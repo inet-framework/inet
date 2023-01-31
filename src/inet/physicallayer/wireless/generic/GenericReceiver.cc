@@ -42,6 +42,7 @@ std::ostream& GenericReceiver::printToStream(std::ostream& stream, int level, in
 
 bool GenericReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
+    // TODO: delegate to analog model
     auto power = check_and_cast<const UnitDiskReception *>(reception)->getPower();
     return power == UnitDiskReception::POWER_RECEIVABLE;
 }
@@ -70,8 +71,7 @@ bool GenericReceiver::computeIsReceptionSuccessful(const IListening *listening, 
 
 const IListening *GenericReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const
 {
-    // TODO: delegate to analog model
-    return new UnitDiskListening(radio, startTime, endTime, startPosition, endPosition);
+    return getAnalogModel()->createListening(radio, startTime, endTime, startPosition, endPosition);
 }
 
 const IListeningDecision *GenericReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const

@@ -10,6 +10,8 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
 
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ScalarTransmitterAnalogModel.h"
+
 namespace inet {
 
 namespace physicallayer {
@@ -17,9 +19,10 @@ namespace physicallayer {
 double PathLossBase::computePathLoss(const ITransmission *transmission, const IArrival *arrival) const
 {
     auto radioMedium = transmission->getMedium();
-    auto narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
+    // TODO: don't require scalar analog model!
+    auto analogModel = check_and_cast<const ScalarTransmissionAnalogModel *>(transmission->getNewAnalogModel());
     mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
-    Hz centerFrequency = Hz(narrowbandSignalAnalogModel->getCenterFrequency());
+    Hz centerFrequency = Hz(analogModel->getCenterFrequency());
     m distance = m(arrival->getStartPosition().distance(transmission->getStartPosition()));
     return computePathLoss(propagationSpeed, centerFrequency, distance);
 }

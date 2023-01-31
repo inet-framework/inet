@@ -25,6 +25,11 @@ class INET_API ScalarTransmissionAnalogModel : public INewTransmissionAnalogMode
 
   public:
     ScalarTransmissionAnalogModel(Hz centerFrequency, Hz bandwidth, W power) : centerFrequency(centerFrequency), bandwidth(bandwidth), power(power) {}
+
+
+    Hz getCenterFrequency() const { return centerFrequency; }
+    Hz getBandwidth() const { return bandwidth; }
+    W getPower() const { return power; }
 };
 
 class INET_API ScalarTransmitterAnalogModel : public TransmitterAnalogModelBase, public ITransmitterAnalogModel

@@ -9,6 +9,7 @@
 #define __INET_RECEIVERBASE_H
 
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReceiver.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReceiverAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
 
@@ -27,6 +28,9 @@ class INET_API ReceiverBase : public cModule, public virtual IReceiver
 
   public:
     ReceiverBase() {}
+
+    virtual IReceiverAnalogModel *getAnalogModel() const { return check_and_cast<IReceiverAnalogModel *>(getSubmodule("analogModel")); }
+
 
     virtual W getMinInterferencePower() const override { return W(NaN); }
     virtual W getMinReceptionPower() const override { return W(NaN); }

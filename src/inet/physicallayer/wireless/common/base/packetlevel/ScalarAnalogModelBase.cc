@@ -12,6 +12,7 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAntennaGain.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ScalarTransmitterAnalogModel.h"
 
 namespace inet {
 
@@ -34,15 +35,16 @@ bool ScalarAnalogModelBase::areOverlappingBands(Hz centerFrequency1, Hz bandwidt
 W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
-    const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
-    const IScalarSignal *scalarSignalAnalogModel = check_and_cast<const IScalarSignal *>(transmission->getAnalogModel());
+
+    const ScalarTransmissionAnalogModel *analogModel = check_and_cast<const ScalarTransmissionAnalogModel *>(transmission->getNewAnalogModel());
+
     const Coord& receptionStartPosition = arrival->getStartPosition();
     // TODO could be used for doppler shift? const Coord& receptionEndPosition = arrival->getEndPosition();
     double transmitterAntennaGain = computeAntennaGain(transmission->getTransmitterAntennaGain(), transmission->getStartPosition(), arrival->getStartPosition(), transmission->getStartOrientation());
     double receiverAntennaGain = computeAntennaGain(receiverRadio->getAntenna()->getGain().get(), arrival->getStartPosition(), transmission->getStartPosition(), arrival->getStartOrientation());
     double pathLoss = radioMedium->getPathLoss()->computePathLoss(transmission, arrival);
-    double obstacleLoss = radioMedium->getObstacleLoss() ? radioMedium->getObstacleLoss()->computeObstacleLoss(narrowbandSignalAnalogModel->getCenterFrequency(), transmission->getStartPosition(), receptionStartPosition) : 1;
-    W transmissionPower = scalarSignalAnalogModel->getPower();
+    double obstacleLoss = radioMedium->getObstacleLoss() ? radioMedium->getObstacleLoss()->computeObstacleLoss(analogModel->getCenterFrequency(), transmission->getStartPosition(), receptionStartPosition) : 1;
+    W transmissionPower = analogModel->getPower();
     ASSERT(!std::isnan(transmissionPower.get()));
     double gain = transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss;
     ASSERT(!std::isnan(gain));
