@@ -314,14 +314,14 @@
 /examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,            100s,            b9d8-0bf1/tplx;95c5-fab7/~tNl;5258-6972/~tND;15a9-1dec/tyf, PASS, EthernetMac Ipv4
 /examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0,                100s,            7520-6d78/tplx;6aa7-af64/~tNl;9acb-7636/~tND;92e8-1868/tyf, PASS, EthernetMac Ipv4
 
-/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          0a57-ae95/tplx;7a43-77b8/~tNl;16dc-f380/tyf, PASS, EthernetMac
+/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          253f-ba1b/tplx;7a43-77b8/~tNl;f1e7-a0cc/tyf, PASS, EthernetMac
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             ea75-5750/tplx;63fd-0642/~tNl;12ed-3bd7/~tND;0d4a-2dc4/tyf, PASS, EthernetMac
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             30eb-d416/tplx;e179-c3bf/~tNl;29e2-73c8/tyf, PASS, EthernetMac
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c Mixed -r 0,                  50s,             2ed6-3320/tplx;f8e9-857b/~tNl;6fb1-4791/tyf, PASS, EthernetMac
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             2b21-0aa7/tplx;e179-c3bf/~tNl;268e-bb92/tyf, PASS, EthernetMac
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c Mixed -r 0,                  50s,             6aae-6db8/tplx;f8e9-857b/~tNl;a87b-23eb/tyf, PASS, EthernetMac
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             4479-851b/tplx;8e07-2aec/~tNl;a63a-cd35/tyf, PASS,
 # /examples/ipv6/nclients/,            -f omnetpp.ini -c TCP_APP -r 0    # abstract-config
 # /examples/ipv6/nclients/,            -f omnetpp.ini -c SCTP_APP -r 0   # abstract-config
-/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           7aaf-adaa/tplx;770a-9c44/~tNl;9199-0d6f/tyf, PASS, EthernetMac
+/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           c5d4-8871/tplx;770a-9c44/~tNl;3475-fc31/tyf, PASS, EthernetMac
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           a39a-669a/tplx;ad75-e817/~tNl;1e5c-bedb/tyf, PASS,
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            1607-36dd/tplx;9c89-c7c1/~tNl;0e90-dcad/~tND;829a-6e83/tyf, PASS,
 
@@ -364,7 +364,7 @@
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0,             20s,             ec17-5cc2/tplx;55f5-0894/~tNl, PASS,  wireless adhoc Ipv4
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0,            20s,             85a0-51b8/tplx;c07a-44e1/~tNl;35f0-b68a/tyf, PASS,  wireless adhoc Ipv4
 
-/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             8736-8b10/tplx;a15f-a225/~tNl;c873-d0b1/~tND;d60f-81e8/tyf, PASS, wireless EthernetMac
+/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             51a2-250b/tplx;a15f-a225/~tNl;c873-d0b1/~tND;c7df-394b/tyf, PASS, wireless EthernetMac
 
 /examples/mobility/,                 -f omnetpp.ini -c AnsimMobility -r 0,          10000s,          72f8-5c0b/tplx;0000-0000/~tNl;0000-0000/~tND;3152-f194/tyf, PASS,
 /examples/mobility,                  -f omnetpp.ini -c AttachedMobility,            10s,             566c-6355/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,
