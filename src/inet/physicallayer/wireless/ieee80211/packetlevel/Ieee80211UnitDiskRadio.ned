@@ -12,7 +12,7 @@ package inet.physicallayer.wireless.ieee80211.packetlevel;
 // It must be used in conjunction with the ~UnitDiskRadioMedium model.
 //
 // @see ~UnitDiskRadioMedium, ~Ieee80211UnitDiskTransmitter,
-// ~UnitDiskReceiver, ~UnitDiskAnalogModel.
+// ~UnitDiskReceiver, ~UnitDiskMediumAnalogModel.
 //
 module Ieee80211UnitDiskRadio extends Ieee80211Radio
 {

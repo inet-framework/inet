@@ -14,13 +14,13 @@ import inet.physicallayer.wireless.common.medium.RadioMedium;
 // physical layer behavior. It must be used in conjunction with the ~UnitDiskRadio
 // model.
 //
-// @see ~UnitDiskRadio, ~UnitDiskAnalogModel, ~UnitDiskTransmitter,
+// @see ~UnitDiskRadio, ~UnitDiskMediumAnalogModel, ~UnitDiskTransmitter,
 // ~UnitDiskReceiver.
 //
 module UnitDiskRadioMedium extends RadioMedium
 {
     parameters:
-        analogModel.typename = default("UnitDiskAnalogModel");
+        analogModel.typename = default("UnitDiskMediumAnalogModel");
         signalAnalogRepresentation = default("unitDisk");
 }
 

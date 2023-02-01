@@ -18,10 +18,10 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IAnalogModel;
 // @see ~UnitDiskRadio, ~UnitDiskRadioMedium, ~UnitDiskTransmitter,
 // ~UnitDiskReceiver.
 //
-module UnitDiskAnalogModel like IAnalogModel
+module UnitDiskMediumAnalogModel like IAnalogModel
 {
     parameters:
-        @class(UnitDiskAnalogModel);
+        @class(UnitDiskMediumAnalogModel);
         @display("i=block/tunnel");
 }
 

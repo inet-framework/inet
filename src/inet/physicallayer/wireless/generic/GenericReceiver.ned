@@ -17,7 +17,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
 // receiver to ignore interfering transmissions.
 //
 // @see ~UnitDiskTransmitter, ~UnitDiskRadio, ~UnitDiskRadioMedium,
-// ~UnitDiskAnalogModel.
+// ~UnitDiskMediumAnalogModel.
 //
 module GenericReceiver extends ReceiverBase like IReceiver
 {

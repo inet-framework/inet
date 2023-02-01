@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskMediumAnalogModel.h"
 
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IArrival.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
@@ -17,14 +17,14 @@
 namespace inet {
 namespace physicallayer {
 
-Define_Module(UnitDiskAnalogModel);
+Define_Module(UnitDiskMediumAnalogModel);
 
-std::ostream& UnitDiskAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
+std::ostream& UnitDiskMediumAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    return stream << "UnitDiskAnalogModel";
+    return stream << "UnitDiskMediumAnalogModel";
 }
 
-const IReception *UnitDiskAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
+const IReception *UnitDiskMediumAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
     const UnitDiskTransmissionAnalogModel *analogModel = check_and_cast<const UnitDiskTransmissionAnalogModel *>(transmission->getNewAnalogModel());
@@ -51,7 +51,7 @@ const IReception *UnitDiskAnalogModel::computeReception(const IRadio *receiverRa
     return new UnitDiskReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation, power);
 }
 
-const INoise *UnitDiskAnalogModel::computeNoise(const IListening *listening, const IInterference *interference) const
+const INoise *UnitDiskMediumAnalogModel::computeNoise(const IListening *listening, const IInterference *interference) const
 {
     bool isInterfering = false;
     for (auto interferingReception : *interference->getInterferingReceptions())
@@ -60,13 +60,13 @@ const INoise *UnitDiskAnalogModel::computeNoise(const IListening *listening, con
     return new UnitDiskNoise(listening->getStartTime(), listening->getEndTime(), isInterfering);
 }
 
-const INoise *UnitDiskAnalogModel::computeNoise(const IReception *reception, const INoise *noise) const
+const INoise *UnitDiskMediumAnalogModel::computeNoise(const IReception *reception, const INoise *noise) const
 {
     bool isInterfering = check_and_cast<const UnitDiskReception *>(reception)->getPower() >= UnitDiskReception::POWER_INTERFERING;
     return new UnitDiskNoise(reception->getStartTime(), reception->getEndTime(), isInterfering);
 }
 
-const ISnir *UnitDiskAnalogModel::computeSNIR(const IReception *reception, const INoise *noise) const
+const ISnir *UnitDiskMediumAnalogModel::computeSNIR(const IReception *reception, const INoise *noise) const
 {
     return new UnitDiskSnir(reception, noise);
 }

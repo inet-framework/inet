@@ -5,8 +5,8 @@
 //
 
 
-#ifndef __INET_UNITDISKANALOGMODEL_H
-#define __INET_UNITDISKANALOGMODEL_H
+#ifndef __INET_UNITDISKMEDIUMANALOGMODEL_H
+#define __INET_UNITDISKMEDIUMANALOGMODEL_H
 
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAnalogModel.h"
 
@@ -15,9 +15,9 @@ namespace inet {
 namespace physicallayer {
 
 /**
- * Implements the UnitDiskAnalogModel model, see the NED file for details.
+ * Implements the UnitDiskMediumAnalogModel model, see the NED file for details.
  */
-class INET_API UnitDiskAnalogModel : public cModule, public IAnalogModel
+class INET_API UnitDiskMediumAnalogModel : public cModule, public IAnalogModel
 {
   public:
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
