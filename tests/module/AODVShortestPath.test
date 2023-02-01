@@ -7,7 +7,7 @@ which has the lowest hop count.
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.aodv.AodvRouter;
-import inet.physicallayer.wireless.unitdisk.UnitDiskRadioMedium;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
 import inet.common.scenario.ScenarioManager;
 
 network AODVTest
