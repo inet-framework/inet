@@ -9,7 +9,7 @@
 #define __INET_IEEE80211UNITDISKTRANSMITTER_H
 
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmitterAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskTransmitterAnalogModel.h"
 
 namespace inet {
 

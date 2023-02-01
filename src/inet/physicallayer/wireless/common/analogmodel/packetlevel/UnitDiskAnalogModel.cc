@@ -5,14 +5,14 @@
 //
 
 
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskAnalogModel.h"
 
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IArrival.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskNoise.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskReception.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskSnir.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmissionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskNoise.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskReception.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskSnir.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskTransmissionAnalogModel.h"
 
 namespace inet {
 namespace physicallayer {

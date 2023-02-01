@@ -11,8 +11,8 @@
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ListeningDecision.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionDecision.h"
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskListening.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskNoise.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskReception.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskNoise.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskReception.h"
 
 namespace inet {
 namespace physicallayer {
