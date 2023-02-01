@@ -5,9 +5,7 @@
 //
 
 
-package inet.physicallayer.wireless.unitdisk;
-
-import inet.physicallayer.wireless.common.medium.RadioMedium;
+package inet.physicallayer.wireless.common.medium;
 
 //
 // This radio medium model provides a very simple but fast and predictable
