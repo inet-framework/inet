@@ -30,8 +30,6 @@ module GenericRadio extends Radio
     parameters:
         transmitter.typename = default("GenericTransmitter");
         receiver.typename = default("GenericReceiver");
-        separateTransmissionParts = default(false);
-        separateReceptionParts = default(false);
         @class(GenericRadio);
 }
 
