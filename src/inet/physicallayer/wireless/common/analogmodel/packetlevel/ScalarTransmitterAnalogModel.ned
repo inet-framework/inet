@@ -5,7 +5,7 @@
 //
 
 
-package inet.physicallayer.wireless.common.radio.packetlevel;
+package inet.physicallayer.wireless.common.analogmodel.packetlevel;
 
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitterAnalogModel;
 
