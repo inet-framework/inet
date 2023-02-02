@@ -15,8 +15,8 @@ import inet.physicallayer.wireless.common.medium.RadioMedium;
 // error correction, interleaving, spreading, etc. It must be used in
 // conjunction with the ~ApskScalarRadio model.
 //
-// @see ~ApskScalarRadio, ~ScalarAnalogModel, ~ApskScalarTransmitter,
-// ~ApskScalarReceiver.
+// @see ~ApskScalarRadio, ~ScalarAnalogModel, ~ApskTransmitter,
+// ~ApskReceiver.
 //
 module ApskScalarRadioMedium extends RadioMedium
 {

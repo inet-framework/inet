@@ -5,38 +5,35 @@
 //
 
 
-#include "inet/physicallayer/wireless/apsk/packetlevel/ApskScalarReceiver.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskReceiver.h"
 
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskTransmission.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarNoise.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReception.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarSnir.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Define_Module(ApskScalarReceiver);
+Define_Module(ApskReceiver);
 
-ApskScalarReceiver::ApskScalarReceiver() :
+ApskReceiver::ApskReceiver() :
     FlatReceiverBase()
 {
 }
 
-std::ostream& ApskScalarReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
+std::ostream& ApskReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    stream << "ApskScalarReceiver";
+    stream << "ApskReceiver";
     return FlatReceiverBase::printToStream(stream, level);
 }
 
-bool ApskScalarReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
+bool ApskReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
 {
     auto apskTransmission = dynamic_cast<const ApskTransmission *>(transmission);
     return apskTransmission && NarrowbandReceiverBase::computeIsReceptionPossible(listening, transmission);
 }
 
-bool ApskScalarReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
+bool ApskReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     auto apksTransmission = dynamic_cast<const ApskTransmission *>(reception->getTransmission());
     return apksTransmission && getAnalogModel()->computeIsReceptionPossible(listening, reception, part);

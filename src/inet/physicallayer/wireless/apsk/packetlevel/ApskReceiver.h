@@ -5,8 +5,8 @@
 //
 
 
-#ifndef __INET_APSKSCALARRECEIVER_H
-#define __INET_APSKSCALARRECEIVER_H
+#ifndef __INET_APSKRECEIVER_H
+#define __INET_APSKRECEIVER_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IModulation.h"
@@ -15,14 +15,14 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API ApskScalarReceiver : public FlatReceiverBase
+class INET_API ApskReceiver : public FlatReceiverBase
 {
   protected:
     virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
 
   public:
-    ApskScalarReceiver();
+    ApskReceiver();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };

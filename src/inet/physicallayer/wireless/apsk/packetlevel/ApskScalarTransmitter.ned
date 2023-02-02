@@ -13,12 +13,12 @@ import inet.physicallayer.wireless.common.base.packetlevel.NarrowbandTransmitter
 // This transmitter model produces transmissions that have scalar transmission
 // power in their analog representation and the configured modulation.
 //
-// @see ~ApskScalarReceiver, ~ApskScalarRadio, ~ApskScalarRadioMedium.
+// @see ~ApskReceiver, ~ApskRadio, ~ApskScalarRadioMedium.
 //
-module ApskScalarTransmitter extends NarrowbandTransmitterBase
+module ApskTransmitter extends NarrowbandTransmitterBase
 {
     parameters:
         modulation = default("BPSK");
-        @class(ApskScalarTransmitter);
+        @class(ApskTransmitter);
 }
 

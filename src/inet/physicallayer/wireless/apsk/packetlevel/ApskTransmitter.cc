@@ -5,33 +5,32 @@
 //
 
 
-#include "inet/physicallayer/wireless/apsk/packetlevel/ApskScalarTransmitter.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskTransmitter.h"
 
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskTransmission.h"
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmissionAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Define_Module(ApskScalarTransmitter);
+Define_Module(ApskTransmitter);
 
-ApskScalarTransmitter::ApskScalarTransmitter() :
+ApskTransmitter::ApskTransmitter() :
     FlatTransmitterBase()
 {
 }
 
-std::ostream& ApskScalarTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
+std::ostream& ApskTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    stream << "ApskScalarTransmitter";
+    stream << "ApskTransmitter";
     return FlatTransmitterBase::printToStream(stream, level);
 }
 
-const ITransmission *ApskScalarTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
+const ITransmission *ApskTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
     auto phyHeader = packet->peekAtFront<ApskPhyHeader>();
     ASSERT(phyHeader->getChunkLength() == headerLength);
