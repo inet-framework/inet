@@ -12,7 +12,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 //
 // This module servces as a base module for narrowband transmitter models.
 //
-module NarrowbandTransmitterBase like ITransmitter
+module NarrowbandTransmitterBase extends TransmitterBase like ITransmitter
 {
     parameters:
         double preambleDuration @unit(s);  // preamble duration

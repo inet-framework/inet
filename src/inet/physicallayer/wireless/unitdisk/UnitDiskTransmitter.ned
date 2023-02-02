@@ -7,6 +7,7 @@
 
 package inet.physicallayer.wireless.unitdisk;
 
+import inet.physicallayer.wireless.common.base.packetlevel.TransmitterBase;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 
 //
@@ -18,7 +19,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 // @see ~UnitDiskReceiver, ~UnitDiskRadio, ~UnitDiskRadioMedium,
 // ~UnitDiskAnalogModel.
 //
-module UnitDiskTransmitter like ITransmitter
+module UnitDiskTransmitter extends TransmitterBase like ITransmitter
 {
     parameters:
         double preambleDuration @unit(s) = default(0s);                  // preamble added before the header
