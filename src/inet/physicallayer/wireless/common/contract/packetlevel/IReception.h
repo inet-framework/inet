@@ -11,6 +11,7 @@
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/INewReceptionAnalogModel.h"
 
 namespace inet {
 
@@ -112,6 +113,8 @@ class INET_API IReception : public IPrintableObject
      * Returns the analog model of the received signal.
      */
     virtual const IReceptionAnalogModel *getAnalogModel() const = 0;
+
+    virtual const INewReceptionAnalogModel *getNewAnalogModel() const = 0;
 };
 
 } // namespace physicallayer

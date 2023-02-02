@@ -31,6 +31,9 @@ class INET_API ReceptionBase : public virtual IReception, public virtual IRecept
     const Quaternion startOrientation;
     const Quaternion endOrientation;
 
+    // TODO make this field protected and set from the constructor
+    public: const INewReceptionAnalogModel *analogModel;
+
   public:
     ReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation);
 
@@ -65,6 +68,7 @@ class INET_API ReceptionBase : public virtual IReception, public virtual IRecept
     virtual const Quaternion& getEndOrientation() const override { return endOrientation; }
 
     virtual const IReceptionAnalogModel *getAnalogModel() const override { return check_and_cast<const IReceptionAnalogModel *>(this); }
+    virtual const INewReceptionAnalogModel *getNewAnalogModel() const override { return analogModel; }
 };
 
 } // namespace physicallayer
