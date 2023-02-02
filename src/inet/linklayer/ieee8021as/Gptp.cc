@@ -7,8 +7,11 @@
 
 #include "Gptp.h"
 
+#include <iomanip>
+
 #include "GptpPacket_m.h"
 
+#include "inet/clock/base/DriftingOscillatorBase.h"
 #include "inet/clock/model/SettableClock.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/clock/ClockUserModuleBase.h"
@@ -365,6 +368,14 @@ void Gptp::processFollowUp(Packet *packet, const GptpFollowUp* gptp)
     rcvdGptpSync = false;
 }
 
+static double getCurrentTickLength(IClock *clock)
+{
+    auto oscillatorBasedClock = check_and_cast<OscillatorBasedClock*>(clock);
+    auto clockOscillator = oscillatorBasedClock->getOscillator();
+    auto driftingOscillator = check_and_cast<const DriftingOscillatorBase *>(clockOscillator);
+    return driftingOscillator->getCurrentTickLength();
+}
+
 void Gptp::synchronize()
 {
     simtime_t now = simTime();
@@ -388,7 +399,24 @@ void Gptp::synchronize()
         gmRateRatio = (peerSentTimeSync - oldPeerSentTimeSync) / (origNow - newLocalTimeAtTimeSync) ;
 
     auto settableClock = check_and_cast<SettableClock *>(clock.get());
-    settableClock->setClockTime(newTime, gmRateRatio * settableClock->getOscillatorCompensationFactor(), true);
+
+    // NOTE: this is accurate
+    double oscillatorCompensationFactor1 = getCurrentTickLength(clock.get()) / getCurrentTickLength(check_and_cast<IClock *>(getModuleByPath("tsnClock1.clock")));
+
+    // NOTE: this is too weak
+    double oscillatorCompensationFactor2 = gmRateRatio * settableClock->getOscillatorCompensationFactor();
+
+//    settableClock->setClockTime(newTime, gmRateRatio * settableClock->getOscillatorCompensationFactor(), true);
+    settableClock->setClockTime(newTime, oscillatorCompensationFactor2, true);
+
+    EV_INFO << "MASTER T1                  - " << oldPeerSentTimeSync << endl;
+    EV_INFO << "MASTER T2                  - " << peerSentTimeSync << endl;
+    EV_INFO << "SLAVE T1                   - " << newLocalTimeAtTimeSync << endl;
+    EV_INFO << "SLAVE T2                   - " << origNow << endl;
+    EV_INFO << "RATE RATIO                 - " << std::setprecision(16) << gmRateRatio << endl;
+    EV_INFO << "OSCILLATOR COMPENSATION 1  - " << std::setprecision(16) << oscillatorCompensationFactor1 << endl;
+    EV_INFO << "OSCILLATOR COMPENSATION 2  - " << std::setprecision(16) << oscillatorCompensationFactor2 << endl;
+    EV_INFO << "OSCILLATOR COMPENSATION FAC- " << std::setprecision(16) << settableClock->getOscillatorCompensationFactor() << endl;
 
     oldPeerSentTimeSync = peerSentTimeSync;
     oldLocalTimeAtTimeSync = origNow;
@@ -411,7 +439,7 @@ void Gptp::synchronize()
     EV_INFO << "CORRECTION FIELD           - " << correctionField << endl;
     EV_INFO << "PROPAGATION DELAY          - " << peerDelay << endl;
     EV_INFO << "TIME DIFFERENCE TO SIMTIME - " << CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now << endl;
-    EV_INFO << "RATE RATIO                 - " << gmRateRatio << endl;
+    EV_INFO << "RATE RATIO                 - " << std::setprecision(16) << gmRateRatio << endl;
 
     emit(rateRatioSignal, gmRateRatio);
     emit(localTimeSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync));
@@ -466,7 +494,7 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
     peerResponseOriginTimestamp = gptp->getResponseOriginTimestamp();
 
     // computePropTime():
-    peerDelay = (gmRateRatio * (pdelayRespEventIngressTimestamp - pdelayReqEventEgressTimestamp) - (peerResponseOriginTimestamp - peerRequestReceiptTimestamp)) / 2.0;
+    peerDelay = 0; // (gmRateRatio * (pdelayRespEventIngressTimestamp - pdelayReqEventEgressTimestamp) - (peerResponseOriginTimestamp - peerRequestReceiptTimestamp)) / 2.0;
 
     EV_INFO << "RATE RATIO                       - " << gmRateRatio << endl;
     EV_INFO << "pdelayReqEventEgressTimestamp    - " << pdelayReqEventEgressTimestamp << endl;

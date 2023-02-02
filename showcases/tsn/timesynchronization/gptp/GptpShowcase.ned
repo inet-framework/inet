@@ -41,32 +41,33 @@ network TwoMasterClocksTreeGptpShowcase extends TsnNetworkBase
         tsnClock2: TsnClock {
             @display("p=700,150");
         }
-        tsnSwitch1: TsnSwitch {
-            @display("p=500,300");
-        }
-        tsnSwitch2: TsnSwitch {
-            @display("p=700,300");
-        }
-        tsnDevice1: TsnDevice {
-            @display("p=300,450");
-        }
-        tsnDevice2: TsnDevice {
-            @display("p=500,450");
-        }
-        tsnDevice3: TsnDevice {
-            @display("p=700,450");
-        }
-        tsnDevice4: TsnDevice {
-            @display("p=900,450");
-        }
+//        tsnSwitch1: TsnSwitch {
+//            @display("p=500,300");
+//        }
+//        tsnSwitch2: TsnSwitch {
+//            @display("p=700,300");
+//        }
+//        tsnDevice1: TsnDevice {
+//            @display("p=300,450");
+//        }
+//        tsnDevice2: TsnDevice {
+//            @display("p=500,450");
+//        }
+//        tsnDevice3: TsnDevice {
+//            @display("p=700,450");
+//        }
+//        tsnDevice4: TsnDevice {
+//            @display("p=900,450");
+//        }
     connections:
-        tsnClock1.ethg++ <--> EthernetLink <--> tsnSwitch1.ethg++;
-        tsnClock2.ethg++ <--> EthernetLink <--> tsnSwitch2.ethg++;
-        tsnSwitch1.ethg++ <--> EthernetLink <--> tsnSwitch2.ethg++;
-        tsnSwitch1.ethg++ <--> EthernetLink <--> tsnDevice1.ethg++;
-        tsnSwitch1.ethg++ <--> EthernetLink <--> tsnDevice2.ethg++;
-        tsnSwitch2.ethg++ <--> EthernetLink <--> tsnDevice3.ethg++;
-        tsnSwitch2.ethg++ <--> EthernetLink <--> tsnDevice4.ethg++;
+        tsnClock1.ethg++ <--> EthernetLink <--> tsnClock2.ethg++;
+//        tsnClock1.ethg++ <--> EthernetLink <--> tsnSwitch1.ethg++;
+//        tsnClock2.ethg++ <--> EthernetLink <--> tsnSwitch2.ethg++;
+//        tsnSwitch1.ethg++ <--> EthernetLink <--> tsnSwitch2.ethg++;
+//        tsnSwitch1.ethg++ <--> EthernetLink <--> tsnDevice1.ethg++;
+//        tsnSwitch1.ethg++ <--> EthernetLink <--> tsnDevice2.ethg++;
+//        tsnSwitch2.ethg++ <--> EthernetLink <--> tsnDevice3.ethg++;
+//        tsnSwitch2.ethg++ <--> EthernetLink <--> tsnDevice4.ethg++;
 }
 
 network TwoMasterClocksRingGptpShowcase extends TsnNetworkBase
