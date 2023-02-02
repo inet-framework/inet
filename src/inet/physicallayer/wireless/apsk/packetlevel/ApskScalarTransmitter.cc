@@ -50,7 +50,7 @@ const ITransmission *ApskScalarTransmitter::createTransmission(const IRadio *tra
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     auto symbolTime = 0;
-    auto transmission = new ApskTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, dataLength, modulation, symbolTime, transmissionBitrate, codeRate);
+    auto transmission = new ApskTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, dataLength, modulation, bandwidth, symbolTime, transmissionBitrate, codeRate);
     transmission->analogModel = new ScalarTransmissionAnalogModel(transmissionCenterFrequency, transmissionBandwidth, transmissionPower);
     return transmission;
 }

@@ -8,7 +8,7 @@
 #include "inet/physicallayer/wireless/apsk/packetlevel/errormodel/ApskErrorModel.h"
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskTransmission.h"
 
 namespace inet {
 
@@ -30,9 +30,9 @@ double ApskErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSignal::S
     else if (bitErrorRate == 1.0)
         return 1.0;
     else {
-        const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(snir->getReception()->getTransmission());
-        double headerSuccessRate = pow(1.0 - bitErrorRate, b(flatTransmission->getHeaderLength()).get());
-        double dataSuccessRate = pow(1.0 - bitErrorRate, b(flatTransmission->getDataLength()).get());
+        auto apskTransmission = check_and_cast<const ApskTransmission *>(snir->getReception()->getTransmission());
+        double headerSuccessRate = pow(1.0 - bitErrorRate, b(apskTransmission->getHeaderLength()).get());
+        double dataSuccessRate = pow(1.0 - bitErrorRate, b(apskTransmission->getDataLength()).get());
         switch (part) {
             case IRadioSignal::SIGNAL_PART_WHOLE:
                 return 1.0 - headerSuccessRate * dataSuccessRate;
@@ -51,17 +51,17 @@ double ApskErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSignal::S
 double ApskErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method("computeBitErrorRate");
-    const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(snir->getReception()->getTransmission());
-    const ApskModulationBase *modulation = check_and_cast<const ApskModulationBase *>(flatTransmission->getModulation());
-    return modulation->calculateBER(getScalarSnir(snir), flatTransmission->getBandwidth(), flatTransmission->getBitrate());
+    const ApskTransmission *apskTransmission = check_and_cast<const ApskTransmission *>(snir->getReception()->getTransmission());
+    const ApskModulationBase *modulation = check_and_cast<const ApskModulationBase *>(apskTransmission->getModulation());
+    return modulation->calculateBER(getScalarSnir(snir), apskTransmission->getBandwidth(), apskTransmission->getBitrate());
 }
 
 double ApskErrorModel::computeSymbolErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method("computeSymbolErrorRate");
-    const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(snir->getReception()->getTransmission());
-    const ApskModulationBase *modulation = check_and_cast<const ApskModulationBase *>(flatTransmission->getModulation());
-    return modulation->calculateSER(getScalarSnir(snir), flatTransmission->getBandwidth(), flatTransmission->getBitrate());
+    auto apskTransmission = check_and_cast<const ApskTransmission *>(snir->getReception()->getTransmission());
+    const ApskModulationBase *modulation = check_and_cast<const ApskModulationBase *>(apskTransmission->getModulation());
+    return modulation->calculateSER(getScalarSnir(snir), apskTransmission->getBandwidth(), apskTransmission->getBitrate());
 }
 
 } // namespace physicallayer

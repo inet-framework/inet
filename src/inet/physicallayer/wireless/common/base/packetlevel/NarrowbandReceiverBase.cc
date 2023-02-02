@@ -74,12 +74,12 @@ bool NarrowbandReceiverBase::computeIsReceptionPossible(const IListening *listen
 
 const IReceptionDecision *NarrowbandReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
 {
-    const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
-    const NarrowbandReceptionBase *narrowbandReception = check_and_cast<const NarrowbandReceptionBase *>(reception);
-    if (bandListening->getCenterFrequency() == narrowbandReception->getCenterFrequency() && bandListening->getBandwidth() >= narrowbandReception->getBandwidth())
+//    const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
+//    const NarrowbandReceptionBase *narrowbandReception = check_and_cast<const NarrowbandReceptionBase *>(reception);
+//    if (bandListening->getCenterFrequency() == narrowbandReception->getCenterFrequency() && bandListening->getBandwidth() >= narrowbandReception->getBandwidth())
         return SnirReceiverBase::computeReceptionDecision(listening, reception, part, interference, snir);
-    else
-        return new ReceptionDecision(reception, part, false, false, false);
+//    else
+//        return new ReceptionDecision(reception, part, false, false, false);
 }
 
 } // namespace physicallayer
