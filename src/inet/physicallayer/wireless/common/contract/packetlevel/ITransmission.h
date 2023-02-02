@@ -15,6 +15,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAntennaGain.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/INewTransmissionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
 
 namespace inet {
@@ -142,6 +143,8 @@ class INET_API ITransmission : public IPrintableObject
      * Returns the analog model of the transmitted signal.
      */
     virtual const ITransmissionAnalogModel *getAnalogModel() const = 0;
+
+    virtual const INewTransmissionAnalogModel *getNewAnalogModel() const = 0;
 };
 
 } // namespace physicallayer
