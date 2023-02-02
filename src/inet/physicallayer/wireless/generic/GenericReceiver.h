@@ -5,8 +5,8 @@
 //
 
 
-#ifndef __INET_UNITDISKRECEIVER_H
-#define __INET_UNITDISKRECEIVER_H
+#ifndef __INET_GENERICRECEIVER_H
+#define __INET_GENERICRECEIVER_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/ReceiverBase.h"
 
@@ -17,7 +17,7 @@ namespace physicallayer {
 /**
  * Implements the UnitDiskReceiver model, see the NED file for details.
  */
-class INET_API UnitDiskReceiver : public ReceiverBase
+class INET_API GenericReceiver : public ReceiverBase
 {
   protected:
     bool ignoreInterference;
@@ -26,7 +26,7 @@ class INET_API UnitDiskReceiver : public ReceiverBase
     virtual void initialize(int stage) override;
 
   public:
-    UnitDiskReceiver();
+    GenericReceiver();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 

@@ -21,7 +21,7 @@ namespace physicallayer {
 Define_Module(Ieee80211UnitDiskReceiver);
 
 Ieee80211UnitDiskReceiver::Ieee80211UnitDiskReceiver() :
-    UnitDiskReceiver()
+    GenericReceiver()
 {
 }
 
@@ -34,7 +34,7 @@ void Ieee80211UnitDiskReceiver::initialize(int stage)
 std::ostream& Ieee80211UnitDiskReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211UnitDiskReceiver";
-    return UnitDiskReceiver::printToStream(stream, level);
+    return GenericReceiver::printToStream(stream, level);
 }
 
 bool Ieee80211UnitDiskReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
@@ -46,13 +46,13 @@ bool Ieee80211UnitDiskReceiver::computeIsReceptionPossible(const IListening *lis
 bool Ieee80211UnitDiskReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     auto ieee80211Transmission = dynamic_cast<const Ieee80211UnitDiskTransmission *>(reception->getTransmission());
-    return ieee80211Transmission && /*modeSet->containsMode(ieee80211Transmission->getMode()) &&*/ UnitDiskReceiver::computeIsReceptionPossible(listening, reception, part);
+    return ieee80211Transmission && /*modeSet->containsMode(ieee80211Transmission->getMode()) &&*/ GenericReceiver::computeIsReceptionPossible(listening, reception, part);
 }
 
 const IReceptionResult *Ieee80211UnitDiskReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
     auto transmission = check_and_cast<const Ieee80211TransmissionBase *>(reception->getTransmission());
-    auto receptionResult = UnitDiskReceiver::computeReceptionResult(listening, reception, interference, snir, decisions);
+    auto receptionResult = GenericReceiver::computeReceptionResult(listening, reception, interference, snir, decisions);
     auto modeInd = const_cast<Packet *>(receptionResult->getPacket())->addTagIfAbsent<Ieee80211ModeInd>();
     modeInd->setMode(transmission->getMode());
     auto channelInd = const_cast<Packet *>(receptionResult->getPacket())->addTagIfAbsent<Ieee80211ChannelInd>();

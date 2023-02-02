@@ -5,7 +5,7 @@
 //
 
 
-package inet.physicallayer.wireless.unitdisk;
+package inet.physicallayer.wireless.generic;
 
 import inet.physicallayer.wireless.common.base.packetlevel.ReceiverBase;
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
@@ -19,11 +19,11 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
 // @see ~UnitDiskTransmitter, ~UnitDiskRadio, ~UnitDiskRadioMedium,
 // ~UnitDiskAnalogModel.
 //
-module UnitDiskReceiver extends ReceiverBase like IReceiver
+module GenericReceiver extends ReceiverBase like IReceiver
 {
     parameters:
         bool ignoreInterference = default(false); // true means interfering transmissions are ignored when determining whether a reception is successful or not
-        @class(UnitDiskReceiver);
+        @class(GenericReceiver);
         @display("i=block/wrx");
 }
 

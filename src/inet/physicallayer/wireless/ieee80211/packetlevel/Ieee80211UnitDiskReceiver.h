@@ -8,14 +8,14 @@
 #ifndef __INET_IEEE80211UNITDISKRECEIVER_H
 #define __INET_IEEE80211UNITDISKRECEIVER_H
 
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskReceiver.h"
+#include "inet/physicallayer/wireless/generic/GenericReceiver.h"
 
 namespace inet {
 
 namespace physicallayer {
 
 // TODO Ieee80211ReceiverBase
-class INET_API Ieee80211UnitDiskReceiver : public UnitDiskReceiver
+class INET_API Ieee80211UnitDiskReceiver : public GenericReceiver
 {
   protected:
     virtual void initialize(int stage) override;
