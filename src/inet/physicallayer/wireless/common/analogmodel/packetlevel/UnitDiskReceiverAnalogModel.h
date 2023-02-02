@@ -35,6 +35,7 @@ class INET_API UnitDiskReceiverAnalogModel : public ReceiverAnalogModelBase, pub
         return new UnitDiskListening(radio, startTime, endTime, startPosition, endPosition);
     }
 
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
 };
 
 } // namespace physicallayer

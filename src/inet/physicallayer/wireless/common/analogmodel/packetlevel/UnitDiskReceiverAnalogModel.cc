@@ -6,11 +6,18 @@
 
 
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskReceiverAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskReceptionAnalogModel.h"
 
 namespace inet {
 namespace physicallayer {
 
 Define_Module(UnitDiskReceiverAnalogModel);
+
+bool UnitDiskReceiverAnalogModel::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
+{
+    auto power = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getAnalogModel())->getPower();
+    return power == UnitDiskReceptionAnalogModel::POWER_RECEIVABLE;
+}
 
 } // namespace physicallayer
 } // namespace inet

@@ -42,9 +42,7 @@ std::ostream& GenericReceiver::printToStream(std::ostream& stream, int level, in
 
 bool GenericReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
-    // TODO: delegate to analog model
-    auto power = check_and_cast<const UnitDiskReception *>(reception)->getPower();
-    return power == UnitDiskReception::POWER_RECEIVABLE;
+    return getAnalogModel()->computeIsReceptionPossible(listening, reception, part);
 }
 
 bool GenericReceiver::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const

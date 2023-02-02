@@ -20,8 +20,10 @@ namespace physicallayer {
 
 class INET_API IReceiverAnalogModel : public IPrintableObject
 {
-public:
+  public:
     virtual IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const = 0;
+
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const = 0;
 };
 
 } // namespace physicallayer

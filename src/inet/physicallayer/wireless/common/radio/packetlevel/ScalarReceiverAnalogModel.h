@@ -46,7 +46,10 @@ class INET_API ScalarReceiverAnalogModel : public ReceiverAnalogModelBase, publi
   public:
     virtual IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const override {
         return new BandListening(radio, startTime, endTime, startPosition, endPosition, centerFrequency, bandwidth);
+    }
 
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override {
+        throw cRuntimeError("TODO");
     }
 };
 
