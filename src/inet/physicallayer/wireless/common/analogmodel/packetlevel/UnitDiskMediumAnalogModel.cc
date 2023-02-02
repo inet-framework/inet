@@ -10,9 +10,10 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IArrival.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskNoise.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskReception.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskSnir.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskTransmissionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskReceptionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ReceptionBase.h"
 
 namespace inet {
 namespace physicallayer {
@@ -37,32 +38,35 @@ const IReception *UnitDiskMediumAnalogModel::computeReception(const IRadio *rece
     m distance = m(transmission->getStartPosition().distance(receptionStartPosition));
     double obstacleLoss = radioMedium->getObstacleLoss() ? radioMedium->getObstacleLoss()->computeObstacleLoss(Hz(NaN), transmission->getStartPosition(), receptionStartPosition) : 1;
     ASSERT(obstacleLoss == 0 || obstacleLoss == 1);
-    UnitDiskReception::Power power;
+    UnitDiskReceptionAnalogModel::Power power;
     if (obstacleLoss == 0)
-        power = UnitDiskReception::POWER_UNDETECTABLE;
+        power = UnitDiskReceptionAnalogModel::POWER_UNDETECTABLE;
     else if (distance <= analogModel->getCommunicationRange())
-        power = UnitDiskReception::POWER_RECEIVABLE;
+        power = UnitDiskReceptionAnalogModel::POWER_RECEIVABLE;
     else if (distance <= analogModel->getInterferenceRange())
-        power = UnitDiskReception::POWER_INTERFERING;
+        power = UnitDiskReceptionAnalogModel::POWER_INTERFERING;
     else if (distance <= analogModel->getDetectionRange())
-        power = UnitDiskReception::POWER_DETECTABLE;
+        power = UnitDiskReceptionAnalogModel::POWER_DETECTABLE;
     else
-        power = UnitDiskReception::POWER_UNDETECTABLE;
-    return new UnitDiskReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation, power);
+        power = UnitDiskReceptionAnalogModel::POWER_UNDETECTABLE;
+    // KLUDGE TODO
+    auto reception = new ReceptionBase(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
+    reception->analogModel = new UnitDiskReceptionAnalogModel(power);
+    return reception;
 }
 
 const INoise *UnitDiskMediumAnalogModel::computeNoise(const IListening *listening, const IInterference *interference) const
 {
     bool isInterfering = false;
     for (auto interferingReception : *interference->getInterferingReceptions())
-        if (check_and_cast<const UnitDiskReception *>(interferingReception)->getPower() >= UnitDiskReception::POWER_INTERFERING)
+        if (check_and_cast<const UnitDiskReceptionAnalogModel *>(interferingReception->getNewAnalogModel())->getPower() >= UnitDiskReceptionAnalogModel::POWER_INTERFERING)
             isInterfering = true;
     return new UnitDiskNoise(listening->getStartTime(), listening->getEndTime(), isInterfering);
 }
 
 const INoise *UnitDiskMediumAnalogModel::computeNoise(const IReception *reception, const INoise *noise) const
 {
-    bool isInterfering = check_and_cast<const UnitDiskReception *>(reception)->getPower() >= UnitDiskReception::POWER_INTERFERING;
+    bool isInterfering = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getNewAnalogModel())->getPower() >= UnitDiskReceptionAnalogModel::POWER_INTERFERING;
     return new UnitDiskNoise(reception->getStartTime(), reception->getEndTime(), isInterfering);
 }
 

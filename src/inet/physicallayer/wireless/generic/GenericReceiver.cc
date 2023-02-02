@@ -12,7 +12,7 @@
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionDecision.h"
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskListening.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskNoise.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskReception.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskReceptionAnalogModel.h"
 
 namespace inet {
 namespace physicallayer {
@@ -47,8 +47,8 @@ bool GenericReceiver::computeIsReceptionPossible(const IListening *listening, co
 
 bool GenericReceiver::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
 {
-    auto power = check_and_cast<const UnitDiskReception *>(reception)->getPower();
-    if (power == UnitDiskReception::POWER_RECEIVABLE) {
+    auto power = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getNewAnalogModel())->getPower();
+    if (power == UnitDiskReceptionAnalogModel::POWER_RECEIVABLE) {
         if (ignoreInterference)
             return true;
         else {
@@ -56,8 +56,8 @@ bool GenericReceiver::computeIsReceptionSuccessful(const IListening *listening, 
             auto endTime = reception->getEndTime(part);
             auto interferingReceptions = interference->getInterferingReceptions();
             for (auto interferingReception : *interferingReceptions) {
-                auto interferingPower = check_and_cast<const UnitDiskReception *>(interferingReception)->getPower();
-                if (interferingPower >= UnitDiskReception::POWER_INTERFERING && startTime <= interferingReception->getEndTime() && endTime >= interferingReception->getStartTime())
+                auto interferingPower = check_and_cast<const UnitDiskReceptionAnalogModel *>(interferingReception->getNewAnalogModel())->getPower();
+                if (interferingPower >= UnitDiskReceptionAnalogModel::POWER_INTERFERING && startTime <= interferingReception->getEndTime() && endTime >= interferingReception->getStartTime())
                     return false;
             }
             return true;
@@ -76,8 +76,8 @@ const IListeningDecision *GenericReceiver::computeListeningDecision(const IListe
 {
     auto interferingReceptions = interference->getInterferingReceptions();
     for (auto interferingReception : *interferingReceptions) {
-        auto interferingPower = check_and_cast<const UnitDiskReception *>(interferingReception)->getPower();
-        if (interferingPower != UnitDiskReception::POWER_UNDETECTABLE)
+        auto interferingPower = check_and_cast<const UnitDiskReceptionAnalogModel *>(interferingReception->getNewAnalogModel())->getPower();
+        if (interferingPower != UnitDiskReceptionAnalogModel::POWER_UNDETECTABLE)
             return new ListeningDecision(listening, true);
     }
     return new ListeningDecision(listening, false);
@@ -86,7 +86,7 @@ const IListeningDecision *GenericReceiver::computeListeningDecision(const IListe
 const IReceptionResult *GenericReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
     auto noise = check_and_cast_nullable<const UnitDiskNoise *>(snir->getNoise());
-    double errorRate = check_and_cast<const UnitDiskReception *>(reception)->getPower() == UnitDiskReception::POWER_RECEIVABLE && (noise == nullptr || !noise->isInterfering()) ? 0 : 1;
+    double errorRate = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getNewAnalogModel())->getPower() == UnitDiskReceptionAnalogModel::POWER_RECEIVABLE && (noise == nullptr || !noise->isInterfering()) ? 0 : 1;
     auto receptionResult = ReceiverBase::computeReceptionResult(listening, reception, interference, snir, decisions);
     auto errorRateInd = const_cast<Packet *>(receptionResult->getPacket())->addTagIfAbsent<ErrorRateInd>();
     errorRateInd->setSymbolErrorRate(errorRate);

@@ -15,7 +15,7 @@ Define_Module(UnitDiskReceiverAnalogModel);
 
 bool UnitDiskReceiverAnalogModel::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
-    auto power = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getAnalogModel())->getPower();
+    auto power = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getNewAnalogModel())->getPower();
     return power == UnitDiskReceptionAnalogModel::POWER_RECEIVABLE;
 }
 
