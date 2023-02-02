@@ -20,7 +20,21 @@ using namespace inet::units::values;
 class INET_API UnitDiskReceptionAnalogModel : public INewReceptionAnalogModel
 {
   public:
-    UnitDiskReceptionAnalogModel() {}
+    enum Power {
+        POWER_UNDETECTABLE,
+        POWER_DETECTABLE,
+        POWER_INTERFERING,
+        POWER_RECEIVABLE
+    };
+
+  protected:
+    const Power power;
+
+  public:
+    UnitDiskReceptionAnalogModel(const Power power) : power(power) {}
+
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+    virtual Power getPower() const { return power; }
 };
 
 } // namespace physicallayer
