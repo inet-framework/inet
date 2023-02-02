@@ -5,15 +5,15 @@
 //
 
 
-#ifndef __INET_UNITDISKPHYHEADERSERIALIZER_H
-#define __INET_UNITDISKPHYHEADERSERIALIZER_H
+#ifndef __INET_GENERICPHYHEADERSERIALIZER_H
+#define __INET_GENERICPHYHEADERSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
 namespace inet {
 
 /**
- * Converts between UnitDiskPhyHeader and binary (network byte order) application packet.
+ * Converts between GenericPhyHeader and binary (network byte order) application packet.
  */
 class INET_API GenericPhyHeaderSerializer : public FieldsChunkSerializer
 {

@@ -15,7 +15,7 @@ namespace inet {
 namespace physicallayer {
 
 /**
- * Implements the UnitDiskReceiver model, see the NED file for details.
+ * Implements the GenericReceiver model, see the NED file for details.
  */
 class INET_API GenericReceiver : public ReceiverBase
 {
