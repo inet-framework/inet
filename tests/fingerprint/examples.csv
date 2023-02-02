@@ -191,7 +191,7 @@
 
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           5959-a4cd/tplx;6a0d-2074/~tNl;4831-3edc/~tND;b997-6d86/tyf, PASS, EthernetMac Ipv4
 
-/examples/inet/redmarker/,           -f omnetpp.ini -c TcpSender1 -r 0,             100s,         ef47-0e0a/tplx;a08b-958f/~tNl;e26e-6000/~tND;c6e2-1ff6/tyf, PASS, EthernetMac Ipv4
+/examples/inet/redmarker/,           -f omnetpp.ini -c TcpSender1 -r 0,             100s,         4bbe-13d2/tplx;c404-57a1/~tNl;ac31-3a65/~tND;dc27-190c/tyf, PASS, EthernetMac Ipv4
 
 /examples/inet/routerperf/,          -f omnetpp.ini -c General -r 0,                100s,            a25b-9004/tplx;de21-71ca/~tNl;bef4-cd44/~tND;241d-c0b2/tyf, PASS, Ipv4
 
