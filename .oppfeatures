@@ -374,7 +374,7 @@
         name = "IEEE 802.11"
         description = "Provides IEEE 802.11 (a/b/g/e/p/n) Ad-hoc and Infrastucture mode NICs."
         initiallyEnabled = "true"
-        requires = "Ieee8022 Mobility PhysicalLayerWirelessCommon UnitDiskRadio"
+        requires = "Ieee8022 Mobility PhysicalLayerWirelessCommon GenericRadio"
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee80211
@@ -1294,17 +1294,17 @@
         linkerFlags = ""
         />
     <feature
-        id = "UnitDiskRadio"
-        name = "Unit disk radio"
-        description = "A simple unit disk radio wireless model."
+        id = "GenericRadio"
+        name = "Generic radio"
+        description = "A simplistic radio wireless model."
         initiallyEnabled = "true"
         requires = "Mobility PhysicalLayerWirelessCommon"
         labels = "nic wireless"
         nedPackages = "
-                       inet.physicallayer.wireless.unitdisk
+                       inet.physicallayer.wireless.generic
                       "
         extraSourceFolders = ""
-        compileFlags = "-DINET_WITH_UNITDISKRADIO"
+        compileFlags = "-DINET_WITH_GENERICRADIO"
         linkerFlags = ""
         />
     <feature
