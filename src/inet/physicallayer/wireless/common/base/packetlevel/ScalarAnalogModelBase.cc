@@ -118,12 +118,12 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IListening *listening, c
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
     for (auto reception : *interferingReceptions) {
         auto signalAnalogModel = reception->getNewAnalogModel();
-        const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(signalAnalogModel);
-        Hz signalCenterFrequency = narrowbandSignalAnalogModel->getCenterFrequency();
-        Hz signalBandwidth = narrowbandSignalAnalogModel->getBandwidth();
+        auto receptionAnalogModel = check_and_cast<const ScalarReceptionAnalogModel *>(signalAnalogModel);
+        Hz signalCenterFrequency = receptionAnalogModel->getCenterFrequency();
+        Hz signalBandwidth = receptionAnalogModel->getBandwidth();
         if (commonCenterFrequency == signalCenterFrequency && commonBandwidth >= signalBandwidth)
             addReception(reception, noiseStartTime, noiseEndTime, powerChanges);
-        else if (!ignorePartialInterference && areOverlappingBands(commonCenterFrequency, commonBandwidth, narrowbandSignalAnalogModel->getCenterFrequency(), narrowbandSignalAnalogModel->getBandwidth()))
+        else if (!ignorePartialInterference && areOverlappingBands(commonCenterFrequency, commonBandwidth, signalCenterFrequency, signalBandwidth))
             throw cRuntimeError("Partially interfering signals are not supported by ScalarAnalogModel, enable ignorePartialInterference to avoid this error!");
     }
     const ScalarNoise *scalarBackgroundNoise = dynamic_cast<const ScalarNoise *>(interference->getBackgroundNoise());
