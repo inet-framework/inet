@@ -16,14 +16,16 @@ namespace physicallayer {
 
 class INET_API UnitDiskSnir : public SnirBase
 {
+    bool isSnirInfinite;
+
   public:
     UnitDiskSnir(const IReception *reception, const INoise *noise);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
-    virtual double getMin() const override;
-    virtual double getMax() const override;
-    virtual double getMean() const override;
+    virtual double getMin() const override { return isSnirInfinite ? INFINITY : 0; }
+    virtual double getMax() const override { return isSnirInfinite ? INFINITY : 0; }
+    virtual double getMean() const override { return isSnirInfinite ? INFINITY : 0; }
 };
 
 } // namespace physicallayer

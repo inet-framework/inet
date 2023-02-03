@@ -7,6 +7,10 @@
 
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskSnir.h"
 
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskReceptionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskNoise.h"
+
+
 namespace inet {
 
 namespace physicallayer {
@@ -14,27 +18,19 @@ namespace physicallayer {
 UnitDiskSnir::UnitDiskSnir(const IReception *reception, const INoise *noise) :
     SnirBase(reception, noise)
 {
+    auto unitDiskReception = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getNewAnalogModel());
+    auto power = unitDiskReception->getPower();
+    auto unitDiskNoise = check_and_cast<const UnitDiskNoise *>(noise);
+    auto isInterfering = unitDiskNoise->isInterfering();
+
+    isSnirInfinite = (power == UnitDiskReceptionAnalogModel::POWER_RECEIVABLE)
+                          && !isInterfering;
 }
 
 std::ostream& UnitDiskSnir::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "UnitDiskSnir";
     return stream;
-}
-
-double UnitDiskSnir::getMin() const
-{
-    return NaN;
-}
-
-double UnitDiskSnir::getMax() const
-{
-    return NaN;
-}
-
-double UnitDiskSnir::getMean() const
-{
-    return NaN;
 }
 
 } // namespace physicallayer
