@@ -351,9 +351,9 @@ void MacForwardingTable::readForwardingTable(const char *fileName)
 
 void MacForwardingTable::parseForwardingTableParameter()
 {
-    auto forwardingTable = check_and_cast<cValueArray *>(par("forwardingTable").objectValue());
-    for (int i = 0; i < forwardingTable->size(); i++) {
-        cValueMap *entry = check_and_cast<cValueMap *>(forwardingTable->get(i).objectValue());
+    auto forwardingTableObject = check_and_cast<cValueArray *>(par("forwardingTable").objectValue());
+    for (int i = 0; i < forwardingTableObject->size(); i++) {
+        cValueMap *entry = check_and_cast<cValueMap *>(forwardingTableObject->get(i).objectValue());
         auto vlan = entry->containsKey("vlan") ? entry->get("vlan").intValue() : 0;
         auto macAddressString = entry->get("address").stringValue();
         L3Address l3Address;
