@@ -368,8 +368,12 @@ void MacForwardingTable::parseForwardingTableParameter()
             throw cRuntimeError("Cannot find network interface '%s'", interfaceName);
         if (macAddress.isMulticast())
             addMulticastAddressForwardingInterface(networkInterface->getInterfaceId(), macAddress, vlan);
-        else
+        else {
+            ForwardingTableKey key(vlan, macAddress);
+            if (containsKey(forwardingTable, key))
+                throw cRuntimeError("Table already contains %s unicast MAC address for vlan %u.", macAddress.str().c_str(), vlan);
             setUnicastAddressForwardingInterface(networkInterface->getInterfaceId(), macAddress, vlan);
+        }
     }
 }
 
