@@ -20,6 +20,8 @@ module ApskDimensionalRadio extends ApskRadio
 {
     parameters:
         transmitter.typename = default("ApskTransmitter");
+        transmitter.analogModel.typename = default("DimensionalTransmitterAnalogModel");
         receiver.typename = default("ApskReceiver");
+        receiver.analogModel.typename = default("DimensionalReceiverAnalogModel");
 }
 

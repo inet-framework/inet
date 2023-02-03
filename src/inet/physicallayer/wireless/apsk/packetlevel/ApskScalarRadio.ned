@@ -20,6 +20,8 @@ module ApskScalarRadio extends ApskRadio
 {
     parameters:
         transmitter.typename = default("ApskTransmitter");
+        transmitter.analogModel.typename = default("ScalarTransmitterAnalogModel");
         receiver.typename = default("ApskReceiver");
+        receiver.analogModel.typename = default("ScalarReceiverAnalogModel");
 }
 
