@@ -354,7 +354,9 @@ void MacForwardingTable::parseForwardingTableParameter()
     auto forwardingTableObject = check_and_cast<cValueArray *>(par("forwardingTable").objectValue());
     for (int i = 0; i < forwardingTableObject->size(); i++) {
         cValueMap *entry = check_and_cast<cValueMap *>(forwardingTableObject->get(i).objectValue());
-        auto vlan = entry->containsKey("vlan") ? entry->get("vlan").intValue() : 0;
+        unsigned int vlan = 0;
+        if (entry->containsKey("vlan"))
+            vlan = entry->get("vlan");
         auto macAddressString = entry->get("address").stringValue();
         L3Address l3Address;
         if (!L3AddressResolver().tryResolve(macAddressString, l3Address, L3AddressResolver::ADDR_MAC))
