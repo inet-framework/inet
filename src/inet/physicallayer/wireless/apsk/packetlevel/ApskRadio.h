@@ -17,7 +17,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API ApskRadio : public FlatRadioBase
+class INET_API ApskRadio : public NarrowbandRadioBase
 {
   protected:
     const Protocol *protocol = nullptr;

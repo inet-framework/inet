@@ -22,7 +22,7 @@ namespace physicallayer {
 Define_Module(ApskRadio);
 
 ApskRadio::ApskRadio() :
-    FlatRadioBase()
+    NarrowbandRadioBase()
 {
 }
 
@@ -41,7 +41,7 @@ void ApskRadio::handleUpperPacket(Packet *packet)
     if (protocol != nullptr && protocol != packet->getTag<PacketProtocolTag>()->getProtocol())
         throw cRuntimeError("Packet received with incorrect protocol");
     else
-        FlatRadioBase::handleUpperPacket(packet);
+        NarrowbandRadioBase::handleUpperPacket(packet);
 }
 
 void ApskRadio::sendUp(Packet *packet)
@@ -53,7 +53,7 @@ void ApskRadio::sendUp(Packet *packet)
         delete packet;
     }
     else
-        FlatRadioBase::sendUp(packet);
+        NarrowbandRadioBase::sendUp(packet);
 }
 
 b ApskRadio::computePaddingLength(b length, const ConvolutionalCode *forwardErrorCorrection, const ApskModulationBase *modulation) const
