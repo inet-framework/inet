@@ -956,7 +956,9 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
 
 void Ipv6::sendDatagramToOutput(Packet *packet, const NetworkInterface *destIE, const MacAddress& macAddr)
 {
-    packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(macAddr);
+    auto macAddrReq = packet->addTagIfAbsent<MacAddressReq>();
+    macAddrReq->setSrcAddress(destIE->getMacAddress());
+    macAddrReq->setDestAddress(macAddr);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
     packet->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);

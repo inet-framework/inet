@@ -1005,7 +1005,9 @@ void Ipv4::sendDatagramToOutput(Packet *packet)
         }
         else {
             ASSERT2(!containsKey(pendingPackets, nextHopAddr), "Ipv4-ARP error: nextHopAddr found in ARP table, but Ipv4 queue for nextHopAddr not empty");
-            packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(nextHopMacAddr);
+            auto macAddrReq = packet->addTagIfAbsent<MacAddressReq>();
+            macAddrReq->setSrcAddress(ie->getMacAddress());
+            macAddrReq->setDestAddress(nextHopMacAddr);
             sendPacketToNIC(packet);
         }
     }
@@ -1025,7 +1027,9 @@ void Ipv4::arpResolutionCompleted(IArp::Notification *entry)
             Packet *packet = check_and_cast<Packet *>(packetQueue.pop());
             EV << "Sending out queued packet " << packet << "\n";
             packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(entry->ie->getInterfaceId());
-            packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(entry->macAddress);
+            auto macAddrReq = packet->addTagIfAbsent<MacAddressReq>();
+            macAddrReq->setSrcAddress(entry->ie->getMacAddress());
+            macAddrReq->setDestAddress(entry->macAddress);
             sendPacketToNIC(packet);
         }
         pendingPackets.erase(it);
