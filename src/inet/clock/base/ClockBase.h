@@ -25,10 +25,14 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
     clocktime_t clockEventTime = -1;
     const char *displayStringTextFormat = nullptr;
     ModuleRefByPar<IClock> referenceClockModule;
+    simtime_t emitClockTimeInterval;
+    cMessage *timer = nullptr;
 
   protected:
+    virtual ~ClockBase() { cancelAndDelete(timer); }
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
     virtual void refreshDisplay() const override;
     virtual void updateDisplayString() const;

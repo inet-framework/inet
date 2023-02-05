@@ -351,10 +351,12 @@ void MacForwardingTable::readForwardingTable(const char *fileName)
 
 void MacForwardingTable::parseForwardingTableParameter()
 {
-    auto forwardingTable = check_and_cast<cValueArray *>(par("forwardingTable").objectValue());
-    for (int i = 0; i < forwardingTable->size(); i++) {
-        cValueMap *entry = check_and_cast<cValueMap *>(forwardingTable->get(i).objectValue());
-        auto vlan = entry->containsKey("vlan") ? entry->get("vlan").intValue() : 0;
+    auto forwardingTableObject = check_and_cast<cValueArray *>(par("forwardingTable").objectValue());
+    for (int i = 0; i < forwardingTableObject->size(); i++) {
+        cValueMap *entry = check_and_cast<cValueMap *>(forwardingTableObject->get(i).objectValue());
+        unsigned int vlan = 0;
+        if (entry->containsKey("vlan"))
+            vlan = entry->get("vlan");
         auto macAddressString = entry->get("address").stringValue();
         L3Address l3Address;
         if (!L3AddressResolver().tryResolve(macAddressString, l3Address, L3AddressResolver::ADDR_MAC))
@@ -366,8 +368,12 @@ void MacForwardingTable::parseForwardingTableParameter()
             throw cRuntimeError("Cannot find network interface '%s'", interfaceName);
         if (macAddress.isMulticast())
             addMulticastAddressForwardingInterface(networkInterface->getInterfaceId(), macAddress, vlan);
-        else
+        else {
+            ForwardingTableKey key(vlan, macAddress);
+            if (containsKey(forwardingTable, key))
+                throw cRuntimeError("Table already contains %s unicast MAC address for vlan %u.", macAddress.str().c_str(), vlan);
             setUnicastAddressForwardingInterface(networkInterface->getInterfaceId(), macAddress, vlan);
+        }
     }
 }
 

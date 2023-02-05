@@ -14,13 +14,29 @@ simsignal_t ClockBase::timeChangedSignal = cComponent::registerSignal("timeChang
 
 void ClockBase::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
         displayStringTextFormat = par("displayStringTextFormat");
+        emitClockTimeInterval = par("emitClockTimeInterval");
+        if (emitClockTimeInterval != 0) {
+            timer = new cMessage();
+            scheduleAt(simTime(), timer);
+        }
+    }
     else if (stage == INITSTAGE_LAST) {
         referenceClockModule.reference(this, "referenceClock", false);
         updateDisplayString();
         emit(timeChangedSignal, getClockTime().asSimTime());
     }
+}
+
+void ClockBase::handleMessage(cMessage *msg)
+{
+    if (msg == timer) {
+        emit(timeChangedSignal, getClockTime().asSimTime());
+        scheduleAfter(emitClockTimeInterval, timer);
+    }
+    else
+        throw cRuntimeError("Unknown message");
 }
 
 void ClockBase::finish()
