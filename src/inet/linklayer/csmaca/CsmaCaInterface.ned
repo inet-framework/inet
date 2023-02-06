@@ -15,7 +15,7 @@ import inet.linklayer.common.WirelessInterface;
 module CsmaCaInterface extends WirelessInterface
 {
     parameters:
-        radio.typename = default("ApskScalarRadio");
+        radio.typename = default("ApskRadio");
         mac.typename = default("CsmaCaMac");
         queue.typename = default("DropTailQueue");
         queue.packetCapacity = default(-1);

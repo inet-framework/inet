@@ -17,6 +17,8 @@ module DummyTransmitterAnalogModel like ITransmitterAnalogModel
 module TransmitterBase
 {
     parameters:
+        string signalAnalogRepresentation @enum("unitDisk","scalar","dimensional") = default("scalar");
+        analogModel.typename = default(signalAnalogRepresentation == "unitDisk" ? "UnitDiskTransmitterAnalogModel" : signalAnalogRepresentation == "scalar" ? "ScalarTransmitterAnalogModel" : "DimensionalTransmitterAnalogModel");
         @display("i=block/tx");
     submodules:
         analogModel: <default("DummyTransmitterAnalogModel")> like ITransmitterAnalogModel if typename != "" {

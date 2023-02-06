@@ -15,7 +15,7 @@ import inet.linklayer.common.WirelessInterface;
 module LMacInterface extends WirelessInterface
 {
     parameters:
-        radio.typename = default("ApskScalarRadio");
+        radio.typename = default("ApskRadio");
         mac.typename = "LMac";
         queue.typename = default("DropTailQueue");
         queue.packetCapacity = default(10);

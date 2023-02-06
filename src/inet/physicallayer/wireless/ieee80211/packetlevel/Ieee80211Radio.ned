@@ -25,7 +25,6 @@ import inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase;
 module Ieee80211Radio extends FlatRadioBase
 {
     parameters:
-        string signalAnalogRepresentation @enum("scalar", "dimensional") = default("scalar");
         string opMode @enum("a", "b", "g(erp)", "g(mixed)", "n(mixed-2.4Ghz)", "p", "ac") = default("g(mixed)"); // operation mode
         string bandName @enum("2.4 GHz", "5 GHz", "5 GHz (20 MHz)", "5 GHz (40 MHz)", "5 GHz (80 MHz)", "5 GHz (160 MHz)", "5.9 GHz") = default("2.4 GHz"); // band name
         int channelNumber = default(0);                                 // initial channel number within the band (TODO this is offset by 1)

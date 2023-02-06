@@ -20,7 +20,6 @@ module ApskRadio extends FlatRadioBase
 {
     parameters:
         string protocol = default("");
-        string signalAnalogRepresentation @enum("scalar", "dimensional") = default("scalar");
         transmitter.typename = default("ApskTransmitter");
         receiver.typename = default("ApskReceiver");
         @class(ApskRadio);

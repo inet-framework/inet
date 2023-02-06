@@ -17,6 +17,8 @@ module DummyReceiverAnalogModel like IReceiverAnalogModel
 module ReceiverBase
 {
     parameters:
+        string signalAnalogRepresentation @enum("unitDisk","scalar","dimensional") = default("scalar");
+        analogModel.typename = default(signalAnalogRepresentation == "unitDisk" ? "UnitDiskReceiverAnalogModel" : signalAnalogRepresentation == "scalar" ? "ScalarReceiverAnalogModel" : "DimensionalReceiverAnalogModel");
         @display("i=block/tx");
     submodules:
         analogModel: <default("DummyReceiverAnalogModel")> like IReceiverAnalogModel if typename != "" {
