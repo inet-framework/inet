@@ -593,12 +593,12 @@
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         c8d2-adf0/tplx;0d34-1473/~tNl;1605-0571/~tND;6380-098c/tyf, PASS, wireless Ipv4
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithBlockAck -r 0,        10s,         a7a1-a183/tplx;6d8a-1592/~tNl;04ca-b13d/~tND;8aa8-1321/tyf, PASS, wireless Ipv4
 
-/examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            bf30-2f13/tplx;7b2f-653d/~tNl;2456-c0fc/~tND;dcc5-5c63/tyf, PASS, wireless
+/examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            bf30-2f13/tplx;7b2f-653d/~tNl;2456-c0fc/~tND;3e9e-7f1d/tyf, PASS, wireless
 
 # /examples/wireless/scaling/,         -f omnetpp.ini -c AbstractAckingMac -r 0,    # abstract-config
-/examples/wireless/scaling/,         -f omnetpp.ini -c UnitDiskRadioMedium -r 0,       10s,               dac1-4df2/tplx;badb-0808/~tNl;56a6-0b6a/~tND, PASS, wireless AckingWirelessInterface Ipv4
-/examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0,      10s,               ee21-b647/tplx;360e-d6ee/~tNl;5066-6640/~tND, PASS, wireless AckingWirelessInterface Ipv4
-/examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 1s,                1d13-1fc7/tplx;b15d-c5f1/~tNl;a755-ccae/~tND, PASS, wireless AckingWirelessInterface Ipv4
+/examples/wireless/scaling/,         -f omnetpp.ini -c UnitDiskRadioMedium -r 0,       10s,               9ff3-9b79/tplx;bcf1-ddd0/~tNl;7d35-214d/~tND, PASS, wireless AckingWirelessInterface Ipv4
+/examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0,      10s,               9d53-27d2/tplx;765b-5d45/~tNl;5c9c-7555/~tND, PASS, wireless AckingWirelessInterface Ipv4
+/examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 1s,                9b3b-f88a/tplx;be94-9c8e/~tNl;7607-db86/~tND, PASS, wireless AckingWirelessInterface Ipv4
 
 /examples/wireless/shortcut/,        -f omnetpp.ini -c ShortcutMac -r 0,            1000s,            91d1-098d/tplx;6924-7e35/~tNl;1069-9852/tyf, PASS, wireless Ipv4
 /examples/wireless/shortcut/,        -f omnetpp.ini -c ShortcutRadio -r 0,          1000s,            4e2a-4349/tplx;1d1b-2b6d/~tNl;7a3c-9e0d/tyf, PASS, wireless AckingWirelessInterface Ipv4
