@@ -12,9 +12,9 @@ import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitterAnalo
 module ScalarTransmitterAnalogModel like ITransmitterAnalogModel
 {
     parameters:
-        double power @unit(W);
-        double centerFrequency @unit(Hz);
-        double bandwidth @unit(Hz);
+        double power @unit(W) = default(nan W); // default power
+        double centerFrequency @unit(Hz) = default(nan Hz); // default center frequency
+        double bandwidth @unit(Hz) = default(nan Hz); // default bandwidth
         @class(ScalarTransmitterAnalogModel);
         @display("i=block/tunnel");
 }

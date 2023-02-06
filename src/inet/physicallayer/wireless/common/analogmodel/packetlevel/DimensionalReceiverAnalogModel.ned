@@ -12,10 +12,10 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IReceiverAnalogMo
 module DimensionalReceiverAnalogModel like IReceiverAnalogModel
 {
     parameters:
-        double centerFrequency @unit(Hz);
-        double bandwidth @unit(Hz);
-        double energyDetection @unit(dBm); // no signal is detected at all below this reception power threshold (idle state)
-        double sensitivity @unit(dBm);     // reception is not possible if the signal power is below sensitivity (idle or busy states)
+        double centerFrequency @unit(Hz) = default(nan Hz);
+        double bandwidth @unit(Hz) = default(nan Hz);
+        double energyDetection @unit(dBm) = default(nan dBm); // no signal is detected at all below this reception power threshold (idle state)
+        double sensitivity @unit(dBm) = default(nan dBm);     // reception is not possible if the signal power is below sensitivity (idle or busy states)
         @class(DimensionalReceiverAnalogModel);
         //@display("i=block/tunnel");
 }
