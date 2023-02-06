@@ -378,7 +378,7 @@
 /examples/mobility/,                 -f omnetpp.ini -c LinearMobility100 -r 0,      10000s,          fcd5-da2e/tplx;0000-0000/~tNl;0000-0000/~tND;708b-4121/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c LinearMobility1000 -r 0,     10000s,          380f-162e/tplx;0000-0000/~tNl;0000-0000/~tND;901c-70f2/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c MassMobility -r 0,           5000s,           b764-ab4a/tplx;0000-0000/~tNl;0000-0000/~tND;48f5-5644/tyf, PASS,
-/examples/mobility/,                 -f omnetpp.ini -c MassMobilityWithScenario -r 0, 10000s,        bb94-612c/tplx;0000-0000/~tNl;0000-0000/~tND;a741-30ba/tyf, PASS,
+/examples/mobility/,                 -f omnetpp.ini -c MassMobilityWithScenario -r 0, 10000s,        2889-e87d/tplx;0000-0000/~tNl;0000-0000/~tND;a741-30ba/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c MoBANMobility1 -r 0,         10000s,          7e9a-4c42/tplx;0000-0000/~tNl;0000-0000/~tND;b785-055e/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c MoBANMobility2 -r 0,         10000s,          5717-6286/tplx;0000-0000/~tNl;0000-0000/~tND;09e7-2670/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c RandomWaypointMobility1 -r 0, 5000s,          deb8-422c/tplx;0000-0000/~tNl;0000-0000/~tND;2f09-8074/tyf, PASS,
@@ -386,7 +386,7 @@
 /examples/mobility/,                 -f omnetpp.ini -c RectangleMobility -r 0,      10000s,          4860-beb1/tplx;0000-0000/~tNl;0000-0000/~tND;2df2-794e/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c StaticGridMobility -r 0,     0s,              0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,         # (zero time simulated)
 /examples/mobility/,                 -f omnetpp.ini -c StationaryMobility -r 0,     0s,              0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,         # (zero time simulated)
-/examples/mobility,                  -f omnetpp.ini -c SuperpositioningMobility,    10s,             4700-bd90/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,
+/examples/mobility/,                 -f omnetpp.ini -c SuperpositioningMobility,    10s,             4700-bd90/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c TractorMobility -r 0,        10000s,          4b3c-6272/tplx;0000-0000/~tNl;0000-0000/~tND;d72c-bdc0/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility1 -r 0,        10000s,          0e28-b6e3/tplx;0000-0000/~tNl;0000-0000/~tND;95ce-e71e/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility2 -r 0,        10000s,          67c8-fee0/tplx;0000-0000/~tNl;0000-0000/~tND;9cfc-e867/tyf, PASS,
@@ -394,7 +394,7 @@
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility4 -r 0,        10000s,          9511-7d84/tplx;0000-0000/~tNl;0000-0000/~tND;06f8-aff3/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility5 -r 0,        10000s,          9511-7d84/tplx;0000-0000/~tNl;0000-0000/~tND;a637-60c8/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility6 -r 0,        10000s,          0e4c-de72/tplx;0000-0000/~tNl;0000-0000/~tND;22cd-9a0f/tyf, PASS,
-/examples/mobility,                  -f omnetpp.ini -c VehicleMobility,             10s,             74e9-d3f9/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,
+/examples/mobility/,                 -f omnetpp.ini -c VehicleMobility,             10s,             566c-6355/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,
 
 /examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50s,             6a1b-caed/tplx;36d7-02a9/~tNl;6a67-8c1b/tyf, PASS, Ipv4
 /examples/mpls/net37/,               -f omnetpp.ini -c General -r 0,                100s,            0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, ERROR,    # <!> Error in module (TED) R37.LSR0.ted (id=45) during network initialization: Model error: ASSERT: condition !remote.isUnspecified() false in function initialize, networklayer/ted/TED.cc line 86.
