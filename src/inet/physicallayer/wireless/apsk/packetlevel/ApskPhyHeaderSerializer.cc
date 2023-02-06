@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/physicallayer/wireless/apsk/bitlevel/ApskPhyHeaderSerializer.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeaderSerializer.h"
 
 #include "inet/common/checksum/EthernetCRC.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
