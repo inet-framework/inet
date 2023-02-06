@@ -455,7 +455,7 @@ def annotate_barchart(ax, offset=0, color='white', size=12, zorder=10, prefix=''
                 return False
     
     for p in range(0, len(ax.patches)):
-        print("p (ax.patches): ", p, ax.patches[p])
+        if debug: print("p (ax.patches): ", p, ax.patches[p])
         if is_in_outliers(p):
             for i in outliers:
                 if i['index'] == p:
