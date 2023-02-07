@@ -404,10 +404,10 @@
 /examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0,                10s,             62ad-da8e/tplx;03fe-e04e/~tNl;966c-4dc4/tyf, PASS, Ipv4
 /examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,                50s,             83d6-2aac/tplx;9b94-282e/~tNl;2822-854c/tyf, PASS, Ipv4
 
-/examples/neighborcache/,            -f omnetpp.ini -c WithoutNeighborCache -r 0,      100s,         dc71-5ea0/tplx;bfd1-84cd/~tNl;02ae-96a6/~tND, PASS, wireless AckingWirelessInterface Ipv4
-/examples/neighborcache/,            -f omnetpp.ini -c QuadTreeNeighborCache -r 0,     100s,         b46b-4d94/tplx;801c-c672/~tNl;d83c-1e7a/~tND, PASS, wireless AckingWirelessInterface Ipv4
-/examples/neighborcache/,            -f omnetpp.ini -c NeighborListNeighborCache -r 0, 100s,         9940-e9be/tplx;f1e5-9031/~tNl;9129-f567/~tND;91e4-3f14/tyf, PASS, wireless AckingWirelessInterface Ipv4
-/examples/neighborcache/,            -f omnetpp.ini -c GridNeighborCache -r 0,         100s,         082a-d5ae/tplx;3790-656a/~tNl;5926-1539/~tND, PASS, wireless AckingWirelessInterface Ipv4
+/examples/neighborcache/,            -f omnetpp.ini -c WithoutNeighborCache -r 0,      100s,         92e8-be6b/tplx;ea60-9956/~tNl;1b49-5bdf/~tND, PASS, wireless AckingWirelessInterface Ipv4
+/examples/neighborcache/,            -f omnetpp.ini -c QuadTreeNeighborCache -r 0,     100s,         366f-e8b8/tplx;ea60-9956/~tNl;fe53-5936/~tND, PASS, wireless AckingWirelessInterface Ipv4
+/examples/neighborcache/,            -f omnetpp.ini -c NeighborListNeighborCache -r 0, 100s,         366f-e8b8/tplx;ea60-9956/~tNl;fe53-5936/~tND, PASS, wireless AckingWirelessInterface Ipv4
+/examples/neighborcache/,            -f omnetpp.ini -c GridNeighborCache -r 0,         100s,         366f-e8b8/tplx;ea60-9956/~tNl;fe53-5936/~tND, PASS, wireless AckingWirelessInterface Ipv4
 
 /examples/objectcache/,              -f omnetpp.ini -c WithoutCache -r 0,           20s,             9c36-7f4c/tplx;3dbf-d975/~tNl;a119-0cbb/~tND;b4f4-1f56/tyf, PASS, wireless Ipv4
 /examples/objectcache/,              -f omnetpp.ini -c GridObjectCache -r 0,        20s,             9c36-7f4c/tplx;3dbf-d975/~tNl;a119-0cbb/~tND;be70-0bf1/tyf, PASS, wireless Ipv4
