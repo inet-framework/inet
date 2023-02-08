@@ -499,8 +499,6 @@
 
 /examples/wireless/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         4b91-925c/tplx;2b55-3ab9/~tNl;dbc6-a6ec/~tND;c39c-a7b0/tyf, PASS, wireless Ipv4
 
-/examples/wireless/errorrate/,       -f omnetpp.ini -c General -r 0,                100s,         0bb3-adca/tplx;b0b7-4a84/~tNl;1c49-63dd/~tND;ac68-ada4/tyf, PASS, wireless Ipv4
-
 /examples/wireless/filtering/,       -f omnetpp.ini -c CommunicationRangeFilter -r 0, 100s,         87b7-c7b5/tplx;ff49-aedd/~tNl;42fd-2c0f/~tND;7e98-d312/tyf, PASS, Ipv4
 /examples/wireless/filtering/,       -f omnetpp.ini -c RadioModeFilter -r 0,          100s,         eaeb-7cd9/tplx;e5d7-0ef7/~tNl;5e2b-1edf/~tND;ba14-04c3/tyf, PASS, Ipv4
 /examples/wireless/filtering/,       -f omnetpp.ini -c ListeningFilter -r 0,          100s,         946b-6f7f/tplx;e5d7-0ef7/~tNl;5e2b-1edf/~tND;f604-07ee/tyf, PASS, Ipv4
