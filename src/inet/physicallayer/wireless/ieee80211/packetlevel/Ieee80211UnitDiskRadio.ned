@@ -19,6 +19,6 @@ module Ieee80211UnitDiskRadio extends Ieee80211Radio
     parameters:
         transmitter.typename = default("Ieee80211UnitDiskTransmitter");
         receiver.typename = default("Ieee80211UnitDiskReceiver");
-        @class(Radio);
+        @class(Ieee80211Radio);
 }
 

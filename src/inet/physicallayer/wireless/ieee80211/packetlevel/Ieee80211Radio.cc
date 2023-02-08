@@ -83,7 +83,9 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
 void Ieee80211Radio::setModeSet(const Ieee80211ModeSet *modeSet)
 {
     Ieee80211TransmitterBase *ieee80211Transmitter = const_cast<Ieee80211TransmitterBase *>(check_and_cast<const Ieee80211TransmitterBase *>(transmitter));
-    Ieee80211ReceiverBase *ieee80211Receiver = const_cast<Ieee80211ReceiverBase *>(check_and_cast<const Ieee80211ReceiverBase *>(receiver));
+    Ieee80211ReceiverBase *ieee80211Receiver = const_cast<Ieee80211ReceiverBase *>(dynamic_cast<const Ieee80211ReceiverBase *>(receiver));
+    if (!ieee80211Receiver)
+        return;
     ieee80211Transmitter->setModeSet(modeSet);
     ieee80211Receiver->setModeSet(modeSet);
     EV << "Changing radio mode set to " << modeSet << endl;
@@ -103,7 +105,9 @@ void Ieee80211Radio::setMode(const IIeee80211Mode *mode)
 void Ieee80211Radio::setBand(const IIeee80211Band *band)
 {
     Ieee80211TransmitterBase *ieee80211Transmitter = const_cast<Ieee80211TransmitterBase *>(check_and_cast<const Ieee80211TransmitterBase *>(transmitter));
-    Ieee80211ReceiverBase *ieee80211Receiver = const_cast<Ieee80211ReceiverBase *>(check_and_cast<const Ieee80211ReceiverBase *>(receiver));
+    Ieee80211ReceiverBase *ieee80211Receiver = const_cast<Ieee80211ReceiverBase *>(dynamic_cast<const Ieee80211ReceiverBase *>(receiver));
+    if (!ieee80211Receiver)
+        return;
     ieee80211Transmitter->setBand(band);
     ieee80211Receiver->setBand(band);
     EV << "Changing radio band to " << band << endl;
@@ -114,7 +118,9 @@ void Ieee80211Radio::setBand(const IIeee80211Band *band)
 void Ieee80211Radio::setChannel(const Ieee80211Channel *channel)
 {
     Ieee80211TransmitterBase *ieee80211Transmitter = const_cast<Ieee80211TransmitterBase *>(check_and_cast<const Ieee80211TransmitterBase *>(transmitter));
-    Ieee80211ReceiverBase *ieee80211Receiver = const_cast<Ieee80211ReceiverBase *>(check_and_cast<const Ieee80211ReceiverBase *>(receiver));
+    Ieee80211ReceiverBase *ieee80211Receiver = const_cast<Ieee80211ReceiverBase *>(dynamic_cast<const Ieee80211ReceiverBase *>(receiver));
+    if (!ieee80211Receiver)
+        return;
     ieee80211Transmitter->setChannel(channel);
     ieee80211Receiver->setChannel(channel);
     EV << "Changing radio channel to " << channel->getChannelNumber() << endl;
@@ -126,7 +132,9 @@ void Ieee80211Radio::setChannel(const Ieee80211Channel *channel)
 void Ieee80211Radio::setChannelNumber(int newChannelNumber)
 {
     Ieee80211TransmitterBase *ieee80211Transmitter = const_cast<Ieee80211TransmitterBase *>(check_and_cast<const Ieee80211TransmitterBase *>(transmitter));
-    Ieee80211ReceiverBase *ieee80211Receiver = const_cast<Ieee80211ReceiverBase *>(check_and_cast<const Ieee80211ReceiverBase *>(receiver));
+    Ieee80211ReceiverBase *ieee80211Receiver = const_cast<Ieee80211ReceiverBase *>(dynamic_cast<const Ieee80211ReceiverBase *>(receiver));
+    if (!ieee80211Receiver)
+        return;
     ieee80211Transmitter->setChannelNumber(newChannelNumber);
     ieee80211Receiver->setChannelNumber(newChannelNumber);
     EV << "Changing radio channel to " << newChannelNumber << ".\n";
