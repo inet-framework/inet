@@ -419,13 +419,13 @@
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backbone -r 0,               100s,            5ae1-7d17/tplx;cc0f-71d2/~tNl;1fc2-03b6/~tND;9b01-a3f8/tyf, PASS, EthernetMac Ipv4
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandonestub -r 0,     100s,            48c9-4a36/tplx;766b-3e67/~tNl;2dc9-e107/~tND;c062-827a/tyf, PASS, EthernetMac Ipv4
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandtwostubs -r 0,    100s,            eef6-d044/tplx;e51f-b973/~tNl;468d-ac0b/~tND;6912-9649/tyf, PASS, EthernetMac Ipv4
-/examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-A -r 0,              100s,            5bcf-1f1e/tplx;ed60-cc30/~tNl;33b4-eb78/~tND;0be0-7bac/tyf, PASS, EthernetMac Ipv4
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-A -r 0,              100s,            9b22-3233/tplx;56be-3f48/~tNl;09d3-6f8a/~tND;0be0-7bac/tyf, PASS, EthernetMac Ipv4
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-B -r 0,              100s,            5bcf-1f1e/tplx;ed60-cc30/~tNl;de27-4e34/~tND;cc57-41c3/tyf, PASS, EthernetMac Ipv4
 /examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0,                100s,            7bec-b40c/tplx;1fb0-9c0a/~tNl;2c50-136d/~tND;acb2-4f21/tyf, PASS, EthernetMac Ipv4
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c static -r 0,                 1000s,           18b3-0682/tplx;8c03-a1f1/~tNl;8f8b-367e/~tND;c5c0-7853/tyf, PASS, EthernetMac Ipv4
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic1 -r 0,               1000s,           cb3f-94ce/tplx;805c-001a/~tNl;42a0-f7d4/~tND;343d-3816/tyf, PASS, EthernetMac Ipv4
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic2 -r 0,               1000s,           ba7a-6695/tplx;11a0-f9f8/~tNl;cb3e-c8e5/~tND;d95e-3ff2/tyf, PASS, EthernetMac Ipv4
-/examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                100s,            ed0c-e9ac/tplx;7d94-2376/~tNl;c317-f1ba/~tND;107b-1ada/tyf, PASS, EthernetMac Ipv4
+/examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                100s,            4597-c734/tplx;1471-dd80/~tNl;d192-f40f/~tND;107b-1ada/tyf, PASS, EthernetMac Ipv4
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c AlwaysUp -r 0,               500s,            bfe7-b113/tplx;a9e5-bd53/~tNl;c470-a004/~tND;948a-5447/tyf, PASS, EthernetMac Ipv4
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c ShutdownAndRestart -r 0,     500s,            fbe5-93ad/tplx;bc6e-6aa5/~tNl;1700-f363/~tND;79b8-a305/tyf, PASS, EthernetMac Ipv4
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0,         500s,            73cc-e6f7/tplx;bc6e-6aa5/~tNl;1700-f363/~tND;faf0-ff2d/tyf, PASS, EthernetMac Ipv4
