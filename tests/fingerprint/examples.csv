@@ -507,7 +507,7 @@
 
 /examples/wireless/hiddennode/,      -f omnetpp.ini -c General -r 0,                5s,         8383-735e/tplx;8e4d-20ee/~tNl;318e-4afd/~tND;d261-55c9/tyf, PASS, wireless
 
-/examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,           1b06-0b2c/tplx;2ad9-0144/~tNl;d8f5-d323/~tND;1bd1-e9ac/tyf, PASS, wireless
+/examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,           ea34-1b2b/tplx;336a-f6a4/~tNl;6b9b-4174/~tND;1bd1-e9ac/tyf, PASS, wireless
 
 /examples/wireless/ieee80211levelofdetail, -f omnetpp.ini -c Default -r '$distance=100  && $bitrate=6  && $repetition=0',               1s,           7d44-b2bb/tplx;d318-d210/~tNl;392b-1b38/~tND;a21e-0940/tyf, PASS, wireless Ipv4
 /examples/wireless/ieee80211levelofdetail, -f omnetpp.ini -c Default -r '$distance=1000 && $bitrate=6  && $repetition=0',               1s,           2de9-fd45/tplx;8aa4-8d31/~tNl;03ac-ef28/~tND;7842-68f1/tyf, PASS, wireless Ipv4
