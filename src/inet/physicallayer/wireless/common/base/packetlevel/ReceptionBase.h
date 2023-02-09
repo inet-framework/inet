@@ -32,7 +32,7 @@ class INET_API ReceptionBase : public virtual IReception, public virtual IRecept
     const Quaternion endOrientation;
 
     // TODO make this field protected and set from the constructor
-    public: const INewReceptionAnalogModel *analogModel;
+    public: const INewReceptionAnalogModel *analogModel = nullptr;
 
   public:
     ReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation);

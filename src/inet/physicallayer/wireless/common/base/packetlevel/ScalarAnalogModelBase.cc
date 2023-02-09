@@ -8,6 +8,8 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/ScalarAnalogModelBase.h"
 
 #include "inet/common/geometry/common/Quaternion.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReceptionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmissionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarSnir.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAntennaGain.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
@@ -57,7 +59,7 @@ W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, cons
 
 void ScalarAnalogModelBase::addReception(const IReception *reception, simtime_t& noiseStartTime, simtime_t& noiseEndTime, std::map<simtime_t, W>& powerChanges) const
 {
-    W power = check_and_cast<const IScalarSignal *>(reception->getAnalogModel())->getPower();
+    W power = check_and_cast<const ScalarReceptionAnalogModel *>(reception->getNewAnalogModel())->getPower();
     simtime_t startTime = reception->getStartTime();
     simtime_t endTime = reception->getEndTime();
     std::map<simtime_t, W>::iterator itStartTime = powerChanges.find(startTime);
@@ -115,7 +117,7 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IListening *listening, c
     powerChanges[math::getUpperBound<simtime_t>()] = W(0);
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
     for (auto reception : *interferingReceptions) {
-        const ISignalAnalogModel *signalAnalogModel = reception->getAnalogModel();
+        auto signalAnalogModel = reception->getNewAnalogModel();
         const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(signalAnalogModel);
         Hz signalCenterFrequency = narrowbandSignalAnalogModel->getCenterFrequency();
         Hz signalBandwidth = narrowbandSignalAnalogModel->getBandwidth();

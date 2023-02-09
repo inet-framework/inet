@@ -38,7 +38,7 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
     const Quaternion endOrientation;
 
   // TODO make this field protected and set from the constructor
-  public: const INewTransmissionAnalogModel *analogModel;
+  public: const INewTransmissionAnalogModel *analogModel = nullptr;
 
   public:
     TransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation);

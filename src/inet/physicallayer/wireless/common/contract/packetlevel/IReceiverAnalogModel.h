@@ -23,6 +23,10 @@ class INET_API IReceiverAnalogModel : public IPrintableObject
   public:
     virtual IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const = 0;
 
+    virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const = 0;
+
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const = 0;
+
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const = 0;
 };
 

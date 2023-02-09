@@ -14,7 +14,8 @@ module ScalarReceiverAnalogModel like IReceiverAnalogModel
     parameters:
         double centerFrequency @unit(Hz);
         double bandwidth @unit(Hz);
-        // sensitivity?
+        double energyDetection @unit(dBm); // no signal is detected at all below this reception power threshold (idle state)
+        double sensitivity @unit(dBm);     // reception is not possible if the signal power is below sensitivity (idle or busy states)
         @class(ScalarReceiverAnalogModel);
         //@display("i=block/tunnel");
 }

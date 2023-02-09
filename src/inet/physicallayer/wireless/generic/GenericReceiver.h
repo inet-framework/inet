@@ -35,7 +35,7 @@ class INET_API GenericReceiver : public ReceiverBase
 
     virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const override;
     virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
-    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
+//    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
 };
 
 } // namespace physicallayer

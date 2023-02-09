@@ -5,12 +5,12 @@
 //
 
 
-#include "inet/physicallayer/wireless/common/radio/packetlevel/ScalarReceiverAnalogModel.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ScalarTransmitterAnalogModel.h"
 
 namespace inet {
 namespace physicallayer {
 
-Define_Module(ScalarReceiverAnalogModel);
+Define_Module(ScalarTransmitterAnalogModel);
 
 } // namespace physicallayer
 } // namespace inet

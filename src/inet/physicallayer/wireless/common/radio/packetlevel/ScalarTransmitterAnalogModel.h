@@ -8,6 +8,7 @@
 #ifndef __INET_SCALARTRANSMITTERANALOGMODEL_H
 #define __INET_SCALARTRANSMITTERANALOGMODEL_H
 
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmissionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/TransmitterAnalogModelBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmitterAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/INewTransmissionAnalogModel.h"
@@ -15,22 +16,6 @@
 namespace inet {
 
 namespace physicallayer {
-
-class INET_API ScalarTransmissionAnalogModel : public INewTransmissionAnalogModel
-{
-  public:
-    Hz centerFrequency = Hz(NaN);
-    Hz bandwidth = Hz(NaN);
-    W power = W(NaN);
-
-  public:
-    ScalarTransmissionAnalogModel(Hz centerFrequency, Hz bandwidth, W power) : centerFrequency(centerFrequency), bandwidth(bandwidth), power(power) {}
-
-
-    Hz getCenterFrequency() const { return centerFrequency; }
-    Hz getBandwidth() const { return bandwidth; }
-    W getPower() const { return power; }
-};
 
 class INET_API ScalarTransmitterAnalogModel : public TransmitterAnalogModelBase, public ITransmitterAnalogModel
 {
