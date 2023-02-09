@@ -20,7 +20,7 @@ jobs:
         mode: ["debug", "release"]
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Pull Docker image
         run: docker pull omnetpp/travis-inet:6.0-220428
       - name: Build (native)
@@ -28,7 +28,7 @@ jobs:
           docker run -i --env TARGET_PLATFORM=linux --env MODE=${{ matrix.mode }} --env GITHUB_WORKSPACE \
             -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE \
             omnetpp/travis-inet:6.0-220428 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-build.sh
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: libinet-so
           path: ${{ github.workspace }}/src/libINET*.so
@@ -41,7 +41,7 @@ jobs:
         mode: ["debug", "release"]
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Pull Docker image
         run: docker pull omnetpp/travis-inet:6.0-220428
       - name: Build (cross)
@@ -59,8 +59,8 @@ jobs:
         split: [0, 1, 2, 3]
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
         with:
           name: libinet-so
           path: ${{ github.workspace }}/src/
@@ -82,8 +82,8 @@ jobs:
         testdir: ["module", "unit", "packet", "queueing", "protocol"]
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
         with:
           name: libinet-so
           path: ${{ github.workspace }}/src/
