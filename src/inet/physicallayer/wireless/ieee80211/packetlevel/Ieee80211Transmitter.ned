@@ -12,12 +12,12 @@ package inet.physicallayer.wireless.ieee80211.packetlevel;
 // transmission power in their analog representation. The bit domain, symbol
 // domain, and sample domains of the transmissions are not represented.
 //
-// @see ~Ieee80211ScalarReceiver, ~Ieee80211ScalarRadio,
+// @see ~Ieee80211Receiver, ~Ieee80211ScalarRadio,
 // ~Ieee80211ScalarRadioMedium.
 //
-module Ieee80211ScalarTransmitter extends Ieee80211TransmitterBase
+module Ieee80211Transmitter extends Ieee80211TransmitterBase
 {
     parameters:
-        @class(Ieee80211ScalarTransmitter);
+        @class(Ieee80211Transmitter);
 }
 

@@ -14,12 +14,12 @@ package inet.physicallayer.wireless.ieee80211.packetlevel;
 // error models to compute the error rate based on this value and the used
 // operation mode.
 //
-// @see ~Ieee80211ScalarTransmitter, ~Ieee80211ScalarRadio,
+// @see ~Ieee80211Transmitter, ~Ieee80211ScalarRadio,
 // ~Ieee80211ScalarRadioMedium.
 //
-module Ieee80211ScalarReceiver extends Ieee80211ReceiverBase
+module Ieee80211Receiver extends Ieee80211ReceiverBase
 {
     parameters:
-        @class(Ieee80211ScalarReceiver);
+        @class(Ieee80211Receiver);
 }
 

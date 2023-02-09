@@ -5,8 +5,8 @@
 //
 
 
-#ifndef __INET_IEEE80211SCALARTRANSMITTER_H
-#define __INET_IEEE80211SCALARTRANSMITTER_H
+#ifndef __INET_IEEE80211TRANSMITTER_H
+#define __INET_IEEE80211TRANSMITTER_H
 
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
 
@@ -14,10 +14,10 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211ScalarTransmitter : public Ieee80211TransmitterBase
+class INET_API Ieee80211Transmitter : public Ieee80211TransmitterBase
 {
   public:
-    Ieee80211ScalarTransmitter();
+    Ieee80211Transmitter();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 

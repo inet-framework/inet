@@ -14,8 +14,8 @@ import inet.physicallayer.wireless.common.base.packetlevel.NarrowbandReceiverBas
 // supports switching channels, configuring different operation modes, and
 // preamble modes.
 //
-// @see ~Ieee80211TransmitterBase, ~Ieee80211ScalarReceiver,
-// ~Ieee80211DimensionalReceiver.
+// @see ~Ieee80211TransmitterBase, ~Ieee80211Receiver,
+// ~Ieee80211Receiver.
 //
 module Ieee80211ReceiverBase extends NarrowbandReceiverBase
 {

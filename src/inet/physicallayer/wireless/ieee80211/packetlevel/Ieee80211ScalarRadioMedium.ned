@@ -13,7 +13,7 @@ package inet.physicallayer.wireless.ieee80211.packetlevel;
 // ~Ieee80211ScalarRadio model.
 //
 // @see ~Ieee80211ScalarRadio, ~Ieee80211ScalarTransmitter,
-// ~Ieee80211ScalarReceiver, ~ScalarAnalogModel.
+// ~Ieee80211Receiver, ~ScalarAnalogModel.
 //
 module Ieee80211ScalarRadioMedium extends Ieee80211RadioMedium
 {

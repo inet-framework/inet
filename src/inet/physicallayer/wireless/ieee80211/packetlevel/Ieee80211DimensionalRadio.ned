@@ -12,8 +12,8 @@ package inet.physicallayer.wireless.ieee80211.packetlevel;
 // and/or frequency) in the analog representation. It must be used in
 // conjunction with the ~Ieee80211DimensionalRadioMedium model.
 //
-// @see ~Ieee80211DimensionalRadioMedium, ~Ieee80211DimensionalTransmitter,
-// ~Ieee80211DimensionalReceiver, ~DimensionalAnalogModel.
+// @see ~Ieee80211DimensionalRadioMedium, ~Ieee80211Transmitter,
+// ~Ieee80211Receiver, ~DimensionalAnalogModel.
 //
 module Ieee80211DimensionalRadio extends Ieee80211Radio
 {

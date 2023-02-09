@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ScalarTransmitter.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
 
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
@@ -18,20 +18,20 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(Ieee80211ScalarTransmitter);
+Define_Module(Ieee80211Transmitter);
 
-Ieee80211ScalarTransmitter::Ieee80211ScalarTransmitter() :
+Ieee80211Transmitter::Ieee80211Transmitter() :
     Ieee80211TransmitterBase()
 {
 }
 
-std::ostream& Ieee80211ScalarTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
+std::ostream& Ieee80211Transmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    stream << "Ieee80211ScalarTransmitter";
+    stream << "Ieee80211Transmitter";
     return Ieee80211TransmitterBase::printToStream(stream, level);
 }
 
-const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, simtime_t startTime) const
+const ITransmission *Ieee80211Transmitter::createTransmission(const IRadio *transmitter, const Packet *packet, simtime_t startTime) const
 {
     auto phyHeader = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
     const IIeee80211Mode *transmissionMode = computeTransmissionMode(packet);
