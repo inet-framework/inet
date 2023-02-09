@@ -8,8 +8,9 @@
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskScalarTransmitter.h"
 
 #include "inet/mobility/contract/IMobility.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskTransmission.h"
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
-#include "inet/physicallayer/wireless/apsk/packetlevel/ApskScalarTransmission.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmissionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 
@@ -49,8 +50,8 @@ const ITransmission *ApskScalarTransmitter::createTransmission(const IRadio *tra
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     auto symbolTime = 0;
-    auto transmission = new ApskScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, dataLength, modulation, symbolTime, transmissionCenterFrequency, transmissionBandwidth, transmissionBitrate, codeRate, transmissionPower);
-    transmission->analogModel = getAnalogModel()->createAnalogModel(packet);
+    auto transmission = new ApskTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, dataLength, modulation, symbolTime, transmissionBitrate, codeRate);
+    transmission->analogModel = new ScalarTransmissionAnalogModel(transmissionCenterFrequency, transmissionBandwidth, transmissionPower);
     return transmission;
 }
 
