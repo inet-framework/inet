@@ -13,8 +13,7 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
 
 namespace inet {
 namespace physicallayer {

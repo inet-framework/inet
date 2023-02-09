@@ -8,7 +8,7 @@
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211ErrorModelBase.h"
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
 
 namespace inet {
 
@@ -23,7 +23,7 @@ double Ieee80211ErrorModelBase::computePacketErrorRate(const ISnir *snir, IRadio
     Enter_Method("computePacketErrorRate");
     auto transmission = snir->getReception()->getTransmission();
     auto flatTransmission = dynamic_cast<const FlatTransmissionBase *>(transmission);
-    auto ieee80211Transmission = check_and_cast<const Ieee80211TransmissionBase *>(transmission);
+    auto ieee80211Transmission = check_and_cast<const Ieee80211Transmission *>(transmission);
     auto mode = ieee80211Transmission->getMode();
     auto headerLength = flatTransmission != nullptr ? flatTransmission->getHeaderLength() : mode->getHeaderMode()->getLength();
     auto dataLength = flatTransmission != nullptr ? flatTransmission->getDataLength() : mode->getDataMode()->getCompleteLength(transmission->getPacket()->getDataLength() - headerLength);

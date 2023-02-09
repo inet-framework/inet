@@ -20,7 +20,7 @@
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmSymbolModel.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmModulation.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
 
@@ -111,7 +111,7 @@ const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const L
     auto analogModel = check_and_cast<const NarrowbandSignalAnalogModel*>(transmission->getAnalogModel());
     // derived quantities
 
-    auto mode = check_and_cast<const Ieee80211OfdmMode*>(check_and_cast<const Ieee80211TransmissionBase*>(transmission)->getMode())->getDataMode();
+    auto mode = check_and_cast<const Ieee80211OfdmMode*>(check_and_cast<const Ieee80211Transmission *>(transmission)->getMode())->getDataMode();
 
     // division
     auto transmittedSymbols = symbolModel->getAllSymbols();

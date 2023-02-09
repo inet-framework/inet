@@ -20,9 +20,9 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
 
 namespace inet {
 
@@ -82,10 +82,8 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
 
 void Ieee80211Radio::setModeSet(const Ieee80211ModeSet *modeSet)
 {
-    Ieee80211TransmitterBase *ieee80211Transmitter = const_cast<Ieee80211TransmitterBase *>(check_and_cast<const Ieee80211TransmitterBase *>(transmitter));
-    Ieee80211ReceiverBase *ieee80211Receiver = const_cast<Ieee80211ReceiverBase *>(dynamic_cast<const Ieee80211ReceiverBase *>(receiver));
-    if (!ieee80211Receiver)
-        return;
+    Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
+    Ieee80211Receiver *ieee80211Receiver = const_cast<Ieee80211Receiver *>(check_and_cast<const Ieee80211Receiver *>(receiver));
     ieee80211Transmitter->setModeSet(modeSet);
     ieee80211Receiver->setModeSet(modeSet);
     EV << "Changing radio mode set to " << modeSet << endl;
@@ -95,7 +93,7 @@ void Ieee80211Radio::setModeSet(const Ieee80211ModeSet *modeSet)
 
 void Ieee80211Radio::setMode(const IIeee80211Mode *mode)
 {
-    Ieee80211TransmitterBase *ieee80211Transmitter = const_cast<Ieee80211TransmitterBase *>(check_and_cast<const Ieee80211TransmitterBase *>(transmitter));
+    Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
     ieee80211Transmitter->setMode(mode);
     EV << "Changing radio mode to " << mode << endl;
     receptionTimer = nullptr;
@@ -104,10 +102,8 @@ void Ieee80211Radio::setMode(const IIeee80211Mode *mode)
 
 void Ieee80211Radio::setBand(const IIeee80211Band *band)
 {
-    Ieee80211TransmitterBase *ieee80211Transmitter = const_cast<Ieee80211TransmitterBase *>(check_and_cast<const Ieee80211TransmitterBase *>(transmitter));
-    Ieee80211ReceiverBase *ieee80211Receiver = const_cast<Ieee80211ReceiverBase *>(dynamic_cast<const Ieee80211ReceiverBase *>(receiver));
-    if (!ieee80211Receiver)
-        return;
+    Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
+    Ieee80211Receiver *ieee80211Receiver = const_cast<Ieee80211Receiver *>(check_and_cast<const Ieee80211Receiver *>(receiver));
     ieee80211Transmitter->setBand(band);
     ieee80211Receiver->setBand(band);
     EV << "Changing radio band to " << band << endl;
@@ -117,10 +113,8 @@ void Ieee80211Radio::setBand(const IIeee80211Band *band)
 
 void Ieee80211Radio::setChannel(const Ieee80211Channel *channel)
 {
-    Ieee80211TransmitterBase *ieee80211Transmitter = const_cast<Ieee80211TransmitterBase *>(check_and_cast<const Ieee80211TransmitterBase *>(transmitter));
-    Ieee80211ReceiverBase *ieee80211Receiver = const_cast<Ieee80211ReceiverBase *>(dynamic_cast<const Ieee80211ReceiverBase *>(receiver));
-    if (!ieee80211Receiver)
-        return;
+    Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
+    Ieee80211Receiver *ieee80211Receiver = const_cast<Ieee80211Receiver *>(check_and_cast<const Ieee80211Receiver *>(receiver));
     ieee80211Transmitter->setChannel(channel);
     ieee80211Receiver->setChannel(channel);
     EV << "Changing radio channel to " << channel->getChannelNumber() << endl;
@@ -131,10 +125,8 @@ void Ieee80211Radio::setChannel(const Ieee80211Channel *channel)
 
 void Ieee80211Radio::setChannelNumber(int newChannelNumber)
 {
-    Ieee80211TransmitterBase *ieee80211Transmitter = const_cast<Ieee80211TransmitterBase *>(check_and_cast<const Ieee80211TransmitterBase *>(transmitter));
-    Ieee80211ReceiverBase *ieee80211Receiver = const_cast<Ieee80211ReceiverBase *>(dynamic_cast<const Ieee80211ReceiverBase *>(receiver));
-    if (!ieee80211Receiver)
-        return;
+    Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
+    Ieee80211Receiver *ieee80211Receiver = const_cast<Ieee80211Receiver *>(check_and_cast<const Ieee80211Receiver *>(receiver));
     ieee80211Transmitter->setChannelNumber(newChannelNumber);
     ieee80211Receiver->setChannelNumber(newChannelNumber);
     EV << "Changing radio channel to " << newChannelNumber << ".\n";
@@ -239,7 +231,7 @@ bool Ieee80211Radio::verifyCrc(const Ptr<const Ieee80211PhyHeader>& phyHeader) c
 
 void Ieee80211Radio::encapsulate(Packet *packet) const
 {
-    auto ieee80211Transmitter = check_and_cast<const Ieee80211TransmitterBase *>(transmitter);
+    auto ieee80211Transmitter = check_and_cast<const Ieee80211Transmitter *>(transmitter);
     auto mode = ieee80211Transmitter->computeTransmissionMode(packet);
     auto phyHeader = mode->getHeaderMode()->createHeader();
     phyHeader->setChunkLength(b(mode->getHeaderMode()->getLength()));
