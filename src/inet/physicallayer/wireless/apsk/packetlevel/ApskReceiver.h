@@ -24,6 +24,8 @@ class INET_API ApskReceiver : public FlatReceiverBase
   public:
     ApskReceiver();
 
+    const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
+
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };
 

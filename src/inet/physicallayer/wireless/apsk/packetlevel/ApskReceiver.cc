@@ -39,6 +39,11 @@ bool ApskReceiver::computeIsReceptionPossible(const IListening *listening, const
     return apksTransmission && getAnalogModel()->computeIsReceptionPossible(listening, reception, part);
 }
 
+const IListeningDecision *ApskReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const
+{
+    return getAnalogModel()->computeListeningDecision(listening, interference);
+}
+
 } // namespace physicallayer
 
 } // namespace inet
