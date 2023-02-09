@@ -36,8 +36,20 @@ class INET_API GenericTransmitter : public TransmitterBase
     virtual simtime_t getPreambleDuration() const { return preambleDuration; }
     virtual b getHeaderLength() const { return headerLength; }
     virtual bps getBitrate() const { return bitrate; }
-    //virtual m getMaxCommunicationRange() const override { return check_and_cast<UnitDiskTransmitterAnalogModel *>(getAnalogModel())->getCommunicationRange(); }
-    //virtual m getMaxInterferenceRange() const override { return check_and_cast<UnitDiskTransmitterAnalogModel *>(getAnalogModel())->getInterferenceRange(); }
+
+    virtual m getMaxCommunicationRange() const override {
+        if (auto analogModel = dynamic_cast<UnitDiskTransmitterAnalogModel *>(getAnalogModel()))
+            return analogModel->getCommunicationRange();
+        else
+            return TransmitterBase::getMaxCommunicationRange();
+    }
+
+    virtual m getMaxInterferenceRange() const override {
+        if (auto analogModel = dynamic_cast<UnitDiskTransmitterAnalogModel *>(getAnalogModel()))
+            return analogModel->getInterferenceRange();
+        else
+            return TransmitterBase::getMaxInterferenceRange();
+    }
 };
 
 } // namespace physicallayer

@@ -19,8 +19,19 @@ class INET_API Ieee80211UnitDiskTransmitter : public Ieee80211TransmitterBase
 {
   public:
     Ieee80211UnitDiskTransmitter();
-    //virtual m getMaxCommunicationRange() const override { return check_and_cast<UnitDiskTransmitterAnalogModel *>(getAnalogModel())->getCommunicationRange(); }
-    //virtual m getMaxInterferenceRange() const override { return check_and_cast<UnitDiskTransmitterAnalogModel *>(getAnalogModel())->getInterferenceRange(); }
+    virtual m getMaxCommunicationRange() const override {
+        if (auto analogModel = dynamic_cast<UnitDiskTransmitterAnalogModel *>(getAnalogModel()))
+            return analogModel->getCommunicationRange();
+        else
+            return Ieee80211TransmitterBase::getMaxCommunicationRange();
+    }
+
+    virtual m getMaxInterferenceRange() const override {
+        if (auto analogModel = dynamic_cast<UnitDiskTransmitterAnalogModel *>(getAnalogModel()))
+            return analogModel->getInterferenceRange();
+        else
+            return Ieee80211TransmitterBase::getMaxInterferenceRange();
+    }
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, simtime_t startTime) const override;
