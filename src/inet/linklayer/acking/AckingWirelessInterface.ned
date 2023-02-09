@@ -47,7 +47,7 @@ module AckingWirelessInterface extends NetworkInterface like IWirelessInterface
             parameters:
                 @display("p=300,100");
         }
-        radio: <default("UnitDiskRadio")> like IRadio {
+        radio: <default("GenericRadio")> like IRadio {
             parameters:
                 @display("p=300,200");
         }
