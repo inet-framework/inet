@@ -25,9 +25,8 @@ class INET_API UnitDiskReceiverAnalogModel : public ReceiverAnalogModelBase, pub
 
   protected:
     virtual void initialize(int stage) override {
-        if (stage == INITSTAGE_LOCAL) {
-            // TODO here? ignoreInterference
-        }
+        if (stage == INITSTAGE_LOCAL)
+            ignoreInterference = par("ignoreInterference");
     }
 
   public:

@@ -12,6 +12,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IReceiverAnalogMo
 module UnitDiskReceiverAnalogModel like IReceiverAnalogModel
 {
     parameters:
+        bool ignoreInterference = default(false); // true means interfering transmissions are ignored when determining whether a reception is successful or not
         @class(UnitDiskReceiverAnalogModel);
         @display("i=block/tunnel");
 }

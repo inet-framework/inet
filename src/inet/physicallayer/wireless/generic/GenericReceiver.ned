@@ -23,6 +23,7 @@ module GenericReceiver extends ReceiverBase like IReceiver
 {
     parameters:
         bool ignoreInterference = default(false); // true means interfering transmissions are ignored when determining whether a reception is successful or not
+        *.ignoreInterference = default(this.ignoreInterference);
         @class(GenericReceiver);
         @display("i=block/wrx");
 }
