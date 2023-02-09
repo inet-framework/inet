@@ -8,7 +8,7 @@
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ScalarTransmission.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
 
 namespace inet {
 
@@ -29,13 +29,13 @@ std::ostream& Ieee80211Receiver::printToStream(std::ostream& stream, int level, 
 
 bool Ieee80211Receiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
 {
-    auto ieee80211Transmission = dynamic_cast<const Ieee80211ScalarTransmission *>(transmission);
+    auto ieee80211Transmission = dynamic_cast<const Ieee80211Transmission *>(transmission);
     return ieee80211Transmission && modeSet->containsMode(ieee80211Transmission->getMode()) && NarrowbandReceiverBase::computeIsReceptionPossible(listening, transmission);
 }
 
 bool Ieee80211Receiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
-    auto ieee80211Transmission = dynamic_cast<const Ieee80211ScalarTransmission *>(reception->getTransmission());
+    auto ieee80211Transmission = dynamic_cast<const Ieee80211Transmission *>(reception->getTransmission());
     return ieee80211Transmission && modeSet->containsMode(ieee80211Transmission->getMode()) && FlatReceiverBase::computeIsReceptionPossible(listening, reception, part);
 }
 
