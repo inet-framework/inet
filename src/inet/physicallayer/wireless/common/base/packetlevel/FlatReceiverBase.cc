@@ -49,16 +49,18 @@ std::ostream& FlatReceiverBase::printToStream(std::ostream& stream, int level, i
 
 const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
-    const IRadio *receiver = listening->getReceiver();
-    const IRadioMedium *radioMedium = receiver->getMedium();
-    const IAnalogModel *analogModel = radioMedium->getAnalogModel();
-    const INoise *noise = analogModel->computeNoise(listening, interference);
-    const NarrowbandNoiseBase *narrowbandNoise = check_and_cast<const NarrowbandNoiseBase *>(noise);
-    W maxPower = narrowbandNoise->computeMaxPower(listening->getStartTime(), listening->getEndTime());
-    bool isListeningPossible = maxPower >= energyDetection;
-    delete noise;
-    EV_DEBUG << "Computing whether listening is possible: maximum power = " << maxPower << ", energy detection = " << energyDetection << " -> listening is " << (isListeningPossible ? "possible" : "impossible") << endl;
-    return new ListeningDecision(listening, isListeningPossible);
+    return getAnalogModel()->computeListeningDecision(listening, interference);
+    // TODO what should we do with this?
+//    const IRadio *receiver = listening->getReceiver();
+//    const IRadioMedium *radioMedium = receiver->getMedium();
+//    const IAnalogModel *analogModel = radioMedium->getAnalogModel();
+//    const INoise *noise = analogModel->computeNoise(listening, interference);
+//    const NarrowbandNoiseBase *narrowbandNoise = check_and_cast<const NarrowbandNoiseBase *>(noise);
+//    W maxPower = narrowbandNoise->computeMaxPower(listening->getStartTime(), listening->getEndTime());
+//    bool isListeningPossible = maxPower >= energyDetection;
+//    delete noise;
+//    EV_DEBUG << "Computing whether listening is possible: maximum power = " << maxPower << ", energy detection = " << energyDetection << " -> listening is " << (isListeningPossible ? "possible" : "impossible") << endl;
+//    return new ListeningDecision(listening, isListeningPossible);
 }
 
 // TODO this is not purely functional, see interface comment
