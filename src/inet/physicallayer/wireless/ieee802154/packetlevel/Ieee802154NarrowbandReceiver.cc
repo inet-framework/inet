@@ -5,20 +5,20 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/physicallayer/wireless/ieee802154/packetlevel/Ieee802154NarrowbandScalarReceiver.h"
+#include "inet/physicallayer/wireless/ieee802154/packetlevel/Ieee802154NarrowbandReceiver.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Define_Module(Ieee802154NarrowbandScalarReceiver);
+Define_Module(Ieee802154NarrowbandReceiver);
 
-Ieee802154NarrowbandScalarReceiver::Ieee802154NarrowbandScalarReceiver() :
+Ieee802154NarrowbandReceiver::Ieee802154NarrowbandReceiver() :
     FlatReceiverBase()
 {
 }
 
-void Ieee802154NarrowbandScalarReceiver::initialize(int stage)
+void Ieee802154NarrowbandReceiver::initialize(int stage)
 {
     FlatReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -26,9 +26,9 @@ void Ieee802154NarrowbandScalarReceiver::initialize(int stage)
     }
 }
 
-std::ostream& Ieee802154NarrowbandScalarReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
+std::ostream& Ieee802154NarrowbandReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    stream << "Ieee802154NarrowbandScalarReceiver";
+    stream << "Ieee802154NarrowbandReceiver";
     return FlatReceiverBase::printToStream(stream, level);
 }
 

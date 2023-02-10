@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/physicallayer/wireless/ieee802154/packetlevel/Ieee802154NarrowbandScalarTransmitter.h"
+#include "inet/physicallayer/wireless/ieee802154/packetlevel/Ieee802154NarrowbandTransmitter.h"
 
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
@@ -14,20 +14,20 @@
 namespace inet {
 namespace physicallayer {
 
-Define_Module(Ieee802154NarrowbandScalarTransmitter);
+Define_Module(Ieee802154NarrowbandTransmitter);
 
-Ieee802154NarrowbandScalarTransmitter::Ieee802154NarrowbandScalarTransmitter() :
+Ieee802154NarrowbandTransmitter::Ieee802154NarrowbandTransmitter() :
     FlatTransmitterBase()
 {
 }
 
-std::ostream& Ieee802154NarrowbandScalarTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
+std::ostream& Ieee802154NarrowbandTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    stream << "Ieee802154NarrowbandScalarTransmitter";
+    stream << "Ieee802154NarrowbandTransmitter";
     return FlatTransmitterBase::printToStream(stream, level);
 }
 
-const ITransmission *Ieee802154NarrowbandScalarTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
+const ITransmission *Ieee802154NarrowbandTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
     W transmissionPower = computeTransmissionPower(packet);
     bps transmissionBitrate = computeTransmissionDataBitrate(packet);

@@ -5,8 +5,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#ifndef __INET_IEEE802154NARROWBANDSCALARRECEIVER_H
-#define __INET_IEEE802154NARROWBANDSCALARRECEIVER_H
+#ifndef __INET_IEEE802154NARROWBANDRECEIVER_H
+#define __INET_IEEE802154NARROWBANDRECEIVER_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
 
@@ -14,13 +14,13 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee802154NarrowbandScalarReceiver : public FlatReceiverBase
+class INET_API Ieee802154NarrowbandReceiver : public FlatReceiverBase
 {
   protected:
     W minInterferencePower;
 
   public:
-    Ieee802154NarrowbandScalarReceiver();
+    Ieee802154NarrowbandReceiver();
 
     void initialize(int stage) override;
 

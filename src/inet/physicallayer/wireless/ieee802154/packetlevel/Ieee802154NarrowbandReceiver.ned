@@ -9,12 +9,12 @@ package inet.physicallayer.wireless.ieee802154.packetlevel;
 
 import inet.physicallayer.wireless.common.base.packetlevel.NarrowbandReceiverBase;
 
-module Ieee802154NarrowbandScalarReceiver extends NarrowbandReceiverBase
+module Ieee802154NarrowbandReceiver extends NarrowbandReceiverBase
 {
     parameters:
         modulation = default("DSSS-OQPSK-16");
         errorModel.typename = default("ApskErrorModel");
         double minInterferencePower @unit(dBm);
-        @class(Ieee802154NarrowbandScalarReceiver);
+        @class(Ieee802154NarrowbandReceiver);
 }
 

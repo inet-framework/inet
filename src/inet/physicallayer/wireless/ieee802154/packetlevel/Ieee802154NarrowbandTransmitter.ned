@@ -9,10 +9,10 @@ package inet.physicallayer.wireless.ieee802154.packetlevel;
 
 import inet.physicallayer.wireless.common.base.packetlevel.NarrowbandTransmitterBase;
 
-module Ieee802154NarrowbandScalarTransmitter extends NarrowbandTransmitterBase
+module Ieee802154NarrowbandTransmitter extends NarrowbandTransmitterBase
 {
     parameters:
         modulation = default("DSSS-OQPSK-16");
-        @class(Ieee802154NarrowbandScalarTransmitter);
+        @class(Ieee802154NarrowbandTransmitter);
 }
 
