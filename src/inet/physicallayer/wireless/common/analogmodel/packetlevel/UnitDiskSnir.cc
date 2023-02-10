@@ -20,8 +20,8 @@ UnitDiskSnir::UnitDiskSnir(const IReception *reception, const INoise *noise) :
 {
     auto unitDiskReception = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getNewAnalogModel());
     auto power = unitDiskReception->getPower();
-    auto unitDiskNoise = check_and_cast<const UnitDiskNoise *>(noise);
-    auto isInterfering = unitDiskNoise->isInterfering();
+    auto unitDiskNoise = dynamic_cast<const UnitDiskNoise *>(noise);
+    auto isInterfering = unitDiskNoise != nullptr && unitDiskNoise->isInterfering();
 
     isSnirInfinite = (power == UnitDiskReceptionAnalogModel::POWER_RECEIVABLE)
                           && !isInterfering;
