@@ -28,7 +28,7 @@ class INET_API DimensionalTransmissionAnalogModel : public INewTransmissionAnalo
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> powerFunction;
 
   public:
-    DimensionalTransmissionAnalogModel(Hz centerFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& powerFunction) : centerFrequency(centerFrequency), bandwidth(bandwidth), powerFunction(powerFunction) {}
+    DimensionalTransmissionAnalogModel(Hz centerFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& powerFunction);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 

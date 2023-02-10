@@ -51,7 +51,7 @@ const ITransmission *ApskTransmitter::createTransmission(const IRadio *transmitt
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     auto symbolTime = 0;
     auto transmission = new ApskTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, dataLength, modulation, bandwidth, symbolTime, transmissionBitrate, codeRate);
-    transmission->analogModel = getAnalogModel()->createAnalogModel(packet);
+    transmission->analogModel = getAnalogModel()->createAnalogModel(packet, duration, transmissionCenterFrequency, transmissionBandwidth, transmissionPower);
     return transmission;
 }
 

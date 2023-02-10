@@ -28,7 +28,7 @@ class INET_API DimensionalReceptionAnalogModel : public INewReceptionAnalogModel
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> powerFunction;
 
   public:
-    DimensionalReceptionAnalogModel(const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> powerFunction) : powerFunction(powerFunction) {}
+    DimensionalReceptionAnalogModel(Hz centerFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> powerFunction) : centerFrequency(centerFrequency), bandwidth(bandwidth), powerFunction(powerFunction) {}
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 

@@ -14,9 +14,8 @@
 #include "inet/common/figures/SignalFigure.h"
 
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalReception.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReception.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReceptionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
 #endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
@@ -1097,7 +1096,7 @@ void MediumCanvasVisualizer::handleSignalArrivalStarted(const IReception *recept
                 auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
                 networkNodeVisualization->setAnnotationVisible(figure, true);
                 auto labelFigure = check_and_cast<LabeledIconFigure *>(figure)->getLabelFigure();
-                if (auto scalarReception = dynamic_cast<const ScalarReception *>(reception)) {
+                if (auto scalarReception = dynamic_cast<const ScalarReceptionAnalogModel *>(reception->getNewAnalogModel())) {
                     char tmp[32];
                     sprintf(tmp, "%.4g dBW", fraction2dB(W(scalarReception->getPower()).get()));
                     labelFigure->setText(tmp);

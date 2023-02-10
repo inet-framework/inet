@@ -12,6 +12,20 @@ namespace physicallayer {
 
 Define_Module(UnitDiskTransmitterAnalogModel);
 
+void UnitDiskTransmitterAnalogModel::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL) {
+        communicationRange = m(par("communicationRange"));
+        interferenceRange = m(par("interferenceRange"));
+        detectionRange = m(par("detectionRange"));
+    }
+}
+
+INewTransmissionAnalogModel* UnitDiskTransmitterAnalogModel::createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const
+{
+    return new UnitDiskTransmissionAnalogModel(communicationRange, interferenceRange, detectionRange);
+}
+
 } // namespace physicallayer
 } // namespace inet
 

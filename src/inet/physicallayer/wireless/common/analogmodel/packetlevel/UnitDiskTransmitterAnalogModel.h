@@ -24,22 +24,14 @@ class INET_API UnitDiskTransmitterAnalogModel : public TransmitterAnalogModelBas
     m detectionRange = m(NaN);
 
   protected:
-    virtual void initialize(int stage) override {
-        if (stage == INITSTAGE_LOCAL) {
-            communicationRange = m(par("communicationRange"));
-            interferenceRange = m(par("interferenceRange"));
-            detectionRange = m(par("detectionRange"));
-        }
-    }
+    virtual void initialize(int stage) override;
 
   public:
     virtual m getCommunicationRange() const { return communicationRange; }
     virtual m getInterferenceRange() const { return interferenceRange; }
     virtual m getDetectionRange() const { return detectionRange; }
 
-    virtual INewTransmissionAnalogModel *createAnalogModel(const Packet *packet) const override {
-        return new UnitDiskTransmissionAnalogModel(communicationRange, interferenceRange, detectionRange);
-    }
+    virtual INewTransmissionAnalogModel* createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const override;
 };
 
 } // namespace physicallayer

@@ -19,7 +19,7 @@ namespace physicallayer {
 class INET_API ITransmitterAnalogModel : public IPrintableObject
 {
   public:
-    virtual INewTransmissionAnalogModel *createAnalogModel(const Packet *packet) const = 0;
+    virtual INewTransmissionAnalogModel *createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const = 0;
 };
 
 } // namespace physicallayer

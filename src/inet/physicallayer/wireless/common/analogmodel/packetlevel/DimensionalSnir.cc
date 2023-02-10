@@ -6,12 +6,13 @@
 
 
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalSnir.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalReceptionAnalogModel.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-DimensionalSnir::DimensionalSnir(const DimensionalReception *reception, const DimensionalNoise *noise) :
+DimensionalSnir::DimensionalSnir(const IReception *reception, const INoise *noise) :
     SnirBase(reception, noise),
     minSNIR(NaN),
     maxSNIR(NaN),
@@ -31,7 +32,7 @@ double DimensionalSnir::computeMin() const
 {
     // TODO factor out common part
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
-    const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
+    auto dimensionalReception = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getNewAnalogModel());
     EV_TRACE << "Reception power begin " << endl;
     EV_TRACE << *dimensionalReception->getPower() << endl;
     EV_TRACE << "Reception power end" << endl;
@@ -56,7 +57,7 @@ double DimensionalSnir::computeMax() const
 {
     // TODO factor out common part
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
-    const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
+    auto dimensionalReception = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getNewAnalogModel());
     EV_DEBUG << "Reception power begin " << endl;
     EV_DEBUG << *dimensionalReception->getPower() << endl;
     EV_DEBUG << "Reception power end" << endl;
@@ -81,7 +82,7 @@ double DimensionalSnir::computeMean() const
 {
     // TODO factor out common part
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
-    const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
+    auto dimensionalReception = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getNewAnalogModel());
     EV_TRACE << "Reception power begin " << endl;
     EV_TRACE << *dimensionalReception->getPower() << endl;
     EV_TRACE << "Reception power end" << endl;
@@ -126,7 +127,7 @@ double DimensionalSnir::getMean() const
 const Ptr<const IFunction<double, Domain<simsec, Hz>>> DimensionalSnir::getSnir() const
 {
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
-    const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
+    auto dimensionalReception = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getNewAnalogModel());
     auto noisePower = dimensionalNoise->getPower();
     auto receptionPower = dimensionalReception->getPower();
     return receptionPower->divide(noisePower);

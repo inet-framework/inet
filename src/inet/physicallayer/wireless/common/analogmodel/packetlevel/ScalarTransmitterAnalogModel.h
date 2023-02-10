@@ -20,23 +20,15 @@ namespace physicallayer {
 class INET_API ScalarTransmitterAnalogModel : public TransmitterAnalogModelBase, public ITransmitterAnalogModel
 {
   protected:
-    Hz centerFrequency = Hz(NaN);
-    Hz bandwidth = Hz(NaN);
-    W power = W(NaN);
+    Hz defaultCenterFrequency = Hz(NaN);
+    Hz defaultBandwidth = Hz(NaN);
+    W defaultPower = W(NaN);
 
   protected:
-    virtual void initialize(int stage) override {
-        if (stage == INITSTAGE_LOCAL) {
-            centerFrequency = Hz(par("centerFrequency"));
-            bandwidth = Hz(par("bandwidth"));
-            power = W(par("power"));
-        }
-    }
+    virtual void initialize(int stage) override;
 
   public:
-    virtual INewTransmissionAnalogModel *createAnalogModel(const Packet *packet) const override {
-        return new ScalarTransmissionAnalogModel(centerFrequency, bandwidth, power);
-    }
+    virtual INewTransmissionAnalogModel *createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const override;
 };
 
 } // namespace physicallayer

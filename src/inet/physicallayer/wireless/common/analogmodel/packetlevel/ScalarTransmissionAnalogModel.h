@@ -25,7 +25,7 @@ class INET_API ScalarTransmissionAnalogModel : public INewTransmissionAnalogMode
     const W power = W(NaN);
 
   public:
-    ScalarTransmissionAnalogModel(Hz centerFrequency, Hz bandwidth, W power) : centerFrequency(centerFrequency), bandwidth(bandwidth), power(power) {}
+    ScalarTransmissionAnalogModel(Hz centerFrequency, Hz bandwidth, W power);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 

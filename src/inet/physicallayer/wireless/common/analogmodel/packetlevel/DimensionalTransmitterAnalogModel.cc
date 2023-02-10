@@ -12,6 +12,27 @@ namespace physicallayer {
 
 Define_Module(DimensionalTransmitterAnalogModel);
 
+void DimensionalTransmitterAnalogModel::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL) {
+        centerFrequency = Hz(par("centerFrequency"));
+        bandwidth = Hz(par("bandwidth"));
+        power = W(par("power"));
+        gainFunctionCacheLimit = par("gainFunctionCacheLimit");
+        parseTimeGains(par("timeGains"));
+        parseFrequencyGains(par("frequencyGains"));
+        timeGainsNormalization = par("timeGainsNormalization");
+        frequencyGainsNormalization = par("frequencyGainsNormalization");
+    }
+}
+
+INewTransmissionAnalogModel* DimensionalTransmitterAnalogModel::createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const
+{
+    simtime_t startTime = simTime();
+    simtime_t endTime = startTime + duration;
+    const auto &powerFunction = createPowerFunction(startTime, endTime, centerFrequency, bandwidth, power);
+    return new DimensionalTransmissionAnalogModel(centerFrequency, bandwidth, powerFunction);
+}
 
 template<typename T>
 std::vector<DimensionalTransmitterAnalogModel::GainEntry<T>> DimensionalTransmitterAnalogModel::parseGains(const char *text) const

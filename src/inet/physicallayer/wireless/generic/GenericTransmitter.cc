@@ -63,7 +63,7 @@ const ITransmission *GenericTransmitter::createTransmission(const IRadio *transm
     auto transmission = new GenericTransmission(transmitter, packet, startTime, endTime,
             preambleDuration, headerDuration, dataDuration,
             startPosition, endPosition, startOrientation, endOrientation);
-    transmission->analogModel = getAnalogModel()->createAnalogModel(packet);
+    transmission->analogModel = getAnalogModel()->createAnalogModel(packet, duration, Hz(NaN), Hz(NaN), W(NaN));
     return transmission;
 }
 

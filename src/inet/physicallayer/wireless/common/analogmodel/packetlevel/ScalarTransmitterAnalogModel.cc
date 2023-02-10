@@ -12,6 +12,20 @@ namespace physicallayer {
 
 Define_Module(ScalarTransmitterAnalogModel);
 
+void ScalarTransmitterAnalogModel::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL) {
+        defaultCenterFrequency = Hz(par("centerFrequency"));
+        defaultBandwidth = Hz(par("bandwidth"));
+        defaultPower = W(par("power"));
+    }
+}
+
+INewTransmissionAnalogModel *ScalarTransmitterAnalogModel::createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const
+{
+    return new ScalarTransmissionAnalogModel(centerFrequency, bandwidth, power);
+}
+
 } // namespace physicallayer
 } // namespace inet
 

@@ -50,18 +50,7 @@ class INET_API DimensionalTransmitterAnalogModel : public TransmitterAnalogModel
     mutable std::map<std::tuple<simtime_t, Hz, Hz>, Ptr<const IFunction<double, Domain<simsec, Hz>>>> gainFunctionCache;
 
   protected:
-    virtual void initialize(int stage) override {
-        if (stage == INITSTAGE_LOCAL) {
-            centerFrequency = Hz(par("centerFrequency"));
-            bandwidth = Hz(par("bandwidth"));
-            power = W(par("power"));
-            gainFunctionCacheLimit = par("gainFunctionCacheLimit");
-            parseTimeGains(par("timeGains"));
-            parseFrequencyGains(par("frequencyGains"));
-            timeGainsNormalization = par("timeGainsNormalization");
-            frequencyGainsNormalization = par("frequencyGainsNormalization");
-        }
-    }
+    virtual void initialize(int stage) override;
 
     template<typename T>
     std::vector<GainEntry<T>> parseGains(const char *text) const;
@@ -76,12 +65,7 @@ class INET_API DimensionalTransmitterAnalogModel : public TransmitterAnalogModel
     virtual Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> createPowerFunction(const simtime_t startTime, const simtime_t endTime, Hz centerFrequency, Hz bandwidth, W power) const;
 
   public:
-    virtual INewTransmissionAnalogModel *createAnalogModel(const Packet *packet) const override {
-        simtime_t startTime = simTime();
-        simtime_t endTime = startTime + packet->getDuration();
-        const auto& powerFunction = createPowerFunction(startTime, endTime, centerFrequency, bandwidth, power);
-        return new DimensionalTransmissionAnalogModel(centerFrequency, bandwidth, powerFunction);
-    }
+    virtual INewTransmissionAnalogModel* createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const override;
 };
 
 } // namespace physicallayer

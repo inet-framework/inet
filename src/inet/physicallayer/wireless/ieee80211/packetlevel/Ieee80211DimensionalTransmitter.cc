@@ -65,7 +65,9 @@ const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const I
     const simtime_t dataDuration = transmissionMode->getDataMode()->getDuration(B(phyHeader->getLengthField()));
     auto dataModulation = transmissionMode->getDataMode()->getModulation();
     auto dataSymbolTime = transmissionMode->getDataMode()->getSymbolInterval();
-    return new Ieee80211DimensionalTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, dataLength, dataModulation, dataSymbolTime, centerFrequency, transmissionBandwidth, transmissionBitrate, codeRate, powerFunction, transmissionMode, transmissionChannel);
+    auto transmission = new Ieee80211DimensionalTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, dataLength, dataModulation, dataSymbolTime, centerFrequency, transmissionBandwidth, transmissionBitrate, codeRate, powerFunction, transmissionMode, transmissionChannel);
+    transmission->analogModel = getAnalogModel()->createAnalogModel(packet, duration, centerFrequency, transmissionBandwidth, transmissionPower);
+    return transmission;
 }
 
 } // namespace physicallayer

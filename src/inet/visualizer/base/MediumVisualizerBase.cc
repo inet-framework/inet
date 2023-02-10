@@ -12,7 +12,7 @@
 
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalReception.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalReceptionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission.h"
 #endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
@@ -343,7 +343,7 @@ void MediumVisualizerBase::handleSignalRemoved(const physicallayer::ITransmissio
 void MediumVisualizerBase::handleSignalArrivalStarted(const physicallayer::IReception *reception)
 {
     if (displayMainPowerDensityMap || displayPowerDensityMaps || displaySpectrums || displaySpectrograms) {
-        auto dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
+        auto dimensionalReception = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getNewAnalogModel());
         auto startTime = reception->getStartTime();
         auto receptionPowerFunction = dimensionalReception->getPower();
         if (autoPowerAxis || autoTimeAxis || autoFrequencyAxis) {
