@@ -8,7 +8,6 @@
 #ifndef __INET_LAYEREDSCALARANALOGMODEL_H
 #define __INET_LAYEREDSCALARANALOGMODEL_H
 
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredReception.h"
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ScalarAnalogModelBase.h"
 

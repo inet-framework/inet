@@ -20,7 +20,7 @@
 
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalNoise.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/SnirBase.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
 
 namespace inet {
 
@@ -39,7 +39,7 @@ class INET_API LayeredSnir : public SnirBase
     virtual double computeMean() const;
 
   public:
-    LayeredSnir(const LayeredReception *reception, const DimensionalNoise *noise);
+    LayeredSnir(const IReception *reception, const DimensionalNoise *noise);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 

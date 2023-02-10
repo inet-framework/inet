@@ -9,7 +9,6 @@
 #define __INET_LAYEREDDIMENSIONALANALOGMODEL_H
 
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredReception.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/DimensionalAnalogModelBase.h"
 
 namespace inet {
