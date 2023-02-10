@@ -35,9 +35,9 @@ class INET_API DimensionalTransmitterAnalogModel : public TransmitterAnalogModel
     };
 
   protected:
-    Hz centerFrequency = Hz(NaN);
-    Hz bandwidth = Hz(NaN);
-    W power = W(NaN);
+    Hz defaultCenterFrequency = Hz(NaN);
+    Hz defaultBandwidth = Hz(NaN);
+    W defaultPower = W(NaN);
 
     const IInterpolator<simsec, double> *firstTimeInterpolator = nullptr;
     const IInterpolator<Hz, double> *firstFrequencyInterpolator = nullptr;
@@ -51,6 +51,18 @@ class INET_API DimensionalTransmitterAnalogModel : public TransmitterAnalogModel
 
   protected:
     virtual void initialize(int stage) override;
+
+    virtual Hz computeCenterFrequency(Hz centerFrequency) const {
+        return std::isnan(centerFrequency.get()) ? defaultCenterFrequency : centerFrequency;
+    }
+
+    virtual Hz computeBandwidth(Hz bandwidth) const {
+        return std::isnan(bandwidth.get()) ? defaultBandwidth : bandwidth;
+    }
+
+    virtual W computePower(W power) const {
+        return std::isnan(power.get()) ? defaultPower : power;
+    }
 
     template<typename T>
     std::vector<GainEntry<T>> parseGains(const char *text) const;

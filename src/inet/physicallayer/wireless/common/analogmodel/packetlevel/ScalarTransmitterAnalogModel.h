@@ -27,6 +27,18 @@ class INET_API ScalarTransmitterAnalogModel : public TransmitterAnalogModelBase,
   protected:
     virtual void initialize(int stage) override;
 
+    virtual Hz computeCenterFrequency(Hz centerFrequency) const {
+        return std::isnan(centerFrequency.get()) ? defaultCenterFrequency : centerFrequency;
+    }
+
+    virtual Hz computeBandwidth(Hz bandwidth) const {
+        return std::isnan(bandwidth.get()) ? defaultBandwidth : bandwidth;
+    }
+
+    virtual W computePower(W power) const {
+        return std::isnan(power.get()) ? defaultPower : power;
+    }
+
   public:
     virtual INewTransmissionAnalogModel *createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const override;
 };

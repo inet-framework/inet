@@ -23,7 +23,10 @@ void ScalarTransmitterAnalogModel::initialize(int stage)
 
 INewTransmissionAnalogModel *ScalarTransmitterAnalogModel::createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const
 {
-    return new ScalarTransmissionAnalogModel(centerFrequency, bandwidth, power);
+    auto transmissionCenterFrequency = computeCenterFrequency(centerFrequency);
+    auto transmissionBandwidth = computeBandwidth(bandwidth);
+    auto transmissionPower = computePower(power);
+    return new ScalarTransmissionAnalogModel(transmissionCenterFrequency, transmissionBandwidth, transmissionPower);
 }
 
 } // namespace physicallayer
