@@ -7,9 +7,10 @@
 
 package inet.physicallayer.wireless.noise;
 
+import inet.physicallayer.wireless.common.base.packetlevel.TransmitterBase;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 
-module NoiseDimensionalTransmitter like ITransmitter
+module NoiseDimensionalTransmitter extends TransmitterBase like ITransmitter
 {
     parameters:
         volatile double duration @unit(s);
@@ -21,6 +22,7 @@ module NoiseDimensionalTransmitter like ITransmitter
         string timeGainsNormalization @enum("","maximum","integral") = default(""); // determines how the time gains function is normalized, no normalization by default
         string frequencyGains = default("left s 0dB either e 0dB right"); // sequence of interpolation method, frequency, gain tuples; frequency can be an expression, gain is in [dB] or [0..1]; default value is a flat signal
         string frequencyGainsNormalization @enum("","maximum","integral") = default("integral"); // determines how the frequency gains function is normalized, integral normalization by default
+        analogModel.typename = default("DimensionalTransmitterAnalogModel");
         @class(NoiseDimensionalTransmitter);
         @display("i=block/wtx");
 }
