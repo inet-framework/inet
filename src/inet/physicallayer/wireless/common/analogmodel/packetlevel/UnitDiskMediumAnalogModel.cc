@@ -13,7 +13,7 @@
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskSnir.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskTransmissionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskReceptionAnalogModel.h"
-#include "inet/physicallayer/wireless/common/base/packetlevel/ReceptionBase.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/Reception.h"
 
 namespace inet {
 namespace physicallayer {
@@ -50,8 +50,8 @@ const IReception *UnitDiskMediumAnalogModel::computeReception(const IRadio *rece
     else
         power = UnitDiskReceptionAnalogModel::POWER_UNDETECTABLE;
     // KLUDGE TODO
-    auto reception = new ReceptionBase(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
-    reception->analogModel = new UnitDiskReceptionAnalogModel(power);
+    auto reception = new Reception(nullptr, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
+    reception->ReceptionBase::analogModel = new UnitDiskReceptionAnalogModel(power);
     return reception;
 }
 

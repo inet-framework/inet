@@ -9,7 +9,7 @@
 
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReceptionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmitterAnalogModel.h"
-#include "inet/physicallayer/wireless/common/base/packetlevel/ReceptionBase.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/Reception.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 
 
@@ -38,8 +38,9 @@ const IReception *ScalarAnalogModel::computeReception(const IRadio *receiverRadi
     const Coord& receptionStartPosition = arrival->getStartPosition();
     const Coord& receptionEndPosition = arrival->getEndPosition();
     W receptionPower = computeReceptionPower(receiverRadio, transmission, arrival);
-    auto reception = new ReceptionBase(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
-    reception->analogModel = new ScalarReceptionAnalogModel(analogModel->getCenterFrequency(), analogModel->getBandwidth(), receptionPower);
+    // KLUDGE TODO
+    auto reception = new Reception(nullptr, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
+    reception->ReceptionBase::analogModel = new ScalarReceptionAnalogModel(analogModel->getCenterFrequency(), analogModel->getBandwidth(), receptionPower);
     return reception;
 }
 

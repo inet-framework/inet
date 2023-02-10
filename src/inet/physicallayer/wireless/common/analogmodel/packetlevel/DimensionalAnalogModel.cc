@@ -12,7 +12,7 @@
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalSnir.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmissionAnalogModel.h"
-#include "inet/physicallayer/wireless/common/base/packetlevel/ReceptionBase.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/Reception.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 
@@ -38,8 +38,9 @@ const IReception *DimensionalAnalogModel::computeReception(const IRadio *receive
     const Quaternion& receptionStartOrientation = arrival->getStartOrientation();
     const Quaternion& receptionEndOrientation = arrival->getEndOrientation();
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& receptionPower = computeReceptionPower(receiverRadio, transmission, arrival);
-    auto reception = new ReceptionBase(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
-    reception->analogModel = new DimensionalReceptionAnalogModel(dimensionalTransmission->getCenterFrequency(), dimensionalTransmission->getBandwidth(), receptionPower);
+    // KLUDGE TODO
+    auto reception = new Reception(nullptr, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
+    reception->ReceptionBase::analogModel = new DimensionalReceptionAnalogModel(dimensionalTransmission->getCenterFrequency(), dimensionalTransmission->getBandwidth(), receptionPower);
     return reception;
 }
 
