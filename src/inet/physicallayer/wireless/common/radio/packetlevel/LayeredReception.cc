@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredReception.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/LayeredReception.h"
 
 namespace inet {
 namespace physicallayer {

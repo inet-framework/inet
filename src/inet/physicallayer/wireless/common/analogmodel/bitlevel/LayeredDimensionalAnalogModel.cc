@@ -9,7 +9,7 @@
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalNoise.h"
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredSnir.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredReception.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/LayeredReception.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalSnir.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
