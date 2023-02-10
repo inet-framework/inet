@@ -36,6 +36,7 @@ class INET_API DimensionalReceptionAnalogModel : public INarrowbandReceptionAnal
     virtual const Hz getBandwidth() const override { return bandwidth; }
     virtual const Hz getCenterFrequency() const override { return centerFrequency; }
     virtual const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> getPower() const { return powerFunction; }
+    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace physicallayer

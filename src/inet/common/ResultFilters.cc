@@ -18,7 +18,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
-#include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceptionBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ReceptionBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #endif
 
@@ -89,8 +89,8 @@ Register_ResultFilter("receptionMinSignalPower", ReceptionMinSignalPowerFilter);
 void ReceptionMinSignalPowerFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
-    if (auto reception = dynamic_cast<inet::physicallayer::FlatReceptionBase *>(object)) {
-        W minReceptionPower = reception->computeMinPower(reception->getStartTime(), reception->getEndTime());
+    if (auto reception = dynamic_cast<inet::physicallayer::ReceptionBase *>(object)) {
+        W minReceptionPower = reception->getNewAnalogModel()->computeMinPower(reception->getStartTime(), reception->getEndTime());
         fire(this, t, minReceptionPower.get(), details);
     }
 #endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON

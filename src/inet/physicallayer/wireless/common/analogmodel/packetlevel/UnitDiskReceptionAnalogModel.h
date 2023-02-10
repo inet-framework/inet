@@ -35,6 +35,7 @@ class INET_API UnitDiskReceptionAnalogModel : public INewReceptionAnalogModel
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual Power getPower() const { return power; }
+    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override { throw cRuntimeError("Invalid operation"); }
 };
 
 } // namespace physicallayer

@@ -32,6 +32,7 @@ class INET_API ScalarReceptionAnalogModel : public INarrowbandReceptionAnalogMod
     virtual const Hz getBandwidth() const override { return bandwidth; }
     virtual const Hz getCenterFrequency() const override { return centerFrequency; }
     virtual const W getPower() const { return power; }
+    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override { return power; }
 };
 
 } // namespace physicallayer

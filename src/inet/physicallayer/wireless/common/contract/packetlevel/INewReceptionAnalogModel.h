@@ -19,6 +19,8 @@ using namespace inet::units::values;
 
 class INET_API INewReceptionAnalogModel : public IPrintableObject
 {
+  public:
+    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const = 0;
 };
 
 class INET_API INarrowbandReceptionAnalogModel : public INewReceptionAnalogModel

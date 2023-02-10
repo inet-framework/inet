@@ -8,7 +8,6 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceptionBase.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
@@ -61,21 +60,6 @@ const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IList
 //    delete noise;
 //    EV_DEBUG << "Computing whether listening is possible: maximum power = " << maxPower << ", energy detection = " << energyDetection << " -> listening is " << (isListeningPossible ? "possible" : "impossible") << endl;
 //    return new ListeningDecision(listening, isListeningPossible);
-}
-
-// TODO this is not purely functional, see interface comment
-bool FlatReceiverBase::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
-{
-    if (!NarrowbandReceiverBase::computeIsReceptionPossible(listening, reception, part))
-        return false;
-    else {
-        const FlatReceptionBase *flatReception = check_and_cast<const FlatReceptionBase *>(reception);
-        W minReceptionPower = flatReception->computeMinPower(reception->getStartTime(part), reception->getEndTime(part));
-        ASSERT(W(0.0) <= minReceptionPower);
-        bool isReceptionPossible = minReceptionPower >= sensitivity;
-        EV_DEBUG << "Computing whether reception is possible" << EV_FIELD(minReceptionPower) << EV_FIELD(sensitivity) << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
-        return isReceptionPossible;
-    }
 }
 
 bool FlatReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
