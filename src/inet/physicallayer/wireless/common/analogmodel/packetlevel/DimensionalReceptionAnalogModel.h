@@ -19,7 +19,7 @@ namespace physicallayer {
 using namespace inet::math;
 using namespace inet::units::values;
 
-class INET_API DimensionalReceptionAnalogModel : public INewReceptionAnalogModel
+class INET_API DimensionalReceptionAnalogModel : public INarrowbandReceptionAnalogModel
 {
   protected:
     // TODO delete the frequencies?
@@ -33,8 +33,8 @@ class INET_API DimensionalReceptionAnalogModel : public INewReceptionAnalogModel
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     // TODO delete the frequencies?
-    virtual const Hz getBandwidth() const { return bandwidth; }
-    virtual const Hz getCenterFrequency() const { return centerFrequency; }
+    virtual const Hz getBandwidth() const override { return bandwidth; }
+    virtual const Hz getCenterFrequency() const override { return centerFrequency; }
     virtual const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> getPower() const { return powerFunction; }
 };
 

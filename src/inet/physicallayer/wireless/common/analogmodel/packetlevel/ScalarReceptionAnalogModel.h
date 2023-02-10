@@ -17,7 +17,7 @@ namespace physicallayer {
 
 using namespace inet::units::values;
 
-class INET_API ScalarReceptionAnalogModel : public INewReceptionAnalogModel
+class INET_API ScalarReceptionAnalogModel : public INarrowbandReceptionAnalogModel
 {
   protected:
     const Hz centerFrequency = Hz(NaN);
@@ -29,8 +29,8 @@ class INET_API ScalarReceptionAnalogModel : public INewReceptionAnalogModel
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
-    virtual const Hz getBandwidth() const { return bandwidth; }
-    virtual const Hz getCenterFrequency() const { return centerFrequency; }
+    virtual const Hz getBandwidth() const override { return bandwidth; }
+    virtual const Hz getCenterFrequency() const override { return centerFrequency; }
     virtual const W getPower() const { return power; }
 };
 

@@ -9,15 +9,24 @@
 #define __INET_INEWRECEPTIONANALOGMODEL_H
 
 #include "inet/common/IPrintableObject.h"
+#include "inet/common/Units.h"
 
 namespace inet {
 
 namespace physicallayer {
 
+using namespace inet::units::values;
+
 class INET_API INewReceptionAnalogModel : public IPrintableObject
 {
 };
 
+class INET_API INarrowbandReceptionAnalogModel : public INewReceptionAnalogModel
+{
+  public:
+    virtual const Hz getBandwidth() const = 0;
+    virtual const Hz getCenterFrequency() const = 0;
+};
 
 } // namespace physicallayer
 
