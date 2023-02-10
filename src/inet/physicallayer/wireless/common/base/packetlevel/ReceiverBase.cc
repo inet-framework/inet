@@ -87,6 +87,18 @@ const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *l
     auto signalTimeInd = packet->addTagIfAbsent<SignalTimeInd>();
     signalTimeInd->setStartTime(reception->getStartTime());
     signalTimeInd->setEndTime(reception->getEndTime());
+    if (snir->getMax() == 0) {
+        auto errorRateInd = packet->addTagIfAbsent<ErrorRateInd>();
+        errorRateInd->setSymbolErrorRate(1);
+        errorRateInd->setBitErrorRate(1);
+        errorRateInd->setPacketErrorRate(1);
+    }
+    else if (snir->getMin() == INFINITY) {
+        auto errorRateInd = packet->addTagIfAbsent<ErrorRateInd>();
+        errorRateInd->setSymbolErrorRate(0);
+        errorRateInd->setBitErrorRate(0);
+        errorRateInd->setPacketErrorRate(0);
+    }
     return new ReceptionResult(reception, decisions, packet);
 }
 
