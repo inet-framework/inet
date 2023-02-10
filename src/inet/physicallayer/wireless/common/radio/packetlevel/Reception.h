@@ -18,7 +18,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API LayeredReception : public ReceptionBase
+class INET_API Reception : public ReceptionBase
 {
   protected:
     // TODO where are the other models?
@@ -29,8 +29,8 @@ class INET_API LayeredReception : public ReceptionBase
     const IReceptionAnalogModel *analogModel;
 
   public:
-    LayeredReception(const IReceptionAnalogModel *analogModel, const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation);
-    virtual ~LayeredReception();
+    Reception(const IReceptionAnalogModel *analogModel, const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation);
+    virtual ~Reception();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 

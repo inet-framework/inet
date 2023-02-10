@@ -8,7 +8,7 @@
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredScalarAnalogModel.h"
 
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
-#include "inet/physicallayer/wireless/common/radio/packetlevel/LayeredReception.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/Reception.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarNoise.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarSnir.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
@@ -38,7 +38,7 @@ const IReception *LayeredScalarAnalogModel::computeReception(const IRadio *recei
     const ScalarTransmissionSignalAnalogModel *transmissionSignalAnalogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(layeredTransmission->getAnalogModel());
     const W receptionPower = computeReceptionPower(receiverRadio, transmission, arrival);
     const ScalarReceptionSignalAnalogModel *receptionSignalAnalogModel = new ScalarReceptionSignalAnalogModel(transmissionSignalAnalogModel->getPreambleDuration(), transmissionSignalAnalogModel->getHeaderDuration(), transmissionSignalAnalogModel->getDataDuration(), transmissionSignalAnalogModel->getCenterFrequency(), transmissionSignalAnalogModel->getBandwidth(), receptionPower);
-    return new LayeredReception(receptionSignalAnalogModel, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
+    return new Reception(receptionSignalAnalogModel, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
 }
 
 } // namespace physicallayer

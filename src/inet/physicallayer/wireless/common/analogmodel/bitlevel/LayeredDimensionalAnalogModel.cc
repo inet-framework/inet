@@ -9,7 +9,7 @@
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalNoise.h"
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredSnir.h"
-#include "inet/physicallayer/wireless/common/radio/packetlevel/LayeredReception.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/Reception.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalSnir.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
@@ -40,7 +40,7 @@ const IReception *LayeredDimensionalAnalogModel::computeReception(const IRadio *
     const INarrowbandSignal *narrowbandAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& receptionPower = computeReceptionPower(receiverRadio, transmission, arrival);
     const DimensionalReceptionSignalAnalogModel *receptionSignalAnalogModel = new DimensionalReceptionSignalAnalogModel(transmissionAnalogModel->getPreambleDuration(), transmissionAnalogModel->getHeaderDuration(), transmissionAnalogModel->getDataDuration(), narrowbandAnalogModel->getCenterFrequency(), narrowbandAnalogModel->getBandwidth(), receptionPower);
-    return new LayeredReception(receptionSignalAnalogModel, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
+    return new Reception(receptionSignalAnalogModel, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
 }
 
 const ISnir *LayeredDimensionalAnalogModel::computeSNIR(const IReception *reception, const INoise *noise) const
