@@ -18,7 +18,7 @@ namespace physicallayer {
 UnitDiskSnir::UnitDiskSnir(const IReception *reception, const INoise *noise) :
     SnirBase(reception, noise)
 {
-    auto unitDiskReception = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getNewAnalogModel());
+    auto unitDiskReception = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getAnalogModel());
     auto power = unitDiskReception->getPower();
     auto unitDiskNoise = dynamic_cast<const UnitDiskNoise *>(noise);
     auto isInterfering = unitDiskNoise != nullptr && unitDiskNoise->isInterfering();

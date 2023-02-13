@@ -67,8 +67,7 @@ class INET_API ReceptionBase : public virtual IReception, public virtual IRecept
     virtual const Quaternion& getStartOrientation() const override { return startOrientation; }
     virtual const Quaternion& getEndOrientation() const override { return endOrientation; }
 
-    virtual const IReceptionAnalogModel *getAnalogModel() const override { return check_and_cast<const IReceptionAnalogModel *>(this); }
-    virtual const IReceptionAnalogModel *getNewAnalogModel() const override { return analogModel; }
+    virtual const IReceptionAnalogModel *getAnalogModel() const override { return analogModel; }
 };
 
 } // namespace physicallayer

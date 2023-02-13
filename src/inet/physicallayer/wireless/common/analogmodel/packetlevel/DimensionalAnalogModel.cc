@@ -29,7 +29,7 @@ std::ostream& DimensionalAnalogModel::printToStream(std::ostream& stream, int le
 
 const IReception *DimensionalAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
-    auto dimensionalTransmission = check_and_cast<const DimensionalSignalAnalogModel *>(transmission->getNewAnalogModel());
+    auto dimensionalTransmission = check_and_cast<const DimensionalSignalAnalogModel *>(transmission->getAnalogModel());
     const simtime_t receptionStartTime = arrival->getStartTime();
     const simtime_t receptionEndTime = arrival->getEndTime();
     const Coord& receptionStartPosition = arrival->getStartPosition();

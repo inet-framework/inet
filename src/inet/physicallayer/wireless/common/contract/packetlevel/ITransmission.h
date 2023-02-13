@@ -142,8 +142,6 @@ class INET_API ITransmission : public IPrintableObject
      * Returns the analog model of the transmitted signal.
      */
     virtual const ITransmissionAnalogModel *getAnalogModel() const = 0;
-
-    virtual const ITransmissionAnalogModel *getNewAnalogModel() const = 0;
 };
 
 } // namespace physicallayer

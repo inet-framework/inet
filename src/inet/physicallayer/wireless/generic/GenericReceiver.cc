@@ -62,7 +62,7 @@ const IListeningDecision *GenericReceiver::computeListeningDecision(const IListe
 //const IReceptionResult *GenericReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 //{
 //    auto noise = check_and_cast_nullable<const UnitDiskNoise *>(snir->getNoise());
-//    double errorRate = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getNewAnalogModel())->getPower() == UnitDiskReceptionAnalogModel::POWER_RECEIVABLE && (noise == nullptr || !noise->isInterfering()) ? 0 : 1;
+//    double errorRate = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getAnalogModel())->getPower() == UnitDiskReceptionAnalogModel::POWER_RECEIVABLE && (noise == nullptr || !noise->isInterfering()) ? 0 : 1;
 //    auto receptionResult = ReceiverBase::computeReceptionResult(listening, reception, interference, snir, decisions);
 //    auto errorRateInd = const_cast<Packet *>(receptionResult->getPacket())->addTagIfAbsent<ErrorRateInd>();
 //    errorRateInd->setSymbolErrorRate(errorRate);

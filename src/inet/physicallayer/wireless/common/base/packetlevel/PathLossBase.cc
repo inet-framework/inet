@@ -21,7 +21,7 @@ double PathLossBase::computePathLoss(const ITransmission *transmission, const IA
 {
     auto radioMedium = transmission->getMedium();
     // TODO: don't require scalar analog model!
-    auto analogModel = check_and_cast<const ScalarSignalAnalogModel *>(transmission->getNewAnalogModel());
+    auto analogModel = check_and_cast<const ScalarSignalAnalogModel *>(transmission->getAnalogModel());
     mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
     Hz centerFrequency = Hz(analogModel->getCenterFrequency());
     m distance = m(arrival->getStartPosition().distance(transmission->getStartPosition()));

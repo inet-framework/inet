@@ -1050,7 +1050,7 @@ void MediumCanvasVisualizer::handleSignalDepartureStarted(const ITransmission *t
             auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
             networkNodeVisualization->setAnnotationVisible(figure, true);
             auto labelFigure = check_and_cast<LabeledIconFigure *>(figure)->getLabelFigure();
-            if (auto scalarTransmission = dynamic_cast<const ScalarSignalAnalogModel *>(transmission->getNewAnalogModel())) {
+            if (auto scalarTransmission = dynamic_cast<const ScalarSignalAnalogModel *>(transmission->getAnalogModel())) {
                 char tmp[32];
                 sprintf(tmp, "%.4g dBW", fraction2dB(W(scalarTransmission->getPower()).get()));
                 labelFigure->setText(tmp);
@@ -1095,7 +1095,7 @@ void MediumCanvasVisualizer::handleSignalArrivalStarted(const IReception *recept
                 auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
                 networkNodeVisualization->setAnnotationVisible(figure, true);
                 auto labelFigure = check_and_cast<LabeledIconFigure *>(figure)->getLabelFigure();
-                if (auto scalarReception = dynamic_cast<const ScalarReceptionSignalAnalogModel *>(reception->getNewAnalogModel())) {
+                if (auto scalarReception = dynamic_cast<const ScalarReceptionSignalAnalogModel *>(reception->getAnalogModel())) {
                     char tmp[32];
                     sprintf(tmp, "%.4g dBW", fraction2dB(W(scalarReception->getPower()).get()));
                     labelFigure->setText(tmp);

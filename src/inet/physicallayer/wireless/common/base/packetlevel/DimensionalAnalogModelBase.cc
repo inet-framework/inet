@@ -29,7 +29,7 @@ void DimensionalAnalogModelBase::initialize(int stage)
 const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
-    auto dimensionalSignalAnalogModel = check_and_cast<const DimensionalSignalAnalogModel *>(transmission->getNewAnalogModel());
+    auto dimensionalSignalAnalogModel = check_and_cast<const DimensionalSignalAnalogModel *>(transmission->getAnalogModel());
     const Coord& transmissionStartPosition = transmission->getStartPosition();
     const Coord& receptionStartPosition = arrival->getStartPosition();
     double transmitterAntennaGain = computeAntennaGain(transmission->getTransmitterAntennaGain(), transmissionStartPosition, arrival->getStartPosition(), transmission->getStartOrientation());
@@ -72,7 +72,7 @@ const INoise *DimensionalAnalogModelBase::computeNoise(const IListening *listeni
     }
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
     for (const auto & interferingReception : *interferingReceptions) {
-        auto dimensionalSignal = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(interferingReception->getNewAnalogModel());
+        auto dimensionalSignal = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(interferingReception->getAnalogModel());
         auto receptionPower = dimensionalSignal->getPower();
         receptionPowers.push_back(receptionPower);
         EV_TRACE << "Interference power begin " << endl;
@@ -89,7 +89,7 @@ const INoise *DimensionalAnalogModelBase::computeNoise(const IListening *listeni
 
 const INoise *DimensionalAnalogModelBase::computeNoise(const IReception *reception, const INoise *noise) const
 {
-    auto dimensionalReception = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(reception->getNewAnalogModel());
+    auto dimensionalReception = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(reception->getAnalogModel());
     auto dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& noisePower = makeShared<AddedFunction<WpHz, Domain<simsec, Hz>>>(dimensionalReception->getPower(), dimensionalNoise->getPower());
     return new DimensionalNoise(reception->getStartTime(), reception->getEndTime(), dimensionalReception->getCenterFrequency(), dimensionalReception->getBandwidth(), noisePower);

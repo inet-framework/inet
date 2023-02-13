@@ -78,8 +78,7 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
     virtual const Quaternion& getStartOrientation() const override { return startOrientation; }
     virtual const Quaternion& getEndOrientation() const override { return endOrientation; }
 
-    virtual const ITransmissionAnalogModel *getAnalogModel() const override { return check_and_cast<const ITransmissionAnalogModel *>(this); }
-    virtual const ITransmissionAnalogModel *getNewAnalogModel() const override { return analogModel; }
+    virtual const ITransmissionAnalogModel *getAnalogModel() const override { return analogModel; }
 };
 
 } // namespace physicallayer

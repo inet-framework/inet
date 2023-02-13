@@ -38,7 +38,7 @@ W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, cons
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
 
-    const ScalarSignalAnalogModel *analogModel = check_and_cast<const ScalarSignalAnalogModel *>(transmission->getNewAnalogModel());
+    const ScalarSignalAnalogModel *analogModel = check_and_cast<const ScalarSignalAnalogModel *>(transmission->getAnalogModel());
 
     const Coord& receptionStartPosition = arrival->getStartPosition();
     // TODO could be used for doppler shift? const Coord& receptionEndPosition = arrival->getEndPosition();
@@ -59,7 +59,7 @@ W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, cons
 
 void ScalarAnalogModelBase::addReception(const IReception *reception, simtime_t& noiseStartTime, simtime_t& noiseEndTime, std::map<simtime_t, W>& powerChanges) const
 {
-    W power = check_and_cast<const ScalarReceptionSignalAnalogModel *>(reception->getNewAnalogModel())->getPower();
+    W power = check_and_cast<const ScalarReceptionSignalAnalogModel *>(reception->getAnalogModel())->getPower();
     simtime_t startTime = reception->getStartTime();
     simtime_t endTime = reception->getEndTime();
     std::map<simtime_t, W>::iterator itStartTime = powerChanges.find(startTime);
@@ -117,7 +117,7 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IListening *listening, c
     powerChanges[math::getUpperBound<simtime_t>()] = W(0);
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
     for (auto reception : *interferingReceptions) {
-        auto signalAnalogModel = reception->getNewAnalogModel();
+        auto signalAnalogModel = reception->getAnalogModel();
         auto receptionAnalogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(signalAnalogModel);
         Hz signalCenterFrequency = receptionAnalogModel->getCenterFrequency();
         Hz signalBandwidth = receptionAnalogModel->getBandwidth();

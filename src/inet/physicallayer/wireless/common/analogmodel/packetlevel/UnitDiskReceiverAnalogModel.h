@@ -37,7 +37,7 @@ class INET_API UnitDiskReceiverAnalogModel : public ReceiverAnalogModelBase, pub
     virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override {
         auto interferingReceptions = interference->getInterferingReceptions();
         for (auto interferingReception : *interferingReceptions) {
-            auto interferingPower = check_and_cast<const UnitDiskReceptionAnalogModel *>(interferingReception->getNewAnalogModel())->getPower();
+            auto interferingPower = check_and_cast<const UnitDiskReceptionAnalogModel *>(interferingReception->getAnalogModel())->getPower();
             if (interferingPower != UnitDiskReceptionAnalogModel::POWER_UNDETECTABLE)
                 return new ListeningDecision(listening, true);
         }
@@ -45,7 +45,7 @@ class INET_API UnitDiskReceiverAnalogModel : public ReceiverAnalogModelBase, pub
     }
 
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const override {
-        auto power = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getNewAnalogModel())->getPower();
+        auto power = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getAnalogModel())->getPower();
         if (power == UnitDiskReceptionAnalogModel::POWER_RECEIVABLE) {
             if (ignoreInterference)
                 return true;
@@ -54,7 +54,7 @@ class INET_API UnitDiskReceiverAnalogModel : public ReceiverAnalogModelBase, pub
                 auto endTime = reception->getEndTime(part);
                 auto interferingReceptions = interference->getInterferingReceptions();
                 for (auto interferingReception : *interferingReceptions) {
-                    auto interferingPower = check_and_cast<const UnitDiskReceptionAnalogModel *>(interferingReception->getNewAnalogModel())->getPower();
+                    auto interferingPower = check_and_cast<const UnitDiskReceptionAnalogModel *>(interferingReception->getAnalogModel())->getPower();
                     if (interferingPower >= UnitDiskReceptionAnalogModel::POWER_INTERFERING && startTime <= interferingReception->getEndTime() && endTime >= interferingReception->getStartTime())
                         return false;
                 }

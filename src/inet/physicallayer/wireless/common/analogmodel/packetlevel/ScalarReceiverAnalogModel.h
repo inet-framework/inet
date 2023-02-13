@@ -62,7 +62,7 @@ class INET_API ScalarReceiverAnalogModel : public ReceiverAnalogModelBase, publi
 
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override {
         const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
-        const ScalarReceptionSignalAnalogModel *analogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(reception->getNewAnalogModel());
+        const ScalarReceptionSignalAnalogModel *analogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(reception->getAnalogModel());
         if (bandListening->getCenterFrequency() != analogModel->getCenterFrequency() || bandListening->getBandwidth() < analogModel->getBandwidth()) {
             EV_DEBUG << "Computing whether reception is possible: listening and reception bands are different -> reception is impossible" << endl;
             return false;

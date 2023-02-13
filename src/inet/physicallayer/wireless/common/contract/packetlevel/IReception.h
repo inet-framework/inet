@@ -112,8 +112,6 @@ class INET_API IReception : public IPrintableObject
      * Returns the analog model of the received signal.
      */
     virtual const IReceptionAnalogModel *getAnalogModel() const = 0;
-
-    virtual const IReceptionAnalogModel *getNewAnalogModel() const = 0;
 };
 
 } // namespace physicallayer

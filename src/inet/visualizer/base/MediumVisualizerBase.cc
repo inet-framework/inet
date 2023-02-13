@@ -255,7 +255,7 @@ bool MediumVisualizerBase::matchesTransmission(const ITransmission *transmission
 void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission *transmission)
 {
     if (displayMainPowerDensityMap || displayPowerDensityMaps || displaySpectrums || displaySpectrograms) {
-        auto dimensionalTransmission = check_and_cast<const DimensionalSignalAnalogModel *>(transmission->getNewAnalogModel());
+        auto dimensionalTransmission = check_and_cast<const DimensionalSignalAnalogModel *>(transmission->getAnalogModel());
         auto transmissionPowerFunction = dimensionalTransmission->getPower();
         const auto& transmitterAntennaGain = transmission->getTransmitter()->getAntenna()->getGain();
         bool isotropicAntenna = transmitterAntennaGain->getMaxGain() == 1 && transmitterAntennaGain->getMinGain() == 1;
@@ -343,7 +343,7 @@ void MediumVisualizerBase::handleSignalRemoved(const physicallayer::ITransmissio
 void MediumVisualizerBase::handleSignalArrivalStarted(const physicallayer::IReception *reception)
 {
     if (displayMainPowerDensityMap || displayPowerDensityMaps || displaySpectrums || displaySpectrograms) {
-        auto dimensionalReception = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(reception->getNewAnalogModel());
+        auto dimensionalReception = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(reception->getAnalogModel());
         auto startTime = reception->getStartTime();
         auto receptionPowerFunction = dimensionalReception->getPower();
         if (autoPowerAxis || autoTimeAxis || autoFrequencyAxis) {
