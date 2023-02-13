@@ -9,11 +9,6 @@ package inet.physicallayer.wireless.common.base.packetlevel;
 
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitterAnalogModel;
 
-// KLUDGE TODO delete this after wireless refactor is complete
-module DummyTransmitterAnalogModel like ITransmitterAnalogModel
-{
-}
-
 module TransmitterBase
 {
     parameters:
@@ -21,7 +16,7 @@ module TransmitterBase
         analogModel.typename = default(signalAnalogRepresentation == "unitDisk" ? "UnitDiskTransmitterAnalogModel" : signalAnalogRepresentation == "scalar" ? "ScalarTransmitterAnalogModel" : "DimensionalTransmitterAnalogModel");
         @display("i=block/tx");
     submodules:
-        analogModel: <default("DummyTransmitterAnalogModel")> like ITransmitterAnalogModel if typename != "" {
+        analogModel: <default("")> like ITransmitterAnalogModel if typename != "" {
             @display("p=100,100");
         }
 }
