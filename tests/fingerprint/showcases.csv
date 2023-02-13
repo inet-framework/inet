@@ -307,8 +307,8 @@
 /showcases/wireless/qos/,     -f omnetpp.ini -c NonQos -r 0,                                       10s,            ab73-19d4/tplx;fddd-9d77/~tNl;412f-f934/~tND;2970-2baa/tyf, PASS,    wireless Ipv4
 /showcases/wireless/qos/,     -f omnetpp.ini -c Qos -r 0,                                        10s,            10c8-4277/tplx;af1c-eb97/~tNl;6441-9f1f/~tND;bd6e-c842/tyf, PASS,    wireless Ipv4
 
-/showcases/wireless/ratecontrol/,    -f omnetpp.ini -c General -r 0,                  14s,            7ee9-503a/tplx;0816-e58f/~tNl;95a3-d148/~tND;659c-8cf2/tyf, PASS,    wireless Ipv4
-/showcases/wireless/ratecontrol/,    -f omnetpp.ini -c General -r 1,                  12s,            a7bc-05bb/tplx;9de0-4dd3/~tNl;b5e0-5707/~tND;ed4f-a856/tyf, PASS,    wireless Ipv4
+/showcases/wireless/ratecontrol/,    -f omnetpp.ini -c NoControl -r 0,                        14s,            7ee9-503a/tplx;0816-e58f/~tNl;95a3-d148/~tND;659c-8cf2/tyf, PASS,    wireless Ipv4
+/showcases/wireless/ratecontrol/,    -f omnetpp.ini -c AarfRateControl -r 0,                  12s,            a7bc-05bb/tplx;9de0-4dd3/~tNl;b5e0-5707/~tND;ed4f-a856/tyf, PASS,    wireless Ipv4
 
 # /showcases/wireless/scaling/,        -f omnetpp.ini -c PingBase -r 0,               100s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,   # PingBase extended
 # /showcases/wireless/scaling/,        -f omnetpp.ini -c UDPBase -r 0,                100s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,   # UDPBase extended
