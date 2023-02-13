@@ -18,9 +18,7 @@ package inet.physicallayer.wireless.ieee80211.packetlevel;
 module Ieee80211DimensionalRadio extends Ieee80211Radio
 {
     parameters:
-        transmitter.typename = default("Ieee80211Transmitter");
         transmitter.analogModel.typename = default("DimensionalTransmitterAnalogModel");
-        receiver.typename = default("Ieee80211Receiver");
         receiver.analogModel.typename = default("DimensionalReceiverAnalogModel");
 }
 
