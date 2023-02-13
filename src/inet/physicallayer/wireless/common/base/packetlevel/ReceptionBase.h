@@ -16,7 +16,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API ReceptionBase : public virtual IReception, public virtual IReceptionAnalogModel, public cObject
+class INET_API ReceptionBase : public virtual IReception, public cObject
 {
   protected:
     const IRadio *receiver;

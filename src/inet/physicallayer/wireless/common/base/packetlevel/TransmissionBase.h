@@ -19,7 +19,7 @@ namespace physicallayer {
 
 class IRadioMedium;
 
-class INET_API TransmissionBase : public virtual ITransmission, public virtual ITransmissionAnalogModel, public cObject
+class INET_API TransmissionBase : public virtual ITransmission, public cObject
 {
   protected:
     const int id;
