@@ -6,7 +6,7 @@
 
 import inet.common.INETDefs;
 import inet.common.Units;
-import inet.physicallayer.wireless.common.base.packetlevel.NarrowbandTransmissionBase;
+import inet.physicallayer.wireless.common.base.packetlevel.TransmissionBase;
 
 cplusplus {{
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase.h"
@@ -14,7 +14,7 @@ cplusplus {{
 
 namespace inet::physicallayer;
 
-class FlatTransmissionBase extends NarrowbandTransmissionBase
+class FlatTransmissionBase extends TransmissionBase
 {
     @existingClass;
     @descriptor(readonly);

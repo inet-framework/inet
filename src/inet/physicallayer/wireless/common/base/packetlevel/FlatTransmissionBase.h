@@ -8,13 +8,13 @@
 #ifndef __INET_FLATTRANSMISSIONBASE_H
 #define __INET_FLATTRANSMISSIONBASE_H
 
-#include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandTransmissionBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/TransmissionBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API FlatTransmissionBase : public NarrowbandTransmissionBase
+class INET_API FlatTransmissionBase : public TransmissionBase
 {
   protected:
     const b headerLength;
