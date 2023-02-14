@@ -15,7 +15,6 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/physicallayer/wireless/common/analogmodel/common/LayeredTransmission.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/Radio.h"
 #include "inet/physicallayer/wireless/common/signal/Interference.h"
 

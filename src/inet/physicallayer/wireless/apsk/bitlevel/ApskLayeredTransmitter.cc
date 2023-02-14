@@ -11,7 +11,7 @@
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskEncoder.h"
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskModulator.h"
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
-#include "inet/physicallayer/wireless/common/analogmodel/common/LayeredTransmission.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskTransmission.h"
 #include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
@@ -159,7 +159,15 @@ const ITransmission *ApskLayeredTransmitter::createTransmission(const IRadio *tr
     const Coord& endPosition = mobility->getCurrentPosition();
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
-    return new LayeredTransmission(packetModel, bitModel, symbolModel, sampleModel, analogModel, transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation);
+    // TODO use ApskTransmission
+    auto transmission = new TransmissionBase(transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation);
+    // TODO pass in constructor
+    transmission->packetModel = packetModel;
+    transmission->bitModel = bitModel;
+    transmission->symbolModel = symbolModel;
+    transmission->sampleModel = sampleModel;
+    transmission->analogModel = analogModel;
+    return transmission;
 }
 
 } // namespace physicallayer

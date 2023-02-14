@@ -57,25 +57,25 @@ class INET_API Ieee80211LayeredOfdmReceiver : public SnirReceiverBase
     virtual void initialize(int stage) override;
 
     /* Analog and sample domain */
-    const IReceptionAnalogModel *createAnalogModel(const LayeredTransmission *transmission, const ISnir *snir) const;
-    const IReceptionSampleModel *createSampleModel(const LayeredTransmission *transmission, const ISnir *snir) const;
+    const IReceptionAnalogModel *createAnalogModel(const ITransmission *transmission, const ISnir *snir) const;
+    const IReceptionSampleModel *createSampleModel(const ITransmission *transmission, const ISnir *snir) const;
 
     /* Symbol domain */
     const IReceptionSymbolModel *createSignalFieldSymbolModel(const IReceptionSymbolModel *symbolModel) const;
     const IReceptionSymbolModel *createDataFieldSymbolModel(const IReceptionSymbolModel *symbolModel) const;
-    const IReceptionSymbolModel *createSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const;
+    const IReceptionSymbolModel *createSymbolModel(const ITransmission *transmission, const ISnir *snir) const;
     const IReceptionSymbolModel *createCompleteSymbolModel(const IReceptionSymbolModel *signalFieldSymbolModel, const IReceptionSymbolModel *dataFieldSymbolModel) const;
 
     /* Bit domain */
     const IReceptionBitModel *createSignalFieldBitModel(const IReceptionBitModel *bitModel, const IReceptionSymbolModel *symbolModel) const;
     const IReceptionBitModel *createDataFieldBitModel(const IReceptionBitModel *bitModel, const IReceptionSymbolModel *symbolModel, const IReceptionPacketModel *signalFieldPacketModel, const IReceptionBitModel *signalFieldBitModel) const;
-    const IReceptionBitModel *createBitModel(const LayeredTransmission *transmission, const ISnir *snir) const;
+    const IReceptionBitModel *createBitModel(const ITransmission *transmission, const ISnir *snir) const;
     const IReceptionBitModel *createCompleteBitModel(const IReceptionBitModel *signalFieldBitModel, const IReceptionBitModel *dataFieldBitModel) const;
 
     /* Packet domain */
     const IReceptionPacketModel *createSignalFieldPacketModel(const IReceptionBitModel *signalFieldBitModel) const;
     const IReceptionPacketModel *createDataFieldPacketModel(const IReceptionBitModel *signalFieldBitModel, const IReceptionBitModel *dataFieldBitModel, const IReceptionPacketModel *signalFieldPacketModel) const;
-    const IReceptionPacketModel *createPacketModel(const LayeredTransmission *transmission, const ISnir *snir) const;
+    const IReceptionPacketModel *createPacketModel(const ITransmission *transmission, const ISnir *snir) const;
     const IReceptionPacketModel *createCompletePacketModel(const char *name, const IReceptionPacketModel *signalFieldPacketModel, const IReceptionPacketModel *dataFieldPacketModel) const;
 
     const Ieee80211OfdmMode *computeMode(Hz bandwidth) const;

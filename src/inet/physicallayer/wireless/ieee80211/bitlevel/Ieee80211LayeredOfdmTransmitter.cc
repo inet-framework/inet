@@ -10,11 +10,10 @@
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/common/LayeredTransmission.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
-#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211LayeredTransmission.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmEncoder.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmEncoderModule.h"
@@ -27,6 +26,7 @@
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
 
 namespace inet {
 
@@ -312,7 +312,14 @@ const ITransmission *Ieee80211LayeredOfdmTransmitter::createTransmission(const I
     const simtime_t preambleDuration = mode->getPreambleLength();
     const simtime_t headerDuration = mode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = mode->getDataMode()->getDuration(packet->getDataLength());
-    return new Ieee80211LayeredTransmission(packetModel, bitModel, symbolModel, sampleModel, analogModel, transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, mode, nullptr);
+    auto transmission = new Ieee80211Transmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, mode, nullptr);
+    // TODO pass in constructor
+    transmission->packetModel = packetModel;
+    transmission->bitModel = bitModel;
+    transmission->symbolModel = symbolModel;
+    transmission->sampleModel = sampleModel;
+    transmission->analogModel = analogModel;
+    return transmission;
 }
 
 Ieee80211LayeredOfdmTransmitter::~Ieee80211LayeredOfdmTransmitter()

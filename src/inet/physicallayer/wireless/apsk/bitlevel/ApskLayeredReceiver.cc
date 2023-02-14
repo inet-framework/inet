@@ -76,7 +76,7 @@ void ApskLayeredReceiver::initialize(int stage)
     }
 }
 
-const IReceptionAnalogModel *ApskLayeredReceiver::createAnalogModel(const LayeredTransmission *transmission, const ISnir *snir) const
+const IReceptionAnalogModel *ApskLayeredReceiver::createAnalogModel(const ITransmission *transmission, const ISnir *snir) const
 {
     // TODO interference + receptionAnalogModel;
     return nullptr;
@@ -101,7 +101,7 @@ std::ostream& ApskLayeredReceiver::printToStream(std::ostream& stream, int level
     return stream;
 }
 
-const IReceptionSampleModel *ApskLayeredReceiver::createSampleModel(const LayeredTransmission *transmission, const ISnir *snir, const IReceptionAnalogModel *analogModel) const
+const IReceptionSampleModel *ApskLayeredReceiver::createSampleModel(const ITransmission *transmission, const ISnir *snir, const IReceptionAnalogModel *analogModel) const
 {
     if (levelOfDetail == SAMPLE_DOMAIN)
         return errorModel->computeSampleModel(transmission, snir);
@@ -111,7 +111,7 @@ const IReceptionSampleModel *ApskLayeredReceiver::createSampleModel(const Layere
         return nullptr;
 }
 
-const IReceptionSymbolModel *ApskLayeredReceiver::createSymbolModel(const LayeredTransmission *transmission, const ISnir *snir, const IReceptionSampleModel *sampleModel) const
+const IReceptionSymbolModel *ApskLayeredReceiver::createSymbolModel(const ITransmission *transmission, const ISnir *snir, const IReceptionSampleModel *sampleModel) const
 {
     if (levelOfDetail == SYMBOL_DOMAIN)
         return errorModel->computeSymbolModel(transmission, snir);
@@ -121,7 +121,7 @@ const IReceptionSymbolModel *ApskLayeredReceiver::createSymbolModel(const Layere
         return nullptr;
 }
 
-const IReceptionBitModel *ApskLayeredReceiver::createBitModel(const LayeredTransmission *transmission, const ISnir *snir, const IReceptionSymbolModel *symbolModel) const
+const IReceptionBitModel *ApskLayeredReceiver::createBitModel(const ITransmission *transmission, const ISnir *snir, const IReceptionSymbolModel *symbolModel) const
 {
     if (levelOfDetail == BIT_DOMAIN)
         return errorModel->computeBitModel(transmission, snir);
@@ -131,7 +131,7 @@ const IReceptionBitModel *ApskLayeredReceiver::createBitModel(const LayeredTrans
         return nullptr;
 }
 
-const IReceptionPacketModel *ApskLayeredReceiver::createPacketModel(const LayeredTransmission *transmission, const ISnir *snir, const IReceptionBitModel *bitModel) const
+const IReceptionPacketModel *ApskLayeredReceiver::createPacketModel(const ITransmission *transmission, const ISnir *snir, const IReceptionBitModel *bitModel) const
 {
     if (levelOfDetail == PACKET_DOMAIN)
         return errorModel->computePacketModel(transmission, snir);
@@ -143,7 +143,7 @@ const IReceptionPacketModel *ApskLayeredReceiver::createPacketModel(const Layere
 
 const IReceptionResult *ApskLayeredReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
-    const LayeredTransmission *transmission = dynamic_cast<const LayeredTransmission *>(reception->getTransmission());
+    const ITransmission *transmission = dynamic_cast<const ITransmission *>(reception->getTransmission());
     const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
     const IReceptionSampleModel *sampleModel = createSampleModel(transmission, snir, analogModel);
     const IReceptionSymbolModel *symbolModel = createSymbolModel(transmission, snir, sampleModel);
@@ -186,7 +186,7 @@ const IListeningDecision *ApskLayeredReceiver::computeListeningDecision(const IL
 
 bool ApskLayeredReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
 {
-    auto layeredTransmission = dynamic_cast<const LayeredTransmission *>(transmission);
+    auto layeredTransmission = dynamic_cast<const ITransmission *>(transmission);
     return layeredTransmission && SnirReceiverBase::computeIsReceptionPossible(listening, transmission);
 }
 

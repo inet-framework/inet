@@ -20,7 +20,6 @@
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ListeningDecision.h"
-#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211LayeredTransmission.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDecoderModule.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDemodulatorModule.h"
@@ -29,6 +28,7 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmModulation.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
 
 namespace inet {
 namespace physicallayer {
@@ -79,7 +79,7 @@ const Ieee80211OfdmMode *Ieee80211LayeredOfdmReceiver::getMode(const Packet *pac
         return mode;
 }
 
-const IReceptionAnalogModel *Ieee80211LayeredOfdmReceiver::createAnalogModel(const LayeredTransmission *transmission, const ISnir *snir) const
+const IReceptionAnalogModel *Ieee80211LayeredOfdmReceiver::createAnalogModel(const ITransmission *transmission, const ISnir *snir) const
 {
     return nullptr;
 }
@@ -107,28 +107,28 @@ std::ostream& Ieee80211LayeredOfdmReceiver::printToStream(std::ostream& stream, 
     return stream;
 }
 
-const IReceptionSampleModel *Ieee80211LayeredOfdmReceiver::createSampleModel(const LayeredTransmission *transmission, const ISnir *snir) const
+const IReceptionSampleModel *Ieee80211LayeredOfdmReceiver::createSampleModel(const ITransmission *transmission, const ISnir *snir) const
 {
     if (levelOfDetail == SAMPLE_DOMAIN)
         return errorModel->computeSampleModel(transmission, snir);
     return nullptr;
 }
 
-const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createBitModel(const LayeredTransmission *transmission, const ISnir *snir) const
+const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createBitModel(const ITransmission *transmission, const ISnir *snir) const
 {
     if (levelOfDetail == BIT_DOMAIN)
         return errorModel->computeBitModel(transmission, snir);
     return nullptr;
 }
 
-const IReceptionPacketModel *Ieee80211LayeredOfdmReceiver::createPacketModel(const LayeredTransmission *transmission, const ISnir *snir) const
+const IReceptionPacketModel *Ieee80211LayeredOfdmReceiver::createPacketModel(const ITransmission *transmission, const ISnir *snir) const
 {
     if (levelOfDetail == PACKET_DOMAIN)
         return errorModel->computePacketModel(transmission, snir);
     return nullptr;
 }
 
-const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const
+const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createSymbolModel(const ITransmission *transmission, const ISnir *snir) const
 {
     if (levelOfDetail == SYMBOL_DOMAIN)
         return errorModel->computeSymbolModel(transmission, snir);
@@ -359,7 +359,7 @@ const Ieee80211OfdmMode *Ieee80211LayeredOfdmReceiver::computeMode(Hz bandwidth)
 
 const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
-    const Ieee80211LayeredTransmission *transmission = check_and_cast<const Ieee80211LayeredTransmission *>(reception->getTransmission());
+    const Ieee80211Transmission *transmission = check_and_cast<const Ieee80211Transmission *>(reception->getTransmission());
     // corruted model
     const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
     const IReceptionSampleModel *sampleModel = createSampleModel(transmission, snir);
@@ -450,7 +450,7 @@ const IListeningDecision *Ieee80211LayeredOfdmReceiver::computeListeningDecision
 
 bool Ieee80211LayeredOfdmReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
 {
-    auto ieee80211Transmission = dynamic_cast<const Ieee80211LayeredTransmission *>(transmission);
+    auto ieee80211Transmission = dynamic_cast<const Ieee80211Transmission *>(transmission);
     return ieee80211Transmission && SnirReceiverBase::computeIsReceptionPossible(listening, transmission);
 }
 
@@ -458,7 +458,7 @@ bool Ieee80211LayeredOfdmReceiver::computeIsReceptionPossible(const IListening *
 // TODO copy
 bool Ieee80211LayeredOfdmReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
-    auto ieee80211Transmission = dynamic_cast<const Ieee80211LayeredTransmission *>(reception->getTransmission());
+    auto ieee80211Transmission = dynamic_cast<const Ieee80211Transmission *>(reception->getTransmission());
     if (ieee80211Transmission == nullptr)
         return false;
     else {

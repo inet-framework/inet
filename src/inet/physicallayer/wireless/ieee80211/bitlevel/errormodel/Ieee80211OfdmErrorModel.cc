@@ -7,7 +7,6 @@
 
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/errormodel/Ieee80211OfdmErrorModel.h"
 
-#include "inet/physicallayer/wireless/common/analogmodel/common/LayeredTransmission.h"
 #include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSnir.h"
 #include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IApskModulation.h"
@@ -18,7 +17,6 @@
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSampleModel.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
-#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211LayeredTransmission.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmSymbolModel.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
@@ -53,7 +51,7 @@ std::ostream& Ieee80211OfdmErrorModel::printToStream(std::ostream& stream, int l
     return stream;
 }
 
-const IReceptionPacketModel *Ieee80211OfdmErrorModel::computePacketModel(const LayeredTransmission *transmission, const ISnir *snir) const
+const IReceptionPacketModel *Ieee80211OfdmErrorModel::computePacketModel(const ITransmission *transmission, const ISnir *snir) const
 {
     double packetErrorRate = computePacketErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE);
     auto transmissionPacketModel = check_and_cast<const TransmissionPacketModel *>(transmission->getPacketModel());
@@ -65,7 +63,7 @@ const IReceptionPacketModel *Ieee80211OfdmErrorModel::computePacketModel(const L
     return new ReceptionPacketModel(receivedPacket, transmissionPacketModel->getHeaderNetBitrate(), transmissionPacketModel->getDataNetBitrate());
 }
 
-const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const LayeredTransmission *transmission, const ISnir *snir) const
+const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const ITransmission *transmission, const ISnir *snir) const
 {
     const ITransmissionBitModel *transmissionBitModel = transmission->getBitModel();
     int signalBitLength = b(transmissionBitModel->getHeaderLength()).get();
@@ -93,7 +91,7 @@ const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const Layered
     return new ReceptionBitModel(b(signalBitLength), signalBitrate, b(dataBitLength), dataBitrate, corruptedBits, NaN);
 }
 
-const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const
+const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const ITransmission *transmission, const ISnir *snir) const
 {
     auto reception = snir->getReception();
     // bit model
@@ -112,7 +110,7 @@ const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const L
     auto analogModel = check_and_cast<const NarrowbandSignalAnalogModel*>(transmission->getAnalogModel());
     // derived quantities
 
-    auto mode = check_and_cast<const Ieee80211OfdmMode*>(check_and_cast<const Ieee80211LayeredTransmission *>(transmission)->getMode())->getDataMode();
+    auto mode = check_and_cast<const Ieee80211OfdmMode*>(check_and_cast<const Ieee80211Transmission *>(transmission)->getMode())->getDataMode();
 
     // division
     auto transmittedSymbols = symbolModel->getAllSymbols();
@@ -223,7 +221,7 @@ void Ieee80211OfdmErrorModel::corruptBits(BitVector *bits, double ber, int begin
     }
 }
 
-const IReceptionSampleModel *Ieee80211OfdmErrorModel::computeSampleModel(const LayeredTransmission *transmission, const ISnir *snir) const
+const IReceptionSampleModel *Ieee80211OfdmErrorModel::computeSampleModel(const ITransmission *transmission, const ISnir *snir) const
 {
     throw cRuntimeError("Unimplemented!");
     // TODO implement sample error model

@@ -24,9 +24,9 @@ class INET_API LayeredErrorModelBase : public cModule, public ILayeredErrorModel
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
-    virtual const IReceptionPacketModel *computePacketModel(const LayeredTransmission *transmission, double packetErrorRate) const;
-    virtual const IReceptionBitModel *computeBitModel(const LayeredTransmission *transmission, double bitErrorRate) const;
-    virtual const IReceptionSymbolModel *computeSymbolModel(const LayeredTransmission *transmission, double symbolErrorRate) const;
+    virtual const IReceptionPacketModel *computePacketModel(const ITransmission *transmission, double packetErrorRate) const;
+    virtual const IReceptionBitModel *computeBitModel(const ITransmission *transmission, double bitErrorRate) const;
+    virtual const IReceptionSymbolModel *computeSymbolModel(const ITransmission *transmission, double symbolErrorRate) const;
 
     virtual const ISymbol *computeCorruptSymbol(const ApskModulationBase *modulation, const ApskSymbol *transmittedSymbol) const;
 };

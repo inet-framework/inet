@@ -32,10 +32,10 @@ class INET_API Ieee80211OfdmErrorModel : public Ieee80211NistErrorModel, public 
     virtual void corruptBits(BitVector *bits, double ber, int begin, int end) const;
 
   public:
-    virtual const IReceptionPacketModel *computePacketModel(const LayeredTransmission *transmission, const ISnir *snir) const override;
-    virtual const IReceptionBitModel *computeBitModel(const LayeredTransmission *transmission, const ISnir *snir) const override;
-    virtual const IReceptionSymbolModel *computeSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const override;
-    virtual const IReceptionSampleModel *computeSampleModel(const LayeredTransmission *transmission, const ISnir *snir) const override;
+    virtual const IReceptionPacketModel *computePacketModel(const ITransmission *transmission, const ISnir *snir) const override;
+    virtual const IReceptionBitModel *computeBitModel(const ITransmission *transmission, const ISnir *snir) const override;
+    virtual const IReceptionSymbolModel *computeSymbolModel(const ITransmission *transmission, const ISnir *snir) const override;
+    virtual const IReceptionSampleModel *computeSampleModel(const ITransmission *transmission, const ISnir *snir) const override;
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     // TODO: don't pass in symbolErrorRate - it's not needed for vectorial corruption mode

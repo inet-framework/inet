@@ -38,7 +38,12 @@ class INET_API TransmissionBase : public virtual ITransmission, public cObject
     const Quaternion endOrientation;
 
   // TODO make this field protected and set from the constructor
-  public: const ITransmissionAnalogModel *analogModel = nullptr;
+  public:
+    const ITransmissionPacketModel *packetModel = nullptr;
+    const ITransmissionBitModel *bitModel = nullptr;
+    const ITransmissionSymbolModel *symbolModel = nullptr;
+    const ITransmissionSampleModel *sampleModel = nullptr;
+    const ITransmissionAnalogModel *analogModel = nullptr;
 
   public:
     TransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation);
@@ -51,7 +56,7 @@ class INET_API TransmissionBase : public virtual ITransmission, public cObject
     virtual int getTransmitterId() const override { return transmitterId; }
     virtual const IAntennaGain *getTransmitterAntennaGain() const override { return transmitterGain.get(); }
     virtual const IRadioMedium *getMedium() const override { return radioMedium; }
-    virtual const Packet *getPacket() const override { return packet; }
+    virtual const Packet *getPacket() const override { return packetModel != nullptr ? packetModel->getPacket() : packet; }
 
     virtual const simtime_t getStartTime() const override { return startTime; }
     virtual const simtime_t getEndTime() const override { return endTime; }
@@ -78,6 +83,10 @@ class INET_API TransmissionBase : public virtual ITransmission, public cObject
     virtual const Quaternion& getStartOrientation() const override { return startOrientation; }
     virtual const Quaternion& getEndOrientation() const override { return endOrientation; }
 
+    virtual const ITransmissionPacketModel *getPacketModel() const override { return packetModel; }
+    virtual const ITransmissionBitModel *getBitModel() const override { return bitModel; }
+    virtual const ITransmissionSymbolModel *getSymbolModel() const override { return symbolModel; }
+    virtual const ITransmissionSampleModel *getSampleModel() const override { return sampleModel; }
     virtual const ITransmissionAnalogModel *getAnalogModel() const override { return analogModel; }
 };
 

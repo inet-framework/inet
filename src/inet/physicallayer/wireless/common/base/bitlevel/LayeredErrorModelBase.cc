@@ -23,7 +23,7 @@ void LayeredErrorModelBase::initialize(int stage)
         symbolCorruptionMode = par("symbolCorruptionMode");
 }
 
-const IReceptionPacketModel *LayeredErrorModelBase::computePacketModel(const LayeredTransmission *transmission, double packetErrorRate) const
+const IReceptionPacketModel *LayeredErrorModelBase::computePacketModel(const ITransmission *transmission, double packetErrorRate) const
 {
     auto transmissionPacketModel = check_and_cast<const TransmissionPacketModel *>(transmission->getPacketModel());
     auto transmittedPacket = transmissionPacketModel->getPacket();
@@ -34,7 +34,7 @@ const IReceptionPacketModel *LayeredErrorModelBase::computePacketModel(const Lay
     return new ReceptionPacketModel(receivedPacket, transmissionPacketModel->getHeaderNetBitrate(), transmissionPacketModel->getDataNetBitrate());
 }
 
-const IReceptionBitModel *LayeredErrorModelBase::computeBitModel(const LayeredTransmission *transmission, double bitErrorRate) const
+const IReceptionBitModel *LayeredErrorModelBase::computeBitModel(const ITransmission *transmission, double bitErrorRate) const
 {
     const TransmissionBitModel *transmissionBitModel = check_and_cast<const TransmissionBitModel *>(transmission->getBitModel());
     if (bitErrorRate == 0)
@@ -48,7 +48,7 @@ const IReceptionBitModel *LayeredErrorModelBase::computeBitModel(const LayeredTr
     }
 }
 
-const IReceptionSymbolModel *LayeredErrorModelBase::computeSymbolModel(const LayeredTransmission *transmission, double symbolErrorRate) const
+const IReceptionSymbolModel *LayeredErrorModelBase::computeSymbolModel(const ITransmission *transmission, double symbolErrorRate) const
 {
     auto transmissionSymbolModel = check_and_cast<const TransmissionSymbolModel *>(transmission->getSymbolModel());
     if (symbolErrorRate == 0)

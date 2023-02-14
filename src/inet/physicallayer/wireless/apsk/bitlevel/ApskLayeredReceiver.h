@@ -51,11 +51,11 @@ class INET_API ApskLayeredReceiver : public SnirReceiverBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual const IReceptionAnalogModel *createAnalogModel(const LayeredTransmission *transmission, const ISnir *snir) const;
-    virtual const IReceptionSampleModel *createSampleModel(const LayeredTransmission *transmission, const ISnir *snir, const IReceptionAnalogModel *analogModel) const;
-    virtual const IReceptionSymbolModel *createSymbolModel(const LayeredTransmission *transmission, const ISnir *snir, const IReceptionSampleModel *sampleModel) const;
-    virtual const IReceptionBitModel *createBitModel(const LayeredTransmission *transmission, const ISnir *snir, const IReceptionSymbolModel *symbolModel) const;
-    virtual const IReceptionPacketModel *createPacketModel(const LayeredTransmission *transmission, const ISnir *snir, const IReceptionBitModel *bitModel) const;
+    virtual const IReceptionAnalogModel *createAnalogModel(const ITransmission *transmission, const ISnir *snir) const;
+    virtual const IReceptionSampleModel *createSampleModel(const ITransmission *transmission, const ISnir *snir, const IReceptionAnalogModel *analogModel) const;
+    virtual const IReceptionSymbolModel *createSymbolModel(const ITransmission *transmission, const ISnir *snir, const IReceptionSampleModel *sampleModel) const;
+    virtual const IReceptionBitModel *createBitModel(const ITransmission *transmission, const ISnir *snir, const IReceptionSymbolModel *symbolModel) const;
+    virtual const IReceptionPacketModel *createPacketModel(const ITransmission *transmission, const ISnir *snir, const IReceptionBitModel *bitModel) const;
 
   public:
     ApskLayeredReceiver();
