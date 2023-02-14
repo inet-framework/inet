@@ -57,7 +57,7 @@ module RadioMedium like IRadioMedium
             parameters:
                 @display("p=100,100");
         }
-        analogModel: <default(signalAnalogRepresentation == "unitDisk" ? "UnitDiskMediumAnalogModel" : signalAnalogRepresentation == "scalar" ? "ScalarAnalogModel" : signalAnalogRepresentation == "dimensional" ? "DimensionalAnalogModel" : "")> like IAnalogModel {
+        analogModel: <default(signalAnalogRepresentation == "unitDisk" ? "UnitDiskMediumAnalogModel" : signalAnalogRepresentation == "scalar" ? "ScalarMediumAnalogModel" : signalAnalogRepresentation == "dimensional" ? "DimensionalMediumAnalogModel" : "")> like IAnalogModel {
             parameters:
                 @display("p=100,200");
         }

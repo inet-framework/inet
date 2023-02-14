@@ -16,7 +16,7 @@ import inet.physicallayer.wireless.common.base.packetlevel.NarrowbandReceiverBas
 // this value and the used modulation.
 //
 // @see ~ApskTransmitter, ~ApskRadio, ~ApskScalarRadioMedium,
-// ~ScalarAnalogModel.
+// ~ScalarMediumAnalogModel.
 //
 module ApskReceiver extends NarrowbandReceiverBase
 {

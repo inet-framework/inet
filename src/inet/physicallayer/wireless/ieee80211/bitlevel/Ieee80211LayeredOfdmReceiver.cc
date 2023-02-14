@@ -9,7 +9,7 @@
 
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalMediumAnalogModel.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISymbol.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"

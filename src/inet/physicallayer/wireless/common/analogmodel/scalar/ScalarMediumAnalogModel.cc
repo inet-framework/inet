@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarMediumAnalogModel.h"
 
 #include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarTransmitterAnalogModel.h"
@@ -17,14 +17,14 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(ScalarAnalogModel);
+Define_Module(ScalarMediumAnalogModel);
 
-std::ostream& ScalarAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
+std::ostream& ScalarMediumAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    return stream << "ScalarAnalogModel";
+    return stream << "ScalarMediumAnalogModel";
 }
 
-const IReception *ScalarAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
+const IReception *ScalarMediumAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
     const ScalarSignalAnalogModel *analogModel = check_and_cast<const ScalarSignalAnalogModel *>(transmission->getAnalogModel());

@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalMediumAnalogModel.h"
 
 #include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalNoise.h"
 #include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSignalAnalogModel.h"
@@ -19,15 +19,15 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(DimensionalAnalogModel);
+Define_Module(DimensionalMediumAnalogModel);
 
-std::ostream& DimensionalAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
+std::ostream& DimensionalMediumAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    stream << "DimensionalAnalogModel";
+    stream << "DimensionalMediumAnalogModel";
     return DimensionalAnalogModelBase::printToStream(stream, level);
 }
 
-const IReception *DimensionalAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
+const IReception *DimensionalMediumAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     auto dimensionalTransmission = check_and_cast<const DimensionalSignalAnalogModel *>(transmission->getAnalogModel());
     const simtime_t receptionStartTime = arrival->getStartTime();

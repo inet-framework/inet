@@ -13,12 +13,12 @@ package inet.physicallayer.wireless.ieee80211.packetlevel;
 // conjunction with the ~Ieee80211DimensionalRadio model.
 //
 // @see ~Ieee80211DimensionalRadio, ~Ieee80211Transmitter,
-// ~Ieee80211Receiver, ~DimensionalAnalogModel.
+// ~Ieee80211Receiver, ~DimensionalMediumAnalogModel.
 //
 module Ieee80211DimensionalRadioMedium extends Ieee80211RadioMedium
 {
     parameters:
-        analogModel.typename = default("DimensionalAnalogModel");
+        analogModel.typename = default("DimensionalMediumAnalogModel");
         backgroundNoise.typename = default("IsotropicDimensionalBackgroundNoise");
 }
 

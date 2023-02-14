@@ -11,7 +11,7 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
-#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalMediumAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSignalAnalogModel.h"
 #endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
@@ -266,7 +266,7 @@ void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission 
         const auto& startOrientation = transmission->getStartOrientation();
         const auto& propagatedTransmissionPowerFunction = makeShared<PropagatedTransmissionPowerFunction>(transmissionPowerFunction, startPosition, propagationSpeed);
         Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>> signalPowerDensityFunction;
-        bool attenuateWithCenterFrequency = check_and_cast<const DimensionalAnalogModel *>(radioMedium->getAnalogModel())->par("attenuateWithCenterFrequency");
+        bool attenuateWithCenterFrequency = check_and_cast<const DimensionalMediumAnalogModel *>(radioMedium->getAnalogModel())->par("attenuateWithCenterFrequency");
         if (attenuateWithCenterFrequency) {
             const auto& attenuationFunction = makeShared<SpaceDependentAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, startPosition, startOrientation, propagationSpeed, dimensionalTransmission->getCenterFrequency());
             signalPowerDensityFunction = propagatedTransmissionPowerFunction->multiply(attenuationFunction);

@@ -14,11 +14,11 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IAnalogModel;
 // words, the signal power does not change over time or frequency, except for
 // the boundaries of the signal.
 //
-module ScalarAnalogModel like IAnalogModel
+module ScalarMediumAnalogModel like IAnalogModel
 {
     parameters:
         bool ignorePartialInterference = default(false); // enabled means interference only partially overlapping with the signal being received is ignored, otherwise the simulation stops with an error
         @display("i=block/tunnel");
-        @class(ScalarAnalogModel);
+        @class(ScalarMediumAnalogModel);
 }
 

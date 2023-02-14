@@ -124,14 +124,14 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IListening *listening, c
         if (commonCenterFrequency == signalCenterFrequency && commonBandwidth >= signalBandwidth)
             addReception(reception, noiseStartTime, noiseEndTime, powerChanges);
         else if (!ignorePartialInterference && areOverlappingBands(commonCenterFrequency, commonBandwidth, signalCenterFrequency, signalBandwidth))
-            throw cRuntimeError("Partially interfering signals are not supported by ScalarAnalogModel, enable ignorePartialInterference to avoid this error!");
+            throw cRuntimeError("Partially interfering signals are not supported by ScalarMediumAnalogModel, enable ignorePartialInterference to avoid this error!");
     }
     const ScalarNoise *scalarBackgroundNoise = dynamic_cast<const ScalarNoise *>(interference->getBackgroundNoise());
     if (scalarBackgroundNoise) {
         if (commonCenterFrequency == scalarBackgroundNoise->getCenterFrequency() && commonBandwidth >= scalarBackgroundNoise->getBandwidth())
             addNoise(scalarBackgroundNoise, noiseStartTime, noiseEndTime, powerChanges);
         else if (!ignorePartialInterference && areOverlappingBands(commonCenterFrequency, commonBandwidth, scalarBackgroundNoise->getCenterFrequency(), scalarBackgroundNoise->getBandwidth()))
-            throw cRuntimeError("Partially interfering background noise is not supported by ScalarAnalogModel, enable ignorePartialInterference to avoid this error!");
+            throw cRuntimeError("Partially interfering background noise is not supported by ScalarMediumAnalogModel, enable ignorePartialInterference to avoid this error!");
     }
     EV_TRACE << "Noise power begin " << endl;
     W power = W(0);

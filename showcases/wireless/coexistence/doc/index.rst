@@ -171,12 +171,8 @@ arranged in a rectangle, and all of them are in communication range with each ot
 (corresponding hosts are 20 meters apart). One host in each host pair sends frames
 to the other (``wifiHost1`` to ``wifiHost2``, and ``wpanHost1`` to ``wpanHost2``).
 
-.. The simulation is defined in the ``Coexistence`` configuration in
-.. :download:`omnetpp.ini <../omnetpp.ini>`. 
-
-The ``General`` configuration in :download:`omnetpp.ini <../omnetpp.ini>` contains the
-radio, radio medium and visualizer settings.
-The radio medium module in the network
+The simulation is defined in the ``Coexistence`` configuration in
+:download:`omnetpp.ini <../omnetpp.ini>`. The radio medium module in the network
 is a :ned:`RadioMedium`. It is configured to use the :ned:`DimensionalAnalogModel`.
 The background noise type is set to :ned:`IsotropicDimensionalBackgroundNoise`,
 with a power of -110 dBm. Here is the radio medium configuration in

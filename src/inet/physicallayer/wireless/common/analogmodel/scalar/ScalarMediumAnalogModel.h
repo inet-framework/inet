@@ -5,8 +5,8 @@
 //
 
 
-#ifndef __INET_SCALARANALOGMODEL_H
-#define __INET_SCALARANALOGMODEL_H
+#ifndef __INET_SCALARMEDIUMANALOGMODEL_H
+#define __INET_SCALARMEDIUMANALOGMODEL_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/ScalarAnalogModelBase.h"
 
@@ -14,7 +14,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API ScalarAnalogModel : public ScalarAnalogModelBase
+class INET_API ScalarMediumAnalogModel : public ScalarAnalogModelBase
 {
   public:
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
