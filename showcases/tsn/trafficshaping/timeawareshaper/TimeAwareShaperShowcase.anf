@@ -5,7 +5,7 @@
         <input pattern="/inet/showcases/tsn/trafficshaping/timeawareshaper/results/*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="250023493" name="Client application traffic and traffic shaper incoming traffic" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="250023493" name="Client application traffic and traffic shaper incoming traffic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -54,7 +54,7 @@ legend_style = [('best effort', {'color': default_colors[0], 'marker': 's', 'lin
                 ('client application', {'linestyle': '--', 'color': 'black'}),
                 ('shaper incoming', {'linestyle': 'solid', 'color': 'black'})]
 
-handles, labels = modifiedplot.multidimensional_legend(legend_style)
+handles, labels = modifiedplot.create_multidimensional_legend(legend_style)
 
 plt.legend(handles, labels, ncol=2)
 
@@ -657,7 +657,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="9"/>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="286260457" name="Shaper Incoming and Outgoing Traffic" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="286260457" name="Shaper Incoming and Outgoing Traffic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -706,7 +706,7 @@ legend_style = [('best effort', {'color': default_colors[0], 'marker': 's', 'lin
                 ('incoming', {'linestyle': 'dotted', 'color': 'black'}),
                 ('outgoing', {'linestyle': 'solid', 'color': 'black'})]
 
-handles, labels = modifiedplot.multidimensional_legend(legend_style)
+handles, labels = modifiedplot.create_multidimensional_legend(legend_style)
 
 plt.legend(handles, labels, ncol=2)
 
@@ -1309,7 +1309,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="9"/>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1898348329" name="Traffic Shaper Outgoing Traffic and Server Application Traffic" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1898348329" name="Traffic Shaper Outgoing Traffic and Server Application Traffic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -1357,7 +1357,7 @@ legend_style = [('best effort', {'color': default_colors[0], 'marker': 's', 'lin
                 ('server application', {'linestyle': '--', 'color': 'black'}),
                 ('shaper outgoing', {'linestyle': 'solid', 'color': 'black'})]
 
-handles, labels = modifiedplot.multidimensional_legend(legend_style)
+handles, labels = modifiedplot.create_multidimensional_legend(legend_style)
 
 plt.legend(handles, labels, ncol=2)
 
@@ -1960,7 +1960,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="9"/>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="963051623" name="Traffic shaper queue lengths" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="963051623" name="Traffic shaper queue lengths" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -2601,7 +2601,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="651585001" name="Transmitting state and gate states" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="651585001" name="Transmitting state and gate states" resultTypes="" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import re
 import math
 import matplotlib.pyplot as plt
@@ -3240,7 +3240,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1635101941" name="Traffic shaping" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1635101941" name="Traffic shaping" resultTypes="" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import re
 import numpy
 import math
