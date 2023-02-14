@@ -7,9 +7,7 @@
 
 package inet.physicallayer.wireless.common.medium;
 
-import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
-
-module ScalarRadioMedium extends Ieee80211RadioMedium
+module ScalarRadioMedium extends RadioMedium
 {
     parameters:
         analogModel.typename = default("ScalarAnalogModel");
