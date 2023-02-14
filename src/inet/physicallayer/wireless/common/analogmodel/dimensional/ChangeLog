@@ -1,0 +1,199 @@
+====== inet-4.x ======
+
+2022-05-13  ------ inet-4.4.0 released ------
+
+2022-03-21  Levente Mészáros
+
+	Fixed cases checked by ScalarNoiseMaxMin_1 test.
+
+2021-01-11  ------ inet-4.3.0 released ------
+
+2020-08-31  Levente Mészáros
+
+	Added evFlags parameter to all printToStream methods and recursive calls.
+
+2020-08-25  Levente Mészáros
+
+	Changed EV output to use the new EV_FIELD macro where appropriate.
+
+2020-06-04  Levente Mészáros
+
+	Added & to const Coord where appropriate.
+	Added & to const Quaternion where appropriate.
+
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-09-23  Levente Mészáros
+
+	Renamed carrierFrequency to centerFrequency.
+
+	This confusion was spread all around the code. In most places we don't
+	know what kind of modulation is used (e.g. OFDM has several subcarriers),
+	so it doesn't really make sense.
+
+2019-08-27  Levente Mészáros
+
+	Replaced simtime_t type with simsec in multidimensional analog domain signal representations.
+
+2019-07-25  Levente Mészáros
+
+	Changed log level for multidimensional values to EV_TRACE.
+
+2019-07-08  Levente Mészáros
+
+	Added getMean to ISnir interface implementation.
+
+2019-06-17  Levente Mészáros
+
+	Implemented new syntax and added expressions to timeGains and frequencyGains parameters.
+
+2019-06-07  Levente Mészáros
+
+	Replaced old multidimensional mappings (MiXiM) with new multidimensional functions.
+	This patch affects member variables, arguments and returns values.
+
+2019-01-28  ------ inet-4.1.0 released ------
+
+2018-12-21  Levente Mészáros
+
+	Added ignorePartialInterference parameter to scalar analogue models.
+
+	This parameter allows ignoring interfering signals which have partially
+	overlapping frequency domain analog representation. For example, a Wifi
+	signal using adjacent channels. This parameter is disabled by default.
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-09  Levente Mészáros
+
+	Fixed computing minPower of a noise.
+
+2018-01-04  Levente Mészáros
+
+	Added several missing class descriptors.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    DimensionalSNIR -> DimensionalSnir
+	    SNIRBase -> SnirBase
+	    ScalarSNIR -> ScalarSnir
+
+2017-11-21  Levente Mészáros
+
+	Removed @opaque from fields, and added @opaque to types where needed.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-11-10  Levente Mészáros
+
+	Updated dimensional transmitters/transmissions to be similar to scalar ones.
+
+2017-01-26  Levente Mészáros
+
+	Switched to bit type where appropriate.
+
+2017-01-25  Zoltan Bojthe
+
+	Renamed macFrame to packet where appropriate.
+
+2017-01-25  Zoltan Bojthe
+
+	Replaced cPacket* with Packet* where appropriate.
+
+====== inet-3.x ======
+
+2018-03-21  ------ inet-3.6.4 released ------
+
+2017-12-22  ------ inet-3.6.3 released ------
+
+2017-10-02  ------ inet-3.6.2 released ------
+
+2017-07-06  ------ inet-3.6.1 released ------
+
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-02-09  Levente Mészáros
+
+	Added class descriptors for transmissions and receptions.
+
+2017-02-20  ------ inet-3.5.0 released ------
+
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-04-19  Levente Meszaros
+
+	Followed recent logging API changes.
+
+2016-06-01  ------ inet-3.3.0 released ------
+
+2016-04-06  ------ inet-3.2.4 released ------
+
+2016-03-16  ------ inet-3.2.3 released ------
+
+2016-03-11  ------ inet-3.2.2 released ------
+
+2016-01-21  ------ inet-3.2.1 released ------
+
+2015-12-16  ------ inet-3.2.0 released ------
+
+2015-11-12  Levente Meszaros
+
+	Radio: Added support for the simulation of separate signal parts.
+
+	The preamble, header and data parts can be optionally simulated
+	separately. This is results in more accurate simulation, because a
+	reception may be aborted before the data part is received.
+
+2015-10-26  ------ inet-3.1.1 released ------
+
+2015-10-15  ------ inet-3.1.0 released ------
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-15  Levente Meszaros
+
+	Radio: Added arrival parameter to computeReceptionPower.
+
+2015-04-03  Levente Meszaros
+
+	Radio: Added level parameter to printToStream functions.
+
+2015-03-16  Levente Meszaros
+
+	Consistently renamed packet level and bit level implementations into
+	separate subdirectories. Renamed analogmodel/layered to analogmodel/bitlevel.
+	Moved remaining analogmodel contents to analogmodel/packetlevel.
+
+2015-03-02  Levente Meszaros
+
+	Fixed memory managements bugs found by valgrind memcheck.
+
+2015-02-24  Levente Meszaros
+
+	Updated analog model to support layered radio.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-04  Florian Meier
+
+	Added Arrival to computeReception of IAnalogModel.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-10-31  Levente Meszaros
+
+	Added initial implementation:
+	ScalarReception, ScalarTransmission, ScalarNoise, ScalarSNIR,
+	ScalarAttenuation, DimensionalReception, DimensionalTransmission,
+	DimensionalNoise, DimensionalSNIR, DimensionalAttenuation
+
+====== inet-2.x ======
