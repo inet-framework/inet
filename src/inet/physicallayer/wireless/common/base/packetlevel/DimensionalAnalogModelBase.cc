@@ -8,7 +8,7 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/DimensionalAnalogModelBase.h"
 
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalNoise.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalReceptionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalSnir.h"
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
@@ -72,7 +72,7 @@ const INoise *DimensionalAnalogModelBase::computeNoise(const IListening *listeni
     }
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
     for (const auto & interferingReception : *interferingReceptions) {
-        auto dimensionalSignal = check_and_cast<const DimensionalReceptionAnalogModel *>(interferingReception->getNewAnalogModel());
+        auto dimensionalSignal = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(interferingReception->getNewAnalogModel());
         auto receptionPower = dimensionalSignal->getPower();
         receptionPowers.push_back(receptionPower);
         EV_TRACE << "Interference power begin " << endl;
@@ -89,7 +89,7 @@ const INoise *DimensionalAnalogModelBase::computeNoise(const IListening *listeni
 
 const INoise *DimensionalAnalogModelBase::computeNoise(const IReception *reception, const INoise *noise) const
 {
-    auto dimensionalReception = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getNewAnalogModel());
+    auto dimensionalReception = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(reception->getNewAnalogModel());
     auto dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& noisePower = makeShared<AddedFunction<WpHz, Domain<simsec, Hz>>>(dimensionalReception->getPower(), dimensionalNoise->getPower());
     return new DimensionalNoise(reception->getStartTime(), reception->getEndTime(), dimensionalReception->getCenterFrequency(), dimensionalReception->getBandwidth(), noisePower);

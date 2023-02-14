@@ -61,7 +61,7 @@ bool NarrowbandReceiverBase::computeIsReceptionPossible(const IListening *listen
 bool NarrowbandReceiverBase::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
-    auto narrowbandReception = check_and_cast<const INarrowbandReceptionAnalogModel *>(reception->getNewAnalogModel());
+    auto narrowbandReception = check_and_cast<const INarrowbandSignal *>(reception->getNewAnalogModel());
     if (bandListening->getCenterFrequency() != narrowbandReception->getCenterFrequency() || bandListening->getBandwidth() < narrowbandReception->getBandwidth()) {
         EV_DEBUG << "Computing whether reception is possible: listening and reception bands are different -> reception is impossible" << endl;
         return false;

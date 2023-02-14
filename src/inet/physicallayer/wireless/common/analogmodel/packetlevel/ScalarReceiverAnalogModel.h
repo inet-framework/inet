@@ -8,12 +8,11 @@
 #ifndef __INET_SCALARRECEIVERANALOGMODEL_H
 #define __INET_SCALARRECEIVERANALOGMODEL_H
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReceptionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ReceiverAnalogModelBase.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReceiverAnalogModel.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/INewReceptionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ListeningDecision.h"
 
@@ -63,7 +62,7 @@ class INET_API ScalarReceiverAnalogModel : public ReceiverAnalogModelBase, publi
 
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override {
         const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
-        const ScalarReceptionAnalogModel *analogModel = check_and_cast<const ScalarReceptionAnalogModel *>(reception->getNewAnalogModel());
+        const ScalarReceptionSignalAnalogModel *analogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(reception->getNewAnalogModel());
         if (bandListening->getCenterFrequency() != analogModel->getCenterFrequency() || bandListening->getBandwidth() < analogModel->getBandwidth()) {
             EV_DEBUG << "Computing whether reception is possible: listening and reception bands are different -> reception is impossible" << endl;
             return false;

@@ -9,7 +9,7 @@
 #define __INET_UNITDISKRECEPTIONANALOGMODEL_H
 
 #include "inet/common/Units.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/INewReceptionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/SignalAnalogModel.h"
 
 namespace inet {
 
@@ -17,7 +17,7 @@ namespace physicallayer {
 
 using namespace inet::units::values;
 
-class INET_API UnitDiskReceptionAnalogModel : public INewReceptionAnalogModel
+class INET_API UnitDiskReceptionAnalogModel : public SignalAnalogModel, public IReceptionAnalogModel
 {
   public:
     enum Power {
@@ -31,11 +31,13 @@ class INET_API UnitDiskReceptionAnalogModel : public INewReceptionAnalogModel
     const Power power;
 
   public:
-    UnitDiskReceptionAnalogModel(const Power power) : power(power) {}
+    UnitDiskReceptionAnalogModel(simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, const Power power) :
+        SignalAnalogModel(preambleDuration, headerDuration, dataDuration),
+        power(power) {}
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual Power getPower() const { return power; }
-    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override { throw cRuntimeError("Invalid operation"); }
+//    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override { throw cRuntimeError("Invalid operation"); }
 };
 
 } // namespace physicallayer

@@ -8,7 +8,7 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/ScalarAnalogModelBase.h"
 
 #include "inet/common/geometry/common/Quaternion.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReceptionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarSnir.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAntennaGain.h"
@@ -59,7 +59,7 @@ W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, cons
 
 void ScalarAnalogModelBase::addReception(const IReception *reception, simtime_t& noiseStartTime, simtime_t& noiseEndTime, std::map<simtime_t, W>& powerChanges) const
 {
-    W power = check_and_cast<const ScalarReceptionAnalogModel *>(reception->getNewAnalogModel())->getPower();
+    W power = check_and_cast<const ScalarReceptionSignalAnalogModel *>(reception->getNewAnalogModel())->getPower();
     simtime_t startTime = reception->getStartTime();
     simtime_t endTime = reception->getEndTime();
     std::map<simtime_t, W>::iterator itStartTime = powerChanges.find(startTime);
@@ -118,7 +118,7 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IListening *listening, c
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
     for (auto reception : *interferingReceptions) {
         auto signalAnalogModel = reception->getNewAnalogModel();
-        auto receptionAnalogModel = check_and_cast<const ScalarReceptionAnalogModel *>(signalAnalogModel);
+        auto receptionAnalogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(signalAnalogModel);
         Hz signalCenterFrequency = receptionAnalogModel->getCenterFrequency();
         Hz signalBandwidth = receptionAnalogModel->getBandwidth();
         if (commonCenterFrequency == signalCenterFrequency && commonBandwidth >= signalBandwidth)

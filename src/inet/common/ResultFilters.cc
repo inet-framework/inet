@@ -19,6 +19,7 @@
 
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 #include "inet/physicallayer/wireless/common/base/packetlevel/ReceptionBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #endif
 
@@ -90,7 +91,7 @@ void ReceptionMinSignalPowerFilter::receiveSignal(cResultFilter *prev, simtime_t
 {
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
     if (auto reception = dynamic_cast<inet::physicallayer::ReceptionBase *>(object)) {
-        W minReceptionPower = reception->getNewAnalogModel()->computeMinPower(reception->getStartTime(), reception->getEndTime());
+        W minReceptionPower = check_and_cast<const inet::physicallayer::INarrowbandSignal *>(reception->getNewAnalogModel())->computeMinPower(reception->getStartTime(), reception->getEndTime());
         fire(this, t, minReceptionPower.get(), details);
     }
 #endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON

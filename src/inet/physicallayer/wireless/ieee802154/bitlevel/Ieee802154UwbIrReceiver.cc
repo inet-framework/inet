@@ -8,7 +8,7 @@
 #include "inet/physicallayer/wireless/ieee802154/bitlevel/Ieee802154UwbIrReceiver.h"
 
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalNoise.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalReceptionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ListeningDecision.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionDecision.h"
@@ -132,7 +132,7 @@ std::pair<double, double> Ieee802154UwbIrReceiver::integrateWindow(simtime_t_cre
         double snir = 0; // burst SNIR estimate
         double vThermalNoise = 0; // thermal noise realization
         // consider signal power
-        auto dimensionalSignalReception = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getNewAnalogModel());
+        auto dimensionalSignalReception = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(reception->getNewAnalogModel());
         const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& signalPower = dimensionalSignalReception->getPower();
         Interval<simsec, Hz> interval(Point<simsec, Hz>(simsec(now), Hz(3.1)), Point<simsec, Hz>(simsec(now), Hz(10.6)), 0b10, 0b10, 0b10);
         double measure = signalPower->getMean(interval).get() * peakPulsePower; // TODO de-normalize (peakPulsePower should be in AirFrame or in Signal, to be set at run-time)
@@ -140,7 +140,7 @@ std::pair<double, double> Ieee802154UwbIrReceiver::integrateWindow(simtime_t_cre
         resPower = resPower + signalValue;
         // consider all interferers at this point in time
         for (const auto& interferingReception : *interferingReceptions) {
-            auto dimensionalInterferingReception = check_and_cast<const DimensionalReceptionAnalogModel *>(interferingReception->getNewAnalogModel());
+            auto dimensionalInterferingReception = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(interferingReception->getNewAnalogModel());
             const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& interferingPower = dimensionalInterferingReception->getPower();
             double measure = interferingPower->getMean(interval).get() * peakPulsePower; // TODO de-normalize (peakPulsePower should be in AirFrame or in Signal, to be set at run-time)
             // measure = measure * uniform(0, +1); // random point of Efield at sampling (due to pulse waveform and self interference)

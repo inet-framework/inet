@@ -11,7 +11,6 @@
 #include "inet/common/IPrintableObject.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/INewReceptionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IListening.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 

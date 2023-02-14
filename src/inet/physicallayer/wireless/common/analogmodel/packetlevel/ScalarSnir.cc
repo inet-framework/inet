@@ -7,7 +7,7 @@
 
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarSnir.h"
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReceptionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarNoise.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
 
@@ -33,14 +33,14 @@ std::ostream& ScalarSnir::printToStream(std::ostream& stream, int level, int evF
 
 double ScalarSnir::computeMin() const
 {
-    auto scalarSignalAnalogModel = check_and_cast<const ScalarReceptionAnalogModel *>(reception->getNewAnalogModel());
+    auto scalarSignalAnalogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(reception->getNewAnalogModel());
     const ScalarNoise *scalarNoise = check_and_cast<const ScalarNoise *>(noise);
     return unit(scalarSignalAnalogModel->getPower() / scalarNoise->computeMaxPower(reception->getStartTime(), reception->getEndTime())).get();
 }
 
 double ScalarSnir::computeMax() const
 {
-    auto scalarSignalAnalogModel = check_and_cast<const ScalarReceptionAnalogModel *>(reception->getNewAnalogModel());
+    auto scalarSignalAnalogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(reception->getNewAnalogModel());
     const ScalarNoise *scalarNoise = check_and_cast<const ScalarNoise *>(noise);
     return unit(scalarSignalAnalogModel->getPower() / scalarNoise->computeMinPower(reception->getStartTime(), reception->getEndTime())).get();
 }
@@ -68,7 +68,7 @@ double ScalarSnir::getMean() const
 
 double ScalarSnir::computeMean(simtime_t startTime, simtime_t endTime) const
 {
-    auto scalarSignalAnalogModel = check_and_cast<const ScalarReceptionAnalogModel *>(reception->getNewAnalogModel());
+    auto scalarSignalAnalogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(reception->getNewAnalogModel());
     const ScalarNoise *scalarNoise = check_and_cast<const ScalarNoise *>(noise);
     const auto& signalPowerFunction = makeShared<math::ConstantFunction<W, math::Domain<simtime_t>>>(scalarSignalAnalogModel->getPower());
     const auto& snirFunction = signalPowerFunction->divide(scalarNoise->getPower());

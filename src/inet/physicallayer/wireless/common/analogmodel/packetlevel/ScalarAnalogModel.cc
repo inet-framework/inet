@@ -7,7 +7,7 @@
 
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarAnalogModel.h"
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReceptionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmitterAnalogModel.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/Reception.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
@@ -40,7 +40,7 @@ const IReception *ScalarAnalogModel::computeReception(const IRadio *receiverRadi
     W receptionPower = computeReceptionPower(receiverRadio, transmission, arrival);
     // KLUDGE TODO
     auto reception = new Reception(nullptr, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
-    reception->newAnalogModel = new ScalarReceptionAnalogModel(analogModel->getCenterFrequency(), analogModel->getBandwidth(), receptionPower);
+    reception->analogModel = new ScalarReceptionSignalAnalogModel(-1, -1, -1, analogModel->getCenterFrequency(), analogModel->getBandwidth(), receptionPower);
     return reception;
 }
 
