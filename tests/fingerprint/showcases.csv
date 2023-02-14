@@ -9,7 +9,7 @@
 /showcases/general/pcaprecording/,   -f omnetpp.ini -c PcapRecording -r 0,          10s,         40e0-9ac8/tplx;96d0-d13f/~tNl;87f0-5b5f/~tND;95ab-1374/tyf, PASS,    wireless EthernetMac Ipv4
 
 /showcases/measurement/datarate/,         -f omnetpp.ini -c General -r 0,           1s,           7af9-93b4/tplx;2d48-cf54/~tNl;ce00-3055/~tND;101c-ea79/tyf, PASS, Ipv4
-/showcases/measurement/endtoenddelay/,    -f omnetpp.ini -c General -r 0,           1s,           a6ec-9c0d/tplx;5632-17e6/~tNl;3b24-2f2d/~tND;03b9-42b3/tyf, PASS, Ipv4
+/showcases/measurement/endtoenddelay/,    -f omnetpp.ini -c General -r 0,           1s,           a6ec-9c0d/tplx;5632-17e6/~tNl;3b24-2f2d/~tND;05e3-3f36/tyf, PASS, Ipv4
 /showcases/measurement/flow/,             -f omnetpp.ini -c Basic -r 0,             1s,           d7da-78a3/tplx;59f8-2338/~tNl;d6e9-4044/~tND;727c-f192/tyf, PASS, Ipv4
 # /showcases/measurement/flow/,             -f omnetpp.ini -c AnyLocation -r 0,       1s,           1211-c17f/tplx;0000-0000/~tNl;0000-0000/~tND;497e-9125/tyf, PASS,
 /showcases/measurement/jitter/,           -f omnetpp.ini -c General -r 0,           1s,           4ad0-0f73/tplx;238c-7bbd/~tNl;b0ce-ce9d/~tND;03b9-42b3/tyf, PASS, Ipv4
@@ -141,7 +141,7 @@
 
 # /showcases/visualizer/osg/osgdemo/,      -f omnetpp.ini -c General -r 0,                100s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, ERROR,
 
-/showcases/visualizer/canvas/packetdrop/,   -f omnetpp.ini -c QueueOverflow -r 0,                                      2002ms,            afbf-aeca/tplx;b7e8-1b57/~tNl;b4fc-c0f1/~tND;2f54-9b7a/tyf, PASS,    wireless EthernetMac Ipv4
+/showcases/visualizer/canvas/packetdrop/,   -f omnetpp.ini -c QueueOverflow -r 0,                                      2002ms,            c23c-c6c8/tplx;b7e8-1b57/~tNl;b4fc-c0f1/~tND;ea28-df1a/tyf, PASS,    wireless EthernetMac Ipv4
 /showcases/visualizer/canvas/packetdrop/,   -f omnetpp.ini -c ArpResolutionFailed -r 0,                                500s,            9069-cca6/tplx;0000-0000/~tNl;0000-0000/~tND;5d58-540c/tyf, PASS,    wireless Ipv4
 /showcases/visualizer/canvas/packetdrop/,   -f omnetpp.ini -c MACRetryLimitReached -r 0,                               500s,            1f7a-e5f3/tplx;14cf-73d2/~tNl;c5f5-7ea6/~tND;a56e-92bc/tyf, PASS,    wireless Ipv4
 /showcases/visualizer/canvas/packetdrop/,   -f omnetpp.ini -c InterfaceNotConnected -r 0,                              500s,            d05f-642a/tplx;0000-0000/~tNl;0000-0000/~tND;4a47-0e85/tyf, PASS, EthernetMac Ipv4
