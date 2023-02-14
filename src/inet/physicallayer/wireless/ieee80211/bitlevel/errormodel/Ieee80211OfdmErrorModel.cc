@@ -7,9 +7,9 @@
 
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/errormodel/Ieee80211OfdmErrorModel.h"
 
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredSnir.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/common/LayeredTransmission.h"
+#include "inet/physicallayer/wireless/common/analogmodel/common/LayeredSnir.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IApskModulation.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/common/modulation/BpskModulation.h"

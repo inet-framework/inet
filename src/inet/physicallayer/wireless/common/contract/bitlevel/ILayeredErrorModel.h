@@ -13,7 +13,7 @@
 
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 //TODO non-contract included and used in contract. maybe create and use ILayeredTransmission?
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/wireless/common/analogmodel/common/LayeredTransmission.h"
 #endif
 
 namespace inet {

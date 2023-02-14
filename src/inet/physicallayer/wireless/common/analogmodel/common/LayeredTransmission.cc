@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/wireless/common/analogmodel/common/LayeredTransmission.h"
 
 namespace inet {
 namespace physicallayer {

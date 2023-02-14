@@ -8,7 +8,7 @@
 #ifndef __INET_SCALARRECEIVERANALOGMODEL_H
 #define __INET_SCALARRECEIVERANALOGMODEL_H
 
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ReceiverAnalogModelBase.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"

@@ -16,7 +16,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel.h"
 
 namespace inet {
 

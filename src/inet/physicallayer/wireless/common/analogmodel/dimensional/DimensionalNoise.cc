@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalNoise.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalNoise.h"
 
 namespace inet {
 

@@ -9,8 +9,8 @@
 
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/common/LayeredTransmission.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"

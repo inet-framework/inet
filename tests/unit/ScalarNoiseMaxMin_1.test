@@ -5,7 +5,7 @@ Tests ScalarNoise max and min functions
 
 % includes:
 #include <stdio.h>
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarNoise.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarNoise.h"
 #include "inet/common/math/Functions.h"
 
 %global:

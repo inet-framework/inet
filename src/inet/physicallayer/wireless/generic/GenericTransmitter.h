@@ -9,7 +9,7 @@
 #define __INET_GENERICTRANSMITTER_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/TransmitterBase.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskTransmitterAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskTransmitterAnalogModel.h"
 
 namespace inet {
 

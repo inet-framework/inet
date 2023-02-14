@@ -5,8 +5,8 @@
 //
 
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalSnir.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSnir.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSignalAnalogModel.h"
 
 namespace inet {
 

@@ -8,7 +8,7 @@ import inet.common.INETDefs;
 import inet.common.Units;
 
 cplusplus {{
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskTransmissionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskTransmissionAnalogModel.h"
 }}
 
 namespace inet::physicallayer;

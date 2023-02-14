@@ -16,7 +16,7 @@
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmitterAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarTransmitterAnalogModel.h"
 
 namespace inet {
 

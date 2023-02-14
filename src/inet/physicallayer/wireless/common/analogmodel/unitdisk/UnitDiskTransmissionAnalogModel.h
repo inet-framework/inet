@@ -9,7 +9,7 @@
 #define __INET_UNITDISKTRANSMISSIONANALOGMODEL_H
 
 #include "inet/common/Units.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/SignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/common/SignalAnalogModel.h"
 
 namespace inet {
 

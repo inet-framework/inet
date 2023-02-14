@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskNoise.h"
+#include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskNoise.h"
 
 namespace inet {
 

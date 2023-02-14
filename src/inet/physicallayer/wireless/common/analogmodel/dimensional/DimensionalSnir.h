@@ -8,7 +8,7 @@
 #ifndef __INET_DIMENSIONALSNIR_H
 #define __INET_DIMENSIONALSNIR_H
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalNoise.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalNoise.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/SnirBase.h"
 
 namespace inet {

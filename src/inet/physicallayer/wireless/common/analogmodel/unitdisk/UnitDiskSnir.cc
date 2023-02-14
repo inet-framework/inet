@@ -5,10 +5,10 @@
 //
 
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskSnir.h"
+#include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskSnir.h"
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskReceptionAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskNoise.h"
+#include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskReceptionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskNoise.h"
 
 
 namespace inet {

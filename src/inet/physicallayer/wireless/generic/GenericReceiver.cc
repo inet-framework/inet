@@ -10,8 +10,8 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ListeningDecision.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionDecision.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskNoise.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskReceptionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskNoise.h"
+#include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskReceptionAnalogModel.h"
 
 namespace inet {
 namespace physicallayer {

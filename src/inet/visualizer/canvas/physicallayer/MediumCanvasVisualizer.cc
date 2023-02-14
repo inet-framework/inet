@@ -14,8 +14,8 @@
 #include "inet/common/figures/SignalFigure.h"
 
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel.h"
 #endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
 namespace inet {

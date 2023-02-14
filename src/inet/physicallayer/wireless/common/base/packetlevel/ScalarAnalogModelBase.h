@@ -8,7 +8,7 @@
 #ifndef __INET_SCALARANALOGMODELBASE_H
 #define __INET_SCALARANALOGMODELBASE_H
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarNoise.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarNoise.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/AnalogModelBase.h"
 
 namespace inet {

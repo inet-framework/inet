@@ -8,8 +8,8 @@
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211LayeredOfdmReceiver.h"
 
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISymbol.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"

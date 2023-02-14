@@ -8,13 +8,13 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/ScalarAnalogModelBase.h"
 
 #include "inet/common/geometry/common/Quaternion.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarSnir.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSnir.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAntennaGain.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmitterAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarTransmitterAnalogModel.h"
 
 namespace inet {
 

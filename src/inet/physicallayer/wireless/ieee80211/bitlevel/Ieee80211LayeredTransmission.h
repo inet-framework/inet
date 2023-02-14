@@ -8,7 +8,7 @@
 #ifndef __INET_IEEE80211LAYEREDTRANSMISSION_H
 #define __INET_IEEE80211LAYEREDTRANSMISSION_H
 
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/wireless/common/analogmodel/common/LayeredTransmission.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
 

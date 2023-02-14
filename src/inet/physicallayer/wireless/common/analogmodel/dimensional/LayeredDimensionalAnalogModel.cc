@@ -4,13 +4,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredDimensionalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/LayeredDimensionalAnalogModel.h"
 
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalNoise.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredSnir.h"
+#include "inet/physicallayer/wireless/common/analogmodel/common/LayeredTransmission.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalNoise.h"
+#include "inet/physicallayer/wireless/common/analogmodel/common/LayeredSnir.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/Reception.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalSnir.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSnir.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 

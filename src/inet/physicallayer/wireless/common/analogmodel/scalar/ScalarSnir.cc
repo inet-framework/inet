@@ -5,10 +5,10 @@
 //
 
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarSnir.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSnir.h"
 
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarNoise.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarNoise.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
 
 namespace inet {

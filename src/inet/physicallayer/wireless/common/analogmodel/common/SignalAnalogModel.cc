@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/SignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/common/SignalAnalogModel.h"
 
 namespace inet {
 

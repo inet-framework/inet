@@ -10,7 +10,7 @@
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskTransmission.h"
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {

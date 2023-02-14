@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskListening.h"
+#include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskListening.h"
 
 namespace inet {
 

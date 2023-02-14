@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredSnir.h"
+#include "inet/physicallayer/wireless/common/analogmodel/common/LayeredSnir.h"
 
 namespace inet {
 

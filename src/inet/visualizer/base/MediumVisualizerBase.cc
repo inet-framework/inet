@@ -11,9 +11,9 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSignalAnalogModel.h"
 #endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
 namespace inet {

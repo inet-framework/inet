@@ -5,12 +5,12 @@
 //
 
 
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredScalarAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/LayeredScalarAnalogModel.h"
 
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/wireless/common/analogmodel/common/LayeredTransmission.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/Reception.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarNoise.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarSnir.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarNoise.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSnir.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 

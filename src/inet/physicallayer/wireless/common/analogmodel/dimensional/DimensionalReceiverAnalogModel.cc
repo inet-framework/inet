@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalReceiverAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalReceiverAnalogModel.h"
 
 namespace inet {
 namespace physicallayer {
