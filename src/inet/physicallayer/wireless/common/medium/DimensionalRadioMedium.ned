@@ -10,7 +10,6 @@ package inet.physicallayer.wireless.common.medium;
 module DimensionalRadioMedium extends RadioMedium
 {
     parameters:
-        analogModel.typename = default("DimensionalAnalogModel");
-        backgroundNoise.typename = default("IsotropicDimensionalBackgroundNoise");
+        signalAnalogRepresentation = default("dimensional");
 }
 

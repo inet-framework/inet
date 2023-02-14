@@ -18,7 +18,6 @@ package inet.physicallayer.wireless.common.medium;
 module UnitDiskRadioMedium extends RadioMedium
 {
     parameters:
-        analogModel.typename = default("UnitDiskMediumAnalogModel");
         signalAnalogRepresentation = default("unitDisk");
 }
 

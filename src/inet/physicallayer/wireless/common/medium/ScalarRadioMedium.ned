@@ -10,7 +10,6 @@ package inet.physicallayer.wireless.common.medium;
 module ScalarRadioMedium extends RadioMedium
 {
     parameters:
-        analogModel.typename = default("ScalarAnalogModel");
-        backgroundNoise.typename = default("IsotropicScalarBackgroundNoise");
+        signalAnalogRepresentation = default("scalar");
 }
 
