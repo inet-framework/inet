@@ -4,5 +4,18 @@ they don't have IPv6 link local addresses and babel daemons don't work.
 You can check that the babeld deamons work by looking for UDP packets
 send to port 6696.
 
-sudo setcap cap_sys_admin+ep opp_run_release
+The CAP_SYS_ADMIN privilege requires for using network namespaces in INET.
+Changing the network namespace requires CAP_SYS_ADMIN authority for the
+'setns()' function in the 'inet::NetworkNamespaceContext' constructor.
+The next commands adds this privilege to opp_run, so the all simulation
+has the CAP_SYS_ADMIN privilege, all simulations run with this privilege!!!
+This is dangerous because it enables a thousand other things for all
+running simulations, it becomes a big security hole.
 
+$> sudo setcap cap_sys_admin+ep /${your-omnetpp-root}/bin/opp_run_release
+$> sudo setcap cap_sys_admin+ep /${your-omnetpp-root}/bin/opp_run_dbg
+
+For remove extra privileges after run the simulation, use next commands:
+
+$> sudo setcap -r /${your-omnetpp-root}/bin/opp_run_release
+$> sudo setcap -r /${your-omnetpp-root}/bin/opp_run_dbg
