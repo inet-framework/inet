@@ -9,7 +9,7 @@ package inet.examples.wireless.layeredapsk;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.wireless.apsk.bitlevel.ApskLayeredScalarRadioMedium;
+import inet.physicallayer.wireless.common.medium.RadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
 network LayeredApsk
@@ -25,7 +25,7 @@ network LayeredApsk
             parameters:
                 @display("p=100,100;is=s");
         }
-        radioMedium: ApskLayeredScalarRadioMedium {
+        radioMedium: RadioMedium {
             parameters:
                 @display("p=100,200;is=s");
         }

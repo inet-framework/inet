@@ -3,11 +3,11 @@ package inet.showcases.wireless.analogmodel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.ManetRouter;
-import inet.physicallayer.wireless.apsk.bitlevel.ApskLayeredScalarRadioMedium;
+import inet.physicallayer.wireless.common.medium.RadioMedium;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.physicallayer.wireless.noise.NoiseSource;
-import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
 import inet.visualizer.common.IntegratedMultiVisualizer;
 import inet.visualizer.common.IntegratedVisualizer;
 
@@ -77,7 +77,7 @@ network AnalogModelShowcaseDistanceNetwork_
             parameters:
                 @display("p=64.256,180.72");
         }
-        radioMedium: ApskLayeredScalarRadioMedium {
+        radioMedium: RadioMedium {
             parameters:
                 @display("p=62.247997,287.14398");
         }

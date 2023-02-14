@@ -8,7 +8,7 @@
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/errormodel/Ieee80211OfdmErrorModel.h"
 
 #include "inet/physicallayer/wireless/common/analogmodel/common/LayeredTransmission.h"
-#include "inet/physicallayer/wireless/common/analogmodel/common/LayeredSnir.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSnir.h"
 #include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IApskModulation.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
@@ -146,7 +146,7 @@ const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const L
     // partition SNIR function and sum SNIR values per symbol
     math::Interval<simsec, Hz> interval(startPoint, endPoint, 0b11, 0b00, 0b00);
     std::vector<double> data(symbolCount);
-    auto snirFunction = check_and_cast<const LayeredSnir *>(snir)->getSnir();
+    auto snirFunction = check_and_cast<const DimensionalSnir *>(snir)->getSnir();
 
     snirFunction->partition(interval, [&] (const math::Interval<simsec, Hz>& i1, const math::IFunction<double, math::Domain<simsec, Hz>> *f1) {
 

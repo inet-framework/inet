@@ -9,9 +9,8 @@ package inet.examples.wireless.layered80211;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211LayeredDimensionalRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
-
 
 network Layered80211
 {
@@ -26,7 +25,7 @@ network Layered80211
             parameters:
                 @display("p=100,100;is=s");
         }
-        radioMedium: Ieee80211LayeredDimensionalRadioMedium {
+        radioMedium: Ieee80211DimensionalRadioMedium {
             parameters:
                 @display("p=100,200;is=s");
         }
