@@ -37,9 +37,8 @@ const IReception *DimensionalAnalogModel::computeReception(const IRadio *receive
     const Quaternion& receptionStartOrientation = arrival->getStartOrientation();
     const Quaternion& receptionEndOrientation = arrival->getEndOrientation();
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& receptionPower = computeReceptionPower(receiverRadio, transmission, arrival);
-    // KLUDGE TODO
-    auto reception = new Reception(nullptr, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
-    reception->analogModel = new DimensionalReceptionSignalAnalogModel(-1, -1, -1, dimensionalTransmission->getCenterFrequency(), dimensionalTransmission->getBandwidth(), receptionPower);
+    auto receptionAnalogModel = new DimensionalReceptionSignalAnalogModel(-1, -1, -1, dimensionalTransmission->getCenterFrequency(), dimensionalTransmission->getBandwidth(), receptionPower);
+    auto reception = new Reception(receptionAnalogModel, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
     return reception;
 }
 

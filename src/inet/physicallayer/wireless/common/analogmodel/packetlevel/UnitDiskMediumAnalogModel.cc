@@ -49,9 +49,8 @@ const IReception *UnitDiskMediumAnalogModel::computeReception(const IRadio *rece
         power = UnitDiskReceptionAnalogModel::POWER_DETECTABLE;
     else
         power = UnitDiskReceptionAnalogModel::POWER_UNDETECTABLE;
-    // KLUDGE TODO
-    auto reception = new Reception(nullptr, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
-    reception->analogModel = new UnitDiskReceptionAnalogModel(-1, -1, -1, power);
+    auto receptionAnalogModel = new UnitDiskReceptionAnalogModel(-1, -1, -1, power);
+    auto reception = new Reception(receptionAnalogModel, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
     return reception;
 }
 

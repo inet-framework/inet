@@ -38,9 +38,8 @@ const IReception *ScalarAnalogModel::computeReception(const IRadio *receiverRadi
     const Coord& receptionStartPosition = arrival->getStartPosition();
     const Coord& receptionEndPosition = arrival->getEndPosition();
     W receptionPower = computeReceptionPower(receiverRadio, transmission, arrival);
-    // KLUDGE TODO
-    auto reception = new Reception(nullptr, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
-    reception->analogModel = new ScalarReceptionSignalAnalogModel(-1, -1, -1, analogModel->getCenterFrequency(), analogModel->getBandwidth(), receptionPower);
+    auto receptionAnalogModel = new ScalarReceptionSignalAnalogModel(-1, -1, -1, analogModel->getCenterFrequency(), analogModel->getBandwidth(), receptionPower);
+    auto reception = new Reception(receptionAnalogModel, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
     return reception;
 }
 
