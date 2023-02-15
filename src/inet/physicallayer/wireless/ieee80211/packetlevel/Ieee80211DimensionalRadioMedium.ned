@@ -17,7 +17,6 @@ package inet.physicallayer.wireless.ieee80211.packetlevel;
 module Ieee80211DimensionalRadioMedium extends Ieee80211RadioMedium
 {
     parameters:
-        analogModel.typename = default("DimensionalMediumAnalogModel");
-        backgroundNoise.typename = default("IsotropicDimensionalBackgroundNoise");
+        signalAnalogRepresentation = default("dimensional");
 }
 

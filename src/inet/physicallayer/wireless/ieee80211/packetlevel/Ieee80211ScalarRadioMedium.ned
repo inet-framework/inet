@@ -17,7 +17,6 @@ package inet.physicallayer.wireless.ieee80211.packetlevel;
 module Ieee80211ScalarRadioMedium extends Ieee80211RadioMedium
 {
     parameters:
-        analogModel.typename = default("ScalarMediumAnalogModel");
-        backgroundNoise.typename = default("IsotropicScalarBackgroundNoise");
+        signalAnalogRepresentation = default("scalar");
 }
 
