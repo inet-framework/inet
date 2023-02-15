@@ -31,7 +31,9 @@ void DimensionalMediumAnalogModel::initialize(int stage)
 std::ostream& DimensionalMediumAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "DimensionalMediumAnalogModel";
-    return DimensionalMediumAnalogModel::printToStream(stream, level);
+    if (level <= PRINT_LEVEL_DEBUG)
+        stream << ", attenuateWithCenterFrequency = " << attenuateWithCenterFrequency;
+    return stream;
 }
 
 const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalMediumAnalogModel::computeReceptionPower(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
