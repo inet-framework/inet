@@ -9,10 +9,10 @@
 #define __INET_IEEE80211TRANSMITTER_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmitterBase.h"
-#include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 
 namespace inet {
@@ -22,16 +22,15 @@ namespace physicallayer {
 class INET_API Ieee80211Transmitter : public FlatTransmitterBase
 {
   protected:
-    const Ieee80211ModeSet *modeSet;
-    const IIeee80211Mode *mode;
-    const IIeee80211Band *band;
-    const Ieee80211Channel *channel;
+    const Ieee80211ModeSet *modeSet = nullptr;
+    const IIeee80211Mode *mode = nullptr;
+    const IIeee80211Band *band = nullptr;
+    const Ieee80211Channel *channel = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
 
   public:
-    Ieee80211Transmitter();
     virtual ~Ieee80211Transmitter();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;

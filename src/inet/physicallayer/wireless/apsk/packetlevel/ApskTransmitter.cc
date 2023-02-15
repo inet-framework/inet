@@ -19,11 +19,6 @@ namespace physicallayer {
 
 Define_Module(ApskTransmitter);
 
-ApskTransmitter::ApskTransmitter() :
-    FlatTransmitterBase()
-{
-}
-
 std::ostream& ApskTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ApskTransmitter";
@@ -49,8 +44,10 @@ const ITransmission *ApskTransmitter::createTransmission(const IRadio *transmitt
     const Coord& endPosition = mobility->getCurrentPosition();
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
+    // TODO KLUDGE
     auto symbolTime = 0;
     auto transmission = new ApskTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, dataLength, modulation, bandwidth, symbolTime, transmissionBitrate, codeRate);
+    // TODO constructor parameter
     transmission->analogModel = getAnalogModel()->createAnalogModel(packet, preambleDuration, headerDuration, dataDuration, transmissionCenterFrequency, transmissionBandwidth, transmissionPower);
     return transmission;
 }

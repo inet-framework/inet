@@ -18,12 +18,6 @@ namespace physicallayer {
 
 Define_Module(GenericReceiver);
 
-GenericReceiver::GenericReceiver() :
-    ReceiverBase(),
-    ignoreInterference(false)
-{
-}
-
 void GenericReceiver::initialize(int stage)
 {
     ReceiverBase::initialize(stage);
@@ -59,17 +53,6 @@ const IListeningDecision *GenericReceiver::computeListeningDecision(const IListe
     return getAnalogModel()->computeListeningDecision(listening, interference);
 }
 
-//const IReceptionResult *GenericReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
-//{
-//    auto noise = check_and_cast_nullable<const UnitDiskNoise *>(snir->getNoise());
-//    double errorRate = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getAnalogModel())->getPower() == UnitDiskReceptionAnalogModel::POWER_RECEIVABLE && (noise == nullptr || !noise->isInterfering()) ? 0 : 1;
-//    auto receptionResult = ReceiverBase::computeReceptionResult(listening, reception, interference, snir, decisions);
-//    auto errorRateInd = const_cast<Packet *>(receptionResult->getPacket())->addTagIfAbsent<ErrorRateInd>();
-//    errorRateInd->setSymbolErrorRate(errorRate);
-//    errorRateInd->setBitErrorRate(errorRate);
-//    errorRateInd->setPacketErrorRate(errorRate);
-//    return receptionResult;
-//}
 
 } // namespace physicallayer
 } // namespace inet

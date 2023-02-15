@@ -8,30 +8,20 @@
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
 
 #include "inet/mobility/contract/IMobility.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarTransmitterAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
-
-#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarTransmitterAnalogModel.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
 
 namespace inet {
 
 namespace physicallayer {
 
 Define_Module(Ieee80211Transmitter);
-
-Ieee80211Transmitter::Ieee80211Transmitter() :
-    FlatTransmitterBase(),
-    modeSet(nullptr),
-    mode(nullptr),
-    band(nullptr),
-    channel(nullptr)
-{
-}
 
 Ieee80211Transmitter::~Ieee80211Transmitter()
 {

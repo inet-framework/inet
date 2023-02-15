@@ -10,12 +10,9 @@ package inet.physicallayer.wireless.ieee80211.packetlevel;
 import inet.physicallayer.wireless.common.base.packetlevel.NarrowbandTransmitterBase;
 
 //
-// This transmitter model produces IEEE 802.11 transmissions that have scalar
-// transmission power in their analog representation. The bit domain, symbol
-// domain, and sample domains of the transmissions are not represented.
+// This transmitter model produces IEEE 802.11 transmissions.
 //
-// @see ~Ieee80211Receiver, ~Ieee80211ScalarRadio,
-// ~Ieee80211ScalarRadioMedium.
+// @see ~Ieee80211Receiver, ~Ieee80211Radio, ~Ieee80211RadioMedium.
 //
 module Ieee80211Transmitter extends NarrowbandTransmitterBase
 {

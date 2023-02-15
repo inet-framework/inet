@@ -20,9 +20,9 @@ namespace physicallayer {
 class INET_API Ieee80211Receiver : public FlatReceiverBase
 {
   protected:
-    const Ieee80211ModeSet *modeSet;
-    const IIeee80211Band *band;
-    const Ieee80211Channel *channel;
+    const Ieee80211ModeSet *modeSet = nullptr;
+    const IIeee80211Band *band = nullptr;
+    const Ieee80211Channel *channel = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
@@ -33,7 +33,6 @@ class INET_API Ieee80211Receiver : public FlatReceiverBase
     virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
 
   public:
-    Ieee80211Receiver();
     virtual ~Ieee80211Receiver();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;

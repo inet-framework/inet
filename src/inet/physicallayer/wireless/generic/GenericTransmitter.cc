@@ -18,12 +18,6 @@ namespace physicallayer {
 
 Define_Module(GenericTransmitter);
 
-GenericTransmitter::GenericTransmitter() :
-    headerLength(b(-1)),
-    bitrate(NaN)
-{
-}
-
 void GenericTransmitter::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
@@ -60,9 +54,8 @@ const ITransmission *GenericTransmitter::createTransmission(const IRadio *transm
     auto endPosition = mobility->getCurrentPosition();
     auto startOrientation = mobility->getCurrentAngularPosition();
     auto endOrientation = mobility->getCurrentAngularPosition();
-    auto transmission = new GenericTransmission(transmitter, packet, startTime, endTime,
-            preambleDuration, headerDuration, dataDuration,
-            startPosition, endPosition, startOrientation, endOrientation);
+    auto transmission = new GenericTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation);
+    // TODO constructor parameter
     transmission->analogModel = getAnalogModel()->createAnalogModel(packet, preambleDuration, headerDuration, dataDuration, Hz(NaN), Hz(NaN), W(NaN));
     return transmission;
 }

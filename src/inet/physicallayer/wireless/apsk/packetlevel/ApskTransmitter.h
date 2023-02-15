@@ -17,8 +17,6 @@ namespace physicallayer {
 class INET_API ApskTransmitter : public FlatTransmitterBase
 {
   public:
-    ApskTransmitter();
-
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, const simtime_t startTime) const override;
 };

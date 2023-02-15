@@ -7,10 +7,10 @@
 
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskRadio.h"
 
+#include "inet/common/packet/chunk/BitCountChunk.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskEncoder.h"
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskLayeredTransmitter.h"
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"

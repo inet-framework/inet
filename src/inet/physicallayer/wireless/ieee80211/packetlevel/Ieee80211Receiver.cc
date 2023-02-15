@@ -18,14 +18,6 @@ namespace physicallayer {
 
 Define_Module(Ieee80211Receiver);
 
-Ieee80211Receiver::Ieee80211Receiver() :
-    FlatReceiverBase(),
-    modeSet(nullptr),
-    band(nullptr),
-    channel(nullptr)
-{
-}
-
 Ieee80211Receiver::~Ieee80211Receiver()
 {
     delete channel;

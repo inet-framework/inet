@@ -9,11 +9,10 @@ package inet.physicallayer.wireless.ieee80211.packetlevel;
 
 //
 // This radio medium model uses scalar transmission power in the analog
-// representation. It must be used in conjunction with the
-// ~Ieee80211ScalarRadio model.
+// representation. It must be used in conjunction with the analog model
+// in radios.
 //
-// @see ~Ieee80211ScalarRadio, ~Ieee80211ScalarTransmitter,
-// ~Ieee80211Receiver, ~ScalarMediumAnalogModel.
+// @see ~ScalarMediumAnalogModel
 //
 module Ieee80211ScalarRadioMedium extends Ieee80211RadioMedium
 {

@@ -12,8 +12,16 @@ package inet.physicallayer.wireless.common.medium;
 // physical layer behavior. It must be used in conjunction with the ~UnitDiskRadio
 // model.
 //
-// @see ~UnitDiskRadio, ~UnitDiskMediumAnalogModel, ~UnitDiskTransmitter,
-// ~UnitDiskReceiver.
+// The idea behind this analog model is to describe transmissions with a few
+// distance based parameters: communication range, interference range, and
+// detection range. Whether the reception is successful or not, depends on the
+// distance between the transmitter and the receiver. This model is similar to
+// the unit disk radio, but it's also more general than that. The analog model
+// also supports an ideal communication channel where all transmissions are
+// received sucessfully independent of distance and interfering transmissions.
+//
+// @see ~UnitDiskMediumAnalogModel, ~UnitDiskTransmitterAnalogModel,
+// ~UnitDiskReceiverAnalogModel.
 //
 module UnitDiskRadioMedium extends RadioMedium
 {

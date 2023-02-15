@@ -7,8 +7,8 @@
 
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/chunk/BitCountChunk.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssOfdmMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ErpOfdmMode.h"

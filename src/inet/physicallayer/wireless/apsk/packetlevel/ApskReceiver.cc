@@ -16,11 +16,6 @@ namespace physicallayer {
 
 Define_Module(ApskReceiver);
 
-ApskReceiver::ApskReceiver() :
-    FlatReceiverBase()
-{
-}
-
 std::ostream& ApskReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ApskReceiver";

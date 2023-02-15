@@ -21,16 +21,14 @@ namespace physicallayer {
 class INET_API GenericTransmitter : public TransmitterBase
 {
   protected:
-    simtime_t preambleDuration;
-    b headerLength;
-    bps bitrate;
+    simtime_t preambleDuration = -1;
+    b headerLength = b(-1);
+    bps bitrate = bps(NaN);
 
   protected:
     virtual void initialize(int stage) override;
 
   public:
-    GenericTransmitter();
-
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, const simtime_t startTime) const override;
     virtual simtime_t getPreambleDuration() const { return preambleDuration; }
