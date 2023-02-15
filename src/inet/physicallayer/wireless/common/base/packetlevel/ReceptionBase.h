@@ -21,21 +21,22 @@ class INET_API ReceptionBase : public virtual IReception, public cObject
   protected:
     const IRadio *receiver;
     const ITransmission *transmission;
+
     const simtime_t startTime;
     const simtime_t endTime;
     const simtime_t preambleDuration;
     const simtime_t headerDuration;
     const simtime_t dataDuration;
+
     const Coord startPosition;
     const Coord endPosition;
     const Quaternion startOrientation;
     const Quaternion endOrientation;
 
-    // TODO make this field protected and set from the constructor
-    public: const IReceptionAnalogModel *analogModel = nullptr;
+    const IReceptionAnalogModel *analogModel = nullptr;
 
   public:
-    ReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation);
+    ReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation, const IReceptionAnalogModel *analogModel);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 

@@ -50,7 +50,7 @@ const IReception *UnitDiskMediumAnalogModel::computeReception(const IRadio *rece
     else
         power = UnitDiskReceptionAnalogModel::POWER_UNDETECTABLE;
     auto receptionAnalogModel = new UnitDiskReceptionAnalogModel(analogModel->getPreambleDuration(), analogModel->getHeaderDuration(), analogModel->getDataDuration(), power);
-    return new Reception(receptionAnalogModel, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
+    return new Reception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation, receptionAnalogModel);
 }
 
 const INoise *UnitDiskMediumAnalogModel::computeNoise(const IListening *listening, const IInterference *interference) const
