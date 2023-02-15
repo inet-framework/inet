@@ -8,7 +8,7 @@
 #ifndef __INET_DIMENSIONALRECEIVERANALOGMODEL_H
 #define __INET_DIMENSIONALRECEIVERANALOGMODEL_H
 
-#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalReceptionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ReceiverAnalogModelBase.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"

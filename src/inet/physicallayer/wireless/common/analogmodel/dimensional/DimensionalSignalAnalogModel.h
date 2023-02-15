@@ -31,18 +31,6 @@ class INET_API DimensionalSignalAnalogModel : public NarrowbandSignalAnalogModel
     virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override;
 };
 
-class INET_API DimensionalTransmissionAnalogModel : public DimensionalSignalAnalogModel, public virtual ITransmissionAnalogModel
-{
-  public:
-    DimensionalTransmissionAnalogModel(const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power);
-};
-
-class INET_API DimensionalReceptionAnalogModel : public DimensionalSignalAnalogModel, public virtual IReceptionAnalogModel
-{
-  public:
-    DimensionalReceptionAnalogModel(const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power);
-};
-
 } // namespace physicallayer
 
 } // namespace inet

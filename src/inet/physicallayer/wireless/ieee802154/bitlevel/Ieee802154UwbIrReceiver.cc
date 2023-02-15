@@ -8,7 +8,7 @@
 #include "inet/physicallayer/wireless/ieee802154/bitlevel/Ieee802154UwbIrReceiver.h"
 
 #include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalNoise.h"
-#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalReceptionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ListeningDecision.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionDecision.h"

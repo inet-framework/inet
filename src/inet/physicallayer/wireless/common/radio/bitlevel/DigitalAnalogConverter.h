@@ -8,7 +8,7 @@
 #ifndef __INET_DIGITALANALOGCONVERTER_H
 #define __INET_DIGITALANALOGCONVERTER_H
 
-#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarTransmissionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/PhysicalLayerDefs.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IDigitalAnalogConverter.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSampleModel.h"

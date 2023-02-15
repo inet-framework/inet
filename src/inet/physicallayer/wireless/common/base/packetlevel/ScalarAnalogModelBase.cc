@@ -8,8 +8,7 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/ScalarAnalogModelBase.h"
 
 #include "inet/common/geometry/common/Quaternion.h"
-#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarReceptionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSnir.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAntennaGain.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"

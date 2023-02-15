@@ -6,7 +6,7 @@
 
 
 #include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSnir.h"
-#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalReceptionAnalogModel.h"
 
 namespace inet {
 
