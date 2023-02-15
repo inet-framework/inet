@@ -33,21 +33,6 @@ class INET_API SignalAnalogModel : public virtual ISignalAnalogModel
     virtual const simtime_t getDuration() const override { return preambleDuration + headerDuration + dataDuration; }
 };
 
-class INET_API NarrowbandSignalAnalogModel : public SignalAnalogModel, public virtual INarrowbandSignal
-{
-  protected:
-    const Hz centerFrequency;
-    const Hz bandwidth;
-
-  public:
-    NarrowbandSignalAnalogModel(const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, Hz centerFrequency, Hz bandwidth);
-
-    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
-
-    virtual Hz getCenterFrequency() const override { return centerFrequency; }
-    virtual Hz getBandwidth() const override { return bandwidth; }
-};
-
 } // namespace physicallayer
 
 } // namespace inet

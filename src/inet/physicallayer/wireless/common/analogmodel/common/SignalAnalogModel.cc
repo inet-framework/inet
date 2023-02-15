@@ -29,22 +29,6 @@ std::ostream& SignalAnalogModel::printToStream(std::ostream& stream, int level, 
     return stream;
 }
 
-NarrowbandSignalAnalogModel::NarrowbandSignalAnalogModel(const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, Hz centerFrequency, Hz bandwidth) :
-    SignalAnalogModel(preambleDuration, headerDuration, dataDuration),
-    centerFrequency(centerFrequency),
-    bandwidth(bandwidth)
-{
-}
-
-std::ostream& NarrowbandSignalAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
-{
-    if (level <= PRINT_LEVEL_DEBUG)
-        stream << EV_FIELD(centerFrequency);
-    if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(bandwidth);
-    return stream;
-}
-
 } // namespace physicallayer
 
 } // namespace inet

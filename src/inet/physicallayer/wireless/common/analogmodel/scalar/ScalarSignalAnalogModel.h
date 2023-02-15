@@ -8,7 +8,7 @@
 #ifndef __INET_SCALARSIGNALANALOGMODEL_H
 #define __INET_SCALARSIGNALANALOGMODEL_H
 
-#include "inet/physicallayer/wireless/common/analogmodel/common/SignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/common/NarrowbandSignalAnalogModel.h"
 
 namespace inet {
 
