@@ -25,14 +25,16 @@ Define_Module(ScalarMediumAnalogModel);
 void ScalarMediumAnalogModel::initialize(int stage)
 {
     AnalogModelBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LOCAL)
         ignorePartialInterference = par("ignorePartialInterference");
-    }
 }
 
 std::ostream& ScalarMediumAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    return stream << "ScalarMediumAnalogModel";
+    stream << "ScalarMediumAnalogModel";
+    if (level <= PRINT_LEVEL_DEBUG)
+        stream << ", ignorePartialInterference = " << ignorePartialInterference;
+    return stream;
 }
 
 bool ScalarMediumAnalogModel::areOverlappingBands(Hz centerFrequency1, Hz bandwidth1, Hz centerFrequency2, Hz bandwidth2) const
@@ -44,9 +46,7 @@ bool ScalarMediumAnalogModel::areOverlappingBands(Hz centerFrequency1, Hz bandwi
 W ScalarMediumAnalogModel::computeReceptionPower(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
-
     const ScalarSignalAnalogModel *analogModel = check_and_cast<const ScalarSignalAnalogModel *>(transmission->getAnalogModel());
-
     const Coord& receptionStartPosition = arrival->getStartPosition();
     // TODO could be used for doppler shift? const Coord& receptionEndPosition = arrival->getEndPosition();
     double transmitterAntennaGain = computeAntennaGain(transmission->getTransmitterAntennaGain(), transmission->getStartPosition(), arrival->getStartPosition(), transmission->getStartOrientation());
@@ -179,10 +179,7 @@ const ISnir *ScalarMediumAnalogModel::computeSNIR(const IReception *reception, c
 const IReception *ScalarMediumAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
-    const ScalarSignalAnalogModel *analogModel = check_and_cast<const ScalarSignalAnalogModel *>(transmission->getAnalogModel());
-
-
-    //const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
+    const ScalarSignalAnalogModel *transmissionAnalogModel = check_and_cast<const ScalarSignalAnalogModel *>(transmission->getAnalogModel());
     const simtime_t receptionStartTime = arrival->getStartTime();
     const simtime_t receptionEndTime = arrival->getEndTime();
     const Quaternion& receptionStartOrientation = arrival->getStartOrientation();
@@ -190,9 +187,8 @@ const IReception *ScalarMediumAnalogModel::computeReception(const IRadio *receiv
     const Coord& receptionStartPosition = arrival->getStartPosition();
     const Coord& receptionEndPosition = arrival->getEndPosition();
     W receptionPower = computeReceptionPower(receiverRadio, transmission, arrival);
-    auto receptionAnalogModel = new ScalarReceptionAnalogModel(-1, -1, -1, analogModel->getCenterFrequency(), analogModel->getBandwidth(), receptionPower);
-    auto reception = new Reception(receptionAnalogModel, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
-    return reception;
+    auto receptionAnalogModel = new ScalarReceptionAnalogModel(transmissionAnalogModel->getPreambleDuration(), transmissionAnalogModel->getHeaderDuration(), transmissionAnalogModel->getDataDuration(), transmissionAnalogModel->getCenterFrequency(), transmissionAnalogModel->getBandwidth(), receptionPower);
+    return new Reception(receptionAnalogModel, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
 }
 
 } // namespace physicallayer

@@ -20,7 +20,7 @@ using namespace inet::math;
 class INET_API DimensionalMediumAnalogModel : public AnalogModelBase
 {
   protected:
-    bool attenuateWithCenterFrequency;
+    bool attenuateWithCenterFrequency = false;
 
   protected:
     virtual void initialize(int stage) override;

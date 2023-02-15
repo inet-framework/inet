@@ -5,7 +5,6 @@
 //
 
 import inet.common.INETDefs;
-import inet.common.Units;
 
 cplusplus {{
 #include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskReceptionAnalogModel.h"
@@ -17,4 +16,5 @@ class UnitDiskReceptionAnalogModel
 {
     @existingClass;
     @descriptor(readonly);
+    // TODO Power power;
 }

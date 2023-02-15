@@ -18,9 +18,9 @@ namespace physicallayer {
 class INET_API UnitDiskTransmitterAnalogModel : public TransmitterAnalogModelBase, public ITransmitterAnalogModel
 {
   protected:
-    m communicationRange;
-    m interferenceRange;
-    m detectionRange;
+    m communicationRange = m(NaN);
+    m interferenceRange = m(NaN);
+    m detectionRange = m(NaN);
 
   protected:
     virtual void initialize(int stage) override;

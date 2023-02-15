@@ -12,11 +12,9 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IAnalogModel;
 //
 // This analog model provides a very simple and predictable physical layer
 // behavior. It determines the reception power by categorizing transmissions
-// based on the distance between the transmitter and the receiver. It doesn't
-// support noise and signal to noise ratio calculations.
+// based on the distance between the transmitter and the receiver.
 //
-// @see ~UnitDiskRadio, ~UnitDiskRadioMedium, ~UnitDiskTransmitter,
-// ~UnitDiskReceiver.
+// @see ~UnitDiskRadioMedium, ~UnitDiskTransmitterAnalogModel, ~UnitDiskReceiverAnalogModel.
 //
 module UnitDiskMediumAnalogModel like IAnalogModel
 {

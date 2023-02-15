@@ -18,7 +18,7 @@ namespace physicallayer {
 class INET_API ScalarMediumAnalogModel : public AnalogModelBase
 {
   protected:
-    bool ignorePartialInterference;
+    bool ignorePartialInterference = false;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
