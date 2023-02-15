@@ -22,7 +22,7 @@ class INET_API NarrowbandSignalAnalogModel : public SignalAnalogModel, public vi
     const Hz bandwidth;
 
   public:
-    NarrowbandSignalAnalogModel(const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, Hz centerFrequency, Hz bandwidth);
+    NarrowbandSignalAnalogModel(simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 

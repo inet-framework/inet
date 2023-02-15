@@ -20,14 +20,12 @@ using namespace inet::units::values;
 class INET_API UnitDiskTransmissionAnalogModel : public SignalAnalogModel, public ITransmissionAnalogModel
 {
   protected:
-    const m communicationRange = m(NaN);
-    const m interferenceRange = m(NaN);
-    const m detectionRange = m(NaN);
+    const m communicationRange;
+    const m interferenceRange;
+    const m detectionRange;
 
   public:
-    UnitDiskTransmissionAnalogModel(simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, m communicationRange, m interferenceRange, m detectionRange) :
-        SignalAnalogModel(preambleDuration, headerDuration, dataDuration),
-        communicationRange(communicationRange), interferenceRange(interferenceRange), detectionRange(detectionRange) {}
+    UnitDiskTransmissionAnalogModel(simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, m communicationRange, m interferenceRange, m detectionRange);
 
     virtual m getCommunicationRange() const { return communicationRange; }
     virtual m getInterferenceRange() const { return interferenceRange; }

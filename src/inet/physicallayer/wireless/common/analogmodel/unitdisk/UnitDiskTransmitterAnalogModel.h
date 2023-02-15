@@ -10,7 +10,6 @@
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/TransmitterAnalogModelBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmitterAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskTransmissionAnalogModel.h"
 
 namespace inet {
 
@@ -19,9 +18,9 @@ namespace physicallayer {
 class INET_API UnitDiskTransmitterAnalogModel : public TransmitterAnalogModelBase, public ITransmitterAnalogModel
 {
   protected:
-    m communicationRange = m(NaN);
-    m interferenceRange = m(NaN);
-    m detectionRange = m(NaN);
+    m communicationRange;
+    m interferenceRange;
+    m detectionRange;
 
   protected:
     virtual void initialize(int stage) override;

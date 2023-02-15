@@ -11,7 +11,7 @@ namespace inet {
 
 namespace physicallayer {
 
-SignalAnalogModel::SignalAnalogModel(const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration) :
+SignalAnalogModel::SignalAnalogModel(simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration) :
     preambleDuration(preambleDuration),
     headerDuration(headerDuration),
     dataDuration(dataDuration)
@@ -25,7 +25,7 @@ std::ostream& SignalAnalogModel::printToStream(std::ostream& stream, int level, 
                << ", headerDuration = " << headerDuration;
     }
     if (level <= PRINT_LEVEL_DEBUG)
-        stream << ", preambleDuration = " << preambleDuration;
+        stream << ", dataDuration = " << dataDuration;
     return stream;
 }
 

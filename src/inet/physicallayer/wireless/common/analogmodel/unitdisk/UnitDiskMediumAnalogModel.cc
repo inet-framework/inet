@@ -7,12 +7,12 @@
 
 #include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskMediumAnalogModel.h"
 
-#include "inet/physicallayer/wireless/common/contract/packetlevel/IArrival.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskNoise.h"
+#include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskReceptionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskSnir.h"
 #include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskTransmissionAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskReceptionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IArrival.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/Reception.h"
 
 namespace inet {
@@ -49,9 +49,8 @@ const IReception *UnitDiskMediumAnalogModel::computeReception(const IRadio *rece
         power = UnitDiskReceptionAnalogModel::POWER_DETECTABLE;
     else
         power = UnitDiskReceptionAnalogModel::POWER_UNDETECTABLE;
-    auto receptionAnalogModel = new UnitDiskReceptionAnalogModel(-1, -1, -1, power);
-    auto reception = new Reception(receptionAnalogModel, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
-    return reception;
+    auto receptionAnalogModel = new UnitDiskReceptionAnalogModel(analogModel->getPreambleDuration(), analogModel->getHeaderDuration(), analogModel->getDataDuration(), power);
+    return new Reception(receptionAnalogModel, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
 }
 
 const INoise *UnitDiskMediumAnalogModel::computeNoise(const IListening *listening, const IInterference *interference) const

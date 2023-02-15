@@ -31,13 +31,11 @@ class INET_API UnitDiskReceptionAnalogModel : public SignalAnalogModel, public I
     const Power power;
 
   public:
-    UnitDiskReceptionAnalogModel(simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, const Power power) :
-        SignalAnalogModel(preambleDuration, headerDuration, dataDuration),
-        power(power) {}
+    UnitDiskReceptionAnalogModel(simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, const Power power);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+
     virtual Power getPower() const { return power; }
-//    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override { throw cRuntimeError("Invalid operation"); }
 };
 
 } // namespace physicallayer

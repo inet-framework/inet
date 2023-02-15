@@ -11,7 +11,7 @@ namespace inet {
 
 namespace physicallayer {
 
-NarrowbandSignalAnalogModel::NarrowbandSignalAnalogModel(const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, Hz centerFrequency, Hz bandwidth) :
+NarrowbandSignalAnalogModel::NarrowbandSignalAnalogModel(simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth) :
     SignalAnalogModel(preambleDuration, headerDuration, dataDuration),
     centerFrequency(centerFrequency),
     bandwidth(bandwidth)

@@ -10,12 +10,17 @@
 namespace inet {
 namespace physicallayer {
 
-
 Register_Enum(inet::physicallayer::UnitDiskReceptionAnalogModel::Power,
         (UnitDiskReceptionAnalogModel::POWER_UNDETECTABLE,
          UnitDiskReceptionAnalogModel::POWER_DETECTABLE,
          UnitDiskReceptionAnalogModel::POWER_INTERFERING,
          UnitDiskReceptionAnalogModel::POWER_RECEIVABLE));
+
+UnitDiskReceptionAnalogModel::UnitDiskReceptionAnalogModel(simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, const Power power) :
+    SignalAnalogModel(preambleDuration, headerDuration, dataDuration),
+    power(power)
+{
+}
 
 std::ostream& UnitDiskReceptionAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {

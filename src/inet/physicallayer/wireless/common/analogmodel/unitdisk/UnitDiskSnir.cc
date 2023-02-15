@@ -7,9 +7,8 @@
 
 #include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskSnir.h"
 
-#include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskReceptionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskNoise.h"
-
+#include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskReceptionAnalogModel.h"
 
 namespace inet {
 
@@ -22,14 +21,14 @@ UnitDiskSnir::UnitDiskSnir(const IReception *reception, const INoise *noise) :
     auto power = unitDiskReception->getPower();
     auto unitDiskNoise = dynamic_cast<const UnitDiskNoise *>(noise);
     auto isInterfering = unitDiskNoise != nullptr && unitDiskNoise->isInterfering();
-
-    isSnirInfinite = (power == UnitDiskReceptionAnalogModel::POWER_RECEIVABLE)
-                          && !isInterfering;
+    isInfinite = (power == UnitDiskReceptionAnalogModel::POWER_RECEIVABLE) && !isInterfering;
 }
 
 std::ostream& UnitDiskSnir::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "UnitDiskSnir";
+    if (level <= PRINT_LEVEL_DEBUG)
+         stream << ", isInfinite = " << isInfinite;
     return stream;
 }
 

@@ -10,6 +10,14 @@
 namespace inet {
 namespace physicallayer {
 
+UnitDiskTransmissionAnalogModel::UnitDiskTransmissionAnalogModel(simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, m communicationRange, m interferenceRange, m detectionRange) :
+    SignalAnalogModel(preambleDuration, headerDuration, dataDuration),
+    communicationRange(communicationRange),
+    interferenceRange(interferenceRange),
+    detectionRange(detectionRange)
+{
+}
+
 } // namespace physicallayer
 } // namespace inet
 

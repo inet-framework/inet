@@ -7,6 +7,8 @@
 
 #include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskTransmitterAnalogModel.h"
 
+#include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskTransmissionAnalogModel.h"
+
 namespace inet {
 namespace physicallayer {
 

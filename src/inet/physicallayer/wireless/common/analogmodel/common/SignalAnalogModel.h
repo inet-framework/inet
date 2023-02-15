@@ -9,7 +9,6 @@
 #define __INET_SIGNALANALOGMODEL_H
 
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
 
 namespace inet {
 
@@ -23,7 +22,7 @@ class INET_API SignalAnalogModel : public virtual ISignalAnalogModel
     const simtime_t dataDuration;
 
   public:
-    SignalAnalogModel(const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration);
+    SignalAnalogModel(simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
