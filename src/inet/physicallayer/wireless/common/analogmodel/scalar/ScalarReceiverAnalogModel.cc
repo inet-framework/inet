@@ -41,11 +41,6 @@ const IListeningDecision *ScalarReceiverAnalogModel::computeListeningDecision(co
     return new ListeningDecision(listening, isListeningPossible);
 }
 
-bool ScalarReceiverAnalogModel::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
-{
-    return true;
-}
-
 bool ScalarReceiverAnalogModel::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
@@ -61,6 +56,11 @@ bool ScalarReceiverAnalogModel::computeIsReceptionPossible(const IListening *lis
         EV_DEBUG << "Computing whether reception is possible" << EV_FIELD(minReceptionPower) << EV_FIELD(sensitivity) << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
         return isReceptionPossible;
     }
+}
+
+bool ScalarReceiverAnalogModel::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
+{
+    return true;
 }
 
 } // namespace physicallayer

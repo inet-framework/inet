@@ -29,8 +29,8 @@ class INET_API UnitDiskReceiverAnalogModel : public ReceiverAnalogModelBase, pub
 
     const virtual IListeningDecision* computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
 
-    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const override;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const override;
 };
 
 } // namespace physicallayer

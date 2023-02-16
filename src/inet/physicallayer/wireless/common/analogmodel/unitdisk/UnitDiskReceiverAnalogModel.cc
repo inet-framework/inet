@@ -20,12 +20,6 @@ void UnitDiskReceiverAnalogModel::initialize(int stage)
         ignoreInterference = par("ignoreInterference");
 }
 
-bool UnitDiskReceiverAnalogModel::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
-{
-    auto power = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getAnalogModel())->getPower();
-    return power == UnitDiskReceptionAnalogModel::POWER_RECEIVABLE;
-}
-
 IListening* UnitDiskReceiverAnalogModel::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord &startPosition, const Coord &endPosition) const
 {
     return new UnitDiskListening(radio, startTime, endTime, startPosition, endPosition);
@@ -40,6 +34,12 @@ const IListeningDecision* UnitDiskReceiverAnalogModel::computeListeningDecision(
             return new ListeningDecision(listening, true);
     }
     return new ListeningDecision(listening, false);
+}
+
+bool UnitDiskReceiverAnalogModel::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
+{
+    auto power = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getAnalogModel())->getPower();
+    return power == UnitDiskReceptionAnalogModel::POWER_RECEIVABLE;
 }
 
 bool UnitDiskReceiverAnalogModel::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const

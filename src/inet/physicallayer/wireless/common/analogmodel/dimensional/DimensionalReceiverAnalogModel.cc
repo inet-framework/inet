@@ -41,11 +41,6 @@ const IListeningDecision *DimensionalReceiverAnalogModel::computeListeningDecisi
     return new ListeningDecision(listening, isListeningPossible);
 }
 
-bool DimensionalReceiverAnalogModel::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
-{
-    return true;
-}
-
 bool DimensionalReceiverAnalogModel::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
@@ -63,6 +58,11 @@ bool DimensionalReceiverAnalogModel::computeIsReceptionPossible(const IListening
         EV_DEBUG << "Computing whether reception is possible" << EV_FIELD(minReceptionPower) << EV_FIELD(sensitivity) << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
         return isReceptionPossible;
     }
+}
+
+bool DimensionalReceiverAnalogModel::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
+{
+    return true;
 }
 
 } // namespace physicallayer
