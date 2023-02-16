@@ -64,7 +64,8 @@ const INoise *UnitDiskMediumAnalogModel::computeNoise(const IListening *listenin
 
 const INoise *UnitDiskMediumAnalogModel::computeNoise(const IReception *reception, const INoise *noise) const
 {
-    bool isInterfering = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getAnalogModel())->getPower() >= UnitDiskReceptionAnalogModel::POWER_INTERFERING;
+    bool isInterfering = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getAnalogModel())->getPower() >= UnitDiskReceptionAnalogModel::POWER_INTERFERING ||
+                         check_and_cast<const UnitDiskNoise *>(noise)->isInterfering();
     return new UnitDiskNoise(reception->getStartTime(), reception->getEndTime(), isInterfering);
 }
 
