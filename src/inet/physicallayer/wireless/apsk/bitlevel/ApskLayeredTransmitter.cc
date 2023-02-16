@@ -159,8 +159,8 @@ const ITransmission *ApskLayeredTransmitter::createTransmission(const IRadio *tr
     const Coord& endPosition = mobility->getCurrentPosition();
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
-    // REFACTOR TODO use ApskTransmission
-    return new TransmissionBase(transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation, packetModel, bitModel, symbolModel, sampleModel, analogModel);
+    // REFACTOR TODO fill in parameters
+    return new ApskTransmission(transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation, packetModel, bitModel, symbolModel, sampleModel, analogModel, b(-1), b(-1), nullptr, bandwidth, -1, bps(NaN), -1);
 }
 
 } // namespace physicallayer
