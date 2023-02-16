@@ -18,6 +18,7 @@ namespace physicallayer {
 
 using namespace inet::math;
 
+// REFACTOR TODO eliminate
 class INET_API DimensionalTransmitterBase : public virtual IPrintableObject
 {
   protected:
