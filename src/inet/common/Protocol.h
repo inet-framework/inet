@@ -129,7 +129,7 @@ class INET_API Protocol
     static const Protocol probabilistic;
     static const Protocol shortcutMac;
     static const Protocol shortcutPhy;
-    static const Protocol unitDisk;
+    static const Protocol genericPhy;
     static const Protocol unknown;
     static const Protocol wiseRoute;
 };
