@@ -16,7 +16,6 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel.h"
 
 namespace inet {
 
@@ -45,7 +44,7 @@ std::ostream& TwoRayGroundReflection::printToStream(std::ostream& stream, int le
 double TwoRayGroundReflection::computePathLoss(const ITransmission *transmission, const IArrival *arrival) const
 {
     auto radioMedium = transmission->getMedium();
-    auto narrowbandSignalAnalogModel = check_and_cast<const ScalarSignalAnalogModel *>(transmission->getAnalogModel());
+    auto narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     auto transmitterPosition = transmission->getStartPosition();
     auto recepiverPosition = arrival->getStartPosition();
     mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
