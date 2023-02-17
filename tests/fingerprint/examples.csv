@@ -294,8 +294,8 @@
 # /examples/inet/udpclientserver/,     -f omnetpp.ini -c _gn -r 0,                  10s,             0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,   # abstract-config
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv4 -r 0,            10s,             8d79-bf2c/tplx;803b-4bed/~tNl;b367-c522/~tND;fc1b-6064/tyf, PASS, Ipv4
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv4_clock,           10s,             8d79-bf2c/tplx;803b-4bed/~tNl;b367-c522/~tND;fc1b-6064/tyf, PASS, Ipv4
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv4_clock_adjust,    10s,             5976-ef29/tplx;803b-4bed/~tNl;b367-c522/~tND;0000-0000/tyf, PASS, Ipv4
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv4_clock_drift,     10s,             8d79-bf2c/tplx;803b-4bed/~tNl;b367-c522/~tND;0000-0000/tyf, PASS, Ipv4
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv4_clock_adjust,    10s,             494a-d934/tplx;031f-9e02/~tNl;2d0e-5c03/~tND;7a62-9593/tyf, PASS, Ipv4
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv4_clock_drift,     10s,             074a-b1ff/tplx;031f-9e02/~tNl;2d0e-5c03/~tND;461f-1722/tyf, PASS, Ipv4
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Fragment_ipv4 -r 0,      10s,             f8fb-0997/tplx;3f90-c480/~tNl;0b85-3891/~tND;82ca-61a2/tyf, PASS, Ipv4
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv4 -r 0,     10s,             8ed9-2714/tplx;e23b-dc11/~tNl;d637-dffb/~tND;38a4-9e86/tyf, PASS, Ipv4
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv4 -r 0,     10s,             5f78-4a56/tplx;0000-0000/~tNl;0000-0000/~tND;2dc3-29f4/tyf, PASS, Ipv4
