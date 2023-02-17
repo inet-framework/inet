@@ -17,7 +17,6 @@ void ScalarReceiverAnalogModel::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         centerFrequency = Hz(par("centerFrequency"));
         bandwidth = Hz(par("bandwidth"));
-        energyDetection = mW(math::dBmW2mW(par("energyDetection")));
         sensitivity = mW(math::dBmW2mW(par("sensitivity")));
     }
 }

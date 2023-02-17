@@ -25,7 +25,6 @@ class INET_API ScalarReceiverAnalogModel : public ReceiverAnalogModelBase, publi
   protected:
     Hz centerFrequency = Hz(NaN);
     Hz bandwidth = Hz(NaN);
-    W energyDetection = W(NaN);
     W sensitivity = W(NaN);
 
   protected:
