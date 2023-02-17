@@ -21,6 +21,7 @@ class INET_API GenericReceiver : public ReceiverBase
 {
   protected:
     bool ignoreInterference = false;
+    W energyDetection;
 
   protected:
     virtual void initialize(int stage) override;

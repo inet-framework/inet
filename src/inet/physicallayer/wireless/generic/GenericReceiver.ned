@@ -17,6 +17,7 @@ module GenericReceiver extends ReceiverBase like IReceiver
 {
     parameters:
         bool ignoreInterference = default(false); // true means interfering transmissions are ignored when determining whether a reception is successful or not
+        double energyDetection @unit(dBm) = default(-85 dBm);
         *.ignoreInterference = default(this.ignoreInterference);
         @class(GenericReceiver);
         @display("i=block/wrx");

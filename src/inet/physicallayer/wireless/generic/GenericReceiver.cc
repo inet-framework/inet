@@ -12,6 +12,8 @@
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionDecision.h"
 #include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskNoise.h"
 #include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskReceptionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/INoise.h"
 
 namespace inet {
 namespace physicallayer {
@@ -21,8 +23,10 @@ Define_Module(GenericReceiver);
 void GenericReceiver::initialize(int stage)
 {
     ReceiverBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
         ignoreInterference = par("ignoreInterference");
+        energyDetection = mW(math::dBmW2mW(par("energyDetection")));
+    }
 }
 
 std::ostream& GenericReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
@@ -50,7 +54,11 @@ const IListening *GenericReceiver::createListening(const IRadio *radio, const si
 
 const IListeningDecision *GenericReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
-    return getAnalogModel()->computeListeningDecision(listening, interference);
+    const INoise *noise = listening->getReceiver()->getMedium()->getAnalogModel()->computeNoise(listening, interference);
+    bool isListeningPossible = noise->computeMaxPower(listening->getStartTime(), listening->getEndTime()) > energyDetection;
+    delete noise;
+
+    return new ListeningDecision(listening, isListeningPossible);
 }
 
 
