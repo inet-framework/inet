@@ -55,18 +55,41 @@ const IReception *UnitDiskMediumAnalogModel::computeReception(const IRadio *rece
 
 const INoise *UnitDiskMediumAnalogModel::computeNoise(const IListening *listening, const IInterference *interference) const
 {
-    bool isInterfering = false;
-    for (auto interferingReception : *interference->getInterferingReceptions())
-        if (check_and_cast<const UnitDiskReceptionAnalogModel *>(interferingReception->getAnalogModel())->getPower() >= UnitDiskReceptionAnalogModel::POWER_INTERFERING)
-            isInterfering = true;
-    return new UnitDiskNoise(listening->getStartTime(), listening->getEndTime(), isInterfering);
+    using Power = UnitDiskReceptionAnalogModel::Power;
+
+    Power minPower = Power::POWER_RECEIVABLE;
+    Power maxPower = Power::POWER_UNDETECTABLE;
+
+    for (auto interferingReception : *interference->getInterferingReceptions()) {
+        Power p = check_and_cast<const UnitDiskReceptionAnalogModel *>(interferingReception->getAnalogModel())->getPower();
+        if (p < minPower)
+            minPower = p;
+        if (p > maxPower)
+            maxPower = p;
+    }
+
+    if (minPower > maxPower)
+        minPower = maxPower;
+
+    return new UnitDiskNoise(listening->getStartTime(), listening->getEndTime(), minPower, maxPower);
 }
 
 const INoise *UnitDiskMediumAnalogModel::computeNoise(const IReception *reception, const INoise *noise) const
 {
-    bool isInterfering = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getAnalogModel())->getPower() >= UnitDiskReceptionAnalogModel::POWER_INTERFERING ||
-                         check_and_cast<const UnitDiskNoise *>(noise)->isInterfering();
-    return new UnitDiskNoise(reception->getStartTime(), reception->getEndTime(), isInterfering);
+    using Power = UnitDiskReceptionAnalogModel::Power;
+
+    ASSERT(reception->getEndTime() == noise->getEndTime() && reception->getStartTime() == noise->getStartTime());
+        Power receptionPower = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getAnalogModel())->getPower();
+
+    Power noiseMinPower = check_and_cast<const UnitDiskNoise *>(noise)->getMinPower();
+    Power noiseMaxPower = check_and_cast<const UnitDiskNoise *>(noise)->getMaxPower();
+
+    if (receptionPower > noiseMinPower)
+        noiseMinPower = receptionPower;
+    if (receptionPower > noiseMaxPower)
+        noiseMaxPower = receptionPower;
+
+    return new UnitDiskNoise(reception->getStartTime(), reception->getEndTime(), noiseMinPower, noiseMaxPower);
 }
 
 const ISnir *UnitDiskMediumAnalogModel::computeSNIR(const IReception *reception, const INoise *noise) const
