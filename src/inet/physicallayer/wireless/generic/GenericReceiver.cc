@@ -44,7 +44,28 @@ bool GenericReceiver::computeIsReceptionPossible(const IListening *listening, co
 
 bool GenericReceiver::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
 {
-    return getAnalogModel()->computeIsReceptionPossible(listening, reception, part, interference, snir);
+    // REFACTOR TODO: this should not be here
+    if (auto unitDiskReceptionAnalogModel = dynamic_cast<const UnitDiskReceptionAnalogModel*>(reception->getAnalogModel())) {
+        auto power = unitDiskReceptionAnalogModel->getPower();
+        if (power == UnitDiskReceptionAnalogModel::POWER_RECEIVABLE) {
+            if (ignoreInterference)
+                return true;
+            else {
+                auto startTime = reception->getStartTime(part);
+                auto endTime = reception->getEndTime(part);
+                auto interferingReceptions = interference->getInterferingReceptions();
+                for (auto interferingReception : *interferingReceptions) {
+                    auto interferingPower = check_and_cast<const UnitDiskReceptionAnalogModel*>(interferingReception->getAnalogModel())->getPower();
+                    if (interferingPower >= UnitDiskReceptionAnalogModel::POWER_INTERFERING && startTime <= interferingReception->getEndTime() && endTime >= interferingReception->getStartTime())
+                        return false;
+                }
+                return true;
+            }
+        }
+        else
+            return false;
+    }
+    return true;
 }
 
 const IListening *GenericReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const

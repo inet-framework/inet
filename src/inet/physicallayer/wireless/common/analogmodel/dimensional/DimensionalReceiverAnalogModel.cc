@@ -45,10 +45,6 @@ bool DimensionalReceiverAnalogModel::computeIsReceptionPossible(const IListening
     }
 }
 
-bool DimensionalReceiverAnalogModel::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
-{
-    return true;
-}
 
 } // namespace physicallayer
 } // namespace inet
