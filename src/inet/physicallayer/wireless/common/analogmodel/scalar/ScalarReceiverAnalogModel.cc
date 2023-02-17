@@ -27,20 +27,6 @@ IListening *ScalarReceiverAnalogModel::createListening(const IRadio *radio, cons
     return new BandListening(radio, startTime, endTime, startPosition, endPosition, centerFrequency, bandwidth);
 }
 
-const IListeningDecision *ScalarReceiverAnalogModel::computeListeningDecision(const IListening *listening, const IInterference *interference) const
-{
-    const IRadio *receiver = listening->getReceiver();
-    const IRadioMedium *radioMedium = receiver->getMedium();
-    const IAnalogModel *analogModel = radioMedium->getAnalogModel();
-    const INoise *noise = analogModel->computeNoise(listening, interference);
-    const NarrowbandNoiseBase *narrowbandNoise = check_and_cast<const NarrowbandNoiseBase *>(noise);
-    W maxPower = narrowbandNoise->computeMaxPower(listening->getStartTime(), listening->getEndTime());
-    bool isListeningPossible = maxPower >= energyDetection;
-    delete noise;
-    EV_DEBUG << "Computing whether listening is possible: maximum power = " << maxPower << ", energy detection = " << energyDetection << " -> listening is " << (isListeningPossible ? "possible" : "impossible") << endl;
-    return new ListeningDecision(listening, isListeningPossible);
-}
-
 bool ScalarReceiverAnalogModel::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);

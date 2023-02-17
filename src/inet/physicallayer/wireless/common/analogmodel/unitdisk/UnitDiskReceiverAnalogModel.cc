@@ -25,17 +25,6 @@ IListening* UnitDiskReceiverAnalogModel::createListening(const IRadio *radio, co
     return new UnitDiskListening(radio, startTime, endTime, startPosition, endPosition);
 }
 
-const IListeningDecision* UnitDiskReceiverAnalogModel::computeListeningDecision(const IListening *listening, const IInterference *interference) const
-{
-    auto interferingReceptions = interference->getInterferingReceptions();
-    for (auto interferingReception : *interferingReceptions) {
-        auto interferingPower = check_and_cast<const UnitDiskReceptionAnalogModel*>(interferingReception->getAnalogModel())->getPower();
-        if (interferingPower != UnitDiskReceptionAnalogModel::POWER_UNDETECTABLE)
-            return new ListeningDecision(listening, true);
-    }
-    return new ListeningDecision(listening, false);
-}
-
 bool UnitDiskReceiverAnalogModel::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     auto power = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getAnalogModel())->getPower();
