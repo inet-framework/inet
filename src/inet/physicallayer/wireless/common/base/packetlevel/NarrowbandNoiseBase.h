@@ -31,9 +31,6 @@ class INET_API NarrowbandNoiseBase : public NoiseBase
 
     virtual Hz getCenterFrequency() const { return centerFrequency; }
     virtual Hz getBandwidth() const { return bandwidth; }
-
-    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const = 0;
-    virtual W computeMaxPower(simtime_t startTime, simtime_t endTime) const = 0;
 };
 
 } // namespace physicallayer

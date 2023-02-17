@@ -11,17 +11,31 @@ namespace inet {
 
 namespace physicallayer {
 
-UnitDiskNoise::UnitDiskNoise(simtime_t startTime, simtime_t endTime, bool isInterfering) :
+UnitDiskNoise::UnitDiskNoise(simtime_t startTime, simtime_t endTime, Power minPower, Power maxPower) :
     NoiseBase(startTime, endTime),
-    isInterfering_(isInterfering)
+    minPower(minPower),
+    maxPower(maxPower)
 {
+    ASSERT(minPower <= maxPower);
+}
+
+
+W UnitDiskNoise::computeMinPower(simtime_t startTime, simtime_t endTime) const
+{
+    return minPower >= UnitDiskReceptionAnalogModel::POWER_DETECTABLE ? W(INFINITY) : W(0);
+}
+
+W UnitDiskNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const
+{
+    return maxPower >= UnitDiskReceptionAnalogModel::POWER_DETECTABLE ? W(INFINITY) : W(0);
 }
 
 std::ostream& UnitDiskNoise::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "UnitDiskNoise";
     if (level <= PRINT_LEVEL_DEBUG)
-        stream << ", isInterfering = " << isInterfering_;
+        stream << ", minPower = " << minPower
+               << ", maxPower = " << maxPower;
     return NoiseBase::printToStream(stream, level);
 }
 
