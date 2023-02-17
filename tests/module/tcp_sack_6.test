@@ -79,7 +79,6 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.timestampSupport = false                      # Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
 *.*_tcp.mss = 500                                     # Maximum Segment Size (RFC 793) (header option)
 *.*_tcp.tcpAlgorithmClass = "TcpReno"                 # TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl/DumbTcp
-*.*_tcp.recordStats = true                            # recording of seqNum etc. into output vectors enabled/disabled
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: postrun.pl
