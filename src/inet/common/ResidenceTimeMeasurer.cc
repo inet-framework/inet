@@ -60,18 +60,21 @@ void ResidenceTimeMeasurer::receiveSignal(cComponent *source, simsignal_t signal
         b offset = b(0);
         b length = packet->getDataLength();
         if (signal == receptionStartedSignal) {
+            EV_DEBUG << "Reception started" << EV_FIELD(packet) << std::endl;
             packet->addRegionTagsWhereAbsent<ResidenceTimeTag>(offset, length);
             packet->mapAllRegionTagsForUpdate<ResidenceTimeTag>(offset, length, [&] (b o, b l, const Ptr<ResidenceTimeTag>& tag) {
                 tag->setStartTime(simTime());
             });
         }
         else if (signal == receptionEndedSignal) {
+            EV_DEBUG << "Reception ended" << EV_FIELD(packet) << std::endl;
             packet->addRegionTagsWhereAbsent<ResidenceTimeTag>(offset, length);
             packet->mapAllRegionTagsForUpdate<ResidenceTimeTag>(offset, length, [&] (b o, b l, const Ptr<ResidenceTimeTag>& tag) {
                 tag->setStartTime(simTime());
             });
         }
         else if (signal == transmissionStartedSignal) {
+            EV_DEBUG << "Transmission started" << EV_FIELD(packet) << std::endl;
             packet->mapAllRegionTagsForUpdate<ResidenceTimeTag>(offset, length, [&] (b o, b l, const Ptr<ResidenceTimeTag>& tag) {
                 tag->setEndTime(simTime());
             });
@@ -79,6 +82,7 @@ void ResidenceTimeMeasurer::receiveSignal(cComponent *source, simsignal_t signal
             packet->removeRegionTagsWherePresent<ResidenceTimeTag>(offset, length);
         }
         else if (signal == transmissionEndedSignal) {
+            EV_DEBUG << "Transmission ended" << EV_FIELD(packet) << std::endl;
             packet->mapAllRegionTagsForUpdate<ResidenceTimeTag>(offset, length, [&] (b o, b l, const Ptr<ResidenceTimeTag>& tag) {
                 tag->setEndTime(simTime());
             });
