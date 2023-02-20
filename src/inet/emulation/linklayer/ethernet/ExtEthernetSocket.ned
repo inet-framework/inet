@@ -13,6 +13,21 @@ package inet.emulation.linklayer.ethernet;
 // on 'upperLayerIn' gate to the specified real socket, and sends out packets
 // arrived from the real socket on 'upperLayerOut' gate.
 //
+// The CAP_NET_RAW privilege requires for using ExtEthernetSocket.
+//
+// The next commands adds this privilege to opp_run, so the all simulation
+// has the CAP_NET_RAW privilege, all simulations run with this privilege!!!
+// This is dangerous because it enables a thousand other things for all
+// running simulations, it becomes a big security hole.
+//
+// $> sudo setcap cap_net_raw+ep /${your-omnetpp-root}/bin/opp_run_release
+// $> sudo setcap cap_net_raw+ep /${your-omnetpp-root}/bin/opp_run_dbg
+//
+// For remove extra privileges after run the simulation, use next commands:
+//
+// $> sudo setcap -r /${your-omnetpp-root}/bin/opp_run_release
+// $> sudo setcap -r /${your-omnetpp-root}/bin/opp_run_dbg
+//
 simple ExtEthernetSocket
 {
     parameters:
