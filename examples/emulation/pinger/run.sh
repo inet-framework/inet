@@ -13,8 +13,14 @@ sudo ip link set veth1 up
 # add routes for new link
 sudo route add -net 192.168.2.0 netmask 255.255.255.0 dev veth1
 
+# set capabilities
+sudo setcap cap_net_raw+ep $(which opp_run_dbg)
+
 # run simulation
 inet_dbg -u Cmdenv
+
+# remove capabilities
+sudo setcap -r $(which opp_run_dbg)
 
 # destroy virtual ethernet link
 sudo ip link del veth0
