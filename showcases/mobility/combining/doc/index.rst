@@ -36,7 +36,7 @@ Example simulations in this showcase, except for the last one, use the following
    :align: center
 
 The size of the scene is 400x400x0 meters. It contains a configurable
-number of hosts and an :ned:`IntegratedVisualizer` module to visualize
+number of hosts and an :ned:`IntegratedMultiVisualizer` module to visualize
 some aspects of mobility.
 
 AttachedMobility

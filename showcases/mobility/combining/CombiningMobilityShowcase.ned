@@ -1,9 +1,6 @@
 package inet.showcases.mobility.combining;
 
 import inet.node.inet.StandardHost;
-import inet.visualizer.common.IntegratedVisualizer;
-
-
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.common.IntegratedMultiVisualizer;
 
@@ -17,7 +14,7 @@ network CombiningMobilityShowcase
         host[numHosts]: StandardHost {
             @display("i=misc/smartphone");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedMultiVisualizer {
             @display("p=47,39");
         }
 }
