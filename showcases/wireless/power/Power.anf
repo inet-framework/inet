@@ -590,7 +590,7 @@ utils.preconfigure_plot(props)
 host = 10
 
 # collect parameters for query
-filter_expression = 'type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ "#0" AND module =~ "PowerConsumptionShowcase.host[' + str(host) + '].energyStorage" AND name =~ residualEnergyCapacity:vector'
+filter_expression = 'type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ "#0" AND (module =~ "PowerConsumptionShowcase.host[' + str(host) + '].energyStorage" AND name =~ residualEnergyCapacity:vector) OR module =~ "PowerConsumptionShowcase.host[' + str(host) + '].energyGenerator"'
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
 
