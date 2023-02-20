@@ -54,7 +54,7 @@ void ExtEthernetSocket::handleMessage(cMessage *message)
     Packet *packet = check_and_cast<Packet *>(message);
     emit(packetReceivedFromUpperSignal, packet);
     if (packet->getTag<PacketProtocolTag>()->getProtocol() != &Protocol::ethernetMac)
-        throw cRuntimeError("Invalid packet protocol");
+        throw cRuntimeError("Unaccepted packet protocol specified on upper layer incoming packet");
 
     struct sockaddr_ll socket_address;
     socket_address.sll_ifindex = ifindex;
@@ -103,25 +103,25 @@ void ExtEthernetSocket::openSocket()
     struct ifreq if_idx;
     fd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW);
     if (fd == INVALID_SOCKET)
-        throw cRuntimeError("Cannot open socket");
+        throw cRuntimeError("Cannot open socket: %s", strerror(errno));
     // get the index of the interface to send on
     memset(&if_idx, 0, sizeof(struct ifreq));
     strncpy(if_idx.ifr_name, device, IFNAMSIZ - 1);
     if (ioctl(fd, SIOCGIFINDEX, &if_idx) < 0)
-        perror("SIOCGIFINDEX");
+        throw cRuntimeError("Cannot get SIOCGIFINDEX: %s", strerror(errno));
     ifindex = if_idx.ifr_ifindex;
     // get the MAC address of the interface to send on
     memset(&if_mac, 0, sizeof(struct ifreq));
     strncpy(if_mac.ifr_name, device, IFNAMSIZ - 1);
     if (ioctl(fd, SIOCGIFHWADDR, &if_mac) < 0)
-        perror("SIOCGIFHWADDR");
+        throw cRuntimeError("Cannot get SIOCGIFHWADDR: %s", strerror(errno));
     macAddress.setAddressBytes(if_mac.ifr_hwaddr.sa_data);
     // bind to interface
     struct ifreq ifr;
     memset(&ifr, 0, sizeof(ifr));
     snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%s", device);
     if (setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, (void *)&ifr, sizeof(ifr)) < 0)
-        throw cRuntimeError("Cannot bind raw socket to '%s' interface", device);
+        throw cRuntimeError("Cannot bind raw socket to '%s' interface: %s", device, strerror(errno));
     // bind to all ethernet frames
     struct sockaddr_ll socket_address;
     memset(&socket_address, 0, sizeof(socket_address));
@@ -129,7 +129,7 @@ void ExtEthernetSocket::openSocket()
     socket_address.sll_ifindex = ifindex;
     socket_address.sll_protocol = htons(ETH_P_ALL);
     if (bind(fd, (struct sockaddr *)&socket_address, sizeof(socket_address)) < 0)
-        throw cRuntimeError("Cannot bind socket");
+        throw cRuntimeError("Cannot bind socket: %s", strerror(errno));
     if (gate("upperLayerOut")->isConnected())
         rtScheduler->addCallback(fd, this);
 }
