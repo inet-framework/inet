@@ -302,7 +302,7 @@
 
 /showcases/wireless/pathloss/,       -f omnetpp.ini -c General -r 0,                100s,         171a-e6eb/tplx;3466-822d/~tNl;6cb0-5c2d/~tND;f9cf-68cc/tyf, PASS,    wireless Ipv4
 
-/showcases/wireless/power/,          -f omnetpp.ini -c General -r 0,                                            100s,            cf0a-6f57/tplx;3919-0e5c/~tNl;2c4f-28e0/~tND, PASS,    wireless Ipv4
+/showcases/wireless/power/,          -f omnetpp.ini -c General -r 0,                                            100s,            498f-b665/tplx;6f50-5caf/~tNl;fb79-0fa3/~tND, PASS,    wireless Ipv4
 
 /showcases/wireless/qos/,     -f omnetpp.ini -c NonQos -r 0,                                       10s,            ab73-19d4/tplx;fddd-9d77/~tNl;412f-f934/~tND;2970-2baa/tyf, PASS,    wireless Ipv4
 /showcases/wireless/qos/,     -f omnetpp.ini -c Qos -r 0,                                        10s,            10c8-4277/tplx;af1c-eb97/~tNl;6441-9f1f/~tND;bd6e-c842/tyf, PASS,    wireless Ipv4
