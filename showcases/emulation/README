@@ -1,0 +1,17 @@
+The CAP_SYS_ADMIN privilege is required for using network namespaces in INET.
+Changing the network namespace requires the CAP_SYS_ADMIN authority for the
+'setns()' function in the 'inet::NetworkNamespaceContext' constructor.
+The next commands add this privilege to opp_run, so that all simulations run with this privilege.
+This is dangerous because it enables several admin capabilities for all
+running simulations, and it becomes a security hole (for more details, see CAP_SYS_ADMIN linux man pages; run command $> man 7 capabilities). Make sure to remove the
+privilege after you're finished using network namespaces.
+
+Run the following commands to add the CAP_SYS_ADMIN privilege to opp_run:
+
+$> sudo setcap cap_sys_admin+ep /${your-omnetpp-root}/bin/opp_run_release
+$> sudo setcap cap_sys_admin+ep /${your-omnetpp-root}/bin/opp_run_dbg
+
+To remove extra privileges after you're finished using network namespaces, use the following commands:
+
+$> sudo setcap -r /${your-omnetpp-root}/bin/opp_run_release
+$> sudo setcap -r /${your-omnetpp-root}/bin/opp_run_dbg
