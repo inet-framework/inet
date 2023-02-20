@@ -162,8 +162,12 @@ arranged in a rectangle, and all of them are in communication range with each ot
 (corresponding hosts are 20 meters apart). One host in each host pair sends frames
 to the other (``wifiHost1`` to ``wifiHost2``, and ``wpanHost1`` to ``wpanHost2``).
 
-The simulation is defined in the ``Coexistence`` configuration in
-:download:`omnetpp.ini <../omnetpp.ini>`. The radio medium module in the network
+.. The simulation is defined in the ``Coexistence`` configuration in
+.. :download:`omnetpp.ini <../omnetpp.ini>`. 
+
+The ``General`` configuration in :download:`omnetpp.ini <../omnetpp.ini>` contains the
+radio, radio medium and visualizer settings.
+The radio medium module in the network
 is a :ned:`RadioMedium`. It is configured to use the :ned:`DimensionalAnalogModel`.
 The background noise type is set to :ned:`IsotropicDimensionalBackgroundNoise`,
 with a power of -110 dBm. Here is the radio medium configuration in
@@ -272,16 +276,18 @@ The transmission power parameters for both technologies are left on default
 default 802.11g mode and use the default data bitrate of 24 Mbps. The WPAN
 hosts use the default bitrate of 250 kbps (specified in :ned:`Ieee802154Mac`).
 
+The traffic for the Wifi hosts is contained in the ``WifiHosts`` configuration.
 ``wifiHost1`` is configured to send a 1000-byte UDP packet to ``wifiHost2``
 every 0.4 milliseconds, corresponding to about 20 Mbps traffic, saturating
 the Wifi channel. Here is the Wifi traffic configuration in
 :download:`omnetpp.ini <../omnetpp.ini>`:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: wifiHost1.numApps = 1
+   :start-at: Config WifiHosts
    :end-at: wifiHost2.app[*].localPort = 5000
    :language: ini
 
+The traffic for the Wpan hosts is contained in the ``WpanHosts`` configuration.
 ``wpanHost1`` is configured to send an 88-byte UDP packet to ``wpanHost2``
 every 0.1 seconds, which is about 7 Kbps of traffic
 (the packet size is set to 88 bytes in order not to exceed the default
@@ -289,19 +295,18 @@ maximum transfer unit in 802.15.4).
 Here is the WPAN traffic configuration in :download:`omnetpp.ini <../omnetpp.ini>`:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: wpanHost1.numApps = 1
+   :start-at: Config WpanHosts
    :end-at: wpanHost2.app[0].localPort = 5000
    :language: ini
 
-The independent performance data can be obtained by running the ``WifiOnly``
-and the ``WpanOnly`` configurations in :download:`omnetpp.ini <../omnetpp.ini>`.
-These configurations extend the ``Coexistence`` configuration, and disable
-either the Wifi or the WPAN host communication by setting the number of
-applications to 0:
+The independent performance data can be obtained by running the ``WifiHosts``
+and the ``WpanHosts`` configurations in :download:`omnetpp.ini <../omnetpp.ini>`,
+as they each contain just one type of hosts (Wifi or Wpan).
+
+To specify the case where they both coexist, the ``Coexistence`` configuration extends both ``WifiHosts`` and ``WpanHosts``:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: WifiOnly
-   :end-at: wifiHost1.numApps
+   :start-at: Config Coexistence
    :language: ini
 
 In all configurations, the simulations are run for five seconds and repeated
