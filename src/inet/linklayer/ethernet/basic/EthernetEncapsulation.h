@@ -8,6 +8,7 @@
 #define __INET_ETHERNETENCAPSULATION_H
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Message.h"
@@ -24,12 +25,11 @@ namespace inet {
  */
 class INET_API EthernetEncapsulation : public OperationalBase, public DefaultProtocolRegistrationListener
 {
-protected:
-  std::set<const Protocol *> upperProtocols; // where to send packets after decapsulation
-
   protected:
+    std::set<const Protocol *> upperProtocols; // where to send packets after decapsulation
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
     int seqNum;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
 
     // statistics
     long totalFromHigherLayer; // total number of packets received from higher layer
@@ -38,7 +38,6 @@ protected:
     static simsignal_t encapPkSignal;
     static simsignal_t decapPkSignal;
     static simsignal_t pauseSentSignal;
-    NetworkInterface *networkInterface = nullptr;
 
     struct Socket {
         int socketId = -1;

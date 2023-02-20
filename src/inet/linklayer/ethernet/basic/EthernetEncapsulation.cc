@@ -65,7 +65,7 @@ void EthernetEncapsulation::initialize(int stage)
         seqNum = 0;
         WATCH(seqNum);
         totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
-        networkInterface = findContainingNicModule(this); // TODO or getContainingNicModule() ? or use a MacForwardingTable?
+        interfaceTable.reference(this, "interfaceTableModule", true);
 
         WATCH_PTRSET(upperProtocols);
         WATCH_PTRMAP(socketIdToSocketMap);
@@ -177,6 +177,8 @@ void EthernetEncapsulation::processPacketFromHigherLayer(Packet *packet)
     const auto& ethHeader = makeShared<EthernetMacHeader>();
     auto macAddressReq = packet->getTag<MacAddressReq>();
     auto srcAddr = macAddressReq->getSrcAddress();
+    auto interfaceReq = packet->getTag<InterfaceReq>();
+    auto networkInterface = interfaceTable->getInterfaceById(interfaceReq->getInterfaceId());
     if (srcAddr.isUnspecified() && networkInterface != nullptr)
         srcAddr = networkInterface->getMacAddress();
     ethHeader->setSrc(srcAddr);
