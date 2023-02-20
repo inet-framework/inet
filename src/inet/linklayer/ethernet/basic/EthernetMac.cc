@@ -130,7 +130,7 @@ void EthernetMac::handleUpperPacket(Packet *packet)
 
     numFramesFromHL++;
 
-    auto frame = packet->peekAtFront<EthernetMacHeader>();
+    const auto& frame = packet->peekAtFront<EthernetMacHeader>();
     if (frame->getDest().equals(getMacAddress())) {
         throw cRuntimeError("logic error: frame %s from higher layer has local MAC address as dest (%s)",
                 packet->getFullName(), frame->getDest().str().c_str());
@@ -150,15 +150,6 @@ void EthernetMac::handleUpperPacket(Packet *packet)
         delete packet;
 
         return;
-    }
-
-    // fill in src address if not set
-    if (frame->getSrc().isUnspecified()) {
-        frame = nullptr; // drop shared ptr
-        auto newFrame = packet->removeAtFront<EthernetMacHeader>();
-        newFrame->setSrc(getMacAddress());
-        packet->insertAtFront(newFrame);
-        frame = newFrame;
     }
 
     if (transmitState != TX_IDLE_STATE)
