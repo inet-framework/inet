@@ -2,7 +2,7 @@
 <analysis version="2">
     <inputs>
         <input pattern="results/Coexistence-*.sca"/>
-        <input pattern="results/*Only-*.sca"/>
+        <input pattern="results/*Hosts-*.sca"/>
     </inputs>
     <charts>
         <chart createdWith="" icon="icons/full/obj/barchart.png" id="1313370426" name="Wifi performance" resultTypes="" template="barchart_mpl" type="MATPLOTLIB">
@@ -36,7 +36,7 @@ groups, series = utils.select_groups_series(df, props)
 confidence_level = utils.get_confidence_level(props)
 valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, groups, series, confidence_level)
 
-modifiedplot.plot_bars(valuedf, errorsdf, metadf, props, order=['WifiOnly', 'Coexistence'], rename={'WifiOnly': 'Wifi only', 'Coexistence': 'Wifi + WPAN coexistence'}, zorder=2)
+modifiedplot.plot_bars(valuedf, errorsdf, metadf, props, order=['WifiHosts', 'Coexistence'], rename={'WifiOnly': 'Wifi only', 'Coexistence': 'Wifi + WPAN coexistence'}, zorder=2)
 
 utils.postconfigure_plot(props)
 
@@ -614,7 +614,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_filename" value="wifiperformance"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="cap_size" value="4"/>
-            <property name="filter" value="type =~ scalar AND isfield =~ false AND module =~ &quot;CoexistenceShowcase.wifiHost2.app[0]&quot; AND name =~ packetReceived:count&#10;AND NOT (type =~ scalar AND runattr:experiment =~ WpanOnly AND module =~ &quot;CoexistenceShowcase.wifiHost2.app[0]&quot; AND name =~ packetReceived:count AND (&#10;    (runattr:replication =~ &quot;#0&quot;) OR&#10;    (runattr:replication =~ &quot;#1&quot;) OR&#10;    (runattr:replication =~ &quot;#2&quot;) OR&#10;    (runattr:replication =~ &quot;#3&quot;) OR&#10;    (runattr:replication =~ &quot;#4&quot;) OR&#10;    (runattr:replication =~ &quot;#5&quot;) OR&#10;    (runattr:replication =~ &quot;#6&quot;) OR&#10;    (runattr:replication =~ &quot;#7&quot;)&#10;))"/>
+            <property name="filter" value="type =~ scalar AND isfield =~ false AND module =~ &quot;CoexistenceShowcase.wifiHost2.app[0]&quot; AND name =~ packetReceived:count&#10;AND NOT (type =~ scalar AND runattr:experiment =~ WpanHosts AND module =~ &quot;CoexistenceShowcase.wifiHost2.app[0]&quot; AND name =~ packetReceived:count AND (&#10;    (runattr:replication =~ &quot;#0&quot;) OR&#10;    (runattr:replication =~ &quot;#1&quot;) OR&#10;    (runattr:replication =~ &quot;#2&quot;) OR&#10;    (runattr:replication =~ &quot;#3&quot;) OR&#10;    (runattr:replication =~ &quot;#4&quot;) OR&#10;    (runattr:replication =~ &quot;#5&quot;) OR&#10;    (runattr:replication =~ &quot;#6&quot;) OR&#10;    (runattr:replication =~ &quot;#7&quot;)&#10;))"/>
             <property name="series" value="inifile"/>
             <property name="plt.style" value="default"/>
             <property name="legend_show" value="true"/>
@@ -662,7 +662,7 @@ groups, series = utils.select_groups_series(df, props)
 confidence_level = utils.get_confidence_level(props)
 valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, groups, series, confidence_level)
 
-modifiedplot.plot_bars(valuedf, errorsdf, metadf, props, order=['WpanOnly', 'Coexistence'], rename={'WpanOnly': 'WPAN only', 'Coexistence': 'Wifi + WPAN coexistence'}, zorder=2)
+modifiedplot.plot_bars(valuedf, errorsdf, metadf, props, order=['WpanHosts', 'Coexistence'], rename={'WpanOnly': 'WPAN only', 'Coexistence': 'Wifi + WPAN coexistence'}, zorder=2)
 
 utils.postconfigure_plot(props)
 
@@ -1240,7 +1240,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_filename" value="wpanperformance"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="cap_size" value="4"/>
-            <property name="filter" value="type =~ scalar AND isfield =~ false AND module =~ &quot;CoexistenceShowcase.wpanHost2.app[0]&quot; AND name =~ packetReceived:count&#10;AND NOT (type =~ scalar AND runattr:experiment =~ WifiOnly AND module =~ &quot;CoexistenceShowcase.wpanHost2.app[0]&quot; AND name =~ packetReceived:count AND (&#10;    (runattr:replication =~ &quot;#0&quot;) OR&#10;    (runattr:replication =~ &quot;#1&quot;) OR&#10;    (runattr:replication =~ &quot;#2&quot;) OR&#10;    (runattr:replication =~ &quot;#3&quot;) OR&#10;    (runattr:replication =~ &quot;#4&quot;) OR&#10;    (runattr:replication =~ &quot;#5&quot;) OR&#10;    (runattr:replication =~ &quot;#6&quot;) OR&#10;    (runattr:replication =~ &quot;#7&quot;)&#10;))"/>
+            <property name="filter" value="type =~ scalar AND isfield =~ false AND module =~ &quot;CoexistenceShowcase.wpanHost2.app[0]&quot; AND name =~ packetReceived:count&#10;AND NOT (type =~ scalar AND runattr:experiment =~ WifiHosts AND module =~ &quot;CoexistenceShowcase.wpanHost2.app[0]&quot; AND name =~ packetReceived:count AND (&#10;    (runattr:replication =~ &quot;#0&quot;) OR&#10;    (runattr:replication =~ &quot;#1&quot;) OR&#10;    (runattr:replication =~ &quot;#2&quot;) OR&#10;    (runattr:replication =~ &quot;#3&quot;) OR&#10;    (runattr:replication =~ &quot;#4&quot;) OR&#10;    (runattr:replication =~ &quot;#5&quot;) OR&#10;    (runattr:replication =~ &quot;#6&quot;) OR&#10;    (runattr:replication =~ &quot;#7&quot;)&#10;))"/>
             <property name="series" value="inifile"/>
             <property name="plt.style" value="default"/>
             <property name="legend_show" value="true"/>
