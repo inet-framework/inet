@@ -1,0 +1,2 @@
+The CAP_SYS_ADMIN privilege is required for using network namespaces in INET.
+Make sure to read the README file in the showcases/emulation directory for more information.
