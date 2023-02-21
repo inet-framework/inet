@@ -54,7 +54,7 @@ std::string InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
         case '6':
 #ifdef INET_WITH_IPv6
             if (auto ipv6Data = networkInterface->findProtocolData<Ipv6InterfaceData>())
-                return ipv6Data->getLinkLocalAddress().str();
+                return ipv6Data->getPreferredAddress().str();
 #endif // INET_WITH_IPv6
             return "";
         case 'a':
@@ -65,7 +65,7 @@ std::string InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
 #endif // INET_WITH_IPv4
 #ifdef INET_WITH_IPv6
             else if (auto ipv6Data = networkInterface->findProtocolData<Ipv6InterfaceData>())
-                return ipv6Data->getLinkLocalAddress().str();
+                return ipv6Data->getPreferredAddress().str();
 #endif // INET_WITH_IPv6
 #ifdef INET_WITH_NEXTHOP
             else if (auto nextHopData = networkInterface->findProtocolData<NextHopInterfaceData>())
@@ -153,6 +153,9 @@ void InterfaceTableVisualizerBase::subscribe()
     visualizationSubjectModule->subscribe(interfaceConfigChangedSignal, this);
     visualizationSubjectModule->subscribe(interfaceStateChangedSignal, this);
     visualizationSubjectModule->subscribe(interfaceIpv4ConfigChangedSignal, this);
+    visualizationSubjectModule->subscribe(interfaceIpv6ConfigChangedSignal, this);
+    visualizationSubjectModule->subscribe(interfaceGnpConfigChangedSignal, this);
+    visualizationSubjectModule->subscribe(interfaceClnsConfigChangedSignal, this);
 }
 
 void InterfaceTableVisualizerBase::unsubscribe()
@@ -165,6 +168,9 @@ void InterfaceTableVisualizerBase::unsubscribe()
         visualizationSubjectModule->unsubscribe(interfaceConfigChangedSignal, this);
         visualizationSubjectModule->unsubscribe(interfaceStateChangedSignal, this);
         visualizationSubjectModule->unsubscribe(interfaceIpv4ConfigChangedSignal, this);
+        visualizationSubjectModule->unsubscribe(interfaceIpv6ConfigChangedSignal, this);
+        visualizationSubjectModule->unsubscribe(interfaceGnpConfigChangedSignal, this);
+        visualizationSubjectModule->unsubscribe(interfaceClnsConfigChangedSignal, this);
     }
 }
 
@@ -281,7 +287,12 @@ void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t
             }
         }
     }
-    else if (signal == interfaceConfigChangedSignal || signal == interfaceIpv4ConfigChangedSignal || signal == interfaceStateChangedSignal) {
+    else if (signal == interfaceConfigChangedSignal
+            || signal == interfaceIpv4ConfigChangedSignal
+            || signal == interfaceIpv6ConfigChangedSignal
+            || signal == interfaceGnpConfigChangedSignal
+            || signal == interfaceClnsConfigChangedSignal
+            || signal == interfaceStateChangedSignal) {
         auto networkNode = getContainingNode(static_cast<cModule *>(source));
         if (object != nullptr && nodeFilter.matches(networkNode)) {
             auto networkInterfaceDetails = static_cast<NetworkInterfaceChangeDetails *>(object);
@@ -291,6 +302,11 @@ void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t
 #ifdef INET_WITH_IPv4
                     || (signal == interfaceIpv4ConfigChangedSignal && (fieldId == Ipv4InterfaceData::F_IP_ADDRESS || fieldId == Ipv4InterfaceData::F_NETMASK))
 #endif // INET_WITH_IPv4
+
+                    || (signal == interfaceIpv6ConfigChangedSignal)
+                    || signal == interfaceGnpConfigChangedSignal
+                    || signal == interfaceClnsConfigChangedSignal
+
                     || (signal == interfaceStateChangedSignal && (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER)))
             {
                 if (networkInterface->getInterfaceId() != -1 && interfaceFilter.matches(networkInterface)) {
