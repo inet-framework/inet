@@ -10,6 +10,7 @@ package inet.examples.ipv6.demonetworketh;
 import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.node.ipv6.Router6;
 import inet.node.ipv6.StandardHost6;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 import ned.DatarateChannel;
 
 
@@ -26,6 +27,9 @@ network DemoNetworkEth
     submodules:
         configurator: Ipv6FlatNetworkConfigurator {
             @display("is=s;p=100,100");
+        }
+        visualizer: IntegratedCanvasVisualizer {
+            @display("p=100,200;is=s");
         }
         r1: Router6 {
             @display("p=550,150");
