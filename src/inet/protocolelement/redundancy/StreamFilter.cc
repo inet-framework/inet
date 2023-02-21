@@ -20,6 +20,16 @@ void StreamFilter::initialize(int stage)
         streamNameFilter.setPattern(par("streamNameFilter"), false, true, true);
 }
 
+cGate *StreamFilter::getRegistrationForwardingGate(cGate *gate)
+{
+    if (gate == outputGate)
+        return inputGate;
+    else if (gate == inputGate)
+        return outputGate;
+    else
+        throw cRuntimeError("Unknown gate");
+}
+
 bool StreamFilter::matchesPacket(const Packet *packet) const
 {
     auto streamReq = packet->findTag<StreamReq>();
