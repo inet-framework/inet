@@ -11,14 +11,29 @@
 
 namespace inet {
 
+OPP_THREAD_LOCAL std::deque<std::string> registrationPath;
+
+std::string printRegistrationPath()
+{
+    std::string result;
+    bool first = true;
+    for (auto level : registrationPath) {
+        result += (first ? "" : "->") + level;
+        first = false;
+    }
+    return result;
+}
+
 void registerService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
+    registrationPath.push_back(gate->getOwnerModule()->getFullName());
     auto otherGate = findConnectedGate<IProtocolRegistrationListener>(gate);
     if (otherGate != nullptr && otherGate->getOwnerModule() != gate->getOwnerModule()) {
-        EV_DEBUG << "Forwarding service registration" << EV_FIELD(protocol) << EV_FIELD(gate) << EV_FIELD(otherGate) << EV_FIELD(servicePrimitive) << EV_ENDL;
+        EV_DEBUG << "Forwarding service registration from " << printRegistrationPath() << EV_FIELD(protocol) << EV_FIELD(gate) << EV_FIELD(otherGate) << EV_FIELD(servicePrimitive) << EV_ENDL;
         IProtocolRegistrationListener *protocolRegistration = check_and_cast<IProtocolRegistrationListener *>(otherGate->getOwner());
         protocolRegistration->handleRegisterService(protocol, otherGate, servicePrimitive);
     }
+    registrationPath.pop_back();
 }
 
 void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationOut, cGate *responseIn, cGate *confirmOut)
@@ -36,12 +51,14 @@ void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicati
 
 void registerServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive)
 {
+    registrationPath.push_back(gate->getOwnerModule()->getFullName());
     auto otherGate = findConnectedGate<IProtocolRegistrationListener>(gate);
     if (otherGate != nullptr && otherGate->getOwnerModule() != gate->getOwnerModule()) {
-        EV_DEBUG << "Forwarding service group registration" << EV_FIELD(protocolGroup) << EV_FIELD(gate) << EV_FIELD(otherGate) << EV_FIELD(servicePrimitive) << EV_ENDL;
+        EV_DEBUG << "Forwarding service group registration from " << printRegistrationPath() << EV_FIELD(protocolGroup) << EV_FIELD(gate) << EV_FIELD(otherGate) << EV_FIELD(servicePrimitive) << EV_ENDL;
         IProtocolRegistrationListener *protocolRegistration = check_and_cast<IProtocolRegistrationListener *>(otherGate->getOwner());
         protocolRegistration->handleRegisterServiceGroup(protocolGroup, otherGate, servicePrimitive);
     }
+    registrationPath.pop_back();
 }
 
 void registerServiceGroup(const ProtocolGroup& protocolGroup, cGate *requestIn, cGate *indicationOut, cGate *responseIn, cGate *confirmOut)
@@ -59,12 +76,14 @@ void registerServiceGroup(const ProtocolGroup& protocolGroup, cGate *requestIn, 
 
 void registerAnyService(cGate *gate, ServicePrimitive servicePrimitive)
 {
+    registrationPath.push_back(gate->getOwnerModule()->getFullName());
     auto otherGate = findConnectedGate<IProtocolRegistrationListener>(gate);
     if (otherGate != nullptr && otherGate->getOwnerModule() != gate->getOwnerModule()) {
-        EV_DEBUG << "Forwarding any service registration" << EV_FIELD(gate) << EV_FIELD(otherGate) << EV_FIELD(servicePrimitive) << EV_ENDL;
+        EV_DEBUG << "Forwarding any service registration from " << printRegistrationPath() << EV_FIELD(gate) << EV_FIELD(otherGate) << EV_FIELD(servicePrimitive) << EV_ENDL;
         IProtocolRegistrationListener *protocolRegistration = check_and_cast<IProtocolRegistrationListener *>(otherGate->getOwner());
         protocolRegistration->handleRegisterAnyService(otherGate, servicePrimitive);
     }
+    registrationPath.pop_back();
 }
 
 void registerAnyService(cGate *requestIn, cGate *indicationOut, cGate *responseIn, cGate *confirmOut)
@@ -82,12 +101,14 @@ void registerAnyService(cGate *requestIn, cGate *indicationOut, cGate *responseI
 
 void registerProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
+    registrationPath.push_back(gate->getOwnerModule()->getFullName());
     auto otherGate = findConnectedGate<IProtocolRegistrationListener>(gate);
     if (otherGate != nullptr && otherGate->getOwnerModule() != gate->getOwnerModule()) {
-        EV_DEBUG << "Forwarding protocol registration" << EV_FIELD(protocol) << EV_FIELD(gate) << EV_FIELD(otherGate) << EV_FIELD(servicePrimitive) << EV_ENDL;
+        EV_DEBUG << "Forwarding protocol registration from " << printRegistrationPath() << EV_FIELD(protocol) << EV_FIELD(gate) << EV_FIELD(otherGate) << EV_FIELD(servicePrimitive) << EV_ENDL;
         IProtocolRegistrationListener *protocolRegistration = check_and_cast<IProtocolRegistrationListener *>(otherGate->getOwner());
         protocolRegistration->handleRegisterProtocol(protocol, otherGate, servicePrimitive);
     }
+    registrationPath.pop_back();
 }
 
 void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationIn, cGate *responseOut, cGate *confirmIn)
@@ -105,12 +126,14 @@ void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indica
 
 void registerProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive)
 {
+    registrationPath.push_back(gate->getOwnerModule()->getFullName());
     auto otherGate = findConnectedGate<IProtocolRegistrationListener>(gate);
     if (otherGate != nullptr && otherGate->getOwnerModule() != gate->getOwnerModule()) {
-        EV_DEBUG << "Forwarding protocol group registration" << EV_FIELD(protocolGroup) << EV_FIELD(gate) << EV_FIELD(otherGate) << EV_FIELD(servicePrimitive) << EV_ENDL;
+        EV_DEBUG << "Forwarding protocol group registration from " << printRegistrationPath() << EV_FIELD(protocolGroup) << EV_FIELD(gate) << EV_FIELD(otherGate) << EV_FIELD(servicePrimitive) << EV_ENDL;
         IProtocolRegistrationListener *protocolRegistration = check_and_cast<IProtocolRegistrationListener *>(otherGate->getOwner());
         protocolRegistration->handleRegisterProtocolGroup(protocolGroup, otherGate, servicePrimitive);
     }
+    registrationPath.pop_back();
 }
 
 void registerProtocolGroup(const ProtocolGroup& protocolGroup, cGate *requestOut, cGate *indicationIn, cGate *responseOut, cGate *confirmIn)
@@ -128,12 +151,14 @@ void registerProtocolGroup(const ProtocolGroup& protocolGroup, cGate *requestOut
 
 void registerAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive)
 {
+    registrationPath.push_back(gate->getOwnerModule()->getFullName());
     auto otherGate = findConnectedGate<IProtocolRegistrationListener>(gate);
     if (otherGate != nullptr && otherGate->getOwnerModule() != gate->getOwnerModule()) {
-        EV_DEBUG << "Forwarding any protocol registration" << EV_FIELD(gate) << EV_FIELD(otherGate) << EV_FIELD(servicePrimitive) << EV_ENDL;
+        EV_DEBUG << "Forwarding any protocol registration from " << printRegistrationPath() << EV_FIELD(gate) << EV_FIELD(otherGate) << EV_FIELD(servicePrimitive) << EV_ENDL;
         IProtocolRegistrationListener *protocolRegistration = check_and_cast<IProtocolRegistrationListener *>(otherGate->getOwner());
         protocolRegistration->handleRegisterAnyProtocol(otherGate, servicePrimitive);
     }
+    registrationPath.pop_back();
 }
 
 void registerAnyProtocol(cGate *requestOut, cGate *indicationIn, cGate *responseOut, cGate *confirmIn)

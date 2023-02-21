@@ -295,7 +295,7 @@ void MessageDispatcher::handleRegisterService(const Protocol& protocol, cGate *g
     }
     else {
         registeringProtocol = &protocol;
-        EV_INFO << "Handling service registration" << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
+        EV_INFO << "Handling service registration from " << printRegistrationPath() << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
         auto key = Key(protocol.getId(), servicePrimitive);
         auto it = serviceToGateIndex.find(key);
         if (it != serviceToGateIndex.end()) {
@@ -320,7 +320,7 @@ void MessageDispatcher::handleRegisterAnyService(cGate *g, ServicePrimitive serv
     Enter_Method("handleRegisterAnyService");
     if (!registeringAny) {
         registeringAny = true;
-        EV_INFO << "Handling any service registration" << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
+        EV_INFO << "Handling any service registration from " << printRegistrationPath() << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
         auto key = Key(-1, servicePrimitive);
         auto it = serviceToGateIndex.find(key);
         if (it != serviceToGateIndex.end()) {
@@ -349,7 +349,7 @@ void MessageDispatcher::handleRegisterProtocol(const Protocol& protocol, cGate *
     }
     else {
         registeringProtocol = &protocol;
-        EV_INFO << "Handling protocol registration" << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
+        EV_INFO << "Handling protocol registration from " << printRegistrationPath() << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
         auto key = Key(protocol.getId(), servicePrimitive);
         auto it = protocolToGateIndex.find(key);
         if (it != protocolToGateIndex.end()) {
@@ -374,7 +374,7 @@ void MessageDispatcher::handleRegisterAnyProtocol(cGate *g, ServicePrimitive ser
     Enter_Method("handleRegisterAnyProtocol");
     if (!registeringAny) {
         registeringAny = true;
-        EV_INFO << "Handling any protocol registration" << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
+        EV_INFO << "Handling any protocol registration from " << printRegistrationPath() << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
         auto key = Key(-1, servicePrimitive);
         auto it = protocolToGateIndex.find(key);
         if (it != protocolToGateIndex.end()) {

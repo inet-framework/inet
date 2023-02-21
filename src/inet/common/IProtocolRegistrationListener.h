@@ -14,6 +14,10 @@
 
 namespace inet {
 
+extern OPP_THREAD_LOCAL std::deque<std::string> registrationPath;
+
+extern std::string printRegistrationPath();
+
 /**
  * Registers a service primitive (SDU processing) at the given gate.
  *
