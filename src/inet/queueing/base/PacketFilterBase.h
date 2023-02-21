@@ -15,6 +15,11 @@
 namespace inet {
 namespace queueing {
 
+// TODO add TransparentProtocolRegistrationListener as base class, but it would break nearly all
+// simulations because protocol header checker modules are also derived from PacketFilterBase and
+// this change would cause multiple protocol registrations reaching the same MessageDispatcher from
+// different paths (e.g. ethernetmac service registration starts from EthernetMacHeaderInserter and
+// ends up multiple times in the li MessageDispatcher module)
 class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPacketFilter
 {
   protected:

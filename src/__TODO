@@ -1,3 +1,9 @@
+ - add TransparentProtocolRegistrationListener to PacketFilterBase as base class, but it would break
+   nearly all simulations because protocol header checker modules are also derived from PacketFilterBase
+   and this change would cause multiple protocol registrations reaching the same MessageDispatcher from
+   different paths (e.g. ethernetmac service registration starts from EthernetMacHeaderInserter and
+   ends up multiple times in the li MessageDispatcher module)
+ 
  - IPv6 has not yet been through the same refactoring and improvements as the IPv4 model
    after that, xMIPv6 needs to be tested and revised as well
 
