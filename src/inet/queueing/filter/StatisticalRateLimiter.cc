@@ -23,16 +23,6 @@ void StatisticalRateLimiter::initialize(int stage)
     }
 }
 
-cGate *StatisticalRateLimiter::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 bool StatisticalRateLimiter::canPushPacket(Packet *packet, cGate *gate) const
 {
     return consumer == nullptr || consumer->canPushPacket(packet, outputGate->getPathEndGate());

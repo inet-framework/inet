@@ -268,6 +268,16 @@ void PacketFilterBase::dropPacket(Packet *packet, PacketDropReason reason, int l
     PacketProcessorBase::dropPacket(packet, reason, limit);
 }
 
+cGate *PacketFilterBase::getRegistrationForwardingGate(cGate *gate)
+{
+    if (gate == outputGate)
+        return inputGate;
+    else if (gate == inputGate)
+        return outputGate;
+    else
+        throw cRuntimeError("Unknown gate");
+}
+
 std::string PacketFilterBase::resolveDirective(char directive) const
 {
     switch (directive) {

@@ -58,15 +58,5 @@ void EthernetFcsChecker::dropPacket(Packet *packet)
     PacketFilterBase::dropPacket(packet, INCORRECTLY_RECEIVED);
 }
 
-cGate *EthernetFcsChecker::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 } // namespace inet
 

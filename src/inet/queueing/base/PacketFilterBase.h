@@ -8,6 +8,7 @@
 #ifndef __INET_PACKETFILTERBASE_H
 #define __INET_PACKETFILTERBASE_H
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRef.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IPacketFilter.h"
@@ -15,7 +16,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPacketFilter
+class INET_API PacketFilterBase : public PacketProcessorBase, public TransparentProtocolRegistrationListener, public virtual IPacketFilter
 {
   protected:
     bool backpressure = false;
@@ -46,6 +47,8 @@ class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPa
 
     virtual void dropPacket(Packet *packet);
     virtual void dropPacket(Packet *packet, PacketDropReason reason, int limit = -1) override;
+
+    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
     virtual std::string resolveDirective(char directive) const override;
 
