@@ -17,6 +17,7 @@ namespace inet {
 class INET_API EthTestApp : public cSimpleModule
 {
   protected:
+    MacAddress srcAddr;
     MacAddress destAddr;
 
   public:
@@ -26,20 +27,26 @@ class INET_API EthTestApp : public cSimpleModule
     void parseScript(const char *script);
     void processIncomingPacket(cMessage *msg);
     void createCommand(simtime_t t, int bytes);
-    virtual void initialize();
-    virtual void finish();
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void finish() override;
+    virtual void handleMessage(cMessage *msg) override;
 };
 
 
 Define_Module(EthTestApp);
 
-void EthTestApp::initialize()
+void EthTestApp::initialize(int stage)
 {
-    const char *addr = par("destAddr");
-    destAddr = MacAddress(addr);
-    const char *script = par("script");
-    parseScript(script);
+    if (stage == INITSTAGE_APPLICATION_LAYER) {
+        cModule *nicModule = gate("out")->getPathEndGate()->getOwnerModule()->getParentModule();
+        const char *srcAddrStr = nicModule->par("address");
+        srcAddr = MacAddress(srcAddrStr);
+        const char *destAddrStr = par("destAddr");
+        destAddr = MacAddress(destAddrStr);
+        const char *script = par("script");
+        parseScript(script);
+    }
 }
 
 void EthTestApp::createCommand(simtime_t t, int bytes)
@@ -48,6 +55,7 @@ void EthTestApp::createCommand(simtime_t t, int bytes)
     sprintf(name, "PK at %s: %i Bytes", SIMTIME_STR(t), bytes);
     Packet *packet = new Packet(name);
     const auto& hdr = makeShared<EthernetMacHeader>();
+    hdr->setSrc(srcAddr);
     hdr->setDest(destAddr);
     hdr->setChunkLength(B(14));
     packet->insertAtFront(hdr);
