@@ -21,11 +21,11 @@ cmdenv-express-mode=false
 
 *.host1.app.destAddr = "AA-00-00-00-00-02"
 *.host1.app.script = "10:92 10:92 20:92 20:92"
-*.host1.eth.mac.address = "AA-00-00-00-00-01"
+*.host1.eth.address = "AA-00-00-00-00-01"
 
 *.host2.app.destAddr = "AA-00-00-00-00-01"
 *.host2.app.script = ""
-*.host2.eth.mac.address = "AA-00-00-00-00-02"
+*.host2.eth.address = "AA-00-00-00-00-02"
 
 *.host*.eth.queue.typename = ${queue="EthernetQueue", "DropTailQueue"}
 *.host*.eth.duplexMode = false     # Half duplex
