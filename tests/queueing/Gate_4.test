@@ -1,0 +1,80 @@
+%description:
+
+In this test, packets are collected periodically by an active packet sink
+(ActivePacketSink). The packets pass through a periodic packet gate and the
+gate is continuously open. The packets are provided by a passive packet
+source (PassivePacketSource).
+
+%file: test.ned
+
+import inet.queueing.gate.PeriodicGate;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.source.PassivePacketSource;
+
+network TestProviderCollector
+{
+    submodules:
+        provider: PassivePacketSource {
+            @display("p=100,100");
+        }
+        gate: PeriodicGate {
+            @display("p=200,100");
+        }
+        collector: ActivePacketSink {
+            @display("p=300,100");
+        }
+    connections:
+        provider.out --> gate.in;
+        gate.out --> collector.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestProviderCollector
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.provider.packetLength = 1B
+*.collector.collectionInterval = 1s
+*.gate.initiallyOpen = true
+*.gate.durations = []
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%subst: /\nRunning simulation\.\.\.\n//
+
+%contains-regex: stdout
+Providing packet, .*?provider-0.*?
+Passing through packet, .*?provider-0.*?
+Collecting packet, .*?provider-0.*?
+Providing packet, .*?provider-1.*?
+Passing through packet, .*?provider-1.*?
+Collecting packet, .*?provider-1.*?
+Providing packet, .*?provider-2.*?
+Passing through packet, .*?provider-2.*?
+Collecting packet, .*?provider-2.*?
+Providing packet, .*?provider-3.*?
+Passing through packet, .*?provider-3.*?
+Collecting packet, .*?provider-3.*?
+Providing packet, .*?provider-4.*?
+Passing through packet, .*?provider-4.*?
+Collecting packet, .*?provider-4.*?
+Providing packet, .*?provider-5.*?
+Passing through packet, .*?provider-5.*?
+Collecting packet, .*?provider-5.*?
+Providing packet, .*?provider-6.*?
+Passing through packet, .*?provider-6.*?
+Collecting packet, .*?provider-6.*?
+Providing packet, .*?provider-7.*?
+Passing through packet, .*?provider-7.*?
+Collecting packet, .*?provider-7.*?
+Providing packet, .*?provider-8.*?
+Passing through packet, .*?provider-8.*?
+Collecting packet, .*?provider-8.*?
+Providing packet, .*?provider-9.*?
+Passing through packet, .*?provider-9.*?
+Collecting packet, .*?provider-9.*?
+Providing packet, .*?provider-10.*?
+Passing through packet, .*?provider-10.*?
+Collecting packet, .*?provider-10.*?

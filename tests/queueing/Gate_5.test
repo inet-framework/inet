@@ -1,0 +1,54 @@
+%description:
+
+In this test, packets are collected periodically by an active packet sink
+(ActivePacketSink). The packets pass through a periodic packet gate and the
+gate is continuously closed. The packets are provided by a passive packet
+source (PassivePacketSource).
+
+%file: test.ned
+
+import inet.queueing.gate.PeriodicGate;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.source.PassivePacketSource;
+
+network TestProviderCollector
+{
+    submodules:
+        provider: PassivePacketSource {
+            @display("p=100,100");
+        }
+        gate: PeriodicGate {
+            @display("p=200,100");
+        }
+        collector: ActivePacketSink {
+            @display("p=300,100");
+        }
+    connections:
+        provider.out --> gate.in;
+        gate.out --> collector.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestProviderCollector
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.provider.packetLength = 1B
+*.collector.collectionInterval = 1s
+*.gate.initiallyOpen = false
+*.gate.durations = []
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%subst: /\nRunning simulation\.\.\.\n//
+
+%not-contains-regex: stdout
+Providing packet, .*?provider.*?
+
+%not-contains-regex: stdout
+Passing through packet, .*?provider.*?
+
+%not-contains-regex: stdout
+Collecting packet, .*?provider.*?
