@@ -4,12 +4,11 @@ IEEE 802.11 Fragmentation
 Goals
 -----
 
-Fragmentation is a way of improving 802.11 performance in the presence
-of interference, noise, or in a network with large distances. It works
-by splitting up large frames to a number of shorter framents called
-fragments, thereby increasing the chance of successful data transfer.
-
-This showcase demonstrates 802.11 MAC-level fragmentation.
+The process of fragmentation is used to improve the performance of 802.11
+networks in situations where there is interference, noise, or long distances
+between nodes. It does this by dividing larger frames into smaller fragments,
+which increases the probability of successful data transfer. This showcase
+presents an example of how MAC-level fragmentation is used in INET.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/fragmentation <https://github.com/inet-framework/inet/tree/master/showcases/wireless/fragmentation>`__

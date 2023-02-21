@@ -4,12 +4,10 @@ MAC Protocols for Wireless Sensor Networks
 Goals
 -----
 
-There are media access control (MAC) protocols designed specifically for
-wireless sensor networks. INET has several such protocol
-implementations, alongside IEEE 802.15.4 models. This showcase consists
-of two parts. In Part 1, we demonstrate three wireless sensor network
-MAC protocols with three example simulations of a wireless sensor
-network. In Part 2, we compare the three protocols using statistics.
+INET has several MAC protocol implementations designed specifically for wireless sensor
+networks, in addition to IEEE 802.15.4 models. This showcase demonstrates three
+different such MAC protocols through example simulations. The showcase compares the
+performance of the three protocols using statistical analysis.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/sensornetwork <https://github.com/inet-framework/inet/tree/master/showcases/wireless/sensornetwork>`__

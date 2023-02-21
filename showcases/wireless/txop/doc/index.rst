@@ -4,7 +4,7 @@ IEEE 802.11 Transmit Opportunity
 Goals
 -----
 
-Transmit opportunity (TXOP) is a MAC feature in 802.11. TXOP increases throughput
+Transmit opportunity (TXOP) is a MAC feature in 802.11, which increases throughput
 for high priority data by providing contention-free channel access for a period of time.
 This showcase demonstrates frame exchanges during a TXOP.
 

@@ -4,14 +4,14 @@ Visualizing Data Link Activity
 Goals
 -----
 
-With INET simulations, it is often useful to be able to visualize
-network traffic. INET offers several visualizers for this task,
-operating at various levels of the network stack. In this showcase, we
-examine :ned:`DataLinkVisualizer` that can provide graphical feedback about
-data link level traffic.
+Visualizing network traffic is an important aspect of running simulations. INET
+provides various visualizers to help you understand the network activity,
+including :ned:`DataLinkVisualizer` which focuses on the data link level. This
+module allows you to see the visual representation of the data link level traffic
+in the form of arrows that fade as the traffic ceases.
 
-The showcase consists of five simulation models, each demonstrating
-different features of the data link activity visualizer.
+This showcase features five different simulation models, each designed to
+demonstrate different capabilities of the data link activity visualizer.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/datalinkactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/datalinkactivity>`__

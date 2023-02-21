@@ -4,12 +4,16 @@ IEEE 802.11 Rate Control
 Goals
 -----
 
-IEEE 802.11 contains a mechanism that is able to adapt to various
-channel conditions, and dynamically choose the optimal bitrate for the
-current conditions. This mechanism is called rate control, and the INET
-framework implements several variants. This showcase demonstrates the
-802.11 rate control mechanism in INET, and examines how rate control can
-improve application level throughput.
+Rate control is a key feature of the IEEE 802.11 wireless networking standard
+that allows devices to adapt to changing channel conditions and dynamically
+select the optimal bitrate for transmitting data. This helps to improve the
+overall performance of the network by reducing the likelihood of errors and
+retransmissions, and increasing the throughput of the network. In INET, several
+different variants of the 802.11 rate control mechanism are implemented,
+allowing users to choose the most appropriate one for their specific needs.
+
+This showcase demonstrates how rate control mechanisms can improve application-level
+throughput.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/ratecontrol <https://github.com/inet-framework/inet/tree/master/showcases/wireless/ratecontrol>`__

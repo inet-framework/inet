@@ -4,11 +4,20 @@ Frame Preemption
 Goals
 -----
 
-Ethernet frame preemption (802.1Qbu) enables higher priority frames to interrupt the transmission 
-of lower priority frames in the Ethernet MAC layer. This facilitates creating low latency for 
-time-critical high-priority frames.
+Ethernet frame preemption is a feature specified in the 802.1Qbu standard that
+allows higher priority frames to interrupt the transmission of lower priority
+frames at the Media Access Control (MAC) layer of an Ethernet network. This can
+be useful for time-critical applications that require low latency for
+high-priority frames. For example, in a Time-Sensitive Networking (TSN)
+application, high-priority frames may contain time-critical data that must be
+delivered with minimal delay. Frame preemption can help ensure that these
+high-priority frames are given priority over lower priority frames, reducing the
+latency of their transmission.
 
-This showcase demonstrates Ethernet frame preemption and examines the latency reduction.
+In this showcase, we will demonstrate Ethernet frame preemption and examine the
+latency reduction that it can provide. By the end of this showcase, you will
+understand how frame preemption works and how it can be used to improve the
+performance of time-critical applications in an Ethernet network.
 
 | INET version: ``4.3``
 | Source files location: `inet/showcases/tsn/framepreemption <https://github.com/inet-framework/inet/tree/master/showcases/tsn/framepreemption>`__

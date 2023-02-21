@@ -4,18 +4,17 @@ Using Real Applications in a Simulated Network
 Goals
 -----
 
-In this showcase, we'll use real applications which communicate over a simulated network.
-This feature is useful for testing how applications work over the network, without having
-to set up a physical network. The simulated network can be easily configured for various
-topologies and behaviors to test a variety of cases.
+This showcase demonstrates the use of real applications in a simulated network, allowing for testing
+of application behavior without having to set up a physical network. This technique is also known as
+software-in-the-loop (SIL).
 
-We'll use INET's emulation feature to interface the real world (the host OS environment) with the simulation.
-INET has various modules which facilitate this interfacing, you can read about them in the
-:doc:`Emulation section </users-guide/ch-emulation>` of the User's Guide.
-In this scenario, we'll use a real video application to stream a video file to another real video application.
+.. TODO this paragraph is too generic, it barely mean anything
+The simulation can be easily configured for various topologies and behaviors to test a variety of cases.
+Using INET's emulation feature, the real world (host OS environment) is interfaced with the simulation.
+INET offers various modules that make this interfacing possible, and more information about these modules
+can be found in the :doc:`Emulation section </users-guide/ch-emulation>` of the INET Framework User's Guide.
 
-Note that this showcase requires the ``Emulation`` feature of the INET Framework to be turned on
-(it's off by default), and it only runs on Linux. 
+In this showcase, a real video application is used to stream a video file to another real video application. Note that this showcase requires the INET Framework's Emulation feature to be turned on (default is off) and is only supported on Linux.
 
 | INET version: ``4.2``
 | Source files location: `inet/showcases/emulation/videostreaming <https://github.com/inet-framework/inet/tree/master/showcases/emulation/videostreaming>`__

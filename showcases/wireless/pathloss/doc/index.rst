@@ -4,13 +4,14 @@ Path Loss Models
 Goals
 -----
 
-INET features various path loss models for simulating radio propagation,
-ranging from simple ones like free space path loss to more complex ones
-like Rician and Rayleigh fading. This showcase demonstrates some of the
-available path loss models and how to use them in simulations.
+Path loss models are used to represent the loss of signal strength over distance
+in wireless communication. INET has a range
+of path loss models available, including simple models like free space path loss
+and more complex ones like Rician and Rayleigh fading.
 
-The showcase contains an example simulation, which computes received
-power vs. distance using several path loss model types.
+This showcase demonstrates how to use path loss models in simulations and
+it also compares the received power at different distances using different path
+loss models.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/pathloss <https://github.com/inet-framework/inet/tree/master/showcases/wireless/pathloss>`__

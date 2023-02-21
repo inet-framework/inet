@@ -4,18 +4,18 @@ Displaying IP Addresses and Other Interface Information
 Goals
 -----
 
-In the simulation of complex networks, it is often useful to be able to
-display node IP addresses, interface names, etc. above the node icons or
-on the links. For example, when automatic address assignment is used in
-a hierarchical network (e.g. using :ned:`Ipv4NetworkConfigurator`), visual
-inspection can help to verify that the result matches the expectations.
-While it is true that addresses and other interface data can also be
-accessed in the GUI by diving into the interface tables of each node,
-that is tedious and unsuitable for getting an overview.
+In complex network simulations, it is often useful to display per-interface information,
+such as IP addresses, interface names, etc., either above node icons or on the
+links. This helps in verifying that the network configuration matches
+expectations, especially when automatic address assignment is used (e.g. using
+the :ned:`Ipv4NetworkConfigurator`). Although this information can be accessed
+through the object inspector panel in the GUI, it can be tedious and difficult
+to get an overview.
 
-This showcase contains two example simulations. The first one demonstrates the
-visualization with the visualizer's default settings; the second one is
-about the advanced features.
+This showcase presents two example simulations that demonstrate the
+visualization of IP addresses and other interface information. The first
+simulation shows the display of the information with the default settings of the
+visualizer, while the second one focuses on the advanced features.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/interfacetable <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/interfacetable>`__

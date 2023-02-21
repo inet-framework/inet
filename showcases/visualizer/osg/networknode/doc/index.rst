@@ -4,14 +4,14 @@ Visualizing Network Nodes
 Goals
 -----
 
-INET provides several options for visualizing network nodes,
-both on the 2D canvas and in 3D scenes. Beyond aesthetics,
-customizing the appearance of nodes can also be useful,
-for example, to highlight certain nodes or to distinguish nodes based
-on location or function.
+INET offers several options for visualizing network nodes in 2D (canvas) and 3D
+(OSG) views. This provides a visually appealing representation of the network,
+and customizing the appearance can also aid in highlighting important nodes or
+differentiating them based on location or function. Options include specifying
+icons, 3D models, and colorization.
 
-This showcase demonstrates how network nodes are visualized and how their
-appearance can be customized in INET simulations.
+This showcase demonstrates the visualization options for network nodes in
+simulations and how to customize their appearance.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/networknode <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/networknode>`__

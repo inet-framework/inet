@@ -4,14 +4,14 @@ IEEE 802.11 Quality of Service
 Goals
 -----
 
-Quality of Service has been introduced into 802.11 in the 802.11e version of the standard in 2005.
-The QoS is considered of critical importance for delay-sensitive applications such as voice,
-streaming multimedia (video), and online gaming. With QoS, packets can belong to different
-traffic classes that have different transmit priorities. Packets with a higher priorities are
-statistically more likely to be transmitted before lower-priority ones, resulting in lower
-delay and jitter for delay-sensitive applications.
+IEEE 802.11 Quality of Service (QoS) is a feature designed to improve the
+performance of delay-sensitive applications, such as voice, streaming
+multimedia, and online gaming, by allowing packets to belong to different
+traffic classes with different transmit priorities. Packets with higher
+priorities are statistically more likely to be transmitted before lower-priority
+ones, resulting in lower delay and jitter for delay-sensitive applications.
 
-This showcase demonstrates QoS in INET's 802.11 MAC model.
+This showcase demonstrates the use of QoS in INET's 802.11 MAC model.
 
 | INET version: ``4.1``
 | Source files location: `inet/showcases/wireless/qos <https://github.com/inet-framework/inet/tree/master/showcases/wireless/qos>`__

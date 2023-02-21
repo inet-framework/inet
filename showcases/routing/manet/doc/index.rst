@@ -1,18 +1,19 @@
-MANET Routing Protocols
-=======================
+Exploring MANET Routing Protocols
+=================================
 
 Goals
 -----
 
-Most routing protocols for mobile ad hoc networks (MANETs) can be categorized
-as being either reactive or proactive. INET contains various routing
-protocols for MANETs from both categories, and other categories as
-well.
+Routing in Mobile Ad Hoc Networks (MANETs) is a challenging problem due to the
+dynamically changing network topology, which gave rise to the development of
+many different routing protocols. MANET routing
+protocols can be classified into reactive, proactive, and location-based, among
+others. INET features various routing protocols for MANETs from different
+categories.
 
-This showcase demonstrates the configuration and operation of three
-MANET routing protocols with three example simulations, using a reactive
-(AODV), a proactive (DSDV), and a location-based (GPSR) routing
-protocol.
+In this showcase, we'll look at three representative MANET routing protocols: a
+reactive protocol (AODV), a proactive protocol (DSDV), and a location-based
+protocol (GPSR). We'll explore each of them through three example simulations.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/routing/manet <https://github.com/inet-framework/inet/tree/master/showcases/routing/manet>`__

@@ -1,21 +1,25 @@
-Crosstalk between adjacent IEEE 802.11 channels
+Crosstalk Between Adjacent IEEE 802.11 Channels
 ===============================================
 
 Goals
 -----
 
-By default, 802.11 hosts and access points in INET are configured to use
-the same Wifi channel (Channel 1.) In reality, however, it is rarely the
-case. There are many Wifi networks at the same location, typically spread
-out on all channels (especially in the case of 2.4 GHz Wifi where only a few
-channels are available, compared to 5 GHz.) Transmissions on many
-adjacent channels also overlap in frequency and can cause interference.
+Crosstalk between adjacent IEEE 802.11 channels refers to the interference that
+can occur when transmissions on different channels overlap in frequency. In the
+IEEE 802.11 standard, which is commonly used for wireless networking, there are
+a number of different channels that can be used, depending on the frequency
+range (e.g. 2.4 GHz or 5 GHz). In a real-world scenario, it is rare for all
+devices to be using the same channel, and there may be multiple networks
+operating on different channels at the same location. When transmissions on
+adjacent channels overlap in frequency, they can interfere with each other and
+affect the performance of the network.
 
-INET has support for simulating communication on the different Wifi
-channels, both in the 2.4 GHz and 5 GHz frequency range. This showcase
-demonstrates using both overlapping and non-overlapping Wifi channels in
-simulations, and how transmissions on different channels interfere with
-each other.
+INET has support for simulating communication on
+different IEEE 802.11 channels, both in the 2.4 GHz and 5 GHz frequency ranges.
+In this showcase, we will demonstrate how to use overlapping and non-overlapping
+channels in simulations and how transmissions on different channels can
+interfere with each other. By the end of this showcase, you will understand the
+impact of crosstalk between adjacent 802.11 channels and how it can be simulated.
 
 This showcase divides the topic of the simulation of different Wifi
 channels into three cases:
@@ -78,6 +82,8 @@ a rectangle; ``host1`` is configured to send UDP packets to ``host2``, and simil
 simulations, specifying e.g. traffic generation and visualization, are
 defined in the ``General`` configuration in :download:`omnetpp.ini <../omnetpp.ini>`.
 The following sections detail the three configurations.
+
+.. note:: By default, 802.11 hosts and access points in INET are configured to use the same Wifi channel (Channel 1).
 
 Completely Overlapping Frequency Bands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

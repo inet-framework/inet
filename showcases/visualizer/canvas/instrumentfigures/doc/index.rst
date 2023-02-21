@@ -4,15 +4,14 @@ Instrument Figures
 Goals
 -----
 
-In complex simulations, there are usually several statistics that are vital
-for understanding what is happening inside the network. Although statistics
-can also be found and read in Qtenv's object inspector panel, it is often more
-convenient to directly display them on the top-level canvas in a graphical form.
-INET supports such visualization in the form of inspector figures
-that display various gauges and meters.
+In complex simulations, there are usually several statistics that are vital for
+understanding what is happening inside the network. While these statistics can
+be found in the object inspector panel of Qtenv, they are not always easily
+accessible. INET provides a convenient way to display these statistics directly
+on the top-level canvas, through the use of instrument figures, which display
+various gauges and meters.
 
-This showcase contains a configuration that demonstrates multiple instrument
-figures.
+This showcase demonstrates the use of multiple instrument figures.
 
 | INET version: ``4.1``
 | Source files location: `inet/showcases/visualizer/instrumentfigures <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/instrumentfigures>`__

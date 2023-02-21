@@ -4,20 +4,15 @@ Visualizing Transport Path Activity
 Goals
 -----
 
-With INET simulations, it is often useful to be able to visualize
-network traffic. INET provides several visualizers for this task,
-operating at various levels of the network stack. In this showcase, we
-examine :ned:`TransportRouteVisualizer` that can provide graphical feedback
-about transport traffic, i.e. traffic that passes through the transport
-layers of two endpoints.
+INET offers a range of network traffic visualizers that operate at different
+levels of the network stack. In this showcase, we will
+focus on :ned:`TransportRouteVisualizer` that provides graphical representation of
+transport layer traffic between two endpoints by displaying polyline arrow along
+the path that fades as the traffic ceases.
 
-.. todo::
-
-   <!-- TODO it would be more natural to be able to say "traffic between the transport
-   layers of two endpoints", but *unfortunately* that would not be true -->
-
-The showcase consists of two simulation models, both demonstrating
-different features of the transport path activity visualizer.
+This showcase contains two simulation models, each highlighting various aspects
+of the transport path activity visualizer, allowing for a comprehensive
+understanding of its features.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/transportpathactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/transportpathactivity>`__

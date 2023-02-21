@@ -4,14 +4,12 @@ Visualizing Node Mobility
 Goals
 -----
 
-In INET simulations, the movement of mobile nodes is often as important
-as the communication among them. However, as mobile nodes roam, it is
-often difficult to visually follow their movement. INET provides a
-visualizer that not only makes visually tracking mobile nodes easier
-but also indicates other properties like speed and direction.
+In wireless simulations, the movement of mobile nodes can be a crucial aspect that
+greatly impacts communication among them. However, visually tracking the movement
+can be challenging. INET provides a mobility visualizer that makes it easier to
+follow mobile nodes and displays properties such as speed and direction.
 
-This showcase consists of one simulation model that demonstrates
-important features of the mobility visualizer.
+This showcase demonstrates the capabilities of the mobility visualizer.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/mobility <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/mobility>`__

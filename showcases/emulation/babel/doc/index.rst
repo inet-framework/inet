@@ -4,19 +4,20 @@ Testing a Linux Routing Daemon in a Simulated Environment
 Goals
 -----
 
-Testing routing protocols with simulation is often easier than
-building a test setup in the real world. INET's emulation features make it possible
-to use a real-world routing protocol implementation in a simulated environment. The
-simulated environment and multiple instances of the real-world routing protocol implementation can
-run on the same computer.
+Testing routing protocols with simulation is often easier than building a test
+setup in the real world. INET's emulation features make it possible to use a
+real-world routing protocol implementation in a simulated environment, where the
+simulated environment and multiple instances of the real-world routing protocol
+implementation can run on the same computer.
 
-This showcase demonstrates such a test scenario with the Linux implementation
-of the Babel routing protocol (Babel daemon). We'll simulate mobility and wireless
-connectivity in a mobile ad hoc network, but the routes will be managed by multiple
-instances of the Babel daemon.
+This showcase demonstrates such a test scenario with the Linux implementation of
+the Babel routing protocol (Babel daemon). We'll run a simulation of a mobile ad
+hoc network, where mobility and wireless connectivity will be simulated using
+INET, and the routes will be managed by multiple instances of the Babel daemon.
 
-Note that the emulation example only runs on Linux. For an introduction to emulation
-in INET, read the :doc:`Emulation section </users-guide/ch-emulation>` in the User's Guide.
+Note that the emulation example only runs on Linux. For a comprehensive
+understanding of emulation in INET, read the :doc:`Emulation section
+</users-guide/ch-emulation>` in the User's Guide.
 
 | INET version: ``4.1``
 | Source files location: `inet/showcases/emulation/babel <https://github.com/inet-framework/inet/tree/master/showcases/emulation/babel>`__

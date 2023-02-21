@@ -4,7 +4,7 @@ IEEE 802.11 Throughput
 Goals
 -----
 
-This example analyzes how application-level throughput changes as a
+This example ana lyzes how application-level throughput changes as a
 function of nominal bitrate in an 802.11g network.
 
 | INET version: ``4.0``

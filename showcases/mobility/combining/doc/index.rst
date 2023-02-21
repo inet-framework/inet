@@ -4,16 +4,16 @@ Combining Mobility Models
 Goals
 -----
 
-Node positioning and mobility is important for many simulation scenarios,
-especially those involving wireless communication.
-In INET, mobility is added to nodes in the form of modules that represent
-mobility models, such as linear motion or random waypoint. A large number of
-mobility models have been provided with INET, and they can also be combined.
+Node positioning and mobility are crucial in simulation scenarios that involve
+wireless communication. INET provides several mobility models, such as linear
+motion or random waypoint, which can be added to nodes as modules. The ability
+to combine these models opens up the possibility of creating complex and
+realistic simulation scenarios.
 
-This showcase focuses on the latter and demonstrates how elementary mobility
-models (those that describe motion, position and orientation on their own)
-can be combined to create more complex motion patterns. (Elementary mobility
-models themselves are demonstrated in  :doc:`../../basic/doc/index`.)
+This showcase focuses on combining elementary mobility models, which describe
+motion, position, and orientation independently, to generate more sophisticated
+motion patterns. (The use of elementary mobility models is covered in a separate
+showcase, :doc:../../basic/doc/index.)
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/mobility/combining <https://github.com/inet-framework/inet/tree/master/showcases/mobility/combining>`__

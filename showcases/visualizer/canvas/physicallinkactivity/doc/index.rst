@@ -4,14 +4,14 @@ Visualizing Physical Link Activity
 Goals
 -----
 
-With INET simulations, it is often useful to be able to visualize
-network traffic. For this task, there are several visualizers in INET,
-operating at various levels of the network stack. In this showcase, we
-demonstrate the operation of :ned:`PhysicalLinkVisualizer`, which can provide
-graphical feedback about physical layer traffic.
+Visualizing the network traffic activity in a simulation at various layers of the
+network stack is often useful for understanding and analyzing the network's
+behavior. In this showcase, we will focus on :ned:`PhysicalLinkVisualizer` that
+provides graphical representation of the physical layer traffic in the form of
+arrows that fade as the traffic ceases.
 
-The showcase consists of three simulation models, each demonstrating
-different features of the physical link visualizer.
+This showcase consists of three simulation models that demonstrate the different
+capabilities of :ned:`PhysicalLinkVisualizer`.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/physicallinkactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/physicallinkactivity>`__

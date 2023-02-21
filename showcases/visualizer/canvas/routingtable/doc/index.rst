@@ -1,19 +1,18 @@
-Visualizing Routing Tables
-==========================
+Visualizing IPv4 Routing Tables
+===============================
 
 Goals
 -----
 
-In a complex network topology, it is difficult to see how a packet would
-be routed because the relevant data is scattered among network nodes and
-hidden in their routing tables. INET contains support for visualization
-of routing tables and can display routing information graphically in a
-concise way. Using visualization, it is often possible to understand
-routing in a simulation without looking into individual routing tables.
-The visualization currently supports IPv4.
+Determining the routes that IPv4 packets take in a multi-hop network can be a
+tedious task. The routing information is stored in the IPv4 routing tables of
+the network nodes, which are scattered throughout the network, making it
+difficult to get a comprehensive view. INET offers a visualizer that can
+graphically display the routing information, making it easier to understand the
+routing in a simulation without having to inspect individual routing tables.
 
-This showcase contains three simulation models of increasing complexity,
-each demonstrating different features of routing table visualization.
+This showcase includes three simulation models of increasing complexity,
+demonstrating the different features of routing table visualization.
 
 | INET version: ``3.6``
 | Source files location: `inet/showcases/visualizer/routingtable <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/routingtable>`__

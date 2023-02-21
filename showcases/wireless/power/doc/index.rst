@@ -4,13 +4,15 @@ Power Consumption
 Goals
 -----
 
-This showcase demonstrates the modeling of energy consumption, energy
-storage and generation in the INET Framework through the example of a
-mobile ad-hoc network. We'll examine the effect of wireless
-communication on the power consumption of the mobile nodes. The main
-energy consumer in the nodes will thus be the radio; the modeled devices
-will also have energy storage (battery) and energy "generator" (e.g.
-solar cells) units built into them.
+Power consumption is a critical aspect of the design and operation of wireless
+networks, particularly in mobile and energy-constrained systems. In this
+showcase, we demonstrate how to model the energy
+consumption, energy storage, and energy generation of mobile nodes in an ad-hoc
+wireless network. Through an example simulation, we will examine the impact of
+wireless communication on the power consumption of the mobile nodes, with the
+main focus being on the energy consumed by the radio. The modeled devices
+also have energy storage units (batteries) and energy generation units
+(modeling solar cells) built into them.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/power <https://github.com/inet-framework/inet/tree/master/showcases/wireless/power>`__

@@ -4,14 +4,14 @@ Visualizing Network Path Activity
 Goals
 -----
 
-With INET simulations, it is often useful to be able to visualize
-network traffic. INET offers several visualizers for this task,
-operating at various levels of the network stack. In this showcase, we
-examine :ned:`NetworkRouteVisualizer` that can provide graphical feedback
-about network layer level traffic.
+When simulating networks, it is often useful to have a visual representation of
+network traffic. INET provides several visualizers for this purpose, each
+operating at different levels of the network stack. The focus of this showcase
+is on the :ned:`NetworkRouteVisualizer`, which graphically displays network layer
+traffic in the form of polyline arrows along the path that fade as the traffic ceases.
 
-The showcase consists of four simulation models, each demonstrating
-different features of the network path activity visualizer.
+The showcase contains four simulation models, each demonstrating different
+features of the network path activity visualizer.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/networkpathactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/networkpathactivity>`__

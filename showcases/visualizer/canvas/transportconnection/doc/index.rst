@@ -4,18 +4,14 @@ Visualizing Transport Connections
 Goals
 -----
 
-In a large network with a complex topology, there might be many
-transport layer applications and many nodes communicating. In such a
-case, it might be difficult to see which nodes communicate with which,
-or if there is any communication at all. Transport connection
-visualization makes it easy to get information about the active
-transport connections in the network at a glance. Visualization makes it
-easy to identify connections by their two endpoints, and to tell
-different connections apart. It also gives a quick overview of the
-number of connections in individual nodes and the whole network.
+In a complex network with many applications and large number of nodes communicating,
+it can be challenging to keep track of all the active transport layer connections.
+Transport connection visualization makes it easier to identify the two endpoints
+of each connection by displaying a marker above the nodes. The markers appear in
+different colors to allow differentiating between connections.
 
-This showcase demonstrates the visualization of TCP connections via two
-example simulations.
+In this showcase, we will present two example simulations that demonstrate the
+visualization of TCP connections.
 
 | INET version: ``3.6``
 | Source files location: `inet/showcases/visualizer/transportconnection <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/transportconnection>`__

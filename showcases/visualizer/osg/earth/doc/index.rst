@@ -4,15 +4,14 @@ Visualizing Terrain and Urban Environment
 Goals
 -----
 
-It is often desirable for simulations to have a real-world context. One
-way to achieve this is to place network nodes on a real world map. The
-map doesn't have any effect on the simulation, it only alters the
-visuals of the network. However, objects can be added to represent
-buildings, which can affect the simulation as obstacles to signal
-propagation.
+This showcase demonstrates adding a map in the simulation. Displaying a map in a
+network simulation provides a real-world context and can help to improve the
+visual appeal of the simulation. It also helps to place network nodes in a
+geographic context and allows the addition of objects, such as buildings. The
+map doesn't have any effect on the simulation, it only alters the visuals of the
+network.
 
-This showcase is about placing a map in the simulation. It contains
-three example configurations of increasing complexity, each
+It contains three example configurations of increasing complexity, each
 demonstrating various features of the visualization.
 
 | INET version: ``4.0``

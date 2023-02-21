@@ -4,11 +4,12 @@ Visualizing IEEE 802.11 Network Membership
 Goals
 -----
 
-When simulating wifi networks that overlap in space, it is difficult to
-see which node is a member of which network. The membership may even
-change over time. It would be useful to be able to display e.g. the SSID
-above node icons. INET provides such a visualizer that we demonstrate in
-this showcase.
+When simulating wireless networks that overlap in space or where network membership
+changes over time, getting an overview of the membership of each node can be cumbersome.
+In such simulations, the IEEE 802.11 network membership visualizer can be very helpful.
+
+In this showcase, we demonstrate how to display the SSID of each node, making it
+easier to understand the network membership and how it changes over time.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/ieee80211 <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/ieee80211>`__

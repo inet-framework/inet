@@ -4,9 +4,11 @@
 Goals
 -----
 
-Simulating scenarios that involve aircraft, drones, etc. require modeling
-of movement in three dimensions. In this showcase, we show how such spatial
-movement can be produced and visualized with INET.
+Modeling the movement of objects in three dimensions is essential when
+simulating scenarios involving aircraft, drones, and similar entities. This
+showcase demonstrates how INET can be used to generate and visualize
+three-dimensional mobility. This can be useful for understanding and evaluating
+the behavior of communication systems in such environments.
 
 | INET version: ``4.1``
 | Source files location: `inet/showcases/mobility/spatial <https://github.com/inet-framework/inet/tree/master/showcases/mobility/spatial>`__

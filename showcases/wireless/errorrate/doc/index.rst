@@ -4,8 +4,11 @@ Packet Loss vs. Distance Using Various WiFi Bitrates
 Goals
 -----
 
-In this showcase, we perform a parameter study examining how packet error
+In this showcase, we perform a parameter study where we examine how packet error
 rate changes as a function of distance in an 802.11g wireless network.
+The packet error rate is measured at various WiFi
+bitrates, providing insights into the impact of different bitrates on the
+quality of communication over different distances. 
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/errorrate <https://github.com/inet-framework/inet/tree/master/showcases/wireless/errorrate>`__

@@ -4,18 +4,18 @@ Visualizing Statistics
 Goals
 -----
 
-Usually, statistics collected while the simulation is running are
-analyzed only after the simulation has concluded. In contrast, while the
-simulation is running, it is difficult to follow what's happening in the
-model in terms of statistics. For example, in a video streaming network,
-seeing the throughput of each client gives a quick overview of whether the
-model is working as expected.
+Although statistical data collected during a simulation is typically analyzed
+after the simulation has completed, monitoring statistical data while the
+simulation is running can also provide valuable insights into the behavior of
+the model. For example, in a video streaming network, observing the throughput
+of each client can immediately indicate if the model is performing as expected.
 
-Statistics collected by submodules can be visualized at network nodes,
-on the top level canvas. This visualization could help in troubleshooting and the
-early detection of problems in simulation models. This showcase contains
-two example simulations, showing the basics and the more advanced
-features of the visualization.
+To aid in real-time monitoring, INET supports the visualization of statistics
+collected by arbitrary submodules of network nodes, and displayed near the icons
+representing the network nodes. This visualization can assist in troubleshooting
+and early detection of potential problems in simulation models. The showcase
+features two example simulations, demonstrating both basic and advanced features
+of the visualization.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/statistic <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/statistic>`__

@@ -4,15 +4,16 @@ Visualizing the Physical Environment
 Goals
 -----
 
-The physical environment has a profound effect on the communication of
-wireless devices. For example, physical objects like walls inside
-buildings constraint mobility. They also obstruct radio signals, often
-resulting in packet loss. It's difficult to make sense of the simulation
-without actually seeing where physical objects are.
+The physical environment has a profound effect on the communication of wireless
+devices. For example, physical objects like walls inside buildings constraint
+mobility. They also obstruct radio signals, often resulting in packet loss.
+It is difficult to make sense of the simulation without actually seeing where
+physical objects are. INET provides the visualization of these objects to
+help understanding the simulation better. This feature is available both in
+2D and 3D visualization.
 
-The visualization of physical objects present in the physical
-environment is essential. This showcase contains two example
-simulations, which demonstrate the visualization of physical objects.
+This showcase demonstrates the visualization of physical objects through displaying
+the floorplan and walls of an apartment.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/environment <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/environment>`__
@@ -26,6 +27,8 @@ objects. The objects themselves are provided by the
 :ned:`PhysicalEnvironment` module; their geometry, physical and visual
 properties are defined in the XML configuration of the
 :ned:`PhysicalEnvironment` module.
+
+.. note:: For more information about the XML format in which the physical environment (geometry, materials, etc.) can be defined, see the NED documentation of the :ned:`PhysicalEnvironment` module.
 
 The two-dimensional projection of physical objects is determined by the
 :ned:`SceneCanvasVisualizer` module. (This is because the projection is

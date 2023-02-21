@@ -4,20 +4,19 @@ Visualizing Submodule Information
 Goals
 -----
 
-In INET, network nodes are typically compound modules that are several levels deep.
-Their submodules (apps, protocols, protocol parts, etc.) often contain information
-that is helpful for understanding model behavior but is difficult to
-access in the graphical runtime environment. (To see them, one needs to drill down
-in the graphical inspector or the object inspector to access them.)
+In INET, network nodes are typically composed of multiple submodules, such as
+apps, protocols, and protocol parts. These submodules often contain important
+information for understanding the behavior of the network, but accessing it can
+be difficult, as it requires drilling down into the graphical inspector or
+object inspector.
 
-To help the user, INET contains support for displaying information produced by
-a submodule (or selected submodules) on the top-level canvas, above (or near) the
-corresponding network node icons. This feature makes such information conveniently
-available at a glance.
+To make this information more accessible, INET provides a feature for displaying
+submodule information on the top-level canvas, near the corresponding network
+node icons. This makes the information readily available at a glance.
 
-This showcase contains the model of a simple WiFi network and
-shows how (1) the number of packets sent/received by an application, and
-(2) IEEE 802.11 MAC state information can be displayed on the network level.
+This showcase features a simple WiFi network model and demonstrates how to
+display (1) the number of packets sent and received by an application, and (2)
+the IEEE 802.11 MAC state information, on the network level.
 
 | INET version: ``4.1``
 | Source files location: `inet/showcases/visualizer/submoduleinfo <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/submoduleinfo>`__

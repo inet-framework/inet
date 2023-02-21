@@ -4,16 +4,13 @@ Visualizing Packet Drops
 Goals
 -----
 
-Several network problems manifest themselves as excessive packet drops,
-for example, poor connectivity, congestion, or misconfiguration.
-Visualizing packet drops helps to identify such problems in simulations,
-thereby reducing time spent on debugging and analysis. Poor connectivity
-in a wireless network can cause senders to drop unacknowledged packets
-after the retry limit is exceeded. Congestion can cause queues to
-overflow in a bottleneck router, again resulting in packet drops.
-
-This showcase contains several simulation models demonstrating typical
-causes of packet drops.
+This showcase presents various simulation models that demonstrate the use of the
+packet drop visualizer in identifying network problems in INET simulations. The
+visualizer helps to pinpoint the causes of excessive packet drops, such as poor
+connectivity, congestion, or misconfiguration, allowing for more efficient
+debugging and analysis. The simulation models showcase typical scenarios of
+packet drops resulting from issues such as retransmission in wireless networks
+and overflowing queues in bottleneck routers.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/packetdrop <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/packetdrop>`__

@@ -4,15 +4,18 @@ IEEE 802.11 Frame Aggregation
 Goals
 -----
 
-When sending small packets, 802.11 protocol overhead becomes significant,
-which hampers performance. Frame aggregation is a feature which can mitigate
-the performance hit, by sending multiple data packets in a single 802.11 transmission.
-The use of aggregation decreases the number of contention periods, interframe spaces
-and protocol headers, thus increasing throughput.
+IEEE 802.11 frame aggregation is a feature that can improve the performance of
+wireless networks by reducing the overhead associated with transmitting small
+packets. When sending small packets over a wireless network using the 802.11
+protocol, the overhead from protocol headers and other control information can
+become significant, resulting in reduced performance. Frame aggregation helps to
+mitigate this performance hit by allowing multiple data packets to be sent in a
+single 802.11 transmission. This reduces the number of contention periods,
+interframe spaces, and protocol headers, increasing the overall throughput of
+the network.
 
-This showcase contains an example simulation which demonstrates frame aggregation
-in INET's 802.11 model, examining if frame aggregation is useful when sending
-lots of small packets.
+In this showcase, we will demonstrate frame aggregation in INET's 802.11 model
+and examine its effect on performance when sending a large number of small packets.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/aggregation <https://github.com/inet-framework/inet/tree/master/showcases/wireless/aggregation>`__

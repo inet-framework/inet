@@ -4,10 +4,12 @@ IEEE 802.11 Handover
 Goals
 -----
 
-This example simulation demonstrates handover between two access points
-(APs) in an 802.11 wireless LAN using infrastructure mode. The goal is
-to show how the handover takes place between the two APs, including
-beacons, active scanning, the authentication and association processes.
+This simulation demonstrates the handover process between two access points (APs)
+in an 802.11 wireless LAN operating in infrastructure mode. The demonstration
+highlights the various steps involved in the handover, including beacon
+transmission, active scanning, authentication, and association. The goal of this
+simulation is to illustrate the realism and accuracy of the INET Framework in
+simulating real-world wireless network scenarios.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/handover <https://github.com/inet-framework/inet/tree/master/showcases/wireless/handover>`__

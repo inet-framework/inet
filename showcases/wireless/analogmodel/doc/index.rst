@@ -4,12 +4,17 @@ Wireless Signal Analog Domain Representations
 Goals
 -----
 
-Radio signal analog models represent signals as a physical phenomena as they are transmitted,
-received and propagate in the wireless medium. Models of different complexity are available,
+Wireless signal analog domain representations are models that represent radio
+signals as physical phenomena as they are transmitted, received, and propagate
+in the wireless medium. Models of different complexity are available,
 suitable for different purposes.
 
-This showcase describes the available analog signal representation models, their advantages and
-drawbacks, and contains three example simulations for typical use cases.
+In this showcase, we will describe the various analog signal representation
+models that are available and their advantages and drawbacks. We will also
+provide three example simulations that demonstrate the use of these models in
+typical use cases. By the end of this showcase, you will understand the
+different analog signal representation models and how they can be used to
+simulate the behavior of wireless systems.
 
 | INET version: ``4.2``
 | Source files location: `inet/showcases/wireless/analogmodel <https://github.com/inet-framework/inet/tree/master/showcases/wireless/analogmodel>`__

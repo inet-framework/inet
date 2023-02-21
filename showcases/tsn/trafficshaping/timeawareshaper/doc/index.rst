@@ -4,10 +4,20 @@ Time-Aware Shaping
 Goals
 -----
 
-The IEEE 802.1qbv Time-aware shaping schedules the transmission of time-critical and lower priority
-frames in time-triggered windows, and as such guarantees bounded latency for time-critical frames.
+Time-aware shaping is a feature specified in the IEEE 802.1Qbv standard that
+allows for the scheduling of the transmission of time-critical and lower
+priority frames in time-triggered windows. This helps to guarantee bounded
+latency for time-critical frames, which is important for applications that
+require low and predictable latency in Time-Sensitive Networking (TSN).
+Time-aware shaping works by dividing time into fixed intervals, or windows, and
+scheduling the transmission of frames within these windows based on their
+priority. Higher priority frames are given priority by transmitting them in a
+separate window, while lower priority frames are transmitted in the remaining time.
 
-In this showcase, we demonstrate how to use time-aware traffic shaping.
+In this showcase, we will demonstrate how to use time-aware traffic shaping to
+improve the performance of time-critical applications in an Ethernet network. By
+the end of this showcase, you will understand how time-aware shaping works and
+how it can be used to guarantee bounded latency for time-critical frames.
 
 | INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/trafficshaping/timeawareshaper <https://github.com/inet-framework/inet/tree/master/showcases/tsn/trafficshaping/timeawareshaper>`__
@@ -21,7 +31,7 @@ Overview
 Time-aware shaping (TAS), and its implementation, the Time-aware shaper, utilizes the Time-division multiple access (TDMA) scheme to send different priority traffic streams
 in their own allotted transmission time windows. This makes the delay bounded, as lower-priority frames cannot hold up higher priority ones.
 
-.. note:: Time-aware shaping can be combined with 802.1qbu Frame Preemption. This can increase bandwidth utilization because frames that otherwise 
+.. note:: Time-aware shaping can be combined with 802.1Qbu Frame Preemption. This can increase bandwidth utilization because frames that otherwise 
    wouldn't fit in the available time window can be sent in fragments.
 
 The time-aware shaper transmits different traffic streams by opening and closing gates belonging to different queues, according

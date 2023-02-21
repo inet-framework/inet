@@ -4,15 +4,15 @@ PCAP Recording
 Goals
 -----
 
-INET has support for recording PCAP traces from simulations. The
-recording process produces PCAP files that are similar to real-world
-PCAP traces, so one can use the same tools and techniques for analyzing
-simulated traffic as used on real traffic, such as Wireshark and
-tcpdump. Knowledge of PCAP can be reused in the context of simulations.
+INET has the capability to record PCAP traces from simulations. These PCAP files
+have the same format as real-world PCAP traces, so that the same tools and
+techniques used to analyze real traffic can also be applied to simulated
+traffic. This means that popular tools like Wireshark and tcpdump can be
+leveraged in the context of simulations.
 
-This showcase contains an example simulation, which generates and
-records PCAP traces of TCP, UDP, and ICMP traffic, using various
-physical layer protocols like Ethernet and 802.11.
+This demonstration includes a sample simulation that generates and records PCAP
+traces of TCP, UDP, and ICMP traffic, using various physical layer protocols
+such as Ethernet and 802.11.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/general/pcaprecording <https://github.com/inet-framework/inet/tree/master/showcases/general/pcaprecording>`__

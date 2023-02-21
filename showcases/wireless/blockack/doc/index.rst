@@ -4,12 +4,18 @@ IEEE 802.11 Block Acknowledgment
 Goals
 -----
 
-Block Acknowledgment is an 802.11 MAC feature that increases throughput by decreasing
-protocol overhead. Instead of individually acknowledging each received packet, a single block
-acknowledgment frame can acknowledge multiple packets. This reduces the number of ack frames
-and corresponding interframe spaces, thereby increasing throughput.
+IEEE 802.11 block acknowledgment is a feature of the Media Access Control (MAC)
+layer of the 802.11 protocol that is designed to increase throughput by reducing
+protocol overhead. It works by allowing a single block acknowledgment frame to
+acknowledge the reception of multiple packets, instead of individually
+acknowledging each packet with a separate acknowledgement (ACK) frame. This
+reduces the number of ACK frames and corresponding interframe spaces, resulting
+in increased throughput.
 
-This showcase demonstrates the block acknowledgment feature in INET's 802.11 model.
+In this showcase, we will demonstrate the block acknowledgment feature in INET's
+802.11 model. By the end of this showcase, you will understand how to enable and configure block
+acknowledgment in INET to improve the performance of
+wireless networks that use the 802.11 protocol.
 
 | INET version: ``4.1``
 | Source files location: `inet/showcases/wireless/blockack <https://github.com/inet-framework/inet/tree/master/showcases/wireless/blockack>`__

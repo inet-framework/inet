@@ -4,21 +4,22 @@ Styling and Appearance
 Goals
 -----
 
-In INET simulations, multiple visualizers are often used simultaneously.
-Since some of them have similar default looks, it is not always easy to
-tell them apart when watching the simulation. To help in
-creating more appealing and more comprehensible simulations, INET
-visualizers have many customization options. These customization options
-are named consistently across all visualizers.
+INET visualizers offer a range of customization options, allowing you to tailor
+the appearance of your simulation to your needs. This includes adjusting colors,
+line widths, sizes, and placements, among other things. These
+customization options can enhance the visual appeal and clarity of your
+simulation, particularly when multiple visualizations are enabled.
 
-This showcase consists of four examples that demonstrate how to
-customize lines, arrows, icons, fonts, and annotations.
+This showcase features four examples that illustrate how to customize lines,
+arrows, icons, fonts, and annotations.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/styling <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/styling>`__
 
 Customizing Lines and Arrows
 ----------------------------
+
+.. These customization options are named consistently across all visualizers.
 
 In INET simulations, links and packet paths are visualized as arrows.
 When too many links and paths are visualized in a simulation, it can be

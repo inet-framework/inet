@@ -4,8 +4,15 @@ The Hidden Node Problem
 Goals
 -----
 
-This showcase demonstrates the hidden node problem in 802.11 wireless
-networks, and the RTS/CTS mechanism that addresses it.
+The hidden node problem occurs when two nodes in a wireless network can
+communicate with a third node, but cannot communicate with each other directly
+due to obstacles or being out of range. This can lead to collisions at the third node
+when both nodes transmit simultaneously. 
+The RTS/CTS mechanism is used to address this problem by allowing nodes
+to reserve the channel before transmitting.
+
+In this showcase, we demonstrate the hidden node problem and how the RTS/CTS
+mechanism can be used to solve it in an 802.11 wireless network.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/hiddennode <https://github.com/inet-framework/inet/tree/master/showcases/wireless/hiddennode>`__

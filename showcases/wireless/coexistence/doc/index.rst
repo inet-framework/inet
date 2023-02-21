@@ -4,15 +4,24 @@ Coexistence of IEEE 802.11 and 802.15.4
 Goals
 -----
 
-Different wireless technologies sometimes operate in the same frequency range.
-For example, both IEEE 802.11 and IEEE 802.15.4 have versions that use the 2.4 GHz
-ISM band. As such, the signals of the two protocols can interfere. This is called
-cross-technology interference, or CTI.
+Wireless technologies such as IEEE 802.11 (Wi-Fi) and IEEE 802.15.4 (Zigbee)
+often operate in the same frequency range, which can lead to cross-technology
+interference (CTI) between the signals of the two protocols, affecting the
+performance of both. In the case of 802.11 and 802.15.4, both
+technologies have versions that use the 2.4 GHz Industrial, Scientific, and
+Medical (ISM) band, which can result in CTI between the two protocols.
 
-INET has support for simulating CTI between any of its wireless protocol models.
-Simulation can be used to examine how the different protocols
-interact and affect each other's operation. This showcase demonstrates the coexistence
-of INET's 802.11 and 802.15.4 models.
+INET has support for simulating CTI between any of its
+wireless protocol models, including 802.11 and 802.15.4. This allows users to
+examine how the different protocols interact and affect each other's operation
+in a simulated environment.
+
+In this showcase, we will demonstrate the
+coexistence of INET's 802.11 and 802.15.4 models and examine how they interact
+with each other. By the end of this showcase, you will understand how these two
+protocols can coexist in the same frequency range and the impact of CTI on their
+operation.
+
 
 | INET version: ``4.2``
 | Source files location: `inet/showcases/wireless/coexistence <https://github.com/inet-framework/inet/tree/master/showcases/wireless/coexistence>`__

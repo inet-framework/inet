@@ -4,28 +4,27 @@ Using Simulated Applications in a Real Network
 Goals
 -----
 
-In this showcase, we show how a simulated application can be used as a real
-application that communicates over the (real) network. Being able to do so opens
-a lot of possibilities. For example, you can deploy an application that only
-exists as a simulation model on real nodes, and test its behavior over a real
-network. Or, by letting the model talk to real-world implementations of the same
-application, you can test its interoperability and validate its behavior.
+This showcase demonstrates how a simulated application can function as a real
+application and communicate over a real network. This opens up a range of
+possibilities, such as testing the behavior of a simulation model over a real
+network, or evaluating its interoperability with real-world implementations of
+the same application.
 
-The goal will be achieved by running the INET application-layer module inside a
-"wrapper" simulation, which (1) ensures that INET sockets map to real
-sockets of the host OS (so that application traffic goes via the network stack
-of the host OS and not stay inside the simulation), and (2) uses a real-time event
-scheduler so that timings correspond to real time.
+The goal is achieved by utilizing the INET application-layer module within a
+"wrapper" simulation. In this simulation, (1) we map INET sockets to the real sockets
+of the host operating system (OS), thus allowing application traffic to go
+through the network stack of the host OS, and (2) we employ a real-time event
+scheduler to ensure that timings align with real time.
 
-We'll use a VoIP application as an example. There'll be a sender and a receiver
-application, running in two separate simulations, and we'll send realistic VoIP
-traffic (contents of an audio file) between them. The received audio will be
-saved to a file, which can be compared to the original to examine how the audio
-quality is affected by the packets passing through the network.
+As an example, the demonstration uses a Voice over IP (VoIP) application. The
+sender and receiver applications run in separate simulations in real time, and
+send realistic VoIP traffic (contents of an audio file) over the host network.
+The received audio is saved to a file, which can be compared to the original to
+assess the impact of network transmission on audio quality.
 
-Note that this showcase requires the ``VoipStream`` and ``NetworkEmulationSupport``
-features of the INET Framework to be turned on (they are off by default), and it
-only runs on Linux.
+Please note that the ``VoipStream`` and ``NetworkEmulationSupport`` features of the INET
+Framework must be enabled for this demonstration (they are disabled by default),
+and it is only compatible with Linux systems.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/emulation/voip <https://github.com/inet-framework/inet/tree/master/showcases/emulation/voip>`__

@@ -4,11 +4,13 @@ Multiple Wireless Interfaces
 Goals
 -----
 
-In real life, many wireless devices have multiple radios so that they can
-communicate on multiple wireless networks simultaneously. Examples of such
-devices are mobile phones that have cellular, WiFi and Bluetooth interfaces,
-or a dual-band wireless router. This showcase demonstrates how such devices
-can be simulated in INET.
+Wireless devices often have multiple network interfaces so they can
+communicate on multiple wireless networks simultaneously. This can be useful for
+devices such as mobile phones, which often have cellular, WiFi, and Bluetooth
+interfaces, or dual-band wireless routers.
+
+This showcase demonstrates how to simulate such devices and how they can be used
+to communicate on multiple wireless networks simultaneously.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/wireless/multiradio <https://github.com/inet-framework/inet/tree/master/showcases/wireless/multiradio>`__

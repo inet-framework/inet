@@ -4,13 +4,15 @@ Visualizing Radio Medium Activity
 Goals
 -----
 
-INET contains support for visualizing radio signals as they propagate
-through space, making it easy to see which nodes are transmitting and
-which are receiving at any given time, and what signals are present at
-various nodes.
+When simulating wireless networks, it can be useful to visualize
+the radio signals as they propagate through the environment. INET
+provides visualization features that make it easy to see which nodes
+are transmitting, which are receiving, and what signals are present at
+various points in the network.
 
-This showcase contains three configurations of increasing complexity,
-each showing different features of the visualization.
+This showcase consists of three simulation models that demonstrate the
+features of the radio medium activity visualizer, increasing in complexity
+from one model to the next.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/radiomediumactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/radiomediumactivity>`__

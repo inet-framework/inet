@@ -4,15 +4,22 @@ Modeling Directional Antennas
 Goals
 -----
 
-INET contains various directional antenna
-models. The support for different antennas is useful for simulating many
-kinds of wireless scenarios where antenna characteristics are important.
+Modeling directional antennas refers to the use of antenna models in simulations
+to represent the directional characteristics of real-world antennas. Directional
+antennas are designed to transmit and receive signals in a specific direction,
+rather than uniformly in all directions. This can be useful in a variety of
+wireless scenarios where the directionality of the antenna is important, such as
+in long-range communication.
 
-This showcase aims to highlight the antenna models available in INET.
-The showcase contains an example
-simulation that demonstrates the directionality of five antenna models.
-Four of these represent well-known antenna models, while the last one
-is a universal antenna that can model any rotationally symmetrical antenna pattern.
+INET contains various models of directional
+antennas, which can be used to simulate different types of antenna patterns. In
+this showcase, we will highlight the antenna models that are available in INET
+and provide an example simulation that demonstrates the directionality of five
+different antenna models. Four of these models represent well-known antenna
+patterns, while the fifth model is a universal antenna that can be used to model
+any rotationally symmetrical antenna pattern. By the end of this showcase, you
+will understand the different antenna models that are available in INET and how
+they can be used to simulate the directionality of antennas.
 
 | INET version: ``4.1``
 | Source files location: `inet/showcases/wireless/directionalantennas <https://github.com/inet-framework/inet/tree/master/showcases/general/directionalantennas>`__
