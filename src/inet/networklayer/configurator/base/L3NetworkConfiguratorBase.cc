@@ -62,9 +62,10 @@ void L3NetworkConfiguratorBase::initialize(int stage)
 
 void L3NetworkConfiguratorBase::extractTopology(Topology& topology)
 {
+    EV_INFO << "Extracting network topology" << endl;
     // extract topology
     topology.extractByProperty("networkNode");
-    EV_DEBUG << "Topology found " << topology.getNumNodes() << " nodes\n";
+    EV_DEBUG << "Topology contains " << topology.getNumNodes() << " nodes" << endl;
 
     // print isolated networks information
     std::map<int, std::vector<Node *>> isolatedNetworks;
@@ -80,9 +81,9 @@ void L3NetworkConfiguratorBase::extractTopology(Topology& topology)
             networkNodes->second.push_back(node);
     }
     if (isolatedNetworks.size() == 1)
-        EV_DEBUG << "All network nodes belong to a connected network.\n";
+        EV_DEBUG << "All network nodes belong to a connected network" << endl;
     else
-        EV_DEBUG << "There exists " << isolatedNetworks.size() << " isolated networks.\n";
+        EV_DEBUG << "There exists " << isolatedNetworks.size() << " isolated networks" << endl;
 
     // extract nodes, fill in interfaceTable and routingTable members in node
     for (int i = 0; i < topology.getNumNodes(); i++) {
@@ -94,6 +95,7 @@ void L3NetworkConfiguratorBase::extractTopology(Topology& topology)
     }
 
     // extract links and interfaces
+    int numLinks = 0;
     std::map<int, NetworkInterface *> interfacesSeen;
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
@@ -107,6 +109,7 @@ void L3NetworkConfiguratorBase::extractTopology(Topology& topology)
                     else {
                         interfacesSeen[networkInterface->getId()] = networkInterface;
                         // create a new network link
+                        numLinks++;
                         LinkInfo *linkInfo = new LinkInfo();
                         linkInfo->networkId = node->getNetworkId();
                         topology.linkInfos.push_back(linkInfo);
@@ -131,6 +134,7 @@ void L3NetworkConfiguratorBase::extractTopology(Topology& topology)
             }
         }
     }
+    EV_DEBUG << "Topology contains " << numLinks << " links" << endl;
 
     // annotate links with interfaces
     for (int i = 0; i < topology.getNumNodes(); i++) {
@@ -157,6 +161,7 @@ void L3NetworkConfiguratorBase::extractTopology(Topology& topology)
             wirelessIdToInterfaceInfosMap[wirelessId].push_back(interfaceInfo);
         }
     }
+    EV_DEBUG << "Topology contains " << wirelessIdToInterfaceInfosMap.size() << " wireless LANs" << endl;
 
     // add extra links between all pairs of wireless interfaces within a LAN (full graph)
     for (auto& entry : wirelessIdToInterfaceInfosMap) {
@@ -639,6 +644,7 @@ bool L3NetworkConfiguratorBase::InterfaceMatcher::matches(InterfaceInfo *interfa
 
 void L3NetworkConfiguratorBase::dumpTopology(Topology& topology)
 {
+    EV_INFO << "Printing connections of " << topology.getNumNodes() << " nodes" << endl;
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         EV_INFO << "Node " << node->module->getFullPath() << endl;
