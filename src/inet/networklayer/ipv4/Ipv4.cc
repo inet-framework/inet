@@ -405,7 +405,6 @@ void Ipv4::datagramLocalOut(Packet *packet)
 
     if (ipv4Header->getDestAddress().isMulticast()) {
         destIE = determineOutgoingInterfaceForMulticastDatagram(ipv4Header, destIE);
-        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE ? destIE->getInterfaceId() : -1);
 
         // loop back a copy
         if (multicastLoop && (!destIE || !destIE->isLoopback())) {
@@ -420,7 +419,7 @@ void Ipv4::datagramLocalOut(Packet *packet)
 
         if (destIE) {
             numMulticast++;
-            packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId()); // KLUDGE is it needed?
+            packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
             packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
             fragmentPostRouting(packet);
         }
@@ -440,15 +439,22 @@ void Ipv4::datagramLocalOut(Packet *packet)
             if (destIE && !destIE->isLoopback()) {
                 EV_DETAIL << "datagram destination address is local, ignoring destination interface specified in the control info\n";
                 destIE = nullptr;
-                packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(-1);
             }
-            if (!destIE) {
+            if (!destIE)
                 destIE = ift->findFirstLoopbackInterface();
-                packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE ? destIE->getInterfaceId() : -1);
+            if (destIE) {
+                packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
+                packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
+                routeUnicastPacket(packet);
             }
-            ASSERT(destIE);
-            packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
-            routeUnicastPacket(packet);
+            else {
+                EV_ERROR << "No loopback interface, packet dropped\n";
+                numUnroutable++;
+                PacketDropDetails details;
+                details.setReason(NO_INTERFACE_FOUND);
+                emit(packetDroppedSignal, packet, &details);
+                delete packet;
+            }
         }
         else if (destAddr.isLimitedBroadcastAddress() || rt->isLocalBroadcastAddress(destAddr))
             routeLocalBroadcastPacket(packet);
@@ -561,7 +567,6 @@ void Ipv4::routeLocalBroadcastPacket(Packet *packet)
     // We always use 255.255.255.255 as nextHopAddress, because it is recognized by ARP,
     // and mapped to the broadcast MAC address.
     if (destIE != nullptr) {
-        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId()); // KLUDGE is it needed?
         packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(Ipv4Address::ALLONES_ADDRESS);
         fragmentPostRouting(packet);
     }
@@ -1076,7 +1081,6 @@ void Ipv4::sendPacketToNIC(Packet *packet)
     if (auto networkInterfaceProtocol = networkInterface->getProtocol())
         ensureEncapsulationProtocolReq(packet, networkInterfaceProtocol, true, false);
     setDispatchProtocol(packet);
-    ASSERT(packet->findTag<InterfaceReq>() != nullptr);
     send(packet, "queueOut");
 }
 
