@@ -28,6 +28,8 @@ void Ieee80211MgmtStaSimplified::initialize(int stage)
         auto accessPointAddress = addressResolver.resolve(par("accessPointAddress"), L3AddressResolver::ADDR_MAC).toMac();
         mib->bssData.bssid = accessPointAddress;
         auto host = addressResolver.findHostWithAddress(mib->bssData.bssid);
+        if (host == nullptr)
+            throw cRuntimeError("Access point with address %s not found", mib->bssData.bssid.str().c_str());
         auto interfaceTable = addressResolver.findInterfaceTableOf(host);
         auto networkInterface = interfaceTable->findInterfaceByAddress(mib->bssData.bssid);
         auto apMib = dynamic_cast<Ieee80211Mib *>(networkInterface->getSubmodule("mib"));
