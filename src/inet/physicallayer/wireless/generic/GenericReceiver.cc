@@ -7,6 +7,7 @@
 
 #include "inet/physicallayer/wireless/generic/GenericReceiver.h"
 
+#include "inet/physicallayer/wireless/generic/GenericTransmission.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ListeningDecision.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionDecision.h"
@@ -22,7 +23,7 @@ Define_Module(GenericReceiver);
 
 void GenericReceiver::initialize(int stage)
 {
-    ReceiverBase::initialize(stage);
+    SnirReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         ignoreInterference = par("ignoreInterference");
         energyDetection = mW(math::dBmW2mW(par("energyDetection")));
@@ -39,33 +40,13 @@ std::ostream& GenericReceiver::printToStream(std::ostream& stream, int level, in
 
 bool GenericReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
-    return getAnalogModel()->computeIsReceptionPossible(listening, reception, part);
+    auto genericTransmission = dynamic_cast<const GenericTransmission *>(reception->getTransmission());
+    return genericTransmission && getAnalogModel()->computeIsReceptionPossible(listening, reception, part);
 }
 
 bool GenericReceiver::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
 {
-    // REFACTOR TODO: this should not be here
-    if (auto unitDiskReceptionAnalogModel = dynamic_cast<const UnitDiskReceptionAnalogModel*>(reception->getAnalogModel())) {
-        auto power = unitDiskReceptionAnalogModel->getPower();
-        if (power == UnitDiskReceptionAnalogModel::POWER_RECEIVABLE) {
-            if (ignoreInterference)
-                return true;
-            else {
-                auto startTime = reception->getStartTime(part);
-                auto endTime = reception->getEndTime(part);
-                auto interferingReceptions = interference->getInterferingReceptions();
-                for (auto interferingReception : *interferingReceptions) {
-                    auto interferingPower = check_and_cast<const UnitDiskReceptionAnalogModel*>(interferingReception->getAnalogModel())->getPower();
-                    if (interferingPower >= UnitDiskReceptionAnalogModel::POWER_INTERFERING && startTime <= interferingReception->getEndTime() && endTime >= interferingReception->getStartTime())
-                        return false;
-                }
-                return true;
-            }
-        }
-        else
-            return false;
-    }
-    return true;
+    return ignoreInterference || SnirReceiverBase::computeIsReceptionSuccessful(listening, reception, part, interference, snir);
 }
 
 const IListening *GenericReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const

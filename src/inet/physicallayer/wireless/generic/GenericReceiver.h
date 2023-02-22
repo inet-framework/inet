@@ -8,7 +8,7 @@
 #ifndef __INET_GENERICRECEIVER_H
 #define __INET_GENERICRECEIVER_H
 
-#include "inet/physicallayer/wireless/common/base/packetlevel/ReceiverBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/SnirReceiverBase.h"
 
 namespace inet {
 
@@ -17,7 +17,7 @@ namespace physicallayer {
 /**
  * Implements the GenericReceiver model, see the NED file for details.
  */
-class INET_API GenericReceiver : public ReceiverBase
+class INET_API GenericReceiver : public SnirReceiverBase
 {
   protected:
     bool ignoreInterference = false;

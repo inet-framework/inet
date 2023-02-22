@@ -7,17 +7,19 @@
 
 package inet.physicallayer.wireless.generic;
 
-import inet.physicallayer.wireless.common.base.packetlevel.ReceiverBase;
+import inet.physicallayer.wireless.common.base.packetlevel.SnirReceiverBase;
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
 
 //
 // @see ~GenericTransmitter, ~GenericRadio.
 //
-module GenericReceiver extends ReceiverBase like IReceiver
+module GenericReceiver extends SnirReceiverBase like IReceiver
 {
     parameters:
         bool ignoreInterference = default(false); // true means interfering transmissions are ignored when determining whether a reception is successful or not
         double energyDetection @unit(dBm) = default(-85 dBm);
+        snirThresholdMode = "mean";
+        snirThreshold = -100dB; // to match the previous permissive behavior
         *.ignoreInterference = default(this.ignoreInterference);
         @class(GenericReceiver);
         @display("i=block/wrx");
