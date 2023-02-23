@@ -16,6 +16,12 @@ namespace inet {
 
 namespace physicallayer {
 
+/**
+ * Implementors are responsible for creating the analog representation of
+ * transmissions emitted by the radio, to be propagated through the medium analog model.
+ *
+ * This interface is strictly immutable to safely support parallel computation.
+ */
 class INET_API ITransmitterAnalogModel : public IPrintableObject
 {
   public:
