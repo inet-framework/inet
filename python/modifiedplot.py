@@ -16,7 +16,13 @@ def get_default_colors():
     print(default_colors)
     return default_colors
 
-def plot_vectors(df, props, legend_func=utils.make_legend_label):
+def add_global_style_if_needed(global_style, style, debug):
+    if global_style != None:
+        if debug: print('adding global style: ', global_style)
+        style.update(global_style)
+        if debug: print('added. "style" dict: ', style)
+
+def plot_vectors(df, props, legend_func=utils.make_legend_label, global_style=None, debug=False):
     """
     Modified version of the built-in plot_vectors() function, with the additional functionality
     of ordering the dataframe before plotting, based on the 'order' column. The order of the line colors and
@@ -72,6 +78,7 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label):
         df.sort_values(by=legend_cols, inplace=True)
     for t in df.itertuples(index=False):
         style = utils._make_line_args(props, t, df)
+        add_global_style_if_needed(global_style, style, debug)
 #        if t.propertyname != '':
 #            style[t.propertyname] = t.propertyvalue
         if 'additional_style' in df.columns and t.additional_style != None:
@@ -87,7 +94,7 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label):
 
     p.ylabel(utils.make_chart_title(df, ["title"]))
     
-def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, debug=False):
+def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, global_style=None, debug=False):
     """
     Modified version of the built-in plot_vectors_separate() function, with the additional functionality
     of ordering the dataframe before plotting, based on the 'order' column. The order of the line colors and
@@ -116,6 +123,7 @@ def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, debug=
     ax = None
     for i, t in enumerate(df.itertuples(index=False)):
         style = utils._make_line_args(props, t, df)
+        add_global_style_if_needed(global_style, style, debug)
         if 'additional_style' in df.columns and t.additional_style != None:
             style_dict = eval(t.additional_style)
             for j in style_dict.items():
@@ -136,7 +144,7 @@ def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, debug=
     
     return ax_list
     
-def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_label, layout='vertical', columns=0, rows=0, debug=False):
+def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_label, layout='vertical', columns=0, rows=0, global_style=None, debug=False):
     """
     This is a modified version of the built-in plot_vectors_separate() function. It takes a list of dataframes,
     and plots each dataframe on its own subplot. Useful for plotting multiple lines on a subplot, as the built-in
@@ -206,6 +214,7 @@ def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_
             
         for t in df.itertuples(index=False):
             style = utils._make_line_args(props, t, df)
+            add_global_style_if_needed(global_style, style, debug)
             if 'additional_style' in df.columns and t.additional_style != None:
                 style_dict = eval(t.additional_style)
                 for i in style_dict.items():
@@ -644,7 +653,7 @@ def plot_bars(df, errors_df=None, meta_df=None, props={}, order=None, zorder=Non
     if title is not None:
         utils.set_plot_title(title)
         
-def plot_lines(df, props, legend_func=utils.make_legend_label, use_default_sort_values=False, debug=False):
+def plot_lines(df, props, legend_func=utils.make_legend_label, use_default_sort_values=False, global_style=None, debug=False):
     """
     Copy of built-in plot_lines() without sorting (by default).
     
@@ -702,6 +711,7 @@ def plot_lines(df, props, legend_func=utils.make_legend_label, use_default_sort_
         if debug: print("values sorted by 'order' column")
     for t in df.itertuples(index=False):
         style = utils._make_line_args(props, t, df)
+        add_global_style_if_needed(global_style, style, debug)
 
         if len(t.x) < 2 and style["marker"] == ' ':
             style["marker"] = '.'
