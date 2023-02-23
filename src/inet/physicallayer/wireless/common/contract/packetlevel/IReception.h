@@ -29,7 +29,7 @@ class INET_API IReception : public IPrintableObject
      * Returns the receiver that received the corresponding transmission
      * from the radio medium. This function never returns nullptr.
      */
-    virtual const IRadio *getReceiver() const = 0;
+    virtual const IRadio *getReceiver() const = 0; // REFACTOR TODO: rename to getReceiverRadio
 
     /**
      * Returns the transmission that corresponds to this reception at the

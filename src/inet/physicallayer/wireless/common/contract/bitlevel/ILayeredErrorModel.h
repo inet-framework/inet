@@ -19,6 +19,7 @@ namespace physicallayer {
  * The layered error model computes the erroneous bits, symbols, or samples
  * based on the SNIR and a simplified model of the signal processing.
  */
+ // REFACTOR TODO: remove transmission parameters, it's accessible from snir through reception
 class INET_API ILayeredErrorModel : public IPrintableObject
 {
   public:

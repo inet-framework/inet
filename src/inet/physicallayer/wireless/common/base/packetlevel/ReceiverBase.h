@@ -19,6 +19,7 @@ namespace physicallayer {
 
 class INET_API ReceiverBase : public cModule, public virtual IReceiver
 {
+  // REFACTOR TODO: add ignoreInterference parameter
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
