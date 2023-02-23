@@ -24,7 +24,7 @@ module NarrowbandTransmitterBase extends TransmitterBase like ITransmitter
         double codeRate = default(1);
         string modulation;                 // "BPSK", "16-QAM", "256-QAM"
         analogModel.power = default(this.power);
-        analogModel.centerFrequency = default(this.centerFrequency);
-        analogModel.bandwidth = default(this.bandwidth);
+        analogModel.defaultCenterFrequency = default(this.centerFrequency);
+        analogModel.defaultBandwidth = default(this.bandwidth);
         @display("i=block/wtx");
 }

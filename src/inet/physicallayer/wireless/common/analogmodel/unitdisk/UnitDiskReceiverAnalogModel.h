@@ -25,9 +25,9 @@ class INET_API UnitDiskReceiverAnalogModel : public ReceiverAnalogModelBase, pub
     virtual void initialize(int stage) override;
 
   public:
-    virtual IListening* createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord &startPosition, const Coord &endPosition) const override;
+    virtual IListening* createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord &startPosition, const Coord &endPosition, Hz centerFrequency, Hz bandwidth) const override;
 
-    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, W sensitivity) const override;
 };
 
 } // namespace physicallayer

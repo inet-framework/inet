@@ -9,12 +9,11 @@ package inet.physicallayer.wireless.common.analogmodel.scalar;
 
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiverAnalogModel;
 
-module ScalarReceiverAnalogModel like IReceiverAnalogModel
+simple ScalarReceiverAnalogModel like IReceiverAnalogModel
 {
     parameters:
-        double centerFrequency @unit(Hz) = default(nan Hz);
-        double bandwidth @unit(Hz) = default(nan Hz);
-        double sensitivity @unit(dBm) = default(nan dBm);     // reception is not possible if the signal power is below sensitivity (idle or busy states)
-        @class(ScalarReceiverAnalogModel);
+        double defaultCenterFrequency @unit(Hz) = default(nan Hz);
+        double defaultBandwidth @unit(Hz) = default(nan Hz);
+        double defaultSensitivity @unit(dBm) = default(nan dBm);     // reception is not possible if the signal power is below sensitivity (idle or busy states)
         @display("i=block/tunnel");
 }

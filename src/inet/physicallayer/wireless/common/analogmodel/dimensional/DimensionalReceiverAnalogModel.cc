@@ -15,19 +15,35 @@ Define_Module(DimensionalReceiverAnalogModel);
 void DimensionalReceiverAnalogModel::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        centerFrequency = Hz(par("centerFrequency"));
-        bandwidth = Hz(par("bandwidth"));
-        sensitivity = mW(math::dBmW2mW(par("sensitivity")));
+        defaultCenterFrequency = Hz(par("defaultCenterFrequency"));
+        defaultBandwidth = Hz(par("defaultBandwidth"));
+        defaultSensitivity = mW(math::dBmW2mW(par("defaultSensitivity")));
     }
 }
 
-IListening *DimensionalReceiverAnalogModel::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const
+IListening *DimensionalReceiverAnalogModel::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition, Hz centerFrequency, Hz bandwidth) const
 {
+    if (std::isnan(centerFrequency.get()))
+        centerFrequency = defaultCenterFrequency;
+    if (std::isnan(bandwidth.get()))
+        bandwidth = defaultBandwidth;
+
+    if (std::isnan(centerFrequency.get()))
+        throw cRuntimeError("DimensionalReceiverAnalogModel: Center frequency is not specified (neither as default nor as a runtime parameter)");
+    if (std::isnan(bandwidth.get()))
+        throw cRuntimeError("DimensionalReceiverAnalogModel: Bandwidth is not specified (neither as default nor as a runtime parameter)");
+
     return new BandListening(radio, startTime, endTime, startPosition, endPosition, centerFrequency, bandwidth);
 }
 
-bool DimensionalReceiverAnalogModel::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
+bool DimensionalReceiverAnalogModel::computeIsReceptionPossible(const IListening *listening, const IReception *reception, W sensitivity) const
 {
+    if (std::isnan(sensitivity.get()))
+        sensitivity = defaultSensitivity;
+
+    if (std::isnan(sensitivity.get()))
+        throw cRuntimeError("DimensionalReceiverAnalogModel: Sensitivity is not specified (neither as default nor as a runtime parameter)");
+
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     const DimensionalReceptionAnalogModel *analogModel = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getAnalogModel());
     if (bandListening->getCenterFrequency() != analogModel->getCenterFrequency() || bandListening->getBandwidth() < analogModel->getBandwidth()) {

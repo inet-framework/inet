@@ -23,17 +23,17 @@ namespace physicallayer {
 class INET_API DimensionalReceiverAnalogModel : public ReceiverAnalogModelBase, public IReceiverAnalogModel
 {
   protected:
-    Hz centerFrequency = Hz(NaN);
-    Hz bandwidth = Hz(NaN);
-    W sensitivity = W(NaN);
+    Hz defaultCenterFrequency = Hz(NaN);
+    Hz defaultBandwidth = Hz(NaN);
+    W defaultSensitivity = W(NaN);
 
   protected:
     virtual void initialize(int stage) override;
 
   public:
-    virtual IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const override;
+    virtual IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition, Hz centerFrequency, Hz bandwidth) const override;
 
-    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, W sensitivity) const override;
 };
 
 } // namespace physicallayer

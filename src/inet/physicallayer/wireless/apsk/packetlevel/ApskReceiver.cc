@@ -31,7 +31,7 @@ bool ApskReceiver::computeIsReceptionPossible(const IListening *listening, const
 bool ApskReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     auto apksTransmission = dynamic_cast<const ApskTransmission *>(reception->getTransmission());
-    return apksTransmission && getAnalogModel()->computeIsReceptionPossible(listening, reception, part);
+    return apksTransmission && getAnalogModel()->computeIsReceptionPossible(listening, reception, sensitivity);
 }
 
 

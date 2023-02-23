@@ -41,7 +41,7 @@ std::ostream& GenericReceiver::printToStream(std::ostream& stream, int level, in
 bool GenericReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     auto genericTransmission = dynamic_cast<const GenericTransmission *>(reception->getTransmission());
-    return genericTransmission && getAnalogModel()->computeIsReceptionPossible(listening, reception, part);
+    return genericTransmission && getAnalogModel()->computeIsReceptionPossible(listening, reception, W(NaN));
 }
 
 bool GenericReceiver::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
@@ -51,7 +51,7 @@ bool GenericReceiver::computeIsReceptionSuccessful(const IListening *listening, 
 
 const IListening *GenericReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const
 {
-    return getAnalogModel()->createListening(radio, startTime, endTime, startPosition, endPosition);
+    return getAnalogModel()->createListening(radio, startTime, endTime, startPosition, endPosition, Hz(NaN), Hz(NaN));
 }
 
 const IListeningDecision *GenericReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const

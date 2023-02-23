@@ -36,7 +36,7 @@ bool Ieee802154NarrowbandReceiver::computeIsReceptionPossible(const IListening *
 bool Ieee802154NarrowbandReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     auto ieee802154Transmission = dynamic_cast<const Ieee802154Transmission *>(reception->getTransmission());
-    return ieee802154Transmission && getAnalogModel()->computeIsReceptionPossible(listening, reception, part);
+    return ieee802154Transmission && getAnalogModel()->computeIsReceptionPossible(listening, reception, sensitivity);
 }
 
 std::ostream& Ieee802154NarrowbandReceiver::printToStream(std::ostream& stream, int level, int evFlags) const

@@ -20,13 +20,15 @@ void UnitDiskReceiverAnalogModel::initialize(int stage)
         ignoreInterference = par("ignoreInterference");
 }
 
-IListening* UnitDiskReceiverAnalogModel::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord &startPosition, const Coord &endPosition) const
+IListening* UnitDiskReceiverAnalogModel::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord &startPosition, const Coord &endPosition, Hz centerFrequency, Hz bandwidth) const
 {
+    // centerFrequency and bandwidth are ignored
     return new UnitDiskListening(radio, startTime, endTime, startPosition, endPosition);
 }
 
-bool UnitDiskReceiverAnalogModel::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
+bool UnitDiskReceiverAnalogModel::computeIsReceptionPossible(const IListening *listening, const IReception *reception, W sensitivity) const
 {
+    // sensitivity is ignored
     auto power = check_and_cast<const UnitDiskReceptionAnalogModel *>(reception->getAnalogModel())->getPower();
     return power == UnitDiskReceptionAnalogModel::POWER_RECEIVABLE;
 }

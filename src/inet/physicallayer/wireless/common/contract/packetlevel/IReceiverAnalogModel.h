@@ -17,14 +17,22 @@
 namespace inet {
 namespace physicallayer {
 
+/**
+ * This class represents a receiver analog model. It is the connecting
+ * piece between the technology-dependent part of the receivers, and
+ * the different analog medium models.
+ */
 class INET_API IReceiverAnalogModel : public IPrintableObject
 {
   public:
-    // REFACTOR TODO document
-    virtual IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const = 0;
+    /// Factory method for IListening objects.
+    virtual IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition, Hz centerFrequency, Hz bandwidth) const = 0;
 
-    // REFACTOR TODO document
-    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const = 0;
+    /// Returns false if the analog model of the receiver considers the reception impossible.
+    /// A true return value does not necessarily mean that the reception is possible,
+    /// just that it is not impossible according to the analog model part of the receiver.
+    /// All it does is check the minimum incoming power level against a given sensitivity threshold.
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, W sensitivity) const = 0;
 };
 
 } // namespace physicallayer
