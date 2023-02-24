@@ -1,7 +1,7 @@
 Measuring Packet Delay Variation
 ================================
 
-Goals
+Goals TODO
 -----
 
 In this example we explore the various packet delay variation (also known as packet jitter) statistics of application modules.

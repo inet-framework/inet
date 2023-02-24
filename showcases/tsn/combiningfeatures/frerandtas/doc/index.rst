@@ -1,7 +1,7 @@
 Frame Replication with Time-Aware Shaping
 =========================================
 
-Goals
+Goals TODO
 -----
 
 In this example we demonstrate how to automatically configure time-aware shaping

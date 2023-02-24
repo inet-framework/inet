@@ -1,7 +1,7 @@
 Automatic Multipath Stream Configuration
 ========================================
 
-Goals
+Goals TODO
 -----
 
 In this example we demonstrate the automatic stream redundancy configuration based

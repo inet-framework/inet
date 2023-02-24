@@ -1,7 +1,7 @@
 Measuring Transmission Time
 ===========================
 
-Goals
+Goals TODO
 -----
 
 In this example we explore the packet transmission time statistics of network

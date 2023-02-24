@@ -1,7 +1,7 @@
 Peeking Under the Hood
 ======================
 
-Goals
+Goals TODO
 -----
 
 This showcase demonstrates that the scheduling and traffic shaping modules can

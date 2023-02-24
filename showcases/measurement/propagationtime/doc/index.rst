@@ -1,7 +1,7 @@
 Measuring Propagation Time
 ==========================
 
-Goals
+Goals TODO
 -----
 
 In this example we explore the channel propagation time statistics for wired and

@@ -1,7 +1,7 @@
 Manual Stream Configuration
 ===========================
 
-Goals
+Goals TODO
 -----
 
 In this example we demonstrate manual configuration of stream identification,

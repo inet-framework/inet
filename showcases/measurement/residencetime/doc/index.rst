@@ -1,7 +1,7 @@
 Measuring Residence Time
 ========================
 
-Goals
+Goals TODO
 -----
 
 In this example we explore the packet residence time statistics of network nodes.

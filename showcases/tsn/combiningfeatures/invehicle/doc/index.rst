@@ -1,7 +1,7 @@
 In-vehicle Network
 ==================
 
-Goals
+Goals TODO
 -----
 
 In this example we demonstrate the combined features of Time-Sensitive Networking

@@ -1,7 +1,7 @@
 Using gPTP
 ==========
 
-Goals
+Goals TODO
 -----
 
 The Generic Precision Time Protocol (gPTP, IEEE 802.1 AS) can synchronize clocks in a network with high accuracy, which is useful for TSN, among others.

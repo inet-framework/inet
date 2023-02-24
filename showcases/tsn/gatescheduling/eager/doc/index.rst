@@ -1,7 +1,7 @@
 Eager Gate Schedule Configuration
 =================================
 
-Goals
+Goals TODO
 -----
 
 This showcase demonstrates how the eager gate schedule configurator can set up schedules in a simple network.

@@ -1,7 +1,7 @@
 Understanding Measurement Relationships
 =======================================
 
-Goals
+Goals TODO
 -----
 
 In this example we explore the relationships between various measurements that

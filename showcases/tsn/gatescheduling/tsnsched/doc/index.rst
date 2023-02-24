@@ -1,7 +1,7 @@
 TSNsched-based Gate Scheduling
 ==============================
 
-Goals
+Goals TODO
 -----
 
 This showcase demonstrates the TSNsched gate schedule configurator that solves the autoconfiguration problem with an external SAT solver tool.

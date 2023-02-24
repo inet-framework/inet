@@ -1,7 +1,7 @@
 Measuring End-to-end Delay
 ==========================
 
-Goals
+Goals TODO
 -----
 
 In this example we explore the end-to-end delay statistics of applications.

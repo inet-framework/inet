@@ -1,7 +1,7 @@
 Measuring Queueing Time
 =======================
 
-Goals
+Goals TODO
 -----
 
 In this example we explore the queueing time statistics of queue modules of

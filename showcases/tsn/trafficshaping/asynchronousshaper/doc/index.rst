@@ -1,7 +1,7 @@
 Asynchronous Shaping
 ====================
 
-Goals
+Goals TODO
 -----
 
 In this example we demonstrate how to use the asynchronous traffic shaper.

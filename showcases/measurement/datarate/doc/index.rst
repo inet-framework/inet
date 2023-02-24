@@ -1,7 +1,7 @@
 Measuring Data Rate
 ===================
 
-Goals
+Goals TODO
 -----
 
 In this example we explore the data rate statistics of application, queue, and

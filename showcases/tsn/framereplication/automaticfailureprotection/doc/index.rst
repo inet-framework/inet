@@ -1,7 +1,7 @@
 Automatic Stream Configuration with Failure Protection
 ======================================================
 
-Goals
+Goals TODO
 -----
 
 In this example we demonstrate the automatic stream redundancy configuration based

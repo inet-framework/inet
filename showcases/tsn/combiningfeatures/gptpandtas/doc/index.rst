@@ -1,7 +1,7 @@
 Effects of Time Synchronization on Time-Aware Shaping
 =====================================================
 
-Goals
+Goals TODO
 -----
 
 In this showcase we demonstrate how time synchronization affects end-to-end delay

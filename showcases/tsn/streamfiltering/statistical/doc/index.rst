@@ -1,7 +1,7 @@
 Statistical Policing
 ====================
 
-Goals
+Goals TODO
 -----
 
 In this example we combine a sliding window rate meter with a probabilistic packet

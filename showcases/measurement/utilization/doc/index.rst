@@ -1,7 +1,7 @@
 Measuring Channel Utilization
 =============================
 
-Goals
+Goals TODO
 -----
 
 In this example we explore the channel utilization statistics of wired and wireless

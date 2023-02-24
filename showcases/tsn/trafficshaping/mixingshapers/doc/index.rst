@@ -1,7 +1,7 @@
 Mixing Different Shapers
 ========================
 
-Goals
+Goals TODO
 -----
 
 In this example we demonstrate how to use different traffic shapers in the same

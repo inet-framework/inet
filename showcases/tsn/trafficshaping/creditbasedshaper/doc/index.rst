@@ -1,7 +1,7 @@
 Credit-Based Shaping
 ====================
 
-Goals
+Goals TODO
 -----
 
 In this example we demonstrate how to use the credit-based traffic shaper.

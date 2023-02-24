@@ -1,7 +1,7 @@
 Clock Drift
 ===========
 
-Goals
+Goals TODO
 -----
 
 In this showcase, we demonstrate the effects of clock drift and time synchronization

@@ -1,7 +1,7 @@
 Multicast Streams with Failure Protection
 =========================================
 
-Goals
+Goals TODO
 -----
 
 In this example we replicate the multicast stream example from the IEEE 802.1 CB standard.

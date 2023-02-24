@@ -1,7 +1,7 @@
 Token Bucket based Policing
 ===========================
 
-Goals
+Goals TODO
 -----
 
 In this example we demonstrate per-stream policing using chained token buckets

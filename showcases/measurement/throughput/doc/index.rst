@@ -1,7 +1,7 @@
 Measuring Channel Throughput
 ============================
 
-Goals
+Goals TODO
 -----
 
 In this example we explore the channel throughput statistics of wired and wireless
