@@ -359,7 +359,7 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order={}, deb
 
 def create_multidimensional_legend(style_tuple_list, labels = [], handles = [], debug=False):
     """
-    DEPRECATED
+    DEPRECATED (use create_custom_legend())
     Can create multi-dimensional legend, where one aspect of a line (e.g. color) represents a dimension, another aspect (e.g. linestyle of solid, dashed or dotted) represents another dimension,
     as opposed to the default behavior, in which lines in the legend represent the lines on the chart directly. **TODO** not sure this explanation is needed
     
@@ -383,11 +383,12 @@ def create_multidimensional_legend(style_tuple_list, labels = [], handles = [], 
     if debug:
         print("labels", labels)
         print("handles", handles)
+    print("create_multidimensional_legend() deprecated, use create_custom_legend()\n")
     return handles, labels
 
 def quick_reorder_legend(handles, labels, order, **kwargs):
     """
-    DEPRECATED
+    DEPRECATED (use create_custom_legend())
     Quickly reorder the legend. Order: list of integers with the new order, e.g. [2, 0, 1].
     Reorders the legend in-place (so it's not needed to call plt.legend() with the returned handles and labels).
     Also, add any parameters for plt.legend() as kwargs.
@@ -396,6 +397,7 @@ def quick_reorder_legend(handles, labels, order, **kwargs):
     if order == []:
         order = [*range(0, legendsize)]
     plt.legend([handles[i] for i in order], [labels[i] for i in order], **kwargs)
+    print("quick_reorder_legend() deprecated, use create_custom_legend()\n")
     return handles, labels
 
 def create_custom_legend(style_tuple_list, order = [], labels = [], handles = [], inplace=True, debug=False, **kwargs):
