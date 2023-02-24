@@ -14,6 +14,7 @@ import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.visualizer.contract.IIntegratedVisualizer;
 
 
 network WirelessNetWithDHCP
@@ -21,6 +22,9 @@ network WirelessNetWithDHCP
     int numHosts;
     **.mgmt.numChannels = 5;
     submodules:
+        visualizer: <default(firstAvailableOrEmpty("IntegratedCanvasVisualizer"))> like IIntegratedVisualizer if typename != "" {
+            @display("p=100,300;is=s");
+        }
         radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=100,200;is=s");
         }
