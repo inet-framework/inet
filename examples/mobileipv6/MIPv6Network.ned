@@ -70,7 +70,7 @@ network mIPv6Network
                 @display("p=220,404");
         }
         CN[total_cn]: CorrespondentNode6 {
-            @display("p=405,595");
+            @display("p=405,595,r,50");
         }
         AP_Home: AccessPoint {
             parameters:

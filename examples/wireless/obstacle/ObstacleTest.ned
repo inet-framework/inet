@@ -17,7 +17,7 @@ network ObstacleTest
 {
     parameters:
         int numHosts;
-        @display("bgb=0,0");
+        @display("bgb=1200,1000");
     submodules:
         visualizer: <default(firstAvailableOrEmpty("IntegratedVisualizer"))> like IIntegratedVisualizer if typename != "" {
             parameters:
