@@ -33,8 +33,13 @@ cGate *StreamFilter::getRegistrationForwardingGate(cGate *gate)
 bool StreamFilter::matchesPacket(const Packet *packet) const
 {
     auto streamReq = packet->findTag<StreamReq>();
+    auto streamInd = packet->findTag<StreamInd>();
     if (streamReq != nullptr) {
         auto streamName = streamReq->getStreamName();
+        cMatchableString matchableString(streamName);
+        return const_cast<cMatchExpression *>(&streamNameFilter)->matches(&matchableString);
+    } else if (streamInd != nullptr) {
+        auto streamName = streamInd->getStreamName();
         cMatchableString matchableString(streamName);
         return const_cast<cMatchExpression *>(&streamNameFilter)->matches(&matchableString);
     }
