@@ -19,6 +19,7 @@ using namespace inet::queueing;
 class INET_API StreamFilter : public PacketFilterBase, public TransparentProtocolRegistrationListener
 {
   protected:
+    const char *mode = nullptr;
     cMatchExpression streamNameFilter;
 
   protected:

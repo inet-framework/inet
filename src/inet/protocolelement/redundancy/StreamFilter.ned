@@ -17,6 +17,7 @@ import inet.queueing.contract.IPacketFilter;
 simple StreamFilter extends PacketFilterBase like IPacketFilter
 {
     parameters:
+        string mode @enum("req", "ind", "both") = default("both");
         string streamNameFilter = default("*"); // filter expression for the stream name
         @class(StreamFilter);
 }

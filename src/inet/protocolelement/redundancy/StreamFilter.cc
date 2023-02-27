@@ -16,8 +16,10 @@ Define_Module(StreamFilter);
 void StreamFilter::initialize(int stage)
 {
     PacketFilterBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
+        mode = par("mode");
         streamNameFilter.setPattern(par("streamNameFilter"), false, true, true);
+    }
 }
 
 cGate *StreamFilter::getRegistrationForwardingGate(cGate *gate)
@@ -32,13 +34,38 @@ cGate *StreamFilter::getRegistrationForwardingGate(cGate *gate)
 
 bool StreamFilter::matchesPacket(const Packet *packet) const
 {
-    auto streamReq = packet->findTag<StreamReq>();
-    if (streamReq != nullptr) {
-        auto streamName = streamReq->getStreamName();
+    const char *streamName = nullptr;
+    switch (*mode) {
+        case 'r': {
+            auto streamReq = packet->findTag<StreamReq>();
+            if (streamReq != nullptr)
+                streamName = streamReq->getStreamName();
+            break;
+        }
+        case 'i': {
+            auto streamInd = packet->findTag<StreamInd>();
+            if (streamInd != nullptr)
+                streamName = streamInd->getStreamName();
+            break;
+        }
+        case 'b': {
+            auto streamReq = packet->findTag<StreamReq>();
+            if (streamReq != nullptr)
+                streamName = streamReq->getStreamName();
+            else {
+                auto streamInd = packet->findTag<StreamInd>();
+                if (streamInd != nullptr)
+                    streamName = streamInd->getStreamName();
+            }
+            break;
+        }
+    }
+    if (streamName != nullptr) {
         cMatchableString matchableString(streamName);
         return const_cast<cMatchExpression *>(&streamNameFilter)->matches(&matchableString);
     }
-    return false;
+    else
+        return false;
 }
 
 } // namespace inet
