@@ -183,6 +183,7 @@ class INET_API GateScheduleConfiguratorBase : public NetworkConfiguratorBase
             simtime_t cycleStart = -1; // start of the cycle in seconds
             simtime_t cycleDuration = -1; // duration of the cycle in seconds
             std::vector<Slot> slots; // list of slots ordered by start time
+            bool open = true; // slots define open or closed gate intervals
         };
 
       public:

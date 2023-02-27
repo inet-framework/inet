@@ -256,7 +256,6 @@ void GateScheduleConfiguratorBase::configureGateScheduling()
 void GateScheduleConfiguratorBase::configureGateScheduling(cModule *networkNode, cModule *gate, Interface *interface)
 {
     auto networkInterface = interface->networkInterface;
-    bool initiallyOpen = false;
     simtime_t offset = 0;
     simtime_t slotEnd = 0;
     int gateIndex = gate->getIndex();
@@ -268,6 +267,7 @@ void GateScheduleConfiguratorBase::configureGateScheduling(cModule *networkNode,
     if (gateIndex >= schedules.size())
         throw cRuntimeError("Cannot find schedule for traffic class, interface = %s, gate index = %d", port->module->getFullPath().c_str(), gateIndex);
     auto schedule = schedules[gateIndex];
+    bool initiallyOpen = !schedule->open;
     cValueArray *durations = new cValueArray();
     for (auto& slot : schedule->slots) {
         simtime_t slotStart = slot.start;
@@ -275,7 +275,7 @@ void GateScheduleConfiguratorBase::configureGateScheduling(cModule *networkNode,
         if (slotStart < 0 || slotStart + slotDuration > gateCycleDuration)
             throw cRuntimeError("Invalid slot start and/or duration");
         if (slotStart == 0)
-            initiallyOpen = true;
+            initiallyOpen = schedule->open;
         else {
             simtime_t duration = slotStart - slotEnd;
             ASSERT(duration >= 0);
