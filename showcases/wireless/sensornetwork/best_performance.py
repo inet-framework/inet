@@ -17,13 +17,13 @@ def get_best_performing_dataframe_separately_packetreceived():
     df_l = results.get_scalars(filter_expression_lmac, include_fields=False, include_attrs=True, include_runattrs=True, include_itervars=True)
     
     # average repetitions    
-    df_b = df_b.groupby(['name','configname','module','iterationvars','inifile'], as_index=False).mean()
+    df_b = df_b.groupby(['name','configname','module','iterationvars','inifile'], as_index=False).mean(numeric_only=True)
     if debug:
         print("\ndf_b after averaging:\n-------------------",df_b)
-    df_x = df_x.groupby(['name','configname','module','iterationvars','inifile'], as_index=False).mean()
+    df_x = df_x.groupby(['name','configname','module','iterationvars','inifile'], as_index=False).mean(numeric_only=True)
     if debug:
         print("\ndf_x after averaging:\n-------------------",df_x)
-    df_l = df_l.groupby(['name','configname','module','iterationvars','inifile'], as_index=False).mean()
+    df_l = df_l.groupby(['name','configname','module','iterationvars','inifile'], as_index=False).mean(numeric_only=True)
     if debug:
         print("\ndf_l after averaging:\n-------------------",df_l)
     
