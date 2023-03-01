@@ -1,3 +1,4 @@
+ - chunk queue and various chunk buffers don't have region tags, there's no place to store data specific tags from packets when reassembling data
  - add ChunkStack (lifo) similarly to how ChunkQueue (fifo) is implemented
  - add test and check for std::dynamic_pointer_cast<Subclass1>(chunk->peek<Subclass1>()) != nullptr always holds when peek uses a variant type deserializer
 
