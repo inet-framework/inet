@@ -1,3 +1,8 @@
+ - extend gate schedule configurators:
+   - add support for switch processing time
+   - add support for time synchronization error
+   - allow using MAC forwarding tables for flow paths
+
  - add TransparentProtocolRegistrationListener to PacketFilterBase as base class, but it would break
    nearly all simulations because protocol header checker modules are also derived from PacketFilterBase
    and this change would cause multiple protocol registrations reaching the same MessageDispatcher from
