@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2023-01-17  Levente Mészáros
+
+	SharingTagSet: Added hasTag template method.
+
+2022-07-01  LucaBH
+
+	Inline mis-redeclaration fixed on two *TagSet.h files.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-05-03  Levente Mészáros

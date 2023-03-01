@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2023-01-25  TÖRÖK Attila
+
+	ReceptionPacketModel: Remove unused packetErrorRate field
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-01-11  ------ inet-4.3.0 released ------

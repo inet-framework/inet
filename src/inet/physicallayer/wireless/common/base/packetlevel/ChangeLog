@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2023-01-25  TÖRÖK Attila
+
+	FlatReceiverBase: Fix assert on packetErrorRate probability
+	ReceptionBase: Compute headerEnd and data[Start|End] times based on the start of the transmission
+	This makes a different in case of WiFi ERP signal extension for example.
+
+2023-01-23  Levente Mészáros
+
+	Changed cast to INarrowbandSignal to allow for more representations in DimensionalAnalogModelBase.
+	Refactored ScalarAnalogModelBase to use the new one dimensional math noise power and SNIR functions.
+	Added codeRate parameter to NarrowbandTransmitterBase.
+	Added codeRate to FlatTransmissionBase, and symbolTime to NarrowbandTransmissionBase and updated all subclasses.
+
+2023-01-11  TÖRÖK Attila
+
+	Fixed @unit typo, these should have been @enum
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-03-22  Levente Mészáros

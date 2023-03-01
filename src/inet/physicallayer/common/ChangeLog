@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2022-12-20  Andras Varga
+
+	threads-support: added OPP_THREAD_LOCAL for rest of global vars
+	where getSharedVariable()/getSharedCounter() was not appropriate.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-01-11  ------ inet-4.3.0 released ------

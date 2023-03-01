@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-12-07  Andras Varga
+
+	Added NED documentation for rate selection and rate control modules.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-04-26  Zoltan Bojthe

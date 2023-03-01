@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-05-31  Zoltan Bojthe
+
+	Fixed packet drop reason when the transmit not acked.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-01-26  Rudolf Hornig

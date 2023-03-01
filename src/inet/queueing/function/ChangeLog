@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2022-11-09  Levente Mészáros
+
+	Added schedulePacketByPacketLength function and PacketLengthScheduler class.
+	Fixed schedulePacketByUserPriority.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-01-11  ------ inet-4.3.0 released ------

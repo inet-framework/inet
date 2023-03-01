@@ -1,5 +1,12 @@
 ====== inet-4.x ======
 
+2023-01-23  Levente Mészáros
+
+	Extended analog models to provide separate durations for preamble, header, and data in the reception.
+	Changed LayeredDimensionalAnalogModel to use the LayeredSnir representation.
+	Implemented the separation of preambleDuration, headerDuration and dataDuration in layered signal model.
+	Added special ISnir implementation for layered radio models.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-01-11  ------ inet-4.3.0 released ------

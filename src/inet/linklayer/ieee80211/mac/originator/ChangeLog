@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2022-12-07  Andras Varga
+
+	Added basic NED documentation for policy modules in MAC.
+
+2022-12-06  Andras Varga
+
+	Made policy submodules replaceable with typename assignments.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-03-17  Levente Mészáros

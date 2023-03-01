@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2020-01-23  Levente Mészáros
+
+	Ieee802154: Updated Ieee802154UwbIrTransmitter to follow recent changes.
+
+2022-10-03  Andras Varga
+
+	Ieee802154UwbIrMode: Eliminated "mutable" qualifier by pre-filling s[] array.
+	Ieee802154UwbIrMode: Fixed bug in s() which resulted in returning zeroes instead of newly computed values.
+
+2022-09-30  Andras Varga
+
+	Ieee802154UwbIrMode: Eliminated non-const static member.
+
+2022-09-26  Andras Varga
+
+	Eliminated static buffer from resolveDirective() by changing return type to std::string.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-02-02  Rudolf Hornig

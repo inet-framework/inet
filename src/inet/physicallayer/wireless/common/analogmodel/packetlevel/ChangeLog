@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2023-01-23  Levente Mészáros
+
+	Changed the representation of ScalarNoise and ScalarSnir to use the new multidimensional math
+	API. Even though these classes are part of the scalar model, they still need to represent values
+	changing over time.
+
+2023-01-22  Levente Mészáros
+
+	Added codeRate to FlatTransmissionBase, and symbolTime to NarrowbandTransmissionBase and updated
+	all subclasses.
+
+2023-01-21  Levente Mészáros
+
+	Added DimensionalSnir::getSnir().
+	Fixed interval boundaries in DimensionalSnir min/max/mean calculation.
+	Implemented IDimensionalSignal with DimensionalReception.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-03-21  Levente Mészáros

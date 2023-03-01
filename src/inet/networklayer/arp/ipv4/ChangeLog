@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2023-02-20  Zoltan Bojthe
+
+	Arp: Set src MAC address in MacAddressReq Tag
+
+2022-12-16  Andras Varga
+
+	GlobalArp: small modernization.
+
+2022-12-13  Andras Varga
+
+	threads-support: use SIMULATION_SHARED_VARIABLE() for global vars
+
+2022-05-17  Zoltan Bojthe
+
+	Arp: Removed temporary variable, added runtime check.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-02-24  Zoltan Bojthe

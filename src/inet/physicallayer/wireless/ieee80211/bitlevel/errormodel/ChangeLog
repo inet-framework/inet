@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2023-01-25  TÖRÖK Attila
+
+	Ieee80211OfdmErrorModel: Compute SNIR per subcarrier symbol, merged vectorial corruption mode.
+	Ieee80211Ofdm*: Switch to dimensional analog model and add startTime parameter to Transmitter.
+	Ieee80211Ofdm*: Renames: *BitRate -> *Bitrate.
+	Ieee80211*Ofdm*: Separate bitrates for header and data in [Transmission|Reception]PacketModel.
+	Ieee80211OfdmErrorModel: Add symbolCorruptionMode parameter.
+
+2023-01-24  TÖRÖK Attila
+
+	Ieee80211*Ofdm*: subcarrierModulation -> modulation, modulationScheme -> subcarrierModulation.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-01-11  ------ inet-4.3.0 released ------

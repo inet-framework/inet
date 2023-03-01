@@ -1,5 +1,16 @@
 ====== inet-4.x ======
 
+2022-06-13  Zoltan Bojthe
+
+	Added throwing an error when the radio is not in transmitter or transceiver mode and a packet arrives
+	from the upper module (typically the MAC).
+
+2022-06-02  Zoltan Bojthe
+
+	LayeredProtocolBase derived classes: Fixed the duplicated emission of
+	packetReceivedFromUpperSignal for #702. The LayeredProtocolBase::handleUpperMessage()
+	also emitted packetReceivedFromUpperSignal before calling handleUpperPacket().
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-03-22  Levente Mészáros

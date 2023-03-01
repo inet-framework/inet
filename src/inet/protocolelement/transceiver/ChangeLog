@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2022-12-16  Levente Mészáros
+
+	StreamThroughTransmitter: Fixed packet ownership problem when processing TX end timer.
+
+2022-12-09  Levente Mészáros
+
+	StreamThroughTransmitter: Fixed corner cases brought up by cut-through switching.
+
+2022-12-08  Levente Mészáros
+
+	StreamingTransmitterBase: Added guard to avoid processing signal notifications
+	during network cleanup.
+
+2022-05-13  Rudolf Hornig
+
+	build: preventing implicit instatiation of some mixin classes
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-03-19  Zoltan Bojthe

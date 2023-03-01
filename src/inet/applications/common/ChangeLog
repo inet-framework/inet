@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-12-10  Andras Varga
+
+	Fixed copy/paste bug in SourceApp
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-11-08  Levente Mészáros

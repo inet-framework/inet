@@ -1,5 +1,20 @@
 ====== inet-4.x ======
 
+2023-02-02  Levente Mészáros
+
+	EthernetLink: Changed delay calculation to default.
+
+	Sometimes it makes sense to set the delay of a link and this calculation
+	is not accurate anyway because the propagation speed is just an
+	approximate value.
+
+2022-12-08  Levente Mészáros
+
+	NED: Moved cut-through switching source and sink modules into the PHY layer.
+
+	Removed the extra message dispatcher that connected cut-through modules.
+	Deleted obsolete cutthroughIn/cutthrougOut gates.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-03-17  Zoltan Bojthe

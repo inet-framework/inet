@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2022-12-05  Levente Mészáros
+
+	Fixed the computation of gmRateRatio.
+
+	The formula uses the previous and the current timestamp of the peer time
+	synchronization frame sending events. We could not find parts of the
+	standard that would justify this but the OneMasterClock example of the
+	gPTP time synchronization showcase proves this method to be accurate and
+	the old method to be completely wrong.
+
+2022-12-02  Levente Mészáros
+
+	Fixed pdelayRespEventIngressTimestamp adjustment after synchronization.
+	This is a local timestamp and must be adjusted similarly to pdelayReqEventEgressTimestamp.
+	GptpEndstation: Changed gptp submodule to be optional.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-02-21  Zoltan Bojthe

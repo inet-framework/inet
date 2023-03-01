@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2022-12-13  Andras Varga
+
+	threads-support: various registries to use getSharedVariable() instead of global variables
+	Mutable global variables are not allowed when multiple simulations are run concurrently using threads.
+
+2022-09-24  Andras Varga
+
+	Quaternion: IDENTITY and NIL made const
+
+2022-05-16  Lars Wischhof
+
+	Added @toString to Coord so that coordinates can be printed.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-01-11  ------ inet-4.3.0 released ------

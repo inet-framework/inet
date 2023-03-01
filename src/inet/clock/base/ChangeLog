@@ -1,5 +1,43 @@
 ====== inet-4.x ======
 
+2023-02-02  Levente Mészáros
+
+	ClockBase: Added emitClockTimeInterval parameter to allow recording the
+	clock time periodically.
+
+2022-12-15  Levente Mészáros
+
+	DriftingOscillatorBase: Changed the nominalTickLength accuracy check to
+	use relative error
+
+	Instead of relying on the string to double and double to string conversion.
+
+2022-12-14  Levente Mészáros
+
+	DriftingOscillatorBase: Changed the nominalTickLength representation
+	precision check to be a bit weaker.
+
+	The 0.1s NED value converts to 0.10000000000000001s double and to 0.1s in
+	simtime. This should not cause the simulation to stop with an error. The
+	difference is ignored if the string representations of the double
+	parameter value and the simtime are the same.
+
+2022-12-07  Levente Mészáros
+
+	DriftingOscillatorBase: Added check for the representation accuracy of
+	the nominalTickLength parameter value.
+
+2022-12-02  Levente Mészáros
+
+	DriftingOscillatorBase: Changed getCurrentTickLength to double return value.
+
+	There were problems with simtime precision when calculating with drift
+	rate at the picosecond level.
+
+2022-09-26  Andras Varga
+
+	Eliminated static buffer from resolveDirective() by changing return type to std::string.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-12-11  Gyorgy Szaszko

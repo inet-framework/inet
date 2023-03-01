@@ -1,6 +1,47 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-4.5 (Jun 2023) - Stable
+----------------------------
+
+This is a new minor stable release of the INET 4.x branch.
+
+Queueing
+ - added scheduling priority parameters
+ - added initial offset parameters to sources and sinks
+ - added BackPressureBarrier, FullPacketSink, PacketDelayerBase modules
+ - refactored PacketTaggerBase
+
+Protocolelement
+ - added cut-through source/sink
+ - minor fixes
+
+Clock
+ - added oscillator compensation factor
+ - changed RandomDriftOscillator
+
+Ethernet
+ - refactored cut-through
+
+802.11
+ - replaceable policy submodules
+
+Composability
+ - refactored protocol encapsulation request and disptach protocol request
+ - more uniform handling of request and indication tags
+
+Multi-threading support
+ - eliminated global variables
+ - changed global variables to const
+ - added OPP_THREAD_LOCAL to variables
+
+Omnetpp 7.0 compatibility
+
+Refined documentation
+ - 802.11
+
+Bug fixes
+
 INET-4.4 (May 2022) - Stable
 ----------------------------
 

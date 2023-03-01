@@ -1,5 +1,42 @@
 ====== inet-4.x ======
 
+2023-01-11  Levente Mészáros
+
+	Packet: Added hasTag template method.
+
+2022-12-20  Andras Varga
+
+	threads-support: added OPP_THREAD_LOCAL for rest of global vars
+	where getSharedVariable()/getSharedCounter() was not appropriate.
+
+2022-12-16  Andras Varga
+
+	threads-support: use SIMULATION_SHARED_COUNTER()/getSharedCounter() for global counters.
+
+2022-12-13  Andras Varga
+
+	threads-support: various registries to use getSharedVariable() instead of global variables.
+	Mutable global variables are not allowed when multiple simulations are run concurrently using threads.
+
+2022-12-08  Levente Mészáros
+
+	PacketDissector: Fixed the front/back offset of the dissected packet to be changed when one of
+	the dissector throws an error.
+
+2022-09-29  Zoltan Bojthe
+
+	packet: using cValue::POINTER instead of obsolete cValue::OBJECT
+	packet: fixed invalid chunk pointer problem
+
+	PacketDissector sometimes generates temporary chunks (typically:
+	serialize from BytesChunk) and PacketFilter was stored only the pointer
+	of temporary chunk. After the fix, the PacketFilter stores shared
+	pointers for prevent deleting temporary chunks.
+
+2022-09-26  Andras Varga
+
+	Eliminated static buffer from resolveDirective() by changing return type to std::string.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-05-03  Levente Mészáros

@@ -1,5 +1,30 @@
 ====== inet-4.x ======
 
+2022-12-22  Andras Varga
+
+	threads-support: EmptyChunk: singleton eliminated
+
+2022-12-16  Andras Varga
+
+	threads-support: use SIMULATION_SHARED_COUNTER()/getSharedCounter() for global counters.
+
+2022-12-13  Andras Varga
+
+	threads-support: Chunk: eliminated static variable.
+	threads-support: various registries to use getSharedVariable() instead of global variables.
+	Mutable global variables are not allowed when multiple simulations are run concurrently using threads.
+
+2022-12-08  Levente Mészáros
+
+	Added StreamBufferChunk to the chunk API.
+
+2022-10-24  Levente Mészáros
+
+	Chunk: Changed the Chunk::convertChunk() reinterpretation error message and refactored the code.
+
+	Removed global enableImplicitChunkSerialization flag because it's not useful now that there's
+	local control. Renamed PF_ALLOW_SERIALIZATION to PF_ALLOW_REINTERPRETATION.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-04-09  llccd

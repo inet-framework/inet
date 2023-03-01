@@ -1,5 +1,23 @@
 ====== inet-4.x ======
 
+2023-01-17  Levente Mészáros
+
+	Adapted controlling the encapsulation protocol order to use the functions from ProtocolUtils.h.
+	This makes the encapsulation protocol control uniform throughout INET.
+	Added appendEncapsulationProtocolInd calls to allow reversing an incoming packet.
+	This change results in copying the encapsulation protocol order for forwarded frames.
+
+2022-12-21  Levente Mészáros
+
+	Ieee8021qTagEpdHeaderChecker: Added support for ProtocolEncapsulationInd tag.
+
+2022-11-10  Levente Mészáros
+
+	SimpleIeee8021qFilter: Moved gates to the first submodule in the branches, also added a backpressure barrier.
+
+	This way if the gate is closed, the stream is not measured and let through using the default output gate.
+	Change the filter expression to empty string to completely disable a stream to pass through.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-12-16  Levente Mészáros

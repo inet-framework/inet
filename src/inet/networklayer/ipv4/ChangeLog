@@ -1,5 +1,60 @@
 ====== inet-4.x ======
 
+2023-01-17  Levente Mészáros
+
+	Adapted controlling the encapsulation protocol order to use the functions from ProtocolUtils.h.
+	This makes the encapsulation protocol control uniform throughout INET.
+
+2023-01-11  TÖRÖK Attila
+
+	Fixed @unit typo, these should have been @enum
+
+2022-12-21  Levente Mészáros
+
+	Ipv4: Refactored to use EncapsulationProtocolReq utility functions.
+
+2022-12-16  Andras Varga
+
+	threads-support: use SIMULATION_SHARED_COUNTER()/getSharedCounter() for global counters.
+
+2022-09-19  Andras Varga
+
+	INET ported to omnetpp pre-7.0 master
+
+	Follow API changes:
+	- cSimulation: getSimulationStage() == CTX_CLEANUP  --> getStage() ==
+	cSimulation::STAGE_CLEANUP
+	- getSimulation() --> cSimulation::getActiveSimulation(), as global
+	getSimulation() function became deprecated
+	- some static cConfiguration methods became non-static
+	- MacAddress: eliminate "getEnvir() deprecated" warnings from header
+
+2022-09-10  Zoltan Bojthe
+
+	Ipv4: Renamed and moved crc-related functions to Ipv4Header.
+
+	Ipv4::setComputedCrc()
+	Ipv4::insertCrc() --> Ipv4Header::updateCrc()
+	Ipv4::verifyCrc() --> Ipv4Header::verifyCrc()
+
+2022-09-26  Andras Varga
+
+	Eliminated static buffer from resolveDirective() by changing return type to std::string.
+
+2022-07-15  Zoltan Bojthe
+
+	Ipv4HeaderSerializer: redesign for direct usage with Ipv4Header
+	Ipv4: Get source interface id from the tag, interface table usage was unnecessary.
+
+2022-06-27  Zoltan Bojthe
+
+	Ipv4: Fixed EncapsulationProtocolReq usage. Should not append nullptr for EncapsulationProtocolReq.
+	Drop the EncapsulationProtocolReq, when empty.
+
+2022-05-18  Zoltan Bojthe
+
+	Igmp: move IgmpTimerKind enum to MSG file, added selfMessageKinds for NED files.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-04-11  Levente Mészáros

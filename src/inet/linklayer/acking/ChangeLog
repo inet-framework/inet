@@ -1,5 +1,23 @@
 ====== inet-4.x ======
 
+2022-09-08  Zoltan Bojthe
+
+	AckingMac: Fixed filling the source MacAddress in outbound headers.
+
+2022-06-13  Zoltan Bojthe
+
+	AckingMac: Fixed #702: "Radio: Received frame from upper layer while already transmitting."
+	Prevent sending down a second packet to radio, when the radio not yet received the previous.
+
+2022-05-31  Zoltan Bojthe
+
+	AckingMac: Fixed packet drop reason when the transmit not acked.
+
+2022-05-18  Zoltan Bojthe
+
+	Use addTagIfAbsent() instead of getTagForUpdate() for set PacketProtocolTag.
+	The protocol must be set at these positions, regardless of whether the packet already has a ProtocolTag.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-09-08  Edward Longman

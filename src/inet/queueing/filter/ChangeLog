@@ -1,5 +1,20 @@
 ====== inet-4.x ======
 
+2023-02-21  Levente Mészáros
+
+	ContentBasedFilter: Added TransparentProtocolRegistrationListener base class to fix #855.
+
+2022-11-21  Levente Mészáros
+
+	StatisticalRateLimiter: Added canPushPacket override.
+
+	This module draws random numbers in matchesPacket and cannot answer the canPushPacket
+	question in repeatable way.
+
+2022-11-10  Levente Mészáros
+
+	LabelFilter: Added support for changing the labelFilter expression during the simulation.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-04-11  Levente Mészáros

@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-12-06  Andras Varga
+
+	Added/refined documentation for Tx, Rx, Ds, Dcf, Hcf, Edcaf, Hcca, etc, and their interface types.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-03-19  Zoltan Bojthe

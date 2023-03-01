@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2023-01-18  Levente Mészáros
+
+	SimpleCcBattery: Changed initialCapacity default value to be nominalCapacity.
+
+2023-01-16  n-jay
+
+	Added CcBatteryPack module.
+
+2022-09-26  Andras Varga
+
+	Eliminated static buffer from resolveDirective() by changing return type to std::string.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-03-21  Levente Mészáros

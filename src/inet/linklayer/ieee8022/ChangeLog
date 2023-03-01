@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-07-05  Zoltan Bojthe
+
+	Ieee8022Llc: Removed registerMyProtocol() function.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-03-11  Zoltan Bojthe

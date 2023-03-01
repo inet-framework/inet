@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2022-12-08  Levente Mészáros
+
+	StreamingTransmitterBase: Added guard to avoid processing signal notifications
+	during network cleanup.
+
+2022-05-13  Rudolf Hornig
+
+	build: preventing implicit instatiation of some mixin classes
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-04-05  Levente Mészáros

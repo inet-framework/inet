@@ -1,5 +1,25 @@
 ====== inet-4.x ======
 
+2023-01-26  TÖRÖK Attila
+
+	Ieee80211*Transmitter: Don't hardcode dataSymbolTime, query it from the mode instead.
+
+2023-01-25  TÖRÖK Attila
+
+	Ieee80211DimensionalTransmitter: Remove "simply wrong" setting modulation to BPSK.
+
+2023-01-23  Levente Mészáros
+
+	Ieee80211Radio: Updated Ieee80211ScalarTransmitter and Ieee80211DimensionalTransmitter to
+	fill in codeRate and symbolTime parameters.
+	Added codeRate to FlatTransmissionBase, and symbolTime to NarrowbandTransmissionBase and
+	updated all subclasses.
+
+2022-05-18  Zoltan Bojthe
+
+	Use addTagIfAbsent() instead of getTagForUpdate() for set PacketProtocolTag.
+	The protocol must be set at these positions, regardless of whether the packet already has a ProtocolTag.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-04-11  Levente Mészáros

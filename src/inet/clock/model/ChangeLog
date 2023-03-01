@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2022-12-02  Levente Mészáros
+
+	Implemented support for oscillator compensation factor.
+
+2022-12-01  Levente Mészáros
+
+	Added oscillator compensation factor parameter to setClockTime.
+	This parameter allows to also synchronize the rate of change of clock times.
+
+2022-09-26  Andras Varga
+
+	Eliminated static buffer from resolveDirective() by changing return type to std::string.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-11-08  Levente Mészáros

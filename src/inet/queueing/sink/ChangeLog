@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2022-11-25  Levente Mészáros
+
+	Added missing module interfaces to like expressions.
+
+2022-11-23  Levente Mészáros
+
+	FullPacketSink: Changed to implement both active/passive packet sink interfaces.
+
+2022-11-21  Levente Mészáros
+
+	Added FullPacketSink, mostly useful for testing purposes.
+
+2022-11-14  Levente Mészáros
+
+	*Sink, *Source: Added missing initial offset parameters and changed the
+	implementations to be more uniform.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-10-18  Levente Mészáros

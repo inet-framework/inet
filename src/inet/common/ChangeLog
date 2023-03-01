@@ -1,5 +1,111 @@
 ====== inet-4.x ======
 
+2023-02-21  Levente Mészáros
+
+	Added service/protocol registration path to help debugging circles detected during registration.
+
+2023-02-20  Levente Mészáros
+
+	ResidenceTimeMeasurer: Added EV_DEBUG logging.
+
+2023-01-10  Levente Mészáros
+
+	ProtocolUtils:
+	Added more functions and extended ensureEncapsulationProtocolReq semantics with present and prepend flags.
+	Added peekEncapsulationProtocolReq(), setDispatchProtocol() and removeDispatchProtocol() functions.
+	Added removeEncapsulationProtocolReq function. Added prependEncapsulationProtocol* functions.
+	Renamed pushEncapsulationProtocol* to appendEncapsulationProtocol*.
+
+2023-01-09  Zoltan Bojthe
+
+	NetworkNamespaceContext: throws verbose error messages
+
+2022-12-23  Andras Varga
+
+	Compat.cc: fix: make getSharedCounter() work with multiple runs
+
+2022-12-22  Andras Varga
+
+	threads-support: Protocol: eliminate using static nextId counter during simulation
+	threads-support: EmptyChunk: singleton eliminated
+
+2022-12-20  Andras Varga
+
+	threads-support: added OPP_THREAD_LOCAL for rest of global vars where
+	getSharedVariable()/getSharedCounter() was not appropriate.
+	ProtocolGroup: deallocate dynamically added protocols in the destructor.
+	threads-support: ProtocolGroup: turn protocol groups into simulation shared vars because they
+	can be modified during simulation.
+
+2022-12-19  Levente Mészáros
+
+	Added ProtocolUtils file with EncapsulationProtocolReq/Ind handling.
+
+2022-12-16  Andras Varga
+
+	threads-support: use SIMULATION_SHARED_COUNTER()/getSharedCounter() for global counters.
+	threads-support: some more consts added
+
+2022-12-13  Andras Varga
+
+	threads-support: various registries to use getSharedVariable() instead of global variables.
+	Mutable global variables are not allowed when multiple simulations are run concurrently using threads.
+	threads-support: Macho: added array size checks, initialize members
+	threads-support: InitStageRegistry: InitStage class made immutable
+	Compat.cc: remove unused cLogStream::globalStream
+	Purpose unclear, EV_GLOBAL_STREAM is never mentioned anywhere else.
+
+2022-12-09  Levente Mészáros
+
+	UtilizationFilter: Clamp utilization to [0,1] range.
+
+2022-09-30  Andras Varga
+
+	Int128::toString(): eliminate static buffer (also: rename to str())
+	Static is eliminated by changing return type to std::string.
+	Renamed to str() for consistency with other classes.
+
+2022-09-26  Andras Varga
+
+	Eliminated static buffer from resolveDirective() by changing return type to std::string.
+
+2022-09-19  Andras Varga
+
+	threads-support: INETDefs.h and Compat.h: added SIMULATION_SHARED_VARIABLE(), and compatibility
+	code for omnetpp-6.x and 7.0
+
+2022-09-19  Andras Varga
+
+	INET ported to omnetpp pre-7.0 master
+
+	Follow API changes:
+	- cSimulation: getSimulationStage() == CTX_CLEANUP  --> getStage() ==
+	cSimulation::STAGE_CLEANUP
+	- getSimulation() --> cSimulation::getActiveSimulation(), as global
+	getSimulation() function became deprecated
+	- some static cConfiguration methods became non-static
+	- MacAddress: eliminate "getEnvir() deprecated" warnings from header
+
+2022-06-23  Levente Mészáros
+
+	Topology: Renamed argument to initial. Added ternary operators for from/to differences.
+	Renamed dest to current, src to remote. Added calls to common calculateWeightedSingleShortestPaths method.
+	Moved body of calculateWeightedSingleShortestPathsTo method to calculateWeightedSingleShortestPaths method.
+	Added a separate calculateWeightedSingleShortestPathsFrom method and the common
+	calculateWeightedSingleShortestPaths method.
+
+2022-06-17  Zoltan Bojthe
+
+	NedFunctions: testing the context component maybe nullptr
+
+2022-06-17  Levente Mészáros
+
+	ResultFilters: Added check for the flow name in *PerRegionFilters.
+
+	When these filters come after a DemuxFlowFilter, then the flow name must
+	be taken into account and data that doesn't belong to the given flow
+	should not be forwarded.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-04-28  Zoltan Bojthe

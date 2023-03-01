@@ -1,5 +1,16 @@
 ====== inet-4.x ======
 
+2022-12-02  Levente Mészáros
+
+	SimpleClockSynchronizer: Implemented synchronization of oscillator compensation factor.
+	Renamed synchronizationAccuracy parameter to synchronizationClockTimeError.
+	Added synchronizationOscillatorCompensationFactorError parameter.
+
+2022-12-01  Levente Mészáros
+
+	Clock: Added oscillator compensation factor parameter to setClockTime.
+	This parameter allows to also synchronize the rate of change of clock times.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-01-28  Levente Mészáros

@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2023-02-21  Levente Mészáros
+
+	PeriodicGate: Fixed #822 as suggested by Manuel Eppler.
+
+2022-11-08  Levente Mészáros
+
+	PeriodicGate: Added changeTimerSchedulingPriority parameter to allow
+	controlling the order of open/close operations in a submodule gate vector.
+
+2022-09-26  Andras Varga
+
+	Eliminated static buffer from resolveDirective() by changing return type to std::string.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-03-10  Levente Mészáros

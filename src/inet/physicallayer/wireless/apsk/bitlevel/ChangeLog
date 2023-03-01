@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2023-01-23  Levente Mészáros
+
+	Added checks for transmission type when deciding if reception is possible to layered radios.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-03-19  Zoltan Bojthe

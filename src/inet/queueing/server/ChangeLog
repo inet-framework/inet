@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2022-11-09  Levente Mészáros
+
+	InstantServer: Added serveSchedulingPriority parameter to allow delaying
+	pulling the packet at the current simulation time.
+
+	The serveTimer allows all source modules (e.g. gates) to do their changes
+	and then pull the packet afterwards.
+
+2022-09-26  Andras Varga
+
+	Eliminated static buffer from resolveDirective() by changing return type to std::string.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-11-29  Levente Mészáros

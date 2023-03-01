@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2023-01-26  TÖRÖK Attila
+
+	LayeredErrorModelBase: Change @symbolCorruptionMode default to "1bit"
+
+2023-01-23  Levente Mészáros
+
+	Refactored stochastic symbol level corruption in LayeredErrorModelBase.
+	Added symbolCorruptionMode parameter.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-01-11  ------ inet-4.3.0 released ------

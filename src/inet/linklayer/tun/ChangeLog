@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2022-10-06  Andras Varga
+
+	Replaced getEnvir() with getActiveSimulationOrEnvir()
+
+2022-06-02  Zoltan Bojthe
+
+	LayeredProtocolBase derived classes: Fixed the duplicated emission of
+	packetReceivedFromUpperSignal for #702. The LayeredProtocolBase::handleUpperMessage()
+	also emitted packetReceivedFromUpperSignal before calling handleUpperPacket().
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-01-28  Rudolf Hornig

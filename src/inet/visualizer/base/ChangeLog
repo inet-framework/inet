@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2023-02-21  Zoltan Bojthe
+
+	Fixed issue 819: InterfaceTableVisualizer does not show IPv6 addesses
+
+2022-11-30  Gyorgy Szaszko
+
+	Fix: don't iterate interfaces if there aren't any.
+
+2022-09-26  Andras Varga
+
+	Eliminated static buffer from resolveDirective() by changing return type to std::string.
+
+2022-07-30  Gyorgy Szaszko
+
+	Added directive to PacketDropVisualizer to display drop reason string.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-03-21  Levente Mészáros

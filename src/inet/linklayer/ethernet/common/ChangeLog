@@ -1,5 +1,41 @@
 ====== inet-4.x ======
 
+2023-02-03  Zoltan Bojthe
+
+	MacForwardingTable: parseForwardingTableParameter(): throws error when table already contains
+	the unicast address for same vlan id.
+	MacForwardingTable: parseForwardingTableParameter(): Fixed type of vlan variable.
+	MacForwardingTable: Renamed local variable forwardingTable to forwardingTableObject
+	The local forwardingTable hides the MacForwardingTable::forwardingTable member.
+
+2023-01-17  Levente Mészáros
+
+	Adapted controlling the encapsulation protocol order to use the functions from ProtocolUtils.h.
+	PacketDirectionReverser: Added forwardVlan, forwardPcp and excludeEncapsulationProtocols parameters.
+
+2023-01-05  Levente Mészáros
+
+	DirectionReverserLayer: Added cutthroughBarrier optional submodule.
+
+2023-01-04  Levente Mészáros
+
+	DirectionReverserLayer: Changed reverser submodule to use parameterized typename.
+
+2022-12-21  Levente Mészáros
+
+	EthernetSocket: Handle EncapsulationProtocolReq when sending a packet.
+	RelayInterfaceSelector: Refactored to use EncapsulationProtocolReq utility functions.
+	PacketDirectionReverser: Added code that turns EncapsulationProtocolInd to EncapsulationProtocolReq.
+
+2022-12-08  Levente Mészáros
+
+	PacketDirectionReverser: Added CutthroughTag to the code blcok that executes when an incoming packet
+	becomes outgoing.
+
+2022-09-26  Andras Varga
+
+	Eliminated static buffer from resolveDirective() by changing return type to std::string.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-01-20  Zoltan Bojthe

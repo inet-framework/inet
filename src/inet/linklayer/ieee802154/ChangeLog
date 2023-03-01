@@ -1,5 +1,19 @@
 ====== inet-4.x ======
 
+2022-06-16  Zoltan Bojthe
+
+	Ieee802154Mac: Removed the unnecessary copy protection code, already a noncopyable object.
+	Ieee802154Mac: Converted constructor to member initialization.
+
+2022-05-31  Zoltan Bojthe
+
+	Ieee802154Mac: Fixed #717: emit linkBrokenSignal when transmitted packet not acked and retry limit reached.
+
+2022-05-18  Zoltan Bojthe
+
+	Use addTagIfAbsent() instead of getTagForUpdate() for set PacketProtocolTag.
+	The protocol must be set at these positions, regardless of whether the packet already has a ProtocolTag.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-02-02  Rudolf Hornig

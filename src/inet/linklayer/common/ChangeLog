@@ -1,5 +1,29 @@
 ====== inet-4.x ======
 
+2022-12-16  Andras Varga
+
+	threads-support: use SIMULATION_SHARED_COUNTER()/getSharedCounter() for global counters.
+
+2022-10-06  Andras Varga
+
+	Replaced getEnvir() with getActiveSimulationOrEnvir()
+
+2022-09-26  Zoltan Bojthe
+
+	QosClassifier: Fixed issue #814: disable parsing the transport layer header in fragmented IPv4 datagrams.
+
+2022-09-19  Andras Varga
+
+	INET ported to omnetpp pre-7.0 master
+
+	Follow API changes:
+	- cSimulation: getSimulationStage() == CTX_CLEANUP  --> getStage() ==
+	cSimulation::STAGE_CLEANUP
+	- getSimulation() --> cSimulation::getActiveSimulation(), as global
+	getSimulation() function became deprecated
+	- some static cConfiguration methods became non-static
+	- MacAddress: eliminate "getEnvir() deprecated" warnings from header
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-04-05  Levente Mészáros

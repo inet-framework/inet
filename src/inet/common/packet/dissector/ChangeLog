@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2022-12-13  Andras Varga
+
+	threads-support: various registries to use getSharedVariable() instead of global variables
+	Mutable global variables are not allowed when multiple simulations are run concurrently using threads.
+
+2022-12-08  Levente Mészáros
+
+	PacketDissector: Fixed the front/back offset of the dissected packet to be changed when one of
+	the dissector throws an error.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-01-11  ------ inet-4.3.0 released ------

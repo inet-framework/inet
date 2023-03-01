@@ -1,5 +1,27 @@
 ====== inet-4.x ======
 
+2023-02-20  Zoltan Bojthe
+
+	EthernetMac, EthernetCsmaMac: Removed the outgoing packet source address testing and filling.
+	EthernetEncapsulation: Changed interface detection, using "interfaceTableModule" parameter and
+	InterfaceReq Tag. (instead of obsoleted container NIC module)
+
+2022-11-25  Zoltan Bojthe
+
+	EthernetMac: Fixed #835: bug at receiving Ethernet Control Frame.
+	Data was peeked from transmission instead of incoming packet.
+
+2022-10-06  Zoltan Bojthe
+
+	EthernetCsmaMac: Removed unnecessary duration setting from SendOptions when finishTx() used.
+	EthernetMac, EthernetCsmaMac: Fixed disconnect handling at transmission sending state.
+
+2022-06-02  Zoltan Bojthe
+
+	LayeredProtocolBase derived classes: Fixed the duplicated emission of
+	packetReceivedFromUpperSignal for #702. The LayeredProtocolBase::handleUpperMessage()
+	also emitted packetReceivedFromUpperSignal before calling handleUpperPacket().
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-04-11  Levente Mészáros

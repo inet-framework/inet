@@ -1,5 +1,29 @@
 ====== inet-4.x ======
 
+2023-01-25  TÖRÖK Attila
+
+	Ieee80211*DataMode: Return invalid symbol interval for non-OFDM modes instead of throwing an error
+
+2023-01-23  Levente Mészáros
+
+	Ieee80211OfdmModeBase: Add getSubcarrier[Start|End]FrequencyOffset()
+	Ieee80211Radio: Followed recent renames in compliant OFDM modulations.
+	Ieee80211Radio: Changed compliant mode lookup to allow for graceful failure, i.e. packet drop.
+	Ieee80211Radio: Added support for numSubcarriers in HT and VHT modes for the MCS table and all spatial streams.
+	Ieee80211Radio: Changed names of Ieee80211OfdmCompliantModulations members to reflect the number of subcarriers.
+	Ieee80211Radio: Added numSubcarriers to Ieee80211OfdmModulation.
+	Ieee80211Radio: Added getSymbolInterval() to IIeee80211HeaderMode and IIeee80211DataMode and implementations.
+	Ieee80211Radio: Removed unnecessary inline keywords.
+
+2022-12-20  Andras Varga
+
+	threads-support: added OPP_THREAD_LOCAL for rest of global vars
+	where getSharedVariable()/getSharedCounter() was not appropriate.
+
+2022-09-30  Andras Varga
+
+	Changed "modes" singleton instances to const and caches to mutable.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-01-11  ------ inet-4.3.0 released ------

@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2023-01-23  Levente Mészáros
+
+	Added cObject base class to IModulation to support getClassName(), etc.
+
+2022-12-16  Andras Varga
+
+	threads-support: use SIMULATION_SHARED_COUNTER()/getSharedCounter() for global counters.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-03-22  Levente Mészáros

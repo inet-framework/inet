@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2022-12-06  Andras Varga
+
+	Added/refined documentation for Tx, Rx, Ds and their interface types.
+	Ieee80211Interface,Ieee80211Mac: Added decent NEDDoc comment instead of obsolete ones.
+	Made policy submodules replaceable with typename assignments.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-05-05  Levente Mészáros

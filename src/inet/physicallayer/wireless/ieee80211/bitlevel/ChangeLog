@@ -1,5 +1,32 @@
 ====== inet-4.x ======
 
+2023-01-25  TÖRÖK Attila
+
+	Ieee80211OfdmErrorModel: Compute SNIR per subcarrier symbol, merged vectorial corruption mode
+	Ieee80211LayeredOfdmTransmitter: Fill in preamble/header/data durations of created transmissions
+	Ieee80211Ofdm*: Switch to dimensional analog model and add startTime parameter to Transmitter
+	Ieee80211Ofdm*: Renames: *BitRate -> *Bitrate
+	Ieee80211*Ofdm*: Separate bitrates for header and data in [Transmission|Reception]PacketModel
+	Ieee80211Ofdm[M|Dem]odulator: Add numSubcarriers parameter
+	Ieee80211OfdmErrorModel: Add symbolCorruptionMode parameter
+	Ieee80211LayeredOfdmReceiver: Move modulator and modulation from heap to stack
+	Ieee80211LayeredOfdmReceiver: Use header length/bitrate even when there is no data
+
+2023-01-24  TÖRÖK Attila
+
+	Ieee80211*Ofdm*: subcarrierModulation -> modulation, modulationScheme -> subcarrierModulation
+	Ieee80211LayeredOfdmReceiver: Add nullptr checks
+
+2023-01-23  Levente Mészáros
+
+	Added checks for transmission type when deciding if reception is possible to layered radios.
+	Ieee80211Radio: Added support for numSubcarriers in HT and VHT modes for the MCS table and all spatial streams.
+
+2022-05-18  Zoltan Bojthe
+
+	Use addTagIfAbsent() instead of getTagForUpdate() for set PacketProtocolTag.
+	The protocol must be set at these positions, regardless of whether the packet already has a ProtocolTag.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-04-11  Levente Mészáros

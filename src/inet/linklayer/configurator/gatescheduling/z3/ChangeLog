@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2022-12-08  Levente Mészáros
+
+	Added support for automatic gate schedule configuration using cut-through switching.
+	The cut-through switching can be enabled per port and the cut-through switching header size can be specified per flow.
+
+2022-12-05  Levente Mészáros
+
+	Fixed bug #834.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-03-02  Levente Mészáros

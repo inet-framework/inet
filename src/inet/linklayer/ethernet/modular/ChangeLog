@@ -1,5 +1,65 @@
 ====== inet-4.x ======
 
+2023-02-20  Levente Mészáros
+
+	*CutthroughSource: Copied region tags from cut-through data to cut-through buffer.
+	This allows using the receptionStart/transmissionStart residence time measurement.
+
+2023-01-17  Levente Mészáros
+
+	EthernetCutthroughSource: Added isEligibleForCutthrough method to allow cut-through decisions
+	on a per packet basis. gPTP packets are not eligible for cut-through switching because that
+	would cause problems with attaching the ingress timestamp on the packet end.
+	EthernetCutthrough: Fixed removeAt calls to use offset relative to the whole packet.
+
+2023-01-05  Levente Mészáros
+
+	EthernetCutthroughSink: Added code to remove the CutthroughTag from the processed packet.
+	Added EthernetCutthroughBarrier module that waits until a cut-through packet is completely received.
+
+2022-12-21  Levente Mészáros
+
+	EthernetMacHeaderChecker: Added support for ProtocolEncapsulationInd tag.
+
+2022-12-19  Levente Mészáros
+
+	EthernetCutthroughInterface: Changed base module to LayeredEthernetInterface and eliminated common parts.
+
+2022-12-13  Andras Varga
+
+	threads-support: various registries to use getSharedVariable() instead of global variables.
+	Mutable global variables are not allowed when multiple simulations are run concurrently using threads.
+
+2022-12-08  Levente Mészáros
+
+	EthernetCutthrough*: Refactored to pass up cut-through packets with a StreamBufferChunk.
+
+	The old implementation directly streamed packets from one interface to
+	the other, the new implementation passes the incoming packet up just like
+	normal packets. The difference for cut-through switching is that the
+	cut-through source doesn't wait until the whole packet is received, but
+	only a portion of it. The packet contains a special chunk type for the
+	remaining part that states that this part is continuously being filled up.
+
+2022-12-08  Levente Mészáros
+
+	EthernetCutthroughInterface: Removed the obsolete C++ class for cut-through switching.
+	NED: Moved cut-through switching source and sink modules into the PHY layer.
+	Removed the extra message dispatcher that connected cut-through modules.
+	Deleted obsolete cutthroughIn/cutthrougOut gates.
+
+2022-11-16  Levente Mészáros
+
+	EthernetCutthroughSource: Moved filling InterfaceReq earlier to be present during the canPushPacket() call.
+
+2022-11-09  Levente Mészáros
+
+	EthernetMacLayer: Added serveShcedulingPriority parameter assignment to create a separate event
+	for pulling the packet from the queue.
+
+	This is required in order to allow all gates to open/close at the same simulation time and still
+	properly pull the packet from the highest priority traffic category.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-04-06  Levente Mészáros

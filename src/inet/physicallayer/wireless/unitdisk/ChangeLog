@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2023-01-06  TÖRÖK Attila
+
+	UnitDiskTransmitter: Check for missing bitrate.
+
+2022-05-18  Zoltan Bojthe
+
+	Use addTagIfAbsent() instead of getTagForUpdate() for set PacketProtocolTag.
+	The protocol must be set at these positions, regardless of whether the packet already has a ProtocolTag.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-01-11  ------ inet-4.3.0 released ------

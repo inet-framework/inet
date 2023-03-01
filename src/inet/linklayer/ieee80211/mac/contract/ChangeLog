@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2022-12-07  Andras Varga
+
+	Added NED documentation for several module interfaces.
+
+2022-12-06  Andras Varga
+
+	Made policy submodules replaceable with typename assignments.
+	Added module interfaces for all affected policy modules.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-03-17  Levente Mészáros

@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2022-09-19  Andras Varga
+
+	INET ported to omnetpp pre-7.0 master
+
+	Follow API changes:
+	- cSimulation: getSimulationStage() == CTX_CLEANUP  --> getStage() ==
+	cSimulation::STAGE_CLEANUP
+	- getSimulation() --> cSimulation::getActiveSimulation(), as global
+	getSimulation() function became deprecated
+	- some static cConfiguration methods became non-static
+	- MacAddress: eliminate "getEnvir() deprecated" warnings from header
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-01-28  Rudolf Hornig

@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-06-28  Zoltan Bojthe
+
+	Optimized send(): added sendOut() utility function.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-03-28  Zoltan Bojthe

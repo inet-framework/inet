@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2023-01-23  Levente Mészáros
+
+	Updated ApskScalarTransmitter and ApskDimensionalTransmitter to fill in codeRate and symbolTime parameters.
+	Added codeRate to FlatTransmissionBase, and symbolTime to NarrowbandTransmissionBase and updated all subclasses.
+
+2022-05-18  Zoltan Bojthe
+
+	Use addTagIfAbsent() instead of getTagForUpdate() for set PacketProtocolTag.
+	The protocol must be set at these positions, regardless of whether the packet already has a ProtocolTag.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2020-12-17  Levente Mészáros

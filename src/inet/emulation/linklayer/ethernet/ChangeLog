@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2023-02-20  Zoltan Bojthe
+
+	ExtEthernetSocket: Added more documentation.
+
+2022-09-22  Zoltan Bojthe
+
+	Fixed issue #812: add queue module for ExtUpperEthernetInterface.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-12-10  Zoltan Bojthe

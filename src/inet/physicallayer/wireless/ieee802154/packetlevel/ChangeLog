@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2023-01-23  Levente Mészáros
+
+	Updated Ieee802154NarrowbandScalarTransmitter and Ieee802154NarrowbandDimensionalTransmitter to fill in
+	codeRate and symbolTime parameters.
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2021-01-11  ------ inet-4.3.0 released ------
