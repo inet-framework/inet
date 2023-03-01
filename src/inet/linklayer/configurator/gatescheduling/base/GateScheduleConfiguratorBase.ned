@@ -29,14 +29,14 @@ package inet.linklayer.configurator.gatescheduling.base;
 //   - packetInterval: the expected interval between packets
 //   - maxLatency (optional): the allowed maximum end-to-end delay of packets, not used by default
 //   - maxJitter (optional): the allowed maximum jitter among the packets, 0 by default
-//   - pathFragments (optional): array of arrays, where each array contains a list of network node names, uses shortest path by default
+//   - pathFragments (optional): array of arrays, where each array contains a list of network node names, supports multicast trees, shortest path is used when omitted
 //
 simple GateScheduleConfiguratorBase
 {
     parameters:
         double gateCycleDuration @unit(s); // the globally used gate scheduling period in each PeriodicGate modules
-        object configuration @mutable = default([]); // a vector of objects (e.g. [{...}, {...}]), see above
-                                                     // here is an example: [{name: "s1", type: "unicast", application: "app[0]", pcp: 0, gateIndex: 0, source: "wheel*", destination: "hud", packetLength: 100B, packetInterval: 5ms, maxLatency: 100us, maxJitter: 10us}]
+        object configuration @mutable = default([]); // array of objects, see ~GateScheduleConfiguratorBase module documentation for more details
+                                                     // example: [{name: "s1", type: "unicast", application: "app[0]", pcp: 0, gateIndex: 0, source: "wheel*", destination: "hud", packetLength: 100B, packetInterval: 5ms, maxLatency: 100us, maxJitter: 10us, pathFragments: [["a", "b", "c"]]}]
         @display("i=block/cogwheel");
 }
 
