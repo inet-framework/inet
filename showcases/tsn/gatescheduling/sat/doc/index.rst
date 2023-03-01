@@ -12,6 +12,8 @@ This showcase demonstrates a gate schedule configurator that solves the autoconf
 The Model
 ---------
 
+The SAT-solver-based gate schedule configurator requires the `Z3 Gate Scheduling Configurator` INET feature to be enabled, and the ``libz3-dev`` or ``z3-devel`` packages to be installed.
+
 The simulation uses the following network:
 
 .. figure:: media/Network.png

@@ -12,7 +12,7 @@ This showcase demonstrates the TSNsched gate schedule configurator that solves t
 The Model
 ---------
 
-The :ned:`TsnSchedGateScheduleConfigurator` module uses the external Z3 SAT solver tool (check the NED documentation the configurator for installation
+The :ned:`TsnSchedGateScheduleConfigurator` module provides a gate scheduling configurator that uses the `TSNsched` tool that is available at https://github.com/ACassimiro/TSNsched (check the NED documentation of the configurator for installation
 instructions). The module has the same parameters as the other gate schedule configurators.
 
 The simulation uses the same network as the showcases for the Eager and SAT configurators:
