@@ -980,30 +980,36 @@ void Udp::processUDPPacket(Packet *udpPacket)
 
 bool Udp::verifyCrc(const Protocol *networkProtocol, const Ptr<const UdpHeader>& udpHeader, Packet *packet)
 {
+    auto totalLength = udpHeader->getTotalLengthField();
+    if (totalLength < UDP_HEADER_LENGTH)
+        return false;
+
     switch (udpHeader->getCrcMode()) {
         case CRC_DISABLED:
             // if the CRC mode is disabled, then the check passes if the CRC is 0
             return udpHeader->getCrc() == 0x0000;
         case CRC_DECLARED_CORRECT: {
             // if the CRC mode is declared to be correct, then the check passes if and only if the chunks are correct
-            auto totalLength = udpHeader->getTotalLengthField();
-            auto udpDataBytes = packet->peekDataAt(B(0), totalLength - udpHeader->getChunkLength(), Chunk::PF_ALLOW_INCORRECT);
+            auto udpDataBytes = packet->peekDataAt(B(0), totalLength - udpHeader->getChunkLength(), Chunk::PF_ALLOW_EMPTY | Chunk::PF_ALLOW_INCORRECT);
             return udpHeader->isCorrect() && udpDataBytes->isCorrect();
         }
         case CRC_DECLARED_INCORRECT:
             // if the CRC mode is declared to be incorrect, then the check fails
             return false;
         case CRC_COMPUTED: {
-            if (udpHeader->getCrc() == 0x0000)
-                // if the CRC mode is computed and the CRC is 0 (disabled), then the check passes
+            if (udpHeader->getCrc() == 0x0000) {
+                // on udp under Ipv6, the CRC 0000 is invalid
+                if (networkProtocol == &Protocol::ipv6)
+                    return false;
+                // on udp under Ipv4, if the CRC mode is computed and the CRC is 0 (disabled), then the check passes
                 return true;
+            }
             else {
                 // otherwise compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC) and the chunks are correct
                 auto l3AddressInd = packet->getTag<L3AddressInd>();
                 auto srcAddress = l3AddressInd->getSrcAddress();
                 auto destAddress = l3AddressInd->getDestAddress();
-                auto totalLength = udpHeader->getTotalLengthField();
-                auto udpData = packet->peekDataAt<BytesChunk>(B(0), totalLength - udpHeader->getChunkLength(), Chunk::PF_ALLOW_INCORRECT);
+                auto udpData = packet->peekDataAt(B(0), totalLength - udpHeader->getChunkLength(), Chunk::PF_ALLOW_EMPTY | Chunk::PF_ALLOW_INCORRECT);
                 auto computedCrc = computeCrc(networkProtocol, srcAddress, destAddress, udpHeader, udpData);
                 // TODO delete these isCorrect calls, rely on CRC only
                 return computedCrc == 0xFFFF && udpHeader->isCorrect() && udpData->isCorrect();
@@ -1479,7 +1485,6 @@ INetfilter::IHook::Result UdpCrcInsertionHook::datagramPostRoutingHook(Packet *p
         packet->insertAtFront(udpHeader);
         packet->insertAtFront(networkHeader);
     }
-
     return ACCEPT;
 }
 
