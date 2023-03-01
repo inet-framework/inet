@@ -1283,6 +1283,13 @@ utils.export_data_if_needed(df, props)
             <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
+import os
+import sys
+# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
+import matplotlib.pyplot as plt
+import modifiedplot
+default_colors = modifiedplot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -1304,10 +1311,14 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df['title'] = df['title'].map(lambda title: re.sub("\, vector.*", "", title))
+#df['title'] = df['title'].map(lambda title: re.sub("\, vector.*", "", title))
+
+print(df)
+
+modifiedplot.add_to_dataframe(df, style_tuple_list=[('name', 'incoming.*', {'linestyle': 'dashed'})])
 
 # plot
-utils.plot_vectors(df, props)
+modifiedplot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
@@ -1911,10 +1922,10 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="9"/>
             <property name="legend_prefer_module_display_paths" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
-            <property name="legend_manual" value="false"/>
-            <property name="legend_replacements" value="/\/ 1000000//"/>
-            <property name="legend_automatic" value="true"/>
-            <property name="legend_format" value=""/>
+            <property name="legend_manual" value="true"/>
+            <property name="legend_replacements" value="/\/ 1000000//&#10;/DataRate.*//"/>
+            <property name="legend_automatic" value="false"/>
+            <property name="legend_format" value="$name"/>
         </chart>
     </charts>
 </analysis>
