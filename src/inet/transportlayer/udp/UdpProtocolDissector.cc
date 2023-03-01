@@ -26,7 +26,7 @@ void UdpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICa
     if (!isCorrectPacket)
         callback.markIncorrect();
     callback.visitChunk(header, &Protocol::udp);
-    auto udpPayloadEndOffset = udpHeaderOffset + B(header->getTotalLengthField());
+    auto udpPayloadEndOffset = udpHeaderOffset + header->getTotalLengthField();
     packet->setBackOffset(udpPayloadEndOffset);
     auto dataProtocol = ProtocolGroup::getUdpProtocolGroup()->findProtocol(header->getDestPort());
     if (dataProtocol == nullptr)
