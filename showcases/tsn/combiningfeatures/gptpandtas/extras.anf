@@ -2617,8 +2617,8 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-order = {'NormalOperation': 0, 'LinkFailure': 1, 'Failover': 2, 'Recovery': 3}
-inet.scave.plot.add_to_dataframe(df, (), order=order)
+order = ['configname', {'NormalOperation': 0, 'LinkFailure': 1, 'Failover': 2, 'Recovery': 3}]
+inet.scave.plot.add_to_dataframe(df, order=order)
 
 # plot
 inet.scave.plot.plot_vectors_separate(df, props)
