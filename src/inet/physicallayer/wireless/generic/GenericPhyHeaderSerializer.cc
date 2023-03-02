@@ -22,7 +22,7 @@ void GenericPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr
     stream.writeUint16Be(header->getPayloadProtocol()->getId());
     int64_t remainders = b(header->getChunkLength() - (stream.getLength() - startPosition)).get();
     if (remainders < 0)
-        throw cRuntimeError("UnitDiskPhyHeader length = %d bits is smaller than required %d bits", (int)b(header->getChunkLength()).get(), (int)b(stream.getLength() - startPosition).get());
+        throw cRuntimeError("GenericPhyHeader length = %d bits is smaller than required %d bits", (int)b(header->getChunkLength()).get(), (int)b(stream.getLength() - startPosition).get());
     stream.writeBitRepeatedly(false, remainders);
 }
 

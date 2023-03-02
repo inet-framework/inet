@@ -11,13 +11,7 @@ import inet.physicallayer.wireless.common.base.packetlevel.ReceiverBase;
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
 
 //
-// This receiver model receives a transmission succesfully within communication
-// range unless there's another interfering transmission within interference
-// range. It also supports an ideal communication channel with configuring the
-// receiver to ignore interfering transmissions.
-//
-// @see ~UnitDiskTransmitter, ~UnitDiskRadio, ~UnitDiskRadioMedium,
-// ~UnitDiskMediumAnalogModel.
+// @see ~GenericTransmitter, ~GenericRadio.
 //
 module GenericReceiver extends ReceiverBase like IReceiver
 {
