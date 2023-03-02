@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeaderSerializer.h"
+#include "inet/physicallayer/wireless/generic/GenericPhyHeaderSerializer.h"
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/physicallayer/wireless/generic/GenericPhyHeader_m.h"

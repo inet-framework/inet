@@ -5,14 +5,14 @@
 //
 
 
-#ifndef __INET_UNITDISKPROTOCOLDISSECTOR_H
-#define __INET_UNITDISKPROTOCOLDISSECTOR_H
+#ifndef __INET_GENERICPROTOCOLDISSECTOR_H
+#define __INET_GENERICPROTOCOLDISSECTOR_H
 
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 
 namespace inet {
 
-class INET_API UnitDiskProtocolDissector : public ProtocolDissector
+class INET_API GenericProtocolDissector : public ProtocolDissector
 {
   public:
     virtual void dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const override;
