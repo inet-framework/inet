@@ -8,16 +8,16 @@
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeaderSerializer.h"
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/generic/GenericPhyHeader_m.h"
 
 namespace inet {
 
-Register_Serializer(UnitDiskPhyHeader, UnitDiskPhyHeaderSerializer);
+Register_Serializer(GenericPhyHeader, GenericPhyHeaderSerializer);
 
-void UnitDiskPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void GenericPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto startPosition = stream.getLength();
-    const auto& header = staticPtrCast<const UnitDiskPhyHeader>(chunk);
+    const auto& header = staticPtrCast<const GenericPhyHeader>(chunk);
     stream.writeUint16Be(b(header->getChunkLength()).get());
     stream.writeUint16Be(header->getPayloadProtocol()->getId());
     int64_t remainders = b(header->getChunkLength() - (stream.getLength() - startPosition)).get();
@@ -26,10 +26,10 @@ void UnitDiskPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
     stream.writeBitRepeatedly(false, remainders);
 }
 
-const Ptr<Chunk> UnitDiskPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> GenericPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto startPosition = stream.getPosition();
-    auto header = makeShared<UnitDiskPhyHeader>();
+    auto header = makeShared<GenericPhyHeader>();
     b dataLength = b(stream.readUint16Be());
     header->setChunkLength(dataLength);
     header->setPayloadProtocol(Protocol::findProtocol(stream.readUint16Be()));

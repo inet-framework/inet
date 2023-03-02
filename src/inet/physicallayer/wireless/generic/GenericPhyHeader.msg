@@ -10,7 +10,7 @@ import inet.common.packet.chunk.Chunk;
 
 namespace inet;
 
-class UnitDiskPhyHeader extends FieldsChunk
+class GenericPhyHeader extends FieldsChunk
 {
     const Protocol *payloadProtocol; // specifies a protocol (internal class with an artificial identifier)
 }

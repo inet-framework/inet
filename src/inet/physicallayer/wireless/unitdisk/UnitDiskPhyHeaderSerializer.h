@@ -15,14 +15,14 @@ namespace inet {
 /**
  * Converts between UnitDiskPhyHeader and binary (network byte order) application packet.
  */
-class INET_API UnitDiskPhyHeaderSerializer : public FieldsChunkSerializer
+class INET_API GenericPhyHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
-    UnitDiskPhyHeaderSerializer() : FieldsChunkSerializer() {}
+    GenericPhyHeaderSerializer() : FieldsChunkSerializer() {}
 };
 
 } // namespace inet

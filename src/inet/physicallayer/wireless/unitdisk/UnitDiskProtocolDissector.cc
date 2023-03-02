@@ -9,7 +9,7 @@
 
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/generic/GenericPhyHeader_m.h"
 
 namespace inet {
 
@@ -17,7 +17,7 @@ Register_Protocol_Dissector(&Protocol::unitDisk, UnitDiskProtocolDissector);
 
 void UnitDiskProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
-    auto header = packet->popAtFront<UnitDiskPhyHeader>();
+    auto header = packet->popAtFront<GenericPhyHeader>();
     callback.startProtocolDataUnit(&Protocol::unitDisk);
     callback.visitChunk(header, &Protocol::unitDisk);
     auto payloadProtocol = header->getPayloadProtocol();
