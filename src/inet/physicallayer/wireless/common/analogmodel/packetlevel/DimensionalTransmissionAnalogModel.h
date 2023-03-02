@@ -22,13 +22,19 @@ using namespace inet::units::values;
 class INET_API DimensionalTransmissionAnalogModel : public INewTransmissionAnalogModel
 {
   protected:
+    // TODO delete the frequencies?
+    const Hz centerFrequency = Hz(NaN);
+    const Hz bandwidth = Hz(NaN);
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> powerFunction;
 
   public:
-    DimensionalTransmissionAnalogModel(const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& powerFunction) : powerFunction(powerFunction) {}
+    DimensionalTransmissionAnalogModel(Hz centerFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& powerFunction) : centerFrequency(centerFrequency), bandwidth(bandwidth), powerFunction(powerFunction) {}
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
+    // TODO delete the frequencies?
+    virtual const Hz getCenterFrequency() const { return centerFrequency; }
+    virtual const Hz getBandwidth() const { return bandwidth; }
     virtual const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> getPower() const { return powerFunction; }
 };
 

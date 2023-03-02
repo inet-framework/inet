@@ -32,8 +32,10 @@ class INET_API DimensionalReceiverAnalogModel : public ReceiverAnalogModelBase, 
   protected:
     virtual void initialize(int stage) override {
         if (stage == INITSTAGE_LOCAL) {
-//            energyDetection = mW(math::dBmW2mW(par("energyDetection")));
-//            sensitivity = mW(math::dBmW2mW(par("sensitivity")));
+            centerFrequency = Hz(par("centerFrequency"));
+            bandwidth = Hz(par("bandwidth"));
+            energyDetection = mW(math::dBmW2mW(par("energyDetection")));
+            sensitivity = mW(math::dBmW2mW(par("sensitivity")));
         }
     }
 
@@ -60,7 +62,21 @@ class INET_API DimensionalReceiverAnalogModel : public ReceiverAnalogModelBase, 
     }
 
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override {
-        throw cRuntimeError("TODO");
+        const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
+        const DimensionalReceptionAnalogModel *analogModel = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getNewAnalogModel());
+        if (bandListening->getCenterFrequency() != analogModel->getCenterFrequency() || bandListening->getBandwidth() < analogModel->getBandwidth()) {
+            EV_DEBUG << "Computing whether reception is possible: listening and reception bands are different -> reception is impossible" << endl;
+            return false;
+        }
+        else {
+            Point<simsec> startPoint{ simsec(reception->getStartTime()) };
+            Point<simsec> endPoint{ simsec(reception->getEndTime()) };
+            W minReceptionPower = integrate<WpHz, Domain<simsec, Hz>, 0b10, W, Domain<simsec>>(analogModel->getPower())->getMin(Interval<simsec>(startPoint, endPoint, 0b1, 0b1, 0b0));
+            ASSERT(W(0.0) <= minReceptionPower);
+            bool isReceptionPossible = minReceptionPower >= sensitivity;
+            EV_DEBUG << "Computing whether reception is possible" << EV_FIELD(minReceptionPower) << EV_FIELD(sensitivity) << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
+            return isReceptionPossible;
+        }
     }
 };
 
