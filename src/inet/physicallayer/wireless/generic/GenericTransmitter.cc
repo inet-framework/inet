@@ -11,6 +11,7 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/TransmissionBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/generic/GenericPhyHeader_m.h"
+#include "inet/physicallayer/wireless/generic/GenericTransmission.h"
 
 namespace inet {
 namespace physicallayer {
@@ -59,7 +60,7 @@ const ITransmission *GenericTransmitter::createTransmission(const IRadio *transm
     auto endPosition = mobility->getCurrentPosition();
     auto startOrientation = mobility->getCurrentAngularPosition();
     auto endOrientation = mobility->getCurrentAngularPosition();
-    auto transmission = new TransmissionBase(transmitter, packet, startTime, endTime,
+    auto transmission = new GenericTransmission(transmitter, packet, startTime, endTime,
             preambleDuration, headerDuration, dataDuration,
             startPosition, endPosition, startOrientation, endOrientation);
     transmission->analogModel = getAnalogModel()->createAnalogModel(packet);
