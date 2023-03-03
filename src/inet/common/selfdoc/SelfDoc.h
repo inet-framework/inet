@@ -53,10 +53,10 @@ class INET_API SelfDocTempOffClass
 #undef Enter_Method_Silent
 
 #define __Enter_Method_SelfDoc(...) \
-        if (SelfDoc::notInInitialize(__VA_ARGS__) && (getSimulation()->getSimulationStage() != STAGE(CLEANUP))) { \
+        if (SelfDoc::notInInitialize(__VA_ARGS__) && (cSimulation::getActiveSimulation()->getSimulationStage() != STAGE(CLEANUP))) { \
             auto __from = __ctx.getCallerContext(); \
             std::string fromModuleName = __from ? __from->getParentModule() ? __from->getComponentType()->getFullName() : "-=Network=-" : "-=unknown=-"; \
-            std::string toModuleName = getSimulation()->getContext()->getComponentType()->getFullName(); \
+            std::string toModuleName = cSimulation::getActiveSimulation()->getContext()->getComponentType()->getFullName(); \
             std::string keyValFunction = SelfDoc::keyVal("function", std::string(opp_typename(typeid(*this))) + "::" + __func__); \
             std::string keyValInfo = SelfDoc::keyVal("info", SelfDoc::enterMethodInfo(__VA_ARGS__)); \
             { \
