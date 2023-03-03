@@ -40,6 +40,7 @@ class INET_API ApskLayeredTransmitter : public TransmitterBase
     bps bitrate;
     Hz bandwidth;
     Hz centerFrequency;
+    simtime_t preambleDuration;
 
   protected:
     virtual void initialize(int stage) override;
