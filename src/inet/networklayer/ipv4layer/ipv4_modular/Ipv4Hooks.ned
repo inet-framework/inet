@@ -24,7 +24,7 @@ module OmittedNetfilterHook like INetfilterHook
     parameters:
         @class(::inet::OmittedModule);
         @display("i=old/hook,black,50");
-     gates:
+    gates:
         input in;
         output out;
     connections:
@@ -35,7 +35,7 @@ module BypassNetfilterHook like INetfilterHook
 {
     parameters:
         @display("i=old/hook,black,50");
-     gates:
+    gates:
         input in;
         output out;
     connections:
