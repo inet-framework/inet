@@ -37,7 +37,7 @@ void Ipv4Decapsulate::decapsulate(Packet *packet)
     packet->addTagIfAbsent<EcnInd>()->setExplicitCongestionNotification(ipv4Header->getEcn());
     packet->addTagIfAbsent<TosInd>()->setTos(ipv4Header->getTypeOfService());
 
-    auto transportProtocol = ProtocolGroup::ipprotocol.getProtocol(ipv4Header->getProtocolId());
+    auto transportProtocol = ProtocolGroup::getIpProtocolGroup()->getProtocol(ipv4Header->getProtocolId());
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(transportProtocol);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(transportProtocol);
     auto l3AddressInd = packet->addTagIfAbsent<L3AddressInd>();
