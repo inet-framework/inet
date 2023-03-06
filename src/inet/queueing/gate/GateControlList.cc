@@ -23,11 +23,10 @@ void GateControlList::initialize(int stage)
         parseGcl();
 
         for (int index = 0; index < numGates; ++index) {
-            char buf[20];
-            sprintf(buf, "^.transmissionGate[%d]", index);
-            PeriodicGate *mod = check_and_cast<PeriodicGate *>(getModuleByPath(buf));
             mod->initialOffset = offset;
             mod->durations = gateDurations.at(index);
+            std::string modulePath = "^.transmissionGate[" + std::to_string(index) + "]";
+            PeriodicGate *mod = check_and_cast<PeriodicGate *>(getModuleByPath(modulePath.c_str()));
         }
     }
 }
