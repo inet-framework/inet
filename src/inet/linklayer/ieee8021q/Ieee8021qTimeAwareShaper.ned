@@ -12,6 +12,7 @@ import inet.queueing.contract.IPacketClassifier;
 import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketScheduler;
+import inet.queueing.gate.GateControlList;
 import inet.queueing.queue.CompoundPacketQueueBase;
 
 //
@@ -22,12 +23,17 @@ module Ieee8021qTimeAwareShaper extends CompoundPacketQueueBase
     parameters:
         int numTrafficClasses = default(8); // number of traffic categories
         double bitrate @unit(bps);
+        bool hasGcl = default(false);
         *.bitrate = default(this.bitrate);
         *.extraLength = default(64b); // overhead for Ethernet PHY header
     submodules:
         buffer: <default("")> like IPacketBuffer if typename != "" {
             parameters:
                 @display("p=100,225");
+        }
+        gateControlList: GateControlList if hasGcl {
+            parameters:
+                @display("p=300,225");
         }
         classifier: <default("PcpTrafficClassClassifier")> like IPacketClassifier {
             parameters:
