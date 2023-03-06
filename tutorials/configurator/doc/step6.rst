@@ -66,11 +66,15 @@ static routing table configuration. If no ``<autoroute>`` element is
 specified, the configurator assumes a default that affects all routing
 tables in the network, and computes shortest paths to all interfaces
 according to the hop count metric. The ``<autoroute>`` element can
-contain the following attributes: - ``sourceHosts``: Selector attribute
+contain the following attributes:
+
+- ``sourceHosts``: Selector attribute
 that selects which hosts' routing tables should be modified. The default
-value is ``"**"``. - ``destinationInterfaces``: Parameter attribute that
+value is ``"**"``.
+- ``destinationInterfaces``: Parameter attribute that
 selects destination interfaces for which the shortest paths will be
-calculated. The default value is ``"**"``. - ``metric``: Parameter
+calculated. The default value is ``"**"``.
+- ``metric``: Parameter
 attribute that sets the metric to be used when calculating shortest
 paths. The default value is ``"hopCount"``.
 
@@ -171,11 +175,12 @@ The XML configuration in step6b.xml is as follows:
    :language: xml
 
 The ``<autoroute>`` elements can also contain the following optional
-sub-elements, which can be used to specify costs in the graph: -
-``<node>``: Specifies cost parameters to network nodes. The ``hosts``
+sub-elements, which can be used to specify costs in the graph:
+
+- ``<node>``: Specifies cost parameters to network nodes. The ``hosts``
 selector attribute selects which hosts are affected, and the ``cost``
-parameter sets their costs. Both attributes are mandatory. - ``<link>``:
-Specifies cost parameters to network links. The ``interfaces`` selector
+parameter sets their costs. Both attributes are mandatory.
+- ``<link>``: Specifies cost parameters to network links. The ``interfaces`` selector
 attribute selects which links are affected, by specifying an interface
 they belong to. The ``cost`` parameter sets the cost. Both attributes
 are mandatory.
