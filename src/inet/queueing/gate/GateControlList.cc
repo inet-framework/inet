@@ -23,10 +23,13 @@ void GateControlList::initialize(int stage)
         parseGcl();
 
         for (int index = 0; index < numGates; ++index) {
-            mod->initialOffset = offset;
-            mod->durations = gateDurations.at(index);
             std::string modulePath = "^.transmissionGate[" + std::to_string(index) + "]";
             PeriodicGate *mod = check_and_cast<PeriodicGate *>(getModuleByPath(modulePath.c_str()));
+            cPar& offsetPar = mod->par("offset");
+            offsetPar.setDoubleValue(offset.dbl());
+            cPar& durationsPar = mod->par("durations");
+            durationsPar.copyIfShared();
+            durationsPar.setObjectValue(durations);
         }
     }
 }
