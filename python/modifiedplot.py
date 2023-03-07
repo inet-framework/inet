@@ -94,11 +94,12 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label, global_style=No
 
     p.ylabel(utils.make_chart_title(df, ["title"]))
     
-def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, global_style=None, debug=False):
+def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, global_style=None, share_axes=True, debug=False):
     """
     Modified version of the built-in plot_vectors_separate() function, with the additional functionality
     of ordering the dataframe before plotting, based on the 'order' column. The order of the line colors and
-    the legend order can be controlled this way. It also returns the list of axes used in the plot for further processing.
+    the legend order can be controlled this way. By default, the x axes of the subplots are shared (so they zoom together); turn this off with 'share_axes=False'. 
+    It also returns the list of axes used in the plot for further processing.
     
     Also adds the content of the 'additional_style' column to the style object before plotting.
     
@@ -128,7 +129,12 @@ def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, global
             style_dict = eval(t.additional_style)
             for j in style_dict.items():
                 style[j[0]] = j[1]
-        ax = plt.subplot(df.shape[0], 1, i+1, sharex=ax)
+        if share_axes:
+            share_ax_dict = {'sharex': ax}
+        else:
+            share_ax_dict = {}
+        if debug: print("share_axes:", share_axes, "share_ax_dict:", share_ax_dict)
+        ax = plt.subplot(df.shape[0], 1, i+1, **share_ax_dict)
 
         if i != df.shape[0]-1:
             plt.setp(ax.get_xticklabels(), visible=False)
@@ -139,12 +145,12 @@ def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, global
 
     plt.subplot(df.shape[0], 1, 1)
 
-    title = get_prop("title") or make_chart_title(df, title_cols)
+    title = get_prop("title") or utils.make_chart_title(df, title_cols)
     utils.set_plot_title(title)
     
     return ax_list
     
-def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_label, layout='vertical', columns=0, rows=0, global_style=None, debug=False):
+def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_label, layout='vertical', columns=0, rows=0, share_axes='auto', global_style=None, debug=False):
     """
     This is a modified version of the built-in plot_vectors_separate() function. It takes a list of dataframes,
     and plots each dataframe on its own subplot. Useful for plotting multiple lines on a subplot, as the built-in
@@ -156,6 +162,14 @@ def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_
     - 'vertical' (default)
     - 'horizontal'
     - 'grid': need to specify number of columns and rows
+    
+    By default, in the horizontal and vertical layouts, the common axes are shared, so they zoom together.
+    Turn this off with 'share_axes'.
+    
+    share_axes: only for the horizontal and vertical layouts; no axes are shared in the grid layout
+    - 'auto' (default): the common axes are shared (x for vertical, y for horizontal)
+    - 'none': no shared axes
+    ' 'both': both axes are shared
     """
     p = ideplot if chart.is_native_chart() else plt
     
@@ -180,19 +194,33 @@ def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_
             cols = 1
             rws = len(df_list)
             # shareaxis = 'shareax = ax'
-            shareaxis = {'sharex': ax}
             if len(ax_list) != 0:
-                ax = plt.subplot(len(df_list), 1, j+1, sharex=ax_list[-1])
+                if share_axes == 'auto':
+                    shareaxis = {'sharex': ax_list[-1]}
+                elif share_axes == 'none':
+                    shareaxis = {}
+                elif share_axes == 'both':
+                    shareaxis = {'sharex': ax_list[-1], 'sharey': ax_list[-1]}
+                else:
+                    assert False, "Wrong value for share_axes: " + str(share_axes) + ". Possible values: 'auto', 'none', 'both'"                
             else:
-                ax = plt.subplot(len(df_list), 1, j+1)
+                shareaxis = {}
+            ax = plt.subplot(len(df_list), 1, j+1, **shareaxis)
         elif layout == 'horizontal':
             cols = len(df_list)
             rws = 1
-            shareaxis = {'sharey': ax}
             if len(ax_list) != 0:
-                ax = plt.subplot(1, len(df_list), j+1, sharey=ax_list[-1])
+                if share_axes == 'auto':
+                    shareaxis = {'sharey': ax_list[-1]}
+                elif share_axes == 'none':
+                    shareaxis = {}
+                elif share_axes == 'both':
+                    shareaxis = {'sharex': ax_list[-1], 'sharey': ax_list[-1]}
+                else:
+                    assert False, "Wrong value for share_axes: " + str(share_axes) + ". Possible values: 'auto', 'none', 'both'"
             else:
-                ax = plt.subplot(1, len(df_list), j+1)
+                shareaxis = {}
+            ax = plt.subplot(1, len(df_list), j+1, **shareaxis)
         elif layout == 'grid':
             cols = columns
             rws = rows
@@ -205,7 +233,7 @@ def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_
         
         if debug: 
             print("Creating subplots with " + str(layout) + " layout with "+ str(cols) + " column(s) and " + str(rws) + " row(s)\n")
-            print("shareaxis: ", *shareaxis, "type", type(shareaxis))
+            print("share_axes ", share_axes, "shareaxis: ", *shareaxis, "type", type(shareaxis))
     
         if 'order' in df.columns:
             df.sort_values(by='order', inplace=True)
