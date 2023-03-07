@@ -16,5 +16,6 @@ The following showcases demonstrate scheduling and traffic shaping:
    cbsandats/doc/index
    underthehood/doc/index
 
+.. cbsandtas/doc/index
 .. tokenbucketbasedshaper/doc/index
 .. htbshaper/doc/index
