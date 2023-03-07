@@ -150,7 +150,7 @@ using namespace units::values;
  * Representation duality is a very important aspect of the chunk API. It means
  * that a protocol doesn't have to worry about the actual representation of the
  * packet's data while it's processing. For example, when the IP protocol peeks
- * the packet for the IpHeader, there are a few possiblities. The requested class
+ * the packet for the IpHeader, there are a few possibilities. The requested class
  * is either already there to be returned, or if the packet contains the raw
  * bytes, then it's going to be deserialized automatically and transparently.
  *
