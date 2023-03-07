@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/showcases/tsn/trafficshaping/mixingshapers/results/*.vec"/>
-        <input pattern="/inet/showcases/tsn/trafficshaping/mixingshapers/results/*.sca"/>
+        <input pattern="/inet/showcases/tsn/trafficshaping/cbsandats/results/*.vec"/>
+        <input pattern="/inet/showcases/tsn/trafficshaping/cbsandats/results/*.sca"/>
     </inputs>
     <charts>
         <chart icon="icons/full/obj/linechart.png" id="357" name="Client application traffic" template="linechart_native" type="LINE">
