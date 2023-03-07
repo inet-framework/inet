@@ -31,7 +31,7 @@ using namespace units::values;
 /**
  * This class maintains a set of tags each referring to a specific region.
  * Regions are identified by their offset and length, and they are not allowed
- * to overlap. Tags are usually small data strcutures that hold some relevant
+ * to overlap. Tags are usually small data structures that hold some relevant
  * information. Tags are identified by their type, which means that this class
  * supports adding the same tag type for a specific region only once. Tags are
  * shared between other instances of this class. Tags can be changed with a

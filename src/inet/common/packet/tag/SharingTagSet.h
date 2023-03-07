@@ -25,7 +25,7 @@ namespace inet {
 #endif
 
 /**
- * This class maintains a set of tags. Tags are usually small data strcutures
+ * This class maintains a set of tags. Tags are usually small data structures
  * that hold some relevant information. Tags are identified by their type,
  * which means that this class supports adding the same tag type only once.
  * Tags are shared between other instances of this class. Tags can be changed
