@@ -36,7 +36,7 @@ groups, series = utils.select_groups_series(df, props)
 confidence_level = utils.get_confidence_level(props)
 valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, groups, series, confidence_level)
 
-modifiedplot.plot_bars(valuedf, errorsdf, metadf, props, order=['WifiHosts', 'Coexistence'], rename={'WifiOnly': 'Wifi only', 'Coexistence': 'Wifi + WPAN coexistence'}, zorder=2)
+modifiedplot.plot_bars(valuedf, errorsdf, metadf, props, order=['WifiHosts', 'Coexistence'], rename={'WifiHosts': 'Wifi only', 'Coexistence': 'Wifi + WPAN coexistence'}, zorder=2)
 
 utils.postconfigure_plot(props)
 
@@ -662,7 +662,7 @@ groups, series = utils.select_groups_series(df, props)
 confidence_level = utils.get_confidence_level(props)
 valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, groups, series, confidence_level)
 
-modifiedplot.plot_bars(valuedf, errorsdf, metadf, props, order=['WpanHosts', 'Coexistence'], rename={'WpanOnly': 'WPAN only', 'Coexistence': 'Wifi + WPAN coexistence'}, zorder=2)
+modifiedplot.plot_bars(valuedf, errorsdf, metadf, props, order=['WpanHosts', 'Coexistence'], rename={'WpanHosts': 'WPAN only', 'Coexistence': 'Wifi + WPAN coexistence'}, zorder=2)
 
 utils.postconfigure_plot(props)
 
