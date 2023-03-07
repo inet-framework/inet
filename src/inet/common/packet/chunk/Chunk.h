@@ -234,6 +234,11 @@ using namespace units::values;
  * c) Inserting a BytesChunk into a BytesChunk merges them
  * d) Inserting a ByteCountChunk into a ByteCountChunk merges them
  * e) Inserting a connecting SliceChunk into a SliceChunk merges them
+ *
+ * Chunks can have region tags are attached to a specific region of their data.
+ * Region tags are identified by their type. Regions are identified by their
+ * offset and length, and they are not allowed to overlap. Tags are usually
+ * small data structures that hold some relevant information.
  */
 // TODO performance related; avoid iteration in SequenceChunk::getChunkLength, avoid peek for simplifying, use vector instead of deque, reverse order for frequent prepends?
 class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintableObject, public IRegionTaggedObject

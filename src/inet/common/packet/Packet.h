@@ -89,6 +89,14 @@ namespace inet {
  *  - attach tags (metadata) to the packet as a whole
  *  - attache tags (metadata) to regions of the content of the packet
  *  - convert to a human readable string
+ *
+ * Packets can have packet tags attached to the whole packet. Packet tags are
+ * identified by their type. Tags are usually small data structures that hold
+ * some relevant information.
+ *
+ * Packets can also have region tags are attached to a specific region of their
+ * data. Region tags are identified by their type. Regions are identified by
+ * their offset and length, and they are not allowed to overlap.
  */
 class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedObject, public IRegionTaggedObject
 {
