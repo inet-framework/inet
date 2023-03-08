@@ -149,7 +149,7 @@ void Ipv4::handleRequest(Request *request)
         throw cRuntimeError("Request '%s' arrived without controlinfo", request->getName());
     else if (Ipv4SocketBindCommand *command = dynamic_cast<Ipv4SocketBindCommand *>(ctrl)) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId(), command->getLocalAddress());
+        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol() ? command->getProtocol()->getId() : -1, command->getLocalAddress());
         socketIdToSocketDescriptor[socketId] = descriptor;
         delete request;
     }
