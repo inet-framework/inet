@@ -8,8 +8,6 @@ Implementation
 
  - fix: PacketTransmitter connected without transmission channel should stop in initialize? otherwise duration parameters will not work
 
- - fix: fragmentation/defragmentation, aggregation/deaggregation must take care of packet/chunk tags and region tags properly
-
  - fix: when deleting a network interface or deleting a network node, the interface deleted signal is missing
 
 Documentation
