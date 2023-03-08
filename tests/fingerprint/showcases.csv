@@ -43,7 +43,7 @@
 /showcases/routing/manet/,           -f omnetpp.ini -c Dsdv -r 0,                   100s,         4eff-8dbc/tplx;bdad-9a28/~tNl;cdce-1d3c/~tND;0fca-2874/tyf, PASS,    wireless Ipv4
 /showcases/routing/manet/,           -f omnetpp.ini -c Gpsr -r 0,                   100s,         53c9-5456/tplx;5452-5da6/~tNl;9c5c-ecb8/tyf, PASS,    wireless Ipv4
 
-/showcases/tsn/combiningfeatures/frerandtas/, -f omnetpp.ini -c General -r 0,       1s,         a12a-71aa/tplx;8826-e8e2/~tNl;3705-5741/~tND;d75b-92b0/tyf, PASS,
+/showcases/tsn/combiningfeatures/frerandtas/, -f omnetpp.ini -c General -r 0,       1s,         2c89-c055/tplx;8826-e8e2/~tNl;3705-5741/~tND;d75b-92b0/tyf, PASS,
 
 /showcases/tsn/combiningfeatures/gptpandtas/, -f extras.ini -c Recovery -r 0,       1s,         472e-aa82/tplx;64b0-c88f/~tNl;af1a-e3b0/~tND;f6b5-25b2/tyf, PASS,
 /showcases/tsn/combiningfeatures/gptpandtas/, -f omnetpp.ini -c NormalOperation -r 0, 1s,       472e-aa82/tplx;64b0-c88f/~tNl;af1a-e3b0/~tND;c274-ac0e/tyf, PASS,
@@ -71,8 +71,8 @@
 /showcases/tsn/framereplication/manualconfiguration/, -f omnetpp.ini -c General -r 0, 0.1s,       5894-8d2a/tplx;a6dc-d131/~tNl;799e-a101/~tND;da26-2894/tyf, PASS,
 /showcases/tsn/framereplication/multicastfailureprotection/, -f omnetpp.ini -c General -r 0, 0.1s, c1d1-d561/tplx;53a4-dd47/~tNl;7c41-1acd/~tND;7a73-befb/tyf, PASS,
 
-/showcases/tsn/gatescheduling/eager/, -f omnetpp.ini -c Eager -r 0,               0.2s,         8671-b3dd/tplx;6cd8-54ff/~tNl;1fa9-dfc1/~tND;2133-a8d8/tyf, PASS,
-/showcases/tsn/gatescheduling/sat/,  -f omnetpp.ini -c SAT -r 0,                0.2s,         03ff-24e5/tplx;f956-a907/~tNl;b4eb-5d5c/~tND;f96f-15d0/tyf, PASS,
+/showcases/tsn/gatescheduling/eager/, -f omnetpp.ini -c Eager -r 0,               0.2s,         b54b-1522/tplx;6cd8-54ff/~tNl;1fa9-dfc1/~tND;2133-a8d8/tyf, PASS,
+/showcases/tsn/gatescheduling/sat/,  -f omnetpp.ini -c SAT -r 0,                0.2s,         d781-ae41/tplx;f956-a907/~tNl;b4eb-5d5c/~tND;f96f-15d0/tyf, PASS,
 #/showcases/tsn/gatescheduling/tsnsched/, -f omnetpp.ini -c General -r 0,            0.2s,         0000-0000/tplx;c268-fae7/~tNl;0d5b-c7a9/~tND;e74e-6ba9/tyf, PASS, # TSNsched externel tool required
 
 /showcases/tsn/streamfiltering/statistical/, -f omnetpp.ini -c General -r 0,        1s,         bc9a-33db/tplx;4794-0e45/~tNl;8a22-dfe5/~tND;a095-8c98/tyf, PASS,
