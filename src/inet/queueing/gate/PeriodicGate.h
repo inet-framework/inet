@@ -25,6 +25,8 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
     clocktime_t offset;
     std::vector<clocktime_t> durations;
     bool scheduleForAbsoluteTime = false;
+    short openSchedulingPriority = 0;
+    short closeSchedulingPriority = 0;
 
     ClockEvent *changeTimer = nullptr;
 
@@ -35,7 +37,7 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
     virtual bool canPacketFlowThrough(Packet *packet) const override;
 
     virtual void initializeGating();
-    virtual void scheduleChangeTimer();
+    virtual void scheduleChangeTimer(bool toOpen);
     virtual void processChangeTimer();
 
   public:

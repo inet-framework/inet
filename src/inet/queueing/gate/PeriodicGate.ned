@@ -24,6 +24,7 @@ simple PeriodicGate extends PacketGateBase like IPacketGate
         object durations @mutable @unit(s) = default([]); // list of time durations within the period that determine if the gate is open or closed; period is the sum of the durations
                                                           // TODO required pair elements with larger than zero durations. 
         bool scheduleForAbsoluteTime = default(true); // when a clock is used relative means that setting the clock will not affect the simulation time of the event
-        int changeTimerSchedulingPriority = default(0); // FES scheduling priority for the next gate state change event
+        int openSchedulingPriority = default(0); // FES scheduling priority for the next gate open event
+        int closeSchedulingPriority = default(0); // FES scheduling priority for the next gate close event
         @class(PeriodicGate);
 }

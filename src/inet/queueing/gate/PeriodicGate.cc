@@ -22,7 +22,8 @@ void PeriodicGate::initialize(int stage)
         initialOffset = par("offset");
         scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
         changeTimer = new ClockEvent("ChangeTimer");
-        changeTimer->setSchedulingPriority(par("changeTimerSchedulingPriority"));
+        openSchedulingPriority = par("openSchedulingPriority");
+        closeSchedulingPriority = par("closeSchedulingPriority");
         initializeGating();
     }
 }
@@ -90,6 +91,7 @@ void PeriodicGate::scheduleChangeTimer()
     ASSERT(0 <= index && index < (int)durations.size());
     clocktime_t duration = durations[index];
     index = (index + 1) % durations.size();
+    changeTimer->setSchedulingPriority(toOpen ? closeSchedulingPriority : openSchedulingPriority);
     if (scheduleForAbsoluteTime)
         scheduleClockEventAt(getClockTime() + duration - offset, changeTimer);
     else
