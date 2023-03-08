@@ -69,11 +69,10 @@ void PeriodicGate::initializeGating()
         else
             break;
     }
-    if (index < (int)durations->size()) {
-        if (changeTimer->isScheduled())
-            cancelClockEvent(changeTimer);
+    if (changeTimer->isScheduled())
+        cancelClockEvent(changeTimer);
+    if (durations->size() > 0)
         scheduleChangeTimer();
-    }
 }
 
 void PeriodicGate::scheduleChangeTimer()
