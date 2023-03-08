@@ -104,7 +104,9 @@ void PeriodicGate::processChangeTimer()
 
 bool PeriodicGate::canPacketFlowThrough(Packet *packet) const
 {
-    if (std::isnan(bitrate.get()))
+    if (!isOpen_)
+        return false;
+    else if (std::isnan(bitrate.get()))
         return PacketGateBase::canPacketFlowThrough(packet);
     else if (packet == nullptr)
         return false;
