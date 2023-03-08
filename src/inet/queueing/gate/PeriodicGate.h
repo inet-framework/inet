@@ -27,6 +27,7 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
     bool scheduleForAbsoluteTime = false;
     bool enableImplicitGuardBand = true;
 
+    bool isGatingInitialized = false;
     ClockEvent *changeTimer = nullptr;
 
   protected:
