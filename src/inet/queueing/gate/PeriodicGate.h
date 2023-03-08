@@ -26,6 +26,8 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
     cValueArray *durations = nullptr;
     bool scheduleForAbsoluteTime = false;
     bool enableImplicitGuardBand = true;
+    int openSchedulingPriority = 0;
+    int closeSchedulingPriority = 0;
 
     bool isGatingInitialized = false;
     ClockEvent *changeTimer = nullptr;

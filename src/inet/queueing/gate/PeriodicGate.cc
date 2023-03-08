@@ -23,8 +23,9 @@ void PeriodicGate::initialize(int stage)
         durations = check_and_cast<cValueArray *>(par("durations").objectValue());
         scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
         changeTimer = new ClockEvent("ChangeTimer");
-        changeTimer->setSchedulingPriority(par("changeTimerSchedulingPriority"));
         enableImplicitGuardBand = par("enableImplicitGuardBand");
+        openSchedulingPriority = par("openSchedulingPriority");
+        closeSchedulingPriority = par("closeSchedulingPriority");
     }
     else if (stage == INITSTAGE_QUEUEING)
         initializeGating();
@@ -96,6 +97,7 @@ void PeriodicGate::scheduleChangeTimer()
         index = (index + 1) % durations->size();
     }
     //std::cout << getFullPath() << " " << duration << std::endl;
+    changeTimer->setSchedulingPriority(isOpen_ ? closeSchedulingPriority : openSchedulingPriority);
     if (scheduleForAbsoluteTime)
         scheduleClockEventAt(getClockTime() + duration - offset, changeTimer);
     else
