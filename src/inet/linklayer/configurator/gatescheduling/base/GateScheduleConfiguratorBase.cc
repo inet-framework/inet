@@ -18,7 +18,7 @@ void GateScheduleConfiguratorBase::initialize(int stage)
         gateCycleDuration = par("gateCycleDuration");
         configuration = check_and_cast<cValueArray *>(par("configuration").objectValue());
     }
-    if (stage == INITSTAGE_QUEUEING) {
+    else if (stage == INITSTAGE_GATE_SCHEDULE_CONFIGURATION) {
         computeConfiguration();
         configureGateScheduling();
         configureApplicationOffsets();
