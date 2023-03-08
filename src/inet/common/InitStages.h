@@ -74,6 +74,11 @@ extern INET_API const InitStage INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE;
 extern INET_API const InitStage INITSTAGE_NETWORK_INTERFACE_CONFIGURATION;
 
 /**
+ * Initialization of gate scheduling.
+ */
+extern INET_API const InitStage INITSTAGE_GATE_SCHEDULE_CONFIGURATION;
+
+/**
  * Initialization of queueing modules.
  */
 extern INET_API const InitStage INITSTAGE_QUEUEING;
