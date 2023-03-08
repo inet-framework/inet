@@ -106,6 +106,7 @@ void PeriodicGate::processChangeTimer()
 
 bool PeriodicGate::canPacketFlowThrough(Packet *packet) const
 {
+    ASSERT(isOpen_);
     if (std::isnan(bitrate.get()))
         return PacketGateBase::canPacketFlowThrough(packet);
     else if (packet == nullptr)
@@ -114,9 +115,9 @@ bool PeriodicGate::canPacketFlowThrough(Packet *packet) const
         if (enableImplicitGuardBand) {
             clocktime_t flowEndTime = getClockTime() + s((packet->getDataLength() + extraLength) / bitrate).get() + SIMTIME_AS_CLOCKTIME(extraDuration);
             return !changeTimer->isScheduled() || flowEndTime <= getArrivalClockTime(changeTimer);
-        } else {
-            return isOpen_;
         }
+        else
+            return PacketGateBase::canPacketFlowThrough(packet);
     }
 }
 

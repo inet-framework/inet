@@ -107,6 +107,7 @@ void PacketGateBase::handleCanPullPacketChanged(cGate *gate)
 
 bool PacketGateBase::canPacketFlowThrough(Packet *packet) const
 {
+    ASSERT(isOpen_);
     return true;
 }
 
