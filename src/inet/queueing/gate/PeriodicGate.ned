@@ -22,6 +22,7 @@ simple PeriodicGate extends PacketGateBase like IPacketGate
         bool initiallyOpen @mutable = default(true); // specifies if the gate is initially open or closed at begin of period
         double offset @mutable @unit(s) = default(0s); // specifies where the period starts in the list of gate state change durations; where it is in the period at the start
         object durations @mutable @unit(s) = default([]); // list of time durations within the period that determine if the gate is open or closed; period is the sum of the durations
+                                                          // TODO required pair elements with larger than zero durations. 
         bool scheduleForAbsoluteTime = default(true); // when a clock is used relative means that setting the clock will not affect the simulation time of the event
         int changeTimerSchedulingPriority = default(0); // FES scheduling priority for the next gate state change event
         @class(PeriodicGate);

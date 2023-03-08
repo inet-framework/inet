@@ -23,7 +23,7 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
     int index = 0;
     clocktime_t initialOffset;
     clocktime_t offset;
-    cValueArray *durations = nullptr;
+    std::vector<clocktime_t> durations;
     bool scheduleForAbsoluteTime = false;
 
     ClockEvent *changeTimer = nullptr;
@@ -43,7 +43,7 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
 
     virtual clocktime_t getInitialOffset() const { return initialOffset; }
     virtual bool getInitiallyOpen() const { return par("initiallyOpen"); }
-    virtual const cValueArray *getDurations() const { return durations; }
+    virtual const cValueArray *getDurations() const { return check_and_cast<cValueArray *>(par("durations").objectValue()); }
 };
 
 } // namespace queueing
