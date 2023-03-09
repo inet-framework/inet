@@ -43,12 +43,12 @@ bool InstantServer::canProcessPacket()
 {
     auto inputGatePathStartGate = inputGate->getPathStartGate();
     auto outputGatePathEndGate = outputGate->getPathEndGate();
-    if (provider->canPullSomePacket(inputGatePathStartGate) && consumer->canPushSomePacket(outputGatePathEndGate))
-        return true;
-    else {
+    if (provider->canPullSomePacket(inputGatePathStartGate) && consumer->canPushSomePacket(outputGatePathEndGate)) {
         auto packet = provider->canPullPacket(inputGatePathStartGate);
         return packet != nullptr && consumer->canPushPacket(packet, outputGatePathEndGate);
     }
+    else
+        return false;
 }
 
 void InstantServer::processPacket()
