@@ -1,5 +1,7 @@
 package inet.tutorials.queueing;
 
+import inet.protocolelement.transceiver.PacketReceiver;
+import inet.protocolelement.transceiver.PacketTransmitter;
 import inet.queueing.buffer.PacketBuffer;
 import inet.queueing.buffer.PriorityBuffer;
 import inet.queueing.classifier.ContentBasedClassifier;
@@ -22,8 +24,8 @@ import inet.queueing.contract.IPassivePacketSink;
 import inet.queueing.contract.IPassivePacketSource;
 import inet.queueing.filter.ContentBasedFilter;
 import inet.queueing.filter.OrdinalBasedDropper;
-import inet.queueing.filter.StatisticalRateLimiter;
 import inet.queueing.filter.RedDropper;
+import inet.queueing.filter.StatisticalRateLimiter;
 import inet.queueing.gate.PacketGate;
 import inet.queueing.marker.ContentBasedLabeler;
 import inet.queueing.marker.ContentBasedTagger;
@@ -38,6 +40,7 @@ import inet.queueing.scheduler.MarkovScheduler;
 import inet.queueing.scheduler.PacketScheduler;
 import inet.queueing.scheduler.PriorityScheduler;
 import inet.queueing.scheduler.WrrScheduler;
+import inet.queueing.server.InstantServer;
 import inet.queueing.server.PacketServer;
 import inet.queueing.server.TokenBasedServer;
 import inet.queueing.shaper.LeakyBucket;
@@ -53,6 +56,8 @@ import inet.queueing.tokengenerator.PacketBasedTokenGenerator;
 import inet.queueing.tokengenerator.QueueBasedTokenGenerator;
 import inet.queueing.tokengenerator.SignalBasedTokenGenerator;
 import inet.queueing.tokengenerator.TimeBasedTokenGenerator;
+import ned.DatarateChannel;
+
 
 network ProducerConsumerTutorialStep
 {
@@ -1365,3 +1370,106 @@ network ExampleNetworkTutorialStep
         cable.bOut --> source.lowerIn;
 }
 
+network InputQueueSwitching
+{
+    parameters:
+        int numSources;
+        int numSinks;
+    submodules:
+        source[numSources]: ActivePacketSource {
+            @display("p=100,150,col,150");
+        }
+        sourceTx[numSources]: PacketTransmitter {
+            @display("p=300,150,col,150");
+        }
+        switchRx[numSources]: PacketReceiver {
+            @display("p=500,150,col,150");
+        }
+        queue[numSources]: PacketQueue {
+            @display("p=700,150,col,150");
+        }
+        server[numSources]: InstantServer {
+            @display("p=900,150,col,150");
+        }
+        join: PacketMultiplexer {
+            @display("p=1100,150");
+        }
+        classifier: ContentBasedClassifier {
+            @display("p=1300,150");
+        }
+        switchTx[numSinks]: PacketTransmitter {
+            @display("p=1500,150,col,150");
+        }
+        sinkRx[numSinks]: PacketReceiver {
+            @display("p=1700,150,col,150");
+        }
+        sink[numSinks]: PassivePacketSink {
+            @display("p=1900,150,col,150");
+        }
+    connections:
+        for i=0..numSources-1 {
+            source[i].out --> sourceTx[i].in;
+            sourceTx[i].out --> {  datarate = 1Gbps; delay = 1ns; } --> switchRx[i].in;
+            switchRx[i].out --> queue[i].in;
+            queue[i].out --> server[i].in;
+            server[i].out --> join.in++;
+        }
+        join.out --> classifier.in;
+        for i=0..numSinks-1 {
+            classifier.out++ --> switchTx[i].in;
+            switchTx[i].out --> {  datarate = 1Gbps; delay = 1ns; } --> sinkRx[i].in;
+            sinkRx[i].out --> sink[i].in;
+        }
+}
+
+network OutputQueueSwitching
+{
+    parameters:
+        int numSources;
+        int numSinks;
+    submodules:
+        source[numSources]: ActivePacketSource {
+            @display("p=100,150,col,150");
+        }
+        sourceTx[numSources]: PacketTransmitter {
+            @display("p=300,150,col,150");
+        }
+        switchRx[numSources]: PacketReceiver {
+            @display("p=500,150,col,150");
+        }
+        join: PacketMultiplexer {
+            @display("p=700,150");
+        }
+        classifier: ContentBasedClassifier {
+            @display("p=900,150");
+        }
+        queue[numSinks]: PacketQueue {
+            @display("p=1100,150,col,150");
+        }
+        server[numSinks]: InstantServer {
+            @display("p=1300,150,col,150");
+        }
+        switchTx[numSinks]: PacketTransmitter {
+            @display("p=1500,150,col,150");
+        }
+        sinkRx[numSinks]: PacketReceiver {
+            @display("p=1700,150,col,150");
+        }
+        sink[numSinks]: PassivePacketSink {
+            @display("p=1900,150,col,150");
+        }
+    connections:
+        for i=0..numSources-1 {
+            source[i].out --> sourceTx[i].in;
+            sourceTx[i].out --> DatarateChannel { delay = 1ns; } --> switchRx[i].in;
+            switchRx[i].out --> join.in++;
+        }
+        join.out --> classifier.in;
+        for i=0..numSinks-1 {
+            classifier.out++ --> queue[i].in;
+            queue[i].out --> server[i].in;
+            server[i].out --> switchTx[i].in;
+            switchTx[i].out --> DatarateChannel { delay = 1ns; } --> sinkRx[i].in;
+            sinkRx[i].out --> sink[i].in;
+        }
+}
