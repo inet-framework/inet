@@ -6,6 +6,31 @@ import ast
 import re
 from matplotlib.lines import Line2D
 import numpy as np
+import colorsys
+import matplotlib as mpl
+import inspect
+import math
+from omnetpp.scave.utils import make_legend_label
+
+def scale_lightness(rgb, scale_l):
+    # convert rgb to hls
+    h, l, s = colorsys.rgb_to_hls(*rgb)
+    # manipulate h, l, s values and return as rgb
+    return colorsys.hls_to_rgb(h, min(1, l * scale_l), s = s)
+
+def hextriplet(colortuple):
+    return '#' + ''.join(f'{i:02X}' for i in colortuple)
+
+def rgb2hex(r,g,b):
+    return "#{:02x}{:02x}{:02x}".format(r,g,b)
+
+def fade_color(color, fakealpha):
+     c = mpl.colors.to_rgb(color)
+     b = mpl.colors.to_rgb(mpl.rcParams["axes.facecolor"])
+     def lerp(a, b, t):
+         return a + (b-a)*t
+     return (lerp(b[0], c[0], fakealpha), lerp(b[1], c[1], fakealpha), lerp(b[2], c[2], fakealpha))
+
 
 # debug = False
 
@@ -260,20 +285,303 @@ def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_
     
     return ax_list
 
-def fix_labels_for_subplots(ax_list, props, layout, debug=False):
-        if debug: print("layout:", layout)
-        if layout == 'vertical':
-            for a in ax_list[0:-1]:
-                a.set_xlabel('')
-            ax_list[-1].set_xlabel(props['xaxis_title'])
-        elif layout == 'horizontal':
-            for a in ax_list[1:]:
-                if debug: print("a:", a)
-                a.set_ylabel('')
-            ax_list[0].set_ylabel(props['yaxis_title'])
-        else:
-            assert False, "somethings wrong"            
+def plot_vectors_separate_faded(df, props, legend_func=utils.make_legend_label, layout='vertical', columns=0, rows=0, share_axes='auto', fade_factor=0.3, remove_ticks=True, global_style=None, debug=False):
+    """
+    This is a modified version of the built-in plot_vectors_separate() function. 
+    Instead of plotting one line per subplot, it plots all lines on all subplots, but
+    each have just one line in focus (i.e. not faded).
+    
+    The dataframes can also contain 'additional_style' columns.
+    
+    Layout can be:
+    - 'vertical' (default)
+    - 'horizontal'
+    - 'grid': need to specify number of columns and rows
+    
+    By default, in the horizontal and vertical layouts, the common axes are shared, so they zoom together.
+    Turn this off with 'share_axes'.
+    
+    share_axes: 
+    - 'auto' (default): the common axes are shared (x for vertical, y for horizontal); both for 'grid'
+    - 'none': no shared axes
+    - 'x': for 'grid' only
+    - 'y': for 'grid' only
+    ' 'both': both axes are shared
+    
+    remove_ticks: remove ticks and tick labels between subplots
+    
+    Use modifiedplot.postconfigure() with this
+    """
+    p = ideplot if chart.is_native_chart() else plt
+    
+    title = ""
+    ax_list = []
+    
+    props['plot_function'] = inspect.currentframe().f_code.co_name
+    
+    def make_individual_legend(legend_cols, t, props):
+        print("legend cols:", legend_cols)
+        print("t:", t)
+    
+    for j in range(0, len(df)):
 
+        def get_prop(k):
+            return props[k] if k in props else None
+    
+        title_cols, legend_cols = utils.extract_label_columns(df, props)
+        
+        cols = 0
+        rws = 0
+        
+        shareaxis = {}
+        
+        ax = None
+        
+        if layout == 'vertical':
+            cols = 1
+            rws = len(df)
+            # shareaxis = 'shareax = ax'
+            if len(ax_list) != 0:
+                if share_axes == 'auto':
+                    shareaxis = {'sharex': ax_list[-1]}
+                elif share_axes == 'none':
+                    shareaxis = {}
+                elif share_axes == 'both':
+                    shareaxis = {'sharex': ax_list[-1], 'sharey': ax_list[-1]}
+                else:
+                    assert False, "Wrong value for share_axes: " + str(share_axes) + ". Possible values: 'auto', 'none', 'both'"                
+            else:
+                shareaxis = {}
+            ax = plt.subplot(len(df), 1, j+1, **shareaxis)
+        elif layout == 'horizontal':
+            cols = len(df)
+            rws = 1
+            if len(ax_list) != 0:
+                if share_axes == 'auto':
+                    shareaxis = {'sharey': ax_list[-1]}
+                elif share_axes == 'none':
+                    shareaxis = {}
+                elif share_axes == 'both':
+                    shareaxis = {'sharex': ax_list[-1], 'sharey': ax_list[-1]}
+                else:
+                    assert False, "Wrong value for share_axes: " + str(share_axes) + ". Possible values: 'auto', 'none', 'both'"
+            else:
+                shareaxis = {}
+            ax = plt.subplot(1, len(df), j+1, **shareaxis)
+        elif layout == 'grid':
+            if columns == 0 or rows == 0:
+                n = math.sqrt(len(df))
+                if debug: print("sqrt(len(df)):", n)
+                if n % 1 == 0:
+                    cols = int(n)
+                    rws = int(n)
+            else:
+                cols = columns
+                rws = rows
+            if len(ax_list) != 0:
+                if share_axes == 'auto' or share_axes == 'both':
+                    print("its auto or both")
+                    shareaxis = {'sharex': ax_list[-1], 'sharey': ax_list[-1]}
+                elif share_axes == 'x':
+                    shareaxis = {'sharex': ax_list[-1]}
+                elif share_axes == 'y':
+                    shareaxis = {'sharey': ax_list[-1]}
+                elif share_axes == 'none':
+                    shareaxis = {}
+                else:
+                    assert False, "Wrong value for share_axes: " + str(share_axes) + ". Possible values: 'auto', 'none', 'x', 'y', 'both'"
+            num_plots = cols * rws
+            assert num_plots == len(df), "Number of plots is not the same as the length of dataframes"
+            ax = plt.subplot(rws, cols, j+1, **shareaxis)
+        else:
+            assert False, "layout is either 'horizontal', 'vertical', or 'grid'"
+        
+        if debug: 
+            print("Creating subplots with " + str(layout) + " layout with "+ str(cols) + " column(s) and " + str(rws) + " row(s)\n")
+            print("share_axes ", share_axes, "shareaxis: ", shareaxis, "type", type(shareaxis))
+    
+        if 'order' in df.columns:
+            df.sort_values(by='order', inplace=True)
+        else:
+            df.sort_values(by=legend_cols, inplace=True)
+            
+        # for Matplotlib version < 1.5
+        # plt.gca().set_color_cycle(None)
+        # for Matplotlib version >= 1.5
+        ax.set_prop_cycle(None)
+            
+        for z, t in zip(range(0, len(df)), df.itertuples(index=False)):
+            style = utils._make_line_args(props, t, df)
+            add_global_style_if_needed(global_style, style, debug)
+            if 'additional_style' in df.columns and t.additional_style != None:
+                style_dict = eval(t.additional_style)
+                for i in style_dict.items():
+                    style[i[0]] = i[1]
+            label = ""
+            if z != j:
+                c = mpl.colors.ColorConverter.to_rgb(style['color'])
+                # if True: print('lightening color. style color: ', style['color'], 'c1: ', c)
+                # scale_lightness(c, 0.1)
+                # if True: print('c2: ', c)
+                # style['color'] = hextriplet(c)
+                # style['color'] = rgb2hex(*c)
+                style['color'] = fade_color(c, fade_factor)
+                style['zorder'] = -10
+                # print("XXXXXXXX t", t)
+            else:
+                label=legend_func(legend_cols, t, props)
+                # if True: print('c3: ', style['color'])
+            # label=legend_func(legend_cols, t, props)
+            # label=make_individual_legend(legend_cols, t, props)
+            p.plot(t.vectime, t.vecvalue, label=label, **style)
+        
+        if j == 0:
+            title = get_prop("title") or utils.make_chart_title(df, title_cols)
+
+            #utils.set_plot_title(title)
+            plt.suptitle(title)
+        ax_list.append(ax)
+        utils.preconfigure_plot(props)
+
+    p.ylabel(utils.make_chart_title(df, ["title"]))
+    fix_labels_for_subplots(ax_list, props, layout, cols, rws, remove_ticks, debug)
+    props['layout'] = layout
+    props['columns'] = cols
+    props['rows'] = rws
+    
+    return ax_list
+
+def fix_labels_for_subplots(ax_list, props, layout, columns=0, rows=0, remove_ticks=True, debug=False):
+    
+        def get_prop(k):
+            return props[k] if k in props else None
+    
+        if debug: print("layout:", layout)
+        # if layout == 'vertical':
+        #     for a in ax_list[0:-1]:
+        #         a.set_xlabel('')
+        #     ax_list[-1].set_xlabel(props['xaxis_title'])
+        # elif layout == 'horizontal':
+        #     for a in ax_list[1:]:
+        #         if debug: print("a:", a)
+        #         a.set_ylabel('')
+        #     ax_list[0].set_ylabel(props['yaxis_title'])
+        # elif layout == 'grid':
+            # for a, i in zip(ax_list[1:], range(0, len(ax_list))):
+            #     for col, row in zip(range(1,columns+1), range(1, rows+1)):
+            #         # if (row+1) % (col+1) == 1:
+            #         #     print("col, row", col, row)
+            #         if i % (row+1) == 1:
+            #             print("y label should be", i)
+            #         if i % (col+1) == 1:
+            #             print("x", i)
+            
+        if layout == 'vertical':
+            columns=1
+            rows=len(ax_list)
+        elif layout == 'horizontal':
+            columns=len(ax_list)
+            rows=1
+        elif layout == 'grid':
+            assert columns != 0 and rows != 0, "specify number of columns and rows in fix_labels_for_subplots()"
+
+        if debug: print("fix_labels_for_subplots: number of subplots: ", len(ax_list))
+        for a in range(0, len(ax_list)):
+            ax_list[a].set_xlabel("")
+            ax_list[a].set_ylabel("")
+            if remove_ticks:
+                ax_list[a].tick_params(bottom=False, labelbottom=False)
+                ax_list[a].tick_params(left=False, labelleft=False)
+            if a%(len(ax_list)/rows) == 0:
+                if debug: print("a", a, 'add y label')
+                ax_list[a].set_ylabel(get_prop("yaxis_title"))
+                ax_list[a].tick_params(left=True, labelleft=True)
+            if a>=(len(ax_list)-columns):
+                if debug: print("a", a, 'add x label')
+                ax_list[a].set_xlabel(get_prop("xaxis_title"))
+                ax_list[a].tick_params(bottom=True, labelbottom=True)
+
+            if debug: print("a:", a)
+                # a.set_ylabel('')
+            # ax_list[0].set_ylabel(props['yaxis_title'])
+            # ax_list[-1].set_xlabel(props['xaxis_title'])
+            
+        # else:
+        #     assert False, "somethings wrong"            
+
+def postconfigure_plot(props, debug=False):
+    """
+    Configures the plot according to the given properties, which normally
+    get their values from setting in the "Configure Chart" dialog.
+    Calling this function after plotting was performed should be a standard part
+    of chart scripts.
+
+    A partial list of properties taken into account:
+    - `yaxis_title`, `yaxis_title`, `xaxis_min`,  `xaxis_max`, `yaxis_min`,
+      `yaxis_max`, `xaxis_log`, `yaxis_log`, `legend_show`, `legend_border`,
+      `legend_placement`, `grid_show`, `grid_density`
+    - properties listed in the `plot.properties` property
+
+    Parameters:
+    - `props` (dict): the properties
+    """
+    p = ideplot if ideplot.is_native_plot() else plt
+
+    def get_prop(k):
+        return props[k] if k in props else None
+
+    def setup():
+        if 'plot_function' in props and props['plot_function'] != 'plot_vectors_separate_faded':
+            if get_prop("xaxis_title"):
+                p.xlabel(get_prop("xaxis_title"))
+            if get_prop("yaxis_title"):
+                p.ylabel(get_prop("yaxis_title"))
+        # else:
+        #     layout = props['layout']
+        #     columns = props['columns']
+        #     rows = props['rows']
+        #     fix_labels_for_subplots(ax_list, props, layout, columns, rows, debug)
+            
+
+        if get_prop("xaxis_min"):
+            p.xlim(left=float(get_prop("xaxis_min")))
+        if get_prop("xaxis_max"):
+            p.xlim(right=float(get_prop("xaxis_max")))
+        if get_prop("yaxis_min"):
+            p.ylim(bottom=float(get_prop("yaxis_min")))
+        if get_prop("yaxis_max"):
+            p.ylim(top=float(get_prop("yaxis_max")))
+
+        if get_prop("xaxis_log"):
+            p.xscale("log" if utils._parse_optional_bool(get_prop("xaxis_log")) else "linear")
+        if get_prop("yaxis_log"):
+            p.yscale("log" if utils._parse_optional_bool(get_prop("yaxis_log")) else "linear")
+
+        ideplot.grid(utils._parse_optional_bool(get_prop("grid_show")),
+            "major" if (get_prop("grid_density") or "").lower() == "major" else "both") # grid_density is "Major" or "All"
+
+    if ideplot.is_native_plot():
+        setup()
+
+        ideplot.legend(show=utils._parse_optional_bool(get_prop("legend_show")),
+           frameon=utils._parse_optional_bool(get_prop("legend_border")),
+           loc=get_prop("legend_placement"))
+
+        ideplot.set_properties(utils.parse_rcparams(get_prop("plot.properties") or ""))
+    else:
+        for ax in p.gcf().axes:
+            plt.sca(ax)
+            setup()
+
+            if utils._parse_optional_bool(get_prop("legend_show")):
+
+                loc = get_prop("legend_placement")
+                args = { "loc": loc}
+                if loc and loc.startswith("outside"):
+                    args.update(_legend_loc_outside_args(loc))
+                args["frameon"] =utils._parse_optional_bool(get_prop("legend_border"))
+                plt.legend(**args)
+        plt.tight_layout()
 
 def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order={}, debug=False):
     """
