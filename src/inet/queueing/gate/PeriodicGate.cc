@@ -34,18 +34,13 @@ void PeriodicGate::initialize(int stage)
 void PeriodicGate::handleParameterChange(const char *name)
 {
     // NOTE: parameters are set from the gate schedule configurator modules
-    if (!initialized()) {
-        if (isGatingInitialized)
-            throw cRuntimeError("Cannot change parameter value, module is already initialized");
-        if (!strcmp(name, "offset"))
-            initialOffset = par("offset");
-        else if (!strcmp(name, "initiallyOpen"))
-            isOpen_ = par("initiallyOpen");
-        else if (!strcmp(name, "durations"))
-            durations = check_and_cast<cValueArray *>(par("durations").objectValue());
-    }
-    else
-        throw cRuntimeError("Cannot change parameters after the module has been initialized.");
+    if (!strcmp(name, "offset"))
+        initialOffset = par("offset");
+    else if (!strcmp(name, "initiallyOpen"))
+        isOpen_ = par("initiallyOpen");
+    else if (!strcmp(name, "durations"))
+        durations = check_and_cast<cValueArray *>(par("durations").objectValue());
+    initializeGating();
 }
 
 void PeriodicGate::handleMessage(cMessage *message)
@@ -60,7 +55,6 @@ void PeriodicGate::handleMessage(cMessage *message)
 
 void PeriodicGate::initializeGating()
 {
-    ASSERT(!isGatingInitialized);
     if (durations->size() % 2 != 0)
         throw cRuntimeError("The duration parameter must contain an even number of values");
     index = 0;
@@ -80,7 +74,6 @@ void PeriodicGate::initializeGating()
             cancelClockEvent(changeTimer);
         scheduleChangeTimer();
     }
-    isGatingInitialized = true;
 }
 
 void PeriodicGate::scheduleChangeTimer()

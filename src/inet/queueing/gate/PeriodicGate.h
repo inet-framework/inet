@@ -29,7 +29,6 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
     int openSchedulingPriority = 0;
     int closeSchedulingPriority = 0;
 
-    bool isGatingInitialized = false;
     ClockEvent *changeTimer = nullptr;
 
   protected:
