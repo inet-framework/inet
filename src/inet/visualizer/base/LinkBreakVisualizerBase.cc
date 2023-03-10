@@ -59,15 +59,13 @@ void LinkBreakVisualizerBase::initialize(int stage)
 void LinkBreakVisualizerBase::handleParameterChange(const char *name)
 {
     if (!hasGUI()) return;
-    if (name != nullptr) {
-        if (!strcmp(name, "nodeFilter"))
-            nodeFilter.setPattern(par("nodeFilter"));
-        else if (!strcmp(name, "interfaceFilter"))
-            interfaceFilter.setPattern(par("interfaceFilter"));
-        else if (!strcmp(name, "packetFilter"))
-            packetFilter.setExpression(par("packetFilter").objectValue());
-        removeAllLinkBreakVisualizations();
-    }
+    if (!strcmp(name, "nodeFilter"))
+        nodeFilter.setPattern(par("nodeFilter"));
+    else if (!strcmp(name, "interfaceFilter"))
+        interfaceFilter.setPattern(par("interfaceFilter"));
+    else if (!strcmp(name, "packetFilter"))
+        packetFilter.setExpression(par("packetFilter").objectValue());
+    removeAllLinkBreakVisualizations();
 }
 
 void LinkBreakVisualizerBase::refreshDisplay() const

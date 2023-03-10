@@ -42,10 +42,8 @@ void ActivePacketSink::handleMessage(cMessage *message)
 
 void ActivePacketSink::handleParameterChange(const char *name)
 {
-    if (name != nullptr) {
-        if (!strcmp(name, "initialCollectionOffset"))
-            initialCollectionOffset = par("initialCollectionOffset");
-    }
+    if (!strcmp(name, "initialCollectionOffset"))
+        initialCollectionOffset = par("initialCollectionOffset");
 }
 
 void ActivePacketSink::scheduleCollectionTimer(clocktime_t delay)

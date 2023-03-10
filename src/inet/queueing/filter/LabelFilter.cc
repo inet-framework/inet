@@ -23,10 +23,8 @@ void LabelFilter::initialize(int stage)
 
 void LabelFilter::handleParameterChange(const char *name)
 {
-    if (name != nullptr) {
-        if (!strcmp(name, "labelFilter"))
-            labelFilter.setPattern(par("labelFilter"), false, true, true);
-    }
+    if (!strcmp(name, "labelFilter"))
+        labelFilter.setPattern(par("labelFilter"), false, true, true);
 }
 
 cGate *LabelFilter::getRegistrationForwardingGate(cGate *gate)

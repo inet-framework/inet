@@ -23,12 +23,10 @@ void MultiClock::initialize(int stage)
 
 void MultiClock::handleParameterChange(const char *name)
 {
-    if (name != nullptr) {
-        if (!strcmp(name, "activeClockIndex")) {
-            emit(ClockBase::timeChangedSignal, getClockTime().asSimTime());
-            activeClock = check_and_cast<IClock *>(getSubmodule("clock", par("activeClockIndex")));
-            emit(ClockBase::timeChangedSignal, getClockTime().asSimTime());
-        }
+    if (!strcmp(name, "activeClockIndex")) {
+        emit(ClockBase::timeChangedSignal, getClockTime().asSimTime());
+        activeClock = check_and_cast<IClock *>(getSubmodule("clock", par("activeClockIndex")));
+        emit(ClockBase::timeChangedSignal, getClockTime().asSimTime());
     }
 }
 

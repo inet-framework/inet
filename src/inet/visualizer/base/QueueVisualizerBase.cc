@@ -56,10 +56,8 @@ void QueueVisualizerBase::initialize(int stage)
 void QueueVisualizerBase::handleParameterChange(const char *name)
 {
     if (!hasGUI()) return;
-    if (name != nullptr) {
-        removeAllQueueVisualizations();
-        addQueueVisualizations();
-    }
+    removeAllQueueVisualizations();
+    addQueueVisualizations();
 }
 
 void QueueVisualizerBase::refreshDisplay() const

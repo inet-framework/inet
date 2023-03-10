@@ -26,10 +26,8 @@ void StreamEncoder::initialize(int stage)
 
 void StreamEncoder::handleParameterChange(const char *name)
 {
-    if (name != nullptr) {
-        if (!strcmp(name, "mapping"))
-            configureMappings();
-    }
+    if (!strcmp(name, "mapping"))
+        configureMappings();
 }
 
 void StreamEncoder::configureMappings()

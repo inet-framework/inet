@@ -82,15 +82,13 @@ void RoutingTableVisualizerBase::initialize(int stage)
 void RoutingTableVisualizerBase::handleParameterChange(const char *name)
 {
     if (!hasGUI()) return;
-    if (name != nullptr) {
-        if (!strcmp(name, "destinationFilter"))
-            destinationFilter.setPattern(par("destinationFilter"));
-        else if (!strcmp(name, "nodeFilter"))
-            nodeFilter.setPattern(par("nodeFilter"));
-        else if (!strcmp(name, "labelFormat"))
-            labelFormat.parseFormat(par("labelFormat"));
-        updateAllRouteVisualizations();
-    }
+    if (!strcmp(name, "destinationFilter"))
+        destinationFilter.setPattern(par("destinationFilter"));
+    else if (!strcmp(name, "nodeFilter"))
+        nodeFilter.setPattern(par("nodeFilter"));
+    else if (!strcmp(name, "labelFormat"))
+        labelFormat.parseFormat(par("labelFormat"));
+    updateAllRouteVisualizations();
 }
 
 void RoutingTableVisualizerBase::subscribe()

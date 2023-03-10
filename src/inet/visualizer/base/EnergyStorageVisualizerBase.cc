@@ -51,10 +51,8 @@ void EnergyStorageVisualizerBase::initialize(int stage)
 void EnergyStorageVisualizerBase::handleParameterChange(const char *name)
 {
     if (!hasGUI()) return;
-    if (name != nullptr) {
-        removeAllEnergyStorageVisualizations();
-        addEnergyStorageVisualizations();
-    }
+    removeAllEnergyStorageVisualizations();
+    addEnergyStorageVisualizations();
 }
 
 void EnergyStorageVisualizerBase::refreshDisplay() const

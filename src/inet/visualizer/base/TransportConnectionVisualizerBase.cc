@@ -57,17 +57,15 @@ void TransportConnectionVisualizerBase::initialize(int stage)
 void TransportConnectionVisualizerBase::handleParameterChange(const char *name)
 {
     if (!hasGUI()) return;
-    if (name != nullptr) {
-        if (!strcmp(name, "sourceNodeFilter"))
-            sourceNodeFilter.setPattern(par("sourceNodeFilter"));
-        else if (!strcmp(name, "sourcePortFilter"))
-            sourcePortFilter.setPattern(par("sourcePortFilter"));
-        else if (!strcmp(name, "destinationNodeFilter"))
-            sourceNodeFilter.setPattern(par("destinationNodeFilter"));
-        else if (!strcmp(name, "destinationPortFilter"))
-            sourcePortFilter.setPattern(par("destinationPortFilter"));
-        removeAllConnectionVisualizations();
-    }
+    if (!strcmp(name, "sourceNodeFilter"))
+        sourceNodeFilter.setPattern(par("sourceNodeFilter"));
+    else if (!strcmp(name, "sourcePortFilter"))
+        sourcePortFilter.setPattern(par("sourcePortFilter"));
+    else if (!strcmp(name, "destinationNodeFilter"))
+        sourceNodeFilter.setPattern(par("destinationNodeFilter"));
+    else if (!strcmp(name, "destinationPortFilter"))
+        sourcePortFilter.setPattern(par("destinationPortFilter"));
+    removeAllConnectionVisualizations();
 }
 
 void TransportConnectionVisualizerBase::subscribe()

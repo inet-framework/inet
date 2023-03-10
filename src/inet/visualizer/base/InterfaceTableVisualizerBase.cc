@@ -135,15 +135,13 @@ void InterfaceTableVisualizerBase::initialize(int stage)
 void InterfaceTableVisualizerBase::handleParameterChange(const char *name)
 {
     if (!hasGUI()) return;
-    if (name != nullptr) {
-        if (!strcmp(name, "nodeFilter"))
-            nodeFilter.setPattern(par("nodeFilter"));
-        else if (!strcmp(name, "interfaceFilter"))
-            interfaceFilter.setPattern(par("interfaceFilter"));
-        else if (!strcmp(name, "format"))
-            format.parseFormat(par("format"));
-        updateAllInterfaceVisualizations();
-    }
+    if (!strcmp(name, "nodeFilter"))
+        nodeFilter.setPattern(par("nodeFilter"));
+    else if (!strcmp(name, "interfaceFilter"))
+        interfaceFilter.setPattern(par("interfaceFilter"));
+    else if (!strcmp(name, "format"))
+        format.parseFormat(par("format"));
+    updateAllInterfaceVisualizations();
 }
 
 void InterfaceTableVisualizerBase::subscribe()

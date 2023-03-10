@@ -31,9 +31,7 @@ Define_Module(Icmp);
 
 void Icmp::handleParameterChange(const char *name)
 {
-    if (name == nullptr)
-        ;
-    else if (!strcmp(name, "crcMode"))
+    if (!strcmp(name, "crcMode"))
         crcMode = parseCrcMode(par("crcMode"), false);
     else if (!strcmp(name, "quoteLength"))
         parseQuoteLengthParameter();

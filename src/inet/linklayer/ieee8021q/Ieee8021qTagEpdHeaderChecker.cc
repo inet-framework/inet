@@ -41,10 +41,8 @@ void Ieee8021qTagEpdHeaderChecker::initialize(int stage)
 
 void Ieee8021qTagEpdHeaderChecker::handleParameterChange(const char *name)
 {
-    if (name != nullptr) {
-        if (!strcmp(name, "vlanIdFilter"))
-            vlanIdFilter = check_and_cast<cValueArray *>(par("vlanIdFilter").objectValue());
-   }
+    if (!strcmp(name, "vlanIdFilter"))
+        vlanIdFilter = check_and_cast<cValueArray *>(par("vlanIdFilter").objectValue());
 }
 
 void Ieee8021qTagEpdHeaderChecker::processPacket(Packet *packet)

@@ -36,9 +36,7 @@ const Quaternion& FacingMobility::getCurrentAngularPosition()
 
 void FacingMobility::handleParameterChange(const char *name)
 {
-    if (name == nullptr)
-        ;
-    else if (!strcmp(name, "displayStringTextFormat"))
+    if (!strcmp(name, "displayStringTextFormat"))
         format.parseFormat(par("displayStringTextFormat"));
     else if (!strcmp(name, "targetMobility")) {
         targetMobility.reference(this, "targetMobility", true);

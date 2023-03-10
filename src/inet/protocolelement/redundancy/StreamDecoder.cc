@@ -36,10 +36,8 @@ void StreamDecoder::initialize(int stage)
 
 void StreamDecoder::handleParameterChange(const char *name)
 {
-    if (name != nullptr) {
-        if (!strcmp(name, "mapping"))
-            configureMappings();
-   }
+    if (!strcmp(name, "mapping"))
+        configureMappings();
 }
 
 void StreamDecoder::configureMappings()

@@ -26,10 +26,8 @@ void StreamMerger::initialize(int stage)
 
 void StreamMerger::handleParameterChange(const char *name)
 {
-    if (name != nullptr) {
-        if (!strcmp(name, "mapping"))
-            mapping = check_and_cast<cValueMap *>(par("mapping").objectValue());
-   }
+    if (!strcmp(name, "mapping"))
+        mapping = check_and_cast<cValueMap *>(par("mapping").objectValue());
 }
 
 cGate *StreamMerger::getRegistrationForwardingGate(cGate *gate)

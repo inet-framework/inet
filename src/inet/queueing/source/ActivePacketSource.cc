@@ -42,10 +42,8 @@ void ActivePacketSource::handleMessage(cMessage *message)
 
 void ActivePacketSource::handleParameterChange(const char *name)
 {
-    if (name != nullptr) {
-        if (!strcmp(name, "initialProductionOffset"))
-            initialProductionOffset = par("initialProductionOffset");
-    }
+    if (!strcmp(name, "initialProductionOffset"))
+        initialProductionOffset = par("initialProductionOffset");
 }
 
 void ActivePacketSource::scheduleProductionTimer(clocktime_t delay)

@@ -308,7 +308,7 @@ std::string NetworkInterface::resolveDirective(char directive) const
 
 void NetworkInterface::handleParameterChange(const char *name)
 {
-    if (name != nullptr && !strcmp(name, "bitrate"))
+    if (!strcmp(name, "bitrate"))
         setDatarate(computeDatarate());
 }
 

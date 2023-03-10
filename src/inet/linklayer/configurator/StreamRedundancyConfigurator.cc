@@ -27,13 +27,11 @@ void StreamRedundancyConfigurator::initialize(int stage)
 
 void StreamRedundancyConfigurator::handleParameterChange(const char *name)
 {
-    if (name != nullptr) {
-        if (!strcmp(name, "configuration")) {
-            configuration = check_and_cast<cValueArray *>(par("configuration").objectValue());
-            clearConfiguration();
-            computeConfiguration();
-            configureStreams();
-        }
+    if (!strcmp(name, "configuration")) {
+        configuration = check_and_cast<cValueArray *>(par("configuration").objectValue());
+        clearConfiguration();
+        computeConfiguration();
+        configureStreams();
     }
 }
 

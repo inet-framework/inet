@@ -124,19 +124,17 @@ void PacketDropVisualizerBase::initialize(int stage)
 void PacketDropVisualizerBase::handleParameterChange(const char *name)
 {
     if (!hasGUI()) return;
-    if (name != nullptr) {
-        if (!strcmp(name, "nodeFilter"))
-            nodeFilter.setPattern(par("nodeFilter"));
-        else if (!strcmp(name, "interfaceFilter"))
-            interfaceFilter.setPattern(par("interfaceFilter"));
-        else if (!strcmp(name, "packetFilter"))
-            packetFilter.setExpression(par("packetFilter").objectValue());
-        else if (!strcmp(name, "detailsFilter"))
-            detailsFilter.setPattern(par("detailsFilter"));
-        else if (!strcmp(name, "labelFormat"))
-            labelFormat.parseFormat(par("labelFormat"));
-        removeAllPacketDropVisualizations();
-    }
+    if (!strcmp(name, "nodeFilter"))
+        nodeFilter.setPattern(par("nodeFilter"));
+    else if (!strcmp(name, "interfaceFilter"))
+        interfaceFilter.setPattern(par("interfaceFilter"));
+    else if (!strcmp(name, "packetFilter"))
+        packetFilter.setExpression(par("packetFilter").objectValue());
+    else if (!strcmp(name, "detailsFilter"))
+        detailsFilter.setPattern(par("detailsFilter"));
+    else if (!strcmp(name, "labelFormat"))
+        labelFormat.parseFormat(par("labelFormat"));
+    removeAllPacketDropVisualizations();
 }
 
 void PacketDropVisualizerBase::refreshDisplay() const

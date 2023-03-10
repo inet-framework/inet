@@ -21,13 +21,11 @@ void InteractiveGate::initialize(int stage)
 
 void InteractiveGate::handleParameterChange(const char *name)
 {
-    if (name != nullptr) {
-        if (!strcmp(name, "open")) {
-            if (par("open"))
-                open();
-            else
-                close();
-        }
+    if (!strcmp(name, "open")) {
+        if (par("open"))
+            open();
+        else
+            close();
     }
 }
 

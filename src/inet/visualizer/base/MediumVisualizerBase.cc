@@ -177,23 +177,21 @@ void MediumVisualizerBase::initialize(int stage)
 void MediumVisualizerBase::handleParameterChange(const char *name)
 {
     if (!hasGUI()) return;
-    if (name != nullptr) {
-        if (!strcmp(name, "networkNodeFilter"))
-            networkNodeFilter.setPattern(par("nodeFilter"));
-        else if (!strcmp(name, "interfaceFilter"))
-            interfaceFilter.setPattern(par("interfaceFilter"));
-        else if (!strcmp(name, "packetFilter"))
-            packetFilter.setExpression(par("packetFilter").objectValue());
-        else if (!strcmp(name, "signalPropagationAnimationSpeed"))
-            signalPropagationAnimationSpeed = par("signalPropagationAnimationSpeed");
-        else if (!strcmp(name, "signalTransmissionAnimationSpeed"))
-            signalTransmissionAnimationSpeed = par("signalTransmissionAnimationSpeed");
-        else if (!strcmp(name, "powerDensityMapCenterFrequency"))
-            powerDensityMapCenterFrequency = Hz(par("powerDensityMapCenterFrequency"));
-        else if (!strcmp(name, "powerDensityMapBandwidth"))
-            powerDensityMapBandwidth = Hz(par("powerDensityMapBandwidth"));
-        // TODO
-    }
+    if (!strcmp(name, "networkNodeFilter"))
+        networkNodeFilter.setPattern(par("nodeFilter"));
+    else if (!strcmp(name, "interfaceFilter"))
+        interfaceFilter.setPattern(par("interfaceFilter"));
+    else if (!strcmp(name, "packetFilter"))
+        packetFilter.setExpression(par("packetFilter").objectValue());
+    else if (!strcmp(name, "signalPropagationAnimationSpeed"))
+        signalPropagationAnimationSpeed = par("signalPropagationAnimationSpeed");
+    else if (!strcmp(name, "signalTransmissionAnimationSpeed"))
+        signalTransmissionAnimationSpeed = par("signalTransmissionAnimationSpeed");
+    else if (!strcmp(name, "powerDensityMapCenterFrequency"))
+        powerDensityMapCenterFrequency = Hz(par("powerDensityMapCenterFrequency"));
+    else if (!strcmp(name, "powerDensityMapBandwidth"))
+        powerDensityMapBandwidth = Hz(par("powerDensityMapBandwidth"));
+    // TODO
 }
 
 void MediumVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)

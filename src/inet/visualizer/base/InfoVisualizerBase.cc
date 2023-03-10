@@ -64,14 +64,12 @@ void InfoVisualizerBase::initialize(int stage)
 void InfoVisualizerBase::handleParameterChange(const char *name)
 {
     if (!hasGUI()) return;
-    if (name != nullptr) {
-        if (!strcmp(name, "modules"))
-            modules.setPattern(par("modules"));
-        else if (!strcmp(name, "format"))
-            format.parseFormat(par("format"));
-        removeAllInfoVisualizations();
-        addInfoVisualizations();
-    }
+    if (!strcmp(name, "modules"))
+        modules.setPattern(par("modules"));
+    else if (!strcmp(name, "format"))
+        format.parseFormat(par("format"));
+    removeAllInfoVisualizations();
+    addInfoVisualizations();
 }
 
 void InfoVisualizerBase::refreshDisplay() const

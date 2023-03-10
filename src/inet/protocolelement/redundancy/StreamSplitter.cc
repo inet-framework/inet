@@ -22,10 +22,8 @@ void StreamSplitter::initialize(int stage)
 
 void StreamSplitter::handleParameterChange(const char *name)
 {
-    if (name != nullptr) {
-        if (!strcmp(name, "mapping"))
-            mapping = check_and_cast<cValueMap *>(par("mapping").objectValue());
-   }
+    if (!strcmp(name, "mapping"))
+        mapping = check_and_cast<cValueMap *>(par("mapping").objectValue());
 }
 
 cGate *StreamSplitter::getRegistrationForwardingGate(cGate *gate)

@@ -62,11 +62,9 @@ void MacForwardingTable::initialize(int stage)
 
 void MacForwardingTable::handleParameterChange(const char *name)
 {
-    if (name != nullptr) {
-        if (!strcmp(name, "forwardingTable")) {
-            clearTable();
-            parseForwardingTableParameter();
-        }
+    if (!strcmp(name, "forwardingTable")) {
+        clearTable();
+        parseForwardingTableParameter();
     }
 }
 

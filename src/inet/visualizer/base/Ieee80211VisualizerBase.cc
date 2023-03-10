@@ -59,13 +59,11 @@ void Ieee80211VisualizerBase::initialize(int stage)
 void Ieee80211VisualizerBase::handleParameterChange(const char *name)
 {
     if (!hasGUI()) return;
-    if (name != nullptr) {
-        if (!strcmp(name, "nodeFilter"))
-            nodeFilter.setPattern(par("nodeFilter"));
-        else if (!strcmp(name, "interfaceFilter"))
-            interfaceFilter.setPattern(par("interfaceFilter"));
-        removeAllIeee80211Visualizations();
-    }
+    if (!strcmp(name, "nodeFilter"))
+        nodeFilter.setPattern(par("nodeFilter"));
+    else if (!strcmp(name, "interfaceFilter"))
+        interfaceFilter.setPattern(par("interfaceFilter"));
+    removeAllIeee80211Visualizations();
 }
 
 void Ieee80211VisualizerBase::subscribe()

@@ -26,10 +26,8 @@ void StreamIdentifier::initialize(int stage)
 
 void StreamIdentifier::handleParameterChange(const char *name)
 {
-    if (name != nullptr) {
-        if (!strcmp(name, "mapping"))
-            mapping = check_and_cast<cValueArray *>(par("mapping").objectValue());
-   }
+    if (!strcmp(name, "mapping"))
+        mapping = check_and_cast<cValueArray *>(par("mapping").objectValue());
 }
 
 cGate *StreamIdentifier::getRegistrationForwardingGate(cGate *gate)

@@ -30,11 +30,9 @@ void NetworkNodeVisualizerBase::initialize(int stage)
 void NetworkNodeVisualizerBase::handleParameterChange(const char *name)
 {
     if (!hasGUI()) return;
-    if (name != nullptr) {
-        if (!strcmp(name, "nodeFilter"))
-            nodeFilter.setPattern(par("nodeFilter"));
-        // TODO
-    }
+    if (!strcmp(name, "nodeFilter"))
+        nodeFilter.setPattern(par("nodeFilter"));
+    // TODO
 }
 
 NetworkNodeVisualizerBase::NetworkNodeVisualization *NetworkNodeVisualizerBase::getNetworkNodeVisualization(const cModule *networkNode) const

@@ -84,13 +84,11 @@ void PathVisualizerBase::initialize(int stage)
 void PathVisualizerBase::handleParameterChange(const char *name)
 {
     if (!hasGUI()) return;
-    if (name != nullptr) {
-        if (!strcmp(name, "nodeFilter"))
-            nodeFilter.setPattern(par("nodeFilter"));
-        else if (!strcmp(name, "packetFilter"))
-            packetFilter.setExpression(par("packetFilter").objectValue());
-        removeAllPathVisualizations();
-    }
+    if (!strcmp(name, "nodeFilter"))
+        nodeFilter.setPattern(par("nodeFilter"));
+    else if (!strcmp(name, "packetFilter"))
+        packetFilter.setExpression(par("packetFilter").objectValue());
+    removeAllPathVisualizations();
 }
 
 void PathVisualizerBase::refreshDisplay() const

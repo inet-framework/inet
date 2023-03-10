@@ -33,21 +33,19 @@ void PeriodicGate::initialize(int stage)
 
 void PeriodicGate::handleParameterChange(const char *name)
 {
-    if (name != nullptr) {
-        // NOTE: parameters are set from the gate schedule configurator modules
-        if (!initialized()) {
-            if (isGatingInitialized)
-                throw cRuntimeError("Cannot change parameter value, module is already initialized");
-            if (!strcmp(name, "offset"))
-                initialOffset = par("offset");
-            else if (!strcmp(name, "initiallyOpen"))
-                isOpen_ = par("initiallyOpen");
-            else if (!strcmp(name, "durations"))
-                durations = check_and_cast<cValueArray *>(par("durations").objectValue());
-        }
-        else
-            throw cRuntimeError("Cannot change parameters after the module has been initialized.");
+    // NOTE: parameters are set from the gate schedule configurator modules
+    if (!initialized()) {
+        if (isGatingInitialized)
+            throw cRuntimeError("Cannot change parameter value, module is already initialized");
+        if (!strcmp(name, "offset"))
+            initialOffset = par("offset");
+        else if (!strcmp(name, "initiallyOpen"))
+            isOpen_ = par("initiallyOpen");
+        else if (!strcmp(name, "durations"))
+            durations = check_and_cast<cValueArray *>(par("durations").objectValue());
     }
+    else
+        throw cRuntimeError("Cannot change parameters after the module has been initialized.");
 }
 
 void PeriodicGate::handleMessage(cMessage *message)

@@ -49,8 +49,7 @@ void TreeVisualizerBase::initialize(int stage)
 void TreeVisualizerBase::handleParameterChange(const char *name)
 {
     if (!hasGUI()) return;
-    if (name != nullptr)
-        removeAllTreeVisualizations();
+    removeAllTreeVisualizations();
 }
 
 const TreeVisualizerBase::TreeVisualization *TreeVisualizerBase::createTreeVisualization(const std::vector<std::vector<int>>& tree) const

@@ -75,12 +75,10 @@ void GateScheduleVisualizerBase::initialize(int stage)
 void GateScheduleVisualizerBase::handleParameterChange(const char *name)
 {
     if (!hasGUI()) return;
-    if (name != nullptr) {
-        if (!strcmp(name, "displayDuration"))
-            displayDuration = par("displayDuration");
-        removeAllGateVisualizations();
-        addGateVisualizations();
-    }
+    if (!strcmp(name, "displayDuration"))
+        displayDuration = par("displayDuration");
+    removeAllGateVisualizations();
+    addGateVisualizations();
 }
 
 void GateScheduleVisualizerBase::refreshDisplay() const
