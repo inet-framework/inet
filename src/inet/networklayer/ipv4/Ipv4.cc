@@ -372,7 +372,8 @@ void Ipv4::handlePacketFromHL(Packet *packet)
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
             auto descriptor = it->second;
-            packet->addTag<L3AddressReq>()->setDestAddress(descriptor->remoteAddress);
+            if (!packet->hasTag<L3AddressReq>())
+                packet->addTag<L3AddressReq>()->setDestAddress(descriptor->remoteAddress);
         }
     }
 
