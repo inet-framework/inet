@@ -20,10 +20,10 @@ bool isNetworkNode(const cModule *mod)
     return (mod != nullptr) ? _isNetworkNode(mod) : false;
 }
 
-cModule *findModuleSomewhereUp(const char *name, cModule *from)
+cModule *findModuleSomewhereUp(const char *name, const cModule *from)
 {
     cModule *mod = nullptr;
-    for (cModule *curmod = from; !mod && curmod; curmod = curmod->getParentModule())
+    for (const cModule *curmod = from; !mod && curmod; curmod = curmod->getParentModule())
         mod = curmod->getSubmodule(name);
     return mod;
 }
