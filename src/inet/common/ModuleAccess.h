@@ -24,7 +24,7 @@ INET_API bool isNetworkNode(const cModule *mod);
  * Operation: gradually rises in the module hierarchy, and looks for a submodule
  * of the given name.
  */
-INET_API cModule *findModuleSomewhereUp(const char *name, const cModule *from);
+INET_API cModule *findModuleSomewhereUp(const char *name, cModule *from);
 
 /**
  * Find the node containing the given module.
