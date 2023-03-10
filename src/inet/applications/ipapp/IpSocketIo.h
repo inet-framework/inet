@@ -16,6 +16,7 @@ namespace inet {
 class INET_API IpSocketIo : public ApplicationBase, public Ipv4Socket::ICallback
 {
   protected:
+    const Protocol *protocol = nullptr;
     bool dontFragment = false;
     Ipv4Socket socket;
     int numSent = 0;

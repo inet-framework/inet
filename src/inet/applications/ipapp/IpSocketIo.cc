@@ -20,6 +20,9 @@ void IpSocketIo::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        const char *protocolAsString = par("protocol");
+        if (!opp_isempty(protocolAsString))
+            protocol = Protocol::getProtocol(protocolAsString);
         numSent = 0;
         numReceived = 0;
         WATCH(numSent);
@@ -80,7 +83,7 @@ void IpSocketIo::handleStartOperation(LifecycleOperation *operation)
     socket.setOutputGate(gate("socketOut"));
     setSocketOptions();
     const char *localAddress = par("localAddress");
-    socket.bind(nullptr, *localAddress ? L3AddressResolver().resolve(localAddress).toIpv4() : Ipv4Address());
+    socket.bind(protocol, *localAddress ? L3AddressResolver().resolve(localAddress).toIpv4() : Ipv4Address());
     const char *destAddrs = par("destAddress");
     if (*destAddrs)
         socket.connect(L3AddressResolver().resolve(destAddrs).toIpv4());
