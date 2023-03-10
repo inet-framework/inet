@@ -366,6 +366,16 @@ void Ipv4::handlePacketFromHL(Packet *packet)
     EV_INFO << "Received " << packet << " from upper layer.\n";
     emit(packetReceivedFromUpperSignal, packet);
 
+    auto socketReq = packet->findTag<SocketReq>();
+    if (socketReq != nullptr) {
+        int socketId = socketReq->getSocketId();
+        auto it = socketIdToSocketDescriptor.find(socketId);
+        if (it != socketIdToSocketDescriptor.end()) {
+            auto descriptor = it->second;
+            packet->addTag<L3AddressReq>()->setDestAddress(descriptor->remoteAddress);
+        }
+    }
+
     // if no interface exists, do not send datagram
     if (ift->getNumInterfaces() == 0) {
         EV_ERROR << "No interfaces exist, dropping packet\n";
