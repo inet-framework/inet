@@ -45,6 +45,25 @@ INET_API cModule *getContainingNode(const cModule *from);
 INET_API cModule *findModuleUnderContainingNode(const cModule *from);
 
 /**
+ * Gets a module in the module tree, by gradually rising in the module hierarchy,
+ * and looking at a submodule of a given name.
+ *
+ * Returns the pointer to a module of type T or throws an error if module not found
+ * or type mismatch.
+ */
+template <typename T>
+T *getModuleSomewhereUp(const char *name, const cModule *from)
+{
+    cModule *mod = findModuleSomewhereUp(name, from);
+    if (!mod)
+        throw cRuntimeError("Module '%s' not found up from module '%s'", name, from->getFullPath().c_str());
+    T *m = dynamic_cast<T *>(mod);
+    if (!m)
+        throw cRuntimeError("Module '%s' can not cast to '%s'", mod->getFullPath().c_str(), opp_typename(typeid(T)));
+    return m;
+}
+    
+/**
  * Finds a module in the module tree, given by its absolute or relative path
  * defined by 'par' parameter.
  * Returns nullptr if the 'par' parameter is empty.
