@@ -731,7 +731,7 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
     decapsulate(packet);
     bool hasSocket = false;
     for (const auto& elem : socketIdToSocketDescriptor) {
-        if (elem.second->protocolId == protocol->getId()
+        if ((elem.second->protocolId == -1 || elem.second->protocolId == protocol->getId())
             && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
             && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress))
         {
