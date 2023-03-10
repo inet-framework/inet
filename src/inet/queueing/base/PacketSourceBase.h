@@ -8,6 +8,7 @@
 #ifndef __INET_PACKETSOURCEBASE_H
 #define __INET_PACKETSOURCEBASE_H
 
+#include "inet/common/Protocol.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 
 namespace inet {
@@ -18,6 +19,7 @@ class INET_API PacketSourceBase : public PacketProcessorBase
   protected:
     const char *packetNameFormat = nullptr;
     const char *packetRepresentation = nullptr;
+    const Protocol *packetProtocol = nullptr;
     cPar *packetLengthParameter = nullptr;
     cPar *packetDataParameter = nullptr;
     bool attachCreationTimeTag = false;

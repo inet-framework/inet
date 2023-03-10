@@ -15,6 +15,7 @@
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/TimeTag_m.h"
 
@@ -27,6 +28,9 @@ void PacketSourceBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         packetNameFormat = par("packetNameFormat");
         packetRepresentation = par("packetRepresentation");
+        const char *packetProtocolAsString = par("packetProtocol");
+        if (!opp_isempty(packetProtocolAsString))
+            packetProtocol = Protocol::getProtocol(packetProtocolAsString);
         packetLengthParameter = &par("packetLength");
         packetDataParameter = &par("packetData");
         attachCreationTimeTag = par("attachCreationTimeTag");
@@ -137,6 +141,8 @@ Packet *PacketSourceBase::createPacket()
     auto packet = new Packet(packetName.c_str(), packetContent);
     if (attachDirectionTag)
         packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
+    if (packetProtocol)
+        packet->addTag<PacketProtocolTag>()->setProtocol(packetProtocol);
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
     emit(packetCreatedSignal, packet);
