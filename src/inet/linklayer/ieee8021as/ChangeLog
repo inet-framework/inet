@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2023-01-30  Zoltan Bojthe
+
+	Gptp: drop incoming packets with foreign domainNumber ("not for me")
+
 2022-12-05  Levente Mészáros
 
 	Fixed the computation of gmRateRatio.

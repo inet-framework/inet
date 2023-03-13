@@ -1,5 +1,42 @@
 ====== inet-4.x ======
 
+2023-03-10  Levente Mészáros
+
+	PeriodicGate: Changed initializeGating to allow the initialOffset to be greater than the total duration.
+
+2023-03-10  Levente Mészáros
+
+	PeriodicGate: Reverted back to the behavior where parameter changes are instantly followed by initializeGating.
+	Removed name != nullptr checks from handleParameterChange.
+
+2023-03-08  Zoltan Bojthe
+
+	PeriodicGate: Fixed rescheduling changeTimer.
+
+2023-03-08  Levente Mészáros
+
+	PeriodicGate: Separated the scheduling priority parameter for open and close events.
+	PeriodicGate: Changed to a more strict gating initalization method.
+	PeriodicGate: The canPacketFlowThrough method already assumes the gate is open.
+
+2023-01-24  Julian Oertel
+
+	CreditBasedGate: Credit updates on closed transmission gate, step 1.
+
+	This change addresses the issue that the credit of CreditBasedGates was
+	increasing on while the corresponding PeriodicGate was closed. Per IEEE
+	802.Q-2018 credit should be frozen on closed gates.
+
+2023-03-06  Levente Mészáros
+
+	GateControlList: Changed setting PeriodicGate parameters to go through cPar instead of directly accessing the fields.
+	GateControlList: Fixed buffer overflow.
+
+2023-03-06  JiashuoLin
+
+	PeriodicGate: Added a parameter to configure whether the implicit guard band feature is enabled.
+	Added GateControlList, a module which accepts parameters in GCL format and configures the corresponding PeriodicGate modules.
+
 2023-02-21  Levente Mészáros
 
 	PeriodicGate: Fixed #822 as suggested by Manuel Eppler.

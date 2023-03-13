@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2023-03-10  Levente Mészáros
+
+	Removed name != nullptr checks from handleParameterChange.
+
 2022-06-22  Philipp Meyer
 
 	Fix missing MTU parameter in LayeredEthernetInterface

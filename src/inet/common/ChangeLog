@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2023-03-10  aagon
+
+	Add getModuleSomewhereUp template method.
+
+2023-03-10  Levente Mészáros
+
+	Fixed findModuleSomewhereUp parameter const qualifier reported by aagon.
+
+2023-03-08  Levente Mészáros
+
+	Added INITSTAGE_GATE_SCHEDULE_CONFIGURATION.
+
 2023-02-21  Levente Mészáros
 
 	Added service/protocol registration path to help debugging circles detected during registration.

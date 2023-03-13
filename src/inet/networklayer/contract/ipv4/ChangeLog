@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2023-03-08  Levente Mészáros
+
+	Ipv4Socket: Changed belongsToSocket to allow not having a SocketInd on the packet.
+
 2022-10-06  Andras Varga
 
 	Replaced getEnvir() with getActiveSimulationOrEnvir()

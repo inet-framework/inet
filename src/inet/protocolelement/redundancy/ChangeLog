@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2023-03-10  Levente Mészáros
+
+	Removed name != nullptr checks from handleParameterChange.
+
 2023-02-27  Levente Mészáros
 
 	StreamFilter: Added mode parameter to choose between filtering for StreamReq or StreamInd

@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2023-03-10  Levente Mészáros
+
+	PacketSourceBase: Added optional packetProtocol parameter, unknown by default.
+
+2023-03-08  Levente Mészáros
+
+	PeriodicGate: The canPacketFlowThrough method already assumes the gate is open.
+
 2023-01-20  Levente Mészáros
 
 	PacketTaggerBase: Added initialize code for encapsulationProtocols array.

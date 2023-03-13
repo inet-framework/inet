@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2023-03-10  Levente Mészáros
+
+	Removed name != nullptr checks from handleParameterChange.
+
+2023-03-06  Levente Mészáros
+
+	Ieee8021qTimeAwareShaper: Added optional GateControlList submodule, disabled by default.
+
 2023-01-17  Levente Mészáros
 
 	Adapted controlling the encapsulation protocol order to use the functions from ProtocolUtils.h.

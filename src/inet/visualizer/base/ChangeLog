@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2023-03-10  Levente Mészáros
+
+	Removed name != nullptr checks from handleParameterChange.
+
 2023-02-21  Zoltan Bojthe
 
 	Fixed issue 819: InterfaceTableVisualizer does not show IPv6 addesses
