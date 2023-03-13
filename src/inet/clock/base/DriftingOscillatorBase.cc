@@ -36,7 +36,7 @@ void DriftingOscillatorBase::initialize(int stage)
     }
 }
 
-void DriftingOscillatorBase::setDriftRate(double newDriftRate)
+void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
 {
     Enter_Method("setDriftRate");
     if (newDriftRate != driftRate) {
@@ -46,7 +46,7 @@ void DriftingOscillatorBase::setDriftRate(double newDriftRate)
         simtime_t currentTickLength = getCurrentTickLength();
         simtime_t baseTickTime = origin + nextTickFromOrigin - currentTickLength;
         simtime_t elapsedTickTime = fmod(currentSimTime - baseTickTime, currentTickLength);
-        double newInverseDriftRate = invertDriftRate(newDriftRate);
+        ppm newInverseDriftRate = invertDriftRate(newDriftRate);
         if (elapsedTickTime == SIMTIME_ZERO)
             nextTickFromOrigin = 0;
         else {
@@ -56,7 +56,7 @@ void DriftingOscillatorBase::setDriftRate(double newDriftRate)
         driftRate = newDriftRate;
         inverseDriftRate = newInverseDriftRate;
         origin = currentSimTime;
-        emit(driftRateChangedSignal, driftRate);
+        emit(driftRateChangedSignal, unit(driftRate).get());
         emit(postOscillatorStateChangedSignal, this);
         updateDisplayString();
     }
@@ -103,7 +103,7 @@ void DriftingOscillatorBase::processCommand(const cXMLElement& node)
     Enter_Method("processCommand");
     if (!strcmp(node.getTagName(), "set-oscillator")) {
         if (const char *driftRateStr = node.getAttribute("drift-rate")) {
-            double newDriftRate = strtod(driftRateStr, nullptr) / 1E+6;
+            ppm newDriftRate = ppm(strtod(driftRateStr, nullptr));
             setDriftRate(newDriftRate);
         }
         if (const char *tickOffsetStr = node.getAttribute("tick-offset")) {
@@ -121,7 +121,7 @@ std::string DriftingOscillatorBase::resolveDirective(char directive) const
         case 'c':
             return std::to_string(getCurrentTickLength()) + " s";
         case 'd':
-            return std::to_string((int64_t)(driftRate * 1E+6)) + " ppm";
+            return std::to_string((int64_t)ppm(driftRate).get()) + " ppm";
         default:
             return OscillatorBase::resolveDirective(directive);
     }

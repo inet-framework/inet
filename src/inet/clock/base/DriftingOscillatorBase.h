@@ -11,16 +11,19 @@
 #include "inet/clock/base/OscillatorBase.h"
 #include "inet/common/INETMath.h"
 #include "inet/common/scenario/IScriptable.h"
+#include "inet/common/Units.h"
 
 namespace inet {
+
+using namespace units::values;
 
 class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptable
 {
   protected:
     simtime_t nominalTickLength;
-    double driftRate = NaN; // measured in ppm, 100 ppm value means the oscillator is faster, it gains 100 microseconds for every second in simulation time
-                            // 100 ppm value means the current tick length is smaller by a factor of (1 / (1 + 100 / 1E+6)) than the nominal tick length measured in simulation time
-    double inverseDriftRate = NaN; // measured in ppm, (1 / (1 + driftRate / 1E+6) - 1) * 1E-6
+    ppm driftRate = ppm(NaN); // measured in ppm, 100 ppm value means the oscillator is faster, it gains 100 microseconds for every second in simulation time
+                              // 100 ppm value means the current tick length is smaller by a factor of (1 / (1 + 100 / 1E+6)) than the nominal tick length measured in simulation time
+    ppm inverseDriftRate = ppm(NaN); // measured in ppm, (1 / (1 + driftRate / 1E+6) - 1) * 1E-6
 
     simtime_t origin; // simulation time from which the computeClockTicksForInterval and computeIntervalForClockTicks is measured
     simtime_t nextTickFromOrigin; // simulation time interval from the computation origin to the next tick
@@ -31,21 +34,21 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
     // IScriptable implementation
     virtual void processCommand(const cXMLElement& node) override;
 
-    double invertDriftRate(double driftRate) const { return 1 / (1 + driftRate) - 1; }
+    ppm invertDriftRate(ppm driftRate) const { return unit(1 / (1 + unit(driftRate).get()) - 1); }
 
     int64_t increaseWithDriftRate(int64_t value) const { return increaseWithDriftRate(value, driftRate); }
-    int64_t increaseWithDriftRate(int64_t value, double driftRate) const { return value + (int64_t)(value * driftRate); }
+    int64_t increaseWithDriftRate(int64_t value, ppm driftRate) const { return value + (int64_t)(value * unit(driftRate).get()); }
 
     int64_t decreaseWithDriftRate(int64_t value) const { return decreaseWithDriftRate(value, inverseDriftRate); }
-    int64_t decreaseWithDriftRate(int64_t value, double inverseDriftRate) const { return value + (int64_t)(value * inverseDriftRate); }
+    int64_t decreaseWithDriftRate(int64_t value, ppm inverseDriftRate) const { return value + (int64_t)(value * unit(inverseDriftRate).get()); }
 
   public:
     virtual simtime_t getComputationOrigin() const override { return origin; }
     virtual simtime_t getNominalTickLength() const override { return nominalTickLength; }
-    virtual double getCurrentTickLength() const { return nominalTickLength.dbl() + nominalTickLength.dbl() * inverseDriftRate; }
+    virtual double getCurrentTickLength() const { return nominalTickLength.dbl() + nominalTickLength.dbl() * unit(inverseDriftRate).get(); }
 
-    virtual double getDriftRate() const { return driftRate; }
-    virtual void setDriftRate(double driftRate);
+    virtual ppm getDriftRate() const { return driftRate; }
+    virtual void setDriftRate(ppm driftRate);
     virtual void setTickOffset(simtime_t tickOffset);
 
     virtual int64_t computeTicksForInterval(simtime_t timeInterval) const override;

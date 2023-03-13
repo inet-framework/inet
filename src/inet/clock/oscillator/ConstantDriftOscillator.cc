@@ -14,7 +14,7 @@ Define_Module(ConstantDriftOscillator);
 void ConstantDriftOscillator::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
-        driftRate = par("driftRate").doubleValue() / 1E+6;
+        driftRate = ppm(par("driftRate"));
     DriftingOscillatorBase::initialize(stage);
 }
 
