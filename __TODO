@@ -4,12 +4,6 @@ INET 4.5 release
 Implementation
 --------------
 
- - fix: replace findPathStartGate/findPathEndGate with findConnectedModule/findConnectedGate and wrap the type specific reference to the module/gate into a template class?
-
- - fix: PacketTransmitter connected without transmission channel should stop in initialize? otherwise duration parameters will not work
-
- - fix: when deleting a network interface or deleting a network node, the interface deleted signal is missing
-
 Documentation
 -------------
 

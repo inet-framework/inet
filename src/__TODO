@@ -1,3 +1,9 @@
+ - replace findPathStartGate/findPathEndGate with findConnectedModule/findConnectedGate and wrap the type specific reference to the module/gate into a template class?
+
+ - PacketTransmitter connected without transmission channel should or should not stop in initialize??? will duration parameters work?
+
+ - when deleting a network interface or deleting a network node, the interface deleted signal is missing
+
  - refactor all quantity formatting to use the OMNeT++ 6.1 quantity formatter (e.g. 160000000 Hz -> 160 MHz)
    - replace long2string and double2string in Units.msg
 
