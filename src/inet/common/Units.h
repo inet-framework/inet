@@ -1176,6 +1176,7 @@ typedef scale<Hz, 60> rpm;
 typedef scale<unit, 100> percent;
 typedef scale<unit, 1, 12> dozen;
 typedef scale<unit, 1, 13> bakers_dozen;
+typedef scale<unit, 1000000> ppm;
 
 } // namespace units
 
@@ -1224,6 +1225,7 @@ UNIT_DISPLAY_NAME(units::percent, "%");
 UNIT_DISPLAY_NAME(units::rpm, "rpm");
 UNIT_DISPLAY_NAME(units::dozen, "dozen");
 UNIT_DISPLAY_NAME(units::bakers_dozen, "bakers dozen");
+UNIT_DISPLAY_NAME(units::ppm, "ppm");
 
 namespace values {
 
@@ -1353,6 +1355,7 @@ typedef value<double, units::percent> percent;
 typedef value<double, units::rpm> rpm;
 typedef value<double, units::dozen> dozen;
 typedef value<double, units::bakers_dozen> bakers_dozen;
+typedef value<double, units::ppm> ppm;
 
 template<typename Value, typename Unit>
 std::string unit2string(const value<Value, Unit>& value) {
