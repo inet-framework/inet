@@ -17,7 +17,7 @@ class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
 {
   protected:
     OverdueClockEventHandlingMode defaultOverdueClockEventHandlingMode = UNSPECIFIED;
-    double oscillatorCompensation = 1.0; // measured in ppm, 100 ppm value means the clock runs faster, it compensates 100 microseconds for every second in clock time
+    ppm oscillatorCompensation = ppm(0); // measured in ppm, 100 ppm value means the clock runs faster, it compensates 100 microseconds for every second in clock time
                                          // 100 ppm value means the oscillator tick length is compensated to be smaller by a factor of (1 / (1 + 100 / 1E+6)) than the actual tick length measured in clock time
 
   protected:
@@ -30,13 +30,13 @@ class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
     virtual void processCommand(const cXMLElement& node) override;
 
   public:
-    virtual double getOscillatorCompensation() const override { return oscillatorCompensation; }
+    virtual ppm getOscillatorCompensation() const override { return oscillatorCompensation; }
 
     /**
      * Sets the clock time immediately to the given value. Greater than 1 oscillator
      * compensation factor means the clock measures time faster.
      */
-    virtual void setClockTime(clocktime_t time, double oscillatorCompensation, bool resetOscillator);
+    virtual void setClockTime(clocktime_t time, ppm oscillatorCompensation, bool resetOscillator);
 };
 
 } // namespace inet

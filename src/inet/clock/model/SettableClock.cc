@@ -56,7 +56,7 @@ simtime_t SettableClock::handleOverdueClockEvent(ClockEvent *event, simtime_t t)
     }
 }
 
-void SettableClock::setClockTime(clocktime_t newClockTime, double oscillatorCompensation, bool resetOscillator)
+void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompensation, bool resetOscillator)
 {
     Enter_Method("setClockTime");
     clocktime_t oldClockTime = getClockTime();
@@ -99,7 +99,7 @@ void SettableClock::processCommand(const cXMLElement& node)
     Enter_Method("processCommand");
     if (!strcmp(node.getTagName(), "set-clock")) {
         clocktime_t time = ClockTime::parse(xmlutils::getMandatoryFilledAttribute(node, "time"));
-        double oscillatorCompensation = xmlutils::getAttributeDoubleValue(&node, "oscillator-compensation", 1.0);
+        ppm oscillatorCompensation = ppm(xmlutils::getAttributeDoubleValue(&node, "oscillator-compensation", 0));
         bool resetOscillator = xmlutils::getAttributeBoolValue(&node, "reset-oscillator", true);
         setClockTime(time, oscillatorCompensation, resetOscillator);
     }

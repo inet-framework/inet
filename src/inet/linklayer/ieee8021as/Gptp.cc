@@ -395,7 +395,8 @@ void Gptp::synchronize()
         gmRateRatio = (peerSentTimeSync - oldPeerSentTimeSync) / (origNow - newLocalTimeAtTimeSync) ;
 
     auto settableClock = check_and_cast<SettableClock *>(clock.get());
-    settableClock->setClockTime(newTime, gmRateRatio * settableClock->getOscillatorCompensation(), true);
+    ppm newOscillatorCompensation = unit(gmRateRatio * (1 + unit(settableClock->getOscillatorCompensation()).get()) - 1);
+    settableClock->setClockTime(newTime, newOscillatorCompensation, true);
 
     oldPeerSentTimeSync = peerSentTimeSync;
     oldLocalTimeAtTimeSync = origNow;
