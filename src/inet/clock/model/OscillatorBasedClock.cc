@@ -78,14 +78,14 @@ clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t t) const
     return originClockTime +
            SIMTIME_AS_CLOCKTIME((oscillator->computeTicksForInterval(t - oscillator->getComputationOrigin()) -
                                  oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin())) *
-                                oscillator->getNominalTickLength() * getOscillatorCompensationFactor());
+                                oscillator->getNominalTickLength() * getOscillatorCompensation());
 }
 
 simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t t) const
 {
     ASSERT(t >= getClockTime());
     return oscillator->getComputationOrigin() +
-           oscillator->computeIntervalForTicks((t - originClockTime).dbl() / oscillator->getNominalTickLength() / getOscillatorCompensationFactor() +
+           oscillator->computeIntervalForTicks((t - originClockTime).dbl() / oscillator->getNominalTickLength() / getOscillatorCompensation() +
                                                oscillator->computeTicksForInterval(originSimulationTime - oscillator->getComputationOrigin()));
 }
 

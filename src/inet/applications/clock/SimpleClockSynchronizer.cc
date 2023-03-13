@@ -23,7 +23,7 @@ void SimpleClockSynchronizer::initialize(int stage)
         slaveClock.reference(this, "slaveClockModule", true);
         synchronizationIntervalParameter = &par("synchronizationInterval");
         synchronizationClockTimeErrorParameter = &par("synchronizationClockTimeError");
-        synchronizationOscillatorCompensationFactorErrorParameter = &par("synchronizationOscillatorCompensationFactorError");
+        synchronizationOscillatorCompensationErrorParameter = &par("synchronizationOscillatorCompensationError");
     }
 }
 
@@ -54,8 +54,8 @@ void SimpleClockSynchronizer::synchronizeSlaveClock()
 {
     auto masterOscillatorBasedClock = check_and_cast<OscillatorBasedClock*>(masterClock.get());
     auto clockTime = masterClock->getClockTime() + synchronizationClockTimeErrorParameter->doubleValue();
-    double oscillatorCompensationFactor = getCurrentTickLength(slaveClock.get()) / getCurrentTickLength(masterClock.get()) * masterOscillatorBasedClock->getOscillatorCompensationFactor() * synchronizationOscillatorCompensationFactorErrorParameter->doubleValue();
-    slaveClock->setClockTime(clockTime, oscillatorCompensationFactor, true);
+    double oscillatorCompensation = getCurrentTickLength(slaveClock.get()) / getCurrentTickLength(masterClock.get()) * masterOscillatorBasedClock->getOscillatorCompensation() * synchronizationOscillatorCompensationErrorParameter->doubleValue();
+    slaveClock->setClockTime(clockTime, oscillatorCompensation, true);
 }
 
 void SimpleClockSynchronizer::scheduleSynchronizationTimer()

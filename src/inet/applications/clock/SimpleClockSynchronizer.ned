@@ -22,7 +22,7 @@ simple SimpleClockSynchronizer like IApp
         string slaveClockModule;
         volatile double synchronizationInterval @unit(s); // clock synchronization period
         volatile double synchronizationClockTimeError @unit(s) = default(0s); // additive, 0 means exact synchronization
-        volatile double synchronizationOscillatorCompensationFactorError = default(1); // multiplicative, 1 means exact synchronization
+        volatile double synchronizationOscillatorCompensationError = default(1); // multiplicative, 1 means exact synchronization
         @display("i=block/app");
         @lifecycleSupport;
     gates:

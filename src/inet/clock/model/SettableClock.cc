@@ -56,7 +56,7 @@ simtime_t SettableClock::handleOverdueClockEvent(ClockEvent *event, simtime_t t)
     }
 }
 
-void SettableClock::setClockTime(clocktime_t newClockTime, double oscillatorCompensationFactor, bool resetOscillator)
+void SettableClock::setClockTime(clocktime_t newClockTime, double oscillatorCompensation, bool resetOscillator)
 {
     Enter_Method("setClockTime");
     clocktime_t oldClockTime = getClockTime();
@@ -70,7 +70,7 @@ void SettableClock::setClockTime(clocktime_t newClockTime, double oscillatorComp
         EV_DEBUG << "Setting clock time from " << oldClockTime << " to " << newClockTime << " at simtime " << currentSimTime << ".\n";
         originSimulationTime = simTime();
         originClockTime = newClockTime;
-        this->oscillatorCompensationFactor = oscillatorCompensationFactor;
+        this->oscillatorCompensation = oscillatorCompensation;
         ASSERT(newClockTime == getClockTime());
         clocktime_t clockDelta = newClockTime - oldClockTime;
         for (auto event : events) {
@@ -99,9 +99,9 @@ void SettableClock::processCommand(const cXMLElement& node)
     Enter_Method("processCommand");
     if (!strcmp(node.getTagName(), "set-clock")) {
         clocktime_t time = ClockTime::parse(xmlutils::getMandatoryFilledAttribute(node, "time"));
-        double oscillatorCompensationFactor = xmlutils::getAttributeDoubleValue(&node, "oscillator-compensation-factor", 1.0);
+        double oscillatorCompensation = xmlutils::getAttributeDoubleValue(&node, "oscillator-compensation", 1.0);
         bool resetOscillator = xmlutils::getAttributeBoolValue(&node, "reset-oscillator", true);
-        setClockTime(time, oscillatorCompensationFactor, resetOscillator);
+        setClockTime(time, oscillatorCompensation, resetOscillator);
     }
     else
         throw cRuntimeError("Invalid command: %s", node.getTagName());
