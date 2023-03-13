@@ -56,7 +56,7 @@ void DriftingOscillatorBase::setDriftRate(ppm newDriftRate)
         driftRate = newDriftRate;
         inverseDriftRate = newInverseDriftRate;
         origin = currentSimTime;
-        emit(driftRateChangedSignal, unit(driftRate).get());
+        emit(driftRateChangedSignal, ppm(driftRate).get());
         emit(postOscillatorStateChangedSignal, this);
         updateDisplayString();
     }

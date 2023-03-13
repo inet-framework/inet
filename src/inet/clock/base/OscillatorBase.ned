@@ -17,6 +17,6 @@ simple OscillatorBase
         @class(OscillatorBase);
         @display("i=block/tunnel");
         @signal[driftRateChanged](type=double);
-        @statistic[driftRateChanged](title="Oscillator drift rate"; record=vector; interpolationmode=sample-hold);
+        @statistic[driftRateChanged](title="Oscillator drift rate"; record=vector; interpolationmode=sample-hold; unit=ppm);
 }
 
