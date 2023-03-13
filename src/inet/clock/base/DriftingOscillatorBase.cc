@@ -121,7 +121,7 @@ std::string DriftingOscillatorBase::resolveDirective(char directive) const
         case 'c':
             return std::to_string(getCurrentTickLength()) + " s";
         case 'd':
-            return std::to_string((int64_t)ppm(driftRate).get()) + " ppm";
+            return driftRate.str();
         default:
             return OscillatorBase::resolveDirective(directive);
     }
