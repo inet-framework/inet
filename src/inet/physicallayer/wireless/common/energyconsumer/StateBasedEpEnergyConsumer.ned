@@ -35,6 +35,6 @@ simple StateBasedEpEnergyConsumer like IEpEnergyConsumer
         @display("i=block/cogwheel");
         @class(StateBasedEpEnergyConsumer);
         @signal[powerConsumptionChanged](type=double);
-        @statistic[powerConsumption](title="Power consumption"; source=powerConsumptionChanged; record=vector; interpolationmode=sample-hold);
+        @statistic[powerConsumption](title="Power consumption"; source=powerConsumptionChanged; record=vector; interpolationmode=sample-hold; unit=W);
 }
 

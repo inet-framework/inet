@@ -37,6 +37,6 @@ simple StateBasedCcEnergyConsumer like ICcEnergyConsumer
         @display("i=block/cogwheel");
         @class(StateBasedCcEnergyConsumer);
         @signal[currentConsumptionChanged](type=double);
-        @statistic[currentConsumption](title="Current consumption"; source=currentConsumptionChanged; record=vector; interpolationmode=sample-hold);
+        @statistic[currentConsumption](title="Current consumption"; source=currentConsumptionChanged; record=vector; interpolationmode=sample-hold; unit=A);
 }
 
