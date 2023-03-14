@@ -45,7 +45,7 @@ class INET_API EthernetMac : public EthernetMacBase
     // helpers
     virtual void startFrameTransmission();
     virtual void handleUpperPacket(Packet *pk) override;
-    virtual void processMsgFromNetwork(EthernetSignalBase *signal);
+    virtual void processMsgFromNetwork(Signal *signal);
     virtual void processReceivedDataFrame(Packet *packet, const Ptr<const EthernetMacHeader>& frame);
     virtual void processPauseCommand(int pauseUnits);
     virtual void scheduleEndIFGPeriod();

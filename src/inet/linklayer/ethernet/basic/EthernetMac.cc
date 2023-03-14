@@ -67,7 +67,7 @@ void EthernetMac::handleMessageWhenUp(cMessage *msg)
     else if (msg->getArrivalGateId() == upperLayerInGateId)
         handleUpperPacket(check_and_cast<Packet *>(msg));
     else if (msg->getArrivalGate() == physInGate)
-        processMsgFromNetwork(check_and_cast<EthernetSignalBase *>(msg));
+        processMsgFromNetwork(check_and_cast<Signal *>(msg));
     else
         throw cRuntimeError("Message received from unknown gate!");
     processAtHandleMessageFinished();
@@ -161,7 +161,7 @@ void EthernetMac::handleUpperPacket(Packet *packet)
     startFrameTransmission();
 }
 
-void EthernetMac::processMsgFromNetwork(EthernetSignalBase *signal)
+void EthernetMac::processMsgFromNetwork(Signal *signal)
 {
     EV_INFO << signal << " received." << endl;
 
@@ -187,8 +187,9 @@ void EthernetMac::processMsgFromNetwork(EthernetSignalBase *signal)
 
     totalSuccessfulRxTime += signal->getDuration();
 
-    if (signal->getSrcMacFullDuplex() != duplexMode)
-        throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
+    if (auto ethernetSignal = dynamic_cast<EthernetSignalBase *>(signal))
+        if (ethernetSignal->getSrcMacFullDuplex() != duplexMode)
+            throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
 
     if (dynamic_cast<EthernetFilledIfgSignal *>(signal))
         throw cRuntimeError("There is no burst mode in full-duplex operation: EtherFilledIfg is unexpected");

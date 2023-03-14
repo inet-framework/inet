@@ -135,7 +135,7 @@ module EthernetMac like IEtherMac
         @signal[receptionStateChanged](type=long); // enum=MacReceiveState
         @signal[transmissionStarted](type=inet::physicallayer::EthernetSignalBase);
         @signal[transmissionEnded](type=inet::physicallayer::EthernetSignalBase);
-        @signal[receptionEnded](type=inet::physicallayer::EthernetSignalBase);
+        @signal[receptionEnded](type=inet::physicallayer::Signal);
 
         @statistic[txPk](title="packets transmitted"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rxPkOk](title="packets received OK"; source=rxPkOk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
