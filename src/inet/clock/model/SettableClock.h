@@ -17,7 +17,7 @@ class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
 {
   protected:
     OverdueClockEventHandlingMode defaultOverdueClockEventHandlingMode = UNSPECIFIED;
-    ppm oscillatorCompensation = ppm(0); // measured in ppm, 100 ppm value means the clock runs faster, it compensates 100 microseconds for every second in clock time
+    ppm oscillatorCompensation = ppm(0); // 0 means no compensation, higher value means faster clock, e.g. 100 ppm value means the clock compensates 100 microseconds for every second in clock time
                                          // 100 ppm value means the oscillator tick length is compensated to be smaller by a factor of (1 / (1 + 100 / 1E+6)) than the actual tick length measured in clock time
 
   protected:

@@ -21,9 +21,9 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
 {
   protected:
     simtime_t nominalTickLength;
-    ppm driftRate = ppm(NaN); // measured in ppm, 100 ppm value means the oscillator is faster, it gains 100 microseconds for every second in simulation time
+    ppm driftRate = ppm(NaN); // 0 means nominal, higher value means faster oscillator, e.g. 100 ppm means the oscillator gains 100 microseconds for every second in simulation time
                               // 100 ppm value means the current tick length is smaller by a factor of (1 / (1 + 100 / 1E+6)) than the nominal tick length measured in simulation time
-    ppm inverseDriftRate = ppm(NaN); // measured in ppm, (1 / (1 + driftRate / 1E+6) - 1) * 1E-6
+    ppm inverseDriftRate = ppm(NaN); // stored for faster computation, calculated as (1 / (1 + driftRate / 1E+6) - 1) * 1E-6
 
     simtime_t origin; // simulation time from which the computeClockTicksForInterval and computeIntervalForClockTicks is measured
     simtime_t nextTickFromOrigin; // simulation time interval from the computation origin to the next tick
