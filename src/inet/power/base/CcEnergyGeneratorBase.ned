@@ -20,6 +20,6 @@ simple CcEnergyGeneratorBase like ICcEnergyGenerator
     parameters:
         @display("i=block/plug");
         @signal[currentGenerationChanged];
-        @statistic[currentGeneration](title="Current generation"; source=currentGenerationChanged; record=vector; interpolationmode=sample-hold);
+        @statistic[currentGeneration](title="Current generation"; source=currentGenerationChanged; record=vector; interpolationmode=sample-hold; unit=A);
 }
 

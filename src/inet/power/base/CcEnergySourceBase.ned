@@ -20,6 +20,6 @@ simple CcEnergySourceBase like ICcEnergySource
     parameters:
         @display("i=block/plug");
         @signal[currentConsumptionChanged];
-        @statistic[currentConsumption](title="Current consumption"; source=currentConsumptionChanged; record=vector; interpolationmode=sample-hold);
+        @statistic[currentConsumption](title="Current consumption"; source=currentConsumptionChanged; record=vector; interpolationmode=sample-hold; unit=A);
 }
 

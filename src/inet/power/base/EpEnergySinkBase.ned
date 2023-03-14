@@ -20,6 +20,6 @@ simple EpEnergySinkBase like IEpEnergySink
     parameters:
         @display("i=block/plug");
         @signal[powerGenerationChanged];
-        @statistic[powerGeneration](title="Power generation"; source=powerGenerationChanged; record=vector; interpolationmode=sample-hold);
+        @statistic[powerGeneration](title="Power generation"; source=powerGenerationChanged; record=vector; interpolationmode=sample-hold; unit=W);
 }
 

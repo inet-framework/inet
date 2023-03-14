@@ -22,8 +22,8 @@ simple CcEnergyStorageBase like ICcEnergyStorage
         @signal[currentConsumptionChanged];
         @signal[currentGenerationChanged];
         @signal[residualChargeCapacityChanged];
-        @statistic[currentConsumption](title="Current consumption"; source=currentConsumptionChanged; record=vector; interpolationmode=sample-hold);
-        @statistic[currentGeneration](title="Current generation"; source=currentGenerationChanged; record=vector; interpolationmode=sample-hold);
-        @statistic[residualChargeCapacity](title="Residual charge capacity"; source=residualChargeCapacityChanged; record=vector; interpolationmode=linear);
+        @statistic[currentConsumption](title="Current consumption"; source=currentConsumptionChanged; record=vector; interpolationmode=sample-hold; unit=A);
+        @statistic[currentGeneration](title="Current generation"; source=currentGenerationChanged; record=vector; interpolationmode=sample-hold; unit=A);
+        @statistic[residualChargeCapacity](title="Residual charge capacity"; source=residualChargeCapacityChanged; record=vector; interpolationmode=linear; unit=C);
 }
 

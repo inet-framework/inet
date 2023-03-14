@@ -23,8 +23,8 @@ simple EpEnergyStorageBase like IEpEnergyStorage
         @signal[powerConsumptionChanged];
         @signal[powerGenerationChanged];
         @signal[residualEnergyCapacityChanged];
-        @statistic[powerConsumption](title="Power consumption"; source=powerConsumptionChanged; record=vector; interpolationmode=sample-hold);
-        @statistic[powerGeneration](title="Power generation"; source=powerGenerationChanged; record=vector; interpolationmode=sample-hold);
-        @statistic[residualEnergyCapacity](title="Residual energy capacity"; source=residualEnergyCapacityChanged; record=vector,last; interpolationmode=linear);
+        @statistic[powerConsumption](title="Power consumption"; source=powerConsumptionChanged; record=vector; interpolationmode=sample-hold; unit=W);
+        @statistic[powerGeneration](title="Power generation"; source=powerGenerationChanged; record=vector; interpolationmode=sample-hold; unit=W);
+        @statistic[residualEnergyCapacity](title="Residual energy capacity"; source=residualEnergyCapacityChanged; record=vector,last; interpolationmode=linear; unit=J);
 }
 

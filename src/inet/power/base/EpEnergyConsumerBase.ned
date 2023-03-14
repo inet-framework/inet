@@ -20,6 +20,6 @@ simple EpEnergyConsumerBase like IEpEnergyConsumer
     parameters:
         @display("i=block/plug");
         @signal[powerConsumptionChanged](type=double);
-        @statistic[powerConsumption](title="Power consumption"; source=powerConsumptionChanged; record=vector; interpolationmode=sample-hold);
+        @statistic[powerConsumption](title="Power consumption"; source=powerConsumptionChanged; record=vector; interpolationmode=sample-hold; unit=W);
 }
 
