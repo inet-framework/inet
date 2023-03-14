@@ -42,19 +42,19 @@ void SimpleClockSynchronizer::handleStartOperation(LifecycleOperation *operation
     scheduleSynchronizationTimer();
 }
 
-static double getCurrentTickLength(IClock *clock)
+static double getCurrentRelativeTickLength(IClock *clock)
 {
     auto oscillatorBasedClock = check_and_cast<OscillatorBasedClock*>(clock);
     auto clockOscillator = oscillatorBasedClock->getOscillator();
     auto driftingOscillator = check_and_cast<const DriftingOscillatorBase *>(clockOscillator);
-    return driftingOscillator->getCurrentTickLength();
+    return driftingOscillator->getCurrentTickLength() / driftingOscillator->getNominalTickLength();
 }
 
 void SimpleClockSynchronizer::synchronizeSlaveClock()
 {
     auto masterOscillatorBasedClock = check_and_cast<OscillatorBasedClock*>(masterClock.get());
     auto clockTime = masterClock->getClockTime() + synchronizationClockTimeErrorParameter->doubleValue();
-    ppm oscillatorCompensation = unit(getCurrentTickLength(slaveClock.get()) / getCurrentTickLength(masterClock.get())
+    ppm oscillatorCompensation = unit(getCurrentRelativeTickLength(slaveClock.get()) / getCurrentRelativeTickLength(masterClock.get())
             * (1 + unit(masterOscillatorBasedClock->getOscillatorCompensation()).get())
             * (1 + unit(ppm(synchronizationOscillatorCompensationErrorParameter->doubleValue())).get()) - 1);
     slaveClock->setClockTime(clockTime, oscillatorCompensation, true);
