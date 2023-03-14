@@ -30,7 +30,7 @@ C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.11: simtime: 2.4, clo
 C:(ClockTestApp)ClockTestNetwork.host.app: arrived After_1.2: simtime: 2.4, clock: 2.2
 C:(ClockTestApp)ClockTestNetwork.host.app: schedule After_1.2 after clock: 1.2, scheduled simtime: 4.8, scheduled clock: 3.4
 C:(ScenarioManager)ClockTestNetwork.scenarioManager: processing <set-oscillator> command...
-C:(ConstantDriftOscillator)ClockTestNetwork.host.clock.oscillator: Setting oscillator drift rate from -0.5 to 0 at simtime 2.5.
+C:(ConstantDriftOscillator)ClockTestNetwork.host.clock.oscillator: Setting oscillator drift rate from -500000 ppm to 0 ppm at simtime 2.5.
 C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.89: simtime: 3.15, clock: 2.9
 C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_2.9999999: simtime: 3.25, clock: 3
 C:(ClockTestApp)ClockTestNetwork.host.app: arrived Timer_3.11: simtime: 3.45, clock: 3.2
