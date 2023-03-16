@@ -36,7 +36,7 @@ def collect_modules(simulation_project, path="src"):
             if match:
                 package = match.group(1)
                 package = re.sub("^\w+?\.", "", package)
-            match = re.match(r"^(simple|module) (\w+) ", line)
+            match = re.match(r"^(simple|module) (\w+)\b", line)
             if match:
                 module = match.group(2)
                 modules.append(package + "." + module if package else module)
@@ -116,7 +116,7 @@ def collect_classes(simulation_project, path="src"):
     for file_name in glob.glob(project_path + "/**/*.h", recursive=True):
         file = open(file_name, encoding="utf-8")
         for line in file:
-            match = re.match(r"^class INET_API (\w+) ", line)
+            match = re.match(r"^class INET_API (\w+)\b", line)
             if match:
                 class_name = match.group(1)
                 relative_path = os.path.relpath(os.path.dirname(file_name), project_path)
