@@ -46,7 +46,7 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
     virtual ~PeriodicGate() { cancelAndDelete(changeTimer); }
 
     virtual clocktime_t getInitialOffset() const { return initialOffset; }
-    virtual bool getInitiallyOpen() const { return par("initiallyOpen"); }
+    virtual bool getInitiallyOpen() const { return initiallyOpen; }
     virtual const cValueArray *getDurations() const { return durations; }
 };
 
