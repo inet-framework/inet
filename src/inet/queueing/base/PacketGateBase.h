@@ -32,6 +32,7 @@ class INET_API PacketGateBase : public PacketFlowBase, public TransparentProtoco
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void finish() override;
 
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 

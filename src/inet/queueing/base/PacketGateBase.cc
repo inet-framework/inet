@@ -26,6 +26,11 @@ void PacketGateBase::initialize(int stage)
         emit(gateStateChangedSignal, isOpen_);
 }
 
+void PacketGateBase::finish()
+{
+    emit(gateStateChangedSignal, isOpen_);
+}
+
 cGate *PacketGateBase::getRegistrationForwardingGate(cGate *gate)
 {
     if (gate == outputGate)
