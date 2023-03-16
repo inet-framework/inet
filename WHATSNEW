@@ -1,46 +1,151 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-4.5 (Jun 2023) - Stable
+INET-4.5 (Arp 2023) - Stable
 ----------------------------
 
-This is a new minor stable release of the INET 4.x branch.
+This is a new minor stable release within the INET 4.x branch. The main feature
+of this release is the ability to concurrently run multiple simulations within
+the same process (requires OMNeT++ 7.0 preview version or layer), along with an
+extended Ethernet cut-through switching functionality.
 
-Queueing
- - added scheduling priority parameters
- - added initial offset parameters to sources and sinks
- - added BackPressureBarrier, FullPacketSink, PacketDelayerBase modules
- - refactored PacketTaggerBase
+There are also a number of small improvements, and several bug fixes. Some changes
+are backward incompatible, so existing models may need to be updated. This version
+requires OMNeT++ 6.0 or later.
 
-Protocolelement
- - added cut-through source/sink
- - minor fixes
+For a complete list of all added, removed, and changed folders, NED modules, packet
+chunks, packet tags, statistics, C++ classes, and signals please refer to the ChangeLog
+file in the src folder.
 
-Clock
- - added oscillator compensation factor
- - changed RandomDriftOscillator
+Notable backward incompatible changes are the following:
 
-Ethernet
- - refactored cut-through
+1. Running simulations concurrently
 
-802.11
- - replaceable policy submodules
+   INET has been changed to support running multiple simulations concurrently
+   within a single process. Previously this was not possible, partly because
+   OMNeT++ itself didn't support concurrent simulation execution, but also
+   because INET contained several global variables.
 
-Composability
- - refactored protocol encapsulation request and disptach protocol request
- - more uniform handling of request and indication tags
+   In order to provide this feature, global variables have been either eliminated,
+   or replaced with simulation shared variables, or marked with the 'const'
+   qualifier signifying that their values cannot be changed, or marked with the
+   'OPP_THREAD_LOCAL' macro to store their values separately for each thread.
 
-Multi-threading support
- - eliminated global variables
- - changed global variables to const
- - added OPP_THREAD_LOCAL to variables
+   This feature requires using OMNeT++ 7.0 preview version or later. For more
+   information, see https://omnetpp.org
 
-Omnetpp 7.0 compatibility
+2. Ethernet cut-through switching
 
-Refined documentation
- - 802.11
+   The Ethernet cut-through switching implementation has been extended to work
+   with all TSN traffic filtering and TSN traffic shaping methods. Previously
+   it was not possible to combine these features. For a packet that was forwarded
+   using cut-through switching, the otherwise configured traffic shaping and
+   traffic filtering methods were completely bypassed.
 
-Bug fixes
+   The new implementation allows processing the incomplete packet in the switch
+   while the packet buffer is being filled up by the incoming interface. All
+   Ethernet headers are available and the packet length is known, so traffic
+   filtering and traffic shaping can take place as for store-and-forward packets.
+
+   For more information, see the showcase at:
+   https://inet.omnetpp.org/docs/showcases/tsn/cutthroughswitching/doc/index.html
+
+3. Clock model
+
+   The RandomDriftOscillator module has been refactored to have a more useful
+   parameterization. The module has an initial random drift rate parameter that
+   represents the inaccuracy of device production. Additionally, the module uses
+   a random walk process for an additional drift rate change that represents the
+   voltage and temperature dependent inaccuracy of the device.
+
+   The gPTP time synchronization change (described later) makes the RandomDriftOscillator
+   more useful than the previously widely used ConstantDriftOscillator because
+   time synchronization can now completely eliminate the effects of a constant
+   drift.
+
+4. Time-Sensitive Networking
+
+   The credit-based shaper has been changed to stop accumulating credits when the
+   corresponding time-aware shaper (same traffic category) transmission gate is
+   closed. Additionally, the credit-based shaper can also stop accumulating
+   credits when the implicit guard band of the time-aware shaper is active.
+
+   The time-aware shaper already provides an implicit guard band before each time
+   a gate is closing according to the gate schedule. This guard band is defined
+   by the rule that says no packet is allowed to pass the gate unless the packet
+   can be transmitted completely before the gate closes.
+
+Notable backward compatible changes are the following:
+
+1. Clock model
+
+   The clock model has been extended with an oscillator compensation parameter.
+   This parameter can be used to reduce the effect of an inaccurate oscillator
+   on clock time. Time synchronization mechanisms can often estimate the clock
+   speed differences and set this parameter to reduce the clock time difference
+   that would arise over time from clocks running at different speeds.
+
+2. IEEE 802.1-AS (gPTP)
+
+   The gPTP time synchronization protocol has been extended to also compensate
+   for a drifting oscillator. Previously time synchronization only set the clock
+   time but it didn't account for the clock speed differences. This change can
+   result in a several orders of magnitude smaller maximum clock time difference
+   between the master and slave clocks over the period of two time synchronization
+   events.
+
+3. Queueing model
+
+   The behavior of complex queueing models depends among others on the execution
+   order of timers. Previously the scheduling priority for such timers were not
+   configurable, so the user could not control the order of execution. This
+   limitation could prevent getting the desired behavior from the combination
+   of certain modules. For example, a packet server may need to wait for all
+   gates to open or close before using the scheduler to process the next packet.
+
+   Several queueing modules have been extended with additional parameters to
+   control the scheduling priority of timers. This gives fine grained control
+   over the order of timer events, that affects how the modules can be combined
+   into more complex behavior.
+
+   Additionally, the active packet source and packet sink modules that generate
+   or consume traffic periodically have been extended with initial offset parameters.
+
+4. IEEE 802.11
+
+   The 802.11 model contains several policy modules that can be replaced by the
+   user to customize the model behavior. For example, the fragmentation policy
+   decides when and how frames should be fragmented. Unfortunately, previously
+   several policy modules were not replaceable using only INI file parameter
+   assignments. This limitation has been fixed.
+
+   All policy submodules have been replaced with submodules having parameterized
+   module types and corresponding module interfaces, making it easy to replace
+   policy submodules using only INI files. Additionally, the documentation of
+   several 802.11 modules and module interfaces have been refined.
+
+5. Protocol element
+
+   The generic protocol elements library have been extended with a protocol
+   independent cut-through implementation. The new modules provide an example
+   of how this mechanism can be implemented and allows teaching and researching
+   this topic.
+
+6. Notable bug fixes and other changes
+
+   The protocol encapsulation requests and protocol dispatching mechanism between
+   applications, IP, Ethernet, and other protocols have been refactored to use a
+   uniform implementation through utility functions. This provides the user with
+   a more flexible network node architecture where the protocol encapsulation can
+   be decided on a per packet basis.
+
+   Fixed exponent in the calculation of dielectric obstacle loss.
+   Fixed getReceptionStartTimeVariables method of Z3GateScheduleConfigurator.
+   Fixed processing of Ethernet control frames.
+   Fixed emitting linkBrokenSignal when transmitted packet is not acknowledged.
+
+   The IPv4NetworkConfigurator log output has been improved.
+
 
 INET-4.4 (May 2022) - Stable
 ----------------------------
