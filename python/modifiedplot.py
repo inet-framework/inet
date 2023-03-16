@@ -91,6 +91,8 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label, global_style=No
         - `cycle_seed`: Alters the sequence in which colors and markers are assigned to series.
     """
     p = ideplot if chart.is_native_chart() else plt
+    
+    props['plot_function'] = inspect.currentframe().f_code.co_name
 
     def get_prop(k):
         return props[k] if k in props else None
@@ -139,6 +141,8 @@ def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, global
         return props[k] if k in props else None
     
     ax_list = []
+    
+    props['plot_function'] = inspect.currentframe().f_code.co_name
 
     title_cols, legend_cols = utils.extract_label_columns(df, props)
 
@@ -200,6 +204,9 @@ def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_
     
     title = ""
     ax_list = []
+    
+    props['plot_function'] = inspect.currentframe().f_code.co_name
+    
     for j in range(0, len(df_list)):
         df = df_list[j]
 
