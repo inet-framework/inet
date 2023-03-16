@@ -31,6 +31,7 @@ void CreditBasedGate::initialize(int stage)
         transmitCreditLimit = par("transmitCreditLimit");
         minCredit = par("minCredit");
         maxCredit = par("maxCredit");
+        accumulateCreditInGuardBand = par("accumulateCreditInGuardBand");
         displayStringTextFormat = par("displayStringTextFormat");
         currentCredit = par("initialCredit");
         currentCreditGainRate = idleCreditGainRate;
@@ -38,8 +39,12 @@ void CreditBasedGate::initialize(int stage)
         lastCurrentCreditEmittedTime = simTime();
         isOpen_ = currentCredit >= transmitCreditLimit;
         periodicGate.reference(outputGate, false);
-        if (periodicGate != nullptr)
-            check_and_cast<cModule *>(periodicGate.get())->subscribe(gateStateChangedSignal, this);
+        if (periodicGate != nullptr) {
+            auto periodicGateModule = check_and_cast<cModule *>(periodicGate.get());
+            periodicGateModule->subscribe(gateStateChangedSignal, this);
+            if (!accumulateCreditInGuardBand)
+                periodicGateModule->subscribe(PeriodicGate::guardBandStateChangedSignal, this);
+        }
         cModule *module = getContainingNicModule(this);
         module->subscribe(transmissionStartedSignal, this);
         module->subscribe(transmissionEndedSignal, this);
@@ -140,7 +145,7 @@ void CreditBasedGate::updateCurrentCreditGainRate()
 {
     if (isTransmitting || isInterpacketGap)
         currentCreditGainRate = -transmitCreditSpendRate;
-    else if (periodicGate != nullptr && !isPeriodicGateOpen())
+    else if (periodicGate != nullptr && (periodicGate->isClosed() || (!accumulateCreditInGuardBand && periodicGate->isInGuardBand())))
         currentCreditGainRate = 0;
     else if (currentCredit < 0 || hasAvailablePacket())
         currentCreditGainRate = idleCreditGainRate;
@@ -151,7 +156,7 @@ void CreditBasedGate::updateCurrentCreditGainRate()
 void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, bool value, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(simsignal));
-    if (simsignal == gateStateChangedSignal) {
+    if (simsignal == gateStateChangedSignal || simsignal == PeriodicGate::guardBandStateChangedSignal) {
         // 1. update currentCreditGainRate and notify listeners about currentCredit change
         updateCurrentCredit();
         updateCurrentCreditGainRate();
