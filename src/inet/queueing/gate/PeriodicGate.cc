@@ -65,7 +65,7 @@ void PeriodicGate::initializeGating()
     offset.setRaw(totalDuration != 0 ? initialOffset.raw() % totalDuration.raw() : 0);
     while (offset > 0) {
         clocktime_t duration = durations->get(index).doubleValueInUnit("s");
-        if (offset > duration) {
+        if (offset >= duration) {
             isOpen_ = !isOpen_;
             offset -= duration;
             index = (index + 1) % durations->size();
