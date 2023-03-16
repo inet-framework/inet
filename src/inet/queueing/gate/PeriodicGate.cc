@@ -81,7 +81,7 @@ void PeriodicGate::initializeGating()
 
 void PeriodicGate::scheduleChangeTimer()
 {
-    ASSERT(0 <= index && index < (int)durations->size());
+    ASSERT(0 <= index && (size_t)index < durations->size());
     clocktime_t duration = durations->get(index).doubleValueInUnit("s");
     index = (index + 1) % durations->size();
 
