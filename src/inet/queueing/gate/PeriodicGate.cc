@@ -20,7 +20,7 @@ void PeriodicGate::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         initiallyOpen = par("initiallyOpen");
         initialOffset = par("offset");
-        durations = check_and_cast<cValueArray *>(par("durations").objectValue());
+        readDurationsPar();
         scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
         changeTimer = new ClockEvent("ChangeTimer");
         enableImplicitGuardBand = par("enableImplicitGuardBand");
@@ -39,7 +39,7 @@ void PeriodicGate::handleParameterChange(const char *name)
     else if (!strcmp(name, "initiallyOpen"))
         initiallyOpen = par("initiallyOpen");
     else if (!strcmp(name, "durations"))
-        durations = check_and_cast<cValueArray *>(par("durations").objectValue());
+        readDurationsPar();
     initializeGating();
 }
 
@@ -53,37 +53,47 @@ void PeriodicGate::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
+void PeriodicGate::readDurationsPar()
+{
+    auto durationsPar = check_and_cast<cValueArray *>(par("durations").objectValue());
+    size_t size = durationsPar->size();
+    if (size % 2 != 0)
+        throw cRuntimeError("The duration parameter must contain an even number of values");
+    totalDuration = CLOCKTIME_ZERO;
+    durations.resize(size);
+    for (int i = 0; i < size; i++) {
+        clocktime_t duration = durationsPar->get(i).doubleValueInUnit("s");
+        durations[i] = duration;
+        totalDuration += duration;
+    }
+}
+
 void PeriodicGate::initializeGating()
 {
-    if (durations->size() % 2 != 0)
-        throw cRuntimeError("The duration parameter must contain an even number of values");
-    clocktime_t totalDuration = 0;
-    for (int i = 0; i < durations->size(); i++)
-        totalDuration += durations->get(i).doubleValueInUnit("s");
     index = 0;
     isOpen_ = initiallyOpen;
     offset.setRaw(totalDuration != 0 ? initialOffset.raw() % totalDuration.raw() : 0);
-    while (offset > 0) {
-        clocktime_t duration = durations->get(index).doubleValueInUnit("s");
+    while (offset > CLOCKTIME_ZERO) {
+        clocktime_t duration = durations[index];
         if (offset >= duration) {
             isOpen_ = !isOpen_;
             offset -= duration;
-            index = (index + 1) % durations->size();
+            index = (index + 1) % durations.size();
         }
         else
             break;
     }
     if (changeTimer->isScheduled())
         cancelClockEvent(changeTimer);
-    if (durations->size() > 0)
+    if (durations.size() > 0)
         scheduleChangeTimer();
 }
 
 void PeriodicGate::scheduleChangeTimer()
 {
-    ASSERT(0 <= index && (size_t)index < durations->size());
-    clocktime_t duration = durations->get(index).doubleValueInUnit("s");
-    index = (index + 1) % durations->size();
+    ASSERT(0 <= index && (size_t)index < durations.size());
+    clocktime_t duration = durations[index];
+    index = (index + 1) % durations.size();
 
     changeTimer->setSchedulingPriority(isOpen_ ? closeSchedulingPriority : openSchedulingPriority);
     if (scheduleForAbsoluteTime)

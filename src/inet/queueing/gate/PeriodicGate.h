@@ -24,7 +24,8 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
     bool initiallyOpen = false;
     clocktime_t initialOffset;
     clocktime_t offset;
-    cValueArray *durations = nullptr;
+    clocktime_t totalDuration = 0;
+    std::vector<clocktime_t> durations;
     bool scheduleForAbsoluteTime = false;
     bool enableImplicitGuardBand = true;
     int openSchedulingPriority = 0;
@@ -41,13 +42,14 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
     virtual void initializeGating();
     virtual void scheduleChangeTimer();
     virtual void processChangeTimer();
+    virtual void readDurationsPar();
 
   public:
     virtual ~PeriodicGate() { cancelAndDelete(changeTimer); }
 
     virtual clocktime_t getInitialOffset() const { return initialOffset; }
     virtual bool getInitiallyOpen() const { return initiallyOpen; }
-    virtual const cValueArray *getDurations() const { return durations; }
+    virtual const std::vector<clocktime_t>& getDurations() const { return durations; }
 };
 
 } // namespace queueing
