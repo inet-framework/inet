@@ -590,7 +590,7 @@ def postconfigure_plot(props, debug=False):
                 plt.legend(**args)
         plt.tight_layout()
 
-def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order={}, debug=False):
+def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order=None, debug=False):
     """
     Adds 'additional_style' column to dataframe. The concent of this column is added to 'style' object when plotting.
     Can also specify row order in dataframe (e.g. for ordering items in legend).
@@ -666,7 +666,7 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order={}, deb
                         if debug: add_separator()
                         df['additional_style'][i] = str(orig_style_dict)                    # add to dataframe as string
             
-    if order:
+    if order is not None:
         # order the dataframe
         df['order'] = None
         
@@ -743,7 +743,7 @@ def quick_reorder_legend(handles, labels, order, **kwargs):
     print("quick_reorder_legend() deprecated, use create_custom_legend()\n")
     return handles, labels
 
-def create_custom_legend(style_tuple_list, order = [], labels = [], handles = [], inplace=True, debug=False, **kwargs):
+def create_custom_legend(props, style_tuple_list, order = None, labels = None, handles = None, inplace=True, debug=False, ax_list=None, **kwargs):
     """
     Can create multi-dimensional legend, where one aspect of a line (e.g. color) represents a dimension, another aspect (e.g. linestyle of solid, dashed or dotted) represents another dimension,
     as opposed to the default behavior, in which lines in the legend represent the lines on the chart directly. **TODO** not sure this explanation is needed
@@ -762,12 +762,29 @@ def create_custom_legend(style_tuple_list, order = [], labels = [], handles = []
     By default, does everything in-place (so it's not needed to call plt.legend() with the returned handles and labels).
     Returns legend handles and labels that can be supplied to plt.legend()
     """
+    
+    if order is None:
+        order = []
+        
+    if labels is None:
+        labels = []
+        
+    if handles is None:
+        handles = []
+        
+    if props is None:
+        props = {}
+        
+    if ax_list is None:
+        ax_list = []
 
-    if debug: print("style_tuple_list", style_tuple_list)
+    if debug: 
+        print("style_tuple_list", style_tuple_list)
+        print("labels", labels, "handles", handles)
     for i in style_tuple_list:
         if debug: print("i", i)
         labels.append(i[0])
-        if debug: print("i[1]", i[1])
+        if debug: print("i[0]", i[0], "i[1]", i[1])
         handles.append(Line2D([0], [0], **i[1]))
     if debug:
         print("labels", labels)
@@ -775,9 +792,17 @@ def create_custom_legend(style_tuple_list, order = [], labels = [], handles = []
         
     if order == []:
         legendsize = len(handles)
+        if debug: print("legendsize", legendsize)
         order = [*range(0, legendsize)]
+        if debug: print("order:", order)
     if inplace:
-        plt.legend([handles[i] for i in order], [labels[i] for i in order], **kwargs)
+        if 'plot_vectors_separate_grouped' in props.values():
+            if debug: print("plot function is plot_vectors_separate_grouped")
+            assert len(ax_list) > 0, "error: specify ax_list"
+            for ax in ax_list:
+                ax.legend([handles[i] for i in order], [labels[i] for i in order], **kwargs)
+        else:
+            plt.legend([handles[i] for i in order], [labels[i] for i in order], **kwargs)
     return handles, labels
             
 def annotate_barchart(ax, offset=0, color='white', size=12, zorder=10, prefix='', postfix='', accuracy=2, outliers=None, result_type='float', debug=False):
@@ -830,7 +855,7 @@ def annotate_barchart(ax, offset=0, color='white', size=12, zorder=10, prefix=''
             horizontalalignment='center', verticalalignment='top', color=color, size=size,
             zorder=zorder)
                     
-def plot_bars(df, errors_df=None, meta_df=None, props={}, order=None, zorder=None, rename=None, override_width=None, debug=False):
+def plot_bars(df, errors_df=None, meta_df=None, props=None, order=None, zorder=None, rename=None, override_width=None, debug=False):
     """
     Modified version of the built-in plot_bars() function.
     The bars can be reordered with the optional 'order' argument. Also, can specify a z-order value, and rename bars with 'rename'.
@@ -877,6 +902,9 @@ def plot_bars(df, errors_df=None, meta_df=None, props={}, order=None, zorder=Non
         - `cycle_seed`: Alters the sequence in which colors are assigned to series.
     """
     p = ideplot if ideplot.is_native_plot() else plt
+    
+    if props is None:
+        props = {}
 
     def get_prop(k):
         return props[k] if k in props else None
