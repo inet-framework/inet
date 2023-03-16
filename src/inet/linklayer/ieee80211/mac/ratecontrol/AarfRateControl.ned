@@ -11,7 +11,7 @@ import inet.linklayer.ieee80211.mac.contract.IRateControl;
 
 //
 // Implements the Adaptive ARF (AARF) rate control mechanism, which was
-// initially described in IEEE 802.11 Rate Adaptation: A Practical Approach, 
+// initially described in IEEE 802.11 Rate Adaptation: A Practical Approach,
 // by M. Lacage, M.H. Manshaei, and T. Turletti, 2004.
 //
 simple AarfRateControl like IRateControl

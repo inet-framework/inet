@@ -62,7 +62,7 @@ T *getModuleSomewhereUp(const char *name, const cModule *from)
         throw cRuntimeError("Module '%s' can not cast to '%s'", mod->getFullPath().c_str(), opp_typename(typeid(T)));
     return m;
 }
-    
+
 /**
  * Finds a module in the module tree, given by its absolute or relative path
  * defined by 'par' parameter.

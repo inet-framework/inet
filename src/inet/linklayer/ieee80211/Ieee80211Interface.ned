@@ -28,7 +28,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 // numerous subcomponents. Most subcomponents are replaceable to facilitate
 // experimentation by using typename assignments in the configuration.
 //
-// The default radio is ~Ieee80211ScalarRadio, but it can be replaced 
+// The default radio is ~Ieee80211ScalarRadio, but it can be replaced
 // with any of several compatible radio types using typename assignments
 // in the configuration. Several radio models of varying levels of detail
 // are available, from simple unit disk radio models to layered radio models
@@ -40,7 +40,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 // The type of the management submodule is also configurable. The type of this
 // submodule decides whether the interfaces acts an AP, a STA, or is in ad hoc mode.
 // Use ~Ieee80211MgmtSta or ~Ieee80211MgmtStaSimplified for STA,
-// ~Ieee80211MgmtAp or ~Ieee80211MgmtApSimplified for AP, and 
+// ~Ieee80211MgmtAp or ~Ieee80211MgmtApSimplified for AP, and
 // ~Ieee80211MgmtAdhoc for ad hoc mode.
 //
 // The agent submodule is responsible for initiating the process of connecting

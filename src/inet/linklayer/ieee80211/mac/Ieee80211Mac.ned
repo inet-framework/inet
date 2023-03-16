@@ -33,7 +33,7 @@ import inet.linklayer.ieee80211.mac.contract.ITx;
 // - Support for 802.11a/b/g/e/p, as well as partial/incomplete support for
 //   later WiFi standards such as n and ac.
 //
-// - Implements DCF and HCF channel access, including support for QoS (EDCA). 
+// - Implements DCF and HCF channel access, including support for QoS (EDCA).
 //
 // - Support for both infrastructure mode and ad hoc mode operation.
 //
@@ -53,7 +53,7 @@ import inet.linklayer.ieee80211.mac.contract.ITx;
 //
 // - Support for energy consumption modeling.
 //
-// The IEEE 802.11 header is represented by ~Ieee80211MacHeader and its 
+// The IEEE 802.11 header is represented by ~Ieee80211MacHeader and its
 // subclasses.
 //
 // Note about the implementation:
@@ -68,9 +68,9 @@ import inet.linklayer.ieee80211.mac.contract.ITx;
 // - PCF is missing
 // - HCCA is currently not implemented. (The module exists, but it is
 //   currently a placeholder.)
-// - Fields related to unsupported features are omitted from frame formats 
+// - Fields related to unsupported features are omitted from frame formats
 //   as well (for example, FH/DS/CF parameter sets, beacon/probe timestamp
-//   which is related to physical layer synchronization, listen interval 
+//   which is related to physical layer synchronization, listen interval
 //   which is related to power management, capability information
 //   which is related to PCF and other non-modeled features).
 //

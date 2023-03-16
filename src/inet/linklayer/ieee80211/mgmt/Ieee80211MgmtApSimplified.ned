@@ -10,7 +10,7 @@ package inet.linklayer.ieee80211.mgmt;
 //
 // Used in 802.11 infrastructure mode in an access point (AP).
 //
-// This management module variant does not send or expect to receive any 
+// This management module variant does not send or expect to receive any
 // management frames -- it simply treats all stations as associated all the time.
 //
 simple Ieee80211MgmtApSimplified like IIeee80211Mgmt

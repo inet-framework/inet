@@ -10,8 +10,8 @@ package inet.linklayer.ieee80211.mgmt;
 //
 // Used in 802.11 infrastructure mode: handles management frames for a station (STA).
 //
-// This module accepts commands such as Scan, Authenticate, Deauthenticate, 
-// Associate, Reassociate, Deassociate from a connected agent module, and carries 
+// This module accepts commands such as Scan, Authenticate, Deauthenticate,
+// Associate, Reassociate, Deassociate from a connected agent module, and carries
 // out the requested action by sending/receiving management frames, switching
 // channels, etc.
 //

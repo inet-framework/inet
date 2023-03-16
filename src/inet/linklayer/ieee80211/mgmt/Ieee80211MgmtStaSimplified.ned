@@ -10,8 +10,8 @@ package inet.linklayer.ieee80211.mgmt;
 //
 // Used in 802.11 infrastructure mode for a station (STA).
 //
-// This management module variant does not implement scanning, nor does 
-// it send or expect to receive any management frames. It simply treats the 
+// This management module variant does not implement scanning, nor does
+// it send or expect to receive any management frames. It simply treats the
 // station as associated to the configured AP all the time.
 //
 simple Ieee80211MgmtStaSimplified like IIeee80211Mgmt

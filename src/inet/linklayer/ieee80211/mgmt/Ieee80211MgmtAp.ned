@@ -8,7 +8,7 @@
 package inet.linklayer.ieee80211.mgmt;
 
 //
-// Used in 802.11 infrastructure mode in an access point (AP). 
+// Used in 802.11 infrastructure mode in an access point (AP).
 //
 // This module expects ~Ieee80211MgmtSta modules to be resent in the stations.
 //

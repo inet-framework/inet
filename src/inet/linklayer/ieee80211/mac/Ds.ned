@@ -10,7 +10,7 @@ package inet.linklayer.ieee80211.mac;
 import inet.linklayer.ieee80211.mac.contract.IDs;
 
 //
-// Implements the DS (Distribution Service) for IEEE 802.11, which is 
+// Implements the DS (Distribution Service) for IEEE 802.11, which is
 // responsible for distributing correctly received frames to the higher
 // layer, to the wireless LAN, etc.
 //
