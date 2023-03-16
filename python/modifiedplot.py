@@ -288,7 +288,7 @@ def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_
             plt.suptitle(title)
         ax_list.append(ax)
 
-    p.ylabel(utils.make_chart_title(df, ["title"]))
+        p.ylabel(utils.make_chart_title(df, ["title"]))
     
     return ax_list
 
