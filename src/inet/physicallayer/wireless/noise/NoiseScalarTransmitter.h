@@ -46,5 +46,5 @@ class INET_API NoiseScalarTransmitter : public TransmitterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_NOISESCALARTRANSMITTER_H
+#endif
 

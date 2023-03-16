@@ -54,5 +54,5 @@ class INET_API LayeredSnir : public SnirBase
 
 } // namespace inet
 
-#endif // ifndef __INET_LAYEREDSNIR_H
+#endif
 

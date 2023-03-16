@@ -5,8 +5,8 @@
 //
 
 
-#ifndef __INET_GATECONTROLLIST_H_
-#define __INET_GATECONTROLLIST_H_
+#ifndef __INET_GATECONTROLLIST_H
+#define __INET_GATECONTROLLIST_H
 
 #include "inet/queueing/gate/PeriodicGate.h"
 
@@ -41,3 +41,4 @@ class INET_API GateControlList : public cSimpleModule
 } // namespace inet
 
 #endif
+
