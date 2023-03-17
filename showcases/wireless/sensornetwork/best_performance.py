@@ -7,14 +7,14 @@ def get_best_performing_dataframe_separately_packetreceived():
     and returns them in three separate dataframes for the three configurations"""
     
     # filter expressions for packetReceived:count for the three configurations
-    filter_expression_bmac = """type =~ scalar AND isfield =~ false AND runattr:configname =~ "StatisticBMac" AND module =~ "*.server.app[0]" AND name =~ packetReceived:count"""
-    filter_expression_xmac = """type =~ scalar AND isfield =~ false AND runattr:configname =~ "StatisticXMac" AND module =~ "*.server.app[0]" AND name =~ packetReceived:count"""
-    filter_expression_lmac = """type =~ scalar AND isfield =~ false AND runattr:configname =~ "StatisticLMac" AND module =~ "*.server.app[0]" AND name =~ packetReceived:count"""
+    filter_expression = """type =~ scalar AND isfield =~ false AND module =~ "*.server.app[0]" AND name =~ packetReceived:count"""
 
     # dataframes for packetReceived:count    
-    df_b = results.get_scalars(filter_expression_bmac, include_fields=False, include_attrs=True, include_runattrs=True, include_itervars=True)
-    df_x = results.get_scalars(filter_expression_xmac, include_fields=False, include_attrs=True, include_runattrs=True, include_itervars=True)
-    df_l = results.get_scalars(filter_expression_lmac, include_fields=False, include_attrs=True, include_runattrs=True, include_itervars=True)
+    df = results.get_scalars(filter_expression, include_fields=False, include_attrs=True, include_runattrs=True, include_itervars=True)
+    
+    df_b = df[df['configname'] == 'StatisticBMac']
+    df_x = df[df['configname'] == 'StatisticXMac']
+    df_l = df[df['configname'] == 'StatisticLMac']
     
     # average repetitions    
     df_b = df_b.groupby(['name','configname','module','iterationvars','inifile'], as_index=False).mean(numeric_only=True)
@@ -27,7 +27,7 @@ def get_best_performing_dataframe_separately_packetreceived():
     if debug:
         print("\ndf_l after averaging:\n-------------------",df_l)
     
-    # get index of the most received packets
+    # get index of the most received packetsB
     df_b_max_index = df_b[['value']].idxmax()
     df_x_max_index = df_x[['value']].idxmax()
     df_l_max_index = df_l[['value']].idxmax()
@@ -73,21 +73,23 @@ def merge_dataframes(*args):
 def sum_dataframe(df):
     """For summing per-module residualEnergyCapacity values"""
     
-    df_sum = df.groupby(['name','configname','iterationvars','inifile'], as_index=False).sum() 
+    df_sum = df.groupby(['name','configname','iterationvars','inifile'], as_index=False).sum(numeric_only=True) 
     return df_sum
 
 def get_power_for_each_module_dataframes():
     """Returns the per-module residualEnergyCapacity values for the three configurations in three separate dataframes."""
     
-    filter_expression = """* AND name =~ residualEnergyCapacity:last"""
+    filter_expression = """type =~ scalar AND isfield =~ false AND name =~ residualEnergyCapacity:last"""
     
-    filter_expression_bmac = """type =~ scalar AND isfield =~ false AND runattr:configname =~ "StatisticBMac" AND """ + filter_expression
-    filter_expression_xmac = """type =~ scalar AND isfield =~ false AND runattr:configname =~ "StatisticXMac" AND """ + filter_expression
-    filter_expression_lmac = """type =~ scalar AND isfield =~ false AND runattr:configname =~ "StatisticLMac" AND """ + filter_expression
     
-    df_b = results.get_scalars(filter_expression_bmac, include_fields=False, include_attrs=True, include_runattrs=True, include_itervars=True)
-    df_x = results.get_scalars(filter_expression_xmac, include_fields=False, include_attrs=True, include_runattrs=True, include_itervars=True)
-    df_l = results.get_scalars(filter_expression_lmac, include_fields=False, include_attrs=True, include_runattrs=True, include_itervars=True)
+    df = results.get_scalars(filter_expression, include_fields=False, include_attrs=True, include_runattrs=True, include_itervars=True)
+    
+    df_b = df[df['configname'] == 'StatisticBMac']
+    # print("DF_B", df_b)
+    df_x = df[df['configname'] == 'StatisticXMac']
+    # print("DF_X", df_x)
+    df_l = df[df['configname'] == 'StatisticLMac']
+    # print("DF_L", df_l)
     
     # average repetitions    
     df_b = df_b.groupby(['name','configname','module', 'iterationvars','inifile'], as_index=False).mean(numeric_only=True)
