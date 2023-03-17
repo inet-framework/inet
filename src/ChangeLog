@@ -1,17 +1,11 @@
 ====== inet-4.x ======
 
-2022-03-16
+2023-03-16
 
     Added folders
     =============
     inet/applications/ipapp
     inet/protocolelement/cutthrough
-
-    Removed folders
-    ===============
-    inet/applications/httptools
-    inet/applications/httptools/common
-    inet/applications/packetdrill
 
     Added modules
     =============
@@ -124,11 +118,6 @@
 
     Removed C++ classes
     ===================
-    applications/httptools/common/HttpBaseMessage
-    applications/httptools/common/HttpReplyMessage
-    applications/httptools/common/HttpRequestMessage
-    applications/httptools/common/HttpServerStatusUpdateMsg
-    applications/packetdrill/PacketDrillInfo
     linklayer/common/SimulationRunUniqueNumberGenerator
 
 2022-05-13  ------ inet-4.4.0 released ------
