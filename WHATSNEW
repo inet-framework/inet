@@ -1,13 +1,13 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-4.5 (Arp 2023) - Stable
-----------------------------
+INET-4.5 (April 2023) - Stable
+------------------------------
 
 This is a new minor stable release within the INET 4.x branch. The main feature
 of this release is the ability to concurrently run multiple simulations within
-the same process (requires OMNeT++ 7.0 preview version or layer), along with an
-extended Ethernet cut-through switching functionality.
+the same process (requires OMNeT++ 7.0 preview 2 or later), along with an extended
+Ethernet cut-through switching functionality.
 
 There are also a number of small improvements, and several bug fixes. Some changes
 are backward incompatible, so existing models may need to be updated. This version
@@ -19,51 +19,44 @@ file in the src folder.
 
 Notable backward incompatible changes are the following:
 
-1. Running simulations concurrently
-
-   INET has been changed to support running multiple simulations concurrently
-   within a single process. Previously this was not possible, partly because
-   OMNeT++ itself didn't support concurrent simulation execution, but also
-   because INET contained several global variables.
-
-   In order to provide this feature, global variables have been either eliminated,
-   or replaced with simulation shared variables, or marked with the 'const'
-   qualifier signifying that their values cannot be changed, or marked with the
-   'OPP_THREAD_LOCAL' macro to store their values separately for each thread.
-
-   This feature requires using OMNeT++ 7.0 preview version or later. For more
-   information, see https://omnetpp.org
-
-2. Ethernet cut-through switching
+1. Ethernet cut-through switching
 
    The Ethernet cut-through switching implementation has been extended to work
    with all TSN traffic filtering and TSN traffic shaping methods. Previously
    it was not possible to combine these features. For a packet that was forwarded
    using cut-through switching, the otherwise configured traffic shaping and
-   traffic filtering methods were completely bypassed.
+   traffic filtering methods in the switch were completely bypassed.
 
    The new implementation allows processing the incomplete packet in the switch
    while the packet buffer is being filled up by the incoming interface. All
    Ethernet headers are available and the packet length is known, so traffic
-   filtering and traffic shaping can take place as for store-and-forward packets.
+   filtering and traffic shaping can take place the same way it does for
+   store-and-forward packets.
 
    For more information, see the showcase at:
    https://inet.omnetpp.org/docs/showcases/tsn/cutthroughswitching/doc/index.html
 
-3. Clock model
+   This change doesn't require the modification of simulation models, but it may
+   significantly change the statistical results of simulations that use traffic
+   filtering or traffic shaping with cut-through switching.
+
+2. Clock model
 
    The RandomDriftOscillator module has been refactored to have a more useful
    parameterization. The module has an initial random drift rate parameter that
-   represents the inaccuracy of device production. Additionally, the module uses
-   a random walk process for an additional drift rate change that represents the
+   represents the inaccuracy of device production. Besides, the module uses a
+   random walk process for an additional drift rate change that represents the
    voltage and temperature dependent inaccuracy of the device.
 
-   The gPTP time synchronization change (described later) makes the RandomDriftOscillator
-   more useful than the previously widely used ConstantDriftOscillator because
-   time synchronization can now completely eliminate the effects of a constant
-   drift.
+   Please note that the gPTP time synchronization change (described later) makes
+   the RandomDriftOscillator module more useful than the previously widely used
+   ConstantDriftOscillator module because the first time synchronization can now
+   completely eliminate the effects of a constant drift.
 
-4. Time-Sensitive Networking
+   This change requires the modification of simulation models that use the
+   RandomDriftOscillator module because the parameterization has been changed.
+
+3. Time-Sensitive Networking
 
    The credit-based shaper has been changed to stop accumulating credits when the
    corresponding time-aware shaper (same traffic category) transmission gate is
@@ -72,8 +65,33 @@ Notable backward incompatible changes are the following:
 
    The time-aware shaper already provides an implicit guard band before each time
    a gate is closing according to the gate schedule. This guard band is defined
-   by the rule that says no packet is allowed to pass the gate unless the packet
+   by the following rule: no packet is allowed to pass the gate unless the packet
    can be transmitted completely before the gate closes.
+
+   This change doesn't require the modification of simulation models, but it may
+   significantly change the statistical results of simulations that use both the
+   credit-based shaper and the time-aware shaper for the same traffic category.
+
+4. Running simulations concurrently (experimental)
+
+   INET has been changed to support running multiple simulations concurrently
+   within a single process. Previously this was not possible, partly because
+   OMNeT++ itself didn't support concurrent simulation execution, but also
+   because INET contained several global variables. Please note that this is
+   an experimental feature in both OMNeT++ and INET.
+
+   In order to provide this feature, global variables have been either eliminated,
+   or replaced with simulation shared variables, or marked with the 'const'
+   qualifier signifying that their values cannot be changed, or marked with the
+   'OPP_THREAD_LOCAL' macro to store their values separately for each thread.
+
+   This change may require the modification of simulation models if they directly
+   access some of the modified global variables. Additionally, simulation models
+   that have their own global variables must be updated to support running
+   simulations concurrently.
+
+   This feature requires using OMNeT++ 7.0 preview 2 or later. For more information,
+   see the https://omnetpp.org/download/preview page.
 
 Notable backward compatible changes are the following:
 
@@ -89,19 +107,22 @@ Notable backward compatible changes are the following:
 
    The gPTP time synchronization protocol has been extended to also compensate
    for a drifting oscillator. Previously time synchronization only set the clock
-   time but it didn't account for the clock speed differences. This change can
-   result in a several orders of magnitude smaller maximum clock time difference
-   between the master and slave clocks over the period of two time synchronization
-   events.
+   time but it didn't account for the clock speed differences between the master
+   and the slave clock.
+
+   This change can result in an order of magnitude smaller maximum clock time
+   difference between the master and slave clocks over the period of two time
+   synchronization events.
 
 3. Queueing model
 
    The behavior of complex queueing models depends among others on the execution
    order of timers. Previously the scheduling priority for such timers were not
-   configurable, so the user could not control the order of execution. This
+   configurable, so the user could not control the order of their execution. This
    limitation could prevent getting the desired behavior from the combination
    of certain modules. For example, a packet server may need to wait for all
-   gates to open or close before using the scheduler to process the next packet.
+   gates to open or close before using the scheduler to process the next packet
+   at the same simulation time.
 
    Several queueing modules have been extended with additional parameters to
    control the scheduling priority of timers. This gives fine grained control
