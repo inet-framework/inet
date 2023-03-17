@@ -4614,7 +4614,7 @@ ax1, ax2 = modifiedplot.plot_vectors_separate_grouped(df, props, layout='horizon
 
 utils.postconfigure_plot(props)
 
-modifiedplot.fix_labels_for_subplots([ax1, ax2], props, 'horizontal')
+modifiedplot.fix_labels_for_subplots([ax1, ax2], props, 'horizontal', remove_ticks=False)
 
 ax1.legend(loc=1, ncol=4, handletextpad=0.1, columnspacing=0.1, markerscale=3)
 ax2.legend(loc=1, ncol=4, handletextpad=0.1, columnspacing=0.1, markerscale=3)
