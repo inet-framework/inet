@@ -17,6 +17,7 @@ the simulations (NED, ini and other files) and the web pages are in the
 
 Recently released showcases:
 
+- :doc:`Clock Drift showcase updated for the upcoming INET 4.5 version </showcases/tsn/timesynchronization/clockdrift/doc/index>`
 - :doc:`Several Time-Sensitive Networking showcases released </showcases/tsn/index>`
 - :doc:`emulation/videostreaming/doc/index`
 - :doc:`wireless/analogmodel/doc/index`
