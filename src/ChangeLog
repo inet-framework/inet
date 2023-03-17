@@ -1,5 +1,136 @@
 ====== inet-4.x ======
 
+2022-03-16
+
+    Added folders
+    =============
+    inet/applications/ipapp
+    inet/protocolelement/cutthrough
+
+    Removed folders
+    ===============
+    inet/applications/httptools
+    inet/applications/httptools/common
+    inet/applications/packetdrill
+
+    Added modules
+    =============
+    applications.ipapp.IpApp
+    applications.ipapp.IpSinkApp
+    applications.ipapp.IpSourceApp
+    linklayer.ethernet.modular.EthernetCutthroughBarrier
+    physicallayer.wireless.noise.NoiseScalarTransmitter
+    power.storage.CcBatteryPack
+    protocolelement.cutthrough.CutthroughSink
+    protocolelement.cutthrough.CutthroughSource
+    queueing.base.PacketDelayerBase
+    queueing.common.BackPressureBarrier
+    queueing.gate.GateControlList
+    queueing.sink.FullPacketSink
+
+    Added parameters
+    ================
+    CcBatteryPack:arrangement
+    CcBatteryPack:cellInternalResistance
+    CcBatteryPack:cellNominalCapacity
+    CcBatteryPack:cellNominalVoltage
+    CcBatteryPack:numberOfCells
+    ClockBase:emitClockTimeInterval
+    CutthroughSource:cutthroughPosition
+    EthernetCutthroughSource:cutthroughSwitchingHeaderSize
+    GateControlList:durations
+    GateControlList:gateStates
+    GateControlList:numGates
+    GateControlList:offset
+    ICtsPolicy:rateSelectionModule
+    ICtsPolicy:rxModule
+    IOriginatorAckPolicy:rateSelectionModule
+    IOriginatorBlockAckAgreementPolicy:originatorAckPolicyModule
+    IOriginatorQosAckPolicy:rateSelectionModule
+    IRecipientAckPolicy:rateSelectionModule
+    IRecipientQosAckPolicy:rateSelectionModule
+    IRtsPolicy:rateSelectionModule
+    Ieee80211OfdmDemodulator:numSubcarriers
+    Ieee80211OfdmErrorModel:symbolCorruptionMode
+    Ieee80211OfdmModulator:numSubcarriers
+    Ieee8021qTimeAwareShaper:hasGcl
+    InstantServer:serveSchedulingPriority
+    IpApp:interfaceTableModule
+    IpSocketIo:destAddress
+    IpSocketIo:interfaceTableModule
+    IpSocketIo:localAddress
+    IpSocketIo:protocol
+    IpSocketIo:stopOperationExtraTime
+    IpSocketIo:stopOperationTimeout
+    LayeredDimensionalAnalogModel:attenuateWithCenterFrequency
+    LayeredErrorModelBase:symbolCorruptionMode
+    LayeredEthernetInterface:mtu
+    NarrowbandTransmitterBase:codeRate
+    NoiseScalarTransmitter:bandwidth
+    NoiseScalarTransmitter:centerFrequency
+    NoiseScalarTransmitter:duration
+    NoiseScalarTransmitter:gainFunctionCacheLimit
+    NoiseScalarTransmitter:power
+    PacketDelayer:bitrate
+    PacketDelayerBase:scheduleZeroDelay
+    PacketDelayerBase:schedulingPriority
+    PacketDirectionReverser:excludeEncapsulationProtocols
+    PacketDirectionReverser:forwardPcp
+    PacketDirectionReverser:forwardVlan
+    PacketServer:serveSchedulingPriority
+    PacketSourceBase:packetProtocol
+    PacketTaggerBase:encapsulationProtocols
+    PassivePacketSink:initialConsumptionOffset
+    PassivePacketSource:initialProvidingOffset
+    PeriodicGate:closeSchedulingPriority
+    PeriodicGate:enableImplicitGuardBand
+    PeriodicGate:openSchedulingPriority
+    SimpleClockSynchronizer:synchronizationOscillatorCompensationError
+    StreamFilter:mode
+    TsnClock:hasCutthroughSwitching
+    VlanReqMapper:protocol
+
+    Moved parameters
+    ================
+    RandomDriftOscillator:driftRate -> RandomDriftOscillator:initialDriftRate
+    PacketDelayer:clockModule -> PacketDelayerBase:clockModule
+    SimpleClockSynchronizer:synchronizationAccuracy -> SimpleClockSynchronizer:synchronizationClockTimeError
+
+    Added tags
+    ==========
+    CutthroughTag
+
+    Added C++ classes
+    =================
+    applications/ipapp/IpSocketIo
+    common/packet/chunk/StreamBufferChunk
+    common/packet/serializer/StreamBufferChunkSerializer
+    linklayer/ethernet/modular/EthernetCutthroughBarrier
+    physicallayer/wireless/common/analogmodel/bitlevel/LayeredSnir
+    physicallayer/wireless/noise/NoiseScalarTransmitter
+    protocolelement/cutthrough/CutthroughSink
+    protocolelement/cutthrough/CutthroughSource
+    protocolelement/cutthrough/CutthroughTag
+    queueing/base/PacketDelayerBase
+    queueing/common/BackPressureBarrier
+    queueing/gate/GateControlList
+    queueing/sink/FullPacketSink
+
+    Moved C++ classes
+    =================
+    protocolelement/redundancy/SequenceNumberInd -> common/SequenceNumberInd
+    protocolelement/redundancy/SequenceNumberReq -> common/SequenceNumberReq
+    protocolelement/redundancy/SequenceNumberTagBase -> common/SequenceNumberTagBase
+
+    Removed C++ classes
+    ===================
+    applications/httptools/common/HttpBaseMessage
+    applications/httptools/common/HttpReplyMessage
+    applications/httptools/common/HttpRequestMessage
+    applications/httptools/common/HttpServerStatusUpdateMsg
+    applications/packetdrill/PacketDrillInfo
+    linklayer/common/SimulationRunUniqueNumberGenerator
+
 2022-05-13  ------ inet-4.4.0 released ------
 
 2022-04-25
