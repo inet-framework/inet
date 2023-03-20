@@ -14,6 +14,8 @@ namespace queueing {
 
 Define_Module(PeriodicGate);
 
+simsignal_t PeriodicGate::guardBandStateChangedSignal = registerSignal("guardBandStateChanged");
+
 void PeriodicGate::initialize(int stage)
 {
     ClockUserModuleMixin::initialize(stage);
@@ -26,9 +28,17 @@ void PeriodicGate::initialize(int stage)
         enableImplicitGuardBand = par("enableImplicitGuardBand");
         openSchedulingPriority = par("openSchedulingPriority");
         closeSchedulingPriority = par("closeSchedulingPriority");
+        WATCH(isInGuardBand_);
     }
     else if (stage == INITSTAGE_QUEUEING)
         initializeGating();
+    else if (stage == INITSTAGE_LAST)
+        emit(guardBandStateChangedSignal, isInGuardBand_);
+}
+
+void PeriodicGate::finish()
+{
+    emit(guardBandStateChangedSignal, isInGuardBand_);
 }
 
 void PeriodicGate::handleParameterChange(const char *name)
@@ -68,6 +78,18 @@ void PeriodicGate::readDurationsPar()
         durations[i] = duration;
         totalDuration += duration;
     }
+}
+
+void PeriodicGate::open()
+{
+    PacketGateBase::open();
+    updateIsInGuardBand();
+}
+
+void PeriodicGate::close()
+{
+    PacketGateBase::close();
+    updateIsInGuardBand();
 }
 
 void PeriodicGate::initializeGating()
@@ -128,6 +150,31 @@ bool PeriodicGate::canPacketFlowThrough(Packet *packet) const
         else
             return PacketGateBase::canPacketFlowThrough(packet);
     }
+}
+
+void PeriodicGate::updateIsInGuardBand()
+{
+    bool newIsInGuardBand = false;
+    if (isOpen_) {
+        auto packet = provider != nullptr ? provider->canPullPacket(inputGate->getPathStartGate()) : nullptr;
+        newIsInGuardBand = packet != nullptr && !canPacketFlowThrough(packet);
+    }
+    if (isInGuardBand_ != newIsInGuardBand) {
+        isInGuardBand_ = newIsInGuardBand;
+        emit(guardBandStateChangedSignal, isInGuardBand_);
+    }
+}
+
+void PeriodicGate::handleCanPushPacketChanged(cGate *gate)
+{
+    PacketGateBase::handleCanPushPacketChanged(gate);
+    updateIsInGuardBand();
+}
+
+void PeriodicGate::handleCanPullPacketChanged(cGate *gate)
+{
+    PacketGateBase::handleCanPullPacketChanged(gate);
+    updateIsInGuardBand();
 }
 
 } // namespace queueing

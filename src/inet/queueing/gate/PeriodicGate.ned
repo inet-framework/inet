@@ -27,4 +27,6 @@ simple PeriodicGate extends PacketGateBase like IPacketGate
         int closeSchedulingPriority = default(0); // FES scheduling priority for the next gate close event
         bool enableImplicitGuardBand = default(true); // implicit guard band means that a packet is not allowed to be forwarded if it cannot finish transmission before the end of window.
         @class(PeriodicGate);
+        @signal[guardBandStateChanged](type=bool);
+        @statistic[guardBandState](title="guard band state"; type=enum; enum=ON, OFF; source=guardBandStateChanged; record=vector; interpolationmode=sample-hold);
 }
