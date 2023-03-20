@@ -39,6 +39,7 @@ network TestServer
 network = TestServer
 sim-time-limit = 10s
 cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
 *.numProducers = 3
 *.producer[*].packetLength = 1B
 *.producer[*].productionInterval = uniform(0s, 2s)

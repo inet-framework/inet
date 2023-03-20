@@ -79,6 +79,7 @@ network TestNetwork
 network = TestNetwork
 sim-time-limit = 10s
 cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
 *.*.sourceApplication.packetLength = 1B
 *.*.sourceApplication.productionInterval = uniform(0s, 2s)
 *.*.mac.server.processingTime = uniform(0s, 2s)

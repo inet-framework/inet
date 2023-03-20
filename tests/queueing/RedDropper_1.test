@@ -37,6 +37,7 @@ network TestRedDropper
 network = TestRedDropper
 sim-time-limit = 100s
 cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
 *.producer.packetLength = 1B
 *.producer.productionInterval = exponential(1s)
 *.dropper.minth = 1

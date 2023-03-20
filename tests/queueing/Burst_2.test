@@ -39,6 +39,7 @@ network TestBurst
 network = TestBurst
 sim-time-limit = 100s
 cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
 *.provider.packetLength = 1B
 *.collector1.collectionInterval = uniform(0s, 20s)
 *.collector2.collectionInterval = uniform(0s, 2s)

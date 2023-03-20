@@ -34,6 +34,7 @@ network TestFilter
 network = TestFilter
 sim-time-limit = 10s
 cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
 *.producer.packetLength = intuniform(1B, 2B)
 *.producer.productionInterval = 1s
 *.filter.packetFilter = expr(totalLength == 1B)

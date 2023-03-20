@@ -55,6 +55,7 @@ Register_Packet_Scheduler_Function(TestScheduler, testSchedule);
 network = TestScheduler
 sim-time-limit = 10s
 cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
 *.provider*.packetLength = 1B
 *.collector.collectionInterval = 1s
 *.scheduler.schedulerClass = "TestScheduler"

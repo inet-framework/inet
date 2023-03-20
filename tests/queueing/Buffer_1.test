@@ -54,6 +54,7 @@ network TestBufferNetwork
 network = TestBufferNetwork
 sim-time-limit = 10s
 cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
 *.buffer.dropperClass = "inet::queueing::PacketAtCollectionBeginDropper"
 *.producer*.packetLength = 1B
 *.producer*.productionInterval = uniform(0s, 1s)

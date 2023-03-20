@@ -31,6 +31,7 @@ network TestQueueFiller
 network = TestQueueFiller
 sim-time-limit = 10s
 cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
 *.filler.provider.packetLength = 1B
 *.filler.tokenGenerator.queueModule = "queue"
 *.consumer.collectionInterval = 1s

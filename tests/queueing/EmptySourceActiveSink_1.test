@@ -26,6 +26,7 @@ network TestSourceSink
 network = TestSourceSink
 sim-time-limit = 10s
 cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
 *.sink.collectionInterval = 1s
 
 %not-contains: stdout

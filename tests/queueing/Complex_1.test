@@ -66,6 +66,7 @@ network BiggerPacketNetwork
 network = BiggerPacketNetwork
 sim-time-limit = 1s
 cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
 *.biggerPacketSource.level = 4
 **.serveSchedulingPriority = 0
 **.packetLength = intuniform(100B, 1000B)

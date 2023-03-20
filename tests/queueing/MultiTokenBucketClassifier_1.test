@@ -38,7 +38,7 @@ network TestTokenBucket
 [General]
 network = TestTokenBucket
 sim-time-limit = 10s
-cmdenv-log-prefix = "%M: "
+cmdenv-log-prefix = "At %ts %N: "
 cmdenv-event-banners = false
 *.producer.packetLength = 1B
 *.producer.productionInterval = exponential(1s)

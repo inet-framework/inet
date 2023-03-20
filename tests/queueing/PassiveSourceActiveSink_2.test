@@ -28,6 +28,7 @@ network TestProviderCollector
 network = TestProviderCollector
 sim-time-limit = 10s
 cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
 *.provider.packetLength = 1B
 *.provider.initialProvidingOffset = 11s
 *.collector.collectionInterval = 1s

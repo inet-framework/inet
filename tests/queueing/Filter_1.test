@@ -47,6 +47,7 @@ Register_Packet_Filter_Function(TestFilter, testFilter);
 network = TestFilter
 sim-time-limit = 10s
 cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
 *.producer.packetLength = 1B
 *.producer.productionInterval = 1s
 *.filter.filterClass = "TestFilter"

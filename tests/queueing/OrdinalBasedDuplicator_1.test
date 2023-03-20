@@ -34,6 +34,7 @@ network TestOrdinalBasedDuplicator
 network = TestOrdinalBasedDuplicator
 sim-time-limit = 10s
 cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
 *.producer.packetLength = 1B
 *.producer.productionInterval = 1s
 *.duplicator.duplicatesVector = "0; 2; 4; 6; 8; 10"

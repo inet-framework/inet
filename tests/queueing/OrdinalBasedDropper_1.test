@@ -34,6 +34,7 @@ network TestOrdinalBasedDropper
 network = TestOrdinalBasedDropper
 sim-time-limit = 10s
 cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
 *.producer.packetLength = 1B
 *.producer.productionInterval = 1s
 *.dropper.dropsVector = "0; 2; 4; 6; 8; 10"

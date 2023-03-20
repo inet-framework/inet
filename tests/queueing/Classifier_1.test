@@ -52,6 +52,7 @@ Register_Packet_Classifier_Function(TestClassifier, testClassify);
 network = TestClassifier
 sim-time-limit = 10s
 cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
 *.producer.packetLength = 1B
 *.producer.productionInterval = 1s
 *.classifier.classifierClass = "TestClassifier"

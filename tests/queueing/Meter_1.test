@@ -38,6 +38,7 @@ network TestMeter
 network = TestMeter
 sim-time-limit = 100s
 cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
 *.producer.packetLength = 1B
 *.producer.productionInterval = 1s
 *.meter.alpha = 0.9
