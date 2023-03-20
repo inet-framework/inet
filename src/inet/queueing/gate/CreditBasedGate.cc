@@ -70,11 +70,9 @@ void CreditBasedGate::handleMessage(cMessage *message)
         setCurrentCredit(transmitCreditLimit);
         // 2. notify listeners and update lastCurrentCreditEmitted
         emitCurrentCredit();
-        // 3. open/close gate and allow consumer to pull packet if necessary
-        processChangeTimer();
-        // 4. update currentCreditGainRate to know the slope when the timer is rescheduled
+        // 3. update currentCreditGainRate to know the slope when the timer is rescheduled
         updateCurrentCreditGainRate();
-        // 5. reschedule change timer based on currentCredit and currentCreditGainRate
+        // 4. reschedule change timer based on currentCredit and currentCreditGainRate
         scheduleChangeTimer();
     }
     else
@@ -102,12 +100,13 @@ void CreditBasedGate::scheduleChangeTimer()
     if (currentCreditGainRate == 0)
         cancelEvent(changeTimer);
     else {
-        double changeTime = (transmitCreditLimit - currentCredit) / currentCreditGainRate;
-        if (changeTime < 0)
+        simtime_t now = simTime();
+        simtime_t changeTime = now + (transmitCreditLimit - currentCredit) / currentCreditGainRate;
+        EV_TRACE << "Scheduling change timer to " << changeTime << std::endl;
+        if (changeTime <= now)
             cancelEvent(changeTimer);
-        else if (changeTime > 0 || (isOpen_ ? currentCreditGainRate < 0 : currentCreditGainRate > 0))
-            // NOTE: schedule for future or for now if credit change direction and gate state requires
-            rescheduleAfter(changeTime, changeTimer);
+        else
+            rescheduleAt(changeTime, changeTimer);
     }
 }
 
@@ -117,18 +116,18 @@ void CreditBasedGate::processPacket(Packet *packet)
     packet->addTag<CreditGateTag>()->setId(getId());
 }
 
-void CreditBasedGate::processChangeTimer()
-{
-    if (isOpen_)
-        close();
-    else
-        open();
-}
-
 void CreditBasedGate::setCurrentCredit(double value)
 {
     EV_TRACE << "Setting currentCredit to " << value << std::endl;
     currentCredit = value;
+    if (currentCredit >= transmitCreditLimit) {
+        if (isClosed())
+            open();
+    }
+    else {
+        if (isOpen())
+            close();
+    }
 }
 
 void CreditBasedGate::updateCurrentCredit()

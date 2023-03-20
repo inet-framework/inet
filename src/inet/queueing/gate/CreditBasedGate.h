@@ -58,7 +58,6 @@ class INET_API CreditBasedGate : public PacketGateBase, public cListener
     virtual void updateCurrentCreditGainRate();
 
     virtual void scheduleChangeTimer();
-    virtual void processChangeTimer();
 
   public:
     virtual ~CreditBasedGate() { cancelAndDelete(changeTimer); }
