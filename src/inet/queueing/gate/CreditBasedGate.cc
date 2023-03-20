@@ -33,8 +33,8 @@ void CreditBasedGate::initialize(int stage)
         maxCredit = par("maxCredit");
         accumulateCreditInGuardBand = par("accumulateCreditInGuardBand");
         displayStringTextFormat = par("displayStringTextFormat");
-        currentCredit = par("initialCredit");
-        currentCreditGainRate = idleCreditGainRate;
+        setCurrentCredit(par("initialCredit"));
+        setCurrentCreditGainRate(idleCreditGainRate);
         lastCurrentCreditEmitted = currentCredit;
         lastCurrentCreditEmittedTime = simTime();
         isOpen_ = currentCredit >= transmitCreditLimit;
@@ -67,7 +67,7 @@ void CreditBasedGate::handleMessage(cMessage *message)
 {
     if (message == changeTimer) {
         // 1. timer is executed when currentCredit reaches transmitCreditLimit with currentCreditGainRate
-        currentCredit = transmitCreditLimit;
+        setCurrentCredit(transmitCreditLimit);
         // 2. notify listeners and update lastCurrentCreditEmitted
         emitCurrentCredit();
         // 3. open/close gate and allow consumer to pull packet if necessary
@@ -125,10 +125,17 @@ void CreditBasedGate::processChangeTimer()
         open();
 }
 
+void CreditBasedGate::setCurrentCredit(double value)
+{
+    EV_TRACE << "Setting currentCredit to " << value << std::endl;
+    currentCredit = value;
+}
+
 void CreditBasedGate::updateCurrentCredit()
 {
-    currentCredit = lastCurrentCreditEmitted + currentCreditGainRate * (simTime() - lastCurrentCreditEmittedTime).dbl();
-    currentCredit = std::max(minCredit, std::min(maxCredit, currentCredit));
+    double value = lastCurrentCreditEmitted + currentCreditGainRate * (simTime() - lastCurrentCreditEmittedTime).dbl();
+    value = std::max(minCredit, std::min(maxCredit, value));
+    setCurrentCredit(value);
 }
 
 void CreditBasedGate::emitCurrentCredit()
@@ -141,16 +148,22 @@ void CreditBasedGate::emitCurrentCredit()
     }
 }
 
+void CreditBasedGate::setCurrentCreditGainRate(double value)
+{
+    EV_TRACE << "Setting currentCreditGainRate to " << currentCreditGainRate << std::endl;
+    currentCreditGainRate = value;
+}
+
 void CreditBasedGate::updateCurrentCreditGainRate()
 {
     if (isTransmitting || isInterpacketGap)
-        currentCreditGainRate = -transmitCreditSpendRate;
+        setCurrentCreditGainRate(-transmitCreditSpendRate);
     else if (periodicGate != nullptr && (periodicGate->isClosed() || (!accumulateCreditInGuardBand && periodicGate->isInGuardBand())))
-        currentCreditGainRate = 0;
+        setCurrentCreditGainRate(0);
     else if (currentCredit < 0 || hasAvailablePacket())
-        currentCreditGainRate = idleCreditGainRate;
+        setCurrentCreditGainRate(idleCreditGainRate);
     else
-        currentCreditGainRate = 0;
+        setCurrentCreditGainRate(0);
 }
 
 void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, bool value, cObject *details)
@@ -176,7 +189,7 @@ void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, d
             isInterpacketGap = false;
             // 1. immediately set currentCredit to 0 if there are no packets to transmit
             if (!hasAvailablePacket())
-                currentCredit = std::min(transmitCreditLimit, currentCredit);
+                setCurrentCredit(std::min(transmitCreditLimit, currentCredit));
             // 2. update currentCreditGainRate and notify listeners about currentCredit change
             updateCurrentCredit();
             updateCurrentCreditGainRate();
