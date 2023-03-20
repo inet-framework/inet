@@ -20,8 +20,6 @@ cd $GITHUB_WORKSPACE
 
 . setenv -f
 
-cp -r /root/nsc-0.5.3 3rdparty
-
 echo "::group::Run feature tests"
 cd tests/features
 ./featuretest | tee featuretest.out

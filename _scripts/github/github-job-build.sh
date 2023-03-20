@@ -28,8 +28,6 @@ cd $GITHUB_WORKSPACE
 
 . setenv -f
 
-cp -r /root/nsc-0.5.3 3rdparty
-
 echo "::group::Enable all features"
 opp_featuretool enable all 2>&1 # redirecting stderr so it doesn't get out of sync with stdout
 echo "::endgroup::"

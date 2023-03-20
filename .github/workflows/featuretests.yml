@@ -19,12 +19,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Pull Docker image
-        run: docker pull omnetpp/travis-inet:6.0-220428
+        run: docker pull ghcr.io/inet-framework/ci-inet:6.0.1-230320
       - name: Feature tests (split)
         run: |
           docker run -i --env SKIPPED_FEATURES="" --env SPLIT_INDEX=${{ matrix.node-index }} --env SPLIT_TOTAL=${{ matrix.node-total }} \
             --env GITHUB_WORKSPACE -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE \
-            omnetpp/travis-inet:6.0-220428 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-featuretests.sh
+            ghcr.io/inet-framework/ci-inet:6.0.1-230320 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-featuretests.sh
       - uses: actions/upload-artifact@v3
         if: always() # even if the test failed, of course
         with:
