@@ -32,7 +32,6 @@ void CreditBasedGate::initialize(int stage)
         minCredit = par("minCredit");
         maxCredit = par("maxCredit");
         accumulateCreditInGuardBand = par("accumulateCreditInGuardBand");
-        displayStringTextFormat = par("displayStringTextFormat");
         setCurrentCredit(par("initialCredit"));
         setCurrentCreditGainRate(idleCreditGainRate);
         lastCurrentCreditEmitted = currentCredit;
