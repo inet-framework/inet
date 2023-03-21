@@ -54,9 +54,7 @@ void CreditBasedGate::initialize(int stage)
         WATCH(currentCreditGainRate);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        updateCurrentCredit();
-        updateCurrentCreditGainRate();
-        emitCurrentCredit();
+        updateCurrentState();
         scheduleChangeTimer();
     }
     else if (stage == INITSTAGE_LAST)
@@ -81,9 +79,7 @@ void CreditBasedGate::handleMessage(cMessage *message)
 
 void CreditBasedGate::finish()
 {
-    updateCurrentCredit();
-    updateCurrentCreditGainRate();
-    emitCurrentCredit();
+    updateCurrentState();
 }
 
 void CreditBasedGate::refreshDisplay() const
@@ -114,6 +110,13 @@ void CreditBasedGate::processPacket(Packet *packet)
 {
     PacketGateBase::processPacket(packet);
     packet->addTag<CreditGateTag>()->setId(getId());
+}
+
+void CreditBasedGate::updateCurrentState()
+{
+    updateCurrentCredit();
+    updateCurrentCreditGainRate();
+    emitCurrentCredit();
 }
 
 void CreditBasedGate::setCurrentCredit(double value)
@@ -170,9 +173,7 @@ void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, b
     Enter_Method("%s", cComponent::getSignalName(simsignal));
     if (simsignal == gateStateChangedSignal || simsignal == PeriodicGate::guardBandStateChangedSignal) {
         // 1. update currentCreditGainRate and notify listeners about currentCredit change
-        updateCurrentCredit();
-        updateCurrentCreditGainRate();
-        emitCurrentCredit();
+        updateCurrentState();
         // 2. reschedule change timer when currentCredit reaches transmitCreditLimit
         scheduleChangeTimer();
     }
@@ -190,9 +191,7 @@ void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, d
             if (!hasAvailablePacket())
                 setCurrentCredit(std::min(transmitCreditLimit, currentCredit));
             // 2. update currentCreditGainRate and notify listeners about currentCredit change
-            updateCurrentCredit();
-            updateCurrentCreditGainRate();
-            emitCurrentCredit();
+            updateCurrentState();
             // 3. reschedule change timer when currentCredit reaches transmitCreditLimit
             scheduleChangeTimer();
         }
@@ -211,9 +210,7 @@ void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, c
         auto creditGateTag = packet->findTag<CreditGateTag>();
         if (creditGateTag != nullptr && creditGateTag->getId() == getId()) {
             // 1. update currentCredit and currentCreditGainRate because some time may have elapsed
-            updateCurrentCredit();
-            updateCurrentCreditGainRate();
-            emitCurrentCredit();
+            updateCurrentState();
             // 2. update transmitting state
             if (simsignal == transmissionStartedSignal)
                 isTransmitting = true;
@@ -224,9 +221,7 @@ void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, c
             else
                 throw cRuntimeError("Unknown signal");
             // 3. update currentCreditGainRate and notify listeners about currentCredit change
-            updateCurrentCredit();
-            updateCurrentCreditGainRate();
-            emitCurrentCredit();
+            updateCurrentState();
             // 4. reschedule change timer when currentCredit reaches transmitCreditLimit
             scheduleChangeTimer();
         }
@@ -240,11 +235,9 @@ void CreditBasedGate::handleCanPullPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     // 1. update currentCredit and currentCreditGainRate
-    updateCurrentCredit();
-    updateCurrentCreditGainRate();
     // 2. notify listeners about currentCredit change
-    emitCurrentCredit();
     // 3. reschedule change timer when currentCredit reaches transmitCreditLimit
+    updateCurrentState();
     scheduleChangeTimer();
     PacketGateBase::handleCanPullPacketChanged(gate);
 }
