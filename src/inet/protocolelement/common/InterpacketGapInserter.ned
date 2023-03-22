@@ -20,6 +20,7 @@ simple InterpacketGapInserter extends PacketProcessorBase
         @class(InterpacketGapInserter);
         @signal[interpacketGapStarted](type=double);
         @signal[interpacketGapEnded](type=double);
+        @statistic[interpacketGap](title="interpacket gap state"; type=int; source=count(interpacketGapStarted) - count(interpacketGapEnded); record=vector; interpolationmode=sample-hold);
     gates:
         input in;
         output out;

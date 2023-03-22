@@ -51,7 +51,7 @@ void InterpacketGapInserter::handleMessage(cMessage *message)
 {
     if (message->isSelfMessage()) {
         if (message == timer) {
-            emit(interpacketGapEndedSignal, NaN);
+            emit(interpacketGapEndedSignal, 0.0);
             if (canPushSomePacket(inputGate))
                 if (producer != nullptr)
                     producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
