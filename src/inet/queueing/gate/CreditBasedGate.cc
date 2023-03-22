@@ -122,15 +122,17 @@ void CreditBasedGate::updateCurrentState()
 
 void CreditBasedGate::setCurrentCredit(double value)
 {
-    EV_TRACE << "Setting currentCredit to " << value << std::endl;
-    currentCredit = value;
-    if (currentCredit >= transmitCreditLimit) {
-        if (isClosed())
-            open();
-    }
-    else {
-        if (isOpen())
-            close();
+    if (currentCredit != value) {
+        EV_TRACE << "Setting currentCredit to " << value << std::endl;
+        currentCredit = value;
+        if (currentCredit >= transmitCreditLimit) {
+            if (isClosed())
+                open();
+        }
+        else {
+            if (isOpen())
+                close();
+        }
     }
 }
 
@@ -153,8 +155,10 @@ void CreditBasedGate::emitCurrentCredit()
 
 void CreditBasedGate::setCurrentCreditGainRate(double value)
 {
-    EV_TRACE << "Setting currentCreditGainRate to " << currentCreditGainRate << std::endl;
-    currentCreditGainRate = value;
+    if (currentCreditGainRate != value) {
+        EV_TRACE << "Setting currentCreditGainRate to " << currentCreditGainRate << std::endl;
+        currentCreditGainRate = value;
+    }
 }
 
 void CreditBasedGate::updateCurrentCreditGainRate()
