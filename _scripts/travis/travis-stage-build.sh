@@ -14,7 +14,7 @@ set -e # make the script exit with error if any executed command exits with erro
 
 ccache -cCz # we don't use ccache across builds, only across stages within each build
 
-export PATH="/root/omnetpp-6.0pre9-$TARGET_PLATFORM/bin:/usr/lib/ccache:$PATH"
+export PATH="/usr/lib/ccache:$PATH"
 
 # this is where the cloned INET repo is mounted into the container (as prescribed in /.travis.yml)
 cd /$TRAVIS_REPO_SLUG
@@ -44,7 +44,7 @@ else
     #   (and leaving it enabled messes up the include paths)
     # - ExternalInterface is only supported on Linux
     # - lwIP and NSC does not seem to compile on at least Windows, oh well...
-    opp_featuretool disable VoipStream VoipStreamExamples NetworkEmulationSupport NetworkEmulationExamples NetworkEmulationShowcases TcpLwip TcpNsc
+    opp_featuretool disable VoipStream VoipStreamExamples NetworkEmulationSupport NetworkEmulationExamples NetworkEmulationShowcases TcpLwip
 
     # When compiling to windows, we have to force-enable precompiled headers, otherwise the
     # debug builds take too long, sometimes exceeding 50 minutes.
