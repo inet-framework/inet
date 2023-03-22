@@ -71,7 +71,7 @@ def compute_tsn_framereplication_validation_test_results(test_accuracy=0.01, **k
     pa2 = compute_frame_replication_success_rate_analytically2()
     test_result1 = compare_test_results(ps, pa1, test_accuracy)
     test_result2 = compare_test_results(ps, pa2, test_accuracy)
-    return TestTaskResult(None, bool_result=test_result1 and test_result2)
+    return TestTaskResult(task=TestTask(), bool_result=test_result1 and test_result2)
 
 def get_tsn_framereplication_simulation_test_task(**kwargs):
     simulation_task = get_simulation_tasks(inet_project, working_directory_filter="tests/validation/tsn/framereplication", sim_time_limit="0.1s", **kwargs).tasks[0]
@@ -111,7 +111,7 @@ def compute_tsn_trafficshaping_asynchronousshaper_icct_validation_test_results(*
     df1 = compute_asynchronousshaper_icct_endtoend_delay_from_simulation_results(**kwargs)
     df2 = compute_asynchronousshaper_icct_endtoend_delay_alternatively()
     test_result = (df1["max"] < df2["max"]).all()
-    return TestTaskResult(None, bool_result=test_result)
+    return TestTaskResult(task=TestTask(), bool_result=test_result)
 
 def get_tsn_trafficshaping_asynchronousshaper_icct_simulation_test_task(**kwargs):
     simulation_task = get_simulation_tasks(inet_project, working_directory_filter="tests/validation/tsn/trafficshaping/asynchronousshaper/icct", sim_time_limit="0.1s", **kwargs).tasks[0]
@@ -170,7 +170,7 @@ def compute_tsn_trafficshaping_asynchronousshaper_core4inet_validation_test_resu
                   numpy.allclose(df1["max"], df2["max"], rtol=test_accuracy, atol=0) and \
                   numpy.allclose(df1["mean"], df2["mean"], rtol=test_accuracy * 7, atol=0) and \
                   numpy.allclose(df1["stddev"], df2["stddev"], rtol=test_accuracy * 30, atol=0)
-    return TestTaskResult(None, bool_result=test_result)
+    return TestTaskResult(task=TestTask(), bool_result=test_result)
 
 def get_tsn_trafficshaping_asynchronousshaper_core4inet_validation_test_task(**kwargs):
     simulation_task = get_simulation_tasks(inet_project, working_directory_filter="tests/validation/tsn/trafficshaping/asynchronousshaper/core4inet", sim_time_limit="1s", **kwargs).tasks[0]
@@ -229,7 +229,7 @@ def compute_tsn_trafficshaping_creditbasedshaper_validation_test_results(test_ac
                   numpy.allclose(df1["max"], df2["max"], rtol=test_accuracy, atol=0) and \
                   numpy.allclose(df1["mean"], df2["mean"], rtol=test_accuracy * 7, atol=0) and \
                   numpy.allclose(df1["stddev"], df2["stddev"], rtol=test_accuracy * 30, atol=0)
-    return TestTaskResult(None, bool_result=test_result)
+    return TestTaskResult(task=TestTask(), bool_result=test_result)
 
 def get_tsn_trafficshaping_creditbasedshaper_validation_test_task(**kwargs):
     simulation_task = get_simulation_tasks(inet_project, working_directory_filter="tests/validation/tsn/trafficshaping/creditbasedshaper", sim_time_limit="1s", **kwargs).tasks[0]
