@@ -138,3 +138,5 @@ Some Complex Examples
 
    Telnet
    Network
+   InputQueueSwitching
+   OutputQueueSwitching

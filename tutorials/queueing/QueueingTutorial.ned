@@ -1370,6 +1370,8 @@ network ExampleNetworkTutorialStep
         cable.bOut --> source.lowerIn;
 }
 
+//-------------------------------------------------
+
 network InputQueueSwitching
 {
     parameters:
@@ -1422,6 +1424,8 @@ network InputQueueSwitching
         }
 }
 
+//-------------------------------------------------
+
 network OutputQueueSwitching
 {
     parameters:
@@ -1473,3 +1477,5 @@ network OutputQueueSwitching
             sinkRx[i].out --> sink[i].in;
         }
 }
+
+//-------------------------------------------------
