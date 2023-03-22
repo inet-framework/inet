@@ -74,7 +74,7 @@ def compute_tsn_framereplication_validation_test_results(test_accuracy=0.01, **k
     return TestTaskResult(task=TestTask(), bool_result=test_result1 and test_result2)
 
 def get_tsn_framereplication_simulation_test_task(**kwargs):
-    simulation_task = get_simulation_tasks(inet_project, working_directory_filter="tests/validation/tsn/framereplication", sim_time_limit="0.1s", **kwargs).tasks[0]
+    simulation_task = get_simulation_tasks(inet_project, working_directory_filter="tests/validation/tsn/framereplication", sim_time_limit="0.2s", **kwargs).tasks[0]
     return ValidationTestTask(simulation_task, compute_tsn_framereplication_validation_test_results, **kwargs)
 
 def run_tsn_framereplication_validation_test(test_accuracy=0.01, **kwargs):
