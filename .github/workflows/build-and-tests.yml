@@ -124,9 +124,9 @@ jobs:
           name: libinet-so
           path: ${{ github.workspace }}/src/
       - name: Pull Docker image
-        run: docker pull omnetpp/travis-inet:6.0rc1-220209
+        run: docker pull ghcr.io/inet-framework/ci-inet:6.0.1-230320
       - name: Run ${{ matrix.scriptname }}
         run: |
           docker run -i --env MODE=debug --env GITHUB_WORKSPACE --env SCRIPTNAME=${{ matrix.scriptname }} \
             -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE \
-            omnetpp/travis-inet:6.0rc1-220209 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-inet_run-tests.sh
+            ghcr.io/inet-framework/ci-inet:6.0.1-230320 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-inet_run-tests.sh
