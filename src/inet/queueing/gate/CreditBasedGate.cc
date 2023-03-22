@@ -49,6 +49,7 @@ void CreditBasedGate::initialize(int stage)
         module->subscribe(transmissionEndedSignal, this);
         module->subscribe(interpacketGapEndedSignal, this);
         changeTimer = new cMessage("ChangeTimer");
+        WATCH(isInterpacketGap);
         WATCH(currentCredit);
         WATCH(currentCreditGainRate);
     }
@@ -184,14 +185,20 @@ void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, d
 {
     Enter_Method("%s", cComponent::getSignalName(simsignal));
     if (simsignal == interpacketGapEndedSignal) {
+        // NOTE: this signal also comes for other packets not in our traffic category
         if (isInterpacketGap) {
-            isInterpacketGap = false;
-            // 1. immediately set currentCredit to 0 if there are no packets to transmit
-            if (!hasAvailablePacket())
-                setCurrentCredit(std::min(transmitCreditLimit, currentCredit));
-            // 2. update currentCreditGainRate and notify listeners about currentCredit change
+            // 1. update current state because some time may have elapsed since last update
             updateCurrentState();
-            // 3. reschedule change timer when currentCredit reaches transmitCreditLimit
+            // 2. update isInterpacketGap state
+            isInterpacketGap = false;
+            // 3. immediately set currentCredit to 0 if there are no packets to transmit
+            if (!hasAvailablePacket()) {
+                setCurrentCredit(std::min(transmitCreditLimit, currentCredit));
+                emitCurrentCredit();
+            }
+            // 4. update current state because some input has been changed
+            updateCurrentState();
+            // 5. reschedule change timer when currentCredit reaches transmitCreditLimit
             scheduleChangeTimer();
         }
     }
@@ -215,6 +222,7 @@ void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, c
                 isTransmitting = true;
             else if (simsignal == transmissionEndedSignal) {
                 isTransmitting = false;
+                // NOTE: mark interpacket gap only for our own transmissions
                 isInterpacketGap = true;
             }
             else
