@@ -70,7 +70,7 @@ def get_statistical_result_sim_time_limit(simulation_config, run=0):
     file = open(ini_file_path, "r", encoding="utf-8")
     text = file.read()
     file.close()
-    match = re.search(r"sim-time-limit *= *(\w+)", text)
+    match = re.search(r"sim-time-limit *= *([\w.]+ *\w*)", text)
     if match:
         return match.group(1)
     else:
