@@ -81,7 +81,9 @@ def get_statistical_result_sim_time_limit(simulation_config, run=0):
             selected_fingerprint_entry = select_fingerprint_entry_with_largest_sim_time_limit(stored_fingerprint_entries)
             return selected_fingerprint_entry["sim_time_limit"]
         else:
-            return "0s"
+            # NOTE: 0s means running the simulations indefinitely, 1ps isn't really good either,
+            # because depending on the simtime precision it may be silently rounded to zero
+            return "1ps"
 
 def get_statistical_test_tasks(sim_time_limit=get_statistical_result_sim_time_limit, **kwargs):
     return get_simulation_tasks(name="statistical test", sim_time_limit=sim_time_limit, simulation_task_class=StatisticalTestTask, multiple_simulation_tasks_class=MultipleSimulationTestTasks, **kwargs)
