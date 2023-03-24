@@ -62,11 +62,8 @@ class MultipleChartTestTasks(MultipleTestTasks):
         self.multiple_simulation_tasks = multiple_simulation_tasks
 
     def run_protected(self, **kwargs):
-        multiple_simulation_task_results = self.multiple_simulation_tasks.run_protected(output_stream=io.StringIO(), **kwargs)
-        if multiple_simulation_task_results.result != "DONE":
-            return self.multiple_task_results_class(self, result=multiple_simulation_task_results.result)
-        else:
-            return super().run_protected(**kwargs)
+        multiple_simulation_task_results = self.multiple_simulation_tasks.run_protected(**kwargs)
+        return super().run_protected(**kwargs)
 
 def get_chart_test_tasks(simulation_project=default_project, run_simulations=True, filter=None, working_directory_filter=None, pool_class=multiprocessing.Pool, **kwargs):
     test_tasks = []
