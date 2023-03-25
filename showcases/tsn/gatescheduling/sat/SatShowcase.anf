@@ -5,7 +5,7 @@
         <input pattern="/inet/showcases/tsn/gatescheduling/eager/results/Eager-#0.vec"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="290703123" name="Application End-to-End Delay" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="290703123" name="Application End-to-End Delay" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -665,7 +665,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="9"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1701145797" name="Application End-to-End Delay, Comparison of Eager and SAT" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1701145797" name="Application End-to-End Delay, Comparison of Eager and SAT" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -704,7 +704,7 @@ if df_sat.empty:
 df_eager = utils.perform_vector_ops(df_eager, props["vector_operations"])
 df_sat= utils.perform_vector_ops(df_sat, props["vector_operations"])
 
-print(df_eager, df_sat)
+#print(df_eager, df_sat)
 
 style_tuple_list = [('module', '.*app\[0\].*', {'marker': 'd', 'markersize': 4, 'color': '#1f77b4'}), 
                     ('module', '.*app\[1\].*', {'marker': 'x', 'markersize': 2, 'color': '#ff7f0e'}),

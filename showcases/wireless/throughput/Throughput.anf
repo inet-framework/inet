@@ -115,7 +115,7 @@ plt.tight_layout()
 
 ax = plt.gca()
 handles, labels = ax.get_legend_handles_labels()
-modifiedplot.quick_reorder_legend(handles, labels, order=[])
+modifiedplot.create_custom_legend(props)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)

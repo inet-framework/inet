@@ -5,7 +5,7 @@
         <input pattern="/inet/showcases/tsn/combiningfeatures/frerandtas/results/*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/barchart.png" id="1054147920" name="Number of packets sent and received" template="barchart_native" type="BAR">
+        <chart createdWith="" icon="icons/full/obj/barchart.png" id="1054147920" name="Number of packets sent and received" resultTypes="" template="barchart_native" type="BAR">
             <script><![CDATA[from omnetpp.scave import results, chart, utils
 
 # get chart properties
@@ -575,7 +575,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_format" value="$name"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1310109976" name="Number of packets received / number of packets sent" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1310109976" name="Number of packets received / number of packets sent" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 import numpy as np
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
@@ -620,7 +620,7 @@ for t in ts:
         vout.append(v1[i1] / v2[i2])
 df = df.append({"title": "quotient", "vectime": tout, "vecvalue": vout}, ignore_index=True)
 df = df[2:] # [["title", "vectime", "vecvalue"]]
-print(df)
+#print(df)
 
 # plot
 utils.plot_vectors(df, props)
