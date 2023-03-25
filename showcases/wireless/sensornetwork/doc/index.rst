@@ -340,8 +340,12 @@ optimize just one parameter of each MAC, the slot duration. Ideally, one
 would want to optimize multiple parameters to find a more
 optimal set of parameter values, but it is out of scope for this
 showcase. The choices for the values of the other parameters are
-arbitrary. The simulations will be run for 100s, and each iteration will
-be run 10 times to get smoother results. We'll choose the best
+arbitrary. 
+
+.. The simulations will be run for 100s, and each iteration will
+   be run 10 times to get smoother results. 
+
+We'll choose the best
 performing parameters according to the number of packets received by the
 server.
 
@@ -357,8 +361,7 @@ configuration):
 In this base configuration, we set the simulation time limit, the number
 of repetitions, and turn vector recording off to speed up the runs.
 
-The results are plotted in the ``StatisticBMac.anf``,
-``StatisticXMac.anf``, and ``StatisticLMac.anf`` files. The parameter
+The parameter
 studies for the individual MACs are detailed in the following sections.
 
 Optimizing B-MAC
@@ -367,7 +370,7 @@ Optimizing B-MAC
 The goal is to optimize :ned:`BMac`'s :par:`slotTime` parameter for the number
 of packets received by the server. The configuration in
 :download:`omnetpp.ini <../omnetpp.ini>` for this is
-``StatisticBMac``. It contains 1000 runs. Here is the configuration:
+``StatisticBMac``. Here is the configuration:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -379,14 +382,14 @@ increments (the default of :par:`slotDuration` is 100ms.) The number of
 packets received by the server for each :par:`slotDuration` value is shown
 on the following image (time in seconds):
 
-.. figure:: media/statisticbmac2.png
+.. figure:: media/bmac.png
    :width: 100%
 
-The sensors send 100 packets each during the 100s, thus
-400 packets total. It is apparent from the results that the network
+The sensors send 25 packets each during the 25s, thus
+100 packets total. It is apparent from the results that the network
 cannot carry all traffic in this scenario. The results also outline a
-smooth curve. We choose 0.19s as the best performing value for
-:par:`slotDuration`.
+smooth curve. The best performing value for
+:par:`slotDuration` is 0.19s.
 
 Optimizing X-MAC
 ~~~~~~~~~~~~~~~~
@@ -395,7 +398,7 @@ Again, we optimize the :par:`slotTime` parameter for the number of packets
 received by the server. As in the :ned:`XMac` configuration, the
 ``slotTime`` for the gateway will be shorter than for the sensors. The
 configuration in :download:`omnetpp.ini <../omnetpp.ini>` for this is
-``StatisticXMac``. It contains 1000 runs. Here is the configuration:
+``StatisticXMac``. Here is the configuration:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -408,19 +411,21 @@ similarly to the parameter study for B-MAC. The :par:`slotDuration` for the
 sensors will be 2.5 times that of the gateway (an arbitrary value.) Here
 are the results (time in seconds):
 
-.. figure:: media/statisticxmac2.png
+.. figure:: media/xmac.png
    :width: 100%
 
 According to this, the optimal value for the gateway's :par:`slotDuration`
-is 0.14s (0.35s for the sensors), so we choose that.
+is 0.13s (0.35s for the sensors).
+
+.. note:: Some of the runs have 0 packets received. This is due to a bug in XMAC.
 
 Optimizing LMAC
 ~~~~~~~~~~~~~~~
 
 We'll optimize the :par:`slotDuration` parameter for the number of packets
 received by the server. The configuration for this study in
-:download:`omnetpp.ini <../omnetpp.ini>` is ``StatisticLMac``. It
-contains 1000 runs. Here is the configuration:
+:download:`omnetpp.ini <../omnetpp.ini>` is ``StatisticLMac``. 
+Here is the configuration:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -432,14 +437,14 @@ We set :par:`reservedMobileSlots` to 0, and :par:`numSlots` to 8. The
 number of received packets are displayed on the following image (time in
 seconds):
 
-.. figure:: media/statisticlmac4.png
+.. figure:: media/lmac.png
    :width: 100%
 
 It is apparent from the results that the network can carry almost all
 the traffic in this scenario (as opposed to the :ned:`XMac` and :ned:`LMac`
-results.) The best performing value for :par:`slotDuration` is 50ms. Note
+results.) The best performing value for :par:`slotDuration` is 40ms. Note
 that the lowest :par:`slotDuration` values up until 120ms yield
-approximately the same results (around 400 packets), with the 50ms
+approximately the same results (around 100 packets), with the 40ms
 value performing marginally better. Choosing the higher :par:`slotDuration`
 value would result in about the same performance but lower power
 consumption, but we are optimizing for the number of packets here.
@@ -559,37 +564,49 @@ and measure power consumption, but not energy capacity, charging, etc.
    parameter values for the three MACs, and -->
 
 The results for the parameter studies contain the required power
-consumption data. We just need to select the appropriate result files.
-``PowerConsumption.anf`` selects the result files corresponding to the
+consumption data. We just need to select the result files corresponding to the
 best performing parameter values selected in the previous sections. We
 will plot the results on bar charts. We'll examine the following
 statistics:
 
 -  ``Total number of packets received``: All the packets received by the
-   server. The UDP applications in the sensors each send 100 packets
-   during the 100s simulations, for a total of 400
-   packets.
+   server. The UDP applications in the sensors each send 25 packets
+   during the 25s simulations, for a total of 100
+   packets. As there are 100 packets, this value is also the successful packet reception in percent,
+   and indirectly, packet loss.
 -  ``Network total power consumption``: The sum of the power consumption
    of the four sensors and the gateway (values in Joules.)
 -  ``Power consumption per packet``: Network total power consumption /
    Total number of packets received, thus power consumption per packet
    in the entire network (values in Joules.)
--  ``Packet loss``: Total number of packets received / total number of
-   packets sent, thus how many packets from the 400 sent are lost.
+
+.. -  ``Packet loss``: Total number of packets received / total number of
+   packets sent, thus how many packets from the 100 sent are lost. **TODO** not sure its needed
 
 Note that the values for the ``residualEnergyCapacity`` statistic are
 negative, so it is inverted in the anf file. Here are the results:
 
-.. figure:: media/power.png
+.. figure:: media/packetsreceived.png
+   :width: 100%
+
+.. figure:: media/powerconsumption.png
+   :width: 100%
+
+.. figure:: media/powerconsumptionperpacket.png
+   :width: 100%
+
+.. .. figure:: media/packetloss.png
    :width: 100%
 
 From this, it is apparent that LMac carried the most packets, and
-:ned:`BMac` the least. :ned:`BMac` consumed significantly more power than the
-others. All three carried around 90-100% of the traffic (:ned:`BMac` 90%,
-:ned:`XMac` 99.25%, :ned:`LMac` 97%), thus BMac has significantly more power
-consumption per packet. The conclusion is that in this scenario, with
-the selected parameter values, :ned:`XMac` turned out to be the most energy
-efficient MAC protocol, although :ned:`LMac` carried a bit more traffic.
+:ned:`XMac` the least. :ned:`XMac` consumed significantly more power than the
+others. BMac and LMac carried around 90-100% of the traffic, XMac only 16%. 
+XMac also has significantly more power
+consumption per packet. This is due to XMac sending lots of preambles. The conclusion is that in this scenario, with
+the selected parameter values, :ned:`LMac` turned out to be the most energy
+efficient MAC protocol. 
+
+.. note:: XMac might perform better with another slot duration value for the sensors, for example. However, this is out of scope for this showcase.
 
 | Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`SensorNetworkShowcase.ned <../SensorNetworkShowcase.ned>`, :download:`config.xml <../config.xml>`
 | Extra configurations: :download:`extras.ini <../extras.ini>`, :download:`ExtrasSensorNetworkShowcase.ned <../ExtrasSensorNetworkShowcase.ned>` 
