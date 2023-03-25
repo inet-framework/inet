@@ -743,7 +743,7 @@ def quick_reorder_legend(handles, labels, order, **kwargs):
     print("quick_reorder_legend() deprecated, use create_custom_legend()\n")
     return handles, labels
 
-def create_custom_legend(props, style_tuple_list, order = None, labels = None, handles = None, inplace=True, debug=False, ax_list=None, **kwargs):
+def create_custom_legend(props, style_tuple_list = None, order = None, labels = None, handles = None, inplace=True, debug=False, ax_list=None, **kwargs):
     """
     Can create multi-dimensional legend, where one aspect of a line (e.g. color) represents a dimension, another aspect (e.g. linestyle of solid, dashed or dotted) represents another dimension,
     as opposed to the default behavior, in which lines in the legend represent the lines on the chart directly. **TODO** not sure this explanation is needed
@@ -762,6 +762,9 @@ def create_custom_legend(props, style_tuple_list, order = None, labels = None, h
     By default, does everything in-place (so it's not needed to call plt.legend() with the returned handles and labels).
     Returns legend handles and labels that can be supplied to plt.legend()
     """
+    
+    if style_tuple_list is None:
+        style_tuple_list = []
     
     if order is None:
         order = []
