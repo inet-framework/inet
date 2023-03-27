@@ -5,11 +5,10 @@
         <input pattern="/inet/showcases/tsn/combiningfeatures/invehicle/results/*.sca"/>
     </inputs>
     <charts>
-        <folder name="Standard Ethernet">
-            <folder name="Normal operation">
-                <chart icon="icons/full/obj/linechart.png" id="1832" name="Traffic source applications" template="linechart_native" type="LINE">
-                    <script>
-                        <![CDATA[import math
+        <folder id="1925952356" name="Standard Ethernet">
+            <folder id="530312629" name="Normal operation">
+                <chart createdWith="" icon="icons/full/obj/linechart.png" id="1832" name="Traffic source applications" resultTypes="" template="linechart_native" type="LINE">
+                    <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -40,10 +39,8 @@ utils.postconfigure_plot(props)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-                    </script>
-                    <dialogPage id="Input" label="Input">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+                    <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -92,10 +89,8 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Lines" label="Lines">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -188,10 +183,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Plot" label="Plot">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -355,10 +348,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Styling" label="Styling">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -468,10 +459,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Advanced" label="Advanced">
-                        <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+                    <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -490,10 +479,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Export" label="Export">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -548,8 +535,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
+]]></dialogPage>
                     <property name="grid_show" value="true"/>
                     <property name="vector_end_time" value=""/>
                     <property name="linecolor" value=""/>
@@ -574,7 +560,7 @@ utils.export_data_if_needed(df, props)
                     <property name="grid_density" value="Major"/>
                     <property name="yaxis_min" value=""/>
                     <property name="Legend.Font" value="Arial-regular-8"/>
-                    <property name="image_export_filename" value="TrafficSourceApplications"/>
+                    <property name="image_export_filename" value="TrafficSourceApplications_standard_ethernet_normal_op"/>
                     <property name="xaxis_min" value=""/>
                     <property name="linewidth" value="1.5"/>
                     <property name="filter" value="runattr:experiment =~ StandardEthernet AND runattr:measurement =~ &quot;$brokenComponent=\&quot;none\&quot;&quot; AND name =~ dataRate:vector AND module =~ &quot;*.*.app[*].source&quot;"/>
@@ -591,9 +577,8 @@ utils.export_data_if_needed(df, props)
                     <property name="xaxis_max" value=""/>
                     <property name="image_export_width" value="9"/>
                 </chart>
-                <chart icon="icons/full/obj/linechart.png" id="1833" name="Traffic sink applications" template="linechart_native" type="LINE">
-                    <script>
-                        <![CDATA[import math
+                <chart createdWith="" icon="icons/full/obj/linechart.png" id="1833" name="Traffic sink applications" resultTypes="" template="linechart_native" type="LINE">
+                    <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -624,10 +609,8 @@ utils.postconfigure_plot(props)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-                    </script>
-                    <dialogPage id="Input" label="Input">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+                    <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -676,10 +659,8 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Lines" label="Lines">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -772,10 +753,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Plot" label="Plot">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -939,10 +918,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Styling" label="Styling">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1052,10 +1029,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Advanced" label="Advanced">
-                        <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+                    <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -1074,10 +1049,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Export" label="Export">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1132,8 +1105,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
+]]></dialogPage>
                     <property name="grid_show" value="true"/>
                     <property name="vector_end_time" value=""/>
                     <property name="linecolor" value=""/>
@@ -1158,7 +1130,7 @@ utils.export_data_if_needed(df, props)
                     <property name="grid_density" value="Major"/>
                     <property name="yaxis_min" value=""/>
                     <property name="Legend.Font" value="Arial-regular-8"/>
-                    <property name="image_export_filename" value="TrafficSinkApplications"/>
+                    <property name="image_export_filename" value="TrafficSinkApplications_standard_ethernet_normal_op"/>
                     <property name="xaxis_min" value=""/>
                     <property name="linewidth" value="1.5"/>
                     <property name="filter" value="runattr:experiment =~ StandardEthernet AND runattr:measurement =~ &quot;$brokenComponent=\&quot;none\&quot;&quot; AND name =~ dataRate:vector AND module =~ &quot;*.*.app[*].sink&quot;"/>
@@ -1176,10 +1148,9 @@ utils.export_data_if_needed(df, props)
                     <property name="image_export_width" value="9"/>
                 </chart>
             </folder>
-            <folder name="Broken link">
-                <chart icon="icons/full/obj/linechart.png" id="1838" name="Traffic source applications" template="linechart_native" type="LINE">
-                    <script>
-                        <![CDATA[import math
+            <folder id="563175980" name="Broken link">
+                <chart createdWith="" icon="icons/full/obj/linechart.png" id="1838" name="Traffic source applications" resultTypes="" template="linechart_native" type="LINE">
+                    <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -1210,10 +1181,8 @@ utils.postconfigure_plot(props)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-                    </script>
-                    <dialogPage id="Input" label="Input">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+                    <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -1262,10 +1231,8 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Lines" label="Lines">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1358,10 +1325,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Plot" label="Plot">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1525,10 +1490,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Styling" label="Styling">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1638,10 +1601,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Advanced" label="Advanced">
-                        <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+                    <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -1660,10 +1621,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Export" label="Export">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1718,8 +1677,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
+]]></dialogPage>
                     <property name="grid_show" value="true"/>
                     <property name="vector_end_time" value=""/>
                     <property name="linecolor" value=""/>
@@ -1744,7 +1702,7 @@ utils.export_data_if_needed(df, props)
                     <property name="grid_density" value="Major"/>
                     <property name="yaxis_min" value=""/>
                     <property name="Legend.Font" value="Arial-regular-8"/>
-                    <property name="image_export_filename" value="TrafficSourceApplications"/>
+                    <property name="image_export_filename" value="TrafficSourceApplications_standard_ethernet_broken_link"/>
                     <property name="xaxis_min" value=""/>
                     <property name="linewidth" value="1.5"/>
                     <property name="filter" value="runattr:experiment =~ StandardEthernet AND runattr:measurement =~ &quot;$brokenComponent=\&quot;link\&quot;&quot; AND name =~ dataRate:vector AND module =~ &quot;*.*.app[*].source&quot;"/>
@@ -1761,9 +1719,8 @@ utils.export_data_if_needed(df, props)
                     <property name="xaxis_max" value=""/>
                     <property name="image_export_width" value="9"/>
                 </chart>
-                <chart icon="icons/full/obj/linechart.png" id="1839" name="Traffic sink applications" template="linechart_native" type="LINE">
-                    <script>
-                        <![CDATA[import math
+                <chart createdWith="" icon="icons/full/obj/linechart.png" id="1839" name="Traffic sink applications" resultTypes="" template="linechart_native" type="LINE">
+                    <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -1794,10 +1751,8 @@ utils.postconfigure_plot(props)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-                    </script>
-                    <dialogPage id="Input" label="Input">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+                    <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -1846,10 +1801,8 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Lines" label="Lines">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1942,10 +1895,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Plot" label="Plot">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2109,10 +2060,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Styling" label="Styling">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2222,10 +2171,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Advanced" label="Advanced">
-                        <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+                    <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -2244,10 +2191,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Export" label="Export">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2302,8 +2247,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
+]]></dialogPage>
                     <property name="grid_show" value="true"/>
                     <property name="vector_end_time" value=""/>
                     <property name="linecolor" value=""/>
@@ -2328,7 +2272,7 @@ utils.export_data_if_needed(df, props)
                     <property name="grid_density" value="Major"/>
                     <property name="yaxis_min" value=""/>
                     <property name="Legend.Font" value="Arial-regular-8"/>
-                    <property name="image_export_filename" value="TrafficSinkApplications"/>
+                    <property name="image_export_filename" value="TrafficSinkApplications_standard_ethernet_broken_link"/>
                     <property name="xaxis_min" value=""/>
                     <property name="linewidth" value="1.5"/>
                     <property name="filter" value="runattr:experiment =~ StandardEthernet AND runattr:measurement =~ &quot;$brokenComponent=\&quot;link\&quot;&quot; AND name =~ dataRate:vector AND module =~ &quot;*.*.app[*].sink&quot;"/>
@@ -2346,10 +2290,9 @@ utils.export_data_if_needed(df, props)
                     <property name="image_export_width" value="9"/>
                 </chart>
             </folder>
-            <folder name="Broken wheel">
-                <chart icon="icons/full/obj/linechart.png" id="1834" name="Traffic source applications" template="linechart_native" type="LINE">
-                    <script>
-                        <![CDATA[import math
+            <folder id="1708970446" name="Broken wheel">
+                <chart createdWith="" icon="icons/full/obj/linechart.png" id="1834" name="Traffic source applications" resultTypes="" template="linechart_native" type="LINE">
+                    <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -2380,10 +2323,8 @@ utils.postconfigure_plot(props)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-                    </script>
-                    <dialogPage id="Input" label="Input">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+                    <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -2432,10 +2373,8 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Lines" label="Lines">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2528,10 +2467,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Plot" label="Plot">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2695,10 +2632,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Styling" label="Styling">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2808,10 +2743,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Advanced" label="Advanced">
-                        <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+                    <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -2830,10 +2763,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Export" label="Export">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2888,8 +2819,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
+]]></dialogPage>
                     <property name="grid_show" value="true"/>
                     <property name="vector_end_time" value=""/>
                     <property name="linecolor" value=""/>
@@ -2914,7 +2844,7 @@ utils.export_data_if_needed(df, props)
                     <property name="grid_density" value="Major"/>
                     <property name="yaxis_min" value=""/>
                     <property name="Legend.Font" value="Arial-regular-8"/>
-                    <property name="image_export_filename" value="TrafficSourceApplications"/>
+                    <property name="image_export_filename" value="TrafficSourceApplications_standard_ethernet_broken_wheel"/>
                     <property name="xaxis_min" value=""/>
                     <property name="linewidth" value="1.5"/>
                     <property name="filter" value="runattr:experiment =~ StandardEthernet AND runattr:measurement =~ &quot;$brokenComponent=\&quot;wheel\&quot;&quot; AND name =~ dataRate:vector AND module =~ &quot;*.*.app[*].source&quot;"/>
@@ -2931,9 +2861,8 @@ utils.export_data_if_needed(df, props)
                     <property name="xaxis_max" value=""/>
                     <property name="image_export_width" value="9"/>
                 </chart>
-                <chart icon="icons/full/obj/linechart.png" id="1836" name="Traffic sink applications" template="linechart_native" type="LINE">
-                    <script>
-                        <![CDATA[import math
+                <chart createdWith="" icon="icons/full/obj/linechart.png" id="1836" name="Traffic sink applications" resultTypes="" template="linechart_native" type="LINE">
+                    <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -2964,10 +2893,8 @@ utils.postconfigure_plot(props)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-                    </script>
-                    <dialogPage id="Input" label="Input">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+                    <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -3016,10 +2943,8 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Lines" label="Lines">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -3112,10 +3037,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Plot" label="Plot">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -3279,10 +3202,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Styling" label="Styling">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -3392,10 +3313,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Advanced" label="Advanced">
-                        <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+                    <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -3414,10 +3333,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Export" label="Export">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -3472,8 +3389,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
+]]></dialogPage>
                     <property name="grid_show" value="true"/>
                     <property name="vector_end_time" value=""/>
                     <property name="linecolor" value=""/>
@@ -3498,7 +3414,7 @@ utils.export_data_if_needed(df, props)
                     <property name="grid_density" value="Major"/>
                     <property name="yaxis_min" value=""/>
                     <property name="Legend.Font" value="Arial-regular-8"/>
-                    <property name="image_export_filename" value="TrafficSinkApplications"/>
+                    <property name="image_export_filename" value="TrafficSinkApplications_standard_ethernet_broken_wheel"/>
                     <property name="xaxis_min" value=""/>
                     <property name="linewidth" value="1.5"/>
                     <property name="filter" value="runattr:experiment =~ StandardEthernet AND runattr:measurement =~ &quot;$brokenComponent=\&quot;wheel\&quot;&quot; AND name =~ dataRate:vector AND module =~ &quot;*.*.app[*].sink&quot;"/>
@@ -3516,10 +3432,9 @@ utils.export_data_if_needed(df, props)
                     <property name="image_export_width" value="9"/>
                 </chart>
             </folder>
-            <folder name="Broken camera">
-                <chart icon="icons/full/obj/linechart.png" id="1835" name="Traffic source applications" template="linechart_native" type="LINE">
-                    <script>
-                        <![CDATA[import math
+            <folder id="1497407877" name="Broken camera">
+                <chart createdWith="" icon="icons/full/obj/linechart.png" id="1835" name="Traffic source applications" resultTypes="" template="linechart_native" type="LINE">
+                    <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -3550,10 +3465,8 @@ utils.postconfigure_plot(props)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-                    </script>
-                    <dialogPage id="Input" label="Input">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+                    <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -3602,10 +3515,8 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Lines" label="Lines">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -3698,10 +3609,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Plot" label="Plot">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -3865,10 +3774,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Styling" label="Styling">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -3978,10 +3885,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Advanced" label="Advanced">
-                        <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+                    <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -4000,10 +3905,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Export" label="Export">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -4058,8 +3961,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
+]]></dialogPage>
                     <property name="grid_show" value="true"/>
                     <property name="vector_end_time" value=""/>
                     <property name="linecolor" value=""/>
@@ -4084,7 +3986,7 @@ utils.export_data_if_needed(df, props)
                     <property name="grid_density" value="Major"/>
                     <property name="yaxis_min" value=""/>
                     <property name="Legend.Font" value="Arial-regular-8"/>
-                    <property name="image_export_filename" value="TrafficSourceApplications"/>
+                    <property name="image_export_filename" value="TrafficSourceApplications_standard_ethernet_broken_camera"/>
                     <property name="xaxis_min" value=""/>
                     <property name="linewidth" value="1.5"/>
                     <property name="filter" value="runattr:experiment =~ StandardEthernet AND runattr:measurement =~ &quot;$brokenComponent=\&quot;camera\&quot;&quot; AND name =~ dataRate:vector AND module =~ &quot;*.*.app[*].source&quot;"/>
@@ -4101,9 +4003,8 @@ utils.export_data_if_needed(df, props)
                     <property name="xaxis_max" value=""/>
                     <property name="image_export_width" value="9"/>
                 </chart>
-                <chart icon="icons/full/obj/linechart.png" id="1837" name="Traffic sink applications" template="linechart_native" type="LINE">
-                    <script>
-                        <![CDATA[import math
+                <chart createdWith="" icon="icons/full/obj/linechart.png" id="1837" name="Traffic sink applications" resultTypes="" template="linechart_native" type="LINE">
+                    <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -4134,10 +4035,8 @@ utils.postconfigure_plot(props)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-                    </script>
-                    <dialogPage id="Input" label="Input">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+                    <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -4186,10 +4085,8 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Lines" label="Lines">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -4282,10 +4179,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Plot" label="Plot">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -4449,10 +4344,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Styling" label="Styling">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -4562,10 +4455,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Advanced" label="Advanced">
-                        <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+                    <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -4584,10 +4475,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Export" label="Export">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -4642,8 +4531,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
+]]></dialogPage>
                     <property name="grid_show" value="true"/>
                     <property name="vector_end_time" value=""/>
                     <property name="linecolor" value=""/>
@@ -4668,7 +4556,7 @@ utils.export_data_if_needed(df, props)
                     <property name="grid_density" value="Major"/>
                     <property name="yaxis_min" value=""/>
                     <property name="Legend.Font" value="Arial-regular-8"/>
-                    <property name="image_export_filename" value="TrafficSinkApplications"/>
+                    <property name="image_export_filename" value="TrafficSinkApplications_standard_ethernet_broken_camera"/>
                     <property name="xaxis_min" value=""/>
                     <property name="linewidth" value="1.5"/>
                     <property name="filter" value="runattr:experiment =~ StandardEthernet AND runattr:measurement =~ &quot;$brokenComponent=\&quot;camera\&quot;&quot; AND name =~ dataRate:vector AND module =~ &quot;*.*.app[*].sink&quot;"/>
@@ -4687,11 +4575,10 @@ utils.export_data_if_needed(df, props)
                 </chart>
             </folder>
         </folder>
-        <folder name="Time-Sensitive Networking">
-            <folder name="Manual configuration">
-                <chart icon="icons/full/obj/linechart.png" id="1794" name="Time synchronization" template="linechart_native" type="LINE">
-                    <script>
-                        <![CDATA[import re
+        <folder id="377017644" name="Time-Sensitive Networking">
+            <folder id="1458086581" name="Manual configuration">
+                <chart createdWith="" icon="icons/full/obj/linechart.png" id="1794" name="Time synchronization" resultTypes="" template="linechart_native" type="LINE">
+                    <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -4724,10 +4611,8 @@ utils.postconfigure_plot(props)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-                    </script>
-                    <dialogPage id="Input" label="Input">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+                    <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -4776,10 +4661,8 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Lines" label="Lines">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -4872,10 +4755,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Plot" label="Plot">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -5039,10 +4920,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Styling" label="Styling">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -5152,10 +5031,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Advanced" label="Advanced">
-                        <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+                    <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -5174,10 +5051,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Export" label="Export">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -5232,8 +5107,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
+]]></dialogPage>
                     <property name="grid_show" value="true"/>
                     <property name="vector_end_time" value=""/>
                     <property name="linecolor" value=""/>
@@ -5258,7 +5132,7 @@ utils.export_data_if_needed(df, props)
                     <property name="grid_density" value="Major"/>
                     <property name="yaxis_min" value=""/>
                     <property name="Legend.Font" value="Arial-regular-8"/>
-                    <property name="image_export_filename" value="TimeSynchronization"/>
+                    <property name="image_export_filename" value="TimeSynchronization_tsn_manual_config"/>
                     <property name="xaxis_min" value=""/>
                     <property name="linewidth" value="1.5"/>
                     <property name="filter" value="runattr:experiment =~ ManualTsn AND runattr:measurement =~ &quot;$brokenComponent=\&quot;none\&quot;&quot; AND type =~ vector AND module =~ &quot;*.clock&quot;"/>
@@ -5276,10 +5150,9 @@ utils.export_data_if_needed(df, props)
                     <property name="image_export_width" value="9"/>
                 </chart>
             </folder>
-            <folder name="Automatic configuration">
-                <chart icon="icons/full/obj/linechart.png" id="1795" name="Time synchronization" template="linechart_native" type="LINE">
-                    <script>
-                        <![CDATA[import re
+            <folder id="881199213" name="Automatic configuration">
+                <chart createdWith="" icon="icons/full/obj/linechart.png" id="1795" name="Time synchronization" resultTypes="" template="linechart_native" type="LINE">
+                    <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -5312,10 +5185,8 @@ utils.postconfigure_plot(props)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-                    </script>
-                    <dialogPage id="Input" label="Input">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+                    <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -5364,10 +5235,8 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Lines" label="Lines">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -5460,10 +5329,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Plot" label="Plot">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -5627,10 +5494,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Styling" label="Styling">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -5740,10 +5605,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Advanced" label="Advanced">
-                        <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+                    <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -5762,10 +5625,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
-                    <dialogPage id="Export" label="Export">
-                        <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+                    <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -5820,8 +5681,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-                    </dialogPage>
+]]></dialogPage>
                     <property name="grid_show" value="true"/>
                     <property name="vector_end_time" value=""/>
                     <property name="linecolor" value=""/>
@@ -5846,7 +5706,7 @@ utils.export_data_if_needed(df, props)
                     <property name="grid_density" value="Major"/>
                     <property name="yaxis_min" value=""/>
                     <property name="Legend.Font" value="Arial-regular-8"/>
-                    <property name="image_export_filename" value="TimeSynchronization"/>
+                    <property name="image_export_filename" value="TimeSynchronization_tsn_automatic_config"/>
                     <property name="xaxis_min" value=""/>
                     <property name="linewidth" value="1.5"/>
                     <property name="filter" value="runattr:experiment =~ ManualTsn AND runattr:measurement =~ &quot;$brokenComponent=\&quot;none\&quot;&quot; AND type =~ vector AND module =~ &quot;*.clock&quot;"/>
@@ -5865,11 +5725,11 @@ utils.export_data_if_needed(df, props)
                 </chart>
             </folder>
         </folder>
-        <folder name="Comparison">
-            <folder name="Normal operation"/>
-            <folder name="Broken link"/>
-            <folder name="Broken wheel"/>
-            <folder name="Broken camera"/>
+        <folder id="1116220060" name="Comparison">
+            <folder id="322867203" name="Normal operation"/>
+            <folder id="1426959545" name="Broken link"/>
+            <folder id="1890456411" name="Broken wheel"/>
+            <folder id="1681852792" name="Broken camera"/>
         </folder>
     </charts>
 </analysis>
