@@ -5,6 +5,7 @@ import multiprocessing
 import multiprocessing.pool
 import sys
 import time
+import traceback
 
 from inet.common.util import *
 
@@ -217,7 +218,7 @@ class Task:
                 task_result = self.task_result_class(task=self, result="CANCEL", reason="Cancel by user")
             except Exception as e:
                 if handle_exception:
-                    task_result = self.task_result_class(task=self, result="ERROR", reason="Exception during task execution", error_message=e.__repr__() + " at " + e.__traceback__.tb_frame.f_code.co_filename + ":" + str(e.__traceback__.tb_lineno))
+                    task_result = self.task_result_class(task=self, result="ERROR", reason="Exception during task execution", error_message=e.__repr__() + ": " + "".join(traceback.format_exception(e)))
                 else:
                     raise e
             task_result.print_result(complete_error_message=False, output_stream=output_stream)
