@@ -54,7 +54,7 @@ legend_style = [('best effort', {'color': default_colors[0], 'marker': 's', 'lin
                 ('client application', {'linestyle': '--', 'color': 'black'}),
                 ('shaper incoming', {'linestyle': 'solid', 'color': 'black'})]
 
-handles, labels = modifiedplot.create_multidimensional_legend(legend_style)
+handles, labels = modifiedplot.create_custom_legend(props, legend_style)
 
 plt.legend(handles, labels, ncol=2)
 
@@ -706,7 +706,7 @@ legend_style = [('best effort', {'color': default_colors[0], 'marker': 's', 'lin
                 ('incoming', {'linestyle': 'dotted', 'color': 'black'}),
                 ('outgoing', {'linestyle': 'solid', 'color': 'black'})]
 
-handles, labels = modifiedplot.create_multidimensional_legend(legend_style)
+handles, labels = modifiedplot.create_custom_legend(props, legend_style)
 
 plt.legend(handles, labels, ncol=2)
 
@@ -1357,7 +1357,7 @@ legend_style = [('best effort', {'color': default_colors[0], 'marker': 's', 'lin
                 ('server application', {'linestyle': '--', 'color': 'black'}),
                 ('shaper outgoing', {'linestyle': 'solid', 'color': 'black'})]
 
-handles, labels = modifiedplot.create_multidimensional_legend(legend_style)
+handles, labels = modifiedplot.create_custom_legend(props, legend_style)
 
 plt.legend(handles, labels, ncol=2)
 
