@@ -395,6 +395,36 @@ class INET_API UtilizationFilter : public cNumericResultFilter
 };
 
 /**
+ * Filter that expects a Packet and outputs the packet rate as double.
+ * Packet rate is computed for the *past* interval every 1.0s.
+ * The filter reads the interval parameter from the INI file configuration.
+ *
+ * Note that this filter is unsuitable for interactive use (with instrument figures,
+ * for example), because zeroes for long silent periods are only emitted retroactively,
+ * when the silent period (or the simulation) is over.
+ *
+ * Recommended interpolation mode: backward sample-hold.
+ */
+class INET_API PacketRateFilter : public cObjectResultFilter
+{
+  protected:
+    simtime_t interval = -1;
+    bool emitIntermediateZeros = true;
+
+    simtime_t lastSignalTime;
+    long numPackets = 0;
+
+  protected:
+    virtual void init(Context *ctx) override;
+    virtual PacketRateFilter *clone() const override;
+    virtual void emitPacketRate(simtime_t endInterval, cObject *details);
+
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+    virtual void finish(cComponent *component, simsignal_t signalID) override;
+};
+
+/**
  * Filter that expects a Packet or a packet length and outputs the throughput as double.
  * Throughput is computed for the *past* interval every 0.1s or 100 packets,
  * whichever comes first. The filter reads the interval and numLengthLimit
