@@ -717,7 +717,7 @@ void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, intv
 {
     const simtime_t now = simTime();
     numLengths++;
-    ASSERT(numLengths <= numLengthLimit);
+    ASSERT(numLengthLimit == 0 || numLengths <= numLengthLimit);
     if (numLengthLimit > 0 && numLengths == numLengthLimit) {
         totalLength += length;
         emitThroughput(now, details);
