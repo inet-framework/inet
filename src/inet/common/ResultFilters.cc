@@ -682,6 +682,70 @@ void PacketTransmissionTimePerRegionFilter::receiveSignal(cResultFilter *prev, s
     });
 }
 
+Register_ResultFilter("packetRate", PacketRateFilter);
+
+void PacketRateFilter::init(Context *ctx)
+{
+    cObjectResultFilter::init(ctx);
+    std::string fullPath = ctx->component->getFullPath() + "." + ctx->attrsProperty->getIndex() + ".packetRate";
+    cConfiguration *cfg = getEnvir()->getConfig();
+    auto intervalValue = cfg->getPerObjectConfigValue(fullPath.c_str(), "interval");
+    interval = cfg->parseDouble(intervalValue, "s", nullptr, 1.0);
+    lastSignalTime = simTime();
+}
+
+PacketRateFilter *PacketRateFilter::clone() const
+{
+    auto clone = new PacketRateFilter();
+    clone->interval = interval;
+    return clone;
+}
+
+void PacketRateFilter::emitPacketRate(simtime_t endInterval, cObject *details)
+{
+    double packetrate = endInterval == lastSignalTime ? 0 : numPackets / (endInterval - lastSignalTime).dbl();
+    fire(this, endInterval, packetrate, details);
+    lastSignalTime = endInterval;
+    numPackets = 0;
+}
+
+void PacketRateFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    if (auto packet = dynamic_cast<cPacket *>(object)) {
+        const simtime_t now = simTime();
+        if (lastSignalTime + interval <= now) {
+            emitPacketRate(lastSignalTime + interval, details);
+            if (emitIntermediateZeros) {
+                while (lastSignalTime + interval <= now)
+                    emitPacketRate(lastSignalTime + interval, details);
+            }
+            else {
+                if (lastSignalTime + interval <= now) { // no packets arrived for a long period
+                    // zero should have been signaled at the beginning of this packet (approximation)
+                    emitPacketRate(now - interval, details);
+                }
+            }
+        }
+        numPackets++;
+    }
+}
+
+void PacketRateFilter::finish(cComponent *component, simsignal_t signalID)
+{
+    const simtime_t now = simTime();
+    if (lastSignalTime < now) {
+        cObject *details = nullptr;
+        if (lastSignalTime + interval < now) {
+            emitPacketRate(lastSignalTime + interval, details);
+            if (emitIntermediateZeros) {
+                while (lastSignalTime + interval < now)
+                    emitPacketRate(lastSignalTime + interval, details);
+            }
+        }
+        emitPacketRate(now, details);
+    }
+}
+
 Register_ResultFilter("throughput", ThroughputFilter);
 
 void ThroughputFilter::init(Context *ctx)
