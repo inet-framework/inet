@@ -233,6 +233,18 @@ class Task:
     def rerun(self, **kwargs):
         return self.recreate(**kwargs).run()
 
+class SuccessfulTask(Task):
+    def run_protected(self, **kwargs):
+        return TaskResult(result="DONE")
+
+class FailingTask(Task):
+    def run_protected(self, **kwargs):
+        return TaskResult(result="FAIL", possible_results=["DONE", "FAIL"], possible_result_colors=[COLOR_GREEN, COLOR_YELLOW])
+
+class ErroneousTask(Task):
+    def run_protected(self, **kwargs):
+        1/0
+
 class MultipleTasks:
     def __init__(self, tasks=[], name="task", concurrent=True, randomize=False, chunksize=1, pool_class=multiprocessing.pool.ThreadPool, multiple_task_results_class=MultipleTaskResults, **kwargs):
         self.locals = locals()
