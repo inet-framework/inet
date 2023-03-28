@@ -7894,7 +7894,7 @@ modifiedplot.plot_vectors(df, props)
 
 plt.axhline(noclockdrift.get_noclockdrift_delay(1000000), linestyle='dashdot', color='black', linewidth=1)
 
-print(df)
+#print(df)
 
 utils.postconfigure_plot(props)
 
@@ -8542,7 +8542,7 @@ modifiedplot.plot_vectors(df, props)
 
 plt.axhline(noclockdrift.get_noclockdrift_delay(1000000), linestyle='dashdot', color='black', linewidth=1)
 
-print(df)
+#print(df)
 
 utils.postconfigure_plot(props)
 
@@ -9197,7 +9197,7 @@ ax_const, ax_rand = modifiedplot.plot_vectors_separate_grouped([df_const, df_ran
 
 handles, labels = plt.gca().get_legend_handles_labels()
 
-ax_const.axhline(noclockdrift.get_noclockdrift_delay(1000000, debug=True), linestyle='dashdot', color='black', linewidth=1)
+ax_const.axhline(noclockdrift.get_noclockdrift_delay(1000000), linestyle='dashdot', color='black', linewidth=1)
 ax_rand.axhline(noclockdrift.get_noclockdrift_delay(1000000), linestyle='dashdot', color='black', linewidth=1)
 
 #ax_const.axhline(20.646, linestyle='dashdot', color='black', linewidth=1)
@@ -9212,7 +9212,7 @@ utils.postconfigure_plot(props)
 
 handles, labels = modifiedplot.create_custom_legend(props, style_tuple_list=[('sink1', {'color': modifiedplot.default_colors[0]}),
                                                               ('sink2', {'color': modifiedplot.default_colors[1]}),
-                                                              ('baseline (no clock drift)', {'color': 'black', 'linestyle': 'dashdot'})], debug=True, inplace=False)
+                                                              ('baseline (no clock drift)', {'color': 'black', 'linestyle': 'dashdot'})], inplace=False)
 
 ax_const.legend(handles, labels, loc='upper left', title='Constant drift')
 ax_rand.legend(handles, labels, loc='upper left', title='Random drift')
