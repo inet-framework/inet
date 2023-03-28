@@ -52,8 +52,8 @@ cd showcases
 # This is a magical "process substitution" for piping stderr into tee...
 # Source: https://stackoverflow.com/a/692407/635587
  # the "| cat" is there to hide the exit code temporarily
-inet_run_chart_tests -m release --no-concurrent > >(tee runtest.out) 2> >(tee runtest.err >&2) | cat
-#                                               ^---- Everything from here on is only needed to make the pretty GitHub annotations. ----v
+inet_run_chart_tests -m release > >(tee runtest.out) 2> >(tee runtest.err >&2) | cat
+#                               ^---- Everything from here on is only needed to make the pretty GitHub annotations. ----v
 EXITCODE="${PIPESTATUS[0]}"
 echo "::endgroup::"
 
