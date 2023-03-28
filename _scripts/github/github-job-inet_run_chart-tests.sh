@@ -33,6 +33,8 @@ cp -r $GITHUB_WORKSPACE /root/workspace/inet
 cd /root/workspace/inet
 . setenv -f
 
+git clone https://github.com/inet-framework/media.git
+
 echo "::group::Enable all features"
 opp_featuretool enable all  2>&1 # redirecting stderr so it doesn't get out of sync with stdout
 echo "::endgroup::"
