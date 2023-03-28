@@ -415,9 +415,7 @@ are the results (time in seconds):
    :width: 100%
 
 According to this, the optimal value for the gateway's :par:`slotDuration`
-is 0.13s (0.35s for the sensors).
-
-.. note:: Some of the runs have 0 packets received. This is due to a bug in XMAC.
+is 0.04s (0.1s for the sensors).
 
 Optimizing LMAC
 ~~~~~~~~~~~~~~~
@@ -598,15 +596,14 @@ negative, so it is inverted in the anf file. Here are the results:
 .. .. figure:: media/packetloss.png
    :width: 100%
 
-From this, it is apparent that LMac carried the most packets, and
-:ned:`XMac` the least. :ned:`XMac` consumed significantly more power than the
-others. BMac and LMac carried around 90-100% of the traffic, XMac only 16%. 
-XMac also has significantly more power
-consumption per packet. This is due to XMac sending lots of preambles. The conclusion is that in this scenario, with
-the selected parameter values, :ned:`LMac` turned out to be the most energy
+From this, it is apparent that LMac and XMac carried all packets, and
+:ned:`BMac` had some packet loss. :ned:`BMac` consumed significantly more power than the
+others. BMac also has significantly more power
+consumption per packet. The conclusion is that in this scenario, with
+the selected parameter values, :ned:`XMac` turned out to be the most energy
 efficient MAC protocol. 
 
-.. note:: XMac might perform better with another slot duration value for the sensors, for example. However, this is out of scope for this showcase.
+.. .. note:: XMac might perform better with another slot duration value for the sensors, for example. However, this is out of scope for this showcase.
 
 | Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`SensorNetworkShowcase.ned <../SensorNetworkShowcase.ned>`, :download:`config.xml <../config.xml>`
 | Extra configurations: :download:`extras.ini <../extras.ini>`, :download:`ExtrasSensorNetworkShowcase.ned <../ExtrasSensorNetworkShowcase.ned>` 
