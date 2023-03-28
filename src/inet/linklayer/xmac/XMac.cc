@@ -206,10 +206,10 @@ void XMac::handleStateEvent(cMessage *msg)
         case INIT:
             if (kind == XMAC_START_XMAC) {
                 EV_DEBUG << "State INIT, message XMAC_START, new state SLEEP" << endl;
-                changeDisplayColor(BLACK);
                 radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                 macState = SLEEP;
                 scheduleAfter(dblrand() * slotDuration, wakeup);
+                changeDisplayColor(BLACK);
                 return;
             }
             else
@@ -221,10 +221,10 @@ void XMac::handleStateEvent(cMessage *msg)
                          << simTime() << " to " << simTime() + 1.7f * checkInterval << endl;
                 // this CCA is useful when in RX to detect preamble and has to make room for
                 // 0.2f = Tx switch, 0.5f = Tx send_preamble, 1f = time_for_ack_back
+                macState = CCA;
                 scheduleAfter(1.7f * checkInterval, cca_timeout);
                 radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
                 changeDisplayColor(GREEN);
-                macState = CCA;
                 return;
             }
             // we receive an ACK back but it is too late
@@ -247,12 +247,12 @@ void XMac::handleStateEvent(cMessage *msg)
                 if (!txQueue->isEmpty()) {
                     EV_DEBUG << "node " << address << " : State CCA, message XMAC_CCA_TIMEOUT, new state SEND_PREAMBLE" << endl;
                     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-                    changeDisplayColor(YELLOW);
                     macState = SEND_PREAMBLE;
                     // We send the preamble for a whole SLOT duration :)
                     scheduleAfter(slotDuration, stop_preambles);
                     // if 0.2f * CI = 2ms to switch to TX -> has to be accounted for RX_preamble_detection
                     scheduleAfter(0.2f * checkInterval, switch_preamble_phase);
+                    changeDisplayColor(YELLOW);
                     return;
                 }
                 // if anything to send, go back to sleep and wake up after a full period
@@ -277,16 +277,16 @@ void XMac::handleStateEvent(cMessage *msg)
                     EV << "node " << address << " : State CCA, message XMAC_PREAMBLE received, new state SEND_ACK" << endl;
                     macState = SEND_ACK;
                     lastPreamblePktSrcAddr = incoming_preamble->getSrcAddr();
-                    changeDisplayColor(YELLOW);
                     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+                    changeDisplayColor(YELLOW);
                 }
                 // the preamble is not for us
                 else {
                     EV << "node " << address << " : State CCA, message XMAC_PREAMBLE not for me, new state SLEEP." << endl;
                     // ~ better overhearing management? :)
                     cancelEvent(cca_timeout);
-                    scheduleAfter(slotDuration, wakeup);
                     macState = SLEEP;
+                    scheduleAfter(slotDuration, wakeup);
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                     changeDisplayColor(BLACK);
                 }
@@ -315,6 +315,7 @@ void XMac::handleStateEvent(cMessage *msg)
                     cancelEvent(stop_preambles);
                     macState = WAIT_DATA;
                     scheduleAfter(SIMTIME_ZERO, msg);
+                    changeDisplayColor(GREEN);
                 }
                 return;
             }
@@ -328,18 +329,18 @@ void XMac::handleStateEvent(cMessage *msg)
                 // 0.5f* = 5ms
                 if (radio->getRadioMode() == IRadio::RADIO_MODE_RECEIVER) {
                     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-                    changeDisplayColor(YELLOW);
                     EV_DEBUG << "node " << address << " : preamble_phase tx, simTime = " << simTime() << endl;
                     scheduleAfter(0.5f * checkInterval, switch_preamble_phase);
+                    changeDisplayColor(YELLOW);
                 }
                 // 1.0f* = 10ms
                 else if (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER) {
                     if (radio->getTransmissionState() == physicallayer::IRadio::TRANSMISSION_STATE_TRANSMITTING)
                         throw cRuntimeError("checkInterval is too short, transmission not finished");
                     radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
-                    changeDisplayColor(GREEN);
                     EV_DEBUG << "node " << address << " : preamble_phase rx, simTime = " << simTime() << endl;
                     scheduleAfter(1.0f * checkInterval, switch_preamble_phase);
+                    changeDisplayColor(GREEN);
                 }
                 else { ASSERT(false); }
                 return;
@@ -369,9 +370,9 @@ void XMac::handleStateEvent(cMessage *msg)
                 macState = SEND_DATA;
                 cancelEvent(stop_preambles);
                 cancelEvent(switch_preamble_phase);
-                changeDisplayColor(RED);
                 radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
                 txAttempts = 1;
+                changeDisplayColor(RED);
                 return;
             }
             // next is the case of a node receiving 1 preamble or data while in his preamble gaps, ignore, we are sending!
@@ -395,6 +396,7 @@ void XMac::handleStateEvent(cMessage *msg)
                 // send the data packet
                 sendDataPacket();
                 macState = WAIT_TX_DATA_OVER;
+                changeDisplayColor(GREEN);
                 return;
             }
             else if (kind == XMAC_SWITCHING_FINISHED) {
@@ -402,6 +404,7 @@ void XMac::handleStateEvent(cMessage *msg)
                 // send the data packet
                 sendDataPacket();
                 macState = WAIT_TX_DATA_OVER;
+                changeDisplayColor(GREEN);
                 return;
             }
             else {
@@ -499,6 +502,7 @@ void XMac::handleStateEvent(cMessage *msg)
                 EV_DEBUG << "node " << address << " : State SEND_ACK, message XMAC_SEND_ACK, new state WAIT_ACK_TX" << endl;
                 sendMacAck();
                 macState = WAIT_ACK_TX;
+                changeDisplayColor(BLACK);
                 return;
             }
             else
@@ -509,11 +513,11 @@ void XMac::handleStateEvent(cMessage *msg)
             // wait for the ACK to be sent back to the Transmitter
             if (kind == XMAC_ACK_TX_OVER) {
                 EV_DEBUG << "node " << address << " : State WAIT_ACK_TX, message XMAC_ACK_TX_OVER, new state WAIT_DATA" << endl;
-                changeDisplayColor(GREEN);
                 macState = WAIT_DATA;
                 cancelEvent(cca_timeout);
                 scheduleAfter((slotDuration / 2), data_timeout);
                 radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+                changeDisplayColor(GREEN);
                 return;
             }
             else
