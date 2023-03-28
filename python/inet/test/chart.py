@@ -113,13 +113,15 @@ class ChartUpdateTask(UpdateTask):
                 new_file_name = os.path.join(folder, file_name)
                 old_file_name = os.path.join(folder, re.sub("_new", "", file_name))
                 if os.path.isfile(old_file_name):
-                    same = filecmp.cmp(old_file_name, new_file_name, shallow=False)
-                    if same:
+                    new_image = matplotlib.image.imread(new_file_name)
+                    old_image = matplotlib.image.imread(old_file_name)
+                    metric = sewar.rmse(old_image, new_image)
+                    if metric == 0:
                         os.remove(new_file_name)
                     else:
                         os.rename(old_file_name, re.sub("_new", "_old", file_name))
                         os.rename(new_file_name, old_file_name)
-                    return self.task_result_class(self, result="KEEP" if same else "UPDATE")
+                    return self.task_result_class(self, result="KEEP" if metric == 0 else "UPDATE")
                 else:
                     os.rename(new_file_name, old_file_name)
                     return self.task_result_class(self, result="INSERT")
