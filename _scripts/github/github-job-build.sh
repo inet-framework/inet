@@ -22,6 +22,9 @@ cd $GITHUB_WORKSPACE
 
 . setenv -f
 
+# activating ccache
+export PATH=/usr/lib/ccache:$PATH
+
 echo "::group::Enable all features"
 opp_featuretool enable all 2>&1 # redirecting stderr so it doesn't get out of sync with stdout
 echo "::endgroup::"
