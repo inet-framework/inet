@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2023-03-27  André Apitzsch
+
+	Add PacketRateFilter to result filters.
+	ThroughputFilter: Allow disabling 'interval by number of packets'.
+
+2023-03-13  Levente Mészáros
+
+	Added ppm unit.
+
 2023-03-10  aagon
 
 	Add getModuleSomewhereUp template method.

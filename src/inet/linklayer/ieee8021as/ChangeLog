@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2023-03-13  Levente Mészáros
+
+	Changed oscillator compensation to be in ppm.
+
+2023-03-13  Levente Mészáros
+
+	Removed the word factor from oscillatorCompensationFactor.
+
 2023-01-30  Zoltan Bojthe
 
 	Gptp: drop incoming packets with foreign domainNumber ("not for me")

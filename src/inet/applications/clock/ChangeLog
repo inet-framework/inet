@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2023-03-14  Levente Mészáros
+
+	Changed clock synchronization to take the slave and master clock nominal tick lengths into account.
+
+2023-03-13  Levente Mészáros
+
+	Changed oscillator compensation to be in ppm.
+	Removed the word factor from oscillatorCompensationFactor.
+
 2022-12-02  Levente Mészáros
 
 	SimpleClockSynchronizer: Implemented synchronization of oscillator compensation factor.

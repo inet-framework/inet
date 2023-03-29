@@ -1,5 +1,34 @@
 ====== inet-4.x ======
 
+2023-03-22  Levente Mészáros
+
+	CreditBasedGate: Changed setter methods to do nothing if the new value equals with the current.
+	CreditBasedGate: Refactored interpacketgap handling.
+
+2023-03-21  Levente Mészáros
+
+	CreditBasedGate: Removed base class field initialization.
+	CreditBasedGate: Extracted updateCurrentState() method.
+
+2023-03-20  Levente Mészáros
+
+	CreditBasedGate: Moved gate open/close to setCurrentCredit().
+	CreditBasedGate: Added setCurrentCredit/setCurrentCreditGainRate methods to log activity.
+	PeriodicGate: Added guardBandStateChanged signal and guardBandState statistic.
+
+2023-03-16  Levente Mészáros
+
+	CreditBasedGate: Changed to not accumulate credits during the guard band period of the connected periodic gate.
+
+2023-03-16  Zoltan Bojthe
+
+	PeriodicGate: Added parameter test: check duration values larger than 0.
+	PeriodicGate: Optimized read durations NED parameter to clocktime_t vector and use it
+	PeriodicGate: Optimized getInitiallyOpen() returns the stored value instead of rereading NED parameter.
+	PeriodicGate: Removed unnecessary 0 duration value processing.
+	PeriodicGate: Fixed offset processing in initializeGating(): when offset positioning to a duration
+	border, choose the next state with 0 offset. -
+
 2023-03-10  Levente Mészáros
 
 	PeriodicGate: Changed initializeGating to allow the initialOffset to be greater than the total duration.

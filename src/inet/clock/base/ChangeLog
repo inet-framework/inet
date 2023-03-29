@@ -1,5 +1,12 @@
 ====== inet-4.x ======
 
+2023-03-13  Levente Mészáros
+
+	Changed the unit of driftRateChanged statistic to be in PPM.
+	Changed the internal representation of driftRate fields to be in ppm.
+	DriftingOscillatorBase: Added documentation for the driftRate/inverseDriftRate fields, changing
+	the fields' meaning.
+
 2023-02-02  Levente Mészáros
 
 	ClockBase: Added emitClockTimeInterval parameter to allow recording the
