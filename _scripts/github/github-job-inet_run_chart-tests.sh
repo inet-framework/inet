@@ -48,7 +48,7 @@ make -C src msgheaders smheaders
 echo "::endgroup::"
 
 echo "::group::Run tests"
-cd showcases
+cd showcases/wireless/sensornetwork
 # This is a magical "process substitution" for piping stderr into tee...
 # Source: https://stackoverflow.com/a/692407/635587
  # the "| cat" is there to hide the exit code temporarily
