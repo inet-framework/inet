@@ -675,7 +675,7 @@ utils.postconfigure_plot(props)
 
 plt.xticks([0,60,120,180,240,300,360])
 
-plt.grid(b=True, which='major', axis='both', linestyle='--')
+plt.grid(which='major', axis='both', linestyle='--')
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -1309,7 +1309,7 @@ utils.postconfigure_plot(props)
 
 plt.xticks([0,60,120,180,240,300,360])
 
-plt.grid(b=True, which='major', axis='both', linestyle='--')
+plt.grid(which='major', axis='both', linestyle='--')
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -1943,7 +1943,7 @@ utils.postconfigure_plot(props)
 
 plt.xticks([0,60,120,180,240,300,360])
 
-plt.grid(b=True, which='major', axis='both', linestyle='--')
+plt.grid(which='major', axis='both', linestyle='--')
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -2577,7 +2577,7 @@ utils.postconfigure_plot(props)
 
 plt.xticks([0,60,120,180,240,300,360])
 
-plt.grid(b=True, which='major', axis='both', linestyle='--')
+plt.grid(which='major', axis='both', linestyle='--')
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -3211,7 +3211,7 @@ utils.postconfigure_plot(props)
 
 plt.xticks([0,60,120,180,240,300,360])
 
-plt.grid(b=True, which='major', axis='both', linestyle='--')
+plt.grid(which='major', axis='both', linestyle='--')
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
