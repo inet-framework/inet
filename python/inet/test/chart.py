@@ -2,6 +2,7 @@ import filecmp
 import io
 import logging
 import matplotlib
+import numpy
 import sewar
 
 import omnetpp
@@ -29,7 +30,7 @@ class ChartTestTask(TestTask):
     def get_parameters_string(self, **kwargs):
         return self.analysis_file_name + ": " + self.chart_name
 
-    def run_protected(self, keep_charts=False, output_stream=sys.stdout, **kwargs):
+    def run_protected(self, keep_charts=True, output_stream=sys.stdout, **kwargs):
         workspace = omnetpp.scave.analysis.Workspace(get_workspace_path("."), [])
         analysis = omnetpp.scave.analysis.load_anf_file(self.simulation_project.get_full_path(self.analysis_file_name))
         for chart in analysis.collect_charts():
@@ -45,8 +46,13 @@ class ChartTestTask(TestTask):
                     new_image = matplotlib.image.imread(new_file_name)
                     old_image = matplotlib.image.imread(old_file_name)
                     metric = sewar.rmse(old_image, new_image)
-                    if not keep_charts:
+                    if metric == 0 or not keep_charts:
                         os.remove(new_file_name)
+                    else:
+                        diff_file_name = os.path.join(folder, re.sub("_new", "_diff", file_name))
+                        print(diff_file_name)
+                        image_diff = numpy.abs(new_image - old_image)
+                        matplotlib.image.imsave(diff_file_name, image_diff)
                     result = "PASS" if metric == 0 else "FAIL"
                     reason = "Metric: " + str(metric) if result == "FAIL" else None
                     return self.task_result_class(self, result=result, reason=reason)
@@ -100,7 +106,7 @@ class ChartUpdateTask(UpdateTask):
     def get_parameters_string(self, **kwargs):
         return self.analysis_file_name + ": " + self.chart_name
 
-    def run_protected(self, keep_charts=False, **kwargs):
+    def run_protected(self, keep_charts=True, **kwargs):
         workspace = omnetpp.scave.analysis.Workspace(get_workspace_path("."), [])
         analysis = omnetpp.scave.analysis.load_anf_file(self.simulation_project.get_full_path(self.analysis_file_name))
         for chart in analysis.collect_charts():
@@ -119,7 +125,13 @@ class ChartUpdateTask(UpdateTask):
                     if metric == 0:
                         os.remove(new_file_name)
                     else:
-                        os.rename(old_file_name, re.sub("_new", "_old", file_name))
+                        if keep_charts:
+                            os.rename(old_file_name, re.sub("_new", "_old", file_name))
+                            diff_file_name = os.path.join(folder, re.sub("_new", "_diff", file_name))
+                            image_diff = numpy.abs(new_image - old_image)
+                            matplotlib.image.imsave(diff_file_name, image_diff)
+                        else:
+                            os.remove(old_file_name)
                         os.rename(new_file_name, old_file_name)
                     return self.task_result_class(self, result="KEEP" if metric == 0 else "UPDATE")
                 else:
