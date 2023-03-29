@@ -464,9 +464,30 @@ class Ipv4 : public cSimpleModule
   MacAddress selfAddress;
 
 public:
+  void initialize(int stage);
+  const Protocol *getNextProtocol(Packet *packet);
   void sendDown(Packet *packet, Ipv4Address nextHopAddress, int interfaceId);
   MacAddress resolveMacAddress(Ipv4Address a);
 };
+
+//!ProtocolRegistrationExample
+void Ipv4::initialize(int stage)
+{
+    if (stage == INITSTAGE_NETWORK_LAYER) {
+        registerService(Protocol::ipv4, gate("transportIn"), gate("transportOut"));
+        registerProtocol(Protocol::ipv4, gate("queueOut"), gate("queueIn"));
+    }
+}
+//!End
+
+//!NextProtocolExample
+const Protocol *Ipv4::getNextProtocol(Packet *packet)
+{
+    auto ipv4Header = packet->peekAtFront<Ipv4Header>();
+    auto ipProtocolId = ipv4Header->getProtocolId();
+    return ProtocolGroup::getIpProtocolGroup()->getProtocol(ipProtocolId);
+}
+//!End
 
 //!PacketTaggingExample
 void Ipv4::sendDown(Packet *packet, Ipv4Address nextHopAddr, int interfaceId)

@@ -13,6 +13,7 @@ Release: |release|
 
    ch-introduction
    ch-packets
+   ch-tags
    ch-sockets
    ch-testing
    ch-authors-guide
