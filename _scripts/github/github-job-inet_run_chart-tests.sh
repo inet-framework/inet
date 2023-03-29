@@ -57,6 +57,8 @@ inet_run_chart_tests -m release > >(tee runtest.out) 2> >(tee runtest.err >&2) |
 EXITCODE="${PIPESTATUS[0]}"
 echo "::endgroup::"
 
+cp -r /root/workspace/inet $GITHUB_WORKSPACE # copy _new.png and _diff.png files back
+
 ERRORS=$(cat runtest.err)
 if [ -n "$ERRORS" ]
 then
