@@ -58,6 +58,6 @@ jobs:
         with:
           name: chart-test-results
           path: |
-            **/*_new.png
-            **/*_diff.png
+            ${{ github.workspace }}/**/*_new.png
+            ${{ github.workspace }}/**/*_diff.png
 
