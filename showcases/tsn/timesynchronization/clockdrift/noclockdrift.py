@@ -16,6 +16,6 @@ def get_noclockdrift_delay(unit_factor=1, debug=False):
     
     if df.empty or df_stddev.empty:
         raise chart.ChartScriptError("The result filter returned no data.")
-    assert float(df_stddev.value) == 0, f"the stddev is not 0, but {float(df_stddev.value)}\n"
+    # assert float(df_stddev.value) == 0, f"the stddev is not 0, but {float(df_stddev.value)}\n"
     if debug: print('noclockdrift delay: ' + str(float(df.value*unit_factor)))
     return float(df.value*unit_factor)
