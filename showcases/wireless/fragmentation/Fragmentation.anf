@@ -1347,7 +1347,7 @@ utils.postconfigure_plot(props)
 
 ax = plt.gca()
 handles, labels = ax.get_legend_handles_labels()
-modifiedplot.quick_reorder_legend(handles, labels, [1,0,2,3], markerscale=2)
+modifiedplot.create_custom_legend(props, handles=handles, labels=labels, order=[1,0,2,3], markerscale=2)
 
 plt.grid(linestyle='--')
 plt.xticks(range(0,2500,200))
@@ -2010,7 +2010,7 @@ ax = plt.gca()
 
 handles, labels = ax.get_legend_handles_labels()
 
-modifiedplot.quick_reorder_legend(handles, labels, [1,0,2,3], markerscale=2)
+modifiedplot.create_custom_legend(props, handles=handles, labels=labels, order=[1,0,2,3], markerscale=2)
 
 plt.grid(linestyle='--')
 plt.xticks(range(0,6100,500))
