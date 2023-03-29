@@ -7,6 +7,7 @@
 
 package inet.linklayer.ieee8021q;
 
+import inet.queueing.common.BackPressureBarrier;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IPacketClassifier;
 import inet.queueing.contract.IPacketFilter;
@@ -64,6 +65,9 @@ module Ieee8021qFilter like IPacketFilter
         multiplexer: PacketMultiplexer {
             @display("p=1700,100");
         }
+        barrier: BackPressureBarrier {
+            @display("p=1900,100");
+        }
     connections allowunconnected:
         in --> { @display("m=w"); } --> classifier.in;
         for i=0..numStreams-1 {
@@ -84,5 +88,6 @@ module Ieee8021qFilter like IPacketFilter
             meter[i].out --> flowFilter[i].in;
             flowFilter[i].out --> multiplexer.in++;
         }
-        multiplexer.out --> { @display("m=e"); } --> out;
+        multiplexer.out --> barrier.in;
+        barrier.out --> { @display("m=e"); } --> out;
 }
