@@ -18,10 +18,17 @@ jobs:
       - uses: actions/checkout@v3
       - name: Pull Docker image
         run: docker pull ghcr.io/inet-framework/ci-inet:6.0.1-230320
+      - run: mkdir /home/runner/work/ccache
+      - uses: actions/cache/restore@v3
+        with:
+          path: /home/runner/work/ccache
+          key: native-${{ matrix.mode }}-ccache-${{ github.run_id }}
+          # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
+          restore-keys: native-${{ matrix.mode }}-ccache
       - name: Build (native)
         run: |
           docker run -i --env TARGET_PLATFORM=linux --env MODE=${{ matrix.mode }} --env GITHUB_WORKSPACE \
-            -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE \
+            -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE -v /home/runner/work/ccache:/root/.ccache \
             ghcr.io/inet-framework/ci-inet:6.0.1-230320 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-build.sh
       - uses: actions/upload-artifact@v3
         with:
