@@ -46,3 +46,10 @@ jobs:
           docker run -i --env MODE=debug --env GITHUB_WORKSPACE \
             -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE \
             ghcr.io/inet-framework/ci-inet:6.0.1-230320 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-inet_run_chart-tests.sh
+      - uses: actions/upload-artifact@v3
+        with:
+          name: charts-test-results
+          path: |
+            path/**/*_new.png
+            path/**/*_diff.png
+
