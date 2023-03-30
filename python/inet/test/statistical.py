@@ -27,14 +27,16 @@ class StatisticalTestTask(SimulationTestTask):
         working_directory = simulation_config.working_directory
         config = simulation_config.config
         current_results_directory = simulation_project.get_full_path(os.path.join(working_directory, "results"))
-        stored_results_directory = simulation_project.get_full_path(os.path.join("tests/statistical/results", working_directory))
+        stored_results_directory = simulation_project.get_full_path(os.path.join("statistics", working_directory))
         scalars_match = False
         for current_scalar_result_file_name in glob.glob(os.path.join(current_results_directory, "*.sca")):
             if re.search(config, current_scalar_result_file_name):
+                logger.debug(f"Reading result file {current_scalar_result_file_name}")
                 current_df = read_result_files(current_scalar_result_file_name)
                 scalar_file_name = os.path.basename(current_scalar_result_file_name)
                 stored_scalar_result_file_name = os.path.join(stored_results_directory, scalar_file_name)
                 if os.path.isfile(stored_scalar_result_file_name):
+                    logger.debug(f"Reading result file {stored_scalar_result_file_name}")
                     stored_df = read_result_files(stored_scalar_result_file_name)
                     current_df = get_scalars(current_df)
                     if "runID" in current_df:
@@ -95,11 +97,12 @@ def get_statistical_result_sim_time_limit(simulation_config, run=0):
             return "1ps"
 
 def get_statistical_test_tasks(sim_time_limit=get_statistical_result_sim_time_limit, **kwargs):
-    return get_simulation_tasks(name="statistical test", sim_time_limit=sim_time_limit, simulation_task_class=StatisticalTestTask, multiple_simulation_tasks_class=MultipleSimulationTestTasks, **kwargs)
+    # remove run=0 parameter and add the same to the github-job-inet_run_statistical-tests.sh
+    return get_simulation_tasks(name="statistical test", run=0, sim_time_limit=sim_time_limit, simulation_task_class=StatisticalTestTask, multiple_simulation_tasks_class=MultipleSimulationTestTasks, **kwargs)
 
 def run_statistical_tests(**kwargs):
     multiple_statistical_test_tasks = get_statistical_test_tasks(**kwargs)
-    return multiple_statistical_test_tasks.run(**kwargs)
+    return multiple_statistical_test_tasks.run(extra_args=["--**.param-recording=false"], **kwargs)
 
 class StatisticalResultsUpdateTask(SimulationTask):
     def __init__(self, simulation_config, run, name="statistical results update", **kwargs):
@@ -113,7 +116,7 @@ class StatisticalResultsUpdateTask(SimulationTask):
         simulation_project = self.simulation_config.simulation_project
         working_directory = self.simulation_config.working_directory
         source_results_directory = simulation_project.get_full_path(os.path.join(working_directory, "results"))
-        target_results_directory = simulation_project.get_full_path(os.path.join("tests/statistical/results", working_directory))
+        target_results_directory = simulation_project.get_full_path(os.path.join("statistics", working_directory))
         if not os.path.exists(target_results_directory):
             os.makedirs(target_results_directory)
         for scalar_result_file_name in glob.glob(os.path.join(source_results_directory, "*.sca")):
@@ -125,4 +128,4 @@ def get_update_statistical_results_tasks(**kwargs):
 
 def update_statistical_results(sim_time_limit=get_statistical_result_sim_time_limit, **kwargs):
     multiple_update_statistical_results_tasks = get_update_statistical_results_tasks(sim_time_limit=sim_time_limit, **kwargs)
-    return multiple_update_statistical_results_tasks.run(sim_time_limit=sim_time_limit, **kwargs)
+    return multiple_update_statistical_results_tasks.run(sim_time_limit=sim_time_limit, extra_args=["--**.param-recording=false"], **kwargs)
