@@ -99,7 +99,7 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
                 num_runs = int(result.stdout)
             else:
                 raise Exception("Cannot determine number of runs")
-        sim_time_limit = config_dict.get("sim_time_limit")
+        sim_time_limit = config_dict.get("sim_time_limit", config_dicts["General"].get("sim_time_limit"))
         description = config_dict["description"]
         description_abstract = (re.search("\((a|A)bstract\)", description) is not None) if description else False
         abstract = (config_dict["network"] is None and config_dict["config"] == "General") or config_dict["abstract_config"] or description_abstract
