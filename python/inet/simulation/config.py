@@ -50,7 +50,21 @@ def get_num_runs_fast(ini_path):
     file.close()
     return None if num_runs_fast_regex.search(text) else 1
 
-# KLUDGE TODO replace this whole magic with a Python binding to the C++ configuration reader
+# KLUDGE TODO replace this with a Python binding to the C++ configuration reader
+def get_sim_time_limit(config_dicts, config):
+    config_dict = config_dicts[config]
+    if "sim_time_limit" in config_dict:
+        return config_dict["sim_time_limit"]
+    if "extends" in config_dict:
+        extends = config_dict["extends"]
+        for base_config in extends.split(","):
+            if base_config in config_dicts:
+                sim_time_limit = get_sim_time_limit(config_dicts, base_config)
+                if sim_time_limit:
+                    return sim_time_limit
+    return config_dicts["General"].get("sim_time_limit")
+
+# KLUDGE TODO replace this with a Python binding to the C++ configuration reader
 def collect_ini_file_simulation_configs(simulation_project, ini_path):
     def create_config_dict(config):
         return {"config": config, "abstract_config": False, "expected_result": "DONE", "user_interface": None, "description": None, "network": None}
@@ -67,6 +81,9 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
             config = match.group(2) or match.group(3)
             config_dict = create_config_dict(config)
             config_dicts[config] = config_dict
+        match = re.match(" *extends *= *(\w+)", line)
+        if match:
+            config_dict["extends"] = match.group(1)
         match = re.match(" *user-interface *= \"*(\w+)\"", line)
         if match:
             config_dict["user_interface"] = match.group(1)
@@ -100,7 +117,7 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
                 num_runs = int(result.stdout)
             else:
                 raise Exception("Cannot determine number of runs")
-        sim_time_limit = config_dict.get("sim_time_limit", config_dicts["General"].get("sim_time_limit"))
+        sim_time_limit = get_sim_time_limit(config_dicts, config)
         description = config_dict["description"]
         description_abstract = (re.search("\((a|A)bstract\)", description) is not None) if description else False
         abstract = (config_dict["network"] is None and config_dict["config"] == "General") or config_dict["abstract_config"] or description_abstract
