@@ -310,7 +310,7 @@
 /showcases/wireless/qos/,     -f omnetpp.ini -c NonQos -r 0,                                       10s,            ab73-19d4/tplx;fddd-9d77/~tNl;412f-f934/~tND;2970-2baa/tyf, PASS,    wireless Ipv4
 /showcases/wireless/qos/,     -f omnetpp.ini -c Qos -r 0,                                        10s,            10c8-4277/tplx;af1c-eb97/~tNl;6441-9f1f/~tND;bd6e-c842/tyf, PASS,    wireless Ipv4
 
-/showcases/wireless/ratecontrol/,    -f omnetpp.ini -c NoControl -r 0,                        14s,            7ee9-503a/tplx;0816-e58f/~tNl;95a3-d148/~tND;659c-8cf2/tyf, PASS,    wireless Ipv4
+/showcases/wireless/ratecontrol/,    -f omnetpp.ini -c NoRateControl -r 0,                        14s,            7ee9-503a/tplx;0816-e58f/~tNl;95a3-d148/~tND;659c-8cf2/tyf, PASS,    wireless Ipv4
 /showcases/wireless/ratecontrol/,    -f omnetpp.ini -c AarfRateControl -r 0,                  12s,            a7bc-05bb/tplx;9de0-4dd3/~tNl;b5e0-5707/~tND;ed4f-a856/tyf, PASS,    wireless Ipv4
 
 # /showcases/wireless/scaling/,        -f omnetpp.ini -c PingBase -r 0,               100s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,   # PingBase extended
@@ -330,7 +330,7 @@
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c LMac -r 0,                   25s,         9d51-0951/tplx;ef40-a9e8/~tNl;2f76-b76a/tyf, PASS,    wireless EthernetMac Ipv4
 # /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticBase -r 0,          25s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,   # StatisticBase extended
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticBMac -r 100,          25s,         171b-e9a6/tplx;d5e3-49c0/~tNl;29dc-6f6d/tyf, PASS,    wireless EthernetMac Ipv4
-/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticXMac -r 100,          25s,         f4e8-9e89/tplx;400c-087c/~tNl;95c6-f7d9/tyf, PASS,    wireless Ipv4
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticXMac -r 100,          25s,         9271-1704/tplx;1890-24d8/~tNl;95c6-f7d9/tyf, PASS,    wireless Ipv4
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticLMac -r 100,          25s,         60e4-3fd6/tplx;6f72-dc77/~tNl;dc00-772a/tyf, PASS,    wireless EthernetMac Ipv4
 
 /showcases/wireless/sensornetwork/,  -f extras.ini -c BMacAodv -r 0,                   25s,         2146-c8a6/tplx;4743-8c64/~tNl;0e6c-651a/tyf, PASS,    wireless Ipv4
