@@ -17,6 +17,7 @@ src/inet/opp_defines.h
 precompiled_*.h.*
 /3rdparty
 /media
+/statistics
 **/MoBAN_Pattern*.txt
 python/inet/test/fingerprint/all_fingerprints.json
 
