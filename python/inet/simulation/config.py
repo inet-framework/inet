@@ -50,6 +50,7 @@ def get_num_runs_fast(ini_path):
     file.close()
     return None if num_runs_fast_regex.search(text) else 1
 
+# KLUDGE TODO replace this whole magic with a Python binding to the C++ configuration reader
 def collect_ini_file_simulation_configs(simulation_project, ini_path):
     def create_config_dict(config):
         return {"config": config, "abstract_config": False, "expected_result": "DONE", "user_interface": None, "description": None, "network": None}
