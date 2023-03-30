@@ -1,3 +1,4 @@
+import difflib
 import glob
 import logging
 import pandas
@@ -43,6 +44,14 @@ class StatisticalTestTask(SimulationTestTask):
                         stored_df.drop("runID", axis=1,  inplace=True)
                     scalars_match = current_df.equals(stored_df)
                     if not scalars_match:
+                        with open(current_scalar_result_file_name, "r") as file:
+                            current_scalar_result_file = file.readlines()
+                        with open(stored_scalar_result_file_name, "r") as file:
+                            stored_scalar_result_file = file.readlines()
+                        scalar_result_diff_file_name = re.sub(".sca", ".diff", stored_scalar_result_file_name)
+                        with open(scalar_result_diff_file_name, "w") as file:
+                            scalar_diff = "".join(difflib.ndiff(current_scalar_result_file, stored_scalar_result_file))
+                            file.write(scalar_diff)
                         if current_df.empty:
                             return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="FAIL", reason="Current statistical results are empty")
                         elif stored_df.empty:
