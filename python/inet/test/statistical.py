@@ -77,13 +77,8 @@ class StatisticalTestTask(SimulationTestTask):
         return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="PASS")
     
 def get_statistical_result_sim_time_limit(simulation_config, run=0):
-    ini_file_path = simulation_config.simulation_project.get_full_path(os.path.join(simulation_config.working_directory, simulation_config.ini_file))
-    file = open(ini_file_path, "r", encoding="utf-8")
-    text = file.read()
-    file.close()
-    match = re.search(r"sim-time-limit *= *([\w.]+ *\w*)", text)
-    if match:
-        return match.group(1)
+    if simulation_config.sim_time_limit:
+        return simulation_config.sim_time_limit
     else:
         simulation_project = simulation_config.simulation_project
         correct_fingerprint_store = get_correct_fingerprint_store(simulation_project)
