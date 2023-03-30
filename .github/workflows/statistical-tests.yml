@@ -1,0 +1,61 @@
+name: Statistical tests
+
+on:
+  schedule:
+      # https://crontab.guru/#0_16_*_*_6
+    - cron: "0 16 * * 6" # “At 16:00 on Saturday.”
+  workflow_dispatch:
+    # nothing
+
+jobs:
+  build-native:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mode: ["release"]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v3
+      - name: Pull Docker image
+        run: docker pull ghcr.io/inet-framework/ci-inet:6.0.1-230320
+      - run: mkdir /home/runner/work/ccache
+      - uses: actions/cache/restore@v3
+        with:
+          path: /home/runner/work/ccache
+          key: native-${{ matrix.mode }}-ccache-${{ github.run_id }}
+          # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
+          restore-keys: native-${{ matrix.mode }}-ccache
+      - name: Build (native)
+        run: |
+          docker run -i --env TARGET_PLATFORM=linux --env MODE=${{ matrix.mode }} --env GITHUB_WORKSPACE \
+            -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE -v /home/runner/work/ccache:/root/.ccache \
+            ghcr.io/inet-framework/ci-inet:6.0.1-230320 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-build.sh
+      - uses: actions/upload-artifact@v3
+        with:
+          name: libinet-so
+          path: ${{ github.workspace }}/src/libINET*.so
+
+  more-tests:
+    needs: build-native
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: libinet-so
+          path: ${{ github.workspace }}/src/
+      - name: Pull Docker image
+        run: docker pull ghcr.io/inet-framework/ci-inet:6.0.1-230320
+      - name: Run tests
+        run: |
+          docker run -i --env MODE=debug --env GITHUB_WORKSPACE \
+            -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE \
+            ghcr.io/inet-framework/ci-inet:6.0.1-230320 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-inet_run_statistical-tests.sh
+      - uses: actions/upload-artifact@v3
+        if: always() # even if the test failed, of course
+        with:
+          name: statistical-test-results
+          path: ${{ github.workspace }}/statistics/**/*.diff
+
