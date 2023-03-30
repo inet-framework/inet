@@ -14,12 +14,13 @@ from inet.simulation.project import *
 logger = logging.getLogger(__name__)
 
 class SimulationConfig:
-    def __init__(self, simulation_project, working_directory, ini_file="omnetpp.ini", config="General", num_runs=1, abstract=False, expected_result="DONE", user_interface="Cmdenv", description=None):
+    def __init__(self, simulation_project, working_directory, ini_file="omnetpp.ini", config="General", num_runs=1, sim_time_limit=None, abstract=False, expected_result="DONE", user_interface="Cmdenv", description=None):
         self.simulation_project = simulation_project
         self.working_directory = working_directory
         self.ini_file = ini_file
         self.config = config
         self.num_runs = num_runs
+        self.sim_time_limit = sim_time_limit
         self.abstract = abstract
         self.emulation = working_directory.find("emulation") != -1
         self.expected_result = expected_result
@@ -80,6 +81,9 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
         match = re.match("network *= *(.*)", line)
         if match:
             config_dict["network"] = match.group(1)
+        match = re.match("sim-time-limit *= *(.*)", line)
+        if match:
+            config_dict["sim_time_limit"] = match.group(1)
     general_config_dict = config_dicts["General"]
     for config, config_dict in config_dicts.items():
         config = config_dict["config"]
@@ -95,12 +99,13 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
                 num_runs = int(result.stdout)
             else:
                 raise Exception("Cannot determine number of runs")
+        sim_time_limit = config_dict.get("sim_time_limit")
         description = config_dict["description"]
         description_abstract = (re.search("\((a|A)bstract\)", description) is not None) if description else False
         abstract = (config_dict["network"] is None and config_dict["config"] == "General") or config_dict["abstract_config"] or description_abstract
         expected_result = config_dict["expected_result"]
         user_interface = config_dict["user_interface"] or general_config_dict["user_interface"]
-        simulation_config = SimulationConfig(simulation_project, os.path.relpath(working_directory, simulation_project.get_full_path(".")), ini_file=ini_file, config=config, num_runs=num_runs, abstract=abstract, expected_result=expected_result, user_interface=user_interface, description=description)
+        simulation_config = SimulationConfig(simulation_project, os.path.relpath(working_directory, simulation_project.get_full_path(".")), ini_file=ini_file, config=config, sim_time_limit=sim_time_limit, num_runs=num_runs, abstract=abstract, expected_result=expected_result, user_interface=user_interface, description=description)
         simulation_configs.append(simulation_config)
     return simulation_configs
 
