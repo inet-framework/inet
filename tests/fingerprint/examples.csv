@@ -173,13 +173,13 @@
 /examples/inet/multicast/,           -f omnetpp.ini -c General -r 0,                2000s,           f11d-f6fd/tplx;3ac0-3950/~tNl;b4b8-940d/~tND;e090-df3c/tyf, PASS, igmp Ipv4
 
 /examples/inet/nclients/,            -f basicHTTP.ini -c General -r 0,              500000s,         b1a9-695d/tplx;3a23-ecff/~tNl;f95e-ca32/tyf, PASS, Ipv4
-/examples/inet/nclients/,            -f filetransfer.ini -c General -r 0,           50s,             086c-734d/tplx;2aa1-b0d3/~tNl;24dc-e826/~tND;c15a-875a/tyf, PASS, Ipv4
+/examples/inet/nclients/,            -f filetransfer.ini -c Filetransfer -r 0,      50s,             086c-734d/tplx;2aa1-b0d3/~tNl;24dc-e826/~tND;c15a-875a/tyf, PASS, Ipv4
 /examples/inet/nclients/,            -f nclients2.ini -c General -r 0,              50s,             cdb7-ef9b/tplx;f235-77df/~tNl;de63-86f7/tyf, PASS, Ipv4
 /examples/inet/nclients/,            -f nclients2.ini -c General -r 1,              50s,             eaed-ee10/tplx;9181-e4d2/~tNl;c5de-dd29/tyf, PASS, Ipv4
-/examples/inet/nclients/,            -f omnetpp-ping.ini -c General -r 0,           10s,             c7fa-2d9e/tplx;67a4-ba00/~tNl;b76e-6fe9/tyf, PASS, Ipv4
+/examples/inet/nclients/,            -f omnetpp-ping.ini -c Ping -r 0,              10s,             c7fa-2d9e/tplx;67a4-ba00/~tNl;b76e-6fe9/tyf, PASS, Ipv4
 /examples/inet/nclients/,            -f omnetpp.ini -c inet__inet -r 0,             200s,            948f-3ee1/tplx;658a-8ff3/~tNl;5e2c-57d6/tyf, PASS, Ipv4
 /examples/inet/nclients/,            -f omnetpp.ini -c General -r 0,                3000s,           e1ea-7739/tplx;658a-8ff3/~tNl;29e7-d87e/tyf, PASS, Ipv4
-/examples/inet/nclients/,            -f video.ini -c General -r 0,                  50s,             1283-585d/tplx;54ff-5a96/~tNl;5a36-258b/~tND;16bc-b91a/tyf, PASS, Ipv4
+/examples/inet/nclients/,            -f video.ini -c Video -r 0,                    50s,             1283-585d/tplx;54ff-5a96/~tNl;5a36-258b/~tND;16bc-b91a/tyf, PASS, Ipv4
 
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Udp -r 0,          100s,            2949-e8ce/tplx;b44e-17d8/~tNl;c2a6-b2ba/~tND;f42c-5973/tyf, PASS, Ipv4
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Tcp -r 0,          100s,            5a1d-d203/tplx;0309-b513/~tNl;5b37-e188/~tND;a023-613e/tyf, PASS, Ipv4
