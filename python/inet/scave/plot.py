@@ -121,7 +121,7 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label, global_style=No
 
     p.ylabel(utils.make_chart_title(df, ["title"]))
     
-def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, global_style=None, share_axes=True, debug=False):
+def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, global_style=None, share_axes='auto', debug=False):
     """
     Modified version of the built-in plot_vectors_separate() function, with the additional functionality
     of ordering the dataframe before plotting, based on the 'order' column. The order of the line colors and
@@ -158,10 +158,16 @@ def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, global
             style_dict = eval(t.additional_style)
             for j in style_dict.items():
                 style[j[0]] = j[1]
-        if share_axes:
+        if share_axes == 'auto' or share_axes == 'x':
             share_ax_dict = {'sharex': ax}
-        else:
+        elif share_axes == 'y':
+            share_ax_dict = {'sharey': ax}
+        elif share_axes == 'both':
+            share_ax_dict = {'sharex': ax, 'sharey': ax}
+        elif share_axes == 'none':
             share_ax_dict = {}
+        else:
+            assert False, "wrong parameter for share_axes (possible values: auto (default), x, y, both, none"
         if debug: print("share_axes:", share_axes, "share_ax_dict:", share_ax_dict)
         ax = plt.subplot(df.shape[0], 1, i+1, **share_ax_dict)
 
