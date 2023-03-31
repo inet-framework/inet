@@ -70,7 +70,7 @@ def add_global_style_if_needed(global_style, style, debug):
         style.update(global_style)
         if debug: print('added. "style" dict: ', style)
 
-def plot_vectors(df, props, legend_func=utils.make_legend_label, global_style=None, debug=False):
+def plot_vectors(df, props, legend_func=utils.make_legend_label, global_style=None, custom_cycle=None, debug=False):
     """
     Modified version of the built-in plot_vectors() function, with the additional functionality
     of ordering the dataframe before plotting, based on the 'order' column. The order of the line colors and
@@ -137,6 +137,8 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label, global_style=No
             for i in style_dict.items():
                 style[i[0]] = i[1]
         # print("style:", style)
+        if custom_cycle is not None:
+            plt.rc('axes', prop_cycle=custom_cycle)
         p.plot(t.vectime, t.vecvalue, label=legend_func(legend_cols, t, props), **style)
 
     title = get_prop("title") or utils.make_chart_title(df, title_cols)
