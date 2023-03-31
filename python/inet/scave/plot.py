@@ -10,6 +10,7 @@ import colorsys
 import matplotlib as mpl
 import inspect
 import math
+from cycler import cycler
 import logging
 import inet.common.util
 from omnetpp.scave.utils import make_legend_label
@@ -38,6 +39,20 @@ def fade_color(color, fakealpha):
      def lerp(a, b, t):
          return a + (b-a)*t
      return (lerp(b[0], c[0], fakealpha), lerp(b[1], c[1], fakealpha), lerp(b[2], c[2], fakealpha))
+ 
+def get_faded_color_cycle(cycle, fade_factor, debug=False):
+     if debug: print("orig cycle:", cycle, "fade_factor:", fade_factor)
+     # for i in cycle.by_key()['color']:
+     #     print(i)
+     new_colors = []
+     for i, item in enumerate(cycle.by_key()['color']):
+        print("i", i, "item", item)
+        new_colors.append(fade_color(item, 0.3))
+     print(new_colors)
+     new_cycle = cycler('color', new_colors)
+     print(new_cycle)
+     
+     return new_cycle
 
 
 # debug = False
