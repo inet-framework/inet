@@ -30,17 +30,17 @@ class StatisticalTestTask(SimulationTestTask):
         stored_results_directory = simulation_project.get_full_path(os.path.join("statistics", working_directory))
         scalars_match = False
         for current_scalar_result_file_name in glob.glob(os.path.join(current_results_directory, "*.sca")):
-            if re.search(config, current_scalar_result_file_name):
+            if re.search("/" + config + "-#", current_scalar_result_file_name):
                 logger.debug(f"Reading result file {current_scalar_result_file_name}")
                 current_df = read_result_files(current_scalar_result_file_name)
+                current_df = get_scalars(current_df)
+                if "runID" in current_df:
+                    current_df.drop("runID", axis=1,  inplace=True)
                 scalar_file_name = os.path.basename(current_scalar_result_file_name)
                 stored_scalar_result_file_name = os.path.join(stored_results_directory, scalar_file_name)
                 if os.path.isfile(stored_scalar_result_file_name):
                     logger.debug(f"Reading result file {stored_scalar_result_file_name}")
                     stored_df = read_result_files(stored_scalar_result_file_name)
-                    current_df = get_scalars(current_df)
-                    if "runID" in current_df:
-                        current_df.drop("runID", axis=1,  inplace=True)
                     stored_df = get_scalars(stored_df)
                     if "runID" in stored_df:
                         stored_df.drop("runID", axis=1,  inplace=True)
