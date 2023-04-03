@@ -213,6 +213,9 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol, public queuei
         YELLOW = 5
     };
 
+    /** @brief Internal function: state machine */
+    void handleStateEvent(cMessage *msg);
+
     /** @brief Internal function to change the color of the node */
     void changeDisplayColor(XMAC_COLORS color);
 

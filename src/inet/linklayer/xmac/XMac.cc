@@ -194,11 +194,17 @@ void XMac::sendMacAck()
  */
 void XMac::handleSelfMessage(cMessage *msg)
 {
+    handleStateEvent(msg);
+}
+
+void XMac::handleStateEvent(cMessage *msg)
+{
+    short kind = msg->getKind();
     MacAddress address = networkInterface->getMacAddress();
 
     switch (macState) {
         case INIT:
-            if (msg->getKind() == XMAC_START_XMAC) {
+            if (kind == XMAC_START_XMAC) {
                 EV_DEBUG << "State INIT, message XMAC_START, new state SLEEP" << endl;
                 changeDisplayColor(BLACK);
                 radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
@@ -208,7 +214,7 @@ void XMac::handleSelfMessage(cMessage *msg)
             }
             break;
         case SLEEP:
-            if (msg->getKind() == XMAC_WAKE_UP) {
+            if (kind == XMAC_WAKE_UP) {
                 EV_DEBUG << "node " << address << " : State SLEEP, message XMAC_WAKEUP, new state CCA, simTime "
                          << simTime() << " to " << simTime() + 1.7f * checkInterval << endl;
                 // this CCA is useful when in RX to detect preamble and has to make room for
@@ -220,7 +226,7 @@ void XMac::handleSelfMessage(cMessage *msg)
                 return;
             }
             // we receive an ACK back but it is too late
-            else if (msg->getKind() == XMAC_ACK) {
+            else if (kind == XMAC_ACK) {
                 EV_DEBUG << "node " << address << " : State SLEEP, receive an XMAC_ACK, ignored" << endl;
                 nbMissedAcks++;
                 delete msg;
@@ -228,12 +234,12 @@ void XMac::handleSelfMessage(cMessage *msg)
             }
             // received messages prior real-switching to SLEEP? I'm sorry, out
             else {
-                EV_DEBUG << "node " << address << " : State SLEEP, receive message with kind=" << msg->getKind() << ", ignored" << endl;
+                EV_DEBUG << "node " << address << " : State SLEEP, receive message with kind=" << kind << ", ignored" << endl;
                 return;
             }
             break;
         case CCA:
-            if (msg->getKind() == XMAC_CCA_TIMEOUT) {
+            if (kind == XMAC_CCA_TIMEOUT) {
                 // channel is clear and we wanna SEND
                 if (!txQueue->isEmpty()) {
                     EV_DEBUG << "node " << address << " : State CCA, message XMAC_CCA_TIMEOUT, new state SEND_PREAMBLE" << endl;
@@ -258,7 +264,7 @@ void XMac::handleSelfMessage(cMessage *msg)
             }
             // during CCA, we received a preamble. Go to state WAIT_DATA and
             // schedule the timeout.
-            else if (msg->getKind() == XMAC_PREAMBLE) {
+            else if (kind == XMAC_PREAMBLE) {
                 auto incoming_preamble = check_and_cast<Packet *>(msg)->peekAtFront<XMacControlFrame>();
 
                 // preamble is for me
@@ -287,7 +293,7 @@ void XMac::handleSelfMessage(cMessage *msg)
             }
             // in case we get an ACK, we simply discard it, because it means the end
             // of another communication
-            else if (msg->getKind() == XMAC_ACK) {
+            else if (kind == XMAC_ACK) {
                 EV_DEBUG << "State CCA, message XMAC_ACK, new state CCA" << endl;
                 delete msg;
                 return;
@@ -295,7 +301,7 @@ void XMac::handleSelfMessage(cMessage *msg)
             // this case is very, very, very improbable, but let's do it.
             // if in CCA the node receives directly the data packet, accept it
             // even if we increased nbMissedAcks in state SLEEP
-            else if (msg->getKind() == XMAC_DATA) {
+            else if (kind == XMAC_DATA) {
                 auto incoming_data = check_and_cast<Packet *>(msg)->peekAtFront<XMacDataFrameHeader>();
 
                 // packet is for me
@@ -312,7 +318,7 @@ void XMac::handleSelfMessage(cMessage *msg)
             break;
 
         case SEND_PREAMBLE:
-            if (msg->getKind() == SWITCH_PREAMBLE_PHASE) {
+            if (kind == SWITCH_PREAMBLE_PHASE) {
                 // ~ make room for preamble + time_for_ack_back, check_interval is 10ms by default (from NetworkXMAC.ini)
                 // 0.5f* = 5ms
                 if (radio->getRadioMode() == IRadio::RADIO_MODE_RECEIVER) {
@@ -331,7 +337,7 @@ void XMac::handleSelfMessage(cMessage *msg)
                 return;
             }
             // radio switch from above
-            else if (msg->getKind() == XMAC_SWITCHING_FINISHED) {
+            else if (kind == XMAC_SWITCHING_FINISHED) {
                 if (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER) {
                     if (currentTxFrame == nullptr) {
                         currentTxFrame = dequeuePacket();
@@ -343,13 +349,13 @@ void XMac::handleSelfMessage(cMessage *msg)
                 return;
             }
             // ack_rx within sending_preamble or preamble_timeout without an ACK
-            else if ((msg->getKind() == XMAC_ACK) || (msg->getKind() == XMAC_STOP_PREAMBLES)) {
+            else if ((kind == XMAC_ACK) || (kind == XMAC_STOP_PREAMBLES)) {
                 // ~ ADDED THE SECOND CONDITION! :) if not, below
-                if (msg->getKind() == XMAC_ACK) {
+                if (kind == XMAC_ACK) {
                     delete msg;
                     EV << "node " << address << " : State SEND_PREAMBLE, message XMAC_ACK, new state SEND_DATA" << endl;
                 }
-                else if (msg->getKind() == XMAC_STOP_PREAMBLES) {
+                else if (kind == XMAC_STOP_PREAMBLES) {
                     EV << "node " << address << " : State SEND_PREAMBLE, message XMAC_STOP_PREAMBLES" << endl;
                 }
                 macState = SEND_DATA;
@@ -361,28 +367,28 @@ void XMac::handleSelfMessage(cMessage *msg)
                 return;
             }
             // next is the case of a node receiving 1 preamble or data while in his preamble gaps, ignore, we are sending!
-            else if ((msg->getKind() == XMAC_PREAMBLE) || (msg->getKind() == XMAC_DATA)) {
-                if (msg->getKind() == XMAC_DATA) {
+            else if ((kind == XMAC_PREAMBLE) || (kind == XMAC_DATA)) {
+                if (kind == XMAC_DATA) {
                     nbDroppedDataPackets++;
                 }
                 delete msg;
                 return;
             }
             else {
-                EV << "**node " << address << " : State SEND_PREAMBLE, received message " << msg->getKind() << endl;
+                EV << "**node " << address << " : State SEND_PREAMBLE, received message " << kind << endl;
                 return;
             }
             break;
 
         case SEND_DATA:
-            if (msg->getKind() == XMAC_STOP_PREAMBLES) {
+            if (kind == XMAC_STOP_PREAMBLES) {
                 EV << "node " << address << " : State SEND_DATA, message XMAC_STOP_PREAMBLES" << endl;
                 // send the data packet
                 sendDataPacket();
                 macState = WAIT_TX_DATA_OVER;
                 return;
             }
-            else if (msg->getKind() == XMAC_SWITCHING_FINISHED) {
+            else if (kind == XMAC_SWITCHING_FINISHED) {
                 EV << "node " << address << " : State SEND_DATA, message RADIO_SWITCHING OVER, sending packet..." << endl;
                 // send the data packet
                 sendDataPacket();
@@ -395,7 +401,7 @@ void XMac::handleSelfMessage(cMessage *msg)
             break;
 
         case WAIT_TX_DATA_OVER:
-            if (msg->getKind() == XMAC_DATA_TX_OVER) {
+            if (kind == XMAC_DATA_TX_OVER) {
                 EV_DEBUG << "node " << address << " : State WAIT_TX_DATA_OVER, message XMAC_DATA_TX_OVER, new state  SLEEP" << endl;
                 // remove the packet just served from the queue
                 deleteCurrentTxFrame();
@@ -410,22 +416,24 @@ void XMac::handleSelfMessage(cMessage *msg)
                 return;
             }
             break;
+
         case WAIT_ACK:
             // not used
             break;
+
         case WAIT_DATA:
-            if (msg->getKind() == XMAC_PREAMBLE) {
+            if (kind == XMAC_PREAMBLE) {
                 // nothing happens
                 nbRxPreambles++;
                 delete msg;
                 return;
             }
-            else if (msg->getKind() == XMAC_ACK) {
+            else if (kind == XMAC_ACK) {
                 // nothing happens
                 delete msg;
                 return;
             }
-            else if (msg->getKind() == XMAC_DATA) {
+            else if (kind == XMAC_DATA) {
                 auto packet = check_and_cast<Packet *>(msg);
                 auto mac = packet->peekAtFront<XMacDataFrameHeader>();
                 const MacAddress& dest = mac->getDestAddr();
@@ -456,7 +464,7 @@ void XMac::handleSelfMessage(cMessage *msg)
                 return;
             }
             // data does not arrives in time
-            else if (msg->getKind() == XMAC_DATA_TIMEOUT) {
+            else if (kind == XMAC_DATA_TIMEOUT) {
                 EV << "node " << address << " : State WAIT_DATA, message XMAC_DATA_TIMEOUT, new state SLEEP" << endl;
                 // if something in the queue, wakeup soon.
                 if (!txQueue->isEmpty())
@@ -469,18 +477,20 @@ void XMac::handleSelfMessage(cMessage *msg)
                 return;
             }
             break;
+
         case SEND_ACK:
             // send now the ack packet
-            if (msg->getKind() == DELAY_FOR_ACK_WITHIN_REMOTE_RX) {
+            if (kind == DELAY_FOR_ACK_WITHIN_REMOTE_RX) {
                 EV_DEBUG << "node " << address << " : State SEND_ACK, message XMAC_SEND_ACK, new state WAIT_ACK_TX" << endl;
                 sendMacAck();
                 macState = WAIT_ACK_TX;
                 return;
             }
             break;
+
         case WAIT_ACK_TX:
             // wait for the ACK to be sent back to the Transmitter
-            if (msg->getKind() == XMAC_ACK_TX_OVER) {
+            if (kind == XMAC_ACK_TX_OVER) {
                 EV_DEBUG << "node " << address << " : State WAIT_ACK_TX, message XMAC_ACK_TX_OVER, new state WAIT_DATA" << endl;
                 changeDisplayColor(GREEN);
                 macState = WAIT_DATA;
@@ -492,7 +502,7 @@ void XMac::handleSelfMessage(cMessage *msg)
             break;
     }
     throw cRuntimeError("Undefined event of type %d in state %d (Radio state %d)!",
-            msg->getKind(), macState, radio->getRadioMode());
+            kind, macState, radio->getRadioMode());
 }
 
 /**
@@ -509,7 +519,7 @@ void XMac::handleLowerPacket(Packet *msg)
     // simply pass the massage as self message, to be processed by the FSM.
     const auto& hdr = msg->peekAtFront<XMacHeaderBase>();
     msg->setKind(hdr->getType());
-    handleSelfMessage(msg);
+    handleStateEvent(msg);
 }
 
 void XMac::sendDataPacket()
