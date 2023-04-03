@@ -334,6 +334,8 @@ void XMac::handleStateEvent(cMessage *msg)
                 }
                 // 1.0f* = 10ms
                 else if (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER) {
+                    if (radio->getTransmissionState() == physicallayer::IRadio::TRANSMISSION_STATE_TRANSMITTING)
+                        throw cRuntimeError("checkInterval is too short, transmission not finished");
                     radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
                     changeDisplayColor(GREEN);
                     EV_DEBUG << "node " << address << " : preamble_phase rx, simTime = " << simTime() << endl;
