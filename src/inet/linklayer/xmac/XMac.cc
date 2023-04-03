@@ -578,6 +578,10 @@ void XMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t valu
             else if (macState == WAIT_ACK_TX) {
                 scheduleAfter(SIMTIME_ZERO, ack_tx_over);
             }
+            else if (macState == SEND_PREAMBLE) {
+                // TODO Preamble transmission finished, should the radio mode be switched to receiving?
+                ;
+            }
         }
         else if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING)
             throw cRuntimeError("WHAT???");
