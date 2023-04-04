@@ -1,0 +1,29 @@
+#!/bin/bash
+
+cd ~/omnetpp-distribution/omnetpp
+
+if [ -z "$NIX_SHELL" ]
+then
+    source setenv
+
+    python3 "$@"
+else
+    source ~/.nix-profile/etc/profile.d/nix.sh
+
+    # some parameters were quoted and contain spaces
+    # $*, $@, "$*", "$@" did not work in any combination
+    CHARS='[ !"#$&()*,;<>?\^`{|}]'
+    for ARG
+    do
+        if [[ $ARG == *"'"* ]]
+        then
+            ARG=\""$ARG"\"
+        elif [[ $ARG == *$CHARS* ]]
+        then
+            ARG="'$ARG'"
+        fi
+        ARGS+=("$ARG")
+    done
+
+    nix-shell --pure --run "python3 ${ARGS[*]}" $NIX_SHELL
+fi
