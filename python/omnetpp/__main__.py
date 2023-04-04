@@ -1,0 +1,1 @@
+from omnetpp.repl import *

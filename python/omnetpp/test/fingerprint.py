@@ -1,15 +1,25 @@
+"""
+Provides functionality for fingerprint testing of multiple simulations.
+
+The main function is :py:func:`run_fingerprint_tests`. It allows running multiple fingerprint tests matching the provided
+filter criteria. Fingerprint tests check for regressions in the simulation execution trajectory.
+
+Please note that undocumented features are not supposed to be used by the user.
+"""
+
+import hashlib
 import logging
+import sqlalchemy
 import re
 
+from omnetpp.simulation.task import *
+
 # TODO use Task classes
+# from omnetpp.common.ide import *
+from omnetpp.simulation.project import *
+from omnetpp.test.simulation import *
 
-from inet.common.ide import *
-from inet.simulation.project import *
-from inet.simulation.task import *
-from inet.test.fingerprint.store import *
-from inet.test.simulation import *
-
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 all_fingerprint_ingredients = ["tplx", "~tNl", "~tND", "tyf"]
 all_fingerprint_ingredients_extra_args = {
     "~tND": {"--**.crcMode=\"computed\"",
@@ -29,13 +39,12 @@ def get_ingredients_extra_args(ingredients):
     return list(all_fingerprint_ingredients_extra_args[ingredients]) if ingredients in all_fingerprint_ingredients_extra_args else []
 
 class Fingerprint:
-    def __init__(self, text):
-        match = re.match("(.*)/(.*)", text)
-        self.fingerprint = match.groups()[0]
-        self.ingredients = match.groups()[1]
+    def __init__(self, fingerprint, ingredients):
+        self.fingerprint = fingerprint
+        self.ingredients = ingredients
 
     def __repr__(self):
-        return "Fingerprint(\"" + str(self) + "\")"
+        return repr(self)
     
     def __str__(self):
         return self.fingerprint + "/" + self.ingredients
@@ -43,7 +52,22 @@ class Fingerprint:
     def __eq__(self, other):
         return other and self.fingerprint == other.fingerprint and self.ingredients == other.ingredients
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __composite_values__(self):
+        return self.fingerprint, self.ingredients
+
+    @classmethod
+    def parse(self, text):
+        match = re.match("(.*)/(.*)", text)
+        fingerprint = match.groups()[0]
+        ingredients = match.groups()[1]
+        return Fingerprint(fingerprint, ingredients)
+
 class FingerprintTestTaskResult(SimulationTestTaskResult):
+    id = sqlalchemy.Column("id", sqlalchemy.Integer, sqlalchemy.ForeignKey("SimulationTestTaskResult.id"), primary_key=True)
+
     def __init__(self, expected_fingerprint=None, calculated_fingerprint=None, **kwargs):
         super().__init__(**kwargs)
         self.locals = locals()
@@ -67,7 +91,7 @@ class FingerprintTestTaskResult(SimulationTestTaskResult):
         simulation_task = self.task.simulation_task
         simulation_config = simulation_task.simulation_config
         simulation_project = simulation_config.simulation_project
-        eventlog_file_name = simulation_config.config + "-#" + str(simulation_task._run) + ".elog"
+        eventlog_file_name = simulation_config.config + "-#" + str(simulation_task.run_number) + ".elog"
         eventlog_file_path = simulation_project.get_full_path(simulation_config.working_directory + "/results/" + eventlog_file_name)
         eventlog_file = open(eventlog_file_path)
         fingerprints = []
@@ -78,27 +102,42 @@ class FingerprintTestTaskResult(SimulationTestTaskResult):
         eventlog_file.close()
         return FingerprintTrajectory(self.simulation_result, self.task.ingredients, fingerprints, range(0, len(fingerprints)))
 
-    def run_baseline_fingerprint_test(self, baseline_simulation_project=inet_baseline_project, **kwargs):
-        simulation_task = self.simulation_result.simulation_task
-        simulation_config = self.simulation_result.simulation_task.simulation_config
-        multiple_test_tasks = get_fingerprint_test_tasks(simulation_project=baseline_simulation_project, ingredients_list=[self.task.ingredients], full_match=True,
-                                                         working_directory_filter=simulation_config.working_directory, ini_file_filter=simulation_config.ini_file, config_filter=simulation_config.config, run=simulation_task._run,
-                                                         **kwargs)
-        assert(len(multiple_test_tasks.tasks) == 1)
-        multiple_test_results = multiple_test_tasks.run(**kwargs)
-        return multiple_test_results.results[0]
+    # def run_baseline_fingerprint_test(self, baseline_simulation_project=inet_baseline_project, **kwargs):
+    #     simulation_task = self.simulation_result.simulation_task
+    #     simulation_config = self.simulation_result.simulation_task.simulation_config
+    #     multiple_test_tasks = get_fingerprint_test_tasks(simulation_project=baseline_simulation_project, ingredients_list=[self.task.ingredients], full_match=True,
+    #                                                      working_directory_filter=simulation_config.working_directory, ini_file_filter=simulation_config.ini_file, config_filter=simulation_config.config, run_number=simulation_task.run_number,
+    #                                                      **kwargs)
+    #     assert(len(multiple_test_tasks.tasks) == 1)
+    #     multiple_test_results = multiple_test_tasks.run(**kwargs)
+    #     return multiple_test_results.results[0]
+    #
+    # def find_fingerprint_trajectory_divergence(self, baseline_fingerprint_test_result=None, baseline_simulation_project=inet_baseline_project):
+    #     if baseline_fingerprint_test_result is None:
+    #         baseline_fingerprint_test_result = self.run_baseline_fingerprint_test(baseline_simulation_project, record_eventlog=True)
+    #     baseline_fingerprint_trajectory = baseline_fingerprint_test_result.get_fingerprint_trajectory()
+    #     current_fingerprint_trajectory = self.get_fingerprint_trajectory()
+    #     return baseline_fingerprint_trajectory.find_divergence_position(current_fingerprint_trajectory)
+    #
+    # def debug_fingerprint_trajectory_divergence(self, baseline_fingerprint_test_result=None, baseline_simulation_project=inet_baseline_project):
+    #     (baseline_simulation_event, current_simulation_event) = self.find_fingerprint_trajectory_divergence(baseline_fingerprint_test_result)
+    #     baseline_simulation_event.debug()
+    #     current_simulation_event.debug()
 
-    def find_fingerprint_trajectory_divergence(self, baseline_fingerprint_test_result=None, baseline_simulation_project=inet_baseline_project):
-        if baseline_fingerprint_test_result is None:
-            baseline_fingerprint_test_result = self.run_baseline_fingerprint_test(baseline_simulation_project, record_eventlog=True)
-        baseline_fingerprint_trajectory = baseline_fingerprint_test_result.get_fingerprint_trajectory()
-        current_fingerprint_trajectory = self.get_fingerprint_trajectory()
-        return baseline_fingerprint_trajectory.find_divergence_position(current_fingerprint_trajectory)
-
-    def debug_fingerprint_trajectory_divergence(self, baseline_fingerprint_test_result=None, baseline_simulation_project=inet_baseline_project):
-        (baseline_simulation_event, current_simulation_event) = self.find_fingerprint_trajectory_divergence(baseline_fingerprint_test_result)
-        baseline_simulation_event.debug()
-        current_simulation_event.debug()
+add_orm_mapper("FingerprintTestTaskResult", lambda: mapper_registry.map_imperatively(
+    FingerprintTestTaskResult,
+    sqlalchemy.Table("FingerprintTestTaskResult",
+                     mapper_registry.metadata,
+                     FingerprintTestTaskResult.id,
+                     sqlalchemy.Column("expected_fingerprint_value", sqlalchemy.String),
+                     sqlalchemy.Column("expected_fingerprint_ingredients", sqlalchemy.String),
+                     sqlalchemy.Column("calculated_fingerprint_value", sqlalchemy.String),
+                     sqlalchemy.Column("calculated_fingerprint_ingredients", sqlalchemy.String)),
+    properties={"id": sqlalchemy.orm.column_property(FingerprintTestTaskResult.id, SimulationTestTaskResult.id, TestTaskResult.id, TaskResult.id),
+                "expected_fingerprint": sqlalchemy.orm.composite(Fingerprint, "expected_fingerprint_value", "expected_fingerprint_ingredients"),
+                "calculated_fingerprint": sqlalchemy.orm.composite(Fingerprint, "calculated_fingerprint_value", "calculated_fingerprint_ingredients")},
+    inherits=SimulationTestTaskResult,
+    polymorphic_identity="FingerprintTestTaskResult"))
 
 class MultipleFingerprintTestTaskResults(MultipleTestTaskResults):
     def __init__(self, **kwargs):
@@ -108,8 +147,10 @@ class MultipleFingerprintTestTaskResults(MultipleTestTaskResults):
         self.kwargs = kwargs
 
 class FingerprintTestTask(SimulationTestTask):
-    def __init__(self, sim_time_limit=None, ingredients="tplx", fingerprint=None, test_result=None, name="fingerprint test", task_result_class=FingerprintTestTaskResult, **kwargs):
-        super().__init__(name=name, task_result_class=task_result_class, **kwargs)
+    id = sqlalchemy.Column("id", sqlalchemy.Integer, sqlalchemy.ForeignKey("SimulationTestTask.id"), primary_key=True)
+
+    def __init__(self, sim_time_limit=None, ingredients="tplx", fingerprint=None, test_result=None, name="fingerprint test", action="Checking fingerprint", task_result_class=FingerprintTestTaskResult, **kwargs):
+        super().__init__(name=name, action=action, task_result_class=task_result_class, **kwargs)
         self.locals = locals()
         self.locals.pop("self")
         self.kwargs = kwargs
@@ -121,6 +162,16 @@ class FingerprintTestTask(SimulationTestTask):
     def __repr__(self):
         return repr(self)
 
+    def get_hash(self, **kwargs):
+        hasher = hashlib.sha256()
+        digest = super().get_hash(**kwargs)
+        if digest:
+            hasher.update(digest)
+        else:
+            return None
+        hasher.update(self.ingredients.encode("utf-8"))
+        return hasher.digest()
+
     def run(self, test_result_filter=None, exclude_test_result_filter="SKIP", output_stream=sys.stdout, **kwargs):
         if self.fingerprint:
             simulation_project = self.simulation_task.simulation_config.simulation_project
@@ -128,7 +179,7 @@ class FingerprintTestTask(SimulationTestTask):
         else:
             if matches_filter("SKIP", test_result_filter, exclude_test_result_filter, True):
                 print("Running " + self.simulation_task.get_parameters_string(**kwargs), end=" ", file=output_stream)
-            return FingerprintTestTaskResult(simulation_task=self, result="SKIP", reason="Correct fingerprint not found")
+            return FingerprintTestTaskResult(task=self, result="SKIP", reason="Correct fingerprint not found")
 
     def check_simulation_task_result(self, simulation_task_result, **kwargs):
         expected_fingerprint = self.fingerprint
@@ -151,7 +202,17 @@ class FingerprintTestTask(SimulationTestTask):
         return FingerprintTestTaskResult(task=self, simulation_task_result=simulation_task_result, expected_fingerprint=expected_fingerprint, calculated_fingerprint=calculated_fingerprint, result=result, expected_result=expected_result, reason=reason)
 
     def get_extra_args(self, simulation_project, fingerprint_arg):
-        return ["-n", simulation_project.get_full_path(".") + "/tests/networks", "--fingerprintcalculator-class", "inet::FingerprintCalculator", "--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"]
+        return ["--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"]
+        # return ["-n", simulation_project.get_full_path(".") + "/tests/networks", "--fingerprintcalculator-class", "inet::FingerprintCalculator", "--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"]
+
+add_orm_mapper("FingerprintTestTask", lambda: mapper_registry.map_imperatively(
+    FingerprintTestTask,
+    sqlalchemy.Table("FingerprintTestTask",
+                     mapper_registry.metadata,
+                     FingerprintTestTask.id),
+    properties={"id": sqlalchemy.orm.column_property(FingerprintTestTask.id, SimulationTestTask.id, TestTask.id, Task.id)},
+    inherits=SimulationTestTask,
+    polymorphic_identity="FingerprintTestTask"))
 
 class FingerprintTestGroupTask(MultipleTestTasks):
     def __init__(self, sim_time_limit=None, **kwargs):
@@ -196,31 +257,6 @@ class MultipleFingerprintTestTasks(MultipleSimulationTestTasks):
         self.kwargs = kwargs
         self.multiple_simulation_tasks = multiple_simulation_tasks
 
-    def store_fingerprint_results(self, multiple_fingerprint_test_results):
-        if len(multiple_fingerprint_test_results.results) > 0:
-            simulation_project = multiple_fingerprint_test_results.results[0].task.simulation_task.simulation_config.simulation_project
-            git_hash = subprocess.run(["git", "rev-parse", "HEAD"], cwd=simulation_project.get_full_path("."), capture_output=True).stdout.decode("utf-8").strip()
-            git_clean = subprocess.run(["git", "diff", "--quiet"], cwd=simulation_project.get_full_path("."), capture_output=True).returncode == 0
-            all_fingerprint_store = get_all_fingerprint_store(simulation_project)
-            for fingerprint_test_result in multiple_fingerprint_test_results.results:
-                result = fingerprint_test_result.result
-                if result != "SKIP" and result != "CANCEL":
-                    fingerprint_test_task = fingerprint_test_result.task
-                    simulation_task_result = fingerprint_test_result.simulation_task_result
-                    simulation_task = fingerprint_test_task.simulation_task
-                    simulation_config = simulation_task.simulation_config
-                    simulation_project = simulation_config.simulation_project
-                    calculated_fingerprint = fingerprint_test_result.calculated_fingerprint.fingerprint if fingerprint_test_result.calculated_fingerprint else None
-                    all_fingerprint_store.insert_fingerprint(calculated_fingerprint, ingredients=fingerprint_test_task.ingredients, test_result=fingerprint_test_result.result, sim_time_limit=fingerprint_test_task.sim_time_limit,
-                                                             working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run=simulation_task._run,
-                                                             git_hash=git_hash, git_clean=git_clean)
-            all_fingerprint_store.write()
-
-    def run(self, **kwargs):
-        multiple_fingerprint_test_results = super().run(**kwargs)
-        self.store_fingerprint_results(multiple_fingerprint_test_results)
-        return multiple_fingerprint_test_results
-
 class FingerprintTrajectoryTestTask(TestTask):
     def __init__(self, simulation_task, sim_time_limit, ingredients, **kwargs):
         super().__init__(simulation_task, **kwargs)
@@ -254,52 +290,52 @@ class FingerprintTrajectory:
             i = j
         return FingerprintTrajectory(self.ingredients, unique_fingerprints, event_numbers)
 
-    def find_divergence_position(self, other):
-        min_size = min(len(self.fingerprints), len(other.fingerprints))
-        for i in range(0, min_size):
-            self_fingerprint = self.fingerprints[i]
-            other_fingerprint = other.fingerprints[i]
-            if self_fingerprint.fingerprint != other_fingerprint.fingerprint:
-                return FingerprintTrajectoryDivergencePosition(SimulationEvent(self.simulation_result.simulation_task, self.event_numbers[i]),
-                                                               SimulationEvent(other.simulation_result.simulation_task, other.event_numbers[i]))
-        return None
+    # def find_divergence_position(self, other):
+    #     min_size = min(len(self.fingerprints), len(other.fingerprints))
+    #     for i in range(0, min_size):
+    #         self_fingerprint = self.fingerprints[i]
+    #         other_fingerprint = other.fingerprints[i]
+    #         if self_fingerprint.fingerprint != other_fingerprint.fingerprint:
+    #             return FingerprintTrajectoryDivergencePosition(SimulationEvent(self.simulation_result.simulation_task, self.event_numbers[i]),
+    #                                                            SimulationEvent(other.simulation_result.simulation_task, other.event_numbers[i]))
+    #     return None
 
-class FingerprintTrajectoryDivergencePosition:
-    def __init__(self, simulation_event_1, simulation_event_2):
-        self.simulation_event_1 = simulation_event_1
-        self.simulation_event_2 = simulation_event_2
-
-    def __repr__(self):
-        simulation_project_1 = self.simulation_event_1.simulation_task.simulation_config.simulation_project
-        simulation_project_2 = self.simulation_event_2.simulation_task.simulation_config.simulation_project
-        return "Fingerprint trajectory divergence at " + \
-               simulation_project_1.get_name() + " #" + str(self.simulation_event_1.event_number) + ", " + \
-               simulation_project_2.get_name() + " #" + str(self.simulation_event_2.event_number)
-
-    def open_sequence_charts(self):
-        project_name1 = self.simulation_event_1.simulation_task.simulation_config.simulation_project.get_name()
-        project_name2 = self.simulation_event_2.simulation_task.simulation_config.simulation_project.get_name()
-        path_name1 = "/" + project_name1 + "/" + self.simulation_event_1.simulation_task.simulation_config.working_directory + "/results/" + self.simulation_event_1.simulation_task.simulation_config.config + "-#" + str(self.simulation_event_1.simulation_task._run) + ".elog"
-        path_name2 = "/" + project_name2 + "/" + self.simulation_event_2.simulation_task.simulation_config.working_directory + "/results/" + self.simulation_event_2.simulation_task.simulation_config.config + "-#" + str(self.simulation_event_2.simulation_task._run) + ".elog"
-        editor1 = open_editor(path_name1)
-        editor2 = open_editor(path_name2)
-        goto_event_number(editor1, self.simulation_event_1.event_number)
-        goto_event_number(editor2, self.simulation_event_2.event_number)
-
-    def debug_simulations(self):
-        pass
-        # TODO
-
-class SimulationEvent:
-    def __init__(self, simulation_task, event_number):
-        self.simulation_task = simulation_task
-        self.event_number = event_number
-
-    def __repr__(self):
-        return repr(self)
-
-    def debug(self):
-        self.simulation_task.run_simulation(debug_event_number=self.event_number)
+# class FingerprintTrajectoryDivergencePosition:
+#     def __init__(self, simulation_event_1, simulation_event_2):
+#         self.simulation_event_1 = simulation_event_1
+#         self.simulation_event_2 = simulation_event_2
+#
+#     def __repr__(self):
+#         simulation_project_1 = self.simulation_event_1.simulation_task.simulation_config.simulation_project
+#         simulation_project_2 = self.simulation_event_2.simulation_task.simulation_config.simulation_project
+#         return "Fingerprint trajectory divergence at " + \
+#                simulation_project_1.get_name() + " #" + str(self.simulation_event_1.event_number) + ", " + \
+#                simulation_project_2.get_name() + " #" + str(self.simulation_event_2.event_number)
+#
+#     def open_sequence_charts(self):
+#         project_name1 = self.simulation_event_1.simulation_task.simulation_config.simulation_project.get_name()
+#         project_name2 = self.simulation_event_2.simulation_task.simulation_config.simulation_project.get_name()
+#         path_name1 = "/" + project_name1 + "/" + self.simulation_event_1.simulation_task.simulation_config.working_directory + "/results/" + self.simulation_event_1.simulation_task.simulation_config.config + "-#" + str(self.simulation_event_1.simulation_task.run_number) + ".elog"
+#         path_name2 = "/" + project_name2 + "/" + self.simulation_event_2.simulation_task.simulation_config.working_directory + "/results/" + self.simulation_event_2.simulation_task.simulation_config.config + "-#" + str(self.simulation_event_2.simulation_task.run_number) + ".elog"
+#         editor1 = open_editor(path_name1)
+#         editor2 = open_editor(path_name2)
+#         goto_event_number(editor1, self.simulation_event_1.event_number)
+#         goto_event_number(editor2, self.simulation_event_2.event_number)
+#
+#     def debug_simulations(self):
+#         pass
+#         # TODO
+#
+# class SimulationEvent:
+#     def __init__(self, simulation_task, event_number):
+#         self.simulation_task = simulation_task
+#         self.event_number = event_number
+#
+#     def __repr__(self):
+#         return repr(self)
+#
+#     def debug(self):
+#         self.simulation_task.run(debug_event_number=self.event_number)
 
 def get_calculated_fingerprint(simulation_result, ingredients):
     stdout = simulation_result.subprocess_result.stdout.decode("utf-8")
@@ -312,7 +348,7 @@ def get_calculated_fingerprint(simulation_result, ingredients):
             value = match.groups()[0]
         else:
             return None
-    return Fingerprint(value + "/" + ingredients)
+    return Fingerprint(value, ingredients)
 
 def check_fingerprint_test_group(simulation_result, fingerprint_test_group, **kwargs):
     fingerprint_test_results = []
@@ -322,7 +358,7 @@ def check_fingerprint_test_group(simulation_result, fingerprint_test_group, **kw
             fingerprint_test_results.append(fingerprint_test_result)
     return MultipleTestTaskResults(fingerprint_test_group.tasks, fingerprint_test_results)
 
-def select_fingerprint_entry_by_sim_time_limit(fingerprint_entries, largest):
+def select_fingerprint_by_sim_time_limit(fingerprint_entries, largest):
     sim_time_limits = list(map(lambda fingerprint_entry: fingerprint_entry["sim_time_limit"], fingerprint_entries))
     sim_time_limits.sort(reverse=largest, key=convert_to_seconds)
     smallest_sim_time_limit = sim_time_limits[0]
@@ -330,27 +366,50 @@ def select_fingerprint_entry_by_sim_time_limit(fingerprint_entries, largest):
     sorted_fingerprint_entries.sort(reverse=True, key=lambda fingerprint_entry: fingerprint_entry["timestamp"])
     return sorted_fingerprint_entries[0]
 
-def select_fingerprint_entry_with_smallest_sim_time_limit(fingerprint_entries):
-    return select_fingerprint_entry_by_sim_time_limit(fingerprint_entries, False)
+def select_fingerprint_with_smallest_sim_time_limit(fingerprint_entries):
+    return select_fingerprint_by_sim_time_limit(fingerprint_entries, False)
 
-def select_fingerprint_entry_with_largest_sim_time_limit(fingerprint_entries):
-    return select_fingerprint_entry_by_sim_time_limit(fingerprint_entries, True)
+def select_fingerprint_with_largest_sim_time_limit(fingerprint_entries):
+    return select_fingerprint_by_sim_time_limit(fingerprint_entries, True)
 
-def get_fingerprint_test_task(simulation_task, ingredients="tplx", sim_time_limit=None, select_fingerprint_entry=select_fingerprint_entry_with_smallest_sim_time_limit, **kwargs):
-    simulation_config = simulation_task.simulation_config
-    correct_fingerprint_store = get_correct_fingerprint_store(simulation_config.simulation_project)
-    stored_fingerprint_entries = correct_fingerprint_store.filter_entries(ingredients=ingredients, sim_time_limit=sim_time_limit,
-                                                                          working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run=simulation_task._run)
-    selected_fingerprint_entry = select_fingerprint_entry(stored_fingerprint_entries) if stored_fingerprint_entries else None
-    if selected_fingerprint_entry:
-        sim_time_limit = selected_fingerprint_entry["sim_time_limit"]
-        fingerprint = selected_fingerprint_entry["fingerprint"]
-        test_result = selected_fingerprint_entry["test_result"]
-        simulation_task.sim_time_limit = sim_time_limit
-        return FingerprintTestTask(simulation_task=simulation_task, sim_time_limit=sim_time_limit, ingredients=ingredients, fingerprint=Fingerprint(fingerprint + "/" + ingredients), test_result=test_result)
+def get_fingerprint_test_task(simulation_task, database_session=None, ingredients="tplx", sim_time_limit=None, select_fingerprint=select_fingerprint_with_smallest_sim_time_limit, **kwargs):
+    # TODO take sim_time_limit into account and also select_fingerprint
+    if sim_time_limit is None:
+        sim_time_limit = simulation_task.sim_time_limit
+    stored_simulation_config = simulation_task.simulation_config.restore(database_session)
+    # TODO this works but its sub-optimal because the query result is further processed later in Python
+    statement = sqlalchemy.select(FingerprintUpdateTaskResult) \
+                    .where(FingerprintUpdateTaskResult.calculated_fingerprint_ingredients==ingredients) \
+                    .order_by(sqlalchemy.desc(TaskResult.run_at))
+    restored_fingerprint_update_task_result = next(filter(lambda restored_fingerprint_update_task_result: \
+                                                            restored_fingerprint_update_task_result.task.simulation_task.run_number == simulation_task.run_number and \
+                                                            restored_fingerprint_update_task_result.task.simulation_task.simulation_config==stored_simulation_config and \
+                                                            (sim_time_limit is None or restored_fingerprint_update_task_result.task.simulation_task.sim_time_limit==sim_time_limit),
+                                                   database_session.scalars(statement)), None)
+    if restored_fingerprint_update_task_result:
+        sim_time_limit = restored_fingerprint_update_task_result.task.simulation_task.sim_time_limit
+        simulation_task = simulation_task.recreate(sim_time_limit=sim_time_limit)
+        expected_fingerprint = restored_fingerprint_update_task_result.calculated_fingerprint
+        fingerprint_test_task = FingerprintTestTask(simulation_task=simulation_task, sim_time_limit=sim_time_limit, ingredients=ingredients, fingerprint=expected_fingerprint, test_result="PASS")
     else:
         simulation_task.sim_time_limit = sim_time_limit
-        return FingerprintTestTask(simulation_task=simulation_task, sim_time_limit=sim_time_limit, ingredients=ingredients, test_result=None)
+        fingerprint_test_task = FingerprintTestTask(simulation_task=simulation_task, sim_time_limit=sim_time_limit, ingredients=ingredients, test_result=None)
+    if database_session:
+        fingerprint_test_task.store(database_session)
+    return fingerprint_test_task
+    # correct_fingerprint_store = get_correct_fingerprint_store(simulation_config.simulation_project)
+    # stored_fingerprint_entries = correct_fingerprint_store.filter_entries(ingredients=ingredients, sim_time_limit=sim_time_limit,
+    #                                                                       working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run_number=simulation_task.run_number)
+    # selected_fingerprint_entry = select_fingerprint(stored_fingerprint_entries) if stored_fingerprint_entries else None
+    # if selected_fingerprint_entry:
+    #     sim_time_limit = selected_fingerprint_entry["sim_time_limit"]
+    #     fingerprint = selected_fingerprint_entry["fingerprint"]
+    #     test_result = selected_fingerprint_entry["test_result"]
+    #     simulation_task.sim_time_limit = sim_time_limit
+    #     return FingerprintTestTask(simulation_task=simulation_task, sim_time_limit=sim_time_limit, ingredients=ingredients, fingerprint=Fingerprint(fingerprint, ingredients), test_result=test_result)
+    # else:
+    #     simulation_task.sim_time_limit = sim_time_limit
+    #     return FingerprintTestTask(simulation_task=simulation_task, sim_time_limit=sim_time_limit, ingredients=ingredients, test_result=None)
 
 def collect_fingerprint_test_groups(simulation_task, ingredients_list=["tplx"], sim_time_limit=None, **kwargs):
     fingerprint_test_tasks = []
@@ -366,15 +425,47 @@ def collect_fingerprint_test_groups(simulation_task, ingredients_list=["tplx"], 
     grouped_fingerprint_test_tasks = [list(it) for k, it in itertools.groupby(sorted_fingerprint_test_tasks, get_sim_time_limit)]
     return list(map(get_fingerprint_test_group_task, grouped_fingerprint_test_tasks))
 
-def get_fingerprint_test_tasks(**kwargs):
-    multiple_simulation_tasks = get_simulation_tasks(**kwargs)
-    fingerprint_test_groups = []
-    for simulation_task in multiple_simulation_tasks.tasks:
-        simulation_config = simulation_task.simulation_config
-        fingerprint_test_groups += collect_fingerprint_test_groups(simulation_task, **kwargs)
-    return MultipleFingerprintTestTasks(multiple_simulation_tasks=multiple_simulation_tasks, tasks=fingerprint_test_groups, simulation_project=multiple_simulation_tasks.simulation_project, **kwargs)
+def get_fingerprint_test_tasks(database=None, database_session=None, **kwargs):
+    """
+    Returns multiple fingerprint test tasks matching the provided filter criteria. The returned tasks can be run by
+    calling the :py:meth:`omnetpp.common.task.MultipleTasks.run` method.
+
+    Parameters:
+        database (string):
+            TODO
+
+        database_session ():
+            TODO
+
+        kwargs (dict):
+            TODO
+
+    Returns (:py:class:`MultipleFingerprintTestTasks`):
+        TODO
+    """
+    def get_tasks(**kwargs):
+        multiple_simulation_tasks = get_simulation_tasks(**kwargs)
+        fingerprint_test_groups = []
+        for simulation_task in multiple_simulation_tasks.tasks:
+            simulation_config = simulation_task.simulation_config
+            fingerprint_test_groups += collect_fingerprint_test_groups(simulation_task, **kwargs)
+        return MultipleFingerprintTestTasks(multiple_simulation_tasks=multiple_simulation_tasks, tasks=fingerprint_test_groups, **dict(kwargs, simulation_project=multiple_simulation_tasks.simulation_project, database=database))
+    if database_session or not database:
+        return get_tasks(database_session=database_session, **kwargs)
+    else:
+        return call_with_database_session(get_tasks, database=database, **kwargs)
 
 def run_fingerprint_tests(**kwargs):
+    """
+    Runs one or more fingerprint tests that match the provided filter criteria.
+
+    Parameters:
+        kwargs (dict):
+            TODO
+
+    Returns (:py:class:`MultipleFingerprintTestTaskResults`):
+        TODO
+    """
     multiple_fingerprint_test_tasks = get_fingerprint_test_tasks(**kwargs)
     return multiple_fingerprint_test_tasks.run(**kwargs)
 
@@ -383,103 +474,126 @@ def print_correct_fingerprints(**kwargs):
     for test_task in multiple_test_tasks.tasks:
         print(test_task.simulation_task.get_parameters_string(**kwargs) + " " + COLOR_GREEN + str(test_task.fingerprint) + COLOR_RESET)
 
-def print_missing_correct_fingerprints(simulation_project=default_project, ingredients="tplx", num_runs=1):
-    correct_fingerprint_store = get_correct_fingerprint_store(simulation_project)
-    for simulation_config in get_all_simulation_configs(simulation_project):
-        if not simulation_config.abstract and not simulation_config.emulation:
-            for run in range(0, num_runs or simulation_config.num_runs):
-                simulation_task = SimulationRun(simulation_config, run=run)
-                if not simulation_task.is_interactive():
-                    stored_fingerprint_entries = correct_fingerprint_store.filter_entries(ingredients=ingredients, working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run=run)
-                    if len(stored_fingerprint_entries) == 0:
-                        print(simulation_task.get_parameters_string())
+def print_missing_correct_fingerprints(simulation_project=None, ingredients="tplx", num_runs=1):
+    if simulation_project is None:
+        simulation_project = get_default_simulation_project()
+    # TODO revive
+    # correct_fingerprint_store = get_correct_fingerprint_store(simulation_project)
+    # for simulation_config in get_all_simulation_configs(simulation_project):
+    #     if not simulation_config.abstract and not simulation_config.emulation:
+    #         for run_number in range(0, num_runs or simulation_config.num_runs):
+    #             simulation_task = SimulationRun(simulation_config, run_number=run_number)
+    #             if not simulation_task.is_interactive():
+    #                 stored_fingerprint_entries = correct_fingerprint_store.filter_entries(ingredients=ingredients, working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run_number=run_number)
+    #                 if len(stored_fingerprint_entries) == 0:
+    #                     print(simulation_task.get_parameters_string())
 
-def insert_missing_correct_fingerprints(source_ingredients, target_ingredients, simulation_project=default_project, **kwargs):
-    correct_fingerprint_store = get_correct_fingerprint_store(simulation_project)
-    multiple_simulation_tasks = get_simulation_tasks(**kwargs)
-    for simulation_task in multiple_simulation_tasks.tasks:
-        simulation_config = simulation_task.simulation_config
-        simulation_project = simulation_config.simulation_project
-        working_directory = simulation_config.working_directory
-        ini_file = simulation_config.ini_file
-        config = simulation_config.config
-        run = simulation_task._run
-        for source_entry in correct_fingerprint_store.filter_entries(ingredients=source_ingredients, working_directory=working_directory, ini_file=ini_file, config=config, run=run):
-            sim_time_limit = source_entry["sim_time_limit"]
-            target_entries = correct_fingerprint_store.filter_entries(ingredients=target_ingredients, working_directory=working_directory, ini_file=ini_file, config=config, run=run, sim_time_limit=sim_time_limit)
-            if len(target_entries) == 0:
-                correct_fingerprint_store.insert_fingerprint("0000-0000/" + target_ingredients, ingredients=target_ingredients, working_directory=working_directory, ini_file=ini_file, config=config, run=run, sim_time_limit=sim_time_limit, test_result=source_entry["test_result"])
-    correct_fingerprint_store.write()
+def insert_missing_correct_fingerprints(source_ingredients, target_ingredients, simulation_project=None, **kwargs):
+    if simulation_project is None:
+        simulation_project = get_default_simulation_project()
+    # TODO revive
+    # correct_fingerprint_store = get_correct_fingerprint_store(simulation_project)
+    # multiple_simulation_tasks = get_simulation_tasks(**kwargs)
+    # for simulation_task in multiple_simulation_tasks.tasks:
+    #     simulation_config = simulation_task.simulation_config
+    #     simulation_project = simulation_config.simulation_project
+    #     working_directory = simulation_config.working_directory
+    #     ini_file = simulation_config.ini_file
+    #     config = simulation_config.config
+    #     run_number = simulation_task.run_number
+    #     for source_entry in correct_fingerprint_store.filter_entries(ingredients=source_ingredients, working_directory=working_directory, ini_file=ini_file, config=config, run_number=run_number):
+    #         sim_time_limit = source_entry["sim_time_limit"]
+    #         target_entries = correct_fingerprint_store.filter_entries(ingredients=target_ingredients, working_directory=working_directory, ini_file=ini_file, config=config, run_number=run_number, sim_time_limit=sim_time_limit)
+    #         if len(target_entries) == 0:
+    #             correct_fingerprint_store.insert_fingerprint("0000-0000/" + target_ingredients, ingredients=target_ingredients, working_directory=working_directory, ini_file=ini_file, config=config, run_number=run_number, sim_time_limit=sim_time_limit, test_result=source_entry["test_result"])
 
-class FingerprintUpdateTask(UpdateTask):
-    def __init__(self, simulation_task=None, **kwargs):
-        super().__init__(**kwargs)
+class FingerprintUpdateTask(SimulationUpdateTask):
+    id = sqlalchemy.Column("id", sqlalchemy.Integer, sqlalchemy.ForeignKey("SimulationUpdateTask.id"), primary_key=True)
+
+    def __init__(self, action="Updating fingerprint", **kwargs):
+        super().__init__(action=action, **kwargs)
         self.locals = locals()
         self.locals.pop("self")
         self.kwargs = kwargs
-        self.simulation_task = simulation_task
 
-    def run_protected(self, ingredients="tplx", insert_missing_correct_fingerprints=False, sim_time_limit=None, output_stream=sys.stdout, **kwargs):
-        simulation_config = self.simulation_task.simulation_config
-        correct_fingerprint_store = get_correct_fingerprint_store(simulation_config.simulation_project)
-        stored_fingerprint_entries = correct_fingerprint_store.filter_entries(ingredients=ingredients, sim_time_limit=sim_time_limit,
-                                                                              working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run=self.simulation_task._run)
-        if len(stored_fingerprint_entries) == 1:
-            stored_fingerprint_entry = stored_fingerprint_entries[0]
-            if sim_time_limit is None:
-                sim_time_limit = stored_fingerprint_entry["sim_time_limit"]
-            correct_fingerprint = Fingerprint(stored_fingerprint_entry["fingerprint"] + "/" + stored_fingerprint_entry["ingredients"])
+    def run_protected(self, ingredients="tplx", insert_missing_correct_fingerprints=False, sim_time_limit=None, output_stream=sys.stdout, database_session=None, **kwargs):
+        fingerprint_arg = "0000-0000/" + ingredients
+        extra_args = ["--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"] + get_ingredients_extra_args(ingredients)
+        simulation_task_result = self.simulation_task.run_protected(sim_time_limit=sim_time_limit, output_stream=output_stream, extra_args=extra_args, **dict(kwargs, restore_task_result=False))
+        stored_simulation_task = self.simulation_task.restore(database_session)
+        statement = sqlalchemy.select(FingerprintUpdateTaskResult).where(FingerprintUpdateTaskResult.calculated_fingerprint_ingredients==ingredients).order_by(sqlalchemy.desc(TaskResult.run_at))
+        restored_fingerprint_update_task_result = next(filter(lambda fingerprint_update_task_result: fingerprint_update_task_result.simulation_task_result.task == stored_simulation_task, database_session.scalars(statement)), None)
+        if restored_fingerprint_update_task_result:
+            correct_fingerprint = restored_fingerprint_update_task_result.calculated_fingerprint
         else:
             correct_fingerprint = None
-        if correct_fingerprint or insert_missing_correct_fingerprints:
-            fingerprint_arg = "0000-0000/" + ingredients
-            extra_args = ["--fingerprintcalculator-class", "inet::FingerprintCalculator", "--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"] + get_ingredients_extra_args(ingredients)
-            self.simulation_task.sim_time_limit = sim_time_limit
-            simulation_result = self.simulation_task.run_protected(sim_time_limit=sim_time_limit, output_stream=output_stream, extra_args=extra_args, **kwargs)
-            calculated_fingerprint = get_calculated_fingerprint(simulation_result, ingredients)
-            return FingerprintUpdateTaskResult(self, simulation_result, correct_fingerprint, calculated_fingerprint)
-        else:
-            reason = "No correct fingerprint is found and inserting new fingerprints is disabled" if len(stored_fingerprint_entries) == 0 else "Multiple correct fingerprints are found with different parameters"
-            return FingerprintUpdateTaskResult(self, None, None, None, reason=reason)
+        calculated_fingerprint = get_calculated_fingerprint(simulation_task_result, ingredients)
+        return FingerprintUpdateTaskResult(task=self, simulation_task_result=simulation_task_result, correct_fingerprint=correct_fingerprint, calculated_fingerprint=calculated_fingerprint)
+        # simulation_config = self.simulation_task.simulation_config
+        # correct_fingerprint_store = get_correct_fingerprint_store(simulation_config.simulation_project)
+        # stored_fingerprint_entries = correct_fingerprint_store.filter_entries(ingredients=ingredients, sim_time_limit=sim_time_limit,
+        #                                                                       working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run_number=self.simulation_task.run_number)
+        # if len(stored_fingerprint_entries) == 1:
+        #     stored_fingerprint_entry = stored_fingerprint_entries[0]
+        #     if sim_time_limit is None:
+        #         sim_time_limit = stored_fingerprint_entry["sim_time_limit"]
+        #     correct_fingerprint = Fingerprint(stored_fingerprint_entry["fingerprint"] + "/" + stored_fingerprint_entry["ingredients"])
+        # else:
+        #     correct_fingerprint = None
+        # if correct_fingerprint or insert_missing_correct_fingerprints:
+        #     fingerprint_arg = "0000-0000/" + ingredients
+        #     extra_args = ["--fingerprintcalculator-class", "inet::FingerprintCalculator", "--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"] + get_ingredients_extra_args(ingredients)
+        #     self.simulation_task.sim_time_limit = sim_time_limit
+        #     simulation_result = self.simulation_task.run_protected(sim_time_limit=sim_time_limit, output_stream=output_stream, extra_args=extra_args, **kwargs)
+        #     calculated_fingerprint = get_calculated_fingerprint(simulation_result, ingredients)
+        #     return FingerprintUpdateTaskResult(self, simulation_result, correct_fingerprint, calculated_fingerprint)
+        # else:
+        #     reason = "No correct fingerprint is found and inserting new fingerprints is disabled" if len(stored_fingerprint_entries) == 0 else "Multiple correct fingerprints are found with different parameters"
+        #     return FingerprintUpdateTaskResult(self, None, None, None, reason=reason)
 
-class MultipleFingerprintUpdateTasks(MultipleUpdateTasks):
-    def __init__(self, multiple_simulation_tasks=None, **kwargs):
-        super().__init__(**kwargs)
+add_orm_mapper("FingerprintUpdateTask", lambda: mapper_registry.map_imperatively(
+    FingerprintUpdateTask,
+    sqlalchemy.Table("FingerprintUpdateTask",
+                     mapper_registry.metadata,
+                     FingerprintUpdateTask.id),
+    properties={"id": sqlalchemy.orm.column_property(FingerprintUpdateTask.id, SimulationUpdateTask.id, UpdateTask.id, Task.id)},
+    inherits=SimulationUpdateTask,
+    polymorphic_identity="FingerprintUpdateTask"))
+
+class MultipleFingerprintUpdateTasks(MultipleSimulationUpdateTasks):
+    def __init__(self, multiple_simulation_tasks=None, name="update fingerprint", **kwargs):
+        super().__init__(name=name, **kwargs)
         self.locals = locals()
         self.locals.pop("self")
         self.kwargs = kwargs
         self.multiple_simulation_tasks = multiple_simulation_tasks
-
-    def __repr__(self):
-        return repr(self)
 
     def run(self, simulation_project=None, concurrent=None, build=True, **kwargs):
         if concurrent is None:
             concurrent = self.multiple_simulation_tasks.concurrent
         simulation_project = simulation_project or self.multiple_simulation_tasks.simulation_project
         if build:
-            build_project(simulation_project, **kwargs)
+            build_project(simulation_project=simulation_project, **kwargs)
         multiple_fingerprint_update_results = super().run(**kwargs)
-        correct_fingerprint_store = get_correct_fingerprint_store(simulation_project)
-        for fingerprint_update_result in multiple_fingerprint_update_results.results:
-            fingerprint_update_task = fingerprint_update_result.fingerprint_update_task
-            simulation_task = fingerprint_update_task.simulation_task
-            simulation_config = simulation_task.simulation_config
-            calculated_fingerprint = fingerprint_update_result.calculated_fingerprint
-            if calculated_fingerprint is not None:
-                correct_fingerprint_store.update_fingerprint(calculated_fingerprint.fingerprint, ingredients=calculated_fingerprint.ingredients, test_result="PASS", sim_time_limit=simulation_task.sim_time_limit,
-                                                             working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run=simulation_task._run)
-        correct_fingerprint_store.write()
+        # correct_fingerprint_store = get_correct_fingerprint_store(simulation_project)
+        # for fingerprint_update_result in multiple_fingerprint_update_results.results:
+        #     fingerprint_update_task = fingerprint_update_result.fingerprint_update_task
+        #     simulation_task = fingerprint_update_task.simulation_task
+        #     simulation_config = simulation_task.simulation_config
+        #     calculated_fingerprint = fingerprint_update_result.calculated_fingerprint
+        #     if calculated_fingerprint is not None:
+        #         correct_fingerprint_store.update_fingerprint(calculated_fingerprint.fingerprint, ingredients=calculated_fingerprint.ingredients, test_result="PASS", sim_time_limit=simulation_task.sim_time_limit,
+        #                                                      working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run_number=simulation_task.run_number)
         return multiple_fingerprint_update_results
 
-class FingerprintUpdateTaskResult(UpdateTaskResult):
-    def __init__(self, fingerprint_update_task, simulation_result, correct_fingerprint, calculated_fingerprint, reason=None, **kwargs):
+class FingerprintUpdateTaskResult(SimulationUpdateTaskResult):
+    id = sqlalchemy.Column("id", sqlalchemy.Integer, sqlalchemy.ForeignKey("SimulationUpdateTaskResult.id"), primary_key=True)
+
+    def __init__(self, correct_fingerprint=None, calculated_fingerprint=None, reason=None, **kwargs):
         super().__init__(**kwargs)
         self.locals = locals()
         self.locals.pop("self")
         self.kwargs = kwargs
-        self.fingerprint_update_task = fingerprint_update_task
-        self.simulation_result = simulation_result
         self.calculated_fingerprint = calculated_fingerprint
         if calculated_fingerprint is None:
             self.result = "ERROR"
@@ -500,9 +614,9 @@ class FingerprintUpdateTaskResult(UpdateTaskResult):
         self.expected = self.result == self.expected_result
 
     def get_description(self, complete_error_message=True, include_parameters=False, **kwargs):
-        return (self.fingerprint_update_task.simulation_task.get_parameters_string() + " " if include_parameters else "") + \
+        return (self.task.simulation_task.get_parameters_string() + " " if include_parameters else "") + \
                self.color + self.result + COLOR_RESET + " " + str(self.calculated_fingerprint) + \
-               ((" " + self.simulation_result.get_error_message(complete_error_message=complete_error_message)) if self.simulation_result and self.simulation_result.result == "ERROR" else "") + \
+               ((" " + self.simulation_task_result.get_error_message(complete_error_message=complete_error_message)) if self.simulation_task_result and self.simulation_task_result.result == "ERROR" else "") + \
                (" (" + self.reason + ")" if self.reason else "")
 
     def __repr__(self):
@@ -510,6 +624,18 @@ class FingerprintUpdateTaskResult(UpdateTaskResult):
 
     def print_result(self, complete_error_message=True, output_stream=sys.stdout, **kwargs):
         print(self.get_description(complete_error_message=complete_error_message), file=output_stream)
+
+add_orm_mapper("FingerprintUpdateTaskResult", lambda: mapper_registry.map_imperatively(
+    FingerprintUpdateTaskResult,
+    sqlalchemy.Table("FingerprintUpdateTaskResult",
+                     mapper_registry.metadata,
+                     FingerprintUpdateTaskResult.id,
+                     sqlalchemy.Column("calculated_fingerprint_value", sqlalchemy.String),
+                     sqlalchemy.Column("calculated_fingerprint_ingredients", sqlalchemy.String)),
+    properties={"id": sqlalchemy.orm.column_property(FingerprintUpdateTaskResult.id, SimulationUpdateTaskResult.id, UpdateTaskResult.id, TaskResult.id),
+                "calculated_fingerprint": sqlalchemy.orm.composite(Fingerprint, "calculated_fingerprint_value", "calculated_fingerprint_ingredients")},
+    inherits=SimulationUpdateTaskResult,
+    polymorphic_identity="FingerprintUpdateTaskResult"))
 
 class MultipleFingerprintUpdateTaskResults(MultipleUpdateTaskResults):
     def __init__(self, multiple_fingerprint_update_tasks, fingerprint_update_results, elapsed_wall_time=None, **kwargs):
@@ -574,41 +700,58 @@ class MultipleFingerprintUpdateTaskResults(MultipleUpdateTaskResults):
             texts.append(simulation_result.get_description(**kwargs))
         return "  " + separator.join(texts)
 
-def get_update_correct_fingerprint_tasks(**kwargs):
+def get_update_correct_fingerprint_tasks(database=None, **kwargs):
     fingerprint_update_tasks = []
-    multiple_simulation_tasks = get_simulation_tasks(**kwargs)
+    multiple_simulation_tasks = get_simulation_tasks(database=database, **kwargs)
     for simulation_task in multiple_simulation_tasks.tasks:
-        fingerprint_update_task = FingerprintUpdateTask(simulation_task, **kwargs)
+        fingerprint_update_task = FingerprintUpdateTask(simulation_task=simulation_task, database=database, **kwargs)
+        if database:
+            call_with_database_session(lambda database_session: fingerprint_update_task.ensure_stored(database_session))
         fingerprint_update_tasks.append(fingerprint_update_task)
-    return MultipleFingerprintUpdateTasks(multiple_simulation_tasks, tasks=fingerprint_update_tasks)
+    return MultipleFingerprintUpdateTasks(multiple_simulation_tasks, tasks=fingerprint_update_tasks, database=database, **kwargs)
 
-def update_correct_fingerprints(**kwargs):
-    multiple_fingerprint_update_tasks = get_update_correct_fingerprint_tasks(**kwargs)
-    return multiple_fingerprint_update_tasks.run(**kwargs)
+def update_correct_fingerprints(restore_task_result=False, **kwargs):
+    """
+    Updates the stored correct fingerprints in the database for one or more fingerprint tests that match the provided
+    filter criteria.
+
+    Parameters:
+        restore_task_result (bool):
+            TODO
+
+        kwargs (dict):
+            TODO
+
+    Returns (:py:class:`MultipleFingerprintUpdateTaskResults`):
+        TODO
+    """
+    multiple_fingerprint_update_tasks = get_update_correct_fingerprint_tasks(restore_task_result=restore_task_result, **kwargs)
+    return multiple_fingerprint_update_tasks.run(restore_task_result=restore_task_result, **kwargs)
 
 def remove_correct_fingerprint(simulation_task, ingredients=None, **kwargs):
     simulation_config = simulation_task.simulation_config
-    correct_fingerprint_store = get_correct_fingerprint_store(simulation_config.simulation_project)
-    correct_fingerprint_store.remove_fingerprints(ingredients=ingredients, sim_time_limit=simulation_task.sim_time_limit,
-                                                  working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run=simulation_task._run)
+    # TODO revive
+    # correct_fingerprint_store = get_correct_fingerprint_store(simulation_config.simulation_project)
+    # correct_fingerprint_store.remove_fingerprints(ingredients=ingredients, sim_time_limit=simulation_task.sim_time_limit,
+    #                                               working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run_number=simulation_task.run_number)
 
 def remove_correct_fingerprints(**kwargs):
-    logger.info("Removing correct fingerprints")
+    _logger.info("Removing correct fingerprints")
     multiple_simulation_tasks = get_simulation_tasks(**kwargs)
     for simulation_task in multiple_simulation_tasks.tasks:
         remove_correct_fingerprint(simulation_task)
-    correct_fingerprint_store = get_correct_fingerprint_store(multiple_simulation_tasks.simulation_project)
-    correct_fingerprint_store.write()
 
-def remove_extra_correct_fingerprints(simulation_project=default_project, **kwargs):
-    correct_fingerprint_store = get_correct_fingerprint_store(simulation_project)
-    for entry in correct_fingerprint_store.get_entries():
-        found = False
-        for simulation_config in get_all_simulation_configs(simulation_project):
-            if simulation_config.working_directory == entry["working_directory"] and \
-               simulation_config.ini_file == entry["ini_file"] and \
-               simulation_config.config == entry["config"]:
-                found = True
-        if not found:
-            correct_fingerprint_store.remove_entry(entry)
-    correct_fingerprint_store.write()
+def remove_extra_correct_fingerprints(simulation_project=None, **kwargs):
+    if simulation_project is None:
+        simulation_project = get_default_simulation_project()
+    # TODO revive
+    # correct_fingerprint_store = get_correct_fingerprint_store(simulation_project)
+    # for entry in correct_fingerprint_store.get_entries():
+    #     found = False
+    #     for simulation_config in get_all_simulation_configs(simulation_project):
+    #         if simulation_config.working_directory == entry["working_directory"] and \
+    #            simulation_config.ini_file == entry["ini_file"] and \
+    #            simulation_config.config == entry["config"]:
+    #             found = True
+    #     if not found:
+    #         correct_fingerprint_store.remove_entry(entry)
