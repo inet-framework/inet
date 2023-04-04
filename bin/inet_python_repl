@@ -1,3 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env ipython3
 
-ipython3 --no-banner -m inet.repl -i
+from inet.repl import *
+
+run_repl_main()
