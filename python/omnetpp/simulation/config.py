@@ -16,7 +16,6 @@ import re
 import shutil
 import subprocess
 
-from omnetpp.common.database import *
 from omnetpp.common.util import *
 
 _logger = logging.getLogger(__name__)
@@ -89,19 +88,6 @@ class SimulationConfig:
         hasher.update(self.config.encode("utf-8"))
         return hasher.digest()
 
-    def store(self, database_session):
-        stored_simulation_config = clone_persistent_object(self)
-        stored_simulation_config.simulation_project = self.simulation_project.ensure_stored(database_session)
-        database_session.add(stored_simulation_config)
-        return stored_simulation_config
-
-    def restore(self, database_session):
-        statement = sqlalchemy.select(SimulationConfig).where(SimulationConfig.working_directory == self.working_directory).where(SimulationConfig.ini_file == self.ini_file).where(SimulationConfig.config == self.config)
-        return database_session.scalars(statement).one_or_none()
-
-    def ensure_stored(self, database_session):
-        return self.restore(database_session) or self.store(database_session)
-
     def matches_filter(self, filter=None, exclude_filter=None,
                        working_directory_filter=None, exclude_working_directory_filter=None,
                        ini_file_filter=None, exclude_ini_file_filter=None,
@@ -164,13 +150,3 @@ class SimulationConfig:
             raise Exception("Path is not in home")
         if os.path.exists(path):
             shutil.rmtree(path)
-
-add_orm_mapper("SimulationConfig", lambda: mapper_registry.map_imperatively(
-    SimulationConfig,
-    sqlalchemy.Table("SimulationConfig",
-                     mapper_registry.metadata,
-                     sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
-                     sqlalchemy.Column("working_directory", sqlalchemy.String),
-                     sqlalchemy.Column("ini_file", sqlalchemy.String),
-                     sqlalchemy.Column("config", sqlalchemy.String)),
-    properties={"simulation_tasks" : sqlalchemy.orm.relationship("SimulationTask", back_populates="simulation_config")}))

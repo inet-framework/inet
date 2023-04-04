@@ -38,7 +38,7 @@ def build_project(build_mode="makefile", **kwargs):
         build_function = build_project_using_tasks
     else:
         raise Exception(f"Unknown build_mode argument: {build_mode}")
-    return build_function(**dict(kwargs, restore_task_result=False, store_task_result=False))
+    return build_function(**kwargs)
 
 def build_project_using_makefile(simulation_project=None, mode="release", capture_output=True, **kwargs):
     """
@@ -306,7 +306,7 @@ def build_project_using_tasks(simulation_project, **kwargs):
     Returns (None):
         Nothing.
     """
-    return BuildSimulationProjectTask(simulation_project, **dict(kwargs, database_session=None)).run(**kwargs)
+    return BuildSimulationProjectTask(simulation_project, **dict(kwargs)).run(**kwargs)
 
 def clean_project(simulation_project=None, mode="release", capture_output=True, **kwargs):
     if simulation_project is None:

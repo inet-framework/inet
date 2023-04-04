@@ -12,7 +12,7 @@ __sphinx_mock__ = True # ignore this module in documentation
 
 _logger = logging.getLogger(__name__)
 
-def parse_run_tasks_arguments(task_name, database_required=False):
+def parse_run_tasks_arguments(task_name):
     description = "Runs all " + task_name + " concurrently in the enclosing project, recursively from the current working directory, as separate processes on localhost."
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("-p", "--simulation-project", default=None, help="specifies the name of the project")
@@ -39,17 +39,6 @@ def parse_run_tasks_arguments(task_name, database_required=False):
     parser.add_argument("--simulation-runner", choices=["subprocess", "inprocess"], default="subprocess", help="specifies the simulation runner for individual simulations")
     parser.add_argument("--hosts", default="localhost", help="specifies the hosts where the simulations are run")
     parser.add_argument("-x", "--nix-shell", default=None, help="specifies the NIX shell in which the simulations are run")
-    parser.add_argument("-d", "--database", required=database_required, default=None, help="specifies the database where data is stored between subsequent executions, the special value 'default' means the default database")
-    parser.add_argument("--store-task-result", default=True, action=argparse.BooleanOptionalAction, help="determines if task results are stored in the database")
-    parser.add_argument("--store-complete-binary-hash", default=None, action=argparse.BooleanOptionalAction, help="determines if the stored task results contain the complete binary hash of simulations")
-    parser.add_argument("--store-complete-source-hash", default=None, action=argparse.BooleanOptionalAction, help="determines if the stored task results contain the complete source hash of simulations")
-    parser.add_argument("--store-partial-binary-hash", default=None, action=argparse.BooleanOptionalAction, help="determines if the stored task results contain the partial binary hash of simulations")
-    parser.add_argument("--store-partial-source-hash", default=None, action=argparse.BooleanOptionalAction, help="determines if the stored task results contain the partial source hash of simulations")
-    parser.add_argument("--restore-task-result", default=True, action=argparse.BooleanOptionalAction, help="determines if task results are restored from the database")
-    parser.add_argument("--restore-by-complete-binary-hash", default=None, action=argparse.BooleanOptionalAction, help="determines if task results can be restored using the complete binary hash of simulations")
-    parser.add_argument("--restore-by-complete-source-hash", default=None, action=argparse.BooleanOptionalAction, help="determines if task results can be restored using the complete source hash of simulations")
-    parser.add_argument("--restore-by-partial-binary-hash", default=None, action=argparse.BooleanOptionalAction, help="determines if task results can be restored using the partial binary hash of simulations")
-    parser.add_argument("--restore-by-partial-source-hash", default=None, action=argparse.BooleanOptionalAction, help="determines if task results can be restored using the partial source hash of simulations")
     parser.add_argument("-l", "--log-level", choices=["ERROR", "WARN", "INFO", "DEBUG"], default="WARN", help="specifies the log level for the root logging category")
     parser.add_argument("--handle-exception", default=True, action=argparse.BooleanOptionalAction, help="disables displaying stacktraces for exceptions")
     parser.set_defaults(concurrent=True, build=True)
@@ -57,8 +46,6 @@ def parse_run_tasks_arguments(task_name, database_required=False):
 
 def process_run_tasks_arguments(args):
     logging.getLogger("distributed.deploy.ssh").setLevel(args.log_level)
-    if args.database:
-        initialize_database_engine(database=args.database if args.database != "default" else default_database)
     define_sample_projects()
     simulation_project = determine_default_simulation_project(name=args.simulation_project)
     kwargs = {k: v for k, v in vars(args).items() if v is not None}
@@ -83,9 +70,9 @@ def process_run_tasks_arguments(args):
         kwargs["cluster"] = cluster
     return kwargs
 
-def run_tasks_main(main_function, task_name, database_required=False):
+def run_tasks_main(main_function, task_name):
     try:
-        args = parse_run_tasks_arguments(task_name, database_required=database_required)
+        args = parse_run_tasks_arguments(task_name)
         initialize_logging(args.log_level)
         _logger.debug(f"Processing command line arguments: {args}")
         kwargs = process_run_tasks_arguments(args)
@@ -109,10 +96,10 @@ def run_smoke_tests_main():
     run_tasks_main(run_smoke_tests, "smoke tests")
 
 def run_fingerprint_tests_main():
-    run_tasks_main(run_fingerprint_tests, "fingerprint tests", database_required=True)
+    run_tasks_main(run_fingerprint_tests, "fingerprint tests")
 
 def update_correct_fingerprints_main():
-    run_tasks_main(update_correct_fingerprints, "update correct fingerprints", database_required=True)
+    run_tasks_main(update_correct_fingerprints, "update correct fingerprints")
 
 def parse_build_project_arguments():
     description = "Builds the specified or enclosing simulation project."

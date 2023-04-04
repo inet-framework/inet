@@ -6,7 +6,6 @@ Please note that undocumented features are not supposed to be used by the user.
 
 from omnetpp.common.cluster import *
 from omnetpp.common.compile import *
-from omnetpp.common.database import *
 from omnetpp.common.task import *
 from omnetpp.common.util import *
 

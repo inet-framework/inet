@@ -6,7 +6,6 @@ Please note that undocumented features are not supposed to be used by the user.
 
 import datetime
 import logging
-import sqlalchemy
 import time
 
 from omnetpp.common import *
@@ -22,8 +21,6 @@ class SimulationTestTaskResult(TestTaskResult):
 
     Please note that undocumented features are not supposed to be called by the user.
     """
-
-    id = sqlalchemy.Column("id", sqlalchemy.Integer, sqlalchemy.ForeignKey("TestTaskResult.id"), primary_key=True)
 
     def __init__(self, simulation_task_result=None, **kwargs):
         super().__init__(**kwargs)
@@ -41,22 +38,6 @@ class SimulationTestTaskResult(TestTaskResult):
 
     def get_test_results(self):
         return [self]
-
-    def store(self, database_session):
-        stored_simulation_test_task_result = super().store(database_session)
-        stored_simulation_test_task_result.simulation_task_result = self.simulation_task_result.ensure_stored(database_session)
-        return stored_simulation_test_task_result
-
-add_orm_mapper("SimulationTestTaskResult", lambda: mapper_registry.map_imperatively(
-    SimulationTestTaskResult,
-    sqlalchemy.Table("SimulationTestTaskResult",
-                     mapper_registry.metadata,
-                     SimulationTestTaskResult.id,
-                     sqlalchemy.Column("simulation_task_result_id", sqlalchemy.Integer, sqlalchemy.ForeignKey("TaskResult.id"))),
-    properties={"id": sqlalchemy.orm.column_property(SimulationTestTaskResult.id, TestTaskResult.id, TaskResult.id),
-                "simulation_task_result": sqlalchemy.orm.relationship("TaskResult", remote_side="TaskResult.id", foreign_keys="SimulationTestTaskResult.simulation_task_result_id", uselist=False)},
-    inherits=TestTaskResult,
-    polymorphic_identity="SimulationTestTaskResult"))
 
 class MultipleSimulationTestTaskResults(MultipleTestTaskResults):
     def get_test_results(self):
@@ -82,8 +63,6 @@ class SimulationTestTask(TestTask):
 
     Please note that undocumented features are not supposed to be called by the user.
     """
-
-    id = sqlalchemy.Column("id", sqlalchemy.Integer, sqlalchemy.ForeignKey("TestTask.id"), primary_key=True)
 
     def __init__(self, simulation_task=None, task_result_class=SimulationTestTaskResult, **kwargs):
         super().__init__(task_result_class=task_result_class, **kwargs)
@@ -113,26 +92,10 @@ class SimulationTestTask(TestTask):
             else:
                 return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result=simulation_task_result.result, expected_result=simulation_task_result.expected_result, expected=simulation_task_result.expected, reason=simulation_task_result.reason, error_message="simulation exited with error")
 
-    def store(self, database_session):
-        stored_simulation_test_task = super().store(database_session)
-        stored_simulation_test_task.simulation_task = self.simulation_task.ensure_stored(database_session)
-        return stored_simulation_test_task
-
     def check_simulation_task_result(self, simulation_task_result, **kwargs):
         result = "PASS" if simulation_task_result.result == "DONE" else simulation_task_result.result
         expected_result = "PASS" if simulation_task_result.expected_result == "DONE" else simulation_task_result.expected_result
         return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result=result, expected_result=expected_result, reason=simulation_task_result.reason)
-
-add_orm_mapper("SimulationTestTask", lambda: mapper_registry.map_imperatively(
-    SimulationTestTask,
-    sqlalchemy.Table("SimulationTestTask",
-                     mapper_registry.metadata,
-                     SimulationTestTask.id,
-                     sqlalchemy.Column("simulation_task_id", sqlalchemy.Integer, sqlalchemy.ForeignKey("Task.id"))),
-    properties={"id": sqlalchemy.orm.column_property(SimulationTestTask.id, TestTask.id, Task.id),
-                "simulation_task": sqlalchemy.orm.relationship("SimulationTask", remote_side="Task.id", foreign_keys="SimulationTestTask.simulation_task_id", uselist=False)},
-    inherits=TestTask,
-    polymorphic_identity="SimulationTestTask"))
 
 class MultipleSimulationTestTasks(MultipleTestTasks):
     def __init__(self, build=True, simulation_project=None, **kwargs):
@@ -161,8 +124,6 @@ def run_simulation_tests(**kwargs):
     return multiple_test_tasks.run()
 
 class SimulationUpdateTaskResult(UpdateTaskResult):
-    id = sqlalchemy.Column("id", sqlalchemy.Integer, sqlalchemy.ForeignKey("UpdateTaskResult.id"), primary_key=True)
-
     def __init__(self, simulation_task_result=None, **kwargs):
         super().__init__(**kwargs)
         self.locals = locals()
@@ -177,25 +138,7 @@ class SimulationUpdateTaskResult(UpdateTaskResult):
     def get_subprocess_result(self):
         return self.simulation_task_result.subprocess_result if self.simulation_task_result else None
 
-    def store(self, database_session):
-        stored_simulation_update_task_result = super().store(database_session)
-        stored_simulation_update_task_result.simulation_task_result = self.simulation_task_result.ensure_stored(database_session)
-        return stored_simulation_update_task_result
-
-add_orm_mapper("SimulationUpdateTaskResult", lambda: mapper_registry.map_imperatively(
-    SimulationUpdateTaskResult,
-    sqlalchemy.Table("SimulationUpdateTaskResult",
-                     mapper_registry.metadata,
-                     SimulationUpdateTaskResult.id,
-                     sqlalchemy.Column("simulation_task_result_id", sqlalchemy.Integer, sqlalchemy.ForeignKey("TaskResult.id"))),
-    properties={"id": sqlalchemy.orm.column_property(SimulationUpdateTaskResult.id, UpdateTaskResult.id, TaskResult.id),
-                "simulation_task_result": sqlalchemy.orm.relationship("TaskResult", remote_side="TaskResult.id", foreign_keys="SimulationUpdateTaskResult.simulation_task_result_id", uselist=False)},
-    inherits=UpdateTaskResult,
-    polymorphic_identity="SimulationUpdateTaskResult"))
-
 class SimulationUpdateTask(UpdateTask):
-    id = sqlalchemy.Column("id", sqlalchemy.Integer, sqlalchemy.ForeignKey("UpdateTask.id"), primary_key=True)
-
     def __init__(self, simulation_task=None, task_result_class=SimulationUpdateTaskResult, **kwargs):
         super().__init__(task_result_class=task_result_class, **kwargs)
         self.locals = locals()
@@ -228,22 +171,6 @@ class SimulationUpdateTask(UpdateTask):
         result = "PASS" if simulation_task_result.result == "DONE" else simulation_task_result.result
         expected_result = "PASS" if simulation_task_result.expected_result == "DONE" else simulation_task_result.expected_result
         return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result=result, expected_result=expected_result, reason=simulation_task_result.reason)
-
-    def store(self, database_session):
-        stored_simulation_update_task = super().store(database_session)
-        stored_simulation_update_task.simulation_task = self.simulation_task.ensure_stored(database_session)
-        return stored_simulation_update_task
-
-add_orm_mapper("SimulationUpdateTask", lambda: mapper_registry.map_imperatively(
-    SimulationUpdateTask,
-    sqlalchemy.Table("SimulationUpdateTask",
-                     mapper_registry.metadata,
-                     SimulationUpdateTask.id,
-                     sqlalchemy.Column("simulation_task_id", sqlalchemy.Integer, sqlalchemy.ForeignKey("Task.id"))),
-    properties={"id": sqlalchemy.orm.column_property(SimulationUpdateTask.id, UpdateTask.id, Task.id),
-                "simulation_task": sqlalchemy.orm.relationship("SimulationTask", remote_side="Task.id", foreign_keys="SimulationUpdateTask.simulation_task_id", uselist=False)},
-    inherits=UpdateTask,
-    polymorphic_identity="SimulationUpdateTask"))
 
 class MultipleSimulationUpdateTasks(MultipleUpdateTasks):
     def __init__(self, simulation_project=None, **kwargs):

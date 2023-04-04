@@ -22,10 +22,8 @@ import os
 import re
 import shutil
 import socket
-import sqlalchemy
 import subprocess
 
-from omnetpp.common.database import *
 from omnetpp.common.util import *
 from omnetpp.simulation.config import *
 
@@ -261,18 +259,6 @@ class SimulationProject:
             msg_files = msg_files + list(map(lambda file_path: self.get_relative_path(file_path), file_paths))
         return msg_files
 
-    def store(self, database_session):
-        stored_simulation_project = clone_persistent_object(self)
-        database_session.add(stored_simulation_project)
-        return stored_simulation_project
-
-    def restore(self, database_session):
-        statement = sqlalchemy.select(SimulationProject).where(SimulationProject.name == self.name).where(SimulationProject.version == self.version).where(SimulationProject.git_hash == self.git_hash).where(SimulationProject.git_diff_hash == self.git_diff_hash)
-        return database_session.scalars(statement).one_or_none()
-
-    def ensure_stored(self, database_session):
-        return self.restore(database_session) or self.store(database_session)
-
     # KLUDGE TODO replace this with a Python binding to the C++ configuration reader
     def collect_ini_file_simulation_configs(self, ini_path):
         def get_sim_time_limit(config_dicts, config):
@@ -446,16 +432,6 @@ export LD_LIBRARY_PATH=$__omnetpp_root_dir/lib:$LD_LIBRARY_PATH
         for worker_hostname in worker_hostnames:
             if hostname != worker_hostname:
                 os.system(f'rsync --exclude "\\*\\*/results" -r "{binary_distribution_folder}" "{worker_hostname}:."')
-
-add_orm_mapper("SimulationProject", lambda: mapper_registry.map_imperatively(
-    SimulationProject,
-    sqlalchemy.Table("SimulationProject",
-                     mapper_registry.metadata,
-                     sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
-                     sqlalchemy.Column("name", sqlalchemy.String),
-                     sqlalchemy.Column("version", sqlalchemy.String),
-                     sqlalchemy.Column("git_hash", sqlalchemy.String),
-                     sqlalchemy.Column("git_diff_hash", sqlalchemy.String))))
 
 simulation_projects = {}
 

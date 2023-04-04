@@ -25,7 +25,6 @@ _logger = logging.getLogger(__name__)
 #  - sequential vs. concurrent
 #  - localhost vs. cluster
 #  - native environment vs specific nix environment
-#  - with or without task result database
 
 class SimulationSelfTestTask(TestTask):
     def __init__(self, simulation_project, action="Running simulation self test", print_run_start_separately=False, **kwargs):
@@ -52,8 +51,8 @@ class SmokeTestSelfTestTask(TestTask):
         return TestTaskResult(task=self, result=smoke_test_task_results.result)
 
 class FingerprintTestSelfTestTask(TestTask):
-    def __init__(self, simulation_project, action="Running fingerprint test self test", print_run_start_separately=False, database=default_database, **kwargs):
-        super().__init__(simulation_project=simulation_project, action=action, print_run_start_separately=print_run_start_separately, database=database, **kwargs)
+    def __init__(self, simulation_project, action="Running fingerprint test self test", print_run_start_separately=False, **kwargs):
+        super().__init__(simulation_project=simulation_project, action=action, print_run_start_separately=print_run_start_separately, **kwargs)
         self.simulation_project = simulation_project
 
     def get_parameters_string(self, **kwargs):
@@ -70,7 +69,7 @@ class SimulationProjectSelfTestTasks(MultipleTestTasks):
     def __init__(self, simulation_project, name="simulation project self test", print_run_start_separately=False, **kwargs):
         super().__init__(tasks = [SimulationSelfTestTask(simulation_project=simulation_project, concurrent=True, **kwargs),
                                   SmokeTestSelfTestTask(simulation_project=simulation_project, concurrent=True, **kwargs),
-                                  FingerprintTestSelfTestTask(simulation_project=simulation_project, simdatabase=default_database, concurrent=False, **kwargs)],
+                                  FingerprintTestSelfTestTask(simulation_project=simulation_project, concurrent=False, **kwargs)],
                          simulation_project=simulation_project, name=name, print_run_start_separately=print_run_start_separately, concurrent=False, **kwargs)
         self.simulation_project = simulation_project
 
@@ -88,7 +87,6 @@ def parse_arguments():
     parser.add_argument("--exclude-filter", default=None, help="exclude simulations that match the specified generic filter")
     parser.add_argument("-r", "--run-filter", default=None, help="includes simulations having the specified run numbers")
     parser.add_argument("--exclude-run-filter", default=None, help="exclude simulations having the specified run numbers")
-    parser.add_argument("-d", "--database", default=None, help="specifies the database where data is stored between subsequent executions")
     parser.add_argument("-l", "--log-level", choices=["ERROR", "WARN", "INFO", "DEBUG"], default="WARN", help="specifies the log level for the root logging category")
     return parser.parse_args(sys.argv[1:])
 
@@ -104,7 +102,6 @@ def run_self_tests_main():
     args = parse_arguments()
     kwargs = process_arguments(args)
     initialize_logging(args.log_level)
-    initialize_database_engine(clear=True)
     define_self_test_projects()
     self_test_task_results = MultipleSelfTestTasks(**kwargs).run(**kwargs)
     print(self_test_task_results)

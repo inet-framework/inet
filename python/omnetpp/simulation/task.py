@@ -13,7 +13,6 @@ import os
 import random
 import re
 import signal
-import sqlalchemy
 import subprocess
 import sys
 import time
@@ -64,8 +63,6 @@ class SimulationTaskResult(TaskResult):
     Please note that undocumented features are not supposed to be called by the user.
     """
 
-    id = sqlalchemy.Column("id", sqlalchemy.Integer, sqlalchemy.ForeignKey("TaskResult.id"), primary_key=True)
-
     def __init__(self, subprocess_result=None, cancel=False, **kwargs):
         super().__init__(**kwargs)
         self.locals = locals()
@@ -106,29 +103,12 @@ class SimulationTaskResult(TaskResult):
     def get_subprocess_result(self):
         return self.subprocess_result
 
-    def store(self, database_session):
-        stored_simulation_task_result = super().store(database_session)
-        stored_simulation_task_result.task = self.task.ensure_stored(database_session)
-        return stored_simulation_task_result
-
-add_orm_mapper("SimulationTaskResult", lambda: mapper_registry.map_imperatively(
-    SimulationTaskResult,
-    sqlalchemy.Table("SimulationTaskResult",
-                     mapper_registry.metadata,
-                     SimulationTaskResult.id,
-                     sqlalchemy.Column("error_module", sqlalchemy.String)),
-    properties={"id": sqlalchemy.orm.column_property(SimulationTaskResult.id, TaskResult.id)},
-    inherits=TaskResult,
-    polymorphic_identity="SimulationTaskResult"))
-
 class SimulationTask(Task):
     """
     Represents a simulation task that can be run as a separate process or in the process where Python is running.
 
     Please note that undocumented features are not supposed to be called by the user.
     """
-
-    id = sqlalchemy.Column("id", sqlalchemy.Integer, sqlalchemy.ForeignKey("Task.id"), primary_key=True)
 
     def __init__(self, simulation_config=None, run_number=0, itervars=None, mode="release", user_interface="Cmdenv", sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, name="simulation", task_result_class=SimulationTaskResult, **kwargs):
         """
@@ -293,17 +273,6 @@ class SimulationTask(Task):
         task_result.partial_source_hash = hex_or_none(self.get_hash(complete=False, binary=False))
         return task_result
 
-    def store(self, database_session):
-        stored_simulation_task = clone_persistent_object(self)
-        stored_simulation_task.simulation_config = self.simulation_config.ensure_stored(database_session)
-        database_session.add(stored_simulation_task)
-        return stored_simulation_task
-
-    def restore(self, database_session):
-        stored_simulation_config = self.simulation_config.restore(database_session)
-        statement = sqlalchemy.select(SimulationTask).where(SimulationTask.simulation_config == stored_simulation_config).where(SimulationTask.run_number == self.run_number).where(SimulationTask.itervars == self.itervars).where(SimulationTask.sim_time_limit == self.sim_time_limit)
-        return database_session.scalars(statement).one_or_none()
-
     def collect_dependency_source_file_paths(self, simulation_task_result):
         simulation_project = self.simulation_config.simulation_project
         stdout = simulation_task_result.subprocess_result.stdout.decode("utf-8")
@@ -348,20 +317,6 @@ class SimulationTask(Task):
         file_names = [simulation_project.get_full_path(file_name) for file_name in file_names]
         return sorted([file_name for file_name in file_names if os.path.exists(file_name)])
 
-add_orm_mapper("SimulationTask", lambda: mapper_registry.map_imperatively(
-    SimulationTask,
-    sqlalchemy.Table("SimulationTask",
-                     mapper_registry.metadata,
-                     SimulationTask.id,
-                     sqlalchemy.Column("simulation_config_id", sqlalchemy.ForeignKey("SimulationConfig.id")),
-                     sqlalchemy.Column("run_number", sqlalchemy.Integer),
-                     sqlalchemy.Column("itervars", sqlalchemy.String),
-                     sqlalchemy.Column("sim_time_limit", sqlalchemy.String)),
-    properties={"id": sqlalchemy.orm.column_property(SimulationTask.id, Task.id),
-                "simulation_config": sqlalchemy.orm.relationship("SimulationConfig", back_populates="simulation_tasks")},
-    inherits=Task,
-    polymorphic_identity="SimulationTask"))
-
 class MultipleSimulationTasks(MultipleTasks):
     """
     Represents multiple simulation tasks that can be run together.
@@ -404,7 +359,7 @@ class MultipleSimulationTasks(MultipleTasks):
             build_project(**dict(kwargs, simulation_project=self.simulation_project, mode=self.mode))
         return super().run(**kwargs)
 
-def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode="release", run_number=None, run_number_filter=None, exclude_run_number_filter=None, sim_time_limit=None, cpu_time_limit=None, concurrent=True, expected_num_tasks=None, simulation_task_class=SimulationTask, database=None, multiple_simulation_tasks_class=MultipleSimulationTasks, **kwargs):
+def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode="release", run_number=None, run_number_filter=None, exclude_run_number_filter=None, sim_time_limit=None, cpu_time_limit=None, concurrent=True, expected_num_tasks=None, simulation_task_class=SimulationTask, multiple_simulation_tasks_class=MultipleSimulationTasks, **kwargs):
     """
     Returns multiple simulation tasks matching the filter criteria. The returned tasks can be run by calling the
     :py:meth:`omnetpp.common.task.MultipleTasks.run` method.
@@ -464,27 +419,19 @@ def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode=
     """
     if simulation_project is None:
         simulation_project = get_default_simulation_project()
-    if database:
-        call_with_database_session(lambda database_session: simulation_project.ensure_stored(database_session))
     if simulation_configs is None:
         simulation_configs = simulation_project.get_simulation_configs(concurrent=concurrent, **kwargs)
     simulation_tasks = []
     for simulation_config in simulation_configs:
-        if database:
-            call_with_database_session(lambda database_session: simulation_config.ensure_stored(database_session))
         if run_number is not None:
             simulation_run_sim_time_limit = sim_time_limit(simulation_config, run_number) if callable(sim_time_limit) else sim_time_limit
             simulation_task = simulation_task_class(simulation_config=simulation_config, run_number=run_number, mode=mode, sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs)
-            if database:
-                call_with_database_session(lambda database_session: simulation_task.ensure_stored(database_session))
             simulation_tasks.append(simulation_task)
         else:
             for generated_run_number in range(0, simulation_config.num_runs):
                 if matches_filter(str(generated_run_number), run_number_filter, exclude_run_number_filter, True):
                     simulation_run_sim_time_limit = sim_time_limit(simulation_config, generated_run_number) if callable(sim_time_limit) else sim_time_limit
                     simulation_task = simulation_task_class(simulation_config=simulation_config, run_number=generated_run_number, mode=mode, sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs)
-                    if database:
-                        call_with_database_session(lambda database_session: simulation_task.ensure_stored(database_session))
                     simulation_tasks.append(simulation_task)
     if expected_num_tasks is not None and len(simulation_tasks) != expected_num_tasks:
         raise Exception("Number of found and expected simulation tasks mismatch")

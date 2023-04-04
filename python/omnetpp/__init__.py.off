@@ -49,7 +49,7 @@ command installs all such required and optional modules:
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/omnetpp$ pip install cppyy dask distributed IPython matplotlib numpy pandas scipy sqlalchemy
+    levy@valardohaeris:~/workspace/omnetpp$ pip install cppyy dask distributed IPython matplotlib numpy pandas scipy
     Collecting cppyy
     ...
 

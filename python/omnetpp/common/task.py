@@ -30,13 +30,10 @@ import logging
 import multiprocessing
 import multiprocessing.pool
 import socket
-import sqlalchemy
-import sqlalchemy.orm
 import sys
 import time
 import traceback
 
-from omnetpp.common.database import *
 from omnetpp.common.util import *
 
 _logger = logging.getLogger(__name__)
@@ -46,8 +43,6 @@ class TaskResult:
     Represents a task result that is produced when a :py:class:`Task` is run. The most important attributes of a task
     result are the result, reason and error_message.
     """
-
-    id = sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True)
 
     def __init__(self, task=None, result="DONE", expected_result="DONE", reason=None, error_message=None, exception=None, store_complete_binary_hash=False, store_complete_source_hash=False, store_partial_binary_hash=False, store_partial_source_hash=False, elapsed_wall_time=None, possible_results=["DONE", "SKIP", "CANCEL", "ERROR"], possible_result_colors=[COLOR_GREEN, COLOR_CYAN, COLOR_CYAN, COLOR_RED], **kwargs):
         """
@@ -99,7 +94,6 @@ class TaskResult:
         self.task = task
         self.hostname = socket.gethostname()
         self.run_at = time.time()
-        self.restored_from_database = False
         self.result = result
         self.expected_result = expected_result
         self.expected = expected_result == result
@@ -124,7 +118,6 @@ class TaskResult:
     def get_description(self, complete_error_message=True, include_parameters=False, **kwargs):
         return (self.task.get_parameters_string() + " " if include_parameters else "") + \
                 self.color + self.result + COLOR_RESET + \
-                ((COLOR_YELLOW + " (restored)" + COLOR_RESET) if self.restored_from_database else "") + \
                 ((COLOR_YELLOW + " (unexpected)" + COLOR_RESET) if not self.expected and self.color != COLOR_GREEN else "") + \
                 ((COLOR_GREEN + " (expected)" + COLOR_RESET) if self.expected and self.color != COLOR_GREEN else "") + \
                (" (" + self.reason + ")" if self.reason else "") + \
@@ -132,18 +125,6 @@ class TaskResult:
 
     def get_error_message(self, **kwargs):
         return self.error_message or "<No error message>"
-
-    def store(self, database_session):
-        stored_task_result = clone_persistent_object(self)
-        stored_task_result.task = self.task.ensure_stored(database_session)
-        database_session.add(stored_task_result)
-        return stored_task_result
-
-    def restore(self, database_session):
-        return None
-
-    def ensure_stored(self, database_session):
-        return self.restore(database_session) or self.store(database_session)
 
     def print_result(self, complete_error_message=False, output_stream=sys.stdout, **kwargs):
         print(self.get_description(complete_error_message=complete_error_message), file=output_stream)
@@ -159,30 +140,6 @@ class TaskResult:
             The task result.
         """
         return self.task.rerun(**kwargs)
-
-add_orm_mapper("TaskResult", lambda: mapper_registry.map_imperatively(
-    TaskResult,
-    sqlalchemy.Table("TaskResult",
-                     mapper_registry.metadata,
-                     TaskResult.id,
-                     sqlalchemy.Column("type", sqlalchemy.String),
-                     sqlalchemy.Column("task_id", sqlalchemy.ForeignKey("Task.id")),
-                     sqlalchemy.Column("hostname", sqlalchemy.String),
-                     sqlalchemy.Column("run_at", sqlalchemy.Integer),
-                     sqlalchemy.Column("result", sqlalchemy.String),
-                     sqlalchemy.Column("expected_result", sqlalchemy.String),
-                     sqlalchemy.Column("expected", sqlalchemy.Boolean),
-                     sqlalchemy.Column("reason", sqlalchemy.String),
-                     sqlalchemy.Column("error_message", sqlalchemy.String),
-                     sqlalchemy.Column("elapsed_wall_time", sqlalchemy.String),
-                     sqlalchemy.Column("color", sqlalchemy.String),
-                     sqlalchemy.Column("complete_binary_hash", sqlalchemy.String),
-                     sqlalchemy.Column("complete_source_hash", sqlalchemy.String),
-                     sqlalchemy.Column("partial_binary_hash", sqlalchemy.String),
-                     sqlalchemy.Column("partial_source_hash", sqlalchemy.String)),
-    properties={"task": sqlalchemy.orm.relationship("Task", back_populates="task_results", foreign_keys="TaskResult.task_id")},
-    polymorphic_identity="TaskResult",
-    polymorphic_on="type"))
 
 class MultipleTaskResults:
     """
@@ -349,8 +306,6 @@ class Task:
     Represents a self-contained operation that captures all necessary information in order to be run.
     """
 
-    id = sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True)
-
     def __init__(self, name="task", action="", print_run_start_separately=True, task_result_class=TaskResult, **kwargs):
         """
         Initializes a new task object.
@@ -411,74 +366,11 @@ class Task:
     def print_run_end(self, task_result, output_stream=sys.stdout, **kwargs):
         task_result.print_result(complete_error_message=False, output_stream=output_stream)
 
-    def store(self, database_session):
-        stored_task = clone_persistent_object(self)
-        database_session.add(stored_task)
-        return stored_task
-
-    def restore(self, database_session):
-        return None
-
-    def ensure_stored(self, database_session):
-        return self.restore(database_session) or self.store(database_session)
-
-    def restore_task_result(self, database_session, restore_by_complete_binary_hash=False, restore_by_complete_source_hash=False, restore_by_partial_binary_hash=False, restore_by_partial_source_hash=False, **kwargs):
+    def run(self, dry_run=False, keyboard_interrupt_handler=None, handle_exception=False, **kwargs):
         """
-        Restores the task result from the database.
+        Runs the task.
 
         Parameters:
-            database_session
-            restore_by_complete_binary_hash (bool):
-                Enables restoring the task result by the complete binary hash of the task.
-
-            restore_by_complete_source_hash (bool):
-                Enables restoring the task result by the complete source hash of the task.
-
-            restore_by_partial_binary_hash (bool):
-                Enables restoring the task result by the partial binary hash of the task.
-
-            restore_by_partial_source_hash (bool):
-                Enables restoring the task result by the partial source hash of the task.
-
-        Returns (:py:class:`TaskResult` or None):
-            The restored task result or nothing.
-        """
-        restored_task_result = None
-        type = self.__class__.__name__ + "Result"
-        if restored_task_result is None and restore_by_complete_binary_hash:
-            statement = sqlalchemy.select(TaskResult).where(TaskResult.type==type).where(TaskResult.complete_binary_hash == hex_or_none(self.get_hash(complete=True, binary=True))).order_by(sqlalchemy.desc(TaskResult.run_at))
-            restored_task_result = database_session.scalars(statement).first()
-        if restored_task_result is None and restore_by_complete_source_hash:
-            statement = sqlalchemy.select(TaskResult).where(TaskResult.type==type).where(TaskResult.complete_source_hash == hex_or_none(self.get_hash(complete=True, binary=False))).order_by(sqlalchemy.desc(TaskResult.run_at))
-            restored_task_result = database_session.scalars(statement).first()
-        if restored_task_result is None and restore_by_partial_binary_hash:
-            statement = sqlalchemy.select(TaskResult).where(TaskResult.type==type).where(TaskResult.partial_binary_hash == hex_or_none(self.get_hash(complete=False, binary=True))).order_by(sqlalchemy.desc(TaskResult.run_at))
-            restored_task_result = database_session.scalars(statement).first()
-        if restored_task_result is None and restore_by_partial_source_hash:
-            statement = sqlalchemy.select(TaskResult).where(TaskResult.type==type).where(TaskResult.partial_source_hash == hex_or_none(self.get_hash(complete=False, binary=False))).order_by(sqlalchemy.desc(TaskResult.run_at))
-            restored_task_result = database_session.scalars(statement).first()
-        if restored_task_result is None:
-            return None
-        else:
-            task_result = clone_persistent_object(restored_task_result)
-            task_result.task = self
-            task_result.restored_from_database = True
-            return task_result
-
-    def run(self, database=None, restore_task_result=False, store_task_result=True, dry_run=False, keyboard_interrupt_handler=None, handle_exception=False, **kwargs):
-        """
-        Runs the task. If requested the task result can be attempted to be restored from the database. If the attempt is
-        successful, then the actual running of the task is skipped and the restored result is returned instead.
-
-        Parameters:
-            restore_task_result (bool):
-                Specifies if the task result is attempted to be restored from the database. This parameter is only used
-                if the database parameter is provided.
-
-            store_task_result (bool):
-                Specifies if the task result is stored in the database. This parameter is only used if the
-                database parameter is provided.
-
             dry_run (bool):
                 Specifies to skip the actual running of the task but do everything else.
 
@@ -489,13 +381,10 @@ class Task:
             handle_exception (bool):
                 Specifies if exceptions are caught and processed or passed to the caller.
 
-            kwargs (dict):
-                Additional parameters are inherited from :py:meth:`restore_task_result`.
-
         Returns (:py:class:`TaskResult`):
             The task result.
         """
-        def do_run(database_session=None):
+        def do_run():
             try:
                 if self.print_run_start_separately:
                     self.print_run_start(**kwargs)
@@ -503,14 +392,10 @@ class Task:
                     if dry_run:
                         task_result = self.task_result_class(task=self, result="DONE", reason="Dry run")
                     else:
-                        task_result = None
-                        if database_session and restore_task_result:
-                            task_result = self.restore_task_result(database_session, **kwargs)
-                        if task_result is None:
-                            start_time = time.time()
-                            task_result = self.run_protected(database_session=database_session, store_task_result=store_task_result, restore_task_result=restore_task_result, **kwargs)
-                            end_time = time.time()
-                            task_result.elapsed_wall_time = end_time - start_time
+                        start_time = time.time()
+                        task_result = self.run_protected(**kwargs)
+                        end_time = time.time()
+                        task_result.elapsed_wall_time = end_time - start_time
             except KeyboardInterrupt:
                 task_result = self.task_result_class(task=self, result="CANCEL", reason="Cancel by user")
             except Exception as e:
@@ -518,8 +403,6 @@ class Task:
                     task_result = self.task_result_class(task=self, result="ERROR", reason="Exception during task execution", error_message=e.__repr__(), exception=e)
                 else:
                     raise e
-            if database_session and store_task_result and not task_result.restored_from_database:
-                task_result.store(database_session)
             if not self.print_run_start_separately:
                 self.print_run_start(**kwargs)
             self.print_run_end(task_result, **kwargs)
@@ -527,10 +410,7 @@ class Task:
         if self.cancel:
             return self.task_result_class(task=self, result="CANCEL", reason="Cancel by user")
         else:
-            if database:
-                return call_with_database_session(do_run)
-            else:
-                return do_run()
+            return do_run()
 
     def run_protected(self, **kwargs):
         """
@@ -561,16 +441,6 @@ class Task:
         else:
             return self.recreate(**kwargs).run()
 
-add_orm_mapper("Task", lambda: mapper_registry.map_imperatively(
-    Task,
-    sqlalchemy.Table("Task",
-                     mapper_registry.metadata,
-                     Task.id,
-                     sqlalchemy.Column("type", sqlalchemy.String)),
-    properties={"task_results": sqlalchemy.orm.relationship("TaskResult", back_populates="task", foreign_keys="TaskResult.task_id")},
-    polymorphic_identity="Task",
-    polymorphic_on="type"))
-
 def _run_task(task):
     return task.run()
 
@@ -591,7 +461,7 @@ class MultipleTasks:
     Represents multiple tasks that can be run together. 
     """
 
-    def __init__(self, tasks=[], name="task", concurrent=True, randomize=False, chunksize=1, scheduler="thread", cluster=None, database=None, multiple_task_results_class=MultipleTaskResults, **kwargs):
+    def __init__(self, tasks=[], name="task", concurrent=True, randomize=False, chunksize=1, scheduler="thread", cluster=None, multiple_task_results_class=MultipleTaskResults, **kwargs):
         """
         Initializes a new multiple tasks object.
 
@@ -614,9 +484,6 @@ class MultipleTasks:
             scheduler (string):
                 Specifies how the tasks are scheduled. Valid values are "process", "thread", and "cluster".
 
-            database (string):
-                The database descriptor as required by sqlalchemy.
-
             multiple_task_results_class (string):
                 The Python class name of the produced multiple task results object.
         """
@@ -631,7 +498,6 @@ class MultipleTasks:
         self.cluster = cluster
         self.scheduler = scheduler
         self.multiple_task_results_class = multiple_task_results_class
-        self.database = database
         self.cancel = False
 
     def __repr__(self):
