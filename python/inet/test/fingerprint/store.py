@@ -101,12 +101,8 @@ class FingerprintStore:
     def set_fingerprint(self, fingerprint, **kwargs):
         self.get_entry(**kwargs)["fingerprint"] = fingerprint
 
-    def insert_fingerprint(self, fingerprint, ingredients="tplx", test_result=None, working_directory=os.getcwd(), ini_file="omnetpp.ini", config="General", run=0, sim_time_limit=None, git_hash=None, git_clean=None, itervars="$repetition==0"):
+    def insert_fingerprint(self, fingerprint, ingredients="tplx", test_result=None, working_directory=os.getcwd(), ini_file="omnetpp.ini", config="General", run=0, sim_time_limit=None, itervars="$repetition==0"):
         assert test_result == "ERROR" or sim_time_limit is not None
-        if git_hash is None:
-            git_hash = subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.simulation_project.get_full_path("."), capture_output=True).stdout.decode("utf-8").strip()
-        if git_clean is None:
-            git_clean = subprocess.run(["git", "diff", "--quiet"], cwd=self.simulation_project.get_full_path("."), capture_output=True).returncode == 0
         self.get_entries().append({"working_directory": working_directory,
                                    "ini_file": ini_file,
                                    "config": config,
@@ -116,8 +112,6 @@ class FingerprintStore:
                                    "ingredients": ingredients,
                                    "fingerprint": fingerprint,
                                    "timestamp": time.time(),
-                                   "git_hash": git_hash,
-                                   "git_clean": git_clean,
                                    "itervars": itervars})
 
     def update_fingerprint(self, fingerprint, **kwargs):
@@ -130,13 +124,7 @@ class FingerprintStore:
     def remove_fingerprints(self, **kwargs):
         list(map(lambda element: self.entries.remove(element), self.filter_entries(**kwargs)))
 
-all_fingerprint_stores = dict()
 correct_fingerprint_stores = dict()
-
-def get_all_fingerprint_store(simulation_project):
-    if not simulation_project in all_fingerprint_stores:
-        all_fingerprint_stores[simulation_project] = FingerprintStore(simulation_project, simulation_project.get_full_path("python/inet/test/fingerprint/all_fingerprints.json"))
-    return all_fingerprint_stores[simulation_project]
 
 def get_correct_fingerprint_store(simulation_project):
     if not simulation_project in correct_fingerprint_stores:

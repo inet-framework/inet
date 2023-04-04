@@ -9,15 +9,16 @@ import omnetpp
 import omnetpp.scave
 import omnetpp.scave.analysis
 
+from omnetpp.test.task import *
+
 from inet.common import *
 from inet.documentation.chart import *
-from inet.test.task import *
 from inet.test.statistical import *
 
 logger = logging.getLogger(__name__)
 
 class ChartTestTask(TestTask):
-    def __init__(self, analysis_file_name, id, chart_name, simulation_project=default_project, name="chart test", **kwargs):
+    def __init__(self, analysis_file_name, id, chart_name, simulation_project=None, name="chart test", **kwargs):
         super().__init__(name=name, **kwargs)
         self.locals = locals()
         self.locals.pop("self")
@@ -72,7 +73,9 @@ class MultipleChartTestTasks(MultipleTestTasks):
         multiple_simulation_task_results = self.multiple_simulation_tasks.run_protected(**kwargs)
         return super().run_protected(**kwargs)
 
-def get_chart_test_tasks(simulation_project=default_project, run_simulations=True, filter=None, working_directory_filter=None, pool_class=multiprocessing.Pool, **kwargs):
+def get_chart_test_tasks(simulation_project=None, run_simulations=True, filter=None, working_directory_filter=None, **kwargs):
+    if simulation_project is None:
+        simulation_project = get_default_simulation_project()
     test_tasks = []
     simulation_tasks = []
     for analysis_file_name in get_analysis_files(simulation_project=simulation_project, filter=filter or working_directory_filter, **kwargs):
@@ -83,10 +86,10 @@ def get_chart_test_tasks(simulation_project=default_project, run_simulations=Tru
             if run_simulations:
                 multiple_simulation_tasks = get_simulation_tasks(simulation_project=simulation_project, working_directory_filter=working_directory, sim_time_limit=get_statistical_result_sim_time_limit, **kwargs)
                 for simulation_task in multiple_simulation_tasks.tasks:
-                    if not list(builtins.filter(lambda element: element.simulation_config == simulation_task.simulation_config and element._run == simulation_task._run, simulation_tasks)):
+                    if not list(builtins.filter(lambda element: element.simulation_config == simulation_task.simulation_config and element.run_number == simulation_task.run_number, simulation_tasks)):
                         simulation_tasks.append(simulation_task)
             test_tasks.append(ChartTestTask(simulation_project=simulation_project, analysis_file_name=analysis_file_name, id=chart.id, chart_name=chart.name, task_result_class=TestTaskResult))
-    return MultipleChartTestTasks(tasks=test_tasks, multiple_simulation_tasks=MultipleSimulationTasks(tasks=simulation_tasks, simulation_project=simulation_project, **kwargs), pool_class=pool_class, **kwargs)
+    return MultipleChartTestTasks(tasks=test_tasks, multiple_simulation_tasks=MultipleSimulationTasks(tasks=simulation_tasks, simulation_project=simulation_project, **kwargs), **dict(kwargs, scheduler="process"))
 
 def run_chart_tests(**kwargs):
     multiple_chart_test_tasks = get_chart_test_tasks(**kwargs)
@@ -148,13 +151,12 @@ class MultipleChartUpdateTasks(MultipleUpdateTasks):
         self.multiple_simulation_tasks = multiple_simulation_tasks
 
     def run_protected(self, **kwargs):
-        multiple_simulation_task_results = self.multiple_simulation_tasks.run_protected(output_stream=io.StringIO(), **kwargs)
-        if multiple_simulation_task_results.result != "DONE":
-            return self.multiple_task_results_class(self, result=simulation_task_result.result, reason=simulation_task_result.reason)
-        else:
-            return super().run_protected(**kwargs)
+        multiple_simulation_task_results = self.multiple_simulation_tasks.run_protected(**kwargs)
+        return super().run_protected(**kwargs)
 
-def get_update_chart_tasks(simulation_project=default_project, run_simulations=True, filter=None, working_directory_filter=None, pool_class=multiprocessing.Pool, **kwargs):
+def get_update_chart_tasks(simulation_project=None, run_simulations=True, filter=None, working_directory_filter=None, **kwargs):
+    if simulation_project is None:
+        simulation_project = get_default_simulation_project()
     update_tasks = []
     simulation_tasks = []
     for analysis_file_name in get_analysis_files(simulation_project=simulation_project, filter=filter or working_directory_filter, **kwargs):
@@ -165,11 +167,13 @@ def get_update_chart_tasks(simulation_project=default_project, run_simulations=T
             if run_simulations:
                 multiple_simulation_tasks = get_simulation_tasks(simulation_project=simulation_project, working_directory_filter=working_directory, sim_time_limit=get_statistical_result_sim_time_limit, **kwargs)
                 for simulation_task in multiple_simulation_tasks.tasks:
-                    if not list(builtins.filter(lambda element: element.simulation_config == simulation_task.simulation_config and element._run == simulation_task._run, simulation_tasks)):
+                    if not list(builtins.filter(lambda element: element.simulation_config == simulation_task.simulation_config and element.run_number == simulation_task.run_number, simulation_tasks)):
                         simulation_tasks.append(simulation_task)
             update_tasks.append(ChartUpdateTask(simulation_project=simulation_project, analysis_file_name=analysis_file_name, id=chart.id, chart_name=chart.name, task_result_class=UpdateTaskResult))
-    return MultipleChartUpdateTasks(tasks=update_tasks, multiple_simulation_tasks=MultipleSimulationTasks(tasks=simulation_tasks, simulation_project=simulation_project, **kwargs), pool_class=pool_class, **kwargs)
+    return MultipleChartUpdateTasks(tasks=update_tasks, multiple_simulation_tasks=MultipleSimulationTasks(tasks=simulation_tasks, simulation_project=simulation_project, **kwargs), **dict(kwargs, scheduler="process"))
 
-def update_charts(simulation_project=default_project, pool_class=multiprocessing.Pool, **kwargs):
+def update_charts(simulation_project=None, **kwargs):
+    if simulation_project is None:
+        simulation_project = get_default_simulation_project()
     multiple_update_chart_tasks = get_update_chart_tasks(**kwargs)
     return multiple_update_chart_tasks.run(**kwargs)
