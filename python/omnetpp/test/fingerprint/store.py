@@ -131,5 +131,5 @@ correct_fingerprint_stores = dict()
 
 def get_correct_fingerprint_store(simulation_project):
     if not simulation_project in correct_fingerprint_stores:
-        correct_fingerprint_stores[simulation_project] = FingerprintStore(simulation_project, simulation_project.get_full_path("tests/fingerprint/correct_fingerprints.json"))
+        correct_fingerprint_stores[simulation_project] = FingerprintStore(simulation_project, simulation_project.get_full_path("tests/fingerprint/store.json"))
     return correct_fingerprint_stores[simulation_project]
