@@ -79,8 +79,6 @@ class MultipleSelfTestTasks(MultipleTestTasks):
         super().__init__(tasks=[SimulationProjectSelfTestTasks(simulation_project=get_simulation_project("aloha", None), sim_time_limit="90min", **kwargs),
                                 SimulationProjectSelfTestTasks(simulation_project=get_simulation_project("tictoc", None), sim_time_limit="1s", **kwargs)],
                          name=name, print_run_start_separately=print_run_start_separately, concurrent=False, **kwargs)
-        aloha_project = get_simulation_project("aloha", None)
-        tictoc_project = get_simulation_project("tictoc", None)
 
 def parse_arguments():
     description = "Runs the self test on the OMNeT sample projects."
@@ -98,12 +96,16 @@ def process_arguments(args):
     kwargs = {k: v for k, v in vars(args).items() if v is not None}
     return kwargs
 
+def define_self_test_projects():
+    define_simulation_project("aloha", folder_environment_variable="__omnetpp_root_dir", folder="samples/aloha")
+    define_simulation_project("tictoc", folder_environment_variable="__omnetpp_root_dir", folder="samples/tictoc")
+
 def run_self_tests_main():
     args = parse_arguments()
     kwargs = process_arguments(args)
     initialize_logging(args.log_level)
     initialize_database_engine(clear=True)
-    define_sample_projects()
+    define_self_test_projects()
     self_test_task_results = MultipleSelfTestTasks(**kwargs).run(**kwargs)
     print(self_test_task_results)
     sys.exit(0 if (self_test_task_results is None or self_test_task_results.is_all_results_expected()) else 1)
