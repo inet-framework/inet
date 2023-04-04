@@ -27,7 +27,7 @@ class StatisticalTestTask(SimulationTestTask):
         working_directory = simulation_config.working_directory
         config = simulation_config.config
         current_results_directory = simulation_project.get_full_path(os.path.join(working_directory, "results"))
-        stored_results_directory = simulation_project.get_full_path(os.path.join("statistics", working_directory))
+        stored_results_directory = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory))
         scalars_match = False
         for current_scalar_result_file_name in glob.glob(os.path.join(current_results_directory, "*.sca")):
             if re.search("/" + config + "-#", current_scalar_result_file_name):
@@ -79,7 +79,7 @@ class StatisticalTestTask(SimulationTestTask):
 def get_statistical_result_sim_time_limit(simulation_config, run=0):
     simulation_project = simulation_config.simulation_project
     correct_fingerprint_store = get_correct_fingerprint_store(simulation_project)
-    stored_fingerprint_entries = correct_fingerprint_store.filter_entries(ingredients=None, working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run=run)
+    stored_fingerprint_entries = correct_fingerprint_store.filter_entries(ingredients=None, working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run_number=run)
     if stored_fingerprint_entries:
         selected_fingerprint_entry = select_fingerprint_with_largest_sim_time_limit(stored_fingerprint_entries)
         return selected_fingerprint_entry["sim_time_limit"]
@@ -110,7 +110,7 @@ class StatisticalResultsUpdateTask(SimulationTask):
         simulation_project = self.simulation_config.simulation_project
         working_directory = self.simulation_config.working_directory
         source_results_directory = simulation_project.get_full_path(os.path.join(working_directory, "results"))
-        target_results_directory = simulation_project.get_full_path(os.path.join("statistics", working_directory))
+        target_results_directory = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory))
         if not os.path.exists(target_results_directory):
             os.makedirs(target_results_directory)
         for scalar_result_file_name in glob.glob(os.path.join(source_results_directory, "*.sca")):

@@ -18,6 +18,9 @@ inet_project = define_simulation_project("inet", version="4.4.x",
                                          cpp_folders=["src"],
                                          cpp_defines=["HAVE_FFMPEG", "HAVE_FFMPEG_SWRESAMPLE"],
                                          msg_folders=["src"],
+                                         media_folder="doc/media",
+                                         statistics_folder="statistics",
+                                         fingerprint_store="tests/fingerprint/store.json",
                                          external_libraries=["avcodec", "avformat", "avutil", "swresample", "osg", "osgText", "osgDB", "osgGA", "osgViewer", "osgUtil", "OpenThreads", "z3", "omp"],
                                          external_include_folders=["/usr/include/x86_64-linux-gnu"])
 

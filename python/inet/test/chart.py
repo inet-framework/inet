@@ -40,7 +40,7 @@ class ChartTestTask(TestTask):
                 if image_export_filename is None or image_export_filename == "":
                     return self.task_result_class(self, result="SKIP", expected_result="SKIP", reason="Chart file name is not specified")
                 folder = os.path.dirname(self.simulation_project.get_full_path(self.analysis_file_name))
-                file_name = analysis.export_image(chart, folder, workspace, format="png", dpi=150, target_folder="doc/media", filename=image_export_filename + "_new")
+                file_name = analysis.export_image(chart, folder, workspace, format="png", dpi=150, target_folder=self.simulation_project.media_folder, filename=image_export_filename + "_new")
                 new_file_name = os.path.join(folder, file_name)
                 old_file_name = os.path.join(folder, re.sub("_new", "", file_name))
                 if os.path.isfile(old_file_name):
@@ -118,7 +118,7 @@ class ChartUpdateTask(UpdateTask):
                 if image_export_filename is None or image_export_filename == "":
                     return self.task_result_class(self, result="SKIP", expected_result="SKIP", reason="Chart file name is not specified")
                 folder = os.path.dirname(self.simulation_project.get_full_path(self.analysis_file_name))
-                file_name = analysis.export_image(chart, folder, workspace, format="png", dpi=150, target_folder="doc/media", filename=image_export_filename + "_new")
+                file_name = analysis.export_image(chart, folder, workspace, format="png", dpi=150, target_folder=self.simulation_project.media_folder, filename=image_export_filename + "_new")
                 new_file_name = os.path.join(folder, file_name)
                 old_file_name = os.path.join(folder, re.sub("_new", "", file_name))
                 if os.path.isfile(old_file_name):

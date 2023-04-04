@@ -41,6 +41,7 @@ class SimulationProject:
                  bin_folder=".", library_folder=".", executables=None, dynamic_libraries=None, static_libraries=None, build_types=["dynamic library"],
                  ned_folders=["."], ned_exclusions=[], ini_file_folders=["."], python_folders=["python"], image_folders=["."],
                  include_folders=["."], cpp_folders=["."], cpp_defines=[], msg_folders=["."],
+                 media_folder=".", statistics_folder=".", fingerprint_store="fingerprint.json",
                  used_projects=[], external_bin_folders=[], external_library_folders=[], external_libraries=[], external_include_folders=[],
                  simulation_configs=None, **kwargs):
         """
@@ -110,6 +111,15 @@ class SimulationProject:
             msg_folders (List of strings):
                 The list of folder_environment_variable relative directories for MSG files.
 
+            media_folder (String):
+                The relative path of chart image files for chart tests.
+
+            statistics_folder (String):
+                The relative path of scalar statistic result files for statistical tests.
+
+            fingerprint_store (String):
+                The relative path of the JSON fingerprint store for fingerprint tests.
+
             used_projects (List of strings):
                 The list of used simulation project names.
 
@@ -157,6 +167,9 @@ class SimulationProject:
         self.cpp_folders = cpp_folders
         self.cpp_defines = cpp_defines
         self.msg_folders = msg_folders
+        self.media_folder = media_folder
+        self.statistics_folder = statistics_folder
+        self.fingerprint_store = fingerprint_store
         self.used_projects = used_projects
         self.external_bin_folders = external_bin_folders
         self.external_library_folders = external_library_folders
