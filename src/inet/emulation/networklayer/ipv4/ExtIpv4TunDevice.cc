@@ -68,7 +68,7 @@ void ExtIpv4TunDevice::handleMessage(cMessage *msg)
     ssize_t nwrite = write(fd, buffer, packetLength);
     if ((size_t)nwrite == packetLength) {
         emit(packetSentSignal, packet);
-        EV_INFO << "Sent a " << packet->getTotalLength() << " packet from " << ipv4Header->getSrcAddress() << " to " << ipv4Header->getDestAddress() << " to TUN device '" << device << "'.\n";
+        EV_INFO << "Sent a " << packet->getDataLength() << " packet from " << ipv4Header->getSrcAddress() << " to " << ipv4Header->getDestAddress() << " to TUN device '" << device << "'.\n";
         numSent++;
     }
     else
@@ -144,7 +144,7 @@ bool ExtIpv4TunDevice::notify(int fd)
         packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());
         emit(packetReceivedSignal, packet);
         const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-        EV_INFO << "Received a " << packet->getTotalLength() << " packet from " << ipv4Header->getSrcAddress() << " to " << ipv4Header->getDestAddress() << ".\n";
+        EV_INFO << "Received a " << packet->getDataLength() << " packet from " << ipv4Header->getSrcAddress() << " to " << ipv4Header->getDestAddress() << ".\n";
         send(packet, "lowerLayerOut");
         emit(packetSentToLowerSignal, packet);
         numReceived++;

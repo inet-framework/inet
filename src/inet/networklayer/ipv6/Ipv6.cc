@@ -901,7 +901,7 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
     int mtu = ie->getMtu();
 
     // check if datagram does not require fragmentation
-    if (packet->getTotalLength() <= B(mtu)) {
+    if (packet->getDataLength() <= B(mtu)) {
         sendDatagramToOutput(packet, ie, nextHopAddr);
         return;
     }

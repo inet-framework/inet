@@ -166,7 +166,7 @@ bool ExtEthernetSocket::notify(int fd)
     packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());
     emit(packetReceivedSignal, packet);
     numReceived++;
-    EV_INFO << "Received " << packet->getTotalLength() << " packet from '" << device << "' device.\n";
+    EV_INFO << "Received " << packet->getDataLength() << " packet from '" << device << "' device.\n";
     send(packet, "upperLayerOut");
     emit(packetSentToUpperSignal, packet);
     return true;
