@@ -1,8 +1,9 @@
 import logging
 
+from omnetpp.test.simulation import *
+from omnetpp.test.task import *
+
 from inet.simulation import *
-from inet.test.simulation import *
-from inet.test.task import *
 
 logger = logging.getLogger(__name__)
 

@@ -6,10 +6,10 @@ import re
 import shutil
 
 from omnetpp.scave.results import *
+from omnetpp.test.simulation import *
 
 from inet.simulation import *
 from inet.test.fingerprint import *
-from inet.test.simulation import *
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +81,7 @@ def get_statistical_result_sim_time_limit(simulation_config, run=0):
     correct_fingerprint_store = get_correct_fingerprint_store(simulation_project)
     stored_fingerprint_entries = correct_fingerprint_store.filter_entries(ingredients=None, working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run=run)
     if stored_fingerprint_entries:
-        selected_fingerprint_entry = select_fingerprint_entry_with_largest_sim_time_limit(stored_fingerprint_entries)
+        selected_fingerprint_entry = select_fingerprint_with_largest_sim_time_limit(stored_fingerprint_entries)
         return selected_fingerprint_entry["sim_time_limit"]
     elif simulation_config.sim_time_limit is not None:
         return simulation_config.sim_time_limit

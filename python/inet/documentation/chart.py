@@ -7,6 +7,8 @@ import re
 
 import omnetpp.scave.analysis
 
+from omnetpp.simulation.project import *
+
 from inet.simulation.project import *
 
 logger = logging.getLogger(__name__)
@@ -14,12 +16,16 @@ logger = logging.getLogger(__name__)
 def is_anf_v2(filename):
     return 'version="2"' in open(filename, "rt").read()
 
-def get_analysis_files(simulation_project=default_project, filter=".*", exclude_filter=None, full_match=False, **kwargs):
+def get_analysis_files(simulation_project=None, filter=".*", exclude_filter=None, full_match=False, **kwargs):
+    if simulation_project is None:
+        simulation_project = get_default_simulation_project()
     simulation_project_path = simulation_project.get_full_path(".")
     analysis_file_names = map(lambda path: os.path.relpath(path, simulation_project_path), glob.glob(simulation_project_path + "/**/*.anf", recursive = True))
     return builtins.filter(lambda analysis_file_name: is_anf_v2(simulation_project_path + "/" + analysis_file_name) and matches_filter(analysis_file_name, filter, exclude_filter, full_match), analysis_file_names)
 
-def export_charts(simulation_project=default_project, **kwargs):
+def export_charts(simulation_project=None, **kwargs):
+    if simulation_project is None:
+        simulation_project = get_default_simulation_project()
     workspace = omnetpp.scave.analysis.Workspace(get_workspace_path("."), [])
     for analysis_file_name in get_analysis_files(**kwargs):
         try:

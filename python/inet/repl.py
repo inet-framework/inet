@@ -1,18 +1,26 @@
+import omnetpp
+from omnetpp.repl import *
+
 import inet
-import logging
-
 from inet import *
-#from inet.simulation.cffi import *
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+__sphinx_mock__ = True # ignore this module in documentation
 
-handler = logging.StreamHandler()
-handler.setFormatter(ColoredLoggingFormatter())
+_logger = logging.getLogger(__name__)
 
-logger.handlers = []
-logger.addHandler(handler)
-
-enable_autoreload()
-
-print("INET Python support is loaded. Run help(inet) for more details.")
+def run_repl_main():
+    try:
+        args = parse_run_repl_arguments()
+        kwargs = process_run_repl_arguments(args)
+        if "-h" in sys.argv:
+            sys.exit(0)
+        else:
+            _logger.info("OMNeT++ Python support is loaded.")
+            IPython.embed(banner1="", colors="neutral")
+    except KeyboardInterrupt:
+        _logger.warn("Program interrupted by user")
+    except Exception as e:
+        if args.handle_exception:
+            _logger.error(str(e))
+        else:
+            raise e

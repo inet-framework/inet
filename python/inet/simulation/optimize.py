@@ -4,11 +4,10 @@ import scipy.optimize
 import time
 
 from omnetpp.scave.results import *
+from omnetpp.simulation.config import *
+from omnetpp.simulation.task import *
 
-from inet.simulation.config import *
 from inet.simulation.project import *
-from inet.simulation.task import *
-from inet.simulation.cffi import *
 
 def cost_function(parameter_values, simulation_task, expected_result_names, expected_result_values, fixed_parameter_names, fixed_parameter_values, fixed_parameter_assignments, fixed_parameter_units, parameter_names, parameter_assignments, parameter_units, kwargs):
     all_parameter_assignments = [*fixed_parameter_assignments, *parameter_assignments]
@@ -33,11 +32,15 @@ def optimize_simulation_parameters(simulation_task, expected_result_names, expec
                                    fixed_parameter_names, fixed_parameter_values, fixed_parameter_assignments, fixed_parameter_units,
                                    parameter_names, parameter_assignments, parameter_units,
                                    initial_values, min_values, max_values, tol=1E-3,
-                                   concurrent=False, simulation_runner=inprocess_simulation_runner if "inprocess_simulation_runner" in locals() else subprocess_simulation_runner, **kwargs):
+                                   concurrent=False, simulation_runner=None, **kwargs):
+    start_time = time.time()
     # TODO unfortunately we cannot run simulations concurrently in the same process right now
     if concurrent:
         simulation_runner = subprocess_simulation_runner
-    start_time = time.time()
+    elif "inet.simulation.cffi.lib" in sys.modules:
+        simulation_runner = getattr(sys.modules["omnetpp.simulation.cffi.inprocess"], "inprocess_simulation_runner")
+    else:
+        simulation_runner = subprocess_simulation_runner
     xs = np.array(initial_values)
     bounds = list(map(lambda min, max: (min, max), min_values, max_values))
     args = (simulation_task, expected_result_names, expected_result_values, fixed_parameter_names, fixed_parameter_values, fixed_parameter_assignments, fixed_parameter_units, parameter_names, parameter_assignments, parameter_units, dict(kwargs, simulation_runner=simulation_runner))
