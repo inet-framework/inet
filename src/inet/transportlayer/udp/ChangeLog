@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2023-04-04  ------ inet-4.5.0 released ------
+
 2022-07-08  Zoltan Bojthe
 
 	Changed Udp to select network protocol using IL3AddressType::getNetworkProtocol().

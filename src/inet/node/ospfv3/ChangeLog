@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2023-04-04  ------ inet-4.5.0 released ------
+
 2019-09-26  Zoltan Bojthe
 
 	Removed IOspfv3, Ospfv3 based on IOspf, ospf module type changeable in Router ned module.

@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2023-04-04  ------ inet-4.5.0 released ------
+
 2022-12-21  Levente Mészáros
 
 	EthernetSocketIo: Revived binding the socket when the local address is specified.

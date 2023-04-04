@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2023-04-04  ------ inet-4.5.0 released ------
+
 2023-01-25  TÖRÖK Attila
 
 	Ieee80211*DataMode: Return invalid symbol interval for non-OFDM modes instead of throwing an error

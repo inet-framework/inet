@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2023-04-04  ------ inet-4.5.0 released ------
+
 2021-02-16  Levente Mészáros
 
 	Added Gate*Visualizer modules that visualize gate scheduling as annotation on network nodes.

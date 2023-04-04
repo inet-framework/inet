@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2023-04-04  ------ inet-4.5.0 released ------
+
 2023-03-14  Levente Mészáros
 
 	EthernetMac: Changed expeceted class of incoming signals to physicallayer::Signal.

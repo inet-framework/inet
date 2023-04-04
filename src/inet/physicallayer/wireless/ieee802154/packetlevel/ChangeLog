@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2023-04-04  ------ inet-4.5.0 released ------
+
 2023-01-23  Levente Mészáros
 
 	Updated Ieee802154NarrowbandScalarTransmitter and Ieee802154NarrowbandDimensionalTransmitter to fill in

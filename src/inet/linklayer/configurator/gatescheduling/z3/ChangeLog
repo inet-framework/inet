@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2023-04-04  ------ inet-4.5.0 released ------
+
 2022-12-08  Levente Mészáros
 
 	Added support for automatic gate schedule configuration using cut-through switching.
