@@ -1,0 +1,5 @@
+#!/usr/bin/env python3
+
+from omnetpp.main import *
+
+update_correct_fingerprints_main()
