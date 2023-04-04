@@ -1,25 +1,27 @@
 import cppyy
 
-from inet.common.util import *
+from omnetpp.common.util import *
+
+libsuffix = ""
 
 # setup omnetpp include path
-cppyy.add_include_path(get_workspace_path("omnetpp/include"))
-cppyy.add_include_path(get_workspace_path("omnetpp/src"))
+cppyy.add_include_path(get_omnetpp_relative_path("include"))
+cppyy.add_include_path(get_omnetpp_relative_path("src"))
 
 # setup omnetpp library path
-cppyy.add_library_path(get_workspace_path("omnetpp/lib"))
+cppyy.add_library_path(get_omnetpp_relative_path("lib"))
 
 # load omnetpp libraries
-cppyy.load_library("liboppcmdenv")
-cppyy.load_library("liboppcommon")
-cppyy.load_library("liboppenvir")
-cppyy.load_library("liboppeventlog")
-cppyy.load_library("libopplayout")
-cppyy.load_library("liboppnedxml")
-#cppyy.load_library("liboppqtenv-osg")
-#cppyy.load_library("liboppqtenv")
-#cppyy.load_library("liboppscave")
-cppyy.load_library("liboppsim")
+cppyy.load_library("liboppcmdenv" + libsuffix)
+cppyy.load_library("liboppcommon" + libsuffix)
+cppyy.load_library("liboppenvir" + libsuffix)
+cppyy.load_library("liboppeventlog" + libsuffix)
+cppyy.load_library("libopplayout" + libsuffix)
+cppyy.load_library("liboppnedxml" + libsuffix)
+#cppyy.load_library("liboppqtenv-osg" + libsuffix)
+#cppyy.load_library("liboppqtenv" + libsuffix)
+#cppyy.load_library("liboppscave" + libsuffix)
+cppyy.load_library("liboppsim" + libsuffix)
 
 # include omnetpp header files
 cppyy.include("omnetpp.h")

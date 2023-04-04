@@ -1,9 +1,12 @@
 import cppyy
+import logging
 import re
 
-from inet.common import *
-from inet.simulation.cffi.inet import *
-from inet.simulation.cffi.omnetpp import *
+from omnetpp.common import *
+from omnetpp.simulation.project import *
+from omnetpp.simulation.cffi.lib import *
+
+_logger = logging.getLogger(__name__)
 
 class PythonCmdenv(Cmdenv):
     def loadNEDFiles(self):
@@ -19,20 +22,33 @@ class InprocessResult:
         return repr(self)
 
 class InprocessSimulationRunner:
-    def __init__(selfs):
-        pass
+    def __init__(self):
+        self.simulation_projects = []
 
-    def setup(self):
-        CodeFragments.executeAll(CodeFragments.STARTUP)
-        SimTime.setScaleExp(-12)
-        static_flag = cStaticFlag()
-        static_flag.__python_owns__ = False
-        cSimulation.loadNedSourceFolder(get_workspace_path("inet/src"))
-        cSimulation.loadNedSourceFolder(get_workspace_path("inet/examples"))
-        cSimulation.loadNedSourceFolder(get_workspace_path("inet/showcases"))
-        cSimulation.loadNedSourceFolder(get_workspace_path("inet/tutorials"))
-        cSimulation.loadNedSourceFolder(get_workspace_path("inet/tests/networks"))
-        cSimulation.doneLoadingNedFiles()
+    def setup(self, simulation_project):
+        if not simulation_project in self.simulation_projects:
+            CodeFragments.executeAll(CodeFragments.STARTUP)
+            SimTime.setScaleExp(-12)
+            static_flag = cStaticFlag()
+            static_flag.__python_owns__ = False
+            library_full_path = simulation_project.get_full_path(simulation_project.library_folder)
+            _logger.info("Adding library path: " + library_full_path)
+            cppyy.add_library_path(library_full_path)
+            libsuffix = ""
+            for dynamic_library in simulation_project.dynamic_libraries:
+                _logger.info("Loading C++ library: " + dynamic_library + libsuffix)
+                cppyy.load_library("lib" + dynamic_library + libsuffix)
+            for external_library_folder in simulation_project.external_library_folders:
+                external_library_full_path = simulation_project.get_full_path(external_library_folder)
+                _logger.info("Adding external library path: " + external_library_full_path)
+                cppyy.add_library_path(external_library_full_path)
+            CodeFragments.executeAll(CodeFragments.STARTUP)
+            for ned_folder in simulation_project.ned_folders:
+                ned_full_path = simulation_project.get_full_path(ned_folder)
+                _logger.info("Loading NED files: " + ned_full_path)
+                cSimulation.loadNedSourceFolder(ned_full_path)
+            cSimulation.doneLoadingNedFiles()
+            self.simulation_projects.append(simulation_project)
 
     def teardown(self):
         CodeFragments.executeAll(CodeFragments.SHUTDOWN)
@@ -43,7 +59,9 @@ class InprocessSimulationRunner:
         simulation_project = simulation_config.simulation_project
         working_directory = simulation_config.working_directory
         full_working_directory = simulation_project.get_full_path(working_directory)
+        # TODO change working directory is not thread safe, because it is stored per-process
         os.chdir(full_working_directory)
+        self.setup(simulation_project)
         iniReader = InifileReader()
         iniReader.readFile(simulation_config.ini_file)
         configuration = SectionBasedConfiguration()
@@ -65,11 +83,9 @@ class InprocessSimulationRunner:
         simulation = cSimulation("simulation", environment)
         environment.__python_owns__ = False
         cSimulation.setActiveSimulation(simulation)
+        environment.run.__release_gil__ = False
         returncode = environment.run(args, configuration)
         cSimulation.setActiveSimulation(cppyy.nullptr)
         simulation.__python_owns__ = False
         os.chdir(old_working_directory)
         return InprocessResult(returncode)
-
-inprocess_simulation_runner = InprocessSimulationRunner()
-inprocess_simulation_runner.setup()
