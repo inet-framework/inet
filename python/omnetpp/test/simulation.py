@@ -107,7 +107,7 @@ class MultipleSimulationTestTasks(MultipleTestTasks):
         self.simulation_project = simulation_project
 
     def get_description(self):
-        return self.simulation_project.get_name() + " " + super().get_description()
+        return ((self.simulation_project.get_name() + " ") if self.simulation_project else "") + super().get_description()
 
     def run(self, **kwargs):
         if self.build:
@@ -181,4 +181,4 @@ class MultipleSimulationUpdateTasks(MultipleUpdateTasks):
         self.simulation_project = simulation_project
 
     def get_description(self):
-        return self.simulation_project.get_name() + " " + super().get_description()
+        return ((self.simulation_project.get_name() + " ") if self.simulation_project else "") + super().get_description()

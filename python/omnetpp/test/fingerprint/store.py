@@ -17,13 +17,9 @@ class FingerprintStore:
 
     def read(self):
         logger.info(f"Reading fingerprints from {self.file_name}")
-        if os.path.exists(self.file_name):
-            file = open(self.file_name)
-            self.entries = json.load(file)
-            file.close()
-        else:
-            self.entries = []
-            self.write()
+        file = open(self.file_name, "r")
+        self.entries = json.load(file)
+        file.close()
 
     def write(self):
         self.get_entries().sort(key=lambda element: (element["working_directory"], element["ini_file"], element["config"], element["run_number"], element["ingredients"], element["sim_time_limit"]))
@@ -31,6 +27,13 @@ class FingerprintStore:
         file = open(self.file_name, "w")
         json.dump(self.entries, file, indent=True)
         file.close()
+
+    def ensure(self):
+        if os.path.exists(self.file_name):
+            self.read()
+        else:
+            self.entries = []
+            self.write()
 
     def clear(self):
         self.entries = []
@@ -40,7 +43,7 @@ class FingerprintStore:
 
     def get_entries(self):
         if self.entries is None:
-            self.read()
+            self.ensure()
         return self.entries
     
     def set_entries(self, entries):
