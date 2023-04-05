@@ -39,12 +39,44 @@ bool EthernetFcsChecker::checkFcs(const Packet *packet, FcsMode fcsMode, uint32_
     }
 }
 
+// TODO duplicated code (see EthernetFcsInserter), move to a utility file
+static void destreamChunkToPacket(Packet *outPacket, const Ptr<const Chunk> data)
+{
+    switch (data->getChunkType()) {
+        case Chunk::CT_STREAM:
+            destreamChunkToPacket(outPacket, dynamicPtrCast<const StreamBufferChunk>(data)->getStreamData());
+            break;
+        case Chunk::CT_SEQUENCE:
+            for (const auto& chunk : dynamicPtrCast<const SequenceChunk>(data)->getChunks())
+                destreamChunkToPacket(outPacket, chunk);
+            break;
+        case Chunk::CT_SLICE:
+        {
+            auto slicePacket = new Packet();
+            auto sliceChunk = dynamicPtrCast<const SliceChunk>(data);
+            destreamChunkToPacket(slicePacket, sliceChunk->getChunk());
+            outPacket->insertAtBack(slicePacket->peekDataAt(sliceChunk->getOffset(), sliceChunk->getLength()));
+            delete slicePacket;
+        }
+        break;
+        default:
+            outPacket->insertAtBack(data);
+            break;
+    }
+}
+
 void EthernetFcsChecker::processPacket(Packet *packet)
 {
     if (isCheckFcs) {
         if (auto cutthroughTag = packet->findTagForUpdate<CutthroughTag>()) {
+            // make a packet copy with entire data for FCS calculation
+            auto entirePacket = new Packet();
+            destreamChunkToPacket(entirePacket, packet->peekData());
             const auto& trailer = packet->peekAtBack<EthernetFcs>(ETHER_FCS_BYTES);
+            bool isGoodFcs = checkFcs(entirePacket, trailer->getFcsMode(), trailer->getFcs());
             cutthroughTag->setTrailerChunk(trailer);
+            cutthroughTag->setIsGoodTrailer(isGoodFcs);
+            delete entirePacket;
         }
     }
 
