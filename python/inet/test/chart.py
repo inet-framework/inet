@@ -60,6 +60,9 @@ class ChartTestTask(TestTask):
                     return self.task_result_class(self, result="FAIL", reason="Baseline chart not found")
         return self.task_result_class(self, result="ERROR", reason="Chart not found")
 
+def get_chart_test_sim_time_limit(simulation_config, run=0):
+    return simulation_config.sim_time_limit
+
 class MultipleChartTestTasks(MultipleTestTasks):
     def __init__(self, multiple_simulation_tasks=None, name="chart test", multiple_task_results_class=MultipleTestTaskResults, **kwargs):
         super().__init__(name=name, multiple_task_results_class=multiple_task_results_class, **kwargs)
@@ -83,7 +86,7 @@ def get_chart_test_tasks(simulation_project=None, run_simulations=True, filter=N
             folder = os.path.dirname(simulation_project.get_full_path(analysis_file_name))
             working_directory = os.path.relpath(folder, simulation_project.get_full_path("."))
             if run_simulations:
-                multiple_simulation_tasks = get_simulation_tasks(simulation_project=simulation_project, working_directory_filter=working_directory, sim_time_limit=get_statistical_result_sim_time_limit, **kwargs)
+                multiple_simulation_tasks = get_simulation_tasks(simulation_project=simulation_project, working_directory_filter=working_directory, sim_time_limit=get_chart_test_sim_time_limit, **kwargs)
                 for simulation_task in multiple_simulation_tasks.tasks:
                     if not list(builtins.filter(lambda element: element.simulation_config == simulation_task.simulation_config and element.run_number == simulation_task.run_number, simulation_tasks)):
                         simulation_tasks.append(simulation_task)
@@ -164,7 +167,7 @@ def get_update_chart_tasks(simulation_project=None, run_simulations=True, filter
             folder = os.path.dirname(simulation_project.get_full_path(analysis_file_name))
             working_directory = os.path.relpath(folder, simulation_project.get_full_path("."))
             if run_simulations:
-                multiple_simulation_tasks = get_simulation_tasks(simulation_project=simulation_project, working_directory_filter=working_directory, sim_time_limit=get_statistical_result_sim_time_limit, **kwargs)
+                multiple_simulation_tasks = get_simulation_tasks(simulation_project=simulation_project, working_directory_filter=working_directory, sim_time_limit=get_chart_test_sim_time_limit, **kwargs)
                 for simulation_task in multiple_simulation_tasks.tasks:
                     if not list(builtins.filter(lambda element: element.simulation_config == simulation_task.simulation_config and element.run_number == simulation_task.run_number, simulation_tasks)):
                         simulation_tasks.append(simulation_task)
