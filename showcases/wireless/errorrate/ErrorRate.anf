@@ -13,8 +13,8 @@ from omnetpp.scave.utils import make_legend_label
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -40,7 +40,7 @@ newdf = utils.pivot_for_scatterchart(df, xaxis_itervar, group_by, confidence_lev
 props['legend_replacements'] = "/bitrate//\n/=//"
 props['legend_format'] = "${name} Mbps"
 
-modifiedplot.plot_lines(newdf, props)
+inet.scave.plot.plot_lines(newdf, props)
 
 names = df["name"].unique()
 scalar_names = names[0] + ", etc." if len(names) > 1 else names[0]
@@ -1320,8 +1320,8 @@ from omnetpp.scave.utils import make_legend_label
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -1347,7 +1347,7 @@ newdf = utils.pivot_for_scatterchart(df, xaxis_itervar, group_by, confidence_lev
 props['legend_replacements'] = "/bitrate//\n/=//"
 props['legend_format'] = "${name} Mbps"
 
-modifiedplot.plot_lines(newdf, props)
+inet.scave.plot.plot_lines(newdf, props)
 
 names = df["name"].unique()
 scalar_names = names[0] + ", etc." if len(names) > 1 else names[0]
@@ -1967,8 +1967,8 @@ from omnetpp.scave.utils import make_legend_label
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -1997,7 +1997,7 @@ newdf = utils.pivot_for_scatterchart(df, xaxis_itervar, group_by, confidence_lev
 props['legend_replacements'] = "/bitrate//\n/=//"
 props['legend_format'] = "${name} Mbps"
 
-modifiedplot.plot_lines(newdf, props)
+inet.scave.plot.plot_lines(newdf, props)
 
 names = df["name"].unique()
 scalar_names = names[0] + ", etc." if len(names) > 1 else names[0]

@@ -14,8 +14,8 @@ from omnetpp.scave.utils import make_legend_label
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 def create_twin_axes(ax):
     ymin, ymax = ax.get_ylim()
@@ -64,14 +64,14 @@ confidence_level = utils.get_confidence_level(props)
 newdf = utils.pivot_for_scatterchart(df, xaxis_itervar, group_by, confidence_level)
 newdf['type'] = 'simulated'
 
-modifiedplot.add_to_dataframe(newdf, style_tuple_list=[('type', 'simulated', {'marker': 's'})])
+inet.scave.plot.add_to_dataframe(newdf, style_tuple_list=[('type', 'simulated', {'marker': 's'})])
 
 newdf = pd.concat([newdf, df_an])
 
 props['legend_replacements'] = "/packetLength=//"
 props['legend_format'] = "${name}B ${type}"
 
-modifiedplot.plot_lines(newdf, props)
+inet.scave.plot.plot_lines(newdf, props)
 
 names = df["name"].unique()
 scalar_names = names[0] + ", etc." if len(names) > 1 else names[0]
@@ -115,7 +115,7 @@ plt.tight_layout()
 
 ax = plt.gca()
 handles, labels = ax.get_legend_handles_labels()
-modifiedplot.create_custom_legend(props)
+inet.scave.plot.create_custom_legend(props)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)

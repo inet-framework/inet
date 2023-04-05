@@ -4548,8 +4548,8 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 import solid_x_axis as sxa
 
 # get chart properties
@@ -4565,8 +4565,8 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 filter_string_nonqos = """type =~ vector AND name =~ endToEndDelay:vector
 AND NOT (type =~ vector AND runattr:experiment =~ Qos AND runattr:replication =~ "#0" AND name =~ endToEndDelay:vector AND (
     (module =~ "QosShowcase.server.app[2]") OR
@@ -4597,12 +4597,12 @@ if df_nonqos.empty or df_qos.empty:
 df_nonqos = utils.perform_vector_ops(df_nonqos, props["vector_operations"])
 df_qos = utils.perform_vector_ops(df_qos, props["vector_operations"])
 
-modifiedplot.add_to_dataframe(df_nonqos, style_tuple_list=[('module', '.*0.*', {'color': default_colors[0]}),
+inet.scave.plot.add_to_dataframe(df_nonqos, style_tuple_list=[('module', '.*0.*', {'color': default_colors[0]}),
                                                            ('module', '.*1.*', {'color': default_colors[1]}),
                                                            ('module', '.*2.*', {'color': default_colors[2]}),
                                                            ('module', '.*3.*', {'color': default_colors[3]})])
 
-modifiedplot.add_to_dataframe(df_qos, style_tuple_list=[('module', '.*0.*', {'color': default_colors[0]}),
+inet.scave.plot.add_to_dataframe(df_qos, style_tuple_list=[('module', '.*0.*', {'color': default_colors[0]}),
                                                         ('module', '.*1.*', {'color': default_colors[1]}),
                                                         ('module', '.*2.*', {'color': default_colors[2]}),
                                                         ('module', '.*3.*', {'color': default_colors[3]})])
@@ -4610,11 +4610,11 @@ modifiedplot.add_to_dataframe(df_qos, style_tuple_list=[('module', '.*0.*', {'co
 df = [df_nonqos, df_qos]
 
 # plot
-ax1, ax2 = modifiedplot.plot_vectors_separate_grouped(df, props, layout='horizontal')
+ax1, ax2 = inet.scave.plot.plot_vectors_separate_grouped(df, props, layout='horizontal')
 
 utils.postconfigure_plot(props)
 
-modifiedplot.fix_labels_for_subplots([ax1, ax2], props, 'horizontal', remove_ticks=False)
+inet.scave.plot.fix_labels_for_subplots([ax1, ax2], props, 'horizontal', remove_ticks=False)
 
 ax1.legend(loc=1, ncol=4, handletextpad=0.1, columnspacing=0.1, markerscale=3)
 ax2.legend(loc=1, ncol=4, handletextpad=0.1, columnspacing=0.1, markerscale=3)

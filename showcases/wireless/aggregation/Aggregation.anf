@@ -16,8 +16,8 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -40,11 +40,11 @@ groups, series = utils.select_groups_series(df, props)
 confidence_level = utils.get_confidence_level(props)
 valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, groups, series, confidence_level)
 
-modifiedplot.plot_bars(valuedf, errorsdf, metadf, props, order=['NoAggregation','Aggregation','VoicePriorityAggregation'], zorder=2)
+inet.scave.plot.plot_bars(valuedf, errorsdf, metadf, props, order=['NoAggregation','Aggregation','VoicePriorityAggregation'], zorder=2)
 
 ax = plt.gca()
 
-modifiedplot.annotate_barchart(ax, offset=10000, result_type='int')
+inet.scave.plot.annotate_barchart(ax, offset=10000, result_type='int')
 
 utils.postconfigure_plot(props)
 
@@ -641,8 +641,8 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -662,7 +662,7 @@ except results.ResultQueryError as e:
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
-modifiedplot.add_to_dataframe(df, style_tuple_list=[('configname', 'NoAggregation', {'color': default_colors[0]}),
+inet.scave.plot.add_to_dataframe(df, style_tuple_list=[('configname', 'NoAggregation', {'color': default_colors[0]}),
                                                     ('configname', 'Aggregation', {'color': default_colors[1]}),
                                                     ('configname', 'VoicePriorityAggregation', {'color': default_colors[2]})],
                                                     order=['configname', 'NoAggregation', 'Aggregation', 'VoicePriorityAggregation'])
@@ -671,7 +671,7 @@ modifiedplot.add_to_dataframe(df, style_tuple_list=[('configname', 'NoAggregatio
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
@@ -1285,8 +1285,8 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -1306,7 +1306,7 @@ except results.ResultQueryError as e:
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
-modifiedplot.add_to_dataframe(df, style_tuple_list=[('configname', 'NoAggregation', {'color': default_colors[0]}),
+inet.scave.plot.add_to_dataframe(df, style_tuple_list=[('configname', 'NoAggregation', {'color': default_colors[0]}),
                                                     ('configname', 'Aggregation', {'color': default_colors[1]}),
                                                     ('configname', 'VoicePriorityAggregation', {'color': default_colors[2]})],
                                                     order=['configname', 'NoAggregation', 'Aggregation', 'VoicePriorityAggregation'])
@@ -1315,7 +1315,7 @@ modifiedplot.add_to_dataframe(df, style_tuple_list=[('configname', 'NoAggregatio
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 

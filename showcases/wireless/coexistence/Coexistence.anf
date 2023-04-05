@@ -12,8 +12,8 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -36,12 +36,12 @@ groups, series = utils.select_groups_series(df, props)
 confidence_level = utils.get_confidence_level(props)
 valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, groups, series, confidence_level)
 
-modifiedplot.plot_bars(valuedf, errorsdf, metadf, props, order=['WifiHosts', 'Coexistence'], rename={'WifiHosts': 'Wifi only', 'Coexistence': 'Wifi + WPAN coexistence'}, zorder=2)
+inet.scave.plot.plot_bars(valuedf, errorsdf, metadf, props, order=['WifiHosts', 'Coexistence'], rename={'WifiHosts': 'Wifi only', 'Coexistence': 'Wifi + WPAN coexistence'}, zorder=2)
 
 utils.postconfigure_plot(props)
 
 ax = plt.gca()
-modifiedplot.annotate_barchart(ax, offset=200)
+inet.scave.plot.annotate_barchart(ax, offset=200)
 
 plt.xlabel("")
 plt.ylabel("")
@@ -638,8 +638,8 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -662,12 +662,12 @@ groups, series = utils.select_groups_series(df, props)
 confidence_level = utils.get_confidence_level(props)
 valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, groups, series, confidence_level)
 
-modifiedplot.plot_bars(valuedf, errorsdf, metadf, props, order=['WpanHosts', 'Coexistence'], rename={'WpanHosts': 'WPAN only', 'Coexistence': 'Wifi + WPAN coexistence'}, zorder=2)
+inet.scave.plot.plot_bars(valuedf, errorsdf, metadf, props, order=['WpanHosts', 'Coexistence'], rename={'WpanHosts': 'WPAN only', 'Coexistence': 'Wifi + WPAN coexistence'}, zorder=2)
 
 utils.postconfigure_plot(props)
 
 ax = plt.gca()
-modifiedplot.annotate_barchart(ax, offset=2, accuracy=3)
+inet.scave.plot.annotate_barchart(ax, offset=2, accuracy=3)
 
 plt.xlabel("")
 plt.ylabel("")

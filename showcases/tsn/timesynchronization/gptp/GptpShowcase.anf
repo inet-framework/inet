@@ -1732,7 +1732,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 
 # get chart properties
 props = chart.get_properties()
@@ -1755,10 +1755,10 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-modifiedplot.add_to_dataframe(df, [('module', 'TwoMasterClocksTreeGptpShowcase.tsnClock2.clock', {'linewidth': 3})])
+inet.scave.plot.add_to_dataframe(df, [('module', 'TwoMasterClocksTreeGptpShowcase.tsnClock2.clock', {'linewidth': 3})])
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
@@ -3013,7 +3013,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 
 # get chart properties
 props = chart.get_properties()
@@ -3036,10 +3036,10 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-modifiedplot.add_to_dataframe(df, [('module', 'TwoMasterClocksRingGptpShowcase.tsnClock1.clock', {'linewidth': 3})])
+inet.scave.plot.add_to_dataframe(df, [('module', 'TwoMasterClocksRingGptpShowcase.tsnClock1.clock', {'linewidth': 3})])
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
@@ -3656,7 +3656,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 
 # get chart properties
 props = chart.get_properties()
@@ -3679,10 +3679,10 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-modifiedplot.add_to_dataframe(df, [('module', 'TwoMasterClocksRingGptpShowcase.tsnClock1.clock', {'linewidth': 3})])
+inet.scave.plot.add_to_dataframe(df, [('module', 'TwoMasterClocksRingGptpShowcase.tsnClock1.clock', {'linewidth': 3})])
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
@@ -4299,7 +4299,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 
 # get chart properties
 props = chart.get_properties()
@@ -4322,11 +4322,11 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-modifiedplot.add_to_dataframe(df, [('module', 'TwoMasterClocksRingGptpShowcase.tsnClock2.clock', {'linewidth': 3}), 
+inet.scave.plot.add_to_dataframe(df, [('module', 'TwoMasterClocksRingGptpShowcase.tsnClock2.clock', {'linewidth': 3}), 
                                    ('module', 'TwoMasterClocksRingGptpShowcase.tsnClock1.clock', {'linestyle': '--'})])
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
@@ -4943,7 +4943,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 
 # get chart properties
 props = chart.get_properties()
@@ -4966,11 +4966,11 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-modifiedplot.add_to_dataframe(df, [('module', 'TwoMasterClocksRingGptpShowcase.tsnClock2.clock', {'linewidth': 3}), 
+inet.scave.plot.add_to_dataframe(df, [('module', 'TwoMasterClocksRingGptpShowcase.tsnClock2.clock', {'linewidth': 3}), 
                                    ('module', 'TwoMasterClocksRingGptpShowcase.tsnClock1.clock', {'linestyle': '--'})])
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 

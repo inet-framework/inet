@@ -13,9 +13,9 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 import matplotlib.pyplot as plt
-default_colors = modifiedplot.default_colors
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -42,10 +42,10 @@ style_tuple_list = [('module', '.*queue\[0\].*', {'color': default_colors[0]}),
                     ('module', '.*queue\[1\].*', {'color': default_colors[1]}),
                     ('name', 'dataRate.*', {'linestyle': '--'})]
 
-modifiedplot.add_to_dataframe(df, style_tuple_list)
+inet.scave.plot.add_to_dataframe(df, style_tuple_list)
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
@@ -54,7 +54,7 @@ legend_style = [('best effort', {'color': default_colors[0], 'marker': 's', 'lin
                 ('client application', {'linestyle': '--', 'color': 'black'}),
                 ('shaper incoming', {'linestyle': 'solid', 'color': 'black'})]
 
-handles, labels = modifiedplot.create_custom_legend(props, legend_style)
+handles, labels = inet.scave.plot.create_custom_legend(props, legend_style)
 
 plt.legend(handles, labels, ncol=2)
 
@@ -665,8 +665,8 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -694,10 +694,10 @@ style_tuple_list = [('module', '.*queue\[0\].*', {'color': default_colors[0]}),
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-modifiedplot.add_to_dataframe(df, style_tuple_list)
+inet.scave.plot.add_to_dataframe(df, style_tuple_list)
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
@@ -706,7 +706,7 @@ legend_style = [('best effort', {'color': default_colors[0], 'marker': 's', 'lin
                 ('incoming', {'linestyle': 'dotted', 'color': 'black'}),
                 ('outgoing', {'linestyle': 'solid', 'color': 'black'})]
 
-handles, labels = modifiedplot.create_custom_legend(props, legend_style)
+handles, labels = inet.scave.plot.create_custom_legend(props, legend_style)
 
 plt.legend(handles, labels, ncol=2)
 
@@ -1317,8 +1317,8 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -1345,10 +1345,10 @@ style_tuple_list = [('module', '.*queue\[0\].*', {'color': default_colors[0]}),
                     ('module', '.*queue\[1\].*', {'color': default_colors[1]}),
                     ('name', 'dataRate.*', {'linestyle': '--'})]
 
-modifiedplot.add_to_dataframe(df, style_tuple_list)
+inet.scave.plot.add_to_dataframe(df, style_tuple_list)
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
@@ -1357,7 +1357,7 @@ legend_style = [('best effort', {'color': default_colors[0], 'marker': 's', 'lin
                 ('server application', {'linestyle': '--', 'color': 'black'}),
                 ('shaper outgoing', {'linestyle': 'solid', 'color': 'black'})]
 
-handles, labels = modifiedplot.create_custom_legend(props, legend_style)
+handles, labels = inet.scave.plot.create_custom_legend(props, legend_style)
 
 plt.legend(handles, labels, ncol=2)
 

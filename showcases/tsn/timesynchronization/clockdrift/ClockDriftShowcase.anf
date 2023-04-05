@@ -5254,7 +5254,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 import noclockdrift
 
 # get chart properties
@@ -5286,11 +5286,11 @@ utils.plot_vectors(df, props)
 utils.postconfigure_plot(props)
 
 handles, labels = plt.gca().get_legend_handles_labels()
-modifiedplot.create_custom_legend(props, style_tuple_list=[('baseline (no clock drift)', {'linestyle': 'dashdot', 'marker': 'None', 'markersize': 1, 'color': 'black'})], order=[0,2,1,3,4], handles=handles, labels=labels, markerscale=8, ncols=3, loc='upper center')
-#modifiedplot.quick_reorder_legend(handles, labels, [0,2,1,3], markerscale=8)
+inet.scave.plot.create_custom_legend(props, style_tuple_list=[('baseline (no clock drift)', {'linestyle': 'dashdot', 'marker': 'None', 'markersize': 1, 'color': 'black'})], order=[0,2,1,3,4], handles=handles, labels=labels, markerscale=8, ncols=3, loc='upper center')
+#inet.scave.plot.quick_reorder_legend(handles, labels, [0,2,1,3], markerscale=8)
 
 #handles, labels = plt.gca().get_legend_handles_labels()
-#handles, labels = modifiedplot.create_multidimensional_legend(style_tuple_list=[('something', {})], handles=handles, labels=labels)
+#handles, labels = inet.scave.plot.create_multidimensional_legend(style_tuple_list=[('something', {})], handles=handles, labels=labels)
 #plt.legend(handles, labels)
 
 
@@ -5902,7 +5902,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 import noclockdrift
 
 # get chart properties
@@ -5934,11 +5934,11 @@ utils.plot_vectors(df, props)
 utils.postconfigure_plot(props)
 
 handles, labels = plt.gca().get_legend_handles_labels()
-modifiedplot.create_custom_legend(props, style_tuple_list=[('baseline (no clock drift)', {'linestyle': 'dashdot', 'marker': 'None', 'markersize': 1, 'color': 'black'})], order=[0,2,1,3,4], handles=handles, labels=labels, markerscale=3, ncols=3, loc='upper center')
-#modifiedplot.quick_reorder_legend(handles, labels, [0,2,1,3], markerscale=8)
+inet.scave.plot.create_custom_legend(props, style_tuple_list=[('baseline (no clock drift)', {'linestyle': 'dashdot', 'marker': 'None', 'markersize': 1, 'color': 'black'})], order=[0,2,1,3,4], handles=handles, labels=labels, markerscale=3, ncols=3, loc='upper center')
+#inet.scave.plot.quick_reorder_legend(handles, labels, [0,2,1,3], markerscale=8)
 
 #handles, labels = plt.gca().get_legend_handles_labels()
-#handles, labels = modifiedplot.create_multidimensional_legend(style_tuple_list=[('something', {})], handles=handles, labels=labels)
+#handles, labels = inet.scave.plot.create_multidimensional_legend(style_tuple_list=[('something', {})], handles=handles, labels=labels)
 #plt.legend(handles, labels)
 
 
@@ -6550,7 +6550,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 import noclockdrift
 
 # get chart properties
@@ -6583,7 +6583,7 @@ utils.postconfigure_plot(props)
 
 handles, labels = plt.gca().get_legend_handles_labels()
 
-modifiedplot.create_custom_legend(props, style_tuple_list=[('baseline (no clock drift)', {'linestyle': 'dashdot', 'color': 'black', 'linewidth': 1})], handles=handles, labels=labels, loc='upper right', markerscale=4)
+inet.scave.plot.create_custom_legend(props, style_tuple_list=[('baseline (no clock drift)', {'linestyle': 'dashdot', 'color': 'black', 'linewidth': 1})], handles=handles, labels=labels, loc='upper right', markerscale=4)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -7193,7 +7193,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 import noclockdrift
 
 # get chart properties
@@ -7228,23 +7228,23 @@ df_gptp = utils.perform_vector_ops(df_gptp, props["vector_operations"])
 
 plt.axhline(noclockdrift.get_noclockdrift_delay(1000000), linestyle='dashdot', color='black', linewidth=1)
 
-modifiedplot.add_to_dataframe(df_oob, style_tuple_list=[('module', '.*sink1.*', {'color': modifiedplot.default_colors[0]}),
-                                                    ('module', '.*sink2.*', {'color': modifiedplot.default_colors[1]})])
+inet.scave.plot.add_to_dataframe(df_oob, style_tuple_list=[('module', '.*sink1.*', {'color': inet.scave.plot.default_colors[0]}),
+                                                    ('module', '.*sink2.*', {'color': inet.scave.plot.default_colors[1]})])
 
-modifiedplot.add_to_dataframe(df_gptp, style_tuple_list=[('module', '.*sink1.*', {'color': modifiedplot.default_colors[0]}),
-                                                    ('module', '.*sink2.*', {'color': modifiedplot.default_colors[1]})])
+inet.scave.plot.add_to_dataframe(df_gptp, style_tuple_list=[('module', '.*sink1.*', {'color': inet.scave.plot.default_colors[0]}),
+                                                    ('module', '.*sink2.*', {'color': inet.scave.plot.default_colors[1]})])
 
 # plot
 #utils.plot_vectors(df, props)
-ax_oob, ax_gptp = modifiedplot.plot_vectors_separate_grouped([df_oob, df_gptp], props, layout='horizontal')
+ax_oob, ax_gptp = inet.scave.plot.plot_vectors_separate_grouped([df_oob, df_gptp], props, layout='horizontal')
 
 ax_oob.axhline(noclockdrift.get_noclockdrift_delay(1000000), linestyle='dashdot', color='black', linewidth=1)
 ax_gptp.axhline(noclockdrift.get_noclockdrift_delay(1000000), linestyle='dashdot', color='black', linewidth=1)
 
 utils.postconfigure_plot(props)
 
-handles, labels = modifiedplot.create_custom_legend(props, style_tuple_list=[('sink1', {'color': modifiedplot.default_colors[0]}),
-                                                              ('sink2', {'color': modifiedplot.default_colors[1]}),
+handles, labels = inet.scave.plot.create_custom_legend(props, style_tuple_list=[('sink1', {'color': inet.scave.plot.default_colors[0]}),
+                                                              ('sink2', {'color': inet.scave.plot.default_colors[1]}),
                                                               ('baseline (no clock drift)', {'color': 'black', 'linestyle': 'dashdot'})], inplace=False)
 
 ax_oob.legend(handles, labels, loc='upper left', title='Out of band sync')
@@ -7862,7 +7862,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 import noclockdrift
 
 # get chart properties
@@ -7886,11 +7886,11 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-modifiedplot.add_to_dataframe(df, style_tuple_list=[('module', '.*sink1.*', {'color': modifiedplot.default_colors[0]}),
-                                                    ('module', '.*sink2.*', {'color': modifiedplot.default_colors[1]})])
+inet.scave.plot.add_to_dataframe(df, style_tuple_list=[('module', '.*sink1.*', {'color': inet.scave.plot.default_colors[0]}),
+                                                    ('module', '.*sink2.*', {'color': inet.scave.plot.default_colors[1]})])
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 plt.axhline(noclockdrift.get_noclockdrift_delay(1000000), linestyle='dashdot', color='black', linewidth=1)
 
@@ -7898,8 +7898,8 @@ plt.axhline(noclockdrift.get_noclockdrift_delay(1000000), linestyle='dashdot', c
 
 utils.postconfigure_plot(props)
 
-modifiedplot.create_custom_legend(props, style_tuple_list=[('sink1', {'color': modifiedplot.default_colors[0]}),
-                                                              ('sink2', {'color': modifiedplot.default_colors[1]}),
+inet.scave.plot.create_custom_legend(props, style_tuple_list=[('sink1', {'color': inet.scave.plot.default_colors[0]}),
+                                                              ('sink2', {'color': inet.scave.plot.default_colors[1]}),
                                                               ('baseline (no clock drift)', {'color': 'black', 'linestyle': 'dashdot'})])
 
 utils.export_image_if_needed(props)
@@ -8510,7 +8510,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 import noclockdrift
 
 # get chart properties
@@ -8534,11 +8534,11 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-modifiedplot.add_to_dataframe(df, style_tuple_list=[('module', '.*sink1.*', {'color': modifiedplot.default_colors[0]}),
-                                                    ('module', '.*sink2.*', {'color': modifiedplot.default_colors[1]})])
+inet.scave.plot.add_to_dataframe(df, style_tuple_list=[('module', '.*sink1.*', {'color': inet.scave.plot.default_colors[0]}),
+                                                    ('module', '.*sink2.*', {'color': inet.scave.plot.default_colors[1]})])
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 plt.axhline(noclockdrift.get_noclockdrift_delay(1000000), linestyle='dashdot', color='black', linewidth=1)
 
@@ -8546,8 +8546,8 @@ plt.axhline(noclockdrift.get_noclockdrift_delay(1000000), linestyle='dashdot', c
 
 utils.postconfigure_plot(props)
 
-modifiedplot.create_custom_legend(props, style_tuple_list=[('sink1', {'color': modifiedplot.default_colors[0]}),
-                                                              ('sink2', {'color': modifiedplot.default_colors[1]}),
+inet.scave.plot.create_custom_legend(props, style_tuple_list=[('sink1', {'color': inet.scave.plot.default_colors[0]}),
+                                                              ('sink2', {'color': inet.scave.plot.default_colors[1]}),
                                                               ('baseline (no clock drift)', {'color': 'black', 'linestyle': 'dashdot'})])
 
 utils.export_image_if_needed(props)
@@ -9158,7 +9158,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 import noclockdrift
 
 # get chart properties
@@ -9185,15 +9185,15 @@ if df_const.empty or df_rand.empty:
 df_const = utils.perform_vector_ops(df_const, props["vector_operations"])
 df_rand = utils.perform_vector_ops(df_rand, props["vector_operations"])
 
-modifiedplot.add_to_dataframe(df_const, style_tuple_list=[('module', '.*sink1.*', {'color': modifiedplot.default_colors[0], 'zorder': 10}),
-                                                    ('module', '.*sink2.*', {'color': modifiedplot.default_colors[1], 'zorder': 10})])
+inet.scave.plot.add_to_dataframe(df_const, style_tuple_list=[('module', '.*sink1.*', {'color': inet.scave.plot.default_colors[0], 'zorder': 10}),
+                                                    ('module', '.*sink2.*', {'color': inet.scave.plot.default_colors[1], 'zorder': 10})])
 
-modifiedplot.add_to_dataframe(df_rand, style_tuple_list=[('module', '.*sink1.*', {'color': modifiedplot.default_colors[0], 'zorder': 20}),
-                                                    ('module', '.*sink2.*', {'color': modifiedplot.default_colors[1], 'zorder': 10})])
+inet.scave.plot.add_to_dataframe(df_rand, style_tuple_list=[('module', '.*sink1.*', {'color': inet.scave.plot.default_colors[0], 'zorder': 20}),
+                                                    ('module', '.*sink2.*', {'color': inet.scave.plot.default_colors[1], 'zorder': 10})])
 
 # plot
-#modifiedplot.plot_vectors(df, props)
-ax_const, ax_rand = modifiedplot.plot_vectors_separate_grouped([df_const, df_rand], props, layout='horizontal')
+#inet.scave.plot.plot_vectors(df, props)
+ax_const, ax_rand = inet.scave.plot.plot_vectors_separate_grouped([df_const, df_rand], props, layout='horizontal')
 
 handles, labels = plt.gca().get_legend_handles_labels()
 
@@ -9210,8 +9210,8 @@ ax_rand.axhline(noclockdrift.get_noclockdrift_delay(1000000), linestyle='dashdot
 
 utils.postconfigure_plot(props)
 
-handles, labels = modifiedplot.create_custom_legend(props, style_tuple_list=[('sink1', {'color': modifiedplot.default_colors[0]}),
-                                                              ('sink2', {'color': modifiedplot.default_colors[1]}),
+handles, labels = inet.scave.plot.create_custom_legend(props, style_tuple_list=[('sink1', {'color': inet.scave.plot.default_colors[0]}),
+                                                              ('sink2', {'color': inet.scave.plot.default_colors[1]}),
                                                               ('baseline (no clock drift)', {'color': 'black', 'linestyle': 'dashdot'})], inplace=False)
 
 ax_const.legend(handles, labels, loc='upper left', title='Constant drift')

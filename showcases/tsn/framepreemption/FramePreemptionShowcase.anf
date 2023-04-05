@@ -13,7 +13,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 import matplotlib.pyplot as plt
 import create_labels_and_style as ls
 
@@ -42,7 +42,7 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 df = ls.add_custom_style(df)
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
@@ -658,7 +658,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import matplotlib.patches as patches
@@ -688,7 +688,7 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 df = ls.add_custom_style(df)
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
@@ -1313,7 +1313,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import matplotlib.patches as patches
@@ -1343,7 +1343,7 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 df = ls.add_custom_style(df)
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 

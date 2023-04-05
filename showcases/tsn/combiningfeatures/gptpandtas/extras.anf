@@ -13,7 +13,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 
 # get chart properties
 props = chart.get_properties()
@@ -38,10 +38,10 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 
 style_tuple_list = [('module', 'GptpAndTasShowcase.tsnClock1.clock', {'linewidth': '2'})]
 
-modifiedplot.add_to_dataframe(df, style_tuple_list)
+inet.scave.plot.add_to_dataframe(df, style_tuple_list)
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
@@ -658,7 +658,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 
 # get chart properties
 props = chart.get_properties()
@@ -684,10 +684,10 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 style_tuple_list = [('module', 'GptpAndTasShowcase.tsnClock1.clock', {'linestyle': 'dotted'}),
                     ('module', 'GptpAndTasShowcase.tsnClock2.clock', {'linewidth': 2})]
                     
-modifiedplot.add_to_dataframe(df, style_tuple_list)
+inet.scave.plot.add_to_dataframe(df, style_tuple_list)
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
@@ -1304,7 +1304,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 
 # get chart properties
 props = chart.get_properties()
@@ -1330,10 +1330,10 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 style_tuple_list = [('module', 'GptpAndTasShowcase.tsnClock1.clock', {'linewidth': 2}), 
                     ('module', 'GptpAndTasShowcase.tsnClock2.clock', {'linewidth': 2})]
 
-modifiedplot.add_to_dataframe(df, style_tuple_list)
+inet.scave.plot.add_to_dataframe(df, style_tuple_list)
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
@@ -2586,7 +2586,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 
 
 # get chart properties
@@ -2612,10 +2612,10 @@ if df.empty:
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 order = {'NormalOperation': 0, 'LinkFailure': 1, 'Failover': 2, 'Recovery': 3}
-modifiedplot.add_to_dataframe(df, (), order=order)
+inet.scave.plot.add_to_dataframe(df, (), order=order)
 
 # plot
-modifiedplot.plot_vectors_separate(df, props)
+inet.scave.plot.plot_vectors_separate(df, props)
 
 utils.postconfigure_plot(props)
 

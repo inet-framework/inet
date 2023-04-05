@@ -26,8 +26,8 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -50,7 +50,7 @@ groups, series = utils.select_groups_series(df, props)
 confidence_level = utils.get_confidence_level(props)
 valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, groups, series, confidence_level)
 
-modifiedplot.plot_bars(valuedf, errorsdf, metadf, props, order=['DCFnofrag', 'DCFfrag', 'HCFfrag', 'HCFfragblockack'], zorder=2)
+inet.scave.plot.plot_bars(valuedf, errorsdf, metadf, props, order=['DCFnofrag', 'DCFfrag', 'HCFfrag', 'HCFfragblockack'], zorder=2)
 
 plt.grid(axis='y', linestyle='--')
 plt.grid(axis='x', linestyle='')
@@ -60,7 +60,7 @@ plt.ylabel('')
 utils.postconfigure_plot(props)
 
 ax = plt.gca()
-modifiedplot.annotate_barchart(ax, offset=100, outliers=[{'index': 0, 'color': 'black', 'offset': -200}])
+inet.scave.plot.annotate_barchart(ax, offset=100, outliers=[{'index': 0, 'color': 'black', 'offset': -200}])
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -650,8 +650,8 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -674,14 +674,14 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-modifiedplot.add_to_dataframe(df, style_tuple_list=[('configname', 'DCFnofrag', {'color': default_colors[2]}),
+inet.scave.plot.add_to_dataframe(df, style_tuple_list=[('configname', 'DCFnofrag', {'color': default_colors[2]}),
                                                     ('configname', 'DCFfrag', {'color': default_colors[3]}),
                                                     ('configname', 'HCFfrag', {'color': default_colors[0]}),
                                                     ('configname', 'HCFfragblockack', {'color': default_colors[1]})],
                               order=['configname', 'DCFnofrag', 'DCFfrag', 'HCFfrag', 'HCFfragblockack'])
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
@@ -1296,8 +1296,8 @@ from omnetpp.scave.utils import make_legend_label
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart propertiesutils
 props = chart.get_properties()
@@ -1322,7 +1322,7 @@ newdf = utils.pivot_for_scatterchart(df, xaxis_itervar, group_by, confidence_lev
 
 newdf.y /= 1000000
 
-modifiedplot.add_to_dataframe(newdf, style_tuple_list=[('name', '.*DCFnofrag', {'color': default_colors[2]}),
+inet.scave.plot.add_to_dataframe(newdf, style_tuple_list=[('name', '.*DCFnofrag', {'color': default_colors[2]}),
                                                        ('name', '.*DCFfrag', {'color': default_colors[3]}),
                                                        ('name', '.*HCFfrag', {'color': default_colors[0]}),
                                                        ('name', '.*HCFfragblockack', {'color': default_colors[1]})],
@@ -1332,7 +1332,7 @@ modifiedplot.add_to_dataframe(newdf, style_tuple_list=[('name', '.*DCFnofrag', {
 props['legend_replacements'] = "/experiment=OnlyPacketSize//"
 props['legend_format'] = "${name}"
 
-modifiedplot.plot_lines(newdf, props)
+inet.scave.plot.plot_lines(newdf, props)
 
 names = df["name"].unique()
 scalar_names = names[0] + ", etc." if len(names) > 1 else names[0]
@@ -1347,7 +1347,7 @@ utils.postconfigure_plot(props)
 
 ax = plt.gca()
 handles, labels = ax.get_legend_handles_labels()
-modifiedplot.create_custom_legend(props, handles=handles, labels=labels, order=[1,0,2,3], markerscale=2)
+inet.scave.plot.create_custom_legend(props, handles=handles, labels=labels, order=[1,0,2,3], markerscale=2)
 
 plt.grid(linestyle='--')
 plt.xticks(range(0,2500,200))
@@ -1958,8 +1958,8 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -1984,7 +1984,7 @@ newdf = utils.pivot_for_scatterchart(df, xaxis_itervar, group_by, confidence_lev
 
 newdf.y /= 1000000
 
-modifiedplot.add_to_dataframe(newdf, style_tuple_list=[('name', '.*DCFnofrag', {'color': default_colors[2]}),
+inet.scave.plot.add_to_dataframe(newdf, style_tuple_list=[('name', '.*DCFnofrag', {'color': default_colors[2]}),
                                                        ('name', '.*DCFfrag', {'color': default_colors[3]}),
                                                        ('name', '.*HCFfrag', {'color': default_colors[0]}),
                                                        ('name', '.*HCFfragblockack', {'color': default_colors[1]})],
@@ -1993,7 +1993,7 @@ modifiedplot.add_to_dataframe(newdf, style_tuple_list=[('name', '.*DCFnofrag', {
 props['legend_replacements'] = "/experiment=PacketSize//"
 props['legend_format'] = "${name}"
 
-modifiedplot.plot_lines(newdf, props)
+inet.scave.plot.plot_lines(newdf, props)
 
 names = df["name"].unique()
 scalar_names = names[0] + ", etc." if len(names) > 1 else names[0]
@@ -2010,7 +2010,7 @@ ax = plt.gca()
 
 handles, labels = ax.get_legend_handles_labels()
 
-modifiedplot.create_custom_legend(props, handles=handles, labels=labels, order=[1,0,2,3], markerscale=2)
+inet.scave.plot.create_custom_legend(props, handles=handles, labels=labels, order=[1,0,2,3], markerscale=2)
 
 plt.grid(linestyle='--')
 plt.xticks(range(0,6100,500))
@@ -2622,8 +2622,8 @@ from omnetpp.scave.utils import make_legend_label
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -2648,7 +2648,7 @@ newdf = utils.pivot_for_scatterchart(df, xaxis_itervar, group_by, confidence_lev
 
 newdf.y /= 1000000
 
-modifiedplot.add_to_dataframe(newdf, style_tuple_list=[('name', '.*DCFnofrag', {'color': default_colors[2]}),
+inet.scave.plot.add_to_dataframe(newdf, style_tuple_list=[('name', '.*DCFnofrag', {'color': default_colors[2]}),
                                                        ('name', '.*DCFfrag', {'color': default_colors[3]}),
                                                        ('name', '.*HCFfrag', {'color': default_colors[0]}),
                                                        ('name', '.*HCFfragblockack', {'color': default_colors[1]})],
@@ -2657,7 +2657,7 @@ modifiedplot.add_to_dataframe(newdf, style_tuple_list=[('name', '.*DCFnofrag', {
 props['legend_replacements'] = "/experiment=Threshold//"
 props['legend_format'] = "${name}"
 
-modifiedplot.plot_lines(newdf, props)
+inet.scave.plot.plot_lines(newdf, props)
 
 names = df["name"].unique()
 scalar_names = names[0] + ", etc." if len(names) > 1 else names[0]
@@ -3284,8 +3284,8 @@ from omnetpp.scave.utils import make_legend_label
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -3319,7 +3319,7 @@ newdf_tp = utils.pivot_for_scatterchart(df_tp, xaxis_itervar, group_by, confiden
 newdf.x = newdf.y
 newdf.y = newdf_tp.y / 1000000
 
-modifiedplot.add_to_dataframe(newdf, style_tuple_list=[('name', '.*DCFnofrag', {'color': default_colors[2]}),
+inet.scave.plot.add_to_dataframe(newdf, style_tuple_list=[('name', '.*DCFnofrag', {'color': default_colors[2]}),
                                                        ('name', '.*DCFfrag', {'color': default_colors[3]}),
                                                        ('name', '.*HCFfrag', {'color': default_colors[0]}),
                                                        ('name', '.*HCFfragblockack', {'color': default_colors[1]})], 
@@ -3329,7 +3329,7 @@ modifiedplot.add_to_dataframe(newdf, style_tuple_list=[('name', '.*DCFnofrag', {
 props['legend_replacements'] = "/experiment=TxPower//"
 props['legend_format'] = "${name}"
 
-modifiedplot.plot_lines(newdf, props, debug=False)
+inet.scave.plot.plot_lines(newdf, props, debug=False)
 
 names = df_snir["name"].unique()
 scalar_names = names[0] + ", etc." if len(names) > 1 else names[0]

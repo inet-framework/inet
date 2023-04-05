@@ -1991,8 +1991,8 @@ import os
 import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -2027,7 +2027,7 @@ plt.ylabel("")
 
 ax = plt.gca()
 
-modifiedplot.annotate_barchart(ax, offset=5, size=10, zorder=10)
+inet.scave.plot.annotate_barchart(ax, offset=5, size=10, zorder=10)
 
 utils.export_image_if_needed(props)
 #utils.export_data_if_needed(df, props)
@@ -2617,8 +2617,8 @@ import os
 import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -2658,7 +2658,7 @@ ax = plt.gca()
 #    ax.annotate(str(round(p.get_height(),2)) + ' J', (p.get_x() + p.get_width() / 2, p.get_height() - 0.2),
 #                horizontalalignment='center', verticalalignment='top', color='white', size=10, zorder=12)
 
-modifiedplot.annotate_barchart(ax, offset=0.05, size=10, postfix=' J')
+inet.scave.plot.annotate_barchart(ax, offset=0.05, size=10, postfix=' J')
 
 utils.export_image_if_needed(props)
 #utils.export_data_if_needed(df, props)
@@ -3248,8 +3248,8 @@ import os
 import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -3308,7 +3308,7 @@ ax = plt.gca()
 #    ax.annotate(str(round(p.get_height(),2)) + ' mJ', (p.get_x() + p.get_width() / 2, p.get_height() - offset),
 #                horizontalalignment='center', verticalalignment='top', color=color, size=10, zorder=12)
 
-modifiedplot.annotate_barchart(ax, offset=0.5, size=10, postfix=' mJ')
+inet.scave.plot.annotate_barchart(ax, offset=0.5, size=10, postfix=' mJ')
 
 utils.export_image_if_needed(props)
 #utils.export_data_if_needed(df, props)

@@ -1906,7 +1906,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 import matplotlib.pyplot as plt
 
 # get chart properties
@@ -1933,10 +1933,10 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 style_tuple_list = [('configname', 'NoRateControl', {'linestyle': 'solid', 'linewidth': 3})]
 #default_dict = {'linewidth': 1}
 
-df = modifiedplot.add_to_dataframe(df, style_tuple_list)
+df = inet.scave.plot.add_to_dataframe(df, style_tuple_list)
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 

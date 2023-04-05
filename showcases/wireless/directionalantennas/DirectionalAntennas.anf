@@ -3820,8 +3820,8 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -3844,12 +3844,12 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-modifiedplot.add_to_dataframe(df, default_dict={'color': default_colors[0]})
+inet.scave.plot.add_to_dataframe(df, default_dict={'color': default_colors[0]})
 
 df = [df, df]
 
 # plot
-ax1, ax2 = modifiedplot.plot_vectors_separate_grouped(df, props)
+ax1, ax2 = inet.scave.plot.plot_vectors_separate_grouped(df, props)
 
 utils.postconfigure_plot(props)
 
@@ -4470,8 +4470,8 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -4494,7 +4494,7 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-modifiedplot.add_to_dataframe(df, style_tuple_list=[('configname', 'Axially.*', {'color': 'xkcd:lightblue'}),
+inet.scave.plot.add_to_dataframe(df, style_tuple_list=[('configname', 'Axially.*', {'color': 'xkcd:lightblue'}),
                                                     ('configname', 'Cosine.*', {'color': 'orange'}),
                                                     ('configname', 'Isotropic.*', {'color': 'green'}),
                                                     ('configname', 'Parabolic.*', {'color': 'red'}),
@@ -4502,7 +4502,7 @@ modifiedplot.add_to_dataframe(df, style_tuple_list=[('configname', 'Axially.*', 
                                                     order=['configname', 'IsotropicAntenna', 'ParabolicAntenna', 'DipoleAntenna', 'CosineAntenna', 'AxiallySymmetricAntenna'])
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 

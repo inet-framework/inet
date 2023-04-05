@@ -13,7 +13,7 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
+import inet.scave.plot
 
 # get chart properties
 props = chart.get_properties()
@@ -46,10 +46,10 @@ order = ['module', {'TsnDumbbellNetwork.server2.app[2].sink': 2,
                     'TsnDumbbellNetwork.server1.app[0].sink': 0,
                     'TsnDumbbellNetwork.server1.app[1].sink': 1}]
 
-modifiedplot.add_to_dataframe(df, style_tuple_list, order=order)
+inet.scave.plot.add_to_dataframe(df, style_tuple_list, order=order)
 
 # plot
-modifiedplot.plot_vectors(df, props)
+inet.scave.plot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
