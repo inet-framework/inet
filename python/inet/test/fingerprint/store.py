@@ -7,7 +7,7 @@ import time
 from inet.common import *
 from inet.simulation.project import *
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 class FingerprintStore:
     def __init__(self, simulation_project, file_name):
@@ -16,14 +16,14 @@ class FingerprintStore:
         self.entries = None
 
     def read(self):
-        logger.info(f"Reading fingerprints from {self.file_name}")
+        _logger.info(f"Reading fingerprints from {self.file_name}")
         file = open(self.file_name, "r")
         self.entries = json.load(file)
         file.close()
 
     def write(self):
         self.get_entries().sort(key=lambda element: (element["working_directory"], element["ini_file"], element["config"], element["run_number"], element["ingredients"], element["sim_time_limit"]))
-        logger.info(f"Writing fingerprints to {self.file_name}")
+        _logger.info(f"Writing fingerprints to {self.file_name}")
         file = open(self.file_name, "w")
         json.dump(self.entries, file, indent=True)
         file.close()

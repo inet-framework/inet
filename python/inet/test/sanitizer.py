@@ -3,7 +3,7 @@ import logging
 from inet.simulation import *
 from inet.test.simulation import *
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 class SanitizerTestTask(SimulationTestTask):
     def run_protected(self, output_stream=sys.stdout, **kwargs):

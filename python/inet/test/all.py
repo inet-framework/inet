@@ -12,7 +12,7 @@ from inet.test.speed import *
 from inet.test.statistical import *
 from inet.test.validation import *
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 class PacketTestTask(TestTask):
     def __init__(self, simulation_project, name="packet test", task_result_class=TestTaskResult, **kwargs):
@@ -26,7 +26,7 @@ class PacketTestTask(TestTask):
         executable = "./runtest"
         working_directory = self.simulation_project.get_full_path("tests/packet")
         args = [executable, "-s"]
-        logger.debug(args)
+        _logger.debug(args)
         subprocess_result = subprocess.run(args, cwd=working_directory, capture_output=True, env=self.simulation_project.get_env())
         stdout = subprocess_result.stdout.decode("utf-8")
         match = re.search(r"Packet unit test: (\w+)", stdout)

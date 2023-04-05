@@ -7,7 +7,7 @@ import subprocess
 from inet.simulation.project import *
 from inet.test.task import *
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 class OppTestTask(TestTask):
     def __init__(self, simulation_project, working_directory, test_file_name, **kwargs):

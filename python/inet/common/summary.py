@@ -4,7 +4,7 @@ import os
 import re
 import subprocess
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 def collect_features(simulation_project):
     file_name = simulation_project.get_full_path(".oppfeatures")

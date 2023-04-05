@@ -1,12 +1,12 @@
 import logging
 import os
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 try:
     from py4j.clientserver import JavaParameters, PythonParameters, ClientServer
 except ImportError as e:
-    logger.warn(str(e) + ": optional inet.common.ide package will not work") # optional feature
+    _logger.warn(str(e) + ": optional inet.common.ide package will not work") # optional feature
 
 client_server = None
 

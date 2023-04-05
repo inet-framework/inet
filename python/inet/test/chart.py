@@ -14,7 +14,7 @@ from inet.documentation.chart import *
 from inet.test.statistical import *
 from inet.test.task import *
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 class ChartTestTask(TestTask):
     def __init__(self, analysis_file_name, id, chart_name, simulation_project=None, name="chart test", **kwargs):

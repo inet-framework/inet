@@ -11,7 +11,7 @@ from inet.simulation import *
 from inet.test.fingerprint import *
 from inet.test.simulation import *
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 class StatisticalTestTask(SimulationTestTask):
     def __init__(self, simulation_config, run, name="statistical test", task_result_class=SimulationTestTaskResult, **kwargs):
@@ -31,7 +31,7 @@ class StatisticalTestTask(SimulationTestTask):
         scalars_match = False
         for current_scalar_result_file_name in glob.glob(os.path.join(current_results_directory, "*.sca")):
             if re.search("/" + config + "-#", current_scalar_result_file_name):
-                logger.debug(f"Reading result file {current_scalar_result_file_name}")
+                _logger.debug(f"Reading result file {current_scalar_result_file_name}")
                 current_df = read_result_files(current_scalar_result_file_name)
                 current_df = get_scalars(current_df)
                 if "runID" in current_df:
@@ -39,7 +39,7 @@ class StatisticalTestTask(SimulationTestTask):
                 scalar_file_name = os.path.basename(current_scalar_result_file_name)
                 stored_scalar_result_file_name = os.path.join(stored_results_directory, scalar_file_name)
                 if os.path.isfile(stored_scalar_result_file_name):
-                    logger.debug(f"Reading result file {stored_scalar_result_file_name}")
+                    _logger.debug(f"Reading result file {stored_scalar_result_file_name}")
                     stored_df = read_result_files(stored_scalar_result_file_name)
                     stored_df = get_scalars(stored_df)
                     if "runID" in stored_df:

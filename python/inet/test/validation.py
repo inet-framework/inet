@@ -9,7 +9,7 @@ from inet.project.inet import *
 from inet.simulation.project import *
 from inet.test.simulation import *
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 class ValidationTestTask(SimulationTestTask):
     def __init__(self, simulation_task, check_function, name="validation test", **kwargs):

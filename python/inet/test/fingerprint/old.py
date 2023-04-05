@@ -11,7 +11,7 @@ from inet.common import *
 from inet.project.inet import *
 from inet.simulation.project import *
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 def update_correct_fingerprints_from_csv(csv_file, correct_fingerprints, filter=None, exclude_filter=None, full_match=False):
     def commentRemover(csv_data):
@@ -39,7 +39,7 @@ def update_correct_fingerprints_from_csv(csv_file, correct_fingerprints, filter=
                     working_directory = working_directory[1:]
                 if working_directory[-1] == '/':
                     working_directory = working_directory[:-1]
-                logger.info("Updating correct fingerprint: " + working_directory + " -f " + args.ini_file + " -c " + args.config + " -r " + args.run)
+                _logger.info("Updating correct fingerprint: " + working_directory + " -f " + args.ini_file + " -c " + args.config + " -r " + args.run)
                 for fingerprint in fingerprints:
                     try:
                         correct_fingerprints.update_fingerprint(fingerprint.fingerprint,
@@ -51,7 +51,7 @@ def update_correct_fingerprints_from_csv(csv_file, correct_fingerprints, filter=
                                                                 ingredients=fingerprint.ingredients,
                                                                 test_result=fields[4])
                     except Exception as e:
-                        logger.warn("Failed to update correct fingerprint: " + str(e))
+                        _logger.warn("Failed to update correct fingerprint: " + str(e))
             else:
                 raise Exception(csv_file + " Line " + str(csvReader.line_num) + ": the 5th item must contain one of 'PASS', 'FAIL', 'ERROR'" + ": " + '"' + '", "'.join(fields) + '"')
         else:
