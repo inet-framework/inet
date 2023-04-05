@@ -19,8 +19,10 @@ Define_Module(EthernetFcsChecker);
 void EthernetFcsChecker::initialize(int stage)
 {
     FcsCheckerBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
+        isCheckFcs = par("checkFcs");
         popFcs = par("popFcs");
+    }
 }
 
 bool EthernetFcsChecker::checkFcs(const Packet *packet, FcsMode fcsMode, uint32_t fcs) const
@@ -39,10 +41,13 @@ bool EthernetFcsChecker::checkFcs(const Packet *packet, FcsMode fcsMode, uint32_
 
 void EthernetFcsChecker::processPacket(Packet *packet)
 {
-    if (auto cutthroughTag = packet->findTagForUpdate<CutthroughTag>()) {
-        const auto& trailer = packet->peekAtBack<EthernetFcs>(ETHER_FCS_BYTES);
-        cutthroughTag->setTrailerChunk(trailer);
+    if (isCheckFcs) {
+        if (auto cutthroughTag = packet->findTagForUpdate<CutthroughTag>()) {
+            const auto& trailer = packet->peekAtBack<EthernetFcs>(ETHER_FCS_BYTES);
+            cutthroughTag->setTrailerChunk(trailer);
+        }
     }
+
     if (popFcs) {
         const auto& trailer = packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
         auto& packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
@@ -52,7 +57,7 @@ void EthernetFcsChecker::processPacket(Packet *packet)
 
 bool EthernetFcsChecker::matchesPacket(const Packet *packet) const
 {
-    if (packet->hasTag<CutthroughTag>())
+    if (!isCheckFcs || packet->hasTag<CutthroughTag>())
         return true;
     const auto& trailer = packet->peekAtBack<EthernetFcs>(ETHER_FCS_BYTES);
     auto fcsMode = trailer->getFcsMode();

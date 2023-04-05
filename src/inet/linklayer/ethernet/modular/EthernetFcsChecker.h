@@ -18,6 +18,7 @@ using namespace inet::queueing;
 class INET_API EthernetFcsChecker : public FcsCheckerBase, public TransparentProtocolRegistrationListener
 {
   protected:
+    bool isCheckFcs = true;
     bool popFcs = true;
 
   protected:
