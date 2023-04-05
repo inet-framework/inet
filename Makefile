@@ -1,7 +1,8 @@
 FEATURETOOL = opp_featuretool
 FEATURES_H = src/inet/features.h
+SELFDOC = tests/fingerprint/SelfDoc
 
-.PHONY: all clean cleanall makefiles makefiles-so makefiles-lib makefiles-exe checkenvir checkmakefiles doxy doc submodule-init
+.PHONY: all clean cleanall neddoc makefiles makefiles-so makefiles-lib makefiles-exe checkenvir checkmakefiles doxy doc submodule-init
 
 all: checkmakefiles $(FEATURES_H)
 	@cd src && $(MAKE)
@@ -12,7 +13,7 @@ clean: checkmakefiles
 cleanall: checkmakefiles
 	@cd src && $(MAKE) MODE=release clean
 	@cd src && $(MAKE) MODE=debug clean
-	@rm -f src/Makefile $(FEATURES_H)
+	@rm -f src/Makefile $(FEATURES_H) $(SELFDOC).xml
 
 INET_PROJ = $(shell inet_root)
 
@@ -60,4 +61,10 @@ doc:
 
 ddoc:
 	@cd doc/src && ./docker-make html && echo "===> file:$$(pwd)/_build/html/index.html"
+
+$(SELFDOC).xml: $(SELFDOC).json
+	@inet_selfdoc_json2xml <$< >$@
+
+neddoc: $(SELFDOC).xml
+	@opp_neddoc --verbose --no-automatic-hyperlinks -x "/*/examples,/*/tests,/*/showcases,/*/tutorials" -f $(SELFDOC).xml $(INET_PROJ)
 

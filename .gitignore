@@ -39,6 +39,7 @@ python/inet/test/fingerprint/all_fingerprints.json
 /tests/*/work/
 /tests/*/*/work/
 /tests/*/results*/
+/tests/fingerprint/SelfDoc.xml
 *.log
 *.sim
 *.pyc
