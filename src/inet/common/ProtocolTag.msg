@@ -11,17 +11,6 @@ import inet.common.packet.chunk.Chunk;
 
 namespace inet;
 
-cplusplus{{
-typedef Ptr<const Chunk> ChunkPtr;
-}}
-
-class ChunkPtr
-{
-    @existingClass;
-    @descriptor(readonly);
-    Chunk *content @getter(get);
-}
-
 //
 // This is an abstract base class that should not be directly added as a tag.
 //
