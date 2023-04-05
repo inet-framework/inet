@@ -135,3 +135,14 @@ class ChunkTemporarySharedPtr extends cObject
     @existingClass;
     @descriptor(readonly);
 }
+
+cplusplus{{
+typedef Ptr<const Chunk> ChunkPtr;
+}}
+
+class ChunkPtr
+{
+    @existingClass;
+    @descriptor(readonly);
+    Chunk *content @getter(get);
+}
