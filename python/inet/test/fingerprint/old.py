@@ -8,6 +8,7 @@ import shlex
 from inet.test.fingerprint import *
 
 from inet.common import *
+from inet.project.inet import *
 from inet.simulation.project import *
 
 logger = logging.getLogger(__name__)

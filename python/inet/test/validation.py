@@ -5,6 +5,7 @@ import random
 
 from omnetpp.scave.results import *
 
+from inet.project.inet import *
 from inet.simulation.project import *
 from inet.test.simulation import *
 

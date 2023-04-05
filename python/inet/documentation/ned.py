@@ -5,6 +5,7 @@ logger = logging.getLogger(__name__)
 
 from inet.common import *
 from inet.simulation.project import *
+from inet.project.inet import *
 
 def generate_ned_documentation(excludes = []):
     logger.info("Generating NED documentation")

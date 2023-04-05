@@ -5,6 +5,7 @@ import webbrowser
 logger = logging.getLogger(__name__)
 
 from inet.common import *
+from inet.project.inet import *
 from inet.simulation.project import *
 
 def generate_html_documentation(docker=False, clean_build=False):

@@ -1,5 +1,6 @@
 import logging
 
+from inet.project.inet import *
 from inet.test.chart import *
 from inet.test.feature import *
 from inet.test.fingerprint import *
