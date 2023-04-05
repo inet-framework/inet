@@ -39,6 +39,32 @@ uint32_t EthernetFcsInserter::computeFcs(const Packet *packet, FcsMode fcsMode) 
     }
 }
 
+// TODO duplicated code (see EthernetFcsInserter), move to a utility file
+static void destreamChunkToPacket(Packet *outPacket, const Ptr<const Chunk> data)
+{
+    switch (data->getChunkType()) {
+        case Chunk::CT_STREAM:
+            destreamChunkToPacket(outPacket, dynamicPtrCast<const StreamBufferChunk>(data)->getStreamData());
+            break;
+        case Chunk::CT_SEQUENCE:
+            for (const auto& chunk : dynamicPtrCast<const SequenceChunk>(data)->getChunks())
+                destreamChunkToPacket(outPacket, chunk);
+            break;
+        case Chunk::CT_SLICE:
+        {
+            auto slicePacket = new Packet();
+            auto sliceChunk = dynamicPtrCast<const SliceChunk>(data);
+            destreamChunkToPacket(slicePacket, sliceChunk->getChunk());
+            outPacket->insertAtBack(slicePacket->peekDataAt(sliceChunk->getOffset(), sliceChunk->getLength()));
+            delete slicePacket;
+        }
+        break;
+        default:
+            outPacket->insertAtBack(data);
+            break;
+    }
+}
+
 void EthernetFcsInserter::processPacket(Packet *packet)
 {
     if (insertFcs) {
@@ -53,9 +79,29 @@ void EthernetFcsInserter::processPacket(Packet *packet)
     if (setFcs) {
         auto header = packet->removeAtBack<EthernetFcs>(ETHER_FCS_BYTES);
         if (auto cutthroughTag = packet->findTag<CutthroughTag>()) {
-            auto oldFcs = dynamicPtrCast<const EthernetFcs>(cutthroughTag->getTrailerChunk());
-            header->setFcs(oldFcs->getFcs());
-            header->setFcsMode(oldFcs->getFcsMode());
+            if (cutthroughTag->isGoodTrailer()) {
+                auto entirePacket = new Packet();
+                destreamChunkToPacket(entirePacket, packet->peekData());
+                header->setFcsMode(fcsMode);
+                header->setFcs(computeFcs(entirePacket, fcsMode));
+                delete entirePacket;
+            }
+            else {
+                switch (fcsMode) {
+                    case FCS_DECLARED_CORRECT:
+                    case FCS_DECLARED_INCORRECT:
+                        header->setFcsMode(FCS_DECLARED_INCORRECT);
+                        header->setFcs(computeDeclaredIncorrectFcs(packet));
+                        break;
+                    case FCS_COMPUTED:
+                        header->setFcsMode(FCS_COMPUTED);
+                        header->setFcs(0x0f0f0f0fL);
+                        break;
+                    default:
+                        throw cRuntimeError("Unknown FCS mode: %d", (int)fcsMode);
+                        break;
+                }
+            }
         }
         else {
             auto fcs = computeFcs(packet, fcsMode);
