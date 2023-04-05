@@ -59,7 +59,7 @@ def process_run_tasks_arguments(args):
     if "working_directory_filter" in kwargs:
         kwargs["working_directory_filter"] = re.sub("(.*)/$", "\\1", kwargs["working_directory_filter"])
     if args.simulation_runner == "inprocess":
-        import omnetpp.simulation.cffi
+        import omnetpp.cffi
     del kwargs["hosts"]
     if args.hosts != "localhost" and args.hosts != socket.gethostname():
         worker_hostnames = args.hosts.split(",")

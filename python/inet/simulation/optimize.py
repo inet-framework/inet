@@ -37,8 +37,8 @@ def optimize_simulation_parameters(simulation_task, expected_result_names, expec
     # TODO unfortunately we cannot run simulations concurrently in the same process right now
     if concurrent:
         simulation_runner = subprocess_simulation_runner
-    elif "inet.simulation.cffi.lib" in sys.modules:
-        simulation_runner = getattr(sys.modules["omnetpp.simulation.cffi.inprocess"], "inprocess_simulation_runner")
+    elif "inet.cffi.libinet" in sys.modules:
+        simulation_runner = getattr(sys.modules["omnetpp.cffi.inprocess"], "inprocess_simulation_runner")
     else:
         simulation_runner = subprocess_simulation_runner
     xs = np.array(initial_values)
