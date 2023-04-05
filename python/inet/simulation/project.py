@@ -287,7 +287,7 @@ class SimulationProject:
                             return sim_time_limit
             return config_dicts["General"].get("sim_time_limit")
         def create_config_dict(config):
-            return {"config": config, "abstract_config": False, "expected_result": "DONE", "user_interface": None, "description": None, "network": None}
+            return {"config": config, "abstract_config": False, "emulation": False, "expected_result": "DONE", "user_interface": None, "description": None, "network": None}
         simulation_configs = []
         working_directory = os.path.dirname(ini_path)
         num_runs_fast = get_num_runs_fast(ini_path)
@@ -301,18 +301,22 @@ class SimulationProject:
                 config = match.group(2) or match.group(3)
                 config_dict = create_config_dict(config)
                 config_dicts[config] = config_dict
+            match = re.match("#? *abstract-config *= *(\w+)", line)
+            if match:
+                config_dict["abstract_config"] = bool(match.group(1))
+            match = re.match("#? *emulation *= *(\w+)", line)
+            if match:
+                config_dict["emulation"] = bool(match.group(1))
+            match = re.match("#? *expected-result *= *\"(\w+)\"", line)
+            if match:
+                config_dict["expected_result"] = match.group(1)
+            line = re.sub("(.*)#.*", "//1", line).strip()
             match = re.match(" *extends *= *(\w+)", line)
             if match:
                 config_dict["extends"] = match.group(1)
             match = re.match(" *user-interface *= \"*(\w+)\"", line)
             if match:
                 config_dict["user_interface"] = match.group(1)
-            match = re.match("#? *abstract-config *= *(\w+)", line)
-            if match:
-                config_dict["abstract_config"] = bool(match.group(1))
-            match = re.match("#? *expected-result *= *\"(\w+)\"", line)
-            if match:
-                config_dict["expected_result"] = match.group(1)
             match = re.match("description *= *\"(.*)\"", line)
             if match:
                 config_dict["description"] = match.group(1)
@@ -346,9 +350,10 @@ class SimulationProject:
             description = config_dict["description"]
             description_abstract = (re.search("\((a|A)bstract\)", description) is not None) if description else False
             abstract = (config_dict["network"] is None and config_dict["config"] == "General") or config_dict["abstract_config"] or description_abstract
+            emulation = config_dict["emulation"]
             expected_result = config_dict["expected_result"]
             user_interface = config_dict["user_interface"] or general_config_dict["user_interface"]
-            simulation_config = SimulationConfig(self, os.path.relpath(working_directory, self.get_full_path(".")), ini_file=ini_file, config=config, sim_time_limit=sim_time_limit, num_runs=num_runs, abstract=abstract, expected_result=expected_result, user_interface=user_interface, description=description)
+            simulation_config = SimulationConfig(self, os.path.relpath(working_directory, self.get_full_path(".")), ini_file=ini_file, config=config, sim_time_limit=sim_time_limit, num_runs=num_runs, abstract=abstract, emulation=emulation, expected_result=expected_result, user_interface=user_interface, description=description)
             simulation_configs.append(simulation_config)
         return simulation_configs
 

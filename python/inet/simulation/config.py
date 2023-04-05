@@ -25,7 +25,7 @@ class SimulationConfig:
     Represents a simulation config from an INI file under a working directory in a specific simulation project.
     """
 
-    def __init__(self, simulation_project, working_directory, ini_file="omnetpp.ini", config="General", num_runs=1, sim_time_limit=None, abstract=False, expected_result="DONE", user_interface="Cmdenv", description=None):
+    def __init__(self, simulation_project, working_directory, ini_file="omnetpp.ini", config="General", num_runs=1, sim_time_limit=None, abstract=False, emulation=False, expected_result="DONE", user_interface="Cmdenv", description=None):
         """
         Initializes a new simulation config.
 
@@ -71,7 +71,7 @@ class SimulationConfig:
         self.num_runs = num_runs
         self.sim_time_limit = sim_time_limit
         self.abstract = abstract
-        self.emulation = working_directory.find("emulation") != -1
+        self.emulation = emulation or working_directory.find("emulation") != -1
         self.expected_result = expected_result
         self.user_interface = user_interface
         self.description = description
