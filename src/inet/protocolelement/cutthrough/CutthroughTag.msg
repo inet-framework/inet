@@ -16,10 +16,12 @@
 import inet.common.INETDefs;
 import inet.common.TagBase;
 import inet.common.Units;
+import inet.common.packet.chunk.Chunk;
 
 namespace inet;
 
 class CutthroughTag extends TagBase
 {
     b cutthroughPosition;
+    ChunkPtr trailerChunk;
 }
