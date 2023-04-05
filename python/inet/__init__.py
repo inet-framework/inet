@@ -621,6 +621,7 @@ often, etc. So it is highly advisable to start writing your own Python package w
 """
 
 from inet.documentation import *
+from inet.scave import *
 from inet.simulation import *
 from inet.test import *
 
