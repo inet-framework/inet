@@ -14,6 +14,8 @@ simple EthernetFcsInserter extends PacketFlowBase like IPacketFlow
 {
     parameters:
         string fcsMode @enum("disabled","declared","computed") = default("declared");
+        bool insertFcs = default(true);
+        bool setFcs = default(true);
         @class(EthernetFcsInserter);
         @display("i=block/inserter");
 }

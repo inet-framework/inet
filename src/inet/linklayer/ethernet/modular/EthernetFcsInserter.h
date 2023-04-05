@@ -17,6 +17,11 @@ using namespace inet::queueing;
 class INET_API EthernetFcsInserter : public FcsInserterBase
 {
   protected:
+    bool setFcs = true;
+    bool insertFcs = true;
+
+  protected:
+    virtual void initialize(int stage) override;
     virtual uint32_t computeFcs(const Packet *packet, FcsMode fcsMode) const override;
     virtual void processPacket(Packet *packet) override;
 };

@@ -8,12 +8,22 @@
 #include "inet/linklayer/ethernet/modular/EthernetFcsInserter.h"
 
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/protocolelement/cutthrough/CutthroughTag_m.h"
 
 namespace inet {
 
 Define_Module(EthernetFcsInserter);
+
+void EthernetFcsInserter::initialize(int stage)
+{
+    FcsInserterBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        insertFcs = par("insertFcs");
+        setFcs = par("setFcs");
+    }
+}
 
 uint32_t EthernetFcsInserter::computeFcs(const Packet *packet, FcsMode fcsMode) const
 {
@@ -31,22 +41,29 @@ uint32_t EthernetFcsInserter::computeFcs(const Packet *packet, FcsMode fcsMode) 
 
 void EthernetFcsInserter::processPacket(Packet *packet)
 {
-    if (auto cutthroughTag = packet->findTag<CutthroughTag>()) {
-        auto header = dynamicPtrCast<const EthernetFcs>(cutthroughTag->getTrailerChunk());
-        packet->insertAtBack(header);
-    }
-    else {
+    if (insertFcs) {
         const auto& header = makeShared<EthernetFcs>();
-        auto fcs = computeFcs(packet, fcsMode);
-        header->setFcs(fcs);
-        header->setFcsMode(fcsMode);
+        packet->insertAtBack(header);
+        auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
+        packetProtocolTag->setProtocol(&Protocol::ethernetMac);
+        packetProtocolTag->setFrontOffset(b(0));
+        packetProtocolTag->setBackOffset(b(0));
+    }
+
+    if (setFcs) {
+        auto header = packet->removeAtBack<EthernetFcs>(ETHER_FCS_BYTES);
+        if (auto cutthroughTag = packet->findTag<CutthroughTag>()) {
+            auto oldFcs = dynamicPtrCast<const EthernetFcs>(cutthroughTag->getTrailerChunk());
+            header->setFcs(oldFcs->getFcs());
+            header->setFcsMode(oldFcs->getFcsMode());
+        }
+        else {
+            auto fcs = computeFcs(packet, fcsMode);
+            header->setFcs(fcs);
+            header->setFcsMode(fcsMode);
+        }
         packet->insertAtBack(header);
     }
-    auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
-    packetProtocolTag->setProtocol(&Protocol::ethernetMac);
-    packetProtocolTag->setFrontOffset(b(0));
-    packetProtocolTag->setBackOffset(b(0));
 }
 
 } // namespace inet
-
