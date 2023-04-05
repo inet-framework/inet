@@ -13,8 +13,8 @@ import shutil
 import signal
 import subprocess
 
-from omnetpp.common.compile import *
-from omnetpp.simulation.project import *
+from inet.common.compile import *
+from inet.simulation.project import *
 
 _logger = logging.getLogger(__name__)
 

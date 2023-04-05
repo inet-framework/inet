@@ -8,10 +8,10 @@ import datetime
 import logging
 import time
 
-from omnetpp.common import *
-from omnetpp.simulation.task import *
-from omnetpp.simulation.config import *
-from omnetpp.test.task import *
+from inet.common import *
+from inet.simulation.task import *
+from inet.simulation.config import *
+from inet.test.task import *
 
 _logger = logging.getLogger(__name__)
 

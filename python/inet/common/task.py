@@ -34,7 +34,7 @@ import sys
 import time
 import traceback
 
-from omnetpp.common.util import *
+from inet.common.util import *
 
 _logger = logging.getLogger(__name__)
 

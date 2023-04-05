@@ -4,9 +4,9 @@ import numpy
 import random
 
 from omnetpp.scave.results import *
-from omnetpp.test.simulation import *
 
 from inet.simulation.project import *
+from inet.test.simulation import *
 
 logger = logging.getLogger(__name__)
 

@@ -11,13 +11,13 @@ import hashlib
 import logging
 import re
 
-from omnetpp.simulation.task import *
+from inet.simulation.task import *
 
 # TODO use Task classes
-# from omnetpp.common.ide import *
-from omnetpp.simulation.project import *
-from omnetpp.test.fingerprint.store import *
-from omnetpp.test.simulation import *
+# from inet.common.ide import *
+from inet.simulation.project import *
+from inet.test.fingerprint.store import *
+from inet.test.simulation import *
 
 _logger = logging.getLogger(__name__)
 all_fingerprint_ingredients = ["tplx", "~tNl", "~tND", "tyf"]

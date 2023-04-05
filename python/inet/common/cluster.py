@@ -11,7 +11,7 @@ import os
 import socket
 import time
 
-from omnetpp.common.util import *
+from inet.common.util import *
 
 _logger = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ class SSHCluster:
         """
         Starts the SSH cluster and the dashboard web page.
         """
-        remote_python = (f"NIX_SHELL={self.nix_shell} " if self.nix_shell else "") + "~/omnetpp-distribution/omnetpp/bin/opp_ssh_cluster_python"
+        remote_python = (f"NIX_SHELL={self.nix_shell} " if self.nix_shell else "") + "~/omnetpp-distribution/inet/bin/inet_ssh_cluster_python"
         _logger.info(f"Starting SSH cluster: scheduler={self.scheduler_hostname}, workers={self.worker_hostnames}, remote_python={remote_python}, dashboard=http://localhost:8797")
         cluster = dask.distributed.SSHCluster([self.scheduler_hostname, *self.worker_hostnames],
                                               remote_python=remote_python,

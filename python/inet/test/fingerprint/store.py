@@ -4,8 +4,8 @@ import os
 import subprocess
 import time
 
-from omnetpp.common import *
-from omnetpp.simulation.project import *
+from inet.common import *
+from inet.simulation.project import *
 
 logger = logging.getLogger(__name__)
 

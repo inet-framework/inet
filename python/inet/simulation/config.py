@@ -16,7 +16,7 @@ import re
 import shutil
 import subprocess
 
-from omnetpp.common.util import *
+from inet.common.util import *
 
 _logger = logging.getLogger(__name__)
 

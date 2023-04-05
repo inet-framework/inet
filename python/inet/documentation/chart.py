@@ -7,7 +7,7 @@ import re
 
 import omnetpp.scave.analysis
 
-from omnetpp.simulation.project import *
+from inet.simulation.project import *
 
 from inet.simulation.project import *
 

@@ -1,6 +1,6 @@
 import cppyy
 
-from omnetpp.common.util import *
+from inet.common.util import *
 
 libsuffix = ""
 

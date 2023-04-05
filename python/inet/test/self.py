@@ -4,8 +4,8 @@ import os
 import re
 import sys
 
-from omnetpp.simulation import *
-from omnetpp.test import *
+from inet.simulation import *
+from inet.test import *
 
 __sphinx_mock__ = True # ignore this module in documentation
 

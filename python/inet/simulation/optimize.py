@@ -4,9 +4,9 @@ import scipy.optimize
 import time
 
 from omnetpp.scave.results import *
-from omnetpp.simulation.config import *
-from omnetpp.simulation.task import *
 
+from inet.simulation.config import *
+from inet.simulation.task import *
 from inet.simulation.project import *
 
 def cost_function(parameter_values, simulation_task, expected_result_names, expected_result_values, fixed_parameter_names, fixed_parameter_values, fixed_parameter_assignments, fixed_parameter_units, parameter_names, parameter_assignments, parameter_units, kwargs):

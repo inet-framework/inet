@@ -9,11 +9,10 @@ import omnetpp
 import omnetpp.scave
 import omnetpp.scave.analysis
 
-from omnetpp.test.task import *
-
 from inet.common import *
 from inet.documentation.chart import *
 from inet.test.statistical import *
+from inet.test.task import *
 
 logger = logging.getLogger(__name__)
 

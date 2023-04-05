@@ -4,9 +4,8 @@ import logging
 import signal
 import subprocess
 
-from omnetpp.test.task import *
-
 from inet.simulation.project import *
+from inet.test.task import *
 
 logger = logging.getLogger(__name__)
 

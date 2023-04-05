@@ -5,7 +5,7 @@ import logging
 import re
 import shlex
 
-from omnetpp.test.fingerprint import *
+from inet.test.fingerprint import *
 
 from inet.common import *
 from inet.simulation.project import *

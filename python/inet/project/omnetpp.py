@@ -1,7 +1,7 @@
 import glob
 import json
 
-from omnetpp.simulation.project import *
+from inet.simulation.project import *
 
 __sphinx_mock__ = True # ignore this module in documentation
 

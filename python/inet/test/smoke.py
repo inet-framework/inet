@@ -9,8 +9,8 @@ Please note that undocumented features are not supposed to be used by the user.
 
 import logging
 
-from omnetpp.simulation import *
-from omnetpp.test.simulation import *
+from inet.simulation import *
+from inet.test.simulation import *
 
 _logger = logging.getLogger(__name__)
 

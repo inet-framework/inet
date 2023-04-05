@@ -17,11 +17,11 @@ import subprocess
 import sys
 import time
 
-from omnetpp.common import *
-from omnetpp.simulation.build import *
-from omnetpp.simulation.config import *
-from omnetpp.simulation.project import *
-from omnetpp.simulation.subprocess import *
+from inet.common import *
+from inet.simulation.build import *
+from inet.simulation.config import *
+from inet.simulation.project import *
+from inet.simulation.subprocess import *
 
 _logger = logging.getLogger(__name__)
 

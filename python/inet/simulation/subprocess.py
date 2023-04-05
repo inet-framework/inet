@@ -2,7 +2,7 @@ import logging
 import os
 import subprocess
 
-from omnetpp.common import *
+from inet.common import *
 
 __sphinx_mock__ = True # ignore this module in documentation
 

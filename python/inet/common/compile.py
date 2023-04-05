@@ -2,7 +2,7 @@ import logging
 import signal
 import subprocess
 
-from omnetpp.common.task import *
+from inet.common.task import *
 
 __sphinx_mock__ = True # ignore this module in documentation
 

@@ -2,9 +2,9 @@ import cppyy
 import logging
 import re
 
-from omnetpp.common import *
-from omnetpp.simulation.project import *
-from omnetpp.simulation.cffi.lib import *
+from inet.common import *
+from inet.simulation.project import *
+from inet.simulation.cffi.libomnetpp import *
 
 _logger = logging.getLogger(__name__)
 

@@ -6,7 +6,7 @@ Please note that undocumented features are not supposed to be used by the user.
 
 import logging
 
-from omnetpp.common import *
+from inet.common import *
 
 _logger = logging.getLogger(__name__)
 
