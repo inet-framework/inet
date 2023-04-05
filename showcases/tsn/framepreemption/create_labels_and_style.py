@@ -4,10 +4,10 @@
 # replace it with:
 #     import modifiedplot
 try:
-    import modifiedplot
+    import inet.scave.plot
 except:
     import modifiedplot_fp
-    import modifiedplot
+    import inet.scave.plot
 import matplotlib.pyplot as plt
 # ----workaround end----
 from matplotlib.lines import Line2D
@@ -26,7 +26,7 @@ def add_custom_style(df):
                     ('configname', '.*FramePreemption', {'linestyle': 'solid'}),
                     ('configname', '.*FifoQueueing', {'linestyle': 'dotted'}),
                     ('configname', '.*PriorityQueueing', {'linestyle': 'dashed'})]
-    df = modifiedplot.add_to_dataframe(df, style_tuple_list)
+    df = inet.scave.plot.add_to_dataframe(df, style_tuple_list)
     return df
 
 # rectangle location

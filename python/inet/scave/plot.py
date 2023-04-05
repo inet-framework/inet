@@ -317,7 +317,7 @@ def plot_vectors_separate_faded(df, props, legend_func=utils.make_legend_label, 
     
     remove_ticks: remove ticks and tick labels between subplots
     
-    Use modifiedplot.postconfigure() with this
+    Use inet.scave.plot.postconfigure() with this
     """
     p = ideplot if chart.is_native_chart() else plt
     
