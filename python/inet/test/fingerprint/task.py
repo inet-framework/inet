@@ -13,8 +13,8 @@ import re
 
 from inet.simulation.task import *
 
-# TODO use Task classes
-# from inet.common.ide import *
+from inet.common.ide import *
+from inet.project.inet import *
 from inet.simulation.project import *
 from inet.test.fingerprint.store import *
 from inet.test.simulation import *
@@ -100,27 +100,27 @@ class FingerprintTestTaskResult(SimulationTestTaskResult):
         eventlog_file.close()
         return FingerprintTrajectory(self.simulation_result, self.task.ingredients, fingerprints, range(0, len(fingerprints)))
 
-    # def run_baseline_fingerprint_test(self, baseline_simulation_project=inet_baseline_project, **kwargs):
-    #     simulation_task = self.simulation_result.simulation_task
-    #     simulation_config = self.simulation_result.simulation_task.simulation_config
-    #     multiple_test_tasks = get_fingerprint_test_tasks(simulation_project=baseline_simulation_project, ingredients_list=[self.task.ingredients], full_match=True,
-    #                                                      working_directory_filter=simulation_config.working_directory, ini_file_filter=simulation_config.ini_file, config_filter=simulation_config.config, run_number=simulation_task.run_number,
-    #                                                      **kwargs)
-    #     assert(len(multiple_test_tasks.tasks) == 1)
-    #     multiple_test_results = multiple_test_tasks.run(**kwargs)
-    #     return multiple_test_results.results[0]
-    #
-    # def find_fingerprint_trajectory_divergence(self, baseline_fingerprint_test_result=None, baseline_simulation_project=inet_baseline_project):
-    #     if baseline_fingerprint_test_result is None:
-    #         baseline_fingerprint_test_result = self.run_baseline_fingerprint_test(baseline_simulation_project, record_eventlog=True)
-    #     baseline_fingerprint_trajectory = baseline_fingerprint_test_result.get_fingerprint_trajectory()
-    #     current_fingerprint_trajectory = self.get_fingerprint_trajectory()
-    #     return baseline_fingerprint_trajectory.find_divergence_position(current_fingerprint_trajectory)
-    #
-    # def debug_fingerprint_trajectory_divergence(self, baseline_fingerprint_test_result=None, baseline_simulation_project=inet_baseline_project):
-    #     (baseline_simulation_event, current_simulation_event) = self.find_fingerprint_trajectory_divergence(baseline_fingerprint_test_result)
-    #     baseline_simulation_event.debug()
-    #     current_simulation_event.debug()
+    def run_baseline_fingerprint_test(self, baseline_simulation_project=inet_baseline_project, **kwargs):
+        simulation_task = self.simulation_result.simulation_task
+        simulation_config = self.simulation_result.simulation_task.simulation_config
+        multiple_test_tasks = get_fingerprint_test_tasks(simulation_project=baseline_simulation_project, ingredients_list=[self.task.ingredients], full_match=True,
+                                                         working_directory_filter=simulation_config.working_directory, ini_file_filter=simulation_config.ini_file, config_filter=simulation_config.config, run_number=simulation_task.run_number,
+                                                         **kwargs)
+        assert(len(multiple_test_tasks.tasks) == 1)
+        multiple_test_results = multiple_test_tasks.run(**kwargs)
+        return multiple_test_results.results[0]
+
+    def find_fingerprint_trajectory_divergence(self, baseline_fingerprint_test_result=None, baseline_simulation_project=inet_baseline_project):
+        if baseline_fingerprint_test_result is None:
+            baseline_fingerprint_test_result = self.run_baseline_fingerprint_test(baseline_simulation_project, record_eventlog=True)
+        baseline_fingerprint_trajectory = baseline_fingerprint_test_result.get_fingerprint_trajectory()
+        current_fingerprint_trajectory = self.get_fingerprint_trajectory()
+        return baseline_fingerprint_trajectory.find_divergence_position(current_fingerprint_trajectory)
+
+    def debug_fingerprint_trajectory_divergence(self, baseline_fingerprint_test_result=None, baseline_simulation_project=inet_baseline_project):
+        (baseline_simulation_event, current_simulation_event) = self.find_fingerprint_trajectory_divergence(baseline_fingerprint_test_result)
+        baseline_simulation_event.debug()
+        current_simulation_event.debug()
 
 class MultipleFingerprintTestTaskResults(MultipleTestTaskResults):
     def __init__(self, **kwargs):
@@ -262,52 +262,52 @@ class FingerprintTrajectory:
             i = j
         return FingerprintTrajectory(self.ingredients, unique_fingerprints, event_numbers)
 
-    # def find_divergence_position(self, other):
-    #     min_size = min(len(self.fingerprints), len(other.fingerprints))
-    #     for i in range(0, min_size):
-    #         self_fingerprint = self.fingerprints[i]
-    #         other_fingerprint = other.fingerprints[i]
-    #         if self_fingerprint.fingerprint != other_fingerprint.fingerprint:
-    #             return FingerprintTrajectoryDivergencePosition(SimulationEvent(self.simulation_result.simulation_task, self.event_numbers[i]),
-    #                                                            SimulationEvent(other.simulation_result.simulation_task, other.event_numbers[i]))
-    #     return None
+    def find_divergence_position(self, other):
+        min_size = min(len(self.fingerprints), len(other.fingerprints))
+        for i in range(0, min_size):
+            self_fingerprint = self.fingerprints[i]
+            other_fingerprint = other.fingerprints[i]
+            if self_fingerprint.fingerprint != other_fingerprint.fingerprint:
+                return FingerprintTrajectoryDivergencePosition(SimulationEvent(self.simulation_result.simulation_task, self.event_numbers[i]),
+                                                               SimulationEvent(other.simulation_result.simulation_task, other.event_numbers[i]))
+        return None
 
-# class FingerprintTrajectoryDivergencePosition:
-#     def __init__(self, simulation_event_1, simulation_event_2):
-#         self.simulation_event_1 = simulation_event_1
-#         self.simulation_event_2 = simulation_event_2
-#
-#     def __repr__(self):
-#         simulation_project_1 = self.simulation_event_1.simulation_task.simulation_config.simulation_project
-#         simulation_project_2 = self.simulation_event_2.simulation_task.simulation_config.simulation_project
-#         return "Fingerprint trajectory divergence at " + \
-#                simulation_project_1.get_name() + " #" + str(self.simulation_event_1.event_number) + ", " + \
-#                simulation_project_2.get_name() + " #" + str(self.simulation_event_2.event_number)
-#
-#     def open_sequence_charts(self):
-#         project_name1 = self.simulation_event_1.simulation_task.simulation_config.simulation_project.get_name()
-#         project_name2 = self.simulation_event_2.simulation_task.simulation_config.simulation_project.get_name()
-#         path_name1 = "/" + project_name1 + "/" + self.simulation_event_1.simulation_task.simulation_config.working_directory + "/results/" + self.simulation_event_1.simulation_task.simulation_config.config + "-#" + str(self.simulation_event_1.simulation_task.run_number) + ".elog"
-#         path_name2 = "/" + project_name2 + "/" + self.simulation_event_2.simulation_task.simulation_config.working_directory + "/results/" + self.simulation_event_2.simulation_task.simulation_config.config + "-#" + str(self.simulation_event_2.simulation_task.run_number) + ".elog"
-#         editor1 = open_editor(path_name1)
-#         editor2 = open_editor(path_name2)
-#         goto_event_number(editor1, self.simulation_event_1.event_number)
-#         goto_event_number(editor2, self.simulation_event_2.event_number)
-#
-#     def debug_simulations(self):
-#         pass
-#         # TODO
-#
-# class SimulationEvent:
-#     def __init__(self, simulation_task, event_number):
-#         self.simulation_task = simulation_task
-#         self.event_number = event_number
-#
-#     def __repr__(self):
-#         return repr(self)
-#
-#     def debug(self):
-#         self.simulation_task.run(debug_event_number=self.event_number)
+class FingerprintTrajectoryDivergencePosition:
+    def __init__(self, simulation_event_1, simulation_event_2):
+        self.simulation_event_1 = simulation_event_1
+        self.simulation_event_2 = simulation_event_2
+
+    def __repr__(self):
+        simulation_project_1 = self.simulation_event_1.simulation_task.simulation_config.simulation_project
+        simulation_project_2 = self.simulation_event_2.simulation_task.simulation_config.simulation_project
+        return "Fingerprint trajectory divergence at " + \
+               simulation_project_1.get_name() + " #" + str(self.simulation_event_1.event_number) + ", " + \
+               simulation_project_2.get_name() + " #" + str(self.simulation_event_2.event_number)
+
+    def open_sequence_charts(self):
+        project_name1 = self.simulation_event_1.simulation_task.simulation_config.simulation_project.get_name()
+        project_name2 = self.simulation_event_2.simulation_task.simulation_config.simulation_project.get_name()
+        path_name1 = "/" + project_name1 + "/" + self.simulation_event_1.simulation_task.simulation_config.working_directory + "/results/" + self.simulation_event_1.simulation_task.simulation_config.config + "-#" + str(self.simulation_event_1.simulation_task.run_number) + ".elog"
+        path_name2 = "/" + project_name2 + "/" + self.simulation_event_2.simulation_task.simulation_config.working_directory + "/results/" + self.simulation_event_2.simulation_task.simulation_config.config + "-#" + str(self.simulation_event_2.simulation_task.run_number) + ".elog"
+        editor1 = open_editor(path_name1)
+        editor2 = open_editor(path_name2)
+        goto_event_number(editor1, self.simulation_event_1.event_number)
+        goto_event_number(editor2, self.simulation_event_2.event_number)
+
+    def debug_simulations(self):
+        pass
+        # TODO
+
+class SimulationEvent:
+    def __init__(self, simulation_task, event_number):
+        self.simulation_task = simulation_task
+        self.event_number = event_number
+
+    def __repr__(self):
+        return repr(self)
+
+    def debug(self):
+        self.simulation_task.run(debug_event_number=self.event_number)
 
 def get_calculated_fingerprint(simulation_result, ingredients):
     stdout = simulation_result.subprocess_result.stdout.decode("utf-8")
