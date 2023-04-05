@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
 
-from omnetpp.test.self import *
+from inet.test.self import *
 
 run_self_tests_main()

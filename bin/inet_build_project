@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
 
-from omnetpp.main import *
+from inet.main import *
 
 build_project_main()
