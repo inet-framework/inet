@@ -24,4 +24,5 @@ class CutthroughTag extends TagBase
 {
     b cutthroughPosition;
     ChunkPtr trailerChunk;
+    bool isGoodTrailer;
 }
