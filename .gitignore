@@ -19,7 +19,7 @@ precompiled_*.h.*
 /media
 /statistics
 **/MoBAN_Pattern*.txt
-python/inet/test/fingerprint/all_fingerprints.json
+**/__pycache__
 
 # output and result files
 .settings/
