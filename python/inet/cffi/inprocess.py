@@ -2,7 +2,8 @@ import cppyy
 import logging
 import re
 
-from inet.cffi.libomnetpp import *
+from omnetpp.runtime import *
+
 from inet.common import *
 from inet.simulation.project import *
 

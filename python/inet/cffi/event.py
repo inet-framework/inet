@@ -1,7 +1,8 @@
 import cppyy
 import re
 
-from inet.cffi.libomnetpp import *
+from omnetpp.runtime import *
+
 from inet.common import *
 
 cppyy.cppdef("""
@@ -33,7 +34,7 @@ void doit(cEvent *event) {
 
 cFunctionalEvent = cppyy.gbl.omnetpp.cFunctionalEvent
 
-class PythonEvent(cEvent):
+class PythonEvent(cppyy.gbl.omnetpp.cEvent):
     def __init__(self):
         super().__init__("")
 
