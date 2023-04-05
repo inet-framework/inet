@@ -54,7 +54,7 @@ def coalesce(*values):
     return next((v for v in values if v is not None), None)
 
 def convert_to_seconds(s):
-    seconds_per_unit = {"ns": 1E-9, "us": 1E-6, "ms": 1E-3, "s": 1, "second": 1, "m": 60, "min": 60, "h": 3600, "hour": 3600, "d": 86400, "day": 86400, "w": 604800, "week": 604800}
+    seconds_per_unit = {"ps": 1E-12, "ns": 1E-9, "us": 1E-6, "ms": 1E-3, "s": 1, "second": 1, "m": 60, "min": 60, "h": 3600, "hour": 3600, "d": 86400, "day": 86400, "w": 604800, "week": 604800}
     match = re.match("(-?[0-9]*\.?[0-9]*) *([a-zA-Z]+)", s)
     return float(match.group(1)) * seconds_per_unit[match.group(2)]
 
