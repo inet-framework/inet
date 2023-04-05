@@ -2,7 +2,7 @@ import cppyy
 
 from inet.common.util import *
 
-libsuffix = ""
+libsuffix = "_dbg"
 
 # setup inet include path
 cppyy.add_include_path(get_inet_relative_path("src"))
