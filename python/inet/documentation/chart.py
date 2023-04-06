@@ -9,8 +9,6 @@ import omnetpp.scave.analysis
 
 from inet.simulation.project import *
 
-from inet.simulation.project import *
-
 _logger = logging.getLogger(__name__)
 
 def is_anf_v2(filename):
