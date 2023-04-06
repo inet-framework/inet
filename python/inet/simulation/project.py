@@ -372,11 +372,7 @@ class SimulationProject:
         return result
 
     def get_all_simulation_configs(self, **kwargs):
-        relative_path = os.path.relpath(os.getcwd(), self.get_full_path("."))
-        if relative_path == "." or relative_path[0:2] == "..":
-            ini_path_globs = list(map(lambda ini_file_folder: self.get_full_path(os.path.join(ini_file_folder, "**/*.ini")), self.ini_file_folders))
-        else:
-            ini_path_globs = [os.getcwd() + "/**/*.ini"]
+        ini_path_globs = list(map(lambda ini_file_folder: self.get_full_path(os.path.join(ini_file_folder, "**/*.ini")), self.ini_file_folders))
         return self.collect_all_simulation_configs(ini_path_globs, **kwargs)
 
     def get_simulation_configs(self, **kwargs):
