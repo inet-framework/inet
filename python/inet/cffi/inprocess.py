@@ -9,10 +9,6 @@ from inet.simulation.project import *
 
 _logger = logging.getLogger(__name__)
 
-class PythonCmdenv(Cmdenv):
-    def loadNEDFiles(self):
-        pass
-
 class InprocessResult:
     def __init__(self, returncode):
         self.returncode = returncode
@@ -28,27 +24,28 @@ class InprocessSimulationRunner:
 
     def setup(self, simulation_project):
         if not simulation_project in self.simulation_projects:
-            CodeFragments.executeAll(CodeFragments.STARTUP)
             SimTime.setScaleExp(-12)
             static_flag = cStaticFlag()
             static_flag.__python_owns__ = False
             library_full_path = simulation_project.get_full_path(simulation_project.library_folder)
-            _logger.info("Adding library path: " + library_full_path)
+            _logger.debug("Adding library path: " + library_full_path)
             cppyy.add_library_path(library_full_path)
-            libsuffix = ""
+            libsuffix = "_dbg"
             for dynamic_library in simulation_project.dynamic_libraries:
-                _logger.info("Loading C++ library: " + dynamic_library + libsuffix)
+                _logger.debug("Loading C++ library: " + dynamic_library + libsuffix)
                 cppyy.load_library("lib" + dynamic_library + libsuffix)
             for external_library_folder in simulation_project.external_library_folders:
                 external_library_full_path = simulation_project.get_full_path(external_library_folder)
-                _logger.info("Adding external library path: " + external_library_full_path)
+                _logger.debug("Adding external library path: " + external_library_full_path)
                 cppyy.add_library_path(external_library_full_path)
             CodeFragments.executeAll(CodeFragments.STARTUP)
+            self.ned_loader = cNedLoader()
+            self.ned_loader.__python_owns__ = False
+            self.ned_loader.setNedPath("")
             for ned_folder in simulation_project.ned_folders:
                 ned_full_path = simulation_project.get_full_path(ned_folder)
-                _logger.info("Loading NED files: " + ned_full_path)
-                cSimulation.loadNedSourceFolder(ned_full_path)
-            cSimulation.doneLoadingNedFiles()
+                _logger.debug("Loading NED files: " + ned_full_path)
+                self.ned_loader.loadNedFolder(ned_full_path)
             self.simulation_projects.append(simulation_project)
 
     def teardown(self):
@@ -63,30 +60,22 @@ class InprocessSimulationRunner:
         # TODO change working directory is not thread safe, because it is stored per-process
         os.chdir(full_working_directory)
         self.setup(simulation_project)
-        iniReader = InifileReader()
-        iniReader.readFile(simulation_config.ini_file)
-        configuration = SectionBasedConfiguration()
-        configuration.setConfigurationReader(iniReader)
-        options = {}
-        if "--release" in args:
-            args.remove("--release")
-        if "--debug" in args:
-            args.remove("--debug")
-        args += ["--cmdenv-output-file=/dev/null", "--cmdenv-redirect-output=true"]
-        for arg in args:
-            match = re.match(r"--(.+)=(.+)", arg)
-            if match:
-                options[match.group(1)] = match.group(2)
-        configuration.setCommandLineConfigOptions(options, ".")
-        iniReader.__python_owns__ = False
-        environment = PythonCmdenv()
-        environment.loggingEnabled = False
-        simulation = cSimulation("simulation", environment)
-        environment.__python_owns__ = False
-        cSimulation.setActiveSimulation(simulation)
-        environment.run.__release_gil__ = False
-        returncode = environment.run(args, configuration)
-        cSimulation.setActiveSimulation(cppyy.nullptr)
-        simulation.__python_owns__ = False
+        inifile_contents = InifileContents(simulation_config.ini_file)
+        config = inifile_contents.extractConfig(simulation_config.config)
+        # options = {}
+        # if "--release" in args:
+        #     args.remove("--release")
+        # if "--debug" in args:
+        #     args.remove("--debug")
+        # args += ["--cmdenv-output-file=/dev/null", "--cmdenv-redirect-output=true"]
+        # for arg in args:
+        #     match = re.match(r"--(.+)=(.+)", arg)
+        #     if match:
+        #         options[match.group(1)] = match.group(2)
+        # config.setCommandLineConfigOptions(options, ".")
+        simulation = cSimulation("simulation", self.ned_loader)
+        simulation.setupNetwork(config)
+        simulation.run.__release_gil__ = False
+        returncode = simulation.run()
         os.chdir(old_working_directory)
         return InprocessResult(returncode)

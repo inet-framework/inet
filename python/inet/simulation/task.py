@@ -259,7 +259,8 @@ class SimulationTask(Task):
             if simulation_runner == "subprocess":
                 simulation_runner_class = SubprocessSimulationRunner
             elif simulation_runner == "inprocess":
-                simulation_runner_class = omnetpp.cffi.InprocessSimulationRunner
+                import inet.cffi
+                simulation_runner_class = inet.cffi.InprocessSimulationRunner
             else:
                 raise Exception("Unknown simulation_runner")
         subprocess_result = simulation_runner_class().run(self, args, capture_output=capture_output)
