@@ -233,7 +233,7 @@ and 0.1s for the gateway. Nodes transmit preambles for the duration of
 their own sleep periods unless interrupted by an acknowledgment from
 the destination node. The design of X-MAC allows setting different sleep
 intervals for different nodes, as long as the sender node's sleep
-interval is greater than the receiver's. (?). We set the slot duration
+interval is greater than the receiver's. We set the slot duration
 of the gateway to a shorter value because it has to receive and relay
 data from all sensors, thus it has more traffic. Here is the
 configuration in :download:`omnetpp.ini <../omnetpp.ini>`:
