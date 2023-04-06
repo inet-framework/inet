@@ -366,7 +366,7 @@ class Task:
     def print_run_end(self, task_result, output_stream=sys.stdout, **kwargs):
         task_result.print_result(complete_error_message=False, output_stream=output_stream)
 
-    def run(self, dry_run=False, keyboard_interrupt_handler=None, handle_exception=False, **kwargs):
+    def run(self, dry_run=False, keyboard_interrupt_handler=None, handle_exception=True, **kwargs):
         """
         Runs the task.
 
@@ -384,7 +384,9 @@ class Task:
         Returns (:py:class:`TaskResult`):
             The task result.
         """
-        def do_run():
+        if self.cancel:
+            return self.task_result_class(task=self, result="CANCEL", reason="Cancel by user")
+        else:
             try:
                 if self.print_run_start_separately:
                     self.print_run_start(**kwargs)
@@ -407,10 +409,6 @@ class Task:
                 self.print_run_start(**kwargs)
             self.print_run_end(task_result, **kwargs)
             return task_result
-        if self.cancel:
-            return self.task_result_class(task=self, result="CANCEL", reason="Cancel by user")
-        else:
-            return do_run()
 
     def run_protected(self, **kwargs):
         """
