@@ -23,7 +23,6 @@ def parse_run_repl_arguments():
     return parser.parse_args(sys.argv[1:])
 
 def process_run_repl_arguments(args):
-    enable_autoreload()
     initialize_logging(args.log_level)
     logging.getLogger("distributed.deploy.ssh").setLevel(args.log_level)
     define_sample_projects()
@@ -37,7 +36,11 @@ def run_repl_main():
             sys.exit(0)
         else:
             _logger.info("OMNeT++ Python support is loaded.")
-            IPython.embed(banner1="", colors="neutral")
+            app = IPython.terminal.ipapp.TerminalIPythonApp.instance()
+            app.display_banner = False
+            app.exec_lines = ["from inet import *", "enable_autoreload()"]
+            app.initialize(argv=[])
+            app.start()
     except KeyboardInterrupt:
         _logger.warn("Program interrupted by user")
     except Exception as e:
