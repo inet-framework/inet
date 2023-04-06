@@ -150,13 +150,14 @@ class SimulationProject:
         self.version = version
         self.folder_environment_variable = folder_environment_variable
         self.folder = folder
-        self.git_hash = git_hash or subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.get_full_path("."), capture_output=True).stdout.decode("utf-8").strip()
-        if git_diff_hash:
-            self.git_diff_hash = git_diff_hash
-        else:
-            git_diff_hasher = hashlib.sha256()
-            git_diff_hasher.update(subprocess.run(["git", "diff", "--quiet"], cwd=self.get_full_path("."), capture_output=True).stdout)
-            self.git_diff_hash = git_diff_hasher.digest().hex()
+        # TODO this is commented out because it runs subprocesses, and it even does this from the IDE when some completely unrelated modules are loaded, sigh!
+        # self.git_hash = git_hash or subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.get_full_path("."), capture_output=True).stdout.decode("utf-8").strip()
+        # if git_diff_hash:
+        #     self.git_diff_hash = git_diff_hash
+        # else:
+        #     git_diff_hasher = hashlib.sha256()
+        #     git_diff_hasher.update(subprocess.run(["git", "diff", "--quiet"], cwd=self.get_full_path("."), capture_output=True).stdout)
+        #     self.git_diff_hash = git_diff_hasher.digest().hex()
         self.bin_folder = bin_folder
         self.library_folder = library_folder
         self.executables = [name] if executables is None else executables
