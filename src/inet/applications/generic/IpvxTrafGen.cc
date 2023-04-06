@@ -30,6 +30,8 @@ IpvxTrafGen::IpvxTrafGen()
 IpvxTrafGen::~IpvxTrafGen()
 {
     cancelAndDelete(timer);
+    if (ProtocolGroup::getIpProtocolGroup()->findProtocol(par("protocol")) == nullptr)
+        delete protocol;
 }
 
 void IpvxTrafGen::initialize(int stage)
