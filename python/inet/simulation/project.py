@@ -24,6 +24,11 @@ import shutil
 import socket
 import subprocess
 
+try:
+    from omnetpp.runtime.omnetpp import *
+except:
+    pass
+
 from inet.common.util import *
 from inet.simulation.config import *
 
@@ -337,15 +342,19 @@ class SimulationProject:
             if num_runs_fast:
                 num_runs = num_runs_fast
             else:
-                _logger.debug(f"Running subprocess: {args}")
-                result = subprocess.run(args, cwd=working_directory, capture_output=True, env=self.get_env())
-                if result.returncode == 0:
-                    # KLUDGE: this was added to test source dependency based task result caching
-                    result.stdout = re.sub("INI dependency: (.*)", "", result.stdout.decode("utf-8"))
-                    num_runs = int(result.stdout)
-                else:
-                    _logger.warn("Cannot determine number of runs: " + result.stderr.decode("utf-8"))
-                    continue
+                try:
+                    inifile_contents = InifileContents(ini_path)
+                    num_runs = inifile_contents.getNumRunsInConfig(config)
+                except Exception as e:
+                    _logger.debug(f"Running subprocess: {args}")
+                    result = subprocess.run(args, cwd=working_directory, capture_output=True, env=self.get_env())
+                    if result.returncode == 0:
+                        # KLUDGE: this was added to test source dependency based task result caching
+                        result.stdout = re.sub("INI dependency: (.*)", "", result.stdout.decode("utf-8"))
+                        num_runs = int(result.stdout)
+                    else:
+                        _logger.warn("Cannot determine number of runs: " + result.stderr.decode("utf-8"))
+                        continue
             sim_time_limit = get_sim_time_limit(config_dicts, config)
             description = config_dict["description"]
             description_abstract = (re.search("\((a|A)bstract\)", description) is not None) if description else False
