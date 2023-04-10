@@ -148,7 +148,7 @@ void IPv6Address::set(const char *addr)
 }
 
 // Helper: finds the longest sequence of zeroes in the address (at least with len=2)
-static void findGap(int *groups, int& start, int& end)
+static void findGap(unsigned int *groups, int& start, int& end)
 {
     start = end = 0;
     int beg = -1;
@@ -181,7 +181,7 @@ std::string IPv6Address::str() const
         return std::string("<unspec>");
 
     // convert to 16-bit grops
-    int groups[8] = {
+    unsigned int groups[8] = {
         (d[0]>>16), (d[0]&0xffff), (d[1]>>16), (d[1]&0xffff),
         (d[2]>>16), (d[2]&0xffff), (d[3]>>16), (d[3]&0xffff)
     };
