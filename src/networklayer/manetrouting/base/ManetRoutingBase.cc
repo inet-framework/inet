@@ -251,7 +251,7 @@ void ManetRoutingBase::registerRoutingModule()
         InterfaceEntry *ie = getInterfaceWlanByAddress();
         if (locator->getIpAddress().isUnspecified() && ie->ipv4Data())
             locator->setIpAddress(ie->ipv4Data()->getIPAddress());
-        if (locator->getMacAddress().isUnspecified())
+        if (locator->getMacAddress().isUnspecified())(ManetAddress)
             locator->setMacAddress(ie->getMacAddress());
         nb->subscribe(this,NF_LOCATOR_ASSOC);
         nb->subscribe(this,NF_LOCATOR_DISASSOC);
@@ -274,7 +274,7 @@ void ManetRoutingBase::registerRoutingModule()
             data.isProactive = isProactive();
             data.routesVector = routesVector;
             vect.push_back(data);
-            globalRouteMap->insert(std::make_pair<ManetAddress,ProtocolsRoutes>(getAddress(),vect));
+            globalRouteMap->insert(std::make_pair((ManetAddress)getAddress(),vect));
         }
         else
         {
@@ -590,7 +590,7 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
                 dest.setAddresType(ManetAddress::IPV4);
                 next.setAddresType(ManetAddress::IPV4);
             }*/
-            routesVector->insert(std::make_pair<ManetAddress,ManetAddress>(dst, gtwy));
+            routesVector->insert(std::make_pair((ManetAddress)dst, (ManetAddress)gtwy));
         }
     }
 
@@ -747,7 +747,7 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
              routesVector->erase(it);
          if (!del_entry)
          {
-             routesVector->insert(std::make_pair<ManetAddress,ManetAddress>(dst, gtwy));
+             routesVector->insert(std::make_pair((ManetAddress)dst, (ManetAddress)gtwy));
          }
     }
     if (mac_layer_)
@@ -1200,7 +1200,7 @@ bool ManetRoutingBase::setRoute(const ManetAddress & destination, const ManetAdd
              routesVector->erase(it);
          if (!del_entry)
          {
-             routesVector->insert(std::make_pair<ManetAddress,ManetAddress>(destination, nextHop));
+             routesVector->insert(std::make_pair((ManetAddress)destination, (ManetAddress)nextHop));
          }
     }
 
