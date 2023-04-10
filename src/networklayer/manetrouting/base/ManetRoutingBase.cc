@@ -339,7 +339,7 @@ void ManetRoutingBase::registerRoutingModule()
             data.isProactive = isProactive();
             data.routesVector = routesVector;
             vect.push_back(data);
-            globalRouteMap->insert(std::make_pair<Uint128,ProtocolsRoutes>(getAddress(),vect));
+            globalRouteMap->insert(std::make_pair((Uint128)getAddress(),vect));
         }
         else
         {
@@ -817,7 +817,7 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
                 dest.setAddresType(Uint128::IPV4);
                 next.setAddresType(Uint128::IPV4);
             }*/
-            routesVector->insert(std::make_pair<Uint128,Uint128>(dst, gtwy));
+            routesVector->insert(std::make_pair((Uint128)dst, (Uint128)gtwy));
         }
     }
 
@@ -974,7 +974,7 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
              routesVector->erase(it);
          if (!del_entry)
          {
-             routesVector->insert(std::make_pair<Uint128,Uint128>(dst, gtwy));
+             routesVector->insert(std::make_pair((Uint128)dst, (Uint128)gtwy));
          }
     }
     if (mac_layer_)
@@ -1525,7 +1525,7 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &next
              routesVector->erase(it);
          if (!del_entry)
          {
-             routesVector->insert(std::make_pair<Uint128,Uint128>(destination, nextHop));
+             routesVector->insert(std::make_pair((Uint128)destination, (Uint128)nextHop));
          }
     }
 
