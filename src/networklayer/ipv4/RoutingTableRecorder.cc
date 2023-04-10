@@ -125,7 +125,7 @@ void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceE
 
     // action, eventNo, simtime, moduleId, ifname, address
     ensureRoutingLogFileOpen();
-    fprintf(routingLogFile, "%s  %"LL"d  %s  %d  %s %s\n",
+    fprintf(routingLogFile, "%s  %" LL "d  %s  %d  %s %s\n",
             tag,
             simulation.getEventNumber(),
             SIMTIME_STR(simTime()),
@@ -150,7 +150,7 @@ void RoutingTableRecorder::recordRouteChange(cModule *host, const IPv4Route *rou
 
     // action, eventNo, simtime, moduleId, routerID, dest, dest netmask, nexthop
     ensureRoutingLogFileOpen();
-    fprintf(routingLogFile, "%s %"LL"d  %s  %d  %s  %s  %s  %s\n",
+    fprintf(routingLogFile, "%s %" LL "d  %s  %d  %s  %s  %s  %s\n",
             tag,
             simulation.getEventNumber(),
             SIMTIME_STR(simTime()),

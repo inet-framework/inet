@@ -404,7 +404,7 @@ struct heartbeat_info {
     uint16_t type;
     uint16_t length;
     union {
-        uint8_t info[];
+        uint8_t info[0];
         struct {
             uint32_t addr;
             uint32_t time;

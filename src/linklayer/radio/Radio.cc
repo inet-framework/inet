@@ -1196,8 +1196,8 @@ void Radio::getSensitivityList(cXMLElement* xmlConfig)
             sensitivityList[0.0] = FWMath::dBm2mW(sens);
         }
 
-        SensitivityList::iterator it = sensitivityList.find(0.0);
-        if (it == sensitivityList.end())
+        SensitivityList::iterator it2 = sensitivityList.find(0.0);
+        if (it2 == sensitivityList.end())
         {
             sensitivityList[0] = FWMath::dBm2mW(par("sensitivity").doubleValue());
         }
