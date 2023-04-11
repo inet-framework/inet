@@ -22,7 +22,8 @@ def parse_run_tasks_arguments(task_name):
     parser.add_argument("--no-build", dest="build", action="store_false")
     parser.add_argument("--concurrent", action="store_true", help="Concurrent execution")
     parser.add_argument("--no-concurrent", dest="concurrent", action="store_false")
-    parser.add_argument("--dry-run", default=False, action=argparse.BooleanOptionalAction, help="displays what would be done but doesn't actually do anything")
+    parser.add_argument("--dry-run", action="store_true", help="displays what would be done but doesn't actually do anything")
+    parser.add_argument("--no-dry-run", dest="dry_run", action="store_false")
     parser.add_argument("-u", "--user-interface", choices=["Cmdenv", "Qtenv"], default="Cmdenv", help="determines the user interface")
     parser.add_argument("-t", "--sim-time-limit", default=None, help="specifies the simulation time limit")
     parser.add_argument("-T", "--cpu-time-limit", default=None, help="specifies the CPU time limit")
@@ -41,8 +42,9 @@ def parse_run_tasks_arguments(task_name):
     parser.add_argument("--hosts", default="localhost", help="specifies the hosts where the simulations are run")
     parser.add_argument("-x", "--nix-shell", default=None, help="specifies the NIX shell in which the simulations are run")
     parser.add_argument("-l", "--log-level", choices=["ERROR", "WARN", "INFO", "DEBUG"], default="WARN", help="specifies the log level for the root logging category")
-    parser.add_argument("--handle-exception", default=True, action=argparse.BooleanOptionalAction, help="disables displaying stacktraces for exceptions")
-    parser.set_defaults(concurrent=True, build=True)
+    parser.add_argument("--handle-exception", action="store_true", help="disables displaying stacktraces for exceptions")
+    parser.add_argument("--no-handle-exception", dest="handle_exception", action="store_false")
+    parser.set_defaults(concurrent=True, build=True, dry_run=False, handle_exception=True)
     return parser.parse_args(sys.argv[1:])
 
 def process_run_tasks_arguments(args):
