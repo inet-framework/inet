@@ -102,6 +102,7 @@ class StatisticalResultsUpdateTask(SimulationTask):
         target_results_directory = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory))
         if not os.path.exists(target_results_directory):
             os.makedirs(target_results_directory)
+        # KLUDGE TODO there's no way of knowing which scalar files are created by a particular simulation run
         for scalar_result_file_name in glob.glob(os.path.join(source_results_directory, "*.sca")):
             shutil.copy(scalar_result_file_name, target_results_directory)
         return update_result
