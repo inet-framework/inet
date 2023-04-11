@@ -67,30 +67,35 @@ void MacForwardingTableConfigurator::computeMacForwardingTables()
 
 void MacForwardingTableConfigurator::extendConfiguration(Node *destinationNode, Interface *destinationInterface, MacAddress macAddress)
 {
-    for (int j = 0; j < destinationNode->getNumInLinks(); j++) {
-        auto link = (Link *)destinationNode->getLinkIn(j);
+    for (int i = 0; i < destinationNode->getNumInLinks(); i++) {
+        auto link = (Link *)destinationNode->getLinkIn(i);
         link->setWeight(link->destinationInterface != destinationInterface ? std::numeric_limits<double>::infinity() : 1);
     }
     topology->calculateWeightedSingleShortestPathsTo(destinationNode);
-    for (int j = 0; j < topology->getNumNodes(); j++) {
-        Node *sourceNode = (Node *)topology->getNode(j);
+    for (int i = 0; i < topology->getNumNodes(); i++) {
+        Node *sourceNode = (Node *)topology->getNode(i);
         if (sourceNode != destinationNode && isBridgeNode(sourceNode) && sourceNode->getNumPaths() != 0) {
             auto firstLink = (Link *)sourceNode->getPath(0);
             auto firstInterface = static_cast<Interface *>(firstLink->sourceInterface);
             auto interfaceName = firstInterface->networkInterface->getInterfaceName();
             auto moduleId = sourceNode->module->getSubmodule("macTable")->getId();
             auto it = configurations.find(moduleId);
+            cValueArray *rules = nullptr;
             if (it == configurations.end())
-                configurations[moduleId] = new cValueArray();
-            else if (findForwardingRule(it->second, macAddress, interfaceName) != nullptr)
-                continue;
-            else {
+                rules = configurations[moduleId] = new cValueArray();
+            else
+                rules = it->second;
+            if (findForwardingRule(rules, macAddress, interfaceName) == nullptr) {
                 auto rule = new cValueMap();
                 rule->set("address", macAddress.str());
                 rule->set("interface", interfaceName);
-                it->second->add(rule);
+                rules->add(rule);
             }
         }
+    }
+    for (int i = 0; i < destinationNode->getNumInLinks(); i++) {
+        auto link = (Link *)destinationNode->getLinkIn(i);
+        link->setWeight(1);
     }
 }
 
