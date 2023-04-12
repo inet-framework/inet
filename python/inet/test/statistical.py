@@ -35,22 +35,24 @@ class StatisticalTestTask(SimulationTestTask):
                 current_df = read_result_files(current_scalar_result_file_name)
                 current_df = get_scalars(current_df)
                 if "runID" in current_df:
-                    current_df.drop("runID", axis=1,  inplace=True)
+                    current_df.drop("runID", axis=1, inplace=True)
                 scalar_file_name = os.path.basename(current_scalar_result_file_name)
                 stored_scalar_result_file_name = os.path.join(stored_results_directory, scalar_file_name)
-                if os.path.isfile(stored_scalar_result_file_name):
+                scalar_result_diff_file_name = re.sub(".sca", ".diff", stored_scalar_result_file_name)
+                if os.path.exists(scalar_result_diff_file_name):
+                    os.remove(scalar_result_diff_file_name)
+                if os.path.exists(stored_scalar_result_file_name):
                     _logger.debug(f"Reading result file {stored_scalar_result_file_name}")
                     stored_df = read_result_files(stored_scalar_result_file_name)
                     stored_df = get_scalars(stored_df)
                     if "runID" in stored_df:
-                        stored_df.drop("runID", axis=1,  inplace=True)
+                        stored_df.drop("runID", axis=1, inplace=True)
                     scalars_match = current_df.equals(stored_df)
                     if not scalars_match:
                         with open(current_scalar_result_file_name, "r") as file:
                             current_scalar_result_file = file.readlines()
                         with open(stored_scalar_result_file_name, "r") as file:
                             stored_scalar_result_file = file.readlines()
-                        scalar_result_diff_file_name = re.sub(".sca", ".diff", stored_scalar_result_file_name)
                         with open(scalar_result_diff_file_name, "w") as file:
                             scalar_diff = "".join(difflib.ndiff(current_scalar_result_file, stored_scalar_result_file))
                             file.write(scalar_diff)

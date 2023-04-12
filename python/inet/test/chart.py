@@ -42,15 +42,16 @@ class ChartTestTask(TestTask):
                 file_name = analysis.export_image(chart, folder, workspace, format="png", dpi=150, target_folder=self.simulation_project.media_folder, filename=image_export_filename + "_new")
                 new_file_name = os.path.join(folder, file_name)
                 old_file_name = os.path.join(folder, re.sub("_new", "", file_name))
-                if os.path.isfile(old_file_name):
+                diff_file_name = os.path.join(folder, re.sub("_new", "_diff", file_name))
+                if os.path.exists(diff_file_name):
+                    os.remove(diff_file_name)
+                if os.path.exists(old_file_name):
                     new_image = matplotlib.image.imread(new_file_name)
                     old_image = matplotlib.image.imread(old_file_name)
                     metric = sewar.rmse(old_image, new_image)
                     if metric == 0 or not keep_charts:
                         os.remove(new_file_name)
                     else:
-                        diff_file_name = os.path.join(folder, re.sub("_new", "_diff", file_name))
-                        print(diff_file_name)
                         image_diff = numpy.abs(new_image - old_image)
                         matplotlib.image.imsave(diff_file_name, image_diff)
                     result = "PASS" if metric == 0 else "FAIL"
@@ -123,7 +124,10 @@ class ChartUpdateTask(UpdateTask):
                 file_name = analysis.export_image(chart, folder, workspace, format="png", dpi=150, target_folder=self.simulation_project.media_folder, filename=image_export_filename + "_new")
                 new_file_name = os.path.join(folder, file_name)
                 old_file_name = os.path.join(folder, re.sub("_new", "", file_name))
-                if os.path.isfile(old_file_name):
+                diff_file_name = os.path.join(folder, re.sub("_new", "_diff", file_name))
+                if os.path.exists(diff_file_name):
+                    os.remove(diff_file_name)
+                if os.path.exists(old_file_name):
                     new_image = matplotlib.image.imread(new_file_name)
                     old_image = matplotlib.image.imread(old_file_name)
                     metric = sewar.rmse(old_image, new_image)
@@ -132,7 +136,6 @@ class ChartUpdateTask(UpdateTask):
                     else:
                         if keep_charts:
                             os.rename(old_file_name, re.sub("_new", "_old", file_name))
-                            diff_file_name = os.path.join(folder, re.sub("_new", "_diff", file_name))
                             image_diff = numpy.abs(new_image - old_image)
                             matplotlib.image.imsave(diff_file_name, image_diff)
                         else:
