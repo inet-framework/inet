@@ -395,6 +395,18 @@ class INET_API UtilizationFilter : public cNumericResultFilter
 };
 
 /**
+ * Filter that expects a Packet and outputs the interarrival time.
+ */
+class INET_API InterarrivalTimeFilter : public cObjectResultFilter
+{
+  protected:
+    simtime_t prevArrivalTime = 0;
+
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
  * Filter that expects a Packet and outputs the packet rate as double.
  * Packet rate is computed for the *past* interval every 1.0s.
  * The filter reads the interval parameter from the INI file configuration.
