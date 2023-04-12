@@ -27,9 +27,9 @@ jobs:
           restore-keys: native-${{ matrix.mode }}-ccache
       - name: Build (native)
         run: |
-          docker run -i --env TARGET_PLATFORM=linux --env MODE=${{ matrix.mode }} --env GITHUB_WORKSPACE \
-            -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE -v /home/runner/work/ccache:/root/.ccache \
-            ghcr.io/inet-framework/ci-inet:6.0.1-230320 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-build.sh
+          docker run -i --env TARGET_PLATFORM=linux --env MODE=${{ matrix.mode }} \
+            -v $GITHUB_WORKSPACE:/root/workspace/inet -v /home/runner/work/ccache:/root/.ccache \
+            ghcr.io/inet-framework/ci-inet:6.0.1-230320 /bin/bash /root/workspace/inet/_scripts/github/github-job-build.sh
       - uses: actions/upload-artifact@v3
         with:
           name: libinet-so
@@ -50,9 +50,9 @@ jobs:
         run: docker pull ghcr.io/inet-framework/ci-inet:6.0.1-230320
       - name: Run tests
         run: |
-          docker run -i --env MODE=debug --env GITHUB_WORKSPACE \
-            -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE \
-            ghcr.io/inet-framework/ci-inet:6.0.1-230320 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-inet_run_chart-tests.sh
+          docker run -i --env MODE=release \
+            -v $GITHUB_WORKSPACE:/root/workspace/inet \
+            ghcr.io/inet-framework/ci-inet:6.0.1-230320 /bin/bash /root/workspace/inet/_scripts/github/github-job-inet_run_chart-tests.sh
       - uses: actions/upload-artifact@v3
         if: always() # even if the test failed, of course
         with:

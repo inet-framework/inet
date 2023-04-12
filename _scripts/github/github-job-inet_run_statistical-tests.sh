@@ -10,7 +10,7 @@
 set -e # make the script exit with error if any executed command exits with error
 
 # this is where the cloned INET repo is mounted into the container
-cd $GITHUB_WORKSPACE
+cd /root/workspace/inet
 
 echo "::group::Installing pip"
 apt install -y python3-pip
@@ -20,13 +20,12 @@ echo "::group::Installing Python packages"
 python3 -m pip install matplotlib numpy pandas scipy ipython cppyy sewar dask distributed IPython optimparallel
 echo "::endgroup::"
 
-mkdir /root/workspace
 export WORKSPACE_ROOT=/root/workspace
 
 # NOTE: `ln -s` can't be used here because it confuses both
 # OMNeT++ and INET when they are sometimes resolved to real paths.
-cp -r /root/omnetpp-6.0.1-linux /root/workspace/omnetpp
-cp -r $GITHUB_WORKSPACE /root/workspace/inet
+mv /root/omnetpp-6.0.1-linux /root/workspace/omnetpp
+export LD_LIBRARY_PATH=/root/workspace/omnetpp/lib:$LD_LIBRARY_PATH
 
 cd /root/workspace
 git clone https://github.com/ACassimiro/TSNsched
@@ -61,8 +60,6 @@ inet_run_statistical_tests -m release --exclude-filter /osg/ > >(tee runtest.out
 #                                                            ^---- Everything from here on is only needed to make the pretty GitHub annotations. ----v
 EXITCODE="${PIPESTATUS[0]}"
 echo "::endgroup::"
-
-cp -r /root/workspace/inet $GITHUB_WORKSPACE # copy _new.png and _diff.png files back
 
 ERRORS=$(cat runtest.err)
 if [ -n "$ERRORS" ]
