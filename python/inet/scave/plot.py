@@ -615,7 +615,7 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order=None, d
     default_dict = {'linestyle': '-', 'linewidth': 1}
     order = ['configname', {'Default_config': 1, 'Advanced_config': 0, 'Manual_config': 2}]
         or
-    order = ['configname', 'Advanced_config', 'Default_config', 'Manual_config'}]
+    order = ['configname', 'Advanced_config', 'Default_config', 'Manual_config']
     
     Note that the value parameter in style_tuple_list and the order can contain regex (e.g. .*foo). Make sure to escape regex characters such as [ and ] with \
     """
