@@ -18,7 +18,7 @@ set -e # make the script exit with error if any executed command exits with erro
 ln -s /usr/bin/echo /usr/local/bin/cygpath
 
 # this is where the cloned INET repo is mounted into the container
-cd /root/workspace/inet
+cd $GITHUB_WORKSPACE
 
 . setenv -f
 
