@@ -8,54 +8,92 @@ on:
     # nothing
 
 jobs:
-  build-native:
-    runs-on: ubuntu-latest
+  main:
+    # runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     strategy:
       matrix:
         mode: ["release"]
       fail-fast: false
     steps:
       - uses: actions/checkout@v3
-      - name: Pull Docker image
-        run: docker pull ghcr.io/inet-framework/ci-inet:6.0.1-230320
-      - run: mkdir /home/runner/work/ccache
+        with:
+          path: inet
+      - uses: actions/checkout@v3
+        with:
+          repository: omnetpp/omnetpp
+          path: omnetpp
+      - run: mkdir -p $GITHUB_WORKSPACE/ccache
       - uses: actions/cache/restore@v3
         with:
-          path: /home/runner/work/ccache
+          path: $GITHUB_WORKSPACE/ccache
           key: native-${{ matrix.mode }}-ccache-${{ github.run_id }}
           # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
           restore-keys: native-${{ matrix.mode }}-ccache
-      - name: Build (native)
+      - name: Run main
         run: |
-          docker run -i --env TARGET_PLATFORM=linux --env MODE=${{ matrix.mode }} \
-            -v $GITHUB_WORKSPACE:/root/workspace/inet -v /home/runner/work/ccache:/root/.ccache \
-            ghcr.io/inet-framework/ci-inet:6.0.1-230320 /bin/bash /root/workspace/inet/_scripts/github/github-job-build.sh
-      - uses: actions/upload-artifact@v3
-        with:
-          name: libinet-so
-          path: ${{ github.workspace }}/src/libINET*.so
+          echo "::group::Installing packages"
+          #sudo apt-get update -y && \
+          #sudo apt-get upgrade -y && \
+          #sudo apt-get install -y --no-install-recommends git wget curl ca-certificates \
+          #  make clang lld gdb bison flex perl doxygen graphviz libxml2-dev zlib1g-dev \
+          #  python3 python3-pip python3-pandas python3-numpy python3-matplotlib \
+          #  python3-scipy python3-seaborn python3-posix-ipc && \
+          #sudo apt-get clean
+          echo "::endgroup::"
+ 
+          echo "::group::Running omnetpp setenv"
+          cd $GITHUB_WORKSPACE/omnetpp
+          cp configure.user.dist configure.user
+          . setenv -f
+          echo "::endgroup::"
 
-  more-tests:
-    needs: build-native
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
-        with:
-          name: libinet-so
-          path: ${{ github.workspace }}/src/
-      - name: Pull Docker image
-        run: docker pull ghcr.io/inet-framework/ci-inet:6.0.1-230320
-      - name: Run tests
-        run: |
-          docker run -i --env MODE=release \
-            -v $GITHUB_WORKSPACE:/root/workspace/inet \
-            ghcr.io/inet-framework/ci-inet:6.0.1-230320 /bin/bash /root/workspace/inet/_scripts/github/github-job-inet_run_statistical-tests.sh
+          echo "::group::Configuring omnetpp"
+          ./configure WITH_LIBXML=yes WITH_QTENV=no WITH_OSG=no WITH_OSGEARTH=no
+          echo "::endgroup::"
+ 
+          echo "::group::Compiling omnetpp"
+          make MODE=${{ matrix.mode }} -j $(nproc) base
+          echo "::endgroup::"
+
+          #echo "::group::Installing pip"
+          #sudo apt install -y python3-pip
+          #echo "::endgroup::"
+
+          echo "::group::Installing Python packages"
+          python3 -m pip install matplotlib numpy pandas scipy ipython cppyy sewar dask distributed IPython optimparallel
+          echo "::endgroup::"
+
+          echo "::group::Running inet setenv"
+          cd $GITHUB_WORKSPACE/inet
+          . setenv -f
+          echo "::endgroup::"
+
+          echo "::group::Enabling all inet features"
+          opp_featuretool enable all
+          echo "::endgroup::"
+
+          echo "::group::Disabling some inet features"
+          opp_featuretool disable VisualizationOsg VisualizationOsgShowcases SelfDoc
+          echo "::endgroup::"
+
+          echo "::group::Making inet makefiles"
+          make makefiles
+          echo "::endgroup::"
+
+          echo "::group::Compiling inet"
+          make MODE=${{ matrix.mode }} -j $(nproc)
+          echo "::endgroup::"
+
+          echo "::group::Cloning inet statistical results"
+          git clone https://github.com/inet-framework/statistics.git
+          echo "::endgroup::"
+
+          echo "::group::Running statistical tests"
+          inet_run_statistical_tests -m release --exclude-filter /osg/
+          echo "::endgroup::"
       - uses: actions/upload-artifact@v3
         if: always() # even if the test failed, of course
         with:
           name: statistical-test-results
-          path: ${{ github.workspace }}/statistics/**/*.diff
-
+          path: ${{ github.workspace }}/inet/statistics/**/*.diff
