@@ -14,11 +14,26 @@ from cycler import cycler
 import logging
 import inet.common.util
 from omnetpp.scave.utils import make_legend_label
+import logging
+
+logger = logging.getLogger(__name__)
+
+BOLD = "\033[1;1m"
+COLOR_RESET = inet.common.util.COLOR_RESET
+
+class DebugLevel(inet.common.util.LoggerLevel):
+    def __init__(self):
+        super().__init__(inet.scave.plot.logger, logging.DEBUG)
+        
+def enable_debug():
+    logger.setLevel(logging.DEBUG)
+    
+def log_chart_name(logger, props):
+    logger.debug(f"{BOLD}Chart: {props['title']}{COLOR_RESET}")
 
 logger = logging.getLogger(__name__)
 
 if inet.common.util.ensure_logging_initialized(logging.WARN):
-    logger.setLevel(logging.DEBUG)
     inet.common.util.get_logging_formatter().print_function_name = True
 
 def scale_lightness(rgb, scale_l):
@@ -40,8 +55,8 @@ def fade_color(color, fakealpha):
          return a + (b-a)*t
      return (lerp(b[0], c[0], fakealpha), lerp(b[1], c[1], fakealpha), lerp(b[2], c[2], fakealpha))
  
-def get_faded_color_cycle(cycle, fade_factor, debug=False):
-     if debug: print("orig cycle:", cycle, "fade_factor:", fade_factor)
+def get_faded_color_cycle(cycle, fade_factor):
+     logger.debug(f"orig cycle: {cycle}, fade_factor: {fade_factor}")
      # for i in cycle.by_key()['color']:
      #     print(i)
      new_colors = []
@@ -55,8 +70,6 @@ def get_faded_color_cycle(cycle, fade_factor, debug=False):
      return new_cycle
 
 
-# debug = False
-
 default_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']
 
 def get_default_colors():
@@ -64,13 +77,13 @@ def get_default_colors():
     print(default_colors)
     return default_colors
 
-def add_global_style_if_needed(global_style, style, debug):
+def add_global_style_if_needed(global_style, style):
     if global_style != None:
-        if debug: print('adding global style: ', global_style)
+        logger.debug(f'adding global style: {global_style}')
         style.update(global_style)
-        if debug: print('added. "style" dict: ', style)
+        logger.debug(f'added. "style" dict: {style}')
 
-def plot_vectors(df, props, legend_func=utils.make_legend_label, global_style=None, custom_cycle=None, debug=False):
+def plot_vectors(df, props, legend_func=utils.make_legend_label, global_style=None, custom_cycle=None):
     """
     Modified version of the built-in plot_vectors() function, with the additional functionality
     of ordering the dataframe before plotting, based on the 'order' column. The order of the line colors and
@@ -113,6 +126,7 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label, global_style=No
         - `linestyle`, `linecolor`, `linewidth`, `marker`, `markersize`: styling
         - `cycle_seed`: Alters the sequence in which colors and markers are assigned to series.
     """
+    log_chart_name(logger, props)
     p = ideplot if chart.is_native_chart() else plt
     
     props['plot_function'] = inspect.currentframe().f_code.co_name
@@ -128,15 +142,15 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label, global_style=No
         df.sort_values(by=legend_cols, inplace=True)
     for t in df.itertuples(index=False):
         style = utils._make_line_args(props, t, df)
-        add_global_style_if_needed(global_style, style, debug)
+        add_global_style_if_needed(global_style, style)
 #        if t.propertyname != '':
 #            style[t.propertyname] = t.propertyvalue
         if 'additional_style' in df.columns and t.additional_style != None:
             style_dict = eval(t.additional_style)
-            # print("style_dict:", style_dict)
+            logger.debug(f"style_dict: {style_dict}")
             for i in style_dict.items():
                 style[i[0]] = i[1]
-        # print("style:", style)
+        logger.debug(f"style: {style}")
         if custom_cycle is not None:
             plt.rc('axes', prop_cycle=custom_cycle)
         p.plot(t.vectime, t.vecvalue, label=legend_func(legend_cols, t, props), **style)
@@ -146,7 +160,7 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label, global_style=No
 
     p.ylabel(utils.make_chart_title(df, ["title"]))
     
-def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, global_style=None, share_axes='x', debug=False):
+def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, global_style=None, share_axes='x'):
     """
     Modified version of the built-in plot_vectors_separate() function, with the additional functionality
     of ordering the dataframe before plotting, based on the 'order' column. The order of the line colors and
@@ -162,6 +176,7 @@ def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, global
         be plotted in its own separate set of axes (coordinate system),
         arranged vertically, with a shared X axis during navigation.
     """
+    log_chart_name(logger, props)
     def get_prop(k):
         return props[k] if k in props else None
     
@@ -172,13 +187,13 @@ def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, global
     title_cols, legend_cols = utils.extract_label_columns(df, props)
 
     if 'order' in df.columns:
-        if debug: print("\nsorting by order\n")
+        logger.debug("sorting by order")
         df.sort_values(by=['order'], inplace=True)
 
     ax = None
     for i, t in enumerate(df.itertuples(index=False)):
         style = utils._make_line_args(props, t, df)
-        add_global_style_if_needed(global_style, style, debug)
+        add_global_style_if_needed(global_style, style)
         if 'additional_style' in df.columns and t.additional_style != None:
             style_dict = eval(t.additional_style)
             for j in style_dict.items():
@@ -193,7 +208,7 @@ def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, global
             share_ax_dict = {}
         else:
             assert False, "wrong parameter for share_axes (possible values: x (default), y, both, none"
-        if debug: print("share_axes:", share_axes, "share_ax_dict:", share_ax_dict)
+        logger.debug(f"share_axes: {share_axes}, share_ax_dict: {share_ax_dict}")
         ax = plt.subplot(df.shape[0], 1, i+1, **share_ax_dict)
 
         if i != df.shape[0]-1:
@@ -210,7 +225,7 @@ def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, global
     
     return ax_list
     
-def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_label, layout='vertical', columns=0, rows=0, share_axes='auto', global_style=None, debug=False):
+def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_label, layout='vertical', columns=0, rows=0, share_axes='auto', global_style=None):
     """
     This is a modified version of the built-in plot_vectors_separate() function. It takes a list of dataframes,
     and plots each dataframe on its own subplot. Useful for plotting multiple lines on a subplot, as the built-in
@@ -231,6 +246,7 @@ def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_
     - 'none': no shared axes
     ' 'both': both axes are shared
     """
+    log_chart_name(logger, props)
     p = ideplot if chart.is_native_chart() else plt
     
     title = ""
@@ -294,9 +310,8 @@ def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_
         else:
             assert False, "layout is either 'horizontal', 'vertical', or 'grid'"
         
-        if debug: 
-            print("Creating subplots with " + str(layout) + " layout with "+ str(cols) + " column(s) and " + str(rws) + " row(s)\n")
-            print("share_axes ", share_axes, "shareaxis: ", *shareaxis, "type", type(shareaxis))
+
+        logger.debug(f"Creating subplots with {str(layout)} layout with {str(cols)} column(s) and {str(rws)} row(s). share_axes {share_axes}, shareaxis: {shareaxis}, type: {type(shareaxis)}")
     
         if 'order' in df.columns:
             df.sort_values(by='order', inplace=True)
@@ -305,7 +320,7 @@ def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_
             
         for t in df.itertuples(index=False):
             style = utils._make_line_args(props, t, df)
-            add_global_style_if_needed(global_style, style, debug)
+            add_global_style_if_needed(global_style, style)
             if 'additional_style' in df.columns and t.additional_style != None:
                 style_dict = eval(t.additional_style)
                 for i in style_dict.items():
@@ -323,7 +338,7 @@ def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_
     
     return ax_list
 
-def plot_vectors_separate_faded(df, props, legend_func=utils.make_legend_label, layout='vertical', columns=0, rows=0, share_axes='auto', fade_factor=0.3, remove_ticks=True, global_style=None, debug=False):
+def plot_vectors_separate_faded(df, props, legend_func=utils.make_legend_label, layout='vertical', columns=0, rows=0, share_axes='auto', fade_factor=0.3, remove_ticks=True, global_style=None):
     """
     This is a modified version of the built-in plot_vectors_separate() function. 
     Instead of plotting one line per subplot, it plots all lines on all subplots, but
@@ -350,6 +365,7 @@ def plot_vectors_separate_faded(df, props, legend_func=utils.make_legend_label, 
     
     Use inet.scave.plot.postconfigure() with this
     """
+    log_chart_name(logger, props)
     p = ideplot if chart.is_native_chart() else plt
     
     title = ""
@@ -409,7 +425,7 @@ def plot_vectors_separate_faded(df, props, legend_func=utils.make_legend_label, 
         elif layout == 'grid':
             if columns == 0 or rows == 0:
                 n = math.sqrt(len(df))
-                if debug: print("sqrt(len(df)):", n)
+                logger.debug(f"sqrt(len(df)): {n}")
                 if n % 1 == 0:
                     cols = int(n)
                     rws = int(n)
@@ -434,9 +450,10 @@ def plot_vectors_separate_faded(df, props, legend_func=utils.make_legend_label, 
         else:
             assert False, "layout is either 'horizontal', 'vertical', or 'grid'"
         
-        if debug: 
-            print("Creating subplots with " + str(layout) + " layout with "+ str(cols) + " column(s) and " + str(rws) + " row(s)\n")
-            print("share_axes ", share_axes, "shareaxis: ", shareaxis, "type", type(shareaxis))
+        # if debug: 
+        #     print("Creating subplots with " + str(layout) + " layout with "+ str(cols) + " column(s) and " + str(rws) + " row(s)\n")
+        #     print("share_axes ", share_axes, "shareaxis: ", shareaxis, "type", type(shareaxis))
+        logger.debug(f"Creating subplots with {str(layout)} layout with {str(cols)} column(s) and {str(rws)} row(s). share_axes {share_axes}, shareaxis: {shareaxis}, type: {type(shareaxis)}")
     
         if 'order' in df.columns:
             df.sort_values(by='order', inplace=True)
@@ -450,7 +467,7 @@ def plot_vectors_separate_faded(df, props, legend_func=utils.make_legend_label, 
             
         for z, t in zip(range(0, len(df)), df.itertuples(index=False)):
             style = utils._make_line_args(props, t, df)
-            add_global_style_if_needed(global_style, style, debug)
+            add_global_style_if_needed(global_style, style)
             if 'additional_style' in df.columns and t.additional_style != None:
                 style_dict = eval(t.additional_style)
                 for i in style_dict.items():
@@ -482,26 +499,28 @@ def plot_vectors_separate_faded(df, props, legend_func=utils.make_legend_label, 
         utils.preconfigure_plot(props)
 
     p.ylabel(utils.make_chart_title(df, ["title"]))
-    fix_labels_for_subplots(ax_list, props, layout, cols, rws, remove_ticks, debug)
+    fix_labels_for_subplots(ax_list, props, layout, cols, rws, remove_ticks)
     props['layout'] = layout
     props['columns'] = cols
     props['rows'] = rws
     
     return ax_list
 
-def fix_labels_for_subplots(ax_list, props, layout, columns=0, rows=0, remove_ticks=True, debug=False):
+def fix_labels_for_subplots(ax_list, props, layout, columns=0, rows=0, remove_ticks=True):
     
         def get_prop(k):
             return props[k] if k in props else None
+        
+        log_chart_name(logger, props)
     
-        if debug: print("layout:", layout)
+        logger.debug(f"layout: {layout}")
         # if layout == 'vertical':
         #     for a in ax_list[0:-1]:
         #         a.set_xlabel('')
         #     ax_list[-1].set_xlabel(props['xaxis_title'])
         # elif layout == 'horizontal':
         #     for a in ax_list[1:]:
-        #         if debug: print("a:", a)
+        #         logger.debug("a:", a)
         #         a.set_ylabel('')
         #     ax_list[0].set_ylabel(props['yaxis_title'])
         # elif layout == 'grid':
@@ -523,7 +542,7 @@ def fix_labels_for_subplots(ax_list, props, layout, columns=0, rows=0, remove_ti
         elif layout == 'grid':
             assert columns != 0 and rows != 0, "specify number of columns and rows in fix_labels_for_subplots()"
 
-        if debug: print("fix_labels_for_subplots: number of subplots: ", len(ax_list))
+        logger.debug(f"fix_labels_for_subplots: number of subplots: {len(ax_list)}")
         for a in range(0, len(ax_list)):
             ax_list[a].set_xlabel("")
             ax_list[a].set_ylabel("")
@@ -531,23 +550,23 @@ def fix_labels_for_subplots(ax_list, props, layout, columns=0, rows=0, remove_ti
                 ax_list[a].tick_params(bottom=False, labelbottom=False)
                 ax_list[a].tick_params(left=False, labelleft=False)
             if a%(len(ax_list)/rows) == 0:
-                if debug: print("a", a, 'add y label')
+                logger.debug(f"a {a}, add y label")
                 ax_list[a].set_ylabel(get_prop("yaxis_title"))
                 ax_list[a].tick_params(left=True, labelleft=True)
             if a>=(len(ax_list)-columns):
-                if debug: print("a", a, 'add x label')
+                logger.debug(f"a {a}, add x label")
                 ax_list[a].set_xlabel(get_prop("xaxis_title"))
                 ax_list[a].tick_params(bottom=True, labelbottom=True)
 
-            if debug: print("a:", a)
+            logger.debug(f"a {a}")
                 # a.set_ylabel('')
             # ax_list[0].set_ylabel(props['yaxis_title'])
             # ax_list[-1].set_xlabel(props['xaxis_title'])
             
         # else:
-        #     assert False, "somethings wrong"            
+        #     assert False, "somethings wrong"    
 
-def postconfigure_plot(props, debug=False):
+def postconfigure_plot(props):
     """
     Configures the plot according to the given properties, which normally
     get their values from setting in the "Configure Chart" dialog.
@@ -563,6 +582,7 @@ def postconfigure_plot(props, debug=False):
     Parameters:
     - `props` (dict): the properties
     """
+    log_chart_name(logger, props)
     p = ideplot if ideplot.is_native_plot() else plt
 
     def get_prop(k):
@@ -621,7 +641,7 @@ def postconfigure_plot(props, debug=False):
                 plt.legend(**args)
         plt.tight_layout()
 
-def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order=None, debug=False):
+def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order=None):
     """
     Adds 'additional_style' column to dataframe. The concent of this column is added to 'style' object when plotting.
     Can also specify row order in dataframe (e.g. for ordering items in legend).
@@ -645,27 +665,28 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order=None, d
     Note that the value parameter in style_tuple_list and the order can contain regex (e.g. .*foo). Make sure to escape regex characters such as [ and ] with \
     """
     
-    def add_separator():
-        print("")
-    def remove_zero_index_if_present(df, debug):
+    
+    # def add_separator():
+    #     print("")
+    def remove_zero_index_if_present(df):
         remove = True
-        if debug: print("remove zero index if present df:", df)
+        logger.debug(f"remove zero index if present\ndf:\n {df}")
         for i, row in df.iterrows():
             if (i != 0):
                 remove = False
                 break
         if remove:
             df.reset_index(drop=True, inplace=True)
-            if debug: print("removing zero index\n")
+            logger.debug("removing zero index")
             
-    remove_zero_index_if_present(df, debug)
+    remove_zero_index_if_present(df)
     
     df['additional_style'] = None
     
     if default_dict is not None:    
         for i in range(0,len(df)):
 #            if (df['additional_style'][i] == None):
-            if debug: print('adding default stuff')
+            logger.debug('adding default stuff')
             df['additional_style'][i] = str(default_dict)
             
     if style_tuple_list is not None:
@@ -676,25 +697,25 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order=None, d
             
             for i in range(0,len(df)):
                 pattern = re.compile(value)
-                if debug: print("value:", value, "pattern:", pattern, "df[column][i]", df[column][i])
+                logger.debug(f"value: {value}, pattern: {pattern}, df[column][i] {df[column][i]}")
                 match = re.fullmatch(pattern, df[column][i])
-                if debug: print("match:", match)
+                logger.debug(f"match: {match}")
                 if match != None:
-                    if debug:
-                        print("MATCH FOUND:")
-                        print("    column:", column)
-                        print("    value:", value)
-                        print("    match:", match.group())
+                    # if debug:
+                    #     print("MATCH FOUND:")
+                    #     print("    column:", column)
+                    #     print("    value:", value)
+                    #     print("    match:", match.group())
+                    logger.debug(f"MATCH FOUND:\n    column: {column}\n    value: {value}\n    match: {match.group()}")
                     if (df['additional_style'][i] == None):
                         df['additional_style'][i] = str(style_tuple)
-                        if debug: print("Adding style tuple:", str(style_tuple))
-                        if debug: add_separator()
+                        logger.debug(f"Adding style tuple: {str(style_tuple)}\n")
                     else:
                         orig_style_dict = ast.literal_eval(df['additional_style'][i])       # convert already added style to dict
-                        if debug: print("Adding style tuple to existing style dict", orig_style_dict, type(orig_style_dict))
+                        logger.debug(f"Adding style tuple to existing style dict {orig_style_dict}, {type(orig_style_dict)}")
                         orig_style_dict.update(style_tuple)                                 # add new style to dict
-                        if debug: print("New style dict", orig_style_dict, type(orig_style_dict))
-                        if debug: add_separator()
+                        logger.debug(f"New style dict {orig_style_dict}, {type(orig_style_dict)}")
+                        # if debug: add_separator()
                         df['additional_style'][i] = str(orig_style_dict)                    # add to dataframe as string
             
     if order is not None:
@@ -704,7 +725,7 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order=None, d
         if type(order[1]) is dict:
             order_column = order[0]
             order_dict = order[1]
-            if debug: print('order_column:', order_column, '\norder_dict', order_dict)
+            logger.debug(f'order_column: {order_column}, order_dict {order_dict}')
             for i in order_dict.items():
                 for j in range(0,len(df)):
                     # if df[order_column][j] == i[0]:
@@ -715,7 +736,7 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order=None, d
         else:
             order_column = order[0]
             order_list = order[1:]
-            if debug: print('order_column:', order_column, '\norder_list', order_list)
+            logger.debug(f'order_column: {order_column}, order_list {order_list}')
             for order in range(0, len(order_list)):
                 for j in range(0,len(df)):
                     # if df[order_column][j] == i[0]:
@@ -725,13 +746,15 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order=None, d
                         df['order'][j] = order
 
                     
-        if debug: 
-            print("order added:")
-            print(df['order'], df)
+        # if debug: 
+        #     print("order added:")
+        #     print(df['order'], df)
+        logger.debug(f"order added\n: {df['order']}\n {df}")
+        
 
     return df
 
-def create_multidimensional_legend(style_tuple_list, labels = [], handles = [], debug=False):
+def create_multidimensional_legend(style_tuple_list, labels = [], handles = []):
     """
     DEPRECATED (use create_custom_legend())
     Can create multi-dimensional legend, where one aspect of a line (e.g. color) represents a dimension, another aspect (e.g. linestyle of solid, dashed or dotted) represents another dimension,
@@ -748,16 +771,17 @@ def create_multidimensional_legend(style_tuple_list, labels = [], handles = [], 
     returns legend handles and labels that can be supplied to plt.legend()
     """
 
-    if debug: print("style_tuple_list", style_tuple_list)
+    logger.debug(f"style_tuple_list {style_tuple_list}")
     for i in style_tuple_list:
-        if debug: print("i", i)
+        logger.debug(f"i {i}")
         labels.append(i[0])
-        if debug: print("i[1]", i[1])
+        logger.debug(f"i[1] {i[1]}")
         handles.append(Line2D([0], [0], **i[1]))
-    if debug:
-        print("labels", labels)
-        print("handles", handles)
-    print("create_multidimensional_legend() deprecated, use create_custom_legend()\n")
+    # if debug:
+    #     print("labels", labels)
+    #     print("handles", handles)
+    logger.debug(f"labels {labels} handles {handles}")
+    logger.warning("create_multidimensional_legend() deprecated, use create_custom_legend()")
     return handles, labels
 
 def quick_reorder_legend(handles, labels, order, **kwargs):
@@ -771,10 +795,10 @@ def quick_reorder_legend(handles, labels, order, **kwargs):
     if order == []:
         order = [*range(0, legendsize)]
     plt.legend([handles[i] for i in order], [labels[i] for i in order], **kwargs)
-    print("quick_reorder_legend() deprecated, use create_custom_legend()\n")
+    print("quick_reorder_legend() deprecated, use create_custom_legend()")
     return handles, labels
 
-def create_custom_legend(props, style_tuple_list = None, order = None, labels = None, handles = None, inplace=True, debug=False, ax_list=None, **kwargs):
+def create_custom_legend(props, style_tuple_list = None, order = None, labels = None, handles = None, inplace=True, ax_list=None, **kwargs):
     """
     Can create multi-dimensional legend, where one aspect of a line (e.g. color) represents a dimension, another aspect (e.g. linestyle of solid, dashed or dotted) represents another dimension,
     as opposed to the default behavior, in which lines in the legend represent the lines on the chart directly. **TODO** not sure this explanation is needed
@@ -794,6 +818,8 @@ def create_custom_legend(props, style_tuple_list = None, order = None, labels = 
     Returns legend handles and labels that can be supplied to plt.legend()
     """
     
+    log_chart_name(logger, props)
+    
     if style_tuple_list is None:
         style_tuple_list = []
     
@@ -812,26 +838,28 @@ def create_custom_legend(props, style_tuple_list = None, order = None, labels = 
     if ax_list is None:
         ax_list = []
 
-    if debug: 
-        print("style_tuple_list", style_tuple_list)
-        print("labels", labels, "handles", handles)
+    # if debug: 
+    #     print("style_tuple_list", style_tuple_list)
+    #     print("labels", labels, "handles", handles)
+    logger.debug(f"style_tuple_list {style_tuple_list} labels {labels} handles {handles}")
     for i in style_tuple_list:
-        if debug: print("i", i)
+        logger.debug(f"i {i}")
         labels.append(i[0])
-        if debug: print("i[0]", i[0], "i[1]", i[1])
+        logger.debug(f"i[0] {i[0]}, i[1] {i[1]}")
         handles.append(Line2D([0], [0], **i[1]))
-    if debug:
-        print("labels", labels)
-        print("handles", handles)
+    # if debug:
+    #     print("labels", labels)
+    #     print("handles", handles)
+    logger.debug(f"labels {labels} handles {handles}")
         
     if order == []:
         legendsize = len(handles)
-        if debug: print("legendsize", legendsize)
+        logger.debug(f"legendsize {legendsize}")
         order = [*range(0, legendsize)]
-        if debug: print("order:", order)
+        logger.debug(f"order: {order}")
     if inplace:
         if 'plot_vectors_separate_grouped' in props.values():
-            if debug: print("plot function is plot_vectors_separate_grouped")
+            logger.debug("plot function is plot_vectors_separate_grouped")
             assert len(ax_list) > 0, "error: specify ax_list"
             for ax in ax_list:
                 ax.legend([handles[i] for i in order], [labels[i] for i in order], **kwargs)
@@ -839,7 +867,7 @@ def create_custom_legend(props, style_tuple_list = None, order = None, labels = 
             plt.legend([handles[i] for i in order], [labels[i] for i in order], **kwargs)
     return handles, labels
             
-def annotate_barchart(ax, offset=0, color='white', size=12, zorder=10, prefix='', postfix='', accuracy=2, outliers=None, result_type='float', debug=False):
+def annotate_barchart(ax, offset=0, color='white', size=12, zorder=10, prefix='', postfix='', accuracy=2, outliers=None, result_type='float'):
     """
     Add text annotations to barcharts, displaying the bar height.
     
@@ -859,37 +887,36 @@ def annotate_barchart(ax, offset=0, color='white', size=12, zorder=10, prefix=''
         
     def is_in_outliers(index: int):
         for i in outliers:
-            if debug: print("index " + str(index) + " is ")
             if 'index' in i and i['index'] == index:
-                if debug: print("in outliers")
+                logger.debug(f"index {str(index)} is in outliers")
                 return True
             else:
-                if debug: print("not in outliers")
+                logger.debug(f"index {str(index)} is not in outliers")
                 return False
     
     for p in range(0, len(ax.patches)):
-        if debug: print("p (ax.patches): ", p, ax.patches[p])
+        logger.debug(f"p (ax.patches): , {p}, {ax.patches[p]}")
         if is_in_outliers(p):
             for i in outliers:
                 if i['index'] == p:
                     i.setdefault('offset', 0)
                     i.setdefault('color', 'white')
                     i.setdefault('size', 12)
-                    if debug: print("adding outlier stuff")
+                    logger.debug("adding outlier stuff")
                     type_conv = eval(result_type)
-                    if debug: print("type_conv: ", type_conv)
+                    logger.debug(f"type_conv: {type_conv}")
                     ax.annotate(prefix + str(round(type_conv(ax.patches[p].get_height()), accuracy)) + postfix, (ax.patches[p].get_x() + ax.patches[p].get_width() / 2, ax.patches[p].get_height() - i['offset']),
                                 horizontalalignment='center', verticalalignment='top', color=i['color'], size=i['size'],
                                 zorder=zorder)
         else:
-            if debug: print('adding default stuff')
+            logger.debug('adding default stuff')
             type_conv = eval(result_type)
-            if debug: print("type_conv: ", type_conv)
+            logger.debug(f"type_conv: {type_conv}")
             ax.annotate(prefix + str(round(type_conv(ax.patches[p].get_height()), accuracy)) + postfix, (ax.patches[p].get_x() + ax.patches[p].get_width() / 2, ax.patches[p].get_height() - offset),
             horizontalalignment='center', verticalalignment='top', color=color, size=size,
             zorder=zorder)
                     
-def plot_bars(df, errors_df=None, meta_df=None, props=None, order=None, zorder=None, rename=None, override_width=None, debug=False):
+def plot_bars(df, errors_df=None, meta_df=None, props=None, order=None, zorder=None, rename=None, override_width=None):
     """
     Modified version of the built-in plot_bars() function.
     The bars can be reordered with the optional 'order' argument. Also, can specify a z-order value, and rename bars with 'rename'.
@@ -935,6 +962,7 @@ def plot_bars(df, errors_df=None, meta_df=None, props=None, order=None, zorder=N
         - `title`: Plot title (autocomputed if missing).
         - `cycle_seed`: Alters the sequence in which colors are assigned to series.
     """
+    log_chart_name(logger, props)
     p = ideplot if ideplot.is_native_plot() else plt
     
     if props is None:
@@ -1014,7 +1042,7 @@ def plot_bars(df, errors_df=None, meta_df=None, props=None, order=None, zorder=N
                 extra_args['zorder'] = zorder
             if override_width is not None:
                 width = override_width
-                if debug: print("override_width:", width)
+                logger.debug(f"override_width: {width}")
             extra_args['bottom'] = bottoms + stacks
 
         label = utils.make_legend_label(legend_cols, meta_row, props)
@@ -1060,7 +1088,7 @@ def plot_bars(df, errors_df=None, meta_df=None, props=None, order=None, zorder=N
     if title is not None:
         utils.set_plot_title(title)
         
-def plot_lines(df, props, legend_func=utils.make_legend_label, use_default_sort_values=False, global_style=None, debug=False):
+def plot_lines(df, props, legend_func=utils.make_legend_label, use_default_sort_values=False, global_style=None):
     """
     Copy of built-in plot_lines() without sorting (by default).
     
@@ -1104,6 +1132,7 @@ def plot_lines(df, props, legend_func=utils.make_legend_label, use_default_sort_
        Accepted values: "Error bars", "Error band"
     - `cycle_seed`: Alters the sequence in which colors and markers are assigned to series.
     """
+    log_chart_name(logger, props)
     p = ideplot if chart.is_native_chart() else plt
 
     def get_prop(k):
@@ -1115,16 +1144,16 @@ def plot_lines(df, props, legend_func=utils.make_legend_label, use_default_sort_
         df.sort_values(by=legend_cols, inplace=True)
     if 'order' in df.columns:
         df.sort_values(by='order', inplace=True)
-        if debug: print("values sorted by 'order' column")
+        logger.debug("values sorted by 'order' column")
     for t in df.itertuples(index=False):
         style = utils._make_line_args(props, t, df)
-        add_global_style_if_needed(global_style, style, debug)
+        add_global_style_if_needed(global_style, style)
 
         if len(t.x) < 2 and style["marker"] == ' ':
             style["marker"] = '.'
             
         if 'additional_style' in df.columns:
-            if debug: print("t.additional_style", t.additional_style)
+            logger.debug(f"t.additional_style: {t.additional_style}")
             style_dict = eval(t.additional_style)
             # print("style_dict:", style_dict)
             for i in style_dict.items():
