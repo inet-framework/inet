@@ -86,12 +86,13 @@ def get_chart_test_tasks(simulation_project=None, run_simulations=True, filter=N
         for chart in analysis.collect_charts():
             folder = os.path.dirname(simulation_project.get_full_path(analysis_file_name))
             working_directory = os.path.relpath(folder, simulation_project.get_full_path("."))
+            multiple_simulation_tasks = get_simulation_tasks(simulation_project=simulation_project, working_directory_filter=working_directory, sim_time_limit=get_chart_test_sim_time_limit, **kwargs)
             if run_simulations:
-                multiple_simulation_tasks = get_simulation_tasks(simulation_project=simulation_project, working_directory_filter=working_directory, sim_time_limit=get_chart_test_sim_time_limit, **kwargs)
                 for simulation_task in multiple_simulation_tasks.tasks:
                     if not list(builtins.filter(lambda element: element.simulation_config == simulation_task.simulation_config and element.run_number == simulation_task.run_number, simulation_tasks)):
                         simulation_tasks.append(simulation_task)
-            test_tasks.append(ChartTestTask(simulation_project=simulation_project, analysis_file_name=analysis_file_name, id=chart.id, chart_name=chart.name, task_result_class=TestTaskResult))
+            if multiple_simulation_tasks.tasks:
+                test_tasks.append(ChartTestTask(simulation_project=simulation_project, analysis_file_name=analysis_file_name, id=chart.id, chart_name=chart.name, task_result_class=TestTaskResult))
     return MultipleChartTestTasks(tasks=test_tasks, multiple_simulation_tasks=MultipleSimulationTasks(tasks=simulation_tasks, simulation_project=simulation_project, **kwargs), **dict(kwargs, scheduler="process"))
 
 def run_chart_tests(**kwargs):
