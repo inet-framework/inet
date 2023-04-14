@@ -8,6 +8,7 @@ import pickle
 import re
 import signal
 import sys
+import threading
 import time
 
 __sphinx_mock__ = True # ignore this module in documentation
@@ -210,6 +211,17 @@ class ColoredLoggingFormatter(logging.Formatter):
     }
 
     def format(self, record):
-        format = self.COLORS.get(record.levelno) + "%(levelname)s " + COLOR_CYAN + "%(name)s " +  COLOR_RESET + "%(message)s (%(filename)s:%(lineno)d)"
+        format = self.COLORS.get(record.levelno) + "%(levelname)s " + COLOR_CYAN + "%(name)s " + COLOR_RESET + "%(message)s (%(filename)s:%(lineno)d)"
         formatter = logging.Formatter(format)
         return formatter.format(record)
+
+def with_extended_thread_name(name, body):
+    current_thread = threading.current_thread()
+    old_name = current_thread.name
+    try:
+        current_thread.name = old_name + "/" + name
+        body()
+        current_thread.name = old_name
+    except:
+        current_thread.name = old_name
+        raise
