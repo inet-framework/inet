@@ -10,7 +10,15 @@ import colorsys
 import matplotlib as mpl
 import inspect
 import math
+import logging
+import inet.common.util
 from omnetpp.scave.utils import make_legend_label
+
+logger = logging.getLogger(__name__)
+
+if inet.common.util.ensure_logging_initialized(logging.WARN):
+    logger.setLevel(logging.DEBUG)
+    inet.common.util.get_logging_formatter().print_function_name = True
 
 def scale_lightness(rgb, scale_l):
     # convert rgb to hls
