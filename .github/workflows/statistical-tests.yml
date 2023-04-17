@@ -98,3 +98,4 @@ jobs:
         with:
           name: statistical-test-results
           path: ${{ github.workspace }}/inet/statistics/**/*.diff
+          if-no-files-found: ignore

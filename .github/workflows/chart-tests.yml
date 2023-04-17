@@ -100,3 +100,4 @@ jobs:
           path: |
             ${{ github.workspace }}/inet/media/**/*_new.png
             ${{ github.workspace }}/inet/media/**/*_diff.png
+          if-no-files-found: ignore
