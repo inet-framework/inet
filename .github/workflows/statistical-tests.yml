@@ -44,6 +44,7 @@ jobs:
           echo "::endgroup::"
  
           echo "::group::Running omnetpp setenv"
+          export CCACHE_DIR=$GITHUB_WORKSPACE/ccache
           cd $GITHUB_WORKSPACE/omnetpp
           cp configure.user.dist configure.user
           . setenv -f
