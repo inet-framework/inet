@@ -20,7 +20,7 @@ cp configure.user.dist configure.user
 echo "::endgroup::"
 
 echo "::group::Configuring omnetpp"
-./configure WITH_LIBXML=yes WITH_QTENV=no WITH_OSG=no WITH_OSGEARTH=no
+./configure WITH_LIBXML=yes WITH_QTENV=no WITH_OSG=yes WITH_OSGEARTH=no
 echo "::endgroup::"
  
 echo "::group::Compiling omnetpp"

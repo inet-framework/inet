@@ -37,7 +37,7 @@ jobs:
           echo "::group::Installing packages"
           sudo apt-get install -y --no-install-recommends git wget curl ca-certificates \
             make ccache clang lld gdb bison flex perl doxygen graphviz libxml2-dev zlib1g-dev \
-            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libz3-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libz3-dev libopenscenegraph-dev \
             python3 python3-pip python3-pandas python3-numpy python3-matplotlib \
             python3-scipy python3-seaborn python3-posix-ipc
           echo "::endgroup::"
@@ -59,7 +59,7 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::Running chart tests"
-          inet_run_chart_tests -m release -f showcases --exclude-filter /osg/
+          inet_run_chart_tests -m release -f showcases
           echo "::endgroup::"
       - uses: actions/upload-artifact@v3
         if: always() # even if the test failed, of course

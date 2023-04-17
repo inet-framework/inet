@@ -37,7 +37,7 @@ jobs:
           echo "::group::Installing packages"
           sudo apt-get install -y --no-install-recommends git wget curl ca-certificates \
             make ccache clang lld gdb bison flex perl doxygen graphviz libxml2-dev zlib1g-dev \
-            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libz3-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libz3-dev libopenscenegraph-dev \
             python3 python3-pip python3-pandas python3-numpy python3-matplotlib \
             python3-scipy python3-seaborn python3-posix-ipc
           echo "::endgroup::"
@@ -55,5 +55,5 @@ jobs:
           source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
 
           echo "::group::Running validation tests"
-          inet_run_validation_tests -m release --exclude-filter /osg/
+          inet_run_validation_tests -m release
           echo "::endgroup::"
