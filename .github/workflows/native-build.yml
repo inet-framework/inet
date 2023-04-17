@@ -39,14 +39,18 @@ jobs:
             libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libz3-dev python3
           echo "::endgroup::"
  
-          echo "::group::Running omnetpp setenv"
+          echo "::group::Configuring ccache"
+          export PATH=/usr/lib/ccache:$PATH
           export CCACHE_DIR=/home/runner/work/ccache
+          echo "::endgroup::"
+
+          echo "::group::Running omnetpp setenv"
           cd $GITHUB_WORKSPACE/omnetpp
-          cp configure.user.dist configure.user
           . setenv -f
           echo "::endgroup::"
 
           echo "::group::Configuring omnetpp"
+          cp configure.user.dist configure.user
           ./configure WITH_LIBXML=yes WITH_QTENV=no WITH_OSG=no WITH_OSGEARTH=no
           echo "::endgroup::"
  
