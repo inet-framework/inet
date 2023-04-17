@@ -3329,7 +3329,7 @@ inet.scave.plot.add_to_dataframe(newdf, style_tuple_list=[('name', '.*DCFnofrag'
 props['legend_replacements'] = "/experiment=TxPower//"
 props['legend_format'] = "${name}"
 
-inet.scave.plot.plot_lines(newdf, props, debug=False)
+inet.scave.plot.plot_lines(newdf, props)
 
 names = df_snir["name"].unique()
 scalar_names = names[0] + ", etc." if len(names) > 1 else names[0]
