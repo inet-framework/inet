@@ -42,7 +42,7 @@ jobs:
             python3-scipy python3-seaborn python3-posix-ipc
           echo "::endgroup::"
 
-          $GITHUB_WORKSPACE/inet/_scripts/github/build-omnetpp.sh
+          source $GITHUB_WORKSPACE/inet/_scripts/github/build-omnetpp.sh
 
           echo "::group::Installing pip"
           sudo apt install -y python3-pip
@@ -52,7 +52,7 @@ jobs:
           python3 -m pip install numpy pandas
           echo "::endgroup::"
 
-          $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
+          source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
 
           echo "::group::Running validation tests"
           inet_run_validation_tests -m release --exclude-filter /osg/

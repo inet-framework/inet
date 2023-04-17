@@ -41,6 +41,6 @@ jobs:
             libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libz3-dev python3
           echo "::endgroup::"
 
-          $GITHUB_WORKSPACE/inet/_scripts/github/build-omnetpp.sh
+          source $GITHUB_WORKSPACE/inet/_scripts/github/build-omnetpp.sh
 
-          $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
+          source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
