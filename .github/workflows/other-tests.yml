@@ -1,0 +1,95 @@
+name: Build and tests
+
+on:
+  schedule:
+    - cron: "0 21 * * 1-5" # https://crontab.guru/#0_21_*_*_1-5 : "At 21:00 on every day-of-week from Monday through Friday."
+  workflow_dispatch:
+    # nothing
+
+jobs:
+  activity-check:
+    name: Activity check
+    runs-on: ubuntu-latest
+    outputs:
+      is_active: ${{ steps.activity.outputs.is_active }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check for repo activity
+        id: activity
+        run: |
+          # Skip activity check when manually triggered.
+          if [ "${{ github.event_name }}" == "repository_dispatch" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            is_active=true
+          elif [ "$(git rev-list --after="24 hours" ${{ github.sha }})" ]; then
+            is_active=true
+          else
+            is_active=false
+          fi
+          echo "is_active=$is_active" >> $GITHUB_OUTPUT
+
+  other-tests:
+    needs: activity-check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # TODO: add debug/release mode when the runtest scripts can switch between
+        # MODEs or executables based on command line arguments or envvars
+        testdir: ["module", "unit", "packet", "queueing", "protocol"]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: libinet-so
+          path: ${{ github.workspace }}/src/
+      - name: Pull Docker image
+        run: docker pull ghcr.io/inet-framework/ci-inet:6.0.1-230320
+      - name: Run ${{ matrix.testdir }} tests
+        run: |
+          echo "::group::Installing packages"
+          sudo apt-get install -y --no-install-recommends git wget curl ca-certificates \
+            make clang lld gdb bison flex perl doxygen graphviz libxml2-dev zlib1g-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libz3-dev python3
+          echo "::endgroup::"
+
+          echo "::group::Running omnetpp setenv"
+          export CCACHE_DIR=/home/runner/work/ccache
+          cd $GITHUB_WORKSPACE/omnetpp
+          cp configure.user.dist configure.user
+          . setenv -f
+          echo "::endgroup::"
+
+          echo "::group::Configuring omnetpp"
+          ./configure WITH_LIBXML=yes WITH_QTENV=no WITH_OSG=no WITH_OSGEARTH=no
+          echo "::endgroup::"
+
+          echo "::group::Compiling omnetpp"
+          make MODE=${{ matrix.mode }} -j $(nproc) base
+          echo "::endgroup::"
+
+          echo "::group::Running inet setenv"
+          cd $GITHUB_WORKSPACE/inet
+          . setenv -f
+          echo "::endgroup::"
+
+          echo "::group::Enabling all inet features"
+          opp_featuretool enable all
+          echo "::endgroup::"
+
+          echo "::group::Disabling some inet features"
+          opp_featuretool disable VisualizationOsg VisualizationOsgShowcases SelfDoc
+          echo "::endgroup::"
+
+          echo "::group::Making inet makefiles"
+          make makefiles
+          echo "::endgroup::"
+
+          echo "::group::Compiling inet"
+          make MODE=${{ matrix.mode }} -j $(nproc)
+          echo "::endgroup::"
+
+          echo "::group::Running ${{ matrix.testdir }} tests"
+          cd tests/${{ matrix.testdir }}
+          ./runtest
+          echo "::endgroup::"
