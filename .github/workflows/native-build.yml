@@ -78,7 +78,3 @@ jobs:
           echo "::group::Compiling inet"
           make MODE=${{ matrix.mode }} -j $(nproc)
           echo "::endgroup::"
-      - uses: actions/upload-artifact@v3
-        with:
-          name: libinet-so
-          path: ${{ github.workspace }}/src/libINET*.so
