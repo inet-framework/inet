@@ -46,11 +46,11 @@ jobs:
 
           echo "::group::Running omnetpp setenv"
           cd $GITHUB_WORKSPACE/omnetpp
+          cp configure.user.dist configure.user
           . setenv -f
           echo "::endgroup::"
 
           echo "::group::Configuring omnetpp"
-          cp configure.user.dist configure.user
           ./configure WITH_LIBXML=yes WITH_QTENV=no WITH_OSG=no WITH_OSGEARTH=no
           echo "::endgroup::"
  
