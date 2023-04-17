@@ -1,0 +1,33 @@
+name: Cross build
+
+on:
+  schedule:
+      # https://crontab.guru/#0_16_*_*_6
+    - cron: "0 16 * * 6" # “At 16:00 on Saturday.”
+  workflow_dispatch:
+    # nothing
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: ["windows", "macosx"]
+        mode: ["debug", "release"]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v3
+      - name: Pull Docker image
+        run: docker pull ghcr.io/inet-framework/ci-inet:6.0.1-230320
+      - run: mkdir /home/runner/work/ccache
+      - uses: actions/cache@v3
+        with:
+          path: /home/runner/work/ccache
+          # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
+          key: cross-${{ matrix.target }}-${{ matrix.mode }}-ccache-${{ github.run_id }}
+          restore-keys: cross-${{ matrix.target }}-${{ matrix.mode }}-ccache
+      - name: Cross-building
+        run: |
+          docker run -i --env TARGET_PLATFORM=${{ matrix.target }} --env MODE=${{ matrix.mode }} --env GITHUB_WORKSPACE \
+            -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE -v /home/runner/work/ccache:/root/.ccache \
+            ghcr.io/inet-framework/ci-inet:6.0.1-230320 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-build.sh
