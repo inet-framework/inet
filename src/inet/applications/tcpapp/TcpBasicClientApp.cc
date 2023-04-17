@@ -132,7 +132,7 @@ void TcpBasicClientApp::socketEstablished(TcpSocket *socket)
 
 void TcpBasicClientApp::rescheduleAfterOrDeleteTimer(simtime_t d, short int msgKind)
 {
-    if (stopTime < SIMTIME_ZERO || d < stopTime) {
+    if (stopTime < SIMTIME_ZERO || simTime() + d < stopTime) {
         timeoutMsg->setKind(msgKind);
         rescheduleAfter(d, timeoutMsg);
     }
