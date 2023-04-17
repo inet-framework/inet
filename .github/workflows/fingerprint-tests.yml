@@ -55,6 +55,8 @@ jobs:
           # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
           restore-keys: native-${{ matrix.mode }}-ccache
       - name: Run main
+        env:
+          MODE: ${{ matrix.mode }}
         run: |
           echo "::group::Installing packages"
           sudo apt-get install -y --no-install-recommends git wget curl ca-certificates \
