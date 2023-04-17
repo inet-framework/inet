@@ -35,6 +35,7 @@ jobs:
       matrix:
         # TODO: add debug/release mode when the runtest scripts can switch between
         # MODEs or executables based on command line arguments or envvars
+        mode: ["debug"]
         testdir: ["module", "unit", "packet", "queueing", "protocol"]
       fail-fast: false
     steps:
