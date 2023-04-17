@@ -23,7 +23,7 @@ opp_featuretool enable all
 echo "::endgroup::"
 
 echo "::group::Disabling some inet features"
-opp_featuretool disable VisualizationOsg VisualizationOsgShowcases SelfDoc
+opp_featuretool disable SelfDoc
 echo "::endgroup::"
 
 echo "::group::Making inet makefiles"
