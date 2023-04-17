@@ -67,10 +67,9 @@ jobs:
           source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
 
           echo "::group::Running fingerprint tests"
-          SPLIT_N="${SPLIT_N:-1}"
-          SPLIT_I="${SPLIT_I:-0}"
+          SPLIT_N=4
+          SPLIT_I=${{ matrix.split }}
           cd $GITHUB_WORKSPACE/inet/tests/fingerprint
           # this indirectly calls the script named simply "inet", which handles the MODE envvar internally
-          ./fingerprinttest -n $SPLIT_N -i $SPLIT_I -f 'tplx' -f '~tNl'
-          ./fingerprinttest -n $SPLIT_N -i $SPLIT_I -f 'tplx' -f '~tND'
+          ./fingerprinttest -n $SPLIT_N -i $SPLIT_I -f 'tplx' -f '~tNl' -f '~tND'
           echo "::endgroup::"
