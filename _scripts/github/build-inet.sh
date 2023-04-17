@@ -13,6 +13,11 @@ export PATH=/usr/lib/ccache:$PATH
 export CCACHE_DIR=/home/runner/work/ccache
 echo "::endgroup::"
 
+echo "::group::Running omnetpp setenv"
+cd $GITHUB_WORKSPACE/omnetpp
+. setenv -f
+echo "::endgroup::"
+
 echo "::group::Running inet setenv"
 cd $GITHUB_WORKSPACE/inet
 . setenv -f
