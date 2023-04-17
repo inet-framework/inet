@@ -1,4 +1,4 @@
-name: Feature tests
+name: "Test: feature"
 
 on:
   schedule:

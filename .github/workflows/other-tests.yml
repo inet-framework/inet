@@ -1,4 +1,4 @@
-name: Other tests
+name: "Test: other"
 
 on:
   schedule:

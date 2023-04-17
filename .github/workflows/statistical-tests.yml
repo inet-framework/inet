@@ -1,4 +1,4 @@
-name: Statistical tests
+name: "Test: statistical"
 
 on:
   schedule:

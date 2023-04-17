@@ -1,4 +1,4 @@
-name: Fingerprint tests
+name: "Test: fingerprint"
 
 on:
   schedule:

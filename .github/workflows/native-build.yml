@@ -1,4 +1,4 @@
-name: Native build
+name: "Build: native"
 
 on:
   push:

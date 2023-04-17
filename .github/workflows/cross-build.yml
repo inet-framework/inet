@@ -1,4 +1,4 @@
-name: Cross build
+name: "Build: cross"
 
 on:
   schedule:

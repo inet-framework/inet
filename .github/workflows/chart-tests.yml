@@ -1,4 +1,4 @@
-name: Chart tests
+name: "Test: chart"
 
 on:
   schedule:

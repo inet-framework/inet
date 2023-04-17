@@ -1,4 +1,4 @@
-name: Validation tests
+name: "Test: validation"
 
 on:
   schedule:
