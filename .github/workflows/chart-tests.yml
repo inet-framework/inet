@@ -18,15 +18,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          path: inet
-      - uses: actions/checkout@v3
-        with:
           repository: omnetpp/omnetpp
           path: omnetpp
-      - run: mkdir -p $GITHUB_WORKSPACE/ccache
+      - uses: actions/checkout@v3
+        with:
+          path: inet
+      - run: mkdir -p /home/runner/work/ccache
       - uses: actions/cache/restore@v3
         with:
-          path: $GITHUB_WORKSPACE/ccache
+          path: /home/runner/work/ccache
           key: native-${{ matrix.mode }}-ccache-${{ github.run_id }}
           # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
           restore-keys: native-${{ matrix.mode }}-ccache
@@ -44,7 +44,7 @@ jobs:
           echo "::endgroup::"
  
           echo "::group::Running omnetpp setenv"
-          export CCACHE_DIR=$GITHUB_WORKSPACE/ccache
+          export CCACHE_DIR=/home/runner/work/ccache
           cd $GITHUB_WORKSPACE/omnetpp
           cp configure.user.dist configure.user
           . setenv -f
