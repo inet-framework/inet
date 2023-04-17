@@ -59,38 +59,34 @@ void PacketDirectionReverser::processPacket(Packet *packet)
     packet->trim();
     packet->clearTags();
     if (packetProtocolTag != nullptr)
-        packet->addTag<PacketProtocolTag>()->setProtocol(packetProtocolTag->getProtocol());
+        *(packet->addTag<PacketProtocolTag>()) = *packetProtocolTag;
     if (directionTag != nullptr) {
         if (directionTag->getDirection() != DIRECTION_INBOUND)
             throw cRuntimeError("Packet must be inbound");
-        packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
+        packet->addTag<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
     }
     if (cutthroughTag != nullptr) {
-        const auto& cutthroughTagOut = packet->addTag<CutthroughTag>();
-        cutthroughTagOut->setCutthroughPosition(cutthroughTag->getCutthroughPosition());
-        cutthroughTagOut->setTrailerChunk(cutthroughTag->getTrailerChunk());
+        *(packet->addTag<CutthroughTag>()) = *cutthroughTag;
     }
     if (eligibilityTimeTag != nullptr)
-        packet->addTag<EligibilityTimeTag>()->setEligibilityTime(eligibilityTimeTag->getEligibilityTime());
+        *(packet->addTag<EligibilityTimeTag>()) = *eligibilityTimeTag;
     if (interfaceInd != nullptr)
-        packet->addTag<InterfaceInd>()->setInterfaceId(interfaceInd->getInterfaceId());
+        packet->addTag<InterfaceInd>()->InterfaceTagBase::operator=(*interfaceInd);
     if (macAddressInd != nullptr) {
-        const auto& macAddressReq = packet->addTag<MacAddressReq>();
-        macAddressReq->setSrcAddress(macAddressInd->getSrcAddress());
-        macAddressReq->setDestAddress(macAddressInd->getDestAddress());
+        packet->addTag<MacAddressReq>()->MacAddressTagBase::operator=(*macAddressInd);
     }
     if (dropEligibleInd != nullptr)
-        packet->addTag<DropEligibleReq>()->setDropEligible(dropEligibleInd->getDropEligible());
+        packet->addTag<DropEligibleReq>()->DropEligibleTagBase::operator=(*dropEligibleInd);
     if (vlanInd != nullptr && forwardVlan)
-        packet->addTag<VlanReq>()->setVlanId(vlanInd->getVlanId());
+        packet->addTag<VlanReq>()->VlanTagBase::operator=(*vlanInd);
     if (pcpInd != nullptr && forwardPcp)
-        packet->addTag<PcpReq>()->setPcp(pcpInd->getPcp());
+        packet->addTag<PcpReq>()->PcpTagBase::operator=(*pcpInd);
     if (userPriorityInd != nullptr)
-        packet->addTag<UserPriorityReq>()->setUserPriority(userPriorityInd->getUserPriority());
+        packet->addTag<UserPriorityReq>()->UserPriorityTagBase::operator=(*userPriorityInd);
     if (streamInd != nullptr)
-        packet->addTag<StreamReq>()->setStreamName(streamInd->getStreamName());
+        packet->addTag<StreamReq>()->StreamTagBase::operator=(*streamInd);
     if (sequenceNumberInd != nullptr)
-        packet->addTag<SequenceNumberReq>()->setSequenceNumber(sequenceNumberInd->getSequenceNumber());
+        packet->addTag<SequenceNumberReq>()->SequenceNumberTagBase::operator=(*sequenceNumberInd);
     if (encapsulationProtocolInd != nullptr) {
         int n = encapsulationProtocolInd->getProtocolArraySize();
         auto encapsulationProtocolReq = packet->addTag<EncapsulationProtocolReq>();
