@@ -20,6 +20,7 @@ COLOR_RED = "\033[1;31m"
 COLOR_YELLOW = "\033[1;33m"
 COLOR_CYAN = "\033[0;36m"
 COLOR_GREEN = "\033[0;32m"
+COLOR_MAGENTA = "\033[1;35m"
 COLOR_RESET = "\033[0;0m"
 
 def enable_autoreload():
@@ -27,13 +28,29 @@ def enable_autoreload():
     ipython.magic("load_ext autoreload")
     ipython.magic("autoreload 2")
 
+_logging_initialized = False
+
 def initialize_logging(level):
+    global _logging_initialized
+    formatter = ColoredLoggingFormatter()
     handler = logging.StreamHandler()
-    handler.setFormatter(ColoredLoggingFormatter())
+    handler.setFormatter(formatter)
     logger = logging.getLogger()
     logger.setLevel(level)
     logger.handlers = []
     logger.addHandler(handler)
+    _logging_initialized = True
+
+def ensure_logging_initialized(level):
+    if not _logging_initialized:
+        initialize_logging(level)
+        return True
+    else:
+        return False
+
+def get_logging_formatter():
+    logger = logging.getLogger()
+    return logger.handlers[0].formatter
 
 def get_omnetpp_relative_path(path):
     return os.path.abspath(os.path.join(os.environ["__omnetpp_root_dir"], path)) if "__omnetpp_root_dir" in os.environ else None
@@ -202,6 +219,9 @@ def test_keyboard_interrupt_handler(a, b):
         print("Disabled end")
 
 class ColoredLoggingFormatter(logging.Formatter):
+    print_thread_name = False
+    print_function_name = False
+
     COLORS = {
         logging.DEBUG: COLOR_GREEN,
         logging.INFO: COLOR_GREEN,
@@ -211,7 +231,11 @@ class ColoredLoggingFormatter(logging.Formatter):
     }
 
     def format(self, record):
-        format = self.COLORS.get(record.levelno) + "%(levelname)s " + COLOR_CYAN + "%(name)s " + COLOR_RESET + "%(message)s (%(filename)s:%(lineno)d)"
+        format = self.COLORS.get(record.levelno) + "%(levelname)s " + \
+                 (COLOR_MAGENTA + "%(threadName)s " if self.print_thread_name else "") + \
+                 COLOR_CYAN + "%(name)s " + \
+                 (COLOR_MAGENTA + "%(funcName)s " if self.print_function_name else "") + \
+                 COLOR_RESET + "%(message)s (%(filename)s:%(lineno)d)"
         formatter = logging.Formatter(format)
         return formatter.format(record)
 
@@ -221,7 +245,29 @@ def with_extended_thread_name(name, body):
     try:
         current_thread.name = old_name + "/" + name
         body()
+    finally:
         current_thread.name = old_name
-    except:
-        current_thread.name = old_name
-        raise
+
+def with_logger_level(logger, level, body):
+    old_level = logger.getEffectiveLevel()
+    try:
+        logger.setLevel(level)
+        body()
+    finally:
+        logger.setLevel(old_level)
+
+class LoggerLevel(object):
+    def __init__(self, logger, level):
+        self.logger = logger
+        self.level = level
+
+    def __enter__(self):
+        self.old_level = self.logger.getEffectiveLevel()
+        self.logger.setLevel(self.level)
+
+    def __exit__(self, type, value, traceback):
+        self.logger.setLevel(self.old_level)
+
+class DebugLevel(LoggerLevel):
+    def __init__(self, logger):
+        super().__init__(self, logger, logging.DEBUG)
