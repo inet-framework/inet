@@ -558,7 +558,7 @@ Running the fingerprint tests from the `fifo` sample project using the default f
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_run_fingerprint_tests -t 1s -d default
+    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_run_fingerprint_tests -t 1s
     Multiple fingerprint test results: SKIP, summary: 7 SKIP (unexpected) in 0:00:00.004558
 
 Not surprisingly all tests are skipped because the database doesn't have any correct fingerprints yet.
@@ -566,7 +566,7 @@ We first need to update the correct fingerprints in the database:
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_update_correct_fingerprints -t 1s -d default
+    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_update_correct_fingerprints -t 1s
     [2/7] Updating fingerprint . -c Fifo2 for 1s INSERT 6593-438a/tplx
     [3/7] Updating fingerprint . -c TandemQueueExperiment for 1s INSERT 4cbd-3dae/tplx
     ...
@@ -586,7 +586,7 @@ Now, we can run all fingerprint tests comparing the fingerprints against the lat
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_run_fingerprint_tests -t 1s -d default
+    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_run_fingerprint_tests -t 1s
     [3/7] Checking fingerprint . -c TandemQueueExperiment for 1s PASS
     [5/7] Checking fingerprint . -c TandemQueueExperiment -r 2 for 1s PASS
     ...
@@ -598,7 +598,7 @@ Of course, trying to update the correct fingerprints again doesn't change the st
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_update_correct_fingerprints -t 1s -d default
+    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_update_correct_fingerprints -t 1s
     [5/7] Updating fingerprint . -c TandemQueueExperiment -r 2 for 1s KEEP 4cbd-3dae/tplx
     [7/7] Updating fingerprint . -c TandemQueues for 1s KEEP 4cbd-3dae/tplx
     ...
