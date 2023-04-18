@@ -579,6 +579,7 @@ utils.export_data_if_needed(df, props)
             <script><![CDATA[import math
 import numpy as np
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
+import pandas as pd
 
 # get chart properties
 props = chart.get_properties()
@@ -618,7 +619,7 @@ for t in ts:
     if i1 < len(v1) and i2 < len(v2):
         tout.append(t)
         vout.append(v1[i1] / v2[i2])
-df = df.append({"title": "quotient", "vectime": tout, "vecvalue": vout}, ignore_index=True)
+df = pd.concat([df, pd.DataFrame({"title": ["quotient"], "vectime": [tout], "vecvalue": [vout]})], ignore_index=True)
 df = df[2:] # [["title", "vectime", "vecvalue"]]
 #print(df)
 
