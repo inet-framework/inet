@@ -28,6 +28,7 @@ precompiled_*.h.*
 /doc/neddoc/
 /doc/src/manual/figures/*.pdf
 /doc/src/manual/inet-manual.pdf
+/doc/src/python-api/_autosummary
 /doc/inet-manual-draft.pdf
 /examples/*/results/
 /examples/*/*/results/

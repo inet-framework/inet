@@ -40,12 +40,18 @@ needs_sphinx = '3.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'IPython.sphinxext.ipython_console_highlighting',
+    'IPython.sphinxext.ipython_directive',
     'sphinx.ext.mathjax',
     'sphinx.ext.extlinks',
     'sphinx.ext.ifconfig',
     'sphinx.ext.todo',
     'sphinx.ext.githubpages',
     'sphinx.ext.graphviz',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
     #'sphinxcontrib.images',
     'tools.doxylink',
 ]
@@ -87,6 +93,62 @@ exclude_patterns = ['_build', '_deploy', 'Thumbs.db', '.DS_Store', '**/_docs', '
 
 # graphviz options
 graphviz_output_format = 'svg'
+
+# -- python auto doc generator configuration ----------------------------------
+autosummary_generate = True  # Turn on sphinx.ext.autosummary
+autoclass_content = "both"  # Add __init__ doc (ie. params) to class summaries
+autosummary_imported_members = False
+autosummary_ignore_module_all = True
+html_show_sourcelink = False  # Remove 'view source code' from top of page (for html, not python)
+autodoc_inherit_docstrings = True  # If no docstring, inherit from base class
+set_type_checking_flag = True  # Enable 'expensive' imports for sphinx_autodoc_typehints
+#autodoc_typehints = "description" # Sphinx-native method. Not as good as sphinx_autodoc_typehints
+add_module_names = False # Remove namespaces from class/method signatures
+
+# Exclusions
+# To exclude a module, use autodoc_mock_imports. Note this may increase build time, a lot.
+# (Also, when installing on readthedocs.org, we omit installing Tensorflow and
+# Tensorflow Probability so mock them here instead.)
+autodoc_mock_imports = [
+#    'inet.sphinx',
+#    'inet.repl',
+#    'inet.documentation',
+#    'inet.project',
+#    'inet.scave'
+]
+# To exclude a class, function, method or attribute, use autodoc-skip-member. (Note this can also
+# be used in reverse, ie. to re-include a particular member that has been excluded.)
+# 'Private' and 'special' members (_ and __) are excluded using the Jinja2 templates; from the main
+# doc by the absence of specific autoclass directives (ie. :private-members:), and from summary
+# tables by explicit 'if-not' statements. Re-inclusion is effective for the main doc though not for
+# the summary tables.
+def autodoc_skip_member_callback(app, what, name, obj, skip, options):
+    exclusions = ('')
+    inclusions = ('')
+    if name in exclusions:
+        return True
+    elif name in inclusions:
+        return False
+    elif obj.__doc__ == None: # skip everything that does not have an explicit docstring
+        return True
+    else:
+        return skip
+
+# Napoleon settings
+napoleon_google_docstring = True
+napoleon_numpy_docstring = True
+napoleon_include_init_with_doc = False
+napoleon_include_private_with_doc = False
+napoleon_include_special_with_doc = False
+napoleon_use_admonition_for_examples = False
+napoleon_use_admonition_for_notes = False
+napoleon_use_admonition_for_references = False
+napoleon_use_ivar = False
+napoleon_use_param = True
+napoleon_use_rtype = True
+napoleon_preprocess_types = False
+napoleon_type_aliases = None
+napoleon_attr_annotations = True
 
 # -- Options for HTML output -------------------------------------------------
 
