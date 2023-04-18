@@ -1,5 +1,5 @@
 """
-Main package for OMNeST/OMNeT++.
+Main package for the INET Framework.
 
 It provides sub-packages for running simulations, analyzing simulation results, generating documentation, automated
 testing, etc.
@@ -8,14 +8,10 @@ Please note that undocumented features are not supposed to be used by the user.
 
 .. TODO the following documentation should be merged into the simulation manual
 
-OMNeT++ Python Module
-#####################
+INET Framework Python Module
+############################
 
-The following sections describe the Python module that comes with the latest OMNeT++ version.
-
-.. note::
-
-    This documentation is going to be part of the OMNeT++ Simulation Manual.
+The following sections describe the Python module that comes with the latest INET Framework version.
 
 Using Python Interactively
 ==========================
@@ -24,44 +20,44 @@ The Python programming language is a very adequate tool for interactive developm
 Python code doesn't require compilation, the interactive code execution creates a bidirectional communication channel
 between the user and the system, and the interactive development session is stateful, remembering code blocks executed
 earlier and also their results. Moreover, Python comes with a plethora of open source libraries which are easy to install
-and use in combination with the functions provided by the OMNeT++ Python module.
+and use in combination with the functions provided by the INET Framework Python module.
 
-The easiest way to start using OMNeT++ in the interactive Python environment is to start the :command:`opp_python_repl`
-shell script. This script is pretty simple, it loads the :py:mod:`omnetpp.repl` Python package and launches an IPython
+The easiest way to start using INET in the interactive Python environment is to start the :command:`inet_python_repl`
+shell script. This script is pretty simple, it loads the :py:mod:`inet.repl` Python package and launches an IPython
 interpreter. Alternatively, it's also possible to use any other Python interpreter, and also to import the desired
-individual OMNeT++ packages as needed. A good place to see how to setup the OMNeT++ Python modules after importing them
-is to look at how the aforementioned OMNeT++ package is implemented.
+individual INET packages as needed. A good place to see how to setup the INET Python modules after importing them
+is to look at how the aforementioned INET package is implemented.
 
 The OMNeT++ IDE contains built-in interactive Python development support. This is provided in the form of a IPython
-console view that automatically imports the :py:mod:`omnetpp.repl` package and it's immediately ready to use when the
+console view that automatically imports the :py:mod:`inet.repl` package and it's immediately ready to use when the
 IDE is started.
 
 Once the Python interpreter is up and running, the user can immediately start interacting with it and run simulations
 and carry out many other tasks. The easiest way to get used to the interactive development, is to run the code fragments
 presented in this document. Later with more experience, the user can run any other Python code that is developed with
-the help of the OMNeT++ Python API reference documentation.
+the help of the INET Python API reference documentation.
 
 Installation
 ============
 
-The OMNeT++ Python module requires certain other Python modules to be installed before it can be used. The following
+The INET Python module requires certain other Python modules to be installed before it can be used. The following
 command installs all such required and optional modules:
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/omnetpp$ pip install cppyy dask distributed IPython matplotlib numpy pandas scipy
+    levy@valardohaeris:~/workspace/inet$ pip install cppyy dask distributed IPython matplotlib numpy pandas scipy
     Collecting cppyy
     ...
 
-After the installation is completed, starting the OMNeT++ Python interpreter from a terminal is pretty straightforward: 
+After the installation is completed, starting the INET Python interpreter from a terminal is pretty straightforward: 
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/omnetpp$ . setenv
+    levy@valardohaeris:~/workspace/inet$ . setenv
     Environment for 'omnetpp-6.0' in directory '/home/levy/workspace/omnetpp' is ready.
-    levy@valardohaeris:~/workspace/omnetpp$ opp_python_repl
-    WARNING omnetpp.simulation.project No enclosing simulation project is found from current working directory, and no simulation project is specified explicitly (project.py:510)
-    INFO omnetpp.repl OMNeT++ Python support is loaded. (repl.py:40)
+    levy@valardohaeris:~/workspace/inet$ inet_python_repl
+    WARNING inet.simulation.project No enclosing simulation project is found from current working directory, and no simulation project is specified explicitly (project.py:510)
+    INFO inet.repl OMNeT++ Python support is loaded. (repl.py:40)
 
 .. note::
 
@@ -86,16 +82,16 @@ the returned result:
 Main Concepts
 =============
 
-The OMNeT++ Python module contains many useful classes and functions. The following lists the most important concepts
+The INET Python module contains many useful classes and functions. The following lists the most important concepts
 represented by Python classes:
 
- - :py:class:`SimulationProject <omnetpp.simulation.project.SimulationProject>`: represents a project that usually comes
+ - :py:class:`SimulationProject <inet.simulation.project.SimulationProject>`: represents a project that usually comes
    with its own modules, their C++ implementation, and also with several example simulations
- - :py:class:`SimulationConfig <omnetpp.simulation.config.SimulationConfig>`: represents a specific configuration section
+ - :py:class:`SimulationConfig <inet.simulation.config.SimulationConfig>`: represents a specific configuration section
    from an INI file under a working directory in a specific simulation project
- - :py:class:`SimulationTask <omnetpp.simulation.task.SimulationTask>`: represents a completely parameterized simulation
+ - :py:class:`SimulationTask <inet.simulation.task.SimulationTask>`: represents a completely parameterized simulation
    using a simulation config which can be run multiple times
- - :py:class:`SimulationTaskResult <omnetpp.simulation.task.SimulationTaskResult>`: represents the result that is created
+ - :py:class:`SimulationTaskResult <inet.simulation.task.SimulationTaskResult>`: represents the result that is created
    when a simulation task is run
 
 .. note::
@@ -108,8 +104,8 @@ tests, fingerprint tests, and so on.
 Defining Projects
 =================
 
-The simulation project is an essential concept of the OMNeT++ Python module. Many functions take a simulation project
-as parameter. OMNeT++ comes with a set of sample projects which are already defined in the OMNeT++ Python module.
+The simulation project is an essential concept of the INET Python module. Many functions take a simulation project
+as parameter. OMNeT++ comes with a set of sample projects which are already defined in the INET Python module.
 
 For example, the following `.omnetpp` project definition file describes the sample simulation project called `aloha`.
 The file can be found under the `aloha` sample project directory. It simply defines a simulation project with a root
@@ -123,15 +119,15 @@ director set to `samples/aloha` relative to the value of the `__omnetpp_root_dir
 
 There are many other options that can be used in the project definition: C++ include folders, NED folders, external
 libraries, etc. The simulation project could also be defined by calling the
-:py:func:`define_simulation_project <omnetpp.simulation.project.define_simulation_project>`
-function. The :py:class:`SimulationProject <omnetpp.simulation.project.SimulationProject>` class constructor has the
+:py:func:`define_simulation_project <inet.simulation.project.define_simulation_project>`
+function. The :py:class:`SimulationProject <inet.simulation.project.SimulationProject>` class constructor has the
 same set of parameters.
 
 An important concept related to simulation projects is the default simulation project. Having a default project greatly
-simplifies using several functions of the OMNeT++ Python module by implicitly using the default project without always
+simplifies using several functions of the INET Python module by implicitly using the default project without always
 explicitly passing it in as a parameter. The default simulation project is automatically set to the one enclosing the
 current working directory when the Python interpreter is started. Alternatively, the default simulation project can also
-be set explicitly using the :py:func:`set_default_simulation_project <omnetpp.simulation.project.set_default_simulation_project>`
+be set explicitly using the :py:func:`set_default_simulation_project <inet.simulation.project.set_default_simulation_project>`
 function.
 
 Building Projects
@@ -143,17 +139,17 @@ can also use the OMNeT++ IDE, which has built-in support for automatically build
 simulation. Alternatively, you can also start the build manually from the IDE.
 
 Unfortunately, none of the above can be done easily when you are working from the Python interpreter. To avoid running
-a stale binary, the OMNeT++ Python module also supports building the simulation project:
+a stale binary, the INET Python module also supports building the simulation project:
 
 .. code-block:: ipython
 
     In [1]: p = get_simulation_project("aloha")
 
     In [2]: build_project(simulation_project=p)
-    INFO omnetpp.simulation.build Building aloha started (build.py:61)
-    INFO omnetpp.simulation.build Building aloha ended (build.py:67)
+    INFO inet.simulation.build Building aloha started (build.py:61)
+    INFO inet.simulation.build Building aloha ended (build.py:67)
 
-The :py:func:`build_project <omnetpp.simulation.build.build_project>` function currently runs the :command:`make` command
+The :py:func:`build_project <inet.simulation.build.build_project>` function currently runs the :command:`make` command
 in the project root directory. Similarly to the :command:`make` build system, you can also build the binaries in different
 modes:
 
@@ -162,7 +158,7 @@ modes:
     In [1]: build_project(simulation_project=p, mode="debug")
     ...
 
-The OMNeT++ Python module also contains a new build system that uses tasks instead of the :command:`make` build system.
+The INET Python module also contains a new build system that uses tasks instead of the :command:`make` build system.
 
 .. code-block:: ipython
 
@@ -186,8 +182,8 @@ example, running multiple simulations on a cluster of computers connected to a L
 including running single simulations, repetitions and parameter studies, should be provided for the users by a single
 entry point in the toolchain.
 
-The Python OMNeT++ library contains a single function that covers all of the above tasks. This function is called
-:py:meth:`run_simulations <omnetpp.simulation.task.run_simulations>` and it is capable of running multiple simulations
+The INET Python library contains a single function that covers all of the above tasks. This function is called
+:py:meth:`run_simulations <inet.simulation.task.run_simulations>` and it is capable of running multiple simulations
 matching the provided filter criteria. The simulations can be run sequentially or concurrently, on the local computer
 or on an SSH cluster.
 
@@ -216,7 +212,7 @@ means all simulation runs from all configurations from all INI files found under
 
     The order of simulation runs is random because they run in parallel utilizing all CPUs by default.
 
-The result of running the above simulations is a :py:class:`MultipleTaskResults <omnetpp.common.task.MultipleTaskResults>`
+The result of running the above simulations is a :py:class:`MultipleTaskResults <inet.common.task.MultipleTaskResults>`
 object, which is represented by a human readable summary in the console output. This object contains several details for
 the individual task results and also for the total result.
 
@@ -232,9 +228,9 @@ project:
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ opp_python_repl
-    INFO omnetpp.simulation.project Default project is set to fifo (project.py:512)
-    INFO omnetpp.repl OMNeT++ Python support is loaded. (repl.py:40)
+    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_python_repl
+    INFO inet.simulation.project Default project is set to fifo (project.py:512)
+    INFO inet.repl OMNeT++ Python support is loaded. (repl.py:40)
 
 After the default simulation project is set, running all simulations can be done with a single parameterless function call:
 
@@ -244,7 +240,7 @@ After the default simulation project is set, running all simulations can be done
 
 .. note::
 
-    The project is automatically built by :py:func:`run_simulations <omnetpp.simulation.task.run_simulations>` unless
+    The project is automatically built by :py:func:`run_simulations <inet.simulation.task.run_simulations>` unless
     the `build=False` parameter is used.
 
 In some cases, running all simulations from a simulation project (e.g. aloha) may not terminate because one or more
@@ -283,7 +279,7 @@ Running a set of simulation configs from a specific simulation project up to a s
 
 .. note::
 
-    For more details on filter parameters see the :py:meth:`matches_filter <omnetpp.simulation.config.SimulationConfig.matches_filter>`
+    For more details on filter parameters see the :py:meth:`matches_filter <inet.simulation.config.SimulationConfig.matches_filter>`
     method.
 
 Storing the result object allows the user to later re-run the same set of simulations with a simple method call:
@@ -312,15 +308,15 @@ and debug mode binaries, the `sim_time_limit` and `cpu_time_limit` parameters ca
 simulations, the `concurrent`, `scheduler`, and `simulation_runner` parameters can be used to control how and where
 simulations are run, etc.
 
-The :py:meth:`run_simulations <omnetpp.simulation.task.run_simulations>` function (and all similar run functions) is
-implemented using the :py:meth:`get_simulation_tasks <omnetpp.simulation.task.get_simulation_tasks>` function (and other
+The :py:meth:`run_simulations <inet.simulation.task.run_simulations>` function (and all similar run functions) is
+implemented using the :py:meth:`get_simulation_tasks <inet.simulation.task.get_simulation_tasks>` function (and other
 similarly named functions). The latter simply returns a list of tasks that can be stored in variables, passed around in
 functions, and run at any later moment, even multiple times if desired.
 
 Running Simulations on a Cluster
 ================================
 
-Running multiple simulations can be drastically sped up by utilizing multiple computers called a cluster. The OMNeT++
+Running multiple simulations can be drastically sped up by utilizing multiple computers called a cluster. The INET
 Python package provides direct support to use SSH clusters. An SSH cluster is a set of network nodes usually connected
 to a single LAN, all of which can login into each other using SSH passwordless login. The SSH cluster utilizes all
 network nodes with automatic and transparent load balancing as if it were a single computer.
@@ -332,7 +328,7 @@ The first step to use an SSH cluster is to create one by specifying the schedule
     In [1]: c = SSHCluster(scheduler_hostname="valardohaeris.local", worker_hostnames=["valardohaeris.local", "valarmorghulis.local"])
 
     In [2]: c.start()
-    INFO omnetpp.common.cluster Starting SSH cluster: scheduler=valardohaeris, workers=['valardohaeris', 'valarmorghulis'] ...
+    INFO inet.common.cluster Starting SSH cluster: scheduler=valardohaeris, workers=['valardohaeris', 'valarmorghulis'] ...
     INFO asyncssh Opening SSH connection to valardohaeris.local, port 22 (logging.py:92)
     INFO asyncssh [conn=0] Connected to SSH server at valardohaeris.local, port 22 (logging.py:92)
     ...
@@ -357,9 +353,9 @@ and debug mode, and distribute the binary files to all worker nodes:
     In [1]: p = get_simulation_project("aloha")
 
     In [2]: build_project(simulation_project=p, mode="release")
-    INFO omnetpp.simulation.build Building aloha started (build.py:61)
+    INFO inet.simulation.build Building aloha started (build.py:61)
     ...
-    INFO omnetpp.simulation.build Building aloha ended (build.py:67)
+    INFO inet.simulation.build Building aloha ended (build.py:67)
 
     In [3]: p.copy_binary_simulation_distribution_to_cluster(["valardohaeris.local", "valarmorghulis.local"])
 
@@ -496,12 +492,12 @@ Command Line Tools
 Some of the tasks that can be carried out using the Python interpreter, can also be done directly from the command line.
 The following list gives a brief overview of these command line tools:
 
- - :command:`opp_python_repl`: starts the OMNeT++ Python interpreter
- - :command:`opp_build_project`: builds a simulation project using tasks
- - :command:`opp_run_simulations`: runs multiple simulations matching a filter criteria
- - :command:`opp_run_smoke_tests`: runs multiple smoke tests matching a filter criteria
- - :command:`opp_run_fingerprint_tests`: runs multiple fingerprint tests matching a filter criteria
- - :command:`opp_update_correct_fingerprints`: updates stored correct fingerprints matching a filter criteria
+ - :command:`inet_python_repl`: starts the INET Python interpreter
+ - :command:`inet_build_project`: builds a simulation project using tasks
+ - :command:`inet_run_simulations`: runs multiple simulations matching a filter criteria
+ - :command:`inet_run_smoke_tests`: runs multiple smoke tests matching a filter criteria
+ - :command:`inet_run_fingerprint_tests`: runs multiple fingerprint tests matching a filter criteria
+ - :command:`inet_update_correct_fingerprints`: updates stored correct fingerprints matching a filter criteria
 
 .. note::
 
@@ -511,7 +507,7 @@ Building the simulation project enclosing the current working directory:
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/omnetpp/samples/aloha$ opp_build_project
+    levy@valardohaeris:~/workspace/omnetpp/samples/aloha$ inet_build_project
     [1/2] Compiling Host.cc DONE
     [2/2] Compiling Server.cc DONE
     [1/1] Linking libaloha.so DONE
@@ -522,14 +518,14 @@ Of course, building the same project again skips all subtasks because everything
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/omnetpp/samples/aloha$ opp_build_project
+    levy@valardohaeris:~/workspace/omnetpp/samples/aloha$ inet_build_project
     Multiple build task results: SKIP, summary: 3 SKIP (expected) in 0:00:00.000395
 
 Building a project outside the current working directory is also possible:
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/omnetpp$ opp_build_project -p tictoc
+    levy@valardohaeris:~/workspace/omnetpp$ inet_build_project -p tictoc
     [15/24] Compiling txc13.cc DONE
     [11/24] Compiling txc14.cc DONE
     ...
@@ -543,7 +539,7 @@ Running all simulations from the `fifo` sample project using the current working
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ opp_run_simulations
+    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_run_simulations
     [3/7] . -c TandemQueueExperiment DONE
     [5/7] . -c TandemQueueExperiment -r 2 DONE
     ...
@@ -555,14 +551,14 @@ Running all simulation runs from the `PureAlohaExperiment` config for 1 second o
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/omnetpp/samples/aloha$ opp_run_simulations -m debug -t 1s --filter PureAlohaExperiment --hosts valarmorghulis.local,valardohaeris.local
+    levy@valardohaeris:~/workspace/omnetpp/samples/aloha$ inet_run_simulations -m debug -t 1s --filter PureAlohaExperiment --hosts valarmorghulis.local,valardohaeris.local
     Multiple simulation results: DONE, summary: 42 DONE in 0:00:01.196147
 
 Running the fingerprint tests from the `fifo` sample project using the default fingerprint database:
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ opp_run_fingerprint_tests -t 1s -d default
+    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_run_fingerprint_tests -t 1s -d default
     Multiple fingerprint test results: SKIP, summary: 7 SKIP (unexpected) in 0:00:00.004558
 
 Not surprisingly all tests are skipped because the database doesn't have any correct fingerprints yet.
@@ -570,7 +566,7 @@ We first need to update the correct fingerprints in the database:
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ opp_update_correct_fingerprints -t 1s -d default
+    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_update_correct_fingerprints -t 1s -d default
     [2/7] Updating fingerprint . -c Fifo2 for 1s INSERT 6593-438a/tplx
     [3/7] Updating fingerprint . -c TandemQueueExperiment for 1s INSERT 4cbd-3dae/tplx
     ...
@@ -590,7 +586,7 @@ Now, we can run all fingerprint tests comparing the fingerprints against the lat
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ opp_run_fingerprint_tests -t 1s -d default
+    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_run_fingerprint_tests -t 1s -d default
     [3/7] Checking fingerprint . -c TandemQueueExperiment for 1s PASS
     [5/7] Checking fingerprint . -c TandemQueueExperiment -r 2 for 1s PASS
     ...
@@ -602,7 +598,7 @@ Of course, trying to update the correct fingerprints again doesn't change the st
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ opp_update_correct_fingerprints -t 1s -d default
+    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_update_correct_fingerprints -t 1s -d default
     [5/7] Updating fingerprint . -c TandemQueueExperiment -r 2 for 1s KEEP 4cbd-3dae/tplx
     [7/7] Updating fingerprint . -c TandemQueues for 1s KEEP 4cbd-3dae/tplx
     ...

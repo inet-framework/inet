@@ -28,7 +28,7 @@ class SSHCluster:
      - all nodes can SSH login into all other nodes (even themselves!) without any user interaction (no password is required)
      - the Python version and all required Python library versions are the same on all nodes
      - no firewall rule prevents the scheduler to connect to the workers
-     - OMNeT++ and simulation projects are compiled both in release and debug versions
+     - simulation projects are compiled both in release and debug versions
     """
 
     def __init__(self, scheduler_hostname, worker_hostnames, nix_shell=None):

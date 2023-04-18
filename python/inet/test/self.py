@@ -80,7 +80,7 @@ class MultipleSelfTestTasks(MultipleTestTasks):
                          name=name, print_run_start_separately=print_run_start_separately, concurrent=False, **kwargs)
 
 def parse_arguments():
-    description = "Runs the self test on the OMNeT sample projects."
+    description = "Runs the self test on the OMNeT++ sample projects."
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("-m", "--mode", choices=["debug", "release"], help="specifies the build mode of the projects")
     parser.add_argument("-f", "--filter", default=None, help="includes simulations that match the specified generic filter")
