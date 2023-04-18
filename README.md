@@ -1,4 +1,14 @@
-[![badge 1][badge-1]][1] [![badge 2][badge-2]][2]
+[![Build: cross](https://github.com/inet-framework/inet/actions/workflows/cross-build.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/cross-build.yml)
+[![Build: native](https://github.com/inet-framework/inet/actions/workflows/native-build.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/native-build.yml)
+
+[![Test: chart](https://github.com/inet-framework/inet/actions/workflows/chart-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/chart-tests.yml)
+[![Test: feature](https://github.com/inet-framework/inet/actions/workflows/feature-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/feature-tests.yml)
+[![Test: fingerprint](https://github.com/inet-framework/inet/actions/workflows/fingerprint-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/fingerprint-tests.yml)
+[![Test: module](https://github.com/inet-framework/inet/actions/workflows/module-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/module-tests.yml)
+[![Test: other](https://github.com/inet-framework/inet/actions/workflows/other-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/other-tests.yml)
+[![Test: statistical](https://github.com/inet-framework/inet/actions/workflows/statistical-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/statistical-tests.yml)
+[![Test: unit](https://github.com/inet-framework/inet/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/unit-tests.yml)
+[![Test: validation](https://github.com/inet-framework/inet/actions/workflows/validation-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/validation-tests.yml)
 
 INET Framework for OMNEST/OMNeT++
 =================================
@@ -51,16 +61,3 @@ If you want to use external interfaces in INET, enable the "Emulation" feature
 either in the IDE or using the inet_featuretool then regenerate the INET makefile
 using 'make makefiles'.
 
-Builds:
-[![cross](https://github.com/inet-framework/inet/actions/workflows/cross-build.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/cross-build.yml)
-[![native](https://github.com/inet-framework/inet/actions/workflows/native-build.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/native-build.yml)
-
-Tests:
-[![chart](https://github.com/inet-framework/inet/actions/workflows/chart-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/chart-tests.yml)
-[![feature](https://github.com/inet-framework/inet/actions/workflows/feature-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/feature-tests.yml)
-[![fingerprint](https://github.com/inet-framework/inet/actions/workflows/fingerprint-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/fingerprint-tests.yml)
-[![module](https://github.com/inet-framework/inet/actions/workflows/module-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/module-tests.yml)
-[![other](https://github.com/inet-framework/inet/actions/workflows/other-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/other-tests.yml)
-[![statistical](https://github.com/inet-framework/inet/actions/workflows/statistical-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/statistical-tests.yml)
-[![unit](https://github.com/inet-framework/inet/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/unit-tests.yml)
-[![validation](https://github.com/inet-framework/inet/actions/workflows/validation-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/validation-tests.yml)
