@@ -51,9 +51,16 @@ If you want to use external interfaces in INET, enable the "Emulation" feature
 either in the IDE or using the inet_featuretool then regenerate the INET makefile
 using 'make makefiles'.
 
+Builds:
+[![cross](https://github.com/inet-framework/inet/actions/workflows/cross-build.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/cross-build.yml)
+[![native](https://github.com/inet-framework/inet/actions/workflows/native-build.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/native-build.yml)
 
-[badge-1]: https://github.com/inet-framework/inet/workflows/Build%20and%20tests/badge.svg?branch=master
-[badge-2]: https://github.com/inet-framework/inet/workflows/Feature%20tests/badge.svg?branch=master
-
-[1]: https://github.com/inet-framework/inet/actions?query=workflow%3A%22Build+and+tests%22
-[2]: https://github.com/inet-framework/inet/actions?query=workflow%3A%22Feature+tests%22
+Tests:
+[![chart](https://github.com/inet-framework/inet/actions/workflows/chart-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/chart-tests.yml)
+[![feature](https://github.com/inet-framework/inet/actions/workflows/feature-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/feature-tests.yml)
+[![fingerprint](https://github.com/inet-framework/inet/actions/workflows/fingerprint-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/fingerprint-tests.yml)
+[![module](https://github.com/inet-framework/inet/actions/workflows/module-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/module-tests.yml)
+[![other](https://github.com/inet-framework/inet/actions/workflows/other-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/other-tests.yml)
+[![statistical](https://github.com/inet-framework/inet/actions/workflows/statistical-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/statistical-tests.yml)
+[![unit](https://github.com/inet-framework/inet/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/unit-tests.yml)
+[![validation](https://github.com/inet-framework/inet/actions/workflows/validation-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/validation-tests.yml)
