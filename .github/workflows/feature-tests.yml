@@ -8,25 +8,37 @@ on:
     # nothing
 
 jobs:
-  featuretests:
+  feature-tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         # we could go all the way up to 20 even
-        node-index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-        node-total: [16] # keep these in sync!
+        split: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        total: [16] # keep these in sync!
       fail-fast: false
     steps:
       - uses: actions/checkout@v3
-      - name: Pull Docker image
-        run: docker pull ghcr.io/inet-framework/ci-inet:6.0.1-230320
       - name: Feature tests (split)
         run: |
-          docker run -i --env SKIPPED_FEATURES="" --env SPLIT_INDEX=${{ matrix.node-index }} --env SPLIT_TOTAL=${{ matrix.node-total }} \
-            --env GITHUB_WORKSPACE -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE \
-            ghcr.io/inet-framework/ci-inet:6.0.1-230320 /bin/bash $GITHUB_WORKSPACE/_scripts/github/feature-tests.sh
+          echo "::group::Installing packages"
+          sudo apt-get install -y --no-install-recommends git wget curl ca-certificates \
+            make ccache clang lld gdb bison flex perl doxygen graphviz libxml2-dev zlib1g-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libz3-dev libopenscenegraph-dev python3
+          echo "::endgroup::"
+
+          source $GITHUB_WORKSPACE/inet/_scripts/github/build-omnetpp.sh
+
+          source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
+
+          echo "::group::Running feature tests"
+          SPLIT_N=${{ matrix.total }}
+          SPLIT_I=${{ matrix.split }}
+          cd $GITHUB_WORKSPACE/inet/tests/features
+          # this indirectly calls the script named simply "inet", which handles the MODE envvar internally
+          ./featuretest
+          echo "::endgroup::"
       - uses: actions/upload-artifact@v3
         if: always() # even if the test failed, of course
         with:
-          name: log-${{ matrix.node-index }}
+          name: log-${{ matrix.split }}
           path: ${{ github.workspace }}/tests/features/_log
