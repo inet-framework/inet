@@ -6,6 +6,7 @@ Please note that undocumented features are not supposed to be used by the user.
 
 from inet.common.cluster import *
 from inet.common.compile import *
+from inet.common.github import *
 from inet.common.ide import *
 from inet.common.summary import *
 from inet.common.task import *
