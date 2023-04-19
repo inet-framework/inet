@@ -1,4 +1,4 @@
-name: "Build: cross"
+name: "Build: Mac OS"
 
 on:
   schedule:
@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: ["windows", "macosx"]
         mode: ["debug", "release"]
       fail-fast: false
     steps:
@@ -24,10 +23,10 @@ jobs:
         with:
           path: /home/runner/work/ccache
           # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
-          key: cross-${{ matrix.target }}-${{ matrix.mode }}-ccache-${{ github.run_id }}
-          restore-keys: cross-${{ matrix.target }}-${{ matrix.mode }}-ccache
-      - name: Cross-building
+          key: cross-macos-${{ matrix.mode }}-ccache-${{ github.run_id }}
+          restore-keys: cross-macos-${{ matrix.mode }}-ccache
+      - name: Cross-building Mac OS binaries
         run: |
-          docker run -i --env TARGET_PLATFORM=${{ matrix.target }} --env MODE=${{ matrix.mode }} --env GITHUB_WORKSPACE \
+          docker run -i --env TARGET_PLATFORM=macos --env MODE=${{ matrix.mode }} --env GITHUB_WORKSPACE \
             -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE -v /home/runner/work/ccache:/root/.ccache \
             ghcr.io/inet-framework/ci-inet:6.0.1-230320 /bin/bash $GITHUB_WORKSPACE/_scripts/github/cross-build.sh

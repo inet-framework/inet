@@ -1,4 +1,4 @@
-name: "Build: native"
+name: "Build: Linux"
 
 on:
   push:
@@ -35,7 +35,7 @@ jobs:
           key: native-${{ matrix.mode }}-ccache-${{ github.run_id }}
           # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
           restore-keys: native-${{ matrix.mode }}-ccache
-      - name: Build
+      - name: Building binaries
         env:
           MODE: ${{ matrix.mode }}
         run: |
