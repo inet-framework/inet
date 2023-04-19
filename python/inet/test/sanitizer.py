@@ -3,6 +3,8 @@ import logging
 from inet.simulation import *
 from inet.test.simulation import *
 
+__sphinx_mock__ = True # ignore this module in documentation
+
 _logger = logging.getLogger(__name__)
 
 class SanitizerTestTask(SimulationTestTask):

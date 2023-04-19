@@ -4,6 +4,8 @@ from omnetpp.runtime import *
 
 from inet.common.util import *
 
+__sphinx_mock__ = True # ignore this module in documentation
+
 inet_project_path = get_inet_relative_path(".")
 
 if inet_project_path is not None and \

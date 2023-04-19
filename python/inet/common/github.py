@@ -1,6 +1,8 @@
 import logging
 import os
 
+__sphinx_mock__ = True # ignore this module in documentation
+
 _logger = logging.getLogger(__name__)
 
 import requests

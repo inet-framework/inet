@@ -7,6 +7,8 @@ import time
 from inet.common import *
 from inet.simulation.project import *
 
+__sphinx_mock__ = True # ignore this module in documentation
+
 _logger = logging.getLogger(__name__)
 
 class FingerprintStore:

@@ -12,6 +12,8 @@ from inet.test.speed import *
 from inet.test.statistical import *
 from inet.test.validation import *
 
+__sphinx_mock__ = True # ignore this module in documentation
+
 _logger = logging.getLogger(__name__)
 
 class PacketTestTask(TestTask):

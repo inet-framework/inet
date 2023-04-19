@@ -13,6 +13,8 @@ from inet.simulation.project import *
 from inet.test.fingerprint.store import *
 from inet.test.fingerprint.task import *
 
+__sphinx_mock__ = True # ignore this module in documentation
+
 _logger = logging.getLogger(__name__)
 
 def update_correct_fingerprints_from_csv(csv_file, correct_fingerprints, filter=None, exclude_filter=None, full_match=False):

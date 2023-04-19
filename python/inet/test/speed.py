@@ -4,6 +4,8 @@ from inet.simulation import *
 from inet.test.simulation import *
 from inet.test.task import *
 
+__sphinx_mock__ = True # ignore this module in documentation
+
 _logger = logging.getLogger(__name__)
 
 class SpeedTestTask(SimulationTestTask):
