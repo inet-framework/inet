@@ -242,7 +242,7 @@ def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_
     Turn this off with 'share_axes'.
     
     share_axes: only for the horizontal and vertical layouts; no axes are shared in the grid layout
-    - 'auto' (default): the common axes are shared (x for vertical, y for horizontal)
+    - 'auto' (default): the common axes are shared (x for vertical, y for horizontal, none for grid)
     - 'none': no shared axes
     ' 'both': both axes are shared
     """
