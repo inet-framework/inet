@@ -95,10 +95,15 @@ Packet::Packet(const Packet& other) :
 
 const ChunkTemporarySharedPtr *Packet::getDissection() const
 {
-    PacketDissector::ChunkBuilder builder;
-    PacketDissector packetDissector(ProtocolDissectorRegistry::getInstance(), builder);
-    packetDissector.dissectPacket(const_cast<Packet *>(this));
-    return new ChunkTemporarySharedPtr(builder.getContent());
+    try {
+        PacketDissector::ChunkBuilder builder;
+        PacketDissector packetDissector(ProtocolDissectorRegistry::getInstance(), builder);
+        packetDissector.dissectPacket(const_cast<Packet *>(this));
+        return new ChunkTemporarySharedPtr(builder.getContent());
+    }
+    catch (cRuntimeError) {
+    }
+    return nullptr;
 }
 
 const ChunkTemporarySharedPtr *Packet::getFront() const
