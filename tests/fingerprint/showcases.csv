@@ -57,7 +57,7 @@
 
 /showcases/tsn/cutthroughswitching/, -f omnetpp.ini -c StoreAndForward -r 0,        1s,         e93f-4829/tplx;2186-4b4a/~tNl;5033-eee8/~tND;e7ea-c40a/tyf, PASS,
 /showcases/tsn/cutthroughswitching/, -f omnetpp.ini -c CutthroughSwitching -r 0,    1s,         d29e-0238/tplx;e65e-6c0d/~tNl;2bfc-0f59/tyf, PASS,
-/showcases/tsn/cutthroughswitching/, -f omnetpp.ini -c CutthroughSwitching -r 0,    1s,         d29e-0238/tplx;e65e-6c0d/~tNl;0000-0000/~tND;2bfc-0f59/tyf, PASS,
+/showcases/tsn/cutthroughswitching/, -f omnetpp.ini -c CutthroughSwitching -r 0,    1s,         d29e-0238/tplx;e65e-6c0d/~tNl;c30f-92f5/~tND;2bfc-0f59/tyf, PASS,
 
 /showcases/tsn/framepreemption/,     -f omnetpp.ini -c FifoQueueing -r 0,           1s,         5ef8-0e2f/tplx;5254-8176/~tNl;734d-28bc/~tND;f14d-148e/tyf, PASS,
 /showcases/tsn/framepreemption/,     -f omnetpp.ini -c PriorityQueueing -r 0,       1s,         3171-cda0/tplx;48c5-41c7/~tNl;f7ae-7530/~tND;19c3-ba2a/tyf, PASS,
