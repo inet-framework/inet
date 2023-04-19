@@ -1,5 +1,6 @@
-[![Build: cross](https://github.com/inet-framework/inet/actions/workflows/cross-build.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/cross-build.yml)
-[![Build: native](https://github.com/inet-framework/inet/actions/workflows/native-build.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/native-build.yml)
+[![Build: Linux](https://github.com/inet-framework/inet/actions/workflows/build-linux.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/build-linux.yml)
+[![Build: Mac OS](https://github.com/inet-framework/inet/actions/workflows/build-macos.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/build-macos.yml)
+[![Build: Windows](https://github.com/inet-framework/inet/actions/workflows/build-windows.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/build-windows.yml)
 
 [![Test: chart](https://github.com/inet-framework/inet/actions/workflows/chart-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/chart-tests.yml)
 [![Test: feature](https://github.com/inet-framework/inet/actions/workflows/feature-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/feature-tests.yml)
