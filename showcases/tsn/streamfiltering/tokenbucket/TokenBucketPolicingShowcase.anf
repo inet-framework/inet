@@ -585,8 +585,8 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -617,9 +617,9 @@ utils.plot_vectors(df, props)
 utils.postconfigure_plot(props)
 
 handles, labels = plt.gca().get_legend_handles_labels()
-handles, labels = modifiedplot.create_multidimensional_legend([('nominal', {'linestyle': 'dashdot', 'color': 'black'})], handles=handles, labels=labels)
+handles, labels = inet.scave.plot.create_multidimensional_legend([('nominal', {'linestyle': 'dashdot', 'color': 'black'})], handles=handles, labels=labels)
 plt.legend(handles, labels)
-modifiedplot.quick_reorder_legend(handles, labels, [1, 2, 3, 0])
+inet.scave.plot.quick_reorder_legend(handles, labels, [1, 2, 3, 0])
 
 plt.axhline(y=40, color='black', linestyle='dashdot', linewidth=1)
 
@@ -1231,8 +1231,8 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -1263,9 +1263,9 @@ utils.plot_vectors(df, props)
 utils.postconfigure_plot(props)
 
 handles, labels = plt.gca().get_legend_handles_labels()
-handles, labels = modifiedplot.create_multidimensional_legend([('nominal', {'linestyle': 'dashdot', 'color': 'black'})], handles=handles, labels=labels)
+handles, labels = inet.scave.plot.create_multidimensional_legend([('nominal', {'linestyle': 'dashdot', 'color': 'black'})], handles=handles, labels=labels)
 plt.legend(handles, labels)
-modifiedplot.quick_reorder_legend(handles, labels, [1, 2, 3, 0])
+inet.scave.plot.quick_reorder_legend(handles, labels, [1, 2, 3, 0])
 
 plt.axhline(y=20, color='black', linestyle='dashdot', linewidth=1)
 
@@ -2450,8 +2450,8 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -2481,12 +2481,12 @@ for i, row in df.iterrows():
     if(row['name'] == 'outgoingDataRate:vector'):
         row.vecvalue /= 1000000
 
-modifiedplot.add_to_dataframe(df, style_tuple_list = [('name', '.*DataRate.*', {'color': default_colors[0]}),
+inet.scave.plot.add_to_dataframe(df, style_tuple_list = [('name', '.*DataRate.*', {'color': default_colors[0]}),
                                                       ('name', '.*Tokens.*', {'color': default_colors[2]})], 
                                                       order=['name', {'outgoingDataRate:vector': 0, 'numTokens:vector': 1}])
 
 # plot
-datarateax, tokenax = modifiedplot.plot_vectors_separate(df, props)
+datarateax, tokenax = inet.scave.plot.plot_vectors_separate(df, props)
 
 datarateax.set_ylabel("Data Rate [Mbps]")
 
@@ -2496,7 +2496,7 @@ utils.postconfigure_plot(props)
 
 handles, labels = datarateax.get_legend_handles_labels()
 
-handles, labels = modifiedplot.create_multidimensional_legend([('Nominal', {'linestyle': 'dashdot', 'color': 'black'})], handles=handles, labels=labels)
+handles, labels = inet.scave.plot.create_multidimensional_legend([('Nominal', {'linestyle': 'dashdot', 'color': 'black'})], handles=handles, labels=labels)
 
 datarateax.legend(handles, labels, loc='upper left')
 
@@ -3110,8 +3110,8 @@ import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
 sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-import modifiedplot
-default_colors = modifiedplot.default_colors
+import inet.scave.plot
+default_colors = inet.scave.plot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -3141,12 +3141,12 @@ for i, row in df.iterrows():
     if(row['name'] == 'outgoingDataRate:vector'):
         row.vecvalue /= 1000000
 
-modifiedplot.add_to_dataframe(df, style_tuple_list = [('name', '.*DataRate.*', {'color': default_colors[1]}),
+inet.scave.plot.add_to_dataframe(df, style_tuple_list = [('name', '.*DataRate.*', {'color': default_colors[1]}),
                                                       ('name', '.*Tokens.*', {'color': default_colors[2]})], 
                                                       order=['name', {'outgoingDataRate:vector': 0, 'numTokens:vector': 1}])
 
 # plot
-datarateax, tokenax = modifiedplot.plot_vectors_separate(df, props)
+datarateax, tokenax = inet.scave.plot.plot_vectors_separate(df, props)
 
 datarateax.set_ylabel("Data Rate [Mbps]")
 
@@ -3156,7 +3156,7 @@ utils.postconfigure_plot(props)
 
 handles, labels = datarateax.get_legend_handles_labels()
 
-handles, labels = modifiedplot.create_multidimensional_legend([('Nominal', {'linestyle': 'dashdot', 'color': 'black'})], handles=handles, labels=labels)
+handles, labels = inet.scave.plot.create_multidimensional_legend([('Nominal', {'linestyle': 'dashdot', 'color': 'black'})], handles=handles, labels=labels)
 
 datarateax.legend(handles, labels, loc='upper left')
 
