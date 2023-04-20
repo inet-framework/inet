@@ -1,7 +1,7 @@
 """
 This package supports automated fingerprint testing.
 
-The main function is :py:func:`run_fingerprint_tests`. It allows running multiple fingerprint tests matching
+The main function is :py:func:`run_fingerprint_tests <inet.test.fingerprint.task.run_fingerprint_tests>`. It allows running multiple fingerprint tests matching
 the provided filter criteria.
 """
 

@@ -380,11 +380,11 @@ def collect_fingerprint_test_groups(simulation_task, ingredients_list=["tplx"], 
 def get_fingerprint_test_tasks(**kwargs):
     """
     Returns multiple fingerprint test tasks matching the provided filter criteria. The returned tasks can be run by
-    calling the :py:meth:`inet.common.task.MultipleTasks.run` method.
+    calling the :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
 
     Parameters:
         kwargs (dict):
-            The filter criteria parameters are inherited from the :py:meth:`inet.simulation.task.get_simulation_tasks` method.
+            The filter criteria parameters are inherited from the :py:meth:`get_simulation_tasks <inet.simulation.task.get_simulation_tasks>` method.
 
     Returns (:py:class:`MultipleFingerprintTestTasks`):
         an object that contains a list of :py:class:`FingerprintTestTask` objects matching the provided filter criteria.
@@ -606,11 +606,11 @@ class MultipleFingerprintUpdateTaskResults(MultipleUpdateTaskResults):
 def get_update_correct_fingerprint_tasks(**kwargs):
     """
     Returns multiple fingerprint update tasks matching the provided filter criteria. The returned tasks can be run by
-    calling the :py:meth:`inet.common.task.MultipleTasks.run` method.
+    calling the :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
 
     Parameters:
         kwargs (dict):
-            The filter criteria parameters are inherited from the :py:meth:`inet.simulation.task.get_simulation_tasks` method.
+            The filter criteria parameters are inherited from the :py:meth:`get_simulation_tasks <inet.simulation.task.get_simulation_tasks>` method.
 
     Returns (:py:class:`MultipleFingerprintUpdateTasks`):
         an object that contains a list of :py:class:`FingerprintUpdateTask` objects matching the provided filter criteria.

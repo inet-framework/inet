@@ -45,7 +45,7 @@ def build_project_using_makefile(simulation_project=None, mode="release", captur
     and their implementations, etc.
 
     Parameters:
-        simulation_project (:py:class:`inet.simulation.project.SimulationProject`):
+        simulation_project (:py:class:`SimulationProject <inet.simulation.project.SimulationProject>`):
             The simulation project to build. If unspecified, then the default simulation project is used.
 
         mode (string):
@@ -295,7 +295,7 @@ def build_project_using_tasks(simulation_project, **kwargs):
     static libraries, C++ object files, C++ message file headers and their implementations, etc.
 
     Parameters:
-        simulation_project (:py:class:`inet.simulation.project.SimulationProject`):
+        simulation_project (:py:class:`SimulationProject <inet.simulation.project.SimulationProject>`):
             The simulation project to build. If unspecified, then the default simulation project is used.
 
         kwargs (dict):

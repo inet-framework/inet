@@ -89,7 +89,7 @@ class MultipleChartTestTasks(MultipleTestTasks):
 def get_chart_test_tasks(simulation_project=None, run_simulations=True, filter=None, working_directory_filter=None, **kwargs):
     """
     Returns multiple chart test tasks matching the provided filter criteria. The returned tasks can be run by
-    calling the :py:meth:`inet.common.task.MultipleTasks.run` method.
+    calling the :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
 
     Parameters:
         kwargs (dict):
@@ -195,7 +195,7 @@ class MultipleChartUpdateTasks(MultipleUpdateTasks):
 def get_update_chart_tasks(simulation_project=None, run_simulations=True, filter=None, working_directory_filter=None, **kwargs):
     """
     Returns multiple update chart tasks matching the provided filter criteria. The returned tasks can be run by
-    calling the :py:meth:`inet.common.task.MultipleTasks.run` method.
+    calling the :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
 
     Parameters:
         kwargs (dict):

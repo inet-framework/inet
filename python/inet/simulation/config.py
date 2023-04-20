@@ -28,7 +28,7 @@ class SimulationConfig:
         Initializes a new simulation config.
 
         Parameters:
-            simulation_project (:py:class:`inet.simulation.project.SimulationProject`):
+            simulation_project (:py:class:`SimulationProject <inet.simulation.project.SimulationProject>`):
                 The simulation project that this simulation config belongs to.
 
             working_directory (string):

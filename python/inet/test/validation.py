@@ -282,11 +282,11 @@ def run_tsn_trafficshaping_creditbasedshaper_validation_test(**kwargs):
 def get_validation_test_tasks(**kwargs):
     """
     Returns multiple validation test tasks matching the provided filter criteria. The returned tasks can be run by
-    calling the :py:meth:`inet.common.task.MultipleTasks.run` method.
+    calling the :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
 
     Parameters:
         kwargs (dict):
-            The filter criteria parameters are inherited from the :py:meth:`inet.simulation.task.get_simulation_tasks` method.
+            The filter criteria parameters are inherited from the :py:meth:`get_simulation_tasks <inet.simulation.task.get_simulation_tasks>` method.
 
     Returns (:py:class:`MultipleTestTasks`):
         an object that contains a list of :py:class:`ValidationTestTask` objects matching the provided filter criteria.

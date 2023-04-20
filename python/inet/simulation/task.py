@@ -111,7 +111,7 @@ class SimulationTask(Task):
     def __init__(self, simulation_config=None, run_number=0, itervars=None, mode="release", user_interface="Cmdenv", sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, name="simulation", task_result_class=SimulationTaskResult, **kwargs):
         """
         Parameters:
-            simulation_config (:py:class:`inet.simulation.config.SimulationConfig`):
+            simulation_config (:py:class:`SimulationConfig <inet.simulation.config.SimulationConfig>`):
                 The simulation config that is used to run this simulation task.
 
             run_number (number):
@@ -142,7 +142,7 @@ class SimulationTask(Task):
                 The Python class that is used to return the result.
 
             kwargs (dict):
-                Additional parameters are inherited from the :py:class:`inet.common.Task` constructor.
+                Additional parameters are inherited from the :py:class:`Task <inet.common.Task>` constructor.
         """
         super().__init__(name=name, task_result_class=task_result_class, **kwargs)
         assert run_number is not None
@@ -332,7 +332,7 @@ class MultipleSimulationTasks(MultipleTasks):
                 Determines if the simulation project is built before running any simulation.
 
             kwargs (dict):
-                Additional arguments are inherited from :py:class:`inet.common.task.MultipleTasks` constructor.
+                Additional arguments are inherited from :py:class:`MultipleTasks <inet.common.task.MultipleTasks>` constructor.
         """
         super().__init__(build=build, name=name, **kwargs)
         self.locals = locals()
@@ -348,8 +348,8 @@ class MultipleSimulationTasks(MultipleTasks):
 
         Parameters:
             kwargs (dict):
-                Additional parameters are inherited from the :py:func:`inet.simulation.build.build_project` function
-                and also from the :py:meth:`inet.common.task.MultipleTasks.run` method.
+                Additional parameters are inherited from the :py:func:`build_project <inet.simulation.build.build_project>` function
+                and also from the :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
 
         Returns (MultipleTaskResults):
             An object that contains a list of :py:class:`SimulationTask`.
@@ -361,14 +361,14 @@ class MultipleSimulationTasks(MultipleTasks):
 def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode="release", run_number=None, run_number_filter=None, exclude_run_number_filter=None, sim_time_limit=None, cpu_time_limit=None, concurrent=True, expected_num_tasks=None, simulation_task_class=SimulationTask, multiple_simulation_tasks_class=MultipleSimulationTasks, **kwargs):
     """
     Returns multiple simulation tasks matching the filter criteria. The returned tasks can be run by calling the
-    :py:meth:`inet.common.task.MultipleTasks.run` method.
+    :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
 
     Parameters:
-        simulation_project (:py:class:`inet.simulation.project.SimulationProject` or None):
+        simulation_project (:py:class:`SimulationProject <inet.simulation.project.SimulationProject>` or None):
             The simulation project from which simulation tasks are collected. If not specified then the default simulation
             project is used.
 
-        simulation_configs (List of :py:class:`inet.simulation.config.SimulationConfig` or None):
+        simulation_configs (List of :py:class:`SimulationConfig <inet.simulation.config.SimulationConfig>` or None):
             The list of simulation configurations from which the simulation tasks are collected. If not specified then
             all simulation configurations are used.
 
@@ -409,7 +409,7 @@ def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode=
             Determines the Python class of the returned multiple simulation tasks object.
 
         kwargs (dict):
-            Additional parameters are inherited from the :py:meth:`inet.simulation.config.SimulationConfig.matches_filter`
+            Additional parameters are inherited from the :py:meth:`matches_filter <inet.simulation.config.SimulationConfig.matches_filter>`
             method  and also from the :py:class:`SimulationTask` and :py:class:`MultipleSimulationTasks` constructors.
 
     Returns (:py:class:`MultipleSimulationTasks`):
@@ -447,7 +447,7 @@ def run_simulations(**kwargs):
             Additional parameters are inherited from the :py:func:`get_simulation_tasks` function and also from the
             :py:meth:`MultipleSimulationTasks.run` method.
 
-    Returns (:py:class:`inet.common.task.MultipleTaskResults`):
+    Returns (:py:class:`MultipleTaskResults <inet.common.task.MultipleTaskResults>`):
         an object that contains a list of :py:class:`SimulationTaskResult` objects. Each object describes the results
         of running one simulation.
     """
@@ -459,15 +459,15 @@ def clean_simulation_results(simulation_project=None, simulation_configs=None, *
     Cleans the results folders for the simulation configs matching the provided filter criteria.
 
     Parameters:
-        simulation_project (:py:class:`inet.simulation.project.SimulationProject` or None):
+        simulation_project (:py:class:`SimulationProject <inet.simulation.project.SimulationProject>` or None):
             The simulation project from which simulation tasks are collected. If not specified then the default simulation
             project is used.
 
-        simulation_configs (List of :py:class:`inet.simulation.config.SimulationConfig` or None):
+        simulation_configs (List of :py:class:`SimulationConfig <inet.simulation.config.SimulationConfig>` or None):
             The list of simulation configurations from which the simulation tasks are collected. If not specified then
             all simulation configurations are used.
 
-        kwargs (dict): Additional parameters are inherited from the :py:meth:`inet.simulation.project.SimulationProject.get_simulation_configs`
+        kwargs (dict): Additional parameters are inherited from the :py:meth:`get_simulation_configs <inet.simulation.project.SimulationProject.get_simulation_configs>`
             function.
 
     Returns (None):

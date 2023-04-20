@@ -23,13 +23,13 @@ class SmokeTestTask(SimulationTestTask):
 def get_smoke_test_tasks(cpu_time_limit="1s", **kwargs):
     """
     Returns multiple smoke test tasks matching the provided filter criteria. The returned tasks can be run by calling
-    the :py:meth:`inet.common.task.MultipleTasks.run` method.
+    the :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
 
     Parameters:
-        kwargs (dict): The filter criteria parameters are inherited from the :py:meth:`inet.simulation.task.get_simulation_tasks` method.
+        kwargs (dict): The filter criteria parameters are inherited from the :py:meth:`get_simulation_tasks <inet.simulation.task.get_simulation_tasks>` method.
 
-    Returns (:py:class:`inet.test.simulation.MultipleSimulationTestTasks`):
-        an object that contains a list of :py:class:`inet.test.simulation.SimulationTestTask` objects matching the provided filter criteria.
+    Returns (:py:class:`MultipleSimulationTestTasks <inet.test.simulation.MultipleSimulationTestTasks>`):
+        an object that contains a list of :py:class:`SimulationTestTask <inet.test.simulation.SimulationTestTask>` objects matching the provided filter criteria.
         The result can be run (and re-run) without providing additional parameters.
     """
     return get_simulation_test_tasks(cpu_time_limit=cpu_time_limit, name="smoke test", simulation_test_task_class=SmokeTestTask, **kwargs)
@@ -41,8 +41,8 @@ def run_smoke_tests(**kwargs):
     Parameters:
         kwargs (dict): The filter criteria parameters are inherited from the :py:func:`get_smoke_test_tasks` function.
 
-    Returns (:py:class:`inet.test.task.MultipleTestTaskResults`):
-        an object that contains a list of :py:class:`inet.test.simulation.SimulationTestTaskResult` objects. Each object describes the result of running one test task.
+    Returns (:py:class:`MultipleTestTaskResults <inet.test.task.MultipleTestTaskResults>`):
+        an object that contains a list of :py:class:`SimulationTestTaskResult <inet.test.simulation.SimulationTestTaskResult>` objects. Each object describes the result of running one test task.
     """
     multiple_test_tasks = get_smoke_test_tasks(**kwargs)
     return multiple_test_tasks.run(**kwargs)

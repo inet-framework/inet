@@ -138,7 +138,7 @@ class SimulationProject:
             external_include_folders (List of strings):
                 The list of absolute directories that contains external C++ include files.
 
-            simulation_configs (List of :py:class:`inet.simulation.config.SimulationConfig`):
+            simulation_configs (List of :py:class:`SimulationConfig <inet.simulation.config.SimulationConfig>`):
                 The list of simulation configs available in this simulation project.
 
             kwargs (dict):

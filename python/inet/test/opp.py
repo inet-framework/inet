@@ -45,7 +45,7 @@ class OppTestTask(TestTask):
 def get_opp_test_tasks(test_folder, simulation_project=None, filter=".*", full_match=False, **kwargs):
     """
     Returns multiple opp test tasks matching the provided filter criteria. The returned tasks can be run by
-    calling the :py:meth:`inet.common.task.MultipleTasks.run` method.
+    calling the :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
 
     Parameters:
         kwargs (dict):
