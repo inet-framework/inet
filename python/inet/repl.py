@@ -25,7 +25,7 @@ def parse_run_repl_arguments():
 def process_run_repl_arguments(args):
     initialize_logging(args.log_level)
     logging.getLogger("distributed.deploy.ssh").setLevel(args.log_level)
-    define_sample_projects()
+    define_omnetpp_sample_projects()
     simulation_project = determine_default_simulation_project(name=args.simulation_project, required=False)
 
 def run_repl_main():

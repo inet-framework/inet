@@ -49,7 +49,7 @@ def parse_run_tasks_arguments(task_name):
 
 def process_run_tasks_arguments(args):
     logging.getLogger("distributed.deploy.ssh").setLevel(args.log_level)
-    define_sample_projects()
+    define_omnetpp_sample_projects()
     simulation_project = determine_default_simulation_project(name=args.simulation_project)
     kwargs = {k: v for k, v in vars(args).items() if v is not None}
     kwargs["simulation_project"] = simulation_project
@@ -149,7 +149,7 @@ def parse_build_project_arguments():
 
 def process_build_project_arguments(args):
     initialize_logging(args.log_level)
-    define_sample_projects()
+    define_omnetpp_sample_projects()
     simulation_project = determine_default_simulation_project(name=args.simulation_project)
     kwargs = {k: v for k, v in vars(args).items() if v is not None}
     kwargs["simulation_project"] = simulation_project
