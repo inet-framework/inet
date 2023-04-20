@@ -75,6 +75,20 @@ ifeq ($(WITH_VISUALIZATIONOSG), enabled)
 endif
 
 #
+# Z3GateSchedulingConfigurator feature:
+#
+WITH_Z3 := $(shell (cd .. && $(FEATURETOOL) -q isenabled Z3GateSchedulingConfigurator && echo enabled) )
+ifeq ($(WITH_Z3), enabled)
+  ifeq ($(HAVE_PKGCFG), yes)
+    HAVE_Z3 := $(shell $(PKGCFG) --exists z3 && echo yes || echo no)
+    ifeq ($(HAVE_Z3), yes)
+      LIBS += $(shell $(PKGCFG) --libs z3)
+      CFLAGS += $(shell $(PKGCFG) --cflags z3) -DHAVE_Z3
+    endif
+  endif
+endif
+
+#
 # OpenMP feature allows faster execution of certain visualizations (like transmission power spectral density maps )
 #
 WITH_OPENMP := $(shell (cd .. && $(FEATURETOOL) -q isenabled OpenMP && echo enabled) )

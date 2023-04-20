@@ -1569,6 +1569,6 @@
                       "
         extraSourceFolders = ""
         compileFlags = "-DINET_WITH_Z3_SAT_SOLVER"
-        linkerFlags = "-lz3"
+        linkerFlags = ""
         />
 </features>
