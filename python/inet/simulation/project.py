@@ -209,10 +209,12 @@ class SimulationProject:
     def get_relative_path(self, path):
         return os.path.relpath(path, self.get_environment_variable_relative_path(self.folder_environment_variable, self.folder))
 
-    def get_executable(self, mode="release", dynamic_loading=True):
+    def get_executable(self, mode="release"):
+        dynamic_loading = self.build_types[0] == "dynamic library"
         executable_environment_variable = "__omnetpp_root_dir" if dynamic_loading else self.folder_environment_variable
-        executable = "bin/opp_run" if dynamic_loading else self.executables[0]
-        return self.get_environment_variable_relative_path(executable_environment_variable, executable + self.get_library_suffix(mode=mode))
+        executable = "bin/opp_run" if dynamic_loading else os.path.join(self.folder, self.executables[0])
+        suffix = self.get_library_suffix(mode=mode) if dynamic_loading else ""
+        return self.get_environment_variable_relative_path(executable_environment_variable, executable + suffix)
 
     def get_library_suffix(self, mode="release"):
         if mode == "release":
@@ -229,11 +231,12 @@ class SimulationProject:
 
     def get_dynamic_libraries_for_running(self):
         result = []
-        for library in self.dynamic_libraries:
-            result.append(os.path.join(self.library_folder, library))
-        for used_project in self.used_projects:
-            simulation_project = get_simulation_project(used_project, None)
-            result = result + list(map(simulation_project.get_full_path, simulation_project.get_dynamic_libraries_for_running()))
+        if self.build_types[0] == "dynamic library":
+            for library in self.dynamic_libraries:
+                result.append(os.path.join(self.library_folder, library))
+            for used_project in self.used_projects:
+                simulation_project = get_simulation_project(used_project, None)
+                result = result + list(map(simulation_project.get_full_path, simulation_project.get_dynamic_libraries_for_running()))
         return result
 
     def get_multiple_args(self, option, elements):
