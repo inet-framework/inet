@@ -2,11 +2,11 @@ import logging
 import subprocess
 import webbrowser
 
-_logger = logging.getLogger(__name__)
-
 from inet.common import *
 from inet.project.inet import *
 from inet.simulation.project import *
+
+_logger = logging.getLogger(__name__)
 
 def generate_html_documentation(docker=False, clean_build=False):
     _logger.info("Generating HTML documentation (docker=" + str(docker) + ", " + "clean_build=" + str(clean_build) + ")")

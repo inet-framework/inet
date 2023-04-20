@@ -1,11 +1,10 @@
 import logging
 import os
+import requests
 
 __sphinx_mock__ = True # ignore this module in documentation
 
 _logger = logging.getLogger(__name__)
-
-import requests
 
 def dispatch_workflow(workflow_name, owner = "inet-framework", repository = "inet"):
     github_token = open(os.path.expanduser("~/.ssh/github_repo_token"), "r").read()
