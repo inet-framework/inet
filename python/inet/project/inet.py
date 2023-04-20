@@ -1,7 +1,7 @@
 from inet.simulation.project import *
 from inet.common.util import *
 
-inet_project = define_simulation_project("inet", version="4.4.x",
+inet_project = define_simulation_project("inet", version=None,
                                          folder_environment_variable="INET_ROOT",
                                          bin_folder="bin",
                                          library_folder="src",
