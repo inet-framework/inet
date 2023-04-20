@@ -537,3 +537,4 @@ def setup(app):
     app.add_directive('video_noloop', tools.video.Video_noloop)
     app.add_directive('audio', tools.audio.Audio)
     app.add_directive('card', opptheme.CardDirective)
+    app.connect("autodoc-skip-member", autodoc_skip_member_callback) # Entry point to autodoc-skip-member
