@@ -228,11 +228,11 @@ a packet to. The list below shows some possibilities:
   the :ned:`Ipv4` module uses the IP protocol ID header field from the 
   :cpp:`Ipv4Header` to look up the next protocol as shown below:
 
-   .. literalinclude:: lib/Snippets.cc
-      :language: cpp
-      :start-after: !NextProtocolExample
-      :end-before: !End
-      :name: Next protocol example
+  .. literalinclude:: lib/Snippets.cc
+     :language: cpp
+     :start-after: !NextProtocolExample
+     :end-before: !End
+     :name: Next protocol example
 
 - The next protocol can be determined by some packet meta-data. For example,
   the :ned:`Tcp` module uses the type of the destination address from the
