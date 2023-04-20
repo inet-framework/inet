@@ -515,7 +515,7 @@ def find_simulation_project_from_current_working_directory():
         else:
             path = parent_path
     for k, simulation_project in simulation_projects.items():
-        if current_working_directory.startswith(simulation_project.get_full_path(".")):
+        if current_working_directory.startswith(os.path.realpath(simulation_project.get_full_path("."))):
             return simulation_project
 
 def determine_default_simulation_project(name=None, version=None, required=True, **kwargs):
