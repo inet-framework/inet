@@ -1,3 +1,13 @@
+"""
+This module provides functionality for chart testing of multiple simulations.
+
+The main function is :py:func:`run_chart_tests`. It allows running multiple chart tests matching the
+provided filter criteria. Chart tests check if charts of the result analysis are the same as the saved
+baseline charts. The baseline charts can be found in the media folder of the simulation project. For
+the INET Framework the media folder can be found at https://github.com/inet-framework/media in a separate
+GitHub repository.
+"""
+
 import filecmp
 import io
 import logging
@@ -77,6 +87,18 @@ class MultipleChartTestTasks(MultipleTestTasks):
         return super().run_protected(**kwargs)
 
 def get_chart_test_tasks(simulation_project=None, run_simulations=True, filter=None, working_directory_filter=None, **kwargs):
+    """
+    Returns multiple chart test tasks matching the provided filter criteria. The returned tasks can be run by
+    calling the :py:meth:`inet.common.task.MultipleTasks.run` method.
+
+    Parameters:
+        kwargs (dict):
+            TODO
+
+    Returns (:py:class:`MultipleTestTasks`):
+        an object that contains a list of :py:class:`ChartTestTask` objects matching the provided filter criteria.
+        The result can be run (and re-run) without providing additional parameters.
+    """
     if simulation_project is None:
         simulation_project = get_default_simulation_project()
     test_tasks = []
@@ -96,6 +118,16 @@ def get_chart_test_tasks(simulation_project=None, run_simulations=True, filter=N
     return MultipleChartTestTasks(tasks=test_tasks, multiple_simulation_tasks=MultipleSimulationTasks(tasks=simulation_tasks, simulation_project=simulation_project, **kwargs), **dict(kwargs, scheduler="process"))
 
 def run_chart_tests(**kwargs):
+    """
+    Runs one or more chart tests that match the provided filter criteria.
+
+    Parameters:
+        kwargs (dict):
+            The filter criteria parameters are inherited from the :py:func:`get_chart_test_tasks` function.
+
+    Returns (:py:class:`MultipleTestTaskResults`):
+        an object that contains a list of :py:class:`TestTaskResult` objects. Each object describes the result of running one test task.
+    """
     multiple_chart_test_tasks = get_chart_test_tasks(**kwargs)
     return multiple_chart_test_tasks.run(**kwargs)
 
@@ -161,6 +193,18 @@ class MultipleChartUpdateTasks(MultipleUpdateTasks):
         return super().run_protected(**kwargs)
 
 def get_update_chart_tasks(simulation_project=None, run_simulations=True, filter=None, working_directory_filter=None, **kwargs):
+    """
+    Returns multiple update chart tasks matching the provided filter criteria. The returned tasks can be run by
+    calling the :py:meth:`inet.common.task.MultipleTasks.run` method.
+
+    Parameters:
+        kwargs (dict):
+            TODO
+
+    Returns (:py:class:`MultipleUpdateTasks`):
+        an object that contains a list of :py:class:`ChartUpdateTask` objects matching the provided filter criteria.
+        The result can be run (and re-run) without providing additional parameters.
+    """
     if simulation_project is None:
         simulation_project = get_default_simulation_project()
     update_tasks = []
@@ -179,6 +223,16 @@ def get_update_chart_tasks(simulation_project=None, run_simulations=True, filter
     return MultipleChartUpdateTasks(tasks=update_tasks, multiple_simulation_tasks=MultipleSimulationTasks(tasks=simulation_tasks, simulation_project=simulation_project, **kwargs), **dict(kwargs, scheduler="process"))
 
 def update_charts(simulation_project=None, **kwargs):
+    """
+    Updates the stored charts for one or more chart tests that match the provided filter criteria.
+
+    Parameters:
+        kwargs (dict):
+            The filter criteria parameters are inherited from the :py:func:`get_update_chart_tasks` function.
+
+    Returns (:py:class:`MultipleUpdateTaskResults`):
+        an object that contains a list of :py:class:`UpdateTaskResult` objects. Each object describes the result of running one update task.
+    """
     if simulation_project is None:
         simulation_project = get_default_simulation_project()
     multiple_update_chart_tasks = get_update_chart_tasks(**kwargs)

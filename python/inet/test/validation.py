@@ -1,3 +1,11 @@
+"""
+This module provides functionality for validation testing of multiple simulations.
+
+The main function is :py:func:`run_validation_tests`. It allows running multiple validation tests matching
+the provided filter criteria. Validation tests check simulations results against analytical model results,
+often cited in research papers, or simulation results of models created for other simulation frameworks.
+"""
+
 import itertools
 import logging
 import numpy
@@ -272,6 +280,18 @@ def run_tsn_trafficshaping_creditbasedshaper_validation_test(**kwargs):
 # Multiple validation tests
 
 def get_validation_test_tasks(**kwargs):
+    """
+    Returns multiple validation test tasks matching the provided filter criteria. The returned tasks can be run by
+    calling the :py:meth:`inet.common.task.MultipleTasks.run` method.
+
+    Parameters:
+        kwargs (dict):
+            The filter criteria parameters are inherited from the :py:meth:`inet.simulation.task.get_simulation_tasks` method.
+
+    Returns (:py:class:`MultipleTestTasks`):
+        an object that contains a list of :py:class:`ValidationTestTask` objects matching the provided filter criteria.
+        The result can be run (and re-run) without providing additional parameters.
+    """
     validation_test_task_functions = [get_tsn_framereplication_simulation_test_task,
                                       get_tsn_trafficshaping_creditbasedshaper_validation_test_task,
                                       get_tsn_trafficshaping_asynchronousshaper_core4inet_validation_test_task,
@@ -288,4 +308,14 @@ def get_validation_test_tasks(**kwargs):
     return MultipleTestTasks(tasks=validation_test_tasks, name="validation test", **kwargs)
 
 def run_validation_tests(**kwargs):
+    """
+    Runs one or more validation tests that match the provided filter criteria.
+
+    Parameters:
+        kwargs (dict):
+            The filter criteria parameters are inherited from the :py:func:`get_validation_test_tasks` function.
+
+    Returns (:py:class:`MultipleTestTaskResults`):
+        an object that contains a list of :py:class:`TestTaskResult` objects. Each object describes the result of running one test task.
+    """
     return get_validation_test_tasks(**kwargs).run(**kwargs)

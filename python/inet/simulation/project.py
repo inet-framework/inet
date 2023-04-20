@@ -1,17 +1,15 @@
 """
-Provides abstractions for simulation projects.
+This module provides abstractions for simulation projects.
 
 The main functions are:
 
- - :py:func:`get_simulation_project`:
- - :py:func:`get_default_simulation_project`:
+- :py:func:`get_simulation_project`:
+- :py:func:`get_default_simulation_project`:
 
 In general, it's a good idea to use the default project, because it makes calling the various functions easier and in
 most cases there's only one simulation project is worked on. The default simulation project is automatically set to the
 one above the current working directory when the omnetpp.repl package is loaded, but it can be overridden by the user
 later.
-
-Please note that undocumented features are not supposed to be used by the user.
 """
 
 import glob
@@ -140,7 +138,7 @@ class SimulationProject:
             external_include_folders (List of strings):
                 The list of absolute directories that contains external C++ include files.
 
-            simulation_configs (List of :py:class:`omnetpp.simulation.config.SimulationConfig`):
+            simulation_configs (List of :py:class:`inet.simulation.config.SimulationConfig`):
                 The list of simulation configs available in this simulation project.
 
             kwargs (dict):

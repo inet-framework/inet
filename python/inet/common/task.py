@@ -1,5 +1,5 @@
 """
-Provides abstractions for generic tasks and their results.
+This module provides abstractions for generic tasks and their results.
 
 Tasks are primarily useful because they can be created, passed around and stored
 before actually being run. This separation allows running the same tasks multiple
@@ -18,8 +18,6 @@ Similarly, creating a multiple tasks object containing two empty tasks and runni
 
     mt = MultipleTasks([Task(), Task()])
     mt.run()
-
-Please note that undocumented features are not supposed to be used by the user.
 """
 
 import dask
@@ -374,7 +372,7 @@ class Task:
             dry_run (bool):
                 Specifies to skip the actual running of the task but do everything else.
 
-            keyboard_interrupt_handler (:py:class:`omnetpp.common.KeyboardInterruptHandler` or None):
+            keyboard_interrupt_handler (:py:class:`inet.common.KeyboardInterruptHandler` or None):
                 Provides a class that will handle keyboard interrupts. This allows seamless exit from running multiple
                 tasks.
 

@@ -1,7 +1,5 @@
 """
-Provides functionality for creating and managing SSH clusters.
-
-Please note that undocumented features are not supposed to be used by the user.
+This module provides functionality for creating and managing SSH clusters.
 """
 
 import dask
@@ -24,11 +22,11 @@ class SSHCluster:
     There are a couple of pitfalls that can prevent the SSH cluster from working correctly. If you encounter problems
     with the SSH cluster, make sure the following conditions are met:
 
-     - scheduler and worker node hostnames can be resolved to IP addresses on all nodes
-     - all nodes can SSH login into all other nodes (even themselves!) without any user interaction (no password is required)
-     - the Python version and all required Python library versions are the same on all nodes
-     - no firewall rule prevents the scheduler to connect to the workers
-     - simulation projects are compiled both in release and debug versions
+    - scheduler and worker node hostnames can be resolved to IP addresses on all nodes
+    - all nodes can SSH login into all other nodes (even themselves!) without any user interaction (no password is required)
+    - the Python version and all required Python library versions are the same on all nodes
+    - no firewall rule prevents the scheduler to connect to the workers
+    - simulation projects are compiled both in release and debug versions
     """
 
     def __init__(self, scheduler_hostname, worker_hostnames, nix_shell=None):

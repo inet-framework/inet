@@ -1,5 +1,5 @@
 """
-This package supports running INET Framework simulations.
+This package supports running simulations.
 
 The main function is run_simulations() that allows running multiple simulations,
 even completely unrelated ones that have different working directories, INI files,

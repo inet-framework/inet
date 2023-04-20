@@ -1,17 +1,15 @@
 """
-Main package for the INET Framework.
+This is the main package for the INET Framework Python library.
 
 It provides sub-packages for running simulations, analyzing simulation results, generating documentation, automated
 testing, etc.
 
 Please note that undocumented features are not supposed to be used by the user.
 
-.. TODO the following documentation should be merged into the simulation manual
+INET Framework Python Package
+#############################
 
-INET Framework Python Module
-############################
-
-The following sections describe the Python module that comes with the latest INET Framework version.
+The following sections give an overview of the INET Framework Python package.
 
 Using Python Interactively
 ==========================
@@ -19,18 +17,19 @@ Using Python Interactively
 The Python programming language is a very adequate tool for interactive development. There are several reasons: running
 Python code doesn't require compilation, the interactive code execution creates a bidirectional communication channel
 between the user and the system, and the interactive development session is stateful, remembering code blocks executed
-earlier and also their results. Moreover, Python comes with a plethora of open source libraries which are easy to install
-and use in combination with the functions provided by the INET Framework Python module.
+earlier and also their results. Moreover, Python comes with a plethora of open source libraries which are easy to install,
+and they can be used in combination with the functions provided by the INET Python package.
 
-The easiest way to start using INET in the interactive Python environment is to start the :command:`inet_python_repl`
-shell script. This script is pretty simple, it loads the :py:mod:`inet.repl` Python package and launches an IPython
+The simplest way to start using INET in the interactive Python environment is to start the :command:`inet_python_repl`
+shell script. This script is pretty simple, it loads the :py:mod:`inet.repl` Python module and launches an IPython
 interpreter. Alternatively, it's also possible to use any other Python interpreter, and also to import the desired
-individual INET packages as needed. A good place to see how to setup the INET Python modules after importing them
+individual INET packages as needed. A good place to see how to setup the INET Python packages after importing them,
 is to look at how the aforementioned INET package is implemented.
 
-The OMNeT++ IDE contains built-in interactive Python development support. This is provided in the form of a IPython
-console view that automatically imports the :py:mod:`inet.repl` package and it's immediately ready to use when the
-IDE is started.
+.. TODO
+   The OMNeT++ IDE contains built-in interactive Python development support. This is provided in the form of a IPython
+   console view that automatically imports the :py:mod:`inet.repl` package and it's immediately ready to use when the
+   IDE is started.
 
 Once the Python interpreter is up and running, the user can immediately start interacting with it and run simulations
 and carry out many other tasks. The easiest way to get used to the interactive development, is to run the code fragments
@@ -40,8 +39,8 @@ the help of the INET Python API reference documentation.
 Installation
 ============
 
-The INET Python module requires certain other Python modules to be installed before it can be used. The following
-command installs all such required and optional modules:
+The INET Python package requires certain other Python libraries to be installed before it can be used. The following
+command installs all such required and optional libraries:
 
 .. code-block:: console
 
@@ -53,15 +52,13 @@ After the installation is completed, starting the INET Python interpreter from a
 
 .. code-block:: console
 
-    levy@valardohaeris:~/workspace/inet$ . setenv
+    levy@valardohaeris:~/workspace/omnetpp$ . setenv
     Environment for 'omnetpp-6.0' in directory '/home/levy/workspace/omnetpp' is ready.
+    levy@valardohaeris:~/workspace/inet$ . setenv
+    Environment for INET 4.5.0 in directory '/home/levy/workspace/inet' is ready.
     levy@valardohaeris:~/workspace/inet$ inet_python_repl
-    WARNING inet.simulation.project No enclosing simulation project is found from current working directory, and no simulation project is specified explicitly (project.py:510)
-    INFO inet.repl OMNeT++ Python support is loaded. (repl.py:40)
-
-.. note::
-
-    The above warning isn't a problem, it simply states that there's no default simulation project.
+    INFO inet.simulation.project Default project is set to inet (project.py:532)
+    INFO inet.repl OMNeT++ Python support is loaded. (repl.py:38)
 
 When the Python interpreter starts the following prompt is displayed:
 
@@ -82,49 +79,49 @@ the returned result:
 Main Concepts
 =============
 
-The INET Python module contains many useful classes and functions. The following lists the most important concepts
+The INET Python package contains many useful classes and functions. The following lists the most important concepts
 represented by Python classes:
 
- - :py:class:`SimulationProject <inet.simulation.project.SimulationProject>`: represents a project that usually comes
-   with its own modules, their C++ implementation, and also with several example simulations
- - :py:class:`SimulationConfig <inet.simulation.config.SimulationConfig>`: represents a specific configuration section
-   from an INI file under a working directory in a specific simulation project
- - :py:class:`SimulationTask <inet.simulation.task.SimulationTask>`: represents a completely parameterized simulation
-   using a simulation config which can be run multiple times
- - :py:class:`SimulationTaskResult <inet.simulation.task.SimulationTaskResult>`: represents the result that is created
-   when a simulation task is run
+- :py:class:`SimulationProject <inet.simulation.project.SimulationProject>`: represents a project that usually comes
+  with its own NED modules, their C++ implementation, and also with several example simulations
+- :py:class:`SimulationConfig <inet.simulation.config.SimulationConfig>`: represents a specific configuration section
+  from an INI file under a working directory in a specific simulation project
+- :py:class:`SimulationTask <inet.simulation.task.SimulationTask>`: represents a completely parameterized simulation
+  (using a simulation config) which can be run multiple times
+- :py:class:`SimulationTaskResult <inet.simulation.task.SimulationTaskResult>`: represents the result that is created
+  when a simulation task is run
 
-.. note::
-
-    Undocumented functions, classes and their methods are not supposed to be used by the user.
-
-There are several other important concepts represented in Python: multiple simulation tasks and their results, smoke
-tests, fingerprint tests, and so on.
+There are several other concepts represented in Python: multiple simulation tasks and their results, smoke tests,
+fingerprint tests, and so on.
 
 Defining Projects
 =================
 
-The simulation project is an essential concept of the INET Python module. Many functions take a simulation project
-as parameter. OMNeT++ comes with a set of sample projects which are already defined in the INET Python module.
+The simulation project is an essential concept of the INET Python package. Many functions take a simulation project
+as parameter. The INET python package contains several predefined simulation projects: all omnetpp sample projects
+and the INET simulation project itself.
 
-For example, the following `.omnetpp` project definition file describes the sample simulation project called `aloha`.
-The file can be found under the `aloha` sample project directory. It simply defines a simulation project with a root
-director set to `samples/aloha` relative to the value of the `__omnetpp_root_dir` environment variable.
+.. TODO
+   OMNeT++ comes with a set of sample projects which are already defined in the INET Python package.
 
-.. code-block:: json
+   For example, the following `.omnetpp` project definition file describes the sample simulation project called `aloha`.
+   The file can be found under the `aloha` sample project directory. It simply defines a simulation project with a root
+   director set to `samples/aloha` relative to the value of the `__omnetpp_root_dir` environment variable.
 
-    {"name": "aloha",
-     "folder_environment_variable": "__omnetpp_root_dir",
-     "folder": "samples/aloha"}
+   .. code-block:: json
 
-There are many other options that can be used in the project definition: C++ include folders, NED folders, external
-libraries, etc. The simulation project could also be defined by calling the
-:py:func:`define_simulation_project <inet.simulation.project.define_simulation_project>`
-function. The :py:class:`SimulationProject <inet.simulation.project.SimulationProject>` class constructor has the
-same set of parameters.
+       {"name": "aloha",
+        "folder_environment_variable": "__omnetpp_root_dir",
+        "folder": "samples/aloha"}
+
+   There are many other options that can be used in the project definition: C++ include folders, NED folders, external
+   libraries, etc. The simulation project could also be defined by calling the
+   :py:func:`define_simulation_project <inet.simulation.project.define_simulation_project>`
+   function. The :py:class:`SimulationProject <inet.simulation.project.SimulationProject>` class constructor has the
+   same set of parameters.
 
 An important concept related to simulation projects is the default simulation project. Having a default project greatly
-simplifies using several functions of the INET Python module by implicitly using the default project without always
+simplifies using several functions of the INET Python package by implicitly using the default project without always
 explicitly passing it in as a parameter. The default simulation project is automatically set to the one enclosing the
 current working directory when the Python interpreter is started. Alternatively, the default simulation project can also
 be set explicitly using the :py:func:`set_default_simulation_project <inet.simulation.project.set_default_simulation_project>`
@@ -139,15 +136,15 @@ can also use the OMNeT++ IDE, which has built-in support for automatically build
 simulation. Alternatively, you can also start the build manually from the IDE.
 
 Unfortunately, none of the above can be done easily when you are working from the Python interpreter. To avoid running
-a stale binary, the INET Python module also supports building the simulation project:
+a stale binary, the INET Python package also supports building the simulation project using Python functions:
 
 .. code-block:: ipython
 
-    In [1]: p = get_simulation_project("aloha")
+    In [1]: p = get_simulation_project("inet")
 
     In [2]: build_project(simulation_project=p)
-    INFO inet.simulation.build Building aloha started (build.py:61)
-    INFO inet.simulation.build Building aloha ended (build.py:67)
+    INFO inet.simulation.build Building inet started (build.py:61)
+    INFO inet.simulation.build Building inet ended (build.py:67)
 
 The :py:func:`build_project <inet.simulation.build.build_project>` function currently runs the :command:`make` command
 in the project root directory. Similarly to the :command:`make` build system, you can also build the binaries in different
@@ -158,26 +155,28 @@ modes:
     In [1]: build_project(simulation_project=p, mode="debug")
     ...
 
-The INET Python module also contains a new build system that uses tasks instead of the :command:`make` build system.
+.. TODO
+   The INET Python package also contains a new build system that uses tasks instead of the :command:`make` command based
+   build system.
 
-.. code-block:: ipython
+   .. code-block:: ipython
 
-    In [1]: build_project(simulation_project=p, build_mode="task")
-    ...
+       In [1]: build_project(simulation_project=p, build_mode="task")
+       ...
 
-The main benefit of building projects like this is that you can easily add your own Python code to the build process or
-even perform automatic cross project builds.
+   The main benefit of building projects like this is that you can easily add your own Python code to the build process or
+   even perform automatic cross project builds.
 
 Running Simulations
 ===================
 
 The most common task performed by users is running simulations. There are already several ways to do this: simulations
 can be run individually from the IDE with a few mouse clicks, they can also be run individually from the command line
-using :command:`opp_run` or the simulation model binary, and repetitions or parameter studies can be run in parallel
-batches from the command line using :command:`opp_runall`.
+using the :command:`opp_run` command or the simulation model binary, and repetitions or parameter studies can be run
+in parallel batches from the command line using the :command:`opp_runall` command.
 
 But there are a few other use cases for running simulations. For example, running multiple unrelated simulations from
-the same simulation project, that may have different working directories, INI files, and configurations. For another
+the same simulation project, which may have different working directories, INI files, and configurations. For another
 example, running multiple simulations on a cluster of computers connected to a LAN. Ideally, all of these use cases,
 including running single simulations, repetitions and parameter studies, should be provided for the users by a single
 entry point in the toolchain.
@@ -229,7 +228,7 @@ project:
 .. code-block:: console
 
     levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_python_repl
-    INFO inet.simulation.project Default project is set to fifo (project.py:512)
+    INFO inet.simulation.project Default project is set to fifo (project.py:533)
     INFO inet.repl OMNeT++ Python support is loaded. (repl.py:40)
 
 After the default simulation project is set, running all simulations can be done with a single parameterless function call:
@@ -361,7 +360,8 @@ and debug mode, and distribute the binary files to all worker nodes:
 
 The binary distribution files are incrementally copied using the :command:`rsync` command.
 
-Running a set of simulations on the cluster is done with the same function with some additional parameters:
+Running a set of simulations on the cluster is done with the same :py:meth:`run_simulations <inet.simulation.task.run_simulations>`
+function with some additional parameters:
 
 .. code-block:: ipython
 
@@ -386,11 +386,6 @@ Another way is to collect multiple simulation tasks and run them on the cluster,
     Out[2]: Multiple simulation results: DONE, summary: 42 DONE in 0:00:04.109337
 
 Exiting from the interactive Python session also automatically stops the SSH cluster.
-
-Analyzing Results
-=================
-
-.. TODO
 
 Testing Projects
 ================
@@ -453,8 +448,7 @@ If there are no fingerprints in the database yet, then they must be first calcul
 
 .. code-block:: ipython
 
-    In [1]: update_correct_fingerprints(simulation_project=p, config_filter="PureAlohaExperiment",
-                                        sim_time_limit="1s", database=default_database)
+    In [1]: update_correct_fingerprints(simulation_project=p, config_filter="PureAlohaExperiment", sim_time_limit="1s")
     [04/42] Updating fingerprint . -c PureAlohaExperiment -r 3 for 1s INSERT 856a-c13d/tplx
     [11/42] Updating fingerprint . -c PureAlohaExperiment -r 10 for 1s INSERT 835c-d8e8/tplx
     ...
@@ -475,8 +469,7 @@ When the fingerprints are already present in the database, then the fingerprint 
 
 .. code-block:: ipython
 
-    In [1]: run_fingerprint_tests(simulation_project=p, config_filter="PureAlohaExperiment",
-                                  sim_time_limit="1s", database=default_database)
+    In [1]: run_fingerprint_tests(simulation_project=p, config_filter="PureAlohaExperiment", sim_time_limit="1s")
     [02/42] Checking fingerprint . -c PureAlohaExperiment -r 1 for 1s PASS
     [06/42] Checking fingerprint . -c PureAlohaExperiment -r 5 for 1s PASS
     ...
@@ -492,12 +485,12 @@ Command Line Tools
 Some of the tasks that can be carried out using the Python interpreter, can also be done directly from the command line.
 The following list gives a brief overview of these command line tools:
 
- - :command:`inet_python_repl`: starts the INET Python interpreter
- - :command:`inet_build_project`: builds a simulation project using tasks
- - :command:`inet_run_simulations`: runs multiple simulations matching a filter criteria
- - :command:`inet_run_smoke_tests`: runs multiple smoke tests matching a filter criteria
- - :command:`inet_run_fingerprint_tests`: runs multiple fingerprint tests matching a filter criteria
- - :command:`inet_update_correct_fingerprints`: updates stored correct fingerprints matching a filter criteria
+- :command:`inet_python_repl`: starts the INET Python interpreter
+- :command:`inet_build_project`: builds a simulation project using tasks
+- :command:`inet_run_simulations`: runs multiple simulations matching a filter criteria
+- :command:`inet_run_smoke_tests`: runs multiple smoke tests matching a filter criteria
+- :command:`inet_run_fingerprint_tests`: runs multiple fingerprint tests matching a filter criteria
+- :command:`inet_update_correct_fingerprints`: updates stored correct fingerprints matching a filter criteria
 
 .. note::
 
@@ -612,7 +605,7 @@ Tips and Tricks
 .. TODO
 
 The real power of using the Python interpreter comes with having your own utilities. This includes importing additional
-Python modules, adding specific functions tailored to your needs, adding state variables to quickly access what you use
+Python packages, adding specific functions tailored to your needs, adding state variables to quickly access what you use
 often, etc. So it is highly advisable to start writing your own Python package where you can add what is required.
 """
 

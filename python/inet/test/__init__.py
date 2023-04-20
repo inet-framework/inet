@@ -1,7 +1,7 @@
 """
-This package supports automated testing for the INET Framework.
+This package supports automated testing.
 
-It provides functions to run various tests:
+It provides several functions to run various tests:
  - run_smoke_tests(): quickly check if simulations run without crashing and terminate properly
  - run_fingerprint_tests(): protect against regressions in the simulation trajectory
  - run_validation_tests(): compare simulation results to analytical models

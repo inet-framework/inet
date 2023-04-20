@@ -1,7 +1,5 @@
 """
-Provides generic functionality for other modules.
-
-Please note that undocumented features are not supposed to be used by the user.
+This package provides generally useful functionality.
 """
 
 from inet.common.cluster import *

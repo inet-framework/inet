@@ -1,7 +1,5 @@
 """
-Provides abstractions for simulation configs.
-
-Please note that undocumented features are not supposed to be used by the user.
+This module provides abstractions for simulation configs.
 """
 
 import builtins
@@ -30,7 +28,7 @@ class SimulationConfig:
         Initializes a new simulation config.
 
         Parameters:
-            simulation_project (:py:class:`omnetpp.simulation.project.SimulationProject`):
+            simulation_project (:py:class:`inet.simulation.project.SimulationProject`):
                 The simulation project that this simulation config belongs to.
 
             working_directory (string):

@@ -1,10 +1,8 @@
 """
-Provides functionality for fingerprint testing of multiple simulations.
+This module provides functionality for fingerprint testing of multiple simulations.
 
 The main function is :py:func:`run_fingerprint_tests`. It allows running multiple fingerprint tests matching the provided
 filter criteria. Fingerprint tests check for regressions in the simulation execution trajectory.
-
-Please note that undocumented features are not supposed to be used by the user.
 """
 
 import hashlib
@@ -382,14 +380,15 @@ def collect_fingerprint_test_groups(simulation_task, ingredients_list=["tplx"], 
 def get_fingerprint_test_tasks(**kwargs):
     """
     Returns multiple fingerprint test tasks matching the provided filter criteria. The returned tasks can be run by
-    calling the :py:meth:`omnetpp.common.task.MultipleTasks.run` method.
+    calling the :py:meth:`inet.common.task.MultipleTasks.run` method.
 
     Parameters:
         kwargs (dict):
-            TODO
+            The filter criteria parameters are inherited from the :py:meth:`inet.simulation.task.get_simulation_tasks` method.
 
     Returns (:py:class:`MultipleFingerprintTestTasks`):
-        TODO
+        an object that contains a list of :py:class:`FingerprintTestTask` objects matching the provided filter criteria.
+        The result can be run (and re-run) without providing additional parameters.
     """
     def get_tasks(**kwargs):
         multiple_simulation_tasks = get_simulation_tasks(**kwargs)
@@ -406,10 +405,10 @@ def run_fingerprint_tests(**kwargs):
 
     Parameters:
         kwargs (dict):
-            TODO
+            The filter criteria parameters are inherited from the :py:func:`get_fingerprint_test_tasks` function.
 
     Returns (:py:class:`MultipleFingerprintTestTaskResults`):
-        TODO
+        an object that contains a list of :py:class:`FingerprintTestTaskResult` objects. Each object describes the result of running one test task.
     """
     multiple_fingerprint_test_tasks = get_fingerprint_test_tasks(**kwargs)
     return multiple_fingerprint_test_tasks.run(**kwargs)
@@ -604,6 +603,18 @@ class MultipleFingerprintUpdateTaskResults(MultipleUpdateTaskResults):
         return "  " + separator.join(texts)
 
 def get_update_correct_fingerprint_tasks(**kwargs):
+    """
+    Returns multiple fingerprint update tasks matching the provided filter criteria. The returned tasks can be run by
+    calling the :py:meth:`inet.common.task.MultipleTasks.run` method.
+
+    Parameters:
+        kwargs (dict):
+            The filter criteria parameters are inherited from the :py:meth:`inet.simulation.task.get_simulation_tasks` method.
+
+    Returns (:py:class:`MultipleFingerprintUpdateTasks`):
+        an object that contains a list of :py:class:`FingerprintUpdateTask` objects matching the provided filter criteria.
+        The result can be run (and re-run) without providing additional parameters.
+    """
     fingerprint_update_tasks = []
     multiple_simulation_tasks = get_simulation_tasks(**kwargs)
     for simulation_task in multiple_simulation_tasks.tasks:
@@ -618,10 +629,10 @@ def update_correct_fingerprints(**kwargs):
 
     Parameters:
         kwargs (dict):
-            TODO
+            The filter criteria parameters are inherited from the :py:func:`get_update_correct_fingerprint_tasks` function.
 
     Returns (:py:class:`MultipleFingerprintUpdateTaskResults`):
-        TODO
+        an object that contains a list of :py:class:`FingerprintUpdateTaskResult` objects. Each object describes the result of running one update task.
     """
     multiple_fingerprint_update_tasks = get_update_correct_fingerprint_tasks(**kwargs)
     return multiple_fingerprint_update_tasks.run(**kwargs)

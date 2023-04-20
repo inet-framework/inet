@@ -1,7 +1,5 @@
 """
-Provides abstractions for simulation test tasks and their results.
-
-Please note that undocumented features are not supposed to be used by the user.
+This module provides abstractions for simulation test tasks and their results.
 """
 
 import datetime
