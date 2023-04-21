@@ -66,7 +66,7 @@ class StatisticalTestTask(SimulationTestTask):
                         with open(stored_scalar_result_file_name, "r") as file:
                             stored_scalar_result_file = file.readlines()
                         with open(scalar_result_diff_file_name, "w") as file:
-                            scalar_diff = "".join(difflib.ndiff(current_scalar_result_file, stored_scalar_result_file))
+                            scalar_diff = "".join(difflib.ndiff(stored_scalar_result_file, current_scalar_result_file))
                             file.write(scalar_diff)
                         if current_df.empty:
                             return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="FAIL", reason="Current statistical results are empty")
