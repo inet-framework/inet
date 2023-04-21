@@ -328,7 +328,7 @@ void UtilizationFilter::updateTotalValue(simtime_t time)
     totalValueTime = time;
 }
 
-void UtilizationFilter::finish(cComponent *component, simsignal_t signal)
+void UtilizationFilter::finish(cResultFilter *prev)
 {
     const simtime_t now = simTime();
     if (lastSignalTime < now) {
@@ -364,7 +364,7 @@ void MaxPerGroupFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cOb
     lastTime = t;
 }
 
-void MaxPerGroupFilter::finish(cComponent *component, simsignal_t signal)
+void MaxPerGroupFilter::finish(cResultFilter *prev)
 {
     if (!lastIdentifier.empty())
         fire(this, lastTime, max, nullptr);
@@ -388,7 +388,7 @@ void WeighedMeanPerGroupFilter::receiveSignal(cResultFilter *prev, simtime_t_cre
     lastTime = t;
 }
 
-void WeighedMeanPerGroupFilter::finish(cComponent *component, simsignal_t signal)
+void WeighedMeanPerGroupFilter::finish(cResultFilter *prev)
 {
     if (!lastIdentifier.empty())
         fire(this, lastTime, sum / weight, nullptr);
@@ -410,7 +410,7 @@ void WeighedSumPerGroupFilter::receiveSignal(cResultFilter *prev, simtime_t_cref
     lastTime = t;
 }
 
-void WeighedSumPerGroupFilter::finish(cComponent *component, simsignal_t signal)
+void WeighedSumPerGroupFilter::finish(cResultFilter *prev)
 {
     if (!lastIdentifier.empty())
         fire(this, lastTime, sum, nullptr);
@@ -730,7 +730,7 @@ void PacketRateFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObj
     }
 }
 
-void PacketRateFilter::finish(cComponent *component, simsignal_t signalID)
+void PacketRateFilter::finish(cResultFilter *prev)
 {
     const simtime_t now = simTime();
     if (lastSignalTime < now) {
@@ -810,7 +810,7 @@ void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObj
         receiveSignal(prev, t, packet->getBitLength(), details);
 }
 
-void ThroughputFilter::finish(cComponent *component, simsignal_t signalID)
+void ThroughputFilter::finish(cResultFilter *prev)
 {
     const simtime_t now = simTime();
     if (lastSignalTime < now) {
@@ -887,7 +887,7 @@ void LiveThroughputFilter::timerDeleted()
     event = nullptr;
 }
 
-void LiveThroughputFilter::finish(cComponent *component, simsignal_t signalID)
+void LiveThroughputFilter::finish(cResultFilter *prev)
 {
     simtime_t now = simTime();
     if (lastSignal < now) {

@@ -201,7 +201,7 @@ class INET_API MaxPerGroupFilter : public cObjectResultFilter
 
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
-    virtual void finish(cComponent *component, simsignal_t signalID) override;
+    virtual void finish(cResultFilter *prev) override;
 };
 
 class INET_API WeighedMeanPerGroupFilter : public cObjectResultFilter
@@ -214,7 +214,7 @@ class INET_API WeighedMeanPerGroupFilter : public cObjectResultFilter
 
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
-    virtual void finish(cComponent *component, simsignal_t signalID) override;
+    virtual void finish(cResultFilter *prev) override;
 };
 
 class INET_API WeighedSumPerGroupFilter : public cObjectResultFilter
@@ -226,7 +226,7 @@ class INET_API WeighedSumPerGroupFilter : public cObjectResultFilter
 
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
-    virtual void finish(cComponent *component, simsignal_t signalID) override;
+    virtual void finish(cResultFilter *prev) override;
 };
 
 class INET_API DropWeightFilter : public cObjectResultFilter
@@ -391,7 +391,7 @@ class INET_API UtilizationFilter : public cNumericResultFilter
     virtual void updateTotalValue(simtime_t time);
 
   public:
-    virtual void finish(cComponent *component, simsignal_t signalID) override;
+    virtual void finish(cResultFilter *prev) override;
 };
 
 /**
@@ -421,7 +421,7 @@ class INET_API PacketRateFilter : public cObjectResultFilter
 
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
-    virtual void finish(cComponent *component, simsignal_t signalID) override;
+    virtual void finish(cResultFilter *prev) override;
 };
 
 /**
@@ -455,7 +455,7 @@ class INET_API ThroughputFilter : public cObjectResultFilter
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t value, cObject *details) override;
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
-    virtual void finish(cComponent *component, simsignal_t signalID) override;
+    virtual void finish(cResultFilter *prev) override;
 };
 
 /**
@@ -481,7 +481,7 @@ class INET_API LiveThroughputFilter : public cObjectResultFilter
     virtual void init(Context *ctx) override;
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t value, cObject *details) override;
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
-    virtual void finish(cComponent *component, simsignal_t signalID) override;
+    virtual void finish(cResultFilter *prev) override;
     virtual void timerExpired();
     virtual void timerDeleted();
 };
