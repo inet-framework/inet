@@ -39,6 +39,8 @@ class StatisticalTestTask(SimulationTestTask):
         current_results_directory = simulation_project.get_full_path(os.path.join(working_directory, "results"))
         stored_results_directory = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory))
         scalars_match = False
+        # KLUDGE TODO there's no way of knowing which scalar files are created by a particular simulation run
+        #             the results folder should be different from the default so that all results can be identified
         for current_scalar_result_file_name in glob.glob(os.path.join(current_results_directory, "*.sca")):
             if re.search("/" + config + "-#", current_scalar_result_file_name):
                 _logger.debug(f"Reading result file {current_scalar_result_file_name}")
@@ -137,6 +139,7 @@ class StatisticalResultsUpdateTask(SimulationTask):
         if not os.path.exists(target_results_directory):
             os.makedirs(target_results_directory)
         # KLUDGE TODO there's no way of knowing which scalar files are created by a particular simulation run
+        #             the results folder should be different from the default so that all results can be identified
         for scalar_result_file_name in glob.glob(os.path.join(source_results_directory, "*.sca")):
             shutil.copy(scalar_result_file_name, target_results_directory)
         return update_result
