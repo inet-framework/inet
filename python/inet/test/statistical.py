@@ -44,7 +44,7 @@ class StatisticalTestTask(SimulationTestTask):
         for current_scalar_result_file_name in glob.glob(os.path.join(current_results_directory, "*.sca")):
             if re.search("/" + config + "-#", current_scalar_result_file_name):
                 _logger.debug(f"Reading result file {current_scalar_result_file_name}")
-                current_df = read_result_files(current_scalar_result_file_name)
+                current_df = read_result_files(current_scalar_result_file_name, include_fields_as_scalars=True)
                 current_df = get_scalars(current_df)
                 if "runID" in current_df:
                     current_df.drop("runID", axis=1, inplace=True)
@@ -55,7 +55,7 @@ class StatisticalTestTask(SimulationTestTask):
                     os.remove(scalar_result_diff_file_name)
                 if os.path.exists(stored_scalar_result_file_name):
                     _logger.debug(f"Reading result file {stored_scalar_result_file_name}")
-                    stored_df = read_result_files(stored_scalar_result_file_name)
+                    stored_df = read_result_files(stored_scalar_result_file_name, include_fields_as_scalars=True)
                     stored_df = get_scalars(stored_df)
                     if "runID" in stored_df:
                         stored_df.drop("runID", axis=1, inplace=True)
