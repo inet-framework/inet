@@ -23,6 +23,9 @@ void EthernetSocketIo::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        const char *protocolAsString = par("protocol");
+        if (!opp_isempty(protocolAsString))
+            protocol = Protocol::getProtocol(protocolAsString);
         numSent = 0;
         numReceived = 0;
         WATCH(numSent);
@@ -126,7 +129,7 @@ void EthernetSocketIo::handleStartOperation(LifecycleOperation *operation)
     setSocketOptions();
     socket.setOutputGate(gate("socketOut"));
     if (!localAddress.isUnspecified())
-        socket.bind(localAddress, remoteAddress, nullptr, true);
+        socket.bind(localAddress, remoteAddress, protocol, par("steal"));
 }
 
 void EthernetSocketIo::handleStopOperation(LifecycleOperation *operation)

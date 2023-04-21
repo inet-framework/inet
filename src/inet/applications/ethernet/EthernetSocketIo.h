@@ -9,6 +9,7 @@
 #define __INET_ETHERNETSOCKETIO_H
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/Protocol.h"
 #include "inet/linklayer/ethernet/common/EthernetSocket.h"
 
 namespace inet {
@@ -17,6 +18,7 @@ class INET_API EthernetSocketIo : public ApplicationBase, public EthernetSocket:
 {
   protected:
     NetworkInterface *networkInterface = nullptr;
+    const Protocol *protocol = nullptr;
     MacAddress remoteAddress;
     MacAddress localAddress;
     EthernetSocket socket;
