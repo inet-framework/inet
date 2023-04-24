@@ -12,13 +12,29 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        mode: ["debug"]
         # we could go all the way up to 20 even
         split: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
         total: [16] # keep these in sync!
       fail-fast: false
     steps:
       - uses: actions/checkout@v3
-      - name: Feature tests (split)
+        with:
+          repository: omnetpp/omnetpp
+          path: omnetpp
+      - uses: actions/checkout@v3
+        with:
+          path: inet
+      - run: mkdir -p /home/runner/work/ccache
+      - uses: actions/cache/restore@v3
+        with:
+          path: /home/runner/work/ccache
+          key: native-${{ matrix.mode }}-ccache-${{ github.run_id }}
+          # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
+          restore-keys: native-${{ matrix.mode }}-ccache
+      - name: Build and test
+        env:
+          MODE: ${{ matrix.mode }}
         run: |
           echo "::group::Installing packages"
           sudo apt-get install -y --no-install-recommends git wget curl ca-certificates \
@@ -28,7 +44,10 @@ jobs:
 
           source $GITHUB_WORKSPACE/inet/_scripts/github/build-omnetpp.sh
 
-          source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
+          echo "::group::Running inet setenv"
+          cd $GITHUB_WORKSPACE/inet
+          . setenv -f
+          echo "::endgroup::"
 
           echo "::group::Running feature tests"
           SPLIT_N=${{ matrix.total }}
@@ -41,4 +60,4 @@ jobs:
         if: always() # even if the test failed, of course
         with:
           name: log-${{ matrix.split }}
-          path: ${{ github.workspace }}/tests/features/_log
+          path: ${{ github.workspace }}/inet/tests/features/_log
