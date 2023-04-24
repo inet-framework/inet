@@ -108,7 +108,7 @@ class SimulationTask(Task):
     Please note that undocumented features are not supposed to be called by the user.
     """
 
-    def __init__(self, simulation_config=None, run_number=0, itervars=None, mode="release", user_interface="Cmdenv", sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, name="simulation", task_result_class=SimulationTaskResult, **kwargs):
+    def __init__(self, simulation_config=None, run_number=0, itervars=None, mode="release", user_interface="Cmdenv", result_folder=None, sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, name="simulation", task_result_class=SimulationTaskResult, **kwargs):
         """
         Parameters:
             simulation_config (:py:class:`SimulationConfig <inet.simulation.config.SimulationConfig>`):
@@ -125,6 +125,9 @@ class SimulationTask(Task):
 
             user_interface (string):
                 The user interface that is used to run this simulation task. Valid values are "Cmdenv", and "Qtenv".
+
+            result_folder (string):
+                The result folder where the output files are generated.
 
             sim_time_limit (string):
                 The simulation time limit as quantity with unit (e.g. "1s").
@@ -155,6 +158,7 @@ class SimulationTask(Task):
         self.itervars = itervars
         self.mode = mode
         self.user_interface = user_interface
+        self.result_folder = result_folder
         self.sim_time_limit = sim_time_limit
         self.cpu_time_limit = cpu_time_limit
         self.record_eventlog = record_eventlog
@@ -245,13 +249,14 @@ class SimulationTask(Task):
         working_directory = self.simulation_config.working_directory
         ini_file = self.simulation_config.ini_file
         config = self.simulation_config.config
+        result_folder_args = ["--result-dir", self.result_folder] if self.result_folder else []
         sim_time_limit_args = ["--sim-time-limit", self.get_sim_time_limit()] if self.sim_time_limit else []
         cpu_time_limit_args = ["--cpu-time-limit", self.get_cpu_time_limit()] if self.cpu_time_limit else []
         record_eventlog_args = ["--record-eventlog", "true"] if self.record_eventlog else []
         record_pcap_args = ["--**.numPcapRecorders=1", "--**.crcMode=\"computed\"", "--**.fcsMode=\"computed\""] if self.record_pcap else []
         executable = simulation_project.get_executable(mode=self.mode)
         default_args = simulation_project.get_default_args()
-        args = [executable, *default_args, "-s", "-u", self.user_interface, "-f", ini_file, "-c", config, "-r", str(self.run_number), *sim_time_limit_args, *cpu_time_limit_args, *record_eventlog_args, *record_pcap_args, *extra_args]
+        args = [executable, *default_args, "-s", "-u", self.user_interface, "-f", ini_file, "-c", config, "-r", str(self.run_number), *result_folder_args, *sim_time_limit_args, *cpu_time_limit_args, *record_eventlog_args, *record_pcap_args, *extra_args]
         expected_result = self.get_expected_result()
         if simulation_runner_class is None:
             if simulation_runner == "subprocess":
