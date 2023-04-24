@@ -30,17 +30,30 @@ class StatisticalTestTask(SimulationTestTask):
         self.locals.pop("self")
         self.kwargs = kwargs
 
+    def run_protected(self, **kwargs):
+        simulation_config = self.simulation_task.simulation_config
+        simulation_project = simulation_config.simulation_project
+        working_directory = simulation_config.working_directory
+        current_results_directory = simulation_project.get_full_path(os.path.join(working_directory, "results.statistical-test"))
+        if os.path.exists(current_results_directory):
+            for file_name in glob.glob(os.path.join(current_results_directory, "*.sca")):
+                os.remove(file_name)
+            for file_name in glob.glob(os.path.join(current_results_directory, "*.vec")):
+                os.remove(file_name)
+            for file_name in glob.glob(os.path.join(current_results_directory, "*.vci")):
+                os.remove(file_name)
+            os.rmdir(current_results_directory)
+        return super().run_protected(**kwargs)
+
     def check_simulation_task_result(self, simulation_task_result, result_name_filter=None, exclude_result_name_filter=None, result_module_filter=None, exclude_result_module_filter=None, full_match=False, **kwargs):
         simulation_task = simulation_task_result.task
         simulation_config = simulation_task.simulation_config
         simulation_project = simulation_config.simulation_project
         working_directory = simulation_config.working_directory
         config = simulation_config.config
-        current_results_directory = simulation_project.get_full_path(os.path.join(working_directory, "results"))
+        current_results_directory = simulation_project.get_full_path(os.path.join(working_directory, "results.statistical-test"))
         stored_results_directory = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory))
         scalars_match = False
-        # KLUDGE TODO there's no way of knowing which scalar files are created by a particular simulation run
-        #             the results folder should be different from the default so that all results can be identified
         for current_scalar_result_file_name in glob.glob(os.path.join(current_results_directory, "*.sca")):
             if re.search("/" + config + "-#", current_scalar_result_file_name):
                 _logger.debug(f"Reading result file {current_scalar_result_file_name}")
@@ -93,7 +106,7 @@ class StatisticalTestTask(SimulationTestTask):
 def get_statistical_test_sim_time_limit(simulation_config, run_number=0):
     return simulation_config.sim_time_limit
 
-def get_statistical_test_tasks(sim_time_limit=get_statistical_test_sim_time_limit, **kwargs):
+def get_statistical_test_tasks(sim_time_limit=get_statistical_test_sim_time_limit, run_number=0, **kwargs):
     """
     Returns multiple statistical test tasks matching the provided filter criteria. The returned tasks can be run by
     calling the :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
@@ -106,8 +119,7 @@ def get_statistical_test_tasks(sim_time_limit=get_statistical_test_sim_time_limi
         an object that contains a list of :py:class:`StatisticalTestTask` objects matching the provided filter criteria.
         The result can be run (and re-run) without providing additional parameters.
     """
-    # remove run_number=0 parameter and add the same to the github-job-inet_run_statistical-tests.sh
-    return get_simulation_tasks(name="statistical test", run_number=0, sim_time_limit=sim_time_limit, simulation_task_class=StatisticalTestTask, multiple_simulation_tasks_class=MultipleSimulationTestTasks, **kwargs)
+    return get_simulation_tasks(name="statistical test", result_folder="results.statistical-test", run_number=run_number, sim_time_limit=sim_time_limit, simulation_task_class=StatisticalTestTask, multiple_simulation_tasks_class=MultipleSimulationTestTasks, **kwargs)
 
 def run_statistical_tests(**kwargs):
     """
@@ -134,17 +146,23 @@ class StatisticalResultsUpdateTask(SimulationTask):
         update_result = super().run_protected(**kwargs)
         simulation_project = self.simulation_config.simulation_project
         working_directory = self.simulation_config.working_directory
-        source_results_directory = simulation_project.get_full_path(os.path.join(working_directory, "results"))
+        source_results_directory = simulation_project.get_full_path(os.path.join(working_directory, "results.statistica-test"))
+        if os.path.exists(source_results_directory):
+            for file_name in glob.glob(os.path.join(source_results_directory, "*.sca")):
+                os.remove(file_name)
+            for file_name in glob.glob(os.path.join(source_results_directory, "*.vec")):
+                os.remove(file_name)
+            for file_name in glob.glob(os.path.join(source_results_directory, "*.vci")):
+                os.remove(file_name)
+            os.rmdir(source_results_directory)
         target_results_directory = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory))
         if not os.path.exists(target_results_directory):
             os.makedirs(target_results_directory)
-        # KLUDGE TODO there's no way of knowing which scalar files are created by a particular simulation run
-        #             the results folder should be different from the default so that all results can be identified
         for scalar_result_file_name in glob.glob(os.path.join(source_results_directory, "*.sca")):
             shutil.copy(scalar_result_file_name, target_results_directory)
         return update_result
 
-def get_update_statistical_result_tasks(**kwargs):
+def get_update_statistical_result_tasks(run_number=0, **kwargs):
     """
     Returns multiple update statisical results tasks matching the provided filter criteria. The returned tasks can be run by
     calling the :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
@@ -157,7 +175,7 @@ def get_update_statistical_result_tasks(**kwargs):
         an object that contains a list of :py:class:`StatisticalResultsUpdateTask` objects matching the provided filter criteria.
         The result can be run (and re-run) without providing additional parameters.
     """
-    return get_simulation_tasks(simulation_task_class=StatisticalResultsUpdateTask, **kwargs)
+    return get_simulation_tasks(simulation_task_class=StatisticalResultsUpdateTask, result_folder="results.statistical-test", run_number=run_number, **kwargs)
 
 def update_statistical_results(sim_time_limit=get_statistical_test_sim_time_limit, **kwargs):
     """
