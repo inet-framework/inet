@@ -66,7 +66,9 @@ void PacketDirectionReverser::processPacket(Packet *packet)
         packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
     }
     if (cutthroughTag != nullptr) {
-        packet->addTagIfAbsent<CutthroughTag>()->setCutthroughPosition(cutthroughTag->getCutthroughPosition());
+        const auto& cutthroughTagOut = packet->addTag<CutthroughTag>();
+        cutthroughTagOut->setCutthroughPosition(cutthroughTag->getCutthroughPosition());
+        cutthroughTagOut->setTrailerChunk(cutthroughTag->getTrailerChunk());
     }
     if (eligibilityTimeTag != nullptr)
         packet->addTag<EligibilityTimeTag>()->setEligibilityTime(eligibilityTimeTag->getEligibilityTime());
