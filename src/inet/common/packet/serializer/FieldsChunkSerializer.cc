@@ -15,19 +15,21 @@ namespace inet {
 void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
 {
     auto fieldsChunk = staticPtrCast<const FieldsChunk>(chunk);
-    if (b(offset).get() % 8 != 0 || (length != b(-1) && b(length).get() % 8 != 0)) {
+    if (length == b(-1))
+        length = fieldsChunk->getChunkLength() - offset;
+    if (b(offset).get() % 8 != 0 || b(length).get() % 8 != 0) {
         MemoryOutputStream chunkStream(fieldsChunk->getChunkLength());
         serialize(chunkStream, fieldsChunk);
         std::vector<bool> data;
         chunkStream.copyData(data);
-        stream.writeBits(data, offset, length == b(-1) ? chunk->getChunkLength() - offset : length);
+        stream.writeBits(data, offset, length);
         ChunkSerializer::totalSerializedLength += chunkStream.getLength();
     }
     else if (fieldsChunk->getSerializedBytes() != nullptr) {
         CHUNK_CHECK_USAGE(B(fieldsChunk->getSerializedBytes()->size()) == chunk->getChunkLength(), "serialized length is incorrect: serialized=%ld, chunk=%ld", fieldsChunk->getSerializedBytes()->size(), B(chunk->getChunkLength()).get());
-        stream.writeBytes(*fieldsChunk->getSerializedBytes(), offset, length == b(-1) ? chunk->getChunkLength() - offset : length);
+        stream.writeBytes(*fieldsChunk->getSerializedBytes(), offset, length);
     }
-    else if (offset == b(0) && (length == b(-1) || length == chunk->getChunkLength())) {
+    else if (offset == b(0) && length == chunk->getChunkLength()) {
         auto startPosition = stream.getLength();
         serialize(stream, fieldsChunk);
         auto endPosition = stream.getLength();
@@ -41,7 +43,7 @@ void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     else {
         MemoryOutputStream chunkStream(fieldsChunk->getChunkLength());
         serialize(chunkStream, fieldsChunk);
-        stream.writeBytes(chunkStream.getData(), offset, length == b(-1) ? chunk->getChunkLength() - offset : length);
+        stream.writeBytes(chunkStream.getData(), offset, length);
         ChunkSerializer::totalSerializedLength += chunkStream.getLength();
         auto serializedBytes = new std::vector<uint8_t>();
         chunkStream.copyData(*serializedBytes);
