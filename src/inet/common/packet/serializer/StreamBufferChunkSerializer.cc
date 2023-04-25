@@ -18,10 +18,13 @@ void StreamBufferChunkSerializer::serialize(MemoryOutputStream& stream, const Pt
 {
     const auto& streamBufferChunk = staticPtrCast<const StreamBufferChunk>(chunk);
     b currentStreamPosition = b((simTime() - streamBufferChunk->getStartTime()).dbl() * streamBufferChunk->getDatarate().get());
-    if (offset < currentStreamPosition)
-        Chunk::serialize(stream, streamBufferChunk->getStreamData(), offset, std::min(length, currentStreamPosition - offset));
-    if (offset + length > currentStreamPosition)
-        stream.writeBitRepeatedly(false, b(offset + length - currentStreamPosition).get());
+    if (length == b(-1))
+        length = streamBufferChunk->getChunkLength() - offset;
+    b copyLength = std::max(b(0), std::min(length, currentStreamPosition - offset));
+    if (copyLength > b(0))
+        Chunk::serialize(stream, streamBufferChunk->getStreamData(), offset, copyLength);
+    if (copyLength < length)
+        stream.writeBitRepeatedly(false, b(length - copyLength).get());
 }
 
 const Ptr<Chunk> StreamBufferChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
