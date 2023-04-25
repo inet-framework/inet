@@ -15,7 +15,15 @@ namespace inet {
 void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
 {
     auto fieldsChunk = staticPtrCast<const FieldsChunk>(chunk);
-    if (fieldsChunk->getSerializedBytes() != nullptr) {
+    if (b(offset).get() % 8 != 0 || (length != b(-1) && b(length).get() % 8 != 0)) {
+        MemoryOutputStream chunkStream(fieldsChunk->getChunkLength());
+        serialize(chunkStream, fieldsChunk);
+        std::vector<bool> data;
+        chunkStream.copyData(data);
+        stream.writeBits(data, offset, length == b(-1) ? chunk->getChunkLength() - offset : length);
+        ChunkSerializer::totalSerializedLength += chunkStream.getLength();
+    }
+    else if (fieldsChunk->getSerializedBytes() != nullptr) {
         CHUNK_CHECK_USAGE(B(fieldsChunk->getSerializedBytes()->size()) == chunk->getChunkLength(), "serialized length is incorrect: serialized=%ld, chunk=%ld", fieldsChunk->getSerializedBytes()->size(), B(chunk->getChunkLength()).get());
         stream.writeBytes(*fieldsChunk->getSerializedBytes(), offset, length == b(-1) ? chunk->getChunkLength() - offset : length);
     }
