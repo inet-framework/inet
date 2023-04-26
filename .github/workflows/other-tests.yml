@@ -53,7 +53,7 @@ jobs:
           key: native-${{ matrix.mode }}-ccache-${{ github.run_id }}
           # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
           restore-keys: native-${{ matrix.mode }}-ccache
-      - name: Run ${{ matrix.testdir }} tests
+      - name: Build and run ${{ matrix.testdir }} test
         env:
           MODE: ${{ matrix.mode }}
         run: |
