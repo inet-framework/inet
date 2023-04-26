@@ -166,8 +166,8 @@ class SimulationUpdateTask(UpdateTask):
                 return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result=simulation_task_result.result, expected_result=simulation_task_result.expected_result, expected=simulation_task_result.expected, reason=simulation_task_result.reason, error_message="simulation exited with error")
 
     def check_simulation_task_result(self, simulation_task_result, **kwargs):
-        result = "PASS" if simulation_task_result.result == "DONE" else simulation_task_result.result
-        expected_result = "PASS" if simulation_task_result.expected_result == "DONE" else simulation_task_result.expected_result
+        result = "KEEP" if simulation_task_result.result == "DONE" else simulation_task_result.result
+        expected_result = "KEEP" if simulation_task_result.expected_result == "DONE" else simulation_task_result.expected_result
         return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result=result, expected_result=expected_result, reason=simulation_task_result.reason)
 
 class MultipleSimulationUpdateTasks(MultipleUpdateTasks):

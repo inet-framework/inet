@@ -86,6 +86,9 @@ class SimulationConfig:
         hasher.update(self.config.encode("utf-8"))
         return hasher.digest()
 
+    def get_working_directory_relative_unique_result_folder(self):
+        return self.ini_file + "_" + self.config
+
     def matches_filter(self, filter=None, exclude_filter=None,
                        working_directory_filter=None, exclude_working_directory_filter=None,
                        ini_file_filter=None, exclude_ini_file_filter=None,
@@ -139,7 +142,7 @@ class SimulationConfig:
                matches_filter(self.ini_file, ini_file_filter, exclude_ini_file_filter, full_match) and \
                matches_filter(self.config, config_filter, exclude_config_filter, full_match) and \
                simulation_config_filter(self)
-    
+
     def clean_simulation_results(self):
         _logger.info("Cleaning simulation results, folder = " + self.working_directory)
         simulation_project = self.simulation_project

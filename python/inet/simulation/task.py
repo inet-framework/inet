@@ -185,6 +185,25 @@ class SimulationTask(Task):
             hasher.update(self.sim_time_limit.encode("utf-8"))
         return hasher.digest()
 
+    def get_working_directory_relative_unique_result_folder(self):
+        return self.simulation_config.get_working_directory_relative_unique_result_folder() + "_" + str(self.run_number)
+
+    def get_result_folder_full_path(self):
+        return self.simulation_config.simulation_project.get_full_path(os.path.join(self.simulation_config.working_directory, self.result_folder))
+
+    def clear_result_folder(self):
+        path = self.get_result_folder_full_path()
+        if os.path.exists(path):
+            for suffix in ["sca", "vec", "vci", "elog", "log", "rt"]:
+                for file_name in glob.glob(os.path.join(path, "*." + suffix)):
+                    os.remove(file_name)
+
+    def remove_result_folder(self):
+        path = self.get_result_folder_full_path()
+        self.clear_result_folder()
+        if os.path.exists(path):
+            os.rmdir(path)
+
     # TODO replace this with something more efficient?
     def is_interactive(self):
         if self.interactive is None:
