@@ -44,8 +44,8 @@ simple Gptp like IApp
         @signal[peerDelay](type=simtime_t);
         @statistic[localTime](record=vector; interpolationmode=linear);
         @statistic[timeDifference](record=vector; interpolationmode=linear);
-        @statistic[rateRatio](record=vector; interpolationmode=samplehold);
-        @statistic[peerDelay](record=vector; interpolationmode=samplehold);
+        @statistic[rateRatio](record=vector; interpolationmode=sample-hold);
+        @statistic[peerDelay](record=vector; interpolationmode=sample-hold);
         @selfMessageKinds(inet::GptpSelfMsgKind);
 
     gates:
