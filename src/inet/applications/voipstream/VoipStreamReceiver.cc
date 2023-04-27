@@ -129,7 +129,7 @@ void VoipStreamReceiver::Connection::writeAudioFrame(AVPacket *avpkt)
 {
     int err = avcodec_send_packet(decCtx, avpkt);
     if (err < 0)
-        throw cRuntimeError("Error in avcodec_send_packet(), err=%d", err);
+        throw cRuntimeError("Error in avcodec_send_packet(), error (%d) %s", err, av_err2str(err));
 
     AVFrame *decodedFrame = av_frame_alloc();
     while (true) {
@@ -138,7 +138,7 @@ void VoipStreamReceiver::Connection::writeAudioFrame(AVPacket *avpkt)
         if (err == AVERROR(EAGAIN) || err == AVERROR_EOF)
             break;
         else if (err < 0)
-            throw cRuntimeError("Error in avcodec_receive_frame(), err=%d", err);
+            throw cRuntimeError("Error in avcodec_receive_frame(), error (%d) %s", err, av_err2str(err));
         simtime_t decodedTime(1.0 * decodedFrame->nb_samples / sampleRate);
         lastPacketFinish += decodedTime;
         if (outFile.isOpen())
@@ -190,7 +190,7 @@ void VoipStreamReceiver::createConnection(Packet *pk)
 
     int err = avcodec_open2(curConn.decCtx, curConn.pCodecDec, nullptr);
     if (err < 0)
-        throw cRuntimeError("could not open decoding codec %d (%s): err=%d", curConn.codec, curConn.pCodecDec->name, err);
+        throw cRuntimeError("could not open decoding codec %d (%s): error (%d) %s", curConn.codec, curConn.pCodecDec->name, err, av_err2str(err));
 
     curConn.openAudio(resultFile);
     curConn.offline = false;

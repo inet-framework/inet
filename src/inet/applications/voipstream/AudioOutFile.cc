@@ -97,26 +97,27 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
             throw cRuntimeError("avcodec_alloc_context3() failed");
         err = avcodec_parameters_to_context(codecCtx, codecPar);
         if (err < 0)
-            throw cRuntimeError("avcodec_parameters_to_context() error: %d", err);
+            throw cRuntimeError("avcodec_parameters_to_context() error: (%d) %s", err, av_err2str(err));
 
         codecCtx->sample_fmt = AV_SAMPLE_FMT_S16; // FIXME hack!
 
         // open it
         err = avcodec_open2(codecCtx, avcodec, nullptr);
         if (err < 0)
-            throw cRuntimeError("Could not open codec %d: error %d", codecPar->codec_id, err);
+            throw cRuntimeError("Could not open codec %d: error=(%d) %s", codecPar->codec_id, err, av_err2str(err));
     }
 
     // open the output file, if needed
     if (!(fmt->flags & AVFMT_NOFILE)) {
-        if (avio_open(&oc->pb, resultFile, AVIO_FLAG_WRITE) < 0)
-            throw cRuntimeError("Could not open '%s'", resultFile);
+        err = avio_open(&oc->pb, resultFile, AVIO_FLAG_WRITE);
+        if (err < 0)
+            throw cRuntimeError("Could not open '%s': error=(%d) %s", resultFile, err, av_err2str(err));
     }
 
     // write the stream header
     err = avformat_write_header(oc, nullptr);
     if (err < 0)
-        throw cRuntimeError("Could not write header to '%s', error=%d", resultFile, err);
+        throw cRuntimeError("Could not write header to '%s', error=(%d) %s", resultFile, err, av_err2str(err));
 }
 
 void AudioOutFile::write(void *decBuf, int pktBytes)
@@ -139,7 +140,7 @@ void AudioOutFile::write(void *decBuf, int pktBytes)
     frame->format = codecCtx->sample_fmt;
     int err = avcodec_fill_audio_frame(frame, /*channels*/ 1, codecCtx->sample_fmt, (const uint8_t *)(decBuf), pktBytes, 1);
     if (err < 0)
-        throw cRuntimeError("Error in avcodec_fill_audio_frame(): err=%d", err);
+        throw cRuntimeError("Error in avcodec_fill_audio_frame(): error (%d) %s", err, av_err2str(err));
 
     // The bitsPerOutSample is not 0 when codec is PCM.
 #if LIBAVCODEC_VERSION_MAJOR < 59
@@ -148,21 +149,21 @@ void AudioOutFile::write(void *decBuf, int pktBytes)
     frame->format = codecCtx->sample_fmt;
     err = avcodec_send_frame(codecCtx, frame);
     if (err < 0)
-        throw cRuntimeError("avcodec_send_frame() error: %d", err);
+        throw cRuntimeError("avcodec_send_frame() error: (%d) %s", err, av_err2str(err));
     AVPacket *pkt = av_packet_alloc();
     while(true) {
         err = avcodec_receive_packet(codecCtx, pkt);
         if (err == AVERROR(EAGAIN) || err == AVERROR_EOF)
             break;
         else if (err < 0)
-            throw cRuntimeError("avcodec_receive_packet() error: %d", err);
+            throw cRuntimeError("avcodec_receive_packet() error: (%d) %s", err, av_err2str(err));
 
         pkt->dts = 0; // HACK for libav 11
 
         // write the compressed frame into the media file
         err = av_interleaved_write_frame(oc, pkt);
         if (err != 0)
-            throw cRuntimeError("Error while writing audio frame: %d", err);
+            throw cRuntimeError("Error while writing audio frame: (%d) %s", err, av_err2str(err));
     }
     av_packet_free(&pkt);
     av_frame_free(&frame);
@@ -175,21 +176,21 @@ bool AudioOutFile::close()
 
     int err = avcodec_send_frame(codecCtx, nullptr);
     if (err < 0)
-        throw cRuntimeError("avcodec_send_frame() error: %d", err);
+        throw cRuntimeError("avcodec_send_frame() error: (%d) %s", err, av_err2str(err));
     AVPacket *pkt = av_packet_alloc();
     while(true) {
         err = avcodec_receive_packet(codecCtx, pkt);
         if (err == AVERROR(EAGAIN) || err == AVERROR_EOF)
             break;
         else if (err < 0)
-            throw cRuntimeError("avcodec_receive_packet() error: %d", err);
+            throw cRuntimeError("avcodec_receive_packet() error: (%d) %s", err, av_err2str(err));
 
         pkt->dts = 0; // HACK for libav 11
 
         // write the compressed frame into the media file
         err = av_interleaved_write_frame(oc, pkt);
         if (err != 0)
-            throw cRuntimeError("Error while writing audio frame: %d", err);
+            throw cRuntimeError("Error while writing audio frame: (%d) %s", err, av_err2str(err));
     }
     av_packet_free(&pkt);
 

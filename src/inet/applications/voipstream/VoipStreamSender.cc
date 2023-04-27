@@ -199,11 +199,11 @@ void VoipStreamSender::openSoundFile(const char *name)
 
     err = avformat_open_input(&pFormatCtx, name, nullptr, nullptr);
     if (err < 0)
-        throw cRuntimeError("Audiofile '%s' open error: %d", name, err);
+        throw cRuntimeError("Audiofile '%s' open error: (%d) %s", name, err, av_err2str(err));
 
     err = avformat_find_stream_info(pFormatCtx, nullptr);
     if (err < 0)
-        throw cRuntimeError("Audiofile '%s' avformat_find_stream_info() error: %d", name, err);
+        throw cRuntimeError("Audiofile '%s' avformat_find_stream_info() error: (%d) %s", name, err, av_err2str(err));
 
     // get stream number
     streamIndex = -1;
@@ -228,10 +228,10 @@ void VoipStreamSender::openSoundFile(const char *name)
         throw cRuntimeError("avcodec_alloc_context3() failed");
     err = avcodec_parameters_to_context(pCodecCtx, codecPar);
     if (err < 0)
-        throw cRuntimeError("avcodec_parameters_to_context() error: %d", err);
+        throw cRuntimeError("avcodec_parameters_to_context() error: (%d) %s", err, av_err2str(err));
     err = avcodec_open2(pCodecCtx, pCodec, nullptr);
     if (err < 0)
-        throw cRuntimeError("avcodec_open() error on file '%s': %d", name, err);
+        throw cRuntimeError("avcodec_open() error on file '%s': (%d) %s", name, err, av_err2str(err));
 
     // allocate encoder
     pEncoderCtx = avcodec_alloc_context3(nullptr);
@@ -297,7 +297,7 @@ void VoipStreamSender::openSoundFile(const char *name)
 
         err = swr_init(pReSampleCtx);
         if (err < 0)
-            throw cRuntimeError("Error opening context");
+            throw cRuntimeError("Error opening context, swr_init() returns (%d) %s", err, av_err2str(err));
     }
 
     if (traceFileName && *traceFileName) {
@@ -340,13 +340,13 @@ Packet *VoipStreamSender::generatePacket()
     int err = avcodec_fill_audio_frame(frame, pEncoderCtx->ch_layout.nb_channels, pEncoderCtx->sample_fmt, (const uint8_t *)(sampleBuffer.readPtr()), inBytes, 1);
 #endif /* LIBAVCODEC_VERSION_MAJOR < 59 */
     if (err < 0)
-        throw cRuntimeError("Error in avcodec_fill_audio_frame(): err=%d", err);
+        throw cRuntimeError("Error in avcodec_fill_audio_frame(): (%d) %s", err, av_err2str(err));
     err = avcodec_send_frame(pEncoderCtx, frame);
     if (err < 0)
-        throw cRuntimeError("avcodec_send_frame() error: %d", err);
+        throw cRuntimeError("avcodec_send_frame() error: (%d) %s", err, av_err2str(err));
     err = avcodec_receive_packet(pEncoderCtx, opacket);
     if (err < 0)
-        throw cRuntimeError("avcodec_receive_packet() error: %d", err);
+        throw cRuntimeError("avcodec_receive_packet() error: (%d) %s", err, av_err2str(err));
 
     if (outFile.isOpen())
         outFile.write(sampleBuffer.readPtr(), inBytes);
@@ -489,7 +489,7 @@ void VoipStreamSender::readFrame()
 
         err = avcodec_send_packet(pCodecCtx, packet);
         if (err < 0)
-            throw cRuntimeError("Error in avcodec_send_packet(), err=%d", err);
+            throw cRuntimeError("Error in avcodec_send_packet(): (%d) %s", err, av_err2str(err));
 
         AVFrame *frame = av_frame_alloc();
         while (true) {
@@ -498,7 +498,7 @@ void VoipStreamSender::readFrame()
             if (err == AVERROR(EAGAIN) || err == AVERROR_EOF)
                 break;
             else if (err < 0)
-                throw cRuntimeError("Error in avcodec_receive_frame(), err=%d", err);
+                throw cRuntimeError("Error in avcodec_receive_frame(): (%d) %s", err, av_err2str(err));
 
             if (!pReSampleCtx) {
                 // copy frame to sampleBuffer
@@ -527,11 +527,11 @@ void VoipStreamSender::resampleFrame(const uint8_t **in_data, int in_nb_samples)
 
     err = av_samples_fill_arrays(out_data, &out_linesize, tmpSamples, 1, maxOutSamples, pEncoderCtx->sample_fmt, 0);
     if (err < 0)
-        throw cRuntimeError("failed out_data fill arrays");
+        throw cRuntimeError("failed out_data fill arrays: (%d) %s", err, av_err2str(err));
 
     int resampled = swr_convert(pReSampleCtx, out_data, out_linesize, in_data, in_nb_samples);
     if (resampled < 0)
-        throw cRuntimeError("swr_convert() returns error %d", resampled);
+        throw cRuntimeError("swr_convert() returns error (%d) %s", resampled, av_err2str(resampled));
     if (swr_get_delay(pReSampleCtx, 0) > 0)
         throw cRuntimeError("%ld delay samples not converted\n", swr_get_delay(pReSampleCtx, 0));
     if (resampled > 0) {
