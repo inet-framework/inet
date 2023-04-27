@@ -219,7 +219,7 @@ void Packet::insertAt(const Ptr<const Chunk>& chunk, b offset)
             sequenceChunk->insertAtBack(content->peek(Chunk::ForwardIterator(b(0), 0), offset, Chunk::PF_ALLOW_ALL));
         sequenceChunk->insertAtBack(chunk);
         if (offset != totalLength)
-            sequenceChunk->insertAtBack(content->peek(Chunk::ForwardIterator(offset, -1), totalLength, Chunk::PF_ALLOW_ALL));
+            sequenceChunk->insertAtBack(content->peek(Chunk::ForwardIterator(offset, -1), totalLength - offset, Chunk::PF_ALLOW_ALL));
         sequenceChunk->markImmutable();
         content = sequenceChunk;
     }
@@ -274,7 +274,7 @@ void Packet::eraseAt(b offset, b length)
         if (offset != b(0))
             sequenceChunk->insertAtBack(content->peek(Chunk::ForwardIterator(b(0), 0), offset));
         if (offset != totalLength)
-            sequenceChunk->insertAtBack(content->peek(Chunk::ForwardIterator(offset + length, -1), totalLength - length));
+            sequenceChunk->insertAtBack(content->peek(Chunk::ForwardIterator(offset + length, -1), totalLength - offset - length));
         sequenceChunk->markImmutable();
         content = sequenceChunk;
     }
