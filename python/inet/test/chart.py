@@ -86,7 +86,7 @@ class MultipleChartTestTasks(MultipleTestTasks):
         multiple_simulation_task_results = self.multiple_simulation_tasks.run_protected(**kwargs)
         return super().run_protected(**kwargs)
 
-def get_chart_test_tasks(simulation_project=None, run_simulations=True, filter=None, working_directory_filter=None, **kwargs):
+def get_chart_test_tasks(simulation_project=None, run_simulations=True, filter=None, working_directory_filter=None, chart_filter=None, exclude_chart_filter=None, **kwargs):
     """
     Returns multiple chart test tasks matching the provided filter criteria. The returned tasks can be run by
     calling the :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
@@ -106,15 +106,16 @@ def get_chart_test_tasks(simulation_project=None, run_simulations=True, filter=N
     for analysis_file_name in get_analysis_files(simulation_project=simulation_project, filter=filter or working_directory_filter, **kwargs):
         analysis = omnetpp.scave.analysis.load_anf_file(simulation_project.get_full_path(analysis_file_name))
         for chart in analysis.collect_charts():
-            folder = os.path.dirname(simulation_project.get_full_path(analysis_file_name))
-            working_directory = os.path.relpath(folder, simulation_project.get_full_path("."))
-            multiple_simulation_tasks = get_simulation_tasks(simulation_project=simulation_project, working_directory_filter=working_directory, sim_time_limit=get_chart_test_sim_time_limit, **kwargs)
-            if run_simulations:
-                for simulation_task in multiple_simulation_tasks.tasks:
-                    if not list(builtins.filter(lambda element: element.simulation_config == simulation_task.simulation_config and element.run_number == simulation_task.run_number, simulation_tasks)):
-                        simulation_tasks.append(simulation_task)
-            if multiple_simulation_tasks.tasks:
-                test_tasks.append(ChartTestTask(simulation_project=simulation_project, analysis_file_name=analysis_file_name, id=chart.id, chart_name=chart.name, task_result_class=TestTaskResult))
+            if matches_filter(chart.name, chart_filter, exclude_chart_filter, False):
+                folder = os.path.dirname(simulation_project.get_full_path(analysis_file_name))
+                working_directory = os.path.relpath(folder, simulation_project.get_full_path("."))
+                multiple_simulation_tasks = get_simulation_tasks(simulation_project=simulation_project, working_directory_filter=working_directory, sim_time_limit=get_chart_test_sim_time_limit, **kwargs)
+                if run_simulations:
+                    for simulation_task in multiple_simulation_tasks.tasks:
+                        if not list(builtins.filter(lambda element: element.simulation_config == simulation_task.simulation_config and element.run_number == simulation_task.run_number, simulation_tasks)):
+                            simulation_tasks.append(simulation_task)
+                if multiple_simulation_tasks.tasks:
+                    test_tasks.append(ChartTestTask(simulation_project=simulation_project, analysis_file_name=analysis_file_name, id=chart.id, chart_name=chart.name, task_result_class=TestTaskResult))
     return MultipleChartTestTasks(tasks=test_tasks, multiple_simulation_tasks=MultipleSimulationTasks(tasks=simulation_tasks, simulation_project=simulation_project, **kwargs), **dict(kwargs, scheduler="process"))
 
 def run_chart_tests(**kwargs):
@@ -192,7 +193,7 @@ class MultipleChartUpdateTasks(MultipleUpdateTasks):
         multiple_simulation_task_results = self.multiple_simulation_tasks.run_protected(**kwargs)
         return super().run_protected(**kwargs)
 
-def get_update_chart_tasks(simulation_project=None, run_simulations=True, filter=None, working_directory_filter=None, **kwargs):
+def get_update_chart_tasks(simulation_project=None, run_simulations=True, filter=None, working_directory_filter=None, chart_filter=None, exclude_chart_filter=None, **kwargs):
     """
     Returns multiple update chart tasks matching the provided filter criteria. The returned tasks can be run by
     calling the :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
@@ -212,14 +213,15 @@ def get_update_chart_tasks(simulation_project=None, run_simulations=True, filter
     for analysis_file_name in get_analysis_files(simulation_project=simulation_project, filter=filter or working_directory_filter, **kwargs):
         analysis = omnetpp.scave.analysis.load_anf_file(simulation_project.get_full_path(analysis_file_name))
         for chart in analysis.collect_charts():
-            folder = os.path.dirname(simulation_project.get_full_path(analysis_file_name))
-            working_directory = os.path.relpath(folder, simulation_project.get_full_path("."))
-            if run_simulations:
-                multiple_simulation_tasks = get_simulation_tasks(simulation_project=simulation_project, working_directory_filter=working_directory, sim_time_limit=get_chart_test_sim_time_limit, **kwargs)
-                for simulation_task in multiple_simulation_tasks.tasks:
-                    if not list(builtins.filter(lambda element: element.simulation_config == simulation_task.simulation_config and element.run_number == simulation_task.run_number, simulation_tasks)):
-                        simulation_tasks.append(simulation_task)
-            update_tasks.append(ChartUpdateTask(simulation_project=simulation_project, analysis_file_name=analysis_file_name, id=chart.id, chart_name=chart.name, task_result_class=UpdateTaskResult))
+            if matches_filter(chart.name, chart_filter, exclude_chart_filter, False):
+                folder = os.path.dirname(simulation_project.get_full_path(analysis_file_name))
+                working_directory = os.path.relpath(folder, simulation_project.get_full_path("."))
+                if run_simulations:
+                    multiple_simulation_tasks = get_simulation_tasks(simulation_project=simulation_project, working_directory_filter=working_directory, sim_time_limit=get_chart_test_sim_time_limit, **kwargs)
+                    for simulation_task in multiple_simulation_tasks.tasks:
+                        if not list(builtins.filter(lambda element: element.simulation_config == simulation_task.simulation_config and element.run_number == simulation_task.run_number, simulation_tasks)):
+                            simulation_tasks.append(simulation_task)
+                update_tasks.append(ChartUpdateTask(simulation_project=simulation_project, analysis_file_name=analysis_file_name, id=chart.id, chart_name=chart.name, task_result_class=UpdateTaskResult))
     return MultipleChartUpdateTasks(tasks=update_tasks, multiple_simulation_tasks=MultipleSimulationTasks(tasks=simulation_tasks, simulation_project=simulation_project, **kwargs), **dict(kwargs, scheduler="process"))
 
 def update_charts(simulation_project=None, **kwargs):
