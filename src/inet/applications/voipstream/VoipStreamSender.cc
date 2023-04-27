@@ -255,33 +255,23 @@ void VoipStreamSender::openSoundFile(const char *name)
     if (avcodec_open2(pEncoderCtx, pCodecEncoder, nullptr) < 0)
         throw cRuntimeError("could not open %s encoding codec!", codec);
 
-    if (pCodecCtx->sample_rate == sampleRate
-        && pCodecCtx->sample_fmt == pEncoderCtx->sample_fmt
+    pReSampleCtx = nullptr;
+    if (pCodecCtx->sample_rate != sampleRate
+        || pCodecCtx->sample_fmt != pEncoderCtx->sample_fmt
 #if LIBAVCODEC_VERSION_MAJOR < 59
-        && pCodecCtx->channels == 1)
+        || pCodecCtx->channels != 1)
 #else /* LIBAVCODEC_VERSION_MAJOR < 59 */
-        && pCodecCtx->ch_layout.nb_channels == 1)
+        || pCodecCtx->ch_layout.nb_channels != 1)
 #endif /* LIBAVCODEC_VERSION_MAJOR < 59 */
     {
-        pReSampleCtx = nullptr;
-    }
-    else {
+#if LIBAVCODEC_VERSION_MAJOR < 59
         pReSampleCtx = swr_alloc();
         if (!pReSampleCtx)
             throw cRuntimeError("error in av_audio_resample_init()");
 
-#if LIBAVCODEC_VERSION_MAJOR < 59
         int inChannelLayout = pCodecCtx->channel_layout == 0 ? av_get_default_channel_layout(pCodecCtx->channels) : pCodecCtx->channel_layout;
         if (av_opt_set_int(pReSampleCtx, "in_channel_layout", inChannelLayout, 0))
             throw cRuntimeError("error in option setting of 'in_channel_layout'");
-#else /* LIBAVCODEC_VERSION_MAJOR < 59 */
-        AVChannelLayout inChannelLayout = pCodecCtx->ch_layout;
-        if (inChannelLayout.u.mask == 0)
-            av_channel_layout_default(&inChannelLayout, pCodecCtx->ch_layout.nb_channels);
-        ASSERT(inChannelLayout.u.mask != 0);
-        if (av_opt_set_int(pReSampleCtx, "in_channel_layout", inChannelLayout.u.mask, 0))
-            throw cRuntimeError("error in option setting of 'in_channel_layout'");
-#endif /* LIBAVCODEC_VERSION_MAJOR < 59 */
         if (av_opt_set_int(pReSampleCtx, "in_sample_fmt", pCodecCtx->sample_fmt, 0))
             throw cRuntimeError("error in option setting of 'in_sample_fmt'");
         if (av_opt_set_int(pReSampleCtx, "in_sample_rate", pCodecCtx->sample_rate, 0))
@@ -292,6 +282,25 @@ void VoipStreamSender::openSoundFile(const char *name)
             throw cRuntimeError("error in option setting of 'out_sample_fmt'");
         if (av_opt_set_int(pReSampleCtx, "out_sample_rate", sampleRate, 0))
             throw cRuntimeError("error in option setting of 'out_sample_rate'");
+#else /* LIBAVCODEC_VERSION_MAJOR < 59 */
+        AVChannelLayout inChannelLayout = pCodecCtx->ch_layout;
+        if (inChannelLayout.u.mask == 0)
+            av_channel_layout_default(&inChannelLayout, pCodecCtx->ch_layout.nb_channels);
+        ASSERT(inChannelLayout.u.mask != 0);
+        AVSampleFormat inSampleFmt = pCodecCtx->sample_fmt;
+        int inSampleRate = pCodecCtx->sample_rate;
+        AVChannelLayout outChannelLayout = AV_CHANNEL_LAYOUT_MONO;
+        AVSampleFormat outSampleFmt = pEncoderCtx->sample_fmt;
+        int outSampleRate = sampleRate;
+        err = swr_alloc_set_opts2(&pReSampleCtx,
+                &outChannelLayout, outSampleFmt, outSampleRate,
+                &inChannelLayout, inSampleFmt, inSampleRate,
+                0, nullptr);
+        if (err < 0)
+            throw cRuntimeError("Error opening context, swr_alloc_set_opts2() returns (%d) %s", err, av_err2str(err));
+        if (!pReSampleCtx)
+            throw cRuntimeError("error in swr_alloc()");
+#endif
         if (av_opt_set_int(pReSampleCtx, "internal_sample_fmt", AV_SAMPLE_FMT_FLTP, 0))
             throw cRuntimeError("error in option setting of 'internal_sample_fmt'");
 
