@@ -1988,7 +1988,10 @@ if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
 for i in range(len(df['value'])):
-    df['value'][i] = float(df['bitrate'][i]) * (1 - float(df['value'][i]))
+    # avoid SettingWithCopyWarning
+    value = df['value'].copy()
+    value[i] = float(df['bitrate'][i]) * (1 - float(df['value'][i]))
+    df['value'] = value
 
 xaxis_itervar, group_by = utils.select_xaxis_and_groupby(df, props)
 confidence_level = utils.get_confidence_level(props)
