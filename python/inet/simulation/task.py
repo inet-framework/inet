@@ -108,7 +108,7 @@ class SimulationTask(Task):
     Please note that undocumented features are not supposed to be called by the user.
     """
 
-    def __init__(self, simulation_config=None, run_number=0, itervars=None, mode="release", user_interface="Cmdenv", result_folder=None, sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, name="simulation", task_result_class=SimulationTaskResult, **kwargs):
+    def __init__(self, simulation_config=None, run_number=0, itervars=None, mode="release", user_interface="Cmdenv", result_folder="results", sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, name="simulation", task_result_class=SimulationTaskResult, **kwargs):
         """
         Parameters:
             simulation_config (:py:class:`SimulationConfig <inet.simulation.config.SimulationConfig>`):
@@ -184,9 +184,6 @@ class SimulationTask(Task):
         if self.sim_time_limit:
             hasher.update(self.sim_time_limit.encode("utf-8"))
         return hasher.digest()
-
-    def get_working_directory_relative_unique_result_folder(self):
-        return self.simulation_config.get_working_directory_relative_unique_result_folder() + "_" + str(self.run_number)
 
     def get_result_folder_full_path(self):
         return self.simulation_config.simulation_project.get_full_path(os.path.join(self.simulation_config.working_directory, self.result_folder))
@@ -268,7 +265,7 @@ class SimulationTask(Task):
         working_directory = self.simulation_config.working_directory
         ini_file = self.simulation_config.ini_file
         config = self.simulation_config.config
-        result_folder_args = ["--result-dir", self.result_folder] if self.result_folder else []
+        result_folder_args = ["--result-dir", self.result_folder] if self.result_folder != "results" else []
         sim_time_limit_args = ["--sim-time-limit", self.get_sim_time_limit()] if self.sim_time_limit else []
         cpu_time_limit_args = ["--cpu-time-limit", self.get_cpu_time_limit()] if self.cpu_time_limit else []
         record_eventlog_args = ["--record-eventlog", "true"] if self.record_eventlog else []

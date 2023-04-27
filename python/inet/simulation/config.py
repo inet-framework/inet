@@ -86,9 +86,6 @@ class SimulationConfig:
         hasher.update(self.config.encode("utf-8"))
         return hasher.digest()
 
-    def get_working_directory_relative_unique_result_folder(self):
-        return self.ini_file + "_" + self.config
-
     def matches_filter(self, filter=None, exclude_filter=None,
                        working_directory_filter=None, exclude_working_directory_filter=None,
                        ini_file_filter=None, exclude_ini_file_filter=None,
