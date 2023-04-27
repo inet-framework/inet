@@ -63,7 +63,7 @@ class ChartTestTask(TestTask):
                         os.remove(new_file_name)
                     else:
                         image_diff = numpy.abs(new_image - old_image)
-                        matplotlib.image.imsave(diff_file_name, image_diff)
+                        matplotlib.image.imsave(diff_file_name, image_diff[:, :, :3])
                     result = "PASS" if metric == 0 else "FAIL"
                     reason = "Metric: " + str(metric) if result == "FAIL" else None
                     return self.task_result_class(self, result=result, reason=reason)
@@ -170,7 +170,7 @@ class ChartUpdateTask(UpdateTask):
                         if keep_charts:
                             os.rename(old_file_name, re.sub("_new", "_old", file_name))
                             image_diff = numpy.abs(new_image - old_image)
-                            matplotlib.image.imsave(diff_file_name, image_diff)
+                            matplotlib.image.imsave(diff_file_name, image_diff[:, :, :3])
                         else:
                             os.remove(old_file_name)
                         os.rename(new_file_name, old_file_name)
