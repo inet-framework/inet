@@ -71,7 +71,11 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
         p->codec_type = AVMEDIA_TYPE_AUDIO;
         p->bit_rate = sampleRate * sampleBits;
         p->sample_rate = sampleRate;
+#if LIBAVCODEC_VERSION_MAJOR < 59
         p->channels = 1;
+#else /* LIBAVCODEC_VERSION_MAJOR < 59 */
+        p->ch_layout = AV_CHANNEL_LAYOUT_MONO;
+#endif /* LIBAVCODEC_VERSION_MAJOR < 59 */
     }
 
     av_dump_format(oc, 0, resultFile, 1);
@@ -124,16 +128,23 @@ void AudioOutFile::write(void *decBuf, int pktBytes)
 
     AVFrame *frame = av_frame_alloc();
     frame->nb_samples = samples;
-    frame->channel_layout = AV_CH_LAYOUT_MONO;
     frame->sample_rate = codecCtx->sample_rate;
+#if LIBAVCODEC_VERSION_MAJOR < 59
+    frame->channel_layout = AV_CH_LAYOUT_MONO;
     frame->channels = codecCtx->channels;
+#else /* LIBAVCODEC_VERSION_MAJOR < 59 */
+    frame->ch_layout = codecCtx->ch_layout;
+    frame->ch_layout.u.mask = AV_CH_LAYOUT_MONO;
+#endif /* LIBAVCODEC_VERSION_MAJOR < 59 */
     frame->format = codecCtx->sample_fmt;
     int err = avcodec_fill_audio_frame(frame, /*channels*/ 1, codecCtx->sample_fmt, (const uint8_t *)(decBuf), pktBytes, 1);
     if (err < 0)
         throw cRuntimeError("Error in avcodec_fill_audio_frame(): err=%d", err);
 
     // The bitsPerOutSample is not 0 when codec is PCM.
+#if LIBAVCODEC_VERSION_MAJOR < 59
     frame->channels = codecCtx->channels;
+#endif /* LIBAVCODEC_VERSION_MAJOR < 59 */
     frame->format = codecCtx->sample_fmt;
     err = avcodec_send_frame(codecCtx, frame);
     if (err < 0)

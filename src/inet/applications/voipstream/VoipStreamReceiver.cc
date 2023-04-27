@@ -181,7 +181,11 @@ void VoipStreamReceiver::createConnection(Packet *pk)
     curConn.decCtx = avcodec_alloc_context3(curConn.pCodecDec);
     curConn.decCtx->bit_rate = curConn.transmitBitrate;
     curConn.decCtx->sample_rate = curConn.sampleRate;
+#if LIBAVCODEC_VERSION_MAJOR < 59
     curConn.decCtx->channels = 1;
+#else /* LIBAVCODEC_VERSION_MAJOR < 59 */
+    curConn.decCtx->ch_layout = AV_CHANNEL_LAYOUT_MONO;
+#endif /* LIBAVCODEC_VERSION_MAJOR < 59 */
     curConn.decCtx->bits_per_coded_sample = curConn.sampleBits;
 
     int err = avcodec_open2(curConn.decCtx, curConn.pCodecDec, nullptr);
