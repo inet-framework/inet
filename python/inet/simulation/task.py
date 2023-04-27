@@ -375,9 +375,12 @@ class MultipleSimulationTasks(MultipleTasks):
         Returns (MultipleTaskResults):
             An object that contains a list of :py:class:`SimulationTask`.
         """
+        return super().run(**kwargs)
+
+    def run_protected(self, **kwargs):
         if self.build:
             build_project(**dict(kwargs, simulation_project=self.simulation_project, mode=self.mode))
-        return super().run(**kwargs)
+        return super().run_protected(**kwargs)
 
 def get_simulation_tasks(simulation_project=None, simulation_configs=None, mode="release", run_number=None, run_number_filter=None, exclude_run_number_filter=None, sim_time_limit=None, cpu_time_limit=None, concurrent=True, expected_num_tasks=None, simulation_task_class=SimulationTask, multiple_simulation_tasks_class=MultipleSimulationTasks, **kwargs):
     """

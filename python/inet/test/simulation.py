@@ -107,10 +107,10 @@ class MultipleSimulationTestTasks(MultipleTestTasks):
     def get_description(self):
         return ((self.simulation_project.get_name() + " ") if self.simulation_project else "") + super().get_description()
 
-    def run(self, **kwargs):
+    def run_protected(self, **kwargs):
         if self.build:
             build_project(**dict(kwargs, simulation_project=self.simulation_project))
-        return super().run(**kwargs)
+        return super().run_protected(**kwargs)
 
 def get_simulation_test_tasks(simulation_test_task_class=SimulationTestTask, multiple_simulation_test_tasks_class=MultipleSimulationTestTasks, **kwargs):
     multiple_simulation_tasks = get_simulation_tasks(**kwargs)
