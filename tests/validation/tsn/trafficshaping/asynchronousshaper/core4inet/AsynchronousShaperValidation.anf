@@ -52,7 +52,7 @@ df_analytical["statistic"] = df_validation_test["name"]
 df_analytical["value"] = df_validation_test[0]
 df_analytical['type'] = "analytical"
 df_analytical.dropna(inplace=True)
-df = df_simulated.append(df_analytical)
+df = pd.concat([df_simulated, df_analytical])
 df.reset_index(inplace=True, drop=True)
 
 groups, series = utils.select_groups_series(df, props)
