@@ -698,7 +698,7 @@ legend_loc = 'center right'
 if add_rectangle:
     w = ls.xmax - ls.xmin
     h = ls.ymax - ls.ymin
-    rect=patches.Rectangle((ls.xmin,ls.ymin),w,h, fill=False, alpha=1, color="black", linewidth=1, edgecolor = "black", zorder=10, facecolor=None)
+    rect=patches.Rectangle((ls.xmin,ls.ymin),w,h, fill=False, alpha=1, linewidth=1, edgecolor = "black", zorder=10, facecolor=None)
     plt.gca().add_patch(rect)
     plt.text((ls.xmin+ls.xmax)/2, ls.ymax + ls.text_offset, "This area is shown in another chart", ha='center')
     
