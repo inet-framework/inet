@@ -72,7 +72,9 @@ void CreditBasedGate::handleMessage(cMessage *message)
         emitCurrentCredit();
         // 3. update currentCreditGainRate to know the slope when the timer is rescheduled
         updateCurrentCreditGainRate();
-        // 4. reschedule change timer when currentCredit reaches transmitCreditLimit
+        // 4. update gate state based on current credit
+        updateGateState();
+        // 5. reschedule change timer when currentCredit reaches transmitCreditLimit
         scheduleChangeTimer();
     }
     else
@@ -119,6 +121,7 @@ void CreditBasedGate::updateCurrentState()
     updateCurrentCredit();
     updateCurrentCreditGainRate();
     emitCurrentCredit();
+    updateGateState();
 }
 
 void CreditBasedGate::setCurrentCredit(double value)
@@ -126,14 +129,6 @@ void CreditBasedGate::setCurrentCredit(double value)
     if (currentCredit != value) {
         EV_DEBUG << "Setting currentCredit to " << value << std::endl;
         currentCredit = value;
-        if (currentCredit >= transmitCreditLimit) {
-            if (isClosed())
-                open();
-        }
-        else {
-            if (isOpen())
-                close();
-        }
     }
 }
 
@@ -172,6 +167,18 @@ void CreditBasedGate::updateCurrentCreditGainRate()
         setCurrentCreditGainRate(idleCreditGainRate);
     else
         setCurrentCreditGainRate(0);
+}
+
+void CreditBasedGate::updateGateState()
+{
+    if (currentCredit >= transmitCreditLimit) {
+        if (isClosed())
+            open();
+    }
+    else {
+        if (isOpen())
+            close();
+    }
 }
 
 void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, bool value, cObject *details)
