@@ -53,18 +53,6 @@ echo "::group::Make Makefiles"
 make makefiles
 echo "::endgroup::"
 
-if [ "$TARGET_PLATFORM" = "windows" ]; then
-    # This is here to stop make from invoking the final .dll linker twice, seeing that
-    # both the .dll and the import lib for it (.dll.a) are targets, that have to be
-    # made the same way. This is a problem because when cross-compiling to mingw, in
-    # debug mode, one linker needs 5GB+ RAM, and it won't fit twice on the CI machines.
-    # This workaround will not be necessary once the tester Docker image includes:
-    # - A newer opp_makemake that generates a group target for the .dll and .dll.a files
-    # - GNU make 4.3 that supports group targets (this is in ubuntu:20.10)
-    sed -i 's|  TARGET_FILES+= $(TARGET_DIR)/$(TARGET_IMPDEF) $(TARGET_DIR)/$(TARGET_IMPLIB)||g' src/Makefile
-    sed -i 's|$O/$(TARGET) $O/$(TARGET_IMPDEF) $O/$(TARGET_IMPLIB) &: $(OBJS)|$O/$(TARGET) : $(OBJS)|g' src/Makefile
-fi
-
 echo "::group::Build"
 # This is a magical "process substitution" for piping stderr into tee...
 # Redirecting stderr will cost us the pretty colors, but we'll manage...
