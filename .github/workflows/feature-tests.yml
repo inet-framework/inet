@@ -14,8 +14,8 @@ jobs:
       matrix:
         mode: ["release"]
         # we could go all the way up to 20 even
-        split: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-        total: [20] # keep these in sync!
+        split: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        total: [16] # keep these in sync!
       fail-fast: false
     steps:
       - uses: actions/checkout@v3
@@ -50,8 +50,8 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::Running feature tests"
-          SPLIT_N=${{ matrix.total }}
-          SPLIT_I=${{ matrix.split }}
+          SPLIT_TOTAL=${{ matrix.total }}
+          SPLIT_INDEX=${{ matrix.split }}
           cd $GITHUB_WORKSPACE/inet/tests/features
           # this indirectly calls the script named simply "inet", which handles the MODE envvar internally
           ./featuretest
