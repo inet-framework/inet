@@ -27,6 +27,6 @@ jobs:
           restore-keys: cross-macos-${{ matrix.mode }}-ccache
       - name: Cross-building Mac OS binaries
         run: |
-          docker run -i --env TARGET_PLATFORM=macos --env MODE=${{ matrix.mode }} --env GITHUB_WORKSPACE \
+          docker run -i --env TARGET_PLATFORM=macosx --env MODE=${{ matrix.mode }} --env GITHUB_WORKSPACE \
             -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE -v /home/runner/work/ccache:/root/.ccache \
             ghcr.io/inet-framework/ci-inet:6.0.1-230320 /bin/bash $GITHUB_WORKSPACE/_scripts/github/cross-build.sh
