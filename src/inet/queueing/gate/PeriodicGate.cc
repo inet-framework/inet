@@ -129,6 +129,7 @@ void PeriodicGate::scheduleChangeTimer()
 
 void PeriodicGate::processChangeTimer()
 {
+    EV_INFO << "Processing change timer" << EV_ENDL;
     if (isOpen_)
         close();
     else
@@ -161,6 +162,7 @@ void PeriodicGate::updateIsInGuardBand()
     }
     if (isInGuardBand_ != newIsInGuardBand) {
         isInGuardBand_ = newIsInGuardBand;
+        EV_INFO << "Changing guard band state" << EV_FIELD(isInGuardBand_) << EV_ENDL;
         emit(guardBandStateChangedSignal, isInGuardBand_);
     }
 }

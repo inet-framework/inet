@@ -65,6 +65,7 @@ void CreditBasedGate::initialize(int stage)
 void CreditBasedGate::handleMessage(cMessage *message)
 {
     if (message == changeTimer) {
+        EV_INFO << "Processing change timer" << EV_ENDL;
         // 1. timer is executed when currentCredit reaches transmitCreditLimit with currentCreditGainRate
         setCurrentCredit(transmitCreditLimit);
         // 2. notify listeners and update lastCurrentCreditEmitted
@@ -101,7 +102,7 @@ void CreditBasedGate::scheduleChangeTimer()
     else {
         simtime_t now = simTime();
         simtime_t changeTime = now + (transmitCreditLimit - currentCredit) / currentCreditGainRate;
-        EV_TRACE << "Scheduling change timer to " << changeTime << std::endl;
+        EV_DEBUG << "Scheduling change timer to " << changeTime << std::endl;
         if (changeTime <= now)
             cancelEvent(changeTimer);
         else
@@ -126,7 +127,7 @@ void CreditBasedGate::updateCurrentState()
 void CreditBasedGate::setCurrentCredit(double value)
 {
     if (currentCredit != value) {
-        EV_TRACE << "Setting currentCredit to " << value << std::endl;
+        EV_DEBUG << "Setting currentCredit to " << value << std::endl;
         currentCredit = value;
     }
 }
@@ -151,7 +152,7 @@ void CreditBasedGate::emitCurrentCredit()
 void CreditBasedGate::setCurrentCreditGainRate(double value)
 {
     if (currentCreditGainRate != value) {
-        EV_TRACE << "Setting currentCreditGainRate to " << currentCreditGainRate << std::endl;
+        EV_DEBUG << "Setting currentCreditGainRate to " << currentCreditGainRate << std::endl;
         currentCreditGainRate = value;
     }
 }
@@ -184,6 +185,7 @@ void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, b
 {
     Enter_Method("%s", cComponent::getSignalName(simsignal));
     if (simsignal == gateStateChangedSignal || simsignal == PeriodicGate::guardBandStateChangedSignal) {
+        EV_INFO << "Processing received gate state or guard band state changed signal" << EV_ENDL;
         // 1. update current state because some time may have elapsed since last update
         updateCurrentState();
         // 2. reschedule change timer when currentCredit reaches transmitCreditLimit
@@ -199,6 +201,7 @@ void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, d
     if (simsignal == interpacketGapEndedSignal) {
         // NOTE: this signal also comes for other packets not in our traffic category
         if (isInterpacketGap) {
+            EV_INFO << "Processing received inter-packet gap ended signal" << EV_ENDL;
             // 1. update current state because some time may have elapsed since last update
             updateCurrentState();
             // 2. update isInterpacketGap state
