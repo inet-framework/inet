@@ -43,7 +43,7 @@ if [ "$TARGET_PLATFORM" != "linux" ]; then
     # - lwIP and NSC does not seem to compile on at least Windows, oh well...
     echo "::group::Disable some features"
     opp_featuretool disable \
-        VoipStream VoipStreamExamples \
+        VoipStream VoipStreamExamples Z3GateSchedulingConfigurator \
         NetworkEmulationSupport NetworkEmulationExamples NetworkEmulationShowcases \
         TcpLwip VisualizationOsg VisualizationOsgShowcases 2>&1
     echo "::endgroup::"
