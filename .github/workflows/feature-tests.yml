@@ -50,8 +50,8 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::Running feature tests"
-          SPLIT_TOTAL=${{ matrix.total }}
-          SPLIT_INDEX=${{ matrix.split }}
+          export SPLIT_TOTAL=${{ matrix.total }}
+          export SPLIT_INDEX=${{ matrix.split }}
           cd $GITHUB_WORKSPACE/inet/tests/features
           # this indirectly calls the script named simply "inet", which handles the MODE envvar internally
           ./featuretest
