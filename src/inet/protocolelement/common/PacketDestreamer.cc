@@ -128,7 +128,7 @@ Packet *PacketDestreamer::pullPacket(cGate *gate)
     delete streamedPacket;
     streamedPacket = packet;
     handlePacketProcessed(packet);
-    animatePullPacket(streamedPacket, outputGate);
+    animatePullPacket(streamedPacket, outputGate, findConnectedGate<IPacketProcessor>(outputGate));
     updateDisplayString();
     streamedPacket = nullptr;
     return packet;

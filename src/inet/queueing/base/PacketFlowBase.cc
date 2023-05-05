@@ -158,7 +158,7 @@ Packet *PacketFlowBase::pullPacket(cGate *gate)
     processPacket(packet);
     handlePacketProcessed(packet);
     emit(packetPulledOutSignal, packet);
-    animatePullPacket(packet, outputGate);
+    animatePullPacket(packet, outputGate, findConnectedGate<IPacketProcessor>(outputGate));
     updateDisplayString();
     return packet;
 }
@@ -173,7 +173,7 @@ Packet *PacketFlowBase::pullPacketStart(cGate *gate, bps datarate)
     inProgressStreamId = packet->getTreeId();
     processPacket(packet);
     emit(packetPulledOutSignal, packet);
-    animatePullPacketStart(packet, outputGate, datarate, packet->getTransmissionId());
+    animatePullPacketStart(packet, outputGate, findConnectedGate<IPacketProcessor>(outputGate), datarate, packet->getTransmissionId());
     updateDisplayString();
     return packet;
 }
@@ -189,7 +189,7 @@ Packet *PacketFlowBase::pullPacketEnd(cGate *gate)
     inProgressStreamId = packet->getTreeId();
     emit(packetPulledOutSignal, packet);
     endPacketStreaming(packet);
-    animatePullPacketEnd(packet, outputGate, packet->getTransmissionId());
+    animatePullPacketEnd(packet, outputGate, findConnectedGate<IPacketProcessor>(outputGate), packet->getTransmissionId());
     updateDisplayString();
     return packet;
 }
@@ -207,7 +207,7 @@ Packet *PacketFlowBase::pullPacketProgress(cGate *gate, bps datarate, b position
         emit(packetPulledOutSignal, packet);
         endPacketStreaming(packet);
     }
-    animatePullPacketProgress(packet, outputGate, datarate, position, extraProcessableLength, packet->getTransmissionId());
+    animatePullPacketProgress(packet, outputGate, findConnectedGate<IPacketProcessor>(outputGate), datarate, position, extraProcessableLength, packet->getTransmissionId());
     updateDisplayString();
     return packet;
 }
