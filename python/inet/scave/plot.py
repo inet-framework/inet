@@ -15,6 +15,7 @@ import logging
 import inet.common.util
 from omnetpp.scave.utils import make_legend_label
 import logging
+from matplotlib.legend_handler import HandlerLine2D
 
 logger = logging.getLogger(__name__)
 
@@ -142,7 +143,9 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label, global_style=No
         df.sort_values(by=legend_cols, inplace=True)
     for t in df.itertuples(index=False):
         style = utils._make_line_args(props, t, df)
+        logger.debug(f"orig style: {style}")
         add_global_style_if_needed(global_style, style)
+        logger.debug(f"style after adding global_style: {style}")
 #        if t.propertyname != '':
 #            style[t.propertyname] = t.propertyvalue
         if 'additional_style' in df.columns and t.additional_style != None:
@@ -1172,3 +1175,23 @@ def plot_lines(df, props, legend_func=utils.make_legend_label, use_default_sort_
 
     title = get_prop("title") or utils.make_chart_title(df, title_cols)
     utils.set_plot_title(title)
+    
+# def legend_change_alpha(handle, original, alpha=1, marker=None):
+#     ''' Change the alpha and marker style of the legend handles '''
+#     logger.debug(f"updating alpha {alpha} marker {marker}")
+#     handle.update_from(original)
+#     handle.set_alpha(alpha)
+#     if marker is not None:
+#         handle.set_marker(marker)
+
+def legend_change_alpha(handle, original, alpha, marker):
+    ''' Change the alpha and marker style of the legend handles '''
+    logger.debug(f"updating")
+    handle.update_from(original)
+    handle.set_alpha(alpha)
+    logger.debug(f"original: {original}")
+    handle.set_marker(marker)
+    
+def fix_legend_transparency(alpha=1, marker='s'):
+    plt.legend(handler_map={plt.Line2D: HandlerLine2D(update_func=lambda handle, original: legend_change_alpha(handle, original, alpha, marker))})
+    
