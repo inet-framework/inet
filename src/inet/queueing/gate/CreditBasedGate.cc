@@ -103,7 +103,7 @@ void CreditBasedGate::scheduleChangeTimer()
         simtime_t now = simTime();
         simtime_t changeTime = now + (transmitCreditLimit - currentCredit) / currentCreditGainRate;
         EV_DEBUG << "Scheduling change timer to " << changeTime << std::endl;
-        if (changeTime <= now)
+        if (changeTime < now)
             cancelEvent(changeTimer);
         else
             rescheduleAt(changeTime, changeTimer);
