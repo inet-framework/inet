@@ -74,8 +74,6 @@ void CreditBasedGate::handleMessage(cMessage *message)
         updateCurrentCreditGainRate();
         // 4. update gate state based on current credit
         updateGateState();
-        // 5. reschedule change timer when currentCredit reaches transmitCreditLimit
-        scheduleChangeTimer();
     }
     else
         throw cRuntimeError("Unknown message");
