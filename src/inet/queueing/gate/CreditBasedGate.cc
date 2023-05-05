@@ -96,7 +96,9 @@ void CreditBasedGate::scheduleChangeTimer()
 {
     ASSERT(lastCurrentCreditEmitted == currentCredit);
     ASSERT(lastCurrentCreditEmittedTime == simTime());
-    if (currentCreditGainRate == 0)
+    if (currentCreditGainRate == 0 ||
+        (currentCreditGainRate > 0 && transmitCreditLimit <= currentCredit) ||
+        (currentCreditGainRate < 0 && transmitCreditLimit >= currentCredit))
         cancelEvent(changeTimer);
     else {
         simtime_t now = simTime();
