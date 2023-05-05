@@ -330,10 +330,18 @@ Packet *VoipStreamSender::generatePacket()
         return nullptr;
 
     short int bytesPerInSample = av_get_bytes_per_sample(pEncoderCtx->sample_fmt);
-    int samples = std::min(sampleBuffer.length() / (bytesPerInSample), samplesPerPacket);
-    int inBytes = samples * bytesPerInSample;
+    int samples = std::min(sampleBuffer.length() / bytesPerInSample, samplesPerPacket);
     bool isSilent = checkSilence(pEncoderCtx->sample_fmt, sampleBuffer.readPtr(), samples);
     const auto& vp = makeShared<VoipStreamPacket>();
+
+    if (samples < samplesPerPacket && repeatCount > 1) {
+        //padding last frame when the sending will be repeating from start
+        int dataSize = (samplesPerPacket - samples) * bytesPerInSample;
+        memset(sampleBuffer.writePtr(), 0, dataSize);
+        sampleBuffer.notifyWrote(dataSize);
+        samples = std::min(sampleBuffer.length() / (bytesPerInSample), samplesPerPacket);
+    }
+    int inBytes = samples * bytesPerInSample;
 
     AVPacket *opacket = av_packet_alloc();
     AVFrame *frame = av_frame_alloc();
