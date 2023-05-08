@@ -104,7 +104,7 @@ Packet *MarkovClassifier::pullPacket(cGate *gate)
         throw cRuntimeError("Cannot pull from gate");
     auto packet = provider->pullPacket(inputGate->getPathEndGate());
     take(packet);
-    animatePullPacket(packet, gate, findConnectedGate<IPacketProcessor>(gate));
+    animatePullPacket(packet, gate, findConnectedGate<IActivePacketSink>(gate));
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
     updateDisplayString();

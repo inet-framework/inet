@@ -122,7 +122,7 @@ Packet *PacketQueue::pullPacket(cGate *gate)
     insertPacketEvent(this, packet, PEK_QUEUED, queueingTime, packetEvent);
     increaseTimeTag<QueueingTimeTag>(packet, queueingTime, queueingTime);
     emit(packetPulledSignal, packet);
-    animatePullPacket(packet, outputGate, findConnectedGate<IPacketProcessor>(outputGate));
+    animatePullPacket(packet, outputGate, findConnectedGate<IActivePacketSink>(outputGate));
     updateDisplayString();
     return packet;
 }

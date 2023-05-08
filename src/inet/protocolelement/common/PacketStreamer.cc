@@ -117,7 +117,7 @@ Packet *PacketStreamer::pullPacketStart(cGate *gate, bps datarate)
     streamedPacket = provider->pullPacket(inputGate->getPathStartGate());
     auto packet = streamedPacket->dup();
     EV_INFO << "Starting streaming packet" << EV_FIELD(packet) << EV_ENDL;
-    animatePullPacketStart(packet, outputGate, findConnectedGate<IPacketProcessor>(outputGate), streamDatarate, streamedPacket->getId());
+    animatePullPacketStart(packet, outputGate, findConnectedGate<IActivePacketSink>(outputGate), streamDatarate, streamedPacket->getId());
     updateDisplayString();
     return packet;
 }
@@ -128,7 +128,7 @@ Packet *PacketStreamer::pullPacketEnd(cGate *gate)
     EV_INFO << "Ending streaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     auto packet = streamedPacket;
     handlePacketProcessed(packet);
-    animatePullPacketEnd(packet, outputGate, findConnectedGate<IPacketProcessor>(outputGate), streamedPacket->getId());
+    animatePullPacketEnd(packet, outputGate, findConnectedGate<IActivePacketSink>(outputGate), streamedPacket->getId());
     streamDatarate = bps(NaN);
     streamedPacket = nullptr;
     updateDisplayString();
@@ -141,7 +141,7 @@ Packet *PacketStreamer::pullPacketProgress(cGate *gate, bps datarate, b position
     streamDatarate = datarate;
     EV_INFO << "Progressing streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     auto packet = streamedPacket->dup();
-    animatePullPacketProgress(packet, outputGate, findConnectedGate<IPacketProcessor>(outputGate), streamDatarate, position, extraProcessableLength, streamedPacket->getId());
+    animatePullPacketProgress(packet, outputGate, findConnectedGate<IActivePacketSink>(outputGate), streamDatarate, position, extraProcessableLength, streamedPacket->getId());
     updateDisplayString();
     return packet;
 }
