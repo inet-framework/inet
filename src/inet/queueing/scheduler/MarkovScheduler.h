@@ -42,22 +42,22 @@ class INET_API MarkovScheduler : public ClockUserModuleMixin<PacketSchedulerBase
   public:
     virtual ~MarkovScheduler();
 
-    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
+    virtual IPassivePacketSink *getConsumer(const cGate *gate) override { return consumer; }
 
-    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPushing(const cGate *gate) const override { return true; }
+    virtual bool supportsPacketPulling(const cGate *gate) const override { return true; }
 
-    virtual bool canPushSomePacket(cGate *gate) const override;
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
+    virtual bool canPushSomePacket(const cGate *gate) const override;
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override;
 
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 
-    virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
-    virtual void pushPacketEnd(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
-    virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
 
-    virtual void handleCanPushPacketChanged(cGate *gate) override;
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
+    virtual void handleCanPushPacketChanged(const cGate *gate) override;
+    virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
 
     virtual std::string resolveDirective(char directive) const override;
 };

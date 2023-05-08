@@ -59,7 +59,7 @@ void DscpMarker::handleMessage(cMessage *message)
     pushPacket(packet, packet->getArrivalGate());
 }
 
-void DscpMarker::pushPacket(Packet *packet, cGate *inputGate)
+void DscpMarker::pushPacket(Packet *packet, const cGate *inputGate)
 {
     Enter_Method("pushPacket");
     take(packet);

@@ -17,7 +17,7 @@ using namespace inet::queueing;
 class INET_API ReceiveWithProtocol : public PacketPusherBase
 {
   public:
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 };
 
 } // namespace inet

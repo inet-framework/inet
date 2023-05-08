@@ -42,7 +42,7 @@ void TwoRateThreeColorMeter::initialize(int stage)
     }
 }
 
-void TwoRateThreeColorMeter::pushPacket(Packet *packet, cGate *inputGate)
+void TwoRateThreeColorMeter::pushPacket(Packet *packet, const cGate *inputGate)
 {
     numRcvd++;
     cGate *outputGate = nullptr;

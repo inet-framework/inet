@@ -158,8 +158,8 @@ class INET_API EthernetMacBase : public MacProtocolBase, public queueing::IActiv
     void addPaddingAndSetFcs(Packet *packet, B requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES) const;
 
     // IActivePacketSink:
-    virtual queueing::IPassivePacketSource *getProvider(cGate *gate) override;
-    virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
+    virtual queueing::IPassivePacketSource *getProvider(const cGate *gate) override;
+    virtual void handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
 
   protected:
     // initialization

@@ -35,10 +35,10 @@ class INET_API PacketDelayerBase : public ClockUserModuleMixin<PacketPusherBase>
     virtual clocktime_t computeDelay(Packet *packet) const = 0;
 
   public:
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 
-    virtual void handleCanPushPacketChanged(cGate *gate) override;
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
+    virtual void handleCanPushPacketChanged(const cGate *gate) override;
+    virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
 };
 
 } // namespace queueing

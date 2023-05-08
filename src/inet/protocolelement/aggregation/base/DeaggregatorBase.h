@@ -24,7 +24,7 @@ class INET_API DeaggregatorBase : public PacketPusherBase
     virtual std::vector<Packet *> deaggregatePacket(Packet *packet) = 0;
 
   public:
-    virtual void pushPacket(Packet *aggregatedPacket, cGate *gate) override;
+    virtual void pushPacket(Packet *aggregatedPacket, const cGate *gate) override;
 };
 
 } // namespace inet

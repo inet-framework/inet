@@ -16,8 +16,8 @@ namespace queueing {
 class INET_API InProgressQueue : public PacketQueue
 {
   public:
-    virtual bool canPushSomePacket(cGate *gate) const override { return false; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
+    virtual bool canPushSomePacket(const cGate *gate) const override { return false; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override;
 };
 
 } // namespace queueing

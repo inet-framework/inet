@@ -42,12 +42,12 @@ class INET_API StreamThroughTransmitter : public StreamingTransmitterBase
   public:
     virtual ~StreamThroughTransmitter() { cancelAndDelete(bufferUnderrunTimer); }
 
-    virtual bool supportsPacketStreaming(cGate *gate) const override { return true; }
+    virtual bool supportsPacketStreaming(const cGate *gate) const override { return true; }
 
-    virtual void pushPacket(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
-    virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override;
-    virtual void pushPacketEnd(Packet *packet, cGate *gate) override;
-    virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override;
+    virtual void pushPacket(Packet *packet, const cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override;
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override;
 };
 
 } // namespace inet

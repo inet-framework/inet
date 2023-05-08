@@ -61,17 +61,17 @@ void PacketStreamer::endStreaming()
     updateDisplayString();
 }
 
-bool PacketStreamer::canPushSomePacket(cGate *gate) const
+bool PacketStreamer::canPushSomePacket(const cGate *gate) const
 {
     return !isStreaming() && consumer->canPushSomePacket(outputGate->getPathEndGate());
 }
 
-bool PacketStreamer::canPushPacket(Packet *packet, cGate *gate) const
+bool PacketStreamer::canPushPacket(Packet *packet, const cGate *gate) const
 {
     return !isStreaming() && consumer->canPushPacket(packet, outputGate->getPathEndGate());
 }
 
-void PacketStreamer::pushPacket(Packet *packet, cGate *gate)
+void PacketStreamer::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     ASSERT(!isStreaming());
@@ -86,31 +86,31 @@ void PacketStreamer::pushPacket(Packet *packet, cGate *gate)
         endStreaming();
 }
 
-void PacketStreamer::handleCanPushPacketChanged(cGate *gate)
+void PacketStreamer::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
-void PacketStreamer::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void PacketStreamer::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
     if (producer != nullptr)
         producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
 }
 
-bool PacketStreamer::canPullSomePacket(cGate *gate) const
+bool PacketStreamer::canPullSomePacket(const cGate *gate) const
 {
     return !isStreaming() && provider->canPullSomePacket(inputGate->getPathStartGate());
 }
 
-Packet *PacketStreamer::canPullPacket(cGate *gate) const
+Packet *PacketStreamer::canPullPacket(const cGate *gate) const
 {
     return isStreaming() ? nullptr : provider->canPullPacket(inputGate->getPathStartGate());
 }
 
-Packet *PacketStreamer::pullPacketStart(cGate *gate, bps datarate)
+Packet *PacketStreamer::pullPacketStart(const cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketStart");
     streamDatarate = datarate;
@@ -122,7 +122,7 @@ Packet *PacketStreamer::pullPacketStart(cGate *gate, bps datarate)
     return packet;
 }
 
-Packet *PacketStreamer::pullPacketEnd(cGate *gate)
+Packet *PacketStreamer::pullPacketEnd(const cGate *gate)
 {
     Enter_Method("pullPacketEnd");
     EV_INFO << "Ending streaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
@@ -135,7 +135,7 @@ Packet *PacketStreamer::pullPacketEnd(cGate *gate)
     return packet;
 }
 
-Packet *PacketStreamer::pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength)
+Packet *PacketStreamer::pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pullPacketProgress");
     streamDatarate = datarate;
@@ -146,14 +146,14 @@ Packet *PacketStreamer::pullPacketProgress(cGate *gate, bps datarate, b position
     return packet;
 }
 
-void PacketStreamer::handleCanPullPacketChanged(cGate *gate)
+void PacketStreamer::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr && !isStreaming())
         collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
 }
 
-void PacketStreamer::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void PacketStreamer::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePullPacketConfirmation");
     if (collector != nullptr)

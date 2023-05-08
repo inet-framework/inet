@@ -64,7 +64,7 @@ class INET_API CreditBasedGate : public PacketGateBase, public cListener
   public:
     virtual ~CreditBasedGate() { cancelAndDelete(changeTimer); }
 
-    virtual void handleCanPullPacketChanged(cGate *gate) override;
+    virtual void handleCanPullPacketChanged(const cGate *gate) override;
 
     virtual std::string resolveDirective(char directive) const override;
 

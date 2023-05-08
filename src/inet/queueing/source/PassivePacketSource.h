@@ -32,21 +32,21 @@ class INET_API PassivePacketSource : public ClockUserModuleMixin<PassivePacketSo
     virtual void handleMessage(cMessage *message) override;
 
     virtual void scheduleProvidingTimer(clocktime_t delay);
-    virtual Packet *providePacket(cGate *gate);
+    virtual Packet *providePacket(const cGate *gate);
 
   public:
     virtual ~PassivePacketSource() { delete nextPacket; cancelAndDeleteClockEvent(providingTimer); }
 
-    virtual bool supportsPacketPushing(cGate *gate) const override { return false; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return outputGate == gate; }
+    virtual bool supportsPacketPushing(const cGate *gate) const override { return false; }
+    virtual bool supportsPacketPulling(const cGate *gate) const override { return outputGate == gate; }
 
-    virtual bool canPullSomePacket(cGate *gate) const override;
-    virtual Packet *canPullPacket(cGate *gate) const override;
+    virtual bool canPullSomePacket(const cGate *gate) const override;
+    virtual Packet *canPullPacket(const cGate *gate) const override;
 
-    virtual Packet *pullPacket(cGate *gate) override;
-    virtual Packet *pullPacketStart(cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
-    virtual Packet *pullPacketEnd(cGate *gate) override { throw cRuntimeError("Invalid operation"); }
-    virtual Packet *pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength) override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacket(const cGate *gate) override;
+    virtual Packet *pullPacketStart(const cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacketEnd(const cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength) override { throw cRuntimeError("Invalid operation"); }
 };
 
 } // namespace queueing

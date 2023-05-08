@@ -55,7 +55,7 @@ void MessageDispatcher::arrived(cMessage *message, cGate *inGate, const SendOpti
 }
 
 #ifdef INET_WITH_QUEUEING
-bool MessageDispatcher::canPushSomePacket(cGate *inGate) const
+bool MessageDispatcher::canPushSomePacket(const cGate *inGate) const
 {
     int size = gateSize("out");
     for (int i = 0; i < size; i++) {
@@ -67,14 +67,14 @@ bool MessageDispatcher::canPushSomePacket(cGate *inGate) const
     return true;
 }
 
-bool MessageDispatcher::canPushPacket(Packet *packet, cGate *inGate) const
+bool MessageDispatcher::canPushPacket(Packet *packet, const cGate *inGate) const
 {
     auto outGate = const_cast<MessageDispatcher *>(this)->handlePacket(packet, inGate);
     auto consumer = findConnectedModule<queueing::IPassivePacketSink>(outGate);
     return consumer != nullptr && !dynamic_cast<MessageDispatcher *>(consumer) && consumer->canPushPacket(packet, outGate->getPathEndGate());
 }
 
-void MessageDispatcher::pushPacket(Packet *packet, cGate *inGate)
+void MessageDispatcher::pushPacket(Packet *packet, const cGate *inGate)
 {
     Enter_Method("pushPacket");
     take(packet);
@@ -86,7 +86,7 @@ void MessageDispatcher::pushPacket(Packet *packet, cGate *inGate)
     updateDisplayString();
 }
 
-void MessageDispatcher::pushPacketStart(Packet *packet, cGate *inGate, bps datarate)
+void MessageDispatcher::pushPacketStart(Packet *packet, const cGate *inGate, bps datarate)
 {
     Enter_Method("pushPacketStart");
     take(packet);
@@ -97,7 +97,7 @@ void MessageDispatcher::pushPacketStart(Packet *packet, cGate *inGate, bps datar
     updateDisplayString();
 }
 
-void MessageDispatcher::pushPacketEnd(Packet *packet, cGate *inGate)
+void MessageDispatcher::pushPacketEnd(Packet *packet, const cGate *inGate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
@@ -109,7 +109,7 @@ void MessageDispatcher::pushPacketEnd(Packet *packet, cGate *inGate)
     updateDisplayString();
 }
 
-void MessageDispatcher::handleCanPushPacketChanged(cGate *outGate)
+void MessageDispatcher::handleCanPushPacketChanged(const cGate *outGate)
 {
     int size = gateSize("in");
     for (int i = 0; i < size; i++) {
@@ -120,13 +120,13 @@ void MessageDispatcher::handleCanPushPacketChanged(cGate *outGate)
     }
 }
 
-void MessageDispatcher::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void MessageDispatcher::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
 }
 
 #endif // #ifdef INET_WITH_QUEUEING
 
-cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
+cGate *MessageDispatcher::handlePacket(Packet *packet, const cGate *inGate)
 {
     const auto& socketInd = packet->findTag<SocketInd>();
     if (socketInd != nullptr) {

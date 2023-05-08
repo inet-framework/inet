@@ -50,15 +50,15 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     virtual void removePacket(Packet *packet) override;
     virtual void removeAllPackets() override;
 
-    virtual bool supportsPacketPushing(cGate *gate) const override { return inputGate == gate; }
-    virtual bool canPushSomePacket(cGate *gate) const override;
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual bool supportsPacketPushing(const cGate *gate) const override { return inputGate == gate; }
+    virtual bool canPushSomePacket(const cGate *gate) const override;
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override;
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 
-    virtual bool supportsPacketPulling(cGate *gate) const override { return outputGate == gate; }
-    virtual bool canPullSomePacket(cGate *gate) const override { return provider->canPullSomePacket(gate); }
-    virtual Packet *canPullPacket(cGate *gate) const override { return provider->canPullPacket(gate); }
-    virtual Packet *pullPacket(cGate *gate) override;
+    virtual bool supportsPacketPulling(const cGate *gate) const override { return outputGate == gate; }
+    virtual bool canPullSomePacket(const cGate *gate) const override { return provider->canPullSomePacket(gate); }
+    virtual Packet *canPullPacket(const cGate *gate) const override { return provider->canPullPacket(gate); }
+    virtual Packet *pullPacket(const cGate *gate) override;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };

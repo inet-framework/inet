@@ -45,7 +45,7 @@ class INET_API VirtualTunnel : public queueing::PassivePacketSinkBase
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 
 #ifdef INET_WITH_ETHERNET
     virtual void socketDataArrived(EthernetSocket *socket, Packet *packet) override;

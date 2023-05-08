@@ -42,7 +42,7 @@ void EthernetFragmentPhyHeaderInserter::handlePacketProcessed(Packet *packet)
     }
 }
 
-void EthernetFragmentPhyHeaderInserter::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
+void EthernetFragmentPhyHeaderInserter::pushPacketStart(Packet *packet, const cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketStart");
     take(packet);

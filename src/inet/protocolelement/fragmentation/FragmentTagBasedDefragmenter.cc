@@ -13,7 +13,7 @@ namespace inet {
 
 Define_Module(FragmentTagBasedDefragmenter);
 
-void FragmentTagBasedDefragmenter::pushPacket(Packet *fragmentPacket, cGate *gate)
+void FragmentTagBasedDefragmenter::pushPacket(Packet *fragmentPacket, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(fragmentPacket);

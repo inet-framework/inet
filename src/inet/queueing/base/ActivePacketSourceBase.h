@@ -25,10 +25,10 @@ class INET_API ActivePacketSourceBase : public PacketSourceBase, public virtual 
     virtual void initialize(int stage) override;
 
   public:
-    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
+    virtual IPassivePacketSink *getConsumer(const cGate *gate) override { return consumer; }
 
-    virtual bool supportsPacketPushing(cGate *gate) const override { return outputGate == gate; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(const cGate *gate) const override { return outputGate == gate; }
+    virtual bool supportsPacketPulling(const cGate *gate) const override { return false; }
 };
 
 } // namespace queueing

@@ -34,7 +34,7 @@ void StreamingTransmitter::handleCrashOperation(LifecycleOperation *operation)
         abortTx();
 }
 
-void StreamingTransmitter::pushPacket(Packet *packet, cGate *gate)
+void StreamingTransmitter::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);

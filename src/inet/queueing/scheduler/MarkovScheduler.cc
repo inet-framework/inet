@@ -87,17 +87,17 @@ void MarkovScheduler::scheduleWaitTimer()
     scheduleClockEventAfter(waitIntervals[state].doubleValue(this), waitTimer);
 }
 
-bool MarkovScheduler::canPushSomePacket(cGate *gate) const
+bool MarkovScheduler::canPushSomePacket(const cGate *gate) const
 {
     return gate->getIndex() == state;
 }
 
-bool MarkovScheduler::canPushPacket(Packet *packet, cGate *gate) const
+bool MarkovScheduler::canPushPacket(Packet *packet, const cGate *gate) const
 {
     return canPushSomePacket(gate);
 }
 
-void MarkovScheduler::pushPacket(Packet *packet, cGate *gate)
+void MarkovScheduler::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
@@ -119,14 +119,14 @@ std::string MarkovScheduler::resolveDirective(char directive) const
     }
 }
 
-void MarkovScheduler::handleCanPushPacketChanged(cGate *gate)
+void MarkovScheduler::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producers[state] != nullptr)
         producers[state]->handleCanPushPacketChanged(inputGates[state]->getPathStartGate());
 }
 
-void MarkovScheduler::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void MarkovScheduler::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
     if (producers[state] != nullptr)

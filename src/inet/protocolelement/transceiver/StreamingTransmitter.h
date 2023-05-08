@@ -24,9 +24,9 @@ class INET_API StreamingTransmitter : public StreamingTransmitterBase
     virtual void abortTx() override;
 
   public:
-    virtual bool supportsPacketStreaming(cGate *gate) const override { return gate == outputGate; }
+    virtual bool supportsPacketStreaming(const cGate *gate) const override { return gate == outputGate; }
 
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 };
 
 } // namespace inet

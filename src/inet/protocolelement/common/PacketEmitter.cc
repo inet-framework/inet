@@ -45,19 +45,19 @@ void PacketEmitter::processPacket(Packet *packet)
     processedPacket = packet->dup();
 }
 
-void PacketEmitter::pushPacket(Packet *packet, cGate *gate)
+void PacketEmitter::pushPacket(Packet *packet, const cGate *gate)
 {
     emitPacket(packet);
     PacketFlowBase::pushPacket(packet, gate);
 }
 
-void PacketEmitter::pushPacketEnd(Packet *packet, cGate *gate)
+void PacketEmitter::pushPacketEnd(Packet *packet, const cGate *gate)
 {
     emitPacket(packet);
     PacketFlowBase::pushPacketEnd(packet, gate);
 }
 
-void PacketEmitter::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void PacketEmitter::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
 //    emitPacket(processedPacket);
     PacketFlowBase::handlePushPacketProcessed(packet, gate, successful);

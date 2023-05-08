@@ -23,7 +23,7 @@ class INET_API DuplicateRemoval : public PacketPusherBase
     virtual void initialize(int stage) override;
 
   public:
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 };
 
 } // namespace inet

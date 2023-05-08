@@ -43,7 +43,7 @@ void PcapFilePacketConsumer::finish()
     pcapWriter.close();
 }
 
-void PcapFilePacketConsumer::pushPacket(Packet *packet, cGate *gate)
+void PcapFilePacketConsumer::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);

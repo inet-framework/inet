@@ -33,7 +33,7 @@ cGate *StatisticalRateLimiter::getRegistrationForwardingGate(cGate *gate)
         throw cRuntimeError("Unknown gate");
 }
 
-bool StatisticalRateLimiter::canPushPacket(Packet *packet, cGate *gate) const
+bool StatisticalRateLimiter::canPushPacket(Packet *packet, const cGate *gate) const
 {
     return consumer == nullptr || consumer->canPushPacket(packet, outputGate->getPathEndGate());
 }

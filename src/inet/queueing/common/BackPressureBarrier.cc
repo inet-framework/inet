@@ -22,7 +22,7 @@ cGate *BackPressureBarrier::getRegistrationForwardingGate(cGate *gate)
         throw cRuntimeError("Unknown gate");
 }
 
-Packet *BackPressureBarrier::canPullPacket(cGate *gate) const
+Packet *BackPressureBarrier::canPullPacket(const cGate *gate) const
 {
     auto packet = provider->canPullPacket(inputGate->getPathStartGate());
     if (packet == nullptr)

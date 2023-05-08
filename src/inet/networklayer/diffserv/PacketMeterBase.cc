@@ -28,13 +28,13 @@ void PacketMeterBase::handleMessage(cMessage *message)
     pushPacket(packet, packet->getArrivalGate());
 }
 
-void PacketMeterBase::handleCanPushPacketChanged(cGate *gate)
+void PacketMeterBase::handleCanPushPacketChanged(const cGate *gate)
 {
     if (producer != nullptr)
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
-void PacketMeterBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void PacketMeterBase::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     if (producer != nullptr)
         producer->handlePushPacketProcessed(packet, gate, successful);

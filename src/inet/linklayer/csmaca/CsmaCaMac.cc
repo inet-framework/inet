@@ -657,12 +657,12 @@ void CsmaCaMac::processUpperPacket()
     handleUpperPacket(packet);
 }
 
-queueing::IPassivePacketSource *CsmaCaMac::getProvider(cGate *gate)
+queueing::IPassivePacketSource *CsmaCaMac::getProvider(const cGate *gate)
 {
     return (gate->getId() == upperLayerInGateId) ? txQueue.get() : nullptr;
 }
 
-void CsmaCaMac::handleCanPullPacketChanged(cGate *gate)
+void CsmaCaMac::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (fsm.getState() == IDLE && !txQueue->isEmpty()) {
@@ -670,7 +670,7 @@ void CsmaCaMac::handleCanPullPacketChanged(cGate *gate)
     }
 }
 
-void CsmaCaMac::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void CsmaCaMac::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePullPacketProcessed");
     throw cRuntimeError("Not supported callback");

@@ -27,8 +27,8 @@ class INET_API PcapFilePacketProducer : public ActivePacketSourceBase
     virtual void schedulePacket();
 
   public:
-    virtual void handleCanPushPacketChanged(cGate *gate) override;
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override {}
+    virtual void handleCanPushPacketChanged(const cGate *gate) override;
+    virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override {}
 };
 
 } // namespace queueing

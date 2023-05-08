@@ -26,7 +26,7 @@ class INET_API Forwarding : public PacketPusherBase
     virtual std::pair<L3Address, int> findNextHop(const L3Address& destinationAddress);
 
   public:
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 };
 
 } // namespace inet

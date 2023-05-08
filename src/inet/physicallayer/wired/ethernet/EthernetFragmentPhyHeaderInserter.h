@@ -27,7 +27,7 @@ class INET_API EthernetFragmentPhyHeaderInserter : public PacketFlowBase
     virtual void handlePacketProcessed(Packet *packet) override;
 
   public:
-    virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override;
 };
 
 } // namespace physicallayer

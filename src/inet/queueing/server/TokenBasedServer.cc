@@ -64,12 +64,12 @@ void TokenBasedServer::processPackets()
     }
 }
 
-void TokenBasedServer::handleCanPushPacketChanged(cGate *gate)
+void TokenBasedServer::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
 }
 
-void TokenBasedServer::handleCanPullPacketChanged(cGate *gate)
+void TokenBasedServer::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     processPackets();

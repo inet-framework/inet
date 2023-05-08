@@ -85,7 +85,7 @@ void PacketClassifierBase::endPacketStreaming(Packet *packet)
     inProgressGateIndex = -1;
 }
 
-bool PacketClassifierBase::canPushSomePacket(cGate *gate) const
+bool PacketClassifierBase::canPushSomePacket(const cGate *gate) const
 {
     for (int i = 0; i < (int)outputGates.size(); i++)
         if (consumers[i]->canPushSomePacket(outputGates[i]->getPathEndGate()))
@@ -93,13 +93,13 @@ bool PacketClassifierBase::canPushSomePacket(cGate *gate) const
     return false;
 }
 
-bool PacketClassifierBase::canPushPacket(Packet *packet, cGate *gate) const
+bool PacketClassifierBase::canPushPacket(Packet *packet, const cGate *gate) const
 {
     int index = callClassifyPacket(packet);
     return consumers[index]->canPushPacket(packet, outputGates[index]->getPathEndGate());
 }
 
-void PacketClassifierBase::pushPacket(Packet *packet, cGate *gate)
+void PacketClassifierBase::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
@@ -112,7 +112,7 @@ void PacketClassifierBase::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void PacketClassifierBase::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
+void PacketClassifierBase::pushPacketStart(Packet *packet, const cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketStart");
     take(packet);
@@ -122,7 +122,7 @@ void PacketClassifierBase::pushPacketStart(Packet *packet, cGate *gate, bps data
     updateDisplayString();
 }
 
-void PacketClassifierBase::pushPacketEnd(Packet *packet, cGate *gate)
+void PacketClassifierBase::pushPacketEnd(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
@@ -137,7 +137,7 @@ void PacketClassifierBase::pushPacketEnd(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void PacketClassifierBase::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
+void PacketClassifierBase::pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pushPacketProgress");
     take(packet);
@@ -153,24 +153,24 @@ void PacketClassifierBase::pushPacketProgress(Packet *packet, cGate *gate, bps d
     updateDisplayString();
 }
 
-void PacketClassifierBase::handleCanPushPacketChanged(cGate *gate)
+void PacketClassifierBase::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
-void PacketClassifierBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void PacketClassifierBase::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
 }
 
-bool PacketClassifierBase::canPullSomePacket(cGate *gate) const
+bool PacketClassifierBase::canPullSomePacket(const cGate *gate) const
 {
     return canPullPacket(gate) != nullptr;
 }
 
-Packet *PacketClassifierBase::canPullPacket(cGate *gate) const
+Packet *PacketClassifierBase::canPullPacket(const cGate *gate) const
 {
     auto packet = provider->canPullPacket(inputGate->getPathStartGate());
     if (packet == nullptr)
@@ -181,7 +181,7 @@ Packet *PacketClassifierBase::canPullPacket(cGate *gate) const
     }
 }
 
-Packet *PacketClassifierBase::pullPacket(cGate *gate)
+Packet *PacketClassifierBase::pullPacket(const cGate *gate)
 {
     auto packet = provider->pullPacket(inputGate->getPathStartGate());
     int index = callClassifyPacket(packet);
@@ -190,7 +190,7 @@ Packet *PacketClassifierBase::pullPacket(cGate *gate)
     return packet;
 }
 
-void PacketClassifierBase::handleCanPullPacketChanged(cGate *gate)
+void PacketClassifierBase::handleCanPullPacketChanged(const cGate *gate)
 {
     auto packet = provider->canPullPacket(inputGate->getPathStartGate());
     if (packet != nullptr) {

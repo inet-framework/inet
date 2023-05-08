@@ -35,8 +35,8 @@ class INET_API PacketServer : public ClockUserModuleMixin<PacketServerBase>
   public:
     virtual ~PacketServer();
 
-    virtual void handleCanPushPacketChanged(cGate *gate) override;
-    virtual void handleCanPullPacketChanged(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(const cGate *gate) override;
+    virtual void handleCanPullPacketChanged(const cGate *gate) override;
 
     virtual std::string resolveDirective(char directive) const override;
 };

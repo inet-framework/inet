@@ -38,8 +38,8 @@ class INET_API ActivePacketSink : public ClockUserModuleMixin<ActivePacketSinkBa
   public:
     virtual ~ActivePacketSink() { cancelAndDeleteClockEvent(collectionTimer); }
 
-    virtual void handleCanPullPacketChanged(cGate *gate) override;
-    virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
+    virtual void handleCanPullPacketChanged(const cGate *gate) override;
+    virtual void handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
 };
 
 } // namespace queueing

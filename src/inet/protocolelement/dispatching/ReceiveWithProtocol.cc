@@ -14,7 +14,7 @@ namespace inet {
 
 Define_Module(ReceiveWithProtocol);
 
-void ReceiveWithProtocol::pushPacket(Packet *packet, cGate *gate)
+void ReceiveWithProtocol::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);

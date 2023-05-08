@@ -24,21 +24,21 @@ class INET_API EmptyPacketSource : public PacketProcessorBase, public virtual IP
     virtual void initialize(int stage) override;
 
   public:
-    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
+    virtual IPassivePacketSink *getConsumer(const cGate *gate) override { return consumer; }
 
-    virtual bool supportsPacketPushing(cGate *gate) const override { return outputGate == gate; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return outputGate == gate; }
+    virtual bool supportsPacketPushing(const cGate *gate) const override { return outputGate == gate; }
+    virtual bool supportsPacketPulling(const cGate *gate) const override { return outputGate == gate; }
 
-    virtual void handleCanPushPacketChanged(cGate *gate) override;
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
+    virtual void handleCanPushPacketChanged(const cGate *gate) override;
+    virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
 
-    virtual bool canPullSomePacket(cGate *gate) const override { return false; }
-    virtual Packet *canPullPacket(cGate *gate) const override { return nullptr; }
+    virtual bool canPullSomePacket(const cGate *gate) const override { return false; }
+    virtual Packet *canPullPacket(const cGate *gate) const override { return nullptr; }
 
-    virtual Packet *pullPacket(cGate *gate) override { throw cRuntimeError("Illegal operation: packet source is empty"); }
-    virtual Packet *pullPacketStart(cGate *gate, bps datarate)  override { throw cRuntimeError("Illegal operation: packet source is empty"); }
-    virtual Packet *pullPacketEnd(cGate *gate)  override { throw cRuntimeError("Illegal operation: packet source is empty"); }
-    virtual Packet *pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength)  override { throw cRuntimeError("Illegal operation: packet source is empty"); }
+    virtual Packet *pullPacket(const cGate *gate) override { throw cRuntimeError("Illegal operation: packet source is empty"); }
+    virtual Packet *pullPacketStart(const cGate *gate, bps datarate)  override { throw cRuntimeError("Illegal operation: packet source is empty"); }
+    virtual Packet *pullPacketEnd(const cGate *gate)  override { throw cRuntimeError("Illegal operation: packet source is empty"); }
+    virtual Packet *pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength)  override { throw cRuntimeError("Illegal operation: packet source is empty"); }
 };
 
 } // namespace queueing

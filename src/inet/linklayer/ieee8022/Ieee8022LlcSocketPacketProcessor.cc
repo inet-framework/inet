@@ -33,7 +33,7 @@ cGate *Ieee8022LlcSocketPacketProcessor::getRegistrationForwardingGate(cGate *ga
         throw cRuntimeError("Unknown gate");
 }
 
-void Ieee8022LlcSocketPacketProcessor::pushPacket(Packet *packet, cGate *gate)
+void Ieee8022LlcSocketPacketProcessor::pushPacket(Packet *packet, const cGate *gate)
 {
     const auto& sap = packet->findTag<Ieee802SapInd>();
     auto sockets = socketTable->findSockets(sap->getDsap(), sap->getSsap());

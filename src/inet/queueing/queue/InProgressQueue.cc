@@ -12,7 +12,7 @@ namespace queueing {
 
 Define_Module(InProgressQueue);
 
-bool InProgressQueue::canPushPacket(Packet *packet, cGate *gate) const
+bool InProgressQueue::canPushPacket(Packet *packet, const cGate *gate) const
 {
     return queue.isEmpty() || packetComparatorFunction->comparePackets(packet, getPacket(0)) > 0;
 }

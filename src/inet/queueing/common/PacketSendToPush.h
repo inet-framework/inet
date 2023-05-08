@@ -26,13 +26,13 @@ class INET_API PacketSendToPush : public PacketProcessorBase, public IActivePack
     virtual void handleMessage(cMessage *message) override;
 
   public:
-    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
+    virtual IPassivePacketSink *getConsumer(const cGate *gate) override { return consumer; }
 
-    virtual bool supportsPacketPushing(cGate *gate) const override { return outputGate == gate; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(const cGate *gate) const override { return outputGate == gate; }
+    virtual bool supportsPacketPulling(const cGate *gate) const override { return false; }
 
-    virtual void handleCanPushPacketChanged(cGate *gate) override {}
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override {}
+    virtual void handleCanPushPacketChanged(const cGate *gate) override {}
+    virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override {}
 };
 
 } // namespace queueing

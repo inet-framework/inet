@@ -74,36 +74,36 @@ void PacketGateBase::processPacket(Packet *packet)
     EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
 }
 
-bool PacketGateBase::canPushSomePacket(cGate *gate) const
+bool PacketGateBase::canPushSomePacket(const cGate *gate) const
 {
     return isOpen_ && canPacketFlowThrough(nullptr) && PacketFlowBase::canPushSomePacket(gate);
 }
 
-bool PacketGateBase::canPushPacket(Packet *packet, cGate *gate) const
+bool PacketGateBase::canPushPacket(Packet *packet, const cGate *gate) const
 {
     return isOpen_ && canPacketFlowThrough(packet) && PacketFlowBase::canPushPacket(packet, gate);
 }
 
-bool PacketGateBase::canPullSomePacket(cGate *gate) const
+bool PacketGateBase::canPullSomePacket(const cGate *gate) const
 {
     auto packet = PacketFlowBase::canPullPacket(gate);
     return isOpen_ && canPacketFlowThrough(packet) && PacketFlowBase::canPullSomePacket(gate);
 }
 
-Packet *PacketGateBase::canPullPacket(cGate *gate) const
+Packet *PacketGateBase::canPullPacket(const cGate *gate) const
 {
     auto packet = PacketFlowBase::canPullPacket(gate);
     return isOpen_ && canPacketFlowThrough(packet) ? packet : nullptr;
 }
 
-void PacketGateBase::handleCanPushPacketChanged(cGate *gate)
+void PacketGateBase::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (isOpen_)
         PacketFlowBase::handleCanPushPacketChanged(gate);
 }
 
-void PacketGateBase::handleCanPullPacketChanged(cGate *gate)
+void PacketGateBase::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (isOpen_)

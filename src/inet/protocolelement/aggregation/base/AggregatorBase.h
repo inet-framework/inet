@@ -36,7 +36,7 @@ class INET_API AggregatorBase : public PacketPusherBase
 
   public:
     virtual ~AggregatorBase() { delete aggregatedPacket; }
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 };
 
 } // namespace inet

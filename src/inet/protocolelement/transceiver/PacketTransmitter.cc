@@ -30,7 +30,7 @@ void PacketTransmitter::handleCrashOperation(LifecycleOperation *operation)
     ASSERT(!isTransmitting());
 }
 
-void PacketTransmitter::pushPacket(Packet *packet, cGate *gate)
+void PacketTransmitter::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);

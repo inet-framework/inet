@@ -701,12 +701,12 @@ void XMac::encapsulate(Packet *packet)
     EV_DETAIL << "pkt encapsulated\n";
 }
 
-queueing::IPassivePacketSource *XMac::getProvider(cGate *gate)
+queueing::IPassivePacketSource *XMac::getProvider(const cGate *gate)
 {
     return (gate->getId() == upperLayerInGateId) ? txQueue.get() : nullptr;
 }
 
-void XMac::handleCanPullPacketChanged(cGate *gate)
+void XMac::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     // force wakeup now
@@ -717,7 +717,7 @@ void XMac::handleCanPullPacketChanged(cGate *gate)
     }
 }
 
-void XMac::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void XMac::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePullPacketProcessed");
     throw cRuntimeError("Not supported callback");

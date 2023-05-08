@@ -400,7 +400,7 @@ void EthernetMac::beginSendFrames()
     }
 }
 
-void EthernetMac::handleCanPullPacketChanged(cGate *gate)
+void EthernetMac::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (currentTxFrame == nullptr && transmitState == TX_IDLE_STATE && canDequeuePacket()) {

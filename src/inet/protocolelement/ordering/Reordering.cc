@@ -30,7 +30,7 @@ void Reordering::initialize(int stage)
     }
 }
 
-void Reordering::pushPacket(Packet *packet, cGate *gate)
+void Reordering::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);

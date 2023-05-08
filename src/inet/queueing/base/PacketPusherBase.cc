@@ -34,44 +34,44 @@ void PacketPusherBase::handleMessage(cMessage *message)
     pushPacket(packet, packet->getArrivalGate());
 }
 
-bool PacketPusherBase::canPushSomePacket(cGate *gate) const
+bool PacketPusherBase::canPushSomePacket(const cGate *gate) const
 {
     return consumer->canPushSomePacket(outputGate->getPathEndGate());
 }
 
-bool PacketPusherBase::canPushPacket(Packet *packet, cGate *gate) const
+bool PacketPusherBase::canPushPacket(Packet *packet, const cGate *gate) const
 {
     return consumer->canPushPacket(packet, outputGate->getPathEndGate());
 }
 
-void PacketPusherBase::pushPacket(Packet *packet, cGate *gate)
+void PacketPusherBase::pushPacket(Packet *packet, const cGate *gate)
 {
     throw cRuntimeError("Invalid operation");
 }
 
-void PacketPusherBase::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
+void PacketPusherBase::pushPacketStart(Packet *packet, const cGate *gate, bps datarate)
 {
     throw cRuntimeError("Invalid operation");
 }
 
-void PacketPusherBase::pushPacketEnd(Packet *packet, cGate *gate)
+void PacketPusherBase::pushPacketEnd(Packet *packet, const cGate *gate)
 {
     throw cRuntimeError("Invalid operation");
 }
 
-void PacketPusherBase::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
+void PacketPusherBase::pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     throw cRuntimeError("Invalid operation");
 }
 
-void PacketPusherBase::handleCanPushPacketChanged(cGate *gate)
+void PacketPusherBase::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
-void PacketPusherBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void PacketPusherBase::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
     if (producer != nullptr)

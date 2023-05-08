@@ -29,8 +29,8 @@ class INET_API CutthroughSource : public PacketDestreamer
   public:
     virtual ~CutthroughSource();
 
-    virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override;
-    virtual void pushPacketEnd(Packet *packet, cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override;
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override;
 };
 
 } // namespace inet

@@ -25,12 +25,12 @@ void FullPacketSink::initialize(int stage)
         checkPacketOperationSupport(inputGate);
 }
 
-void FullPacketSink::handleCanPullPacketChanged(cGate *gate)
+void FullPacketSink::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
 }
 
-void FullPacketSink::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void FullPacketSink::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePullPacketProcessed");
 }

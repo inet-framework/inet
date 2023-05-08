@@ -41,12 +41,12 @@ void PassivePacketSource::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-bool PassivePacketSource::canPullSomePacket(cGate *gate) const
+bool PassivePacketSource::canPullSomePacket(const cGate *gate) const
 {
     return getClockTime() >= initialProvidingOffset && !providingTimer->isScheduled();
 }
 
-Packet *PassivePacketSource::canPullPacket(cGate *gate) const
+Packet *PassivePacketSource::canPullPacket(const cGate *gate) const
 {
     Enter_Method("canPullPacket");
     if (getClockTime() < initialProvidingOffset || providingTimer->isScheduled())
@@ -69,7 +69,7 @@ void PassivePacketSource::scheduleProvidingTimer(clocktime_t delay)
     }
 }
 
-Packet *PassivePacketSource::pullPacket(cGate *gate)
+Packet *PassivePacketSource::pullPacket(const cGate *gate)
 {
     Enter_Method("pullPacket");
     if (providingTimer->isScheduled() && providingTimer->getArrivalTime() > simTime())
@@ -84,7 +84,7 @@ Packet *PassivePacketSource::pullPacket(cGate *gate)
     }
 }
 
-Packet *PassivePacketSource::providePacket(cGate *gate)
+Packet *PassivePacketSource::providePacket(const cGate *gate)
 {
     Packet *packet;
     if (nextPacket == nullptr)

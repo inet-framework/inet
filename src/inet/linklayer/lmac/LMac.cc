@@ -647,18 +647,18 @@ void LMac::attachSignal(Packet *macPkt)
     macPkt->setDuration(duration);
 }
 
-queueing::IPassivePacketSource *LMac::getProvider(cGate *gate)
+queueing::IPassivePacketSource *LMac::getProvider(const cGate *gate)
 {
     return (gate->getId() == upperLayerInGateId) ? txQueue.get() : nullptr;
 }
 
-void LMac::handleCanPullPacketChanged(cGate *gate)
+void LMac::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     // packed arrived from upper layer
 }
 
-void LMac::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void LMac::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePullPacketProcessed");
     throw cRuntimeError("Not supported callback");

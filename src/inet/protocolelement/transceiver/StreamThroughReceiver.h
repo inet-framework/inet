@@ -23,7 +23,7 @@ class INET_API StreamThroughReceiver : public StreamingReceiverBase
     virtual void receivePacketEnd(cPacket *packet, cGate *gate, bps datarate);
 
   public:
-    virtual bool supportsPacketStreaming(cGate *gate) const override { return true; }
+    virtual bool supportsPacketStreaming(const cGate *gate) const override { return true; }
 };
 
 } // namespace inet

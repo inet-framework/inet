@@ -25,7 +25,7 @@ void ReceiveWithAcknowledge::initialize(int stage)
     }
 }
 
-void ReceiveWithAcknowledge::pushPacket(Packet *dataPacket, cGate *gate)
+void ReceiveWithAcknowledge::pushPacket(Packet *dataPacket, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(dataPacket);

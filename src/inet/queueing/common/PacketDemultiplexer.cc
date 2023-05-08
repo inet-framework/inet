@@ -35,20 +35,20 @@ void PacketDemultiplexer::initialize(int stage)
     }
 }
 
-Packet *PacketDemultiplexer::pullPacket(cGate *gate)
+Packet *PacketDemultiplexer::pullPacket(const cGate *gate)
 {
     Enter_Method("pullPacket");
     auto packet = provider->pullPacket(inputGate->getPathStartGate());
     take(packet);
     EV_INFO << "Forwarding packet" << EV_FIELD(packet) << EV_ENDL;
-    animatePullPacket(packet, gate, findConnectedGate<IActivePacketSink>(gate));
+    animatePullPacket(packet, outputGates[gate->getIndex()], findConnectedGate<IActivePacketSink>(gate));
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
     updateDisplayString();
     return packet;
 }
 
-void PacketDemultiplexer::handleCanPullPacketChanged(cGate *gate)
+void PacketDemultiplexer::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     for (int i = 0; i < (int)outputGates.size(); i++)
@@ -57,7 +57,7 @@ void PacketDemultiplexer::handleCanPullPacketChanged(cGate *gate)
             collectors[i]->handleCanPullPacketChanged(outputGates[i]->getPathEndGate());
 }
 
-void PacketDemultiplexer::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void PacketDemultiplexer::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePullPacketProcessed");
     throw cRuntimeError("Invalid operation");

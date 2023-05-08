@@ -73,7 +73,7 @@ void EthernetCutthroughSource::EthernetCutthroughDissectorCallback::visitChunk(c
         payloadProtocol = protocol;
 }
 
-void EthernetCutthroughSource::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
+void EthernetCutthroughSource::pushPacketStart(Packet *packet, const cGate *gate, bps datarate)
 {
     PacketDestreamer::pushPacketStart(packet, gate, datarate);
     if (!cutthroughInProgress && isEligibleForCutthrough(packet)) {
@@ -84,7 +84,7 @@ void EthernetCutthroughSource::pushPacketStart(Packet *packet, cGate *gate, bps 
     }
 }
 
-void EthernetCutthroughSource::pushPacketEnd(Packet *packet, cGate *gate)
+void EthernetCutthroughSource::pushPacketEnd(Packet *packet, const cGate *gate)
 {
     if (cutthroughInProgress) {
         Enter_Method("pushPacketEnd");

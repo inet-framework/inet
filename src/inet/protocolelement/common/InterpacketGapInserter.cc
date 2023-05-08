@@ -106,21 +106,21 @@ void InterpacketGapInserter::receivePacketEnd(cPacket *cpacket, cGate *gate, dou
     pushOrSendPacketEnd(packet, outputGate, consumer.getReferencedGate(), consumer, packet->getTransmissionId());
 }
 
-bool InterpacketGapInserter::canPushSomePacket(cGate *gate) const
+bool InterpacketGapInserter::canPushSomePacket(const cGate *gate) const
 {
     // TODO getting a value from the durationPar here is wrong, because it's volatile and this method can be called any number of times
     return (getClockTime() >= packetEndTime + durationPar->doubleValue()) &&
            (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()));
 }
 
-bool InterpacketGapInserter::canPushPacket(Packet *packet, cGate *gate) const
+bool InterpacketGapInserter::canPushPacket(Packet *packet, const cGate *gate) const
 {
     // TODO getting a value from the durationPar here is wrong, because it's volatile and this method can be called any number of times
     return (getClockTime() >= packetEndTime + durationPar->doubleValue()) &&
            (consumer == nullptr || consumer->canPushPacket(packet, outputGate->getPathEndGate()));
 }
 
-void InterpacketGapInserter::pushPacket(Packet *packet, cGate *gate)
+void InterpacketGapInserter::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
@@ -142,7 +142,7 @@ void InterpacketGapInserter::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void InterpacketGapInserter::handleCanPushPacketChanged(cGate *gate)
+void InterpacketGapInserter::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (packetEndTime + durationPar->doubleValue() <= getClockTime()) {
@@ -156,7 +156,7 @@ void InterpacketGapInserter::handleCanPushPacketChanged(cGate *gate)
     }
 }
 
-void InterpacketGapInserter::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
+void InterpacketGapInserter::pushPacketStart(Packet *packet, const cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketStart");
     take(packet);
@@ -165,7 +165,7 @@ void InterpacketGapInserter::pushPacketStart(Packet *packet, cGate *gate, bps da
     updateDisplayString();
 }
 
-void InterpacketGapInserter::pushPacketEnd(Packet *packet, cGate *gate)
+void InterpacketGapInserter::pushPacketEnd(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
@@ -174,7 +174,7 @@ void InterpacketGapInserter::pushPacketEnd(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void InterpacketGapInserter::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
+void InterpacketGapInserter::pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pushPacketProgress");
     take(packet);
@@ -183,14 +183,14 @@ void InterpacketGapInserter::pushPacketProgress(Packet *packet, cGate *gate, bps
     updateDisplayString();
 }
 
-void InterpacketGapInserter::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void InterpacketGapInserter::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     packetEndTime = getClockTime();
     if (producer != nullptr)
         producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
 }
 
-void InterpacketGapInserter::pushOrSendOrSchedulePacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
+void InterpacketGapInserter::pushOrSendOrSchedulePacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     auto now = getClockTime();
     if (now >= packetEndTime) {

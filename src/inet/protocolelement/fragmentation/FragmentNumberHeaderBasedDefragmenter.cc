@@ -25,7 +25,7 @@ void FragmentNumberHeaderBasedDefragmenter::initialize(int stage)
     }
 }
 
-void FragmentNumberHeaderBasedDefragmenter::pushPacket(Packet *fragmentPacket, cGate *gate)
+void FragmentNumberHeaderBasedDefragmenter::pushPacket(Packet *fragmentPacket, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(fragmentPacket);

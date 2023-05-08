@@ -25,14 +25,14 @@ class INET_API SendToMacAddress : public PacketFlowBase
     virtual void processPacket(Packet *packet) override;
 
   public:
-    virtual bool canPushSomePacket(cGate *gate) const override { return consumer->canPushSomePacket(outputGate->getPathEndGate()); }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return consumer->canPushPacket(packet, outputGate->getPathEndGate()); }
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual bool canPushSomePacket(const cGate *gate) const override { return consumer->canPushSomePacket(outputGate->getPathEndGate()); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return consumer->canPushPacket(packet, outputGate->getPathEndGate()); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 
-    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return nullptr; }
-    virtual void handleCanPushPacketChanged(cGate *gate) override;
+    virtual IPassivePacketSink *getConsumer(const cGate *gate) override { return nullptr; }
+    virtual void handleCanPushPacketChanged(const cGate *gate) override;
 
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
+    virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
 };
 
 } // namespace inet

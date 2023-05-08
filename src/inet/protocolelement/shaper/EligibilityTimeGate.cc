@@ -76,7 +76,7 @@ void EligibilityTimeGate::emitEligibilityTimeChangedSignal()
     lastRemainingEligibilityTimeSignalTime = now;
 }
 
-Packet *EligibilityTimeGate::pullPacket(cGate *gate)
+Packet *EligibilityTimeGate::pullPacket(const cGate *gate)
 {
     Enter_Method("pullPacket");
     emitEligibilityTimeChangedSignal();
@@ -86,7 +86,7 @@ Packet *EligibilityTimeGate::pullPacket(cGate *gate)
     return packet;
 }
 
-void EligibilityTimeGate::handleCanPullPacketChanged(cGate *gate)
+void EligibilityTimeGate::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     emitEligibilityTimeChangedSignal();

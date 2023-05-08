@@ -881,7 +881,7 @@ void EthernetCsmaMac::dropCurrentTxFrame(PacketDropDetails& details)
     curTxSignal = nullptr;
 }
 
-void EthernetCsmaMac::handleCanPullPacketChanged(cGate *gate)
+void EthernetCsmaMac::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (duplexMode || receiveState == RX_IDLE_STATE) {

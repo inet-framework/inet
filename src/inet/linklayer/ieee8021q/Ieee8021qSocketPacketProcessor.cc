@@ -34,7 +34,7 @@ cGate *Ieee8021qSocketPacketProcessor::getRegistrationForwardingGate(cGate *gate
         throw cRuntimeError("Unknown gate");
 }
 
-void Ieee8021qSocketPacketProcessor::pushPacket(Packet *packet, cGate *gate)
+void Ieee8021qSocketPacketProcessor::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);

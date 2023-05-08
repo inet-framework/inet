@@ -26,7 +26,7 @@ class INET_API StreamingTransmitterBase : public PacketTransmitterBase, public c
     virtual void scheduleTxEndTimer(Signal *signal);
 
   public:
-    virtual bool canPushSomePacket(cGate *gate) const override;
+    virtual bool canPushSomePacket(const cGate *gate) const override;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };

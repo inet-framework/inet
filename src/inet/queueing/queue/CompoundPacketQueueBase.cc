@@ -50,7 +50,7 @@ bool CompoundPacketQueueBase::isOverloaded() const
            (dataCapacity != b(-1) && getTotalLength() > dataCapacity);
 }
 
-void CompoundPacketQueueBase::pushPacket(Packet *packet, cGate *gate)
+void CompoundPacketQueueBase::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
@@ -72,7 +72,7 @@ void CompoundPacketQueueBase::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-Packet *CompoundPacketQueueBase::pullPacket(cGate *gate)
+Packet *CompoundPacketQueueBase::pullPacket(const cGate *gate)
 {
     Enter_Method("pullPacket");
     auto packet = provider->pullPacket(outputGate->getPathStartGate());
@@ -97,7 +97,7 @@ void CompoundPacketQueueBase::removeAllPackets()
     updateDisplayString();
 }
 
-bool CompoundPacketQueueBase::canPushSomePacket(cGate *gate) const
+bool CompoundPacketQueueBase::canPushSomePacket(const cGate *gate) const
 {
     if (packetDropperFunction)
         return true;
@@ -108,7 +108,7 @@ bool CompoundPacketQueueBase::canPushSomePacket(cGate *gate) const
     return true;
 }
 
-bool CompoundPacketQueueBase::canPushPacket(Packet *packet, cGate *gate) const
+bool CompoundPacketQueueBase::canPushPacket(Packet *packet, const cGate *gate) const
 {
     if (packetDropperFunction)
         return true;

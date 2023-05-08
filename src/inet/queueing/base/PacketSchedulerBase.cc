@@ -77,18 +77,18 @@ void PacketSchedulerBase::endPacketStreaming(Packet *packet)
     inProgressGateIndex = -1;
 }
 
-bool PacketSchedulerBase::canPushSomePacket(cGate *gate) const
+bool PacketSchedulerBase::canPushSomePacket(const cGate *gate) const
 {
     int index = callSchedulePacket();
     return index == gate->getIndex();
 }
 
-bool PacketSchedulerBase::canPushPacket(Packet *packet, cGate *gate) const
+bool PacketSchedulerBase::canPushPacket(Packet *packet, const cGate *gate) const
 {
     return canPushSomePacket(gate);
 }
 
-void PacketSchedulerBase::pushPacket(Packet *packet, cGate *gate)
+void PacketSchedulerBase::pushPacket(Packet *packet, const cGate *gate)
 {
     int index = callSchedulePacket();
     if (index != gate->getIndex())
@@ -96,7 +96,7 @@ void PacketSchedulerBase::pushPacket(Packet *packet, cGate *gate)
     consumer->pushPacket(packet, outputGate->getPathEndGate());
 }
 
-void PacketSchedulerBase::handleCanPushPacketChanged(cGate *gate)
+void PacketSchedulerBase::handleCanPushPacketChanged(const cGate *gate)
 {
     int index = schedulePacket();
     if (index != -1) {
@@ -106,7 +106,7 @@ void PacketSchedulerBase::handleCanPushPacketChanged(cGate *gate)
     }
 }
 
-bool PacketSchedulerBase::canPullSomePacket(cGate *gate) const
+bool PacketSchedulerBase::canPullSomePacket(const cGate *gate) const
 {
     for (int i = 0; i < (int)inputGates.size(); i++) {
         auto inputProvider = providers[i];
@@ -116,7 +116,7 @@ bool PacketSchedulerBase::canPullSomePacket(cGate *gate) const
     return false;
 }
 
-Packet *PacketSchedulerBase::canPullPacket(cGate *gate) const
+Packet *PacketSchedulerBase::canPullPacket(const cGate *gate) const
 {
     for (int i = 0; i < (int)inputGates.size(); i++) {
         auto inputProvider = providers[i];
@@ -127,7 +127,7 @@ Packet *PacketSchedulerBase::canPullPacket(cGate *gate) const
     return nullptr;
 }
 
-Packet *PacketSchedulerBase::pullPacket(cGate *gate)
+Packet *PacketSchedulerBase::pullPacket(const cGate *gate)
 {
     Enter_Method("pullPacket");
     checkPacketStreaming(nullptr);
@@ -142,7 +142,7 @@ Packet *PacketSchedulerBase::pullPacket(cGate *gate)
     return packet;
 }
 
-Packet *PacketSchedulerBase::pullPacketStart(cGate *gate, bps datarate)
+Packet *PacketSchedulerBase::pullPacketStart(const cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketStart");
     checkPacketStreaming(nullptr);
@@ -155,7 +155,7 @@ Packet *PacketSchedulerBase::pullPacketStart(cGate *gate, bps datarate)
     return packet;
 }
 
-Packet *PacketSchedulerBase::pullPacketEnd(cGate *gate)
+Packet *PacketSchedulerBase::pullPacketEnd(const cGate *gate)
 {
     Enter_Method("pullPacketEnd");
     if (!isStreamingPacket())
@@ -170,7 +170,7 @@ Packet *PacketSchedulerBase::pullPacketEnd(cGate *gate)
     return packet;
 }
 
-Packet *PacketSchedulerBase::pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength)
+Packet *PacketSchedulerBase::pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pullPacketProgress");
     if (!isStreamingPacket())
@@ -186,14 +186,14 @@ Packet *PacketSchedulerBase::pullPacketProgress(cGate *gate, bps datarate, b pos
     return packet;
 }
 
-void PacketSchedulerBase::handleCanPullPacketChanged(cGate *gate)
+void PacketSchedulerBase::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr && (!isStreamingPacket() || callSchedulePacket() != inProgressGateIndex))
         collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
 }
 
-void PacketSchedulerBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void PacketSchedulerBase::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     collector->handlePullPacketProcessed(packet, outputGate->getPathEndGate(), successful);
     inProgressStreamId = -1;

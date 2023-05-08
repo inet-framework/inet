@@ -90,7 +90,7 @@ void PacketServer::endProcessingPacket()
     packet = nullptr;
 }
 
-void PacketServer::handleCanPushPacketChanged(cGate *gate)
+void PacketServer::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (!processingTimer->isScheduled() && canStartProcessingPacket()) {
@@ -103,7 +103,7 @@ void PacketServer::handleCanPushPacketChanged(cGate *gate)
     }
 }
 
-void PacketServer::handleCanPullPacketChanged(cGate *gate)
+void PacketServer::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (!processingTimer->isScheduled() && canStartProcessingPacket()) {

@@ -34,8 +34,8 @@ class INET_API TimeBasedTokenGenerator : public ClockUserModuleMixin<TokenGenera
   public:
     virtual ~TimeBasedTokenGenerator() { cancelAndDeleteClockEvent(generationTimer); }
 
-    virtual bool supportsPacketPushing(cGate *gate) const override { return false; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(const cGate *gate) const override { return false; }
+    virtual bool supportsPacketPulling(const cGate *gate) const override { return false; }
 };
 
 } // namespace queueing

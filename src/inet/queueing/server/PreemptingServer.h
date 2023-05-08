@@ -41,10 +41,10 @@ class INET_API PreemptingServer : public ClockUserModuleMixin<PacketServerBase>
   public:
     virtual ~PreemptingServer() { delete streamedPacket; cancelAndDeleteClockEvent(timer); }
 
-    virtual void handleCanPushPacketChanged(cGate *gate) override;
-    virtual void handleCanPullPacketChanged(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(const cGate *gate) override;
+    virtual void handleCanPullPacketChanged(const cGate *gate) override;
 
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
+    virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
 };
 
 } // namespace queueing

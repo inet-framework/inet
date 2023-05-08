@@ -26,7 +26,7 @@ class INET_API EthernetCsmaMac : public EthernetMacBase
     virtual ~EthernetCsmaMac();
 
     // IActivePacketSink:
-    virtual void handleCanPullPacketChanged(cGate *gate) override;
+    virtual void handleCanPullPacketChanged(const cGate *gate) override;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

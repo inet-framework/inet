@@ -24,7 +24,7 @@ class INET_API EthernetMac : public EthernetMacBase
     EthernetMac();
 
     // IActivePacketSink:
-    virtual void handleCanPullPacketChanged(cGate *gate) override;
+    virtual void handleCanPullPacketChanged(const cGate *gate) override;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

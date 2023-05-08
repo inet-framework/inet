@@ -24,7 +24,7 @@ class INET_API FragmentNumberHeaderBasedDefragmenter : public DefragmenterBase
     virtual void initialize(int stage) override;
 
   public:
-    virtual void pushPacket(Packet *fragmentPacket, cGate *gate) override;
+    virtual void pushPacket(Packet *fragmentPacket, const cGate *gate) override;
 };
 
 } // namespace inet

@@ -24,21 +24,21 @@ class INET_API FullPacketSink : public PacketProcessorBase, public virtual IPack
     virtual void initialize(int stage) override;
 
   public:
-    virtual IPassivePacketSource *getProvider(cGate *gate) override { return provider; }
+    virtual IPassivePacketSource *getProvider(const cGate *gate) override { return provider; }
 
-    virtual bool supportsPacketPushing(cGate *gate) const override { return inputGate == gate; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return inputGate == gate; }
+    virtual bool supportsPacketPushing(const cGate *gate) const override { return inputGate == gate; }
+    virtual bool supportsPacketPulling(const cGate *gate) const override { return inputGate == gate; }
 
-    virtual void handleCanPullPacketChanged(cGate *gate) override;
-    virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
+    virtual void handleCanPullPacketChanged(const cGate *gate) override;
+    virtual void handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
 
-    virtual bool canPushSomePacket(cGate *gate) const override { return false; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return false; }
+    virtual bool canPushSomePacket(const cGate *gate) const override { return false; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return false; }
 
-    virtual void pushPacket(Packet *packet, cGate *gate) override { return throw cRuntimeError("Illegal operation: packet sink is full"); }
-    virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override { return throw cRuntimeError("Illegal operation: packet sink is full"); }
-    virtual void pushPacketEnd(Packet *packet, cGate *gate) override { return throw cRuntimeError("Illegal operation: packet sink is full"); }
-    virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { return throw cRuntimeError("Illegal operation: packet sink is full"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override { return throw cRuntimeError("Illegal operation: packet sink is full"); }
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { return throw cRuntimeError("Illegal operation: packet sink is full"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { return throw cRuntimeError("Illegal operation: packet sink is full"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { return throw cRuntimeError("Illegal operation: packet sink is full"); }
 };
 
 } // namespace queueing

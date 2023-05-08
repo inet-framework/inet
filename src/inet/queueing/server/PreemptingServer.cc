@@ -58,14 +58,14 @@ void PreemptingServer::endStreaming()
     updateDisplayString();
 }
 
-void PreemptingServer::handleCanPushPacketChanged(cGate *gate)
+void PreemptingServer::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (!isStreaming() && canStartStreaming())
         startStreaming();
 }
 
-void PreemptingServer::handleCanPullPacketChanged(cGate *gate)
+void PreemptingServer::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (isStreaming()) {
@@ -76,7 +76,7 @@ void PreemptingServer::handleCanPullPacketChanged(cGate *gate)
         startStreaming();
 }
 
-void PreemptingServer::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void PreemptingServer::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
     if (isStreaming()) {

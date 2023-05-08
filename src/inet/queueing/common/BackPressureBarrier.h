@@ -22,11 +22,11 @@ class INET_API BackPressureBarrier : public PacketFlowBase, public TransparentPr
   public:
     virtual void processPacket(Packet *packet) override {}
 
-    virtual bool canPushSomePacket(cGate *gate) const override { return true; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
 
-    virtual bool canPullSomePacket(cGate *gate) const override { return true; }
-    virtual Packet* canPullPacket(cGate *gate) const override;
+    virtual bool canPullSomePacket(const cGate *gate) const override { return true; }
+    virtual Packet* canPullPacket(const cGate *gate) const override;
 };
 
 } // namespace queueing

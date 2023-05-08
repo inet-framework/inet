@@ -25,7 +25,7 @@ class INET_API DestreamingReceiver : public StreamingReceiverBase
     virtual void receivePacketProgress(cPacket *packet, cGate *gate, bps datarate, b position, simtime_t timePosition, b extraProcessableLength, simtime_t extraProcessableDuration);
 
   public:
-    virtual bool supportsPacketStreaming(cGate *gate) const override { return gate == inputGate; }
+    virtual bool supportsPacketStreaming(const cGate *gate) const override { return gate == inputGate; }
 };
 
 } // namespace inet

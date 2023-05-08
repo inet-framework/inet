@@ -36,19 +36,19 @@ class INET_API DscpMarker : public queueing::PacketProcessorBase, public queuein
   public:
     DscpMarker() {}
 
-    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(const cGate *gate) const override { return true; }
+    virtual bool supportsPacketPulling(const cGate *gate) const override { return false; }
 
-    virtual queueing::IPassivePacketSink *getConsumer(cGate *gate) override { return this; }
+    virtual queueing::IPassivePacketSink *getConsumer(const cGate *gate) override { return this; }
 
-    virtual bool canPushSomePacket(cGate *gate) const override { return true; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
 
-    virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
-    virtual void pushPacketEnd(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
-    virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
 
-    virtual void handleCanPushPacketChanged(cGate *gate) override {}
+    virtual void handleCanPushPacketChanged(const cGate *gate) override {}
 
   protected:
     virtual void initialize(int stage) override;
@@ -58,9 +58,9 @@ class INET_API DscpMarker : public queueing::PacketProcessorBase, public queuein
     virtual bool markPacket(Packet *msg, int dscp);
 
   public:
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override {}
+    virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override {}
 };
 
 } // namespace inet

@@ -12,7 +12,7 @@ namespace queueing {
 
 Define_Module(PacketPushToSend);
 
-void PacketPushToSend::pushPacket(Packet *packet, cGate *gate)
+void PacketPushToSend::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);

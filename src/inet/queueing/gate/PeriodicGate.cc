@@ -167,13 +167,13 @@ void PeriodicGate::updateIsInGuardBand()
     }
 }
 
-void PeriodicGate::handleCanPushPacketChanged(cGate *gate)
+void PeriodicGate::handleCanPushPacketChanged(const cGate *gate)
 {
     PacketGateBase::handleCanPushPacketChanged(gate);
     updateIsInGuardBand();
 }
 
-void PeriodicGate::handleCanPullPacketChanged(cGate *gate)
+void PeriodicGate::handleCanPullPacketChanged(const cGate *gate)
 {
     PacketGateBase::handleCanPullPacketChanged(gate);
     updateIsInGuardBand();

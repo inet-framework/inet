@@ -28,7 +28,7 @@ void PacketDuplicatorBase::initialize(int stage)
     }
 }
 
-void PacketDuplicatorBase::pushPacket(Packet *packet, cGate *gate)
+void PacketDuplicatorBase::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
@@ -42,7 +42,7 @@ void PacketDuplicatorBase::pushPacket(Packet *packet, cGate *gate)
     pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
 }
 
-void PacketDuplicatorBase::handleCanPushPacketChanged(cGate *gate)
+void PacketDuplicatorBase::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)

@@ -30,7 +30,7 @@ class INET_API RelayInterfaceSelector : public PacketPusherBase, public Transpar
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 
     virtual bool isForwardingInterface(NetworkInterface *networkInterface) const { return !networkInterface->isLoopback() && networkInterface->isBroadcast(); }
     virtual void broadcastPacket(Packet *packet, const MacAddress& destinationAddress, NetworkInterface *incomingInterface);

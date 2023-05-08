@@ -23,7 +23,7 @@ class INET_API StreamSplitter : public PacketDuplicatorBase, public TransparentP
   protected:
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 
     virtual int getNumPacketDuplicates(Packet *packet) override;
 

@@ -70,9 +70,9 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol, publ
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 
     // IActivePacketSink:
-    virtual queueing::IPassivePacketSource *getProvider(cGate *gate) override;
-    virtual void handleCanPullPacketChanged(cGate *gate) override;
-    virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
+    virtual queueing::IPassivePacketSource *getProvider(const cGate *gate) override;
+    virtual void handleCanPullPacketChanged(const cGate *gate) override;
+    virtual void handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
 
   protected:
     /** @name Different tracked statistics.*/

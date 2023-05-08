@@ -36,7 +36,7 @@ void StreamingTransmitterBase::scheduleAt(simtime_t t, cMessage *message)
     ClockUserModuleMixin::scheduleAt(t, message);
 }
 
-bool StreamingTransmitterBase::canPushSomePacket(cGate *gate) const
+bool StreamingTransmitterBase::canPushSomePacket(const cGate *gate) const
 {
     return transmissionChannel != nullptr && !transmissionChannel->isDisabled() && PacketTransmitterBase::canPushSomePacket(gate);
 }

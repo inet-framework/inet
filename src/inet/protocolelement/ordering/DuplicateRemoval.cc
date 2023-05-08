@@ -24,7 +24,7 @@ void DuplicateRemoval::initialize(int stage)
     }
 }
 
-void DuplicateRemoval::pushPacket(Packet *packet, cGate *gate)
+void DuplicateRemoval::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);

@@ -27,10 +27,10 @@ class INET_API PcapFilePacketConsumer : public PassivePacketSinkBase
     virtual void finish() override;
 
   public:
-    virtual bool supportsPacketPushing(cGate *gate) const override { return gate == inputGate; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(const cGate *gate) const override { return gate == inputGate; }
+    virtual bool supportsPacketPulling(const cGate *gate) const override { return false; }
 
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 };
 
 } // namespace queueing

@@ -29,14 +29,14 @@ void SendToMacAddress::initialize(int stage)
     }
 }
 
-void SendToMacAddress::pushPacket(Packet *packet, cGate *inGate)
+void SendToMacAddress::pushPacket(Packet *packet, const cGate *inGate)
 {
     Enter_Method("pushPacket");
     take(packet);
     handleMessage(packet);
 }
 
-void SendToMacAddress::handleCanPushPacketChanged(cGate *outGate)
+void SendToMacAddress::handleCanPushPacketChanged(const cGate *outGate)
 {
     producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
@@ -51,7 +51,7 @@ void SendToMacAddress::processPacket(Packet *packet)
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::destinationMacAddress);
 }
 
-void SendToMacAddress::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void SendToMacAddress::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     producer->handlePushPacketProcessed(packet, gate, successful);
 }

@@ -36,7 +36,7 @@ void PacketCloner::handleMessage(cMessage *message)
     pushPacket(packet, packet->getArrivalGate());
 }
 
-void PacketCloner::pushPacket(Packet *packet, cGate *gate)
+void PacketCloner::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
@@ -49,14 +49,14 @@ void PacketCloner::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void PacketCloner::handleCanPushPacketChanged(cGate *gate)
+void PacketCloner::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
-void PacketCloner::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void PacketCloner::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
     producer->handlePushPacketProcessed(packet, gate, successful);

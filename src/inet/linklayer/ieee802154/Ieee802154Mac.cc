@@ -987,19 +987,19 @@ void Ieee802154Mac::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
-queueing::IPassivePacketSource *Ieee802154Mac::getProvider(cGate *gate)
+queueing::IPassivePacketSource *Ieee802154Mac::getProvider(const cGate *gate)
 {
     return (gate->getId() == upperLayerInGateId) ? txQueue.get() : nullptr;
 }
 
-void Ieee802154Mac::handleCanPullPacketChanged(cGate *gate)
+void Ieee802154Mac::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (gate->getId() == upperLayerInGateId)
         executeMac(EV_SEND_REQUEST, nullptr);
 }
 
-void Ieee802154Mac::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void Ieee802154Mac::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePullPacketProcessed");
     throw cRuntimeError("Not supported callback");

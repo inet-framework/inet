@@ -78,14 +78,14 @@ void ActivePacketSink::collectPacket()
     dropPacket(packet, OTHER_PACKET_DROP);
 }
 
-void ActivePacketSink::handleCanPullPacketChanged(cGate *gate)
+void ActivePacketSink::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (!collectionTimer->isScheduled())
         scheduleCollectionTimerAndCollectPacket();
 }
 
-void ActivePacketSink::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void ActivePacketSink::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePullPacketProcessed");
 }

@@ -362,19 +362,19 @@ void Ppp::handleStopOperation(LifecycleOperation *operation)
     }
 }
 
-queueing::IPassivePacketSource *Ppp::getProvider(cGate *gate)
+queueing::IPassivePacketSource *Ppp::getProvider(const cGate *gate)
 {
     return (gate->getId() == upperLayerInGateId) ? txQueue.get() : nullptr;
 }
 
-void Ppp::handleCanPullPacketChanged(cGate *gate)
+void Ppp::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     while (currentTxFrame == nullptr && canDequeuePacket())
         processUpperPacket();
 }
 
-void Ppp::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void Ppp::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePullPacketProcessed");
     throw cRuntimeError("Not supported callback");

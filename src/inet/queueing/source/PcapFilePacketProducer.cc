@@ -57,7 +57,7 @@ void PcapFilePacketProducer::schedulePacket()
         EV << "End of PCAP file reached" << EV_ENDL;
 }
 
-void PcapFilePacketProducer::handleCanPushPacketChanged(cGate *gate)
+void PcapFilePacketProducer::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (gate == outputGate)

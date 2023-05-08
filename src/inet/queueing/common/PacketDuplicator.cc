@@ -14,7 +14,7 @@ namespace queueing {
 
 Define_Module(PacketDuplicator);
 
-void PacketDuplicator::pushPacket(Packet *packet, cGate *gate)
+void PacketDuplicator::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
@@ -30,14 +30,14 @@ void PacketDuplicator::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void PacketDuplicator::handleCanPushPacketChanged(cGate *gate)
+void PacketDuplicator::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
-void PacketDuplicator::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void PacketDuplicator::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
     producer->handlePushPacketProcessed(packet, gate, successful);

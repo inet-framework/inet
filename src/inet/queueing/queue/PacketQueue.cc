@@ -78,7 +78,7 @@ Packet *PacketQueue::getPacket(int index) const
     return check_and_cast<Packet *>(queue.get(index));
 }
 
-void PacketQueue::pushPacket(Packet *packet, cGate *gate)
+void PacketQueue::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
@@ -104,7 +104,7 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-Packet *PacketQueue::pullPacket(cGate *gate)
+Packet *PacketQueue::pullPacket(const cGate *gate)
 {
     Enter_Method("pullPacket");
     auto packet = check_and_cast<Packet *>(queue.front());
@@ -154,7 +154,7 @@ void PacketQueue::removeAllPackets()
     updateDisplayString();
 }
 
-bool PacketQueue::canPushSomePacket(cGate *gate) const
+bool PacketQueue::canPushSomePacket(const cGate *gate) const
 {
     if (packetDropperFunction)
         return true;
@@ -165,7 +165,7 @@ bool PacketQueue::canPushSomePacket(cGate *gate) const
     return true;
 }
 
-bool PacketQueue::canPushPacket(Packet *packet, cGate *gate) const
+bool PacketQueue::canPushPacket(Packet *packet, const cGate *gate) const
 {
     if (packetDropperFunction)
         return true;

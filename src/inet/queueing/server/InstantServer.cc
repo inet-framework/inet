@@ -66,7 +66,7 @@ void InstantServer::processPacket()
     EV_INFO << "Processing packet ended" << EV_ENDL;
 }
 
-void InstantServer::handleCanPushPacketChanged(cGate *gate)
+void InstantServer::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (serveTimer)
@@ -75,7 +75,7 @@ void InstantServer::handleCanPushPacketChanged(cGate *gate)
         processPackets();
 }
 
-void InstantServer::handleCanPullPacketChanged(cGate *gate)
+void InstantServer::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (serveTimer)

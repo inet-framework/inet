@@ -63,8 +63,8 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
     virtual void open() override;
     virtual void close() override;
 
-    virtual void handleCanPushPacketChanged(cGate *gate) override;
-    virtual void handleCanPullPacketChanged(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(const cGate *gate) override;
+    virtual void handleCanPullPacketChanged(const cGate *gate) override;
 };
 
 } // namespace queueing

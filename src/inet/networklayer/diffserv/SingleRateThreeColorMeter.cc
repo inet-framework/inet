@@ -42,7 +42,7 @@ void SingleRateThreeColorMeter::initialize(int stage)
     }
 }
 
-void SingleRateThreeColorMeter::pushPacket(Packet *packet, cGate *inputGate)
+void SingleRateThreeColorMeter::pushPacket(Packet *packet, const cGate *inputGate)
 {
     numRcvd++;
     cGate *outputGate = nullptr;

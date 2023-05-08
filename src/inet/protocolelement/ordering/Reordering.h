@@ -26,7 +26,7 @@ class INET_API Reordering : public PacketPusherBase
   public:
     virtual ~Reordering();
 
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 };
 
 } // namespace inet

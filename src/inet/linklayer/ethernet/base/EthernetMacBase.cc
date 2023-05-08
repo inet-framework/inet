@@ -736,12 +736,12 @@ void EthernetMacBase::txFinished()
     curTxSignal = nullptr;
 }
 
-queueing::IPassivePacketSource *EthernetMacBase::getProvider(cGate *gate)
+queueing::IPassivePacketSource *EthernetMacBase::getProvider(const cGate *gate)
 {
     return (gate->getId() == upperLayerInGateId) ? txQueue.get() : nullptr;
 }
 
-void EthernetMacBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void EthernetMacBase::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePullPacketProcessed");
     throw cRuntimeError("Not supported callback");

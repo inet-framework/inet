@@ -181,7 +181,7 @@ void StreamThroughTransmitter::scheduleBufferUnderrunTimer()
     }
 }
 
-void StreamThroughTransmitter::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
+void StreamThroughTransmitter::pushPacketStart(Packet *packet, const cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketStart");
     take(packet);
@@ -189,7 +189,7 @@ void StreamThroughTransmitter::pushPacketStart(Packet *packet, cGate *gate, bps 
     updateDisplayString();
 }
 
-void StreamThroughTransmitter::pushPacketEnd(Packet *packet, cGate *gate)
+void StreamThroughTransmitter::pushPacketEnd(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
@@ -202,7 +202,7 @@ void StreamThroughTransmitter::pushPacketEnd(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void StreamThroughTransmitter::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
+void StreamThroughTransmitter::pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pushPacketProgress");
     take(packet);

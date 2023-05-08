@@ -29,14 +29,14 @@ class INET_API PacketServerBase : public PacketProcessorBase, public virtual IAc
     virtual void initialize(int stage) override;
 
   public:
-    virtual IPassivePacketSource *getProvider(cGate *gate) override { return provider; }
-    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
+    virtual IPassivePacketSource *getProvider(const cGate *gate) override { return provider; }
+    virtual IPassivePacketSink *getConsumer(const cGate *gate) override { return consumer; }
 
-    virtual bool supportsPacketPushing(cGate *gate) const override { return outputGate == gate; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return inputGate == gate; }
+    virtual bool supportsPacketPushing(const cGate *gate) const override { return outputGate == gate; }
+    virtual bool supportsPacketPulling(const cGate *gate) const override { return inputGate == gate; }
 
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
-    virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
+    virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
+    virtual void handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
 };
 
 } // namespace queueing

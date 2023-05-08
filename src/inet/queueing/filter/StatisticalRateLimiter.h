@@ -26,7 +26,7 @@ class INET_API StatisticalRateLimiter : public PacketFilterBase, public Transpar
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
     // NOTE: cannot answer because matchesPacket draws random numbers
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override;
 
     virtual bool matchesPacket(const Packet *packet) const override;
 };

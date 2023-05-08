@@ -20,8 +20,8 @@ class INET_API PriorityClassifier : public PacketClassifierBase
     virtual int classifyPacket(Packet *packet) override;
 
   public:
-    virtual bool canPushSomePacket(cGate *gate) const override;
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
+    virtual bool canPushSomePacket(const cGate *gate) const override;
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override;
 };
 
 } // namespace queueing

@@ -247,12 +247,12 @@ void AckingMac::decapsulate(Packet *packet)
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
 }
 
-queueing::IPassivePacketSource *AckingMac::getProvider(cGate *gate)
+queueing::IPassivePacketSource *AckingMac::getProvider(const cGate *gate)
 {
     return (gate->getId() == upperLayerInGateId) ? txQueue.get() : nullptr;
 }
 
-void AckingMac::handleCanPullPacketChanged(cGate *gate)
+void AckingMac::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (currentTxFrame == nullptr    // not an active transmission
@@ -262,7 +262,7 @@ void AckingMac::handleCanPullPacketChanged(cGate *gate)
         processUpperPacket();
 }
 
-void AckingMac::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void AckingMac::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePullPacketProcessed");
     throw cRuntimeError("Not supported callback");

@@ -75,14 +75,14 @@ void ActivePacketSource::producePacket()
     updateDisplayString();
 }
 
-void ActivePacketSource::handleCanPushPacketChanged(cGate *gate)
+void ActivePacketSource::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (!productionTimer->isScheduled())
         scheduleProductionTimerAndProducePacket();
 }
 
-void ActivePacketSource::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void ActivePacketSource::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
 }

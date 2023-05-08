@@ -31,12 +31,12 @@ class INET_API PacketBasedTokenGenerator : public PassivePacketSinkBase, public 
     virtual void initialize(int stage) override;
 
   public:
-    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(const cGate *gate) const override { return true; }
+    virtual bool supportsPacketPulling(const cGate *gate) const override { return false; }
 
-    virtual bool canPushSomePacket(cGate *gate) const override { return storage->getNumTokens() == 0; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return storage->getNumTokens() == 0; }
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual bool canPushSomePacket(const cGate *gate) const override { return storage->getNumTokens() == 0; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return storage->getNumTokens() == 0; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 
     virtual std::string resolveDirective(char directive) const override;
     virtual void receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details) override;

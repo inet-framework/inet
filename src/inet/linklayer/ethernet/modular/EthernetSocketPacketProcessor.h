@@ -24,7 +24,7 @@ class INET_API EthernetSocketPacketProcessor : public queueing::PacketPusherBase
     virtual void initialize(int stage) override;
 
   public:
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 

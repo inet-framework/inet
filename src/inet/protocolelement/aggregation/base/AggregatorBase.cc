@@ -57,7 +57,7 @@ void AggregatorBase::endAggregation(Packet *packet)
         deleteModule();
 }
 
-void AggregatorBase::pushPacket(Packet *subpacket, cGate *gate)
+void AggregatorBase::pushPacket(Packet *subpacket, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(subpacket);

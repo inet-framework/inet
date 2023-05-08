@@ -36,7 +36,7 @@ cGate *StreamSplitter::getRegistrationForwardingGate(cGate *gate)
         throw cRuntimeError("Unknown gate");
 }
 
-void StreamSplitter::pushPacket(Packet *packet, cGate *gate)
+void StreamSplitter::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);

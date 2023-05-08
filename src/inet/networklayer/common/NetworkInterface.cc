@@ -186,7 +186,7 @@ void NetworkInterface::arrived(cMessage *message, cGate *gate, const SendOptions
     cModule::arrived(message, gate, options, time);
 }
 
-bool NetworkInterface::canPushSomePacket(cGate *gate) const
+bool NetworkInterface::canPushSomePacket(const cGate *gate) const
 {
     auto pathEndGate = gate->getPathEndGate();
     if (auto packetSink = dynamic_cast<IPassivePacketSink *>(pathEndGate->getOwnerModule()))
@@ -195,7 +195,7 @@ bool NetworkInterface::canPushSomePacket(cGate *gate) const
         return true;
 }
 
-bool NetworkInterface::canPushPacket(Packet *packet, cGate *gate) const
+bool NetworkInterface::canPushPacket(Packet *packet, const cGate *gate) const
 {
     auto pathEndGate = gate->getPathEndGate();
     if (auto packetSink = dynamic_cast<IPassivePacketSink *>(pathEndGate->getOwnerModule()))
@@ -204,7 +204,7 @@ bool NetworkInterface::canPushPacket(Packet *packet, cGate *gate) const
         return true;
 }
 
-void NetworkInterface::pushPacket(Packet *packet, cGate *gate)
+void NetworkInterface::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
@@ -228,7 +228,7 @@ void NetworkInterface::pushPacket(Packet *packet, cGate *gate)
         throw cRuntimeError("Unknown gate: %s", gate->getName());
 }
 
-void NetworkInterface::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
+void NetworkInterface::pushPacketStart(Packet *packet, const cGate *gate, bps datarate)
 {
     Enter_Method("pushPacket");
     take(packet);
@@ -253,7 +253,7 @@ void NetworkInterface::pushPacketStart(Packet *packet, cGate *gate, bps datarate
 }
 
 
-void NetworkInterface::pushPacketEnd(Packet *packet, cGate *gate)
+void NetworkInterface::pushPacketEnd(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);

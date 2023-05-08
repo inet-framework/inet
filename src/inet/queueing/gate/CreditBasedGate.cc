@@ -253,7 +253,7 @@ void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, c
         throw cRuntimeError("Unknown signal");
 }
 
-void CreditBasedGate::handleCanPullPacketChanged(cGate *gate)
+void CreditBasedGate::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     // 1. update current state because some time may have elapsed since last update

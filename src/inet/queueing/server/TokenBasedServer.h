@@ -35,8 +35,8 @@ class INET_API TokenBasedServer : public PacketServerBase, public ITokenStorage
     virtual void addTokenProductionRate(double tokenRate) override { throw cRuntimeError("TODO"); }
     virtual void removeTokenProductionRate(double tokenRate) override { throw cRuntimeError("TODO"); }
 
-    virtual void handleCanPushPacketChanged(cGate *gate) override;
-    virtual void handleCanPullPacketChanged(cGate *gate) override;
+    virtual void handleCanPushPacketChanged(const cGate *gate) override;
+    virtual void handleCanPullPacketChanged(const cGate *gate) override;
 
     virtual std::string resolveDirective(char directive) const override;
 };

@@ -76,9 +76,9 @@ class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacke
     virtual void updateDisplayString() const;
 
   public:
-    virtual bool supportsPacketSending(cGate *gate) const override { return true; }
-    virtual bool supportsPacketPassing(cGate *gate) const override { return true; }
-    virtual bool supportsPacketStreaming(cGate *gate) const override { return false; }
+    virtual bool supportsPacketSending(const cGate *gate) const override { return true; }
+    virtual bool supportsPacketPassing(const cGate *gate) const override { return true; }
+    virtual bool supportsPacketStreaming(const cGate *gate) const override { return false; }
 
     virtual std::string resolveDirective(char directive) const override;
 };

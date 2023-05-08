@@ -25,14 +25,14 @@ class INET_API PassivePacketSourceBase : public PacketSourceBase, public virtual
     virtual void initialize(int stage) override;
 
   public:
-    virtual bool supportsPacketPushing(cGate *gate) const override { return false; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return outputGate == gate; }
+    virtual bool supportsPacketPushing(const cGate *gate) const override { return false; }
+    virtual bool supportsPacketPulling(const cGate *gate) const override { return outputGate == gate; }
 
-    virtual bool canPullSomePacket(cGate *gate) const override { return true; }
+    virtual bool canPullSomePacket(const cGate *gate) const override { return true; }
 
-    virtual Packet *pullPacketStart(cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
-    virtual Packet *pullPacketEnd(cGate *gate) override { throw cRuntimeError("Invalid operation"); }
-    virtual Packet *pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacketStart(const cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacketEnd(const cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
 };
 
 } // namespace queueing

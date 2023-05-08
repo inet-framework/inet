@@ -34,7 +34,7 @@ void PacketBasedTokenGenerator::initialize(int stage)
     }
 }
 
-void PacketBasedTokenGenerator::pushPacket(Packet *packet, cGate *gate)
+void PacketBasedTokenGenerator::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);

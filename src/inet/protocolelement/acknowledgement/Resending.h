@@ -29,11 +29,11 @@ class INET_API Resending : public PacketPusherBase
 
   public:
     virtual ~Resending() { delete packet; }
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
+    virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
 
-    virtual bool canPushSomePacket(cGate *gate) const override { return packet == nullptr; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return packet == nullptr; }
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual bool canPushSomePacket(const cGate *gate) const override { return packet == nullptr; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return packet == nullptr; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 };
 
 } // namespace inet

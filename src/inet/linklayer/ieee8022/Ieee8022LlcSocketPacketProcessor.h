@@ -26,7 +26,7 @@ class INET_API Ieee8022LlcSocketPacketProcessor : public queueing::PacketPusherB
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
   public:
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 };
 
 } // namespace inet

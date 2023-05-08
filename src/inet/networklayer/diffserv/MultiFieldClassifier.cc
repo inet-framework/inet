@@ -146,7 +146,7 @@ void MultiFieldClassifier::initialize(int stage)
     }
 }
 
-void MultiFieldClassifier::pushPacket(Packet *packet, cGate *inputGate)
+void MultiFieldClassifier::pushPacket(Packet *packet, const cGate *inputGate)
 {
     numRcvd++;
     int gateIndex = classifyPacket(packet);

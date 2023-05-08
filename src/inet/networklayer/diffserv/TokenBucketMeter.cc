@@ -38,7 +38,7 @@ void TokenBucketMeter::initialize(int stage)
     }
 }
 
-void TokenBucketMeter::pushPacket(Packet *packet, cGate *inputGate)
+void TokenBucketMeter::pushPacket(Packet *packet, const cGate *inputGate)
 {
     numRcvd++;
     cGate *outputGate = nullptr;

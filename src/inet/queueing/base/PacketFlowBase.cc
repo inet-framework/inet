@@ -53,17 +53,17 @@ void PacketFlowBase::endPacketStreaming(Packet *packet)
     inProgressStreamId = -1;
 }
 
-bool PacketFlowBase::canPushSomePacket(cGate *gate) const
+bool PacketFlowBase::canPushSomePacket(const cGate *gate) const
 {
     return consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate());
 }
 
-bool PacketFlowBase::canPushPacket(Packet *packet, cGate *gate) const
+bool PacketFlowBase::canPushPacket(Packet *packet, const cGate *gate) const
 {
     return consumer == nullptr || consumer->canPushPacket(packet, outputGate->getPathEndGate());
 }
 
-void PacketFlowBase::pushPacket(Packet *packet, cGate *gate)
+void PacketFlowBase::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
@@ -76,7 +76,7 @@ void PacketFlowBase::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void PacketFlowBase::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
+void PacketFlowBase::pushPacketStart(Packet *packet, const cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketStart");
     take(packet);
@@ -88,7 +88,7 @@ void PacketFlowBase::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
     updateDisplayString();
 }
 
-void PacketFlowBase::pushPacketEnd(Packet *packet, cGate *gate)
+void PacketFlowBase::pushPacketEnd(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
@@ -103,7 +103,7 @@ void PacketFlowBase::pushPacketEnd(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void PacketFlowBase::pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength)
+void PacketFlowBase::pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pushPacketProgress");
     take(packet);
@@ -123,14 +123,14 @@ void PacketFlowBase::pushPacketProgress(Packet *packet, cGate *gate, bps datarat
     updateDisplayString();
 }
 
-void PacketFlowBase::handleCanPushPacketChanged(cGate *gate)
+void PacketFlowBase::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
-void PacketFlowBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void PacketFlowBase::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
     endPacketStreaming(packet);
@@ -138,17 +138,17 @@ void PacketFlowBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool
         producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
 }
 
-bool PacketFlowBase::canPullSomePacket(cGate *gate) const
+bool PacketFlowBase::canPullSomePacket(const cGate *gate) const
 {
     return provider != nullptr && provider->canPullSomePacket(inputGate->getPathStartGate());
 }
 
-Packet *PacketFlowBase::canPullPacket(cGate *gate) const
+Packet *PacketFlowBase::canPullPacket(const cGate *gate) const
 {
     return provider != nullptr ? provider->canPullPacket(inputGate->getPathStartGate()) : nullptr;
 }
 
-Packet *PacketFlowBase::pullPacket(cGate *gate)
+Packet *PacketFlowBase::pullPacket(const cGate *gate)
 {
     Enter_Method("pullPacket");
     checkPacketStreaming(nullptr);
@@ -163,7 +163,7 @@ Packet *PacketFlowBase::pullPacket(cGate *gate)
     return packet;
 }
 
-Packet *PacketFlowBase::pullPacketStart(cGate *gate, bps datarate)
+Packet *PacketFlowBase::pullPacketStart(const cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketStart");
     checkPacketStreaming(nullptr);
@@ -178,7 +178,7 @@ Packet *PacketFlowBase::pullPacketStart(cGate *gate, bps datarate)
     return packet;
 }
 
-Packet *PacketFlowBase::pullPacketEnd(cGate *gate)
+Packet *PacketFlowBase::pullPacketEnd(const cGate *gate)
 {
     Enter_Method("pullPacketEnd");
     auto packet = provider->pullPacketEnd(inputGate->getPathStartGate());
@@ -194,7 +194,7 @@ Packet *PacketFlowBase::pullPacketEnd(cGate *gate)
     return packet;
 }
 
-Packet *PacketFlowBase::pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength)
+Packet *PacketFlowBase::pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pullPacketProgress");
     auto packet = provider->pullPacketProgress(inputGate->getPathStartGate(), datarate, position, extraProcessableLength);
@@ -212,14 +212,14 @@ Packet *PacketFlowBase::pullPacketProgress(cGate *gate, bps datarate, b position
     return packet;
 }
 
-void PacketFlowBase::handleCanPullPacketChanged(cGate *gate)
+void PacketFlowBase::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr)
         collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
 }
 
-void PacketFlowBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void PacketFlowBase::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePullPacketProcessed");
     endPacketStreaming(packet);

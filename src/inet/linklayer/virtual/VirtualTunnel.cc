@@ -90,7 +90,7 @@ void VirtualTunnel::handleMessage(cMessage *message)
     }
 }
 
-void VirtualTunnel::pushPacket(Packet *packet, cGate *gate)
+void VirtualTunnel::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);

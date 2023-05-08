@@ -29,8 +29,8 @@ class INET_API TokenGeneratorBase : public PacketProcessorBase
     virtual void initialize(int stage) override;
 
   public:
-    virtual bool supportsPacketPushing(cGate *gate) const override { return false; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(const cGate *gate) const override { return false; }
+    virtual bool supportsPacketPulling(const cGate *gate) const override { return false; }
     virtual std::string resolveDirective(char directive) const override;
 };
 

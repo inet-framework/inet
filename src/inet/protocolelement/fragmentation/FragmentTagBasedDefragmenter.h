@@ -17,7 +17,7 @@ using namespace inet::queueing;
 class INET_API FragmentTagBasedDefragmenter : public DefragmenterBase
 {
   public:
-    virtual void pushPacket(Packet *fragmentPacket, cGate *gate) override;
+    virtual void pushPacket(Packet *fragmentPacket, const cGate *gate) override;
 };
 
 } // namespace inet

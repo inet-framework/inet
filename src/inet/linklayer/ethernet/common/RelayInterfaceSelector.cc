@@ -38,7 +38,7 @@ cGate *RelayInterfaceSelector::getRegistrationForwardingGate(cGate *gate)
         throw cRuntimeError("Unknown gate");
 }
 
-void RelayInterfaceSelector::pushPacket(Packet *packet, cGate *gates)
+void RelayInterfaceSelector::pushPacket(Packet *packet, const cGate *gates)
 {
     Enter_Method("pushPacket");
     take(packet);

@@ -53,7 +53,7 @@ cGate *PacketDelayerBase::getRegistrationForwardingGate(cGate *gate)
         throw cRuntimeError("Unknown gate");
 }
 
-void PacketDelayerBase::pushPacket(Packet *packet, cGate *gate)
+void PacketDelayerBase::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
@@ -84,14 +84,14 @@ void PacketDelayerBase::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-void PacketDelayerBase::handleCanPushPacketChanged(cGate *gate)
+void PacketDelayerBase::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
-void PacketDelayerBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+void PacketDelayerBase::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
     if (producer != nullptr)

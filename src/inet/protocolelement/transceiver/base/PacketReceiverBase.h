@@ -53,13 +53,13 @@ class INET_API PacketReceiverBase : public OperationalMixin<PacketProcessorBase>
   public:
     virtual ~PacketReceiverBase();
 
-    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
+    virtual IPassivePacketSink *getConsumer(const cGate *gate) override { return consumer; }
 
-    virtual bool supportsPacketPushing(cGate *gate) const override { return gate == outputGate; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(const cGate *gate) const override { return gate == outputGate; }
+    virtual bool supportsPacketPulling(const cGate *gate) const override { return false; }
 
-    virtual void handleCanPushPacketChanged(cGate *gate) override {}
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override {}
+    virtual void handleCanPushPacketChanged(const cGate *gate) override {}
+    virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override {}
 };
 
 } // namespace inet

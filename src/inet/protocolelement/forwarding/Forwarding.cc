@@ -45,7 +45,7 @@ std::pair<L3Address, int> Forwarding::findNextHop(const L3Address& destinationAd
     return { Ipv4Address(), -1 };
 }
 
-void Forwarding::pushPacket(Packet *packet, cGate *gate)
+void Forwarding::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);

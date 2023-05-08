@@ -26,7 +26,7 @@ void EthernetPhyHeaderInserter::processPacket(Packet *packet)
     packetProtocolTag->setBackOffset(b(0));
 }
 
-void EthernetPhyHeaderInserter::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
+void EthernetPhyHeaderInserter::pushPacketStart(Packet *packet, const cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketStart");
     take(packet);
