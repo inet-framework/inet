@@ -8,6 +8,7 @@
 #include "inet/networklayer/diffserv/SingleRateThreeColorMeter.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ModuleRefByGate.h"
 #include "inet/networklayer/diffserv/DiffservUtil.h"
 
 namespace inet {
@@ -61,8 +62,9 @@ void SingleRateThreeColorMeter::pushPacket(Packet *packet, cGate *inputGate)
             outputGate = gate("redOut");
             break;
     }
-    auto consumer = findConnectedModule<IPassivePacketSink>(outputGate);
-    pushOrSendPacket(packet, outputGate, consumer);
+    ModuleRefByGate<IPassivePacketSink> consumer;
+    consumer.reference(outputGate, false);
+    pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
 }
 
 void SingleRateThreeColorMeter::refreshDisplay() const

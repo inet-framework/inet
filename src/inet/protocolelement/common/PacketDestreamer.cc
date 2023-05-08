@@ -28,7 +28,7 @@ void PacketDestreamer::initialize(int stage)
         outputGate = gate("out");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
         provider = findConnectedModule<IPassivePacketSource>(inputGate);
-        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
+        consumer.reference(outputGate, false);
         collector = findConnectedModule<IActivePacketSink>(outputGate);
     }
     else if (stage == INITSTAGE_QUEUEING) {
@@ -72,7 +72,7 @@ void PacketDestreamer::pushPacketEnd(Packet *packet, cGate *gate)
     streamDatarate = datarate;
     auto packetLength = streamedPacket->getTotalLength();
     EV_INFO << "Ending destreaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
-    pushOrSendPacket(streamedPacket, outputGate, consumer);
+    pushOrSendPacket(streamedPacket, outputGate, consumer.getReferencedGate(), consumer);
     streamedPacket = nullptr;
     numProcessedPackets++;
     processedTotalLength += packetLength;

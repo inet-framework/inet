@@ -39,7 +39,7 @@ void CutthroughSource::handleMessage(cMessage *message)
         auto cutthroughTag = cutthroughPacket->addTag<CutthroughTag>();
         cutthroughTag->setCutthroughPosition(cutthroughPosition);
         EV_INFO << "Sending cut-through packet" << EV_FIELD(packet, *cutthroughPacket) << EV_ENDL;
-        pushOrSendPacket(cutthroughPacket, outputGate, consumer);
+        pushOrSendPacket(cutthroughPacket, outputGate, consumer.getReferencedGate(), consumer);
     }
     else
         PacketDestreamer::handleMessage(message);

@@ -20,7 +20,7 @@ void PacketPusherBase::initialize(int stage)
         inputGate = gate("in");
         outputGate = gate("out");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
-        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
+        consumer.reference(outputGate, false);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);

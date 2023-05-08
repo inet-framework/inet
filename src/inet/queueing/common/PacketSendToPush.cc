@@ -19,7 +19,7 @@ void PacketSendToPush::initialize(int stage)
     PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         outputGate = gate("out");
-        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
+        consumer.reference(outputGate, false);
     }
     else if (stage == INITSTAGE_QUEUEING)
         checkPacketOperationSupport(outputGate);
@@ -29,7 +29,7 @@ void PacketSendToPush::handleMessage(cMessage *message)
 {
     auto packet = check_and_cast<Packet *>(message);
     handlePacketProcessed(packet);
-    pushOrSendPacket(packet, outputGate, consumer);
+    pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
     updateDisplayString();
 }
 

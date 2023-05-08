@@ -9,6 +9,7 @@
 #define __INET_PACKETMULTIPLEXER_H
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
@@ -26,7 +27,7 @@ class INET_API PacketMultiplexer : public PacketProcessorBase, public virtual IP
     std::vector<IActivePacketSource *> producers;
 
     cGate *outputGate = nullptr;
-    IPassivePacketSink *consumer = nullptr;
+    ModuleRefByGate<IPassivePacketSink> consumer;
 
     int inProgressStreamId = -1;
 

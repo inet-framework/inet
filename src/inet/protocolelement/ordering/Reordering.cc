@@ -42,7 +42,7 @@ void Reordering::pushPacket(Packet *packet, cGate *gate)
             auto it = packets.find(expectedSequenceNumber);
             if (it == packets.end())
                 break;
-            pushOrSendPacket(it->second, outputGate, consumerGate, consumer);
+            pushOrSendPacket(it->second, outputGate, consumer.getReferencedGate(), consumer);
             packets.erase(it);
             expectedSequenceNumber++;
         }

@@ -8,6 +8,7 @@
 #ifndef __INET_PACKETSENDTOPUSH_H
 #define __INET_PACKETSENDTOPUSH_H
 
+#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 
@@ -18,7 +19,7 @@ class INET_API PacketSendToPush : public PacketProcessorBase, public IActivePack
 {
   protected:
     cGate *outputGate = nullptr;
-    IPassivePacketSink *consumer = nullptr;
+    ModuleRefByGate<IPassivePacketSink> consumer;
 
   protected:
     virtual void initialize(int stage) override;

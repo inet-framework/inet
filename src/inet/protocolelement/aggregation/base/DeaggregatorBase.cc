@@ -23,7 +23,7 @@ void DeaggregatorBase::pushPacket(Packet *aggregatedPacket, cGate *gate)
     auto subpackets = deaggregatePacket(aggregatedPacket);
     for (auto subpacket : subpackets) {
         EV_INFO << "Deaggregating packet" << EV_FIELD(subpacket) << EV_FIELD(packet, *aggregatedPacket) << EV_ENDL;
-        pushOrSendPacket(subpacket, outputGate, consumerGate, consumer);
+        pushOrSendPacket(subpacket, outputGate, consumer.getReferencedGate(), consumer);
     }
     processedTotalLength += aggregatedPacket->getDataLength();
     numProcessedPackets++;

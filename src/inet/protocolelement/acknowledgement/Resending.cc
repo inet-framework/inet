@@ -31,7 +31,7 @@ void Resending::handleMessage(cMessage *message)
 {
     ASSERT(retry == 0);
     packet = check_and_cast<Packet *>(message);
-    pushOrSendPacket(packet->dup(), outputGate, consumerGate, consumer);
+    pushOrSendPacket(packet->dup(), outputGate, consumer.getReferencedGate(), consumer);
     retry++;
 }
 
@@ -48,7 +48,7 @@ void Resending::handlePushPacketProcessed(Packet *p, cGate *gate, bool successfu
             producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     }
     else {
-        pushOrSendPacket(packet->dup(), outputGate, consumerGate, consumer);
+        pushOrSendPacket(packet->dup(), outputGate, consumer.getReferencedGate(), consumer);
         retry++;
     }
 }

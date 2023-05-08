@@ -8,6 +8,7 @@
 #include "inet/common/MessageDispatcher.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ModuleRefByGate.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -78,9 +79,10 @@ void MessageDispatcher::pushPacket(Packet *packet, cGate *inGate)
     Enter_Method("pushPacket");
     take(packet);
     auto outGate = handlePacket(packet, inGate);
-    auto consumer = findConnectedModule<IPassivePacketSink>(outGate);
+    ModuleRefByGate<IPassivePacketSink> consumer;
+    consumer.reference(outGate, false);
     handlePacketProcessed(packet);
-    pushOrSendPacket(packet, outGate, consumer);
+    pushOrSendPacket(packet, outGate, consumer.getReferencedGate(), consumer);
     updateDisplayString();
 }
 
@@ -89,8 +91,9 @@ void MessageDispatcher::pushPacketStart(Packet *packet, cGate *inGate, bps datar
     Enter_Method("pushPacketStart");
     take(packet);
     auto outGate = handlePacket(packet, inGate);
-    auto consumer = findConnectedModule<IPassivePacketSink>(outGate);
-    pushOrSendPacketStart(packet, outGate, consumer, datarate, packet->getTransmissionId());
+    ModuleRefByGate<IPassivePacketSink> consumer;
+    consumer.reference(outGate, false);
+    pushOrSendPacketStart(packet, outGate, consumer.getReferencedGate(), consumer, datarate, packet->getTransmissionId());
     updateDisplayString();
 }
 
@@ -99,9 +102,10 @@ void MessageDispatcher::pushPacketEnd(Packet *packet, cGate *inGate)
     Enter_Method("pushPacketEnd");
     take(packet);
     auto outGate = handlePacket(packet, inGate);
-    auto consumer = findConnectedModule<IPassivePacketSink>(outGate);
+    ModuleRefByGate<IPassivePacketSink> consumer;
+    consumer.reference(outGate, false);
     handlePacketProcessed(packet);
-    pushOrSendPacketEnd(packet, outGate, consumer, packet->getTransmissionId());
+    pushOrSendPacketEnd(packet, outGate, consumer.getReferencedGate(), consumer, packet->getTransmissionId());
     updateDisplayString();
 }
 

@@ -28,7 +28,7 @@ void MarkovScheduler::initialize(int stage)
             auto input = findConnectedModule<IActivePacketSource>(inputGates[i]);
             producers.push_back(input);
         }
-        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
+        consumer.reference(outputGate, false);
         state = par("initialState");
         int numStates = gateSize("in");
         cStringTokenizer transitionProbabilitiesTokenizer(par("transitionProbabilities"));
@@ -104,7 +104,7 @@ void MarkovScheduler::pushPacket(Packet *packet, cGate *gate)
     if (gate->getIndex() != state)
         throw cRuntimeError("Cannot push to gate");
     processedTotalLength += packet->getDataLength();
-    pushOrSendPacket(packet, outputGate, consumer);
+    pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
     numProcessedPackets++;
     updateDisplayString();
 }

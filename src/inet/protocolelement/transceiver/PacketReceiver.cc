@@ -26,7 +26,7 @@ void PacketReceiver::receiveSignal(Signal *signal)
     emit(receptionEndedSignal, signal);
     auto packet = decodePacket(signal);
     handlePacketProcessed(packet);
-    pushOrSendPacket(packet, outputGate, consumerGate, consumer);
+    pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
     delete signal;
 }
 

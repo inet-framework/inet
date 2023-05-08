@@ -8,6 +8,7 @@
 #ifndef __INET_PACKETDESTREAMER_H
 #define __INET_PACKETDESTREAMER_H
 
+#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IPacketFlow.h"
 
@@ -25,7 +26,7 @@ class INET_API PacketDestreamer : public PacketProcessorBase, public virtual IPa
     IPassivePacketSource *provider = nullptr;
 
     cGate *outputGate = nullptr;
-    IPassivePacketSink *consumer = nullptr;
+    ModuleRefByGate<IPassivePacketSink> consumer;
     IActivePacketSink *collector = nullptr;
 
     bps streamDatarate = bps(NaN);

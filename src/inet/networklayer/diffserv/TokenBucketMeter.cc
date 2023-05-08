@@ -8,6 +8,7 @@
 #include "inet/networklayer/diffserv/TokenBucketMeter.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ModuleRefByGate.h"
 #include "inet/networklayer/diffserv/DiffservUtil.h"
 
 namespace inet {
@@ -48,8 +49,9 @@ void TokenBucketMeter::pushPacket(Packet *packet, cGate *inputGate)
         numRed++;
         outputGate = gate("redOut");
     }
-    auto consumer = findConnectedModule<IPassivePacketSink>(outputGate);
-    pushOrSendPacket(packet, outputGate, consumer);
+    ModuleRefByGate<IPassivePacketSink> consumer;
+    consumer.reference(outputGate, false);
+    pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
 }
 
 void TokenBucketMeter::refreshDisplay() const

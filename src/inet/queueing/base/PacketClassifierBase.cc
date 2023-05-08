@@ -23,7 +23,8 @@ void PacketClassifierBase::initialize(int stage)
         for (int i = 0; i < gateSize("out"); i++) {
             auto outputGate = gate("out", i);
             outputGates.push_back(outputGate);
-            auto consumer = findConnectedModule<IPassivePacketSink>(outputGate);
+            ModuleRefByGate<IPassivePacketSink> consumer;
+            consumer.reference(outputGate, false);
             consumers.push_back(consumer);
             auto collector = findConnectedModule<IActivePacketSink>(outputGate);
             collectors.push_back(collector);
@@ -107,7 +108,7 @@ void PacketClassifierBase::pushPacket(Packet *packet, cGate *gate)
     int index = callClassifyPacket(packet);
     handlePacketProcessed(packet);
     emit(packetPushedSignal, packet);
-    pushOrSendPacket(packet, outputGates[index], consumers[index]);
+    pushOrSendPacket(packet, outputGates[index], consumers[index].getReferencedGate(), consumers[index]);
     updateDisplayString();
 }
 
@@ -117,7 +118,7 @@ void PacketClassifierBase::pushPacketStart(Packet *packet, cGate *gate, bps data
     take(packet);
     checkPacketStreaming(packet);
     startPacketStreaming(packet);
-    pushOrSendPacketStart(packet, outputGates[inProgressGateIndex], consumers[inProgressGateIndex], datarate, packet->getTransmissionId());
+    pushOrSendPacketStart(packet, outputGates[inProgressGateIndex], consumers[inProgressGateIndex].getReferencedGate(), consumers[inProgressGateIndex], datarate, packet->getTransmissionId());
     updateDisplayString();
 }
 
@@ -132,7 +133,7 @@ void PacketClassifierBase::pushPacketEnd(Packet *packet, cGate *gate)
     auto outputGate = outputGates[inProgressGateIndex];
     auto consumer = consumers[inProgressGateIndex];
     endPacketStreaming(packet);
-    pushOrSendPacketEnd(packet, outputGate, consumer, packet->getTransmissionId());
+    pushOrSendPacketEnd(packet, outputGate, consumers[inProgressGateIndex].getReferencedGate(), consumer, packet->getTransmissionId());
     updateDisplayString();
 }
 
@@ -148,7 +149,7 @@ void PacketClassifierBase::pushPacketProgress(Packet *packet, cGate *gate, bps d
     auto consumer = consumers[inProgressGateIndex];
     if (packet->getTotalLength() == position + extraProcessableLength)
         endPacketStreaming(packet);
-    pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength, packet->getTransmissionId());
+    pushOrSendPacketProgress(packet, outputGate, consumers[inProgressGateIndex].getReferencedGate(), consumer, datarate, position, extraProcessableLength, packet->getTransmissionId());
     updateDisplayString();
 }
 

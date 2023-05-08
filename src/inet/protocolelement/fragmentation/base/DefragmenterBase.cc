@@ -65,7 +65,7 @@ void DefragmenterBase::defragmentPacket(Packet *fragmentPacket, bool firstFragme
         EV_INFO << "Defragmenting packet" << EV_FIELD(packet, *defragmentedPacket) << EV_FIELD(fragment, *fragmentPacket) << EV_ENDL;
         continueDefragmentation(fragmentPacket);
         if (lastFragment) {
-            pushOrSendPacket(defragmentedPacket->dup(), outputGate, consumerGate, consumer);
+            pushOrSendPacket(defragmentedPacket->dup(), outputGate, consumer.getReferencedGate(), consumer);
             endDefragmentation(fragmentPacket);
         }
         else

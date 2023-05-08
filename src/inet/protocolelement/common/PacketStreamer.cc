@@ -28,7 +28,7 @@ void PacketStreamer::initialize(int stage)
         outputGate = gate("out");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
         provider = findConnectedModule<IPassivePacketSource>(inputGate);
-        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
+        consumer.reference(outputGate, false);
         collector = findConnectedModule<IActivePacketSink>(outputGate);
         endStreamingTimer = new ClockEvent("EndStreamingTimer");
     }
@@ -55,7 +55,7 @@ void PacketStreamer::endStreaming()
     EV_INFO << "Ending streaming packet" << EV_FIELD(packet) << EV_ENDL;
     streamDatarate = bps(NaN);
     streamedPacket = nullptr;
-    pushOrSendPacketEnd(packet, outputGate, consumer, packet->getId());
+    pushOrSendPacketEnd(packet, outputGate, consumer.getReferencedGate(), consumer, packet->getId());
     numProcessedPackets++;
     processedTotalLength += packetLength;
     updateDisplayString();
@@ -81,7 +81,7 @@ void PacketStreamer::pushPacket(Packet *packet, cGate *gate)
     EV_INFO << "Starting streaming packet" << EV_FIELD(packet) << EV_ENDL;
     if (!std::isnan(streamDatarate.get()))
         scheduleClockEventAfter(s(streamedPacket->getTotalLength() / streamDatarate).get(), endStreamingTimer);
-    pushOrSendPacketStart(streamedPacket->dup(), outputGate, consumer, streamDatarate, streamedPacket->getId());
+    pushOrSendPacketStart(streamedPacket->dup(), outputGate, consumer.getReferencedGate(), consumer, streamDatarate, streamedPacket->getId());
     if (std::isnan(streamDatarate.get()))
         endStreaming();
 }

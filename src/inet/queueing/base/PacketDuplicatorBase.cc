@@ -20,7 +20,7 @@ void PacketDuplicatorBase::initialize(int stage)
         inputGate = gate("in");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
         outputGate = gate("out");
-        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
+        consumer.reference(outputGate, false);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
@@ -36,10 +36,10 @@ void PacketDuplicatorBase::pushPacket(Packet *packet, cGate *gate)
     for (int i = 0; i < numDuplicates; i++) {
         EV_INFO << "Forwarding duplicate packet" << EV_FIELD(packet) << EV_ENDL;
         auto duplicate = packet->dup();
-        pushOrSendPacket(duplicate, outputGate, consumer);
+        pushOrSendPacket(duplicate, outputGate, consumer.getReferencedGate(), consumer);
     }
     EV_INFO << "Forwarding original packet" << EV_FIELD(packet) << EV_ENDL;
-    pushOrSendPacket(packet, outputGate, consumer);
+    pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
 }
 
 void PacketDuplicatorBase::handleCanPushPacketChanged(cGate *gate)

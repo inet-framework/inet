@@ -9,6 +9,7 @@
 #define __INET_PREEMPTABLESTREAMER_H
 
 #include "inet/common/clock/ClockUserModuleMixin.h"
+#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IPacketFlow.h"
 
@@ -30,7 +31,7 @@ class INET_API PreemptableStreamer : public ClockUserModuleMixin<PacketProcessor
     IPassivePacketSource *provider = nullptr;
 
     cGate *outputGate = nullptr;
-    IPassivePacketSink *consumer = nullptr;
+    ModuleRefByGate<IPassivePacketSink> consumer;
     IActivePacketSink *collector = nullptr;
 
     simtime_t streamStart;

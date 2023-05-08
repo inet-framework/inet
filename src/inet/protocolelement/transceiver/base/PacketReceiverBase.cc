@@ -28,7 +28,7 @@ void PacketReceiverBase::initialize(int stage)
         inputGate = gate("in");
         outputGate = gate("out");
         networkInterface = findContainingNicModule(this);
-        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
+        consumer.reference(outputGate, false);
     }
     else if (stage == INITSTAGE_QUEUEING)
         checkPacketOperationSupport(outputGate);

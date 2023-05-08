@@ -19,7 +19,7 @@ void PacketServerBase::initialize(int stage)
         inputGate = gate("in");
         provider = getConnectedModule<IPassivePacketSource>(inputGate);
         outputGate = gate("out");
-        consumer = getConnectedModule<IPassivePacketSink>(outputGate);
+        consumer.reference(outputGate, true);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);

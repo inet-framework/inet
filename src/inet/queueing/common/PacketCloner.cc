@@ -22,8 +22,9 @@ void PacketCloner::initialize(int stage)
         producer = findConnectedModule<IActivePacketSource>(inputGate);
         for (int i = 0; i < gateSize("out"); i++) {
             auto outputGate = gate("out", i);
-            auto consumer = getConnectedModule<IPassivePacketSink>(outputGate);
             outputGates.push_back(outputGate);
+            ModuleRefByGate<IPassivePacketSink> consumer;
+            consumer.reference(outputGate, true);
             consumers.push_back(consumer);
         }
     }
@@ -43,7 +44,7 @@ void PacketCloner::pushPacket(Packet *packet, cGate *gate)
     handlePacketProcessed(packet);
     for (int i = 0; i < numGates; i++) {
         EV_INFO << "Cloning packet" << EV_FIELD(packet) << EV_ENDL;
-        pushOrSendPacket(i == numGates - 1 ? packet : packet->dup(), outputGates[i], consumers[i]);
+        pushOrSendPacket(i == numGates - 1 ? packet : packet->dup(), outputGates[i], consumers[i].getReferencedGate(), consumers[i]);
     }
     updateDisplayString();
 }

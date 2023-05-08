@@ -9,6 +9,7 @@
 #define __INET_PACKETFLOWBASE_H
 
 #include "inet/common/ModuleRef.h"
+#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IPacketCollection.h"
 #include "inet/queueing/contract/IPacketFlow.h"
@@ -25,7 +26,7 @@ class INET_API PacketFlowBase : public PacketProcessorBase, public virtual IPack
     ModuleRef<IPacketCollection> collection;
 
     cGate *outputGate = nullptr;
-    ModuleRef<IPassivePacketSink> consumer;
+    ModuleRefByGate<IPassivePacketSink> consumer;
     ModuleRef<IActivePacketSink> collector;
 
     int inProgressStreamId = -1;

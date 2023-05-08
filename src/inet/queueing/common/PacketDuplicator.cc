@@ -22,11 +22,11 @@ void PacketDuplicator::pushPacket(Packet *packet, cGate *gate)
     for (int i = 0; i < numDuplicates; i++) {
         EV_INFO << "Forwarding duplicate packet" << EV_FIELD(packet) << EV_ENDL;
         auto duplicate = packet->dup();
-        pushOrSendPacket(duplicate, outputGate, consumerGate, consumer);
+        pushOrSendPacket(duplicate, outputGate, consumer.getReferencedGate(), consumer);
     }
     EV_INFO << "Forwarding original packet" << EV_FIELD(packet) << EV_ENDL;
     handlePacketProcessed(packet);
-    pushOrSendPacket(packet, outputGate, consumerGate, consumer);
+    pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
     updateDisplayString();
 }
 

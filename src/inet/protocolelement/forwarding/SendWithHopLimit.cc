@@ -33,7 +33,7 @@ void SendWithHopLimit::processPacket(Packet *packet)
     header->setHopLimit(hopLimit);
     packet->insertAtFront(header);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::hopLimit);
-    pushOrSendPacket(packet, outputGate, consumer);
+    pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
 }
 
 } // namespace inet

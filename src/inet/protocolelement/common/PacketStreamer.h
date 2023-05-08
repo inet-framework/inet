@@ -9,6 +9,7 @@
 #define __INET_PACKETSTREAMER_H
 
 #include "inet/common/clock/ClockUserModuleMixin.h"
+#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IPacketFlow.h"
 
@@ -28,7 +29,7 @@ class INET_API PacketStreamer : public ClockUserModuleMixin<PacketProcessorBase>
     IPassivePacketSource *provider = nullptr;
 
     cGate *outputGate = nullptr;
-    IPassivePacketSink *consumer = nullptr;
+    ModuleRefByGate<IPassivePacketSink> consumer;
     IActivePacketSink *collector = nullptr;
 
     bps streamDatarate = bps(NaN);

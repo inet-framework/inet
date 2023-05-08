@@ -8,6 +8,7 @@
 #include "inet/networklayer/diffserv/TwoRateThreeColorMeter.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ModuleRefByGate.h"
 #include "inet/networklayer/diffserv/DiffservUtil.h"
 
 namespace inet {
@@ -61,8 +62,9 @@ void TwoRateThreeColorMeter::pushPacket(Packet *packet, cGate *inputGate)
             outputGate = gate("redOut");
             break;
     }
-    auto consumer = findConnectedModule<IPassivePacketSink>(outputGate);
-    pushOrSendPacket(packet, outputGate, consumer);
+    ModuleRefByGate<IPassivePacketSink> consumer;
+    consumer.reference(outputGate, false);
+    pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
 }
 
 void TwoRateThreeColorMeter::refreshDisplay() const

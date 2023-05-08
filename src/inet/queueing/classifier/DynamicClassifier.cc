@@ -45,7 +45,8 @@ int DynamicClassifier::classifyPacket(Packet *packet)
         auto classifierOutputGate = gate("out", gateSize("out") - 1);
         classifierOutputGate->connectTo(moduleInputGate);
         outputGates.push_back(classifierOutputGate);
-        auto consumer = findConnectedModule<IPassivePacketSink>(classifierOutputGate);
+        ModuleRefByGate<IPassivePacketSink> consumer;
+        consumer.reference(classifierOutputGate, false);
         consumers.push_back(consumer);
         moduleOutputGate->connectTo(multiplexerInputGate);
         module->finalizeParameters();
