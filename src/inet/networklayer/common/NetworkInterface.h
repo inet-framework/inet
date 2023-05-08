@@ -100,6 +100,8 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     cGate *txOut = nullptr;
     cChannel *rxTransmissionChannel = nullptr;
     cChannel *txTransmissionChannel = nullptr;
+    cGate *upperLayerInConsumerGate = nullptr;
+    cGate *upperLayerOutConsumerGate = nullptr;
     queueing::IPassivePacketSink *upperLayerInConsumer = nullptr;
     queueing::IPassivePacketSink *upperLayerOutConsumer = nullptr;
 
