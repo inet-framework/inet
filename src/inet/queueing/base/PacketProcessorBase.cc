@@ -123,10 +123,9 @@ void PacketProcessorBase::checkPacketOperationSupport(cGate *startGate, cGate *e
         throw cRuntimeError("Cannot check packet operation support on gates %s - %s", startGate->getFullPath().c_str(), endGate->getFullPath().c_str());
 }
 
-void PacketProcessorBase::pushOrSendPacket(Packet *packet, cGate *startGate, IPassivePacketSink *consumer)
+void PacketProcessorBase::pushOrSendPacket(Packet *packet, cGate *startGate, cGate *endGate, IPassivePacketSink *consumer)
 {
     if (consumer != nullptr) {
-        auto endGate = findConnectedGate<IPacketProcessor>(startGate);
         animatePushPacket(packet, startGate, endGate);
         consumer->pushPacket(packet, endGate);
     }
@@ -134,14 +133,13 @@ void PacketProcessorBase::pushOrSendPacket(Packet *packet, cGate *startGate, IPa
         send(packet, startGate);
 }
 
-void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *startGate, IPassivePacketSink *consumer, bps datarate, int transmissionId)
+void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *startGate, cGate *endGate, IPassivePacketSink *consumer, bps datarate, int transmissionId)
 {
     simtime_t duration = s(packet->getTotalLength() / datarate).get();
     SendOptions sendOptions;
     sendOptions.duration(duration);
     sendOptions.updateTx(transmissionId, duration);
     if (consumer != nullptr) {
-        auto endGate = findConnectedGate<IPacketProcessor>(startGate);
         animatePushPacketStart(packet, startGate, endGate, datarate, sendOptions);
         consumer->pushPacketStart(packet, endGate, datarate);
     }
@@ -153,13 +151,12 @@ void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *startGate
     }
 }
 
-void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *startGate, IPassivePacketSink *consumer, int transmissionId)
+void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *startGate, cGate *endGate, IPassivePacketSink *consumer, int transmissionId)
 {
     // NOTE: duration is unknown due to arbitrarily changing datarate
     SendOptions sendOptions;
     sendOptions.updateTx(transmissionId, 0);
     if (consumer != nullptr) {
-        auto endGate = findConnectedGate<IPacketProcessor>(startGate);
         animatePushPacketEnd(packet, startGate, endGate, sendOptions);
         consumer->pushPacketEnd(packet, endGate);
     }
@@ -171,14 +168,13 @@ void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *startGate, 
     }
 }
 
-void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *startGate, IPassivePacketSink *consumer, bps datarate, b position, b extraProcessableLength, int transmissionId)
+void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *startGate, cGate *endGate, IPassivePacketSink *consumer, bps datarate, b position, b extraProcessableLength, int transmissionId)
 {
     // NOTE: duration is unknown due to arbitrarily changing datarate
     simtime_t remainingDuration = s((packet->getTotalLength() - position) / datarate).get();
     SendOptions sendOptions;
     sendOptions.updateTx(transmissionId, remainingDuration);
     if (consumer != nullptr) {
-        auto endGate = findConnectedGate<IPacketProcessor>(startGate);
         if (position == b(0)) {
             animatePushPacketStart(packet, startGate, endGate, datarate, sendOptions);
             consumer->pushPacketStart(packet, endGate, datarate);

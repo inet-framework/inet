@@ -48,10 +48,10 @@ class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacke
     virtual void animatePacketProgress(Packet *packet, cGate *startGate, cGate *endGate, bps datarate, b position, b extraProcessableLength, long transmissionId, Action action) const;
     virtual void animatePacketProgress(Packet *packet, cGate *startGate, cGate *endGate, bps datarate, b position, b extraProcessableLength, const SendOptions& sendOptions, Action action) const;
 
-    virtual void pushOrSendPacket(Packet *packet, cGate *gate, IPassivePacketSink *consumer);
-    virtual void pushOrSendPacketStart(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate, int transmissionId);
-    virtual void pushOrSendPacketEnd(Packet *packet, cGate *gate, IPassivePacketSink *consumer, int transmissionId);
-    virtual void pushOrSendPacketProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, bps datarate, b position, b extraProcessableLength, int transmissionId);
+    virtual void pushOrSendPacket(Packet *packet, cGate *startGate, cGate *endGate, IPassivePacketSink *consumer);
+    virtual void pushOrSendPacketStart(Packet *packet, cGate *startGate, cGate *endGate, IPassivePacketSink *consumer, bps datarate, int transmissionId);
+    virtual void pushOrSendPacketEnd(Packet *packet, cGate *startGate, cGate *endGate, IPassivePacketSink *consumer, int transmissionId);
+    virtual void pushOrSendPacketProgress(Packet *packet, cGate *startGate, cGate *endGate, IPassivePacketSink *consumer, bps datarate, b position, b extraProcessableLength, int transmissionId);
 
     virtual void animatePush(Packet *packet, cGate *startGate, cGate *endGate, const SendOptions& sendOptions) const;
     virtual void animatePushPacket(Packet *packet, cGate *startGate, cGate *endGate) const;
