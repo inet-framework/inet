@@ -224,7 +224,7 @@ void PacketFlowBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bool
     Enter_Method("handlePullPacketProcessed");
     endPacketStreaming(packet);
     if (collector != nullptr)
-        collector->handlePullPacketProcessed(packet, outputGate->getPathStartGate(), successful);
+        collector->handlePullPacketProcessed(packet, outputGate->getPathEndGate(), successful);
 }
 
 } // namespace queueing

@@ -195,7 +195,7 @@ void PacketSchedulerBase::handleCanPullPacketChanged(cGate *gate)
 
 void PacketSchedulerBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
-    collector->handlePullPacketProcessed(packet, outputGate->getPathStartGate(), successful);
+    collector->handlePullPacketProcessed(packet, outputGate->getPathEndGate(), successful);
     inProgressStreamId = -1;
     inProgressGateIndex = -1;
 }
