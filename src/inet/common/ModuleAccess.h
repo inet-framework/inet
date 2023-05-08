@@ -173,6 +173,30 @@ T *getConnectedModule(cGate *gate, int direction = 0)
     return module;
 }
 
+/**
+ * Returns a module of type T that is on the path starting at the given gate.
+ * Returns nullptr if no such module is found along the path.
+ */
+template<typename T>
+std::pair<T *, cGate *> findConnectedModuleAndGate(cGate *gate, int direction = 0)
+{
+    auto connectedGate = findConnectedGate<T>(gate, direction);
+    return connectedGate != nullptr ? std::pair<T *, cGate *>(check_and_cast<T *>(connectedGate->getOwnerModule()), connectedGate) : std::pair<T *, cGate *>(nullptr, nullptr);
+}
+
+/**
+ * Returns a module of type T that is on the path starting at the given gate.
+ * Throws an error if no such module is found along the path.
+ */
+template<typename T>
+std::pair<T *, cGate *> getConnectedModuleAndGate(cGate *gate, int direction = 0)
+{
+    auto pair = findConnectedModuleAndGate<T>(gate, direction);
+    if (pair.first == nullptr)
+        throw cRuntimeError("Gate %s is not connected to a module of type %s", gate->getFullPath().c_str(), opp_typename(typeid(T)));
+    return pair;
+}
+
 } // namespace inet
 
 #endif
