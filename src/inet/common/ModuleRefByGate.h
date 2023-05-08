@@ -25,8 +25,9 @@ template<typename T>
 class INET_API ModuleRefByGate
 {
   private:
-    opp_component_ptr<T> referencedModule;
     cGate *gate = nullptr;
+    cGate *referencedGate = nullptr;
+    opp_component_ptr<T> referencedModule;
 
     void checkReference() const {
         if (referencedModule.getNullable() == nullptr) {
@@ -64,13 +65,16 @@ class INET_API ModuleRefByGate
     cGate *getGate() { return gate; }
     const cGate *getGate() const { return gate; }
 
+    cGate *getReferencedGate() { return referencedGate; }
+    const cGate *getReferencedGate() const { return referencedGate; }
+
     void reference(cGate *gate, bool mandatory) {
         if (gate == nullptr)
             throw cRuntimeError("Gate is nullptr");
         if (this->gate != nullptr)
             throw cRuntimeError("Reference is already initialized");
         this->gate = gate;
-        referencedModule = mandatory ? getConnectedModule<T>(gate) : findConnectedModule<T>(gate);
+        std::tie(referencedModule, referencedGate) = mandatory ? getConnectedModuleAndGate<T>(gate) : findConnectedModuleAndGate<T>(gate);
     }
 };
 
