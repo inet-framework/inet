@@ -29,7 +29,7 @@ class INET_API IPassivePacketSink
      * The gate must be a valid gate of this module and it must support pushing
      * packets.
      */
-    virtual bool canPushSomePacket(cGate *gate) const = 0;
+    virtual bool canPushSomePacket(const cGate *gate) const = 0;
 
     /**
      * Returns true if the given packet can be pushed at the given gate into
@@ -38,7 +38,7 @@ class INET_API IPassivePacketSink
      * The packet must not be nullptr. The gate must be a valid gate of this
      * module and it must support pushing packets.
      */
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const = 0;
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const = 0;
 
     /**
      * Pushes the packet into the packet sink at the given gate. This operation
@@ -52,7 +52,7 @@ class INET_API IPassivePacketSink
      * The gate must be a valid gate of this module and it must support pushing
      * and passing packets.
      */
-    virtual void pushPacket(Packet *packet, cGate *gate) = 0;
+    virtual void pushPacket(Packet *packet, const cGate *gate) = 0;
 
     /**
      * Starts pushing the packet into the packet sink at the given gate. This is
@@ -70,7 +70,7 @@ class INET_API IPassivePacketSink
      * be in progress. The packet must not be nullptr. The gate must be a valid
      * gate of this module and it must support pushing and streaming packets.
      */
-    virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) = 0;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) = 0;
 
     /**
      * Ends pushing the packet into the packet sink at the given gate. This is
@@ -88,7 +88,7 @@ class INET_API IPassivePacketSink
      * be in progress. The packet must not be nullptr. The gate must be a valid
      * gate of this module and it must support pushing and streaming packets.
      */
-    virtual void pushPacketEnd(Packet *packet, cGate *gate) = 0;
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) = 0;
 
     /**
      * Progresses pushing the packet into the packet sink at the given gate. This
@@ -108,7 +108,7 @@ class INET_API IPassivePacketSink
      * be in progress. The packet must not be nullptr. The gate must be a valid
      * gate of this module and it must support pushing and streaming packets.
      */
-    virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) = 0;
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) = 0;
 };
 
 } // namespace queueing

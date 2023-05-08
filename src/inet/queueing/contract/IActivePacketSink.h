@@ -28,7 +28,7 @@ class INET_API IActivePacketSink
      *
      * The gate parameter must be a valid gate of this module.
      */
-    virtual IPassivePacketSource *getProvider(cGate *gate) = 0;
+    virtual IPassivePacketSource *getProvider(const cGate *gate) = 0;
 
     /**
      * Notifies about a change in the possibility of pulling some packet from
@@ -39,7 +39,7 @@ class INET_API IActivePacketSink
      *
      * The gate parameter must be a valid gate of this module.
      */
-    virtual void handleCanPullPacketChanged(cGate *gate) = 0;
+    virtual void handleCanPullPacketChanged(const cGate *gate) = 0;
 
     /**
      * Notifies about the completion of the packet processing for a packet that
@@ -52,7 +52,7 @@ class INET_API IActivePacketSink
      * The gate parameter must be a valid gate of this module. The packet must
      * not be nullptr.
      */
-    virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) = 0;
+    virtual void handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful) = 0;
 };
 
 } // namespace queueing

@@ -37,7 +37,7 @@ class INET_API IPacketProcessor
      * parameter must be a valid gate of this module. The gate should be marked
      * with @labels(send) in the NED file.
      */
-    virtual bool supportsPacketSending(cGate *gate) const = 0;
+    virtual bool supportsPacketSending(const cGate *gate) const = 0;
 
     /**
      * Returns true if the processor supports pushing packets at the given gate.
@@ -55,7 +55,7 @@ class INET_API IPacketProcessor
      * parameter must be a valid gate of this module. The gate should be marked
      * with @labels(push) in the NED file.
      */
-    virtual bool supportsPacketPushing(cGate *gate) const = 0;
+    virtual bool supportsPacketPushing(const cGate *gate) const = 0;
 
     /**
      * Returns true if the processor supports pulling packets at the given gate.
@@ -73,7 +73,7 @@ class INET_API IPacketProcessor
      * parameter must be a valid gate of this module. The gate should be marked
      * with @labels(pull) in the NED file.
      */
-    virtual bool supportsPacketPulling(cGate *gate) const = 0;
+    virtual bool supportsPacketPulling(const cGate *gate) const = 0;
 
     /**
      * Returns true if the processor supports passing packets as a whole at the
@@ -87,7 +87,7 @@ class INET_API IPacketProcessor
      * parameter must be a valid gate of this module. The gate should be marked
      * with @labels(pass) in the NED file.
      */
-    virtual bool supportsPacketPassing(cGate *gate) const = 0;
+    virtual bool supportsPacketPassing(const cGate *gate) const = 0;
 
     /**
      * Returns true if the processor supports streaming packets at the given gate.
@@ -100,7 +100,7 @@ class INET_API IPacketProcessor
      * parameter must be a valid gate of this module. The gate should be marked
      * with @labels(stream) in the NED file.
      */
-    virtual bool supportsPacketStreaming(cGate *gate) const = 0;
+    virtual bool supportsPacketStreaming(const cGate *gate) const = 0;
 };
 
 } // namespace queueing

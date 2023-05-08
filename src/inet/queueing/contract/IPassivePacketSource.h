@@ -29,7 +29,7 @@ class INET_API IPassivePacketSource
      * The gate must be a valid gate of this module and it must support pulling
      * packets.
      */
-    virtual bool canPullSomePacket(cGate *gate) const = 0;
+    virtual bool canPullSomePacket(const cGate *gate) const = 0;
 
     /**
      * Returns the packet that can be pulled at the given gate. The returned
@@ -38,7 +38,7 @@ class INET_API IPassivePacketSource
      * The gate must be a valid gate of this module and it must support pushing
      * packets.
      */
-    virtual Packet *canPullPacket(cGate *gate) const = 0;
+    virtual Packet *canPullPacket(const cGate *gate) const = 0;
 
     /**
      * Pulls the packet from the packet source at the given gate. This operation
@@ -49,7 +49,7 @@ class INET_API IPassivePacketSource
      * not be nullptr. The gate must be a valid gate of this module and it must
      * support pulling and passing packets.
      */
-    virtual Packet *pullPacket(cGate *gate) = 0;
+    virtual Packet *pullPacket(const cGate *gate) = 0;
 
     /**
      * Starts pulling the packet from the packet source at the given gate. This
@@ -68,7 +68,7 @@ class INET_API IPassivePacketSource
      * must support pulling and streaming packets. The returned packet must not
      * be nullptr.
      */
-    virtual Packet *pullPacketStart(cGate *gate, bps datarate) = 0;
+    virtual Packet *pullPacketStart(const cGate *gate, bps datarate) = 0;
 
     /**
      * Ends pulling the packet from the packet source at the given gate. This is
@@ -87,7 +87,7 @@ class INET_API IPassivePacketSource
      * must support pulling and streaming packets. The returned packet must not
      * be nullptr.
      */
-    virtual Packet *pullPacketEnd(cGate *gate) = 0;
+    virtual Packet *pullPacketEnd(const cGate *gate) = 0;
 
     /**
      * Progresses pulling the packet from the packet source at the given gate.
@@ -108,7 +108,7 @@ class INET_API IPassivePacketSource
      * must support pulling and streaming packets. The returned packet must not
      * be nullptr.
      */
-    virtual Packet *pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength) = 0;
+    virtual Packet *pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength) = 0;
 };
 
 } // namespace queueing
