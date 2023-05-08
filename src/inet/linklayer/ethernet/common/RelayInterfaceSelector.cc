@@ -120,7 +120,7 @@ void RelayInterfaceSelector::sendPacket(Packet *packet, const MacAddress& destin
     if (auto outgoingInterfaceProtocol = outgoingInterface->getProtocol())
         ensureEncapsulationProtocolReq(packet, outgoingInterfaceProtocol, true, false);
     setDispatchProtocol(packet);
-    pushOrSendPacket(packet, outputGate, consumer);
+    pushOrSendPacket(packet, outputGate, consumerGate, consumer);
 }
 
 } // namespace inet

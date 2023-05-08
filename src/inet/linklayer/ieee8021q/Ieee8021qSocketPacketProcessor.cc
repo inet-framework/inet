@@ -49,14 +49,14 @@ void Ieee8021qSocketPacketProcessor::pushPacket(Packet *packet, cGate *gate)
         packetCopy->setKind(SOCKET_I_DATA);
         packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(socket->socketId);
         EV_INFO << "Passing up packet to socket" << EV_FIELD(socket) << EV_FIELD(packet) << EV_ENDL;
-        pushOrSendPacket(packetCopy, outputGate, consumer);
+        pushOrSendPacket(packetCopy, outputGate, consumerGate, consumer);
         steal |= socket->steal;
     }
     handlePacketProcessed(packet);
     if (steal)
         delete packet;
     else
-        pushOrSendPacket(packet, outputGate, consumer);
+        pushOrSendPacket(packet, outputGate, consumerGate, consumer);
     updateDisplayString();
 }
 

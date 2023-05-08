@@ -49,7 +49,7 @@ void StreamThroughReceiver::receivePacketStart(cPacket *cpacket, cGate *gate, bp
     rxSignal = signal;
     emit(receptionStartedSignal, rxSignal);
     auto packet = decodePacket(rxSignal);
-    pushOrSendPacketStart(packet, outputGate, consumer, datarate, rxSignal->getTransmissionId());
+    pushOrSendPacketStart(packet, outputGate, consumerGate, consumer, datarate, rxSignal->getTransmissionId());
 }
 
 void StreamThroughReceiver::receivePacketProgress(cPacket *cpacket, cGate *gate, bps datarate, b position, simtime_t timePosition, b extraProcessableLength, simtime_t extraProcessableDuration)
@@ -78,7 +78,7 @@ void StreamThroughReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, bps 
         rxSignal = signal;
         auto packet = decodePacket(rxSignal);
         handlePacketProcessed(packet);
-        pushOrSendPacketEnd(packet, outputGate, consumer, rxSignal->getTransmissionId());
+        pushOrSendPacketEnd(packet, outputGate, consumerGate, consumer, rxSignal->getTransmissionId());
         delete rxSignal;
         rxSignal = nullptr;
     }
