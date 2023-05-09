@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/showcases/tsn/streamfiltering/underthehood/results/*.sca"/>
         <input pattern="results/General-#0.sca"/>
         <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="21" name="Traffic class 1" resultTypes="" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="446864451" name="Traffic class 1" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
@@ -643,7 +642,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="269" name="Traffic class 2" resultTypes="" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="920160435" name="Traffic class 2" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
@@ -1280,7 +1279,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="268" name="Traffic class 3" resultTypes="" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="29579289" name="Traffic class 3" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
