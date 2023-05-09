@@ -159,12 +159,12 @@ void PacketFilterBase::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(producer.getReferencedGate());
 }
 
 void PacketFilterBase::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
-    producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
+    producer->handlePushPacketProcessed(packet, producer.getReferencedGate(), successful);
 }
 
 bool PacketFilterBase::canPullSomePacket(const cGate *gate) const
@@ -176,7 +176,7 @@ bool PacketFilterBase::canPullSomePacket(const cGate *gate) const
 Packet *PacketFilterBase::canPullPacket(const cGate *gate) const
 {
     Enter_Method("canPullPacket");
-    auto providerGate = inputGate->getPathStartGate();
+    auto providerGate = provider.getReferencedGate();
     while (true) {
         auto packet = provider->canPullPacket(providerGate);
         if (packet == nullptr)
@@ -202,7 +202,7 @@ Packet *PacketFilterBase::canPullPacket(const cGate *gate) const
 Packet *PacketFilterBase::pullPacket(const cGate *gate)
 {
     Enter_Method("pullPacket");
-    auto providerGate = inputGate->getPathStartGate();
+    auto providerGate = provider.getReferencedGate();
     while (true) {
         auto packet = provider->pullPacket(providerGate);
         take(packet);

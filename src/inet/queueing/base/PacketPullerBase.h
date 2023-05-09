@@ -21,7 +21,7 @@ class INET_API PacketPullerBase : public PacketProcessorBase, public virtual IPa
 {
   protected:
     cGate *inputGate = nullptr;
-    IPassivePacketSource *provider = nullptr;
+    ModuleRefByGate<IPassivePacketSource> provider;
 
     cGate *outputGate = nullptr;
     ModuleRefByGate<IActivePacketSink> collector;

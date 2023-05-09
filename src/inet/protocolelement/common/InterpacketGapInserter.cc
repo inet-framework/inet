@@ -54,7 +54,7 @@ void InterpacketGapInserter::handleMessage(cMessage *message)
             emit(interpacketGapEndedSignal, 0.0);
             if (canPushSomePacket(inputGate))
                 if (producer != nullptr)
-                    producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+                    producer->handleCanPushPacketChanged(producer.getReferencedGate());
         }
         else if (message == progress) {
             auto packet = static_cast<Packet *>(message->getContextPointer());
@@ -147,7 +147,7 @@ void InterpacketGapInserter::handleCanPushPacketChanged(const cGate *gate)
     Enter_Method("handleCanPushPacketChanged");
     if (packetEndTime + durationPar->doubleValue() <= getClockTime()) {
         if (producer != nullptr)
-            producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+            producer->handleCanPushPacketChanged(producer.getReferencedGate());
     }
     else {
         double interpacketGapDuration = durationPar->doubleValue();
@@ -187,7 +187,7 @@ void InterpacketGapInserter::handlePushPacketProcessed(Packet *packet, const cGa
 {
     packetEndTime = getClockTime();
     if (producer != nullptr)
-        producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
+        producer->handlePushPacketProcessed(packet, producer.getReferencedGate(), successful);
 }
 
 void InterpacketGapInserter::pushOrSendOrSchedulePacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength)

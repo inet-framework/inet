@@ -33,7 +33,7 @@ void TokenBasedServer::initialize(int stage)
 void TokenBasedServer::processPackets()
 {
     while (true) {
-        auto packet = provider->canPullPacket(inputGate->getPathStartGate());
+        auto packet = provider->canPullPacket(provider.getReferencedGate());
         if (packet == nullptr)
             break;
         else {
@@ -41,7 +41,7 @@ void TokenBasedServer::processPackets()
             auto tokenConsumptionPerBit = tokenConsumptionPerBitParameter->doubleValue();
             int numRequiredTokens = tokenConsumptionPerPacket + tokenConsumptionPerBit * packet->getTotalLength().get();
             if (numTokens >= numRequiredTokens) {
-                packet = provider->pullPacket(inputGate->getPathStartGate());
+                packet = provider->pullPacket(provider.getReferencedGate());
                 take(packet);
                 emit(packetPulledSignal, packet);
                 EV_INFO << "Processing packet" << EV_FIELD(packet) << EV_ENDL;

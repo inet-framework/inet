@@ -20,7 +20,7 @@ class INET_API PacketDemultiplexer : public PacketProcessorBase, public virtual 
 {
   protected:
     cGate *inputGate = nullptr;
-    IPassivePacketSource *provider = nullptr;
+    ModuleRefByGate<IPassivePacketSource> provider;
 
     std::vector<cGate *> outputGates;
     std::vector<ModuleRefByGate<IActivePacketSink>> collectors;
@@ -34,8 +34,8 @@ class INET_API PacketDemultiplexer : public PacketProcessorBase, public virtual 
     virtual bool supportsPacketPushing(const cGate *gate) const override { return false; }
     virtual bool supportsPacketPulling(const cGate *gate) const override { return true; }
 
-    virtual bool canPullSomePacket(const cGate *gate) const override { return provider->canPullSomePacket(inputGate->getPathStartGate()); }
-    virtual Packet *canPullPacket(const cGate *gate) const override { return provider->canPullPacket(inputGate->getPathStartGate()); }
+    virtual bool canPullSomePacket(const cGate *gate) const override { return provider->canPullSomePacket(provider.getReferencedGate()); }
+    virtual Packet *canPullPacket(const cGate *gate) const override { return provider->canPullPacket(provider.getReferencedGate()); }
 
     virtual Packet *pullPacket(const cGate *gate) override;
 

@@ -24,7 +24,7 @@ void PassivePacketSink::initialize(int stage)
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
         if (producer != nullptr)
-            producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+            producer->handleCanPushPacketChanged(producer.getReferencedGate());
         if (!consumptionTimer->isScheduled() && initialConsumptionOffset != 0)
             scheduleConsumptionTimer(initialConsumptionOffset);
     }
@@ -34,7 +34,7 @@ void PassivePacketSink::handleMessage(cMessage *message)
 {
     if (message == consumptionTimer) {
         if (producer != nullptr)
-            producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+            producer->handleCanPushPacketChanged(producer.getReferencedGate());
     }
     else
         PassivePacketSinkBase::handleMessage(message);

@@ -22,7 +22,7 @@ void PacketBasedTokenGenerator::initialize(int stage)
         numTokensPerPacketParameter = &par("numTokensPerPacket");
         numTokensPerBitParameter = &par("numTokensPerBit");
         inputGate = gate("in");
-        producer = getConnectedModule<IActivePacketSource>(inputGate);
+        producer.reference(inputGate, true);
         storage.reference(this, "storageModule", true);
         getModuleFromPar<cModule>(par("storageModule"), this)->subscribe(tokensDepletedSignal, this);
         numTokensGenerated = 0;
@@ -30,7 +30,7 @@ void PacketBasedTokenGenerator::initialize(int stage)
     }
     else if (stage == INITSTAGE_QUEUEING) {
         if (producer != nullptr)
-            producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+            producer->handleCanPushPacketChanged(producer.getReferencedGate());
     }
 }
 
@@ -70,7 +70,7 @@ void PacketBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t si
 
     if (signal == tokensDepletedSignal) {
         Enter_Method("tokensDepleted");
-        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(producer.getReferencedGate());
     }
     else
         throw cRuntimeError("Unknown signal");

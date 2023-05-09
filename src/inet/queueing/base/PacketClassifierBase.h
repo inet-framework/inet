@@ -23,8 +23,8 @@ class INET_API PacketClassifierBase : public PacketProcessorBase, public Transpa
     bool reverseOrder = false;
 
     cGate *inputGate = nullptr;
-    IActivePacketSource *producer = nullptr;
-    IPassivePacketSource *provider = nullptr;
+    ModuleRefByGate<IActivePacketSource> producer;
+    ModuleRefByGate<IPassivePacketSource> provider;
 
     std::vector<cGate *> outputGates;
     std::vector<ModuleRefByGate<IPassivePacketSink>> consumers;

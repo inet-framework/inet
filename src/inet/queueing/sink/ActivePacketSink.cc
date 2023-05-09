@@ -31,7 +31,7 @@ void ActivePacketSink::initialize(int stage)
 void ActivePacketSink::handleMessage(cMessage *message)
 {
     if (message == collectionTimer) {
-        if (provider == nullptr || provider->canPullSomePacket(inputGate->getPathStartGate())) {
+        if (provider == nullptr || provider->canPullSomePacket(provider.getReferencedGate())) {
             scheduleCollectionTimer(collectionIntervalParameter->doubleValue());
             collectPacket();
         }
@@ -60,7 +60,7 @@ void ActivePacketSink::scheduleCollectionTimerAndCollectPacket()
         scheduleCollectionTimer(initialCollectionOffset);
         initialCollectionOffsetScheduled = true;
     }
-    else if (provider == nullptr || provider->canPullSomePacket(inputGate->getPathStartGate())) {
+    else if (provider == nullptr || provider->canPullSomePacket(provider.getReferencedGate())) {
         scheduleCollectionTimer(collectionIntervalParameter->doubleValue());
         collectPacket();
     }
@@ -68,7 +68,7 @@ void ActivePacketSink::scheduleCollectionTimerAndCollectPacket()
 
 void ActivePacketSink::collectPacket()
 {
-    auto packet = provider->pullPacket(inputGate->getPathStartGate());
+    auto packet = provider->pullPacket(provider.getReferencedGate());
     take(packet);
     emit(packetPulledSignal, packet);
     EV_INFO << "Collecting packet" << EV_FIELD(packet) << EV_ENDL;

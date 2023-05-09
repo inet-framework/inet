@@ -18,7 +18,6 @@ class INET_API Resending : public PacketPusherBase
 {
   protected:
     int numRetries = 0;
-    queueing::IActivePacketSource *producer = nullptr;
 
     Packet *packet = nullptr;
     int retry = 0;

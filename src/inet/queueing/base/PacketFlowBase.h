@@ -21,8 +21,8 @@ class INET_API PacketFlowBase : public PacketProcessorBase, public virtual IPack
 {
   protected:
     cGate *inputGate = nullptr;
-    ModuleRef<IActivePacketSource> producer;
-    ModuleRef<IPassivePacketSource> provider;
+    ModuleRefByGate<IActivePacketSource> producer;
+    ModuleRefByGate<IPassivePacketSource> provider;
     ModuleRef<IPacketCollection> collection;
 
     cGate *outputGate = nullptr;

@@ -47,7 +47,7 @@ void PacketGateBase::open()
     EV_DEBUG << "Opening gate" << EV_ENDL;
     isOpen_ = true;
     if (producer != nullptr)
-        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(producer.getReferencedGate());
     if (collector != nullptr)
         collector->handleCanPullPacketChanged(collector.getReferencedGate());
     emit(gateStateChangedSignal, isOpen_);
@@ -60,7 +60,7 @@ void PacketGateBase::close()
     EV_DEBUG << "Closing gate" << EV_ENDL;
     isOpen_ = false;
     if (producer != nullptr)
-        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(producer.getReferencedGate());
     if (collector != nullptr)
         collector->handleCanPullPacketChanged(collector.getReferencedGate());
     emit(gateStateChangedSignal, isOpen_);

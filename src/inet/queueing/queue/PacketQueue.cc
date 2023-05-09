@@ -24,7 +24,7 @@ void PacketQueue::initialize(int stage)
     PacketQueueBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         queue.setName("storage");
-        producer = findConnectedModule<IActivePacketSource>(inputGate);
+        producer.reference(inputGate, false);
         collector.reference(outputGate, false);
         packetCapacity = par("packetCapacity");
         dataCapacity = b(par("dataCapacity"));
@@ -38,7 +38,7 @@ void PacketQueue::initialize(int stage)
         checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);
         if (producer != nullptr)
-            producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+            producer->handleCanPushPacketChanged(producer.getReferencedGate());
     }
     else if (stage == INITSTAGE_LAST)
         updateDisplayString();

@@ -29,7 +29,7 @@ void MarkovClassifier::initialize(int stage)
             collector.reference(outputGates[i], false);
             collectors.push_back(collector);
         }
-        provider = findConnectedModule<IPassivePacketSource>(inputGate);
+        provider.reference(inputGate, false);
         state = par("initialState");
         int numStates = gateSize("out");
         cStringTokenizer transitionProbabilitiesTokenizer(par("transitionProbabilities"));
@@ -95,7 +95,7 @@ bool MarkovClassifier::canPullSomePacket(const cGate *gate) const
 
 Packet *MarkovClassifier::canPullPacket(const cGate *gate) const
 {
-    return canPullSomePacket(gate) ? provider->canPullPacket(inputGate->getPathStartGate()) : nullptr;
+    return canPullSomePacket(gate) ? provider->canPullPacket(provider.getReferencedGate()) : nullptr;
 }
 
 Packet *MarkovClassifier::pullPacket(const cGate *gate)
@@ -103,7 +103,7 @@ Packet *MarkovClassifier::pullPacket(const cGate *gate)
     Enter_Method("pullPacket");
     if (gate->getIndex() != state)
         throw cRuntimeError("Cannot pull from gate");
-    auto packet = provider->pullPacket(inputGate->getPathStartGate());
+    auto packet = provider->pullPacket(provider.getReferencedGate());
     take(packet);
     animatePullPacket(packet, outputGates[gate->getIndex()], findConnectedGate<IActivePacketSink>(gate));
     numProcessedPackets++;

@@ -27,8 +27,8 @@ class INET_API PreemptableStreamer : public ClockUserModuleMixin<PacketProcessor
     b roundingLength = b(-1);
 
     cGate *inputGate = nullptr;
-    IActivePacketSource *producer = nullptr;
-    IPassivePacketSource *provider = nullptr;
+    ModuleRefByGate<IActivePacketSource> producer;
+    ModuleRefByGate<IPassivePacketSource> provider;
 
     cGate *outputGate = nullptr;
     ModuleRefByGate<IPassivePacketSink> consumer;

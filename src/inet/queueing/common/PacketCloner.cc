@@ -19,7 +19,7 @@ void PacketCloner::initialize(int stage)
     PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
-        producer = findConnectedModule<IActivePacketSource>(inputGate);
+        producer.reference(inputGate, false);
         for (int i = 0; i < gateSize("out"); i++) {
             auto outputGate = gate("out", i);
             outputGates.push_back(outputGate);
@@ -53,7 +53,7 @@ void PacketCloner::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(producer.getReferencedGate());
 }
 
 void PacketCloner::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)

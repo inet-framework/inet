@@ -34,7 +34,7 @@ void SendWithAcknowledge::handleMessage(cMessage *message)
     auto sequenceNumber = message->getKind();
     timers.erase(timers.find(sequenceNumber));
     auto packet = static_cast<Packet *>(message->getContextPointer());
-    producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), false);
+    producer->handlePushPacketProcessed(packet, producer.getReferencedGate(), false);
     delete message;
 }
 
@@ -49,7 +49,7 @@ void SendWithAcknowledge::processPacket(Packet *packet)
         timers.erase(it);
         delete packet;
         packet = static_cast<Packet *>(timer->getContextPointer());
-        producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), true);
+        producer->handlePushPacketProcessed(packet, producer.getReferencedGate(), true);
         cancelAndDelete(timer);
     }
     else {

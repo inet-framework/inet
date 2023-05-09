@@ -15,7 +15,7 @@ void PacketMeterBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
-        producer = findConnectedModule<IActivePacketSource>(inputGate);
+        producer.reference(inputGate, false);
     }
     else if (stage == INITSTAGE_LAST) {
         checkPacketOperationSupport(inputGate);
@@ -31,7 +31,7 @@ void PacketMeterBase::handleMessage(cMessage *message)
 void PacketMeterBase::handleCanPushPacketChanged(const cGate *gate)
 {
     if (producer != nullptr)
-        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(producer.getReferencedGate());
 }
 
 void PacketMeterBase::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)

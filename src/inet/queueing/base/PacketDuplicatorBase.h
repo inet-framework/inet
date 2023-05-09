@@ -19,7 +19,7 @@ class INET_API PacketDuplicatorBase : public PacketProcessorBase, public virtual
 {
   protected:
     cGate *inputGate = nullptr;
-    IActivePacketSource *producer = nullptr;
+    ModuleRefByGate<IActivePacketSource> producer;
 
     cGate *outputGate = nullptr;
     ModuleRefByGate<IPassivePacketSink> consumer;

@@ -25,7 +25,7 @@ class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICall
     int packetCapacity = -1;
     b dataCapacity = b(-1);
 
-    IActivePacketSource *producer = nullptr;
+    ModuleRefByGate<IActivePacketSource> producer;
     ModuleRefByGate<IActivePacketSink> collector;
 
     cPacketQueue queue;

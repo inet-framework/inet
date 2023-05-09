@@ -31,8 +31,8 @@ void PreemptableStreamer::initialize(int stage)
         roundingLength = b(par("roundingLength"));
         inputGate = gate("in");
         outputGate = gate("out");
-        producer = findConnectedModule<IActivePacketSource>(inputGate);
-        provider = findConnectedModule<IPassivePacketSource>(inputGate);
+        producer.reference(inputGate, false);
+        provider.reference(inputGate, false);
         consumer.reference(outputGate, false);
         collector.reference(outputGate, false);
         endStreamingTimer = new ClockEvent("EndStreamingTimer");
@@ -94,24 +94,24 @@ void PreemptableStreamer::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(producer.getReferencedGate());
 }
 
 void PreemptableStreamer::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
     if (producer != nullptr)
-        producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
+        producer->handlePushPacketProcessed(packet, producer.getReferencedGate(), successful);
 }
 
 bool PreemptableStreamer::canPullSomePacket(const cGate *gate) const
 {
-    return !isStreaming() && (remainingPacket != nullptr || provider->canPullSomePacket(inputGate->getPathStartGate()));
+    return !isStreaming() && (remainingPacket != nullptr || provider->canPullSomePacket(provider.getReferencedGate()));
 }
 
 Packet *PreemptableStreamer::canPullPacket(const cGate *gate) const
 {
-    return isStreaming() ? nullptr : remainingPacket != nullptr ? remainingPacket : provider->canPullPacket(inputGate->getPathStartGate());
+    return isStreaming() ? nullptr : remainingPacket != nullptr ? remainingPacket : provider->canPullPacket(provider.getReferencedGate());
 }
 
 Packet *PreemptableStreamer::pullPacketStart(const cGate *gate, bps datarate)
@@ -119,7 +119,7 @@ Packet *PreemptableStreamer::pullPacketStart(const cGate *gate, bps datarate)
     Enter_Method("pullPacketStart");
     streamDatarate = datarate;
     if (remainingPacket == nullptr) {
-        streamedPacket = provider->pullPacket(inputGate->getPathStartGate());
+        streamedPacket = provider->pullPacket(provider.getReferencedGate());
         take(streamedPacket);
     }
     else {

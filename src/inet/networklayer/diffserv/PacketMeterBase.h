@@ -8,6 +8,7 @@
 #ifndef __INET_PACKETMETERBASE_H
 #define __INET_PACKETMETERBASE_H
 
+#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 #include "inet/queueing/contract/IPassivePacketSource.h"
@@ -20,7 +21,7 @@ class INET_API PacketMeterBase : public PacketProcessorBase, public IPassivePack
 {
   protected:
     cGate *inputGate = nullptr;
-    IActivePacketSource *producer = nullptr;
+    ModuleRefByGate<IActivePacketSource> producer;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

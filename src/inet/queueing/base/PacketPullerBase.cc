@@ -20,7 +20,7 @@ void PacketPullerBase::initialize(int stage)
         inputGate = gate("in");
         outputGate = gate("out");
         collector.reference(outputGate, false);
-        provider = findConnectedModule<IPassivePacketSource>(inputGate);
+        provider.reference(inputGate, false);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
@@ -30,12 +30,12 @@ void PacketPullerBase::initialize(int stage)
 
 bool PacketPullerBase::canPullSomePacket(const cGate *gate) const
 {
-    return provider->canPullSomePacket(inputGate->getPathStartGate());
+    return provider->canPullSomePacket(provider.getReferencedGate());
 }
 
 Packet *PacketPullerBase::canPullPacket(const cGate *gate) const
 {
-    return provider->canPullPacket(inputGate->getPathStartGate());
+    return provider->canPullPacket(provider.getReferencedGate());
 }
 
 Packet *PacketPullerBase::pullPacket(const cGate *gate)

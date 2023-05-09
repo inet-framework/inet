@@ -73,8 +73,8 @@ void PacketTransmitter::endTx()
     txStartClockTime = -1;
     // 4. notify producer
     if (producer != nullptr) {
-        producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), true);
-        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+        producer->handlePushPacketProcessed(packet, producer.getReferencedGate(), true);
+        producer->handleCanPushPacketChanged(producer.getReferencedGate());
     }
     delete packet;
 }

@@ -25,8 +25,8 @@ class INET_API PacketStreamer : public ClockUserModuleMixin<PacketProcessorBase>
     bps datarate = bps(NaN);
 
     cGate *inputGate = nullptr;
-    IActivePacketSource *producer = nullptr;
-    IPassivePacketSource *provider = nullptr;
+    ModuleRefByGate<IActivePacketSource> producer;
+    ModuleRefByGate<IPassivePacketSource> provider;
 
     cGate *outputGate = nullptr;
     ModuleRefByGate<IPassivePacketSink> consumer;

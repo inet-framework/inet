@@ -38,7 +38,7 @@ void SendToMacAddress::pushPacket(Packet *packet, const cGate *inGate)
 
 void SendToMacAddress::handleCanPushPacketChanged(const cGate *outGate)
 {
-    producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+    producer->handleCanPushPacketChanged(producer.getReferencedGate());
 }
 
 void SendToMacAddress::processPacket(Packet *packet)

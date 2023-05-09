@@ -27,7 +27,7 @@ void PacketDemultiplexer::initialize(int stage)
             collector.reference(outputGate, true);
             collectors.push_back(collector);
         }
-        provider = findConnectedModule<IPassivePacketSource>(inputGate);
+        provider.reference(inputGate, false);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
@@ -39,7 +39,7 @@ void PacketDemultiplexer::initialize(int stage)
 Packet *PacketDemultiplexer::pullPacket(const cGate *gate)
 {
     Enter_Method("pullPacket");
-    auto packet = provider->pullPacket(inputGate->getPathStartGate());
+    auto packet = provider->pullPacket(provider.getReferencedGate());
     take(packet);
     EV_INFO << "Forwarding packet" << EV_FIELD(packet) << EV_ENDL;
     animatePullPacket(packet, outputGates[gate->getIndex()], findConnectedGate<IActivePacketSink>(gate));
@@ -54,7 +54,7 @@ void PacketDemultiplexer::handleCanPullPacketChanged(const cGate *gate)
     Enter_Method("handleCanPullPacketChanged");
     for (int i = 0; i < (int)outputGates.size(); i++)
         // NOTE: notifying a listener may prevent others from pulling
-        if (collectors[i] != nullptr && provider->canPullSomePacket(inputGate->getPathStartGate()))
+        if (collectors[i] != nullptr && provider->canPullSomePacket(provider.getReferencedGate()))
             collectors[i]->handleCanPullPacketChanged(outputGates[i]->getPathEndGate());
 }
 

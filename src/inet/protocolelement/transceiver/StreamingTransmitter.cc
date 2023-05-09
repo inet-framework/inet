@@ -76,7 +76,7 @@ void StreamingTransmitter::endTx()
     txStartTime = -1;
     txStartClockTime = -1;
     // 4. notify producer
-    auto gate = inputGate->getPathStartGate();
+    auto gate = producer.getReferencedGate();
     if (producer != nullptr) {
         producer->handlePushPacketProcessed(packet, gate, true);
         producer->handleCanPushPacketChanged(gate);
@@ -108,7 +108,7 @@ void StreamingTransmitter::abortTx()
     txStartTime = -1;
     txStartClockTime = -1;
     // 6. notify producer
-    auto gate = inputGate->getPathStartGate();
+    auto gate = producer.getReferencedGate();
     if (producer != nullptr) {
         producer->handlePushPacketProcessed(packet, gate, true);
         producer->handleCanPushPacketChanged(gate);

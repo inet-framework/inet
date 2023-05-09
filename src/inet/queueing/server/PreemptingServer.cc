@@ -31,12 +31,12 @@ void PreemptingServer::handleMessage(cMessage *message)
 
 bool PreemptingServer::canStartStreaming() const
 {
-    return provider->canPullSomePacket(inputGate->getPathStartGate()) && consumer->canPushSomePacket(consumer.getReferencedGate());
+    return provider->canPullSomePacket(provider.getReferencedGate()) && consumer->canPushSomePacket(consumer.getReferencedGate());
 }
 
 void PreemptingServer::startStreaming()
 {
-    auto packet = provider->pullPacketStart(inputGate->getPathStartGate(), datarate);
+    auto packet = provider->pullPacketStart(provider.getReferencedGate(), datarate);
     take(packet);
     EV_INFO << "Starting streaming packet" << EV_FIELD(packet) << EV_ENDL;
     streamedPacket = packet;
@@ -48,7 +48,7 @@ void PreemptingServer::startStreaming()
 
 void PreemptingServer::endStreaming()
 {
-    auto packet = provider->pullPacketEnd(inputGate->getPathStartGate());
+    auto packet = provider->pullPacketEnd(provider.getReferencedGate());
     take(packet);
     delete streamedPacket;
     streamedPacket = packet;
@@ -81,7 +81,7 @@ void PreemptingServer::handlePushPacketProcessed(Packet *packet, const cGate *ga
     Enter_Method("handlePushPacketProcessed");
     if (isStreaming()) {
         delete streamedPacket;
-        streamedPacket = provider->pullPacketEnd(inputGate->getPathStartGate());
+        streamedPacket = provider->pullPacketEnd(provider.getReferencedGate());
         take(streamedPacket);
         EV_INFO << "Ending streaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
         delete streamedPacket;

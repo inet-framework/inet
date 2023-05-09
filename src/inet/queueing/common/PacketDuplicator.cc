@@ -34,7 +34,7 @@ void PacketDuplicator::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(producer.getReferencedGate());
 }
 
 void PacketDuplicator::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)

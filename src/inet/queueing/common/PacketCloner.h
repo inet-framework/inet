@@ -20,7 +20,7 @@ class INET_API PacketCloner : public PacketProcessorBase, public virtual IPassiv
 {
   protected:
     cGate *inputGate = nullptr;
-    IActivePacketSource *producer = nullptr;
+    ModuleRefByGate<IActivePacketSource> producer;
 
     std::vector<cGate *> outputGates;
     std::vector<ModuleRefByGate<IPassivePacketSink>> consumers;

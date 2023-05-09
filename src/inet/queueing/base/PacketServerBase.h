@@ -20,7 +20,7 @@ class INET_API PacketServerBase : public PacketProcessorBase, public virtual IAc
 {
   protected:
     cGate *inputGate = nullptr;
-    IPassivePacketSource *provider = nullptr;
+    ModuleRefByGate<IPassivePacketSource> provider;
 
     cGate *outputGate = nullptr;
     ModuleRefByGate<IPassivePacketSink> consumer;

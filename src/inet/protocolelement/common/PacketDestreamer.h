@@ -22,8 +22,8 @@ class INET_API PacketDestreamer : public PacketProcessorBase, public virtual IPa
     bps datarate;
 
     cGate *inputGate = nullptr;
-    IActivePacketSource *producer = nullptr;
-    IPassivePacketSource *provider = nullptr;
+    ModuleRefByGate<IActivePacketSource> producer;
+    ModuleRefByGate<IPassivePacketSource> provider;
 
     cGate *outputGate = nullptr;
     ModuleRefByGate<IPassivePacketSink> consumer;

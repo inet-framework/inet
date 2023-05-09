@@ -22,7 +22,7 @@ class INET_API PacketBasedTokenGenerator : public PassivePacketSinkBase, public 
     cPar *numTokensPerBitParameter = nullptr;
 
     cGate *inputGate = nullptr;
-    opp_component_ptr<IActivePacketSource> producer;
+    ModuleRefByGate<IActivePacketSource> producer;
     ModuleRefByPar<ITokenStorage> storage;
 
     int numTokensGenerated = -1;

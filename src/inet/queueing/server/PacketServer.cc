@@ -64,13 +64,13 @@ void PacketServer::scheduleProcessingTimer()
 
 bool PacketServer::canStartProcessingPacket()
 {
-    return provider->canPullSomePacket(inputGate->getPathStartGate()) &&
+    return provider->canPullSomePacket(provider.getReferencedGate()) &&
            consumer->canPushSomePacket(consumer.getReferencedGate());
 }
 
 void PacketServer::startProcessingPacket()
 {
-    packet = provider->pullPacket(inputGate->getPathStartGate());
+    packet = provider->pullPacket(provider.getReferencedGate());
     take(packet);
     emit(packetPulledSignal, packet);
     EV_INFO << "Processing packet started" << EV_FIELD(packet) << EV_ENDL;

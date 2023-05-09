@@ -19,7 +19,7 @@ void PacketPusherBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         outputGate = gate("out");
-        producer = findConnectedModule<IActivePacketSource>(inputGate);
+        producer.reference(inputGate, false);
         consumer.reference(outputGate, false);
     }
     else if (stage == INITSTAGE_QUEUEING) {
@@ -68,14 +68,14 @@ void PacketPusherBase::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+        producer->handleCanPushPacketChanged(producer.getReferencedGate());
 }
 
 void PacketPusherBase::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
     if (producer != nullptr)
-        producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
+        producer->handlePushPacketProcessed(packet, producer.getReferencedGate(), successful);
 }
 
 } // namespace queueing

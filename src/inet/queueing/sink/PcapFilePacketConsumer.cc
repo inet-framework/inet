@@ -34,7 +34,7 @@ void PcapFilePacketConsumer::initialize(int stage)
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
         if (producer != nullptr)
-            producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+            producer->handleCanPushPacketChanged(producer.getReferencedGate());
     }
 }
 

@@ -27,8 +27,8 @@ class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPa
     bool backpressure = false;
 
     cGate *inputGate = nullptr;
-    ModuleRef<IActivePacketSource> producer;
-    ModuleRef<IPassivePacketSource> provider;
+    ModuleRefByGate<IActivePacketSource> producer;
+    ModuleRefByGate<IPassivePacketSource> provider;
 
     cGate *outputGate = nullptr;
     ModuleRefByGate<IPassivePacketSink> consumer;
