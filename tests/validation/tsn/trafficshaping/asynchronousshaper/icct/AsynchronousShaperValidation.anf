@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/tests/validation/tsn/trafficshaping/asynchronousshaper/icct/results/*.vec"/>
-        <input pattern="/inet/tests/validation/tsn/trafficshaping/asynchronousshaper/icct/results/*.sca"/>
+        <input pattern="results/General-#0.sca"/>
+        <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
         <folder id="1858" name="Source application traffic">
-            <chart icon="icons/full/obj/linechart.png" id="415" name="N1 application traffic" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="415" name="N1 application traffic" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -576,7 +576,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="6"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="416" name="N2 application traffic" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="416" name="N2 application traffic" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -1146,7 +1146,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="6"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="417" name="N3 application traffic" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="417" name="N3 application traffic" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -1716,7 +1716,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="6"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="418" name="N4 application traffic" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="418" name="N4 application traffic" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -2286,7 +2286,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="6"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="420" name="N5 application traffic" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="420" name="N5 application traffic" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -2856,7 +2856,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="6"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="421" name="N8 application traffic" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="421" name="N8 application traffic" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -3428,7 +3428,7 @@ utils.export_data_if_needed(df, props)
             </chart>
         </folder>
         <folder id="1865" name="Sink application traffic">
-            <chart icon="icons/full/obj/linechart.png" id="411" name="N6 application traffic" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="411" name="N6 application traffic" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -3998,7 +3998,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="6"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="412" name="N7 CDT application traffic" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="412" name="N7 CDT application traffic" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -4568,7 +4568,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="6"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="413" name="N7 Class A application traffic" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="413" name="N7 Class A application traffic" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -5138,7 +5138,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="6"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="414" name="N7 Class B application traffic" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="414" name="N7 Class B application traffic" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -5709,7 +5709,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="6"/>
             </chart>
         </folder>
-        <chart icon="icons/full/obj/barchart.png" id="267367943" name="End-to-end delay maximum" template="barchart_native" type="BAR">
+        <chart createdWith="" icon="icons/full/obj/barchart.png" id="267367943" name="End-to-end delay maximum" resultTypes="" template="barchart_native" type="BAR">
             <script><![CDATA[from omnetpp.scave import results, chart, utils
 import re
 
@@ -6295,7 +6295,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_format" value=""/>
             <property name="include_fields" value="true"/>
         </chart>
-        <chart icon="icons/full/obj/scatterchart.png" id="1872" name="End-to-end delay maximum over S1 Class A CBS" template="scatterchart_itervars_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/scatterchart.png" id="1872" name="End-to-end delay maximum over S1 Class A CBS" resultTypes="" template="scatterchart_itervars_native" type="LINE">
             <script><![CDATA[import re
 import math
 import numpy as np
