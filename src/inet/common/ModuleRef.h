@@ -13,13 +13,9 @@
 namespace inet {
 
 /**
- * This template class implements a module reference that is parameterized by
- * a gate of the referencing module. The reference can be set by providing the
- * gate of the referencing module. After the reference is set, it can be used
- * similarly to simple a C++ pointer. The pointer is automatically set to nullptr
- * when the referenced module is deleted.
- *
- * TODO follow connection
+ * This template class implements a module reference. After the reference is set,
+ * it can be used similarly to a simple C++ pointer. The pointer is automatically
+ * set to nullptr when the referenced module is deleted.
  */
 template<typename T>
 class INET_API ModuleRef
