@@ -137,7 +137,8 @@ Packet *PreemptableStreamer::pullPacketStart(const cGate *gate, bps datarate)
     streamStart = simTime();
     auto packet = streamedPacket->dup();
     EV_INFO << "Starting streaming packet" << EV_FIELD(packet) << EV_ENDL;
-    animatePullPacketStart(packet, outputGate, findConnectedGate<IActivePacketSink>(outputGate), streamDatarate, streamedPacket->getId());
+    if (collector != nullptr)
+        animatePullPacketStart(packet, outputGate, collector.getReferencedGate(), streamDatarate, streamedPacket->getId());
     updateDisplayString();
     return packet;
 }
@@ -173,7 +174,8 @@ Packet *PreemptableStreamer::pullPacketEnd(const cGate *gate)
         remainingPacketFragmentTag->setFragmentNumber(fragmentNumber + 1);
     }
     handlePacketProcessed(packet);
-    animatePullPacketEnd(packet, outputGate, findConnectedGate<IActivePacketSink>(outputGate), streamedPacket->getId());
+    if (collector != nullptr)
+        animatePullPacketEnd(packet, outputGate, collector.getReferencedGate(), streamedPacket->getId());
     streamedPacket = nullptr;
     updateDisplayString();
     return packet;
@@ -185,7 +187,8 @@ Packet *PreemptableStreamer::pullPacketProgress(const cGate *gate, bps datarate,
     streamDatarate = datarate;
     EV_INFO << "Progressing streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     auto packet = streamedPacket->dup();
-    animatePullPacketProgress(packet, outputGate, findConnectedGate<IActivePacketSink>(outputGate), streamDatarate, position, extraProcessableLength, streamedPacket->getId());
+    if (collector != nullptr)
+        animatePullPacketProgress(packet, outputGate, collector.getReferencedGate(), streamDatarate, position, extraProcessableLength, streamedPacket->getId());
     updateDisplayString();
     return packet;
 }

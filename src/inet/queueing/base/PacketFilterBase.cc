@@ -211,7 +211,8 @@ Packet *PacketFilterBase::pullPacket(const cGate *gate)
             processPacket(packet);
             handlePacketProcessed(packet);
             EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
-            animatePullPacket(packet, outputGate, findConnectedGate<IActivePacketSink>(outputGate));
+            if (collector != nullptr)
+                animatePullPacket(packet, outputGate, collector.getReferencedGate());
             updateDisplayString();
             emit(packetPulledOutSignal, packet);
             return packet;

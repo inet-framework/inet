@@ -158,7 +158,8 @@ Packet *PacketFlowBase::pullPacket(const cGate *gate)
     processPacket(packet);
     handlePacketProcessed(packet);
     emit(packetPulledOutSignal, packet);
-    animatePullPacket(packet, outputGate, findConnectedGate<IActivePacketSink>(outputGate));
+    if (collector != nullptr)
+        animatePullPacket(packet, outputGate, collector.getReferencedGate());
     updateDisplayString();
     return packet;
 }
@@ -173,7 +174,8 @@ Packet *PacketFlowBase::pullPacketStart(const cGate *gate, bps datarate)
     inProgressStreamId = packet->getTreeId();
     processPacket(packet);
     emit(packetPulledOutSignal, packet);
-    animatePullPacketStart(packet, outputGate, findConnectedGate<IActivePacketSink>(outputGate), datarate, packet->getTransmissionId());
+    if (collector != nullptr)
+        animatePullPacketStart(packet, outputGate, collector.getReferencedGate(), datarate, packet->getTransmissionId());
     updateDisplayString();
     return packet;
 }
@@ -189,7 +191,8 @@ Packet *PacketFlowBase::pullPacketEnd(const cGate *gate)
     inProgressStreamId = packet->getTreeId();
     emit(packetPulledOutSignal, packet);
     endPacketStreaming(packet);
-    animatePullPacketEnd(packet, outputGate, findConnectedGate<IActivePacketSink>(outputGate), packet->getTransmissionId());
+    if (collector != nullptr)
+        animatePullPacketEnd(packet, outputGate, collector.getReferencedGate(), packet->getTransmissionId());
     updateDisplayString();
     return packet;
 }
@@ -207,7 +210,8 @@ Packet *PacketFlowBase::pullPacketProgress(const cGate *gate, bps datarate, b po
         emit(packetPulledOutSignal, packet);
         endPacketStreaming(packet);
     }
-    animatePullPacketProgress(packet, outputGate, findConnectedGate<IActivePacketSink>(outputGate), datarate, position, extraProcessableLength, packet->getTransmissionId());
+    if (collector != nullptr)
+        animatePullPacketProgress(packet, outputGate, collector.getReferencedGate(), datarate, position, extraProcessableLength, packet->getTransmissionId());
     updateDisplayString();
     return packet;
 }

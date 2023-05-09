@@ -76,7 +76,8 @@ Packet *PassivePacketSource::pullPacket(const cGate *gate)
         throw cRuntimeError("Another packet is already being provided");
     else {
         auto packet = providePacket(gate);
-        animatePullPacket(packet, outputGate, findConnectedGate<IActivePacketSink>(outputGate));
+        if (collector != nullptr)
+            animatePullPacket(packet, outputGate, collector.getReferencedGate());
         emit(packetPulledSignal, packet);
         scheduleProvidingTimer(providingIntervalParameter->doubleValue());
         updateDisplayString();

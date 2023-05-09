@@ -137,7 +137,8 @@ Packet *PacketSchedulerBase::pullPacket(const cGate *gate)
     EV_INFO << "Scheduling packet" << EV_FIELD(packet) << EV_ENDL;
     handlePacketProcessed(packet);
     emit(packetPulledSignal, packet);
-    animatePullPacket(packet, outputGate, findConnectedGate<IActivePacketSink>(outputGate));
+    if (collector != nullptr)
+        animatePullPacket(packet, outputGate, collector.getReferencedGate());
     updateDisplayString();
     return packet;
 }
@@ -150,7 +151,8 @@ Packet *PacketSchedulerBase::pullPacketStart(const cGate *gate, bps datarate)
     auto packet = providers[inProgressGateIndex]->pullPacketStart(inputGates[inProgressGateIndex]->getPathStartGate(), datarate);
     take(packet);
     inProgressStreamId = packet->getTreeId();
-    animatePullPacketStart(packet, outputGate, findConnectedGate<IActivePacketSink>(outputGate), datarate, packet->getTransmissionId());
+    if (collector != nullptr)
+        animatePullPacketStart(packet, outputGate, collector.getReferencedGate(), datarate, packet->getTransmissionId());
     updateDisplayString();
     return packet;
 }
@@ -165,7 +167,8 @@ Packet *PacketSchedulerBase::pullPacketEnd(const cGate *gate)
     checkPacketStreaming(packet);
     inProgressStreamId = packet->getTreeId();
     endPacketStreaming(packet);
-    animatePullPacketEnd(packet, outputGate, findConnectedGate<IActivePacketSink>(outputGate), packet->getTransmissionId());
+    if (collector != nullptr)
+        animatePullPacketEnd(packet, outputGate, collector.getReferencedGate(), packet->getTransmissionId());
     updateDisplayString();
     return packet;
 }
@@ -181,7 +184,8 @@ Packet *PacketSchedulerBase::pullPacketProgress(const cGate *gate, bps datarate,
     inProgressStreamId = packet->getTreeId();
     if (packet->getTotalLength() == position + extraProcessableLength)
         endPacketStreaming(packet);
-    animatePullPacketProgress(packet, outputGate, findConnectedGate<IActivePacketSink>(outputGate), datarate, position, extraProcessableLength, packet->getTransmissionId());
+    if (collector != nullptr)
+        animatePullPacketProgress(packet, outputGate, collector.getReferencedGate(), datarate, position, extraProcessableLength, packet->getTransmissionId());
     updateDisplayString();
     return packet;
 }
