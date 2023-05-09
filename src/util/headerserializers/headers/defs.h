@@ -52,7 +52,7 @@ typedef unsigned long long  uint64_t;
 # define LITTLE_ENDIAN  1
 # define BIG_ENDIAN     2
 # define BYTE_ORDER     LITTLE_ENDIAN   /* XXX at least on x86 */
-#elif defined(linux)
+#elif defined(linux) || defined(__linux__)
 # include <endian.h>
 # define LITTLE_ENDIAN __LITTLE_ENDIAN
 # define BIG_ENDIAN    __BIG_ENDIAN
