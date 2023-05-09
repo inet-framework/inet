@@ -16,7 +16,7 @@
 #define LITTLE_ENDIAN    1
 #define BIG_ENDIAN       2
 #define BYTE_ORDER       LITTLE_ENDIAN   /* TODO at least on x86 */
-#elif defined(__linux)
+#elif defined(__linux__)
 #include <endian.h>
 #define LITTLE_ENDIAN    __LITTLE_ENDIAN
 #define BIG_ENDIAN       __BIG_ENDIAN
@@ -45,17 +45,17 @@
 
 #if defined(htole16)
 #else
-#if defined(__linux)
+#if defined(__linux__)
 #include <bits/byteswap.h>
 
 #define htole16(x)    __bswap_16(x)
 #define htole32(x)    __bswap_32(x)
-#else // if defined(__linux)
+#else // if defined(__linux__)
 #define htole16(x)    ((((x) & 0x00FF) << 8) | (((x) & 0xFF00) >> 8))
 #define htole32(x)    ((((x) & 0x000000FF) << 24) | (((x) & 0x0000FF00) << 8) | (((x) & 0x00FF0000) >> 8) | (((x) & 0xFF000000) >> 24))
 #define le16toh(x)    htole16(x)
 #define le32toh(x)    htole32(x)
-#endif // if defined(__linux)
+#endif // if defined(__linux__)
 #endif // if defined(htole16)
 
 #endif // if BYTE_ORDER == LITTLE_ENDIAN

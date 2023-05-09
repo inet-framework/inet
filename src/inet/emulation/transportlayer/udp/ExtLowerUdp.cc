@@ -204,7 +204,7 @@ void ExtLowerUdp::bind(int socketId, const L3Address& localAddress, int localPor
     sockaddr.sin_family = PF_INET;
     sockaddr.sin_port = htons(localPort);
     sockaddr.sin_addr.s_addr = htonl(localAddress.toIpv4().getInt());
-#if !defined(linux) && !defined(__linux) && !defined(_WIN32)
+#if !defined(linux) && !defined(__linux__) && !defined(_WIN32)
     sockaddr.sin_len = sizeof(struct sockaddr_in);
 #endif
     int n = ::bind(socket->fd, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
@@ -224,7 +224,7 @@ void ExtLowerUdp::connect(int socketId, const L3Address& remoteAddress, int remo
     sockaddr.sin_family = PF_INET;
     sockaddr.sin_port = htons(remotePort);
     sockaddr.sin_addr.s_addr = htonl(remoteAddress.toIpv4().getInt());
-#if !defined(linux) && !defined(__linux) && !defined(_WIN32)
+#if !defined(linux) && !defined(__linux__) && !defined(_WIN32)
     sockaddr.sin_len = sizeof(struct sockaddr_in);
 #endif
     int n = ::connect(socket->fd, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
@@ -264,7 +264,7 @@ void ExtLowerUdp::processPacketFromUpper(Packet *packet)
             sockaddr.sin_family = PF_INET;
             sockaddr.sin_port = htons(packet->getTag<L4PortReq>()->getDestPort());
             sockaddr.sin_addr.s_addr = htonl(addressReq->getDestAddress().toIpv4().getInt());
-#if !defined(linux) && !defined(__linux) && !defined(_WIN32)
+#if !defined(linux) && !defined(__linux__) && !defined(_WIN32)
             sockaddr.sin_len = sizeof(struct sockaddr_in);
 #endif
             // type of buffer in sendto(): win: char *, linux: void *

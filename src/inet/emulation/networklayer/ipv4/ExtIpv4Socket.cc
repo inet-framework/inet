@@ -55,9 +55,9 @@ void ExtIpv4Socket::handleMessage(cMessage *msg)
 
     struct sockaddr_in ip_addr;
     ip_addr.sin_family = AF_INET;
-#if !defined(linux) && !defined(__linux) && !defined(_WIN32)
+#if !defined(linux) && !defined(__linux__) && !defined(_WIN32)
     ip_addr.sin_len = sizeof(struct sockaddr_in);
-#endif // if !defined(linux) && !defined(__linux) && !defined(_WIN32)
+#endif // if !defined(linux) && !defined(__linux__) && !defined(_WIN32)
     ip_addr.sin_port = htons(0);
 
     auto bytesChunk = packet->peekAllAsBytes();
