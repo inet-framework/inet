@@ -27,7 +27,7 @@
 
 #include "aodv_msg_struct.h"
 
-#if (OMNETPP_VERSION < 0x0403)
+#if (OMNETPP_VERSION < 0x0500)
 #define getFieldArraySize    getArraySize
 #endif
 
