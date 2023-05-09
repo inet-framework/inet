@@ -28,7 +28,7 @@ class INET_API PacketClassifierBase : public PacketProcessorBase, public Transpa
 
     std::vector<cGate *> outputGates;
     std::vector<ModuleRefByGate<IPassivePacketSink>> consumers;
-    std::vector<IActivePacketSink *> collectors;
+    std::vector<ModuleRefByGate<IActivePacketSink>> collectors;
 
     int inProgressStreamId = -1;
     int inProgressGateIndex = -1;

@@ -27,7 +27,7 @@ class INET_API PacketSchedulerBase : public PacketProcessorBase, public Transpar
     std::vector<IActivePacketSource *> producers;
 
     cGate *outputGate = nullptr;
-    IActivePacketSink *collector = nullptr;
+    ModuleRefByGate<IActivePacketSink> collector;
     ModuleRefByGate<IPassivePacketSink> consumer;
 
     int inProgressStreamId = -1;

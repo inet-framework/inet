@@ -29,7 +29,7 @@ void PacketStreamer::initialize(int stage)
         producer = findConnectedModule<IActivePacketSource>(inputGate);
         provider = findConnectedModule<IPassivePacketSource>(inputGate);
         consumer.reference(outputGate, false);
-        collector = findConnectedModule<IActivePacketSink>(outputGate);
+        collector.reference(outputGate, false);
         endStreamingTimer = new ClockEvent("EndStreamingTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {

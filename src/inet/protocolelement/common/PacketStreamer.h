@@ -30,7 +30,7 @@ class INET_API PacketStreamer : public ClockUserModuleMixin<PacketProcessorBase>
 
     cGate *outputGate = nullptr;
     ModuleRefByGate<IPassivePacketSink> consumer;
-    IActivePacketSink *collector = nullptr;
+    ModuleRefByGate<IActivePacketSink> collector;
 
     bps streamDatarate = bps(NaN);
     Packet *streamedPacket = nullptr;

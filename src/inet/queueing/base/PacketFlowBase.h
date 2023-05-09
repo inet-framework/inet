@@ -27,7 +27,7 @@ class INET_API PacketFlowBase : public PacketProcessorBase, public virtual IPack
 
     cGate *outputGate = nullptr;
     ModuleRefByGate<IPassivePacketSink> consumer;
-    ModuleRef<IActivePacketSink> collector;
+    ModuleRefByGate<IActivePacketSink> collector;
 
     int inProgressStreamId = -1;
 

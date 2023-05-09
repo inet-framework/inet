@@ -19,7 +19,7 @@ void PacketSchedulerBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         reverseOrder = par("reverseOrder");
         outputGate = gate("out");
-        collector = findConnectedModule<IActivePacketSink>(outputGate);
+        collector.reference(outputGate, false);
         consumer.reference(outputGate, false);
         for (int i = 0; i < gateSize("in"); i++) {
             auto inputGate = gate("in", i);

@@ -23,7 +23,7 @@ class INET_API MarkovClassifier : public ClockUserModuleMixin<PacketClassifierBa
 {
   protected:
     IPassivePacketSource *provider = nullptr;
-    std::vector<IActivePacketSink *> collectors;
+    std::vector<ModuleRefByGate<IActivePacketSink>> collectors;
 
     std::vector<std::vector<double>> transitionProbabilities;
     std::vector<cDynamicExpression> waitIntervals;

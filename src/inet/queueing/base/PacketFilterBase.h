@@ -32,7 +32,7 @@ class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPa
 
     cGate *outputGate = nullptr;
     ModuleRefByGate<IPassivePacketSink> consumer;
-    ModuleRef<IActivePacketSink> collector;
+    ModuleRefByGate<IActivePacketSink> collector;
 
     int inProgressStreamId = -1;
 

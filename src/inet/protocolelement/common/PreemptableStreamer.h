@@ -32,7 +32,7 @@ class INET_API PreemptableStreamer : public ClockUserModuleMixin<PacketProcessor
 
     cGate *outputGate = nullptr;
     ModuleRefByGate<IPassivePacketSink> consumer;
-    IActivePacketSink *collector = nullptr;
+    ModuleRefByGate<IActivePacketSink> collector;
 
     simtime_t streamStart;
     bps streamDatarate = bps(NaN);

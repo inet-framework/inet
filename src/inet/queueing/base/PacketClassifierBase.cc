@@ -26,7 +26,8 @@ void PacketClassifierBase::initialize(int stage)
             ModuleRefByGate<IPassivePacketSink> consumer;
             consumer.reference(outputGate, false);
             consumers.push_back(consumer);
-            auto collector = findConnectedModule<IActivePacketSink>(outputGate);
+            ModuleRefByGate<IActivePacketSink> collector;
+            collector.reference(outputGate, false);
             collectors.push_back(collector);
         }
     }

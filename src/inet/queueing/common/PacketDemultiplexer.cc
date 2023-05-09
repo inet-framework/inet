@@ -22,9 +22,10 @@ void PacketDemultiplexer::initialize(int stage)
         inputGate = gate("in");
         for (int i = 0; i < gateSize("out"); i++) {
             auto outputGate = gate("out", i);
-            auto output = getConnectedModule<IActivePacketSink>(outputGate);
             outputGates.push_back(outputGate);
-            collectors.push_back(output);
+            ModuleRefByGate<IActivePacketSink> collector;
+            collector.reference(outputGate, true);
+            collectors.push_back(collector);
         }
         provider = findConnectedModule<IPassivePacketSource>(inputGate);
     }

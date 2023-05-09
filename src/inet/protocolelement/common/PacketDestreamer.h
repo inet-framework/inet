@@ -27,7 +27,7 @@ class INET_API PacketDestreamer : public PacketProcessorBase, public virtual IPa
 
     cGate *outputGate = nullptr;
     ModuleRefByGate<IPassivePacketSink> consumer;
-    IActivePacketSink *collector = nullptr;
+    ModuleRefByGate<IActivePacketSink> collector;
 
     bps streamDatarate = bps(NaN);
     Packet *streamedPacket = nullptr;
