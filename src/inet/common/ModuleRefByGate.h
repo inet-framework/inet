@@ -58,8 +58,8 @@ class INET_API ModuleRefByGate
     T *getNullable() { return referencedModule.getNullable(); }
     const T *getNullable() const { return referencedModule.getNullable(); }
 
-    T *get() { checkReference(); return get(); }
-    const T *get() const { checkReference(); return get(); }
+    T *get() { checkReference(); return referencedModule; }
+    const T *get() const { checkReference(); return referencedModule; }
 
     cGate *getGate() { return gate; }
     const cGate *getGate() const { return gate; }
