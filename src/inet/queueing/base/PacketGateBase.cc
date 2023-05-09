@@ -49,7 +49,7 @@ void PacketGateBase::open()
     if (producer != nullptr)
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     if (collector != nullptr)
-        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
+        collector->handleCanPullPacketChanged(collector.getReferencedGate());
     emit(gateStateChangedSignal, isOpen_);
     updateDisplayString();
 }
@@ -62,7 +62,7 @@ void PacketGateBase::close()
     if (producer != nullptr)
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     if (collector != nullptr)
-        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
+        collector->handleCanPullPacketChanged(collector.getReferencedGate());
     emit(gateStateChangedSignal, isOpen_);
     updateDisplayString();
 }

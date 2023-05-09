@@ -45,12 +45,12 @@ void PacketDestreamer::handleMessage(cMessage *message)
 
 bool PacketDestreamer::canPushSomePacket(const cGate *gate) const
 {
-    return !isStreaming() && consumer->canPushSomePacket(outputGate->getPathEndGate());
+    return !isStreaming() && consumer->canPushSomePacket(consumer.getReferencedGate());
 }
 
 bool PacketDestreamer::canPushPacket(Packet *packet, const cGate *gate) const
 {
-    return !isStreaming() && consumer->canPushPacket(packet, outputGate->getPathEndGate());
+    return !isStreaming() && consumer->canPushPacket(packet, consumer.getReferencedGate());
 }
 
 void PacketDestreamer::pushPacketStart(Packet *packet, const cGate *gate, bps datarate)
@@ -145,7 +145,7 @@ void PacketDestreamer::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr)
-        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
+        collector->handleCanPullPacketChanged(collector.getReferencedGate());
 }
 
 } // namespace inet

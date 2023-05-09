@@ -9,6 +9,7 @@
 #define __INET_PACKETSCHEDULERBASE_H
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IPacketSink.h"
 #include "inet/queueing/contract/IPacketSource.h"
@@ -27,7 +28,7 @@ class INET_API PacketSchedulerBase : public PacketProcessorBase, public Transpar
 
     cGate *outputGate = nullptr;
     IActivePacketSink *collector = nullptr;
-    IPassivePacketSink *consumer = nullptr;
+    ModuleRefByGate<IPassivePacketSink> consumer;
 
     int inProgressStreamId = -1;
     int inProgressGateIndex = -1;

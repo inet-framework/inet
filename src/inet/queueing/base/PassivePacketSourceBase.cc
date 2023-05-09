@@ -17,7 +17,7 @@ void PassivePacketSourceBase::initialize(int stage)
     PacketSourceBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         outputGate = gate("out");
-        collector = findConnectedModule<IActivePacketSink>(outputGate);
+        collector.reference(outputGate, false);
     }
     else if (stage == INITSTAGE_QUEUEING)
         checkPacketOperationSupport(outputGate);

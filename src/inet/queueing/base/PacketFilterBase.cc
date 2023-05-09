@@ -59,15 +59,15 @@ void PacketFilterBase::endPacketStreaming(Packet *packet)
 
 bool PacketFilterBase::canPushSomePacket(const cGate *gate) const
 {
-    return consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate());
+    return consumer == nullptr || consumer->canPushSomePacket(consumer.getReferencedGate());
 }
 
 bool PacketFilterBase::canPushPacket(Packet *packet, const cGate *gate) const
 {
     if (backpressure)
-        return matchesPacket(packet) && consumer != nullptr && consumer->canPushPacket(packet, outputGate->getPathEndGate());
+        return matchesPacket(packet) && consumer != nullptr && consumer->canPushPacket(packet, consumer.getReferencedGate());
     else
-        return !matchesPacket(packet) || consumer == nullptr || consumer->canPushPacket(packet, outputGate->getPathEndGate());
+        return !matchesPacket(packet) || consumer == nullptr || consumer->canPushPacket(packet, consumer.getReferencedGate());
 }
 
 void PacketFilterBase::pushPacket(Packet *packet, const cGate *gate)
@@ -246,14 +246,14 @@ void PacketFilterBase::handlePullPacketProcessed(Packet *packet, const cGate *ga
 {
     Enter_Method("handlePullPacketProcessed");
     if (collector != nullptr)
-        collector->handlePullPacketProcessed(packet, outputGate->getPathEndGate(), successful);
+        collector->handlePullPacketProcessed(packet, collector.getReferencedGate(), successful);
 }
 
 void PacketFilterBase::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr)
-        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
+        collector->handleCanPullPacketChanged(collector.getReferencedGate());
 }
 
 void PacketFilterBase::dropPacket(Packet *packet)

@@ -35,7 +35,7 @@ cGate *StatisticalRateLimiter::getRegistrationForwardingGate(cGate *gate)
 
 bool StatisticalRateLimiter::canPushPacket(Packet *packet, const cGate *gate) const
 {
-    return consumer == nullptr || consumer->canPushPacket(packet, outputGate->getPathEndGate());
+    return consumer == nullptr || consumer->canPushPacket(packet, consumer.getReferencedGate());
 }
 
 bool StatisticalRateLimiter::matchesPacket(const Packet *packet) const

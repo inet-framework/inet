@@ -67,12 +67,12 @@ void PreemptableStreamer::endStreaming()
 
 bool PreemptableStreamer::canPushSomePacket(const cGate *gate) const
 {
-    return !isStreaming() && consumer->canPushSomePacket(outputGate->getPathEndGate());
+    return !isStreaming() && consumer->canPushSomePacket(consumer.getReferencedGate());
 }
 
 bool PreemptableStreamer::canPushPacket(Packet *packet, const cGate *gate) const
 {
-    return !isStreaming() && consumer->canPushPacket(packet, outputGate->getPathEndGate());
+    return !isStreaming() && consumer->canPushPacket(packet, consumer.getReferencedGate());
 }
 
 void PreemptableStreamer::pushPacket(Packet *packet, const cGate *gate)
@@ -194,7 +194,7 @@ void PreemptableStreamer::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr && !isStreaming())
-        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
+        collector->handleCanPullPacketChanged(collector.getReferencedGate());
 }
 
 void PreemptableStreamer::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)

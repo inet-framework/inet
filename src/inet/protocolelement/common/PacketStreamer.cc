@@ -63,12 +63,12 @@ void PacketStreamer::endStreaming()
 
 bool PacketStreamer::canPushSomePacket(const cGate *gate) const
 {
-    return !isStreaming() && consumer->canPushSomePacket(outputGate->getPathEndGate());
+    return !isStreaming() && consumer->canPushSomePacket(consumer.getReferencedGate());
 }
 
 bool PacketStreamer::canPushPacket(Packet *packet, const cGate *gate) const
 {
-    return !isStreaming() && consumer->canPushPacket(packet, outputGate->getPathEndGate());
+    return !isStreaming() && consumer->canPushPacket(packet, consumer.getReferencedGate());
 }
 
 void PacketStreamer::pushPacket(Packet *packet, const cGate *gate)
@@ -150,7 +150,7 @@ void PacketStreamer::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr && !isStreaming())
-        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
+        collector->handleCanPullPacketChanged(collector.getReferencedGate());
 }
 
 void PacketStreamer::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)

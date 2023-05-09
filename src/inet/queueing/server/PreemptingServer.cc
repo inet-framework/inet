@@ -31,7 +31,7 @@ void PreemptingServer::handleMessage(cMessage *message)
 
 bool PreemptingServer::canStartStreaming() const
 {
-    return provider->canPullSomePacket(inputGate->getPathStartGate()) && consumer->canPushSomePacket(outputGate->getPathEndGate());
+    return provider->canPullSomePacket(inputGate->getPathStartGate()) && consumer->canPushSomePacket(consumer.getReferencedGate());
 }
 
 void PreemptingServer::startStreaming()

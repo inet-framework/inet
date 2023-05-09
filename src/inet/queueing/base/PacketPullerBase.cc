@@ -19,7 +19,7 @@ void PacketPullerBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         outputGate = gate("out");
-        collector = findConnectedModule<IActivePacketSink>(outputGate);
+        collector.reference(outputGate, false);
         provider = findConnectedModule<IPassivePacketSource>(inputGate);
     }
     else if (stage == INITSTAGE_QUEUEING) {
@@ -62,14 +62,14 @@ void PacketPullerBase::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr)
-        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
+        collector->handleCanPullPacketChanged(collector.getReferencedGate());
 }
 
 void PacketPullerBase::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePullPacketProcessed");
     if (collector != nullptr)
-        collector->handlePullPacketProcessed(packet, outputGate->getPathEndGate(), successful);
+        collector->handlePullPacketProcessed(packet, collector.getReferencedGate(), successful);
 }
 
 } // namespace queueing

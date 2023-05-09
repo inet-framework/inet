@@ -25,7 +25,7 @@ void PacketQueue::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         queue.setName("storage");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
-        collector = findConnectedModule<IActivePacketSink>(outputGate);
+        collector.reference(outputGate, false);
         packetCapacity = par("packetCapacity");
         dataCapacity = b(par("dataCapacity"));
         buffer = findModuleFromPar<IPacketBuffer>(par("bufferModule"), this);
@@ -98,7 +98,7 @@ void PacketQueue::pushPacket(Packet *packet, const cGate *gate)
     }
     ASSERT(!isOverloaded());
     if (collector != nullptr && getNumPackets() != 0)
-        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
+        collector->handleCanPullPacketChanged(collector.getReferencedGate());
     cNamedObject packetPushEndedDetails("atomicOperationEnded");
     emit(packetPushEndedSignal, nullptr, &packetPushEndedDetails);
     updateDisplayString();

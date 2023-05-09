@@ -36,12 +36,12 @@ void PacketPusherBase::handleMessage(cMessage *message)
 
 bool PacketPusherBase::canPushSomePacket(const cGate *gate) const
 {
-    return consumer->canPushSomePacket(outputGate->getPathEndGate());
+    return consumer->canPushSomePacket(consumer.getReferencedGate());
 }
 
 bool PacketPusherBase::canPushPacket(Packet *packet, const cGate *gate) const
 {
-    return consumer->canPushPacket(packet, outputGate->getPathEndGate());
+    return consumer->canPushPacket(packet, consumer.getReferencedGate());
 }
 
 void PacketPusherBase::pushPacket(Packet *packet, const cGate *gate)

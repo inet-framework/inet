@@ -110,14 +110,14 @@ bool InterpacketGapInserter::canPushSomePacket(const cGate *gate) const
 {
     // TODO getting a value from the durationPar here is wrong, because it's volatile and this method can be called any number of times
     return (getClockTime() >= packetEndTime + durationPar->doubleValue()) &&
-           (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()));
+           (consumer == nullptr || consumer->canPushSomePacket(consumer.getReferencedGate()));
 }
 
 bool InterpacketGapInserter::canPushPacket(Packet *packet, const cGate *gate) const
 {
     // TODO getting a value from the durationPar here is wrong, because it's volatile and this method can be called any number of times
     return (getClockTime() >= packetEndTime + durationPar->doubleValue()) &&
-           (consumer == nullptr || consumer->canPushPacket(packet, outputGate->getPathEndGate()));
+           (consumer == nullptr || consumer->canPushPacket(packet, consumer.getReferencedGate()));
 }
 
 void InterpacketGapInserter::pushPacket(Packet *packet, const cGate *gate)

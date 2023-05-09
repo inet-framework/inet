@@ -42,7 +42,7 @@ void InstantServer::handleMessage(cMessage *message)
 bool InstantServer::canProcessPacket()
 {
     auto inputGatePathStartGate = inputGate->getPathStartGate();
-    auto outputGatePathEndGate = outputGate->getPathEndGate();
+    auto outputGatePathEndGate = consumer.getReferencedGate();
     if (provider->canPullSomePacket(inputGatePathStartGate) && consumer->canPushSomePacket(outputGatePathEndGate)) {
         auto packet = provider->canPullPacket(inputGatePathStartGate);
         return packet != nullptr && consumer->canPushPacket(packet, outputGatePathEndGate);

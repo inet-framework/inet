@@ -65,7 +65,7 @@ void PacketServer::scheduleProcessingTimer()
 bool PacketServer::canStartProcessingPacket()
 {
     return provider->canPullSomePacket(inputGate->getPathStartGate()) &&
-           consumer->canPushSomePacket(outputGate->getPathEndGate());
+           consumer->canPushSomePacket(consumer.getReferencedGate());
 }
 
 void PacketServer::startProcessingPacket()

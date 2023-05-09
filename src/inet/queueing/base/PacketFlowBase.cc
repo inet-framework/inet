@@ -55,12 +55,12 @@ void PacketFlowBase::endPacketStreaming(Packet *packet)
 
 bool PacketFlowBase::canPushSomePacket(const cGate *gate) const
 {
-    return consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate());
+    return consumer == nullptr || consumer->canPushSomePacket(consumer.getReferencedGate());
 }
 
 bool PacketFlowBase::canPushPacket(Packet *packet, const cGate *gate) const
 {
-    return consumer == nullptr || consumer->canPushPacket(packet, outputGate->getPathEndGate());
+    return consumer == nullptr || consumer->canPushPacket(packet, consumer.getReferencedGate());
 }
 
 void PacketFlowBase::pushPacket(Packet *packet, const cGate *gate)
@@ -216,7 +216,7 @@ void PacketFlowBase::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr)
-        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
+        collector->handleCanPullPacketChanged(collector.getReferencedGate());
 }
 
 void PacketFlowBase::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
@@ -224,7 +224,7 @@ void PacketFlowBase::handlePullPacketProcessed(Packet *packet, const cGate *gate
     Enter_Method("handlePullPacketProcessed");
     endPacketStreaming(packet);
     if (collector != nullptr)
-        collector->handlePullPacketProcessed(packet, outputGate->getPathEndGate(), successful);
+        collector->handlePullPacketProcessed(packet, collector.getReferencedGate(), successful);
 }
 
 } // namespace queueing

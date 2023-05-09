@@ -20,7 +20,7 @@ void PacketSchedulerBase::initialize(int stage)
         reverseOrder = par("reverseOrder");
         outputGate = gate("out");
         collector = findConnectedModule<IActivePacketSink>(outputGate);
-        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
+        consumer.reference(outputGate, false);
         for (int i = 0; i < gateSize("in"); i++) {
             auto inputGate = gate("in", i);
             inputGates.push_back(inputGate);
@@ -93,7 +93,7 @@ void PacketSchedulerBase::pushPacket(Packet *packet, const cGate *gate)
     int index = callSchedulePacket();
     if (index != gate->getIndex())
         throw cRuntimeError("Scheduled packet from wrong input gate");
-    consumer->pushPacket(packet, outputGate->getPathEndGate());
+    consumer->pushPacket(packet, consumer.getReferencedGate());
 }
 
 void PacketSchedulerBase::handleCanPushPacketChanged(const cGate *gate)
@@ -190,12 +190,12 @@ void PacketSchedulerBase::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr && (!isStreamingPacket() || callSchedulePacket() != inProgressGateIndex))
-        collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
+        collector->handleCanPullPacketChanged(collector.getReferencedGate());
 }
 
 void PacketSchedulerBase::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
-    collector->handlePullPacketProcessed(packet, outputGate->getPathEndGate(), successful);
+    collector->handlePullPacketProcessed(packet, collector.getReferencedGate(), successful);
     inProgressStreamId = -1;
     inProgressGateIndex = -1;
 }

@@ -31,7 +31,7 @@ void ActivePacketSource::initialize(int stage)
 void ActivePacketSource::handleMessage(cMessage *message)
 {
     if (message == productionTimer) {
-        if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
+        if (consumer == nullptr || consumer->canPushSomePacket(consumer.getReferencedGate())) {
             scheduleProductionTimer(productionIntervalParameter->doubleValue());
             producePacket();
         }
@@ -60,7 +60,7 @@ void ActivePacketSource::scheduleProductionTimerAndProducePacket()
         scheduleProductionTimer(initialProductionOffset);
         initialProductionOffsetScheduled = true;
     }
-    else if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
+    else if (consumer == nullptr || consumer->canPushSomePacket(consumer.getReferencedGate())) {
         scheduleProductionTimer(productionIntervalParameter->doubleValue());
         producePacket();
     }
