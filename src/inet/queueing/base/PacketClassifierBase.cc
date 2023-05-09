@@ -133,8 +133,9 @@ void PacketClassifierBase::pushPacketEnd(Packet *packet, const cGate *gate)
         checkPacketStreaming(packet);
     auto outputGate = outputGates[inProgressGateIndex];
     auto consumer = consumers[inProgressGateIndex];
+    auto consumerGate = consumers[inProgressGateIndex].getReferencedGate();
     endPacketStreaming(packet);
-    pushOrSendPacketEnd(packet, outputGate, consumers[inProgressGateIndex].getReferencedGate(), consumer, packet->getTransmissionId());
+    pushOrSendPacketEnd(packet, outputGate, consumerGate, consumer, packet->getTransmissionId());
     updateDisplayString();
 }
 
