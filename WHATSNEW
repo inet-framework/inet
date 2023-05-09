@@ -360,7 +360,7 @@ Notable backward compatible changes are the following:
    new modules, currently used in TSN frame replication, for stream identification,
    stream splitting/merging, stream encoding/decoding. There are a few other new
    modules, currently used in TSN asynchronous shaping, for transmission eligibility
-   time metering, filtering, and queueing. 
+   time metering, filtering, and queueing.
 
    A new interactive packet gate has been added that allows the user to directly
    control the gate's open/closed state from Qtenv and experiment interactively.
@@ -2256,6 +2256,169 @@ The highlights of this release are:
 
 4. The new implementation has been extensibly tested. We used fingerprint tests
    after each change to ensure that all protocol behaviors have been preserved.
+
+
+INET 3.8.2 (April 2022) - stable
+--------------------------------
+
+Contains compatibility fixes for OMNeT++ 6.0.
+Requires OMNeT++ 5.7 or 6.0.
+
+
+INET 3.8.2 (February 2022) - stable
+-----------------------------------
+
+Contains compatibility fixes for OMNeT++ 6.0.
+Requires OMNeT++ 5.7 or 6.0rc1.
+
+
+INET 3.8.1 (November 2021) - stable
+-----------------------------------
+
+Contains compatibility fixes for OMNeT++ 6.0.
+Requires OMNeT++ 5.7 or 6.0 preview 14.
+
+
+INET 3.8 (September 2021) - stable
+----------------------------------
+
+This release requires OMNeT++ 5.7 or 6.0 preview 13. For older OMNeT++ versions
+please use INET 3.7.x. This version serves as a stepping stone for porting
+older INET based models to OMNeT++ 6 and INET 4.x. A recommended way is to
+port first to INET 3.8 (and OMNeT++ 5.7), then upgrade to OMNeT++ 6 and finally
+port the model to INET 4.x.
+
+Main changes since 3.7:
+
+  - MSG files are now in OMNeT++ 6 compatible format (i.e. using --msg6
+    because OMNeT++ 6 no longer supports --msg4)
+  - NED files are now compatible with both OMNeT++ 5.7 and 6.0 (i.e. they are
+    explictly using `parent.foo` and `this.foo` in experssions of submodule
+    and connection blocks.)
+  - Follow OMNeT++ API changes: use AnyPtr instead of void*
+  - Fix #92: TcpConnection: accepts simultaneous open requests
+
+
+INET 3.7.1 (April 2021) - stable
+--------------------------------
+
+This release contains compatibility fixes for OMNeT++ 6.0 preview 11,
+plus minor bugfixes:
+
+  - localPort parameter didn't take effect in TCPAppBase
+  - use BYPASS for multicast packets to allow unfiltered multicast traffic in IPSec
+
+
+INET 3.7 (January 2021) - stable
+--------------------------------
+
+This release adds an IPsec model, improves on UDPBasicApp, and contains small
+bug fixes. It requires OMNeT++ 5.3 or later, or OMNeT++ 6.0 Preview 9 or 10.
+
+IPsec:
+
+  The IPsec model implements basic RFC 4301 functionality: Authentication
+  Header (AH) and Encapsulating Security Payload (ESP). Key exchange protocols
+  are not model modeled, but instead, security associations (SAs) are statically
+  configured and remain in effect for the entire duration of the simulation.
+
+  The model does not perform actual cryptography. This was an explicit non-goal,
+  as the purpose of the model is to study the effects of the network overhead of
+  IPsec. As a consequence, encryption keys, certificates, and other cryptography-
+  related data do not appear in the model's data structures. However, protocol
+  overhead and a simple performance model to account for the runtime overhead
+  of cryptography are included.
+
+  Further limitations:
+  - Transport mode only. Tunnel mode is not supported.
+  - Multicast traffic is not supported.
+  - The anti-replay mechanism is not implemented.
+  - DSCP-based SA selection is not implemented.
+
+UDPBasicApp:
+
+  Added sendScript parameter; sendInterval made optional. The change is
+  backward compatible (existing fingerprints unchanged).
+
+VoIPStream:
+
+  Updated for avcodec-7:4.2.4
+
+Other:
+
+  Fixed a number of (previously hidden) subtle ownership problems.
+
+
+INET 3.6.8 (October 2020) - stable
+----------------------------------
+
+This release contains a compatibility fix to be able to build INET with
+OMNeT++ 6.0 Preview 9. It requires OMNeT++ 5.3 or later.
+
+NOTE: OMNeT++ 6.0 Preview 5-8 will NOT work with this release. Use INET 3.6.7
+with those versions or rather upgrade your OMNeT++ installation.
+
+
+INET 3.6.7 (November 2019) - stable
+-----------------------------------
+
+This release contains a compatibility fix to be able to build INET with
+OMNeT++ 6.0 Preview 5. It requires OMNeT++ 5.3 or later.
+
+
+INET 3.6.6 (August 2019) - stable
+---------------------------------
+
+This release contains a bug fix for an issue where clang did not export
+the typinfo symbols for classes on Windows. This caused link errors on
+dependent projets. It requires OMNeT++ 5.3 or later.
+
+General:
+
+  - Added NetworkCommunicationFingerprintCalculator, to be able to generate
+    INET 4 compatible fingerprints that are based on network communication.
+
+
+INET 3.6.5 (April 2019) - stable
+--------------------------------
+
+This release contains minor bug fixes and compatibility fixes for the
+OMNeT++ 5.4.1 release and for recent Linux distros. It requires
+OMNeT++ 5.3 or later.
+
+General:
+
+  - Added missing measurement units for 0 values in NED and INI files
+  - NED files are now using fully qualified type names
+  - Added missing doParsimPacking/doParsimUnpacking in L3Address
+
+Ethernet:
+
+  - Fixed 'EtherMAC swallows frames when PAUSE is engaged (#391)'
+  - Fixed 'Cannot abort PAUSE (LFC) before timeout (#390)'
+    (author: Danushka Menikkumbura)
+
+ieee802.11:
+
+  - Fixed ACK frame duration bug where the duration was incorrectly
+    rounded up in seconds instead of microseconds for data fragment ACKs.
+
+TCP:
+
+  - Bugfix: static variables were removed, but remained in header
+
+SCTP:
+
+  - Set the DupTsn relative to the localDiffTSN
+
+IPv6:
+
+  - Added constructors in AdvPrefix.
+
+Visualizers:
+
+  - Removed dependence on ObjectLocatorNode as it was removed in recent
+    versions of osgEarth
 
 
 INET 3.6.4 (March 2018) - stable
