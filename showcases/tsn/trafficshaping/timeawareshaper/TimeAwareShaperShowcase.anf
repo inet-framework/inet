@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/showcases/tsn/trafficshaping/timeawareshaper/results/*.vec"/>
-        <input pattern="/inet/showcases/tsn/trafficshaping/timeawareshaper/results/*.sca"/>
+        <input pattern="results/General-#0.sca"/>
+        <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="250023493" name="Client application traffic and traffic shaper incoming traffic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">

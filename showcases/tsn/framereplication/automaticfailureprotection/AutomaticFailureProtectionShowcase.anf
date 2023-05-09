@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/showcases/tsn/framereplication/automaticfailureprotection/results/*.vec"/>
-        <input pattern="/inet/showcases/tsn/framereplication/automaticfailureprotection/results/*.sca"/>
+        <input pattern="results/General-#0.sca"/>
+        <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
         <chart createdWith="" icon="icons/full/obj/barchart.png" id="1289612090" name="Number of packets sent and received" resultTypes="" template="barchart_native" type="BAR">

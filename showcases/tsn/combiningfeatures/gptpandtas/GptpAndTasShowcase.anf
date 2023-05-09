@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/showcases/tsn/combiningfeatures/gptpandtas/results/*.vec"/>
-        <input pattern="/inet/showcases/tsn/combiningfeatures/gptpandtas/results/*.sca"/>
+        <input pattern="results/Failover-#0.sca"/>
+        <input pattern="results/Failover-#0.vec"/>
+        <input pattern="results/LinkFailure-#0.sca"/>
+        <input pattern="results/LinkFailure-#0.vec"/>
+        <input pattern="results/NormalOperation-#0.sca"/>
+        <input pattern="results/NormalOperation-#0.vec"/>
     </inputs>
     <charts>
         <folder id="686738086" name="Clock Drift, Normal Operation">
-            <chart icon="icons/full/obj/linechart.png" id="58392000" name="Normal Operation, Clock Drift, Time Domain of Primary Master (Domain 0)" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="58392000" name="Normal Operation, Clock Drift, Time Domain of Primary Master (Domain 0)" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -651,7 +655,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1452968581" name="Normal Operation, Clock Drift, Time Domain of Hot-Standby Master (Domain 2)" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="1452968581" name="Normal Operation, Clock Drift, Time Domain of Hot-Standby Master (Domain 2)" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -1297,7 +1301,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="680541503" name="Normal Operation, Clock Drift, Active Clocks in Bridges and End Stations" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="680541503" name="Normal Operation, Clock Drift, Active Clocks in Bridges and End Stations" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -1944,7 +1948,7 @@ utils.export_data_if_needed(df, props)
             </chart>
         </folder>
         <folder id="1954444571" name="Clock Drift, Link Failure">
-            <chart icon="icons/full/obj/linechart.png" id="2127769190" name="Link Failure, Clock Drift, Time Domain of Primary Master (Domain 0)" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="2127769190" name="Link Failure, Clock Drift, Time Domain of Primary Master (Domain 0)" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -2589,7 +2593,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1164565886" name="Link Failure, Clock Drift, Time Domain of Hot-Standby Master (Domain 2)" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="1164565886" name="Link Failure, Clock Drift, Time Domain of Hot-Standby Master (Domain 2)" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -3235,7 +3239,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="2117312165" name="Link Failure, Clock Drift, Active Clocks in Bridges and End Stations" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="2117312165" name="Link Failure, Clock Drift, Active Clocks in Bridges and End Stations" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -3882,7 +3886,7 @@ utils.export_data_if_needed(df, props)
             </chart>
         </folder>
         <folder id="1457639970" name="Clock Drift, Failover">
-            <chart icon="icons/full/obj/linechart.png" id="2037641704" name="Failover, Clock Drift, Time Domain of Primary Master (Domain 0)" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="2037641704" name="Failover, Clock Drift, Time Domain of Primary Master (Domain 0)" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -4527,7 +4531,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="961922815" name="Failover, Clock Drift, Time Domain of Hot-Standby Master (Domain 2)" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="961922815" name="Failover, Clock Drift, Time Domain of Hot-Standby Master (Domain 2)" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -5173,7 +5177,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1700728201" name="Failover, Clock Drift, Active Clocks in Bridges and End Stations" template="linechart_native" type="LINE">
+            <chart createdWith="" icon="icons/full/obj/linechart.png" id="1700728201" name="Failover, Clock Drift, Active Clocks in Bridges and End Stations" resultTypes="" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -5820,7 +5824,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_format" value=""/>
             </chart>
         </folder>
-        <chart icon="icons/full/obj/linechart.png" id="1037877039" name="Application end-to-end delay, normal operation" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1037877039" name="Application end-to-end delay, normal operation" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -6455,7 +6459,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="meanBitLifeTimePerPacket"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="532204673" name="Application end-to-end delay, link failure" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="532204673" name="Application end-to-end delay, link failure" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -7090,7 +7094,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="meanBitLifeTimePerPacket"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1427731443" name="Application end-to-end delay, failover" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1427731443" name="Application end-to-end delay, failover" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -7725,7 +7729,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="meanBitLifeTimePerPacket"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="310236629" name="Application End-To-End Delay, All Cases" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="310236629" name="Application End-To-End Delay, All Cases" resultTypes="" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils

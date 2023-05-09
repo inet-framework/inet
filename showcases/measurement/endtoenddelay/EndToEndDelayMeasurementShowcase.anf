@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/showcases/measurement/endtoenddelay/results/*.vec"/>
-        <input pattern="/inet/showcases/measurement/endtoenddelay/results/*.sca"/>
+        <input pattern="results/General-#0.sca"/>
+        <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/histogramchart.png" id="133" name="Application end-to-end delay, histogram" template="histogramchart_native" type="HISTOGRAM">
+        <chart createdWith="" icon="icons/full/obj/histogramchart.png" id="133" name="Application end-to-end delay, histogram" resultTypes="" template="histogramchart_native" type="HISTOGRAM">
             <script><![CDATA[from omnetpp.scave import results, chart, utils
 
 # get chart properties
@@ -571,7 +571,7 @@ Show over_underflow cell?
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="$name"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="132" name="Application end-to-end delay, vector" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="132" name="Application end-to-end delay, vector" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 

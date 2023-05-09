@@ -1,8 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/showcases/tsn/combiningfeatures/invehicle/results/*.vec"/>
-        <input pattern="/inet/showcases/tsn/combiningfeatures/invehicle/results/*.sca"/>
+        <input pattern="results/AutomaticTsn-brokenComponent=camera-#0.sca"/>
+        <input pattern="results/AutomaticTsn-brokenComponent=camera-#0.vec"/>
+        <input pattern="results/AutomaticTsn-brokenComponent=link-#0.sca"/>
+        <input pattern="results/AutomaticTsn-brokenComponent=link-#0.vec"/>
+        <input pattern="results/AutomaticTsn-brokenComponent=none-#0.sca"/>
+        <input pattern="results/AutomaticTsn-brokenComponent=none-#0.vec"/>
+        <input pattern="results/AutomaticTsn-brokenComponent=wheel-#0.sca"/>
+        <input pattern="results/AutomaticTsn-brokenComponent=wheel-#0.vec"/>
+        <input pattern="results/ManualTsn-brokenComponent=camera-#0.sca"/>
+        <input pattern="results/ManualTsn-brokenComponent=camera-#0.vec"/>
+        <input pattern="results/ManualTsn-brokenComponent=link-#0.sca"/>
+        <input pattern="results/ManualTsn-brokenComponent=link-#0.vec"/>
+        <input pattern="results/ManualTsn-brokenComponent=none-#0.sca"/>
+        <input pattern="results/ManualTsn-brokenComponent=none-#0.vec"/>
+        <input pattern="results/ManualTsn-brokenComponent=wheel-#0.sca"/>
+        <input pattern="results/ManualTsn-brokenComponent=wheel-#0.vec"/>
+        <input pattern="results/StandardEthernet-brokenComponent=camera-#0.sca"/>
+        <input pattern="results/StandardEthernet-brokenComponent=camera-#0.vec"/>
+        <input pattern="results/StandardEthernet-brokenComponent=link-#0.sca"/>
+        <input pattern="results/StandardEthernet-brokenComponent=link-#0.vec"/>
+        <input pattern="results/StandardEthernet-brokenComponent=none-#0.sca"/>
+        <input pattern="results/StandardEthernet-brokenComponent=none-#0.vec"/>
+        <input pattern="results/StandardEthernet-brokenComponent=wheel-#0.sca"/>
+        <input pattern="results/StandardEthernet-brokenComponent=wheel-#0.vec"/>
     </inputs>
     <charts>
         <folder id="1925952356" name="Standard Ethernet">

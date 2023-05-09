@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/showcases/measurement/jitter/results/*.vec"/>
-        <input pattern="/inet/showcases/measurement/jitter/results/*.sca"/>
+        <input pattern="results/General-#0.sca"/>
+        <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="208" name="Packet jitter, vector" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="208" name="Packet jitter, vector" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -581,7 +581,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/histogramchart.png" id="209" name="Packet jitter, histogram" template="histogramchart_native" type="HISTOGRAM">
+        <chart createdWith="" icon="icons/full/obj/histogramchart.png" id="209" name="Packet jitter, histogram" resultTypes="" template="histogramchart_native" type="HISTOGRAM">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -1079,7 +1079,7 @@ Show over_underflow cell?
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="210" name="Packet delay difference to mean, vector" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="210" name="Packet delay difference to mean, vector" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -1655,7 +1655,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/histogramchart.png" id="211" name="Packet delay difference to mean, histogram" template="histogramchart_native" type="HISTOGRAM">
+        <chart createdWith="" icon="icons/full/obj/histogramchart.png" id="211" name="Packet delay difference to mean, histogram" resultTypes="" template="histogramchart_native" type="HISTOGRAM">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -2156,7 +2156,7 @@ Show over_underflow cell?
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="213" name="Packet delay variation, vector" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="213" name="Packet delay variation, vector" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -2732,7 +2732,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/histogramchart.png" id="212" name="Packet delay variation, histogram" template="histogramchart_native" type="HISTOGRAM">
+        <chart createdWith="" icon="icons/full/obj/histogramchart.png" id="212" name="Packet delay variation, histogram" resultTypes="" template="histogramchart_native" type="HISTOGRAM">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
