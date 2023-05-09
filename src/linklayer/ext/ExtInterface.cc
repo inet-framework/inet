@@ -146,7 +146,7 @@ void ExtInterface::handleMessage(cMessage *msg)
         {
             struct sockaddr_in addr;
             addr.sin_family = AF_INET;
-#if !defined(linux) && !defined(__linux) && !defined(_WIN32)
+#if !defined(linux) && !defined(__linux__) && !defined(_WIN32)
             addr.sin_len = sizeof(struct sockaddr_in);
 #endif
             addr.sin_port = 0;
