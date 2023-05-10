@@ -20,8 +20,8 @@
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/queueing/contract/IPacketProcessor.h"
-#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 
@@ -102,8 +102,8 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     cChannel *txTransmissionChannel = nullptr;
     cGate *upperLayerInConsumerGate = nullptr;
     cGate *upperLayerOutConsumerGate = nullptr;
-    queueing::IPassivePacketSink *upperLayerInConsumer = nullptr;
-    queueing::IPassivePacketSink *upperLayerOutConsumer = nullptr;
+    queueing::PassivePacketSinkRef upperLayerInConsumer;
+    queueing::PassivePacketSinkRef upperLayerOutConsumer;
 
     const Protocol *protocol = nullptr;
     ModuleRefByPar<IInterfaceTable> interfaceTable; ///< IInterfaceTable that contains this interface, or nullptr

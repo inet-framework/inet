@@ -72,7 +72,7 @@ void PacketDestreamer::pushPacketEnd(Packet *packet, const cGate *gate)
     streamDatarate = datarate;
     auto packetLength = streamedPacket->getTotalLength();
     EV_INFO << "Ending destreaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
-    pushOrSendPacket(streamedPacket, outputGate, consumer.getReferencedGate(), consumer);
+    pushOrSendPacket(streamedPacket, outputGate, consumer);
     streamedPacket = nullptr;
     numProcessedPackets++;
     processedTotalLength += packetLength;

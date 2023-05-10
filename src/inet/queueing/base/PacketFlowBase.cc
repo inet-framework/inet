@@ -72,7 +72,7 @@ void PacketFlowBase::pushPacket(Packet *packet, const cGate *gate)
     processPacket(packet);
     handlePacketProcessed(packet);
     emit(packetPushedOutSignal, packet);
-    pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
+    pushOrSendPacket(packet, outputGate, consumer);
     updateDisplayString();
 }
 
@@ -84,7 +84,7 @@ void PacketFlowBase::pushPacketStart(Packet *packet, const cGate *gate, bps data
     emit(packetPushedInSignal, packet);
     startPacketStreaming(packet);
     processPacket(packet);
-    pushOrSendPacketStart(packet, outputGate, consumer.getReferencedGate(), consumer, datarate, packet->getTransmissionId());
+    pushOrSendPacketStart(packet, outputGate, consumer, datarate, packet->getTransmissionId());
     updateDisplayString();
 }
 
@@ -99,7 +99,7 @@ void PacketFlowBase::pushPacketEnd(Packet *packet, const cGate *gate)
     processPacket(packet);
     emit(packetPushedOutSignal, packet);
     endPacketStreaming(packet);
-    pushOrSendPacketEnd(packet, outputGate, consumer.getReferencedGate(), consumer, packet->getTransmissionId());
+    pushOrSendPacketEnd(packet, outputGate, consumer, packet->getTransmissionId());
     updateDisplayString();
 }
 
@@ -116,10 +116,10 @@ void PacketFlowBase::pushPacketProgress(Packet *packet, const cGate *gate, bps d
     if (isPacketEnd) {
         emit(packetPushedOutSignal, packet);
         endPacketStreaming(packet);
-        pushOrSendPacketEnd(packet, outputGate, consumer.getReferencedGate(), consumer, packet->getTransmissionId());
+        pushOrSendPacketEnd(packet, outputGate, consumer, packet->getTransmissionId());
     }
     else
-        pushOrSendPacketProgress(packet, outputGate, consumer.getReferencedGate(), consumer, datarate, position, extraProcessableLength, packet->getTransmissionId());
+        pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength, packet->getTransmissionId());
     updateDisplayString();
 }
 

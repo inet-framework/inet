@@ -58,7 +58,7 @@ void InstantServer::processPacket()
     auto packetLength = packet->getDataLength();
     EV_INFO << "Processing packet started" << EV_FIELD(packet) << EV_ENDL;
     emit(packetPushedSignal, packet);
-    pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
+    pushOrSendPacket(packet, outputGate, consumer);
     processedTotalLength += packetLength;
     numProcessedPackets++;
     EV_INFO << "Processing packet ended" << EV_ENDL;

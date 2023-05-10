@@ -82,7 +82,7 @@ void MessageDispatcher::pushPacket(Packet *packet, const cGate *inGate)
     queueing::PassivePacketSinkRef consumer;
     consumer.reference(outGate, false);
     handlePacketProcessed(packet);
-    pushOrSendPacket(packet, outGate, consumer.getReferencedGate(), consumer);
+    pushOrSendPacket(packet, outGate, consumer);
     updateDisplayString();
 }
 
@@ -93,7 +93,7 @@ void MessageDispatcher::pushPacketStart(Packet *packet, const cGate *inGate, bps
     auto outGate = handlePacket(packet, inGate);
     queueing::PassivePacketSinkRef consumer;
     consumer.reference(outGate, false);
-    pushOrSendPacketStart(packet, outGate, consumer.getReferencedGate(), consumer, datarate, packet->getTransmissionId());
+    pushOrSendPacketStart(packet, outGate, consumer, datarate, packet->getTransmissionId());
     updateDisplayString();
 }
 
@@ -105,7 +105,7 @@ void MessageDispatcher::pushPacketEnd(Packet *packet, const cGate *inGate)
     queueing::PassivePacketSinkRef consumer;
     consumer.reference(outGate, false);
     handlePacketProcessed(packet);
-    pushOrSendPacketEnd(packet, outGate, consumer.getReferencedGate(), consumer, packet->getTransmissionId());
+    pushOrSendPacketEnd(packet, outGate, consumer, packet->getTransmissionId());
     updateDisplayString();
 }
 

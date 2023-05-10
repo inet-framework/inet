@@ -78,7 +78,7 @@ void PacketMultiplexer::pushPacket(Packet *packet, const cGate *gate)
     take(packet);
     EV_INFO << "Forwarding packet" << EV_FIELD(packet) << EV_ENDL;
     handlePacketProcessed(packet);
-    pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
+    pushOrSendPacket(packet, outputGate, consumer);
     updateDisplayString();
 }
 
@@ -89,7 +89,7 @@ void PacketMultiplexer::pushPacketStart(Packet *packet, const cGate *gate, bps d
     EV_INFO << "Forwarding packet" << EV_FIELD(packet) << EV_ENDL;
     checkPacketStreaming(packet);
     startPacketStreaming(packet);
-    pushOrSendPacketStart(packet, outputGate, consumer.getReferencedGate(), consumer, datarate, packet->getTransmissionId());
+    pushOrSendPacketStart(packet, outputGate, consumer, datarate, packet->getTransmissionId());
     updateDisplayString();
 }
 
@@ -103,7 +103,7 @@ void PacketMultiplexer::pushPacketEnd(Packet *packet, const cGate *gate)
     else
         checkPacketStreaming(packet);
     endPacketStreaming(packet);
-    pushOrSendPacketEnd(packet, outputGate, consumer.getReferencedGate(), consumer, packet->getTransmissionId());
+    pushOrSendPacketEnd(packet, outputGate, consumer, packet->getTransmissionId());
     updateDisplayString();
 }
 
@@ -118,7 +118,7 @@ void PacketMultiplexer::pushPacketProgress(Packet *packet, const cGate *gate, bp
         checkPacketStreaming(packet);
     if (packet->getTotalLength() == position + extraProcessableLength)
         endPacketStreaming(packet);
-    pushOrSendPacketProgress(packet, outputGate, consumer.getReferencedGate(), consumer, datarate, position, extraProcessableLength, packet->getTransmissionId());
+    pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength, packet->getTransmissionId());
     updateDisplayString();
 }
 

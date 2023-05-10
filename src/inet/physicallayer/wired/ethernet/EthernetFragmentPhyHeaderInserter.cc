@@ -49,7 +49,7 @@ void EthernetFragmentPhyHeaderInserter::pushPacketStart(Packet *packet, const cG
     checkPacketStreaming(packet);
     startPacketStreaming(packet);
     processPacket(packet);
-    pushOrSendPacketProgress(packet, outputGate, consumer.getReferencedGate(), consumer, datarate, B(8), b(0), packet->getTransmissionId());
+    pushOrSendPacketProgress(packet, outputGate, consumer, datarate, B(8), b(0), packet->getTransmissionId());
     updateDisplayString();
 }
 

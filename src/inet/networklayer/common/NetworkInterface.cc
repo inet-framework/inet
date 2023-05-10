@@ -122,8 +122,8 @@ void NetworkInterface::initialize(int stage)
         else
             wireless = rxIn == nullptr && txOut == nullptr;
 
-        std::tie(upperLayerInConsumer, upperLayerInConsumerGate) = findConnectedModuleAndGate<IPassivePacketSink>(upperLayerIn, 1);
-        std::tie(upperLayerOutConsumer, upperLayerOutConsumerGate) = findConnectedModuleAndGate<IPassivePacketSink>(upperLayerOut, 1);
+        upperLayerInConsumer.reference(upperLayerIn, false, 1);
+        upperLayerOutConsumer.reference(upperLayerOut, false, 1);
         interfaceTable.reference(this, "interfaceTableModule", false);
         setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
         setCarrier(computeCarrier());
@@ -218,11 +218,11 @@ void NetworkInterface::pushPacket(Packet *packet, const cGate *gate)
             dropPacket(packet, NO_CARRIER);
         }
         else
-            pushOrSendPacket(packet, upperLayerIn, upperLayerInConsumerGate, upperLayerInConsumer);
+            pushOrSendPacket(packet, upperLayerIn, upperLayerInConsumer);
     }
     else if (gate == upperLayerOut) {
         packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
-        pushOrSendPacket(packet, upperLayerOut, upperLayerOutConsumerGate, upperLayerOutConsumer);
+        pushOrSendPacket(packet, upperLayerOut, upperLayerOutConsumer);
     }
     else
         throw cRuntimeError("Unknown gate: %s", gate->getName());
@@ -242,11 +242,11 @@ void NetworkInterface::pushPacketStart(Packet *packet, const cGate *gate, bps da
             dropPacket(packet, NO_CARRIER);
         }
         else
-            pushOrSendPacketStart(packet, upperLayerIn, upperLayerInConsumerGate, upperLayerInConsumer, datarate, packet->getTransmissionId());
+            pushOrSendPacketStart(packet, upperLayerIn, upperLayerInConsumer, datarate, packet->getTransmissionId());
     }
     else if (gate == upperLayerOut) {
         packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
-        pushOrSendPacketStart(packet, upperLayerOut, upperLayerOutConsumerGate, upperLayerOutConsumer, datarate, packet->getTransmissionId());
+        pushOrSendPacketStart(packet, upperLayerOut, upperLayerOutConsumer, datarate, packet->getTransmissionId());
     }
     else
         throw cRuntimeError("Unknown gate: %s", gate->getName());
@@ -267,11 +267,11 @@ void NetworkInterface::pushPacketEnd(Packet *packet, const cGate *gate)
             dropPacket(packet, NO_CARRIER);
         }
         else
-            pushOrSendPacketEnd(packet, upperLayerIn, upperLayerInConsumerGate, upperLayerInConsumer, packet->getTransmissionId());
+            pushOrSendPacketEnd(packet, upperLayerIn, upperLayerInConsumer, packet->getTransmissionId());
     }
     else if (gate == upperLayerOut) {
         packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
-        pushOrSendPacketEnd(packet, upperLayerOut, upperLayerOutConsumerGate, upperLayerOutConsumer, packet->getTransmissionId());
+        pushOrSendPacketEnd(packet, upperLayerOut, upperLayerOutConsumer, packet->getTransmissionId());
     }
     else
         throw cRuntimeError("Unknown gate: %s", gate->getName());

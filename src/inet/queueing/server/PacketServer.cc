@@ -85,7 +85,7 @@ void PacketServer::endProcessingPacket()
     increaseTimeTag<ProcessingTimeTag>(packet, bitProcessingTime, packetProcessingTime);
     processedTotalLength += packet->getDataLength();
     emit(packetPushedSignal, packet);
-    pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
+    pushOrSendPacket(packet, outputGate, consumer);
     numProcessedPackets++;
     packet = nullptr;
 }

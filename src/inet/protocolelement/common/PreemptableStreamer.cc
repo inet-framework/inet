@@ -57,7 +57,7 @@ void PreemptableStreamer::endStreaming()
 {
     auto packetLength = streamedPacket->getDataLength();
     EV_INFO << "Ending streaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
-    pushOrSendPacketEnd(streamedPacket, outputGate, consumer.getReferencedGate(), consumer, streamedPacket->getId());
+    pushOrSendPacketEnd(streamedPacket, outputGate, consumer, streamedPacket->getId());
     streamDatarate = bps(NaN);
     streamedPacket = nullptr;
     numProcessedPackets++;
@@ -83,7 +83,7 @@ void PreemptableStreamer::pushPacket(Packet *packet, const cGate *gate)
     streamDatarate = datarate;
     streamedPacket = packet;
     EV_INFO << "Starting streaming packet" << EV_FIELD(packet) << EV_ENDL;
-    pushOrSendPacketStart(streamedPacket->dup(), outputGate, consumer.getReferencedGate(), consumer, datarate, streamedPacket->getId());
+    pushOrSendPacketStart(streamedPacket->dup(), outputGate, consumer, datarate, streamedPacket->getId());
     if (std::isnan(streamDatarate.get()))
         endStreaming();
     else

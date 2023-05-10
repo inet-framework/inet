@@ -109,7 +109,7 @@ void PacketClassifierBase::pushPacket(Packet *packet, const cGate *gate)
     int index = callClassifyPacket(packet);
     handlePacketProcessed(packet);
     emit(packetPushedSignal, packet);
-    pushOrSendPacket(packet, outputGates[index], consumers[index].getReferencedGate(), consumers[index]);
+    pushOrSendPacket(packet, outputGates[index], consumers[index]);
     updateDisplayString();
 }
 
@@ -119,7 +119,7 @@ void PacketClassifierBase::pushPacketStart(Packet *packet, const cGate *gate, bp
     take(packet);
     checkPacketStreaming(packet);
     startPacketStreaming(packet);
-    pushOrSendPacketStart(packet, outputGates[inProgressGateIndex], consumers[inProgressGateIndex].getReferencedGate(), consumers[inProgressGateIndex], datarate, packet->getTransmissionId());
+    pushOrSendPacketStart(packet, outputGates[inProgressGateIndex], consumers[inProgressGateIndex], datarate, packet->getTransmissionId());
     updateDisplayString();
 }
 
@@ -133,9 +133,8 @@ void PacketClassifierBase::pushPacketEnd(Packet *packet, const cGate *gate)
         checkPacketStreaming(packet);
     auto outputGate = outputGates[inProgressGateIndex];
     auto consumer = consumers[inProgressGateIndex];
-    auto consumerGate = consumers[inProgressGateIndex].getReferencedGate();
     endPacketStreaming(packet);
-    pushOrSendPacketEnd(packet, outputGate, consumerGate, consumer, packet->getTransmissionId());
+    pushOrSendPacketEnd(packet, outputGate, consumer, packet->getTransmissionId());
     updateDisplayString();
 }
 
@@ -151,7 +150,7 @@ void PacketClassifierBase::pushPacketProgress(Packet *packet, const cGate *gate,
     auto consumer = consumers[inProgressGateIndex];
     if (packet->getTotalLength() == position + extraProcessableLength)
         endPacketStreaming(packet);
-    pushOrSendPacketProgress(packet, outputGate, consumers[inProgressGateIndex].getReferencedGate(), consumer, datarate, position, extraProcessableLength, packet->getTransmissionId());
+    pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength, packet->getTransmissionId());
     updateDisplayString();
 }
 

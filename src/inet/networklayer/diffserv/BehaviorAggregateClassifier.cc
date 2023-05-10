@@ -98,12 +98,12 @@ void BehaviorAggregateClassifier::pushPacket(Packet *packet, const cGate *inputG
     int index = classifyPacket(packet);
     emit(pkClassSignal, index);
     if (index >= 0)
-        pushOrSendPacket(packet, outputGates[index], consumers[index].getReferencedGate(), consumers[index]);
+        pushOrSendPacket(packet, outputGates[index], consumers[index]);
     else {
         auto defaultOutputGate = gate("defaultOut");
         queueing::PassivePacketSinkRef defaultConsumer;
         defaultConsumer.reference(defaultOutputGate, false);
-        pushOrSendPacket(packet, defaultOutputGate, defaultConsumer.getReferencedGate(), defaultConsumer);
+        pushOrSendPacket(packet, defaultOutputGate, defaultConsumer);
     }
 }
 

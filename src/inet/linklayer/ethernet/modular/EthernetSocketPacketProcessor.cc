@@ -52,14 +52,14 @@ void EthernetSocketPacketProcessor::pushPacket(Packet *packet, const cGate *gate
         packetCopy->setKind(SOCKET_I_DATA);
         packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(socket->socketId);
         EV_INFO << "Passing up packet to socket" << EV_FIELD(socket) << EV_FIELD(packet) << EV_ENDL;
-        pushOrSendPacket(packetCopy, outputGate, consumer.getReferencedGate(), consumer);
+        pushOrSendPacket(packetCopy, outputGate, consumer);
         steal |= socket->steal;
     }
     handlePacketProcessed(packet);
     if (steal)
         delete packet;
     else
-        pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
+        pushOrSendPacket(packet, outputGate, consumer);
     updateDisplayString();
 }
 

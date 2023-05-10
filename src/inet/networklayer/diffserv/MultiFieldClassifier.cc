@@ -158,7 +158,7 @@ void MultiFieldClassifier::pushPacket(Packet *packet, const cGate *inputGate)
         outputGate = gate("defaultOut", gateIndex);
     queueing::PassivePacketSinkRef consumer;
     consumer.reference(outputGate, false);
-    pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
+    pushOrSendPacket(packet, outputGate, consumer);
 }
 
 void MultiFieldClassifier::refreshDisplay() const

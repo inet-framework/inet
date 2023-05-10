@@ -69,7 +69,7 @@ void DscpMarker::pushPacket(Packet *packet, const cGate *inputGate)
         emit(packetMarkedSignal, packet);
         numMarked++;
     }
-    pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
+    pushOrSendPacket(packet, outputGate, consumer);
 }
 
 void DscpMarker::refreshDisplay() const

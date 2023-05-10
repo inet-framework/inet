@@ -34,7 +34,7 @@ void DuplicateRemoval::pushPacket(Packet *packet, const cGate *gate)
         delete packet;
     else {
         lastSequenceNumber = sequenceNumber;
-        pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
+        pushOrSendPacket(packet, outputGate, consumer);
     }
 }
 

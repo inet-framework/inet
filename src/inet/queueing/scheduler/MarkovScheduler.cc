@@ -104,7 +104,7 @@ void MarkovScheduler::pushPacket(Packet *packet, const cGate *gate)
     if (gate->getIndex() != state)
         throw cRuntimeError("Cannot push to gate");
     processedTotalLength += packet->getDataLength();
-    pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
+    pushOrSendPacket(packet, outputGate, consumer);
     numProcessedPackets++;
     updateDisplayString();
 }

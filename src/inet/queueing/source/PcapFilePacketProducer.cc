@@ -36,7 +36,7 @@ void PcapFilePacketProducer::handleMessage(cMessage *message)
         auto packet = check_and_cast<Packet *>(message);
         if (consumer == nullptr || consumer.canPushPacket(packet)) {
             emit(packetPushedSignal, packet);
-            pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
+            pushOrSendPacket(packet, outputGate, consumer);
             schedulePacket();
         }
     }

@@ -81,7 +81,7 @@ void PacketFilterBase::pushPacket(Packet *packet, const cGate *gate)
         handlePacketProcessed(packet);
         EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
         emit(packetPushedOutSignal, packet);
-        pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
+        pushOrSendPacket(packet, outputGate, consumer);
     }
     else {
         EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
@@ -100,7 +100,7 @@ void PacketFilterBase::pushPacketStart(Packet *packet, const cGate *gate, bps da
     if (matchesPacket(packet)) {
         processPacket(packet);
         EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
-        pushOrSendPacketStart(packet, outputGate, consumer.getReferencedGate(), consumer, datarate, packet->getTransmissionId());
+        pushOrSendPacketStart(packet, outputGate, consumer, datarate, packet->getTransmissionId());
     }
     else {
         EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
@@ -122,7 +122,7 @@ void PacketFilterBase::pushPacketEnd(Packet *packet, const cGate *gate)
         EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
         endPacketStreaming(packet);
         emit(packetPushedOutSignal, packet);
-        pushOrSendPacketEnd(packet, outputGate, consumer.getReferencedGate(), consumer, packet->getTransmissionId());
+        pushOrSendPacketEnd(packet, outputGate, consumer, packet->getTransmissionId());
     }
     else {
         EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
@@ -145,7 +145,7 @@ void PacketFilterBase::pushPacketProgress(Packet *packet, const cGate *gate, bps
         EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
         if (packet->getTotalLength() == position + extraProcessableLength)
             endPacketStreaming(packet);
-        pushOrSendPacketProgress(packet, outputGate, consumer.getReferencedGate(), consumer, datarate, position, extraProcessableLength, packet->getTransmissionId());
+        pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength, packet->getTransmissionId());
     }
     else {
         EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;

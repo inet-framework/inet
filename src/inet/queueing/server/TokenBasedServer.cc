@@ -47,7 +47,7 @@ void TokenBasedServer::processPackets()
                 EV_INFO << "Processing packet" << EV_FIELD(packet) << EV_ENDL;
                 processedTotalLength += packet->getDataLength();
                 emit(packetPushedSignal, packet);
-                pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
+                pushOrSendPacket(packet, outputGate, consumer);
                 numProcessedPackets++;
                 numTokens -= numRequiredTokens;
                 emit(tokensRemovedSignal, numTokens);

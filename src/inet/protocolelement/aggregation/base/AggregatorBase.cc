@@ -64,7 +64,7 @@ void AggregatorBase::pushPacket(Packet *subpacket, const cGate *gate)
     if (!isAggregating())
         startAggregation(subpacket);
     else if (!aggregatorPolicy->isAggregatablePacket(aggregatedPacket, aggregatedSubpackets, subpacket)) {
-        pushOrSendPacket(aggregatedPacket, outputGate, consumer.getReferencedGate(), consumer);
+        pushOrSendPacket(aggregatedPacket, outputGate, consumer);
         endAggregation(subpacket);
         startAggregation(subpacket);
     }

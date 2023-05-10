@@ -49,19 +49,19 @@ void StreamSplitter::pushPacket(Packet *packet, const cGate *gate)
                 const char *splitStreamName = outputStreams->get(i).stringValue();
                 auto duplicate = packet->dup();
                 duplicate->addTagIfAbsent<StreamReq>()->setStreamName(splitStreamName);
-                pushOrSendPacket(duplicate, outputGate, consumer.getReferencedGate(), consumer);
+                pushOrSendPacket(duplicate, outputGate, consumer);
             }
             handlePacketProcessed(packet);
             delete packet;
         }
         else {
             handlePacketProcessed(packet);
-            pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
+            pushOrSendPacket(packet, outputGate, consumer);
         }
     }
     else {
         handlePacketProcessed(packet);
-        pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
+        pushOrSendPacket(packet, outputGate, consumer);
     }
     updateDisplayString();
 }

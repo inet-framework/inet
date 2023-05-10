@@ -64,7 +64,7 @@ void SingleRateThreeColorMeter::pushPacket(Packet *packet, const cGate *inputGat
     }
     queueing::PassivePacketSinkRef consumer;
     consumer.reference(outputGate, false);
-    pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
+    pushOrSendPacket(packet, outputGate, consumer);
 }
 
 void SingleRateThreeColorMeter::refreshDisplay() const

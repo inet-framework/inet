@@ -57,7 +57,7 @@ void Forwarding::pushPacket(Packet *packet, const cGate *gate)
     if (nextHopAddress.isUnspecified()) {
         packet->popAtFront<DestinationL3AddressHeader>();
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&AccessoryProtocol::destinationL3Address);
-        pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
+        pushOrSendPacket(packet, outputGate, consumer);
     }
     else {
         auto interface = check_and_cast<NetworkInterface *>(getParentModule()->getParentModule()->getSubmodule("interface", interfaceIndex));
@@ -69,7 +69,7 @@ void Forwarding::pushPacket(Packet *packet, const cGate *gate)
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::forwarding);
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&AccessoryProtocol::hopLimit);
         packet->trimFront();
-        pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
+        pushOrSendPacket(packet, outputGate, consumer);
     }
 }
 

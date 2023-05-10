@@ -37,7 +37,7 @@ void EthernetCutthroughSource::handleMessage(cMessage *message)
         cutthroughPacket->copyRegionTags(*streamedPacket, cutthroughPosition, cutthroughPosition, cutthroughData->getChunkLength());
         cutthroughPacket->addTag<CutthroughTag>()->setCutthroughPosition(cutthroughPosition);
         EV_INFO << "Sending cut-through packet" << EV_FIELD(packet, *cutthroughPacket) << EV_ENDL;
-        pushOrSendPacket(cutthroughPacket, outputGate, consumer.getReferencedGate(), consumer);
+        pushOrSendPacket(cutthroughPacket, outputGate, consumer);
         cutthroughInProgress = true;
     }
     else

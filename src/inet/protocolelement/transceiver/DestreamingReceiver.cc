@@ -42,7 +42,7 @@ void DestreamingReceiver::handleMessageWhenUp(cMessage *message)
 
 void DestreamingReceiver::sendToUpperLayer(Packet *packet)
 {
-    pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
+    pushOrSendPacket(packet, outputGate, consumer);
 }
 
 void DestreamingReceiver::receivePacketStart(cPacket *cpacket, cGate *gate, bps datarate)

@@ -77,7 +77,7 @@ class INET_API ModuleRefByGate
     cGate *getReferencedGate() { return referencedGate; }
     const cGate *getReferencedGate() const { return referencedGate; }
 
-    void reference(cGate *referencingGate, bool mandatory) {
+    void reference(cGate *referencingGate, bool mandatory, int direction = 0) {
         if (referencingGate == nullptr)
             throw cRuntimeError("Referencing gate is nullptr");
 #ifndef NDEBUG
@@ -85,7 +85,7 @@ class INET_API ModuleRefByGate
             throw cRuntimeError("Reference is already initialized");
         this->referencingGate = referencingGate;
 #endif
-        std::tie(referencedModule, referencedGate) = mandatory ? getConnectedModuleAndGate<T>(referencingGate) : findConnectedModuleAndGate<T>(referencingGate);
+        std::tie(referencedModule, referencedGate) = mandatory ? getConnectedModuleAndGate<T>(referencingGate, direction) : findConnectedModuleAndGate<T>(referencingGate, direction);
     }
 };
 
