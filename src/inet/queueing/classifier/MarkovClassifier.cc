@@ -95,7 +95,7 @@ bool MarkovClassifier::canPullSomePacket(const cGate *gate) const
 
 Packet *MarkovClassifier::canPullPacket(const cGate *gate) const
 {
-    return canPullSomePacket(gate) ? provider->canPullPacket(provider.getReferencedGate()) : nullptr;
+    return canPullSomePacket(gate) ? provider.canPullPacket() : nullptr;
 }
 
 Packet *MarkovClassifier::pullPacket(const cGate *gate)
@@ -103,7 +103,7 @@ Packet *MarkovClassifier::pullPacket(const cGate *gate)
     Enter_Method("pullPacket");
     if (gate->getIndex() != state)
         throw cRuntimeError("Cannot pull from gate");
-    auto packet = provider->pullPacket(provider.getReferencedGate());
+    auto packet = provider.pullPacket();
     take(packet);
     animatePullPacket(packet, outputGates[gate->getIndex()], findConnectedGate<IActivePacketSink>(gate));
     numProcessedPackets++;

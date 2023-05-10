@@ -93,7 +93,7 @@ void PacketSchedulerBase::pushPacket(Packet *packet, const cGate *gate)
     int index = callSchedulePacket();
     if (index != gate->getIndex())
         throw cRuntimeError("Scheduled packet from wrong input gate");
-    consumer->pushPacket(packet, consumer.getReferencedGate());
+    consumer.pushPacket(packet);
 }
 
 void PacketSchedulerBase::handleCanPushPacketChanged(const cGate *gate)
@@ -194,12 +194,12 @@ void PacketSchedulerBase::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr && (!isStreamingPacket() || callSchedulePacket() != inProgressGateIndex))
-        collector->handleCanPullPacketChanged(collector.getReferencedGate());
+        collector.handleCanPullPacketChanged();
 }
 
 void PacketSchedulerBase::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
-    collector->handlePullPacketProcessed(packet, collector.getReferencedGate(), successful);
+    collector.handlePullPacketProcessed(packet, successful);
     inProgressStreamId = -1;
     inProgressGateIndex = -1;
 }

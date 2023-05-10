@@ -36,12 +36,12 @@ void PacketPusherBase::handleMessage(cMessage *message)
 
 bool PacketPusherBase::canPushSomePacket(const cGate *gate) const
 {
-    return consumer->canPushSomePacket(consumer.getReferencedGate());
+    return consumer.canPushSomePacket();
 }
 
 bool PacketPusherBase::canPushPacket(Packet *packet, const cGate *gate) const
 {
-    return consumer->canPushPacket(packet, consumer.getReferencedGate());
+    return consumer.canPushPacket(packet);
 }
 
 void PacketPusherBase::pushPacket(Packet *packet, const cGate *gate)
@@ -68,14 +68,14 @@ void PacketPusherBase::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacketChanged(producer.getReferencedGate());
+        producer.handleCanPushPacketChanged();
 }
 
 void PacketPusherBase::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
     if (producer != nullptr)
-        producer->handlePushPacketProcessed(packet, producer.getReferencedGate(), successful);
+        producer.handlePushPacketProcessed(packet, successful);
 }
 
 } // namespace queueing

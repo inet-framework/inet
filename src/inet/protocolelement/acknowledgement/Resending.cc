@@ -40,12 +40,12 @@ void Resending::handlePushPacketProcessed(Packet *p, const cGate *gate, bool suc
     Enter_Method("handlePushPacketProcessed");
     if (successful || retry == numRetries) {
         if (producer != nullptr)
-            producer->handlePushPacketProcessed(packet, producer.getReferencedGate(), successful);
+            producer.handlePushPacketProcessed(packet, successful);
         delete packet;
         packet = nullptr;
         retry = 0;
         if (producer != nullptr)
-            producer->handleCanPushPacketChanged(producer.getReferencedGate());
+            producer.handleCanPushPacketChanged();
     }
     else {
         pushOrSendPacket(packet->dup(), outputGate, consumer.getReferencedGate(), consumer);

@@ -59,15 +59,15 @@ void PacketFilterBase::endPacketStreaming(Packet *packet)
 
 bool PacketFilterBase::canPushSomePacket(const cGate *gate) const
 {
-    return consumer == nullptr || consumer->canPushSomePacket(consumer.getReferencedGate());
+    return consumer == nullptr || consumer.canPushSomePacket();
 }
 
 bool PacketFilterBase::canPushPacket(Packet *packet, const cGate *gate) const
 {
     if (backpressure)
-        return matchesPacket(packet) && consumer != nullptr && consumer->canPushPacket(packet, consumer.getReferencedGate());
+        return matchesPacket(packet) && consumer != nullptr && consumer.canPushPacket(packet);
     else
-        return !matchesPacket(packet) || consumer == nullptr || consumer->canPushPacket(packet, consumer.getReferencedGate());
+        return !matchesPacket(packet) || consumer == nullptr || consumer.canPushPacket(packet);
 }
 
 void PacketFilterBase::pushPacket(Packet *packet, const cGate *gate)
@@ -159,12 +159,12 @@ void PacketFilterBase::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacketChanged(producer.getReferencedGate());
+        producer.handleCanPushPacketChanged();
 }
 
 void PacketFilterBase::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
-    producer->handlePushPacketProcessed(packet, producer.getReferencedGate(), successful);
+    producer.handlePushPacketProcessed(packet, successful);
 }
 
 bool PacketFilterBase::canPullSomePacket(const cGate *gate) const
@@ -176,9 +176,8 @@ bool PacketFilterBase::canPullSomePacket(const cGate *gate) const
 Packet *PacketFilterBase::canPullPacket(const cGate *gate) const
 {
     Enter_Method("canPullPacket");
-    auto providerGate = provider.getReferencedGate();
     while (true) {
-        auto packet = provider->canPullPacket(providerGate);
+        auto packet = provider.canPullPacket();
         if (packet == nullptr)
             return nullptr;
         else if (matchesPacket(packet))
@@ -187,7 +186,7 @@ Packet *PacketFilterBase::canPullPacket(const cGate *gate) const
             return nullptr;
         else {
             auto nonConstThisPtr = const_cast<PacketFilterBase *>(this);
-            packet = provider->pullPacket(providerGate);
+            packet = nonConstThisPtr->provider.pullPacket();
             nonConstThisPtr->take(packet);
             nonConstThisPtr->emit(packetPulledInSignal, packet);
             EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
@@ -202,9 +201,8 @@ Packet *PacketFilterBase::canPullPacket(const cGate *gate) const
 Packet *PacketFilterBase::pullPacket(const cGate *gate)
 {
     Enter_Method("pullPacket");
-    auto providerGate = provider.getReferencedGate();
     while (true) {
-        auto packet = provider->pullPacket(providerGate);
+        auto packet = provider.pullPacket();
         take(packet);
         emit(packetPulledInSignal, packet);
         if (matchesPacket(packet)) {
@@ -247,14 +245,14 @@ void PacketFilterBase::handlePullPacketProcessed(Packet *packet, const cGate *ga
 {
     Enter_Method("handlePullPacketProcessed");
     if (collector != nullptr)
-        collector->handlePullPacketProcessed(packet, collector.getReferencedGate(), successful);
+        collector.handlePullPacketProcessed(packet, successful);
 }
 
 void PacketFilterBase::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr)
-        collector->handleCanPullPacketChanged(collector.getReferencedGate());
+        collector.handleCanPullPacketChanged();
 }
 
 void PacketFilterBase::dropPacket(Packet *packet)

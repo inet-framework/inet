@@ -157,7 +157,7 @@ void PeriodicGate::updateIsInGuardBand()
 {
     bool newIsInGuardBand = false;
     if (isOpen_) {
-        auto packet = provider != nullptr ? provider->canPullPacket(provider.getReferencedGate()) : nullptr;
+        auto packet = provider != nullptr ? provider.canPullPacket() : nullptr;
         newIsInGuardBand = packet != nullptr && !canPacketFlowThrough(packet);
     }
     if (isInGuardBand_ != newIsInGuardBand) {

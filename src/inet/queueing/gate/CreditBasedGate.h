@@ -48,7 +48,7 @@ class INET_API CreditBasedGate : public PacketGateBase, public cListener
     virtual void refreshDisplay() const override;
 
     virtual void processPacket(Packet *packet) override;
-    virtual bool hasAvailablePacket() const { return provider->canPullSomePacket(provider.getReferencedGate()); }
+    virtual bool hasAvailablePacket() const { return provider.canPullSomePacket(); }
     virtual void updateCurrentState();
 
     virtual void setCurrentCredit(double value);

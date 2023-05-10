@@ -45,12 +45,12 @@ void PacketDestreamer::handleMessage(cMessage *message)
 
 bool PacketDestreamer::canPushSomePacket(const cGate *gate) const
 {
-    return !isStreaming() && consumer->canPushSomePacket(consumer.getReferencedGate());
+    return !isStreaming() && consumer.canPushSomePacket();
 }
 
 bool PacketDestreamer::canPushPacket(Packet *packet, const cGate *gate) const
 {
-    return !isStreaming() && consumer->canPushPacket(packet, consumer.getReferencedGate());
+    return !isStreaming() && consumer.canPushPacket(packet);
 }
 
 void PacketDestreamer::pushPacketStart(Packet *packet, const cGate *gate, bps datarate)
@@ -93,24 +93,24 @@ void PacketDestreamer::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacketChanged(producer.getReferencedGate());
+        producer.handleCanPushPacketChanged();
 }
 
 void PacketDestreamer::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
     if (producer != nullptr)
-        producer->handlePushPacketProcessed(packet, producer.getReferencedGate(), successful);
+        producer.handlePushPacketProcessed(packet, successful);
 }
 
 bool PacketDestreamer::canPullSomePacket(const cGate *gate) const
 {
-    return !isStreaming() && provider->canPullSomePacket(provider.getReferencedGate());
+    return !isStreaming() && provider.canPullSomePacket();
 }
 
 Packet *PacketDestreamer::canPullPacket(const cGate *gate) const
 {
-    return isStreaming() ? nullptr : provider->canPullPacket(provider.getReferencedGate());
+    return isStreaming() ? nullptr : provider.canPullPacket();
 }
 
 Packet *PacketDestreamer::pullPacket(const cGate *gate)
@@ -118,11 +118,11 @@ Packet *PacketDestreamer::pullPacket(const cGate *gate)
     Enter_Method("pullPacket");
     ASSERT(!isStreaming());
     streamDatarate = datarate;
-    auto packet = provider->pullPacketStart(provider.getReferencedGate(), streamDatarate);
+    auto packet = provider.pullPacketStart(streamDatarate);
     EV_INFO << "Starting destreaming packet" << EV_FIELD(packet) << EV_ENDL;
     take(packet);
     streamedPacket = packet;
-    packet = provider->pullPacketEnd(provider.getReferencedGate());
+    packet = provider.pullPacketEnd();
     EV_INFO << "Ending destreaming packet" << EV_FIELD(packet) << EV_ENDL;
     take(packet);
     delete streamedPacket;
@@ -146,7 +146,7 @@ void PacketDestreamer::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr)
-        collector->handleCanPullPacketChanged(collector.getReferencedGate());
+        collector.handleCanPullPacketChanged();
 }
 
 } // namespace inet

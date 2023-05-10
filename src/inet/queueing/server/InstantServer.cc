@@ -41,11 +41,9 @@ void InstantServer::handleMessage(cMessage *message)
 
 bool InstantServer::canProcessPacket()
 {
-    auto inputGatePathStartGate = provider.getReferencedGate();
-    auto outputGatePathEndGate = consumer.getReferencedGate();
-    if (provider->canPullSomePacket(inputGatePathStartGate) && consumer->canPushSomePacket(outputGatePathEndGate)) {
-        auto packet = provider->canPullPacket(inputGatePathStartGate);
-        return packet != nullptr && consumer->canPushPacket(packet, outputGatePathEndGate);
+    if (provider.canPullSomePacket() && consumer.canPushSomePacket()) {
+        auto packet = provider.canPullPacket();
+        return packet != nullptr && consumer.canPushPacket(packet);
     }
     else
         return false;
@@ -53,7 +51,7 @@ bool InstantServer::canProcessPacket()
 
 void InstantServer::processPacket()
 {
-    auto packet = provider->pullPacket(provider.getReferencedGate());
+    auto packet = provider.pullPacket();
     take(packet);
     emit(packetPulledSignal, packet);
     std::string packetName = packet->getName();

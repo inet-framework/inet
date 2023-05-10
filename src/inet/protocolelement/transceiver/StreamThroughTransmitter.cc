@@ -122,10 +122,9 @@ void StreamThroughTransmitter::endTx(Packet *packet)
     lastInputProgressTime = -1;
     lastInputProgressPosition = b(-1);
     // 4. notify producer
-    auto gate = producer.getReferencedGate();
     if (producer != nullptr) {
-        producer->handlePushPacketProcessed(packet, gate, true);
-        producer->handleCanPushPacketChanged(gate);
+        producer.handlePushPacketProcessed(packet, true);
+        producer.handleCanPushPacketChanged();
     }
     delete signal;
 }
@@ -161,10 +160,9 @@ void StreamThroughTransmitter::abortTx()
     lastInputProgressTime = -1;
     lastInputProgressPosition = b(-1);
     // 6. notify producer
-    auto gate = producer.getReferencedGate();
     if (producer != nullptr) {
-        producer->handlePushPacketProcessed(packet, gate, true);
-        producer->handleCanPushPacketChanged(gate);
+        producer.handlePushPacketProcessed(packet, true);
+        producer.handleCanPushPacketChanged();
     }
 }
 

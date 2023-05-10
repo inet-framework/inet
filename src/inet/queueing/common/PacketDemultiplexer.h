@@ -35,8 +35,8 @@ class INET_API PacketDemultiplexer : public PacketProcessorBase, public virtual 
     virtual bool supportsPacketPushing(const cGate *gate) const override { return false; }
     virtual bool supportsPacketPulling(const cGate *gate) const override { return true; }
 
-    virtual bool canPullSomePacket(const cGate *gate) const override { return provider->canPullSomePacket(provider.getReferencedGate()); }
-    virtual Packet *canPullPacket(const cGate *gate) const override { return provider->canPullPacket(provider.getReferencedGate()); }
+    virtual bool canPullSomePacket(const cGate *gate) const override { return provider.canPullSomePacket(); }
+    virtual Packet *canPullPacket(const cGate *gate) const override { return provider.canPullPacket(); }
 
     virtual Packet *pullPacket(const cGate *gate) override;
 

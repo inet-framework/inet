@@ -8,6 +8,7 @@
 #ifndef __INET_PACKETFLOWBASE_H
 #define __INET_PACKETFLOWBASE_H
 
+#include "inet/common/ModuleRef.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/common/ActivePacketSinkRef.h"
 #include "inet/queueing/common/ActivePacketSourceRef.h"

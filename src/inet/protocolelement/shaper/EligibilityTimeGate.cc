@@ -43,7 +43,7 @@ void EligibilityTimeGate::finish()
 
 void EligibilityTimeGate::updateOpen()
 {
-    auto packet = provider->canPullPacket(provider.getReferencedGate());
+    auto packet = provider.canPullPacket();
     if (packet == nullptr || packet->getTag<EligibilityTimeTag>()->getEligibilityTime() <= getClockTime()) {
         if (isClosed())
             open();
@@ -52,7 +52,7 @@ void EligibilityTimeGate::updateOpen()
         if (isOpen())
             close();
     }
-    packet = provider->canPullPacket(provider.getReferencedGate());
+    packet = provider.canPullPacket();
     if (packet != nullptr) {
         clocktime_t eligibilityTime = packet->getTag<EligibilityTimeTag>()->getEligibilityTime();
         if (eligibilityTime > getClockTime())
@@ -65,7 +65,7 @@ void EligibilityTimeGate::emitEligibilityTimeChangedSignal()
     simtime_t now = simTime();
     simtime_t signalValue;
     if (lastRemainingEligibilityTimeSignalTime == now) {
-        auto packet = provider->canPullPacket(provider.getReferencedGate());
+        auto packet = provider.canPullPacket();
         signalValue = packet == nullptr ? 0 : CLOCKTIME_AS_SIMTIME(packet->getTag<EligibilityTimeTag>()->getEligibilityTime() - getClockTime());
         lastRemainingEligibilityTimePacket = packet;
     }

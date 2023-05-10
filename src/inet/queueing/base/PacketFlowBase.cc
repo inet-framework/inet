@@ -55,12 +55,12 @@ void PacketFlowBase::endPacketStreaming(Packet *packet)
 
 bool PacketFlowBase::canPushSomePacket(const cGate *gate) const
 {
-    return consumer == nullptr || consumer->canPushSomePacket(consumer.getReferencedGate());
+    return consumer == nullptr || consumer.canPushSomePacket();
 }
 
 bool PacketFlowBase::canPushPacket(Packet *packet, const cGate *gate) const
 {
-    return consumer == nullptr || consumer->canPushPacket(packet, consumer.getReferencedGate());
+    return consumer == nullptr || consumer.canPushPacket(packet);
 }
 
 void PacketFlowBase::pushPacket(Packet *packet, const cGate *gate)
@@ -127,7 +127,7 @@ void PacketFlowBase::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacketChanged(producer.getReferencedGate());
+        producer.handleCanPushPacketChanged();
 }
 
 void PacketFlowBase::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
@@ -135,24 +135,24 @@ void PacketFlowBase::handlePushPacketProcessed(Packet *packet, const cGate *gate
     Enter_Method("handlePushPacketProcessed");
     endPacketStreaming(packet);
     if (producer != nullptr)
-        producer->handlePushPacketProcessed(packet, producer.getReferencedGate(), successful);
+        producer.handlePushPacketProcessed(packet, successful);
 }
 
 bool PacketFlowBase::canPullSomePacket(const cGate *gate) const
 {
-    return provider != nullptr && provider->canPullSomePacket(provider.getReferencedGate());
+    return provider != nullptr && provider.canPullSomePacket();
 }
 
 Packet *PacketFlowBase::canPullPacket(const cGate *gate) const
 {
-    return provider != nullptr ? provider->canPullPacket(provider.getReferencedGate()) : nullptr;
+    return provider != nullptr ? provider.canPullPacket() : nullptr;
 }
 
 Packet *PacketFlowBase::pullPacket(const cGate *gate)
 {
     Enter_Method("pullPacket");
     checkPacketStreaming(nullptr);
-    auto packet = provider->pullPacket(provider.getReferencedGate());
+    auto packet = provider.pullPacket();
     take(packet);
     emit(packetPulledInSignal, packet);
     processPacket(packet);
@@ -168,7 +168,7 @@ Packet *PacketFlowBase::pullPacketStart(const cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketStart");
     checkPacketStreaming(nullptr);
-    auto packet = provider->pullPacketStart(provider.getReferencedGate(), datarate);
+    auto packet = provider.pullPacketStart(datarate);
     take(packet);
     emit(packetPulledInSignal, packet);
     inProgressStreamId = packet->getTreeId();
@@ -183,7 +183,7 @@ Packet *PacketFlowBase::pullPacketStart(const cGate *gate, bps datarate)
 Packet *PacketFlowBase::pullPacketEnd(const cGate *gate)
 {
     Enter_Method("pullPacketEnd");
-    auto packet = provider->pullPacketEnd(provider.getReferencedGate());
+    auto packet = provider.pullPacketEnd();
     take(packet);
     checkPacketStreaming(packet);
     emit(packetPulledInSignal, packet);
@@ -200,7 +200,7 @@ Packet *PacketFlowBase::pullPacketEnd(const cGate *gate)
 Packet *PacketFlowBase::pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pullPacketProgress");
-    auto packet = provider->pullPacketProgress(provider.getReferencedGate(), datarate, position, extraProcessableLength);
+    auto packet = provider.pullPacketProgress(datarate, position, extraProcessableLength);
     take(packet);
     checkPacketStreaming(packet);
     inProgressStreamId = packet->getTreeId();
@@ -220,7 +220,7 @@ void PacketFlowBase::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr)
-        collector->handleCanPullPacketChanged(collector.getReferencedGate());
+        collector.handleCanPullPacketChanged();
 }
 
 void PacketFlowBase::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
@@ -228,7 +228,7 @@ void PacketFlowBase::handlePullPacketProcessed(Packet *packet, const cGate *gate
     Enter_Method("handlePullPacketProcessed");
     endPacketStreaming(packet);
     if (collector != nullptr)
-        collector->handlePullPacketProcessed(packet, collector.getReferencedGate(), successful);
+        collector.handlePullPacketProcessed(packet, successful);
 }
 
 } // namespace queueing

@@ -24,7 +24,7 @@ namespace inet {
 template<typename T>
 class INET_API ModuleRefByGate
 {
-  private:
+  protected:
     cGate *referencedGate = nullptr;
     opp_component_ptr<T> referencedModule;
 

@@ -88,14 +88,14 @@ void PacketDelayerBase::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacketChanged(producer.getReferencedGate());
+        producer.handleCanPushPacketChanged();
 }
 
 void PacketDelayerBase::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
     if (producer != nullptr)
-        producer->handlePushPacketProcessed(packet, gate, successful);
+        producer.handlePushPacketProcessed(packet, successful);
 }
 
 } // namespace queueing

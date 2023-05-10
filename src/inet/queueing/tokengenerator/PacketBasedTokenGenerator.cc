@@ -30,7 +30,7 @@ void PacketBasedTokenGenerator::initialize(int stage)
     }
     else if (stage == INITSTAGE_QUEUEING) {
         if (producer != nullptr)
-            producer->handleCanPushPacketChanged(producer.getReferencedGate());
+            producer.handleCanPushPacketChanged();
     }
 }
 
@@ -70,7 +70,7 @@ void PacketBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t si
 
     if (signal == tokensDepletedSignal) {
         Enter_Method("tokensDepleted");
-        producer->handleCanPushPacketChanged(producer.getReferencedGate());
+        producer.handleCanPushPacketChanged();
     }
     else
         throw cRuntimeError("Unknown signal");

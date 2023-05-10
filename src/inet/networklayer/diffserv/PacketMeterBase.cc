@@ -31,7 +31,7 @@ void PacketMeterBase::handleMessage(cMessage *message)
 void PacketMeterBase::handleCanPushPacketChanged(const cGate *gate)
 {
     if (producer != nullptr)
-        producer->handleCanPushPacketChanged(producer.getReferencedGate());
+        producer.handleCanPushPacketChanged();
 }
 
 void PacketMeterBase::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)

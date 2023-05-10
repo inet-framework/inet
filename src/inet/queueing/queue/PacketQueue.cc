@@ -38,7 +38,7 @@ void PacketQueue::initialize(int stage)
         checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);
         if (producer != nullptr)
-            producer->handleCanPushPacketChanged(producer.getReferencedGate());
+            producer.handleCanPushPacketChanged();
     }
     else if (stage == INITSTAGE_LAST)
         updateDisplayString();
@@ -98,7 +98,7 @@ void PacketQueue::pushPacket(Packet *packet, const cGate *gate)
     }
     ASSERT(!isOverloaded());
     if (collector != nullptr && getNumPackets() != 0)
-        collector->handleCanPullPacketChanged(collector.getReferencedGate());
+        collector.handleCanPullPacketChanged();
     cNamedObject packetPushEndedDetails("atomicOperationEnded");
     emit(packetPushEndedSignal, nullptr, &packetPushEndedDetails);
     updateDisplayString();

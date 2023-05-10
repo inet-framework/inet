@@ -63,12 +63,12 @@ void PacketStreamer::endStreaming()
 
 bool PacketStreamer::canPushSomePacket(const cGate *gate) const
 {
-    return !isStreaming() && consumer->canPushSomePacket(consumer.getReferencedGate());
+    return !isStreaming() && consumer.canPushSomePacket();
 }
 
 bool PacketStreamer::canPushPacket(Packet *packet, const cGate *gate) const
 {
-    return !isStreaming() && consumer->canPushPacket(packet, consumer.getReferencedGate());
+    return !isStreaming() && consumer.canPushPacket(packet);
 }
 
 void PacketStreamer::pushPacket(Packet *packet, const cGate *gate)
@@ -90,31 +90,31 @@ void PacketStreamer::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacketChanged(producer.getReferencedGate());
+        producer.handleCanPushPacketChanged();
 }
 
 void PacketStreamer::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
     if (producer != nullptr)
-        producer->handlePushPacketProcessed(packet, producer.getReferencedGate(), successful);
+        producer.handlePushPacketProcessed(packet, successful);
 }
 
 bool PacketStreamer::canPullSomePacket(const cGate *gate) const
 {
-    return !isStreaming() && provider->canPullSomePacket(provider.getReferencedGate());
+    return !isStreaming() && provider.canPullSomePacket();
 }
 
 Packet *PacketStreamer::canPullPacket(const cGate *gate) const
 {
-    return isStreaming() ? nullptr : provider->canPullPacket(provider.getReferencedGate());
+    return isStreaming() ? nullptr : provider.canPullPacket();
 }
 
 Packet *PacketStreamer::pullPacketStart(const cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketStart");
     streamDatarate = datarate;
-    streamedPacket = provider->pullPacket(provider.getReferencedGate());
+    streamedPacket = provider.pullPacket();
     auto packet = streamedPacket->dup();
     EV_INFO << "Starting streaming packet" << EV_FIELD(packet) << EV_ENDL;
     if (collector != nullptr)
@@ -153,14 +153,14 @@ void PacketStreamer::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr && !isStreaming())
-        collector->handleCanPullPacketChanged(collector.getReferencedGate());
+        collector.handleCanPullPacketChanged();
 }
 
 void PacketStreamer::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePullPacketConfirmation");
     if (collector != nullptr)
-        collector->handlePullPacketProcessed(packet, gate, successful);
+        collector.handlePullPacketProcessed(packet, successful);
 }
 
 } // namespace inet

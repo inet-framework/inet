@@ -30,12 +30,12 @@ void PacketPullerBase::initialize(int stage)
 
 bool PacketPullerBase::canPullSomePacket(const cGate *gate) const
 {
-    return provider->canPullSomePacket(provider.getReferencedGate());
+    return provider.canPullSomePacket();
 }
 
 Packet *PacketPullerBase::canPullPacket(const cGate *gate) const
 {
-    return provider->canPullPacket(provider.getReferencedGate());
+    return provider.canPullPacket();
 }
 
 Packet *PacketPullerBase::pullPacket(const cGate *gate)
@@ -62,14 +62,14 @@ void PacketPullerBase::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (collector != nullptr)
-        collector->handleCanPullPacketChanged(collector.getReferencedGate());
+        collector.handleCanPullPacketChanged();
 }
 
 void PacketPullerBase::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePullPacketProcessed");
     if (collector != nullptr)
-        collector->handlePullPacketProcessed(packet, collector.getReferencedGate(), successful);
+        collector.handlePullPacketProcessed(packet, successful);
 }
 
 } // namespace queueing

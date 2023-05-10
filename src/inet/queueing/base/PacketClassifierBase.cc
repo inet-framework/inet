@@ -159,12 +159,12 @@ void PacketClassifierBase::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producer != nullptr)
-        producer->handleCanPushPacketChanged(producer.getReferencedGate());
+        producer.handleCanPushPacketChanged();
 }
 
 void PacketClassifierBase::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
-    producer->handlePushPacketProcessed(packet, producer.getReferencedGate(), successful);
+    producer.handlePushPacketProcessed(packet, successful);
 }
 
 bool PacketClassifierBase::canPullSomePacket(const cGate *gate) const
@@ -174,7 +174,7 @@ bool PacketClassifierBase::canPullSomePacket(const cGate *gate) const
 
 Packet *PacketClassifierBase::canPullPacket(const cGate *gate) const
 {
-    auto packet = provider->canPullPacket(provider.getReferencedGate());
+    auto packet = provider.canPullPacket();
     if (packet == nullptr)
         return nullptr;
     else {
@@ -185,7 +185,7 @@ Packet *PacketClassifierBase::canPullPacket(const cGate *gate) const
 
 Packet *PacketClassifierBase::pullPacket(const cGate *gate)
 {
-    auto packet = provider->pullPacket(provider.getReferencedGate());
+    auto packet = provider.pullPacket();
     int index = callClassifyPacket(packet);
     if (index != gate->getIndex())
         throw cRuntimeError("Packet is classified to the wrong output gate (%d) when pulled from gate (%d)", index, gate->getIndex());
@@ -194,7 +194,7 @@ Packet *PacketClassifierBase::pullPacket(const cGate *gate)
 
 void PacketClassifierBase::handleCanPullPacketChanged(const cGate *gate)
 {
-    auto packet = provider->canPullPacket(provider.getReferencedGate());
+    auto packet = provider.canPullPacket();
     if (packet != nullptr) {
         int index = callClassifyPacket(packet);
         auto collector = collectors[index];

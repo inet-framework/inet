@@ -54,7 +54,7 @@ void InterpacketGapInserter::handleMessage(cMessage *message)
             emit(interpacketGapEndedSignal, 0.0);
             if (canPushSomePacket(inputGate))
                 if (producer != nullptr)
-                    producer->handleCanPushPacketChanged(producer.getReferencedGate());
+                    producer.handleCanPushPacketChanged();
         }
         else if (message == progress) {
             auto packet = static_cast<Packet *>(message->getContextPointer());
@@ -110,14 +110,14 @@ bool InterpacketGapInserter::canPushSomePacket(const cGate *gate) const
 {
     // TODO getting a value from the durationPar here is wrong, because it's volatile and this method can be called any number of times
     return (getClockTime() >= packetEndTime + durationPar->doubleValue()) &&
-           (consumer == nullptr || consumer->canPushSomePacket(consumer.getReferencedGate()));
+           (consumer == nullptr || consumer.canPushSomePacket());
 }
 
 bool InterpacketGapInserter::canPushPacket(Packet *packet, const cGate *gate) const
 {
     // TODO getting a value from the durationPar here is wrong, because it's volatile and this method can be called any number of times
     return (getClockTime() >= packetEndTime + durationPar->doubleValue()) &&
-           (consumer == nullptr || consumer->canPushPacket(packet, consumer.getReferencedGate()));
+           (consumer == nullptr || consumer.canPushPacket(packet));
 }
 
 void InterpacketGapInserter::pushPacket(Packet *packet, const cGate *gate)
@@ -147,7 +147,7 @@ void InterpacketGapInserter::handleCanPushPacketChanged(const cGate *gate)
     Enter_Method("handleCanPushPacketChanged");
     if (packetEndTime + durationPar->doubleValue() <= getClockTime()) {
         if (producer != nullptr)
-            producer->handleCanPushPacketChanged(producer.getReferencedGate());
+            producer.handleCanPushPacketChanged();
     }
     else {
         double interpacketGapDuration = durationPar->doubleValue();
@@ -187,7 +187,7 @@ void InterpacketGapInserter::handlePushPacketProcessed(Packet *packet, const cGa
 {
     packetEndTime = getClockTime();
     if (producer != nullptr)
-        producer->handlePushPacketProcessed(packet, producer.getReferencedGate(), successful);
+        producer.handlePushPacketProcessed(packet, successful);
 }
 
 void InterpacketGapInserter::pushOrSendOrSchedulePacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength)
