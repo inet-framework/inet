@@ -8,7 +8,7 @@
 #ifndef __INET_CREDITBASEDGATE_H
 #define __INET_CREDITBASEDGATE_H
 
-#include "inet/common/ModuleRefByGate.h"
+#include "inet/common/ModuleRef.h"
 #include "inet/queueing/base/PacketGateBase.h"
 #include "inet/queueing/gate/PeriodicGate.h"
 
@@ -21,7 +21,7 @@ class INET_API CreditBasedGate : public PacketGateBase, public cListener
     static simsignal_t creditsChangedSignal;
 
   protected:
-    ModuleRefByGate<PeriodicGate> periodicGate;
+    ModuleRef<PeriodicGate> periodicGate;
 
     // parameters
     double idleCreditGainRate = NaN;

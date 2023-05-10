@@ -25,7 +25,7 @@ class INET_API PacketFlowBase : public PacketProcessorBase, public virtual IPack
     cGate *inputGate = nullptr;
     ActivePacketSourceRef producer;
     PassivePacketSourceRef provider;
-    ModuleRefByGate<IPacketCollection> collection;
+    ModuleRef<IPacketCollection> collection;
 
     cGate *outputGate = nullptr;
     PassivePacketSinkRef consumer;
