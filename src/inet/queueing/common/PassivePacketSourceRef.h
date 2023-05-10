@@ -16,6 +16,30 @@ namespace queueing {
 
 class INET_API PassivePacketSourceRef : public ModuleRefByGate<IPassivePacketSource>
 {
+  public:
+    virtual bool canPullSomePacket() const {
+        return referencedModule->canPullSomePacket(referencedGate);
+    }
+
+    virtual Packet *canPullPacket() const {
+        return referencedModule->canPullPacket(referencedGate);
+    }
+
+    virtual Packet *pullPacket() {
+        return referencedModule->pullPacket(referencedGate);
+    }
+
+    virtual Packet *pullPacketStart(bps datarate) {
+        return referencedModule->pullPacketStart(referencedGate, datarate);
+    }
+
+    virtual Packet *pullPacketEnd() {
+        return referencedModule->pullPacketEnd(referencedGate);
+    }
+
+    virtual Packet *pullPacketProgress(bps datarate, b position, b extraProcessableLength) {
+        return referencedModule->pullPacketProgress(referencedGate, datarate, position, extraProcessableLength);
+    }
 };
 
 } // namespace queueing

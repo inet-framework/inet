@@ -16,6 +16,18 @@ namespace queueing {
 
 class INET_API ActivePacketSourceRef : public ModuleRefByGate<IActivePacketSource>
 {
+  public:
+    virtual IPassivePacketSink *getConsumer() {
+        return referencedModule->getConsumer(referencedGate);
+    }
+
+    virtual void handleCanPushPacketChanged() {
+        referencedModule->handleCanPushPacketChanged(referencedGate);
+    }
+
+    virtual void handlePushPacketProcessed(Packet *packet, bool successful) {
+        referencedModule->handlePushPacketProcessed(packet, referencedGate, successful);
+    }
 };
 
 } // namespace queueing
