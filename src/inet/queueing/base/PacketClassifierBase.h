@@ -9,8 +9,11 @@
 #define __INET_PACKETCLASSIFIERBASE_H
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/common/ActivePacketSinkRef.h"
+#include "inet/queueing/common/ActivePacketSourceRef.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
+#include "inet/queueing/common/PassivePacketSourceRef.h"
 #include "inet/queueing/contract/IPacketSink.h"
 #include "inet/queueing/contract/IPacketSource.h"
 
@@ -23,12 +26,12 @@ class INET_API PacketClassifierBase : public PacketProcessorBase, public Transpa
     bool reverseOrder = false;
 
     cGate *inputGate = nullptr;
-    ModuleRefByGate<IActivePacketSource> producer;
-    ModuleRefByGate<IPassivePacketSource> provider;
+    ActivePacketSourceRef producer;
+    PassivePacketSourceRef provider;
 
     std::vector<cGate *> outputGates;
-    std::vector<ModuleRefByGate<IPassivePacketSink>> consumers;
-    std::vector<ModuleRefByGate<IActivePacketSink>> collectors;
+    std::vector<PassivePacketSinkRef> consumers;
+    std::vector<ActivePacketSinkRef> collectors;
 
     int inProgressStreamId = -1;
     int inProgressGateIndex = -1;

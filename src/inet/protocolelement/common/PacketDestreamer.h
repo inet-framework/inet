@@ -8,8 +8,11 @@
 #ifndef __INET_PACKETDESTREAMER_H
 #define __INET_PACKETDESTREAMER_H
 
-#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/common/ActivePacketSinkRef.h"
+#include "inet/queueing/common/ActivePacketSourceRef.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
+#include "inet/queueing/common/PassivePacketSourceRef.h"
 #include "inet/queueing/contract/IPacketFlow.h"
 
 namespace inet {
@@ -22,12 +25,12 @@ class INET_API PacketDestreamer : public PacketProcessorBase, public virtual IPa
     bps datarate;
 
     cGate *inputGate = nullptr;
-    ModuleRefByGate<IActivePacketSource> producer;
-    ModuleRefByGate<IPassivePacketSource> provider;
+    ActivePacketSourceRef producer;
+    PassivePacketSourceRef provider;
 
     cGate *outputGate = nullptr;
-    ModuleRefByGate<IPassivePacketSink> consumer;
-    ModuleRefByGate<IActivePacketSink> collector;
+    PassivePacketSinkRef consumer;
+    ActivePacketSinkRef collector;
 
     bps streamDatarate = bps(NaN);
     Packet *streamedPacket = nullptr;

@@ -8,8 +8,9 @@
 #ifndef __INET_PACKETSERVERBASE_H
 #define __INET_PACKETSERVERBASE_H
 
-#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
+#include "inet/queueing/common/PassivePacketSourceRef.h"
 #include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 
@@ -20,10 +21,10 @@ class INET_API PacketServerBase : public PacketProcessorBase, public virtual IAc
 {
   protected:
     cGate *inputGate = nullptr;
-    ModuleRefByGate<IPassivePacketSource> provider;
+    PassivePacketSourceRef provider;
 
     cGate *outputGate = nullptr;
-    ModuleRefByGate<IPassivePacketSink> consumer;
+    PassivePacketSinkRef consumer;
 
   protected:
     virtual void initialize(int stage) override;

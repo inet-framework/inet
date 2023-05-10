@@ -8,7 +8,6 @@
 #include "inet/networklayer/diffserv/MultiFieldClassifier.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/ModuleRefByGate.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/XMLUtils.h"
 #include "inet/common/packet/Packet.h"
@@ -157,7 +156,7 @@ void MultiFieldClassifier::pushPacket(Packet *packet, const cGate *inputGate)
         outputGate = gate("out", gateIndex);
     else
         outputGate = gate("defaultOut", gateIndex);
-    ModuleRefByGate<IPassivePacketSink> consumer;
+    queueing::PassivePacketSinkRef consumer;
     consumer.reference(outputGate, false);
     pushOrSendPacket(packet, outputGate, consumer.getReferencedGate(), consumer);
 }

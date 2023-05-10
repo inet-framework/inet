@@ -8,8 +8,11 @@
 #ifndef __INET_PACKETFLOWBASE_H
 #define __INET_PACKETFLOWBASE_H
 
-#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/common/ActivePacketSinkRef.h"
+#include "inet/queueing/common/ActivePacketSourceRef.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
+#include "inet/queueing/common/PassivePacketSourceRef.h"
 #include "inet/queueing/contract/IPacketCollection.h"
 #include "inet/queueing/contract/IPacketFlow.h"
 
@@ -20,13 +23,13 @@ class INET_API PacketFlowBase : public PacketProcessorBase, public virtual IPack
 {
   protected:
     cGate *inputGate = nullptr;
-    ModuleRefByGate<IActivePacketSource> producer;
-    ModuleRefByGate<IPassivePacketSource> provider;
+    ActivePacketSourceRef producer;
+    PassivePacketSourceRef provider;
     ModuleRefByGate<IPacketCollection> collection;
 
     cGate *outputGate = nullptr;
-    ModuleRefByGate<IPassivePacketSink> consumer;
-    ModuleRefByGate<IActivePacketSink> collector;
+    PassivePacketSinkRef consumer;
+    ActivePacketSinkRef collector;
 
     int inProgressStreamId = -1;
 

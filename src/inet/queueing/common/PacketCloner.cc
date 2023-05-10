@@ -23,7 +23,7 @@ void PacketCloner::initialize(int stage)
         for (int i = 0; i < gateSize("out"); i++) {
             auto outputGate = gate("out", i);
             outputGates.push_back(outputGate);
-            ModuleRefByGate<IPassivePacketSink> consumer;
+            PassivePacketSinkRef consumer;
             consumer.reference(outputGate, true);
             consumers.push_back(consumer);
         }

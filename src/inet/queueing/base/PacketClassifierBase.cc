@@ -23,10 +23,10 @@ void PacketClassifierBase::initialize(int stage)
         for (int i = 0; i < gateSize("out"); i++) {
             auto outputGate = gate("out", i);
             outputGates.push_back(outputGate);
-            ModuleRefByGate<IPassivePacketSink> consumer;
+            PassivePacketSinkRef consumer;
             consumer.reference(outputGate, false);
             consumers.push_back(consumer);
-            ModuleRefByGate<IActivePacketSink> collector;
+            ActivePacketSinkRef collector;
             collector.reference(outputGate, false);
             collectors.push_back(collector);
         }

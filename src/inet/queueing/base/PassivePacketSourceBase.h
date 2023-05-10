@@ -8,8 +8,8 @@
 #ifndef __INET_PASSIVEPACKETSOURCEBASE_H
 #define __INET_PASSIVEPACKETSOURCEBASE_H
 
-#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketSourceBase.h"
+#include "inet/queueing/common/ActivePacketSinkRef.h"
 #include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IPassivePacketSource.h"
 
@@ -20,7 +20,7 @@ class INET_API PassivePacketSourceBase : public PacketSourceBase, public virtual
 {
   protected:
     cGate *outputGate = nullptr;
-    ModuleRefByGate<IActivePacketSink> collector;
+    ActivePacketSinkRef collector;
 
   protected:
     virtual void initialize(int stage) override;

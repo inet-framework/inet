@@ -8,8 +8,9 @@
 #ifndef __INET_PACKETQUEUE_H
 #define __INET_PACKETQUEUE_H
 
-#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketQueueBase.h"
+#include "inet/queueing/common/ActivePacketSinkRef.h"
+#include "inet/queueing/common/ActivePacketSourceRef.h"
 #include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 #include "inet/queueing/contract/IPacketBuffer.h"
@@ -25,8 +26,8 @@ class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICall
     int packetCapacity = -1;
     b dataCapacity = b(-1);
 
-    ModuleRefByGate<IActivePacketSource> producer;
-    ModuleRefByGate<IActivePacketSink> collector;
+    ActivePacketSourceRef producer;
+    ActivePacketSinkRef collector;
 
     cPacketQueue queue;
     IPacketBuffer *buffer = nullptr;

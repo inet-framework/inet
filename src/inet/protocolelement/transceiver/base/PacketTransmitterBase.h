@@ -8,12 +8,12 @@
 #ifndef __INET_PACKETTRANSMITTERBASE_H
 #define __INET_PACKETTRANSMITTERBASE_H
 
-#include "inet/common/ModuleRefByGate.h"
 #include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalMixin.h"
 #include "inet/physicallayer/common/Signal.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/common/ActivePacketSourceRef.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
 
@@ -31,7 +31,7 @@ class INET_API PacketTransmitterBase : public ClockUserModuleMixin<OperationalMi
 
     cGate *inputGate = nullptr;
     cGate *outputGate = nullptr;
-    ModuleRefByGate<IActivePacketSource> producer;
+    ActivePacketSourceRef producer;
 
     bps txDatarate = bps(NaN);
     Signal *txSignal = nullptr;

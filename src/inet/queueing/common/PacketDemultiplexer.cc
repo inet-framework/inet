@@ -23,7 +23,7 @@ void PacketDemultiplexer::initialize(int stage)
         for (int i = 0; i < gateSize("out"); i++) {
             auto outputGate = gate("out", i);
             outputGates.push_back(outputGate);
-            ModuleRefByGate<IActivePacketSink> collector;
+            ActivePacketSinkRef collector;
             collector.reference(outputGate, true);
             collectors.push_back(collector);
         }

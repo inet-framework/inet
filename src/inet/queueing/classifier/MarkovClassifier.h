@@ -22,8 +22,8 @@ namespace queueing {
 class INET_API MarkovClassifier : public ClockUserModuleMixin<PacketClassifierBase>, public virtual IActivePacketSink, public virtual IPassivePacketSource
 {
   protected:
-    ModuleRefByGate<IPassivePacketSource> provider;
-    std::vector<ModuleRefByGate<IActivePacketSink>> collectors;
+    PassivePacketSourceRef provider;
+    std::vector<ActivePacketSinkRef> collectors;
 
     std::vector<std::vector<double>> transitionProbabilities;
     std::vector<cDynamicExpression> waitIntervals;

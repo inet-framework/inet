@@ -8,8 +8,9 @@
 #ifndef __INET_PACKETCLONER_H
 #define __INET_PACKETCLONER_H
 
-#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/common/ActivePacketSourceRef.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
 
@@ -20,10 +21,10 @@ class INET_API PacketCloner : public PacketProcessorBase, public virtual IPassiv
 {
   protected:
     cGate *inputGate = nullptr;
-    ModuleRefByGate<IActivePacketSource> producer;
+    ActivePacketSourceRef producer;
 
     std::vector<cGate *> outputGates;
-    std::vector<ModuleRefByGate<IPassivePacketSink>> consumers;
+    std::vector<PassivePacketSinkRef> consumers;
 
   protected:
     virtual void initialize(int stage) override;

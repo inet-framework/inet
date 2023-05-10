@@ -8,8 +8,9 @@
 #ifndef __INET_PACKETDUPLICATORBASE_H
 #define __INET_PACKETDUPLICATORBASE_H
 
-#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/common/ActivePacketSourceRef.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/queueing/contract/IPacketDuplicator.h"
 
 namespace inet {
@@ -19,10 +20,10 @@ class INET_API PacketDuplicatorBase : public PacketProcessorBase, public virtual
 {
   protected:
     cGate *inputGate = nullptr;
-    ModuleRefByGate<IActivePacketSource> producer;
+    ActivePacketSourceRef producer;
 
     cGate *outputGate = nullptr;
-    ModuleRefByGate<IPassivePacketSink> consumer;
+    PassivePacketSinkRef consumer;
 
   protected:
     virtual void initialize(int stage) override;

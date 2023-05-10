@@ -25,7 +25,7 @@ void MarkovClassifier::initialize(int stage)
         ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         for (int i = 0; i < gateSize("out"); i++) {
-            ModuleRefByGate<IActivePacketSink> collector;
+            ActivePacketSinkRef collector;
             collector.reference(outputGates[i], false);
             collectors.push_back(collector);
         }

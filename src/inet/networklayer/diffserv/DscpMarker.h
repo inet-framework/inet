@@ -8,10 +8,10 @@
 #ifndef __INET_DSCPMARKER_H
 #define __INET_DSCPMARKER_H
 
-#include "inet/common/ModuleRefByGate.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/Protocol.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
 
@@ -24,7 +24,7 @@ class INET_API DscpMarker : public queueing::PacketProcessorBase, public queuein
 {
   protected:
     cGate *outputGate = nullptr;
-    ModuleRefByGate<IPassivePacketSink> consumer;
+    queueing::PassivePacketSinkRef consumer;
 
     std::vector<int> dscps;
 

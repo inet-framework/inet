@@ -8,8 +8,9 @@
 #ifndef __INET_PACKETDEMULTIPLEXER_H
 #define __INET_PACKETDEMULTIPLEXER_H
 
-#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/common/ActivePacketSinkRef.h"
+#include "inet/queueing/common/PassivePacketSourceRef.h"
 #include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IPassivePacketSource.h"
 
@@ -20,10 +21,10 @@ class INET_API PacketDemultiplexer : public PacketProcessorBase, public virtual 
 {
   protected:
     cGate *inputGate = nullptr;
-    ModuleRefByGate<IPassivePacketSource> provider;
+    PassivePacketSourceRef provider;
 
     std::vector<cGate *> outputGates;
-    std::vector<ModuleRefByGate<IActivePacketSink>> collectors;
+    std::vector<ActivePacketSinkRef> collectors;
 
   protected:
     virtual void initialize(int stage) override;

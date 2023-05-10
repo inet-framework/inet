@@ -9,7 +9,6 @@
 #define __INET_MARKOVSCHEDULER_H
 
 #include "inet/common/clock/ClockUserModuleMixin.h"
-#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketSchedulerBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 
@@ -23,7 +22,7 @@ class INET_API MarkovScheduler : public ClockUserModuleMixin<PacketSchedulerBase
 {
   protected:
     std::vector<IActivePacketSource *> producers;
-    ModuleRefByGate<IPassivePacketSink> consumer;
+    PassivePacketSinkRef consumer;
 
     std::vector<std::vector<double>> transitionProbabilities;
     std::vector<cDynamicExpression> waitIntervals;

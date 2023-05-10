@@ -8,7 +8,6 @@
 #include "inet/networklayer/diffserv/BehaviorAggregateClassifier.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/ModuleRefByGate.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -102,7 +101,7 @@ void BehaviorAggregateClassifier::pushPacket(Packet *packet, const cGate *inputG
         pushOrSendPacket(packet, outputGates[index], consumers[index].getReferencedGate(), consumers[index]);
     else {
         auto defaultOutputGate = gate("defaultOut");
-        ModuleRefByGate<IPassivePacketSink> defaultConsumer;
+        queueing::PassivePacketSinkRef defaultConsumer;
         defaultConsumer.reference(defaultOutputGate, false);
         pushOrSendPacket(packet, defaultOutputGate, defaultConsumer.getReferencedGate(), defaultConsumer);
     }

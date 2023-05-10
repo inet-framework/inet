@@ -9,8 +9,9 @@
 #define __INET_PACKETSCHEDULERBASE_H
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/common/ActivePacketSinkRef.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/queueing/contract/IPacketSink.h"
 #include "inet/queueing/contract/IPacketSource.h"
 
@@ -27,8 +28,8 @@ class INET_API PacketSchedulerBase : public PacketProcessorBase, public Transpar
     std::vector<IActivePacketSource *> producers;
 
     cGate *outputGate = nullptr;
-    ModuleRefByGate<IActivePacketSink> collector;
-    ModuleRefByGate<IPassivePacketSink> consumer;
+    ActivePacketSinkRef collector;
+    PassivePacketSinkRef consumer;
 
     int inProgressStreamId = -1;
     int inProgressGateIndex = -1;

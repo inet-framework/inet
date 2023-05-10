@@ -8,9 +8,11 @@
 #ifndef __INET_PACKETFILTERBASE_H
 #define __INET_PACKETFILTERBASE_H
 
-#include "inet/common/ModuleRef.h"
-#include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/common/ActivePacketSinkRef.h"
+#include "inet/queueing/common/ActivePacketSourceRef.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
+#include "inet/queueing/common/PassivePacketSourceRef.h"
 #include "inet/queueing/contract/IPacketFilter.h"
 
 namespace inet {
@@ -27,12 +29,12 @@ class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPa
     bool backpressure = false;
 
     cGate *inputGate = nullptr;
-    ModuleRefByGate<IActivePacketSource> producer;
-    ModuleRefByGate<IPassivePacketSource> provider;
+    ActivePacketSourceRef producer;
+    PassivePacketSourceRef provider;
 
     cGate *outputGate = nullptr;
-    ModuleRefByGate<IPassivePacketSink> consumer;
-    ModuleRefByGate<IActivePacketSink> collector;
+    PassivePacketSinkRef consumer;
+    ActivePacketSinkRef collector;
 
     int inProgressStreamId = -1;
 
