@@ -123,25 +123,25 @@ void PacketProcessorBase::checkPacketOperationSupport(cGate *startGate, cGate *e
         throw cRuntimeError("Cannot check packet operation support on gates %s - %s", startGate->getFullPath().c_str(), endGate->getFullPath().c_str());
 }
 
-void PacketProcessorBase::pushOrSendPacket(Packet *packet, cGate *startGate, cGate *endGate, IPassivePacketSink *consumer)
+void PacketProcessorBase::pushOrSendPacket(Packet *packet, cGate *startGate, PassivePacketSinkRef& consumer)
 {
     if (consumer != nullptr) {
-        animatePushPacket(packet, startGate, endGate);
-        consumer->pushPacket(packet, endGate);
+        animatePushPacket(packet, startGate, consumer.getReferencedGate());
+        consumer->pushPacket(packet, consumer.getReferencedGate());
     }
     else
         send(packet, startGate);
 }
 
-void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *startGate, cGate *endGate, IPassivePacketSink *consumer, bps datarate, int transmissionId)
+void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *startGate, PassivePacketSinkRef& consumer, bps datarate, int transmissionId)
 {
     simtime_t duration = s(packet->getTotalLength() / datarate).get();
     SendOptions sendOptions;
     sendOptions.duration(duration);
     sendOptions.updateTx(transmissionId, duration);
     if (consumer != nullptr) {
-        animatePushPacketStart(packet, startGate, endGate, datarate, sendOptions);
-        consumer->pushPacketStart(packet, endGate, datarate);
+        animatePushPacketStart(packet, startGate, consumer.getReferencedGate(), datarate, sendOptions);
+        consumer->pushPacketStart(packet, consumer.getReferencedGate(), datarate);
     }
     else {
         auto progressTag = packet->addTagIfAbsent<ProgressTag>();
@@ -151,14 +151,14 @@ void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *startGate
     }
 }
 
-void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *startGate, cGate *endGate, IPassivePacketSink *consumer, int transmissionId)
+void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *startGate, PassivePacketSinkRef& consumer, int transmissionId)
 {
     // NOTE: duration is unknown due to arbitrarily changing datarate
     SendOptions sendOptions;
     sendOptions.updateTx(transmissionId, 0);
     if (consumer != nullptr) {
-        animatePushPacketEnd(packet, startGate, endGate, sendOptions);
-        consumer->pushPacketEnd(packet, endGate);
+        animatePushPacketEnd(packet, startGate, consumer.getReferencedGate(), sendOptions);
+        consumer->pushPacketEnd(packet, consumer.getReferencedGate());
     }
     else {
         auto progressTag = packet->addTagIfAbsent<ProgressTag>();
@@ -168,7 +168,7 @@ void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *startGate, 
     }
 }
 
-void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *startGate, cGate *endGate, IPassivePacketSink *consumer, bps datarate, b position, b extraProcessableLength, int transmissionId)
+void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *startGate, PassivePacketSinkRef& consumer, bps datarate, b position, b extraProcessableLength, int transmissionId)
 {
     // NOTE: duration is unknown due to arbitrarily changing datarate
     simtime_t remainingDuration = s((packet->getTotalLength() - position) / datarate).get();
@@ -176,16 +176,16 @@ void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *startG
     sendOptions.updateTx(transmissionId, remainingDuration);
     if (consumer != nullptr) {
         if (position == b(0)) {
-            animatePushPacketStart(packet, startGate, endGate, datarate, sendOptions);
-            consumer->pushPacketStart(packet, endGate, datarate);
+            animatePushPacketStart(packet, startGate, consumer.getReferencedGate(), datarate, sendOptions);
+            consumer->pushPacketStart(packet, consumer.getReferencedGate(), datarate);
         }
         else if (position == packet->getTotalLength()) {
-            animatePushPacketEnd(packet, startGate, endGate, sendOptions);
-            consumer->pushPacketEnd(packet, endGate);
+            animatePushPacketEnd(packet, startGate, consumer.getReferencedGate(), sendOptions);
+            consumer->pushPacketEnd(packet, consumer.getReferencedGate());
         }
         else {
-            animatePushPacketProgress(packet, startGate, endGate, datarate, position, extraProcessableLength, sendOptions);
-            consumer->pushPacketProgress(packet, endGate, datarate, position, extraProcessableLength);
+            animatePushPacketProgress(packet, startGate, consumer.getReferencedGate(), datarate, position, extraProcessableLength, sendOptions);
+            consumer->pushPacketProgress(packet, consumer.getReferencedGate(), datarate, position, extraProcessableLength);
         }
     }
     else {
