@@ -9,10 +9,10 @@
 #define __INET_COMPOUNDPACKETQUEUEBASE_H
 
 #include "inet/queueing/base/PacketQueueBase.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
+#include "inet/queueing/common/PassivePacketSourceRef.h"
 #include "inet/queueing/contract/IPacketCollection.h"
 #include "inet/queueing/contract/IPacketDropperFunction.h"
-#include "inet/queueing/contract/IPassivePacketSink.h"
-#include "inet/queueing/contract/IPassivePacketSource.h"
 
 namespace inet {
 namespace queueing {
@@ -23,8 +23,8 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     int packetCapacity = -1;
     b dataCapacity = b(-1);
 
-    IPassivePacketSink *consumer = nullptr;
-    IPassivePacketSource *provider = nullptr;
+    PassivePacketSinkRef consumer;
+    PassivePacketSourceRef provider;
     IPacketCollection *collection = nullptr;
 
     IPacketDropperFunction *packetDropperFunction = nullptr;
