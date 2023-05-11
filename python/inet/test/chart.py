@@ -49,10 +49,10 @@ class ChartTestTask(TestTask):
                 if image_export_filename is None or image_export_filename == "":
                     return self.task_result_class(self, result="SKIP", expected_result="SKIP", reason="Chart file name is not specified")
                 folder = os.path.dirname(self.simulation_project.get_full_path(self.analysis_file_name))
-                file_name = analysis.export_image(chart, folder, workspace, format="png", dpi=150, target_folder=self.simulation_project.media_folder, filename=image_export_filename + "_new")
+                file_name = analysis.export_image(chart, folder, workspace, format="png", dpi=150, target_folder=self.simulation_project.media_folder, filename=image_export_filename + ".new")
                 new_file_name = os.path.join(folder, file_name)
-                old_file_name = os.path.join(folder, re.sub("_new", "", file_name))
-                diff_file_name = os.path.join(folder, re.sub("_new", "_diff", file_name))
+                old_file_name = os.path.join(folder, re.sub(".new", "", file_name))
+                diff_file_name = os.path.join(folder, re.sub(".new", ".diff", file_name))
                 if os.path.exists(diff_file_name):
                     os.remove(diff_file_name)
                 if os.path.exists(old_file_name):
@@ -155,10 +155,10 @@ class ChartUpdateTask(UpdateTask):
                 if image_export_filename is None or image_export_filename == "":
                     return self.task_result_class(self, result="SKIP", expected_result="SKIP", reason="Chart file name is not specified")
                 folder = os.path.dirname(self.simulation_project.get_full_path(self.analysis_file_name))
-                file_name = analysis.export_image(chart, folder, workspace, format="png", dpi=150, target_folder=self.simulation_project.media_folder, filename=image_export_filename + "_new")
+                file_name = analysis.export_image(chart, folder, workspace, format="png", dpi=150, target_folder=self.simulation_project.media_folder, filename=image_export_filename + ".new")
                 new_file_name = os.path.join(folder, file_name)
-                old_file_name = os.path.join(folder, re.sub("_new", "", file_name))
-                diff_file_name = os.path.join(folder, re.sub("_new", "_diff", file_name))
+                old_file_name = os.path.join(folder, re.sub(".new", "", file_name))
+                diff_file_name = os.path.join(folder, re.sub(".new", ".diff", file_name))
                 if os.path.exists(diff_file_name):
                     os.remove(diff_file_name)
                 if os.path.exists(old_file_name):
@@ -169,7 +169,7 @@ class ChartUpdateTask(UpdateTask):
                         os.remove(new_file_name)
                     else:
                         if keep_charts:
-                            os.rename(old_file_name, re.sub("_new", "_old", file_name))
+                            os.rename(old_file_name, re.sub(".new", ".old", file_name))
                             image_diff = numpy.abs(new_image - old_image)
                             matplotlib.image.imsave(diff_file_name, image_diff[:, :, :3])
                         else:
