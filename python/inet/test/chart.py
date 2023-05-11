@@ -51,8 +51,8 @@ class ChartTestTask(TestTask):
                 folder = os.path.dirname(self.simulation_project.get_full_path(self.analysis_file_name))
                 file_name = analysis.export_image(chart, folder, workspace, format="png", dpi=150, target_folder=self.simulation_project.media_folder, filename=image_export_filename + ".new")
                 new_file_name = os.path.join(folder, file_name)
-                old_file_name = os.path.join(folder, re.sub(".new", "", file_name))
-                diff_file_name = os.path.join(folder, re.sub(".new", ".diff", file_name))
+                old_file_name = os.path.join(folder, re.sub(".new$", "", file_name))
+                diff_file_name = os.path.join(folder, re.sub(".new$", ".diff", file_name))
                 if os.path.exists(diff_file_name):
                     os.remove(diff_file_name)
                 if os.path.exists(old_file_name):
@@ -157,8 +157,8 @@ class ChartUpdateTask(UpdateTask):
                 folder = os.path.dirname(self.simulation_project.get_full_path(self.analysis_file_name))
                 file_name = analysis.export_image(chart, folder, workspace, format="png", dpi=150, target_folder=self.simulation_project.media_folder, filename=image_export_filename + ".new")
                 new_file_name = os.path.join(folder, file_name)
-                old_file_name = os.path.join(folder, re.sub(".new", "", file_name))
-                diff_file_name = os.path.join(folder, re.sub(".new", ".diff", file_name))
+                old_file_name = os.path.join(folder, re.sub(".new$", "", file_name))
+                diff_file_name = os.path.join(folder, re.sub(".new$", ".diff", file_name))
                 if os.path.exists(diff_file_name):
                     os.remove(diff_file_name)
                 if os.path.exists(old_file_name):
@@ -169,7 +169,7 @@ class ChartUpdateTask(UpdateTask):
                         os.remove(new_file_name)
                     else:
                         if keep_charts:
-                            os.rename(old_file_name, re.sub(".new", ".old", file_name))
+                            os.rename(old_file_name, re.sub(".new$", ".old", file_name))
                             image_diff = numpy.abs(new_image - old_image)
                             matplotlib.image.imsave(diff_file_name, image_diff[:, :, :3])
                         else:

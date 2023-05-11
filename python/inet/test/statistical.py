@@ -58,7 +58,7 @@ class StatisticalTestTask(SimulationTestTask):
         stored_scalar_result_file_name = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory, self.get_scalar_file_name()))
         _logger.debug(f"Reading result file {current_scalar_result_file_name}")
         current_df = _read_scalar_result_file(current_scalar_result_file_name)
-        scalar_result_diff_file_name = re.sub(".sca", ".diff", stored_scalar_result_file_name)
+        scalar_result_diff_file_name = re.sub(".sca$", ".diff", stored_scalar_result_file_name)
         if os.path.exists(scalar_result_diff_file_name):
             os.remove(scalar_result_diff_file_name)
         if os.path.exists(stored_scalar_result_file_name):
@@ -152,7 +152,7 @@ class StatisticalResultsUpdateTask(SimulationUpdateTask):
         stored_scalar_result_file_name = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory, self.get_scalar_file_name()))
         _logger.debug(f"Reading result file {current_scalar_result_file_name}")
         current_df = _read_scalar_result_file(current_scalar_result_file_name)
-        scalar_result_diff_file_name = re.sub(".sca", ".diff", stored_scalar_result_file_name)
+        scalar_result_diff_file_name = re.sub(".sca$", ".diff", stored_scalar_result_file_name)
         if os.path.exists(scalar_result_diff_file_name):
             os.remove(scalar_result_diff_file_name)
         if not os.path.exists(stored_scalar_result_file_name):
