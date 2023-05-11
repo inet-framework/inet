@@ -5,12 +5,6 @@
         <input pattern="results/FifoQueueing-#0.vec"/>
         <input pattern="results/FramePreemption-#0.sca"/>
         <input pattern="results/FramePreemption-#0.vec"/>
-        <input pattern="results/omnetpp.ini-FifoQueueing-#0.sca"/>
-        <input pattern="results/omnetpp.ini-FramePreemption-#0.sca"/>
-        <input pattern="results/omnetpp.ini-PriorityQueueing-#0.sca"/>
-        <input pattern="results/omnetpp.ini-RealisticFifoQueueing-#0.sca"/>
-        <input pattern="results/omnetpp.ini-RealisticFramePreemption-#0.sca"/>
-        <input pattern="results/omnetpp.ini-RealisticPriorityQueueing-#0.sca"/>
         <input pattern="results/PriorityQueueing-#0.sca"/>
         <input pattern="results/PriorityQueueing-#0.vec"/>
         <input pattern="results/RealisticFifoQueueing-#0.sca"/>
