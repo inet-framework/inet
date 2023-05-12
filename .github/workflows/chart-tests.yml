@@ -87,6 +87,6 @@ jobs:
         with:
           name: chart-test-results
           path: |
-            ${{ github.workspace }}/inet/media/**/*_new.png
-            ${{ github.workspace }}/inet/media/**/*_diff.png
+            ${{ github.workspace }}/inet/media/**/*-new.png
+            ${{ github.workspace }}/inet/media/**/*-diff.png
           if-no-files-found: ignore
