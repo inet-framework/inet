@@ -29,12 +29,12 @@ void EligibilityTimeMeter::initialize(int stage)
         WATCH(numTokens);
     }
     else if (stage == INITSTAGE_QUEUEING)
-        emitNumTokenChangedSignal();
+        emitNumTokenChangedSignal(nullptr);
 }
 
 void EligibilityTimeMeter::meterPacket(Packet *packet)
 {
-    emitNumTokenChangedSignal();
+    emitNumTokenChangedSignal(packet);
     clocktime_t arrivalTime = getClockTime();
     clocktime_t lengthRecoveryDuration = s((packet->getDataLength() + packetOverheadLength) / committedInformationRate).get();
     clocktime_t emptyToFullDuration = s(committedBurstSize / committedInformationRate).get();
@@ -46,11 +46,11 @@ void EligibilityTimeMeter::meterPacket(Packet *packet)
         groupEligibilityTime = eligibilityTime;
         bucketEmptyTime = eligibilityTime < bucketFullTime ? schedulerEligibilityTime : schedulerEligibilityTime + eligibilityTime - bucketFullTime;
         packet->addTagIfAbsent<EligibilityTimeTag>()->setEligibilityTime(eligibilityTime);
-        emitNumTokenChangedSignal();
+        emitNumTokenChangedSignal(packet);
     }
 }
 
-void EligibilityTimeMeter::emitNumTokenChangedSignal()
+void EligibilityTimeMeter::emitNumTokenChangedSignal(Packet *packet)
 {
     clocktime_t emptyToFullDuration = s(committedBurstSize / committedInformationRate).get();
     double alpha = (getClockTime() - bucketEmptyTime).dbl() / emptyToFullDuration.dbl();
@@ -59,6 +59,12 @@ void EligibilityTimeMeter::emitNumTokenChangedSignal()
         cTimestampedValue value(CLOCKTIME_AS_SIMTIME(bucketEmptyTime + emptyToFullDuration), numTokens);
         emit(tokensChangedSignal, &value);
         emit(tokensChangedSignal, numTokens);
+    }
+    else if (alpha < 0) {
+        cTimestampedValue value1(CLOCKTIME_AS_SIMTIME(bucketEmptyTime), b(packet->getDataLength() + packetOverheadLength).get());
+        cTimestampedValue value2(CLOCKTIME_AS_SIMTIME(bucketEmptyTime), 0.0);
+        emit(tokensChangedSignal, &value1);
+        emit(tokensChangedSignal, &value2);
     }
     else {
         numTokens = b(committedBurstSize).get() * alpha;
