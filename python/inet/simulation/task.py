@@ -163,7 +163,7 @@ class SimulationTask(Task):
         self.cpu_time_limit = cpu_time_limit
         self.record_eventlog = record_eventlog
         self.record_pcap = record_pcap
-        self.dependency_source_file_paths = None
+        # self.dependency_source_file_paths = None
 
     def get_hash(self, complete=True, binary=True, **kwargs):
         hasher = hashlib.sha256()
@@ -173,11 +173,12 @@ class SimulationTask(Task):
             if binary:
                 raise Exception("Not implemented yet")
             else:
-                if self.dependency_source_file_paths:
-                    for file_path in self.dependency_source_file_paths:
-                        hasher.update(open(file_path, "rb").read())
-                else:
-                    return None
+                return None
+                # if self.dependency_source_file_paths:
+                #     for file_path in self.dependency_source_file_paths:
+                #         hasher.update(open(file_path, "rb").read())
+                # else:
+                #     return None
         hasher.update(self.simulation_config.get_hash(**kwargs))
         hasher.update(str(self.run_number).encode("utf-8"))
         hasher.update(self.mode.encode("utf-8"))
@@ -289,53 +290,53 @@ class SimulationTask(Task):
             task_result = self.task_result_class(task=self, subprocess_result=subprocess_result, result="DONE", expected_result=expected_result)
         else:
             task_result = self.task_result_class(task=self, subprocess_result=subprocess_result, result="ERROR", expected_result=expected_result, reason=f"Non-zero exit code: {subprocess_result.returncode}")
-        self.dependency_source_file_paths = self.collect_dependency_source_file_paths(task_result)
+        # self.dependency_source_file_paths = self.collect_dependency_source_file_paths(task_result)
         task_result.partial_source_hash = hex_or_none(self.get_hash(complete=False, binary=False))
         return task_result
 
-    def collect_dependency_source_file_paths(self, simulation_task_result):
-        simulation_project = self.simulation_config.simulation_project
-        stdout = simulation_task_result.subprocess_result.stdout.decode("utf-8")
-        ini_dependency_file_paths = []
-        ned_dependency_file_paths = []
-        cpp_dependency_file_paths = []
-        for line in stdout.splitlines():
-            match = re.match("INI dependency: (.*)", line)
-            if match:
-                ini_full_path = simulation_project.get_full_path(os.path.join(self.simulation_config.working_directory, match.group(1)))
-                if not ini_full_path in ini_dependency_file_paths:
-                    ini_dependency_file_paths.append(ini_full_path)
-            match = re.match("NED dependency: (.*)", line)
-            if match:
-                ned_full_path = match.group(1)
-                if os.path.exists(ned_full_path):
-                    if not ned_full_path in ned_dependency_file_paths:
-                        ned_dependency_file_paths.append(ned_full_path)
-            match = re.match("CC dependency: (.*)", line)
-            if match:
-                cpp_full_path = match.group(1)
-                if not cpp_full_path in cpp_dependency_file_paths:
-                    cpp_dependency_file_paths.append(cpp_full_path)
-        cpp_dependency_file_paths = self.collect_cpp_dependency_file_paths(cpp_dependency_file_paths)
-        msg_dependency_file_paths = [file_name.replace("_m.cc", ".msg") for file_name in cpp_dependency_file_paths if file_name.endswith("_m.cc")]
-        return sorted(ini_dependency_file_paths + ned_dependency_file_paths + msg_dependency_file_paths + cpp_dependency_file_paths)
+    # def collect_dependency_source_file_paths(self, simulation_task_result):
+    #     simulation_project = self.simulation_config.simulation_project
+    #     stdout = simulation_task_result.subprocess_result.stdout.decode("utf-8")
+    #     ini_dependency_file_paths = []
+    #     ned_dependency_file_paths = []
+    #     cpp_dependency_file_paths = []
+    #     for line in stdout.splitlines():
+    #         match = re.match("INI dependency: (.*)", line)
+    #         if match:
+    #             ini_full_path = simulation_project.get_full_path(os.path.join(self.simulation_config.working_directory, match.group(1)))
+    #             if not ini_full_path in ini_dependency_file_paths:
+    #                 ini_dependency_file_paths.append(ini_full_path)
+    #         match = re.match("NED dependency: (.*)", line)
+    #         if match:
+    #             ned_full_path = match.group(1)
+    #             if os.path.exists(ned_full_path):
+    #                 if not ned_full_path in ned_dependency_file_paths:
+    #                     ned_dependency_file_paths.append(ned_full_path)
+    #         match = re.match("CC dependency: (.*)", line)
+    #         if match:
+    #             cpp_full_path = match.group(1)
+    #             if not cpp_full_path in cpp_dependency_file_paths:
+    #                 cpp_dependency_file_paths.append(cpp_full_path)
+    #     cpp_dependency_file_paths = self.collect_cpp_dependency_file_paths(cpp_dependency_file_paths)
+    #     msg_dependency_file_paths = [file_name.replace("_m.cc", ".msg") for file_name in cpp_dependency_file_paths if file_name.endswith("_m.cc")]
+    #     return sorted(ini_dependency_file_paths + ned_dependency_file_paths + msg_dependency_file_paths + cpp_dependency_file_paths)
 
-    def collect_cpp_dependency_file_paths(self, file_names):
-        simulation_project = self.simulation_config.simulation_project
-        while True:
-            file_names_copy = file_names.copy()
-            for file_name in file_names_copy:
-                full_file_path = simulation_project.get_full_path(f"out/clang-{self.mode}/" + re.sub(".cc", ".o.d", file_name))
-                if os.path.exists(full_file_path):
-                    dependency = read_dependency_file(full_file_path)
-                    for key, depends_on_file_names in dependency.items():
-                        additional_file_names = [file_name.replace(".h", ".cc") for file_name in depends_on_file_names if file_name.endswith(".h")] 
-                        file_names = file_names + depends_on_file_names + additional_file_names
-            file_names = sorted(list(set(file_names)))
-            if file_names_copy == file_names:
-                break
-        file_names = [simulation_project.get_full_path(file_name) for file_name in file_names]
-        return sorted([file_name for file_name in file_names if os.path.exists(file_name)])
+    # def collect_cpp_dependency_file_paths(self, file_names):
+    #     simulation_project = self.simulation_config.simulation_project
+    #     while True:
+    #         file_names_copy = file_names.copy()
+    #         for file_name in file_names_copy:
+    #             full_file_path = simulation_project.get_full_path(f"out/clang-{self.mode}/" + re.sub(".cc", ".o.d", file_name))
+    #             if os.path.exists(full_file_path):
+    #                 dependency = read_dependency_file(full_file_path)
+    #                 for key, depends_on_file_names in dependency.items():
+    #                     additional_file_names = [file_name.replace(".h", ".cc") for file_name in depends_on_file_names if file_name.endswith(".h")] 
+    #                     file_names = file_names + depends_on_file_names + additional_file_names
+    #         file_names = sorted(list(set(file_names)))
+    #         if file_names_copy == file_names:
+    #             break
+    #     file_names = [simulation_project.get_full_path(file_name) for file_name in file_names]
+    #     return sorted([file_name for file_name in file_names if os.path.exists(file_name)])
 
 class MultipleSimulationTasks(MultipleTasks):
     """
