@@ -35,7 +35,7 @@ class INET_API EligibilityTimeMeter : public ClockUserModuleMixin<PacketMeterBas
 
     virtual void meterPacket(Packet *packet) override;
 
-    virtual void emitNumTokenChangedSignal();
+    virtual void emitNumTokenChangedSignal(Packet *packet);
 };
 
 } // namespace inet
