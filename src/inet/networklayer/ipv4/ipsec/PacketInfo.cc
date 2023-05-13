@@ -16,7 +16,7 @@
 //
 
 #include "inet/networklayer/ipv4/ipsec/PacketInfo.h"
-#include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/common/IpProtocolId_m.h"
 
 namespace inet {
 namespace ipsec {

@@ -15,6 +15,9 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+
 namespace inet::ipsec;
 
 cplusplus {{
@@ -24,9 +27,11 @@ const int IP_AH_HEADER_BYTES = 24;  // IPsec AH header length (variable-length I
 //
 // IPsec AH header (RFC 4302).
 //
-packet IPsecAuthenticationHeader
+class IPsecAuthenticationHeader extends FieldsChunk
 {
     uint8_t nextHeader; // IP Protocol number defined by IANA (4 = IPv4; 41 = IPv6; 6 = TCP)
+    uint8_t payloadLength;
+    uint16_t reserved;
     uint32_t spi; // security parameters index
     uint32_t sequenceNumber;
 }

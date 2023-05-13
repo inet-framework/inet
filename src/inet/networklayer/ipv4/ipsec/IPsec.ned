@@ -181,6 +181,7 @@ simple IPsec
 		@display("i=block/control;is=s");
         
         string networkProtocolModule = default("^.ip");
+        string interfaceTableModule;
 		string spdModule = default("^.spd");
 		string sadModule = default("^.sad");
 		xml spdConfig;

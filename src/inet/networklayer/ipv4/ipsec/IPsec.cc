@@ -18,15 +18,22 @@
 #include <algorithm>
 
 #include "inet/networklayer/ipv4/ipsec/IPsec.h"
-#include "inet/common/ModuleAccess.h"
+
 #include "inet/common/INETUtils.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/XMLUtils.h"
-#include "inet/networklayer/ipv4/IPv4Datagram_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/transportlayer/tcp_common/TCPSegment.h"
-#include "inet/transportlayer/udp/UDPPacket.h"
-#include "IPsecAuthenticationHeader_m.h"
-#include "IPsecEncapsulatingSecurityPayload_m.h"
+#include "inet/networklayer/ipv4/IcmpHeader.h"
+#include "inet/networklayer/ipv4/ipsec/IPsecAuthenticationHeader_m.h"
+#include "inet/networklayer/ipv4/ipsec/IPsecEncapsulatingSecurityPayload_m.h"
+
+#ifdef INET_WITH_TCP_COMMON
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
+#endif
+#ifdef INET_WITH_UDP
+#include "inet/transportlayer/udp/UdpHeader_m.h"
+#endif
 
 using namespace inet::xmlutils;
 
@@ -152,13 +159,13 @@ void IPsec::parseSelector(const cXMLElement *selectorElem, PacketSelector& selec
 {
     checkTags(selectorElem, "LocalAddress RemoteAddress Protocol LocalPort RemotePort ICMPType ICMPCode");
 
-    auto addrConv = [](std::string s) {return L3AddressResolver().resolve(s.c_str(), L3AddressResolver::ADDR_IPv4).toIPv4();};
+    auto addrConv = [](std::string s) {return L3AddressResolver().resolve(s.c_str(), L3AddressResolver::ADDR_IPv4).toIpv4();};
     auto intConv = [](std::string s) {return atoi(s.c_str());};
     auto protocolConv = [](std::string s) {return parseProtocol(s);};
     if (const cXMLElement *localAddressElem = getUniqueChildIfExists(selectorElem, "LocalAddress"))
-        selector.setLocalAddress(rangelist<IPv4Address>::parse(localAddressElem->getNodeValue(), addrConv));
+        selector.setLocalAddress(rangelist<Ipv4Address>::parse(localAddressElem->getNodeValue(), addrConv));
     if (const cXMLElement *remoteAddressElem = getUniqueChildIfExists(selectorElem, "RemoteAddress"))
-        selector.setRemoteAddress(rangelist<IPv4Address>::parse(remoteAddressElem->getNodeValue(), addrConv));
+        selector.setRemoteAddress(rangelist<Ipv4Address>::parse(remoteAddressElem->getNodeValue(), addrConv));
     if (const cXMLElement *protocolElem = getUniqueChildIfExists(selectorElem, "Protocol"))
         selector.setNextProtocol(rangelist<unsigned int>::parse(protocolElem->getNodeValue(), protocolConv));
     if (const cXMLElement *localPortElem = getUniqueChildIfExists(selectorElem, "LocalPort"))
@@ -215,23 +222,24 @@ E IPsec::parseEnumElem(const Enum<E>& enum_, const cXMLElement *parentElem, cons
 
 void IPsec::initialize(int stage)
 {
-    if (stage == INITSTAGE_NETWORK_LAYER_3) {
+    if (stage == INITSTAGE_LOCAL) {
         ahProtectOutDelay = &par("ahProtectOutDelay");
         ahProtectInDelay = &par("ahProtectInDelay");
 
         espProtectOutDelay = &par("espProtectOutDelay");
         espProtectInDelay = &par("espProtectInDelay");
 
-        ipLayer = getModuleFromPar<IPv4>(par("networkProtocolModule"), this);
+        ipLayer = getModuleFromPar<Ipv4>(par("networkProtocolModule"), this);
+        interfaceTable.reference(this, "interfaceTableModule", true);
 
         //register IPsec hook
         ipLayer->registerHook(0, this);
 
         spdModule = getModuleFromPar<SecurityPolicyDatabase>(par("spdModule"), this);
         sadModule = getModuleFromPar<SecurityAssociationDatabase>(par("sadModule"), this);
-
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {  // TODO: was INITSTAGE_NETWORK_LAYER_3
         cXMLElement *spdConfig = par("spdConfig").xmlValue();
-
         initSecurityDBs(spdConfig);
     }
 }
@@ -239,59 +247,64 @@ void IPsec::initialize(int stage)
 void IPsec::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
-        INetworkDatagram *context = static_cast<INetworkDatagram *>(msg->getContextPointer());
+        Packet *context = static_cast<Packet *>(msg->getContextPointer());
         delete msg;
         ipLayer->reinjectQueuedDatagram(context);
     }
 }
 
-INetfilter::IHook::Result IPsec::datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result IPsec::datagramPreRoutingHook(Packet *packet)
 {
     // First hook at the receiver (before fragment reassembly)
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result IPsec::datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result IPsec::datagramForwardHook(Packet *packet)
 {
     return INetfilter::IHook::ACCEPT;
 }
 
-PacketInfo IPsec::extractEgressPacketInfo(IPv4Datagram *ipv4datagram, const IPv4Address& localAddress)
+PacketInfo IPsec::extractEgressPacketInfo(Packet *packet, const Ipv4Address& localAddress)
 {
     PacketInfo packetInfo;
+    const auto& ipv4datagram = packet->peekAtFront<Ipv4Header>();
+
     packetInfo.setLocalAddress(localAddress);
-    packetInfo.setRemoteAddress(ipv4datagram->getDestinationAddress().toIPv4());
+    packetInfo.setRemoteAddress(ipv4datagram->getDestAddress());
 
-    packetInfo.setNextProtocol(ipv4datagram->getTransportProtocol());
+    packetInfo.setNextProtocol(ipv4datagram->getProtocolId());
 
-    if (ipv4datagram->getTransportProtocol() == IP_PROT_TCP) {
-        tcp::TCPSegment *tcpSegment = check_and_cast<tcp::TCPSegment *>(ipv4datagram->getEncapsulatedPacket());
-        packetInfo.setLocalPort(tcpSegment->getSourcePort());
-        packetInfo.setRemotePort(tcpSegment->getDestinationPort());
+    if (ipv4datagram->getProtocolId() == IP_PROT_TCP) {
+        const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv4datagram->getChunkLength());
+        packetInfo.setLocalPort(tcpHeader->getSourcePort());
+        packetInfo.setRemotePort(tcpHeader->getDestinationPort());
     }
-    else if (ipv4datagram->getTransportProtocol() == IP_PROT_UDP) {
-        UDPPacket *udpPacket = check_and_cast<UDPPacket *>(ipv4datagram->getEncapsulatedPacket());
-        packetInfo.setLocalPort(udpPacket->getSourcePort());
-        packetInfo.setRemotePort(udpPacket->getDestinationPort());
+    else if (ipv4datagram->getProtocolId() == IP_PROT_UDP) {
+        const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipv4datagram->getChunkLength());
+        packetInfo.setLocalPort(udpHeader->getSourcePort());
+        packetInfo.setRemotePort(udpHeader->getDestinationPort());
     }
-    else if (ipv4datagram->getTransportProtocol() == IP_PROT_ICMP) {
-        ICMPMessage *icmpMessage = check_and_cast<ICMPMessage *>(ipv4datagram->getEncapsulatedPacket());
-        packetInfo.setIcmpType(icmpMessage->getType());
-        packetInfo.setIcmpCode(icmpMessage->getCode());
+    else if (ipv4datagram->getProtocolId() == IP_PROT_ICMP) {
+        const auto& icmpHeader = packet->peekDataAt<IcmpHeader>(ipv4datagram->getChunkLength());
+        packetInfo.setIcmpType(icmpHeader->getType());
+        packetInfo.setIcmpCode(icmpHeader->getCode());
     }
     return packetInfo;
 }
 
-INetfilter::IHook::Result IPsec::datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result IPsec::datagramPostRoutingHook(Packet *packet)
 {
-    return processEgressPacket(check_and_cast<IPv4Datagram *>(datagram), outIE->getIPv4Address());
+    auto outIE = interfaceTable->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
+    return processEgressPacket(packet, outIE->getIpv4Address());
 }
 
-INetfilter::IHook::Result IPsec::processEgressPacket(IPv4Datagram *ipv4datagram, const IPv4Address& localAddress)
+INetfilter::IHook::Result IPsec::processEgressPacket(Packet *packet, const Ipv4Address& localAddress)
 {
     // packet will be fragmented (if necessary) later
 
-    PacketInfo egressPacketInfo = extractEgressPacketInfo(ipv4datagram, localAddress);
+    PacketInfo egressPacketInfo = extractEgressPacketInfo(packet, localAddress);
+
+    const auto& ipv4datagram = packet->peekAtFront<Ipv4Header>();
 
     if (ipv4datagram->getDestAddress().isMulticast()) {
         EV_INFO << "IPsec OUT BYPASS due to multicast, packet: " << egressPacketInfo.str() << std::endl;
@@ -306,7 +319,7 @@ INetfilter::IHook::Result IPsec::processEgressPacket(IPv4Datagram *ipv4datagram,
         if (spdEntry->getAction() == Action::PROTECT) {
             emit(outProtectSignal, 1L);
             outProtect++;
-            return protectDatagram(ipv4datagram, egressPacketInfo, spdEntry);
+            return protectDatagram(packet, egressPacketInfo, spdEntry);
         }
         else if (spdEntry->getAction() == Action::BYPASS) {
             EV_INFO << "IPsec OUT BYPASS rule, packet: " << egressPacketInfo.str() << std::endl;
@@ -327,39 +340,38 @@ INetfilter::IHook::Result IPsec::processEgressPacket(IPv4Datagram *ipv4datagram,
     return INetfilter::IHook::DROP;
 }
 
-PacketInfo IPsec::extractIngressPacketInfo(IPv4Datagram *ipv4datagram)
+PacketInfo IPsec::extractIngressPacketInfo(Packet *packet)
 {
     PacketInfo packetInfo;
 
-    packetInfo.setLocalAddress(ipv4datagram->getDestinationAddress().toIPv4());
-    packetInfo.setRemoteAddress(ipv4datagram->getSourceAddress().toIPv4());
+    const auto& ipv4datagram = packet->peekAtFront<Ipv4Header>();
+    packetInfo.setLocalAddress(ipv4datagram->getDestAddress());
+    packetInfo.setRemoteAddress(ipv4datagram->getSrcAddress());
 
-    packetInfo.setNextProtocol(ipv4datagram->getTransportProtocol());
+    packetInfo.setNextProtocol(ipv4datagram->getProtocolId());
 
-    if (ipv4datagram->getTransportProtocol() == IP_PROT_TCP) {
-        tcp::TCPSegment *tcpSegment = check_and_cast<tcp::TCPSegment *>(ipv4datagram->getEncapsulatedPacket());
-        packetInfo.setLocalPort(tcpSegment->getDestinationPort());
-        packetInfo.setRemotePort(tcpSegment->getSourcePort());
+    if (ipv4datagram->getProtocolId() == IP_PROT_TCP) {
+        const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv4datagram->getChunkLength());
+        packetInfo.setLocalPort(tcpHeader->getDestinationPort());
+        packetInfo.setRemotePort(tcpHeader->getSourcePort());
     }
-    else if (ipv4datagram->getTransportProtocol() == IP_PROT_UDP) {
-        UDPPacket *udpPacket = check_and_cast<UDPPacket *>(ipv4datagram->getEncapsulatedPacket());
-        packetInfo.setLocalPort(udpPacket->getDestinationPort());
-        packetInfo.setRemotePort(udpPacket->getSourcePort());
+    else if (ipv4datagram->getProtocolId() == IP_PROT_UDP) {
+        const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipv4datagram->getChunkLength());
+        packetInfo.setLocalPort(udpHeader->getDestinationPort());
+        packetInfo.setRemotePort(udpHeader->getSourcePort());
     }
-    else if (ipv4datagram->getTransportProtocol() == IP_PROT_ICMP) {
-        ICMPMessage *icmpMessage = check_and_cast<ICMPMessage *>(ipv4datagram->getEncapsulatedPacket());
-        packetInfo.setIcmpType(icmpMessage->getType());
-        packetInfo.setIcmpCode(icmpMessage->getCode());
+    else if (ipv4datagram->getProtocolId() == IP_PROT_ICMP) {
+        const auto& icmpHeader = packet->peekDataAt<IcmpHeader>(ipv4datagram->getChunkLength());
+        packetInfo.setIcmpType(icmpHeader->getType());
+        packetInfo.setIcmpCode(icmpHeader->getCode());
     }
     return packetInfo;
 }
 
-cPacket *IPsec::espProtect(cPacket *transport, SecurityAssociation *sadEntry, int transportType)
+void IPsec::espProtect(Packet *transport, SecurityAssociation *sadEntry, int transportType)
 {
-    IPsecEncapsulatingSecurityPayload *espPacket = new IPsecEncapsulatingSecurityPayload();
-
     bool haveEncryption = sadEntry->getEspMode()==EspMode::CONFIDENTIALITY || sadEntry->getEspMode()==EspMode::COMBINED;
-    ASSERT(haveEncryption == (sadEntry->getEnryptionAlg()!=EncryptionAlg::NONE));
+    ASSERT(haveEncryption == (sadEntry->getEnryptionAlg() != EncryptionAlg::NONE));
 
     // Handle encryption part. Compute padding according to RFC 4303 Sections 2.4 and 2.5
     unsigned int tcfPadding = intuniform(0, sadEntry->getMaxTfcPadLength());
@@ -401,33 +413,58 @@ cPacket *IPsec::espProtect(cPacket *transport, SecurityAssociation *sadEntry, in
     // compute total length
     unsigned int len = ESP_FIXED_HEADER_BYTES + ivBytes + paddedLength + icvBytes;
 
-    // create ESP packet
-    espPacket->setPadLength(padLength);
-    espPacket->setSequenceNumber(sadEntry->getAndIncSeqNum());
-    espPacket->setSpi(sadEntry->getSpi());
-    espPacket->setNextHeader(transportType);
-    espPacket->encapsulate(transport);
-    espPacket->setByteLength(len);
+    // encrypting:
+    if (tcfPadding > 0)
+        transport->insertAtBack(makeShared<ByteCountChunk>(B(tcfPadding)));
+    if (padLength > 0)
+        transport->insertAtBack(makeShared<ByteCountChunk>(B(padLength)));
+    auto data = transport->removeData();
+    data->markImmutable();
+    auto encryptedData = makeShared<EncryptedChunk>(data, data->getChunkLength() + B(ivBytes));
+    transport->insertData(encryptedData);
 
-    return espPacket;
+    // create ESP packet
+    const auto& espHeader = makeShared<IPsecEspHeader>();
+    espHeader->setSequenceNumber(sadEntry->getAndIncSeqNum());
+    espHeader->setSpi(sadEntry->getSpi());
+    transport->insertAtFront(espHeader);
+
+    const auto& espTrailer = makeShared<IPsecEspTrailer>();
+    espTrailer->setPadLength(padLength);
+    espTrailer->setNextHeader(transportType);
+    transport->insertAtBack(espTrailer);
+
+    // Add integrity check value if needed
+    if (icvBytes)
+        transport->insertAtBack(makeShared<ByteCountChunk>(B(icvBytes)));
+
+    ASSERT(transport->getByteLength() == len);
 }
 
-cPacket *IPsec::ahProtect(cPacket *transport, SecurityAssociation *sadEntry, int transportType)
+void IPsec::ahProtect(Packet *transport, SecurityAssociation *sadEntry, int transportType)
 {
-    IPsecAuthenticationHeader *ahPacket = new IPsecAuthenticationHeader();
-
     unsigned int icvBytes = getIntegrityCheckValueBitLength(sadEntry->getAuthenticationAlg()) / 8;
     unsigned int ivBytes  = getInitializationVectorBitLength(sadEntry->getAuthenticationAlg()) / 8;
 
     unsigned int len = IP_AH_HEADER_BYTES + ivBytes + icvBytes;
-    ahPacket->setByteLength(len);
 
-    ahPacket->setSequenceNumber(sadEntry->getAndIncSeqNum());
-    ahPacket->setSpi(sadEntry->getSpi());
-    ahPacket->encapsulate(transport);
-    ahPacket->setNextHeader(transportType);
+    // encrypting:
+    auto data = transport->removeData();
+    data->markImmutable();
+    auto encryptedData = makeShared<EncryptedChunk>(data, data->getChunkLength() + B(ivBytes));
+    transport->insertData(encryptedData);
 
-    return ahPacket;
+    const auto& ahHeader = makeShared<IPsecAuthenticationHeader>();
+    ahHeader->setSequenceNumber(sadEntry->getAndIncSeqNum());
+    ahHeader->setSpi(sadEntry->getSpi());
+    ahHeader->setNextHeader(transportType);
+    transport->insertAtFront(ahHeader);
+
+    // Add integrity check value if needed
+    if (icvBytes)
+        transport->insertAtBack(makeShared<ByteCountChunk>(B(icvBytes)));
+
+    ASSERT(transport->getByteLength() == len);
 }
 
 int IPsec::getIntegrityCheckValueBitLength(EncryptionAlg alg)
@@ -560,10 +597,16 @@ int IPsec::getInitializationVectorBitLength(AuthenticationAlg alg)
     return 0;
 }
 
-INetfilter::IHook::Result IPsec::protectDatagram(IPv4Datagram *ipv4datagram, const PacketInfo& packetInfo, SecurityPolicy *spdEntry)
+INetfilter::IHook::Result IPsec::protectDatagram(Packet *packet, const PacketInfo& packetInfo, SecurityPolicy *spdEntry)
 {
     Enter_Method_Silent();
-    cPacket *transport = ipv4datagram->decapsulate();
+
+    auto ipv4Header = packet->removeAtFront<Ipv4Header>();
+
+    auto padding = packet->getDataLength() + ipv4Header->getChunkLength() - ipv4Header->getTotalLengthField();
+    if (padding > b(0))
+        packet->removeAtBack(padding);
+
     double delay = 0;
 
     bool espProtected = false, ahProtected = false;
@@ -572,9 +615,9 @@ INetfilter::IHook::Result IPsec::protectDatagram(IPv4Datagram *ipv4datagram, con
             if (saEntry->getProtection() == Protection::ESP && !espProtected && !ahProtected) { // ESP protection must precede possible AH protection
                 EV_INFO << "IPsec OUT ESP PROTECT packet: " << packetInfo.str() << std::endl;
 
-                int transportType = ipv4datagram->getTransportProtocol();
-                ipv4datagram->setTransportProtocol(IP_PROT_ESP);
-                transport = espProtect(transport, (saEntry), transportType);
+                int transportType = ipv4Header->getProtocolId();
+                espProtect(packet, (saEntry), transportType);
+                ipv4Header->setProtocolId(IP_PROT_ESP);
 
                 delay += espProtectOutDelay->doubleValue();
                 espProtected = true;
@@ -582,9 +625,9 @@ INetfilter::IHook::Result IPsec::protectDatagram(IPv4Datagram *ipv4datagram, con
             else if (saEntry->getProtection() == Protection::AH && !ahProtected) {
                 EV_INFO << "IPsec OUT AH PROTECT packet: " << packetInfo.str() << std::endl;
 
-                int transportType = ipv4datagram->getTransportProtocol();
-                ipv4datagram->setTransportProtocol(IP_PROT_AH);
-                transport = ahProtect(transport, saEntry, transportType);
+                int transportType = ipv4Header->getProtocolId();
+                ipv4Header->setProtocolId(IP_PROT_AH);
+                ahProtect(packet, saEntry, transportType);
 
                 delay += ahProtectOutDelay->doubleValue();
                 ahProtected = true;
@@ -595,11 +638,12 @@ INetfilter::IHook::Result IPsec::protectDatagram(IPv4Datagram *ipv4datagram, con
         }
     }
 
-    ipv4datagram->encapsulate(transport);
+    ipv4Header->setTotalLengthField(ipv4Header->getChunkLength() + packet->getDataLength());
+    packet->insertAtFront(ipv4Header);
 
     if (delay > 0 || lastProtectedOut > simTime()) {
         cMessage *selfmsg = new cMessage("IPsecProtectOutDelay");
-        selfmsg->setContextPointer(static_cast<INetworkDatagram *>(ipv4datagram));
+        selfmsg->setContextPointer(packet);
         lastProtectedOut = std::max(simTime(), lastProtectedOut) + delay;
         scheduleAt(lastProtectedOut, selfmsg);
 
@@ -616,20 +660,20 @@ INetfilter::IHook::Result IPsec::protectDatagram(IPv4Datagram *ipv4datagram, con
     }
 }
 
-INetfilter::IHook::Result IPsec::datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inIE)
+INetfilter::IHook::Result IPsec::datagramLocalInHook(Packet *packet)
 {
-    return processIngressPacket(check_and_cast<IPv4Datagram *>(datagram));
+    return processIngressPacket(packet);
 }
 
-INetfilter::IHook::Result IPsec::processIngressPacket(IPv4Datagram *ipv4datagram)
+INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
 {
     Enter_Method_Silent();
 
-    int transportProtocol = ipv4datagram->getTransportProtocol();
+    PacketInfo ingressPacketInfo = extractIngressPacketInfo(packet);
 
-    PacketInfo ingressPacketInfo = extractIngressPacketInfo(ipv4datagram);
+    int transportProtocol = ingressPacketInfo.getNextProtocol();
 
-    if (ipv4datagram->getDestAddress().isMulticast()) {
+    if (ingressPacketInfo.getLocalAddress().isMulticast()) {
         EV_INFO << "IPsec IN BYPASS due to multicast, packet: " << ingressPacketInfo.str() << std::endl;
         emit(inUnprotectedBypassSignal, 1L);
         inBypass++;
@@ -638,7 +682,9 @@ INetfilter::IHook::Result IPsec::processIngressPacket(IPv4Datagram *ipv4datagram
 
     double delay = 0.0;
     if (transportProtocol == IP_PROT_AH) {
-        IPsecAuthenticationHeader *ah = check_and_cast<IPsecAuthenticationHeader *>(ipv4datagram->decapsulate());
+        auto ipv4Header = packet->removeAtFront<Ipv4Header>();
+
+        auto ah = packet->removeAtFront<IPsecAuthenticationHeader>();
 
         // find SA Entry in SAD
         SecurityAssociation *sadEntry = sadModule->findEntry(Direction::IN, ah->getSpi());
@@ -652,20 +698,28 @@ INetfilter::IHook::Result IPsec::processIngressPacket(IPv4Datagram *ipv4datagram
             }
 
             // found SA
-            ipv4datagram->encapsulate(ah->decapsulate());
-            ipv4datagram->setTransportProtocol(ah->getNextHeader());
+            auto ahHeader = packet->removeAtFront<IPsecAuthenticationHeader>();
+
+            // decrypting:
+            auto encryptedData = packet->removeAtFront<EncryptedChunk>();
+            packet->removeData(Chunk::PF_ALLOW_EMPTY);
+            auto data = encryptedData->getChunk();
+            packet->insertData(data);
+            ipv4Header->setProtocolId((IpProtocolId)ahHeader->getNextHeader());
+            ipv4Header->setTotalLengthField(ipv4Header->getChunkLength() + data->getChunkLength());
+            packet->insertAtFront(ipv4Header);
+
+            // TODO check icv, ...
 
             delay = ahProtectInDelay->doubleValue();
 
-            if (ah->getNextHeader() != IP_PROT_ESP) {
-                delete ah;
-
+            if (ahHeader->getNextHeader() != IP_PROT_ESP) {
                 emit(inProtectedAcceptSignal, 1L);
                 inAccept++;
 
                 if (delay > 0 || lastProtectedIn > simTime()) {
                     cMessage *selfmsg = new cMessage("IPsecProtectInDelay");
-                    selfmsg->setContextPointer(static_cast<INetworkDatagram*>(ipv4datagram));
+                    selfmsg->setContextPointer(packet);
                     lastProtectedIn = std::max(simTime(), lastProtectedIn) + delay;
                     scheduleAt(lastProtectedIn, selfmsg);
                     simtime_t actualDelay = lastProtectedIn - simTime();
@@ -681,7 +735,6 @@ INetfilter::IHook::Result IPsec::processIngressPacket(IPv4Datagram *ipv4datagram
                 }
             }
         }
-        delete ah;
 
         if (sadEntry == nullptr) {
             EV_INFO << "IPsec IN DROP AH, no matching rule, packet: " << ingressPacketInfo.str() << std::endl;
@@ -691,12 +744,11 @@ INetfilter::IHook::Result IPsec::processIngressPacket(IPv4Datagram *ipv4datagram
         }
     }
 
-    transportProtocol = ipv4datagram->getTransportProtocol();
-
     if (transportProtocol == IP_PROT_ESP) {
-        IPsecEncapsulatingSecurityPayload *esp = check_and_cast<IPsecEncapsulatingSecurityPayload *>(ipv4datagram->decapsulate());
+        auto ipv4Header = packet->removeAtFront<Ipv4Header>();
+        auto espHeader = packet->removeAtFront<IPsecEspHeader>();
 
-        SecurityAssociation *sadEntry = sadModule->findEntry(Direction::IN, esp->getSpi());
+        SecurityAssociation *sadEntry = sadModule->findEntry(Direction::IN, espHeader->getSpi());
 
         if (sadEntry != nullptr) {
             if (sadEntry->getProtection() != Protection::ESP) {
@@ -710,15 +762,23 @@ INetfilter::IHook::Result IPsec::processIngressPacket(IPv4Datagram *ipv4datagram
             emit(inProtectedAcceptSignal, 1L);
             inAccept++;
 
-            ipv4datagram->encapsulate(esp->decapsulate());
-            ipv4datagram->setTransportProtocol(esp->getNextHeader());
-            delete esp;
+            // decrypting:
+            auto encryptedData = packet->removeAtFront<EncryptedChunk>();
+            auto espTrailer = packet->removeAtFront<IPsecEspTrailer>();
+            packet->removeData(Chunk::PF_ALLOW_EMPTY); // remove icv bytes
+            auto data = encryptedData->getChunk();
+            packet->insertData(data);
+            if (espTrailer->getPadLength() > 0)
+                packet->removeAtBack(B(espTrailer->getPadLength()));
+            ipv4Header->setProtocolId((IpProtocolId)espTrailer->getNextHeader());
+            ipv4Header->setTotalLengthField(ipv4Header->getChunkLength() + data->getChunkLength() - B(espTrailer->getPadLength()));
+            packet->insertAtFront(ipv4Header);
 
             delay += espProtectInDelay->doubleValue();
 
             if (delay > 0 || lastProtectedIn > simTime()) {
                 cMessage *selfmsg = new cMessage("IPsecProtectInDelay");
-                selfmsg->setContextPointer(static_cast<INetworkDatagram*>(ipv4datagram));
+                selfmsg->setContextPointer(packet);
                 lastProtectedOut = std::max(simTime(), lastProtectedOut) + delay;
                 scheduleAt(lastProtectedOut, selfmsg);
                 simtime_t actualDelay = lastProtectedOut - simTime();
@@ -733,8 +793,6 @@ INetfilter::IHook::Result IPsec::processIngressPacket(IPv4Datagram *ipv4datagram
                 return INetfilter::IHook::ACCEPT;
             }
         }
-
-        delete esp;
 
         if (sadEntry == nullptr) {
             EV_INFO << "IPsec IN DROP ESP, no matching rule, packet: " << ingressPacketInfo.str() << std::endl;
@@ -773,7 +831,7 @@ INetfilter::IHook::Result IPsec::processIngressPacket(IPv4Datagram *ipv4datagram
     return INetfilter::IHook::DROP;
 }
 
-INetfilter::IHook::Result IPsec::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result IPsec::datagramLocalOutHook(Packet *packet)
 {
     return INetfilter::IHook::ACCEPT;
 }

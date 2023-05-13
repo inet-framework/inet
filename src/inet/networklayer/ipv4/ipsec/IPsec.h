@@ -21,7 +21,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/ipv4/IPv4.h"
+#include "inet/networklayer/ipv4/Ipv4.h"
 #include "SecurityPolicy.h"
 #include "SecurityAssociation.h"
 #include "inet/networklayer/ipv4/ipsec/SecurityAssociationDatabase.h"
@@ -34,7 +34,7 @@ namespace ipsec {
  * Implements IPsec for IPv4. Supports AH and ESP in transport mode.
  * See the NED documentation for more info.
  */
-class INET_API IPsec : public cSimpleModule, INetfilter::IHook
+class INET_API IPsec : public cSimpleModule, NetfilterBase::HookBase
 {
   public:
     typedef IPsecRule::Action Action;
@@ -45,7 +45,8 @@ class INET_API IPsec : public cSimpleModule, INetfilter::IHook
     typedef IPsecRule::AuthenticationAlg AuthenticationAlg;
 
   private:
-    IPv4 *ipLayer;
+    Ipv4 *ipLayer;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
     SecurityPolicyDatabase *spdModule;
     SecurityAssociationDatabase *sadModule;
 
@@ -86,13 +87,13 @@ class INET_API IPsec : public cSimpleModule, INetfilter::IHook
     template<typename E>
     static E parseEnumElem(const Enum<E>& enum_, const cXMLElement *parentElem, const char *childElemName, E defaultValue=(E)-1, E defaultValue2=(E)-1);
 
-    virtual PacketInfo extractIngressPacketInfo(IPv4Datagram *ipv4datagram);
-    virtual PacketInfo extractEgressPacketInfo(IPv4Datagram *ipv4datagram, const IPv4Address& localAddress);
+    virtual PacketInfo extractIngressPacketInfo(Packet *packet);
+    virtual PacketInfo extractEgressPacketInfo(Packet *ipv4datagram, const Ipv4Address& localAddress);
 
-    virtual cPacket *espProtect(cPacket *transport, SecurityAssociation *sadEntry, int transportType);
-    virtual cPacket *ahProtect(cPacket *transport, SecurityAssociation *sadEntry, int transportType);
+    virtual void espProtect(Packet *transport, SecurityAssociation *sadEntry, int transportType);
+    virtual void ahProtect(Packet *transport, SecurityAssociation *sadEntry, int transportType);
 
-    virtual INetfilter::IHook::Result protectDatagram(IPv4Datagram *ipv4datagram, const PacketInfo& packetInfo, SecurityPolicy *spdEntry);
+    virtual INetfilter::IHook::Result protectDatagram(Packet *ipv4datagram, const PacketInfo& packetInfo, SecurityPolicy *spdEntry);
 
     virtual int getIntegrityCheckValueBitLength(EncryptionAlg alg);
     virtual int getInitializationVectorBitLength(EncryptionAlg alg);
@@ -111,15 +112,15 @@ class INET_API IPsec : public cSimpleModule, INetfilter::IHook
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void refreshDisplay() const override;
 
-    INetfilter::IHook::Result processEgressPacket(IPv4Datagram *ipv4datagram, const IPv4Address& localAddress);
-    INetfilter::IHook::Result processIngressPacket(IPv4Datagram *ipv4datagram);
+    INetfilter::IHook::Result processEgressPacket(Packet *ipv4datagram, const Ipv4Address& localAddress);
+    INetfilter::IHook::Result processIngressPacket(Packet *ipv4datagram);
 
     /* Netfilter hooks */
-    virtual IHook::Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
-    virtual IHook::Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
-    virtual IHook::Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
-    virtual IHook::Result datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inIE) override;
-    virtual IHook::Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
+    virtual IHook::Result datagramPreRoutingHook(Packet *datagram) override;
+    virtual IHook::Result datagramForwardHook(Packet *datagram) override;
+    virtual IHook::Result datagramPostRoutingHook(Packet *datagram) override;
+    virtual IHook::Result datagramLocalInHook(Packet *datagram) override;
+    virtual IHook::Result datagramLocalOutHook(Packet *datagram) override;
 };
 
 }    // namespace ipsec

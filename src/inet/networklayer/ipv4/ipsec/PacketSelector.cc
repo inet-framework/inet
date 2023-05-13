@@ -17,7 +17,7 @@
 
 #include "PacketSelector.h"
 
-#include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/common/IpProtocolId_m.h"
 
 namespace inet {
 namespace ipsec {

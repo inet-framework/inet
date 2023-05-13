@@ -19,7 +19,7 @@
 #define INET_NETWORKLAYER_IPV4_IPSEC_PACKETINFO_H_
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {
 namespace ipsec {
@@ -31,8 +31,8 @@ namespace ipsec {
 class INET_API PacketInfo
 {
   private:
-    IPv4Address localAddress;
-    IPv4Address remoteAddress;
+    Ipv4Address localAddress;
+    Ipv4Address remoteAddress;
     unsigned int nextProtocol = 0; // next layer protocol
     unsigned int localPort = 0;
     unsigned int remotePort = 0;
@@ -41,10 +41,10 @@ class INET_API PacketInfo
 
   public:
     PacketInfo() {}
-    const IPv4Address& getLocalAddress() const { return localAddress; }
-    void setLocalAddress(const IPv4Address &localAddress) { this->localAddress = localAddress; }
-    const IPv4Address& getRemoteAddress() const { return remoteAddress; }
-    void setRemoteAddress(const IPv4Address &remoteAddress) { this->remoteAddress = remoteAddress; }
+    const Ipv4Address& getLocalAddress() const { return localAddress; }
+    void setLocalAddress(const Ipv4Address &localAddress) { this->localAddress = localAddress; }
+    const Ipv4Address& getRemoteAddress() const { return remoteAddress; }
+    void setRemoteAddress(const Ipv4Address &remoteAddress) { this->remoteAddress = remoteAddress; }
     unsigned int getNextProtocol() const { return nextProtocol; }
     void setNextProtocol(unsigned int nextProtocol) { this->nextProtocol = nextProtocol; }
     unsigned int getLocalPort() const { return localPort; }
