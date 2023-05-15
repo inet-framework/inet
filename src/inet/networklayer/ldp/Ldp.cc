@@ -791,16 +791,16 @@ Ipv4Address Ldp::locateNextHop(Ipv4Address dest)
 
 Ipv4Address Ldp::findPeerAddrFromInterface(std::string interfaceName)
 {
-    int i = 0;
-    int k = 0;
+    size_t i = 0;
+    size_t k = 0;
     NetworkInterface *ie = ift->findInterfaceByName(interfaceName.c_str());
     if (ie == nullptr)
         return Ipv4Address();
 
     const Ipv4Route *anEntry;
 
-    for (i = 0; i < rt->getNumRoutes(); i++) {
-        for (k = 0; k < (int)myPeers.size(); k++) {
+    for (i = 0; i < (size_t)rt->getNumRoutes(); i++) {
+        for (k = 0; k < myPeers.size(); k++) {
             anEntry = rt->getRoute(i);
             if (anEntry->getDestination() == myPeers[k].peerIP && anEntry->getInterface() == ie) {
                 return myPeers[k].peerIP;
@@ -810,18 +810,18 @@ Ipv4Address Ldp::findPeerAddrFromInterface(std::string interfaceName)
     }
 
     // Return any IP which has default route - not in routing table entries
-    for (i = 0; i < (int)myPeers.size(); i++) {
-        for (k = 0; k < rt->getNumRoutes(); k++) {
+    for (i = 0; i < myPeers.size(); i++) {
+        for (k = 0; k < (size_t)rt->getNumRoutes(); k++) {
             anEntry = rt->getRoute(i);
             if (anEntry->getDestination() == myPeers[i].peerIP)
                 break;
         }
-        if (k == rt->getNumRoutes())
+        if (k == (size_t)rt->getNumRoutes())
             break;
     }
 
     // return the peer's address if found, unspecified address otherwise
-    return i == (int)myPeers.size() ? Ipv4Address() : myPeers[i].peerIP;
+    return i == myPeers.size() ? Ipv4Address() : myPeers[i].peerIP;
 }
 
 // Pre-condition: myPeers vector is finalized

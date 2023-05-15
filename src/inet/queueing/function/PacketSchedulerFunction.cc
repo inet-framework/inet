@@ -16,7 +16,7 @@ static int schedulePacketByData(const std::vector<IPassivePacketSource *>& sourc
 {
     int selectedIndex = -1;
     int selectedData = -1;
-    for (int i = 0; i < (int)sources.size(); i++) {
+    for (size_t i = 0; i < sources.size(); i++) {
         auto source = sources[i];
         auto module = check_and_cast<cModule *>(source);
         auto packet = source->canPullPacket(module->gate("out"));
@@ -38,7 +38,7 @@ static int schedulePacketByUserPriority(const std::vector<IPassivePacketSource *
 {
     int selectedIndex = -1;
     int selectedUserPriority = -1;
-    for (int i = 0; i < (int)sources.size(); i++) {
+    for (size_t i = 0; i < sources.size(); i++) {
         auto source = sources[i];
         auto module = check_and_cast<cModule *>(source);
         auto packet = source->canPullPacket(module->gate("out"));
@@ -57,7 +57,7 @@ static int schedulePacketByPacketLength(const std::vector<IPassivePacketSource *
 {
     int selectedIndex = -1;
     b selectedPacketLength = b(-1);
-    for (int i = 0; i < (int)sources.size(); i++) {
+    for (size_t i = 0; i < sources.size(); i++) {
         auto source = sources[i];
         auto module = check_and_cast<cModule *>(source);
         auto packet = source->canPullPacket(module->gate("out"));

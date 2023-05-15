@@ -31,7 +31,7 @@ void LabelClassifier::initialize(int stage)
 int LabelClassifier::classifyPacket(Packet *packet)
 {
     auto labelsTag = packet->getTag<LabelsTag>();
-    for (int i = 0; i < (int)labelsTag->getLabelsArraySize(); i++) {
+    for (size_t i = 0; i < labelsTag->getLabelsArraySize(); i++) {
         auto label = labelsTag->getLabels(i);
         auto it = labelsToGateIndexMap.find(label);
         if (it != labelsToGateIndexMap.end())

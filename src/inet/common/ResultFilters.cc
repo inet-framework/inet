@@ -179,7 +179,7 @@ void FlowPacketLengthFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t
     auto flow = check_and_cast<Flow *>(details);
     b length = b(0);
     packet->mapAllRegionTags<FlowTag>(b(0), packet->getTotalLength(), [&] (b o, b l, const Ptr<const FlowTag>& flowTag) {
-        for (int i = 0; i < flowTag->getNamesArraySize(); i++) {
+        for (size_t i = 0; i < flowTag->getNamesArraySize(); i++) {
             if (!strcmp(flowTag->getNames(i), flow->getName()))
                 length += l;
         }
@@ -479,7 +479,7 @@ void DemuxFlowFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObje
     else
         packet = check_and_cast<Packet *>(check_and_cast<cPacket *>(object)->getEncapsulatedPacket());
     packet->mapAllRegionTags<FlowTag>(b(0), packet->getTotalLength(), [&] (b o, b l, const Ptr<const FlowTag>& flowTag) {
-        for (int i = 0; i < flowTag->getNamesArraySize(); i++) {
+        for (size_t i = 0; i < flowTag->getNamesArraySize(); i++) {
             auto flowName = flowTag->getNames(i);
             cMatchableString matchableFlowName(flowName);
             if (flows.find(flowName) == flows.end() && flowNameMatcher.matches(&matchableFlowName)) {
@@ -535,7 +535,7 @@ void ElapsedTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_cr
     auto packet = check_and_cast<Packet *>(object);
     auto flow = dynamic_cast<Flow *>(details);
     packet->mapAllRegionTags<ElapsedTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const ElapsedTimeTag>& tag) {
-        for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
+        for (size_t i = 0; i < tag->getBitTotalTimesArraySize(); i++) {
             auto flowName = tag->getFlowNames(i);
             if (flow == nullptr || !strcmp(flowName, flow->getName())) {
                 PacketRegionValue packetRegionValue;
@@ -557,7 +557,7 @@ void DelayingTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_c
     auto packet = check_and_cast<Packet *>(object);
     auto flow = dynamic_cast<Flow *>(details);
     packet->mapAllRegionTags<DelayingTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const DelayingTimeTag>& tag) {
-        for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
+        for (size_t i = 0; i < tag->getBitTotalTimesArraySize(); i++) {
             auto flowName = tag->getFlowNames(i);
             if (flow == nullptr || !strcmp(flowName, flow->getName())) {
                 PacketRegionValue packetRegionValue;
@@ -579,7 +579,7 @@ void ProcessingTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t
     auto packet = check_and_cast<Packet *>(object);
     auto flow = dynamic_cast<Flow *>(details);
     packet->mapAllRegionTags<ProcessingTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const ProcessingTimeTag>& tag) {
-        for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
+        for (size_t i = 0; i < tag->getBitTotalTimesArraySize(); i++) {
             auto flowName = tag->getFlowNames(i);
             if (flow == nullptr || !strcmp(flowName, flow->getName())) {
                 PacketRegionValue packetRegionValue;
@@ -601,7 +601,7 @@ void QueueingTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_c
     auto packet = check_and_cast<Packet *>(object);
     auto flow = dynamic_cast<Flow *>(details);
     packet->mapAllRegionTags<QueueingTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const QueueingTimeTag>& tag) {
-        for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
+        for (size_t i = 0; i < tag->getBitTotalTimesArraySize(); i++) {
             auto flowName = tag->getFlowNames(i);
             if (flow == nullptr || !strcmp(flowName, flow->getName())) {
                 PacketRegionValue packetRegionValue;
@@ -623,7 +623,7 @@ void PropagationTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_
     auto packet = check_and_cast<Packet *>(object);
     auto flow = dynamic_cast<Flow *>(details);
     packet->mapAllRegionTags<PropagationTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const PropagationTimeTag>& tag) {
-        for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
+        for (size_t i = 0; i < tag->getBitTotalTimesArraySize(); i++) {
             auto flowName = tag->getFlowNames(i);
             if (flow == nullptr || !strcmp(flowName, flow->getName())) {
                 PacketRegionValue packetRegionValue;
@@ -645,7 +645,7 @@ void TransmissionTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime
     auto packet = check_and_cast<Packet *>(object);
     auto flow = dynamic_cast<Flow *>(details);
     packet->mapAllRegionTags<TransmissionTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const TransmissionTimeTag>& tag) {
-        for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
+        for (size_t i = 0; i < tag->getBitTotalTimesArraySize(); i++) {
             auto flowName = tag->getFlowNames(i);
             if (flow == nullptr || !strcmp(flowName, flow->getName())) {
                 PacketRegionValue packetRegionValue;
@@ -667,7 +667,7 @@ void PacketTransmissionTimePerRegionFilter::receiveSignal(cResultFilter *prev, s
     auto packet = check_and_cast<Packet *>(object);
     auto flow = dynamic_cast<Flow *>(details);
     packet->mapAllRegionTags<TransmissionTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const TransmissionTimeTag>& tag) {
-        for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
+        for (size_t i = 0; i < tag->getBitTotalTimesArraySize(); i++) {
             auto flowName = tag->getFlowNames(i);
             if (flow == nullptr || !strcmp(flowName, flow->getName())) {
                 PacketRegionValue packetRegionValue;

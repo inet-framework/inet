@@ -138,7 +138,7 @@ WireJunction::TxInfo *WireJunction::findTxInfo(long incomingTxId, int port)
     // find transmission, purge expired ones
     int txIndex = -1;
     simtime_t now = getSimulation()->getSimTime();
-    for (int i = 0; i < (int)txList.size(); i++) {
+    for (size_t i = 0; i < txList.size(); i++) {
         if (txList[i].finishTime < now) {
             txList[i] = txList.back(); // no-op if txList[i] is the last item (i.e. txList.back())
             txList.pop_back();

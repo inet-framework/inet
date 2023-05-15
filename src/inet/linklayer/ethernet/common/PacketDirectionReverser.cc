@@ -101,7 +101,7 @@ void PacketDirectionReverser::processPacket(Packet *packet)
                 protocols.push_back(protocol);
         }
         encapsulationProtocolReq->setProtocolArraySize(protocols.size());
-        for (int i = 0; i < protocols.size(); i++)
+        for (size_t i = 0; i < protocols.size(); i++)
             encapsulationProtocolReq->setProtocol(protocols.size() - i - 1, protocols[i]);
     }
 }

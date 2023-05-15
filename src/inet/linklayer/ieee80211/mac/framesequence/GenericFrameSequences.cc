@@ -156,7 +156,7 @@ std::string RepeatingFs::getHistory() const
 {
     ASSERT(step != -1);
     std::string history;
-    for (int i = 0; i < (int)histories.size(); i++) {
+    for (size_t i = 0; i < histories.size(); i++) {
         auto elementHistory = histories.at(i);
         if (!elementHistory.empty()) {
             if (!history.empty())

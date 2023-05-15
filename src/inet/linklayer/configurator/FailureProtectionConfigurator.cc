@@ -70,7 +70,7 @@ void FailureProtectionConfigurator::computeStream(cValueMap *configuration)
     auto sourceNodeName = sourceNode->module->getFullName();
     std::stringstream destinationNodeNames;
     destinationNodeNames << "[";
-    for (int i = 0; i < destinationNodes.size(); i++) {
+    for (size_t i = 0; i < destinationNodes.size(); i++) {
         if (i != 0)
             destinationNodeNames << ", ";
         destinationNodeNames << destinationNodes[i]->module->getFullName();
@@ -146,7 +146,7 @@ double FailureProtectionConfigurator::computeTreeCost(const Node *sourceNode, co
             auto startCost = it.second;
             for (auto path : tree.paths) {
                 if (path.interfaces[0]->node == startNode) {
-                    for (int i = 0; i < path.interfaces.size(); i++) {
+                    for (size_t i = 0; i < path.interfaces.size(); i++) {
                         auto interface = path.interfaces[i];
                         if (interface->node == destinationNode) {
                             cost += startCost + i;
@@ -243,7 +243,7 @@ bool FailureProtectionConfigurator::checkNodeFailureProtection(cValueArray *conf
             EV_DEBUG << std::endl;
             std::vector<bool> reachedDestinationNodes;
             reachedDestinationNodes.resize(destinationNodes.size(), false);
-            for (int i = 0; i < trees.size(); i++)
+            for (size_t i = 0; i < trees.size(); i++)
                 collectReachedNodes(sourceNode, destinationNodes, trees[i], failedNodes, reachedDestinationNodes);
             bool isProtected = std::all_of(reachedDestinationNodes.begin(), reachedDestinationNodes.end(), [] (bool v) { return v; });
             EV_DEBUG << "Node failure protection " << (isProtected ? "succeeded" : "failed") << EV_ENDL;
@@ -284,7 +284,7 @@ bool FailureProtectionConfigurator::checkLinkFailureProtection(cValueArray *conf
             EV_DEBUG << std::endl;
             std::vector<bool> reachedDestinationNodes;
             reachedDestinationNodes.resize(destinationNodes.size(), false);
-            for (int i = 0; i < trees.size(); i++)
+            for (size_t i = 0; i < trees.size(); i++)
                 collectReachedNodes(sourceNode, destinationNodes, trees[i], failedLinks, reachedDestinationNodes);
             bool isProtected = std::all_of(reachedDestinationNodes.begin(), reachedDestinationNodes.end(), [] (bool v) { return v; });
             EV_DEBUG << "Link failure protection " << (isProtected ? "succeeded" : "failed") << EV_ENDL;

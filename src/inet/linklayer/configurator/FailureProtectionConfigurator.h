@@ -26,7 +26,7 @@ class INET_API FailureProtectionConfigurator : public NetworkConfiguratorBase
         friend std::ostream& operator<<(std::ostream& os, const FailureProtectionConfigurator::Path& path)
         {
             os << "[";
-            for (int i = 0; i < path.interfaces.size(); i++) {
+            for (size_t i = 0; i < path.interfaces.size(); i++) {
                 auto interface = path.interfaces[i];
                 if (i != 0)
                     os << ", ";
@@ -50,7 +50,7 @@ class INET_API FailureProtectionConfigurator : public NetworkConfiguratorBase
         friend std::ostream& operator<<(std::ostream& os, const FailureProtectionConfigurator::Tree& tree)
         {
             os << "{";
-            for (int i = 0; i < tree.paths.size(); i++) {
+            for (size_t i = 0; i < tree.paths.size(); i++) {
                 auto path = tree.paths[i];
                 if (i != 0)
                     os << ", ";

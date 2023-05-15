@@ -24,7 +24,7 @@ Define_Module(MacForwardingTable);
 std::ostream& operator<<(std::ostream& os, const std::vector<int>& ids)
 {
     os << "[";
-    for (int i = 0; i < ids.size(); i++) {
+    for (size_t i = 0; i < ids.size(); i++) {
         auto id = ids[i];
         if (i != 0)
             os << ", ";

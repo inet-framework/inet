@@ -53,7 +53,7 @@ bool DestFilter::matches(IRoute *route)
     if (destAddresses.empty())
         return true;
 
-    for (int i = 0; i < (int)destAddresses.size(); ++i)
+    for (size_t i = 0; i < destAddresses.size(); ++i)
     {
         L3Address &dest = destAddresses[i];
         int prefixLength = prefixLengths[i];

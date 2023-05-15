@@ -153,7 +153,7 @@ void SharingRegionTagSet::mapAllTagsForUpdate(b offset, b length, std::function<
         prepareTagsVectorForUpdate();
         b startOffset = offset;
         b endOffset = offset + length;
-        for (int i = 0; i < (int)regionTags->size(); i++) {
+        for (size_t i = 0; i < regionTags->size(); i++) {
             const RegionTag<TagBase>& regionTag = (*regionTags)[i];
             if (endOffset <= regionTag.getStartOffset() || regionTag.getEndOffset() <= startOffset)
                 // no intersection
@@ -182,7 +182,7 @@ void SharingRegionTagSet::clearTags(b offset, b length)
         bool changed = false;
         b clearStartOffset = offset;
         b clearEndOffset = offset + length;
-        for (int i = 0; i < (int)regionTags->size(); i++) {
+        for (size_t i = 0; i < regionTags->size(); i++) {
             auto& regionTag = (*regionTags)[i];
             if (clearEndOffset <= regionTag.getStartOffset() || regionTag.getEndOffset() <= clearStartOffset)
                 // no intersection

@@ -88,7 +88,7 @@ std::vector<bool> GateControlList::retrieveGateStates(const char *gateStates, ui
         throw cRuntimeError("The length of the entry is not equal to numGates.");
     }
 
-    for (int indexGate = 0; indexGate < numGates; ++indexGate) {
+    for (size_t indexGate = 0; indexGate < numGates; ++indexGate) {
         char ch = *(gateStates + indexGate);
         if (ch == '1') {
             res[numGates - indexGate - 1] = true;

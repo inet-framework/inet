@@ -108,7 +108,7 @@ void PacketSchedulerBase::handleCanPushPacketChanged(const cGate *gate)
 
 bool PacketSchedulerBase::canPullSomePacket(const cGate *gate) const
 {
-    for (int i = 0; i < (int)inputGates.size(); i++) {
+    for (size_t i = 0; i < inputGates.size(); i++) {
         auto inputProvider = providers[i];
         if (inputProvider->canPullSomePacket(inputGates[i]->getPathStartGate()))
             return true;
@@ -118,7 +118,7 @@ bool PacketSchedulerBase::canPullSomePacket(const cGate *gate) const
 
 Packet *PacketSchedulerBase::canPullPacket(const cGate *gate) const
 {
-    for (int i = 0; i < (int)inputGates.size(); i++) {
+    for (size_t i = 0; i < inputGates.size(); i++) {
         auto inputProvider = providers[i];
         auto packet = inputProvider->canPullPacket(inputGates[i]->getPathStartGate());
         if (packet != nullptr)

@@ -464,7 +464,7 @@ void Ipv6InterfaceData::joinMulticastGroup(const Ipv6Address& multicastAddress)
     Ipv6AddressVector& multicastGroups = getHostData()->joinedMulticastGroups;
 
     std::vector<int>& refCounts = getHostData()->refCounts;
-    for (int i = 0; i < (int)multicastGroups.size(); ++i) {
+    for (size_t i = 0; i < multicastGroups.size(); ++i) {
         if (multicastGroups[i] == multicastAddress) {
             refCounts[i]++;
             return;
@@ -490,7 +490,7 @@ void Ipv6InterfaceData::leaveMulticastGroup(const Ipv6Address& multicastAddress)
 
     Ipv6AddressVector& multicastGroups = getHostData()->joinedMulticastGroups;
     std::vector<int>& refCounts = getHostData()->refCounts;
-    for (int i = 0; i < (int)multicastGroups.size(); ++i) {
+    for (size_t i = 0; i < multicastGroups.size(); ++i) {
         if (multicastGroups[i] == multicastAddress) {
             if (--refCounts[i] == 0) {
                 multicastGroups.erase(multicastGroups.begin() + i);

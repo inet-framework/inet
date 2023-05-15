@@ -959,7 +959,7 @@ void Dymo::processRerr(Packet *packet, const Ptr<const Rerr>& rerrIncoming)
         // route table for a route using longest prefix matching.  If no such
         // Route is found, processing is complete for that UnreachableNode.Address.
         std::vector<L3Address> unreachableAddresses;
-        for (int i = 0; i < (int)rerrIncoming->getUnreachableNodeArraySize(); i++) {
+        for (size_t i = 0; i < rerrIncoming->getUnreachableNodeArraySize(); i++) {
             const AddressBlock& addressBlock = rerrIncoming->getUnreachableNode(i);
             for (int j = 0; j < routingTable->getNumRoutes(); j++) {
                 IRoute *route = routingTable->getRoute(j);

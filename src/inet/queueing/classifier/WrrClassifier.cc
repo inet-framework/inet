@@ -28,11 +28,11 @@ void WrrClassifier::initialize(int stage)
         buckets = new int[consumers.size()];
 
         cStringTokenizer tokenizer(par("weights"));
-        int i;
-        for (i = 0; i < (int)consumers.size() && tokenizer.hasMoreTokens(); ++i)
+        size_t i;
+        for (i = 0; i < consumers.size() && tokenizer.hasMoreTokens(); ++i)
             buckets[i] = weights[i] = (int)utils::atoul(tokenizer.nextToken());
 
-        if (i < (int)consumers.size())
+        if (i < consumers.size())
             throw cRuntimeError("Too few values given in the weights parameter.");
         if (tokenizer.hasMoreTokens())
             throw cRuntimeError("Too many values given in the weights parameter.");
@@ -42,7 +42,7 @@ void WrrClassifier::initialize(int stage)
 int WrrClassifier::classifyPacket(Packet *packet)
 {
     bool isEmpty = true;
-    for (int i = 0; i < (int)consumers.size(); ++i) {
+    for (size_t i = 0; i < consumers.size(); ++i) {
         if (consumers[i]->canPushSomePacket(outputGates[i]->getPathEndGate())) {
             isEmpty = false;
             if (buckets[i] > 0) {
@@ -56,7 +56,7 @@ int WrrClassifier::classifyPacket(Packet *packet)
         return -1;
 
     int result = -1;
-    for (int i = 0; i < (int)consumers.size(); ++i) {
+    for (size_t i = 0; i < consumers.size(); ++i) {
         buckets[i] = weights[i];
         if (result == -1 && buckets[i] > 0 && consumers[i]->canPushSomePacket(outputGates[i]->getPathEndGate())) {
             buckets[i]--;

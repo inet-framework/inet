@@ -84,7 +84,7 @@ void TreeCanvasVisualizerBase::refreshDisplay() const
     for (auto it : treeVisualizations) {
         auto treeVisualization = it.second;
         auto treeCanvasVisualization = static_cast<const TreeCanvasVisualization *>(treeVisualization);
-        for (int i = 0; i < treeCanvasVisualization->paths.size(); i++) {
+        for (size_t i = 0; i < treeCanvasVisualization->paths.size(); i++) {
             auto& path = treeCanvasVisualization->paths[i];
             auto figure = treeCanvasVisualization->figures[i];
             auto moduleIds = path.moduleIds;
@@ -138,7 +138,7 @@ void TreeCanvasVisualizerBase::refreshDisplay() const
 const TreeVisualizerBase::TreeVisualization *TreeCanvasVisualizerBase::createTreeVisualization(const std::vector<std::vector<int>>& tree) const
 {
     std::vector<LabeledPolylineFigure *> figures;
-    for (int i = 0; i < tree.size(); i++) {
+    for (size_t i = 0; i < tree.size(); i++) {
         auto figure = new LabeledPolylineFigure("tree");
         auto polylineFigure = figure->getPolylineFigure();
         polylineFigure->setSmooth(lineSmooth);

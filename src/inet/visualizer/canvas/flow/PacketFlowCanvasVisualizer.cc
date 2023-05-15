@@ -69,7 +69,7 @@ const PathCanvasVisualizerBase::PathVisualization *PacketFlowCanvasVisualizer::c
 void PacketFlowCanvasVisualizer::processPathElement(cModule *networkNode, const char *label, Packet *packet)
 {
     packet->mapAllRegionTags<FlowTag>(b(0), packet->getTotalLength(), [&] (b offset, b length, const Ptr<const FlowTag>& flowTag) {
-        for (int i = 0; i < (int)flowTag->getNamesArraySize(); i++) {
+        for (size_t i = 0; i < flowTag->getNamesArraySize(); i++) {
             auto label = flowTag->getNames(i);
             mapChunks(packet->peekAt(b(0), packet->getTotalLength()), [&] (const Ptr<const Chunk>& chunk, int chunkId) {
                 auto path = getIncompletePath(label, chunkId);

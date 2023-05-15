@@ -16,7 +16,7 @@ void startPacketFlow(cModule *module, Packet *packet, const char *name)
 {
     packet->addRegionTagsWhereAbsent<FlowTag>(b(0), packet->getTotalLength());
     packet->mapAllRegionTagsForUpdate<FlowTag>(b(0), packet->getTotalLength(), [&] (b o, b l, const Ptr<FlowTag>& flowTag) {
-        for (int i = 0; i < (int)flowTag->getNamesArraySize(); i++)
+        for (size_t i = 0; i < flowTag->getNamesArraySize(); i++)
             if (!strcmp(name, flowTag->getNames(i)))
                 throw cRuntimeError("Flow already exists");
         flowTag->appendNames(name);
@@ -28,7 +28,7 @@ void startPacketFlow(cModule *module, Packet *packet, const char *name)
 void endPacketFlow(cModule *module, Packet *packet, const char *name)
 {
     packet->mapAllRegionTagsForUpdate<FlowTag>(b(0), packet->getTotalLength(), [&] (b o, b l, const Ptr<FlowTag>& flowTag) {
-        for (int i = 0; i < (int)flowTag->getNamesArraySize(); i++)
+        for (size_t i = 0; i < flowTag->getNamesArraySize(); i++)
             if (!strcmp(name, flowTag->getNames(i)))
                 return flowTag->eraseNames(i);
     });

@@ -80,7 +80,7 @@ void GateScheduleCanvasVisualizer::refreshGateVisualization(const GateVisualizat
     auto durations = gate->getDurations();
     bool open = gate->getInitiallyOpen();
     clocktime_t scheduleDuration = 0;
-    for (int i = 0; i < durations.size(); i++)
+    for (size_t i = 0; i < durations.size(); i++)
         scheduleDuration += durations[i];
     if (scheduleDuration == 0)
         figure->addSchedule(0, width, open);

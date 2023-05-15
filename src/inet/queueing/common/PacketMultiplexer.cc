@@ -125,7 +125,7 @@ void PacketMultiplexer::pushPacketProgress(Packet *packet, const cGate *gate, bp
 void PacketMultiplexer::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
-    for (int i = 0; i < (int)inputGates.size(); i++)
+    for (size_t i = 0; i < inputGates.size(); i++)
         // NOTE: notifying a listener may prevent others from pushing
         if (producers[i] != nullptr && consumer->canPushSomePacket(outputGate))
             producers[i]->handleCanPushPacketChanged(inputGates[i]->getPathStartGate());

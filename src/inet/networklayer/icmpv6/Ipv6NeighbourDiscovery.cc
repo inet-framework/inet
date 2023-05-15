@@ -1316,7 +1316,7 @@ void Ipv6NeighbourDiscovery::processRaPacket(Packet *packet, const Ipv6RouterAdv
         // Possible options
 //        MacAddress macAddress = ra->getSourceLinkLayerAddress();
 //        uint mtu = ra->getMTU();
-        for (int i = 0; i < (int)ra->getOptions().getOptionArraySize(); i++) {
+        for (size_t i = 0; i < ra->getOptions().getOptionArraySize(); i++) {
             auto option = ra->getOptions().getOption(i);
             if (option->getType() != IPv6ND_PREFIX_INFORMATION)
                 continue;
@@ -1493,7 +1493,7 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfo(const Ipv6RouterAdvertisement *
        the autonomous flag set and be used by [ADDRCONF].*/
     Ipv6NdPrefixInformation prefixInfo;
     // For each Prefix Information option
-    for (int i = 0; i < (int)ra->getOptions().getOptionArraySize(); i++) {
+    for (size_t i = 0; i < ra->getOptions().getOptionArraySize(); i++) {
         auto option = ra->getOptions().getOption(i);
         if (option->getType() != IPv6ND_PREFIX_INFORMATION)
             continue;
@@ -1790,7 +1790,7 @@ bool Ipv6NeighbourDiscovery::validateRaPacket(Packet *packet, const Ipv6RouterAd
     // - All included options have a length that is greater than zero.
     // CB
     bool prefixInfoFound = false;
-    for (int i = 0; i < (int)ra->getOptions().getOptionArraySize(); i++) {
+    for (size_t i = 0; i < ra->getOptions().getOptionArraySize(); i++) {
         auto option = ra->getOptions().getOption(i);
         if (option->getType() == IPv6ND_PREFIX_INFORMATION) {
             prefixInfoFound = true;

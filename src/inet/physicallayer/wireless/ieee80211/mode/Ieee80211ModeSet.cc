@@ -475,7 +475,7 @@ Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> en
 
 int Ieee80211ModeSet::findModeIndex(const IIeee80211Mode *mode) const
 {
-    for (int index = 0; index < (int)entries.size(); index++)
+    for (size_t index = 0; index < entries.size(); index++)
         if (entries[index].mode == mode)
             return index;
     return -1;
@@ -592,7 +592,7 @@ const IIeee80211Mode *Ieee80211ModeSet::getFasterMandatoryMode(const IIeee80211M
 {
     int index = findModeIndex(mode);
     if (index >= 0)
-        for (int i = index + 1; i < (int)entries.size(); i++)
+        for (size_t i = index + 1; i < entries.size(); i++)
             if (entries[i].isMandatory)
                 return entries[i].mode;
     return nullptr;
@@ -600,7 +600,7 @@ const IIeee80211Mode *Ieee80211ModeSet::getFasterMandatoryMode(const IIeee80211M
 
 const Ieee80211ModeSet *Ieee80211ModeSet::findModeSet(const char *mode)
 {
-    for (int index = 0; index < (int)(&modeSets)->size(); index++) {
+    for (size_t index = 0; index < (&modeSets)->size(); index++) {
         const Ieee80211ModeSet *modeSet = &(&modeSets)->at(index);
         if (strcmp(modeSet->getName(), mode) == 0)
             return modeSet;

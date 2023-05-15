@@ -133,14 +133,14 @@ void StreamRedundancyConfigurator::computeStreamSendersAndReceivers(cValueMap *s
     for (auto& it : stream.streamNodes) {
         EV_DEBUG << "  Node " << it.first << std::endl;
         auto& streamNode = it.second;
-        for (int i = 0; i < streamNode.senders.size(); i++) {
+        for (size_t i = 0; i < streamNode.senders.size(); i++) {
             auto& e = streamNode.senders[i];
             EV_DEBUG << "    Sender for tree " << i << " = " << e << std::endl;
         }
-        for (int i = 0; i < streamNode.receivers.size(); i++) {
+        for (size_t i = 0; i < streamNode.receivers.size(); i++) {
             auto& receiverNodes = streamNode.receivers[i];
             EV_DEBUG << "    Receivers for tree " << i << " = [";
-            for (int j = 0; j < receiverNodes.size(); j++) {
+            for (size_t j = 0; j < receiverNodes.size(); j++) {
                 auto& e = receiverNodes[j];
                 if (j != 0)
                     EV_DEBUG << ", ";
@@ -163,7 +163,7 @@ void StreamRedundancyConfigurator::computeStreamEncodings(cValueMap *streamConfi
         // encoding configuration
         auto& stream = streams[streamName];
         auto& streamNode = stream.streamNodes[networkNodeName];
-        for (int j = 0; j < streamNode.receivers.size(); j++) {
+        for (size_t j = 0; j < streamNode.receivers.size(); j++) {
             auto& receiverNetworkNodeNames = streamNode.receivers[j];
             if (!receiverNetworkNodeNames.empty()) {
                 std::string streamNameSuffix;
@@ -179,7 +179,7 @@ void StreamRedundancyConfigurator::computeStreamEncodings(cValueMap *streamConfi
                 int vlanId = jt.first->second++;
                 if (vlanId > maxVlanId)
                     throw cRuntimeError("Cannot assign VLAN ID in the available range");
-                for (int k = 0; k < receiverNetworkNodeNames.size(); k++) {
+                for (size_t k = 0; k < receiverNetworkNodeNames.size(); k++) {
                     auto receiverNetworkNodeName = receiverNetworkNodeNames[k];
                     EV_DEBUG << "Assigning VLAN id" << EV_FIELD(streamName) << EV_FIELD(networkNodeName) << EV_FIELD(receiverNetworkNodeName) << EV_FIELD(destinationAddress) << EV_FIELD(vlanId) << EV_ENDL;
                     assignedVlanIds[{networkNodeName, receiverNetworkNodeName, destinationAddress, streamName}] = vlanId;

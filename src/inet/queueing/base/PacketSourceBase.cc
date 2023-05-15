@@ -96,7 +96,7 @@ Ptr<Chunk> PacketSourceBase::createPacketContent() const
         const auto& packetContent = makeShared<BitsChunk>();
         std::vector<bool> bits;
         bits.resize(b(packetLength).get());
-        for (int i = 0; i < (int)bits.size(); i++) {
+        for (size_t i = 0; i < bits.size(); i++) {
             int packetData = packetDataParameter->intValue();
             bits[i] = packetData == -1 ? i % 2 == 0 : packetData;
         }
@@ -111,7 +111,7 @@ Ptr<Chunk> PacketSourceBase::createPacketContent() const
         const auto& packetContent = makeShared<BytesChunk>();
         std::vector<uint8_t> bytes;
         bytes.resize(B(packetLength).get());
-        for (int i = 0; i < (int)bytes.size(); i++) {
+        for (size_t i = 0; i < bytes.size(); i++) {
             int packetData = packetDataParameter->intValue();
             bytes[i] = packetData == -1 ? i % 256 : packetData;
         }

@@ -52,7 +52,7 @@ Packet *PacketDemultiplexer::pullPacket(const cGate *gate)
 void PacketDemultiplexer::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
-    for (int i = 0; i < (int)outputGates.size(); i++)
+    for (size_t i = 0; i < outputGates.size(); i++)
         // NOTE: notifying a listener may prevent others from pulling
         if (collectors[i] != nullptr && provider.canPullSomePacket())
             collectors[i]->handleCanPullPacketChanged(outputGates[i]->getPathEndGate());

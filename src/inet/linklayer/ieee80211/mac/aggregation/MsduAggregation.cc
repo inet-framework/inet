@@ -54,7 +54,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
     auto ra = firstHeader->getReceiverAddress();
     auto aggregatedFrame = new Packet();
     std::string aggregatedName;
-    for (int i = 0; i < (int)frames->size(); i++) {
+    for (size_t i = 0; i < frames->size(); i++) {
         auto msduSubframeHeader = makeShared<Ieee80211MsduSubframeHeader>();
         auto frame = frames->at(i);
         const auto& header = frame->popAtFront<Ieee80211DataHeader>();

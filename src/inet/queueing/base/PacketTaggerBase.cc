@@ -93,7 +93,7 @@ void PacketTaggerBase::markPacket(Packet *packet)
         EV_DEBUG << "Attaching SignalPowerReq" << EV_FIELD(packet) << EV_FIELD(transmissionPower) << EV_ENDL;
         packet->addTagIfAbsent<SignalPowerReq>()->setPower(transmissionPower);
     }
-    for (int i = 0; i < encapsulationProtocols.size(); i++) {
+    for (size_t i = 0; i < encapsulationProtocols.size(); i++) {
         auto protocol = encapsulationProtocols[encapsulationProtocols.size() - i - 1];
         ensureEncapsulationProtocolReq(packet, protocol);
     }

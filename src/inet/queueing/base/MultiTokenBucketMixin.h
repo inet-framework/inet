@@ -19,7 +19,7 @@ namespace queueing {
 inline std::ostream& operator<<(std::ostream& out, const std::vector<TokenBucket>& vector)
 {
     out << "[";
-    for (int i = 0; i < vector.size(); i++) {
+    for (size_t i = 0; i < vector.size(); i++) {
         auto& element = vector[i];
         if (i != 0)
             out << ", ";
@@ -82,7 +82,7 @@ class INET_API MultiTokenBucketMixin : public T, public ITokenStorage
         switch (directive) {
             case 'n': {
                 std::stringstream stream;
-                for (int i = 0; i < tokenBuckets.size(); i++) {
+                for (size_t i = 0; i < tokenBuckets.size(); i++) {
                     auto &tokenBucket = tokenBuckets[i];
                     if (i != 0)
                         stream << ", ";

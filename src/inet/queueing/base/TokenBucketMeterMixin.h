@@ -42,7 +42,7 @@ class INET_API TokenBucketMeterMixin : public T
             labelsTag->appendLabels(label);
         else {
             int newPriority = std::find(labelPriority.begin(), labelPriority.end(), label) - labelPriority.begin();
-            for (int i = 0; i < labelsTag->getLabelsArraySize(); i++) {
+            for (size_t i = 0; i < labelsTag->getLabelsArraySize(); i++) {
                 auto it = std::find(labelPriority.begin(), labelPriority.end(), labelsTag->getLabels(i));
                 if (it != labelPriority.end()) {
                     int oldPriority = it - labelPriority.begin();

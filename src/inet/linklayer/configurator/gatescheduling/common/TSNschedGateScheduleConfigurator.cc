@@ -67,7 +67,7 @@ cValueMap *TSNschedGateScheduleConfigurator::convertInputToJson(const Input& inp
     }
     cValueArray *jsonSwitches = new cValueArray();
     json->set("switches", jsonSwitches);
-    for (int i = 0; i < input.switches.size(); i++) {
+    for (size_t i = 0; i < input.switches.size(); i++) {
         auto switch_ = input.switches[i];
         cValueMap *jsonSwitch = new cValueMap();
         jsonSwitches->add(jsonSwitch);
@@ -81,7 +81,7 @@ cValueMap *TSNschedGateScheduleConfigurator::convertInputToJson(const Input& inp
         auto jsonPorts = new cValueArray();
         jsonSwitch->set("name", switch_->module->getFullName());
         jsonSwitch->set("ports", jsonPorts);
-        for (int j = 0; j < switch_->ports.size(); j++) {
+        for (size_t j = 0; j < switch_->ports.size(); j++) {
             auto port = switch_->ports[j];
             auto jsonPort = new cValueMap();
             jsonPorts->add(jsonPort);
@@ -124,9 +124,9 @@ cValueMap *TSNschedGateScheduleConfigurator::convertInputToJson(const Input& inp
         endDevices->add(cValue(flow->endDevice->module->getFullName()));
         cValueArray *hops = new cValueArray();
         jsonFlow->set("hops", hops);
-        for (int j = 0; j < flow->pathFragments.size(); j++) {
+        for (size_t j = 0; j < flow->pathFragments.size(); j++) {
             auto pathFragment = flow->pathFragments[j];
-            for (int k = 0; k < pathFragment->networkNodes.size() - 1; k++) {
+            for (size_t k = 0; k < pathFragment->networkNodes.size() - 1; k++) {
                 auto networkNode = pathFragment->networkNodes[k];
                 auto nextNetworkNode = pathFragment->networkNodes[k + 1];
                 cValueMap *hop = new cValueMap();

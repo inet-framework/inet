@@ -537,7 +537,7 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
                     // check for overlapping network address ranges
                     if (assignDisjunctSubnetAddressesParameter) {
                         bool overlaps = false;
-                        for (int i = 0; i < (int)assignedNetworkAddresses.size(); i++) {
+                        for (size_t i = 0; i < assignedNetworkAddresses.size(); i++) {
                             uint32_t assignedNetworkAddress = assignedNetworkAddresses[i];
                             uint32_t assignedNetworkNetmask = assignedNetworkNetmasks[i];
                             uint32_t assignedNetworkAddressMaximum = assignedNetworkAddress | ~assignedNetworkNetmask;
@@ -691,7 +691,7 @@ void Ipv4NetworkConfigurator::readInterfaceConfiguration(Topology& topology)
 
             // configure address/netmask constraints on matching interfaces
             for (auto& linkInfo : topology.linkInfos) {
-                for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++) {
+                for (size_t j = 0; j < linkInfo->interfaceInfos.size(); j++) {
                     InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(linkInfo->interfaceInfos[j]);
                     if (interfacesSeen.count(interfaceInfo) == 0) {
                         cModule *hostModule = interfaceInfo->networkInterface->getInterfaceTable()->getHostModule();
@@ -1728,7 +1728,7 @@ bool Ipv4NetworkConfigurator::tryToMergeTwoRoutes(RoutingTableInfo& routingTable
  */
 bool Ipv4NetworkConfigurator::tryToMergeAnyTwoRoutes(RoutingTableInfo& routingTableInfo)
 {
-    for (int i = 0; i < (int)routingTableInfo.routeInfos.size(); i++) {
+    for (size_t i = 0; i < routingTableInfo.routeInfos.size(); i++) {
         Ipv4NetworkConfigurator::RouteInfo *routeInfoI = routingTableInfo.routeInfos.at(i);
 
         // iterate backward so that we try to merge routes having longer netmasks first.

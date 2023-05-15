@@ -47,7 +47,7 @@ void layoutSubmodulesWithGates(cModule *module, int dimensionIndex, double modul
     std::sort(submodules.begin(), submodules.end(), [&] (cModule *s1, cModule *s2) {
         return getPosition(s1, dimensionIndex) < getPosition(s2, dimensionIndex);
     });
-    for (int i = 0; i < (int)submodules.size(); i++) {
+    for (size_t i = 0; i < submodules.size(); i++) {
         auto submodule = submodules[i];
         double maxPosition = 0;
         if (*submodule->getDisplayString().getTagArg("p", 2) != '\0')
@@ -71,7 +71,7 @@ void layoutSubmodulesWithGates(cModule *module, int dimensionIndex, double modul
                 maxPosition = std::max(maxPosition, connectedPosition);
             }
         }
-        for (int j = 0; j < i; j++) {
+        for (size_t j = 0; j < i; j++) {
             auto alignedSubmodule = submodules[j];
             if (getPosition(submodule, 1 - dimensionIndex) == getPosition(alignedSubmodule, 1 - dimensionIndex)) {
                 auto alignedPosition = getPosition(alignedSubmodule, dimensionIndex);

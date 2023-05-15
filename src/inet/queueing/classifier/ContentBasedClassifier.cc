@@ -34,7 +34,7 @@ void ContentBasedClassifier::initialize(int stage)
 
 int ContentBasedClassifier::classifyPacket(Packet *packet)
 {
-    for (int i = 0; i < (int)filters.size(); i++) {
+    for (size_t i = 0; i < filters.size(); i++) {
         auto filter = filters[i];
         if (filter->matches(packet))
             return i;

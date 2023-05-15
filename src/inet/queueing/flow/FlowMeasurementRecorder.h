@@ -46,7 +46,7 @@ class INET_API FlowMeasurementRecorder : public PacketFlowBase, public Transpare
     template<typename T>
     void endMeasurement(Packet *packet, b offset, b length) {
         packet->mapAllRegionTagsForUpdate<T>(offset, length, [&] (b o, b l, const Ptr<T>& timeTag) {
-            for (int i = 0; i < (int)timeTag->getBitTotalTimesArraySize(); i++) {
+            for (size_t i = 0; i < timeTag->getBitTotalTimesArraySize(); i++) {
                 auto flowName = timeTag->getFlowNames(i);
                 cMatchableString matchableFlowName(flowName);
                 if (flowNameMatcher.matches(&matchableFlowName)) {

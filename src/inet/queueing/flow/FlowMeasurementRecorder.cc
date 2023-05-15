@@ -85,7 +85,7 @@ void FlowMeasurementRecorder::endMeasurements(Packet *packet)
     if (measurePropagationTime)
         endMeasurement<PropagationTimeTag>(packet, offset, length);
     packet->mapAllRegionTagsForUpdate<FlowTag>(offset, length, [&] (b o, b l, const Ptr<FlowTag>& flowTag) {
-        for (int i = 0; i < (int)flowTag->getNamesArraySize(); i++) {
+        for (size_t i = 0; i < flowTag->getNamesArraySize(); i++) {
             auto flowName = flowTag->getNames(i);
             cMatchableString matchableFlowName(flowName);
             if (flowNameMatcher.matches(&matchableFlowName)) {

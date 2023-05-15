@@ -231,7 +231,7 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
         unsigned int byteLength = 8;   // Igmpv3Report header size
 
         msg->setGroupRecordArraySize(records.size());
-        for (int i = 0; i < (int)records.size(); ++i) {
+        for (size_t i = 0; i < records.size(); ++i) {
             cXMLElement *recordNode = records[i];
             const char *groupStr = recordNode->getAttribute("group");
             string recordTypeStr = recordNode->getAttribute("type");

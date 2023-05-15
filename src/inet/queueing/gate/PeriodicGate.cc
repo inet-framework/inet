@@ -71,7 +71,7 @@ void PeriodicGate::readDurationsPar()
         throw cRuntimeError("The duration parameter must contain an even number of values");
     totalDuration = CLOCKTIME_ZERO;
     durations.resize(size);
-    for (int i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
         clocktime_t duration = durationsPar->get(i).doubleValueInUnit("s");
         if (duration <= CLOCKTIME_ZERO)
             throw cRuntimeError("Unaccepted duration value (%s) at position %d", durationsPar->get(i).str().c_str(), i);

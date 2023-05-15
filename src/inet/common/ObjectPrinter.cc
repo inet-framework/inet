@@ -112,7 +112,7 @@ ObjectPrinter::ObjectPrinter(ObjectPrinterRecursionPredicate recursionPredicate,
 
 ObjectPrinter::~ObjectPrinter()
 {
-    for (int i = 0; i < (int)objectMatchExpressions.size(); i++) {
+    for (size_t i = 0; i < objectMatchExpressions.size(); i++) {
         delete objectMatchExpressions[i];
         std::vector<cMatchExpression *>& fieldNameMatchExpressions = fieldNameMatchExpressionsList[i];
         for (auto& fieldNameMatchExpression : fieldNameMatchExpressions)
@@ -238,7 +238,7 @@ bool ObjectPrinter::matchesObjectField(cObject *object, int fieldIndex)
 {
     const MatchableObject matchableObject(MatchableObject::ATTRIBUTE_CLASSNAME, object);
 
-    for (int i = 0; i < (int)objectMatchExpressions.size(); i++) {
+    for (size_t i = 0; i < objectMatchExpressions.size(); i++) {
         cMatchExpression *objectMatchExpression = objectMatchExpressions[i];
 
         if (objectMatchExpression->matches(&matchableObject)) {

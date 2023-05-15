@@ -77,7 +77,7 @@ const IReceptionPacketModel *Ieee80211OfdmDecoder::createPacketModel(const BitVe
     }
     else {
         std::vector<bool> bits;
-        for (int i = 0; i < (int)decodedBits->getSize(); i++)
+        for (size_t i = 0; i < decodedBits->getSize(); i++)
             bits.push_back(decodedBits->getBit(i));
         const auto& bitsChunk = makeShared<BitsChunk>(bits);
         packet = new Packet(nullptr, bitsChunk);

@@ -68,7 +68,7 @@ bool SequenceChunk::containsSameData(const Chunk& other) const
         if (chunks.size() != otherSequence->chunks.size())
             return false;
         else {
-            for (auto i = 0; i < (int)chunks.size(); i++)
+            for (size_t i = 0; i < chunks.size(); i++)
                 if (!chunks[i]->containsSameData(*otherSequence->chunks[i].get()))
                     return false;
             return true;

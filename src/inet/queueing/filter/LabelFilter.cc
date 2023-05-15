@@ -41,7 +41,7 @@ bool LabelFilter::matchesPacket(const Packet *packet) const
 {
     auto labelsTag = packet->findTag<LabelsTag>();
     if (labelsTag != nullptr) {
-        for (int i = 0; i < labelsTag->getLabelsArraySize(); i++) {
+        for (size_t i = 0; i < labelsTag->getLabelsArraySize(); i++) {
             auto label = labelsTag->getLabels(i);
             cMatchableString matchableString(label);
             if (const_cast<cMatchExpression *>(&labelFilter)->matches(&matchableString))

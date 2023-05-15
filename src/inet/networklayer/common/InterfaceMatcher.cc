@@ -98,7 +98,7 @@ InterfaceMatcher::~InterfaceMatcher()
  */
 int InterfaceMatcher::findMatchingSelector(const NetworkInterface *ie)
 {
-    for (int i = 0; i < (int)selectors.size(); i++)
+    for (size_t i = 0; i < selectors.size(); i++)
         if (selectors[i]->matches(ie))
             return i;
 

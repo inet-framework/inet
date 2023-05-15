@@ -88,7 +88,7 @@ void PacketClassifierBase::endPacketStreaming(Packet *packet)
 
 bool PacketClassifierBase::canPushSomePacket(const cGate *gate) const
 {
-    for (int i = 0; i < (int)outputGates.size(); i++)
+    for (size_t i = 0; i < outputGates.size(); i++)
         if (consumers[i]->canPushSomePacket(outputGates[i]->getPathEndGate()))
             return true;
     return false;
