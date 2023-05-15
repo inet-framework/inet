@@ -156,9 +156,10 @@ cValue PacketFilter::DynamicExpressionResolver::readVariable(cExpression::Contex
 
 cValue PacketFilter::DynamicExpressionResolver::readVariable(cExpression::Context *context, const char *name, intval_t index)
 {
+    ASSERT(index >= 0);
     bool isClassName = isupper(name[0]);
     if (isClassName) {
-        if (index < packetFilter->classNameToChunkMap.count(name)) {
+        if ((size_t)index < packetFilter->classNameToChunkMap.count(name)) {
             auto it = packetFilter->classNameToChunkMap.lower_bound(name);
             while (index-- > 0)
                 it++;
@@ -170,7 +171,7 @@ cValue PacketFilter::DynamicExpressionResolver::readVariable(cExpression::Contex
     else {
         auto protocol = Protocol::findProtocol(name);
         if (protocol != nullptr) {
-            if (index < packetFilter->protocolToChunkMap.count(protocol)) {
+            if ((size_t)index < packetFilter->protocolToChunkMap.count(protocol)) {
                 auto it = packetFilter->protocolToChunkMap.lower_bound(protocol);
                 while (index-- > 0)
                     it++;
@@ -219,13 +220,14 @@ cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context 
 
 cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context *context, const cValue &object, const char *name, intval_t index)
 {
+    ASSERT(index >= 0);
     if (object.getType() == cValue::POINTER) {
         auto cobject = object.objectValue();
         if (cobject != nullptr) {
             if (dynamic_cast<Packet *>(cobject)) {
                 bool isClassName = isupper(name[0]);
                 if (isClassName) {
-                    if (index < packetFilter->classNameToChunkMap.count(name)) {
+                    if ((size_t)index < packetFilter->classNameToChunkMap.count(name)) {
                         auto it = packetFilter->classNameToChunkMap.lower_bound(name);
                         while (index-- > 0)
                             it++;
@@ -237,7 +239,7 @@ cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context 
                 else {
                     auto protocol = Protocol::findProtocol(name);
                     if (protocol != nullptr) {
-                        if (index < packetFilter->protocolToChunkMap.count(protocol)) {
+                        if ((size_t)index < packetFilter->protocolToChunkMap.count(protocol)) {
                             auto it = packetFilter->protocolToChunkMap.lower_bound(protocol);
                             while (index-- > 0)
                                 it++;

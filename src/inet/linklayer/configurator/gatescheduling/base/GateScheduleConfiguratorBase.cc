@@ -199,14 +199,14 @@ void GateScheduleConfiguratorBase::addFlows(Input& input) const
                         for (int m = 0; m < pathFragment->size(); m++) {
                             for (auto networkNode : input.networkNodes) {
                                 auto name = pathFragment->get(m).stdstringValue();
-                                int index = name.find('.');
+                                auto index = name.find('.');
                                 auto nodeName = index != std::string::npos ? name.substr(0, index) : name;
                                 auto interfaceName = index != std::string::npos ? name.substr(index + 1) : "";
                                 if (networkNode->module->getFullName() == nodeName) {
                                     if (m != pathFragment->size() - 1) {
                                         auto startNode = networkNode;
                                         auto endNodeName = pathFragment->get(m + 1).stdstringValue();
-                                        int index = endNodeName.find('.');
+                                        auto index = endNodeName.find('.');
                                         endNodeName = index != std::string::npos ? endNodeName.substr(0, index) : endNodeName;
                                         auto outputPort = *std::find_if(startNode->ports.begin(), startNode->ports.end(), [&] (const auto& port) {
                                             return port->endNode->module->getFullName() == endNodeName && (interfaceName == "" || interfaceName == check_and_cast<NetworkInterface *>(port->module)->getInterfaceName());
@@ -262,7 +262,7 @@ void GateScheduleConfiguratorBase::configureGateScheduling(cModule *networkNode,
     if (it == gateSchedulingOutput->gateSchedules.end())
         throw cRuntimeError("Cannot find schedule for interface, interface = %s", networkInterface->getInterfaceFullPath().c_str());
     auto& schedules = it->second;
-    if (gateIndex >= schedules.size())
+    if (gateIndex >= (int)schedules.size())
         throw cRuntimeError("Cannot find schedule for traffic class, interface = %s, gate index = %d", port->module->getFullPath().c_str(), gateIndex);
     auto schedule = schedules[gateIndex];
     bool initiallyOpen = !schedule->open;

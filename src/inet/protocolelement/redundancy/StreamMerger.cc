@@ -49,7 +49,7 @@ void StreamMerger::processPacket(Packet *packet)
             auto outputStreamName = mapping->get(inputStreamName).stringValue();
             auto& it = sequenceNumbers[outputStreamName];
             it.push_back(packet->getTag<SequenceNumberInd>()->getSequenceNumber());
-            if (it.size() > bufferSize)
+            if ((int)it.size() > bufferSize)
                 it.erase(it.begin(), it.begin() + it.size() - bufferSize);
             if (*outputStreamName != '\0')
                 packet->getTagForUpdate<StreamInd>()->setStreamName(outputStreamName);

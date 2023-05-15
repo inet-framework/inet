@@ -66,7 +66,7 @@ void layoutSubmodulesWithGates(cModule *module, int dimensionIndex, double modul
             else
                 throw cRuntimeError("Unknown gate type");
             auto jt = find(submodules, connectedModule);
-            if (jt != submodules.end() && jt - submodules.begin() < i) {
+            if (jt != submodules.end() && (size_t)(jt - submodules.begin()) < i) {
                 auto connectedPosition = getPosition(connectedModule, dimensionIndex);
                 maxPosition = std::max(maxPosition, connectedPosition);
             }

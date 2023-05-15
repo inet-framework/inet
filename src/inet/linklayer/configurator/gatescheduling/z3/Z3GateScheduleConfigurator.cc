@@ -308,7 +308,7 @@ Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateSched
 double Z3GateScheduleConfigurator::getVariableValue(const model& model, const std::shared_ptr<expr> expr) const
 {
     auto str = model.eval(*expr.get(), false).to_string();
-    int index = str.find('/');
+    auto index = str.find('/');
     if (index != std::string::npos) {
         str = str.substr(3, str.length() - 1);
         index = str.find(' ');

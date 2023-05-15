@@ -30,7 +30,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     int slavePortId = -1; // interface ID of slave port
     std::set<int> masterPortIds; // interface IDs of master ports
     clocktime_t correctionField;
-    int64_t clockIdentity = 0;
+    uint64_t clockIdentity = 0;
 
     double gmRateRatio = 1.0;
     double receivedRateRatio = 1.0;

@@ -166,7 +166,7 @@ T& SharedDataManager::getSharedVariable(const char *key, Args&&... args)
 template <typename T, typename... Args>
 T& SharedDataManager::getSharedVariable(int handle, Args&&... args)
 {
-    if (sharedVariables.size() <= handle)
+    if ((int)sharedVariables.size() <= handle)
         sharedVariables.resize(handle+1);
     auto& item = sharedVariables[handle];
     if (item.first != nullptr)

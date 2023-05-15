@@ -73,7 +73,7 @@ void InitStageRegistry::assignInitStageNumbers()
         following->precedingStages.push_back(preceding);
     }
     numInitStages = 0;
-    while (numInitStages < stages.size()) {
+    while (numInitStages < (int)stages.size()) {
         bool assigned = false;
         for (auto stage : stages) {
             if (stage->number == -1) {

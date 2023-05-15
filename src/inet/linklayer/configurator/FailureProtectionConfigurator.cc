@@ -380,7 +380,7 @@ std::vector<FailureProtectionConfigurator::Tree> FailureProtectionConfigurator::
     return allTrees;
 }
 
-void FailureProtectionConfigurator::collectAllTrees(const std::vector<const Node *>& stopNodes, const std::vector<const Node *>& destinationNodes, int destinationNodeIndex, std::vector<Path>& currentTree, std::vector<Tree>& allTrees) const
+void FailureProtectionConfigurator::collectAllTrees(const std::vector<const Node *>& stopNodes, const std::vector<const Node *>& destinationNodes, size_t destinationNodeIndex, std::vector<Path>& currentTree, std::vector<Tree>& allTrees) const
 {
     if (destinationNodes.size() == destinationNodeIndex)
         allTrees.push_back(computeCanonicalTree(currentTree));

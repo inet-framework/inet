@@ -103,7 +103,7 @@ std::vector<short> Ieee802154UwbIrMode::make_s() const
 
 int Ieee802154UwbIrMode::s(int n) const
 {
-    if (n >= s_values.size())
+    if (n >= (int)s_values.size())
         throw cRuntimeError("Precomputed s[] values exhausted"); //TODO do "n = n % CYCLE_LENGTH" instead
     return s_values[n];
 }

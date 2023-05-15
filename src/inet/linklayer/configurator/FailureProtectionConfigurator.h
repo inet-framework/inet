@@ -122,7 +122,7 @@ class INET_API FailureProtectionConfigurator : public NetworkConfiguratorBase
     virtual void configureStreams() const;
 
     virtual std::vector<Tree> collectAllTrees(Node *sourceNode, const std::vector<const Node *>& destinationNodes) const;
-    virtual void collectAllTrees(const std::vector<const Node *>& stopNodes, const std::vector<const Node *>& destinationNodes, int destinationNodeIndex, std::vector<Path>& currentTree, std::vector<Tree>& allTrees) const;
+    virtual void collectAllTrees(const std::vector<const Node *>& stopNodes, const std::vector<const Node *>& destinationNodes, size_t destinationNodeIndex, std::vector<Path>& currentTree, std::vector<Tree>& allTrees) const;
 
     virtual std::vector<Path> collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *destinationNode) const;
     virtual void collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *currentNode, std::vector<const Interface *>& currentPath, std::vector<Path>& allPaths) const;
