@@ -52,11 +52,19 @@ class INET_API SelfDocTempOffClass
 #undef Enter_Method
 #undef Enter_Method_Silent
 
+#if OMNETPP_BUILDNUM < 2001
+#define __CSIMULATION_GET_SIMULATION_STAGE getSimulationStage
+#define __GET_SIMULATION getSimulation
+#else
+#define __CSIMULATION_GET_SIMULATION_STAGE getStage
+#define __GET_SIMULATION cSimulation::getActiveSimulation
+#endif
+
 #define __Enter_Method_SelfDoc(...) \
-        if (SelfDoc::notInInitialize(__VA_ARGS__) && (getSimulation()->getSimulationStage() != STAGE(CLEANUP))) { \
+        if (SelfDoc::notInInitialize(__VA_ARGS__) && (__GET_SIMULATION()->__CSIMULATION_GET_SIMULATION_STAGE() != STAGE(CLEANUP))) { \
             auto __from = __ctx.getCallerContext(); \
             std::string fromModuleName = __from ? __from->getParentModule() ? __from->getComponentType()->getFullName() : "-=Network=-" : "-=unknown=-"; \
-            std::string toModuleName = getSimulation()->getContext()->getComponentType()->getFullName(); \
+            std::string toModuleName = __GET_SIMULATION()->getContext()->getComponentType()->getFullName(); \
             std::string keyValFunction = SelfDoc::keyVal("function", std::string(opp_typename(typeid(*this))) + "::" + __func__); \
             std::string keyValInfo = SelfDoc::keyVal("info", SelfDoc::enterMethodInfo(__VA_ARGS__)); \
             { \
