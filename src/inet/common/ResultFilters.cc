@@ -711,7 +711,7 @@ void PacketRateFilter::emitPacketRate(simtime_t endInterval, cObject *details)
 
 void PacketRateFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
-    if (auto packet = dynamic_cast<cPacket *>(object)) {
+    if (dynamic_cast<cPacket *>(object)) {
         const simtime_t now = simTime();
         if (lastSignalTime + interval <= now) {
             emitPacketRate(lastSignalTime + interval, details);

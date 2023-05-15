@@ -70,7 +70,7 @@ const char *SharedDataManager::getSharedCounterName(sharedcounterhandle_t handle
 
 uint64_t& SharedDataManager::getSharedCounter(sharedcounterhandle_t handle, uint64_t initialValue)
 {
-    if (sharedCounters.size() <= handle)
+    if ((int)sharedCounters.size() <= handle)
         throw cRuntimeError("getSharedCounter(): invalid handle %lu, or number of shared counters exhausted (you can increase table size in " __FILE__ ")", (unsigned long)handle); // fixed size to prevent array reallocation which would invalidate returned references -- increase if necessary
     uint64_t& counter = sharedCounters[handle];
     if (counter == INVALID)

@@ -138,7 +138,7 @@ void Icmp::sendPtbMessage(Packet *packet, int mtu)
     if (maySendErrorMessage(packet, -1)) {
         // assemble a message name
         char msgname[80];
-        sprintf(msgname, "ICMP-PTB-#%ld-mtu%d", ++ctr, mtu);
+        sprintf(msgname, "ICMP-PTB-#%" PRIu64 "-mtu%d", ++ctr, mtu);
 
         // debugging information
         EV_DETAIL << "sending ICMP PTB " << msgname << endl;
@@ -166,7 +166,7 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
     if (maySendErrorMessage(packet, inputInterfaceId)) {
         // assemble a message name
         char msgname[80];
-        sprintf(msgname, "ICMP-error-#%ld-type%d-code%d", ++ctr, type, code);
+        sprintf(msgname, "ICMP-error-#%" PRIu64 "-type%d-code%d", ++ctr, type, code);
 
         // debugging information
         EV_DETAIL << "sending ICMP error " << msgname << endl;
