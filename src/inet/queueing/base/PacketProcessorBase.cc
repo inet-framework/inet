@@ -210,7 +210,7 @@ void PacketProcessorBase::animate(Packet *packet, cGate *startGate, cGate *endGa
 
 #ifdef INET_WITH_SELFDOC
     if (SelfDoc::generateSelfdoc) {
-        auto from = gate->getOwnerModule();
+        auto from = startGate->getOwnerModule();
         auto fromName = from->getComponentType()->getFullName();
         auto to = endGate->getOwnerModule();
         auto toName = to->getComponentType()->getFullName();
@@ -220,9 +220,9 @@ void PacketProcessorBase::animate(Packet *packet, cGate *startGate, cGate *endGa
             os << "=SelfDoc={ " << SelfDoc::keyVal("module", fromName)
                     << ", " << SelfDoc::keyVal("action", action == PUSH ? "PUSH_OUT" : "PULLED_OUT")
                     << ", " << SelfDoc::val("details") << " : {"
-                    << SelfDoc::keyVal("gate", SelfDoc::gateInfo(gate))
+                    << SelfDoc::keyVal("gate", SelfDoc::gateInfo(startGate))
                     << ", "<< SelfDoc::keyVal("msg", opp_typename(typeid(*packet)))
-                    << ", " << SelfDoc::keyVal("kind", SelfDoc::kindToStr(packet->getKind(), gate->getProperties(), "messageKinds", endGate->getProperties(), "messageKinds"))
+                    << ", " << SelfDoc::keyVal("kind", SelfDoc::kindToStr(packet->getKind(), startGate->getProperties(), "messageKinds", endGate->getProperties(), "messageKinds"))
                     << ", " << SelfDoc::keyVal("ctrl", ctrl ? opp_typename(typeid(*ctrl)) : "")
                     << ", " << SelfDoc::tagsToJson("tags", packet)
                     << ", " << SelfDoc::keyVal("destModule", toName)
@@ -237,7 +237,7 @@ void PacketProcessorBase::animate(Packet *packet, cGate *startGate, cGate *endGa
                     << ", " << SelfDoc::val("details") << " : {"
                     << SelfDoc::keyVal("gate", SelfDoc::gateInfo(endGate))
                     << ", " << SelfDoc::keyVal("msg", opp_typename(typeid(*packet)))
-                    << ", " << SelfDoc::keyVal("kind", SelfDoc::kindToStr(packet->getKind(), endGate->getProperties(), "messageKinds", gate->getProperties(), "messageKinds"))
+                    << ", " << SelfDoc::keyVal("kind", SelfDoc::kindToStr(packet->getKind(), endGate->getProperties(), "messageKinds", startGate->getProperties(), "messageKinds"))
                     << ", " << SelfDoc::keyVal("ctrl", ctrl ? opp_typename(typeid(*ctrl)) : "")
                     << ", " << SelfDoc::tagsToJson("tags", packet)
                     << ", " << SelfDoc::keyVal("srcModule", fromName)
