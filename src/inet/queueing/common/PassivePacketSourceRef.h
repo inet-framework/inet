@@ -17,6 +17,8 @@ namespace queueing {
 class INET_API PassivePacketSourceRef : public ModuleRefByGate<IPassivePacketSource>
 {
   public:
+    virtual ~PassivePacketSourceRef() {}
+
     virtual bool canPullSomePacket() const {
         return referencedModule->canPullSomePacket(referencedGate);
     }

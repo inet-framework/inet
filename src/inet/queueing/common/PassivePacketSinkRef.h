@@ -17,6 +17,8 @@ namespace queueing {
 class INET_API PassivePacketSinkRef : public ModuleRefByGate<IPassivePacketSink>
 {
   public:
+    virtual ~PassivePacketSinkRef() {}
+
     virtual bool canPushSomePacket() const {
         return referencedModule->canPushSomePacket(referencedGate);
     }
