@@ -14,6 +14,7 @@ The following showcases demonstrate scheduling and traffic shaping:
    creditbasedshaper/doc/index
    asynchronousshaper/doc/index
    cbsandats/doc/index
+   cbsandtas/doc/index
    underthehood/doc/index
 
 .. cbsandtas/doc/index
