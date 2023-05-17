@@ -39,7 +39,7 @@ class INET_API FlowMeasurementStarter : public PacketFlowBase, public Transparen
     template<typename T>
     void startMeasurement(Packet *packet, b offset, b length, simtime_t value) const {
         if (length == b(-1))
-            length = packet->getTotalLength();
+            length = packet->getDataLength();
         EV_INFO << "Starting measurement on packet" << EV_FIELD(offset) << EV_FIELD(length);
         if (flowName != nullptr && *flowName != '\0')
             EV_INFO << EV_FIELD(flowName);

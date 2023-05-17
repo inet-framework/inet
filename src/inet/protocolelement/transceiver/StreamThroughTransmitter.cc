@@ -74,7 +74,7 @@ void StreamThroughTransmitter::progressTx(Packet *packet, bps datarate, b positi
     // 2. store input progress
     b inputProgressPosition = lastInputProgressPosition + b(std::floor((simTime() - lastInputProgressTime).dbl() * lastInputDatarate.get()));
     auto txPacket = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
-    bool isInputProgressAtEnd = inputProgressPosition == packet->getTotalLength() && packet->getTotalLength() == txPacket->getTotalLength();
+    bool isInputProgressAtEnd = inputProgressPosition == packet->getDataLength() && packet->getDataLength() == txPacket->getDataLength();
     bool isPacketUnchangedSinceLastProgress = isInputProgressAtEnd || packet->peekAll()->containsSameData(*txPacket->peekAll().get());
     lastInputDatarate = datarate;
     lastInputProgressTime = simTime();
@@ -138,7 +138,7 @@ void StreamThroughTransmitter::abortTx()
     // TODO we can't just simply cut the packet proportionally with time because it's not always the case (modulation, scrambling, etc.)
     simtime_t timePosition = simTime() - txStartTime;
     b dataPosition = b(std::floor(txDatarate.get() * timePosition.dbl()));
-    packet->eraseAtBack(packet->getTotalLength() - dataPosition);
+    packet->eraseAtBack(packet->getDataLength() - dataPosition);
     packet->setBitError(true);
     auto signal = encodePacket(packet);
     signal->setDuration(timePosition);

@@ -111,7 +111,7 @@ void PacketFlowBase::pushPacketProgress(Packet *packet, const cGate *gate, bps d
         startPacketStreaming(packet);
     else
         checkPacketStreaming(packet);
-    bool isPacketEnd = packet->getTotalLength() == position + extraProcessableLength;
+    bool isPacketEnd = packet->getDataLength() == position + extraProcessableLength;
     processPacket(packet);
     if (isPacketEnd) {
         emit(packetPushedOutSignal, packet);
@@ -204,7 +204,7 @@ Packet *PacketFlowBase::pullPacketProgress(const cGate *gate, bps datarate, b po
     take(packet);
     checkPacketStreaming(packet);
     inProgressStreamId = packet->getTreeId();
-    bool isPacketEnd = packet->getTotalLength() == position + extraProcessableLength;
+    bool isPacketEnd = packet->getDataLength() == position + extraProcessableLength;
     processPacket(packet);
     if (isPacketEnd) {
         emit(packetPulledOutSignal, packet);

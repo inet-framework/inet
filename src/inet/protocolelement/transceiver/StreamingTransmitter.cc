@@ -91,7 +91,7 @@ void StreamingTransmitter::abortTx()
     // TODO we can't just simply cut the packet proportionally with time because it's not always the case (modulation, scrambling, etc.)
     simtime_t timePosition = simTime() - txStartTime;
     b dataPosition = b(std::floor(txDatarate.get() * timePosition.dbl()));
-    packet->eraseAtBack(packet->getTotalLength() - dataPosition);
+    packet->eraseAtBack(packet->getDataLength() - dataPosition);
     packet->setBitError(true);
     auto signal = encodePacket(packet);
     signal->setDuration(timePosition);

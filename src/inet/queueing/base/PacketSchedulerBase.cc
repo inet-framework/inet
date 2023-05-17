@@ -182,7 +182,7 @@ Packet *PacketSchedulerBase::pullPacketProgress(const cGate *gate, bps datarate,
     take(packet);
     checkPacketStreaming(packet);
     inProgressStreamId = packet->getTreeId();
-    if (packet->getTotalLength() == position + extraProcessableLength)
+    if (packet->getDataLength() == position + extraProcessableLength)
         endPacketStreaming(packet);
     if (collector != nullptr)
         animatePullPacketProgress(packet, outputGate, collector.getReferencedGate(), datarate, position, extraProcessableLength, packet->getTransmissionId());

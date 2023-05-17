@@ -359,7 +359,7 @@ public:
 //!CorruptingPacketsExample
 Packet *ErrorModel::corruptPacket(Packet *packet, double ber)
 {
-  auto length = packet->getTotalLength();
+  auto length = packet->getDataLength();
   auto hasErrors = hasProbabilisticError(length, ber); // decide randomly
   auto corruptedPacket = packet->dup(); // cheap operation
   corruptedPacket->setBitError(hasErrors); // set bit error flag

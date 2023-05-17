@@ -235,7 +235,7 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
     auto mode = ieee80211Transmitter->computeTransmissionMode(packet);
     auto phyHeader = mode->getHeaderMode()->createHeader();
     phyHeader->setChunkLength(b(mode->getHeaderMode()->getLength()));
-    phyHeader->setLengthField(B(packet->getTotalLength()));
+    phyHeader->setLengthField(B(packet->getDataLength()));
     insertCrc(phyHeader);
     packet->insertAtFront(phyHeader);
 

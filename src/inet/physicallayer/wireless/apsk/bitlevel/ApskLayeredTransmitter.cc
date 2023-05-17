@@ -97,7 +97,7 @@ const ITransmissionBitModel *ApskLayeredTransmitter::createBitModel(const ITrans
     else {
         auto packet = packetModel->getPacket();
         b netHeaderLength = packet->peekAtFront<ApskPhyHeader>()->getChunkLength();
-        b netDataLength = packet->getTotalLength() - netHeaderLength;
+        b netDataLength = packet->getDataLength() - netHeaderLength;
         if (encoder) {
             const ApskEncoder *apskEncoder = check_and_cast<const ApskEncoder *>(encoder);
             const ConvolutionalCode *forwardErrorCorrection = apskEncoder->getCode()->getConvolutionalCode();

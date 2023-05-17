@@ -26,7 +26,7 @@ void PaddingInserter::initialize(int stage)
 
 void PaddingInserter::processPacket(Packet *packet)
 {
-    auto length = packet->getTotalLength();
+    auto length = packet->getDataLength();
     b paddingLength = roundingLength * std::ceil(b(length).get() / b(roundingLength).get()) - length;
     if (length + paddingLength < minLength)
         paddingLength = minLength - length;

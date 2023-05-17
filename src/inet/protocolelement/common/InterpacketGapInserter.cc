@@ -201,7 +201,7 @@ void InterpacketGapInserter::pushOrSendOrSchedulePacketProgress(Packet *packet, 
     }
     packetEndTime = packetStartTime + SIMTIME_AS_CLOCKTIME(packet->getDuration());
     if (progress == nullptr || !progress->isScheduled()) {
-        if (packet->getTotalLength() == position + extraProcessableLength)
+        if (packet->getDataLength() == position + extraProcessableLength)
             handlePacketProcessed(packet);
         pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength, packet->getTransmissionId());
     }

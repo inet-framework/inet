@@ -148,7 +148,7 @@ void PacketClassifierBase::pushPacketProgress(Packet *packet, const cGate *gate,
         checkPacketStreaming(packet);
     auto outputGate = outputGates[inProgressGateIndex];
     auto consumer = consumers[inProgressGateIndex];
-    if (packet->getTotalLength() == position + extraProcessableLength)
+    if (packet->getDataLength() == position + extraProcessableLength)
         endPacketStreaming(packet);
     pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength, packet->getTransmissionId());
     updateDisplayString();

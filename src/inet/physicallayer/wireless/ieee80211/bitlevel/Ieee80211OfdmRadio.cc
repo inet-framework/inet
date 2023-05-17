@@ -31,7 +31,7 @@ void Ieee80211OfdmRadio::encapsulate(Packet *packet) const
     const auto& phyHeader = makeShared<Ieee80211OfdmPhyHeader>();
     auto mode = ofdmTransmitter->getMode(packet);
     phyHeader->setRate(mode->getSignalMode()->getRate());
-    phyHeader->setLengthField(B(packet->getTotalLength()));
+    phyHeader->setLengthField(B(packet->getDataLength()));
     packet->insertAtFront(phyHeader);
     auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
     const auto& phyTrailer = makeShared<BitCountChunk>(paddingLength + b(6));

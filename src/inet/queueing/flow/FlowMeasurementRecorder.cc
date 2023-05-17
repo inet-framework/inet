@@ -71,7 +71,7 @@ void FlowMeasurementRecorder::makeMeasurements(Packet *packet)
 void FlowMeasurementRecorder::endMeasurements(Packet *packet)
 {
     std::set<std::string> endedFlowNames;
-    b length = this->length == b(-1) ? packet->getTotalLength() - offset : this->length;
+    b length = this->length == b(-1) ? packet->getDataLength() - offset : this->length;
     if (measureElapsedTime)
         endMeasurement<ElapsedTimeTag>(packet, offset, length);
     if (measureDelayingTime)

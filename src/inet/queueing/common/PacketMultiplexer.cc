@@ -116,7 +116,7 @@ void PacketMultiplexer::pushPacketProgress(Packet *packet, const cGate *gate, bp
         startPacketStreaming(packet);
     else
         checkPacketStreaming(packet);
-    if (packet->getTotalLength() == position + extraProcessableLength)
+    if (packet->getDataLength() == position + extraProcessableLength)
         endPacketStreaming(packet);
     pushOrSendPacketProgress(packet, outputGate, consumer, datarate, position, extraProcessableLength, packet->getTransmissionId());
     updateDisplayString();

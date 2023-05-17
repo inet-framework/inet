@@ -58,7 +58,7 @@ void PacketServer::scheduleProcessingTimer()
 {
     clocktime_t processingTime = par("processingTime");
     auto processingBitrate = bps(par("processingBitrate"));
-    processingTime += s(packet->getTotalLength() / processingBitrate).get();
+    processingTime += s(packet->getDataLength() / processingBitrate).get();
     scheduleClockEventAfter(processingTime, processingTimer);
 }
 

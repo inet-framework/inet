@@ -135,7 +135,7 @@ void PacketProcessorBase::pushOrSendPacket(Packet *packet, cGate *startGate, Pas
 
 void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *startGate, PassivePacketSinkRef& consumer, bps datarate, int transmissionId)
 {
-    simtime_t duration = s(packet->getTotalLength() / datarate).get();
+    simtime_t duration = s(packet->getDataLength() / datarate).get();
     SendOptions sendOptions;
     sendOptions.duration(duration);
     sendOptions.updateTx(transmissionId, duration);
@@ -163,7 +163,7 @@ void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *startGate, 
     else {
         auto progressTag = packet->addTagIfAbsent<ProgressTag>();
         progressTag->setDatarate(bps(NaN));
-        progressTag->setPosition(packet->getTotalLength());
+        progressTag->setPosition(packet->getDataLength());
         send(packet, sendOptions, startGate);
     }
 }
@@ -171,7 +171,7 @@ void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *startGate, 
 void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *startGate, PassivePacketSinkRef& consumer, bps datarate, b position, b extraProcessableLength, int transmissionId)
 {
     // NOTE: duration is unknown due to arbitrarily changing datarate
-    simtime_t remainingDuration = s((packet->getTotalLength() - position) / datarate).get();
+    simtime_t remainingDuration = s((packet->getDataLength() - position) / datarate).get();
     SendOptions sendOptions;
     sendOptions.updateTx(transmissionId, remainingDuration);
     if (consumer != nullptr) {
@@ -179,7 +179,7 @@ void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *startG
             animatePushPacketStart(packet, startGate, consumer.getReferencedGate(), datarate, sendOptions);
             consumer->pushPacketStart(packet, consumer.getReferencedGate(), datarate);
         }
-        else if (position == packet->getTotalLength()) {
+        else if (position == packet->getDataLength()) {
             animatePushPacketEnd(packet, startGate, consumer.getReferencedGate(), sendOptions);
             consumer->pushPacketEnd(packet, consumer.getReferencedGate());
         }

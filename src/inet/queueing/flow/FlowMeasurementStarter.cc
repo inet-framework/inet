@@ -62,7 +62,7 @@ void FlowMeasurementStarter::processPacket(Packet *packet)
 
 void FlowMeasurementStarter::startMeasurements(Packet *packet) const
 {
-    auto length = this->length == b(-1) ? packet->getTotalLength() : this->length;
+    auto length = this->length == b(-1) ? packet->getDataLength() : this->length;
     if (measureElapsedTime)
         startMeasurement<ElapsedTimeTag>(packet, offset, length, simTime());
     if (measureDelayingTime)

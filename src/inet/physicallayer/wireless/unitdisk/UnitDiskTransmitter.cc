@@ -56,7 +56,7 @@ std::ostream& UnitDiskTransmitter::printToStream(std::ostream& stream, int level
 const ITransmission *UnitDiskTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
     auto phyHeader = packet->peekAtFront<UnitDiskPhyHeader>();
-    auto dataLength = packet->getTotalLength() - phyHeader->getChunkLength();
+    auto dataLength = packet->getDataLength() - phyHeader->getChunkLength();
     const auto& signalBitrateReq = const_cast<Packet *>(packet)->findTag<SignalBitrateReq>();
     auto transmissionBitrate = signalBitrateReq != nullptr ? signalBitrateReq->getDataBitrate() : bitrate;
     if (!(transmissionBitrate > bps(0)))

@@ -60,7 +60,7 @@ const ITransmissionBitModel *ApskEncoder::encode(const ITransmissionPacketModel 
 {
     auto packet = packetModel->getPacket();
     const auto& apskPhyHeader = packet->peekAtFront<ApskPhyHeader>();
-    auto length = packet->getTotalLength();
+    auto length = packet->getDataLength();
     BitVector *encodedBits;
     if (b(length).get() % 8 == 0)
         encodedBits = new BitVector(packet->peekAllAsBytes()->getBytes());

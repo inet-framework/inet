@@ -65,7 +65,7 @@ Signal *PacketTransmitterBase::encodePacket(Packet *packet)
     simtime_t packetTransmissionTime = CLOCKTIME_AS_SIMTIME(txDurationClockTime);
     simtime_t bitTransmissionTime = packet->getBitLength() != 0 ? CLOCKTIME_AS_SIMTIME(txDurationClockTime / packet->getBitLength()) : 0;
     auto packetEvent = new PacketTransmittedEvent();
-    packetEvent->setDatarate(packet->getTotalLength() / s(txDurationClockTime.dbl()));
+    packetEvent->setDatarate(packet->getDataLength() / s(txDurationClockTime.dbl()));
     insertPacketEvent(this, packet, PEK_TRANSMITTED, bitTransmissionTime, packetEvent);
     increaseTimeTag<TransmissionTimeTag>(packet, bitTransmissionTime, packetTransmissionTime);
     if (auto channel = dynamic_cast<cDatarateChannel *>(outputGate->findTransmissionChannel())) {
@@ -113,7 +113,7 @@ void PacketTransmitterBase::sendSignalEnd(Signal *signal, int transmissionId)
 
 clocktime_t PacketTransmitterBase::calculateClockTimeDuration(const Packet *packet) const
 {
-    s duration = packet->getTotalLength() / txDatarate;
+    s duration = packet->getDataLength() / txDatarate;
     EV_TRACE << "Calculating signal duration" << EV_FIELD(packet) << EV_FIELD(duration, simsec(duration)) << EV_ENDL;
     return duration.get();
 }

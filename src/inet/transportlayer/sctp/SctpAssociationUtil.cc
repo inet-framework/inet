@@ -389,7 +389,7 @@ void SctpAssociation::sendToIP(Packet *pkt, const Ptr<SctpHeader>& sctpmsg,
         auto udpHeader = makeShared<UdpHeader>();
         udpHeader->setSourcePort(SCTP_UDP_PORT);
         udpHeader->setDestinationPort(SCTP_UDP_PORT);
-        udpHeader->setTotalLengthField(udpHeader->getChunkLength() + pkt->getTotalLength());
+        udpHeader->setTotalLengthField(udpHeader->getChunkLength() + pkt->getDataLength());
         EV_INFO << "Packet: " << pkt << endl;
         udpHeader->setCrcMode(sctpMain->crcMode);
         insertTransportProtocolHeader(pkt, Protocol::udp, udpHeader);

@@ -148,7 +148,7 @@ const ITransmissionPacketModel *Ieee80211LayeredOfdmTransmitter::createSignalFie
 const ITransmissionPacketModel *Ieee80211LayeredOfdmTransmitter::createDataFieldPacketModel(const ITransmissionPacketModel *completePacketModel) const
 {
     auto packet = completePacketModel->getPacket();
-    const auto& dataChunk = packet->peekAt(b(NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2), packet->getTotalLength() - b(NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2));
+    const auto& dataChunk = packet->peekAt(b(NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2), packet->getDataLength() - b(NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2));
     return new TransmissionPacketModel(new Packet(nullptr, dataChunk), bps(NaN), bps(NaN));
 }
 

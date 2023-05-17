@@ -62,7 +62,7 @@ void CutthroughSource::pushPacketEnd(Packet *packet, const cGate *gate)
     cutthroughBuffer->setStreamData(cutthroughData);
     cutthroughBuffer = nullptr;
     numProcessedPackets++;
-    processedTotalLength += packet->getTotalLength();
+    processedTotalLength += packet->getDataLength();
     delete packet;
     updateDisplayString();
 }

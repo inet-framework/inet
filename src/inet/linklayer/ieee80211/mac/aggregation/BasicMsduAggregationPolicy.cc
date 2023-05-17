@@ -35,7 +35,7 @@ bool BasicMsduAggregationPolicy::isEligible(Packet *packet, const Ptr<const Ieee
     // The maximum MPDU length that can be transported using A-MPDU aggregation is 4095 octets. An
     // A-MSDU cannot be fragmented. Therefore, an A-MSDU of a length that exceeds 4065 octets (
     // 4095 minus the QoS data MPDU overhead) cannot be transported in an A-MPDU.
-    if (aMsduLength + packet->getTotalLength() - header->getChunkLength() - trailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER) > maxAMsduSize) // default value of maxAMsduSize is 4065
+    if (aMsduLength + packet->getDataLength() - header->getChunkLength() - trailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER) > maxAMsduSize) // default value of maxAMsduSize is 4065
         return false;
 
     // The value of TID present in the QoS Control field of the MPDU carrying the A-MSDU indicates the TID for
@@ -77,7 +77,7 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queuei
         }
         EV_TRACE << "Queued " << *dataPacket << " is eligible for A-MSDU aggregation.\n";
         frames->push_back(dataPacket);
-        aMsduLength += dataPacket->getTotalLength() - dataHeader->getChunkLength() - dataTrailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header
+        aMsduLength += dataPacket->getDataLength() - dataHeader->getChunkLength() - dataTrailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header
     }
     if (frames->size() <= 1 || !isAggregationPossible(frames->size(), B(aMsduLength).get())) {
         EV_DEBUG << "A-MSDU aggregation is not possible, collected " << frames->size() << " packets.\n";

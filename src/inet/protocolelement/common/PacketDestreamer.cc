@@ -70,7 +70,7 @@ void PacketDestreamer::pushPacketEnd(Packet *packet, const cGate *gate)
     delete streamedPacket;
     streamedPacket = packet;
     streamDatarate = datarate;
-    auto packetLength = streamedPacket->getTotalLength();
+    auto packetLength = streamedPacket->getDataLength();
     EV_INFO << "Ending destreaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     pushOrSendPacket(streamedPacket, outputGate, consumer);
     streamedPacket = nullptr;

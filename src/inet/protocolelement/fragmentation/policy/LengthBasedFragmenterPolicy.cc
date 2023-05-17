@@ -25,10 +25,10 @@ std::vector<b> LengthBasedFragmenterPolicy::computeFragmentLengths(Packet *packe
 {
     Enter_Method("computeFragmentLengths");
     std::vector<b> fragmentLengths;
-    if (maxFragmentLength >= packet->getTotalLength())
-        fragmentLengths.push_back(packet->getTotalLength());
+    if (maxFragmentLength >= packet->getDataLength())
+        fragmentLengths.push_back(packet->getDataLength());
     else {
-        b remainingLength = packet->getTotalLength();
+        b remainingLength = packet->getDataLength();
         while (fragmentHeaderLength + remainingLength > maxFragmentLength) {
             auto fragmentLength = maxFragmentLength - fragmentHeaderLength;
             fragmentLengths.push_back(fragmentLength);

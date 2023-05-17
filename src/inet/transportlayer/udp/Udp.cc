@@ -774,7 +774,7 @@ void Udp::handleUpperPacket(Packet *packet)
     udpHeader->setSourcePort(srcPort);
     udpHeader->setDestinationPort(destPort);
 
-    B totalLength = udpHeader->getChunkLength() + packet->getTotalLength();
+    B totalLength = udpHeader->getChunkLength() + packet->getDataLength();
     if (totalLength.get() > UDP_MAX_MESSAGE_SIZE)
         throw cRuntimeError("send: total UDP message size exceeds %u", UDP_MAX_MESSAGE_SIZE);
 

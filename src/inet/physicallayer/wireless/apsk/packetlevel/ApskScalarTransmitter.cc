@@ -34,7 +34,7 @@ const ITransmission *ApskScalarTransmitter::createTransmission(const IRadio *tra
 {
     auto phyHeader = packet->peekAtFront<ApskPhyHeader>();
     ASSERT(phyHeader->getChunkLength() == headerLength);
-    auto dataLength = packet->getTotalLength() - phyHeader->getChunkLength();
+    auto dataLength = packet->getDataLength() - phyHeader->getChunkLength();
     W transmissionPower = computeTransmissionPower(packet);
     Hz transmissionCenterFrequency = computeCenterFrequency(packet);
     Hz transmissionBandwidth = computeBandwidth(packet);

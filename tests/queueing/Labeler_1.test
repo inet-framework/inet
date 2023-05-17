@@ -47,14 +47,14 @@ using namespace inet;
 
 static bool testSmall(const Packet *packet)
 {
-    return packet->getTotalLength() == B(1);
+    return packet->getDataLength() == B(1);
 }
 
 Register_Packet_Filter_Function(TestSmall, testSmall);
 
 static bool testLarge(const Packet *packet)
 {
-    return packet->getTotalLength() == B(2);
+    return packet->getDataLength() == B(2);
 }
 
 Register_Packet_Filter_Function(TestLarge, testLarge);

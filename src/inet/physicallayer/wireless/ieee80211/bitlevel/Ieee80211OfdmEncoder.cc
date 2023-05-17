@@ -37,7 +37,7 @@ std::ostream& Ieee80211OfdmEncoder::printToStream(std::ostream& stream, int leve
 const ITransmissionBitModel *Ieee80211OfdmEncoder::encode(const ITransmissionPacketModel *packetModel) const
 {
     auto packet = packetModel->getPacket();
-    auto length = packet->getTotalLength();
+    auto length = packet->getDataLength();
     BitVector *encodedBits;
     if (b(length).get() % 8 == 0) {
         auto bytes = packet->peekAllAsBytes()->getBytes();

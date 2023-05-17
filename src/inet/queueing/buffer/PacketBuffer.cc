@@ -49,7 +49,7 @@ b PacketBuffer::getTotalLength() const
 {
     b totalLength = b(0);
     for (auto packet : packets)
-        totalLength += packet->getTotalLength();
+        totalLength += packet->getDataLength();
     return totalLength;
 }
 

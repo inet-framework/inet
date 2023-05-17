@@ -39,7 +39,7 @@ void ExponentialRateMeter::meterPacket(Packet *packet)
         lastUpdate = now;
     }
     currentNumPackets++;
-    currentTotalPacketLength += packet->getTotalLength();
+    currentTotalPacketLength += packet->getDataLength();
     auto rateTag = packet->addTagIfAbsent<RateTag>();
     rateTag->setDatarate(datarate);
     rateTag->setPacketrate(packetrate);
