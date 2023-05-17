@@ -58,7 +58,7 @@ void CompoundPacketQueueBase::pushPacket(Packet *packet, const cGate *gate)
     emit(packetPushStartedSignal, packet, &packetPushStartedDetails);
     animatePushPacket(packet, inputGate, consumer.getReferencedGate());
     EV_INFO << "Pushing packet" << EV_FIELD(packet) << EV_ENDL;
-    consumer->pushPacket(packet, consumer.getReferencedGate());
+    consumer.pushPacket(packet);
     if (packetDropperFunction != nullptr) {
         while (isOverloaded()) {
             auto packet = packetDropperFunction->selectPacket(this);
@@ -76,7 +76,7 @@ void CompoundPacketQueueBase::pushPacket(Packet *packet, const cGate *gate)
 Packet *CompoundPacketQueueBase::pullPacket(const cGate *gate)
 {
     Enter_Method("pullPacket");
-    auto packet = provider->pullPacket(provider.getReferencedGate());
+    auto packet = provider.pullPacket();
     take(packet);
     emit(packetPulledSignal, packet);
     updateDisplayString();

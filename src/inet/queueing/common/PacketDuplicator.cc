@@ -40,7 +40,7 @@ void PacketDuplicator::handleCanPushPacketChanged(const cGate *gate)
 void PacketDuplicator::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
-    producer->handlePushPacketProcessed(packet, gate, successful);
+    producer.handlePushPacketProcessed(packet, successful);
 }
 
 } // namespace queueing

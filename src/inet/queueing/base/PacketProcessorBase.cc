@@ -127,7 +127,7 @@ void PacketProcessorBase::pushOrSendPacket(Packet *packet, cGate *startGate, Pas
 {
     if (consumer != nullptr) {
         animatePushPacket(packet, startGate, consumer.getReferencedGate());
-        consumer->pushPacket(packet, consumer.getReferencedGate());
+        consumer.pushPacket(packet);
     }
     else
         send(packet, startGate);
@@ -141,7 +141,7 @@ void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *startGate
     sendOptions.updateTx(transmissionId, duration);
     if (consumer != nullptr) {
         animatePushPacketStart(packet, startGate, consumer.getReferencedGate(), datarate, sendOptions);
-        consumer->pushPacketStart(packet, consumer.getReferencedGate(), datarate);
+        consumer.pushPacketStart(packet, datarate);
     }
     else {
         auto progressTag = packet->addTagIfAbsent<ProgressTag>();
@@ -158,7 +158,7 @@ void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *startGate, 
     sendOptions.updateTx(transmissionId, 0);
     if (consumer != nullptr) {
         animatePushPacketEnd(packet, startGate, consumer.getReferencedGate(), sendOptions);
-        consumer->pushPacketEnd(packet, consumer.getReferencedGate());
+        consumer.pushPacketEnd(packet);
     }
     else {
         auto progressTag = packet->addTagIfAbsent<ProgressTag>();
@@ -177,15 +177,15 @@ void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *startG
     if (consumer != nullptr) {
         if (position == b(0)) {
             animatePushPacketStart(packet, startGate, consumer.getReferencedGate(), datarate, sendOptions);
-            consumer->pushPacketStart(packet, consumer.getReferencedGate(), datarate);
+            consumer.pushPacketStart(packet, datarate);
         }
         else if (position == packet->getDataLength()) {
             animatePushPacketEnd(packet, startGate, consumer.getReferencedGate(), sendOptions);
-            consumer->pushPacketEnd(packet, consumer.getReferencedGate());
+            consumer.pushPacketEnd(packet);
         }
         else {
             animatePushPacketProgress(packet, startGate, consumer.getReferencedGate(), datarate, position, extraProcessableLength, sendOptions);
-            consumer->pushPacketProgress(packet, consumer.getReferencedGate(), datarate, position, extraProcessableLength);
+            consumer.pushPacketProgress(packet, datarate, position, extraProcessableLength);
         }
     }
     else {

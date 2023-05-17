@@ -36,7 +36,7 @@ int ContentBasedScheduler::schedulePacket()
 {
     for (auto filter : filters) {
         for (size_t i = 0; i < inputGates.size(); i++) {
-            auto packet = providers[i]->canPullPacket(inputGates[i]);
+            auto packet = providers[i].canPullPacket();
             if (packet != nullptr && filter->matches(packet))
                 return i;
         }

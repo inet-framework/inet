@@ -37,7 +37,7 @@ void PacketMeterBase::handleCanPushPacketChanged(const cGate *gate)
 void PacketMeterBase::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     if (producer != nullptr)
-        producer->handlePushPacketProcessed(packet, gate, successful);
+        producer.handlePushPacketProcessed(packet, successful);
 }
 
 } // namespace inet

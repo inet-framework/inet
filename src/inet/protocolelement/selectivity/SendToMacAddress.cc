@@ -53,7 +53,7 @@ void SendToMacAddress::processPacket(Packet *packet)
 
 void SendToMacAddress::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
-    producer->handlePushPacketProcessed(packet, gate, successful);
+    producer.handlePushPacketProcessed(packet, successful);
 }
 
 } // namespace inet

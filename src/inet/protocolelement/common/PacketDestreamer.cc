@@ -139,7 +139,7 @@ void PacketDestreamer::handlePullPacketProcessed(Packet *packet, const cGate *ga
 {
     Enter_Method("handlePullPacketConfirmation");
     if (collector != nullptr)
-        collector->handlePullPacketProcessed(packet, gate, successful);
+        collector.handlePullPacketProcessed(packet, successful);
 }
 
 void PacketDestreamer::handleCanPullPacketChanged(const cGate *gate)

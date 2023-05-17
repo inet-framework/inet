@@ -204,7 +204,7 @@ void PreemptableStreamer::handlePullPacketProcessed(Packet *packet, const cGate 
 {
     Enter_Method("handlePullPacketConfirmation");
     if (collector != nullptr)
-        collector->handlePullPacketProcessed(packet, gate, successful);
+        collector.handlePullPacketProcessed(packet, successful);
 }
 
 } // namespace inet
