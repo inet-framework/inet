@@ -43,7 +43,7 @@ int WrrClassifier::classifyPacket(Packet *packet)
 {
     bool isEmpty = true;
     for (size_t i = 0; i < consumers.size(); ++i) {
-        if (consumers[i]->canPushSomePacket(outputGates[i]->getPathEndGate())) {
+        if (consumers[i].canPushSomePacket()) {
             isEmpty = false;
             if (buckets[i] > 0) {
                 buckets[i]--;
@@ -58,7 +58,7 @@ int WrrClassifier::classifyPacket(Packet *packet)
     int result = -1;
     for (size_t i = 0; i < consumers.size(); ++i) {
         buckets[i] = weights[i];
-        if (result == -1 && buckets[i] > 0 && consumers[i]->canPushSomePacket(outputGates[i]->getPathEndGate())) {
+        if (result == -1 && buckets[i] > 0 && consumers[i].canPushSomePacket()) {
             buckets[i]--;
             result = i;
         }

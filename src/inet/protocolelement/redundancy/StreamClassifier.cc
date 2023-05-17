@@ -54,7 +54,7 @@ int StreamClassifier::classifyPacket(Packet *packet)
     }
     if (streamName != nullptr && mapping->containsKey(streamName)) {
         int outputGateIndex = mapping->get(streamName).intValue() + gateIndexOffset;
-        if (consumers[outputGateIndex]->canPushPacket(packet, outputGates[outputGateIndex]->getPathEndGate()))
+        if (consumers[outputGateIndex].canPushPacket(packet))
             return outputGateIndex;
     }
     return defaultGateIndex;

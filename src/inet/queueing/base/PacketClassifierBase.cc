@@ -89,7 +89,7 @@ void PacketClassifierBase::endPacketStreaming(Packet *packet)
 bool PacketClassifierBase::canPushSomePacket(const cGate *gate) const
 {
     for (size_t i = 0; i < outputGates.size(); i++)
-        if (consumers[i]->canPushSomePacket(outputGates[i]->getPathEndGate()))
+        if (consumers[i].canPushSomePacket())
             return true;
     return false;
 }
@@ -97,7 +97,7 @@ bool PacketClassifierBase::canPushSomePacket(const cGate *gate) const
 bool PacketClassifierBase::canPushPacket(Packet *packet, const cGate *gate) const
 {
     int index = callClassifyPacket(packet);
-    return consumers[index]->canPushPacket(packet, outputGates[index]->getPathEndGate());
+    return consumers[index].canPushPacket(packet);
 }
 
 void PacketClassifierBase::pushPacket(Packet *packet, const cGate *gate)
@@ -198,7 +198,7 @@ void PacketClassifierBase::handleCanPullPacketChanged(const cGate *gate)
         int index = callClassifyPacket(packet);
         auto collector = collectors[index];
         if (collector != nullptr)
-            collector->handleCanPullPacketChanged(outputGates[index]->getPathEndGate());
+            collector.handleCanPullPacketChanged();
     }
 }
 

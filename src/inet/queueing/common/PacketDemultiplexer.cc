@@ -55,7 +55,7 @@ void PacketDemultiplexer::handleCanPullPacketChanged(const cGate *gate)
     for (size_t i = 0; i < outputGates.size(); i++)
         // NOTE: notifying a listener may prevent others from pulling
         if (collectors[i] != nullptr && provider.canPullSomePacket())
-            collectors[i]->handleCanPullPacketChanged(outputGates[i]->getPathEndGate());
+            collectors[i].handleCanPullPacketChanged();
 }
 
 void PacketDemultiplexer::handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful)
