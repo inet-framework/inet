@@ -51,7 +51,7 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
         inout ethg[numEthInterfaces] @labels(EtherFrame-conn) @allowUnconnected;
     submodules:
         pcapRecorder[numPcapRecorders]: PcapRecorder {
-            @display("p=125,640;is=s");
+            @display("p=125,720;is=s");
         }
         interfaceTable: InterfaceTable {
             @display("p=125,240;is=s");

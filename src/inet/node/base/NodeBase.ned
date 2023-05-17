@@ -60,7 +60,7 @@ module NodeBase like INetworkNode
             @display("p=125,160;is=s");
         }
         measurer: <default("")> like IMeasurer if typename != "" {
-            @display("p=125,660;is=s");
+            @display("p=125,640;is=s");
         }
 }
 
