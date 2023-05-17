@@ -11,7 +11,9 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/common/ActivePacketSinkRef.h"
+#include "inet/queueing/common/ActivePacketSourceRef.h"
 #include "inet/queueing/common/PassivePacketSinkRef.h"
+#include "inet/queueing/common/PassivePacketSourceRef.h"
 #include "inet/queueing/contract/IPacketSink.h"
 #include "inet/queueing/contract/IPacketSource.h"
 
@@ -24,8 +26,8 @@ class INET_API PacketSchedulerBase : public PacketProcessorBase, public Transpar
     bool reverseOrder = false;
 
     std::vector<cGate *> inputGates;
-    std::vector<IPassivePacketSource *> providers;
-    std::vector<IActivePacketSource *> producers;
+    std::vector<PassivePacketSourceRef> providers;
+    std::vector<ActivePacketSourceRef> producers;
 
     cGate *outputGate = nullptr;
     ActivePacketSinkRef collector;

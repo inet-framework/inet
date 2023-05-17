@@ -17,7 +17,7 @@ void PriorityScheduler::initialize(int stage)
     PacketSchedulerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         for (auto provider : providers)
-            collections.push_back(dynamic_cast<IPacketCollection *>(provider));
+            collections.push_back(dynamic_cast<IPacketCollection *>(provider.get()));
     }
 }
 
@@ -82,7 +82,7 @@ int PriorityScheduler::schedulePacket()
 {
     for (size_t i = 0; i < providers.size(); i++) {
         int inputIndex = getInputGateIndex(i);
-        if (inputIndex == inProgressGateIndex || providers[inputIndex]->canPullSomePacket(inputGates[inputIndex]->getPathStartGate()))
+        if (inputIndex == inProgressGateIndex || providers[inputIndex].canPullSomePacket())
             return inputIndex;
     }
     return -1;

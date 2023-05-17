@@ -10,7 +10,7 @@
 
 #include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PacketSchedulerBase.h"
-#include "inet/queueing/contract/IActivePacketSource.h"
+#include "inet/queueing/common/ActivePacketSourceRef.h"
 
 namespace inet {
 
@@ -21,7 +21,7 @@ namespace queueing {
 class INET_API MarkovScheduler : public ClockUserModuleMixin<PacketSchedulerBase>, public virtual IPassivePacketSink, public virtual IActivePacketSource
 {
   protected:
-    std::vector<IActivePacketSource *> producers;
+    std::vector<ActivePacketSourceRef> producers;
     PassivePacketSinkRef consumer;
 
     std::vector<std::vector<double>> transitionProbabilities;

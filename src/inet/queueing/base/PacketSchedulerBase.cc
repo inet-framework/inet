@@ -24,9 +24,11 @@ void PacketSchedulerBase::initialize(int stage)
         for (int i = 0; i < gateSize("in"); i++) {
             auto inputGate = gate("in", i);
             inputGates.push_back(inputGate);
-            auto provider = findConnectedModule<IPassivePacketSource>(inputGate);
+            PassivePacketSourceRef provider;
+            provider.reference(inputGate, false);
             providers.push_back(provider);
-            auto producer = findConnectedModule<IActivePacketSource>(inputGate);
+            ActivePacketSourceRef producer;
+            producer.reference(inputGate, false);
             producers.push_back(producer);
         }
     }
@@ -102,7 +104,7 @@ void PacketSchedulerBase::handleCanPushPacketChanged(const cGate *gate)
     if (index != -1) {
         auto producer = producers[index];
         if (producer != nullptr)
-            producer->handleCanPushPacketChanged(inputGates[index]->getPathStartGate());
+            producer.handleCanPushPacketChanged();
     }
 }
 
@@ -110,7 +112,7 @@ bool PacketSchedulerBase::canPullSomePacket(const cGate *gate) const
 {
     for (size_t i = 0; i < inputGates.size(); i++) {
         auto inputProvider = providers[i];
-        if (inputProvider->canPullSomePacket(inputGates[i]->getPathStartGate()))
+        if (inputProvider.canPullSomePacket())
             return true;
     }
     return false;
@@ -120,7 +122,7 @@ Packet *PacketSchedulerBase::canPullPacket(const cGate *gate) const
 {
     for (size_t i = 0; i < inputGates.size(); i++) {
         auto inputProvider = providers[i];
-        auto packet = inputProvider->canPullPacket(inputGates[i]->getPathStartGate());
+        auto packet = inputProvider.canPullPacket();
         if (packet != nullptr)
             return packet;
     }
@@ -132,7 +134,7 @@ Packet *PacketSchedulerBase::pullPacket(const cGate *gate)
     Enter_Method("pullPacket");
     checkPacketStreaming(nullptr);
     int index = callSchedulePacket();
-    auto packet = providers[index]->pullPacket(inputGates[index]->getPathStartGate());
+    auto packet = providers[index].pullPacket();
     take(packet);
     EV_INFO << "Scheduling packet" << EV_FIELD(packet) << EV_ENDL;
     handlePacketProcessed(packet);
@@ -148,7 +150,7 @@ Packet *PacketSchedulerBase::pullPacketStart(const cGate *gate, bps datarate)
     Enter_Method("pullPacketStart");
     checkPacketStreaming(nullptr);
     startPacketStreaming();
-    auto packet = providers[inProgressGateIndex]->pullPacketStart(inputGates[inProgressGateIndex]->getPathStartGate(), datarate);
+    auto packet = providers[inProgressGateIndex].pullPacketStart(datarate);
     take(packet);
     inProgressStreamId = packet->getTreeId();
     if (collector != nullptr)
@@ -162,7 +164,7 @@ Packet *PacketSchedulerBase::pullPacketEnd(const cGate *gate)
     Enter_Method("pullPacketEnd");
     if (!isStreamingPacket())
         startPacketStreaming();
-    auto packet = providers[inProgressGateIndex]->pullPacketEnd(inputGates[inProgressGateIndex]->getPathStartGate());
+    auto packet = providers[inProgressGateIndex].pullPacketEnd();
     take(packet);
     checkPacketStreaming(packet);
     inProgressStreamId = packet->getTreeId();
@@ -178,7 +180,7 @@ Packet *PacketSchedulerBase::pullPacketProgress(const cGate *gate, bps datarate,
     Enter_Method("pullPacketProgress");
     if (!isStreamingPacket())
         startPacketStreaming();
-    auto packet = providers[inProgressGateIndex]->pullPacketProgress(inputGates[inProgressGateIndex]->getPathStartGate(), datarate, position, extraProcessableLength);
+    auto packet = providers[inProgressGateIndex].pullPacketProgress(datarate, position, extraProcessableLength);
     take(packet);
     checkPacketStreaming(packet);
     inProgressStreamId = packet->getTreeId();

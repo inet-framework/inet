@@ -21,7 +21,7 @@ void LabelScheduler::initialize(int stage)
         defaultGateIndex = par("defaultGateIndex");
         labels = cStringTokenizer(par("labels")).asVector();
         for (auto provider : providers)
-            collections.push_back(dynamic_cast<IPacketCollection *>(provider));
+            collections.push_back(dynamic_cast<IPacketCollection *>(provider.get()));
     }
 }
 
@@ -62,7 +62,7 @@ int LabelScheduler::schedulePacket()
 {
     for (auto label : labels) {
         for (size_t i = 0; i < providers.size(); i++) {
-            auto packet = providers[i]->canPullPacket(inputGates[i]->getPathStartGate());
+            auto packet = providers[i].canPullPacket();
             const auto& labelsTag = packet->findTag<LabelsTag>();
             if (labelsTag != nullptr) {
                 for (size_t j = 0; j < labelsTag->getLabelsArraySize(); j++)

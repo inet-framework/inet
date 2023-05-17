@@ -26,7 +26,11 @@ IPacketSchedulerFunction *PacketScheduler::createSchedulerFunction(const char *s
 
 int PacketScheduler::schedulePacket()
 {
-    int index = packetSchedulerFunction->schedulePacket(providers);
+    // TODO: should we change the interface method instead?
+    std::vector<IPassivePacketSource *> rawProviders;
+    for (auto provider : providers)
+        rawProviders.push_back(provider.get());
+    int index = packetSchedulerFunction->schedulePacket(rawProviders);
     return index == -1 ? index : getInputGateIndex(index);
 }
 

@@ -22,9 +22,10 @@ void PacketMultiplexer::initialize(int stage)
         forwardProtocolRegistration = par("forwardProtocolRegistration");
         for (int i = 0; i < gateSize("in"); i++) {
             auto inputGate = gate("in", i);
-            auto input = findConnectedModule<IActivePacketSource>(inputGate);
             inputGates.push_back(inputGate);
-            producers.push_back(input);
+            ActivePacketSourceRef producer;
+            producer.reference(inputGate, false);
+            producers.push_back(producer);
         }
         outputGate = gate("out");
         consumer.reference(outputGate, false);
@@ -128,7 +129,7 @@ void PacketMultiplexer::handleCanPushPacketChanged(const cGate *gate)
     for (size_t i = 0; i < inputGates.size(); i++)
         // NOTE: notifying a listener may prevent others from pushing
         if (producers[i] != nullptr && consumer->canPushSomePacket(outputGate))
-            producers[i]->handleCanPushPacketChanged(inputGates[i]->getPathStartGate());
+            producers[i].handleCanPushPacketChanged();
 }
 
 void PacketMultiplexer::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)

@@ -38,7 +38,7 @@ void WrrScheduler::initialize(int stage)
             throw cRuntimeError("Too many values given in the weights parameter.");
 
         for (auto provider : providers)
-            collections.push_back(dynamic_cast<IPacketCollection *>(provider));
+            collections.push_back(dynamic_cast<IPacketCollection *>(provider.get()));
     }
 }
 
@@ -70,7 +70,7 @@ int WrrScheduler::schedulePacket()
     int firstWeighted = -1;
     int firstNonWeighted = -1;
     for (size_t i = 0; i < providers.size(); ++i) {
-        if (providers[i]->canPullSomePacket(inputGates[i]->getPathStartGate())) {
+        if (providers[i].canPullSomePacket()) {
             if (buckets[i] > 0) {
                 buckets[i]--;
                 return (int)i;

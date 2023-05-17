@@ -10,8 +10,8 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/common/ActivePacketSourceRef.h"
 #include "inet/queueing/common/PassivePacketSinkRef.h"
-#include "inet/queueing/contract/IActivePacketSource.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
@@ -24,7 +24,7 @@ class INET_API PacketMultiplexer : public PacketProcessorBase, public virtual IP
     bool forwardProtocolRegistration;
 
     std::vector<cGate *> inputGates;
-    std::vector<IActivePacketSource *> producers;
+    std::vector<ActivePacketSourceRef> producers;
 
     cGate *outputGate = nullptr;
     PassivePacketSinkRef consumer;

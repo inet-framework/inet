@@ -25,8 +25,9 @@ void MarkovScheduler::initialize(int stage)
         ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         for (int i = 0; i < gateSize("in"); i++) {
-            auto input = findConnectedModule<IActivePacketSource>(inputGates[i]);
-            producers.push_back(input);
+            ActivePacketSourceRef producer;
+            producer.reference(inputGates[i], false);
+            producers.push_back(producer);
         }
         consumer.reference(outputGate, false);
         state = par("initialState");
@@ -51,7 +52,7 @@ void MarkovScheduler::initialize(int stage)
             checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);
         if (producers[state] != nullptr)
-            producers[state]->handleCanPushPacketChanged(inputGates[state]->getPathStartGate());
+            producers[state].handleCanPushPacketChanged();
         scheduleWaitTimer();
     }
 }
@@ -70,7 +71,7 @@ void MarkovScheduler::handleMessage(cMessage *message)
             }
         }
         if (producers[state] != nullptr)
-            producers[state]->handleCanPushPacketChanged(inputGates[state]->getPathStartGate());
+            producers[state].handleCanPushPacketChanged();
         scheduleWaitTimer();
     }
     else
@@ -123,14 +124,14 @@ void MarkovScheduler::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (producers[state] != nullptr)
-        producers[state]->handleCanPushPacketChanged(inputGates[state]->getPathStartGate());
+        producers[state].handleCanPushPacketChanged();
 }
 
 void MarkovScheduler::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
     if (producers[state] != nullptr)
-        producers[state]->handlePushPacketProcessed(packet, inputGates[state]->getPathStartGate(), successful);
+        producers[state].handlePushPacketProcessed(packet, successful);
 }
 
 } // namespace queueing
