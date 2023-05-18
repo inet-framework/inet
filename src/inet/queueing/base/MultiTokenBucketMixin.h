@@ -52,12 +52,25 @@ class INET_API MultiTokenBucketMixin : public T, public ITokenStorage
             WATCH_VECTOR(tokenBuckets);
         }
         else if (stage == INITSTAGE_QUEUEING)
-            T::emit(tokensChangedSignal, getNumTokens());
+            emitTokensChangedSignals();
     }
 
     virtual void finish() override
     {
+        emitTokensChangedSignals();
+    }
+
+    virtual std::string getTokenBucketName(int i) {
+        return std::to_string(i);
+    }
+
+    virtual void emitTokensChangedSignals() {
         T::emit(tokensChangedSignal, getNumTokens());
+        for (size_t i = 0; i < tokenBuckets.size(); i++) {
+            auto name = getTokenBucketName(i);
+            cNamedObject tokenBucketName(name.c_str());
+            T::emit(tokensChangedSignal, tokenBuckets[i].getNumTokens(), &tokenBucketName);
+        }
     }
 
     virtual ITokenStorage* getExcessTokenStorage(const char *designator)
@@ -108,18 +121,18 @@ class INET_API MultiTokenBucketMixin : public T, public ITokenStorage
     {
         Enter_Method("addTokens");
         EV_INFO << "Adding tokens" << EV_FIELD(numTokens) << EV_FIELD(tokenBuckets) << EV_ENDL;
-        T::emit(tokensChangedSignal, getNumTokens());
+        emitTokensChangedSignals();
         tokenBuckets[0].addTokens(numTokens);
-        T::emit(tokensChangedSignal, getNumTokens());
+        emitTokensChangedSignals();
     }
 
     virtual void removeTokens(double numTokens) override
     {
         Enter_Method("removeTokens");
         EV_INFO << "Removing tokens" << EV_FIELD(numTokens) << EV_ENDL;
-        T::emit(tokensChangedSignal, getNumTokens());
+        emitTokensChangedSignals();
         tokenBuckets[0].removeTokens(numTokens);
-        T::emit(tokensChangedSignal, getNumTokens());
+        emitTokensChangedSignals();
     }
 
     virtual void addTokenProductionRate(double tokenRate) override

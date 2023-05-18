@@ -24,6 +24,6 @@ simple MultiTokenBucketClassifier extends PacketClassifierBase like IPacketClass
         double tokenConsumptionPerBit = default(1); // how many tokens are consumed per bit
         displayStringTextFormat = default("contains %n tk\nmetered %p pk (%l)");
         @signal[tokensChanged](type=double);
-        @statistic[numTokens](title="number of tokens"; source=tokensChanged; record=vector; unit=tk; interpolationmode=linear);
+        @statistic[numTokens](title="number of tokens"; source=demux(tokensChanged); record=vector; unit=tk; interpolationmode=linear);
         @class(MultiTokenBucketClassifier);
 }
