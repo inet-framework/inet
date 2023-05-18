@@ -18,7 +18,7 @@
 
 package inet.examples.inet.ipsec;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
@@ -32,7 +32,7 @@ network TwoHosts
         server: StandardHost {
             @display("p=300,60;i=device/pc2");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=53,134");
         }
     connections:
