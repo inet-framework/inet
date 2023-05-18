@@ -31,7 +31,7 @@ void MultiTokenBucketMeter::initialize(int stage)
 
 void MultiTokenBucketMeter::meterPacket(Packet *packet)
 {
-    emit(tokensChangedSignal, getNumTokens());
+    emitTokensChangedSignals();
     auto numTokens = getNumPacketTokens(packet);
     for (int i = 0; i < tokenBuckets.size(); i++) {
         auto& tokenBucket = tokenBuckets[i];
@@ -41,7 +41,7 @@ void MultiTokenBucketMeter::meterPacket(Packet *packet)
             auto label = labels[i].c_str();
             EV_INFO << "Removed tokens, labeling packet" << EV_FIELD(numTokens) << EV_FIELD(tokenBucket) << EV_FIELD(label) << EV_FIELD(packet) << EV_ENDL;
             packet->addTagIfAbsent<LabelsTag>()->appendLabels(label);
-            emit(tokensChangedSignal, getNumTokens());
+            emitTokensChangedSignals();
             return;
         }
     }

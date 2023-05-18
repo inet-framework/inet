@@ -26,6 +26,6 @@ simple MultiTokenBucketMeter extends PacketMeterBase like IPacketMeter
         object labelPriority = default([]); // the list of labels in the order of priority, if specified packets can only be promoted in this order
         displayStringTextFormat = default("contains %n tk\nmetered %p pk (%l)");
         @signal[tokensChanged](type=double);
-        @statistic[numTokens](title="number of tokens"; source=tokensChanged; record=vector; unit=tk; interpolationmode=linear);
+        @statistic[numTokens](title="number of tokens"; source=demux(tokensChanged); record=vector; unit=tk; interpolationmode=linear);
         @class(MultiTokenBucketMeter);
 }

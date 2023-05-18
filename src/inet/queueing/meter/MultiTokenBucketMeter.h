@@ -26,6 +26,8 @@ class INET_API MultiTokenBucketMeter : public TokenBucketMeterMixin<MultiTokenBu
     virtual void initialize(int stage) override;
 
     virtual void meterPacket(Packet *packet) override;
+
+    virtual std::string getTokenBucketName(int i) override { return labels[i]; }
 };
 
 } // namespace queueing

@@ -25,7 +25,7 @@ void MultiTokenBucketClassifier::initialize(int stage)
 
 int MultiTokenBucketClassifier::classifyPacket(Packet *packet)
 {
-    emit(tokensChangedSignal, getNumTokens());
+    emitTokensChangedSignals();
     auto numTokens = getNumPacketTokens(packet);
     for (int i = 0; i < tokenBuckets.size(); i++) {
         auto& tokenBucket = tokenBuckets[i];
@@ -33,7 +33,7 @@ int MultiTokenBucketClassifier::classifyPacket(Packet *packet)
         if (tokenBucket.getNumTokens() > numTokens) {
             tokenBucket.removeTokens(numTokens);
             EV_INFO << "Removed tokens from ith bucket for packet" << EV_FIELD(numTokens) << EV_FIELD(i) << EV_FIELD(tokenBucket) << EV_FIELD(packet) << EV_ENDL;
-            emit(tokensChangedSignal, getNumTokens());
+            emitTokensChangedSignals();
             return i;
         }
     }
