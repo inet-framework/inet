@@ -34,7 +34,7 @@ cNEDValue nedf_hasModule(cComponent *context, cNEDValue argv[], int argc)
     auto types = cModuleType::findAll(name); // by simple name
     for (cModuleType *type : types)
         if (type && type->isAvailable())
-        return true;
+            return true;
     return false;
 #endif
 }
