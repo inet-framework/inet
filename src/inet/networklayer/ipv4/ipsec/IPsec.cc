@@ -278,16 +278,19 @@ PacketInfo IPsec::extractEgressPacketInfo(Packet *packet, const Ipv4Address& loc
         const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv4datagram->getChunkLength());
         packetInfo.setLocalPort(tcpHeader->getSourcePort());
         packetInfo.setRemotePort(tcpHeader->getDestinationPort());
+        packetInfo.setTfcSupported(false);
     }
     else if (ipv4datagram->getProtocolId() == IP_PROT_UDP) {
         const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipv4datagram->getChunkLength());
         packetInfo.setLocalPort(udpHeader->getSourcePort());
         packetInfo.setRemotePort(udpHeader->getDestinationPort());
+        packetInfo.setTfcSupported(true);
     }
     else if (ipv4datagram->getProtocolId() == IP_PROT_ICMP) {
         const auto& icmpHeader = packet->peekDataAt<IcmpHeader>(ipv4datagram->getChunkLength());
         packetInfo.setIcmpType(icmpHeader->getType());
         packetInfo.setIcmpCode(icmpHeader->getCode());
+        packetInfo.setTfcSupported(false);
     }
     return packetInfo;
 }
@@ -354,27 +357,30 @@ PacketInfo IPsec::extractIngressPacketInfo(Packet *packet)
         const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv4datagram->getChunkLength());
         packetInfo.setLocalPort(tcpHeader->getDestinationPort());
         packetInfo.setRemotePort(tcpHeader->getSourcePort());
+        packetInfo.setTfcSupported(false);
     }
     else if (ipv4datagram->getProtocolId() == IP_PROT_UDP) {
         const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipv4datagram->getChunkLength());
         packetInfo.setLocalPort(udpHeader->getDestinationPort());
         packetInfo.setRemotePort(udpHeader->getSourcePort());
+        packetInfo.setTfcSupported(true);
     }
     else if (ipv4datagram->getProtocolId() == IP_PROT_ICMP) {
         const auto& icmpHeader = packet->peekDataAt<IcmpHeader>(ipv4datagram->getChunkLength());
         packetInfo.setIcmpType(icmpHeader->getType());
         packetInfo.setIcmpCode(icmpHeader->getCode());
+        packetInfo.setTfcSupported(false);
     }
     return packetInfo;
 }
 
-void IPsec::espProtect(Packet *transport, SecurityAssociation *sadEntry, int transportType)
+void IPsec::espProtect(Packet *transport, SecurityAssociation *sadEntry, int transportType, bool tfcEnabled)
 {
     bool haveEncryption = sadEntry->getEspMode()==EspMode::CONFIDENTIALITY || sadEntry->getEspMode()==EspMode::COMBINED;
     ASSERT(haveEncryption == (sadEntry->getEnryptionAlg() != EncryptionAlg::NONE));
 
     // Handle encryption part. Compute padding according to RFC 4303 Sections 2.4 and 2.5
-    unsigned int tfcPadding = intuniform(0, sadEntry->getMaxTfcPadLength());
+    unsigned int tfcPadding = tfcEnabled ? intuniform(0, sadEntry->getMaxTfcPadLength()) : 0;
     unsigned int paddableLength = transport->getByteLength() + tfcPadding + ESP_FIXED_PAYLOAD_TRAILER_BYTES;
     unsigned int blockSize = getBlockSizeBytes(sadEntry->getEnryptionAlg());
     unsigned int paddedLength = blockSize * ((paddableLength + blockSize - 1) / blockSize);
@@ -601,6 +607,7 @@ INetfilter::IHook::Result IPsec::protectDatagram(Packet *packet, const PacketInf
 {
     Enter_Method_Silent();
 
+    bool tfcEnabled = packetInfo.isTfcSupported();
     auto ipv4Header = packet->removeAtFront<Ipv4Header>();
 
     auto padding = packet->getDataLength() + ipv4Header->getChunkLength() - ipv4Header->getTotalLengthField();
@@ -616,7 +623,7 @@ INetfilter::IHook::Result IPsec::protectDatagram(Packet *packet, const PacketInf
                 EV_INFO << "IPsec OUT ESP PROTECT packet: " << packetInfo.str() << std::endl;
 
                 int transportType = ipv4Header->getProtocolId();
-                espProtect(packet, (saEntry), transportType);
+                espProtect(packet, (saEntry), transportType, tfcEnabled);
                 ipv4Header->setProtocolId(IP_PROT_ESP);
 
                 delay += espProtectOutDelay->doubleValue();

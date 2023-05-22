@@ -90,7 +90,7 @@ class INET_API IPsec : public cSimpleModule, NetfilterBase::HookBase
     virtual PacketInfo extractIngressPacketInfo(Packet *packet);
     virtual PacketInfo extractEgressPacketInfo(Packet *ipv4datagram, const Ipv4Address& localAddress);
 
-    virtual void espProtect(Packet *transport, SecurityAssociation *sadEntry, int transportType);
+    virtual void espProtect(Packet *transport, SecurityAssociation *sadEntry, int transportType, bool tfcEnabled);
     virtual void ahProtect(Packet *transport, SecurityAssociation *sadEntry, int transportType);
 
     virtual INetfilter::IHook::Result protectDatagram(Packet *ipv4datagram, const PacketInfo& packetInfo, SecurityPolicy *spdEntry);
