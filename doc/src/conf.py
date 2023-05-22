@@ -40,8 +40,8 @@ needs_sphinx = '3.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'IPython.sphinxext.ipython_console_highlighting',
-    'IPython.sphinxext.ipython_directive',
+#    'IPython.sphinxext.ipython_console_highlighting',
+#    'IPython.sphinxext.ipython_directive',
     'sphinx.ext.mathjax',
     'sphinx.ext.extlinks',
     'sphinx.ext.ifconfig',
