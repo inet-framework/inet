@@ -362,8 +362,8 @@ cPacket *IPsec::espProtect(cPacket *transport, SecurityAssociation *sadEntry, in
     ASSERT(haveEncryption == (sadEntry->getEnryptionAlg()!=EncryptionAlg::NONE));
 
     // Handle encryption part. Compute padding according to RFC 4303 Sections 2.4 and 2.5
-    unsigned int tcfPadding = intuniform(0, sadEntry->getMaxTfcPadLength());
-    unsigned int paddableLength = transport->getByteLength() + tcfPadding + ESP_FIXED_PAYLOAD_TRAILER_BYTES;
+    unsigned int tfcPadding = intuniform(0, sadEntry->getMaxTfcPadLength());
+    unsigned int paddableLength = transport->getByteLength() + tfcPadding + ESP_FIXED_PAYLOAD_TRAILER_BYTES;
     unsigned int blockSize = getBlockSizeBytes(sadEntry->getEnryptionAlg());
     unsigned int paddedLength = blockSize * ((paddableLength + blockSize - 1) / blockSize);
     paddedLength = (paddedLength+3) & ~3;  // multiple of 32 bits
