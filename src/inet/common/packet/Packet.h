@@ -183,6 +183,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
     virtual void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
+  private:
     /** @name Unsupported cPacket interface functions */
     //@{
     virtual void encapsulate(cPacket *packet) override { throw cRuntimeError("Invalid operation"); }
@@ -191,6 +192,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
     virtual void setControlInfo(cObject *p) override { throw cRuntimeError("Invalid operation"); }
     virtual void setBitLength(int64_t value) override { throw cRuntimeError("Invalid operation"); }
     //@}
+  public:
 
     /** @name Length querying functions */
     //@{
