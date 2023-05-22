@@ -374,8 +374,8 @@ void IPsec::espProtect(Packet *transport, SecurityAssociation *sadEntry, int tra
     ASSERT(haveEncryption == (sadEntry->getEnryptionAlg() != EncryptionAlg::NONE));
 
     // Handle encryption part. Compute padding according to RFC 4303 Sections 2.4 and 2.5
-    unsigned int tcfPadding = intuniform(0, sadEntry->getMaxTfcPadLength());
-    unsigned int paddableLength = transport->getByteLength() + tcfPadding + ESP_FIXED_PAYLOAD_TRAILER_BYTES;
+    unsigned int tfcPadding = intuniform(0, sadEntry->getMaxTfcPadLength());
+    unsigned int paddableLength = transport->getByteLength() + tfcPadding + ESP_FIXED_PAYLOAD_TRAILER_BYTES;
     unsigned int blockSize = getBlockSizeBytes(sadEntry->getEnryptionAlg());
     unsigned int paddedLength = blockSize * ((paddableLength + blockSize - 1) / blockSize);
     paddedLength = (paddedLength+3) & ~3;  // multiple of 32 bits
@@ -414,8 +414,8 @@ void IPsec::espProtect(Packet *transport, SecurityAssociation *sadEntry, int tra
     unsigned int len = ESP_FIXED_HEADER_BYTES + ivBytes + paddedLength + icvBytes;
 
     // encrypting:
-    if (tcfPadding > 0)
-        transport->insertAtBack(makeShared<ByteCountChunk>(B(tcfPadding)));
+    if (tfcPadding > 0)
+        transport->insertAtBack(makeShared<ByteCountChunk>(B(tfcPadding)));
     if (padLength > 0)
         transport->insertAtBack(makeShared<ByteCountChunk>(B(padLength)));
     auto data = transport->removeData();
