@@ -46,10 +46,12 @@ Define_NED_Function2(nedf_hasVisualizer,
 
 cNEDValue nedf_hasModule(cComponent *context, cNEDValue argv[], int argc)
 {
-    cRegistrationList *types = OMNETPP6_CODE(omnetpp::internal::)componentTypes.getInstance();
     if (argv[0].getType() != cNEDValue::STR)
         throw cRuntimeError("hasModule(): string arguments expected");
     const char *name = argv[0].stringValue();
+
+#if OMNETPP_BUILDNUM < 2000
+    cRegistrationList *types = OMNETPP6_CODE(omnetpp::internal::)componentTypes.getInstance();
     cComponentType *c;
     c = dynamic_cast<cComponentType *>(types->lookup(name)); // by qualified name
     if (c && c->isAvailable())
@@ -58,6 +60,16 @@ cNEDValue nedf_hasModule(cComponent *context, cNEDValue argv[], int argc)
     if (c && c->isAvailable())
         return true;
     return false;
+#else
+    cModuleType *type = cModuleType::find(name); // by qualified name
+    if (type && type->isAvailable())
+        return true;
+    auto types = cModuleType::findAll(name); // by simple name
+    for (cModuleType *type : types)
+        if (type && type->isAvailable())
+            return true;
+    return false;
+#endif
 }
 
 Define_NED_Function2(nedf_hasModule,
@@ -170,6 +182,7 @@ Define_NED_Function2(nedf_absPath,
 
 cNEDValue nedf_firstAvailableOrEmpty(cComponent *context, cNEDValue argv[], int argc)
 {
+#if OMNETPP_BUILDNUM < 2000
     cRegistrationList *types = OMNETPP6_CODE(omnetpp::internal::)componentTypes.getInstance();
     for (int i=0; i<argc; i++)
     {
@@ -185,6 +198,22 @@ cNEDValue nedf_firstAvailableOrEmpty(cComponent *context, cNEDValue argv[], int 
             return argv[i];
     }
     return "";
+#else
+    // note: diff is due to cComponentType::findAll() being absent in OMNeT++ 6.0 and earlier
+    for (int i = 0; i < argc; i++) {
+        if (argv[i].getType() != cNEDValue::STRING)
+            throw cRuntimeError("firstAvailable(): string arguments expected");
+        const char *name = argv[i].stringValue();
+        cComponentType *type = cComponentType::find(name); // by qualified name
+        if (type && type->isAvailable())
+            return argv[i];
+        auto types = cComponentType::findAll(name); // by simple name
+        for (cComponentType *type : types)
+            if (type && type->isAvailable())
+                return argv[i];
+    }
+    return "";
+#endif
 }
 
 Define_NED_Function2(nedf_firstAvailableOrEmpty,

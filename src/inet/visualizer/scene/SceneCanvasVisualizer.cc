@@ -174,9 +174,14 @@ void SceneCanvasVisualizer::displayDescription(const char *descriptionFigurePath
         throw cRuntimeError("Figure \"%s\" not found", descriptionFigurePath);
     auto descriptionTextFigure = check_and_cast<cAbstractTextFigure*>(descriptionFigure);
 
+#if OMNETPP_BUILDNUM < 2000
     auto config = getEnvir()->getConfigEx();
     const char *activeConfig = config->getActiveConfigName();
     std::string description = std::string(activeConfig) + ": " + config->getConfigDescription(activeConfig);
+#else
+    auto cfg = getEnvir()->getConfig();
+    std::string description = std::string(cfg->getVariable(CFGVAR_CONFIGNAME)) + ": " + cfg->getVariable(CFGVAR_DESCRIPTION);
+#endif
     descriptionTextFigure->setText(description.c_str());
 }
 

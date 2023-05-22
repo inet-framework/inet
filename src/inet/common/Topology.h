@@ -100,7 +100,7 @@ class INET_API Topology : public cOwnedObject
         /**
          * Returns the pointer to the network module to which this node corresponds.
          */
-        cModule *getModule() const { return getSimulation()->getModule(moduleId); }
+        cModule *getModule() const { return cSimulation::getActiveSimulation()->getModule(moduleId); }
 
         /**
          * Returns the weight of this node. Weight is used with the

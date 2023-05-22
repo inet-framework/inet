@@ -157,7 +157,13 @@ void IPv4RoutingTable::handleMessage(cMessage *msg)
 
 void IPv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
+#if OMNETPP_BUILDNUM >= 2000
+    if (getSimulation()->getStage() == cSimulation::STAGE_INITIALIZE)
+#elif OMNETPP_VERSION >= 0x600
+    if (getSimulation()->getSimulationStage() == CTX_INITIALIZE)
+#else
     if (getSimulation()->getContextType() == CTX_INITIALIZE)
+#endif
         return; // ignore notifications during initialize
 
     Enter_Method_Silent();

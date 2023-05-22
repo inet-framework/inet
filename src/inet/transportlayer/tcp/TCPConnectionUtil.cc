@@ -277,7 +277,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
     controlInfo->setDestinationAddress(dest);
     tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
     tcpseg->setByteLength(tcpseg->getHeaderLength() + tcpseg->getPayloadLength());
-    check_and_cast<TCP *>(getSimulation()->getContextModule())->send(tcpseg, "ipOut");
+    check_and_cast<TCP *>(cSimulation::getActiveSimulation()->getContextModule())->send(tcpseg, "ipOut");
 }
 
 TCPSegment *TCPConnection::createTCPSegment(const char *name)
