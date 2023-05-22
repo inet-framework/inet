@@ -89,7 +89,7 @@ class INET_API IPsec : public cSimpleModule, INetfilter::IHook
     virtual PacketInfo extractIngressPacketInfo(IPv4Datagram *ipv4datagram);
     virtual PacketInfo extractEgressPacketInfo(IPv4Datagram *ipv4datagram, const IPv4Address& localAddress);
 
-    virtual cPacket *espProtect(cPacket *transport, SecurityAssociation *sadEntry, int transportType);
+    virtual cPacket *espProtect(cPacket *transport, SecurityAssociation *sadEntry, int transportType, bool tfcEnabled);
     virtual cPacket *ahProtect(cPacket *transport, SecurityAssociation *sadEntry, int transportType);
 
     virtual INetfilter::IHook::Result protectDatagram(IPv4Datagram *ipv4datagram, const PacketInfo& packetInfo, SecurityPolicy *spdEntry);

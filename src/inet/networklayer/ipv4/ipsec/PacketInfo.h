@@ -38,6 +38,7 @@ class INET_API PacketInfo
     unsigned int remotePort = 0;
     unsigned int icmpType = 0;
     unsigned int icmpCode = 0;
+    bool tfcSupported = false;
 
   public:
     PacketInfo() {}
@@ -55,6 +56,8 @@ class INET_API PacketInfo
     void setIcmpType(unsigned int icmpType) { this->icmpType = icmpType; }
     unsigned int getIcmpCode() const { return icmpCode; }
     void setIcmpCode(unsigned int icmpCode) { this->icmpCode = icmpCode; }
+    bool isTfcSupported() const { return tfcSupported; }
+    void setTfcSupported(bool tfcSupported) { this->tfcSupported = tfcSupported; }
     std::string str() const;
 };
 

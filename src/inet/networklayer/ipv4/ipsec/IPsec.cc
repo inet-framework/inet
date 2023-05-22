@@ -268,16 +268,19 @@ PacketInfo IPsec::extractEgressPacketInfo(IPv4Datagram *ipv4datagram, const IPv4
         tcp::TCPSegment *tcpSegment = check_and_cast<tcp::TCPSegment *>(ipv4datagram->getEncapsulatedPacket());
         packetInfo.setLocalPort(tcpSegment->getSourcePort());
         packetInfo.setRemotePort(tcpSegment->getDestinationPort());
+        packetInfo.setTfcSupported(false);
     }
     else if (ipv4datagram->getTransportProtocol() == IP_PROT_UDP) {
         UDPPacket *udpPacket = check_and_cast<UDPPacket *>(ipv4datagram->getEncapsulatedPacket());
         packetInfo.setLocalPort(udpPacket->getSourcePort());
         packetInfo.setRemotePort(udpPacket->getDestinationPort());
+        packetInfo.setTfcSupported(true);
     }
     else if (ipv4datagram->getTransportProtocol() == IP_PROT_ICMP) {
         ICMPMessage *icmpMessage = check_and_cast<ICMPMessage *>(ipv4datagram->getEncapsulatedPacket());
         packetInfo.setIcmpType(icmpMessage->getType());
         packetInfo.setIcmpCode(icmpMessage->getCode());
+        packetInfo.setTfcSupported(false);
     }
     return packetInfo;
 }
@@ -340,21 +343,24 @@ PacketInfo IPsec::extractIngressPacketInfo(IPv4Datagram *ipv4datagram)
         tcp::TCPSegment *tcpSegment = check_and_cast<tcp::TCPSegment *>(ipv4datagram->getEncapsulatedPacket());
         packetInfo.setLocalPort(tcpSegment->getDestinationPort());
         packetInfo.setRemotePort(tcpSegment->getSourcePort());
+        packetInfo.setTfcSupported(false);
     }
     else if (ipv4datagram->getTransportProtocol() == IP_PROT_UDP) {
         UDPPacket *udpPacket = check_and_cast<UDPPacket *>(ipv4datagram->getEncapsulatedPacket());
         packetInfo.setLocalPort(udpPacket->getDestinationPort());
         packetInfo.setRemotePort(udpPacket->getSourcePort());
+        packetInfo.setTfcSupported(true);
     }
     else if (ipv4datagram->getTransportProtocol() == IP_PROT_ICMP) {
         ICMPMessage *icmpMessage = check_and_cast<ICMPMessage *>(ipv4datagram->getEncapsulatedPacket());
         packetInfo.setIcmpType(icmpMessage->getType());
         packetInfo.setIcmpCode(icmpMessage->getCode());
+        packetInfo.setTfcSupported(false);
     }
     return packetInfo;
 }
 
-cPacket *IPsec::espProtect(cPacket *transport, SecurityAssociation *sadEntry, int transportType)
+cPacket *IPsec::espProtect(cPacket *transport, SecurityAssociation *sadEntry, int transportType, bool tfcEnabled)
 {
     IPsecEncapsulatingSecurityPayload *espPacket = new IPsecEncapsulatingSecurityPayload();
 
@@ -362,7 +368,7 @@ cPacket *IPsec::espProtect(cPacket *transport, SecurityAssociation *sadEntry, in
     ASSERT(haveEncryption == (sadEntry->getEnryptionAlg()!=EncryptionAlg::NONE));
 
     // Handle encryption part. Compute padding according to RFC 4303 Sections 2.4 and 2.5
-    unsigned int tfcPadding = intuniform(0, sadEntry->getMaxTfcPadLength());
+    unsigned int tfcPadding = tfcEnabled ? intuniform(0, sadEntry->getMaxTfcPadLength()) : 0;
     unsigned int paddableLength = transport->getByteLength() + tfcPadding + ESP_FIXED_PAYLOAD_TRAILER_BYTES;
     unsigned int blockSize = getBlockSizeBytes(sadEntry->getEnryptionAlg());
     unsigned int paddedLength = blockSize * ((paddableLength + blockSize - 1) / blockSize);
@@ -563,6 +569,8 @@ int IPsec::getInitializationVectorBitLength(AuthenticationAlg alg)
 INetfilter::IHook::Result IPsec::protectDatagram(IPv4Datagram *ipv4datagram, const PacketInfo& packetInfo, SecurityPolicy *spdEntry)
 {
     Enter_Method_Silent();
+
+    bool tfcEnabled = packetInfo.isTfcSupported();
     cPacket *transport = ipv4datagram->decapsulate();
     double delay = 0;
 
@@ -574,7 +582,7 @@ INetfilter::IHook::Result IPsec::protectDatagram(IPv4Datagram *ipv4datagram, con
 
                 int transportType = ipv4datagram->getTransportProtocol();
                 ipv4datagram->setTransportProtocol(IP_PROT_ESP);
-                transport = espProtect(transport, (saEntry), transportType);
+                transport = espProtect(transport, (saEntry), transportType, tfcEnabled);
 
                 delay += espProtectOutDelay->doubleValue();
                 espProtected = true;
