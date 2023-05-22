@@ -416,8 +416,8 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                             cmd->setPrValue(0);
                             cmd->setSid(lastStream);
                             cmd->setLast(true);
-                            cmsg->encapsulate(smsg);
-                            cmsg->setControlInfo(cmd.get()); // KLUDGE
+//                            cmsg->encapsulate(smsg); // KLUDGE: commented out the unavailable function
+//                            cmsg->setControlInfo(cmd.get()); // KLUDGE: commented out the unavailable function
                             packetsSent++;
                             delete msg;
                             sendOrSchedule(cmsg);
