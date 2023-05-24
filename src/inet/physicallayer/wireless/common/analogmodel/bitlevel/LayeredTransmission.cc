@@ -15,9 +15,10 @@ LayeredTransmission::LayeredTransmission(const ITransmissionPacketModel *packetM
     packetModel(packetModel),
     bitModel(bitModel),
     symbolModel(symbolModel),
-    sampleModel(sampleModel),
-    analogModel(analogModel)
+    sampleModel(sampleModel)
 {
+    // TODO move to base class
+    this->analogModel = analogModel;
 }
 
 LayeredTransmission::~LayeredTransmission()
