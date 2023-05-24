@@ -21,8 +21,8 @@ module ApskRadio extends FlatRadioBase
     parameters:
         string protocol = default("");
         string signalAnalogRepresentation @enum("scalar", "dimensional") = default("scalar");
-        transmitter.typename = default(signalAnalogRepresentation == "scalar" ? "ApskTransmitter" : signalAnalogRepresentation == "dimensional" ? "ApskDimensionalTransmitter" : "");
-        receiver.typename = default(signalAnalogRepresentation == "scalar" ? "ApskReceiver" : signalAnalogRepresentation == "dimensional" ? "ApskDimensionalReceiver" : "");
+        transmitter.typename = default("ApskTransmitter");
+        receiver.typename = default("ApskReceiver");
         @class(ApskRadio);
         @signal[packetDropped](type=inet::Packet);
         @statistic[packetDropped](title="packets dropped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

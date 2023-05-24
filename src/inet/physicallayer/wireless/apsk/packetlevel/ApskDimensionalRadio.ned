@@ -14,12 +14,12 @@ package inet.physicallayer.wireless.apsk.packetlevel;
 // conjunction with the ~ApskDimensionalRadioMedium model.
 //
 // @see ~ApskDimensionalRadioMedium, ~DimensionalAnalogModel,
-// ~ApskDimensionalTransmitter, ~ApskDimensionalReceiver.
+// ~ApskTransmitter, ~ApskReceiver.
 //
 module ApskDimensionalRadio extends ApskRadio
 {
     parameters:
-        transmitter.typename = default("ApskDimensionalTransmitter");
-        receiver.typename = default("ApskDimensionalReceiver");
+        transmitter.typename = default("ApskTransmitter");
+        receiver.typename = default("ApskReceiver");
 }
 

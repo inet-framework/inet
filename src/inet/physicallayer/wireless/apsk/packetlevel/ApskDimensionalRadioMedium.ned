@@ -16,7 +16,7 @@ import inet.physicallayer.wireless.common.medium.RadioMedium;
 // conjunction with the ~ApskDimensionalRadio model.
 //
 // @see ~ApskDimensionalRadio, ~DimensionalAnalogModel,
-// ~ApskDimensionalTransmitter, ~ApskDimensionalReceiver.
+// ~ApskTransmitter, ~ApskReceiver.
 //
 module ApskDimensionalRadioMedium extends RadioMedium
 {
