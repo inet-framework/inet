@@ -5,8 +5,8 @@
 //
 
 
-#ifndef __INET_UNITDISKRADIO_H
-#define __INET_UNITDISKRADIO_H
+#ifndef __INET_GENERICRADIO_H
+#define __INET_GENERICRADIO_H
 
 #include "inet/physicallayer/wireless/common/radio/packetlevel/Radio.h"
 
@@ -14,14 +14,14 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API UnitDiskRadio : public Radio
+class INET_API GenericRadio : public Radio
 {
   protected:
     virtual void encapsulate(Packet *packet) const override;
     virtual void decapsulate(Packet *packet) const override;
 
   public:
-    UnitDiskRadio();
+    GenericRadio();
 };
 
 } // namespace physicallayer

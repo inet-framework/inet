@@ -5,7 +5,7 @@
 //
 
 
-package inet.physicallayer.wireless.unitdisk;
+package inet.physicallayer.wireless.generic;
 
 import inet.physicallayer.wireless.common.radio.packetlevel.Radio;
 
@@ -25,13 +25,13 @@ import inet.physicallayer.wireless.common.radio.packetlevel.Radio;
 // @see ~UnitDiskRadioMedium, ~UnitDiskAnalogModel, ~UnitDiskTransmitter,
 // ~UnitDiskReceiver.
 //
-module UnitDiskRadio extends Radio
+module GenericRadio extends Radio
 {
     parameters:
-        transmitter.typename = default("UnitDiskTransmitter");
-        receiver.typename = default("UnitDiskReceiver");
+        transmitter.typename = default("GenericTransmitter");
+        receiver.typename = default("GenericReceiver");
         separateTransmissionParts = default(false);
         separateReceptionParts = default(false);
-        @class(UnitDiskRadio);
+        @class(GenericRadio);
 }
 

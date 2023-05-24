@@ -5,7 +5,7 @@
 //
 
 
-package inet.physicallayer.wireless.unitdisk;
+package inet.physicallayer.wireless.generic;
 
 import inet.physicallayer.wireless.common.base.packetlevel.TransmitterBase;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
@@ -19,12 +19,12 @@ import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 // @see ~UnitDiskReceiver, ~UnitDiskRadio, ~UnitDiskRadioMedium,
 // ~UnitDiskAnalogModel.
 //
-module UnitDiskTransmitter extends TransmitterBase like ITransmitter
+module GenericTransmitter extends TransmitterBase like ITransmitter
 {
     parameters:
         double preambleDuration @unit(s) = default(0s);                  // preamble added before the header
         int headerLength @unit(b) = default(96b);                     // number of header bits added to the length of the MAC frame
         double bitrate @unit(bps);                                       // the bitrate of the transmitter is used to compute the duration of the transmission
-        @class(UnitDiskTransmitter);
+        @class(GenericTransmitter);
         @display("i=block/wtx");
 }

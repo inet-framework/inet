@@ -5,25 +5,25 @@
 //
 
 
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmitter.h"
+#include "inet/physicallayer/wireless/generic/GenericTransmitter.h"
 
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/TransmissionBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/generic/GenericPhyHeader_m.h"
 
 namespace inet {
 namespace physicallayer {
 
-Define_Module(UnitDiskTransmitter);
+Define_Module(GenericTransmitter);
 
-UnitDiskTransmitter::UnitDiskTransmitter() :
+GenericTransmitter::GenericTransmitter() :
     headerLength(b(-1)),
     bitrate(NaN)
 {
 }
 
-void UnitDiskTransmitter::initialize(int stage)
+void GenericTransmitter::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         preambleDuration = par("preambleDuration");
@@ -32,9 +32,9 @@ void UnitDiskTransmitter::initialize(int stage)
     }
 }
 
-std::ostream& UnitDiskTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
+std::ostream& GenericTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    stream << "UnitDiskTransmitter";
+    stream << "GenericTransmitter";
     if (level <= PRINT_LEVEL_TRACE)
         stream << EV_FIELD(preambleDuration)
                << EV_FIELD(headerLength)
@@ -42,9 +42,9 @@ std::ostream& UnitDiskTransmitter::printToStream(std::ostream& stream, int level
     return stream;
 }
 
-const ITransmission *UnitDiskTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
+const ITransmission *GenericTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
-    auto phyHeader = packet->peekAtFront<UnitDiskPhyHeader>();
+    auto phyHeader = packet->peekAtFront<GenericPhyHeader>();
     auto dataLength = packet->getDataLength() - phyHeader->getChunkLength();
     const auto& signalBitrateReq = const_cast<Packet *>(packet)->findTag<SignalBitrateReq>();
     auto transmissionBitrate = signalBitrateReq != nullptr ? signalBitrateReq->getDataBitrate() : bitrate;

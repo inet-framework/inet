@@ -5,38 +5,38 @@
 //
 
 
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskRadio.h"
+#include "inet/physicallayer/wireless/generic/GenericRadio.h"
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeader_m.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmitter.h"
+#include "inet/physicallayer/wireless/generic/GenericPhyHeader_m.h"
+#include "inet/physicallayer/wireless/generic/GenericTransmitter.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Define_Module(UnitDiskRadio);
+Define_Module(GenericRadio);
 
-UnitDiskRadio::UnitDiskRadio() :
+GenericRadio::GenericRadio() :
     Radio()
 {
 }
 
-void UnitDiskRadio::encapsulate(Packet *packet) const
+void GenericRadio::encapsulate(Packet *packet) const
 {
-    auto idealTransmitter = check_and_cast<const UnitDiskTransmitter *>(transmitter);
-    auto phyHeader = makeShared<UnitDiskPhyHeader>();
+    auto idealTransmitter = check_and_cast<const GenericTransmitter *>(transmitter);
+    auto phyHeader = makeShared<GenericPhyHeader>();
     phyHeader->setChunkLength(idealTransmitter->getHeaderLength());
     phyHeader->setPayloadProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
     packet->insertAtFront(phyHeader);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::unitDisk);
 }
 
-void UnitDiskRadio::decapsulate(Packet *packet) const
+void GenericRadio::decapsulate(Packet *packet) const
 {
-    const auto& phyHeader = packet->popAtFront<UnitDiskPhyHeader>();
+    const auto& phyHeader = packet->popAtFront<GenericPhyHeader>();
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(phyHeader->getPayloadProtocol());
 }
 

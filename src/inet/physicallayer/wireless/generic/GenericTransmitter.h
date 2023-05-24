@@ -5,20 +5,20 @@
 //
 
 
-#ifndef __INET_UNITDISKTRANSMITTER_H
-#define __INET_UNITDISKTRANSMITTER_H
+#ifndef __INET_GENERICTRANSMITTER_H
+#define __INET_GENERICTRANSMITTER_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/TransmitterBase.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmitterAnalogModel.h"
+#include "inet/physicallayer/wireless/generic/GenericTransmitterAnalogModel.h"
 
 namespace inet {
 
 namespace physicallayer {
 
 /**
- * Implements the UnitDiskTransmitter model, see the NED file for details.
+ * Implements the GenericTransmitter model, see the NED file for details.
  */
-class INET_API UnitDiskTransmitter : public TransmitterBase
+class INET_API GenericTransmitter : public TransmitterBase
 {
   protected:
     simtime_t preambleDuration;
@@ -29,15 +29,15 @@ class INET_API UnitDiskTransmitter : public TransmitterBase
     virtual void initialize(int stage) override;
 
   public:
-    UnitDiskTransmitter();
+    GenericTransmitter();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, const simtime_t startTime) const override;
     virtual simtime_t getPreambleDuration() const { return preambleDuration; }
     virtual b getHeaderLength() const { return headerLength; }
     virtual bps getBitrate() const { return bitrate; }
-    virtual m getMaxCommunicationRange() const override { return check_and_cast<UnitDiskTransmitterAnalogModel *>(getAnalogModel())->getCommunicationRange(); }
-    virtual m getMaxInterferenceRange() const override { return check_and_cast<UnitDiskTransmitterAnalogModel *>(getAnalogModel())->getInterferenceRange(); }
+    virtual m getMaxCommunicationRange() const override { return check_and_cast<GenericTransmitterAnalogModel *>(getAnalogModel())->getCommunicationRange(); }
+    virtual m getMaxInterferenceRange() const override { return check_and_cast<GenericTransmitterAnalogModel *>(getAnalogModel())->getInterferenceRange(); }
 };
 
 } // namespace physicallayer
