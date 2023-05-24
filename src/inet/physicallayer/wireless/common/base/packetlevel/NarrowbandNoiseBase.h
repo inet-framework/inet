@@ -17,6 +17,7 @@ namespace physicallayer {
 
 using namespace inet::units::values;
 
+// REFACTOR TODO
 class INET_API NarrowbandNoiseBase : public NoiseBase
 {
   protected:

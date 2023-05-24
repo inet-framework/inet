@@ -15,6 +15,7 @@ namespace inet {
 
 namespace physicallayer {
 
+// REFACTOR TODO
 class INET_API NarrowbandRadioBase : public Radio
 {
   protected:

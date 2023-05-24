@@ -14,6 +14,7 @@ namespace inet {
 
 namespace physicallayer {
 
+// REFACTOR TODO
 class INET_API FlatTransmissionBase : public TransmissionBase
 {
   protected:

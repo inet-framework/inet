@@ -193,6 +193,7 @@ const ITransmission *Ieee802154UwbIrTransmitter::createTransmission(const IRadio
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& powerFunction = generateIEEE802154AUWBSignal(startTime, bits);
     auto analogModel = new DimensionalTransmissionAnalogModel(-1, -1, duration, cfg.centerFrequency, cfg.bandwidth, powerFunction);
+    // REFACTOR TODO
     return new FlatTransmissionBase(transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel, packet->getDataLength(), b(-1), cfg.bitrate, -1, nullptr, -1, cfg.centerFrequency, cfg.bandwidth);
 }
 

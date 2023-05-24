@@ -50,6 +50,7 @@ const ITransmission *NoiseDimensionalTransmitter::createTransmission(const IRadi
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& powerFunction = createPowerFunction(startTime, endTime, centerFrequency, bandwidth, power);
     auto analogModel = getAnalogModel()->createAnalogModel(packet, 0, 0, duration, centerFrequency, bandwidth, power);
+    // REFACTOR TODO
     return new FlatTransmissionBase(transmitter, nullptr, startTime, endTime, 0, 0, duration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel, b(-1), b(-1), bps(NaN), -1, nullptr, -1, centerFrequency, bandwidth);
 }
 

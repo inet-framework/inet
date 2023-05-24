@@ -56,6 +56,7 @@ const ITransmission *NoiseScalarTransmitter::createTransmission(const IRadio *tr
     const Coord endPosition = mobility->getCurrentPosition();
     const Quaternion startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion endOrientation = mobility->getCurrentAngularPosition();
+    // REFACTOR TODO
     return new FlatTransmissionBase(transmitter, nullptr, startTime, endTime, 0, 0, duration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, nullptr, b(-1), b(-1), bps(NaN), -1, nullptr, -1, centerFrequency, bandwidth);
 }
 

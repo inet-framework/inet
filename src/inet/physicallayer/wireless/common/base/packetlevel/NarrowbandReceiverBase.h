@@ -16,6 +16,7 @@ namespace inet {
 
 namespace physicallayer {
 
+// REFACTOR TODO
 class INET_API NarrowbandReceiverBase : public SnirReceiverBase
 {
   protected:
