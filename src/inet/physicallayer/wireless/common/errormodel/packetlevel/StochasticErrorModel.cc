@@ -7,8 +7,6 @@
 
 #include "inet/physicallayer/wireless/common/errormodel/packetlevel/StochasticErrorModel.h"
 
-#include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase.h"
-
 namespace inet {
 
 namespace physicallayer {
@@ -50,10 +48,11 @@ double StochasticErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSig
         return pow(packetErrorRate, factor);
     }
     else {
-        const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(reception->getTransmission());
+        auto transmission = reception->getTransmission();
+        auto bitModel = transmission->getBitModel();
         double bitErrorRate = computeBitErrorRate(snir, part);
-        double headerSuccessRate = pow(1.0 - bitErrorRate, b(flatTransmission->getHeaderLength()).get());
-        double dataSuccessRate = pow(1.0 - bitErrorRate, b(flatTransmission->getDataLength()).get());
+        double headerSuccessRate = pow(1.0 - bitErrorRate, b(bitModel->getHeaderLength()).get());
+        double dataSuccessRate = pow(1.0 - bitErrorRate, b(bitModel->getDataLength()).get());
         switch (part) {
             case IRadioSignal::SIGNAL_PART_WHOLE:
                 return 1.0 - headerSuccessRate * dataSuccessRate;

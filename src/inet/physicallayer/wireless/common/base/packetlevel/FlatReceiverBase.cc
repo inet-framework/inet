@@ -8,7 +8,6 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"

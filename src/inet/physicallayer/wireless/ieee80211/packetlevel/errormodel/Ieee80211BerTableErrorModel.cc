@@ -7,7 +7,6 @@
 
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211BerTableErrorModel.h"
 
-#include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
@@ -58,9 +57,9 @@ double Ieee80211BerTableErrorModel::computePacketErrorRate(const ISnir *snir, IR
 {
     Enter_Method("computePacketErrorRate");
     auto transmission = check_and_cast<const Ieee80211Transmission *>(snir->getReception()->getTransmission());
-    const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(transmission);
+    auto bitModel = transmission->getBitModel();
     bps bitrate = transmission->getMode()->getDataMode()->getNetBitrate();
-    b dataLength = flatTransmission->getDataLength();
+    b dataLength = bitModel->getDataLength();
     return berTableFile->getPer(bps(bitrate).get(), getScalarSnir(snir), B(dataLength).get());
 }
 
