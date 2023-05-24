@@ -26,15 +26,15 @@ void DimensionalTransmitterAnalogModel::initialize(int stage)
     }
 }
 
-ITransmissionAnalogModel* DimensionalTransmitterAnalogModel::createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const
+ITransmissionAnalogModel* DimensionalTransmitterAnalogModel::createAnalogModel(const Packet *packet, simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) const
 {
     simtime_t startTime = simTime();
-    simtime_t endTime = startTime + duration;
+    simtime_t endTime = startTime + preambleDuration + headerDuration + dataDuration;
     auto transmissionCenterFrequency = computeCenterFrequency(centerFrequency);
     auto transmissionBandwidth = computeBandwidth(bandwidth);
     auto transmissionPower = computePower(power);
     const auto &powerFunction = createPowerFunction(startTime, endTime, transmissionCenterFrequency, transmissionBandwidth, transmissionPower);
-    return new DimensionalTransmissionAnalogModel(-1, -1, duration, transmissionCenterFrequency, transmissionBandwidth, powerFunction);
+    return new DimensionalTransmissionAnalogModel(preambleDuration, headerDuration, dataDuration, transmissionCenterFrequency, transmissionBandwidth, powerFunction);
 }
 
 template<typename T>

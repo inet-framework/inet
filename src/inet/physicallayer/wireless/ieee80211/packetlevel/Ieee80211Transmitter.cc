@@ -161,7 +161,7 @@ const ITransmission *Ieee80211Transmitter::createTransmission(const IRadio *tran
     auto dataModulation = transmissionMode->getDataMode()->getModulation();
     auto dataSymbolTime = transmissionMode->getDataMode()->getSymbolInterval();
     auto transmission = new Ieee80211Transmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, transmissionMode, transmissionChannel);
-    transmission->analogModel = getAnalogModel()->createAnalogModel(packet, duration, centerFrequency, transmissionBandwidth, transmissionPower);
+    transmission->analogModel = getAnalogModel()->createAnalogModel(packet, preambleDuration, headerDuration, dataDuration, centerFrequency, transmissionBandwidth, transmissionPower);
     return transmission;
 }
 

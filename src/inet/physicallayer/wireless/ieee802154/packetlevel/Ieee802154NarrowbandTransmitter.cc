@@ -42,7 +42,7 @@ const ITransmission *Ieee802154NarrowbandTransmitter::createTransmission(const I
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     auto symbolTime = 0;
     auto transmission = new ApskTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, packet->getDataLength(), modulation, bandwidth, symbolTime, transmissionBitrate, codeRate);
-    transmission->analogModel = getAnalogModel()->createAnalogModel(packet, duration, centerFrequency, bandwidth, transmissionPower);
+    transmission->analogModel = getAnalogModel()->createAnalogModel(packet, preambleDuration, headerDuration, dataDuration, centerFrequency, bandwidth, transmissionPower);
     return transmission;
 }
 

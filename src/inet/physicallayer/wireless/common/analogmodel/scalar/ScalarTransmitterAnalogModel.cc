@@ -21,12 +21,12 @@ void ScalarTransmitterAnalogModel::initialize(int stage)
     }
 }
 
-ITransmissionAnalogModel *ScalarTransmitterAnalogModel::createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const
+ITransmissionAnalogModel *ScalarTransmitterAnalogModel::createAnalogModel(const Packet *packet, simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) const
 {
     auto transmissionCenterFrequency = computeCenterFrequency(centerFrequency);
     auto transmissionBandwidth = computeBandwidth(bandwidth);
     auto transmissionPower = computePower(power);
-    return new ScalarTransmissionAnalogModel(-1, -1, duration, transmissionCenterFrequency, transmissionBandwidth, transmissionPower);
+    return new ScalarTransmissionAnalogModel(preambleDuration, headerDuration, dataDuration, transmissionCenterFrequency, transmissionBandwidth, transmissionPower);
 }
 
 } // namespace physicallayer
