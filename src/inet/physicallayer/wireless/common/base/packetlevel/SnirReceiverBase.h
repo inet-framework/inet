@@ -34,7 +34,7 @@ class INET_API SnirReceiverBase : public ReceiverBase
   public:
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
-    virtual double getSNIRThreshold() const { return snirThreshold; }
+    virtual double getSnirThreshold() const { return snirThreshold; }
 
     virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const override;
 };
