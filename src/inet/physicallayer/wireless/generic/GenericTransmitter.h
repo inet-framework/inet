@@ -36,6 +36,7 @@ class INET_API GenericTransmitter : public TransmitterBase
     virtual bps getBitrate() const { return bitrate; }
 
     virtual m getMaxCommunicationRange() const override {
+        // TODO should we move this to the base class? how is it not going to be repeated in other transmitters?
         if (auto analogModel = dynamic_cast<UnitDiskTransmitterAnalogModel *>(getAnalogModel()))
             return analogModel->getCommunicationRange();
         else
@@ -43,6 +44,7 @@ class INET_API GenericTransmitter : public TransmitterBase
     }
 
     virtual m getMaxInterferenceRange() const override {
+        // TODO should we move this to the base class? how is it not going to be repeated in other transmitters?
         if (auto analogModel = dynamic_cast<UnitDiskTransmitterAnalogModel *>(getAnalogModel()))
             return analogModel->getInterferenceRange();
         else

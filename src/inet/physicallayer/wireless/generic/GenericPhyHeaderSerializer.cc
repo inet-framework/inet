@@ -19,6 +19,7 @@ void GenericPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr
     auto startPosition = stream.getLength();
     const auto& header = staticPtrCast<const GenericPhyHeader>(chunk);
     stream.writeUint16Be(b(header->getChunkLength()).get());
+    // TODO KLUDGE this makes the serialized form dependent on the protocol ID
     stream.writeUint16Be(header->getPayloadProtocol()->getId());
     int64_t remainders = b(header->getChunkLength() - (stream.getLength() - startPosition)).get();
     if (remainders < 0)
@@ -32,6 +33,7 @@ const Ptr<Chunk> GenericPhyHeaderSerializer::deserialize(MemoryInputStream& stre
     auto header = makeShared<GenericPhyHeader>();
     b dataLength = b(stream.readUint16Be());
     header->setChunkLength(dataLength);
+    // TODO KLUDGE this makes the serialized form dependent on the protocol ID
     header->setPayloadProtocol(Protocol::findProtocol(stream.readUint16Be()));
     b remainders = dataLength - (stream.getPosition() - startPosition);
     ASSERT(remainders >= b(0));

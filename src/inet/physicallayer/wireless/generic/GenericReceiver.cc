@@ -10,9 +10,6 @@
 #include "inet/physicallayer/wireless/generic/GenericTransmission.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ListeningDecision.h"
-#include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionDecision.h"
-#include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskNoise.h"
-#include "inet/physicallayer/wireless/common/analogmodel/unitdisk/UnitDiskReceptionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/INoise.h"
 
@@ -56,10 +53,9 @@ const IListening *GenericReceiver::createListening(const IRadio *radio, const si
 
 const IListeningDecision *GenericReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
-    const INoise *noise = listening->getReceiver()->getMedium()->getAnalogModel()->computeNoise(listening, interference);
+    auto noise = listening->getReceiver()->getMedium()->getAnalogModel()->computeNoise(listening, interference);
     bool isListeningPossible = noise->computeMaxPower(listening->getStartTime(), listening->getEndTime()) > energyDetection;
     delete noise;
-
     return new ListeningDecision(listening, isListeningPossible);
 }
 

@@ -8,8 +8,6 @@
 #include "inet/physicallayer/wireless/generic/GenericRadio.h"
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/physicallayer/wireless/generic/GenericPhyHeader_m.h"
 #include "inet/physicallayer/wireless/generic/GenericTransmitter.h"
 
@@ -26,9 +24,9 @@ GenericRadio::GenericRadio() :
 
 void GenericRadio::encapsulate(Packet *packet) const
 {
-    auto idealTransmitter = check_and_cast<const GenericTransmitter *>(transmitter);
+    auto genericTransmitter = check_and_cast<const GenericTransmitter *>(transmitter);
     auto phyHeader = makeShared<GenericPhyHeader>();
-    phyHeader->setChunkLength(idealTransmitter->getHeaderLength());
+    phyHeader->setChunkLength(genericTransmitter->getHeaderLength());
     phyHeader->setPayloadProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
     packet->insertAtFront(phyHeader);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::genericPhy);

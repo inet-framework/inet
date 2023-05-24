@@ -42,11 +42,14 @@ const ITransmission *GenericTransmitter::createTransmission(const IRadio *transm
     auto phyHeader = packet->peekAtFront<GenericPhyHeader>();
     auto dataLength = packet->getDataLength() - phyHeader->getChunkLength();
     const auto& signalBitrateReq = const_cast<Packet *>(packet)->findTag<SignalBitrateReq>();
-    auto transmissionBitrate = signalBitrateReq != nullptr ? signalBitrateReq->getDataBitrate() : bitrate;
-    if (!(transmissionBitrate > bps(0)))
-        throw cRuntimeError("Missing transmission bitrate (got %g): No bitrate request on packet, and bitrate parameter not set", transmissionBitrate.get());
-    auto headerDuration = b(headerLength).get() / bps(transmissionBitrate).get();
-    auto dataDuration = b(dataLength).get() / bps(transmissionBitrate).get();
+    auto headerBitrate = signalBitrateReq != nullptr ? signalBitrateReq->getDataBitrate() : bitrate;
+    if (!(headerBitrate > bps(0)))
+        throw cRuntimeError("Missing transmission header bitrate (got %g): No header bitrate request on packet, and bitrate parameter is not set", headerBitrate.get());
+    auto headerDuration = s(headerLength / headerBitrate).get();
+    auto dataBitrate = signalBitrateReq != nullptr ? signalBitrateReq->getDataBitrate() : bitrate;
+    if (!(dataBitrate > bps(0)))
+        throw cRuntimeError("Missing transmission data bitrate (got %g): No data bitrate request on packet, and bitrate parameter is not set", dataBitrate.get());
+    auto dataDuration = s(dataLength / dataBitrate).get();
     auto duration = preambleDuration + headerDuration + dataDuration;
     auto endTime = startTime + duration;
     auto mobility = transmitter->getAntenna()->getMobility();
