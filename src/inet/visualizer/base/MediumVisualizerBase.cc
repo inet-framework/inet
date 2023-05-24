@@ -238,7 +238,7 @@ bool MediumVisualizerBase::isSignalTransmissionInProgress(const ITransmission *t
 
 bool MediumVisualizerBase::matchesTransmission(const ITransmission *transmission) const
 {
-    auto radio = dynamic_cast<const cModule *>(transmission->getTransmitter());
+    auto radio = dynamic_cast<const cModule *>(transmission->getTransmitterRadio());
     if (!radio)
         return false;
     auto networkNode = getContainingNode(radio);
@@ -256,7 +256,7 @@ void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission 
     if (displayMainPowerDensityMap || displayPowerDensityMaps || displaySpectrums || displaySpectrograms) {
         auto dimensionalTransmission = check_and_cast<const DimensionalSignalAnalogModel *>(transmission->getAnalogModel());
         auto transmissionPowerFunction = dimensionalTransmission->getPower();
-        const auto& transmitterAntennaGain = transmission->getTransmitter()->getAntenna()->getGain();
+        const auto& transmitterAntennaGain = transmission->getTransmitterRadio()->getAntenna()->getGain();
         bool isotropicAntenna = transmitterAntennaGain->getMaxGain() == 1 && transmitterAntennaGain->getMinGain() == 1;
         const auto& transmitterAntennaGainFunction = !isotropicAntenna ? makeShared<AntennaGainFunction>(transmitterAntennaGain.get()) : nullptr;
         mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();

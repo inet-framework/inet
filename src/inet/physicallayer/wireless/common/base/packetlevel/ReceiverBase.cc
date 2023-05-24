@@ -35,12 +35,12 @@ bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, cons
         return false;
     else if (simTime() == reception->getStartTime(part)) {
         // TODO isn't there a better way for this optimization? see also in RadioMedium::isReceptionAttempted
-        auto transmission = reception->getReceiver()->getReceptionInProgress();
+        auto transmission = reception->getReceiverRadio()->getReceptionInProgress();
         return transmission == nullptr || transmission == reception->getTransmission();
     }
     else {
         // determining whether the reception is attempted or not for the future
-        auto radio = reception->getReceiver();
+        auto radio = reception->getReceiverRadio();
         auto radioMedium = radio->getMedium();
         auto interferingReceptions = interference->getInterferingReceptions();
         for (auto interferingReception : *interferingReceptions) {

@@ -16,7 +16,7 @@ namespace physicallayer {
 WirelessSignal::WirelessSignal(const ITransmission *transmission) :
     transmissionId(transmission->getId()),
     transmission(transmission),
-    radioMedium(transmission->getTransmitter()->getMedium())
+    radioMedium(transmission->getTransmitterRadio()->getMedium())
 {
 }
 
@@ -36,7 +36,7 @@ std::ostream& WirelessSignal::printToStream(std::ostream& stream, int level, int
 const IRadio *WirelessSignal::getTransmitter() const
 {
     auto transmission = getTransmission();
-    return transmission != nullptr ? transmission->getTransmitter() : nullptr;
+    return transmission != nullptr ? transmission->getTransmitterRadio() : nullptr;
 }
 
 const IRadio *WirelessSignal::getReceiver() const

@@ -1042,7 +1042,7 @@ void MediumCanvasVisualizer::handleSignalDepartureStarted(const ITransmission *t
         if (displaySignals || displayMainPowerDensityMap || displayPowerDensityMaps)
             setAnimationSpeed();
         if (displaySignalDepartures) {
-            auto transmitter = transmission->getTransmitter();
+            auto transmitter = transmission->getTransmitterRadio();
             if (!transmitter) return;
             auto figure = getSignalDepartureFigure(transmitter);
             auto networkNode = getContainingNode(check_and_cast<const cModule *>(transmitter));
@@ -1068,7 +1068,7 @@ void MediumCanvasVisualizer::handleSignalDepartureEnded(const ITransmission *tra
         if (displaySignals || displayMainPowerDensityMap || displayPowerDensityMaps)
             setAnimationSpeed();
         if (displaySignalDepartures) {
-            auto transmitter = transmission->getTransmitter();
+            auto transmitter = transmission->getTransmitterRadio();
             if (!transmitter) return;
             auto figure = getSignalDepartureFigure(transmitter);
             auto networkNode = getContainingNode(check_and_cast<const cModule *>(transmitter));
@@ -1087,7 +1087,7 @@ void MediumCanvasVisualizer::handleSignalArrivalStarted(const IReception *recept
         if (displaySignals || displayMainPowerDensityMap || displayPowerDensityMaps)
             setAnimationSpeed();
         if (displaySignalArrivals) {
-            auto receiver = reception->getReceiver();
+            auto receiver = reception->getReceiverRadio();
             if (networkNodeFilter.matches(check_and_cast<const cModule *>(receiver))) {
                 auto figure = getSignalArrivalFigure(receiver);
                 auto networkNode = getContainingNode(check_and_cast<const cModule *>(receiver));
@@ -1126,7 +1126,7 @@ void MediumCanvasVisualizer::handleSignalArrivalEnded(const IReception *receptio
         if (displaySignals || displayMainPowerDensityMap || displayPowerDensityMaps)
             setAnimationSpeed();
         if (displaySignalArrivals) {
-            auto receiver = reception->getReceiver();
+            auto receiver = reception->getReceiverRadio();
             if (networkNodeFilter.matches(check_and_cast<const cModule *>(receiver))) {
                 auto figure = getSignalArrivalFigure(receiver);
                 auto networkNode = getContainingNode(check_and_cast<const cModule *>(receiver));

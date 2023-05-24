@@ -13,11 +13,11 @@ namespace inet {
 
 namespace physicallayer {
 
-TransmissionBase::TransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation, const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSymbolModel *symbolModel, const ITransmissionSampleModel *sampleModel, const ITransmissionAnalogModel *analogModel) :
+TransmissionBase::TransmissionBase(const IRadio *transmitterRadio, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation, const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSymbolModel *symbolModel, const ITransmissionSampleModel *sampleModel, const ITransmissionAnalogModel *analogModel) :
     id(nextId++),
-    radioMedium(transmitter->getMedium()),
-    transmitterId(transmitter->getId()),
-    transmitterGain(transmitter->getAntenna()->getGain()),
+    radioMedium(transmitterRadio->getMedium()),
+    transmitterRadioId(transmitterRadio->getId()),
+    transmitterGain(transmitterRadio->getAntenna()->getGain()),
     packet(packet),
     startTime(startTime),
     endTime(endTime),
@@ -41,7 +41,7 @@ std::ostream& TransmissionBase::printToStream(std::ostream& stream, int level, i
     if (level <= PRINT_LEVEL_DETAIL)
         stream << EV_FIELD(id);
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(transmitterId)
+        stream << EV_FIELD(transmitterRadioId)
                << EV_FIELD(startTime)
                << EV_FIELD(endTime)
                << EV_FIELD(preambleDuration)
@@ -54,9 +54,9 @@ std::ostream& TransmissionBase::printToStream(std::ostream& stream, int level, i
     return stream;
 }
 
-const IRadio *TransmissionBase::getTransmitter() const
+const IRadio *TransmissionBase::getTransmitterRadio() const
 {
-    return radioMedium->getRadio(transmitterId);
+    return radioMedium->getRadio(transmitterRadioId);
 }
 
 const simtime_t TransmissionBase::getStartTime(IRadioSignal::SignalPart part) const

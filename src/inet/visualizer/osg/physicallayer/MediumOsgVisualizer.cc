@@ -437,7 +437,7 @@ void MediumOsgVisualizer::handleSignalDepartureStarted(const ITransmission *tran
     if (displaySignals)
         setAnimationSpeed();
     if (displaySignalDepartures) {
-        auto group = static_cast<osg::Group *>(getRadioOsgNode(transmission->getTransmitter()));
+        auto group = static_cast<osg::Group *>(getRadioOsgNode(transmission->getTransmitterRadio()));
         auto node = static_cast<osg::Node *>(group->getChild(0));
         node->setNodeMask(1);
     }
@@ -449,7 +449,7 @@ void MediumOsgVisualizer::handleSignalDepartureEnded(const ITransmission *transm
     if (displaySignals)
         setAnimationSpeed();
     if (displaySignalDepartures) {
-        auto transmitter = transmission->getTransmitter();
+        auto transmitter = transmission->getTransmitterRadio();
         auto group = static_cast<osg::Group *>(getRadioOsgNode(transmitter));
         auto node = static_cast<osg::Node *>(group->getChild(0));
         node->setNodeMask(0);
@@ -462,7 +462,7 @@ void MediumOsgVisualizer::handleSignalArrivalStarted(const IReception *reception
     if (displaySignals)
         setAnimationSpeed();
     if (displaySignalArrivals) {
-        auto group = static_cast<osg::Group *>(getRadioOsgNode(reception->getReceiver()));
+        auto group = static_cast<osg::Group *>(getRadioOsgNode(reception->getReceiverRadio()));
         auto node = static_cast<osg::Node *>(group->getChild(displaySignalDepartures ? 1 : 0));
         node->setNodeMask(1);
     }
@@ -474,7 +474,7 @@ void MediumOsgVisualizer::handleSignalArrivalEnded(const IReception *reception)
     if (displaySignals)
         setAnimationSpeed();
     if (displaySignalArrivals) {
-        auto receiver = reception->getReceiver();
+        auto receiver = reception->getReceiverRadio();
         auto group = static_cast<osg::Group *>(getRadioOsgNode(receiver));
         auto node = static_cast<osg::Node *>(group->getChild(displaySignalDepartures ? 1 : 0));
         node->setNodeMask(0);

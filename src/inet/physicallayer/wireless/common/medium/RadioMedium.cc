@@ -205,7 +205,7 @@ bool RadioMedium::isInterferingTransmission(const ITransmission *transmission, c
     const IRadio *receiver = listening->getReceiver();
     const IArrival *arrival = getArrival(receiver, transmission);
     const simtime_t& minInterferenceTime = mediumLimitCache->getMinInterferenceTime();
-    return transmission->getTransmitterId() != receiver->getId() &&
+    return transmission->getTransmitterRadioId() != receiver->getId() &&
            arrival->getEndTime() >= listening->getStartTime() + minInterferenceTime &&
            arrival->getStartTime() <= listening->getEndTime() - minInterferenceTime &&
            isInInterferenceRange(transmission, listening->getStartPosition(), listening->getEndPosition());
@@ -213,10 +213,10 @@ bool RadioMedium::isInterferingTransmission(const ITransmission *transmission, c
 
 bool RadioMedium::isInterferingTransmission(const ITransmission *transmission, const IReception *reception) const
 {
-    const IRadio *receiver = reception->getReceiver();
+    const IRadio *receiver = reception->getReceiverRadio();
     const IArrival *arrival = getArrival(receiver, transmission);
     const simtime_t& minInterferenceTime = mediumLimitCache->getMinInterferenceTime();
-    return transmission->getTransmitterId() != receiver->getId() &&
+    return transmission->getTransmitterRadioId() != receiver->getId() &&
            arrival->getEndTime() > reception->getStartTime() + minInterferenceTime &&
            arrival->getStartTime() < reception->getEndTime() - minInterferenceTime &&
            isInInterferenceRange(transmission, reception->getStartPosition(), reception->getEndPosition());
@@ -248,7 +248,7 @@ const std::vector<const IReception *> *RadioMedium::computeInterferingReceptions
 
 const std::vector<const IReception *> *RadioMedium::computeInterferingReceptions(const IReception *reception) const
 {
-    const IRadio *radio = reception->getReceiver();
+    const IRadio *radio = reception->getReceiverRadio();
     const ITransmission *transmission = reception->getTransmission();
     std::vector<const ITransmission *> *interferingTransmissions = communicationCache->computeInterferingTransmissions(radio, reception->getStartTime(), reception->getEndTime());
     std::vector<const IReception *> *interferingReceptions = new std::vector<const IReception *>();
@@ -676,7 +676,7 @@ void RadioMedium::sendToAllRadios(IRadio *transmitter, const IWirelessSignal *si
 void RadioMedium::pickUpSignals(IRadio *receiverRadio)
 {
     communicationCache->mapTransmissions([&] (const ITransmission *transmission) {
-        auto transmitterRadio = dynamic_cast<const Radio *>(getRadio(transmission->getTransmitterId()));
+        auto transmitterRadio = dynamic_cast<const Radio *>(getRadio(transmission->getTransmitterRadioId()));
         if (!transmitterRadio)
             return;
         if (communicationCache->getCachedSignal(receiverRadio, transmission) == nullptr &&

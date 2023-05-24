@@ -37,7 +37,7 @@ void CommunicationLog::writeReception(const IRadio *receiver, const IWirelessSig
     const ITransmission *transmission = signal->getTransmission();
     const IReception *reception = signal->getReception();
     const Radio *receiverRadio = check_and_cast<const Radio *>(receiver);
-    output << "R " << receiverRadio->getFullPath() << " " << reception->getReceiver()->getId() << " "
+    output << "R " << receiverRadio->getFullPath() << " " << reception->getReceiverRadio()->getId() << " "
            << "M " << check_and_cast<const WirelessSignal *>(signal)->getName() << " " << transmission->getId() << " "
            << "S " << reception->getStartTime() << " " << reception->getStartPosition() << " -> "
            << "E " << reception->getEndTime() << " " << reception->getEndPosition() << endl;
