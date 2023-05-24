@@ -35,6 +35,7 @@ const ITransmission *ApskTransmitter::createTransmission(const IRadio *transmitt
     auto phyHeader = packet->peekAtFront<ApskPhyHeader>();
     ASSERT(phyHeader->getChunkLength() == headerLength);
     auto dataLength = packet->getDataLength() - phyHeader->getChunkLength();
+    // TODO move these to analog model
     W transmissionPower = computeTransmissionPower(packet);
     Hz transmissionCenterFrequency = computeCenterFrequency(packet);
     Hz transmissionBandwidth = computeBandwidth(packet);
@@ -50,7 +51,7 @@ const ITransmission *ApskTransmitter::createTransmission(const IRadio *transmitt
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     auto symbolTime = 0;
     auto transmission = new ApskTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, dataLength, modulation, bandwidth, symbolTime, transmissionBitrate, codeRate);
-    transmission->analogModel = new ScalarTransmissionAnalogModel(transmissionCenterFrequency, transmissionBandwidth, transmissionPower);
+    transmission->analogModel = getAnalogModel()->createAnalogModel(packet);
     return transmission;
 }
 
