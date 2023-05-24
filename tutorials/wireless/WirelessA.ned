@@ -7,7 +7,7 @@ package inet.tutorials.wireless;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.contract.INetworkNode;
-import inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium;
+import inet.physicallayer.wireless.common.medium.RadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
 network WirelessA
@@ -26,7 +26,7 @@ network WirelessA
         configurator: Ipv4NetworkConfigurator {
             @display("p=580,200");
         }
-        radioMedium: <default("UnitDiskRadioMedium")> like IRadioMedium {
+        radioMedium: RadioMedium {
             @display("p=580,275");
         }
         hostA: <default("WirelessHost")> like INetworkNode {

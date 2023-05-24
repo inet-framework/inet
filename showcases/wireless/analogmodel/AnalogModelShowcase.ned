@@ -7,7 +7,7 @@ import inet.physicallayer.wireless.apsk.bitlevel.ApskLayeredScalarRadioMedium;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.physicallayer.wireless.noise.NoiseSource;
-import inet.physicallayer.wireless.unitdisk.UnitDiskRadioMedium;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
 import inet.visualizer.common.IntegratedMultiVisualizer;
 import inet.visualizer.common.IntegratedVisualizer;
 

@@ -6,10 +6,9 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.SensorNode;
 import inet.node.inet.StandardHost;
-import inet.physicallayer.wireless.apsk.packetlevel.ApskScalarRadioMedium;
+import inet.physicallayer.wireless.common.medium.RadioMedium;
 import inet.routing.contract.IManetRouting;
 import inet.visualizer.common.IntegratedVisualizer;
-
 
 module ManetSensorNode extends SensorNode
 {
@@ -32,7 +31,7 @@ network ManetSensorNetwork
         visualizer: IntegratedVisualizer {
             @display("p=4.0722203,9.346079");
         }
-        radioMedium: ApskScalarRadioMedium {
+        radioMedium: RadioMedium {
             @display("p=4.0054626,14.219392");
         }
         sensor4: ManetSensorNode {
