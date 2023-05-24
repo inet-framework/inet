@@ -7,7 +7,6 @@
 
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskProtocolDissector.h"
 
-#include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
 

@@ -9,7 +9,6 @@
 #define __INET_APSKRECEIVER_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/IModulation.h"
 
 namespace inet {
 
@@ -22,7 +21,6 @@ class INET_API ApskReceiver : public FlatReceiverBase
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
 
   public:
-
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };
 

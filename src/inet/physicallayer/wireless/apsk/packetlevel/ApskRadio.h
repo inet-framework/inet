@@ -10,7 +10,7 @@
 
 #include "inet/common/Protocol.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/wireless/common/base/packetlevel/FlatRadioBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandRadioBase.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCode.h"
 
 namespace inet {

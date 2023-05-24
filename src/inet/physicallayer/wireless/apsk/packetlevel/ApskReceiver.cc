@@ -8,7 +8,6 @@
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskReceiver.h"
 
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskTransmission.h"
-#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 
 namespace inet {
 
