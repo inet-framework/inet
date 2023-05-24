@@ -150,9 +150,8 @@ const ITransmission *Ieee80211Transmitter::createTransmission(const IRadio *tran
     const simtime_t dataDuration = duration - headerDuration - preambleDuration;
     auto dataModulation = transmissionMode->getDataMode()->getModulation();
     auto dataSymbolTime = transmissionMode->getDataMode()->getSymbolInterval();
-    auto transmission = new Ieee80211Transmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, transmissionMode, transmissionChannel);
-    transmission->analogModel = getAnalogModel()->createAnalogModel(packet, preambleDuration, headerDuration, dataDuration, centerFrequency, transmissionBandwidth, transmissionPower);
-    return transmission;
+    auto analogModel = getAnalogModel()->createAnalogModel(packet, preambleDuration, headerDuration, dataDuration, centerFrequency, transmissionBandwidth, transmissionPower);
+    return new Ieee80211Transmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel, transmissionMode, transmissionChannel);
 }
 
 } // namespace physicallayer

@@ -46,10 +46,8 @@ const ITransmission *ApskTransmitter::createTransmission(const IRadio *transmitt
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     // TODO KLUDGE
     auto symbolTime = 0;
-    auto transmission = new ApskTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, dataLength, modulation, bandwidth, symbolTime, transmissionBitrate, codeRate);
-    // TODO constructor parameter
-    transmission->analogModel = getAnalogModel()->createAnalogModel(packet, preambleDuration, headerDuration, dataDuration, transmissionCenterFrequency, transmissionBandwidth, transmissionPower);
-    return transmission;
+    auto analogModel = getAnalogModel()->createAnalogModel(packet, preambleDuration, headerDuration, dataDuration, transmissionCenterFrequency, transmissionBandwidth, transmissionPower);
+    return new ApskTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel, headerLength, dataLength, modulation, bandwidth, symbolTime, transmissionBitrate, codeRate);
 }
 
 } // namespace physicallayer

@@ -312,14 +312,7 @@ const ITransmission *Ieee80211LayeredOfdmTransmitter::createTransmission(const I
     const simtime_t preambleDuration = mode->getPreambleLength();
     const simtime_t headerDuration = mode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = mode->getDataMode()->getDuration(packet->getDataLength());
-    auto transmission = new Ieee80211Transmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, mode, nullptr);
-    // TODO pass in constructor
-    transmission->packetModel = packetModel;
-    transmission->bitModel = bitModel;
-    transmission->symbolModel = symbolModel;
-    transmission->sampleModel = sampleModel;
-    transmission->analogModel = analogModel;
-    return transmission;
+    return new Ieee80211Transmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, packetModel, bitModel, symbolModel, sampleModel, analogModel, mode, nullptr);
 }
 
 Ieee80211LayeredOfdmTransmitter::~Ieee80211LayeredOfdmTransmitter()

@@ -27,18 +27,18 @@ class INET_API TransmissionBase : public virtual ITransmission, public cObject
     const int transmitterId;
     Ptr<const IAntennaGain> transmitterGain;
     const Packet *packet;
+
     const simtime_t startTime;
     const simtime_t endTime;
     const simtime_t preambleDuration;
     const simtime_t headerDuration;
     const simtime_t dataDuration;
+
     const Coord startPosition;
     const Coord endPosition;
     const Quaternion startOrientation;
     const Quaternion endOrientation;
 
-  // TODO make this field protected and set from the constructor
-  public:
     const ITransmissionPacketModel *packetModel = nullptr;
     const ITransmissionBitModel *bitModel = nullptr;
     const ITransmissionSymbolModel *symbolModel = nullptr;
@@ -46,7 +46,7 @@ class INET_API TransmissionBase : public virtual ITransmission, public cObject
     const ITransmissionAnalogModel *analogModel = nullptr;
 
   public:
-    TransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation);
+    TransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation, const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSymbolModel *symbolModel, const ITransmissionSampleModel *sampleModel, const ITransmissionAnalogModel *analogModel);
 
     virtual int getId() const override { return id; }
 

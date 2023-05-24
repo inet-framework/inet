@@ -13,7 +13,7 @@ namespace inet {
 
 namespace physicallayer {
 
-TransmissionBase::TransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation) :
+TransmissionBase::TransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation, const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSymbolModel *symbolModel, const ITransmissionSampleModel *sampleModel, const ITransmissionAnalogModel *analogModel) :
     id(nextId++),
     radioMedium(transmitter->getMedium()),
     transmitterId(transmitter->getId()),
@@ -27,7 +27,12 @@ TransmissionBase::TransmissionBase(const IRadio *transmitter, const Packet *pack
     startPosition(startPosition),
     endPosition(endPosition),
     startOrientation(startOrientation),
-    endOrientation(endOrientation)
+    endOrientation(endOrientation),
+    packetModel(packetModel),
+    bitModel(bitModel),
+    symbolModel(symbolModel),
+    sampleModel(sampleModel),
+    analogModel(analogModel)
 {
 }
 
