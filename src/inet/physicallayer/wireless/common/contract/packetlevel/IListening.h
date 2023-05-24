@@ -23,7 +23,7 @@ class IRadio;
 class INET_API IListening : public IPrintableObject
 {
   public:
-    virtual const IRadio *getReceiver() const = 0;
+    virtual const IRadio *getReceiverRadio() const = 0;
 
     virtual const simtime_t getStartTime() const = 0;
     virtual const simtime_t getEndTime() const = 0;
