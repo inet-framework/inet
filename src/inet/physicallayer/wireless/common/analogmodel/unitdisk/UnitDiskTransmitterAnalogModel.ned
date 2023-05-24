@@ -9,6 +9,12 @@ package inet.physicallayer.wireless.common.analogmodel.unitdisk;
 
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitterAnalogModel;
 
+//
+// This transmitter analog model produces signals which are described with a few
+// distance based parameters.
+//
+// @see ~UnitDiskRadioMedium, ~UnitDiskMediumAnalogModel, ~UnitDiskReceiverAnalogModel.
+//
 module UnitDiskTransmitterAnalogModel like ITransmitterAnalogModel
 {
     parameters:

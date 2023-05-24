@@ -7,6 +7,12 @@
 
 package inet.physicallayer.wireless.common.contract.packetlevel;
 
+//
+// The transmitter analog model describes the process which produces the signal
+// analog domain representation.
+//
+// @see ~IAnalogModel, ~IReceiverAnalogModel
+//
 moduleinterface ITransmitterAnalogModel
 {
     parameters:
