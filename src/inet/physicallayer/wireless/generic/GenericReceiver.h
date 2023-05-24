@@ -21,7 +21,6 @@ class INET_API GenericReceiver : public SnirReceiverBase
 {
   protected:
     W energyDetection;
-    // REFACTOR TODO add error model?
 
   protected:
     virtual void initialize(int stage) override;
