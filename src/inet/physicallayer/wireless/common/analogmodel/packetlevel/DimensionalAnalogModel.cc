@@ -10,7 +10,7 @@
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalNoise.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalReceptionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalSnir.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmissionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/Reception.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
@@ -29,7 +29,7 @@ std::ostream& DimensionalAnalogModel::printToStream(std::ostream& stream, int le
 
 const IReception *DimensionalAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
-    auto dimensionalTransmission = check_and_cast<const DimensionalTransmissionAnalogModel *>(transmission->getNewAnalogModel());
+    auto dimensionalTransmission = check_and_cast<const DimensionalSignalAnalogModel *>(transmission->getNewAnalogModel());
     const simtime_t receptionStartTime = arrival->getStartTime();
     const simtime_t receptionEndTime = arrival->getEndTime();
     const Coord& receptionStartPosition = arrival->getStartPosition();

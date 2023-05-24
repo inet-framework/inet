@@ -21,9 +21,9 @@ void UnitDiskTransmitterAnalogModel::initialize(int stage)
     }
 }
 
-INewTransmissionAnalogModel* UnitDiskTransmitterAnalogModel::createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const
+ITransmissionAnalogModel* UnitDiskTransmitterAnalogModel::createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const
 {
-    return new UnitDiskTransmissionAnalogModel(communicationRange, interferenceRange, detectionRange);
+    return new UnitDiskTransmissionAnalogModel(-1, -1, duration, communicationRange, interferenceRange, detectionRange);
 }
 
 } // namespace physicallayer

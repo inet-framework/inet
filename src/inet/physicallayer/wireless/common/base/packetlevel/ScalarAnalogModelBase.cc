@@ -9,7 +9,7 @@
 
 #include "inet/common/geometry/common/Quaternion.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReceptionAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmissionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarSnir.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAntennaGain.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
@@ -38,7 +38,7 @@ W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, cons
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
 
-    const ScalarTransmissionAnalogModel *analogModel = check_and_cast<const ScalarTransmissionAnalogModel *>(transmission->getNewAnalogModel());
+    const ScalarSignalAnalogModel *analogModel = check_and_cast<const ScalarSignalAnalogModel *>(transmission->getNewAnalogModel());
 
     const Coord& receptionStartPosition = arrival->getStartPosition();
     // TODO could be used for doppler shift? const Coord& receptionEndPosition = arrival->getEndPosition();

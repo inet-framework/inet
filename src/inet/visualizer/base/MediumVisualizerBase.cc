@@ -13,7 +13,7 @@
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalReceptionAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmissionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
 #endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
 namespace inet {
@@ -255,7 +255,7 @@ bool MediumVisualizerBase::matchesTransmission(const ITransmission *transmission
 void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission *transmission)
 {
     if (displayMainPowerDensityMap || displayPowerDensityMaps || displaySpectrums || displaySpectrograms) {
-        auto dimensionalTransmission = check_and_cast<const DimensionalTransmissionAnalogModel *>(transmission->getNewAnalogModel());
+        auto dimensionalTransmission = check_and_cast<const DimensionalSignalAnalogModel *>(transmission->getNewAnalogModel());
         auto transmissionPowerFunction = dimensionalTransmission->getPower();
         const auto& transmitterAntennaGain = transmission->getTransmitter()->getAntenna()->getGain();
         bool isotropicAntenna = transmitterAntennaGain->getMaxGain() == 1 && transmitterAntennaGain->getMinGain() == 1;

@@ -9,7 +9,7 @@
 #define __INET_UNITDISKTRANSMISSIONANALOGMODEL_H
 
 #include "inet/common/Units.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/INewTransmissionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/SignalAnalogModel.h"
 
 namespace inet {
 
@@ -17,7 +17,7 @@ namespace physicallayer {
 
 using namespace inet::units::values;
 
-class INET_API UnitDiskTransmissionAnalogModel : public INewTransmissionAnalogModel
+class INET_API UnitDiskTransmissionAnalogModel : public SignalAnalogModel, public ITransmissionAnalogModel
 {
   protected:
     const m communicationRange = m(NaN);
@@ -25,7 +25,9 @@ class INET_API UnitDiskTransmissionAnalogModel : public INewTransmissionAnalogMo
     const m detectionRange = m(NaN);
 
   public:
-    UnitDiskTransmissionAnalogModel(m communicationRange, m interferenceRange, m detectionRange) : communicationRange(communicationRange), interferenceRange(interferenceRange), detectionRange(detectionRange) {}
+    UnitDiskTransmissionAnalogModel(simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, m communicationRange, m interferenceRange, m detectionRange) :
+        SignalAnalogModel(preambleDuration, headerDuration, dataDuration),
+        communicationRange(communicationRange), interferenceRange(interferenceRange), detectionRange(detectionRange) {}
 
     virtual m getCommunicationRange() const { return communicationRange; }
     virtual m getInterferenceRange() const { return interferenceRange; }

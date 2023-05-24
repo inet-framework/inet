@@ -19,7 +19,7 @@
 
 #include "inet/physicallayer/wireless/ieee802154/bitlevel/Ieee802154UwbIrTransmitter.h"
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmissionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
@@ -193,7 +193,7 @@ const ITransmission *Ieee802154UwbIrTransmitter::createTransmission(const IRadio
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& powerFunction = generateIEEE802154AUWBSignal(startTime, bits);
     auto transmission = new FlatTransmissionBase(transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation, packet->getDataLength(), b(-1), cfg.bitrate, -1, nullptr, -1, cfg.centerFrequency, cfg.bandwidth);
-    transmission->newAnalogModel = new DimensionalTransmissionAnalogModel(cfg.centerFrequency, cfg.bandwidth, powerFunction);
+    transmission->newAnalogModel = new DimensionalTransmissionSignalAnalogModel(-1, -1, duration, cfg.centerFrequency, cfg.bandwidth, powerFunction);
     return transmission;
 }
 

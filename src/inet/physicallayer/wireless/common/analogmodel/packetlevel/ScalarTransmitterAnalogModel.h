@@ -8,10 +8,10 @@
 #ifndef __INET_SCALARTRANSMITTERANALOGMODEL_H
 #define __INET_SCALARTRANSMITTERANALOGMODEL_H
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmissionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/TransmitterAnalogModelBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmitterAnalogModel.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/INewTransmissionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"
 
 namespace inet {
 
@@ -40,7 +40,7 @@ class INET_API ScalarTransmitterAnalogModel : public TransmitterAnalogModelBase,
     }
 
   public:
-    virtual INewTransmissionAnalogModel *createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const override;
+    virtual ITransmissionAnalogModel *createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const override;
 };
 
 } // namespace physicallayer

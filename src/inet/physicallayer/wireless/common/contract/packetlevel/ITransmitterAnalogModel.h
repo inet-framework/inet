@@ -10,7 +10,7 @@
 
 #include "inet/common/IPrintableObject.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/INewTransmissionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"
 
 namespace inet {
 
@@ -19,7 +19,7 @@ namespace physicallayer {
 class INET_API ITransmitterAnalogModel : public IPrintableObject
 {
   public:
-    virtual INewTransmissionAnalogModel *createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const = 0;
+    virtual ITransmissionAnalogModel *createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const = 0;
 };
 
 } // namespace physicallayer

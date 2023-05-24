@@ -10,7 +10,7 @@
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalNoise.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalReceptionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalSnir.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmissionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 #include "inet/physicallayer/wireless/common/signal/PowerFunctions.h"
@@ -29,7 +29,7 @@ void DimensionalAnalogModelBase::initialize(int stage)
 const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
-    auto dimensionalSignalAnalogModel = check_and_cast<const DimensionalTransmissionAnalogModel *>(transmission->getNewAnalogModel());
+    auto dimensionalSignalAnalogModel = check_and_cast<const DimensionalSignalAnalogModel *>(transmission->getNewAnalogModel());
     const Coord& transmissionStartPosition = transmission->getStartPosition();
     const Coord& receptionStartPosition = arrival->getStartPosition();
     double transmitterAntennaGain = computeAntennaGain(transmission->getTransmitterAntennaGain(), transmissionStartPosition, arrival->getStartPosition(), transmission->getStartOrientation());

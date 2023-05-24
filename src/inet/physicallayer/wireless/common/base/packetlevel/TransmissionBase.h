@@ -38,7 +38,7 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
     const Quaternion endOrientation;
 
   // TODO make this field protected and set from the constructor
-  public: const INewTransmissionAnalogModel *newAnalogModel = nullptr;
+  public: const ITransmissionAnalogModel *newAnalogModel = nullptr;
 
   public:
     TransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation);
@@ -79,7 +79,7 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
     virtual const Quaternion& getEndOrientation() const override { return endOrientation; }
 
     virtual const ITransmissionAnalogModel *getAnalogModel() const override { return check_and_cast<const ITransmissionAnalogModel *>(this); }
-    virtual const INewTransmissionAnalogModel *getNewAnalogModel() const override { return newAnalogModel; }
+    virtual const ITransmissionAnalogModel *getNewAnalogModel() const override { return newAnalogModel; }
 };
 
 } // namespace physicallayer

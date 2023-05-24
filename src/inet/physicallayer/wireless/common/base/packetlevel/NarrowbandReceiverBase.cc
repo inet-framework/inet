@@ -53,7 +53,7 @@ const IListening *NarrowbandReceiverBase::createListening(const IRadio *radio, c
 bool NarrowbandReceiverBase::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
 {
     // TODO check if modulation matches?
-    auto narrowbandTransmission = check_and_cast<const INarrowbandTransmissionAnalogModel *>(transmission->getNewAnalogModel());
+    auto narrowbandTransmission = check_and_cast<const INarrowbandSignal *>(transmission->getNewAnalogModel());
     return centerFrequency == narrowbandTransmission->getCenterFrequency() && bandwidth >= narrowbandTransmission->getBandwidth();
 }
 

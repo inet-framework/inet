@@ -8,10 +8,10 @@
 #ifndef __INET_DIMENSIONALTRANSMITTERANALOGMODEL_H
 #define __INET_DIMENSIONALTRANSMITTERANALOGMODEL_H
 
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmissionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/TransmitterAnalogModelBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmitterAnalogModel.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/INewTransmissionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"
 
 namespace inet {
 
@@ -77,7 +77,7 @@ class INET_API DimensionalTransmitterAnalogModel : public TransmitterAnalogModel
     virtual Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> createPowerFunction(const simtime_t startTime, const simtime_t endTime, Hz centerFrequency, Hz bandwidth, W power) const;
 
   public:
-    virtual INewTransmissionAnalogModel* createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const override;
+    virtual ITransmissionAnalogModel* createAnalogModel(const Packet *packet, simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) const override;
 };
 
 } // namespace physicallayer

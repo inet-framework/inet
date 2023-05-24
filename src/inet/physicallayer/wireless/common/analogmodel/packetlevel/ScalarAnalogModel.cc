@@ -27,7 +27,7 @@ std::ostream& ScalarAnalogModel::printToStream(std::ostream& stream, int level, 
 const IReception *ScalarAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
-    const ScalarTransmissionAnalogModel *analogModel = check_and_cast<const ScalarTransmissionAnalogModel *>(transmission->getNewAnalogModel());
+    const ScalarSignalAnalogModel *analogModel = check_and_cast<const ScalarSignalAnalogModel *>(transmission->getNewAnalogModel());
 
 
     //const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
