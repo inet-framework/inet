@@ -5,8 +5,8 @@
 //
 
 
-#ifndef __INET_IANALOGMODEL_H
-#define __INET_IANALOGMODEL_H
+#ifndef __INET_IMEDIUMANALOGMODEL_H
+#define __INET_IMEDIUMANALOGMODEL_H
 
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IArrival.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IInterference.h"
@@ -24,7 +24,7 @@ namespace physicallayer {
  * includes various effects such as free-space path loss, shadowing, refraction,
  * reflection, absorption, diffraction and others.
  */
-class INET_API IAnalogModel : public IPrintableObject
+class INET_API IMediumAnalogModel : public IPrintableObject
 {
   public:
     /**

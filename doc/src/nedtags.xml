@@ -1153,8 +1153,8 @@
     <filename>inet.physicallayer.wireless.common.contract.bitlevel.IAnalogDigitalConverter.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.physicallayer.wireless.common.contract.packetlevel.IAnalogModel</name>
-    <filename>inet.physicallayer.wireless.common.contract.packetlevel.IAnalogModel.html</filename>
+    <name>inet.physicallayer.wireless.common.contract.packetlevel.IMediumAnalogModel</name>
+    <filename>inet.physicallayer.wireless.common.contract.packetlevel.IMediumAnalogModel.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.physicallayer.wireless.common.contract.packetlevel.IAntenna</name>

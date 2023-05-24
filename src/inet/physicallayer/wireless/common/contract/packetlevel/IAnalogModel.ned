@@ -11,7 +11,7 @@ package inet.physicallayer.wireless.common.contract.packetlevel;
 // The analog model describes how the analog representation of the transmissions
 // is turned into the analog representation of the receptions.
 //
-moduleinterface IAnalogModel
+moduleinterface IMediumAnalogModel
 {
     parameters:
         @display("i=block/tunnel");

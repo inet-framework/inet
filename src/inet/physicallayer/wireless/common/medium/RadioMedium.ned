@@ -7,7 +7,7 @@
 
 package inet.physicallayer.wireless.common.medium;
 
-import inet.physicallayer.wireless.common.contract.packetlevel.IAnalogModel;
+import inet.physicallayer.wireless.common.contract.packetlevel.IMediumAnalogModel;
 import inet.physicallayer.wireless.common.contract.packetlevel.ICommunicationCache;
 import inet.physicallayer.wireless.common.contract.packetlevel.IMediumLimitCache;
 import inet.physicallayer.wireless.common.contract.packetlevel.INeighborCache;
@@ -57,7 +57,7 @@ module RadioMedium like IRadioMedium
             parameters:
                 @display("p=100,100");
         }
-        analogModel: <default(signalAnalogRepresentation == "unitDisk" ? "UnitDiskMediumAnalogModel" : signalAnalogRepresentation == "scalar" ? "ScalarMediumAnalogModel" : signalAnalogRepresentation == "dimensional" ? "DimensionalMediumAnalogModel" : "")> like IAnalogModel {
+        analogModel: <default(signalAnalogRepresentation == "unitDisk" ? "UnitDiskMediumAnalogModel" : signalAnalogRepresentation == "scalar" ? "ScalarMediumAnalogModel" : signalAnalogRepresentation == "dimensional" ? "DimensionalMediumAnalogModel" : "")> like IMediumAnalogModel {
             parameters:
                 @display("p=100,200");
         }

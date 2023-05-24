@@ -8,14 +8,14 @@
 #ifndef __INET_ANALOGMODELBASE_H
 #define __INET_ANALOGMODELBASE_H
 
-#include "inet/physicallayer/wireless/common/contract/packetlevel/IAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IMediumAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAntennaGain.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API AnalogModelBase : public cModule, public virtual IAnalogModel
+class INET_API AnalogModelBase : public cModule, public virtual IMediumAnalogModel
 {
   protected:
     virtual double computeAntennaGain(const IAntennaGain *antenna, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation) const;

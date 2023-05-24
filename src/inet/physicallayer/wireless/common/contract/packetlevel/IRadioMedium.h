@@ -12,7 +12,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/environment/contract/IMaterial.h"
 #include "inet/environment/contract/IPhysicalEnvironment.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/IAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IMediumAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IArrival.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IBackgroundNoise.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ICommunicationCache.h"
@@ -115,7 +115,7 @@ class INET_API IRadioMedium : public IPrintableObject
      * Returns the signal analog model of this medium.
      * This function never returns nullptr.
      */
-    virtual const IAnalogModel *getAnalogModel() const = 0;
+    virtual const IMediumAnalogModel *getAnalogModel() const = 0;
 
     /**
      * Returns the background noise model of this medium.

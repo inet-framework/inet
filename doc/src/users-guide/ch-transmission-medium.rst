@@ -53,7 +53,7 @@ types:
 .. code-block:: ned
 
    propagation: <default("ConstantSpeedPropagation")> like IPropagation;
-   analogModel: <default("ScalarAnalogModel")> like IAnalogModel;
+   analogModel: <default("ScalarAnalogModel")> like IMediumAnalogModel;
    backgroundNoise: <default("IsotropicScalarBackgroundNoise")> like IRadioBackgroundNoise
        if typename != "";
    pathLoss: <default("FreeSpacePathLoss")> like IPathLoss;

@@ -49,7 +49,7 @@ const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IList
 {
     const IRadio *receiver = listening->getReceiverRadio();
     const IRadioMedium *radioMedium = receiver->getMedium();
-    const IAnalogModel *analogModel = radioMedium->getAnalogModel();
+    const IMediumAnalogModel *analogModel = radioMedium->getAnalogModel();
     const INoise *noise = analogModel->computeNoise(listening, interference);
 
     W maxPower = noise->computeMaxPower(listening->getStartTime(), listening->getEndTime());

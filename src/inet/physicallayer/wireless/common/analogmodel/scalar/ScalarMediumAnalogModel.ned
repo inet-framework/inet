@@ -7,14 +7,14 @@
 
 package inet.physicallayer.wireless.common.analogmodel.scalar;
 
-import inet.physicallayer.wireless.common.contract.packetlevel.IAnalogModel;
+import inet.physicallayer.wireless.common.contract.packetlevel.IMediumAnalogModel;
 
 //
 // This analog model computes with scalar analog power representation. In other
 // words, the signal power does not change over time or frequency, except for
 // the boundaries of the signal.
 //
-module ScalarMediumAnalogModel like IAnalogModel
+module ScalarMediumAnalogModel like IMediumAnalogModel
 {
     parameters:
         bool ignorePartialInterference = default(false); // enabled means interference only partially overlapping with the signal being received is ignored, otherwise the simulation stops with an error

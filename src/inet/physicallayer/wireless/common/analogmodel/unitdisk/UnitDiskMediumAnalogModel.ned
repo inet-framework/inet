@@ -7,7 +7,7 @@
 
 package inet.physicallayer.wireless.common.analogmodel.unitdisk;
 
-import inet.physicallayer.wireless.common.contract.packetlevel.IAnalogModel;
+import inet.physicallayer.wireless.common.contract.packetlevel.IMediumAnalogModel;
 
 //
 // This analog model provides a very simple and predictable physical layer
@@ -16,7 +16,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IAnalogModel;
 //
 // @see ~UnitDiskRadioMedium, ~UnitDiskTransmitterAnalogModel, ~UnitDiskReceiverAnalogModel.
 //
-module UnitDiskMediumAnalogModel like IAnalogModel
+module UnitDiskMediumAnalogModel like IMediumAnalogModel
 {
     parameters:
         @class(UnitDiskMediumAnalogModel);
