@@ -10,7 +10,6 @@
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalNoise.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalReceptionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalSnir.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmissionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/Reception.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"

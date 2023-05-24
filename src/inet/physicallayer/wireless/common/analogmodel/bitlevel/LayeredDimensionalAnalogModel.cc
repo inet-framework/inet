@@ -11,7 +11,6 @@
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredSnir.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/Reception.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalSnir.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 

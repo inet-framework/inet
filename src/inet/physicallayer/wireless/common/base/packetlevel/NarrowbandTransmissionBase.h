@@ -16,7 +16,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API NarrowbandTransmissionBase : public TransmissionBase, public virtual INarrowbandSignal
+class INET_API NarrowbandTransmissionBase : public TransmissionBase
 {
   protected:
     const IModulation *modulation;
@@ -31,8 +31,6 @@ class INET_API NarrowbandTransmissionBase : public TransmissionBase, public virt
 
     virtual const IModulation *getModulation() const { return modulation; }
     virtual simtime_t getSymbolTime() const { return symbolTime; }
-    virtual Hz getCenterFrequency() const override { return centerFrequency; }
-    virtual Hz getBandwidth() const override { return bandwidth; }
 };
 
 } // namespace physicallayer

@@ -30,9 +30,6 @@ class INET_API Ieee80211Transmission : public FlatTransmissionBase
 
     virtual const IIeee80211Mode *getMode() const { return mode; }
     virtual const Ieee80211Channel *getChannel() const { return channel; }
-
-    // TODO KLUDGE replace this with analog model
-    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override { throw cRuntimeError("KLUDGE"); }
 };
 
 } // namespace physicallayer

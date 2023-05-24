@@ -8,7 +8,7 @@
 #include "inet/physicallayer/wireless/noise/NoiseDimensionalTransmitter.h"
 
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {
@@ -49,7 +49,7 @@ const ITransmission *NoiseDimensionalTransmitter::createTransmission(const IRadi
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& powerFunction = createPowerFunction(startTime, endTime, centerFrequency, bandwidth, power);
-    auto transmission = new DimensionalTransmission(transmitter, nullptr, startTime, endTime, 0, 0, duration, startPosition, endPosition, startOrientation, endOrientation, b(-1), b(-1), nullptr, -1, centerFrequency, bandwidth, bps(NaN), NaN, powerFunction);
+    auto transmission = new FlatTransmissionBase(transmitter, nullptr, startTime, endTime, 0, 0, duration, startPosition, endPosition, startOrientation, endOrientation, b(-1), b(-1), bps(NaN), -1, nullptr, -1, centerFrequency, bandwidth);
     transmission->analogModel = getAnalogModel()->createAnalogModel(packet, duration, centerFrequency, bandwidth, power);
     return transmission;
 }

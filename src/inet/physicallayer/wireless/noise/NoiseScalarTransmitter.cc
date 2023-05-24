@@ -19,7 +19,7 @@
 
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase.h"
 
 namespace inet {
 
@@ -56,7 +56,7 @@ const ITransmission *NoiseScalarTransmitter::createTransmission(const IRadio *tr
     const Coord endPosition = mobility->getCurrentPosition();
     const Quaternion startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion endOrientation = mobility->getCurrentAngularPosition();
-    return new ScalarTransmission(transmitter, nullptr, startTime, endTime, 0, 0, duration, startPosition, endPosition, startOrientation, endOrientation, b(-1), b(-1), nullptr, -1, centerFrequency, bandwidth, bps(NaN), NaN, power);
+    return new FlatTransmissionBase(transmitter, nullptr, startTime, endTime, 0, 0, duration, startPosition, endPosition, startOrientation, endOrientation, b(-1), b(-1), bps(NaN), -1, nullptr, -1, centerFrequency, bandwidth);
 }
 
 } // namespace physicallayer

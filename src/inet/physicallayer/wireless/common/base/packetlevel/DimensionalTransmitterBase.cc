@@ -8,7 +8,6 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/DimensionalTransmitterBase.h"
 
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {
