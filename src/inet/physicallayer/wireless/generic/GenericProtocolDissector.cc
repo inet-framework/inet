@@ -13,17 +13,17 @@
 
 namespace inet {
 
-Register_Protocol_Dissector(&Protocol::unitDisk, GenericProtocolDissector);
+Register_Protocol_Dissector(&Protocol::genericPhy, GenericProtocolDissector);
 
 void GenericProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto header = packet->popAtFront<GenericPhyHeader>();
-    callback.startProtocolDataUnit(&Protocol::unitDisk);
-    callback.visitChunk(header, &Protocol::unitDisk);
+    callback.startProtocolDataUnit(&Protocol::genericPhy);
+    callback.visitChunk(header, &Protocol::genericPhy);
     auto payloadProtocol = header->getPayloadProtocol();
     callback.dissectPacket(packet, payloadProtocol);
     ASSERT(packet->getDataLength() == B(0));
-    callback.endProtocolDataUnit(&Protocol::unitDisk);
+    callback.endProtocolDataUnit(&Protocol::genericPhy);
 }
 
 } // namespace inet

@@ -56,7 +56,7 @@ const ITransmission *NoiseTransmitter::createTransmission(const IRadio *transmit
     const Coord endPosition = mobility->getCurrentPosition();
     const Quaternion startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion endOrientation = mobility->getCurrentAngularPosition();
-    auto analogModel = getAnalogModel()->createAnalogModel(packet, 0, 0, duration, centerFrequency, bandwidth, power);
+    auto analogModel = getAnalogModel()->createAnalogModel(0, 0, duration, centerFrequency, bandwidth, power);
     return new NoiseTransmission(transmitter, nullptr, startTime, endTime, 0, 0, duration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel);
 }
 

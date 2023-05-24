@@ -26,7 +26,7 @@ void DimensionalTransmitterAnalogModel::initialize(int stage)
     }
 }
 
-ITransmissionAnalogModel* DimensionalTransmitterAnalogModel::createAnalogModel(const Packet *packet, simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) const
+ITransmissionAnalogModel* DimensionalTransmitterAnalogModel::createAnalogModel(simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) const
 {
     simtime_t startTime = simTime();
     simtime_t endTime = startTime + preambleDuration + headerDuration + dataDuration;

@@ -77,7 +77,7 @@ class INET_API DimensionalTransmitterAnalogModel : public TransmitterAnalogModel
     virtual Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> createPowerFunction(const simtime_t startTime, const simtime_t endTime, Hz centerFrequency, Hz bandwidth, W power) const;
 
   public:
-    virtual ITransmissionAnalogModel* createAnalogModel(const Packet *packet, simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) const override;
+    virtual ITransmissionAnalogModel* createAnalogModel(simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) const override;
 };
 
 } // namespace physicallayer

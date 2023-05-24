@@ -30,7 +30,7 @@ class INET_API UnitDiskTransmitterAnalogModel : public TransmitterAnalogModelBas
     virtual m getInterferenceRange() const { return interferenceRange; }
     virtual m getDetectionRange() const { return detectionRange; }
 
-    virtual ITransmissionAnalogModel* createAnalogModel(const Packet *packet, simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) const override;
+    virtual ITransmissionAnalogModel* createAnalogModel(simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) const override;
 };
 
 } // namespace physicallayer

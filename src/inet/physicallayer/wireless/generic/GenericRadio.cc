@@ -31,7 +31,7 @@ void GenericRadio::encapsulate(Packet *packet) const
     phyHeader->setChunkLength(idealTransmitter->getHeaderLength());
     phyHeader->setPayloadProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
     packet->insertAtFront(phyHeader);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::unitDisk);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::genericPhy);
 }
 
 void GenericRadio::decapsulate(Packet *packet) const

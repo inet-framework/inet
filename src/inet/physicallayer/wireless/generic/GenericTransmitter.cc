@@ -54,7 +54,7 @@ const ITransmission *GenericTransmitter::createTransmission(const IRadio *transm
     auto endPosition = mobility->getCurrentPosition();
     auto startOrientation = mobility->getCurrentAngularPosition();
     auto endOrientation = mobility->getCurrentAngularPosition();
-    auto analogModel = getAnalogModel()->createAnalogModel(packet, preambleDuration, headerDuration, dataDuration, Hz(NaN), Hz(NaN), W(NaN));
+    auto analogModel = getAnalogModel()->createAnalogModel(preambleDuration, headerDuration, dataDuration, Hz(NaN), Hz(NaN), W(NaN));
     return new GenericTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel);
 }
 

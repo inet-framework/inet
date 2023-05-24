@@ -21,7 +21,7 @@ void ScalarTransmitterAnalogModel::initialize(int stage)
     }
 }
 
-ITransmissionAnalogModel *ScalarTransmitterAnalogModel::createAnalogModel(const Packet *packet, simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) const
+ITransmissionAnalogModel *ScalarTransmitterAnalogModel::createAnalogModel(simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) const
 {
     auto transmissionCenterFrequency = computeCenterFrequency(centerFrequency);
     auto transmissionBandwidth = computeBandwidth(bandwidth);
