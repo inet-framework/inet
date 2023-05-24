@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_NOISESCALARTRANSMITTER_H
-#define __INET_NOISESCALARTRANSMITTER_H
+#ifndef __INET_NOISETRANSMITTER_H
+#define __INET_NOISETRANSMITTER_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/TransmitterBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmitter.h"
@@ -25,7 +25,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API NoiseScalarTransmitter : public TransmitterBase
+class INET_API NoiseTransmitter : public TransmitterBase
 {
   protected:
     cPar *durationParameter = nullptr;

@@ -17,9 +17,10 @@
 
 package inet.physicallayer.wireless.noise;
 
+import inet.physicallayer.wireless.common.base.packetlevel.TransmitterBase;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 
-module NoiseScalarTransmitter like ITransmitter
+module NoiseTransmitter extends TransmitterBase like ITransmitter
 {
     parameters:
         volatile double duration @unit(s);
@@ -27,7 +28,7 @@ module NoiseScalarTransmitter like ITransmitter
         volatile double bandwidth @unit(Hz) = default(0Hz);
         volatile double power @unit(W);
         int gainFunctionCacheLimit = default(0); // limits the number of gain functions cached for a given duration, centerFrequency and bandwidth
-        @class(NoiseScalarTransmitter);
+        @class(NoiseTransmitter);
         @display("i=block/wtx");
 }
 

@@ -15,19 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/wireless/noise/NoiseScalarTransmitter.h"
+#include "inet/physicallayer/wireless/noise/NoiseTransmitter.h"
 
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/TransmissionBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Define_Module(NoiseScalarTransmitter);
+Define_Module(NoiseTransmitter);
 
-void NoiseScalarTransmitter::initialize(int stage)
+void NoiseTransmitter::initialize(int stage)
 {
     TransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -38,13 +38,13 @@ void NoiseScalarTransmitter::initialize(int stage)
     }
 }
 
-std::ostream& NoiseScalarTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
+std::ostream& NoiseTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    stream << "NoiseScalarTransmitter";
+    stream << "NoiseTransmitter";
     return TransmitterBase::printToStream(stream, level);
 }
 
-const ITransmission *NoiseScalarTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, simtime_t startTime) const
+const ITransmission *NoiseTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, simtime_t startTime) const
 {
     Hz centerFrequency = Hz(centerFrequencyParameter->doubleValue());
     Hz bandwidth = Hz(bandwidthParameter->doubleValue());
@@ -56,8 +56,8 @@ const ITransmission *NoiseScalarTransmitter::createTransmission(const IRadio *tr
     const Coord endPosition = mobility->getCurrentPosition();
     const Quaternion startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion endOrientation = mobility->getCurrentAngularPosition();
-    // REFACTOR TODO
-    return new FlatTransmissionBase(transmitter, nullptr, startTime, endTime, 0, 0, duration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, nullptr, b(-1), b(-1), bps(NaN), -1, nullptr, -1, centerFrequency, bandwidth);
+    auto analogModel = getAnalogModel()->createAnalogModel(packet, 0, 0, duration, centerFrequency, bandwidth, power);
+    return new TransmissionBase(transmitter, nullptr, startTime, endTime, 0, 0, duration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel);
 }
 
 } // namespace physicallayer
