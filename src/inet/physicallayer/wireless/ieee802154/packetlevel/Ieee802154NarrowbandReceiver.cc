@@ -6,7 +6,7 @@
 //
 
 #include "inet/physicallayer/wireless/ieee802154/packetlevel/Ieee802154NarrowbandReceiver.h"
-#include "inet/physicallayer/wireless/apsk/packetlevel/ApskTransmission.h"
+#include "inet/physicallayer/wireless/ieee802154/packetlevel/Ieee802154Transmission.h"
 
 namespace inet {
 
@@ -29,13 +29,13 @@ void Ieee802154NarrowbandReceiver::initialize(int stage)
 
 bool Ieee802154NarrowbandReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
 {
-    auto ieee802154Transmission = dynamic_cast<const ApskTransmission *>(transmission);
+    auto ieee802154Transmission = dynamic_cast<const Ieee802154Transmission *>(transmission);
     return ieee802154Transmission && NarrowbandReceiverBase::computeIsReceptionPossible(listening, transmission);
 }
 
 bool Ieee802154NarrowbandReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
-    auto ieee802154Transmission = dynamic_cast<const ApskTransmission *>(reception->getTransmission());
+    auto ieee802154Transmission = dynamic_cast<const Ieee802154Transmission *>(reception->getTransmission());
     return ieee802154Transmission && getAnalogModel()->computeIsReceptionPossible(listening, reception, part);
 }
 

@@ -8,8 +8,8 @@
 #include "inet/physicallayer/wireless/ieee802154/packetlevel/Ieee802154NarrowbandTransmitter.h"
 
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/wireless/apsk/packetlevel/ApskTransmission.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/wireless/ieee802154/packetlevel/Ieee802154Transmission.h"
 
 namespace inet {
 namespace physicallayer {
@@ -41,7 +41,7 @@ const ITransmission *Ieee802154NarrowbandTransmitter::createTransmission(const I
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     auto analogModel = getAnalogModel()->createAnalogModel(packet, preambleDuration, headerDuration, dataDuration, centerFrequency, bandwidth, transmissionPower);
-    return new ApskTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel, headerLength, packet->getDataLength(), modulation, bandwidth, -1, transmissionBitrate, codeRate);
+    return new Ieee802154Transmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel, headerLength, packet->getDataLength(), modulation, bandwidth, transmissionBitrate);
 }
 
 } // namespace physicallayer

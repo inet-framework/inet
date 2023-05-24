@@ -13,7 +13,7 @@ module Ieee802154NarrowbandReceiver extends NarrowbandReceiverBase
 {
     parameters:
         modulation = default("DSSS-OQPSK-16");
-        errorModel.typename = default("ApskErrorModel");
+        errorModel.typename = default("Ieee802154ErrorModel");
         double minInterferencePower @unit(dBm);
         @class(Ieee802154NarrowbandReceiver);
 }
