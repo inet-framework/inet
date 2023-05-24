@@ -10,7 +10,7 @@
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/ReceiverAnalogModelBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReceiverAnalogModel.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskListening.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/UnitDiskListening.h"
 
 namespace inet {
 
