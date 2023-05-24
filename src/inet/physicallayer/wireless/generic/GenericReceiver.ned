@@ -11,6 +11,8 @@ import inet.physicallayer.wireless.common.base.packetlevel.SnirReceiverBase;
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
 
 //
+// This receiver is part of the generic radio architecture.
+//
 // @see ~GenericTransmitter, ~GenericRadio.
 //
 module GenericReceiver extends SnirReceiverBase like IReceiver

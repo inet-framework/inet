@@ -11,20 +11,16 @@ import inet.physicallayer.wireless.common.base.packetlevel.TransmitterBase;
 import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 
 //
-// This transmitter model produces transmissions that are parameterized with
-// communication range, interference range, and detection range. It also
-// supports an ideal communication channel with configuring the range parameters
-// to infinity.
+// This transmitter is part of the generic radio architecture.
 //
-// @see ~UnitDiskReceiver, ~UnitDiskRadio, ~UnitDiskRadioMedium,
-// ~UnitDiskAnalogModel.
+// @see ~GenericReceiver, ~GenericRadio
 //
 module GenericTransmitter extends TransmitterBase like ITransmitter
 {
     parameters:
-        double preambleDuration @unit(s) = default(0s);                  // preamble added before the header
-        int headerLength @unit(b) = default(96b);                     // number of header bits added to the length of the MAC frame
-        double bitrate @unit(bps);                                       // the bitrate of the transmitter is used to compute the duration of the transmission
+        double preambleDuration @unit(s) = default(0s); // preamble added before the PHY header
+        int headerLength @unit(b) = default(96b); // number of PHY header bits
+        double bitrate @unit(bps); // the bitrate of the transmitter is used to compute the duration of PHY header and the data part
         @class(GenericTransmitter);
         @display("i=block/wtx");
 }

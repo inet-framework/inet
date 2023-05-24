@@ -10,6 +10,8 @@ package inet.physicallayer.wireless.generic;
 import inet.physicallayer.wireless.common.radio.packetlevel.Radio;
 
 //
+// This radio is part of the generic radio architecture.
+//
 // @see ~GenericTransmitter, ~GenericReceiver.
 //
 module GenericRadio extends Radio
