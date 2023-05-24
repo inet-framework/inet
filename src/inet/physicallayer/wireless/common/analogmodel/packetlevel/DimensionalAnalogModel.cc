@@ -39,7 +39,7 @@ const IReception *DimensionalAnalogModel::computeReception(const IRadio *receive
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& receptionPower = computeReceptionPower(receiverRadio, transmission, arrival);
     // KLUDGE TODO
     auto reception = new Reception(nullptr, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
-    reception->ReceptionBase::analogModel = new DimensionalReceptionAnalogModel(dimensionalTransmission->getCenterFrequency(), dimensionalTransmission->getBandwidth(), receptionPower);
+    reception->newAnalogModel = new DimensionalReceptionAnalogModel(dimensionalTransmission->getCenterFrequency(), dimensionalTransmission->getBandwidth(), receptionPower);
     return reception;
 }
 

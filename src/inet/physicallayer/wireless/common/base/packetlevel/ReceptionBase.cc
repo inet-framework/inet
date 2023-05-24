@@ -41,7 +41,7 @@ std::ostream& ReceptionBase::printToStream(std::ostream& stream, int level, int 
                << EV_FIELD(endPosition)
                << EV_FIELD(startOrientation)
                << EV_FIELD(endOrientation)
-               << EV_FIELD(analogModel);
+               << EV_FIELD(newAnalogModel);
     return stream;
 }
 

@@ -40,7 +40,7 @@ const IReception *ScalarAnalogModel::computeReception(const IRadio *receiverRadi
     W receptionPower = computeReceptionPower(receiverRadio, transmission, arrival);
     // KLUDGE TODO
     auto reception = new Reception(nullptr, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
-    reception->ReceptionBase::analogModel = new ScalarReceptionAnalogModel(analogModel->getCenterFrequency(), analogModel->getBandwidth(), receptionPower);
+    reception->newAnalogModel = new ScalarReceptionAnalogModel(analogModel->getCenterFrequency(), analogModel->getBandwidth(), receptionPower);
     return reception;
 }
 
