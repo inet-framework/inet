@@ -49,7 +49,7 @@ const IListening *GenericReceiver::createListening(const IRadio *radio, const si
 
 const IListeningDecision *GenericReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
-    auto noise = listening->getReceiver()->getMedium()->getAnalogModel()->computeNoise(listening, interference);
+    auto noise = listening->getReceiverRadio()->getMedium()->getAnalogModel()->computeNoise(listening, interference);
     bool isListeningPossible = noise->computeMaxPower(listening->getStartTime(), listening->getEndTime()) > energyDetection;
     delete noise;
     return new ListeningDecision(listening, isListeningPossible);

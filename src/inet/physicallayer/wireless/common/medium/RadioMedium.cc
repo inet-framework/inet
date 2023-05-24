@@ -202,7 +202,7 @@ bool RadioMedium::isInInterferenceRange(const ITransmission *transmission, const
 
 bool RadioMedium::isInterferingTransmission(const ITransmission *transmission, const IListening *listening) const
 {
-    const IRadio *receiver = listening->getReceiver();
+    const IRadio *receiver = listening->getReceiverRadio();
     const IArrival *arrival = getArrival(receiver, transmission);
     const simtime_t& minInterferenceTime = mediumLimitCache->getMinInterferenceTime();
     return transmission->getTransmitterRadioId() != receiver->getId() &&
@@ -236,7 +236,7 @@ void RadioMedium::removeNonInterferingTransmissions()
 
 const std::vector<const IReception *> *RadioMedium::computeInterferingReceptions(const IListening *listening) const
 {
-    const IRadio *radio = listening->getReceiver();
+    const IRadio *radio = listening->getReceiverRadio();
     std::vector<const ITransmission *> *interferingTransmissions = communicationCache->computeInterferingTransmissions(radio, listening->getStartTime(), listening->getEndTime());
     std::vector<const IReception *> *interferingReceptions = new std::vector<const IReception *>();
     for (const auto interferingTransmission : *interferingTransmissions)

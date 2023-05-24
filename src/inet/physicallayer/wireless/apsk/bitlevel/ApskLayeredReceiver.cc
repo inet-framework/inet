@@ -172,7 +172,7 @@ const IListening *ApskLayeredReceiver::createListening(const IRadio *radio, cons
 // TODO copy
 const IListeningDecision *ApskLayeredReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
-    const IRadio *receiver = listening->getReceiver();
+    const IRadio *receiver = listening->getReceiverRadio();
     const IRadioMedium *radioMedium = receiver->getMedium();
     const IAnalogModel *analogModel = radioMedium->getAnalogModel();
     const INoise *noise = analogModel->computeNoise(listening, interference);

@@ -436,7 +436,7 @@ const IListening *Ieee80211LayeredOfdmReceiver::createListening(const IRadio *ra
 // TODO copy
 const IListeningDecision *Ieee80211LayeredOfdmReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
-    const IRadio *receiver = listening->getReceiver();
+    const IRadio *receiver = listening->getReceiverRadio();
     const IRadioMedium *radioMedium = receiver->getMedium();
     const IAnalogModel *analogModel = radioMedium->getAnalogModel();
     const INoise *noise = analogModel->computeNoise(listening, interference);

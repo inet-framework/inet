@@ -48,7 +48,7 @@ std::ostream& FlatReceiverBase::printToStream(std::ostream& stream, int level, i
 
 const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
-    const IRadio *receiver = listening->getReceiver();
+    const IRadio *receiver = listening->getReceiverRadio();
     const IRadioMedium *radioMedium = receiver->getMedium();
     const IAnalogModel *analogModel = radioMedium->getAnalogModel();
     const INoise *noise = analogModel->computeNoise(listening, interference);

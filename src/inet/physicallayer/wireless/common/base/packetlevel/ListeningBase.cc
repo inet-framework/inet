@@ -13,8 +13,8 @@ namespace inet {
 
 namespace physicallayer {
 
-ListeningBase::ListeningBase(const IRadio *receiver, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) :
-    receiver(receiver),
+ListeningBase::ListeningBase(const IRadio *receiverRadio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) :
+    receiverRadio(receiverRadio),
     startTime(startTime),
     endTime(endTime),
     startPosition(startPosition),
@@ -25,7 +25,7 @@ ListeningBase::ListeningBase(const IRadio *receiver, simtime_t startTime, simtim
 std::ostream& ListeningBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(receiverId, receiver->getId())
+        stream << EV_FIELD(receiverRadioId, receiverRadio->getId())
                << EV_FIELD(startTime)
                << EV_FIELD(endTime)
                << EV_FIELD(startPosition)

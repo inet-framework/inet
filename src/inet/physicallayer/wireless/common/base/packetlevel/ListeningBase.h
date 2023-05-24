@@ -17,18 +17,18 @@ namespace physicallayer {
 class INET_API ListeningBase : public IListening
 {
   protected:
-    const IRadio *receiver;
+    const IRadio *receiverRadio;
     const simtime_t startTime;
     const simtime_t endTime;
     const Coord startPosition;
     const Coord endPosition;
 
   public:
-    ListeningBase(const IRadio *receiver, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition);
+    ListeningBase(const IRadio *receiverRadio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
-    virtual const IRadio *getReceiver() const override { return receiver; }
+    virtual const IRadio *getReceiverRadio() const override { return receiverRadio; }
 
     virtual const simtime_t getStartTime() const override { return startTime; }
     virtual const simtime_t getEndTime() const override { return endTime; }
