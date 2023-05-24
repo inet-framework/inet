@@ -46,22 +46,22 @@ std::ostream& StochasticLayeredErrorModel::printToStream(std::ostream& stream, i
     return stream;
 }
 
-const IReceptionPacketModel *StochasticLayeredErrorModel::computePacketModel(const ITransmission *transmission, const ISnir *snir) const
+const IReceptionPacketModel *StochasticLayeredErrorModel::computePacketModel(const ISnir *snir) const
 {
     throw cRuntimeError("Not yet implemented");
 }
 
-const IReceptionBitModel *StochasticLayeredErrorModel::computeBitModel(const ITransmission *transmission, const ISnir *snir) const
+const IReceptionBitModel *StochasticLayeredErrorModel::computeBitModel(const ISnir *snir) const
 {
-    return LayeredErrorModelBase::computeBitModel(transmission, bitErrorRate);
+    return LayeredErrorModelBase::computeBitModel(snir->getReception()->getTransmission(), bitErrorRate);
 }
 
-const IReceptionSymbolModel *StochasticLayeredErrorModel::computeSymbolModel(const ITransmission *transmission, const ISnir *snir) const
+const IReceptionSymbolModel *StochasticLayeredErrorModel::computeSymbolModel(const ISnir *snir) const
 {
-    return LayeredErrorModelBase::computeSymbolModel(transmission, symbolErrorRate);
+    return LayeredErrorModelBase::computeSymbolModel(snir->getReception()->getTransmission(), symbolErrorRate);
 }
 
-const IReceptionSampleModel *StochasticLayeredErrorModel::computeSampleModel(const ITransmission *transmission, const ISnir *snir) const
+const IReceptionSampleModel *StochasticLayeredErrorModel::computeSampleModel(const ISnir *snir) const
 {
     throw cRuntimeError("Not yet implemented");
 }

@@ -110,28 +110,28 @@ std::ostream& Ieee80211LayeredOfdmReceiver::printToStream(std::ostream& stream, 
 const IReceptionSampleModel *Ieee80211LayeredOfdmReceiver::createSampleModel(const ITransmission *transmission, const ISnir *snir) const
 {
     if (levelOfDetail == SAMPLE_DOMAIN)
-        return errorModel->computeSampleModel(transmission, snir);
+        return errorModel->computeSampleModel(snir);
     return nullptr;
 }
 
 const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createBitModel(const ITransmission *transmission, const ISnir *snir) const
 {
     if (levelOfDetail == BIT_DOMAIN)
-        return errorModel->computeBitModel(transmission, snir);
+        return errorModel->computeBitModel(snir);
     return nullptr;
 }
 
 const IReceptionPacketModel *Ieee80211LayeredOfdmReceiver::createPacketModel(const ITransmission *transmission, const ISnir *snir) const
 {
     if (levelOfDetail == PACKET_DOMAIN)
-        return errorModel->computePacketModel(transmission, snir);
+        return errorModel->computePacketModel(snir);
     return nullptr;
 }
 
 const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createSymbolModel(const ITransmission *transmission, const ISnir *snir) const
 {
     if (levelOfDetail == SYMBOL_DOMAIN)
-        return errorModel->computeSymbolModel(transmission, snir);
+        return errorModel->computeSymbolModel(snir);
     return nullptr;
 }
 

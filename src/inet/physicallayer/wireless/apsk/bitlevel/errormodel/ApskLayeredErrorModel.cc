@@ -31,8 +31,9 @@ std::ostream& ApskLayeredErrorModel::printToStream(std::ostream& stream, int lev
     return stream << "LayeredApskErrorModel";
 }
 
-const IReceptionPacketModel *ApskLayeredErrorModel::computePacketModel(const ITransmission *transmission, const ISnir *snir) const
+const IReceptionPacketModel *ApskLayeredErrorModel::computePacketModel(const ISnir *snir) const
 {
+    auto transmission = snir->getReception()->getTransmission();
     const ITransmissionBitModel *bitModel = transmission->getBitModel();
     const ScalarTransmissionAnalogModel *analogModel = check_and_cast<const ScalarTransmissionAnalogModel *>(transmission->getAnalogModel());
     const IModulation *modulation = transmission->getSymbolModel()->getDataModulation();
@@ -49,8 +50,9 @@ const IReceptionPacketModel *ApskLayeredErrorModel::computePacketModel(const ITr
     return LayeredErrorModelBase::computePacketModel(transmission, packetErrorRate);
 }
 
-const IReceptionBitModel *ApskLayeredErrorModel::computeBitModel(const ITransmission *transmission, const ISnir *snir) const
+const IReceptionBitModel *ApskLayeredErrorModel::computeBitModel(const ISnir *snir) const
 {
+    auto transmission = snir->getReception()->getTransmission();
     const ITransmissionBitModel *bitModel = transmission->getBitModel();
     const ScalarTransmissionAnalogModel *analogModel = check_and_cast<const ScalarTransmissionAnalogModel *>(transmission->getAnalogModel());
     const IModulation *modulation = transmission->getSymbolModel()->getDataModulation();
@@ -58,8 +60,9 @@ const IReceptionBitModel *ApskLayeredErrorModel::computeBitModel(const ITransmis
     return LayeredErrorModelBase::computeBitModel(transmission, bitErrorRate);
 }
 
-const IReceptionSymbolModel *ApskLayeredErrorModel::computeSymbolModel(const ITransmission *transmission, const ISnir *snir) const
+const IReceptionSymbolModel *ApskLayeredErrorModel::computeSymbolModel(const ISnir *snir) const
 {
+    auto transmission = snir->getReception()->getTransmission();
     const IModulation *modulation = transmission->getSymbolModel()->getDataModulation();
     const ScalarTransmissionAnalogModel *analogModel = check_and_cast<const ScalarTransmissionAnalogModel *>(transmission->getAnalogModel());
     const ITransmissionBitModel *bitModel = transmission->getBitModel();
@@ -67,7 +70,7 @@ const IReceptionSymbolModel *ApskLayeredErrorModel::computeSymbolModel(const ITr
     return LayeredErrorModelBase::computeSymbolModel(transmission, symbolErrorRate);
 }
 
-const IReceptionSampleModel *ApskLayeredErrorModel::computeSampleModel(const ITransmission *transmission, const ISnir *snir) const
+const IReceptionSampleModel *ApskLayeredErrorModel::computeSampleModel(const ISnir *snir) const
 {
     throw cRuntimeError("Not yet implemented");
 }

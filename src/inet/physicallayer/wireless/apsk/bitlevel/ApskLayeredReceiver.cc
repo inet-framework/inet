@@ -104,7 +104,7 @@ std::ostream& ApskLayeredReceiver::printToStream(std::ostream& stream, int level
 const IReceptionSampleModel *ApskLayeredReceiver::createSampleModel(const ITransmission *transmission, const ISnir *snir, const IReceptionAnalogModel *analogModel) const
 {
     if (levelOfDetail == SAMPLE_DOMAIN)
-        return errorModel->computeSampleModel(transmission, snir);
+        return errorModel->computeSampleModel(snir);
     else if (analogDigitalConverter)
         return analogDigitalConverter->convertAnalogToDigital(analogModel);
     else
@@ -114,7 +114,7 @@ const IReceptionSampleModel *ApskLayeredReceiver::createSampleModel(const ITrans
 const IReceptionSymbolModel *ApskLayeredReceiver::createSymbolModel(const ITransmission *transmission, const ISnir *snir, const IReceptionSampleModel *sampleModel) const
 {
     if (levelOfDetail == SYMBOL_DOMAIN)
-        return errorModel->computeSymbolModel(transmission, snir);
+        return errorModel->computeSymbolModel(snir);
     else if (levelOfDetail >= SAMPLE_DOMAIN)
         return pulseFilter->filter(sampleModel);
     else
@@ -124,7 +124,7 @@ const IReceptionSymbolModel *ApskLayeredReceiver::createSymbolModel(const ITrans
 const IReceptionBitModel *ApskLayeredReceiver::createBitModel(const ITransmission *transmission, const ISnir *snir, const IReceptionSymbolModel *symbolModel) const
 {
     if (levelOfDetail == BIT_DOMAIN)
-        return errorModel->computeBitModel(transmission, snir);
+        return errorModel->computeBitModel(snir);
     else if (levelOfDetail >= SYMBOL_DOMAIN)
         return demodulator->demodulate(symbolModel);
     else
@@ -134,7 +134,7 @@ const IReceptionBitModel *ApskLayeredReceiver::createBitModel(const ITransmissio
 const IReceptionPacketModel *ApskLayeredReceiver::createPacketModel(const ITransmission *transmission, const ISnir *snir, const IReceptionBitModel *bitModel) const
 {
     if (levelOfDetail == PACKET_DOMAIN)
-        return errorModel->computePacketModel(transmission, snir);
+        return errorModel->computePacketModel(snir);
     else if (levelOfDetail >= BIT_DOMAIN)
         return decoder->decode(bitModel);
     else

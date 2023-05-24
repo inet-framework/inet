@@ -51,9 +51,10 @@ std::ostream& Ieee80211OfdmErrorModel::printToStream(std::ostream& stream, int l
     return stream;
 }
 
-const IReceptionPacketModel *Ieee80211OfdmErrorModel::computePacketModel(const ITransmission *transmission, const ISnir *snir) const
+const IReceptionPacketModel *Ieee80211OfdmErrorModel::computePacketModel(const ISnir *snir) const
 {
     double packetErrorRate = computePacketErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE);
+    auto transmission = snir->getReception()->getTransmission();
     auto transmissionPacketModel = check_and_cast<const TransmissionPacketModel *>(transmission->getPacketModel());
     auto transmittedPacket = transmissionPacketModel->getPacket();
     auto receivedPacket = transmittedPacket->dup();
@@ -63,8 +64,9 @@ const IReceptionPacketModel *Ieee80211OfdmErrorModel::computePacketModel(const I
     return new ReceptionPacketModel(receivedPacket, transmissionPacketModel->getHeaderNetBitrate(), transmissionPacketModel->getDataNetBitrate());
 }
 
-const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const ITransmission *transmission, const ISnir *snir) const
+const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const ISnir *snir) const
 {
+    auto transmission = snir->getReception()->getTransmission();
     const ITransmissionBitModel *transmissionBitModel = transmission->getBitModel();
     int signalBitLength = b(transmissionBitModel->getHeaderLength()).get();
     bps signalBitrate = transmissionBitModel->getHeaderGrossBitrate();
@@ -91,9 +93,10 @@ const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const ITransm
     return new ReceptionBitModel(b(signalBitLength), signalBitrate, b(dataBitLength), dataBitrate, corruptedBits, NaN);
 }
 
-const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const ITransmission *transmission, const ISnir *snir) const
+const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const ISnir *snir) const
 {
     auto reception = snir->getReception();
+    auto transmission = reception->getTransmission();
     // bit model
     auto bitModel = transmission->getBitModel();
     auto headerGrossBitrate = bitModel->getHeaderGrossBitrate();
@@ -221,10 +224,11 @@ void Ieee80211OfdmErrorModel::corruptBits(BitVector *bits, double ber, int begin
     }
 }
 
-const IReceptionSampleModel *Ieee80211OfdmErrorModel::computeSampleModel(const ITransmission *transmission, const ISnir *snir) const
+const IReceptionSampleModel *Ieee80211OfdmErrorModel::computeSampleModel(const ISnir *snir) const
 {
     throw cRuntimeError("Unimplemented!");
     // TODO implement sample error model
+    auto transmission = snir->getReception()->getTransmission();
     const ITransmissionSampleModel *transmissionSampleModel = transmission->getSampleModel();
     int headerSampleLength = transmissionSampleModel->getHeaderSampleLength();
     double headerSampleRate = transmissionSampleModel->getHeaderSampleRate();

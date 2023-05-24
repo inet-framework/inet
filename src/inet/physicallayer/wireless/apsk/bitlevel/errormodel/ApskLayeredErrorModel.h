@@ -21,10 +21,10 @@ class INET_API ApskLayeredErrorModel : public LayeredErrorModelBase
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
-    virtual const IReceptionPacketModel *computePacketModel(const ITransmission *transmission, const ISnir *snir) const override;
-    virtual const IReceptionBitModel *computeBitModel(const ITransmission *transmission, const ISnir *snir) const override;
-    virtual const IReceptionSymbolModel *computeSymbolModel(const ITransmission *transmission, const ISnir *snir) const override;
-    virtual const IReceptionSampleModel *computeSampleModel(const ITransmission *transmission, const ISnir *snir) const override;
+    virtual const IReceptionPacketModel *computePacketModel(const ISnir *snir) const override;
+    virtual const IReceptionBitModel *computeBitModel(const ISnir *snir) const override;
+    virtual const IReceptionSymbolModel *computeSymbolModel(const ISnir *snir) const override;
+    virtual const IReceptionSampleModel *computeSampleModel(const ISnir *snir) const override;
 };
 
 } // namespace physicallayer
