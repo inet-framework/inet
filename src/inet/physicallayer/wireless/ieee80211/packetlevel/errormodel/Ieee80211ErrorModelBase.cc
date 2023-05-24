@@ -7,7 +7,7 @@
 
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211ErrorModelBase.h"
 
-#include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmissionBase.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
 
 namespace inet {
@@ -21,12 +21,11 @@ Ieee80211ErrorModelBase::Ieee80211ErrorModelBase()
 double Ieee80211ErrorModelBase::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method("computePacketErrorRate");
-    auto transmission = snir->getReception()->getTransmission();
-    auto flatTransmission = dynamic_cast<const FlatTransmissionBase *>(transmission);
-    auto ieee80211Transmission = check_and_cast<const Ieee80211Transmission *>(transmission);
-    auto mode = ieee80211Transmission->getMode();
-    auto headerLength = flatTransmission != nullptr ? flatTransmission->getHeaderLength() : mode->getHeaderMode()->getLength();
-    auto dataLength = flatTransmission != nullptr ? flatTransmission->getDataLength() : mode->getDataMode()->getCompleteLength(transmission->getPacket()->getDataLength() - headerLength);
+    auto transmission = check_and_cast<const Ieee80211Transmission *>(snir->getReception()->getTransmission());
+    auto mode = transmission->getMode();
+    auto phyHeader = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(transmission->getPacket());
+    auto headerLength = mode->getHeaderMode()->getLength();
+    auto dataLength = b(mode->getDataMode()->getCompleteLength(B(phyHeader->getLengthField())));
     // TODO check header length and data length for OFDM (signal) field
     double headerSuccessRate = getHeaderSuccessRate(mode, b(headerLength).get(), getScalarSnir(snir));
     double dataSuccessRate = getDataSuccessRate(mode, b(dataLength).get(), getScalarSnir(snir));
