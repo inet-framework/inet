@@ -25,12 +25,12 @@ std::ostream& ScalarSignalAnalogModel::printToStream(std::ostream& stream, int l
     return NarrowbandSignalAnalogModel::printToStream(stream, level);
 }
 
-ScalarTransmissionSignalAnalogModel::ScalarTransmissionSignalAnalogModel(const simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) :
+ScalarTransmissionAnalogModel::ScalarTransmissionAnalogModel(const simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) :
     ScalarSignalAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, bandwidth, power)
 {
 }
 
-ScalarReceptionSignalAnalogModel::ScalarReceptionSignalAnalogModel(const simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) :
+ScalarReceptionAnalogModel::ScalarReceptionAnalogModel(const simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) :
     ScalarSignalAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, bandwidth, power)
 {
 }

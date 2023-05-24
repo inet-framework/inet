@@ -196,7 +196,7 @@ bool ApskLayeredReceiver::computeIsReceptionPossible(const IListening *listening
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     // TODO scalar
-    const ScalarReceptionSignalAnalogModel *analogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(reception->getAnalogModel());
+    const ScalarReceptionAnalogModel *analogModel = check_and_cast<const ScalarReceptionAnalogModel *>(reception->getAnalogModel());
     if (bandListening->getCenterFrequency() != analogModel->getCenterFrequency() || bandListening->getBandwidth() != analogModel->getBandwidth()) {
         EV_DEBUG << "Computing reception possible: listening and reception bands are different -> reception is impossible" << endl;
         return false;

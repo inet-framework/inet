@@ -26,7 +26,7 @@ ITransmissionAnalogModel *ScalarTransmitterAnalogModel::createAnalogModel(const 
     auto transmissionCenterFrequency = computeCenterFrequency(centerFrequency);
     auto transmissionBandwidth = computeBandwidth(bandwidth);
     auto transmissionPower = computePower(power);
-    return new ScalarTransmissionSignalAnalogModel(-1, -1, duration, transmissionCenterFrequency, transmissionBandwidth, transmissionPower);
+    return new ScalarTransmissionAnalogModel(-1, -1, duration, transmissionCenterFrequency, transmissionBandwidth, transmissionPower);
 }
 
 } // namespace physicallayer

@@ -141,7 +141,7 @@ const ITransmissionAnalogModel *ApskLayeredTransmitter::createAnalogModel(const 
     }
     else {
         simtime_t duration = packetModel->getPacket()->getBitLength() / bitrate.get();
-        return new ScalarTransmissionSignalAnalogModel(0, 0, duration, centerFrequency, bandwidth, power);
+        return new ScalarTransmissionAnalogModel(0, 0, duration, centerFrequency, bandwidth, power);
     }
 }
 

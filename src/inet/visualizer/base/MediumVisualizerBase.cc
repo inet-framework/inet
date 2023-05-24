@@ -343,7 +343,7 @@ void MediumVisualizerBase::handleSignalRemoved(const physicallayer::ITransmissio
 void MediumVisualizerBase::handleSignalArrivalStarted(const physicallayer::IReception *reception)
 {
     if (displayMainPowerDensityMap || displayPowerDensityMaps || displaySpectrums || displaySpectrograms) {
-        auto dimensionalReception = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(reception->getAnalogModel());
+        auto dimensionalReception = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getAnalogModel());
         auto startTime = reception->getStartTime();
         auto receptionPowerFunction = dimensionalReception->getPower();
         if (autoPowerAxis || autoTimeAxis || autoFrequencyAxis) {

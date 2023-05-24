@@ -66,7 +66,7 @@ W ScalarMediumAnalogModel::computeReceptionPower(const IRadio *receiverRadio, co
 
 void ScalarMediumAnalogModel::addReception(const IReception *reception, simtime_t& noiseStartTime, simtime_t& noiseEndTime, std::map<simtime_t, W>& powerChanges) const
 {
-    W power = check_and_cast<const ScalarReceptionSignalAnalogModel *>(reception->getAnalogModel())->getPower();
+    W power = check_and_cast<const ScalarReceptionAnalogModel *>(reception->getAnalogModel())->getPower();
     simtime_t startTime = reception->getStartTime();
     simtime_t endTime = reception->getEndTime();
     std::map<simtime_t, W>::iterator itStartTime = powerChanges.find(startTime);
@@ -125,7 +125,7 @@ const INoise *ScalarMediumAnalogModel::computeNoise(const IListening *listening,
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
     for (auto reception : *interferingReceptions) {
         auto signalAnalogModel = reception->getAnalogModel();
-        auto receptionAnalogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(signalAnalogModel);
+        auto receptionAnalogModel = check_and_cast<const ScalarReceptionAnalogModel *>(signalAnalogModel);
         Hz signalCenterFrequency = receptionAnalogModel->getCenterFrequency();
         Hz signalBandwidth = receptionAnalogModel->getBandwidth();
         if (commonCenterFrequency == signalCenterFrequency && commonBandwidth >= signalBandwidth)
@@ -190,7 +190,7 @@ const IReception *ScalarMediumAnalogModel::computeReception(const IRadio *receiv
     const Coord& receptionStartPosition = arrival->getStartPosition();
     const Coord& receptionEndPosition = arrival->getEndPosition();
     W receptionPower = computeReceptionPower(receiverRadio, transmission, arrival);
-    auto receptionAnalogModel = new ScalarReceptionSignalAnalogModel(-1, -1, -1, analogModel->getCenterFrequency(), analogModel->getBandwidth(), receptionPower);
+    auto receptionAnalogModel = new ScalarReceptionAnalogModel(-1, -1, -1, analogModel->getCenterFrequency(), analogModel->getBandwidth(), receptionPower);
     auto reception = new Reception(receptionAnalogModel, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
     return reception;
 }

@@ -31,16 +31,16 @@ class INET_API DimensionalSignalAnalogModel : public NarrowbandSignalAnalogModel
     virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override;
 };
 
-class INET_API DimensionalTransmissionSignalAnalogModel : public DimensionalSignalAnalogModel, public virtual ITransmissionAnalogModel
+class INET_API DimensionalTransmissionAnalogModel : public DimensionalSignalAnalogModel, public virtual ITransmissionAnalogModel
 {
   public:
-    DimensionalTransmissionSignalAnalogModel(const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power);
+    DimensionalTransmissionAnalogModel(const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power);
 };
 
-class INET_API DimensionalReceptionSignalAnalogModel : public DimensionalSignalAnalogModel, public virtual IReceptionAnalogModel
+class INET_API DimensionalReceptionAnalogModel : public DimensionalSignalAnalogModel, public virtual IReceptionAnalogModel
 {
   public:
-    DimensionalReceptionSignalAnalogModel(const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power);
+    DimensionalReceptionAnalogModel(const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power);
 };
 
 } // namespace physicallayer

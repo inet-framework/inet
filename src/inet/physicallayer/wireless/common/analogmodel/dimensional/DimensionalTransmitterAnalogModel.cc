@@ -34,7 +34,7 @@ ITransmissionAnalogModel* DimensionalTransmitterAnalogModel::createAnalogModel(c
     auto transmissionBandwidth = computeBandwidth(bandwidth);
     auto transmissionPower = computePower(power);
     const auto &powerFunction = createPowerFunction(startTime, endTime, transmissionCenterFrequency, transmissionBandwidth, transmissionPower);
-    return new DimensionalTransmissionSignalAnalogModel(-1, -1, duration, transmissionCenterFrequency, transmissionBandwidth, powerFunction);
+    return new DimensionalTransmissionAnalogModel(-1, -1, duration, transmissionCenterFrequency, transmissionBandwidth, powerFunction);
 }
 
 template<typename T>

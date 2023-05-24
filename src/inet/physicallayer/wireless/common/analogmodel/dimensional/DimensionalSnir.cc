@@ -32,7 +32,7 @@ double DimensionalSnir::computeMin() const
 {
     // TODO factor out common part
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
-    auto dimensionalReception = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(reception->getAnalogModel());
+    auto dimensionalReception = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getAnalogModel());
     EV_TRACE << "Reception power begin " << endl;
     EV_TRACE << *dimensionalReception->getPower() << endl;
     EV_TRACE << "Reception power end" << endl;
@@ -57,7 +57,7 @@ double DimensionalSnir::computeMax() const
 {
     // TODO factor out common part
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
-    auto dimensionalReception = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(reception->getAnalogModel());
+    auto dimensionalReception = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getAnalogModel());
     EV_DEBUG << "Reception power begin " << endl;
     EV_DEBUG << *dimensionalReception->getPower() << endl;
     EV_DEBUG << "Reception power end" << endl;
@@ -82,7 +82,7 @@ double DimensionalSnir::computeMean() const
 {
     // TODO factor out common part
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
-    auto dimensionalReception = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(reception->getAnalogModel());
+    auto dimensionalReception = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getAnalogModel());
     EV_TRACE << "Reception power begin " << endl;
     EV_TRACE << *dimensionalReception->getPower() << endl;
     EV_TRACE << "Reception power end" << endl;
@@ -127,7 +127,7 @@ double DimensionalSnir::getMean() const
 const Ptr<const IFunction<double, Domain<simsec, Hz>>> DimensionalSnir::getSnir() const
 {
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
-    auto dimensionalReception = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(reception->getAnalogModel());
+    auto dimensionalReception = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getAnalogModel());
     auto noisePower = dimensionalNoise->getPower();
     auto receptionPower = dimensionalReception->getPower();
     return receptionPower->divide(noisePower);

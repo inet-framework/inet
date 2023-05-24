@@ -133,7 +133,7 @@ const ITransmissionAnalogModel *Ieee80211LayeredOfdmTransmitter::createDimension
     auto endTime = startTime + preambleDuration + headerDuration + dataDuration;
     // TODO: centerFrequency doesn't take the channel into account
     auto powerFunction = makeShared<math::Boxcar2DFunction<WpHz, simsec, Hz>>(simsec(startTime), simsec(endTime), centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, power / bandwidth);
-    return new DimensionalTransmissionSignalAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, mode->getDataMode()->getBandwidth(), powerFunction);
+    return new DimensionalTransmissionAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, mode->getDataMode()->getBandwidth(), powerFunction);
 }
 
 const ITransmissionPacketModel *Ieee80211LayeredOfdmTransmitter::createSignalFieldPacketModel(const ITransmissionPacketModel *completePacketModel) const

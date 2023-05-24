@@ -463,7 +463,7 @@ bool Ieee80211LayeredOfdmReceiver::computeIsReceptionPossible(const IListening *
         return false;
     else {
         const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
-        const DimensionalReceptionSignalAnalogModel *analogModel = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(reception->getAnalogModel());
+        const DimensionalReceptionAnalogModel *analogModel = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getAnalogModel());
         if (bandListening->getCenterFrequency() != analogModel->getCenterFrequency() || bandListening->getBandwidth() != analogModel->getBandwidth()) {
             EV_DEBUG << "Computing reception possible: listening and reception bands are different -> reception is impossible" << endl;
             return false;

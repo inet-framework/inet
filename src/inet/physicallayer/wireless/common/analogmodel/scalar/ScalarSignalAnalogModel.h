@@ -28,16 +28,16 @@ class INET_API ScalarSignalAnalogModel : public NarrowbandSignalAnalogModel, pub
     virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override { return power; }
 };
 
-class INET_API ScalarTransmissionSignalAnalogModel : public ScalarSignalAnalogModel, public virtual ITransmissionAnalogModel
+class INET_API ScalarTransmissionAnalogModel : public ScalarSignalAnalogModel, public virtual ITransmissionAnalogModel
 {
   public:
-    ScalarTransmissionSignalAnalogModel(const simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power);
+    ScalarTransmissionAnalogModel(const simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power);
 };
 
-class INET_API ScalarReceptionSignalAnalogModel : public ScalarSignalAnalogModel, public virtual IReceptionAnalogModel
+class INET_API ScalarReceptionAnalogModel : public ScalarSignalAnalogModel, public virtual IReceptionAnalogModel
 {
   public:
-    ScalarReceptionSignalAnalogModel(const simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power);
+    ScalarReceptionAnalogModel(const simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power);
 };
 
 } // namespace physicallayer

@@ -59,7 +59,7 @@ W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, cons
 
 void ScalarAnalogModelBase::addReception(const IReception *reception, simtime_t& noiseStartTime, simtime_t& noiseEndTime, std::map<simtime_t, W>& powerChanges) const
 {
-    W power = check_and_cast<const ScalarReceptionSignalAnalogModel *>(reception->getAnalogModel())->getPower();
+    W power = check_and_cast<const ScalarReceptionAnalogModel *>(reception->getAnalogModel())->getPower();
     simtime_t startTime = reception->getStartTime();
     simtime_t endTime = reception->getEndTime();
     std::map<simtime_t, W>::iterator itStartTime = powerChanges.find(startTime);
@@ -118,7 +118,7 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IListening *listening, c
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
     for (auto reception : *interferingReceptions) {
         auto signalAnalogModel = reception->getAnalogModel();
-        auto receptionAnalogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(signalAnalogModel);
+        auto receptionAnalogModel = check_and_cast<const ScalarReceptionAnalogModel *>(signalAnalogModel);
         Hz signalCenterFrequency = receptionAnalogModel->getCenterFrequency();
         Hz signalBandwidth = receptionAnalogModel->getBandwidth();
         if (commonCenterFrequency == signalCenterFrequency && commonBandwidth >= signalBandwidth)

@@ -80,7 +80,7 @@ const INoise *DimensionalMediumAnalogModel::computeNoise(const IListening *liste
     }
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
     for (const auto & interferingReception : *interferingReceptions) {
-        auto dimensionalSignal = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(interferingReception->getAnalogModel());
+        auto dimensionalSignal = check_and_cast<const DimensionalReceptionAnalogModel *>(interferingReception->getAnalogModel());
         auto receptionPower = dimensionalSignal->getPower();
         receptionPowers.push_back(receptionPower);
         EV_TRACE << "Interference power begin " << endl;
@@ -97,7 +97,7 @@ const INoise *DimensionalMediumAnalogModel::computeNoise(const IListening *liste
 
 const INoise *DimensionalMediumAnalogModel::computeNoise(const IReception *reception, const INoise *noise) const
 {
-    auto dimensionalReception = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(reception->getAnalogModel());
+    auto dimensionalReception = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getAnalogModel());
     auto dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& noisePower = makeShared<AddedFunction<WpHz, Domain<simsec, Hz>>>(dimensionalReception->getPower(), dimensionalNoise->getPower());
     return new DimensionalNoise(reception->getStartTime(), reception->getEndTime(), dimensionalReception->getCenterFrequency(), dimensionalReception->getBandwidth(), noisePower);
@@ -118,7 +118,7 @@ const IReception *DimensionalMediumAnalogModel::computeReception(const IRadio *r
     const Quaternion& receptionStartOrientation = arrival->getStartOrientation();
     const Quaternion& receptionEndOrientation = arrival->getEndOrientation();
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& receptionPower = computeReceptionPower(receiverRadio, transmission, arrival);
-    auto receptionAnalogModel = new DimensionalReceptionSignalAnalogModel(-1, -1, -1, dimensionalTransmission->getCenterFrequency(), dimensionalTransmission->getBandwidth(), receptionPower);
+    auto receptionAnalogModel = new DimensionalReceptionAnalogModel(-1, -1, -1, dimensionalTransmission->getCenterFrequency(), dimensionalTransmission->getBandwidth(), receptionPower);
     auto reception = new Reception(receptionAnalogModel, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
     return reception;
 }

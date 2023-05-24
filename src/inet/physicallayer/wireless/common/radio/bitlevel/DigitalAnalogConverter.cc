@@ -22,7 +22,7 @@ const ITransmissionAnalogModel *ScalarDigitalAnalogConverter::convertDigitalToAn
     simtime_t preambleDuration = 0; // TODO:
     simtime_t headerDuration = sampleModel->getHeaderSampleLength() / sampleModel->getHeaderSampleRate();
     simtime_t dataDuration = sampleModel->getDataSampleLength() / sampleModel->getDataSampleRate();
-    return new ScalarTransmissionSignalAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, bandwidth, power);
+    return new ScalarTransmissionAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, bandwidth, power);
 }
 
 } // namespace physicallayer
