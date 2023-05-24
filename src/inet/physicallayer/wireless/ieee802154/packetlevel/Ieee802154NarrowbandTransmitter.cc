@@ -40,9 +40,8 @@ const ITransmission *Ieee802154NarrowbandTransmitter::createTransmission(const I
     const Coord& endPosition = mobility->getCurrentPosition();
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
-    auto symbolTime = 0;
     auto analogModel = getAnalogModel()->createAnalogModel(packet, preambleDuration, headerDuration, dataDuration, centerFrequency, bandwidth, transmissionPower);
-    return new ApskTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel, headerLength, packet->getDataLength(), modulation, bandwidth, symbolTime, transmissionBitrate, codeRate);
+    return new ApskTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel, headerLength, packet->getDataLength(), modulation, bandwidth, -1, transmissionBitrate, codeRate);
 }
 
 } // namespace physicallayer
