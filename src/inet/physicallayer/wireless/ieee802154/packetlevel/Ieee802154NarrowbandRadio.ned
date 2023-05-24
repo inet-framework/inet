@@ -12,8 +12,8 @@ import inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase;
 module Ieee802154NarrowbandRadio extends FlatRadioBase
 {
     parameters:
-        transmitter.typename = default(signalAnalogRepresentation == "scalar" ? "Ieee802154NarrowbandScalarTransmitter" : signalAnalogRepresentation == "dimensional" ? "Ieee802154NarrowbandDimensionalTransmitter" : "");
-        receiver.typename = default(signalAnalogRepresentation == "scalar" ? "Ieee802154NarrowbandScalarReceiver" : signalAnalogRepresentation == "dimensional" ? "Ieee802154NarrowbandDimensionalReceiver" : "");
+        transmitter.typename = default("Ieee802154NarrowbandTransmitter");
+        receiver.typename = default("Ieee802154NarrowbandReceiver");
 
         centerFrequency = default(2450 MHz);
 

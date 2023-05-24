@@ -6,6 +6,7 @@
 //
 
 #include "inet/physicallayer/wireless/ieee802154/packetlevel/Ieee802154NarrowbandReceiver.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskTransmission.h"
 
 namespace inet {
 
@@ -24,6 +25,18 @@ void Ieee802154NarrowbandReceiver::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         minInterferencePower = mW(math::dBmW2mW(par("minInterferencePower")));
     }
+}
+
+bool Ieee802154NarrowbandReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
+{
+    auto ieee802154Transmission = dynamic_cast<const ApskTransmission *>(transmission);
+    return ieee802154Transmission && NarrowbandReceiverBase::computeIsReceptionPossible(listening, transmission);
+}
+
+bool Ieee802154NarrowbandReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
+{
+    auto ieee802154Transmission = dynamic_cast<const ApskTransmission *>(reception->getTransmission());
+    return ieee802154Transmission && getAnalogModel()->computeIsReceptionPossible(listening, reception, part);
 }
 
 std::ostream& Ieee802154NarrowbandReceiver::printToStream(std::ostream& stream, int level, int evFlags) const

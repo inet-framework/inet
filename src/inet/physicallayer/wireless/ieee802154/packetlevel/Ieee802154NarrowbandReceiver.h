@@ -24,6 +24,9 @@ class INET_API Ieee802154NarrowbandReceiver : public FlatReceiverBase
 
     void initialize(int stage) override;
 
+    virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
+
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual W getMinInterferencePower() const override { return minInterferencePower; }
