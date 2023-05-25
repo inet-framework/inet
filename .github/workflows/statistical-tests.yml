@@ -28,7 +28,7 @@ jobs:
           fi
           echo "is_active=$is_active" >> $GITHUB_OUTPUT
 
-  main:
+  statistical-tests:
     needs: activity-check
     if: steps.activity.outputs.is_active == 'true'
     runs-on: ubuntu-latest
