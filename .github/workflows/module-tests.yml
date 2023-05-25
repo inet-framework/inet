@@ -30,6 +30,7 @@ jobs:
 
   module-tests:
     needs: activity-check
+    if: steps.activity.outputs.is_active == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
