@@ -1,7 +1,7 @@
 
 #include "inet/physicallayer/wireless/common/pathloss/TwoRayInterference.h"
 
-#include "inet/physicallayer/wireless/common/contract/packetlevel/INarrowbandSignal.h"
+#include "../contract/packetlevel/INarrowbandSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
@@ -51,7 +51,7 @@ std::ostream& TwoRayInterference::printToStream(std::ostream& os, int level, int
 double TwoRayInterference::computePathLoss(const ITransmission *transmission, const IArrival *arrival) const
 {
     auto radioMedium = transmission->getMedium();
-    auto narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
+    auto narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignalAnalogModel *>(transmission->getAnalogModel());
     mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
     Hz centerFrequency = Hz(narrowbandSignalAnalogModel->getCenterFrequency());
     const m waveLength = propagationSpeed / centerFrequency;

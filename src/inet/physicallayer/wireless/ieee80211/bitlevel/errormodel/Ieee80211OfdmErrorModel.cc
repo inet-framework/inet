@@ -77,7 +77,7 @@ const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const ISnir *
     const IModulation *dataModulation = check_and_cast<const Ieee80211OfdmModulation *>(transmission->getSymbolModel()->getDataModulation())->getSubcarrierModulation();
     const BitVector *bits = transmissionBitModel->getAllBits();
     BitVector *corruptedBits = new BitVector(*bits);
-    auto analogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
+    auto analogModel = check_and_cast<const INarrowbandSignalAnalogModel *>(transmission->getAnalogModel());
     if (auto apskSignalModulation = dynamic_cast<const IApskModulation *>(signalModulation)) {
         double signalFieldBer = std::isnan(signalBitErrorRate) ? apskSignalModulation->calculateBER(getScalarSnir(snir), analogModel->getBandwidth(), signalBitrate) : signalBitErrorRate;
         corruptBits(corruptedBits, signalFieldBer, 0, signalBitLength);

@@ -10,7 +10,7 @@
 
 #include "inet/common/math/IFunction.h"
 #include "inet/physicallayer/wireless/common/analogmodel/common/NarrowbandSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/IDimensionalSignal.h"
+#include "../../contract/packetlevel/IDimensionalSignalAnalogModel.h"
 
 namespace inet {
 
@@ -18,7 +18,7 @@ namespace physicallayer {
 
 using namespace inet::math;
 
-class INET_API DimensionalSignalAnalogModel : public NarrowbandSignalAnalogModel, public IDimensionalSignal
+class INET_API DimensionalSignalAnalogModel : public NarrowbandSignalAnalogModel, public IDimensionalSignalAnalogModel
 {
   protected:
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> power;

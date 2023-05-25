@@ -13,7 +13,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API IScalarSignal : public virtual ISignalAnalogModel
+class INET_API IScalarSignalAnalogModel : public virtual ISignalAnalogModel
 {
   public:
     virtual W getPower() const = 0;

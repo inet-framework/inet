@@ -13,7 +13,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API IDimensionalSignal : public virtual ISignalAnalogModel
+class INET_API IDimensionalSignalAnalogModel : public virtual ISignalAnalogModel
 {
   public:
     virtual const Ptr<const math::IFunction<WpHz, math::Domain<simsec, Hz>>>& getPower() const = 0;

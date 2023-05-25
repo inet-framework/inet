@@ -469,7 +469,7 @@ bool Ieee80211LayeredOfdmReceiver::computeIsReceptionPossible(const IListening *
             return false;
         }
         else {
-            const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(reception->getAnalogModel());
+            const INarrowbandSignalAnalogModel *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignalAnalogModel *>(reception->getAnalogModel());
             W minReceptionPower = narrowbandSignalAnalogModel->computeMinPower(reception->getStartTime(), reception->getEndTime());
             bool isReceptionPossible = minReceptionPower >= sensitivity;
             EV_DEBUG << "Computing reception possible" << EV_FIELD(minReceptionPower) << EV_FIELD(sensitivity) << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;

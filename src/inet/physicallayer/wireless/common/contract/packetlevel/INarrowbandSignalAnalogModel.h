@@ -16,7 +16,7 @@ namespace physicallayer {
 
 using namespace units::values;
 
-class INET_API INarrowbandSignal : public virtual ISignalAnalogModel
+class INET_API INarrowbandSignalAnalogModel : public virtual ISignalAnalogModel
 {
   public:
     virtual Hz getCenterFrequency() const = 0;

@@ -9,13 +9,13 @@
 #define __INET_SCALARSIGNALANALOGMODEL_H
 
 #include "inet/physicallayer/wireless/common/analogmodel/common/NarrowbandSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/IScalarSignal.h"
+#include "../../contract/packetlevel/IScalarSignalAnalogModel.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API ScalarSignalAnalogModel : public NarrowbandSignalAnalogModel, public virtual IScalarSignal
+class INET_API ScalarSignalAnalogModel : public NarrowbandSignalAnalogModel, public virtual IScalarSignalAnalogModel
 {
   protected:
     const W power;

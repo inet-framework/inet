@@ -9,13 +9,13 @@
 #define __INET_NARROWBANDSIGNALANALOGMODEL_H
 
 #include "inet/physicallayer/wireless/common/analogmodel/common/SignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/INarrowbandSignal.h"
+#include "../../contract/packetlevel/INarrowbandSignalAnalogModel.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API NarrowbandSignalAnalogModel : public SignalAnalogModel, public virtual INarrowbandSignal
+class INET_API NarrowbandSignalAnalogModel : public SignalAnalogModel, public virtual INarrowbandSignalAnalogModel
 {
   protected:
     const Hz centerFrequency;
