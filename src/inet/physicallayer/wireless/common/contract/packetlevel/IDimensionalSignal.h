@@ -8,9 +8,7 @@
 #ifndef __INET_IDIMENSIONALSIGNAL_H
 #define __INET_IDIMENSIONALSIGNAL_H
 
-#include "inet/common/IPrintableObject.h"
-#include "inet/common/geometry/common/Coord.h"
-#include "inet/common/math/Functions.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"
 
 namespace inet {
 namespace physicallayer {

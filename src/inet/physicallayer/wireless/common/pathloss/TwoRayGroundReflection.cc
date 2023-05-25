@@ -15,6 +15,7 @@
 #include "inet/physicallayer/wireless/common/pathloss/TwoRayGroundReflection.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/INarrowbandSignal.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {

@@ -9,7 +9,7 @@
 #define __INET_NARROWBANDSIGNALANALOGMODEL_H
 
 #include "inet/physicallayer/wireless/common/analogmodel/common/SignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/INarrowbandSignal.h"
 
 namespace inet {
 

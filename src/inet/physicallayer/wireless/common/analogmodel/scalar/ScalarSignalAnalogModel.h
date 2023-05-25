@@ -9,6 +9,7 @@
 #define __INET_SCALARSIGNALANALOGMODEL_H
 
 #include "inet/physicallayer/wireless/common/analogmodel/common/NarrowbandSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IScalarSignal.h"
 
 namespace inet {
 

@@ -8,7 +8,7 @@
 #ifndef __INET_DIMENSIONALNOISE_H
 #define __INET_DIMENSIONALNOISE_H
 
-#include "inet/common/math/Functions.h"
+#include "inet/common/math/IFunction.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
 
 namespace inet {

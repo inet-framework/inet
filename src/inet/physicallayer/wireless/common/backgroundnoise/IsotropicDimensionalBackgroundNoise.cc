@@ -7,6 +7,7 @@
 
 #include "inet/physicallayer/wireless/common/backgroundnoise/IsotropicDimensionalBackgroundNoise.h"
 
+#include "inet/common/math/Functions.h"
 #include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalNoise.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 

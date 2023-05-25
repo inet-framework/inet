@@ -8,6 +8,7 @@
 #ifndef __INET_DIMENSIONALMEDIUMANALOGMODEL_H
 #define __INET_DIMENSIONALMEDIUMANALOGMODEL_H
 
+#include "inet/common/math/IFunction.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/AnalogModelBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 

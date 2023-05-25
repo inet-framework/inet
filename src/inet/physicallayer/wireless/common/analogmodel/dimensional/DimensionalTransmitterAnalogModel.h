@@ -8,10 +8,11 @@
 #ifndef __INET_DIMENSIONALTRANSMITTERANALOGMODEL_H
 #define __INET_DIMENSIONALTRANSMITTERANALOGMODEL_H
 
+#include "inet/common/math/IInterpolator.h"
 #include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalTransmissionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/TransmitterAnalogModelBase.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmitterAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmitterAnalogModel.h"
 
 namespace inet {
 

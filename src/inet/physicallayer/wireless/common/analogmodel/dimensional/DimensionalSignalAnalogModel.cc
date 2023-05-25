@@ -7,6 +7,8 @@
 
 #include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSignalAnalogModel.h"
 
+#include "inet/common/math/Functions.h"
+
 namespace inet {
 namespace physicallayer {
 

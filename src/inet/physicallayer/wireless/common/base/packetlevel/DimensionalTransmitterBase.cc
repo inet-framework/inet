@@ -7,6 +7,7 @@
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/DimensionalTransmitterBase.h"
 
+#include "inet/common/math/Functions.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 

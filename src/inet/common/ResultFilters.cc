@@ -19,7 +19,7 @@
 
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 #include "inet/physicallayer/wireless/common/base/packetlevel/ReceptionBase.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/INarrowbandSignal.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #endif
 

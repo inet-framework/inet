@@ -8,8 +8,9 @@
 #ifndef __INET_DIMENSIONALSIGNALANALOGMODEL_H
 #define __INET_DIMENSIONALSIGNALANALOGMODEL_H
 
-#include "inet/common/math/Functions.h"
+#include "inet/common/math/IFunction.h"
 #include "inet/physicallayer/wireless/common/analogmodel/common/NarrowbandSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IDimensionalSignal.h"
 
 namespace inet {
 
