@@ -453,7 +453,7 @@ void IPsec::ahProtect(Packet *transport, SecurityAssociation *sadEntry, int tran
     unsigned int icvBytes = getIntegrityCheckValueBitLength(sadEntry->getAuthenticationAlg()) / 8;
     unsigned int ivBytes  = getInitializationVectorBitLength(sadEntry->getAuthenticationAlg()) / 8;
 
-    unsigned int len = IP_AH_HEADER_BYTES + ivBytes + icvBytes;
+    unsigned int len = IP_AH_HEADER_BYTES + transport->getByteLength() + ivBytes + icvBytes;
 
     // encrypting:
     auto data = transport->removeData();
