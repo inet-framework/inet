@@ -16,6 +16,10 @@ namespace physicallayer {
 
 using namespace units::values;
 
+/**
+ * This interface represents narrowband radio signals that fit in a specific
+ * bandwidth around a center frequency in the analog domain.
+ */
 class INET_API INarrowbandSignalAnalogModel : public virtual ISignalAnalogModel
 {
   public:

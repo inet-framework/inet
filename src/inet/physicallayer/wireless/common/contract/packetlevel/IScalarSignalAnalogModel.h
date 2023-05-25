@@ -13,6 +13,10 @@
 namespace inet {
 namespace physicallayer {
 
+/**
+ * This interface represents the analog domain of a radio signal with a time and
+ * frequency independent constant power.
+ */
 class INET_API IScalarSignalAnalogModel : public virtual ISignalAnalogModel
 {
   public:

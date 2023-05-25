@@ -14,6 +14,9 @@ namespace inet {
 
 namespace physicallayer {
 
+/**
+ * This interface represents an amplitude phase shift keying method.
+ */
 class INET_API IApskModulation : public IModulation
 {
   public:
