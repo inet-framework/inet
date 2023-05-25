@@ -1,7 +1,7 @@
 
 #include "inet/physicallayer/wireless/common/pathloss/TwoRayInterference.h"
 
-#include "../contract/packetlevel/INarrowbandSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/INarrowbandSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {

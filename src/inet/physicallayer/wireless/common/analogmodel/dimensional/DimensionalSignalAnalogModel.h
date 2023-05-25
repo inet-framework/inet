@@ -10,7 +10,7 @@
 
 #include "inet/common/math/IFunction.h"
 #include "inet/physicallayer/wireless/common/analogmodel/common/NarrowbandSignalAnalogModel.h"
-#include "../../contract/packetlevel/IDimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IDimensionalSignalAnalogModel.h"
 
 namespace inet {
 
