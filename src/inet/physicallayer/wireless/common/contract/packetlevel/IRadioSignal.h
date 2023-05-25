@@ -40,26 +40,6 @@ class INET_API IRadioSignal
      * Returns the name of the provided signal part.
      */
     static const char *getSignalPartName(SignalPart signalPart);
-
-    /**
-     * Returns the time when the signal starts at the start position.
-     */
-    virtual const simtime_t getStartTime() const = 0;
-
-    /**
-     * Returns the time when the signal ends at the end position.
-     */
-    virtual const simtime_t getEndTime() const = 0;
-
-    /**
-     * Returns the position where the signal starts at the start time.
-     */
-    virtual const Coord& getStartPosition() const = 0;
-
-    /**
-     * Returns the position where the signal ends at the end time.
-     */
-    virtual const Coord& getEndPosition() const = 0;
 };
 
 class INET_API INarrowbandSignal : public virtual IRadioSignal
