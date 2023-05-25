@@ -106,7 +106,9 @@ void GateScheduleConfiguratorBase::addPorts(Input& input) const
                 port->numGates = subqueue != nullptr ? subqueue->getVectorSize() : -1;
                 port->module = interface->networkInterface;
                 port->datarate = bps(interface->networkInterface->getDatarate());
-                port->propagationTime = check_and_cast<cDatarateChannel *>(interface->networkInterface->getTxTransmissionChannel())->getDelay();
+                auto channel = dynamic_cast<cDatarateChannel *>(interface->networkInterface->getTxTransmissionChannel());
+                if (channel != nullptr)
+                    port->propagationTime = channel->getDelay();
                 port->maxPacketLength = B(interface->networkInterface->getMtu());
                 port->guardBand = s(port->maxPacketLength / port->datarate).get();
                 port->maxCycleTime = gateCycleDuration;
@@ -124,15 +126,17 @@ void GateScheduleConfiguratorBase::addPorts(Input& input) const
             auto networkInterface = check_and_cast<NetworkInterface *>(port->module);
             auto link = findLinkOut(findInterface(node, networkInterface));
             auto linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
-            auto remoteNode = check_and_cast<Node *>(linkOut->getLinkOutRemoteNode());
-            port->endNode = *std::find_if(input.networkNodes.begin(), input.networkNodes.end(), [&] (const auto& networkNode) {
-                return networkNode->module == remoteNode->module;
-            });
-            port->otherPort = *std::find_if(input.ports.begin(), input.ports.end(), [&] (const auto& otherPort) {
-                return otherPort->module == link->destinationInterface->networkInterface;
-            });
-            ASSERT(port->endNode);
-            ASSERT(port->otherPort);
+            if (linkOut != nullptr) {
+                auto remoteNode = check_and_cast<Node *>(linkOut->getLinkOutRemoteNode());
+                port->endNode = *std::find_if(input.networkNodes.begin(), input.networkNodes.end(), [&] (const auto& networkNode) {
+                    return networkNode->module == remoteNode->module;
+                });
+                port->otherPort = *std::find_if(input.ports.begin(), input.ports.end(), [&] (const auto& otherPort) {
+                    return otherPort->module == link->destinationInterface->networkInterface;
+                });
+                ASSERT(port->endNode);
+                ASSERT(port->otherPort);
+            }
         }
     }
 }
