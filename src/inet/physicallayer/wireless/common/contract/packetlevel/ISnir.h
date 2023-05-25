@@ -15,7 +15,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API ISnir : public IPrintableObject
+class INET_API ISnir : public virtual IPrintableObject
 {
   public:
     virtual const IReception *getReception() const = 0;

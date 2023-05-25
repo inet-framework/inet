@@ -23,7 +23,7 @@ namespace physicallayer {
  *
  * This interface is strictly immutable to safely support parallel computation.
  */
-class INET_API IArrival : public IPrintableObject
+class INET_API IArrival : public virtual IPrintableObject
 {
   public:
     virtual const simtime_t getStartPropagationTime() const = 0;

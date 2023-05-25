@@ -22,7 +22,7 @@ namespace physicallayer {
  *
  * This interface is strictly immutable to safely support parallel computation.
  */
-class INET_API ITransmitterAnalogModel : public IPrintableObject
+class INET_API ITransmitterAnalogModel : public virtual IPrintableObject
 {
   public:
     virtual ITransmissionAnalogModel *createAnalogModel(simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) const = 0;

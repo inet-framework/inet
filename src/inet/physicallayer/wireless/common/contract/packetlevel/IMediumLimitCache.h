@@ -18,7 +18,7 @@ namespace physicallayer {
 /**
  * This interface is used to cache various medium limits among the radios.
  */
-class INET_API IMediumLimitCache : public IPrintableObject
+class INET_API IMediumLimitCache : public virtual IPrintableObject
 {
   public:
     /**

@@ -22,7 +22,7 @@ namespace physicallayer {
  *
  * This interface is strictly immutable to safely support parallel computation.
  */
-class INET_API IReception : public IPrintableObject
+class INET_API IReception : public virtual IPrintableObject
 {
   public:
     /**

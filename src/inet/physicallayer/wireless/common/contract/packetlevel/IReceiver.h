@@ -39,7 +39,7 @@ namespace physicallayer {
  * thread. They may also be called several times due to cache invalidation before
  * the actual result is needed. This process is controlled by the medium.
  */
-class INET_API IReceiver : public IPrintableObject
+class INET_API IReceiver : public virtual IPrintableObject
 {
   public:
     /**

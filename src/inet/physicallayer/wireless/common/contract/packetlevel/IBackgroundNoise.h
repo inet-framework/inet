@@ -18,7 +18,7 @@ namespace physicallayer {
 /**
  * This interface models a source which provides background noise over space and time.
  */
-class INET_API IBackgroundNoise : public IPrintableObject
+class INET_API IBackgroundNoise : public virtual IPrintableObject
 {
   public:
     virtual const INoise *computeNoise(const IListening *listening) const = 0;

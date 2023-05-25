@@ -29,7 +29,7 @@ class IRadioMedium;
 // TODO add burst support, sending of signals back to back (using a resource limited queue)
 // TODO rename *Changed signals to *Change signals and emit them just before overwriting
 //       the current state, and thus allowing listeners to use the current value too
-class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
+class INET_API IRadio : public IPhysicalLayer, public virtual IPrintableObject
 {
   protected:
     uint64_t& nextId = SIMULATION_SHARED_COUNTER(nextId);

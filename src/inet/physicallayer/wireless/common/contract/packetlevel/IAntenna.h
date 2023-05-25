@@ -19,7 +19,7 @@ namespace physicallayer {
  * This interface represents a physical device (a part of the radio) which converts
  * electric signals into radio waves, and vice versa.
  */
-class INET_API IAntenna : public IPrintableObject
+class INET_API IAntenna : public virtual IPrintableObject
 {
   public:
     /**

@@ -21,7 +21,7 @@ namespace physicallayer {
 /**
  * This purely virtual interface provides an abstraction for different signals.
  */
-class INET_API IWirelessSignal : public IPhysicalLayerFrame, public IPrintableObject
+class INET_API IWirelessSignal : public IPhysicalLayerFrame, public virtual IPrintableObject
 {
   public:
     /**

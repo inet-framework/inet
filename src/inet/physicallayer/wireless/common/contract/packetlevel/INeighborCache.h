@@ -17,7 +17,7 @@ namespace physicallayer {
 /**
  * This interface keeps track of neighbor relationships between radios.
  */
-class INET_API INeighborCache : public IPrintableObject
+class INET_API INeighborCache : public virtual IPrintableObject
 {
   public:
     virtual void addRadio(const IRadio *radio) = 0;

@@ -22,7 +22,7 @@ namespace physicallayer {
  * piece between the technology-dependent part of the receivers, and
  * the different analog medium models.
  */
-class INET_API IReceiverAnalogModel : public IPrintableObject
+class INET_API IReceiverAnalogModel : public virtual IPrintableObject
 {
   public:
     /// Factory method for IListening objects.

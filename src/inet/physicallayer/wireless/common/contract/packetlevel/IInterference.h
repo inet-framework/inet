@@ -20,7 +20,7 @@ namespace physicallayer {
  *
  * This interface is strictly immutable to safely support parallel computation.
  */
-class INET_API IInterference : public IPrintableObject
+class INET_API IInterference : public virtual IPrintableObject
 {
   public:
     virtual const INoise *getBackgroundNoise() const = 0;

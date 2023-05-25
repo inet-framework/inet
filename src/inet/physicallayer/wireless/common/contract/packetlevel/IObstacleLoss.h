@@ -19,7 +19,7 @@ namespace physicallayer {
  * This interface models obstacle loss that is the reduction in power density of
  * a radio signal as it propagates through physical objects present in space.
  */
-class INET_API IObstacleLoss : public IPrintableObject
+class INET_API IObstacleLoss : public virtual IPrintableObject
 {
   public:
     /**

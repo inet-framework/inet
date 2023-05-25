@@ -19,7 +19,7 @@ namespace physicallayer {
  * This interface models path loss (or path attenuation) that is the reduction
  * in power density of a radio signal as it propagates through space.
  */
-class INET_API IPathLoss : public IPrintableObject
+class INET_API IPathLoss : public virtual IPrintableObject
 {
   public:
     /**

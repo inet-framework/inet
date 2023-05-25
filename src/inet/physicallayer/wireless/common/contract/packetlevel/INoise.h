@@ -20,7 +20,7 @@ using namespace inet::units::values;
 /**
  * This interface represents a meaningless radio signal.
  */
-class INET_API INoise : public IPrintableObject
+class INET_API INoise : public virtual IPrintableObject
 {
   public:
     virtual const simtime_t getStartTime() const = 0;

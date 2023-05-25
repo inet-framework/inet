@@ -34,7 +34,7 @@ class IRadioMedium;
  *
  * This interface is strictly immutable to safely support parallel computation.
  */
-class INET_API ITransmission : public IPrintableObject
+class INET_API ITransmission : public virtual IPrintableObject
 {
   protected:
     uint64_t& nextId = SIMULATION_SHARED_COUNTER(nextId);

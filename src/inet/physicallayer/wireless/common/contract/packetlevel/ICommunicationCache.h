@@ -25,7 +25,7 @@ namespace physicallayer {
  * It also provides caching for various intermediate computation results related
  * to the communication on the medium.
  */
-class INET_API ICommunicationCache : public IPrintableObject
+class INET_API ICommunicationCache : public virtual IPrintableObject
 {
   public:
     virtual ~ICommunicationCache() {}

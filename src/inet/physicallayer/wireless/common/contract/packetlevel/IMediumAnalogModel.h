@@ -24,7 +24,7 @@ namespace physicallayer {
  * includes various effects such as free-space path loss, shadowing, refraction,
  * reflection, absorption, diffraction and others.
  */
-class INET_API IMediumAnalogModel : public IPrintableObject
+class INET_API IMediumAnalogModel : public virtual IPrintableObject
 {
   public:
     /**

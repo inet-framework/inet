@@ -19,7 +19,7 @@ namespace physicallayer {
 /**
  * This interface models how a radio signal propagates through space over time.
  */
-class INET_API IPropagation : public IPrintableObject
+class INET_API IPropagation : public virtual IPrintableObject
 {
   public:
     /**

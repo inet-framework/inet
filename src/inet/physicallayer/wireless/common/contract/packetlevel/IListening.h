@@ -20,7 +20,7 @@ class IRadio;
 /**
  * This interface represents how a receiver is listening on the radio channel.
  */
-class INET_API IListening : public IPrintableObject
+class INET_API IListening : public virtual IPrintableObject
 {
   public:
     virtual const IRadio *getReceiverRadio() const = 0;

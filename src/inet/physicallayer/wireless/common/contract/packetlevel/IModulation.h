@@ -22,7 +22,7 @@ using namespace inet::units::values;
  * properties of a periodic waveform, called the carrier signal, with a
  * modulating signal that typically contains information to be transmitted.
  */
-class INET_API IModulation : public IPrintableObject, public cObject
+class INET_API IModulation : public virtual IPrintableObject, public cObject
 {
   public:
     /**

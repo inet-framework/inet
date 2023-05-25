@@ -17,7 +17,7 @@ namespace physicallayer {
 /**
  * This interface represents the directional selectivity of an antenna.
  */
-class INET_API IAntennaGain : public IPrintableObject
+class INET_API IAntennaGain : public virtual IPrintableObject
 #if INET_PTR_IMPLEMENTATION == INET_INTRUSIVE_PTR
     , public IntrusivePtrCounter<IAntennaGain>
 #endif

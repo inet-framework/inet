@@ -21,7 +21,7 @@ namespace physicallayer {
  * layer indications for higher layers such as packet error rate, bit error rate,
  * and symbol error rate.
  */
-class INET_API IErrorModel : public IPrintableObject
+class INET_API IErrorModel : public virtual IPrintableObject
 {
   public:
     virtual Packet *computeCorruptedPacket(const ISnir *snir) const = 0;

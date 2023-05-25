@@ -19,7 +19,7 @@ namespace physicallayer {
  *
  * This interface is strictly immutable to safely support parallel computation.
  */
-class INET_API IListeningDecision : public IPrintableObject
+class INET_API IListeningDecision : public virtual IPrintableObject
 {
   public:
     virtual const IListening *getListening() const = 0;

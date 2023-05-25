@@ -35,7 +35,7 @@ namespace physicallayer {
  *
  * This interface supports optimistic parallel computation.
  */
-class INET_API IRadioMedium : public IPrintableObject
+class INET_API IRadioMedium : public virtual IPrintableObject
 {
   public:
     /**
