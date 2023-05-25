@@ -424,6 +424,11 @@ void IPsec::espProtect(Packet *transport, SecurityAssociation *sadEntry, int tra
         transport->insertAtBack(makeShared<ByteCountChunk>(B(tfcPadding)));
     if (padLength > 0)
         transport->insertAtBack(makeShared<ByteCountChunk>(B(padLength)));
+    const auto& espTrailer = makeShared<IPsecEspTrailer>();
+    espTrailer->setPadLength(padLength);
+    espTrailer->setNextHeader(transportType);
+    transport->insertAtBack(espTrailer);
+
     auto data = transport->removeData();
     data->markImmutable();
     auto encryptedData = makeShared<EncryptedChunk>(data, data->getChunkLength() + B(ivBytes));
@@ -435,11 +440,6 @@ void IPsec::espProtect(Packet *transport, SecurityAssociation *sadEntry, int tra
     espHeader->setSpi(sadEntry->getSpi());
     espHeader->setIcvBytes(icvBytes);
     transport->insertAtFront(espHeader);
-
-    const auto& espTrailer = makeShared<IPsecEspTrailer>();
-    espTrailer->setPadLength(padLength);
-    espTrailer->setNextHeader(transportType);
-    transport->insertAtBack(espTrailer);
 
     // Add integrity check value if needed
     if (icvBytes)
@@ -777,10 +777,10 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
                 packet->removeAtBack(B(icvBytes));
             // decrypting:
             auto encryptedData = packet->removeAtFront<EncryptedChunk>();
-            auto espTrailer = packet->removeAtFront<IPsecEspTrailer>();
-            packet->removeData(Chunk::PF_ALLOW_EMPTY); // remove icv bytes
+            ASSERT(packet->getDataLength() == b(0));
             auto data = encryptedData->getChunk();
             packet->insertData(data);
+            auto espTrailer = packet->removeAtBack<IPsecEspTrailer>(B(ESP_FIXED_PAYLOAD_TRAILER_BYTES));
             if (espTrailer->getPadLength() > 0)
                 packet->removeAtBack(B(espTrailer->getPadLength()));
             ipv4Header->setProtocolId((IpProtocolId)espTrailer->getNextHeader());
