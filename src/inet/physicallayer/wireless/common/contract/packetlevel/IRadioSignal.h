@@ -15,7 +15,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API IRadioSignal
+class INET_API IRadioSignal: public IPrintableObject
 {
   public:
     /**
