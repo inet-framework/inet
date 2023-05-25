@@ -34,4 +34,5 @@ class IPsecAuthenticationHeader extends FieldsChunk
     uint16_t reserved;
     uint32_t spi; // security parameters index
     uint32_t sequenceNumber;
+    unsigned int icvBytes; // non-existent field, coded in SPI
 }

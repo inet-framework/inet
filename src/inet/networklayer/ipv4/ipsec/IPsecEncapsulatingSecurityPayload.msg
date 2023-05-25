@@ -33,6 +33,7 @@ class IPsecEspHeader extends FieldsChunk
     chunkLength = B(ESP_FIXED_HEADER_BYTES);
     uint32_t spi; // security parameters index
     uint32_t sequenceNumber;
+    unsigned int icvBytes; // non-existent field, coded in SPI
 }
 
 //

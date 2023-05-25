@@ -433,6 +433,7 @@ void IPsec::espProtect(Packet *transport, SecurityAssociation *sadEntry, int tra
     const auto& espHeader = makeShared<IPsecEspHeader>();
     espHeader->setSequenceNumber(sadEntry->getAndIncSeqNum());
     espHeader->setSpi(sadEntry->getSpi());
+    espHeader->setIcvBytes(icvBytes);
     transport->insertAtFront(espHeader);
 
     const auto& espTrailer = makeShared<IPsecEspTrailer>();
@@ -464,6 +465,7 @@ void IPsec::ahProtect(Packet *transport, SecurityAssociation *sadEntry, int tran
     ahHeader->setSequenceNumber(sadEntry->getAndIncSeqNum());
     ahHeader->setSpi(sadEntry->getSpi());
     ahHeader->setNextHeader(transportType);
+    ahHeader->setIcvBytes(icvBytes);
     transport->insertAtFront(ahHeader);
 
     // Add integrity check value if needed
@@ -769,6 +771,10 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
             emit(inProtectedAcceptSignal, 1L);
             inAccept++;
 
+            // TODO calculate icv bytes length from SPI and use espHeader.icvBytes for verify it
+            auto icvBytes = espHeader->getIcvBytes();
+            if (icvBytes > 0)
+                packet->removeAtBack(B(icvBytes));
             // decrypting:
             auto encryptedData = packet->removeAtFront<EncryptedChunk>();
             auto espTrailer = packet->removeAtFront<IPsecEspTrailer>();
