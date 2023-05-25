@@ -62,7 +62,7 @@ class INET_API IRadioSignal
     virtual const Coord& getEndPosition() const = 0;
 };
 
-class INET_API INarrowbandSignal
+class INET_API INarrowbandSignal : public virtual IRadioSignal
 {
   public:
     virtual Hz getCenterFrequency() const = 0;
@@ -71,13 +71,13 @@ class INET_API INarrowbandSignal
     virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const = 0;
 };
 
-class INET_API IScalarSignal
+class INET_API IScalarSignal : public virtual IRadioSignal
 {
   public:
     virtual W getPower() const = 0;
 };
 
-class INET_API IDimensionalSignal
+class INET_API IDimensionalSignal : public virtual IRadioSignal
 {
   public:
     virtual const Ptr<const math::IFunction<WpHz, math::Domain<simsec, Hz>>>& getPower() const = 0;
