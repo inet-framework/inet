@@ -2,7 +2,7 @@ package inet.test.moduletest.lib;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.idealradio.UnitDiskRadioMedium;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
 
 
 network NetIdealRadios
