@@ -16,12 +16,12 @@ Communication should be impossible.
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
-import inet.physicallayer.wireless.apsk.packetlevel.ApskScalarRadioMedium;
+import inet.physicallayer.wireless.common.medium.ScalarRadioMedium;
 
 network Test
 {
     submodules:
-        radioMedium: ApskScalarRadioMedium;
+        radioMedium: ScalarRadioMedium;
         configurator: Ipv4NetworkConfigurator;
         host1: WirelessHost;
         host2: WirelessHost;
@@ -74,7 +74,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.host*.wlan[*].bitrate = 2Mbps
 *.host*.wlan[*].mac.headerLength = 10B
 *.host*.wlan[*].mac.fullDuplex = false
-*.host*.wlan[*].radio.typename = "ApskScalarRadio"
+*.host*.wlan[*].radio.typename = "ApskRadio"
 *.host*.wlan[*].radio.centerFrequency = 2.4GHz
 *.host*.wlan[*].radio.bandwidth = 2MHz
 *.host*.wlan[*].radio.antenna.typename = "DipoleAntenna"
