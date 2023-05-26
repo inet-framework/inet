@@ -86,8 +86,8 @@ ned-path = .;../../../../src;../../lib
 **.wlan[*].radio.typename = "GenericRadio"
 **.wlan[*].radio.transmitter.headerLength = 100b
 **.wlan[*].radio.transmitter.analogModel.communicationRange = 250m
-**.wlan[*].radio.transmitter.interferenceRange = 0m
-**.wlan[*].radio.transmitter.detectionRange = 0m
+**.wlan[*].radio.transmitter.analogModel.interferenceRange = 0m
+**.wlan[*].radio.transmitter.analogModel.detectionRange = 0m
 **.wlan[*].radio.receiver.ignoreInterference = true
 *.numHosts = 20
 

@@ -63,14 +63,14 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.host*.wlan[*].radio.transmitter.headerLength = 96b
 *.host*.wlan[*].radio.receiver.ignoreInterference = false
 *.hostSender1.wlan[*].radio.transmitter.analogModel.communicationRange = 300m
-*.hostSender1.wlan[*].radio.transmitter.interferenceRange = 600m
-*.hostSender1.wlan[*].radio.transmitter.detectionRange = 1.2km
+*.hostSender1.wlan[*].radio.transmitter.analogModel.interferenceRange = 600m
+*.hostSender1.wlan[*].radio.transmitter.analogModel.detectionRange = 1.2km
 *.hostSender2.wlan[*].radio.transmitter.analogModel.communicationRange = 300m
-*.hostSender2.wlan[*].radio.transmitter.interferenceRange = 600m
-*.hostSender2.wlan[*].radio.transmitter.detectionRange = 1.2km
+*.hostSender2.wlan[*].radio.transmitter.analogModel.interferenceRange = 600m
+*.hostSender2.wlan[*].radio.transmitter.analogModel.detectionRange = 1.2km
 *.hostReceiver.wlan[*].radio.transmitter.analogModel.communicationRange = 0m
-*.hostReceiver.wlan[*].radio.transmitter.interferenceRange = 0m
-*.hostReceiver.wlan[*].radio.transmitter.detectionRange = 0m
+*.hostReceiver.wlan[*].radio.transmitter.analogModel.interferenceRange = 0m
+*.hostReceiver.wlan[*].radio.transmitter.analogModel.detectionRange = 0m
 
 # ping app
 *.hostSender*.numApps = 1

@@ -315,9 +315,9 @@ The following ini file fragment shows an example configuration.
    *.host[*].wlan[*].radio.transmitter.bitrate = 2Mbps
    *.host[*].wlan[*].radio.transmitter.preambleDuration = 0s
    *.host[*].wlan[*].radio.transmitter.headerLength = 96b
-   *.host[*].wlan[*].radio.transmitter.communicationRange = 100m
-   *.host[*].wlan[*].radio.transmitter.interferenceRange = 0m
-   *.host[*].wlan[*].radio.transmitter.detectionRange = 0m
+   *.host[*].wlan[*].radio.transmitter.analogModel.communicationRange = 100m
+   *.host[*].wlan[*].radio.transmitter.analogModel.interferenceRange = 0m
+   *.host[*].wlan[*].radio.transmitter.analogModel.detectionRange = 0m
    *.host[*].wlan[*].radio.receiver.ignoreInterference = true
 
 As a side note, if modeling full connectivity and ignoring interference
