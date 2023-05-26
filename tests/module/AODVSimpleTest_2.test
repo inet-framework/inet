@@ -99,7 +99,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # nic settings
 **.wlan[*].typename = "AckingWirelessInterface"
-**.wlan[*].radio.transmitter.communicationRange = 240m
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 240m
 **.wlan[*].radio.transmitter.headerLength = 4b
 **.wlan[*].bitrate = 2Mbps
 **.wlan[*].mac.address = "auto"

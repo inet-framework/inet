@@ -61,13 +61,13 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.host*.wlan[*].radio.transmitter.preambleDuration = 0s
 *.host*.wlan[*].radio.transmitter.headerLength = 96b
 *.host*.wlan[*].radio.receiver.ignoreInterference = false
-*.hostSender1.wlan[*].radio.transmitter.communicationRange = 150m
+*.hostSender1.wlan[*].radio.transmitter.analogModel.communicationRange = 150m
 *.hostSender1.wlan[*].radio.transmitter.interferenceRange = 300m
 *.hostSender1.wlan[*].radio.transmitter.detectionRange = 600m
-*.hostSender2.wlan[*].radio.transmitter.communicationRange = 300m
+*.hostSender2.wlan[*].radio.transmitter.analogModel.communicationRange = 300m
 *.hostSender2.wlan[*].radio.transmitter.interferenceRange = 600m
 *.hostSender2.wlan[*].radio.transmitter.detectionRange = 1.2km
-*.hostReceiver.wlan[*].radio.transmitter.communicationRange = 0m
+*.hostReceiver.wlan[*].radio.transmitter.analogModel.communicationRange = 0m
 *.hostReceiver.wlan[*].radio.transmitter.interferenceRange = 0m
 *.hostReceiver.wlan[*].radio.transmitter.detectionRange = 0m
 
