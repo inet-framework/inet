@@ -311,7 +311,7 @@ The following ini file fragment shows an example configuration.
 .. code-block:: ini
 
    *.radioMedium.typename = "UnitDiskRadioMedium"
-   *.host[*].wlan[*].radio.typename = "UnitDiskRadio"
+   *.host[*].wlan[*].radio.typename = "GenericUnitDiskRadio"
    *.host[*].wlan[*].radio.transmitter.bitrate = 2Mbps
    *.host[*].wlan[*].radio.transmitter.preambleDuration = 0s
    *.host[*].wlan[*].radio.transmitter.headerLength = 96b
