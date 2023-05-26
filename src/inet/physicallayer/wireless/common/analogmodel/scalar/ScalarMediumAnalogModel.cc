@@ -179,7 +179,6 @@ const ISnir *ScalarMediumAnalogModel::computeSNIR(const IReception *reception, c
 
 const IReception *ScalarMediumAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
-    const IRadioMedium *radioMedium = receiverRadio->getMedium();
     const ScalarSignalAnalogModel *transmissionAnalogModel = check_and_cast<const ScalarSignalAnalogModel *>(transmission->getAnalogModel());
     const simtime_t receptionStartTime = arrival->getStartTime();
     const simtime_t receptionEndTime = arrival->getEndTime();
