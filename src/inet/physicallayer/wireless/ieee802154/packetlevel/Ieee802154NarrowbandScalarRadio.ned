@@ -5,9 +5,9 @@
 //
 
 
-package inet.physicallayer.wireless.apsk.packetlevel;
+package inet.physicallayer.wireless.ieee802154.packetlevel;
 
-module ApskScalarRadio extends ApskRadio
+module Ieee802154NarrowbandScalarRadio extends Ieee802154NarrowbandRadio
 {
     parameters:
         signalAnalogRepresentation = default("scalar");

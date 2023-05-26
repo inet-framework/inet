@@ -5,9 +5,9 @@
 //
 
 
-package inet.physicallayer.wireless.apsk.packetlevel;
+package inet.physicallayer.wireless.ieee80211.packetlevel;
 
-module ApskDimensionalRadio extends ApskRadio
+module Ieee80211DimensionalRadio extends Ieee80211Radio
 {
     parameters:
         signalAnalogRepresentation = default("dimensional");

@@ -7,9 +7,9 @@
 
 package inet.physicallayer.wireless.apsk.packetlevel;
 
-module ApskScalarRadio extends ApskRadio
+module ApskUnitDiskRadio extends ApskRadio
 {
     parameters:
-        signalAnalogRepresentation = default("scalar");
+        signalAnalogRepresentation = default("unitDisk");
 }
 
