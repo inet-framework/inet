@@ -18,7 +18,6 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
 module GenericReceiver extends SnirReceiverBase like IReceiver
 {
     parameters:
-        bool ignoreInterference = default(false); // true means interfering transmissions are ignored when determining whether a reception is successful or not
         double energyDetection @unit(dBm) = default(-85 dBm);
         snirThresholdMode = "mean";
         snirThreshold = -100dB; // to match the previous permissive behavior

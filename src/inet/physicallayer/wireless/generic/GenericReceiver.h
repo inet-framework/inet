@@ -20,7 +20,6 @@ namespace physicallayer {
 class INET_API GenericReceiver : public SnirReceiverBase
 {
   protected:
-    bool ignoreInterference = false;
     W energyDetection;
     // REFACTOR TODO add error model?
 

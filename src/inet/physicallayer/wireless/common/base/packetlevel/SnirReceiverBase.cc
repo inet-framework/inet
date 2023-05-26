@@ -33,7 +33,7 @@ std::ostream& SnirReceiverBase::printToStream(std::ostream& stream, int level, i
 {
     if (level <= PRINT_LEVEL_TRACE)
         stream << EV_FIELD(snirThreshold);
-    return stream;
+    return ReceiverBase::printToStream(stream, level, evFlags);
 }
 
 bool SnirReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const

@@ -19,8 +19,11 @@ namespace physicallayer {
 
 class INET_API ReceiverBase : public cModule, public virtual IReceiver
 {
-  // REFACTOR TODO: add ignoreInterference parameter
   protected:
+    bool ignoreInterference = false;
+
+  protected:
+    virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     virtual W computeSignalPower(const IListening *listening, const ISnir *snir, const IInterference *interference) const;
@@ -32,6 +35,7 @@ class INET_API ReceiverBase : public cModule, public virtual IReceiver
 
     virtual IReceiverAnalogModel *getAnalogModel() const { return check_and_cast<IReceiverAnalogModel *>(getSubmodule("analogModel")); }
 
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual W getMinInterferencePower() const override { return W(NaN); }
     virtual W getMinReceptionPower() const override { return W(NaN); }

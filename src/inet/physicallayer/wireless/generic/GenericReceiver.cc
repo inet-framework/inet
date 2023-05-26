@@ -21,18 +21,14 @@ Define_Module(GenericReceiver);
 void GenericReceiver::initialize(int stage)
 {
     SnirReceiverBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        ignoreInterference = par("ignoreInterference");
+    if (stage == INITSTAGE_LOCAL)
         energyDetection = mW(math::dBmW2mW(par("energyDetection")));
-    }
 }
 
 std::ostream& GenericReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "GenericReceiver";
-    if (level <= PRINT_LEVEL_INFO)
-        stream << (ignoreInterference ? ", ignoring interference" : ", considering interference");
-    return stream;
+    return SnirReceiverBase::printToStream(stream, level, evFlags);
 }
 
 bool GenericReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const

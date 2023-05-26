@@ -19,6 +19,19 @@
 namespace inet {
 namespace physicallayer {
 
+void ReceiverBase::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+        ignoreInterference = par("ignoreInterference");
+}
+
+std::ostream& ReceiverBase::printToStream(std::ostream& stream, int level, int evFlags) const
+{
+    if (level <= PRINT_LEVEL_INFO)
+        stream << (ignoreInterference ? ", ignoring interference" : ", considering interference");
+    return stream;
+}
+
 bool ReceiverBase::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
 {
     return true;
