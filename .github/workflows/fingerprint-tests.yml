@@ -60,7 +60,8 @@ jobs:
           MODE: ${{ matrix.mode }}
         run: |
           echo "::group::Installing packages"
-          sudo apt-get install -y --no-install-recommends git wget curl ca-certificates \
+          sudo apt update
+          sudo apt install -y --no-install-recommends git wget curl ca-certificates \
             make ccache clang lld gdb bison flex perl doxygen graphviz libxml2-dev zlib1g-dev \
             libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libz3-dev libopenscenegraph-dev python3
           echo "::endgroup::"
