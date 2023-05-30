@@ -1,4 +1,5 @@
 import curses.ascii
+import glob
 import hashlib
 import io
 import IPython
@@ -271,3 +272,93 @@ class LoggerLevel(object):
 class DebugLevel(LoggerLevel):
     def __init__(self, logger):
         super().__init__(self, logger, logging.DEBUG)
+
+def collect_existing_ned_types():
+    types = set()
+    for ini_file_path in glob.glob(get_inet_relative_path("**/*.ned"), recursive=True):
+        if not re.search("doc/src/_deploy", ini_file_path):
+            with open(ini_file_path, "r") as f:
+                text = f.read()
+                for type in re.findall("^simple (\\w+)", text, re.M):
+                    types.add(type)
+                for type in re.findall("^module (\\w+)", text, re.M):
+                    types.add(type)
+                for type in re.findall("^network (\\w+)", text, re.M):
+                    types.add(type)
+                for type in re.findall("^moduleinterface (\\w+)", text, re.M):
+                    types.add(type)
+                for type in re.findall("^channel (\\w+)", text, re.M):
+                    types.add(type)
+    return types
+
+def collect_referenced_ned_types():
+    types = set()
+    for ini_file_path in glob.glob(get_inet_relative_path("**/*.ini"), recursive=True):
+        if not re.search("doc/src/_deploy", ini_file_path):
+            with open(ini_file_path, "r") as f:
+                for type in re.findall("typename = \"(\\w+?)\"", f.read()):
+                    types.add(type)
+    for ned_file_path in glob.glob(get_inet_relative_path("**/*.ned"), recursive=True):
+        if not re.search("doc/src/_deploy", ini_file_path):
+            with open(ned_file_path, "r") as f:
+                for type in re.findall("~(\\w+)", f.read()):
+                    types.add(type)
+    for rst_file_path in glob.glob(get_inet_relative_path("**/*.rst"), recursive=True):
+        if not re.search("doc/src/_deploy", ini_file_path):
+            with open(rst_file_path, "r") as f:
+                for type in re.findall(":ned:`(\\w+?)`", f.read()):
+                    types.add(type)
+    return types
+
+def collect_ned_type_reference_file_paths(type):
+    references = []
+    for ini_file_path in glob.glob(get_inet_relative_path("**/*.ini"), recursive=True):
+        if not re.search("doc/src/_deploy", ini_file_path):
+            with open(ini_file_path, "r") as f:
+                if re.search(f"typename = \"{type}\"", f.read()):
+                    references.append(ini_file_path)
+    for rst_file_path in glob.glob(get_inet_relative_path("**/*.rst"), recursive=True):
+        if not re.search("doc/src/_deploy", ini_file_path):
+            with open(rst_file_path, "r") as f:
+                if re.search(f":ned:`{type}`", f.read()):
+                    references.append(rst_file_path)
+    return references
+
+def collect_existing_msg_types():
+    types = set()
+    for ini_file_path in glob.glob(get_inet_relative_path("**/*.msg"), recursive=True):
+        if not re.search("doc/src/_deploy", ini_file_path):
+            with open(ini_file_path, "r") as f:
+                text = f.read()
+                for type in re.findall("^class (\\w+)", text, re.M):
+                    types.add(type)
+                for type in re.findall("^packet (\\w+)", text, re.M):
+                    types.add(type)
+    return types
+
+def collect_existing_cpp_types():
+    types = set()
+    for ini_file_path in glob.glob(get_inet_relative_path("**/*.h"), recursive=True):
+        if not re.search("doc/src/_deploy", ini_file_path):
+            with open(ini_file_path, "r") as f:
+                text = f.read()
+                for type in re.findall("^class INET_API (\\w+)", text, re.M):
+                    types.add(type)
+                for type in re.findall("^enum (\\w+)", text, re.M):
+                    types.add(type)
+    for ini_file_path in glob.glob(get_inet_relative_path("**/*.cc"), recursive=True):
+        if not re.search("doc/src/_deploy", ini_file_path):
+            with open(ini_file_path, "r") as f:
+                text = f.read()
+                for type in re.findall("Register_Packet_Dropper_Function\\((\\w+),", text, re.M):
+                    types.add(type)
+                for type in re.findall("Register_Packet_Comparator_Function\\((\\w+),", text, re.M):
+                    types.add(type)
+    return types
+
+def collect_referenced_non_existing_ned_types():
+    referenced_ned_types = collect_referenced_ned_types()
+    existing_ned_types = collect_existing_ned_types()
+    existing_msg_types = collect_existing_msg_types()
+    existing_cpp_types = collect_existing_cpp_types()
+    return referenced_ned_types.difference(existing_ned_types).difference(existing_msg_types).difference(existing_cpp_types)
