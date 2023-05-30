@@ -10,7 +10,7 @@ package inet.linklayer.ppp;
 //
 // PPP implementation.
 //
-// Packets are encapsulated in ~PppFrame.
+// Packets are encapsulated in ~PppHeader and ~PppTrailer.
 //
 // PPP is a complex protocol with strong support for link configuration
 // and maintenance. This model ignores those details, and only performs

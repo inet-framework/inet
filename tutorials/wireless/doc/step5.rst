@@ -27,9 +27,9 @@ The model
 ---------
 
 To turn on interference modeling, we set the ``ignoreInterference``
-parameter in the receiver part of :ned:`UnitDiskRadio` to ``false``.
+parameter in the receiver part of :ned:`GenericUnitDiskRadio` to ``false``.
 Interference range is the ``interferenceRange`` parameter of
-:ned:`UnitDiskRadio`'s transmitter part, so we set that to 500m.
+:ned:`GenericUnitDiskRadio`'s transmitter part, so we set that to 500m.
 
 We expect that although host B will not be able to receive host A's
 transmissions, those transmissions will still cause interference with

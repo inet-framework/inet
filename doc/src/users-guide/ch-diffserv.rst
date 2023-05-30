@@ -185,7 +185,7 @@ the arrival of new packets.
 FIFO Queue
 ^^^^^^^^^^
 
-The :ned:`FifoQueue` module implements a passive FIFO queue with
+The :ned:`PacketQueue` module implements a passive FIFO queue with
 unlimited buffer space. It can be combined with algorithmic droppers and
 schedulers to form an IPacketQueue compound module.
 
@@ -201,7 +201,7 @@ The other primitive queue module is :ned:`DropTailQueue`. Its capacity
 can be specified by the :par:`packetCapacity` parameter. When the number
 of stored packet reached the capacity of the queue, further packets are
 dropped. Because this module contains a built-in dropping strategy, it
-cannot be combined with algorithmic droppers as :ned:`FifoQueue` can be.
+cannot be combined with algorithmic droppers as :ned:`PacketQueue` can be.
 However its output can be connected to schedulers.
 
 This module implements the :ned:`IPacketQueue` interface, so it can be
@@ -258,7 +258,7 @@ It has :math:`n` input and :math:`n` output gates (specified by the
 :par:`numGates` parameter). Packets that arrive at the :math:`i^{th}`
 input gate are forwarded to the :math:`i^{th}` output gate, or dropped.
 The output gates must be connected to simple modules implementing the
-:cpp:`IQueueAccess` C++ interface (e.g. :ned:`FifoQueue`).
+:cpp:`IPacketQueue` C++ interface (e.g. :ned:`PacketQueue`).
 
 The module sums the used buffer space of the queues attached to the
 output gates. If it is below a minimum threshold, the packet won’t be

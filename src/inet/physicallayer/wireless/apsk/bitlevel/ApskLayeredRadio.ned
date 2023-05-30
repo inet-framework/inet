@@ -12,11 +12,9 @@ import inet.physicallayer.wireless.apsk.packetlevel.ApskRadio;
 //
 // This radio model is part of a simple hypothetical layered radio. It
 // produces detailed transmissions that have separate representation for
-// all simulated domains. It must be used in conjunction with the
-// ~ApskLayeredDimensionalRadioMedium model.
+// all simulated domains.
 //
-// @see ~ApskLayeredDimensionalRadioMedium, ~LayeredDimensionalAnalogModel,
-// ~ApskLayeredTransmitter, ~ApskLayeredReceiver.
+// @see ~DimensionalRadioMedium, ~ApskLayeredTransmitter, ~ApskLayeredReceiver.
 //
 module ApskLayeredRadio extends ApskRadio
 {

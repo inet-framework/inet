@@ -28,7 +28,7 @@ simple TokenBucketMeter extends PacketMeterBase like IPacketMeter
         string label; // the label that is attached to packets if there are enough tokens in the bucket
         string defaultLabel = default(""); // the label that is attached to packets if there are not enouth tokens in the bucket, no label by default
         object labelPriority = default([]); // the list of labels in the order of priority, if specified packets can only be promoted in this order
-        string excessTokenModule = default(""); // specifies the module (~ITokenConsumer) that receives the excess tokens that are produced by this module when overflown
+        string excessTokenModule = default(""); // specifies the module (~ITokenStorage) that receives the excess tokens that are produced by this module when overflown
         displayStringTextFormat = default("contains %n tk\nmetered %p pk (%l)");
         @signal[tokensChanged](type=double);
         @statistic[numTokens](title="number of tokens"; source=tokensChanged; record=vector; unit=tk; interpolationmode=linear);

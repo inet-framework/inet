@@ -83,7 +83,7 @@ are not models of physical network nodes. They are necessary to model
 other aspects. Some of them are:
 
 -  A *radio medium* module such as :ned:`Ieee80211RadioMedium`,
-   :ned:`ApskScalarRadioMedium` and :ned:`UnitDiskRadioMedium` (there
+   :ned:`ScalarRadioMedium` and :ned:`UnitDiskRadioMedium` (there
    are a few of them) are a required component of wireless networks.
 
 -  :ned:`PhysicalEnvironment` models the effect of the physical

@@ -112,11 +112,11 @@ than more realistic ones, due to the low computational cost.
 In hosts, network interface cards are represented by NIC modules. Radio
 is part of wireless NIC modules. There are various radio modules, and
 one must always use one that is compatible with the medium module. In
-this step, hosts contain :ned:`UnitDiskRadio` as part of
+this step, hosts contain :ned:`GenericUnitDiskRadio` as part of
 ``AckingWirelessInterface``.
 
 In this model, we configure the chosen physical layer model
-(:ned:`UnitDiskRadioMedium` and :ned:`UnitDiskRadio`) as follows. The
+(:ned:`UnitDiskRadioMedium` and :ned:`GenericUnitDiskRadio`) as follows. The
 communication range is set to 500m. Modeling packet losses due to
 collision (termed "interference" in this model) is turned off, resulting
 in pairwise independent duplex communication channels. The radio data

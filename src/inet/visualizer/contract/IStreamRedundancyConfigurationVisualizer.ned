@@ -12,7 +12,7 @@ package inet.visualizer.contract;
 // submodules from INI files. Such a visualizer displays the StreamRedundancy configuration
 // in a network.
 //
-// @see ~StreamRedundancyConfigurationCanvasVisualizer, ~StreamRedundancyConfigurationOsgVisualizer, ~StreamRedundancyConfigurationVisualizer, ~StreamRedundancyConfigurationVisualizerBase
+// @see ~StreamRedundancyConfigurationCanvasVisualizer
 //
 moduleinterface IStreamRedundancyConfigurationVisualizer
 {

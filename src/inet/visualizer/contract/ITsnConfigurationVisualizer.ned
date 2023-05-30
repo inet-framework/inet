@@ -12,7 +12,7 @@ package inet.visualizer.contract;
 // submodules from INI files. Such a visualizer displays the TSN configuration
 // in a network.
 //
-// @see ~FailureProtectionConfigurationCanvasVisualizer, ~FailureProtectionConfigurationOsgVisualizer, ~FailureProtectionConfigurationVisualizer, ~FailureProtectionConfigurationVisualizerBase
+// @see ~FailureProtectionConfigurationCanvasVisualizer
 //
 moduleinterface IFailureProtectionConfigurationVisualizer
 {

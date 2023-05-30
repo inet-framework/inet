@@ -305,10 +305,10 @@ completely ignored, for example testing the basic functionality of a
 wireless ad-hoc routing protocol.
 
 :ned:`AckingWirelessInterface` is a :ned:`WirelessInterface`
-parameterized to contain a unit disk radio (:ned:`UnitDiskRadio`) and a
+parameterized to contain a unit disk radio (:ned:`GenericUnitDiskRadio`) and a
 trivial MAC protocol (:ned:`AckingMac`).
 
-The most important parameter :ned:`UnitDiskRadio` accepts is the
+The most important parameter :ned:`GenericUnitDiskRadio` accepts is the
 transmission range. When a radio transmits a frame, all other radios
 within transmission range are able to receive the frame correctly, and
 radios that are out of range will not be affected at all. Interference

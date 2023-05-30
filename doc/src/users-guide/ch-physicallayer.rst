@@ -118,17 +118,13 @@ There are two main levels of detail (or modeling depths):
 
 Some of the transmitter types available in INET:
 
--  :ned:`UnitDiskTransmitter`
+-  :ned:`GenericTransmitter`
 
--  :ned:`ApskScalarTransmitter`
-
--  :ned:`ApskDimensionalTransmitter`
+-  :ned:`ApskTransmitter`
 
 -  :ned:`ApskLayeredTransmitter`
 
--  :ned:`Ieee80211ScalarTransmitter`
-
--  :ned:`Ieee80211DimensionalTransmitter`
+-  :ned:`Ieee80211Transmitter`
 
 .. _ug:sec:phy:receiver-models:
 
@@ -162,17 +158,13 @@ representations.
 
 Some of the receiver types available in INET:
 
--  :ned:`UnitDiskReceiver`
+-  :ned:`GenericReceiver`
 
--  :ned:`ApskScalarReceiver`
-
--  :ned:`ApskDimensionalReceiver`
+-  :ned:`ApskReceiver`
 
 -  :ned:`ApskLayeredReceiver`
 
--  :ned:`Ieee80211ScalarReceiver`
-
--  :ned:`Ieee80211DimensionalReceiver`
+-  :ned:`Ieee80211Receiver`
 
 .. _ug:sec:phy:error-models:
 
@@ -279,7 +271,7 @@ file fragment.
 
 .. code-block:: ini
 
-   **.wlan[*].radio.typename = "UnitDiskRadio"
+   **.wlan[*].radio.typename = "GenericUnitDiskRadio"
 
 However, be aware that not all MAC protocols can be used with all radio
 models, and that some radio models require a matching transmission
@@ -287,23 +279,23 @@ medium module.
 
 .. _ug:sec:phy:unitdiskradio:
 
-UnitDiskRadio
-~~~~~~~~~~~~~
+GenericUnitDiskRadio
+~~~~~~~~~~~~~~~~~~~~
 
-:ned:`UnitDiskRadio` provides a very simple but fast and predictable
+:ned:`GenericUnitDiskRadio` provides a very simple but fast and predictable
 physical layer model. It is the implementation (with some extensions) of
 the *Unit Disk Graph* model, which is widely used for the study of
-wireless ad-hoc networks. :ned:`UnitDiskRadio` is applicable if network
+wireless ad-hoc networks. :ned:`GenericUnitDiskRadio` is applicable if network
 nodes need to have a finite communication range, but physical effects of
 signal propagation are to be ignored.
 
-:ned:`UnitDiskRadio` allows three radii to be given as parameters,
+:ned:`GenericUnitDiskRadio` allows three radii to be given as parameters,
 instead of the usual one: communication range, interference range, and
 detection range. One can also turn off interference modeling (meaning
 that signals colliding at a receiver will all be received correctly),
 which is sometimes a useful abstraction.
 
-:ned:`UnitDiskRadio` needs to be used together with a special physical
+:ned:`GenericUnitDiskRadio` needs to be used together with a special physical
 medium model, :ned:`UnitDiskRadioMedium`.
 
 The following ini file fragment shows an example configuration.
@@ -338,17 +330,15 @@ variants, :ned:`ApskScalarRadio` and :ned:`ApskDimensionalRadio` model
 frame transmissons in the selected modulation scheme but without
 utilizing other techniques such as forward error correction (FEC),
 interleaving, spreading, etc. These radios require matching medium
-models, :ned:`ApskScalarRadioMedium` and
-:ned:`ApskDimensionalRadioMedium`.
+models, :ned:`ScalarRadioMedium` and
+:ned:`DimensionalRadioMedium`.
 
-The layered versions, :ned:`ApskLayeredScalarRadio` and
-:ned:`ApskLayeredDimensionalRadio` can not only model the processing
+The layered version, :ned:`ApskLayeredRadio` can not only model the processing
 steps missing from their simpler counterparts, they also feature
 configurable level of detail: the transmitter and receiver modules have
 :par:`levelOfDetail` parameters that control which domains are actually
 simulated. These radio models must be used in conjuction with
-:ned:`ApskLayeredScalarRadioMedium` and
-:ned:`ApskLayeredDimensionalRadioMedium`, respectively.
+:ned:`DimensionalRadioMedium`.
 
 .. [1]
    Wired network interfaces could similarly contain an explicit PHY

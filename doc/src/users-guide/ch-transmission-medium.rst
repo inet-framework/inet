@@ -53,7 +53,7 @@ types:
 .. code-block:: ned
 
    propagation: <default("ConstantSpeedPropagation")> like IPropagation;
-   analogModel: <default("ScalarAnalogModel")> like IMediumAnalogModel;
+   analogModel: <default("ScalarMediuAnalogModel")> like IMediumAnalogModel;
    backgroundNoise: <default("IsotropicScalarBackgroundNoise")> like IRadioBackgroundNoise
        if typename != "";
    pathLoss: <default("FreeSpacePathLoss")> like IPathLoss;
@@ -66,17 +66,13 @@ types:
 
 There are many preconfigured versions of :ned:`RadioMedium`:
 
--  For use with :ned:`UnitDiskRadio`: :ned:`UnitDiskRadioMedium`
+-  For use with :ned:`GenericUnitDiskRadio`: :ned:`UnitDiskRadioMedium`
 
--  For APSK radios: :ned:`ApskScalarRadioMedium`,
-   :ned:`ApskDimensionalRadioMedium`,
-   :ned:`ApskLayeredScalarRadioMedium`,
-   :ned:`ApskLayeredDimensionalRadioMedium`,
+-  For APSK radios: :ned:`ScalarRadioMedium`,
+   :ned:`DimensionalRadioMedium`
 
 -  For IEEE 802.11: :ned:`Ieee80211ScalarRadioMedium`,
-   :ned:`Ieee80211DimensionalRadioMedium`,
-   :ned:`Ieee80211LayeredScalarRadioMedium`,
-   :ned:`Ieee80211LayeredDimensionalRadioMedium`,
+   :ned:`Ieee80211DimensionalRadioMedium`.
 
 -  For IEEE 802.15.4: :ned:`Ieee802154UwbIrRadioMedium`,
    :ned:`Ieee802154NarrowbandScalarRadioMedium`

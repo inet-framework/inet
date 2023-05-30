@@ -371,7 +371,7 @@ Examples:
    **.app[0].destAddresses = moduleListByPath("**.host[*]", "**.fixhost[*]")
    **.app[1].destAddresses = moduleListByNedType("inet.nodes.inet.StandardHost")
 
-The peer can be UDPSink or another UDPBasicBurst.
+The peer can be UdpSink or another UdpBasicBurst.
 
 Bursts
 ^^^^^^

@@ -173,7 +173,7 @@ to the other (``wifiHost1`` to ``wifiHost2``, and ``wpanHost1`` to ``wpanHost2``
 
 The simulation is defined in the ``Coexistence`` configuration in
 :download:`omnetpp.ini <../omnetpp.ini>`. The radio medium module in the network
-is a :ned:`RadioMedium`. It is configured to use the :ned:`DimensionalAnalogModel`.
+is a :ned:`RadioMedium`. It is configured to use the :ned:`DimensionalMediumAnalogModel`.
 The background noise type is set to :ned:`IsotropicDimensionalBackgroundNoise`,
 with a power of -110 dBm. Here is the radio medium configuration in
 :download:`omnetpp.ini <../omnetpp.ini>`:

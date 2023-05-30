@@ -13,7 +13,7 @@ that calculates with one reflection from the ground.
 The model
 ---------
 
-It has been mentioned that :ned:`ApskScalarRadioMedium` relies on various
+It has been mentioned that :ned:`ScalarRadioMedium` relies on various
 subcomponents for computing path loss, obstacle loss, and background
 noise, among others. Installing the two-ray ground reflection model is
 just a matter of changing its ``pathLossType`` parameter from the

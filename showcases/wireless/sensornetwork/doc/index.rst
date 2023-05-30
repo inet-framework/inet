@@ -115,8 +115,8 @@ parameters. Check the NED files of the MAC modules (``BMac.ned``,
 
 The MACs don't have corresponding physical layer models. They can be
 used with existing generic radio models in INET, such as
-:ned:`UnitDiskRadio` or :ned:`ApskRadio`. We're using :ned:`ApskRadio` in this
-showcase because it is more realistic than :ned:`UnitDiskRadio`.
+:ned:`GenericRadio` or :ned:`ApskRadio`. We're using :ned:`ApskRadio` in this
+showcase because it is more realistic than :ned:`GenericRadio`.
 
 INET doesn't have WSN routing protocol models (such as Collection Tree
 Protocol), so we're using Ipv4 and static routing.
@@ -153,7 +153,7 @@ In the network, the wireless sensor nodes are of the type
 :ned:`SensorNode`, named ``sensor1`` up to ``sensor4``, and ``gateway``.
 The node named ``server`` is a :ned:`StandardHost`. The network also
 contains an :ned:`Ipv4NetworkConfigurator`, an :ned:`IntegratedVisualizer`,
-and an :ned:`ApskScalarRadioMedium` module. The nodes are placed against
+and an :ned:`ScalarRadioMedium` module. The nodes are placed against
 the backdrop of a warehouse floorplan. The scene size is 60x30
 meters. The warehouse is just a background image providing context.
 Obstacle loss is not modeled, so the background image doesn't affect
@@ -505,7 +505,7 @@ terms of power consumption.
    mode/state. Note that the energy consumption values are parameters of
    the consumer module, they don't come from the radio.
    :ned:`SensorStateBasedEpEnergyConsumer` is an extension of
-   :ned:`StateBasedEnergyConsumer` with default consumption values typical for
+   :ned:`StateBasedEpEnergyConsumer` with default consumption values typical for
    low power wireless sensor nodes. (Note that the consumption values
    should be set to more accurate ones if needed.)
 

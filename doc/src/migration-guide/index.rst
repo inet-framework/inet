@@ -104,7 +104,7 @@ For example, the existing configuration:
    *.host1.numPingApps = 1
    *.host1.pingApp[0].destAddr = "host7"
    *.host1.numUdpApps = 1
-   *.host1.udpApp[0].typename = "UDPSink"
+   *.host1.udpApp[0].typename = "UdpSink"
 
 The updated configuration:
 

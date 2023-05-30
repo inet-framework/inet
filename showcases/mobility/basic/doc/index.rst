@@ -44,7 +44,7 @@ contains a more in-depth treatment of mobility models.
 The Model
 ---------
 
-All simulations use the :ned:`MobilityShowcase` network.
+All simulations use the :ned:`BasicMobilityShowcase` network.
 The size of the scene is 400x400x0 meters. It contains a configurable
 number of hosts and an :ned:`IntegratedVisualizer` module to
 visualize some aspects of mobility. The following image shows the layout of the network:
@@ -328,7 +328,7 @@ The configuration just sets the mobility type. Here is what it looks like when t
    :scale: 100%
    :align: center
 
-Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`MobilityShowcase.ned <../MobilityShowcase.ned>`
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`BasicMobilityShowcase.ned <../BasicMobilityShowcase.ned>`
 
 Discussion
 ----------

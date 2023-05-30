@@ -38,7 +38,7 @@ the estimated packet error rate of links between the nodes. (The
 configurator looks at the wireless network as a full graph. Links with
 high error rates will have high costs, and links with low error rates
 will have low costs. Routes are formed such as to minimize their costs.
-In the case of the :ned:`UnitDiskRadio` model, the error rate is 1 for
+In the case of the :ned:`GenericUnitDiskRadio` model, the error rate is 1 for
 nodes that are out of range and a very small value for ones in range.
 The result will be that nodes that are out of range of each other will
 send packets to intermediate nodes that can forward them.)

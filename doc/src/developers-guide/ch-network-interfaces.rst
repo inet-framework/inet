@@ -186,24 +186,23 @@ Interface Change Notifications
 the granularity of interface entries.
 
 Clients that wish to be notified when something changes in
-:ned:`InterfaceTable` can subscribe to the following notification
-categories in the host’s :ned:`NotificationBoard`:
+:ned:`InterfaceTable` can subscribe to signals:
 
--  ``NF_INTERFACE_CREATED``: an interface entry has been created and
+-  ``interfaceCreated``: an interface entry has been created and
    added to the interface table
 
--  ``NF_INTERFACE_DELETED``: an interface entry is going to be
+-  ``interfaceDeleted``: an interface entry is going to be
    removed from the interface table. This is a pre-delete notification
    so that clients have access to interface data that are possibly
    needed to react to the change
 
--  ``NF_INTERFACE_CONFIG_CHANGED``: a configuration setting in an
+-  ``interfaceConfigChanged``: a configuration setting in an
    interface entry has changed (e.g. MTU or IP address)
 
--  ``NF_INTERFACE_STATE_CHANGED``: a state variable in an interface
+-  ``interfaceStateChanged``: a state variable in an interface
    entry has changed (e.g. the up/down flag)
 
 In all those notifications, the data field is a pointer to the
 corresponding :cpp:`NetworkInterface` object. This is even true for
-``NF_INTERFACE_DELETED`` (which is actually a pre-delete
+``interfaceDeleted`` (which is actually a pre-delete
 notification).

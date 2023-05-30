@@ -172,10 +172,10 @@
    layer needs to be queued.
 
    In routers, MAC relies on an external queue module (see
-   :ned:`OutputQueue`), and requests packets from this external queue
+   :ned:`PacketQueue`), and requests packets from this external queue
    one-by-one. The name of the external queue must be given as the
-   :par:`queueModule` parameer. There are implementations of
-   :ned:`OutputQueue` to model finite buffer, QoS and/or RED.
+   :par:`queueModule` parameter. There are implementations of
+   :ned:`IPacketQueue` to model finite buffer, QoS and/or RED.
 
    In hosts, no such queue is used, so MAC contains an internal queue named
    :var:`txQueue` to queue up packets waiting for transmission.

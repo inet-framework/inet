@@ -18,7 +18,7 @@ import inet.linklayer.contract.IMacRelayUnit;
 // - STP unaware mode (If no module connected to its STP gate):
 //     Looks up the frames destination address in the ~MacForwardingTable, if it found the address, sends through
 //     that port, or otherwise broadcasts it.
-// - STP aware mode (If an ~STP or ~RSTP module connected to its STP gate):
+// - STP aware mode (If an ~Stp or ~Rstp module connected to its STP gate):
 //     Handles BPDU frames.
 //     If relaying a message also checks the port's status in the InterfaceTable.
 //

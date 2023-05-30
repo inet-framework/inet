@@ -54,7 +54,7 @@ INET contains the following analog model types, presented in the order of increa
 
 More complex models are more accurate but more computationally intensive.
 INET contains a version of radio and radio medium module for each type and technology, e.g.
-:ned:`Ieee80211UnitDiskRadio`/:ned:`UnitDiskRadioMedium`, :ned:`ApskScalarRadio`/:ned:`ApskScalarRadioMedium`,
+:ned:`Ieee80211UnitDiskRadio`/:ned:`UnitDiskRadioMedium`, :ned:`ApskScalarRadio`/:ned:`ScalarRadioMedium`,
 :ned:`Ieee802154NarrowbandDimensionalRadio`/ :ned:`Ieee802154NarrowbandDimensionalRadioMedium`, etc.
 These models use the appropriate analog signal representation (i.e. in the receiver, the transmitter,
 and the radio medium)
@@ -100,8 +100,8 @@ In this case, it is an adequate abstraction for physical layer behavior.
 The following modules use the unit disk analog model:
 
 - :ned:`UnitDiskRadioMedium`: the only radio medium using the unit disk analog model; to be used with all unit disk radio types
-- :ned:`UnitDiskRadio`: generic radio using the unit disk analog model; contains :ned:`UnitDiskTransmitter` and :ned:`UnitDiskReceiver`
-- :ned:`Ieee80211UnitDiskRadio`: unit disk version of Wifi; contains :ned:`Ieee80211UnitDiskTransmitter`, :ned:`Ieee80211UnitDiskReceiver` and :ned:`Ieee80211Mac`
+- :ned:`GenericUnitDiskRadio`: generic radio using the unit disk analog model; contains :ned:`GenericTransmitter` and :ned:`GenericReceiver`
+- :ned:`Ieee80211UnitDiskRadio`: unit disk version of Wifi; contains :ned:`Ieee80211Transmitter`, :ned:`Ieee80211Receiver` and :ned:`Ieee80211Mac`
 
 Example: Testing Routing Protocols
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -334,7 +334,7 @@ A noise source (:ned:`NoiseSource`) creates small bursts of noise periodically,
 which overlaps with all transmissions.
 
 The :ned:`NoiseSource` module creates dimensional transmissions, which interfere
-with other signals. It contains a transmitter module (:ned:`NoiseDimensionalTransmitter`),
+with other signals. It contains a transmitter module (:ned:`NoiseTransmitter`),
 an antenna module (:ned:`IsotropicAntenna` by default), mobility module (so that it
 has a position, and can optinally move around):
 

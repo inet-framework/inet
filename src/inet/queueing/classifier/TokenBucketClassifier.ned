@@ -26,7 +26,7 @@ simple TokenBucketClassifier extends PacketClassifierBase like IPacketClassifier
         double tokenProductionRate;
         double tokenConsumptionPerPacket = default(0); // how many tokens are consumed per packet
         double tokenConsumptionPerBit = default(1); // how many tokens are consumed per bit
-        string excessTokenModule = default(""); // specifies the module (~ITokenConsumer) that receives the excess tokens that are produced by this module
+        string excessTokenModule = default(""); // specifies the module (~ITokenStorage) that receives the excess tokens that are produced by this module
         displayStringTextFormat = default("contains %n tk\nmetered %p pk (%l)");
         @signal[tokensChanged](type=double);
         @statistic[numTokens](title="number of tokens"; source=tokensChanged; record=vector; unit=tk; interpolationmode=linear);

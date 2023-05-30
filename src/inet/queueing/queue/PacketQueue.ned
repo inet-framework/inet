@@ -47,7 +47,7 @@ import inet.queueing.contract.IPacketQueue;
 //
 // Some notable packet dropper functions are: ~PacketAtCollectionBeginDropper,
 // ~PacketAtCollectionEndDropper, ~PacketWithHighestOwnerModuleIdDropper,
-// ~PacketWithLowestModuleIdDropper.
+// ~PacketWithLowestOwnerModuleIdDropper.
 //
 // Some notable packet comparator functions are: ~PacketUserPriorityComparator,
 // ~PacketCreationTimeComparator, ~PacketEligibilityTimeComparator.

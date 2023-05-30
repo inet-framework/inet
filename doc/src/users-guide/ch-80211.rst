@@ -84,7 +84,7 @@ The new model also separates the following components in the 802.11 standard int
 
 -  Channel access function: :ned:`Edcaf`, :ned:`Dcaf`. The channel access function controls channel ownership, etc.
 
--  MAC data services: :ned:`OriginatorMacDataService`, :ned:`RecipientMacDataService`, :ned:`OriginatorQosDataService`, :ned:`RecipientQosMacDataService`.
+-  MAC data services: :ned:`OriginatorMacDataService`, :ned:`RecipientMacDataService`, :ned:`OriginatorQosMacDataService`, :ned:`RecipientQosMacDataService`.
    The MAC data services are implemented as compound modules, which combine functions related to transforming data frames (sequence numbering, duplicate removal, frame reordering, fragmentation, aggregation).
 
 -  Aggregation and deaggregation (C++ class in MAC data services): These classes implement aggregation and deaggregation according to the policy modules (see below).

@@ -16,7 +16,7 @@ The model
 Switching to APSK radio
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-In this step, we replace :ned:`UnitDiskRadio` with :ned:`ApskScalarRadio`.
+In this step, we replace :ned:`GenericUnitDiskRadio` with :ned:`ApskScalarRadio`.
 :ned:`ApskScalarRadio` models a radio with an APSK (amplitude and
 phase-shift keying) modulation scheme. By default it uses BPSK, but
 QPSK, QAM-16, QAM-64, QAM-256 and several other modulations can also be
@@ -56,11 +56,11 @@ Setting up the wireless channel
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Since we switched the radio to :ned:`ApskScalarRadio`, we also need to
-change the medium to :ned:`ApskScalarRadioMedium`. In general, one always
+change the medium to :ned:`ScalarRadioMedium`. In general, one always
 needs to use a medium that is compatible with the given radio. (With
-:ned:`UnitDiskRadio`, we also used :ned:`UnitDiskRadioMedium`.)
+:ned:`GenericUnitDiskRadio`, we also used :ned:`UnitDiskRadioMedium`.)
 
-:ned:`ApskScalarRadioMedium` has "slots" to plug in various propagation
+:ned:`ScalarRadioMedium` has "slots" to plug in various propagation
 models, path loss models, obstacle loss models, analog models, and
 background noise models. Here we make use of the fact that the default
 background noise model is homogeneous isotropic white noise, and set up
@@ -88,7 +88,7 @@ In this model, more physical effects are simulated than in previous
 steps. There are radio signal attenuation, background noise and a more
 realistic radio model. The blue circles representing the communication range
 is an approximation. There is no distinct distance where receptions
-fail, as in the case of :ned:`UnitDiskRadio`.
+fail, as in the case of :ned:`GenericUnitDiskRadio`.
 
 
 
