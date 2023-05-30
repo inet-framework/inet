@@ -38,7 +38,7 @@ std::ostream& RicianFading::printToStream(std::ostream& stream, int level, int e
     stream << "RicianFading";
     if (level <= PRINT_LEVEL_TRACE)
         stream << EV_FIELD(alpha)
-               << ", system loss = " << systemLoss
+               << EV_FIELD(systemLoss)
                << EV_FIELD(k);
     return stream;
 }

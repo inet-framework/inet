@@ -34,8 +34,8 @@ std::ostream& UnitDiskNoise::printToStream(std::ostream& stream, int level, int 
 {
     stream << "UnitDiskNoise";
     if (level <= PRINT_LEVEL_DEBUG)
-        stream << ", minPower = " << minPower
-               << ", maxPower = " << maxPower;
+        stream << EV_FIELD(minPower)
+               << EV_FIELD(maxPower);
     return NoiseBase::printToStream(stream, level);
 }
 

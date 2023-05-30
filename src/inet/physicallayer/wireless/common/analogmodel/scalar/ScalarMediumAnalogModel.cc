@@ -34,7 +34,7 @@ std::ostream& ScalarMediumAnalogModel::printToStream(std::ostream& stream, int l
 {
     stream << "ScalarMediumAnalogModel";
     if (level <= PRINT_LEVEL_DEBUG)
-        stream << ", ignorePartialInterference = " << ignorePartialInterference;
+        stream << EV_FIELD(ignorePartialInterference);
     return stream;
 }
 

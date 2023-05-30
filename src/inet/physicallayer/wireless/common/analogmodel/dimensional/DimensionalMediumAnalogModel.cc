@@ -32,7 +32,7 @@ std::ostream& DimensionalMediumAnalogModel::printToStream(std::ostream& stream, 
 {
     stream << "DimensionalMediumAnalogModel";
     if (level <= PRINT_LEVEL_DEBUG)
-        stream << ", attenuateWithCenterFrequency = " << attenuateWithCenterFrequency;
+        stream << EV_FIELD(attenuateWithCenterFrequency);
     return stream;
 }
 

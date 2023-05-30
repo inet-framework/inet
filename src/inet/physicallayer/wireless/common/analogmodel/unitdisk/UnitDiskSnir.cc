@@ -28,7 +28,7 @@ std::ostream& UnitDiskSnir::printToStream(std::ostream& stream, int level, int e
 {
     stream << "UnitDiskSnir";
     if (level <= PRINT_LEVEL_DEBUG)
-         stream << ", isInfinite = " << isInfinite;
+         stream << EV_FIELD(isInfinite);
     return stream;
 }
 

@@ -34,10 +34,10 @@ std::ostream& BreakpointPathLoss::printToStream(std::ostream& stream, int level,
 {
     stream << "BreakpointPathLoss";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", L01 = " << l01
-               << ", L02 = " << l02
-               << ", alpha1 = " << alpha1
-               << ", alpha2 = " << alpha2
+        stream << EV_FIELD(l01)
+               << EV_FIELD(l02)
+               << EV_FIELD(alpha1)
+               << EV_FIELD(alpha2)
                << EV_FIELD(breakpointDistance);
     return stream;
 }
