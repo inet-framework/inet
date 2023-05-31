@@ -31,6 +31,7 @@ module Ieee80211Radio extends FlatRadioBase
         string crcMode @enum("declared","computed") = default("declared");
         transmitter.typename = default("Ieee80211Transmitter");
         receiver.typename = default("Ieee80211Receiver");
+        receiver.errorModel.typename = default(signalAnalogRepresentation != "unitDisk" ? "Ieee80211NistErrorModel" : "");
         centerFrequency @unit(Hz) = default(2.412GHz);                 // the center frequency of the band is automatically set by the radio
         bandwidth @unit(Hz) = default(nan MHz);
         transmitter.preambleDuration = default(-1 s);
