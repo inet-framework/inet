@@ -54,10 +54,10 @@ int PcpTrafficClassClassifier::classifyPacket(Packet *packet)
     if (pcp != -1) {
         int numTrafficClasses = gateSize("out");
         auto pcpToGateIndex = check_and_cast<cValueArray *>(mapping->get(pcp).objectValue());
-        return pcpToGateIndex->get(numTrafficClasses - 1);
+        return getOutputGateIndex(pcpToGateIndex->get(numTrafficClasses - 1));
     }
     else
-        return defaultGateIndex;
+        return getOutputGateIndex(defaultGateIndex);
 }
 
 } // namespace inet
