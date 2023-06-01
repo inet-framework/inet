@@ -11,6 +11,7 @@ import inet.linklayer.ethernet.contract.IEthernetMacLayer;
 import inet.protocolelement.contract.IPacketLifeTimer;
 import inet.queueing.classifier.PacketClassifier;
 import inet.queueing.common.PacketMultiplexer;
+import inet.queueing.contract.IPacketClassifier;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.scheduler.PriorityScheduler;
 import inet.queueing.server.PreemptingServer;
@@ -34,7 +35,7 @@ module EthernetPreemptingMacLayer like IEthernetMacLayer
         queue: <default("")> like IPacketQueue {
             @display("p=200,100");
         }
-        outboundClassifier: PacketClassifier {
+        outboundClassifier: <default("PacketClassifier")> like IPacketClassifier {
             classifierClass = default("inet::PacketVlanReqClassifier");
             @display("p=200,200");
         }
@@ -51,7 +52,7 @@ module EthernetPreemptingMacLayer like IEthernetMacLayer
             datarate = default(parent.bitrate);
             @display("p=200,500");
         }
-        inboundClassifier: PacketClassifier {
+        inboundClassifier: <default("PacketClassifier")> like IPacketClassifier {
             classifierClass = default("inet::PacketFragmentTagClassifier");
             @display("p=600,400");
         }
