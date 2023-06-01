@@ -786,7 +786,8 @@ ThroughputFilter *ThroughputFilter::clone() const
 
 void ThroughputFilter::emitThroughput(simtime_t endInterval, cObject *details)
 {
-    double throughput = endInterval == lastSignalTime ? 0 : totalLength / (endInterval - lastSignalTime).dbl();
+    // this expression can result in 0, inf and nan too, and this is intentional
+    double throughput = totalLength / (endInterval - lastSignalTime).dbl();
     fire(this, endInterval, throughput, details);
     lastSignalTime = endInterval;
     totalLength = 0;
