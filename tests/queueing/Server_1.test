@@ -44,29 +44,35 @@ cmdenv-log-prefix = "At %ts %N: "
 %subst: /\nRunning simulation\.\.\.\n//
 
 %contains-regex: stdout
-Providing packet, .*?provider-0.*?
-Processing packet started, .*?provider-0.*?
-Processing packet ended, .*?provider-0.*?
-Consuming packet, .*?provider-0.*?
-Providing packet, .*?provider-1.*?
-Processing packet started, .*?provider-1.*?
-Processing packet ended, .*?provider-1.*?
-Consuming packet, .*?provider-1.*?
-Providing packet, .*?provider-2.*?
-Processing packet started, .*?provider-2.*?
-Processing packet ended, .*?provider-2.*?
-Consuming packet, .*?provider-2.*?
-Providing packet, .*?provider-3.*?
-Processing packet started, .*?provider-3.*?
-Processing packet ended, .*?provider-3.*?
-Consuming packet, .*?provider-3.*?
-Providing packet, .*?provider-4.*?
-Processing packet started, .*?provider-4.*?
-Processing packet ended, .*?provider-4.*?
-Consuming packet, .*?provider-4.*?
-Providing packet, .*?provider-5.*?
-Processing packet started, .*?provider-5.*?
-Processing packet ended, .*?provider-5.*?
-Consuming packet, .*?provider-5.*?
-Providing packet, .*?provider-6.*?
-Processing packet started, .*?provider-6.*?
+At 0s provider: Providing packet, .*?provider-0.*?
+At 0s server: Processing packet started, .*?provider-0.*?
+At 1.097627004609s server: Processing packet ended, .*?provider-0.*?
+At 1.097627004609s consumer: Consuming packet, .*?provider-0.*?
+At 1.097627004609s provider: Providing packet, .*?provider-1.*?
+At 1.097627004609s server: Processing packet started, .*?provider-1.*?
+At 2.283316237387s server: Processing packet ended, .*?provider-1.*?
+At 2.283316237387s consumer: Consuming packet, .*?provider-1.*?
+At 2.283316237387s provider: Providing packet, .*?provider-2.*?
+At 2.283316237387s server: Processing packet started, .*?provider-2.*?
+At 3.71369496733s server: Processing packet ended, .*?provider-2.*?
+At 3.71369496733s consumer: Consuming packet, .*?provider-2.*?
+At 3.71369496733s provider: Providing packet, .*?provider-3.*?
+At 3.71369496733s server: Processing packet started, .*?provider-3.*?
+At 5.40222645551s server: Processing packet ended, .*?provider-3.*?
+At 5.40222645551s consumer: Consuming packet, .*?provider-3.*?
+At 5.40222645551s provider: Providing packet, .*?provider-4.*?
+At 5.40222645551s server: Processing packet started, .*?provider-4.*?
+At 6.607753196266s server: Processing packet ended, .*?provider-4.*?
+At 6.607753196266s consumer: Consuming packet, .*?provider-4.*?
+At 6.607753196266s provider: Providing packet, .*?provider-5.*?
+At 6.607753196266s server: Processing packet started, .*?provider-5.*?
+At 8.323644435965s server: Processing packet ended, .*?provider-5.*?
+At 8.323644435965s consumer: Consuming packet, .*?provider-5.*?
+At 8.323644435965s provider: Providing packet, .*?provider-6.*?
+At 8.323644435965s server: Processing packet started, .*?provider-6.*?
+At 9.413410790731s server: Processing packet ended, .*?provider-6.*?
+At 9.413410790731s consumer: Consuming packet, .*?provider-6.*?
+At 9.413410790731s provider: Providing packet, .*?provider-7.*?
+At 9.413410790731s server: Processing packet started, .*?provider-7.*?
+
+<!> Simulation time limit reached -- at t=10s

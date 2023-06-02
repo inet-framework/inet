@@ -80,35 +80,38 @@ cmdenv-log-prefix = "At %ts %N: "
 %subst: /\nRunning simulation\.\.\.\n//
 
 %contains-regex: stdout
-Consuming.*949 B.*
-Consuming.*945 B.*
-Consuming.*935 B.*
-Consuming.*904 B.*
-Consuming.*877 B.*
-Consuming.*863 B.*
-Consuming.*854 B.*
-Consuming.*823 B.*
-Consuming.*807 B.*
-Consuming.*805 B.*
-Consuming.*784 B.*
-Consuming.*777 B.*
-Consuming.*729 B.*
-Consuming.*700 B.*
-Consuming.*700 B.*
-Consuming.*699 B.*
-Consuming.*659 B.*
-Consuming.*651 B.*
-Consuming.*637 B.*
-Consuming.*586 B.*
-Consuming.*572 B.*
-Consuming.*496 B.*
-Consuming.*459 B.*
-Consuming.*414 B.*
-Consuming.*377 B.*
-Consuming.*292 B.*
-Consuming.*274 B.*
-Consuming.*215 B.*
-Consuming.*187 B.*
-Consuming.*172 B.*
-Consuming.*170 B.*
-Consuming.*109 B.*
+At 0s sink: Consuming.*949 B.*
+At 0s sink: Consuming.*945 B.*
+At 0s sink: Consuming.*935 B.*
+At 0s sink: Consuming.*904 B.*
+At 0s sink: Consuming.*877 B.*
+At 0s sink: Consuming.*863 B.*
+At 0s sink: Consuming.*854 B.*
+At 0s sink: Consuming.*823 B.*
+At 0s sink: Consuming.*807 B.*
+At 0s sink: Consuming.*805 B.*
+At 0s sink: Consuming.*784 B.*
+At 0s sink: Consuming.*777 B.*
+At 0s sink: Consuming.*729 B.*
+At 0s sink: Consuming.*700 B.*
+At 0s sink: Consuming.*700 B.*
+At 0s sink: Consuming.*699 B.*
+At 0s sink: Consuming.*659 B.*
+At 0s sink: Consuming.*651 B.*
+At 0s sink: Consuming.*637 B.*
+At 0s sink: Consuming.*586 B.*
+At 0s sink: Consuming.*572 B.*
+At 0s sink: Consuming.*496 B.*
+At 0s sink: Consuming.*459 B.*
+At 0s sink: Consuming.*414 B.*
+At 0s sink: Consuming.*377 B.*
+At 0s sink: Consuming.*292 B.*
+At 0s sink: Consuming.*274 B.*
+At 0s sink: Consuming.*215 B.*
+At 0s sink: Consuming.*187 B.*
+At 0s sink: Consuming.*172 B.*
+At 0s sink: Consuming.*170 B.*
+At 0s sink: Consuming.*109 B.*
+
+<!> Simulation time limit reached -- at t=1s
+

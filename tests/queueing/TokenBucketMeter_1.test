@@ -43,43 +43,67 @@ cmdenv-log-prefix = "At %ts %N: "
 %subst: /\nRunning simulation\.\.\.\n//
 
 %contains-regex: stdout
-Producing packet, .*?producer-0.*?
-Metering packet, .*?producer-0.*?
-Checking tokens for packet, .*?8.*?, .*?0.*?, .*?producer-0.*?
-Insufficient number of tokens for packet, .*?8.*?, .*?0.*?, .*?producer-0.*?
-Consuming packet, .*?producer-0.*?
-Producing packet, .*?producer-1.*?
-Metering packet, .*?producer-1.*?
-Checking tokens for packet, .*?8.*?, .*?3.1835.*?, .*?producer-1.*?
-Insufficient number of tokens for packet, .*?8.*?, .*?3.1835.*?, .*?producer-1.*?
-Consuming packet, .*?producer-1.*?
-Producing packet, .*?producer-2.*?
-Metering packet, .*?producer-2.*?
-Checking tokens for packet, .*?8.*?, .*?6.77774.*?, .*?producer-2.*?
-Insufficient number of tokens for packet, .*?8.*?, .*?6.77774.*?, .*?producer-2.*?
-Consuming packet, .*?producer-2.*?
-Producing packet, .*?producer-3.*?
-Metering packet, .*?producer-3.*?
-Checking tokens for packet, .*?8.*?, .*?11.8015.*?, .*?producer-3.*?
-Removed tokens, labeling packet, .*?8.*?, .*?3.80146.*?, .*?green.*?, .*?producer-3.*?
-Consuming packet, .*?producer-3.*?
-Producing packet, .*?producer-4.*?
-Metering packet, .*?producer-4.*?
-Checking tokens for packet, .*?8.*?, .*?11.2399.*?, .*?producer-4.*?
-Removed tokens, labeling packet, .*?8.*?, .*?3.23988.*?, .*?green.*?, .*?producer-4.*?
-Consuming packet, .*?producer-4.*?
-Producing packet, .*?producer-5.*?
-Metering packet, .*?producer-5.*?
-Checking tokens for packet, .*?8.*?, .*?6.93277.*?, .*?producer-5.*?
-Insufficient number of tokens for packet, .*?8.*?, .*?6.93277.*?, .*?producer-5.*?
-Consuming packet, .*?producer-5.*?
-Producing packet, .*?producer-6.*?
-Metering packet, .*?producer-6.*?
-Checking tokens for packet, .*?8.*?, .*?14.739.*?, .*?producer-6.*?
-Removed tokens, labeling packet, .*?8.*?, .*?6.73895.*?, .*?green.*?, .*?producer-6.*?
-Consuming packet, .*?producer-6.*?
-Producing packet, .*?producer-7.*?
-Metering packet, .*?producer-7.*?
-Checking tokens for packet, .*?8.*?, .*?9.88776.*?, .*?producer-7.*?
-Removed tokens, labeling packet, .*?8.*?, .*?1.88776.*?, .*?green.*?, .*?producer-7.*?
-Consuming packet, .*?producer-7.*?
+At 0s producer: Producing packet, .*?producer-0.*?
+At 0s meter: Metering packet, .*?producer-0.*?
+At 0s meter: Checking tokens for packet, .*?8.*?0.*?producer-0.*?
+At 0s meter: Insufficient number of tokens for packet, .*?8.*?0.*?producer-0.*?
+At 0s consumer: Consuming packet, .*?producer-0.*?
+At 0.795874504566s producer: Producing packet, .*?producer-1.*?
+At 0.795874504566s meter: Metering packet, .*?producer-1.*?
+At 0.795874504566s meter:  Adding tokens: numTokens = 0, addedNumTokens = 3.1835
+At 0.795874504566s meter:  Added tokens: numTokens = 3.1835, addedNumTokens = 3.1835
+At 0.795874504566s meter: Checking tokens for packet, .*?8.*?3.1835.*?producer-1.*?
+At 0.795874504566s meter: Insufficient number of tokens for packet, .*?8.*?3.1835.*?producer-1.*?
+At 0.795874504566s consumer: Consuming packet, .*?producer-1.*?
+At 1.69443489305s producer: Producing packet, .*?producer-2.*?
+At 1.69443489305s meter: Metering packet, .*?producer-2.*?
+At 1.69443489305s meter:  Adding tokens: numTokens = 3.1835, addedNumTokens = 3.59424
+At 1.69443489305s meter:  Added tokens: numTokens = 6.77774, addedNumTokens = 3.59424
+At 1.69443489305s meter: Checking tokens for packet, .*?8.*?6.77774.*?producer-2.*?
+At 1.69443489305s meter: Insufficient number of tokens for packet, .*?8.*?6.77774.*?producer-2.*?
+At 1.69443489305s consumer: Consuming packet, .*?producer-2.*?
+At 2.950365651097s producer: Producing packet, .*?producer-3.*?
+At 2.950365651097s meter: Metering packet, .*?producer-3.*?
+At 2.950365651097s meter:  Adding tokens: numTokens = 6.77774, addedNumTokens = 5.02372
+At 2.950365651097s meter:  Added tokens: numTokens = 11.8015, addedNumTokens = 5.02372
+At 2.950365651097s meter: Checking tokens for packet, .*?8.*?11.8015.*?producer-3.*?
+At 2.950365651097s meter:  Removing tokens: numTokens = 11.8015, removedNumTokens = 8
+At 2.950365651097s meter:  Removed tokens: numTokens = 3.80146, removedNumTokens = 8
+At 2.950365651097s meter: Removed tokens, labeling packet, .*?8.*?3.80146.*?green.*?producer-3.*?
+At 2.950365651097s consumer: Consuming packet, .*?producer-3.*?
+At 4.809969863172s producer: Producing packet, .*?producer-4.*?
+At 4.809969863172s meter: Metering packet, .*?producer-4.*?
+At 4.809969863172s meter:  Adding tokens: numTokens = 3.80146, addedNumTokens = 7.43842
+At 4.809969863172s meter:  Added tokens: numTokens = 11.2399, addedNumTokens = 7.43842
+At 4.809969863172s meter: Checking tokens for packet, .*?8.*?11.2399.*?producer-4.*?
+At 4.809969863172s meter:  Removing tokens: numTokens = 11.2399, removedNumTokens = 8
+At 4.809969863172s meter:  Removed tokens: numTokens = 3.23988, removedNumTokens = 8
+At 4.809969863172s meter: Removed tokens, labeling packet, .*?8.*?3.23988.*?green.*?producer-4.*?
+At 4.809969863172s consumer: Consuming packet, .*?producer-4.*?
+At 5.733192994643s producer: Producing packet, .*?producer-5.*?
+At 5.733192994643s meter: Metering packet, .*?producer-5.*?
+At 5.733192994643s meter:  Adding tokens: numTokens = 3.23988, addedNumTokens = 3.69289
+At 5.733192994643s meter:  Added tokens: numTokens = 6.93277, addedNumTokens = 3.69289
+At 5.733192994643s meter: Checking tokens for packet, .*?8.*?6.93277.*?producer-5.*?
+At 5.733192994643s meter: Insufficient number of tokens for packet, .*?8.*?6.93277.*?producer-5.*?
+At 5.733192994643s consumer: Consuming packet, .*?producer-5.*?
+At 7.684738330527s producer: Producing packet, .*?producer-6.*?
+At 7.684738330527s meter: Metering packet, .*?producer-6.*?
+At 7.684738330527s meter:  Adding tokens: numTokens = 6.93277, addedNumTokens = 7.80618
+At 7.684738330527s meter:  Added tokens: numTokens = 14.739, addedNumTokens = 7.80618
+At 7.684738330527s meter: Checking tokens for packet, .*?8.*?14.739.*?producer-6.*?
+At 7.684738330527s meter:  Removing tokens: numTokens = 14.739, removedNumTokens = 8
+At 7.684738330527s meter:  Removed tokens: numTokens = 6.73895, removedNumTokens = 8
+At 7.684738330527s meter: Removed tokens, labeling packet, .*?8.*?6.73895.*?green.*?producer-6.*?
+At 7.684738330527s consumer: Consuming packet, .*?producer-6.*?
+At 8.471939470509s producer: Producing packet, .*?producer-7.*?
+At 8.471939470509s meter: Metering packet, .*?producer-7.*?
+At 8.471939470509s meter:  Adding tokens: numTokens = 6.73895, addedNumTokens = 3.1488
+At 8.471939470509s meter:  Added tokens: numTokens = 9.88776, addedNumTokens = 3.1488
+At 8.471939470509s meter: Checking tokens for packet, .*?8.*?9.88776.*?producer-7.*?
+At 8.471939470509s meter:  Removing tokens: numTokens = 9.88776, removedNumTokens = 8
+At 8.471939470509s meter:  Removed tokens: numTokens = 1.88776, removedNumTokens = 8
+At 8.471939470509s meter: Removed tokens, labeling packet, .*?8.*?1.88776.*?green.*?producer-7.*?
+At 8.471939470509s consumer: Consuming packet, .*?producer-7.*?
+
+<!> Simulation time limit reached -- at t=10s

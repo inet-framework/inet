@@ -66,36 +66,38 @@ cmdenv-log-prefix = "At %ts %N: "
 %subst: /\nRunning simulation\.\.\.\n//
 
 %contains-regex: stdout
-Providing packet, .*?provider1-0.*?
-Scheduling packet, .*?provider1-0.*?
-Collecting packet, .*?provider1-0.*?
-Providing packet, .*?provider2-0.*?
-Scheduling packet, .*?provider2-0.*?
-Collecting packet, .*?provider2-0.*?
-Providing packet, .*?provider1-1.*?
-Scheduling packet, .*?provider1-1.*?
-Collecting packet, .*?provider1-1.*?
-Providing packet, .*?provider2-1.*?
-Scheduling packet, .*?provider2-1.*?
-Collecting packet, .*?provider2-1.*?
-Providing packet, .*?provider1-2.*?
-Scheduling packet, .*?provider1-2.*?
-Collecting packet, .*?provider1-2.*?
-Providing packet, .*?provider2-2.*?
-Scheduling packet, .*?provider2-2.*?
-Collecting packet, .*?provider2-2.*?
-Providing packet, .*?provider1-3.*?
-Scheduling packet, .*?provider1-3.*?
-Collecting packet, .*?provider1-3.*?
-Providing packet, .*?provider2-3.*?
-Scheduling packet, .*?provider2-3.*?
-Collecting packet, .*?provider2-3.*?
-Providing packet, .*?provider1-4.*?
-Scheduling packet, .*?provider1-4.*?
-Collecting packet, .*?provider1-4.*?
-Providing packet, .*?provider2-4.*?
-Scheduling packet, .*?provider2-4.*?
-Collecting packet, .*?provider2-4.*?
-Providing packet, .*?provider1-5.*?
-Scheduling packet, .*?provider1-5.*?
-Collecting packet, .*?provider1-5.*?
+At 0s provider1: Providing packet, .*?provider1-0.*?
+At 0s scheduler: Scheduling packet, .*?provider1-0.*?
+At 0s collector: Collecting packet, .*?provider1-0.*?
+At 1s provider2: Providing packet, .*?provider2-0.*?
+At 1s scheduler: Scheduling packet, .*?provider2-0.*?
+At 1s collector: Collecting packet, .*?provider2-0.*?
+At 2s provider1: Providing packet, .*?provider1-1.*?
+At 2s scheduler: Scheduling packet, .*?provider1-1.*?
+At 2s collector: Collecting packet, .*?provider1-1.*?
+At 3s provider2: Providing packet, .*?provider2-1.*?
+At 3s scheduler: Scheduling packet, .*?provider2-1.*?
+At 3s collector: Collecting packet, .*?provider2-1.*?
+At 4s provider1: Providing packet, .*?provider1-2.*?
+At 4s scheduler: Scheduling packet, .*?provider1-2.*?
+At 4s collector: Collecting packet, .*?provider1-2.*?
+At 5s provider2: Providing packet, .*?provider2-2.*?
+At 5s scheduler: Scheduling packet, .*?provider2-2.*?
+At 5s collector: Collecting packet, .*?provider2-2.*?
+At 6s provider1: Providing packet, .*?provider1-3.*?
+At 6s scheduler: Scheduling packet, .*?provider1-3.*?
+At 6s collector: Collecting packet, .*?provider1-3.*?
+At 7s provider2: Providing packet, .*?provider2-3.*?
+At 7s scheduler: Scheduling packet, .*?provider2-3.*?
+At 7s collector: Collecting packet, .*?provider2-3.*?
+At 8s provider1: Providing packet, .*?provider1-4.*?
+At 8s scheduler: Scheduling packet, .*?provider1-4.*?
+At 8s collector: Collecting packet, .*?provider1-4.*?
+At 9s provider2: Providing packet, .*?provider2-4.*?
+At 9s scheduler: Scheduling packet, .*?provider2-4.*?
+At 9s collector: Collecting packet, .*?provider2-4.*?
+At 10s provider1: Providing packet, .*?provider1-5.*?
+At 10s scheduler: Scheduling packet, .*?provider1-5.*?
+At 10s collector: Collecting packet, .*?provider1-5.*?
+
+<!> Simulation time limit reached -- at t=10s

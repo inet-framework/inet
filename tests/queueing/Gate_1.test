@@ -46,17 +46,19 @@ cmdenv-log-prefix = "At %ts %N: "
 %subst: /\nRunning simulation\.\.\.\n//
 
 %contains-regex: stdout
-Opening gate.
-Producing packet, .*?producer-0.*?
-Passing through packet, .*?producer-0.*?
-Consuming packet, .*?producer-0.*?
-Producing packet, .*?producer-1.*?
-Passing through packet, .*?producer-1.*?
-Consuming packet, .*?producer-1.*?
-Producing packet, .*?producer-2.*?
-Passing through packet, .*?producer-2.*?
-Consuming packet, .*?producer-2.*?
-Producing packet, .*?producer-3.*?
-Passing through packet, .*?producer-3.*?
-Consuming packet, .*?producer-3.*?
-Closing gate.
+At 3s gate: Opening gate.
+At 3s producer: Producing packet, .*?producer-0.*?
+At 3s gate: Passing through packet, .*?producer-0.*?
+At 3s consumer: Consuming packet, .*?producer-0.*?
+At 4s producer: Producing packet, .*?producer-1.*?
+At 4s gate: Passing through packet, .*?producer-1.*?
+At 4s consumer: Consuming packet, .*?producer-1.*?
+At 5s producer: Producing packet, .*?producer-2.*?
+At 5s gate: Passing through packet, .*?producer-2.*?
+At 5s consumer: Consuming packet, .*?producer-2.*?
+At 6s producer: Producing packet, .*?producer-3.*?
+At 6s gate: Passing through packet, .*?producer-3.*?
+At 6s consumer: Consuming packet, .*?producer-3.*?
+At 7s gate: Closing gate.
+
+<!> Simulation time limit reached -- at t=10s

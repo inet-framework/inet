@@ -52,35 +52,37 @@ cmdenv-log-prefix = "At %ts %N: "
 %subst: /\nRunning simulation\.\.\.\n//
 
 %contains-regex: stdout
-Providing packet, .*?provider-0.*?
-Collecting packet, .*?provider-0.*?
-Providing packet, .*?provider-1.*?
-Collecting packet, .*?provider-1.*?
-Providing packet, .*?provider-2.*?
-Collecting packet, .*?provider-2.*?
-Providing packet, .*?provider-3.*?
-Collecting packet, .*?provider-3.*?
-Providing packet, .*?provider-4.*?
-Collecting packet, .*?provider-4.*?
-Providing packet, .*?provider-5.*?
-Collecting packet, .*?provider-5.*?
-Providing packet, .*?provider-6.*?
-Collecting packet, .*?provider-6.*?
-Providing packet, .*?provider-7.*?
-Collecting packet, .*?provider-7.*?
-Providing packet, .*?provider-8.*?
-Collecting packet, .*?provider-8.*?
-Providing packet, .*?provider-9.*?
-Collecting packet, .*?provider-9.*?
-Providing packet, .*?provider-10.*?
-Collecting packet, .*?provider-10.*?
-Providing packet, .*?provider-11.*?
-Collecting packet, .*?provider-11.*?
-Providing packet, .*?provider-12.*?
-Collecting packet, .*?provider-12.*?
-Providing packet, .*?provider-13.*?
-Collecting packet, .*?provider-13.*?
-Providing packet, .*?provider-14.*?
-Collecting packet, .*?provider-14.*?
-Providing packet, .*?provider-15.*?
-Collecting packet, .*?provider-15.*?
+At 0s provider: Providing packet, .*?provider-0.*?
+At 0s collector1: Collecting packet, .*?provider-0.*?
+At 10.976270046085s provider: Providing packet, .*?provider-1.*?
+At 10.976270046085s collector1: Collecting packet, .*?provider-1.*?
+At 22.833162373863s provider: Providing packet, .*?provider-2.*?
+At 22.833162373863s collector1: Collecting packet, .*?provider-2.*?
+At 37.136949673295s provider: Providing packet, .*?provider-3.*?
+At 37.136949673295s collector1: Collecting packet, .*?provider-3.*?
+At 40s provider: Providing packet, .*?provider-4.*?
+At 40s collector2: Collecting packet, .*?provider-4.*?
+At 41.715891239699s provider: Providing packet, .*?provider-5.*?
+At 41.715891239699s collector2: Collecting packet, .*?provider-5.*?
+At 42.805657594465s provider: Providing packet, .*?provider-6.*?
+At 42.805657594465s collector2: Collecting packet, .*?provider-6.*?
+At 54.022264555097s provider: Providing packet, .*?provider-7.*?
+At 54.022264555097s collector1: Collecting packet, .*?provider-7.*?
+At 66.493538483046s provider: Providing packet, .*?provider-8.*?
+At 66.493538483046s collector1: Collecting packet, .*?provider-8.*?
+At 79.411420784891s provider: Providing packet, .*?provider-9.*?
+At 79.411420784891s collector1: Collecting packet, .*?provider-9.*?
+At 84s provider: Providing packet, .*?provider-10.*?
+At 84s collector2: Collecting packet, .*?provider-10.*?
+At 84.595069210511s provider: Providing packet, .*?provider-11.*?
+At 84.595069210511s collector2: Collecting packet, .*?provider-11.*?
+At 86.378615214024s provider: Providing packet, .*?provider-12.*?
+At 86.378615214024s collector2: Collecting packet, .*?provider-12.*?
+At 86.492041165475s provider: Providing packet, .*?provider-13.*?
+At 86.492041165475s collector2: Collecting packet, .*?provider-13.*?
+At 88s provider: Providing packet, .*?provider-14.*?
+At 88s collector1: Collecting packet, .*?provider-14.*?
+At 95.66883042641s provider: Providing packet, .*?provider-15.*?
+At 95.66883042641s collector1: Collecting packet, .*?provider-15.*?
+
+<!> Simulation time limit reached -- at t=100s

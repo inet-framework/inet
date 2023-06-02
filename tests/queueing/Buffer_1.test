@@ -68,196 +68,198 @@ cmdenv-log-prefix = "At %ts %N: "
 %subst: /\nRunning simulation\.\.\.\n//
 
 %contains-regex: stdout
-Producing packet, .*?producer1-0.*?
-Pushing packet, .*?producer1-0.*?
-Adding packet, .*?producer1-0.*?
-Pulling packet, .*?producer1-0.*?
-Removing packet, .*?producer1-0.*?
-Collecting packet, .*?producer1-0.*?
-Producing packet, .*?producer2-0.*?
-Pushing packet, .*?producer2-0.*?
-Adding packet, .*?producer2-0.*?
-Pulling packet, .*?producer2-0.*?
-Removing packet, .*?producer2-0.*?
-Collecting packet, .*?producer2-0.*?
-Producing packet, .*?producer1-1.*?
-Pushing packet, .*?producer1-1.*?
-Adding packet, .*?producer1-1.*?
-Producing packet, .*?producer2-1.*?
-Pushing packet, .*?producer2-1.*?
-Adding packet, .*?producer2-1.*?
-Producing packet, .*?producer1-2.*?
-Pushing packet, .*?producer1-2.*?
-Adding packet, .*?producer1-2.*?
-Dropping packet, .*?producer1-1.*?
-Removing packet, .*?producer1-1.*?
-Pulling packet, .*?producer1-2.*?
-Removing packet, .*?producer1-2.*?
-Collecting packet, .*?producer1-2.*?
-Producing packet, .*?producer2-2.*?
-Pushing packet, .*?producer2-2.*?
-Adding packet, .*?producer2-2.*?
-Pulling packet, .*?producer2-1.*?
-Removing packet, .*?producer2-1.*?
-Collecting packet, .*?producer2-1.*?
-Producing packet, .*?producer1-3.*?
-Pushing packet, .*?producer1-3.*?
-Adding packet, .*?producer1-3.*?
-Producing packet, .*?producer2-3.*?
-Pushing packet, .*?producer2-3.*?
-Adding packet, .*?producer2-3.*?
-Dropping packet, .*?producer2-2.*?
-Removing packet, .*?producer2-2.*?
-Producing packet, .*?producer1-4.*?
-Pushing packet, .*?producer1-4.*?
-Adding packet, .*?producer1-4.*?
-Dropping packet, .*?producer1-3.*?
-Removing packet, .*?producer1-3.*?
-Producing packet, .*?producer2-4.*?
-Pushing packet, .*?producer2-4.*?
-Adding packet, .*?producer2-4.*?
-Dropping packet, .*?producer2-3.*?
-Removing packet, .*?producer2-3.*?
-Producing packet, .*?producer2-5.*?
-Pushing packet, .*?producer2-5.*?
-Adding packet, .*?producer2-5.*?
-Dropping packet, .*?producer1-4.*?
-Removing packet, .*?producer1-4.*?
-Producing packet, .*?producer1-5.*?
-Pushing packet, .*?producer1-5.*?
-Adding packet, .*?producer1-5.*?
-Dropping packet, .*?producer2-4.*?
-Removing packet, .*?producer2-4.*?
-Producing packet, .*?producer1-6.*?
-Pushing packet, .*?producer1-6.*?
-Adding packet, .*?producer1-6.*?
-Dropping packet, .*?producer2-5.*?
-Removing packet, .*?producer2-5.*?
-Pulling packet, .*?producer1-5.*?
-Removing packet, .*?producer1-5.*?
-Collecting packet, .*?producer1-5.*?
-Pulling packet, .*?producer1-6.*?
-Removing packet, .*?producer1-6.*?
-Collecting packet, .*?producer1-6.*?
-Producing packet, .*?producer2-6.*?
-Pushing packet, .*?producer2-6.*?
-Adding packet, .*?producer2-6.*?
-Pulling packet, .*?producer2-6.*?
-Removing packet, .*?producer2-6.*?
-Collecting packet, .*?producer2-6.*?
-Producing packet, .*?producer1-7.*?
-Pushing packet, .*?producer1-7.*?
-Adding packet, .*?producer1-7.*?
-Producing packet, .*?producer2-7.*?
-Pushing packet, .*?producer2-7.*?
-Adding packet, .*?producer2-7.*?
-Pulling packet, .*?producer1-7.*?
-Removing packet, .*?producer1-7.*?
-Collecting packet, .*?producer1-7.*?
-Producing packet, .*?producer2-8.*?
-Pushing packet, .*?producer2-8.*?
-Adding packet, .*?producer2-8.*?
-Producing packet, .*?producer1-8.*?
-Pushing packet, .*?producer1-8.*?
-Adding packet, .*?producer1-8.*?
-Dropping packet, .*?producer2-7.*?
-Removing packet, .*?producer2-7.*?
-Producing packet, .*?producer1-9.*?
-Pushing packet, .*?producer1-9.*?
-Adding packet, .*?producer1-9.*?
-Dropping packet, .*?producer2-8.*?
-Removing packet, .*?producer2-8.*?
-Producing packet, .*?producer2-9.*?
-Pushing packet, .*?producer2-9.*?
-Adding packet, .*?producer2-9.*?
-Dropping packet, .*?producer1-8.*?
-Removing packet, .*?producer1-8.*?
-Pulling packet, .*?producer1-9.*?
-Removing packet, .*?producer1-9.*?
-Collecting packet, .*?producer1-9.*?
-Pulling packet, .*?producer2-9.*?
-Removing packet, .*?producer2-9.*?
-Collecting packet, .*?producer2-9.*?
-Producing packet, .*?producer1-10.*?
-Pushing packet, .*?producer1-10.*?
-Adding packet, .*?producer1-10.*?
-Pulling packet, .*?producer1-10.*?
-Removing packet, .*?producer1-10.*?
-Collecting packet, .*?producer1-10.*?
-Producing packet, .*?producer2-10.*?
-Pushing packet, .*?producer2-10.*?
-Adding packet, .*?producer2-10.*?
-Pulling packet, .*?producer2-10.*?
-Removing packet, .*?producer2-10.*?
-Collecting packet, .*?producer2-10.*?
-Producing packet, .*?producer2-11.*?
-Pushing packet, .*?producer2-11.*?
-Adding packet, .*?producer2-11.*?
-Producing packet, .*?producer1-11.*?
-Pushing packet, .*?producer1-11.*?
-Adding packet, .*?producer1-11.*?
-Pulling packet, .*?producer2-11.*?
-Removing packet, .*?producer2-11.*?
-Collecting packet, .*?producer2-11.*?
-Producing packet, .*?producer2-12.*?
-Pushing packet, .*?producer2-12.*?
-Adding packet, .*?producer2-12.*?
-Producing packet, .*?producer2-13.*?
-Pushing packet, .*?producer2-13.*?
-Adding packet, .*?producer2-13.*?
-Dropping packet, .*?producer1-11.*?
-Removing packet, .*?producer1-11.*?
-Producing packet, .*?producer1-12.*?
-Pushing packet, .*?producer1-12.*?
-Adding packet, .*?producer1-12.*?
-Dropping packet, .*?producer2-12.*?
-Removing packet, .*?producer2-12.*?
-Pulling packet, .*?producer1-12.*?
-Removing packet, .*?producer1-12.*?
-Collecting packet, .*?producer1-12.*?
-Producing packet, .*?producer2-14.*?
-Pushing packet, .*?producer2-14.*?
-Adding packet, .*?producer2-14.*?
-Producing packet, .*?producer1-13.*?
-Pushing packet, .*?producer1-13.*?
-Adding packet, .*?producer1-13.*?
-Dropping packet, .*?producer2-13.*?
-Removing packet, .*?producer2-13.*?
-Pulling packet, .*?producer2-14.*?
-Removing packet, .*?producer2-14.*?
-Collecting packet, .*?producer2-14.*?
-Producing packet, .*?producer2-15.*?
-Pushing packet, .*?producer2-15.*?
-Adding packet, .*?producer2-15.*?
-Producing packet, .*?producer1-14.*?
-Pushing packet, .*?producer1-14.*?
-Adding packet, .*?producer1-14.*?
-Dropping packet, .*?producer1-13.*?
-Removing packet, .*?producer1-13.*?
-Producing packet, .*?producer2-16.*?
-Pushing packet, .*?producer2-16.*?
-Adding packet, .*?producer2-16.*?
-Dropping packet, .*?producer2-15.*?
-Removing packet, .*?producer2-15.*?
-Producing packet, .*?producer1-15.*?
-Pushing packet, .*?producer1-15.*?
-Adding packet, .*?producer1-15.*?
-Dropping packet, .*?producer1-14.*?
-Removing packet, .*?producer1-14.*?
-Pulling packet, .*?producer1-15.*?
-Removing packet, .*?producer1-15.*?
-Collecting packet, .*?producer1-15.*?
-Producing packet, .*?producer2-17.*?
-Pushing packet, .*?producer2-17.*?
-Adding packet, .*?producer2-17.*?
-Producing packet, .*?producer1-16.*?
-Pushing packet, .*?producer1-16.*?
-Adding packet, .*?producer1-16.*?
-Dropping packet, .*?producer2-16.*?
-Removing packet, .*?producer2-16.*?
-Pulling packet, .*?producer1-16.*?
-Removing packet, .*?producer1-16.*?
-Collecting packet, .*?producer1-16.*?
-Pulling packet, .*?producer2-17.*?
-Removing packet, .*?producer2-17.*?
-Collecting packet, .*?producer2-17.*?
+At 0s producer1: Producing packet, .*?producer1-0.*?
+At 0s queue1: Pushing packet, .*?producer1-0.*?
+At 0s buffer: Adding packet, .*?producer1-0.*?
+At 0s queue1: Pulling packet, .*?producer1-0.*?
+At 0s buffer: Removing packet, .*?producer1-0.*?
+At 0s collector1: Collecting packet, .*?producer1-0.*?
+At 0s producer2: Producing packet, .*?producer2-0.*?
+At 0s queue2: Pushing packet, .*?producer2-0.*?
+At 0s buffer: Adding packet, .*?producer2-0.*?
+At 0s queue2: Pulling packet, .*?producer2-0.*?
+At 0s buffer: Removing packet, .*?producer2-0.*?
+At 0s collector2: Collecting packet, .*?producer2-0.*?
+At 0.548813502304s producer1: Producing packet, .*?producer1-1.*?
+At 0.548813502304s queue1: Pushing packet, .*?producer1-1.*?
+At 0.548813502304s buffer: Adding packet, .*?producer1-1.*?
+At 0.715189364972s producer2: Producing packet, .*?producer2-1.*?
+At 0.715189364972s queue2: Pushing packet, .*?producer2-1.*?
+At 0.715189364972s buffer: Adding packet, .*?producer2-1.*?
+At 1.151576872682s producer1: Producing packet, .*?producer1-2.*?
+At 1.151576872682s queue1: Pushing packet, .*?producer1-2.*?
+At 1.151576872682s buffer: Adding packet, .*?producer1-2.*?
+At 1.151576872682s buffer: Dropping packet, .*?producer1-1.*?
+At 1.151576872682s queue1: Removing packet, .*?producer1-1.*?
+At 1.185689232778s queue1: Pulling packet, .*?producer1-2.*?
+At 1.185689232778s buffer: Removing packet, .*?producer1-2.*?
+At 1.185689232778s collector1: Collecting packet, .*?producer1-2.*?
+At 1.573134984821s producer2: Producing packet, .*?producer2-2.*?
+At 1.573134984821s queue2: Pushing packet, .*?producer2-2.*?
+At 1.573134984821s buffer: Adding packet, .*?producer2-2.*?
+At 1.68853148818s queue2: Pulling packet, .*?producer2-1.*?
+At 1.68853148818s buffer: Removing packet, .*?producer2-1.*?
+At 1.68853148818s collector2: Collecting packet, .*?producer2-1.*?
+At 1.696460050065s producer1: Producing packet, .*?producer1-3.*?
+At 1.696460050065s queue1: Pushing packet, .*?producer1-3.*?
+At 1.696460050065s buffer: Adding packet, .*?producer1-3.*?
+At 1.996789781609s producer2: Producing packet, .*?producer2-3.*?
+At 1.996789781609s queue2: Pushing packet, .*?producer2-3.*?
+At 1.996789781609s buffer: Adding packet, .*?producer2-3.*?
+At 1.996789781609s buffer: Dropping packet, .*?producer2-2.*?
+At 1.996789781609s queue2: Removing packet, .*?producer2-2.*?
+At 2.342354165157s producer1: Producing packet, .*?producer1-4.*?
+At 2.342354165157s queue1: Pushing packet, .*?producer1-4.*?
+At 2.342354165157s buffer: Adding packet, .*?producer1-4.*?
+At 2.342354165157s buffer: Dropping packet, .*?producer1-3.*?
+At 2.342354165157s queue1: Removing packet, .*?producer1-3.*?
+At 2.381171489832s producer2: Producing packet, .*?producer2-4.*?
+At 2.381171489832s queue2: Pushing packet, .*?producer2-4.*?
+At 2.381171489832s buffer: Adding packet, .*?producer2-4.*?
+At 2.381171489832s buffer: Dropping packet, .*?producer2-3.*?
+At 2.381171489832s queue2: Removing packet, .*?producer2-3.*?
+At 2.678706095087s producer2: Producing packet, .*?producer2-5.*?
+At 2.678706095087s queue2: Pushing packet, .*?producer2-5.*?
+At 2.678706095087s buffer: Adding packet, .*?producer2-5.*?
+At 2.678706095087s buffer: Dropping packet, .*?producer1-4.*?
+At 2.678706095087s queue1: Removing packet, .*?producer1-4.*?
+At 2.779941375134s producer1: Producing packet, .*?producer1-5.*?
+At 2.779941375134s queue1: Pushing packet, .*?producer1-5.*?
+At 2.779941375134s buffer: Adding packet, .*?producer1-5.*?
+At 2.779941375134s buffer: Dropping packet, .*?producer2-4.*?
+At 2.779941375134s queue2: Removing packet, .*?producer2-4.*?
+At 2.83665435086s producer1: Producing packet, .*?producer1-6.*?
+At 2.83665435086s queue1: Pushing packet, .*?producer1-6.*?
+At 2.83665435086s buffer: Adding packet, .*?producer1-6.*?
+At 2.83665435086s buffer: Dropping packet, .*?producer2-5.*?
+At 2.83665435086s queue2: Removing packet, .*?producer2-5.*?
+At 2.880192707293s queue1: Pulling packet, .*?producer1-5.*?
+At 2.880192707293s buffer: Removing packet, .*?producer1-5.*?
+At 2.880192707293s collector1: Collecting packet, .*?producer1-5.*?
+At 3.425505296327s queue1: Pulling packet, .*?producer1-6.*?
+At 3.425505296327s buffer: Removing packet, .*?producer1-6.*?
+At 3.425505296327s collector1: Collecting packet, .*?producer1-6.*?
+At 3.570479096844s producer2: Producing packet, .*?producer2-6.*?
+At 3.570479096844s queue2: Pushing packet, .*?producer2-6.*?
+At 3.570479096844s buffer: Adding packet, .*?producer2-6.*?
+At 3.570479096844s queue2: Pulling packet, .*?producer2-6.*?
+At 3.570479096844s buffer: Removing packet, .*?producer2-6.*?
+At 3.570479096844s collector2: Collecting packet, .*?producer2-6.*?
+At 3.800317114918s producer1: Producing packet, .*?producer1-7.*?
+At 3.800317114918s queue1: Pushing packet, .*?producer1-7.*?
+At 3.800317114918s buffer: Adding packet, .*?producer1-7.*?
+At 4.048144208499s producer2: Producing packet, .*?producer2-7.*?
+At 4.048144208499s queue2: Pushing packet, .*?producer2-7.*?
+At 4.048144208499s buffer: Adding packet, .*?producer2-7.*?
+At 4.192388338968s queue1: Pulling packet, .*?producer1-7.*?
+At 4.192388338968s buffer: Removing packet, .*?producer1-7.*?
+At 4.192388338968s collector1: Collecting packet, .*?producer1-7.*?
+At 4.577039130031s producer2: Producing packet, .*?producer2-8.*?
+At 4.577039130031s queue2: Pushing packet, .*?producer2-8.*?
+At 4.577039130031s buffer: Adding packet, .*?producer2-8.*?
+At 4.612485841383s producer1: Producing packet, .*?producer1-8.*?
+At 4.612485841383s queue1: Pushing packet, .*?producer1-8.*?
+At 4.612485841383s buffer: Adding packet, .*?producer1-8.*?
+At 4.612485841383s buffer: Dropping packet, .*?producer2-7.*?
+At 4.612485841383s queue2: Removing packet, .*?producer2-7.*?
+At 5.005270634546s producer1: Producing packet, .*?producer1-9.*?
+At 5.005270634546s queue1: Pushing packet, .*?producer1-9.*?
+At 5.005270634546s buffer: Adding packet, .*?producer1-9.*?
+At 5.005270634546s buffer: Dropping packet, .*?producer2-8.*?
+At 5.005270634546s queue2: Removing packet, .*?producer2-8.*?
+At 5.145083693786s producer2: Producing packet, .*?producer2-9.*?
+At 5.145083693786s queue2: Pushing packet, .*?producer2-9.*?
+At 5.145083693786s buffer: Adding packet, .*?producer2-9.*?
+At 5.145083693786s buffer: Dropping packet, .*?producer1-8.*?
+At 5.145083693786s queue1: Removing packet, .*?producer1-8.*?
+At 5.152342681773s queue1: Pulling packet, .*?producer1-9.*?
+At 5.152342681773s buffer: Removing packet, .*?producer1-9.*?
+At 5.152342681773s collector1: Collecting packet, .*?producer1-9.*?
+At 5.153929163701s queue2: Pulling packet, .*?producer2-9.*?
+At 5.153929163701s buffer: Removing packet, .*?producer2-9.*?
+At 5.153929163701s collector2: Collecting packet, .*?producer2-9.*?
+At 5.930867267774s producer1: Producing packet, .*?producer1-10.*?
+At 5.930867267774s queue1: Pushing packet, .*?producer1-10.*?
+At 5.930867267774s buffer: Adding packet, .*?producer1-10.*?
+At 5.930867267774s queue1: Pulling packet, .*?producer1-10.*?
+At 5.930867267774s buffer: Removing packet, .*?producer1-10.*?
+At 5.930867267774s collector1: Collecting packet, .*?producer1-10.*?
+At 5.981162462615s producer2: Producing packet, .*?producer2-10.*?
+At 5.981162462615s queue2: Pushing packet, .*?producer2-10.*?
+At 5.981162462615s buffer: Adding packet, .*?producer2-10.*?
+At 5.981162462615s queue2: Pulling packet, .*?producer2-10.*?
+At 5.981162462615s buffer: Removing packet, .*?producer2-10.*?
+At 5.981162462615s collector2: Collecting packet, .*?producer2-10.*?
+At 6.001380861735s producer2: Producing packet, .*?producer2-11.*?
+At 6.001380861735s queue2: Pushing packet, .*?producer2-11.*?
+At 6.001380861735s buffer: Adding packet, .*?producer2-11.*?
+At 6.017996564742s producer1: Producing packet, .*?producer1-11.*?
+At 6.017996564742s queue1: Pushing packet, .*?producer1-11.*?
+At 6.017996564742s buffer: Adding packet, .*?producer1-11.*?
+At 6.71764553734s queue2: Pulling packet, .*?producer2-11.*?
+At 6.71764553734s buffer: Removing packet, .*?producer2-11.*?
+At 6.71764553734s collector2: Collecting packet, .*?producer2-11.*?
+At 6.834000704575s producer2: Producing packet, .*?producer2-12.*?
+At 6.834000704575s queue2: Pushing packet, .*?producer2-12.*?
+At 6.834000704575s buffer: Adding packet, .*?producer2-12.*?
+At 6.974351481998s producer2: Producing packet, .*?producer2-13.*?
+At 6.974351481998s queue2: Pushing packet, .*?producer2-13.*?
+At 6.974351481998s buffer: Adding packet, .*?producer2-13.*?
+At 6.974351481998s buffer: Dropping packet, .*?producer1-11.*?
+At 6.974351481998s queue1: Removing packet, .*?producer1-11.*?
+At 6.975151719061s producer1: Producing packet, .*?producer1-12.*?
+At 6.975151719061s queue1: Pushing packet, .*?producer1-12.*?
+At 6.975151719061s buffer: Adding packet, .*?producer1-12.*?
+At 6.975151719061s buffer: Dropping packet, .*?producer2-12.*?
+At 6.975151719061s queue2: Removing packet, .*?producer2-12.*?
+At 7.227211020888s queue1: Pulling packet, .*?producer1-12.*?
+At 7.227211020888s buffer: Removing packet, .*?producer1-12.*?
+At 7.227211020888s collector1: Collecting packet, .*?producer1-12.*?
+At 7.844363627255s producer2: Producing packet, .*?producer2-14.*?
+At 7.844363627255s queue2: Pushing packet, .*?producer2-14.*?
+At 7.844363627255s buffer: Adding packet, .*?producer2-14.*?
+At 7.845238970128s producer1: Producing packet, .*?producer1-13.*?
+At 7.845238970128s queue1: Pushing packet, .*?producer1-13.*?
+At 7.845238970128s buffer: Adding packet, .*?producer1-13.*?
+At 7.845238970128s buffer: Dropping packet, .*?producer2-13.*?
+At 7.845238970128s queue2: Removing packet, .*?producer2-13.*?
+At 8.273959051118s queue2: Pulling packet, .*?producer2-14.*?
+At 8.273959051118s buffer: Removing packet, .*?producer2-14.*?
+At 8.273959051118s collector2: Collecting packet, .*?producer2-14.*?
+At 8.317971667273s producer2: Producing packet, .*?producer2-15.*?
+At 8.317971667273s queue2: Pushing packet, .*?producer2-15.*?
+At 8.317971667273s buffer: Adding packet, .*?producer2-15.*?
+At 8.644397533965s producer1: Producing packet, .*?producer1-14.*?
+At 8.644397533965s queue1: Pushing packet, .*?producer1-14.*?
+At 8.644397533965s buffer: Adding packet, .*?producer1-14.*?
+At 8.644397533965s buffer: Dropping packet, .*?producer1-13.*?
+At 8.644397533965s queue1: Removing packet, .*?producer1-13.*?
+At 8.779451030072s producer2: Producing packet, .*?producer2-16.*?
+At 8.779451030072s queue2: Pushing packet, .*?producer2-16.*?
+At 8.779451030072s buffer: Adding packet, .*?producer2-16.*?
+At 8.779451030072s buffer: Dropping packet, .*?producer2-15.*?
+At 8.779451030072s queue2: Removing packet, .*?producer2-15.*?
+At 9.164875014453s producer1: Producing packet, .*?producer1-15.*?
+At 9.164875014453s queue1: Pushing packet, .*?producer1-15.*?
+At 9.164875014453s buffer: Adding packet, .*?producer1-15.*?
+At 9.164875014453s buffer: Dropping packet, .*?producer1-14.*?
+At 9.164875014453s queue1: Removing packet, .*?producer1-14.*?
+At 9.184447706678s queue1: Pulling packet, .*?producer1-15.*?
+At 9.184447706678s buffer: Removing packet, .*?producer1-15.*?
+At 9.184447706678s collector1: Collecting packet, .*?producer1-15.*?
+At 9.559980205724s producer2: Producing packet, .*?producer2-17.*?
+At 9.559980205724s queue2: Pushing packet, .*?producer2-17.*?
+At 9.559980205724s buffer: Adding packet, .*?producer2-17.*?
+At 9.843754548115s producer1: Producing packet, .*?producer1-16.*?
+At 9.843754548115s queue1: Pushing packet, .*?producer1-16.*?
+At 9.843754548115s buffer: Adding packet, .*?producer1-16.*?
+At 9.843754548115s buffer: Dropping packet, .*?producer2-16.*?
+At 9.843754548115s queue2: Removing packet, .*?producer2-16.*?
+At 9.843754548115s queue1: Pulling packet, .*?producer1-16.*?
+At 9.843754548115s buffer: Removing packet, .*?producer1-16.*?
+At 9.843754548115s collector1: Collecting packet, .*?producer1-16.*?
+At 9.875780556117s queue2: Pulling packet, .*?producer2-17.*?
+At 9.875780556117s buffer: Removing packet, .*?producer2-17.*?
+At 9.875780556117s collector2: Collecting packet, .*?producer2-17.*?
+
+<!> Simulation time limit reached -- at t=10s

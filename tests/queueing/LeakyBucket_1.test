@@ -42,43 +42,51 @@ cmdenv-log-prefix = "At %ts %N: "
 %subst: /\nRunning simulation\.\.\.\n//
 
 %contains-regex: stdout
-Producing packet, .*?producer-0.*?
-Pushing packet, .*?producer-0.*?
-Pulling packet, .*?producer-0.*?
-Processing packet started, .*?producer-0.*?
-Processing packet ended, .*?producer-0.*?
-Consuming packet, .*?producer-0.*?
-Producing packet, .*?producer-1.*?
-Pushing packet, .*?producer-1.*?
-Pulling packet, .*?producer-1.*?
-Processing packet started, .*?producer-1.*?
-Processing packet ended, .*?producer-1.*?
-Consuming packet, .*?producer-1.*?
-Producing packet, .*?producer-2.*?
-Pushing packet, .*?producer-2.*?
-Pulling packet, .*?producer-2.*?
-Processing packet started, .*?producer-2.*?
-Processing packet ended, .*?producer-2.*?
-Consuming packet, .*?producer-2.*?
-Producing packet, .*?producer-3.*?
-Pushing packet, .*?producer-3.*?
-Pulling packet, .*?producer-3.*?
-Processing packet started, .*?producer-3.*?
-Processing packet ended, .*?producer-3.*?
-Consuming packet, .*?producer-3.*?
-Producing packet, .*?producer-4.*?
-Pushing packet, .*?producer-4.*?
-Pulling packet, .*?producer-4.*?
-Processing packet started, .*?producer-4.*?
-Processing packet ended, .*?producer-4.*?
-Consuming packet, .*?producer-4.*?
-Producing packet, .*?producer-5.*?
-Pushing packet, .*?producer-5.*?
-Pulling packet, .*?producer-5.*?
-Processing packet started, .*?producer-5.*?
-Processing packet ended, .*?producer-5.*?
-Consuming packet, .*?producer-5.*?
-Producing packet, .*?producer-6.*?
-Pushing packet, .*?producer-6.*?
-Pulling packet, .*?producer-6.*?
-Processing packet started, .*?producer-6.*?
+At 0s producer: Producing packet, .*?producer-0.*?
+At 0s queue: Pushing packet, .*?producer-0.*?
+At 0s queue: Pulling packet, .*?producer-0.*?
+At 0s server: Processing packet started, .*?producer-0.*?
+At 1s server: Processing packet ended, .*?producer-0.*?
+At 1s consumer: Consuming packet, .*?producer-0.*?
+At 1.097627004609s producer: Producing packet, .*?producer-1.*?
+At 1.097627004609s queue: Pushing packet, .*?producer-1.*?
+At 1.097627004609s queue: Pulling packet, .*?producer-1.*?
+At 1.097627004609s server: Processing packet started, .*?producer-1.*?
+At 2.097627004609s server: Processing packet ended, .*?producer-1.*?
+At 2.097627004609s consumer: Consuming packet, .*?producer-1.*?
+At 2.283316237387s producer: Producing packet, .*?producer-2.*?
+At 2.283316237387s queue: Pushing packet, .*?producer-2.*?
+At 2.283316237387s queue: Pulling packet, .*?producer-2.*?
+At 2.283316237387s server: Processing packet started, .*?producer-2.*?
+At 3.283316237387s server: Processing packet ended, .*?producer-2.*?
+At 3.283316237387s consumer: Consuming packet, .*?producer-2.*?
+At 3.71369496733s producer: Producing packet, .*?producer-3.*?
+At 3.71369496733s queue: Pushing packet, .*?producer-3.*?
+At 3.71369496733s queue: Pulling packet, .*?producer-3.*?
+At 3.71369496733s server: Processing packet started, .*?producer-3.*?
+At 4.71369496733s server: Processing packet ended, .*?producer-3.*?
+At 4.71369496733s consumer: Consuming packet, .*?producer-3.*?
+At 5.40222645551s producer: Producing packet, .*?producer-4.*?
+At 5.40222645551s queue: Pushing packet, .*?producer-4.*?
+At 5.40222645551s queue: Pulling packet, .*?producer-4.*?
+At 5.40222645551s server: Processing packet started, .*?producer-4.*?
+At 6.40222645551s server: Processing packet ended, .*?producer-4.*?
+At 6.40222645551s consumer: Consuming packet, .*?producer-4.*?
+At 6.607753196266s producer: Producing packet, .*?producer-5.*?
+At 6.607753196266s queue: Pushing packet, .*?producer-5.*?
+At 6.607753196266s queue: Pulling packet, .*?producer-5.*?
+At 6.607753196266s server: Processing packet started, .*?producer-5.*?
+At 7.607753196266s server: Processing packet ended, .*?producer-5.*?
+At 7.607753196266s consumer: Consuming packet, .*?producer-5.*?
+At 8.323644435965s producer: Producing packet, .*?producer-6.*?
+At 8.323644435965s queue: Pushing packet, .*?producer-6.*?
+At 8.323644435965s queue: Pulling packet, .*?producer-6.*?
+At 8.323644435965s server: Processing packet started, .*?producer-6.*?
+At 9.323644435965s server: Processing packet ended, .*?producer-6.*?
+At 9.323644435965s consumer: Consuming packet, .*?producer-6.*?
+At 9.413410790731s producer: Producing packet, .*?producer-7.*?
+At 9.413410790731s queue: Pushing packet, .*?producer-7.*?
+At 9.413410790731s queue: Pulling packet, .*?producer-7.*?
+At 9.413410790731s server: Processing packet started, .*?producer-7.*?
+
+<!> Simulation time limit reached -- at t=10s

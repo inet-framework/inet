@@ -91,54 +91,65 @@ cmdenv-log-prefix = "At %ts %N: "
 %subst: /\nRunning simulation\.\.\.\n//
 
 %contains-regex: stdout
-Producing packet, .*?producer-0.*?
-Classifying packet, .*?producer-0.*?
-Pushing packet, .*?producer-0.*?
-Pulling packet, .*?producer-0.*?
-Scheduling packet, .*?producer-0.*?
-Collecting packet, .*?producer-0.*?
-Producing packet, .*?producer-1.*?
-Classifying packet, .*?producer-1.*?
-Pushing packet, .*?producer-1.*?
-Pulling packet, .*?producer-1.*?
-Scheduling packet, .*?producer-1.*?
-Collecting packet, .*?producer-1.*?
-Producing packet, .*?producer-2.*?
-Classifying packet, .*?producer-2.*?
-Pushing packet, .*?producer-2.*?
-Pulling packet, .*?producer-2.*?
-Scheduling packet, .*?producer-2.*?
-Collecting packet, .*?producer-2.*?
-Producing packet, .*?producer-3.*?
-Classifying packet, .*?producer-3.*?
-Pushing packet, .*?producer-3.*?
-Pulling packet, .*?producer-3.*?
-Scheduling packet, .*?producer-3.*?
-Collecting packet, .*?producer-3.*?
-Producing packet, .*?producer-4.*?
-Classifying packet, .*?producer-4.*?
-Pushing packet, .*?producer-4.*?
-Producing packet, .*?producer-5.*?
-Classifying packet, .*?producer-5.*?
-Pushing packet, .*?producer-5.*?
-Pulling packet, .*?producer-4.*?
-Scheduling packet, .*?producer-4.*?
-Collecting packet, .*?producer-4.*?
-Producing packet, .*?producer-6.*?
-Classifying packet, .*?producer-6.*?
-Pushing packet, .*?producer-6.*?
-Pulling packet, .*?producer-6.*?
-Scheduling packet, .*?producer-6.*?
-Collecting packet, .*?producer-6.*?
-Producing packet, .*?producer-7.*?
-Classifying packet, .*?producer-7.*?
-Pushing packet, .*?producer-7.*?
-Producing packet, .*?producer-8.*?
-Classifying packet, .*?producer-8.*?
-Pushing packet, .*?producer-8.*?
-Pulling packet, .*?producer-8.*?
-Scheduling packet, .*?producer-8.*?
-Collecting packet, .*?producer-8.*?
-Pulling packet, .*?producer-5.*?
-Scheduling packet, .*?producer-5.*?
-Collecting packet, .*?producer-5.*?
+At 0s producer: Producing packet, .*?producer-0.*?
+At 0s queue: Pushing packet, .*?producer-0.*?
+At 0s classifier: Classifying packet, .*?producer-0.*?
+At 0s queue1: Pushing packet, .*?producer-0.*?
+At 0s queue1: Pulling packet, .*?producer-0.*?
+At 0s scheduler: Scheduling packet, .*?producer-0.*?
+At 0s collector: Collecting packet, .*?producer-0.*?
+At 1.097627004609s producer: Producing packet, .*?producer-1.*?
+At 1.097627004609s queue: Pushing packet, .*?producer-1.*?
+At 1.097627004609s classifier: Classifying packet, .*?producer-1.*?
+At 1.097627004609s queue2: Pushing packet, .*?producer-1.*?
+At 1.185689232778s queue2: Pulling packet, .*?producer-1.*?
+At 1.185689232778s scheduler: Scheduling packet, .*?producer-1.*?
+At 1.185689232778s collector: Collecting packet, .*?producer-1.*?
+At 2.528005734552s producer: Producing packet, .*?producer-2.*?
+At 2.528005734552s queue: Pushing packet, .*?producer-2.*?
+At 2.528005734552s classifier: Classifying packet, .*?producer-2.*?
+At 2.528005734552s queue1: Pushing packet, .*?producer-2.*?
+At 2.874220720958s queue1: Pulling packet, .*?producer-2.*?
+At 2.874220720958s scheduler: Scheduling packet, .*?producer-2.*?
+At 2.874220720958s collector: Collecting packet, .*?producer-2.*?
+At 3.733532475308s producer: Producing packet, .*?producer-3.*?
+At 3.733532475308s queue: Pushing packet, .*?producer-3.*?
+At 3.733532475308s classifier: Classifying packet, .*?producer-3.*?
+At 3.733532475308s queue2: Pushing packet, .*?producer-3.*?
+At 4.590111960657s queue2: Pulling packet, .*?producer-3.*?
+At 4.590111960657s scheduler: Scheduling packet, .*?producer-3.*?
+At 4.590111960657s collector: Collecting packet, .*?producer-3.*?
+At 4.823298830074s producer: Producing packet, .*?producer-4.*?
+At 4.823298830074s queue: Pushing packet, .*?producer-4.*?
+At 4.823298830074s classifier: Classifying packet, .*?producer-4.*?
+At 4.823298830074s queue1: Pushing packet, .*?producer-4.*?
+At 5.670608423651s producer: Producing packet, .*?producer-5.*?
+At 5.670608423651s queue: Pushing packet, .*?producer-5.*?
+At 5.670608423651s classifier: Classifying packet, .*?producer-5.*?
+At 5.670608423651s queue2: Pushing packet, .*?producer-5.*?
+At 6.284615435172s queue1: Pulling packet, .*?producer-4.*?
+At 6.284615435172s scheduler: Scheduling packet, .*?producer-4.*?
+At 6.284615435172s collector: Collecting packet, .*?producer-4.*?
+At 6.917735816446s producer: Producing packet, .*?producer-6.*?
+At 6.917735816446s queue: Pushing packet, .*?producer-6.*?
+At 6.917735816446s classifier: Classifying packet, .*?producer-6.*?
+At 6.917735816446s queue1: Pushing packet, .*?producer-6.*?
+At 7.576403665356s queue1: Pulling packet, .*?producer-6.*?
+At 7.576403665356s scheduler: Scheduling packet, .*?producer-6.*?
+At 7.576403665356s collector: Collecting packet, .*?producer-6.*?
+At 7.686499232893s producer: Producing packet, .*?producer-7.*?
+At 7.686499232893s queue: Pushing packet, .*?producer-7.*?
+At 7.686499232893s classifier: Classifying packet, .*?producer-7.*?
+At 7.686499232893s queue2: Pushing packet, .*?producer-7.*?
+At 8.281568443404s producer: Producing packet, .*?producer-8.*?
+At 8.281568443404s queue: Pushing packet, .*?producer-8.*?
+At 8.281568443404s classifier: Classifying packet, .*?producer-8.*?
+At 8.281568443404s queue1: Pushing packet, .*?producer-8.*?
+At 8.45157808531s queue1: Pulling packet, .*?producer-8.*?
+At 8.45157808531s scheduler: Scheduling packet, .*?producer-8.*?
+At 8.45157808531s collector: Collecting packet, .*?producer-8.*?
+At 8.565004036761s queue2: Pulling packet, .*?producer-5.*?
+At 8.565004036761s scheduler: Scheduling packet, .*?producer-5.*?
+At 8.565004036761s collector: Collecting packet, .*?producer-5.*?
+
+<!> Simulation time limit reached -- at t=10s

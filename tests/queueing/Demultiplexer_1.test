@@ -50,84 +50,86 @@ cmdenv-log-prefix = "At %ts %N: "
 %subst: /\nRunning simulation\.\.\.\n//
 
 %contains-regex: stdout
-Providing packet, .*?provider-0.*?
-Forwarding packet, .*?provider-0.*?
-Collecting packet, .*?provider-0.*?
-Providing packet, .*?provider-1.*?
-Forwarding packet, .*?provider-1.*?
-Collecting packet, .*?provider-1.*?
-Providing packet, .*?provider-2.*?
-Forwarding packet, .*?provider-2.*?
-Collecting packet, .*?provider-2.*?
-Providing packet, .*?provider-3.*?
-Forwarding packet, .*?provider-3.*?
-Collecting packet, .*?provider-3.*?
-Providing packet, .*?provider-4.*?
-Forwarding packet, .*?provider-4.*?
-Collecting packet, .*?provider-4.*?
-Providing packet, .*?provider-5.*?
-Forwarding packet, .*?provider-5.*?
-Collecting packet, .*?provider-5.*?
-Providing packet, .*?provider-6.*?
-Forwarding packet, .*?provider-6.*?
-Collecting packet, .*?provider-6.*?
-Providing packet, .*?provider-7.*?
-Forwarding packet, .*?provider-7.*?
-Collecting packet, .*?provider-7.*?
-Providing packet, .*?provider-8.*?
-Forwarding packet, .*?provider-8.*?
-Collecting packet, .*?provider-8.*?
-Providing packet, .*?provider-9.*?
-Forwarding packet, .*?provider-9.*?
-Collecting packet, .*?provider-9.*?
-Providing packet, .*?provider-10.*?
-Forwarding packet, .*?provider-10.*?
-Collecting packet, .*?provider-10.*?
-Providing packet, .*?provider-11.*?
-Forwarding packet, .*?provider-11.*?
-Collecting packet, .*?provider-11.*?
-Providing packet, .*?provider-12.*?
-Forwarding packet, .*?provider-12.*?
-Collecting packet, .*?provider-12.*?
-Providing packet, .*?provider-13.*?
-Forwarding packet, .*?provider-13.*?
-Collecting packet, .*?provider-13.*?
-Providing packet, .*?provider-14.*?
-Forwarding packet, .*?provider-14.*?
-Collecting packet, .*?provider-14.*?
-Providing packet, .*?provider-15.*?
-Forwarding packet, .*?provider-15.*?
-Collecting packet, .*?provider-15.*?
-Providing packet, .*?provider-16.*?
-Forwarding packet, .*?provider-16.*?
-Collecting packet, .*?provider-16.*?
-Providing packet, .*?provider-17.*?
-Forwarding packet, .*?provider-17.*?
-Collecting packet, .*?provider-17.*?
-Providing packet, .*?provider-18.*?
-Forwarding packet, .*?provider-18.*?
-Collecting packet, .*?provider-18.*?
-Providing packet, .*?provider-19.*?
-Forwarding packet, .*?provider-19.*?
-Collecting packet, .*?provider-19.*?
-Providing packet, .*?provider-20.*?
-Forwarding packet, .*?provider-20.*?
-Collecting packet, .*?provider-20.*?
-Providing packet, .*?provider-21.*?
-Forwarding packet, .*?provider-21.*?
-Collecting packet, .*?provider-21.*?
-Providing packet, .*?provider-22.*?
-Forwarding packet, .*?provider-22.*?
-Collecting packet, .*?provider-22.*?
-Providing packet, .*?provider-23.*?
-Forwarding packet, .*?provider-23.*?
-Collecting packet, .*?provider-23.*?
-Providing packet, .*?provider-24.*?
-Forwarding packet, .*?provider-24.*?
-Collecting packet, .*?provider-24.*?
-Providing packet, .*?provider-25.*?
-Forwarding packet, .*?provider-25.*?
-Collecting packet, .*?provider-25.*?
-Providing packet, .*?provider-26.*?
-Forwarding packet, .*?provider-26.*?
-Collecting packet, .*?provider-26.*?
+At 0s provider: Providing packet, .*?provider-0.*?
+At 0s demultiplexer: Forwarding packet, .*?provider-0.*?
+At 0s collector\[0\]: Collecting packet, .*?provider-0.*?
+At 0s provider: Providing packet, .*?provider-1.*?
+At 0s demultiplexer: Forwarding packet, .*?provider-1.*?
+At 0s collector\[1\]: Collecting packet, .*?provider-1.*?
+At 0s provider: Providing packet, .*?provider-2.*?
+At 0s demultiplexer: Forwarding packet, .*?provider-2.*?
+At 0s collector\[2\]: Collecting packet, .*?provider-2.*?
+At 1.097627004609s provider: Providing packet, .*?provider-3.*?
+At 1.097627004609s demultiplexer: Forwarding packet, .*?provider-3.*?
+At 1.097627004609s collector\[0\]: Collecting packet, .*?provider-3.*?
+At 1.185689232778s provider: Providing packet, .*?provider-4.*?
+At 1.185689232778s demultiplexer: Forwarding packet, .*?provider-4.*?
+At 1.185689232778s collector\[1\]: Collecting packet, .*?provider-4.*?
+At 1.430378729943s provider: Providing packet, .*?provider-5.*?
+At 1.430378729943s demultiplexer: Forwarding packet, .*?provider-5.*?
+At 1.430378729943s collector\[2\]: Collecting packet, .*?provider-5.*?
+At 2.391215973534s provider: Providing packet, .*?provider-6.*?
+At 2.391215973534s demultiplexer: Forwarding packet, .*?provider-6.*?
+At 2.391215973534s collector\[1\]: Collecting packet, .*?provider-6.*?
+At 2.786158492789s provider: Providing packet, .*?provider-7.*?
+At 2.786158492789s demultiplexer: Forwarding packet, .*?provider-7.*?
+At 2.786158492789s collector\[0\]: Collecting packet, .*?provider-7.*?
+At 3.146269969642s provider: Providing packet, .*?provider-8.*?
+At 3.146269969642s demultiplexer: Forwarding packet, .*?provider-8.*?
+At 3.146269969642s collector\[2\]: Collecting packet, .*?provider-8.*?
+At 3.4809823283s provider: Providing packet, .*?provider-9.*?
+At 3.4809823283s demultiplexer: Forwarding packet, .*?provider-9.*?
+At 3.4809823283s collector\[1\]: Collecting packet, .*?provider-9.*?
+At 3.993579563219s provider: Providing packet, .*?provider-10.*?
+At 3.993579563219s demultiplexer: Forwarding packet, .*?provider-10.*?
+At 3.993579563219s collector\[2\]: Collecting packet, .*?provider-10.*?
+At 4.480661967304s provider: Providing packet, .*?provider-11.*?
+At 4.480661967304s demultiplexer: Forwarding packet, .*?provider-11.*?
+At 4.480661967304s collector\[0\]: Collecting packet, .*?provider-11.*?
+At 4.728109721095s provider: Providing packet, .*?provider-12.*?
+At 4.728109721095s demultiplexer: Forwarding packet, .*?provider-12.*?
+At 4.728109721095s collector\[1\]: Collecting packet, .*?provider-12.*?
+At 5.249425383751s provider: Providing packet, .*?provider-13.*?
+At 5.249425383751s demultiplexer: Forwarding packet, .*?provider-13.*?
+At 5.249425383751s collector\[0\]: Collecting packet, .*?provider-13.*?
+At 5.285367793403s provider: Providing packet, .*?provider-14.*?
+At 5.285367793403s demultiplexer: Forwarding packet, .*?provider-14.*?
+At 5.285367793403s collector\[2\]: Collecting packet, .*?provider-14.*?
+At 5.603284141049s provider: Providing packet, .*?provider-15.*?
+At 5.603284141049s demultiplexer: Forwarding packet, .*?provider-15.*?
+At 5.603284141049s collector\[1\]: Collecting packet, .*?provider-15.*?
+At 5.7167100925s provider: Providing packet, .*?provider-16.*?
+At 5.7167100925s demultiplexer: Forwarding packet, .*?provider-16.*?
+At 5.7167100925s collector\[1\]: Collecting packet, .*?provider-16.*?
+At 5.844494594262s provider: Providing packet, .*?provider-17.*?
+At 5.844494594262s demultiplexer: Forwarding packet, .*?provider-17.*?
+At 5.844494594262s collector\[0\]: Collecting packet, .*?provider-17.*?
+At 6.389807183296s provider: Providing packet, .*?provider-18.*?
+At 6.389807183296s demultiplexer: Forwarding packet, .*?provider-18.*?
+At 6.389807183296s collector\[0\]: Collecting packet, .*?provider-18.*?
+At 7.068913796916s provider: Providing packet, .*?provider-19.*?
+At 7.068913796916s demultiplexer: Forwarding packet, .*?provider-19.*?
+At 7.068913796916s collector\[2\]: Collecting packet, .*?provider-19.*?
+At 7.156690225937s provider: Providing packet, .*?provider-20.*?
+At 7.156690225937s demultiplexer: Forwarding packet, .*?provider-20.*?
+At 7.156690225937s collector\[0\]: Collecting packet, .*?provider-20.*?
+At 7.644035620615s provider: Providing packet, .*?provider-21.*?
+At 7.644035620615s demultiplexer: Forwarding packet, .*?provider-21.*?
+At 7.644035620615s collector\[1\]: Collecting packet, .*?provider-21.*?
+At 8.024244020227s provider: Providing packet, .*?provider-22.*?
+At 8.024244020227s demultiplexer: Forwarding packet, .*?provider-22.*?
+At 8.024244020227s collector\[2\]: Collecting packet, .*?provider-22.*?
+At 8.740140292794s provider: Providing packet, .*?provider-23.*?
+At 8.740140292794s demultiplexer: Forwarding packet, .*?provider-23.*?
+At 8.740140292794s collector\[0\]: Collecting packet, .*?provider-23.*?
+At 9.082033863291s provider: Providing packet, .*?provider-24.*?
+At 9.082033863291s demultiplexer: Forwarding packet, .*?provider-24.*?
+At 9.082033863291s collector\[2\]: Collecting packet, .*?provider-24.*?
+At 9.268373073544s provider: Providing packet, .*?provider-25.*?
+At 9.268373073544s demultiplexer: Forwarding packet, .*?provider-25.*?
+At 9.268373073544s collector\[1\]: Collecting packet, .*?provider-25.*?
+At 9.700094635599s provider: Providing packet, .*?provider-26.*?
+At 9.700094635599s demultiplexer: Forwarding packet, .*?provider-26.*?
+At 9.700094635599s collector\[0\]: Collecting packet, .*?provider-26.*?
+
+<!> Simulation time limit reached -- at t=10s

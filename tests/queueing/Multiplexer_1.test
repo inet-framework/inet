@@ -50,84 +50,86 @@ cmdenv-log-prefix = "At %ts %N: "
 %subst: /\nRunning simulation\.\.\.\n//
 
 %contains-regex: stdout
-Producing packet, .*?producer\[0\]-0.*?
-Forwarding packet, .*?producer\[0\]-0.*?
-Consuming packet, .*?producer\[0\]-0.*?
-Producing packet, .*?producer\[1\]-0.*?
-Forwarding packet, .*?producer\[1\]-0.*?
-Consuming packet, .*?producer\[1\]-0.*?
-Producing packet, .*?producer\[2\]-0.*?
-Forwarding packet, .*?producer\[2\]-0.*?
-Consuming packet, .*?producer\[2\]-0.*?
-Producing packet, .*?producer\[0\]-1.*?
-Forwarding packet, .*?producer\[0\]-1.*?
-Consuming packet, .*?producer\[0\]-1.*?
-Producing packet, .*?producer\[1\]-1.*?
-Forwarding packet, .*?producer\[1\]-1.*?
-Consuming packet, .*?producer\[1\]-1.*?
-Producing packet, .*?producer\[2\]-1.*?
-Forwarding packet, .*?producer\[2\]-1.*?
-Consuming packet, .*?producer\[2\]-1.*?
-Producing packet, .*?producer\[1\]-2.*?
-Forwarding packet, .*?producer\[1\]-2.*?
-Consuming packet, .*?producer\[1\]-2.*?
-Producing packet, .*?producer\[0\]-2.*?
-Forwarding packet, .*?producer\[0\]-2.*?
-Consuming packet, .*?producer\[0\]-2.*?
-Producing packet, .*?producer\[2\]-2.*?
-Forwarding packet, .*?producer\[2\]-2.*?
-Consuming packet, .*?producer\[2\]-2.*?
-Producing packet, .*?producer\[1\]-3.*?
-Forwarding packet, .*?producer\[1\]-3.*?
-Consuming packet, .*?producer\[1\]-3.*?
-Producing packet, .*?producer\[2\]-3.*?
-Forwarding packet, .*?producer\[2\]-3.*?
-Consuming packet, .*?producer\[2\]-3.*?
-Producing packet, .*?producer\[0\]-3.*?
-Forwarding packet, .*?producer\[0\]-3.*?
-Consuming packet, .*?producer\[0\]-3.*?
-Producing packet, .*?producer\[1\]-4.*?
-Forwarding packet, .*?producer\[1\]-4.*?
-Consuming packet, .*?producer\[1\]-4.*?
-Producing packet, .*?producer\[0\]-4.*?
-Forwarding packet, .*?producer\[0\]-4.*?
-Consuming packet, .*?producer\[0\]-4.*?
-Producing packet, .*?producer\[2\]-4.*?
-Forwarding packet, .*?producer\[2\]-4.*?
-Consuming packet, .*?producer\[2\]-4.*?
-Producing packet, .*?producer\[1\]-5.*?
-Forwarding packet, .*?producer\[1\]-5.*?
-Consuming packet, .*?producer\[1\]-5.*?
-Producing packet, .*?producer\[1\]-6.*?
-Forwarding packet, .*?producer\[1\]-6.*?
-Consuming packet, .*?producer\[1\]-6.*?
-Producing packet, .*?producer\[0\]-5.*?
-Forwarding packet, .*?producer\[0\]-5.*?
-Consuming packet, .*?producer\[0\]-5.*?
-Producing packet, .*?producer\[0\]-6.*?
-Forwarding packet, .*?producer\[0\]-6.*?
-Consuming packet, .*?producer\[0\]-6.*?
-Producing packet, .*?producer\[2\]-5.*?
-Forwarding packet, .*?producer\[2\]-5.*?
-Consuming packet, .*?producer\[2\]-5.*?
-Producing packet, .*?producer\[0\]-7.*?
-Forwarding packet, .*?producer\[0\]-7.*?
-Consuming packet, .*?producer\[0\]-7.*?
-Producing packet, .*?producer\[1\]-7.*?
-Forwarding packet, .*?producer\[1\]-7.*?
-Consuming packet, .*?producer\[1\]-7.*?
-Producing packet, .*?producer\[2\]-6.*?
-Forwarding packet, .*?producer\[2\]-6.*?
-Consuming packet, .*?producer\[2\]-6.*?
-Producing packet, .*?producer\[0\]-8.*?
-Forwarding packet, .*?producer\[0\]-8.*?
-Consuming packet, .*?producer\[0\]-8.*?
-Producing packet, .*?producer\[2\]-7.*?
-Forwarding packet, .*?producer\[2\]-7.*?
-Consuming packet, .*?producer\[2\]-7.*?
-Producing packet, .*?producer\[1\]-8.*?
-Forwarding packet, .*?producer\[1\]-8.*?
-Consuming packet, .*?producer\[1\]-8.*?
-Producing packet, .*?producer\[0\]-9.*?
-Forwarding packet, .*?producer\[0\]-9.*?
-Consuming packet, .*?producer\[0\]-9.*?
+At 0s producer\[0\]: Producing packet, .*?producer\[0\]-0.*?
+At 0s multiplexer: Forwarding packet, .*?producer\[0\]-0.*?
+At 0s consumer: Consuming packet, .*?producer\[0\]-0.*?
+At 0s producer\[1\]: Producing packet, .*?producer\[1\]-0.*?
+At 0s multiplexer: Forwarding packet, .*?producer\[1\]-0.*?
+At 0s consumer: Consuming packet, .*?producer\[1\]-0.*?
+At 0s producer\[2\]: Producing packet, .*?producer\[2\]-0.*?
+At 0s multiplexer: Forwarding packet, .*?producer\[2\]-0.*?
+At 0s consumer: Consuming packet, .*?producer\[2\]-0.*?
+At 1.097627004609s producer\[0\]: Producing packet, .*?producer\[0\]-1.*?
+At 1.097627004609s multiplexer: Forwarding packet, .*?producer\[0\]-1.*?
+At 1.097627004609s consumer: Consuming packet, .*?producer\[0\]-1.*?
+At 1.185689232778s producer\[1\]: Producing packet, .*?producer\[1\]-1.*?
+At 1.185689232778s multiplexer: Forwarding packet, .*?producer\[1\]-1.*?
+At 1.185689232778s consumer: Consuming packet, .*?producer\[1\]-1.*?
+At 1.430378729943s producer\[2\]: Producing packet, .*?producer\[2\]-1.*?
+At 1.430378729943s multiplexer: Forwarding packet, .*?producer\[2\]-1.*?
+At 1.430378729943s consumer: Consuming packet, .*?producer\[2\]-1.*?
+At 2.391215973534s producer\[1\]: Producing packet, .*?producer\[1\]-2.*?
+At 2.391215973534s multiplexer: Forwarding packet, .*?producer\[1\]-2.*?
+At 2.391215973534s consumer: Consuming packet, .*?producer\[1\]-2.*?
+At 2.786158492789s producer\[0\]: Producing packet, .*?producer\[0\]-2.*?
+At 2.786158492789s multiplexer: Forwarding packet, .*?producer\[0\]-2.*?
+At 2.786158492789s consumer: Consuming packet, .*?producer\[0\]-2.*?
+At 3.146269969642s producer\[2\]: Producing packet, .*?producer\[2\]-2.*?
+At 3.146269969642s multiplexer: Forwarding packet, .*?producer\[2\]-2.*?
+At 3.146269969642s consumer: Consuming packet, .*?producer\[2\]-2.*?
+At 3.4809823283s producer\[1\]: Producing packet, .*?producer\[1\]-3.*?
+At 3.4809823283s multiplexer: Forwarding packet, .*?producer\[1\]-3.*?
+At 3.4809823283s consumer: Consuming packet, .*?producer\[1\]-3.*?
+At 3.993579563219s producer\[2\]: Producing packet, .*?producer\[2\]-3.*?
+At 3.993579563219s multiplexer: Forwarding packet, .*?producer\[2\]-3.*?
+At 3.993579563219s consumer: Consuming packet, .*?producer\[2\]-3.*?
+At 4.480661967304s producer\[0\]: Producing packet, .*?producer\[0\]-3.*?
+At 4.480661967304s multiplexer: Forwarding packet, .*?producer\[0\]-3.*?
+At 4.480661967304s consumer: Consuming packet, .*?producer\[0\]-3.*?
+At 4.728109721095s producer\[1\]: Producing packet, .*?producer\[1\]-4.*?
+At 4.728109721095s multiplexer: Forwarding packet, .*?producer\[1\]-4.*?
+At 4.728109721095s consumer: Consuming packet, .*?producer\[1\]-4.*?
+At 5.249425383751s producer\[0\]: Producing packet, .*?producer\[0\]-4.*?
+At 5.249425383751s multiplexer: Forwarding packet, .*?producer\[0\]-4.*?
+At 5.249425383751s consumer: Consuming packet, .*?producer\[0\]-4.*?
+At 5.285367793403s producer\[2\]: Producing packet, .*?producer\[2\]-4.*?
+At 5.285367793403s multiplexer: Forwarding packet, .*?producer\[2\]-4.*?
+At 5.285367793403s consumer: Consuming packet, .*?producer\[2\]-4.*?
+At 5.603284141049s producer\[1\]: Producing packet, .*?producer\[1\]-5.*?
+At 5.603284141049s multiplexer: Forwarding packet, .*?producer\[1\]-5.*?
+At 5.603284141049s consumer: Consuming packet, .*?producer\[1\]-5.*?
+At 5.7167100925s producer\[1\]: Producing packet, .*?producer\[1\]-6.*?
+At 5.7167100925s multiplexer: Forwarding packet, .*?producer\[1\]-6.*?
+At 5.7167100925s consumer: Consuming packet, .*?producer\[1\]-6.*?
+At 5.844494594262s producer\[0\]: Producing packet, .*?producer\[0\]-5.*?
+At 5.844494594262s multiplexer: Forwarding packet, .*?producer\[0\]-5.*?
+At 5.844494594262s consumer: Consuming packet, .*?producer\[0\]-5.*?
+At 6.389807183296s producer\[0\]: Producing packet, .*?producer\[0\]-6.*?
+At 6.389807183296s multiplexer: Forwarding packet, .*?producer\[0\]-6.*?
+At 6.389807183296s consumer: Consuming packet, .*?producer\[0\]-6.*?
+At 7.068913796916s producer\[2\]: Producing packet, .*?producer\[2\]-5.*?
+At 7.068913796916s multiplexer: Forwarding packet, .*?producer\[2\]-5.*?
+At 7.068913796916s consumer: Consuming packet, .*?producer\[2\]-5.*?
+At 7.156690225937s producer\[0\]: Producing packet, .*?producer\[0\]-7.*?
+At 7.156690225937s multiplexer: Forwarding packet, .*?producer\[0\]-7.*?
+At 7.156690225937s consumer: Consuming packet, .*?producer\[0\]-7.*?
+At 7.644035620615s producer\[1\]: Producing packet, .*?producer\[1\]-7.*?
+At 7.644035620615s multiplexer: Forwarding packet, .*?producer\[1\]-7.*?
+At 7.644035620615s consumer: Consuming packet, .*?producer\[1\]-7.*?
+At 8.024244020227s producer\[2\]: Producing packet, .*?producer\[2\]-6.*?
+At 8.024244020227s multiplexer: Forwarding packet, .*?producer\[2\]-6.*?
+At 8.024244020227s consumer: Consuming packet, .*?producer\[2\]-6.*?
+At 8.740140292794s producer\[0\]: Producing packet, .*?producer\[0\]-8.*?
+At 8.740140292794s multiplexer: Forwarding packet, .*?producer\[0\]-8.*?
+At 8.740140292794s consumer: Consuming packet, .*?producer\[0\]-8.*?
+At 9.082033863291s producer\[2\]: Producing packet, .*?producer\[2\]-7.*?
+At 9.082033863291s multiplexer: Forwarding packet, .*?producer\[2\]-7.*?
+At 9.082033863291s consumer: Consuming packet, .*?producer\[2\]-7.*?
+At 9.268373073544s producer\[1\]: Producing packet, .*?producer\[1\]-8.*?
+At 9.268373073544s multiplexer: Forwarding packet, .*?producer\[1\]-8.*?
+At 9.268373073544s consumer: Consuming packet, .*?producer\[1\]-8.*?
+At 9.700094635599s producer\[0\]: Producing packet, .*?producer\[0\]-9.*?
+At 9.700094635599s multiplexer: Forwarding packet, .*?producer\[0\]-9.*?
+At 9.700094635599s consumer: Consuming packet, .*?producer\[0\]-9.*?
+
+<!> Simulation time limit reached -- at t=10s

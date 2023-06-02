@@ -52,35 +52,37 @@ cmdenv-log-prefix = "At %ts %N: "
 %subst: /\nRunning simulation\.\.\.\n//
 
 %contains-regex: stdout
-Producing packet, .*?producer1-0.*?
-Consuming packet, .*?producer1-0.*?
-Producing packet, .*?producer1-1.*?
-Consuming packet, .*?producer1-1.*?
-Producing packet, .*?producer1-2.*?
-Consuming packet, .*?producer1-2.*?
-Producing packet, .*?producer1-3.*?
-Consuming packet, .*?producer1-3.*?
-Producing packet, .*?producer2-0.*?
-Consuming packet, .*?producer2-0.*?
-Producing packet, .*?producer2-1.*?
-Consuming packet, .*?producer2-1.*?
-Producing packet, .*?producer2-2.*?
-Consuming packet, .*?producer2-2.*?
-Producing packet, .*?producer1-4.*?
-Consuming packet, .*?producer1-4.*?
-Producing packet, .*?producer1-5.*?
-Consuming packet, .*?producer1-5.*?
-Producing packet, .*?producer1-6.*?
-Consuming packet, .*?producer1-6.*?
-Producing packet, .*?producer2-3.*?
-Consuming packet, .*?producer2-3.*?
-Producing packet, .*?producer2-4.*?
-Consuming packet, .*?producer2-4.*?
-Producing packet, .*?producer2-5.*?
-Consuming packet, .*?producer2-5.*?
-Producing packet, .*?producer2-6.*?
-Consuming packet, .*?producer2-6.*?
-Producing packet, .*?producer1-7.*?
-Consuming packet, .*?producer1-7.*?
-Producing packet, .*?producer1-8.*?
-Consuming packet, .*?producer1-8.*?
+At 0s producer1: Producing packet, .*?producer1-0.*?
+At 0s consumer: Consuming packet, .*?producer1-0.*?
+At 10.976270046085s producer1: Producing packet, .*?producer1-1.*?
+At 10.976270046085s consumer: Consuming packet, .*?producer1-1.*?
+At 22.833162373863s producer1: Producing packet, .*?producer1-2.*?
+At 22.833162373863s consumer: Consuming packet, .*?producer1-2.*?
+At 37.136949673295s producer1: Producing packet, .*?producer1-3.*?
+At 37.136949673295s consumer: Consuming packet, .*?producer1-3.*?
+At 40s producer2: Producing packet, .*?producer2-0.*?
+At 40s consumer: Consuming packet, .*?producer2-0.*?
+At 41.715891239699s producer2: Producing packet, .*?producer2-1.*?
+At 41.715891239699s consumer: Consuming packet, .*?producer2-1.*?
+At 42.805657594465s producer2: Producing packet, .*?producer2-2.*?
+At 42.805657594465s consumer: Consuming packet, .*?producer2-2.*?
+At 54.022264555097s producer1: Producing packet, .*?producer1-4.*?
+At 54.022264555097s consumer: Consuming packet, .*?producer1-4.*?
+At 66.493538483046s producer1: Producing packet, .*?producer1-5.*?
+At 66.493538483046s consumer: Consuming packet, .*?producer1-5.*?
+At 79.411420784891s producer1: Producing packet, .*?producer1-6.*?
+At 79.411420784891s consumer: Consuming packet, .*?producer1-6.*?
+At 84s producer2: Producing packet, .*?producer2-3.*?
+At 84s consumer: Consuming packet, .*?producer2-3.*?
+At 84.595069210511s producer2: Producing packet, .*?producer2-4.*?
+At 84.595069210511s consumer: Consuming packet, .*?producer2-4.*?
+At 86.378615214024s producer2: Producing packet, .*?producer2-5.*?
+At 86.378615214024s consumer: Consuming packet, .*?producer2-5.*?
+At 86.492041165475s producer2: Producing packet, .*?producer2-6.*?
+At 86.492041165475s consumer: Consuming packet, .*?producer2-6.*?
+At 88s producer1: Producing packet, .*?producer1-7.*?
+At 88s consumer: Consuming packet, .*?producer1-7.*?
+At 95.66883042641s producer1: Producing packet, .*?producer1-8.*?
+At 95.66883042641s consumer: Consuming packet, .*?producer1-8.*?
+
+<!> Simulation time limit reached -- at t=100s

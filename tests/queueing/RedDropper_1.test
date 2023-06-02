@@ -52,430 +52,437 @@ cmdenv-log-prefix = "At %ts %N: "
 %subst: /\nRunning simulation\.\.\.\n//
 
 %contains-regex: stdout
-Producing packet, .*?producer-1.*?
-Passing through packet, .*?producer-1.*?
-Pushing packet, .*?producer-1.*?
-Pulling packet, .*?producer-1.*?
-Collecting packet, .*?producer-1.*?
-Producing packet, .*?producer-2.*?
-Passing through packet, .*?producer-2.*?
-Pushing packet, .*?producer-2.*?
-Pulling packet, .*?producer-2.*?
-Collecting packet, .*?producer-2.*?
-Producing packet, .*?producer-3.*?
-Passing through packet, .*?producer-3.*?
-Pushing packet, .*?producer-3.*?
-Producing packet, .*?producer-4.*?
-Passing through packet, .*?producer-4.*?
-Pushing packet, .*?producer-4.*?
-Pulling packet, .*?producer-3.*?
-Collecting packet, .*?producer-3.*?
-Pulling packet, .*?producer-4.*?
-Collecting packet, .*?producer-4.*?
-Producing packet, .*?producer-5.*?
-Passing through packet, .*?producer-5.*?
-Pushing packet, .*?producer-5.*?
-Pulling packet, .*?producer-5.*?
-Collecting packet, .*?producer-5.*?
-Producing packet, .*?producer-6.*?
-Passing through packet, .*?producer-6.*?
-Pushing packet, .*?producer-6.*?
-Pulling packet, .*?producer-6.*?
-Collecting packet, .*?producer-6.*?
-Producing packet, .*?producer-7.*?
-Passing through packet, .*?producer-7.*?
-Pushing packet, .*?producer-7.*?
-Pulling packet, .*?producer-7.*?
-Collecting packet, .*?producer-7.*?
-Producing packet, .*?producer-8.*?
-Passing through packet, .*?producer-8.*?
-Pushing packet, .*?producer-8.*?
-Pulling packet, .*?producer-8.*?
-Collecting packet, .*?producer-8.*?
-Producing packet, .*?producer-9.*?
-Passing through packet, .*?producer-9.*?
-Pushing packet, .*?producer-9.*?
-Pulling packet, .*?producer-9.*?
-Collecting packet, .*?producer-9.*?
-Producing packet, .*?producer-10.*?
-Passing through packet, .*?producer-10.*?
-Pushing packet, .*?producer-10.*?
-Pulling packet, .*?producer-10.*?
-Collecting packet, .*?producer-10.*?
-Producing packet, .*?producer-11.*?
-Passing through packet, .*?producer-11.*?
-Pushing packet, .*?producer-11.*?
-Pulling packet, .*?producer-11.*?
-Collecting packet, .*?producer-11.*?
-Producing packet, .*?producer-12.*?
-Passing through packet, .*?producer-12.*?
-Pushing packet, .*?producer-12.*?
-Pulling packet, .*?producer-12.*?
-Collecting packet, .*?producer-12.*?
-Producing packet, .*?producer-13.*?
-Passing through packet, .*?producer-13.*?
-Pushing packet, .*?producer-13.*?
-Pulling packet, .*?producer-13.*?
-Collecting packet, .*?producer-13.*?
-Producing packet, .*?producer-14.*?
-Passing through packet, .*?producer-14.*?
-Pushing packet, .*?producer-14.*?
-Pulling packet, .*?producer-14.*?
-Collecting packet, .*?producer-14.*?
-Producing packet, .*?producer-15.*?
-Passing through packet, .*?producer-15.*?
-Pushing packet, .*?producer-15.*?
-Producing packet, .*?producer-16.*?
-Passing through packet, .*?producer-16.*?
-Pushing packet, .*?producer-16.*?
-Pulling packet, .*?producer-15.*?
-Collecting packet, .*?producer-15.*?
-Pulling packet, .*?producer-16.*?
-Collecting packet, .*?producer-16.*?
-Producing packet, .*?producer-17.*?
-Passing through packet, .*?producer-17.*?
-Pushing packet, .*?producer-17.*?
-Pulling packet, .*?producer-17.*?
-Collecting packet, .*?producer-17.*?
-Producing packet, .*?producer-18.*?
-Passing through packet, .*?producer-18.*?
-Pushing packet, .*?producer-18.*?
-Pulling packet, .*?producer-18.*?
-Collecting packet, .*?producer-18.*?
-Producing packet, .*?producer-19.*?
-Passing through packet, .*?producer-19.*?
-Pushing packet, .*?producer-19.*?
-Pulling packet, .*?producer-19.*?
-Collecting packet, .*?producer-19.*?
-Producing packet, .*?producer-20.*?
-Passing through packet, .*?producer-20.*?
-Pushing packet, .*?producer-20.*?
-Pulling packet, .*?producer-20.*?
-Collecting packet, .*?producer-20.*?
-Producing packet, .*?producer-21.*?
-Passing through packet, .*?producer-21.*?
-Pushing packet, .*?producer-21.*?
-Pulling packet, .*?producer-21.*?
-Collecting packet, .*?producer-21.*?
-Producing packet, .*?producer-22.*?
-Passing through packet, .*?producer-22.*?
-Pushing packet, .*?producer-22.*?
-Pulling packet, .*?producer-22.*?
-Collecting packet, .*?producer-22.*?
-Producing packet, .*?producer-23.*?
-Passing through packet, .*?producer-23.*?
-Pushing packet, .*?producer-23.*?
-Pulling packet, .*?producer-23.*?
-Collecting packet, .*?producer-23.*?
-Producing packet, .*?producer-24.*?
-Passing through packet, .*?producer-24.*?
-Pushing packet, .*?producer-24.*?
-Pulling packet, .*?producer-24.*?
-Collecting packet, .*?producer-24.*?
-Producing packet, .*?producer-25.*?
-Passing through packet, .*?producer-25.*?
-Pushing packet, .*?producer-25.*?
-Producing packet, .*?producer-26.*?
-Passing through packet, .*?producer-26.*?
-Pushing packet, .*?producer-26.*?
-Pulling packet, .*?producer-25.*?
-Collecting packet, .*?producer-25.*?
-Pulling packet, .*?producer-26.*?
-Collecting packet, .*?producer-26.*?
-Producing packet, .*?producer-27.*?
-Passing through packet, .*?producer-27.*?
-Pushing packet, .*?producer-27.*?
-Pulling packet, .*?producer-27.*?
-Collecting packet, .*?producer-27.*?
-Producing packet, .*?producer-28.*?
-Passing through packet, .*?producer-28.*?
-Pushing packet, .*?producer-28.*?
-Pulling packet, .*?producer-28.*?
-Collecting packet, .*?producer-28.*?
-Producing packet, .*?producer-29.*?
-Passing through packet, .*?producer-29.*?
-Pushing packet, .*?producer-29.*?
-Pulling packet, .*?producer-29.*?
-Collecting packet, .*?producer-29.*?
-Producing packet, .*?producer-30.*?
-Passing through packet, .*?producer-30.*?
-Pushing packet, .*?producer-30.*?
-Pulling packet, .*?producer-30.*?
-Collecting packet, .*?producer-30.*?
-Producing packet, .*?producer-31.*?
-Passing through packet, .*?producer-31.*?
-Pushing packet, .*?producer-31.*?
-Pulling packet, .*?producer-31.*?
-Collecting packet, .*?producer-31.*?
-Producing packet, .*?producer-32.*?
-Passing through packet, .*?producer-32.*?
-Pushing packet, .*?producer-32.*?
-Pulling packet, .*?producer-32.*?
-Collecting packet, .*?producer-32.*?
-Producing packet, .*?producer-33.*?
-Passing through packet, .*?producer-33.*?
-Pushing packet, .*?producer-33.*?
-Pulling packet, .*?producer-33.*?
-Collecting packet, .*?producer-33.*?
-Producing packet, .*?producer-34.*?
-Passing through packet, .*?producer-34.*?
-Pushing packet, .*?producer-34.*?
-Pulling packet, .*?producer-34.*?
-Collecting packet, .*?producer-34.*?
-Producing packet, .*?producer-35.*?
-Passing through packet, .*?producer-35.*?
-Pushing packet, .*?producer-35.*?
-Pulling packet, .*?producer-35.*?
-Collecting packet, .*?producer-35.*?
-Producing packet, .*?producer-36.*?
-Passing through packet, .*?producer-36.*?
-Pushing packet, .*?producer-36.*?
-Pulling packet, .*?producer-36.*?
-Collecting packet, .*?producer-36.*?
-Producing packet, .*?producer-37.*?
-Passing through packet, .*?producer-37.*?
-Pushing packet, .*?producer-37.*?
-Pulling packet, .*?producer-37.*?
-Collecting packet, .*?producer-37.*?
-Producing packet, .*?producer-38.*?
-Passing through packet, .*?producer-38.*?
-Pushing packet, .*?producer-38.*?
-Pulling packet, .*?producer-38.*?
-Collecting packet, .*?producer-38.*?
-Producing packet, .*?producer-39.*?
-Passing through packet, .*?producer-39.*?
-Pushing packet, .*?producer-39.*?
-Pulling packet, .*?producer-39.*?
-Collecting packet, .*?producer-39.*?
-Producing packet, .*?producer-40.*?
-Passing through packet, .*?producer-40.*?
-Pushing packet, .*?producer-40.*?
-Pulling packet, .*?producer-40.*?
-Collecting packet, .*?producer-40.*?
-Producing packet, .*?producer-41.*?
-Passing through packet, .*?producer-41.*?
-Pushing packet, .*?producer-41.*?
-Pulling packet, .*?producer-41.*?
-Collecting packet, .*?producer-41.*?
-Producing packet, .*?producer-42.*?
-Passing through packet, .*?producer-42.*?
-Pushing packet, .*?producer-42.*?
-Producing packet, .*?producer-43.*?
-Passing through packet, .*?producer-43.*?
-Pushing packet, .*?producer-43.*?
-Producing packet, .*?producer-44.*?
-Passing through packet, .*?producer-44.*?
-Pushing packet, .*?producer-44.*?
-Producing packet, .*?producer-45.*?
-Queue length >= capacity, .*?queueLength.*? = 3, .*?packetCapacity.*? = 3.
-Filtering out packet, .*?producer-45.*?
-Pulling packet, .*?producer-42.*?
-Collecting packet, .*?producer-42.*?
-Producing packet, .*?producer-46.*?
-Passing through packet, .*?producer-46.*?
-Pushing packet, .*?producer-46.*?
-Pulling packet, .*?producer-43.*?
-Collecting packet, .*?producer-43.*?
-Pulling packet, .*?producer-44.*?
-Collecting packet, .*?producer-44.*?
-Producing packet, .*?producer-47.*?
-Passing through packet, .*?producer-47.*?
-Pushing packet, .*?producer-47.*?
-Producing packet, .*?producer-48.*?
-Passing through packet, .*?producer-48.*?
-Pushing packet, .*?producer-48.*?
-Pulling packet, .*?producer-46.*?
-Collecting packet, .*?producer-46.*?
-Producing packet, .*?producer-49.*?
-Passing through packet, .*?producer-49.*?
-Pushing packet, .*?producer-49.*?
-Pulling packet, .*?producer-47.*?
-Collecting packet, .*?producer-47.*?
-Producing packet, .*?producer-50.*?
-Passing through packet, .*?producer-50.*?
-Pushing packet, .*?producer-50.*?
-Pulling packet, .*?producer-48.*?
-Collecting packet, .*?producer-48.*?
-Producing packet, .*?producer-51.*?
-Passing through packet, .*?producer-51.*?
-Pushing packet, .*?producer-51.*?
-Producing packet, .*?producer-52.*?
-Queue length >= capacity, .*?queueLength.*? = 3, .*?packetCapacity.*? = 3.
-Filtering out packet, .*?producer-52.*?
-Pulling packet, .*?producer-49.*?
-Collecting packet, .*?producer-49.*?
-Pulling packet, .*?producer-50.*?
-Collecting packet, .*?producer-50.*?
-Producing packet, .*?producer-53.*?
-Passing through packet, .*?producer-53.*?
-Pushing packet, .*?producer-53.*?
-Producing packet, .*?producer-54.*?
-Passing through packet, .*?producer-54.*?
-Pushing packet, .*?producer-54.*?
-Pulling packet, .*?producer-51.*?
-Collecting packet, .*?producer-51.*?
-Pulling packet, .*?producer-53.*?
-Collecting packet, .*?producer-53.*?
-Producing packet, .*?producer-55.*?
-Passing through packet, .*?producer-55.*?
-Pushing packet, .*?producer-55.*?
-Pulling packet, .*?producer-54.*?
-Collecting packet, .*?producer-54.*?
-Producing packet, .*?producer-56.*?
-Passing through packet, .*?producer-56.*?
-Pushing packet, .*?producer-56.*?
-Pulling packet, .*?producer-55.*?
-Collecting packet, .*?producer-55.*?
-Pulling packet, .*?producer-56.*?
-Collecting packet, .*?producer-56.*?
-Producing packet, .*?producer-57.*?
-Passing through packet, .*?producer-57.*?
-Pushing packet, .*?producer-57.*?
-Pulling packet, .*?producer-57.*?
-Collecting packet, .*?producer-57.*?
-Producing packet, .*?producer-58.*?
-Passing through packet, .*?producer-58.*?
-Pushing packet, .*?producer-58.*?
-Pulling packet, .*?producer-58.*?
-Collecting packet, .*?producer-58.*?
-Producing packet, .*?producer-59.*?
-Passing through packet, .*?producer-59.*?
-Pushing packet, .*?producer-59.*?
-Pulling packet, .*?producer-59.*?
-Collecting packet, .*?producer-59.*?
-Producing packet, .*?producer-60.*?
-Passing through packet, .*?producer-60.*?
-Pushing packet, .*?producer-60.*?
-Pulling packet, .*?producer-60.*?
-Collecting packet, .*?producer-60.*?
-Producing packet, .*?producer-61.*?
-Passing through packet, .*?producer-61.*?
-Pushing packet, .*?producer-61.*?
-Pulling packet, .*?producer-61.*?
-Collecting packet, .*?producer-61.*?
-Producing packet, .*?producer-62.*?
-Passing through packet, .*?producer-62.*?
-Pushing packet, .*?producer-62.*?
-Producing packet, .*?producer-63.*?
-Passing through packet, .*?producer-63.*?
-Pushing packet, .*?producer-63.*?
-Producing packet, .*?producer-64.*?
-Passing through packet, .*?producer-64.*?
-Pushing packet, .*?producer-64.*?
-Pulling packet, .*?producer-62.*?
-Collecting packet, .*?producer-62.*?
-Producing packet, .*?producer-65.*?
-Passing through packet, .*?producer-65.*?
-Pushing packet, .*?producer-65.*?
-Producing packet, .*?producer-66.*?
-Queue length >= capacity, .*?queueLength.*? = 3, .*?packetCapacity.*? = 3.
-Filtering out packet, .*?producer-66.*?
-Pulling packet, .*?producer-63.*?
-Collecting packet, .*?producer-63.*?
-Pulling packet, .*?producer-64.*?
-Collecting packet, .*?producer-64.*?
-Pulling packet, .*?producer-65.*?
-Collecting packet, .*?producer-65.*?
-Producing packet, .*?producer-67.*?
-Passing through packet, .*?producer-67.*?
-Pushing packet, .*?producer-67.*?
-Pulling packet, .*?producer-67.*?
-Collecting packet, .*?producer-67.*?
-Producing packet, .*?producer-68.*?
-Passing through packet, .*?producer-68.*?
-Pushing packet, .*?producer-68.*?
-Pulling packet, .*?producer-68.*?
-Collecting packet, .*?producer-68.*?
-Producing packet, .*?producer-69.*?
-Passing through packet, .*?producer-69.*?
-Pushing packet, .*?producer-69.*?
-Pulling packet, .*?producer-69.*?
-Collecting packet, .*?producer-69.*?
-Producing packet, .*?producer-70.*?
-Passing through packet, .*?producer-70.*?
-Pushing packet, .*?producer-70.*?
-Pulling packet, .*?producer-70.*?
-Collecting packet, .*?producer-70.*?
-Producing packet, .*?producer-71.*?
-Passing through packet, .*?producer-71.*?
-Pushing packet, .*?producer-71.*?
-Producing packet, .*?producer-72.*?
-Passing through packet, .*?producer-72.*?
-Pushing packet, .*?producer-72.*?
-Pulling packet, .*?producer-71.*?
-Collecting packet, .*?producer-71.*?
-Pulling packet, .*?producer-72.*?
-Collecting packet, .*?producer-72.*?
-Producing packet, .*?producer-73.*?
-Passing through packet, .*?producer-73.*?
-Pushing packet, .*?producer-73.*?
-Pulling packet, .*?producer-73.*?
-Collecting packet, .*?producer-73.*?
-Producing packet, .*?producer-74.*?
-Passing through packet, .*?producer-74.*?
-Pushing packet, .*?producer-74.*?
-Producing packet, .*?producer-75.*?
-Passing through packet, .*?producer-75.*?
-Pushing packet, .*?producer-75.*?
-Pulling packet, .*?producer-74.*?
-Collecting packet, .*?producer-74.*?
-Pulling packet, .*?producer-75.*?
-Collecting packet, .*?producer-75.*?
-Producing packet, .*?producer-76.*?
-Passing through packet, .*?producer-76.*?
-Pushing packet, .*?producer-76.*?
-Producing packet, .*?producer-77.*?
-Passing through packet, .*?producer-77.*?
-Pushing packet, .*?producer-77.*?
-Pulling packet, .*?producer-76.*?
-Collecting packet, .*?producer-76.*?
-Pulling packet, .*?producer-77.*?
-Collecting packet, .*?producer-77.*?
-Producing packet, .*?producer-78.*?
-Passing through packet, .*?producer-78.*?
-Pushing packet, .*?producer-78.*?
-Pulling packet, .*?producer-78.*?
-Collecting packet, .*?producer-78.*?
-Producing packet, .*?producer-79.*?
-Passing through packet, .*?producer-79.*?
-Pushing packet, .*?producer-79.*?
-Pulling packet, .*?producer-79.*?
-Collecting packet, .*?producer-79.*?
-Producing packet, .*?producer-80.*?
-Passing through packet, .*?producer-80.*?
-Pushing packet, .*?producer-80.*?
-Producing packet, .*?producer-81.*?
-Passing through packet, .*?producer-81.*?
-Pushing packet, .*?producer-81.*?
-Producing packet, .*?producer-82.*?
-Passing through packet, .*?producer-82.*?
-Pushing packet, .*?producer-82.*?
-Pulling packet, .*?producer-80.*?
-Collecting packet, .*?producer-80.*?
-Pulling packet, .*?producer-81.*?
-Collecting packet, .*?producer-81.*?
-Producing packet, .*?producer-83.*?
-Passing through packet, .*?producer-83.*?
-Pushing packet, .*?producer-83.*?
-Producing packet, .*?producer-84.*?
-Passing through packet, .*?producer-84.*?
-Pushing packet, .*?producer-84.*?
-Pulling packet, .*?producer-82.*?
-Collecting packet, .*?producer-82.*?
-Pulling packet, .*?producer-83.*?
-Collecting packet, .*?producer-83.*?
-Pulling packet, .*?producer-84.*?
-Collecting packet, .*?producer-84.*?
-Producing packet, .*?producer-85.*?
-Passing through packet, .*?producer-85.*?
-Pushing packet, .*?producer-85.*?
-Pulling packet, .*?producer-85.*?
-Collecting packet, .*?producer-85.*?
-Producing packet, .*?producer-86.*?
-Passing through packet, .*?producer-86.*?
-Pushing packet, .*?producer-86.*?
-Pulling packet, .*?producer-86.*?
-Collecting packet, .*?producer-86.*?
-Producing packet, .*?producer-87.*?
-Passing through packet, .*?producer-87.*?
-Pushing packet, .*?producer-87.*?
+At 0s producer: Producing packet, .*?producer-0.*?
+At 0s dropper: Passing through packet, .*?producer-0.*?
+At 0s queue: Pushing packet, .*?producer-0.*?
+At 0s queue: Pulling packet, .*?producer-0.*?
+At 0s collector: Collecting packet, .*?producer-0.*?
+At 0.795874504566s producer: Producing packet, .*?producer-1.*?
+At 0.795874504566s dropper: Passing through packet, .*?producer-1.*?
+At 0.795874504566s queue: Pushing packet, .*?producer-1.*?
+At 0.898560388484s queue: Pulling packet, .*?producer-1.*?
+At 0.898560388484s collector: Collecting packet, .*?producer-1.*?
+At 2.051805262613s producer: Producing packet, .*?producer-2.*?
+At 2.051805262613s dropper: Passing through packet, .*?producer-2.*?
+At 2.051805262613s queue: Pushing packet, .*?producer-2.*?
+At 2.758164600559s queue: Pulling packet, .*?producer-2.*?
+At 2.758164600559s collector: Collecting packet, .*?producer-2.*?
+At 2.975028394084s producer: Producing packet, .*?producer-3.*?
+At 2.975028394084s dropper: Passing through packet, .*?producer-3.*?
+At 2.975028394084s queue: Pushing packet, .*?producer-3.*?
+At 3.762229534066s producer: Producing packet, .*?producer-4.*?
+At 3.762229534066s dropper: Passing through packet, .*?producer-4.*?
+At 3.762229534066s queue: Pushing packet, .*?producer-4.*?
+At 4.709709936443s queue: Pulling packet, .*?producer-3.*?
+At 4.709709936443s collector: Collecting packet, .*?producer-3.*?
+At 5.260758423113s queue: Pulling packet, .*?producer-4.*?
+At 5.260758423113s collector: Collecting packet, .*?producer-4.*?
+At 5.641193588269s producer: Producing packet, .*?producer-5.*?
+At 5.641193588269s dropper: Passing through packet, .*?producer-5.*?
+At 5.641193588269s queue: Pushing packet, .*?producer-5.*?
+At 6.237764849506s queue: Pulling packet, .*?producer-5.*?
+At 6.237764849506s collector: Collecting packet, .*?producer-5.*?
+At 6.679352888933s producer: Producing packet, .*?producer-6.*?
+At 6.679352888933s dropper: Passing through packet, .*?producer-6.*?
+At 6.679352888933s queue: Pushing packet, .*?producer-6.*?
+At 6.722893013228s queue: Pulling packet, .*?producer-6.*?
+At 6.722893013228s collector: Collecting packet, .*?producer-6.*?
+At 7.254872085816s producer: Producing packet, .*?producer-7.*?
+At 7.254872085816s dropper: Passing through packet, .*?producer-7.*?
+At 7.254872085816s queue: Pushing packet, .*?producer-7.*?
+At 7.254872085816s queue: Pulling packet, .*?producer-7.*?
+At 7.254872085816s collector: Collecting packet, .*?producer-7.*?
+At 9.478396507852s producer: Producing packet, .*?producer-8.*?
+At 9.478396507852s dropper: Passing through packet, .*?producer-8.*?
+At 9.478396507852s queue: Pushing packet, .*?producer-8.*?
+At 9.478396507852s queue: Pulling packet, .*?producer-8.*?
+At 9.478396507852s collector: Collecting packet, .*?producer-8.*?
+At 12.79330878778s producer: Producing packet, .*?producer-9.*?
+At 12.79330878778s dropper: Passing through packet, .*?producer-9.*?
+At 12.79330878778s queue: Pushing packet, .*?producer-9.*?
+At 12.79330878778s queue: Pulling packet, .*?producer-9.*?
+At 12.79330878778s collector: Collecting packet, .*?producer-9.*?
+At 13.276910892728s producer: Producing packet, .*?producer-10.*?
+At 13.276910892728s dropper: Passing through packet, .*?producer-10.*?
+At 13.276910892728s queue: Pushing packet, .*?producer-10.*?
+At 13.442755136031s queue: Pulling packet, .*?producer-10.*?
+At 13.442755136031s collector: Collecting packet, .*?producer-10.*?
+At 14.845807010351s producer: Producing packet, .*?producer-11.*?
+At 14.845807010351s dropper: Passing through packet, .*?producer-11.*?
+At 14.845807010351s queue: Pushing packet, .*?producer-11.*?
+At 15.114966336356s queue: Pulling packet, .*?producer-11.*?
+At 15.114966336356s collector: Collecting packet, .*?producer-11.*?
+At 15.598481123664s producer: Producing packet, .*?producer-12.*?
+At 15.598481123664s dropper: Passing through packet, .*?producer-12.*?
+At 15.598481123664s queue: Pushing packet, .*?producer-12.*?
+At 15.768848903577s queue: Pulling packet, .*?producer-12.*?
+At 15.768848903577s collector: Collecting packet, .*?producer-12.*?
+At 16.437913976564s producer: Producing packet, .*?producer-13.*?
+At 16.437913976564s dropper: Passing through packet, .*?producer-13.*?
+At 16.437913976564s queue: Pushing packet, .*?producer-13.*?
+At 16.437913976564s queue: Pulling packet, .*?producer-13.*?
+At 16.437913976564s collector: Collecting packet, .*?producer-13.*?
+At 19.036168062413s producer: Producing packet, .*?producer-14.*?
+At 19.036168062413s dropper: Passing through packet, .*?producer-14.*?
+At 19.036168062413s queue: Pushing packet, .*?producer-14.*?
+At 19.036168062413s queue: Pulling packet, .*?producer-14.*?
+At 19.036168062413s collector: Collecting packet, .*?producer-14.*?
+At 19.109853417878s producer: Producing packet, .*?producer-15.*?
+At 19.109853417878s dropper: Passing through packet, .*?producer-15.*?
+At 19.109853417878s queue: Pushing packet, .*?producer-15.*?
+At 19.201014444002s producer: Producing packet, .*?producer-16.*?
+At 19.201014444002s dropper: Passing through packet, .*?producer-16.*?
+At 19.201014444002s queue: Pushing packet, .*?producer-16.*?
+At 19.447746058656s queue: Pulling packet, .*?producer-15.*?
+At 19.447746058656s collector: Collecting packet, .*?producer-15.*?
+At 19.468171647055s queue: Pulling packet, .*?producer-16.*?
+At 19.468171647055s collector: Collecting packet, .*?producer-16.*?
+At 20.24562695231s producer: Producing packet, .*?producer-17.*?
+At 20.24562695231s dropper: Passing through packet, .*?producer-17.*?
+At 20.24562695231s queue: Pushing packet, .*?producer-17.*?
+At 20.24562695231s queue: Pulling packet, .*?producer-17.*?
+At 20.24562695231s collector: Collecting packet, .*?producer-17.*?
+At 22.033114615749s producer: Producing packet, .*?producer-18.*?
+At 22.033114615749s dropper: Passing through packet, .*?producer-18.*?
+At 22.033114615749s queue: Pushing packet, .*?producer-18.*?
+At 23.395796880986s queue: Pulling packet, .*?producer-18.*?
+At 23.395796880986s collector: Collecting packet, .*?producer-18.*?
+At 23.538898874386s producer: Producing packet, .*?producer-19.*?
+At 23.538898874386s dropper: Passing through packet, .*?producer-19.*?
+At 23.538898874386s queue: Pushing packet, .*?producer-19.*?
+At 23.547027734651s queue: Pulling packet, .*?producer-19.*?
+At 23.547027734651s collector: Collecting packet, .*?producer-19.*?
+At 25.579213132328s producer: Producing packet, .*?producer-20.*?
+At 25.579213132328s dropper: Passing through packet, .*?producer-20.*?
+At 25.579213132328s queue: Pushing packet, .*?producer-20.*?
+At 25.587919950563s queue: Pulling packet, .*?producer-20.*?
+At 25.587919950563s collector: Collecting packet, .*?producer-20.*?
+At 29.42443500147s producer: Producing packet, .*?producer-21.*?
+At 29.42443500147s dropper: Passing through packet, .*?producer-21.*?
+At 29.42443500147s queue: Pushing packet, .*?producer-21.*?
+At 29.42443500147s queue: Pulling packet, .*?producer-21.*?
+At 29.42443500147s collector: Collecting packet, .*?producer-21.*?
+At 31.029674558532s producer: Producing packet, .*?producer-22.*?
+At 31.029674558532s dropper: Passing through packet, .*?producer-22.*?
+At 31.029674558532s queue: Pushing packet, .*?producer-22.*?
+At 31.038437076363s queue: Pulling packet, .*?producer-22.*?
+At 31.038437076363s collector: Collecting packet, .*?producer-22.*?
+At 31.648604018159s producer: Producing packet, .*?producer-23.*?
+At 31.648604018159s dropper: Passing through packet, .*?producer-23.*?
+At 31.648604018159s queue: Pushing packet, .*?producer-23.*?
+At 31.773401497553s queue: Pulling packet, .*?producer-23.*?
+At 31.773401497553s collector: Collecting packet, .*?producer-23.*?
+At 33.165139992149s producer: Producing packet, .*?producer-24.*?
+At 33.165139992149s dropper: Passing through packet, .*?producer-24.*?
+At 33.165139992149s queue: Pushing packet, .*?producer-24.*?
+At 33.165139992149s queue: Pulling packet, .*?producer-24.*?
+At 33.165139992149s collector: Collecting packet, .*?producer-24.*?
+At 33.291014401587s producer: Producing packet, .*?producer-25.*?
+At 33.291014401587s dropper: Passing through packet, .*?producer-25.*?
+At 33.291014401587s queue: Pushing packet, .*?producer-25.*?
+At 34.312446275936s producer: Producing packet, .*?producer-26.*?
+At 34.312446275936s dropper: Passing through packet, .*?producer-26.*?
+At 34.312446275936s queue: Pushing packet, .*?producer-26.*?
+At 34.440367694373s queue: Pulling packet, .*?producer-25.*?
+At 34.440367694373s collector: Collecting packet, .*?producer-25.*?
+At 34.595097374873s queue: Pulling packet, .*?producer-26.*?
+At 34.595097374873s collector: Collecting packet, .*?producer-26.*?
+At 35.184767470978s producer: Producing packet, .*?producer-27.*?
+At 35.184767470978s dropper: Passing through packet, .*?producer-27.*?
+At 35.184767470978s queue: Pushing packet, .*?producer-27.*?
+At 35.36593203334s queue: Pulling packet, .*?producer-27.*?
+At 35.36593203334s collector: Collecting packet, .*?producer-27.*?
+At 38.079187948965s producer: Producing packet, .*?producer-28.*?
+At 38.079187948965s dropper: Passing through packet, .*?producer-28.*?
+At 38.079187948965s queue: Pushing packet, .*?producer-28.*?
+At 38.079187948965s queue: Pulling packet, .*?producer-28.*?
+At 38.079187948965s collector: Collecting packet, .*?producer-28.*?
+At 38.817015240721s producer: Producing packet, .*?producer-29.*?
+At 38.817015240721s dropper: Passing through packet, .*?producer-29.*?
+At 38.817015240721s queue: Pushing packet, .*?producer-29.*?
+At 38.817015240721s queue: Pulling packet, .*?producer-29.*?
+At 38.817015240721s collector: Collecting packet, .*?producer-29.*?
+At 39.352580960949s producer: Producing packet, .*?producer-30.*?
+At 39.352580960949s dropper: Passing through packet, .*?producer-30.*?
+At 39.352580960949s queue: Pushing packet, .*?producer-30.*?
+At 39.458709942752s queue: Pulling packet, .*?producer-30.*?
+At 39.458709942752s collector: Collecting packet, .*?producer-30.*?
+At 39.659861313102s producer: Producing packet, .*?producer-31.*?
+At 39.659861313102s dropper: Passing through packet, .*?producer-31.*?
+At 39.659861313102s queue: Pushing packet, .*?producer-31.*?
+At 39.664913224782s queue: Pulling packet, .*?producer-31.*?
+At 39.664913224782s collector: Collecting packet, .*?producer-31.*?
+At 41.148116138854s producer: Producing packet, .*?producer-32.*?
+At 41.148116138854s dropper: Passing through packet, .*?producer-32.*?
+At 41.148116138854s queue: Pushing packet, .*?producer-32.*?
+At 41.148116138854s queue: Pulling packet, .*?producer-32.*?
+At 41.148116138854s collector: Collecting packet, .*?producer-32.*?
+At 41.757198562037s producer: Producing packet, .*?producer-33.*?
+At 41.757198562037s dropper: Passing through packet, .*?producer-33.*?
+At 41.757198562037s queue: Pushing packet, .*?producer-33.*?
+At 41.757198562037s queue: Pulling packet, .*?producer-33.*?
+At 41.757198562037s collector: Collecting packet, .*?producer-33.*?
+At 42.597533267649s producer: Producing packet, .*?producer-34.*?
+At 42.597533267649s dropper: Passing through packet, .*?producer-34.*?
+At 42.597533267649s queue: Pushing packet, .*?producer-34.*?
+At 42.597533267649s queue: Pulling packet, .*?producer-34.*?
+At 42.597533267649s collector: Collecting packet, .*?producer-34.*?
+At 42.61650183685s producer: Producing packet, .*?producer-35.*?
+At 42.61650183685s dropper: Passing through packet, .*?producer-35.*?
+At 42.61650183685s queue: Pushing packet, .*?producer-35.*?
+At 42.989304078326s queue: Pulling packet, .*?producer-35.*?
+At 42.989304078326s collector: Collecting packet, .*?producer-35.*?
+At 43.577882775916s producer: Producing packet, .*?producer-36.*?
+At 43.577882775916s dropper: Passing through packet, .*?producer-36.*?
+At 43.577882775916s queue: Pushing packet, .*?producer-36.*?
+At 43.577882775916s queue: Pulling packet, .*?producer-36.*?
+At 43.577882775916s collector: Collecting packet, .*?producer-36.*?
+At 44.524879453091s producer: Producing packet, .*?producer-37.*?
+At 44.524879453091s dropper: Passing through packet, .*?producer-37.*?
+At 44.524879453091s queue: Pushing packet, .*?producer-37.*?
+At 44.524879453091s queue: Pulling packet, .*?producer-37.*?
+At 44.524879453091s collector: Collecting packet, .*?producer-37.*?
+At 45.484427430459s producer: Producing packet, .*?producer-38.*?
+At 45.484427430459s dropper: Passing through packet, .*?producer-38.*?
+At 45.484427430459s queue: Pushing packet, .*?producer-38.*?
+At 45.484427430459s queue: Pulling packet, .*?producer-38.*?
+At 45.484427430459s collector: Collecting packet, .*?producer-38.*?
+At 48.362342451737s producer: Producing packet, .*?producer-39.*?
+At 48.362342451737s dropper: Passing through packet, .*?producer-39.*?
+At 48.362342451737s queue: Pushing packet, .*?producer-39.*?
+At 48.362342451737s queue: Pulling packet, .*?producer-39.*?
+At 48.362342451737s collector: Collecting packet, .*?producer-39.*?
+At 49.507481406437s producer: Producing packet, .*?producer-40.*?
+At 49.507481406437s dropper: Passing through packet, .*?producer-40.*?
+At 49.507481406437s queue: Pushing packet, .*?producer-40.*?
+At 49.507481406437s queue: Pulling packet, .*?producer-40.*?
+At 49.507481406437s collector: Collecting packet, .*?producer-40.*?
+At 49.952999901488s producer: Producing packet, .*?producer-41.*?
+At 49.952999901488s dropper: Passing through packet, .*?producer-41.*?
+At 49.952999901488s queue: Pushing packet, .*?producer-41.*?
+At 50.456975989934s queue: Pulling packet, .*?producer-41.*?
+At 50.456975989934s collector: Collecting packet, .*?producer-41.*?
+At 50.527532308229s producer: Producing packet, .*?producer-42.*?
+At 50.527532308229s dropper: Passing through packet, .*?producer-42.*?
+At 50.527532308229s queue: Pushing packet, .*?producer-42.*?
+At 51.723640107686s producer: Producing packet, .*?producer-43.*?
+At 51.723640107686s dropper: Passing through packet, .*?producer-43.*?
+At 51.723640107686s queue: Pushing packet, .*?producer-43.*?
+At 51.828201333461s producer: Producing packet, .*?producer-44.*?
+At 51.828201333461s dropper: Passing through packet, .*?producer-44.*?
+At 51.828201333461s queue: Pushing packet, .*?producer-44.*?
+At 51.890316623927s producer: Producing packet, .*?producer-45.*?
+At 51.890316623927s dropper: Queue length >= capacity, .*?
+At 51.890316623927s dropper: Filtering out packet, .*?producer-45.*?
+At 52.783327051628s queue: Pulling packet, .*?producer-42.*?
+At 52.783327051628s collector: Collecting packet, .*?producer-42.*?
+At 52.989229091478s producer: Producing packet, .*?producer-46.*?
+At 52.989229091478s dropper: Passing through packet, .*?producer-46.*?
+At 52.989229091478s queue: Pushing packet, .*?producer-46.*?
+At 53.842161183116s queue: Pulling packet, .*?producer-43.*?
+At 53.842161183116s collector: Collecting packet, .*?producer-43.*?
+At 54.078367889199s queue: Pulling packet, .*?producer-44.*?
+At 54.078367889199s collector: Collecting packet, .*?producer-44.*?
+At 54.099826537165s producer: Producing packet, .*?producer-47.*?
+At 54.099826537165s dropper: Passing through packet, .*?producer-47.*?
+At 54.099826537165s queue: Pushing packet, .*?producer-47.*?
+At 54.237855225593s producer: Producing packet, .*?producer-48.*?
+At 54.237855225593s dropper: Passing through packet, .*?producer-48.*?
+At 54.237855225593s queue: Pushing packet, .*?producer-48.*?
+At 54.52177191782s queue: Pulling packet, .*?producer-46.*?
+At 54.52177191782s collector: Collecting packet, .*?producer-46.*?
+At 54.616817189876s producer: Producing packet, .*?producer-49.*?
+At 54.616817189876s dropper: Passing through packet, .*?producer-49.*?
+At 54.616817189876s queue: Pushing packet, .*?producer-49.*?
+At 54.973873978045s queue: Pulling packet, .*?producer-47.*?
+At 54.973873978045s collector: Collecting packet, .*?producer-47.*?
+At 55.00992974718s producer: Producing packet, .*?producer-50.*?
+At 55.00992974718s dropper: Passing through packet, .*?producer-50.*?
+At 55.00992974718s queue: Pushing packet, .*?producer-50.*?
+At 55.013057134458s queue: Pulling packet, .*?producer-48.*?
+At 55.013057134458s collector: Collecting packet, .*?producer-48.*?
+At 55.587254057987s producer: Producing packet, .*?producer-51.*?
+At 55.587254057987s dropper: Passing through packet, .*?producer-51.*?
+At 55.587254057987s queue: Pushing packet, .*?producer-51.*?
+At 58.780200700041s producer: Producing packet, .*?producer-52.*?
+At 58.780200700041s dropper: Queue length >= capacity, .*?
+At 58.780200700041s dropper: Filtering out packet, .*?producer-52.*?
+At 59.467553980634s queue: Pulling packet, .*?producer-49.*?
+At 59.467553980634s collector: Collecting packet, .*?producer-49.*?
+At 59.70185549941s queue: Pulling packet, .*?producer-50.*?
+At 59.70185549941s collector: Collecting packet, .*?producer-50.*?
+At 59.838027113393s producer: Producing packet, .*?producer-53.*?
+At 59.838027113393s dropper: Passing through packet, .*?producer-53.*?
+At 59.838027113393s queue: Pushing packet, .*?producer-53.*?
+At 60.013940658819s producer: Producing packet, .*?producer-54.*?
+At 60.013940658819s dropper: Passing through packet, .*?producer-54.*?
+At 60.013940658819s queue: Pushing packet, .*?producer-54.*?
+At 60.70987474483s queue: Pulling packet, .*?producer-51.*?
+At 60.70987474483s collector: Collecting packet, .*?producer-51.*?
+At 61.001955278097s queue: Pulling packet, .*?producer-53.*?
+At 61.001955278097s collector: Collecting packet, .*?producer-53.*?
+At 61.072683373913s producer: Producing packet, .*?producer-55.*?
+At 61.072683373913s dropper: Passing through packet, .*?producer-55.*?
+At 61.072683373913s queue: Pushing packet, .*?producer-55.*?
+At 61.53701995518s queue: Pulling packet, .*?producer-54.*?
+At 61.53701995518s collector: Collecting packet, .*?producer-54.*?
+At 61.700624954904s producer: Producing packet, .*?producer-56.*?
+At 61.700624954904s dropper: Passing through packet, .*?producer-56.*?
+At 61.700624954904s queue: Pushing packet, .*?producer-56.*?
+At 61.817296963659s queue: Pulling packet, .*?producer-55.*?
+At 61.817296963659s collector: Collecting packet, .*?producer-55.*?
+At 62.229798193581s queue: Pulling packet, .*?producer-56.*?
+At 62.229798193581s collector: Collecting packet, .*?producer-56.*?
+At 62.677489028975s producer: Producing packet, .*?producer-57.*?
+At 62.677489028975s dropper: Passing through packet, .*?producer-57.*?
+At 62.677489028975s queue: Pushing packet, .*?producer-57.*?
+At 62.677489028975s queue: Pulling packet, .*?producer-57.*?
+At 62.677489028975s collector: Collecting packet, .*?producer-57.*?
+At 63.800657330508s producer: Producing packet, .*?producer-58.*?
+At 63.800657330508s dropper: Passing through packet, .*?producer-58.*?
+At 63.800657330508s queue: Pushing packet, .*?producer-58.*?
+At 63.800657330508s queue: Pulling packet, .*?producer-58.*?
+At 63.800657330508s collector: Collecting packet, .*?producer-58.*?
+At 64.182213173882s producer: Producing packet, .*?producer-59.*?
+At 64.182213173882s dropper: Passing through packet, .*?producer-59.*?
+At 64.182213173882s queue: Pushing packet, .*?producer-59.*?
+At 64.182213173882s queue: Pulling packet, .*?producer-59.*?
+At 64.182213173882s collector: Collecting packet, .*?producer-59.*?
+At 65.688848507155s producer: Producing packet, .*?producer-60.*?
+At 65.688848507155s dropper: Passing through packet, .*?producer-60.*?
+At 65.688848507155s queue: Pushing packet, .*?producer-60.*?
+At 65.688848507155s queue: Pulling packet, .*?producer-60.*?
+At 65.688848507155s collector: Collecting packet, .*?producer-60.*?
+At 68.676038399007s producer: Producing packet, .*?producer-61.*?
+At 68.676038399007s dropper: Passing through packet, .*?producer-61.*?
+At 68.676038399007s queue: Pushing packet, .*?producer-61.*?
+At 68.676038399007s queue: Pulling packet, .*?producer-61.*?
+At 68.676038399007s collector: Collecting packet, .*?producer-61.*?
+At 69.762307779885s producer: Producing packet, .*?producer-62.*?
+At 69.762307779885s dropper: Passing through packet, .*?producer-62.*?
+At 69.762307779885s queue: Pushing packet, .*?producer-62.*?
+At 69.775972358316s producer: Producing packet, .*?producer-63.*?
+At 69.775972358316s dropper: Passing through packet, .*?producer-63.*?
+At 69.775972358316s queue: Pushing packet, .*?producer-63.*?
+At 69.878117239841s producer: Producing packet, .*?producer-64.*?
+At 69.878117239841s dropper: Passing through packet, .*?producer-64.*?
+At 69.878117239841s queue: Pushing packet, .*?producer-64.*?
+At 70.396370056724s queue: Pulling packet, .*?producer-62.*?
+At 70.396370056724s collector: Collecting packet, .*?producer-62.*?
+At 70.853219173997s producer: Producing packet, .*?producer-65.*?
+At 70.853219173997s dropper: Passing through packet, .*?producer-65.*?
+At 70.853219173997s queue: Pushing packet, .*?producer-65.*?
+At 70.954253949306s producer: Producing packet, .*?producer-66.*?
+At 70.954253949306s dropper: Queue length >= capacity, .*?
+At 70.954253949306s dropper: Filtering out packet, .*?producer-66.*?
+At 71.516184422478s queue: Pulling packet, .*?producer-63.*?
+At 71.516184422478s collector: Collecting packet, .*?producer-63.*?
+At 73.62150572327s queue: Pulling packet, .*?producer-64.*?
+At 73.62150572327s collector: Collecting packet, .*?producer-64.*?
+At 74.253842319666s queue: Pulling packet, .*?producer-65.*?
+At 74.253842319666s collector: Collecting packet, .*?producer-65.*?
+At 74.70328540889s producer: Producing packet, .*?producer-67.*?
+At 74.70328540889s dropper: Passing through packet, .*?producer-67.*?
+At 74.70328540889s queue: Pushing packet, .*?producer-67.*?
+At 74.966425912999s queue: Pulling packet, .*?producer-67.*?
+At 74.966425912999s collector: Collecting packet, .*?producer-67.*?
+At 78.465212693394s producer: Producing packet, .*?producer-68.*?
+At 78.465212693394s dropper: Passing through packet, .*?producer-68.*?
+At 78.465212693394s queue: Pushing packet, .*?producer-68.*?
+At 78.465212693394s queue: Pulling packet, .*?producer-68.*?
+At 78.465212693394s collector: Collecting packet, .*?producer-68.*?
+At 79.393691190295s producer: Producing packet, .*?producer-69.*?
+At 79.393691190295s dropper: Passing through packet, .*?producer-69.*?
+At 79.393691190295s queue: Pushing packet, .*?producer-69.*?
+At 79.393691190295s queue: Pulling packet, .*?producer-69.*?
+At 79.393691190295s collector: Collecting packet, .*?producer-69.*?
+At 80.737936462447s producer: Producing packet, .*?producer-70.*?
+At 80.737936462447s dropper: Passing through packet, .*?producer-70.*?
+At 80.737936462447s queue: Pushing packet, .*?producer-70.*?
+At 80.737936462447s queue: Pulling packet, .*?producer-70.*?
+At 80.737936462447s collector: Collecting packet, .*?producer-70.*?
+At 80.777912761505s producer: Producing packet, .*?producer-71.*?
+At 80.777912761505s dropper: Passing through packet, .*?producer-71.*?
+At 80.777912761505s queue: Pushing packet, .*?producer-71.*?
+At 81.110323002469s producer: Producing packet, .*?producer-72.*?
+At 81.110323002469s dropper: Passing through packet, .*?producer-72.*?
+At 81.110323002469s queue: Pushing packet, .*?producer-72.*?
+At 81.320814851314s queue: Pulling packet, .*?producer-71.*?
+At 81.320814851314s collector: Collecting packet, .*?producer-71.*?
+At 81.448871616625s queue: Pulling packet, .*?producer-72.*?
+At 81.448871616625s collector: Collecting packet, .*?producer-72.*?
+At 85.001893125314s producer: Producing packet, .*?producer-73.*?
+At 85.001893125314s dropper: Passing through packet, .*?producer-73.*?
+At 85.001893125314s queue: Pushing packet, .*?producer-73.*?
+At 85.001893125314s queue: Pulling packet, .*?producer-73.*?
+At 85.001893125314s collector: Collecting packet, .*?producer-73.*?
+At 85.353069214695s producer: Producing packet, .*?producer-74.*?
+At 85.353069214695s dropper: Passing through packet, .*?producer-74.*?
+At 85.353069214695s queue: Pushing packet, .*?producer-74.*?
+At 85.47945785112s producer: Producing packet, .*?producer-75.*?
+At 85.47945785112s dropper: Passing through packet, .*?producer-75.*?
+At 85.47945785112s queue: Pushing packet, .*?producer-75.*?
+At 85.657539409678s queue: Pulling packet, .*?producer-74.*?
+At 85.657539409678s collector: Collecting packet, .*?producer-74.*?
+At 86.04024035854s queue: Pulling packet, .*?producer-75.*?
+At 86.04024035854s collector: Collecting packet, .*?producer-75.*?
+At 86.646331377669s producer: Producing packet, .*?producer-76.*?
+At 86.646331377669s dropper: Passing through packet, .*?producer-76.*?
+At 86.646331377669s queue: Pushing packet, .*?producer-76.*?
+At 87.181215753426s producer: Producing packet, .*?producer-77.*?
+At 87.181215753426s dropper: Passing through packet, .*?producer-77.*?
+At 87.181215753426s queue: Pushing packet, .*?producer-77.*?
+At 88.164477555542s queue: Pulling packet, .*?producer-76.*?
+At 88.164477555542s collector: Collecting packet, .*?producer-76.*?
+At 88.230774957024s queue: Pulling packet, .*?producer-77.*?
+At 88.230774957024s collector: Collecting packet, .*?producer-77.*?
+At 89.685127536511s producer: Producing packet, .*?producer-78.*?
+At 89.685127536511s dropper: Passing through packet, .*?producer-78.*?
+At 89.685127536511s queue: Pushing packet, .*?producer-78.*?
+At 89.685127536511s queue: Pulling packet, .*?producer-78.*?
+At 89.685127536511s collector: Collecting packet, .*?producer-78.*?
+At 90.864317063576s producer: Producing packet, .*?producer-79.*?
+At 90.864317063576s dropper: Passing through packet, .*?producer-79.*?
+At 90.864317063576s queue: Pushing packet, .*?producer-79.*?
+At 90.864317063576s queue: Pulling packet, .*?producer-79.*?
+At 90.864317063576s collector: Collecting packet, .*?producer-79.*?
+At 91.700414595546s producer: Producing packet, .*?producer-80.*?
+At 91.700414595546s dropper: Passing through packet, .*?producer-80.*?
+At 91.700414595546s queue: Pushing packet, .*?producer-80.*?
+At 92.008829435644s producer: Producing packet, .*?producer-81.*?
+At 92.008829435644s dropper: Passing through packet, .*?producer-81.*?
+At 92.008829435644s queue: Pushing packet, .*?producer-81.*?
+At 92.720077372861s producer: Producing packet, .*?producer-82.*?
+At 92.720077372861s dropper: Passing through packet, .*?producer-82.*?
+At 92.720077372861s queue: Pushing packet, .*?producer-82.*?
+At 92.867557586083s queue: Pulling packet, .*?producer-80.*?
+At 92.867557586083s collector: Collecting packet, .*?producer-80.*?
+At 92.966207894501s queue: Pulling packet, .*?producer-81.*?
+At 92.966207894501s collector: Collecting packet, .*?producer-81.*?
+At 93.460836323308s producer: Producing packet, .*?producer-83.*?
+At 93.460836323308s dropper: Passing through packet, .*?producer-83.*?
+At 93.460836323308s queue: Pushing packet, .*?producer-83.*?
+At 94.318731964382s producer: Producing packet, .*?producer-84.*?
+At 94.318731964382s dropper: Passing through packet, .*?producer-84.*?
+At 94.318731964382s queue: Pushing packet, .*?producer-84.*?
+At 95.50651240246s queue: Pulling packet, .*?producer-82.*?
+At 95.50651240246s collector: Collecting packet, .*?producer-82.*?
+At 95.890072616559s queue: Pulling packet, .*?producer-83.*?
+At 95.890072616559s collector: Collecting packet, .*?producer-83.*?
+At 95.899473367223s queue: Pulling packet, .*?producer-84.*?
+At 95.899473367223s collector: Collecting packet, .*?producer-84.*?
+At 96.967987893058s producer: Producing packet, .*?producer-85.*?
+At 96.967987893058s dropper: Passing through packet, .*?producer-85.*?
+At 96.967987893058s queue: Pushing packet, .*?producer-85.*?
+At 97.000319277314s queue: Pulling packet, .*?producer-85.*?
+At 97.000319277314s collector: Collecting packet, .*?producer-85.*?
+At 98.81531554406s producer: Producing packet, .*?producer-86.*?
+At 98.81531554406s dropper: Passing through packet, .*?producer-86.*?
+At 98.81531554406s queue: Pushing packet, .*?producer-86.*?
+At 98.81531554406s queue: Pulling packet, .*?producer-86.*?
+At 98.81531554406s collector: Collecting packet, .*?producer-86.*?
+At 99.857096198239s producer: Producing packet, .*?producer-87.*?
+At 99.857096198239s dropper: Passing through packet, .*?producer-87.*?
+At 99.857096198239s queue: Pushing packet, .*?producer-87.*?
+
+<!> Simulation time limit reached -- at t=100s

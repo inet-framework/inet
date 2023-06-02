@@ -45,49 +45,56 @@ cmdenv-log-prefix = "At %ts %N: "
 %subst: /\nRunning simulation\.\.\.\n//
 
 %contains-regex: stdout
-Producing packet, .*?producer-0.*?
-Forwarding original packet, .*?producer-0.*?
-Consuming packet, .*?producer-0.*?
-Producing packet, .*?producer-1.*?
-Forwarding duplicate packet, .*?producer-1.*?
-Consuming packet, .*?producer-1.*?
-Forwarding original packet, .*?producer-1.*?
-Consuming packet, .*?producer-1.*?
-Producing packet, .*?producer-2.*?
-Forwarding duplicate packet, .*?producer-2.*?
-Consuming packet, .*?producer-2.*?
-Forwarding original packet, .*?producer-2.*?
-Consuming packet, .*?producer-2.*?
-Producing packet, .*?producer-3.*?
-Forwarding original packet, .*?producer-3.*?
-Consuming packet, .*?producer-3.*?
-Producing packet, .*?producer-4.*?
-Forwarding duplicate packet, .*?producer-4.*?
-Consuming packet, .*?producer-4.*?
-Forwarding original packet, .*?producer-4.*?
-Consuming packet, .*?producer-4.*?
-Producing packet, .*?producer-5.*?
-Forwarding duplicate packet, .*?producer-5.*?
-Consuming packet, .*?producer-5.*?
-Forwarding original packet, .*?producer-5.*?
-Consuming packet, .*?producer-5.*?
-Producing packet, .*?producer-6.*?
-Forwarding duplicate packet, .*?producer-6.*?
-Consuming packet, .*?producer-6.*?
-Forwarding original packet, .*?producer-6.*?
-Consuming packet, .*?producer-6.*?
-Producing packet, .*?producer-7.*?
-Forwarding duplicate packet, .*?producer-7.*?
-Consuming packet, .*?producer-7.*?
-Forwarding original packet, .*?producer-7.*?
-Consuming packet, .*?producer-7.*?
-Producing packet, .*?producer-8.*?
-Forwarding duplicate packet, .*?producer-8.*?
-Consuming packet, .*?producer-8.*?
-Forwarding original packet, .*?producer-8.*?
-Consuming packet, .*?producer-8.*?
-Producing packet, .*?producer-9.*?
-Forwarding duplicate packet, .*?producer-9.*?
-Consuming packet, .*?producer-9.*?
-Forwarding original packet, .*?producer-9.*?
-Consuming packet, .*?producer-9.*?
+At 0s producer: Producing packet, .*?producer-0.*?
+At 0s duplicator: Forwarding original packet, .*?producer-0.*?
+At 0s consumer: Consuming packet, .*?producer-0.*?
+At 1s producer: Producing packet, .*?producer-1.*?
+At 1s duplicator: Forwarding duplicate packet, .*?producer-1.*?
+At 1s consumer: Consuming packet, .*?producer-1.*?
+At 1s duplicator: Forwarding original packet, .*?producer-1.*?
+At 1s consumer: Consuming packet, .*?producer-1.*?
+At 2s producer: Producing packet, .*?producer-2.*?
+At 2s duplicator: Forwarding duplicate packet, .*?producer-2.*?
+At 2s consumer: Consuming packet, .*?producer-2.*?
+At 2s duplicator: Forwarding original packet, .*?producer-2.*?
+At 2s consumer: Consuming packet, .*?producer-2.*?
+At 3s producer: Producing packet, .*?producer-3.*?
+At 3s duplicator: Forwarding original packet, .*?producer-3.*?
+At 3s consumer: Consuming packet, .*?producer-3.*?
+At 4s producer: Producing packet, .*?producer-4.*?
+At 4s duplicator: Forwarding duplicate packet, .*?producer-4.*?
+At 4s consumer: Consuming packet, .*?producer-4.*?
+At 4s duplicator: Forwarding original packet, .*?producer-4.*?
+At 4s consumer: Consuming packet, .*?producer-4.*?
+At 5s producer: Producing packet, .*?producer-5.*?
+At 5s duplicator: Forwarding duplicate packet, .*?producer-5.*?
+At 5s consumer: Consuming packet, .*?producer-5.*?
+At 5s duplicator: Forwarding original packet, .*?producer-5.*?
+At 5s consumer: Consuming packet, .*?producer-5.*?
+At 6s producer: Producing packet, .*?producer-6.*?
+At 6s duplicator: Forwarding duplicate packet, .*?producer-6.*?
+At 6s consumer: Consuming packet, .*?producer-6.*?
+At 6s duplicator: Forwarding original packet, .*?producer-6.*?
+At 6s consumer: Consuming packet, .*?producer-6.*?
+At 7s producer: Producing packet, .*?producer-7.*?
+At 7s duplicator: Forwarding duplicate packet, .*?producer-7.*?
+At 7s consumer: Consuming packet, .*?producer-7.*?
+At 7s duplicator: Forwarding original packet, .*?producer-7.*?
+At 7s consumer: Consuming packet, .*?producer-7.*?
+At 8s producer: Producing packet, .*?producer-8.*?
+At 8s duplicator: Forwarding duplicate packet, .*?producer-8.*?
+At 8s consumer: Consuming packet, .*?producer-8.*?
+At 8s duplicator: Forwarding original packet, .*?producer-8.*?
+At 8s consumer: Consuming packet, .*?producer-8.*?
+At 9s producer: Producing packet, .*?producer-9.*?
+At 9s duplicator: Forwarding duplicate packet, .*?producer-9.*?
+At 9s consumer: Consuming packet, .*?producer-9.*?
+At 9s duplicator: Forwarding original packet, .*?producer-9.*?
+At 9s consumer: Consuming packet, .*?producer-9.*?
+At 10s producer: Producing packet, .*?producer-10.*?
+At 10s duplicator: Forwarding duplicate packet, .*?producer-10.*?
+At 10s consumer: Consuming packet, .*?producer-10.*?
+At 10s duplicator: Forwarding original packet, .*?producer-10.*?
+At 10s consumer: Consuming packet, .*?producer-10.*?
+
+<!> Simulation time limit reached -- at t=10s
