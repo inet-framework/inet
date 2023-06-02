@@ -1,0 +1,284 @@
+Measurement
+===========
+
+- data:
+  - time [s]
+    - residence time
+    - queueing time
+    - processing time
+    - delaying time
+    - transmission time
+    - propagation time
+    - end-to-end delay
+    - life time
+  - jitter [s]
+    - difference in delay between two subsequent packets
+    - difference to mean
+    - packet delay variation
+  - data rate or throughput [bps]
+    - incoming
+    - outgoing
+    - dropped
+  - utilization [%]
+  - counts
+    - packet count [pk]
+    - data count [b]
+  - credits [cr]
+  - tokens [tk]
+
+- where:
+  - network
+  - subnetwork
+  - network node
+  - network interface
+  - channel
+  - application
+  - protocol
+  - module
+
+- granularity:
+  - per bit
+  - per region
+  - per packet
+
+- filtering:
+  - all data
+  - data of only specific flows
+  - data of arbitrary conditions
+
+- aggregation:
+  - min, max, mean, sum, stddev, bins, etc.
+
+- recording:
+  - scalars (one of min, max, mean, sum, etc.)
+  - statistics (all of min, max, mean, sum, stddev, etc.)
+  - histograms (statistics + bins)
+  - vectors (values over time)
+
+Statistics
+==========
+
+- for the network: @network
+  - packet count
+    once
+  - data count
+    once
+
+- for each subnetwork: @subnetwork
+  - packet count
+    once
+  - data count
+    once
+
+- for each network node: @network-node
+  - residence time
+    per packet
+  - packet count
+    once
+  - data count
+    once
+
+- for each network interface: @network-interface
+  - packet count
+    once
+  - data count
+    once
+  - utilization
+    periodically
+  - throughput
+    periodically
+  - transmission time
+    per packet
+  - propagation time
+    once
+
+- for each application: @application
+  - end-to-end delay (elapsed time)
+    per packet
+  - jitter
+    per packet
+
+- for each protocol: @protocol
+  - packet count
+    once
+  - data count
+    once
+
+- for each packet source:
+  - data rate
+    periodically
+
+- for each packet sink:
+  - data rate
+    periodically
+
+- for each packet flow:
+  - incoming traffic
+    periodically
+  - outgoing traffic
+    periodically
+
+- for each packet filter:
+  - incoming traffic
+    periodically
+  - dropped traffic
+    periodically
+  - outgoing traffic
+    periodically
+
+- for each packet shaper:
+  - incoming traffic
+    periodically
+  - outgoing traffic
+    periodically
+
+- for each packet queue:
+  - queue length
+    per packet
+  - queueing time
+    per packet
+  - enqueued traffic
+    periodically
+  - dequeued traffic
+    periodically
+
+- for each packet delayer:
+  - delaying time
+    per packet
+  - input traffic
+    periodically
+  - output traffic
+    periodically
+
+- for each packet processor:
+  - processing time
+    per packet
+  - input traffic
+    periodically
+  - output traffic
+    periodically
+
+- for each flow:
+  - life time
+    per bit/region/packet
+  - end-to-end delay (elapsed time)
+    per bit/region/packet
+  - total queueing time
+    per bit/region/packet
+  - total processing time
+    per bit/region/packet
+  - total delaying time
+    per bit/region/packet
+  - total transmission time
+    per bit/region/packet
+  - total propagation time
+    per bit/region/packet
+  - jitter (difference between end-to-end delay and mean end-to-end delay, alternatively difference between subsequent end-to-end delays: packet delay variation)
+    per packet
+  - input traffic
+    periodically
+  - output traffic
+    periodically
+
+- for each component along the flow path; flow specific statistics:
+  - the network
+  - subnetworks
+  - network nodes
+  - network interfaces
+  - applications
+  - sources
+  - sinks
+  - flows
+  - filters
+  - shapers
+  - queues
+  - delayers
+  - processors
+
+Implementation
+==============
+
+- all statistics should be available from the browse data page out of the box
+- all statistics should be recorded as vector and histogram by default
+- all statistics which are recorded periodically should have an interval parameter in the module
+- how do we know what the interval parameter should be? how does the user override the default value? in the module
+- perhaps use flow name parameter in applications when generating packets?
+- extend filters, queues, etc. to flow specific statistics?
+- extend applications to also flow specific statistics?
+- how to implement this using @signal and @statistic properties and specific filters?
+
+orthogonal dimensions of statistics recording:
+ - data: queueingTime/residenceTime/etc.
+ - granularity: bit/region/packet
+ - filtering: all/flow/perdicate
+ - aggregation: mean/min/max/sum/etc.
+ - form: scalar/statistics/histogram/vector
+
+possible filter values:
+ - packet
+ - packet, flow
+ - packet, region
+ - packet, region, flow
+ - number, weight
+ - number
+
+example: vector(meanPerGroup(packetGranularity(residenceTime(demuxFlow(packetHappened)))))
+example: vector(dropWeight(regionGranularity(residenceTime(demuxFlow(packetHappened)))))
+example: vector(weightTimes(bitGranularity(residenceTime(demuxFlow(packetHappened)))))
+example: vector(meanPerGroup(packetGranularity(packetHappened)))
+
+example: vector(meanPerGroup(residenceTime(demuxFlow(packetHappened))))
+example: vector(dropWeight(residenceTime(demuxFlow(packetHappened))))
+example: vector(weightTimes(residenceTime(demuxFlow(packetHappened))))
+example: vector(meanPerGroup(residenceTime(packetHappened)))
+
+example: vector(jitter(meanPerGroup(residenceTime(demuxFlow(packetHappened)))))
+
+flow: unique flows in the packet
+  object=packet -> object=packet, details=flow
+
+demux: duplicates chain for unique names
+  object=any, details=name -> object=any, details=name
+
+packetLength:
+  object=packet -> object=number
+  object=packet, details=flow -> object=number, details=flow
+
+throughput:
+  object=number -> object=number
+  object=packet -> object=number
+
+queueingTime:
+  object=packet -> object={packet, region, number}
+  object=packet, details=flow -> object={packet, region, number}, details=flow
+
+residenceTime:
+  object=packet -> object={number, weight}, details=packet
+  object=packet, details=flow -> object={number, weight}, details=packet
+
+  object=packet -> object={packet, region, number}
+  object=packet, details=flow -> object={packet, region, number}, details=flow
+
+meanPerGroup:
+  object=number, details=identifier -> object=number, object=identifier
+  object={number, weight}, details=identifier -> object=number, object=identifier
+
+dropWeight:
+  object={number, weight}, details=identifier -> object=number
+
+packetGranularity = meanPerGroup:
+  object={packet, region, number} -> object={number, weight}, details=packet
+  object={packet, region, number}, details=flow -> object={number, weight}, details=packet
+
+regionGranularity = dropWeight:
+  object={packet, region, number} -> object=number
+  object={packet, region, number} -> object={number, weight} # postponed
+  object={packet, region, number}, details=flow -> object=number, details=flow
+  object={packet, region, number}, details=flow -> object={number, weight}, details=flow # postponed
+
+bitGranularity = weightTimes:
+  object={packet, region, number} -> object=number repeated region times
+  object={packet, region, number} -> object={number, weight} # postponed
+
+weightTimes:
+  object={number, weight} -> object=number repeated weight times
