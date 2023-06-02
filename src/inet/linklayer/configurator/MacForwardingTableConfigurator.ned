@@ -22,6 +22,8 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 simple MacForwardingTableConfigurator like INetworkConfigurator
 {
     parameters:
+        bool addUnicastRules = default(true);
+        object configuration = default([]);
         @display("i=block/cogwheel");
 }
 
