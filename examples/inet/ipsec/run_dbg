@@ -1,2 +1,0 @@
-#!/bin/sh
-DBG=_dbg ../../../src/run_inet "$@"
