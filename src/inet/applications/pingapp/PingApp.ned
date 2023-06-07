@@ -47,7 +47,7 @@ import inet.applications.contract.IApp;
 simple PingApp like IApp
 {
     parameters:
-        string destAddr = default(""); // destination address(es), separated by spaces, "*" means all IPv4/IPv6 interfaces in entire simulation
+        object destAddr = default([]); // destination address(es), "*" means all IPv4/IPv6 interfaces in entire simulation
         string srcAddr = default(""); // source address (useful with multi-homing)
         int packetSize @unit(B) = default(56B); // of ping payload, in bytes
         volatile double sendInterval @unit(s) = default(1s); // time to wait between pings (can be random)

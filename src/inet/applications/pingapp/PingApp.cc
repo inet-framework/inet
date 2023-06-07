@@ -10,6 +10,7 @@
 #include <iostream>
 
 #include "inet/applications/pingapp/PingApp_m.h"
+#include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolGroup.h"
@@ -123,16 +124,13 @@ void PingApp::initialize(int stage)
 void PingApp::parseDestAddressesPar()
 {
     srcAddr = L3AddressResolver().resolve(par("srcAddr"));
-    const char *destAddrs = par("destAddr");
-    if (!strcmp(destAddrs, "*")) {
+    auto destAddrs = utils::getObjectAsStringVector(par("destAddr").objectValue());
+    if (destAddrs.size() == 1 && destAddrs[0] == "*") {
         destAddresses = getAllAddresses();
     }
     else {
-        cStringTokenizer tokenizer(destAddrs);
-        const char *token;
-
-        while ((token = tokenizer.nextToken()) != nullptr) {
-            L3Address addr = L3AddressResolver().resolve(token);
+        for (const auto& addrStr : destAddrs) {
+            L3Address addr = L3AddressResolver().resolve(addrStr.c_str());
             destAddresses.push_back(addr);
         }
     }

@@ -17,6 +17,12 @@ namespace inet {
 namespace utils {
 
 /**
+ * Converts cObject to string vector.
+ * Accepts cValueArray or cValueHolder object with strinc value content.
+ */
+INET_API std::vector<std::string> getObjectAsStringVector(cObject *obj);
+
+/**
  *  Converts an integer to string.
  */
 INET_API std::string ltostr(long i); // TODO make an ultostr as well, to be consistent with atoul

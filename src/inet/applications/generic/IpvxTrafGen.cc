@@ -7,6 +7,7 @@
 
 #include "inet/applications/generic/IpvxTrafGen.h"
 
+#include "inet/common/INETUtils.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
@@ -80,12 +81,10 @@ void IpvxTrafGen::handleMessageWhenUp(cMessage *msg)
     if (msg == timer) {
         if (msg->getKind() == START) {
             destAddresses.clear();
-            const char *destAddrs = par("destAddresses");
-            cStringTokenizer tokenizer(destAddrs);
-            const char *token;
-            while ((token = tokenizer.nextToken()) != nullptr) {
+            auto destAddrs = utils::getObjectAsStringVector(par("destAddresses").objectValue());
+            for (auto token : destAddrs) {
                 L3Address result;
-                L3AddressResolver().tryResolve(token, result);
+                L3AddressResolver().tryResolve(token.c_str(), result);
                 if (result.isUnspecified())
                     EV_ERROR << "cannot resolve destination address: " << token << endl;
                 else

@@ -11,6 +11,22 @@ namespace inet {
 
 namespace utils {
 
+std::vector<std::string> getObjectAsStringVector(cObject *obj)
+{
+    std::vector<std::string> result;
+
+    if (auto arr = dynamic_cast<cValueArray *>(obj))
+        result = arr->asStringVector();
+    else if (auto holder = dynamic_cast<cValueHolder *>(obj)) {
+        std::string v = holder->get().stdstringValue();
+        if (!v.empty())
+            result.push_back(v);
+    }
+    else
+        throw cRuntimeError("getAsStringVector(): Unaccepted cObject content: '%s'", obj->str().c_str());
+    return result;
+}
+
 std::string ltostr(long i)
 {
     std::ostringstream os;

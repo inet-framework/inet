@@ -9,6 +9,7 @@
 #include "inet/applications/udpapp/UdpBasicApp.h"
 
 #include "inet/applications/base/ApplicationPacket_m.h"
+#include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/TagBase_m.h"
 #include "inet/common/TimeTag_m.h"
@@ -125,13 +126,14 @@ void UdpBasicApp::processStart()
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
     setSocketOptions();
 
-    cValueArray *destAddrs = check_and_cast<cValueArray*>(par("destAddresses").objectValue());
+    destAddressStr = utils::getObjectAsStringVector(par("destAddresses").objectValue());
 
-    for (int i=0; i < destAddrs->size(); i++) {
-        const char *token = destAddrs->get(i).stringValue();
-        destAddressStr.push_back(token);
+    destAddresses.clear();
+    destAddresses.reserve(destAddressStr.size());
+
+    for (const auto& token : destAddressStr) {
         L3Address result;
-        L3AddressResolver().tryResolve(token, result);
+        L3AddressResolver().tryResolve(token.c_str(), result);
         if (result.isUnspecified())
             EV_ERROR << "cannot resolve destination address: " << token << endl;
         destAddresses.push_back(result);
