@@ -49,6 +49,11 @@ void NetworkNodeCanvasVisualizer::refreshDisplay() const
         auto visualization = it.second;
         auto position = canvasProjection->computeCanvasPoint(getPosition(networkNode));
         visualization->setTransform(cFigure::Transform().translate(position.x, position.y));
+        auto imageFigure = visualization->getImageFigure();
+        if (imageFigure != nullptr) {
+            auto orientation = getOrientation(networkNode);
+            imageFigure->setTransform(cFigure::Transform().rotate(orientation.toEulerAngles().getAlpha().get()));
+        }
         visualization->refreshDisplay();
     }
 }

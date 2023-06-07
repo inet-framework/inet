@@ -36,6 +36,7 @@ class INET_API NetworkNodeCanvasVisualization : public NetworkNodeVisualizerBase
     double placementPenalty = NaN;
 
     bool isLayoutInvalid = false;
+    cImageFigure *imageFigure = nullptr;
     cFigure::Rectangle submoduleBounds;
     std::vector<Annotation> annotations;
     cPanelFigure *annotationFigure = nullptr;
@@ -47,6 +48,8 @@ class INET_API NetworkNodeCanvasVisualization : public NetworkNodeVisualizerBase
     NetworkNodeCanvasVisualization(cModule *networkNode, double annotationSpacing, double placementPenalty);
 
     virtual void refreshDisplay() override;
+
+    virtual cImageFigure *getImageFigure() { return imageFigure; }
 
     virtual int getNumAnnotations() const { return annotations.size(); }
     virtual void addAnnotation(cFigure *figure, cFigure::Point size, Placement placement = PLACEMENT_ANY, double placementPriority = 0);
