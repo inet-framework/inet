@@ -456,6 +456,8 @@
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario3 -r 0,              300s,            a949-2097/tplx;2e76-520f/~tNl;eb91-fabc/~tND;49a3-92b5/tyf, PASS, igmp EthernetMac Ipv4
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario4 -r 0,              100s,            ce7b-6ea5/tplx;90c6-efdf/~tNl;3c6f-feb9/~tND;bb65-31f3/tyf, PASS, igmp EthernetMac Ipv4
 
+/examples/seaport/,                  -f omnetpp.ini -c General -r 0,                1000s,           32cb-156a/tplx;fcf4-00cd/~tNl;bb65-31f3/tyf, PASS, igmp EthernetMac Ipv4
+
 /examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            f1d5-1f6d/tplx;f190-9d17/~tNl;09be-cb28/~tND;492f-8b01/tyf, PASS, EthernetMac Ipv4
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            5639-8b29/tplx;04c6-2330/~tNl;6587-d7a7/~tND;ccd0-29d5/tyf, PASS, EthernetMac Ipv4
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic2 -r 0,               500s,            f08d-0e77/tplx;1d39-ec2f/~tNl;feb0-0be3/~tND;866d-7f23/tyf, PASS, EthernetMac Ipv4
