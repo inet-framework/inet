@@ -14,39 +14,45 @@ namespace inet {
 std::vector<L3Address> GpsrNeighborTable::getAddresses() const
 {
     std::vector<L3Address> addresses;
-    for (const auto& elem : addressToPositionMap)
+    for (const auto& elem : addressToNeighborMap)
         addresses.push_back(elem.first);
     return addresses;
 }
 
-bool GpsrNeighborTable::hasPosition(const L3Address& address) const
+bool GpsrNeighborTable::hasNeighbor(const L3Address& address) const
 {
-    return containsKey(addressToPositionMap, address);
+    return containsKey(addressToNeighborMap, address);
+}
+
+int GpsrNeighborTable::getNetworkInterfaceId(const L3Address& address) const
+{
+    auto it = addressToNeighborMap.find(address);
+    return (it == addressToNeighborMap.end()) ? -1 : it->second.networkInterfaceId;
 }
 
 Coord GpsrNeighborTable::getPosition(const L3Address& address) const
 {
-    auto it = addressToPositionMap.find(address);
-    return (it == addressToPositionMap.end()) ? Coord(NaN, NaN, NaN) : it->second.second;
+    auto it = addressToNeighborMap.find(address);
+    return (it == addressToNeighborMap.end()) ? Coord::NIL : it->second.position;
 }
 
-void GpsrNeighborTable::setPosition(const L3Address& address, const Coord& coord)
+void GpsrNeighborTable::updateNeighbor(const L3Address& address, int networkInterfaceId, const Coord& position)
 {
     ASSERT(!address.isUnspecified());
-    addressToPositionMap[address] = AddressToPositionMapValue(simTime(), coord);
+    addressToNeighborMap[address] = Neighbor(networkInterfaceId, position, simTime());
 }
 
-void GpsrNeighborTable::removePosition(const L3Address& address)
+void GpsrNeighborTable::removeNeighbor(const L3Address& address)
 {
-    auto it = addressToPositionMap.find(address);
-    addressToPositionMap.erase(it);
+    auto it = addressToNeighborMap.find(address);
+    addressToNeighborMap.erase(it);
 }
 
-void GpsrNeighborTable::removeOldPositions(simtime_t timestamp)
+void GpsrNeighborTable::removeOldNeighbors(simtime_t timestamp)
 {
-    for (auto it = addressToPositionMap.begin(); it != addressToPositionMap.end();)
-        if (it->second.first <= timestamp)
-            addressToPositionMap.erase(it++);
+    for (auto it = addressToNeighborMap.begin(); it != addressToNeighborMap.end();)
+        if (it->second.lastUpdate <= timestamp)
+            addressToNeighborMap.erase(it++);
         else
             it++;
 
@@ -54,14 +60,14 @@ void GpsrNeighborTable::removeOldPositions(simtime_t timestamp)
 
 void GpsrNeighborTable::clear()
 {
-    addressToPositionMap.clear();
+    addressToNeighborMap.clear();
 }
 
-simtime_t GpsrNeighborTable::getOldestPosition() const
+simtime_t GpsrNeighborTable::getOldestNeighbor() const
 {
     simtime_t oldestPosition = SimTime::getMaxTime();
-    for (const auto& elem : addressToPositionMap) {
-        const simtime_t& time = elem.second.first;
+    for (const auto& elem : addressToNeighborMap) {
+        const simtime_t& time = elem.second.lastUpdate;
         if (time < oldestPosition)
             oldestPosition = time;
     }
@@ -71,8 +77,8 @@ simtime_t GpsrNeighborTable::getOldestPosition() const
 std::ostream& operator<<(std::ostream& o, const GpsrNeighborTable& t)
 {
     o << "{ ";
-    for (auto elem : t.addressToPositionMap) {
-        o << elem.first << ":(" << elem.second.first << ";" << elem.second.second << ") ";
+    for (auto elem : t.addressToNeighborMap) {
+        o << elem.first << ":(" << elem.second.lastUpdate << ";" << elem.second.position << ") ";
     }
     o << "}";
     return o;

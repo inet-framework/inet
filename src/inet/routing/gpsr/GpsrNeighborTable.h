@@ -22,28 +22,34 @@ namespace inet {
 class INET_API GpsrNeighborTable
 {
   private:
-    typedef std::pair<simtime_t, Coord> AddressToPositionMapValue;
-    typedef std::map<L3Address, AddressToPositionMapValue> AddressToPositionMap;
-    AddressToPositionMap addressToPositionMap;
+    struct Neighbor {
+        int networkInterfaceId = -1;
+        Coord position = Coord::NIL;
+        simtime_t lastUpdate = -1;
 
-  public:
-    std::map<L3Address, int> addressToInterfaceIdMap;
+        Neighbor() {}
+        Neighbor(int networkInterfaceId, const Coord& position, simtime_t lastUpdate) :
+            networkInterfaceId(networkInterfaceId), position(position), lastUpdate(lastUpdate) {}
+    };
+
+    std::map<L3Address, Neighbor> addressToNeighborMap;
 
   public:
     GpsrNeighborTable() {}
 
     std::vector<L3Address> getAddresses() const;
 
-    bool hasPosition(const L3Address& address) const;
+    bool hasNeighbor(const L3Address& address) const;
+    int getNetworkInterfaceId(const L3Address& address) const;
     Coord getPosition(const L3Address& address) const;
-    void setPosition(const L3Address& address, const Coord& coord);
+    void updateNeighbor(const L3Address& address, int networkInterfaceId, const Coord& position);
 
-    void removePosition(const L3Address& address);
-    void removeOldPositions(simtime_t timestamp);
+    void removeNeighbor(const L3Address& address);
+    void removeOldNeighbors(simtime_t timestamp);
 
     void clear();
 
-    simtime_t getOldestPosition() const;
+    simtime_t getOldestNeighbor() const;
 
     friend std::ostream& operator<<(std::ostream& o, const GpsrNeighborTable& t);
 };
