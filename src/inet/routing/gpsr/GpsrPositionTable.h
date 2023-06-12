@@ -27,20 +27,10 @@ class INET_API GpsrPositionTable
     AddressToPositionMap addressToPositionMap;
 
   public:
-    GpsrPositionTable() {}
-
-    std::vector<L3Address> getAddresses() const;
-
-    bool hasPosition(const L3Address& address) const;
     Coord getPosition(const L3Address& address) const;
     void setPosition(const L3Address& address, const Coord& coord);
 
-    void removePosition(const L3Address& address);
-    void removeOldPositions(simtime_t timestamp);
-
     void clear();
-
-    simtime_t getOldestPosition() const;
 
     friend std::ostream& operator<<(std::ostream& o, const GpsrPositionTable& t);
 };
