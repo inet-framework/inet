@@ -11,8 +11,6 @@
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/networklayer/ipv4/ipsec/IPsecAuthenticationHeader_m.h"
 #include "inet/networklayer/ipv4/ipsec/IPsecEncapsulatingSecurityPayload_m.h"
-#include "inet/transportlayer/udp/Udp.h"
-#include "inet/transportlayer/udp/UdpHeader_m.h"
 
 namespace inet {
 namespace ipsec {

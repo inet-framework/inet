@@ -274,18 +274,23 @@ PacketInfo IPsec::extractEgressPacketInfo(Packet *packet, const Ipv4Address& loc
 
     packetInfo.setNextProtocol(ipv4datagram->getProtocolId());
 
-    if (ipv4datagram->getProtocolId() == IP_PROT_TCP) {
+    if (false) ;
+#ifdef INET_WITH_TCP
+    else if (ipv4datagram->getProtocolId() == IP_PROT_TCP) {
         const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv4datagram->getChunkLength());
         packetInfo.setLocalPort(tcpHeader->getSourcePort());
         packetInfo.setRemotePort(tcpHeader->getDestinationPort());
         packetInfo.setTfcSupported(false);
     }
+#endif
+#ifdef INET_WITH_UDP
     else if (ipv4datagram->getProtocolId() == IP_PROT_UDP) {
         const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipv4datagram->getChunkLength());
         packetInfo.setLocalPort(udpHeader->getSourcePort());
         packetInfo.setRemotePort(udpHeader->getDestinationPort());
         packetInfo.setTfcSupported(true);
     }
+#endif
     else if (ipv4datagram->getProtocolId() == IP_PROT_ICMP) {
         const auto& icmpHeader = packet->peekDataAt<IcmpHeader>(ipv4datagram->getChunkLength());
         packetInfo.setIcmpType(icmpHeader->getType());
@@ -353,18 +358,23 @@ PacketInfo IPsec::extractIngressPacketInfo(Packet *packet)
 
     packetInfo.setNextProtocol(ipv4datagram->getProtocolId());
 
-    if (ipv4datagram->getProtocolId() == IP_PROT_TCP) {
+    if (false) ;
+#ifdef INET_WITH_TCP
+    else if (ipv4datagram->getProtocolId() == IP_PROT_TCP) {
         const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv4datagram->getChunkLength());
         packetInfo.setLocalPort(tcpHeader->getDestinationPort());
         packetInfo.setRemotePort(tcpHeader->getSourcePort());
         packetInfo.setTfcSupported(false);
     }
+#endif
+#ifdef INET_WITH_UDP
     else if (ipv4datagram->getProtocolId() == IP_PROT_UDP) {
         const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipv4datagram->getChunkLength());
         packetInfo.setLocalPort(udpHeader->getDestinationPort());
         packetInfo.setRemotePort(udpHeader->getSourcePort());
         packetInfo.setTfcSupported(true);
     }
+#endif
     else if (ipv4datagram->getProtocolId() == IP_PROT_ICMP) {
         const auto& icmpHeader = packet->peekDataAt<IcmpHeader>(ipv4datagram->getChunkLength());
         packetInfo.setIcmpType(icmpHeader->getType());
