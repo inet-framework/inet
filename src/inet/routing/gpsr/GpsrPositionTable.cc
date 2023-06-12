@@ -5,13 +5,13 @@
 //
 
 
-#include "inet/routing/gpsr/PositionTable.h"
+#include "inet/routing/gpsr/GpsrPositionTable.h"
 
 #include "inet/common/stlutils.h"
 
 namespace inet {
 
-std::vector<L3Address> PositionTable::getAddresses() const
+std::vector<L3Address> GpsrPositionTable::getAddresses() const
 {
     std::vector<L3Address> addresses;
     for (const auto& elem : addressToPositionMap)
@@ -19,30 +19,30 @@ std::vector<L3Address> PositionTable::getAddresses() const
     return addresses;
 }
 
-bool PositionTable::hasPosition(const L3Address& address) const
+bool GpsrPositionTable::hasPosition(const L3Address& address) const
 {
     return containsKey(addressToPositionMap, address);
 }
 
-Coord PositionTable::getPosition(const L3Address& address) const
+Coord GpsrPositionTable::getPosition(const L3Address& address) const
 {
     auto it = addressToPositionMap.find(address);
     return (it == addressToPositionMap.end()) ? Coord(NaN, NaN, NaN) : it->second.second;
 }
 
-void PositionTable::setPosition(const L3Address& address, const Coord& coord)
+void GpsrPositionTable::setPosition(const L3Address& address, const Coord& coord)
 {
     ASSERT(!address.isUnspecified());
     addressToPositionMap[address] = AddressToPositionMapValue(simTime(), coord);
 }
 
-void PositionTable::removePosition(const L3Address& address)
+void GpsrPositionTable::removePosition(const L3Address& address)
 {
     auto it = addressToPositionMap.find(address);
     addressToPositionMap.erase(it);
 }
 
-void PositionTable::removeOldPositions(simtime_t timestamp)
+void GpsrPositionTable::removeOldPositions(simtime_t timestamp)
 {
     for (auto it = addressToPositionMap.begin(); it != addressToPositionMap.end();)
         if (it->second.first <= timestamp)
@@ -52,12 +52,12 @@ void PositionTable::removeOldPositions(simtime_t timestamp)
 
 }
 
-void PositionTable::clear()
+void GpsrPositionTable::clear()
 {
     addressToPositionMap.clear();
 }
 
-simtime_t PositionTable::getOldestPosition() const
+simtime_t GpsrPositionTable::getOldestPosition() const
 {
     simtime_t oldestPosition = SimTime::getMaxTime();
     for (const auto& elem : addressToPositionMap) {
@@ -68,7 +68,7 @@ simtime_t PositionTable::getOldestPosition() const
     return oldestPosition;
 }
 
-std::ostream& operator<<(std::ostream& o, const PositionTable& t)
+std::ostream& operator<<(std::ostream& o, const GpsrPositionTable& t)
 {
     o << "{ ";
     for (auto elem : t.addressToPositionMap) {
