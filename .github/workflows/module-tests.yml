@@ -1,8 +1,9 @@
 name: "Test: module"
 
 on:
-  schedule:
-    - cron: "0 21 * * 1-5" # https://crontab.guru/#0_21_*_*_1-5 : "At 21:00 on every day-of-week from Monday through Friday."
+  push:
+    branches:
+      - master
   workflow_dispatch:
     # nothing
 
