@@ -7,30 +7,7 @@ on:
     # nothing
 
 jobs:
-  activity-check:
-    name: Activity check
-    runs-on: ubuntu-latest
-    outputs:
-      is_active: ${{ steps.activity.outputs.is_active }}
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: Check for repo activity
-        id: activity
-        run: |
-          # Skip activity check when manually triggered.
-          if [ "${{ github.event_name }}" == "repository_dispatch" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            is_active=true
-          elif [ "$(git rev-list --after="24 hours" ${{ github.sha }})" ]; then
-            is_active=true
-          else
-            is_active=false
-          fi
-          echo "is_active=$is_active" >> $GITHUB_OUTPUT
-
   other-tests:
-    needs: activity-check
-    if: needs.activity-check.outputs.is_active == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
