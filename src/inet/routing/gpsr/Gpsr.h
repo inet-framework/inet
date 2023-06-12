@@ -8,8 +8,8 @@
 #ifndef __INET_GPSR_H
 #define __INET_GPSR_H
 
-#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/geometry/common/Coord.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
@@ -17,7 +17,8 @@
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/gpsr/Gpsr_m.h"
-#include "inet/routing/gpsr/PositionTable.h"
+#include "inet/routing/gpsr/GpsrNeighborTable.h"
+#include "inet/routing/gpsr/GpsrPositionTable.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
 namespace inet {
@@ -49,10 +50,9 @@ class INET_API Gpsr : public RoutingProtocolBase, public cListener, public Netfi
     opp_component_ptr<IMobility> mobility;
     const IL3AddressType *addressType = nullptr;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
-    const char *outputInterface = nullptr;
     ModuleRefByPar<IRoutingTable> routingTable; // TODO delete when necessary functions are moved to interface table
     ModuleRefByPar<INetfilter> networkProtocol;
-    PositionTable& globalPositionTable = SIMULATION_SHARED_VARIABLE(globalPositionTable); // KLUDGE implement position registry protocol
+    GpsrPositionTable& globalPositionTable = SIMULATION_SHARED_VARIABLE(globalPositionTable); // KLUDGE implement position registry protocol
 
     // packet size
     int positionByteLength = -1;
@@ -60,7 +60,7 @@ class INET_API Gpsr : public RoutingProtocolBase, public cListener, public Netfi
     // internal
     cMessage *beaconTimer = nullptr;
     cMessage *purgeNeighborsTimer = nullptr;
-    PositionTable neighborPositionTable;
+    GpsrNeighborTable neighborTable;
 
   public:
     Gpsr();
@@ -91,7 +91,7 @@ class INET_API Gpsr : public RoutingProtocolBase, public cListener, public Netfi
 
     // handling beacons
     const Ptr<GpsrBeacon> createBeacon();
-    void sendBeacon(const Ptr<GpsrBeacon>& beacon);
+    void sendBeacon(const Ptr<GpsrBeacon>& beacon, NetworkInterface *networkInterface);
     void processBeacon(Packet *packet);
 
     // handling packets

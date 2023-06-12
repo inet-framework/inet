@@ -26,7 +26,6 @@ simple Gpsr like IManetRouting
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule = default("^.ipv4.routingTable");
         string networkProtocolModule = default("^.ipv4.ip");
-        string outputInterface = default("wlan0");
 
         // GPSR parameters
         string planarizationMode @enum("", "GG", "RNG") = default("GG");
