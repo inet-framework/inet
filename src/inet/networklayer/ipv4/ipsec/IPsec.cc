@@ -275,7 +275,7 @@ PacketInfo IPsec::extractEgressPacketInfo(Packet *packet, const Ipv4Address& loc
     packetInfo.setNextProtocol(ipv4datagram->getProtocolId());
 
     if (false) ;
-#ifdef INET_WITH_TCP
+#ifdef INET_WITH_TCP_COMMON
     else if (ipv4datagram->getProtocolId() == IP_PROT_TCP) {
         const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv4datagram->getChunkLength());
         packetInfo.setLocalPort(tcpHeader->getSourcePort());
@@ -359,7 +359,7 @@ PacketInfo IPsec::extractIngressPacketInfo(Packet *packet)
     packetInfo.setNextProtocol(ipv4datagram->getProtocolId());
 
     if (false) ;
-#ifdef INET_WITH_TCP
+#ifdef INET_WITH_TCP_COMMON
     else if (ipv4datagram->getProtocolId() == IP_PROT_TCP) {
         const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv4datagram->getChunkLength());
         packetInfo.setLocalPort(tcpHeader->getDestinationPort());
