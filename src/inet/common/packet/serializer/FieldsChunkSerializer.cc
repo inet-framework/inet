@@ -17,7 +17,7 @@ void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     auto fieldsChunk = staticPtrCast<const FieldsChunk>(chunk);
     if (length == b(-1))
         length = fieldsChunk->getChunkLength() - offset;
-    if (offset.get<b>() % 8 != 0 || length.get<b>() % 8 != 0) {
+    if (offset.get<b>() % 8 != 0 || length.get<b>() % 8 != 0 || stream.getLength().get<b>() % 8 != 0) {
         MemoryOutputStream chunkStream(fieldsChunk->getChunkLength());
         serialize(chunkStream, fieldsChunk);
         std::vector<bool> data;
