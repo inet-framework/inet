@@ -88,6 +88,23 @@ int PriorityScheduler::schedulePacket()
     return -1;
 }
 
+void PriorityScheduler::handleCanPullPacketChanged(const cGate *gate)
+{
+    Enter_Method("handleCanPullPacketChanged");
+    if (isStreamingPacket()) {
+        EV_INFO << "Checking if the ongoing packet streaming should be ended" << EV_ENDL;
+        int index = callSchedulePacket();
+        if (index != inProgressGateIndex) {
+            auto packet = providers[inProgressGateIndex].pullPacketEnd();
+            EV_INFO << "Ending packet streaming" << EV_FIELD(packet) << EV_ENDL;
+            take(packet);
+            endPacketStreaming(packet);
+            consumer.pushPacketEnd(packet);
+        }
+    }
+    PacketSchedulerBase::handleCanPullPacketChanged(gate);
+}
+
 } // namespace queueing
 } // namespace inet
 

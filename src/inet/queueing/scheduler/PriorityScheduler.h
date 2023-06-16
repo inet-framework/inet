@@ -34,6 +34,8 @@ class INET_API PriorityScheduler : public PacketSchedulerBase, public virtual IP
     virtual Packet *getPacket(int index) const override;
     virtual void removePacket(Packet *packet) override;
     virtual void removeAllPackets() override;
+
+    virtual void handleCanPullPacketChanged(const cGate *gate) override;
 };
 
 } // namespace queueing
