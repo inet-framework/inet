@@ -23,6 +23,7 @@ void PacketFlowBase::initialize(int stage)
         provider.reference(inputGate, false);
         collector.reference(outputGate, false);
         collection.reference(inputGate, false);
+        WATCH(inProgressStreamId);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
@@ -79,6 +80,7 @@ void PacketFlowBase::pushPacket(Packet *packet, const cGate *gate)
 void PacketFlowBase::pushPacketStart(Packet *packet, const cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketStart");
+    EV_INFO << "Starting packet streaming" << EV_FIELD(packet) << EV_ENDL;
     take(packet);
     checkPacketStreaming(packet);
     emit(packetPushedInSignal, packet);
@@ -91,6 +93,7 @@ void PacketFlowBase::pushPacketStart(Packet *packet, const cGate *gate, bps data
 void PacketFlowBase::pushPacketEnd(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacketEnd");
+    EV_INFO << "Ending packet streaming" << EV_FIELD(packet) << EV_ENDL;
     take(packet);
     if (!isStreamingPacket())
         startPacketStreaming(packet);
@@ -106,6 +109,7 @@ void PacketFlowBase::pushPacketEnd(Packet *packet, const cGate *gate)
 void PacketFlowBase::pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pushPacketProgress");
+    EV_INFO << "Progressing packet streaming" << EV_FIELD(packet) << EV_ENDL;
     take(packet);
     if (!isStreamingPacket())
         startPacketStreaming(packet);
