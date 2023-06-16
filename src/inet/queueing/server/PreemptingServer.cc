@@ -89,6 +89,18 @@ void PreemptingServer::handlePushPacketProcessed(Packet *packet, const cGate *ga
     }
 }
 
+void PreemptingServer::pushPacketEnd(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacketEnd");
+    ASSERT(isStreaming());
+    EV_INFO << "Ending packet streaming, requested by packet producer" << EV_FIELD(packet) << EV_ENDL;
+    take(packet);
+    consumer.pushPacketEnd(packet);
+    cancelEvent(timer);
+    streamedPacket = nullptr;
+    updateDisplayString();
+}
+
 } // namespace queueing
 } // namespace inet
 

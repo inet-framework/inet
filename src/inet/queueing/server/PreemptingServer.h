@@ -10,6 +10,7 @@
 
 #include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PacketServerBase.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 
@@ -19,7 +20,7 @@ namespace queueing {
 
 using namespace inet::queueing;
 
-class INET_API PreemptingServer : public ClockUserModuleMixin<PacketServerBase>
+class INET_API PreemptingServer : public ClockUserModuleMixin<PacketServerBase>, public virtual IPassivePacketSink
 {
   protected:
     bps datarate = bps(NaN);
@@ -45,6 +46,13 @@ class INET_API PreemptingServer : public ClockUserModuleMixin<PacketServerBase>
     virtual void handleCanPullPacketChanged(const cGate *gate) override;
 
     virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { throw cRuntimeError("TODO"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { throw cRuntimeError("TODO"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace queueing
