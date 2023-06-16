@@ -92,10 +92,42 @@ bool PacketSchedulerBase::canPushPacket(Packet *packet, const cGate *gate) const
 
 void PacketSchedulerBase::pushPacket(Packet *packet, const cGate *gate)
 {
+    Enter_Method("pushPacket");
     int index = callSchedulePacket();
     if (index != gate->getIndex())
         throw cRuntimeError("Scheduled packet from wrong input gate");
     consumer.pushPacket(packet);
+}
+
+void PacketSchedulerBase::pushPacketStart(Packet *packet, const cGate *gate, bps datarate)
+{
+    Enter_Method("pushPacketStart");
+    ASSERT(!isStreamingPacket());
+    int index = callSchedulePacket();
+    if (index != gate->getIndex())
+        throw cRuntimeError("Scheduled packet from wrong input gate");
+    consumer.pushPacketStart(packet, datarate);
+}
+
+void PacketSchedulerBase::pushPacketEnd(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacketEnd");
+    ASSERT(isStreamingPacket());
+    int index = callSchedulePacket();
+    if (index != gate->getIndex())
+        throw cRuntimeError("Scheduled packet from wrong input gate");
+    endPacketStreaming(packet);
+    consumer.pushPacketEnd(packet);
+}
+
+void PacketSchedulerBase::pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength)
+{
+    Enter_Method("pushPacketProgress");
+    ASSERT(isStreamingPacket());
+    int index = callSchedulePacket();
+    if (index != gate->getIndex())
+        throw cRuntimeError("Scheduled packet from wrong input gate");
+    consumer.pushPacketProgress(packet, datarate, position, extraProcessableLength);
 }
 
 void PacketSchedulerBase::handleCanPushPacketChanged(const cGate *gate)
@@ -151,6 +183,7 @@ Packet *PacketSchedulerBase::pullPacketStart(const cGate *gate, bps datarate)
     checkPacketStreaming(nullptr);
     startPacketStreaming();
     auto packet = providers[inProgressGateIndex].pullPacketStart(datarate);
+    EV_INFO << "Starting packet streaming" << EV_FIELD(packet) << EV_ENDL;
     take(packet);
     inProgressStreamId = packet->getTreeId();
     if (collector != nullptr)
@@ -165,6 +198,7 @@ Packet *PacketSchedulerBase::pullPacketEnd(const cGate *gate)
     if (!isStreamingPacket())
         startPacketStreaming();
     auto packet = providers[inProgressGateIndex].pullPacketEnd();
+    EV_INFO << "Ending packet streaming" << EV_FIELD(packet) << EV_ENDL;
     take(packet);
     checkPacketStreaming(packet);
     inProgressStreamId = packet->getTreeId();
@@ -181,6 +215,7 @@ Packet *PacketSchedulerBase::pullPacketProgress(const cGate *gate, bps datarate,
     if (!isStreamingPacket())
         startPacketStreaming();
     auto packet = providers[inProgressGateIndex].pullPacketProgress(datarate, position, extraProcessableLength);
+    EV_INFO << "Progressing packet streaming" << EV_FIELD(packet) << EV_ENDL;
     take(packet);
     checkPacketStreaming(packet);
     inProgressStreamId = packet->getTreeId();
@@ -195,7 +230,7 @@ Packet *PacketSchedulerBase::pullPacketProgress(const cGate *gate, bps datarate,
 void PacketSchedulerBase::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
-    if (collector != nullptr && (!isStreamingPacket() || callSchedulePacket() != inProgressGateIndex))
+    if (collector != nullptr)
         collector.handleCanPullPacketChanged();
 }
 

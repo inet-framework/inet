@@ -62,9 +62,9 @@ class INET_API PacketSchedulerBase : public PacketProcessorBase, public Transpar
     virtual bool canPushPacket(Packet *packet, const cGate *gate) const override;
 
     virtual void pushPacket(Packet *packet, const cGate *gate) override;
-    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
-    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
-    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override;
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override;
 
     virtual void handleCanPushPacketChanged(const cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override { throw cRuntimeError("TODO"); }
