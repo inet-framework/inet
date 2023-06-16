@@ -14,21 +14,19 @@ namespace inet {
 
 FieldsChunk::FieldsChunk() :
     Chunk(),
-    chunkLength(b(-1)),
-    serializedBytes(nullptr)
+    chunkLength(b(-1))
 {
 }
 
 FieldsChunk::FieldsChunk(const FieldsChunk& other) :
     Chunk(other),
     chunkLength(other.chunkLength),
-    serializedBytes(other.serializedBytes != nullptr ? new std::vector<uint8_t>(*other.serializedBytes) : nullptr)
+    serializedData(other.serializedData)
 {
 }
 
 FieldsChunk::~FieldsChunk()
 {
-    delete serializedBytes;
 }
 
 void FieldsChunk::parsimPack(cCommBuffer *buffer) const
@@ -43,15 +41,13 @@ void FieldsChunk::parsimUnpack(cCommBuffer *buffer)
     int64_t l;
     buffer->unpack(l);
     chunkLength = b(l);
-    delete serializedBytes;
-    serializedBytes = nullptr;
+    serializedData.clear();
 }
 
 void FieldsChunk::handleChange()
 {
     Chunk::handleChange();
-    delete serializedBytes;
-    serializedBytes = nullptr;
+    serializedData.clear();
 }
 
 bool FieldsChunk::containsSameData(const Chunk& other) const
