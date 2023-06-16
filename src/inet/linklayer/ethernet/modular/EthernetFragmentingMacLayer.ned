@@ -12,6 +12,7 @@ import inet.protocolelement.contract.IPacketLifeTimer;
 import inet.protocolelement.fragmentation.FragmentTagBasedDefragmenter;
 import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
+import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketQueue;
 
 module EthernetFragmentingMacLayer like IEthernetMacLayer
@@ -44,11 +45,14 @@ module EthernetFragmentingMacLayer like IEthernetMacLayer
         streamer: <default("PreemptableStreamer")> like IPacketFlow {
             @display("p=200,300");
         }
-        fragmentFcsInserter: <default("EthernetFragmentFcsInserter")> like IPacketFlow {
+        gate: <default("")> like IPacketGate {
             @display("p=200,400");
         }
-        outboundEmitter: <default("PacketEmitter")> like IPacketFlow {
+        fragmentFcsInserter: <default("EthernetFragmentFcsInserter")> like IPacketFlow {
             @display("p=200,500");
+        }
+        outboundEmitter: <default("PacketEmitter")> like IPacketFlow {
+            @display("p=200,600");
         }
         fcsInserter: <default("EthernetFcsInserter")> like IPacketFlow {
             @display("p=500,200");
@@ -66,7 +70,8 @@ module EthernetFragmentingMacLayer like IEthernetMacLayer
         upperLayerIn --> { @display("m=n"); } --> queue.in;
         queue.out --> fcsRemover.in;
         fcsRemover.out --> streamer.in;
-        streamer.out --> fragmentFcsInserter.in;
+        streamer.out --> gate.in;
+        gate.out --> fragmentFcsInserter.in;
         fragmentFcsInserter.out --> outboundEmitter.in;
         outboundEmitter.out --> { @display("m=s"); } --> lowerLayerOut;
 
