@@ -137,8 +137,9 @@ void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *startGate
 {
     simtime_t duration = s(packet->getDataLength() / datarate).get();
     SendOptions sendOptions;
-    sendOptions.duration(duration);
-    sendOptions.updateTx(transmissionId, duration);
+    sendOptions.duration_ = duration;
+    sendOptions.remainingDuration = duration;
+    sendOptions.transmissionId(transmissionId);
     if (consumer != nullptr) {
         animatePushPacketStart(packet, startGate, consumer.getReferencedGate(), datarate, sendOptions);
         consumer.pushPacketStart(packet, datarate);
