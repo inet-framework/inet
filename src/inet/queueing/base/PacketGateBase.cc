@@ -19,7 +19,6 @@ void PacketGateBase::initialize(int stage)
         bitrate = bps(par("bitrate"));
         extraLength = b(par("extraLength"));
         extraDuration = par("extraDuration");
-        getDisplayString().setTagArg("i", 2, 20);
         WATCH(isOpen_);
     }
     else if (stage == INITSTAGE_LAST)
