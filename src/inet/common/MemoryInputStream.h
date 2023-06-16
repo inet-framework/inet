@@ -45,13 +45,14 @@ class INET_API MemoryInputStream
      * The position of the next bit that will be read measured in bits.
      */
     b position;
+
     /**
      * This flag indicates if the stream has been read beyond the end of data.
      */
     bool isReadBeyondEnd_ = false;
 
   protected:
-    bool isByteAligned() {
+    bool isByteAligned() const {
         return b(position).get() % 8 == 0;
     }
 
