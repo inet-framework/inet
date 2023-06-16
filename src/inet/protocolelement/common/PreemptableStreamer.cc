@@ -128,6 +128,7 @@ Packet *PreemptableStreamer::canPullPacket(const cGate *gate) const
 Packet *PreemptableStreamer::pullPacketStart(const cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketStart");
+    ASSERT(!isStreaming());
     streamDatarate = datarate;
     if (remainingPacket == nullptr) {
         streamedPacket = provider.pullPacket();
@@ -157,6 +158,7 @@ Packet *PreemptableStreamer::pullPacketStart(const cGate *gate, bps datarate)
 Packet *PreemptableStreamer::pullPacketEnd(const cGate *gate)
 {
     Enter_Method("pullPacketEnd");
+    ASSERT(isStreaming());
     EV_INFO << "Ending streaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     auto packet = streamedPacket;
     b pulledLength = streamDatarate * s((simTime() - streamStart).dbl());
