@@ -90,6 +90,17 @@ void PreemptableStreamer::pushPacket(Packet *packet, const cGate *gate)
         scheduleClockEventAfter(s(streamedPacket->getDataLength() / streamDatarate).get(), endStreamingTimer);
 }
 
+void PreemptableStreamer::pushPacketEnd(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacketEnd");
+    ASSERT(isStreaming());
+    take(packet);
+    cancelClockEvent(endStreamingTimer);
+    delete streamedPacket;
+    streamedPacket = packet;
+    endStreaming();
+}
+
 void PreemptableStreamer::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");

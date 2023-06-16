@@ -67,7 +67,7 @@ class INET_API PreemptableStreamer : public ClockUserModuleMixin<PacketProcessor
     virtual void pushPacket(Packet *packet, const cGate *gate) override;
 
     virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
-    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override;
     virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
 
     virtual void handleCanPushPacketChanged(const cGate *gate) override;
