@@ -191,6 +191,33 @@ Packet *PacketClassifierBase::pullPacket(const cGate *gate)
     return packet;
 }
 
+Packet *PacketClassifierBase::pullPacketStart(const cGate *gate, bps datarate)
+{
+    auto packet = provider.pullPacketStart(datarate);
+    int index = callClassifyPacket(packet);
+    if (index != gate->getIndex())
+        throw cRuntimeError("Packet is classified to the wrong output gate (%d) when pulled from gate (%d)", index, gate->getIndex());
+    return packet;
+}
+
+Packet *PacketClassifierBase::pullPacketEnd(const cGate *gate)
+{
+    auto packet = provider.pullPacketEnd();
+    int index = callClassifyPacket(packet);
+    if (index != gate->getIndex())
+        throw cRuntimeError("Packet is classified to the wrong output gate (%d) when pulled from gate (%d)", index, gate->getIndex());
+    return packet;
+}
+
+Packet *PacketClassifierBase::pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength)
+{
+    auto packet = provider.pullPacketProgress(datarate, position, extraProcessableLength);
+    int index = callClassifyPacket(packet);
+    if (index != gate->getIndex())
+        throw cRuntimeError("Packet is classified to the wrong output gate (%d) when pulled from gate (%d)", index, gate->getIndex());
+    return packet;
+}
+
 void PacketClassifierBase::handleCanPullPacketChanged(const cGate *gate)
 {
     auto packet = provider.canPullPacket();

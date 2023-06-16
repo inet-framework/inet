@@ -74,9 +74,9 @@ class INET_API PacketClassifierBase : public PacketProcessorBase, public Transpa
     virtual Packet *canPullPacket(const cGate *gate) const override;
 
     virtual Packet *pullPacket(const cGate *gate) override;
-    virtual Packet *pullPacketStart(const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
-    virtual Packet *pullPacketEnd(const cGate *gate) override { throw cRuntimeError("TODO"); }
-    virtual Packet *pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength) override { throw cRuntimeError("TODO"); }
+    virtual Packet *pullPacketStart(const cGate *gate, bps datarate) override;
+    virtual Packet *pullPacketEnd(const cGate *gate) override;
+    virtual Packet *pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength) override;
 
     virtual void handleCanPullPacketChanged(const cGate *gate) override;
     virtual void handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful) override { throw cRuntimeError("TODO"); }
