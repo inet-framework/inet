@@ -1,0 +1,151 @@
+%description:
+
+Checks that closing a PacketGate while a packet streaming operation is in progress
+ends the packet streaming in both the source and the sink.
+
+%file: TestSource.cc
+#include "inet/common/ModuleRefByGate.h"
+#include "inet/queueing/contract/IPacketSource.h"
+#include "inet/queueing/gate/PacketGate.h"
+
+using namespace inet;
+using namespace inet::queueing;
+namespace PacketGate_1 {
+
+class TestSource : public cSimpleModule, public IPacketSource
+{
+    private:
+        Packet *streamedPacket = nullptr;
+
+    public:
+        TestSource() : cSimpleModule(65536) {}
+
+        virtual bool canPullSomePacket(const cGate *gate) const override { return true; }
+        virtual Packet *canPullPacket(const cGate *gate) const override { return nullptr; }
+        virtual Packet *pullPacket(const cGate *gate) override { return nullptr; }
+        virtual Packet *pullPacketStart(const cGate *gate, bps datarate) override { return nullptr; }
+
+        virtual Packet *pullPacketEnd(const cGate *gate) override {
+            Enter_Method("pullPacketEnd");
+            auto packet = streamedPacket;
+            EV_INFO << "Ending packet streaming" << EV_FIELD(packet) << EV_ENDL;
+            streamedPacket = nullptr;
+            return packet;
+        }
+
+        virtual Packet *pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength) override { return nullptr; }
+
+        virtual IPassivePacketSink *getConsumer(const cGate *gate) override { return nullptr; }
+        virtual void handleCanPushPacketChanged(const cGate *gate) override { }
+        virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override { }
+
+    protected:
+        virtual void activity() override;
+};
+
+Define_Module(TestSource);
+
+void TestSource::activity()
+{
+    auto outputGate = gate("out");
+    ModuleRefByGate<PacketGate> gate;
+    gate.reference(outputGate, true);
+    streamedPacket = new Packet(nullptr, makeShared<ByteCountChunk>(B(10)));
+    wait(2);
+    EV_INFO << "Starting packet streaming" << EV_FIELD(packet, streamedPacket) << EV_ENDL;
+    gate->pushPacketStart(streamedPacket->dup(), gate.getReferencedGate(), bps(8));
+    wait(10);
+    if (streamedPacket != nullptr)
+	    gate->pushPacketEnd(streamedPacket, gate.getReferencedGate());
+}
+
+}
+
+%file: TestSource.ned
+
+simple TestSource
+{
+    gates:
+        output out;
+}
+
+%file: TestSink.cc
+#include "inet/common/ModuleRefByGate.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
+#include "inet/queueing/gate/PacketGate.h"
+
+using namespace inet;
+using namespace inet::queueing;
+namespace PacketGate_1 {
+
+class TestSink : public cSimpleModule, public IPassivePacketSink
+{
+    public:
+        virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+        virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+
+        virtual void pushPacket(Packet *packet, const cGate *gate) override { }
+
+        virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override {
+            Enter_Method("pushPacketStart");
+            EV_INFO << "Starting packet streaming" << EV_FIELD(packet) << EV_ENDL;
+            take(packet);
+            delete packet;
+        }
+
+        virtual void pushPacketEnd(Packet *packet, const cGate *gate) override {
+            Enter_Method("pushPacketEnd");
+            EV_INFO << "Ending packet streaming" << EV_FIELD(packet) << EV_ENDL;
+            take(packet);
+            delete packet;
+        }
+
+        virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { }
+};
+
+Define_Module(TestSink);
+
+}
+
+%file: TestSink.ned
+
+simple TestSink
+{
+    gates:
+        input in;
+}
+
+%file: TestNetwork.ned
+
+import inet.queueing.gate.PacketGate;
+
+network TestNetwork
+{
+    submodules:
+        source: TestSource;
+        gate: PacketGate;
+        sink: TestSink;
+    connections:
+        source.out --> gate.in;
+        gate.out --> sink.in;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
+*.gate.openTime = 1s
+*.gate.closeTime = 3s
+
+%contains-regex: stdout
+At 1s gate: Opening gate.
+At 2s source: Starting packet streaming, [^\n]*?
+At 2s gate: Starting packet streaming, [^\n]*?
+At 2s gate: Passing through packet, [^\n]*?
+At 2s sink: Starting packet streaming, [^\n]*?
+At 3s gate: Closing gate.
+At 3s source: Ending packet streaming, [^\n]*?
+At 3s gate: Ending packet streaming, [^\n]*?
+At 3s sink: Ending packet streaming, [^\n]*?

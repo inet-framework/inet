@@ -1,0 +1,68 @@
+%description:
+
+TODO
+
+%file: test.ned
+
+import inet.queueing.gate.PacketGate;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+import inet.protocolelement.common.PacketStreamer;
+import inet.protocolelement.common.PacketDestreamer;
+
+network TestProducerConsumer
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        streamer: PacketStreamer {
+            @display("p=200,100");
+        }
+        gate: PacketGate {
+            @display("p=300,100");
+        }
+        destreamer: PacketDestreamer {
+            @display("p=400,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=500,100");
+        }
+    connections:
+        producer.out --> streamer.in;
+        streamer.out --> gate.in;
+        gate.out --> destreamer.in;
+        destreamer.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestProducerConsumer
+sim-time-limit = 10s
+record-eventlog = true
+cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
+*.producer.packetLength = 1B
+*.producer.productionInterval = 1s
+*.streamer.datarate = 1bps
+*.gate.openTime = 3s
+*.gate.closeTime = 7s
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%subst: /\nRunning simulation\.\.\.\n//
+
+%contains-regex: stdout
+At 3s gate: Opening gate.
+At 3s producer: Producing packet, .*?producer-0.*?
+At 3s streamer: Starting streaming packet, .*?producer-0.*?
+At 3s gate: Passing through packet, .*?producer-0.*?
+At 3s destreamer: Starting destreaming packet, .*?producer-0.*?
+At 7s gate: Closing gate.
+At 7s streamer: Ending streaming packet, .*?producer-0.*?
+At 7s destreamer: Ending destreaming packet, .*?producer-0.*?
+At 7s consumer: Consuming packet, .*?producer-0.*?
+
+<!> Simulation time limit reached -- at t=10s

@@ -1,0 +1,163 @@
+%description:
+
+Checks that making a packet available on a higher priority source while a packet streaming operation
+is in progress on a lower priority source of a PriorityScheduler ends the packet streaming in both
+the source and the sink.
+
+%file: TestSource.cc
+#include "inet/common/ModuleRefByGate.h"
+#include "inet/queueing/contract/IPassivePacketSource.h"
+#include "inet/queueing/scheduler/PriorityScheduler.h"
+
+using namespace inet;
+using namespace inet::queueing;
+namespace PriorityScheduler_1 {
+
+class TestSource : public cSimpleModule, public IPassivePacketSource
+{
+    private:
+        bool canPullSomePacketOnGate[2] = {false, true};
+
+    public:
+        TestSource() : cSimpleModule(65536) {}
+
+        virtual bool canPullSomePacket(const cGate *gate) const override { return canPullSomePacketOnGate[gate->getIndex()]; }
+        virtual Packet *canPullPacket(const cGate *gate) const override { return nullptr; }
+        virtual Packet *pullPacket(const cGate *gate) override { return nullptr; }
+
+        virtual Packet *pullPacketStart(const cGate *gate, bps datarate) override {
+            Enter_Method("pullPacketStart");
+            auto packet = new Packet(nullptr, makeShared<ByteCountChunk>(B(10)));
+            EV_INFO << "Starting packet streaming" << EV_FIELD(packet) << EV_ENDL;
+            return packet;
+        }
+
+        virtual Packet *pullPacketEnd(const cGate *gate) override {
+            Enter_Method("pullPacketEnd");
+            auto packet = new Packet(nullptr, makeShared<ByteCountChunk>(B(10)));
+            EV_INFO << "Ending packet streaming" << EV_FIELD(packet) << EV_ENDL;
+            return packet;
+        }
+
+        virtual Packet *pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength) override { return nullptr; }
+
+    protected:
+        virtual void activity() override;
+};
+
+Define_Module(TestSource);
+
+void TestSource::activity()
+{
+    auto outputGate = gate("out", 0);
+    ModuleRefByGate<PriorityScheduler> scheduler;
+    scheduler.reference(outputGate, true);
+    wait(1);
+    canPullSomePacketOnGate[0] = true;
+    EV_INFO << "Packet becomes available on higher priority gate" << EV_ENDL;
+    scheduler->handleCanPullPacketChanged(gate("out", 0)->getPathEndGate());
+}
+
+}
+
+%file: TestSource.ned
+
+simple TestSource
+{
+    gates:
+        output out[];
+}
+
+%file: TestSink.cc
+#include "inet/common/ModuleRefByGate.h"
+#include "inet/queueing/contract/IPacketSink.h"
+#include "inet/queueing/scheduler/PriorityScheduler.h"
+
+using namespace inet;
+using namespace inet::queueing;
+namespace PriorityScheduler_1 {
+
+class TestSink : public cSimpleModule, public IPacketSink
+{
+    public:
+        TestSink() : cSimpleModule(65536) {}
+
+        virtual IPassivePacketSource *getProvider(const cGate *gate) override { return nullptr; }
+
+        virtual void handleCanPullPacketChanged(const cGate *gate) override { }
+        virtual void handlePullPacketProcessed(Packet *packet, const cGate *gate, bool successful) override { }
+
+        virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+        virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+        virtual void pushPacket(Packet *packet, const cGate *gate) override { delete packet; }
+        virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { delete packet; }
+
+        virtual void pushPacketEnd(Packet *packet, const cGate *gate) override {
+            Enter_Method("pushPacketEnd");
+            EV_INFO << "Ending packet streaming" << EV_FIELD(packet) << EV_ENDL;
+            delete packet;
+        }
+
+        virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { delete packet; }
+
+    protected:
+        virtual void activity() override;
+};
+
+Define_Module(TestSink);
+
+void TestSink::activity()
+{
+    auto inputGate = gate("in");
+    ModuleRefByGate<PriorityScheduler> scheduler;
+    scheduler.reference(inputGate, true);
+    auto packet = scheduler->pullPacketStart(scheduler.getReferencedGate(), bps(8));
+    EV_INFO << "Starting packet streaming" << EV_FIELD(packet) << EV_ENDL;
+    take(packet);
+    delete packet;
+}
+
+}
+
+%file: TestSink.ned
+
+simple TestSink
+{
+    gates:
+        input in;
+}
+
+%file: TestNetwork.ned
+
+import inet.queueing.scheduler.PriorityScheduler;
+
+network TestNetwork
+{
+    submodules:
+        source: TestSource;
+        scheduler: PriorityScheduler;
+        sink: TestSink;
+    connections:
+        source.out++ --> scheduler.in++;
+        source.out++ --> scheduler.in++;
+        scheduler.out --> sink.in;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
+*.gate.openTime = 1s
+*.gate.closeTime = 3s
+
+%contains-regex: stdout
+At 0s source: Starting packet streaming, [^\n]*?
+At 0s scheduler: Starting packet streaming, [^\n]*?
+At 0s sink: Starting packet streaming, [^\n]*?
+At 1s source: Packet becomes available on higher priority gate.
+At 1s scheduler: Checking if the ongoing packet streaming should be ended.
+At 1s source: Ending packet streaming, [^\n]*?
+At 1s scheduler: Ending packet streaming, [^\n]*?
+At 1s sink: Ending packet streaming, [^\n]*?
