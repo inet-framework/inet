@@ -70,11 +70,8 @@ void PreemptingServer::handleCanPushPacketChanged(const cGate *gate)
 void PreemptingServer::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
-    if (isStreaming()) {
-        endStreaming();
-        cancelClockEvent(timer);
-    }
-    else if (canStartStreaming())
+    EV_DEBUG << "Checking if packet streaming should be started" << EV_ENDL;
+    if (!isStreaming() && canStartStreaming())
         startStreaming();
 }
 
