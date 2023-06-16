@@ -50,6 +50,7 @@ void PreemptingServer::endStreaming()
 {
     auto packet = provider.pullPacketEnd();
     take(packet);
+    EV_INFO << "Ending streaming packet" << EV_FIELD(packet) << EV_ENDL;
     delete streamedPacket;
     streamedPacket = packet;
     EV_INFO << "Ending streaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
@@ -61,6 +62,7 @@ void PreemptingServer::endStreaming()
 void PreemptingServer::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
+    EV_DEBUG << "Checking if packet streaming should be started" << EV_ENDL;
     if (!isStreaming() && canStartStreaming())
         startStreaming();
 }
