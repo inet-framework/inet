@@ -13,6 +13,7 @@ import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.static.StationaryMobility;
 import inet.networklayer.common.InterfaceTable;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.tracker.integrated.IntegratedTracker;
 
 
 module Node
@@ -90,6 +91,10 @@ network HiddenNode
 {
     parameters:
     submodules:
+        tracker: IntegratedTracker {
+            parameters:
+                @display("p=100,50;is=s");
+        }
         A: Node {
             parameters:
                 @display("r=,,#707070;p=159,143");

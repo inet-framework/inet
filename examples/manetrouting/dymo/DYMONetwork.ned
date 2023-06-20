@@ -10,6 +10,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.dymo.DymoRouter;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.tracker.integrated.IntegratedTracker;
 
 
 //
@@ -21,6 +22,10 @@ network DYMONetwork
         int numHosts;
         @display("bgb=650,650");
     submodules:
+        tracker: IntegratedTracker {
+            parameters:
+                @display("p=100,50;is=s");
+        }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=100,200;is=s");

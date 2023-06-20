@@ -13,6 +13,7 @@ import inet.node.inet.StandardHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.common.IntegratedVisualizer;
 import inet.visualizer.common.TransportRouteVisualizer;
+import inet.tracker.integrated.IntegratedTracker;
 
 network TransportPathVisualizerSimpleWiredShowcase
 {
@@ -60,6 +61,10 @@ network TransportPathVisualizerFilteringShowcase
 {
     @display("bgb=1024,700");
     submodules:
+        tracker: IntegratedTracker {
+            parameters:
+                @display("p=100,50;is=s");
+        }
         visualizer: IntegratedVisualizer {
             parameters:
                 @display("p=80,50");

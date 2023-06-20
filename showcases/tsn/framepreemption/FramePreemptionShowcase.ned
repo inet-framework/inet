@@ -8,10 +8,15 @@ package inet.showcases.tsn.framepreemption;
 import inet.networks.base.WiredNetworkBase;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.StandardHost;
+import inet.tracker.integrated.IntegratedTracker;
 
 network FramePreemptionShowcase extends WiredNetworkBase
 {
     submodules:
+        tracker: IntegratedTracker {
+            parameters:
+                @display("p=100,50;is=s");
+        }
         host1: StandardHost {
             @display("p=250,100");
         }

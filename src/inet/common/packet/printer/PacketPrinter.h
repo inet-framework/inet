@@ -30,6 +30,7 @@ class INET_API PacketPrinter : public cMessagePrinter
         std::stringstream protocolColumn;
         std::stringstream lengthColumn;
         std::stringstream typeColumn;
+        std::stringstream trackerColumn;
         std::stringstream infoColumn;
     };
 

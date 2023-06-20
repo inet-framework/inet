@@ -10,6 +10,7 @@ package inet.examples.adhoc.ieee80211;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.tracker.integrated.IntegratedTracker;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
 network Net80211
@@ -18,6 +19,10 @@ network Net80211
         int numHosts;
         @display("bgb=650,450");
     submodules:
+        tracker: IntegratedTracker {
+            parameters:
+                @display("p=100,50;is=s");
+        }
         visualizer: <default(firstAvailableOrEmpty("IntegratedOsgVisualizer"))> like IIntegratedVisualizer if typename != "" {
             parameters:
                 @display("p=100,300;is=s");

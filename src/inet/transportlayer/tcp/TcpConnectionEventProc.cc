@@ -114,6 +114,7 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
     // FIXME how to support PUSH? One option is to treat each SEND as a unit of data,
     // and set PSH at SEND boundaries
     Packet *packet = check_and_cast<Packet *>(msg);
+    tcpMain->emit(packetReceivedFromUpperSignal, packet);
     switch (fsm.getState()) {
         case TCP_S_INIT:
             throw cRuntimeError(tcpMain, "Error processing command SEND: connection not open");

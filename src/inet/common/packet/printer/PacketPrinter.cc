@@ -7,9 +7,10 @@
 
 #include "inet/common/packet/printer/PacketPrinter.h"
 
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/stlutils.h"
+#include "inet/common/TrackerTag_m.h"
 
 namespace inet {
 
@@ -28,6 +29,8 @@ std::string PacketPrinter::DirectiveResolver::resolveDirective(char directive) c
             return context.lengthColumn.str();
         case 't':
             return context.typeColumn.str();
+        case 'r':
+            return context.trackerColumn.str();
         case 'i':
             return context.infoColumn.str();
         case 'n':
@@ -74,7 +77,7 @@ const ProtocolPrinter& PacketPrinter::getProtocolPrinter(const Protocol *protoco
 std::set<std::string> PacketPrinter::getSupportedTags() const
 {
     return { "Print inside out", "Print left to right",
-             "Show 'Source' column", "Show 'Destination' column", "Show 'Protocol' column", "Show 'Type' column", "Show 'Length' column", "Show 'Info' column",
+             "Show 'Source' column", "Show 'Destination' column", "Show 'Protocol' column", "Show 'Type' column", "Show 'Length' column", "Show 'Tracker' column", "Show 'Info' column",
              "Show all PDU source fields", "Show all PDU destination fields", "Show all PDU protocols", "Show all PDU lengths",
              "Show physical layer info", "Show link layer info", "Show network layer info", "Show transport layer info", "Show all info", "Show innermost info",
              "Show auto source fields", "Show auto destination fields", "Show auto info" };
@@ -100,6 +103,8 @@ std::vector<std::string> PacketPrinter::getColumnNames(const Options *options) c
         columnNames.push_back("Type");
     if (isEnabledOption(options, "Show 'Length' column"))
         columnNames.push_back("Length");
+    if (isEnabledOption(options, "Show 'Tracker' column"))
+        columnNames.push_back("Tracker");
     if (isEnabledOption(options, "Show 'Info' column"))
         columnNames.push_back("Info");
     return columnNames;
@@ -120,6 +125,8 @@ void PacketPrinter::printContext(std::ostream& stream, const Options *options, C
         stream << "\x1b[34m" << context.typeColumn.str() << "\x1b[39m\t";
     if (isEnabledOption(options, "Show 'Length' column"))
         stream << context.lengthColumn.str() << "\t";
+    if (isEnabledOption(options, "Show 'Tracker' column"))
+        stream << context.trackerColumn.str() << "\t";
     if (isEnabledOption(options, "Show 'Info' column"))
         stream << context.infoColumn.str();
     stream << std::endl;
@@ -209,6 +216,8 @@ void PacketPrinter::printPacket(Packet *packet, const Options *options, Context&
         else
             const_cast<PacketPrinter *>(this)->printPacketLeftToRight(protocolDataUnit, options, context);
     }
+    if (auto trackerTag = packet->findTag<TrackerTag>())
+        context.trackerColumn << trackerTag->getTags();
 }
 
 std::string PacketPrinter::printPacketToString(Packet *packet, const char *format) const

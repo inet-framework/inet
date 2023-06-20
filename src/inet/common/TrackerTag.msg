@@ -1,0 +1,15 @@
+//
+// Copyright (C) 2020 OpenSim Ltd.
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
+//
+
+import inet.common.INETDefs;
+import inet.common.TagBase;
+
+namespace inet;
+
+class TrackerTag extends TagBase
+{
+    string tags;
+}

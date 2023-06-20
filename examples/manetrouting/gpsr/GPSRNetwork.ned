@@ -10,7 +10,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.gpsr.GpsrRouter;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-
+import inet.tracker.integrated.IntegratedTracker;
 
 //
 // TODO
@@ -20,6 +20,10 @@ network GPSRNetworkRandom
     parameters:
         int numHosts;
     submodules:
+        tracker: IntegratedTracker {
+            parameters:
+                @display("p=100,50;is=s");
+        }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=100,200;is=s");

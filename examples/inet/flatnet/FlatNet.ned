@@ -14,8 +14,8 @@ package inet.examples.inet.flatnet;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
+import inet.tracker.integrated.IntegratedTracker;
 import ned.DatarateChannel;
-
 
 network FlatNet
 {
@@ -31,6 +31,10 @@ network FlatNet
             datarate = 10Mbps;
         }
     submodules:
+        tracker: IntegratedTracker {
+            parameters:
+                @display("p=100,50;is=s");
+        }
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config><interface hosts='*' address='192.168.x.x' netmask='255.255.x.x'/></config>");

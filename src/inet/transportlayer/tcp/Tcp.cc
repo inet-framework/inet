@@ -135,6 +135,7 @@ TcpConnection *Tcp::findConnForApp(int socketId)
 
 void Tcp::handleLowerPacket(Packet *packet)
 {
+    emit(packetReceivedFromLowerSignal, packet);
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     if (protocol == &Protocol::tcp) {
         if (!checkCrc(packet)) {
