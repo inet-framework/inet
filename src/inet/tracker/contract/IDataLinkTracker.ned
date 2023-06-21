@@ -19,7 +19,10 @@
 package inet.tracker.contract;
 
 //
-// TODO
+// This module interface allows configuring different ~IDataLinkTracker
+// submodules from INI files.
+//
+// @see ~DataLinkTracker
 //
 moduleinterface IDataLinkTracker
 {

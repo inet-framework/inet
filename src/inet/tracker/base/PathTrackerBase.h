@@ -22,7 +22,6 @@
 #include <fstream>
 
 #include "inet/common/packet/PacketFilter.h"
-#include "inet/common/StringFormat.h"
 #include "inet/tracker/base/TrackerBase.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
 
@@ -34,11 +33,19 @@ using namespace inet::visualizer;
 
 class INET_API PathTrackerBase : public TrackerBase, public cListener
 {
+protected:
+    enum ActivityLevel {
+        ACTIVITY_LEVEL_SERVICE,
+        ACTIVITY_LEVEL_PEER,
+        ACTIVITY_LEVEL_PROTOCOL,
+    };
+
   protected:
     /** @name Parameters */
     //@{
     std::ofstream file;
     bool trackPaths = false;
+    ActivityLevel activityLevel = static_cast<ActivityLevel>(-1);
     NetworkNodeFilter nodeFilter;
     PacketFilter packetFilter;
     //@}
@@ -66,7 +73,7 @@ class INET_API PathTrackerBase : public TrackerBase, public cListener
 
     virtual const char *getTags() const = 0;
 
-    virtual void trackPacketSend(Packet *packet, cModule *senderModule, cModule *receiverModule);
+    virtual void trackPacketSend(Packet *packet, cModule *senderNetworkNode, cModule *senderModule, cModule *receiverNetworkNode, cModule *receiverModule);
 
   public:
     virtual ~PathTrackerBase();

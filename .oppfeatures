@@ -1264,6 +1264,20 @@
         linkerFlags = ""
         />
     <feature
+        id = "Tracker"
+        name = "Communication tracker"
+        description = "Tracks physical, data link, network, and transport layer level communication in the packet log"
+        initiallyEnabled = "true"
+        requires = "VisualizationCommon"
+        labels = ""
+        nedPackages = "
+                       inet.tracker
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_TRACKER"
+        linkerFlags = ""
+        />
+    <feature
         id = "Tun"
         name = "TUN/TAP virtual network interface"
         description = "TUN/TAP virtual network interface."

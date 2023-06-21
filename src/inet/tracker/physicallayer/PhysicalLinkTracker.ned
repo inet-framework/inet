@@ -22,7 +22,7 @@ import inet.tracker.base.LinkTrackerBase;
 import inet.tracker.contract.IPhysicalLinkTracker;
 
 //
-// TODO
+// This module tracks physical layer communication.
 //
 simple PhysicalLinkTracker extends LinkTrackerBase like IPhysicalLinkTracker
 {

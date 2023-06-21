@@ -18,14 +18,8 @@
 
 #include "inet/tracker/base/TrackerBase.h"
 
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/geometry/object/LineSegment.h"
-#include "inet/common/geometry/shape/Cuboid.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/chunk/SliceChunk.h"
-#include "inet/mobility/contract/IMobility.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
 
@@ -35,10 +29,7 @@ void TrackerBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        const char *path = par("trackingTargetModule");
-        trackingTargetModule = getModuleByPath(path);
-        if (trackingTargetModule == nullptr)
-            throw cRuntimeError("Module not found on path '%s' defined by par 'trackingTargetModule'", path);
+        const char *path = par("trackingSubjectModule");
         trackingSubjectModule = getModuleByPath(path);
         if (trackingSubjectModule == nullptr)
             throw cRuntimeError("Module not found on path '%s' defined by par 'trackingSubjectModule'", path);

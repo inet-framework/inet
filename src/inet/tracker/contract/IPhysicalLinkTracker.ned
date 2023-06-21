@@ -19,7 +19,10 @@
 package inet.tracker.contract;
 
 //
-// TODO
+// This module interface allows configuring different ~IPhysicalLinkTracker
+// submodules from INI files.
+//
+// @see ~PhysicalLinkTracker
 //
 moduleinterface IPhysicalLinkTracker
 {

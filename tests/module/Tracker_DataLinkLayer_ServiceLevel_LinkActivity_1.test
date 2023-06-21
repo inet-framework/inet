@@ -1,0 +1,63 @@
+%description:
+
+Tests communication tracking at the service level of the data link layer on a wireless network.
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.tracker.integrated.IntegratedTracker;
+
+network TestNetwork
+{
+    submodules:
+        tracker: IntegratedTracker;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        source: AdhocHost;
+        destination: AdhocHost;
+        neighbor: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestNetwork
+sim-time-limit = 1s
+ned-path = .;../../../../src
+
+**.arp.typename = "GlobalArp"
+
+**.host*.mobility.typename = "StationaryMobility"
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+
+# ping app
+*.source.numApps = 1
+*.source.app[0].typename = "PingApp"
+*.source.app[0].destAddr = "destination"
+*.source.app[0].startTime = 0s
+
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+
+*.source.mobility.initialX = 200m
+*.destination.mobility.initialX = 800m
+*.neighbor.mobility.initialX = 500m
+
+*.tracker.dataLinkTracker.fileName = "results/data-link-layer.log"
+*.tracker.dataLinkTracker.trackLinks = true
+*.tracker.dataLinkTracker.activityLevel = "service"
+
+%contains: results/data-link-layer.log
+TestNetwork.source	TestNetwork.destination	ping0	link_layer service_level
+TestNetwork.destination	TestNetwork.source	ping0-reply	link_layer service_level
+
+%not-contains-regex: results/data-link-layer.log
+neighbor

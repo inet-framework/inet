@@ -41,6 +41,15 @@ void PathTrackerBase::initialize(int stage)
         if (!opp_isempty(fileName))
             file.open(fileName);
         trackPaths = par("trackPaths");
+        const char *activityLevelString = par("activityLevel");
+        if (!strcmp(activityLevelString, "service"))
+            activityLevel = ACTIVITY_LEVEL_SERVICE;
+        else if (!strcmp(activityLevelString, "peer"))
+            activityLevel = ACTIVITY_LEVEL_PEER;
+        else if (!strcmp(activityLevelString, "protocol"))
+            activityLevel = ACTIVITY_LEVEL_PROTOCOL;
+        else
+            throw cRuntimeError("Unknown activity level: %s", activityLevelString);
         nodeFilter.setPattern(par("nodeFilter"));
         packetFilter.setPattern(par("packetFilter"));
         if (trackPaths)
@@ -66,9 +75,19 @@ void PathTrackerBase::handleParameterChange(const char *name)
 
 void PathTrackerBase::subscribe()
 {
-    trackingSubjectModule->subscribe(packetSentToUpperSignal, this);
-    trackingSubjectModule->subscribe(packetReceivedFromUpperSignal, this);
-    trackingSubjectModule->subscribe(packetReceivedFromLowerSignal, this);
+    if (activityLevel == ACTIVITY_LEVEL_SERVICE) {
+        trackingSubjectModule->subscribe(packetSentToUpperSignal, this);
+        trackingSubjectModule->subscribe(packetReceivedFromUpperSignal, this);
+        trackingSubjectModule->subscribe(packetReceivedFromLowerSignal, this);
+    }
+    else if (activityLevel == ACTIVITY_LEVEL_PEER) {
+        trackingSubjectModule->subscribe(packetSentToPeerSignal, this);
+        trackingSubjectModule->subscribe(packetReceivedFromPeerSignal, this);
+    }
+    else if (activityLevel == ACTIVITY_LEVEL_PROTOCOL) {
+        trackingSubjectModule->subscribe(packetSentToLowerSignal, this);
+        trackingSubjectModule->subscribe(packetReceivedFromLowerSignal, this);
+    }
 }
 
 void PathTrackerBase::unsubscribe()
@@ -76,9 +95,19 @@ void PathTrackerBase::unsubscribe()
     // NOTE: lookup the module again because it may have been deleted first
     auto trackingSubjectModule = findModuleFromPar<cModule>(par("trackingSubjectModule"), this);
     if (trackingSubjectModule != nullptr) {
-        trackingSubjectModule->unsubscribe(packetSentToUpperSignal, this);
-        trackingSubjectModule->unsubscribe(packetReceivedFromUpperSignal, this);
-        trackingSubjectModule->unsubscribe(packetReceivedFromLowerSignal, this);
+        if (activityLevel == ACTIVITY_LEVEL_SERVICE) {
+            trackingSubjectModule->unsubscribe(packetSentToUpperSignal, this);
+            trackingSubjectModule->unsubscribe(packetReceivedFromUpperSignal, this);
+            trackingSubjectModule->unsubscribe(packetReceivedFromLowerSignal, this);
+        }
+        else if (activityLevel == ACTIVITY_LEVEL_PEER) {
+            trackingSubjectModule->unsubscribe(packetSentToPeerSignal, this);
+            trackingSubjectModule->unsubscribe(packetReceivedFromPeerSignal, this);
+        }
+        else if (activityLevel == ACTIVITY_LEVEL_PROTOCOL) {
+            trackingSubjectModule->unsubscribe(packetSentToLowerSignal, this);
+            trackingSubjectModule->unsubscribe(packetReceivedFromLowerSignal, this);
+        }
     }
 }
 
@@ -107,7 +136,10 @@ void PathTrackerBase::removeIncompletePath(int chunkId)
 void PathTrackerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    if (signal == packetReceivedFromUpperSignal) {
+    if ((activityLevel == ACTIVITY_LEVEL_SERVICE && signal == packetReceivedFromUpperSignal) ||
+        (activityLevel == ACTIVITY_LEVEL_PEER && signal == packetSentToPeerSignal) ||
+        (activityLevel == ACTIVITY_LEVEL_PROTOCOL && signal == packetSentToLowerSignal))
+    {
         auto module = check_and_cast<cModule *>(source);
         if (isPathStart(module)) {
             auto networkNode = getContainingNode(module);
@@ -135,22 +167,26 @@ void PathTrackerBase::receiveSignal(cComponent *source, simsignal_t signal, cObj
             }
         }
     }
-    else if (signal == packetSentToUpperSignal) {
-        auto module = check_and_cast<cModule *>(source);
-        if (isPathEnd(module)) {
-            auto networkNode = getContainingNode(module);
+    else if ((activityLevel == ACTIVITY_LEVEL_SERVICE && signal == packetSentToUpperSignal) ||
+             (activityLevel == ACTIVITY_LEVEL_PEER && signal == packetReceivedFromPeerSignal) ||
+             (activityLevel == ACTIVITY_LEVEL_PROTOCOL && signal == packetReceivedFromLowerSignal))
+    {
+        auto receiverModule = check_and_cast<cModule *>(source);
+        if (isPathEnd(receiverModule)) {
+            auto receiverNetworkNode = getContainingNode(receiverModule);
             auto packet = check_and_cast<Packet *>(object);
-            if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
+            if (nodeFilter.matches(receiverNetworkNode) && packetFilter.matches(packet)) {
                 mapChunks(packet->peekAt(b(0), packet->getTotalLength()), [&] (const Ptr<const Chunk>& chunk, int id) {
                     auto path = getIncompletePath(id);
                     if (path != nullptr) {
                         if (path->size() > 1) {
                             auto senderModule = check_and_cast<cModule *>(getSimulation()->getComponent(path->at(0)));
+                            auto senderNetworkNode = getContainingNode(senderModule);
                             auto trackedPacket = packet->dup();
                             trackedPacket->trim();
                             auto trackerTag = trackedPacket->addTag<TrackerTag>();
                             trackerTag->setTags(getTags());
-                            trackPacketSend(trackedPacket, senderModule, module);
+                            trackPacketSend(trackedPacket, senderNetworkNode, senderModule, receiverNetworkNode, receiverModule);
                             delete trackedPacket;
                         }
                         removeIncompletePath(id);
@@ -163,20 +199,33 @@ void PathTrackerBase::receiveSignal(cComponent *source, simsignal_t signal, cObj
         throw cRuntimeError("Unknown signal");
 }
 
-void PathTrackerBase::trackPacketSend(Packet *packet, cModule *senderModule, cModule *receiverModule)
+void PathTrackerBase::trackPacketSend(Packet *packet, cModule *senderNetworkNode, cModule *senderModule, cModule *receiverNetworkNode, cModule *receiverModule)
 {
     EV_INFO << "Recording virtual packet send" << EV_FIELD(senderModule) << EV_FIELD(receiverModule) << EV_FIELD(packet) << EV_ENDL;
-    // KLUDGE TODO: this gate may not even exist
-    auto senderGate = senderModule->hasGate("transportIn") ? senderModule->gate("transportIn") : senderModule->gate("appIn"); // TODO:
-    packet->setSentFrom(senderModule, senderGate->getId(), simTime());
-    auto envir = getEnvir();
-//    envir->beginSend(packet, SendOptions().tags(getTags()));
-    envir->beginSend(packet, SendOptions());
-    // KLUDGE TODO: this gate may not even exist
-    auto arrivalGate = receiverModule->hasGate("transportOut") ? receiverModule->gate("transportOut") : receiverModule->gate("appOut");
-    envir->messageSendDirect(packet, arrivalGate, ChannelResult());
-    envir->endSend(packet);
-    file << senderModule->getFullPath() << "\t" << receiverModule->getFullPath() << "\t" << packet->getFullName() << "\t" << packet->getTag<TrackerTag>()->getTags() << std::endl;
+//    // KLUDGE TODO: this gate may not even exist
+//    auto senderGate = senderModule->hasGate("transportIn") ? senderModule->gate("transportIn") : senderModule->gate("appIn"); // TODO:
+//    packet->setSentFrom(senderModule, senderGate->getId(), simTime());
+//    auto envir = getEnvir();
+////    envir->beginSend(packet, SendOptions().tags(getTags()));
+//    envir->beginSend(packet, SendOptions());
+//    // KLUDGE TODO: this gate may not even exist
+//    auto arrivalGate = receiverModule->hasGate("transportOut") ? receiverModule->gate("transportOut") : receiverModule->gate("appOut");
+//    envir->messageSendDirect(packet, arrivalGate, ChannelResult());
+//    envir->endSend(packet);
+    const char *moduleMode = par("moduleMode");
+    cModule *sender = nullptr;
+    cModule *receiver = nullptr;
+    if (!strcmp(moduleMode, "networkNode")) {
+        sender = senderNetworkNode;
+        receiver = receiverNetworkNode;
+    }
+    else if (!strcmp(moduleMode, "module")) {
+        sender = senderModule;
+        receiver = receiverModule;
+    }
+    else
+        throw cRuntimeError("Unknown moduleMode parameter value");
+    file << sender->getFullPath() << "\t" << receiver->getFullPath() << "\t" << packet->getFullName() << "\t" << packet->getTag<TrackerTag>()->getTags() << std::endl;
 }
 
 } // namespace tracker

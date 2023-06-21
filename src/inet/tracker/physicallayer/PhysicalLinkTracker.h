@@ -32,9 +32,9 @@ class INET_API PhysicalLinkTracker : public LinkTrackerBase
     virtual bool isLinkEnd(cModule *module) const override;
     virtual const char *getTags() const override {
         switch (activityLevel) {
-            case ACTIVITY_LEVEL_SERVICE: return "physical_layer service";
-            case ACTIVITY_LEVEL_PEER: return "physical_layer peer";
-            case ACTIVITY_LEVEL_PROTOCOL: return "physical_layer protocol";
+            case ACTIVITY_LEVEL_SERVICE: return "physical_layer service_level";
+            case ACTIVITY_LEVEL_PEER: return "physical_layer peer_level";
+            case ACTIVITY_LEVEL_PROTOCOL: return "physical_layer protocol_level";
             default: throw cRuntimeError("Unknown activity level");
         }
     }

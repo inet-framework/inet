@@ -1,0 +1,44 @@
+%description:
+
+Tests communication tracking at the service level of the data link layer on an Ethernet network.
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth1G;
+import inet.node.inet.StandardHost;
+import inet.tracker.integrated.IntegratedTracker;
+
+network TestNetwork
+{
+    submodules:
+        tracker: IntegratedTracker;
+        configurator: Ipv4NetworkConfigurator;
+        source: StandardHost;
+        destination: StandardHost;
+    connections:
+        source.ethg++ <--> Eth1G <--> destination.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestNetwork
+sim-time-limit = 1s
+ned-path = .;../../../../src
+
+**.arp.typename = "GlobalArp"
+
+# ping app
+*.source.numApps = 1
+*.source.app[0].typename = "PingApp"
+*.source.app[0].destAddr = "destination"
+*.source.app[0].startTime = 0s
+
+*.tracker.dataLinkTracker.fileName = "results/data-link-layer.log"
+*.tracker.dataLinkTracker.trackLinks = true
+*.tracker.dataLinkTracker.activityLevel = "service"
+
+%contains: results/data-link-layer.log
+TestNetwork.source	TestNetwork.destination	ping0	link_layer service_level
+TestNetwork.destination	TestNetwork.source	ping0-reply	link_layer service_level

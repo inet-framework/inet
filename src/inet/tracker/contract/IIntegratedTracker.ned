@@ -19,7 +19,13 @@
 package inet.tracker.contract;
 
 //
-// TODO
+// This module interface allows configuring different ~IIntegratedTracker
+// submodules from INI files. Integrated trackers are compound modules, they
+// don't track anything on their own. Instead they combine multiple trackers,
+// most often simple modules, to provide a convenient way to add complex
+// communication tracking to a simulation.
+//
+// @see ~IntegratedTracker
 //
 moduleinterface IIntegratedTracker
 {

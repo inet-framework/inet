@@ -36,8 +36,10 @@ package inet.tracker.base;
 simple PathTrackerBase extends TrackerBase
 {
     parameters:
-        string fileName = default("");
+        string fileName = default(""); // output file name, disabled by default
         bool trackPaths = default(false); // track paths, disabled by default
+        string moduleMode @enum("networkNode", "module") = default("networkNode");
+        string activityLevel @enum("service", "peer", "protocol") = default("service"); // determines what level of activity is tracked, service level by default
 
         string startPathSignal = default("packetReceivedFromUpper");
         string extendPathSignal = default("packetReceivedFromLower");

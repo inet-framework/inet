@@ -21,6 +21,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/TrackerTag_m.h"
+#include "inet/physicallayer/common/Signal.h"
 
 namespace inet {
 
@@ -139,7 +140,8 @@ void LinkTrackerBase::receiveSignal(cComponent *source, simsignal_t signal, cObj
     {
         auto module = check_and_cast<cModule *>(source);
         if (isLinkStart(module)) {
-            auto packet = check_and_cast<Packet *>(object);
+            auto signal = dynamic_cast<physicallayer::Signal *>(object);
+            auto packet = signal != nullptr ? check_and_cast<Packet *>(signal->getEncapsulatedPacket()) : check_and_cast<Packet *>(object);
             mapChunks(packet->peekAt(b(0), packet->getTotalLength()), [&] (const Ptr<const Chunk>& chunk, int id) { if (getLastModule(id) != nullptr) removeLastModule(id); });
             auto networkNode = getContainingNode(module);
             auto networkInterface = getContainingNicModule(module);
@@ -154,7 +156,8 @@ void LinkTrackerBase::receiveSignal(cComponent *source, simsignal_t signal, cObj
     {
         auto receiverModule = check_and_cast<cModule *>(source);
         if (isLinkEnd(receiverModule)) {
-            auto packet = check_and_cast<Packet *>(object);
+            auto signal = dynamic_cast<physicallayer::Signal *>(object);
+            auto packet = signal != nullptr ? check_and_cast<Packet *>(signal->getEncapsulatedPacket()) : check_and_cast<Packet *>(object);
             auto receiverNetworkNode = getContainingNode(receiverModule);
             auto receiverNetworkInterface = getContainingNicModule(receiverModule);
             if (nodeFilter.matches(receiverNetworkNode) && interfaceFilter.matches(receiverNetworkInterface) && packetFilter.matches(packet)) {
@@ -185,16 +188,16 @@ void LinkTrackerBase::receiveSignal(cComponent *source, simsignal_t signal, cObj
 void LinkTrackerBase::trackPacketSend(Packet *packet, cModule *senderNetworkNode, cModule *senderNetworkInterface, cModule *senderModule, cModule *receiverNetworkNode, cModule *receiverNetworkInterface, cModule *receiverModule)
 {
     EV_INFO << "Recording virtual packet send" << EV_FIELD(senderModule) << EV_FIELD(receiverModule) << EV_FIELD(packet) << EV_ENDL;
-    // KLUDGE TODO: this gate may not even exist
-    auto senderGate = senderModule->gate("upperLayerIn");
-    packet->setSentFrom(senderModule, senderGate->getId(), simTime());
-    auto envir = getEnvir();
-//    envir->beginSend(packet, SendOptions().tags(getTags()));
-    envir->beginSend(packet, SendOptions());
-    // KLUDGE TODO: this gate may not even exist
-    auto arrivalGate = receiverModule->gate("upperLayerOut");
-    envir->messageSendDirect(packet, arrivalGate, ChannelResult());
-    envir->endSend(packet);
+//    // KLUDGE TODO: this gate may not even exist
+//    auto senderGate = senderModule->gate("upperLayerIn");
+//    packet->setSentFrom(senderModule, senderGate->getId(), simTime());
+//    auto envir = getEnvir();
+////    envir->beginSend(packet, SendOptions().tags(getTags()));
+//    envir->beginSend(packet, SendOptions());
+//    // KLUDGE TODO: this gate may not even exist
+//    auto arrivalGate = receiverModule->gate("upperLayerOut");
+//    envir->messageSendDirect(packet, arrivalGate, ChannelResult());
+//    envir->endSend(packet);
     const char *moduleMode = par("moduleMode");
     cModule *sender = nullptr;
     cModule *receiver = nullptr;

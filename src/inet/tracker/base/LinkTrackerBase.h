@@ -22,7 +22,6 @@
 #include <fstream>
 
 #include "inet/common/packet/PacketFilter.h"
-#include "inet/common/StringFormat.h"
 #include "inet/tracker/base/TrackerBase.h"
 #include "inet/visualizer/util/InterfaceFilter.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"

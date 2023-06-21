@@ -29,8 +29,8 @@ package inet.tracker.base;
 simple LinkTrackerBase extends TrackerBase
 {
     parameters:
-        string fileName = default("");
-        bool trackLinks = default(false);
+        string fileName = default(""); // output file name, disabled by default
+        bool trackLinks = default(false); // track links, disabled by default
         string moduleMode @enum("networkNode", "networkInterface", "module") = default("networkNode");
         string activityLevel @enum("service", "peer", "protocol") = default("service"); // determines what level of activity is tracked, service level by default
 

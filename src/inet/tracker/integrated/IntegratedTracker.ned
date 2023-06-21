@@ -25,13 +25,14 @@ import inet.tracker.contract.IPhysicalLinkTracker;
 import inet.tracker.contract.ITransportPathTracker;
 
 //
-// TODO
+// This module integrates all communication trackers into a single module. It
+// supports disabling any submodule tracker by providing an empty string as
+// its type.
 //
 module IntegratedTracker like IIntegratedTracker
 {
     parameters:
         @display("i=block/app");
-        *.trackingTargetModule = default("^.^");
         *.trackingSubjectModule = default("^.^");
     submodules:
         physicalLinkTracker: <default("PhysicalLinkTracker")> like IPhysicalLinkTracker if typename != "" {

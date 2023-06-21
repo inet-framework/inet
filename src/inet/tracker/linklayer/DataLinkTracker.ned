@@ -22,7 +22,7 @@ import inet.tracker.base.LinkTrackerBase;
 import inet.tracker.contract.IDataLinkTracker;
 
 //
-// TODO
+// This module tracks data link layer communication.
 //
 simple DataLinkTracker extends LinkTrackerBase like IDataLinkTracker
 {

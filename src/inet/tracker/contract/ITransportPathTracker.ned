@@ -20,10 +20,9 @@ package inet.tracker.contract;
 
 //
 // This module interface allows configuring different ~ITransportPathTracker
-// submodules from INI files. Such a tracker displays active transport routes
-// in a network.
+// submodules from INI files.
 //
-// @see ~TransportPathTracker, ~TransportPathOsgTracker, ~TransportPathTracker
+// @see ~TransportPathTracker
 //
 moduleinterface ITransportPathTracker
 {

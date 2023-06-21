@@ -22,7 +22,7 @@ import inet.tracker.base.PathTrackerBase;
 import inet.tracker.contract.INetworkPathTracker;
 
 //
-// TODO
+// This module tracks network layer communication.
 //
 simple NetworkPathTracker extends PathTrackerBase like INetworkPathTracker
 {

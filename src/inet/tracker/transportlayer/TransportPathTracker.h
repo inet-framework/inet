@@ -31,7 +31,14 @@ class INET_API TransportPathTracker : public PathTrackerBase
     virtual bool isPathStart(cModule *module) const override;
     virtual bool isPathEnd(cModule *module) const override;
     virtual bool isPathElement(cModule *module) const override;
-    virtual const char *getTags() const override { return "transport_layer service"; }
+    virtual const char *getTags() const override {
+        switch (activityLevel) {
+            case ACTIVITY_LEVEL_SERVICE: return "transport_layer service_level";
+            case ACTIVITY_LEVEL_PEER: return "transport_layer peer_level";
+            case ACTIVITY_LEVEL_PROTOCOL: return "transport_layer protocol_level";
+            default: throw cRuntimeError("Unknown activity level");
+        }
+    }
 };
 
 } // namespace tracker
