@@ -52,7 +52,7 @@ ned-path = .;../../../../src
 *.neighbor.mobility.initialX = 500m
 
 *.tracker.transportPathTracker.fileName = "results/transport-layer.log"
-*.tracker.transportPathTracker.trackLinks = true
+*.tracker.transportPathTracker.trackPaths = true
 *.tracker.transportPathTracker.activityLevel = "service"
 
 %contains: results/transport-layer.log

@@ -28,7 +28,7 @@ void PhysicalLayerBase::handleLowerMessage(cMessage *message)
     if (!message->isPacket())
         handleLowerCommand(message);
     else {
-        emit(packetReceivedFromLowerSignal, message);
+//        emit(packetReceivedFromLowerSignal, message);
         handleSignal(check_and_cast<WirelessSignal *>(message));
     }
 }

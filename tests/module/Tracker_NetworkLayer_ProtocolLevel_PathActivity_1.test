@@ -1,23 +1,26 @@
 %description:
 
-Tests communication tracking at the service level of the network layer on a wireless network.
+Tests communication tracking at the service level of the network layer on an Ethernet network.
 
 %file: test.ned
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.inet.AdhocHost;
-import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.node.ethernet.Eth1G;
+import inet.node.inet.StandardHost;
+import inet.node.inet.Router;
 import inet.tracker.integrated.IntegratedTracker;
 
 network TestNetwork
 {
     submodules:
         tracker: IntegratedTracker;
-        radioMedium: Ieee80211ScalarRadioMedium;
         configurator: Ipv4NetworkConfigurator;
-        source: AdhocHost;
-        destination: AdhocHost;
-        neighbor: AdhocHost;
+        source: StandardHost;
+        destination: StandardHost;
+        router: Router;
+    connections:
+        source.ethg++ <--> Eth1G <--> router.ethg++;
+        router.ethg++ <--> Eth1G <--> destination.ethg++;
 }
 
 %inifile: omnetpp.ini
@@ -29,30 +32,14 @@ ned-path = .;../../../../src
 
 **.arp.typename = "GlobalArp"
 
-**.host*.mobility.typename = "StationaryMobility"
-**.mobility.constraintAreaMinZ = 0m
-**.mobility.constraintAreaMinX = 0m
-**.mobility.constraintAreaMinY = 0m
-**.mobility.constraintAreaMaxX = 1000m
-**.mobility.constraintAreaMaxY = 1000m
-**.mobility.constraintAreaMaxZ = 0m
-
 # ping app
 *.source.numApps = 1
 *.source.app[0].typename = "PingApp"
 *.source.app[0].destAddr = "destination"
 *.source.app[0].startTime = 0s
 
-**.mobility.initFromDisplayString = false
-**.mobility.initialY = 500m
-**.mobility.initialZ = 0m
-
-*.source.mobility.initialX = 200m
-*.destination.mobility.initialX = 800m
-*.neighbor.mobility.initialX = 500m
-
 *.tracker.networkPathTracker.fileName = "results/network-layer.log"
-*.tracker.networkPathTracker.trackLinks = true
+*.tracker.networkPathTracker.trackPaths = true
 *.tracker.networkPathTracker.activityLevel = "protocol"
 
 %contains: results/network-layer.log

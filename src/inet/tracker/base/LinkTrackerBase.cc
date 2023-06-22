@@ -22,6 +22,8 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/TrackerTag_m.h"
 #include "inet/physicallayer/common/Signal.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
 
 namespace inet {
 
@@ -89,6 +91,8 @@ void LinkTrackerBase::subscribe()
     else if (activityLevel == ACTIVITY_LEVEL_PROTOCOL) {
         trackingSubjectModule->subscribe(packetSentToLowerSignal, this);
         trackingSubjectModule->subscribe(packetReceivedFromLowerSignal, this);
+        trackingSubjectModule->subscribe(transmissionEndedSignal, this);
+        trackingSubjectModule->subscribe(receptionEndedSignal, this);
     }
 }
 
@@ -108,6 +112,8 @@ void LinkTrackerBase::unsubscribe()
         else if (activityLevel == ACTIVITY_LEVEL_PROTOCOL) {
             trackingSubjectModule->unsubscribe(packetSentToLowerSignal, this);
             trackingSubjectModule->unsubscribe(packetReceivedFromLowerSignal, this);
+            trackingSubjectModule->unsubscribe(transmissionEndedSignal, this);
+            trackingSubjectModule->unsubscribe(receptionEndedSignal, this);
         }
     }
 }
@@ -136,12 +142,20 @@ void LinkTrackerBase::receiveSignal(cComponent *source, simsignal_t signal, cObj
     Enter_Method_Silent();
     if ((activityLevel == ACTIVITY_LEVEL_SERVICE && signal == packetReceivedFromUpperSignal) ||
         (activityLevel == ACTIVITY_LEVEL_PEER && signal == packetSentToPeerSignal) ||
-        (activityLevel == ACTIVITY_LEVEL_PROTOCOL && signal == packetSentToLowerSignal))
+        (activityLevel == ACTIVITY_LEVEL_PROTOCOL && signal == packetSentToLowerSignal) ||
+        (activityLevel == ACTIVITY_LEVEL_PROTOCOL && signal == transmissionEndedSignal))
     {
         auto module = check_and_cast<cModule *>(source);
         if (isLinkStart(module)) {
+            const Packet *packet = nullptr;
             auto signal = dynamic_cast<physicallayer::Signal *>(object);
-            auto packet = signal != nullptr ? check_and_cast<Packet *>(signal->getEncapsulatedPacket()) : check_and_cast<Packet *>(object);
+            if (signal != nullptr)
+                packet = check_and_cast<Packet *>(signal->getEncapsulatedPacket());
+            auto transmission = dynamic_cast<physicallayer::ITransmission *>(object);
+            if (transmission != nullptr)
+                packet = transmission->getPacket();
+            if (packet == nullptr)
+                packet = check_and_cast<Packet *>(object);
             mapChunks(packet->peekAt(b(0), packet->getTotalLength()), [&] (const Ptr<const Chunk>& chunk, int id) { if (getLastModule(id) != nullptr) removeLastModule(id); });
             auto networkNode = getContainingNode(module);
             auto networkInterface = getContainingNicModule(module);
@@ -152,12 +166,20 @@ void LinkTrackerBase::receiveSignal(cComponent *source, simsignal_t signal, cObj
     }
     else if ((activityLevel == ACTIVITY_LEVEL_SERVICE && signal == packetSentToUpperSignal) ||
              (activityLevel == ACTIVITY_LEVEL_PEER && signal == packetReceivedFromPeerSignal) ||
-             (activityLevel == ACTIVITY_LEVEL_PROTOCOL && signal == packetReceivedFromLowerSignal))
+             (activityLevel == ACTIVITY_LEVEL_PROTOCOL && signal == packetReceivedFromLowerSignal) ||
+             (activityLevel == ACTIVITY_LEVEL_PROTOCOL && signal == receptionEndedSignal))
     {
         auto receiverModule = check_and_cast<cModule *>(source);
         if (isLinkEnd(receiverModule)) {
+            const Packet *packet = nullptr;
             auto signal = dynamic_cast<physicallayer::Signal *>(object);
-            auto packet = signal != nullptr ? check_and_cast<Packet *>(signal->getEncapsulatedPacket()) : check_and_cast<Packet *>(object);
+            if (signal != nullptr)
+                packet = check_and_cast<Packet *>(signal->getEncapsulatedPacket());
+            auto reception = dynamic_cast<physicallayer::IReception *>(object);
+            if (reception != nullptr)
+                packet = reception->getTransmission()->getPacket();
+            if (packet == nullptr)
+                packet = check_and_cast<Packet *>(object);
             auto receiverNetworkNode = getContainingNode(receiverModule);
             auto receiverNetworkInterface = getContainingNicModule(receiverModule);
             if (nodeFilter.matches(receiverNetworkNode) && interfaceFilter.matches(receiverNetworkInterface) && packetFilter.matches(packet)) {

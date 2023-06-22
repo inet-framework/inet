@@ -18,6 +18,7 @@
 
 #include "inet/tracker/physicallayer/PhysicalLinkTracker.h"
 
+#include "inet/linklayer/ethernet/base/EthernetMacBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {
@@ -28,12 +29,14 @@ Define_Module(PhysicalLinkTracker);
 
 bool PhysicalLinkTracker::isLinkStart(cModule *module) const
 {
-    return dynamic_cast<inet::physicallayer::IRadio *>(module) != nullptr;
+    return dynamic_cast<inet::physicallayer::IRadio *>(module) != nullptr ||
+           dynamic_cast<EthernetMacBase *>(module); // NOTE: this module also serves as a PHY
 }
 
 bool PhysicalLinkTracker::isLinkEnd(cModule *module) const
 {
-    return dynamic_cast<inet::physicallayer::IRadio *>(module) != nullptr;
+    return dynamic_cast<inet::physicallayer::IRadio *>(module) != nullptr ||
+           dynamic_cast<EthernetMacBase *>(module); // NOTE: this module also serves as a PHY
 }
 
 } // namespace tracker

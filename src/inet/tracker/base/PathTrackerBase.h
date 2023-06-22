@@ -73,7 +73,7 @@ protected:
 
     virtual const char *getTags() const = 0;
 
-    virtual void trackPacketSend(Packet *packet, cModule *senderNetworkNode, cModule *senderModule, cModule *receiverNetworkNode, cModule *receiverModule);
+    virtual void trackPacketSend(Packet *packet, cModule *senderNetworkNode, cModule *senderModule, cModule *receiverNetworkNode, cModule *receiverModule, const std::vector<int> *path);
 
   public:
     virtual ~PathTrackerBase();

@@ -1092,6 +1092,7 @@ void Ipv4::sendPacketToNIC(Packet *packet)
     if (auto networkInterfaceProtocol = networkInterface->getProtocol())
         ensureEncapsulationProtocolReq(packet, networkInterfaceProtocol, true, false);
     setDispatchProtocol(packet);
+    emit(packetSentToLowerSignal, packet);
     send(packet, "queueOut");
 }
 

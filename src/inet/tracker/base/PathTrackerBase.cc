@@ -179,6 +179,7 @@ void PathTrackerBase::receiveSignal(cComponent *source, simsignal_t signal, cObj
                 mapChunks(packet->peekAt(b(0), packet->getTotalLength()), [&] (const Ptr<const Chunk>& chunk, int id) {
                     auto path = getIncompletePath(id);
                     if (path != nullptr) {
+                        addToIncompletePath(id, receiverModule);
                         if (path->size() > 1) {
                             auto senderModule = check_and_cast<cModule *>(getSimulation()->getComponent(path->at(0)));
                             auto senderNetworkNode = getContainingNode(senderModule);
@@ -186,7 +187,7 @@ void PathTrackerBase::receiveSignal(cComponent *source, simsignal_t signal, cObj
                             trackedPacket->trim();
                             auto trackerTag = trackedPacket->addTag<TrackerTag>();
                             trackerTag->setTags(getTags());
-                            trackPacketSend(trackedPacket, senderNetworkNode, senderModule, receiverNetworkNode, receiverModule);
+                            trackPacketSend(trackedPacket, senderNetworkNode, senderModule, receiverNetworkNode, receiverModule, path);
                             delete trackedPacket;
                         }
                         removeIncompletePath(id);
@@ -199,7 +200,7 @@ void PathTrackerBase::receiveSignal(cComponent *source, simsignal_t signal, cObj
         throw cRuntimeError("Unknown signal");
 }
 
-void PathTrackerBase::trackPacketSend(Packet *packet, cModule *senderNetworkNode, cModule *senderModule, cModule *receiverNetworkNode, cModule *receiverModule)
+void PathTrackerBase::trackPacketSend(Packet *packet, cModule *senderNetworkNode, cModule *senderModule, cModule *receiverNetworkNode, cModule *receiverModule, const std::vector<int> *path)
 {
     EV_INFO << "Recording virtual packet send" << EV_FIELD(senderModule) << EV_FIELD(receiverModule) << EV_FIELD(packet) << EV_ENDL;
 //    // KLUDGE TODO: this gate may not even exist
