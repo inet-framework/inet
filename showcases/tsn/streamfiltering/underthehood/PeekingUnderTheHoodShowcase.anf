@@ -5,7 +5,7 @@
         <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="21" name="Traffic class 1" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="21" name="Traffic class 1" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
@@ -642,7 +642,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="269" name="Traffic class 2" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="269" name="Traffic class 2" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
@@ -1279,7 +1279,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="268" name="Traffic class 3" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="268" name="Traffic class 3" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
@@ -1923,7 +1923,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_prefer_module_display_paths" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
             <property name="legend_manual" value="true"/>
-            <property name="legend_replacements" value="/\/ 1000000//&#10;/DataRate.*//"/>
+            <property name="legend_replacements" value="/\/ 1000000//&#10;/DataRate.*/ data rate/"/>
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="$name"/>
         </chart>
