@@ -13,8 +13,9 @@ which allows specifying committed/excess information rates and burst sizes.
 The Model
 ---------
 
-Filtering Overview
-~~~~~~~~~~~~~~~~~~
+Let's see the model...token bucket
+
+For an overview of filtering in INET, check out the TODO section of the TODO showcase.
 
 As described in the TODO showcase in more detail, filtering done in the bridging layer TODO
 
