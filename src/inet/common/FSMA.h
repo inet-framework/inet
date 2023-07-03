@@ -118,14 +118,20 @@ namespace inet {
     ___transition_seen = true; if ((condition) && ___is_event) \
     { \
         ___is_event = false; \
-        FSMA_Transition(transition, (condition), target, action)
+        FSMA_Transition_Internal(transition, (condition), target, action)
 
 #define FSMA_No_Event_Transition(transition, condition, target, action) \
     ___transition_seen = true; if ((condition) && !___is_event) \
     { \
-        FSMA_Transition(transition, (condition), target, action)
+        FSMA_Transition_Internal(transition, (condition), target, action)
 
 #define FSMA_Transition(transition, condition, target, action) \
+    ___transition_seen = true; if ((condition)) \
+    { \
+        ___is_event = false; \
+        FSMA_Transition_Internal(transition, (condition), target, action)
+
+#define FSMA_Transition_Internal(transition, condition, target, action) \
     FSMA_Print(true); \
     if (___logging) EV_DEBUG << "FSM " << ___fsm.getName() << ": condition \"" << #condition << "\" holds, taking transition \"" << #transition << "\" to state " << #target << endl; \
     action; \
