@@ -91,7 +91,7 @@ namespace inet {
 #define FSMA_Switch(fsm) \
     bool ___is_event = true; \
     bool ___exit = false; \
-    bool ___transition_seen = false; \
+    bool ___transition_seen = false; (void)___transition_seen; \
     int ___c = 0; \
     cFSM& ___fsm = (fsm); \
     bool ___logging = true; \
