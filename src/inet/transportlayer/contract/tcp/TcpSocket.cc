@@ -144,6 +144,28 @@ void TcpSocket::connect(L3Address remoteAddress, int remotePort)
     sockstate = CONNECTING;
 }
 
+void TcpSocket::read(int64_t numBytes)
+{
+    //TODO check connection state
+//    if (sockstate != NOT_BOUND && sockstate != BOUND)
+//        throw cRuntimeError("TcpSocket::connect(): connect() or listen() already called (need renewSocket()?)");
+//
+//    if (remotePort < 0 || remotePort > 65535)
+//        throw cRuntimeError("TcpSocket::connect(): invalid remote port number %d", remotePort);
+
+    auto request = new Request("ActiveOPEN", TCP_C_OPEN_ACTIVE);
+
+    remoteAddr = remoteAddress;
+    remotePrt = remotePort;
+
+    TcpOpenCommand *openCmd = new TcpOpenCommand();
+    openCmd->setNumBytes(numBytes);
+
+    request->setControlInfo(openCmd);
+    sendToTcp(request);
+    sockstate = CONNECTING;
+}
+
 void TcpSocket::send(Packet *msg)
 {
     if (sockstate != CONNECTED && sockstate != CONNECTING && sockstate != PEER_CLOSED)

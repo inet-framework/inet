@@ -158,6 +158,9 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
 
 void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
+    TcpReadCommand *readCmd = check_and_cast<TcpReadCommand *>(tcpCommand);
+    int64_t numBytes = readCmd->getNumberOfBytes();
+
     if (isToBeAccepted())
         throw cRuntimeError("READ without ACCEPT");
     delete msg;

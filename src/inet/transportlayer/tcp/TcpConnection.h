@@ -131,6 +131,9 @@ class INET_API TcpConnection : public cSimpleModule
     short dscp = -1;
     short tos = -1;
 
+    bool autoSendUp = true;  // first READ request switches from true to false
+    int64_t numBytesRequested = 0;  // from READ requests
+
   protected:
     Tcp *tcpMain = nullptr; // Tcp module
 
