@@ -1,21 +1,33 @@
-Mixing Different Shapers
-========================
+Using Different Traffic Shapers for Different Traffic Classes
+=============================================================
 
 Goals
 -----
 
-In this example we demonstrate how to use different traffic shapers in the same
-network interface.
+In INET, it is possible to use different traffic shapers for different traffic classes in a
+TSN switch. In this showcase, we demonstrate using a Credit-Based Shaper (CBS)
+and an Asynchronous Traffic Shaper (ATS), together in the same switch.
+
+.. note:: You might be interested in looking at another showcase, in which multiple traffic shapers are combined in the same traffic stream: :doc:`/showcases/tsn/trafficshaping/cbsandtas/doc/index`.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/tsn/trafficshaping/mixingshapers <https://github.com/inet-framework/inet/tree/master/showcases/tsn/trafficshaping/mixingshapers>`__
+| Source files location: `inet/showcases/tsn/trafficshaping/cbsandats <https://github.com/inet-framework/inet/tree/master/showcases/tsn/trafficshaping/cbsandats>`__
 
 The Model
 ---------
 
+In this demonstration, similarly to the :doc:`/showcases/tsn/trafficshaping/creditbasedshaper/doc/index` and :doc:`/showcases/tsn/trafficshaping/asynchronousshaper/doc/index` showcases, we employ a
+:ned:`Ieee8021qTimeAwareShaper` module with two traffic classes. However, unlike the previously mentioned two showcases, here one
+class is shaped using a CBS, and the other class is shaped
+by an ATS. Time-aware shaping is not enabled.
+
 There are three network nodes in the network. The client and the server are
-:ned:`TsnDevice` modules, and the switch is a :ned:`TsnSwitch` module. The
-links between them use 100 Mbps :ned:`EthernetLink` channels.
+:ned:`TsnDevice` modules, and the switch is a :ned:`TsnSwitch` module. The links
+between them use 100 Mbps :ned:`EthernetLink` channels. The client generates two
+traffic streams, and transmits them to the switch. In the switch, these streams
+undergo traffic shaping, and are transmitted to the
+server. In the results section, we plot the traffic in the switch before and
+after shapers, to see the effects of traffic shaping. 
 
 .. figure:: media/Network.png
    :align: center
@@ -60,63 +72,17 @@ traffic class.
 Results
 -------
 
-The first diagram shows the data rate of the application level outgoing traffic
-in the client. The data rate varies randomly over time but the averages are the
-same.
+Let's examine the traffic shaping process within the switch. The chart below
+illustrates the incoming and outgoing data rates within the base time-aware
+shaper module for the two traffic streams:
 
-.. figure:: media/ClientApplicationTraffic.png
+.. figure:: media/shaper_both.png
    :align: center
 
-The next diagram shows the data rate of the incoming traffic of the traffic
-shapers of the outgoing network interface in the switch. This is different
-from the previous because the traffic is already in the switch and it is also
-measured at different protocol level.
-
-.. figure:: media/TrafficShaperIncomingTraffic.png
-   :align: center
-
-The next diagram shows the data rate of the already shaped outgoing traffic of
-the outgoing network interface in the switch. The randomly varying data rate of
-the incoming traffic is transformed into a quite stable data rate for the outgoing
-traffic.
-
-.. figure:: media/TrafficShaperOutgoingTraffic.png
-   :align: center
-
-TODO
-
-.. figure:: media/TransmittingStateAndGateStates.png
-   :align: center
-
-The next diagram shows the queue lengths of the traffic shapers in the outgoing
-network interface of the switch. The queue lengths increase over time because
-the data rate of the incoming traffic of the shapers is greater than the data
-rate of the outgoing traffic.
-
-.. figure:: media/TrafficShaperQueueLengths.png
-   :align: center
-
-The next diagram shows the relationships between the number of credits, the gate
-state of the credit based transmission selection algorithm, and the transmitting
-state of the outgoing network interface for the best effort traffic class.
-
-.. figure:: media/BestEffortTrafficClass.png
-   :align: center
-
-The next diagram shows the relationships between the number of credits, the gate
-state of the credit based transmission selection algorithm, and the transmitting
-state of the outgoing network interface for the video traffic class.
-
-.. figure:: media/VideoTrafficClass.png
-   :align: center
-
-The last diagram shows the data rate of the application level incoming traffic
-in the server. The data rate is somewhat lower than the data rate of the
-outgoing traffic of the corresponding traffic shaper. The reason is that they
-are measured at different protocol layers.
-
-.. figure:: media/ServerApplicationTraffic.png
-   :align: center
+The CBS shapes the best effort traffic by restricting the data rate to a fixed
+value of 40 Mbps without any bursts. The ATS shapes the video
+stream by not only limiting the data rate to the desired nominal value but also
+allowing for bursts when the traffic exceeds the nominal rate.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`
 
@@ -124,4 +90,3 @@ Discussion
 ----------
 
 Use `this <https://github.com/inet-framework/inet/discussions/801>`__ page in the GitHub issue tracker for commenting on this showcase.
-
