@@ -126,8 +126,19 @@ class INET_API MemoryOutputStream
      * Writes the same bit repeatedly to the end of the stream.
      */
     void writeBitRepeatedly(bool value, size_t count) {
-        for (size_t i = 0; i < count; i++)
-            writeBit(value);
+        if (count > 0) {
+            size_t i = length.get<b>();
+            size_t startByteIndex = i >> 3;
+            uint8_t startMask = (1 << (8 - (i & 7))) - 1;
+            size_t endByteIndex = (i + count - 1) >> 3;
+            uint8_t endMask = 0xFFu << (7 - ((i + count - 1) & 7));
+            if (endByteIndex >= data.size())
+                data.resize(endByteIndex + 1, value ? 0xFFu : 0x00u);
+            if (value)
+                data[startByteIndex] |= startMask;
+            data[endByteIndex] &= endMask;
+            length += b(count);
+        }
     }
 
     /**
