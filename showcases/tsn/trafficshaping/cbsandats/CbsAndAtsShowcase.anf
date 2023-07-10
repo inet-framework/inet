@@ -654,7 +654,7 @@ utils.export_data_if_needed(df, props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
             <property name="plt.style" value="default"/>
-            <property name="legend_show" value="true"/>
+            <property name="legend_show" value="false"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value="70"/>

@@ -5,7 +5,7 @@
         <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart createdWith="OMNeT++ 7.0.0.230207-439c415f65" icon="icons/full/obj/linechart.png" id="81291689" name="Client Application and Filter Incoming Data Rate" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.230207-439c415f65" icon="icons/full/obj/linechart.png" id="678787873" name="Client Application and Filter Incoming Data Rate" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -642,7 +642,7 @@ utils.export_data_if_needed(df, props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
             <property name="plt.style" value="default"/>
-            <property name="legend_show" value="true"/>
+            <property name="legend_show" value="false"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
@@ -651,7 +651,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="459077433" name="Filter incoming, outgoing and dropped data rate" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="182658708" name="Filter incoming, outgoing and dropped data rate" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -1305,7 +1305,7 @@ utils.export_data_if_needed(df, props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
             <property name="plt.style" value="default"/>
-            <property name="legend_show" value="true"/>
+            <property name="legend_show" value="false"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value="60"/>
@@ -1314,7 +1314,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True&#10;figure.autolayout : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.230207-439c415f65" icon="icons/full/obj/linechart.png" id="1381163548" name="Queue incoming and outgoing data rate" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.230207-439c415f65" icon="icons/full/obj/linechart.png" id="983061138" name="Queue incoming and outgoing data rate" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -1364,9 +1364,9 @@ legend_style = [('Queue incoming', {'linestyle': 'dotted', 'color': 'black'}),
 # plot
 inet.scave.plot.plot_vectors(df, props)
 
-utils.postconfigure_plot(props)
-
 inet.scave.plot.create_custom_legend(props, legend_style, ncols=3)
+
+utils.postconfigure_plot(props)
 
 plt.axhline(y=20.84, color='grey', linestyle='dashdot', linewidth=1)
 plt.axhline(y=41.68, color='grey', linestyle='dashdot', linewidth=1)
@@ -1962,7 +1962,7 @@ utils.export_data_if_needed(df, props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
             <property name="plt.style" value="default"/>
-            <property name="legend_show" value="true"/>
+            <property name="legend_show" value="false"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value="60"/>
@@ -1971,7 +1971,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True&#10;figure.autolayout : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1950989758" name="Queue incoming and outgoing data rate, zoomed" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="453153400" name="Queue incoming and outgoing data rate, zoomed" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -2629,7 +2629,7 @@ utils.export_data_if_needed(df, props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
             <property name="plt.style" value="default"/>
-            <property name="legend_show" value="true"/>
+            <property name="legend_show" value="false"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value="54"/>
@@ -2638,7 +2638,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1293538696" name="Server Application and Queue Outgoing Traffic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1095145658" name="Server Application and Queue Outgoing Traffic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -3286,7 +3286,7 @@ utils.export_data_if_needed(df, props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
             <property name="plt.style" value="default"/>
-            <property name="legend_show" value="true"/>
+            <property name="legend_show" value="false"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
@@ -3295,7 +3295,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.230207-439c415f65" icon="icons/full/obj/linechart.png" id="139911714" name="Filter and queue incoming and outgoing traffic + drop rate, best effort" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.230207-439c415f65" icon="icons/full/obj/linechart.png" id="1118731091" name="Filter and queue incoming and outgoing traffic + drop rate, best effort" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
@@ -3364,7 +3364,7 @@ ax2.set_ylabel("Queue traffic [Mbps]")
 ax2.legend(title="Queue traffic", loc='upper right')
 ax3.set_ylabel("Queue length [pk]")
 ax3.set_xlabel("Simulation time [s]")
-#ax3.legend(title="Queue length", loc='upper right')
+ax3.legend(loc='upper right')
 
 
 
@@ -3964,7 +3964,7 @@ utils.export_image_if_needed(props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
             <property name="plt.style" value="default"/>
-            <property name="legend_show" value="true"/>
+            <property name="legend_show" value="false"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
@@ -3973,7 +3973,7 @@ utils.export_image_if_needed(props)
             <property name="matplotlibrc" value="savefig.transparent : True&#10;figure.autolayout : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.230207-439c415f65" icon="icons/full/obj/linechart.png" id="1256570244" name="Filter and queue incoming and outgoing traffic + drop rate, video" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.230207-439c415f65" icon="icons/full/obj/linechart.png" id="396641951" name="Filter and queue incoming and outgoing traffic + drop rate, video" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
@@ -4042,7 +4042,7 @@ ax2.set_ylabel("Queue traffic [Mbps]")
 ax2.legend(title="Queue traffic", loc='upper right')
 ax3.set_ylabel("Queue length [pk]")
 ax3.set_xlabel("Simulation time [s]")
-#ax3.legend(title="Queue length", loc='upper right')
+ax3.legend(loc='upper right')
 
 
 
@@ -4642,7 +4642,7 @@ utils.export_image_if_needed(props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
             <property name="plt.style" value="default"/>
-            <property name="legend_show" value="true"/>
+            <property name="legend_show" value="false"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
@@ -4651,7 +4651,7 @@ utils.export_image_if_needed(props)
             <property name="matplotlibrc" value="savefig.transparent : True&#10;figure.autolayout : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.230207-439c415f65" icon="icons/full/obj/linechart.png" id="1349251454" name="Queue remaining eligibility time" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.230207-439c415f65" icon="icons/full/obj/linechart.png" id="1893942980" name="Queue remaining eligibility time" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -5281,7 +5281,7 @@ utils.export_data_if_needed(df, props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
             <property name="plt.style" value="default"/>
-            <property name="legend_show" value="true"/>
+            <property name="legend_show" value="false"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value="0.5"/>
@@ -5290,7 +5290,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="16199746" name="Queue remaining eligibility time, zoomed" resultTypes="" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1874158300" name="Queue remaining eligibility time, zoomed" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -5931,7 +5931,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="2072954553" name="Traffic shaping" resultTypes="" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1641514640" name="Traffic shaping" resultTypes="" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import re
 import numpy
 import math
@@ -6647,7 +6647,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="943214394" name="Traffic shaping, zoomed" resultTypes="" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="727250450" name="Traffic shaping, zoomed" resultTypes="" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import re
 import numpy
 import math
