@@ -116,8 +116,8 @@ class INET_API MemoryOutputStream
         size_t byteIndex = i / 8;
         size_t bitIndex = i % 8;
         if (bitIndex == 0)
-            data.push_back(0);
-        if (value)
+            data.push_back(value ? 0x80 : 0);
+        else if (value)
             data[byteIndex] |= 1 << (7 - bitIndex);
         length += b(1);
     }
