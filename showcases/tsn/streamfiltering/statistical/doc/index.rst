@@ -20,6 +20,8 @@ Filtering and policing - we'll use the two terms interchangably here - enforces 
 by dropping excessive packets from the stream. In INET, by default, filtering is done in the bridging layer of TSN network nodes (however, the
 modules can be inserted elsewhere in the network stack; they don't even require a complete network to function, see the :doc:`/showcases/tsn/streamfiltering/underthehood/doc/index` showcase).
 
+   is this redundant?
+
 .. In INET, TSN network nodes, such as TsnDevice or TsnSwitch, have boolean parameters that enable ingress and egress filtering (similarly to parameters
 .. that enable ingress or egress traffic shaping). For example, TsnDevice has :par:`ingressTrafficFiltering` and :par:`egressTrafficFiltering` parameters,
 .. TsnSwitch has :par:`ingressTrafficFiltering` (check the NED documentation for TSN network nodes for the available parameters).
@@ -37,7 +39,7 @@ or ``egressFilter`` submodule (or both, depending on the direction) that has the
 
 .. This module has a configurable number of paths, each of which can handle the metering and filtering of a traffic stream independently of the other streams.
 
-This module can handle a configurable number of traffic streams (:par:`numStreams`). Each traffic stream has a path that meters and filters the stream independently of the other streams.
+The :ned:`SimpleIeee8021qFilter` module can handle a configurable number of traffic streams (specified by the :par:`numStreams` parameter). Each traffic stream has a path that meters and filters the stream independently of the other streams.
 For example, here is a :ned:`SimpleIeee8021qFilter` module with two traffic streams:
 
 .. figure:: media/SimpleIeee8021qFilter.png
