@@ -132,8 +132,8 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
     B startPos = stream.getLength();
     auto macHeader = dynamicPtrCast<const Ieee80211MacHeader>(chunk);
     stream.writeUint4(macHeader->getSubType());
-    stream.writeNBitsOfUint64Be(macHeader->getFrameType(), 2);
-    stream.writeNBitsOfUint64Be(macHeader->getProtocolVersion(), 2);
+    stream.writeUint2(macHeader->getFrameType());
+    stream.writeUint2(macHeader->getProtocolVersion());
     stream.writeBit(macHeader->getOrder());
     stream.writeBit(macHeader->getProtectedFrame());
     stream.writeBit(macHeader->getMoreData());
@@ -332,7 +332,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             if (type == ST_DATA_WITH_QOS) {
                 stream.writeUint4(dataHeader->getTid());
                 stream.writeBit(true);
-                stream.writeNBitsOfUint64Be(dataHeader->getAckPolicy(), 2);
+                stream.writeUint2(dataHeader->getAckPolicy());
                 stream.writeBit(dataHeader->getAMsduPresent());
                 stream.writeByte(0);
             }

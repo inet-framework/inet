@@ -90,7 +90,7 @@ void RtcpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 {
     const auto& rtcpPacket = staticPtrCast<const RtcpPacket>(chunk);
     B start_position = B(stream.getLength());
-    stream.writeNBitsOfUint64Be(rtcpPacket->getVersion(), 2);
+    stream.writeUint2(rtcpPacket->getVersion());
     stream.writeBit(rtcpPacket->getPadding());
     short count = rtcpPacket->getCount();
     stream.writeNBitsOfUint64Be(count, 5);

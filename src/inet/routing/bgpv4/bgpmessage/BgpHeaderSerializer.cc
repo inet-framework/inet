@@ -95,7 +95,7 @@ void BgpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
                     throw cRuntimeError("Cannot serialize BGP UPDATE Message: incorrect flags.");
                 if (optionalBit && !transitiveBit && partialBit)
                     throw cRuntimeError("Cannot serialize BGP UPDATE Message: incorrect flags.");
-                stream.writeNBitsOfUint64Be(pathAttributes->getReserved(), 4);
+                stream.writeUint4(pathAttributes->getReserved());
                 BgpUpdateAttributeTypeCode typeCode = pathAttributes->getTypeCode();
                 stream.writeByte(typeCode);
                 if (!extendedLengthBit)

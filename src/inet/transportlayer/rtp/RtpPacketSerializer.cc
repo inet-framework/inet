@@ -17,7 +17,7 @@ Register_Serializer(RtpHeader, RtpPacketSerializer);
 void RtpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& rtpHeader = staticPtrCast<const RtpHeader>(chunk);
-    stream.writeNBitsOfUint64Be(rtpHeader->getVersion(), 2);
+    stream.writeUint2(rtpHeader->getVersion());
     stream.writeBit(rtpHeader->getPaddingFlag());
     stream.writeBit(rtpHeader->getExtensionFlag());
     size_t csrcArraySize = rtpHeader->getCsrcArraySize();

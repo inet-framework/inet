@@ -40,7 +40,7 @@ void IgmpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             stream.writeIpv4Address(check_and_cast<const IgmpQuery *>(igmpMessage.get())->getGroupAddress());
             if (auto igmpv3Query = dynamicPtrCast<const Igmpv3Query>(igmpMessage)) {
                 ASSERT(igmpv3Query->getRobustnessVariable() <= 7);
-                stream.writeNBitsOfUint64Be(igmpv3Query->getResv(), 4);
+                stream.writeUint4(igmpv3Query->getResv());
                 stream.writeBit(igmpv3Query->getSuppressRouterProc());
                 stream.writeNBitsOfUint64Be(igmpv3Query->getRobustnessVariable(), 3);
                 stream.writeByte(igmpv3Query->getQueryIntervalCode());
