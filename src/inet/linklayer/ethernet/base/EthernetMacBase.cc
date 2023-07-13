@@ -27,130 +27,6 @@
 
 namespace inet {
 
-const EthernetMacBase::EtherDescr EthernetMacBase::nullEtherDescr = {
-    0.0,
-    0.0,
-    0,
-    B(0),
-    B(0),
-    B(0),
-    0.0,
-    0.0
-};
-
-const EthernetMacBase::EtherDescr EthernetMacBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
-    {
-        ETHERNET_TXRATE,
-        0.5 / ETHERNET_TXRATE,
-        0,
-        B(0),
-        MIN_ETHERNET_FRAME_BYTES,
-        MIN_ETHERNET_FRAME_BYTES,
-        512 / ETHERNET_TXRATE,
-        2500 /*m*/ / SPEED_OF_LIGHT_IN_CABLE
-    },
-    {
-        FAST_ETHERNET_TXRATE,
-        0.5 / FAST_ETHERNET_TXRATE,
-        0,
-        B(0),
-        MIN_ETHERNET_FRAME_BYTES,
-        MIN_ETHERNET_FRAME_BYTES,
-        512 / FAST_ETHERNET_TXRATE,
-        250 /*m*/ / SPEED_OF_LIGHT_IN_CABLE
-    },
-    {
-        GIGABIT_ETHERNET_TXRATE,
-        0.5 / GIGABIT_ETHERNET_TXRATE,
-        MAX_PACKETBURST,
-        GIGABIT_MAX_BURST_BYTES,
-        GIGABIT_MIN_FRAME_BYTES_WITH_EXT,
-        MIN_ETHERNET_FRAME_BYTES,
-        4096 / GIGABIT_ETHERNET_TXRATE,
-        250 /*m*/ / SPEED_OF_LIGHT_IN_CABLE
-    },
-    {
-        TWOANDHALFGIGABIT_ETHERNET_TXRATE,
-        0.5 / TWOANDHALFGIGABIT_ETHERNET_TXRATE,
-        0,
-        B(0),
-        B(-1), // half-duplex is not supported
-        B(0),
-        0.0,
-        0.0
-    },
-    {
-        FIVEGIGABIT_ETHERNET_TXRATE,
-        0.5 / FIVEGIGABIT_ETHERNET_TXRATE,
-        0,
-        B(0),
-        B(-1), // half-duplex is not supported
-        B(0),
-        0.0,
-        0.0
-    },
-    {
-        FAST_GIGABIT_ETHERNET_TXRATE,
-        0.5 / FAST_GIGABIT_ETHERNET_TXRATE,
-        0,
-        B(0),
-        B(-1), // half-duplex is not supported
-        B(0),
-        0.0,
-        0.0
-    },
-    {
-        TWENTYFIVE_GIGABIT_ETHERNET_TXRATE,
-        0.5 / TWENTYFIVE_GIGABIT_ETHERNET_TXRATE,
-        0,
-        B(0),
-        B(-1), // half-duplex is not supported
-        B(0),
-        0.0,
-        0.0
-    },
-    {
-        FOURTY_GIGABIT_ETHERNET_TXRATE,
-        0.5 / FOURTY_GIGABIT_ETHERNET_TXRATE,
-        0,
-        B(0),
-        B(-1), // half-duplex is not supported
-        B(0),
-        0.0,
-        0.0
-    },
-    {
-        HUNDRED_GIGABIT_ETHERNET_TXRATE,
-        0.5 / HUNDRED_GIGABIT_ETHERNET_TXRATE,
-        0,
-        B(0),
-        B(-1), // half-duplex is not supported
-        B(0),
-        0.0,
-        0.0
-    },
-    {
-        TWOHUNDRED_GIGABIT_ETHERNET_TXRATE,
-        0.5 / TWOHUNDRED_GIGABIT_ETHERNET_TXRATE,
-        0,
-        B(0),
-        B(-1), // half-duplex is not supported
-        B(0),
-        0.0,
-        0.0
-    },
-    {
-        FOURHUNDRED_GIGABIT_ETHERNET_TXRATE,
-        0.5 / FOURHUNDRED_GIGABIT_ETHERNET_TXRATE,
-        0,
-        B(0),
-        B(-1), // half-duplex is not supported
-        B(0),
-        0.0,
-        0.0
-    }
-};
-
 static int compareEthernetFrameType(Packet *a, Packet *b)
 {
     const auto& ah = a->peekAtFront<EthernetMacHeader>();
@@ -172,7 +48,7 @@ simsignal_t EthernetMacBase::receptionStateChangedSignal = registerSignal("recep
 EthernetMacBase::EthernetMacBase()
 {
     lastTxFinishTime = -1.0; // never equals to current simtime
-    curEtherDescr = &nullEtherDescr;
+    curEtherDescr = &EthernetModes::nullEtherDescr;
 }
 
 EthernetMacBase::~EthernetMacBase()
@@ -529,7 +405,7 @@ void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
 
     bool dataratesDiffer;
     if (!connected) {
-        curEtherDescr = &nullEtherDescr;
+        curEtherDescr = &EthernetModes::nullEtherDescr;
         dataratesDiffer = false;
         if (!outTrChannel)
             transmissionChannel = nullptr;
@@ -552,18 +428,11 @@ void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
 
     if (connected) {
         // Check valid speeds
-        for (auto& etherDescr : etherDescrs) {
-            if (txRate == etherDescr.txrate) {
-                curEtherDescr = &(etherDescr);
-                if (networkInterface) {
-                    networkInterface->setCarrier(true);
-                    networkInterface->setDatarate(txRate);
-                }
-                return;
-            }
+        curEtherDescr = &EthernetModes::getEthernetMode(txRate);
+        if (networkInterface) {
+            networkInterface->setCarrier(true);
+            networkInterface->setDatarate(txRate);
         }
-        throw cRuntimeError("Invalid transmission rate %g bps on channel %s at module %s",
-                txRate, transmissionChannel->getFullPath().c_str(), getFullPath().c_str());
     }
 }
 
