@@ -16,6 +16,8 @@ using namespace inet::units::values;
 // Constants from the 802.3 spec
 #define MAX_PACKETBURST    13
 
+const double SPEED_OF_LIGHT_IN_CABLE = 200000000.0;
+
 const B GIGABIT_MAX_BURST_BYTES          = B(8192); /* don't start new frame after 8192 or more bytes already transmitted */
 const B MAX_ETHERNET_DATA_BYTES          = B(1500); /* including LLC, SNAP etc headers */
 const B MAX_ETHERNET_FRAME_BYTES         = B(1526); /* excludes preamble and SFD */

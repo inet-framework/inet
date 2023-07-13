@@ -27,8 +27,6 @@
 
 namespace inet {
 
-const double EthernetMacBase::SPEED_OF_LIGHT_IN_CABLE = 200000000.0;
-
 const EthernetMacBase::EtherDescr EthernetMacBase::nullEtherDescr = {
     0.0,
     0.0,

@@ -133,9 +133,6 @@ class INET_API EthernetMacBase : public MacProtocolBase, public queueing::IActiv
     static simsignal_t receptionStateChangedSignal;
 
   public:
-    static const double SPEED_OF_LIGHT_IN_CABLE;
-
-  public:
     EthernetMacBase();
     virtual ~EthernetMacBase();
 
