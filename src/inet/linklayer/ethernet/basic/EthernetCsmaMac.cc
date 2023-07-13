@@ -110,7 +110,7 @@ void EthernetCsmaMac::processConnectDisconnect()
         if (!duplexMode) {
             // start RX_RECONNECT_STATE
             changeReceptionState(RX_RECONNECT_STATE);
-            simtime_t reconnectEndTime = simTime() + b(MAX_ETHERNET_FRAME_BYTES + JAM_SIGNAL_BYTES).get() / curEtherDescr->txrate;
+            simtime_t reconnectEndTime = simTime() + b(MAX_ETHERNET_FRAME_BYTES + JAM_SIGNAL_BYTES).get() / curEtherDescr->bitrate;
             for (auto& rx : rxSignals)
                 delete rx.signal;
             rxSignals.clear();
@@ -128,7 +128,7 @@ void EthernetCsmaMac::readChannelParameters(bool errorWhenAsymmetric)
 
     if (connected && !duplexMode) {
         if (curEtherDescr->halfDuplexFrameMinBytes < B(0))
-            throw cRuntimeError("%g bps Ethernet only supports full-duplex links", curEtherDescr->txrate);
+            throw cRuntimeError("%g bps Ethernet only supports full-duplex links", curEtherDescr->bitrate);
     }
 }
 
@@ -406,7 +406,7 @@ void EthernetCsmaMac::startFrameTransmission()
     EV_INFO << "Transmission of " << frame << " started.\n";
     auto signal = new EthernetSignal(frame->getName());
     signal->setSrcMacFullDuplex(duplexMode);
-    signal->setBitrate(curEtherDescr->txrate);
+    signal->setBitrate(curEtherDescr->bitrate);
     if (sendRawBytes) {
         auto bytes = frame->peekDataAsBytes();
         frame->eraseAll();
@@ -414,7 +414,7 @@ void EthernetCsmaMac::startFrameTransmission()
     }
     signal->encapsulate(frame);
     signal->addByteLength(extensionLength.get());
-    simtime_t duration = signal->getBitLength() / this->curEtherDescr->txrate;
+    simtime_t duration = signal->getBitLength() / this->curEtherDescr->bitrate;
 
     sendSignal(signal, duration);
 
@@ -586,9 +586,9 @@ void EthernetCsmaMac::sendJamSignal()
     // send JAM
     EthernetJamSignal *jam = new EthernetJamSignal("JAM_SIGNAL");
     jam->setByteLength(B(JAM_SIGNAL_BYTES).get());
-    jam->setBitrate(curEtherDescr->txrate);
+    jam->setBitrate(curEtherDescr->bitrate);
 //    emit(packetSentToLowerSignal, jam);
-    duration = jam->getBitLength() / this->curEtherDescr->txrate;
+    duration = jam->getBitLength() / this->curEtherDescr->bitrate;
     sendSignal(jam, duration);
 
     scheduleAfter(duration, endJammingTimer);
@@ -794,7 +794,7 @@ void EthernetCsmaMac::scheduleEndIFGPeriod()
 {
     bytesSentInBurst = B(0);
     framesSentInBurst = 0;
-    simtime_t ifgTime = b(INTERFRAME_GAP_BITS).get() / curEtherDescr->txrate;
+    simtime_t ifgTime = b(INTERFRAME_GAP_BITS).get() / curEtherDescr->bitrate;
     scheduleAfter(ifgTime, endIfgTimer);
     changeTransmissionState(WAIT_IFG_STATE);
 }
@@ -804,9 +804,9 @@ void EthernetCsmaMac::fillIFGInBurst()
     EV_TRACE << "fillIFGInBurst(): t=" << simTime() << ", framesSentInBurst=" << framesSentInBurst << ", bytesSentInBurst=" << bytesSentInBurst << endl;
 
     EthernetFilledIfgSignal *gap = new EthernetFilledIfgSignal("FilledIFG");
-    gap->setBitrate(curEtherDescr->txrate);
+    gap->setBitrate(curEtherDescr->bitrate);
     bytesSentInBurst += B(gap->getByteLength());
-    simtime_t duration = gap->getBitLength() / this->curEtherDescr->txrate;
+    simtime_t duration = gap->getBitLength() / this->curEtherDescr->bitrate;
     sendSignal(gap, duration);
     scheduleAfter(duration, endIfgTimer);
     changeTransmissionState(SEND_IFG_STATE);
@@ -814,7 +814,7 @@ void EthernetCsmaMac::fillIFGInBurst()
 
 bool EthernetCsmaMac::canContinueBurst(b remainingGapLength)
 {
-    if ((frameBursting && framesSentInBurst > 0) && (framesSentInBurst < curEtherDescr->maxFramesInBurst)) {
+    if ((frameBursting && framesSentInBurst > 0) && (framesSentInBurst < curEtherDescr->maxFrameCountInBurst)) {
         if (Packet *pk = txQueue->canPullPacket(gate(upperLayerInGateId)->getPathStartGate())) {
             // TODO before/after FilledIfg!!!
             B pkLength = std::max(MIN_ETHERNET_FRAME_BYTES, B(pk->getDataLength()));
@@ -827,7 +827,7 @@ bool EthernetCsmaMac::canContinueBurst(b remainingGapLength)
 void EthernetCsmaMac::scheduleEndPausePeriod(int pauseUnits)
 {
     // length is interpreted as 512-bit-time units
-    simtime_t pausePeriod = pauseUnits * PAUSE_UNIT_BITS / curEtherDescr->txrate;
+    simtime_t pausePeriod = pauseUnits * PAUSE_UNIT_BITS / curEtherDescr->bitrate;
     scheduleAfter(pausePeriod, endPauseTimer);
     changeTransmissionState(PAUSE_STATE);
 }

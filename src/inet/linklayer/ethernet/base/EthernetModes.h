@@ -21,11 +21,11 @@ using namespace inet::units::values;
 class INET_API EthernetModes
 {
   public:
-    struct EtherDescr {
-        double txrate;
+    struct EthernetMode {
+        double bitrate;
         double halfBitTime; // transmission time of a half bit
         // for half-duplex operation:
-        short int maxFramesInBurst;
+        short int maxFrameCountInBurst;
         B maxBytesInBurst; // including IFG and preamble, etc.
         B halfDuplexFrameMinBytes; // minimal frame length in half-duplex mode; -1 means half duplex is not supported
         B frameInBurstMinBytes; // minimal frame length in burst mode, after first frame
@@ -35,17 +35,17 @@ class INET_API EthernetModes
 
   protected:
     enum {
-        NUM_OF_ETHERDESCRS = 11
+        NUM_OF_ETHERNETMODES = 11
     };
 
     // MAC constants for bitrates and modes
-    static const EtherDescr etherDescrs[NUM_OF_ETHERDESCRS];
+    static const EthernetMode ethernetModes[NUM_OF_ETHERNETMODES];
 
   public:
-    static const EtherDescr nullEtherDescr;
+    static const EthernetMode nullEthernetMode;
 
   public:
-    static const EthernetModes::EtherDescr& getEthernetMode(double txRate);
+    static const EthernetModes::EthernetMode& getEthernetMode(double txRate);
 };
 
 } // namespace inet

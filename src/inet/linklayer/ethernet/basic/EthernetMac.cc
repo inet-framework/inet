@@ -108,7 +108,7 @@ void EthernetMac::startFrameTransmission()
     EV_INFO << "Transmission of " << frame << " started.\n";
     auto signal = new EthernetSignal(frame->getName());
     signal->setSrcMacFullDuplex(duplexMode);
-    signal->setBitrate(curEtherDescr->txrate);
+    signal->setBitrate(curEtherDescr->bitrate);
     if (sendRawBytes) {
         auto bytes = frame->peekDataAsBytes();
         frame->eraseAll();
@@ -373,7 +373,7 @@ void EthernetMac::scheduleEndIFGPeriod()
 {
     ASSERT(nullptr == currentTxFrame);
     changeTransmissionState(WAIT_IFG_STATE);
-    simtime_t endIFGTime = simTime() + (b(INTERFRAME_GAP_BITS).get() / curEtherDescr->txrate);
+    simtime_t endIFGTime = simTime() + (b(INTERFRAME_GAP_BITS).get() / curEtherDescr->bitrate);
     scheduleAt(endIFGTime, endIfgTimer);
 }
 
@@ -381,7 +381,7 @@ void EthernetMac::scheduleEndPausePeriod(int pauseUnits)
 {
     ASSERT(nullptr == currentTxFrame);
     // length is interpreted as 512-bit-time units
-    simtime_t pausePeriod = ((pauseUnits * PAUSE_UNIT_BITS) / curEtherDescr->txrate);
+    simtime_t pausePeriod = ((pauseUnits * PAUSE_UNIT_BITS) / curEtherDescr->bitrate);
     scheduleAfter(pausePeriod, endPauseTimer);
     changeTransmissionState(PAUSE_STATE);
 }

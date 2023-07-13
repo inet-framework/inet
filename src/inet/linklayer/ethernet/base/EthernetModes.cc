@@ -11,7 +11,7 @@
 
 namespace inet {
 
-const EthernetModes::EtherDescr EthernetModes::nullEtherDescr = {
+const EthernetModes::EthernetMode EthernetModes::nullEthernetMode = {
     0.0,
     0.0,
     0,
@@ -22,7 +22,7 @@ const EthernetModes::EtherDescr EthernetModes::nullEtherDescr = {
     0.0
 };
 
-const EthernetModes::EtherDescr EthernetModes::etherDescrs[NUM_OF_ETHERDESCRS] = {
+const EthernetModes::EthernetMode EthernetModes::ethernetModes[NUM_OF_ETHERNETMODES] = {
     {
         ETHERNET_TXRATE,
         0.5 / ETHERNET_TXRATE,
@@ -135,14 +135,13 @@ const EthernetModes::EtherDescr EthernetModes::etherDescrs[NUM_OF_ETHERDESCRS] =
     }
 };
 
-const EthernetModes::EtherDescr& EthernetModes::getEthernetMode(double txRate)
+const EthernetModes::EthernetMode& EthernetModes::getEthernetMode(double txRate)
 {
-    for (auto& etherDescr : etherDescrs) {
-        if (txRate == etherDescr.txrate)
-            return etherDescr;
+    for (auto& ethernetMode : ethernetModes) {
+        if (txRate == ethernetMode.bitrate)
+            return ethernetMode;
     }
     throw cRuntimeError("Invalid ethernet transmission rate %g bps", txRate);
 }
 
 } // namespace inet
-

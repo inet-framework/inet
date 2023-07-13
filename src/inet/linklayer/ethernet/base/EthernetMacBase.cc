@@ -48,7 +48,7 @@ simsignal_t EthernetMacBase::receptionStateChangedSignal = registerSignal("recep
 EthernetMacBase::EthernetMacBase()
 {
     lastTxFinishTime = -1.0; // never equals to current simtime
-    curEtherDescr = &EthernetModes::nullEtherDescr;
+    curEtherDescr = &EthernetModes::nullEthernetMode;
 }
 
 EthernetMacBase::~EthernetMacBase()
@@ -405,7 +405,7 @@ void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
 
     bool dataratesDiffer;
     if (!connected) {
-        curEtherDescr = &EthernetModes::nullEtherDescr;
+        curEtherDescr = &EthernetModes::nullEthernetMode;
         dataratesDiffer = false;
         if (!outTrChannel)
             transmissionChannel = nullptr;
@@ -440,12 +440,12 @@ void EthernetMacBase::printParameters()
 {
     // Dump parameters
     EV_DETAIL << "MAC address: " << getMacAddress() << (promiscuous ? ", promiscuous mode" : "") << endl
-              << "txrate: " << curEtherDescr->txrate << " bps, "
+              << "txrate: " << curEtherDescr->bitrate << " bps, "
               << (duplexMode ? "full-duplex" : "half-duplex") << endl
-              << "bitTime: " << 1e9 / curEtherDescr->txrate << " ns" << endl
+              << "bitTime: " << 1e9 / curEtherDescr->bitrate << " ns" << endl
               << "frameBursting: " << (frameBursting ? "on" : "off") << endl
               << "slotTime: " << curEtherDescr->slotTime << endl
-              << "interFrameGap: " << INTERFRAME_GAP_BITS / curEtherDescr->txrate << endl
+              << "interFrameGap: " << INTERFRAME_GAP_BITS / curEtherDescr->bitrate << endl
               << endl;
 }
 
