@@ -130,8 +130,8 @@ class INET_API MemoryOutputStream
         else {
             int l1 = b(length).get() % 8;
             int l2 = 8 - l1;
-            data.back() |= (value & (0xFF << l2)) >> l2;
-            data.push_back((value & (0xFF >> l1)) << l1);
+            data.back() |= (value & (0xFF << l1)) >> l1;
+            data.push_back((value & (0xFF >> l2)) << l2);
         }
         length += B(1);
     }
