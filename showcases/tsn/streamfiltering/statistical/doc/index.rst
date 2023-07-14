@@ -53,7 +53,14 @@ excess packets. In INET, by default, filtering is done in the bridging layer
 of TSN network nodes (although filtering components can also be inserted elsewhere
 in network nodes).
 
+Filtering and policing is defined in the TODO standard. In general, filtering prevents certain types of packets from entering a network node.
+Policing refers to enforcing data rate and bursting limits to protect upstream components and devices in a network. In INET, filtering
+is used with somewhat different meanings sometimes, as it generally refers to the filtering layer where filtering and policing takes places.
+Also, policing involves dropping (or filtering out) packets, also done in the filtering layer. So in this document, filtering is used in a broader sense than in the standard.
+
 **review** filtering AND policing -> interchangable? then why 'and'?
+
+-> actually, in the standard its called filtering and policing, which means basically the same; policing by filtering?
 
 .. note:: Filtering components don't even require a complete network to function, as demonstrated in the the :doc:`/showcases/tsn/streamfiltering/underthehood/doc/index` showcase.
 
@@ -224,6 +231,10 @@ In the next sections, we describe the network, and examine the configuration of 
 
 -> how this, but understandable.
 
+We use a simple network in which a client is connected to a server via a switch, using 100Mbps Ethernet links. The client generates traffic, and sends it to the server.
+The traffic undergoes filtering in the switch. We examine the traffic before and after filtering/how filtering changes the traffic.
+Here is the network:
+
 .. The :ned:`StatisticalRateLimiter` is a filter module. We can specify a maximum data rate with the :par:`maxDataRate` parameter. The module
    drops packets that would exceed this limit.
 
@@ -238,19 +249,19 @@ In the next sections, we describe the network, and examine the configuration of 
 
 .. note:: This setup does simple statistical filtering, because the data rate is measured with a sliding window. The precision depends on the size of the time window, i.e. how fast the filter reacts to changes in incoming data rate, and how precisely the outgoing data rate aligns with the configured maximum.
 
-The Network
-~~~~~~~~~~~
+.. The Network
+.. ~~~~~~~~~~~
 
 .. Here is the network:
 
-The simulation uses the :ned:`TsnLinearNetwork`, with two :ned:`TsnDevice` modules connected by a :ned:`TsnSwitch`, using 100Mbps Ethernet links:
+.. The simulation uses the :ned:`TsnLinearNetwork`, with two :ned:`TsnDevice` modules connected by a :ned:`TsnSwitch`, using 100Mbps Ethernet links:
 
 .. figure:: media/Network.png
    :align: center
    :width: 100%
 
-The Configuration
-~~~~~~~~~~~~~~~~~
+.. The Configuration
+.. ~~~~~~~~~~~~~~~~~
 
    .. In this configuration we use a sliding window rate meter in combination with a
    .. statistical rate limiter. The former measures the thruput by summing up the
