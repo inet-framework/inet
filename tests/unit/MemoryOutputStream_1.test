@@ -8,8 +8,10 @@ Test MemoryOutputStream
 static std::ostream& operator<<(std::ostream& os, const ::inet::MemoryOutputStream& stream)
 {
     const std::vector<uint8_t>& data = stream.getData();
+    const char *sep = "";
     for (auto b: data) {
-        os << " " << std::hex << std::setw(2) << std::setfill('0') << (unsigned int)b;
+        os << sep << std::hex << std::setw(2) << std::setfill('0') << (unsigned int)b;
+        sep = " ";
     }
     os << std::dec;
     return os;
@@ -17,145 +19,44 @@ static std::ostream& operator<<(std::ostream& os, const ::inet::MemoryOutputStre
 
 %global:
 
+#define Bit(x) s.writeBit(x)
+#define BitR(x, y) s.writeBitRepeatedly(x, y)
+#define Byte(x) s.writeByte(x)
+#define TEST(x, y, z) { inet::MemoryOutputStream s; x; EV << "    TEST(" << #x << ", " << #y << ", " << s << ");\n"; }
 //
 
 %activity:
-{
-    inet::MemoryOutputStream s;
-    s.writeBit(1);
-    s.writeBit(0);
-    s.writeBit(0);
-    s.writeBit(0);
-    s.writeBit(0);
-    s.writeBit(0);
-    s.writeBit(1);
-    s.writeBit(0);
+    EV << "Start:\n";
 
-    EV << "b1.b0.b0.b0.b0.b0.b1.b0:" << s << "\n";
-}
+    // INFO: use indent 4, use one space between parameters, and copy TEST lines to 'contains'
 
-{
-    inet::MemoryOutputStream s;
-    s.writeBit(0);
-    s.writeByte(0xff);
-    s.writeBitRepeatedly(0, 7);
+    TEST(Bit(1);Bit(0);Bit(0);Bit(0);Bit(0);Bit(0);Bit(1);Bit(0), 1 0 0 0 0 0 1 0, 82);
+    TEST(Bit(0);Byte(0xff);BitR(0,7), 0 1111.1111 0000.000: 0111 1111 1000 0000, 7f 80);
+    TEST(Bit(1);Byte(0x00);BitR(1,7), 1 0000.0000 1111.111: 1000 0000 0111 1111, 80 7f);
+    TEST(Bit(1);Byte(0xff);BitR(1,7), 1 1111.1111 1111.111: 1111 1111 1111 1111, ff ff);
+    TEST(Bit(0);Byte(0x82);BitR(0,7), 0 1000.0010 0000.000: 0100 0001 0000 0000, 41 00);
+    TEST(Bit(1);Byte(0x82);BitR(1,7), 1 1000.0010 1111.111: 1100 0001 0111 1111, c1 7f);
+    TEST(BitR(0,5);Byte(0x82);BitR(0,3), 0000.0 1000.0010 000: 0000 0100 0001 0000, 04 10);
+    TEST(BitR(1,5);Byte(0x82);BitR(1,3), 1111.1 1000.0010 111: 1111 1100 0001 0111, fc 17);
+    TEST(BitR(0,3);Byte(0x82);BitR(0,5), 000 1000.0010 0000.0: 0001 0000 0100 0000, 10 40);
+    TEST(BitR(1,3);Byte(0x82);BitR(1,5), 111 1000.0010 1111.1: 1111 0000 0101 1111, f0 5f);
+    TEST(BitR(0,7);Byte(0x82);Bit(0), 0000.000 1000.0010 0: 0000 0001 0000 0100, 01 04);
+    TEST(BitR(1,7);Byte(0x82);Bit(1), 1111.111 1000.0010 1: 1111 1111 0000 0101, ff 05);
 
-    EV << "b0.xff.b0*7:" << s << "\n"; // 0 1111 1111 0000000: 0111 1111 1000 0000
-}
-
-{
-    inet::MemoryOutputStream s;
-    s.writeBit(1);
-    s.writeByte(0xff);
-    s.writeBitRepeatedly(1, 7);
-
-    EV << "b1.xff.b1*7:" << s << "\n"; // 1 1111 1111 1111111: 1111 1111 1111 1111
-}
-
-{
-    inet::MemoryOutputStream s;
-    s.writeBit(0);
-    s.writeByte(0x82);
-    s.writeBitRepeatedly(0, 7);
-
-    EV << "b0.x82.b0*7:" << s << "\n"; // 0 1000 0010 0000000: 0100 0001 0000 0000
-}
-
-{
-    inet::MemoryOutputStream s;
-    s.writeBit(1);
-    s.writeByte(0x82);
-    s.writeBitRepeatedly(1, 7);
-
-    EV << "b1.x82.b1*7:" << s << "\n"; // 1 1000 0010 1111111: 1100 0001 0111 1111
-}
-
-{
-    inet::MemoryOutputStream s;
-    s.writeBitRepeatedly(0, 5);
-    s.writeByte(0x82);
-    s.writeBitRepeatedly(0, 3);
-
-    EV << "b0*5.x82.b0*3:" << s << "\n"; // 00000 1000 0010 000: 0000 0100 0001 0000
-}
-
-{
-    inet::MemoryOutputStream s;
-    s.writeBitRepeatedly(1, 5);
-    s.writeByte(0x82);
-    s.writeBitRepeatedly(1, 3);
-
-    EV << "b1*5.x82.b1*3:" << s << "\n"; // 11111 1000 0010 111: 1111 1100 0001 0111
-}
-
-{
-    inet::MemoryOutputStream s;
-    s.writeBitRepeatedly(0, 3);
-    s.writeByte(0x82);
-    s.writeBitRepeatedly(0, 5);
-
-    EV << "b0*3.x82.b0*5:" << s << "\n"; // 000 1000 0010 00000: 0001 0000 0100 0000
-}
-
-{
-    inet::MemoryOutputStream s;
-    s.writeBitRepeatedly(1, 3);
-    s.writeByte(0x82);
-    s.writeBitRepeatedly(1, 5);
-
-    EV << "b1*3.x82.b1*5:" << s << "\n"; // 111 1000 0010 11111: 1111 0000 0101 1111
-}
-
-{
-    inet::MemoryOutputStream s;
-    s.writeBitRepeatedly(0, 5);
-    s.writeByte(0x82);
-    s.writeBitRepeatedly(0, 3);
-
-    EV << "b0*5.x82.b0*3:" << s << "\n"; // 00000 1000 0010 000: 0000 0100 0001 0000
-}
-
-{
-    inet::MemoryOutputStream s;
-    s.writeBitRepeatedly(1, 5);
-    s.writeByte(0x82);
-    s.writeBitRepeatedly(1, 3);
-
-    EV << "b1*5.x82.b1*3:" << s << "\n"; // 11111 1000 0010 111: 1111 1100 0001 0111
-}
-
-{
-    inet::MemoryOutputStream s;
-    s.writeBitRepeatedly(0, 7);
-    s.writeByte(0x82);
-    s.writeBit(0);
-
-    EV << "b0*7.x82.b0:" << s << "\n"; // 0000000 1000 0010 0: 0000 0001 0000 0100
-}
-
-{
-    inet::MemoryOutputStream s;
-    s.writeBitRepeatedly(1, 7);
-    s.writeByte(0x82);
-    s.writeBit(1);
-
-    EV << "b1*7.x82.b1:" << s << "\n"; // 1111111 1000 0010 1: 1111 1111 0000 0101
-}
-
-EV << ".\n";
+    EV << ".\n";
 
 %contains: stdout
-b1.b0.b0.b0.b0.b0.b1.b0: 82
-b0.xff.b0*7: 7f 80
-b1.xff.b1*7: ff ff
-b0.x82.b0*7: 41 00
-b1.x82.b1*7: c1 7f
-b0*5.x82.b0*3: 04 10
-b1*5.x82.b1*3: fc 17
-b0*3.x82.b0*5: 10 40
-b1*3.x82.b1*5: f0 5f
-b0*5.x82.b0*3: 04 10
-b1*5.x82.b1*3: fc 17
-b0*7.x82.b0: 01 04
-b1*7.x82.b1: ff 05
+Start:
+    TEST(Bit(1);Bit(0);Bit(0);Bit(0);Bit(0);Bit(0);Bit(1);Bit(0), 1 0 0 0 0 0 1 0, 82);
+    TEST(Bit(0);Byte(0xff);BitR(0,7), 0 1111.1111 0000.000: 0111 1111 1000 0000, 7f 80);
+    TEST(Bit(1);Byte(0x00);BitR(1,7), 1 0000.0000 1111.111: 1000 0000 0111 1111, 80 7f);
+    TEST(Bit(1);Byte(0xff);BitR(1,7), 1 1111.1111 1111.111: 1111 1111 1111 1111, ff ff);
+    TEST(Bit(0);Byte(0x82);BitR(0,7), 0 1000.0010 0000.000: 0100 0001 0000 0000, 41 00);
+    TEST(Bit(1);Byte(0x82);BitR(1,7), 1 1000.0010 1111.111: 1100 0001 0111 1111, c1 7f);
+    TEST(BitR(0,5);Byte(0x82);BitR(0,3), 0000.0 1000.0010 000: 0000 0100 0001 0000, 04 10);
+    TEST(BitR(1,5);Byte(0x82);BitR(1,3), 1111.1 1000.0010 111: 1111 1100 0001 0111, fc 17);
+    TEST(BitR(0,3);Byte(0x82);BitR(0,5), 000 1000.0010 0000.0: 0001 0000 0100 0000, 10 40);
+    TEST(BitR(1,3);Byte(0x82);BitR(1,5), 111 1000.0010 1111.1: 1111 0000 0101 1111, f0 5f);
+    TEST(BitR(0,7);Byte(0x82);Bit(0), 0000.000 1000.0010 0: 0000 0001 0000 0100, 01 04);
+    TEST(BitR(1,7);Byte(0x82);Bit(1), 1111.111 1000.0010 1: 1111 1111 0000 0101, ff 05);
 .
