@@ -21,16 +21,18 @@ Goals
 .. window. Based on the measured data rate, we drop packets in a probabilistic way, so
 .. that the packet stream's data rate comforms to a specified limit.
 
-In this showcase, we demonstrate a simple statistical policing scenario. We
-generate traffic in an example network, and measure its data rate with a sliding
-window. Based on the measured data rate, we drop packets in a way that
-the packet stream's data rate on average comforms to a specified limit.
+.. In this showcase, we demonstrate a simple statistical policing scenario. We
+.. generate traffic in an example network, and measure its data rate with a sliding
+.. window. Based on the measured data rate, we drop packets in a way that
+.. the packet stream's data rate on average comforms to a specified limit.
 
 This showcase demonstrates a simple statistical policing
 scenario. We generate traffic within an example network and
-employ a sliding window to measure its data rate. By dynamically dropping
+employ a sliding time window to measure its data rate. By dynamically dropping
 packets based on the measured data rate, we ensure that the average data rate of
-the packet stream aligns with a specified limit.
+the packet stream doesn't exceed the specified limit.
+
+.. **review** what window sliding over what?
 
 .. We dynamically drop
 .. packets based on the measured data rate to ensure that the average data rate of
@@ -45,11 +47,13 @@ the packet stream aligns with a specified limit.
 Filtering and Policing in INET
 ------------------------------
 
-Filtering and policing - we'll use the two terms interchangably here - enforces
+Filtering and policing - we'll use the two terms interchangeably here - enforces
 requirements for data rate and burst size in a packet stream, by dropping
-excessive packets. In INET, by default, filtering is done in the bridging layer
+excess packets. In INET, by default, filtering is done in the bridging layer
 of TSN network nodes (although filtering components can also be inserted elsewhere
-in the network stack). network stack? wdym?
+in network nodes).
+
+**review** filtering AND policing -> interchangable? then why 'and'?
 
 .. note:: Filtering components don't even require a complete network to function, as demonstrated in the the :doc:`/showcases/tsn/streamfiltering/underthehood/doc/index` showcase.
 
@@ -102,18 +106,23 @@ in the network stack). network stack? wdym?
 .. submodule is added to the node's bridging layer, containing an ingress and/or
 .. egress filter submodule. By default, the ingress and egress filter type is :ned:`SimpleIeee8021qFilter`.
 
-To employ filtering and policing in TSN network nodes, the feature first needs to be enabled.
+To employ filtering and policing in TSN network nodes, this functionality first needs to be enabled.
 Then, by selecting and configuring the appropriate filtering components, different filtering methods can be realized.
+
+To employ filtering and policing, this functionality first needs to be enabled in TSN network nodes.
+Then, by selecting and configuring the appropriate components, different filtering methods can be realized.
+
+**review** enabled in them? in the nodes? no 'filtering' in appropriate filtering components
 
 Filtering and policing can be enabled in TSN network nodes by setting their
 :par:`ingressTrafficFiltering` and :par:`egressTrafficFiltering` parameters to ``true``. In
-:ned:`TsnSwitch`, only ingress filtering is available (as typically this direction is needed in switches), while :ned:`TsnDevice`
+:ned:`TsnSwitch`, only ingress filtering is available (as typically only this direction is needed in switches), while :ned:`TsnDevice`
 supports both ingress and egress filtering. When enabled in any direction, a
 :ned:`StreamFilteringLayer` submodule is added to the node's bridging layer,
 containing an ``ingressFilter`` and/or an ``egressFilter`` submodule. By
 default, the ingress and egress filter type is :ned:`SimpleIeee8021qFilter`.
 
-For context, here is a stream filtering layer module containing :ned:`SimpleIeee8021qFilter` submodules for both directions:
+For context, here is a stream filtering layer module containing filter submodules for both directions:
 
 .. figure:: media/both_directions.png
    :align: center
@@ -134,8 +143,8 @@ For context, here is a stream filtering layer module containing :ned:`SimpleIeee
 
 .. This module has a configurable number of paths, each of which can handle the metering and filtering of a traffic stream independently of the other streams.
 
-The :ned:`SimpleIeee8021qFilter` is a compound module that can handle a configurable number of
-traffic streams (specified by its :par:`numStreams` parameter). Each traffic
+:ned:`SimpleIeee8021qFilter` is a compound module that can handle a configurable number of
+traffic streams, as specified by its :par:`numStreams` parameter. Each traffic
 stream has a path that filters the stream independently of the other
 streams. For example, here is an internal view of a :ned:`SimpleIeee8021qFilter` module with two
 traffic streams:
@@ -147,14 +156,14 @@ traffic streams:
 
 .. these are some general notes on how the filtering works in general.
 
-Let's examine the filtering process in general in a :ned:`SimpleIeee8021qFilter` module:
+Let's examine the filtering process in this module, in general:
 
-- The `classifier` decides which traffic path incoming packets should take. By default, it's a :ned:`StreamClassifier` module, which classifies packets by stream name contained in a packet tag.
+- The `classifier` decides which traffic path incoming packets should take. By default, it's a :ned:`StreamClassifier` module, which classifies packets by stream name, contained in a packet tag.
 - The `gate` module is an :ned:`InteractiveGate` that is always open by default, but can be opened/closed by user interaction.
-- The `meter` module measures some property of the packet stream, and attaches this information to each packet by using a packet tag
-- The `filter` module can use this information to decide which packets to drop
+- The `meter` module measures some property of the packet stream, and attaches this information to each packet using a packet tag.
+- The `filter` module can use this information to decide which packets to drop.
 - Depending on configuration, the classifier can send some packets through an `unfiltered path` between the classifier and the multiplexer. This unfiltered path is available by default,
-  but can be turned off with :ned:`SimpleIeee8021qFilter`'s :par:`hasDefaultPath` parameter.
+  but can be turned off with the :par:`hasDefaultPath` parameter.
 
 .. - By default, the packets for the different streams are classified by stream name by a :ned:`StreamClassifier` module.
 .. - The module meter submodule adds a tag based on the metering to the packet. The filter module
@@ -167,7 +176,7 @@ Let's examine the filtering process in general in a :ned:`SimpleIeee8021qFilter`
 .. between the classifier and the multiplexer.
 
 By overriding the type of the meter and filter submodules in :ned:`SimpleIeee8021qFilter`, specific filtering behaviors can be achieved. 
-It's important to note that each traffic path can be configured independently for different filtering behaviors.
+It's important to note that each traffic path can be configured independently, for different filtering behaviors.
 
 .. can contain different modules./
 
@@ -210,6 +219,10 @@ The :ned:`SlidingWindowRateMeter` module measures data rate by summing up the
 packet bytes over the specified time window, and attaches a ``rateTag`` to each packet.
 The :ned:`StatisticalRateLimiter` is a filter module that uses the rate tag to drop packets in a probabilistic way, so that the 
 average data rate doesn't exceed the maximum data rate specified with the :par:`maxDataRate` parameter.
+
+In the next sections, we describe the network, and examine the configuration of traffic, stream identification and encoding, and filtering.
+
+-> how this, but understandable.
 
 .. The :ned:`StatisticalRateLimiter` is a filter module. We can specify a maximum data rate with the :par:`maxDataRate` parameter. The module
    drops packets that would exceed this limit.
