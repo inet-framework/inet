@@ -28,7 +28,7 @@ Goals
 
 This showcase demonstrates a simple statistical policing
 scenario. We generate traffic within an example network and
-employ a sliding time window to measure its data rate. By dynamically dropping
+employ a sliding time window to measure its data rate. By probabilistically dropping
 packets based on the measured data rate, we ensure that the average data rate of
 the packet stream doesn't exceed the specified limit.
 
@@ -47,20 +47,54 @@ the packet stream doesn't exceed the specified limit.
 Filtering and Policing in INET
 ------------------------------
 
-Filtering and policing - we'll use the two terms interchangeably here - enforces
-requirements for data rate and burst size in a packet stream, by dropping
-excess packets. In INET, by default, filtering is done in the bridging layer
-of TSN network nodes (although filtering components can also be inserted elsewhere
-in network nodes).
+.. Filtering and policing - we'll use the two terms interchangeably here - enforces
+.. requirements for data rate and burst size in a packet stream, by dropping
+.. excess packets. In INET, by default, filtering is done in the bridging layer
+.. of TSN network nodes (although filtering components can also be inserted elsewhere
+.. in network nodes).
 
-Filtering and policing is defined in the TODO standard. In general, filtering prevents certain types of packets from entering a network node.
-Policing refers to enforcing data rate and bursting limits to protect upstream components and devices in a network. In INET, filtering
-is used with somewhat different meanings sometimes, as it generally refers to the filtering layer where filtering and policing takes places.
-Also, policing involves dropping (or filtering out) packets, also done in the filtering layer. So in this document, filtering is used in a broader sense than in the standard.
+.. Filtering and policing is defined in the TODO standard. In general, filtering
+.. prevents certain types of packets from entering a network node. Policing refers
+.. to enforcing data rate and bursting limits to protect upstream components and
+.. devices in a network. In INET, filtering is used with somewhat different
+.. meanings sometimes, as it generally refers to the filtering layer where
+.. filtering and policing takes places. Also, policing involves dropping (or
+.. filtering out) packets, also done in the filtering layer. So in this document,
+.. filtering is used in a broader sense than in the standard.
 
-**review** filtering AND policing -> interchangable? then why 'and'?
+.. **review** filtering AND policing -> interchangable? then why 'and'?
 
--> actually, in the standard its called filtering and policing, which means basically the same; policing by filtering?
+.. -> actually, in the standard its called filtering and policing, which means basically the same; policing by filtering?
+
+.. - Filtering and policing in the standard: filters out packets. prevents certain
+..   types of packets from entering the network for security. policing is limiting
+..   the data rate and bursting in order not to overload other network components
+.. - In INET, filtering and policing is done in the filtering layer. The filtering layer performs both. It can drop certain types of packets,
+..   and can use queueing components for rate limiting traffic streams
+
+.. Per-Stream Filtering and Policing is defined in the IEEE 802.1Qci standard. Filtering
+.. prevents certain types of packets from entering the network. Policing refers
+.. to enforcing limits for data rate and bursting to protect upstream components and
+.. devices in the network. In INET, both filtering and policing is performed in the filtering layer, 
+.. located in the bridging layer of TSN network nodes.
+
+The IEEE 802.1Qci standard defines Per-Stream Filtering and
+Policing. Filtering can blocking specific packet types from
+entering the network, while Policing focuses on enforcing limits for data rate
+and bursting to safeguard upstream components and network devices. Both mechanisms involve dropping invalid or excess/selected packets.
+In INET, both filtering and policing operations are conducted in the
+filtering layer, which is located in the bridging layer of TSN network nodes.
+
+**review** does this description belong here? and not one level up?
+
+   .. Since both filtering and policing is performed in the filtering layer in INET, we generally use filtering
+   .. in this document to refer to both.
+
+.. In INET, the filtering layer performs both filtering and policing. 
+   It is located in the bridging layer of TSN network nodes.
+
+.. In INET, both filtering and policing is done in the filtering
+   layer, located in the bridging layer of network nodes.
 
 .. note:: Filtering components don't even require a complete network to function, as demonstrated in the the :doc:`/showcases/tsn/streamfiltering/underthehood/doc/index` showcase.
 
@@ -113,13 +147,13 @@ Also, policing involves dropping (or filtering out) packets, also done in the fi
 .. submodule is added to the node's bridging layer, containing an ingress and/or
 .. egress filter submodule. By default, the ingress and egress filter type is :ned:`SimpleIeee8021qFilter`.
 
-To employ filtering and policing in TSN network nodes, this functionality first needs to be enabled.
-Then, by selecting and configuring the appropriate filtering components, different filtering methods can be realized.
+.. To employ filtering and policing in TSN network nodes, this functionality first needs to be enabled.
+.. Then, by selecting and configuring the appropriate filtering components, different filtering methods can be realized.
 
 To employ filtering and policing, this functionality first needs to be enabled in TSN network nodes.
 Then, by selecting and configuring the appropriate components, different filtering methods can be realized.
 
-**review** enabled in them? in the nodes? no 'filtering' in appropriate filtering components
+.. **review** enabled in them? in the nodes? no 'filtering' in appropriate filtering components
 
 Filtering and policing can be enabled in TSN network nodes by setting their
 :par:`ingressTrafficFiltering` and :par:`egressTrafficFiltering` parameters to ``true``. In
@@ -163,7 +197,7 @@ traffic streams:
 
 .. these are some general notes on how the filtering works in general.
 
-Let's examine the filtering process in this module, in general:
+Let's examine the filtering process in this module:
 
 - The `classifier` decides which traffic path incoming packets should take. By default, it's a :ned:`StreamClassifier` module, which classifies packets by stream name, contained in a packet tag.
 - The `gate` module is an :ned:`InteractiveGate` that is always open by default, but can be opened/closed by user interaction.
@@ -189,7 +223,9 @@ It's important to note that each traffic path can be configured independently, f
 
 .. .. note:: Traffic shapers, such as the Asynchronous Traffic Shaper, can have elements in the filtering layer.
 
-.. note:: Although traffic shaping primarily happens in network interfaces, some elements of traffic shapers might be located in the filtering layer. For example, the Asynchronous Traffic Shaper has its meter and filter components there.
+.. note:: Although traffic shaping primarily happens in network interfaces, 
+   some elements of traffic shapers might be located in the filtering layer. 
+   For example, the Asynchronous Traffic Shaper's meter and filter components are located there.
 
    .. so
 
@@ -218,22 +254,79 @@ It's important to note that each traffic path can be configured independently, f
    .. - note check out other meter modules (DualRateThreeColorMeter)can contain different modules./
 .. ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The Model
----------
+.. The Model
+.. ---------
 
-In this showcase, we'll use the :ned:`SlidingWindowRateMeter` and the :ned:`StatisticalRateLimiter` modules for basic statistical filtering.
-The :ned:`SlidingWindowRateMeter` module measures data rate by summing up the
-packet bytes over the specified time window, and attaches a ``rateTag`` to each packet.
-The :ned:`StatisticalRateLimiter` is a filter module that uses the rate tag to drop packets in a probabilistic way, so that the 
-average data rate doesn't exceed the maximum data rate specified with the :par:`maxDataRate` parameter.
+Statistical Policing
+--------------------
+
+.. "drops packets in a probabilistic way by comparing the measured datarate to the maximum allowed datarate."
+
+In this showcase, we employ a basic statistical policing mechanism,
+i.e., measure data rate of a packet stream, and drop packets in a probabilistic manner
+to keep the filtered data rate below a specified maximum.
+To implement this mechanism, we'll use the :ned:`SlidingWindowRateMeter` and the
+:ned:`StatisticalRateLimiter` modules. 
+
+.. In this showcase, we'll use the :ned:`SlidingWindowRateMeter` and the
+.. :ned:`StatisticalRateLimiter` modules for basic statistical policing, i.e.,
+.. the filtered data rate 
+
+:ned:`SlidingWindowRateMeter` measures data rate with a sliding time window,
+whose size is configured with the :par:`timeWindow` parameter.
+The module sums up the packet bytes over the specified time window, and attaches a ``rateTag`` to each packet.
+
+.. The :ned:`StatisticalRateLimiter` is a filter module that uses the rate tag to
+.. drop packets in a probabilistic way, so that the average data rate doesn't
+.. exceed the maximum data rate specified with the :par:`maxDataRate` parameter.
+
+.. The :ned:`StatisticalRateLimiter` is a filter module that uses its
+.. :par:`maxDataRate` parameter, and the rate tag on packets to calculate a packet
+.. drop probability. It drops certain packets based on this probability,
+.. guaranteeing that on average, filtered data rate stays below the specified maximum.
+
+.. The :ned:`StatisticalRateLimiter` is a filter module that drops packets in a probabilistic way by comparing the measured datarate to the maximum allowed datarate.
+
+.. The :ned:`StatisticalRateLimiter` is a filter module that calculates a packet drop probability by comparing the measured datarate to the maximum allowed datarate.
+.. Drop probability depends on how excessive the data rate gets.
+
+:ned:`StatisticalRateLimiter` is a filter module that calculates a packet drop probability by comparing the measured datarate (contained in rate tags) to the maximum allowed datarate (specified by the module's :par:`maxDataRate` parameter).
+Packet drop probability increases depending how much how much the measured data rate exceeds the maximum.
+
+.. It drops packets with a probability increasing with the measured datarate. It drops packets based on how much the measured data rate exceeds the maximum.
+
+The precision of the policing process relies on the size of the time window, which determines how quickly the filter responds 
+to fluctuations in the incoming data rate and how closely the filtered outgoing data rate matches the configured maximum.
+
+.. It calculates packet drop probability based on the maximum data rate specified with the :par:`maxDataRate` parameter.
+
+.. so
+
+.. - specifiy a max data rate
+.. - the filter calculates a packet drop probability based on the max data rate and the rate tag
+.. - and drops certain packets (By applying this probability, certain packets are selectively dropped.)
+.. - the result is that the filtered outgoing data rate stays below the specified limit on average
+
+.. **review** statistically, the components limit the data rate on average. how does that work? it calculates a probability
+.. that a packet should be dropped? so that the outgoing rate matches the configured limit.
+.. record a statistic (data rate), calculate a packet drop probability, and drop certain packets.
+
+.. .. note:: This setup performs straightforward statistical filtering by utilizing a sliding window to measure the data rate. 
+..    The precision of the filtering process relies on the size of the time window, which determines how quickly the filter responds 
+..    to fluctuations in the incoming data rate and how closely the filtered outgoing data rate matches the configured maximum.
+
+The Configuration
+-----------------
 
 In the next sections, we describe the network, and examine the configuration of traffic, stream identification and encoding, and filtering.
 
 -> how this, but understandable.
 
-We use a simple network in which a client is connected to a server via a switch, using 100Mbps Ethernet links. The client generates traffic, and sends it to the server.
-The traffic undergoes filtering in the switch. We examine the traffic before and after filtering/how filtering changes the traffic.
-Here is the network:
+.. We use a simple network in which a client is connected to a server via a switch, using 100Mbps Ethernet links. The client generates traffic, and sends it to the server.
+.. The traffic undergoes filtering in the switch. We examine the traffic before and after filtering/how filtering changes the traffic.
+.. Here is the network:
+
+We use the following simple network, in which a client is connected to a server via a switch, using 100Mbps Ethernet links:
 
 .. The :ned:`StatisticalRateLimiter` is a filter module. We can specify a maximum data rate with the :par:`maxDataRate` parameter. The module
    drops packets that would exceed this limit.
@@ -247,7 +340,7 @@ Here is the network:
 .. This is a simple statistical filtering, because the data rate is measured with a sliding window. the precision depends on the timewindow size
 .. -> like how fast the filter reacts to changes in incoming data rate? and how precisely the outgoing datarate sticks to the configured maximum. TODO
 
-.. note:: This setup does simple statistical filtering, because the data rate is measured with a sliding window. The precision depends on the size of the time window, i.e. how fast the filter reacts to changes in incoming data rate, and how precisely the outgoing data rate aligns with the configured maximum.
+.. .. note:: This setup does simple statistical filtering, because the data rate is measured with a sliding window. The precision depends on the size of the time window, i.e. how fast the filter reacts to changes in incoming data rate, and how precisely the outgoing data rate aligns with the configured maximum.
 
 .. The Network
 .. ~~~~~~~~~~~
@@ -273,14 +366,17 @@ Here is the network:
    .. literalinclude:: ../omnetpp.ini
       :language: ini
 
-In this simulation, the client generates two traffic streams with sinusoidally changing data rates.
-The filtering layer in the switch limits this traffic to a nominal rate by dropping excessive packets.
+The client generates two traffic streams with sinusoidally changing data rates.
+Then, the filtering layer in the switch limits this traffic to a nominal rate by dropping excessive packets.
+
+The client is configured to generate two traffic streams
 
 Traffic
 +++++++
 
-The source is configured to generate two traffic streams (we classify them to the best effort and video traffic classes in the next section, based on destination port).
-The best effort and video data streams have a sinusoidally changing data rate with a mean of 40 and 20 Mbps, respectively:
+The client is configured to generate two traffic streams with sinusoidally changing data rates, with a mean of 40 and 20 Mbps:
+
+.. The best effort and video data streams have a sinusoidally changing data rate with a mean of 40 and 20 Mbps, respectively:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -312,6 +408,33 @@ data rates. The data rates of the incoming traffic are sinusoids with a mean of 
    :language: ini
    :start-at: enable per-stream filtering
 
+To configure the statistical policing, we first enable ingress per-stream filtering in the switch. This setting adds a :ned:`SimpleIeee8021qFilter` module to the switch's bridging layer:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: enable per-stream filtering
+   :end-before: per-stream filtering
+
+Then, we set the number of streams to 2, for our best effort and video classes. The classifier is set to prioritize the video class:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: # per-stream filtering
+   :end-before: meter[0].display-name
+
+In the meter module, we configure the type to be :ned:`SlidingWindowRateMeter`, and set the sliding time window size:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: meter[0].display-name
+   :end-at: timeWindow
+
+Finally, the filter module type is set to :ned:`StatisticalRateLimiter`. We configure the rate limiter to maximize data rate at 40 and 20 Mbps for the two traffic classes, respectively:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: StatisticalRateLimiter
+
 Results
 -------
 
@@ -326,6 +449,12 @@ The following two charts show the incoming, outgoing (filtered), and dropped dat
    :align: center
 
 .. figure:: media/datarate_vi.png
+   :align: center
+
+.. figure:: media/datarate_be2.png
+   :align: center
+
+.. figure:: media/datarate_vi2.png
    :align: center
 
 The filter limits the data rate to the configured value. Note that the filtered data rate is less than the incoming rougly with the amount of the dropped data rate.
