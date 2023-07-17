@@ -393,7 +393,7 @@ class INET_API MemoryOutputStream
      * Writes a zero terminated string in the order of the characters.
      */
     void writeString(std::string s) {
-        writeBytes(std::vector<uint8_t>(s.begin(), s.end()));
+        writeBytes(reinterpret_cast<const uint8_t*>(s.c_str()), B(s.length()));
         writeByte(0);
     }
 
