@@ -175,8 +175,17 @@ class INET_API MemoryOutputStream
      * bit order.
      */
     void writeByteRepeatedly(uint8_t value, size_t count) {
-        for (size_t i = 0; i < count; i++)
-            writeByte(value);
+        uint8_t bitOffset = length.get<b>() & 7;
+        if (bitOffset == 0) {
+            data.insert(data.end(), count, value);
+        }
+        else if (count > 0) {
+            data.back() |= value >> bitOffset;
+            if (count > 1)
+                data.insert(data.end(), count-1, value >> bitOffset | value << (8 - bitOffset));
+            data.push_back(value << (8 - bitOffset));
+        }
+        length += B(count);
     }
 
     /**
