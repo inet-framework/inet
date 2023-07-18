@@ -46,8 +46,10 @@ the packet stream doesn't exceed a specified limit.
 
 **review** does this description belong here? and not one level up?
 
-Filtering and Policing in INET
-------------------------------
+.. _sh:tsn:filtering:statistical:filtering_in_inet:
+
+Per-Stream Filtering and Policing in INET
+-----------------------------------------
 
 .. Filtering and policing - we'll use the two terms interchangeably here - enforces
 .. requirements for data rate and burst size in a packet stream, by dropping
@@ -275,8 +277,8 @@ It's important to note that each traffic path can be configured independently, f
 .. The Model
 .. ---------
 
-Statistical Policing
---------------------
+Statistical Policing Overview
+-----------------------------
 
 .. "drops packets in a probabilistic way by comparing the measured datarate to the maximum allowed datarate."
 
