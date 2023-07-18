@@ -318,15 +318,24 @@ to fluctuations in the incoming data rate and how closely the filtered outgoing 
 The Configuration
 -----------------
 
-In the next sections, we describe the network, and examine the configuration of traffic, stream identification and encoding, and filtering.
+.. In the next sections, we describe the network, and examine the configuration of traffic, stream identification and encoding, and filtering.
 
--> how this, but understandable.
+.. -> how this, but understandable.
 
 .. We use a simple network in which a client is connected to a server via a switch, using 100Mbps Ethernet links. The client generates traffic, and sends it to the server.
 .. The traffic undergoes filtering in the switch. We examine the traffic before and after filtering/how filtering changes the traffic.
 .. Here is the network:
 
-We use the following simple network, in which a client is connected to a server via a switch, using 100Mbps Ethernet links:
+.. We use the following simple network, in which a client is connected to a server via a switch, using 100Mbps Ethernet links:
+
+The network contains three hosts: the ``client`` and the ``server`` (both :ned:`TsnDevice` modules), connected via the ``switch`` (:ned:`TsnSwitch`) with
+100 Mbps Ethernet links. The client generates traffic, and the filtering layer in the switch limits this traffic to a nominal rate by dropping excessive packets.
+We plot the data rate in the client and the server to observe the effects of policing. Here is the network:
+
+.. The network contains three hosts. A client is connected to a server via a switch, using 100 Mbps Ethernet links.
+.. Both the client and the server are :ned:`TsnDevice` modules, the switch's type is :ned:`TsnSwitch`. 
+.. The client generates traffic, and the filtering layer in the switch limits this traffic to a nominal rate by dropping excessive packets.
+.. We plot the data rate in the client and the server to observe the effects of policing. Here is the network:
 
 .. The :ned:`StatisticalRateLimiter` is a filter module. We can specify a maximum data rate with the :par:`maxDataRate` parameter. The module
    drops packets that would exceed this limit.
@@ -366,10 +375,14 @@ We use the following simple network, in which a client is connected to a server 
    .. literalinclude:: ../omnetpp.ini
       :language: ini
 
-The client generates two traffic streams with sinusoidally changing data rates.
-Then, the filtering layer in the switch limits this traffic to a nominal rate by dropping excessive packets.
+.. The client generates two traffic streams with sinusoidally changing data rates.
+.. Then, the filtering layer in the switch limits this traffic to a nominal rate by dropping excessive packets.
 
-The client is configured to generate two traffic streams
+.. The client generates traffic, and the filtering layer in the switch limits this traffic to a nominal rate by dropping excessive packets.
+
+We take a look the configuration in the following sections.
+
+.. The client is configured to generate two traffic streams
 
 Traffic
 +++++++
@@ -390,6 +403,8 @@ We enable outgoing streams in the client (this adds a :ned:`StreamIdentifierLaye
 destination port. The stream coder encodes the streams with PCP numbers. We configure the switch similarly to decode the named stream based on PCP. Here is the relevant
 configuration:
 
+**review** more understandable?
+
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: enable outgoing streams
@@ -398,15 +413,15 @@ configuration:
 Per-Stream Filtering
 ++++++++++++++++++++
 
-We enable ingress per-stream filtering in the switch. As mentioned before, this setting adds a :ned:`StreamFilteringLayer` to the bridging layer of the switch,
-with a :ned:`SimpleIeee8021qFilter` submodule as the ingress filter. We set the number of traffic streams to 2; the default path is enabled by default, though
-it won't be used in this scenario, as all packets are part of either the best effort or video stream. We configure the priority of the streams in the classifier.
-We set the type of both meter submodules to :ned:`SlidingWindowRateMeter`, and configure the time window to be 10ms. We specify the maximum
-data rates. The data rates of the incoming traffic are sinusoids with a mean of 40 and 20 Mbps, thus they fluctuate around the mean. The filter limits the data rate to the mean value:
+.. We enable ingress per-stream filtering in the switch. As mentioned before, this setting adds a :ned:`StreamFilteringLayer` to the bridging layer of the switch,
+.. with a :ned:`SimpleIeee8021qFilter` submodule as the ingress filter. We set the number of traffic streams to 2; the default path is enabled by default, though
+.. it won't be used in this scenario, as all packets are part of either the best effort or video stream. We configure the priority of the streams in the classifier.
+.. We set the type of both meter submodules to :ned:`SlidingWindowRateMeter`, and configure the time window to be 10ms. We specify the maximum
+.. data rates. The data rates of the incoming traffic are sinusoids with a mean of 40 and 20 Mbps, thus they fluctuate around the mean. The filter limits the data rate to the mean value:
 
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :start-at: enable per-stream filtering
+.. .. literalinclude:: ../omnetpp.ini
+..    :language: ini
+..    :start-at: enable per-stream filtering
 
 To configure the statistical policing, we first enable ingress per-stream filtering in the switch. This setting adds a :ned:`SimpleIeee8021qFilter` module to the switch's bridging layer:
 
