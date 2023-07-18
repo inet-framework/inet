@@ -29,8 +29,8 @@ Goals
 This showcase demonstrates a simple statistical policing
 scenario. We generate traffic within an example network and
 employ a sliding time window to measure its data rate. By probabilistically dropping
-packets based on the measured data rate, we ensure that the average data rate of
-the packet stream doesn't exceed the specified limit.
+packets based on the measured data rate, this mechanism ensures that the average data rate of
+the packet stream doesn't exceed a specified limit.
 
 .. **review** what window sliding over what?
 
@@ -43,6 +43,8 @@ the packet stream doesn't exceed the specified limit.
 
 .. The Model
 .. ---------
+
+**review** does this description belong here? and not one level up?
 
 Filtering and Policing in INET
 ------------------------------
@@ -85,7 +87,21 @@ and bursting to safeguard upstream components and network devices. Both mechanis
 In INET, both filtering and policing operations are conducted in the
 filtering layer, which is located in the bridging layer of TSN network nodes.
 
-**review** does this description belong here? and not one level up?
+The IEEE 802.1Qci standard defines Per-Stream Filtering and
+Policing. In order to safeguard upstream components and network devices, Filtering can blocking specific packet types from
+entering the network, while Policing focuses on enforcing limits for data rate
+and bursting. Both mechanisms involve dropping selected packets.
+In INET, both filtering and policing operations are conducted in the
+filtering layer, which is located in the bridging layer of TSN network nodes.
+
+   Thus, in this document, we refer to filtering in general to mean that some selected packets are filtered out and dropped in the filtering layer,
+   whether thats for filtering and policing.
+
+   We use filtering in this documents as an umbrella term for filtering and policing operations, as we concentrate
+   on how packets are selected and filtered out and dropped in the filtering layer.
+
+   We use filtering in this documents as an umbrella term for filtering and policing operations, as both happen in the
+   filtering layer of network nodes and involve filtering out and dropping certain packets.
 
    .. Since both filtering and policing is performed in the filtering layer in INET, we generally use filtering
    .. in this document to refer to both.
@@ -206,6 +222,8 @@ Let's examine the filtering process in this module:
 - Depending on configuration, the classifier can send some packets through an `unfiltered path` between the classifier and the multiplexer. This unfiltered path is available by default,
   but can be turned off with the :par:`hasDefaultPath` parameter.
 
+**review** how does the classifier use the default path? "can send packets that don't match any traffic class through the unfiltered direct path"
+
 .. - By default, the packets for the different streams are classified by stream name by a :ned:`StreamClassifier` module.
 .. - The module meter submodule adds a tag based on the metering to the packet. The filter module
 ..   then can use this information to drop excessive packets.
@@ -292,6 +310,8 @@ The module sums up the packet bytes over the specified time window, and attaches
 
 :ned:`StatisticalRateLimiter` is a filter module that calculates a packet drop probability by comparing the measured datarate (contained in rate tags) to the maximum allowed datarate (specified by the module's :par:`maxDataRate` parameter).
 Packet drop probability increases depending how much how much the measured data rate exceeds the maximum.
+
+**review** is it clear that these are the meter and filter submodules in the SimpleIeee8021qFilter?
 
 .. It drops packets with a probability increasing with the measured datarate. It drops packets based on how much the measured data rate exceeds the maximum.
 
@@ -380,7 +400,7 @@ We plot the data rate in the client and the server to observe the effects of pol
 
 .. The client generates traffic, and the filtering layer in the switch limits this traffic to a nominal rate by dropping excessive packets.
 
-We take a look the configuration in the following sections.
+We take a look at the configuration in the following sections.
 
 .. The client is configured to generate two traffic streams
 
@@ -399,11 +419,31 @@ The client is configured to generate two traffic streams with sinusoidally chang
 Stream Identification, Encoding and Decoding
 ++++++++++++++++++++++++++++++++++++++++++++
 
-We enable outgoing streams in the client (this adds a :ned:`StreamIdentifierLayer`), and assign packets to the `best effort` and `video` named streams based on
-destination port. The stream coder encodes the streams with PCP numbers. We configure the switch similarly to decode the named stream based on PCP. Here is the relevant
-configuration:
+.. We enable outgoing streams in the client (this adds a :ned:`StreamIdentifierLayer`), and assign packets to the `best effort` and `video` named streams based on
+.. destination port. The stream coder encodes the streams with PCP numbers. We configure the switch similarly to decode the named stream based on PCP. Here is the relevant
+.. configuration:
 
-**review** more understandable?
+.. The two streams have two different traffic classes: best effort and video. The
+.. bridging layer in the client identifies the outgoing packets by their UDP destination port.
+.. The client encodes and the switch decodes the streams using the IEEE 802.1Q PCP
+.. field:
+
+We assign the two streams to two different traffic classes: best effort and video. To this end, we configure the
+bridging layer in the client to identify outgoing packets by their UDP destination port.
+Then, the client encodes and the switch decodes the streams using the IEEE 802.1Q PCP
+field:
+
+..    Within the client, our goal is to classify packets originating from the two
+..    packet sources into two traffic classes: best effort and video. To achieve this,
+..    we activate IEEE 802.1 stream identification and stream encoding functionalities
+..    by setting the hasOutgoingStreams parameter in the switch to true. We proceed by
+..    configuring the stream identifier module within the bridging layer; this module
+..    is responsible for associating outgoing packets with named streams based on
+..    their UDP destination ports. Following this, the stream encoder sets the
+..    Priority Code Point (PCP) number on the packets according to the assigned stream
+..    name (using the IEEE 802.1Q header’s PCP field):
+
+.. **review** more understandable?
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -430,7 +470,9 @@ To configure the statistical policing, we first enable ingress per-stream filter
    :start-at: enable per-stream filtering
    :end-before: per-stream filtering
 
-Then, we set the number of streams to 2, for our best effort and video classes. The classifier is set to prioritize the video class:
+Then, we set the number of streams to 2, for our best effort and video classes. The classifier is set to prioritize the video class **review** is it?:
+
+**review** also, shouldn't index 0 be the default path, making the best effort stream unfiltered? or if there is a default path, its index is -1?
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -438,6 +480,8 @@ Then, we set the number of streams to 2, for our best effort and video classes. 
    :end-before: meter[0].display-name
 
 In the meter module, we configure the type to be :ned:`SlidingWindowRateMeter`, and set the sliding time window size:
+
+**review** (and also the display name, so we can see which traffic path belongs to which traffic class)
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -453,12 +497,12 @@ Finally, the filter module type is set to :ned:`StatisticalRateLimiter`. We conf
 Results
 -------
 
-Let's examine the results. The following chart shows the data rates for the two traffic streams in the source:
+Let's examine the results. The following chart shows the data rates for the two traffic streams in the client:
 
 .. figure:: media/ClientApplicationTraffic.png
    :align: center
 
-The following two charts show the incoming, outgoing (filtered), and dropped data rates, for the two traffic categories:
+The following two charts show the incoming, outgoing (filtered), and dropped data rates in the switch, for the two traffic categories:
 
 .. figure:: media/datarate_be.png
    :align: center
