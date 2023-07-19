@@ -617,7 +617,7 @@ utils.plot_vectors(df, props)
 utils.postconfigure_plot(props)
 
 handles, labels = plt.gca().get_legend_handles_labels()
-handles, labels = inet.scave.plot.create_multidimensional_legend([('nominal', {'linestyle': 'dashdot', 'color': 'black'})], handles=handles, labels=labels)
+handles, labels = inet.scave.plot.create_multidimensional_legend([('committed information rate', {'linestyle': 'dashdot', 'color': 'black'})], handles=handles, labels=labels)
 plt.legend(handles, labels)
 inet.scave.plot.quick_reorder_legend(handles, labels, [1, 2, 3, 0])
 
@@ -1920,7 +1920,7 @@ utils.plot_vectors(df, props)
 utils.postconfigure_plot(props)
 
 handles, labels = plt.gca().get_legend_handles_labels()
-handles, labels = inet.scave.plot.create_multidimensional_legend([('nominal', {'linestyle': 'dashdot', 'color': 'black'})], handles=handles, labels=labels)
+handles, labels = inet.scave.plot.create_multidimensional_legend([('committed information rate', {'linestyle': 'dashdot', 'color': 'black'})], handles=handles, labels=labels)
 plt.legend(handles, labels)
 inet.scave.plot.quick_reorder_legend(handles, labels, [1, 2, 3, 0])
 
@@ -3153,7 +3153,7 @@ utils.postconfigure_plot(props)
 
 handles, labels = datarateax.get_legend_handles_labels()
 
-handles, labels = inet.scave.plot.create_multidimensional_legend([('Nominal', {'linestyle': 'dashdot', 'color': 'black'})], handles=handles, labels=labels)
+handles, labels = inet.scave.plot.create_multidimensional_legend([('committed information rate', {'linestyle': 'dashdot', 'color': 'black'})], handles=handles, labels=labels)
 
 datarateax.legend(handles, labels, loc='upper left')
 
@@ -3813,7 +3813,7 @@ utils.postconfigure_plot(props)
 
 handles, labels = datarateax.get_legend_handles_labels()
 
-handles, labels = inet.scave.plot.create_multidimensional_legend([('Nominal', {'linestyle': 'dashdot', 'color': 'black'})], handles=handles, labels=labels)
+handles, labels = inet.scave.plot.create_multidimensional_legend([('committed information rate', {'linestyle': 'dashdot', 'color': 'black'})], handles=handles, labels=labels)
 
 datarateax.legend(handles, labels, loc='upper left')
 
