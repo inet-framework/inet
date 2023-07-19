@@ -44,7 +44,7 @@ the packet stream doesn't exceed a specified limit.
 .. The Model
 .. ---------
 
-**review** does this description belong here? and not one level up?
+.. **review** does this description belong here? and not one level up?
 
 .. _sh:tsn:filtering:statistical:filtering_in_inet:
 
@@ -82,12 +82,12 @@ Per-Stream Filtering and Policing in INET
 .. devices in the network. In INET, both filtering and policing is performed in the filtering layer, 
 .. located in the bridging layer of TSN network nodes.
 
-The IEEE 802.1Qci standard defines Per-Stream Filtering and
-Policing. Filtering can blocking specific packet types from
-entering the network, while Policing focuses on enforcing limits for data rate
-and bursting to safeguard upstream components and network devices. Both mechanisms involve dropping invalid or excess/selected packets.
-In INET, both filtering and policing operations are conducted in the
-filtering layer, which is located in the bridging layer of TSN network nodes.
+.. The IEEE 802.1Qci standard defines Per-Stream Filtering and
+.. Policing. Filtering can blocking specific packet types from
+.. entering the network, while Policing focuses on enforcing limits for data rate
+.. and bursting to safeguard upstream components and network devices. Both mechanisms involve dropping invalid or excess/selected packets.
+.. In INET, both filtering and policing operations are conducted in the
+.. filtering layer, which is located in the bridging layer of TSN network nodes.
 
 The IEEE 802.1Qci standard defines Per-Stream Filtering and
 Policing. In order to safeguard upstream components and network devices, Filtering can blocking specific packet types from
@@ -96,14 +96,29 @@ and bursting. Both mechanisms involve dropping selected packets.
 In INET, both filtering and policing operations are conducted in the
 filtering layer, which is located in the bridging layer of TSN network nodes.
 
-   Thus, in this document, we refer to filtering in general to mean that some selected packets are filtered out and dropped in the filtering layer,
-   whether thats for filtering and policing.
+.. We use `filtering` in this documents as an umbrella term for filtering and policing operations, as we concentrate
+.. on how packets are filtered out in the filtering layer.
 
-   We use filtering in this documents as an umbrella term for filtering and policing operations, as we concentrate
-   on how packets are selected and filtered out and dropped in the filtering layer.
+.. "For the purpose of this document, the term 'filtering' encompasses filtering
+.. and policing operations, with a particular concentration on how packets are
+.. filtered at the filtering layer."
 
-   We use filtering in this documents as an umbrella term for filtering and policing operations, as both happen in the
-   filtering layer of network nodes and involve filtering out and dropping certain packets.
+Throughout this document, we often use the term `filtering` broadly to cover both
+filtering and policing operations, emphasizing the process of packet filtering
+at the filtering layer.
+
+.. "The term 'filtering' is used as an umbrella term in this document, encompassing
+.. both filtering and policing operations, with a specific focus on how packets are
+.. filtered out at the filtering layer."
+
+   .. Thus, in this document, we refer to filtering in general to mean that some selected packets are filtered out and dropped in the filtering layer,
+   .. whether thats for filtering and policing.
+
+   .. We use filtering in this documents as an umbrella term for filtering and policing operations, as we concentrate
+   .. on how packets are selected and filtered out and dropped in the filtering layer.
+
+   .. We use filtering in this documents as an umbrella term for filtering and policing operations, as both happen in the
+   .. filtering layer of network nodes and involve filtering out and dropping certain packets.
 
    .. Since both filtering and policing is performed in the filtering layer in INET, we generally use filtering
    .. in this document to refer to both.
@@ -221,10 +236,10 @@ Let's examine the filtering process in this module:
 - The `gate` module is an :ned:`InteractiveGate` that is always open by default, but can be opened/closed by user interaction.
 - The `meter` module measures some property of the packet stream, and attaches this information to each packet using a packet tag.
 - The `filter` module can use this information to decide which packets to drop.
-- Depending on configuration, the classifier can send some packets through an `unfiltered path` between the classifier and the multiplexer. This unfiltered path is available by default,
+- Depending on configuration, the classifier can send packets that don't match any traffic stream through an `unfiltered path` between the classifier and the multiplexer. This unfiltered path is available by default,
   but can be turned off with the :par:`hasDefaultPath` parameter.
 
-**review** how does the classifier use the default path? "can send packets that don't match any traffic class through the unfiltered direct path"
+.. **review** how does the classifier use the default path? "can send packets that don't match any traffic stream through the unfiltered direct path"
 
 .. - By default, the packets for the different streams are classified by stream name by a :ned:`StreamClassifier` module.
 .. - The module meter submodule adds a tag based on the metering to the packet. The filter module
@@ -313,7 +328,7 @@ The module sums up the packet bytes over the specified time window, and attaches
 :ned:`StatisticalRateLimiter` is a filter module that calculates a packet drop probability by comparing the measured datarate (contained in rate tags) to the maximum allowed datarate (specified by the module's :par:`maxDataRate` parameter).
 Packet drop probability increases depending how much how much the measured data rate exceeds the maximum.
 
-**review** is it clear that these are the meter and filter submodules in the SimpleIeee8021qFilter?
+.. **review** is it clear that these are the meter and filter submodules in the SimpleIeee8021qFilter?
 
 .. It drops packets with a probability increasing with the measured datarate. It drops packets based on how much the measured data rate exceeds the maximum.
 
@@ -430,7 +445,7 @@ Stream Identification, Encoding and Decoding
 .. The client encodes and the switch decodes the streams using the IEEE 802.1Q PCP
 .. field:
 
-We assign the two streams to two different traffic classes: best effort and video. To this end, we configure the
+We assign the two streams to two different traffic categories: best effort and video. To this end, we configure the
 bridging layer in the client to identify outgoing packets by their UDP destination port.
 Then, the client encodes and the switch decodes the streams using the IEEE 802.1Q PCP
 field:
@@ -472,9 +487,9 @@ To configure the statistical policing, we first enable ingress per-stream filter
    :start-at: enable per-stream filtering
    :end-before: per-stream filtering
 
-Then, we set the number of streams to 2, for our best effort and video classes. The classifier is set to prioritize the video class **review** is it?:
+Then, we set the number of streams to 2, and configure the classifier mapping for our best effort and video streams.
 
-**review** also, shouldn't index 0 be the default path, making the best effort stream unfiltered? or if there is a default path, its index is -1?
+.. **review** also, shouldn't index 0 be the default path, making the best effort stream unfiltered? or if there is a default path, its index is -1?
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -483,14 +498,16 @@ Then, we set the number of streams to 2, for our best effort and video classes. 
 
 In the meter module, we configure the type to be :ned:`SlidingWindowRateMeter`, and set the sliding time window size:
 
-**review** (and also the display name, so we can see which traffic path belongs to which traffic class)
+.. In the meter module, we set the display names, so we can see which traffic path belongs to which traffic stream. Then, we configure the type to be :ned:`SlidingWindowRateMeter`, and set the sliding time window size:
+
+.. **review** (and also the display name, so we can see which traffic path belongs to which traffic class)
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: meter[0].display-name
    :end-at: timeWindow
 
-Finally, the filter module type is set to :ned:`StatisticalRateLimiter`. We configure the rate limiter to maximize data rate at 40 and 20 Mbps for the two traffic classes, respectively:
+Finally, the filter module type is set to :ned:`StatisticalRateLimiter`. We configure the rate limiter to maximize data rate at 40 and 20 Mbps for the two traffic categories, respectively:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -512,20 +529,20 @@ The following two charts show the incoming, outgoing (filtered), and dropped dat
 .. figure:: media/datarate_vi.png
    :align: center
 
-.. figure:: media/datarate_be2.png
-   :align: center
+.. .. figure:: media/datarate_be2.png
+..    :align: center
 
-.. figure:: media/datarate_vi2.png
-   :align: center
+.. .. figure:: media/datarate_vi2.png
+..    :align: center
 
 The filter limits the data rate to the configured value. Note that the filtered data rate is less than the incoming rougly with the amount of the dropped data rate.
 
-The next chart displays the incoming and outgoing data rate for both traffic categories for an overview:
+.. The next chart displays the incoming and outgoing data rate for both traffic categories for an overview:
 
-.. **TODO** this might not be needed cos its the same
+.. .. **TODO** this might not be needed cos its the same
 
-.. figure:: media/source_sink.png
-   :align: center
+.. .. figure:: media/source_sink.png
+..    :align: center
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`
 
