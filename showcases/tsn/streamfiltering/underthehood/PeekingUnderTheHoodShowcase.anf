@@ -5,7 +5,7 @@
         <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="2117224265" name="Traffic class 1" resultTypes="" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="2117958656" name="Traffic class 1" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
@@ -642,7 +642,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1488594064" name="Traffic class 2" resultTypes="" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1502694020" name="Traffic class 2" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
@@ -1279,7 +1279,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="572563779" name="Traffic class 3" resultTypes="" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="477121564" name="Traffic class 3" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
@@ -1927,7 +1927,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="$name"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.230526-85b71cbd8c" icon="icons/full/obj/linechart.png" id="1594226290" name="Traffic Class 1" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.230526-85b71cbd8c" icon="icons/full/obj/linechart.png" id="461024417" name="Traffic Category 1" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -1965,7 +1965,7 @@ utils.plot_vectors(df, props)
 utils.postconfigure_plot(props)
 
 handles, labels = plt.gca().get_legend_handles_labels()
-inet.scave.plot.create_custom_legend(props, [('committed information rate', {'linestyle': 'dashdot', 'color': 'black'})])
+inet.scave.plot.create_custom_legend(props, [('limit', {'linestyle': 'dashdot', 'color': 'black'})], order=[1,2,3,0], handles=handles, labels=labels)
 
 plt.axhline(y=8, color='black', linestyle='dashdot', linewidth=1)
 
@@ -2536,7 +2536,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_manual" value="false"/>
             <property name="yaxis_title" value="Data rate [Mbps]"/>
             <property name="legend_replacements" value="/ data rate \/ 1000000//"/>
-            <property name="title" value="Filter Incoming, Outgoing and Dropped Data Rate - Traffic Class 1"/>
+            <property name="title" value="Filter Incoming, Outgoing and Dropped Data Rate - Traffic Category 1"/>
             <property name="legend_automatic" value="true"/>
             <property name="vector_operations" value="apply: divide_by(1000000)"/>
             <property name="cycle_seed" value="0"/>
@@ -2569,7 +2569,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.230526-85b71cbd8c" icon="icons/full/obj/linechart.png" id="519023616" name="Traffic Class 2" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.230526-85b71cbd8c" icon="icons/full/obj/linechart.png" id="122434034" name="Traffic Category 2" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -2607,7 +2607,7 @@ utils.plot_vectors(df, props)
 utils.postconfigure_plot(props)
 
 handles, labels = plt.gca().get_legend_handles_labels()
-inet.scave.plot.create_custom_legend(props, [('committed information rate', {'linestyle': 'dashdot', 'color': 'black'})])
+inet.scave.plot.create_custom_legend(props, [('limit', {'linestyle': 'dashdot', 'color': 'black'})], order=[1,2,3,0], handles=handles, labels=labels, loc='upper right')
 
 plt.axhline(y=8, color='black', linestyle='dashdot', linewidth=1)
 
@@ -3178,7 +3178,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_manual" value="false"/>
             <property name="yaxis_title" value="Data rate [Mbps]"/>
             <property name="legend_replacements" value="/ data rate \/ 1000000//"/>
-            <property name="title" value="Filter Incoming, Outgoing and Dropped Data Rate - Traffic Class 2"/>
+            <property name="title" value="Filter Incoming, Outgoing and Dropped Data Rate - Traffic Category 2"/>
             <property name="legend_automatic" value="true"/>
             <property name="vector_operations" value="apply: divide_by(1000000)"/>
             <property name="cycle_seed" value="0"/>
@@ -3211,7 +3211,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.230526-85b71cbd8c" icon="icons/full/obj/linechart.png" id="1937318478" name="Traffic Class 3" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.230526-85b71cbd8c" icon="icons/full/obj/linechart.png" id="22423829" name="Traffic Category 3" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -3249,7 +3249,7 @@ utils.plot_vectors(df, props)
 utils.postconfigure_plot(props)
 
 handles, labels = plt.gca().get_legend_handles_labels()
-inet.scave.plot.create_custom_legend(props, [('committed information rate', {'linestyle': 'dashdot', 'color': 'black'})])
+inet.scave.plot.create_custom_legend(props, [('limit', {'linestyle': 'dashdot', 'color': 'black'})], order=[1,2,3,0], handles=handles, labels=labels)
 
 plt.axhline(y=8, color='black', linestyle='dashdot', linewidth=1)
 
@@ -3820,7 +3820,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_manual" value="false"/>
             <property name="yaxis_title" value="Data rate [Mbps]"/>
             <property name="legend_replacements" value="/ data rate \/ 1000000//"/>
-            <property name="title" value="Filter Incoming, Outgoing and Dropped Data Rate - Traffic Class 3"/>
+            <property name="title" value="Filter Incoming, Outgoing and Dropped Data Rate - Traffic Category 3"/>
             <property name="legend_automatic" value="true"/>
             <property name="vector_operations" value="apply: divide_by(1000000)"/>
             <property name="cycle_seed" value="0"/>
