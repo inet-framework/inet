@@ -16,6 +16,8 @@ Goals
 In this showcase, we demonstrate per-stream policing using a token bucket mechanism that allows specifiying committed information rates and committed burst sizes. 
 We generate traffic in a straightforward network, and employ this method to limit the data rate of the packet stream. Finally, we examine the traffic before and after policing.
 
+This document assumes familiarity with per-stream filtering and policing in INET, :ref:`detailed here <sh:tsn:filtering:statistical:filtering_in_inet>`.
+
 | INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/streamfiltering/tokenbucket <https://github.com/inet-framework/inet/tree/master/showcases/tsn/streamfiltering/tokenbucket>`__
 
@@ -25,10 +27,8 @@ Overview of Token-Bucket-Based Policing
 .. This document assumes that you're familiar with per-stream filtering and policing in INET.
 .. For a description, see the TODO section.
 
-This document assumes familiarity with per-stream filtering and policing in INET.
-For a description, see the TODO section.
-
-This document assumes familiarity with per-stream filtering and policing in INET, :ref:`detailed here <sh:tsn:filtering:statistical:filtering_in_inet>`.
+.. This document assumes familiarity with per-stream filtering and policing in INET.
+.. For a description, see the TODO section.
 
 .. See the TODO section for a description.
 
@@ -40,27 +40,32 @@ This document assumes familiarity with per-stream filtering and policing in INET
 ..   depending on if enough tokens are available for transmitting that packet. also, the committed information rate and burst size can be configured
 .. - by default, the :ned:`SimpleIeee8021qFilter` module has :ned:`LabelFilter` submodules, and is configured to pass green packets and drop the rest
 
-To implement the token-bucket-based policing, we use :ned:`SingleRateTwoColorMeter` and :ned:`LabelFilter` modules.
+To implement this token-bucket-based policing mechanism, we utilize :ned:`SingleRateTwoColorMeter` and :ned:`LabelFilter` modules.
 
 .. SingleRateTwoColorMeter contains one token bucket. The module measures packets passing through it, and attaches a LabelTag to each. The label tag contains 'green'
 .. if enough tokens are available for transmitting that packet, and 'red' otherwise. Also, the committed information rate and burst size can be configured
 .. - by default, the :ned:`SimpleIeee8021qFilter` module has :ned:`LabelFilter` submodules, and is configured to pass green packets and drop the rest
 
-SingleRateTwoColorMeter contains one token bucket, and can be configured with/its main parameters are the committedInformationRate and committedBurstSize parameters. 
-Based on these parameters, the module attaches a LabelTag to each packet passing through it. 
+:ned:`SingleRateTwoColorMeter` contains one token bucket, and its main parameters are the :par:`committedInformationRate` and :par:`committedBurstSize` parameters 
+(under the hood, these two parameters set token generation rate and the maximum number of tokens).
+Based on these parameters, the module attaches a ``LabelTag`` to each packet passing through it. 
 The label tag contains 'green' if enough tokens are available for transmitting that packet, and 'red' otherwise.
 
-The :ned:`LabelFilter` module has a label parameter. Packets whose labels match this parameter are allowed through, the rest are dropped.
-By default, the :ned:`SimpleIeee8021qFilter` module has :ned:`LabelFilter` submodules, and is configured to pass green packets and drop the rest
-:ned:`LabelFilter` is the default filter submodule in :ned:`SimpleIeee8021qFilter`, configured to only allow 'green' packets to pass.
+The :ned:`LabelFilter` module is configured with its :par:`label` parameter. Packets with labels matching this parameter are allowed through, the rest are dropped.
+The default configuration of :ned:`SimpleIeee8021qFilter` includes :ned:`LabelFilter` submodules, configured to permit only 'green' packets to pass.
 
-The following internal view of the :ned:`SimpleIeee8021qFilter` module in the switch illustrates this:
+.. By default, the :ned:`SimpleIeee8021qFilter` module has :ned:`LabelFilter` submodules, and is configured to pass green packets and drop the rest
+.. :ned:`LabelFilter` is the default filter submodule in :ned:`SimpleIeee8021qFilter`, configured to only allow 'green' packets to pass.
+
+The following internal view of the :ned:`SimpleIeee8021qFilter` module in the switch illustrates this setup:
 
 .. figure:: media/filter2.png
    :align: center
 
-The Model
----------
+.. note:: Other, more complex token-based meter modules are available (using multiple token buckets, for example), such as :ned:`SingleRateThreeColorMeter` or :ned:`DualRateThreeColorMeter`.
+
+.. The Model
+.. ---------
 
 .. Let's see the model...token bucket
 
@@ -115,24 +120,27 @@ The Model
 ..    - the filter is a :ned:`LabelFilter` and it drops red packets
 ..    - note check out other meter modules (DualRateThreeColorMeter)
 
-"under the hood it uses tokens, and these two parameters actually configure token generation rate and max number of tokens"
+.. "under the hood it uses tokens, and these two parameters actually configure token generation rate and max number of tokens"
 
-We can do token bucket filtering by using a :ned:`SingleRateTwoColorMeter` as the meter module, and :ned:`LabelFilter` that is the default filter in :ned:`SimpleIeee8021qFilter`.
-The :ned:`SingleRateTwoColorMeter` is a packet meter queueing element that has one token bucket. It has :par:`committedInformationRate` and :par:`committedBurstSize`
-parameters. Under the hood, the information rate parameter sets the token generation rate, the burst size the maximum number of tokens.
-Packets in the traffic category can be trasmitted if there are tokens available; if there are lots of tokens, packets can be transmitted in a burst until
-the tokens are depleted.
+.. We can do token bucket filtering by using a :ned:`SingleRateTwoColorMeter` as the meter module, and :ned:`LabelFilter` that is the default filter in :ned:`SimpleIeee8021qFilter`.
+.. The :ned:`SingleRateTwoColorMeter` is a packet meter queueing element that has one token bucket. It has :par:`committedInformationRate` and :par:`committedBurstSize`
+.. parameters. Under the hood, the information rate parameter sets the token generation rate, the burst size the maximum number of tokens.
+.. Packets in the traffic category can be trasmitted if there are tokens available; if there are lots of tokens, packets can be transmitted in a burst until
+.. the tokens are depleted.
 
-The meter measures the data rate of the traffic stream, and labels packets either `green` or `red`, depending on the
-number of available tokens. By default, the filter module is a :ned:`LabelFilter`, and drops packets that aren't green.
+.. The meter measures the data rate of the traffic stream, and labels packets either `green` or `red`, depending on the
+.. number of available tokens. By default, the filter module is a :ned:`LabelFilter`, and drops packets that aren't green.
 
-.. note:: Other, more complex token-based meter modules are available (using multiple token buckets, for example), such as :ned:`SingleRateThreeColorMeter` or :ned:`DualRateThreeColorMeter`.
-          For more information and the list of other meter modules, check the NED documentation.
+.. .. note:: Other, more complex token-based meter modules are available (using multiple token buckets, for example), such as :ned:`SingleRateThreeColorMeter` or :ned:`DualRateThreeColorMeter`.
+..           For more information and the list of other meter modules, check the NED documentation.
 
-.. note:: Other, more complex token-based meter modules are available (using multiple token buckets, for example), such as :ned:`SingleRateThreeColorMeter` or :ned:`DualRateThreeColorMeter`.
+.. .. note:: Other, more complex token-based meter modules are available (using multiple token buckets, for example), such as :ned:`SingleRateThreeColorMeter` or :ned:`DualRateThreeColorMeter`.
 
-The Network
-~~~~~~~~~~~
+.. The Network
+.. ~~~~~~~~~~~
+
+The Configuration
+-----------------
 
 There are three network nodes in the network. The client and the server are
 :ned:`TsnDevice` modules, and the switch is a :ned:`TsnSwitch` module. The
@@ -141,12 +149,12 @@ links between them use 100 Mbps :ned:`EthernetLink` channels.
 .. figure:: media/Network.png
    :align: center
 
-The Configuration
-~~~~~~~~~~~~~~~~~
+.. The Configuration
+.. ~~~~~~~~~~~~~~~~~
 
 There are four applications in the network creating two independent data streams
 between the client and the server. The average data rates are 40 Mbps and 20 Mbps
-but both varies over time using a sinusoid packet interval.
+but both vary over time with a sinusoid packet interval.
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: client applications
@@ -210,11 +218,30 @@ the dropped data rate.
 .. figure:: media/datarate_vi.png
    :align: center
 
+We can compare the filter's outgoing data rate and the number of tokens on the following diagrams.
+We only display the outgoing data rate for better details:
+
 .. figure:: media/datarate_tokens_be.png
    :align: center
 
 .. figure:: media/datarate_tokens_vi.png
    :align: center
+
+.. When the traffic is lower than the committed information rate, the number of tokens fluctuate near the maximum.
+.. When the incoming traffic increases, the number of tokens starts to decrease. As there are lots of tokens (burst reserve),
+.. some bursts are allowed.
+
+.. When traffic is lower than the committed information rate, the number of tokens fluctuate near the maximum,
+.. and the filter has a burst reserve. As traffic increases and goes above the committed information rate,
+.. the filter can use this reserve of tokens to allow a burst. When the tokens deplete, the outgoing data rate
+.. stagnates at the committed information rate (as this data rate now only depends on the rate of token generation).
+
+When the traffic remains below the committed information rate, the number of
+tokens fluctuates near the maximum value, thus the filter has a burst
+reserve. As traffic increases and surpasses the committed information rate, the
+filter utilizes this token reserve to allow for a burst. Once the surplus tokens are
+depleted, the outgoing data rate stabilizes at the committed information rate
+since it now solely depends on the rate of token generation.
 
 .. The next diagram shows the number of tokens in the token bucket for both streams.
 .. The filled areas mean that the number of tokens changes quickly as packets pass
@@ -223,7 +250,7 @@ the dropped data rate.
 .. .. figure:: media/TokenBuckets.png
 ..    :align: center
 
-"The data rate is at maximum when the line is near the minimum."
+.. "The data rate is at maximum when the line is near the minimum."
 
 .. The last diagram shows the data rate of the application level incoming traffic
 .. in the server. The data rate is somewhat lower than the data rate of the
