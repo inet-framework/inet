@@ -207,7 +207,7 @@ html_theme_options = {
     'show_footer': False,
 
     # google analytics
-    'googleanalytics_id': 'UA-240922-3'
+    'googleanalytics_id': 'G-WPFKHJQDQW'
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
