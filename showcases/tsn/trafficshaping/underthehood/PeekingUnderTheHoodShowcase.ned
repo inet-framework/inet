@@ -9,10 +9,12 @@ import inet.protocolelement.shaper.EligibilityTimeFilter;
 import inet.protocolelement.shaper.EligibilityTimeGate;
 import inet.protocolelement.shaper.EligibilityTimeMeter;
 import inet.protocolelement.shaper.EligibilityTimeQueue;
+import inet.queueing.classifier.ContentBasedClassifier;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.server.PacketServer;
 import inet.queueing.sink.PassivePacketSink;
 import inet.queueing.source.ActivePacketSource;
+
 
 network PeekingUnderTheHoodShowcase
 {
@@ -40,8 +42,11 @@ network PeekingUnderTheHoodShowcase
         server: PacketServer {
             @display("p=1300,100");
         }
-        sink: PassivePacketSink {
+        classifier: ContentBasedClassifier {
             @display("p=1500,100");
+        }
+        sink[numSources]: PassivePacketSink {
+            @display("p=1700,100,col,150");
         }
     connections:
         for i=0..numSources-1 {
@@ -52,5 +57,8 @@ network PeekingUnderTheHoodShowcase
         filter.out --> queue.in;
         queue.out --> gate.in;
         gate.out --> server.in;
-        server.out --> sink.in;
+        server.out --> classifier.in;
+        for i=0..numSources-1 {
+            classifier.out++ --> sink[i].in;
+        }
 }
