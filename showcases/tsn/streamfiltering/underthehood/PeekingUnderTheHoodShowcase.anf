@@ -4508,7 +4508,7 @@ utils.export_image_if_needed(props)
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value="10"/>
             <property name="image_export_width" value="9"/>
-            <property name="matplotlibrc" value=""/>
+            <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.230526-85b71cbd8c" icon="icons/full/obj/linechart.png" id="500706306" name="Data rate and tokens - traffic category 2" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
@@ -5166,7 +5166,7 @@ utils.export_image_if_needed(props)
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value="10"/>
             <property name="image_export_width" value="9"/>
-            <property name="matplotlibrc" value=""/>
+            <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.230526-85b71cbd8c" icon="icons/full/obj/linechart.png" id="975897689" name="Data rate and tokens - traffic category 3" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
@@ -5824,11 +5824,12 @@ utils.export_image_if_needed(props)
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value="10"/>
             <property name="image_export_width" value="9"/>
-            <property name="matplotlibrc" value=""/>
+            <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.230526-85b71cbd8c" icon="icons/full/obj/linechart.png" id="339150046" name="Data rate and tokens - traffic category 1 (2)" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
-            <script><![CDATA[import math
+        <folder id="177177844" name="unneeded">
+            <chart createdWith="OMNeT++ 7.0.0.230526-85b71cbd8c" icon="icons/full/obj/linechart.png" id="1475767969" name="Data rate and tokens - traffic category 1 (2)" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+                <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
 import os
@@ -5888,7 +5889,7 @@ props['image_export_filename'] += str(stream_index)
 
 utils.export_image_if_needed(props)
 #utils.export_data_if_needed(df, props)]]></script>
-            <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -5938,7 +5939,7 @@ utils.export_image_if_needed(props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -6032,7 +6033,7 @@ utils.export_image_if_needed(props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -6190,7 +6191,7 @@ utils.export_image_if_needed(props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -6257,7 +6258,7 @@ utils.export_image_if_needed(props)
 
   </x:children>
 </xswt>]]></dialogPage>
-            <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -6365,7 +6366,7 @@ utils.export_image_if_needed(props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+                <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -6385,7 +6386,7 @@ utils.export_image_if_needed(props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -6441,52 +6442,52 @@ utils.export_image_if_needed(props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <property name="legend_prefer_module_display_paths" value="true"/>
-            <property name="matplotlibrc.legend.frameon" value="true"/>
-            <property name="matplotlibrc.legend.fancybox" value="false"/>
-            <property name="grid_show" value="true"/>
-            <property name="vector_end_time" value=""/>
-            <property name="linecolor" value=""/>
-            <property name="matplotlibrc.figure.facecolor" value=""/>
-            <property name="legend_prefer_result_titles" value="true"/>
-            <property name="legend_manual" value="true"/>
-            <property name="yaxis_title" value=""/>
-            <property name="legend_replacements" value="/ \/ 1000000//"/>
-            <property name="title" value="experiment=General"/>
-            <property name="legend_automatic" value="false"/>
-            <property name="vector_operations" value="apply: divide_by(1000000)"/>
-            <property name="cycle_seed" value="0"/>
-            <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="6"/>
-            <property name="xaxis_log" value="false"/>
-            <property name="legend_placement" value="upper right"/>
-            <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value=""/>
-            <property name="grid_density" value="Major"/>
-            <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value="datarate_tokens_"/>
-            <property name="xaxis_min" value="0"/>
-            <property name="matplotlibrc.axes.facecolor" value=""/>
-            <property name="linewidth" value="1.5"/>
-            <property name="legend_format" value="$title"/>
-            <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND (&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.meter[0]&quot; AND name =~ numTokens:vector) OR&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.filter[0]&quot; AND name =~ outgoingDataRate:vector)&#10;)"/>
-            <property name="vector_start_time" value=""/>
-            <property name="linestyle" value="solid"/>
-            <property name="markersize" value="5"/>
-            <property name="drawstyle" value="auto"/>
-            <property name="marker" value="none"/>
-            <property name="plt.style" value="default"/>
-            <property name="legend_show" value="true"/>
-            <property name="matplotlibrc.legend.shadow" value="false"/>
-            <property name="simplify" value="false"/>
-            <property name="yaxis_max" value=""/>
-            <property name="xaxis_max" value="10"/>
-            <property name="image_export_width" value="9"/>
-            <property name="matplotlibrc" value=""/>
-            <property name="include_fields" value="false"/>
-        </chart>
-        <chart createdWith="OMNeT++ 7.0.0.230526-85b71cbd8c" icon="icons/full/obj/linechart.png" id="1887543676" name="Data rate and tokens - traffic category 2" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
-            <script><![CDATA[import math
+                <property name="legend_prefer_module_display_paths" value="true"/>
+                <property name="matplotlibrc.legend.frameon" value="true"/>
+                <property name="matplotlibrc.legend.fancybox" value="false"/>
+                <property name="grid_show" value="true"/>
+                <property name="vector_end_time" value=""/>
+                <property name="linecolor" value=""/>
+                <property name="matplotlibrc.figure.facecolor" value=""/>
+                <property name="legend_prefer_result_titles" value="true"/>
+                <property name="legend_manual" value="true"/>
+                <property name="yaxis_title" value=""/>
+                <property name="legend_replacements" value="/ \/ 1000000//"/>
+                <property name="title" value="experiment=General"/>
+                <property name="legend_automatic" value="false"/>
+                <property name="vector_operations" value="apply: divide_by(1000000)"/>
+                <property name="cycle_seed" value="0"/>
+                <property name="yaxis_log" value="false"/>
+                <property name="image_export_height" value="6"/>
+                <property name="xaxis_log" value="false"/>
+                <property name="legend_placement" value="upper right"/>
+                <property name="data_export_filename" value=""/>
+                <property name="xaxis_title" value=""/>
+                <property name="grid_density" value="Major"/>
+                <property name="yaxis_min" value=""/>
+                <property name="image_export_filename" value="datarate_tokens_"/>
+                <property name="xaxis_min" value="0"/>
+                <property name="matplotlibrc.axes.facecolor" value=""/>
+                <property name="linewidth" value="1.5"/>
+                <property name="legend_format" value="$title"/>
+                <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND (&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.meter[0]&quot; AND name =~ numTokens:vector) OR&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.filter[0]&quot; AND name =~ outgoingDataRate:vector)&#10;)"/>
+                <property name="vector_start_time" value=""/>
+                <property name="linestyle" value="solid"/>
+                <property name="markersize" value="5"/>
+                <property name="drawstyle" value="auto"/>
+                <property name="marker" value="none"/>
+                <property name="plt.style" value="default"/>
+                <property name="legend_show" value="true"/>
+                <property name="matplotlibrc.legend.shadow" value="false"/>
+                <property name="simplify" value="false"/>
+                <property name="yaxis_max" value=""/>
+                <property name="xaxis_max" value="10"/>
+                <property name="image_export_width" value="9"/>
+                <property name="matplotlibrc" value=""/>
+                <property name="include_fields" value="false"/>
+            </chart>
+            <chart createdWith="OMNeT++ 7.0.0.230526-85b71cbd8c" icon="icons/full/obj/linechart.png" id="1718850444" name="Data rate and tokens - traffic category 2" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+                <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
 import os
@@ -6545,7 +6546,7 @@ props['image_export_filename'] += str(stream_index)
 
 utils.export_image_if_needed(props)
 #utils.export_data_if_needed(df, props)]]></script>
-            <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -6595,7 +6596,7 @@ utils.export_image_if_needed(props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -6689,7 +6690,7 @@ utils.export_image_if_needed(props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -6847,7 +6848,7 @@ utils.export_image_if_needed(props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -6914,7 +6915,7 @@ utils.export_image_if_needed(props)
 
   </x:children>
 </xswt>]]></dialogPage>
-            <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -7022,7 +7023,7 @@ utils.export_image_if_needed(props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+                <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -7042,7 +7043,7 @@ utils.export_image_if_needed(props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -7098,52 +7099,52 @@ utils.export_image_if_needed(props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <property name="legend_prefer_module_display_paths" value="true"/>
-            <property name="matplotlibrc.legend.frameon" value="true"/>
-            <property name="matplotlibrc.legend.fancybox" value="false"/>
-            <property name="grid_show" value="true"/>
-            <property name="vector_end_time" value=""/>
-            <property name="linecolor" value=""/>
-            <property name="matplotlibrc.figure.facecolor" value=""/>
-            <property name="legend_prefer_result_titles" value="true"/>
-            <property name="legend_manual" value="true"/>
-            <property name="yaxis_title" value=""/>
-            <property name="legend_replacements" value="/ \/ 1000000//"/>
-            <property name="title" value="experiment=General"/>
-            <property name="legend_automatic" value="false"/>
-            <property name="vector_operations" value="apply: divide_by(1000000)"/>
-            <property name="cycle_seed" value="0"/>
-            <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="6"/>
-            <property name="xaxis_log" value="false"/>
-            <property name="legend_placement" value="upper right"/>
-            <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value=""/>
-            <property name="grid_density" value="Major"/>
-            <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value="datarate_tokens_"/>
-            <property name="xaxis_min" value="0"/>
-            <property name="matplotlibrc.axes.facecolor" value=""/>
-            <property name="linewidth" value="1.5"/>
-            <property name="legend_format" value="$title"/>
-            <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND (&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.meter[0]&quot; AND name =~ numTokens:vector) OR&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.filter[0]&quot; AND name =~ outgoingDataRate:vector)&#10;)"/>
-            <property name="vector_start_time" value=""/>
-            <property name="linestyle" value="solid"/>
-            <property name="markersize" value="5"/>
-            <property name="drawstyle" value="auto"/>
-            <property name="marker" value="none"/>
-            <property name="plt.style" value="default"/>
-            <property name="legend_show" value="true"/>
-            <property name="matplotlibrc.legend.shadow" value="false"/>
-            <property name="simplify" value="false"/>
-            <property name="yaxis_max" value=""/>
-            <property name="xaxis_max" value="10"/>
-            <property name="image_export_width" value="9"/>
-            <property name="matplotlibrc" value=""/>
-            <property name="include_fields" value="false"/>
-        </chart>
-        <chart createdWith="OMNeT++ 7.0.0.230526-85b71cbd8c" icon="icons/full/obj/linechart.png" id="1830757757" name="experiment=General (4)" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
-            <script><![CDATA[import math
+                <property name="legend_prefer_module_display_paths" value="true"/>
+                <property name="matplotlibrc.legend.frameon" value="true"/>
+                <property name="matplotlibrc.legend.fancybox" value="false"/>
+                <property name="grid_show" value="true"/>
+                <property name="vector_end_time" value=""/>
+                <property name="linecolor" value=""/>
+                <property name="matplotlibrc.figure.facecolor" value=""/>
+                <property name="legend_prefer_result_titles" value="true"/>
+                <property name="legend_manual" value="true"/>
+                <property name="yaxis_title" value=""/>
+                <property name="legend_replacements" value="/ \/ 1000000//"/>
+                <property name="title" value="experiment=General"/>
+                <property name="legend_automatic" value="false"/>
+                <property name="vector_operations" value="apply: divide_by(1000000)"/>
+                <property name="cycle_seed" value="0"/>
+                <property name="yaxis_log" value="false"/>
+                <property name="image_export_height" value="6"/>
+                <property name="xaxis_log" value="false"/>
+                <property name="legend_placement" value="upper right"/>
+                <property name="data_export_filename" value=""/>
+                <property name="xaxis_title" value=""/>
+                <property name="grid_density" value="Major"/>
+                <property name="yaxis_min" value=""/>
+                <property name="image_export_filename" value="datarate_tokens_"/>
+                <property name="xaxis_min" value="0"/>
+                <property name="matplotlibrc.axes.facecolor" value=""/>
+                <property name="linewidth" value="1.5"/>
+                <property name="legend_format" value="$title"/>
+                <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND (&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.meter[0]&quot; AND name =~ numTokens:vector) OR&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.filter[0]&quot; AND name =~ outgoingDataRate:vector)&#10;)"/>
+                <property name="vector_start_time" value=""/>
+                <property name="linestyle" value="solid"/>
+                <property name="markersize" value="5"/>
+                <property name="drawstyle" value="auto"/>
+                <property name="marker" value="none"/>
+                <property name="plt.style" value="default"/>
+                <property name="legend_show" value="true"/>
+                <property name="matplotlibrc.legend.shadow" value="false"/>
+                <property name="simplify" value="false"/>
+                <property name="yaxis_max" value=""/>
+                <property name="xaxis_max" value="10"/>
+                <property name="image_export_width" value="9"/>
+                <property name="matplotlibrc" value=""/>
+                <property name="include_fields" value="false"/>
+            </chart>
+            <chart createdWith="OMNeT++ 7.0.0.230526-85b71cbd8c" icon="icons/full/obj/linechart.png" id="290175877" name="experiment=General (4)" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+                <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
 import os
@@ -7202,7 +7203,7 @@ props['image_export_filename'] += str(stream_index)
 
 utils.export_image_if_needed(props)
 #utils.export_data_if_needed(df, props)]]></script>
-            <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -7252,7 +7253,7 @@ utils.export_image_if_needed(props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -7346,7 +7347,7 @@ utils.export_image_if_needed(props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -7504,7 +7505,7 @@ utils.export_image_if_needed(props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -7571,7 +7572,7 @@ utils.export_image_if_needed(props)
 
   </x:children>
 </xswt>]]></dialogPage>
-            <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -7679,7 +7680,7 @@ utils.export_image_if_needed(props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+                <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -7699,7 +7700,7 @@ utils.export_image_if_needed(props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -7755,52 +7756,52 @@ utils.export_image_if_needed(props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <property name="legend_prefer_module_display_paths" value="true"/>
-            <property name="matplotlibrc.legend.frameon" value="true"/>
-            <property name="matplotlibrc.legend.fancybox" value="false"/>
-            <property name="grid_show" value="true"/>
-            <property name="vector_end_time" value=""/>
-            <property name="linecolor" value=""/>
-            <property name="matplotlibrc.figure.facecolor" value=""/>
-            <property name="legend_prefer_result_titles" value="true"/>
-            <property name="legend_manual" value="true"/>
-            <property name="yaxis_title" value=""/>
-            <property name="legend_replacements" value="/ \/ 1000000//"/>
-            <property name="title" value="experiment=General"/>
-            <property name="legend_automatic" value="false"/>
-            <property name="vector_operations" value="apply: divide_by(1000000)"/>
-            <property name="cycle_seed" value="0"/>
-            <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="6"/>
-            <property name="xaxis_log" value="false"/>
-            <property name="legend_placement" value="upper right"/>
-            <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value=""/>
-            <property name="grid_density" value="Major"/>
-            <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value="datarate_tokens_"/>
-            <property name="xaxis_min" value="0"/>
-            <property name="matplotlibrc.axes.facecolor" value=""/>
-            <property name="linewidth" value="1.5"/>
-            <property name="legend_format" value="$title"/>
-            <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND (&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.meter[0]&quot; AND name =~ numTokens:vector) OR&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.filter[0]&quot; AND name =~ outgoingDataRate:vector)&#10;)"/>
-            <property name="vector_start_time" value=""/>
-            <property name="linestyle" value="solid"/>
-            <property name="markersize" value="5"/>
-            <property name="drawstyle" value="auto"/>
-            <property name="marker" value="none"/>
-            <property name="plt.style" value="default"/>
-            <property name="legend_show" value="true"/>
-            <property name="matplotlibrc.legend.shadow" value="false"/>
-            <property name="simplify" value="false"/>
-            <property name="yaxis_max" value=""/>
-            <property name="xaxis_max" value="10"/>
-            <property name="image_export_width" value="9"/>
-            <property name="matplotlibrc" value=""/>
-            <property name="include_fields" value="false"/>
-        </chart>
-        <chart createdWith="OMNeT++ 7.0.0.230526-85b71cbd8c" icon="icons/full/obj/linechart.png" id="1298418865" name="experiment=General (2)" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
-            <script><![CDATA[import math
+                <property name="legend_prefer_module_display_paths" value="true"/>
+                <property name="matplotlibrc.legend.frameon" value="true"/>
+                <property name="matplotlibrc.legend.fancybox" value="false"/>
+                <property name="grid_show" value="true"/>
+                <property name="vector_end_time" value=""/>
+                <property name="linecolor" value=""/>
+                <property name="matplotlibrc.figure.facecolor" value=""/>
+                <property name="legend_prefer_result_titles" value="true"/>
+                <property name="legend_manual" value="true"/>
+                <property name="yaxis_title" value=""/>
+                <property name="legend_replacements" value="/ \/ 1000000//"/>
+                <property name="title" value="experiment=General"/>
+                <property name="legend_automatic" value="false"/>
+                <property name="vector_operations" value="apply: divide_by(1000000)"/>
+                <property name="cycle_seed" value="0"/>
+                <property name="yaxis_log" value="false"/>
+                <property name="image_export_height" value="6"/>
+                <property name="xaxis_log" value="false"/>
+                <property name="legend_placement" value="upper right"/>
+                <property name="data_export_filename" value=""/>
+                <property name="xaxis_title" value=""/>
+                <property name="grid_density" value="Major"/>
+                <property name="yaxis_min" value=""/>
+                <property name="image_export_filename" value="datarate_tokens_"/>
+                <property name="xaxis_min" value="0"/>
+                <property name="matplotlibrc.axes.facecolor" value=""/>
+                <property name="linewidth" value="1.5"/>
+                <property name="legend_format" value="$title"/>
+                <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND (&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.meter[0]&quot; AND name =~ numTokens:vector) OR&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.filter[0]&quot; AND name =~ outgoingDataRate:vector)&#10;)"/>
+                <property name="vector_start_time" value=""/>
+                <property name="linestyle" value="solid"/>
+                <property name="markersize" value="5"/>
+                <property name="drawstyle" value="auto"/>
+                <property name="marker" value="none"/>
+                <property name="plt.style" value="default"/>
+                <property name="legend_show" value="true"/>
+                <property name="matplotlibrc.legend.shadow" value="false"/>
+                <property name="simplify" value="false"/>
+                <property name="yaxis_max" value=""/>
+                <property name="xaxis_max" value="10"/>
+                <property name="image_export_width" value="9"/>
+                <property name="matplotlibrc" value=""/>
+                <property name="include_fields" value="false"/>
+            </chart>
+            <chart createdWith="OMNeT++ 7.0.0.230526-85b71cbd8c" icon="icons/full/obj/linechart.png" id="606827144" name="experiment=General (2)" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+                <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
 
@@ -7836,7 +7837,7 @@ plt.subplots_adjust(left = 0.05, right = 0.99, top = 0.9, bottom = 0.1, wspace=0
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)]]></script>
-            <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -7886,7 +7887,7 @@ utils.export_data_if_needed(df, props)]]></script>
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -7980,7 +7981,7 @@ utils.export_data_if_needed(df, props)]]></script>
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -8138,7 +8139,7 @@ utils.export_data_if_needed(df, props)]]></script>
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -8205,7 +8206,7 @@ utils.export_data_if_needed(df, props)]]></script>
 
   </x:children>
 </xswt>]]></dialogPage>
-            <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -8313,7 +8314,7 @@ utils.export_data_if_needed(df, props)]]></script>
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+                <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -8333,7 +8334,7 @@ utils.export_data_if_needed(df, props)]]></script>
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -8389,52 +8390,52 @@ utils.export_data_if_needed(df, props)]]></script>
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <property name="legend_prefer_module_display_paths" value="true"/>
-            <property name="matplotlibrc.legend.frameon" value="true"/>
-            <property name="matplotlibrc.legend.fancybox" value="false"/>
-            <property name="grid_show" value="true"/>
-            <property name="vector_end_time" value=""/>
-            <property name="linecolor" value=""/>
-            <property name="matplotlibrc.figure.facecolor" value=""/>
-            <property name="legend_prefer_result_titles" value="true"/>
-            <property name="legend_manual" value=""/>
-            <property name="yaxis_title" value=""/>
-            <property name="legend_replacements" value=""/>
-            <property name="title" value="experiment=General"/>
-            <property name="legend_automatic" value="true"/>
-            <property name="vector_operations" value=""/>
-            <property name="cycle_seed" value="0"/>
-            <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
-            <property name="xaxis_log" value="false"/>
-            <property name="legend_placement" value="upper right"/>
-            <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value=""/>
-            <property name="grid_density" value="Major"/>
-            <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value=""/>
-            <property name="xaxis_min" value=""/>
-            <property name="matplotlibrc.axes.facecolor" value=""/>
-            <property name="linewidth" value="1.5"/>
-            <property name="legend_format" value=""/>
-            <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND (&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.meter[1]&quot; AND name =~ numTokens:vector) OR&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.filter[1]&quot; AND name =~ outgoingDataRate:vector)&#10;)"/>
-            <property name="vector_start_time" value=""/>
-            <property name="linestyle" value="solid"/>
-            <property name="markersize" value="5"/>
-            <property name="drawstyle" value="auto"/>
-            <property name="marker" value="none"/>
-            <property name="plt.style" value="default"/>
-            <property name="legend_show" value="true"/>
-            <property name="matplotlibrc.legend.shadow" value="false"/>
-            <property name="simplify" value=""/>
-            <property name="yaxis_max" value=""/>
-            <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
-            <property name="matplotlibrc" value=""/>
-            <property name="include_fields" value="false"/>
-        </chart>
-        <chart createdWith="OMNeT++ 7.0.0.230526-85b71cbd8c" icon="icons/full/obj/linechart.png" id="523888921" name="experiment=General (3)" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
-            <script><![CDATA[import math
+                <property name="legend_prefer_module_display_paths" value="true"/>
+                <property name="matplotlibrc.legend.frameon" value="true"/>
+                <property name="matplotlibrc.legend.fancybox" value="false"/>
+                <property name="grid_show" value="true"/>
+                <property name="vector_end_time" value=""/>
+                <property name="linecolor" value=""/>
+                <property name="matplotlibrc.figure.facecolor" value=""/>
+                <property name="legend_prefer_result_titles" value="true"/>
+                <property name="legend_manual" value=""/>
+                <property name="yaxis_title" value=""/>
+                <property name="legend_replacements" value=""/>
+                <property name="title" value="experiment=General"/>
+                <property name="legend_automatic" value="true"/>
+                <property name="vector_operations" value=""/>
+                <property name="cycle_seed" value="0"/>
+                <property name="yaxis_log" value="false"/>
+                <property name="image_export_height" value="4"/>
+                <property name="xaxis_log" value="false"/>
+                <property name="legend_placement" value="upper right"/>
+                <property name="data_export_filename" value=""/>
+                <property name="xaxis_title" value=""/>
+                <property name="grid_density" value="Major"/>
+                <property name="yaxis_min" value=""/>
+                <property name="image_export_filename" value=""/>
+                <property name="xaxis_min" value=""/>
+                <property name="matplotlibrc.axes.facecolor" value=""/>
+                <property name="linewidth" value="1.5"/>
+                <property name="legend_format" value=""/>
+                <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND (&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.meter[1]&quot; AND name =~ numTokens:vector) OR&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.filter[1]&quot; AND name =~ outgoingDataRate:vector)&#10;)"/>
+                <property name="vector_start_time" value=""/>
+                <property name="linestyle" value="solid"/>
+                <property name="markersize" value="5"/>
+                <property name="drawstyle" value="auto"/>
+                <property name="marker" value="none"/>
+                <property name="plt.style" value="default"/>
+                <property name="legend_show" value="true"/>
+                <property name="matplotlibrc.legend.shadow" value="false"/>
+                <property name="simplify" value=""/>
+                <property name="yaxis_max" value=""/>
+                <property name="xaxis_max" value=""/>
+                <property name="image_export_width" value="6"/>
+                <property name="matplotlibrc" value=""/>
+                <property name="include_fields" value="false"/>
+            </chart>
+            <chart createdWith="OMNeT++ 7.0.0.230526-85b71cbd8c" icon="icons/full/obj/linechart.png" id="1113613731" name="experiment=General (3)" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+                <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
 
@@ -8470,7 +8471,7 @@ plt.subplots_adjust(left = 0.05, right = 0.99, top = 0.9, bottom = 0.1, wspace=0
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)]]></script>
-            <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -8520,7 +8521,7 @@ utils.export_data_if_needed(df, props)]]></script>
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -8614,7 +8615,7 @@ utils.export_data_if_needed(df, props)]]></script>
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -8772,7 +8773,7 @@ utils.export_data_if_needed(df, props)]]></script>
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -8839,7 +8840,7 @@ utils.export_data_if_needed(df, props)]]></script>
 
   </x:children>
 </xswt>]]></dialogPage>
-            <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -8947,7 +8948,7 @@ utils.export_data_if_needed(df, props)]]></script>
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+                <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -8967,7 +8968,7 @@ utils.export_data_if_needed(df, props)]]></script>
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -9023,50 +9024,50 @@ utils.export_data_if_needed(df, props)]]></script>
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <property name="legend_prefer_module_display_paths" value="true"/>
-            <property name="matplotlibrc.legend.frameon" value="true"/>
-            <property name="matplotlibrc.legend.fancybox" value="false"/>
-            <property name="grid_show" value="true"/>
-            <property name="vector_end_time" value=""/>
-            <property name="linecolor" value=""/>
-            <property name="matplotlibrc.figure.facecolor" value=""/>
-            <property name="legend_prefer_result_titles" value="true"/>
-            <property name="legend_manual" value=""/>
-            <property name="yaxis_title" value=""/>
-            <property name="legend_replacements" value=""/>
-            <property name="title" value="experiment=General"/>
-            <property name="legend_automatic" value="true"/>
-            <property name="vector_operations" value=""/>
-            <property name="cycle_seed" value="0"/>
-            <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
-            <property name="xaxis_log" value="false"/>
-            <property name="legend_placement" value="upper right"/>
-            <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value=""/>
-            <property name="grid_density" value="Major"/>
-            <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value=""/>
-            <property name="xaxis_min" value=""/>
-            <property name="matplotlibrc.axes.facecolor" value=""/>
-            <property name="linewidth" value="1.5"/>
-            <property name="legend_format" value=""/>
-            <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND (&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.meter[2]&quot; AND name =~ numTokens:vector) OR&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.filter[2]&quot; AND name =~ outgoingDataRate:vector)&#10;)"/>
-            <property name="vector_start_time" value=""/>
-            <property name="linestyle" value="solid"/>
-            <property name="markersize" value="5"/>
-            <property name="drawstyle" value="auto"/>
-            <property name="marker" value="none"/>
-            <property name="plt.style" value="default"/>
-            <property name="legend_show" value="true"/>
-            <property name="matplotlibrc.legend.shadow" value="false"/>
-            <property name="simplify" value=""/>
-            <property name="yaxis_max" value=""/>
-            <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
-            <property name="matplotlibrc" value=""/>
-            <property name="include_fields" value="false"/>
-        </chart>
-        <folder id="177177844" name="unneeded"/>
+                <property name="legend_prefer_module_display_paths" value="true"/>
+                <property name="matplotlibrc.legend.frameon" value="true"/>
+                <property name="matplotlibrc.legend.fancybox" value="false"/>
+                <property name="grid_show" value="true"/>
+                <property name="vector_end_time" value=""/>
+                <property name="linecolor" value=""/>
+                <property name="matplotlibrc.figure.facecolor" value=""/>
+                <property name="legend_prefer_result_titles" value="true"/>
+                <property name="legend_manual" value=""/>
+                <property name="yaxis_title" value=""/>
+                <property name="legend_replacements" value=""/>
+                <property name="title" value="experiment=General"/>
+                <property name="legend_automatic" value="true"/>
+                <property name="vector_operations" value=""/>
+                <property name="cycle_seed" value="0"/>
+                <property name="yaxis_log" value="false"/>
+                <property name="image_export_height" value="4"/>
+                <property name="xaxis_log" value="false"/>
+                <property name="legend_placement" value="upper right"/>
+                <property name="data_export_filename" value=""/>
+                <property name="xaxis_title" value=""/>
+                <property name="grid_density" value="Major"/>
+                <property name="yaxis_min" value=""/>
+                <property name="image_export_filename" value=""/>
+                <property name="xaxis_min" value=""/>
+                <property name="matplotlibrc.axes.facecolor" value=""/>
+                <property name="linewidth" value="1.5"/>
+                <property name="legend_format" value=""/>
+                <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND (&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.meter[2]&quot; AND name =~ numTokens:vector) OR&#10;    (module =~ &quot;PeekingUnderTheHoodShowcase.filter.filter[2]&quot; AND name =~ outgoingDataRate:vector)&#10;)"/>
+                <property name="vector_start_time" value=""/>
+                <property name="linestyle" value="solid"/>
+                <property name="markersize" value="5"/>
+                <property name="drawstyle" value="auto"/>
+                <property name="marker" value="none"/>
+                <property name="plt.style" value="default"/>
+                <property name="legend_show" value="true"/>
+                <property name="matplotlibrc.legend.shadow" value="false"/>
+                <property name="simplify" value=""/>
+                <property name="yaxis_max" value=""/>
+                <property name="xaxis_max" value=""/>
+                <property name="image_export_width" value="6"/>
+                <property name="matplotlibrc" value=""/>
+                <property name="include_fields" value="false"/>
+            </chart>
+        </folder>
     </charts>
 </analysis>
