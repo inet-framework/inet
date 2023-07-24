@@ -97,7 +97,7 @@
 /showcases/tsn/trafficshaping/cbsandats/, -f omnetpp.ini -c General -r 0,           1s,         7ee9-d3c7/tplx;825c-4c52/~tNl;41dd-69a0/~tND;6dce-0c5c/tyf, PASS,
 /showcases/tsn/trafficshaping/cbsandtas/, -f omnetpp.ini -c General -r 0,           1s,         ac22-8b54/tplx;d1ed-8739/~tNl;5406-a1a6/~tND;6dce-0c5c/tyf, PASS,
 /showcases/tsn/trafficshaping/timeawareshaper/, -f omnetpp.ini -c General -r 0,     1s,         a3f3-82c6/tplx;ae6c-571a/~tNl;4bd6-0bf1/~tND;0e56-93d9/tyf, PASS,
-/showcases/tsn/trafficshaping/underthehood/, -f omnetpp.ini -c General -r 0,        1s,         c6b4-d64d/tplx;0000-0000/~tNl;0000-0000/~tND;0a0d-68d4/tyf, PASS,
+/showcases/tsn/trafficshaping/underthehood/, -f omnetpp.ini -c General -r 0,        1s,         f5ab-befe/tplx;0000-0000/~tNl;0000-0000/~tND;0a0d-68d4/tyf, PASS,
 
 # /showcases/visualizer/canvas/advanced/,     -f omnetpp.ini -c IncludingMultipleVisualizerModules -r 0, 100s, 1b92-4be3/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,
 # /showcases/visualizer/canvas/advanced/,     -f omnetpp.ini -c Wireless -r 0,               5s,         1543-37d9/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,    wireless
