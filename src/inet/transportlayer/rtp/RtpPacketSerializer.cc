@@ -35,7 +35,7 @@ void RtpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
 const Ptr<Chunk> RtpPacketSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto rtpHeader = makeShared<RtpHeader>();
-    rtpHeader->setVersion(stream.readNBitsToUint64Be(2));
+    rtpHeader->setVersion(stream.readUint2());
     rtpHeader->setPaddingFlag(stream.readBit());
     rtpHeader->setExtensionFlag(stream.readBit());
     size_t csrcArraySize = stream.readUint4();

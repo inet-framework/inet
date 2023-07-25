@@ -36,7 +36,7 @@ void serializeReceptionReport(MemoryOutputStream& stream, const ReceptionReport 
 void deserializeReceptionReport(MemoryInputStream& stream, ReceptionReport& receptionReport) {
     receptionReport.setSsrc(stream.readUint32Be());
     receptionReport.setFractionLost(stream.readByte());
-    receptionReport.setPacketsLostCumulative(stream.readNBitsToUint64Be(24));
+    receptionReport.setPacketsLostCumulative(stream.readUint24Be());
     receptionReport.setSequenceNumber(stream.readUint32Be());
     receptionReport.setJitter(stream.readUint32Be());
     receptionReport.setLastSR(stream.readUint32Be());
@@ -145,7 +145,7 @@ void RtcpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 const Ptr<Chunk> RtcpPacketSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto rtcpPacket = makeShared<RtcpPacket>();
-    rtcpPacket->setVersion(stream.readNBitsToUint64Be(2));
+    rtcpPacket->setVersion(stream.readUint2());
     rtcpPacket->setPadding(stream.readBit());
     short count = stream.readNBitsToUint64Be(5);
     rtcpPacket->setCount(count);

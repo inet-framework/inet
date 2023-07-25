@@ -131,7 +131,7 @@ const Ptr<Chunk> IgmpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                 igmpv3Query->setCrc(chksum);
                 igmpv3Query->setCrcMode(CRC_COMPUTED);
                 igmpv3Query->setGroupAddress(stream.readIpv4Address());
-                igmpv3Query->setResv(stream.readNBitsToUint64Be(4));
+                igmpv3Query->setResv(stream.readUint4());
                 igmpv3Query->setSuppressRouterProc(stream.readBit());
                 igmpv3Query->setRobustnessVariable(stream.readNBitsToUint64Be(3));
                 igmpv3Query->setQueryIntervalCode(stream.readByte());

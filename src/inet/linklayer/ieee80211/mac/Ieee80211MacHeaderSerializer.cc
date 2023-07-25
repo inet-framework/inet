@@ -353,8 +353,8 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
 {
     auto macHeader = makeShared<Ieee80211MacHeader>();
     uint8_t subType = stream.readUint4();
-    uint8_t frameType = stream.readNBitsToUint64Be(2);
-    uint8_t protocolVersion = stream.readNBitsToUint64Be(2);
+    uint8_t frameType = stream.readUint2();
+    uint8_t protocolVersion = stream.readUint2();
     macHeader->setType(protocolVersion, frameType, subType);
     bool order = stream.readBit();
     macHeader->setOrder(order);
@@ -579,7 +579,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             if (type == ST_DATA_WITH_QOS) {
                 dataHeader->setTid(stream.readUint4());
                 stream.readBit();
-                dataHeader->setAckPolicy(static_cast<AckPolicy>(stream.readNBitsToUint64Be(2)));
+                dataHeader->setAckPolicy(static_cast<AckPolicy>(stream.readUint2()));
                 dataHeader->setAMsduPresent(stream.readBit());
                 stream.readByte();
             }
