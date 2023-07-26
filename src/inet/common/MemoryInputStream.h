@@ -36,7 +36,7 @@ class INET_API MemoryInputStream
      * the last byte. In other cases some of the lower bits of the last byte are
      * not used.
      */
-    std::vector<uint8_t> data;
+    const std::vector<uint8_t> data;
     /**
      * The length of the bit stream measured in bits.
      */
