@@ -363,7 +363,7 @@ class INET_API MemoryOutputStream
     void writeNBitsOfUint64Be(uint64_t value, uint8_t n) {
         if (n == 0 || n > 64)
             throw cRuntimeError("Can not write 0 bit or more than 64 bits.");
-        uint64_t mul = 1 << (n - 1);
+        uint64_t mul = (uint64_t)1 << (n - 1);
         for (int i = 0; i < n; ++i) {
             writeBit((value & mul) != 0);
             mul >>= 1;
