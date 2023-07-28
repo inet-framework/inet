@@ -218,7 +218,6 @@ class INET_API MemoryInputStream
      * the original byte order in MSB to LSB bit order.
      */
     B readBytes(std::vector<uint8_t>& bytes, B length) {
-        ASSERT(isByteAligned());
         if (position + length > this->length) {
             length = this->length - position;
             isReadBeyondEnd_ = true;
@@ -227,8 +226,14 @@ class INET_API MemoryInputStream
         ASSERT(b(0) <= position && position <= B(data.size()));
         ASSERT(b(0) <= end && end <= B(data.size()));
         ASSERT(position <= end);
-        bytes.insert(bytes.end(), data.begin() + B(position).get(), data.begin() + B(end).get());
-        position += length;
+        if (isByteAligned()) {
+            bytes.insert(bytes.end(), data.begin() + B(position).get(), data.begin() + B(end).get());
+            position += length;
+        }
+        else {
+            for (size_t i = 0; i < B(length).get(); i++)
+                bytes.push_back(readByte());
+        }
         return length;
     }
 
@@ -237,13 +242,18 @@ class INET_API MemoryInputStream
      * the original byte order in MSB to LSB bit order.
      */
     B readBytes(uint8_t *buffer, B length) {
-        ASSERT(isByteAligned());
         if (position + length > this->length) {
             length = this->length - position;
             isReadBeyondEnd_ = true;
         }
-        std::copy(data.begin() + B(position).get(), data.begin() + B(position + length).get(), buffer);
-        position += length;
+        if (isByteAligned()) {
+            std::copy(data.begin() + B(position).get(), data.begin() + B(position + length).get(), buffer);
+            position += length;
+        }
+        else {
+            for (size_t i = 0; i < B(length).get(); i++)
+                *buffer++ = readByte();
+        }
         return length;
     }
     //@}
