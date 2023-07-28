@@ -471,7 +471,7 @@ class INET_API MemoryInputStream
     uint64_t readNBitsToUint64Be(uint8_t n) {
         if (n == 0 || n > 64)
             throw cRuntimeError("Can not read 0 bit or more than 64 bits.");
-        uint64_t mul = 1 << (n - 1);
+        uint64_t mul = (uint64_t)1 << (n - 1);
         uint64_t num = 0;
         for (int i = 0; i < n; ++i) {
             if (readBit())
