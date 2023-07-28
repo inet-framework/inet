@@ -480,7 +480,7 @@ bool Ieee80211LayeredOfdmReceiver::computeIsReceptionPossible(const IListening *
 
 Ieee80211LayeredOfdmReceiver::~Ieee80211LayeredOfdmReceiver()
 {
-    if (!isCompliant) {
+    if (!isCompliant && mode != nullptr) {
         delete mode->getPreambleMode();
         delete mode->getSignalMode();
         delete mode->getDataMode();
