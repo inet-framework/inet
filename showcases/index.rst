@@ -15,17 +15,17 @@ the simulations (NED, ini and other files) and the web pages are in the
 
 .. The following showcases are available:
 
-Recently released showcases:
+Latest changes:
 
-- :doc:`Clock Drift showcase updated for the upcoming INET 4.5 version </showcases/tsn/timesynchronization/clockdrift/doc/index>`
-- :doc:`Several Time-Sensitive Networking showcases released </showcases/tsn/index>`
-- :doc:`emulation/videostreaming/doc/index`
-- :doc:`wireless/analogmodel/doc/index`
-- :doc:`wireless/crosstalk/doc/index`
-- :doc:`wireless/coexistence/doc/index`
-- :doc:`visualizer/canvas/spectrum/doc/index`
-- :doc:`emulation/voip/doc/index`
-- :doc:`emulation/babel/doc/index`
+- :doc:`tsn/trafficshaping/underthehood/doc/index` updated (2023-07-28)
+- :doc:`tsn/trafficshaping/cbsandtas/doc/index` released (2023-07-28)
+- :doc:`tsn/trafficshaping/cbsandats/doc/index` updated (2023-07-28)
+- :doc:`tsn/trafficshaping/asynchronousshaper/doc/index` updated (2023-07-28)
+- :doc:`tsn/trafficshaping/creditbasedshaper/doc/index` updated (2023-07-28)
+- :doc:`tsn/combiningfeatures/gptpandtas/doc/index` updated (2023-07-28)
+- :doc:`tsn/timesynchronization/gptp/doc/index` updated for INET 4.5 (2023-07-28)
+- :doc:`tsn/timesynchronization/clockdrift/doc/index` updated for INET 4.5 (2023-03-17)
+- :doc:`Several Time-Sensitive Networking showcases released </showcases/tsn/index>` (2022-06-13)
 
 All showcases:
 
