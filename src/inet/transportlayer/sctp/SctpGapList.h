@@ -35,13 +35,13 @@ class INET_API SctpSimpleGapList
 
     uint32_t getGapStart(const uint32_t index) const
     {
-        assert(index < NumGaps);
+        ASSERT(index < NumGaps);
         return GapStartList[index];
     }
 
     uint32_t getGapStop(const uint32_t index) const
     {
-        assert(index < NumGaps);
+        ASSERT(index < NumGaps);
         return GapStopList[index];
     }
 
@@ -72,7 +72,7 @@ class INET_API SctpGapList
 
     void setInitialCumAckTsn(const uint32_t cumAckTsn)
     {
-        assert(CombinedGapList.getNumGaps() == 0);
+        ASSERT(CombinedGapList.getNumGaps() == 0);
         CumAckTsn = cumAckTsn;
     }
 

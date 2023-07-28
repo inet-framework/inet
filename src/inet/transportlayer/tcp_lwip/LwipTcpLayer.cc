@@ -69,9 +69,9 @@ err_t LwipTcpLayer::ip_output(LwipTcpLayer::tcp_pcb *pcb, struct pbuf *p,
         struct ip_addr *src, struct ip_addr *dest,
         u8_t ttl, u8_t tos, u8_t proto)
 {
-    assert(proto == IP_PROTO_TCP);
-    assert(p);
-    assert(p->len <= p->tot_len);
+    ASSERT(proto == IP_PROTO_TCP);
+    ASSERT(p);
+    ASSERT(p->len <= p->tot_len);
 
     u16_t len = 0;
     char *buffer = new char[p->tot_len]();

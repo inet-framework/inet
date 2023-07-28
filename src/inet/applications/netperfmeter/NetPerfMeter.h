@@ -165,13 +165,13 @@ class INET_API NetPerfMeter : public cSimpleModule
 
     inline SenderStatistics *getSenderStatistics(const unsigned int streamID) {
         auto found = SenderStatisticsMap.find(streamID);
-        assert(found != SenderStatisticsMap.end());
+        ASSERT(found != SenderStatisticsMap.end());
         return found->second;
     }
 
     inline ReceiverStatistics *getReceiverStatistics(const unsigned int streamID) {
         auto found = ReceiverStatisticsMap.find(streamID);
-        assert(found != ReceiverStatisticsMap.end());
+        ASSERT(found != ReceiverStatisticsMap.end());
         return found->second;
     }
 

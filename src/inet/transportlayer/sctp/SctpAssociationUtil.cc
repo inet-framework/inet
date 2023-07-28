@@ -76,35 +76,35 @@ void SctpAssociation::listOrderedQ()
 uint32_t SctpAssociation::getBytesInFlightOfStream(uint16_t sid)
 {
     auto streamIterator = sendStreams.find(sid);
-    assert(streamIterator != sendStreams.end());
+    ASSERT(streamIterator != sendStreams.end());
     return streamIterator->second->getBytesInFlight();
 }
 
 bool SctpAssociation::orderedQueueEmptyOfStream(uint16_t sid)
 {
     auto streamIterator = sendStreams.find(sid);
-    assert(streamIterator != sendStreams.end());
+    ASSERT(streamIterator != sendStreams.end());
     return streamIterator->second->getStreamQ()->isEmpty();
 }
 
 bool SctpAssociation::unorderedQueueEmptyOfStream(uint16_t sid)
 {
     auto streamIterator = sendStreams.find(sid);
-    assert(streamIterator != sendStreams.end());
+    ASSERT(streamIterator != sendStreams.end());
     return streamIterator->second->getUnorderedStreamQ()->isEmpty();
 }
 
 bool SctpAssociation::getFragInProgressOfStream(uint16_t sid)
 {
     auto streamIterator = sendStreams.find(sid);
-    assert(streamIterator != sendStreams.end());
+    ASSERT(streamIterator != sendStreams.end());
     return streamIterator->second->getFragInProgress();
 }
 
 void SctpAssociation::setFragInProgressOfStream(uint16_t sid, bool frag)
 {
     auto streamIterator = sendStreams.find(sid);
-    assert(streamIterator != sendStreams.end());
+    ASSERT(streamIterator != sendStreams.end());
     return streamIterator->second->setFragInProgress(frag);
 }
 
@@ -435,7 +435,7 @@ void SctpAssociation::signalConnectionTimeout()
 void SctpAssociation::sendIndicationToApp(int32_t code, int32_t value)
 {
     EV_INFO << "sendIndicationToApp: " << indicationName(code) << endl;
-    assert(code != SCTP_I_SENDQUEUE_ABATED);
+    ASSERT(code != SCTP_I_SENDQUEUE_ABATED);
 
     Indication *msg = new Indication(indicationName(code), code);
 
@@ -1443,8 +1443,8 @@ static uint32_t compressGaps(const SctpGapList *gapList, const SctpGapList::GapT
     unsigned int entriesWritten = 0;
     uint32_t last = gapList->getCumAckTsn();
     for (unsigned int i = 0; i < gapList->getNumGaps(type); i++) {
-        assert(SctpAssociation::tsnGt(gapList->getGapStart(type, i), last + 1));
-        assert(SctpAssociation::tsnGe(gapList->getGapStop(type, i), gapList->getGapStart(type, i)));
+        ASSERT(SctpAssociation::tsnGt(gapList->getGapStart(type, i), last + 1));
+        ASSERT(SctpAssociation::tsnGe(gapList->getGapStop(type, i), gapList->getGapStart(type, i)));
         const uint16_t startOffset = gapList->getGapStart(type, i) - last;
         const uint16_t stopOffset = gapList->getGapStop(type, i) - gapList->getGapStart(type, i);
         const size_t lastOutputPos = outputPos;
@@ -1458,7 +1458,7 @@ static uint32_t compressGaps(const SctpGapList *gapList, const SctpGapList::GapT
         entriesWritten++;
         last = gapList->getGapStop(type, i);
     }
-    assert(writeCompressedValue((uint8_t *)&compressedDataBuffer, sizeof(compressedDataBuffer), outputPos, 0x00) == true);
+    ASSERT(writeCompressedValue((uint8_t *)&compressedDataBuffer, sizeof(compressedDataBuffer), outputPos, 0x00) == true);
     space = outputPos;
 
     return entriesWritten;
@@ -1482,8 +1482,8 @@ static uint32_t copyToRGaps(SctpSackChunk *sackChunk,
 
     for (uint32_t key = 0; key < keys; key++) {
         // ====== Validity check ========================================
-        assert(SctpAssociation::tsnGt(gapList->getGapStart(type, key), last + 1));
-        assert(SctpAssociation::tsnGe(gapList->getGapStop(type, key), gapList->getGapStart(type, key)));
+        ASSERT(SctpAssociation::tsnGt(gapList->getGapStart(type, key), last + 1));
+        ASSERT(SctpAssociation::tsnGe(gapList->getGapStop(type, key), gapList->getGapStart(type, key)));
         sackChunk->setGapStart(key, gapList->getGapStart(type, key));
         sackChunk->setGapStop(key, gapList->getGapStop(type, key));
         last = gapList->getGapStop(type, key);
@@ -1517,8 +1517,8 @@ static uint32_t copyToNRGaps(SctpSackChunk *sackChunk,
 
     for (uint32_t key = 0; key < keys; key++) {
         // ====== Validity check ========================================
-        assert(SctpAssociation::tsnGt(gapList->getGapStart(type, key), last + 1));
-        assert(SctpAssociation::tsnGe(gapList->getGapStop(type, key), gapList->getGapStart(type, key)));
+        ASSERT(SctpAssociation::tsnGt(gapList->getGapStart(type, key), last + 1));
+        ASSERT(SctpAssociation::tsnGe(gapList->getGapStop(type, key), gapList->getGapStart(type, key)));
         sackChunk->setNrGapStart(key, gapList->getGapStart(type, key));
         sackChunk->setNrGapStop(key, gapList->getGapStop(type, key));
         last = gapList->getGapStop(type, key);
@@ -1665,23 +1665,23 @@ SctpSackChunk *SctpAssociation::createSack()
         (((optR > 0) && (state->gapListOptimizationVariant == SctpStateVariables::GLOV_Optimized1)) ||
          ((optR > 0) && (optR >= optNR) && (state->gapListOptimizationVariant >= SctpStateVariables::GLOV_Optimized2))))
     {
-        assert(totalGaps < numRevokableGaps);
+        ASSERT(totalGaps < numRevokableGaps);
         sackHeaderLength = (compression == true) ? SCTP_COMPRESSED_NRSACK_CHUNK_LENGTH : SCTP_NRSACK_CHUNK_LENGTH;
         numRevokableGaps = copyToRGaps(sackChunk, &state->gapList, SctpGapList::GT_Any, compression, revokableGapsSpace); // Add ALL
         numNonRevokableGaps = copyToNRGaps(sackChunk, &state->gapList, SctpGapList::GT_NonRevokable, compression, nonRevokableGapsSpace); // Add NR-acks only
-        assert(numRevokableGaps == totalGaps);
+        ASSERT(numRevokableGaps == totalGaps);
 //        opt += optR;
     }
     // ------ Optimization 2: NR=ANY, R=difference ---------
     else if ((state->nrSack == true) &&
              (optNR > 0) && (state->gapListOptimizationVariant >= SctpStateVariables::GLOV_Optimized2))
     {
-        assert(totalGaps < numNonRevokableGaps);
+        ASSERT(totalGaps < numNonRevokableGaps);
         sackChunk->setNrSubtractRGaps(true);
         sackHeaderLength = (compression == true) ? SCTP_COMPRESSED_NRSACK_CHUNK_LENGTH : SCTP_NRSACK_CHUNK_LENGTH;
         numRevokableGaps = copyToRGaps(sackChunk, &state->gapList, SctpGapList::GT_Revokable, compression, revokableGapsSpace); // Add R-acks only
         numNonRevokableGaps = copyToNRGaps(sackChunk, &state->gapList, SctpGapList::GT_Any, compression, nonRevokableGapsSpace); // Add ALL
-        assert(numNonRevokableGaps == totalGaps);
+        ASSERT(numNonRevokableGaps == totalGaps);
 //        opt += optNR;
     }
     else {
@@ -1769,7 +1769,7 @@ SctpSackChunk *SctpAssociation::createSack()
                 }
             }
 
-            assert(sackLength <= allowedLength);
+            ASSERT(sackLength <= allowedLength);
 
             // Update values in SACK chunk ...
             sackChunk->setNumGaps(numRevokableGaps);
@@ -1790,7 +1790,7 @@ SctpSackChunk *SctpAssociation::createSack()
             sackLength = sackHeaderLength + revokableGapsSpace + nonRevokableGapsSpace + numDups * 4;
         }
         else {
-            assert(false); // NOTE: IMPLEMENT ME!
+            ASSERT(false); // NOTE: IMPLEMENT ME!
         }
     }
 
@@ -2160,7 +2160,7 @@ bool SctpAssociation::makeRoomForTsn(const uint32_t tsn, const uint32_t length, 
     calculateRcvBuffer();
 
     // Reneging may not happen when it is turned off!
-    assert(state->disableReneging == false);
+    ASSERT(state->disableReneging == false);
 
     // Get the highest TSN of the GapAck blocks.
     uint32_t tryTsn = state->gapList.getHighestTsnReceived();

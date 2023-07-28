@@ -321,7 +321,7 @@ void NetPerfMeter::handleTimer(cMessage *msg)
         ResetTimer = nullptr;
         resetStatistics();
 
-        assert(StopTimer == nullptr);
+        ASSERT(StopTimer == nullptr);
         if (StopTime > 0.0) {
             StopTimer = new cMessage("StopTimer", TIMER_STOP);
             scheduleAfter(StopTime, StopTimer);
@@ -442,7 +442,7 @@ void NetPerfMeter::handleMessage(cMessage *msg)
                 Message *message = check_and_cast<Message *>(msg);
                 auto& tags = message->getTags();
                 const auto& sendQueueAbatedIndication = tags.getTag<SctpSendQueueAbatedReq>();
-                assert(sendQueueAbatedIndication != nullptr);
+                ASSERT(sendQueueAbatedIndication != nullptr);
                 // Queue is underfull again -> give it more data.
                 SendingAllowed = true;
                 if (TraceVector.size() == 0) {
@@ -596,7 +596,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage *msg,
     // ====== Get connection ID ==============================================
     if (TransportProtocol == TCP) {
         if (ActiveMode == false) {
-            assert(SocketTCP != nullptr);
+            ASSERT(SocketTCP != nullptr);
             if (IncomingSocketTCP != nullptr) {
                 delete IncomingSocketTCP;
             }
@@ -609,7 +609,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage *msg,
     }
     else if (TransportProtocol == SCTP) {
         if (ActiveMode == false) {
-            assert(SocketSCTP != nullptr);
+            ASSERT(SocketSCTP != nullptr);
             if (IncomingSocketSCTP != nullptr) {
                 delete IncomingSocketSCTP;
             }
@@ -629,7 +629,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage *msg,
 
     // ====== Schedule Start Timer to begin transmission =====================
     if (OnOffCycleCounter == 0) {
-        assert(StartTimer == nullptr);
+        ASSERT(StartTimer == nullptr);
         StartTimer = new cMessage("StartTimer", TIMER_START);
         TransmissionStartTime = ConnectTime + StartTime;
         if (TransmissionStartTime < simTime()) {
@@ -638,7 +638,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage *msg,
         scheduleAt(TransmissionStartTime, StartTimer);
 
         // ====== Schedule Reset Timer to reset statistics ====================
-        assert(ResetTimer == nullptr);
+        ASSERT(ResetTimer == nullptr);
         ResetTimer = new cMessage("ResetTimer", TIMER_RESET);
         StatisticsResetTime = ConnectTime + ResetTime;
         scheduleAt(StatisticsResetTime, ResetTimer);
@@ -704,7 +704,7 @@ void NetPerfMeter::createAndBindSocket()
         localAddr = L3AddressResolver().resolve(localAddress);
 
     if (TransportProtocol == SCTP) {
-        assert(SocketSCTP == nullptr);
+        ASSERT(SocketSCTP == nullptr);
         SocketSCTP = new SctpSocket;
         SocketSCTP->setInboundStreams(MaxInboundStreams);
         SocketSCTP->setOutboundStreams(RequestedOutboundStreams);
@@ -715,7 +715,7 @@ void NetPerfMeter::createAndBindSocket()
         }
     }
     else if (TransportProtocol == TCP) {
-        assert(SocketTCP == nullptr);
+        ASSERT(SocketTCP == nullptr);
         SocketTCP = new TcpSocket;
         SocketTCP->setOutputGate(gate("socketOut"));
         SocketTCP->bind(localAddr, localPort);
@@ -724,7 +724,7 @@ void NetPerfMeter::createAndBindSocket()
         }
     }
     else if (TransportProtocol == UDP) {
-        assert(SocketUDP == nullptr);
+        ASSERT(SocketUDP == nullptr);
         SocketUDP = new UdpSocket;
         SocketUDP->setOutputGate(gate("socketOut"));
         SocketUDP->bind(localAddr, localPort);
@@ -891,7 +891,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
 {
     EV << simTime() << ", " << getFullPath() << ": Transmit frame of size "
        << frameSize << " on stream #" << streamID << endl;
-    assert(OnTimer == nullptr);
+    ASSERT(OnTimer == nullptr);
 
     // ====== TCP ============================================================
     unsigned long newlyQueuedBytes = 0;
@@ -1042,7 +1042,7 @@ void NetPerfMeter::sendDataOfSaturatedStreams(const unsigned long long bytesAvai
             }
         }
         else {
-            assert(ActualOutboundStreams <= sendQueueAbatedIndication->getQueuedForStreamArraySize());
+            ASSERT(ActualOutboundStreams <= sendQueueAbatedIndication->getQueuedForStreamArraySize());
             for (unsigned int streamID = 0; streamID < ActualOutboundStreams; streamID++) {
                 queued[streamID] = sendQueueAbatedIndication->getQueuedForStream(streamID);
             }
@@ -1082,7 +1082,7 @@ void NetPerfMeter::sendDataOfSaturatedStreams(const unsigned long long bytesAvai
 void NetPerfMeter::sendDataOfNonSaturatedStreams(const unsigned long long bytesAvailableInQueue,
                                                  const unsigned int       streamID)
 {
-    assert(OnTimer == nullptr);
+    ASSERT(OnTimer == nullptr);
 
     // ====== Is there something to send? ====================================
     const double frameRate = getFrameRate(streamID);
@@ -1115,7 +1115,7 @@ void NetPerfMeter::sendDataOfNonSaturatedStreams(const unsigned long long bytesA
     }
 
     // ====== Schedule next frame transmission ===============================
-    assert(TransmitTimerVector[streamID] == nullptr);
+    ASSERT(TransmitTimerVector[streamID] == nullptr);
     TransmitTimerVector[streamID] = new NetPerfMeterTransmitTimer("TransmitTimer", TIMER_TRANSMIT);
     TransmitTimerVector[streamID]->setStreamID(streamID);
     const double nextFrameTime = 1.0 / frameRate;
@@ -1149,7 +1149,7 @@ void NetPerfMeter::sendDataOfTraceFile(const unsigned long long bytesAvailableIn
     // ====== Schedule next frame transmission ===============================
     if (TraceIndex < TraceVector.size()) {
         const double nextFrameTime = TraceVector[TraceIndex].InterFrameDelay;
-        assert(TransmitTimerVector[0] == nullptr);
+        ASSERT(TransmitTimerVector[0] == nullptr);
         TransmitTimerVector[0] = new NetPerfMeterTransmitTimer("TransmitTimer", TIMER_TRANSMIT);
         TransmitTimerVector[0]->setStreamID(0);
 
@@ -1184,7 +1184,7 @@ void NetPerfMeter::receiveMessage(cMessage *msg)
 // ###### SCTP queue length configuration ###################################
 void NetPerfMeter::sendSCTPQueueRequest(const unsigned int queueSize)
 {
-    assert(SocketSCTP != nullptr);
+    ASSERT(SocketSCTP != nullptr);
 
     // Tell SCTP to limit the send queue to the number of bytes specified.
     // When the queue is able accept more data again, it will be indicated by
@@ -1206,7 +1206,7 @@ void NetPerfMeter::sendSCTPQueueRequest(const unsigned int queueSize)
 // ###### TCP queue length configuration ####################################
 void NetPerfMeter::sendTCPQueueRequest(const unsigned int queueSize)
 {
-    assert(SocketTCP != nullptr);
+    ASSERT(SocketTCP != nullptr);
 
     // Tell TCP to limit the send queue to the number of bytes specified.
     // When the queue is able accept more data again, it will be indicated by

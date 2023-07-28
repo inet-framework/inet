@@ -522,7 +522,7 @@ int32_t SctpAssociation::pathStreamSchedulerMapToPath(SctpPathVariables *path, b
             if ((stream->getUnorderedStreamQ()->getLength() > 0) || // Stream has something to send ...
                 (stream->getStreamQ()->getLength() > 0))
             {
-                assert(sid == -1);
+                ASSERT(sid == -1);
                 sid = stream->getStreamId();
                 break;
             }

@@ -77,9 +77,9 @@ class INET_API MemoryOutputStream
 
     void copyData(std::vector<uint8_t>& result, B offset = B(0), B length = B(-1)) const {
         auto end = length == B(-1) ? B(data.size()) : offset + length;
-        assert(b(0) <= offset && offset <= B(data.size()));
-        assert(b(0) <= end && end <= B(data.size()));
-        assert(offset <= end);
+        ASSERT(b(0) <= offset && offset <= B(data.size()));
+        ASSERT(b(0) <= end && end <= B(data.size()));
+        ASSERT(offset <= end);
         result.insert(result.begin(), data.begin() + B(offset).get(), data.begin() + B(end).get());
     }
     //@}
@@ -150,11 +150,11 @@ class INET_API MemoryOutputStream
      * byte order and in MSB to LSB bit order.
      */
     void writeBytes(const std::vector<uint8_t>& bytes, B offset = B(0), B length = B(-1)) {
-        assert(isByteAligned());
+        ASSERT(isByteAligned());
         auto end = length == B(-1) ? B(bytes.size()) : offset + length;
-        assert(b(0) <= offset && offset <= B(bytes.size()));
-        assert(b(0) <= end && end <= B(bytes.size()));
-        assert(offset <= end);
+        ASSERT(b(0) <= offset && offset <= B(bytes.size()));
+        ASSERT(b(0) <= end && end <= B(bytes.size()));
+        ASSERT(offset <= end);
         data.insert(data.end(), bytes.begin() + B(offset).get(), bytes.begin() + B(end).get());
         this->length += end - offset;
     }
@@ -164,7 +164,7 @@ class INET_API MemoryOutputStream
      * byte order and in MSB to LSB bit order.
      */
     void writeBytes(const uint8_t *buffer, B length) {
-        assert(isByteAligned());
+        ASSERT(isByteAligned());
         data.insert(data.end(), buffer, buffer + B(length).get());
         this->length += length;
     }

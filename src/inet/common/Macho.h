@@ -403,8 +403,8 @@ void *_createBox(void *& place)
 template<class B>
 void _deleteBox(void *& box, void *& place)
 {
-    assert(box);
-    assert(!place);
+    ASSERT(box);
+    ASSERT(!place);
 
     static_cast<B *>(box)->~B();
     place = box;
@@ -415,7 +415,7 @@ void _deleteBox(void *& box, void *& place)
 template<class B>
 void *_cloneBox(void *other)
 {
-    assert(other);
+    ASSERT(other);
     return new B(*static_cast<B *>(other));
 }
 
@@ -774,7 +774,7 @@ class _StateInstance
     // Only needed for top state (constructor of Machine calls this)
     void setBox(void *box)
     {
-        assert(!myBox);
+        ASSERT(!myBox);
 
         if (myBoxPlace) {
             // Free cached memory of previously used box.
@@ -793,13 +793,13 @@ class _StateInstance
 
     _StateSpecification& specification()
     {
-        assert(mySpecification);
+        ASSERT(mySpecification);
         return *mySpecification;
     }
 
     void *box()
     {
-        assert(myBox);
+        ASSERT(myBox);
         return myBox;
     }
 
@@ -847,7 +847,7 @@ class _RootInstance : public _StateInstance
     virtual Key key() override
     {
         // Can't happen: key is only called by users, and they don't know about Root.
-        assert(false);
+        ASSERT(false);
         return 0;
     }
 
@@ -879,7 +879,7 @@ class _SubstateInstance : public _StateInstance
     _SubstateInstance(_MachineBase& machine, _StateInstance *parent)
         : _StateInstance(machine, parent)
     {
-        assert(parent);
+        ASSERT(parent);
         this->mySpecification = new S(*this);
     }
 
@@ -918,15 +918,15 @@ class _SubstateInstance : public _StateInstance
 
     virtual void deleteBox() override
     {
-        assert(myBox);
+        ASSERT(myBox);
         Macho::_deleteBox<Box>(myBox, myBoxPlace);
     }
 
 #ifdef MACHO_SNAPSHOTS
     virtual void cloneBox(void *box)
     {
-        assert(!myBox);
-        assert(!myBoxPlace);
+        ASSERT(!myBox);
+        ASSERT(!myBoxPlace);
         // Needs copy constructor in ALL box types.
         myBox = Macho::_cloneBox<Box>(box);
     }
@@ -1517,7 +1517,7 @@ class _MachineBase
     // 'init' is an initializer for the new state.
     void setPendingState(_StateInstance& instance, _Initializer *init)
     {
-        assert((!myPendingState || (myPendingState == &instance && myPendingInit == init)) &&
+        ASSERT((!myPendingState || (myPendingState == &instance && myPendingInit == init)) &&
                 "There is already a state transition pending!");
 
         myPendingState = &instance;
@@ -1527,8 +1527,8 @@ class _MachineBase
     // Provide event object to be executed on current state.
     void setPendingEvent(_IEventBase *event)
     {
-        assert(event);
-        assert(!myPendingEvent && "There is already an event pending!");
+        ASSERT(event);
+        ASSERT(!myPendingEvent && "There is already an event pending!");
 
         myPendingEvent = event;
     }
@@ -1632,14 +1632,14 @@ class Alias
         : myStateKey(key)
         , myInitializer(history ? static_cast<_Initializer *>(&_theHistoryInitializer) : static_cast<_Initializer *>(&_theDefaultInitializer))
     {
-        assert(key);
+        ASSERT(key);
     }
 
     Alias(Key key, _Initializer *init)
         : myStateKey(key)
         , myInitializer(init)
     {
-        assert(key);
+        ASSERT(key);
     }
 
     Alias(const Alias& other)
@@ -1866,8 +1866,8 @@ class Machine : public _MachineBase
     // Overwrite current machine state by snapshot.
     Machine<TOP>& operator=(const Snapshot<TOP>& snapshot)
     {
-        assert(!myPendingState);
-        assert(!myPendingEvent);
+        ASSERT(!myPendingState);
+        ASSERT(!myPendingEvent);
 
         myCurrentState->shutdown();
 
@@ -1898,8 +1898,8 @@ class Machine : public _MachineBase
     // it allows us to perform actions after access.
     AfterAdvice operator->()
     {
-        assert(myCurrentState);
-        assert(!myPendingState);
+        ASSERT(myCurrentState);
+        ASSERT(!myPendingState);
 
         // We need to know when the event handler has finished.
         return AfterAdvice(*this);
@@ -1908,7 +1908,7 @@ class Machine : public _MachineBase
     // Dispatch an event object to machine.
     void dispatch(IEvent<TOP> *event, bool destroy = true)
     {
-        assert(event);
+        ASSERT(event);
 
         event->dispatch(*myCurrentState);
         if (destroy)
@@ -1920,7 +1920,7 @@ class Machine : public _MachineBase
     // Allow (const) access to top state's box (for state data extraction).
     const typename TOP::Box& box() const
     {
-        assert(myCurrentState);
+        ASSERT(myCurrentState);
         return static_cast<TOP&>(myCurrentState->specification()).TOP::box();
     }
 
@@ -2047,7 +2047,7 @@ inline void _StateSpecification::setStateDirect(typename S::Box *box)
 template<class T>
 inline void TopBase<T>::dispatch(IEvent<TOP> *event)
 {
-    assert(event);
+    ASSERT(event);
     _myStateInstance.machine().setPendingEvent(event);
 }
 
@@ -2157,9 +2157,9 @@ template<class C, class P>
 template<class TOP>
 Snapshot<TOP>::Snapshot(Machine<TOP>& machine)
 {
-    assert(!machine.myPendingState);
-    assert(!machine.myPendingEvent);
-    assert(machine.myCurrentState);
+    ASSERT(!machine.myPendingState);
+    ASSERT(!machine.myPendingEvent);
+    ASSERT(machine.myCurrentState);
 
     allocate(Machine<TOP>::theStateCount);
     copy(machine.myInstances, Machine<TOP>::theStateCount);

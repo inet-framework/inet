@@ -178,7 +178,7 @@ void Ieee802154Mac::configureNetworkInterface()
 void Ieee802154Mac::encapsulate(Packet *packet)
 {
     auto macPkt = makeShared<Ieee802154MacHeader>();
-    assert(headerLength % 8 == 0);
+    ASSERT(headerLength % 8 == 0);
     macPkt->setChunkLength(b(headerLength));
     MacAddress dest = packet->getTag<MacAddressReq>()->getDestAddress();
     EV_DETAIL << "CSMA received a message from upper layer, name is " << packet->getName() << ", CInfo removed, mac addr=" << dest << endl;
@@ -487,7 +487,7 @@ void Ieee802154Mac::updateStatusTransmitFrame(t_mac_event event, cMessage *msg)
 
 void Ieee802154Mac::updateStatusWaitAck(t_mac_event event, cMessage *msg)
 {
-    assert(useMACAcks);
+    ASSERT(useMACAcks);
 
     switch (event) {
         case EV_ACK_RECEIVED: {
@@ -548,7 +548,7 @@ void Ieee802154Mac::manageMissingAck(t_mac_event /*event*/, cMessage * /*msg*/)
 
 void Ieee802154Mac::updateStatusSIFS(t_mac_event event, cMessage *msg)
 {
-    assert(useMACAcks);
+    ASSERT(useMACAcks);
 
     switch (event) {
         case EV_TIMER_SIFS:
@@ -585,7 +585,7 @@ void Ieee802154Mac::updateStatusSIFS(t_mac_event event, cMessage *msg)
 
 void Ieee802154Mac::updateStatusTransmitAck(t_mac_event event, cMessage *msg)
 {
-    assert(useMACAcks);
+    ASSERT(useMACAcks);
 
     if (event == EV_FRAME_TRANSMITTED) {
         EV_DETAIL << "(19) FSM State TRANSMITACK_7, EV_FRAME_TRANSMITTED:"
@@ -704,12 +704,12 @@ void Ieee802154Mac::startTimer(t_mac_timer timer)
         scheduleAfter(rxSetupTime + ccaDetectionTime, ccaTimer);
     }
     else if (timer == TIMER_SIFS) {
-        assert(useMACAcks);
+        ASSERT(useMACAcks);
         EV_DETAIL << "(startTimer) sifsTimer value=" << sifs << endl;
         scheduleAfter(sifs, sifsTimer);
     }
     else if (timer == TIMER_RX_ACK) {
-        assert(useMACAcks);
+        ASSERT(useMACAcks);
         EV_DETAIL << "(startTimer) rxAckTimer value=" << macAckWaitDuration << endl;
         scheduleAfter(macAckWaitDuration, rxAckTimer);
     }

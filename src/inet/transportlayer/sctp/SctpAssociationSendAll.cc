@@ -56,7 +56,7 @@ void SctpAssociation::storePacket(SctpPathVariables *pathVar,
             if (dataChunk != nullptr) {
                 const uint32_t tsn = dataChunk->getTsn();
                 SctpDataVariables *chunk = retransmissionQ->payloadQueue.find(tsn)->second;
-                assert(chunk != nullptr);
+                ASSERT(chunk != nullptr);
                 decreaseOutstandingBytes(chunk);
                 chunk->queuedOnPath->queuedBytes -= chunk->booksize;
                 chunk->queuedOnPath = nullptr;
@@ -107,7 +107,7 @@ void SctpAssociation::loadPacket(SctpPathVariables *pathVar,
             if (dataChunk != nullptr) {
                 const uint32_t tsn = dataChunk->getTsn();
                 SctpDataVariables *chunk = retransmissionQ->payloadQueue.find(tsn)->second;
-                assert(chunk != nullptr);
+                ASSERT(chunk != nullptr);
                 chunk->queuedOnPath = pathVar;
                 chunk->queuedOnPath->queuedBytes += chunk->booksize;
                 chunk->setLastDestination(pathVar);
@@ -343,7 +343,7 @@ void SctpAssociation::chunkReschedulingControl(SctpPathVariables *path)
         totalOutstandingBytes += myPath->outstandingBytes;
 //        totalBandwidth += (double)myPath->cwnd / myPath->srtt.dbl();
     }
-    assert(totalOutstandingBytes == state->outstandingBytes);
+    ASSERT(totalOutstandingBytes == state->outstandingBytes);
 
     const unsigned int queuedBytes = path->queuedBytes;
     const unsigned int outstandingBytes = path->outstandingBytes;
@@ -414,8 +414,8 @@ void SctpAssociation::chunkReschedulingControl(SctpPathVariables *path)
                         ((lastPath != path) ||
                          (chunk->sendTime + (2 * path->srtt) < simTime())))
                     {
-                        assert(chunk->numberOfTransmissions > 0); // It has been transmitted as least once
-                        assert(chunk->hasBeenAcked == false); // It has not been acked (since it is outstanding)
+                        ASSERT(chunk->numberOfTransmissions > 0); // It has been transmitted as least once
+                        ASSERT(chunk->hasBeenAcked == false); // It has not been acked (since it is outstanding)
 
                         EV << simTime() << ": RESCHEDULING TSN " << chunk->tsn << " on "
                            << lastPath->remoteAddress << " to "
@@ -456,7 +456,7 @@ void SctpAssociation::chunkReschedulingControl(SctpPathVariables *path)
                                     // A further problem during Fast Recovery -> block path
                                     const simtime_t pause = lastPath->srtt;
                                     lastPath->blockingTimeout = simTime() + pause;
-                                    assert(!lastPath->BlockingTimer->isScheduled());
+                                    ASSERT(!lastPath->BlockingTimer->isScheduled());
                                     startTimer(lastPath->BlockingTimer, pause);
                                     EV << simTime() << "\tCR-2 on path "
                                        << lastPath->remoteAddress << " (pause="
@@ -501,7 +501,7 @@ void SctpAssociation::sendSACKviaSelectedPath(const Ptr<SctpHeader>& sctpMsg)
     SctpPathVariables *sackPath =
         (state->lastDataSourceList.size() > 0) ? state->lastDataSourceList.front() :
         state->lastDataSourcePath;
-    assert(sackPath != nullptr);
+    ASSERT(sackPath != nullptr);
 
     if (state->allowCMT) {
         if (state->cmtSackPath == SctpStateVariables::CSP_RoundRobin) {
@@ -547,7 +547,7 @@ void SctpAssociation::sendSACKviaSelectedPath(const Ptr<SctpHeader>& sctpMsg)
 void SctpAssociation::bytesAllowedToSend(SctpPathVariables *path,
         const bool firstPass)
 {
-    assert(path != nullptr);
+    ASSERT(path != nullptr);
 
     bytes.chunk = false;
     bytes.packet = false;
@@ -705,7 +705,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
         if (state->bytesToRetransmit > 0) {
             // There are bytes in the transmissionQ. They have to be sent first.
             path = choosePathForRetransmission();
-            assert(path != nullptr);
+            ASSERT(path != nullptr);
         }
         else {
             if (pathId == nullptr) { // No path given => use primary path.
@@ -742,7 +742,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
             break;
         }
         outstandingBytes = path->outstandingBytes;
-        assert((int32_t)outstandingBytes >= 0);
+        ASSERT((int32_t)outstandingBytes >= 0);
         auto tq = qCounter.roomTransQ.find(path->remoteAddress);
         tcount = tq->second;
         Tcount = getAllTransQ();
@@ -794,7 +794,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
 
         if (!sackAdded && (sackWithData || sackOnly)) {
             // SACK can be sent
-            assert(headerCreated == true);
+            ASSERT(headerCreated == true);
             sackChunk = createSack();
             // CMT DAC
             if ((state->allowCMT == true) && (state->cmtUseDAC == true)) {
@@ -865,7 +865,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
         bool packetFull = false;
 
         while (!packetFull && headerCreated) {
-            assert(headerCreated == true);
+            ASSERT(headerCreated == true);
             EV_DETAIL << assocId << ": bytesToSend=" << bytesToSend
                       << " bytes.chunk=" << bytes.chunk
                       << " bytes.packet=" << bytes.packet << endl;
@@ -1010,7 +1010,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                     }
 
                     if (datVar != nullptr) {
-                        assert(datVar->getNextDestinationPath() == path);
+                        ASSERT(datVar->getNextDestinationPath() == path);
                         datVar->numberOfRetransmissions++;
                         if (chunkHasBeenAcked(datVar) == false) {
                             EV_DETAIL << simTime() << ": Retransmission #" << datVar->numberOfRetransmissions
@@ -1224,7 +1224,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                 if (datVar != nullptr && !packetFull) {
                     // ------ Assign TSN -----------------------------------------
                     if (firstTime) {
-                        assert(datVar->tsn == 0);
+                        ASSERT(datVar->tsn == 0);
                         datVar->tsn = state->nextTsn;
                         EV_DETAIL << "sendAll: set TSN=" << datVar->tsn
                                   << " sid=" << datVar->sid << ", ssn=" << datVar->ssn << "\n";

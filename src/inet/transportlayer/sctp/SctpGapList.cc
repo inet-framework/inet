@@ -32,12 +32,12 @@ void SctpSimpleGapList::check(const uint32_t cTsnAck) const
 {
     for (uint32_t i = 0; i < NumGaps; i++) {
         if (i == 0) {
-            assert(SctpAssociation::tsnGt(GapStartList[i], cTsnAck + 1));
+            ASSERT(SctpAssociation::tsnGt(GapStartList[i], cTsnAck + 1));
         }
         else {
-            assert(SctpAssociation::tsnGt(GapStartList[i], GapStopList[i - 1] + 1));
+            ASSERT(SctpAssociation::tsnGt(GapStartList[i], GapStopList[i - 1] + 1));
         }
-        assert(SctpAssociation::tsnLe(GapStartList[i], GapStopList[i]));
+        ASSERT(SctpAssociation::tsnLe(GapStartList[i], GapStopList[i]));
     }
 }
 

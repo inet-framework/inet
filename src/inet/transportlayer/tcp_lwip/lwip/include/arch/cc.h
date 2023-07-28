@@ -13,7 +13,7 @@ namespace inet {
 namespace tcp {
 
 #define PACK_STRUCT_STRUCT __attribute__ (( __packed__ ))
-#define LWIP_PLATFORM_ASSERT(c) assert(c)
+#define LWIP_PLATFORM_ASSERT(c) ASSERT(c)
 /*
 #define LWIP_PLATFORM_DIAG(c) do { printf("%u] ", get_stack_id()); printf(c); } while (0)
 */

@@ -191,7 +191,7 @@ void _StateInstance::copy(_StateInstance& original)
 {
     if (original.myHistory) {
         _StateInstance *history = myMachine.getInstance(original.myHistory->id());
-        assert(history);
+        ASSERT(history);
         setHistory(history);
     }
 
@@ -201,7 +201,7 @@ void _StateInstance::copy(_StateInstance& original)
 
 _StateInstance *_StateInstance::clone(_MachineBase& newMachine)
 {
-    assert(!newMachine.getInstance(id()));
+    ASSERT(!newMachine.getInstance(id()));
 
     _StateInstance *parent = 0;
     if (myParent)
@@ -267,7 +267,7 @@ void _MachineBase::start(const Alias& state)
 
 void _MachineBase::shutdown()
 {
-    assert(!myPendingState);
+    ASSERT(!myPendingState);
 
     MACHO_TRC1("Shutting down Machine");
 
@@ -319,7 +319,7 @@ void _MachineBase::copy(_StateInstance **others, unsigned int count)
     for (ID i = 0; i < count; ++i) {
         _StateInstance *state = myInstances[i];
         if (state) {
-            assert(others[i]);
+            ASSERT(others[i]);
             state->copy(*others[i]);
         }
     }
@@ -341,7 +341,7 @@ _StateInstance *_MachineBase::createClone(ID id, _StateInstance *original)
 // Performs a pending state transition.
 void _MachineBase::rattleOn()
 {
-    assert(myCurrentState);
+    ASSERT(myCurrentState);
 
     while (myPendingState || myPendingEvent) {
         // Loop here because init actions might change state again.
@@ -384,7 +384,7 @@ void _MachineBase::rattleOn()
             init->execute(*myCurrentState);
             init->destroy();
 
-            assert("Init may only transition to proper substates" &&
+            ASSERT("Init may only transition to proper substates" &&
                     (!myPendingState ||
                      (myPendingState->isChild(*myCurrentState) && (myCurrentState != myPendingState))));
 

@@ -423,7 +423,7 @@ int32_t SctpAssociation::rpPathBlockingControl(SctpPathVariables *path, const do
             EV << "Blocking " << path->remoteAddress << " for " << timeout << endl;
 
             path->blockingTimeout = simTime() + timeout;
-            assert(!path->BlockingTimer->isScheduled());
+            ASSERT(!path->BlockingTimer->isScheduled());
             startTimer(path->BlockingTimer, timeout);
         }
     }
@@ -947,7 +947,7 @@ void SctpAssociation::cwndUpdateMaxBurst(SctpPathVariables *path)
                 path->tempCwnd = path->outstandingBytes + (state->maxBurst * path->pmtu);
             }
             else {
-                assert(false);
+                ASSERT(false);
             }
 
             if (state->maxBurstVariant == SctpStateVariables::MBV_CongestionWindowLimiting) {

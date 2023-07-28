@@ -36,7 +36,7 @@ void SctpAssociation::decreaseOutstandingBytes(SctpDataVariables *chunk)
     SctpPathVariables *lastPath = chunk->getLastDestinationPath();
 
     if (chunk->countsAsOutstanding) {
-        assert(lastPath->outstandingBytes >= chunk->booksize);
+        ASSERT(lastPath->outstandingBytes >= chunk->booksize);
         lastPath->outstandingBytes -= chunk->booksize;
         lastPath->statisticsPathOutstandingBytes->record(lastPath->outstandingBytes);
         state->outstandingBytes -= chunk->booksize;
@@ -49,7 +49,7 @@ void SctpAssociation::decreaseOutstandingBytes(SctpDataVariables *chunk)
             throw cRuntimeError("Stream with id %d not found", chunk->sid);
         }
         stream->setBytesInFlight(stream->getBytesInFlight() - chunk->booksize);
-        assert((int64_t)state->outstandingBytes >= 0);
+        ASSERT((int64_t)state->outstandingBytes >= 0);
         statisticsOutstandingBytes->record(state->outstandingBytes);
 
         chunk->countsAsOutstanding = false;
@@ -990,7 +990,7 @@ SctpEventCode SctpAssociation::processSackArrived(SctpSackChunk *sackChunk)
     uint32_t lastTsn = sackChunk->getCumTsnAck();
     for (uint32_t i = 0; i < sackChunk->getNumGaps(); i++) {
         uint32_t tsn = sackChunk->getGapStart(i);
-        assert(tsnLt(lastTsn + 1, tsn));
+        ASSERT(tsnLt(lastTsn + 1, tsn));
         lastTsn = tsn;
         while (tsnLe(tsn, sackChunk->getGapStop(i))) {
             bool dummy;
@@ -1008,7 +1008,7 @@ SctpEventCode SctpAssociation::processSackArrived(SctpSackChunk *sackChunk)
         lastTsn = sackChunk->getCumTsnAck();
         for (uint32_t i = 0; i < sackChunk->getNumNrGaps(); i++) {
             uint32_t tsn = sackChunk->getNrGapStart(i);
-            assert(tsnLt(lastTsn + 1, tsn));
+            ASSERT(tsnLt(lastTsn + 1, tsn));
             lastTsn = tsn;
             while (tsnLe(tsn, sackChunk->getNrGapStop(i))) {
                 bool dummy;
@@ -1022,7 +1022,7 @@ SctpEventCode SctpAssociation::processSackArrived(SctpSackChunk *sackChunk)
         lastTsn = sackChunk->getCumTsnAck();
         for (uint32_t i = 0; i < sackChunk->getNumNrGaps(); i++) {
             uint32_t tsn = sackChunk->getNrGapStart(i);
-            assert(tsnLt(lastTsn + 1, tsn));
+            ASSERT(tsnLt(lastTsn + 1, tsn));
             lastTsn = tsn;
             while (tsnLe(tsn, sackChunk->getNrGapStop(i))) {
                 if (sackGapList.tsnIsRevokable(tsn) == false) {
@@ -1279,12 +1279,12 @@ SctpEventCode SctpAssociation::processSackArrived(SctpSackChunk *sackChunk)
 
             // ====== Iterate over TSNs *not* listed in gap reports ============
             for (uint32_t pos = lo1 + 1; pos <= lo - 1; pos++) {
-                assert(tsnCheck == pos);
+                ASSERT(tsnCheck == pos);
                 tsnCheck++;
                 SctpDataVariables *myChunk = retransmissionQ->getChunk(pos);
                 if (myChunk) {
                     SctpPathVariables *myChunkLastPath = myChunk->getLastDestinationPath();
-                    assert(myChunkLastPath != nullptr);
+                    ASSERT(myChunkLastPath != nullptr);
                     // T.D. 22.11.09: CUCv2 - chunk is *not* acked
                     cucProcessGapReports(myChunk, myChunkLastPath, false);
                 }
@@ -1294,13 +1294,13 @@ SctpEventCode SctpAssociation::processSackArrived(SctpSackChunk *sackChunk)
             EV_INFO << "Examine TSNs between " << lo << " and " << hi << endl;
             for (uint32_t pos = lo; pos <= hi; pos++) {
                 bool chunkFirstTime = true;
-                assert(tsnCheck == pos);
+                ASSERT(tsnCheck == pos);
                 tsnCheck++;
                 SctpDataVariables *myChunk = retransmissionQ->getChunkFast(pos, chunkFirstTime);
                 if (myChunk) {
                     if (chunkHasBeenAcked(myChunk) == false) {
                         SctpPathVariables *myChunkLastPath = myChunk->getLastDestinationPath();
-                        assert(myChunkLastPath != nullptr);
+                        ASSERT(myChunkLastPath != nullptr);
                         // CUCv2 - chunk is acked
                         cucProcessGapReports(myChunk, myChunkLastPath, true);
                         // This chunk has been acked newly.
@@ -1543,7 +1543,7 @@ SctpEventCode SctpAssociation::processSackArrived(SctpSackChunk *sackChunk)
                 myPath->oldestChunkSendTime = myPath->newOldestChunkSendTime;
                 updatedOldestChunkSendTime = true;
             }
-            assert(myPath->oldestChunkSendTime <= simTime());
+            ASSERT(myPath->oldestChunkSendTime <= simTime());
         }
         if (myPath->outstandingBytes == 0) {
             // T.D. 07.01.2010: Only stop T3 timer when there is nothing more to send on this path!
@@ -1814,7 +1814,7 @@ void SctpAssociation::handleChunkReportedAsMissing(const SctpSackChunk *sackChun
 
                         myChunk->setNextDestination(getNextDestination(myChunk));
                         SctpPathVariables *myChunkNextPath = myChunk->getNextDestinationPath();
-                        assert(myChunkNextPath != nullptr);
+                        ASSERT(myChunkNextPath != nullptr);
 
                         if (myChunk->countsAsOutstanding) {
                             decreaseOutstandingBytes(myChunk);
@@ -1854,7 +1854,7 @@ void SctpAssociation::nonRenegablyAckChunk(SctpDataVariables *chunk,
         Sctp::AssocStat *assocStat)
 {
     SctpPathVariables *lastPath = chunk->getLastDestinationPath();
-    assert(lastPath != nullptr);
+    ASSERT(lastPath != nullptr);
 
     // ====== Bookkeeping ====================================================
     // Subtract chunk size from sender buffer size
@@ -1862,11 +1862,11 @@ void SctpAssociation::nonRenegablyAckChunk(SctpDataVariables *chunk,
 
     // Subtract chunk size from the queue size of its stream
     auto streamIterator = sendStreams.find(chunk->sid);
-    assert(streamIterator != sendStreams.end());
+    ASSERT(streamIterator != sendStreams.end());
     SctpSendStream *stream = streamIterator->second;
-    assert(stream != nullptr);
+    ASSERT(stream != nullptr);
     cPacketQueue *streamQ = (chunk->ordered == false) ? stream->getUnorderedStreamQ() : stream->getStreamQ();
-    assert(streamQ != nullptr);
+    ASSERT(streamQ != nullptr);
 
     if (chunk->priority > 0) {
         state->queuedDroppableBytes -= chunk->len / 8;
@@ -1885,12 +1885,12 @@ void SctpAssociation::nonRenegablyAckChunk(SctpDataVariables *chunk,
         }
     }
 
-    assert(chunk->queuedOnPath->queuedBytes >= chunk->booksize);
+    ASSERT(chunk->queuedOnPath->queuedBytes >= chunk->booksize);
     chunk->queuedOnPath->queuedBytes -= chunk->booksize;
     chunk->queuedOnPath->statisticsPathQueuedSentBytes->record(chunk->queuedOnPath->queuedBytes);
     chunk->queuedOnPath = nullptr;
 
-    assert(state->queuedSentBytes >= chunk->booksize);
+    ASSERT(state->queuedSentBytes >= chunk->booksize);
     state->queuedSentBytes -= chunk->booksize;
     statisticsQueuedSentBytes->record(state->queuedSentBytes);
     if (assocStat) {
@@ -1993,7 +1993,7 @@ void SctpAssociation::generateSendQueueAbatedIndication(const uint64_t bytes)
         // Just send SCTP_I_SENDQUEUE_ABATED once, after all newly acked
         // chunks have been dequeued.
         // Only send indication if the sendBuffer size has dropped below the sendQueueLimit
-//        assert(state->lastSendQueueAbated < simTime());
+//        ASSERT(state->lastSendQueueAbated < simTime());
         state->appSendAllowed = true;
         EV_INFO << simTime() << ":\tSCTP_I_SENDQUEUE_ABATED("
                 << bytes << ") to refill buffer "
@@ -3849,7 +3849,7 @@ void SctpAssociation::process_TIMEOUT_RTX(SctpPathVariables *path)
 
         for (auto& elem : retransmissionQ->payloadQueue) {
             SctpDataVariables *chunk = elem.second;
-            assert(chunk != nullptr);
+            ASSERT(chunk != nullptr);
 
             // ====== Insert chunks into TransmissionQ ============================
             // Only insert chunks that were sent to the path that has timed out
@@ -3906,7 +3906,7 @@ void SctpAssociation::moveChunkToOtherPath(SctpDataVariables *chunk,
     chunk->setNextDestination(newPath);
 
     // ====== Rebook chunk on new path =======================================
-    assert(chunk->queuedOnPath->queuedBytes >= chunk->booksize);
+    ASSERT(chunk->queuedOnPath->queuedBytes >= chunk->booksize);
     chunk->queuedOnPath->queuedBytes -= chunk->booksize;
     chunk->queuedOnPath->statisticsPathQueuedSentBytes->record(chunk->queuedOnPath->queuedBytes);
 

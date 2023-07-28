@@ -530,7 +530,7 @@ void Igmpv3::processQuery(Packet *packet)
 {
     NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     const auto& msg = packet->peekAtFront<Igmpv3Query>(); // TODO should processing Igmpv1Query and Igmpv2Query, too
-    assert(msg != nullptr);
+    ASSERT(msg != nullptr);
 
     Ipv4Address groupAddr = msg->getGroupAddress();
     Ipv4AddressVector queriedSources = msg->getSourceList();
@@ -638,7 +638,7 @@ void Igmpv3::processQuery(Packet *packet)
 void Igmpv3::processReport(Packet *packet)
 {
     const auto& msg = packet->peekAtFront<Igmpv3Report>(); // FIXME also accept Igmpv1Report and Igmpv2Report
-    assert(msg != nullptr);
+    ASSERT(msg != nullptr);
     NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
 
     ASSERT(ie->isMulticast());
