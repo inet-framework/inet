@@ -5,6 +5,7 @@ Write data to MemoryOutputStream, read back and write to a second MemoryOutputSt
 Checks the two MemoryOutputStreams are have same content.
 
 %includes:
+
 #include "inet/common/MemoryInputStream.h"
 #include "inet/common/MemoryOutputStream.h"
 #include <iomanip>
@@ -70,14 +71,13 @@ class ReadTest {
 #define Bytes(x, y) test._Bytes(x, y)
 #define TEST(x, y, z) { \
     std::vector<uint8_t> vec; b len; \
-    { WriteTest test; x; vec = test.s.getData(); len = test.s.getLength(); } \
-    { ReadTest test(vec, len); x; \
+    { WriteTest test; try { x; } catch(const std::exception& e) { EV << e.what(); }; vec = test.s.getData(); len = test.s.getLength(); } \
+    { ReadTest test(vec, len); try { x; } catch(const std::exception& e) { EV << e.what(); }; \
       EV << "    TEST(" << #x << ", " << #y << ", " << test.is; \
       if (test.is.getData() != test.os.getData()) \
         EV << "->" << test.os; \
       EV << ");\n"; \
     } }
-//
 
 %activity:
     EV << "Start:\n";

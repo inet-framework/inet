@@ -2,6 +2,7 @@
 Test MemoryOutputStream
 
 %includes:
+
 #include "inet/common/MemoryOutputStream.h"
 #include <iomanip>
 
@@ -25,8 +26,7 @@ static std::ostream& operator<<(std::ostream& os, const ::inet::MemoryOutputStre
 #define Byte(x) s.writeByte(x)
 #define ByteR(x, y) s.writeByteRepeatedly(x, y)
 #define Bytes(x, y) s.writeBytes(x, inet::B(y))
-#define TEST(x, y, z) { inet::MemoryOutputStream s; x; EV << "    TEST(" << #x << ", " << #y << ", " << s << ");\n"; }
-//
+#define TEST(x, y, z) { inet::MemoryOutputStream s; try { x; } catch(const std::exception& e) { EV << e.what(); }; EV << "    TEST(" << #x << ", " << #y << ", " << s << ");\n"; }
 
 %activity:
     EV << "Start:\n";
