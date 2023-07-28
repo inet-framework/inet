@@ -1,0 +1,163 @@
+%description:
+Test MemoryOutputStream and MemoryInputStream
+
+Write data to MemoryOutputStream, read back and write to a second MemoryOutputStream.
+Checks the two MemoryOutputStreams are have same content.
+
+%includes:
+#include "inet/common/MemoryInputStream.h"
+#include "inet/common/MemoryOutputStream.h"
+#include <iomanip>
+
+static std::ostream& operator<<(std::ostream& os, const ::inet::MemoryInputStream& stream)
+{
+    const std::vector<uint8_t>& data = stream.getData();
+    const char *sep = "";
+    for (auto b: data) {
+        os << sep << std::hex << std::setw(2) << std::setfill('0') << (unsigned int)b;
+        sep = " ";
+    }
+    os << std::dec;
+    return os;
+}
+
+static std::ostream& operator<<(std::ostream& os, const ::inet::MemoryOutputStream& stream)
+{
+    const std::vector<uint8_t>& data = stream.getData();
+    const char *sep = "";
+    for (auto b: data) {
+        os << sep << std::hex << std::setw(2) << std::setfill('0') << (unsigned int)b;
+        sep = " ";
+    }
+    os << std::dec;
+    return os;
+}
+
+%global:
+
+using namespace inet;
+
+class WriteTest {
+  public:
+    MemoryOutputStream s;
+    void _Bit(bool x) { s.writeBit(x); }
+    void _BitR(bool x, size_t y) { s.writeBitRepeatedly(x, y); }
+    void _BitN(uint64_t x, uint8_t y) { s.writeNBitsOfUint64Be(x, y); }
+    void _Byte(uint8_t x) { s.writeByte(x); }
+    void _ByteR(uint8_t x, uint8_t y) { s.writeByteRepeatedly(x, y); }
+    void _Bytes(const uint8_t *x, uint8_t y) { s.writeBytes(x, B(y)); }
+};
+
+class ReadTest {
+  public:
+    ReadTest(const std::vector<uint8_t>& data, b len) : is(data, len) {}
+    MemoryInputStream is;
+    MemoryOutputStream os;
+    bool ok = true;
+    void _Bit(bool x) { bool v = is.readBit(); os.writeBit(v); }
+    void _BitR(bool x, size_t y) { os.writeBitRepeatedly(is.readBitRepeatedly(x, y) ? x : !x, y); }
+    void _BitN(uint64_t x, uint8_t y) { uint64_t n = is.readNBitsToUint64Be(y); os.writeNBitsOfUint64Be(n, y); }
+    void _Byte(uint8_t x) { os.writeByte(is.readByte()); }
+    void _ByteR(uint8_t x, uint8_t y) { os.writeByteRepeatedly(is.readByteRepeatedly(x, y) ? x : ~x, y); }
+    void _Bytes(const uint8_t *x, uint8_t y) { std::vector<uint8_t> vec; B l = is.readBytes(vec, B(y)); os.writeBytes(vec, B(0), l); }
+};
+
+#define Bit(x)      test._Bit(x)
+#define BitR(x, y)  test._BitR(x, y)
+#define BitN(x, y)  test._BitN(x, y)
+#define Byte(x)     test._Byte(x)
+#define ByteR(x, y) test._ByteR(x, y)
+#define Bytes(x, y) test._Bytes(x, y)
+#define TEST(x, y, z) { \
+    std::vector<uint8_t> vec; b len; \
+    { WriteTest test; x; vec = test.s.getData(); len = test.s.getLength(); } \
+    { ReadTest test(vec, len); x; \
+      EV << "    TEST(" << #x << ", " << #y << ", " << test.is; \
+      if (test.is.getData() != test.os.getData()) \
+        EV << "->" << test.os; \
+      EV << ");\n"; \
+    } }
+//
+
+%activity:
+    EV << "Start:\n";
+
+    uint8_t x81x82x83[3] = { 0x81, 0x82, 0x83 };
+    // INFO: use indent 4, use one space between parameters, and copy TEST lines to 'contains'
+
+    TEST(Bit(1);Bit(0);Bit(0);Bit(0);Bit(0);Bit(0);Bit(1);Bit(0), 1 0 0 0 0 0 1 0, 82);
+    TEST(Bit(0);Byte(0xff);BitR(0,7), 0 1111.1111 0000.000: 0111 1111 1000 0000, 7f 80);
+    TEST(Bit(1);Byte(0x00);BitR(1,7), 1 0000.0000 1111.111: 1000 0000 0111 1111, 80 7f);
+    TEST(Bit(1);Byte(0xff);BitR(1,7), 1 1111.1111 1111.111: 1111 1111 1111 1111, ff ff);
+    TEST(Bit(0);Byte(0x82);BitR(0,7), 0 1000.0010 0000.000: 0100 0001 0000 0000, 41 00);
+    TEST(Bit(1);Byte(0x82);BitR(1,7), 1 1000.0010 1111.111: 1100 0001 0111 1111, c1 7f);
+    TEST(BitR(0,5);Byte(0x82);BitR(0,3), 0000.0 1000.0010 000: 0000 0100 0001 0000, 04 10);
+    TEST(BitR(1,5);Byte(0x82);BitR(1,3), 1111.1 1000.0010 111: 1111 1100 0001 0111, fc 17);
+    TEST(BitR(0,3);Byte(0x82);BitR(0,5), 000 1000.0010 0000.0: 0001 0000 0100 0000, 10 40);
+    TEST(BitR(1,3);Byte(0x82);BitR(1,5), 111 1000.0010 1111.1: 1111 0000 0101 1111, f0 5f);
+    TEST(BitR(0,7);Byte(0x82);Bit(0), 0000.000 1000.0010 0: 0000 0001 0000 0100, 01 04);
+    TEST(BitR(1,7);Byte(0x82);Bit(1), 1111.111 1000.0010 1: 1111 1111 0000 0101, ff 05);
+    TEST(Bit(0);ByteR(0xff,3);BitR(0,7), 0 1111.1111 1111.1111 1111.1111 0000.000: 0111 1111 1111 1111 1111 1111 1000 0000, 7f ff ff 80);
+    TEST(Bit(1);ByteR(0x00,3);BitR(1,7), 1 0000.0000 0000.0000 0000.0000 1111.111: 1000 0000 0000 0000 0000 0000 0111 1111, 80 00 00 7f);
+    TEST(Bit(1);ByteR(0xff,3);BitR(1,7), 1 1111.1111 1111.1111 1111.1111 1111.111: 1111 1111 1111 1111 1111 1111 1111 1111, ff ff ff ff);
+    TEST(Bit(0);ByteR(0x82,3);BitR(0,7), 0 1000.0010 1000.0010 1000.0010 0000.000: 0100 0001 0100 0001 0100 0001 0000 0000, 41 41 41 00);
+    TEST(Bit(1);ByteR(0x82,3);BitR(1,7), 1 1000.0010 1000.0010 1000.0010 1111.111: 1100 0001 0100 0001 0100 0001 0111 1111, c1 41 41 7f);
+    TEST(BitR(0,5);ByteR(0x82,3);BitR(0,3), 0000.0 1000.0010 1000.0010 1000.0010 000: 0000 0100 0001 0100 0001 0100 0001 0000, 04 14 14 10);
+    TEST(BitR(1,5);ByteR(0x82,3);BitR(1,3), 1111.1 1000.0010 1000.0010 1000.0010 111: 1111 1100 0001 0100 0001 0100 0001 0111, fc 14 14 17);
+    TEST(BitR(0,3);ByteR(0x82,3);BitR(0,5), 000 1000.0010 1000.0010 1000.0010 0000.0: 0001 0000 0101 0000 0101 0000 0100 0000, 10 50 50 40);
+    TEST(BitR(1,3);ByteR(0x82,3);BitR(1,5), 111 1000.0010 1000.0010 1000.0010 1111.1: 1111 0000 0101 0000 0101 0000 0101 1111, f0 50 50 5f);
+    TEST(BitR(0,7);ByteR(0x82,3);Bit(0), 0000.000 1000.0010 1000.0010 1000.0010 0: 0000 0001 0000 0101 0000 0101 0000 0100, 01 05 05 04);
+    TEST(BitR(1,7);ByteR(0x82,3);Bit(1), 1111.111 1000.0010 1000.0010 1000.0010 1: 1111 1111 0000 0101 0000 0101 0000 0101, ff 05 05 05);
+    TEST(BitR(0,5);Bytes(x81x82x83,3);BitR(0,3), 0000.0 1000.0001 1000.0010 1000.0011 000: 0000 0100 0000 1100 0001 0100 0001 1000, 04 0c 14 18);
+    TEST(BitR(1,5);Bytes(x81x82x83,3);BitR(1,3), 1111.1 1000.0001 1000.0010 1000.0011 111: 1111 1100 0000 1100 0001 0100 0001 1111, fc 0c 14 1f);
+    TEST(BitR(0,3);Bytes(x81x82x83,3);BitR(0,5), 000 1000.0001 1000.0010 1000.0011 0000.0: 0001 0000 0011 0000 0101 0000 0110 0000, 10 30 50 60);
+    TEST(BitR(1,3);Bytes(x81x82x83,3);BitR(1,5), 111 1000.0001 1000.0010 1000.0011 1111.1: 1111 0000 0011 0000 0101 0000 0111 1111, f0 30 50 7f);
+    TEST(BitR(0,7);Bytes(x81x82x83,3);Bit(0), 0000.000 1000.0001 1000.0010 1000.0011 0: 0000 0001 0000 0011 0000 0101 0000 0110, 01 03 05 06);
+    TEST(BitR(1,7);Bytes(x81x82x83,3);Bit(1), 1111.111 1000.0001 1000.0010 1000.0011 1: 1111 1111 0000 0011 0000 0101 0000 0111, ff 03 05 07);
+    TEST(BitN(0x2000000000000003,62);BitR(0,2), 10.0000...0011 00: 1000 0000 ... 0000 1100, 80 00 00 00 00 00 00 0c);
+    TEST(BitR(0,2);BitN(0x2000000000000003,62), 00 10.0000...0011: 0010 0000 ... 0000 0011, 20 00 00 00 00 00 00 03);
+    TEST(Bit(0);BitN(0x2000000000000003,62);Bit(0), 0 10.0000...0011 0: 0100 0000 ... 0000 0110, 40 00 00 00 00 00 00 06);
+    TEST(Bit(1);BitN(0x1ffffffffffffffc,62);Bit(1), 1 01.1111...1100 1: 1011 1111 ... 1111 1001, bf ff ff ff ff ff ff f9);
+    TEST(Bit(0);BitN(0x23,6);Bit(0), 0 10.0011 0: 0100 0110, 46);
+    TEST(Bit(1);BitN(0x1c,6);Bit(1), 1 01.1100 1: 1011 1001, b9);
+
+    EV << ".\n";
+
+%contains: stdout
+Start:
+    TEST(Bit(1);Bit(0);Bit(0);Bit(0);Bit(0);Bit(0);Bit(1);Bit(0), 1 0 0 0 0 0 1 0, 82);
+    TEST(Bit(0);Byte(0xff);BitR(0,7), 0 1111.1111 0000.000: 0111 1111 1000 0000, 7f 80);
+    TEST(Bit(1);Byte(0x00);BitR(1,7), 1 0000.0000 1111.111: 1000 0000 0111 1111, 80 7f);
+    TEST(Bit(1);Byte(0xff);BitR(1,7), 1 1111.1111 1111.111: 1111 1111 1111 1111, ff ff);
+    TEST(Bit(0);Byte(0x82);BitR(0,7), 0 1000.0010 0000.000: 0100 0001 0000 0000, 41 00);
+    TEST(Bit(1);Byte(0x82);BitR(1,7), 1 1000.0010 1111.111: 1100 0001 0111 1111, c1 7f);
+    TEST(BitR(0,5);Byte(0x82);BitR(0,3), 0000.0 1000.0010 000: 0000 0100 0001 0000, 04 10);
+    TEST(BitR(1,5);Byte(0x82);BitR(1,3), 1111.1 1000.0010 111: 1111 1100 0001 0111, fc 17);
+    TEST(BitR(0,3);Byte(0x82);BitR(0,5), 000 1000.0010 0000.0: 0001 0000 0100 0000, 10 40);
+    TEST(BitR(1,3);Byte(0x82);BitR(1,5), 111 1000.0010 1111.1: 1111 0000 0101 1111, f0 5f);
+    TEST(BitR(0,7);Byte(0x82);Bit(0), 0000.000 1000.0010 0: 0000 0001 0000 0100, 01 04);
+    TEST(BitR(1,7);Byte(0x82);Bit(1), 1111.111 1000.0010 1: 1111 1111 0000 0101, ff 05);
+    TEST(Bit(0);ByteR(0xff,3);BitR(0,7), 0 1111.1111 1111.1111 1111.1111 0000.000: 0111 1111 1111 1111 1111 1111 1000 0000, 7f ff ff 80);
+    TEST(Bit(1);ByteR(0x00,3);BitR(1,7), 1 0000.0000 0000.0000 0000.0000 1111.111: 1000 0000 0000 0000 0000 0000 0111 1111, 80 00 00 7f);
+    TEST(Bit(1);ByteR(0xff,3);BitR(1,7), 1 1111.1111 1111.1111 1111.1111 1111.111: 1111 1111 1111 1111 1111 1111 1111 1111, ff ff ff ff);
+    TEST(Bit(0);ByteR(0x82,3);BitR(0,7), 0 1000.0010 1000.0010 1000.0010 0000.000: 0100 0001 0100 0001 0100 0001 0000 0000, 41 41 41 00);
+    TEST(Bit(1);ByteR(0x82,3);BitR(1,7), 1 1000.0010 1000.0010 1000.0010 1111.111: 1100 0001 0100 0001 0100 0001 0111 1111, c1 41 41 7f);
+    TEST(BitR(0,5);ByteR(0x82,3);BitR(0,3), 0000.0 1000.0010 1000.0010 1000.0010 000: 0000 0100 0001 0100 0001 0100 0001 0000, 04 14 14 10);
+    TEST(BitR(1,5);ByteR(0x82,3);BitR(1,3), 1111.1 1000.0010 1000.0010 1000.0010 111: 1111 1100 0001 0100 0001 0100 0001 0111, fc 14 14 17);
+    TEST(BitR(0,3);ByteR(0x82,3);BitR(0,5), 000 1000.0010 1000.0010 1000.0010 0000.0: 0001 0000 0101 0000 0101 0000 0100 0000, 10 50 50 40);
+    TEST(BitR(1,3);ByteR(0x82,3);BitR(1,5), 111 1000.0010 1000.0010 1000.0010 1111.1: 1111 0000 0101 0000 0101 0000 0101 1111, f0 50 50 5f);
+    TEST(BitR(0,7);ByteR(0x82,3);Bit(0), 0000.000 1000.0010 1000.0010 1000.0010 0: 0000 0001 0000 0101 0000 0101 0000 0100, 01 05 05 04);
+    TEST(BitR(1,7);ByteR(0x82,3);Bit(1), 1111.111 1000.0010 1000.0010 1000.0010 1: 1111 1111 0000 0101 0000 0101 0000 0101, ff 05 05 05);
+    TEST(BitR(0,5);Bytes(x81x82x83,3);BitR(0,3), 0000.0 1000.0001 1000.0010 1000.0011 000: 0000 0100 0000 1100 0001 0100 0001 1000, 04 0c 14 18);
+    TEST(BitR(1,5);Bytes(x81x82x83,3);BitR(1,3), 1111.1 1000.0001 1000.0010 1000.0011 111: 1111 1100 0000 1100 0001 0100 0001 1111, fc 0c 14 1f);
+    TEST(BitR(0,3);Bytes(x81x82x83,3);BitR(0,5), 000 1000.0001 1000.0010 1000.0011 0000.0: 0001 0000 0011 0000 0101 0000 0110 0000, 10 30 50 60);
+    TEST(BitR(1,3);Bytes(x81x82x83,3);BitR(1,5), 111 1000.0001 1000.0010 1000.0011 1111.1: 1111 0000 0011 0000 0101 0000 0111 1111, f0 30 50 7f);
+    TEST(BitR(0,7);Bytes(x81x82x83,3);Bit(0), 0000.000 1000.0001 1000.0010 1000.0011 0: 0000 0001 0000 0011 0000 0101 0000 0110, 01 03 05 06);
+    TEST(BitR(1,7);Bytes(x81x82x83,3);Bit(1), 1111.111 1000.0001 1000.0010 1000.0011 1: 1111 1111 0000 0011 0000 0101 0000 0111, ff 03 05 07);
+    TEST(BitN(0x2000000000000003,62);BitR(0,2), 10.0000...0011 00: 1000 0000 ... 0000 1100, 80 00 00 00 00 00 00 0c);
+    TEST(BitR(0,2);BitN(0x2000000000000003,62), 00 10.0000...0011: 0010 0000 ... 0000 0011, 20 00 00 00 00 00 00 03);
+    TEST(Bit(0);BitN(0x2000000000000003,62);Bit(0), 0 10.0000...0011 0: 0100 0000 ... 0000 0110, 40 00 00 00 00 00 00 06);
+    TEST(Bit(1);BitN(0x1ffffffffffffffc,62);Bit(1), 1 01.1111...1100 1: 1011 1111 ... 1111 1001, bf ff ff ff ff ff ff f9);
+    TEST(Bit(0);BitN(0x23,6);Bit(0), 0 10.0011 0: 0100 0110, 46);
+    TEST(Bit(1);BitN(0x1c,6);Bit(1), 1 01.1100 1: 1011 1001, b9);
+.
