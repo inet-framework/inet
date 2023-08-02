@@ -132,7 +132,7 @@ void Ldp::initialize(int stage)
         EV_INFO << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
         serverSocket.setOutputGate(gate("socketOut"));
         serverSocket.bind(LDP_PORT);
-        serverSocket.listen();
+        serverSocket.listen(false);
 
         // build list of recognized FECs
         rebuildFecList();
@@ -622,7 +622,7 @@ void Ldp::openTCPConnectionToPeer(int peerIndex)
     socketMap.addSocket(socket);
     myPeers[peerIndex].socket = socket;
 
-    socket->connect(myPeers[peerIndex].peerIP, LDP_PORT);
+    socket->connect(myPeers[peerIndex].peerIP, LDP_PORT, false);
 }
 
 void Ldp::socketEstablished(TcpSocket *socket)

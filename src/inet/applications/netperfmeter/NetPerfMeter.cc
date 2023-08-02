@@ -556,7 +556,7 @@ void NetPerfMeter::establishConnection()
         }
         else if (TransportProtocol == TCP) {
             SocketTCP->renewSocket();
-            SocketTCP->connect(L3AddressResolver().resolve(remoteAddress), remotePort);
+            SocketTCP->connect(L3AddressResolver().resolve(remoteAddress), remotePort, false);
         }
         else if (TransportProtocol == UDP) {
             SocketUDP->connect(L3AddressResolver().resolve(remoteAddress), remotePort);
@@ -720,7 +720,7 @@ void NetPerfMeter::createAndBindSocket()
         SocketTCP->setOutputGate(gate("socketOut"));
         SocketTCP->bind(localAddr, localPort);
         if (ActiveMode == false) {
-            SocketTCP->listen();
+            SocketTCP->listen(false);
         }
     }
     else if (TransportProtocol == UDP) {

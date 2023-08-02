@@ -323,7 +323,7 @@ void BgpRouter::listenConnectionFromPeer(SessionId sessionID)
         }
         else
             _BGPSessions[sessionID]->getSocketListen()->bind(TCP_PORT);
-        _BGPSessions[sessionID]->getSocketListen()->listen();
+        _BGPSessions[sessionID]->getSocketListen()->listen(false);
         _socketMap.addSocket(_BGPSessions[sessionID]->getSocketListen());
 
         EV_DEBUG << "Start listening to incoming TCP connections on "
@@ -376,7 +376,7 @@ void BgpRouter::openTCPConnectionToPeer(SessionId sessionID)
     }
     _socketMap.addSocket(socket);
 
-    socket->connect(_BGPSessions[sessionID]->getPeerAddr(), TCP_PORT);
+    socket->connect(_BGPSessions[sessionID]->getPeerAddr(), TCP_PORT, false);
 }
 
 void BgpRouter::socketEstablished(TcpSocket *socket)
