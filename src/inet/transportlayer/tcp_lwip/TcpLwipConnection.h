@@ -87,6 +87,7 @@ class INET_API TcpLwipConnection : public cSimpleModule
     bool isListenerM = false;
     bool onCloseM = false;
     bool sendUpEnabled = false;
+    bool usingTcpWithRead = false;
 
     // statistics
     static simsignal_t sndWndSignal; // snd_wnd

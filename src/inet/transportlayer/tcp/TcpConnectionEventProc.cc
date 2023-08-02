@@ -39,6 +39,7 @@ void TcpConnection::process_OPEN_ACTIVE(TcpEventCode& event, TcpCommand *tcpComm
             remoteAddr = openCmd->getRemoteAddr();
             localPort = openCmd->getLocalPort();
             remotePort = openCmd->getRemotePort();
+            usingTcpWithRead = openCmd->getUsingTcpWithRead();
 
             if (remoteAddr.isUnspecified() || remotePort == -1)
                 throw cRuntimeError(tcpMain, "Error processing command OPEN_ACTIVE: remote address and port must be specified");
@@ -80,6 +81,7 @@ void TcpConnection::process_OPEN_PASSIVE(TcpEventCode& event, TcpCommand *tcpCom
             // store local/remote socket
             state->active = false;
             state->fork = openCmd->getFork();
+            usingTcpWithRead = openCmd->getUsingTcpWithRead();
             localAddr = openCmd->getLocalAddr();
             localPort = openCmd->getLocalPort();
 
@@ -158,15 +160,31 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
 
 void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
+    if (!usingTcpWithRead)
+        throw cRuntimeError("TCP READ arrived, but connection not in usingTcpWithRead");
+    //check whether we have data in the TCP queue. Store how much data the application wants. Check for pending read request.
+    TcpReadCommand *readCmd = check_and_cast<TcpReadCommand *>(tcpCommand);
+    if (readCmd->getNumberOfBytes() <= 0)
+        throw cRuntimeError("illegal argument: numberOfBytes is negative or zero.");
+    if (numBytesRequested != 0)
+        throw cRuntimeError("arrived a second TCP READ before send up any data for first read");
+    numBytesRequested = readCmd->getNumberOfBytes();
     if (isToBeAccepted())
         throw cRuntimeError("READ without ACCEPT");
-    delete msg;
-    Packet *dataMsg;
-    while ((dataMsg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr) {
-        dataMsg->setKind(TCP_I_DATA);
-        dataMsg->addTag<SocketInd>()->setSocketId(socketId);
-        sendToApp(dataMsg);
+
+    if (receiveQueue->getQueueLength() > 0) {
+        uint32_t endSeqNo = state->rcv_nxt;
+        uint32_t requestedEndPos = receiveQueue->getFirstSeqNo() + numBytesRequested;
+        if (seqLess(requestedEndPos, endSeqNo))
+            endSeqNo = requestedEndPos;
+        if (Packet *dataMsg = receiveQueue->extractBytesUpTo(endSeqNo)) {
+            dataMsg->setKind(TCP_I_DATA);
+            dataMsg->addTag<SocketInd>()->setSocketId(socketId);
+            sendToApp(dataMsg);
+            numBytesRequested = 0;
+        }
     }
+    delete msg;
 }
 
 void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
@@ -296,6 +314,7 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
     statusInfo->setRemoteAddr(remoteAddr);
     statusInfo->setLocalPort(localPort);
     statusInfo->setRemotePort(remotePort);
+    statusInfo->setUsingTcpWithRead(usingTcpWithRead);
 
     statusInfo->setSnd_mss(state->snd_mss);
     statusInfo->setSnd_una(state->snd_una);

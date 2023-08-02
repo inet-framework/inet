@@ -106,6 +106,7 @@ void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
     ind->setRemoteAddr(remoteAddr);
     ind->setLocalPort(pcbM->local_port);
     ind->setRemotePort(pcbM->remote_port);
+    ind->setUsingTcpWithRead(usingTcpWithRead);
 
     indication->setControlInfo(ind);
     indication->addTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
@@ -181,6 +182,7 @@ void TcpLwipConnection::fillStatusInfo(TcpStatusInfo& statusInfo)
     statusInfo.setLocalPort(pcbM->local_port);
     statusInfo.setRemoteAddr((pcbM->remote_ip.addr));
     statusInfo.setRemotePort(pcbM->remote_port);
+    statusInfo.setUsingTcpWithRead(usingTcpWithRead);
 
     statusInfo.setSnd_mss(pcbM->mss);
     // TODO    statusInfo.setSnd_una(pcbM->snd_una);

@@ -32,6 +32,7 @@ TcpSocket::TcpSocket(cMessage *msg)
         remoteAddr = availableInfo->getRemoteAddr();
         localPrt = availableInfo->getLocalPort();
         remotePrt = availableInfo->getRemotePort();
+        usingTcpWithRead = availableInfo->getUsingTcpWithRead();
     }
     else if (msg->getKind() == TCP_I_ESTABLISHED) {
         // management of stockstate is left to processMessage() so we always
@@ -44,6 +45,7 @@ TcpSocket::TcpSocket(cMessage *msg)
         remoteAddr = connectInfo->getRemoteAddr();
         localPrt = connectInfo->getLocalPort();
         remotePrt = connectInfo->getRemotePort();
+        usingTcpWithRead = connectInfo->getUsingTcpWithRead();
     }
 }
 
@@ -55,6 +57,7 @@ TcpSocket::TcpSocket(TcpAvailableInfo *availableInfo)
     remoteAddr = availableInfo->getRemoteAddr();
     localPrt = availableInfo->getLocalPort();
     remotePrt = availableInfo->getRemotePort();
+    usingTcpWithRead = availableInfo->getUsingTcpWithRead();
 }
 
 TcpSocket::~TcpSocket()
@@ -92,18 +95,20 @@ void TcpSocket::bind(L3Address lAddr, int lPort)
     sockstate = BOUND;
 }
 
-void TcpSocket::listen(bool fork)
+void TcpSocket::listen(bool fork, bool  usingTcpWithReadPar)
 {
     if (sockstate != BOUND)
         throw cRuntimeError(sockstate == NOT_BOUND ? "TcpSocket: must call bind() before listen()"
                 : "TcpSocket::listen(): connect() or listen() already called");
 
+    usingTcpWithRead = usingTcpWithReadPar;
     auto request = new Request("PassiveOPEN", TCP_C_OPEN_PASSIVE);
 
     TcpOpenCommand *openCmd = new TcpOpenCommand();
     openCmd->setLocalAddr(localAddr);
     openCmd->setLocalPort(localPrt);
     openCmd->setFork(fork);
+    openCmd->setUsingTcpWithRead(usingTcpWithRead);
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
     request->setControlInfo(openCmd);
@@ -119,7 +124,7 @@ void TcpSocket::accept(int socketId)
     sendToTcp(request, socketId);
 }
 
-void TcpSocket::connect(L3Address remoteAddress, int remotePort)
+void TcpSocket::connect(L3Address remoteAddress, int remotePort, bool  usingTcpWithReadPar)
 {
     if (sockstate != NOT_BOUND && sockstate != BOUND)
         throw cRuntimeError("TcpSocket::connect(): connect() or listen() already called (need renewSocket()?)");
@@ -131,17 +136,37 @@ void TcpSocket::connect(L3Address remoteAddress, int remotePort)
 
     remoteAddr = remoteAddress;
     remotePrt = remotePort;
+    usingTcpWithRead = usingTcpWithReadPar;
 
     TcpOpenCommand *openCmd = new TcpOpenCommand();
     openCmd->setLocalAddr(localAddr);
     openCmd->setLocalPort(localPrt);
     openCmd->setRemoteAddr(remoteAddr);
     openCmd->setRemotePort(remotePrt);
+    openCmd->setUsingTcpWithRead(usingTcpWithRead);
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
     request->setControlInfo(openCmd);
     sendToTcp(request);
     sockstate = CONNECTING;
+}
+
+void TcpSocket::read(int32_t numBytes)
+{
+    ASSERT(numBytes > 0);
+
+    //TODO check connection state
+    if (sockstate != CONNECTED && sockstate != CONNECTING && sockstate != PEER_CLOSED && sockstate != LOCALLY_CLOSED)
+        throw cRuntimeError("TcpSocket::read(): socket not connected or connecting, state is %s", stateName(sockstate));
+
+
+    auto request = new Request("Read", TCP_C_READ);
+
+    TcpReadCommand *readCmd = new TcpReadCommand();
+    readCmd->setNumberOfBytes(numBytes);
+
+    request->setControlInfo(readCmd);
+    sendToTcp(request);
 }
 
 void TcpSocket::send(Packet *msg)
@@ -243,7 +268,12 @@ void TcpSocket::sendToTcp(cMessage *msg, int connId)
     auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
     tags.addTagIfAbsent<SocketReq>()->setSocketId(connId == -1 ? this->connId : connId);
-    check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule())->send(msg, gateToTcp);
+    cSimpleModule *senderModule = check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule());
+    senderModule->send(msg, gateToTcp);
+//    {
+//        omnetpp::cMethodCallContextSwitcher __ctx(senderModule);
+//        __ctx.methodCall("TcpSocket::sendToTcp");
+//    }
 }
 
 void TcpSocket::renewSocket()
@@ -265,6 +295,25 @@ bool TcpSocket::isOpen() const
         case LOCALLY_CLOSED:
         case SOCKERROR: // TODO check SOCKERROR is opened or is closed socket
             return true;
+        case NOT_BOUND:
+        case CLOSED:
+            return false;
+        default:
+            throw cRuntimeError("invalid TcpSocket state: %d", sockstate);
+    }
+}
+
+bool TcpSocket::isLocalOpen() const
+{
+    switch (sockstate) {
+        case CONNECTED:
+        case PEER_CLOSED:
+        case LOCALLY_CLOSED:
+            return true;
+        case BOUND:
+        case LISTENING:
+        case CONNECTING:
+        case SOCKERROR: // TODO check SOCKERROR is opened or is closed socket
         case NOT_BOUND:
         case CLOSED:
             return false;

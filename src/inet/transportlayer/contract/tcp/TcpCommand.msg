@@ -119,7 +119,14 @@ class TcpOpenCommand extends TcpCommand
     int localPort = -1;       // required for passive open
     int remotePort = -1;      // required for active open
     bool fork = false;        // used only for passive open
+    bool  usingTcpWithRead = false;   // false: TCP send up data automatically. true: should use read command.
     string tcpAlgorithmClass; // TCP congestion control algorithm; leave empty for default
+}
+
+// Number of bytes to be read
+class TcpReadCommand extends TcpCommand
+{
+    int32_t numberOfBytes;
 }
 
 //
@@ -164,6 +171,7 @@ class TcpAvailableInfo extends TcpCommand
     int localPort;
     int remotePort;
     int newSocketId;
+    bool usingTcpWithRead;
 }
 
 //
@@ -178,6 +186,7 @@ class TcpConnectInfo extends TcpCommand
     L3Address remoteAddr;
     int localPort;
     int remotePort;
+    bool usingTcpWithRead;
 }
 
 //
@@ -196,6 +205,7 @@ class TcpStatusInfo extends TcpCommand
     L3Address remoteAddr;
     int localPort;
     int remotePort;
+    bool usingTcpWithRead;
 
     unsigned int snd_mss;
 

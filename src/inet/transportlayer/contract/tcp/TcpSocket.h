@@ -161,6 +161,8 @@ class INET_API TcpSocket : public ISocket
     L3Address remoteAddr;
     int remotePrt = -1;
 
+    bool  usingTcpWithRead = false;   // false: TCP send up data automatically. true: should use read command.
+
     ICallback *cb = nullptr;
     void *userData = nullptr;
     cGate *gateToTcp = nullptr;
@@ -172,7 +174,7 @@ class INET_API TcpSocket : public ISocket
     void sendToTcp(cMessage *msg, int c = -1);
 
     // internal: implementation behind listen() and listenOnce()
-    void listen(bool fork);
+    void listen(bool fork, bool  usingTcpWithRead);
 
   public:
     /**
@@ -230,6 +232,7 @@ class INET_API TcpSocket : public ISocket
     int getLocalPort() const { return localPrt; }
     L3Address getRemoteAddress() const { return remoteAddr; }
     int getRemotePort() const { return remotePrt; }
+    bool isUsingTcpWithRead() { return usingTcpWithRead; }
     //@}
 
     /** @name Opening and closing connections, sending data */
@@ -274,7 +277,7 @@ class INET_API TcpSocket : public ISocket
      * class can also be useful, and TcpServerHostApp shows how to put it all
      * together. See also TcpOpenCommand documentation (neddoc) for more info.
      */
-    void listen() { listen(true); }
+    void listen(bool  usingTcpWithRead) { listen(true,  usingTcpWithRead); }
 
     /**
      * Initiates passive OPEN to create a non-forking listening connection.
@@ -283,7 +286,7 @@ class INET_API TcpSocket : public ISocket
      *
      * See TcpOpenCommand documentation (neddoc) for more info.
      */
-    void listenOnce() { listen(false); }
+    void listenOnce(bool  usingTcpWithRead) { listen(false,  usingTcpWithRead); }
 
     /**
      * Accepts a new incoming connection reported as available.
@@ -293,8 +296,11 @@ class INET_API TcpSocket : public ISocket
     /**
      * Active OPEN to the given remote socket.
      */
-    void connect(L3Address remoteAddr, int remotePort);
-
+    void connect(L3Address remoteAddr, int remotePort, bool  usingTcpWithRead);
+    /**
+     * sends a read request to TCP
+     */
+    void read(int32_t numBytes);
     /**
      * Sends data packet.
      */
@@ -369,6 +375,9 @@ class INET_API TcpSocket : public ISocket
     void renewSocket();
 
     virtual bool isOpen() const override;
+
+    /// returns true when the socket is locally opened, e.g. send(), read() and close() is acceptable
+    virtual bool isLocalOpen() const;
     //@}
 
     /** @name Handling of messages arriving from TCP */
