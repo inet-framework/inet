@@ -195,6 +195,7 @@ const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const I
     // calulate symbol error rate and corrupt symbols
     auto receivedOfdmSymbols = new std::vector<const ISymbol *>();
     for (int i = 0; i < numOfdmSymbols; i++) {
+        // TODO: look here!
         auto modulation = i == 0 ? headerSubcarrierModulation : dataSubcarrierModulation;
         auto grossBitrate = i == 0 ? headerGrossBitrate : dataGrossBitrate;
         auto transmittedOfdmSymbol = check_and_cast<const Ieee80211OfdmSymbol *>(transmittedSymbols->at(i));
