@@ -60,18 +60,8 @@ void NeuralNetworkErrorModel::initialize(int stage)
         auto v = check_and_cast<cValueArray *>(par("neuralNetworkModelFilenames").objectValue())->asStringVector();
 
         for (auto filename : v) {
-
-            auto index = filename.rfind('/');
-            if (index == std::string::npos)
-                index = 0;
-            else
-                index++;
-            auto modelName = filename.substr(index, filename.rfind('.') - index);
-            EV_INFO << "Loading neural network model " << modelName << std::endl;
-
-            std::string modelFile = "results/" + modelName + ".json";
-            std::cout << "modelfile: " << modelFile << std::endl;
-            models.insert({modelName, fdeep::load_model(modelFile, true, EV_logger)});
+            EV_INFO << "Loading neural network model " << filename << std::endl;
+            models.insert({filename, fdeep::load_model(filename, true, EV_logger)});
         }
     }
 
@@ -90,11 +80,13 @@ double NeuralNetworkErrorModel::computeSignalPartErrorRate(const ISnir *snir) co
 
     auto reception = snir->getReception();
     auto grossBitrate = mode->getGrossBitrate();
+    auto netBitrate = mode->getNetBitrate();
 
-    ASSERT(grossBitrate == Mbps(6));
+    ASSERT(netBitrate == Mbps(6));
+    ASSERT(grossBitrate == Mbps(12)); // 2:1 coding rate
 
     auto subcarrierModulation = modulation->getSubcarrierModulation();
-    auto analogModel = check_and_cast<const NarrowbandSignalAnalogModel*>(reception->getAnalogModel());
+    auto analogModel = check_and_cast<const INarrowbandSignalAnalogModel*>(reception->getAnalogModel());
     auto numSubcarriers = modulation->getNumSubcarriers();
     auto centerFrequency = analogModel->getCenterFrequency();
 
