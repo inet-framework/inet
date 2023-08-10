@@ -1444,7 +1444,7 @@ void TcpConnection::updateRcvQueueVars()
 //    tcpEV << "receiveQ: receiveQLength=" << receiveQueue->getQueueLength() << " maxRcvBuffer=" << state->maxRcvBuffer << " usedRcvBuffer=" << state->usedRcvBuffer << " freeRcvBuffer=" << state->freeRcvBuffer << "\n";
 }
 
-unsigned short TcpConnection::updateRcvWnd()
+uint16_t TcpConnection::updateRcvWnd()
 {
     uint32_t win = 0;
 
@@ -1487,9 +1487,9 @@ unsigned short TcpConnection::updateRcvWnd()
         scaled_rcv_wnd = scaled_rcv_wnd >> state->rcv_wnd_scale;
     }
 
-    ASSERT(scaled_rcv_wnd == (unsigned short)scaled_rcv_wnd);
+    ASSERT(scaled_rcv_wnd == (uint16_t)scaled_rcv_wnd);
 
-    return (unsigned short)scaled_rcv_wnd;
+    return (uint16_t)scaled_rcv_wnd;
 }
 
 void TcpConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways)
