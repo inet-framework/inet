@@ -350,7 +350,7 @@ class INET_API TcpConnection : public cSimpleModule
     /** Utility: update receive window (rcv_wnd), and calculate scaled value if window scaling enabled.
      *  Returns the (scaled) receive window size.
      */
-    virtual unsigned short updateRcvWnd();
+    virtual uint16_t updateRcvWnd();
 
     /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
     virtual void updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways = false);
