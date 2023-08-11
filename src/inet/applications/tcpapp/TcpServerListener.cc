@@ -22,6 +22,7 @@ void TcpServerListener::handleStartOperation(LifecycleOperation *operation)
     serverSocket.setOutputGate(gate("socketOut"));
     serverSocket.setCallback(this);
     serverSocket.bind(localAddress[0] ? L3Address(localAddress) : L3Address(), localPort);
+    serverSocket.setAutoRead(par("autoRead"));
     serverSocket.listen();
     if (!getParentModule()->hasSubmoduleVector(submoduleVectorName))
         throw cRuntimeError("The submodule vector '%s' missing from %s", submoduleVectorName, getParentModule()->getFullPath().c_str());
@@ -30,7 +31,7 @@ void TcpServerListener::handleStartOperation(LifecycleOperation *operation)
 void TcpServerListener::handleStopOperation(LifecycleOperation *operation)
 {
     for (auto connection : connectionSet)
-        connection->getSocket()->close();
+        connection->close();
     serverSocket.close();
     delayActiveOperationFinish(par("stopOperationTimeout"));
 }
@@ -40,7 +41,7 @@ void TcpServerListener::handleCrashOperation(LifecycleOperation *operation)
     while (!connectionSet.empty()) {
         auto connection = *connectionSet.begin();
         // TODO destroy!!!
-        connection->getSocket()->close();
+        connection->close();
         removeConnection(connection);
     }
     // TODO always?
