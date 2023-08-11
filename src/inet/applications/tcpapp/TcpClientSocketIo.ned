@@ -19,6 +19,9 @@ simple TcpClientSocketIo
         int localPort = default(-1);
         string connectAddress;
         int connectPort;
+        bool autoRead = default(true);
+        volatile int readSize @unit(B) = default(-1B);    // used only with autoRead==false 
+        volatile double readDelay @unit(s) = default(-1s);    // used only with autoRead==false, negative delay means immediatelly send a read command, otherwise schedule timer with >= 0 delay for waiting to send a read command  
         @display("i=block/socket");
     gates:
         input trafficIn;

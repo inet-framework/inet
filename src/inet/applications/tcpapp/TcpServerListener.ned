@@ -21,6 +21,8 @@ simple TcpServerListener like IApp
         string localAddress = default(""); // may be left empty ("")
         int localPort = default(1000); // port number to listen on
         string serverConnectionModuleType = default("inet.applications.tcpapp.TcpServerConnection"); // module type of "connection" module to launch on incoming connections
+        bool autoRead = default(true);
+        // this module never receives data, so the readSize and readDelay parameters are unnecesary  
         @display("i=block/server");
     gates:
         input socketIn;

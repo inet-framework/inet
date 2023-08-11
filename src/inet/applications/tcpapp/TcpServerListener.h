@@ -22,7 +22,6 @@ class INET_API TcpServerListener : public ApplicationBase, public TcpSocket::ICa
     std::set<TcpServerSocketIo *> connectionSet;
     static const char *submoduleVectorName;
 
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
 
@@ -47,4 +46,3 @@ class INET_API TcpServerListener : public ApplicationBase, public TcpSocket::ICa
 } // namespace inet
 
 #endif
-
