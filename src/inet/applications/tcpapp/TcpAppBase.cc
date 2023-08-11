@@ -32,6 +32,7 @@ void TcpAppBase::initialize(int stage)
         // parameters
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
+        usingTcpWithRead = par("usingTcpWithRead");
         socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
 
         socket.setCallback(this);
@@ -80,7 +81,7 @@ void TcpAppBase::connect()
     else {
         EV_INFO << "Connecting to " << connectAddress << "(" << destination << ") port=" << connectPort << endl;
 
-        socket.connect(destination, connectPort);
+        socket.connect(destination, connectPort,  usingTcpWithRead);
 
         numSessions++;
         emit(connectSignal, 1L);

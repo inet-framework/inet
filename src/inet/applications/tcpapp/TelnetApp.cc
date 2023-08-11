@@ -25,6 +25,7 @@ Define_Module(TelnetApp);
 TelnetApp::~TelnetApp()
 {
     cancelAndDelete(timeoutMsg);
+    cancelAndDelete(readDelayTimer);
 }
 
 void TelnetApp::checkedScheduleAt(simtime_t t, cMessage *msg)
@@ -46,6 +47,7 @@ void TelnetApp::initialize(int stage)
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         timeoutMsg = new cMessage("timer");
+        readDelayTimer = new cMessage("readDelayTimer");
     }
 }
 
@@ -63,6 +65,7 @@ void TelnetApp::handleStartOperation(LifecycleOperation *operation)
 void TelnetApp::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(timeoutMsg);
+    cancelEvent(readDelayTimer);
     if (socket.isOpen()) {
         close();
         delayActiveOperationFinish(par("stopOperationTimeout"));
@@ -72,11 +75,12 @@ void TelnetApp::handleStopOperation(LifecycleOperation *operation)
 void TelnetApp::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(timeoutMsg);
+    cancelEvent(readDelayTimer);
     if (operation->getRootModule() != getContainingNode(this))
         socket.destroy();
 }
 
-void TelnetApp::handleTimer(cMessage *msg)
+void TelnetApp::handleSenderTimer(cMessage *msg)
 {
     switch (msg->getKind()) {
         case MSGKIND_CONNECT:
@@ -111,6 +115,21 @@ void TelnetApp::handleTimer(cMessage *msg)
     }
 }
 
+void TelnetApp::handleReadTimer(cMessage *msg)
+{
+    socket.read(par("readSize"));
+}
+
+void TelnetApp::handleTimer(cMessage *msg)
+{
+    if (msg == timeoutMsg)
+        handleSenderTimer(msg);
+    else if (msg == readDelayTimer)
+        handleReadTimer(msg);
+    else
+        throw cRuntimeError("Unknown timer arrived");
+}
+
 void TelnetApp::sendGenericAppMsg(int numBytes, int expectedReplyBytes)
 {
     EV_INFO << "sending " << numBytes << " bytes, expecting " << expectedReplyBytes << endl;
@@ -135,6 +154,7 @@ void TelnetApp::socketEstablished(TcpSocket *socket)
     numCharsToType = par("commandLength");
     timeoutMsg->setKind(numLinesToType > 0 ? MSGKIND_SEND : MSGKIND_CLOSE);
     checkedScheduleAt(simTime() + par("thinkTime"), timeoutMsg);
+    sendOrScheduleReadCommandIfNeeded();
 }
 
 void TelnetApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
@@ -156,8 +176,7 @@ void TelnetApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 
         if (numLinesToType == 0) {
             EV_INFO << "user has no more commands to type\n";
-            if (timeoutMsg->isScheduled())
-                cancelEvent(timeoutMsg);
+            cancelEvent(timeoutMsg);
             timeoutMsg->setKind(MSGKIND_CLOSE);
             checkedScheduleAt(simTime() + par("thinkTime"), timeoutMsg);
         }
@@ -169,12 +188,14 @@ void TelnetApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
             }
         }
     }
+    sendOrScheduleReadCommandIfNeeded();
 }
 
 void TelnetApp::socketClosed(TcpSocket *socket)
 {
     TcpAppBase::socketClosed(socket);
     cancelEvent(timeoutMsg);
+    cancelEvent(readDelayTimer);
     if (operationalState == State::OPERATING) {
         // start another session after a delay
         timeoutMsg->setKind(MSGKIND_CONNECT);
@@ -192,8 +213,27 @@ void TelnetApp::socketFailure(TcpSocket *socket, int code)
 
     // reconnect after a delay
     cancelEvent(timeoutMsg);
+    cancelEvent(readDelayTimer);
     timeoutMsg->setKind(MSGKIND_CONNECT);
     checkedScheduleAt(simTime() + par("reconnectInterval"), timeoutMsg);
+}
+
+void TelnetApp::close()
+{
+    cancelEvent(readDelayTimer);
+    TcpAppBase::close();
+}
+
+void TelnetApp::sendOrScheduleReadCommandIfNeeded()
+{
+    if (socket.isUsingTcpWithRead() && socket.isLocalOpen()) {
+        simtime_t delay = par("readDelay");
+        if (delay >= SIMTIME_ZERO)
+            scheduleAfter(delay, readDelayTimer);
+        else
+            // send read message to TCP
+            socket.read(par("readSize"));
+    }
 }
 
 } // namespace inet

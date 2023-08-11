@@ -37,8 +37,33 @@ void TcpServerSocketIo::handleMessage(cMessage *message)
 
 void TcpServerSocketIo::socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent)
 {
+    ASSERT(socket == this->socket);
     packet->removeTag<SocketInd>();
     send(packet, "trafficOut");
+}
+
+void TcpServerSocketIo::socketEstablished(TcpSocket *socket)
+{
+    ASSERT(socket == this->socket);
+    sendOrScheduleReadCommandIfNeeded();
+}
+
+void TcpServerSocketIo::sendOrScheduleReadCommandIfNeeded()
+{
+    if (socket->isUsingTcpWithRead() && socket->isLocalOpen()) {
+        simtime_t delay = par("readDelay");
+        if (delay >= SIMTIME_ZERO) {
+            if (readDelayTimer == nullptr) {
+                readDelayTimer = new cMessage("readDelayTimer");
+                readDelayTimer->setContextPointer(this);
+            }
+            scheduleAfter(delay, readDelayTimer);
+        }
+        else {
+            // send read message to TCP
+            socket->read(par("readSize"));
+        }
+    }
 }
 
 } // namespace inet

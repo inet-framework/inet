@@ -29,6 +29,9 @@ simple TcpGenericServerApp like IApp
     parameters:
         string localAddress = default(""); // local address; may be left empty ("")
         int localPort = default(1000);     // localPort number to listen on
+        bool usingTcpWithRead = default(false);
+        volatile int readSize @unit(B) = default(-1B);    // used only with usingTcpWithRead==true 
+        volatile double readDelay @unit(s) = default(-1s);    // used only with usingTcpWithRead==true, negative delay means immediatelly send a read command, otherwise schedule timer with >= 0 delay for waiting to send a read command  
         double replyDelay @unit(s) = default(0s);
         @display("i=block/app");
         @lifecycleSupport;

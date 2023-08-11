@@ -75,7 +75,7 @@ class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::ICa
     virtual void socketEstablished(TcpSocket *socket) override { established(); }
     virtual void socketPeerClosed(TcpSocket *socket) override { peerClosed(); }
     virtual void socketClosed(TcpSocket *socket) override { hostmod->threadClosed(this); }
-    virtual void socketFailure(TcpSocket *socket, int code) override { failure(code); }
+    virtual void socketFailure(TcpSocket *socket, int code) override { hostmod->removeThread(this); }
     virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { statusArrived(status); }
     virtual void socketDeleted(TcpSocket *socket) override;
 
@@ -88,6 +88,8 @@ class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::ICa
 
     // internal: called by TcpServerHostApp after creating this module
     virtual void init(TcpServerHostApp *hostmodule, TcpSocket *socket) { hostmod = hostmodule; sock = socket; }
+
+    virtual void close() { sock->close(); }
 
     /*
      * Returns the socket object
@@ -118,13 +120,7 @@ class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::ICa
      * Called when the client closes the connection. By default it closes
      * our side too, but it can be redefined to do something different.
      */
-    virtual void peerClosed() { getSocket()->close(); }
-
-    /*
-     * Called when the connection breaks (TCP error). By default it deletes
-     * this thread, but it can be redefined to do something different.
-     */
-    virtual void failure(int code) { hostmod->removeThread(this); }
+    virtual void peerClosed() { close(); }
 
     /*
      * Called when a status arrives in response to getSocket()->getStatus().

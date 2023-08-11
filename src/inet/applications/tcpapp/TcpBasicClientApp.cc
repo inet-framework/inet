@@ -23,6 +23,7 @@ Define_Module(TcpBasicClientApp);
 TcpBasicClientApp::~TcpBasicClientApp()
 {
     cancelAndDelete(timeoutMsg);
+    cancelAndDelete(readDelayTimer);
 }
 
 void TcpBasicClientApp::initialize(int stage)
@@ -40,6 +41,9 @@ void TcpBasicClientApp::initialize(int stage)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         timeoutMsg = new cMessage("timer");
     }
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
+        readDelayTimer = new cMessage("readDelayTimer");
+    }
 }
 
 void TcpBasicClientApp::handleStartOperation(LifecycleOperation *operation)
@@ -54,14 +58,20 @@ void TcpBasicClientApp::handleStartOperation(LifecycleOperation *operation)
 
 void TcpBasicClientApp::handleStopOperation(LifecycleOperation *operation)
 {
-    cancelEvent(timeoutMsg);
+    if (timeoutMsg != nullptr)
+        cancelEvent(timeoutMsg);
+    if (readDelayTimer != nullptr)
+        cancelEvent(readDelayTimer);
     if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
         close();
 }
 
 void TcpBasicClientApp::handleCrashOperation(LifecycleOperation *operation)
 {
-    cancelEvent(timeoutMsg);
+    if (timeoutMsg != nullptr)
+        cancelEvent(timeoutMsg);
+    if (readDelayTimer != nullptr)
+        cancelEvent(readDelayTimer);
     if (operation->getRootModule() != getContainingNode(this))
         socket.destroy();
 }
@@ -128,6 +138,7 @@ void TcpBasicClientApp::socketEstablished(TcpSocket *socket)
         sendRequest();
 
     numRequestsToSend--;
+    sendOrScheduleReadCommandIfNeeded();
 }
 
 void TcpBasicClientApp::rescheduleAfterOrDeleteTimer(simtime_t d, short int msgKind)
@@ -153,6 +164,7 @@ void TcpBasicClientApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool u
             simtime_t d = par("thinkTime");
             rescheduleAfterOrDeleteTimer(d, MSGKIND_SEND);
         }
+        sendOrScheduleReadCommandIfNeeded();
     }
     else if (socket->getState() != TcpSocket::LOCALLY_CLOSED) {
         EV_INFO << "reply to last request arrived, closing session\n";
@@ -163,11 +175,14 @@ void TcpBasicClientApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool u
 void TcpBasicClientApp::close()
 {
     TcpAppBase::close();
-    cancelEvent(timeoutMsg);
+    if (timeoutMsg != nullptr)
+        cancelEvent(timeoutMsg);
+    cancelEvent(readDelayTimer);
 }
 
 void TcpBasicClientApp::socketClosed(TcpSocket *socket)
 {
+    cancelEvent(readDelayTimer);
     TcpAppBase::socketClosed(socket);
 
     // start another session after a delay
@@ -179,12 +194,25 @@ void TcpBasicClientApp::socketClosed(TcpSocket *socket)
 
 void TcpBasicClientApp::socketFailure(TcpSocket *socket, int code)
 {
+    cancelEvent(readDelayTimer);
     TcpAppBase::socketFailure(socket, code);
 
     // reconnect after a delay
     if (timeoutMsg) {
         simtime_t d = par("reconnectInterval");
         rescheduleAfterOrDeleteTimer(d, MSGKIND_CONNECT);
+    }
+}
+
+void TcpBasicClientApp::sendOrScheduleReadCommandIfNeeded()
+{
+    if (socket.isUsingTcpWithRead() && socket.isLocalOpen()) {
+        simtime_t delay = par("readDelay");
+        if (delay >= SIMTIME_ZERO)
+            scheduleAfter(delay, readDelayTimer);
+        else
+            // send read message to TCP
+            socket.read(par("readSize"));
     }
 }
 

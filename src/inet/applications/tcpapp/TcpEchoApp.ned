@@ -20,6 +20,9 @@ simple TcpEchoApp extends TcpServerHostApp
 {
     parameters:
         @class(TcpEchoApp);
+        bool usingTcpWithRead = default(false);
+        volatile int readSize @unit(B) = default(-1B);    // used only with usingTcpWithRead==true 
+        volatile double readDelay @unit(s) = default(-1s);    // used only with usingTcpWithRead==true, negative delay means immediatelly send a read command, otherwise schedule timer with >= 0 delay for waiting to send a read command  
         double echoFactor = default(1);
         double echoDelay @unit(s) = default(0s);
         serverThreadModuleType = default("inet.applications.tcpapp.TcpEchoAppThread"); // module type of "thread" module to launch on incoming connections

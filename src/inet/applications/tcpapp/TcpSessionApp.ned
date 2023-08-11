@@ -78,6 +78,9 @@ simple TcpSessionApp like IApp
         string connectAddress;
         int connectPort = default(1000);
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
+        bool usingTcpWithRead = default(false);
+        volatile int readSize @unit(B) = default(-1B);    // used only with usingTcpWithRead==true 
+        volatile double readDelay @unit(s) = default(-1s);    // used only with usingTcpWithRead==true, negative delay means immediatelly send a read command, otherwise schedule timer with >= 0 delay for waiting to send a read command  
         double tOpen @unit(s) = default(1s);
         double tSend @unit(s) = default(1s);
         int sendBytes @unit(B) = default(1MiB);
