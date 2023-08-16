@@ -194,7 +194,7 @@
 
 /showcases/wireless/analogmodel/,     -f omnetpp.ini -c Routing -r 0,                5s,         56b0-3510/tplx;baeb-0d2c/~tNl;7ae8-89ba/~tND;38b7-f1c9/tyf, PASS,    wireless Ipv4
 /showcases/wireless/analogmodel/,     -f omnetpp.ini -c Distance -r 0,                2.5s,         1e75-270e/tplx;6d7a-d84c/~tNl;9ccb-a57b/~tND;5a09-9640/tyf, PASS,    wireless Ipv4
-/showcases/wireless/analogmodel/,     -f omnetpp.ini -c Noise -r 0,                0.1s,         dd08-a63c/tplx;e167-9c84/~tNl;9dad-dc30/~tND;f6e7-f392/tyf, PASS,    wireless Ipv4
+/showcases/wireless/analogmodel/,     -f omnetpp.ini -c Noise -r 0,                0.1s,         dd08-a63c/tplx;9a96-9c6f/~tNl;5bac-e267/~tND;f6e7-f392/tyf, PASS,    wireless Ipv4
 
 /showcases/wireless/blockack/,     -f omnetpp.ini -c NoFragmentation -r 0,                                        1s,            aa2d-5d35/tplx;2094-1f2a/~tNl;4e02-c64f/~tND, PASS,    wireless Ipv4
 /showcases/wireless/blockack/,     -f omnetpp.ini -c Fragmentation -r 0,                                          1s,            7ae9-e07d/tplx;db8b-3b81/~tNl;7c5e-90dc/~tND, PASS,    wireless Ipv4
