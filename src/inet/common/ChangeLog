@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2023-08-24  Rudolf Hornig
+
+	Compat.h: added missing INET_API macros that caused a linker error on Windows
+
+	Some header files had to be rearranged. Note: Compat.h is meant to be
+	included automatically by INETDefs.h so it should not be included
+	manually in any files (except Compat.cc)
+
 2023-04-04  ------ inet-4.5.0 released ------
 
 2023-03-27  André Apitzsch
