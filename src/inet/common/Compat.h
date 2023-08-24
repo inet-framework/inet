@@ -39,7 +39,7 @@ typedef int sharedcounterhandle_t;
  * This class encapsulates the "simulation-global variables" functionality which became
  * part of the cSimulation class in OMNeT++ 7.0.
  */
-class SharedDataManager : public omnetpp::cISimulationLifecycleListener
+class INET_API SharedDataManager : public omnetpp::cISimulationLifecycleListener
 {
   private:
     struct SharedDataHandles {
@@ -186,7 +186,7 @@ T& SharedDataManager::getSharedVariable(int handle, Args&&... args)
  * Supporting class for EXECUTE_PRE_NETWORK_SETUP() / EXECUTE_POST_NETWORK_DELETE(),
  * which didn't exist prior to OMNeT++ 7.0.
  */
-class CodeFragment
+class INET_API CodeFragment
 {
   private:
     omnetpp::SimulationLifecycleEventType lifecycleEvent;

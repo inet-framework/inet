@@ -5,6 +5,7 @@
 //
 
 
+#include "inet/common/INETDefs.h"
 #include "inet/common/Compat.h"
 
 namespace inet {

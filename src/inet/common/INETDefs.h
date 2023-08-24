@@ -25,8 +25,6 @@
 // General definitions.
 //
 
-#include "inet/common/Compat.h"
-
 namespace inet {
 using namespace omnetpp;
 } // namespace inet
@@ -46,6 +44,7 @@ using namespace omnetpp;
 #define INET_API
 #endif // if defined(INET_EXPORT)
 
+#include "inet/common/Compat.h"
 #include "inet/common/InitStages.h"
 
 // main namespace of INET framework
