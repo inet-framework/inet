@@ -93,10 +93,10 @@ void GateScheduleCanvasVisualizer::refreshGateVisualization(const GateVisualizat
         auto scheduleDisplayEnd = scheduleDisplayStart + displayDuration;
         int indexStart = (int)std::floor(scheduleDisplayStart.dbl() / scheduleDuration.dbl()) * numDurations;
         int indexEnd = (int)std::ceil(scheduleDisplayEnd.dbl() / scheduleDuration.dbl()) * numDurations;
-        clocktime_t displayTime = currentTime - schedulePosition + indexStart / durations.size() * scheduleDuration;
+        clocktime_t displayTime = currentTime - schedulePosition + indexStart / numDurations * scheduleDuration;
         figure->clearSchedule();
         for (int i = indexStart; i <= indexEnd; i++) {
-            auto duration = durations[(i + durations.size()) % durations.size()];
+            auto duration = durations[(i + numDurations) % numDurations];
             clocktime_t startTime = displayTime - currentTime;
             clocktime_t endTime = displayTime + duration - currentTime;
             double factor = width / displayDuration.dbl();
