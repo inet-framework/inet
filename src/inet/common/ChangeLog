@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2023-06-01  Levente Mészáros
+
+	ThroughputFilter: Fixed the 0 time interval case when emitting the
+	throughput.
+
+	Previously the filter emitted 0 but now it either emits nan or inf
+	depending on what is the value of totalLength.
+
+2023-05-09  Levente Mészáros
+
+	ModuleRefByGate: Fixed infinite recursion.
+
 2023-08-24  ------ inet-4.5.1 released ------
 
 2023-08-24  Rudolf Hornig

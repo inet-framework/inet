@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2023-04-25  Levente Mészáros
+
+	StreamBufferChunkSerializer: Fixed padding with 0s after the
+	currentStreamPosition.
+
 2023-08-24  ------ inet-4.5.1 released ------
 
 2023-04-04  ------ inet-4.5.0 released ------

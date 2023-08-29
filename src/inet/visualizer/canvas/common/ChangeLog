@@ -1,5 +1,23 @@
 ====== inet-4.x ======
 
+2023-08-29  Andras Varga
+
+	GateScheduleCanvasVisualizer: fix runtime error on Windows
+
+	The "displayTime=..." line produced simtime overflow error, because
+	indexStart was bogus a huge positive integer.
+
+	It was computed as:
+
+	auto indexStart = (int)... * durations.size();
+
+	which is signed * unsigned multiplication, whose result was signed on
+	Linux, and unsigned on Windows.
+
+	Workaround: factor out durations.size() as int numDurations, to eliminate
+	mixed-sign multiplications in the code. Also, make indexStart / indexEnd
+	explicit signed int.
+
 2023-08-24  ------ inet-4.5.1 released ------
 
 2023-04-04  ------ inet-4.5.0 released ------

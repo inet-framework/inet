@@ -1,5 +1,26 @@
 ====== inet-4.x ======
 
+2023-05-05  Zoltan Bojthe
+
+	VoipStreamSender: padding last frame when the sending will be repeating
+	from start
+
+2023-05-03  Zoltan Bojthe
+
+	Fixup: set frame_size in pEncoderCtx.
+
+	Required for g726 codec in libavcodec: 60.3.100. Tested with libavcodec:
+	59.37.100, too.
+
+2023-04-27  Zoltan Bojthe
+
+	VoipStreamSender: Use swr_alloc_set_opts2() instead of many
+	av_opt_set_int()
+
+	More verbose error messages
+
+	Replace deprecated code
+
 2023-08-24  ------ inet-4.5.1 released ------
 
 2023-04-04  ------ inet-4.5.0 released ------

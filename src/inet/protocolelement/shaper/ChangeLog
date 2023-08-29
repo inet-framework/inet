@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2023-05-12  Philipp Meyer
+
+	EligibilityTimeMeter: Fixed number of token statistic to not have
+	negative values.
+
+	Previously if the rate of incoming traffic was higher than the rate of
+	outgoing traffic, the number of tokens statistic could be negative which
+	doesn't really make sense. The number of tokens statistics is created by
+	emitting values into the future such that a sawtooth pattern is created.
+	The actual behavior of the ATS is not influenced by this change because
+	the number of tokens is just a derived statistic for a virtual token
+	bucket.
+
 2023-08-24  ------ inet-4.5.1 released ------
 
 2023-04-04  ------ inet-4.5.0 released ------

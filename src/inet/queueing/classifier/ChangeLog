@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2023-05-08  Levente Mészáros
+
+	Fixed incorrectly used getPathStartGate/getPathEndGate.
+
 2023-08-24  ------ inet-4.5.1 released ------
 
 2023-04-04  ------ inet-4.5.0 released ------
@@ -40,7 +44,7 @@
 
 2021-06-03  Levente Mészáros
 
-    Added TokenBucketClassifier, MultiTokenBucketClassifier, SingleRateTwoColorClassifier,
+	Added TokenBucketClassifier, MultiTokenBucketClassifier, SingleRateTwoColorClassifier,
 	SingleRateThreeColorClassifier, and DualRateThreeColorClassifier modules.
 
 2021-03-19  Zoltan Bojthe
