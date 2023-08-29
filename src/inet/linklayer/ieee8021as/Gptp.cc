@@ -486,62 +486,67 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
     emit(peerDelaySignal, CLOCKTIME_AS_SIMTIME(peerDelay));
 }
 
-void Gptp::receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details)
+void Gptp::receiveSignal(cComponent *source, simsignal_t ethernetEvent, cObject *obj, cObject *details)
 {
-    Enter_Method("%s", cComponent::getSignalName(signal));
+    Enter_Method("%s", cComponent::getSignalName(ethernetEvent));
 
-    if (signal == receptionEndedSignal) {
-        auto signal = check_and_cast<cPacket *>(obj);
-        auto packet = check_and_cast_nullable<Packet *>(signal->getEncapsulatedPacket());
-        if (packet) {
-            auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-            if (*protocol == Protocol::ethernetPhy) {
-                const auto& ethPhyHeader = packet->peekAtFront<physicallayer::EthernetPhyHeader>();
-                const auto& ethMacHeader = packet->peekDataAt<EthernetMacHeader>(ethPhyHeader->getChunkLength());
-                if (ethMacHeader->getTypeOrLength() == ETHERTYPE_GPTP) {
-                    const auto& gptp = packet->peekDataAt<GptpBase>(ethPhyHeader->getChunkLength() + ethMacHeader->getChunkLength());
-                    if (gptp->getDomainNumber() == domainNumber)
-                        packet->addTagIfAbsent<GptpIngressTimeInd>()->setArrivalClockTime(clock->getClockTime());
-                }
-            }
-        }
+    if (ethernetEvent != receptionEndedSignal && ethernetEvent != transmissionEndedSignal) {
+        return;
     }
-    else if (signal == transmissionEndedSignal) {
-        auto signal = check_and_cast<cPacket *>(obj);
-        auto packet = check_and_cast_nullable<Packet *>(signal->getEncapsulatedPacket());
-        if (packet) {
-            auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-            if (*protocol == Protocol::ethernetPhy) {
-                const auto& ethPhyHeader = packet->peekAtFront<physicallayer::EthernetPhyHeader>();
-                const auto& ethMacHeader = packet->peekDataAt<EthernetMacHeader>(ethPhyHeader->getChunkLength());
-                if (ethMacHeader->getTypeOrLength() == ETHERTYPE_GPTP) {
-                    const auto& gptp = packet->peekDataAt<GptpBase>(ethPhyHeader->getChunkLength() + ethMacHeader->getChunkLength());
-                    if (gptp->getDomainNumber() == domainNumber) {
-                        int portId = getContainingNicModule(check_and_cast<cModule*>(source))->getInterfaceId();
-                        switch (gptp->getMessageType()) {
-                            case GPTPTYPE_PDELAY_RESP: {
-                                auto gptpResp = dynamicPtrCast<const GptpPdelayResp>(gptp);
-                                sendPdelayRespFollowUp(portId, gptpResp.get());
-                                break;
-                            }
-                            case GPTPTYPE_SYNC: {
-                                auto gptpSync = dynamicPtrCast<const GptpSync>(gptp);
-                                sendFollowUp(portId, gptpSync.get(), clock->getClockTime());
-                                break;
-                            }
-                            case GPTPTYPE_PDELAY_REQ:
-                                if (portId == slavePortId)
-                                    pdelayReqEventEgressTimestamp = clock->getClockTime();
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                }
-            }
-        }
+
+    auto signal = check_and_cast<cPacket *>(obj);
+    auto packet = check_and_cast_nullable<Packet *>(signal->getEncapsulatedPacket());
+    if (!packet) {
+        return;
+    }
+
+    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+    if (*protocol != Protocol::ethernetPhy) {
+        return;
+    }
+
+    const auto& ethPhyHeader = packet->peekAtFront<physicallayer::EthernetPhyHeader>();
+    const auto& ethMacHeader = packet->peekDataAt<EthernetMacHeader>(ethPhyHeader->getChunkLength());
+    if (ethMacHeader->getTypeOrLength() != ETHERTYPE_GPTP) {
+        return;
+    }
+
+    b offset = ethPhyHeader->getChunkLength() + ethMacHeader->getChunkLength();
+    auto &gptp = packet->peekDataAt<GptpBase>(offset);
+
+    if (gptp->getDomainNumber() != domainNumber) {
+        return;
+    }
+
+    if (ethernetEvent == receptionEndedSignal)
+        packet->addTagIfAbsent<GptpIngressTimeInd>()->setArrivalClockTime(clock->getClockTime());
+    else if (ethernetEvent == transmissionEndedSignal) {
+        handleDelayOrSendFollowUp(gptp.get(), source);
     }
 }
 
+
+void Gptp::handleDelayOrSendFollowUp(const GptpBase *gptp, cComponent *source) {
+    int portId = getContainingNicModule(check_and_cast<cModule*>(source))->getInterfaceId();
+
+    switch (gptp->getMessageType()) {
+    case GPTPTYPE_PDELAY_RESP: {
+        auto gptpResp = static_cast<const GptpPdelayResp*>(gptp);
+        sendPdelayRespFollowUp(portId, gptpResp);
+        break;
+    }
+    case GPTPTYPE_SYNC: {
+        auto gptpSync = static_cast<const GptpSync*>(gptp);
+        sendFollowUp(portId, gptpSync, clock->getClockTime());
+        break;
+    }
+    case GPTPTYPE_PDELAY_REQ:
+        if (portId == slavePortId)
+            pdelayReqEventEgressTimestamp = clock->getClockTime();
+        break;
+    default:
+        break;
+    }
+}
 }
 
