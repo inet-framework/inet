@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2023-08-29  ------ inet-4.5.2 released ------
+
 2023-04-27  Levente Mészáros
 
 	Gptp: Fixed interpolationmode parameter value.
