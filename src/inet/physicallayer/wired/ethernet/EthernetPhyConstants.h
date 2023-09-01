@@ -16,6 +16,7 @@ namespace physicallayer {
 
 using namespace inet::units::values;
 const B ETHERNET_PHY_HEADER_LEN = B(8);
+const B ETHERNET_PHY_ESD_LEN = B(1);
 
 } // namespace physicallayer
 } // namespace inet
