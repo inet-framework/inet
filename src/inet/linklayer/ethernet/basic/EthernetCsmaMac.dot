@@ -1,0 +1,27 @@
+digraph EthernetCsmaMac {
+    nodesep = 1;
+    ranksep = 1;
+    node [shape=box, style="rounded,filled", color="#ECECEC", fontname="Arial", margin=0.15, height=1, width=3];
+    edge [fontname="Arial", labeldistance=22.5];
+
+    IDLE [label="IDLE", fillcolor="#FFD966"];
+    TRANSMITTING [label="TRANSMITTING", fillcolor="#70AD47"];
+    RECEIVING [label="RECEIVING", fillcolor="#5B9BD5"];
+    WAIT_IFG [label="WAIT_IFG", fillcolor="#FCD5B4"];
+    JAMMING [label="JAMMING", fillcolor="#ED7D31"];
+    BACKOFF [label="BACKOFF", fillcolor="#A6A6A6"];
+
+    IDLE -> TRANSMITTING [label="UPPER_PACKET"];
+    IDLE -> RECEIVING [label="CARRIER_SENSE_START"];
+    WAIT_IFG -> TRANSMITTING [label="IFG_END_AND_HAS_CURRENT_TX / IFG_END_AND_QUEUE_NOT_EMPTY"];
+    WAIT_IFG -> IDLE [label="IFG_END_AND_QUEUE_EMPTY"];
+    WAIT_IFG -> RECEIVING [label="CARRIER_SENSE_START"];
+    TRANSMITTING -> WAIT_IFG [label="TX_END"];
+    TRANSMITTING -> JAMMING [label="COLLISION_START"];
+    JAMMING -> BACKOFF [label="JAM_END"];
+    BACKOFF -> WAIT_IFG [label="BACKOFF_END_AND_NOT_CARRIER_SENSE"];
+    BACKOFF -> RECEIVING [label="BACKOFF_END_AND_CARRIER_SENSE"];
+    BACKOFF -> BACKOFF [label="LOWER_PACKET"];
+    RECEIVING -> RECEIVING [label="LOWER_PACKET"];
+    RECEIVING -> WAIT_IFG [label="CARRIER_SENSE_END"];
+}
