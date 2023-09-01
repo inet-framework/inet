@@ -52,7 +52,7 @@ Packet *PacketQueueBase::dequeuePacket()
 
 void PacketQueueBase::emit(simsignal_t signal, cObject *object, cObject *details)
 {
-    if (signal == packetPushedSignal)
+    if (signal == packetPushedSignal || signal == packetPushStartedSignal)
         numPushedPackets++;
     else if (signal == packetPulledSignal)
         numPulledPackets++;
