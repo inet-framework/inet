@@ -10,7 +10,9 @@
 
 #include "inet/common/FSMA.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ethernet/base/EthernetModes.h"
 #include "inet/linklayer/ethernet/basic/IEthernetCsmaMac.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wired/ethernet/EthernetSignal_m.h"
 #include "inet/physicallayer/wired/ethernet/IEthernetCsmaPhy.h"
 
@@ -129,6 +131,7 @@ class INET_API EthernetPlca : public cSimpleModule, public virtual IEthernetCsma
     std::string tx_cmd = "NONE"; // possible values "NONE", "BEACON", "COMMIT"
 
     // additional state variables
+    const EthernetModes::EthernetMode *mode = nullptr;
     simtime_t macStartFrameTransmissionTime = -1;
     simtime_t phyStartFrameTransmissionTime = -1;
     bool old_carrier_sense_signal = false;
