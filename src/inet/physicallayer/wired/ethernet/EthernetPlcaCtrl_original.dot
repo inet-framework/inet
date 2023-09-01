@@ -1,0 +1,185 @@
+digraph EthernetPlcaCtrl {
+    nodesep = 1;
+    ranksep = 1;
+
+    graph [
+		label = "EthernetPlcaCtrl"
+		labelloc = t
+		fontname = "Helvetica,Arial,sans-serif"
+		fontsize = 20
+		layout = dot
+		newrank = true
+    ];
+    node [
+		style=filled
+		shape=rect
+		pencolor="#00000044" // frames color
+		fontname="Helvetica,Arial,sans-serif"
+		shape=plain
+    ];
+    edge [fontname="Arial"];
+
+    Global1 [ shape=circle ]
+    Global1 -> DISABLED [label="plca_reset || (!plca_en) || (local_nodeID == 255)"]; 
+
+    DISABLED [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                DISABLED
+            </td></tr><tr><td align="left" balign="left">
+                tx_cmd := NONE <br/>
+                committed := FALSE  <br/>
+                curID := 0 <br/>
+                plca_active := FALSE
+            </td></tr></table>>
+    ];
+    DISABLED -> RECOVER [label="plca_en \n && (local_nodeID != 0)"];
+    DISABLED -> RESYNC [label="plca_en \n && (local_nodeID != 0) \n && (local_nodeID != 255)"];
+
+    Global2 [ shape=circle ]
+    Global2 -> RESYNC [label="invalid_beacon_timer_done"]; 
+
+    RESYNC [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                RESYNC
+            </td></tr><tr><td align="left" balign="left">
+                plca_active := FALSE
+            </td></tr></table>>;
+    ];
+    RESYNC -> EARLY_RECEIVE [label="(local_nodeID != 0) \n && CRS"];
+    RESYNC -> SEND_BEACON [label="PMCD \n && (!CRS) \n && (local_nodeID == 0)"];
+
+    RECOVER [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                RECOVER
+            </td></tr><tr><td align="left" balign="left">
+                plca_active := FALSE
+            </td></tr></table>>;
+    ];
+    RECOVER -> WAIT_TO [label="TRUE"];
+
+    SEND_BEACON [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                SEND_BEACON
+            </td></tr><tr><td align="left" balign="left">
+                start beacon_timer <br/>
+                tx_cmd := BEACON <br/>
+                plca_active := TRUE
+            </td></tr></table>>;
+    ];
+    SEND_BEACON -> SYNCING [label="beacon_timer_done"];
+
+    SYNCING [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                SYNCING
+            </td></tr><tr><td align="left" balign="left">
+                curID := 0 <br/>
+                tx_cmd := NONE <br/>
+                plca_active := TRUE <br/>
+                IF (local_nodeID != 0 &amp;&amp; rx_cmd != BEACON) THEN <br/>
+                .   start invalid_beacon_timer <br/>
+                END
+            </td></tr></table>>
+    ];
+    SYNCING -> WAIT_TO [label="!CRS"];
+
+    WAIT_TO [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                WAIT_TO
+            </td></tr><tr><td align="left" balign="left">
+                start to_timer
+            </td></tr></table>>
+    ];
+    WAIT_TO -> EARLY_RECEIVE [label="CRS"];
+    WAIT_TO -> COMMIT [label="plca_active \n && (curID == local_nodeID) \n && packetPending \n && (!CRS)"];
+    WAIT_TO -> NEXT_TX_OPPORTUNITY [label="to_timer_done && \n (curID != local_nodeID) \n && (!CRS)"];
+    WAIT_TO -> YIELD [label="(curID == local_nodeID) \n && ((!packetPending) \n || (!plca_active)) \n && (!CRS)"];
+
+    EARLY_RECEIVE [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                EARLY_RECEIVE
+            </td></tr><tr><td align="left" balign="left">
+                stop to_timer <br/>
+                start beacon_det_timer
+            </td></tr></table>>
+    ];
+    EARLY_RECEIVE -> SYNCING [label="(local_nodeID != 0) \n && (!receiving) \n && ((rx_cmd == BEACON) \n || ((!CRS) \n && beacon_det_timer_not_done))"];
+    EARLY_RECEIVE -> RESYNC [label="(!CRS) \n && (local_nodeID != 0) \n && (rx_cmd != BEACON) \n && beacon_det_timer_done"];
+    EARLY_RECEIVE -> RECOVER [label="(!CRS) \n && (local_nodeID == 0)"];
+    EARLY_RECEIVE -> RECEIVE [label="receiving \n && CRS"];
+
+    COMMIT [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                COMMIT
+            </td></tr><tr><td align="left" balign="left">
+                tx_cmd := COMMIT <br/>
+                committed := TRUE <br/>
+                stop to_timer <br/>
+                bc := 0
+            </td></tr></table>>
+    ];
+    COMMIT -> TRANSMIT [label="TX_EN"];
+    COMMIT -> ABORT [label="(!TX_EN) \n && (!packetPending)"];
+
+    YIELD [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                YIELD
+            </td></tr><tr><td align="left" balign="left">
+            </td></tr></table>>
+    ];
+    YIELD -> EARLY_RECEIVE [label="CRS \n && to_timer_not_done"];
+    YIELD -> NEXT_TX_OPPORTUNITY [label="to_timer_done"];
+
+    RECEIVE [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                RECEIVE
+            </td></tr><tr><td align="left" balign="left">
+            </td></tr></table>>
+    ];
+    RECEIVE -> NEXT_TX_OPPORTUNITY [label="!CRS"];
+
+    TRANSMIT [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                TRANSMIT
+            </td></tr><tr><td align="left" balign="left">
+                tx_cmd := NONE <br/>
+                IF bc &gt;= max_bc THEN <br/>
+                .   committed := FALSE <br/>
+                END
+            </td></tr></table>>
+    ];
+    TRANSMIT -> NEXT_TX_OPPORTUNITY [label="(!TX_EN) \n && (!CRS) \n && (bc >= max_bc)"];
+    TRANSMIT -> BURST [label="(!TX_EN) \n && (bc < max_bc)"];
+
+    BURST [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                BURST
+            </td></tr><tr><td align="left" balign="left">
+                bc := bc + 1 <br/>
+                tx_cmd := COMMIT <br/>
+                start burst_timer
+            </td></tr></table>>
+    ];
+    BURST -> TRANSMIT [label="TX_EN"];
+    BURST -> ABORT [label="(!TX_EN) \n && burst_timer_done"];
+
+    NEXT_TX_OPPORTUNITY [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                NEXT_TX_OPPORTUNITY
+            </td></tr><tr><td align="left" balign="left">
+                curID := curID + 1 <br/>
+                committed := FALSE
+            </td></tr></table>>
+    ];
+    NEXT_TX_OPPORTUNITY -> RESYNC [label="((local_nodeID == 0) \n && (curID >= plca_node_count)) \n || (curID == 255)"];
+    NEXT_TX_OPPORTUNITY -> WAIT_TO [label="ELSE"];
+
+    ABORT [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                ABORT
+            </td></tr><tr><td align="left" balign="left">
+                tx_cmd := NONE
+            </td></tr></table>>
+    ];
+    ABORT -> NEXT_TX_OPPORTUNITY [label="!CRS"];
+}
+

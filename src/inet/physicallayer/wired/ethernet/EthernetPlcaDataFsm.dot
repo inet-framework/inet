@@ -1,0 +1,28 @@
+digraph EthernetPlcaDataFsm {
+    nodesep = 1;
+    ranksep = 1;
+    node [shape=box, style="rounded,filled", color="#ECECEC", fontname="Arial", margin=0.15, height=1, width=3];
+    edge [fontname="Arial"];
+
+    IDLE;
+    RECEIVE;
+    HOLD;
+    COLLIDE;
+    DELAY_PENDING;
+    PENDING;
+    WAIT_MAC;
+    TRANSMIT;
+
+    IDLE -> HOLD [label="START_FRAME_TRANSMISSION"];
+    IDLE -> RECEIVE [label="RECEPTION_START"];
+    RECEIVE -> IDLE [label="RECEPTION_END"];
+    RECEIVE -> COLLIDE [label="START_FRAME_TRANSMISSION"];
+    HOLD -> COLLIDE [label="DELAY_LINE_TIMER_EXPIRED"];
+    HOLD -> COLLIDE [label="RECEPTION_START"];
+    HOLD -> TRANSMIT [label="COMMIT_TO"];
+    COLLIDE -> DELAY_PENDING [label="END_JAM_TRANSMISSION"];
+    DELAY_PENDING -> PENDING [label="PENDING_TIMER_EXPIRED"];
+    PENDING -> WAIT_MAC [label="COMMIT_TO"];
+    WAIT_MAC -> TRANSMIT [label="START_FRAME_TRANSMISSION"];
+    TRANSMIT -> IDLE [label="TX_TIMER_EXPIRED"];
+}
