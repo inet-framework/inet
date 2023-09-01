@@ -299,6 +299,7 @@ void EthernetCsmaPhy::startFrameTransmission(Packet *packet, EthernetEsdType esd
     ASSERT(!currentTxSignal);
     EV_DEBUG << "Starting frame transmission" << EV_FIELD(packet) << EV_ENDL;
     take(packet);
+    packet->clearTags();
     encapsulate(packet);
     auto signal = new EthernetSignal(packet->getName());
     signal->setKind(DATA);
