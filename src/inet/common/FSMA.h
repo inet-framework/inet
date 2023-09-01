@@ -44,7 +44,7 @@ namespace inet {
     bool ___is_event = true;
     bool ___exit = false;
     int ___c = 0;
-    cFSM& ___fsm = fsm;
+    Fsm& ___fsm = fsm;
     while (!___exit && (___c++ < FSM_MAXT || (throw cRuntimeError(E_INFLOOP, ___fsm.getStateName())))
     {
         if (transition_seen = false, ___exit = true, ___fsm.getState() == X)
@@ -88,12 +88,155 @@ namespace inet {
     }
  */
 
+class SIM_API Fsm : public cOwnedObject
+{
+  private:
+    //
+    // About state codes:
+    //  initial state is number 0
+    //  negative state codes are transient states
+    //  positive state codes are steady states
+    //
+    int state = 0;
+    const char *stateName = "INIT";   // just a ptr to an external string
+    simsignal_t stateChangedSignal = -1;
+
+  public:
+    std::vector<std::function<void ()>> delayedActions;
+    bool busy = false;
+
+  private:
+    void copy(const Fsm& other) {
+        stateName = other.stateName;
+        state = other.state;
+    }
+
+    virtual void parsimPack(cCommBuffer *) const override {throw cRuntimeError(this, E_CANTPACK);}
+    virtual void parsimUnpack(cCommBuffer *) override {throw cRuntimeError(this, E_CANTPACK);}
+
+  public:
+    /** @name Constructors, destructor, assignment. */
+    //@{
+
+    /**
+     * Constructor.
+     */
+    explicit Fsm(const char *name=nullptr) :
+        cOwnedObject(name)
+    {
+    }
+
+    /**
+     * Copy constructor.
+     */
+    Fsm(const Fsm& other) : cOwnedObject(other) {copy(other);}
+
+    /**
+     * Assignment operator. The name member is not copied;
+     * see cOwnedObject's operator=() for more details.
+     */
+    Fsm& operator=(const Fsm& vs) {
+        if (this == &vs)
+            return *this;
+        cOwnedObject::operator=(vs);
+        copy(vs);
+        return *this;
+    }
+    //@}
+
+    /** @name Redefined cObject member functions. */
+    //@{
+
+    /**
+     * Creates and returns an exact copy of this object.
+     * See cObject for more details.
+     */
+    virtual Fsm *dup() const override  {return new Fsm(*this);}
+
+    /**
+     * Produces a one-line description of the object's contents.
+     * See cObject for more details.
+     */
+    virtual std::string str() const override {
+        std::stringstream out;
+        if (!stateName)
+            out << "state: " << state;
+        else
+            out << "state: " << stateName << " (" << state << ")";
+        return out.str();
+    }
+    //@}
+
+    /** @name FSM functions. */
+    //@{
+
+    void setStateChangedSignal(simsignal_t stateChangedSignal) {
+        this->stateChangedSignal = stateChangedSignal;
+    }
+
+    /**
+     * Returns the state the FSM is currently in.
+     */
+    int getState() const  {return state;}
+
+    /**
+     * Returns the name of the state the FSM is currently in.
+     */
+    const char *getStateName() const {return stateName?stateName:"";}
+
+    /**
+     * Sets the state of the FSM. This method is usually invoked through
+     * the FSM_Goto() macro.
+     *
+     * The first arg is the state code. The second arg is the name of the state.
+     * setState() assumes this is pointer to a string literal (the string is
+     * not copied, only the pointer is stored).
+     *
+     * @see FSM_Goto
+     */
+    void setState(int state, const char *stateName) {
+        this->state = state;
+        this->stateName = stateName;
+        if (stateChangedSignal != -1)
+            getActiveSimulationOrEnvir()->getContextModule()->emit(stateChangedSignal, state);
+    }
+
+    void insertDelayedAction(std::function<void ()> action) {
+        delayedActions.push_back(action);
+    }
+
+    void executeDelayedActions() {
+        auto actions = delayedActions;
+        delayedActions.clear();
+        for (auto action : actions)
+            action();
+    }
+    //@}
+};
+
+class FsmContext
+{
+  private:
+    Fsm& fsm;
+
+  public:
+    FsmContext(Fsm& fsm) : fsm(fsm) {
+        ASSERT(!fsm.busy);
+        fsm.busy = true;
+    }
+    ~FsmContext() {
+        fsm.busy = false;
+    }
+};
+
 #define FSMA_Switch(fsm) \
+    Fsm& ___fsm = (fsm); \
+    ASSERT(___fsm.delayedActions.empty()); \
+    FsmContext fsmContext(___fsm); \
     bool ___is_event = true; \
     bool ___exit = false; \
     bool ___transition_seen = false; (void)___transition_seen; \
     int ___c = 0; \
-    cFSM& ___fsm = (fsm); \
     bool ___logging = true; \
     if (___logging) EV_DEBUG << "FSM " << ___fsm.getName() << ": processing event in state " << ___fsm.getStateName() << "\n"; \
     while (!___exit && (___c++ < FSM_MAXT || (throw cRuntimeError(E_INFLOOP, ___fsm.getStateName()), 0)))
@@ -152,8 +295,11 @@ namespace inet {
 #define FSMA_Fail_On_Unhandled_Event() \
     ___transition_seen = true; if (___is_event) \
     { \
-        throw cRuntimeError(&___fsm, "Unhandled event"); \
+        throw cRuntimeError(&___fsm, "Unhandled event in state %s", ___fsm.getStateName()); \
     }
+
+#define FSMA_Delay_Action(body) \
+    ___fsm.insertDelayedAction([=] () { body; });
 
 } // namespace inet
 
