@@ -77,6 +77,7 @@ void CsmaCaMac::initialize(int stage)
         txQueue = getQueue(gate(upperLayerInGateId));
 
         // state variables
+        fsm.setState(IDLE, "IDLE");
         fsm.setName("CsmaCaMac State Machine");
         backoffPeriod = -1;
         retryCounter = 0;
