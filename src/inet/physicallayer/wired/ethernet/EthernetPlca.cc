@@ -570,7 +570,7 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
             FSMA_Event_Transition(T3,
                                   event == CARRIER_SENSE_START || event == CARRIER_SENSE_END,
                                   DS_RECEIVE,
-                CARRIER_STATUS = CRS && rx_cmd != CMD_COMMIT ? CARRIER_ON : CARRIER_OFF;
+                CARRIER_STATUS = CRS && rx_cmd != CMD_COMMIT ? CARRIER_ON : CARRIER_OFF;    // TODO is this required? FSMA_Enter() is the same...
             );
             FSMA_Fail_On_Unhandled_Event();
         }
