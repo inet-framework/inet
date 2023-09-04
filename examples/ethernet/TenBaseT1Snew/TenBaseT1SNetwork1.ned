@@ -11,7 +11,7 @@ import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
 import inet.physicallayer.wired.common.WireJunction;
 
-network TenBaseT1SNetwork
+network TenBaseT1SNetwork1
 {
     parameters:
         int numNodes;
