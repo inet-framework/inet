@@ -519,13 +519,13 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
                 TX_EN = false;
                 FSMA_Delay_Action(handleWithControlFSM());
             );
-            FSMA_Event_Transition(T1,
+            FSMA_Event_Transition(TX_START,
                                   event == START_FRAME_TRANSMISSION,
                                   DS_TRANSMIT,
                 ASSERT(currentTx == nullptr);
                 currentTx = check_and_cast<Packet *>(message);
             );
-            FSMA_Event_Transition(T2,
+            FSMA_Event_Transition(CRS_END,
                                   event == CARRIER_SENSE_END,
                                   DS_IDLE,
             );
@@ -540,11 +540,11 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
                 TX_EN = false;
                 FSMA_Delay_Action(handleWithControlFSM());
             );
-            FSMA_Event_Transition(T1,
+            FSMA_Event_Transition(RX_START,
                                   event == RECEPTION_START,
                                   DS_RECEIVE,
             );
-            FSMA_Event_Transition(T2,
+            FSMA_Event_Transition(TX_START,
                                   event == START_FRAME_TRANSMISSION,
                                   DS_HOLD,
                 ASSERT(currentTx == nullptr);
@@ -557,17 +557,17 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
             FSMA_Enter(
                 CARRIER_STATUS = CRS && rx_cmd != CMD_COMMIT ? CARRIER_ON : CARRIER_OFF;
             );
-            FSMA_Event_Transition(T1,
+            FSMA_Event_Transition(RX_END,
                                   event == RECEPTION_END,
                                   DS_IDLE,
                 CARRIER_STATUS = CRS && rx_cmd != CMD_COMMIT ? CARRIER_ON : CARRIER_OFF;
             );
-            FSMA_Event_Transition(T2,
+            FSMA_Event_Transition(TX_START,
                                   event == START_FRAME_TRANSMISSION,
                                   DS_COLLIDE,
                 delete message;
             );
-            FSMA_Event_Transition(T3,
+            FSMA_Event_Transition(CRS_CHANGE,
                                   event == CARRIER_SENSE_START || event == CARRIER_SENSE_END,
                                   DS_RECEIVE,
                 CARRIER_STATUS = CRS && rx_cmd != CMD_COMMIT ? CARRIER_ON : CARRIER_OFF;    // TODO is this required? FSMA_Enter() is the same...
@@ -581,20 +581,20 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
                 scheduleAfter(delay_line_length * 4 / mode->bitrate, hold_timer);
                 FSMA_Delay_Action(handleWithControlFSM());
             );
-            FSMA_Event_Transition(T1,
+            FSMA_Event_Transition(HOLD_END,
                                   event == END_HOLD_TIMER,
                                   DS_COLLIDE,
                 delete currentTx;
                 currentTx = nullptr;
             );
-            FSMA_Event_Transition(T2,
+            FSMA_Event_Transition(RX_START,
                                   event == RECEPTION_START,
                                   DS_COLLIDE,
                 delete currentTx;
                 currentTx = nullptr;
                 cancelEvent(hold_timer);
             );
-            FSMA_Event_Transition(T3,
+            FSMA_Event_Transition(COMMIT_TO,
                                   event == COMMIT_TO,
                                   DS_TRANSMIT,
                 cancelEvent(hold_timer);
@@ -609,8 +609,8 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
                 SIGNAL_STATUS = SIGNAL_ERROR;
                 FSMA_Delay_Action(handleWithControlFSM());
             );
-            FSMA_Event_Transition(T1,
-                                  event == END_SIGNAL_TRANSMISSION,
+            FSMA_Event_Transition(JAM_END,
+                                  event == END_SIGNAL_TRANSMISSION, // TODO check for JAM signal type
                                   DS_DELAY_PENDING,
             );
             FSMA_Ignore_Event(event == CARRIER_SENSE_START || event == CARRIER_SENSE_END);
@@ -622,7 +622,7 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
                 SIGNAL_STATUS = NO_SIGNAL_ERROR;
                 scheduleAfter(512 / mode->bitrate, pending_timer)
             );
-            FSMA_Event_Transition(T1,
+            FSMA_Event_Transition(PENDING_END,
                                   event == END_PENDING_TIMER,
                                   DS_PENDING,
             );
@@ -635,7 +635,7 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
                 packetPending = true;
                 FSMA_Delay_Action(handleWithControlFSM());
             );
-            FSMA_Event_Transition(T1,
+            FSMA_Event_Transition(COMMIT_TO,
                                   event == COMMIT_TO,
                                   DS_WAIT_MAC,
             );
@@ -648,14 +648,14 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
                 CARRIER_STATUS = CARRIER_OFF;
                 scheduleAfter(288 / mode->bitrate, commit_timer)
             );
-            FSMA_Event_Transition(T1,
+            FSMA_Event_Transition(TX_START,
                                   event == START_FRAME_TRANSMISSION,
                                   DS_TRANSMIT,
                 cancelEvent(commit_timer);
                 ASSERT(currentTx == nullptr);
                 currentTx = check_and_cast<Packet *>(message);
             );
-            FSMA_Event_Transition(T2,
+            FSMA_Event_Transition(COMMIT_END,
                                   event == END_COMMIT_TIMER,
                                   DS_WAIT_IDLE,
             );
@@ -685,7 +685,7 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
                 FSMA_Delay_Action(phy->startFrameTransmission(currentTx->dup(), bc < max_bc - 1 ? ESDBRS : ESD));
                 FSMA_Delay_Action(handleWithControlFSM());
             );
-            FSMA_Event_Transition(T1,
+            FSMA_Event_Transition(TX_END,
                                   event == END_TX_TIMER,
                                   DS_WAIT_IDLE,
                 delete currentTx;

@@ -1,21 +1,35 @@
 digraph EthernetCsmaPhy {
-    nodesep = 1;
-    ranksep = 1;
-    node [shape=box, style="rounded,filled", color="#ECECEC", fontname="Arial", margin=0.15, height=1, width=3];
-    edge [fontname="Arial"];
+    nodesep = 0.5;
+    ranksep = 0.5;
+    node [shape=box, style="rounded,filled", color="#ECECEC", fontname="Arial", fontsize=16, margin=0.15, height=1, width=3];
+    edge [fontname="Arial", fontsize=16];
 
-    IDLE [label="IDLE", fillcolor="#FFD966"];
-    TRANSMITTING [label="TRANSMITTING", fillcolor="#70AD47"];
-    RECEIVING [label="RECEIVING", fillcolor="#5B9BD5"];
-    COLLISION [label="COLLISION", fillcolor="#ED7D31"];
+    IDLE;
+    TRANSMITTING;
+    RECEIVING;
+    COLLISION;
+    CRS_ON;
 
     IDLE -> TRANSMITTING [label="TX_START"];
     IDLE -> RECEIVING [label="RX_START"];
-    TRANSMITTING -> IDLE [label="TX_END"];
+    TRANSMITTING -> CRS_ON [label="TX_END"];
     TRANSMITTING -> COLLISION [label="RX_START"];
-    RECEIVING -> COLLISION [label="TX_START"];
     RECEIVING -> RECEIVING [label="RX_START / RX_UPDATE"];
-    RECEIVING -> IDLE [label="RX_END"];
-    COLLISION -> COLLISION [label="TX_START_JAM / RX_START / RX_UPDATE / RX_END_AND_TRANSMITTING / TX_END_AND_RECEIVING"];
-    COLLISION -> IDLE [label="RX_END_AND_NOT_TRANSMITTING / TX_END_AND_NOT_RECEIVING"];
+    RECEIVING -> CRS_ON [label="RX_END"];
+    RECEIVING -> COLLISION [label="TX_START"];
+    COLLISION -> COLLISION [label="TX_START_JAM\nRX_START / RX_UPDATE\nRX_END_AND_TX\nTX_END_AND_RX"];
+    COLLISION -> CRS_ON [label="RX_END_AND_NO_TX\nTX_END_AND_NO_RX"];
+    CRS_ON -> TRANSMITTING [label="TX_START"];
+    CRS_ON -> RECEIVING [label="RX_START"];
+    CRS_ON -> IDLE [label="CRS_OFF"];
+
+    {
+        rank=source;
+        IDLE;
+    }
+
+    {
+        rank=sink;
+        CRS_ON;
+    }
 }

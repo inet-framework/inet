@@ -1,9 +1,10 @@
 digraph EthernetPlcaDataFsm {
-    nodesep = 1;
-    ranksep = 1;
-    node [shape=box, style="rounded,filled", color="#ECECEC", fontname="Arial", margin=0.15, height=1, width=3];
-    edge [fontname="Arial"];
+    nodesep = 0.5;
+    ranksep = 0.5;
+    node [shape=box, style="rounded,filled", color="#ECECEC", fontname="Arial", fontsize=18, margin=0.15, height=1, width=3];
+    edge [fontname="Arial", fontsize=18];
 
+    WAIT_IDLE;
     IDLE;
     RECEIVE;
     HOLD;
@@ -13,16 +14,30 @@ digraph EthernetPlcaDataFsm {
     WAIT_MAC;
     TRANSMIT;
 
-    IDLE -> HOLD [label="START_FRAME_TRANSMISSION"];
-    IDLE -> RECEIVE [label="RECEPTION_START"];
-    RECEIVE -> IDLE [label="RECEPTION_END"];
-    RECEIVE -> COLLIDE [label="START_FRAME_TRANSMISSION"];
-    HOLD -> COLLIDE [label="DELAY_LINE_TIMER_EXPIRED"];
-    HOLD -> COLLIDE [label="RECEPTION_START"];
+    WAIT_IDLE -> TRANSMIT [label="TX_START"];
+    WAIT_IDLE -> IDLE [label="CRS_END"];
+    IDLE -> RECEIVE [label="RX_START"];
+    IDLE -> HOLD [label="TX_START"];
+    RECEIVE -> IDLE [label="RX_END"];
+    RECEIVE -> COLLIDE [label="TX_START"];
+    RECEIVE -> RECEIVE [label="CRS_CHANGE"];
+    HOLD -> COLLIDE [label="HOLD_END"];
+    HOLD -> COLLIDE [label="RX_START"];
     HOLD -> TRANSMIT [label="COMMIT_TO"];
-    COLLIDE -> DELAY_PENDING [label="END_JAM_TRANSMISSION"];
-    DELAY_PENDING -> PENDING [label="PENDING_TIMER_EXPIRED"];
+    COLLIDE -> DELAY_PENDING [label="JAM_END"];
+    DELAY_PENDING -> PENDING [label="PENDING_END"];
     PENDING -> WAIT_MAC [label="COMMIT_TO"];
-    WAIT_MAC -> TRANSMIT [label="START_FRAME_TRANSMISSION"];
-    TRANSMIT -> IDLE [label="TX_TIMER_EXPIRED"];
+    WAIT_MAC -> TRANSMIT [label="TX_START"];
+    WAIT_MAC -> WAIT_IDLE [label="COMMIT_END"];
+    TRANSMIT -> WAIT_IDLE [label="TX_END"];
+
+    {
+        rank=source;
+        WAIT_IDLE;
+    }
+
+    {
+        rank=sink;
+        TRANSMIT;
+    }
 }

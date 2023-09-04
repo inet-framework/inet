@@ -181,13 +181,13 @@ void EthernetCsmaPhy::handleWithFsm(int event, cMessage *message)
                                   COLLISION,
                 handleStartTransmission(check_and_cast<EthernetSignalBase *>(message));
             );
-            FSMA_Event_Transition(TX_END_AND_NOT_RECEIVING,
+            FSMA_Event_Transition(TX_END_AND_NO_RX,
                                   event == TX_END && rxSignals.empty(),
                                   CRS_ON,
                 handleEndTransmission();
                 FSMA_Delay_Action(mac->handleCollisionEnd());
             );
-            FSMA_Event_Transition(TX_END_AND_RECEIVING,
+            FSMA_Event_Transition(TX_END_AND_RX,
                                   event == TX_END && !rxSignals.empty(),
                                   COLLISION,
                 handleEndTransmission();
@@ -202,12 +202,12 @@ void EthernetCsmaPhy::handleWithFsm(int event, cMessage *message)
                                   COLLISION,
                 updateRxSignals(check_and_cast<EthernetSignalBase *>(message));
             );
-            FSMA_Event_Transition(RX_END_AND_TRANSMITTING,
+            FSMA_Event_Transition(RX_END_AND_TX,
                                   event == RX_END_TIMER && currentTxSignal != nullptr,
                                   COLLISION,
                 handleEndReception();
             );
-            FSMA_Event_Transition(RX_END_AND_NOT_TRANSMITTING,
+            FSMA_Event_Transition(RX_END_AND_NO_TX,
                                   event == RX_END_TIMER && currentTxSignal == nullptr,
                                   CRS_ON,
                 handleEndReception();

@@ -189,7 +189,7 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
                                   TRANSMITTING,
                 setCurrentTransmission(check_and_cast<Packet *>(message));
             );
-            FSMA_Event_Transition(CARRIER_SENSE_START,
+            FSMA_Event_Transition(CRS_START,
                                   event == CARRIER_SENSE_START,
                                   RECEIVING,
             );
@@ -210,7 +210,7 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
                                   event == END_IFG_TIMER && currentTxFrame == nullptr && txQueue->isEmpty() && carrierSense,
                                   RECEIVING,
             );
-            FSMA_Event_Transition(IFG_END_AND_QUEUE_EMPTY_AND_NOT_CRS,
+            FSMA_Event_Transition(IFG_END_AND_QUEUE_EMPTY_AND_NO_CRS,
                                   event == END_IFG_TIMER && currentTxFrame == nullptr && txQueue->isEmpty() && !carrierSense,
                                   IDLE,
             );
@@ -223,7 +223,7 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
                 startTransmission();
                 FSMA_Delay_Action(phy->startFrameTransmission(currentTxFrame->dup(), ESDNONE));
             );
-            FSMA_Event_Transition(END_TX_TIMER,
+            FSMA_Event_Transition(TX_END,
                                   event == END_TX_TIMER,
                                   WAIT_IFG,
                 endTransmission();
@@ -242,7 +242,7 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
         }
         FSMA_State(JAMMING) {
             FSMA_Enter(scheduleJamTimer());
-            FSMA_Event_Transition(END_JAM_TIMER,
+            FSMA_Event_Transition(JAM_END,
                                   event == END_JAM_TIMER,
                                   BACKOFF,
                 FSMA_Delay_Action(phy->endSignalTransmission(ESDNONE));
@@ -263,11 +263,11 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
             FSMA_Fail_On_Unhandled_Event();
         }
         FSMA_State(BACKOFF) {
-            FSMA_Event_Transition(BACKOFF_END_AND_NOT_CARRIER_SENSE,
+            FSMA_Event_Transition(BACKOFF_END_AND_NO_CRS,
                                   event == END_BACKOFF_TIMER && !carrierSense,
                                   WAIT_IFG,
             );
-            FSMA_Event_Transition(BACKOFF_END_AND_CARRIER_SENSE,
+            FSMA_Event_Transition(BACKOFF_END_AND_CRS,
                                   event == END_BACKOFF_TIMER && carrierSense,
                                   RECEIVING,
             );
@@ -286,7 +286,7 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
                                   RECEIVING,
                 processReceivedFrame(check_and_cast<Packet *>(message));
             );
-            FSMA_Event_Transition(CARRIER_SENSE_END,
+            FSMA_Event_Transition(CRS_END,
                                   event == CARRIER_SENSE_END,
                                   WAIT_IFG,
             );
