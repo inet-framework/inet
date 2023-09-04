@@ -32,7 +32,7 @@ digraph EthernetPlcaCtrl {
                 plca_active := FALSE
             </td></tr></table>>
     ];
-    DISABLED -> RECOVER [label="plca_en \n && (local_nodeID != 0)"];
+    DISABLED -> RECOVER [label="plca_en \n && (local_nodeID == 0)"];
     DISABLED -> RESYNC [label="plca_en \n && (local_nodeID != 0) \n && (local_nodeID != 255)"];
 
     Global2 [ shape=circle ]
