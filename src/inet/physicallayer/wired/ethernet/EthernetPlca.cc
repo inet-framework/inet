@@ -57,6 +57,17 @@ Register_Enum(EthernetPlca::DataState,
      EthernetPlca::DS_WAIT_MAC,
      EthernetPlca::DS_TRANSMIT));
 
+Register_Enum(EthernetPlca::CARRIER_STATUS_ENUM,
+    (EthernetPlca::CARRIER_OFF,
+     EthernetPlca::CARRIER_ON));
+Register_Enum(EthernetPlca::SIGNAL_STATUS_ENUM,
+    (EthernetPlca::NO_SIGNAL_ERROR,
+     EthernetPlca::SIGNAL_ERROR));
+Register_Enum(EthernetPlca::CMD_ENUM,
+    (EthernetPlca::CMD_NONE,
+     EthernetPlca::CMD_BEACON,
+     EthernetPlca::CMD_COMMIT));
+
 EthernetPlca::~EthernetPlca()
 {
     cancelAndDelete(beacon_timer);
@@ -115,8 +126,8 @@ void EthernetPlca::finish()
     emit(collisionChangedSignal, (int)COL);
     emit(controlStateChangedSignal, controlFsm.getState());
     emit(dataStateChangedSignal, dataFsm.getState());
-    emit(rxCmdSignal, getCmdCode(rx_cmd));
-    emit(txCmdSignal, getCmdCode(tx_cmd));
+    emit(rxCmdSignal, rx_cmd);
+    emit(txCmdSignal, tx_cmd);
 }
 
 void EthernetPlca::refreshDisplay() const
@@ -196,18 +207,18 @@ void EthernetPlca::handleReceptionStart(EthernetSignalType signalType, Packet *p
     EV_DEBUG << "Handling reception start" << EV_FIELD(signalType) << EV_FIELD(packet) << EV_ENDL;
     if (signalType == BEACON) {
         RX_DV = false;
-        rx_cmd = "BEACON";
+        rx_cmd = CMD_BEACON;
     }
     else if (signalType == COMMIT) {
         RX_DV = false;
-        rx_cmd = "COMMIT";
+        rx_cmd = CMD_COMMIT;
     }
     else {
         RX_DV = true;
-        rx_cmd = "NONE";
+        rx_cmd = CMD_NONE;
     }
-    emit(rxCmdSignal, getCmdCode(rx_cmd));
-    receiving = RX_DV || rx_cmd == "COMMIT";
+    emit(rxCmdSignal, rx_cmd);
+    receiving = RX_DV || rx_cmd == CMD_COMMIT;
     handleWithDataFSM(RECEPTION_START, packet);
     if (packet != nullptr)
         mac->handleReceptionStart(signalType, packet);
@@ -225,13 +236,13 @@ void EthernetPlca::handleReceptionError(EthernetSignalType signalType, Packet *p
 void EthernetPlca::handleReceptionEnd(EthernetSignalType signalType, Packet *packet, EthernetEsdType esd1)
 {
     Enter_Method("handleReceptionEnd");
-    ASSERT(RX_DV || rx_cmd != "NONE");
+    ASSERT(RX_DV || rx_cmd != CMD_NONE);
     if (packet != nullptr)
         take(packet);
     EV_DEBUG << "Handling reception end" << EV_FIELD(signalType) << EV_FIELD(packet) << EV_ENDL;
     RX_DV = false;
-    rx_cmd = "NONE";
-    emit(rxCmdSignal, getCmdCode(rx_cmd));
+    rx_cmd = CMD_NONE;
+    emit(rxCmdSignal, rx_cmd);
     receiving = false;
     if (packet != nullptr)
         mac->handleReceptionEnd(signalType, packet, esd1);
@@ -278,10 +289,10 @@ void EthernetPlca::handleWithControlFSM()
     { FSMA_Switch(controlFsm) {
         FSMA_State(CS_DISABLE) {
             FSMA_Enter(
-                if (tx_cmd != "NONE") {
+                if (tx_cmd != CMD_NONE) {
                     FSMA_Delay_Action(phy->endSignalTransmission(ESDNONE));
-                    tx_cmd = "NONE";
-                    emit(txCmdSignal, getCmdCode(tx_cmd));
+                    tx_cmd = CMD_NONE;
+                    emit(txCmdSignal, tx_cmd);
                 }
                 committed = false;
                 curID = 0;
@@ -319,8 +330,8 @@ void EthernetPlca::handleWithControlFSM()
         FSMA_State(CS_SEND_BEACON) {
             FSMA_Enter(
                 scheduleAfter(20 / mode->bitrate, beacon_timer);
-                tx_cmd = "BEACON";
-                emit(txCmdSignal, getCmdCode(tx_cmd));
+                tx_cmd = CMD_BEACON;
+                emit(txCmdSignal, tx_cmd);
                 FSMA_Delay_Action(phy->startSignalTransmission(BEACON));
             );
             FSMA_Transition(T1,
@@ -332,10 +343,10 @@ void EthernetPlca::handleWithControlFSM()
             FSMA_Enter(
                 curID = 0;
                 emit(curIDSignal, curID);
-                if (tx_cmd != "NONE") {
+                if (tx_cmd != CMD_NONE) {
                     FSMA_Delay_Action(phy->endSignalTransmission(ESDNONE));
-                    tx_cmd = "NONE";
-                    emit(txCmdSignal, getCmdCode(tx_cmd));
+                    tx_cmd = CMD_NONE;
+                    emit(txCmdSignal, tx_cmd);
                 }
             );
             FSMA_Transition(T1,
@@ -371,11 +382,11 @@ void EthernetPlca::handleWithControlFSM()
             );
             // TODO this transition takes normal nodes to the first transmit opportunity too early because BEACON is detected at RECEPTION_START
             FSMA_Transition(T1, // D
-                            local_nodeID != 0 && !receiving && (rx_cmd == "BEACON" || (!CRS && beacon_det_timer->isScheduled())),
+                            local_nodeID != 0 && !receiving && (rx_cmd == CMD_BEACON || (!CRS && beacon_det_timer->isScheduled())),
                             CS_SYNCING,
             );
             FSMA_Transition(T2, // B
-                            !CRS && local_nodeID != 0 && rx_cmd != "BEACON" && !beacon_det_timer->isScheduled(),
+                            !CRS && local_nodeID != 0 && rx_cmd != CMD_BEACON && !beacon_det_timer->isScheduled(),
                             CS_RESYNC,
             );
             FSMA_Transition(T3, // C
@@ -389,8 +400,8 @@ void EthernetPlca::handleWithControlFSM()
         }
         FSMA_State(CS_COMMIT) {
             FSMA_Enter(
-                tx_cmd = "COMMIT";
-                emit(txCmdSignal, getCmdCode(tx_cmd));
+                tx_cmd = CMD_COMMIT;
+                emit(txCmdSignal, tx_cmd);
                 FSMA_Delay_Action(phy->startSignalTransmission(COMMIT));
                 committed = true;
                 cancelEvent(to_timer);
@@ -428,10 +439,10 @@ void EthernetPlca::handleWithControlFSM()
         }
         FSMA_State(CS_TRANSMIT) {
             FSMA_Enter(
-                if (tx_cmd != "NONE") {
+                if (tx_cmd != CMD_NONE) {
                     FSMA_Delay_Action(phy->endSignalTransmission(ESDNONE));
-                    tx_cmd = "NONE";
-                    emit(txCmdSignal, getCmdCode(tx_cmd));
+                    tx_cmd = CMD_NONE;
+                    emit(txCmdSignal, tx_cmd);
                 }
                 if (bc >= max_bc)
                     committed = false;
@@ -448,8 +459,8 @@ void EthernetPlca::handleWithControlFSM()
         FSMA_State(CS_BURST) {
             FSMA_Enter(
                 bc = bc + 1;
-                tx_cmd = "COMMIT";
-                emit(txCmdSignal, getCmdCode(tx_cmd));
+                tx_cmd = CMD_COMMIT;
+                emit(txCmdSignal, tx_cmd);
                 FSMA_Delay_Action(phy->startSignalTransmission(COMMIT));
                 scheduleAfter(burst_interval, burst_timer);
             );
@@ -465,10 +476,10 @@ void EthernetPlca::handleWithControlFSM()
         }
         FSMA_State(CS_ABORT) {
             FSMA_Enter(
-                if (tx_cmd != "NONE") {
+                if (tx_cmd != CMD_NONE) {
                     FSMA_Delay_Action(phy->endSignalTransmission(ESD));
-                    tx_cmd = "NONE";
-                    emit(txCmdSignal, getCmdCode(tx_cmd));
+                    tx_cmd = CMD_NONE;
+                    emit(txCmdSignal, tx_cmd);
                 }
             );
             FSMA_Transition(T1,
@@ -503,8 +514,8 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
         FSMA_State(DS_WAIT_IDLE) {
             FSMA_Enter(
                 packetPending = false;
-                CARRIER_STATUS = "CARRIER_OFF";
-                SIGNAL_STATUS = "NO_SIGNAL_ERROR";
+                CARRIER_STATUS = CARRIER_OFF;
+                SIGNAL_STATUS = NO_SIGNAL_ERROR;
                 TX_EN = false;
                 FSMA_Delay_Action(handleWithControlFSM());
             );
@@ -524,8 +535,8 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
         FSMA_State(DS_IDLE) {
             FSMA_Enter(
                 packetPending = false;
-                CARRIER_STATUS = "CARRIER_OFF";
-                SIGNAL_STATUS = "NO_SIGNAL_ERROR";
+                CARRIER_STATUS = CARRIER_OFF;
+                SIGNAL_STATUS = NO_SIGNAL_ERROR;
                 TX_EN = false;
                 FSMA_Delay_Action(handleWithControlFSM());
             );
@@ -544,12 +555,12 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
         }
         FSMA_State(DS_RECEIVE) {
             FSMA_Enter(
-                CARRIER_STATUS = CRS && rx_cmd != "COMMIT" ? "CARRIER_ON" : "CARRIER_OFF";
+                CARRIER_STATUS = CRS && rx_cmd != CMD_COMMIT ? CARRIER_ON : CARRIER_OFF;
             );
             FSMA_Event_Transition(T1,
                                   event == RECEPTION_END,
                                   DS_IDLE,
-                CARRIER_STATUS = CRS && rx_cmd != "COMMIT" ? "CARRIER_ON" : "CARRIER_OFF";
+                CARRIER_STATUS = CRS && rx_cmd != CMD_COMMIT ? CARRIER_ON : CARRIER_OFF;
             );
             FSMA_Event_Transition(T2,
                                   event == START_FRAME_TRANSMISSION,
@@ -559,14 +570,14 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
             FSMA_Event_Transition(T3,
                                   event == CARRIER_SENSE_START || event == CARRIER_SENSE_END,
                                   DS_RECEIVE,
-                CARRIER_STATUS = CRS && rx_cmd != "COMMIT" ? "CARRIER_ON" : "CARRIER_OFF";
+                CARRIER_STATUS = CRS && rx_cmd != CMD_COMMIT ? CARRIER_ON : CARRIER_OFF;
             );
             FSMA_Fail_On_Unhandled_Event();
         }
         FSMA_State(DS_HOLD) {
             FSMA_Enter(
                 packetPending = true;
-                CARRIER_STATUS = "CARRIER_ON";
+                CARRIER_STATUS = CARRIER_ON;
                 scheduleAfter(delay_line_length * 4 / mode->bitrate, hold_timer);
                 FSMA_Delay_Action(handleWithControlFSM());
             );
@@ -594,8 +605,8 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
         FSMA_State(DS_COLLIDE) {
             FSMA_Enter(
                 packetPending = false;
-                CARRIER_STATUS = "CARRIER_ON";
-                SIGNAL_STATUS = "SIGNAL_ERROR";
+                CARRIER_STATUS = CARRIER_ON;
+                SIGNAL_STATUS = SIGNAL_ERROR;
                 FSMA_Delay_Action(handleWithControlFSM());
             );
             FSMA_Event_Transition(T1,
@@ -608,7 +619,7 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
         }
         FSMA_State(DS_DELAY_PENDING) {
             FSMA_Enter(
-                SIGNAL_STATUS = "NO_SIGNAL_ERROR";
+                SIGNAL_STATUS = NO_SIGNAL_ERROR;
                 scheduleAfter(512 / mode->bitrate, pending_timer)
             );
             FSMA_Event_Transition(T1,
@@ -634,7 +645,7 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
         }
         FSMA_State(DS_WAIT_MAC) {
             FSMA_Enter(
-                CARRIER_STATUS = "CARRIER_OFF";
+                CARRIER_STATUS = CARRIER_OFF;
                 scheduleAfter(288 / mode->bitrate, commit_timer)
             );
             FSMA_Event_Transition(T1,
@@ -655,13 +666,13 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
         FSMA_State(DS_TRANSMIT) {
             FSMA_Enter(
                 packetPending = false;
-                CARRIER_STATUS = "CARRIER_ON";
-                SIGNAL_STATUS = COL ? "SIGNAL_ERROR" : "NO_SIGNAL_ERROR";
+                CARRIER_STATUS = CARRIER_ON;
+                SIGNAL_STATUS = COL ? SIGNAL_ERROR : NO_SIGNAL_ERROR;
                 TX_EN = true;
-                if (tx_cmd != "NONE") { // KLUDGE: end commit signal
+                if (tx_cmd != CMD_NONE) { // KLUDGE: end commit signal
                     FSMA_Delay_Action(phy->endSignalTransmission(ESDNONE));
-                    tx_cmd = "NONE";
-                    emit(txCmdSignal, getCmdCode(tx_cmd));
+                    tx_cmd = CMD_NONE;
+                    emit(txCmdSignal, tx_cmd);
                 }
                 simtime_t duration = b(currentTx->getDataLength() + ETHERNET_PHY_HEADER_LEN + getEsdLength()).get() / mode->bitrate;
                 scheduleAfter(duration, tx_timer);
@@ -694,9 +705,9 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
     dataFsm.executeDelayedActions();
     // call handleCarrierSenseStart/handleCarrierSenseEnd if needed
     bool new_carrier_sense_signal;
-    if (CARRIER_STATUS == "CARRIER_OFF")
+    if (CARRIER_STATUS == CARRIER_OFF)
         new_carrier_sense_signal = false;
-    else if (CARRIER_STATUS == "CARRIER_ON")
+    else if (CARRIER_STATUS == CARRIER_ON)
         new_carrier_sense_signal = true;
     else
         throw cRuntimeError("Unknown carrier status");
@@ -709,9 +720,9 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
     }
     // call handleCollisionStart/handleCollisionEnd if needed
     bool new_collision_signal;
-    if (SIGNAL_STATUS == "NO_SIGNAL_ERROR")
+    if (SIGNAL_STATUS == NO_SIGNAL_ERROR)
         new_collision_signal = false;
-    else if (SIGNAL_STATUS == "SIGNAL_ERROR")
+    else if (SIGNAL_STATUS == SIGNAL_ERROR)
         new_collision_signal = true;
     else
         throw cRuntimeError("Unknown signal status");
@@ -722,18 +733,6 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
         else
             mac->handleCollisionEnd();
     }
-}
-
-int EthernetPlca::getCmdCode(std::string cmd)
-{
-    if (cmd == "NONE")
-        return 0;
-    else if (cmd == "BEACON")
-        return 1;
-    else if (cmd == "COMMIT")
-        return 2;
-    else
-        throw cRuntimeError("Unknown cmd");
 }
 
 } // namespace physicallayer

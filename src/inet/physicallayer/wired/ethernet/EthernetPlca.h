@@ -90,6 +90,10 @@ class INET_API EthernetPlca : public cSimpleModule, public virtual IEthernetCsma
         END_TX_TIMER,
     };
 
+    enum CARRIER_STATUS_ENUM {CARRIER_OFF, CARRIER_ON};
+    enum SIGNAL_STATUS_ENUM { NO_SIGNAL_ERROR, SIGNAL_ERROR };
+    enum CMD_ENUM {CMD_NONE, CMD_BEACON, CMD_COMMIT};
+
   protected:
     // parameters which can be configured from the NED/INI files
     int plca_node_count = -1;
@@ -125,10 +129,10 @@ class INET_API EthernetPlca : public cSimpleModule, public virtual IEthernetCsma
     int bc = 0;
     int curID = -1;
     Packet *currentTx = nullptr;
-    std::string CARRIER_STATUS = "CARRIER_OFF";
-    std::string rx_cmd = "NONE"; // possible values "NONE", "BEACON", "COMMIT"
-    std::string SIGNAL_STATUS = "NO_SIGNAL_ERROR";
-    std::string tx_cmd = "NONE"; // possible values "NONE", "BEACON", "COMMIT"
+    CARRIER_STATUS_ENUM CARRIER_STATUS = CARRIER_OFF;
+    CMD_ENUM rx_cmd = CMD_NONE;
+    SIGNAL_STATUS_ENUM SIGNAL_STATUS = NO_SIGNAL_ERROR;
+    CMD_ENUM tx_cmd = CMD_NONE;
 
     // additional state variables
     const EthernetModes::EthernetMode *mode = nullptr;
@@ -162,8 +166,6 @@ class INET_API EthernetPlca : public cSimpleModule, public virtual IEthernetCsma
 
     virtual void handleWithControlFSM();
     virtual void handleWithDataFSM(int event, cMessage *message);
-
-    virtual int getCmdCode(std::string cmd);
 
   public:
     virtual ~EthernetPlca();
