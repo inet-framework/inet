@@ -114,12 +114,12 @@ void TransportConnectionVisualizerBase::receiveSignal(cComponent *source, simsig
     if (signal == inet::tcp::Tcp::tcpConnectionAddedSignal) {
         auto tcpConnection = check_and_cast<inet::tcp::TcpConnection *>(object);
         L3AddressResolver resolver;
-        auto source = resolver.findHostWithAddress(tcpConnection->localAddr);
-        auto destination = resolver.findHostWithAddress(tcpConnection->remoteAddr);
+        auto source = resolver.findHostWithAddress(tcpConnection->getLocalAddress());
+        auto destination = resolver.findHostWithAddress(tcpConnection->getRemoteAddress());
         if (source != nullptr && sourceNodeFilter.matches(source) &&
             destination != nullptr && destinationNodeFilter.matches(destination) &&
-            sourcePortFilter.matches(tcpConnection->localPort) &&
-            destinationPortFilter.matches(tcpConnection->remotePort))
+            sourcePortFilter.matches(tcpConnection->getLocalPort()) &&
+            destinationPortFilter.matches(tcpConnection->getRemotePort()))
         {
             addConnectionVisualization(createConnectionVisualization(source, destination, tcpConnection));
         }
