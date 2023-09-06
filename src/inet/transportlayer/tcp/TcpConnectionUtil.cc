@@ -714,7 +714,7 @@ void TcpConnection::sendAck()
     // flag set).  After the receipt of the CWR packet, acknowledgments for
     // subsequent non-CE data packets do not have the ECN-Echo flag set.
 
-    TcpStateVariables *state = getState();
+    TcpStateVariables *state = getStateForUpdate();
     if (state && state->ect) {
         if (tcpAlgorithm->shouldMarkAck()) {
             tcpHeader->setEceBit(true);

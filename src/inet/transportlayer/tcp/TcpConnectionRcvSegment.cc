@@ -1131,7 +1131,7 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
     int payloadLength = tcpSegment->getByteLength() - B(tcpHeader->getHeaderLength()).get();
 
     // ECN
-    TcpStateVariables *state = getState();
+    TcpStateVariables *state = getStateForUpdate();
     if (state && state->ect) {
         if (tcpHeader->getEceBit() == true)
             EV_INFO << "Received packet with ECE\n";
