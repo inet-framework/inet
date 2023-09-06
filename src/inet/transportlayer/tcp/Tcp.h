@@ -131,7 +131,6 @@ class INET_API Tcp : public TransportProtocolBase
     virtual void refreshDisplay() const override;
 
   public:
-    bool useDataNotification = false;
     CrcMode crcMode = CRC_MODE_UNDEFINED;
     int msl;
 

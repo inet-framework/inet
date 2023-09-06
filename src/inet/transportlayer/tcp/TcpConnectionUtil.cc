@@ -387,19 +387,10 @@ void TcpConnection::sendToApp(cMessage *msg)
 void TcpConnection::sendAvailableDataToApp()
 {
     if (receiveQueue->getAmountOfBufferedBytes()) {
-        if (tcpMain->useDataNotification) {
-            auto indication = new Indication("Data Notification", TCP_I_DATA_NOTIFICATION); // TODO currently we never send TCP_I_URGENT_DATA
-            TcpCommand *cmd = new TcpCommand();
-            indication->addTag<SocketInd>()->setSocketId(socketId);
-            indication->setControlInfo(cmd);
-            sendToApp(indication);
-        }
-        else {
-            while (auto msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) {
-                msg->setKind(TCP_I_DATA); // TODO currently we never send TCP_I_URGENT_DATA
-                msg->addTag<SocketInd>()->setSocketId(socketId);
-                sendToApp(msg);
-            }
+        while (auto msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) {
+            msg->setKind(TCP_I_DATA); // TODO currently we never send TCP_I_URGENT_DATA
+            msg->addTag<SocketInd>()->setSocketId(socketId);
+            sendToApp(msg);
         }
     }
 }
