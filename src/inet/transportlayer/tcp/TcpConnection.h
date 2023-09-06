@@ -88,7 +88,7 @@ class TcpAlgorithm;
  */
 class INET_API TcpConnection : public cSimpleModule
 {
-  public:
+  protected:
     static simsignal_t tcpConnectionAddedSignal;
     static simsignal_t stateSignal; // FSM state
     static simsignal_t sndWndSignal; // snd_wnd
@@ -112,17 +112,12 @@ class INET_API TcpConnection : public cSimpleModule
 
     // connection identification by apps: socketId
     int socketId = -1; // identifies connection within the app
-    int getSocketId() const { return socketId; }
-    void setSocketId(int newSocketId) { ASSERT(socketId == -1); socketId = newSocketId; }
 
     int listeningSocketId = -1; // identifies listening connection within the app
-    int getListeningSocketId() const { return listeningSocketId; }
 
     // socket pair
     L3Address localAddr;
-    const L3Address& getLocalAddr() const { return localAddr; }
     L3Address remoteAddr;
-    const L3Address& getRemoteAddr() const { return remoteAddr; }
     int localPort = -1;
     int remotePort = -1;
 
@@ -131,7 +126,6 @@ class INET_API TcpConnection : public cSimpleModule
     short dscp = -1;
     short tos = -1;
 
-  protected:
     Tcp *tcpMain = nullptr; // Tcp module
 
     // TCP state machine
@@ -142,18 +136,11 @@ class INET_API TcpConnection : public cSimpleModule
 
     // TCP queues
     TcpSendQueue *sendQueue = nullptr;
-    TcpSendQueue *getSendQueue() const { return sendQueue; }
     TcpReceiveQueue *receiveQueue = nullptr;
-    TcpReceiveQueue *getReceiveQueue() const { return receiveQueue; }
-
-  public:
     TcpSackRexmitQueue *rexmitQueue = nullptr;
-    TcpSackRexmitQueue *getRexmitQueue() const { return rexmitQueue; }
 
-  protected:
     // TCP behavior in data transfer state
     TcpAlgorithm *tcpAlgorithm = nullptr;
-    TcpAlgorithm *getTcpAlgorithm() const { return tcpAlgorithm; }
 
     // timers
     cMessage *the2MSLTimer = nullptr;
@@ -370,11 +357,16 @@ class INET_API TcpConnection : public cSimpleModule
      */
     virtual ~TcpConnection();
 
+    int getTtl() const { return ttl; }
+    int getSocketId() const { return socketId; }
+    void setSocketId(int newSocketId) { ASSERT(socketId == -1); socketId = newSocketId; }
+    int getListeningSocketId() const { return listeningSocketId; }
+
     int getLocalPort() const { return localPort; }
-    L3Address getLocalAddress() const { return localAddr; }
+    const L3Address& getLocalAddress() const { return localAddr; }
 
     int getRemotePort() const { return remotePort; }
-    L3Address getRemoteAddress() const { return remoteAddr; }
+    const L3Address& getRemoteAddress() const { return remoteAddr; }
 
     /**
      * This method gets invoked from TCP when a segment arrives which
@@ -388,11 +380,16 @@ class INET_API TcpConnection : public cSimpleModule
     //@{
     int getFsmState() const { return fsm.getState(); }
     const TcpStateVariables *getState() const { return state; }
-    TcpStateVariables *getState() { return state; }
-    TcpSendQueue *getSendQueue() { return sendQueue; }
-    TcpSackRexmitQueue *getRexmitQueue() { return rexmitQueue; }
-    TcpReceiveQueue *getReceiveQueue() { return receiveQueue; }
-    TcpAlgorithm *getTcpAlgorithm() { return tcpAlgorithm; }
+    TcpStateVariables *getStateForUpdate() { return state; }
+    const TcpSendQueue *getSendQueue() const { return sendQueue; }
+    TcpSendQueue *getSendQueueForUpdate() { return sendQueue; }
+    const TcpSackRexmitQueue *getRexmitQueue() const { return rexmitQueue; }
+    TcpSackRexmitQueue *getRexmitQueueForUpdate() { return rexmitQueue; }
+    const TcpReceiveQueue *getReceiveQueue() const { return receiveQueue; }
+    TcpReceiveQueue *getReceiveQueueForUpdate() { return receiveQueue; }
+    const TcpAlgorithm *getTcpAlgorithm() const { return tcpAlgorithm; }
+    TcpAlgorithm *getTcpAlgorithmForUpdate() { return tcpAlgorithm; }
+
     Tcp *getTcpMain() { return tcpMain; }
     //@}
 
@@ -479,6 +476,8 @@ class INET_API TcpConnection : public cSimpleModule
      * Utility: checks if send queue is empty (no data to send).
      */
     virtual bool isSendQueueEmpty();
+
+    friend class Tcp;
 };
 
 } // namespace tcp
