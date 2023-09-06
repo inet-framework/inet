@@ -15,10 +15,10 @@
 
 package inet.physicallayer.wired.ethernet;
 
-import inet.queueing.queue.PacketQueue;
-import inet.queueing.server.PacketServer;
+import inet.queueing.contract.IPacketQueue;
+import inet.queueing.contract.IPacketServer;
 
-module Spi1
+module Spi1 like ISpi
 {
     parameters:
         double speed @unit(MHz);
@@ -27,12 +27,12 @@ module Spi1
         input in;
         output out;
     submodules:
-        queue: PacketQueue {
+        queue: <default("PacketQueue")> like IPacketQueue {
             @display("p=150,150");
         }
-        server: PacketServer {
-            processingTime = 0s;
-            processingBitrate = min(10, dropUnit(parent.speed)) * 1Mbps;
+        server: <default("PacketServer")> like IPacketServer {
+            processingTime = default(0s);
+            processingBitrate = default(min(10, dropUnit(parent.speed)) * 1Mbps);
             @display("p=150,300");
         }
     connections:

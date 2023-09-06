@@ -17,11 +17,11 @@ package inet.physicallayer.wired.ethernet;
 
 import inet.queueing.common.PacketDelayer;
 
-simple Spi2 extends PacketDelayer like ISpi
+moduleinterface ISpi
 {
     parameters:
-        double speed @unit(MHz);
-        delay = default(0s);
-        bitrate = default(min(10, dropUnit(this.speed)) * 1Mbps);
         @display("i=block/mac");
+    gates:
+        input in;
+        output out;
 }
