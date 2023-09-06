@@ -74,6 +74,7 @@ EthernetPlca::~EthernetPlca()
     cancelAndDelete(beacon_det_timer);
     cancelAndDelete(burst_timer);
     cancelAndDelete(to_timer);
+    cancelAndDelete(syncing_timer);
     cancelAndDelete(hold_timer);
     cancelAndDelete(pending_timer);
     cancelAndDelete(commit_timer);
@@ -98,6 +99,7 @@ void EthernetPlca::initialize(int stage)
         beacon_det_timer = new cMessage("beacon_det_timer", END_BEACON_DET_TIMER);
         burst_timer = new cMessage("burst_timer", END_BURST_TIMER);
         to_timer = new cMessage("to_timer", END_TO_TIMER);
+        syncing_timer = new cMessage("syncing_timer", END_SYNCING_TIMER);
         hold_timer = new cMessage("hold_timer", END_HOLD_TIMER);
         pending_timer = new cMessage("pending_timer", END_PENDING_TIMER);
         commit_timer = new cMessage("commit_timer", END_COMMIT_TIMER);
@@ -348,9 +350,13 @@ void EthernetPlca::handleWithControlFSM()
                     tx_cmd = CMD_NONE;
                     emit(txCmdSignal, tx_cmd);
                 }
+                if (local_nodeID == 0)
+                    // the syncing timer separates the BEACON and the following COMMIT/DATA signals with a small amount of time
+                    // this is done for non-controller nodes to have a CRS OFF/ON spike in the SYNCING state to allow them to go into WAIT_TO
+                    scheduleAfter(1E-9, syncing_timer);
             );
             FSMA_Transition(T1,
-                            !CRS,
+                            !CRS && !syncing_timer->isScheduled(),
                             CS_WAIT_TO,
             );
         }
@@ -378,7 +384,7 @@ void EthernetPlca::handleWithControlFSM()
         FSMA_State(CS_EARLY_RECEIVE) {
             FSMA_Enter(
                 cancelEvent(to_timer);
-                scheduleAfter(22 / mode->bitrate, beacon_det_timer);
+                rescheduleAfter(22 / mode->bitrate, beacon_det_timer);
             );
             // TODO this transition takes normal nodes to the first transmit opportunity too early because BEACON is detected at RECEPTION_START
             FSMA_Transition(T1, // D

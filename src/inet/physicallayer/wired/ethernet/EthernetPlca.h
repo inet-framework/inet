@@ -84,6 +84,7 @@ class INET_API EthernetPlca : public cSimpleModule, public virtual IEthernetCsma
         END_BEACON_DET_TIMER,
         END_BURST_TIMER,
         END_TO_TIMER,
+        END_SYNCING_TIMER,
         END_HOLD_TIMER,
         END_PENDING_TIMER,
         END_COMMIT_TIMER,
@@ -146,6 +147,7 @@ class INET_API EthernetPlca : public cSimpleModule, public virtual IEthernetCsma
     cMessage *beacon_det_timer = nullptr;
     cMessage *burst_timer = nullptr;
     cMessage *to_timer = nullptr;
+    cMessage *syncing_timer = nullptr;
 
     // data state machine timers
     cMessage *hold_timer = nullptr; // additional timer not present in the standard to avoid looping per bit
