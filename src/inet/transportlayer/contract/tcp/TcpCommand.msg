@@ -50,7 +50,6 @@ enum TcpStatusInd
     TCP_I_TIMED_OUT = 9;         // conn-estab timer went off, or max retransm. count reached
     TCP_I_STATUS = 10;           // status info (will carry ~TcpStatusInfo)
     TCP_I_SEND_MSG = 11;         // send queue abated, send more messages
-    TCP_I_DATA_NOTIFICATION = 12; // notify the upper layer that data has arrived
 }
 
 //

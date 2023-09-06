@@ -394,14 +394,7 @@ void TcpConnection::sendToApp(cMessage *msg)
 void TcpConnection::sendAvailableDataToApp()
 {
     if (receiveQueue->getAmountOfBufferedBytes()) {
-        if (tcpMain->useDataNotification) {
-            auto indication = new Indication("Data Notification", TCP_I_DATA_NOTIFICATION); // TODO currently we never send TCP_I_URGENT_DATA
-            TcpCommand *cmd = new TcpCommand();
-            indication->addTag<SocketInd>()->setSocketId(socketId);
-            indication->setControlInfo(cmd);
-            sendToApp(indication);
-        }
-        else if (!usingTcpWithRead || numBytesRequested > 0) {
+        if (!usingTcpWithRead || numBytesRequested > 0) {
             uint32_t endSeqNo = state->rcv_nxt;
             if (usingTcpWithRead) {
                 uint32_t requestedEndPos = receiveQueue->getFirstSeqNo() + numBytesRequested;
