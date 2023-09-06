@@ -1,48 +1,37 @@
 //
-// Copyright (C) 2003 CTIE, Monash University
+// Copyright (C) 2023 OpenSim Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
-//
 //
 
 package inet.examples.ethernet.TenBaseT1S;
 
+import inet.node.contract.IEthernetNetworkNode;
 import inet.node.ethernet.EthernetLink;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
 import inet.physicallayer.wired.common.WireJunction;
 
-module TenBaseT1SNode extends StandardHost
-{
-    parameters:
-        hasTcp = false;
-        hasUdp = false;
-        hasIpv4 = false;
-        numLoInterfaces = 0;
-        eth[*].typename = default("EthernetPlcaInterface");
-        @display("i=device/card");
-}
-
-network TenBaseT1SNetwork
+network EthernetMultidropNetwork
 {
     parameters:
         int numNodes;
     submodules:
         switch: EthernetSwitch {
             parameters:
-                eth[0].plca.plca_node_count = parent.numNodes + 1;
-                eth[0].plca.local_nodeID = 0;
+                eth[0].plca.plca_node_count = default(parent.numNodes + 1);
+                eth[0].plca.local_nodeID = default(0);
                 @display("p=150,150");
         }
         host: StandardHost {
             parameters:
                 @display("p=150,300");
         }
-        node[numNodes]: TenBaseT1SNode {
+        node[numNodes]: <> like IEthernetNetworkNode {
             parameters:
-                eth[*].plca.plca_node_count = parent.numNodes + 1;
-                eth[*].plca.local_nodeID = this.index + 1;
-                @display("p=300,300,row,150");
+                eth[*].plca.plca_node_count = default(parent.numNodes + 1);
+                eth[*].plca.local_nodeID = default(this.index + 1);
+                @display("p=300,300,row,150;i=device/card");
         }
         j[numNodes]: WireJunction {
             parameters:
