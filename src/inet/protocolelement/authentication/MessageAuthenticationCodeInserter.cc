@@ -23,6 +23,16 @@ void MessageAuthenticationCodeInserter::initialize(int stage)
     }
 }
 
+cGate *MessageAuthenticationCodeInserter::getRegistrationForwardingGate(cGate *gate)
+{
+    if (gate == outputGate)
+        return inputGate;
+    else if (gate == inputGate)
+        return outputGate;
+    else
+        throw cRuntimeError("Unknown gate");
+}
+
 void MessageAuthenticationCodeInserter::processPacket(Packet *packet)
 {
     const auto& header = makeShared<ByteCountChunk>(headerLength);
