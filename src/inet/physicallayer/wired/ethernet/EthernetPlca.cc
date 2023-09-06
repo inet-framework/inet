@@ -343,8 +343,8 @@ void EthernetPlca::handleWithControlFSM()
         }
         FSMA_State(CS_SYNCING) {
             FSMA_Enter(
-                curID = 0;
-                emit(curIDSignal, curID);
+                // curID = 0; NOTE: this is removed so that the curID gets zero exactly at the first TO start in both the contoller and other nodes
+                // emit(curIDSignal, curID);
                 if (tx_cmd != CMD_NONE) {
                     FSMA_Delay_Action(phy->endSignalTransmission(ESDNONE));
                     tx_cmd = CMD_NONE;
@@ -358,6 +358,8 @@ void EthernetPlca::handleWithControlFSM()
             FSMA_Transition(T1,
                             !CRS && !syncing_timer->isScheduled(),
                             CS_WAIT_TO,
+                curID = 0;
+                emit(curIDSignal, curID);
             );
         }
         FSMA_State(CS_WAIT_TO) {
