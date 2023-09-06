@@ -161,7 +161,7 @@ void Tcp::handleLowerPacket(Packet *packet)
         // process segment
         TcpConnection *conn = findConnForSegment(tcpHeader, srcAddr, destAddr);
         if (conn) {
-            TcpStateVariables *state = conn->getState();
+            TcpStateVariables *state = conn->getStateForUpdate();
             if (state && state->ect) {
                 // This may be true only in receiver side. According to RFC 3168, page 20:
                 // pure acknowledgement packets (e.g., packets that do not contain
@@ -348,7 +348,7 @@ void Tcp::updateSockPair(TcpConnection *conn, L3Address localAddr, L3Address rem
     // then update addresses/ports, and re-insert it with new key into tcpConnMap
     key.localAddr = conn->localAddr = localAddr;
     key.remoteAddr = conn->remoteAddr = remoteAddr;
-    ASSERT(conn->localPort == localPort);
+    ASSERT(conn->getLocalPort() == localPort);
     key.remotePort = conn->remotePort = remotePort;
     tcpConnMap[key] = conn;
 
@@ -544,10 +544,10 @@ std::ostream& operator<<(std::ostream& os, const Tcp::SockPair& sp)
 
 std::ostream& operator<<(std::ostream& os, const TcpConnection& conn)
 {
-    os << "socketId=" << conn.socketId << " ";
+    os << "socketId=" << conn.getSocketId() << " ";
     os << "fsmState=" << TcpConnection::stateName(conn.getFsmState()) << " ";
     os << "connection=" << (conn.getState() == nullptr ? "<empty>" : conn.getState()->str()) << " ";
-    os << "ttl=" << (conn.ttl == -1 ? "<default>" : std::to_string(conn.ttl)) << " ";
+    os << "ttl=" << (conn.getTtl() == -1 ? "<default>" : std::to_string(conn.getTtl())) << " ";
     return os;
 }
 

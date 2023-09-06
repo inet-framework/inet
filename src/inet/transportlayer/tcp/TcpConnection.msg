@@ -49,8 +49,8 @@ class TcpConnection extends cObject
     int listeningSocketId;    // identifies listening connection within the app
 
     // socket pair
-    L3Address localAddr;
-    L3Address remoteAddr;
+    L3Address localAddr @getter(getLocalAddress);
+    L3Address remoteAddr @getter(getRemoteAddress);
     int localPort;
     int remotePort;
 
