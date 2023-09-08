@@ -25,7 +25,7 @@ network EthernetMultidropNetwork
         }
         host: StandardHost {
             parameters:
-                @display("p=150,300");
+                @display("p=150,300;i=device/device");
         }
         node[numNodes]: <> like IEthernetNetworkNode {
             parameters:
