@@ -15,28 +15,13 @@
 
 package inet.physicallayer.wired.ethernet;
 
-import inet.queueing.contract.IPacketQueue;
-import inet.queueing.contract.IPacketServer;
+import inet.queueing.common.PacketDelayer;
 
-module Spi1 like ISpi
+simple SpiDelayer extends PacketDelayer like ISpi
 {
     parameters:
         double speed @unit(MHz);
+        delay = default(0s);
+        bitrate = default(min(10, dropUnit(this.speed)) * 1Mbps);
         @display("i=block/mac");
-    gates:
-        input in;
-        output out;
-    submodules:
-        queue: <default("PacketQueue")> like IPacketQueue {
-            @display("p=150,150");
-        }
-        server: <default("PacketServer")> like IPacketServer {
-            processingTime = default(0s);
-            processingBitrate = default(min(10, dropUnit(parent.speed)) * 1Mbps);
-            @display("p=150,300");
-        }
-    connections:
-        in --> { @display("m=n"); } --> queue.in;
-        queue.out --> server.in;
-        server.out --> { @display("m=s"); } --> out;
 }
