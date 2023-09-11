@@ -10,6 +10,11 @@ import inet.node.contract.IEthernetNetworkNode;
 import inet.node.ethernet.EthernetLink;
 import inet.physicallayer.wired.common.WireJunction;
 
+//
+// This module contains a single 10Base-T1S multidrop link with a separate
+// controller node and a configurable number of additional nodes. The network
+// node type can be configured for all network nodes on the multidrop link.
+//
 network MultidropNetwork
 {
     parameters:
