@@ -124,12 +124,12 @@ void TcpLwipReceiveQueue::enqueueTcpLayerData(void *dataP, unsigned int dataLeng
     dataBuffer.push(makeShared<BytesChunk>(static_cast<uint8_t *>(dataP), dataLengthP));
 }
 
-unsigned long TcpLwipReceiveQueue::getExtractableBytesUpTo() const
+B TcpLwipReceiveQueue::getExtractableBytesUpTo() const
 {
-    return B(dataBuffer.getLength()).get();
+    return B(dataBuffer.getLength());
 }
 
-Packet *TcpLwipReceiveQueue::extractBytesUpTo()
+Packet *TcpLwipReceiveQueue::extractBytesUpTo(B length)
 {
     ASSERT(connM);
 

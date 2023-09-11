@@ -626,8 +626,10 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
         case TCP_S_FIN_WAIT_1:
         case TCP_S_FIN_WAIT_2:
         case TCP_S_CLOSING:
-            if (state == TCP_S_CLOSE_WAIT)
+            if (!peerClosedSentUp && state == TCP_S_CLOSE_WAIT && this->receiveQueue->getQueueLength() == 0) {
                 sendIndicationToApp(TCP_I_PEER_CLOSED);
+                peerClosedSentUp = true;
+            }
             // whether connection setup succeeded (ESTABLISHED) or not (others),
             // cancel these timers
             if (connEstabTimer)

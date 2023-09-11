@@ -73,6 +73,8 @@ class INET_API TcpLwipConnection : public cSimpleModule
     void process_CLOSE(TcpCommand *tcpCommandP, cMessage *msgP);
     void process_ABORT(TcpCommand *tcpCommandP, cMessage *msgP);
     void process_STATUS(TcpCommand *tcpCommandP, cMessage *msgP);
+    void process_READ_REQUEST(TcpCommand *tcpCommand, cMessage *msg);
+
     void fillStatusInfo(TcpStatusInfo& statusInfo);
 
   public:
@@ -87,6 +89,8 @@ class INET_API TcpLwipConnection : public cSimpleModule
     bool isListenerM = false;
     bool onCloseM = false;
     bool sendUpEnabled = false;
+    bool autoRead = true;
+    int32_t maxByteCountRequested = 0;  // from READ requests
 
     // statistics
     static simsignal_t sndWndSignal; // snd_wnd

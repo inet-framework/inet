@@ -75,8 +75,11 @@ const char *TcpConnection::eventName(int event)
         CASE(TCP_E_SEND);
         CASE(TCP_E_CLOSE);
         CASE(TCP_E_ABORT);
+        CASE(TCP_E_DESTROY);
         CASE(TCP_E_STATUS);
         CASE(TCP_E_QUEUE_BYTES_LIMIT);
+        CASE(TCP_E_READ);
+        CASE(TCP_E_SETOPTION);
         CASE(TCP_E_RCV_DATA);
         CASE(TCP_E_RCV_ACK);
         CASE(TCP_E_RCV_SYN);
@@ -228,6 +231,8 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     state->fork = true;
     localAddr = listenerConn->localAddr;
     localPort = listenerConn->localPort;
+    autoRead = listenerConn->autoRead;
+
     FSM_Goto(fsm, TCP_S_LISTEN);
 }
 
@@ -359,6 +364,7 @@ void TcpConnection::sendAvailableIndicationToApp()
     ind->setRemoteAddr(remoteAddr);
     ind->setLocalPort(localPort);
     ind->setRemotePort(remotePort);
+    ind->setAutoRead(autoRead);
 
     indication->addTag<SocketInd>()->setSocketId(listeningSocketId);
     indication->setControlInfo(ind);
@@ -374,6 +380,7 @@ void TcpConnection::sendEstabIndicationToApp()
     ind->setRemoteAddr(remoteAddr);
     ind->setLocalPort(localPort);
     ind->setRemotePort(remotePort);
+    ind->setAutoRead(autoRead);
     indication->addTag<SocketInd>()->setSocketId(socketId);
     indication->setControlInfo(ind);
     sendToApp(indication);
@@ -387,10 +394,22 @@ void TcpConnection::sendToApp(cMessage *msg)
 void TcpConnection::sendAvailableDataToApp()
 {
     if (receiveQueue->getAmountOfBufferedBytes()) {
-        while (auto msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) {
-            msg->setKind(TCP_I_DATA); // TODO currently we never send TCP_I_URGENT_DATA
-            msg->addTag<SocketInd>()->setSocketId(socketId);
-            sendToApp(msg);
+        if (autoRead || maxByteCountRequested > 0) {
+            uint32_t endSeqNo = state->rcv_nxt;
+            if (!autoRead) {
+                uint32_t requestedEndPos = receiveQueue->getFirstSeqNo() + maxByteCountRequested;
+                if (seqLess(requestedEndPos, endSeqNo))
+                    endSeqNo = requestedEndPos;
+            }
+            while (auto msg = receiveQueue->extractBytesUpTo(endSeqNo)) {
+                msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
+                msg->addTag<SocketInd>()->setSocketId(socketId);
+                sendToApp(msg);
+                if (!autoRead) {
+                    maxByteCountRequested = 0;
+                    break;
+                }
+            }
         }
     }
 }

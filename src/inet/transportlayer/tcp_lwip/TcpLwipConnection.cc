@@ -106,6 +106,7 @@ void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
     ind->setRemoteAddr(remoteAddr);
     ind->setLocalPort(pcbM->local_port);
     ind->setRemotePort(pcbM->remote_port);
+    ind->setAutoRead(autoRead);
 
     indication->setControlInfo(ind);
     indication->addTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
@@ -125,6 +126,7 @@ void TcpLwipConnection::sendEstablishedMsg()
     tcpConnectInfo->setRemoteAddr(remoteAddr);
     tcpConnectInfo->setLocalPort(pcbM->local_port);
     tcpConnectInfo->setRemotePort(pcbM->remote_port);
+    tcpConnectInfo->setAutoRead(autoRead);
 
     indication->setControlInfo(tcpConnectInfo);
     indication->addTag<TransportProtocolInd>()->setProtocol(&Protocol::udp);
@@ -181,6 +183,7 @@ void TcpLwipConnection::fillStatusInfo(TcpStatusInfo& statusInfo)
     statusInfo.setLocalPort(pcbM->local_port);
     statusInfo.setRemoteAddr((pcbM->remote_ip.addr));
     statusInfo.setRemotePort(pcbM->remote_port);
+    statusInfo.setAutoRead(autoRead);
 
     statusInfo.setSnd_mss(pcbM->mss);
     // TODO    statusInfo.setSnd_una(pcbM->snd_una);
@@ -342,18 +345,19 @@ void TcpLwipConnection::do_SEND()
 void TcpLwipConnection::sendUpData()
 {
     if (sendUpEnabled) {
-        while (Packet *dataMsg = receiveQueueM->extractBytesUpTo()) {
+        while (true) {
+            B len = receiveQueueM->getExtractableBytesUpTo();
+            if (!autoRead && len > B(maxByteCountRequested))
+                len = B(maxByteCountRequested);
+            Packet *dataMsg = len > b(0) ? receiveQueueM->extractBytesUpTo(len) : nullptr;
+            if (dataMsg == nullptr)
+                break;
             dataMsg->setKind(TCP_I_DATA);
             dataMsg->addTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
             dataMsg->addTag<SocketInd>()->setSocketId(connIdM);
-//            int64_t len = dataMsg->getByteLength();
-            // send Msg to Application layer:
             tcpLwipM->send(dataMsg, "appOut");
-//            while (len > 0) {
-//                unsigned int slen = len > 0xffff ? 0xffff : len;
-//                tcpLwipM->getLwipTcpLayer()->tcp_recved(pcbM, slen);
-//                len -= slen;
-//            }
+            if (!autoRead)
+                maxByteCountRequested = 0;
         }
     }
 }
@@ -395,6 +399,10 @@ void TcpLwipConnection::processAppCommand(cMessage *msgP)
             process_STATUS(tcpCommand, msgP);
             break;
 
+        case TCP_C_READ:
+            process_READ_REQUEST(tcpCommand, msgP);
+            break;
+
         default:
             throw cRuntimeError("Wrong command from app: %d", msgP->getKind());
     }
@@ -410,6 +418,7 @@ void TcpLwipConnection::process_OPEN_ACTIVE(TcpOpenCommand *tcpCommandP, cMessag
     int localPort = tcpCommandP->getLocalPort();
     if (localPort == -1)
         localPort = 0;
+    autoRead = tcpCommandP->getAutoRead();
 
     EV_INFO << this << ": OPEN: "
             << tcpCommandP->getLocalAddr() << ":" << localPort << " --> "
@@ -431,6 +440,7 @@ void TcpLwipConnection::process_OPEN_PASSIVE(TcpOpenCommand *tcpCommandP,
     if (tcpCommandP->getLocalPort() == -1)
         throw cRuntimeError("Error processing command OPEN_PASSIVE: local port must be specified");
 
+    autoRead = tcpCommandP->getAutoRead();
     EV_INFO << this << "Starting to listen on: " << tcpCommandP->getLocalAddr() << ":"
             << tcpCommandP->getLocalPort() << "\n";
     listen(tcpCommandP->getLocalAddr(), tcpCommandP->getLocalPort());
@@ -476,6 +486,23 @@ void TcpLwipConnection::process_STATUS(TcpCommand *tcpCommandP, cMessage *msgP)
     msgP->setControlInfo(statusInfo);
     msgP->setKind(TCP_I_STATUS);
     tcpLwipM->send(msgP, "appOut");
+}
+
+void TcpLwipConnection::process_READ_REQUEST(TcpCommand *tcpCommand, cMessage *msg)
+{
+    if (autoRead)
+        throw cRuntimeError("TCP READ arrived, but connection used in autoRead mode");
+    //check whether we have data in the TCP queue. Store how much data the application wants. Check for pending read request.
+    TcpReadCommand *readCmd = check_and_cast<TcpReadCommand *>(tcpCommand);
+    if (readCmd->getMaxByteCount() <= 0)
+        throw cRuntimeError("Illegal argument: numberOfBytes in TCP READ command is negative or zero.");
+    if (maxByteCountRequested != 0)
+        throw cRuntimeError("A second TCP READ command arrived before data for the previous READ was sent up");
+    maxByteCountRequested = readCmd->getMaxByteCount();
+    if (!sendUpEnabled)
+        throw cRuntimeError("READ without ACCEPT");
+    sendUpData();
+    delete msg;
 }
 
 } // namespace tcp
