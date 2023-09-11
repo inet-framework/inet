@@ -30,7 +30,7 @@ module EthernetPlcaNode like IEthernetNetworkNode
 {
     parameters:
         int numApps = default(0);
-        int numEthInterfaces = default(1);
+        int numEthInterfaces = 1;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         @networkNode;
         @display("i=device/card");

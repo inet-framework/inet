@@ -44,10 +44,10 @@ network EthernetMultidropNetwork
                 @display("p=300,150,row,150");
         }
     connections:
-        switch.ethg++ <--> EthernetLink {  length = 100cm; datarate = 10Mbps; } <--> j[0].port++;
-        switch.ethg++ <--> EthernetLink {  length = 50cm; datarate = 100Mbps; } <--> host.ethg++;
+        switch.ethg++ <--> EthernetLink { length = 100cm; datarate = 10Mbps; } <--> j[0].port++;
+        switch.ethg++ <--> EthernetLink { length = 50cm; datarate = 100Mbps; } <--> host.ethg++;
         for i=0..numNodes-1 {
-            j[i].port++ <--> EthernetLink {  length = 100cm; datarate = 10Mbps; } <--> j[i + 1].port++ if i < numNodes - 1;
-            j[i].port++ <--> EthernetLink {  length = 50cm; datarate = 10Mbps; } <--> node[i].ethg++;
+            j[i].port++ <--> EthernetLink { length = 100cm; datarate = 10Mbps; } <--> j[i + 1].port++ if i < numNodes - 1;
+            j[i].port++ <--> EthernetLink { length = 50cm; datarate = 10Mbps; } <--> node[i].ethg++;
         }
 }
