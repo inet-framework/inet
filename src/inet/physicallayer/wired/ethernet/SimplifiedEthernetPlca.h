@@ -20,18 +20,10 @@ namespace inet {
 
 namespace physicallayer {
 
-// different approaches for implementing HOLD and PENDING_DELAY
+// TODO: implement behavior of HOLD and PENDING_DELAY states from the original data state machine in the standard
+// different approaches for the implementation
 // - add two timers to the current state machine and handle them separately in the handleSelfMessage to avoid drastically increasing the number of transitions
 // - add a separate state machine that have the above two states and the related timers, it would delay packetPending = true and also the collision notification to the MAC
-// - switch back to the standard based state machines
-//   - use the control state machine from the standard as it is already implemented
-//   - use the simplified data state machine for which we created a GraphViz diagram
-
-
-// TODO: Table 147–1—4B/5B Encoding
-// TODO: normal transmit opportunity ends with ESDBRS ESDOK signals end of data
-// TODO: ESDBRS ESDOK indicates burst is coming
-// TODO: ESDBRS ESDOK COMMIT ESD ESDOK indicates burst end
 class INET_API SimplifiedEthernetPlca : public cSimpleModule, public virtual IEthernetCsmaMac, public virtual IEthernetCsmaPhy
 {
   public:
