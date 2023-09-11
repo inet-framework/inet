@@ -9,6 +9,25 @@ package inet.physicallayer.wired.ethernet;
 
 import inet.protocolelement.contract.IProtocolLayer;
 
+//
+// This module implements the Ethernet Phyisical Layer Collision Avoidance (PLCA)
+// protocol defined in the IEEE 802.3cg-2019 standard.
+//
+// The PLCA protocol is implemented with the several limitations:
+//  - status state machine is not implemented (plca_status)
+//  - PLCA mode cannot be enabled/disabled dynamically (plca_en), it's always active
+//  - PLCA cannot be reset (plca_reset)
+//  - special handling of local_nodeID 255 is missing
+//  - beacons are assumed to be never lost (no invalid_beacon_timer)
+//  - data state machine cannot abort transmissions
+//  - mixed operation with CSMA/CD nodes on the same multidrop link is not supported
+//
+// The upper layer must be connected to a module implementing the ~IEthernetCsmaMac
+// C++ interface. The lower layer must be connected to a module implementing the
+// ~IEthernetCsmaPhy C++ interface.
+//
+// @see ~EthernetCsmaMac, ~EthernetCsmaPhy, ~EthernetPlcaInterface
+//
 simple EthernetPlca like IProtocolLayer
 {
     parameters:

@@ -16,7 +16,11 @@ import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.ITrafficConditioner;
 
 //
-// This module represents an Ethernet PLCA capable network interface.
+// This module implements an Ethernet PLCA capable network interface. The Ethernet
+// Phyisical Layer Collision Avoidance (PLCA) protocol is defined in the IEEE
+// 802.3cg-2019 standard.
+//
+// This module uses separate Ethernet MAC, PLCA, and PHY protocol modules.
 //
 module EthernetPlcaInterface extends NetworkInterface like IEthernetInterface
 {
