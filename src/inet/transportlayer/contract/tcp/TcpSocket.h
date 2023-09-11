@@ -140,6 +140,7 @@ class INET_API TcpSocket : public ISocket
     };
 
     class INET_API ReceiveQueueBasedCallback : public ICallback {
+        // TODO át lehetne tenni ide a receiveQueue-t ?
       public:
         virtual void socketDataArrived(TcpSocket *socket) = 0;
 
@@ -160,6 +161,8 @@ class INET_API TcpSocket : public ISocket
     int localPrt = -1;
     L3Address remoteAddr;
     int remotePrt = -1;
+
+    bool autoRead = true;   // true: TCP send up arrived data automatically. false: should use read command.
 
     ICallback *cb = nullptr;
     void *userData = nullptr;
@@ -230,7 +233,30 @@ class INET_API TcpSocket : public ISocket
     int getLocalPort() const { return localPrt; }
     L3Address getRemoteAddress() const { return remoteAddr; }
     int getRemotePort() const { return remotePrt; }
+    bool getAutoRead() { return autoRead; }
     //@}
+
+    /**
+     * Set autoRead mode on/off.
+     *
+     * The autoRead is on by default. In this mode, incoming data
+     * is immediately forwarded by TCP connection to the socket. This turns
+     * off TCP flow control because the application is capable of
+     * receiving any amount of data at any time.
+     *
+     * When autoRead is set to off, it operates similarly to the Unix
+     * socket API. In this mode, the TCP retains the received data in a
+     * buffer and only sends it to the socket when the read() function
+     * is called.
+     *
+     * Please note that this setting can only be used before calling
+     * connect() or listen(). When a connection is established in a listening
+     * socket, a new fork of the socket is automatically created, and the
+     * connection is established with this new fork. Sockets created from
+     * a fork operation in a listen socket will inherit this setting from
+     * the parent listen socket.
+     */
+    void setAutoRead(bool autoRead);
 
     /** @name Opening and closing connections, sending data */
     //@{
@@ -294,6 +320,17 @@ class INET_API TcpSocket : public ISocket
      * Active OPEN to the given remote socket.
      */
     void connect(L3Address remoteAddr, int remotePort);
+
+    /**
+     * This function sends a READ request message to the TCP connection module,
+     * specifying the intended data length. The TCP connection module responds
+     * by sending data bytes to processMessage() function. If data is unavailable,
+     * the TCP connection module stores the request and sends data when available.
+     * Only one READ request can be active at a time; secondary requests are rejected.
+     *
+     * Note: This function can only be used when the autoRead mode is turned off.
+     */
+    void read(int32_t numBytes);
 
     /**
      * Sends data packet.
@@ -368,6 +405,9 @@ class INET_API TcpSocket : public ISocket
      */
     void renewSocket();
 
+    /**
+     * Returns true when the socket is opened
+     */
     virtual bool isOpen() const override;
     //@}
 

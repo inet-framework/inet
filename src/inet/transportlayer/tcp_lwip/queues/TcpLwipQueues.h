@@ -155,11 +155,11 @@ class INET_API TcpLwipReceiveQueue : public cObject
     /**
      * The method called when data received from LWIP
      * The method should set status of the data in queue to received
-     * called after socket->read_data() successfull
+     * called after socket->read_data() successful
      */
     virtual void enqueueTcpLayerData(void *dataP, unsigned int dataLengthP);
 
-    virtual unsigned long getExtractableBytesUpTo() const;
+    virtual B getExtractableBytesUpTo() const;
 
     /**
      * Should create a packet to be passed up to the app, up to (but NOT
@@ -167,9 +167,9 @@ class INET_API TcpLwipReceiveQueue : public cObject
      * It should return nullptr if there's no more data to be passed up --
      * this method is called several times until it returns nullptr.
      *
-     * called after socket->read_data() successfull
+     * called after socket->read_data() successful
      */
-    virtual Packet *extractBytesUpTo();
+    virtual Packet *extractBytesUpTo(B length);
 
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.

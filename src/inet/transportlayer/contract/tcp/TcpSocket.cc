@@ -32,6 +32,7 @@ TcpSocket::TcpSocket(cMessage *msg)
         remoteAddr = availableInfo->getRemoteAddr();
         localPrt = availableInfo->getLocalPort();
         remotePrt = availableInfo->getRemotePort();
+        autoRead = availableInfo->getAutoRead();
     }
     else if (msg->getKind() == TCP_I_ESTABLISHED) {
         // management of stockstate is left to processMessage() so we always
@@ -44,6 +45,7 @@ TcpSocket::TcpSocket(cMessage *msg)
         remoteAddr = connectInfo->getRemoteAddr();
         localPrt = connectInfo->getLocalPort();
         remotePrt = connectInfo->getRemotePort();
+        autoRead = connectInfo->getAutoRead();
     }
 }
 
@@ -55,6 +57,7 @@ TcpSocket::TcpSocket(TcpAvailableInfo *availableInfo)
     remoteAddr = availableInfo->getRemoteAddr();
     localPrt = availableInfo->getLocalPort();
     remotePrt = availableInfo->getRemotePort();
+    autoRead = availableInfo->getAutoRead();
 }
 
 TcpSocket::~TcpSocket()
@@ -104,6 +107,7 @@ void TcpSocket::listen(bool fork)
     openCmd->setLocalAddr(localAddr);
     openCmd->setLocalPort(localPrt);
     openCmd->setFork(fork);
+    openCmd->setAutoRead(autoRead);
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
     request->setControlInfo(openCmd);
@@ -137,11 +141,30 @@ void TcpSocket::connect(L3Address remoteAddress, int remotePort)
     openCmd->setLocalPort(localPrt);
     openCmd->setRemoteAddr(remoteAddr);
     openCmd->setRemotePort(remotePrt);
+    openCmd->setAutoRead(autoRead);
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
     request->setControlInfo(openCmd);
     sendToTcp(request);
     sockstate = CONNECTING;
+}
+
+void TcpSocket::read(int32_t numBytes)
+{
+    ASSERT(numBytes > 0);
+
+    //TODO check connection state
+    if (sockstate != CONNECTED && sockstate != CONNECTING && sockstate != PEER_CLOSED && sockstate != LOCALLY_CLOSED)
+        throw cRuntimeError("TcpSocket::read(): socket not connected or connecting, state is %s", stateName(sockstate));
+
+
+    auto request = new Request("Read", TCP_C_READ);
+
+    TcpReadCommand *readCmd = new TcpReadCommand();
+    readCmd->setMaxByteCount(numBytes);
+
+    request->setControlInfo(readCmd);
+    sendToTcp(request);
 }
 
 void TcpSocket::send(Packet *msg)
@@ -243,7 +266,12 @@ void TcpSocket::sendToTcp(cMessage *msg, int connId)
     auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
     tags.addTagIfAbsent<SocketReq>()->setSocketId(connId == -1 ? this->connId : connId);
-    check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule())->send(msg, gateToTcp);
+    cSimpleModule *senderModule = check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule());
+    senderModule->send(msg, gateToTcp);
+//    {
+//        omnetpp::cMethodCallContextSwitcher __ctx(senderModule);
+//        __ctx.methodCall("TcpSocket::sendToTcp");
+//    }
 }
 
 void TcpSocket::renewSocket()
@@ -257,7 +285,6 @@ void TcpSocket::renewSocket()
 bool TcpSocket::isOpen() const
 {
     switch (sockstate) {
-        case BOUND:
         case LISTENING:
         case CONNECTING:
         case CONNECTED:
@@ -265,6 +292,7 @@ bool TcpSocket::isOpen() const
         case LOCALLY_CLOSED:
         case SOCKERROR: // TODO check SOCKERROR is opened or is closed socket
             return true;
+        case BOUND:
         case NOT_BOUND:
         case CLOSED:
             return false;
@@ -389,5 +417,16 @@ const char *TcpSocket::stateName(TcpSocket::State state)
 #undef CASE
 }
 
-} // namespace inet
+void TcpSocket::setAutoRead(bool autoRead)
+{
+    switch (sockstate) {
+        case NOT_BOUND:
+        case BOUND:
+            this->autoRead = autoRead;
+            break;
+        default:
+            throw cRuntimeError("The auto read mode cannot be changed on an open socket (sockstate is %s)", stateName(sockstate));
+    }
+}
 
+} // namespace inet
