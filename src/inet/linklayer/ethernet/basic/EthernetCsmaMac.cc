@@ -44,7 +44,6 @@ void EthernetCsmaMac::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         fcsMode = parseFcsMode(par("fcsMode"));
         txQueue = getQueue(gate(upperLayerInGateId));
-        sendRawBytes = par("sendRawBytes");
         promiscuous = par("promiscuous");
         phy = getConnectedModule<IEthernetCsmaPhy>(gate("lowerLayerOut"));
         txTimer = new cMessage("TxTimer", END_TX_TIMER);

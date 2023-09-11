@@ -61,7 +61,6 @@ class INET_API EthernetCsmaMac : public MacProtocolBase, public virtual IEtherne
   protected:
     // parameters
     FcsMode fcsMode;
-    bool sendRawBytes = false;
     bool promiscuous = false;
     const EthernetModes::EthernetMode *mode = nullptr;
 
