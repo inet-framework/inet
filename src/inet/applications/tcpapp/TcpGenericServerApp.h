@@ -26,6 +26,7 @@ class INET_API TcpGenericServerApp : public cSimpleModule, public LifecycleUnsup
     TcpSocket socket;
     simtime_t delay;
     simtime_t maxMsgDelay;
+    bool autoRead = true;
 
     long msgsRcvd;
     long msgsSent;
@@ -37,6 +38,7 @@ class INET_API TcpGenericServerApp : public cSimpleModule, public LifecycleUnsup
   protected:
     virtual void sendBack(cMessage *msg);
     virtual void sendOrSchedule(cMessage *msg, simtime_t delay);
+    virtual void sendOrScheduleReadCommandIfNeeded(int connId);
 
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

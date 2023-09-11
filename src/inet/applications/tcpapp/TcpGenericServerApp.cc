@@ -41,8 +41,10 @@ void TcpGenericServerApp::initialize(int stage)
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
+        autoRead = par("autoRead");
         socket.setOutputGate(gate("socketOut"));
         socket.bind(localAddress[0] ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
+        socket.setAutoRead(autoRead);
         socket.listen();
 
         cModule *node = findContainingNode(this);
@@ -102,6 +104,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
         auto chunk = packet->peekDataAt(B(0), packet->getDataLength());
         queue.push(chunk);
         emit(packetReceivedSignal, packet);
+        sendOrScheduleReadCommandIfNeeded(connId);
 
         bool doClose = false;
         while (queue.has<GenericAppMsg>(b(-1))) {
@@ -139,8 +142,17 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
             sendOrSchedule(request, delay + maxMsgDelay);
         }
     }
-    else if (msg->getKind() == TCP_I_AVAILABLE)
+    else if (msg->getKind() == TCP_I_AVAILABLE) {
         socket.processMessage(msg);
+    }
+    else if (msg->getKind() == TCP_I_ESTABLISHED) {
+        auto connectInfo = check_and_cast<TcpConnectInfo *>(msg->getControlInfo());
+        ASSERT(autoRead == connectInfo->getAutoRead());
+        if (!autoRead) {
+            int connId = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
+            sendOrScheduleReadCommandIfNeeded(connId);
+        }
+    }
     else {
         // some indication -- ignore
         EV_WARN << "drop msg: " << msg->getName() << ", kind:" << msg->getKind() << "(" << cEnum::get("inet::TcpStatusInd")->getStringFor(msg->getKind()) << ")\n";
@@ -159,6 +171,29 @@ void TcpGenericServerApp::finish()
 {
     EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << msgsSent << " packets\n";
     EV_INFO << getFullPath() << ": received " << bytesRcvd << " bytes in " << msgsRcvd << " packets\n";
+}
+
+void TcpGenericServerApp::sendOrScheduleReadCommandIfNeeded(int connId)
+{
+    if (!autoRead) {
+        simtime_t delay = par("readDelay");
+        auto request = new Request("Read", TCP_C_READ);
+
+        TcpReadCommand *readCmd = new TcpReadCommand();
+        readCmd->setMaxByteCount(par("readSize"));
+        request->setControlInfo(readCmd);
+        request->addTagIfAbsent<SocketReq>()->setSocketId(connId);
+
+        if (delay >= SIMTIME_ZERO) {
+            scheduleAfter(delay, request);
+        }
+        else {
+            // send read message to TCP
+            request->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
+            EV_INFO << "sending \"" << request->getName() << "\" to TCP\n";
+            send(request, "socketOut");
+        }
+    }
 }
 
 } // namespace inet
