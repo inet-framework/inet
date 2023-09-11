@@ -33,8 +33,6 @@ module EthernetPlcaInterface extends NetworkInterface like IEthernetInterface
     gates:
         input upperLayerIn;
         output upperLayerOut;
-        input cutthroughIn @loose;
-        output cutthroughOut @loose;
         inout phys @labels(EthernetSignal);
     submodules:
         egressTC: <default("")> like ITrafficConditioner {
