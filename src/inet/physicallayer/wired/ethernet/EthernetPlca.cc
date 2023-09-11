@@ -91,8 +91,12 @@ void EthernetPlca::initialize(int stage)
         local_nodeID = par("local_nodeID");
         max_bc = par("max_bc");
         delay_line_length = par("delay_line_length");
-        to_interval = par("to_interval");
-        burst_interval = par("burst_interval");
+        to_timer_length = b(par("to_timer_length"));
+        burst_timer_length = b(par("burst_timer_length"));
+        beacon_timer_length = b(par("beacon_timer_length"));
+        beacon_det_timer_length = b(par("beacon_det_timer_length"));
+        pending_timer_length = b(par("pending_timer_length"));
+        commit_timer_length = b(par("commit_timer_length"));
         phy = getConnectedModule<IEthernetCsmaPhy>(gate("lowerLayerOut"));
         mac = getConnectedModule<IEthernetCsmaMac>(gate("upperLayerOut"));
         beacon_timer = new cMessage("beacon_timer", END_BEACON_TIMER);
@@ -331,7 +335,7 @@ void EthernetPlca::handleWithControlFSM()
         }
         FSMA_State(CS_SEND_BEACON) {
             FSMA_Enter(
-                scheduleAfter(20 / mode->bitrate, beacon_timer);
+                scheduleAfter(b(beacon_timer_length).get() / mode->bitrate, beacon_timer);
                 tx_cmd = CMD_BEACON;
                 emit(txCmdSignal, tx_cmd);
                 FSMA_Delay_Action(phy->startSignalTransmission(BEACON));
@@ -364,7 +368,7 @@ void EthernetPlca::handleWithControlFSM()
         }
         FSMA_State(CS_WAIT_TO) {
             FSMA_Enter(
-                scheduleAfter(to_interval, to_timer);
+                scheduleAfter(b(to_timer_length).get() / mode->bitrate, to_timer);
             );
             FSMA_Transition(T1,
                             CRS,
@@ -386,7 +390,7 @@ void EthernetPlca::handleWithControlFSM()
         FSMA_State(CS_EARLY_RECEIVE) {
             FSMA_Enter(
                 cancelEvent(to_timer);
-                rescheduleAfter(22 / mode->bitrate, beacon_det_timer);
+                rescheduleAfter(b(beacon_det_timer_length).get() / mode->bitrate, beacon_det_timer);
             );
             // TODO this transition takes normal nodes to the first transmit opportunity too early because BEACON is detected at RECEPTION_START
             FSMA_Transition(T1, // D
@@ -470,7 +474,7 @@ void EthernetPlca::handleWithControlFSM()
                 tx_cmd = CMD_COMMIT;
                 emit(txCmdSignal, tx_cmd);
                 FSMA_Delay_Action(phy->startSignalTransmission(COMMIT));
-                scheduleAfter(burst_interval, burst_timer);
+                scheduleAfter(b(burst_timer_length).get() / mode->bitrate, burst_timer);
             );
             FSMA_Transition(T1,
                             TX_EN,
@@ -628,7 +632,7 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
         FSMA_State(DS_DELAY_PENDING) {
             FSMA_Enter(
                 SIGNAL_STATUS = NO_SIGNAL_ERROR;
-                scheduleAfter(512 / mode->bitrate, pending_timer)
+                scheduleAfter(b(pending_timer_length).get() / mode->bitrate, pending_timer)
             );
             FSMA_Event_Transition(PENDING_END,
                                   event == END_PENDING_TIMER,
@@ -654,7 +658,7 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
         FSMA_State(DS_WAIT_MAC) {
             FSMA_Enter(
                 CARRIER_STATUS = CARRIER_OFF;
-                scheduleAfter(288 / mode->bitrate, commit_timer)
+                scheduleAfter(b(commit_timer_length).get() / mode->bitrate, commit_timer)
             );
             FSMA_Event_Transition(TX_START,
                                   event == START_FRAME_TRANSMISSION,

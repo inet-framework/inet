@@ -101,8 +101,12 @@ class INET_API EthernetPlca : public cSimpleModule, public virtual IEthernetCsma
     int local_nodeID = -1;
     int max_bc = -1;
     int delay_line_length = -1;
-    simtime_t to_interval = -1;
-    simtime_t burst_interval = -1;
+    b to_timer_length = b(-1);
+    b burst_timer_length = b(-1);
+    b beacon_timer_length = b(-1);
+    b beacon_det_timer_length = b(-1);
+    b pending_timer_length = b(-1);
+    b commit_timer_length = b(-1);
 
     // environment for external communication
     IEthernetCsmaPhy *phy = nullptr;
@@ -118,6 +122,9 @@ class INET_API EthernetPlca : public cSimpleModule, public virtual IEthernetCsma
     bool CRS = false;
 //    bool MCD = true;
     bool packetPending = false;
+//    bool plca_en = false;
+//    bool plca_reset = false;
+//    bool plca_status = false;
 //    bool plca_txen = false;
 //    bool plca_txer = false;
     bool PMCD = true;

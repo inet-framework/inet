@@ -18,14 +18,22 @@ simple EthernetPlca like IProtocolLayer
         // ID representing the PLCA transmit opportunity number assigned to the node.
         int local_nodeID;
         // Maximum number of additional packets the node is allowed to transmit in a single burst.
-        int max_bc = default(10);
+        int max_bc = default(0);
         // The maximum number of nibbles that the PLCA RS variable delay line can hold.
         int delay_line_length = default(100);
         // The transmit opportunity timer should be set equal across the mixing segment for PLCA to work properly.
-        double to_interval @unit(s) = default(3.2us);
+        int to_timer_length @unit(b) = default(32b);
         // This timer determines how long to wait for the MAC to send a new packet before yielding the transmit
         // opportunity. For PLCA burst mode to work properly this timer should be set greater than one IPG.
-        double burst_interval @unit(s) = default(10us);
+        int burst_timer_length @unit(b) = default(100b);
+        // Times the duration of the BEACON signal.
+        int beacon_timer_length @unit(b) = default(20b);
+        // Timer for detecting received BEACONs.
+        int beacon_det_timer_length @unit(b) = default(22b);
+        // Defines the time the PLCA Data state diagram waits in the DELAY_PENDING state before switching to PENDING state.
+        int pending_timer_length @unit(b) = default(512b);
+        // Defines the maximum time the PLCA Data state machine is allowed to stay in WAIT_MAC state.
+        int commit_timer_length @unit(b) = default(288b);
         @signal[curID](type=int);
         @signal[carrierSenseChanged](type=int);
         @signal[collisionChanged](type=int);
