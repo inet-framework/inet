@@ -1,0 +1,9 @@
+For studying how TCP (and its various flavors) tolerate long link delays.
+
+Run the Experiment parameter study, then plot the sum of the tcpRcvPayloadBytes
+statistics of the TCP connection in the server. You can make the parameter study
+cover more input variations by uncommenting the lines that define more iteration
+values.
+
+Observe that larger link delays necessitate larger advertised windows for TCP to
+produce throughputs that are near the link capacity.
