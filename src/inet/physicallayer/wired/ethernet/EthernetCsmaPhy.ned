@@ -42,8 +42,8 @@ simple EthernetCsmaPhy
         @statistic[propagationTime](title="propagation time"; unit=s);
         @statistic[transmissionTime](title="transmission time"; unit=s; source=packetDuration(transmissionEnded); record=vector,histogram; interpolationmode=none);
 //        @statistic[flowTransmissionTime](title="flow transmission time"; unit=s; source=packetDuration(demuxFlow(transmissionEnded)); record=vector,histogram; interpolationmode=none);
-        @statistic[busUsed](title="bus used"; record=count,vector; interpolationmode=none);
-        @statistic[busUtilization](title="bus utilization"; source=utilization(busUsed); record=count,vector; interpolationmode=none);
+        @statistic[busUsed](title="bus used"; record=count,vector; interpolationmode=sample-hold);
+        @statistic[busUtilization](title="bus utilization"; source=utilization(busUsed); record=count,vector; interpolationmode=linear);
         @display("i=block/rxtx");
     gates:
         input upperLayerIn @labels(EtherFrame);
