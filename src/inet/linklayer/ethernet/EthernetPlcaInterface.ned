@@ -23,9 +23,11 @@ import inet.queueing.contract.ITrafficConditioner;
 // This module contains separate Ethernet MAC, PLCA, and PHY protocol modules.
 // If the PLCA module is omitted, then this module implements a half-duplex
 // Ethernet CSMA/CD network interface. If the PLCA module is present, then this
-// module implements an Ethernet PLCA network interface.
+// module implements an Ethernet PLCA network interface that supports multidrop
+// links. In a multidrop link network nodes can be connected using ~WireJunction
+// modules and ~EthernetLink channels.
 //
-// @see ~EthernetCsmaMac, ~EthernetPlca, ~EthernetCsmaPhy
+// @see ~EthernetCsmaMac, ~EthernetPlca, ~EthernetCsmaPhy, ~WireJunction, ~EthernetLink
 //
 module EthernetPlcaInterface extends NetworkInterface like IEthernetInterface
 {
