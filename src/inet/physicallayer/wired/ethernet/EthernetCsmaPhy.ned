@@ -9,14 +9,16 @@ package inet.physicallayer.wired.ethernet;
 
 //
 // This module implements the Ethernet CSMA/CD PHY protocol. It supports building
-// Ethernet CSMA/CD and Ethernet PLCA network interfaces.
+// both Ethernet CSMA/CD and Ethernet PLCA network interfaces.
 //
 // This module detects the carrier signal and collisions on the channel. Frames
 // are received correctly if there are no overlapping transmissions or receptions.
 // It also supports sending special Ethernet signals: jam, commit, and beacon.
 //
 // The upper layer must be connected to a module implementing the ~IEthernetCsmaMac
-// C++ interface.
+// C++ interface. There are two such modules: ~EthernetCsmaMac and ~EthernetPlca.
+// The former can be used to build an Ethernet CSMA/CD network interface, the
+// latter can be used to build an Ethernet PLCA network interface.
 //
 // @see ~EthernetCsmaPhy, ~EthernetPlca, ~EthernetPlcaInterface
 //

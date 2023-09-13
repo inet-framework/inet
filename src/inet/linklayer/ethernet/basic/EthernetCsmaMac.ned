@@ -11,7 +11,7 @@ import inet.linklayer.base.MacProtocolBase;
 
 //
 // This module implements the Ethernet CSMA/CD MAC protocol. It supports building
-// Ethernet CSMA/CD and Ethernet PLCA network interfaces.
+// both Ethernet CSMA/CD and Ethernet PLCA network interfaces.
 //
 // This module implements the exponential backoff algorithm, sends jam signal
 // when a collision is detected, and maintains IFG between signals on the channel.
@@ -19,7 +19,9 @@ import inet.linklayer.base.MacProtocolBase;
 // header and an Ethernet FCS.
 //
 // The lower layer must be connected to a module implementing the ~IEthernetCsmaPhy
-// C++ interface.
+// C++ interface. There are two such modules: ~EthernetCsmaPhy and ~EthernetPlca.
+// The former can be used to build an Ethernet CSMA/CD network interface, the
+// latter can be used to build an Ethernet PLCA network interface.
 //
 // @see ~EthernetCsmaPhy, ~EthernetPlca, ~EthernetPlcaInterface
 //

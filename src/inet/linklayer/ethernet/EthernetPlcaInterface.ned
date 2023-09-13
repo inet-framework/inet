@@ -20,7 +20,12 @@ import inet.queueing.contract.ITrafficConditioner;
 // Phyisical Layer Collision Avoidance (PLCA) protocol is defined in the IEEE
 // 802.3cg-2019 standard.
 //
-// This module uses separate Ethernet MAC, PLCA, and PHY protocol modules.
+// This module contains separate Ethernet MAC, PLCA, and PHY protocol modules.
+// If the PLCA module is omitted, then this module implements a half-duplex
+// Ethernet CSMA/CD network interface. If the PLCA module is present, then this
+// module implements an Ethernet PLCA network interface.
+//
+// @see ~EthernetCsmaMac, ~EthernetPlca, ~EthernetCsmaPhy
 //
 module EthernetPlcaInterface extends NetworkInterface like IEthernetInterface
 {
