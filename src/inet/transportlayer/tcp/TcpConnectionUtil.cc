@@ -435,29 +435,38 @@ void TcpConnection::initConnection(TcpOpenCommand *openCmd)
 
 void TcpConnection::configureStateVariables()
 {
-    state->dupthresh = tcpMain->par("dupthresh");
-    long advertisedWindowPar = tcpMain->par("advertisedWindow");
-    state->ws_support = tcpMain->par("windowScalingSupport"); // if set, this means that current host supports WS (RFC 1323)
-    state->ws_manual_scale = tcpMain->par("windowScalingFactor"); // scaling factor (set manually) to help for Tcp validation
-    state->ecnWillingness = tcpMain->par("ecnWillingness"); // if set, current host is willing to use ECN
-    if ((!state->ws_support && advertisedWindowPar > TCP_MAX_WIN) || advertisedWindowPar <= 0 || advertisedWindowPar > TCP_MAX_WIN_SCALED)
-        throw cRuntimeError("Invalid advertisedWindow parameter: %ld", advertisedWindowPar);
+    uint32_t advertisedWindow = tcpMain->par("advertisedWindow");
+    state->ws_support = tcpMain->par("windowScalingSupport");
+    int windowScalingFactor = tcpMain->par("windowScalingFactor");
+    if (windowScalingFactor < -1 || windowScalingFactor > 14)
+        throw cRuntimeError("Invalid parameter value windowScalingFactor=%d -- valid values are 0..14, and -1 for automatic selection based on advertisedWindow", windowScalingFactor);
+    if (state->ws_support) {
+        uint32_t maxAdvertisedWindow = TCP_MAX_WIN << (windowScalingFactor==-1 ? 14 : windowScalingFactor);
+        if (advertisedWindow > maxAdvertisedWindow)
+            throw cRuntimeError("Invalid parameter value: advertisedWindow=%" PRIu32 " exceeds representable maximum %" PRIu32 " with windowScalingFactor=%d", advertisedWindow, maxAdvertisedWindow, windowScalingFactor);
+    }
+    else if (advertisedWindow > TCP_MAX_WIN) {
+        throw cRuntimeError("Invalid parameter value: advertisedWindow=%" PRIu32 " exceeds representable maximum %lu, try turning on window scaling (windowScalingSupport=true)", advertisedWindow, TCP_MAX_WIN);
+    }
+    state->ws_manual_scale = windowScalingFactor;
 
-    state->rcv_wnd = advertisedWindowPar;
-    state->rcv_adv = advertisedWindowPar;
+    state->rcv_wnd = advertisedWindow;
+    state->rcv_adv = advertisedWindow;
 
-    if (state->ws_support && advertisedWindowPar > TCP_MAX_WIN) {
+    if (state->ws_support && advertisedWindow > TCP_MAX_WIN) {
         state->rcv_wnd = TCP_MAX_WIN; // we cannot to guarantee that the other end is also supporting the Window Scale (header option) (RFC 1322)
         state->rcv_adv = TCP_MAX_WIN; // therefore TCP_MAX_WIN is used as initial value for rcv_wnd and rcv_adv
     }
 
-    state->maxRcvBuffer = advertisedWindowPar;
+    state->maxRcvBuffer = advertisedWindow;
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACK algorithm (RFC 1122) enabled/disabled
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
     state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 1323)
+    state->ecnWillingness = tcpMain->par("ecnWillingness"); // if set, current host is willing to use ECN
+    state->dupthresh = tcpMain->par("dupthresh");
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
 
     if (state->sack_support) {
