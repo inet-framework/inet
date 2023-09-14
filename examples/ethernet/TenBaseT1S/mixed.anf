@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/Switch-*.vec"/>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/Switch-*.sca"/>
+        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/Mixed-*.vec"/>
+        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/Mixed-*.sca"/>
     </inputs>
     <charts>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="998481550" name="transmit opportunity ID" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1013711651" name="transmit opportunity ID" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -641,7 +641,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1896051560" name="switch" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="504565990" name="switch" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
@@ -1290,7 +1290,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value=""/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="294439852" name="node[n]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="2086270192" name="node[n]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Button

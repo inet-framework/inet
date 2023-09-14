@@ -18,7 +18,7 @@ import inet.physicallayer.wired.common.WireJunction;
 // port acts as the controller of the multidrop link. The network node type can
 // be configured for all the nodes on the multidrop link.
 //
-network EthernetMultidropNetwork
+network MixedMultidropNetwork
 {
     parameters:
         int numNodes;
