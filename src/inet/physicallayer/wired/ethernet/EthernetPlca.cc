@@ -103,6 +103,8 @@ void EthernetPlca::initialize(int stage)
         beacon_det_timer = new cMessage("beacon_det_timer", END_BEACON_DET_TIMER);
         burst_timer = new cMessage("burst_timer", END_BURST_TIMER);
         to_timer = new cMessage("to_timer", END_TO_TIMER);
+        // schedule so that the control state machine doesn't yield when a packet arrives at the same time as the transmit opportunity start
+        to_timer->setSchedulingPriority(100);
         syncing_timer = new cMessage("syncing_timer", END_SYNCING_TIMER);
         hold_timer = new cMessage("hold_timer", END_HOLD_TIMER);
         pending_timer = new cMessage("pending_timer", END_PENDING_TIMER);
@@ -553,7 +555,7 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
                 FSMA_Delay_Action(handleWithControlFSM());
             );
             FSMA_Event_Transition(RX_START,
-                                  event == RECEPTION_START,
+                                  event == RECEPTION_START && receiving,
                                   DS_RECEIVE,
             );
             FSMA_Event_Transition(TX_START,
@@ -563,6 +565,7 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
                 currentTx = check_and_cast<Packet *>(message);
             );
             FSMA_Ignore_Event(event == CARRIER_SENSE_START || event == CARRIER_SENSE_END);
+            FSMA_Ignore_Event((event == RECEPTION_START && !receiving) || event == RECEPTION_END);
             FSMA_Fail_On_Unhandled_Event();
         }
         FSMA_State(DS_RECEIVE) {
