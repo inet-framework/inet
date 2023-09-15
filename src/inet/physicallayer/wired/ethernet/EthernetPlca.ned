@@ -102,8 +102,8 @@ simple EthernetPlca like IProtocolLayer
         @statistic[dataState](title="data state"; type=enum; enum=WAIT_IDLE, IDLE, RECEIVE, HOLD, COLLIDE, DELAY_PENDING, PENDING, WAIT_MAC, TRANSMIT; source=dataStateChanged; record=count,vector; interpolationmode=sample-hold);
         @statistic[rxCmd](title="RX command"; type=enum; enum=NONE, BEACON, COMMIT; record=count,vector; interpolationmode=sample-hold);
         @statistic[txCmd](title="TX command"; type=enum; enum=NONE, BEACON, COMMIT; record=count,vector; interpolationmode=sample-hold);
-        @statistic[packetPendingDelay](title="packet pending delay"; unit=s; record=count,vector; interpolationmode=none);
-        @statistic[packetInterval](title="packet interval"; unit=s; record=count,vector; interpolationmode=none);
+        @statistic[packetPendingDelay](title="packet pending delay"; unit=s; record=count,histogram,vector; interpolationmode=none);
+        @statistic[packetInterval](title="packet interval"; unit=s; record=count,histogram,vector; interpolationmode=none);
         @statistic[transmitOpportunityUsed](title="transmit opportunity used"; record=count,vector; interpolationmode=none);
         @display("i=block/rxtx");
     gates:
