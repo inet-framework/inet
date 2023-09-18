@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/Bestcase-*.vec"/>
-        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/Bestcase-*.sca"/>
+        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/BestCase-*.vec"/>
+        <input pattern="/inet/examples/ethernet/TenBaseT1S/results/BestCase-*.sca"/>
     </inputs>
     <charts>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="902249262" name="packet pending delay (should be alwyas zero)" resultTypes="vector" template="linechart_native" type="LINE">
@@ -630,7 +630,7 @@ utils.export_data_if_needed(df, props)
             <property name="X.Label.Wrap" value="true"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
-            <property name="markersize" value="10"/>
+            <property name="markersize" value="5"/>
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="auto"/>
             <property name="legend_show" value="true"/>
@@ -1903,7 +1903,7 @@ utils.export_data_if_needed(df, props)
             <property name="X.Label.Wrap" value="true"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
-            <property name="markersize" value="10"/>
+            <property name="markersize" value="5"/>
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="auto"/>
             <property name="legend_show" value="true"/>

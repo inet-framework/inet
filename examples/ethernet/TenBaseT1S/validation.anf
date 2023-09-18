@@ -9,7 +9,7 @@
         <input pattern="/inet/examples/ethernet/TenBaseT1S/results/HalfDuplex-*.sca"/>
     </inputs>
     <charts>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="480642003" name="current transmit opportunity ID" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1041710402" name="current transmit opportunity ID" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -645,7 +645,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1599792539" name="switch.eth[0]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1098580827" name="controller" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
@@ -1246,7 +1246,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="legend_manual" value="false"/>
             <property name="yaxis_title" value=""/>
             <property name="legend_replacements" value=""/>
-            <property name="title" value="switch.eth[1]"/>
+            <property name="title" value="controller"/>
             <property name="legend_automatic" value="true"/>
             <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
@@ -1263,7 +1263,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="legend_format" value=""/>
-            <property name="filter" value="type =~ vector AND runattr:experiment =~ PLCA AND runattr:replication =~ &quot;#0&quot; AND runattr:measurement =~ &quot;$numNodes=1, $packetInterval=200&quot; AND (&#10;    (module =~ &quot;*.switch.eth[0].mac&quot; AND name =~ state:vector) OR&#10;    (module =~ &quot;*.switch.eth[0].mac&quot; AND name =~ carrierSense:vector) OR&#10;    (module =~ &quot;*.switch.eth[0].mac&quot; AND name =~ collision:vector) OR&#10;    (module =~ &quot;*.switch.eth[0].phy&quot; AND name =~ state:vector) OR&#10;    (module =~ &quot;*.switch.eth[0].phy&quot; AND name =~ receivedSignalType:vector) OR&#10;    (module =~ &quot;*.switch.eth[0].phy&quot; AND name =~ transmittedSignalType:vector) OR&#10;    (module =~ &quot;*.switch.eth[0].plca&quot; AND name =~ state:vector) OR&#10;    (module =~ &quot;*.switch.eth[0].plca&quot; AND name =~ controlState:vector) OR&#10;    (module =~ &quot;*.switch.eth[0].plca&quot; AND name =~ dataState:vector) OR&#10;    (module =~ &quot;*.switch.eth[0].plca&quot; AND name =~ carrierSense:vector) OR&#10;    (module =~ &quot;*.switch.eth[0].plca&quot; AND name =~ collision:vector) OR&#10;    (module =~ &quot;*.switch.eth[0].plca&quot; AND name =~ curID:vector)&#10;)"/>
+            <property name="filter" value="type =~ vector AND runattr:experiment =~ PLCA AND runattr:replication =~ &quot;#0&quot; AND runattr:measurement =~ &quot;$numNodes=1, $packetInterval=200&quot; AND (&#10;    (module =~ &quot;*.controller.eth[0].mac&quot; AND name =~ state:vector) OR&#10;    (module =~ &quot;*.controller.eth[0].mac&quot; AND name =~ carrierSense:vector) OR&#10;    (module =~ &quot;*.controller.eth[0].mac&quot; AND name =~ collision:vector) OR&#10;    (module =~ &quot;*.controller.eth[0].phy&quot; AND name =~ state:vector) OR&#10;    (module =~ &quot;*.controller.eth[0].phy&quot; AND name =~ receivedSignalType:vector) OR&#10;    (module =~ &quot;*.controller.eth[0].phy&quot; AND name =~ transmittedSignalType:vector) OR&#10;    (module =~ &quot;*.controller.eth[0].plca&quot; AND name =~ state:vector) OR&#10;    (module =~ &quot;*.controller.eth[0].plca&quot; AND name =~ controlState:vector) OR&#10;    (module =~ &quot;*.controller.eth[0].plca&quot; AND name =~ dataState:vector) OR&#10;    (module =~ &quot;*.controller.eth[0].plca&quot; AND name =~ carrierSense:vector) OR&#10;    (module =~ &quot;*.controller.eth[0].plca&quot; AND name =~ collision:vector) OR&#10;    (module =~ &quot;*.controller.eth[0].plca&quot; AND name =~ curID:vector)&#10;)"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
             <property name="markersize" value="5"/>
@@ -1279,7 +1279,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value=""/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="887486873" name="node[0]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1407673570" name="node[0]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
@@ -1913,7 +1913,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value=""/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="2141152755" name="node[1]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1821609172" name="node[1]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
@@ -2547,7 +2547,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value=""/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="468499861" name="node[2]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1692747013" name="node[2]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
@@ -3181,7 +3181,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value=""/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="954185871" name="node[n]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="811933698" name="node[n]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
@@ -3859,7 +3859,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="node_index" value="2"/>
             <property name="num_nodes" value="4"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="264916494" name="packetReceived:count vs numNodes" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="89006457" name="packetReceived:count vs numNodes" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -4412,7 +4412,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
-            <property name="filter" value="type =~ scalar AND isfield =~ false AND runattr:measurement =~ &quot;*$packetInterval=200&quot; AND module =~ &quot;*.host.app[0].io&quot; AND name =~ packetReceived:count"/>
+            <property name="filter" value="type =~ scalar AND isfield =~ false AND runattr:measurement =~ &quot;*$packetInterval=200&quot; AND module =~ &quot;*.controller.app[0].io&quot; AND name =~ packetReceived:count"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="linestyle" value="solid"/>
             <property name="markersize" value="10"/>
@@ -4427,7 +4427,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="1032694996" name="meanBitLifeTimePerPacket:vector:min vs. numNodes" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="788698138" name="meanBitLifeTimePerPacket:vector:min vs. numNodes" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -4980,7 +4980,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
-            <property name="filter" value="type =~ scalar AND runattr:measurement =~ &quot;$numNodes=*, $packetInterval=200&quot; AND module =~ &quot;*.host.app[0].sink&quot; AND name =~ meanBitLifeTimePerPacket:vector:min"/>
+            <property name="filter" value="type =~ scalar AND runattr:measurement =~ &quot;$numNodes=*, $packetInterval=200&quot; AND module =~ &quot;*.controller.app[0].sink&quot; AND name =~ meanBitLifeTimePerPacket:vector:min"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="linestyle" value="solid"/>
             <property name="markersize" value="10"/>
@@ -4995,7 +4995,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="107890894" name="meanBitLifeTimePerPacket:vector:max vs. numNodes" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="1258326251" name="meanBitLifeTimePerPacket:vector:max vs. numNodes" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -5548,7 +5548,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
-            <property name="filter" value="type =~ scalar AND runattr:measurement =~ &quot;$numNodes=*, $packetInterval=200&quot; AND module =~ &quot;*.host.app[0].sink&quot; AND name =~ meanBitLifeTimePerPacket:vector:max"/>
+            <property name="filter" value="type =~ scalar AND runattr:measurement =~ &quot;$numNodes=*, $packetInterval=200&quot; AND module =~ &quot;*.controller.app[0].sink&quot; AND name =~ meanBitLifeTimePerPacket:vector:max"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="linestyle" value="solid"/>
             <property name="markersize" value="10"/>
@@ -5563,7 +5563,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="72128628" name="meanBitLifeTimePerPacket:vector:mean vs. numNodes" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/scatterchart.png" id="254406074" name="meanBitLifeTimePerPacket:vector:mean vs. numNodes" resultTypes="scalar" template="scatterchart_itervars_native" type="LINE">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -6116,7 +6116,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
-            <property name="filter" value="type =~ scalar AND runattr:measurement =~ &quot;$numNodes=*, $packetInterval=200&quot; AND module =~ &quot;*.host.app[0].sink&quot; AND name =~ meanBitLifeTimePerPacket:vector:mean"/>
+            <property name="filter" value="type =~ scalar AND runattr:measurement =~ &quot;$numNodes=*, $packetInterval=200&quot; AND module =~ &quot;*.controller.app[0].sink&quot; AND name =~ meanBitLifeTimePerPacket:vector:mean"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="linestyle" value="solid"/>
             <property name="markersize" value="10"/>
@@ -6131,7 +6131,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="254550804" name="PLCA packetReceived:count vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1500840239" name="PLCA packetReceived:count vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
@@ -6802,7 +6802,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
-            <property name="filter" value="type =~ scalar AND runattr:experiment =~ PLCA AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;*.host.app[0].io&quot; AND name =~ packetReceived:count"/>
+            <property name="filter" value="type =~ scalar AND runattr:experiment =~ PLCA AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;*.controller.app[0].io&quot; AND name =~ packetReceived:count"/>
             <property name="colormap_reverse" value="false"/>
             <property name="plt.style" value="default"/>
             <property name="legend_show" value="true"/>
@@ -6814,7 +6814,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1174376735" name="CSMA/CD packetReceived:count vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1711785224" name="CSMA/CD packetReceived:count vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
@@ -7485,7 +7485,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
-            <property name="filter" value="type =~ scalar AND runattr:experiment =~ CSMACD AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;*.host.app[0].io&quot; AND name =~ packetReceived:count"/>
+            <property name="filter" value="type =~ scalar AND runattr:experiment =~ CSMACD AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;*.controller.app[0].io&quot; AND name =~ packetReceived:count"/>
             <property name="colormap_reverse" value="false"/>
             <property name="plt.style" value="default"/>
             <property name="legend_show" value="true"/>
@@ -7497,7 +7497,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1877277954" name="HalfDuplex packetReceived:count vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="2035147868" name="HalfDuplex packetReceived:count vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
@@ -8168,7 +8168,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
-            <property name="filter" value="type =~ scalar AND runattr:experiment =~ HalfDuplex AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;*.host.app[0].io&quot; AND name =~ packetReceived:count"/>
+            <property name="filter" value="type =~ scalar AND runattr:experiment =~ HalfDuplex AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;*.controller.app[0].io&quot; AND name =~ packetReceived:count"/>
             <property name="colormap_reverse" value="false"/>
             <property name="plt.style" value="default"/>
             <property name="legend_show" value="true"/>
@@ -8180,7 +8180,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1181293040" name="PLCA meanBitLifeTimePerPacket:vector:min vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="74919321" name="PLCA meanBitLifeTimePerPacket:vector:min vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
@@ -8863,7 +8863,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="509063371" name="PLCA meanBitLifeTimePerPacket:vector:max vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1673647778" name="PLCA meanBitLifeTimePerPacket:vector:max vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
@@ -9546,7 +9546,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1614837308" name="PLCA meanBitLifeTimePerPacket:vector:mean vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="932512228" name="PLCA meanBitLifeTimePerPacket:vector:mean vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
@@ -10229,7 +10229,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1558500355" name="CSMA/CD meanBitLifeTimePerPacket:vector:min vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="957785743" name="CSMA/CD meanBitLifeTimePerPacket:vector:min vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
@@ -10912,7 +10912,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1367533329" name="CSMA/CD meanBitLifeTimePerPacket:vector:max vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="337259781" name="CSMA/CD meanBitLifeTimePerPacket:vector:max vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
@@ -11595,7 +11595,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="2017878550" name="CSMA/CD meanBitLifeTimePerPacket:vector:mean vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="250608646" name="CSMA/CD meanBitLifeTimePerPacket:vector:mean vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
@@ -12278,7 +12278,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1274709256" name="HalfDuplex meanBitLifeTimePerPacket:vector:min vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="242465750" name="HalfDuplex meanBitLifeTimePerPacket:vector:min vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
@@ -12961,7 +12961,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="239290505" name="HalfDuplex meanBitLifeTimePerPacket:vector:max vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1040227777" name="HalfDuplex meanBitLifeTimePerPacket:vector:max vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
@@ -13644,7 +13644,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1737370720" name="HalfDuplex meanBitLifeTimePerPacket:vector:mean vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="2099947874" name="HalfDuplex meanBitLifeTimePerPacket:vector:mean vs. packetInterval and numNodes" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
@@ -14327,7 +14327,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1752463432" name="PLCA queueLength:max vs. numNodes and packetInterval" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="33370609" name="PLCA queueLength:max vs. numNodes and packetInterval" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
@@ -15010,7 +15010,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="435164986" name="CSMACD queueLength:max vs. numNodes and packetInterval" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1904298732" name="CSMACD queueLength:max vs. numNodes and packetInterval" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
@@ -15693,7 +15693,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1490819819" name="HalfDuplex queueLength:max vs. numNodes and packetInterval" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/matplotlibchart.png" id="1604934674" name="HalfDuplex queueLength:max vs. numNodes and packetInterval" resultTypes="scalar" template="3dchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
