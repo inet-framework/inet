@@ -17,9 +17,9 @@ void PacketServerBase::initialize(int stage)
     PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
-        provider.reference(inputGate, true);
+        provider.reference(inputGate, false);
         outputGate = gate("out");
-        consumer.reference(outputGate, true);
+        consumer.reference(outputGate, false);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
