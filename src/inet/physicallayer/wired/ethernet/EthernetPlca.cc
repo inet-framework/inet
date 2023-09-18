@@ -110,6 +110,8 @@ void EthernetPlca::initialize(int stage)
         pending_timer = new cMessage("pending_timer", END_PENDING_TIMER);
         commit_timer = new cMessage("commit_timer", END_COMMIT_TIMER);
         tx_timer = new cMessage("tx_timer", END_TX_TIMER);
+        curID = plca_node_count;
+        emit(curIDSignal, curID);
         emit(carrierSenseChangedSignal, (int)CRS);
         emit(collisionChangedSignal, (int)COL);
     }
@@ -121,7 +123,7 @@ void EthernetPlca::initialize(int stage)
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         controlFsm.setStateChangedSignal(controlStateChangedSignal);
         dataFsm.setStateChangedSignal(dataStateChangedSignal);
-        controlFsm.setState(CS_DISABLE, "CS_DISABLE");
+        controlFsm.setState(CS_RESYNC, "CS_RESYNC");
         dataFsm.setState(DS_IDLE, "DS_IDLE");
         handleWithControlFSM();
     }
