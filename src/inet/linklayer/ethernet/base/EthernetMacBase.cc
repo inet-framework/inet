@@ -98,6 +98,10 @@ void EthernetMacBase::initialize(int stage)
         WATCH(promiscuous);
         WATCH(pauseUnitsRequested);
     }
+    else if (stage == INITSTAGE_LINK_LAYER) {
+        emit(transmissionStateChangedSignal, transmitState);
+        emit(receptionStateChangedSignal, receiveState);
+    }
 }
 
 void EthernetMacBase::initializeFlags()
