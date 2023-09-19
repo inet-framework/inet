@@ -262,7 +262,6 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
                                   BACKOFF,
                 FSMA_Delay_Action(phy->endSignalTransmission(ESDNONE));
                 retryTransmission();
-                scheduleBackoffTimer();
             );
             FSMA_Event_Transition(LOWER_PACKET,
                                   event == LOWER_PACKET,
@@ -277,6 +276,9 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
             FSMA_Fail_On_Unhandled_Event();
         }
         FSMA_State(BACKOFF) {
+            FSMA_Enter(
+                scheduleBackoffTimer();
+            );
             FSMA_Event_Transition(BACKOFF_END_AND_NO_CRS,
                                   event == END_BACKOFF_TIMER && !carrierSense,
                                   WAIT_IFG,
@@ -285,9 +287,7 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
                                   event == END_BACKOFF_TIMER && carrierSense,
                                   RECEIVING,
             );
-            FSMA_Event_Transition(LOWER_PACKET,
-                                  event == LOWER_PACKET,
-                                  BACKOFF,
+            FSMA_Stay(event == LOWER_PACKET,
                 processReceivedFrame(check_and_cast<Packet *>(message));
             );
             FSMA_Ignore_Event(event == CARRIER_SENSE_START || event == CARRIER_SENSE_END);
