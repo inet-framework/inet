@@ -257,6 +257,15 @@ class FsmContext
         action; \
     }
 
+#define FSMA_Stay(condition, action) \
+    ___transition_seen = true; if ((condition) && ___is_event) \
+    { \
+        if (___logging) EV_DEBUG << "FSM " << ___fsm.getName() << ": condition \"" << #condition << "\" holds, staying in current state" << endl; \
+        action; \
+        if (___logging) EV_DEBUG << "FSM " << ___fsm.getName() << ": done processing associated actions\n"; \
+        ___is_event = false; \
+    }
+
 #define FSMA_Event_Transition(transition, condition, target, action) \
     ___transition_seen = true; if ((condition) && ___is_event) \
     { \
@@ -288,7 +297,7 @@ class FsmContext
 #define FSMA_Ignore_Event(condition) \
     ___transition_seen = true; if ((condition) && ___is_event) \
     { \
-        if (___logging) EV_DEBUG << "FSM " << ___fsm.getName() << ": condition \"" << #condition << "\" holds, staying in current state" << endl; \
+        if (___logging) EV_DEBUG << "FSM " << ___fsm.getName() << ": condition \"" << #condition << "\" holds, ignoring in current state" << endl; \
         ___is_event = false; \
     }
 
