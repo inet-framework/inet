@@ -218,8 +218,7 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
                                   event == END_IFG_TIMER && currentTxFrame == nullptr && txQueue->isEmpty() && !carrierSense,
                                   IDLE,
             );
-            FSMA_Ignore_Event(event == CARRIER_SENSE_START);
-            FSMA_Ignore_Event(event == CARRIER_SENSE_END);
+            FSMA_Ignore_Event(event == CARRIER_SENSE_START || event == CARRIER_SENSE_END);
             FSMA_Fail_On_Unhandled_Event();
         }
         FSMA_State(TRANSMITTING) {
@@ -246,8 +245,7 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
                 FSMA_Delay_Action(phy->endFrameTransmission());
                 FSMA_Delay_Action(phy->startSignalTransmission(JAM));
             );
-            FSMA_Ignore_Event(event == CARRIER_SENSE_START);
-            FSMA_Ignore_Event(event == CARRIER_SENSE_END);
+            FSMA_Ignore_Event(event == CARRIER_SENSE_START || event == CARRIER_SENSE_END);
             FSMA_Fail_On_Unhandled_Event();
         }
         FSMA_State(JAMMING) {
@@ -268,8 +266,7 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
                 emit(packetDroppedSignal, packet, &details);
                 delete packet
             );
-            FSMA_Ignore_Event(event == CARRIER_SENSE_START);
-            FSMA_Ignore_Event(event == CARRIER_SENSE_END);
+            FSMA_Ignore_Event(event == CARRIER_SENSE_START || event == CARRIER_SENSE_END);
             FSMA_Fail_On_Unhandled_Event();
         }
         FSMA_State(BACKOFF) {
@@ -286,8 +283,7 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
                                   BACKOFF,
                 processReceivedFrame(check_and_cast<Packet *>(message));
             );
-            FSMA_Ignore_Event(event == CARRIER_SENSE_START);
-            FSMA_Ignore_Event(event == CARRIER_SENSE_END);
+            FSMA_Ignore_Event(event == CARRIER_SENSE_START || event == CARRIER_SENSE_END);
             FSMA_Fail_On_Unhandled_Event();
         }
         FSMA_State(RECEIVING) {
