@@ -220,6 +220,9 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
                                   event == END_IFG_TIMER && currentTxFrame == nullptr && txQueue->isEmpty() && !carrierSense,
                                   IDLE,
             );
+            FSMA_Stay(event == LOWER_PACKET,
+                processReceivedFrame(check_and_cast<Packet *>(message));
+            );
             FSMA_Ignore_Event(event == CARRIER_SENSE_START || event == CARRIER_SENSE_END);
             FSMA_Fail_On_Unhandled_Event();
         }
