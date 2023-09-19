@@ -536,14 +536,18 @@ void EthernetMacBase::refreshDisplay() const
 
 void EthernetMacBase::changeTransmissionState(MacTransmitState newState)
 {
-    transmitState = newState;
-    emit(transmissionStateChangedSignal, newState);
+    if (transmitState != newState) {
+        transmitState = newState;
+        emit(transmissionStateChangedSignal, newState);
+    }
 }
 
 void EthernetMacBase::changeReceptionState(MacReceiveState newState)
 {
-    receiveState = newState;
-    emit(receptionStateChangedSignal, newState);
+    if (receiveState != newState) {
+        receiveState = newState;
+        emit(receptionStateChangedSignal, newState);
+    }
 }
 
 void EthernetMacBase::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) const
