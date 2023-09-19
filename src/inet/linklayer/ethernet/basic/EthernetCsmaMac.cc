@@ -462,7 +462,7 @@ void EthernetCsmaMac::scheduleBackoffTimer()
     int backoffRange = (numRetries >= BACKOFF_RANGE_LIMIT) ? 1024 : (1 << numRetries);
     int slotNumber = intuniform(0, backoffRange - 1);
     EV_DEBUG << "Executing backoff procedure" << EV_FIELD(slotNumber) << ", backoffRange = [0," << backoffRange - 1 << "]" << EV_ENDL;
-    simtime_t backoffDuration = slotNumber * 512 / mode->bitrate;
+    simtime_t backoffDuration = slotNumber * mode->slotTime;
     scheduleAfter(backoffDuration, backoffTimer);
 }
 
