@@ -184,7 +184,9 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
 {
     { FSMA_Switch(fsm) {
         FSMA_State(IDLE) {
-            FSMA_Enter(ASSERT(!carrierSense));
+            FSMA_Enter(
+                ASSERT(!carrierSense);
+            );
             FSMA_Event_Transition(UPPER_PACKET,
                                   event == UPPER_PACKET,
                                   TRANSMITTING,
@@ -199,7 +201,7 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
         FSMA_State(WAIT_IFG) {
             FSMA_Enter(
                 ASSERT(!carrierSense);
-                scheduleIfgTimer()
+                scheduleIfgTimer();
             );
             FSMA_Event_Transition(IFG_END_AND_HAS_CURRENT_TX,
                                   event == END_IFG_TIMER && currentTxFrame != nullptr,
@@ -249,7 +251,9 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
             FSMA_Fail_On_Unhandled_Event();
         }
         FSMA_State(JAMMING) {
-            FSMA_Enter(scheduleJamTimer());
+            FSMA_Enter(
+                scheduleJamTimer();
+            );
             FSMA_Event_Transition(JAM_END,
                                   event == END_JAM_TIMER,
                                   BACKOFF,
