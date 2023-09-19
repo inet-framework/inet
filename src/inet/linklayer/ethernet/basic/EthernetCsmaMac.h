@@ -94,6 +94,7 @@ class INET_API EthernetCsmaMac : public MacProtocolBase, public virtual IEtherne
     virtual void endTransmission();
     virtual void abortTransmission();
     virtual void retryTransmission();
+    virtual void giveUpTransmission();
 
     virtual void processReceivedFrame(Packet *packet);
 

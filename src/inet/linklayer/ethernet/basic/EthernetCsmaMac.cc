@@ -257,20 +257,26 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
             FSMA_Enter(
                 scheduleJamTimer();
             );
-            FSMA_Event_Transition(JAM_END,
-                                  event == END_JAM_TIMER,
+            FSMA_Event_Transition(JAM_END_AND_GIVE_UP_AND_NO_CRS,
+                                  event == END_JAM_TIMER && numRetries == MAX_ATTEMPTS && !carrierSense,
+                                  WAIT_IFG,
+                FSMA_Delay_Action(phy->endSignalTransmission(ESDNONE));
+                giveUpTransmission();
+            );
+            FSMA_Event_Transition(JAM_END_AND_GIVE_UP_AND_CRS,
+                                  event == END_JAM_TIMER && numRetries == MAX_ATTEMPTS && carrierSense,
+                                  RECEIVING,
+                FSMA_Delay_Action(phy->endSignalTransmission(ESDNONE));
+                giveUpTransmission();
+            );
+            FSMA_Event_Transition(JAM_END_AND_RETRY,
+                                  event == END_JAM_TIMER && numRetries < MAX_ATTEMPTS,
                                   BACKOFF,
                 FSMA_Delay_Action(phy->endSignalTransmission(ESDNONE));
                 retryTransmission();
             );
-            FSMA_Event_Transition(LOWER_PACKET,
-                                  event == LOWER_PACKET,
-                                  JAMMING,
-                auto packet = check_and_cast<Packet *>(message);
-                PacketDropDetails details;
-                details.setReason(INCORRECTLY_RECEIVED);
-                emit(packetDroppedSignal, packet, &details);
-                delete packet
+            FSMA_Stay(event == LOWER_PACKET,
+                processReceivedFrame(check_and_cast<Packet *>(message));
             );
             FSMA_Ignore_Event(event == CARRIER_SENSE_START || event == CARRIER_SENSE_END);
             FSMA_Fail_On_Unhandled_Event();
@@ -350,14 +356,17 @@ void EthernetCsmaMac::abortTransmission()
 void EthernetCsmaMac::retryTransmission()
 {
     EV_DEBUG << "Retrying frame transmission" << EV_FIELD(currentTxFrame) << EV_ENDL;
-    if (++numRetries > MAX_ATTEMPTS) {
-        EV_DEBUG << "Number of retransmit attempts of frame exceeds maximum, cancelling transmission of frame\n";
-        PacketDropDetails details;
-        details.setReason(RETRY_LIMIT_REACHED);
-        details.setLimit(MAX_ATTEMPTS);
-        dropCurrentTxFrame(details);
-        numRetries = 0;
-    }
+    numRetries++;
+}
+
+void EthernetCsmaMac::giveUpTransmission()
+{
+    EV_DEBUG << "Giving up frame transmission" << EV_FIELD(currentTxFrame) << EV_ENDL;
+    PacketDropDetails details;
+    details.setReason(RETRY_LIMIT_REACHED);
+    details.setLimit(MAX_ATTEMPTS);
+    dropCurrentTxFrame(details);
+    numRetries = 0;
 }
 
 void EthernetCsmaMac::processReceivedFrame(Packet *packet)
