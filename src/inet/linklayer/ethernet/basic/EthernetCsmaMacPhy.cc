@@ -614,13 +614,11 @@ void EthernetCsmaMacPhy::handleRetransmission()
         details.setReason(RETRY_LIMIT_REACHED);
         details.setLimit(MAX_ATTEMPTS);
         dropCurrentTxFrame(details);
-        changeTransmissionState(TX_IDLE_STATE);
         backoffs = 0;
-
-        if (canDequeuePacket()) {
-            Packet *packet = dequeuePacket();
-            handleUpperPacket(packet);
-        }
+        if (receiveState == RX_IDLE_STATE)
+            scheduleEndIFGPeriod();
+        else
+            changeTransmissionState(TX_IDLE_STATE);
         return;
     }
 
