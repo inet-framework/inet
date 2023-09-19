@@ -51,6 +51,8 @@ void EthernetCsmaMac::initialize(int stage)
         jamTimer = new cMessage("JamTimer", END_JAM_TIMER);
         backoffTimer = new cMessage("BackoffTimer", END_BACKOFF_TIMER);
         fsm.setStateChangedSignal(stateChangedSignal);
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         fsm.setState(IDLE, "IDLE");
         emit(carrierSenseChangedSignal, (int)carrierSense);
         emit(collisionChangedSignal, (int)collision);
