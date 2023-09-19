@@ -294,14 +294,15 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
             FSMA_Fail_On_Unhandled_Event();
         }
         FSMA_State(RECEIVING) {
-            FSMA_Event_Transition(LOWER_PACKET,
-                                  event == LOWER_PACKET,
-                                  RECEIVING,
-                processReceivedFrame(check_and_cast<Packet *>(message));
+            FSMA_Enter(
+                ASSERT(carrierSense);
             );
             FSMA_Event_Transition(CRS_END,
                                   event == CARRIER_SENSE_END,
                                   WAIT_IFG,
+            );
+            FSMA_Stay(event == LOWER_PACKET,
+                processReceivedFrame(check_and_cast<Packet *>(message));
             );
             FSMA_Fail_On_Unhandled_Event();
         }
