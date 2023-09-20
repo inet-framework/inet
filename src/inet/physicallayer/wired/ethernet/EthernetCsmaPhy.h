@@ -100,7 +100,7 @@ class INET_API EthernetCsmaPhy : public cSimpleModule, public virtual IEthernetC
     virtual void encapsulate(Packet *packet);
     virtual void decapsulate(Packet *packet);
 
-    virtual void trimSignal(EthernetSignalBase *signal, simtime_t duration);
+    virtual void truncateSignal(EthernetSignalBase *signal, simtime_t duration);
 
     virtual void updateRxSignals(EthernetSignalBase *signal);
     virtual simtime_t getMaxRxEndTime();

@@ -346,7 +346,7 @@ void EthernetCsmaPhy::handleEndTransmission()
     emit(busUsedSignal, 0);
     simtime_t duration = simTime() - currentTxSignal->getCreationTime(); // TODO save and use start tx time
     if (duration != currentTxSignal->getDuration()) {
-        trimSignal(currentTxSignal, duration); // TODO save and use start tx time
+        truncateSignal(currentTxSignal, duration); // TODO save and use start tx time
         emit(transmissionEndedSignal, currentTxSignal);
         send(currentTxSignal, SendOptions().finishTx(currentTxSignal->getId()), physOutGate);
     }
@@ -419,7 +419,7 @@ void EthernetCsmaPhy::decapsulate(Packet *packet)
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 }
 
-void EthernetCsmaPhy::trimSignal(EthernetSignalBase *signal, simtime_t duration)
+void EthernetCsmaPhy::truncateSignal(EthernetSignalBase *signal, simtime_t duration)
 {
     ASSERT(duration <= signal->getDuration());
     if (duration == signal->getDuration())
