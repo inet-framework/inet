@@ -25,6 +25,7 @@ class INET_API TcpBasicClientApp : public TcpAppBase
     int numRequestsToSend = 0; // requests to send in this session
     simtime_t startTime;
     simtime_t stopTime;
+    int64_t waitedReplyLength = 0;
 
     virtual void sendRequest();
     virtual void rescheduleAfterOrDeleteTimer(simtime_t d, short int msgKind);
