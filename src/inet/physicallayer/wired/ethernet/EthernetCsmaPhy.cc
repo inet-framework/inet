@@ -342,16 +342,18 @@ void EthernetCsmaPhy::handleEndTransmission()
 {
     ASSERT(currentTxSignal != nullptr);
     EV_DEBUG << "Handling end transmission" << EV_ENDL;
-    emit(transmissionEndedSignal, currentTxSignal);
     emit(transmittedSignalTypeSignal, NONE);
     emit(busUsedSignal, 0);
     simtime_t duration = simTime() - currentTxSignal->getCreationTime(); // TODO save and use start tx time
     if (duration != currentTxSignal->getDuration()) {
         trimSignal(currentTxSignal, duration); // TODO save and use start tx time
+        emit(transmissionEndedSignal, currentTxSignal);
         send(currentTxSignal, SendOptions().finishTx(currentTxSignal->getId()), physOutGate);
     }
-    else
+    else {
+        emit(transmissionEndedSignal, currentTxSignal);
         delete currentTxSignal;
+    }
     txEndTime = simTime();
     scheduleCrsOffTimer();
     currentTxSignal = nullptr;
