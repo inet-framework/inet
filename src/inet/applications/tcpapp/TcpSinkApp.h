@@ -39,13 +39,20 @@ class INET_API TcpSinkApp : public TcpServerHostApp
 
 class INET_API TcpSinkAppThread : public TcpServerThreadBase
 {
+  public:
+    ~TcpSinkAppThread() { hostmod->cancelAndDelete(readDelayTimer); }
+
   protected:
     long bytesRcvd;
     TcpSinkApp *sinkAppModule = nullptr;
+    cMessage *readDelayTimer = nullptr;
 
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *message) override;
     virtual void refreshDisplay() const override;
+
+    virtual void sendOrScheduleReadCommandIfNeeded();
 
     // TcpServerThreadBase:
     /**
@@ -61,9 +68,11 @@ class INET_API TcpSinkAppThread : public TcpServerThreadBase
     /*
      * Called when a timer (scheduled via scheduleAt()) expires.
      */
-    virtual void timerExpired(cMessage *timer) override { throw cRuntimeError("Model error: unknown timer message arrived"); }
+    virtual void timerExpired(cMessage *timer) override;
 
     virtual void init(TcpServerHostApp *hostmodule, TcpSocket *socket) override { TcpServerThreadBase::init(hostmodule, socket); sinkAppModule = check_and_cast<TcpSinkApp *>(hostmod); }
+
+    virtual void close() override { hostmod->cancelAndDelete(readDelayTimer); readDelayTimer = nullptr; TcpServerThreadBase::close(); }
 };
 
 } // namespace inet

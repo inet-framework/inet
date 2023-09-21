@@ -73,8 +73,27 @@ void TcpEchoApp::finish()
     recordScalar("bytesSent", bytesSent);
 }
 
+void TcpEchoAppThread::sendOrScheduleReadCommandIfNeeded()
+{
+    if (!sock->getAutoRead() && sock->isOpen()) {
+        simtime_t delay = hostmod->par("readDelay");
+        if (delay >= SIMTIME_ZERO) {
+            if (readDelayTimer == nullptr) {
+                readDelayTimer = new cMessage("readDelayTimer");
+                readDelayTimer->setContextPointer(this);
+            }
+            hostmod->scheduleAfter(delay, readDelayTimer);
+        }
+        else {
+            // send read message to TCP
+            sock->read(hostmod->par("readSize"));
+        }
+    }
+}
+
 void TcpEchoAppThread::established()
 {
+    sendOrScheduleReadCommandIfNeeded();
 }
 
 void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
@@ -83,7 +102,9 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
     int64_t rcvdBytes = rcvdPkt->getByteLength();
     echoAppModule->bytesRcvd += rcvdBytes;
 
-    if (echoAppModule->echoFactor > 0 && sock->getState() == TcpSocket::CONNECTED) {
+    if (sock->getState() != TcpSocket::CONNECTED) {
+    }
+    else if (echoAppModule->echoFactor > 0) {
         Packet *outPkt = new Packet(rcvdPkt->getName(), TCP_C_SEND);
         // reverse direction, modify length, and send it back
         int socketId = rcvdPkt->getTag<SocketInd>()->getSocketId();
@@ -103,10 +124,15 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
 
         ASSERT(outPkt->getByteLength() == outByteLen);
 
-        if (echoAppModule->delay == 0)
+        if (echoAppModule->delay == 0) {
             echoAppModule->sendDown(outPkt);
+            sendOrScheduleReadCommandIfNeeded();
+        }
         else
             scheduleAfter(echoAppModule->delay, outPkt); // send after a delay
+    }
+    else {
+        sendOrScheduleReadCommandIfNeeded();
     }
     delete rcvdPkt;
 }
@@ -116,9 +142,17 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
  */
 void TcpEchoAppThread::timerExpired(cMessage *timer)
 {
-    Packet *pkt = check_and_cast<Packet *>(timer);
-    pkt->setContextPointer(nullptr);
-    echoAppModule->sendDown(pkt);
+    if (timer == readDelayTimer) {
+        // send read message to TCP
+        sock->read(this->hostmod->par("readSize"));
+    }
+    else if (Packet *pkt = check_and_cast<Packet *>(timer)) {
+        pkt->setContextPointer(nullptr);
+        echoAppModule->sendDown(pkt);
+        sendOrScheduleReadCommandIfNeeded();
+    }
+    else
+        throw cRuntimeError("Model error: unknown timer message arrived");
 }
 
 } // namespace inet

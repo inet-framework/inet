@@ -46,8 +46,12 @@ class INET_API TcpEchoAppThread : public TcpServerThreadBase
 {
   protected:
     TcpEchoApp *echoAppModule = nullptr;
+    cMessage *readDelayTimer = nullptr;
 
   public:
+    ~TcpEchoAppThread() { hostmod->cancelAndDelete(readDelayTimer); }
+    virtual void sendOrScheduleReadCommandIfNeeded();
+
     /**
      * Called when connection is established.
      */
@@ -64,6 +68,8 @@ class INET_API TcpEchoAppThread : public TcpServerThreadBase
     virtual void timerExpired(cMessage *timer) override;
 
     virtual void init(TcpServerHostApp *hostmodule, TcpSocket *socket) override { TcpServerThreadBase::init(hostmodule, socket); echoAppModule = check_and_cast<TcpEchoApp *>(hostmod); }
+
+    virtual void close() override { hostmod->cancelAndDelete(readDelayTimer); TcpServerThreadBase::close(); }
 };
 
 } // namespace inet

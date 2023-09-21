@@ -15,6 +15,9 @@ module TcpSinkApp extends TcpServerHostApp
 {
     parameters:
         serverThreadModuleType = default("inet.applications.tcpapp.TcpSinkAppThread");
+        bool autoRead = default(true);
+        volatile int readSize @unit(B) = default(-1B);    // used only with autoRead==false 
+        volatile double readDelay @unit(s) = default(-1s);    // used only with autoRead==false, negative delay means immediatelly send a read command, otherwise schedule timer with >= 0 delay for waiting to send a read command  
         @class(TcpSinkApp);
         @display("i=block/sink");
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none; checkSignals=false);

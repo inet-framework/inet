@@ -26,17 +26,19 @@ void TcpServerHostApp::handleStartOperation(LifecycleOperation *operation)
 {
     const char *localAddress = par("localAddress");
     int localPort = par("localPort");
+    bool autoRead = par("autoRead");
 
     serverSocket.setOutputGate(gate("socketOut"));
     serverSocket.setCallback(this);
     serverSocket.bind(localAddress[0] ? L3Address(localAddress) : L3Address(), localPort);
+    serverSocket.setAutoRead(autoRead);
     serverSocket.listen();
 }
 
 void TcpServerHostApp::handleStopOperation(LifecycleOperation *operation)
 {
     for (auto thread : threadSet)
-        thread->getSocket()->close();
+        thread->close();
     serverSocket.close();
     delayActiveOperationFinish(par("stopOperationTimeout"));
 }
@@ -47,7 +49,7 @@ void TcpServerHostApp::handleCrashOperation(LifecycleOperation *operation)
     while (!threadSet.empty()) {
         auto thread = *threadSet.begin();
         // TODO destroy!!!
-        thread->getSocket()->close();
+        thread->close();
         removeThread(thread);
     }
     // TODO always?

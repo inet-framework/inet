@@ -63,9 +63,47 @@ void TcpSinkAppThread::initialize(int stage)
     }
 }
 
+void TcpSinkAppThread::handleMessage(cMessage *msg)
+{
+    if(msg->isSelfMessage()) {
+        timerExpired(msg);
+    }
+    else
+        throw cRuntimeError("Received a non-self message.");
+}
+
+void TcpSinkAppThread::timerExpired(cMessage *timer)
+{
+    if (timer == readDelayTimer) {
+        // send read message to TCP
+        sock->read(this->hostmod->par("readSize"));
+    }
+    else
+        throw cRuntimeError("Model error: unknown timer message arrived");
+}
+
+void TcpSinkAppThread::sendOrScheduleReadCommandIfNeeded()
+{
+    if (!sock->getAutoRead() && sock->isOpen()) {
+        simtime_t delay = hostmod->par("readDelay");
+        if (delay >= SIMTIME_ZERO) {
+            if (readDelayTimer == nullptr) {
+                readDelayTimer = new cMessage("readDelayTimer");
+                readDelayTimer->setContextPointer(this);
+            }
+            hostmod->scheduleAfter(delay, readDelayTimer);
+        }
+        else {
+            // send read message to TCP
+            sock->read(hostmod->par("readSize"));
+        }
+    }
+}
+
 void TcpSinkAppThread::established()
 {
     bytesRcvd = 0;
+    sendOrScheduleReadCommandIfNeeded();
 }
 
 void TcpSinkAppThread::dataArrived(Packet *pk, bool urgent)
@@ -76,6 +114,7 @@ void TcpSinkAppThread::dataArrived(Packet *pk, bool urgent)
 
     emit(packetReceivedSignal, pk);
     delete pk;
+    sendOrScheduleReadCommandIfNeeded();
 }
 
 void TcpSinkAppThread::refreshDisplay() const
