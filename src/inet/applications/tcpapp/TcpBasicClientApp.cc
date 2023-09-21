@@ -23,6 +23,7 @@ Define_Module(TcpBasicClientApp);
 TcpBasicClientApp::~TcpBasicClientApp()
 {
     cancelAndDelete(timeoutMsg);
+    cancelAndDelete(readDelayTimer);
 }
 
 void TcpBasicClientApp::initialize(int stage)
@@ -40,6 +41,7 @@ void TcpBasicClientApp::initialize(int stage)
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         timeoutMsg = new cMessage("timer");
+        readDelayTimer = new cMessage("readDelayTimer");
     }
 }
 
@@ -55,14 +57,18 @@ void TcpBasicClientApp::handleStartOperation(LifecycleOperation *operation)
 
 void TcpBasicClientApp::handleStopOperation(LifecycleOperation *operation)
 {
-    cancelEvent(timeoutMsg);
+    if (timeoutMsg != nullptr)
+        cancelEvent(timeoutMsg);
+    cancelEvent(readDelayTimer);
     if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
         close();
 }
 
 void TcpBasicClientApp::handleCrashOperation(LifecycleOperation *operation)
 {
-    cancelEvent(timeoutMsg);
+    if (timeoutMsg != nullptr)
+        cancelEvent(timeoutMsg);
+    cancelEvent(readDelayTimer);
     if (operation->getRootModule() != getContainingNode(this))
         socket.destroy();
 }
@@ -116,6 +122,7 @@ void TcpBasicClientApp::handleTimer(cMessage *msg)
         case MSGKIND_SEND:
             sendRequest();
             // next request will be sent when reply to this one arrives (see socketDataArrived())
+            sendOrScheduleReadCommandIfNeeded();
             break;
 
         default:
@@ -130,6 +137,8 @@ void TcpBasicClientApp::socketEstablished(TcpSocket *socket)
     // perform first request if not already done (next one will be sent when reply arrives)
     if (!earlySend)
         sendRequest();
+
+    sendOrScheduleReadCommandIfNeeded();
 }
 
 void TcpBasicClientApp::rescheduleAfterOrDeleteTimer(simtime_t d, short int msgKind)
@@ -153,6 +162,7 @@ void TcpBasicClientApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool u
     waitedReplyLength -= B(msg->getDataLength()).get();
     if (waitedReplyLength > 0) {
         EV_INFO << "Waiting remained " << waitedReplyLength << " bytes of reply\n";
+        sendOrScheduleReadCommandIfNeeded();
     }
     else {
         EV_INFO << "The complete reply arrived\n";
@@ -171,7 +181,6 @@ void TcpBasicClientApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool u
             close();
         }
     }
-
 }
 
 void TcpBasicClientApp::close()
@@ -179,10 +188,12 @@ void TcpBasicClientApp::close()
     TcpAppBase::close();
     if (timeoutMsg != nullptr)
         cancelEvent(timeoutMsg);
+    cancelEvent(readDelayTimer);
 }
 
 void TcpBasicClientApp::socketClosed(TcpSocket *socket)
 {
+    cancelEvent(readDelayTimer);
     TcpAppBase::socketClosed(socket);
 
     // start another session after a delay
@@ -194,12 +205,25 @@ void TcpBasicClientApp::socketClosed(TcpSocket *socket)
 
 void TcpBasicClientApp::socketFailure(TcpSocket *socket, int code)
 {
+    cancelEvent(readDelayTimer);
     TcpAppBase::socketFailure(socket, code);
 
     // reconnect after a delay
     if (timeoutMsg) {
         simtime_t d = par("reconnectInterval");
         rescheduleAfterOrDeleteTimer(d, MSGKIND_CONNECT);
+    }
+}
+
+void TcpBasicClientApp::sendOrScheduleReadCommandIfNeeded()
+{
+    if (!socket.getAutoRead() && socket.isOpen()) {
+        simtime_t delay = par("readDelay");
+        if (delay >= SIMTIME_ZERO)
+            scheduleAfter(delay, readDelayTimer);
+        else
+            // send read message to TCP
+            socket.read(par("readSize"));
     }
 }
 

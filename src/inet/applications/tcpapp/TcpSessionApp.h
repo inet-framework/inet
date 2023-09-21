@@ -39,6 +39,7 @@ class INET_API TcpSessionApp : public TcpAppBase
     // state
     int commandIndex = -1;
     cMessage *timeoutMsg = nullptr;
+    cMessage *readDelayTimer = nullptr;
 
   protected:
     virtual void handleStartOperation(LifecycleOperation *operation) override;
@@ -53,12 +54,17 @@ class INET_API TcpSessionApp : public TcpAppBase
     virtual void parseScript(const char *script);
     virtual Packet *createDataPacket(long sendBytes);
     virtual void sendData();
+    virtual void close() override;
 
+    virtual void handleSenderTimer(cMessage *msg);
+    virtual void handleReadTimer(cMessage *msg);
     virtual void handleTimer(cMessage *msg) override;
     virtual void socketEstablished(TcpSocket *socket) override;
     virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
     virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override;
+
+    virtual void sendOrScheduleReadCommandIfNeeded();
 
   public:
     TcpSessionApp() {}
