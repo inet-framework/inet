@@ -20,6 +20,7 @@ class INET_API TelnetApp : public TcpAppBase
 {
   protected:
     cMessage *timeoutMsg = nullptr;
+    cMessage *readDelayTimer = nullptr;
     int numLinesToType = 0; // lines (commands) the user will type in this session
     int numCharsToType = 0; // characters the user will type for current line (command)
     simtime_t stopTime;
@@ -28,6 +29,8 @@ class INET_API TelnetApp : public TcpAppBase
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleTimer(cMessage *msg) override;
+    virtual void handleSenderTimer(cMessage *msg);
+    virtual void handleReadTimer(cMessage *msg);
     virtual void socketEstablished(TcpSocket *socket) override;
     virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
     virtual void socketClosed(TcpSocket *socket) override;
@@ -38,6 +41,10 @@ class INET_API TelnetApp : public TcpAppBase
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
+    virtual void close() override;
+
+    virtual void sendOrScheduleReadCommandIfNeeded();
 
   public:
     TelnetApp() {}

@@ -28,6 +28,7 @@ Define_Module(TcpSessionApp);
 TcpSessionApp::~TcpSessionApp()
 {
     cancelAndDelete(timeoutMsg);
+    cancelAndDelete(readDelayTimer);
 }
 
 void TcpSessionApp::initialize(int stage)
@@ -51,6 +52,7 @@ void TcpSessionApp::initialize(int stage)
         if (commands.size() == 0)
             throw cRuntimeError("sendScript is empty");
         timeoutMsg = new cMessage("timer");
+        readDelayTimer = new cMessage("readDelayTimer");
     }
 }
 
@@ -65,6 +67,7 @@ void TcpSessionApp::handleStartOperation(LifecycleOperation *operation)
 void TcpSessionApp::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(timeoutMsg);
+    cancelEvent(readDelayTimer);
     if (socket.isOpen())
         close();
     delayActiveOperationFinish(par("stopOperationTimeout"));
@@ -73,11 +76,13 @@ void TcpSessionApp::handleStopOperation(LifecycleOperation *operation)
 void TcpSessionApp::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(timeoutMsg);
+    cancelEvent(readDelayTimer);
     if (operation->getRootModule() != getContainingNode(this))
         socket.destroy();
 }
 
-void TcpSessionApp::handleTimer(cMessage *msg)
+
+void TcpSessionApp::handleSenderTimer(cMessage *msg)
 {
     switch (msg->getKind()) {
         case MSGKIND_CONNECT:
@@ -100,6 +105,21 @@ void TcpSessionApp::handleTimer(cMessage *msg)
     }
 }
 
+void TcpSessionApp::handleReadTimer(cMessage *msg)
+{
+    socket.read(par("readSize"));
+}
+
+void TcpSessionApp::handleTimer(cMessage *msg)
+{
+    if (msg == timeoutMsg)
+        handleSenderTimer(msg);
+    else if (msg == readDelayTimer)
+        handleReadTimer(msg);
+    else
+        throw cRuntimeError("Unknown timer arrived");
+}
+
 void TcpSessionApp::sendData()
 {
     long numBytes = commands[commandIndex].numBytes;
@@ -114,6 +134,12 @@ void TcpSessionApp::sendData()
         timeoutMsg->setKind(MSGKIND_CLOSE);
         scheduleAt(std::max(tClose, simTime()), timeoutMsg);
     }
+}
+
+void TcpSessionApp::close()
+{
+    cancelEvent(readDelayTimer);
+    TcpAppBase::close();
 }
 
 Packet *TcpSessionApp::createDataPacket(long sendBytes)
@@ -153,17 +179,20 @@ void TcpSessionApp::socketEstablished(TcpSocket *socket)
     timeoutMsg->setKind(MSGKIND_SEND);
     simtime_t tSend = commands[commandIndex].tSend;
     scheduleAt(std::max(tSend, simTime()), timeoutMsg);
+    sendOrScheduleReadCommandIfNeeded();
 }
 
 void TcpSessionApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
     TcpAppBase::socketDataArrived(socket, msg, urgent);
+    sendOrScheduleReadCommandIfNeeded();
 }
 
 void TcpSessionApp::socketClosed(TcpSocket *socket)
 {
     TcpAppBase::socketClosed(socket);
     cancelEvent(timeoutMsg);
+    cancelEvent(readDelayTimer);
     if (operationalState == State::STOPPING_OPERATION && !this->socket.isOpen())
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
@@ -172,6 +201,7 @@ void TcpSessionApp::socketFailure(TcpSocket *socket, int code)
 {
     TcpAppBase::socketFailure(socket, code);
     cancelEvent(timeoutMsg);
+    cancelEvent(readDelayTimer);
 }
 
 void TcpSessionApp::parseScript(const char *script)
@@ -241,6 +271,18 @@ void TcpSessionApp::refreshDisplay() const
     std::ostringstream os;
     os << TcpSocket::stateName(socket.getState()) << "\nsent: " << bytesSent << " bytes\nrcvd: " << bytesRcvd << " bytes";
     getDisplayString().setTagArg("t", 0, os.str().c_str());
+}
+
+void TcpSessionApp::sendOrScheduleReadCommandIfNeeded()
+{
+    if (!socket.getAutoRead() && socket.isOpen()) {
+        simtime_t delay = par("readDelay");
+        if (delay >= SIMTIME_ZERO)
+            scheduleAfter(delay, readDelayTimer);
+        else
+            // send read message to TCP
+            socket.read(par("readSize"));
+    }
 }
 
 } // namespace inet
