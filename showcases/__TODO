@@ -29,6 +29,11 @@ Eventually all sensor nodes get into this state and the number of successfully s
 Planned Showcases:
 ------------------
 
+-Ethernet capture effect
+    create CSMA/CD Ethernet link with two sender and one receiver nodes
+    use QueueFiller to always have traffic to send
+    expected behavior is explained at https://intronetworks.cs.luc.edu/1/html/ethernet.html#capture-effect
+    observed results for 64B packets were: for 1s, one node could send 1k packets, the other 14k packets, for 10s, both could send 74k packets
 -Hardware-in-the-loop: simulated AODV, real network
 -Modeling radio interference:
 	modeling radio interference -> distinct showcase -> noise sources (bg noise with
