@@ -21,6 +21,8 @@ import inet.protocolelement.contract.IProtocolLayer;
 //  - beacons are assumed to be never lost (no invalid_beacon_timer)
 //  - data state machine cannot abort transmissions
 //  - mixed operation with CSMA/CD nodes on the same multidrop link is not supported
+//  - controller immediately start sending a beacon
+//  - nodes start with waiting to receive a beacon
 //
 // The upper layer must be connected to a module implementing the ~IEthernetCsmaMac
 // C++ interface. The lower layer must be connected to a module implementing the
@@ -85,20 +87,35 @@ simple EthernetPlca like IProtocolLayer
         // In 802.3cg: Duration: 288 bit times. Tolerance: +/- 1⁄2 bit time.
         int commit_timer_length @unit(b) = default(288b);
 
+        // emitted when the current transmit opportunity ID changes, the value is the node ID of the owner of the current transmit opportunity
         @signal[curID](type=int);
+        // emitted when the carrier signal is detected or gone, the value is 1 or 0
         @signal[carrierSenseChanged](type=int);
+        // emitted when a collision is starts or ends, the value is 1 or 0
         @signal[collisionChanged](type=int);
+        // emitted when the state of the control state machine changes, the value is one of DISABLE, RESYNC, RECOVER, SEND_BEACON, SYNCING, WAIT_TO, EARLY_RECEIVE, COMMIT, YIELD, RECEIVE, TRANSMIT, BURST, ABORT, NEXT_TX_OPPORTUNITY
         @signal[controlStateChanged](type=long);
+        // emitted when the state of the data state machine changes, the value is one of WAIT_IDLE, IDLE, RECEIVE, HOLD, COLLIDE, DELAY_PENDING, PENDING, WAIT_MAC, TRANSMIT 
         @signal[dataStateChanged](type=long);
+        // emitted when the value of the rx_cmd variable changes, the value is one of NONE, BEACON, COMMIT
         @signal[rxCmd](type=long);
+        // emitted when the value of the tx_cmd variable changes, the value is one of NONE, BEACON, COMMIT
         @signal[txCmd](type=long);
+        // emitted when a packet is sent to the PHY, the value is the delay from when the packet was received from the MAC
         @signal[packetPendingDelay](type=simtime_t);
+        // emitted when a packet is sent to the PHY, the value is the time elapsed since the last packet was sent
         @signal[packetInterval](type=simtime_t);
+        // emitted when a transmit opportunity happens, the value is 1 or 0
         @signal[transmitOpportunityUsed](type=int);
+        // the time evolution of the current transmit opportunity ID
         @statistic[curID](title="current transmit opportunity ID"; record=vector; interpolationmode=sample-hold);
+        // the time evolution of the carrier sense signal
         @statistic[carrierSense](title="carrier sense"; type=int; source=carrierSenseChanged; record=count,vector; interpolationmode=sample-hold);
+        // the time evolution of the collision signal
         @statistic[collision](title="collision"; type=int; source=collisionChanged; record=count,vector; interpolationmode=sample-hold);
+        // the time evolution of the state of the control state machine
         @statistic[controlState](title="control state"; type=enum; enum=DISABLE, RESYNC, RECOVER, SEND_BEACON, SYNCING, WAIT_TO, EARLY_RECEIVE, COMMIT, YIELD, RECEIVE, TRANSMIT, BURST, ABORT, NEXT_TX_OPPORTUNITY; source=controlStateChanged; record=count,vector; interpolationmode=sample-hold);
+        // the time evolution of the state of the data state machine
         @statistic[dataState](title="data state"; type=enum; enum=WAIT_IDLE, IDLE, RECEIVE, HOLD, COLLIDE, DELAY_PENDING, PENDING, WAIT_MAC, TRANSMIT; source=dataStateChanged; record=count,vector; interpolationmode=sample-hold);
         @statistic[rxCmd](title="RX command"; type=enum; enum=NONE, BEACON, COMMIT; record=count,vector; interpolationmode=sample-hold);
         @statistic[txCmd](title="TX command"; type=enum; enum=NONE, BEACON, COMMIT; record=count,vector; interpolationmode=sample-hold);

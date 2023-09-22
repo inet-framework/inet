@@ -17,6 +17,13 @@ package inet.physicallayer.wired.ethernet;
 
 import inet.queueing.common.PacketDelayer;
 
+//
+// This module models the delay of sending a packet through a Serial Peripheral
+// Interface (SPI). The SPI is characterized by the clock frequency (speed). The
+// transmission delay is calculated from the speed parameter and the packet length.
+//
+// @see ~SpiShaper
+//
 simple SpiDelayer extends PacketDelayer like ISpi
 {
     parameters:

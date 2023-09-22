@@ -25,14 +25,23 @@ package inet.physicallayer.wired.ethernet;
 simple EthernetCsmaPhy
 {
     parameters:
+        // emitted when the state of the state machine changes, the value is one of IDLE, TRANSMITTING, RECEIVING, COLLISION, CRS_ON
         @signal[stateChanged](type=int);
+        // emitted when the type of the received signal changes, the value is one of NONE, BEACON, COMMIT, DATA, JAM
         @signal[receivedSignalType](type=int);
+        // emitted when the type of the transmitted signal changes, the value is one of NONE, BEACON, COMMIT, DATA, JAM
         @signal[transmittedSignalType](type=int);
+        // emitted at the reception start, the value is the Ethernet signal being received
         @signal[receptionStarted](type=inet::physicallayer::EthernetSignalBase);
+        // emitted at the reception end, the value is the Ethernet signal being received
         @signal[receptionEnded](type=inet::physicallayer::EthernetSignalBase);
+        // emitted at the transmission start, the value is the Ethernet signal being transmitted
         @signal[transmissionStarted](type=inet::physicallayer::EthernetSignalBase);
+        // emitted at the transmission end, the value is the Ethernet signal being transmitted
         @signal[transmissionEnded](type=inet::physicallayer::EthernetSignalBase);
+        // emitted when the bus usage changes, the value is 1 if transmission or reception is in progress, 0 otherwise
         @signal[busUsed](type=int);
+        // the time evolution of the state of the state machine
         @statistic[state](title="state"; type=enum; enum=IDLE, TRANSMITTING, RECEIVING, COLLISION, CRS_ON; source=stateChanged; record=count,vector; interpolationmode=sample-hold);
         @statistic[receivedSignalType](title="received signal type"; type=enum; enum=NONE, BEACON, COMMIT, DATA, JAM; record=count,vector; interpolationmode=sample-hold);
         @statistic[transmittedSignalType](title="transmitted signal type"; type=enum; enum=NONE, BEACON, COMMIT, DATA, JAM; record=count,vector; interpolationmode=sample-hold);

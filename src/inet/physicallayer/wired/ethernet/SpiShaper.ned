@@ -18,6 +18,14 @@ package inet.physicallayer.wired.ethernet;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketServer;
 
+//
+// This module models a Serial Peripheral Interface (SPI) by connecting a packet
+// queue and a packet server. The SPI is characterized by the clock frequency
+// (speed). The packet server processing delay is calculated from the speed
+// parameter and the packet length.
+//
+// @see ~SpiDelayer
+//
 module SpiShaper like ISpi
 {
     parameters:
