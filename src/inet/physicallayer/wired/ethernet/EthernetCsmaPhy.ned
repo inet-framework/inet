@@ -47,10 +47,8 @@ simple EthernetCsmaPhy
         @statistic[transmittedSignalType](title="transmitted signal type"; type=enum; enum=NONE, BEACON, COMMIT, DATA, JAM; record=count,vector; interpolationmode=sample-hold);
         @statistic[transmitting](title="transmitting state"; type=int; source=count(transmissionStarted) - count(transmissionEnded); record=vector; interpolationmode=sample-hold);
         @statistic[throughput](title="throughput"; unit=bps; source=throughput(transmissionEnded); record=vector,histogram; interpolationmode=linear);
-//        @statistic[utilization](title="utilization"; unit=%; source=100 * utilization(count(transmissionStarted) - count(transmissionEnded)); record=vector,histogram; interpolationmode=linear);
         @statistic[propagationTime](title="propagation time"; unit=s);
         @statistic[transmissionTime](title="transmission time"; unit=s; source=packetDuration(transmissionEnded); record=vector,histogram; interpolationmode=none);
-//        @statistic[flowTransmissionTime](title="flow transmission time"; unit=s; source=packetDuration(demuxFlow(transmissionEnded)); record=vector,histogram; interpolationmode=none);
         @statistic[busUsed](title="bus used"; record=count,vector; interpolationmode=sample-hold);
         @statistic[busUtilization](title="bus utilization"; source=utilization(busUsed); record=count,vector; interpolationmode=linear);
         @display("i=block/rxtx");
