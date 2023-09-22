@@ -113,22 +113,33 @@ class TcpErrorInfo extends TcpCommand
 //
 class TcpOpenCommand extends TcpCommand
 {
-    L3Address localAddr; // may be left empty
-    L3Address remoteAddr;// required for active open
-    int localPort = -1;       // required for passive open
-    int remotePort = -1;      // required for active open
-    bool fork = false;        // used only for passive open
-    bool autoRead = true;   // true: TCP send up arrived data automatically. false: should use read command.
+    L3Address localAddr;   // may be left empty
+    L3Address remoteAddr;  // required for active open
+    int localPort = -1;    // required for passive open
+    int remotePort = -1;   // required for active open
+    bool fork = false;     // used only for passive open
+    bool autoRead = true;  // true: TCPs sends up arrived data automatically. false: should use read command
     string tcpAlgorithmClass; // TCP congestion control algorithm; leave empty for default
 }
 
 //
-// TODO
-// Number of bytes to be read
+// Control info that represents a READ request. ~Tcp only accepts READ requests
+// from the user when the connection was opened with autoRead=false.
+//
+// ~Tcp will respond to the reception of a READ request with data; either
+// from previously received and buffered data, or data received from the network.
+// Only one READ request may be outstanding, ~Tcp will not accept another READ
+// until the previous one has been satisfied.
+//
+// The maxByteCount field specifies the maximum number of bytes to be read.
+// Note that ~Tcp will respond as soon as any data becomes available,
+// so the response is often smaller than maxByteCount.
+//
+// @see ~TcpOpenCommand
 //
 class TcpReadCommand extends TcpCommand
 {
-    int32_t maxByteCount; //limit for DATA response
+    int32_t maxByteCount; // size limit for the data response
 }
 
 //

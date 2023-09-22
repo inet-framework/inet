@@ -20,6 +20,11 @@ import inet.applications.contract.IApp;
 // back the same message object. The reply can be delayed by a constant time
 // (replyDelay parameter).
 //
+// By default, the server does not impose rate limiting on data reads from the
+// socket. To enable rate limiting, you can set "autoRead" to "false" and
+// configure the "readSize" and "readDelay" parameters, thereby facilitating TCP
+// flow control.
+//
 // Compatible with both ~Ipv4 and ~Ipv6.
 //
 // @see ~GenericAppMsg, ~TcpBasicClientApp, ~TelnetApp
@@ -29,9 +34,9 @@ simple TcpGenericServerApp like IApp
     parameters:
         string localAddress = default(""); // local address; may be left empty ("")
         int localPort = default(1000);     // localPort number to listen on
-        bool autoRead = default(true);
-        volatile int readSize @unit(B) = default(-1B);    // used only with autoRead==false 
-        volatile double readDelay @unit(s) = default(-1s);    // used only with autoRead==false, negative delay means immediatelly send a read command, otherwise schedule timer with >= 0 delay for waiting to send a read command  
+        bool autoRead = default(true); // whether to use "autoread" or "explicit-read" mode for TCP connection
+        volatile int readSize @unit(B) = default(-1B);    // used only with autoRead==false
+        volatile double readDelay @unit(s) = default(-1s);    // used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay
         double replyDelay @unit(s) = default(0s);
         @display("i=block/app");
         @lifecycleSupport;

@@ -53,6 +53,19 @@ class TcpStatusInfo;
  * socketPeerClosed(), etc (these are methods of TcpSocket::ICallback).,
  * The callback object can be your simple module class too.
  *
+ * Note that receiving data (i.e. callbacks to socketDataArrived()) are subject
+ * to the read mode. Namely, the socket can be in one of two modes: "autoread"
+ * and "explicit-read". In "autoread" mode, TCP immediately forwards received
+ * data to the app, while in "explicit-read" mode, the app must issue explicit
+ * READ commands. The latter can be done with the read() member function. The
+ * socket is created in "autoread" mode by default; "explicit-read" mode can be
+ * selected by calling setAutoRead(false) before the connection is established.
+ * Note that sockets created by forking off a listening socket inherit the mode
+ * from the listening socket.
+ *
+ * Note that data arrive piecewise; the ReceiveQueueBasedCallback utility class
+ * is provided to simplify the job of assembling the data into a single message.
+ *
  * This code skeleton example shows how to set up a TcpSocket to use the module
  * itself as callback object:
  *
@@ -161,7 +174,7 @@ class INET_API TcpSocket : public ISocket
     L3Address remoteAddr;
     int remotePrt = -1;
 
-    bool autoRead = true;   // true: TCP send up arrived data automatically. false: should use read command.
+    bool autoRead = true;
 
     ICallback *cb = nullptr;
     void *userData = nullptr;
@@ -207,6 +220,12 @@ class INET_API TcpSocket : public ISocket
      */
     int getSocketId() const override { return connId; }
 
+    /**
+     * Returns the buffer where ReceiveQueueBasedCallback collects received data.
+     * The user can peek the buffer to determine whether enough data has arrived
+     * that can be meaningfully processed (e.g. a whole protocol message), and
+     * if so, extract the data from the buffer and process it.
+     */
     ChunkQueue *getReceiveQueue() { if (receiveQueue == nullptr) receiveQueue = new ChunkQueue(); return receiveQueue; }
 
     void *getUserData() const { return userData; }
@@ -237,6 +256,23 @@ class INET_API TcpSocket : public ISocket
 
     /**
      * Set autoRead mode on/off.
+     *
+     * The autoRead is on by default. In this mode, incoming data
+     * is immediately forwarded by TCP connection to the socket. This turns
+     * off TCP flow control because the application is capable of
+     * receiving any amount of data at any time.
+     *
+     * When autoRead is set to off, it operates similarly to the Unix
+     * socket API. In this mode, the TCP retains the received data in a
+     * buffer and only sends it to the socket when the read() function
+     * is called.
+     *
+     * Please note that this setting can only be used before calling
+     * connect() or listen(). When a connection is established in a listening
+     * socket, a new fork of the socket is automatically created, and the
+     * connection is established with this new fork. Sockets created from
+     * a fork operation of a listening socket will inherit this setting from
+     * the parent listen socket.
      */
     void setAutoRead(bool autoRead);
 
@@ -304,13 +340,14 @@ class INET_API TcpSocket : public ISocket
     void connect(L3Address remoteAddr, int remotePort);
 
     /**
-     * This function sends a READ request message to the TCP connection module,
-     * specifying the intended data length. The TCP connection module responds
-     * by sending data bytes to processMessage() function. If data is unavailable,
-     * the TCP connection module stores the request and sends data when available.
-     * Only one READ request can be active at a time; secondary requests are rejected.
+     * This function is only in use in "explicit-read" mode, i.e. when the
+     * autoRead is turned off with setAutoRead(false).
      *
-     * Note: This function can only be used when the autoRead mode is turned off.
+     * It sends a READ request message to TCP, specifying maximum amount of data
+     * it wishes to read. The TCP connection module responds by sending data as
+     * soon as any is available. Only one READ request can be active at a time;
+     * secondary requests are rejected. This method returns immediately; data
+     * will be delivered to the socket callback asynchronously.
      */
     void read(int32_t numBytes);
 

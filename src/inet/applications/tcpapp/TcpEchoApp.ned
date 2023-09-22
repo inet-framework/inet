@@ -14,15 +14,19 @@ package inet.applications.tcpapp;
 // result in sending back the same message unmodified.) The reply can also be
 // delayed by a constant time (echoDelay parameter).
 //
+// By default, reading from the socket is not rate limited. To allow rate
+// limiting, set autoRead=false, and use the readSize and readDelay parameters
+// to set a rate limit. This will allow TCP flow control to come into effect.
+//
 // Compatible with both ~Ipv4 and ~Ipv6.
 //
 simple TcpEchoApp extends TcpServerHostApp
 {
     parameters:
         @class(TcpEchoApp);
-        bool autoRead = default(true);
-        volatile int readSize @unit(B) = default(-1B);    // used only with autoRead==false 
-        volatile double readDelay @unit(s) = default(-1s);    // used only with autoRead==false, negative delay means immediatelly send a read command, otherwise schedule timer with >= 0 delay for waiting to send a read command  
+        bool autoRead = default(true); // whether to use "autoread" or "explicit-read" mode for TCP connection
+        volatile int readSize @unit(B) = default(-1B);    // used only with autoRead==false
+        volatile double readDelay @unit(s) = default(-1s);    // used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay
         double echoFactor = default(1);
         double echoDelay @unit(s) = default(0s);
         serverThreadModuleType = default("inet.applications.tcpapp.TcpEchoAppThread"); // module type of "thread" module to launch on incoming connections

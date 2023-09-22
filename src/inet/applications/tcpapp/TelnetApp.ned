@@ -20,6 +20,10 @@ import inet.applications.contract.IApp;
 // to gather statistics from packet traces on a real network, and
 // write your model accordingly.
 //
+// By default, reading from the socket is not rate limited. To allow rate
+// limiting, set autoRead=false, and use the readSize and readDelay parameters
+// to set a rate limit. This will allow TCP flow control to come into effect.
+//
 simple TelnetApp like IApp
 {
     parameters:
@@ -27,9 +31,9 @@ simple TelnetApp like IApp
         int localPort; // local port number
         string connectAddress;  // server address (may be symbolic)
         int connectPort = default(1000); // port number to connect to
-        bool autoRead = default(true);
-        volatile int readSize @unit(B) = default(-1B);    // used only with autoRead==false 
-        volatile double readDelay @unit(s) = default(-1s);    // used only with autoRead==false, negative delay means immediatelly send a read command, otherwise schedule timer with >= 0 delay for waiting to send a read command  
+        bool autoRead = default(true); // whether to use "autoread" or "explicit-read" mode for TCP connection
+        volatile int readSize @unit(B) = default(-1B);    // used only with autoRead==false
+        volatile double readDelay @unit(s) = default(-1s);    // used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay
         double startTime @unit(s) = default(1s); // time first session begins
         double stopTime @unit(s) = default(-1s);  // time of finishing sending, negative values mean forever
         volatile int numCommands = default(int(exponential(10))); // user types this many commands in a session

@@ -416,10 +416,19 @@ over time according to the protocol logic.
 Receiving Data
 ~~~~~~~~~~~~~~
 
-Receiving data is as simple as implementing the corresponding method of
+The socket can be in one of two modes: "autoread" and "explicit-read". In
+"autoread" mode, TCP immediately forwards received data to the socket, whereas
+in "explicit-read" mode, the application must explicitly request data by calling
+the :cpp:`read()` method of :cpp:`TcpSocket`. By default, the socket is created
+in "autoread" mode; "explicit-read" mode can be selected by calling
+:cpp:`setAutoRead(false)` before the connection is established. Note that
+sockets created by forking off a listening socket inherit the mode from the
+listening socket.
+
+Receiving data is done by implementing the corresponding method of
 the :cpp:`TcpSocket::ICallback` interface. One caveat is that packet
 data may arrive in different chunk sizes (but the same order) than they
-were sent due to the nature of :protocol:`TCP` protocol.
+were sent, due to the nature of :protocol:`TCP` protocol.
 
 For example, the application may directly implement the
 :cpp:`TcpSocket::ICallback` interface and print the received data as

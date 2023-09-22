@@ -10,14 +10,19 @@ package inet.applications.tcpapp;
 //
 // This module provides TCP server socket handling for generic TCP applications.
 //
-// @see ~TcpServerConnection, ~TcpClientSocketIo
+// Note that reading from the socket is only rate limited if the connection was
+// originally created with the autoRead=false setting. Then, you can use the
+// readSize and readDelay parameters to set a rate limit. This will allow TCP
+// flow control to come into effect.
+//
+// @see ~TcpServerConnection, ~TcpServerListener, ~TcpClientSocketIo
 //
 simple TcpServerSocketIo
 {
     parameters:
         @display("i=block/socket");
-        volatile int readSize @unit(B) = default(-1B);    // used only with autoRead==false 
-        volatile double readDelay @unit(s) = default(-1s);    // used only with autoRead==false, negative delay means immediatelly send a read command, otherwise schedule timer with >= 0 delay for waiting to send a read command  
+        volatile int readSize @unit(B) = default(-1B);    // used only with autoRead==false
+        volatile double readDelay @unit(s) = default(-1s);    // used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay
     gates:
         input trafficIn;
         output trafficOut;

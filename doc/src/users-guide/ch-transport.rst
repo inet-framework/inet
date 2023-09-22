@@ -62,6 +62,24 @@ All three module types implement the :ned:`ITcp` interface and
 communicate with other layers through the same interface, so they can be
 interchanged and also mixed in the same network.
 
+It is important to note that in all three implementations, applications using
+TCP can open a connection in either of two modes: "autoread" or
+"explicit-read", usually controlled by a boolean parameter called :par:`autoRead`.
+In "autoread" mode, all incoming data in a TCP connection is
+immediately sent to the application, whereas in "explicit-read" mode, the user
+must send a specific read request similar to the Unix Socket API read() call,
+allowing TCP to respond with either queued data or new incoming data based on
+the connection.
+
+Although read mode appears to be an implementation detail, it has fundamental
+implications on the behavior of the TCP protocol. "Autoread" mode always
+advertises the full buffer size, while "explicit-read" mode manages the
+advertised window based on read requests. Therefore, TCP flow control is
+only effective in applications that open connections in "explicit-read" mode.
+Most applications use "autoread" mode, which must be taken into account
+when designing simulation experiments that involve TCP connections.
+
+
 .. _ug:sec:transport:tcpcore:
 
 Tcp
