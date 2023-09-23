@@ -89,7 +89,7 @@ is -1, then an unused port is selected automatically by the UDP module.
 The localAddress/localPort combination must be unique.
 
 When a packet arrives from the network, first its error bit is checked.
-Erronous messages are dropped by the UDP component. Otherwise the
+Erroneous messages are dropped by the UDP component. Otherwise the
 application bound to the destination port is looked up, and the
 decapsulated packet passed to it. If no application is bound to the
 destination port, an ICMP error is sent to the source of the packet. If

@@ -124,7 +124,7 @@ Output Queues
 
 Queue components must implement the :ned:`IPacketQueue` module
 interface. In addition to having one input and one output gate, these
-components must implement a passive queue behaviour: they only deliver a
+components must implement a passive queue behavior: they only deliver a
 packet when the module connected to their output explicitly requests it.
 (In C++ terms, the module must implement the :cpp:`IPacketQueue`
 interface. The next module requests a packet by calling the
@@ -607,5 +607,5 @@ meter and dropping packets that does not conform to the traffic profile.
 There are other queues for AFx classes and BE. The AFx queues use RED to
 implement 3 different drop priorities within the class. BE packets are
 stored in a drop tail queue. Packets from AFxy and BE queues are
-sheduled by a WRR scheduler, which ensures that the remaining bandwith
+scheduled by a WRR scheduler, which ensures that the remaining bandwidth
 is allocated among the classes according to the specified weights.

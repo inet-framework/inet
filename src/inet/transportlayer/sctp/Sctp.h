@@ -60,7 +60,7 @@ class SctpHeader;
  * SctpAssociation internally relies on 3 objects. The first two are subclassed
  * from SctpSendQueue and SctpReceiveQueue. They manage the actual data stream,
  * so SctpAssociation itself only works with sequence number variables.
- * This makes it possible to easily accomodate need for various types of
+ * This makes it possible to easily accommodate need for various types of
  * simulated data transfer: real byte stream, "virtual" bytes (byte counts
  * only), and sequence of cMessage objects (where every message object is
  * mapped to a SCTP sequence number range).

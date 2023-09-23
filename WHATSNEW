@@ -3623,7 +3623,7 @@ STP / RSTP support (802.1d) added to the EthernetSwitch:
      This module allows one to configure network scenarios at Layer 2.
 
    - Replaced the EtherSwitch relay unit with a new, STP/RSTP capable one.
-     The CPU and memory modelling are no longer supported in this relay unit.
+     The CPU and memory modeling are no longer supported in this relay unit.
 
 Nodes automatically pick-up the network configuration on restart:
 

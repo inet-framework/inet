@@ -65,7 +65,7 @@ class TcpLwipConnection;
  *   receiving side when its last byte has arrived on the simulated
  *   connection.
  *
- * Different TcpLwipSendQueue subclasses can be written to accomodate
+ * Different TcpLwipSendQueue subclasses can be written to accommodate
  * different needs.
  *
  * This class goes hand-in-hand with TcpLwipReceiveQueue.

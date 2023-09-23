@@ -119,7 +119,7 @@ AdaptiveProbabilisticBroadcast
 
 :ned:`AdaptiveProbabilisticBroadcast` is a variant of
 :ned:`ProbabilisticBroadcast` that automatically adjusts transmission
-probabilities depending on the estimated number of neighbours.
+probabilities depending on the estimated number of neighbors.
 
 .. _ug:sec:networkprotocols:wiseroute:
 

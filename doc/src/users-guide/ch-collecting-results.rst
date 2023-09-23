@@ -126,7 +126,7 @@ module records all traffic specific to that network interface, and similarly a
 recorder put in the network node records all traffic from the given node. It's
 also possible to put a PCAP recorder module on the network level to produce a
 PCAP file that contains all network traffic. If the traffic of more than one
-network interface is recorded into a signle file, then the newer PCAPng file
+network interface is recorded into a single file, then the newer PCAPng file
 format must be used to also record the data of the corresponding network interfaces.
 
 Recording PCAP traces also supports using packet filters, which in turn allows

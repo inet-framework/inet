@@ -173,7 +173,7 @@ The out-of-band synchronization settings are defined in a base configuration, ``
 Since we want to use clock synchronization, we need to be able to set the
 clocks, so network nodes have :ned:`SettableClock` modules. The
 ``defaultOverdueClockEventHandlingMode = "execute"`` setting means that when
-setting the clock forward, events that become overdue are done immediatelly. We
+setting the clock forward, events that become overdue are done immediately. We
 use the :ned:`SimpleClockSynchronizer` for out-of-band synchronization.
 Synchronizer modules are implemented as applications, so we add one to each
 source host in an application slot. We set the synchronizer modules to sync time

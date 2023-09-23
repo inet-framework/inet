@@ -39,7 +39,7 @@ The following sequence chart shows a gate cycle period (1ms):
 .. figure:: media/seqchart3.png
     :align: center
 
-Note that the frames are forwarded immediatelly by the switches.
+Note that the frames are forwarded immediately by the switches.
 
 The following sequence chart shows frame transmissions, with the best effort gate state displayed on the axes for the two switches.
 
@@ -53,7 +53,7 @@ The following figure shows application end-to-end delay for the four streams:
 .. figure:: media/delay.png
     :align: center
 
-All streams have the minimal possible delay, as they are forwarded immediatelly.
+All streams have the minimal possible delay, as they are forwarded immediately.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`
 

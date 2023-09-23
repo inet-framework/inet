@@ -53,7 +53,7 @@ types:
 .. code-block:: ned
 
    propagation: <default("ConstantSpeedPropagation")> like IPropagation;
-   analogModel: <default("ScalarMediuAnalogModel")> like IMediumAnalogModel;
+   analogModel: <default("ScalarMediumAnalogModel")> like IMediumAnalogModel;
    backgroundNoise: <default("IsotropicScalarBackgroundNoise")> like IRadioBackgroundNoise
        if typename != "";
    pathLoss: <default("FreeSpacePathLoss")> like IPathLoss;
@@ -382,7 +382,7 @@ the host’s neighbors on the link, which is usually 1 in modern networks
 that are dominated by point-to-point links. The wireless medium,
 however, is a broadcast medium. Any transmission is “heard” by all nodes
 within interference range, not only the intended recipients. The signal
-may be receivable by them (and must be indeeded received before the
+may be receivable by them (and must be indeed received before the
 destination address field in it can be examined), or may interfere with
 the reception of other transmissions. Whichever the case, the
 transmission must be evaluated or processed by a much larger number of
@@ -393,7 +393,7 @@ effects may further increase the exponent.
 The medium module provides a set of parameters that can be used to
 alleviate the scalability issue. These *filter* parameters that can be
 used to reduce the amount of processing at nodes that are not the
-indended recipients of the frame, increasing simulation performance.
+intended recipients of the frame, increasing simulation performance.
 
 There are several filters that can be enabled/disabled individually:
 

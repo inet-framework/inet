@@ -446,7 +446,7 @@ assumed to be given as meters, time intervals in seconds and speeds in
 meter per seconds. Attibutes can contain expressions that are evaluated
 each time the command is executed. The limits of the constraint area can
 be referenced as ``$MINX``, ``$MAXX``, ``$MINY``, and ``$MAXY``. Random
-number distibutions generate a new random number when evaluated, so the
+number distributions generate a new random number when evaluated, so the
 script can describe random as well as deterministic scenarios.
 
 To illustrate the usage of the module, we show how some mobility models

@@ -35,7 +35,7 @@ applications use :msg:`GenericAppMsg` objects to represent the data sent
 between the client and server. The client message contains the expected
 reply length, the processing delay, and a flag indicating that the
 connection should be closed after sending the reply. This way
-intelligence (behaviour specific to the modelled application, e.g. HTTP,
+intelligence (behavior specific to the modelled application, e.g. HTTP,
 SMB, database protocol) needs only to be present in the client, and the
 server model can be kept simple and dumb.
 
@@ -99,7 +99,7 @@ arrives on them.
 TcpGenericServerApp
 ~~~~~~~~~~~~~~~~~~~
 
-Generic server application for modelling TCP-based request-reply style
+Generic server application for modeling TCP-based request-reply style
 protocols or applications.
 
 The module accepts any number of incoming TCP connections, and expects
@@ -172,7 +172,7 @@ The application will issue a TCP CLOSE at time :par:`tClose`. If
 TelnetApp
 ~~~~~~~~~
 
-Models Telnet sessions with a specific user behaviour. The server app
+Models Telnet sessions with a specific user behavior. The server app
 should be :ned:`TcpGenericServerApp`.
 
 In this model the client repeats the following activity between
@@ -195,13 +195,13 @@ In this model the client repeats the following activity between
    :par:`reconnectInterval` and the connection is reopened
 
 Each parameter in the above description is “volatile”, so you can use
-distributions to emulate random behaviour.
+distributions to emulate random behavior.
 
 
 
 .. note::
 
-   This module emulates a very specific user behaviour, and as such,
+   This module emulates a very specific user behavior, and as such,
    it should be viewed as an example rather than a generic Telnet model.
    If you want to model realistic Telnet traffic, you are encouraged
    to gather statistics from packet traces on a real network, and
@@ -319,7 +319,7 @@ streaming, it will send UDP packets of size :par:`packetLen` at every
 :par:`sendInterval`, until :par:`videoSize` is reached. The parameters
 :par:`packetLen` and :par:`sendInterval` can be set to constant values
 to create CBR traffic, or to random values (e.g.
-``sendInterval=uniform(1e-6, 1.01e-6)``) to accomodate jitter.
+``sendInterval=uniform(1e-6, 1.01e-6)``) to accommodate jitter.
 
 The server can serve several clients, and several streams per client.
 
@@ -472,7 +472,7 @@ Ethernet applications
 
 The ``inet.applications.ethernet`` package contains modules for a
 simple client-server application. The :ned:`EtherAppClient` is a simple
-traffic generator that peridically sends :msg:`EtherAppReq` messages
+traffic generator that periodically sends :msg:`EtherAppReq` messages
 whose length can be configured. destAddress, startTime,waitType,
 reqLength, respLength
 

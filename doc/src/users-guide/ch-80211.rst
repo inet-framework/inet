@@ -78,9 +78,9 @@ are extracted into their own modules.
 
 The new model also separates the following components in the 802.11 standard into modules:
 
--  Coordination function: :ned:`Dcf`, :ned:`Hcf`. The coordination functions control the medium access as specified by the standard.  
+-  Coordination function: :ned:`Dcf`, :ned:`Hcf`. The coordination functions control the medium access as specified by the standard.
 
--  Channel access method as specified by the standard: :ned:`Edca` 
+-  Channel access method as specified by the standard: :ned:`Edca`
 
 -  Channel access function: :ned:`Edcaf`, :ned:`Dcaf`. The channel access function controls channel ownership, etc.
 
@@ -135,7 +135,7 @@ The MAC model has the following replaceable built-in policy submodules by defaul
 
 -  Originator and recipient block ACK agreement policies (e.g. :ned:`OriginatorBlockAckAgreementPolicy`, :ned:`RecipientBlockAckAgreementPolicy`): determine when and what kind of agreements are made
 
--  MSDU aggregation policy (e.g. :ned:`BasicMsduAggregationPolicy`): controls when and which frames are aggregated into an A-MSDU 
+-  MSDU aggregation policy (e.g. :ned:`BasicMsduAggregationPolicy`): controls when and which frames are aggregated into an A-MSDU
 
 -  Fragmentation policy (e.g. :ned:`BasicFragmentationPolicy`): controls when and how fragmentation happens
 
@@ -149,7 +149,7 @@ The MAC model has the following replaceable built-in policy submodules by defaul
 Physical Layer
 --------------
 
-*The physical layer* modules (:ned:`Ieee80211Radio`) deal with modelling
+*The physical layer* modules (:ned:`Ieee80211Radio`) deal with modeling
 transmission and reception of frames. They model the characteristics of
 the radio channel, and determine if a frame was received correctly (that
 is, it did not suffer bit errors due to low signal power or interference
@@ -199,11 +199,11 @@ out these commands by performing the scanning, authentication and
 association procedures, and reports back the results to the agent.
 
 The agent component is currently only needed with the
-:ned:`Ieee80211MgmtSta` module. The managament entities in other NIC
+:ned:`Ieee80211MgmtSta` module. The management entities in other NIC
 variants do not have as much freedom as to need an agent to control
 them.
 
 :ned:`Ieee80211MgmtSta` requires a :ned:`Ieee80211AgentSta` or a custom
 agent. By modifying or replacing the agent, one can alter the dynamic
-behaviour of STAs in the network, for example implement different
+behavior of STAs in the network, for example implement different
 handover strategies.

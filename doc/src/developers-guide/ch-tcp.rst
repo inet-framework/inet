@@ -164,7 +164,7 @@ There are two additional objects the :cpp:`TcpConnection` relies on
 internally: instances of :cpp:`TcpSendQueue` and :cpp:`TcpReceiveQueue`.
 These polymorph classes manage the actual data stream, so
 :cpp:`TcpConnection` itself only works with sequence number variables.
-This makes it possible to easily accomodate need for various types of
+This makes it possible to easily accommodate need for various types of
 simulated data transfer: real byte stream, "virtual" bytes (byte counts
 only), and sequence of :cpp:`cMessage` objects (where every message
 object is mapped to a TCP sequence number range).
@@ -504,7 +504,7 @@ be :math:`cwnd/2`, :math:`cwnd` will be 1 SMSS.
 TcpReno
 ~~~~~~~
 
-The :cpp:`TcpReno` algorithm extends the behaviour :cpp:`TcpTahoe` with
+The :cpp:`TcpReno` algorithm extends the behavior :cpp:`TcpTahoe` with
 *Fast Recovery*. This algorithm can also use the information transmitted
 in SACK options, which enables a much more accurate congestion control.
 

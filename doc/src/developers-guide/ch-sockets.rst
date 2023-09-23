@@ -13,7 +13,7 @@ standard OMNeT++ message passing interface for several communication
 protocols.
 
 Sockets are most often used by applications and routing protocols to
-acccess the corresponding protocol services. Sockets are capable of
+access the corresponding protocol services. Sockets are capable of
 communicating with the underlying protocol in a bidirectional way. They
 can assemble and send service requests and packets, and they can also
 receive service indications and packets.
@@ -21,7 +21,7 @@ receive service indications and packets.
 Applications can simply call the socket class member functions (e.g.
 :fun:`bind()`, :fun:`connect()`, :fun:`send()`, :fun:`close()`) to
 create and configure sockets, and to send and receive packets. They may
-also use several different sockets simulatenously.
+also use several different sockets simultaneously.
 
 The following sections first introduce the shared functionality of
 sockets, and then list all INET sockets in detail, mostly by shedding
@@ -523,7 +523,7 @@ Sending Data
 ~~~~~~~~~~~~
 
 After the connection has been established, applications can send data to
-the remote applica- tion via a simple function call:
+the remote application via a simple function call:
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp

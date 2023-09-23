@@ -489,7 +489,7 @@
 	from the RelayUnit. The new MACTable is ready for future VLAN support.
 
 	IEEE8021DRelay: added a new relay for supporting STP/RSTP protocols.
-	The CPU and memory modelling are no longer supported with this relay.
+	The CPU and memory modeling are no longer supported with this relay.
 
 2013-08-22  ------ inet-2.2.0 released ------
 

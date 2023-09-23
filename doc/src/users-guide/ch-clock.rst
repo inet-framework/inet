@@ -17,7 +17,7 @@ quantity. All components of the network share the same time throughout the
 simulation independently of where they are physically located or how they are
 logically connected to the network.
 
-In contast, in time sensitive networking, the bookkeeping of time is an essential
+In contrast, in time sensitive networking, the bookkeeping of time is an essential
 part, which should be explicitly simulated independently of the underlying global
 time. The reason is that the differences among the local time of the communication
 network components significantly affects the simulation results.
@@ -25,7 +25,7 @@ network components significantly affects the simulation results.
 In such simulations, hardware clocks are simulated on their own, and communication
 protocols don't rely on the global value of simulation time, which is in fact
 unknown in reality, but on the value of their own clocks. With having hardware
-clocks modeled, it's also often required to use various time synhronization
+clocks modeled, it's also often required to use various time synchronization
 protocols, because clocks tend to drift over time and communication protocols
 rely on the precision of the clocks they are using.
 
@@ -53,14 +53,14 @@ The clock API uses the clock time instead of the simulation time as arguments an
 return values. The interface contains functions such as :fun:`getClockTime()`,
 :fun:`scheduleClockEventAt()`, :fun:`scheduleClockEventAfter()`,
 :fun:`cancelClockEvent()`.
- 
+
 INET contains optional clock modules (not used by default) at the network node
 and the network interface levels. The following clock models are available:
 
 -  :ned:`IdealClock`: clock time is identical to the simulation time.
 -  :ned:`OscillatorBasedClock`: clock time is the number of oscillator ticks
    multiplied by the nominal tick length.
--  :ned:`SettableClock`: a clock which can be set to a different clock time. 
+-  :ned:`SettableClock`: a clock which can be set to a different clock time.
 
 Clock Time
 ----------

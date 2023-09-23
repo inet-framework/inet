@@ -28,7 +28,7 @@ enum ArpOpcode
 // addresses and IPv4. Packet fields are therefore represented by C++ classes
 // MACAddress and IPv4Address. Also, some ARP protocol header fields are
 // not modelled explicitly (their values are implied):
-//   - hardwareType (not needed for modelling);
+//   - hardwareType (not needed for modeling);
 //   - protocol type (0x800 IPv4)
 //   - hardware address length (6)
 //   - protocol address length (4)

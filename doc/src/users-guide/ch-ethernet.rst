@@ -78,14 +78,14 @@ lengths should be reflected in the delays of the connections.
 Ethernet Bus
 ~~~~~~~~~~~~
 
-The :ned:`WireJunction` component can also model a connection to a 
+The :ned:`WireJunction` component can also model a connection to a
 common coaxial cable found in early Ethernet LANs. Network nodes
 are attached to the :ned:`WireJunction` via a :ned:`DatarateChannel`.
-The :ned:`WireJunction` modules are connected to each other via 
+The :ned:`WireJunction` modules are connected to each other via
 :ned:`DatarateChannel` as well. When a node sends a signal, it will propagate
 along the cable in both directions at the given propagation speed.
 
-The speed of the connection can be set on the datarate channels; 
+The speed of the connection can be set on the datarate channels;
 all connected channels must have the same speed.
 
 .. _ug:sec:ethernet:the-physical-layer:
@@ -142,7 +142,7 @@ of the LLC layer.
 
 Nowadays almost all Ethernet networks operate using full-duplex
 point-to-point connections between hosts and switches. This means that
-there are no collisions, and the behaviour of the MAC component is much
+there are no collisions, and the behavior of the MAC component is much
 simpler than in classic Ethernet that used coaxial cables and hubs. The
 INET framework contains two MAC modules for Ethernet: the
 :ned:`EthernetMac` is simpler to understand and easier to extend,

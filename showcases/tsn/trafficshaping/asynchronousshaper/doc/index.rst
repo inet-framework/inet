@@ -283,7 +283,7 @@ queue:
    :align: center
 
 At the beginning, the shaper has a burst reserve available, so all incoming
-packets are sent immediatelly. When the burst reserve is depleted, the shaper
+packets are sent immediately. When the burst reserve is depleted, the shaper
 starts limiting the outgoing data rate to the committed information rate.
 Meanwhile, the excess incoming traffic is being stored in the queue. As
 described previously, the queue has a virtual limit, as packets that would wait

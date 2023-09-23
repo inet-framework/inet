@@ -13,7 +13,7 @@ supposed to demonstrate.
 
 
 Script for the tutorial (work in progress)
-========================================== 
+==========================================
 
 The INET Wireless Tutorial contains a series of simulation models numbered. 1
 through 16. The models are of increasing complexity -- they start from the
@@ -95,7 +95,7 @@ current radio model handles each radio channel independently.
 
 15) To support the modeling of the cross-talk effect we will switch to
 dimensional analog radio model. This model requires much more processing power,
-but allows much more accurate modelling of each packets as they travel through
+but allows much more accurate modeling of each packets as they travel through
 space.
 
 16) Now we are introducing some very short burst radio signals (1ns?) that can

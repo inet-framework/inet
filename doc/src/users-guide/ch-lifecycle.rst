@@ -57,7 +57,7 @@ examples how INET components react to a *crash* lifecycle event:
 While down, network interfaces, and components in general, ignore
 (discard) messages sent to them.
 
-Lifecycle operations are currently instanteneous, i.e. they complete in
+Lifecycle operations are currently instantaneous, i.e. they complete in
 zero simulation time. The underlying framework would allow for modeling
 them as processes that take place in some finite (nonzero) simulation
 time, but this possibility is currently not in use.

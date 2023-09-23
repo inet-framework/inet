@@ -90,7 +90,7 @@ The configurator goes through the following steps:
    most constrained case, the configurator is forced to use the
    requested addresses and netmasks for all interfaces (which translates
    to manual address assignment). There are many possible configuration
-   options between these two extremums. The configurator assigns
+   options between these two extremes. The configurator assigns
    addresses in a way that maximizes the number of nodes per subnet.
    Once it figures out the nodes that belong to a single subnet it, will
    optimize for allocating the longest possible netmask. The
@@ -408,15 +408,15 @@ Multicast routing tables can similarly be configured by adding
    -  a name pattern (e.g. "ppp*") matches the name of the interface
 
    -  a ’towards’ pattern (starting with ">", e.g. ">router*") matches
-      the interface by naming one of the neighbour nodes on its link.
+      the interface by naming one of the neighbor nodes on its link.
 
    Incoming multicast datagrams are forwarded to each child interface
    except the one they arrived in.
 
 The following example adds an entry to the multicast routing table of
-``router1``, that intsructs the routing algorithm to forward
+``router1``, that instructs the routing algorithm to forward
 multicast datagrams whose source is in the 10.0.1.0 network and whose
-destinatation address is 225.0.0.1 to send on the ``eth1`` and
+destination address is 225.0.0.1 to send on the ``eth1`` and
 ``eth2`` interfaces assuming it arrived on the ``eth0`` interface:
 
 

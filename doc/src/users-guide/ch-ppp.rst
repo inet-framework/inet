@@ -55,13 +55,13 @@ and requests packets from this external queue one-by-one. The name of
 this queue is given as the :par:`queueModule` parameter.
 
 In hosts, no such queue is used, so :ned:`Ppp` contains an internal
-queue to store packets wainting for transmission.
-Conceptually the queue is of inifinite size, but for better diagnostics
+queue to store packets waiting for transmission.
+Conceptually the queue is of infinite size, but for better diagnostics
 one can specify a hard limit in the :par:`packetCapacity` parameter – if
 this is exceeded, the simulation stops with an error.
 
 The module can be used in simulations where the nodes are connected and
-disconnected dinamically. If the channel between the PPP modules is
+disconnected dynamically. If the channel between the PPP modules is
 down, the messages received from the upper layer are dropped (including
 the messages waiting in the queue). When the connection is restored it
 will poll the queue and transmits the messages again.

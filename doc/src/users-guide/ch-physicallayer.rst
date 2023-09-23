@@ -337,7 +337,7 @@ The layered version, :ned:`ApskLayeredRadio` can not only model the processing
 steps missing from their simpler counterparts, they also feature
 configurable level of detail: the transmitter and receiver modules have
 :par:`levelOfDetail` parameters that control which domains are actually
-simulated. These radio models must be used in conjuction with
+simulated. These radio models must be used in conjunction with
 :ned:`DimensionalRadioMedium`.
 
 .. [1]

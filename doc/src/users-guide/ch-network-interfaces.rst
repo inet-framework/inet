@@ -98,7 +98,7 @@ type like this:
 
 When the :par:`typename` parameter of the queue submodule is unspecified
 (this is the default), the queue module is a :ned:`DropTailQueue`. Conceptually,
-the queue is of inifinite size, but for better diagnostics one can often specify
+the queue is of infinite size, but for better diagnostics one can often specify
 a hard limit for the queue length in a module parameter – if this is exceeded,
 the simulation stops with an error.
 
@@ -286,7 +286,7 @@ settings, it can approximate basic 802.11b ad-hoc mode operation.
 
 :ned:`CsmaCaMac` provides a lot of room for experimentation:
 acknowledgements can be turned on/off, and operation parameters like
-inter-frame gap sizes, backoff behaviour (slot time, minimum and maximum
+inter-frame gap sizes, backoff behavior (slot time, minimum and maximum
 number of slots), maximum retry count, header and ACK frame sizes, bit
 rate, etc. can be configured via NED parameters.
 
@@ -319,7 +319,7 @@ with :ned:`AckingMac`.
 encapsulation and decapsulation, but no real medium access procedure.
 Frames are simply transmitted on the wireless channel as soon as the
 transmitter becomes idle. There is no carrier sense, collision
-avoidance, or collison detection. :ned:`AckingMac` also provides an
+avoidance, or collision detection. :ned:`AckingMac` also provides an
 optional out-of-band acknowledgement mechanism (using C++ function
 calls, not actual wirelessly sent frames), which is turned on by
 default. There is no retransmission: if the acknowledgement does not

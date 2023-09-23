@@ -15,8 +15,8 @@ configuration (address, state, timeouts, etc.) is held in the node’s
 :ned:`InterfaceTable`.
 
 The :ned:`Ipv6NeighbourDiscovery` module implements all tasks associated
-with neighbour discovery and stateless address autoconfiguration. The
-data structures themselves (destination cache, neighbour cache, prefix
+with neighbor discovery and stateless address autoconfiguration. The
+data structures themselves (destination cache, neighbor cache, prefix
 list) are kept in :ned:`Ipv6RoutingTable`. The rest of ICMPv6’s
 functionality, such as error messages, echo request/reply, etc.) is
 implemented in :ned:`Icmpv6`.

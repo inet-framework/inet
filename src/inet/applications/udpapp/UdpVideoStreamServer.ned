@@ -19,7 +19,7 @@ import inet.applications.contract.IApp;
 // sendInterval, until videoSize is reached. The parameters packetLen
 // and sendInterval can be set to constant values to create CBR traffic,
 // or to random values (e.g. sendInterval=uniform(1e-6, 1.01e-6)) to
-// accomodate jitter.
+// accommodate jitter.
 //
 // The server can serve several clients, and several streams per client.
 //

@@ -21,7 +21,7 @@ class SctpAssociation;
 /**
  * Abstract base class for SCTP receive queues. This class represents
  * data received by SCTP but not yet passed up to the application.
- * The class also accomodates for selective retransmission, i.e.
+ * The class also accommodates for selective retransmission, i.e.
  * also acts as a segment buffer.
  *
  * This class goes hand-in-hand with SctpSendQueue.
@@ -30,7 +30,7 @@ class SctpAssociation;
  * use the SCTP model you might have different ideas about "sending data"
  * on a simulated connection: you might want to transmit real bytes,
  * "dummy" (byte count only), cMessage objects, etc; see discussion
- * at SctpSendQueue. Different subclasses can be written to accomodate
+ * at SctpSendQueue. Different subclasses can be written to accommodate
  * different needs.
  *
  * @see SctpSendQueue

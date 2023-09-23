@@ -44,7 +44,7 @@ INET benefits from the infrastructure provided by OMNeT++. Beyond making
 use of the services provided by the OMNeT++ simulation kernel and
 library (component model, parameterization, result recording, etc.),
 this also means that models may be developed, assembled, parameterized,
-run, and their results evaluted from the comfort of the OMNeT++
+run, and their results evaluated from the comfort of the OMNeT++
 Simulation IDE, or from the command line.
 
 INET Framework is maintained by the OMNeT++ team for the community,
@@ -58,7 +58,7 @@ Scope of this Manual
 
 This manual is written for users who are interested in assembling
 simulations using the components provided by the INET Framework. (In
-contrast, if you are interested in modifing INET’s components or plan to
+contrast, if you are interested in modifying INET’s components or plan to
 extend INET with new protocols or other components using C++, we
 recommend the *INET Developers Guide*.)
 

@@ -17,7 +17,7 @@ state information about the individual datagrams, each datagram handled
 independently.
 
 The nodes that are connected to the Internet can be either a host or a
-router. The hosts can send and recieve IP datagrams, and their operating
+router. The hosts can send and receive IP datagrams, and their operating
 system implements the full TCP/IP stack including the transport layer.
 On the other hand, routers have more than one interface cards and
 perform packet routing between the connected networks. Routers does not
@@ -155,7 +155,7 @@ direction, Reverse ARP (RARP).
 The address to be resolved can be either an IPv4 broadcast/multicast or
 a unicast address. The corresponding MAC addresses can be computed for
 broadcast and multicast addresses (RFC 1122, 6.4); unicast addresses are
-resolved using the ARP procotol.
+resolved using the ARP protocol.
 
 If the MAC address is found in the ARP cache, then the packet is
 transmitted to the addressed interface immediately. Otherwise the packet
@@ -216,11 +216,11 @@ IGMP module delivers the IGMP messages not processed by itself to the
 connected routing module.
 
 The :ned:`Igmpv2` module implements version 2 of the IGMP protocol (RFC
-2236). Next we describe its behaviour in host and routers in details.
+2236). Next we describe its behavior in host and routers in details.
 Note that multicast routers behaves as hosts too, i.e. they are sending
 reports to other routers when joining or leaving a multicast group.
 
-Host behaviour
+Host behavior
 ~~~~~~~~~~~~~~
 
 When an interface joins to a multicast group, the host will send a
@@ -241,7 +241,7 @@ Report. When the host receives a General Query on an interface, a timer
 is initialized and a report is sent for each group membership of the
 interface.
 
-Router behaviour
+Router behavior
 ~~~~~~~~~~~~~~~~
 
 Multicast routers maintains a list for each interface containing the

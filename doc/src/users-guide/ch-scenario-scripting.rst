@@ -14,7 +14,7 @@ configuration. You can schedule actions to be carried out at specified
 simulation times, for example changing a parameter value, changing the
 bit error rate of a connection, removing or adding connections, removing
 or adding routes in a routing table, shutting down or crashing routers,
-etc. The aim is usually to observe transient behaviour caused by the
+etc. The aim is usually to observe transient behavior caused by the
 changes.
 
 INET supports the following built-in actions:

@@ -45,7 +45,7 @@ In INET, the physical environment is modeled by the
 instance in the network, and acts as a database that other parts of the
 simulation can query at runtime. It contains the following information:
 
--  geometry and properties of *physical objects* (usually referrred to
+-  geometry and properties of *physical objects* (usually referred to
    as “obstacles” in wireless simulations)
 
 -  a *ground model*
