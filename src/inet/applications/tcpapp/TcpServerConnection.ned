@@ -21,7 +21,7 @@ import inet.queueing.contract.IPassivePacketSink;
 //
 // @see ~TcpServerApp, ~TcpServerListener
 //
-module TcpServerConnection like IApp
+module TcpServerConnection like IApp  //TODO FIXME this is a really bad name! TcpServerThread?
 {
     parameters:
         @application;

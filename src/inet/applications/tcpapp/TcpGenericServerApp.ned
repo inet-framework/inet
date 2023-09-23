@@ -15,7 +15,7 @@ import inet.applications.contract.IApp;
 //
 // The module listens on the designated TCP port, accepting incoming TCP
 // connections. When a TCP connection is established, the model expects to
-// receive messages of class ~GenericAppMsg on it. A message should contain how
+// receive messages of class ~GenericAppMsg on it. A message should contain how  <---TODO NONONO! GenericAppMsg is a chunk not a message type!!! (update everywhere!)
 // large the reply should be (number of bytes). For each received
 // ~GenericAppMsg, ~TcpGenericServerApp will create another ~GenericAppMsg with
 // the requested length as response, and send it back. The reply can be delayed

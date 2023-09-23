@@ -15,6 +15,8 @@ package inet.applications.tcpapp;
 // determines the response traffic, which can be configured to produce complex
 // streams of packets with various data and timing distributions.
 //
+//TODO this needs more explanation
+//
 module TcpRequestResponseApp extends TcpServerConnection
 {
     parameters:
