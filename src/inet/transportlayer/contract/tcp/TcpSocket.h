@@ -38,20 +38,19 @@ class TcpStatusInfo;
  *   TcpSocket socket;
  *   socket.connect(Address("10.0.0.2"), 2000);
  *
- *   msg = new cMessage("data1");
- *   msg->setByteLength(16*1024);  // 16K
- *   socket.send(msg);
+ *   Packet *packet = new Packet("data", makeShared<ByteCountChunk>(B(16*1024)));
+ *   socket.send(packet);
  *
  *   socket.close();
  * </pre>
  *
  * Dealing with packets and notification messages coming from TCP is somewhat
  * more cumbersome. Basically you have two choices: you either process those
- * messages yourself, or let TcpSocket do part of the job. For the latter,
- * you give TcpSocket a callback object on which it'll invoke the appropriate
- * member functions: socketEstablished(), socketDataArrived(), socketFailure(),
- * socketPeerClosed(), etc (these are methods of TcpSocket::ICallback).,
- * The callback object can be your simple module class too.
+ * messages yourself, or let TcpSocket do part of the job. For the latter, you
+ * give TcpSocket a callback object of the type TcpSocket::ICallback, on which
+ * it will invoke the appropriate member functions: socketEstablished(),
+ * socketDataArrived(), socketFailure(), socketPeerClosed(), etc. The callback
+ * object can be your simple module class too.
  *
  * Note that receiving data (i.e. callbacks to socketDataArrived()) are subject
  * to the read mode. Namely, the socket can be in one of two modes: "autoread"
@@ -73,7 +72,7 @@ class TcpStatusInfo;
  * class MyModule : public cSimpleModule, public TcpSocket::ICallback
  * {
  *     TcpSocket socket;
- *     virtual void socketDataArrived(TcpSocket *tcpSocket, cPacket *msg, bool urgent);
+ *     virtual void socketDataArrived(TcpSocket *tcpSocket, Packet *packet, bool urgent);
  *     virtual void socketFailure(int connId, int code);
  *     ...
  * };
@@ -84,14 +83,14 @@ class TcpStatusInfo;
  *
  * void MyModule::handleMessage(cMessage *msg) {
  *     if (socket.belongsToSocket(msg))
- *         socket.processMessage(msg); // dispatch to socketTODOX() methods
+ *         socket.processMessage(msg); // dispatch to socketXXX() methods
  *     else
  *         ...
  * }
  *
- * void MyModule::socketDataArrived(TcpSocket *tcpSocket, cPacket *msg, bool) {
- *     EV << "Received TCP data, " << msg->getByteLength() << " bytes\\n";
- *     delete msg;
+ * void MyModule::socketDataArrived(TcpSocket *tcpSocket, Packet *packet, bool) {
+ *     EV << "Received TCP data, " << packet->getByteLength() << " bytes\\n";
+ *     delete packet;
  * }
  *
  * void MyModule::socketFailure(TcpSocket *tcpSocket, int code) {
@@ -106,25 +105,25 @@ class TcpStatusInfo;
  *
  * If you need to manage a large number of sockets (e.g. in a server
  * application which handles multiple incoming connections), the SocketMap
- * class may be useful. The following code fragment to handle incoming
- * connections is from the Ldp module:
+ * class may be useful. The following code fragment could be used to handle
+ * incoming connections:
  *
  * <pre>
  * TcpSocket *socket = check_and_cast_nullable<TcpSocket*>socketMap.findSocketFor(msg);
- * if (!socket)
- * {
+ * if (!socket) {
  *     // not yet in socketMap, must be new incoming connection: add to socketMap
  *     socket = new TcpSocket(msg);
  *     socket->setOutputGate(gate("tcpOut"));
  *     socket->setCallback(this);
  *     socketMap.addSocket(socket);
  * }
+ *
  * // dispatch to socketEstablished(), socketDataArrived(), socketPeerClosed()
  * // or socketFailure()
  * socket->processMessage(msg);
  * </pre>
  *
- * @see TcpSocketMap
+ * @see SocketMap
  */
 class INET_API TcpSocket : public ISocket
 {
@@ -132,10 +131,9 @@ class INET_API TcpSocket : public ISocket
     /**
      * Callback interface for TCP sockets, see setCallback() and processMessage() for more info.
      *
-     * Note: this class is not subclassed from cObject, because
-     * classes may have both this class and cSimpleModule as base class,
-     * and cSimpleModule is already a cObject.
      */
+    // Note: This class is not subclassed from cObject, to allow module classes
+    // implement it without creating diamond inheritance
     class INET_API ICallback {
       public:
         virtual ~ICallback() {}
@@ -152,6 +150,10 @@ class INET_API TcpSocket : public ISocket
         virtual void socketDeleted(TcpSocket *socket) = 0;
     };
 
+    /**
+     * Utility callback class for TCP sockets. It inserts incoming data into a
+     * buffer in TcpSocket, with the buffer being accessible via getReceiveQueue().
+     */
     class INET_API ReceiveQueueBasedCallback : public ICallback {
       public:
         virtual void socketDataArrived(TcpSocket *socket) = 0;

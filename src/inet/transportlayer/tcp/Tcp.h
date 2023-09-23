@@ -29,25 +29,78 @@ class TcpSendQueue;
 class TcpReceiveQueue;
 
 /**
- * Implements the Tcp protocol. This section describes the internal
- * architecture of the Tcp model.
+ * Implements the TCP protocol. Usage and compliance with various RFCs are
+ * discussed in the corresponding NED documentation.
  *
- * Usage and compliance with various RFCs are discussed in the corresponding
- * NED documentation for Tcp. Also, you may want to check the TcpSocket
- * class which makes it easier to use Tcp from applications.
+ * **Communication with clients**
  *
- * The Tcp protocol implementation is composed of several classes (discussion
- * follows below):
- *  - Tcp: the module class
- *  - TcpConnection: manages a connection
- *  - TcpSendQueue, TcpReceiveQueue: abstract base classes for various types
- *    of send and receive queues
- *  - TCPVirtualDataSendQueue and TCPVirtualDataRcvQueue which implement
- *    queues with "virtual" bytes (byte counts only)
- *  - TcpAlgorithm: abstract base class for Tcp algorithms, and subclasses:
- *    DumbTcp, TcpBaseAlg, TcpTahoeRenoFamily, TcpTahoe, TcpReno, TcpNewReno.
+ * This section describes the interface between the Tcp module and its clients
+ * (applications or higher-layer protocols). However, note that implementors
+ * of client modules do not necessarily need to know the details described herein.
+ * Instead, they can use the TcpSocket utility class which hides the details
+ * of talking to Tcp under an easy-to-use class interface.
+
+ * For communication between client applications and TCP, the TcpCommandCode
+ * and TcpStatusInd enums are used as message kinds, and TcpCommand
+ * and its subclasses are used as control info.
  *
- * Tcp subclassed from cSimpleModule. It manages socketpair-to-connection
+ * To open a connection from a client app, send a cMessage to TCP with
+ * TCP_C_OPEN_ACTIVE as message kind and a TcpOpenCommand object filled in
+ * and attached to it as control info. (The peer TCP will have to be LISTENing;
+ * the server app can achieve this with a similar cMessage but TCP_C_OPEN_PASSIVE
+ * message kind.) With passive open, there's a possibility to cause the connection
+ * "fork" on an incoming connection, leaving the original connection LISTENing
+ * on the port (see the fork field in TcpOpenCommand). Note that TcpOpenCommand
+ * allows tcpAlgorithmClass to be specified, which will override the setting
+ * in the TCP module. Also note that TcpOpenCommand allows the client to
+ * choose between "autoread" and "explicit-read" modes.
+ *
+ * The client can send data by assigning the TCP_C_SEND message kind to the data
+ * packet and sending it to TCP. Received data will be forwarded by TCP to the
+ * client as messages with the TCP_I_DATA message kind. This happens
+ * automatically in "autoread" mode. In "explicit-read" mode, the client must
+ * issue READ requests to receive data. READ requests are cMessages with the
+ * TCP_C_READ message kind and a TcpReadCommand control info attached.
+ *
+ * To close, the client sends a cMessage to TCP with the TCP_C_CLOSE message kind
+ * and TcpCommand control info.
+ *
+ * Tcp sends notifications to the application whenever there's a significant
+ * change in the state of the connection: established, remote TCP closed,
+ * closed, timed out, connection refused, connection reset, etc. These
+ * notifications are also cMessages with message kind TCP_I_xxx
+ * (TCP_I_ESTABLISHED, etc.) and TcpCommand as control info.
+ *
+ * One TCP module can serve several application modules, and several
+ * connections per application. When talking to applications, a
+ * connection is identified by the socketId that is assigned by the application in
+ * the OPEN call.
+ *
+ * **Sockets**
+ *
+ * The TcpSocket C++ class is provided to simplify managing TCP connections
+ * from applications. TcpSocket handles the job of assembling and sending
+ * command messages (OPEN, CLOSE, etc) to TCP, and it also simplifies
+ * the task of dealing with packets and notification messages coming from Tcp.
+ *
+ *
+ * **Communication with the IP layer**
+ *
+ * The TCP model relies on sending and receiving L3AddressReq/L3AddressInd tags
+ * attached to TCP segment packets.
+ *
+ *
+ * **Architecture**
+ *
+ * This section describes the internal architecture of the TCP model.
+ * The implementation is composed of several classes (discussion follows below):
+ *  - Tcp: the main module class
+ *  - TcpConnection: module class that manages a connection
+ *  - TcpSendQueue, TcpReceiveQueue: send and receive queues
+ *  - TcpAlgorithm: abstract base class for TCP algorithms: DumbTcp, TcpTahoe,
+ *    TcpReno, TcpNewReno, etc.
+ *
+ * Tcp is subclassed from cSimpleModule. It manages socketpair-to-connection
  * mapping, and dispatches segments and user commands to the appropriate
  * TcpConnection object.
  *
@@ -56,27 +109,17 @@ class TcpReceiveQueue;
  * of the state machine, stores the state variables (TCB), sends/receives
  * SYN, FIN, RST, ACKs, etc.
  *
- * TcpConnection internally relies on 3 objects. The first two are subclassed
- * from TcpSendQueue and TcpReceiveQueue. They manage the actual data stream,
- * so TcpConnection itself only works with sequence number variables.
- * This makes it possible to easily accommodate need for various types of
- * simulated data transfer: real byte stream, "virtual" bytes (byte counts
- * only), and sequence of cMessage objects (where every message object is
- * mapped to a Tcp sequence number range).
- *
- * Currently implemented send queue and receive queue classes are
- * TCPVirtualDataSendQueue and TCPVirtualDataRcvQueue which implement
- * queues with "virtual" bytes (byte counts only).
- *
- * The third object is subclassed from TcpAlgorithm. Control over
+ * TcpConnection internally relies on 3 objects: send queue, receive queue,
+ * and TCP algorithm. The first two are TcpSendQueue and TcpReceiveQueue.
+ * They manage the actual data stream, so TcpConnection need to only concern
+ * itself with sequence numbers.
+
+ * The TCP algorithm class is subclassed from TcpAlgorithm. Control over
  * retransmissions, congestion control and ACK sending are "outsourced"
  * from TcpConnection into TcpAlgorithm: delayed acks, slow start, fast rexmit,
  * etc. are all implemented in TcpAlgorithm subclasses. This simplifies the
  * design of TcpConnection and makes it a lot easier to implement new Tcp
  * variations such as NewReno, Vegas or LinuxTcp as TcpAlgorithm subclasses.
- *
- * Currently implemented TcpAlgorithm classes are TcpReno, TcpTahoe, TcpNewReno,
- * TcpNoCongestionControl and DumbTcp.
  *
  * The concrete TcpAlgorithm class to use can be chosen per connection (in OPEN)
  * or in a module parameter.
