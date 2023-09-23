@@ -10,8 +10,11 @@ package inet.applications.tcpapp;
 import inet.applications.contract.IApp;
 
 //
-// This module accepts/rejects TCP connections and creates TCP server connections
-// as part of a generic TCP server application.
+// This module opens a TCP socket to listen on a port, accepts incoming
+// connections, and dynamically creates modules to handle them. The type of
+// modules to be created can be specified in a parameter. The new modules
+// will be appended to the connection[] submodule array of the parent of
+// this module, i.e. they will be siblings of this module.
 //
 // Accepted TCP connections will inherit the autoRead setting of this module. To
 // allow rate limiting on the connections, set autoRead=false here, and use

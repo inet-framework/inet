@@ -10,48 +10,30 @@ package inet.applications.tcpapp;
 import inet.applications.contract.IApp;
 
 //
-// Client for a generic request-response style protocol over TCP.
-// May be used as a rough model of HTTP or FTP users.
-// Compatible with both IPv4 (~Ipv4) and IPv6 (~Ipv6).
+// Client for a generic request-response style protocol over TCP, to be used
+// with ~TcpGenericServerApp.
 //
-// The model communicates with the server in sessions. During a session,
-// the client opens a single TCP connection to the server, sends several
-// requests (always waiting for the complete reply to arrive before
-// sending a new request), and closes the connection.
+// The model communicates with the server in sessions. During a session, the
+// client opens a single TCP connection to the server, sends several requests
+// (always waiting for the complete reply to arrive before sending a new
+// request), and closes the connection. Requests and responses are represented
+// by messages of class ~GenericAppMsg.
 //
-// The server app should be ~TcpGenericServerApp; the model sends ~GenericAppMsg
-// messages.
-//
-// Example settings:
 // By default, reading from the socket is not rate limited. To allow rate
 // limiting, set autoRead=false, and use the readSize and readDelay parameters
 // to set a rate limit. This will allow TCP flow control to come into effect.
 //
-// FTP:
-// <pre>
-//    numRequestsPerSession = exponential(3)
-//    requestLength = 1B*int(truncnormal(20,5))
-//    replyLength = 1B*int(exponential(1000000))
-// </pre>
+// Compatible with both IPv4 (~Ipv4) and IPv6 (~Ipv6).
 //
-// Note that this module doesn't open separate TCP connections for commands
-// and data transfer as the FTP protocol.
+// As an example, the following parameterization can be used as a very rough
+// model of an HTTP session where the client downloads a file, or several files.
 //
-// HTTP:
 // <pre>
 //    numRequestsPerSession = 1 <i>(HTTP 1.0)</i>
 //    numRequestsPerSession = exponential(5) <i>(HTTP 1.1, with keepalive)</i>
 //    requestLength = 1B*int(truncnormal(350,20))
 //    replyLength = 1B*int(exponential(2000))
 // </pre>
-//
-// Note that since most web pages contain images and may contain frames,
-// applets etc, possibly from various servers, and browsers usually download
-// these items in parallel to the main HTML document, this module cannot
-// serve as a realistic web client.
-//
-// Also, with HTTP 1.0 it is the server that closes the connection after
-// sending the response, while in this model it is the client.
 //
 // @see ~TcpGenericServerApp, ~GenericAppMsg, ~TelnetApp
 //

@@ -21,12 +21,6 @@ import inet.applications.contract.IApp;
 // peerClosed(), timerExpired()), and can send packets via TcpSocket's send()
 // method.
 //
-// IMPORTANT: Before you try to use this module, make sure you actually need it!
-// In most cases, ~TcpGenericServerApp and ~GenericAppMsg will be completely
-// enough, and they are a lot easier to handle. You'll want to subclass your
-// client from TCPGenericCliAppBase then; check ~TelnetApp and ~TcpBasicClientApp
-// for examples.
-//
 // Compatible with both ~Ipv4 and ~Ipv6.
 //
 simple TcpServerHostApp like IApp

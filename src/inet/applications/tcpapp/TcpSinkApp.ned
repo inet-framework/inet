@@ -11,6 +11,9 @@ package inet.applications.tcpapp;
 // Accepts any number of incoming TCP connections, and discards whatever
 // arrives on them. Compatible with both ~Ipv4 and ~Ipv6.
 //
+// Each incoming connection is handled by a separate, dynamically created module,
+// which allows collecting per-connection statistics in a convenient way.
+//
 // By default, reading from the socket is not rate limited. To allow rate
 // limiting, set autoRead=false, and use the readSize and readDelay parameters
 // to set a rate limit. This will allow TCP flow control to come into effect.
@@ -28,6 +31,9 @@ module TcpSinkApp extends TcpServerHostApp
         @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,weightedHistogram,vector; interpolationmode=none; checkSignals=false);
 }
 
+//
+// Handles a single incoming TCP connection for ~TcpSinkApp.
+//
 simple TcpSinkAppThread
 {
     parameters:

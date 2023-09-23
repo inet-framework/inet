@@ -8,7 +8,13 @@
 package inet.applications.tcpapp;
 
 //
-// This module provides TCP client socket handling for generic TCP applications.
+// This module opens a TCP connection to a given address and port, and lets the
+// module connected to its the trafficIn and trafficOut gates send and receive
+// data over that connection. When data is received on the trafficIn gate, it is
+// forwarded on the TCP connection via the socketOut gate, and vice versa. This
+// module simplifies the task of data exchange over a TCP connection. The TCP
+// connection is opened when the module first receives data on its trafficIn
+// gate.
 //
 // By default, reading from the socket is not rate limited. To allow rate
 // limiting, set autoRead=false, and use the readSize and readDelay parameters

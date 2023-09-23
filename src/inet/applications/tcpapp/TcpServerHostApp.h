@@ -14,12 +14,10 @@
 
 namespace inet {
 
-// forward declaration:
 class TcpServerThreadBase;
 
 /**
- * Hosts a server application, to be subclassed from TCPServerProcess (which
- * is a sSimpleModule). Creates one instance (using dynamic module creation)
+ * Opens a TCP server socket, and launches one dynamically created module
  * for each incoming connection. More info in the corresponding NED file.
  */
 class INET_API TcpServerHostApp : public ApplicationBase, public TcpSocket::ICallback
@@ -58,8 +56,7 @@ class INET_API TcpServerHostApp : public ApplicationBase, public TcpSocket::ICal
 };
 
 /**
- * Abstract base class for server processes to be used with TcpServerHostApp.
- * Subclasses need to be registered using the Register_Class() macro.
+ * Abstract base class for server process modules to be used with TcpServerHostApp.
  *
  * @see TcpServerHostApp
  */

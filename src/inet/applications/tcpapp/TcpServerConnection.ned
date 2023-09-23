@@ -13,10 +13,13 @@ import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module is a generic TCP server connection. The traffic source and traffic
-// sink modules can be built from queueing model elements.
+// This is a pre-assembled module type to be used in ~TcpServerApp. One instance
+// of this module type is launched by ~TcpServerListener for each incoming
+// connection. It is composed of a traffic source, a traffic sink, a socket I/O
+// and other modules, and most of the module types are parametric. The traffic
+// source and traffic sink modules can be built from queueing model elements.
 //
-// @see ~TcpServerApp
+// @see ~TcpServerApp, ~TcpServerListener
 //
 module TcpServerConnection like IApp
 {

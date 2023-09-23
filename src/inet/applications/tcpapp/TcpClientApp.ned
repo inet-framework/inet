@@ -13,8 +13,9 @@ import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module is a generic TCP client application. The traffic source
-// and traffic sink modules can be built from queueing model elements.
+// This module is a generic, very modular TCP client application, similar to
+// ~TcpServerApp. The traffic source and traffic sink modules can be built from
+// queueing model elements.
 //
 // @see ~TcpServerApp
 //

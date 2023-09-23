@@ -8,11 +8,11 @@
 package inet.applications.tcpapp;
 
 //
-// Accepts any number of incoming TCP connections, and sends back the
-// messages that arrive on them, The lengths of the messages are
-// multiplied by echoFactor before sending them back (echoFactor=1 will
-// result in sending back the same message unmodified.) The reply can also be
-// delayed by a constant time (echoDelay parameter).
+// Accepts any number of incoming TCP connections, and sends back the messages
+// that arrive on them, The lengths of the messages are multiplied by echoFactor
+// before sending them back (echoFactor=1 will result in sending back the same
+// message unmodified.) The reply can also be delayed by a constant time
+// (echoDelay parameter).
 //
 // By default, reading from the socket is not rate limited. To allow rate
 // limiting, set autoRead=false, and use the readSize and readDelay parameters
