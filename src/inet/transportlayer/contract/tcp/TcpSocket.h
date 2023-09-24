@@ -161,6 +161,8 @@ class INET_API TcpSocket : public ISocket
     L3Address remoteAddr;
     int remotePrt = -1;
 
+    bool autoRead = true;   // true: TCP send up arrived data automatically. false: should use read command.
+
     ICallback *cb = nullptr;
     void *userData = nullptr;
     cGate *gateToTcp = nullptr;
@@ -230,7 +232,13 @@ class INET_API TcpSocket : public ISocket
     int getLocalPort() const { return localPrt; }
     L3Address getRemoteAddress() const { return remoteAddr; }
     int getRemotePort() const { return remotePrt; }
+    bool getAutoRead() { return autoRead; }
     //@}
+
+    /**
+     * Set autoRead mode on/off.
+     */
+    void setAutoRead(bool autoRead);
 
     /** @name Opening and closing connections, sending data */
     //@{
@@ -294,6 +302,17 @@ class INET_API TcpSocket : public ISocket
      * Active OPEN to the given remote socket.
      */
     void connect(L3Address remoteAddr, int remotePort);
+
+    /**
+     * This function sends a READ request message to the TCP connection module,
+     * specifying the intended data length. The TCP connection module responds
+     * by sending data bytes to processMessage() function. If data is unavailable,
+     * the TCP connection module stores the request and sends data when available.
+     * Only one READ request can be active at a time; secondary requests are rejected.
+     *
+     * Note: This function can only be used when the autoRead mode is turned off.
+     */
+    void read(int32_t numBytes);
 
     /**
      * Sends data packet.
@@ -368,6 +387,9 @@ class INET_API TcpSocket : public ISocket
      */
     void renewSocket();
 
+    /**
+     * Returns true when the socket is opened
+     */
     virtual bool isOpen() const override;
     //@}
 
