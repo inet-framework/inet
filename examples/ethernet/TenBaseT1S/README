@@ -1,0 +1,12 @@
+This folder contains various Ethernet 10Base-T1S examples demonstrating Physical Layer Collision Avoidance (PLCA)
+
+notraffic.ini/anf	An Ethernet 10Base-T1S multidrop link without traffic
+bestcase.ini/anf	An Ethernet 10Base-T1S multidrop link with optimal zero pending packet delay 
+worstcase.ini/anf	An Ethernet 10Base-T1S multidrop link with worst case pending packet delay for one node
+throughput.ini/anf	Throughput analysis of an Ethernet 10Base-T1S multidrop link
+latency.ini/anf		Latency analysis of an Ethernet 10Base-T1S multidrop link
+paper.ini/anf		Reproducing the results of the paper titled Network Performance Evaluation of IEEE 802.3cg
+validation.ini/anf	Comparison of an Ethernet 10Base-T1S multidrop link against an Ethernet CSMA/CD link
+smoke.ini/anf		Wide range smoke test of an Ethernet 10Base-T1S multidrop link
+simple.ini/anf		An Ethernet 10Base-T1S multidrop link with project specific nodes
+mixed.ini/anf		A network that mixes standard Ethernet with 10Base-T1S Ethernet project specific nodes
