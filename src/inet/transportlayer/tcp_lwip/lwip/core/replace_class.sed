@@ -1,0 +1,11 @@
+s/ +$//g;
+s/\bNULL\b/nullptr/g;
+s/^(\w+[(])/LwipTcpLayer::\n\1/g;
+s/^static *//g;
+s/^struct tcp_hdr\b/LwipTcpLayer::tcp_hdr/g;
+s/^struct tcp_pcb\b/LwipTcpLayer::tcp_pcb/g;
+s/^struct tcp_seg\b/LwipTcpLayer::tcp_seg/g;
+s/\%([0-9]*\")([SUX]16_F)\"/%\1 \2 "/g;
+s/\%([0-9]*\")([SUX]32_F)\"/%\1 \2 "/g;
+s/\(void\)/()/g;
+s/\bip_output\(/ip_output(pcb, /g;

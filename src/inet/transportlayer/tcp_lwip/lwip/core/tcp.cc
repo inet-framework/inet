@@ -95,7 +95,7 @@ const u8_t tcp_persist_backoff[7] = { 3, 6, 12, 24, 48, 96, 120 };
  */
 void
 LwipTcpLayer::
-tcp_tmr(void)
+tcp_tmr()
 {
   /* Call tcp_fasttmr() every 250 ms */
   tcp_fasttmr();
@@ -474,7 +474,7 @@ tcp_recved(struct tcp_pcb *pcb, u16_t len)
  */
 u16_t
 LwipTcpLayer::
-tcp_new_port(void)
+tcp_new_port()
 {
   struct tcp_pcb *pcb;
 
@@ -579,7 +579,7 @@ tcp_connect(struct tcp_pcb *pcb, struct ip_addr *ipaddr, u16_t port,
  */
 void
 LwipTcpLayer::
-tcp_slowtmr(void)
+tcp_slowtmr()
 {
   struct tcp_pcb *pcb, *pcb2, *prev;
   u16_t eff_wnd;
@@ -684,9 +684,6 @@ tcp_slowtmr(void)
          (pcb->keep_idle + TCP_MAXIDLE) / TCP_SLOW_INTERVAL)
 #endif /* LWIP_TCP_KEEPALIVE */
       {
-//        LWIP_DEBUGF(TCP_DEBUG, ("tcp_slowtmr: KEEPALIVE timeout. Aborting connection to %" U16_F ".%" U16_F ".%" U16_F ".%" U16_F ".\n",
-//                                ip4_addr1(&pcb->remote_ip), ip4_addr2(&pcb->remote_ip),
-//                                ip4_addr3(&pcb->remote_ip), ip4_addr4(&pcb->remote_ip)));
         LWIP_DEBUGF(TCP_DEBUG, ("tcp_slowtmr: KEEPALIVE timeout. Aborting connection to %s\n",
                                 pcb->remote_ip.addr.str().c_str()
                                 ));
@@ -823,7 +820,7 @@ tcp_slowtmr(void)
  */
 void
 LwipTcpLayer::
-tcp_fasttmr(void)
+tcp_fasttmr()
 {
   struct tcp_pcb *pcb;
 
@@ -990,7 +987,7 @@ tcp_kill_prio(u8_t prio)
  */
 void
 LwipTcpLayer::
-tcp_kill_timewait(void)
+tcp_kill_timewait()
 {
   struct tcp_pcb *pcb, *inactive;
   u32_t inactivity;
@@ -1104,7 +1101,7 @@ tcp_alloc(u8_t prio)
  */
 LwipTcpLayer::tcp_pcb *
 LwipTcpLayer::
-tcp_new(void)
+tcp_new()
 {
   return tcp_alloc(TCP_PRIO_NORMAL);
 }
@@ -1313,7 +1310,7 @@ tcp_pcb_remove(struct tcp_pcb **pcblist, struct tcp_pcb *pcb)
  */
 u32_t
 LwipTcpLayer::
-tcp_next_iss(void)
+tcp_next_iss()
 {
   iss += tcp_ticks;       /* TODO */
   return iss;

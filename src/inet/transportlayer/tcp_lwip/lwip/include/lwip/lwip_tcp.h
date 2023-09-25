@@ -225,7 +225,6 @@ class INET_API LwipTcpLayer
 
 /* Functions for interfacing with TCP: */
 
-
 /* Lower layer interface to TCP: */
 #define tcp_init() /* Compatibility define, not init needed. */
 void             tcp_tmr     (void);  /* Must be called every
@@ -272,13 +271,10 @@ err_t            tcp_connect (struct tcp_pcb *pcb, struct ip_addr *ipaddr,
                               err_t err));
 
 struct tcp_pcb * tcp_listen_with_backlog(struct tcp_pcb *pcb, u8_t backlog);
-
 #define          tcp_listen(pcb) tcp_listen_with_backlog(pcb, TCP_DEFAULT_LISTEN_BACKLOG)
 
 void             tcp_abandon (struct tcp_pcb *pcb, int reset);
-
 #define          tcp_abort(pcb) tcp_abandon((pcb), 1)
-
 err_t            tcp_close   (struct tcp_pcb *pcb);
 
 /* Flags for "apiflags" parameter in tcp_write and tcp_enqueue */
@@ -298,6 +294,7 @@ void             tcp_setprio (struct tcp_pcb *pcb, u8_t prio);
    intervals (instead of calling tcp_tmr()). */
 void             tcp_slowtmr (void);
 void             tcp_fasttmr (void);
+
 
 /* Only used by IP to pass a TCP segment to TCP: */
 void             tcp_input   (struct pbuf *p, struct netif *inp);
@@ -444,7 +441,7 @@ enum tcp_state {
   /* Function to call when a listener has been connected.
    * @param arg user-supplied argument (tcp_pcb.callback_arg)
    * @param pcb a new tcp_pcb that now is connected
-   * @param err an error argument (TODO that is current always ERR_OK?)
+   * @param err an error argument (TODO: that is current always ERR_OK?)
    * @return ERR_OK: accept the new connection,
    *                 any other err_t abortsthe new connection
    */
@@ -555,7 +552,7 @@ struct tcp_pcb {
    * @param arg user-supplied argument (tcp_pcb.callback_arg)
    * @param pcb the tcp_pcb for which data has arrived
    * @param p the packet buffer which arrived
-   * @param err an error argument (TODO that is current always ERR_OK?)
+   * @param err an error argument (TODO: that is current always ERR_OK?)
    * @return ERR_OK: try to send some data by calling tcp_output
    */
   err_t (* recv)(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err);
@@ -563,7 +560,7 @@ struct tcp_pcb {
   /* Function to be called when a connection has been set up.
    * @param arg user-supplied argument (tcp_pcb.callback_arg)
    * @param pcb the tcp_pcb that now is connected
-   * @param err an error argument (TODO that is current always ERR_OK?)
+   * @param err an error argument (TODO: that is current always ERR_OK?)
    * @return value is currently ignored
    */
   err_t (* connected)(void *arg, struct tcp_pcb *pcb, err_t err);
