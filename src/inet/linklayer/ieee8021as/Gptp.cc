@@ -525,18 +525,18 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t ethernetEvent, cObject 
     }
 }
 
-
-void Gptp::handleDelayOrSendFollowUp(const GptpBase *gptp, cComponent *source) {
+void Gptp::handleDelayOrSendFollowUp(const GptpBase *gptp, cComponent *source)
+{
     int portId = getContainingNicModule(check_and_cast<cModule*>(source))->getInterfaceId();
 
     switch (gptp->getMessageType()) {
     case GPTPTYPE_PDELAY_RESP: {
-        auto gptpResp = static_cast<const GptpPdelayResp*>(gptp);
+        auto gptpResp = check_and_cast<const GptpPdelayResp*>(gptp);
         sendPdelayRespFollowUp(portId, gptpResp);
         break;
     }
     case GPTPTYPE_SYNC: {
-        auto gptpSync = static_cast<const GptpSync*>(gptp);
+        auto gptpSync = check_and_cast<const GptpSync*>(gptp);
         sendFollowUp(portId, gptpSync, clock->getClockTime());
         break;
     }
