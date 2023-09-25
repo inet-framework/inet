@@ -218,8 +218,16 @@ static cNedValue nedf_intWithUnit(cComponent *context, cNedValue argv[], int arg
             return cNedValue(checked_int_cast<intval_t>(floor(argv[0].doubleValueRaw())), argv[0].getUnit());
         case cNedValue::STRING:
             throw cRuntimeError("intWithUnit(): Cannot convert string to int");
+#if OMNETPP_BUILDNUM < 1527
         case cNedValue::OBJECT:
             throw cRuntimeError("intWithUnit(): Cannot convert cObject to int");
+#else
+        case cNedValue::POINTER:
+            if (argv[0].containsXML())
+                throw cRuntimeError("intWithUnit(): Cannot convert xml to int");
+            else
+                throw cRuntimeError("intWithUnit(): Cannot convert pointer to int");
+#endif
         default:
             throw cRuntimeError("Internal error: Invalid cNedValue type");
     }
@@ -232,8 +240,13 @@ Define_NED_Function2(nedf_intWithUnit,
 
 cNedValue nedf_xmlattr(cComponent *context, cNedValue argv[], int argc)
 {
+#if OMNETPP_BUILDNUM < 1527
     if (argv[0].getType() != cNedValue::OBJECT)
         throw cRuntimeError("xmlattr(): xmlNode argument must be an xml node");
+#else
+    if (argv[0].getType() != cNedValue::POINTER || !argv[0].containsXML())
+        throw cRuntimeError("xmlattr(): xmlNode argument must be an xml node");
+#endif
     if (argv[1].getType() != cNEDValue::STRING)
         throw cRuntimeError("xmlattr(): attributeName argument must be a string");
 
