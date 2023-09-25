@@ -17,7 +17,11 @@ Define_Module(TSNschedGateScheduleConfigurator);
 static void printJson(std::ostream& stream, const cValue& value, int level = 0)
 {
     std::string indent(level * 2, ' ');
+#if OMNETPP_BUILDNUM < 1527
     if (value.getType() == cValue::OBJECT) {
+#else
+    if (value.getType() == cNedValue::POINTER && value.containsObject()) {
+#endif
         auto object = value.objectValue();
         if (auto array = dynamic_cast<cValueArray *>(object)) {
             if (array->size() == 0)
