@@ -286,7 +286,6 @@ tcp_input(struct pbuf *p, struct netif *inp)
         return;
       }
     }
-
     tcp_input_pcb = pcb;
     err = tcp_process(pcb);
     /* A return value of ERR_ABRT means that tcp_abort() was called
@@ -1448,7 +1447,7 @@ tcp_parseopt(struct tcp_pcb *pcb)
   /* Parse the TCP MSS option, if present. */
   if(TCPH_HDRLEN(tcphdr) > 0x5) {
     max_c = (TCPH_HDRLEN(tcphdr) - 5) << 2;
-    for (c = 0; c < max_c;) {
+    for (c = 0; c < max_c; ) {
       opt = opts[c];
       switch (opt) {
       case 0x00:

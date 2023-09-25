@@ -113,7 +113,7 @@ struct memp {
 
 /** This array holds the first free element of each pool.
  *  Elements form a linked list. */
-OPP_THREAD_LOCAL static OPP_THREAD_LOCAL struct memp *memp_tab[MEMP_MAX];
+static OPP_THREAD_LOCAL struct memp *memp_tab[MEMP_MAX];
 
 #else /* MEMP_MEM_MALLOC */
 
@@ -157,7 +157,7 @@ static OPP_THREAD_LOCAL u8_t memp_memory[MEM_ALIGNMENT - 1
  * Check that memp-lists don't form a circle
  */
 static int
-memp_sanity(void)
+memp_sanity()
 {
   s16_t i, c;
   struct memp *m, *n;
@@ -212,7 +212,7 @@ memp_overflow_check_element(struct memp *p, u16_t memp_size)
  * @see memp_overflow_check_element for a description of the check
  */
 static void
-memp_overflow_check_all(void)
+memp_overflow_check_all()
 {
   u16_t i, j;
   struct memp *p;
@@ -231,7 +231,7 @@ memp_overflow_check_all(void)
  * Initialize the restricted areas of all memp elements in every pool.
  */
 static void
-memp_overflow_init(void)
+memp_overflow_init()
 {
   u16_t i, j;
   struct memp *p;
@@ -261,7 +261,7 @@ memp_overflow_init(void)
  * Carves out memp_memory into linked lists for each pool-type.
  */
 void
-memp_init(void)
+memp_init()
 {
   struct memp *memp;
   u16_t i, j;

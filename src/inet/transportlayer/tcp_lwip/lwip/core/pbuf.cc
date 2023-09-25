@@ -111,7 +111,7 @@ namespace inet {
 namespace tcp {
 
 #define PBUF_POOL_IS_EMPTY() pbuf_pool_is_empty()
-OPP_THREAD_LOCAL static OPP_THREAD_LOCAL u8_t pbuf_free_ooseq_queued;
+static OPP_THREAD_LOCAL u8_t pbuf_free_ooseq_queued;
 /**
  * Attempt to reclaim some memory from queued out-of-sequence TCP segments
  * if we run out of pool pbufs. It's better to give priority to new packets
@@ -144,7 +144,7 @@ pbuf_free_ooseq(void* arg)
 
 /** Queue a call to pbuf_free_ooseq if not already queued. */
 static void
-pbuf_pool_is_empty(void)
+pbuf_pool_is_empty()
 {
   u8_t queued;
   SYS_ARCH_DECL_PROTECT(old_level);
