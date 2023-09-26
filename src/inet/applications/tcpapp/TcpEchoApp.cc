@@ -45,12 +45,8 @@ void TcpEchoApp::initialize(int stage)
 
 void TcpEchoApp::sendDown(Packet *msg)
 {
-    if (msg->isPacket()) {
-        Packet *pk = static_cast<Packet *>(msg);
-        bytesSent += pk->getByteLength();
-        emit(packetSentSignal, pk);
-    }
-
+    bytesSent += msg->getByteLength();
+    emit(packetSentSignal, msg);
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
     msg->getTag<SocketReq>();
     send(msg, "socketOut");
