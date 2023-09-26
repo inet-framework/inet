@@ -227,8 +227,8 @@
 
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c default_tcp -r 0,            100s,            0feb-a2af/tplx;1bb2-0e00/~tNl;0bf8-99d7/~tND;edeb-ea0f/tyf, PASS, Ipv4
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet -r 0,             100s,            0feb-a2af/tplx;1bb2-0e00/~tNl;0bf8-99d7/~tND;edeb-ea0f/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet_msg -r 0,         100s,            0feb-a2af/tplx;1bb2-0e00/~tNl;3b5d-9ac8/~tND;edeb-ea0f/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet_stream -r 0,      100s,            0feb-a2af/tplx;1bb2-0e00/~tNl;53f1-4486/~tND;edeb-ea0f/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet_msg -r 0,         100s,            0feb-a2af/tplx;1bb2-0e00/~tNl;2f5d-d9d7/~tND;edeb-ea0f/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet_stream -r 0,      100s,            0feb-a2af/tplx;1bb2-0e00/~tNl;7329-f14e/~tND;edeb-ea0f/tyf, PASS, Ipv4
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 0,              500s,            294f-345d/tplx;b117-8ff2/~tNl;fea6-1d82/~tND;e4fa-ede5/tyf, PASS, Ipv4
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 1,              500s,            89fa-5805/tplx;f786-f5ff/~tNl;c449-966a/~tND;cfb2-468d/tyf, PASS, Ipv4
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 2,              500s,            6607-7b0a/tplx;8f24-8d59/~tNl;add7-50c6/~tND;4a12-aa23/tyf, PASS, Ipv4
