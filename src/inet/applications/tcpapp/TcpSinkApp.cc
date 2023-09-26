@@ -76,7 +76,7 @@ void TcpSinkAppThread::timerExpired(cMessage *timer)
 {
     if (timer == readDelayTimer) {
         // send read message to TCP
-        sock->read(this->hostmod->par("readSize"));
+        read();
     }
     else
         throw cRuntimeError("Model error: unknown timer message arrived");
@@ -91,23 +91,25 @@ void TcpSinkAppThread::sendOrScheduleReadCommandIfNeeded()
                 readDelayTimer = new cMessage("readDelayTimer");
                 readDelayTimer->setContextPointer(this);
             }
-            hostmod->scheduleAfter(delay, readDelayTimer);
+            scheduleAfter(delay, readDelayTimer);
         }
         else {
             // send read message to TCP
-            sock->read(hostmod->par("readSize"));
+            read();
         }
     }
 }
 
 void TcpSinkAppThread::established()
 {
+    Enter_Method("established");
     bytesRcvd = 0;
     sendOrScheduleReadCommandIfNeeded();
 }
 
 void TcpSinkAppThread::dataArrived(Packet *pk, bool urgent)
 {
+    Enter_Method("dataArrived");
     long packetLength = pk->getByteLength();
     bytesRcvd += packetLength;
     sinkAppModule->bytesRcvd += packetLength;
@@ -122,6 +124,13 @@ void TcpSinkAppThread::refreshDisplay() const
     std::ostringstream os;
     os << (sock ? TcpSocket::stateName(sock->getState()) : "NULL_SOCKET") << "\nrcvd: " << bytesRcvd << " bytes";
     getDisplayString().setTagArg("t", 0, os.str().c_str());
+}
+
+void TcpSinkAppThread::read()
+{
+    omnetpp::cMethodCallContextSwitcher __ctx(hostmod);
+    __ctx.methodCall("TcpSocket::read");
+    sock->read(hostmod->par("readSize"));
 }
 
 } // namespace inet
