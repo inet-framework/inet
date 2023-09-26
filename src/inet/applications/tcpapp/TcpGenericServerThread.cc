@@ -17,11 +17,13 @@ Register_Class(TcpGenericServerThread);
 
 void TcpGenericServerThread::established()
 {
+    Enter_Method("established");
     // no initialization needed
 }
 
 void TcpGenericServerThread::dataArrived(Packet *msg, bool)
 {
+    Enter_Method("dataArrived");
     const auto& appmsg = msg->peekData<GenericAppMsg>();
 
     if (!appmsg)
@@ -53,6 +55,8 @@ void TcpGenericServerThread::dataArrived(Packet *msg, bool)
 
 void TcpGenericServerThread::timerExpired(cMessage *timer)
 {
+    ASSERT(getSimulation()->getContext() == this);
+
     // no timers in this serverThread
 }
 
