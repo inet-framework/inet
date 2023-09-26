@@ -216,6 +216,8 @@ void TcpServerThreadBase::init(TcpServerHostApp *hostmodule, TcpSocket *socket)
 
 void TcpServerThreadBase::close()
 {
+    omnetpp::cMethodCallContextSwitcher __ctx(hostmod);
+    __ctx.methodCall("TcpSocket::close");
     sock->close();
 }
 
