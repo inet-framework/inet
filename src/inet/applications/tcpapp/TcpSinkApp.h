@@ -40,7 +40,7 @@ class INET_API TcpSinkApp : public TcpServerHostApp
 class INET_API TcpSinkAppThread : public TcpServerThreadBase
 {
   public:
-    ~TcpSinkAppThread() { hostmod->cancelAndDelete(readDelayTimer); }
+    ~TcpSinkAppThread() { cancelAndDelete(readDelayTimer); }
 
   protected:
     long bytesRcvd;
@@ -53,6 +53,7 @@ class INET_API TcpSinkAppThread : public TcpServerThreadBase
     virtual void refreshDisplay() const override;
 
     virtual void sendOrScheduleReadCommandIfNeeded();
+    virtual void read();    // send a read request to the socket
 
     // TcpServerThreadBase:
     /**
