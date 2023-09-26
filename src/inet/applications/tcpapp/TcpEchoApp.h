@@ -46,8 +46,16 @@ class INET_API TcpEchoAppThread : public TcpServerThreadBase
 {
   protected:
     TcpEchoApp *echoAppModule = nullptr;
+    cMessage *readDelayTimer = nullptr;
+    Packet *delayedPacket = nullptr;
 
   public:
+    ~TcpEchoAppThread();
+    virtual void sendOrScheduleReadCommandIfNeeded();
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void sendDown(Packet *packet);
+    virtual void read();    // send a read request to the socket
+
     /**
      * Called when connection is established.
      */
@@ -63,7 +71,9 @@ class INET_API TcpEchoAppThread : public TcpServerThreadBase
      */
     virtual void timerExpired(cMessage *timer) override;
 
-    virtual void init(TcpServerHostApp *hostmodule, TcpSocket *socket) override { TcpServerThreadBase::init(hostmodule, socket); echoAppModule = check_and_cast<TcpEchoApp *>(hostmod); }
+    virtual void init(TcpServerHostApp *hostmodule, TcpSocket *socket) override;
+
+    virtual void close() override;
 };
 
 } // namespace inet
