@@ -48,7 +48,6 @@ void TcpEchoApp::sendDown(Packet *msg)
     Enter_Method("sendDown");
     take(msg);
     bytesSent += msg->getByteLength();
-    emit(packetSentSignal, msg);
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
     msg->getTag<SocketReq>();
     send(msg, "socketOut");
@@ -101,9 +100,9 @@ void TcpEchoAppThread::established()
 
 void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
 {
-    echoAppModule->emit(packetReceivedSignal, rcvdPkt);
     Enter_Method("dataArrived");
     take(rcvdPkt);
+    emit(packetReceivedSignal, rcvdPkt);
     int64_t rcvdBytes = rcvdPkt->getByteLength();
     echoAppModule->bytesRcvd += rcvdBytes;
 
@@ -190,6 +189,7 @@ void TcpEchoAppThread::close()
 
 void TcpEchoAppThread::sendDown(Packet *msg)
 {
+    emit(packetSentSignal, msg);
     drop(msg);
     echoAppModule->sendDown(msg);
 }
