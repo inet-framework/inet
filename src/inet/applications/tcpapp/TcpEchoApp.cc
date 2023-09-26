@@ -151,5 +151,17 @@ void TcpEchoAppThread::timerExpired(cMessage *timer)
         throw cRuntimeError("Model error: unknown timer message arrived");
 }
 
+void TcpEchoAppThread::init(TcpServerHostApp *hostmodule, TcpSocket *socket)
+{
+    TcpServerThreadBase::init(hostmodule, socket);
+    echoAppModule = check_and_cast<TcpEchoApp *>(hostmod);
+}
+
+void TcpEchoAppThread::close()
+{
+    hostmod->cancelAndDelete(readDelayTimer);
+    TcpServerThreadBase::close();
+}
+
 } // namespace inet
 
