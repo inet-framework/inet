@@ -107,26 +107,21 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
 
     if (sock->getState() != TcpSocket::CONNECTED) {
     }
-    else if (echoAppModule->echoFactor > 0) {
+    else if (echoAppModule->echoFactor > 0.0) {
         Packet *outPkt = new Packet(rcvdPkt->getName(), TCP_C_SEND);
         // reverse direction, modify length, and send it back
         int socketId = rcvdPkt->getTag<SocketInd>()->getSocketId();
         outPkt->addTag<SocketReq>()->setSocketId(socketId);
 
-        long outByteLen = rcvdBytes * echoAppModule->echoFactor;
-
-        if (outByteLen < 1)
-            outByteLen = 1;
-
-        int64_t len = 0;
-        for (; len + rcvdBytes <= outByteLen; len += rcvdBytes) {
+        if (echoAppModule->echoFactor == 1.0) {
             outPkt->insertAtBack(rcvdPkt->peekDataAt(B(0), B(rcvdBytes)));
         }
-        if (len < outByteLen)
-            outPkt->insertAtBack(rcvdPkt->peekDataAt(B(0), B(outByteLen - len)));
-
-        ASSERT(outPkt->getByteLength() == outByteLen);
-
+        else {
+            int64_t outByteLen = rcvdBytes * echoAppModule->echoFactor;
+            if (outByteLen < 1)
+                outByteLen = 1;
+            outPkt->insertAtBack(makeShared<ByteCountChunk>(B(outByteLen)));
+        }
         if (echoAppModule->delay == 0) {
             sendDown(outPkt);
             sendOrScheduleReadCommandIfNeeded();
