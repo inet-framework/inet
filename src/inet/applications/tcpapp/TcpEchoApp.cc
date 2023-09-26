@@ -101,6 +101,7 @@ void TcpEchoAppThread::established()
 void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
 {
     Enter_Method("dataArrived");
+    take(rcvdPkt);
     emit(packetReceivedSignal, rcvdPkt);
     int64_t rcvdBytes = rcvdPkt->getByteLength();
     echoAppModule->bytesRcvd += rcvdBytes;
