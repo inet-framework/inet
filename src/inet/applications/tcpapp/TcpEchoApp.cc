@@ -45,6 +45,8 @@ void TcpEchoApp::initialize(int stage)
 
 void TcpEchoApp::sendDown(Packet *msg)
 {
+    Enter_Method("sendDown");
+    take(msg);
     bytesSent += msg->getByteLength();
     emit(packetSentSignal, msg);
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
@@ -71,7 +73,8 @@ void TcpEchoApp::finish()
 
 TcpEchoAppThread::~TcpEchoAppThread()
 {
-    hostmod->cancelAndDelete(readDelayTimer);
+    cancelAndDelete(readDelayTimer);
+    cancelAndDelete(delayedPacket);
 }
 
 void TcpEchoAppThread::sendOrScheduleReadCommandIfNeeded()
@@ -79,27 +82,27 @@ void TcpEchoAppThread::sendOrScheduleReadCommandIfNeeded()
     if (!sock->getAutoRead() && sock->isOpen()) {
         simtime_t delay = hostmod->par("readDelay");
         if (delay >= SIMTIME_ZERO) {
-            if (readDelayTimer == nullptr) {
+            if (readDelayTimer == nullptr)
                 readDelayTimer = new cMessage("readDelayTimer");
-                readDelayTimer->setContextPointer(this);
-            }
-            hostmod->scheduleAfter(delay, readDelayTimer);
+            scheduleAfter(delay, readDelayTimer);
         }
         else {
             // send read message to TCP
-            sock->read(hostmod->par("readSize"));
+            read();
         }
     }
 }
 
 void TcpEchoAppThread::established()
 {
+    Enter_Method("established");
     sendOrScheduleReadCommandIfNeeded();
 }
 
 void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
 {
     echoAppModule->emit(packetReceivedSignal, rcvdPkt);
+    Enter_Method("dataArrived");
     int64_t rcvdBytes = rcvdPkt->getByteLength();
     echoAppModule->bytesRcvd += rcvdBytes;
 
@@ -126,11 +129,13 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
         ASSERT(outPkt->getByteLength() == outByteLen);
 
         if (echoAppModule->delay == 0) {
-            echoAppModule->sendDown(outPkt);
+            sendDown(outPkt);
             sendOrScheduleReadCommandIfNeeded();
         }
-        else
+        else {
+            delayedPacket = outPkt;
             scheduleAfter(echoAppModule->delay, outPkt); // send after a delay
+        }
     }
     else {
         sendOrScheduleReadCommandIfNeeded();
@@ -143,17 +148,27 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
  */
 void TcpEchoAppThread::timerExpired(cMessage *timer)
 {
+    ASSERT(getSimulation()->getContext() == this);
+
     if (timer == readDelayTimer) {
         // send read message to TCP
-        sock->read(this->hostmod->par("readSize"));
+        read();
     }
-    else if (Packet *pkt = check_and_cast<Packet *>(timer)) {
-        pkt->setContextPointer(nullptr);
-        echoAppModule->sendDown(pkt);
+    else if (timer == delayedPacket) {
+        sendDown(delayedPacket);
+        delayedPacket = nullptr;
         sendOrScheduleReadCommandIfNeeded();
     }
     else
         throw cRuntimeError("Model error: unknown timer message arrived");
+}
+
+void TcpEchoAppThread::handleMessage(cMessage *msg)
+{
+    if (msg->isSelfMessage())
+        timerExpired(msg);
+    else
+        throw cRuntimeError("Model error: allows only self messages");
 }
 
 void TcpEchoAppThread::init(TcpServerHostApp *hostmodule, TcpSocket *socket)
@@ -164,8 +179,24 @@ void TcpEchoAppThread::init(TcpServerHostApp *hostmodule, TcpSocket *socket)
 
 void TcpEchoAppThread::close()
 {
-    hostmod->cancelAndDelete(readDelayTimer);
+    cancelAndDelete(readDelayTimer);
+    readDelayTimer = nullptr;
+    cancelAndDelete(delayedPacket);
+    delayedPacket = nullptr;
     TcpServerThreadBase::close();
+}
+
+void TcpEchoAppThread::sendDown(Packet *msg)
+{
+    drop(msg);
+    echoAppModule->sendDown(msg);
+}
+
+void TcpEchoAppThread::read()
+{
+    omnetpp::cMethodCallContextSwitcher __ctx(echoAppModule);
+    __ctx.methodCall("TcpSocket::read");
+    sock->read(hostmod->par("readSize"));
 }
 
 } // namespace inet

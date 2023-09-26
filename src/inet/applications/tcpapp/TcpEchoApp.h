@@ -47,10 +47,14 @@ class INET_API TcpEchoAppThread : public TcpServerThreadBase
   protected:
     TcpEchoApp *echoAppModule = nullptr;
     cMessage *readDelayTimer = nullptr;
+    Packet *delayedPacket = nullptr;
 
   public:
     ~TcpEchoAppThread();
     virtual void sendOrScheduleReadCommandIfNeeded();
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void sendDown(Packet *packet);
+    virtual void read();    // send a read request to the socket
 
     /**
      * Called when connection is established.
