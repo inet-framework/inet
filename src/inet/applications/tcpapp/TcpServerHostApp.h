@@ -67,26 +67,26 @@ class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::ICa
     TcpSocket *sock; // ptr into socketMap managed by TcpServerHostApp
 
     // internal: TcpSocket::ICallback methods
-    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override { dataArrived(msg, urgent); }
-    virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override { socket->accept(availableInfo->getNewSocketId()); }
-    virtual void socketEstablished(TcpSocket *socket) override { established(); }
-    virtual void socketPeerClosed(TcpSocket *socket) override { peerClosed(); }
-    virtual void socketClosed(TcpSocket *socket) override { hostmod->threadClosed(this); }
-    virtual void socketFailure(TcpSocket *socket, int code) override { hostmod->removeThread(this); }
-    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { statusArrived(status); }
+    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;
+    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketPeerClosed(TcpSocket *socket) override;
+    virtual void socketClosed(TcpSocket *socket) override;
+    virtual void socketFailure(TcpSocket *socket, int code) override;
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override;
     virtual void socketDeleted(TcpSocket *socket) override;
 
     virtual void refreshDisplay() const override;
 
   public:
 
-    TcpServerThreadBase() { sock = nullptr; hostmod = nullptr; }
-    virtual ~TcpServerThreadBase() { delete sock; }
+    TcpServerThreadBase();
+    virtual ~TcpServerThreadBase();
 
     // internal: called by TcpServerHostApp after creating this module
-    virtual void init(TcpServerHostApp *hostmodule, TcpSocket *socket) { hostmod = hostmodule; sock = socket; }
+    virtual void init(TcpServerHostApp *hostmodule, TcpSocket *socket);
 
-    virtual void close() { sock->close(); }
+    virtual void close();
 
     /*
      * Returns the socket object
