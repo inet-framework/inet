@@ -126,6 +126,7 @@ void TcpLwipConnection::sendEstablishedMsg()
     tcpConnectInfo->setRemoteAddr(remoteAddr);
     tcpConnectInfo->setLocalPort(pcbM->local_port);
     tcpConnectInfo->setRemotePort(pcbM->remote_port);
+    tcpConnectInfo->setAutoRead(autoRead);
 
     indication->setControlInfo(tcpConnectInfo);
     indication->addTag<TransportProtocolInd>()->setProtocol(&Protocol::udp);
