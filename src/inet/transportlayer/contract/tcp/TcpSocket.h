@@ -62,7 +62,7 @@ class TcpStatusInfo;
  * Note that sockets created by forking off a listening socket inherit the mode
  * from the listening socket.
  *
- * Note that data arrive piecewise; the ReceiveQueueBasedCallback utility class
+ * Note that data arrive piecewise; the BufferingCallback utility class
  * is provided to simplify the job of assembling the data into a single message.
  *
  * This code skeleton example shows how to set up a TcpSocket to use the module
@@ -152,14 +152,14 @@ class INET_API TcpSocket : public ISocket
 
     /**
      * Utility callback class for TCP sockets. It inserts incoming data into a
-     * buffer in TcpSocket, with the buffer being accessible via getReceiveQueue().
+     * buffer in TcpSocket, with the buffer being accessible via getReadBuffer().
      */
-    class INET_API ReceiveQueueBasedCallback : public ICallback {
+    class INET_API BufferingCallback : public ICallback {
       public:
         virtual void socketDataArrived(TcpSocket *socket) = 0;
 
         virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override {
-            socket->getReceiveQueue()->push(packet->peekData());
+            socket->getReadBuffer()->push(packet->peekData());
             delete packet;
             socketDataArrived(socket);
         }
@@ -223,12 +223,12 @@ class INET_API TcpSocket : public ISocket
     int getSocketId() const override { return connId; }
 
     /**
-     * Returns the buffer where ReceiveQueueBasedCallback collects received data.
+     * Returns the buffer where BufferingCallback collects received data.
      * The user can peek the buffer to determine whether enough data has arrived
      * that can be meaningfully processed (e.g. a whole protocol message), and
      * if so, extract the data from the buffer and process it.
      */
-    ChunkQueue *getReceiveQueue() { if (receiveQueue == nullptr) receiveQueue = new ChunkQueue(); return receiveQueue; }
+    ChunkQueue *getReadBuffer() { if (receiveQueue == nullptr) receiveQueue = new ChunkQueue(); return receiveQueue; }
 
     void *getUserData() const { return userData; }
     void setUserData(void *userData) { this->userData = userData; }
