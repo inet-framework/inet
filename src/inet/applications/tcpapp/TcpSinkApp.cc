@@ -74,6 +74,8 @@ void TcpSinkAppThread::handleMessage(cMessage *msg)
 
 void TcpSinkAppThread::timerExpired(cMessage *timer)
 {
+    ASSERT(getSimulation()->getContext() == this);
+
     if (timer == readDelayTimer) {
         // send read message to TCP
         read();
