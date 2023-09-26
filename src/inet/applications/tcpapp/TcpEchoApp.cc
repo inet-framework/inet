@@ -69,6 +69,11 @@ void TcpEchoApp::finish()
     recordScalar("bytesSent", bytesSent);
 }
 
+TcpEchoAppThread::~TcpEchoAppThread()
+{
+    hostmod->cancelAndDelete(readDelayTimer);
+}
+
 void TcpEchoAppThread::sendOrScheduleReadCommandIfNeeded()
 {
     if (!sock->getAutoRead() && sock->isOpen()) {

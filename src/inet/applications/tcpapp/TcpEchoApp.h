@@ -49,7 +49,7 @@ class INET_API TcpEchoAppThread : public TcpServerThreadBase
     cMessage *readDelayTimer = nullptr;
 
   public:
-    ~TcpEchoAppThread() { hostmod->cancelAndDelete(readDelayTimer); }
+    ~TcpEchoAppThread();
     virtual void sendOrScheduleReadCommandIfNeeded();
 
     /**
