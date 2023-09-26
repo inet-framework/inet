@@ -126,6 +126,7 @@ void TcpServerHostApp::socketClosed(TcpSocket *socket)
 
 void TcpServerHostApp::removeThread(TcpServerThreadBase *thread)
 {
+    Enter_Method("removeThread");
     // remove socket
     socketMap.removeSocket(thread->getSocket());
     threadSet.erase(thread);
@@ -136,6 +137,7 @@ void TcpServerHostApp::removeThread(TcpServerThreadBase *thread)
 
 void TcpServerHostApp::threadClosed(TcpServerThreadBase *thread)
 {
+    Enter_Method("threadClosed");
     // remove socket
     socketMap.removeSocket(thread->getSocket());
     threadSet.erase(thread);
@@ -148,6 +150,7 @@ void TcpServerHostApp::threadClosed(TcpServerThreadBase *thread)
 
 void TcpServerThreadBase::socketDeleted(TcpSocket *socket)
 {
+    Enter_Method("socketDeleted");
     if (socket == sock) {
         sock = nullptr;
         hostmod->socketDeleted(socket);
