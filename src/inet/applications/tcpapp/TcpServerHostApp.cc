@@ -159,5 +159,62 @@ void TcpServerThreadBase::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, TcpSocket::stateName(sock->getState()));
 }
 
+void TcpServerThreadBase::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
+{
+    dataArrived(msg, urgent);
+}
+
+void TcpServerThreadBase::socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo)
+{
+    socket->accept(availableInfo->getNewSocketId());
+}
+
+void TcpServerThreadBase::socketEstablished(TcpSocket *socket)
+{
+    established();
+}
+
+void TcpServerThreadBase::socketPeerClosed(TcpSocket *socket)
+{
+    peerClosed();
+}
+
+void TcpServerThreadBase::socketClosed(TcpSocket *socket)
+{
+    hostmod->threadClosed(this);
+}
+
+void TcpServerThreadBase::socketFailure(TcpSocket *socket, int code)
+{
+    hostmod->removeThread(this);
+}
+
+void TcpServerThreadBase::socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status)
+{
+    statusArrived(status);
+}
+
+TcpServerThreadBase::TcpServerThreadBase()
+{
+    sock = nullptr;
+    hostmod = nullptr;
+}
+
+TcpServerThreadBase::~TcpServerThreadBase()
+{
+    delete sock;
+}
+
+void TcpServerThreadBase::init(TcpServerHostApp *hostmodule, TcpSocket *socket)
+{
+    hostmod = hostmodule;
+    sock = socket;
+}
+
+void TcpServerThreadBase::close()
+{
+    sock->close();
+}
+
 } // namespace inet
 
