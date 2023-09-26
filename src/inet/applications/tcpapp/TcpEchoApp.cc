@@ -178,6 +178,7 @@ void TcpEchoAppThread::init(TcpServerHostApp *hostmodule, TcpSocket *socket)
 
 void TcpEchoAppThread::close()
 {
+    Enter_Method("close");
     cancelAndDelete(readDelayTimer);
     readDelayTimer = nullptr;
     cancelAndDelete(delayedPacket);
