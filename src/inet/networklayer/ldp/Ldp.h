@@ -43,7 +43,7 @@ class Ted;
 /**
  * LDP (rfc 3036) protocol implementation.
  */
-class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::ReceiveQueueBasedCallback, public UdpSocket::ICallback, public IIngressClassifier, public cListener
+class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCallback, public UdpSocket::ICallback, public IIngressClassifier, public cListener
 {
   public:
 

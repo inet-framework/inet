@@ -668,7 +668,7 @@ void Ldp::socketDataArrived(TcpSocket *socket)
     peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
     EV_INFO << "Message arrived over TCP from peer " << peer.peerIP << "\n";
 
-    auto queue = socket->getReceiveQueue();
+    auto queue = socket->getReadBuffer();
     while (queue->has<LdpPacket>()) {
         auto header = queue->pop<LdpPacket>();
         processLdpPacketFromTcp(header);

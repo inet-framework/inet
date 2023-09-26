@@ -417,7 +417,7 @@ void BgpRouter::socketFailure(TcpSocket *socket, int code)
 
 void BgpRouter::socketDataArrived(TcpSocket *socket)
 {
-    auto queue = socket->getReceiveQueue();
+    auto queue = socket->getReadBuffer();
     while (queue->has<BgpHeader>()) {
         auto header = queue->pop<BgpHeader>();
         processChunks(*header.get());
@@ -428,7 +428,7 @@ void BgpRouter::socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent
 {
     _currSessionId = findIdFromSocketConnId(_BGPSessions, socket->getSocketId());
     if (_currSessionId != static_cast<SessionId>(-1))
-        ReceiveQueueBasedCallback::socketDataArrived(socket, packet, urgent);
+        BufferingCallback::socketDataArrived(socket, packet, urgent);
     else
         delete packet;
 }

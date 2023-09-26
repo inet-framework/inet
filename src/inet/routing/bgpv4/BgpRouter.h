@@ -23,7 +23,7 @@ namespace bgp {
 
 class BgpSession;
 
-class INET_API BgpRouter : public TcpSocket::ReceiveQueueBasedCallback
+class INET_API BgpRouter : public TcpSocket::BufferingCallback
 {
   private:
     IInterfaceTable *ift = nullptr;
