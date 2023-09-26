@@ -49,15 +49,15 @@ module TcpServerConnection like IApp
         }
         io: TcpServerSocketIo {
             parameters:
-                @display("p=150,300");
+                @display("p=350,600");
         }
     connections allowunconnected:
         source.out --> tagger.in if exists(source);
         tagger.out --> measurementStarter.in;
         measurementStarter.out --> io.trafficIn;
-        io.socketOut --> socketOut;
+        io.socketOut --> { @display("m=s"); } --> socketOut;
 
-        socketIn --> io.socketIn;
+        socketIn --> { @display("m=s"); } --> io.socketIn;
         io.trafficOut --> measurementRecorder.in;
         measurementRecorder.out --> sink.in if exists(sink);
 }
