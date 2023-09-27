@@ -1,1 +1,15 @@
 Applications using the TCP protocol.
+
+
+TcpBasicClientApp -->  TcpRequestResponseClientApp
+TcpGenericServerApp -> TcpRequestResponseServerApp
+GenericAppMsg  --> RequestResponseAppMsg
+TcpGenericServerThread --> TcpRequestResponseServerThread -- currently unused, make TcpGenericServerApp launch these!
+
+existing TcpRequestResponseApp --> TcpRequestResponseServerThread
+
+TcpServerConnection --> TcpServerThread  (TcpServerConnectionHandler???)
+serverConnectionModuleType --> serverThreadModuleType in TcpServerApp
+connection[] -> thread[]  in TcpServerApp
+
+TcpSessionApp --> TcpScriptedApp
