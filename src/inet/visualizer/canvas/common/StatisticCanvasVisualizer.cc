@@ -68,7 +68,7 @@ StatisticVisualizerBase::StatisticVisualization *StatisticCanvasVisualizer::crea
             throw cRuntimeError("Cannot create figure with type: %s", property->getValue("type"));
         figure->parse(property);
         figure->setName("statistic");
-        figure->setTooltip("This figure represents the value of a statistic");
+        figure->setTooltip("Statistic's value");
     }
     figure->setTags((std::string("statistic ") + tags).c_str());
     figure->setAssociatedObject(source);

@@ -44,7 +44,7 @@ GateScheduleVisualizerBase::GateVisualization *GateScheduleCanvasVisualizer::cre
     auto module = check_and_cast<cModule *>(gate);
     auto figure = new GateFigure("gate");
     figure->setTags((std::string("gate ") + tags).c_str());
-    figure->setTooltip("This figure represents a gate");
+    figure->setTooltip("TAS gate schedule");
     figure->setAssociatedObject(module);
     figure->setSpacing(spacing);
     figure->setBounds(cFigure::Rectangle(0, 0, width, height));

@@ -44,7 +44,7 @@ EnergyStorageVisualizerBase::EnergyStorageVisualization *EnergyStorageCanvasVisu
     auto module = check_and_cast<const cModule *>(energyStorage);
     auto figure = new BarFigure("energyStorage");
     figure->setTags((std::string("energyStorage ") + tags).c_str());
-    figure->setTooltip("This figure represents an energy storage");
+    figure->setTooltip("Residual capacity of energy storage");
     figure->setAssociatedObject(const_cast<cModule *>(module));
     figure->setBounds(cFigure::Rectangle(0, 0, width, height));
     figure->setSpacing(spacing);

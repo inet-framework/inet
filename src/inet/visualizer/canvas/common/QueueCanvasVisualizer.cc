@@ -44,7 +44,7 @@ QueueVisualizerBase::QueueVisualization *QueueCanvasVisualizer::createQueueVisua
     auto module = check_and_cast<cModule *>(ownedObject->getOwner());
     auto figure = new QueueFigure("queue");
     figure->setTags((std::string("queue ") + tags).c_str());
-    figure->setTooltip("This figure represents a queue");
+    figure->setTooltip("Queue");
     figure->setAssociatedObject(ownedObject);
     figure->setColor(color);
     figure->setSpacing(spacing);

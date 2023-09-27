@@ -54,7 +54,7 @@ RadioVisualizerBase::RadioVisualization *RadioCanvasVisualizer::createRadioVisua
     if (displayRadioMode) {
         radioModeFigure = new IndexedImageFigure("radioMode");
         radioModeFigure->setTags((std::string("radioMode ") + tags).c_str());
-        radioModeFigure->setTooltip("This figure represents the radio mode of a radio");
+        radioModeFigure->setTooltip("Radio mode");
         radioModeFigure->setAssociatedObject(const_cast<cModule *>(module));
         radioModeFigure->setImages(radioModeImages);
         radioModeFigure->setSize(cFigure::Point(width, height));
@@ -63,7 +63,7 @@ RadioVisualizerBase::RadioVisualization *RadioCanvasVisualizer::createRadioVisua
     if (displayReceptionState) {
         receptionStateFigure = new IndexedImageFigure("receptionState");
         receptionStateFigure->setTags((std::string("receptionState ") + tags).c_str());
-        receptionStateFigure->setTooltip("This figure represents the reception state of a radio");
+        receptionStateFigure->setTooltip("Reception state of radio");
         receptionStateFigure->setImages(receptionStateImages);
         receptionStateFigure->setSize(cFigure::Point(width, height));
     }
@@ -71,7 +71,7 @@ RadioVisualizerBase::RadioVisualization *RadioCanvasVisualizer::createRadioVisua
     if (displayTransmissionState) {
         transmissionStateFigure = new IndexedImageFigure("transmissionState");
         transmissionStateFigure->setTags((std::string("transmissionState ") + tags).c_str());
-        transmissionStateFigure->setTooltip("This figure represents the transmission state of a radio");
+        transmissionStateFigure->setTooltip("Transmission state of radio");
         transmissionStateFigure->setImages(transmissionStateImages);
         transmissionStateFigure->setSize(cFigure::Point(width, height));
     }
@@ -81,7 +81,7 @@ RadioVisualizerBase::RadioVisualization *RadioCanvasVisualizer::createRadioVisua
     if (displayAntennaLobes) {
         antennaLobeFigure = new cPolygonFigure("antenna_lobe");
         antennaLobeFigure->setTags("antennaLobe");
-        antennaLobeFigure->setTooltip("This figure represents the antenna lobe of a radio");
+        antennaLobeFigure->setTooltip("Antenna lobe of radio");
         antennaLobeFigure->setZIndex(zIndex);
         antennaLobeFigure->setOutlined(true);
         antennaLobeFigure->setLineColor(antennaLobeLineColor);
@@ -93,14 +93,14 @@ RadioVisualizerBase::RadioVisualization *RadioCanvasVisualizer::createRadioVisua
         antennaLobeFigure->setSmooth(antennaLobeLineSmooth);
         antennaLobeUnitGainFigure = new cOvalFigure("antenna_lobe unit_gain");
         antennaLobeUnitGainFigure->setTags("antennaLobe unitGain");
-        antennaLobeUnitGainFigure->setTooltip("This figure represents the 0dB gain of a radio antenna");
+        antennaLobeUnitGainFigure->setTooltip("0dB gain of radio antenna");
         antennaLobeUnitGainFigure->setZIndex(zIndex);
         antennaLobeUnitGainFigure->setOutlined(true);
         antennaLobeUnitGainFigure->setLineColor(cFigure::GREY);
         antennaLobeUnitGainFigure->setLineStyle(cFigure::LINE_DOTTED);
         antennaLobeMaxGainFigure = new cOvalFigure("antenna_lobe max_gain");
         antennaLobeMaxGainFigure->setTags("antennaLobe maxGain");
-        antennaLobeMaxGainFigure->setTooltip("This figure represents the maximum gain of a radio antenna");
+        antennaLobeMaxGainFigure->setTooltip("Maximum gain of radio antenna");
         antennaLobeMaxGainFigure->setZIndex(zIndex);
         antennaLobeMaxGainFigure->setOutlined(true);
         antennaLobeMaxGainFigure->setLineColor(cFigure::GREY);
