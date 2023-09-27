@@ -75,6 +75,10 @@ void TcpServerHostApp::handleMessageWhenUp(cMessage *msg)
         thread->timerExpired(msg);
     }
     else {
+        //TODO we could make more self-contained "thread" processes, if we maintained sockpair-to-threadmodule
+        // mapping, and gave the message to the threadmodule instead of the socket: threadModule->processMessage(msg).
+        // threadModule->processMessage(msg) would then call socket.processMessage(msg).
+        // Then we could remove the Enter_Method() macros from the socket callback's methods.
         TcpSocket *socket = check_and_cast_nullable<TcpSocket *>(socketMap.findSocketFor(msg));
         if (socket)
             socket->processMessage(msg);
