@@ -2566,6 +2566,7 @@ filter_expression = props["filter"]
 filter_expression = filter_expression.format(**props)
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
+props["enum_as_strip"] = True
 
 # query vector data into a data frame
 try:
@@ -3200,6 +3201,7 @@ filter_expression = props["filter"]
 filter_expression = filter_expression.format(**props)
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
+props["enum_as_strip"] = True
 
 # query vector data into a data frame
 try:
@@ -3834,6 +3836,7 @@ filter_expression = props["filter"]
 filter_expression = filter_expression.format(**props)
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
+props["enum_as_strip"] = True
 
 # query vector data into a data frame
 try:
@@ -4468,6 +4471,7 @@ filter_expression = props["filter"]
 filter_expression = filter_expression.format(**props)
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
+props["enum_as_strip"] = True
 
 # query vector data into a data frame
 try:
