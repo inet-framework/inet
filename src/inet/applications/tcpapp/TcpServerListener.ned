@@ -24,7 +24,7 @@ import inet.applications.contract.IApp;
 //
 // @see ~TcpServerApp, ~TcpServerConnection
 //
-simple TcpServerListener like IApp
+simple TcpServerListener
 {
     parameters:
         string localAddress = default(""); // may be left empty ("")
