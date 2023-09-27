@@ -13,3 +13,5 @@ serverConnectionModuleType --> serverThreadModuleType in TcpServerApp
 connection[] -> thread[]  in TcpServerApp
 
 TcpSessionApp --> TcpScriptedApp
+
+add a TcpSourceApp; derive TcpCbrApp from it
