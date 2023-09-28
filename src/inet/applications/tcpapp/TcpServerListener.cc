@@ -59,8 +59,6 @@ void TcpServerListener::handleMessageWhenUp(cMessage *msg)
 
 void TcpServerListener::finish()
 {
-    while (!connectionSet.empty())
-        removeConnection(*connectionSet.begin());
 }
 
 void TcpServerListener::socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo)
