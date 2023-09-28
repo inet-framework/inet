@@ -2554,6 +2554,7 @@ utils.export_data_if_needed(df, props)
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
+from inet.scave import sort_values_by_legend_label
 
 
 # get chart properties
@@ -2581,7 +2582,8 @@ if df.empty:
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
-utils.plot_vectors_separate(df, props)
+sort_values_by_legend_label(df, props, ["carrier.*mac", "mac", "carrier.*plca", "plca", "phy"])
+utils.plot_vectors_separate(df, props, sort=False)
 
 utils.postconfigure_plot(props)
 

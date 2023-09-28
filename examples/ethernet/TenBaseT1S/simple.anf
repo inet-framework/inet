@@ -647,6 +647,7 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
 from omnetpp.scave import results, chart, utils
 from numpy import argmax
+from inet.scave import sort_values_by_legend_label
 
 # get chart properties
 props = chart.get_properties()
@@ -677,7 +678,8 @@ df = df[df.name != "packetPendingDelay:vector"]
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
-utils.plot_vectors_separate(df, props)
+sort_values_by_legend_label(df, props, ["queue", "carrier.*mac", "collision.*mac", "mac", "carrier.*plca", "collision.*plca", "plca", "phy"])
+utils.plot_vectors_separate(df, props, sort=False)
 
 utils.postconfigure_plot(props)
 
