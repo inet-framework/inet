@@ -79,7 +79,7 @@ void TcpServerListener::socketAvailable(TcpSocket *socket, TcpAvailableInfo *ava
     dispatcher->setGateSize("out", dispatcher->gateSize("out") + 1);
     connection->gate("socketOut")->connectTo(dispatcher->gate("in", dispatcher->gateSize("in") - 1));
     dispatcher->gate("out", dispatcher->gateSize("out") - 1)->connectTo(connection->gate("socketIn"));
-    auto serverSocketIo = check_and_cast<TcpServerSocketIo *>(connection->gate("socketIn")->getPathEndGate()->getOwnerModule());
+    auto serverSocketIo = check_and_cast<ITcpServerSocketIo *>(connection->gate("socketIn")->getPathEndGate()->getOwnerModule());
     serverSocketIo->acceptSocket(availableInfo);
     connectionSet.insert(serverSocketIo);
 }
@@ -90,13 +90,13 @@ void TcpServerListener::socketClosed(TcpSocket *socket)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
-void TcpServerListener::removeConnection(TcpServerSocketIo *connection)
+void TcpServerListener::removeConnection(ITcpServerSocketIo *connection)
 {
     connectionSet.erase(connection);
     connection->deleteModule();
 }
 
-void TcpServerListener::connectionClosed(TcpServerSocketIo *connection)
+void TcpServerListener::connectionClosed(ITcpServerSocketIo *connection)
 {
     connectionSet.erase(connection);
     socketClosed(connection->getSocket());

@@ -8,11 +8,12 @@
 #ifndef __INET_TCPSERVERSOCKETIO_H
 #define __INET_TCPSERVERSOCKETIO_H
 
+#include "inet/applications/tcpapp/ITcpServerSocketIo.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
 
-class INET_API TcpServerSocketIo : public cSimpleModule, public TcpSocket::ICallback
+class INET_API TcpServerSocketIo : public cSimpleModule, public TcpSocket::ICallback, public ITcpServerSocketIo
 {
   protected:
     TcpSocket *socket = nullptr;
@@ -24,9 +25,10 @@ class INET_API TcpServerSocketIo : public cSimpleModule, public TcpSocket::ICall
   public:
     virtual ~TcpServerSocketIo() { cancelAndDelete(readDelayTimer); delete socket; }
 
-    virtual TcpSocket *getSocket() { return socket; }
-    virtual void acceptSocket(TcpAvailableInfo *availableInfo);
-    virtual void close() { socket->close(); }
+    virtual TcpSocket *getSocket() override { return socket; }
+    virtual void acceptSocket(TcpAvailableInfo *availableInfo) override;
+    virtual void close() override { socket->close(); }
+    virtual void deleteModule() override { cSimpleModule::deleteModule(); }
 
     virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override;
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override {}

@@ -9,7 +9,7 @@
 #define __INET_TCPSERVERLISTENER_H
 
 #include "inet/applications/base/ApplicationBase.h"
-#include "inet/applications/tcpapp/TcpServerSocketIo.h"
+#include "inet/applications/tcpapp/ITcpServerSocketIo.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
@@ -19,7 +19,7 @@ class INET_API TcpServerListener : public ApplicationBase, public TcpSocket::ICa
   protected:
     int connectionId = 0;
     TcpSocket serverSocket;
-    std::set<TcpServerSocketIo *> connectionSet;
+    std::set<ITcpServerSocketIo *> connectionSet;
     static const char *submoduleVectorName;
 
     virtual void handleMessageWhenUp(cMessage *msg) override;
@@ -39,8 +39,8 @@ class INET_API TcpServerListener : public ApplicationBase, public TcpSocket::ICa
     virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override {}
     virtual void socketDeleted(TcpSocket *socket) override {}
 
-    virtual void removeConnection(TcpServerSocketIo *connection);
-    virtual void connectionClosed(TcpServerSocketIo *connection);
+    virtual void removeConnection(ITcpServerSocketIo *connection);
+    virtual void connectionClosed(ITcpServerSocketIo *connection);
 };
 
 } // namespace inet
