@@ -1195,4 +1195,23 @@ def legend_change_alpha(handle, original, alpha, marker):
     
 def fix_legend_transparency(alpha=1, marker='s'):
     plt.legend(handler_map={plt.Line2D: HandlerLine2D(update_func=lambda handle, original: legend_change_alpha(handle, original, alpha, marker))})
-    
+
+def add_legend_label_column(df, props, legend_func=make_legend_label):
+    title_cols, legend_cols = utils.extract_label_columns(df, props)
+    def get_legend_label(row):
+        return legend_func(legend_cols, row, props)
+    df['legend_label'] = df.apply(get_legend_label, axis=1)
+
+def add_order_column(df, regex_list):
+    def find_first_match(row):
+        for id, regex in enumerate(regex_list):
+            if re.search(regex, row['legend_label']):
+                return id
+        return math.inf
+    df['order'] = df.apply(find_first_match, axis=1)
+    return df
+
+def sort_values_by_legend_label(df, props, legex_list):
+    add_legend_label_column(df, props)
+    add_order_column(df, legex_list)
+    df.sort_values(by='order', inplace=True)
