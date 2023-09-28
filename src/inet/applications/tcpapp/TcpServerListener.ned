@@ -32,6 +32,9 @@ simple TcpServerListener
         string serverConnectionModuleType = default("inet.applications.tcpapp.TcpServerConnection"); // module type of "connection" module to launch on incoming connections
         bool autoRead = default(true); // defines the autoRead setting for connection handling modules
         @display("i=block/server");
+        @lifecycleSupport;
+        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
     gates:
         input socketIn;
         output socketOut;
