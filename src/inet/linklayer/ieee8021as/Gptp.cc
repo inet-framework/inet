@@ -486,43 +486,44 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
     emit(peerDelaySignal, CLOCKTIME_AS_SIMTIME(peerDelay));
 }
 
-void Gptp::receiveSignal(cComponent *source, simsignal_t ethernetEvent, cObject *obj, cObject *details)
+const GptpBase *Gptp::extractGptpHeader(Packet *packet)
 {
-    Enter_Method("%s", cComponent::getSignalName(ethernetEvent));
-
-    if (ethernetEvent != receptionEndedSignal && ethernetEvent != transmissionEndedSignal) {
-        return;
-    }
-
-    auto signal = check_and_cast<cPacket *>(obj);
-    auto packet = check_and_cast_nullable<Packet *>(signal->getEncapsulatedPacket());
-    if (!packet) {
-        return;
-    }
-
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-    if (*protocol != Protocol::ethernetPhy) {
-        return;
-    }
+    if (*protocol != Protocol::ethernetPhy)
+        return nullptr;
 
     const auto& ethPhyHeader = packet->peekAtFront<physicallayer::EthernetPhyHeader>();
     const auto& ethMacHeader = packet->peekDataAt<EthernetMacHeader>(ethPhyHeader->getChunkLength());
-    if (ethMacHeader->getTypeOrLength() != ETHERTYPE_GPTP) {
-        return;
-    }
+    if (ethMacHeader->getTypeOrLength() != ETHERTYPE_GPTP)
+        return nullptr;
 
     b offset = ethPhyHeader->getChunkLength() + ethMacHeader->getChunkLength();
-    auto &gptp = packet->peekDataAt<GptpBase>(offset);
+    return packet->peekDataAt<GptpBase>(offset).get();
+}
 
-    if (gptp->getDomainNumber() != domainNumber) {
+void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(simSignal));
+
+    if (simSignal != receptionEndedSignal && simSignal != transmissionEndedSignal)
         return;
-    }
 
-    if (ethernetEvent == receptionEndedSignal)
+    auto ethernetSignal = check_and_cast<cPacket *>(obj);
+    auto packet = check_and_cast_nullable<Packet *>(ethernetSignal->getEncapsulatedPacket());
+    if (!packet)
+        return;
+
+    auto gptp = extractGptpHeader(packet);
+    if (!gptp)
+        return;
+
+    if (gptp->getDomainNumber() != domainNumber)
+        return;
+
+    if (simSignal == receptionEndedSignal)
         packet->addTagIfAbsent<GptpIngressTimeInd>()->setArrivalClockTime(clock->getClockTime());
-    else if (ethernetEvent == transmissionEndedSignal) {
-        handleDelayOrSendFollowUp(gptp.get(), source);
-    }
+    else if (simSignal == transmissionEndedSignal)
+        handleDelayOrSendFollowUp(gptp, source);
 }
 
 void Gptp::handleDelayOrSendFollowUp(const GptpBase *gptp, cComponent *source)

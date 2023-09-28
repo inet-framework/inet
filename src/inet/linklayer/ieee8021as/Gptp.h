@@ -85,10 +85,12 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     virtual void handleMessage(cMessage *msg) override;
 
     virtual void handleSelfMessage(cMessage *msg);
-    virtual void handleDelayOrSendFollowUp(const GptpBase *gptp, omnetpp::cComponent *source);
+    void handleDelayOrSendFollowUp(const GptpBase *gptp, omnetpp::cComponent *source);
+    const GptpBase *extractGptpHeader(Packet *packet);
 
   public:
     virtual ~Gptp();
+  protected:
     void sendPacketToNIC(Packet *packet, int portId);
 
     void sendSync();
