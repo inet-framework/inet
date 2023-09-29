@@ -5,7 +5,7 @@
         <input pattern="/inet/examples/ethernet/TenBaseT1S/results/Simple-*.sca"/>
     </inputs>
     <charts>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1308886134" name="transmit opportunity ID" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1338528350" name="transmit opportunity ID" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -641,13 +641,14 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="20749877" name="controller" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="766043897" name="controller" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
 from omnetpp.scave import results, chart, utils
 from numpy import argmax
 from inet.scave import sort_values_by_legend_label
+from inet.scave.plca import add_go_to_max_packet_pending_delay_button
 
 # get chart properties
 props = chart.get_properties()
@@ -669,28 +670,15 @@ except results.ResultQueryError as e:
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
-packetPendingDelayVector = df[df.name == "packetPendingDelay:vector"].iloc[0]
-pos = argmax(packetPendingDelayVector.vecvalue)
-maxPacketPendingDelaySendTime = packetPendingDelayVector.vectime[pos]
-df = df[df.name != "packetPendingDelay:vector"]
-
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
+button = add_go_to_max_packet_pending_delay_button(df, props)
 sort_values_by_legend_label(df, props, ["queue", "carrier.*mac", "collision.*mac", "mac", "carrier.*plca", "collision.*plca", "plca", "phy"])
 utils.plot_vectors_separate(df, props, sort=False)
 
 utils.postconfigure_plot(props)
-
-def show_max_pending_packet_delay(event):
-    ax = plt.gcf().axes[0]
-    ax.set_xlim(maxPacketPendingDelaySendTime - 100E-6, maxPacketPendingDelaySendTime + 100E-6)
-    plt.draw()
-
-button_ax = plt.axes([0.5, 0.93, 0.3, 0.04])
-button = Button(button_ax, 'Go to max packet pending delay')
-button.on_clicked(show_max_pending_packet_delay)
 
 plt.subplots_adjust(left = 0.05, right = 0.99, top = 0.9, bottom = 0.1, wspace=0.1, hspace=0.1)
 
@@ -1293,12 +1281,14 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value=""/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="697926155" name="node[n]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="273393173" name="node[n]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
 from omnetpp.scave import results, chart, utils
 from numpy import argmax
+from inet.scave import sort_values_by_legend_label
+from inet.scave.plca import add_go_to_max_packet_pending_delay_button
 
 # get chart properties
 props = chart.get_properties()
@@ -1321,27 +1311,15 @@ except results.ResultQueryError as e:
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
-packetPendingDelayVector = df[df.name == "packetPendingDelay:vector"].iloc[0]
-pos = argmax(packetPendingDelayVector.vecvalue)
-maxPacketPendingDelaySendTime = packetPendingDelayVector.vectime[pos]
-df = df[df.name != "packetPendingDelay:vector"]
-
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
+button = add_go_to_max_packet_pending_delay_button(df, props)
+sort_values_by_legend_label(df, props, ["queue", "carrier.*mac", "collision.*mac", "mac", "carrier.*plca", "collision.*plca", "plca", "phy"])
 utils.plot_vectors_separate(df, props)
 
 utils.postconfigure_plot(props)
-
-def show_max_pending_packet_delay(event):
-    ax = plt.gcf().axes[0]
-    ax.set_xlim(maxPacketPendingDelaySendTime - 100E-6, maxPacketPendingDelaySendTime + 100E-6)
-    plt.draw()
-
-button_ax = plt.axes([0.5, 0.93, 0.3, 0.04])
-button = Button(button_ax, 'Go to max packet pending delay')
-button.on_clicked(show_max_pending_packet_delay)
 
 plt.subplots_adjust(left = 0.05, right = 0.99, top = 0.9, bottom = 0.1, wspace=0.1, hspace=0.1)
 
