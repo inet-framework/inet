@@ -1211,7 +1211,7 @@ def add_order_column(df, regex_list):
     df['order'] = df.apply(find_first_match, axis=1)
     return df
 
-def sort_values_by_legend_label(df, props, legex_list):
+def sort_values_by_legend_label(df, props, regex_list):
     add_legend_label_column(df, props)
-    add_order_column(df, legex_list)
+    add_order_column(df, regex_list)
     df.sort_values(by='order', inplace=True)
