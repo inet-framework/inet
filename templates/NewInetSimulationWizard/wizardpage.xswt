@@ -15,7 +15,7 @@
 
   <x:children>
 
-    <label x:text="Create a new Inet simulation." x:style="WRAP">
+    <label x:text="Create a new INET simulation." x:style="WRAP">
       <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </label>
 
@@ -30,15 +30,8 @@
     <label text="Number of clients:"/>
     <spinner x:id="numClients" minimum="1" maximum="10" x:style="BORDER"/>
 
-    <!-- ipProtocol:IPv4/IPv6 -->
-<!--    <label text="IP protocol:"/>
-    <combo x:id="ipProtocol" x:style="BORDER|READ_ONLY">
-      <add x:p0="IPv4"/>
-      <add x:p0="IPv6"/>
-    </combo>
--->
     <group text="IP layer">
-        <layoutData x:class="GridData" horizontalSpan="2"/>
+        <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
         <layout x:class="GridLayout"/>
         <x:children>
             <button x:id="ipv4Layer" text="IPv4" x:style="RADIO"/>
@@ -57,7 +50,7 @@
       <x:children>
 
     <group text="TCP traffic">
-        <layoutData x:class="GridData" horizontalSpan="2"/>
+        <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
         <layout x:class="GridLayout"/>
         <x:children>
     <!-- noneTcpTraffic? -->
