@@ -5,7 +5,7 @@
         <input pattern="/inet/examples/ethernet/TenBaseT1S/results/Mixed-*.sca"/>
     </inputs>
     <charts>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1013711651" name="transmit opportunity ID" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1165876601" name="transmit opportunity ID" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -601,13 +601,13 @@ utils.export_data_if_needed(df, props)
             <property name="Plot.Caching" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
             <property name="legend_manual" value="false"/>
-            <property name="yaxis_title" value=""/>
-            <property name="legend_replacements" value=""/>
+            <property name="yaxis_title" value="transmit opportunity ID"/>
+            <property name="legend_replacements" value="/MixedMultidropNetwork\.(.*?)\.eth\[0\]\.plca/\1/"/>
             <property name="Legend.Border" value="false"/>
-            <property name="title" value="current transmit opportunity ID"/>
+            <property name="title" value="transmit opportunity ID"/>
             <property name="legend_automatic" value="true"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
-            <property name="vector_operations" value=""/>
+            <property name="vector_operations" value="apply: timedilation(c=1000)"/>
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
@@ -617,7 +617,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value=""/>
+            <property name="xaxis_title" value="simulation time [ms]"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
@@ -641,7 +641,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="504565990" name="switch" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="836898393" name="switch" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
@@ -676,7 +676,7 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 # plot
 button = add_go_to_max_packet_pending_delay_button(df, props)
 sort_values_by_legend_label(df, props, ["queue", "carrier.*mac", "collision.*mac", "mac", "carrier.*plca", "collision.*plca", "plca", "phy"])
-utils.plot_vectors_separate(df, props)
+utils.plot_vectors_separate(df, props, sort=False)
 
 utils.postconfigure_plot(props)
 
@@ -1247,8 +1247,8 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="legend_prefer_result_titles" value="true"/>
             <property name="legend_manual" value="false"/>
             <property name="yaxis_title" value=""/>
-            <property name="legend_replacements" value=""/>
-            <property name="title" value="switch.eth[1]"/>
+            <property name="legend_replacements" value="/MixedMultidropNetwork\.switch\.eth\[0\]\.//&#10;/dilated by 1000000 //"/>
+            <property name="title" value="switch MAC, PLCA, and PHY"/>
             <property name="legend_automatic" value="true"/>
             <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
@@ -1257,7 +1257,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value=""/>
+            <property name="xaxis_title" value="simulation time [s]"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="image_export_filename" value=""/>
@@ -1281,7 +1281,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value=""/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="2086270192" name="node[n]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="2134077846" name="node[n]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
@@ -1317,7 +1317,7 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 # plot
 button = add_go_to_max_packet_pending_delay_button(df, props)
 sort_values_by_legend_label(df, props, ["queue", "carrier.*mac", "collision.*mac", "mac", "carrier.*plca", "collision.*plca", "plca", "phy"])
-utils.plot_vectors_separate(df, props)
+utils.plot_vectors_separate(df, props, sort=False)
 
 utils.postconfigure_plot(props)
 
@@ -1929,8 +1929,8 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="legend_prefer_result_titles" value="true"/>
             <property name="legend_manual" value="false"/>
             <property name="yaxis_title" value=""/>
-            <property name="legend_replacements" value=""/>
-            <property name="title" value="node[0]"/>
+            <property name="legend_replacements" value="/MixedMultidropNetwork\.node\[.*?\]\.eth\[0\]\.//"/>
+            <property name="title" value="node[0] MAC, PLCA, and PHY"/>
             <property name="legend_automatic" value="true"/>
             <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
@@ -1939,7 +1939,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value=""/>
+            <property name="xaxis_title" value="simulation time [s]"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="image_export_filename" value=""/>
