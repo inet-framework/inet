@@ -645,7 +645,6 @@ utils.export_data_if_needed(df, props)
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
-from inet.scave import sort_values_by_legend_label
 
 
 # get chart properties
@@ -655,10 +654,8 @@ utils.preconfigure_plot(props)
 
 # collect parameters for query
 filter_expression = props["filter"]
-filter_expression = filter_expression.format(**props)
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
-props["enum_as_strip"] = True
 
 # query vector data into a data frame
 try:
@@ -673,7 +670,8 @@ if df.empty:
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
-sort_values_by_legend_label(df, props, ["carrier.*mac", "mac", "carrier.*plca", "plca", "phy"])
+utils.add_legend_labels(df, props)
+utils.sort_rows_by_legend(df, props)
 utils.plot_vectors_separate(df, props, sort=False)
 
 utils.postconfigure_plot(props)
@@ -745,7 +743,7 @@ utils.export_data_if_needed(df, props)]]></script>
     <package name="org.omnetpp.ned.editor.wizards.support" />
     <package name="org.omnetpp.cdt.wizard.support" />
   </import>
-  <layout x:class="GridLayout" numColumns="2"/>
+  <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="true"/>
 
   <x:children>
 
@@ -780,6 +778,10 @@ utils.export_data_if_needed(df, props)]]></script>
 
     <label text="Line width:"/>
     <spinner x:id="linewidth" x:id.default="1.5" minimum="0" digits="1" selection="15" maximum="1000" x:style="BORDER"/>
+
+    <button x:id="enum_as_strip" x:id.default="false" text="Display enums as colored strips" x:style="CHECK">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
 
       </x:children>
     </group>
@@ -819,7 +821,29 @@ utils.export_data_if_needed(df, props)]]></script>
 
     <label text="Marker size:"/>
     <spinner x:id="markersize" x:id.default="5" selection="6" minimum="0" maximum="100" x:style="BORDER"/>
+      </x:children>
+    </group>
 
+    <group text="Hints">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="1"/>
+      <x:children>
+
+        <label x:style="WRAP" text="* To change the set of colors/markers used in Auto mode, choose a different cycle seed on the Styling page">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="* To have more control over the specific colors/markers chosen, add properties in the Advanced page. Examples:">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `axes.prop_cycle: cycler('color', ['blue', 'green', 'red'])`  # on a Matplotlib chart: selects colors">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `Line.Color/3: yellow`  # on a native chart: selects the color of the 3rd line">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
       </x:children>
     </group>
 
@@ -1051,6 +1075,53 @@ utils.export_data_if_needed(df, props)]]></script>
 
   </x:children>
 </xswt>]]></dialogPage>
+            <dialogPage id="ORDERING" label="Ordering"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+    <package name='org.omnetpp.common.wizard.support' />
+    <package name='org.omnetpp.ned.editor.wizards.support' />
+    <package name='org.omnetpp.cdt.wizard.support' />
+  </import>
+
+  <layout x:class='GridLayout' numColumns='2'/>
+
+  <x:children>
+
+    <label x:style='WRAP' text='Define the ordering of items on the legend and on the plot'>
+      <layoutData x:class='GridData' horizontalSpan='2' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </label>
+
+    <!-- ordering_regex_list -->
+    <label text='Ordering rules (one regex per line):'/>
+    <label text='Rules for secondary ordering:'/>
+    <text x:id='ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+      <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </text>
+
+    <!-- secondary_ordering_regex_list -->
+    <text x:id='secondary_ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+      <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </text>
+
+    <!-- hint -->
+    <label x:style='WRAP' text='NOTE: Items will be ordered based on legend labels. Specify a series of regexes, one per line, to define the ranking of items. Each item&apos;s rank will be determined by the index of the first regex it matches. After sorting, items matching the first regex will appear at the top, those matching the second regex will be placed below, and so forth. Case-sensitive substring match is used.'>
+      <layoutData x:class='GridData' horizontalSpan='2' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </label>
+
+    <!-- sorting -->
+    <button x:id='sorting' text='Additional sorting' x:style='CHECK'>
+      <layoutData x:class='GridData' horizontalSpan='2'/>
+    </button>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
             <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
@@ -1277,12 +1348,15 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
+            <property name="ordering_regex_list" value="carrier.*mac&#10;mac&#10;carrier.*plca&#10;plca&#10;phy"/>
+            <property name="enum_as_strip" value="true"/>
+            <property name="sorting" value="false"/>
+            <property name="secondary_ordering_regex_list" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1598424491" name="node[0] worst case" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
-from inet.scave import sort_values_by_legend_label
 
 
 # get chart properties
@@ -1292,10 +1366,8 @@ utils.preconfigure_plot(props)
 
 # collect parameters for query
 filter_expression = props["filter"]
-filter_expression = filter_expression.format(**props)
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
-props["enum_as_strip"] = True
 
 # query vector data into a data frame
 try:
@@ -1310,7 +1382,8 @@ if df.empty:
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
-sort_values_by_legend_label(df, props, ["carrier.*mac", "mac", "carrier.*plca", "plca", "phy"])
+utils.add_legend_labels(df, props)
+utils.sort_rows_by_legend(df, props)
 utils.plot_vectors_separate(df, props, sort=False)
 
 utils.postconfigure_plot(props)
@@ -1382,7 +1455,7 @@ utils.export_data_if_needed(df, props)]]></script>
     <package name="org.omnetpp.ned.editor.wizards.support" />
     <package name="org.omnetpp.cdt.wizard.support" />
   </import>
-  <layout x:class="GridLayout" numColumns="2"/>
+  <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="true"/>
 
   <x:children>
 
@@ -1417,6 +1490,10 @@ utils.export_data_if_needed(df, props)]]></script>
 
     <label text="Line width:"/>
     <spinner x:id="linewidth" x:id.default="1.5" minimum="0" digits="1" selection="15" maximum="1000" x:style="BORDER"/>
+
+    <button x:id="enum_as_strip" x:id.default="false" text="Display enums as colored strips" x:style="CHECK">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
 
       </x:children>
     </group>
@@ -1456,7 +1533,29 @@ utils.export_data_if_needed(df, props)]]></script>
 
     <label text="Marker size:"/>
     <spinner x:id="markersize" x:id.default="5" selection="6" minimum="0" maximum="100" x:style="BORDER"/>
+      </x:children>
+    </group>
 
+    <group text="Hints">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="1"/>
+      <x:children>
+
+        <label x:style="WRAP" text="* To change the set of colors/markers used in Auto mode, choose a different cycle seed on the Styling page">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="* To have more control over the specific colors/markers chosen, add properties in the Advanced page. Examples:">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `axes.prop_cycle: cycler('color', ['blue', 'green', 'red'])`  # on a Matplotlib chart: selects colors">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `Line.Color/3: yellow`  # on a native chart: selects the color of the 3rd line">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
       </x:children>
     </group>
 
@@ -1688,6 +1787,53 @@ utils.export_data_if_needed(df, props)]]></script>
 
   </x:children>
 </xswt>]]></dialogPage>
+            <dialogPage id="ORDERING" label="Ordering"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+    <package name='org.omnetpp.common.wizard.support' />
+    <package name='org.omnetpp.ned.editor.wizards.support' />
+    <package name='org.omnetpp.cdt.wizard.support' />
+  </import>
+
+  <layout x:class='GridLayout' numColumns='2'/>
+
+  <x:children>
+
+    <label x:style='WRAP' text='Define the ordering of items on the legend and on the plot'>
+      <layoutData x:class='GridData' horizontalSpan='2' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </label>
+
+    <!-- ordering_regex_list -->
+    <label text='Ordering rules (one regex per line):'/>
+    <label text='Rules for secondary ordering:'/>
+    <text x:id='ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+      <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </text>
+
+    <!-- secondary_ordering_regex_list -->
+    <text x:id='secondary_ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+      <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </text>
+
+    <!-- hint -->
+    <label x:style='WRAP' text='NOTE: Items will be ordered based on legend labels. Specify a series of regexes, one per line, to define the ranking of items. Each item&apos;s rank will be determined by the index of the first regex it matches. After sorting, items matching the first regex will appear at the top, those matching the second regex will be placed below, and so forth. Case-sensitive substring match is used.'>
+      <layoutData x:class='GridData' horizontalSpan='2' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </label>
+
+    <!-- sorting -->
+    <button x:id='sorting' text='Additional sorting' x:style='CHECK'>
+      <layoutData x:class='GridData' horizontalSpan='2'/>
+    </button>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
             <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
@@ -1914,12 +2060,15 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
+            <property name="ordering_regex_list" value="carrier.*mac&#10;mac&#10;carrier.*plca&#10;plca&#10;phy"/>
+            <property name="enum_as_strip" value="true"/>
+            <property name="sorting" value="false"/>
+            <property name="secondary_ordering_regex_list" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="12111151" name="node[1]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
-from inet.scave import sort_values_by_legend_label
 
 
 # get chart properties
@@ -1929,10 +2078,8 @@ utils.preconfigure_plot(props)
 
 # collect parameters for query
 filter_expression = props["filter"]
-filter_expression = filter_expression.format(**props)
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
-props["enum_as_strip"] = True
 
 # query vector data into a data frame
 try:
@@ -1947,7 +2094,8 @@ if df.empty:
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
-sort_values_by_legend_label(df, props, ["carrier.*mac", "mac", "carrier.*plca", "plca", "phy"])
+utils.add_legend_labels(df, props)
+utils.sort_rows_by_legend(df, props)
 utils.plot_vectors_separate(df, props, sort=False)
 
 utils.postconfigure_plot(props)
@@ -2019,7 +2167,7 @@ utils.export_data_if_needed(df, props)]]></script>
     <package name="org.omnetpp.ned.editor.wizards.support" />
     <package name="org.omnetpp.cdt.wizard.support" />
   </import>
-  <layout x:class="GridLayout" numColumns="2"/>
+  <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="true"/>
 
   <x:children>
 
@@ -2054,6 +2202,10 @@ utils.export_data_if_needed(df, props)]]></script>
 
     <label text="Line width:"/>
     <spinner x:id="linewidth" x:id.default="1.5" minimum="0" digits="1" selection="15" maximum="1000" x:style="BORDER"/>
+
+    <button x:id="enum_as_strip" x:id.default="false" text="Display enums as colored strips" x:style="CHECK">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
 
       </x:children>
     </group>
@@ -2093,7 +2245,29 @@ utils.export_data_if_needed(df, props)]]></script>
 
     <label text="Marker size:"/>
     <spinner x:id="markersize" x:id.default="5" selection="6" minimum="0" maximum="100" x:style="BORDER"/>
+      </x:children>
+    </group>
 
+    <group text="Hints">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="1"/>
+      <x:children>
+
+        <label x:style="WRAP" text="* To change the set of colors/markers used in Auto mode, choose a different cycle seed on the Styling page">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="* To have more control over the specific colors/markers chosen, add properties in the Advanced page. Examples:">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `axes.prop_cycle: cycler('color', ['blue', 'green', 'red'])`  # on a Matplotlib chart: selects colors">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `Line.Color/3: yellow`  # on a native chart: selects the color of the 3rd line">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
       </x:children>
     </group>
 
@@ -2325,6 +2499,53 @@ utils.export_data_if_needed(df, props)]]></script>
 
   </x:children>
 </xswt>]]></dialogPage>
+            <dialogPage id="ORDERING" label="Ordering"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+    <package name='org.omnetpp.common.wizard.support' />
+    <package name='org.omnetpp.ned.editor.wizards.support' />
+    <package name='org.omnetpp.cdt.wizard.support' />
+  </import>
+
+  <layout x:class='GridLayout' numColumns='2'/>
+
+  <x:children>
+
+    <label x:style='WRAP' text='Define the ordering of items on the legend and on the plot'>
+      <layoutData x:class='GridData' horizontalSpan='2' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </label>
+
+    <!-- ordering_regex_list -->
+    <label text='Ordering rules (one regex per line):'/>
+    <label text='Rules for secondary ordering:'/>
+    <text x:id='ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+      <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </text>
+
+    <!-- secondary_ordering_regex_list -->
+    <text x:id='secondary_ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+      <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </text>
+
+    <!-- hint -->
+    <label x:style='WRAP' text='NOTE: Items will be ordered based on legend labels. Specify a series of regexes, one per line, to define the ranking of items. Each item&apos;s rank will be determined by the index of the first regex it matches. After sorting, items matching the first regex will appear at the top, those matching the second regex will be placed below, and so forth. Case-sensitive substring match is used.'>
+      <layoutData x:class='GridData' horizontalSpan='2' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </label>
+
+    <!-- sorting -->
+    <button x:id='sorting' text='Additional sorting' x:style='CHECK'>
+      <layoutData x:class='GridData' horizontalSpan='2'/>
+    </button>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
             <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
@@ -2551,12 +2772,15 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
+            <property name="ordering_regex_list" value="carrier.*mac&#10;mac&#10;carrier.*plca&#10;plca&#10;phy"/>
+            <property name="enum_as_strip" value="true"/>
+            <property name="sorting" value="false"/>
+            <property name="secondary_ordering_regex_list" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="436790536" name="node[2]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
-from inet.scave import sort_values_by_legend_label
 
 
 # get chart properties
@@ -2566,10 +2790,8 @@ utils.preconfigure_plot(props)
 
 # collect parameters for query
 filter_expression = props["filter"]
-filter_expression = filter_expression.format(**props)
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
-props["enum_as_strip"] = True
 
 # query vector data into a data frame
 try:
@@ -2584,7 +2806,8 @@ if df.empty:
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
-sort_values_by_legend_label(df, props, ["carrier.*mac", "mac", "carrier.*plca", "plca", "phy"])
+utils.add_legend_labels(df, props)
+utils.sort_rows_by_legend(df, props)
 utils.plot_vectors_separate(df, props, sort=False)
 
 utils.postconfigure_plot(props)
@@ -2656,7 +2879,7 @@ utils.export_data_if_needed(df, props)]]></script>
     <package name="org.omnetpp.ned.editor.wizards.support" />
     <package name="org.omnetpp.cdt.wizard.support" />
   </import>
-  <layout x:class="GridLayout" numColumns="2"/>
+  <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="true"/>
 
   <x:children>
 
@@ -2691,6 +2914,10 @@ utils.export_data_if_needed(df, props)]]></script>
 
     <label text="Line width:"/>
     <spinner x:id="linewidth" x:id.default="1.5" minimum="0" digits="1" selection="15" maximum="1000" x:style="BORDER"/>
+
+    <button x:id="enum_as_strip" x:id.default="false" text="Display enums as colored strips" x:style="CHECK">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
 
       </x:children>
     </group>
@@ -2730,7 +2957,29 @@ utils.export_data_if_needed(df, props)]]></script>
 
     <label text="Marker size:"/>
     <spinner x:id="markersize" x:id.default="5" selection="6" minimum="0" maximum="100" x:style="BORDER"/>
+      </x:children>
+    </group>
 
+    <group text="Hints">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="1"/>
+      <x:children>
+
+        <label x:style="WRAP" text="* To change the set of colors/markers used in Auto mode, choose a different cycle seed on the Styling page">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="* To have more control over the specific colors/markers chosen, add properties in the Advanced page. Examples:">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `axes.prop_cycle: cycler('color', ['blue', 'green', 'red'])`  # on a Matplotlib chart: selects colors">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `Line.Color/3: yellow`  # on a native chart: selects the color of the 3rd line">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
       </x:children>
     </group>
 
@@ -2962,6 +3211,53 @@ utils.export_data_if_needed(df, props)]]></script>
 
   </x:children>
 </xswt>]]></dialogPage>
+            <dialogPage id="ORDERING" label="Ordering"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+    <package name='org.omnetpp.common.wizard.support' />
+    <package name='org.omnetpp.ned.editor.wizards.support' />
+    <package name='org.omnetpp.cdt.wizard.support' />
+  </import>
+
+  <layout x:class='GridLayout' numColumns='2'/>
+
+  <x:children>
+
+    <label x:style='WRAP' text='Define the ordering of items on the legend and on the plot'>
+      <layoutData x:class='GridData' horizontalSpan='2' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </label>
+
+    <!-- ordering_regex_list -->
+    <label text='Ordering rules (one regex per line):'/>
+    <label text='Rules for secondary ordering:'/>
+    <text x:id='ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+      <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </text>
+
+    <!-- secondary_ordering_regex_list -->
+    <text x:id='secondary_ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+      <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </text>
+
+    <!-- hint -->
+    <label x:style='WRAP' text='NOTE: Items will be ordered based on legend labels. Specify a series of regexes, one per line, to define the ranking of items. Each item&apos;s rank will be determined by the index of the first regex it matches. After sorting, items matching the first regex will appear at the top, those matching the second regex will be placed below, and so forth. Case-sensitive substring match is used.'>
+      <layoutData x:class='GridData' horizontalSpan='2' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </label>
+
+    <!-- sorting -->
+    <button x:id='sorting' text='Additional sorting' x:style='CHECK'>
+      <layoutData x:class='GridData' horizontalSpan='2'/>
+    </button>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
             <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
@@ -3188,12 +3484,15 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
+            <property name="ordering_regex_list" value="carrier.*mac&#10;mac&#10;carrier.*plca&#10;plca&#10;phy"/>
+            <property name="enum_as_strip" value="true"/>
+            <property name="sorting" value="false"/>
+            <property name="secondary_ordering_regex_list" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="181814584" name="node[3]" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
-from inet.scave import sort_values_by_legend_label
 
 
 # get chart properties
@@ -3203,10 +3502,8 @@ utils.preconfigure_plot(props)
 
 # collect parameters for query
 filter_expression = props["filter"]
-filter_expression = filter_expression.format(**props)
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
-props["enum_as_strip"] = True
 
 # query vector data into a data frame
 try:
@@ -3221,7 +3518,8 @@ if df.empty:
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
-sort_values_by_legend_label(df, props, ["carrier.*mac", "mac", "carrier.*plca", "plca", "phy"])
+utils.add_legend_labels(df, props)
+utils.sort_rows_by_legend(df, props)
 utils.plot_vectors_separate(df, props, sort=False)
 
 utils.postconfigure_plot(props)
@@ -3293,7 +3591,7 @@ utils.export_data_if_needed(df, props)]]></script>
     <package name="org.omnetpp.ned.editor.wizards.support" />
     <package name="org.omnetpp.cdt.wizard.support" />
   </import>
-  <layout x:class="GridLayout" numColumns="2"/>
+  <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="true"/>
 
   <x:children>
 
@@ -3328,6 +3626,10 @@ utils.export_data_if_needed(df, props)]]></script>
 
     <label text="Line width:"/>
     <spinner x:id="linewidth" x:id.default="1.5" minimum="0" digits="1" selection="15" maximum="1000" x:style="BORDER"/>
+
+    <button x:id="enum_as_strip" x:id.default="false" text="Display enums as colored strips" x:style="CHECK">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
 
       </x:children>
     </group>
@@ -3367,7 +3669,29 @@ utils.export_data_if_needed(df, props)]]></script>
 
     <label text="Marker size:"/>
     <spinner x:id="markersize" x:id.default="5" selection="6" minimum="0" maximum="100" x:style="BORDER"/>
+      </x:children>
+    </group>
 
+    <group text="Hints">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="1"/>
+      <x:children>
+
+        <label x:style="WRAP" text="* To change the set of colors/markers used in Auto mode, choose a different cycle seed on the Styling page">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="* To have more control over the specific colors/markers chosen, add properties in the Advanced page. Examples:">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `axes.prop_cycle: cycler('color', ['blue', 'green', 'red'])`  # on a Matplotlib chart: selects colors">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
+
+        <label x:style="WRAP" text="       `Line.Color/3: yellow`  # on a native chart: selects the color of the 3rd line">
+          <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+        </label>
       </x:children>
     </group>
 
@@ -3599,6 +3923,53 @@ utils.export_data_if_needed(df, props)]]></script>
 
   </x:children>
 </xswt>]]></dialogPage>
+            <dialogPage id="ORDERING" label="Ordering"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+    <package name='org.omnetpp.common.wizard.support' />
+    <package name='org.omnetpp.ned.editor.wizards.support' />
+    <package name='org.omnetpp.cdt.wizard.support' />
+  </import>
+
+  <layout x:class='GridLayout' numColumns='2'/>
+
+  <x:children>
+
+    <label x:style='WRAP' text='Define the ordering of items on the legend and on the plot'>
+      <layoutData x:class='GridData' horizontalSpan='2' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </label>
+
+    <!-- ordering_regex_list -->
+    <label text='Ordering rules (one regex per line):'/>
+    <label text='Rules for secondary ordering:'/>
+    <text x:id='ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+      <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </text>
+
+    <!-- secondary_ordering_regex_list -->
+    <text x:id='secondary_ordering_regex_list' x:style='BORDER|WRAP|MULTI|V_SCROLL'>
+      <layoutData x:class='GridData' heightHint='60' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </text>
+
+    <!-- hint -->
+    <label x:style='WRAP' text='NOTE: Items will be ordered based on legend labels. Specify a series of regexes, one per line, to define the ranking of items. Each item&apos;s rank will be determined by the index of the first regex it matches. After sorting, items matching the first regex will appear at the top, those matching the second regex will be placed below, and so forth. Case-sensitive substring match is used.'>
+      <layoutData x:class='GridData' horizontalSpan='2' horizontalAlignment='FILL' grabExcessHorizontalSpace='true'/>
+    </label>
+
+    <!-- sorting -->
+    <button x:id='sorting' text='Additional sorting' x:style='CHECK'>
+      <layoutData x:class='GridData' horizontalSpan='2'/>
+    </button>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
             <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
@@ -3825,6 +4196,10 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
+            <property name="ordering_regex_list" value="carrier.*mac&#10;mac&#10;carrier.*plca&#10;plca&#10;phy"/>
+            <property name="enum_as_strip" value="true"/>
+            <property name="sorting" value="false"/>
+            <property name="secondary_ordering_regex_list" value=""/>
         </chart>
         <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1387250312" name="packet pending delay" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
