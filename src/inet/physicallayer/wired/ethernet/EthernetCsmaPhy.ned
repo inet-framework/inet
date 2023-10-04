@@ -39,7 +39,7 @@ simple EthernetCsmaPhy
         @signal[transmissionStarted](type=inet::physicallayer::EthernetSignalBase);
         // emitted at the transmission end, the value is the Ethernet signal being transmitted
         @signal[transmissionEnded](type=inet::physicallayer::EthernetSignalBase);
-        // emitted when the bus usage changes, the value is 1 if transmission or reception is in progress, 0 otherwise
+        // emitted when the bus usage changes, the value is 1 if DATA transmission or reception is in progress, 0 otherwise
         @signal[busUsed](type=int);
         // the time evolution of the state of the state machine
         @statistic[state](title="state"; type=enum; enum=IDLE, TRANSMITTING, RECEIVING, COLLISION, CRS_ON; source=stateChanged; record=count,vector; interpolationmode=sample-hold);
@@ -49,7 +49,9 @@ simple EthernetCsmaPhy
         @statistic[throughput](title="throughput"; unit=bps; source=throughput(transmissionEnded); record=vector,histogram; interpolationmode=linear);
         @statistic[propagationTime](title="propagation time"; unit=s);
         @statistic[transmissionTime](title="transmission time"; unit=s; source=packetDuration(transmissionEnded); record=vector,histogram; interpolationmode=none);
+        // the time evolution of the bus used signal
         @statistic[busUsed](title="bus used"; record=count,vector; interpolationmode=sample-hold);
+        // periodically calculated average bus usage, the value 1 means there was a DATA signal on the bus during the whole period, 0 means there was no DATA signal
         @statistic[busUtilization](title="bus utilization"; source=utilization(busUsed); record=count,vector; interpolationmode=linear);
         @display("i=block/rxtx");
     gates:
