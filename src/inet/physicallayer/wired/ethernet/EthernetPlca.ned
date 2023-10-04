@@ -107,6 +107,8 @@ simple EthernetPlca like IProtocolLayer
         @signal[packetInterval](type=simtime_t);
         // emitted when a transmit opportunity happens, the value is 1 or 0
         @signal[transmitOpportunityUsed](type=int);
+        @signal[packetSentToLower](type=inet::Packet);
+        @signal[packetReceivedFromLower](type=inet::Packet);
         // the time evolution of the current transmit opportunity ID
         @statistic[curID](title="current transmit opportunity ID"; record=vector; interpolationmode=sample-hold);
         // the time evolution of the carrier sense signal

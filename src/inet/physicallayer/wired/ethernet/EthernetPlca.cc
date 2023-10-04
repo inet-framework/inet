@@ -254,8 +254,10 @@ void EthernetPlca::handleReceptionEnd(EthernetSignalType signalType, Packet *pac
     rx_cmd = CMD_NONE;
     emit(rxCmdSignal, rx_cmd);
     receiving = false;
-    if (packet != nullptr)
+    if (packet != nullptr) {
+        emit(packetReceivedFromLowerSignal, packet);
         mac->handleReceptionEnd(signalType, packet, esd1);
+    }
     handleWithDataFSM(RECEPTION_END, packet);
 }
 
@@ -700,6 +702,7 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
                 if (phyStartFrameTransmissionTime != -1)
                     emit(packetIntervalSignal, simTime() - phyStartFrameTransmissionTime);
                 phyStartFrameTransmissionTime = simTime();
+                emit(packetSentToLowerSignal, currentTx);
                 FSMA_Delay_Action(phy->startFrameTransmission(currentTx->dup(), bc < max_bc - 1 ? ESDBRS : ESD));
                 FSMA_Delay_Action(handleWithControlFSM());
             );
