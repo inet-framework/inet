@@ -8,13 +8,14 @@ package inet.examples.ethernet.TenBaseT1S;
 
 import inet.applications.contract.IApp;
 import inet.common.MessageDispatcher;
-import inet.linklayer.ethernet.EthernetPlcaInterface;
-import inet.linklayer.ethernet.modular.EthernetLayer;
+import inet.linklayer.contract.IEthernetInterface;
+import inet.linklayer.ethernet.contract.IEthernetLayer;
 import inet.networklayer.common.InterfaceTable;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.physicallayer.wired.ethernet.ISpi;
 import inet.protocolelement.authentication.MessageAuthenticationCodeInserter;
-import inet.queueing.common.PacketDelayer;
+import inet.queueing.contract.IPacketDelayer;
+
 
 //
 // This module implements an Ethernet PLCA network node suitable for use in
@@ -30,7 +31,7 @@ module EthernetPlcaNode like IEthernetNetworkNode
 {
     parameters:
         int numApps = default(0);
-        int numEthInterfaces = 1;
+        int numEthInterfaces = default(1);
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         @networkNode;
         @display("i=device/card");
@@ -52,13 +53,13 @@ module EthernetPlcaNode like IEthernetNetworkNode
         authentication: MessageAuthenticationCodeInserter {
             @display("p=250,400");
         }
-        encryption: PacketDelayer {
+        encryption: <default("PacketDelayer")> like IPacketDelayer {
             @display("p=250,550");
         }
-        ethernet: EthernetLayer {
+        ethernet: <default("EthernetLayer")> like IEthernetLayer {
             @display("p=250,700");
         }
-        eth[numEthInterfaces]: EthernetPlcaInterface {
+        eth[numEthInterfaces]: <default("EthernetPlcaInterface")> like IEthernetInterface {
             @display("p=250,850");
         }
     connections allowunconnected:
