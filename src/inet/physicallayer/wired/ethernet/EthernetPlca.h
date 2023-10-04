@@ -36,6 +36,12 @@ class INET_API EthernetPlca : public cSimpleModule, public virtual IEthernetCsma
     static simsignal_t packetPendingDelaySignal;
     static simsignal_t packetIntervalSignal;
     static simsignal_t transmitOpportunityUsedSignal;
+    static simsignal_t numPacketsPerToSignal;
+    static simsignal_t numPacketsPerOwnToSignal;
+    static simsignal_t numPacketsPerCycleSignal;
+    static simsignal_t toLengthSignal;
+    static simsignal_t ownToLengthSignal;
+    static simsignal_t cycleLengthSignal;
 
     // 148.4.4.6 State diagram from IEEE Std 802.3cg-2019
     enum ControlState {
@@ -163,6 +169,10 @@ class INET_API EthernetPlca : public cSimpleModule, public virtual IEthernetCsma
     cMessage *tx_timer = nullptr; // additional timer not present in the standard to avoid looping per bit
 
     // statistics
+    int numPacketsPerTo = -1;
+    int numPacketsPerCycle = -1;
+    simtime_t toStartTime = -1;
+    simtime_t cycleStartTime = -1;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

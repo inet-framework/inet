@@ -105,8 +105,20 @@ simple EthernetPlca like IProtocolLayer
         @signal[packetPendingDelay](type=simtime_t);
         // emitted when a packet is sent to the PHY, the value is the time elapsed since the last packet was sent
         @signal[packetInterval](type=simtime_t);
-        // emitted when a transmit opportunity happens, the value is 1 or 0
+        // emitted when a transmit opportunity starts, the value is 1 or 0
         @signal[transmitOpportunityUsed](type=int);
+        // emitted when a transmit opportunity ends for any node, the value is the number of packets sent or received during the transmit opportunity
+        @signal[numPacketsPerTo](type=int);
+        // emitted when a transmit opportunity ends for this node, the value is the number of packets sent during the transmit opportunity
+        @signal[numPacketsPerOwnTo](type=int);
+        // emitted when a cycle ends, the value is the number of packets sent or received during the cycle
+        @signal[numPacketsPerCycle](type=int);
+        // emitted when a transmit opportunity ends for any node, the value is the duration of the transmit opportunity
+        @signal[toLength](type=simtime_t);
+        // emitted when a transmit opportunity ends for this node, the value is the duration of the transmit opportunity
+        @signal[ownToLength](type=simtime_t);
+        // emitted when a cycle ends, the value is the duration of the cycle
+        @signal[cycleLength](type=simtime_t);
         @signal[packetSentToLower](type=inet::Packet);
         @signal[packetReceivedFromLower](type=inet::Packet);
         // the time evolution of the current transmit opportunity ID
@@ -124,6 +136,18 @@ simple EthernetPlca like IProtocolLayer
         @statistic[packetPendingDelay](title="packet pending delay"; unit=s; record=count,histogram,vector; interpolationmode=none);
         @statistic[packetInterval](title="packet interval"; unit=s; record=count,histogram,vector; interpolationmode=none);
         @statistic[transmitOpportunityUsed](title="transmit opportunity used"; record=count,vector; interpolationmode=none);
+        // the time evolution of the number of packets sent or received per transmit opportunity for any node
+        @statistic[numPacketsPerTo](title="number of packets per transmit opportunity"; record=vector; interpolationmode=none);
+        // the time evolution of the number of packets sent per transmit opportunity for this node
+        @statistic[numPacketsPerOwnTo](title="number of packets per transmit opportunity"; record=vector; interpolationmode=none);
+        // the time evolution of the number of packets sent or received per cycle
+        @statistic[numPacketsPerCycle](title="number of packets per cycle"; record=vector; interpolationmode=none);
+        // the time evolution of the transmit opportunity length for any node
+        @statistic[toLength](title="transmit opportunity length"; record=vector; interpolationmode=none);
+        // the time evolution of the transmit opportunity length for any node
+        @statistic[ownToLength](title="own transmit opportunity length"; record=vector; interpolationmode=none);
+        // the time evolution of the cycle length
+        @statistic[cycleLength](title="cycle length"; record=vector; interpolationmode=none);
         @display("i=block/rxtx");
     gates:
         input upperLayerIn @labels(EtherFrame);

@@ -29,6 +29,12 @@ simsignal_t EthernetPlca::txCmdSignal = cComponent::registerSignal("txCmd");
 simsignal_t EthernetPlca::packetPendingDelaySignal = cComponent::registerSignal("packetPendingDelay");
 simsignal_t EthernetPlca::packetIntervalSignal = cComponent::registerSignal("packetInterval");
 simsignal_t EthernetPlca::transmitOpportunityUsedSignal = cComponent::registerSignal("transmitOpportunityUsed");
+simsignal_t EthernetPlca::numPacketsPerToSignal = cComponent::registerSignal("numPacketsPerTo");
+simsignal_t EthernetPlca::numPacketsPerOwnToSignal = cComponent::registerSignal("numPacketsPerOwnTo");
+simsignal_t EthernetPlca::numPacketsPerCycleSignal = cComponent::registerSignal("numPacketsPerCycle");
+simsignal_t EthernetPlca::toLengthSignal = cComponent::registerSignal("toLength");
+simsignal_t EthernetPlca::ownToLengthSignal = cComponent::registerSignal("ownToLength");
+simsignal_t EthernetPlca::cycleLengthSignal = cComponent::registerSignal("cycleLength");
 
 Register_Enum(EthernetPlca::ControlState,
     (EthernetPlca::CS_DISABLE,
@@ -255,6 +261,8 @@ void EthernetPlca::handleReceptionEnd(EthernetSignalType signalType, Packet *pac
     emit(rxCmdSignal, rx_cmd);
     receiving = false;
     if (packet != nullptr) {
+        numPacketsPerTo++;
+        numPacketsPerCycle++;
         emit(packetReceivedFromLowerSignal, packet);
         mac->handleReceptionEnd(signalType, packet, esd1);
     }
@@ -370,11 +378,19 @@ void EthernetPlca::handleWithControlFSM()
                             CS_WAIT_TO,
                 curID = 0;
                 emit(curIDSignal, curID);
+                if (cycleStartTime != -1) {
+                    emit(numPacketsPerCycleSignal, numPacketsPerCycle);
+                    emit(cycleLengthSignal, simTime() - cycleStartTime);
+                }
+                numPacketsPerCycle = 0;
+                cycleStartTime = simTime();
             );
         }
         FSMA_State(CS_WAIT_TO) {
             FSMA_Enter(
                 scheduleAfter(b(to_timer_length).get() / mode->bitrate, to_timer);
+                numPacketsPerTo = 0;
+                toStartTime = simTime();
             );
             FSMA_Transition(T1,
                             CRS,
@@ -507,6 +523,16 @@ void EthernetPlca::handleWithControlFSM()
         }
         FSMA_State(CS_NEXT_TX_OPPORTUNITY) {
             FSMA_Enter(
+                if (toStartTime != -1) {
+                    emit(numPacketsPerToSignal, numPacketsPerTo);
+                    emit(toLengthSignal, simTime() - toStartTime);
+                    if (curID == local_nodeID) {
+                        emit(numPacketsPerOwnToSignal, numPacketsPerTo);
+                        emit(ownToLengthSignal, simTime() - toStartTime);
+                    }
+                    numPacketsPerTo = -1;
+                    toStartTime = -1;
+                }
                 curID = curID + 1;
                 emit(curIDSignal, curID);
                 committed = false;
@@ -703,6 +729,8 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
                     emit(packetIntervalSignal, simTime() - phyStartFrameTransmissionTime);
                 phyStartFrameTransmissionTime = simTime();
                 emit(packetSentToLowerSignal, currentTx);
+                numPacketsPerTo++;
+                numPacketsPerCycle++;
                 FSMA_Delay_Action(phy->startFrameTransmission(currentTx->dup(), bc < max_bc - 1 ? ESDBRS : ESD));
                 FSMA_Delay_Action(handleWithControlFSM());
             );
