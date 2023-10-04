@@ -25,9 +25,10 @@ class INET_API TcpEchoAppThread : public cSimpleModule, public TcpSocket::ICallb
     int64_t bytesRcvd = 0;
     int64_t bytesSent = 0;
     double echoFactor = NaN;
-    Packet *delayedPacket = nullptr;
+    std::set<Packet *> delayedPackets;
 
     virtual void sendDown(Packet *packet);
+    virtual void clearDelayedPackets();
 
   protected:
     virtual void initialize() override;

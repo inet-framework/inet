@@ -23,7 +23,7 @@ Define_Module(TcpEchoAppThread);
 TcpEchoAppThread::~TcpEchoAppThread()
 {
     cancelAndDelete(readDelayTimer);
-    cancelAndDelete(delayedPacket);
+    clearDelayedPackets();
     delete socket;
 }
 
@@ -40,22 +40,31 @@ void TcpEchoAppThread::acceptSocket(TcpAvailableInfo *availableInfo)
 
 void TcpEchoAppThread::handleMessage(cMessage *message)
 {
-    if (message->arrivedOn("socketIn")) {
-        ASSERT(socket != nullptr && socket->belongsToSocket(message));
-        socket->processMessage(message);
+    if (!message->isSelfMessage()) {
+        if (message->arrivedOn("socketIn")) {
+            ASSERT(socket != nullptr && socket->belongsToSocket(message));
+            socket->processMessage(message);
+            return;
+        }
     }
-    else if (message == readDelayTimer) {
-        if (socket->isOpen())
-            socket->read(par("readSize"));
+    else {
+        if (message == readDelayTimer) {
+            if (socket->isOpen())
+                socket->read(par("readSize"));
+            return;
+        }
+        else if (Packet *packet = dynamic_cast<Packet *>(message)) {
+            auto it = delayedPackets.find(packet);
+            if (it != delayedPackets.end()) {
+                emit(packetSentSignal, packet);
+                socket->send(packet);
+                delayedPackets.erase(it);
+                sendOrScheduleReadCommandIfNeeded();
+                return;
+            }
+        }
     }
-    else if (message == delayedPacket) {
-        emit(packetSentSignal, delayedPacket);
-        socket->send(delayedPacket);
-        delayedPacket = nullptr;
-        sendOrScheduleReadCommandIfNeeded();
-    }
-    else
-        throw cRuntimeError("Unknown message");
+    throw cRuntimeError("Unknown message");
 }
 
 void TcpEchoAppThread::socketDataArrived(TcpSocket *socket, Packet *rcvdPkt, bool urgent)
@@ -94,7 +103,7 @@ void TcpEchoAppThread::socketDataArrived(TcpSocket *socket, Packet *rcvdPkt, boo
             sendOrScheduleReadCommandIfNeeded();
         }
         else {
-            delayedPacket = outPkt;
+            delayedPackets.insert(outPkt);
             scheduleAfter(delay, outPkt); // send after a delay
         }
     }
@@ -119,8 +128,7 @@ void TcpEchoAppThread::socketPeerClosed(TcpSocket *socket)
 {
     if (readDelayTimer)
         cancelEvent(readDelayTimer);
-    cancelAndDelete(delayedPacket);
-    delayedPacket = nullptr;
+    clearDelayedPackets();
     socket->close();
 }
 
@@ -128,17 +136,14 @@ void TcpEchoAppThread::socketClosed(TcpSocket *socket)
 {
     if (readDelayTimer)
         cancelEvent(readDelayTimer);
-    cancelAndDelete(delayedPacket);
-    delayedPacket = nullptr;
-
+    clearDelayedPackets();
 }
 
 void TcpEchoAppThread::socketFailure(TcpSocket *socket, int code)
 {
     if (readDelayTimer)
         cancelEvent(readDelayTimer);
-    cancelAndDelete(delayedPacket);
-    delayedPacket = nullptr;
+    clearDelayedPackets();
 }
 
 void TcpEchoAppThread::socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status)
@@ -150,8 +155,7 @@ void TcpEchoAppThread::socketDeleted(TcpSocket *socket)
     ASSERT(socket == this->socket);
     if (readDelayTimer)
         cancelEvent(readDelayTimer);
-    cancelAndDelete(delayedPacket);
-    delayedPacket = nullptr;
+    clearDelayedPackets();
     socket = nullptr;
 }
 
@@ -196,6 +200,13 @@ void TcpEchoAppThread::sendDown(Packet *msg)
     bytesSent += msg->getByteLength();
     emit(packetSentSignal, msg);
     socket->send(msg);
+}
+
+void TcpEchoAppThread::clearDelayedPackets()
+{
+    for (auto delayedPacket: delayedPackets)
+        cancelAndDelete(delayedPacket);
+    delayedPackets.clear();
 }
 
 } // namespace inet
