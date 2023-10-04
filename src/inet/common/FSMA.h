@@ -198,7 +198,7 @@ class SIM_API Fsm : public cOwnedObject
         this->state = state;
         this->stateName = stateName;
         if (stateChangedSignal != -1)
-            getActiveSimulationOrEnvir()->getContextModule()->emit(stateChangedSignal, state);
+            cSimulation::getActiveSimulation()->getContextModule()->emit(stateChangedSignal, state);
     }
 
     void insertDelayedAction(std::function<void ()> action) {
