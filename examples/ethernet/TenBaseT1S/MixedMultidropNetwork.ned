@@ -7,6 +7,7 @@
 package inet.examples.ethernet.TenBaseT1S;
 
 import inet.node.contract.IEthernetNetworkNode;
+import inet.node.ethernet.Ethernet10BaseT1sCable;
 import inet.node.ethernet.EthernetLink;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
@@ -44,10 +45,10 @@ network MixedMultidropNetwork
                 @display("p=300,150,row,150");
         }
     connections:
-        switch.ethg++ <--> EthernetLink { length = 100cm; datarate = 10Mbps; } <--> j[0].port++;
+        switch.ethg++ <--> Ethernet10BaseT1sCable { length = 100cm; } <--> j[0].port++;
         switch.ethg++ <--> EthernetLink { length = 50cm; datarate = 100Mbps; } <--> host.ethg++;
         for i=0..numNodes-1 {
-            j[i].port++ <--> EthernetLink { length = 100cm; datarate = 10Mbps; } <--> j[i + 1].port++ if i < numNodes - 1;
-            j[i].port++ <--> EthernetLink { length = 50cm; datarate = 10Mbps; } <--> node[i].ethg++;
+            j[i].port++ <--> Ethernet10BaseT1sCable { length = 100cm; } <--> j[i + 1].port++ if i < numNodes - 1;
+            j[i].port++ <--> Ethernet10BaseT1sCable { length = 50cm; } <--> node[i].ethg++;
         }
 }
