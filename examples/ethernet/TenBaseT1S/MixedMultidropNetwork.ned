@@ -14,7 +14,7 @@ import inet.physicallayer.wired.common.WireJunction;
 
 //
 // This module contains an ~EthernetSwitch connected to a ~StandardHost and a
-// 10-BaseT1S multidrop link with a configurable number of nodes. The switch
+// 10BASE-T1S multidrop link with a configurable number of nodes. The switch
 // port acts as the controller of the multidrop link. The network node type can
 // be configured for all the nodes on the multidrop link.
 //
