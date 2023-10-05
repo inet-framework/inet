@@ -16,18 +16,21 @@ import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.ITrafficConditioner;
 
 //
-// This module implements an Ethernet PLCA capable network interface. The Ethernet
-// Phyisical Layer Collision Avoidance (PLCA) protocol is defined in the IEEE
-// 802.3cg-2019 standard.
+// This module implements a network interface that is suitable for use in Ethernet
+// 10BASE-T1S multidrop links. Such a multidrop link uses the Ethernet Phyisical
+// Layer Collision Avoidance (PLCA) protocol. The protocol is defined in the IEEE
+// 802.3cg-2019 standard. This network interface can be used in any network node
+// module (e.g. ~StandardHost) that allows replacing its network interfaces. All
+// network interfaces on the same multidrop link must use this module.
 //
-// This module contains separate Ethernet MAC, PLCA, and PHY protocol modules.
-// If the PLCA module is omitted, then this module implements a half-duplex
-// Ethernet CSMA/CD network interface. If the PLCA module is present, then this
-// module implements a 10Base-T1S Ethernet PLCA network interface that supports
-// multidrop links. In a multidrop link network nodes can be connected using
-// ~WireJunction modules and ~EthernetLink channels.
+// This module contains separate Ethernet MAC, Ethernet PLCA, and Ethernet PHY
+// protocol modules. If the PLCA module is omitted, then this module implements
+// a half-duplex Ethernet CSMA/CD network interface. If the PLCA module is present,
+// then this module implements an Ethernet 10BASE-T1S network interface that
+// supports multidrop links. In a multidrop link network nodes can be connected
+// using ~WireJunction modules and ~EthernetLink channels.
 //
-// @see ~EthernetCsmaMac, ~EthernetPlca, ~EthernetCsmaPhy, ~WireJunction, ~EthernetLink
+// @see ~EthernetPlcaHost, ~EthernetPlca, ~EthernetCsmaMac, ~EthernetCsmaPhy, ~EthernetLink, ~WireJunction
 //
 module EthernetPlcaInterface extends NetworkInterface like IEthernetInterface
 {

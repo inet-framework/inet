@@ -33,15 +33,15 @@ simple EthernetCsmaMac extends MacProtocolBase
         int mtu @unit(B) = default(1500B);
         string fcsMode @enum("declared","computed");
         @class(EthernetCsmaMac);
-        // emitted when the carrier signal is detected or gone, the value is 1 or 0
+        // emitted when the incoming carrier sense signal changes, the value is 1 or 0
         @signal[carrierSenseChanged](type=int);
-        // emitted when a collision is starts or ends, the value is 1 or 0
+        // emitted when the incoming collision signal changes, the value is 1 or 0
         @signal[collisionChanged](type=int);
         // emitted when the state of the state machine changes, the value is one of IDLE, WAIT_IFG, TRANSMITTING, JAMMING, BACKOFF, RECEIVING
         @signal[stateChanged](type=int);
-        // the time evolution of the carrier sense signal
+        // the time evolution of the incoming carrier sense signal
         @statistic[carrierSense](title="carrier sense"; type=int; source=carrierSenseChanged; record=count,vector; interpolationmode=sample-hold);
-        // the time evolution of the collision signal
+        // the time evolution of the incoming collision signal
         @statistic[collision](title="collision"; type=int; source=collisionChanged; record=count,vector; interpolationmode=sample-hold);
         // the time evolution of the state of the state machine
         @statistic[state](title="state"; type=enum; enum=IDLE, WAIT_IFG, TRANSMITTING, JAMMING, BACKOFF, RECEIVING; source=stateChanged; record=count,vector; interpolationmode=sample-hold);
