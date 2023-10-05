@@ -18,14 +18,14 @@ import inet.queueing.contract.IPacketDelayer;
 
 
 //
-// This module implements an Ethernet PLCA network node suitable for use in
-// Ethernet 10Base-T1S multidrop links. The Ethernet Phyisical Layer Collision
-// Avoidance (PLCA) protocol is defined in the IEEE 802.3cg-2019 standard.
+// This module implements an Ethernet network node that is suitable for use in
+// Ethernet 10BASE-T1S multidrop links. Such a multidrop link uses the Ethernet
+// Phyisical Layer Collision Avoidance (PLCA) protocol. The protocol is defined
+// in the IEEE 802.3cg-2019 standard.
 //
-// This module is a simplified network node that is not derived from ~StandardHost.
-// It can be configured with multiple applications, and it also contains additional
-// modules for simulating SPI delay, encryption delay, and message authentication
-// code overhead.
+// This module is a bare bones, simplified network node. It can be configured with
+// multiple applications, and it also contains additional modules for simulating
+// SPI delay, encryption delay, and message authentication code header overhead.
 //
 module EthernetPlcaNode like IEthernetNetworkNode
 {
