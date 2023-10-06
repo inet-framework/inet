@@ -26,6 +26,7 @@ import inet.protocolelement.contract.IProtocolLayer;
 //  - various end signal delimiters
 //
 // The PLCA protocol is implemented with several limitations:
+//  - PHY collisions are not supported (avoidance assumed)
 //  - status state machine is not implemented (plca_status)
 //  - PLCA mode cannot be enabled/disabled dynamically (plca_en), it's always active
 //  - PLCA cannot be reset (plca_reset)
@@ -33,7 +34,7 @@ import inet.protocolelement.contract.IProtocolLayer;
 //  - beacons are assumed to be never lost (no invalid_beacon_timer)
 //  - data state machine cannot abort transmissions
 //  - mixed operation with CSMA/CD nodes on the same multidrop link is not supported
-//  - controller immediately start sending a beacon
+//  - controller immediately starts sending a beacon
 //  - nodes start with waiting to receive a beacon
 //
 // All ~EthernetPlca modules in the network interfaces on the same multidrop link
