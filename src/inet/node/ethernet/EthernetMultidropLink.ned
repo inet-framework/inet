@@ -9,7 +9,7 @@ package inet.node.ethernet;
 
 import ned.DatarateChannel;
 
-channel Ethernet10BaseT1sCable extends DatarateChannel
+channel EthernetMultidropLink extends DatarateChannel
 {
     double length @unit(m);
     delay = default(replaceUnit(length / 2e8, "s"));
