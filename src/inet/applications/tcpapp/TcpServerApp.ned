@@ -26,7 +26,7 @@ module TcpServerApp like IApp
         input socketIn;
         output socketOut;
     submodules:
-        listener: <default("TcpServerListener")> like IApp {
+        listener: TcpServerListener {
             parameters:
                 @display("p=100,100");
         }
