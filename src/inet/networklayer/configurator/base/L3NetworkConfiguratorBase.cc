@@ -383,7 +383,14 @@ double L3NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const ch
             cModule *receiverInterfaceModule = receiverInterfaceInfo->networkInterface;
             const IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
             const IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
-            const Packet *macFrame = new Packet();
+            Packet *macFrame = new Packet();
+            auto byteCountChunk = makeShared<ByteCountChunk>(B(transmitterInterfaceInfo->networkInterface->getMtu()));
+            macFrame->insertAtBack(byteCountChunk);
+
+            // KLUDGE the frame must contain the PHY header to create a transmission
+            macFrame->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ackingMac);
+            check_and_cast<const Radio *>(transmitterRadio)->encapsulate(macFrame);
+
             const IRadioMedium *radioMedium = receiverRadio->getMedium();
             const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, macFrame, simTime());
             const IArrival *arrival = radioMedium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
@@ -409,7 +416,7 @@ double L3NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const ch
             auto byteCountChunk = makeShared<ByteCountChunk>(B(transmitterInterfaceInfo->networkInterface->getMtu()));
             transmittedFrame->insertAtBack(byteCountChunk);
 
-            // KLUDGE
+            // KLUDGE the frame must contain the PHY header to create a transmission
             transmittedFrame->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ackingMac);
             check_and_cast<const Radio *>(transmitterRadio)->encapsulate(transmittedFrame);
 
