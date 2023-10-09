@@ -19,7 +19,7 @@ Define_Module(InterpacketGapInserter);
 InterpacketGapInserter::~InterpacketGapInserter()
 {
     cancelAndDelete(timer);
-    if (progress != nullptr)
+    if (progress != nullptr && progress->isScheduled())
         delete static_cast<Packet *>(progress->getContextPointer());
     cancelAndDeleteClockEvent(progress);
 }
