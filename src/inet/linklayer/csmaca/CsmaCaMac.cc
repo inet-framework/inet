@@ -175,8 +175,7 @@ void CsmaCaMac::handleLowerPacket(Packet *packet)
 void CsmaCaMac::handleWithFsm(cMessage *msg)
 {
     Packet *frame = dynamic_cast<Packet *>(msg);
-    FSMA_Switch(fsm)
-    {
+    { FSMA_Switch(fsm) {
         FSMA_State(IDLE)
         {
             FSMA_Event_Transition(Defer-Transmit,
@@ -252,7 +251,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
         }
         FSMA_State(TRANSMIT)
         {
-            FSMA_Enter(sendDataFrame(getCurrentTransmission()));
+            FSMA_Enter(FSMA_Delay_Action(sendDataFrame(getCurrentTransmission())));
             FSMA_Event_Transition(Transmit-Broadcast,
                                   msg == endData && isBroadcast(getCurrentTransmission()),
                                   IDLE,
@@ -338,10 +337,11 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Transmit-Ack,
                                   msg == endSifs,
                                   IDLE,
-                sendAckFrame();
+                FSMA_Delay_Action(sendAckFrame());
             );
         }
-    }
+    } }
+    fsm.executeDelayedActions();
     if (fsm.getState() == IDLE) {
         if (isReceiving())
             handleWithFsm(mediumStateChange);
