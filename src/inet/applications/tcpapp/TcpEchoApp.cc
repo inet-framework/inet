@@ -7,12 +7,13 @@
 
 #include "inet/applications/tcpapp/TcpEchoApp.h"
 
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Packet_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
-#include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/packet/Packet_m.h"
 #include "inet/common/socket/SocketTag_m.h"
+#include "inet/common/TimeTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 
 namespace inet {
@@ -115,13 +116,18 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
         outPkt->addTag<SocketReq>()->setSocketId(socketId);
 
         if (echoAppModule->echoFactor == 1.0) {
-            outPkt->insertAtBack(rcvdPkt->peekDataAt(B(0), B(rcvdBytes)));
+            auto content = rcvdPkt->peekDataAt(B(0), B(rcvdBytes))->dupShared();
+            content->removeTagsWherePresent<CreationTimeTag>(b(0), content->getChunkLength());
+            content->addTag<CreationTimeTag>()->setCreationTime(simTime());
+            outPkt->insertAtBack(content);
         }
         else {
             int64_t outByteLen = rcvdBytes * echoAppModule->echoFactor;
             if (outByteLen < 1)
                 outByteLen = 1;
-            outPkt->insertAtBack(makeShared<ByteCountChunk>(B(outByteLen)));
+            auto content = makeShared<ByteCountChunk>(B(outByteLen));
+            content->addTag<CreationTimeTag>()->setCreationTime(simTime());
+            outPkt->insertAtBack(content);
         }
         if (echoAppModule->delay == 0) {
             sendDown(outPkt);
