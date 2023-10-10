@@ -8,8 +8,7 @@
 #ifndef __INET_TCPECHOAPP_H
 #define __INET_TCPECHOAPP_H
 
-#include "inet/applications/tcpapp/TcpServerHostApp.h"
-#include "inet/common/INETMath.h"
+#include "inet/applications/tcpapp/ITcpServerSocketIo.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
@@ -18,62 +17,41 @@ namespace inet {
  * Accepts any number of incoming connections, and sends back whatever
  * arrives on them.
  */
-class INET_API TcpEchoApp : public TcpServerHostApp
+class INET_API TcpEchoAppThread : public cSimpleModule, public TcpSocket::ICallback, public ITcpServerSocketIo
 {
   protected:
-    simtime_t delay;
+    TcpSocket *socket = nullptr;
+    cMessage *readDelayTimer = nullptr;
+    int64_t bytesRcvd = 0;
+    int64_t bytesSent = 0;
     double echoFactor = NaN;
+    Packet *delayedPacket = nullptr;
 
-    long bytesRcvd = 0;
-    long bytesSent = 0;
-
-  protected:
     virtual void sendDown(Packet *packet);
 
-    virtual void initialize(int stage) override;
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void finish() override;
+  protected:
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *message) override;
     virtual void refreshDisplay() const override;
 
   public:
-    TcpEchoApp();
-    ~TcpEchoApp();
-
-    friend class TcpEchoAppThread;
-};
-
-class INET_API TcpEchoAppThread : public TcpServerThreadBase
-{
-  protected:
-    TcpEchoApp *echoAppModule = nullptr;
-    cMessage *readDelayTimer = nullptr;
-    Packet *delayedPacket = nullptr;
-
-  public:
     ~TcpEchoAppThread();
+
+    virtual TcpSocket *getSocket() override { return socket; }
+    virtual void acceptSocket(TcpAvailableInfo *availableInfo) override;
+    virtual void close() override { socket->close(); }
+    virtual void deleteModule() override { cSimpleModule::deleteModule(); }
+
+    virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override;
+    virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;
+    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketPeerClosed(TcpSocket *socket) override;
+    virtual void socketClosed(TcpSocket *socket) override;
+    virtual void socketFailure(TcpSocket *socket, int code) override;
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override;
+    virtual void socketDeleted(TcpSocket *socket) override;
+
     virtual void sendOrScheduleReadCommandIfNeeded();
-    virtual void handleMessage(cMessage *msg) override;
-    virtual void sendDown(Packet *packet);
-    virtual void read();    // send a read request to the socket
-
-    /**
-     * Called when connection is established.
-     */
-    virtual void established() override;
-
-    /*
-     * Called when a data packet arrives. To be redefined.
-     */
-    virtual void dataArrived(Packet *msg, bool urgent) override;
-
-    /*
-     * Called when a timer (scheduled via scheduleAt()) expires. To be redefined.
-     */
-    virtual void timerExpired(cMessage *timer) override;
-
-    virtual void init(TcpServerHostApp *hostmodule, TcpSocket *socket) override;
-
-    virtual void close() override;
 };
 
 } // namespace inet

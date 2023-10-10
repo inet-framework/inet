@@ -7,6 +7,9 @@
 
 package inet.applications.tcpapp;
 
+import inet.applications.contract.IApp;
+
+
 //
 // Accepts any number of incoming TCP connections, and sends back the data that
 // arrives on them. The echoFactor parameter controls the amount of data to be
@@ -23,29 +26,45 @@ package inet.applications.tcpapp;
 //
 // Compatible with both ~Ipv4 and ~Ipv6.
 //
-simple TcpEchoApp extends TcpServerHostApp
+module TcpEchoApp extends TcpServerApp
 {
     parameters:
-        @class(TcpEchoApp);
+        listener.serverConnectionModuleType = default("inet.applications.tcpapp.TcpEchoAppThread");
+        string localAddress = default(""); // may be left empty ("")
+        int localPort = default(1000); // port number to listen on
         bool autoRead = default(true); // whether to use "autoread" or "explicit-read" mode for TCP connection
         volatile int readSize @unit(B) = default(-1B);    // used only with autoRead==false
         volatile double readDelay @unit(s) = default(-1s);    // used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay
         double echoFactor = default(1);
         double echoDelay @unit(s) = default(0s);
-        serverThreadModuleType = default("inet.applications.tcpapp.TcpEchoAppThread"); // module type of "thread" module to launch on incoming connections
-        @signal[packetSent](type=inet::Packet);
-        @signal[packetReceived](type=inet::Packet);
-        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        *.localAddress = this.localAddress;
+        *.localPort = this.localPort;
+        *.autoRead = this.autoRead;
+        *.readSize = this.readSize;
+        *.readDelay = this.readDelay;
+        *.echoFactor = this.echoFactor;
+        *.echoDelay = this.echoDelay;
+        //@display("i=block/sink");
+        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none; checkSignals=false);
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,weightedHistogram,vector; interpolationmode=none);
+        @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,weightedHistogram,vector; interpolationmode=none; checkSignals=false);
 }
 
 // Thread for ~TcpEchoApp
-simple TcpEchoAppThread
+simple TcpEchoAppThread like IApp
 {
+    parameters:
+        bool autoRead = default(true); // whether to use "autoread" or "explicit-read" mode for TCP connection
+        volatile int readSize @unit(B) = default(-1B);    // used only with autoRead==false
+        volatile double readDelay @unit(s) = default(-1s);    // used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay
+        double echoFactor = default(1);
+        double echoDelay @unit(s) = default(0s);
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,weightedHistogram,vector; interpolationmode=none);
+    gates:
+        input socketIn;
+        output socketOut;
 }
