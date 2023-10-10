@@ -27,7 +27,7 @@ _logger = logging.getLogger(__name__)
 def _read_scalar_result_file(file_name):
     df = read_result_files(file_name, include_fields_as_scalars=True)
     df = get_scalars(df, include_runattrs=True)
-    df = df[["experiment", "measurement", "replication", "module", "name", "value"]]
+    df = df if df.empty else df[["experiment", "measurement", "replication", "module", "name", "value"]]
     return df
 
 def _write_diff_file(a_file_name, b_file_name, diff_file_name):
