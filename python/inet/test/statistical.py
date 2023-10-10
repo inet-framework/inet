@@ -11,6 +11,7 @@ https://github.com/inet-framework/statistics in a separate GitHub repository.
 import difflib
 import glob
 import logging
+import math
 import pandas
 import re
 import shutil
@@ -25,9 +26,8 @@ _logger = logging.getLogger(__name__)
 
 def _read_scalar_result_file(file_name):
     df = read_result_files(file_name, include_fields_as_scalars=True)
-    df = get_scalars(df)
-    if "runID" in df:
-        df.drop("runID", axis=1, inplace=True)
+    df = get_scalars(df, include_runattrs=True)
+    df = df[["experiment", "measurement", "replication", "module", "name", "value"]]
     return df
 
 def _write_diff_file(a_file_name, b_file_name, diff_file_name):
@@ -71,16 +71,19 @@ class StatisticalTestTask(SimulationTestTask):
                 elif stored_df.empty:
                     return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="FAIL", reason="Stored statistical results are empty")
                 else:
-                    df = pandas.DataFrame()
-                    df["module"] = stored_df["module"]
-                    df["name"] = stored_df["name"]
-                    df["stored_value"] = stored_df["value"]
-                    df["current_value"] = current_df["value"]
-                    df["absolute_error"] = df.apply(lambda row: abs(row["current_value"] - row["stored_value"]), axis=1)
-                    df["relative_error"] = df.apply(lambda row: row["absolute_error"] / abs(row["stored_value"]) if row["stored_value"] != 0 else (float("inf") if row["current_value"] != 0 else 0), axis=1)
+                    merged = stored_df.merge(current_df, on=['experiment', 'measurement', 'replication', 'module', 'name'], how='outer', suffixes=('_stored', '_current'))
+                    df = merged[
+                        (merged['value_stored'].isna() & merged['value_current'].notna()) |
+                        (merged['value_stored'].notna() & merged['value_current'].isna()) |
+                        (merged['value_stored'] != merged['value_current'])].dropna(subset=['value_stored', 'value_current'], how='all').copy()
+                    df["absolute_error"] = df.apply(lambda row: abs(row["value_current"] - row["value_stored"]), axis=1)
+                    df["relative_error"] = df.apply(lambda row: row["absolute_error"] / abs(row["value_stored"]) if row["value_stored"] != 0 else (float("inf") if row["value_current"] != 0 else 0), axis=1)
                     df = df[df.apply(lambda row: matches_filter(row["name"], result_name_filter, exclude_result_name_filter, full_match) and \
                                                  matches_filter(row["module"], result_module_filter, exclude_result_module_filter, full_match), axis=1)]
-                    reason = df.loc[df["relative_error"].idxmax()].to_string()
+                    id = df["relative_error"].idxmax()
+                    if math.isnan(id):
+                        id = next(iter(df.index), None)
+                    reason = df.loc[id].to_string()
                     reason = re.sub(" +", " = ", reason)
                     reason = re.sub("\\n", ", ", reason)
                     return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="FAIL", reason=reason)
