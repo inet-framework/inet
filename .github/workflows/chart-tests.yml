@@ -53,6 +53,12 @@ jobs:
 
           source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
 
+          echo "::group::Reclaiming some disk space"
+          rm -rf $GITHUB_WORKSPACE/omnetpp/out
+          rm -rf $GITHUB_WORKSPACE/inet/out
+          ccache -cCz
+          echo "::endgroup::"
+
           echo "::group::Cloning inet media repository"
           git clone https://github.com/inet-framework/media.git
           echo "::endgroup::"
