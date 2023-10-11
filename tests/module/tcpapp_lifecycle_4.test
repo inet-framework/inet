@@ -81,8 +81,6 @@ network Test
 </scenario>
 
 %contains-regex: stdout
-
-.*
 Test.server shutting down
 .*
 Test.server shut down
@@ -92,7 +90,6 @@ Test.client starting up
 Test.client started
 .*
 Test.client.app\[0\]: received 0 bytes in 0 packets
-.*
 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
