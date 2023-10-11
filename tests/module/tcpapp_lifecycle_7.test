@@ -40,6 +40,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.client.app[0].connectPort = 1000
 **.client.app[0].numRequestsPerSession = 1000
 **.client.app[0].requestLength = 100B
+**.client.app[0].replyLength = 100B
 **.client.app[0].idleInterval = 1000000s
 **.client.app[0].thinkTime = 100ms
 
