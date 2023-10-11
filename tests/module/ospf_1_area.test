@@ -102,6 +102,7 @@ description = "Simple test"
 network = Test1
 ned-path = .;../../../../src;../../lib
 sim-time-limit = 200s
+cmdenv-express-mode = true
 
 **.vector-recording = false
 **.cmdenv-log-level = "info"

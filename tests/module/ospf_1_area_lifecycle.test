@@ -107,7 +107,8 @@ cmdenv-express-mode = false
 sim-time-limit = 200s
 
 **.vector-recording = false
-**.cmdenv-log-level = "info"
+**.status.cmdenv-log-level = "info"
+**.cmdenv-log-level = "warn"
 
 #omnetpp 5.0 - 5.1 compatibility:
 eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"

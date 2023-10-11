@@ -11,7 +11,7 @@ based retransmissions.
 [General]
 network = inet.test.moduletest.lib.multihomed
 cmdenv-event-banners=false
-cmdenv-express-mode = false
+cmdenv-express-mode = true
 ned-path = .;../../../../src;../../lib
 
 #omnetpp 5.0 - 5.1 compatibility:
