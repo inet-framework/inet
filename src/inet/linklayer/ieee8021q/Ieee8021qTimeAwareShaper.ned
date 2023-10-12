@@ -33,7 +33,7 @@ module Ieee8021qTimeAwareShaper extends CompoundPacketQueueBase
         }
         gateControlList: GateControlList if hasGcl {
             parameters:
-                @display("p=300,225");
+                @display("p=100,350");
         }
         classifier: <default("PcpTrafficClassClassifier")> like IPacketClassifier {
             parameters:
