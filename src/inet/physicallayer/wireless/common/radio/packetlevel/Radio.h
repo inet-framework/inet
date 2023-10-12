@@ -154,6 +154,10 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
      * The timer that is scheduled to the end of the radio mode switch.
      */
     cMessage *switchTimer = nullptr;
+    /**
+     * All reception timers including timers for non-attempted receptions.
+     */
+    std::vector<cMessage *> allReceptionTimers;
     //@}
 
   private:

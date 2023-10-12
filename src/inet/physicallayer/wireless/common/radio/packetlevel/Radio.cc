@@ -8,9 +8,10 @@
 #include "inet/physicallayer/wireless/common/radio/packetlevel/Radio.h"
 
 #include "inet/common/LayeredProtocolBase.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
-#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/stlutils.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
 
@@ -31,6 +32,9 @@ Radio::~Radio()
         check_and_cast<IRadioMedium *>(medium)->removeRadio(this);
     cancelAndDelete(transmissionTimer);
     cancelAndDelete(switchTimer);
+    for (auto timer : allReceptionTimers)
+        cancelAndDelete(timer);
+    allReceptionTimers.clear();
 }
 
 void Radio::initialize(int stage)
@@ -195,8 +199,10 @@ IRadioSignal::SignalPart Radio::getReceivedSignalPart() const
 
 void Radio::handleMessageWhenDown(cMessage *message)
 {
-    if (message->getArrivalGate() == radioIn || isReceptionTimer(message))
+    if (message->getArrivalGate() == radioIn || isReceptionTimer(message)) {
+        remove(allReceptionTimers, message);
         delete message;
+    }
     else
         PhysicalLayerBase::handleMessageWhenDown(message);
 }
@@ -280,6 +286,7 @@ void Radio::handleUpperPacket(Packet *packet)
 void Radio::handleSignal(WirelessSignal *signal)
 {
     auto receptionTimer = createReceptionTimer(signal);
+    allReceptionTimers.push_back(receptionTimer);
     if (separateReceptionParts)
         startReception(receptionTimer, IRadioSignal::SIGNAL_PART_PREAMBLE);
     else
@@ -478,6 +485,7 @@ void Radio::endReception(cMessage *timer)
     updateTransceiverPart();
     if (timer == receptionTimer)
         receptionTimer = nullptr;
+    remove(allReceptionTimers, timer);
     delete timer;
     // TODO move to radio medium
     check_and_cast<RadioMedium *>(medium.get())->emit(IRadioMedium::signalArrivalEndedSignal, check_and_cast<const cObject *>(reception));
