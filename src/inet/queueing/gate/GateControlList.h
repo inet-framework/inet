@@ -22,6 +22,7 @@ class INET_API GateControlList : public cSimpleModule
     cValueArray *gateStates = nullptr;
 
   protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
 

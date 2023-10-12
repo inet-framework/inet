@@ -21,7 +21,8 @@ void GateControlList::initialize(int stage)
         gateStates = check_and_cast<cValueArray *>(par("gateStates").objectValue());
 
         parseGcl();
-
+    }
+    else if (stage == INITSTAGE_QUEUEING) {
         for (int index = 0; index < numGates; ++index) {
             std::string modulePath = "^.transmissionGate[" + std::to_string(index) + "]";
             PeriodicGate *mod = check_and_cast<PeriodicGate *>(getModuleByPath(modulePath.c_str()));
