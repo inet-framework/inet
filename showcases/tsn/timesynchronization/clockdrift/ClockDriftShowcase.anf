@@ -15,7 +15,7 @@
         <input pattern="results/ConstantClockDriftOutOfBandSync-#0.vec"/>
     </inputs>
     <charts>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1569204360" name="Constant drift rate" resultTypes="" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1075282213" name="Constant drift rate" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -596,7 +596,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value="0.1"/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1157057083" name="Constant drift rate, out-of-band time synchronization" resultTypes="" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1476862264" name="Constant drift rate, out-of-band time synchronization" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -1177,7 +1177,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1844046701" name="Constant drift rate, out-of-band time synchronization -  zoomed" resultTypes="" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1747619177" name="Constant drift rate, out-of-band time synchronization -  zoomed" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -1758,7 +1758,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value="0.00155"/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="2029101570" name="Random drift rate" resultTypes="" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="471629031" name="Random drift rate" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -2339,7 +2339,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value="0.1"/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1203561652" name="Random drift rate, out-of-band time synchronization" resultTypes="" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="402519669" name="Random drift rate, out-of-band time synchronization" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -2920,7 +2920,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="21645223" name="Random drift rate, out-of-band time synchronization - zoomed" resultTypes="" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1839039397" name="Random drift rate, out-of-band time synchronization - zoomed" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -3501,7 +3501,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value="0.0604"/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="803855933" name="Random drift rate, gPTP time synchronization" resultTypes="" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1412086216" name="Random drift rate, gPTP time synchronization" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -4082,7 +4082,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="679263038" name="Random drift rate, gPTP time synchronization -  zoomed" resultTypes="" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1374287847" name="Random drift rate, gPTP time synchronization -  zoomed" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -4665,7 +4665,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value="0.0848"/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="818239133" name="gPTP time synchronization, sync accuracy" resultTypes="" template="linechart_native" type="LINE">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1105595937" name="gPTP time synchronization, sync accuracy" resultTypes="" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -5246,7 +5246,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value="0.0599"/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.220921-6e93d9d2c9" icon="icons/full/obj/linechart.png" id="1344861630" name="End-to-end delay, out of band sync" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.220921-6e93d9d2c9" icon="icons/full/obj/linechart.png" id="579643975" name="End-to-end delay, out of band sync" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -5894,7 +5894,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.220921-6e93d9d2c9" icon="icons/full/obj/linechart.png" id="1021625148" name="End-to-end delay, out of band sync, zoomed in" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.220921-6e93d9d2c9" icon="icons/full/obj/linechart.png" id="167315390" name="End-to-end delay, out of band sync, zoomed in" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -6542,7 +6542,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.220921-6e93d9d2c9" icon="icons/full/obj/linechart.png" id="1025710228" name="End-to-end delay, gPTP" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.220921-6e93d9d2c9" icon="icons/full/obj/linechart.png" id="1033851030" name="End-to-end delay, gPTP" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -7185,7 +7185,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="true"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.220921-6e93d9d2c9" icon="icons/full/obj/linechart.png" id="244963504" name="End-to-end delay, out of band sync and gptp" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.220921-6e93d9d2c9" icon="icons/full/obj/linechart.png" id="96680141" name="End-to-end delay, out of band sync and gptp" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -7225,8 +7225,6 @@ if df_oob.empty or df_gptp.empty:
 # apply vector operations
 df_oob = utils.perform_vector_ops(df_oob, props["vector_operations"])
 df_gptp = utils.perform_vector_ops(df_gptp, props["vector_operations"])
-
-plt.axhline(noclockdrift.get_noclockdrift_delay(1000000), linestyle='dashdot', color='black', linewidth=1)
 
 inet.scave.plot.add_to_dataframe(df_oob, style_tuple_list=[('module', '.*sink1.*', {'color': inet.scave.plot.default_colors[0]}),
                                                     ('module', '.*sink2.*', {'color': inet.scave.plot.default_colors[1]})])
@@ -7854,7 +7852,7 @@ utils.export_image_if_needed(props)
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.220921-6e93d9d2c9" icon="icons/full/obj/linechart.png" id="378806258" name="End-to-End Delay, Constant Clock Drift Rate" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.220921-6e93d9d2c9" icon="icons/full/obj/linechart.png" id="1622325041" name="End-to-End Delay, Constant Clock Drift Rate" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -8502,7 +8500,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.220921-6e93d9d2c9" icon="icons/full/obj/linechart.png" id="1148501736" name="End-to-End Delay, Random Clock Drift Rate" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.220921-6e93d9d2c9" icon="icons/full/obj/linechart.png" id="520676657" name="End-to-End Delay, Random Clock Drift Rate" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -9150,7 +9148,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.220921-6e93d9d2c9" icon="icons/full/obj/linechart.png" id="1277186028" name="End-to-end delay, Random and Constant Clock Drift Rate" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 7.0.0.220921-6e93d9d2c9" icon="icons/full/obj/linechart.png" id="1563819731" name="End-to-end delay, Random and Constant Clock Drift Rate" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
