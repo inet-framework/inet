@@ -97,7 +97,7 @@ struct ip_pcb {
 };
 
 /*
- * Option flags per-socket. These are the same like SO_TODO.
+ * Option flags per-socket. These are the same like SO_XXX.
  */
 #define SOF_DEBUG       (u16_t)0x0001U    /* turn on debugging info recording */
 #define SOF_ACCEPTCONN  (u16_t)0x0002U    /* socket has had listen() */

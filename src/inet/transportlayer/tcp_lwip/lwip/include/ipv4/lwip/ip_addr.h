@@ -64,7 +64,6 @@ struct ip_addr2 {
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"
-
 #endif
 
 struct netif;
