@@ -16,96 +16,72 @@ void GateControlList::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         numGates = par("numGates");
-        offset = par("offset");
         durations = check_and_cast<cValueArray *>(par("durations").objectValue());
         gateStates = check_and_cast<cValueArray *>(par("gateStates").objectValue());
-
+        if (durations->size() != gateStates->size())
+            throw cRuntimeError("The length of durations is not equal to the length of gateStates");
         parseGcl();
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        for (int index = 0; index < numGates; ++index) {
-            std::string modulePath = "^.transmissionGate[" + std::to_string(index) + "]";
-            PeriodicGate *mod = check_and_cast<PeriodicGate *>(getModuleByPath(modulePath.c_str()));
-            cPar& offsetPar = mod->par("offset");
-            offsetPar.setDoubleValue(offset.dbl());
-            cPar& durationsPar = mod->par("durations");
-            durationsPar.copyIfShared();
-            durationsPar.setObjectValue(durations);
-        }
-    }
-}
-
-void GateControlList::handleMessage(cMessage *msg)
-{
-    throw cRuntimeError("Do not handle cMessage");
-}
-
-void GateControlList::parseGcl() {
-    if (durations->size() != gateStates->size()) {
-        throw cRuntimeError("The length of durations is not equal to gateStates.");
-    }
-
-    for (int i = 0; i < numGates; ++i) {
-        gateDurations.emplace_back(new cValueArray());
-    }
-
-    int numEntries = durations->size();
-    std::vector<bool> currentGateStates(numGates, true);
-    std::vector<double> currentDuration(numGates, 0);
-
-    for (int indexEntry = 0; indexEntry < numEntries; ++indexEntry) {
-        const char *curGateStates = gateStates->get(indexEntry).stringValue();
-        double duration = durations->get(indexEntry).doubleValueInUnit("s");
-
-        std::vector<bool> entry = retrieveGateStates(curGateStates, numGates);
-
         for (int i = 0; i < numGates; ++i) {
-            if (entry.at(i) != currentGateStates.at(i)) {
-                gateDurations.at(i)->add(cValue(currentDuration[i], "s"));
+            std::string modulePath = "^.transmissionGate[" + std::to_string(i) + "]";
+            PeriodicGate *periodicGate = check_and_cast<PeriodicGate *>(getModuleByPath(modulePath.c_str()));
+            periodicGate->par("initiallyOpen").setBoolValue(initiallyOpens[i]);
+            periodicGate->par("offset").setDoubleValue(offsets[i].dbl());
+            cPar& durationsParameter = periodicGate->par("durations");
+            durationsParameter.copyIfShared();
+            durationsParameter.setObjectValue(gateDurations[i]);
+        }
+    }
+}
 
-                currentGateStates[i] = !currentGateStates[i];
-                currentDuration[i] = 0;
+void GateControlList::parseGcl()
+{
+    initiallyOpens = parseGclLine(gateStates->get(0).stringValue());
+    for (int i = 0; i < numGates; ++i) {
+        offsets.push_back(0);
+        gateDurations.push_back(new cValueArray());
+    }
+    std::vector<bool> currentGateStates = initiallyOpens;
+    std::vector<double> currentDuration(numGates, 0);
+    for (int i = 0; i < gateStates->size(); ++i) {
+        double duration = durations->get(i).doubleValueInUnit("s");
+        std::vector<bool> entry = parseGclLine(gateStates->get(i).stringValue());
+        for (int j = 0; j < numGates; ++j) {
+            if (entry.at(j) != currentGateStates.at(j)) {
+                gateDurations.at(j)->add(cValue(currentDuration[j], "s"));
+                currentGateStates[j] = !currentGateStates[j];
+                currentDuration[j] = 0;
             }
-
-            currentDuration[i] += duration;
+            currentDuration[j] += duration;
         }
-
     }
-
     for (int i = 0; i < numGates; ++i) {
-        gateDurations.at(i)->add(cValue(currentDuration[i], "s"));
-
-        if (gateDurations.at(i)->size() % 2 != 0) {
-            gateDurations.at(i)->add(cValue(0.0, "s"));
+        auto durations = gateDurations.at(i);
+        if (durations->size() % 2 != 0)
+            durations->add(cValue(currentDuration[i], "s"));
+        else {
+            durations->set(i, cValue(durations->get(i).doubleValueInUnit("s") + currentDuration[i], "s"));
+            offsets[i] = currentDuration[i];
         }
     }
-
 }
 
-std::vector<bool> GateControlList::retrieveGateStates(const char *gateStates, uint numGates) {
-    std::vector<bool> res(numGates);
-
-    if (strlen(gateStates) != numGates) {
-        throw cRuntimeError("The length of the entry is not equal to numGates.");
-    }
-
-    for (size_t indexGate = 0; indexGate < numGates; ++indexGate) {
-        char ch = *(gateStates + indexGate);
-        if (ch == '1') {
-            res[numGates - indexGate - 1] = true;
-        } else if (ch == '0') {
-            res[numGates - indexGate - 1] = false;
-        } else {
+std::vector<bool> GateControlList::parseGclLine(const char *gateStates)
+{
+    std::vector<bool> result(numGates);
+    if (strlen(gateStates) != numGates)
+        throw cRuntimeError("The length of the entry is not equal to numGates");
+    for (int i = 0; i < numGates; ++i) {
+        char ch = *(gateStates + i);
+        if (ch == '1')
+            result[numGates - i - 1] = true;
+        else if (ch == '0')
+            result[numGates - i - 1] = false;
+        else
             throw cRuntimeError("Unknown char");
-        }
     }
-    return res;
-}
-
-GateControlList::~GateControlList() {
-    for (int i = 0; i < numGates; ++i) {
-        delete gateDurations.at(i);
-    }
+    return result;
 }
 
 } // namespace queueing
