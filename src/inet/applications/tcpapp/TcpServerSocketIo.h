@@ -31,7 +31,7 @@ class INET_API TcpServerSocketIo : public cSimpleModule, public TcpSocket::ICall
     virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override;
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override {}
     virtual void socketEstablished(TcpSocket *socket) override;
-    virtual void socketPeerClosed(TcpSocket *socket) override {}
+    virtual void socketPeerClosed(TcpSocket *socket) override { socket->close(); }
     virtual void socketClosed(TcpSocket *socket) override { if (readDelayTimer) cancelEvent(readDelayTimer); }
     virtual void socketFailure(TcpSocket *socket, int code) override { if (readDelayTimer) cancelEvent(readDelayTimer); }
     virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override {}
