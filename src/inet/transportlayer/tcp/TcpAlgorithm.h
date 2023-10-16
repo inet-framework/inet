@@ -27,6 +27,7 @@ class INET_API TcpAlgorithm : public cObject
     TcpStateVariables *state; // our state variables
     simtime_t MIN_REXMIT_TIMEOUT;
     simtime_t MAX_REXMIT_TIMEOUT;
+    bool sendDataWithFirstAck = true;
 
     /**
      * Create state block (TCB) used by this TCP variant. It is expected
@@ -72,6 +73,7 @@ class INET_API TcpAlgorithm : public cObject
     virtual void initialize() {
         MIN_REXMIT_TIMEOUT = conn->getTcpMain()->par("rto_min");
         MAX_REXMIT_TIMEOUT = conn->getTcpMain()->par("rto_max");
+        sendDataWithFirstAck = conn->getTcpMain()->par("sendDataWithFirstAck");
     }
 
     /**
