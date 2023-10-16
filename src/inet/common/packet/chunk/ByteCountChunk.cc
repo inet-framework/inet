@@ -64,7 +64,7 @@ const Ptr<Chunk> ByteCountChunk::peekUnchecked(PeekPredicate predicate, PeekConv
     if (converter == nullptr) {
         // 3.a) peeking complete bytes without conversion returns a ByteCountChunk
         if (b(iterator.getPosition()).get() % 8 == 0 && (length < b(0) || length.get() % 8 == 0)) {
-            auto chunk = makeShared<ByteCountChunk>(length < b(0) ? std::min(-length, chunkLength - iterator.getPosition()) : length);
+            auto chunk = makeShared<ByteCountChunk>(length < b(0) ? std::min(-length, chunkLength - iterator.getPosition()) : length, data);
             chunk->regionTags.copyTags(regionTags, iterator.getPosition(), b(0), chunk->getChunkLength());
             chunk->markImmutable();
             return chunk;
