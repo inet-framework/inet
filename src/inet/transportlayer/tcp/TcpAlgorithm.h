@@ -27,6 +27,7 @@ class INET_API TcpAlgorithm : public cObject
     TcpStateVariables *state; // our state variables
     simtime_t MIN_REXMIT_TIMEOUT;
     simtime_t MAX_REXMIT_TIMEOUT;
+    int MAX_REXMIT_COUNT;
     bool sendDataWithFirstAck = true;
 
     /**
@@ -73,6 +74,7 @@ class INET_API TcpAlgorithm : public cObject
     virtual void initialize() {
         MIN_REXMIT_TIMEOUT = conn->getTcpMain()->par("rto_min");
         MAX_REXMIT_TIMEOUT = conn->getTcpMain()->par("rto_max");
+        MAX_REXMIT_COUNT = conn->getTcpMain()->par("maxRexmitCount");
         sendDataWithFirstAck = conn->getTcpMain()->par("sendDataWithFirstAck");
     }
 

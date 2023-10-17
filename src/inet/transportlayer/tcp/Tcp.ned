@@ -175,6 +175,7 @@ simple Tcp like ITcp
         volatile int initialSendSequenceNumber = default(-1); // -1 means the value is calculated from the current simulation time
         double rto_min @unit(s) = default(1s); // MIN_REXMIT_TIMEOUT
         double rto_max @unit(s) = default(240s); // MIN_REXMIT_TIMEOUT
+        int maxRexmitCount = default(12);
         bool sendDataWithFirstAck = default(true); // send data in 3rd packet in SYN - SYN+ACK - ACK sequence
         bool alignOptions = default(true);  // enable/disable per-option predefined alignment
         @display("i=block/wheelbarrow");
