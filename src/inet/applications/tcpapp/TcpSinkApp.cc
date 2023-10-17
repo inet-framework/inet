@@ -112,6 +112,7 @@ void TcpSinkAppThread::established()
 void TcpSinkAppThread::dataArrived(Packet *pk, bool urgent)
 {
     Enter_Method("dataArrived");
+    take(pk);
     long packetLength = pk->getByteLength();
     bytesRcvd += packetLength;
     sinkAppModule->bytesRcvd += packetLength;
