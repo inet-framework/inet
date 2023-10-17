@@ -52,6 +52,7 @@ void Tcp::initialize(int stage)
 
         msl = par("msl");
         alignOptions = par("alignOptions");
+        sendMssOption = par("sendMssOption");
 
         WATCH(checksumMode);
         WATCH(lastEphemeralPort);
