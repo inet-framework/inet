@@ -1259,7 +1259,7 @@ bool TcpConnection::processSACKPermittedOption(const Ptr<const TcpHeader>& tcpHe
 
 TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
 {
-    // SYN flag set and connetion in INIT or LISTEN state (or after synRexmit timeout)
+    // SYN flag set and the connection state is INIT or LISTEN state (or after synRexmit timeout)
     if (tcpHeader->getSynBit() && (fsm.getState() == TCP_S_INIT || fsm.getState() == TCP_S_LISTEN
                                 || ((fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD)
                                     && state->syn_rexmit_count > 0)))
