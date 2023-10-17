@@ -176,6 +176,7 @@ simple Tcp like ITcp
         double rto_min @unit(s) = default(1s); // MIN_REXMIT_TIMEOUT
         double rto_max @unit(s) = default(240s); // MIN_REXMIT_TIMEOUT
         bool sendDataWithFirstAck = default(true); // send data in 3rd packet in SYN - SYN+ACK - ACK sequence
+        bool alignOptions = default(true);  // enable/disable per-option predefined alignment
         @display("i=block/wheelbarrow");
         @signal[tcpConnectionAdded];
         @signal[tcpConnectionRemoved];

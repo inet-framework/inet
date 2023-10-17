@@ -1276,8 +1276,8 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         if (state->ws_support && (state->rcv_ws || (fsm.getState() == TCP_S_INIT
                                                     || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
         {
-            // 1 padding byte
-            tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
+            if (tcpMain->alignOptions) // align
+                tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
 
             // Update WS variables
             if (state->ws_manual_scale > -1) {
@@ -1305,7 +1305,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         if (state->sack_support && (state->rcv_sack_perm || (fsm.getState() == TCP_S_INIT
                                                              || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
         {
-            if (!state->ts_support) { // if TS is supported by host, do not add NOPs to this segment
+            if (tcpMain->alignOptions && !state->ts_support) { // if TS is supported by host, do not add NOPs to this segment
                 // 2 padding bytes
                 tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
                 tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
@@ -1323,7 +1323,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         if (state->ts_support && (state->rcv_initial_ts || (fsm.getState() == TCP_S_INIT
                                                             || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
         {
-            if (!state->sack_support) { // if SACK is supported by host, do not add NOPs to this segment
+            if (tcpMain->alignOptions && !state->sack_support) { // if SACK is supported by host, do not add NOPs to this segment
                 // 2 padding bytes
                 tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
                 tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
@@ -1358,7 +1358,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
     {
         // TS header option
         if (state->ts_enabled) { // Is TS enabled?
-            if (!(state->sack_enabled && (state->snd_sack || state->snd_dsack))) { // if SACK is enabled and SACKs need to be added, do not add NOPs to this segment
+            if (tcpMain->alignOptions && !(state->sack_enabled && (state->snd_sack || state->snd_dsack))) { // if SACK is enabled and SACKs need to be added, do not add NOPs to this segment
                 // 2 padding bytes
                 tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
                 tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
@@ -1404,6 +1404,10 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
     }
 
     if (tcpHeader->getHeaderOptionArraySize() != 0) {
+        // alignment to a 4-byte boundary
+        while (tcpHeader->getHeaderOptionArrayLength().get() % 4 != 0)
+            tcpHeader->appendHeaderOption(new TcpOptionEnd());
+
         B options_len = tcpHeader->getHeaderOptionArrayLength();
 
         if (options_len <= TCP_OPTIONS_MAX_SIZE) { // Options length allowed? - maximum: 40 Bytes

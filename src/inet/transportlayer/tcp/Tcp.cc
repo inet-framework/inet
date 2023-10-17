@@ -57,6 +57,7 @@ void Tcp::initialize(int stage)
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
 
         msl = par("msl");
+        alignOptions = par("alignOptions");
 
         WATCH(lastEphemeralPort);
         WATCH_PTRMAP(tcpConnMap);

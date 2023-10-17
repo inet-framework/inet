@@ -176,6 +176,7 @@ class INET_API Tcp : public TransportProtocolBase
   public:
     CrcMode crcMode = CRC_MODE_UNDEFINED;
     int msl;
+    bool alignOptions = true;
 
   public:
     Tcp() {}
