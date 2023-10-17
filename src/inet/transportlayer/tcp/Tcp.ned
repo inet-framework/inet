@@ -181,6 +181,7 @@ simple Tcp like ITcp
         double delayedAckTimeout @unit(s) = default(200ms); // DELAYED_ACK_TIMEOUT
         bool sendDataWithFirstAck = default(true); // send data in 3rd packet in SYN - SYN+ACK - ACK sequence
         bool alignOptions = default(true);  // enable/disable per-option predefined alignment
+        bool sendMssOption = default(true);  // enable/disable MSS option sending
         @display("i=block/wheelbarrow");
         @signal[tcpConnectionAdded];
         @signal[tcpConnectionRemoved];
