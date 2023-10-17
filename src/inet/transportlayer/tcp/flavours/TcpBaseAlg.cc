@@ -30,8 +30,6 @@ namespace tcp {
 // segment."
 
 #define DELAYED_ACK_TIMEOUT    0.2   // 200ms (RFC 1122: MUST be less than 0.5 seconds)
-#define MIN_PERSIST_TIMEOUT    5   // 5s
-#define MAX_PERSIST_TIMEOUT    60   // 60s
 std::string TcpBaseAlgStateVariables::str() const
 {
     std::stringstream out;
