@@ -29,7 +29,6 @@ namespace tcp {
 // segments there SHOULD be an ACK for at least every second
 // segment."
 
-#define DELAYED_ACK_TIMEOUT    0.2   // 200ms (RFC 1122: MUST be less than 0.5 seconds)
 std::string TcpBaseAlgStateVariables::str() const
 {
     std::stringstream out;
