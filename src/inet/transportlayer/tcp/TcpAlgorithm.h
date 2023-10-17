@@ -28,6 +28,8 @@ class INET_API TcpAlgorithm : public cObject
     simtime_t MIN_REXMIT_TIMEOUT;
     simtime_t MAX_REXMIT_TIMEOUT;
     int MAX_REXMIT_COUNT;
+    simtime_t MIN_PERSIST_TIMEOUT;
+    simtime_t MAX_PERSIST_TIMEOUT;
     bool sendDataWithFirstAck = true;
 
     /**
@@ -75,6 +77,8 @@ class INET_API TcpAlgorithm : public cObject
         MIN_REXMIT_TIMEOUT = conn->getTcpMain()->par("rto_min");
         MAX_REXMIT_TIMEOUT = conn->getTcpMain()->par("rto_max");
         MAX_REXMIT_COUNT = conn->getTcpMain()->par("maxRexmitCount");
+        MIN_PERSIST_TIMEOUT = conn->getTcpMain()->par("persistTimeoutMin");
+        MAX_PERSIST_TIMEOUT = conn->getTcpMain()->par("persistTimeoutMax");
         sendDataWithFirstAck = conn->getTcpMain()->par("sendDataWithFirstAck");
     }
 
