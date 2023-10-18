@@ -61,7 +61,7 @@ void GateControlList::parseGcl()
         if (durations->size() % 2 != 0)
             durations->add(cValue(currentDuration[i], "s"));
         else {
-            durations->set(i, cValue(durations->get(i).doubleValueInUnit("s") + currentDuration[i], "s"));
+            durations->set(0, cValue(durations->get(0).doubleValueInUnit("s") + currentDuration[i], "s"));
             offsets[i] = currentDuration[i];
         }
     }
