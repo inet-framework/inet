@@ -25,6 +25,7 @@ class INET_API PcapngWriter : public IPcapWriter
     FILE *dumpfile = nullptr; // pcap file
     bool flush = false;
     int nextPcapngInterfaceId = 0;
+    int timePrecision = 6;
     std::map<int, int> interfaceModuleIdToPcapngInterfaceId;
 
   public:
@@ -42,7 +43,7 @@ class INET_API PcapngWriter : public IPcapWriter
      * Opens a PCAP file with the given file name. Throws an exception
      * if the file cannot be opened.
      */
-    void open(const char *filename, unsigned int snaplen) override;
+    void open(const char *filename, unsigned int snaplen, int timePrecision) override;
 
     /**
      * Returns true if the pcap file is currently open.

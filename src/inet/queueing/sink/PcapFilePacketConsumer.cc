@@ -19,7 +19,7 @@ void PcapFilePacketConsumer::initialize(int stage)
     PassivePacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         pcapWriter.setFlush(par("alwaysFlush"));
-        pcapWriter.open(par("filename"), par("snaplen"));
+        pcapWriter.open(par("filename"), par("snaplen"), par("timePrecision"));
         networkType = static_cast<PcapLinkType>(par("networkType").intValue());
         const char *dirString = par("direction");
         if (*dirString == 0)

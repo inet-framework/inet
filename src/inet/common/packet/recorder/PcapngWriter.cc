@@ -83,7 +83,7 @@ PcapngWriter::~PcapngWriter()
     PcapngWriter::close(); // NOTE: admitting that this will not call overridden methods from the destructor
 }
 
-void PcapngWriter::open(const char *filename, unsigned int snaplen)
+void PcapngWriter::open(const char *filename, unsigned int snaplen, int timePrecision)
 {
     if (opp_isempty(filename))
         throw cRuntimeError("Cannot open pcap file: file name is empty");
@@ -96,6 +96,9 @@ void PcapngWriter::open(const char *filename, unsigned int snaplen)
         throw cRuntimeError("Cannot open pcap file [%s] for writing: %s", filename, strerror(errno));
 
     flush = false;
+
+    // TODO check validity of timePrecision
+    this->timePrecision = timePrecision;
 
     // header
     int blockTotalLength = 28;
@@ -178,7 +181,7 @@ void PcapngWriter::writeInterface(NetworkInterface *networkInterface, PcapLinkTy
     doh.code = 0x0009;
     doh.length = 1;
     fwrite(&doh, sizeof(doh), 1, dumpfile);
-    uint8_t d = 9;
+    uint8_t d = timePrecision;
     fwrite(&d, 1, 1, dumpfile);
     paddingLength = pad(1);
     fwrite(padding, paddingLength, 1, dumpfile);
@@ -221,7 +224,7 @@ void PcapngWriter::writePacket(simtime_t stime, const Packet *packet, Direction 
     pbh.blockTotalLength = blockTotalLength;
     pbh.interfaceId = pcapngInterfaceId;
     ASSERT(stime >= SIMTIME_ZERO);
-    uint64_t timestamp = stime.inUnit(SIMTIME_NS);
+    uint64_t timestamp = stime.inUnit(static_cast<SimTimeUnit>(-timePrecision));
     pbh.timestampHigh = static_cast<uint32_t>((timestamp >> 32) & 0xFFFFFFFFLLU);
     pbh.timestampLow = static_cast<uint32_t>(timestamp & 0xFFFFFFFFLLU);
     pbh.capturedPacketLength = packet->getByteLength();

@@ -113,6 +113,7 @@ void PcapRecorder::initialize()
 
     const char *file = par("pcapFile");
     const char *fileFormat = par("fileFormat");
+    int timePrecision = par("timePrecision");
     if (!strcmp(fileFormat, "pcap"))
         pcapWriter = new PcapWriter();
     else if (!strcmp(fileFormat, "pcapng"))
@@ -121,7 +122,7 @@ void PcapRecorder::initialize()
         throw cRuntimeError("Unknown fileFormat parameter");
     recordPcap = *file != '\0';
     if (recordPcap) {
-        pcapWriter->open(file, snaplen);
+        pcapWriter->open(file, snaplen, timePrecision);
         pcapWriter->setFlush(par("alwaysFlush"));
     }
 

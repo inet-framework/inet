@@ -19,7 +19,8 @@ namespace inet {
 
 #define MAXBUFLENGTH    65536
 
-#define PCAP_MAGIC      0xa1b23c4d
+#define PCAP_MAGIC      0xa1b2c3d4
+#define PCAP_MAGIC_NANO 0xa1b23c4d
 
 /* "libpcap" file header (minus magic number). */
 struct pcap_hdr
@@ -47,11 +48,18 @@ PcapWriter::~PcapWriter()
     PcapWriter::close(); // NOTE: admitting that this will not call overridden methods from the destructor
 }
 
-void PcapWriter::open(const char *filename, unsigned int snaplen_par)
+void PcapWriter::open(const char *filename, unsigned int snaplen_par, int timePrecision)
 {
     if (opp_isempty(filename))
         throw cRuntimeError("Cannot open pcap file: file name is empty");
 
+    switch (timePrecision) {
+        case 6:
+        case 9:
+            this->timePrecision = timePrecision;
+            break;
+        default: throw cRuntimeError("Unsupported time precision (%d) in PcapWriter.", timePrecision);
+    }
     inet::utils::makePathForFile(filename);
     dumpfile = fopen(filename, "wb");
     fileName = filename;
@@ -70,7 +78,11 @@ void PcapWriter::writeHeader(PcapLinkType linkType)
 {
     struct pcap_hdr fh;
 
-    fh.magic = PCAP_MAGIC;
+    switch(timePrecision) {
+        case 6: fh.magic = PCAP_MAGIC; break;
+        case 9: fh.magic = PCAP_MAGIC_NANO; break;
+        default: throw cRuntimeError("Unsupported time precision (%d) in PcapWriter.", timePrecision);
+    }
     fh.version_major = 2;
     fh.version_minor = 4;
     fh.thiszone = 0;
@@ -106,7 +118,11 @@ void PcapWriter::writePacket(simtime_t stime, const Packet *packet, Direction di
 
     struct pcaprec_hdr ph;
     ph.ts_sec = (int32_t)stime.inUnit(SIMTIME_S);
-    ph.ts_usec = (uint32_t)(stime.inUnit(SIMTIME_NS) - (uint32_t)1000000000 * stime.inUnit(SIMTIME_S));
+    switch(timePrecision) {
+        case 6: ph.ts_usec = (uint32_t)(stime.inUnit(SIMTIME_US) - (uint32_t)1000000 * stime.inUnit(SIMTIME_S)); break;
+        case 9: ph.ts_usec = (uint32_t)(stime.inUnit(SIMTIME_NS) - (uint32_t)1000000000 * stime.inUnit(SIMTIME_S)); break;
+        default: throw cRuntimeError("Unsupported time precision (%d) in PcapWriter.", timePrecision);
+    }
     auto data = packet->peekDataAsBytes();
     auto bytes = data->getBytes();
     for (size_t i = 0; i < bytes.size(); i++) {

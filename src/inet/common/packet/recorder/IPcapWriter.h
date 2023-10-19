@@ -205,7 +205,7 @@ class INET_API IPcapWriter
   public:
     virtual ~IPcapWriter() {}
 
-    virtual void open(const char *filename, unsigned int snaplen) = 0;
+    virtual void open(const char *filename, unsigned int snaplen, int timePrecision) = 0;
     virtual void close() = 0;
     virtual bool isOpen() const = 0;
 
