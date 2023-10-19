@@ -19,7 +19,7 @@ namespace inet {
 
 #define MAXBUFLENGTH    65536
 
-#define PCAP_MAGIC      0xa1b2c3d4
+#define PCAP_MAGIC      0xa1b23c4d
 
 /* "libpcap" file header (minus magic number). */
 struct pcap_hdr
@@ -106,7 +106,7 @@ void PcapWriter::writePacket(simtime_t stime, const Packet *packet, Direction di
 
     struct pcaprec_hdr ph;
     ph.ts_sec = (int32_t)stime.inUnit(SIMTIME_S);
-    ph.ts_usec = (uint32_t)(stime.inUnit(SIMTIME_US) - (uint32_t)1000000 * stime.inUnit(SIMTIME_S));
+    ph.ts_usec = (uint32_t)(stime.inUnit(SIMTIME_NS) - (uint32_t)1000000000 * stime.inUnit(SIMTIME_S));
     auto data = packet->peekDataAsBytes();
     auto bytes = data->getBytes();
     for (size_t i = 0; i < bytes.size(); i++) {
