@@ -123,7 +123,7 @@ void PcapngWriter::writeInterface(NetworkInterface *networkInterface, PcapLinkTy
     std::string name = networkInterface->getInterfaceName();
     std::string fullPath = networkInterface->getInterfaceFullPath();
     fullPath = fullPath.substr(fullPath.find('.') + 1);
-    uint32_t optionsLength = (4 + roundUp(name.length())) + (4 + roundUp(fullPath.length())) + (4 + 8) + (4 + 4 + 4) + 4;
+    uint32_t optionsLength = (4 + roundUp(name.length())) + (4 + roundUp(fullPath.length())) + (4 + 8) + (4 + 4 + 4) + (4 + 4) + 4;
     uint32_t blockTotalLength = 20 + optionsLength;
     ASSERT(blockTotalLength % 4 == 0);
 
@@ -174,6 +174,15 @@ void PcapngWriter::writeInterface(NetworkInterface *networkInterface, PcapLinkTy
     for (int i = 0; i < 4; i++) ipAddressBytes[i] = ipv4Netmask.getDByte(i);
     fwrite(ipAddressBytes, 4, 1, dumpfile);
 
+    // tsresol option
+    doh.code = 0x0009;
+    doh.length = 1;
+    fwrite(&doh, sizeof(doh), 1, dumpfile);
+    uint8_t d = 9;
+    fwrite(&d, 1, 1, dumpfile);
+    paddingLength = pad(1);
+    fwrite(padding, paddingLength, 1, dumpfile);
+
     // end of options
     uint32_t endOfOptions = 0;
     fwrite(&endOfOptions, sizeof(endOfOptions), 1, dumpfile);
@@ -212,7 +221,7 @@ void PcapngWriter::writePacket(simtime_t stime, const Packet *packet, Direction 
     pbh.blockTotalLength = blockTotalLength;
     pbh.interfaceId = pcapngInterfaceId;
     ASSERT(stime >= SIMTIME_ZERO);
-    uint64_t timestamp = stime.inUnit(SIMTIME_US);
+    uint64_t timestamp = stime.inUnit(SIMTIME_NS);
     pbh.timestampHigh = static_cast<uint32_t>((timestamp >> 32) & 0xFFFFFFFFLLU);
     pbh.timestampLow = static_cast<uint32_t>(timestamp & 0xFFFFFFFFLLU);
     pbh.capturedPacketLength = packet->getByteLength();
