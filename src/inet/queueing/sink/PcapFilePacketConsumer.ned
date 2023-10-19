@@ -17,6 +17,7 @@ import inet.queueing.contract.IPassivePacketSink;
 simple PcapFilePacketConsumer extends PassivePacketSinkBase like IPassivePacketSink
 {
     parameters:
+        string fileFormat @enum("pcap", "pcapng") = default("pcap");
         string filename; // the PCAP file to be written
         int networkType; // the network type header field in the PCAP file, see http://www.tcpdump.org/linktypes.html (1=ethernet, 204=ppp, 105=IEEE 802.11, ...)
         int snaplen = default(65535);  // maximum number of bytes to record per packet

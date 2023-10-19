@@ -8,7 +8,7 @@
 #ifndef __INET_PCAPFILEPACKETCONSUMER_H
 #define __INET_PCAPFILEPACKETCONSUMER_H
 
-#include "inet/common/packet/recorder/PcapWriter.h"
+#include "inet/common/packet/recorder/IPcapWriter.h"
 #include "inet/queueing/base/PassivePacketSinkBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 
@@ -18,7 +18,7 @@ namespace queueing {
 class INET_API PcapFilePacketConsumer : public PassivePacketSinkBase
 {
   protected:
-    PcapWriter pcapWriter;
+    IPcapWriter *pcapWriter = nullptr;
     Direction direction = DIRECTION_UNDEFINED;
     PcapLinkType networkType = LINKTYPE_INVALID;
 
