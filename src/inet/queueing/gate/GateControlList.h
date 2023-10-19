@@ -17,6 +17,7 @@ class INET_API GateControlList : public cSimpleModule
 {
   protected:
     int numGates = -1;
+    const char *mapping = nullptr;
     cValueArray *durations = nullptr;
     cValueArray *gateStates = nullptr;
     std::vector<bool> initiallyOpens;

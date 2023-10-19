@@ -16,6 +16,9 @@ void GateControlList::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         numGates = par("numGates");
+        mapping = par("mapping");
+        if (strlen(mapping) != numGates)
+            throw cRuntimeError("The length of mapping is not equal to numGates");
         durations = check_and_cast<cValueArray *>(par("durations").objectValue());
         gateStates = check_and_cast<cValueArray *>(par("gateStates").objectValue());
         if (durations->size() != gateStates->size())
@@ -74,10 +77,13 @@ std::vector<bool> GateControlList::parseGclLine(const char *gateStates)
         throw cRuntimeError("The length of the entry is not equal to numGates");
     for (int i = 0; i < numGates; ++i) {
         char ch = *(gateStates + i);
+        int index = mapping[i] - '0';
+        if (index < 0 || index >= numGates)
+            throw cRuntimeError("Invalid gate index %d in mapping", index);
         if (ch == '1')
-            result[numGates - i - 1] = true;
+            result[index] = true;
         else if (ch == '0')
-            result[numGates - i - 1] = false;
+            result[index] = false;
         else
             throw cRuntimeError("Unknown char");
     }
