@@ -376,6 +376,15 @@ void TcpSackRexmitQueue::checkSackBlock(uint32_t fromSeqNum, uint32_t& length, b
     rexmitted = i->rexmitted;
 }
 
+uint32_t TcpSackRexmitQueue::getRetrans() const
+{
+    uint32_t retrans = 0;
+    for (auto& region : rexmitQueue)
+        if (region.rexmitted)
+            retrans += region.endSeqNum - region.beginSeqNum;
+    return retrans;
+}
+
 } // namespace tcp
 
 } // namespace inet
