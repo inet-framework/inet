@@ -833,8 +833,7 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     }
 
     // if sack_enabled copy region of tcpHeader to rexmitQueue
-    if (state->sack_enabled)
-        rexmitQueue->enqueueSentData(old_snd_nxt, state->snd_nxt);
+    rexmitQueue->enqueueSentData(old_snd_nxt, state->snd_nxt);
 
     // add header options and update header length (from tcpseg_temp)
     for (uint i = 0; i < tmpTcpHeader->getHeaderOptionArraySize(); i++)
