@@ -8,6 +8,7 @@
 #ifndef __INET_PACKETSERVERBASE_H
 #define __INET_PACKETSERVERBASE_H
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/queueing/common/PassivePacketSourceRef.h"
@@ -17,7 +18,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketServerBase : public PacketProcessorBase, public virtual IActivePacketSink, public virtual IActivePacketSource
+class INET_API PacketServerBase : public PacketProcessorBase, public TransparentProtocolRegistrationListener, public virtual IActivePacketSink, public virtual IActivePacketSource
 {
   protected:
     cGate *inputGate = nullptr;
@@ -28,6 +29,8 @@ class INET_API PacketServerBase : public PacketProcessorBase, public virtual IAc
 
   protected:
     virtual void initialize(int stage) override;
+
+    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
   public:
     virtual IPassivePacketSource *getProvider(const cGate *gate) override { return provider; }

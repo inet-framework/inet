@@ -57,13 +57,13 @@ void MessageDispatcher::arrived(cMessage *message, cGate *inGate, const SendOpti
 #ifdef INET_WITH_QUEUEING
 bool MessageDispatcher::canPushSomePacket(const cGate *inGate) const
 {
-    int size = gateSize("out");
-    for (int i = 0; i < size; i++) {
-        auto outGate = const_cast<MessageDispatcher *>(this)->gate("out", i);
-        auto consumer = findConnectedModule<queueing::IPassivePacketSink>(outGate);
-        if (consumer != nullptr && !dynamic_cast<MessageDispatcher *>(consumer) && !consumer->canPushSomePacket(outGate->getPathEndGate()))
-            return false;
-    }
+//    int size = gateSize("out");
+//    for (int i = 0; i < size; i++) {
+//        auto outGate = const_cast<MessageDispatcher *>(this)->gate("out", i);
+//        auto consumer = findConnectedModule<queueing::IPassivePacketSink>(outGate);
+//        if (consumer != nullptr && !dynamic_cast<MessageDispatcher *>(consumer) && consumer->canPushSomePacket(outGate->getPathEndGate()))
+//            return true;
+//    }
     return true;
 }
 

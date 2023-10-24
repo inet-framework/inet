@@ -8,13 +8,14 @@
 #ifndef __INET_PACKETQUEUEBASE_H
 #define __INET_PACKETQUEUEBASE_H
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketQueueBase : public PacketProcessorBase, public virtual IPacketQueue
+class INET_API PacketQueueBase : public PacketProcessorBase, public TransparentProtocolRegistrationListener, public virtual IPacketQueue
 {
   protected:
     int numPushedPackets = -1;
@@ -29,6 +30,8 @@ class INET_API PacketQueueBase : public PacketProcessorBase, public virtual IPac
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
+
+    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
     virtual void emit(simsignal_t signal, cObject *object, cObject *details = nullptr) override;
 

@@ -50,6 +50,16 @@ Packet *PacketQueueBase::dequeuePacket()
     return packet;
 }
 
+cGate *PacketQueueBase::getRegistrationForwardingGate(cGate *gate)
+{
+    if (gate == outputGate)
+        return inputGate;
+    else if (gate == inputGate)
+        return outputGate;
+    else
+        throw cRuntimeError("Unknown gate");
+}
+
 void PacketQueueBase::emit(simsignal_t signal, cObject *object, cObject *details)
 {
     if (signal == packetPushedSignal || signal == packetPushStartedSignal)
