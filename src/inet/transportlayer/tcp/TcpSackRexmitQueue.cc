@@ -174,6 +174,19 @@ bool TcpSackRexmitQueue::checkQueue() const
     return f;
 }
 
+void TcpSackRexmitQueue::addInferredSack()
+{
+    // skip the head which is assumed to be lost
+    auto i = ++rexmitQueue.begin();
+    while (i != rexmitQueue.end() && i->sacked)
+        i++;
+    if (i != rexmitQueue.end()) {
+        i->sacked = true;
+        auto sendQueue = conn->getSendQueueForUpdate();
+        sendQueue->sackedOut += i->endSeqNum - i->beginSeqNum;
+    }
+}
+
 void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
 {
     if (seqLess(fromSeqNum, begin))
