@@ -29,6 +29,7 @@ simple TcpConnection {
         @signal[tcpRcvQueueBytes];    // current amount of used bytes in tcp receive queue
         @signal[tcpRcvQueueDrops];    // number of drops in tcp receive queue
         @signal[tcpRcvPayloadBytes];   // amount of payload bytes received (including duplicates, out of order etc) for TCP throughput
+        @signal[bytesInFlight];
 
         //TcpAlgorithm signals:
         @signal[cwnd];    // will record changes to snd_cwnd
@@ -62,6 +63,7 @@ simple TcpConnection {
         @statistic[tcpRcvQueueBytes](record=vector; interpolationmode=sample-hold);    // current amount of used bytes in tcp receive queue
         @statistic[tcpRcvQueueDrops](record=vector; interpolationmode=sample-hold);    // number of drops in tcp receive queue
         @statistic[tcpRcvPayloadBytes](record=vector; interpolationmode=sample-hold);    // current amount of payload bytes received (including duplicates, out of order etc) for TCP throughput
+        @statistic[bytesInFlight](record=vector; interpolationmode=sample-hold);
 
         @statistic[cwnd](record=vector; interpolationmode=sample-hold);    // will record changes to snd_cwnd
         @statistic[ssthresh](record=vector; interpolationmode=sample-hold);    // will record changes to ssthresh
