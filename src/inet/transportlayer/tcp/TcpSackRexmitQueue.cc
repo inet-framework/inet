@@ -7,6 +7,8 @@
 
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 
+#include "inet/transportlayer/tcp/TcpSendQueue.h"
+
 namespace inet {
 
 namespace tcp {
@@ -61,7 +63,13 @@ void TcpSackRexmitQueue::discardUpTo(uint32_t seqNum)
         auto i = rexmitQueue.begin();
 
         while ((i != rexmitQueue.end()) && seqLE(i->endSeqNum, seqNum)) // discard/delete regions from rexmit queue, which have been acked
+        {
+            if (i->sacked) {
+                auto sendQueue = conn->getSendQueueForUpdate();
+                sendQueue->sackedOut -= i->endSeqNum - i->beginSeqNum;
+            }
             i = rexmitQueue.erase(i);
+        }
 
         if (i != rexmitQueue.end()) {
             ASSERT(seqLE(i->beginSeqNum, seqNum) && seqLess(seqNum, i->endSeqNum));
@@ -218,6 +226,8 @@ void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
             if (seqGE(i->beginSeqNum, fromSeqNum)) { // Search region in queue!
                 found = true;
                 i->sacked = true; // set sacked bit
+                auto sendQueue = conn->getSendQueueForUpdate();
+                sendQueue->sackedOut += i->endSeqNum - i->beginSeqNum;
             }
 
             i++;
@@ -228,6 +238,8 @@ void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
 
             region.endSeqNum = toSeqNum;
             region.sacked = true;
+            auto sendQueue = conn->getSendQueueForUpdate();
+            sendQueue->sackedOut += region.endSeqNum - region.beginSeqNum;
             rexmitQueue.insert(i, region);
             i->beginSeqNum = toSeqNum;
         }
