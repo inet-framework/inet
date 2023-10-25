@@ -885,7 +885,7 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     uint32_t maxWindow = std::min(state->snd_wnd, congestionWindow);
 
     // effectiveWindow: number of bytes we're allowed to send now
-    int64_t effectiveWin = (int64_t)maxWindow - (state->snd_nxt - state->snd_una);
+    int64_t effectiveWin = (int64_t)maxWindow - getBytesInFlight();
 
     if (effectiveWin <= 0) {
         EV_WARN << "Effective window is zero (advertised window " << state->snd_wnd
