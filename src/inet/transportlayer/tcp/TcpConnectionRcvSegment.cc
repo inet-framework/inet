@@ -1175,9 +1175,10 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         // are ignored anyway if neither seqNo nor ackNo has changed.
         //
         if (state->snd_una == tcpHeader->getAckNo() && payloadLength == 0 && state->snd_una != state->snd_max) {
-            state->dupacks++;
-
-            emit(dupAcksSignal, state->dupacks);
+            if (!state->lossRecovery) {
+                state->dupacks++;
+                emit(dupAcksSignal, state->dupacks);
+            }
 
             // we need to update send window even if the ACK is a dupACK, because rcv win
             // could have been changed if faulty data receiver is not respecting the "do not shrink window" rule
