@@ -39,6 +39,7 @@ simple TcpConnection extends SimpleModule {
         @signal[tcpRcvQueueBytes];    // Current amount of used bytes in TCP receive queue
         @signal[tcpRcvQueueDrops];    // Number of drops in TCP receive queue
         @signal[tcpRcvPayloadBytes];   // Amount of payload bytes received (including duplicates, out of order, etc.) for TCP throughput
+        @signal[bytesInFlight];
 
         //TcpAlgorithm signals:
         @signal[cwnd];    // Will record changes to snd_cwnd
@@ -72,6 +73,7 @@ simple TcpConnection extends SimpleModule {
         @statistic[tcpRcvQueueBytes](record=vector; interpolationmode=sample-hold);    // Current amount of used bytes in tcp receive queue
         @statistic[tcpRcvQueueDrops](record=vector; interpolationmode=sample-hold);    // Number of drops in tcp receive queue
         @statistic[tcpRcvPayloadBytes](record=vector; interpolationmode=sample-hold);    // Current amount of payload bytes received (including duplicates, out of order etc) for TCP throughput
+        @statistic[bytesInFlight](record=vector; interpolationmode=sample-hold);
 
         @statistic[cwnd](record=vector; interpolationmode=sample-hold);    // Will record changes to snd_cwnd
         @statistic[ssthresh](record=vector; interpolationmode=sample-hold);    // Will record changes to ssthresh
