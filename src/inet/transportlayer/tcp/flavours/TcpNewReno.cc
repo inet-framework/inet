@@ -9,6 +9,7 @@
 #include <algorithm> // min,max
 
 #include "inet/transportlayer/tcp/Tcp.h"
+#include "inet/transportlayer/tcp/TcpSendQueue.h"
 
 namespace inet {
 namespace tcp {
@@ -108,6 +109,9 @@ void TcpNewReno::receivedDataAck(uint32_t firstSeqAcked)
     // simulator.  Exit the Fast Recovery procedure."
     if (state->lossRecovery) {
         if (seqGE(state->snd_una - 1, state->recover)) {
+            auto sendQueue = conn->getSendQueueForUpdate();
+            sendQueue->lostOut = 0;
+
             // Exit Fast Recovery: deflating cwnd
             //
             // option (1): set cwnd to min (ssthresh, FlightSize + SMSS)
@@ -244,7 +248,9 @@ void TcpNewReno::receivedDuplicateAck()
 {
     TcpTahoeRenoFamily::receivedDuplicateAck();
 
+    auto sendQueue = conn->getSendQueueForUpdate();
     if (state->dupacks == state->dupthresh) {
+        sendQueue->lostOut = state->snd_mss;
         if (!state->lossRecovery) {
             // RFC 3782, page 4:
             // "1) Three duplicate ACKs:
