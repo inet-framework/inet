@@ -349,6 +349,8 @@ class INET_API TcpConnection : public SimpleModule
     /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
     virtual void updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways = false);
 
+    std::string validationInfo() const;
+
   public:
     TcpConnection() {}
     TcpConnection(const TcpConnection& other) {} // FIXME kludge
