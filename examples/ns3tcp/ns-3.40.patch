@@ -1,0 +1,205 @@
+diff --git a/src/internet/model/tcp-socket-base.cc b/src/internet/model/tcp-socket-base.cc
+index c305f27..0d9b49d 100644
+--- a/src/internet/model/tcp-socket-base.cc
++++ b/src/internet/model/tcp-socket-base.cc
+@@ -62,6 +62,7 @@
+ #include "ns3/trace-source-accessor.h"
+ #include "ns3/uinteger.h"
+ 
++#include <iomanip>
+ #include <algorithm>
+ #include <math.h>
+ 
+@@ -183,6 +184,10 @@ TcpSocketBase::GetTypeId()
+                             "Next sequence number to send (SND.NXT)",
+                             MakeTraceSourceAccessor(&TcpSocketBase::m_nextTxSequenceTrace),
+                             "ns3::SequenceNumber32TracedValueCallback")
++            .AddTraceSource("LastAckedSeq",
++                            "",
++                            MakeTraceSourceAccessor(&TcpSocketBase::m_lastAckedSeqTrace),
++                            "ns3::SequenceNumber32TracedValueCallback")
+             .AddTraceSource("HighestSequence",
+                             "Highest sequence number ever sent in socket's life time",
+                             MakeTraceSourceAccessor(&TcpSocketBase::m_highTxMarkTrace),
+@@ -312,6 +317,11 @@ TcpSocketBase::TcpSocketBase()
+                                           MakeCallback(&TcpSocketBase::UpdateNextTxSequence, this));
+     NS_ASSERT(ok == true);
+ 
++    ok =
++        m_tcb->TraceConnectWithoutContext("LastAckedSeq",
++                                          MakeCallback(&TcpSocketBase::UpdateLastAckedSeq, this));
++    NS_ASSERT(ok == true);
++
+     ok = m_tcb->TraceConnectWithoutContext("HighestSequence",
+                                            MakeCallback(&TcpSocketBase::UpdateHighTxMark, this));
+     NS_ASSERT(ok == true);
+@@ -448,6 +458,11 @@ TcpSocketBase::TcpSocketBase(const TcpSocketBase& sock)
+                                           MakeCallback(&TcpSocketBase::UpdateNextTxSequence, this));
+     NS_ASSERT(ok == true);
+ 
++    ok =
++        m_tcb->TraceConnectWithoutContext("LastAckedSeq",
++                                          MakeCallback(&TcpSocketBase::UpdateLastAckedSeq, this));
++    NS_ASSERT(ok == true);
++
+     ok = m_tcb->TraceConnectWithoutContext("HighestSequence",
+                                            MakeCallback(&TcpSocketBase::UpdateHighTxMark, this));
+     NS_ASSERT(ok == true);
+@@ -1308,6 +1323,9 @@ TcpSocketBase::IsValidTcpSegment(const SequenceNumber32 seq,
+ void
+ TcpSocketBase::DoForwardUp(Ptr<Packet> packet, const Address& fromAddress, const Address& toAddress)
+ {
++    if (Simulator::Now().GetSeconds() >= 0.258260118814)
++        std::cout << "";
++
+     // in case the packet still has a priority tag attached, remove it
+     SocketPriorityTag priorityTag;
+     packet->RemovePacketTag(priorityTag);
+@@ -1317,6 +1335,9 @@ TcpSocketBase::DoForwardUp(Ptr<Packet> packet, const Address& fromAddress, const
+     packet->RemoveHeader(tcpHeader);
+     SequenceNumber32 seq = tcpHeader.GetSequenceNumber();
+ 
++    if (tcpHeader.GetSourcePort() == 1000)
++        std::cout << std::setprecision(15) << "TRACE ProcessSegment enter time: " << Simulator::Now().GetSeconds() << ", " << validationInfo() << std::endl;
++
+     if (m_state == ESTABLISHED && !(tcpHeader.GetFlags() & TcpHeader::RST))
+     {
+         // Check if the sender has responded to ECN echo by reducing the Congestion Window
+@@ -1483,6 +1504,9 @@ TcpSocketBase::DoForwardUp(Ptr<Packet> packet, const Address& fromAddress, const
+ 
+         SendPendingData(m_connected);
+     }
++
++    if (tcpHeader.GetSourcePort() == 1000)
++        std::cout << std::setprecision(15) << "TRACE ProcessSegment exit time: " << Simulator::Now().GetSeconds() << ", " << validationInfo() << std::endl;
+ }
+ 
+ /* Received a packet upon ESTABLISHED state. This function is mimicking the
+@@ -3350,14 +3374,6 @@ TcpSocketBase::SendPendingData(bool withAck)
+             {
+                 NotifySend(GetTxAvailable());
+             }
+-
+-            // Stop sending if we need to wait for a larger Tx window (prevent silly window
+-            // syndrome) but continue if we don't have data
+-            if (availableWindow < m_tcb->m_segmentSize && availableData > availableWindow)
+-            {
+-                NS_LOG_LOGIC("Preventing Silly Window Syndrome. Wait to send.");
+-                break; // No more
+-            }
+             // Nagle's algorithm (RFC896): Hold off sending if there is unacked data
+             // in the buffer and the amount of data to send is less than one segment
+             if (!m_noDelay && UnAckDataCount() > 0 && availableData < m_tcb->m_segmentSize)
+@@ -3373,6 +3389,18 @@ TcpSocketBase::SendPendingData(bool withAck)
+             auto maxSizeToSend = static_cast<uint32_t>(nextHigh - next);
+             s = std::min(s, maxSizeToSend);
+ 
++            // Stop sending if we need to wait for a larger Tx window (prevent silly window
++            // syndrome) but continue if we don't have data
++            std::cout << "TRACE SILLY " << s << std::endl;
++            if (s < m_tcb->m_segmentSize && availableData > s)
++            {
++                NS_LOG_LOGIC("Preventing Silly Window Syndrome. Wait to send.");
++                break; // No more
++            }
++
++            if (s == 0)
++                break;
++
+             // (C.2) If any of the data octets sent in (C.1) are below HighData,
+             //       HighRxt MUST be set to the highest sequence number of the
+             //       retransmitted segment unless NextSeg () rule (4) was
+@@ -4506,6 +4534,13 @@ TcpSocketBase::UpdateNextTxSequence(SequenceNumber32 oldValue, SequenceNumber32
+     m_nextTxSequenceTrace(oldValue, newValue);
+ }
+ 
++void
++TcpSocketBase::UpdateLastAckedSeq(SequenceNumber32 oldValue, SequenceNumber32 newValue) const
++
++{
++    m_lastAckedSeqTrace(oldValue, newValue);
++}
++
+ void
+ TcpSocketBase::UpdateHighTxMark(SequenceNumber32 oldValue, SequenceNumber32 newValue) const
+ {
+@@ -4672,6 +4707,22 @@ TcpSocketBase::GetHighRxAck() const
+     return m_highRxAckMark.Get();
+ }
+ 
++std::string TcpSocketBase::validationInfo() const
++{
++    std::stringstream out;
++    out << "lostOut: " << GetTxBuffer()->GetLost() << ", "
++        << "sackedOut: " << GetTxBuffer()->GetSacked() << ", "
++        << "retrans: " << GetTxBuffer()->GetRetransmitsCount() << ", "
++        << "bytesInFligh: " << GetTxBuffer()->BytesInFlight() << ", "
++        << "ssthresh: " << m_tcb->m_ssThresh << ", "
++        << "cwnd: " << m_tcb->m_cWnd << ", "
++        << "snd_una: " << GetTxBuffer()->HeadSequence() << ", "
++        << "snd_max: " << m_tcb->m_highTxMark << ", "
++        << "snd_wnd: " << m_rWnd << ", "
++        << "dup_ack: " << m_dupAckCount;
++    return out.str();
++}
++
+ // RttHistory methods
+ RttHistory::RttHistory(SequenceNumber32 s, uint32_t c, Time t)
+     : seq(s),
+diff --git a/src/internet/model/tcp-socket-base.h b/src/internet/model/tcp-socket-base.h
+index 1f0a3af..9d2051a 100644
+--- a/src/internet/model/tcp-socket-base.h
++++ b/src/internet/model/tcp-socket-base.h
+@@ -361,6 +361,7 @@ class TcpSocketBase : public TcpSocket
+      * \brief Callback pointer for next tx sequence chaining
+      */
+     TracedCallback<SequenceNumber32, SequenceNumber32> m_nextTxSequenceTrace;
++    TracedCallback<SequenceNumber32, SequenceNumber32> m_lastAckedSeqTrace;
+ 
+     /**
+      * \brief Callback pointer for bytesInFlight trace chaining
+@@ -429,6 +430,7 @@ class TcpSocketBase : public TcpSocket
+      * \param newValue new nextTxSeq value
+      */
+     void UpdateNextTxSequence(SequenceNumber32 oldValue, SequenceNumber32 newValue) const;
++    void UpdateLastAckedSeq(SequenceNumber32 oldValue, SequenceNumber32 newValue) const;
+ 
+     /**
+      * \brief Callback function to hook to TcpSocketState bytes inflight
+@@ -1274,6 +1276,8 @@ class TcpSocketBase : public TcpSocket
+      */
+     SequenceNumber32 GetHighRxAck() const;
+ 
++    std::string validationInfo() const;
++
+   protected:
+     // Counters and events
+     EventId m_retxEvent{};     //!< Retransmission event
+diff --git a/src/internet/model/tcp-socket-state.cc b/src/internet/model/tcp-socket-state.cc
+index 3292fa1..69f8095 100644
+--- a/src/internet/model/tcp-socket-state.cc
++++ b/src/internet/model/tcp-socket-state.cc
+@@ -86,6 +86,10 @@ TcpSocketState::GetTypeId()
+                             "Next sequence number to send (SND.NXT)",
+                             MakeTraceSourceAccessor(&TcpSocketState::m_nextTxSequence),
+                             "ns3::TracedValueCallback::SequenceNumber32")
++            .AddTraceSource("LastAckedSeq",
++                            "Next sequence number to send (SND.NXT)",
++                            MakeTraceSourceAccessor(&TcpSocketState::m_lastAckedSeq),
++                            "ns3::TracedValueCallback::SequenceNumber32")
+             .AddTraceSource("BytesInFlight",
+                             "The TCP connection's congestion window",
+                             MakeTraceSourceAccessor(&TcpSocketState::m_bytesInFlight),
+diff --git a/src/internet/model/tcp-socket-state.h b/src/internet/model/tcp-socket-state.h
+index eb605c6..2f583c8 100644
+--- a/src/internet/model/tcp-socket-state.h
++++ b/src/internet/model/tcp-socket-state.h
+@@ -182,7 +182,7 @@ class TcpSocketState : public Object
+ 
+     // Segment
+     uint32_t m_segmentSize{0};          //!< Segment size
+-    SequenceNumber32 m_lastAckedSeq{0}; //!< Last sequence ACKed
++    TracedValue<SequenceNumber32> m_lastAckedSeq{0}; //!< Last sequence ACKed
+ 
+     TracedValue<TcpCongState_t> m_congState{CA_OPEN}; //!< State in the Congestion state machine
+ 
