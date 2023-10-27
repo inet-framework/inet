@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
+#include <iomanip>
 #include <assert.h>
 #include <string.h>
 
@@ -16,6 +17,7 @@
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamilyState_m.h"
 
 namespace inet {
 namespace tcp {
@@ -94,6 +96,24 @@ std::string TcpStateVariables::detailedInfo() const
     out << "dupacks=" << dupacks << "\n";
     out << "rcv_oooseg=" << rcv_oooseg << "\n";
     out << "rcv_naseg=" << rcv_naseg << "\n";
+    return out.str();
+}
+
+std::string TcpConnection::validationInfo() const
+{
+    std::stringstream out;
+    out << "lostOut: " << sendQueue->lostOut << ", "
+        << "sackedOut: " << sendQueue->sackedOut << ", "
+        << "retrans: " << rexmitQueue->getRetrans() << ", "
+        << "bytesInFligh: " << getBytesInFlight() << ", "
+        << "ssthresh: " << static_cast<const TcpTahoeRenoFamilyStateVariables *>(state)->ssthresh << ", "
+        << "cwnd: " << static_cast<const TcpBaseAlgStateVariables *>(state)->snd_cwnd << ", "
+        << "snd_una: " << state->snd_una << ", "
+        << "snd_max: " << state->snd_max << ", "
+        << "snd_wnd: " << state->snd_wnd << ", "
+        << "dup_ack: " << state->dupacks << ", "
+        << "recover: " << state->recoveryPoint << ", "
+        << "recovery: " << (state->lossRecovery ? "true" : "false");
     return out.str();
 }
 
@@ -189,6 +209,9 @@ bool TcpConnection::processTCPSegment(Packet *tcpSegment, const Ptr<const TcpHea
 {
     Enter_Method("processTCPSegment");
 
+    if (remotePort == 1000)
+        std::cout << std::setprecision(15) << "TRACE ProcessSegment enter time: " << simTime() << ", " << validationInfo() << std::endl;
+
     take(tcpSegment);
     printConnBrief();
     if (!localAddr.isUnspecified()) {
@@ -208,7 +231,12 @@ bool TcpConnection::processTCPSegment(Packet *tcpSegment, const Ptr<const TcpHea
     TcpEventCode event = process_RCV_SEGMENT(tcpSegment, tcpHeader, segSrcAddr, segDestAddr);
 
     // then state transitions
-    return performStateTransition(event);
+    auto r = performStateTransition(event);
+
+    if (remotePort == 1000)
+        std::cout << std::setprecision(15) << "TRACE ProcessSegment exit time: " << simTime() << ", " << validationInfo() << std::endl;
+
+    return r;
 }
 
 bool TcpConnection::processAppCommand(cMessage *msg)
