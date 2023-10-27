@@ -894,6 +894,11 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         return false;
     }
 
+    if (allowedToSend < state->snd_mss && buffered > allowedToSend) {
+        EV_WARN << "Not sending to prevent Silly Window Syndrome.\n";
+        return false;
+    }
+
     uint32_t bytesToSend = std::min(buffered, (uint32_t)allowedToSend);
 
     // make a temporary tcp header for detecting tcp options length (copied from 'TcpConnection::sendSegment(uint32_t bytes)' )
@@ -924,6 +929,10 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         // data is acknowledged.
         bool unacknowledgedData = (state->snd_una != state->snd_max);
         bool containsFin = state->send_fin && (state->snd_nxt + bytesToSend) == state->snd_fin_seq;
+        if (allowedToSend < state->snd_mss && buffered > allowedToSend) {
+            EV_WARN << "Not sending to prevent Silly Window Syndrome.\n";
+            return false;
+        }
         if (state->nagle_enabled && unacknowledgedData && !containsFin)
             EV_WARN << "Cannot send (last) segment due to Nagle, not enough data for a full segment\n";
         else
