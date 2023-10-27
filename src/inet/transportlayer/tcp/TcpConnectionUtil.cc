@@ -933,7 +933,7 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
             EV_WARN << "Not sending to prevent Silly Window Syndrome.\n";
             return false;
         }
-        if (state->nagle_enabled && unacknowledgedData && !containsFin)
+        if (state->nagle_enabled && unacknowledgedData && !containsFin && buffered < state->snd_mss)
             EV_WARN << "Cannot send (last) segment due to Nagle, not enough data for a full segment\n";
         else
             sendSegment(bytesToSend);
