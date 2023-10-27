@@ -306,6 +306,8 @@ void TcpNewReno::receivedDuplicateAck()
                 // subsequent duplicate ACKs."
             }
         }
+        else
+            sendData(false);
         EV_INFO << "NewReno on dupAcks == DUPTHRESH(=" << state->dupthresh << ": TCP is already in Fast Recovery procedure\n";
     }
     else if (state->dupacks > state->dupthresh) {
@@ -329,6 +331,8 @@ void TcpNewReno::receivedDuplicateAck()
             sendData(false);
         }
     }
+    else
+        sendData(false);
 }
 
 } // namespace tcp
