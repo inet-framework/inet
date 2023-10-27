@@ -1295,7 +1295,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
                 state->rcv_wnd_scale = state->ws_manual_scale;
             }
             else {
-                ulong scaled_rcv_wnd = receiveQueue->getFirstSeqNo() + state->maxRcvBuffer - state->rcv_nxt;
+                ulong scaled_rcv_wnd = state->maxRcvBuffer - receiveQueue->getAvailableDataLength();
                 state->rcv_wnd_scale = 0;
 
                 while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) { // RFC 1323, page 11: "the shift count must be limited to 14"
