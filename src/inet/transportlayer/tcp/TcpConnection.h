@@ -373,6 +373,11 @@ class INET_API TcpConnection : public cSimpleModule
     const L3Address& getRemoteAddress() const { return remoteAddr; }
 
     /**
+     * Returns the sender's estimation of total bytes in flight in the network.
+     */
+    uint32_t getBytesInFlight() const;
+
+    /**
      * This method gets invoked from TCP when a segment arrives which
      * doesn't belong to an existing connection. TCP creates a temporary
      * connection object so that it can call this method, then immediately
