@@ -173,6 +173,8 @@ simple Tcp like ITcp
         bool ecnWillingness = default(false); // true if willing to use ECN
         double dctcpGamma = default(0.0625); // A fixed estimation gain for calculating dctcp_alpha (RFC 8257 4.2)
         volatile int initialSendSequenceNumber = default(-1); // -1 means the value is calculated from the current simulation time
+        double rto_min @unit(s) = default(1s); // MIN_REXMIT_TIMEOUT
+        double rto_max @unit(s) = default(240s); // MIN_REXMIT_TIMEOUT
         @display("i=block/wheelbarrow");
         @signal[tcpConnectionAdded];
         @signal[tcpConnectionRemoved];
