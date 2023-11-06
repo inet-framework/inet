@@ -25,6 +25,8 @@ class INET_API TcpAlgorithm : public cObject
   protected:
     TcpConnection *conn; // we belong to this connection
     TcpStateVariables *state; // our state variables
+    simtime_t MIN_REXMIT_TIMEOUT;
+    simtime_t MAX_REXMIT_TIMEOUT;
 
     /**
      * Create state block (TCB) used by this TCP variant. It is expected
@@ -67,7 +69,10 @@ class INET_API TcpAlgorithm : public cObject
      * This method is necessary because the TcpConnection ptr is not
      * available in the constructor yet.
      */
-    virtual void initialize() {}
+    virtual void initialize() {
+        MIN_REXMIT_TIMEOUT = conn->getTcpMain()->par("rto_min");
+        MAX_REXMIT_TIMEOUT = conn->getTcpMain()->par("rto_max");
+    }
 
     /**
      * Called when the connection is going to ESTABLISHED from SYN_SENT or
