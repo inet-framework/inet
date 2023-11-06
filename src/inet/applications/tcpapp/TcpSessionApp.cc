@@ -148,7 +148,8 @@ Packet *TcpSessionApp::createDataPacket(long sendBytes)
     const char *dataTransferMode = par("dataTransferMode");
     Ptr<Chunk> payload;
     if (!strcmp(dataTransferMode, "bytecount")) {
-        payload = makeShared<ByteCountChunk>(B(sendBytes));
+        int packetData = par("packetData");
+        payload = packetData == -1 ? makeShared<ByteCountChunk>(B(sendBytes)) : makeShared<ByteCountChunk>(B(sendBytes), packetData);
     }
     else if (!strcmp(dataTransferMode, "object")) {
         const auto& applicationPacket = makeShared<ApplicationPacket>();
@@ -159,8 +160,9 @@ Packet *TcpSessionApp::createDataPacket(long sendBytes)
         const auto& bytesChunk = makeShared<BytesChunk>();
         std::vector<uint8_t> vec;
         vec.resize(sendBytes);
+        int packetData = par("packetData");
         for (int i = 0; i < sendBytes; i++)
-            vec[i] = (bytesSent + i) & 0xFF;
+            vec[i] = packetData == -1 ? (bytesSent + i) & 0xFF : packetData;
         bytesChunk->setBytes(vec);
         payload = bytesChunk;
     }
