@@ -42,6 +42,7 @@ void Ppp::initialize(int stage)
         displayStringTextFormat = par("displayStringTextFormat");
         sendRawBytes = par("sendRawBytes");
         endTransmissionEvent = new cMessage("pppEndTxEvent");
+        endTransmissionEvent->setSchedulingPriority(par("endTxSchedulingPriority"));
         lowerLayerInGateId = findGate("phys$i");
         physOutGate = gate("phys$o");
         lowerLayerOutGateId = physOutGate->getId();
