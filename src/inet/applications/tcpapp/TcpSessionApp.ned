@@ -84,6 +84,7 @@ simple TcpSessionApp like IApp
         string connectAddress;
         int connectPort = default(1000);
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
+        int packetData = default(-1); // the packet is filled with this byte if not -1
         bool autoRead = default(true); // whether to use "autoread" or "explicit-read" mode for TCP connection
         volatile int readSize @unit(B) = default(-1B);    // used only with autoRead==false
         volatile double readDelay @unit(s) = default(-1s);    // used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay
