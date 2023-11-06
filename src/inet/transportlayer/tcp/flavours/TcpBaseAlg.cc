@@ -13,15 +13,6 @@
 namespace inet {
 namespace tcp {
 
-//
-// Some constants below. MIN_REXMIT_TIMEOUT is the minimum allowed retransmit
-// interval.  It is currently one second but e.g. a FreeBSD kernel comment says
-// it "will ultimately be reduced to 3 ticks for algorithmic stability,
-// leaving the 200ms variance to deal with delayed-acks, protocol overheads.
-// A 1 second minimum badly breaks throughput on any network faster then
-// a modem that has minor but continuous packet loss unrelated to congestion,
-// such as on a wireless network."
-//
 // RFC 1122, page 95:
 // "A TCP SHOULD implement a delayed ACK, but an ACK should not
 // be excessively delayed; in particular, the delay MUST be
@@ -191,8 +182,8 @@ void TcpBaseAlg::processRexmitTimer(TcpEventCode& event)
     // However, retransmission is actually more complicated than that
     // in RFC 793 above, we'll leave it to subclasses (e.g. TcpTahoe, TcpReno).
     //
-    if (++state->rexmit_count > MAX_REXMIT_COUNT) {
-        EV_DETAIL << "Retransmission count exceeds " << MAX_REXMIT_COUNT << ", aborting connection\n";
+    if (++state->rexmit_count > maxRexmitCount) {
+        EV_DETAIL << "Retransmission count exceeds " << maxRexmitCount << ", aborting connection\n";
         conn->signalConnectionTimeout();
         event = TCP_E_ABORT; // TODO maybe rather introduce a TCP_E_TIMEDOUT event
         return;
@@ -209,8 +200,8 @@ void TcpBaseAlg::processRexmitTimer(TcpEventCode& event)
 
     // restart the retransmission timer with twice the latest RTO value, or with the max, whichever is smaller
     state->rexmit_timeout += state->rexmit_timeout;
-    if (state->rexmit_timeout > MAX_REXMIT_TIMEOUT)
-        state->rexmit_timeout = MAX_REXMIT_TIMEOUT;
+    if (state->rexmit_timeout > maxRexmitTimeout)
+        state->rexmit_timeout = maxRexmitTimeout;
 
     conn->scheduleAfter(state->rexmit_timeout, rexmitTimer);
 
@@ -269,11 +260,11 @@ void TcpBaseAlg::processPersistTimer(TcpEventCode& event)
     state->persist_timeout = state->persist_factor * 1.5; // 1.5 is a factor for typical LAN connection [Stevens, W.R.: TCP/IP Ill. Vol. 1, chapter 22.2]
 
     // PERSIST timer is bounded to 5-60 seconds
-    if (state->persist_timeout < MIN_PERSIST_TIMEOUT)
-        state->rexmit_timeout = MIN_PERSIST_TIMEOUT;
+    if (state->persist_timeout < minPersistTimeout)
+        state->rexmit_timeout = minPersistTimeout;
 
-    if (state->persist_timeout > MAX_PERSIST_TIMEOUT)
-        state->rexmit_timeout = MAX_PERSIST_TIMEOUT;
+    if (state->persist_timeout > maxPersistTimeout)
+        state->rexmit_timeout = maxPersistTimeout;
 
     conn->scheduleAfter(state->persist_timeout, persistTimer);
 
@@ -337,10 +328,10 @@ void TcpBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     // assign RTO (here: rexmit_timeout) a new value
     simtime_t rto = srtt + 4 * rttvar;
 
-    if (rto > MAX_REXMIT_TIMEOUT)
-        rto = MAX_REXMIT_TIMEOUT;
-    else if (rto < MIN_REXMIT_TIMEOUT)
-        rto = MIN_REXMIT_TIMEOUT;
+    if (rto > maxRexmitTimeout)
+        rto = maxRexmitTimeout;
+    else if (rto < minRexmitTimeout)
+        rto = minRexmitTimeout;
 
     state->rexmit_timeout = rto;
 
@@ -445,7 +436,7 @@ void TcpBaseAlg::receiveSeqChanged()
             else {
                 EV_INFO << "rcv_nxt changed to " << state->rcv_nxt << ", (delayed ACK enabled and full_sized_segment_counter=" << state->full_sized_segment_counter << ") scheduling ACK\n";
                 if (!delayedAckTimer->isScheduled()) // schedule delayed ACK timer if not already running
-                    conn->scheduleAfter(DELAYED_ACK_TIMEOUT, delayedAckTimer);
+                    conn->scheduleAfter(delayedAckTimeout, delayedAckTimer);
             }
         }
     }
