@@ -25,12 +25,12 @@ class INET_API TcpAlgorithm : public cObject
   protected:
     TcpConnection *conn; // we belong to this connection
     TcpStateVariables *state; // our state variables
-    simtime_t MIN_REXMIT_TIMEOUT;
-    simtime_t MAX_REXMIT_TIMEOUT;
-    int MAX_REXMIT_COUNT;
-    simtime_t MIN_PERSIST_TIMEOUT;
-    simtime_t MAX_PERSIST_TIMEOUT;
-    simtime_t DELAYED_ACK_TIMEOUT;
+    simtime_t minRexmitTimeout;
+    simtime_t maxRexmitTimeout;
+    int maxRexmitCount;
+    simtime_t minPersistTimeout;
+    simtime_t maxPersistTimeout;
+    simtime_t delayedAckTimeout;
     bool sendDataWithFirstAck = true;
 
     /**
@@ -75,13 +75,13 @@ class INET_API TcpAlgorithm : public cObject
      * available in the constructor yet.
      */
     virtual void initialize() {
-        MIN_REXMIT_TIMEOUT = conn->getTcpMain()->par("rto_min");
-        MAX_REXMIT_TIMEOUT = conn->getTcpMain()->par("rto_max");
-        MAX_REXMIT_COUNT = conn->getTcpMain()->par("maxRexmitCount");
-        MIN_PERSIST_TIMEOUT = conn->getTcpMain()->par("persistTimeoutMin");
-        MAX_PERSIST_TIMEOUT = conn->getTcpMain()->par("persistTimeoutMax");
+        minRexmitTimeout = conn->getTcpMain()->par("minRexmitTimeout");
+        maxRexmitTimeout = conn->getTcpMain()->par("maxRexmitTimeout");
+        maxRexmitCount = conn->getTcpMain()->par("maxRexmitCount");
+        minPersistTimeout = conn->getTcpMain()->par("minPersistTimeout");
+        maxPersistTimeout = conn->getTcpMain()->par("maxPersistTimeout");
         sendDataWithFirstAck = conn->getTcpMain()->par("sendDataWithFirstAck");
-        DELAYED_ACK_TIMEOUT = conn->getTcpMain()->par("delayedAckTimeout");
+        delayedAckTimeout = conn->getTcpMain()->par("delayedAckTimeout");
     }
 
     /**
