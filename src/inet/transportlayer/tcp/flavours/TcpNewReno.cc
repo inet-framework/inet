@@ -31,12 +31,7 @@ void TcpNewReno::recalculateSlowStartThreshold()
     //
     // As discussed above, FlightSize is the amount of outstanding data in
     // the network."
-
-    // set ssthresh to flight size / 2, but at least 2 SMSS
-    // (the formula below practically amounts to ssthresh = cwnd / 2 most of the time)
-    uint32_t flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME - Does this formula computes the amount of outstanding data?
-//    uint32_t flight_size = state->snd_max - state->snd_una;
-    state->ssthresh = std::max(flight_size / 2, 2 * state->snd_mss);
+    state->ssthresh = std::max(conn->getBytesInFlight() / 2, 2 * state->snd_mss);
 
     conn->emit(ssthreshSignal, state->ssthresh);
 }
@@ -116,8 +111,7 @@ void TcpNewReno::receivedDataAck(uint32_t firstSeqAcked)
             // Exit Fast Recovery: deflating cwnd
             //
             // option (1): set cwnd to min (ssthresh, FlightSize + SMSS)
-            uint32_t flight_size = state->snd_max - state->snd_una;
-            state->snd_cwnd = std::min(state->ssthresh, flight_size + state->snd_mss);
+            state->snd_cwnd = std::min(state->ssthresh, conn->getBytesInFlight() + state->snd_mss);
             EV_INFO << "Fast Recovery - Full ACK received: Exit Fast Recovery, setting cwnd to " << state->snd_cwnd << "\n";
             // option (2): set cwnd to ssthresh
 //            state->snd_cwnd = state->ssthresh;
