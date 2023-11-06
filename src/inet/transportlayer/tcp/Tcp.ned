@@ -208,6 +208,8 @@ simple Tcp extends SimpleModule like ITcp
         bool pmtudEnabled = default(false); // Path MTU Discovery (RFC 1191, RFC 1981) enabled/disabled
         double pmtudTimeout @unit(s) = default(600s); // Time after which the original MSS is restored to probe for increased path MTU (RFC 1191, Section 6.3)
         volatile int initialSendSequenceNumber = default(-1); // -1 means the value is calculated from the current simulation time
+        double rto_min @unit(s) = default(1s); // MIN_REXMIT_TIMEOUT
+        double rto_max @unit(s) = default(240s); // MIN_REXMIT_TIMEOUT
         @display("i=block/wheelbarrow");
         @signal[tcpConnectionAdded];
         @signal[tcpConnectionRemoved];
