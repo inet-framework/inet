@@ -93,7 +93,7 @@ class INET_API TcpReceiveQueue : public cObject
     /**
      * Returns the amount of contiguous data available for reading.
      */
-    virtual uint32_t getAvailableDataLength() {
+    virtual uint32_t getAcknowledgedDataLength() {
         return B(reorderBuffer.getAvailableDataLength()).get();
     }
 

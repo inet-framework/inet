@@ -1295,7 +1295,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
                 state->rcv_wnd_scale = state->ws_manual_scale;
             }
             else {
-                ulong scaled_rcv_wnd = state->maxRcvBuffer - receiveQueue->getAvailableDataLength();
+                ulong scaled_rcv_wnd = state->maxRcvBuffer - receiveQueue->getAcknowledgedDataLength();
                 state->rcv_wnd_scale = 0;
 
                 while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) { // RFC 1323, page 11: "the shift count must be limited to 14"
@@ -1486,7 +1486,7 @@ uint16_t TcpConnection::updateRcvWnd()
 
     // update receive queue related state variables and statistics
     updateRcvQueueVars();
-    win = state->maxRcvBuffer - receiveQueue->getAvailableDataLength();
+    win = state->maxRcvBuffer - receiveQueue->getAcknowledgedDataLength();
 
     // Following lines are based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, chapter 26.7, pages 878-879]:
     // Don't advertise less than one full-sized segment to avoid SWS
