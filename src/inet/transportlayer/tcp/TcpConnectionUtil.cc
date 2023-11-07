@@ -881,19 +881,20 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     if (buffered == 0)
         return false;
 
-    // maxWindow is minimum of snd_wnd and congestionWindow (snd_cwnd)
-    uint32_t maxWindow = std::min(state->snd_wnd, congestionWindow);
+    ASSERT(state->snd_wnd >= state->snd_nxt - state->snd_una);
+    uint32_t spaceLeftInSendWindow = state->snd_wnd - (state->snd_nxt - state->snd_una);
+    uint32_t bytesInFlight = getBytesInFlight();
+    uint32_t spaceLeftInCongestionWindow = bytesInFlight >= congestionWindow ? 0 : congestionWindow - bytesInFlight;
 
-    // effectiveWindow: number of bytes we're allowed to send now
-    int64_t effectiveWin = (int64_t)maxWindow - getBytesInFlight();
+    uint32_t allowedToSend = std::min(spaceLeftInSendWindow, spaceLeftInCongestionWindow);
 
-    if (effectiveWin <= 0) {
-        EV_WARN << "Effective window is zero (advertised window " << state->snd_wnd
+    if (allowedToSend <= 0) {
+        EV_WARN << "AllowedToSend is zero (advertised window " << state->snd_wnd
                 << ", congestion window " << congestionWindow << "), cannot send.\n";
         return false;
     }
 
-    uint32_t bytesToSend = std::min(buffered, (uint32_t)effectiveWin);
+    uint32_t bytesToSend = std::min(buffered, (uint32_t)allowedToSend);
 
     // make a temporary tcp header for detecting tcp options length (copied from 'TcpConnection::sendSegment(uint32_t bytes)' )
     const auto& tmpTcpHeader = makeShared<TcpHeader>();
@@ -906,13 +907,15 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     uint32_t old_snd_nxt = state->snd_nxt;
 
     // start sending 'bytesToSend' bytes
-    EV_INFO << "May send " << bytesToSend << " bytes (effectiveWindow " << effectiveWin << ", in buffer " << buffered << " bytes)\n";
+    EV_INFO << "May send " << bytesToSend << " bytes (allowedToSend " << allowedToSend << ", in buffer " << buffered << " bytes)\n";
 
     // send whole segments
     while (bytesToSend >= effectiveMss) {
         uint32_t sentBytes = sendSegment(effectiveMss);
         ASSERT(bytesToSend >= sentBytes);
         bytesToSend -= sentBytes;
+        allowedToSend -= sentBytes;
+        buffered -= sentBytes;
     }
 
     if (bytesToSend > 0) {
