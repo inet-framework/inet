@@ -690,6 +690,15 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
             }
         }
 
+        // RFC 2581, page 6:
+        // "3.2 Fast Retransmit/Fast Recovery
+        // (...)
+        // In addition, a TCP receiver SHOULD send an immediate ACK
+        // when the incoming segment fills in all or part of a gap in the
+        // sequence space."
+        if (tcpHeader->getSequenceNo() + payloadLength != state->rcv_nxt)
+            state->ack_now = true; // although not mentioned in [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 861] seems like we have to set ack_now
+
         // tcpAlgorithm decides when and how to do ACKs
         tcpAlgorithm->receiveSeqChanged();
     }
