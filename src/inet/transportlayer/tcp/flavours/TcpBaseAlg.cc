@@ -410,15 +410,6 @@ void TcpBaseAlg::receiveSeqChanged()
 //        tcpEV << "ACK has already been sent (possibly piggybacked on data)\n";
     }
     else {
-        // RFC 2581, page 6:
-        // "3.2 Fast Retransmit/Fast Recovery
-        // (...)
-        // In addition, a TCP receiver SHOULD send an immediate ACK
-        // when the incoming segment fills in all or part of a gap in the
-        // sequence space."
-        if (state->lossRecovery)
-            state->ack_now = true; // although not mentioned in [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 861] seems like we have to set ack_now
-
         if (!state->delayed_acks_enabled) { // delayed ACK disabled
             EV_INFO << "rcv_nxt changed to " << state->rcv_nxt << ", (delayed ACK disabled) sending ACK now\n";
             conn->sendAck();
