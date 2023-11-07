@@ -1474,7 +1474,7 @@ uint16_t TcpConnection::updateRcvWnd()
 
     // update receive queue related state variables and statistics
     updateRcvQueueVars();
-    win = state->freeRcvBuffer;
+    win = state->maxRcvBuffer - receiveQueue->getAvailableDataLength();
 
     // Following lines are based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, chapter 26.7, pages 878-879]:
     // Don't advertise less than one full-sized segment to avoid SWS
