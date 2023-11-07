@@ -91,6 +91,13 @@ class INET_API TcpReceiveQueue : public cObject
     virtual Packet *extractBytesUpTo(uint32_t seq);
 
     /**
+     * Returns the amount of contiguous data available for reading.
+     */
+    virtual uint32_t getAvailableDataLength() {
+        return B(reorderBuffer.getAvailableDataLength()).get();
+    }
+
+    /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
      */
     virtual uint32_t getAmountOfBufferedBytes();
