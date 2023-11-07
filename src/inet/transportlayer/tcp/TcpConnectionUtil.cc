@@ -719,6 +719,7 @@ void TcpConnection::sendSyn()
     tcpHeader->setWindow(state->rcv_wnd);
 
     state->snd_max = state->snd_nxt = state->iss + 1;
+    state->full_sized_segment_counter = 2;
 
     // ECN
     if (state->ecnWillingness) {
@@ -795,6 +796,7 @@ void TcpConnection::sendSynAck()
 
     // notify
     tcpAlgorithm->ackSent();
+    state->full_sized_segment_counter = 2;
 }
 
 void TcpConnection::sendRst(uint32_t seqNo)
