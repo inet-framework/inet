@@ -1590,6 +1590,7 @@ void TcpConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32_t congestion
             if (outstandingData + state->snd_mss <= state->snd_wnd &&
                 outstandingData + state->snd_mss <= congestionWindow + 2 * state->snd_mss)
             {
+                // TODO review effectiveWin calculation based on how allowedToSend is calculated in sendData
                 // RFC 3042, page 3: "(...)the sender can only send two segments beyond the congestion window (cwnd)."
                 uint32_t effectiveWin = std::min(state->snd_wnd, congestionWindow) - outstandingData + 2 * state->snd_mss;
 
