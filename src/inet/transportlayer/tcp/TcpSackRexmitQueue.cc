@@ -77,6 +77,21 @@ void TcpSackRexmitQueue::discardUpTo(uint32_t seqNum)
         }
     }
 
+    if (!rexmitQueue.empty())
+    {
+        auto& head = rexmitQueue.front();
+        if (head.sacked)
+        {
+            // It is not possible to have the UNA sacked; otherwise, it would
+            // have been ACKed. This is, most likely, our wrong guessing
+            // when adding Reno dupacks in the count.
+            head.sacked = false;
+            auto sendQueue = conn->getSendQueueForUpdate();
+            sendQueue->sackedOut -= head.endSeqNum - head.beginSeqNum;
+            addInferredSack();
+        }
+    }
+
     begin = seqNum;
 
     // TESTING queue:
