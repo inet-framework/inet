@@ -155,6 +155,7 @@ struct TcpStateVariables
     bool increased_IW_enabled = false;          // set if Increased Initial Window (RFC 3390) is enabled
 
     uint32_t full_sized_segment_counter = 0;    // this counter is needed for delayed ACK
+    uint32_t delayedAckFrameCount = 0;          // number of frames after delayed acks are sent
     bool ack_now = false;                       // send ACK immediately, needed if delayed_acks_enabled is set
                                                 // Based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 861].
                                                 // ack_now should be set when:

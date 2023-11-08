@@ -470,6 +470,7 @@ void TcpConnection::configureStateVariables()
 
     state->maxRcvBuffer = advertisedWindow;
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACK algorithm (RFC 1122) enabled/disabled
+    state->delayedAckFrameCount = tcpMain->par("delayedAckFrameCount");
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
@@ -571,7 +572,7 @@ void TcpConnection::sendSyn()
     tcpHeader->setWindow(state->rcv_wnd);
 
     state->snd_max = state->snd_nxt = state->iss + 1;
-    state->full_sized_segment_counter = 2;
+    state->full_sized_segment_counter = state->delayedAckFrameCount;
 
     // ECN
     if (state->ecnWillingness) {
@@ -648,7 +649,7 @@ void TcpConnection::sendSynAck()
 
     // notify
     tcpAlgorithm->ackSent();
-    state->full_sized_segment_counter = 2;
+    state->full_sized_segment_counter = state->delayedAckFrameCount;
 }
 
 void TcpConnection::sendRst(uint32_t seqNo)
