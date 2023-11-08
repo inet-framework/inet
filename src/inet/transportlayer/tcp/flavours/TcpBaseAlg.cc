@@ -420,7 +420,7 @@ void TcpBaseAlg::receiveSeqChanged()
                 conn->sendAck();
             }
             // RFC 1122, page 96: "in a stream of full-sized segments there SHOULD be an ACK for at least every second segment."
-            else if (state->full_sized_segment_counter >= 2) {
+            else if (state->full_sized_segment_counter >= state->delayedAckFrameCount) {
                 EV_INFO << "rcv_nxt changed to " << state->rcv_nxt << ", (delayed ACK enabled, but full_sized_segment_counter=" << state->full_sized_segment_counter << ") sending ACK now\n";
                 conn->sendAck();
             }
