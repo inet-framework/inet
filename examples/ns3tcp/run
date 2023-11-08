@@ -1,0 +1,36 @@
+#!/bin/bash
+
+CCACHE_PREFIX=
+
+EXAMPLE=$1
+if [ "$EXAMPLE" == "" ]; then
+    echo "Usage: ./run <example>"
+    exit
+fi
+
+NS_DIR=~/workspace/ns-allinone-3.40/ns-3.40
+
+rm -f results/pcap-inet.log results/pcap-ns3.log results/pcap-diff.log
+cp $EXAMPLE.cc $NS_DIR/scratch
+$NS_DIR/ns3 build scratch/$EXAMPLE || exit 1
+( cd results; $NS_DIR/build/scratch/ns3.40-$EXAMPLE-debug | grep TRACE > stdout-ns3.log) || exit 1
+( cd ../../; make MODE=debug -j16) || exit 1
+(inet_dbg -u Cmdenv -f $EXAMPLE.ini -c $EXAMPLE | grep TRACE > results/stdout-inet.log) || exit 1
+
+tshark -V -r results/$EXAMPLE-$EXAMPLE.source.ppp\[0\].pcap > results/pcap-inet-source.log
+tshark -V -r results/$EXAMPLE-0-0.pcap > results/pcap-ns3-source.log
+diff -F '^Frame ' -u results/pcap-ns3-source.log results/pcap-inet-source.log > results/pcap-diff-source.log
+
+tshark -V -r results/$EXAMPLE-$EXAMPLE.sink.ppp\[0\].pcap > results/pcap-inet-sink.log
+tshark -V -r results/$EXAMPLE-2-0.pcap > results/pcap-ns3-sink.log
+diff -F '^Frame ' -u results/pcap-ns3-sink.log results/pcap-inet-sink.log > results/pcap-diff-sink.log
+
+diff -u results/stdout-ns3.log results/stdout-inet.log > results/stdout-diff.log
+
+if [ ! -e results/pcap-diff-source.log ]; then
+  echo "ERROR"
+elif [ ! -s results/pcap-diff-source.log ]; then
+  echo "PASS"
+else
+  echo "FAIL"
+fi
