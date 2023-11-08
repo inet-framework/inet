@@ -369,7 +369,10 @@ class INET_API TcpSocket : public ISocket
      * connection until the remote TCP closes too (or the FIN_WAIT_1 timeout
      * expires)
      */
-    void close() override;
+    void close() override; //TODO close is close entirely socket.
+
+    enum ShutdownMode { SHUT_RD,  SHUT_WR,  SHUT_RDWR };
+    virtual void shutdown(ShutdownMode how) {} // TODO implement
 
     /**
      * Aborts the connection.
