@@ -81,6 +81,7 @@ void TcpSackRexmitQueue::discardUpTo(uint32_t seqNum)
             // It is not possible to have the UNA sacked; otherwise, it would
             // have been ACKed. This is, most likely, our wrong guessing
             // when adding Reno dupacks in the count.
+            head.lost = true;
             head.sacked = false;
             addInferredSack();
         }
@@ -106,6 +107,7 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
     if (rexmitQueue.empty() || (end == fromSeqNum)) {
         region.beginSeqNum = fromSeqNum;
         region.endSeqNum = toSeqNum;
+        region.lost = false;
         region.sacked = false;
         region.rexmitted = false;
         rexmitQueue.push_back(region);
@@ -143,6 +145,7 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
 
             region.beginSeqNum = fromSeqNum;
             region.endSeqNum = toSeqNum;
+            region.lost = beforeEnd ? i->lost : false;
             region.sacked = beforeEnd ? i->sacked : false;
             region.rexmitted = beforeEnd;
             rexmitQueue.insert(i, region);
@@ -197,8 +200,10 @@ void TcpSackRexmitQueue::addInferredSack()
     auto i = ++rexmitQueue.begin();
     while (i != rexmitQueue.end() && i->sacked)
         i++;
-    if (i != rexmitQueue.end())
+    if (i != rexmitQueue.end()) {
+        i->lost = false;
         i->sacked = true;
+    }
 }
 
 void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
@@ -231,6 +236,7 @@ void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
         while (i != rexmitQueue.end() && seqLE(i->endSeqNum, toSeqNum)) {
             if (seqGE(i->beginSeqNum, fromSeqNum)) { // Search region in queue!
                 found = true;
+                i->lost = false;
                 i->sacked = true;
             }
 
@@ -241,6 +247,7 @@ void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
             Region region = *i;
 
             region.endSeqNum = toSeqNum;
+            region.lost = false;
             region.sacked = true;
             rexmitQueue.insert(i, region);
             i->beginSeqNum = toSeqNum;
