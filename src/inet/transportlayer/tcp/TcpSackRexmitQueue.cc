@@ -416,6 +416,24 @@ void TcpSackRexmitQueue::checkSackBlock(uint32_t fromSeqNum, uint32_t& length, b
     rexmitted = i->rexmitted;
 }
 
+uint32_t TcpSackRexmitQueue::getLost() const
+{
+    uint32_t lost = 0;
+    for (auto& region : rexmitQueue)
+        if (region.lost)
+            lost += region.endSeqNum - region.beginSeqNum;
+    return lost;
+}
+
+uint32_t TcpSackRexmitQueue::getSacked() const
+{
+    uint32_t sacked = 0;
+    for (auto& region : rexmitQueue)
+        if (region.sacked)
+            sacked += region.endSeqNum - region.beginSeqNum;
+    return sacked;
+}
+
 uint32_t TcpSackRexmitQueue::getRetrans() const
 {
     uint32_t retrans = 0;
