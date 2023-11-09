@@ -10,6 +10,7 @@
 
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
+#include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 
 namespace inet {
 namespace tcp {
@@ -109,8 +110,7 @@ void TcpNewReno::receivedDataAck(uint32_t firstSeqAcked)
     // simulator.  Exit the Fast Recovery procedure."
     if (state->lossRecovery) {
         if (seqGE(state->snd_una - 1, state->recover)) {
-            auto sendQueue = conn->getSendQueueForUpdate();
-            sendQueue->lostOut = 0;
+            conn->getRexmitQueueForUpdate()->resetLostBit();
 
             uint32_t incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
             if (incr == 0)
@@ -232,9 +232,8 @@ void TcpNewReno::receivedDuplicateAck()
 {
     TcpTahoeRenoFamily::receivedDuplicateAck();
 
-    auto sendQueue = conn->getSendQueueForUpdate();
     if (state->dupacks == state->dupthresh) {
-        sendQueue->lostOut = state->snd_mss;
+            conn->getRexmitQueueForUpdate()->markHeadLost();
         if (!state->lossRecovery) {
             // RFC 3782, page 4:
             // "1) Three duplicate ACKs:

@@ -1464,7 +1464,7 @@ uint32_t TcpConnection::getTSecr(const Ptr<const TcpHeader>& tcpHeader) const
 uint32_t TcpConnection::getBytesInFlight() const
 {
     int64_t sentSize = state->snd_max - state->snd_una;
-    int64_t in_flight = sentSize - sendQueue->sackedOut - sendQueue->lostOut + rexmitQueue->getRetrans();
+    int64_t in_flight = sentSize - rexmitQueue->getSacked() - rexmitQueue->getLost() + rexmitQueue->getRetrans();
     if (in_flight < 0)
         in_flight = 0;
     const_cast<TcpConnection *>(this)->emit(bytesInFlightSignal, in_flight);

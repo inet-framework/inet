@@ -102,8 +102,8 @@ std::string TcpStateVariables::detailedInfo() const
 std::string TcpConnection::validationInfo() const
 {
     std::stringstream out;
-    out << "lostOut: " << sendQueue->lostOut << ", "
-        << "sackedOut: " << sendQueue->sackedOut << ", "
+    out << "lostOut: " << rexmitQueue->getLost() << ", "
+        << "sackedOut: " << rexmitQueue->getSacked() << ", "
         << "retrans: " << rexmitQueue->getRetrans() << ", "
         << "bytesInFligh: " << getBytesInFlight() << ", "
         << "ssthresh: " << static_cast<const TcpTahoeRenoFamilyStateVariables *>(state)->ssthresh << ", "
