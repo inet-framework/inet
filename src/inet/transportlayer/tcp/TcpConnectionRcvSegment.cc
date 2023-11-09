@@ -1193,7 +1193,8 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
             // could have been changed if faulty data receiver is not respecting the "do not shrink window" rule
             updateWndInfo(tcpHeader);
 
-            rexmitQueue->addInferredSack();
+            if (!state->sack_enabled)
+                rexmitQueue->addInferredSack();
             tcpAlgorithm->receivedDuplicateAck();
         }
         else {

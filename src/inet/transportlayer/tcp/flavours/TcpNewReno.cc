@@ -233,6 +233,7 @@ void TcpNewReno::receivedDuplicateAck()
     TcpTahoeRenoFamily::receivedDuplicateAck();
 
     if (state->dupacks == state->dupthresh) {
+        if (!state->sack_enabled)
             conn->getRexmitQueueForUpdate()->markHeadLost();
         if (!state->lossRecovery) {
             // RFC 3782, page 4:
