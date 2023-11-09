@@ -64,10 +64,6 @@ void TcpSackRexmitQueue::discardUpTo(uint32_t seqNum)
 
         while ((i != rexmitQueue.end()) && seqLE(i->endSeqNum, seqNum)) // discard/delete regions from rexmit queue, which have been acked
         {
-            if (i->sacked) {
-                auto sendQueue = conn->getSendQueueForUpdate();
-                sendQueue->sackedOut -= i->endSeqNum - i->beginSeqNum;
-            }
             i = rexmitQueue.erase(i);
         }
 
@@ -86,8 +82,6 @@ void TcpSackRexmitQueue::discardUpTo(uint32_t seqNum)
             // have been ACKed. This is, most likely, our wrong guessing
             // when adding Reno dupacks in the count.
             head.sacked = false;
-            auto sendQueue = conn->getSendQueueForUpdate();
-            sendQueue->sackedOut -= head.endSeqNum - head.beginSeqNum;
             addInferredSack();
         }
     }
@@ -203,11 +197,8 @@ void TcpSackRexmitQueue::addInferredSack()
     auto i = ++rexmitQueue.begin();
     while (i != rexmitQueue.end() && i->sacked)
         i++;
-    if (i != rexmitQueue.end()) {
+    if (i != rexmitQueue.end())
         i->sacked = true;
-        auto sendQueue = conn->getSendQueueForUpdate();
-        sendQueue->sackedOut += i->endSeqNum - i->beginSeqNum;
-    }
 }
 
 void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
@@ -240,9 +231,7 @@ void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
         while (i != rexmitQueue.end() && seqLE(i->endSeqNum, toSeqNum)) {
             if (seqGE(i->beginSeqNum, fromSeqNum)) { // Search region in queue!
                 found = true;
-                i->sacked = true; // set sacked bit
-                auto sendQueue = conn->getSendQueueForUpdate();
-                sendQueue->sackedOut += i->endSeqNum - i->beginSeqNum;
+                i->sacked = true;
             }
 
             i++;
@@ -253,8 +242,6 @@ void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
 
             region.endSeqNum = toSeqNum;
             region.sacked = true;
-            auto sendQueue = conn->getSendQueueForUpdate();
-            sendQueue->sackedOut += region.endSeqNum - region.beginSeqNum;
             rexmitQueue.insert(i, region);
             i->beginSeqNum = toSeqNum;
         }
