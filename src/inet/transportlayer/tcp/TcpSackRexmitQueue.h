@@ -174,6 +174,8 @@ class INET_API TcpSackRexmitQueue
      */
     virtual void checkSackBlock(uint32_t seqNum, uint32_t& length, bool& sacked, bool& rexmitted) const;
 
+    virtual void updateLost();
+
     /**
      * Returns the total number of lost bytes in the queue.
      */
