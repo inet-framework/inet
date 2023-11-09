@@ -73,7 +73,7 @@ void TcpSackRexmitQueue::discardUpTo(uint32_t seqNum)
         }
     }
 
-    if (!rexmitQueue.empty())
+    if (!conn->getState()->sack_enabled && !rexmitQueue.empty())
     {
         auto& head = rexmitQueue.front();
         if (head.sacked)
