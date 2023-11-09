@@ -24,6 +24,7 @@ class INET_API TcpSackRexmitQueue
     struct Region {
         uint32_t beginSeqNum;
         uint32_t endSeqNum;
+        bool lost; // indicates whether region has been lost
         bool sacked; // indicates whether region has already been sacked by data receiver
         bool rexmitted; // indicates whether region has already been retransmitted by data sender
     };
