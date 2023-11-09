@@ -107,6 +107,8 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, con
             else
                 EV_DETAIL << "Received SACK below total cumulative ACK snd_una=" << state->snd_una << "\n";
         }
+        rexmitQueue->updateLost();
+
         state->rcv_sacks += n; // total counter, no current number
 
         emit(rcvSacksSignal, state->rcv_sacks);
