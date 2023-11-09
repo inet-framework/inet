@@ -327,6 +327,18 @@ uint32_t TcpSackRexmitQueue::checkRexmitQueueForSackedOrRexmittedSegments(uint32
     return bytes;
 }
 
+void TcpSackRexmitQueue::markHeadLost()
+{
+    ASSERT(!rexmitQueue.empty());
+    rexmitQueue.begin()->lost = true;
+}
+
+void TcpSackRexmitQueue::resetLostBit()
+{
+    for (auto& elem : rexmitQueue)
+        elem.lost = false;
+}
+
 void TcpSackRexmitQueue::resetSackedBit()
 {
     for (auto& elem : rexmitQueue)
