@@ -482,7 +482,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpHeader)
             state->sacks_array.push_front(nSack);
             EV_DETAIL << "inserted DSACK entry: " << nSack.str() << "\n";
         }
-        else {
+        else if (seqGreater(end, state->rcv_nxt)) {
             uint32_t contStart = receiveQueue->getLE(start);
             uint32_t contEnd = receiveQueue->getRE(end);
 
