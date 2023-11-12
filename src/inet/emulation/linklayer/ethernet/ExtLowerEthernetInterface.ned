@@ -10,6 +10,9 @@ package inet.emulation.linklayer.ethernet;
 import inet.emulation.common.ExtInterface;
 import inet.linklayer.contract.IEthernetInterface;
 
+import inet.linklayer.ethernet.contract.IEthernetMacLayer;
+import inet.physicallayer.wired.ethernet.IEthernetPhyLayer;
+
 //
 // This module provides an Ethernet network interface suitable for emulation.
 // The lower part of the network interface is realized in the real world using
@@ -29,7 +32,18 @@ module ExtLowerEthernetInterface extends ExtInterface like IEthernetInterface
             parameters:
                 @display("p=300,200");
         }
+        macLayer: <default("EthernetMacLayer")> like IEthernetMacLayer {
+            parameters:
+                @display("p=400,400");
+        }
+        phyLayer: <default("EthernetPhyLayer")> like IEthernetPhyLayer {
+            parameters:
+                transmitter.clockModule = default("");
+                @display("p=400,500");
+        }
     connections allowunconnected:
-        upperLayerIn --> { @display("m=n"); } --> socket.upperLayerIn;
+        phys$i --> { @display("m=s"); } --> phyLayer.lowerLayerIn;
+        phyLayer.upperLayerOut --> macLayer.lowerLayerIn;
+        macLayer.upperLayerOut --> { @display("m=n"); } --> socket.upperLayerIn;
         upperLayerOut <-- { @display("m=n"); } <-- socket.upperLayerOut;
 }
