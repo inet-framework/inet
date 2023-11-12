@@ -23,6 +23,7 @@ module ExtLowerEthernetInterface extends ExtInterface like IEthernetInterface
     parameters:
         string protocol = default("ethernetmac");
         double bitrate @unit(bps) = default(nan bps);
+        *.bitrate = default(this.bitrate);
     gates:
         input cutthroughIn @loose;
         output cutthroughOut @loose;
