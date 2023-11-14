@@ -173,7 +173,7 @@ class GptpTlv {
 class GptpFollowUpInformationTlv extends GptpTlv
 {
     tlvType = GPTP_FOLLOW_UP_INFORMATION_TLV;
-    uint16_t lengthField @bit(16) = B(GPTP_FOLLOW_UP_INFORMATION_TLV_BODYSIZE).get();
+    lengthField @bit(16) = B(GPTP_FOLLOW_UP_INFORMATION_TLV_BODYSIZE).get();
     uint32_t organizationId @bit(24) = 0x0080C2;
     uint32_t organizationSubType @bit(24) = 1;
     double rateRatio @bit(32); // 11.4.4.3.6 The value of cumulativeScaledRateOffset is equal to (rateRatio – 1.0) / (2^41), truncated to the next smaller
