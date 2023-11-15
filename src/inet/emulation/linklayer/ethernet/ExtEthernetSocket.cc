@@ -66,12 +66,9 @@ void ExtEthernetSocket::handleMessage(cMessage *message)
     socket_address.sll_addr[4] = macAddress.getAddressByte(4);
     socket_address.sll_addr[5] = macAddress.getAddressByte(5);
 
-    uint8_t buffer[packet->getByteLength()];
-    auto bytesChunk = packet->peekAllAsBytes();
-    size_t packetLength = bytesChunk->copyToBuffer(buffer, sizeof(buffer));
-    ASSERT(packetLength == (size_t)packet->getByteLength());
-
-    int sent = sendto(fd, buffer, packetLength, 0, (struct sockaddr *)&socket_address, sizeof(socket_address));
+    auto bytes = packet->peekDataAsBytes()->getBytes();
+    auto packetLength = bytes.size();
+    int sent = sendto(fd, bytes.data(), packetLength, 0, (struct sockaddr *)&socket_address, sizeof(socket_address));
     if ((size_t)sent == packetLength)
         EV_INFO << "Sent " << packetLength << " packet to '" << device << "' device.\n";
     else
