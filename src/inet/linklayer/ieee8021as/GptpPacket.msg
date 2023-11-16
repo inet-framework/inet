@@ -157,7 +157,7 @@ class GptpBase extends FieldsChunk
                                         // reception.
 }
 
-class GptpTlv {
+class GptpTlv extends cObject {
     @packetData;
     GptpTlvType tlvType @bit(16);
     uint16_t lengthField @bit(16);
