@@ -201,6 +201,10 @@ class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase
      */
     virtual void optimizeRoutes(std::vector<Ipv4Route *>& routes);
 
+    virtual Node *findNode(Topology& topology, Ipv4Address& address);
+    virtual void addStaticMulticastRoutes(Topology& topology);
+    virtual void addStaticMulticastRoutes(Topology& topology, Node *sourceNode, Node *receiverNode, Ipv4Address& multicastGroup);
+
     void ensureConfigurationComputed(Topology& topology);
     void configureInterface(InterfaceInfo *interfaceInfo);
     void configureRoutingTable(Node *node);

@@ -243,6 +243,10 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //    The multicast group element provides multicast network addresses for one
 //    or more interfaces in the network.
 //
+//    - @source
+//      Optional attribute that specifies a host name. This specifies the root
+//      of the multicast spanning when static routing is enabled.
+//
 //    - @hosts
 //      Optional selector attribute that specifies a list of host name patterns.
 //      Only interfaces in the specified hosts are affected. The default value

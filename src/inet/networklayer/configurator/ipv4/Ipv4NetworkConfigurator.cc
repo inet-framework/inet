@@ -99,6 +99,7 @@ void Ipv4NetworkConfigurator::computeConfiguration()
             for (auto& autorouteElement : autorouteElements)
                 TIME(addStaticRoutes(topology, autorouteElement));
         }
+        TIME(addStaticMulticastRoutes(topology));
     }
     printElapsedTime("computeConfiguration", initializeStartTime);
 }
@@ -1823,6 +1824,110 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
 
     // copy optimized routes to original routes and return
     originalRoutes = optimizedRoutes;
+}
+
+Ipv4NetworkConfigurator::Node *Ipv4NetworkConfigurator::findNode(Topology& topology, Ipv4Address& address)
+{
+    for (int i = 0; i < topology.getNumNodes(); i++) {
+        Node *node = (Node *)topology.getNode(i);
+        for (auto& elem : node->interfaceInfos) {
+            InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(elem);
+            if (interfaceInfo->address == address.getInt())
+                return node;
+        }
+    }
+    return nullptr;
+}
+
+void Ipv4NetworkConfigurator::addStaticMulticastRoutes(Topology& topology)
+{
+    cXMLElementList multicastGroupElements = configuration->getChildrenByTagName("multicast-group");
+    for (auto& multicastGroupElement : multicastGroupElements) {
+        const char *sourceAttr = multicastGroupElement->getAttribute("source");
+        if (!opp_isempty(sourceAttr)) {
+            const char *hostAttr = multicastGroupElement->getAttribute("hosts");
+            const char *addressAttr = multicastGroupElement->getAttribute("address");
+            // parse group addresses
+            std::vector<Ipv4Address> multicastGroups;
+            cStringTokenizer tokenizer(addressAttr);
+            while (tokenizer.hasMoreTokens()) {
+                Ipv4Address addr = Ipv4Address(tokenizer.nextToken());
+                if (!addr.isMulticast())
+                    throw cRuntimeError("Non-multicast address %s found in the multicast-group element", addr.str().c_str());
+                multicastGroups.push_back(addr);
+            }
+            Ipv4Address sourceAddress = resolve(sourceAttr, L3AddressResolver::ADDR_IPv4).toIpv4();
+            auto sourceNode = findNode(topology, sourceAddress);
+            if (!sourceNode)
+                throw cRuntimeError("Multicast group source node %s not found", sourceAttr);
+            topology.calculateUnweightedSingleShortestPathsTo(sourceNode);
+            Matcher hostMatcher(hostAttr);
+            for (int i = 0; i < topology.getNumNodes(); i++) {
+                Node *receiverNode = (Node *)topology.getNode(i);
+                std::string receiverFullPath = receiverNode->module->getFullPath();
+                std::string hostShortenedFullPath = receiverFullPath.substr(receiverFullPath.find('.') + 1);
+                if ((hostMatcher.matchesAny() || hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(receiverFullPath.c_str())))
+                {
+                    for (Ipv4Address& multicastGroup : multicastGroups) {
+                        addStaticMulticastRoutes(topology, sourceNode, receiverNode, multicastGroup);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void Ipv4NetworkConfigurator::addStaticMulticastRoutes(Topology& topology, Node *sourceNode, Node *receiverNode, Ipv4Address& multicastGroup)
+{
+    InterfaceInfo *inInterfaceInfo = nullptr;
+    InterfaceInfo *outInterfaceInfo = nullptr;
+    Node *node = receiverNode;
+    while (node != sourceNode) {
+        auto link = (Link *)node->getPath(0);
+        outInterfaceInfo = static_cast<InterfaceInfo *>(link->destinationInterfaceInfo);
+        node = (Node *)link->getLinkOutRemoteNode();
+        inInterfaceInfo = node == sourceNode ? nullptr : static_cast<InterfaceInfo *>(((Link *)node->getPath(0))->sourceInterfaceInfo);
+        ASSERT(inInterfaceInfo == nullptr || inInterfaceInfo->node == node);
+        ASSERT(outInterfaceInfo->node == node);
+
+        Ipv4Address origin = Ipv4Address::UNSPECIFIED_ADDRESS;
+        Ipv4Address originNetmask = Ipv4Address::UNSPECIFIED_ADDRESS;
+        Ipv4MulticastRoute *route = nullptr;
+        for (auto r : node->staticMulticastRoutes) {
+            if (r->getSourceType() == IMulticastRoute::MANUAL &&
+                r->getOrigin() == origin &&
+                r->getOriginNetmask() == originNetmask &&
+                r->getMulticastGroup() == multicastGroup &&
+                ((r->getInInterface() == nullptr && inInterfaceInfo == nullptr) ||
+                 (r->getInInterface() != nullptr && inInterfaceInfo != nullptr && r->getInInterface()->getInterface() == inInterfaceInfo->networkInterface)))
+            {
+                route = r;
+                break;
+            }
+        }
+
+        if (route == nullptr) {
+            route = new Ipv4MulticastRoute();
+            route->setSourceType(IMulticastRoute::MANUAL);
+            route->setOrigin(origin);
+            route->setOriginNetmask(originNetmask);
+            route->setMulticastGroup(multicastGroup);
+            route->setInInterface(inInterfaceInfo != nullptr ? new Ipv4MulticastRoute::InInterface(inInterfaceInfo->networkInterface) : nullptr);
+//            if (!opp_isempty(metricAttr))
+//                route->setMetric(atoi(metricAttr));
+//            EV_INFO << "Adding static multicast route " << *route << " to " << node->module->getFullPath() << endl;
+            node->staticMulticastRoutes.push_back(route);
+        }
+
+        bool foundOutInterface = false;
+        for (int i = 0; i < route->getNumOutInterfaces(); i++)
+            if (route->getOutInterface(i)->getInterface() == outInterfaceInfo->networkInterface)
+                foundOutInterface = true;
+        if (!foundOutInterface) {
+            route->addOutInterface(new Ipv4MulticastRoute::OutInterface(outInterfaceInfo->networkInterface, false /*TODOisLeaf*/));
+            EV_INFO << "Extending static multicast route " << *route << " in " << node->module->getFullPath() << endl;
+        }
+    }
 }
 
 bool Ipv4NetworkConfigurator::getInterfaceIpv4Address(L3Address& ret, NetworkInterface *networkInterface, bool netmask)
