@@ -9,6 +9,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/PatternMatcher.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/stlutils.h"
@@ -84,6 +85,14 @@ void Aodv::initialize(int stage)
         networkProtocol->registerHook(0, this);
         host->subscribe(linkBrokenSignal, this);
         usingIpv6 = (routingTable->getRouterIdAsGeneric().getType() == L3Address::IPv6);
+
+        PatternMatcher interfaceMatcher(par("interface").stringValue(), false, true, true);
+        for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
+            auto networkInterface = interfaceTable->getInterface(i);
+            if (!networkInterface->isLoopback() && interfaceMatcher.matches(networkInterface->getInterfaceName())) {
+                interfaces.insert(networkInterface->getInterfaceId());
+            }
+        }
     }
 }
 

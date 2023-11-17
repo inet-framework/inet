@@ -72,6 +72,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     bool usingIpv6 = false;
 
     // AODV parameters: the following parameters are configurable, see the NED file for more info.
+    std::set<int> interfaces;
     unsigned int rerrRatelimit = 0;
     unsigned int aodvUDPPort = 0;
     bool askGratuitousRREP = false;
