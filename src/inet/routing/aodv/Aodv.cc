@@ -252,7 +252,7 @@ void Aodv::startRouteDiscovery(const L3Address& target, unsigned timeToLive)
     ASSERT(!hasOngoingRouteDiscovery(target));
     addressToRreqRetries[target] = 0;
     auto rreq = createRREQ(target);
-    sendRREQ(rreq, addressType->getBroadcastAddress(), timeToLive);
+    sendRREQ(rreq, timeToLive);
 }
 
 L3Address Aodv::getSelfIPAddress() const
@@ -268,7 +268,7 @@ void Aodv::delayDatagram(Packet *datagram)
     targetAddressToDelayedPackets.insert(std::pair<L3Address, Packet *>(target, datagram));
 }
 
-void Aodv::sendRREQ(const Ptr<Rreq>& rreq, const L3Address& destAddr, unsigned int timeToLive)
+void Aodv::sendRREQ(const Ptr<Rreq>& rreq, unsigned int timeToLive)
 {
     // In an expanding ring search, the originating node initially uses a TTL =
     // TTL_START in the RREQ packet IP header and sets the timeout for
@@ -335,6 +335,7 @@ void Aodv::sendRREQ(const Ptr<Rreq>& rreq, const L3Address& destAddr, unsigned i
     scheduleAfter(ringTraversalTime, rrepTimerMsg);
 
     EV_INFO << "Sending a Route Request with target " << rreq->getDestAddr() << " and TTL= " << timeToLive << endl;
+    const L3Address destAddr = addressType->getBroadcastAddress();
     sendAODVPacket(rreq, destAddr, timeToLive, *jitterPar);
     rreqCount++;
 }
@@ -1282,7 +1283,7 @@ void Aodv::handleWaitForRREP(WaitForRrep *rrepTimer)
         addressToRreqRetries[destAddr]++;
 
     auto rreq = createRREQ(destAddr);
-    sendRREQ(rreq, addressType->getBroadcastAddress(), 0);
+    sendRREQ(rreq, 0);
 }
 
 void Aodv::forwardRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned int timeToLive)

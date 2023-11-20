@@ -161,7 +161,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void handleRREPACK(const Ptr<const RrepAck>& rrepACK, const L3Address& neighborAddr);
 
     /* Control Packet sender methods */
-    void sendRREQ(const Ptr<Rreq>& rreq, const L3Address& destAddr, unsigned int timeToLive);
+    void sendRREQ(const Ptr<Rreq>& rreq, unsigned int timeToLive);
     void sendRREPACK(const Ptr<RrepAck>& rrepACK, const L3Address& destAddr);
     void sendRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned int timeToLive);
     void sendGRREP(const Ptr<Rrep>& grrep, const L3Address& destAddr, unsigned int timeToLive);
