@@ -250,8 +250,8 @@ void Aodv::startRouteDiscovery(const L3Address& target, unsigned timeToLive)
 {
     EV_INFO << "Starting route discovery with originator " << getSelfIPAddress() << " and destination " << target << endl;
     ASSERT(!hasOngoingRouteDiscovery(target));
-    auto rreq = createRREQ(target);
     addressToRreqRetries[target] = 0;
+    auto rreq = createRREQ(target);
     sendRREQ(rreq, addressType->getBroadcastAddress(), timeToLive);
 }
 
@@ -1276,13 +1276,12 @@ void Aodv::handleWaitForRREP(WaitForRrep *rrepTimer)
         return;
     }
 
-    auto rreq = createRREQ(destAddr);
-
     // the node MAY try again to discover a route by broadcasting another
     // RREQ, up to a maximum of RREQ_RETRIES times at the maximum TTL value.
     if (rrepTimer->getLastTTL() == netDiameter) // netDiameter is the maximum TTL value
         addressToRreqRetries[destAddr]++;
 
+    auto rreq = createRREQ(destAddr);
     sendRREQ(rreq, addressType->getBroadcastAddress(), 0);
 }
 
