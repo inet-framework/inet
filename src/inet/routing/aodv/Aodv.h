@@ -169,7 +169,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
 
     /* Control Packet forwarders */
     void forwardRREP(const Ptr<Rrep>& rrep, int interfaceId, const L3Address& destAddr, unsigned int timeToLive);
-    void forwardRREQ(const Ptr<Rreq>& rreq, unsigned int timeToLive);
+    void broadcastOnAllInterfaces(const Ptr<AodvControlPacket>& aodvPacket, int sourceInterfaceId, unsigned int timeToLive, double delay);
 
     /* Self message handlers */
     void handleRREPACKTimer();

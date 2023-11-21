@@ -345,11 +345,7 @@ void Aodv::sendRREQ(const Ptr<Rreq>& rreq, unsigned int timeToLive)
     scheduleAfter(ringTraversalTime, rrepTimerMsg);
 
     EV_INFO << "Sending a Route Request with target " << rreq->getDestAddr() << " and TTL= " << timeToLive << endl;
-    for (auto interfaceId: interfaces) {
-        // NetworkInterface *nic = interfaceTable->getInterfaceById(interfaceId);
-        const L3Address destAddr = addressType->getBroadcastAddress();  // TODO get interface broadcast address
-        sendAODVPacket(rreq, interfaceId, destAddr, timeToLive, *jitterPar);
-    }
+    broadcastOnAllInterfaces(rreq, -1, timeToLive, *jitterPar);
     rreqCount++;
 }
 
@@ -982,14 +978,7 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, int sourceInterfaceId, const L3Addr
         auto outgoingRREQ = dynamicPtrCast<Rreq>(rreq->dupShared());
         // forward RREQ(outgoingRREQ, timeToLive);
         EV_INFO << "Forwarding the Route Request message with TTL= " << timeToLive << endl;
-        for (auto interfaceId: interfaces) {
-            NetworkInterface *nic = interfaceTable->getInterfaceById(interfaceId);
-            if (interfaceId == sourceInterfaceId && nic->isWired())
-                continue; // skip the incoming interface when it is wired
-            const L3Address destAddr = addressType->getBroadcastAddress();  // TODO get interface broadcast address
-            sendAODVPacket(outgoingRREQ, interfaceId, destAddr, timeToLive, *jitterPar);
-        }
-
+        broadcastOnAllInterfaces(rreq, sourceInterfaceId, timeToLive, *jitterPar);
     }
     else
         EV_WARN << "Can't forward the RREQ because of its small (<= 1) TTL: " << timeToLive << " or the AODV reboot has not completed yet" << endl;
@@ -1142,11 +1131,7 @@ void Aodv::handleLinkBreakSendRERR(const L3Address& unreachableAddr)
 
     // broadcast
     EV_INFO << "Broadcasting Route Error message with TTL=1" << endl;
-    for (auto interfaceId: interfaces) {
-        // NetworkInterface *nic = interfaceTable->getInterfaceById(interfaceId);
-        const L3Address destAddr = addressType->getBroadcastAddress();  // TODO get interface broadcast address
-        sendAODVPacket(rerr, interfaceId, destAddr, 1, *jitterPar);
-    }
+    broadcastOnAllInterfaces(rerr, -1, 1, *jitterPar);
 }
 
 const Ptr<Rerr> Aodv::createRERR(const std::vector<UnreachableNode>& unreachableNodes)
@@ -1225,13 +1210,7 @@ void Aodv::handleRERR(const Ptr<const Rerr>& rerr, int sourceInterfaceId, const 
     if (unreachableNeighbors.size() > 0 && (simTime() > rebootTime + deletePeriod || rebootTime == 0)) {
         EV_INFO << "Sending RERR to inform our neighbors about link breaks." << endl;
         auto newRERR = createRERR(unreachableNeighbors);
-        for (auto interfaceId: interfaces) {
-            NetworkInterface *nic = interfaceTable->getInterfaceById(interfaceId);
-            if (interfaceId == sourceInterfaceId && nic->isWired())
-                continue; // skip the incoming interface when it is wired
-            const L3Address destAddr = addressType->getBroadcastAddress();  // TODO get interface broadcast address
-            sendAODVPacket(newRERR, interfaceId, destAddr, 1, 0);
-        }
+        broadcastOnAllInterfaces(newRERR, sourceInterfaceId, 1, 0);
         rerrCount++;
     }
 }
@@ -1327,14 +1306,14 @@ void Aodv::forwardRREP(const Ptr<Rrep>& rrep, int interfaceId, const L3Address& 
     sendAODVPacket(rrep, interfaceId, destAddr, 100, *jitterPar);
 }
 
-void Aodv::forwardRREQ(const Ptr<Rreq>& rreq, unsigned int timeToLive)
+void Aodv::broadcastOnAllInterfaces(const Ptr<AodvControlPacket>& aodvPacket, int sourceInterfaceId, unsigned int timeToLive, double delay)
 {
-    EV_INFO << "Forwarding the Route Request message with TTL= " << timeToLive << endl;
     for (auto interfaceId: interfaces) {
-        // NetworkInterface *nic = interfaceTable->getInterfaceById(interfaceId);
-        // TODO skip the incoming interface when it wired
+        NetworkInterface *nic = interfaceTable->getInterfaceById(interfaceId);
+        if (interfaceId == sourceInterfaceId && nic->isWired())
+            continue; // skip the incoming interface when it is wired
         const L3Address destAddr = addressType->getBroadcastAddress();  // TODO get interface broadcast address
-        sendAODVPacket(rreq, interfaceId, destAddr, timeToLive, *jitterPar);
+        sendAODVPacket(aodvPacket, interfaceId, destAddr, timeToLive, delay);
     }
 }
 
@@ -1426,11 +1405,7 @@ void Aodv::sendHelloMessagesIfNeeded()
     if (hasActiveRoute && (lastBroadcastTime == 0 || simTime() - lastBroadcastTime > helloInterval)) {
         EV_INFO << "It is hello time, broadcasting Hello Messages with TTL=1" << endl;
         auto helloMessage = createHelloMessage();
-        for (auto interfaceId: interfaces) {
-            // NetworkInterface *nic = interfaceTable->getInterfaceById(interfaceId);
-            const L3Address destAddr = addressType->getBroadcastAddress();  // TODO get interface broadcast address
-            sendAODVPacket(helloMessage, interfaceId, destAddr, 1, 0);
-        }
+        broadcastOnAllInterfaces(helloMessage, -1, 1, 0);
     }
 
     scheduleAfter(helloInterval - *periodicJitter, helloMsgTimer);
@@ -1637,11 +1612,7 @@ void Aodv::sendRERRWhenNoRouteToForward(const L3Address& unreachableAddr)
     EV_INFO << "Broadcasting Route Error message with TTL=1" << endl;
 
     // TODO unicast if there exists a route to the source
-    for (auto interfaceId: interfaces) {
-        // NetworkInterface *nic = interfaceTable->getInterfaceById(interfaceId);
-        const L3Address destAddr = addressType->getBroadcastAddress();  // TODO get interface broadcast address
-        sendAODVPacket(rerr, interfaceId, destAddr, 1, *jitterPar);
-    }
+    broadcastOnAllInterfaces(rerr, -1, 1, *jitterPar);
 }
 
 void Aodv::cancelRouteDiscovery(const L3Address& destAddr)
