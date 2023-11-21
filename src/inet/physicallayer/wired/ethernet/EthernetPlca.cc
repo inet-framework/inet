@@ -9,8 +9,10 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/PacketEventTag.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/TimeTag.h"
 #include "inet/physicallayer/wired/ethernet/EthernetPhyHeader_m.h"
 
 namespace inet {
@@ -723,15 +725,19 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
                 simtime_t duration = b(currentTx->getDataLength() + ETHERNET_PHY_HEADER_LEN + getEsdLength()).get() / mode->bitrate;
                 scheduleAfter(duration, tx_timer);
                 ASSERT(macStartFrameTransmissionTime != -1);
-                emit(packetPendingDelaySignal, simTime() - macStartFrameTransmissionTime);
+                simtime_t packetPendingDelay = simTime() - macStartFrameTransmissionTime;
+                emit(packetPendingDelaySignal, packetPendingDelay);
+                auto packet = currentTx->dup();
+                insertPacketEvent(this, packet, PEK_PROCESSED, 0, packetPendingDelay);
+                increaseTimeTag<PropagationTimeTag>(packet, packetPendingDelay, packetPendingDelay);
                 macStartFrameTransmissionTime = -1;
                 if (phyStartFrameTransmissionTime != -1)
                     emit(packetIntervalSignal, simTime() - phyStartFrameTransmissionTime);
                 phyStartFrameTransmissionTime = simTime();
-                emit(packetSentToLowerSignal, currentTx);
+                emit(packetSentToLowerSignal, packet);
                 numPacketsPerTo++;
                 numPacketsPerCycle++;
-                FSMA_Delay_Action(phy->startFrameTransmission(currentTx->dup(), bc < max_bc - 1 ? ESDBRS : ESD));
+                FSMA_Delay_Action(phy->startFrameTransmission(packet, bc < max_bc - 1 ? ESDBRS : ESD));
                 FSMA_Delay_Action(handleWithControlFSM());
             );
             FSMA_Event_Transition(TX_END,
