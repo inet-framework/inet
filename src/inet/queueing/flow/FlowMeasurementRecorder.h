@@ -9,8 +9,9 @@
 #define __INET_FLOWMEASUREMENTRECORDER_H
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/TimeTag_m.h"
+#include "inet/common/JsonWriter.h"
 #include "inet/common/packet/PacketFilter.h"
+#include "inet/common/TimeTag_m.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
 namespace inet {
@@ -35,6 +36,8 @@ class INET_API FlowMeasurementRecorder : public PacketFlowBase, public Transpare
     bool measureProcessingTime = false;
     bool measureTransmissionTime = false;
     bool measurePropagationTime = false;
+    bool measurePacketEvent = false;
+    JsonWriter packetEventFile;
 
   protected:
     virtual void initialize(int stage) override;
@@ -65,6 +68,7 @@ class INET_API FlowMeasurementRecorder : public PacketFlowBase, public Transpare
     }
 
   public:
+    virtual ~FlowMeasurementRecorder();
     virtual void processPacket(Packet *packet) override;
 };
 
