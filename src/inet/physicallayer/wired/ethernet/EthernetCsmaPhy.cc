@@ -9,8 +9,10 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/PacketEventTag.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/TimeTag.h"
 #include "inet/physicallayer/wired/ethernet/EthernetPhyHeader_m.h"
 
 namespace inet {
@@ -409,6 +411,16 @@ void EthernetCsmaPhy::encapsulate(Packet *packet)
     auto phyHeader = makeShared<EthernetPhyHeader>();
     packet->insertAtFront(phyHeader);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetPhy);
+    auto packetEvent = new PacketTransmittedEvent();
+    simtime_t packetTransmissionTime = packet->getBitLength() / mode->bitrate;
+    simtime_t bitTransmissionTime = packet->getBitLength() != 0 ? 1 / mode->bitrate : 0;
+    packetEvent->setDatarate(bps(mode->bitrate));
+    insertPacketEvent(this, packet, PEK_TRANSMITTED, bitTransmissionTime, 8 * bitTransmissionTime, packetEvent);
+    increaseTimeTag<TransmissionTimeTag>(packet, bitTransmissionTime, packetTransmissionTime);
+    if (auto channel = dynamic_cast<cDatarateChannel *>(physOutGate->findTransmissionChannel())) {
+        insertPacketEvent(this, packet, PEK_PROPAGATED, 0, channel->getDelay());
+        increaseTimeTag<PropagationTimeTag>(packet, channel->getDelay(), channel->getDelay());
+    }
 }
 
 void EthernetCsmaPhy::decapsulate(Packet *packet)
