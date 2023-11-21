@@ -6,7 +6,9 @@
 
 #include "inet/physicallayer/wired/common/WireJunction.h"
 
+#include "inet/common/PacketEventTag.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/TimeTag.h"
 
 namespace inet {
 namespace physicallayer {
@@ -117,6 +119,13 @@ void WireJunction::handleMessage(cMessage *msg)
             }
 
             // send
+            if (auto channel = dynamic_cast<cDatarateChannel *>(ogate->findTransmissionChannel())) {
+                auto packet = check_and_cast_nullable<Packet *>(outSignal->getEncapsulatedPacket());
+                if (packet != nullptr) {
+                    insertPacketEvent(this, packet, PEK_PROPAGATED, 0, channel->getDelay());
+                    increaseTimeTag<PropagationTimeTag>(packet, channel->getDelay(), channel->getDelay());
+                }
+            }
             send(outSignal, sendOptions, ogate);
         }
     }
