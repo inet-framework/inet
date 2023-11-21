@@ -66,10 +66,10 @@ Signal *PacketTransmitterBase::encodePacket(Packet *packet)
     simtime_t bitTransmissionTime = packet->getBitLength() != 0 ? CLOCKTIME_AS_SIMTIME(txDurationClockTime / packet->getBitLength()) : 0;
     auto packetEvent = new PacketTransmittedEvent();
     packetEvent->setDatarate(packet->getDataLength() / s(txDurationClockTime.dbl()));
-    insertPacketEvent(this, packet, PEK_TRANSMITTED, bitTransmissionTime, packetEvent);
+    insertPacketEvent(this, packet, PEK_TRANSMITTED, bitTransmissionTime, 0, packetEvent);
     increaseTimeTag<TransmissionTimeTag>(packet, bitTransmissionTime, packetTransmissionTime);
     if (auto channel = dynamic_cast<cDatarateChannel *>(outputGate->findTransmissionChannel())) {
-        insertPacketEvent(this, packet, PEK_PROPAGATED, channel->getDelay());
+        insertPacketEvent(this, packet, PEK_PROPAGATED, 0, channel->getDelay());
         increaseTimeTag<PropagationTimeTag>(packet, channel->getDelay(), channel->getDelay());
     }
     auto signal = new Signal(packet->getName());

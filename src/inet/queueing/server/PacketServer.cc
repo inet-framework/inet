@@ -81,7 +81,7 @@ void PacketServer::endProcessingPacket()
     EV_INFO << "Processing packet ended" << EV_FIELD(packet) << EV_ENDL;
     simtime_t packetProcessingTime = simTime() - processingTimer->getSendingTime();
     simtime_t bitProcessingTime = packetProcessingTime / packet->getBitLength();
-    insertPacketEvent(this, packet, PEK_PROCESSED, bitProcessingTime);
+    insertPacketEvent(this, packet, PEK_PROCESSED, bitProcessingTime, 0);
     increaseTimeTag<ProcessingTimeTag>(packet, bitProcessingTime, packetProcessingTime);
     processedTotalLength += packet->getDataLength();
     emit(packetPushedSignal, packet);
