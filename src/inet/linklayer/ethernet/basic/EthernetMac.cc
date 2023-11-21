@@ -7,8 +7,10 @@
 
 #include "inet/linklayer/ethernet/basic/EthernetMac.h"
 
+#include "inet/common/PacketEventTag.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/TimeTag.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
@@ -99,6 +101,18 @@ void EthernetMac::startFrameTransmission()
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
     encapsulate(frame);
+
+    auto packetEvent = new PacketTransmittedEvent();
+    auto packet = frame;
+    simtime_t packetTransmissionTime = packet->getBitLength() / curEtherDescr->bitrate;
+    simtime_t bitTransmissionTime = packet->getBitLength() != 0 ? 1 / curEtherDescr->bitrate : 0;
+    packetEvent->setDatarate(bps(curEtherDescr->bitrate));
+    insertPacketEvent(this, packet, PEK_TRANSMITTED, bitTransmissionTime, 0, packetEvent);
+    increaseTimeTag<TransmissionTimeTag>(packet, bitTransmissionTime, packetTransmissionTime);
+    if (auto channel = dynamic_cast<cDatarateChannel *>(physOutGate->findTransmissionChannel())) {
+        insertPacketEvent(this, packet, PEK_PROPAGATED, 0, channel->getDelay());
+        increaseTimeTag<PropagationTimeTag>(packet, channel->getDelay(), channel->getDelay());
+    }
 
     // send
     auto& oldPacketProtocolTag = frame->removeTag<PacketProtocolTag>();
