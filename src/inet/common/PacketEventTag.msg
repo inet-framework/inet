@@ -27,7 +27,8 @@ class PacketEvent extends cObject
     string modulePath;
     int64_t eventNumber = -1;
     simtime_t simulationTime = -1;
-    simtime_t duration = -1;
+    simtime_t bitDuration = 0; // per bit duration
+    simtime_t packetDuration = 0; // per packet duration
     b packetLength = b(-1);
 }
 

@@ -9,7 +9,7 @@
 
 namespace inet {
 
-void insertPacketEvent(const cModule *module, Packet *packet, int kind, simtime_t duration, PacketEvent *packetEvent)
+void insertPacketEvent(const cModule *module, Packet *packet, int kind, simtime_t bitDuration, simtime_t packetDuration, PacketEvent *packetEvent)
 {
     auto simulation = module->getSimulation();
     packet->mapAllRegionTagsForUpdate<PacketEventTag>(b(0), packet->getTotalLength(), [&] (b offset, b length, const Ptr<PacketEventTag>& eventTag) {
@@ -18,7 +18,8 @@ void insertPacketEvent(const cModule *module, Packet *packet, int kind, simtime_
         packetEventCopy->setModulePath(module->getFullPath().c_str());
         packetEventCopy->setEventNumber(simulation->getEventNumber());
         packetEventCopy->setSimulationTime(simulation->getSimTime());
-        packetEventCopy->setDuration(duration);
+        packetEventCopy->setBitDuration(bitDuration);
+        packetEventCopy->setPacketDuration(packetDuration);
         packetEventCopy->setPacketLength(packet->getDataLength());
         eventTag->appendPacketEvents(packetEventCopy);
     });

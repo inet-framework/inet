@@ -13,7 +13,7 @@
 
 namespace inet {
 
-INET_API void insertPacketEvent(const cModule *module, Packet *packet, int kind, simtime_t duration, PacketEvent *packetEvent = new PacketEvent());
+INET_API void insertPacketEvent(const cModule *module, Packet *packet, int kind, simtime_t bitDuration, simtime_t packetDuration, PacketEvent *packetEvent = new PacketEvent());
 
 } // namespace inet
 
