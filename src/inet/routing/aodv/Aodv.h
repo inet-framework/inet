@@ -140,8 +140,8 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void cancelRouteDiscovery(const L3Address& destAddr);
 
     /* Routing Table management */
-    void updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
-    IRoute *createRoute(const L3Address& destAddr, const L3Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
+    void updateRoutingTable(IRoute *route, int interfaceId, const L3Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
+    IRoute *createRoute(const L3Address& destAddr, int interfaceId, const L3Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
     bool updateValidRouteLifeTime(const L3Address& destAddr, simtime_t lifetime);
     void scheduleExpungeRoutes();
     void expungeRoutes();
@@ -155,20 +155,20 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     const Ptr<Rerr> createRERR(const std::vector<UnreachableNode>& unreachableNodes);
 
     /* Control Packet handlers */
-    void handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr);
-    void handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsigned int timeToLive);
-    void handleRERR(const Ptr<const Rerr>& rerr, const L3Address& sourceAddr);
-    void handleHelloMessage(const Ptr<Rrep>& helloMessage);
-    void handleRREPACK(const Ptr<const RrepAck>& rrepACK, const L3Address& neighborAddr);
+    void handleRREP(const Ptr<Rrep>& rrep, int sourceInterfaceId, const L3Address& sourceAddr);
+    void handleRREQ(const Ptr<Rreq>& rreq, int sourceInterfaceId, const L3Address& sourceAddr, unsigned int timeToLive);
+    void handleRERR(const Ptr<const Rerr>& rerr, int sourceInterfaceId, const L3Address& sourceAddr);
+    void handleHelloMessage(const Ptr<Rrep>& helloMessage, int sourceInterfaceId);
+    void handleRREPACK(const Ptr<const RrepAck>& rrepACK, int sourceInterfaceId, const L3Address& neighborAddr);
 
     /* Control Packet sender methods */
     void sendRREQ(const Ptr<Rreq>& rreq, unsigned int timeToLive);
-    void sendRREPACK(const Ptr<RrepAck>& rrepACK, const L3Address& destAddr);
+    void sendRREPACK(const Ptr<RrepAck>& rrepACK, int interfaceId, const L3Address& destAddr);
     void sendRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned int timeToLive);
     void sendGRREP(const Ptr<Rrep>& grrep, const L3Address& destAddr, unsigned int timeToLive);
 
     /* Control Packet forwarders */
-    void forwardRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned int timeToLive);
+    void forwardRREP(const Ptr<Rrep>& rrep, int interfaceId, const L3Address& destAddr, unsigned int timeToLive);
     void forwardRREQ(const Ptr<Rreq>& rreq, unsigned int timeToLive);
 
     /* Self message handlers */
@@ -193,7 +193,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
 
     /* Helper functions */
     L3Address getSelfIPAddress() const;
-    void sendAODVPacket(const Ptr<AodvControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay);
+    void sendAODVPacket(const Ptr<AodvControlPacket>& packet, int interfaceId, const L3Address& destAddr, unsigned int timeToLive, double delay);
     void processPacket(Packet *pk);
     void clearState();
     void checkIpVersionAndPacketTypeCompatibility(AodvControlPacketType packetType);
