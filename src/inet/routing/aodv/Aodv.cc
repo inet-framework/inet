@@ -1303,7 +1303,7 @@ void Aodv::forwardRREP(const Ptr<Rrep>& rrep, int interfaceId, const L3Address& 
     // When a node forwards a message, it SHOULD be jittered by delaying it
     // by a random duration.  This delay SHOULD be generated uniformly in an
     // interval between zero and MAXJITTER.
-    sendAODVPacket(rrep, interfaceId, destAddr, 100, *jitterPar);
+    sendAODVPacket(rrep, interfaceId, destAddr, timeToLive, *jitterPar);
 }
 
 void Aodv::broadcastOnAllInterfaces(const Ptr<AodvControlPacket>& aodvPacket, int sourceInterfaceId, unsigned int timeToLive, double delay)
