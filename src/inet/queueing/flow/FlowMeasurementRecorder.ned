@@ -29,7 +29,7 @@ simple FlowMeasurementRecorder extends PacketFlowBase like IPacketFlow
         int offset @unit(b) = default(0b); // designates the packet part to be measured
         int length @unit(b) = default(-1b); // designates the packet part to be measured
         string flowName = default(""); // use packet flow to separate measurement from other measurements
-        string measure = default("*"); // match expression for a combination of: packetEvent, elapsedTime, delayingTime, queueingTime, processingTime, transmissionTime, propagationTime
+        string measure = default("not packetEvent"); // match expression for a combination of: packetEvent, elapsedTime, delayingTime, queueingTime, processingTime, transmissionTime, propagationTime
         bool endMeasurement = default(true);
         string packetEventFileName = default("results/" + expand("${configname}-") + fullPath() + "-packetEvent.json");
         @class(FlowMeasurementRecorder);
