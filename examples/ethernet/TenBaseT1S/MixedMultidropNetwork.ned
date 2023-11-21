@@ -12,6 +12,7 @@ import inet.node.ethernet.EthernetLink;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
 import inet.physicallayer.wired.common.WireJunction;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 //
 // This module contains an ~EthernetSwitch connected to a ~StandardHost and a
@@ -43,6 +44,10 @@ network MixedMultidropNetwork
         j[numNodes]: WireJunction {
             parameters:
                 @display("p=300,150,row,150");
+        }
+        visualizer: IntegratedCanvasVisualizer {
+            parameters:
+                @display("p=100,400;is=s");
         }
     connections:
         switch.ethg++ <--> EthernetMultidropLink { length = 100cm; } <--> j[0].port++;

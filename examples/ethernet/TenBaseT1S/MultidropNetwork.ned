@@ -9,6 +9,7 @@ package inet.examples.ethernet.TenBaseT1S;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.node.ethernet.EthernetMultidropLink;
 import inet.physicallayer.wired.common.WireJunction;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 //
 // This module contains a single 10BASE-T1S multidrop link with a separate
@@ -35,6 +36,10 @@ network MultidropNetwork
         j[numNodes]: WireJunction {
             parameters:
                 @display("p=300,150,row,150");
+        }
+        visualizer: IntegratedCanvasVisualizer {
+            parameters:
+                @display("p=100,300;is=s");
         }
     connections:
         controller.ethg++ <--> EthernetMultidropLink { length = 100cm; } <--> j[0].port++;
