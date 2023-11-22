@@ -21,6 +21,7 @@
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo.h"
@@ -1360,7 +1361,10 @@ void Aodv::broadcastOnAllInterfaces(const Ptr<AodvControlPacket>& aodvPacket, in
             continue; // interface down
         if (interfaceId == sourceInterfaceId && nic->isWired())
             continue; // skip the incoming interface when it is wired
-        const L3Address destAddr = addressType->getBroadcastAddress();  // TODO get interface broadcast address
+        const L3Address destAddr =
+                (addressType->getType() == L3Address::AddressType::IPv4) ?
+                L3Address(nic->getProtocolData<Ipv4InterfaceData>()->getNetworkBroadcastAddress()) :
+                addressType->getBroadcastAddress();
         sendAODVPacket(aodvPacket, interfaceId, destAddr, timeToLive, delay);
     }
 }
