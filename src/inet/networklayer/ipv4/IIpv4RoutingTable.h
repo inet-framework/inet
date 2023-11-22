@@ -201,6 +201,7 @@ class INET_API IIpv4RoutingTable : public IRoutingTable
     virtual NetworkInterface *getInterfaceByAddress(const L3Address& address) const override { return getInterfaceByAddress(address.toIpv4()); }
     virtual L3Address getRouterIdAsGeneric() const override { return getRouterId(); }
     virtual bool isLocalAddress(const L3Address& dest) const override { return isLocalAddress(dest.toIpv4()); }
+    virtual bool isLocalBroadcastAddress(const L3Address& dest) const override { return isLocalBroadcastAddress(dest.toIpv4()); }
     virtual IRoute *findBestMatchingRoute(const L3Address& dest) const override { return findBestMatchingRoute(dest.toIpv4()); }
     virtual NetworkInterface *getOutputInterfaceForDestination(const L3Address& dest) const override { return getInterfaceForDestAddr(dest.toIpv4()); } // TODO inconsistent names
     virtual L3Address getNextHopForDestination(const L3Address& dest) const override { return getGatewayForDestAddr(dest.toIpv4()); } // TODO inconsistent names

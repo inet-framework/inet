@@ -49,6 +49,12 @@ class INET_API IRoutingTable
     virtual bool isLocalAddress(const L3Address& dest) const = 0; // TODO maybe into InterfaceTable?
 
     /**
+     * Checks if the address is a local network broadcast address, i.e. one of the
+     * broadcast addresses derived from the interface addresses and netmasks.
+     */
+    virtual bool isLocalBroadcastAddress(const L3Address& dest) const = 0;
+
+    /**
      * Returns an interface given by its address. Returns nullptr if not found.
      */
     virtual NetworkInterface *getInterfaceByAddress(const L3Address& address) const = 0; // TODO should be find..., see next one
