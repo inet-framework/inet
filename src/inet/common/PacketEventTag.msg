@@ -32,12 +32,6 @@ class PacketEvent extends cObject
     b packetLength = b(-1);
 }
 
-class PacketQueuedEvent extends PacketEvent
-{
-    int queuePacketLength = -1;
-    b queueDataLength = b(-1);
-}
-
 class PacketTransmittedEvent extends PacketEvent
 {
     bps datarate = bps(-1);
