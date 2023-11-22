@@ -117,13 +117,20 @@ const Ptr<Chunk> FieldsChunk::peekUnchecked(PeekPredicate predicate, PeekConvert
 
 std::ostream& FieldsChunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const
 {
-    auto className = getClassName();
     auto descriptor = getDescriptor();
     // TODO make this more sophisticated, e.g. add properties to fields to control what is printed
-    if (level <= PRINT_LEVEL_DETAIL)
-        for (int i = 0; i < descriptor->getFieldCount(); i++)
-            if (!descriptor->getFieldIsArray(i) && !strcmp(className, descriptor->getFieldDeclaredOn(i)))
+    if (level <= PRINT_LEVEL_DETAIL) {
+        for (int i = 0; i < descriptor->getFieldCount(); i++) {
+            auto fieldDeclaredOn = descriptor->getFieldDeclaredOn(i);
+            if (!descriptor->getFieldIsArray(i) &&
+                strcmp("inet::FieldsChunk", fieldDeclaredOn) &&
+                strcmp("inet::Chunk", fieldDeclaredOn) &&
+                strcmp("omnetpp::cObject", fieldDeclaredOn))
+            {
                 stream << ", " << EV_BOLD << descriptor->getFieldName(i) << EV_NORMAL << " = " << descriptor->getFieldValueAsString(toAnyPtr(this), i, 0);
+            }
+        }
+    }
     return stream;
 }
 
