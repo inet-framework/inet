@@ -98,13 +98,19 @@ void FlowMeasurementRecorder::endMeasurements(Packet *packet)
         packetEventFile.openObject();
         packetEventFile.writeInt("eventNumber", cSimulation::getActiveSimulation()->getEventNumber());
         packetEventFile.writeRaw("simulationTime", simTime().str());
+        packetEventFile.writeString("module", getFullPath());
+        packetEventFile.writeInt("packetId", packet->getId());
+        packetEventFile.writeInt("packetTreeId", packet->getTreeId());
         packetEventFile.writeString("packetName", packet->getName());
+        std::stringstream s;
+        packet->peekAll()->printToStream(s, 0);
+        packetEventFile.writeString("packetData", s.str());
         packetEventFile.openArray("lifeTimes");
         packet->peekData()->mapAllTags<CreationTimeTag>(offset, length, [&] (b o, b l, const Ptr<const CreationTimeTag>& creationTimeTag) {
             simtime_t lifeTime = simTime() - creationTimeTag->getCreationTime();
             packetEventFile.openObject();
             packetEventFile.writeInt("offset", b(o).get());
-            packetEventFile.writeInt("length", b(l).get() );
+            packetEventFile.writeInt("length", b(l).get());
             packetEventFile.writeRaw("lifeTime", lifeTime.str());
             packetEventFile.closeObject();
         });
@@ -114,7 +120,7 @@ void FlowMeasurementRecorder::endMeasurements(Packet *packet)
             simtime_t totalDuration = 0;
             packetEventFile.openObject();
             packetEventFile.writeInt("offset", b(o).get());
-            packetEventFile.writeInt("length", b(l).get() );
+            packetEventFile.writeInt("length", b(l).get());
             packetEventFile.openArray("events");
             for (int i = 0; i < packetEventTag->getPacketEventsArraySize(); i++) {
                 auto packetEvent = packetEventTag->getPacketEvents(i);
@@ -129,7 +135,12 @@ void FlowMeasurementRecorder::endMeasurements(Packet *packet)
                 packetEventFile.writeRaw("simulationTime", packetEvent->getSimulationTime().str());
                 packetEventFile.writeString("type", kindName + 4);
                 packetEventFile.writeString("module", packetEvent->getModulePath());
+                packetEventFile.writeInt("packetLength", b(packetEvent->getPacketLength()).get());
                 packetEventFile.writeRaw("duration", duration.str());
+                if (kind == PEK_TRANSMITTED) {
+                    auto packetTransmittedEvent = static_cast<const PacketTransmittedEvent *>(packetEvent);
+                    packetEventFile.writeDouble("datarate", bps(packetTransmittedEvent->getDatarate()).get());
+                }
                 packetEventFile.closeObject();
             }
             packetEventFile.closeArray();
