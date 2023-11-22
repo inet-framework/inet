@@ -202,7 +202,7 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram)
     const L3Address& destAddr = networkHeader->getDestinationAddress();
     const L3Address& sourceAddr = networkHeader->getSourceAddress();
 
-    if (destAddr.isBroadcast() || routingTable->isLocalAddress(destAddr) || destAddr.isMulticast())
+    if (destAddr.isBroadcast() || destAddr.isMulticast() || routingTable->isLocalAddress(destAddr) || routingTable->isLocalBroadcastAddress(destAddr))
         return ACCEPT;
     else {
         EV_INFO << "Finding route for source " << sourceAddr << " with destination " << destAddr << endl;
