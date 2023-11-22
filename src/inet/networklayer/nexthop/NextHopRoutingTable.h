@@ -96,6 +96,8 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
      */
     virtual bool isLocalAddress(const L3Address& dest) const override; // TODO maybe into InterfaceTable?
 
+    virtual bool isLocalBroadcastAddress(const L3Address& dest) const override { return false; } // TODO maybe into InterfaceTable?
+
     /**
      * Returns an interface given by its address. Returns nullptr if not found.
      */

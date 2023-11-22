@@ -378,7 +378,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual bool isMulticastForwardingEnabled() const override { return true; /*TODO isMulticastForwardingEnabled();*/ }
     virtual L3Address getRouterIdAsGeneric() const override { return L3Address(Ipv6Address()); /*TODO getRouterId();*/ }
     virtual bool isLocalAddress(const L3Address& dest) const override { return isLocalAddress(dest.toIpv6()); }
-    virtual bool isLocalBroadcastAddress(const L3Address& dest) const { return false; /*TODO isLocalBroadcastAddress(dest.toIPv6());*/ }
+    virtual bool isLocalBroadcastAddress(const L3Address& dest) const override { return false; /*TODO isLocalBroadcastAddress(dest.toIPv6());*/ }
     virtual NetworkInterface *getInterfaceByAddress(const L3Address& address) const override;
     virtual NetworkInterface *findInterfaceByLocalBroadcastAddress(const L3Address& dest) const { return nullptr; /*TODO findInterfaceByLocalBroadcastAddress(dest.toIPv6());*/ }
     virtual IRoute *findBestMatchingRoute(const L3Address& dest) const override { return const_cast<Ipv6Route *>((const_cast<Ipv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIpv6())); } // FIXME what a name??!! also: remove const; ALSO: THIS DOES NOT UPDATE DESTCACHE LIKE METHODS BUILT ON IT!
