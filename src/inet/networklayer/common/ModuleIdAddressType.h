@@ -22,6 +22,7 @@ class INET_API ModuleIdAddressType : public IL3AddressType
     ModuleIdAddressType() {}
     virtual ~ModuleIdAddressType() {}
 
+    virtual L3Address::AddressType getType() const override { return L3Address::AddressType::MODULEID; }
     virtual int getAddressBitLength() const override { return 64; } // change to your choice
     virtual int getMaxPrefixLength() const override { return 0; }
     virtual L3Address getUnspecifiedAddress() const override { return ModuleIdAddress(); } // TODO constant

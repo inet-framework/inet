@@ -29,6 +29,7 @@ class INET_API CLNSAddressType : public IL3AddressType
     CLNSAddressType() {}
     virtual ~CLNSAddressType() {}
 
+    virtual L3Address::AddressType getType() const override { return L3Address::AddressType::CLNS; }
     virtual int getAddressBitLength() const override { return 32; }
     virtual int getMaxPrefixLength() const override { return 32; }
     virtual L3Address getUnspecifiedAddress() const override { return ClnsAddress::UNSPECIFIED_ADDRESS; }

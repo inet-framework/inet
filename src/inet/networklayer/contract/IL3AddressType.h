@@ -24,6 +24,7 @@ class INET_API IL3AddressType
     virtual ~IL3AddressType() {}
     int getAddressByteLength() const { return (getAddressBitLength() + 7) / 8; };
 
+    virtual L3Address::AddressType getType() const = 0;
     virtual int getAddressBitLength() const = 0; // returns address representation length on network (bits)
     virtual int getMaxPrefixLength() const = 0;
     virtual L3Address getUnspecifiedAddress() const = 0;

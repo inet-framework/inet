@@ -24,6 +24,7 @@ class INET_API Ipv4AddressType : public IL3AddressType
     Ipv4AddressType() {}
     virtual ~Ipv4AddressType() {}
 
+    virtual L3Address::AddressType getType() const override { return L3Address::AddressType::IPv4; }
     virtual int getAddressBitLength() const override { return 32; }
     virtual int getMaxPrefixLength() const override { return 32; }
     virtual L3Address getUnspecifiedAddress() const override { return Ipv4Address::UNSPECIFIED_ADDRESS; }

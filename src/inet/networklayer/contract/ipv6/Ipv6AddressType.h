@@ -24,6 +24,7 @@ class INET_API Ipv6AddressType : public IL3AddressType
     Ipv6AddressType() {}
     virtual ~Ipv6AddressType() {}
 
+    virtual L3Address::AddressType getType() const override { return L3Address::AddressType::IPv6; }
     virtual int getAddressBitLength() const override { return 128; }
     virtual int getMaxPrefixLength() const override { return 128; }
     virtual L3Address getUnspecifiedAddress() const override { return Ipv6Address::UNSPECIFIED_ADDRESS; }
