@@ -546,7 +546,8 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
 
             // make sure there are enough bits to configure a unique address for all interface
             // the +2 means that all-0 and all-1 addresses are ruled out
-            int compatibleInterfaceCount = compatibleInterfaces.size() + 2;
+            int compatibleInterfaceCount = compatibleInterfaces.size() == 1 ? 0 : compatibleInterfaces.size() + 2;
+
             int interfaceAddressBitCount = getRepresentationBitCount(compatibleInterfaceCount);
             maximumNetmaskLength = std::min(maximumNetmaskLength, bitSize - interfaceAddressBitCount);
             EV_TRACE << "Netmask valid length range: " << minimumNetmaskLength << " - " << maximumNetmaskLength << " bits" << endl;
@@ -556,10 +557,10 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
             int netmaskLength = -1;
             uint32_t networkAddress = 0; // network part of the addresses  (e.g. 10.1.1.0)
             uint32_t networkNetmask = 0; // netmask for the network (e.g. 255.255.255.0)
-            ASSERT(maximumNetmaskLength < bitSize);
+            ASSERT(maximumNetmaskLength <= bitSize);
             for (netmaskLength = maximumNetmaskLength; netmaskLength >= minimumNetmaskLength; netmaskLength--) {
-                ASSERT(netmaskLength < bitSize);
-                networkNetmask = ~(~((uint32_t)0) >> netmaskLength);
+                ASSERT(netmaskLength <= bitSize);
+                networkNetmask = (netmaskLength == bitSize) ? ~((uint32_t)0) : ~(~((uint32_t)0) >> netmaskLength);
                 EV_TRACE << "Trying network netmask: " << Ipv4Address(networkNetmask) << " : " << netmaskLength << " bits" << endl;
                 networkAddress = mergedAddress & mergedAddressSpecifiedBits & networkNetmask;
                 uint32_t networkAddressUnspecifiedBits = ~mergedAddressSpecifiedBits & networkNetmask; // 1 means the network address unspecified
