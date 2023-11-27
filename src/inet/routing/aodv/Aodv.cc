@@ -154,7 +154,7 @@ void Aodv::processPacket(Packet *packet)
     int sourceInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
     L3Address sourceAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
     // KLUDGE I added this -1 after TTL decrement has been moved in Ipv4
-    unsigned int arrivalPacketTTL = packet->getTag<HopLimitInd>()->getHopLimit() - 1;
+    int arrivalPacketTTL = packet->getTag<HopLimitInd>()->getHopLimit() - 1;
     const auto& aodvPacket = packet->popAtFront<AodvControlPacket>();
     // TODO aodvPacket->copyTags(*udpPacket);
 
