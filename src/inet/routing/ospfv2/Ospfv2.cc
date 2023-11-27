@@ -95,25 +95,23 @@ void Ospfv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
 
-    const NetworkInterface *ie;
-    const NetworkInterfaceChangeDetails *change;
-
     if (signalID == interfaceCreatedSignal) {
         // configure interface for RIP
-        ie = check_and_cast<const NetworkInterface *>(obj);
+        const NetworkInterface *ie = check_and_cast<const NetworkInterface *>(obj);
         if (ie->isMulticast() && !ie->isLoopback()) {
             // TODO
         }
     }
     else if (signalID == interfaceDeletedSignal) {
-        ie = check_and_cast<const NetworkInterface *>(obj);
+        const NetworkInterface *ie = check_and_cast<const NetworkInterface *>(obj);
         // TODO
+        (void)ie;
     }
     else if (signalID == interfaceStateChangedSignal) {
-        change = check_and_cast<const NetworkInterfaceChangeDetails *>(obj);
+        const NetworkInterfaceChangeDetails *change = check_and_cast<const NetworkInterfaceChangeDetails *>(obj);
         auto fieldId = change->getFieldId();
         if (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER) {
-            ie = change->getNetworkInterface();
+            const NetworkInterface *ie = change->getNetworkInterface();
             if (!ie->isUp())
                 handleInterfaceDown(ie);
             else {
