@@ -24,6 +24,7 @@ package inet.physicallayer.wired.common;
 simple WireJunction
 {
     parameters:
+        @wireJunction;
         @display("i=misc/node_vs");
         @signal[packetReceived](type=cPacket);
         @statistic[packetReceived](title="packets"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
