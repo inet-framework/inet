@@ -81,7 +81,7 @@ void FlowMeasurementRecorder::makeMeasurements(Packet *packet)
 void FlowMeasurementRecorder::endMeasurements(Packet *packet)
 {
     std::set<std::string> endedFlowNames;
-    b length = this->length == b(-1) ? packet->getDataLength() - offset : this->length;
+    b length = this->length == b(-1) ? packet->getTotalLength() - offset : this->length;
     if (measureElapsedTime)
         endMeasurement<ElapsedTimeTag>(packet, offset, length);
     if (measureDelayingTime)
@@ -106,7 +106,7 @@ void FlowMeasurementRecorder::endMeasurements(Packet *packet)
         packet->peekAll()->printToStream(s, 0);
         packetEventFile.writeString("packetData", s.str());
         packetEventFile.openArray("lifeTimes");
-        packet->peekData()->mapAllTags<CreationTimeTag>(offset, length, [&] (b o, b l, const Ptr<const CreationTimeTag>& creationTimeTag) {
+        packet->peekData()->mapAllTags<CreationTimeTag>(b(0), b(-1), [&] (b o, b l, const Ptr<const CreationTimeTag>& creationTimeTag) {
             simtime_t lifeTime = simTime() - creationTimeTag->getCreationTime();
             packetEventFile.openObject();
             packetEventFile.writeInt("offset", b(o).get());
