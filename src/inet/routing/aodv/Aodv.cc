@@ -1310,6 +1310,8 @@ void Aodv::broadcastOnAllInterfaces(const Ptr<AodvControlPacket>& aodvPacket, in
 {
     for (auto interfaceId: interfaces) {
         NetworkInterface *nic = interfaceTable->getInterfaceById(interfaceId);
+        if (!nic->isUp())
+            continue; // interface down
         if (interfaceId == sourceInterfaceId && nic->isWired())
             continue; // skip the incoming interface when it is wired
         const L3Address destAddr = addressType->getBroadcastAddress();  // TODO get interface broadcast address
