@@ -18,6 +18,7 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
@@ -84,6 +85,7 @@ void Aodv::initialize(int stage)
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         networkProtocol->registerHook(0, this);
         host->subscribe(linkBrokenSignal, this);
+        host->subscribe(interfaceStateChangedSignal, this);
         usingIpv6 = (routingTable->getRouterIdAsGeneric().getType() == L3Address::IPv6);
 
         PatternMatcher interfaceMatcher(par("interface").stringValue(), false, true, true);
@@ -1043,6 +1045,26 @@ void Aodv::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
                 if (route && route->getSource() == this)
                     handleLinkBreakSendRERR(route->getNextHopAsGeneric());
             }
+        }
+    }
+    else if (signalID == interfaceStateChangedSignal) {
+        auto change = check_and_cast<const NetworkInterfaceChangeDetails *>(obj);
+        handleInterfaceStateChanged(change);
+    }
+    else
+        throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
+}
+
+void Aodv::handleInterfaceStateChanged(const NetworkInterfaceChangeDetails *change)
+{
+    auto fieldId = change->getFieldId();
+    if (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER) {
+        auto ie = change->getNetworkInterface();
+        if (!ie->isUp()) {
+            // TODO handle interface down
+        }
+        else {
+            // handle interface up
         }
     }
 }

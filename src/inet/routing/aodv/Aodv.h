@@ -180,6 +180,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     /* General functions to handle route errors */
     void sendRERRWhenNoRouteToForward(const L3Address& unreachableAddr);
     void handleLinkBreakSendRERR(const L3Address& unreachableAddr);
+    void handleInterfaceStateChanged(const NetworkInterfaceChangeDetails *change);
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     /* Netfilter hooks */
