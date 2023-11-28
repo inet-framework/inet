@@ -8,29 +8,23 @@
 #define __INET_RFC5681_H
 
 #include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
+#include "inet/transportlayer/tcp/TcpCongestionControl.h"
+#include "inet/transportlayer/tcp/TcpConnection.h"
 
 namespace inet {
 namespace tcp {
 
-typedef TcpTahoeRenoFamilyStateVariables Rfc5681StateVariables;
-
 /**
  * Implements RFC 5681: TCP Congestion Control.
  */
-class INET_API Rfc5681 : public TcpTahoeRenoFamily
+class INET_API Rfc5681 : public TcpCongestionControl
 {
   protected:
-    Rfc5681StateVariables *& state;
-
-    virtual TcpStateVariables *createStateVariables() override
-    {
-        return new Rfc5681StateVariables();
-    }
-
-    virtual void processRexmitTimer(TcpEventCode& event) override;
+    TcpTahoeRenoFamilyStateVariables *state = nullptr;
+    TcpConnection *conn = nullptr;
 
   public:
-    Rfc5681();
+    Rfc5681(TcpStateVariables *state, TcpConnection *conn) : state(check_and_cast<TcpTahoeRenoFamilyStateVariables *>(state)), conn(conn) { }
 
     virtual void receivedDataAck(uint32_t firstSeqAcked) override;
 
