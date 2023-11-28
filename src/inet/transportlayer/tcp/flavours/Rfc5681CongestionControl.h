@@ -17,14 +17,14 @@ namespace tcp {
 /**
  * Implements RFC 5681: TCP Congestion Control.
  */
-class INET_API Rfc5681 : public TcpCongestionControl
+class INET_API Rfc5681CongestionControl : public TcpCongestionControl
 {
   protected:
     TcpTahoeRenoFamilyStateVariables *state = nullptr;
     TcpConnection *conn = nullptr;
 
   public:
-    Rfc5681(TcpStateVariables *state, TcpConnection *conn) : state(check_and_cast<TcpTahoeRenoFamilyStateVariables *>(state)), conn(conn) { }
+    Rfc5681CongestionControl(TcpStateVariables *state, TcpConnection *conn) : state(check_and_cast<TcpTahoeRenoFamilyStateVariables *>(state)), conn(conn) { }
 
     virtual void receivedDataAck(uint32_t firstSeqAcked) override;
 
