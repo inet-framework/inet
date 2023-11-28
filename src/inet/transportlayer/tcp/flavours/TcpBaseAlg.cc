@@ -7,6 +7,7 @@
 
 #include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
 
+#include "inet/transportlayer/tcp/flavours/Rfc5681.h"
 #include "inet/transportlayer/tcp/flavours/Rfc6582.h"
 #include "inet/transportlayer/tcp/flavours/Rfc6675.h"
 #include "inet/transportlayer/tcp/Tcp.h"
@@ -150,6 +151,8 @@ void TcpBaseAlg::established(bool active)
         recovery = new Rfc6675(state, conn);
     else
         recovery = new Rfc6582(state, conn);
+
+    congestionControl = new Rfc5681(state, conn);
 }
 
 void TcpBaseAlg::connectionClosed()
