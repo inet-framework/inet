@@ -15,25 +15,8 @@
 namespace inet {
 namespace tcp {
 
-Register_Class(Rfc5681);
-
-Rfc5681::Rfc5681() : TcpTahoeRenoFamily(),
-    state((Rfc5681StateVariables *&)TcpAlgorithm::state)
-{
-}
-
-void Rfc5681::processRexmitTimer(TcpEventCode& event)
-{
-    TcpTahoeRenoFamily::processRexmitTimer(event);
-
-    if (event == TCP_E_ABORT)
-        return;
-}
-
 void Rfc5681::receivedDataAck(uint32_t firstSeqAcked)
 {
-    TcpTahoeRenoFamily::receivedDataAck(firstSeqAcked);
-
     if (!state->lossRecovery) {
         // 3.1. Slow Start and Congestion Avoidance
         if (state->snd_cwnd < state->ssthresh) {
@@ -57,7 +40,7 @@ void Rfc5681::receivedDataAck(uint32_t firstSeqAcked)
             // TCP that increments cwnd by SMSS for each such ACK will
             // inappropriately inflate the amount of data injected into the network.
             state->snd_cwnd += state->snd_mss; // TODO implement min function from (2)
-            conn->emit(cwndSignal, state->snd_cwnd);
+// TODO           conn->emit(cwndSignal, state->snd_cwnd);
         }
         else {
             // The RECOMMENDED way to increase cwnd during congestion avoidance is
@@ -90,15 +73,13 @@ void Rfc5681::receivedDataAck(uint32_t firstSeqAcked)
             uint32_t i = state->snd_mss * state->snd_mss / state->snd_cwnd;
             if (i == 0) i = 1;
             state->snd_cwnd += i;
-            conn->emit(cwndSignal, state->snd_cwnd);
+// TODO           conn->emit(cwndSignal, state->snd_cwnd);
         }
     }
 }
 
 void Rfc5681::receivedDuplicateAck()
 {
-    TcpTahoeRenoFamily::receivedDuplicateAck();
-
     // 3.2. Fast Retransmit/Fast Recovery
     //
     // ...
@@ -132,7 +113,7 @@ void Rfc5681::receivedDuplicateAck()
         // where, as discussed above, FlightSize is the amount of outstanding
         // data in the network.
         state->ssthresh = std::max(conn->getBytesInFlight() / 2, 2 * state->snd_mss);
-        conn->emit(ssthreshSignal, state->ssthresh);
+// TODO       conn->emit(ssthreshSignal, state->ssthresh);
 
         // 3. The lost segment starting at SND.UNA MUST be retransmitted and
         //    cwnd set to ssthresh plus 3*SMSS.  This artificially "inflates"
@@ -140,7 +121,7 @@ void Rfc5681::receivedDuplicateAck()
         //    left the network and which the receiver has buffered.
         conn->retransmitOneSegment(false);
         state->snd_cwnd = state->ssthresh + 3 * state->snd_mss;
-        conn->emit(cwndSignal, state->snd_cwnd);
+// TODO        conn->emit(cwndSignal, state->snd_cwnd);
     }
     // 4. For each additional duplicate ACK received (after the third),
     //    cwnd MUST be incremented by SMSS.  This artificially inflates the
@@ -148,7 +129,7 @@ void Rfc5681::receivedDuplicateAck()
     //    has left the network.
     else if (state->dupacks > state->dupthresh) {
         state->snd_cwnd += state->snd_mss;
-        conn->emit(cwndSignal, state->snd_cwnd);
+// TODO        conn->emit(cwndSignal, state->snd_cwnd);
     }
 }
 
