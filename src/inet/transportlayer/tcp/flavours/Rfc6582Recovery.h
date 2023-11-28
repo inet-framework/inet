@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#ifndef __INET_RFC6582_H
-#define __INET_RFC6582_H
+#ifndef __INET_RFC6582RECOVERY_H
+#define __INET_RFC6582RECOVERY_H
 
 #include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
@@ -17,14 +17,14 @@ namespace tcp {
 /**
  * Implements RFC 6582: The NewReno Modification to TCP's Fast Recovery Algorithm.
  */
-class INET_API Rfc6582 : public TcpRecovery
+class INET_API Rfc6582Recovery : public TcpRecovery
 {
   protected:
     TcpTahoeRenoFamilyStateVariables *state = nullptr;
     TcpConnection *conn = nullptr;
 
   public:
-    Rfc6582(TcpStateVariables *state, TcpConnection *conn) : state(check_and_cast<TcpTahoeRenoFamilyStateVariables *>(state)), conn(conn) { }
+    Rfc6582Recovery(TcpStateVariables *state, TcpConnection *conn) : state(check_and_cast<TcpTahoeRenoFamilyStateVariables *>(state)), conn(conn) { }
 
     virtual void receivedDataAck(uint32_t firstSeqAcked) override;
 
