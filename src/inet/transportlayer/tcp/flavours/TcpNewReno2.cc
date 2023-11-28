@@ -17,7 +17,7 @@ Register_Class(TcpNewReno2);
 //    When the TCP protocol control block is initialized, recover is
 //    set to the initial send sequence number.
 
-TcpNewReno2::TcpNewReno2() : Rfc5681(),
+TcpNewReno2::TcpNewReno2() : TcpTahoeRenoFamily(),
     state((TcpNewReno2StateVariables *&)TcpAlgorithm::state)
 {
 }
@@ -33,17 +33,14 @@ void TcpNewReno2::processRexmitTimer(TcpEventCode& event)
 void TcpNewReno2::receivedDataAck(uint32_t firstSeqAcked)
 {
     recovery->receivedDataAck(firstSeqAcked);
-
-    Rfc5681::receivedDataAck(firstSeqAcked);
-
+    congestionControl->receivedDataAck(firstSeqAcked);
     sendData(false);
 }
 
 void TcpNewReno2::receivedDuplicateAck()
 {
     recovery->receivedDuplicateAck();
-
-    Rfc5681::receivedDuplicateAck();
+    congestionControl->receivedDuplicateAck();
 }
 
 } // namespace tcp
