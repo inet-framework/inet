@@ -7,9 +7,9 @@
 
 #include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
 
-#include "inet/transportlayer/tcp/flavours/Rfc5681.h"
-#include "inet/transportlayer/tcp/flavours/Rfc6582.h"
-#include "inet/transportlayer/tcp/flavours/Rfc6675.h"
+#include "inet/transportlayer/tcp/flavours/Rfc5681CongestionControl.h"
+#include "inet/transportlayer/tcp/flavours/Rfc6582Recovery.h"
+#include "inet/transportlayer/tcp/flavours/Rfc6675Recovery.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 
@@ -148,11 +148,11 @@ void TcpBaseAlg::established(bool active)
     }
 
     if (state->sack_enabled)
-        recovery = new Rfc6675(state, conn);
+        recovery = new Rfc6675Recovery(state, conn);
     else
-        recovery = new Rfc6582(state, conn);
+        recovery = new Rfc6582Recovery(state, conn);
 
-    congestionControl = new Rfc5681(state, conn);
+    congestionControl = new Rfc5681CongestionControl(state, conn);
 }
 
 void TcpBaseAlg::connectionClosed()

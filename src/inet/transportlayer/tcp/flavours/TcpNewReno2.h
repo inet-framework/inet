@@ -7,7 +7,7 @@
 #ifndef __INET_TCPNEWRENO2_H
 #define __INET_TCPNEWRENO2_H
 
-#include "inet/transportlayer/tcp/flavours/Rfc5681.h"
+#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
 
 namespace inet {
 namespace tcp {

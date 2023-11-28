@@ -6,8 +6,6 @@
 
 #include "inet/transportlayer/tcp/flavours/TcpNewReno2.h"
 
-#include "inet/transportlayer/tcp/flavours/Rfc6675.h"
-
 namespace inet {
 namespace tcp {
 
