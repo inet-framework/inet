@@ -33,7 +33,7 @@ void TcpNewReno2::processRexmitTimer(TcpEventCode& event)
 void TcpNewReno2::receivedDataAck(uint32_t firstSeqAcked)
 {
     if (state->sack_enabled)
-        rfc6675->receivedDataAck(firstSeqAcked);
+        recovery->receivedDataAck(firstSeqAcked);
 
     Rfc5681::receivedDataAck(firstSeqAcked);
 
@@ -134,7 +134,7 @@ void TcpNewReno2::receivedDataAck(uint32_t firstSeqAcked)
 void TcpNewReno2::receivedDuplicateAck()
 {
     if (state->sack_enabled)
-        rfc6675->receivedDuplicateAck();
+        recovery->receivedDuplicateAck();
 
     // 2) Three duplicate ACKs:
     //    When the third duplicate ACK is received, the TCP sender first
