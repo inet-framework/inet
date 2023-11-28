@@ -4,12 +4,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/transportlayer/tcp/flavours/Rfc6582.h"
+#include "inet/transportlayer/tcp/flavours/Rfc6582Recovery.h"
 
 namespace inet {
 namespace tcp {
 
-void Rfc6582::receivedDataAck(uint32_t firstSeqAcked)
+void Rfc6582Recovery::receivedDataAck(uint32_t firstSeqAcked)
 {
     // 3.2. Specification
     if (state->lossRecovery) {
@@ -105,7 +105,7 @@ void Rfc6582::receivedDataAck(uint32_t firstSeqAcked)
 //    sendData(false);
 }
 
-void Rfc6582::receivedDuplicateAck()
+void Rfc6582Recovery::receivedDuplicateAck()
 {
     // 2) Three duplicate ACKs:
     //    When the third duplicate ACK is received, the TCP sender first
