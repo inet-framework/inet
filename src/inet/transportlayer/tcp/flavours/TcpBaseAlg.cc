@@ -7,7 +7,8 @@
 
 #include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
 
-#include "inet/transportlayer/tcp/Rfc6675.h"
+#include "inet/transportlayer/tcp/flavours/Rfc6582.h"
+#include "inet/transportlayer/tcp/flavours/Rfc6675.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 
@@ -83,8 +84,6 @@ void TcpBaseAlg::initialize()
     persistTimer->setContextPointer(conn);
     delayedAckTimer->setContextPointer(conn);
     keepAliveTimer->setContextPointer(conn);
-
-    recovery = new Rfc6675(state, conn);
 }
 
 void TcpBaseAlg::established(bool active)
@@ -146,6 +145,11 @@ void TcpBaseAlg::established(bool active)
             sendData(false);
         }
     }
+
+    if (state->sack_enabled)
+        recovery = new Rfc6675(state, conn);
+    else
+        recovery = new Rfc6582(state, conn);
 }
 
 void TcpBaseAlg::connectionClosed()
