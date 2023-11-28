@@ -60,7 +60,8 @@ TcpBaseAlg::TcpBaseAlg() : TcpAlgorithm(),
 TcpBaseAlg::~TcpBaseAlg()
 {
     // Note: don't delete "state" here, it'll be deleted from TcpConnection
-
+    delete congestionControl;
+    delete recovery;
     // cancel and delete timers
     if (rexmitTimer)
         delete cancelEvent(rexmitTimer);
