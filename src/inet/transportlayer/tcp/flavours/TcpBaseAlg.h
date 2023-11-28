@@ -10,6 +10,7 @@
 
 #include "inet/transportlayer/tcp/flavours/TcpBaseAlgState_m.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
+#include "inet/transportlayer/tcp/TcpCongestionControl.h"
 #include "inet/transportlayer/tcp/TcpRecovery.h"
 
 namespace inet {
@@ -43,6 +44,7 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
 {
   protected:
     TcpBaseAlgStateVariables *& state; // alias to TcpAlgorithm's 'state'
+    TcpCongestionControl *congestionControl = nullptr;
     TcpRecovery *recovery = nullptr;
 
     cMessage *rexmitTimer;
