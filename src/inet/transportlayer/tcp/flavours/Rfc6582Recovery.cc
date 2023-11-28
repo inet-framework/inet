@@ -100,9 +100,6 @@ void Rfc6582Recovery::receivedDataAck(uint32_t firstSeqAcked)
         // window of data is of particular importance, the best alternative
         // would be to use the SACK option.
     }
-
-//    // TODO this should not be here
-//    sendData(false);
 }
 
 void Rfc6582Recovery::receivedDuplicateAck()
@@ -119,12 +116,8 @@ void Rfc6582Recovery::receivedDuplicateAck()
         if (state->snd_una - 1 > state->recover)
             state->recover = (state->snd_max - 1);
 
-//        Rfc5681::receivedDuplicateAck();
-
         state->lossRecovery = true; // TODO where does this come from? should it be somewhere else?
     }
-//    else
-//        Rfc5681::receivedDuplicateAck();
 }
 
 } // namespace tcp
