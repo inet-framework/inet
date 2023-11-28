@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/transportlayer/tcp/flavours/Rfc6675.h"
+#include "inet/transportlayer/tcp/flavours/Rfc6675Recovery.h"
 
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 
@@ -20,7 +20,7 @@ namespace tcp {
 //    reset DupAcks to zero.
 // implemented in TcpConnection::processSegment1stThru8th() and TcpConnection::processAckInEstabEtc()
 
-void Rfc6675::stepA()
+void Rfc6675Recovery::stepA()
 {
     // (A) An incoming cumulative ACK for a sequence number greater than
     //     RecoveryPoint signals the end of loss recovery, and the loss
@@ -34,7 +34,7 @@ void Rfc6675::stepA()
     }
 }
 
-void Rfc6675::stepB()
+void Rfc6675Recovery::stepB()
 {
     // (B) Upon receipt of an ACK that does not cover RecoveryPoint, the
     //     following actions MUST be taken:
@@ -49,7 +49,7 @@ void Rfc6675::stepB()
     }
 }
 
-void Rfc6675::stepC()
+void Rfc6675Recovery::stepC()
 {
     // (C) If cwnd - pipe >= 1 SMSS, the sender SHOULD transmit one or more
     //     segments as follows:
@@ -92,7 +92,7 @@ void Rfc6675::stepC()
     }
 }
 
-void Rfc6675::receivedDataAck(uint32_t firstSeqAcked)
+void Rfc6675Recovery::receivedDataAck(uint32_t firstSeqAcked)
 {
     // Once a TCP is in the loss recovery phase, the following procedure
     // MUST be used for each arriving ACK:
@@ -108,7 +108,7 @@ void Rfc6675::receivedDataAck(uint32_t firstSeqAcked)
     }
 }
 
-void Rfc6675::step4()
+void Rfc6675Recovery::step4()
 {
     // (4) Invoke fast retransmit and enter loss recovery as follows:
     state->lossRecovery = true;
@@ -134,7 +134,7 @@ void Rfc6675::step4()
     //       RescueRxt to the highest sequence number in the
     //       retransmitted segment.
     // TODO which one and why?
-    // conn->retransmitOneSegment(false);
+    conn->retransmitOneSegment(false);
     // conn->sendDataDuringLossRecoveryPhase(status->snd_cwnd);
 
     // (4.4) Run SetPipe ()
@@ -152,7 +152,7 @@ void Rfc6675::step4()
     stepC();
 }
 
-void Rfc6675::receivedDuplicateAck()
+void Rfc6675Recovery::receivedDuplicateAck()
 {
     // If the incoming ACK is a duplicate acknowledgment per the definition
     // in Section 2 (regardless of its status as a cumulative
