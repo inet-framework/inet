@@ -10,11 +10,10 @@
 
 #include "inet/transportlayer/tcp/flavours/TcpBaseAlgState_m.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
+#include "inet/transportlayer/tcp/TcpRecovery.h"
 
 namespace inet {
 namespace tcp {
-
-class Rfc6675;
 
 /**
  * Includes basic TCP algorithms: adaptive retransmission, PERSIST timer,
@@ -44,7 +43,7 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
 {
   protected:
     TcpBaseAlgStateVariables *& state; // alias to TcpAlgorithm's 'state'
-    Rfc6675 *rfc6675 = nullptr;
+    TcpRecovery *recovery = nullptr;
 
     cMessage *rexmitTimer;
     cMessage *persistTimer;

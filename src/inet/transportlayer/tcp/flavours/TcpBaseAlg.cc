@@ -84,7 +84,7 @@ void TcpBaseAlg::initialize()
     delayedAckTimer->setContextPointer(conn);
     keepAliveTimer->setContextPointer(conn);
 
-    rfc6675 = new Rfc6675(state, conn);
+    recovery = new Rfc6675(state, conn);
 }
 
 void TcpBaseAlg::established(bool active)
