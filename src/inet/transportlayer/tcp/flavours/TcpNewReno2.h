@@ -17,7 +17,7 @@ typedef TcpTahoeRenoFamilyStateVariables TcpNewReno2StateVariables;
 /**
  * Implements RFC 6582: The NewReno Modification to TCP's Fast Recovery Algorithm.
  */
-class INET_API TcpNewReno2 : public Rfc5681
+class INET_API TcpNewReno2 : public TcpTahoeRenoFamily
 {
   protected:
     TcpNewReno2StateVariables *& state;
