@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/transportlayer/tcp/Rfc6675.h"
+#include "inet/transportlayer/tcp/flavours/Rfc6675.h"
 
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 
