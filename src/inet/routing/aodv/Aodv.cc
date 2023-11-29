@@ -575,15 +575,7 @@ void Aodv::handleRREP(const Ptr<Rrep>& rrep, int sourceInterfaceId, const L3Addr
 
     // If needed, a route is created for the previous hop,
     // but without a valid sequence number (see section 6.2)
-
-    IRoute *previousHopRoute = routingTable->findBestMatchingRoute(sourceAddr);
-
-    if (!previousHopRoute || previousHopRoute->getSource() != this) {
-        // create without valid sequence number
-        previousHopRoute = createRoute(sourceAddr, sourceInterfaceId, sourceAddr, 1, false, rrep->getDestSeqNum(), true, simTime() + activeRouteTimeout);
-    }
-    else
-        updateRoutingTable(previousHopRoute, sourceInterfaceId, sourceAddr, 1, false, rrep->getDestSeqNum(), true, simTime() + activeRouteTimeout);
+    createOrUpdateRouteToPrevHop(rrep->getDestSeqNum(), sourceInterfaceId, sourceAddr);
 
     // Next, the node then increments the hop count value in the RREP by one,
     // to account for the new hop through the intermediate node
@@ -781,6 +773,19 @@ void Aodv::socketClosed(UdpSocket *socket)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
+void Aodv::createOrUpdateRouteToPrevHop(uint32_t seqNo, int sourceInterfaceId, const L3Address& sourceAddr)
+{
+    IRoute *previousHopRoute = routingTable->findBestMatchingRoute(sourceAddr);
+
+    if (!previousHopRoute || previousHopRoute->getSource() != this) {
+        // create without valid sequence number
+        createRoute(sourceAddr, sourceInterfaceId, sourceAddr, 1, false, seqNo, true, simTime() + activeRouteTimeout);
+    }
+    else {
+        updateRoutingTable(previousHopRoute, sourceInterfaceId, sourceAddr, 1, false, seqNo, true, simTime() + activeRouteTimeout);
+    }
+}
+
 void Aodv::handleRREQ(const Ptr<Rreq>& rreq, int sourceInterfaceId, const L3Address& sourceAddr, unsigned int timeToLive)
 {
     EV_INFO << "AODV Route Request arrived with source addr: " << sourceAddr << " originator addr: " << rreq->getOriginatorAddr()
@@ -795,15 +800,7 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, int sourceInterfaceId, const L3Addr
 
     // When a node receives a RREQ, it first creates or updates a route to
     // the previous hop without a valid sequence number (see section 6.2).
-
-    IRoute *previousHopRoute = routingTable->findBestMatchingRoute(sourceAddr);
-
-    if (!previousHopRoute || previousHopRoute->getSource() != this) {
-        // create without valid sequence number
-        previousHopRoute = createRoute(sourceAddr, sourceInterfaceId, sourceAddr, 1, false, rreq->getOriginatorSeqNum(), true, simTime() + activeRouteTimeout);
-    }
-    else
-        updateRoutingTable(previousHopRoute, sourceInterfaceId, sourceAddr, 1, false, rreq->getOriginatorSeqNum(), true, simTime() + activeRouteTimeout);
+    createOrUpdateRouteToPrevHop(rreq->getOriginatorSeqNum(), sourceInterfaceId, sourceAddr);
 
     // then checks to determine whether it has received a RREQ with the same
     // Originator IP Address and RREQ ID within at least the last PATH_DISCOVERY_TIME.
