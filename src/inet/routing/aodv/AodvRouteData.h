@@ -23,7 +23,7 @@ class INET_API AodvRouteData : public cObject
     bool repariable;
     bool beingRepaired;
     bool validDestNum;
-    unsigned int destSeqNum;
+    uint32_t destSeqNum;
     simtime_t lifeTime; // expiration or deletion time of the route
 
   public:
@@ -40,7 +40,7 @@ class INET_API AodvRouteData : public cObject
 
     virtual ~AodvRouteData() {}
 
-    unsigned int getDestSeqNum() const { return destSeqNum; }
+    uint32_t getDestSeqNum() const { return destSeqNum; }
     void setDestSeqNum(unsigned int destSeqNum) { this->destSeqNum = destSeqNum; }
     bool hasValidDestNum() const { return validDestNum; }
     void setHasValidDestNum(bool hasValidDestNum) { this->validDestNum = hasValidDestNum; }

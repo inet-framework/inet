@@ -596,7 +596,7 @@ void Aodv::handleRREP(const Ptr<Rrep>& rrep, int sourceInterfaceId, const L3Addr
     IRoute *destRoute = routingTable->findBestMatchingRoute(rrep->getDestAddr());
     AodvRouteData *destRouteData = nullptr;
     simtime_t lifeTime = rrep->getLifeTime();
-    unsigned int destSeqNum = rrep->getDestSeqNum();
+    uint32_t destSeqNum = rrep->getDestSeqNum();
 
     if (destRoute && destRoute->getSource() == this) { // already exists
         destRouteData = check_and_cast<AodvRouteData *>(destRoute->getProtocolData());
@@ -857,7 +857,7 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, int sourceInterfaceId, const L3Addr
     unsigned int hopCount = rreq->getHopCount();
     simtime_t minimalLifeTime = simTime() + 2 * netTraversalTime - 2 * hopCount * nodeTraversalTime;
     simtime_t newLifeTime = std::max(simTime(), minimalLifeTime);
-    int rreqSeqNum = rreq->getOriginatorSeqNum();
+    uint32_t rreqSeqNum = rreq->getOriginatorSeqNum();
     if (!reverseRoute || reverseRoute->getSource() != this) { // create
         // This reverse route will be needed if the node receives a RREP back to the
         // node that originated the RREQ (identified by the Originator IP Address).
@@ -865,8 +865,8 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, int sourceInterfaceId, const L3Addr
     }
     else {
         AodvRouteData *routeData = check_and_cast<AodvRouteData *>(reverseRoute->getProtocolData());
-        int routeSeqNum = routeData->getDestSeqNum();
-        int newSeqNum = std::max(routeSeqNum, rreqSeqNum);
+        uint32_t routeSeqNum = routeData->getDestSeqNum();
+        uint32_t newSeqNum = std::max(routeSeqNum, rreqSeqNum);
         int newHopCount = rreq->getHopCount(); // Note: already incremented by 1.
         int routeHopCount = reverseRoute->getMetric();
         // The route is only updated if the new sequence number is either
