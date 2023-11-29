@@ -26,6 +26,8 @@ class INET_API Rfc5681Recovery : public TcpRecovery
   public:
     Rfc5681Recovery(TcpStateVariables *state, TcpConnection *conn) : state(check_and_cast<TcpTahoeRenoFamilyStateVariables *>(state)), conn(conn) { }
 
+    virtual bool isDuplicateAck(Packet *tcpSegment, TcpHeader *tcpHeader);
+
     virtual void receivedDataAck(uint32_t firstSeqAcked) override;
 
     virtual void receivedDuplicateAck() override;
