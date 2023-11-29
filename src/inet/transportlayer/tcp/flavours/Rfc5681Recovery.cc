@@ -19,6 +19,29 @@ void Rfc5681Recovery::receivedDataAck(uint32_t firstSeqAcked)
 {
 }
 
+bool Rfc5681Recovery::isDuplicateAck(Packet *tcpSegment, TcpHeader *tcpHeader)
+{
+    // DUPLICATE ACKNOWLEDGMENT: An acknowledgment is considered a
+    // "duplicate" in the following algorithms when
+    //   (a) the receiver of the ACK has outstanding data,
+    bool a = state->snd_una != state->snd_max;
+    //   (b) the incoming acknowledgment carries no data,
+    int payloadLength = tcpSegment->getByteLength() - B(tcpHeader->getHeaderLength()).get();
+    bool b = payloadLength == 0;
+    //   (c) the SYN and FIN bits are both off,
+    bool c = !tcpHeader->getSynBit() && !tcpHeader->getFinBit();
+    //   (d) the acknowledgment number is equal to the greatest acknowledgment
+    //       received on the given connection (TCP.UNA from [RFC793]) and
+    bool d = tcpHeader->getAckNo() == state->snd_una;
+    //   (e) the advertised window in the incoming acknowledgment equals the
+    //       advertised window in the last incoming acknowledgment.
+    uint32_t trueWindow = tcpHeader->getWindow();
+    if (state->ws_enabled && !tcpHeader->getSynBit())
+        trueWindow = tcpHeader->getWindow() << state->snd_wnd_scale;
+    bool e = trueWindow == state->snd_wnd;
+    return a && b && c && d && e;
+}
+
 void Rfc5681Recovery::receivedDuplicateAck()
 {
     // 3.2. Fast Retransmit/Fast Recovery
