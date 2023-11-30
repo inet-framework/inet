@@ -261,7 +261,7 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
 {
     // record seq (only if we do send data) and ackno
     if (tcpSegment->getByteLength() > tcpHeader->getChunkLength().get<B>())
-        emit(sndNxtSignal, tcpHeader->getSequenceNo());
+        emit(sndSeqSignal, tcpHeader->getSequenceNo());
 
     emit(sndAckSignal, tcpHeader->getAckNo());
 
