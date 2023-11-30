@@ -40,7 +40,7 @@ void Rfc5681CongestionControl::receivedDataAck(uint32_t firstSeqAcked)
             // TCP that increments cwnd by SMSS for each such ACK will
             // inappropriately inflate the amount of data injected into the network.
             state->snd_cwnd += state->snd_mss; // TODO implement min function from (2)
-// TODO           conn->emit(cwndSignal, state->snd_cwnd);
+            conn->emit(cwndSignal, state->snd_cwnd);
         }
         else {
             // The RECOMMENDED way to increase cwnd during congestion avoidance is
@@ -73,7 +73,7 @@ void Rfc5681CongestionControl::receivedDataAck(uint32_t firstSeqAcked)
             uint32_t i = state->snd_mss * state->snd_mss / state->snd_cwnd;
             if (i == 0) i = 1;
             state->snd_cwnd += i;
-// TODO           conn->emit(cwndSignal, state->snd_cwnd);
+            conn->emit(cwndSignal, state->snd_cwnd);
         }
     }
 }
