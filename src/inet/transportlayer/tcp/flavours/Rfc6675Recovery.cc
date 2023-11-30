@@ -6,7 +6,10 @@
 
 #include "inet/transportlayer/tcp/flavours/Rfc6675Recovery.h"
 
+#include "inet/transportlayer/tcp/TcpReceiveQueue.h"
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
+#include "inet/transportlayer/tcp/TcpSendQueue.h"
+#include "inet/transportlayer/tcp/TcpSimsignals.h"
 
 namespace inet {
 namespace tcp {
@@ -14,11 +17,11 @@ namespace tcp {
 // 5. Algorithm Details
 //    Upon the receipt of any ACK containing SACK information, the
 //    scoreboard MUST be updated via the Update () routine.
-// implemented in TcpConnection::processSACKOption()
+// implemented in processSACKOption()
 //
 //    If the incoming ACK is a cumulative acknowledgment, the TCP MUST
 //    reset DupAcks to zero.
-// implemented in TcpConnection::processSegment1stThru8th() and TcpConnection::processAckInEstabEtc()
+// implemented in processSegment1stThru8th() and Rfc6675Recovery::processAckInEstabEtc()
 
 void Rfc6675Recovery::stepA()
 {
@@ -41,11 +44,11 @@ void Rfc6675Recovery::stepB()
     if (seqLE(state->snd_una, state->recoveryPoint)) {
         // (B.1) Use Update () to record the new SACK information conveyed
         //       by the incoming ACK.
-        // implemented by TcpConnection::processSACKOption()
+        // implemented by processSACKOption()
 
         // (B.2) Use SetPipe () to re-calculate the number of octets still
         //       in the network.
-        conn->setPipe();
+        setPipe();
     }
 }
 
@@ -60,7 +63,7 @@ void Rfc6675Recovery::stepC()
         //       failure (no data to send), return without sending anything
         //       (i.e., terminate steps C.1 -- C.5).
         uint32_t seqNum;
-        if (!conn->nextSeg(seqNum))
+        if (!nextSeg(seqNum))
             break;
 
         // (C.2) If any of the data octets sent in (C.1) are below HighData,
@@ -145,7 +148,7 @@ void Rfc6675Recovery::step4()
     //       not been determined to have been dropped in the network.
     //       It is assumed that the data is still traversing the network
     //       path.
-    conn->setPipe();
+    setPipe();
 
     // (4.5) In order to take advantage of potential additional
     //       available cwnd, proceed to step (C) below.
@@ -171,7 +174,7 @@ void Rfc6675Recovery::receivedDuplicateAck()
             //     indicating at least three segments have arrived above the current
             //     cumulative acknowledgment point, which is taken to indicate loss
             //     -- go to step (4).
-            if (conn->isLost(state->snd_una + 1))
+            if (isLost(state->snd_una + 1))
                 step4();
             else {
                 // (3) The TCP MAY transmit previously unsent data segments as per
@@ -182,7 +185,7 @@ void Rfc6675Recovery::receivedDuplicateAck()
                 state->highRxt = state->snd_una;
 
                 // (3.2) Run SetPipe ().
-                conn->setPipe();
+                setPipe();
 
                 // (3.3) If (cwnd - pipe) >= 1 SMSS, there exists previously unsent
                 //       data, and the receiver's advertised window allows, transmit
@@ -191,7 +194,7 @@ void Rfc6675Recovery::receivedDuplicateAck()
                 //       to (3.2).
                 while ((int32_t)state->snd_cwnd - (int32_t)state->pipe >= (int32_t)state->snd_mss) {
                     uint32_t seqNum;
-                    if (!conn->nextSeg(seqNum))
+                    if (!nextSeg(seqNum))
                         break;
                     if (seqLE(seqNum + state->snd_mss, state->snd_una + state->snd_wnd)) {
                         state->snd_nxt = seqNum;
