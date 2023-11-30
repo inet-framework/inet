@@ -7,6 +7,7 @@
 
 #include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
 
+#include "inet/transportlayer/tcp/Rfc6675.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 
@@ -82,6 +83,8 @@ void TcpBaseAlg::initialize()
     persistTimer->setContextPointer(conn);
     delayedAckTimer->setContextPointer(conn);
     keepAliveTimer->setContextPointer(conn);
+
+    rfc6675 = new Rfc6675(state, conn);
 }
 
 void TcpBaseAlg::established(bool active)
