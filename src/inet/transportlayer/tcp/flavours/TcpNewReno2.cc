@@ -6,6 +6,8 @@
 
 #include "inet/transportlayer/tcp/flavours/TcpNewReno2.h"
 
+#include "inet/transportlayer/tcp/Rfc6675.h"
+
 namespace inet {
 namespace tcp {
 
@@ -30,6 +32,9 @@ void TcpNewReno2::processRexmitTimer(TcpEventCode& event)
 
 void TcpNewReno2::receivedDataAck(uint32_t firstSeqAcked)
 {
+    if (state->sack_enabled)
+        rfc6675->receivedDataAck(firstSeqAcked);
+
     Rfc5681::receivedDataAck(firstSeqAcked);
 
     // 3.2. Specification
@@ -128,6 +133,9 @@ void TcpNewReno2::receivedDataAck(uint32_t firstSeqAcked)
 
 void TcpNewReno2::receivedDuplicateAck()
 {
+    if (state->sack_enabled)
+        rfc6675->receivedDuplicateAck();
+
     // 2) Three duplicate ACKs:
     //    When the third duplicate ACK is received, the TCP sender first
     //    checks the value of recover to see if the Cumulative
