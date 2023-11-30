@@ -181,7 +181,6 @@ class INET_API TcpConnection : public cSimpleModule
     virtual bool processMSSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionMaxSegmentSize& option);
     virtual bool processWSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionWindowScale& option);
     virtual bool processSACKPermittedOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionSackPermitted& option);
-    virtual bool processSACKOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionSack& option);
     virtual bool processTSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTimestamp& option);
     //@}
 
@@ -221,9 +220,6 @@ class INET_API TcpConnection : public cSimpleModule
 
     /** Utility: writeHeaderOptions (Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented) */
     virtual TcpHeader writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader);
-
-    /** Utility: adds SACKs to segments header options field */
-    virtual TcpHeader addSacks(const Ptr<TcpHeader>& tcpHeader);
 
     /** Utility: get TSval from segments TS header option */
     virtual uint32_t getTSval(const Ptr<const TcpHeader>& tcpHeader) const;
@@ -404,47 +400,6 @@ class INET_API TcpConnection : public cSimpleModule
     virtual bool processAppCommand(cMessage *msg);
 
     virtual void handleMessage(cMessage *msg);
-
-    /**
-     * For SACK TCP. RFC 3517, page 3: "This routine returns whether the given
-     * sequence number is considered to be lost.  The routine returns true when
-     * either DupThresh discontiguous SACKed sequences have arrived above
-     * 'SeqNum' or (DupThresh * SMSS) bytes with sequence numbers greater
-     * than 'SeqNum' have been SACKed.  Otherwise, the routine returns
-     * false."
-     */
-    virtual bool isLost(uint32_t seqNum);
-
-    /**
-     * For SACK TCP. RFC 3517, page 3: "This routine traverses the sequence
-     * space from HighACK to HighData and MUST set the "pipe" variable to an
-     * estimate of the number of octets that are currently in transit between
-     * the TCP sender and the TCP receiver."
-     */
-    virtual void setPipe();
-
-    /**
-     * For SACK TCP. RFC 3517, page 3: "This routine uses the scoreboard data
-     * structure maintained by the Update() function to determine what to transmit
-     * based on the SACK information that has arrived from the data receiver
-     * (and hence been marked in the scoreboard).  NextSeg () MUST return the
-     * sequence number range of the next segment that is to be
-     * transmitted..."
-     * Returns true if a valid sequence number (for the next segment) is found and
-     * returns false if no segment should be send.
-     */
-    virtual bool nextSeg(uint32_t& seqNum);
-
-    /**
-     * Utility: send data during Loss Recovery phase (if SACK is enabled).
-     */
-    virtual void sendDataDuringLossRecoveryPhase(uint32_t congestionWindow);
-
-    /**
-     * Utility: send segment during Loss Recovery phase (if SACK is enabled).
-     * Returns the number of bytes sent.
-     */
-    virtual uint32_t sendSegmentDuringLossRecoveryPhase(uint32_t seqNum);
 
     /**
      * Utility: send one new segment from snd_max if allowed (RFC 3042).
