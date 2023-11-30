@@ -1128,7 +1128,7 @@ void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpHeader)
                 break;
 
             case TCPOPTION_SACK: // SACK=5
-                ok = processSACKOption(tcpHeader, *check_and_cast<const TcpOptionSack *>(option));
+                ok = check_and_cast<Rfc6675Recovery *>(tcpAlgorithm->getRecovery())->processSACKOption(tcpHeader, *check_and_cast<const TcpOptionSack *>(option));
                 break;
 
             case TCPOPTION_TIMESTAMP: // TS=8
@@ -1411,7 +1411,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         // containing new data, and each of these "duplicate" ACKs SHOULD bear a
         // SACK option."
         if (state->sack_enabled && (state->snd_sack || state->snd_dsack)) {
-            addSacks(tcpHeader);
+            check_and_cast<Rfc6675Recovery *>(tcpAlgorithm->getRecovery())->addSacks(tcpHeader);
         }
 
         // TODO add new TCPOptions here once they are implemented
