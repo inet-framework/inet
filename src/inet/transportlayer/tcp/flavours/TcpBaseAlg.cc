@@ -43,14 +43,6 @@ std::string TcpBaseAlgStateVariables::detailedInfo() const
     return out.str();
 }
 
-simsignal_t TcpBaseAlg::cwndSignal = cComponent::registerSignal("cwnd"); // will record changes to snd_cwnd
-simsignal_t TcpBaseAlg::ssthreshSignal = cComponent::registerSignal("ssthresh"); // will record changes to ssthresh
-simsignal_t TcpBaseAlg::rttSignal = cComponent::registerSignal("rtt"); // will record measured RTT
-simsignal_t TcpBaseAlg::srttSignal = cComponent::registerSignal("srtt"); // will record smoothed RTT
-simsignal_t TcpBaseAlg::rttvarSignal = cComponent::registerSignal("rttvar"); // will record RTT variance (rttvar)
-simsignal_t TcpBaseAlg::rtoSignal = cComponent::registerSignal("rto"); // will record retransmission timeout
-simsignal_t TcpBaseAlg::numRtosSignal = cComponent::registerSignal("numRtos"); // will record total number of RTOs
-
 TcpBaseAlg::TcpBaseAlg() : TcpAlgorithm(),
     state((TcpBaseAlgStateVariables *&)TcpAlgorithm::state)
 {

@@ -89,28 +89,6 @@ class TcpAlgorithm;
 class INET_API TcpConnection : public cSimpleModule
 {
   protected:
-    static simsignal_t tcpConnectionAddedSignal;
-    static simsignal_t stateSignal; // FSM state
-    static simsignal_t sndWndSignal; // snd_wnd
-    static simsignal_t rcvWndSignal; // rcv_wnd
-    static simsignal_t rcvAdvSignal; // current advertised window (=rcv_adv)
-    static simsignal_t sndNxtSignal; // sent seqNo
-    static simsignal_t sndAckSignal; // sent ackNo
-    static simsignal_t rcvSeqSignal; // received seqNo
-    static simsignal_t rcvAckSignal; // received ackNo (=snd_una)
-    static simsignal_t unackedSignal; // number of bytes unacknowledged
-    static simsignal_t dupAcksSignal; // current number of received dupAcks
-    static simsignal_t pipeSignal; // current sender's estimate of bytes outstanding in the network
-    static simsignal_t sndSacksSignal; // number of sent Sacks
-    static simsignal_t rcvSacksSignal; // number of received Sacks
-    static simsignal_t rcvOooSegSignal; // number of received out-of-order segments
-    static simsignal_t rcvNASegSignal; // number of received not acceptable segments
-    static simsignal_t sackedBytesSignal; // current number of received sacked bytes
-    static simsignal_t tcpRcvQueueBytesSignal; // current amount of used bytes in tcp receive queue
-    static simsignal_t tcpRcvQueueDropsSignal; // number of drops in tcp receive queue
-    static simsignal_t tcpRcvPayloadBytesSignal; // amount of payload bytes received (including duplicates, out of order etc) for TCP throughput
-    static simsignal_t bytesInFlightSignal;
-
     // connection identification by apps: socketId
     int socketId = -1; // identifies connection within the app
 
