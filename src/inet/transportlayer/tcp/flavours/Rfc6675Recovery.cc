@@ -131,6 +131,8 @@ void Rfc6675Recovery::step4()
     //       be counted in FlightSize for the purpose of the above
     //       equation.
     state->ssthresh = state->snd_cwnd = conn->getBytesInFlight() / 2;
+    conn->emit(cwndSignal, state->snd_cwnd);
+    conn->emit(ssthreshSignal, state->ssthresh);
 
     // (4.3) Retransmit the first data segment presumed dropped -- the
     //       segment starting with sequence number HighACK + 1.  To
