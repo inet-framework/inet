@@ -1,5 +1,5 @@
 diff --git a/src/internet/model/tcp-socket-base.cc b/src/internet/model/tcp-socket-base.cc
-index c305f27..0d9b49d 100644
+index c305f27..f8a369b 100644
 --- a/src/internet/model/tcp-socket-base.cc
 +++ b/src/internet/model/tcp-socket-base.cc
 @@ -62,6 +62,7 @@
@@ -75,7 +75,40 @@ index c305f27..0d9b49d 100644
  }
  
  /* Received a packet upon ESTABLISHED state. This function is mimicking the
-@@ -3350,14 +3374,6 @@ TcpSocketBase::SendPendingData(bool withAck)
+@@ -1689,7 +1713,8 @@ TcpSocketBase::EnterRecovery(uint32_t currentDelivered)
+     }
+ 
+     // (4.3) Retransmit the first data segment presumed dropped
+-    DoRetransmit();
++    uint32_t sz = SendDataPacket(m_highRxAckMark, m_tcb->m_segmentSize, true);
++    NS_ASSERT(sz > 0);
+     // (4.4) Run SetPipe ()
+     // (4.5) Proceed to step (C)
+     // these steps are done after the ProcessAck function (SendPendingData)
+@@ -1778,7 +1803,7 @@ TcpSocketBase::DupAck(uint32_t currentDelivered)
+         // (indicating at least three segments have arrived above the current
+         // cumulative acknowledgment point, which is taken to indicate loss)
+         // go to step (4).
+-        else if (m_txBuffer->IsLost(m_highRxAckMark + m_tcb->m_segmentSize))
++        else if (m_txBuffer->IsLost(m_highRxAckMark)) // TODO it's +1 and not +1 SMSS, besides why is it not IsLostRFC?
+         {
+             EnterRecovery(currentDelivered);
+             NS_ASSERT(m_tcb->m_congState == TcpSocketState::CA_RECOVERY);
+@@ -2048,13 +2073,6 @@ TcpSocketBase::ProcessAck(const SequenceNumber32& ackNumber,
+                 m_recoveryOps->DoRecovery(m_tcb, currentDelivered);
+             }
+ 
+-            // If the packet is already retransmitted do not retransmit it
+-            if (!m_txBuffer->IsRetransmittedDataAcked(ackNumber + m_tcb->m_segmentSize))
+-            {
+-                DoRetransmit(); // Assume the next seq is lost. Retransmit lost packet
+-                m_tcb->m_cWndInfl = SafeSubtraction(m_tcb->m_cWndInfl, bytesAcked);
+-            }
+-
+             // This partial ACK acknowledge the fact that one segment has been
+             // previously lost and now successfully received. All others have
+             // been processed when they come under the form of dupACKs
+@@ -3350,14 +3368,6 @@ TcpSocketBase::SendPendingData(bool withAck)
              {
                  NotifySend(GetTxAvailable());
              }
@@ -90,13 +123,12 @@ index c305f27..0d9b49d 100644
              // Nagle's algorithm (RFC896): Hold off sending if there is unacked data
              // in the buffer and the amount of data to send is less than one segment
              if (!m_noDelay && UnAckDataCount() > 0 && availableData < m_tcb->m_segmentSize)
-@@ -3373,6 +3389,18 @@ TcpSocketBase::SendPendingData(bool withAck)
+@@ -3373,6 +3383,17 @@ TcpSocketBase::SendPendingData(bool withAck)
              auto maxSizeToSend = static_cast<uint32_t>(nextHigh - next);
              s = std::min(s, maxSizeToSend);
  
 +            // Stop sending if we need to wait for a larger Tx window (prevent silly window
 +            // syndrome) but continue if we don't have data
-+            std::cout << "TRACE SILLY " << s << std::endl;
 +            if (s < m_tcb->m_segmentSize && availableData > s)
 +            {
 +                NS_LOG_LOGIC("Preventing Silly Window Syndrome. Wait to send.");
@@ -109,7 +141,7 @@ index c305f27..0d9b49d 100644
              // (C.2) If any of the data octets sent in (C.1) are below HighData,
              //       HighRxt MUST be set to the highest sequence number of the
              //       retransmitted segment unless NextSeg () rule (4) was
-@@ -4506,6 +4534,13 @@ TcpSocketBase::UpdateNextTxSequence(SequenceNumber32 oldValue, SequenceNumber32
+@@ -4506,6 +4527,13 @@ TcpSocketBase::UpdateNextTxSequence(SequenceNumber32 oldValue, SequenceNumber32
      m_nextTxSequenceTrace(oldValue, newValue);
  }
  
@@ -123,7 +155,7 @@ index c305f27..0d9b49d 100644
  void
  TcpSocketBase::UpdateHighTxMark(SequenceNumber32 oldValue, SequenceNumber32 newValue) const
  {
-@@ -4672,6 +4707,22 @@ TcpSocketBase::GetHighRxAck() const
+@@ -4672,6 +4700,24 @@ TcpSocketBase::GetHighRxAck() const
      return m_highRxAckMark.Get();
  }
  
@@ -139,7 +171,9 @@ index c305f27..0d9b49d 100644
 +        << "snd_una: " << GetTxBuffer()->HeadSequence() << ", "
 +        << "snd_max: " << m_tcb->m_highTxMark << ", "
 +        << "snd_wnd: " << m_rWnd << ", "
-+        << "dup_ack: " << m_dupAckCount;
++        << "dup_ack: " << m_dupAckCount << ", "
++        << "recover: " << m_recover << ", "
++        << "recovery: " << (m_tcb->m_congState == TcpSocketState::CA_RECOVERY ? "true" : "false");
 +    return out.str();
 +}
 +
@@ -203,3 +237,32 @@ index eb605c6..2f583c8 100644
  
      TracedValue<TcpCongState_t> m_congState{CA_OPEN}; //!< State in the Congestion state machine
  
+diff --git a/src/internet/model/tcp-tx-buffer.cc b/src/internet/model/tcp-tx-buffer.cc
+index 99ff8af..59d409f 100644
+--- a/src/internet/model/tcp-tx-buffer.cc
++++ b/src/internet/model/tcp-tx-buffer.cc
+@@ -926,7 +926,6 @@ TcpTxBuffer::IsLost(const SequenceNumber32& seq) const
+ {
+     NS_LOG_FUNCTION(this << seq);
+ 
+-    SequenceNumber32 beginOfCurrentPacket = m_firstByteSeq;
+ 
+     if (seq >= m_highestSack.second)
+     {
+@@ -938,7 +937,7 @@ TcpTxBuffer::IsLost(const SequenceNumber32& seq) const
+     for (auto it = m_sentList.begin(); it != m_sentList.end(); ++it)
+     {
+         // Search for the right iterator before calling IsLost()
+-        if (beginOfCurrentPacket >= seq)
++        if ((*it)->m_startSeq <= seq && seq < (*it)->m_startSeq + (*it)->m_packet->GetSize())
+         {
+             if ((*it)->m_lost)
+             {
+@@ -953,7 +952,6 @@ TcpTxBuffer::IsLost(const SequenceNumber32& seq) const
+             }
+         }
+ 
+-        beginOfCurrentPacket += (*it)->m_packet->GetSize();
+     }
+ 
+     return false;
