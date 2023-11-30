@@ -14,6 +14,23 @@
 namespace inet {
 namespace tcp {
 
+bool Rfc6675Recovery::isDuplicateAck(TcpHeader *tcpHeader)
+{
+    // For the purposes of this specification, we define a "duplicate
+    // acknowledgment" as a segment that arrives carrying a SACK block that
+    // identifies previously unacknowledged and un-SACKed octets between
+    // HighACK and HighData.  Note that an ACK which carries new SACK data
+    // is counted as a duplicate acknowledgment under this definition even
+    // if it carries new data, changes the advertised window, or moves the
+    // cumulative acknowledgment point, which is different from the
+    // definition of duplicate acknowledgment in [RFC5681].
+
+    // TODO unfortunately these values are wrong, see other comment where they are set
+    return state->sackedBytes != state->sackedBytes_old;
+
+    // could be something like return state->addedSackedBytes > 0;
+}
+
 // 5. Algorithm Details
 //    Upon the receipt of any ACK containing SACK information, the
 //    scoreboard MUST be updated via the Update () routine.
@@ -298,6 +315,7 @@ bool Rfc6675Recovery::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, c
             }
 
             if (seqGreater(tmp.getEnd(), tcpHeader->getAckNo()) && seqGreater(tmp.getEnd(), state->snd_una))
+                // TODO return number of additionally sacked bytes, sum it up and store in state->addedSackedBytes?
                 conn->getRexmitQueueForUpdate()->setSackedBit(tmp.getStart(), tmp.getEnd());
             else
                 EV_DETAIL << "Received SACK below total cumulative ACK snd_una=" << state->snd_una << "\n";
@@ -309,6 +327,9 @@ bool Rfc6675Recovery::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, c
         conn->emit(rcvSacksSignal, state->rcv_sacks);
 
         // update scoreboard
+        // TODO this is wrong because discardUpTo can delete sackedBytes,
+        // and the SACK option can add the same amount of new sack bytes
+        // leading to no changes in number of sacked bytes?
         state->sackedBytes_old = state->sackedBytes; // needed for RFC 3042 to check if last dupAck contained new sack information
         state->sackedBytes = conn->getRexmitQueue()->getTotalAmountOfSackedBytes();
 
