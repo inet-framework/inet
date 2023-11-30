@@ -108,6 +108,21 @@ import inet.transportlayer.contract.ITcp;
 //   - RFC 3168 - The Addition of Explicit Congestion Notification (ECN) to IP
 //   - RFC 8257 - Data Center TCP (DCTCP): ECN Marking at the Data Sender
 //
+// We want to implement the following RFCs:
+//   - RFC 2018 - TCP Selective Acknowledgment Options
+//   - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP
+//   - RFC 3042 - Enhancing TCP's Loss Recovery Using Limited Transmit
+//   - RFC 3168 - The Addition of Explicit Congestion Notification (ECN) to IP
+//   - RFC 3390 - Increasing TCP's Initial Window
+//   - RFC 5681 - TCP Congestion Control
+//   - RFC 6582 - The NewReno Modification to TCP's Fast Recovery Algorithm
+//   - RFC 6675 - A Conservative Loss Recovery Algorithm Based on Selective Acknowledgment (SACK) for TCP
+//   - RFC 7323 - TCP Extensions for High Performance
+//   - RFC 9293 - Transmission Control Protocol (TCP)
+//
+// See also:
+//   - RFC 7805 - Moving Outdated TCP Extensions and TCP-Related Documents to Historic or Informational Status
+//
 // Implemented features include the following:
 //  - all RFC 793 TCP states and state transitions
 //  - connection setup and teardown as in RFC 793
