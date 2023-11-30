@@ -135,6 +135,10 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
     virtual bool shouldMarkAck() override;
 
     virtual void processEcnInEstablished() override;
+
+    virtual TcpCongestionControl *getCongestionControl() override { return congestionControl; }
+
+    virtual TcpRecovery *getRecovery() override { return recovery; }
 };
 
 } // namespace tcp
