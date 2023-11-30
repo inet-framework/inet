@@ -52,6 +52,10 @@ class INET_API TcpAlgorithm : public cObject
      */
     virtual ~TcpAlgorithm() {}
 
+    virtual TcpCongestionControl *getCongestionControl() = 0;
+
+    virtual TcpRecovery *getRecovery() = 0;
+
     /**
      * Assign this object to a TcpConnection. Its sendQueue and receiveQueue
      * must be set already at this time, because we cache their pointers here.
