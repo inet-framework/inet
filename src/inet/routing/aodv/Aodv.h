@@ -201,7 +201,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
 
     // This function creates or updates a route to the previous hop without a valid sequence number
     // TODO remove seqNo argument
-    void createOrUpdateRouteToPrevHop(uint32_t seqNo, int sourceInterfaceId, const L3Address& sourceAddr);
+    void createOrUpdateRouteToPrevHop(int sourceInterfaceId, const L3Address& sourceAddr);
 
     /* UDP callback interface */
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
