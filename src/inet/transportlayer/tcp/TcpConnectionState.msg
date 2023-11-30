@@ -198,7 +198,7 @@ struct TcpStateVariables
     SackList sacks_array;    // MAX_SACK_BLOCKS is set to 60
     uint32_t highRxt = 0;    // RFC 3517, page 3: ""HighRxt" is the highest sequence number which has been retransmitted during the current loss recovery phase."
     uint32_t pipe = 0;    // RFC 3517, page 3: ""Pipe" is a sender's estimate of the number of bytes outstanding in the network."
-    uint32_t recoveryPoint = 0;    // RFC 3517
+    uint32_t recoveryPoint = 0;    // RFC 3517; snd_max when loss recovery started
     uint32_t sackedBytes = 0;    // number of sackedBytes
     uint32_t sackedBytes_old = 0;    // old number of sackedBytes - needed for RFC 3042 to check if last dupAck contained new sack information
     bool lossRecovery = false;    // indicates if algorithm is in loss recovery phase
