@@ -32,12 +32,12 @@ void CwndChange(std::string context, uint32_t oldCwnd, uint32_t newCwnd)
     cwndOverTime.push_back(std::make_pair(simTime, newCwnd));
 }
 
-std::vector<std::pair<double, ns3::SequenceNumber32>> seqNumOverTime;
+std::vector<std::pair<double, ns3::SequenceNumber32>> sndMaxOverTime;
 
-void SeqNumChange(std::string context, ns3::SequenceNumber32 oldValue, ns3::SequenceNumber32 newValue)
+void SndMaxChange(std::string context, ns3::SequenceNumber32 oldValue, ns3::SequenceNumber32 newValue)
 {
     double simTime = ns3::Simulator::Now().GetSeconds();
-    seqNumOverTime.push_back(std::make_pair(simTime, newValue));
+    sndMaxOverTime.push_back(std::make_pair(simTime, newValue));
 }
 
 std::vector<std::pair<double, ns3::SequenceNumber32>> lastAckedSeqOverTime;
@@ -51,7 +51,7 @@ void LastAckedSeqChange(std::string context, ns3::SequenceNumber32 oldValue, ns3
 void ConnectTraceFunctions()
 {
     Config::Connect("/NodeList/0/$ns3::TcpL4Protocol/SocketList/*/CongestionWindow", MakeCallback(&CwndChange));
-    Config::Connect("/NodeList/0/$ns3::TcpL4Protocol/SocketList/*/NextTxSequence", MakeCallback(&SeqNumChange));
+    Config::Connect("/NodeList/0/$ns3::TcpL4Protocol/SocketList/*/HighestSequence", MakeCallback(&SndMaxChange));
     Config::Connect("/NodeList/0/$ns3::TcpL4Protocol/SocketList/*/CongState", MakeCallback(&CongStateTrace));
     Config::Connect("/NodeList/0/$ns3::TcpL4Protocol/SocketList/*/BytesInFlight", MakeCallback(&BytesInFlightTrace));
     Config::Connect("/NodeList/0/$ns3::TcpL4Protocol/SocketList/*/LastAckedSeq", MakeCallback(&LastAckedSeqChange));
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
   ofs2.close();
 
   std::ofstream ofs3("ns3-seq-num.dat", std::ios::out);
-  for(auto &x : seqNumOverTime)
+  for(auto &x : sndMaxOverTime)
     ofs3 << x.first << " " << x.second << std::endl;
   ofs3.close();
 
