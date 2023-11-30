@@ -629,7 +629,7 @@ void TcpConnection::configureStateVariables()
     state->pmtudEnabled = tcpMain->par("pmtudEnabled"); // Path MTU Discovery (RFC 1191, RFC 1981)
     state->pmtudTimeout = tcpMain->par("pmtudTimeout"); // time after which original MSS is restored
     state->pmtudLastMssReduction = -1; // never reduced yet
-    state->dsack_support = tcpMain->par("dsackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
+    state->dsack_enabled = tcpMain->par("dsackEnabled"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
 
     if (state->sack_support) {
         std::string algorithmName1 = "TcpReno";

@@ -187,7 +187,7 @@ struct TcpStateVariables
 
     // SACK related variables
     bool sack_support = false;      // set if the host supports selective acknowledgment (header option) (RFC 2018, 2883, 3517)
-    bool dsack_support = false;      // set if the host supports dsack in sack option (header option) (RFC 2883)
+    bool dsack_enabled = false;      // set if the host supports dsack in sack option (header option) (RFC 2883)
     bool sack_enabled = false;      // set if the connection uses selective acknowledgment (header option)
     bool snd_sack_perm = false;     // set if SACK_PERMITTED has been sent
     bool rcv_sack_perm = false;     // set if SACK_PERMITTED has been received
