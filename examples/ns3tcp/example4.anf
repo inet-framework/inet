@@ -1350,8 +1350,8 @@ except results.ResultQueryError as e:
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
-col1, col2 = np.loadtxt('results/ns3-seq-num.dat', unpack=True)
-df = pd.concat([df, pd.DataFrame({'module': ['ns3'], 'name': ['sndNxt:vector'], 'vectime': [col1], 'vecvalue': [col2], 'unit': [''], 'interpolationmode': 'sample-hold'})])
+col1, col2 = np.loadtxt('results/ns3-snd-max.dat', unpack=True)
+df = pd.concat([df, pd.DataFrame({'module': ['ns3'], 'name': ['sndMax:vector'], 'vectime': [col1], 'vecvalue': [col2], 'unit': [''], 'interpolationmode': 'sample-hold'})])
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
@@ -1948,7 +1948,7 @@ utils.export_data_if_needed(df, props)
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
-            <property name="legend_manual" value=""/>
+            <property name="legend_manual" value="false"/>
             <property name="yaxis_title" value=""/>
             <property name="legend_replacements" value=""/>
             <property name="Legend.Border" value="false"/>
@@ -1974,7 +1974,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="legend_format" value=""/>
-            <property name="filter" value="type =~ vector AND name =~ sndNxt:vector"/>
+            <property name="filter" value="type =~ vector AND name =~ sndMax:vector AND module =~ *.source.*"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
@@ -1982,14 +1982,14 @@ utils.export_data_if_needed(df, props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
             <property name="legend_show" value="true"/>
-            <property name="simplify" value=""/>
+            <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1803542438" name="sshthresh" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1803542438" name="ssthresh" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
