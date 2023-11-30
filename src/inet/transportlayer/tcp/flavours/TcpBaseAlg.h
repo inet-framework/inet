@@ -52,14 +52,6 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
     cMessage *delayedAckTimer;
     cMessage *keepAliveTimer;
 
-    static simsignal_t cwndSignal; // will record changes to snd_cwnd
-    static simsignal_t ssthreshSignal; // will record changes to ssthresh
-    static simsignal_t rttSignal; // will record measured RTT
-    static simsignal_t srttSignal; // will record smoothed RTT
-    static simsignal_t rttvarSignal; // will record RTT variance (rttvar)
-    static simsignal_t rtoSignal; // will record retransmission timeout
-    static simsignal_t numRtosSignal; // will record total number of RTOs
-
   protected:
     /** @name Process REXMIT, PERSIST, DELAYED-ACK and KEEP-ALIVE timers */
     //@{
