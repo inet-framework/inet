@@ -31,7 +31,7 @@ void Rfc6675Recovery::stepA()
     //     the scoreboard for sequence numbers greater than the new value of
     //     HighACK SHOULD NOT be cleared when leaving the loss recovery
     //     phase.
-    if (seqGreater(state->snd_una, state->recoveryPoint)) {
+    if (seqGE(state->snd_una, state->recoveryPoint)) {
         state->lossRecovery = false;
         conn->getRexmitQueueForUpdate()->discardUpTo(state->snd_una);
     }
