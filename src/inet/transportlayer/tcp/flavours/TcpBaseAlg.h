@@ -10,8 +10,6 @@
 
 #include "inet/transportlayer/tcp/flavours/TcpBaseAlgState_m.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
-#include "inet/transportlayer/tcp/TcpCongestionControl.h"
-#include "inet/transportlayer/tcp/TcpRecovery.h"
 
 namespace inet {
 namespace tcp {
