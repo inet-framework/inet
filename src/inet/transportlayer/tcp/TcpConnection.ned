@@ -24,7 +24,7 @@ simple TcpConnection extends SimpleModule {
         @signal[sndWnd];    // Snd_wnd
         @signal[rcvWnd];    // Rcv_wnd
         @signal[rcvAdv];    // Current advertised window (=rcv_adv)
-        @signal[sndNxt];    // Sent seqNo
+        @signal[sndSeq];    // Sent seqNo
         @signal[sndAck];    // Sent ackNo
         @signal[rcvSeq];    // Received seqNo
         @signal[rcvAck];    // Received ackNo (=snd_una)
@@ -58,7 +58,7 @@ simple TcpConnection extends SimpleModule {
         @statistic[sndWnd](record=vector; interpolationmode=sample-hold);    // Snd_wnd
         @statistic[rcvWnd](record=vector; interpolationmode=sample-hold);    // Rcv_wnd
         @statistic[rcvAdv](record=vector; interpolationmode=sample-hold);    // Current advertised window (=rcv_adv)
-        @statistic[sndNxt](record=vector; interpolationmode=sample-hold);    // Sent seqNo
+        @statistic[sndSeq](record=vector; interpolationmode=sample-hold);    // Sent seqNo
         @statistic[sndAck](record=vector; interpolationmode=sample-hold);    // Sent ackNo
         @statistic[rcvSeq](record=vector; interpolationmode=sample-hold);    // Received seqNo
         @statistic[rcvAck](record=vector; interpolationmode=sample-hold);    // Received ackNo (=snd_una)
