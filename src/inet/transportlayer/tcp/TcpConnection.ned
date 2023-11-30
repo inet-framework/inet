@@ -14,7 +14,7 @@ simple TcpConnection {
         @signal[sndWnd];    // snd_wnd
         @signal[rcvWnd];    // rcv_wnd
         @signal[rcvAdv];    // current advertised window (=rcv_adv)
-        @signal[sndNxt];    // sent seqNo
+        @signal[sndSeq];    // sent seqNo
         @signal[sndAck];    // sent ackNo
         @signal[rcvSeq];    // received seqNo
         @signal[rcvAck];    // received ackNo (=snd_una)
@@ -48,7 +48,7 @@ simple TcpConnection {
         @statistic[sndWnd](record=vector; interpolationmode=sample-hold);    // snd_wnd
         @statistic[rcvWnd](record=vector; interpolationmode=sample-hold);    // rcv_wnd
         @statistic[rcvAdv](record=vector; interpolationmode=sample-hold);    // current advertised window (=rcv_adv)
-        @statistic[sndNxt](record=vector; interpolationmode=sample-hold);    // sent seqNo
+        @statistic[sndSeq](record=vector; interpolationmode=sample-hold);    // sent seqNo
         @statistic[sndAck](record=vector; interpolationmode=sample-hold);    // sent ackNo
         @statistic[rcvSeq](record=vector; interpolationmode=sample-hold);    // received seqNo
         @statistic[rcvAck](record=vector; interpolationmode=sample-hold);    // received ackNo (=snd_una)
