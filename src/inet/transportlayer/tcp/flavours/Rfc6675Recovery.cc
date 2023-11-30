@@ -140,9 +140,9 @@ void Rfc6675Recovery::step4()
     //       premature rescue retransmission, set both HighRxt and
     //       RescueRxt to the highest sequence number in the
     //       retransmitted segment.
-    // TODO which one and why?
-    conn->retransmitOneSegment(false);
-    // conn->sendDataDuringLossRecoveryPhase(status->snd_cwnd);
+    conn->retransmitOneSegment(false); // this also sends retransmitted segments
+    // state->highRxt = state->snd_una + ?; // this is done in retransmitOneSegment
+    // state->rescueRxt = state->snd_una + ?; // this is done in retransmitOneSegment
 
     // (4.4) Run SetPipe ()
     //       Set a "pipe" variable to the number of outstanding octets
