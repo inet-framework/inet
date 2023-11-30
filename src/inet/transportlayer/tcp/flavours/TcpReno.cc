@@ -202,12 +202,12 @@ void TcpReno::receivedDataAck(uint32_t firstSeqAcked)
         // in the network."
         else {
             // update of scoreboard (B.1) has already be done in readHeaderOptions()
-            conn->setPipe();
+            check_and_cast<Rfc6675Recovery *>(recovery)->setPipe();
 
             // RFC 3517, page 7: "(C) If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
             // segments as follows:"
             if (((int)state->snd_cwnd - (int)state->pipe) >= (int)state->snd_mss) // Note: Typecast needed to avoid prohibited transmissions
-                conn->sendDataDuringLossRecoveryPhase(state->snd_cwnd);
+                check_and_cast<Rfc6675Recovery *>(recovery)->sendDataDuringLossRecoveryPhase(state->snd_cwnd);
         }
     }
 
@@ -292,7 +292,7 @@ void TcpReno::receivedDuplicateAck()
             // acknowledgment has been received and the data has not been
             // determined to have been dropped in the network.  It is assumed
             // that the data is still traversing the network path."
-            conn->setPipe();
+            check_and_cast<Rfc6675Recovery *>(recovery)->setPipe();
             // RFC 3517, page 7: "(5) In order to take advantage of potential additional available
             // cwnd, proceed to step (C) below."
             if (state->lossRecovery) {
@@ -311,7 +311,7 @@ void TcpReno::receivedDuplicateAck()
                 // RFC 3517, page 7: "(C) If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
                 // segments as follows:"
                 if (((int)state->snd_cwnd - (int)state->pipe) >= (int)state->snd_mss) // Note: Typecast needed to avoid prohibited transmissions
-                    conn->sendDataDuringLossRecoveryPhase(state->snd_cwnd);
+                    check_and_cast<Rfc6675Recovery *>(recovery)->sendDataDuringLossRecoveryPhase(state->snd_cwnd);
             }
         }
 
