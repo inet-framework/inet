@@ -26,6 +26,7 @@ simple TcpConnection extends SimpleModule {
         @signal[rcvAdv];    // Current advertised window (=rcv_adv)
         @signal[sndSeq];    // Sent seqNo
         @signal[sndAck];    // Sent ackNo
+        @signal[sndMax];    // Snd_max
         @signal[rcvSeq];    // Received seqNo
         @signal[rcvAck];    // Received ackNo (=snd_una)
         @signal[unacked];    // Number of bytes unacknowledged
@@ -60,6 +61,7 @@ simple TcpConnection extends SimpleModule {
         @statistic[rcvAdv](record=vector; interpolationmode=sample-hold);    // Current advertised window (=rcv_adv)
         @statistic[sndSeq](record=vector; interpolationmode=sample-hold);    // Sent seqNo
         @statistic[sndAck](record=vector; interpolationmode=sample-hold);    // Sent ackNo
+        @statistic[sndMax](record=vector; interpolationmode=sample-hold);    // Snd_max
         @statistic[rcvSeq](record=vector; interpolationmode=sample-hold);    // Received seqNo
         @statistic[rcvAck](record=vector; interpolationmode=sample-hold);    // Received ackNo (=snd_una)
         @statistic[unacked](record=vector; interpolationmode=sample-hold);    // Number of bytes unacknowledged
