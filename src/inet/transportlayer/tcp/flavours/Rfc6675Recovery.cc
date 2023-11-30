@@ -686,7 +686,7 @@ TcpHeader Rfc6675Recovery::addSacks(const Ptr<TcpHeader>& tcpHeader)
     }
 
     if (start != end) {
-        if (state->dsack_support && state->snd_dsack) { // SequenceNo < rcv_nxt
+        if (state->dsack_enabled && state->snd_dsack) { // SequenceNo < rcv_nxt
             // RFC 2883, page 3:
             // "(3) The left edge of the D-SACK block specifies the first sequence
             // number of the duplicate contiguous sequence, and the right edge of
