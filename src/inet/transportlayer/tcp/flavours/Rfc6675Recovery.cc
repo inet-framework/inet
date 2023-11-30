@@ -348,7 +348,7 @@ bool Rfc6675Recovery::isLost(uint32_t seqNum)
     // 'SeqNum' or (DupThresh * SMSS) bytes with sequence numbers greater
     // than 'SeqNum' have been SACKed.  Otherwise, the routine returns
     // false."
-    ASSERT(seqGE(seqNum, state->snd_una)); // HighAck = snd_una
+    ASSERT(seqGE(seqNum, state->snd_una)); // HighAck = snd_una - 1
 
     bool isLost = (conn->getRexmitQueue()->getNumOfDiscontiguousSacks(seqNum) >= state->dupthresh
                    || conn->getRexmitQueue()->getAmountOfSackedBytes(seqNum) >= (state->dupthresh * state->snd_mss));
