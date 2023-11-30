@@ -1178,6 +1178,10 @@ void Aodv::handleRERR(const Ptr<const Rerr>& rerr, int sourceInterfaceId, const 
 {
     EV_INFO << "AODV Route Error arrived with source addr: " << sourceAddr << endl;
 
+    // If needed, a route is created for the previous hop,
+    // but without a valid sequence number (see section 6.2)
+    createOrUpdateRouteToPrevHop(sourceInterfaceId, sourceAddr);
+
     // A node initiates processing for a RERR message in three situations:
     // (iii)   if it receives a RERR from a neighbor for one or more
     //         active routes.
