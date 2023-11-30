@@ -16,6 +16,7 @@ simple TcpConnection {
         @signal[rcvAdv];    // current advertised window (=rcv_adv)
         @signal[sndSeq];    // sent seqNo
         @signal[sndAck];    // sent ackNo
+        @signal[sndMax];    // sent seqNo
         @signal[rcvSeq];    // received seqNo
         @signal[rcvAck];    // received ackNo (=snd_una)
         @signal[unacked];    // number of bytes unacknowledged
@@ -50,6 +51,7 @@ simple TcpConnection {
         @statistic[rcvAdv](record=vector; interpolationmode=sample-hold);    // current advertised window (=rcv_adv)
         @statistic[sndSeq](record=vector; interpolationmode=sample-hold);    // sent seqNo
         @statistic[sndAck](record=vector; interpolationmode=sample-hold);    // sent ackNo
+        @statistic[sndMax](record=vector; interpolationmode=sample-hold);    // snd_max
         @statistic[rcvSeq](record=vector; interpolationmode=sample-hold);    // received seqNo
         @statistic[rcvAck](record=vector; interpolationmode=sample-hold);    // received ackNo (=snd_una)
         @statistic[unacked](record=vector; interpolationmode=sample-hold);    // number of bytes unacknowledged

@@ -35,6 +35,7 @@ extern INET_API simsignal_t rttvarSignal; // will record RTT variance (rttvar)
 extern INET_API simsignal_t rttvarSignal; // will record RTT variance (rttvar)
 extern INET_API simsignal_t sackedBytesSignal; // current number of received sacked bytes
 extern INET_API simsignal_t sndAckSignal; // sent ackNo
+extern INET_API simsignal_t sndMaxSignal; // snd_max
 extern INET_API simsignal_t sndSacksSignal; // number of sent Sacks
 extern INET_API simsignal_t sndSeqSignal; // sent seqNo
 extern INET_API simsignal_t sndWndSignal; // snd_wnd

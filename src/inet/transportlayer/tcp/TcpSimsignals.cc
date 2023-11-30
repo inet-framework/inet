@@ -26,6 +26,7 @@ simsignal_t rttSignal = cComponent::registerSignal("rtt"); // will record measur
 simsignal_t rttvarSignal = cComponent::registerSignal("rttvar"); // will record RTT variance (rttvar)
 simsignal_t sackedBytesSignal = cComponent::registerSignal("sackedBytes"); // current number of received sacked bytes
 simsignal_t sndAckSignal = cComponent::registerSignal("sndAck"); // sent ackNo
+simsignal_t sndMaxSignal = cComponent::registerSignal("sndMax"); // snd_max
 simsignal_t sndSacksSignal = cComponent::registerSignal("sndSacks"); // number of sent Sacks
 simsignal_t sndSeqSignal = cComponent::registerSignal("sndSeq"); // sent seqNo
 simsignal_t sndWndSignal = cComponent::registerSignal("sndWnd"); // snd_wnd

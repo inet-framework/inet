@@ -1061,6 +1061,7 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
         //"
         EV_INFO << "SYN bit set: sending SYN+ACK\n";
         state->snd_max = state->snd_nxt = state->iss;
+        emit(sndMaxSignal, state->snd_max);
         sendSynAck();
         startSynRexmitTimer();
 

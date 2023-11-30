@@ -76,8 +76,10 @@ void Rfc6675Recovery::stepC()
         // (C.3) If any of the data octets sent in (C.1) are above HighData,
         //       HighData must be updated to reflect the transmission of
         //       previously unsent data.
-        if (seqGreater(seqNum, state->snd_max))
+        if (seqGreater(seqNum, state->snd_max)) {
             state->snd_max = seqNum + state->snd_mss;
+            conn->emit(sndMaxSignal, state->snd_max);
+        }
 
         if (seqLE(seqNum + state->snd_mss, state->snd_una + state->snd_wnd)) {
             state->snd_nxt = seqNum;
@@ -580,8 +582,10 @@ uint32_t Rfc6675Recovery::sendSegmentDuringLossRecoveryPhase(uint32_t seqNum)
     // RFC 3517 page 8: "(C.3) If any of the data octets sent in (C.1) are above HighData,
     // HighData must be updated to reflect the transmission of
     // previously unsent data."
-    if (seqGreater(sentSeqNum, state->snd_max)) // HighData = snd_max
+    if (seqGreater(sentSeqNum, state->snd_max)) { // HighData = snd_max
         state->snd_max = sentSeqNum;
+        conn->emit(sndMaxSignal, state->snd_max);
+    }
 
     conn->emit(unackedSignal, state->snd_max - state->snd_una);
 

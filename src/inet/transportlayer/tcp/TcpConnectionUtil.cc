@@ -575,6 +575,7 @@ void TcpConnection::sendSyn()
     tcpHeader->setWindow(state->rcv_wnd);
 
     state->snd_max = state->snd_nxt = state->iss + 1;
+    emit(sndMaxSignal, state->snd_max);
     state->full_sized_segment_counter = state->delayedAckFrameCount;
 
     // ECN
@@ -615,6 +616,7 @@ void TcpConnection::sendSynAck()
     tcpHeader->setWindow(state->rcv_wnd);
 
     state->snd_max = state->snd_nxt = state->iss + 1;
+    emit(sndMaxSignal, state->snd_max);
 
     // ECN
     if (state->ecnWillingness) {
@@ -864,8 +866,10 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     // remember highest seq sent (snd_nxt may be set back on retransmission,
     // but we'll need snd_max to check validity of ACKs -- they must ack
     // something we really sent)
-    if (seqGreater(state->snd_nxt, state->snd_max))
+    if (seqGreater(state->snd_nxt, state->snd_max)) {
         state->snd_max = state->snd_nxt;
+        emit(sndMaxSignal, state->snd_max);
+    }
 
     return sentBytes;
 }
@@ -984,6 +988,7 @@ bool TcpConnection::sendProbe()
     // but we'll need snd_max to check validity of ACKs -- they must ack
     // something we really sent)
     state->snd_max = state->snd_nxt;
+    emit(sndMaxSignal, state->snd_max);
 
     emit(unackedSignal, state->snd_max - state->snd_una);
 
@@ -1019,6 +1024,7 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
         sendFin();
         tcpAlgorithm->segmentRetransmitted(state->snd_nxt, state->snd_nxt + 1);
         state->snd_max = ++state->snd_nxt;
+        emit(sndMaxSignal, state->snd_max);
 
         emit(unackedSignal, state->snd_max - state->snd_una);
     }
@@ -1069,6 +1075,7 @@ void TcpConnection::retransmitData()
         state->snd_nxt = state->snd_max;
         sendFin();
         state->snd_max = ++state->snd_nxt;
+        emit(sndMaxSignal, state->snd_max);
 
         emit(unackedSignal, state->snd_max - state->snd_una);
         return;
@@ -1620,8 +1627,10 @@ void TcpConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32_t congestion
                     EV_DETAIL << "Limited Transmit algorithm enabled. Sending one new segment.\n";
                     uint32_t sentBytes = sendSegment(bytes);
 
-                    if (seqGreater(state->snd_nxt, state->snd_max))
+                    if (seqGreater(state->snd_nxt, state->snd_max)) {
                         state->snd_max = state->snd_nxt;
+                        emit(sndMaxSignal, state->snd_max);
+                    }
 
                     emit(unackedSignal, state->snd_max - state->snd_una);
 

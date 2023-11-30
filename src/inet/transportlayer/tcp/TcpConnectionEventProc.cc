@@ -242,6 +242,7 @@ void TcpConnection::process_CLOSE(TcpEventCode& event, TcpCommand *tcpCommand, c
                 sendFin();
                 tcpAlgorithm->restartRexmitTimer();
                 state->snd_max = ++state->snd_nxt;
+                emit(sndMaxSignal, state->snd_max);
 
                 emit(unackedSignal, state->snd_max - state->snd_una);
 
