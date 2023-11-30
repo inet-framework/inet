@@ -9,6 +9,7 @@
 
 #include <algorithm> // min,max
 
+#include "inet/transportlayer/tcp/flavours/Rfc6675Recovery.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 
 namespace inet {
