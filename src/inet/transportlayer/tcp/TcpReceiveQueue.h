@@ -120,12 +120,12 @@ class INET_API TcpReceiveQueue : public cObject
     /**
      * Returns left edge of enqueued region.
      */
-    virtual uint32_t getLE(uint32_t fromSeqNum);
+    virtual uint32_t getLE(uint32_t fromSeqNum) const;
 
     /**
      * Returns right edge of enqueued region.
      */
-    virtual uint32_t getRE(uint32_t toSeqNum);
+    virtual uint32_t getRE(uint32_t toSeqNum) const;
 
     /** Returns the minimum of first byte seq.no. in queue and rcv_nxt */
     virtual uint32_t getFirstSeqNo();

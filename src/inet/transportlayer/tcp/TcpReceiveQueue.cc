@@ -127,7 +127,7 @@ void TcpReceiveQueue::getQueueStatus()
     EV_DEBUG << "receiveQLength=" << reorderBuffer.getNumRegions() << " " << str() << "\n";
 }
 
-uint32_t TcpReceiveQueue::getLE(uint32_t fromSeqNum)
+uint32_t TcpReceiveQueue::getLE(uint32_t fromSeqNum) const
 {
     B fs = seqToOffset(fromSeqNum);
 
@@ -139,7 +139,7 @@ uint32_t TcpReceiveQueue::getLE(uint32_t fromSeqNum)
     return fromSeqNum;
 }
 
-uint32_t TcpReceiveQueue::getRE(uint32_t toSeqNum)
+uint32_t TcpReceiveQueue::getRE(uint32_t toSeqNum) const
 {
     B fs = seqToOffset(toSeqNum);
 
