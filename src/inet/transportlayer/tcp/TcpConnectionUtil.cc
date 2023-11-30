@@ -481,6 +481,7 @@ void TcpConnection::configureStateVariables()
     state->ecnWillingness = tcpMain->par("ecnWillingness"); // if set, current host is willing to use ECN
     state->dupthresh = tcpMain->par("dupthresh");
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
+    state->dsack_support = tcpMain->par("dsackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
 
     if (state->sack_support) {
         std::string algorithmName1 = "TcpReno";
