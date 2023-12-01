@@ -89,7 +89,7 @@ void Ppp::configureNetworkInterface()
 
 void Ppp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method("%s", cComponent::getSignalName(signalID));
+//    Enter_Method("%s", cComponent::getSignalName(signalID));
 
     MacProtocolBase::receiveSignal(source, signalID, obj, details);
 

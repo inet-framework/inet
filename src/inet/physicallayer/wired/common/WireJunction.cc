@@ -60,7 +60,7 @@ void WireJunction::setChannelModes()
 
 void WireJunction::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method("%s", cComponent::getSignalName(signalID));
+//    Enter_Method("%s", cComponent::getSignalName(signalID));
 
     ASSERT(signalID == POST_MODEL_CHANGE);
 

@@ -51,7 +51,7 @@ void StreamingTransmitterBase::scheduleTxEndTimer(Signal *signal)
 
 void StreamingTransmitterBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method("%s", cComponent::getSignalName(signal));
+//    Enter_Method("%s", cComponent::getSignalName(signal));
 #if OMNETPP_BUILDNUM < 2001
     if (getSimulation()->getSimulationStage() == STAGE(CLEANUP))
 #else

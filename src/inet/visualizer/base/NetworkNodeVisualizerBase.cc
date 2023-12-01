@@ -46,7 +46,7 @@ NetworkNodeVisualizerBase::NetworkNodeVisualization *NetworkNodeVisualizerBase::
 
 void NetworkNodeVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method("%s", cComponent::getSignalName(signal));
+//    Enter_Method("%s", cComponent::getSignalName(signal));
 
     if (signal == POST_MODEL_CHANGE) {
         if (auto moduleInit = dynamic_cast<cPreModuleInitNotification *>(object)) {
