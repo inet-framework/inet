@@ -93,7 +93,7 @@ class INET_API Ipv4Route : public cObject, public IRoute
     void setSource(cObject *_source) override { if (source != _source) { source = _source; changed(F_SOURCE); } }
     cObject *getSource() const override { return source; }
 
-    cObject *getProtocolData() const override { return protocolData; }
+    const cObject *getProtocolData() const override { return protocolData; }
     void setProtocolData(cObject *protocolData) override { this->protocolData = protocolData; }
 
     virtual IRoutingTable *getRoutingTableAsGeneric() const override;

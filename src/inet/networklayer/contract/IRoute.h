@@ -112,7 +112,7 @@ class INET_API IRoute
     /** Cost to reach the destination */
     virtual int getMetric() const = 0;
 
-    virtual cObject *getProtocolData() const = 0;
+    virtual const cObject *getProtocolData() const = 0;
     virtual void setProtocolData(cObject *protocolData) = 0;
 
     static const char *sourceTypeName(SourceType sourceType);

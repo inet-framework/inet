@@ -735,7 +735,7 @@ const Ptr<Rrep> Dymo::createRrep(const Ptr<const RteMsg>& rteMsg)
 
 const Ptr<Rrep> Dymo::createRrep(const Ptr<const RteMsg>& rteMsg, IRoute *route)
 {
-    DymoRouteData *routeData = check_and_cast<DymoRouteData *>(route->getProtocolData());
+    const DymoRouteData *routeData = check_and_cast<const DymoRouteData *>(route->getProtocolData());
     auto rrep = makeShared<Rrep>(); // TODO "RREP");
     AddressBlock& originatorNode = rrep->getOriginatorNodeForUpdate();
     AddressBlock& targetNode = rrep->getTargetNodeForUpdate();
@@ -936,13 +936,15 @@ void Dymo::sendRerrForBrokenLink(const NetworkInterface *networkInterface, const
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         IRoute *route = routingTable->getRoute(i);
         if (route->getSource() == this) {
-            DymoRouteData *routeData = check_and_cast<DymoRouteData *>(route->getProtocolData());
+            auto routeData = check_and_cast<const DymoRouteData *>(route->getProtocolData());
             DymoRouteState routeState = getRouteState(routeData);
             if (routeState != BROKEN && route->getInterface() == networkInterface && route->getNextHopAsGeneric() == nextHop) {
                 EV_DETAIL << "Marking route as broken: " << route << endl;
                 // TODO delete route, but save its data for later update
 //                route->setEnabled(false);
-                routeData->setBroken(true);
+                auto newRouteData = routeData->dup();
+                newRouteData->setBroken(true);
+                route->setProtocolData(newRouteData);
                 unreachableAddresses.push_back(route->getDestinationAsGeneric());
             }
         }
@@ -975,7 +977,7 @@ void Dymo::processRerr(Packet *packet, const Ptr<const Rerr>& rerrIncoming)
             for (int j = 0; j < routingTable->getNumRoutes(); j++) {
                 IRoute *route = routingTable->getRoute(j);
                 if (route->getSource() == this) {
-                    DymoRouteData *routeData = check_and_cast<DymoRouteData *>(route->getProtocolData());
+                    auto routeData = check_and_cast<const DymoRouteData *>(route->getProtocolData());
                     const L3Address& unreachableAddress = addressBlock.getAddress();
                     // HandlingRtr verifies the following:
                     // 1. The UnreachableNode.Address is a routable unicast address.
@@ -995,7 +997,9 @@ void Dymo::processRerr(Packet *packet, const Ptr<const Rerr>& rerrIncoming)
                         EV_DETAIL << "Marking route as broken: " << route << endl;
                         // TODO delete route, but save its data for later update
 //                        route->setEnabled(false);
-                        routeData->setBroken(true);
+                        auto newRouteData = routeData->dup();
+                        newRouteData->setBroken(true);
+                        route->setProtocolData(newRouteData);
                         unreachableAddresses.push_back(unreachableAddress);
                     }
                 }
@@ -1095,7 +1099,7 @@ void Dymo::updateRoutes(Packet *packet, const Ptr<const RteMsg>& rteMsg, const A
         for (int i = 0; i < routingTable->getNumRoutes(); i++) {
             IRoute *routeCandidate = routingTable->getRoute(i);
             if (routeCandidate->getSource() == this) {
-                DymoRouteData *routeData = check_and_cast<DymoRouteData *>(routeCandidate->getProtocolData());
+                auto routeData = check_and_cast<const DymoRouteData *>(routeCandidate->getProtocolData());
                 if (routeCandidate->getDestinationAsGeneric() == address && routeData->getMetricType() == addressBlock.getMetricType()) {
                     route = routeCandidate;
                     break;
@@ -1112,7 +1116,7 @@ void Dymo::updateRoutes(Packet *packet, const Ptr<const RteMsg>& rteMsg, const A
             routingTable->addRoute(route);
         }
         else {
-            DymoRouteData *routeData = check_and_cast<DymoRouteData *>(route->getProtocolData());
+            auto routeData = check_and_cast<const DymoRouteData *>(route->getProtocolData());
             // Offers improvement if
             // (RteMsg.SeqNum > Route.SeqNum) OR
             // {(RteMsg.SeqNum == Route.SeqNum) AND
@@ -1147,7 +1151,7 @@ IRoute *Dymo::createRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const
 void Dymo::updateRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const AddressBlock& addressBlock, IRoute *route)
 {
     // 6.2. Applying Route Updates To Route Table Entries
-    DymoRouteData *routeData = check_and_cast<DymoRouteData *>(route->getProtocolData());
+    DymoRouteData *routeData = check_and_cast<const DymoRouteData *>(route->getProtocolData())->dup();
     // Route.Address := RteMsg.Addr
     const L3Address& address = addressBlock.getAddress();
     route->setDestination(address);
@@ -1182,6 +1186,7 @@ void Dymo::updateRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const Ad
         routeData->setExpirationTime(simTime() + addressBlock.getValidityTime());
     else
         routeData->setExpirationTime(SimTime::getMaxTime());
+    route->setProtocolData(routeData);
     scheduleExpungeTimer();
 }
 
@@ -1240,7 +1245,7 @@ void Dymo::expungeRoutes()
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         IRoute *route = routingTable->getRoute(i);
         if (route->getSource() == this) {
-            DymoRouteData *routeData = check_and_cast<DymoRouteData *>(route->getProtocolData());
+            auto routeData = check_and_cast<const DymoRouteData *>(route->getProtocolData());
             // An Active route MUST NOT be expunged
             // An Idle route SHOULD NOT be expunged
             // An Expired route MAY be expunged (least recently used first)
@@ -1264,7 +1269,7 @@ simtime_t Dymo::getNextExpungeTime()
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         IRoute *route = routingTable->getRoute(i);
         if (route->getSource() == this) {
-            DymoRouteData *routeData = check_and_cast<DymoRouteData *>(route->getProtocolData());
+            auto routeData = check_and_cast<const DymoRouteData *>(route->getProtocolData());
             const simtime_t& expirationTime = routeData->getExpirationTime();
             if (expirationTime < nextExpirationTime)
                 nextExpirationTime = expirationTime;
@@ -1394,14 +1399,17 @@ INetfilter::IHook::Result Dymo::ensureRouteForDatagram(Packet *datagram)
     else {
         EV_DETAIL << "Finding route: source = " << source << ", destination = " << destination << endl;
         IRoute *route = routingTable->findBestMatchingRoute(destination);
-        DymoRouteData *routeData = route ? dynamic_cast<DymoRouteData *>(route->getProtocolData()) : nullptr;
+        const DymoRouteData *routeData = route ? dynamic_cast<const DymoRouteData *>(route->getProtocolData()) : nullptr;
         bool broken = routeData && routeData->getBroken();
         if (route && !route->getNextHopAsGeneric().isUnspecified() && !broken) {
             EV_DETAIL << "Route found: source = " << source << ", destination = " << destination << ", route: " << route << endl;
-            if (routeData)
+            if (routeData) {
                 // 8.1. Handling Route Lifetimes During Packet Forwarding
                 // Route.LastUsed := Current_Time, and the packet is forwarded to the route's next hop.
-                routeData->setLastUsed(simTime());
+                auto newRouteData = routeData->dup();
+                newRouteData->setLastUsed(simTime());
+                route->setProtocolData(newRouteData);
+            }
             return ACCEPT;
         }
         else if (source.isUnspecified() || isClientAddress(source)) {
