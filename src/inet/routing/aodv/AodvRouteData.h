@@ -50,7 +50,7 @@ class INET_API AodvRouteData : public cObject
     void setIsActive(bool active) { this->active = active; }
     void addPrecursor(const L3Address& precursorAddr) { precursorList.insert(precursorAddr); }
     const std::set<L3Address>& getPrecursorList() const { return precursorList; }
-    virtual std::string str() const;
+    virtual std::string str() const override;
 };
 
 } // namespace aodv
