@@ -183,6 +183,8 @@ void Dymo::retryRouteDiscovery(const L3Address& target, int retryCount)
 {
     EV_INFO << "Retrying route discovery: originator = " << getSelfAddress() << ", target = " << target << ", retry = " << retryCount << endl;
     ASSERT(hasOngoingRouteDiscovery(target));
+    deleteRreqTimer(target);
+    eraseRreqTimer(target);
     sendRreq(createRreq(target, retryCount));
     scheduleRreqWaitRrepTimer(createRreqWaitRrepTimer(target, retryCount));
 }
@@ -269,11 +271,13 @@ void Dymo::deleteRreqTimer(const L3Address& target)
     auto tt = targetAddressToRREQTimer.find(target);
     ASSERT(tt != targetAddressToRREQTimer.end());
     delete tt->second;
+    tt->second = nullptr;
 }
 
 void Dymo::eraseRreqTimer(const L3Address& target)
 {
     auto tt = targetAddressToRREQTimer.find(target);
+    ASSERT(tt != targetAddressToRREQTimer.end());
     targetAddressToRREQTimer.erase(tt);
 }
 
@@ -292,6 +296,7 @@ RreqWaitRrepTimer *Dymo::createRreqWaitRrepTimer(const L3Address& target, int re
 void Dymo::scheduleRreqWaitRrepTimer(RreqWaitRrepTimer *message)
 {
     EV_DETAIL << "Scheduling RREQ wait RREP timer" << endl;
+    ASSERT(targetAddressToRREQTimer.find(message->getTarget()) == targetAddressToRREQTimer.end());
     targetAddressToRREQTimer[message->getTarget()] = message;
     scheduleAfter(routeRREQWaitTime, message);
 }
@@ -299,17 +304,20 @@ void Dymo::scheduleRreqWaitRrepTimer(RreqWaitRrepTimer *message)
 void Dymo::processRreqWaitRrepTimer(RreqWaitRrepTimer *message)
 {
     EV_DETAIL << "Processing RREQ wait RREP timer" << endl;
-    const L3Address& target = message->getTarget();
-    if (message->getRetryCount() == discoveryAttemptsMax - 1) {
+    auto target = message->getTarget();
+    auto retryCount = message->getRetryCount();
+    if (retryCount == discoveryAttemptsMax - 1) {
         cancelRouteDiscovery(target);
         cancelRreqTimer(target);
         deleteRreqTimer(target);
         eraseRreqTimer(target);
         scheduleRreqHolddownTimer(createRreqHolddownTimer(target));
     }
-    else
-        scheduleRreqBackoffTimer(createRreqBackoffTimer(target, message->getRetryCount()));
-    delete message;
+    else {
+        deleteRreqTimer(target);
+        eraseRreqTimer(target);
+        scheduleRreqBackoffTimer(createRreqBackoffTimer(target, retryCount));
+    }
 }
 
 //
@@ -327,6 +335,7 @@ RreqBackoffTimer *Dymo::createRreqBackoffTimer(const L3Address& target, int retr
 void Dymo::scheduleRreqBackoffTimer(RreqBackoffTimer *message)
 {
     EV_DETAIL << "Scheduling RREQ backoff timer" << endl;
+    ASSERT(targetAddressToRREQTimer.find(message->getTarget()) == targetAddressToRREQTimer.end());
     targetAddressToRREQTimer[message->getTarget()] = message;
     scheduleAfter(computeRreqBackoffTime(message->getRetryCount()), message);
 }
@@ -334,8 +343,9 @@ void Dymo::scheduleRreqBackoffTimer(RreqBackoffTimer *message)
 void Dymo::processRreqBackoffTimer(RreqBackoffTimer *message)
 {
     EV_DETAIL << "Processing RREQ backoff timer" << endl;
-    retryRouteDiscovery(message->getTarget(), message->getRetryCount() + 1);
-    delete message;
+    auto target = message->getTarget();
+    auto retryCount = message->getRetryCount();
+    retryRouteDiscovery(target, retryCount + 1);
 }
 
 simtime_t Dymo::computeRreqBackoffTime(int retryCount)
@@ -357,6 +367,7 @@ RreqHolddownTimer *Dymo::createRreqHolddownTimer(const L3Address& target)
 void Dymo::scheduleRreqHolddownTimer(RreqHolddownTimer *message)
 {
     EV_DETAIL << "Scheduling RREQ holddown timer" << endl;
+    ASSERT(targetAddressToRREQTimer.find(message->getTarget()) == targetAddressToRREQTimer.end());
     targetAddressToRREQTimer[message->getTarget()] = message;
     scheduleAfter(rreqHolddownTime, message);
 }
@@ -364,11 +375,11 @@ void Dymo::scheduleRreqHolddownTimer(RreqHolddownTimer *message)
 void Dymo::processRreqHolddownTimer(RreqHolddownTimer *message)
 {
     EV_DETAIL << "Processing RREQ holddown timer" << endl;
-    const L3Address& target = message->getTarget();
+    auto target = message->getTarget();
+    deleteRreqTimer(target);
     eraseRreqTimer(target);
     if (hasDelayedDatagrams(target))
         startRouteDiscovery(target);
-    delete message;
 }
 
 //
