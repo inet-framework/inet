@@ -51,7 +51,7 @@ class INET_API DymoRouteData : public cObject
     DymoMetricType getMetricType() const { return metricType; }
     void setMetricType(DymoMetricType metricType) { this->metricType = metricType; }
 
-    virtual std::string str() const;
+    virtual std::string str() const override;
 };
 
 } // namespace dymo
