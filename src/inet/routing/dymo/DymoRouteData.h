@@ -20,14 +20,14 @@ namespace dymo {
 class INET_API DymoRouteData : public cObject
 {
   private:
-    bool isBroken;
-    DymoSequenceNumber sequenceNumber;
+    bool isBroken = false;
+    DymoSequenceNumber sequenceNumber = 0;
     simtime_t lastUsed;
     simtime_t expirationTime;
-    DymoMetricType metricType;
+    DymoMetricType metricType = HOP_COUNT;
 
   public:
-    DymoRouteData();
+    DymoRouteData() {}
     virtual ~DymoRouteData() {}
 
     bool getBroken() const { return isBroken; }

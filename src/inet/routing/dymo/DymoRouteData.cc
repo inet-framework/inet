@@ -11,15 +11,6 @@ namespace inet {
 
 namespace dymo {
 
-DymoRouteData::DymoRouteData()
-{
-    isBroken = false;
-    sequenceNumber = 0;
-    lastUsed = 0;
-    expirationTime = 0;
-    metricType = HOP_COUNT;
-}
-
 std::string DymoRouteData::str() const
 {
     std::ostringstream out;
