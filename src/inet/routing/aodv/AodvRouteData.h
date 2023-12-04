@@ -19,24 +19,16 @@ class INET_API AodvRouteData : public cObject
 {
   protected:
     std::set<L3Address> precursorList;
-    bool active;
-    bool repariable;
-    bool beingRepaired;
-    bool validDestNum;
-    uint32_t destSeqNum;
+    bool active = true;
+    bool repariable = false;
+    bool beingRepaired = false;
+    bool validDestNum = true;
+    uint32_t destSeqNum = 0;
     simtime_t lifeTime; // expiration or deletion time of the route
 
-  public:
 
-    AodvRouteData()
-    {
-        active = true;
-        repariable = false;
-        beingRepaired = false;
-        validDestNum = true;
-        lifeTime = SIMTIME_ZERO;
-        destSeqNum = 0;
-    }
+  public:
+    AodvRouteData() { }
 
     virtual ~AodvRouteData() {}
 
