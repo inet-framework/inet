@@ -11,6 +11,15 @@ namespace inet {
 
 namespace dymo {
 
+void DymoRouteData::copy(const DymoRouteData& other)
+{
+    isBroken = other.isBroken;
+    sequenceNumber = other.sequenceNumber;
+    lastUsed = other.lastUsed;
+    expirationTime = other.expirationTime;
+    metricType = other.metricType;
+}
+
 std::string DymoRouteData::str() const
 {
     std::ostringstream out;

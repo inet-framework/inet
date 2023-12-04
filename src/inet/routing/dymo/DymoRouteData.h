@@ -26,9 +26,15 @@ class INET_API DymoRouteData : public cObject
     simtime_t expirationTime;
     DymoMetricType metricType = HOP_COUNT;
 
+  private:
+    void copy(const DymoRouteData& other);
+
   public:
     DymoRouteData() {}
+    DymoRouteData(const DymoRouteData& other) : cObject(other) { copy(other); }
     virtual ~DymoRouteData() {}
+
+    virtual DymoRouteData *dup() const override { return new DymoRouteData(*this); }
 
     bool getBroken() const { return isBroken; }
     void setBroken(bool isBroken) { this->isBroken = isBroken; }
