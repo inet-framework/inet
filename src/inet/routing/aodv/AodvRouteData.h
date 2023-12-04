@@ -26,12 +26,16 @@ class INET_API AodvRouteData : public cObject
     uint32_t destSeqNum = 0;
     simtime_t lifeTime; // expiration or deletion time of the route
 
+  private:
+    void copy(const AodvRouteData& other);
 
   public:
     AodvRouteData() { }
+    AodvRouteData(const AodvRouteData& other) : cObject(other) { copy(other); }
 
     virtual ~AodvRouteData() {}
 
+    virtual AodvRouteData *dup() const override {return new AodvRouteData(*this);}
     uint32_t getDestSeqNum() const { return destSeqNum; }
     void setDestSeqNum(unsigned int destSeqNum) { this->destSeqNum = destSeqNum; }
     bool hasValidDestNum() const { return validDestNum; }

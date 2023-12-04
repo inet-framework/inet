@@ -10,6 +10,17 @@
 namespace inet {
 namespace aodv {
 
+void AodvRouteData::copy(const AodvRouteData& other)
+{
+    precursorList = other.precursorList;
+    active = other.active;
+    repariable = other.repariable;
+    beingRepaired = other.beingRepaired;
+    validDestNum = other.validDestNum;
+    destSeqNum = other.destSeqNum;
+    lifeTime = other.lifeTime;
+}
+
 std::string AodvRouteData::str() const
 {
     std::ostringstream out;
