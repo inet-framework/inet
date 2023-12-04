@@ -1265,7 +1265,7 @@ simtime_t Dymo::getNextExpungeTime()
     return nextExpirationTime;
 }
 
-DymoRouteState Dymo::getRouteState(DymoRouteData *routeData)
+DymoRouteState Dymo::getRouteState(const DymoRouteData *routeData) const
 {
     simtime_t lastUsed = routeData->getLastUsed();
     if (routeData->getBroken())
@@ -1306,12 +1306,12 @@ void Dymo::configureInterfaces()
 // address
 //
 
-L3Address Dymo::getSelfAddress()
+L3Address Dymo::getSelfAddress() const
 {
     return routingTable->getRouterIdAsGeneric();
 }
 
-bool Dymo::isClientAddress(const L3Address& address)
+bool Dymo::isClientAddress(const L3Address& address) const
 {
     if (routingTable->isLocalAddress(address))
         return true;

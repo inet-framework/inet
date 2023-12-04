@@ -182,14 +182,14 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
     void scheduleExpungeTimer();
     void expungeRoutes();
     simtime_t getNextExpungeTime();
-    DymoRouteState getRouteState(DymoRouteData *routeData);
+    DymoRouteState getRouteState(const DymoRouteData *routeData) const;
 
     // configuration
     void configureInterfaces();
 
     // address
-    L3Address getSelfAddress();
-    bool isClientAddress(const L3Address& address);
+    L3Address getSelfAddress() const;
+    bool isClientAddress(const L3Address& address) const;
 
     // added node
     void addSelfNode(const Ptr<RteMsg>& rteMsg);
