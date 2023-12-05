@@ -72,10 +72,6 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     bool isNodeUp = false;
     bool useAdminDist = false; // Use Cisco like administrative distances
 
-    // for convenience
-    typedef Ipv4MulticastRoute::OutInterface OutInterface;
-    typedef Ipv4MulticastRoute::OutInterfaceVector OutInterfaceVector;
-
     // routing cache: maps destination address to the route
     typedef std::map<Ipv4Address, Ipv4Route *> RoutingCache;
     mutable RoutingCache routingCache;
