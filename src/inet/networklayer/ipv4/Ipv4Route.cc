@@ -250,5 +250,11 @@ void Ipv4MulticastRoute::changed(int fieldCode)
         rt->multicastRouteChanged(this, fieldCode);
 }
 
+bool Ipv4MulticastRoute::matches(const Ipv4Address& origin, const Ipv4Address& group) const
+{
+    return (this->group.isUnspecified() || this->group == group) &&
+            Ipv4Address::maskedAddrAreEqual(origin, this->origin, this->originNetmask);
+}
+
 } // namespace inet
 

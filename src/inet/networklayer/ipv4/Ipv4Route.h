@@ -170,11 +170,7 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
     /** test validity of route entry, e.g. check expiry */
     virtual bool isValid() const { return true; }
 
-    virtual bool matches(const Ipv4Address& origin, const Ipv4Address& group) const
-    {
-        return (this->group.isUnspecified() || this->group == group) &&
-               Ipv4Address::maskedAddrAreEqual(origin, this->origin, this->originNetmask);
-    }
+    virtual bool matches(const Ipv4Address& origin, const Ipv4Address& group) const;
 
     virtual void setOrigin(Ipv4Address _origin) { if (origin != _origin) { origin = _origin; changed(F_ORIGIN); } }
     virtual void setOriginNetmask(Ipv4Address _netmask) { if (originNetmask != _netmask) { originNetmask = _netmask; changed(F_ORIGINMASK); } }
