@@ -26,9 +26,10 @@ bool Rfc6675Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloa
     // definition of duplicate acknowledgment in [RFC5681].
 
     // TODO unfortunately these values are wrong, see other comment where they are set
-    return state->sackedBytes != state->sackedBytes_old;
-
     // could be something like return state->addedSackedBytes > 0;
+//    return state->sackedBytes != state->sackedBytes_old;
+    return state->snd_una == tcpHeader->getAckNo() && payloadLength == 0 && state->snd_una != state->snd_max;
+
 }
 
 // 5. Algorithm Details
