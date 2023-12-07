@@ -139,6 +139,11 @@ class INET_API TcpAlgorithm : public cObject
     virtual void receiveSeqChanged() = 0;
 
     /**
+     * TODO
+     */
+    virtual void receivedNonNewAck(const TcpHeader *tcpHeader, uint32_t payloadLength) = 0;
+
+    /**
      * Called after we received an ACK which acked some data (that is,
      * we could advance snd_una). At this point the state variables
      * (snd_una, snd_wnd) have already been updated. The argument firstSeqAcked
