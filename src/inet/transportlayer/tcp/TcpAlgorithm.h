@@ -154,14 +154,6 @@ class INET_API TcpAlgorithm : public cObject
     virtual void receivedAckForDataNotYetAcked(uint32_t firstSeqAcked) = 0;
 
     /**
-     * Called after we received a duplicate ACK (that is: ackNo == snd_una,
-     * no data in segment, segment doesn't carry window update, and also,
-     * we have unacked data). The dupack counter got already updated
-     * when calling this method (i.e. dupacks == 1 on first duplicate ACK.)
-     */
-    virtual void receivedDuplicateAck() = 0;
-
-    /**
      * Called after we received an ACK for data not yet sent.
      * According to RFC 793 this function should send an ACK.
      */

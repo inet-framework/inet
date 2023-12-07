@@ -63,8 +63,6 @@ class INET_API DumbTcp : public TcpAlgorithm
 
     virtual void receivedAckForDataNotYetAcked(uint32_t firstSeqAcked) override;
 
-    virtual void receivedDuplicateAck() override;
-
     virtual void receivedAckForDataNotYetSent(uint32_t seq) override;
 
     virtual void ackSent() override;

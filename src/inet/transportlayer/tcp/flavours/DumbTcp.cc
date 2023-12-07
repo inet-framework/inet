@@ -94,11 +94,6 @@ void DumbTcp::receivedAckForDataNotYetAcked(uint32_t)
     conn->sendData(65535);
 }
 
-void DumbTcp::receivedDuplicateAck()
-{
-    EV_INFO << "Duplicate ACK #" << state->dupacks << "\n";
-}
-
 void DumbTcp::receivedAckForDataNotYetSent(uint32_t seq)
 {
     EV_INFO << "ACK acks something not yet sent, sending immediate ACK\n";
