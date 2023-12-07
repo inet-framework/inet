@@ -139,7 +139,7 @@ class INET_API TcpAlgorithm : public cObject
     virtual void receiveSeqChanged() = 0;
 
     /**
-     * TODO
+     * Called after we received an ACK for which ackNo <= snd_una.
      */
     virtual void receivedNonNewAck(const TcpHeader *tcpHeader, uint32_t payloadLength) = 0;
 
