@@ -1174,17 +1174,6 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
     // Note: should use SND.MAX instead of SND.NXT in above checks
     //
     if (seqGE(state->snd_una, tcpHeader->getAckNo())) {
-        //
-        // duplicate ACK? A received TCP segment is a duplicate ACK if all of
-        // the following apply:
-        //    (1) snd_una == ackNo
-        //    (2) segment contains no data
-        //    (3) there's unacked data (snd_una != snd_max)
-        //
-        // Note: ssfnet uses additional constraint "window is the same as last
-        // received (not an update)" -- we don't do that because window updates
-        // are ignored anyway if neither seqNo nor ackNo has changed.
-        //
         if (state->snd_una == tcpHeader->getAckNo() && payloadLength == 0 && state->snd_una != state->snd_max) {
             // we need to update send window even if the ACK is a dupACK, because rcv win
             // could have been changed if faulty data receiver is not respecting the "do not shrink window" rule
