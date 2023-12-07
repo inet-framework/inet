@@ -39,7 +39,7 @@ void Rfc5681CongestionControl::receivedDataAck(uint32_t numBytesAcked)
             // TCP data segment, each acknowledging only a portion of its data.  A
             // TCP that increments cwnd by SMSS for each such ACK will
             // inappropriately inflate the amount of data injected into the network.
-            state->snd_cwnd += state->snd_mss; // TODO implement min function from (2)
+            state->snd_cwnd += std::min(numBytesAcked, state->snd_mss);
             conn->emit(cwndSignal, state->snd_cwnd);
         }
         else {
