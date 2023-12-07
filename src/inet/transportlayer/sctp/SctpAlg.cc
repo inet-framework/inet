@@ -68,7 +68,7 @@ void SctpAlg::receivedDuplicateAck()
     EV_INFO << "Duplicate ACK #" << endl;
 }
 
-void SctpAlg::receivedAckForDataNotYetSent(uint32_t seq)
+void SctpAlg::receivedAckForUnsentData(uint32_t seq)
 {
     EV_INFO << "ACK acks something not yet sent, sending immediate ACK" << endl;
 }

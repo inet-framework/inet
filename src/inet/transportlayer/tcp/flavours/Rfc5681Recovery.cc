@@ -15,7 +15,7 @@
 namespace inet {
 namespace tcp {
 
-void Rfc5681Recovery::receivedAckForDataNotYetAcked(uint32_t numBytesAcked)
+void Rfc5681Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
 {
 }
 

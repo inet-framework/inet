@@ -34,7 +34,7 @@ class INET_API Rfc6675Recovery : public ITcpRecovery
 
     virtual bool isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
 
-    virtual void receivedAckForDataNotYetAcked(uint32_t numBytesAcked) override;
+    virtual void receivedAckForUnackedData(uint32_t numBytesAcked) override;
 
     virtual void receivedDuplicateAck() override;
 

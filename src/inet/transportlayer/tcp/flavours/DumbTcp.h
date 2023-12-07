@@ -59,11 +59,11 @@ class INET_API DumbTcp : public TcpAlgorithm
 
     virtual void receiveSeqChanged() override;
 
-    virtual void receivedAckForDataAlreadyAcked(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
+    virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
 
-    virtual void receivedAckForDataNotYetAcked(uint32_t firstSeqAcked) override;
+    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
 
-    virtual void receivedAckForDataNotYetSent(uint32_t seq) override;
+    virtual void receivedAckForUnsentData(uint32_t seq) override;
 
     virtual void ackSent() override;
 
