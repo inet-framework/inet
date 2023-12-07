@@ -7,7 +7,7 @@
 #ifndef __INET_ITCPRECOVERY_H
 #define __INET_ITCPRECOVERY_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
 namespace tcp {
@@ -15,6 +15,8 @@ namespace tcp {
 class INET_API ITcpRecovery : public cObject
 {
   public:
+    virtual bool isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength) = 0;
+
     virtual void receivedDataAck(uint32_t numBytesAcked) = 0;
 
     virtual void receivedDuplicateAck() = 0;
