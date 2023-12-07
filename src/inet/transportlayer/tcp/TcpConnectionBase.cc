@@ -86,7 +86,7 @@ std::string TcpConnection::validationInfo() const
         << "retrans: " << rexmitQueue->getRetrans() << ", "
         << "bytesInFligh: " << getBytesInFlight() << ", "
         << "ssthresh: " << static_cast<const TcpTahoeRenoFamilyStateVariables *>(state)->ssthresh << ", "
-        << "cwnd: " << static_cast<const TcpBaseAlgStateVariables *>(state)->snd_cwnd << ", "
+        << "cwnd: " << static_cast<const TcpAlgorithmBaseStateVariables *>(state)->snd_cwnd << ", "
         << "snd_una: " << state->snd_una << ", "
         << "snd_max: " << state->snd_max << ", "
         << "snd_wnd: " << state->snd_wnd << ", "

@@ -8,7 +8,7 @@
 #ifndef __INET_TCPTAHOERENOFAMILY_H
 #define __INET_TCPTAHOERENOFAMILY_H
 
-#include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
+#include "inet/transportlayer/tcp/flavours/TcpAlgorithmBase.h"
 #include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamilyState_m.h"
 
 namespace inet {
@@ -16,9 +16,9 @@ namespace tcp {
 
 /**
  * Provides utility functions to implement TcpTahoe, TcpReno and TcpNewReno.
- * (TcpVegas should inherit from TcpBaseAlg instead of this one.)
+ * (TcpVegas should inherit from TcpAlgorithmBase instead of this one.)
  */
-class INET_API TcpTahoeRenoFamily : public TcpBaseAlg
+class INET_API TcpTahoeRenoFamily : public TcpAlgorithmBase
 {
   protected:
     TcpTahoeRenoFamilyStateVariables *& state; // alias to TcpAlgorithm's 'state'

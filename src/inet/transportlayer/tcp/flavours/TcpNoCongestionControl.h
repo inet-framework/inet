@@ -8,7 +8,7 @@
 #ifndef __INET_TCPNOCONGESTIONCONTROL_H
 #define __INET_TCPNOCONGESTIONCONTROL_H
 
-#include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
+#include "inet/transportlayer/tcp/flavours/TcpAlgorithmBase.h"
 
 namespace inet {
 namespace tcp {
@@ -16,13 +16,13 @@ namespace tcp {
 /**
  * State variables for TcpNoCongestionControl.
  */
-typedef TcpBaseAlgStateVariables TcpNoCongestionControlStateVariables;
+typedef TcpAlgorithmBaseStateVariables TcpNoCongestionControlStateVariables;
 
 /**
  * TCP with no congestion control (i.e. congestion window kept very large).
  * Can be used to demonstrate effect of lack of congestion control.
  */
-class INET_API TcpNoCongestionControl : public TcpBaseAlg
+class INET_API TcpNoCongestionControl : public TcpAlgorithmBase
 {
   protected:
     TcpNoCongestionControlStateVariables *& state; // alias to TcpAlgorithm's 'state'

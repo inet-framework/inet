@@ -6,14 +6,14 @@
 
 import inet.common.INETDefs;
 import inet.transportlayer.tcp_common.TcpHeader;
-import inet.transportlayer.tcp.flavours.TcpBaseAlgState;
+import inet.transportlayer.tcp.flavours.TcpAlgorithmBaseState;
 
 namespace inet::tcp;
 
 ///
 /// State variables for TcpTahoeRenoFamily.
 ///
-struct TcpTahoeRenoFamilyStateVariables extends TcpBaseAlgStateVariables
+struct TcpTahoeRenoFamilyStateVariables extends TcpAlgorithmBaseStateVariables
 {
     @descriptor(readonly);
 

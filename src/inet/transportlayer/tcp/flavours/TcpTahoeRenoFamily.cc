@@ -22,7 +22,7 @@ void TcpTahoeRenoFamilyStateVariables::setSendQueueLimit(uint32_t newLimit) {
 std::string TcpTahoeRenoFamilyStateVariables::str() const
 {
     std::stringstream out;
-    out << TcpBaseAlgStateVariables::str();
+    out << TcpAlgorithmBaseStateVariables::str();
     out << " ssthresh=" << ssthresh;
     return out.str();
 }
@@ -30,21 +30,21 @@ std::string TcpTahoeRenoFamilyStateVariables::str() const
 std::string TcpTahoeRenoFamilyStateVariables::detailedInfo() const
 {
     std::stringstream out;
-    out << TcpBaseAlgStateVariables::detailedInfo();
+    out << TcpAlgorithmBaseStateVariables::detailedInfo();
     out << "ssthresh=" << ssthresh << "\n";
     return out.str();
 }
 
 // ---
 
-TcpTahoeRenoFamily::TcpTahoeRenoFamily() : TcpBaseAlg(),
+TcpTahoeRenoFamily::TcpTahoeRenoFamily() : TcpAlgorithmBase(),
     state((TcpTahoeRenoFamilyStateVariables *&)TcpAlgorithm::state)
 {
 }
 
 void TcpTahoeRenoFamily::initialize()
 {
-    TcpBaseAlg::initialize();
+    TcpAlgorithmBase::initialize();
     state->ssthresh = conn->getTcpMain()->par("initialSsthresh");
 }
 

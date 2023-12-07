@@ -3401,8 +3401,8 @@
     <filename>inet-TcpAvailableInfo.html</filename>
   </compound>
   <compound kind="class">
-    <name>TcpBaseAlgStateVariables</name>
-    <filename>inet-tcp-TcpBaseAlgStateVariables.html</filename>
+    <name>TcpAlgorithmBaseStateVariables</name>
+    <filename>inet-tcp-TcpAlgorithmBaseStateVariables.html</filename>
   </compound>
   <compound kind="class">
     <name>TcpCommand</name>
