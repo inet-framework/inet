@@ -15,7 +15,7 @@
 namespace inet {
 namespace tcp {
 
-void Rfc5681CongestionControl::receivedDataAck(uint32_t firstSeqAcked)
+void Rfc5681CongestionControl::receivedDataAck(uint32_t numBytesAcked)
 {
     if (!state->lossRecovery) {
         // 3.1. Slow Start and Congestion Avoidance

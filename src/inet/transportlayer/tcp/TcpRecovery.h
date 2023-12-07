@@ -15,7 +15,7 @@ namespace tcp {
 class INET_API TcpRecovery : public cObject
 {
   public:
-    virtual void receivedDataAck(uint32_t firstSeqAcked) = 0;
+    virtual void receivedDataAck(uint32_t numBytesAcked) = 0;
 
     virtual void receivedDuplicateAck() = 0;
 };
