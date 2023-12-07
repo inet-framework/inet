@@ -7,7 +7,7 @@
 #ifndef __INET_RFC6675RECOVERY_H
 #define __INET_RFC6675RECOVERY_H
 
-#include "inet/transportlayer/tcp/TcpRecovery.h"
+#include "inet/transportlayer/tcp/ITcpRecovery.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
 
@@ -17,7 +17,7 @@ namespace tcp {
 /**
  * Implements RFC 6675: A Conservative Loss Recovery Algorithm Based on Selective Acknowledgment (SACK) for TCP.
  */
-class INET_API Rfc6675Recovery : public TcpRecovery
+class INET_API Rfc6675Recovery : public ITcpRecovery
 {
   protected:
     TcpTahoeRenoFamilyStateVariables *state = nullptr;

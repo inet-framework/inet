@@ -43,7 +43,7 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
   protected:
     TcpBaseAlgStateVariables *& state; // alias to TcpAlgorithm's 'state'
     TcpCongestionControl *congestionControl = nullptr;
-    TcpRecovery *recovery = nullptr;
+    ITcpRecovery *recovery = nullptr;
 
     cMessage *rexmitTimer;
     cMessage *persistTimer;
@@ -136,7 +136,7 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
 
     virtual TcpCongestionControl *getCongestionControl() override { return congestionControl; }
 
-    virtual TcpRecovery *getRecovery() override { return recovery; }
+    virtual ITcpRecovery *getRecovery() override { return recovery; }
 };
 
 } // namespace tcp
