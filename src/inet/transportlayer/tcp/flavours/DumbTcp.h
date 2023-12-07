@@ -41,7 +41,7 @@ class INET_API DumbTcp : public TcpAlgorithm
 
     virtual ~DumbTcp();
 
-    virtual TcpCongestionControl *getCongestionControl() override { return nullptr; }
+    virtual ITcpCongestionControl *getCongestionControl() override { return nullptr; }
 
     virtual ITcpRecovery *getRecovery() override { return nullptr; }
 

@@ -8,7 +8,7 @@
 #define __INET_RFC5681_H
 
 #include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
-#include "inet/transportlayer/tcp/TcpCongestionControl.h"
+#include "inet/transportlayer/tcp/ITcpCongestionControl.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 
 namespace inet {
@@ -17,7 +17,7 @@ namespace tcp {
 /**
  * Implements RFC 5681: TCP Congestion Control.
  */
-class INET_API Rfc5681CongestionControl : public TcpCongestionControl
+class INET_API Rfc5681CongestionControl : public ITcpCongestionControl
 {
   protected:
     TcpTahoeRenoFamilyStateVariables *state = nullptr;
