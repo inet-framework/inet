@@ -459,7 +459,7 @@ void TcpAlgorithmBase::receivedAckForDataAlreadyAcked(const TcpHeader *tcpHeader
     }
 }
 
-void TcpAlgorithmBase::receivedDataAck(uint32_t firstSeqAcked)
+void TcpAlgorithmBase::receivedAckForDataNotYetAcked(uint32_t firstSeqAcked)
 {
     if (!state->ts_enabled) {
         // if round-trip time measurement is running, check if rtseq has been acked

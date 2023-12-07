@@ -17,7 +17,7 @@ class INET_API ITcpRecovery : public cObject
   public:
     virtual bool isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength) = 0;
 
-    virtual void receivedDataAck(uint32_t numBytesAcked) = 0;
+    virtual void receivedAckForDataNotYetAcked(uint32_t numBytesAcked) = 0;
 
     virtual void receivedDuplicateAck() = 0;
 };

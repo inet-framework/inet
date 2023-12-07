@@ -74,9 +74,9 @@ void TcpNoCongestionControl::processRexmitTimer(TcpEventCode& event)
     ASSERT(state->snd_cwnd == 0x7fffffff);
 }
 
-void TcpNoCongestionControl::receivedDataAck(uint32_t firstSeqAcked)
+void TcpNoCongestionControl::receivedAckForDataNotYetAcked(uint32_t firstSeqAcked)
 {
-    TcpAlgorithmBase::receivedDataAck(firstSeqAcked);
+    TcpAlgorithmBase::receivedAckForDataNotYetAcked(firstSeqAcked);
 
     // ack may have freed up some room in the window, try sending
     sendData(false);

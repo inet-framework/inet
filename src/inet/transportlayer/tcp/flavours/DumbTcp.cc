@@ -88,7 +88,7 @@ void DumbTcp::receivedAckForDataAlreadyAcked(const TcpHeader *tcpHeader, uint32_
     // TODO
 }
 
-void DumbTcp::receivedDataAck(uint32_t)
+void DumbTcp::receivedAckForDataNotYetAcked(uint32_t)
 {
     // ack may have freed up some room in the window, try sending.
     conn->sendData(65535);
