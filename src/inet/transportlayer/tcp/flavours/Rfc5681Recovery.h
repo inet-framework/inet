@@ -9,7 +9,7 @@
 
 #include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
-#include "inet/transportlayer/tcp/TcpRecovery.h"
+#include "inet/transportlayer/tcp/ITcpRecovery.h"
 
 namespace inet {
 namespace tcp {
@@ -17,7 +17,7 @@ namespace tcp {
 /**
  * Implements RFC 5681: TCP Congestion Control.
  */
-class INET_API Rfc5681Recovery : public TcpRecovery
+class INET_API Rfc5681Recovery : public ITcpRecovery
 {
   protected:
     TcpTahoeRenoFamilyStateVariables *state = nullptr;
