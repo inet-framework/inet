@@ -99,6 +99,8 @@ void TcpWestwood::processRexmitTimer(TcpEventCode& event)
 
 void TcpWestwood::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
+    uint32_t old_dupacks = state->dupacks;
+
     TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
 
     state->regions.clearTo(state->snd_una);
@@ -115,10 +117,10 @@ void TcpWestwood::receivedAckForUnackedData(uint32_t firstSeqAcked)
         // cumul_ack: cumulative ack's that acks 2 or more pkts count 1,
         // because DUPACKs count them
         uint32_t cumul_ack = state->snd_una - firstSeqAcked; // acked bytes
-        if ((state->dupacks * state->snd_mss) >= cumul_ack)
+        if ((old_dupacks * state->snd_mss) >= cumul_ack)
             cumul_ack = state->snd_mss; // cumul_ack = 1:
         else
-            cumul_ack -= (state->dupacks * state->snd_mss);
+            cumul_ack -= (old_dupacks * state->snd_mss);
 
         // security check: if previous steps are right cumul_ack shoudl be > 2:
         if (cumul_ack > (2 * state->snd_mss))
@@ -129,7 +131,7 @@ void TcpWestwood::receivedAckForUnackedData(uint32_t firstSeqAcked)
 
     // Same behavior of Reno during fast recovery, slow start and cong. avoidance
 
-    if (state->dupacks >= state->dupthresh) {
+    if (old_dupacks >= state->dupthresh) {
         //
         // Perform Fast Recovery: set cwnd to ssthresh (deflating the window).
         //

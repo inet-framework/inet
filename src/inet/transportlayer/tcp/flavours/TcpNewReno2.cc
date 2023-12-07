@@ -30,6 +30,7 @@ void TcpNewReno2::processRexmitTimer(TcpEventCode& event)
 
 void TcpNewReno2::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
+    TcpTahoeRenoFamily::receivedAckForUnackedData(firstSeqAcked);
     uint32_t numBytesAcked = state->snd_una - firstSeqAcked;
     recovery->receivedAckForUnackedData(numBytesAcked);
     congestionControl->receivedAckForUnackedData(numBytesAcked);

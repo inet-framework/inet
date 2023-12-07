@@ -79,9 +79,11 @@ void TcpReno::processRexmitTimer(TcpEventCode& event)
 
 void TcpReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
+    uint32_t old_dupacks = state->dupacks;
+
     TcpTahoeRenoFamily::receivedAckForUnackedData(firstSeqAcked);
 
-    if (state->dupacks >= state->dupthresh) {
+    if (old_dupacks >= state->dupthresh) {
         //
         // Perform Fast Recovery: set cwnd to ssthresh (deflating the window).
         //
