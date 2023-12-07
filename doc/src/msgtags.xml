@@ -3169,8 +3169,8 @@
     <filename>src-inet-transportlayer-contract-tcp-TcpAvailableInfo.html</filename>
   </compound>
   <compound kind="class">
-    <name>TcpBaseAlgStateVariables</name>
-    <filename>src-inet-transportlayer-tcp-flavours-TcpBaseAlgStateVariables.html</filename>
+    <name>TcpAlgorithmBaseStateVariables</name>
+    <filename>src-inet-transportlayer-tcp-flavours-TcpAlgorithmBaseStateVariables.html</filename>
   </compound>
   <compound kind="class">
     <name>TcpCommand</name>

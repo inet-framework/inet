@@ -7,13 +7,13 @@
 #ifndef __INET_TCPWESTWOOD_H
 #define __INET_TCPWESTWOOD_H
 
-#include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
+#include "inet/transportlayer/tcp/flavours/TcpAlgorithmBase.h"
 #include "inet/transportlayer/tcp/flavours/TcpWestwoodState_m.h"
 
 namespace inet {
 namespace tcp {
 
-class INET_API TcpWestwood : public TcpBaseAlg
+class INET_API TcpWestwood : public TcpAlgorithmBase
 {
   protected:
     TcpWestwoodStateVariables *& state; // alias to TCLAlgorithm's 'state'

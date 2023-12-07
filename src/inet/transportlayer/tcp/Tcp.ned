@@ -140,10 +140,10 @@ import inet.transportlayer.contract.ITcp;
 //    adaptive retransmission
 //  - TcpTahoe (Fast Retransmit), TcpReno (Fast Retransmit and Fast Recovery),
 //    TcpNewReno (Fast Retransmit and Fast Recovery)
-//  - RFC 3390 - Increased Initial Window (optional) integrated to TcpBaseAlg
+//  - RFC 3390 - Increased Initial Window (optional) integrated to TcpAlgorithmBase
 //    (can be used for TcpNewReno, TcpReno, TcpTahoe and TcpNoCongestionControl but not
 //    for DumbTcp).
-//  - RFC 3042 - Limited Transmit algorithm (optional) integrated to TcpBaseAlg
+//  - RFC 3042 - Limited Transmit algorithm (optional) integrated to TcpAlgorithmBase
 //    (can be used for TcpNewReno, TcpReno, TcpTahoe and TcpNoCongestionControl but not
 //    for DumbTcp).
 //
