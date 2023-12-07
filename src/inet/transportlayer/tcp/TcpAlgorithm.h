@@ -9,7 +9,7 @@
 #define __INET_TCPALGORITHM_H
 
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
-#include "inet/transportlayer/tcp/TcpCongestionControl.h"
+#include "inet/transportlayer/tcp/ITcpCongestionControl.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp/ITcpRecovery.h"
 #include "inet/transportlayer/tcp/TcpSimsignals.h"
@@ -55,7 +55,7 @@ class INET_API TcpAlgorithm : public cObject
      */
     virtual ~TcpAlgorithm() {}
 
-    virtual TcpCongestionControl *getCongestionControl() = 0;
+    virtual ITcpCongestionControl *getCongestionControl() = 0;
 
     virtual ITcpRecovery *getRecovery() = 0;
 
