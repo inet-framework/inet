@@ -15,7 +15,7 @@ namespace tcp {
 class INET_API ITcpCongestionControl : public cObject
 {
   public:
-    virtual void receivedDataAck(uint32_t numBytesAcked) = 0;
+    virtual void receivedAckForDataNotYetAcked(uint32_t numBytesAcked) = 0;
 
     virtual void receivedDuplicateAck() = 0;
 };

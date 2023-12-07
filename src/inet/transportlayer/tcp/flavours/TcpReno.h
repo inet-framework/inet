@@ -43,7 +43,7 @@ class INET_API TcpReno : public TcpTahoeRenoFamily
     TcpReno();
 
     /** Redefine what should happen when data got acked, to add congestion window management */
-    virtual void receivedDataAck(uint32_t firstSeqAcked) override;
+    virtual void receivedAckForDataNotYetAcked(uint32_t firstSeqAcked) override;
 
     /** Redefine what should happen when dupAck was received, to add congestion window management */
     virtual void receivedDuplicateAck() override;

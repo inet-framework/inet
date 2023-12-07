@@ -54,9 +54,9 @@ void TcpTahoe::processRexmitTimer(TcpEventCode& event)
     conn->retransmitOneSegment(true);
 }
 
-void TcpTahoe::receivedDataAck(uint32_t firstSeqAcked)
+void TcpTahoe::receivedAckForDataNotYetAcked(uint32_t firstSeqAcked)
 {
-    TcpTahoeRenoFamily::receivedDataAck(firstSeqAcked);
+    TcpTahoeRenoFamily::receivedAckForDataNotYetAcked(firstSeqAcked);
 
     //
     // Perform slow start and congestion avoidance.
