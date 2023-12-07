@@ -76,7 +76,7 @@ void Rfc5681Recovery::receivedDuplicateAck()
         // where, as discussed above, FlightSize is the amount of outstanding
         // data in the network.
         state->ssthresh = std::max(conn->getBytesInFlight() / 2, 2 * state->snd_mss);
-// TODO       conn->emit(ssthreshSignal, state->ssthresh);
+        conn->emit(ssthreshSignal, state->ssthresh);
 
         // 3. The lost segment starting at SND.UNA MUST be retransmitted and
         //    cwnd set to ssthresh plus 3*SMSS.  This artificially "inflates"
@@ -84,7 +84,7 @@ void Rfc5681Recovery::receivedDuplicateAck()
         //    left the network and which the receiver has buffered.
         conn->retransmitOneSegment(false);
         state->snd_cwnd = state->ssthresh + 3 * state->snd_mss;
-// TODO        conn->emit(cwndSignal, state->snd_cwnd);
+        conn->emit(cwndSignal, state->snd_cwnd);
     }
     // 4. For each additional duplicate ACK received (after the third),
     //    cwnd MUST be incremented by SMSS.  This artificially inflates the
@@ -92,7 +92,7 @@ void Rfc5681Recovery::receivedDuplicateAck()
     //    has left the network.
     else if (state->dupacks > state->dupthresh) {
         state->snd_cwnd += state->snd_mss;
-// TODO        conn->emit(cwndSignal, state->snd_cwnd);
+        conn->emit(cwndSignal, state->snd_cwnd);
     }
 }
 
