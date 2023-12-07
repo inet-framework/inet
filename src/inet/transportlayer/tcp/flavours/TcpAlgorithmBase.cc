@@ -438,7 +438,7 @@ void TcpAlgorithmBase::receiveSeqChanged()
 
 void TcpAlgorithmBase::receivedNonNewAck(const TcpHeader *tcpHeader, uint32_t payloadLength)
 {
-    if (state->snd_una == tcpHeader->getAckNo() && payloadLength == 0 && state->snd_una != state->snd_max) {
+    if (recovery->isDuplicateAck(tcpHeader, payloadLength)) {
         if (!state->lossRecovery) {
             state->dupacks++;
             conn->emit(dupAcksSignal, state->dupacks);
