@@ -1182,7 +1182,7 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
             if (!state->sack_enabled)
                 rexmitQueue->addInferredSack();
         }
-        tcpAlgorithm->receivedNonNewAck(tcpHeader.get(), payloadLength);
+        tcpAlgorithm->receivedAckForDataAlreadyAcked(tcpHeader.get(), payloadLength);
     }
     else if (seqLE(tcpHeader->getAckNo(), state->snd_max)) {
         // ack in window.
