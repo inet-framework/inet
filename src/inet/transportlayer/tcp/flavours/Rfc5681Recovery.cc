@@ -19,14 +19,13 @@ void Rfc5681Recovery::receivedDataAck(uint32_t numBytesAcked)
 {
 }
 
-bool Rfc5681Recovery::isDuplicateAck(Packet *tcpSegment, TcpHeader *tcpHeader)
+bool Rfc5681Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength)
 {
     // DUPLICATE ACKNOWLEDGMENT: An acknowledgment is considered a
     // "duplicate" in the following algorithms when
     //   (a) the receiver of the ACK has outstanding data,
     bool a = state->snd_una != state->snd_max;
     //   (b) the incoming acknowledgment carries no data,
-    int payloadLength = tcpSegment->getByteLength() - B(tcpHeader->getHeaderLength()).get();
     bool b = payloadLength == 0;
     //   (c) the SYN and FIN bits are both off,
     bool c = !tcpHeader->getSynBit() && !tcpHeader->getFinBit();
