@@ -26,7 +26,7 @@ class INET_API Rfc6582Recovery : public TcpRecovery
   public:
     Rfc6582Recovery(TcpStateVariables *state, TcpConnection *conn) : state(check_and_cast<TcpTahoeRenoFamilyStateVariables *>(state)), conn(conn) { }
 
-    virtual void receivedDataAck(uint32_t firstSeqAcked) override;
+    virtual void receivedDataAck(uint32_t numBytesAcked) override;
 
     virtual void receivedDuplicateAck() override;
 };

@@ -30,8 +30,9 @@ void TcpNewReno2::processRexmitTimer(TcpEventCode& event)
 
 void TcpNewReno2::receivedDataAck(uint32_t firstSeqAcked)
 {
-    recovery->receivedDataAck(firstSeqAcked);
-    congestionControl->receivedDataAck(firstSeqAcked);
+    uint32_t numBytesAcked = state->snd_una - firstSeqAcked;
+    recovery->receivedDataAck(numBytesAcked);
+    congestionControl->receivedDataAck(numBytesAcked);
     sendData(false);
 }
 

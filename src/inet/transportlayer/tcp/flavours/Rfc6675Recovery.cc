@@ -114,7 +114,7 @@ void Rfc6675Recovery::stepC()
     }
 }
 
-void Rfc6675Recovery::receivedDataAck(uint32_t firstSeqAcked)
+void Rfc6675Recovery::receivedDataAck(uint32_t numBytesAcked)
 {
     // Once a TCP is in the loss recovery phase, the following procedure
     // MUST be used for each arriving ACK:
