@@ -13,9 +13,9 @@ cplusplus {{
 namespace inet::tcp;
 
 ///
-/// State variables for TcpBaseAlg.
+/// State variables for TcpAlgorithmBase.
 ///
-struct TcpBaseAlgStateVariables extends TcpStateVariables
+struct TcpAlgorithmBaseStateVariables extends TcpStateVariables
 {
     @descriptor(readonly);
 
@@ -60,7 +60,7 @@ struct TcpBaseAlgStateVariables extends TcpStateVariables
     //@}
 };
 
-cplusplus(TcpBaseAlgStateVariables) {{
+cplusplus(TcpAlgorithmBaseStateVariables) {{
   public:
     virtual std::string str() const override;
     virtual std::string detailedInfo() const override;
