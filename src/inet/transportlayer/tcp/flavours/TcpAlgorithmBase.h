@@ -5,10 +5,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#ifndef __INET_TCPBASEALG_H
-#define __INET_TCPBASEALG_H
+#ifndef __INET_TCPALGORITHMBASE_H
+#define __INET_TCPALGORITHMBASE_H
 
-#include "inet/transportlayer/tcp/flavours/TcpBaseAlgState_m.h"
+#include "inet/transportlayer/tcp/flavours/TcpAlgorithmBaseState_m.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 
 namespace inet {
@@ -38,10 +38,10 @@ namespace tcp {
  * and not touched after that. Subclasses may redefine any of the virtual
  * functions here to add their congestion control code.
  */
-class INET_API TcpBaseAlg : public TcpAlgorithm
+class INET_API TcpAlgorithmBase : public TcpAlgorithm
 {
   protected:
-    TcpBaseAlgStateVariables *& state; // alias to TcpAlgorithm's 'state'
+    TcpAlgorithmBaseStateVariables *& state; // alias to TcpAlgorithm's 'state'
     ITcpCongestionControl *congestionControl = nullptr;
     ITcpRecovery *recovery = nullptr;
 
@@ -89,12 +89,12 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
     /**
      * Ctor.
      */
-    TcpBaseAlg();
+    TcpAlgorithmBase();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TcpBaseAlg();
+    virtual ~TcpAlgorithmBase();
 
     /**
      * Create timers, etc.
