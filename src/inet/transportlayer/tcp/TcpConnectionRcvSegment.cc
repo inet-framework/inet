@@ -1234,7 +1234,7 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         // which are thereby entirely acknowledged."
         if (state->ts_enabled)
             tcpAlgorithm->rttMeasurementCompleteUsingTS(getTSecr(tcpHeader));
-        // Note: If TS is disabled the RTT measurement is completed in TcpBaseAlg::receivedDataAck()
+        // Note: If TS is disabled the RTT measurement is completed in TcpAlgorithmBase::receivedDataAck()
 
         uint32_t discardUpToSeq = state->snd_una;
 
