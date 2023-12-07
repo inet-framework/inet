@@ -141,7 +141,7 @@ class INET_API TcpAlgorithm : public cObject
     /**
      * Called after we received an ACK for which ackNo <= snd_una.
      */
-    virtual void receivedAckForDataAlreadyAcked(const TcpHeader *tcpHeader, uint32_t payloadLength) = 0;
+    virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) = 0;
 
     /**
      * Called after we received an ACK which acked some data (that is,
@@ -151,13 +151,13 @@ class INET_API TcpAlgorithm : public cObject
      * (snd_una - firstSeqAcked). The dupack counter still reflects the old value
      * (needed for Reno and NewReno); it'll be reset to 0 after this call returns.
      */
-    virtual void receivedAckForDataNotYetAcked(uint32_t firstSeqAcked) = 0;
+    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) = 0;
 
     /**
      * Called after we received an ACK for data not yet sent.
      * According to RFC 793 this function should send an ACK.
      */
-    virtual void receivedAckForDataNotYetSent(uint32_t seq) = 0;
+    virtual void receivedAckForUnsentData(uint32_t seq) = 0;
 
     /**
      * Called after we sent an ACK. This hook can be used to cancel

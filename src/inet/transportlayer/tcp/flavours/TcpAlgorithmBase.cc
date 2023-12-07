@@ -436,7 +436,7 @@ void TcpAlgorithmBase::receiveSeqChanged()
     }
 }
 
-void TcpAlgorithmBase::receivedAckForDataAlreadyAcked(const TcpHeader *tcpHeader, uint32_t payloadLength)
+void TcpAlgorithmBase::receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength)
 {
     if (recovery->isDuplicateAck(tcpHeader, payloadLength)) {
         if (!state->lossRecovery) {
@@ -459,7 +459,7 @@ void TcpAlgorithmBase::receivedAckForDataAlreadyAcked(const TcpHeader *tcpHeader
     }
 }
 
-void TcpAlgorithmBase::receivedAckForDataNotYetAcked(uint32_t firstSeqAcked)
+void TcpAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
     if (!state->ts_enabled) {
         // if round-trip time measurement is running, check if rtseq has been acked
@@ -558,7 +558,7 @@ void TcpAlgorithmBase::receivedDuplicateAck()
     //
 }
 
-void TcpAlgorithmBase::receivedAckForDataNotYetSent(uint32_t seq)
+void TcpAlgorithmBase::receivedAckForUnsentData(uint32_t seq)
 {
     // Note: In this case no immediate ACK will be send because not mentioned
     // in [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 861].

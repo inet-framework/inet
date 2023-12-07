@@ -81,9 +81,9 @@ void TcpNewReno::processRexmitTimer(TcpEventCode& event)
     conn->retransmitOneSegment(true);
 }
 
-void TcpNewReno::receivedAckForDataNotYetAcked(uint32_t firstSeqAcked)
+void TcpNewReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
-    TcpTahoeRenoFamily::receivedAckForDataNotYetAcked(firstSeqAcked);
+    TcpTahoeRenoFamily::receivedAckForUnackedData(firstSeqAcked);
 
     // RFC 3782, page 5:
     // "5) When an ACK arrives that acknowledges new data, this ACK could be

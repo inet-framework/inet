@@ -56,7 +56,7 @@ class INET_API SctpAlg : public SctpAlgorithm
 
     virtual void receivedDuplicateAck() override;
 
-    virtual void receivedAckForDataNotYetSent(uint32_t seq) override;
+    virtual void receivedAckForUnsentData(uint32_t seq) override;
 
     virtual void sackSent() override;
 

@@ -44,7 +44,7 @@ class INET_API TcpNoCongestionControl : public TcpAlgorithmBase
     virtual void initialize() override;
 
     /** Redefine what should happen when data got acked, to add congestion window management */
-    virtual void receivedAckForDataNotYetAcked(uint32_t firstSeqAcked) override;
+    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
 
     virtual void established(bool active) override;
 
