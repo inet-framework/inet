@@ -532,6 +532,9 @@ void TcpAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
         }
     }
 
+    state->dupacks = 0;
+    conn->emit(dupAcksSignal, state->dupacks);
+
     //
     // Leave congestion window management and possible sending data to
     // subclasses (e.g. TcpTahoe, TcpReno).
