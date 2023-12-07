@@ -9,7 +9,7 @@
 
 #include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
-#include "inet/transportlayer/tcp/TcpRecovery.h"
+#include "inet/transportlayer/tcp/ITcpRecovery.h"
 
 namespace inet {
 namespace tcp {
@@ -17,7 +17,7 @@ namespace tcp {
 /**
  * Implements RFC 6582: The NewReno Modification to TCP's Fast Recovery Algorithm.
  */
-class INET_API Rfc6582Recovery : public TcpRecovery
+class INET_API Rfc6582Recovery : public ITcpRecovery
 {
   protected:
     TcpTahoeRenoFamilyStateVariables *state = nullptr;
