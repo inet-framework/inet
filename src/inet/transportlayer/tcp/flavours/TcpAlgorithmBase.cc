@@ -436,7 +436,7 @@ void TcpAlgorithmBase::receiveSeqChanged()
     }
 }
 
-void TcpAlgorithmBase::receivedNonNewAck(const TcpHeader *tcpHeader, uint32_t payloadLength)
+void TcpAlgorithmBase::receivedAckForDataAlreadyAcked(const TcpHeader *tcpHeader, uint32_t payloadLength)
 {
     if (recovery->isDuplicateAck(tcpHeader, payloadLength)) {
         if (!state->lossRecovery) {

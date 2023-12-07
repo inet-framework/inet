@@ -141,7 +141,7 @@ class INET_API TcpAlgorithm : public cObject
     /**
      * Called after we received an ACK for which ackNo <= snd_una.
      */
-    virtual void receivedNonNewAck(const TcpHeader *tcpHeader, uint32_t payloadLength) = 0;
+    virtual void receivedAckForDataAlreadyAcked(const TcpHeader *tcpHeader, uint32_t payloadLength) = 0;
 
     /**
      * Called after we received an ACK which acked some data (that is,
