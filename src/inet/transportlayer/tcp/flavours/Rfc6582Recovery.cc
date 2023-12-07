@@ -9,7 +9,7 @@
 namespace inet {
 namespace tcp {
 
-void Rfc6582Recovery::receivedDataAck(uint32_t firstSeqAcked)
+void Rfc6582Recovery::receivedDataAck(uint32_t numBytesAcked)
 {
     // 3.2. Specification
     if (state->lossRecovery) {
