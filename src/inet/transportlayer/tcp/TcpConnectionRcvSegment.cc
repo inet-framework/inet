@@ -502,9 +502,9 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
 
                 if (seqGreater(state->snd_una, old_snd_una)) {
                     // notify
-                    tcpAlgorithm->receivedDataAck(old_snd_una);
+                    tcpAlgorithm->receivedAckForDataNotYetAcked(old_snd_una);
 
-                    // in the receivedDataAck we need the old value
+                    // in the receivedAckForDataNotYetAcked we need the old value
                     state->dupacks = 0;
 
                     emit(dupAcksSignal, state->dupacks);
@@ -1204,7 +1204,7 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         // which are thereby entirely acknowledged."
         if (state->ts_enabled)
             tcpAlgorithm->rttMeasurementCompleteUsingTS(getTSecr(tcpHeader));
-        // Note: If TS is disabled the RTT measurement is completed in TcpAlgorithmBase::receivedDataAck()
+        // Note: If TS is disabled the RTT measurement is completed in TcpAlgorithmBase::receivedAckForDataNotYetAcked()
 
         uint32_t discardUpToSeq = state->snd_una;
 
@@ -1228,9 +1228,9 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         // otherwise we would use an old ACKNo
         if (payloadLength == 0 && fsm.getState() != TCP_S_SYN_RCVD) {
             // notify
-            tcpAlgorithm->receivedDataAck(old_snd_una);
+            tcpAlgorithm->receivedAckForDataNotYetAcked(old_snd_una);
 
-            // in the receivedDataAck we need the old value
+            // in the receivedAckForDataNotYetAcked we need the old value
             state->dupacks = 0;
 
             emit(dupAcksSignal, state->dupacks);

@@ -31,9 +31,9 @@ void DcTcp::initialize()
     state->dctcp_gamma = conn->getTcpMain()->par("dctcpGamma");
 }
 
-void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
+void DcTcp::receivedAckForDataNotYetAcked(uint32_t firstSeqAcked)
 {
-    TcpTahoeRenoFamily::receivedDataAck(firstSeqAcked);
+    TcpTahoeRenoFamily::receivedAckForDataNotYetAcked(firstSeqAcked);
 
     if (state->dupacks >= state->dupthresh) {
         //

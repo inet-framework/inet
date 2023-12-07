@@ -26,7 +26,7 @@ class INET_API Rfc5681CongestionControl : public ITcpCongestionControl
   public:
     Rfc5681CongestionControl(TcpStateVariables *state, TcpConnection *conn) : state(check_and_cast<TcpTahoeRenoFamilyStateVariables *>(state)), conn(conn) { }
 
-    virtual void receivedDataAck(uint32_t numBytesAcked) override;
+    virtual void receivedAckForDataNotYetAcked(uint32_t numBytesAcked) override;
 
     virtual void receivedDuplicateAck() override;
 };
