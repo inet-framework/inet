@@ -1241,9 +1241,6 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
 
         // send an ACK, drop the segment, and return.
         tcpAlgorithm->receivedAckForDataNotYetSent(tcpHeader->getAckNo());
-        state->dupacks = 0;
-
-        emit(dupAcksSignal, state->dupacks);
 
         return false; // means "drop"
     }

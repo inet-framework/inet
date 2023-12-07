@@ -567,6 +567,8 @@ void TcpAlgorithmBase::receivedAckForDataNotYetSent(uint32_t seq)
 //    tcpEV << "ACK acks something not yet sent, sending immediate ACK\n";
     EV_INFO << "ACK acks something not yet sent, sending ACK\n";
     conn->sendAck();
+    state->dupacks = 0;
+    conn->emit(dupAcksSignal, state->dupacks);
 }
 
 void TcpAlgorithmBase::ackSent()
