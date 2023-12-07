@@ -83,6 +83,11 @@ void DumbTcp::receiveSeqChanged()
     conn->sendAck();
 }
 
+void DumbTcp::receivedNonNewAck(const TcpHeader *tcpHeader, uint32_t payloadLength)
+{
+    // TODO
+}
+
 void DumbTcp::receivedDataAck(uint32_t)
 {
     // ack may have freed up some room in the window, try sending.
