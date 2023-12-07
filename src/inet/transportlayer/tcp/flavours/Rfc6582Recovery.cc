@@ -16,7 +16,7 @@ bool Rfc6582Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloa
     return rfc5681Recovery.isDuplicateAck(tcpHeader, payloadLength);
 }
 
-void Rfc6582Recovery::receivedAckForDataNotYetAcked(uint32_t numBytesAcked)
+void Rfc6582Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
 {
     // 3.2. Specification
     if (state->lossRecovery) {

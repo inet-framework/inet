@@ -32,7 +32,7 @@ class INET_API TcpNewReno2 : public TcpTahoeRenoFamily
   public:
     TcpNewReno2();
 
-    virtual void receivedAckForDataNotYetAcked(uint32_t firstSeqAcked) override;
+    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
 
     virtual void receivedDuplicateAck() override;
 };
