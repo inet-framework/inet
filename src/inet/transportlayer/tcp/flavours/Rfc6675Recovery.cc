@@ -14,7 +14,7 @@
 namespace inet {
 namespace tcp {
 
-bool Rfc6675Recovery::isDuplicateAck(TcpHeader *tcpHeader)
+bool Rfc6675Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength)
 {
     // For the purposes of this specification, we define a "duplicate
     // acknowledgment" as a segment that arrives carrying a SACK block that

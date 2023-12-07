@@ -32,7 +32,7 @@ class INET_API Rfc6675Recovery : public ITcpRecovery
   public:
     Rfc6675Recovery(TcpStateVariables *state, TcpConnection *conn) : state(check_and_cast<TcpTahoeRenoFamilyStateVariables *>(state)), conn(conn) { }
 
-    virtual bool isDuplicateAck(TcpHeader *tcpHeader);
+    virtual bool isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
 
     virtual void receivedDataAck(uint32_t numBytesAcked) override;
 

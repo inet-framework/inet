@@ -5,9 +5,16 @@
 //
 
 #include "inet/transportlayer/tcp/flavours/Rfc6582Recovery.h"
+#include "inet/transportlayer/tcp/flavours/Rfc5681Recovery.h"
 
 namespace inet {
 namespace tcp {
+
+bool Rfc6582Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength)
+{
+    Rfc5681Recovery rfc5681Recovery(state, conn);
+    return rfc5681Recovery.isDuplicateAck(tcpHeader, payloadLength);
+}
 
 void Rfc6582Recovery::receivedDataAck(uint32_t numBytesAcked)
 {
