@@ -82,6 +82,8 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
      */
     virtual bool sendData(bool sendCommandInvoked);
 
+    virtual void receivedDuplicateAck();
+
     /** Utility function */
     cMessage *cancelEvent(cMessage *msg) { return conn->cancelEvent(msg); }
 
@@ -119,8 +121,6 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     virtual void receivedAckForDataAlreadyAcked(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
 
     virtual void receivedAckForDataNotYetAcked(uint32_t firstSeqAcked) override;
-
-    virtual void receivedDuplicateAck() override;
 
     virtual void receivedAckForDataNotYetSent(uint32_t seq) override;
 
