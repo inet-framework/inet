@@ -16,6 +16,7 @@ namespace tcp {
 
 bool Rfc6675Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength)
 {
+    //"
     // For the purposes of this specification, we define a "duplicate
     // acknowledgment" as a segment that arrives carrying a SACK block that
     // identifies previously unacknowledged and un-SACKed octets between
@@ -24,6 +25,7 @@ bool Rfc6675Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloa
     // if it carries new data, changes the advertised window, or moves the
     // cumulative acknowledgment point, which is different from the
     // definition of duplicate acknowledgment in [RFC5681].
+    //"
 
     // TODO unfortunately these values are wrong, see other comment where they are set
     // could be something like return state->addedSackedBytes > 0;
@@ -32,6 +34,7 @@ bool Rfc6675Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloa
 
 }
 
+//"
 // 5. Algorithm Details
 //    Upon the receipt of any ACK containing SACK information, the
 //    scoreboard MUST be updated via the Update () routine.
@@ -40,15 +43,18 @@ bool Rfc6675Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloa
 //    If the incoming ACK is a cumulative acknowledgment, the TCP MUST
 //    reset DupAcks to zero.
 // implemented in processSegment1stThru8th() and Rfc6675Recovery::processAckInEstabEtc()
+//"
 
 void Rfc6675Recovery::stepA()
 {
+    //"
     // (A) An incoming cumulative ACK for a sequence number greater than
     //     RecoveryPoint signals the end of loss recovery, and the loss
     //     recovery phase MUST be terminated.  Any information contained in
     //     the scoreboard for sequence numbers greater than the new value of
     //     HighACK SHOULD NOT be cleared when leaving the loss recovery
     //     phase.
+    //"
     if (seqGE(state->snd_una, state->recoveryPoint)) {
         state->lossRecovery = false;
         conn->getRexmitQueueForUpdate()->discardUpTo(state->snd_una);
@@ -57,43 +63,57 @@ void Rfc6675Recovery::stepA()
 
 void Rfc6675Recovery::stepB()
 {
+    //"
     // (B) Upon receipt of an ACK that does not cover RecoveryPoint, the
     //     following actions MUST be taken:
+    //"
     if (seqLE(state->snd_una, state->recoveryPoint)) {
+        //"
         // (B.1) Use Update () to record the new SACK information conveyed
         //       by the incoming ACK.
         // implemented by processSACKOption()
+        //"
 
+        //"
         // (B.2) Use SetPipe () to re-calculate the number of octets still
         //       in the network.
+        //"
         setPipe();
     }
 }
 
 void Rfc6675Recovery::stepC()
 {
+    //"
     // (C) If cwnd - pipe >= 1 SMSS, the sender SHOULD transmit one or more
     //     segments as follows:
+    //"
     while ((int32_t)state->snd_cwnd - (int32_t)state->pipe >= (int32_t)state->snd_mss) {
+        //"
         // (C.1) The scoreboard MUST be queried via NextSeg () for the
         //       sequence number range of the next segment to transmit (if
         //       any), and the given segment sent.  If NextSeg () returns
         //       failure (no data to send), return without sending anything
         //       (i.e., terminate steps C.1 -- C.5).
+        //"
         uint32_t seqNum;
         if (!nextSeg(seqNum))
             break;
 
+        //"
         // (C.2) If any of the data octets sent in (C.1) are below HighData,
         //       HighRxt MUST be set to the highest sequence number of the
         //       retransmitted segment unless NextSeg () rule (4) was
         //       invoked for this retransmission.
+        //"
         if (seqLess(seqNum, state->snd_max))
             state->highRxt = seqNum + state->snd_mss;
 
+        //"
         // (C.3) If any of the data octets sent in (C.1) are above HighData,
         //       HighData must be updated to reflect the transmission of
         //       previously unsent data.
+        //"
         if (seqGreater(seqNum, state->snd_max)) {
             state->snd_max = seqNum + state->snd_mss;
             conn->emit(sndMaxSignal, state->snd_max);
@@ -103,44 +123,57 @@ void Rfc6675Recovery::stepC()
             state->snd_nxt = seqNum;
             uint32_t sentBytes = conn->sendSegment(state->snd_mss);
 
+            //"
             // (C.4) The estimate of the amount of data outstanding in the
             //       network must be updated by incrementing pipe by the number
             //       of octets transmitted in (C.1).
+            //"
             state->pipe += sentBytes;
         }
         else
             break;
 
+        //"
         // (C.5) If cwnd - pipe >= 1 SMSS, return to (C.1)
+        //"
     }
 }
 
 void Rfc6675Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
 {
+    //"
     // Once a TCP is in the loss recovery phase, the following procedure
     // MUST be used for each arriving ACK:
+    //"
     if (state->lossRecovery) {
         stepA();
         stepB();
         stepC();
+        //"
         // Note that steps (A) and (C) can potentially send a burst of
         // back-to-back segments into the network if the incoming cumulative
         // acknowledgment is for more than SMSS octets of data, or if incoming
         // SACK blocks indicate that more than SMSS octets of data have been
         // lost in the second half of the window.
+        //"
     }
 }
 
 void Rfc6675Recovery::step4()
 {
+    //"
     // (4) Invoke fast retransmit and enter loss recovery as follows:
+    //"
     state->lossRecovery = true;
 
+    //"
     // (4.1) RecoveryPoint = HighData
     //       When the TCP sender receives a cumulative ACK for this data
     //       octet, the loss recovery phase is terminated.
+    //"
     state->recoveryPoint = state->snd_max;
 
+    //"
     // (4.2) ssthresh = cwnd = (FlightSize / 2)
     //       The congestion window (cwnd) and slow start threshold
     //       (ssthresh) are reduced to half of FlightSize per [RFC5681].
@@ -148,20 +181,24 @@ void Rfc6675Recovery::step4()
     //       segments sent as part of the Limited Transmit mechanism not
     //       be counted in FlightSize for the purpose of the above
     //       equation.
+    //"
     state->ssthresh = state->snd_cwnd = conn->getBytesInFlight() / 2;
     conn->emit(cwndSignal, state->snd_cwnd);
     conn->emit(ssthreshSignal, state->ssthresh);
 
+    //"
     // (4.3) Retransmit the first data segment presumed dropped -- the
     //       segment starting with sequence number HighACK + 1.  To
     //       prevent repeated retransmission of the same data or a
     //       premature rescue retransmission, set both HighRxt and
     //       RescueRxt to the highest sequence number in the
     //       retransmitted segment.
+    //"
     conn->retransmitOneSegment(false); // this also sends retransmitted segments
     // state->highRxt = state->snd_una + ?; // this is done in retransmitOneSegment
     // state->rescueRxt = state->snd_una + ?; // this is done in retransmitOneSegment
 
+    //"
     // (4.4) Run SetPipe ()
     //       Set a "pipe" variable to the number of outstanding octets
     //       currently "in the pipe"; this is the data which has been
@@ -170,50 +207,67 @@ void Rfc6675Recovery::step4()
     //       not been determined to have been dropped in the network.
     //       It is assumed that the data is still traversing the network
     //       path.
+    //"
     setPipe();
 
+    //"
     // (4.5) In order to take advantage of potential additional
     //       available cwnd, proceed to step (C) below.
+    //"
     stepC();
 }
 
 void Rfc6675Recovery::receivedDuplicateAck()
 {
+    //"
     // If the incoming ACK is a duplicate acknowledgment per the definition
     // in Section 2 (regardless of its status as a cumulative
     // acknowledgment), and the TCP is not currently in loss recovery, the
     // TCP MUST increase DupAcks by one and take the following steps:
+    //"
     if (!state->lossRecovery) {
+        //"
         // (1) If DupAcks >= DupThresh, go to step (4).
         //     Note: This check covers the case when a TCP receives SACK
         //     information for multiple segments smaller than SMSS, which can
         //     potentially prevent IsLost() (next step) from declaring a segment
         //     as lost.
+        //"
         if (state->dupacks >= state->dupthresh)
             step4();
         else {
+            //"
             // (2) If DupAcks < DupThresh but IsLost (HighACK + 1) returns true --
             //     indicating at least three segments have arrived above the current
             //     cumulative acknowledgment point, which is taken to indicate loss
             //     -- go to step (4).
+            //"
             if (isLost(state->snd_una + 1))
                 step4();
             else {
+                //"
                 // (3) The TCP MAY transmit previously unsent data segments as per
                 //     Limited Transmit [RFC5681], except that the number of octets
                 //     which may be sent is governed by pipe and cwnd as follows:
+                //"
 
+                //"
                 // (3.1) Set HighRxt to HighACK.
+                //"
                 state->highRxt = state->snd_una;
 
+                //"
                 // (3.2) Run SetPipe ().
+                //"
                 setPipe();
 
+                //"
                 // (3.3) If (cwnd - pipe) >= 1 SMSS, there exists previously unsent
                 //       data, and the receiver's advertised window allows, transmit
                 //       up to 1 SMSS of data starting with the octet HighData+1 and
                 //       update HighData to reflect this transmission, then return
                 //       to (3.2).
+                //"
                 while ((int32_t)state->snd_cwnd - (int32_t)state->pipe >= (int32_t)state->snd_mss) {
                     uint32_t seqNum;
                     if (!nextSeg(seqNum))
@@ -227,7 +281,9 @@ void Rfc6675Recovery::receivedDuplicateAck()
                         break;
                 }
 
+                //"
                 // (3.4) Terminate processing of this ACK.
+                //"
             }
         }
     }
@@ -273,7 +329,8 @@ bool Rfc6675Recovery::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, c
             // check for D-SACK
             if (i == 0 && seqLE(tmp.getEnd(), tcpHeader->getAckNo())) {
                 // RFC 2883, page 8:
-                // "In order for the sender to check that the first (D)SACK block of an
+                //"
+                // In order for the sender to check that the first (D)SACK block of an
                 // acknowledgement in fact acknowledges duplicate data, the sender
                 // should compare the sequence space in the first SACK block to the
                 // cumulative ACK which is carried IN THE SAME PACKET.  If the SACK
@@ -282,24 +339,29 @@ bool Rfc6675Recovery::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, c
                 // than once by the receiver.  An implementation MUST NOT compare the
                 // sequence space in the SACK block to the TCP state variable snd.una
                 // (which carries the total cumulative ACK), as this may result in the
-                // wrong conclusion if ACK packets are reordered."
+                // wrong conclusion if ACK packets are reordered.
+                //"
                 EV_DETAIL << "Received D-SACK below cumulative ACK=" << tcpHeader->getAckNo()
                           << " D-SACK: " << tmp.str() << endl;
                 // Note: RFC 2883 does not specify what should be done in this case.
                 // RFC 2883, page 9:
-                // "5. Detection of Duplicate Packets
+                //"
+                // 5. Detection of Duplicate Packets
                 // (...) This document does not specify what action a TCP implementation should
                 // take in these cases. The extension to the SACK option simply enables
-                // the sender to detect each of these cases.(...)"
+                // the sender to detect each of these cases.(...)
+                //"
             }
             else if (i == 0 && n > 1 && seqGreater(tmp.getEnd(), tcpHeader->getAckNo())) {
                 // RFC 2883, page 8:
-                // "If the sequence space in the first SACK block is greater than the
+                //"
+                // If the sequence space in the first SACK block is greater than the
                 // cumulative ACK, then the sender next compares the sequence space in
                 // the first SACK block with the sequence space in the second SACK
                 // block, if there is one.  This comparison can determine if the first
                 // SACK block is reporting duplicate data that lies above the cumulative
-                // ACK."
+                // ACK.
+                //"
                 Sack tmp2(option.getSackItem(1).getStart(), option.getSackItem(1).getEnd());
 
                 if (tmp2.contains(tmp)) {
@@ -308,10 +370,12 @@ bool Rfc6675Recovery::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, c
                               << ", SACK: " << tmp2.str() << endl;
                     // Note: RFC 2883 does not specify what should be done in this case.
                     // RFC 2883, page 9:
-                    // "5. Detection of Duplicate Packets
+                    //"
+                    // 5. Detection of Duplicate Packets
                     // (...) This document does not specify what action a TCP implementation should
                     // take in these cases. The extension to the SACK option simply enables
-                    // the sender to detect each of these cases.(...)"
+                    // the sender to detect each of these cases.(...)
+                    //"
                 }
             }
 
@@ -343,12 +407,15 @@ bool Rfc6675Recovery::isLost(uint32_t seqNum)
 {
     ASSERT(state->sack_enabled);
 
-    // RFC 3517, page 3: "This routine returns whether the given sequence number is
+    // RFC 3517, page 3:
+    //"
+    // This routine returns whether the given sequence number is
     // considered to be lost.  The routine returns true when either
     // DupThresh discontiguous SACKed sequences have arrived above
     // 'SeqNum' or (DupThresh * SMSS) bytes with sequence numbers greater
     // than 'SeqNum' have been SACKed.  Otherwise, the routine returns
-    // false."
+    // false.
+    //"
     ASSERT(seqGE(seqNum, state->snd_una)); // HighAck = snd_una - 1
 
     bool isLost = (conn->getRexmitQueue()->getNumOfDiscontiguousSacks(seqNum) >= state->dupthresh
@@ -361,7 +428,8 @@ void Rfc6675Recovery::setPipe()
 {
     ASSERT(state->sack_enabled);
 
-    // RFC 3517, pages 1 and 2: "
+    // RFC 3517, pages 1 and 2:
+    //"
     // "HighACK" is the sequence number of the highest byte of data that
     // has been cumulatively ACKed at a given point.
     //
@@ -376,7 +444,8 @@ void Rfc6675Recovery::setPipe()
     // sender's sending rate.  The pipe variable allows TCP to use a
     // fundamentally different congestion control than specified in
     // [RFC2581].  The algorithm is often referred to as the "pipe
-    // algorithm"."
+    // algorithm".
+    //"
     // HighAck = snd_una
     // HighData = snd_max
 
@@ -386,28 +455,36 @@ void Rfc6675Recovery::setPipe()
     bool sacked; // required for rexmitQueue->checkSackBlock()
     bool rexmitted; // required for rexmitQueue->checkSackBlock()
 
-    // RFC 3517, page 3: "This routine traverses the sequence space from HighACK to HighData
+    // RFC 3517, page 3:
+    //"
+    // This routine traverses the sequence space from HighACK to HighData
     // and MUST set the "pipe" variable to an estimate of the number of
     // octets that are currently in transit between the TCP sender and
     // the TCP receiver.  After initializing pipe to zero the following
     // steps are taken for each octet 'S1' in the sequence space between
-    // HighACK and HighData that has not been SACKed:"
+    // HighACK and HighData that has not been SACKed:
+    //"
     for (uint32_t s1 = state->snd_una; seqLess(s1, state->snd_max); s1 += length) {
         conn->getRexmitQueue()->checkSackBlock(s1, length, sacked, rexmitted);
 
         if (!sacked) {
-            // RFC 3517, page 3: "(a) If IsLost (S1) returns false:
+            // RFC 3517, page 3:
+            //"
+            // (a) If IsLost (S1) returns false:
             //
             //     Pipe is incremented by 1 octet.
             //
             //     The effect of this condition is that pipe is incremented for
             //     packets that have not been SACKed and have not been determined
             //     to have been lost (i.e., those segments that are still assumed
-            //     to be in the network)."
+            //     to be in the network).
+            //"
             if (isLost(s1) == false)
                 state->pipe += length;
 
-            // RFC 3517, pages 3 and 4: "(b) If S1 <= HighRxt:
+            // RFC 3517, pages 3 and 4:
+            //"
+            // (b) If S1 <= HighRxt:
             //
             //     Pipe is incremented by 1 octet.
             //
@@ -415,7 +492,8 @@ void Rfc6675Recovery::setPipe()
             //     the retransmission of the octet.
             //
             //  Note that octets retransmitted without being considered lost are
-            //  counted twice by the above mechanism."
+            //  counted twice by the above mechanism.
+            //"
             if (seqLess(s1, state->highRxt))
                 state->pipe += length;
         }
@@ -428,12 +506,15 @@ bool Rfc6675Recovery::nextSeg(uint32_t& seqNum)
 {
     ASSERT(state->sack_enabled);
 
-    // RFC 3517, page 5: "This routine uses the scoreboard data structure maintained by the
+    // RFC 3517, page 5:
+    //"
+    // This routine uses the scoreboard data structure maintained by the
     // Update() function to determine what to transmit based on the SACK
     // information that has arrived from the data receiver (and hence
     // been marked in the scoreboard).  NextSeg () MUST return the
     // sequence number range of the next segment that is to be
-    // transmitted, per the following rules:"
+    // transmitted, per the following rules:
+    //"
 
     state->highRxt = conn->getRexmitQueue()->getHighestRexmittedSeqNum();
     uint32_t highestSackedSeqNum = conn->getRexmitQueue()->getHighestSackedSeqNum();
@@ -446,7 +527,9 @@ bool Rfc6675Recovery::nextSeg(uint32_t& seqNum)
     if (state->ts_enabled)
         shift -= B(TCP_OPTION_TS_SIZE).get();
 
-    // RFC 3517, page 5: "(1) If there exists a smallest unSACKed sequence number 'S2' that
+    // RFC 3517, page 5:
+    //"
+    // (1) If there exists a smallest unSACKed sequence number 'S2' that
     // meets the following three criteria for determining loss, the
     // sequence range of one segment of up to SMSS octets starting
     // with S2 MUST be returned.
@@ -456,7 +539,8 @@ bool Rfc6675Recovery::nextSeg(uint32_t& seqNum)
     // (1.b) S2 is less than the highest octet covered by any
     //       received SACK.
     //
-    // (1.c) IsLost (S2) returns true."
+    // (1.c) IsLost (S2) returns true.
+    //"
 
     // Note: state->highRxt == RFC.HighRxt + 1
     for (uint32_t s2 = state->highRxt;
@@ -476,11 +560,14 @@ bool Rfc6675Recovery::nextSeg(uint32_t& seqNum)
         }
     }
 
-    // RFC 3517, page 5: "(2) If no sequence number 'S2' per rule (1) exists but there
+    // RFC 3517, page 5
+    //"
+    // (2) If no sequence number 'S2' per rule (1) exists but there
     // exists available unsent data and the receiver's advertised
     // window allows, the sequence range of one segment of up to SMSS
     // octets of previously unsent data starting with sequence number
-    // HighData+1 MUST be returned."
+    // HighData+1 MUST be returned.
+    //"
     {
         // check how many unsent bytes we have
         uint32_t buffered = conn->getSendQueue()->getBytesAvailable(state->snd_max);
@@ -495,7 +582,9 @@ bool Rfc6675Recovery::nextSeg(uint32_t& seqNum)
         }
     }
 
-    // RFC 3517, pages 5 and 6: "(3) If the conditions for rules (1) and (2) fail, but there exists
+    // RFC 3517, pages 5 and 6
+    //"
+    // (3) If the conditions for rules (1) and (2) fail, but there exists
     // an unSACKed sequence number 'S3' that meets the criteria for
     // detecting loss given in steps (1.a) and (1.b) above
     // (specifically excluding step (1.c)) then one segment of up to
@@ -520,7 +609,8 @@ bool Rfc6675Recovery::nextSeg(uint32_t& seqNum)
     // that the implications are likely limited to corner cases
     // relative to the entire recovery algorithm.  Therefore we leave
     // the decision of whether or not to use rule (3) to
-    // implementors."
+    // implementors.
+    //"
     {
         for (uint32_t s3 = state->highRxt;
              seqLess(s3, state->snd_max) && seqLess(s3, highestSackedSeqNum);
@@ -537,9 +627,12 @@ bool Rfc6675Recovery::nextSeg(uint32_t& seqNum)
         }
     }
 
-    // RFC 3517, page 6: "(4) If the conditions for each of (1), (2), and (3) are not met,
+    // RFC 3517, page 6:
+    //"
+    // (4) If the conditions for each of (1), (2), and (3) are not met,
     // then NextSeg () MUST indicate failure, and no segment is
-    // returned."
+    // returned.
+    //"
     seqNum = 0;
 
     return false;
@@ -549,19 +642,25 @@ void Rfc6675Recovery::sendDataDuringLossRecoveryPhase(uint32_t congestionWindow)
 {
     ASSERT(state->sack_enabled && state->lossRecovery);
 
-    // RFC 3517 pages 7 and 8: "(5) In order to take advantage of potential additional available
+    // RFC 3517 pages 7 and 8
+    //"
+    // (5) In order to take advantage of potential additional available
     // cwnd, proceed to step (C) below.
     // (...)
     // (C) If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
     // segments as follows:
     // (...)
-    // (C.5) If cwnd - pipe >= 1 SMSS, return to (C.1)"
+    // (C.5) If cwnd - pipe >= 1 SMSS, return to (C.1)
+    //"
     while (((int)congestionWindow - (int)state->pipe) >= (int)state->snd_mss) { // Note: Typecast needed to avoid prohibited transmissions
-        // RFC 3517 pages 7 and 8: "(C.1) The scoreboard MUST be queried via NextSeg () for the
+        // RFC 3517 pages 7 and 8:
+        //"
+        // (C.1) The scoreboard MUST be queried via NextSeg () for the
         // sequence number range of the next segment to transmit (if any),
         // and the given segment sent.  If NextSeg () returns failure (no
         // data to send) return without sending anything (i.e., terminate
-        // steps C.1 -- C.5)."
+        // steps C.1 -- C.5).
+        //"
 
         uint32_t seqNum;
 
@@ -569,9 +668,12 @@ void Rfc6675Recovery::sendDataDuringLossRecoveryPhase(uint32_t congestionWindow)
             break;
 
         uint32_t sentBytes = sendSegmentDuringLossRecoveryPhase(seqNum);
-        // RFC 3517 page 8: "(C.4) The estimate of the amount of data outstanding in the
+        // RFC 3517 page 8:
+        //"
+        // (C.4) The estimate of the amount of data outstanding in the
         // network must be updated by incrementing pipe by the number of
-        // octets transmitted in (C.1)."
+        // octets transmitted in (C.1).
+        //"
         state->pipe += sentBytes;
     }
 }
@@ -596,16 +698,22 @@ uint32_t Rfc6675Recovery::sendSegmentDuringLossRecoveryPhase(uint32_t seqNum)
 
     ASSERT(seqLE(state->snd_nxt, sentSeqNum));
 
-    // RFC 3517 page 8: "(C.2) If any of the data octets sent in (C.1) are below HighData,
+    // RFC 3517 page 8:
+    //"
+    // (C.2) If any of the data octets sent in (C.1) are below HighData,
     // HighRxt MUST be set to the highest sequence number of the
-    // retransmitted segment."
+    // retransmitted segment.
+    //"
     if (seqLess(seqNum, state->snd_max)) { // HighData = snd_max
         state->highRxt = conn->getRexmitQueue()->getHighestRexmittedSeqNum();
     }
 
-    // RFC 3517 page 8: "(C.3) If any of the data octets sent in (C.1) are above HighData,
+    // RFC 3517 page 8:
+    //"
+    // (C.3) If any of the data octets sent in (C.1) are above HighData,
     // HighData must be updated to reflect the transmission of
-    // previously unsent data."
+    // previously unsent data.
+    //"
     if (seqGreater(sentSeqNum, state->snd_max)) { // HighData = snd_max
         state->snd_max = sentSeqNum;
         conn->emit(sndMaxSignal, state->snd_max);
@@ -613,7 +721,9 @@ uint32_t Rfc6675Recovery::sendSegmentDuringLossRecoveryPhase(uint32_t seqNum)
 
     conn->emit(unackedSignal, state->snd_max - state->snd_una);
 
-    // RFC 3517, page 9: "6   Managing the RTO Timer
+    // RFC 3517, page 9:
+    //"
+    // 6   Managing the RTO Timer
     //
     // The standard TCP RTO estimator is defined in [RFC2988].  Due to the
     // fact that the SACK algorithm in this document can have an impact on
@@ -634,7 +744,8 @@ uint32_t Rfc6675Recovery::sendSegmentDuringLossRecoveryPhase(uint32_t seqNum)
     // specified in [RFC2988], and so may not always be an attractive
     // alternative.  However, in some cases it may prevent needless
     // retransmissions, go-back-N transmission and further reduction of the
-    // congestion window."
+    // congestion window.
+    //"
     conn->getTcpAlgorithmForUpdate()->ackSent();
 
     if (old_highRxt != state->highRxt) {
@@ -689,10 +800,12 @@ TcpHeader Rfc6675Recovery::addSacks(const Ptr<TcpHeader>& tcpHeader)
     if (start != end) {
         if (state->dsack_enabled && state->snd_dsack) { // SequenceNo < rcv_nxt
             // RFC 2883, page 3:
-            // "(3) The left edge of the D-SACK block specifies the first sequence
+            //"
+            // (3) The left edge of the D-SACK block specifies the first sequence
             // number of the duplicate contiguous sequence, and the right edge of
             // the D-SACK block specifies the sequence number immediately following
-            // the last sequence in the duplicate contiguous sequence."
+            // the last sequence in the duplicate contiguous sequence.
+            //"
             if (seqLess(start, state->rcv_nxt) && seqLess(state->rcv_nxt, end))
                 end = state->rcv_nxt;
 
@@ -711,7 +824,8 @@ TcpHeader Rfc6675Recovery::addSacks(const Ptr<TcpHeader>& tcpHeader)
         }
 
         // RFC 2883, page 3:
-        // "(3) The left edge of the D-SACK block specifies the first sequence
+        //"
+        // (3) The left edge of the D-SACK block specifies the first sequence
         // number of the duplicate contiguous sequence, and the right edge of
         // the D-SACK block specifies the sequence number immediately following
         // the last sequence in the duplicate contiguous sequence."
@@ -723,28 +837,33 @@ TcpHeader Rfc6675Recovery::addSacks(const Ptr<TcpHeader>& tcpHeader)
         // unless that segment advanced the Acknowledgment Number field in
         // the header.  This assures that the ACK with the SACK option
         // reflects the most recent change in the data receiver's buffer
-        // queue."
+        // queue.
+        //"
 
         // RFC 2018, page 4:
-        // "* The first SACK block (i.e., the one immediately following the
+        //"
+        // * The first SACK block (i.e., the one immediately following the
         // kind and length fields in the option) MUST specify the contiguous
-        // block of data containing the segment which triggered this ACK,"
+        // block of data containing the segment which triggered this ACK,
+        //"
 
         // RFC 2883, page 3:
-        // "(4) If the D-SACK block reports a duplicate contiguous sequence from
+        // (4) If the D-SACK block reports a duplicate contiguous sequence from
         // a (possibly larger) block of data in the receiver's data queue above
         // the cumulative acknowledgement, then the second SACK block in that
         // SACK option should specify that (possibly larger) block of data.
         //
         // (5) Following the SACK blocks described above for reporting duplicate
         // segments, additional SACK blocks can be used for reporting additional
-        // blocks of data, as specified in RFC 2018."
+        // blocks of data, as specified in RFC 2018.
+        //"
 
         // RFC 2018, page 4:
-        // "* The SACK option SHOULD be filled out by repeating the most
+        // * The SACK option SHOULD be filled out by repeating the most
         // recently reported SACK blocks (based on first SACK blocks in
         // previous SACK options) that are not subsets of a SACK block
-        // already included in the SACK option being constructed."
+        // already included in the SACK option being constructed.
+        //"
 
         it = state->sacks_array.begin();
         if (dsack_inserted)
@@ -845,15 +964,17 @@ TcpHeader Rfc6675Recovery::addSacks(const Ptr<TcpHeader>& tcpHeader)
     }
 
     // RFC 2883, page 3:
-    // "(1) A D-SACK block is only used to report a duplicate contiguous
+    //"
+    // (1) A D-SACK block is only used to report a duplicate contiguous
     // sequence of data received by the receiver in the most recent packet.
     //
     // (2) Each duplicate contiguous sequence of data received is reported
     // in at most one D-SACK block.  (I.e., the receiver sends two identical
     // D-SACK blocks in subsequent packets only if the receiver receives two
-    // duplicate segments.)//
+    // duplicate segments.)
     //
     // In case of d-sack: delete first sack (d-sack) and move old sacks by one to the left
+    //"
     if (dsack_inserted)
         state->sacks_array.pop_front(); // delete DSACK entry
 
