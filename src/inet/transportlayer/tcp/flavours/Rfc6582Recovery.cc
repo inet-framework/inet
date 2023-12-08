@@ -5,7 +5,9 @@
 //
 
 #include "inet/transportlayer/tcp/flavours/Rfc6582Recovery.h"
+
 #include "inet/transportlayer/tcp/flavours/Rfc5681Recovery.h"
+#include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 
 namespace inet {
 namespace tcp {
@@ -137,6 +139,8 @@ void Rfc6582Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
 void Rfc6582Recovery::receivedDuplicateAck()
 {
     //"
+    // 3.2.  Specification
+    // ...
     // 2) Three duplicate ACKs:
     //    When the third duplicate ACK is received, the TCP sender first
     //    checks the value of recover to see if the Cumulative
@@ -147,10 +151,25 @@ void Rfc6582Recovery::receivedDuplicateAck()
     //    does not enter fast retransmit and does not reset ssthresh.
     //"
     if (state->dupacks == state->dupthresh) {
-        if (state->snd_una - 1 > state->recover)
-            state->recover = (state->snd_max - 1);
+        conn->getRexmitQueueForUpdate()->markHeadLost(); // update for flight size calculation
+        if (!state->lossRecovery) {
+            if (seqGreater(state->snd_una - 1, state->recover)) {
+                state->recover = state->snd_max - 1;
 
-        state->lossRecovery = true; // TODO where does this come from? should it be somewhere else?
+                Rfc5681Recovery rfc5681Recovery(state, conn);
+                rfc5681Recovery.receivedDuplicateAck(); // TODO be more specific
+
+                // entering fast retransmit means starting the loss recovery phase
+                state->lossRecovery = true;
+                state->firstPartialACK = false;
+            }
+        }
+        else
+            conn->sendData(state->snd_cwnd); // TODO why?
+    }
+    else {
+        Rfc5681Recovery rfc5681Recovery(state, conn);
+        rfc5681Recovery.receivedDuplicateAck(); // TODO be more specific
     }
 }
 
