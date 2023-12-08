@@ -49,8 +49,9 @@ void Rfc6582Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
             // acknowledgment.  Exit the fast recovery procedure.
             //"
             state->ssthresh = std::max(conn->getBytesInFlight() / 2, 2 * state->snd_mss); // use equation (4)
+            conn->emit(ssthreshSignal, state->ssthresh);
             state->snd_cwnd = state->ssthresh; // use option (2)
-// TODO           conn->emit(ssthreshSignal, state->ssthresh);
+            conn->emit(cwndSignal, state->ssthresh);
         }
         else {
             //"
