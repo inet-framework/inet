@@ -905,19 +905,8 @@ TcpHeader Rfc6675Recovery::addSacks(const Ptr<TcpHeader>& tcpHeader)
         return *tcpHeader;
     }
 
-    uint optArrSize = tcpHeader->getHeaderOptionArraySize();
-
-    uint optArrSizeAligned = optArrSize;
-
-    while (B(used_options_len).get() % 4 != 2) {
+    while (B(used_options_len).get() % 4 != 2)
         used_options_len++;
-        optArrSizeAligned++;
-    }
-
-    while (optArrSize < optArrSizeAligned) {
-        tcpHeader->appendHeaderOption(new TcpOptionNop());
-        optArrSize++;
-    }
 
     ASSERT(B(used_options_len).get() % 4 == 2);
 
