@@ -84,10 +84,6 @@ void Rfc5681CongestionControl::receivedAckForUnackedData(uint32_t numBytesAcked)
     }
 }
 
-void Rfc5681CongestionControl::receivedDuplicateAck()
-{
-}
-
 } // namespace tcp
 } // namespace inet
 

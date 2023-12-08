@@ -84,7 +84,6 @@ void TcpNewReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
 void TcpNewReno::receivedDuplicateAck()
 {
     recovery->receivedDuplicateAck();
-    congestionControl->receivedDuplicateAck();
 }
 
 } // namespace tcp
