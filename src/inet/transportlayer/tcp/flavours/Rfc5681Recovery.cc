@@ -72,15 +72,15 @@ void Rfc5681Recovery::receivedDuplicateAck()
     //    new data unless the incoming duplicate acknowledgment contains
     //    new SACK information.
     //"
-    // TODO how is this implemented?
-
+    if (state->dupacks < state->dupthresh)
+        conn->sendData(state->snd_cwnd);
     //"
     // 2. When the third duplicate ACK is received, a TCP MUST set ssthresh
     //    to no more than the value given in equation (4).  When [RFC3042]
     //    is in use, additional data sent in limited transmit MUST NOT be
     //    included in this calculation.
     //"
-    if (state->dupacks == state->dupthresh) {
+    else if (state->dupacks == state->dupthresh) {
         //"
         // When a TCP sender detects segment loss using the retransmission timer
         // and the given segment has not yet been resent by way of the
