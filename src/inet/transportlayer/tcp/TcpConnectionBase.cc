@@ -80,18 +80,19 @@ std::string TcpStateVariables::detailedInfo() const
 
 std::string TcpConnection::validationInfo() const
 {
+    auto baseState = static_cast<const TcpAlgorithmBaseStateVariables *>(state);
     std::stringstream out;
     out << "lostOut: " << rexmitQueue->getLost() << ", "
         << "sackedOut: " << rexmitQueue->getSacked() << ", "
         << "retrans: " << rexmitQueue->getRetrans() << ", "
         << "bytesInFligh: " << getBytesInFlight() << ", "
         << "ssthresh: " << static_cast<const TcpTahoeRenoFamilyStateVariables *>(state)->ssthresh << ", "
-        << "cwnd: " << static_cast<const TcpAlgorithmBaseStateVariables *>(state)->snd_cwnd << ", "
+        << "cwnd: " << baseState->snd_cwnd << ", "
         << "snd_una: " << state->snd_una << ", "
         << "snd_max: " << state->snd_max << ", "
         << "snd_wnd: " << state->snd_wnd << ", "
         << "dup_ack: " << state->dupacks << ", "
-        << "recover: " << state->recoveryPoint << ", "
+        << "recover: " << (baseState->recover != 0 ? baseState->recover + 1 : state->recoveryPoint) << ", "
         << "recovery: " << (state->lossRecovery ? "true" : "false");
     return out.str();
 }
