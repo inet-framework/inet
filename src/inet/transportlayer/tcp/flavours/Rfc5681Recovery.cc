@@ -15,10 +15,6 @@
 namespace inet {
 namespace tcp {
 
-void Rfc5681Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
-{
-}
-
 bool Rfc5681Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength)
 {
     //"
@@ -49,6 +45,11 @@ bool Rfc5681Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloa
         trueWindow = tcpHeader->getWindow() << state->snd_wnd_scale;
     bool e = trueWindow == state->snd_wnd;
     return a && b && c && d && e;
+}
+
+void Rfc5681Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
+{
+    throw cRuntimeError("Not implemented");
 }
 
 void Rfc5681Recovery::receivedDuplicateAck()
