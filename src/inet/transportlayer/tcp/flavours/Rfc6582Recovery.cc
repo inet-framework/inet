@@ -48,10 +48,11 @@ void Rfc6582Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
             // number of data packets that can be sent in response to a single
             // acknowledgment.  Exit the fast recovery procedure.
             //"
-            state->ssthresh = std::max(conn->getBytesInFlight() / 2, 2 * state->snd_mss); // use equation (4)
-            conn->emit(ssthreshSignal, state->ssthresh);
             state->snd_cwnd = state->ssthresh; // use option (2)
             conn->emit(cwndSignal, state->ssthresh);
+            state->lossRecovery = false;
+            state->firstPartialACK = false;
+            EV_INFO << "Loss recovery terminated" << EV_ENDL;
         }
         else {
             //"
@@ -64,17 +65,30 @@ void Rfc6582Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
             // at least one SMSS of new data, then add back SMSS bytes to the
             // congestion window.  This artificially inflates the congestion
             // window in order to reflect the additional segment that has left
-            // the network.  Send a new segment if permitted by the new value of
+            // the network.
+            //"
+            conn->retransmitOneSegment(false);
+
+            //"
+            // Send a new segment if permitted by the new value of
             // cwnd.  This "partial window deflation" attempts to ensure that,
             // when fast recovery eventually ends, approximately ssthresh amount
             // of data will be outstanding in the network.  Do not exit the fast
             // recovery procedure (i.e., if any duplicate ACKs subsequently
             // arrive, execute step 4 of Section 3.2 of [RFC5681]).
-            //
+            //"
+            conn->sendData(state->snd_cwnd);
+
+            //"
             // For the first partial ACK that arrives during fast recovery, also
             // reset the retransmit timer.  Timer management is discussed in
             // more detail in Section 4.
             //"
+            if (!state->firstPartialACK) {
+                state->firstPartialACK = true;
+                EV_DETAIL << "First partial ACK arrived during recovery, restarting REXMIT timer.\n";
+                conn->getTcpAlgorithmForUpdate()->restartRexmitTimer();
+            }
         }
         //"
         // 4) Retransmit timeouts:
