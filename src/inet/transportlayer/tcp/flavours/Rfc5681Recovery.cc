@@ -91,7 +91,9 @@ void Rfc5681Recovery::receivedDuplicateAck()
         // where, as discussed above, FlightSize is the amount of outstanding
         // data in the network.
         //"
-        state->ssthresh = std::max(conn->getBytesInFlight() / 2, 2 * state->snd_mss);
+//        uint32_t flightSize = state->snd_max - state->snd_una; // literal RFC version
+        uint32_t flightSize = conn->getBytesInFlight() + state->snd_mss; // Ns-3 validation version: the +1 MSS accounts for the retransmitOneSegment call below
+        state->ssthresh = std::max(flightSize / 2, 2 * state->snd_mss);
         conn->emit(ssthreshSignal, state->ssthresh);
 
         //"
@@ -101,7 +103,8 @@ void Rfc5681Recovery::receivedDuplicateAck()
         //    left the network and which the receiver has buffered.
         //"
         conn->retransmitOneSegment(false);
-        state->snd_cwnd = state->ssthresh + 3 * state->snd_mss;
+//        state->snd_cwnd = state->ssthresh + 3 * state->snd_mss; // literal RFC version
+        state->snd_cwnd = state->ssthresh; // Ns-3 validation version: getBytesInFlight already accounts for the 3 segments in sackedOut
         conn->emit(cwndSignal, state->snd_cwnd);
     }
     //"
