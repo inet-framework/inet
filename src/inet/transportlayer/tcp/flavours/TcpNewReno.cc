@@ -9,18 +9,18 @@
 namespace inet {
 namespace tcp {
 
-Register_Class(TcpNewReno2);
+Register_Class(TcpNewReno);
 
 // 1) Initialization of TCP protocol control block:
 //    When the TCP protocol control block is initialized, recover is
 //    set to the initial send sequence number.
 
-TcpNewReno2::TcpNewReno2() : TcpTahoeRenoFamily(),
-    state((TcpNewReno2StateVariables *&)TcpAlgorithm::state)
+TcpNewReno::TcpNewReno() : TcpTahoeRenoFamily(),
+    state((TcpNewRenoStateVariables *&)TcpAlgorithm::state)
 {
 }
 
-void TcpNewReno2::processRexmitTimer(TcpEventCode& event)
+void TcpNewReno::processRexmitTimer(TcpEventCode& event)
 {
     TcpTahoeRenoFamily::processRexmitTimer(event);
 
@@ -72,7 +72,7 @@ void TcpNewReno2::processRexmitTimer(TcpEventCode& event)
     conn->retransmitOneSegment(true);
 }
 
-void TcpNewReno2::receivedAckForUnackedData(uint32_t firstSeqAcked)
+void TcpNewReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
     TcpTahoeRenoFamily::receivedAckForUnackedData(firstSeqAcked);
     uint32_t numBytesAcked = state->snd_una - firstSeqAcked;
@@ -81,7 +81,7 @@ void TcpNewReno2::receivedAckForUnackedData(uint32_t firstSeqAcked)
     sendData(false);
 }
 
-void TcpNewReno2::receivedDuplicateAck()
+void TcpNewReno::receivedDuplicateAck()
 {
     recovery->receivedDuplicateAck();
     congestionControl->receivedDuplicateAck();

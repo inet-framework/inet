@@ -4,33 +4,33 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#ifndef __INET_TCPNEWRENO2_H
-#define __INET_TCPNEWRENO2_H
+#ifndef __INET_TCPNEWRENO_H
+#define __INET_TCPNEWRENO_H
 
 #include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
 
 namespace inet {
 namespace tcp {
 
-typedef TcpTahoeRenoFamilyStateVariables TcpNewReno2StateVariables;
+typedef TcpTahoeRenoFamilyStateVariables TcpNewRenoStateVariables;
 
 /**
  * Implements RFC 6582: The NewReno Modification to TCP's Fast Recovery Algorithm.
  */
-class INET_API TcpNewReno2 : public TcpTahoeRenoFamily
+class INET_API TcpNewReno : public TcpTahoeRenoFamily
 {
   protected:
-    TcpNewReno2StateVariables *& state;
+    TcpNewRenoStateVariables *& state;
 
     virtual TcpStateVariables *createStateVariables() override
     {
-        return new TcpNewReno2StateVariables();
+        return new TcpNewRenoStateVariables();
     }
 
     virtual void processRexmitTimer(TcpEventCode& event) override;
 
   public:
-    TcpNewReno2();
+    TcpNewReno();
 
     virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
 
