@@ -18,15 +18,20 @@ bool Rfc6582Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloa
 
 void Rfc6582Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
 {
+    //"
     // 3.2. Specification
+    //"
     if (state->lossRecovery) {
+        //"
         // 3) Response to newly acknowledged data:
         //    Step 6 of [RFC5681] specifies the response to the next ACK that
         //    acknowledges previously unacknowledged data.  When an ACK arrives
         //    that acknowledges new data, this ACK could be the acknowledgment
         //    elicited by the initial retransmission from fast retransmit, or
         //    elicited by a later retransmission.  There are two cases:
+        //"
         if (seqGE(state->snd_una - 1, state->recover)) {
+            //"
             // Full acknowledgments:
             // If this ACK acknowledges all of the data up to and including
             // recover, then the ACK acknowledges all the intermediate segments
@@ -42,11 +47,13 @@ void Rfc6582Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
             // new congestion window allows.  A simple mechanism is to limit the
             // number of data packets that can be sent in response to a single
             // acknowledgment.  Exit the fast recovery procedure.
+            //"
             state->ssthresh = std::max(conn->getBytesInFlight() / 2, 2 * state->snd_mss); // use equation (4)
             state->snd_cwnd = state->ssthresh; // use option (2)
 // TODO           conn->emit(ssthreshSignal, state->ssthresh);
         }
         else {
+            //"
             // Partial acknowledgments:
             // If this ACK does *not* acknowledge all of the data up to and
             // including recover, then this is a partial ACK.  In this case,
@@ -66,7 +73,9 @@ void Rfc6582Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
             // For the first partial ACK that arrives during fast recovery, also
             // reset the retransmit timer.  Timer management is discussed in
             // more detail in Section 4.
+            //"
         }
+        //"
         // 4) Retransmit timeouts:
         //    After a retransmit timeout, record the highest sequence number
         //    transmitted in the variable recover, and exit the fast recovery
@@ -106,11 +115,13 @@ void Rfc6582Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
         // the issue of recovery from multiple dropped packets from a single
         // window of data is of particular importance, the best alternative
         // would be to use the SACK option.
+        //"
     }
 }
 
 void Rfc6582Recovery::receivedDuplicateAck()
 {
+    //"
     // 2) Three duplicate ACKs:
     //    When the third duplicate ACK is received, the TCP sender first
     //    checks the value of recover to see if the Cumulative
@@ -119,6 +130,7 @@ void Rfc6582Recovery::receivedDuplicateAck()
     //    number transmitted by the TCP so far.  The TCP then enters fast
     //    retransmit (step 2 of Section 3.2 of [RFC5681]).  If not, the TCP
     //    does not enter fast retransmit and does not reset ssthresh.
+    //"
     if (state->dupacks == state->dupthresh) {
         if (state->snd_una - 1 > state->recover)
             state->recover = (state->snd_max - 1);

@@ -18,8 +18,11 @@ namespace tcp {
 void Rfc5681CongestionControl::receivedAckForUnackedData(uint32_t numBytesAcked)
 {
     if (!state->lossRecovery) {
+        //"
         // 3.1. Slow Start and Congestion Avoidance
+        //"
         if (state->snd_cwnd < state->ssthresh) {
+            //"
             // During slow start, a TCP increments cwnd by at most SMSS bytes for
             // each ACK received that cumulatively acknowledges new data.  Slow
             // start ends when cwnd exceeds ssthresh (or, optionally, when it
@@ -39,10 +42,12 @@ void Rfc5681CongestionControl::receivedAckForUnackedData(uint32_t numBytesAcked)
             // TCP data segment, each acknowledging only a portion of its data.  A
             // TCP that increments cwnd by SMSS for each such ACK will
             // inappropriately inflate the amount of data injected into the network.
+            //"
             state->snd_cwnd += std::min(numBytesAcked, state->snd_mss);
             conn->emit(cwndSignal, state->snd_cwnd);
         }
         else {
+            //"
             // The RECOMMENDED way to increase cwnd during congestion avoidance is
             // to count the number of bytes that have been acknowledged by ACKs for
             // new data.  (A drawback of this implementation is that it requires
@@ -70,6 +75,7 @@ void Rfc5681CongestionControl::receivedAckForUnackedData(uint32_t numBytesAcked)
             // increase cwnd when the congestion window is larger than SMSS*SMSS.
             // If the above formula yields 0, the result SHOULD be rounded up to 1
             // byte.
+            //"
             uint32_t i = state->snd_mss * state->snd_mss / state->snd_cwnd;
             if (i == 0) i = 1;
             state->snd_cwnd += i;
