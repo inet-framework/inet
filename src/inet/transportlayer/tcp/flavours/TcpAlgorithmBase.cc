@@ -7,9 +7,6 @@
 
 #include "inet/transportlayer/tcp/flavours/TcpAlgorithmBase.h"
 
-#include "inet/transportlayer/tcp/flavours/Rfc5681CongestionControl.h"
-#include "inet/transportlayer/tcp/flavours/Rfc6582Recovery.h"
-#include "inet/transportlayer/tcp/flavours/Rfc6675Recovery.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 
@@ -52,8 +49,6 @@ TcpAlgorithmBase::TcpAlgorithmBase() : TcpAlgorithm(),
 TcpAlgorithmBase::~TcpAlgorithmBase()
 {
     // Note: don't delete "state" here, it'll be deleted from TcpConnection
-    delete congestionControl;
-    delete recovery;
     // cancel and delete timers
     if (rexmitTimer)
         delete cancelEvent(rexmitTimer);
@@ -139,13 +134,6 @@ void TcpAlgorithmBase::established(bool active)
             sendData(false);
         }
     }
-
-    if (state->sack_enabled)
-        recovery = new Rfc6675Recovery(state, conn);
-    else
-        recovery = new Rfc6582Recovery(state, conn);
-
-    congestionControl = new Rfc5681CongestionControl(state, conn);
 }
 
 void TcpAlgorithmBase::connectionClosed()
@@ -438,25 +426,13 @@ void TcpAlgorithmBase::receiveSeqChanged()
 
 void TcpAlgorithmBase::receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength)
 {
-    if (recovery->isDuplicateAck(tcpHeader, payloadLength)) {
-        if (!state->lossRecovery) {
-            state->dupacks++;
-            conn->emit(dupAcksSignal, state->dupacks);
-        }
-        receivedDuplicateAck();
-    }
-    else {
-        // if doesn't qualify as duplicate ACK, just ignore it.
-        if (payloadLength == 0) {
-            if (state->snd_una != tcpHeader->getAckNo())
-                EV_DETAIL << "Old ACK: ackNo < snd_una\n";
-            else if (state->snd_una == state->snd_max)
-                EV_DETAIL << "ACK looks duplicate but we have currently no unacked data (snd_una == snd_max)\n";
-        }
-        // reset counter
-        state->dupacks = 0;
-        conn->emit(dupAcksSignal, state->dupacks);
-    }
+    //
+    // Leave congestion window management and possible sending data to
+    // subclasses (e.g. TcpTahoe, TcpReno).
+    //
+    // That is, subclasses will redefine this method, call us, then perform
+    // window adjustments and send data (if there's room in the window).
+    //
 }
 
 void TcpAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)

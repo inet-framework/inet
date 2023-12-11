@@ -42,8 +42,6 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
 {
   protected:
     TcpAlgorithmBaseStateVariables *& state; // alias to TcpAlgorithm's 'state'
-    ITcpCongestionControl *congestionControl = nullptr;
-    ITcpRecovery *recovery = nullptr;
 
     cMessage *rexmitTimer;
     cMessage *persistTimer;
@@ -135,10 +133,6 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     virtual bool shouldMarkAck() override;
 
     virtual void processEcnInEstablished() override;
-
-    virtual ITcpCongestionControl *getCongestionControl() override { return congestionControl; }
-
-    virtual ITcpRecovery *getRecovery() override { return recovery; }
 };
 
 } // namespace tcp
