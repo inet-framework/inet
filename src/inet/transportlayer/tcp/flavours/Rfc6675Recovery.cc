@@ -141,22 +141,21 @@ void Rfc6675Recovery::stepC()
 
 void Rfc6675Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
 {
+    ASSERT(state->lossRecovery);
     //"
     // Once a TCP is in the loss recovery phase, the following procedure
     // MUST be used for each arriving ACK:
     //"
-    if (state->lossRecovery) {
-        stepA();
-        stepB();
-        stepC();
-        //"
-        // Note that steps (A) and (C) can potentially send a burst of
-        // back-to-back segments into the network if the incoming cumulative
-        // acknowledgment is for more than SMSS octets of data, or if incoming
-        // SACK blocks indicate that more than SMSS octets of data have been
-        // lost in the second half of the window.
-        //"
-    }
+    stepA();
+    stepB();
+    stepC();
+    //"
+    // Note that steps (A) and (C) can potentially send a burst of
+    // back-to-back segments into the network if the incoming cumulative
+    // acknowledgment is for more than SMSS octets of data, or if incoming
+    // SACK blocks indicate that more than SMSS octets of data have been
+    // lost in the second half of the window.
+    //"
 }
 
 void Rfc6675Recovery::step4()
