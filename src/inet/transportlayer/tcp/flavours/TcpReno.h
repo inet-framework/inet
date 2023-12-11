@@ -8,7 +8,7 @@
 #ifndef __INET_TCPRENO_H
 #define __INET_TCPRENO_H
 
-#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBase.h"
 
 namespace inet {
 namespace tcp {
@@ -16,12 +16,12 @@ namespace tcp {
 /**
  * State variables for TcpReno.
  */
-typedef TcpTahoeRenoFamilyStateVariables TcpRenoStateVariables;
+typedef TcpClassicAlgorithmBaseStateVariables TcpRenoStateVariables;
 
 /**
  * Implements TCP Reno.
  */
-class INET_API TcpReno : public TcpTahoeRenoFamily
+class INET_API TcpReno : public TcpClassicAlgorithmBase
 {
   protected:
     TcpRenoStateVariables *& state; // alias to TCLAlgorithm's 'state'

@@ -9,7 +9,7 @@
 
 #include "inet/transportlayer/tcp/ITcpRecovery.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
-#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBase.h"
 
 namespace inet {
 namespace tcp {
@@ -20,7 +20,7 @@ namespace tcp {
 class INET_API Rfc6675Recovery : public ITcpRecovery
 {
   protected:
-    TcpTahoeRenoFamilyStateVariables *state = nullptr;
+    TcpClassicAlgorithmBaseStateVariables *state = nullptr;
     TcpConnection *conn = nullptr;
 
     virtual void stepA();
@@ -30,7 +30,7 @@ class INET_API Rfc6675Recovery : public ITcpRecovery
     virtual void step4();
 
   public:
-    Rfc6675Recovery(TcpStateVariables *state, TcpConnection *conn) : state(check_and_cast<TcpTahoeRenoFamilyStateVariables *>(state)), conn(conn) { }
+    Rfc6675Recovery(TcpStateVariables *state, TcpConnection *conn) : state(check_and_cast<TcpClassicAlgorithmBaseStateVariables *>(state)), conn(conn) { }
 
     virtual bool isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
 
