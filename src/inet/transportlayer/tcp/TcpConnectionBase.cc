@@ -17,7 +17,7 @@
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
-#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamilyState_m.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBaseState_m.h"
 
 namespace inet {
 namespace tcp {
@@ -86,7 +86,7 @@ std::string TcpConnection::validationInfo() const
         << "sackedOut: " << rexmitQueue->getSacked() << ", "
         << "retrans: " << rexmitQueue->getRetrans() << ", "
         << "bytesInFligh: " << getBytesInFlight() << ", "
-        << "ssthresh: " << static_cast<const TcpTahoeRenoFamilyStateVariables *>(state)->ssthresh << ", "
+        << "ssthresh: " << static_cast<const TcpClassicAlgorithmBaseStateVariables *>(state)->ssthresh << ", "
         << "cwnd: " << baseState->snd_cwnd << ", "
         << "snd_una: " << state->snd_una << ", "
         << "snd_max: " << state->snd_max << ", "

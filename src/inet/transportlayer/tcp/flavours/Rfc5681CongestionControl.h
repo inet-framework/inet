@@ -7,7 +7,7 @@
 #ifndef __INET_RFC5681_H
 #define __INET_RFC5681_H
 
-#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBase.h"
 #include "inet/transportlayer/tcp/ITcpCongestionControl.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 
@@ -20,7 +20,7 @@ namespace tcp {
 class INET_API Rfc5681CongestionControl : public ITcpCongestionControl
 {
   protected:
-    TcpTahoeRenoFamilyStateVariables *state = nullptr;
+    TcpClassicAlgorithmBaseStateVariables *state = nullptr;
     TcpConnection *conn = nullptr;
 
   protected:
@@ -28,7 +28,7 @@ class INET_API Rfc5681CongestionControl : public ITcpCongestionControl
     virtual void congestionAvoidance(uint32_t numBytesAcked);
 
   public:
-    Rfc5681CongestionControl(TcpStateVariables *state, TcpConnection *conn) : state(check_and_cast<TcpTahoeRenoFamilyStateVariables *>(state)), conn(conn) { }
+    Rfc5681CongestionControl(TcpStateVariables *state, TcpConnection *conn) : state(check_and_cast<TcpClassicAlgorithmBaseStateVariables *>(state)), conn(conn) { }
 
     virtual void receivedAckForUnackedData(uint32_t numBytesAcked) override;
 };

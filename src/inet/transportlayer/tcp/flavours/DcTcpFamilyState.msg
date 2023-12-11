@@ -5,14 +5,14 @@
 //
 
 import inet.common.INETDefs;
-import inet.transportlayer.tcp.flavours.TcpTahoeRenoFamilyState;
+import inet.transportlayer.tcp.flavours.TcpClassicAlgorithmBaseState;
 
 namespace inet::tcp;
 
 ///
 /// State variables for DcTcpFamily.
 ///
-struct DcTcpFamilyStateVariables extends TcpTahoeRenoFamilyStateVariables
+struct DcTcpFamilyStateVariables extends TcpClassicAlgorithmBaseStateVariables
 {
     @descriptor(readonly);
 

@@ -3537,8 +3537,8 @@
     <filename>inet-TcpStatusInfo.html</filename>
   </compound>
   <compound kind="class">
-    <name>TcpTahoeRenoFamilyStateVariables</name>
-    <filename>inet-tcp-TcpTahoeRenoFamilyStateVariables.html</filename>
+    <name>TcpClassicAlgorithmBaseStateVariables</name>
+    <filename>inet-tcp-TcpClassicAlgorithmBaseStateVariables.html</filename>
   </compound>
   <compound kind="class">
     <name>TcpVegasStateVariables</name>
