@@ -260,6 +260,7 @@ latex_elements = {
 latex_documents = [
     ('users-guide/index', 'users-guide.tex', "INET Framework User's Guide", '', 'manual', False),
     ('developers-guide/index', 'developers-guide.tex', "INET Framework Developer's Guide", '', 'manual', False),
+    ('tutorials/index', 'tutorials.tex', "tutorials", '', 'article', False),
 ]
 
 
