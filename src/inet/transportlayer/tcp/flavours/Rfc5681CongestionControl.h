@@ -23,6 +23,10 @@ class INET_API Rfc5681CongestionControl : public ITcpCongestionControl
     TcpTahoeRenoFamilyStateVariables *state = nullptr;
     TcpConnection *conn = nullptr;
 
+  protected:
+    virtual void slowStart(uint32_t numBytesAcked);
+    virtual void congestionAvoidance(uint32_t numBytesAcked);
+
   public:
     Rfc5681CongestionControl(TcpStateVariables *state, TcpConnection *conn) : state(check_and_cast<TcpTahoeRenoFamilyStateVariables *>(state)), conn(conn) { }
 
