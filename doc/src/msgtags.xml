@@ -3301,8 +3301,8 @@
     <filename>src-inet-transportlayer-contract-tcp-TcpStatusInfo.html</filename>
   </compound>
   <compound kind="class">
-    <name>TcpTahoeRenoFamilyStateVariables</name>
-    <filename>src-inet-transportlayer-tcp-flavours-TcpTahoeRenoFamilyStateVariables.html</filename>
+    <name>TcpClassicAlgorithmBaseStateVariables</name>
+    <filename>src-inet-transportlayer-tcp-flavours-TcpClassicAlgorithmBaseStateVariables.html</filename>
   </compound>
   <compound kind="class">
     <name>TcpVegasStateVariables</name>
