@@ -76,7 +76,7 @@ because only host R1 is transmitting.
 
 
 
-   <!--internal video recording, playback speed 0.72 -->
+.. <!--internal video recording, playback speed 0.72 -->
 
 The following sequence chart displays that after receiving the UDPData-2
 packet, host R1 transmits it after the backoff period timer has expired.

@@ -85,7 +85,7 @@ This is shown in the animation below:
 
 
 
-   <!--internal video recording, playback speed 0.72, from #1418-->
+.. <!--internal video recording, playback speed 0.72, from #1418-->
 
 As we expected, the number of packets received by host B is low. The
 following sequence chart illustrates packet traffic between hosts A's,

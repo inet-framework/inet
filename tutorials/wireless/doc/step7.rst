@@ -60,7 +60,7 @@ corresponding ACK from host B.
    :width: 655
    :height: 575
 
-   <!--internal video recording, playback speed 0.65, from #767-->
+.. <!--internal video recording, playback speed 0.65, from #767-->
 
 The UDPData + ACK sequences can be seen in the sequence chart below:
 

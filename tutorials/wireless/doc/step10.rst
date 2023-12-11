@@ -74,7 +74,7 @@ packets to host B. This can be seen in the animation below.
 
 
 
-   <!--internal video recording, animation time = playback speed = 1, fadeOutMode animationTime, 1s -> 26 sec video, blue arrows only
+.. <!--internal video recording, animation time = playback speed = 1, fadeOutMode animationTime, 1s -> 26 sec video, blue arrows only
    if playback speed = 2 -> 13 sec video, blue and red arrows
    not sure which one is better
    -->
