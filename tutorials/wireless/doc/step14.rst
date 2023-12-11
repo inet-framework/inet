@@ -46,7 +46,7 @@ through host R2, which is again just two hops.
 
 
 
-   <!--internal video recording, playback speed animation speed 1-->
+.. <!--internal video recording, playback speed animation speed 1-->
 
 **Number of packets received by host B: 1045**
 

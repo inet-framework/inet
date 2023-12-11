@@ -109,7 +109,7 @@ because it is not addressed to them.
 
 .. video:: media/step4-4-1.mp4
 
-   <!--internal video recording, playback speed 0.72, fadeOutMode animationTime, fadeOutTime 1.5s, normal run until event #184-->
+.. <!--internal video recording, playback speed 0.72, fadeOutMode animationTime, fadeOutTime 1.5s, normal run until event #184-->
    <!--crop green background: top bottom left right 8 5 8 5 width 655-->
 
 Note that the number of packets received by host B has dropped to about

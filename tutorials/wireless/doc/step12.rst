@@ -98,7 +98,7 @@ fail, as in the case of :ned:`GenericUnitDiskRadio`.
 
 
 
-   <!--internal video recording, playback speed animation speed 1-->
+.. <!--internal video recording, playback speed animation speed 1-->
 
 In host A, the MAC receives the packet UDPData-408 from the radio. The
 MAC drops the packet because of bit errors; this can be seen in the
