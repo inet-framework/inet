@@ -20,6 +20,11 @@ void Rfc5681CongestionControl::receivedAckForUnackedData(uint32_t numBytesAcked)
     ASSERT(!state->lossRecovery);
     //"
     // 3.1. Slow Start and Congestion Avoidance
+    // ...
+    // The slow start algorithm is used when cwnd < ssthresh, while the
+    // congestion avoidance algorithm is used when cwnd > ssthresh.  When
+    // cwnd and ssthresh are equal, the sender may use either slow start or
+    // congestion avoidance.
     //"
     if (state->snd_cwnd < state->ssthresh) {
         //"
