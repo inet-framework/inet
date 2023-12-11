@@ -10,8 +10,8 @@
 
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/tcp/ITcpCongestionControl.h"
-#include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp/ITcpRecovery.h"
+#include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp/TcpSimsignals.h"
 
 namespace inet {
@@ -54,10 +54,6 @@ class INET_API TcpAlgorithm : public cObject
      * Virtual dtor.
      */
     virtual ~TcpAlgorithm() {}
-
-    virtual ITcpCongestionControl *getCongestionControl() = 0;
-
-    virtual ITcpRecovery *getRecovery() = 0;
 
     /**
      * Assign this object to a TcpConnection. Its sendQueue and receiveQueue
