@@ -123,7 +123,7 @@ The following video shows ``area1host1`` pinging ``area2host1``:
 .. video:: media/Step12_2_cropped.mp4
    :width: 100%
 
-   <!--internal video recording playback speed 2 animation speed none zoom 1.0 from sendPing(1) to #1734 crop 140 380 150 440-->
+   <!--internal video recording playback speed 2 animation speed none zoom 1.0 from sendPing(1) to event 1734 crop 140 380 150 440-->
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`ConfiguratorE.ned <../ConfiguratorE.ned>`

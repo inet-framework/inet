@@ -106,7 +106,7 @@ The ping exchanges highlight the modified routes on the following video:
 .. video:: media/Step11B_2_cropped.mp4
    :width: 100%
 
-   <!--from #295 zoom 0.77 playback speed 2.5 animation speed none crop 30 70 150 80-->
+   <!--from event 295 zoom 0.77 playback speed 2.5 animation speed none crop 30 70 150 80-->
 
 The packets travel only counter-clockwise in the triangle of the three
 routers.

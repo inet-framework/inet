@@ -110,7 +110,7 @@ of the contention modules of the transmitting hosts.
   :width: 90%
   :align: center
 
-   <!--internal video recording, animation speed none, playback speed 0.59, zoom 1.69, display message name and message class off, run until #141-->
+   <!--internal video recording, animation speed none, playback speed 0.59, zoom 1.69, display message name and message class off, run until event 141-->
 
 At first the two source nodes, ``host1`` and ``host3``, start
 transmitting at the same time. The transmissions collide, and neither
@@ -145,7 +145,7 @@ The video below shows the hosts communicating:
   :width: 90%
   :align: center
 
-   <!--internal video recoding, animation speed none, playback speed 0.59, zoom 1.69, display message name and message class off, run until #159-->
+   <!--internal video recoding, animation speed none, playback speed 0.59, zoom 1.69, display message name and message class off, run until event 159-->
 
 Since host-pairs communicate on independent channels, there is no
 interference. ``host1`` and ``host3`` can transmit simultaneously, and
@@ -188,7 +188,7 @@ host-pairs communicating:
   :width: 90%
   :align: center
 
-   <!--internal video recording, animation speed none, playback speed 0.59, zoom 1.69, display message name and message class off, run until #129-->
+   <!--internal video recording, animation speed none, playback speed 0.59, zoom 1.69, display message name and message class off, run until event 129-->
 
 The host pairs communicate without interference.
 Notice that there are only message sends between hosts using the same radio medium module.
@@ -225,7 +225,7 @@ The following video shows the host pairs communicating:
    :width: 90%
    :align: center
 
-.. animation speed none, playback speed 0.47, zoom 1.69, run until #84
+.. animation speed none, playback speed 0.47, zoom 1.69, run until event 84
 
 Even though they are on different channels, the transmissions interfere.
 In the beginning, ``host1`` and ``host3`` transmit simultaneously,

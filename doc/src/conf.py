@@ -48,6 +48,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.githubpages',
     'sphinx.ext.graphviz',
+    'sphinx.ext.imgconverter',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.viewcode',
@@ -79,7 +80,7 @@ master_doc = 'index'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -116,6 +117,7 @@ autodoc_mock_imports = [
 #    'inet.project',
 #    'inet.scave'
 ]
+
 # To exclude a class, function, method or attribute, use autodoc-skip-member. (Note this can also
 # be used in reverse, ie. to re-include a particular member that has been excluded.)
 # 'Private' and 'special' members (_ and __) are excluded using the Jinja2 templates; from the main
@@ -258,10 +260,10 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    ('users-guide/index', 'users-guide.tex', "INET Framework User's Guide", '', 'manual', False),
-    ('developers-guide/index', 'developers-guide.tex', "INET Framework Developer's Guide", '', 'manual', False),
-    ('tutorials/index', 'tutorials.tex', "tutorials", '', 'article', False),
-    ('showcases/index', 'showcases.tex', "showcases", '', 'article', False),
+    ('users-guide/index', 'inet-users-guide.tex', "INET Framework User's Guide", '', 'manual', False),
+    ('developers-guide/index', 'inet-developers-guide.tex', "INET Framework Developer's Guide", '', 'manual', False),
+    ('showcases/index', 'inet-showcases.tex', "INET Framework Showcases", '', 'manual', False),
+    ('tutorials/index', 'inet-tutorials.tex', "INET Framework Tutorials", '', 'manual', False),
 ]
 
 

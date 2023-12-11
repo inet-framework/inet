@@ -31,7 +31,7 @@ create one, and because of the vast possibilities. However, the OMNeT++
 IDE provides several topology generator wizards for advanced scenarios.
 
 As INET is an OMNeT++-based framework, users mainly use NED to describe
-the model topology, and ini files to provide configuration. [1]_
+the model topology, and ini files to provide configuration.
 
 .. _ug:sec:networks:built-in-network-nodes-and-other-top-level-modules:
 
@@ -314,6 +314,3 @@ packet forwarding as simply as flipping a switch.
    :end-before: !End
    :name: Forwarding example
 
-.. [1]
-   Some components require additional configuration to be provided as
-   separate files, e.g. in XML.
