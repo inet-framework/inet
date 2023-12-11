@@ -5,21 +5,21 @@
 //
 
 
-#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBase.h"
 
 #include "inet/transportlayer/tcp/Tcp.h"
 
 namespace inet {
 namespace tcp {
 
-void TcpTahoeRenoFamilyStateVariables::setSendQueueLimit(uint32_t newLimit) {
+void TcpClassicAlgorithmBaseStateVariables::setSendQueueLimit(uint32_t newLimit) {
     // The initial value of ssthresh SHOULD be set arbitrarily high (e.g.,
     // to the size of the largest possible advertised window) -> defined by sendQueueLimit
     sendQueueLimit = newLimit;
     ssthresh = sendQueueLimit;
 }
 
-std::string TcpTahoeRenoFamilyStateVariables::str() const
+std::string TcpClassicAlgorithmBaseStateVariables::str() const
 {
     std::stringstream out;
     out << TcpAlgorithmBaseStateVariables::str();
@@ -27,7 +27,7 @@ std::string TcpTahoeRenoFamilyStateVariables::str() const
     return out.str();
 }
 
-std::string TcpTahoeRenoFamilyStateVariables::detailedInfo() const
+std::string TcpClassicAlgorithmBaseStateVariables::detailedInfo() const
 {
     std::stringstream out;
     out << TcpAlgorithmBaseStateVariables::detailedInfo();
@@ -37,24 +37,24 @@ std::string TcpTahoeRenoFamilyStateVariables::detailedInfo() const
 
 // ---
 
-TcpTahoeRenoFamily::TcpTahoeRenoFamily() : TcpAlgorithmBase(),
-    state((TcpTahoeRenoFamilyStateVariables *&)TcpAlgorithm::state)
+TcpClassicAlgorithmBase::TcpClassicAlgorithmBase() : TcpAlgorithmBase(),
+    state((TcpClassicAlgorithmBaseStateVariables *&)TcpAlgorithm::state)
 {
 }
 
-TcpTahoeRenoFamily::~TcpTahoeRenoFamily()
+TcpClassicAlgorithmBase::~TcpClassicAlgorithmBase()
 {
     delete congestionControl;
     delete recovery;
 }
 
-void TcpTahoeRenoFamily::initialize()
+void TcpClassicAlgorithmBase::initialize()
 {
     TcpAlgorithmBase::initialize();
     state->ssthresh = conn->getTcpMain()->par("initialSsthresh");
 }
 
-void TcpTahoeRenoFamily::established(bool active)
+void TcpClassicAlgorithmBase::established(bool active)
 {
     TcpAlgorithmBase::established(active);
 
@@ -62,7 +62,7 @@ void TcpTahoeRenoFamily::established(bool active)
     congestionControl = createCongestionControl();
 }
 
-void TcpTahoeRenoFamily::processRexmitTimer(TcpEventCode& event)
+void TcpClassicAlgorithmBase::processRexmitTimer(TcpEventCode& event)
 {
     TcpAlgorithmBase::processRexmitTimer(event);
 
@@ -114,7 +114,7 @@ void TcpTahoeRenoFamily::processRexmitTimer(TcpEventCode& event)
     conn->retransmitOneSegment(true);
 }
 
-void TcpTahoeRenoFamily::receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength)
+void TcpClassicAlgorithmBase::receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength)
 {
     if (recovery->isDuplicateAck(tcpHeader, payloadLength)) {
         if (!state->lossRecovery) {
@@ -137,7 +137,7 @@ void TcpTahoeRenoFamily::receivedAckForAlreadyAckedData(const TcpHeader *tcpHead
     }
 }
 
-void TcpTahoeRenoFamily::receivedAckForUnackedData(uint32_t firstSeqAcked)
+void TcpClassicAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
     TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
     uint32_t numBytesAcked = state->snd_una - firstSeqAcked;
@@ -148,7 +148,7 @@ void TcpTahoeRenoFamily::receivedAckForUnackedData(uint32_t firstSeqAcked)
     sendData(false);
 }
 
-void TcpTahoeRenoFamily::receivedDuplicateAck()
+void TcpClassicAlgorithmBase::receivedDuplicateAck()
 {
     recovery->receivedDuplicateAck();
 }
