@@ -5,11 +5,11 @@
 //
 
 
-#ifndef __INET_TCPTAHOERENOFAMILY_H
-#define __INET_TCPTAHOERENOFAMILY_H
+#ifndef __INET_TCPCLASSICALGORITHMBASE_H
+#define __INET_TCPCLASSICALGORITHMBASE_H
 
 #include "inet/transportlayer/tcp/flavours/TcpAlgorithmBase.h"
-#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamilyState_m.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBaseState_m.h"
 
 namespace inet {
 namespace tcp {
@@ -18,10 +18,10 @@ namespace tcp {
  * Provides utility functions to implement TcpTahoe, TcpReno and TcpNewReno.
  * (TcpVegas should inherit from TcpAlgorithmBase instead of this one.)
  */
-class INET_API TcpTahoeRenoFamily : public TcpAlgorithmBase
+class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
 {
   protected:
-    TcpTahoeRenoFamilyStateVariables *& state; // alias to TcpAlgorithm's 'state'
+    TcpClassicAlgorithmBaseStateVariables *& state; // alias to TcpAlgorithm's 'state'
 
     ITcpCongestionControl *congestionControl = nullptr;
     ITcpRecovery *recovery = nullptr;
@@ -32,7 +32,7 @@ class INET_API TcpTahoeRenoFamily : public TcpAlgorithmBase
 
     virtual TcpStateVariables *createStateVariables() override
     {
-        return new TcpTahoeRenoFamilyStateVariables();
+        return new TcpClassicAlgorithmBaseStateVariables();
     }
 
     virtual void established(bool active) override;
@@ -41,8 +41,8 @@ class INET_API TcpTahoeRenoFamily : public TcpAlgorithmBase
 
   public:
     /** Ctor */
-    TcpTahoeRenoFamily();
-    virtual ~TcpTahoeRenoFamily();
+    TcpClassicAlgorithmBase();
+    virtual ~TcpClassicAlgorithmBase();
 
     virtual void initialize() override;
 

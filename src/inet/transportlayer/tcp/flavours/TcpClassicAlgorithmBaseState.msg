@@ -11,16 +11,16 @@ import inet.transportlayer.tcp.flavours.TcpAlgorithmBaseState;
 namespace inet::tcp;
 
 ///
-/// State variables for TcpTahoeRenoFamily.
+/// State variables for TcpClassicAlgorithmBase.
 ///
-struct TcpTahoeRenoFamilyStateVariables extends TcpAlgorithmBaseStateVariables
+struct TcpClassicAlgorithmBaseStateVariables extends TcpAlgorithmBaseStateVariables
 {
     @descriptor(readonly);
 
     uint32_t ssthresh; ///< slow start threshold
 };
 
-cplusplus(TcpTahoeRenoFamilyStateVariables) {{
+cplusplus(TcpClassicAlgorithmBaseStateVariables) {{
   public:
     virtual std::string str() const override;
     virtual std::string detailedInfo() const override;
