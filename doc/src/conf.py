@@ -54,6 +54,7 @@ extensions = [
     'sphinx.ext.napoleon',
     #'sphinxcontrib.images',
     'tools.doxylink',
+    'sphinx.ext.imgconverter',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -263,6 +264,8 @@ latex_documents = [
     ('tutorials/index', 'tutorials.tex', "tutorials", '', 'article', False),
     ('showcases/index', 'showcases.tex', "showcases", '', 'article', False),
 ]
+
+#latex_toplevel_sectioning = "section"
 
 
 # -- Options for manual page output ------------------------------------------
