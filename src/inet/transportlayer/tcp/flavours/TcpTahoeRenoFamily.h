@@ -30,11 +30,19 @@ class INET_API TcpTahoeRenoFamily : public TcpAlgorithmBase
     virtual ITcpRecovery *createRecovery() { return nullptr; }
     virtual ITcpCongestionControl *createCongestionControl() { return nullptr; }
 
+    virtual TcpStateVariables *createStateVariables() override
+    {
+        return new TcpTahoeRenoFamilyStateVariables();
+    }
 
     virtual void established(bool active) override;
+
+    virtual void processRexmitTimer(TcpEventCode& event) override;
+
   public:
     /** Ctor */
     TcpTahoeRenoFamily();
+    virtual ~TcpTahoeRenoFamily();
 
     virtual void initialize() override;
 
@@ -42,6 +50,10 @@ class INET_API TcpTahoeRenoFamily : public TcpAlgorithmBase
     virtual ITcpRecovery *getRecovery() { return recovery; }
 
     virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
+
+    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
+
+    virtual void receivedDuplicateAck() override;
 };
 
 } // namespace tcp
