@@ -76,8 +76,10 @@ void TcpNewReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
     TcpTahoeRenoFamily::receivedAckForUnackedData(firstSeqAcked);
     uint32_t numBytesAcked = state->snd_una - firstSeqAcked;
-    recovery->receivedAckForUnackedData(numBytesAcked);
-    congestionControl->receivedAckForUnackedData(numBytesAcked);
+    if (state->lossRecovery)
+        recovery->receivedAckForUnackedData(numBytesAcked);
+    if (!state->lossRecovery)
+        congestionControl->receivedAckForUnackedData(numBytesAcked);
     sendData(false);
 }
 
