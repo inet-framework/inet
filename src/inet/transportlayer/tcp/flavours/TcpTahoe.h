@@ -8,46 +8,37 @@
 #ifndef __INET_TCPTAHOE_H
 #define __INET_TCPTAHOE_H
 
-#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBase.h"
+#include "inet/transportlayer/tcp/flavours/TcpAlgorithmBase.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBaseState_m.h"
 
 namespace inet {
 namespace tcp {
 
 /**
- * State variables for TcpTahoe.
+ * This class serves educational purposes to demonstrate a simple congestion
+ * control algorithm. It implements slow start, congestion avoidance, and fast
+ * retransmit algorithms.
  */
-typedef TcpClassicAlgorithmBaseStateVariables TcpTahoeStateVariables;
-
-/**
- * Implements Tahoe.
- */
-class INET_API TcpTahoe : public TcpClassicAlgorithmBase
+class INET_API TcpTahoe : public TcpAlgorithmBase
 {
   protected:
-    TcpTahoeStateVariables *& state; // alias to TCLAlgorithm's 'state'
+    TcpClassicAlgorithmBaseStateVariables *& state;
 
   protected:
-    /** Create and return a TcpTahoeStateVariables object. */
-    virtual TcpStateVariables *createStateVariables() override
-    {
-        return new TcpTahoeStateVariables();
-    }
+    virtual TcpStateVariables *createStateVariables() override { return new TcpClassicAlgorithmBaseStateVariables(); }
 
-    /** Utility function to recalculate ssthresh */
-    virtual void recalculateSlowStartThreshold();
+    virtual void initialize() override;
 
-    /** Redefine what should happen on retransmission */
     virtual void processRexmitTimer(TcpEventCode& event) override;
 
-  public:
-    /** Ctor */
-    TcpTahoe();
-
-    /** Redefine what should happen when data got acked, to add congestion window management */
     virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
 
-    /** Redefine what should happen when dupAck was received, to add congestion window management */
-    virtual void receivedDuplicateAck() override;
+    virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
+
+    virtual void resetToSlowStart();
+
+  public:
+    TcpTahoe();
 };
 
 } // namespace tcp
