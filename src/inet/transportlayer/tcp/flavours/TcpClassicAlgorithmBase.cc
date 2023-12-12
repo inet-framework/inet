@@ -7,7 +7,7 @@
 
 #include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBase.h"
 
-#include "inet/transportlayer/tcp/Tcp.h"
+#include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 
 namespace inet {
 namespace tcp {
@@ -62,6 +62,17 @@ void TcpClassicAlgorithmBase::established(bool active)
     congestionControl = createCongestionControl();
 }
 
+uint32_t TcpClassicAlgorithmBase::getBytesInFlight() const
+{
+    auto rexmitQueue = conn->getRexmitQueue();
+    int64_t sentSize = state->snd_max - state->snd_una;
+    int64_t in_flight = sentSize - rexmitQueue->getSacked() - rexmitQueue->getLost() + rexmitQueue->getRetrans();
+    if (in_flight < 0)
+        in_flight = 0;
+    conn->emit(bytesInFlightSignal, in_flight);
+    return in_flight;
+}
+
 void TcpClassicAlgorithmBase::processRexmitTimer(TcpEventCode& event)
 {
     TcpAlgorithmBase::processRexmitTimer(event);
@@ -102,7 +113,7 @@ void TcpClassicAlgorithmBase::processRexmitTimer(TcpEventCode& event)
     //
     // As discussed above, FlightSize is the amount of outstanding data in
     // the network."
-    state->ssthresh = std::max(conn->getBytesInFlight() / 2, 2 * state->snd_mss);
+    state->ssthresh = std::max(conn->getTcpAlgorithm()->getBytesInFlight() / 2, 2 * state->snd_mss);
     conn->emit(ssthreshSignal, state->ssthresh);
 
     state->snd_cwnd = state->snd_mss;

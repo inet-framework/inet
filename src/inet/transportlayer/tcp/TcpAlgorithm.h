@@ -196,6 +196,11 @@ class INET_API TcpAlgorithm : public cObject
      * This function process ECN marks.
      */
     virtual void processEcnInEstablished() = 0;
+
+    /**
+     * Returns the sender's estimation of total bytes in flight in the network.
+     */
+    virtual uint32_t getBytesInFlight() const = 0;
 };
 
 } // namespace tcp
