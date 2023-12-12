@@ -54,6 +54,8 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
     virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
 
     virtual void receivedDuplicateAck() override;
+
+    virtual uint32_t getBytesInFlight() const override;
 };
 
 } // namespace tcp
