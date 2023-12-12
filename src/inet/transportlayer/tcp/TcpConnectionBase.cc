@@ -85,7 +85,7 @@ std::string TcpConnection::validationInfo() const
     out << "lostOut: " << rexmitQueue->getLost() << ", "
         << "sackedOut: " << rexmitQueue->getSacked() << ", "
         << "retrans: " << rexmitQueue->getRetrans() << ", "
-        << "bytesInFligh: " << getBytesInFlight() << ", "
+        << "bytesInFligh: " << tcpAlgorithm->getBytesInFlight() << ", "
         << "ssthresh: " << static_cast<const TcpClassicAlgorithmBaseStateVariables *>(state)->ssthresh << ", "
         << "cwnd: " << baseState->snd_cwnd << ", "
         << "snd_una: " << state->snd_una << ", "

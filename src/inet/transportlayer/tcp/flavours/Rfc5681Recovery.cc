@@ -93,7 +93,7 @@ void Rfc5681Recovery::receivedDuplicateAck()
         // data in the network.
         //"
 //        uint32_t flightSize = state->snd_max - state->snd_una; // literal RFC version
-        uint32_t flightSize = conn->getBytesInFlight() + state->snd_mss; // Ns-3 validation version: the +1 MSS accounts for the retransmitOneSegment call below
+        uint32_t flightSize = conn->getTcpAlgorithm()->getBytesInFlight() + state->snd_mss; // Ns-3 validation version: the +1 MSS accounts for the retransmitOneSegment call below
         state->ssthresh = std::max(flightSize / 2, 2 * state->snd_mss);
         conn->emit(ssthreshSignal, state->ssthresh);
 

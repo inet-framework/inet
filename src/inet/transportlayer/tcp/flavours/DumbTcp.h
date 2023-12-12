@@ -74,6 +74,8 @@ class INET_API DumbTcp : public TcpAlgorithm
     virtual bool shouldMarkAck() override;
 
     virtual void processEcnInEstablished() override;
+
+    virtual uint32_t getBytesInFlight() const override;
 };
 
 } // namespace tcp

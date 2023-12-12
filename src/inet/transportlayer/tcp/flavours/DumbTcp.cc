@@ -130,6 +130,11 @@ void DumbTcp::processEcnInEstablished()
 {
 }
 
+uint32_t DumbTcp::getBytesInFlight() const
+{
+    return state->snd_nxt - state->snd_una;
+}
+
 } // namespace tcp
 } // namespace inet
 

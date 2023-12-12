@@ -628,6 +628,11 @@ void TcpAlgorithmBase::processEcnInEstablished()
 {
 }
 
+uint32_t TcpAlgorithmBase::getBytesInFlight() const
+{
+    return state->snd_nxt - state->snd_una;
+}
+
 } // namespace tcp
 } // namespace inet
 

@@ -894,7 +894,7 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
 
     ASSERT(state->snd_wnd >= state->snd_nxt - state->snd_una);
     uint32_t spaceLeftInSendWindow = state->snd_wnd - (state->snd_nxt - state->snd_una);
-    uint32_t bytesInFlight = getBytesInFlight();
+    uint32_t bytesInFlight = tcpAlgorithm->getBytesInFlight();
     uint32_t spaceLeftInCongestionWindow = bytesInFlight >= congestionWindow ? 0 : congestionWindow - bytesInFlight;
 
     uint32_t allowedToSend = std::min(spaceLeftInSendWindow, spaceLeftInCongestionWindow);
@@ -1470,16 +1470,6 @@ uint32_t TcpConnection::getTSecr(const Ptr<const TcpHeader>& tcpHeader) const
     }
 
     return 0;
-}
-
-uint32_t TcpConnection::getBytesInFlight() const
-{
-    int64_t sentSize = state->snd_max - state->snd_una;
-    int64_t in_flight = sentSize - rexmitQueue->getSacked() - rexmitQueue->getLost() + rexmitQueue->getRetrans();
-    if (in_flight < 0)
-        in_flight = 0;
-    const_cast<TcpConnection *>(this)->emit(bytesInFlightSignal, in_flight);
-    return in_flight;
 }
 
 void TcpConnection::updateRcvQueueVars()
