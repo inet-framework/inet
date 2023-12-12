@@ -6,12 +6,6 @@
 
 #include "inet/transportlayer/tcp/flavours/Rfc5681CongestionControl.h"
 
-#include <algorithm> // min,max
-
-#include "inet/transportlayer/tcp/Tcp.h"
-#include "inet/transportlayer/tcp/TcpSendQueue.h"
-#include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
-
 namespace inet {
 namespace tcp {
 

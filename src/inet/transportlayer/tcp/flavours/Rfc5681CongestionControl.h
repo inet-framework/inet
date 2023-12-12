@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#ifndef __INET_RFC5681_H
-#define __INET_RFC5681_H
+#ifndef __INET_RFC5681CONGESTIONCONTROL_H
+#define __INET_RFC5681CONGESTIONCONTROL_H
 
 #include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBase.h"
 #include "inet/transportlayer/tcp/ITcpCongestionControl.h"
