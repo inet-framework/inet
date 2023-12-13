@@ -13,9 +13,9 @@ NS_DIR=~/workspace/ns-allinone-3.40/ns-3.40
 rm -f results/pcap-inet.log results/pcap-ns3.log results/pcap-diff.log
 cp $EXAMPLE.cc $NS_DIR/scratch
 $NS_DIR/ns3 build scratch/$EXAMPLE || exit 1
-( cd results; $NS_DIR/build/scratch/ns3.40-$EXAMPLE-debug | grep TRACE > stdout-ns3.log) || exit 1
-( cd ../../; make MODE=debug -j16) || exit 1
-(inet_dbg -u Cmdenv -f $EXAMPLE.ini -c $EXAMPLE | grep TRACE > results/stdout-inet.log) || exit 1
+(cd results; $NS_DIR/build/scratch/ns3.40-$EXAMPLE-debug --ns3::TcpL4Protocol::SocketType=$2 | grep TRACE > stdout-ns3.log) || exit 1
+(cd ../../; make MODE=debug -j16) || exit 1
+(inet_dbg -u Cmdenv -f $EXAMPLE.ini -c $EXAMPLE "--**.tcp.tcpAlgorithmClass=\"$3\"" | grep TRACE > results/stdout-inet.log) || exit 1
 
 tshark -V -r results/$EXAMPLE-$EXAMPLE.source.ppp\[0\].pcap > results/pcap-inet-source.log
 tshark -V -r results/$EXAMPLE-0-0.pcap > results/pcap-ns3-source.log
