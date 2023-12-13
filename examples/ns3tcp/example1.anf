@@ -30,7 +30,7 @@ if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
 col1, col2 = np.loadtxt('results/ns3-cwnd.dat', unpack=True)
-df = pd.concat([df, pd.DataFrame({'module': ['ns3'], 'name': ['cwnd:vector'], 'vectime': [col1], 'vecvalue': [col2], 'unit': [''], 'interpolationmode': 'sample-hold'})])
+df = pd.concat([df, pd.DataFrame({'module': ['ns3'], 'name': ['cwnd:vector'], 'vectime': [col1], 'vecvalue': [col2], 'unit': [math.nan], 'interpolationmode': 'sample-hold'})])
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
@@ -693,7 +693,7 @@ if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
 col1, col2 = np.loadtxt('results/ns3-seq-num.dat', unpack=True)
-df = pd.concat([df, pd.DataFrame({'module': ['ns3'], 'name': ['sndMax:vector'], 'vectime': [col1], 'vecvalue': [col2], 'unit': [''], 'interpolationmode': 'sample-hold'})])
+df = pd.concat([df, pd.DataFrame({'module': ['ns3'], 'name': ['sndMax:vector'], 'vectime': [col1], 'vecvalue': [col2], 'unit': [math.nan], 'interpolationmode': 'sample-hold'})])
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
@@ -1356,7 +1356,7 @@ if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
 col1, col2 = np.loadtxt('results/ns3-bytesInFlight.dat', unpack=True)
-df = pd.concat([df, pd.DataFrame({'module': ['ns3'], 'name': ['bytesInFlight:vector'], 'vectime': [col1], 'vecvalue': [col2], 'unit': [''], 'interpolationmode': 'sample-hold'})])
+df = pd.concat([df, pd.DataFrame({'module': ['ns3'], 'name': ['bytesInFlight:vector'], 'vectime': [col1], 'vecvalue': [col2], 'unit': [math.nan], 'interpolationmode': 'sample-hold'})])
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
@@ -2019,7 +2019,7 @@ if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
 col1, col2 = np.loadtxt('results/ns3-last-acked-seq.dat', unpack=True)
-df = pd.concat([df, pd.DataFrame({'module': ['ns3'], 'name': ['rcvAck:vector'], 'vectime': [col1], 'vecvalue': [col2], 'unit': [''], 'interpolationmode': 'sample-hold'})])
+df = pd.concat([df, pd.DataFrame({'module': ['ns3'], 'name': ['rcvAck:vector'], 'vectime': [col1], 'vecvalue': [col2], 'unit': [math.nan], 'interpolationmode': 'sample-hold'})])
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
@@ -2684,7 +2684,7 @@ end_time = float(props["vector_end_time"] or math.inf)
 df = pd.DataFrame()
 
 col1, col2 = np.loadtxt('results/ns3-cong-state.dat', unpack=True)
-df = pd.concat([df, pd.DataFrame({'module': ['ns3'], 'name': ['congestionState:vector'], 'vectime': [col1], 'vecvalue': [col2], 'unit': [''], 'interpolationmode': 'sample-hold'})])
+df = pd.concat([df, pd.DataFrame({'module': ['ns3'], 'name': ['congestionState:vector'], 'vectime': [col1], 'vecvalue': [col2], 'unit': [math.nan], 'interpolationmode': 'sample-hold'})])
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
