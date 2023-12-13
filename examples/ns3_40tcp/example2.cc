@@ -83,6 +83,15 @@ void ConnectTraceFunctions()
 }
 
 int main(int argc, char *argv[]) {
+  bool sack = false;
+  int delAckCount = 1;
+  std::string socketType = "ns3::TcpNewReno";
+  CommandLine cmd(__FILE__);
+  cmd.AddValue("ns3::TcpSocketBase::Sack", "", sack);
+  cmd.AddValue("ns3::TcpSocket::DelAckCount", "", delAckCount);
+  cmd.AddValue("ns3::TcpL4Protocol::SocketType", "", socketType);
+  cmd.Parse(argc, argv);
+
   Time::SetResolution(Time::PS);
 
   NodeContainer nodes;
@@ -90,12 +99,12 @@ int main(int argc, char *argv[]) {
 
   GlobalValue::Bind("ChecksumEnabled", BooleanValue(true));
 
-  Config::SetDefault("ns3::TcpSocketBase::Sack", BooleanValue(false));
+  Config::SetDefault("ns3::TcpSocketBase::Sack", BooleanValue(sack));
   Config::SetDefault("ns3::TcpSocketBase::Timestamp", BooleanValue(false));
   Config::SetDefault("ns3::TcpSocket::SegmentSize", UintegerValue(536));
   Config::SetDefault("ns3::TcpSocket::InitialCwnd", UintegerValue(1));
-  Config::SetDefault("ns3::TcpSocket::DelAckCount", UintegerValue(1));
-  Config::SetDefault("ns3::TcpL4Protocol::SocketType", StringValue("ns3::TcpNewReno"));
+  Config::SetDefault("ns3::TcpSocket::DelAckCount", UintegerValue(delAckCount));
+  Config::SetDefault("ns3::TcpL4Protocol::SocketType", StringValue(socketType.c_str()));
   Config::SetDefault("ns3::TcpL4Protocol::RecoveryType", TypeIdValue(TypeId::LookupByName("ns3::TcpClassicRecovery")));
   Config::SetDefault("ns3::PcapFileWrapper::NanosecMode", ns3::BooleanValue(true));
   Config::SetDefault("ns3::TcpSocket::SndBufSize", UintegerValue(1000000));
