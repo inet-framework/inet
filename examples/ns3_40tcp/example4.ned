@@ -13,13 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.examples.ns3tcp;
+package inet.examples.ns3_40tcp;
 
 import inet.networks.base.WiredNetworkBase;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 
-network example5 extends WiredNetworkBase
+network example4 extends WiredNetworkBase
 {
     submodules:
         source: StandardHost;
