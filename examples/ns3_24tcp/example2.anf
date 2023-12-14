@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="results/reno*.vec"/>
-        <input pattern="results/reno*.sca"/>
+        <input pattern="results/example2*.vec"/>
+        <input pattern="results/example2*.sca"/>
     </inputs>
     <charts>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="971669029" name="queue length" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="506209040" name="queue length" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -626,7 +626,7 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_title" value=""/>
             <property name="legend_replacements" value=""/>
             <property name="Legend.Border" value="false"/>
-            <property name="title" value="queue length in reno.router.ppp[1].queue"/>
+            <property name="title" value="queue length in example2.router.ppp[1].queue"/>
             <property name="legend_automatic" value="true"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
             <property name="vector_operations" value=""/>
@@ -648,7 +648,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="legend_format" value=""/>
-            <property name="filter" value="type =~ vector AND runattr:experiment =~ reno AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;reno.router.ppp[1].queue&quot; AND name =~ queueLength:vector"/>
+            <property name="filter" value="type =~ vector AND runattr:experiment =~ example2 AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;example2.router.ppp[1].queue&quot; AND name =~ queueLength:vector"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
@@ -663,7 +663,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="290127694" name="cwnd" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="843605497" name="cwnd" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
@@ -1311,7 +1311,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="legend_format" value=""/>
-            <property name="filter" value="type =~ vector AND name =~ cwnd:vector AND module =~ reno.source.tcp.*"/>
+            <property name="filter" value="type =~ vector AND name =~ cwnd:vector AND module =~ example2.source.tcp.*"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
@@ -1326,7 +1326,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1605434363" name="sndNext" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1474347715" name="sndNext" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
@@ -1989,7 +1989,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1226799182" name="ssthresh" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1299786977" name="ssthresh" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
@@ -2652,7 +2652,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="303881348" name="bytesInFlight" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1189031013" name="bytesInFlight" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
@@ -3315,7 +3315,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="59561033" name="rcvAck" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="2136907900" name="rcvAck" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
@@ -3978,7 +3978,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 6.1.0.qualifier" icon="icons/full/obj/linechart.png" id="1456175537" name="rtt" resultTypes="vector" template="linechart_native" type="LINE">
+        <chart createdWith="OMNeT++ 6.1.0.qualifier" icon="icons/full/obj/linechart.png" id="1279745747" name="rtt" resultTypes="vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 

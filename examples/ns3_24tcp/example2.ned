@@ -19,7 +19,7 @@ import inet.networks.base.WiredNetworkBase;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 
-network westwood extends WiredNetworkBase
+network example2 extends WiredNetworkBase
 {
     submodules:
         source: StandardHost;

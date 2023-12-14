@@ -74,6 +74,11 @@ void ConnectTraceFunctions()
 }
 
 int main(int argc, char *argv[]) {
+  std::string socketType = "ns3::TcpNewReno";
+  CommandLine cmd;
+  cmd.AddValue("ns3::TcpL4Protocol::SocketType", "", socketType);
+  cmd.Parse(argc, argv);
+
   Time::SetResolution(Time::PS);
 
   NodeContainer nodes;
@@ -85,7 +90,7 @@ int main(int argc, char *argv[]) {
   Config::SetDefault("ns3::TcpSocket::SegmentSize", UintegerValue(536));
   Config::SetDefault("ns3::TcpSocket::InitialCwnd", UintegerValue(1));
   Config::SetDefault("ns3::TcpSocket::DelAckCount", UintegerValue(1));
-  Config::SetDefault("ns3::TcpL4Protocol::SocketType", StringValue("ns3::TcpWestwood"));
+  Config::SetDefault("ns3::TcpL4Protocol::SocketType", StringValue(socketType.c_str()));
   Config::SetDefault("ns3::TcpSocket::SndBufSize", UintegerValue(1000000));
   Config::SetDefault("ns3::BulkSendApplication::SendSize", UintegerValue(100));
 
@@ -141,7 +146,7 @@ int main(int argc, char *argv[]) {
 
   Simulator::Schedule(MilliSeconds(1), &ConnectTraceFunctions);
 
-  p2p1.EnablePcapAll("westwood");
+  p2p1.EnablePcapAll("example2");
 
   Simulator::Run();
   Simulator::Destroy();
