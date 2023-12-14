@@ -308,16 +308,19 @@ void TcpAlgorithmBase::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     const double g = 0.125; // 1 / 8; (1 - alpha) where alpha == 7 / 8;
     simtime_t newRTT = tAcked - tSent;
 
-    simtime_t& srtt = state->srtt;
-    simtime_t& rttvar = state->rttvar;
+    simtime_t err = newRTT - state->srtt;
 
-    simtime_t err = newRTT - srtt;
-
-    srtt += g * err;
-    rttvar += g * (fabs(err) - rttvar);
+    if (state->srtt == 0) {
+        state->srtt = newRTT;
+        state->rttvar = newRTT / 2;
+    }
+    else {
+        state->srtt += g * err;
+        state->rttvar += g * (fabs(err) - state->rttvar);
+    }
 
     // assign RTO (here: rexmit_timeout) a new value
-    simtime_t rto = srtt + 4 * rttvar;
+    simtime_t rto = state->srtt + 4 * state->rttvar;
 
     if (rto > maxRexmitTimeout)
         rto = maxRexmitTimeout;
@@ -327,12 +330,12 @@ void TcpAlgorithmBase::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     state->rexmit_timeout = rto;
 
     // record statistics
-    EV_DETAIL << "Measured RTT=" << (newRTT * 1000) << "ms, updated SRTT=" << (srtt * 1000)
+    EV_DETAIL << "Measured RTT=" << (newRTT * 1000) << "ms, updated SRTT=" << (state->srtt * 1000)
               << "ms, new RTO=" << (rto * 1000) << "ms\n";
 
     conn->emit(rttSignal, newRTT);
-    conn->emit(srttSignal, srtt);
-    conn->emit(rttvarSignal, rttvar);
+    conn->emit(srttSignal, state->srtt);
+    conn->emit(rttvarSignal, state->rttvar);
     conn->emit(rtoSignal, rto);
 }
 
