@@ -1297,6 +1297,37 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
             EV_INFO << "Tcp Header Option MSS(=" << state->snd_mss << ") sent\n";
         }
 
+        // TS header option
+        if (state->ts_support && (state->rcv_initial_ts || (fsm.getState() == TCP_S_INIT
+                                                            || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
+        {
+            if (tcpMain->alignOptions && !state->sack_support) { // if SACK is supported by host, do not add NOPs to this segment
+                // 2 padding bytes
+                tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
+                tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
+            }
+
+            TcpOptionTimestamp *option = new TcpOptionTimestamp();
+
+            // Update TS variables
+            // RFC 1323, page 13: "The Timestamp Value field (TSval) contains the current value of the timestamp clock of the Tcp sending the option."
+            option->setSenderTimestamp(convertSimtimeToTS(simTime()));
+
+            // RFC 1323, page 16: "(3) When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
+            // RFC 1323, page 13:
+            // "The Timestamp Echo Reply field (TSecr) is only valid if the ACK
+            // bit is set in the Tcp header; if it is valid, it echos a times-
+            // tamp value that was sent by the remote Tcp in the TSval field
+            // of a Timestamps option.  When TSecr is not valid, its value
+            // must be zero."
+            option->setEchoedTimestamp(tcpHeader->getAckBit() ? state->ts_recent : 0);
+
+            state->snd_initial_ts = true;
+            state->ts_enabled = state->ts_support && state->snd_initial_ts && state->rcv_initial_ts;
+            EV_INFO << "Tcp Header Option TS(TSval=" << option->getSenderTimestamp() << ", TSecr=" << option->getEchoedTimestamp() << ") sent, TS (ts_enabled) is set to " << state->ts_enabled << "\n";
+            tcpHeader->appendHeaderOption(option);
+        }
+
         // WS header option
         if (state->ws_support && (state->rcv_ws || (fsm.getState() == TCP_S_INIT
                                                     || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
@@ -1342,37 +1373,6 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
             state->snd_sack_perm = true;
             state->sack_enabled = state->sack_support && state->snd_sack_perm && state->rcv_sack_perm;
             EV_INFO << "Tcp Header Option SACK_PERMITTED sent, SACK (sack_enabled) is set to " << state->sack_enabled << "\n";
-        }
-
-        // TS header option
-        if (state->ts_support && (state->rcv_initial_ts || (fsm.getState() == TCP_S_INIT
-                                                            || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
-        {
-            if (tcpMain->alignOptions && !state->sack_support) { // if SACK is supported by host, do not add NOPs to this segment
-                // 2 padding bytes
-                tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
-                tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
-            }
-
-            TcpOptionTimestamp *option = new TcpOptionTimestamp();
-
-            // Update TS variables
-            // RFC 1323, page 13: "The Timestamp Value field (TSval) contains the current value of the timestamp clock of the Tcp sending the option."
-            option->setSenderTimestamp(convertSimtimeToTS(simTime()));
-
-            // RFC 1323, page 16: "(3) When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
-            // RFC 1323, page 13:
-            // "The Timestamp Echo Reply field (TSecr) is only valid if the ACK
-            // bit is set in the Tcp header; if it is valid, it echos a times-
-            // tamp value that was sent by the remote Tcp in the TSval field
-            // of a Timestamps option.  When TSecr is not valid, its value
-            // must be zero."
-            option->setEchoedTimestamp(tcpHeader->getAckBit() ? state->ts_recent : 0);
-
-            state->snd_initial_ts = true;
-            state->ts_enabled = state->ts_support && state->snd_initial_ts && state->rcv_initial_ts;
-            EV_INFO << "Tcp Header Option TS(TSval=" << option->getSenderTimestamp() << ", TSecr=" << option->getEchoedTimestamp() << ") sent, TS (ts_enabled) is set to " << state->ts_enabled << "\n";
-            tcpHeader->appendHeaderOption(option);
         }
 
         // TODO add new TCPOptions here once they are implemented
