@@ -73,6 +73,7 @@ void Rfc5681Recovery::receivedDuplicateAck()
     //    new SACK information.
     //"
     if (state->dupacks < state->dupthresh)
+        // TODO FlightSize would remain less than or equal to cwnd plus 2*SMSS
         conn->sendData(state->snd_cwnd);
     //"
     // 2. When the third duplicate ACK is received, a TCP MUST set ssthresh
@@ -118,6 +119,12 @@ void Rfc5681Recovery::receivedDuplicateAck()
         state->snd_cwnd += state->snd_mss;
         conn->emit(cwndSignal, state->snd_cwnd);
     }
+    //"
+    // 5.  When previously unsent data is available and the new value of
+    //     cwnd and the receiver's advertised window allow, a TCP SHOULD
+    //     send 1*SMSS bytes of previously unsent data.
+    //"
+    conn->sendData(state->snd_cwnd);
 }
 
 } // namespace tcp
