@@ -27,6 +27,8 @@
 #ifndef _CC_NEWRENO_H
 #define _CC_NEWRENO_H
 
+extern struct cc_algo newreno_cc_algo;
+
 #define CCALGONAME_NEWRENO "newreno"
 
 struct newreno {
@@ -56,4 +58,12 @@ struct cc_newreno_opts {
 #define CC_NEWRENO_HYSTART_ENABLED  0x0002  /* We can do hystart, a loss removes this flag */
 #define CC_NEWRENO_HYSTART_IN_CSS   0x0004  /* If we enter hystart CSS this flag is set */
 #define CC_NEWRENO_BETA_ECN_ENABLED 0x0020
+
+int newreno_cb_init(struct cc_var *ccv, void *);
+void newreno_ack_received(struct cc_var *ccv, uint16_t type);
+void newreno_cong_signal(struct cc_var *ccv, uint32_t type);
+void newreno_after_idle(struct cc_var *ccv);
+void newreno_newround(struct cc_var *ccv, uint32_t round_cnt);
+void newreno_rttsample(struct cc_var *ccv, uint32_t usec_rtt, uint32_t rxtcnt, uint32_t fas);
+
 #endif /* _CC_NEWRENO_H */
