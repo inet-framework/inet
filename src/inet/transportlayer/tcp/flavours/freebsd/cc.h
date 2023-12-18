@@ -49,23 +49,47 @@
 #ifndef _NETINET_CC_CC_H_
 #define _NETINET_CC_CC_H_
 
-#ifdef _KERNEL
+#include "inet/transportlayer/tcp/flavours/freebsd/tcp.h"
 
-MALLOC_DECLARE(M_CC_MEM);
+extern int64_t ticks;
+
+struct tcpcb {
+    uint32_t t_maxseg;
+    u_char snd_scale;
+    uint32_t snd_cwnd;
+    tcp_seq snd_max;
+    tcp_seq snd_nxt;
+    uint32_t snd_ssthresh;
+    uint32_t snd_wnd;
+    u_int t_flags;
+    uint8_t t_rttupdated;
+    int t_rxtshift;
+    int t_srtt;
+    uint32_t flightSize;
+};
+
+int tcp_compute_pipe(struct tcpcb *tp);
+u_int tcp_maxseg(const struct tcpcb *tp);
+u_int tcp_fixed_maxseg(const struct tcpcb *tp);
+uint32_t tcp_get_srtt(struct tcpcb *tp, int granularity);
+
+//#ifdef _KERNEL
+
+//MALLOC_DECLARE(M_CC_MEM);
 
 /* Global CC vars. */
-extern STAILQ_HEAD(cc_head, cc_algo) cc_list;
+//extern STAILQ_HEAD(cc_head, cc_algo) cc_list;
 extern const int tcprexmtthresh;
 
 /* Per-netstack bits. */
-VNET_DECLARE(struct cc_algo *, default_cc_ptr);
+//VNET_DECLARE(struct cc_algo *, default_cc_ptr);
 #define V_default_cc_ptr VNET(default_cc_ptr)
 
-VNET_DECLARE(int, cc_do_abe);
-#define V_cc_do_abe         VNET(cc_do_abe)
+//VNET_DECLARE(int, cc_do_abe);
+//#define V_cc_do_abe         VNET(cc_do_abe)
 
-VNET_DECLARE(int, cc_abe_frlossreduce);
-#define V_cc_abe_frlossreduce       VNET(cc_abe_frlossreduce)
+//VNET_DECLARE(int, cc_abe_frlossreduce);
+//#define V_cc_abe_frlossreduce       VNET(cc_abe_frlossreduce)
 
 /* Define the new net.inet.tcp.cc sysctl tree. */
 #ifdef _SYS_SYSCTL_H_
@@ -84,9 +108,9 @@ extern uint32_t hystart_bblogs;
 /* CC housekeeping functions. */
 int cc_register_algo(struct cc_algo *add_cc);
 int cc_deregister_algo(struct cc_algo *remove_cc);
-#endif /* _KERNEL */
+//#endif /* _KERNEL */
 
-#if defined(_KERNEL) || defined(_WANT_TCPCB)
+//#if defined(_KERNEL) || defined(_WANT_TCPCB)
 /*
  * Wrapper around transport structs that contain same-named congestion
  * control variables. Allows algos to be shared amongst multiple CC aware
@@ -126,7 +150,7 @@ struct cc_var {
 #define CC_DUPACK   0x0002  /* Duplicate ACK. */
 #define CC_PARTIALACK   0x0004  /* Not yet. */
 #define CC_SACK     0x0008  /* Not yet. */
-#endif /* defined(_KERNEL) || defined(_WANT_TCPCB) */
+//#endif /* defined(_KERNEL) || defined(_WANT_TCPCB) */
 
 /*
  * Congestion signal types passed to the cong_signal() hook. The highest order 8
@@ -140,7 +164,7 @@ struct cc_var {
 
 #define CC_SIGPRIVMASK  0xFF000000  /* Mask to check if sig is private. */
 
-#ifdef _KERNEL
+//#ifdef _KERNEL
 /*
  * Structure to hold data and function pointers that together represent a
  * congestion control algorithm.
@@ -201,7 +225,7 @@ struct cc_algo {
     /* Called for {get|set}sockopt() on a TCP socket with TCP_CCALGOOPT. */
     int     (*ctl_output)(struct cc_var *, struct sockopt *, void *);
 
-    STAILQ_ENTRY (cc_algo) entries;
+//    STAILQ_ENTRY (cc_algo) entries;
     u_int   cc_refcount;
     uint8_t flags;
 };
@@ -249,5 +273,5 @@ void cc_attach(struct tcpcb *, struct cc_algo *);
 /* Called to detach a CC algorithm from a tcpcb */
 void cc_detach(struct tcpcb *);
 
-#endif /* _KERNEL */
+//#endif /* _KERNEL */
 #endif /* _NETINET_CC_CC_H_ */

@@ -47,60 +47,44 @@
  *   http://caia.swin.edu.au/urp/newtcp/
  */
 
-#include <sys/param.h>
-#include <sys/kernel.h>
-#include <sys/limits.h>
-#include <sys/malloc.h>
-#include <sys/module.h>
-#include <sys/socket.h>
-#include <sys/socketvar.h>
-#include <sys/sysctl.h>
-#include <sys/systm.h>
+#include "inet/transportlayer/tcp/flavours/freebsd/cc_cubic.h"
 
-#include <net/vnet.h>
+#include "inet/transportlayer/tcp/flavours/freebsd/cc_module.h"
+#include "inet/transportlayer/tcp/flavours/freebsd/cc.h"
+#include "inet/transportlayer/tcp/flavours/freebsd/tcp_timer.h"
+#include "inet/transportlayer/tcp/flavours/freebsd/tcp_var.h"
+#include "inet/transportlayer/tcp/flavours/freebsd/tcp.h"
 
-#include <net/route.h>
-#include <net/route/nhop.h>
+#include <malloc.h>
 
-#include <netinet/in_pcb.h>
-#include <netinet/tcp.h>
-#include <netinet/tcp_seq.h>
-#include <netinet/tcp_timer.h>
-#include <netinet/tcp_var.h>
-#include <netinet/tcp_log_buf.h>
-#include <netinet/tcp_hpts.h>
-#include <netinet/cc/cc.h>
-#include <netinet/cc/cc_cubic.h>
-#include <netinet/cc/cc_module.h>
+#define TCP_TMR_GRANULARITY_USEC    2   /* TCP timers are in microseconds */
 
-static void cubic_ack_received(struct cc_var *ccv, uint16_t type);
+int hz = 1000;
+int64_t tick = 1000000 / hz;
+
+static bool V_cubic_use_tf = false;
+static bool V_tcp_do_newsack = false;
+static uint16_t V_tcp_abc_l_var = 1;
+
 static void cubic_cb_destroy(struct cc_var *ccv);
-static int  cubic_cb_init(struct cc_var *ccv, void *ptr);
-static void cubic_cong_signal(struct cc_var *ccv, uint32_t type);
-static void cubic_conn_init(struct cc_var *ccv);
 static int  cubic_mod_init(void);
-static void cubic_post_recovery(struct cc_var *ccv);
 static void cubic_record_rtt(struct cc_var *ccv);
 static void cubic_ssthresh_update(struct cc_var *ccv, uint32_t maxseg);
-static void cubic_after_idle(struct cc_var *ccv);
 static size_t   cubic_data_sz(void);
-static void cubic_newround(struct cc_var *ccv, uint32_t round_cnt);
-static void cubic_rttsample(struct cc_var *ccv, uint32_t usec_rtt,
-       uint32_t rxtcnt, uint32_t fas);
 
 struct cc_algo cubic_cc_algo = {
     .name = "cubic",
-    .ack_received = cubic_ack_received,
-    .cb_destroy = cubic_cb_destroy,
-    .cb_init = cubic_cb_init,
-    .cong_signal = cubic_cong_signal,
-    .conn_init = cubic_conn_init,
     .mod_init = cubic_mod_init,
+    .cc_data_sz = cubic_data_sz,
+    .cb_init = cubic_cb_init,
+    .cb_destroy = cubic_cb_destroy,
+    .conn_init = cubic_conn_init,
+    .ack_received = cubic_ack_received,
+    .cong_signal = cubic_cong_signal,
     .post_recovery = cubic_post_recovery,
     .after_idle = cubic_after_idle,
-    .cc_data_sz = cubic_data_sz,
+    .newround = cubic_newround,
     .rttsample = cubic_rttsample,
-    .newround = cubic_newround
 };
 
 static void
@@ -121,37 +105,37 @@ cubic_log_hystart_event(struct cc_var *ccv, struct cubic *cubicd, uint8_t mod, u
      * 11 - We have slipped out of SS into CA via cwnd growth.
      * 12 - After idle has re-enabled hystart++
      */
-    struct tcpcb *tp;
+//    struct tcpcb *tp;
 
-    if (hystart_bblogs == 0)
-        return;
-    tp = ccv->ccvc.tcp;
-    if (tcp_bblogging_on(tp)) {
-        union tcp_log_stackspecific log;
-        struct timeval tv;
-
-        memset(&log, 0, sizeof(log));
-        log.u_bbr.flex1 = flex1;
-        log.u_bbr.flex2 = cubicd->css_current_round_minrtt;
-        log.u_bbr.flex3 = cubicd->css_lastround_minrtt;
-        log.u_bbr.flex4 = cubicd->css_rttsample_count;
-        log.u_bbr.flex5 = cubicd->css_entered_at_round;
-        log.u_bbr.flex6 = cubicd->css_baseline_minrtt;
-        /* We only need bottom 16 bits of flags */
-        log.u_bbr.flex7 = cubicd->flags & 0x0000ffff;
-        log.u_bbr.flex8 = mod;
-        log.u_bbr.epoch = cubicd->css_current_round;
-        log.u_bbr.timeStamp = tcp_get_usecs(&tv);
-        log.u_bbr.lt_epoch = cubicd->css_fas_at_css_entry;
-        log.u_bbr.pkts_out = cubicd->css_last_fas;
-        log.u_bbr.delivered = cubicd->css_lowrtt_fas;
-        log.u_bbr.pkt_epoch = ccv->flags;
-        TCP_LOG_EVENTP(tp, NULL,
-            &tptosocket(tp)->so_rcv,
-            &tptosocket(tp)->so_snd,
-            TCP_HYSTART, 0,
-            0, &log, false, &tv);
-    }
+//    if (hystart_bblogs == 0)
+//        return;
+//    tp = ccv->ccvc.tcp;
+//    if (tcp_bblogging_on(tp)) {
+//        union tcp_log_stackspecific log;
+//        struct timeval tv;
+//
+//        memset(&log, 0, sizeof(log));
+//        log.u_bbr.flex1 = flex1;
+//        log.u_bbr.flex2 = cubicd->css_current_round_minrtt;
+//        log.u_bbr.flex3 = cubicd->css_lastround_minrtt;
+//        log.u_bbr.flex4 = cubicd->css_rttsample_count;
+//        log.u_bbr.flex5 = cubicd->css_entered_at_round;
+//        log.u_bbr.flex6 = cubicd->css_baseline_minrtt;
+//        /* We only need bottom 16 bits of flags */
+//        log.u_bbr.flex7 = cubicd->flags & 0x0000ffff;
+//        log.u_bbr.flex8 = mod;
+//        log.u_bbr.epoch = cubicd->css_current_round;
+//        log.u_bbr.timeStamp = tcp_get_usecs(&tv);
+//        log.u_bbr.lt_epoch = cubicd->css_fas_at_css_entry;
+//        log.u_bbr.pkts_out = cubicd->css_last_fas;
+//        log.u_bbr.delivered = cubicd->css_lowrtt_fas;
+//        log.u_bbr.pkt_epoch = ccv->flags;
+//        TCP_LOG_EVENTP(tp, NULL,
+//            &tptosocket(tp)->so_rcv,
+//            &tptosocket(tp)->so_snd,
+//            TCP_HYSTART, 0,
+//            0, &log, false, &tv);
+//    }
 }
 
 static void
@@ -201,7 +185,7 @@ cubic_does_slow_start(struct cc_var *ccv, struct cubic *cubicd)
                 /* Enter CSS */
                 cubicd->flags |= CUBICFLAG_HYSTART_IN_CSS;
                 cubicd->css_fas_at_css_entry = cubicd->css_lowrtt_fas;
-                /* 
+                /*
                  * The draft (v4) calls for us to set baseline to css_current_round_min
                  * but that can cause an oscillation. We probably shoudl be using
                  * css_lastround_minrtt, but the authors insist that will cause
@@ -215,11 +199,11 @@ cubic_does_slow_start(struct cc_var *ccv, struct cubic *cubicd)
         }
     }
     if (CCV(ccv, snd_nxt) == CCV(ccv, snd_max))
-        incr = min(ccv->bytes_this_ack,
+        incr = std::min((uint32_t)ccv->bytes_this_ack,
                ccv->nsegs * abc_val *
                CCV(ccv, t_maxseg));
     else
-        incr = min(ccv->bytes_this_ack, CCV(ccv, t_maxseg));
+        incr = std::min((uint32_t)ccv->bytes_this_ack, CCV(ccv, t_maxseg));
 
     /* Only if Hystart is enabled will the flag get set */
     if (cubicd->flags & CUBICFLAG_HYSTART_IN_CSS) {
@@ -228,18 +212,18 @@ cubic_does_slow_start(struct cc_var *ccv, struct cubic *cubicd)
     }
     /* ABC is on by default, so incr equals 0 frequently. */
     if (incr > 0)
-        CCV(ccv, snd_cwnd) = min((cw + incr),
-                     TCP_MAXWIN << CCV(ccv, snd_scale));
+        CCV(ccv, snd_cwnd) = std::min((cw + incr),
+                     (u_int)TCP_MAXWIN << CCV(ccv, snd_scale));
 }
 
-static void
+void
 cubic_ack_received(struct cc_var *ccv, uint16_t type)
 {
     struct cubic *cubic_data;
     unsigned long W_est, W_cubic;
     int usecs_since_epoch;
 
-    cubic_data = ccv->cc_data;
+    cubic_data = static_cast<struct cubic *>(ccv->cc_data);
     cubic_record_rtt(ccv);
 
     /*
@@ -305,20 +289,20 @@ cubic_ack_received(struct cc_var *ccv, uint16_t type)
 
             ccv->flags &= ~CCF_ABC_SENTAWND;
 
-            if (W_cubic < W_est) {
+            if (V_cubic_use_tf && W_cubic < W_est) {
                 /*
                  * TCP-friendly region, follow tf
                  * cwnd growth.
                  */
                 if (CCV(ccv, snd_cwnd) < W_est)
-                    CCV(ccv, snd_cwnd) = ulmin(W_est, INT_MAX);
+                    CCV(ccv, snd_cwnd) = std::min(W_est, (unsigned long)INT_MAX);
             } else if (CCV(ccv, snd_cwnd) < W_cubic) {
                 /*
                  * Concave or convex region, follow CUBIC
                  * cwnd growth.
                  * Only update snd_cwnd, if it doesn't shrink.
                  */
-                CCV(ccv, snd_cwnd) = ulmin(W_cubic, INT_MAX);
+                CCV(ccv, snd_cwnd) = std::min(W_cubic, (unsigned long)INT_MAX);
             }
 
             /*
@@ -346,14 +330,14 @@ cubic_ack_received(struct cc_var *ccv, uint16_t type)
  *   - Reset cwnd by calling New Reno implementation of after_idle.
  *   - Reset t_epoch.
  */
-static void
+void
 cubic_after_idle(struct cc_var *ccv)
 {
     struct cubic *cubic_data;
 
-    cubic_data = ccv->cc_data;
+    cubic_data = static_cast<struct cubic *>(ccv->cc_data);
 
-    cubic_data->W_max = ulmax(cubic_data->W_max, CCV(ccv, snd_cwnd));
+    cubic_data->W_max = std::max(cubic_data->W_max, (uint64_t)CCV(ccv, snd_cwnd));
     cubic_data->K = cubic_k(cubic_data->W_max / CCV(ccv, t_maxseg));
     if ((cubic_data->flags & CUBICFLAG_HYSTART_ENABLED) == 0) {
         /*
@@ -370,7 +354,7 @@ cubic_after_idle(struct cc_var *ccv)
 static void
 cubic_cb_destroy(struct cc_var *ccv)
 {
-    free(ccv->cc_data, M_CC_MEM);
+    free(ccv->cc_data);
 }
 
 static size_t
@@ -379,18 +363,18 @@ cubic_data_sz(void)
     return (sizeof(struct cubic));
 }
 
-static int
+int
 cubic_cb_init(struct cc_var *ccv, void *ptr)
 {
     struct cubic *cubic_data;
 
-    INP_WLOCK_ASSERT(tptoinpcb(ccv->ccvc.tcp));
+//    INP_WLOCK_ASSERT(tptoinpcb(ccv->ccvc.tcp));
     if (ptr == NULL) {
-        cubic_data = malloc(sizeof(struct cubic), M_CC_MEM, M_NOWAIT|M_ZERO);
+        cubic_data = static_cast<struct cubic *>(calloc(1, sizeof(struct cubic)));
         if (cubic_data == NULL)
             return (ENOMEM);
     } else
-        cubic_data = ptr;
+        cubic_data = static_cast<struct cubic *>(ptr);
 
     /* Init some key variables with sensible defaults. */
     cubic_data->t_epoch = ticks;
@@ -416,13 +400,13 @@ cubic_cb_init(struct cc_var *ccv, void *ptr)
 /*
  * Perform any necessary tasks before we enter congestion recovery.
  */
-static void
+void
 cubic_cong_signal(struct cc_var *ccv, uint32_t type)
 {
     struct cubic *cubic_data;
     u_int mss;
 
-    cubic_data = ccv->cc_data;
+    cubic_data = static_cast<struct cubic *>(ccv->cc_data);
     mss = tcp_maxseg(ccv->ccvc.tcp);
 
     switch (type) {
@@ -498,12 +482,12 @@ cubic_cong_signal(struct cc_var *ccv, uint32_t type)
     }
 }
 
-static void
+void
 cubic_conn_init(struct cc_var *ccv)
 {
     struct cubic *cubic_data;
 
-    cubic_data = ccv->cc_data;
+    cubic_data = static_cast<struct cubic *>(ccv->cc_data);
 
     /*
      * Ensure we have a sane initial value for W_max recorded. Without
@@ -522,13 +506,13 @@ cubic_mod_init(void)
 /*
  * Perform any necessary tasks before we exit congestion recovery.
  */
-static void
+void
 cubic_post_recovery(struct cc_var *ccv)
 {
     struct cubic *cubic_data;
     int pipe;
 
-    cubic_data = ccv->cc_data;
+    cubic_data = static_cast<struct cubic *>(ccv->cc_data);
     pipe = 0;
 
     if (IN_FASTRECOVERY(CCV(ccv, t_flags))) {
@@ -549,13 +533,13 @@ cubic_post_recovery(struct cc_var *ccv)
              * Ensure that cwnd does not collapse to 1 MSS under
              * adverse conditions. Implements RFC6582
              */
-            CCV(ccv, snd_cwnd) = max(pipe, CCV(ccv, t_maxseg)) +
+            CCV(ccv, snd_cwnd) = std::max((uint32_t)pipe, CCV(ccv, t_maxseg)) +
                 CCV(ccv, t_maxseg);
         else
             /* Update cwnd based on beta and adjusted W_max. */
-            CCV(ccv, snd_cwnd) = max(((uint64_t)cubic_data->W_max *
+            CCV(ccv, snd_cwnd) = std::max(((uint64_t)cubic_data->W_max *
                 CUBIC_BETA) >> CUBIC_SHIFT,
-                2 * CCV(ccv, t_maxseg));
+                2 * (uint64_t)CCV(ccv, t_maxseg));
     }
 
     /* Calculate the average RTT between congestion epochs. */
@@ -580,7 +564,7 @@ cubic_record_rtt(struct cc_var *ccv)
 
     /* Ignore srtt until a min number of samples have been taken. */
     if (CCV(ccv, t_rttupdated) >= CUBIC_MIN_RTT_SAMPLES) {
-        cubic_data = ccv->cc_data;
+        cubic_data = static_cast<struct cubic *>(ccv->cc_data);
         t_srtt_usecs = tcp_get_srtt(ccv->ccvc.tcp,
                         TCP_TMR_GRANULARITY_USEC);
         /*
@@ -594,8 +578,8 @@ cubic_record_rtt(struct cc_var *ccv)
             cubic_data->min_rtt_usecs == TCPTV_SRTTBASE)) {
             /* A minimal rtt is a single unshifted tick of a ticks
              * timer. */
-            cubic_data->min_rtt_usecs = max(tick >> TCP_RTT_SHIFT,
-                            t_srtt_usecs);
+            cubic_data->min_rtt_usecs = std::max(tick >> TCP_RTT_SHIFT,
+                            (int64_t)t_srtt_usecs);
 
             /*
              * If the connection is within its first congestion
@@ -625,7 +609,7 @@ cubic_ssthresh_update(struct cc_var *ccv, uint32_t maxseg)
     uint32_t ssthresh;
     uint32_t cwnd;
 
-    cubic_data = ccv->cc_data;
+    cubic_data = static_cast<struct cubic *>(ccv->cc_data);
     cwnd = CCV(ccv, snd_cwnd);
 
     /* Fast convergence heuristic. */
@@ -649,15 +633,15 @@ cubic_ssthresh_update(struct cc_var *ccv, uint32_t maxseg)
         ssthresh = ((uint64_t)cwnd *
             CUBIC_BETA) >> CUBIC_SHIFT;
     }
-    CCV(ccv, snd_ssthresh) = max(ssthresh, 2 * maxseg);
+    CCV(ccv, snd_ssthresh) = std::max(ssthresh, 2 * maxseg);
 }
 
-static void
+void
 cubic_rttsample(struct cc_var *ccv, uint32_t usec_rtt, uint32_t rxtcnt, uint32_t fas)
 {
     struct cubic *cubicd;
 
-    cubicd = ccv->cc_data;
+    cubicd = static_cast<struct cubic *>(ccv->cc_data);
     if (rxtcnt > 1) {
         /*
          * Only look at RTT's that are non-ambiguous.
@@ -686,12 +670,12 @@ cubic_rttsample(struct cc_var *ccv, uint32_t usec_rtt, uint32_t rxtcnt, uint32_t
         cubic_log_hystart_event(ccv, cubicd, 5, usec_rtt);
 }
 
-static void
+void
 cubic_newround(struct cc_var *ccv, uint32_t round_cnt)
 {
     struct cubic *cubicd;
 
-    cubicd = ccv->cc_data;
+    cubicd = static_cast<struct cubic *>(ccv->cc_data);
     /* We have entered a new round */
     cubicd->css_lastround_minrtt = cubicd->css_current_round_minrtt;
     cubicd->css_current_round_minrtt = 0xffffffff;
@@ -727,5 +711,5 @@ cubic_newround(struct cc_var *ccv, uint32_t round_cnt)
         cubic_log_hystart_event(ccv, cubicd, 4, round_cnt);
 }
 
-DECLARE_CC_MODULE(cubic, &cubic_cc_algo);
-MODULE_VERSION(cubic, 2);
+//DECLARE_CC_MODULE(cubic, &cubic_cc_algo);
+//MODULE_VERSION(cubic, 2);

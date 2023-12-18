@@ -55,62 +55,44 @@
  *
  */
 
-#include <sys/param.h>
-#include <sys/kernel.h>
-#include <sys/malloc.h>
-#include <sys/module.h>
-#include <sys/socket.h>
-#include <sys/lock.h>
-#include <sys/mutex.h>
-#include <sys/socketvar.h>
-#include <sys/sysctl.h>
-#include <sys/systm.h>
+#include "inet/transportlayer/tcp/flavours/freebsd/cc_newreno.h"
 
-#include <net/vnet.h>
+#include "inet/transportlayer/tcp/flavours/freebsd/cc_module.h"
+#include "inet/transportlayer/tcp/flavours/freebsd/cc.h"
+#include "inet/transportlayer/tcp/flavours/freebsd/tcp_timer.h"
+#include "inet/transportlayer/tcp/flavours/freebsd/tcp_var.h"
+#include "inet/transportlayer/tcp/flavours/freebsd/tcp.h"
 
-#include <net/route.h>
-#include <net/route/nhop.h>
+#include <malloc.h>
 
-#include <netinet/in_pcb.h>
-#include <netinet/in.h>
-#include <netinet/in_pcb.h>
-#include <netinet/tcp.h>
-#include <netinet/tcp_seq.h>
-#include <netinet/tcp_var.h>
-#include <netinet/tcp_log_buf.h>
-#include <netinet/tcp_hpts.h>
-#include <netinet/cc/cc.h>
-#include <netinet/cc/cc_module.h>
-#include <netinet/cc/cc_newreno.h>
+static bool V_cc_do_abe = false;
+static bool V_cc_abe_frlossreduce = false;
+static uint32_t V_newreno_beta = 50;
+static uint32_t V_newreno_beta_ecn = 50;
+static uint16_t V_tcp_abc_l_var = 0;
+static bool V_tcp_do_rfc3465 = false;
 
 static void newreno_cb_destroy(struct cc_var *ccv);
-static void newreno_ack_received(struct cc_var *ccv, uint16_t type);
-static void newreno_after_idle(struct cc_var *ccv);
-static void newreno_cong_signal(struct cc_var *ccv, uint32_t type);
-static int newreno_ctl_output(struct cc_var *ccv, struct sockopt *sopt, void *buf);
-static void newreno_newround(struct cc_var *ccv, uint32_t round_cnt);
-static void newreno_rttsample(struct cc_var *ccv, uint32_t usec_rtt, uint32_t rxtcnt, uint32_t fas);
-static  int newreno_cb_init(struct cc_var *ccv, void *);
+//static int newreno_ctl_output(struct cc_var *ccv, struct sockopt *sopt, void *buf);
 static size_t   newreno_data_sz(void);
 
-
-VNET_DECLARE(uint32_t, newreno_beta);
-#define V_newreno_beta VNET(newreno_beta)
-VNET_DECLARE(uint32_t, newreno_beta_ecn);
-#define V_newreno_beta_ecn VNET(newreno_beta_ecn)
+//VNET_DECLARE(uint32_t, newreno_beta);
+//#define V_newreno_beta VNET(newreno_beta)
+//VNET_DECLARE(uint32_t, newreno_beta_ecn);
+//#define V_newreno_beta_ecn VNET(newreno_beta_ecn)
 
 struct cc_algo newreno_cc_algo = {
     .name = "newreno",
+    .cc_data_sz = newreno_data_sz,
+    .cb_init = newreno_cb_init,
     .cb_destroy = newreno_cb_destroy,
     .ack_received = newreno_ack_received,
-    .after_idle = newreno_after_idle,
     .cong_signal = newreno_cong_signal,
     .post_recovery = newreno_cc_post_recovery,
-    .ctl_output = newreno_ctl_output,
+    .after_idle = newreno_after_idle,
     .newround = newreno_newround,
     .rttsample = newreno_rttsample,
-    .cb_init = newreno_cb_init,
-    .cc_data_sz = newreno_data_sz,
+//    .ctl_output = newreno_ctl_output,
 };
 
 static void
@@ -131,37 +113,37 @@ newreno_log_hystart_event(struct cc_var *ccv, struct newreno *nreno, uint8_t mod
      * 11 - We have slipped out of SS into CA via cwnd growth.
      * 12 - After idle has re-enabled hystart++
      */
-    struct tcpcb *tp;
-
-    if (hystart_bblogs == 0)
-        return;
-    tp = ccv->ccvc.tcp;
-    if (tcp_bblogging_on(tp)) {
-        union tcp_log_stackspecific log;
-        struct timeval tv;
-
-        memset(&log, 0, sizeof(log));
-        log.u_bbr.flex1 = flex1;
-        log.u_bbr.flex2 = nreno->css_current_round_minrtt;
-        log.u_bbr.flex3 = nreno->css_lastround_minrtt;
-        log.u_bbr.flex4 = nreno->css_rttsample_count;
-        log.u_bbr.flex5 = nreno->css_entered_at_round;
-        log.u_bbr.flex6 = nreno->css_baseline_minrtt;
-        /* We only need bottom 16 bits of flags */
-        log.u_bbr.flex7 = nreno->newreno_flags & 0x0000ffff;
-        log.u_bbr.flex8 = mod;
-        log.u_bbr.epoch = nreno->css_current_round;
-        log.u_bbr.timeStamp = tcp_get_usecs(&tv);
-        log.u_bbr.lt_epoch = nreno->css_fas_at_css_entry;
-        log.u_bbr.pkts_out = nreno->css_last_fas;
-        log.u_bbr.delivered = nreno->css_lowrtt_fas;
-        log.u_bbr.pkt_epoch = ccv->flags;
-        TCP_LOG_EVENTP(tp, NULL,
-            &tptosocket(tp)->so_rcv,
-            &tptosocket(tp)->so_snd,
-            TCP_HYSTART, 0,
-            0, &log, false, &tv);
-    }
+//    struct tcpcb *tp;
+//
+//    if (hystart_bblogs == 0)
+//        return;
+//    tp = ccv->ccvc.tcp;
+//    if (tcp_bblogging_on(tp)) {
+//        union tcp_log_stackspecific log;
+//        struct timeval tv;
+//
+//        memset(&log, 0, sizeof(log));
+//        log.u_bbr.flex1 = flex1;
+//        log.u_bbr.flex2 = nreno->css_current_round_minrtt;
+//        log.u_bbr.flex3 = nreno->css_lastround_minrtt;
+//        log.u_bbr.flex4 = nreno->css_rttsample_count;
+//        log.u_bbr.flex5 = nreno->css_entered_at_round;
+//        log.u_bbr.flex6 = nreno->css_baseline_minrtt;
+//        /* We only need bottom 16 bits of flags */
+//        log.u_bbr.flex7 = nreno->newreno_flags & 0x0000ffff;
+//        log.u_bbr.flex8 = mod;
+//        log.u_bbr.epoch = nreno->css_current_round;
+//        log.u_bbr.timeStamp = tcp_get_usecs(&tv);
+//        log.u_bbr.lt_epoch = nreno->css_fas_at_css_entry;
+//        log.u_bbr.pkts_out = nreno->css_last_fas;
+//        log.u_bbr.delivered = nreno->css_lowrtt_fas;
+//        log.u_bbr.pkt_epoch = ccv->flags;
+//        TCP_LOG_EVENTP(tp, NULL,
+//            &tptosocket(tp)->so_rcv,
+//            &tptosocket(tp)->so_snd,
+//            TCP_HYSTART, 0,
+//            0, &log, false, &tv);
+//    }
 }
 
 static size_t
@@ -170,14 +152,14 @@ newreno_data_sz(void)
     return (sizeof(struct newreno));
 }
 
-static int
+int
 newreno_cb_init(struct cc_var *ccv, void *ptr)
 {
     struct newreno *nreno;
 
-    INP_WLOCK_ASSERT(tptoinpcb(ccv->ccvc.tcp));
+//    INP_WLOCK_ASSERT(tptoinpcb(ccv->ccvc.tcp));
     if (ptr == NULL) {
-        ccv->cc_data = malloc(sizeof(struct newreno), M_CC_MEM, M_NOWAIT);
+        ccv->cc_data = calloc(1, sizeof(struct newreno));
         if (ccv->cc_data == NULL)
             return (ENOMEM);
     } else
@@ -208,15 +190,15 @@ newreno_cb_init(struct cc_var *ccv, void *ptr)
 static void
 newreno_cb_destroy(struct cc_var *ccv)
 {
-    free(ccv->cc_data, M_CC_MEM);
+    free(ccv->cc_data);
 }
 
-static void
+void
 newreno_ack_received(struct cc_var *ccv, uint16_t type)
 {
     struct newreno *nreno;
 
-    nreno = ccv->cc_data;
+    nreno = static_cast<struct newreno *>(ccv->cc_data);
     if (type == CC_ACK && !IN_RECOVERY(CCV(ccv, t_flags)) &&
         (ccv->flags & CCF_CWND_LIMITED)) {
         u_int cw = CCV(ccv, snd_cwnd);
@@ -267,7 +249,7 @@ newreno_ack_received(struct cc_var *ccv, uint16_t type)
                 else
                     incr = 0;
             } else
-                incr = max((incr * incr / cw), 1);
+                incr = std::max((incr * incr / cw), 1u);
         } else if (V_tcp_do_rfc3465) {
             /*
              * In slow-start with ABC enabled and no RTO in sight?
@@ -323,11 +305,11 @@ newreno_ack_received(struct cc_var *ccv, uint16_t type)
                 }
             }
             if (CCV(ccv, snd_nxt) == CCV(ccv, snd_max))
-                incr = min(ccv->bytes_this_ack,
+                incr = std::min((uint32_t)ccv->bytes_this_ack,
                     ccv->nsegs * abc_val *
                     CCV(ccv, t_maxseg));
             else
-                incr = min(ccv->bytes_this_ack, CCV(ccv, t_maxseg));
+                incr = std::min((uint32_t)ccv->bytes_this_ack, CCV(ccv, t_maxseg));
 
             /* Only if Hystart is enabled will the flag get set */
             if (nreno->newreno_flags & CC_NEWRENO_HYSTART_IN_CSS) {
@@ -338,16 +320,16 @@ newreno_ack_received(struct cc_var *ccv, uint16_t type)
         /* ABC is on by default, so incr equals 0 frequently. */
         if (incr > 0)
             CCV(ccv, snd_cwnd) = min(cw + incr,
-                TCP_MAXWIN << CCV(ccv, snd_scale));
+                (u_int)TCP_MAXWIN << CCV(ccv, snd_scale));
     }
 }
 
-static void
+void
 newreno_after_idle(struct cc_var *ccv)
 {
     struct newreno *nreno;
 
-    nreno = ccv->cc_data;
+    nreno = static_cast<struct newreno *>(ccv->cc_data);
     newreno_cc_after_idle(ccv);
     if ((nreno->newreno_flags & CC_NEWRENO_HYSTART_ENABLED) == 0) {
         /*
@@ -362,7 +344,7 @@ newreno_after_idle(struct cc_var *ccv)
 /*
  * Perform any necessary tasks before we enter congestion recovery.
  */
-static void
+void
 newreno_cong_signal(struct cc_var *ccv, uint32_t type)
 {
     struct newreno *nreno;
@@ -371,7 +353,7 @@ newreno_cong_signal(struct cc_var *ccv, uint32_t type)
 
     cwin = CCV(ccv, snd_cwnd);
     mss = tcp_fixed_maxseg(ccv->ccvc.tcp);
-    nreno = ccv->cc_data;
+    nreno = static_cast<struct newreno *>(ccv->cc_data);
     beta = (nreno == NULL) ? V_newreno_beta : nreno->beta;;
     beta_ecn = (nreno == NULL) ? V_newreno_beta_ecn : nreno->beta_ecn;
     /*
@@ -388,11 +370,11 @@ newreno_cong_signal(struct cc_var *ccv, uint32_t type)
         factor = beta;
 
     /* Catch algos which mistakenly leak private signal types. */
-    KASSERT((type & CC_SIGPRIVMASK) == 0,
-        ("%s: congestion signal type 0x%08x is private\n", __func__, type));
+//    KASSERT((type & CC_SIGPRIVMASK) == 0,
+//        ("%s: congestion signal type 0x%08x is private\n", __func__, type));
 
-    cwin = max(((uint64_t)cwin * (uint64_t)factor) / (100ULL * (uint64_t)mss),
-        2) * mss;
+    cwin = std::max(((uint64_t)cwin * (uint64_t)factor) / (100ULL * (uint64_t)mss),
+        2ULL) * mss;
 
     switch (type) {
     case CC_NDUPACK:
@@ -428,82 +410,82 @@ newreno_cong_signal(struct cc_var *ccv, uint32_t type)
         }
         break;
     case CC_RTO:
-        CCV(ccv, snd_ssthresh) = max(min(CCV(ccv, snd_wnd),
+        CCV(ccv, snd_ssthresh) = std::max(std::min(CCV(ccv, snd_wnd),
                          CCV(ccv, snd_cwnd)) / 2 / mss,
-                         2) * mss;
+                         2u) * mss;
         CCV(ccv, snd_cwnd) = mss;
         break;
     }
 }
 
-static int
-newreno_ctl_output(struct cc_var *ccv, struct sockopt *sopt, void *buf)
-{
-    struct newreno *nreno;
-    struct cc_newreno_opts *opt;
+//static int
+//newreno_ctl_output(struct cc_var *ccv, struct sockopt *sopt, void *buf)
+//{
+//    struct newreno *nreno;
+//    struct cc_newreno_opts *opt;
+//
+//    if (sopt->sopt_valsize != sizeof(struct cc_newreno_opts))
+//        return (EMSGSIZE);
+//
+//    if (CC_ALGO(ccv->ccvc.tcp) != &newreno_cc_algo)
+//        return (ENOPROTOOPT);
+//
+//    nreno = (struct newreno *)ccv->cc_data;
+//    opt = buf;
+//    switch (sopt->sopt_dir) {
+//    case SOPT_SET:
+//        switch (opt->name) {
+//        case CC_NEWRENO_BETA:
+//            nreno->beta = opt->val;
+//            break;
+//        case CC_NEWRENO_BETA_ECN:
+//            nreno->beta_ecn = opt->val;
+//            nreno->newreno_flags |= CC_NEWRENO_BETA_ECN_ENABLED;
+//            break;
+//        default:
+//            return (ENOPROTOOPT);
+//        }
+//        break;
+//    case SOPT_GET:
+//        switch (opt->name) {
+//        case CC_NEWRENO_BETA:
+//            opt->val =  nreno->beta;
+//            break;
+//        case CC_NEWRENO_BETA_ECN:
+//            opt->val = nreno->beta_ecn;
+//            break;
+//        default:
+//            return (ENOPROTOOPT);
+//        }
+//        break;
+//    default:
+//        return (EINVAL);
+//    }
+//
+//    return (0);
+//}
 
-    if (sopt->sopt_valsize != sizeof(struct cc_newreno_opts))
-        return (EMSGSIZE);
+//static int
+//newreno_beta_handler(SYSCTL_HANDLER_ARGS)
+//{
+//    int error;
+//    uint32_t new;
+//
+//    new = *(uint32_t *)arg1;
+//    error = sysctl_handle_int(oidp, &new, 0, req);
+//    if (error == 0 && req->newptr != NULL ) {
+//        if (arg1 == &VNET_NAME(newreno_beta_ecn) && !V_cc_do_abe)
+//            error = EACCES;
+//        else if (new == 0 || new > 100)
+//            error = EINVAL;
+//        else
+//            *(uint32_t *)arg1 = new;
+//    }
+//
+//    return (error);
+//}
 
-    if (CC_ALGO(ccv->ccvc.tcp) != &newreno_cc_algo)
-        return (ENOPROTOOPT);
-
-    nreno = (struct newreno *)ccv->cc_data;
-    opt = buf;
-    switch (sopt->sopt_dir) {
-    case SOPT_SET:
-        switch (opt->name) {
-        case CC_NEWRENO_BETA:
-            nreno->beta = opt->val;
-            break;
-        case CC_NEWRENO_BETA_ECN:
-            nreno->beta_ecn = opt->val;
-            nreno->newreno_flags |= CC_NEWRENO_BETA_ECN_ENABLED;
-            break;
-        default:
-            return (ENOPROTOOPT);
-        }
-        break;
-    case SOPT_GET:
-        switch (opt->name) {
-        case CC_NEWRENO_BETA:
-            opt->val =  nreno->beta;
-            break;
-        case CC_NEWRENO_BETA_ECN:
-            opt->val = nreno->beta_ecn;
-            break;
-        default:
-            return (ENOPROTOOPT);
-        }
-        break;
-    default:
-        return (EINVAL);
-    }
-
-    return (0);
-}
-
-static int
-newreno_beta_handler(SYSCTL_HANDLER_ARGS)
-{
-    int error;
-    uint32_t new;
-
-    new = *(uint32_t *)arg1;
-    error = sysctl_handle_int(oidp, &new, 0, req);
-    if (error == 0 && req->newptr != NULL ) {
-        if (arg1 == &VNET_NAME(newreno_beta_ecn) && !V_cc_do_abe)
-            error = EACCES;
-        else if (new == 0 || new > 100)
-            error = EINVAL;
-        else
-            *(uint32_t *)arg1 = new;
-    }
-
-    return (error);
-}
-
-static void
+void
 newreno_newround(struct cc_var *ccv, uint32_t round_cnt)
 {
     struct newreno *nreno;
@@ -544,7 +526,7 @@ newreno_newround(struct cc_var *ccv, uint32_t round_cnt)
         newreno_log_hystart_event(ccv, nreno, 4, round_cnt);
 }
 
-static void
+void
 newreno_rttsample(struct cc_var *ccv, uint32_t usec_rtt, uint32_t rxtcnt, uint32_t fas)
 {
     struct newreno *nreno;
@@ -578,20 +560,20 @@ newreno_rttsample(struct cc_var *ccv, uint32_t usec_rtt, uint32_t rxtcnt, uint32
         newreno_log_hystart_event(ccv, nreno, 5, usec_rtt);
 }
 
-SYSCTL_DECL(_net_inet_tcp_cc_newreno);
-SYSCTL_NODE(_net_inet_tcp_cc, OID_AUTO, newreno,
-    CTLFLAG_RW | CTLFLAG_MPSAFE, NULL,
-    "New Reno related settings");
+//SYSCTL_DECL(_net_inet_tcp_cc_newreno);
+//SYSCTL_NODE(_net_inet_tcp_cc, OID_AUTO, newreno,
+//    CTLFLAG_RW | CTLFLAG_MPSAFE, NULL,
+//    "New Reno related settings");
+//
+//SYSCTL_PROC(_net_inet_tcp_cc_newreno, OID_AUTO, beta,
+//    CTLFLAG_VNET | CTLTYPE_UINT | CTLFLAG_RW | CTLFLAG_NEEDGIANT,
+//    &VNET_NAME(newreno_beta), 3, &newreno_beta_handler, "IU",
+//    "New Reno beta, specified as number between 1 and 100");
+//
+//SYSCTL_PROC(_net_inet_tcp_cc_newreno, OID_AUTO, beta_ecn,
+//    CTLFLAG_VNET | CTLTYPE_UINT | CTLFLAG_RW | CTLFLAG_NEEDGIANT,
+//    &VNET_NAME(newreno_beta_ecn), 3, &newreno_beta_handler, "IU",
+//    "New Reno beta ecn, specified as number between 1 and 100");
 
-SYSCTL_PROC(_net_inet_tcp_cc_newreno, OID_AUTO, beta,
-    CTLFLAG_VNET | CTLTYPE_UINT | CTLFLAG_RW | CTLFLAG_NEEDGIANT,
-    &VNET_NAME(newreno_beta), 3, &newreno_beta_handler, "IU",
-    "New Reno beta, specified as number between 1 and 100");
-
-SYSCTL_PROC(_net_inet_tcp_cc_newreno, OID_AUTO, beta_ecn,
-    CTLFLAG_VNET | CTLTYPE_UINT | CTLFLAG_RW | CTLFLAG_NEEDGIANT,
-    &VNET_NAME(newreno_beta_ecn), 3, &newreno_beta_handler, "IU",
-    "New Reno beta ecn, specified as number between 1 and 100");
-
-DECLARE_CC_MODULE(newreno, &newreno_cc_algo);
-MODULE_VERSION(newreno, 2);
+//DECLARE_CC_MODULE(newreno, &newreno_cc_algo);
+//MODULE_VERSION(newreno, 2);
