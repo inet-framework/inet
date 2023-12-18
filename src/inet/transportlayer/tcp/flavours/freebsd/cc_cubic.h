@@ -39,7 +39,11 @@
 #ifndef _NETINET_CC_CUBIC_H_
 #define _NETINET_CC_CUBIC_H_
 
-#include <sys/limits.h>
+#include <algorithm>
+
+extern int64_t tick;
+
+extern struct cc_algo cubic_cc_algo;
 
 /* Number of bits of precision for fixed point math calcs. */
 #define CUBIC_SHIFT     8
@@ -85,7 +89,7 @@
 #define CUBICFLAG_HYSTART_IN_CSS    0x00000020  /* We are in Hystart++ CSS */
 
 /* Kernel only bits */
-#ifdef _KERNEL
+//#ifdef _KERNEL
 struct cubic {
     /* CUBIC K in fixed point form with CUBIC_SHIFT worth of precision. */
     int64_t     K;
@@ -133,7 +137,16 @@ struct cubic {
     uint32_t css_lowrtt_fas;
     uint32_t css_last_fas;
 };
-#endif
+//#endif
+
+int  cubic_cb_init(struct cc_var *ccv, void *ptr);
+void cubic_conn_init(struct cc_var *ccv);
+void cubic_ack_received(struct cc_var *ccv, uint16_t type);
+void cubic_cong_signal(struct cc_var *ccv, uint32_t type);
+void cubic_after_idle(struct cc_var *ccv);
+void cubic_post_recovery(struct cc_var *ccv);
+void cubic_newround(struct cc_var *ccv, uint32_t round_cnt);
+void cubic_rttsample(struct cc_var *ccv, uint32_t usec_rtt, uint32_t rxtcnt, uint32_t fas);
 
 /* Userland only bits. */
 #ifndef _KERNEL
@@ -260,7 +273,7 @@ cubic_cwnd(int usecs_since_epoch, unsigned long wmax, uint32_t smss, int64_t K)
     /*
      * for negative cwnd, limiting to zero as lower bound
      */
-    return (lmax(0,cwnd));
+    return (std::max((int64_t)0,cwnd));
 }
 
 /*

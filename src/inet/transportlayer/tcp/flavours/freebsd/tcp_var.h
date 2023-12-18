@@ -32,9 +32,6 @@
 #ifndef _NETINET_TCP_VAR_H_
 #define _NETINET_TCP_VAR_H_
 
-#include <netinet/tcp.h>
-#include <netinet/tcp_fsm.h>
-
 #ifdef _KERNEL
 #include <net/vnet.h>
 #include <sys/mbuf.h>
