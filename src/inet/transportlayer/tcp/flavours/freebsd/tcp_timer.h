@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 1982, 1986, 1993
- *	The Regents of the University of California.  All rights reserved.
+ *  The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -61,7 +61,7 @@
  * is established, if the connection is idle for TCPTV_KEEP_IDLE time
  * (and keepalives have been enabled on the socket), we begin to probe
  * the connection.  We force the peer to send us a segment by sending:
- *	<SEQ=SND.UNA-1><ACK=RCV.NXT><CTL=ACK>
+ *  <SEQ=SND.UNA-1><ACK=RCV.NXT><CTL=ACK>
  * This segment is (deliberately) outside the window, and should elicit
  * an ack segment in response from the peer.  If, despite the TCPT_KEEP
  * initiated segments we cannot elicit a response from a peer in TCPT_MAXIDLE
@@ -71,19 +71,19 @@
 /*
  * Time constants.
  */
-#define	TCPTV_MSL	( 30*hz)		/* max seg lifetime (hah!) */
-#define	TCPTV_SRTTBASE	0			/* base roundtrip time;
-						   if 0, no idea yet */
-#define	TCPTV_RTOBASE	(  1*hz)		/* assumed RTO if no info */
+#define TCPTV_MSL   ( 30*hz)        /* max seg lifetime (hah!) */
+#define TCPTV_SRTTBASE  0           /* base roundtrip time;
+                           if 0, no idea yet */
+#define TCPTV_RTOBASE   (  1*hz)        /* assumed RTO if no info */
 
-#define	TCPTV_PERSMIN	(  5*hz)		/* minimum persist interval */
-#define	TCPTV_PERSMAX	( 60*hz)		/* maximum persist interval */
+#define TCPTV_PERSMIN   (  5*hz)        /* minimum persist interval */
+#define TCPTV_PERSMAX   ( 60*hz)        /* maximum persist interval */
 
-#define	TCPTV_KEEP_INIT	( 75*hz)		/* initial connect keepalive */
-#define	TCPTV_KEEP_IDLE	(120*60*hz)		/* dflt time before probing */
-#define	TCPTV_KEEPINTVL	( 75*hz)		/* default probe interval */
-#define	TCPTV_KEEPCNT	8			/* max probes before drop */
-#define	TCPTV_MAXUNACKTIME	0		/* max time without making progress */
+#define TCPTV_KEEP_INIT ( 75*hz)        /* initial connect keepalive */
+#define TCPTV_KEEP_IDLE (120*60*hz)     /* dflt time before probing */
+#define TCPTV_KEEPINTVL ( 75*hz)        /* default probe interval */
+#define TCPTV_KEEPCNT   8           /* max probes before drop */
+#define TCPTV_MAXUNACKTIME  0       /* max time without making progress */
 
 #define TCPTV_FINWAIT2_TIMEOUT (60*hz)         /* FIN_WAIT_2 timeout if no receiver */
 
@@ -107,15 +107,15 @@
  * The prior minimum of 1*hz (1 second) badly breaks throughput on any
  * networks faster then a modem that has minor (e.g. 1%) packet loss.
  */
-#define	TCPTV_MIN	( hz/33 )		/* minimum allowable value */
-#define TCPTV_CPU_VAR	( hz/5 )		/* cpu variance allowed (200ms) */
-#define	TCPTV_REXMTMAX	( 64*hz)		/* max allowable REXMT value */
+#define TCPTV_MIN   ( hz/33 )       /* minimum allowable value */
+#define TCPTV_CPU_VAR   ( hz/5 )        /* cpu variance allowed (200ms) */
+#define TCPTV_REXMTMAX  ( 64*hz)        /* max allowable REXMT value */
 
-#define TCPTV_TWTRUNC	8			/* RTO factor to truncate TW */
+#define TCPTV_TWTRUNC   8           /* RTO factor to truncate TW */
 
-#define	TCP_MAXRXTSHIFT	12			/* maximum retransmits */
+#define TCP_MAXRXTSHIFT 12          /* maximum retransmits */
 
-#define	TCPTV_DELACK	( hz/25 )		/* 40ms timeout */
+#define TCPTV_DELACK    ( hz/25 )       /* 40ms timeout */
 
 /*
  * If we exceed this number of retransmits for a single segment, we'll consider
@@ -127,22 +127,22 @@
 /*
  * Force a time value to be in a certain range.
  */
-#define	TCPT_RANGESET(tv, value, tvmin, tvmax) do { \
-	(tv) = (value) + tcp_rexmit_slop; \
-	if ((u_long)(tv) < (u_long)(tvmin)) \
-		(tv) = (tvmin); \
-	if ((u_long)(tv) > (u_long)(tvmax)) \
-		(tv) = (tvmax); \
+#define TCPT_RANGESET(tv, value, tvmin, tvmax) do { \
+    (tv) = (value) + tcp_rexmit_slop; \
+    if ((u_long)(tv) < (u_long)(tvmin)) \
+        (tv) = (tvmin); \
+    if ((u_long)(tv) > (u_long)(tvmax)) \
+        (tv) = (tvmax); \
 } while(0)
 
 #ifdef _KERNEL
 
-#define	TP_KEEPINIT(tp)	((tp)->t_keepinit ? (tp)->t_keepinit : tcp_keepinit)
-#define	TP_KEEPIDLE(tp)	((tp)->t_keepidle ? (tp)->t_keepidle : tcp_keepidle)
-#define	TP_KEEPINTVL(tp) ((tp)->t_keepintvl ? (tp)->t_keepintvl : tcp_keepintvl)
-#define	TP_KEEPCNT(tp)	((tp)->t_keepcnt ? (tp)->t_keepcnt : tcp_keepcnt)
-#define	TP_MAXIDLE(tp)	(TP_KEEPCNT(tp) * TP_KEEPINTVL(tp))
-#define	TP_MAXUNACKTIME(tp)	\
+#define TP_KEEPINIT(tp) ((tp)->t_keepinit ? (tp)->t_keepinit : tcp_keepinit)
+#define TP_KEEPIDLE(tp) ((tp)->t_keepidle ? (tp)->t_keepidle : tcp_keepidle)
+#define TP_KEEPINTVL(tp) ((tp)->t_keepintvl ? (tp)->t_keepintvl : tcp_keepintvl)
+#define TP_KEEPCNT(tp)  ((tp)->t_keepcnt ? (tp)->t_keepcnt : tcp_keepcnt)
+#define TP_MAXIDLE(tp)  (TP_KEEPCNT(tp) * TP_KEEPINTVL(tp))
+#define TP_MAXUNACKTIME(tp) \
     ((tp)->t_maxunacktime ? (tp)->t_maxunacktime : tcp_maxunacktime)
 
 /*
@@ -150,23 +150,23 @@
  * This macro ensures the restransmit timer fires at the earlier of the
  * t_rxtcur value or the time the maxunacktime would be exceeded.
  */
-#define	TP_RXTCUR(tp)							\
-    ((TP_MAXUNACKTIME(tp) == 0 || tp->t_acktime == 0) ? tp->t_rxtcur :	\
+#define TP_RXTCUR(tp)                           \
+    ((TP_MAXUNACKTIME(tp) == 0 || tp->t_acktime == 0) ? tp->t_rxtcur :  \
     max(1, min(tp->t_rxtcur, tp->t_acktime + TP_MAXUNACKTIME(tp) - ticks)))
 
-extern int tcp_persmin;			/* minimum persist interval */
-extern int tcp_persmax;			/* maximum persist interval */
-extern int tcp_keepinit;		/* time to establish connection */
-extern int tcp_keepidle;		/* time before keepalive probes begin */
-extern int tcp_keepintvl;		/* time between keepalive probes */
-extern int tcp_keepcnt;			/* number of keepalives */
-extern int tcp_delacktime;		/* time before sending a delayed ACK */
-extern int tcp_maxunacktime;		/* max time without making progress */
+extern int tcp_persmin;         /* minimum persist interval */
+extern int tcp_persmax;         /* maximum persist interval */
+extern int tcp_keepinit;        /* time to establish connection */
+extern int tcp_keepidle;        /* time before keepalive probes begin */
+extern int tcp_keepintvl;       /* time between keepalive probes */
+extern int tcp_keepcnt;         /* number of keepalives */
+extern int tcp_delacktime;      /* time before sending a delayed ACK */
+extern int tcp_maxunacktime;        /* max time without making progress */
 extern int tcp_maxpersistidle;
 extern int tcp_rexmit_initial;
 extern int tcp_rexmit_min;
 extern int tcp_rexmit_slop;
-extern int tcp_ttl;			/* time to live for TCP segs */
+extern int tcp_ttl;         /* time to live for TCP segs */
 extern int tcp_backoff[];
 extern int tcp_totbackoff;
 extern int tcp_rexmit_drop_options;
@@ -175,15 +175,15 @@ extern int tcp_finwait2_timeout;
 extern int tcp_fast_finwait2_recycle;
 
 VNET_DECLARE(int, tcp_always_keepalive);
-#define	V_tcp_always_keepalive		VNET(tcp_always_keepalive)
+#define V_tcp_always_keepalive      VNET(tcp_always_keepalive)
 VNET_DECLARE(int, tcp_pmtud_blackhole_detect);
-#define V_tcp_pmtud_blackhole_detect	VNET(tcp_pmtud_blackhole_detect)
+#define V_tcp_pmtud_blackhole_detect    VNET(tcp_pmtud_blackhole_detect)
 VNET_DECLARE(int, tcp_pmtud_blackhole_mss);
-#define	V_tcp_pmtud_blackhole_mss	VNET(tcp_pmtud_blackhole_mss)
+#define V_tcp_pmtud_blackhole_mss   VNET(tcp_pmtud_blackhole_mss)
 VNET_DECLARE(int, tcp_v6pmtud_blackhole_mss);
-#define V_tcp_v6pmtud_blackhole_mss	VNET(tcp_v6pmtud_blackhole_mss)
+#define V_tcp_v6pmtud_blackhole_mss VNET(tcp_v6pmtud_blackhole_mss)
 VNET_DECLARE(int, tcp_msl);
-#define V_tcp_msl			VNET(tcp_msl)
+#define V_tcp_msl           VNET(tcp_msl)
 
 #endif /* _KERNEL */
 
