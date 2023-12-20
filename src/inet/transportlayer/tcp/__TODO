@@ -4,6 +4,7 @@ Modern (latest RFCs) and correct TCP implementation (at least validated)
 
 Tasks
 
+Move GPL TcpCubic to inet-gpl
 Remove the concept of dup ACKs from TcpConnection
 Move dupacks to TcpAlgorithmBase
 Rename TcpAlgorithm to ITcpAlgorithm
