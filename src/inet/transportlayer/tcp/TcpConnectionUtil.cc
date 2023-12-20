@@ -940,11 +940,9 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         // data is acknowledged.
         bool unacknowledgedData = (state->snd_una != state->snd_max);
         bool containsFin = state->send_fin && (state->snd_nxt + bytesToSend) == state->snd_fin_seq;
-        if (allowedToSend < state->snd_mss && buffered > allowedToSend) {
+        if (allowedToSend < state->snd_mss && buffered > allowedToSend)
             EV_WARN << "Not sending to prevent Silly Window Syndrome.\n";
-            return false;
-        }
-        if (state->nagle_enabled && unacknowledgedData && !containsFin && buffered < state->snd_mss)
+        else if (state->nagle_enabled && unacknowledgedData && !containsFin && buffered < state->snd_mss)
             EV_WARN << "Cannot send (last) segment due to Nagle, not enough data for a full segment\n";
         else
             sendSegment(bytesToSend);
