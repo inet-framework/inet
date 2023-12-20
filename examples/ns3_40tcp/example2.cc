@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
   Config::SetDefault("ns3::TcpL4Protocol::SocketType", StringValue(socketType.c_str()));
   Config::SetDefault("ns3::TcpL4Protocol::RecoveryType", TypeIdValue(TypeId::LookupByName("ns3::TcpClassicRecovery")));
   Config::SetDefault("ns3::PcapFileWrapper::NanosecMode", ns3::BooleanValue(true));
-  Config::SetDefault("ns3::TcpSocket::SndBufSize", UintegerValue(1000000));
+  Config::SetDefault("ns3::TcpSocket::SndBufSize", UintegerValue(2000000));
   Config::SetDefault("ns3::BulkSendApplication::SendSize", UintegerValue(100));
 
   PointToPointHelper p2p1, p2p2;
@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
   uint16_t remotePort = 1000;
 
   BulkSendHelper source("ns3::TcpSocketFactory", InetSocketAddress(iface2.GetAddress(1), remotePort));
-  source.SetAttribute("MaxBytes", UintegerValue(1000000));
+  source.SetAttribute("MaxBytes", UintegerValue(2000000));
   ApplicationContainer sourceApps = source.Install(nodes.Get(0));
   sourceApps.Start(Seconds(0.0));
   sourceApps.Stop(Seconds(10.0));
