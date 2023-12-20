@@ -16,14 +16,14 @@
  *
  */
 
-#ifndef TCPCUBIC_H
-#define TCPCUBIC_H
+#ifndef __INET_TCPCUBIC_H
+#define __INET_TCPCUBIC_H
 
-#include "tcp-congestion-ops.h"
-#include "tcp-socket-base.h"
+#include "inet/transportlayer/tcp/flavours/TcpAlgorithmBase.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBaseState_m.h"
 
-namespace ns3
-{
+namespace inet {
+namespace tcp {
 
 /**
  * \brief The Cubic Congestion Control Algorithm
@@ -66,7 +66,7 @@ namespace ns3
  *
  * More information on this implementation: http://dl.acm.org/citation.cfm?id=2756518
  */
-class TcpCubic : public TcpCongestionOps
+class INET_API TcpCubic : public TcpAlgorithmBase
 {
   public:
     /**
@@ -79,39 +79,32 @@ class TcpCubic : public TcpCongestionOps
         BOTH = 3,         //!< Detection by both
     };
 
-    /**
-     * \brief Get the type ID.
-     * \return the object TypeId
-     */
-    static TypeId GetTypeId();
-
     TcpCubic();
 
-    /**
-     * Copy constructor
-     * \param sock Socket to copy
-     */
-    TcpCubic(const TcpCubic& sock);
+    virtual void initialize() override;
+    virtual void established(bool active) override;
+    virtual void processRexmitTimer(TcpEventCode& event) override;
+    virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
+    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
+    virtual void receivedAckForUnsentData(uint32_t seq) override;
+    virtual void receivedDuplicateAck() override;
+    virtual uint32_t getBytesInFlight() const override;
 
-    std::string GetName() const override;
-    void PktsAcked(Ptr<TcpSocketState> tcb, uint32_t segmentsAcked, const Time& rtt) override;
-    void IncreaseWindow(Ptr<TcpSocketState> tcb, uint32_t segmentsAcked) override;
-    uint32_t GetSsThresh(Ptr<const TcpSocketState> tcb, uint32_t bytesInFlight) override;
-    void CongestionStateSet(Ptr<TcpSocketState> tcb,
-                            const TcpSocketState::TcpCongState_t newState) override;
+    uint32_t calculateSsthresh(uint32_t bytesInFlight);
 
-    Ptr<TcpCongestionOps> Fork() override;
+  protected:
+    TcpClassicAlgorithmBaseStateVariables *& state; // alias to TcpAlgorithm's 'state'
+    ITcpRecovery *recovery = nullptr;
 
-  private:
     bool m_fastConvergence; //!< Enable or disable fast convergence algorithm
     double m_beta;          //!< Beta for cubic multiplicative increase
 
     bool m_hystart;                        //!< Enable or disable HyStart algorithm
     HybridSSDetectionMode m_hystartDetect; //!< Detect way for HyStart algorithm
     uint32_t m_hystartLowWindow;           //!< Lower bound cWnd for hybrid slow start (segments)
-    Time m_hystartAckDelta;                //!< Spacing between ack's indicating train
-    Time m_hystartDelayMin;                //!< Minimum time for hystart algorithm
-    Time m_hystartDelayMax;                //!< Maximum time for hystart algorithm
+    simtime_t m_hystartAckDelta;                //!< Spacing between ack's indicating train
+    simtime_t m_hystartDelayMin;                //!< Minimum time for hystart algorithm
+    simtime_t m_hystartDelayMax;                //!< Maximum time for hystart algorithm
     uint8_t m_hystartMinSamples; //!< Number of delay samples for detecting the increase of delay
 
     uint32_t m_initialCwnd; //!< Initial cWnd
@@ -123,45 +116,46 @@ class TcpCubic : public TcpCongestionOps
     uint32_t m_cWndCnt;        //!<  cWnd integer-to-float counter
     uint32_t m_lastMaxCwnd;    //!<  Last maximum cWnd
     uint32_t m_bicOriginPoint; //!<  Origin point of bic function
-    double m_bicK;             //!<  Time to origin point from the beginning
+    double m_bicK;             //!<  simtime_t to origin point from the beginning
                                //    of the current epoch (in s)
-    Time m_delayMin;           //!<  Min delay
-    Time m_epochStart;         //!<  Beginning of an epoch
+    simtime_t m_delayMin;           //!<  Min delay
+    simtime_t m_epochStart;         //!<  Beginning of an epoch
     bool m_found;              //!<  The exit point is found?
-    Time m_roundStart;         //!<  Beginning of each round
-    SequenceNumber32 m_endSeq; //!<  End sequence of the round
-    Time m_lastAck;            //!<  Last time when the ACK spacing is close
-    Time m_cubicDelta;         //!<  Time to wait after recovery before update
-    Time m_currRtt;            //!<  Current Rtt
+    simtime_t m_roundStart;         //!<  Beginning of each round
+    uint32_t m_endSeq; //!<  End sequence of the round
+    simtime_t m_lastAck;            //!<  Last time when the ACK spacing is close
+    simtime_t m_cubicDelta;         //!<  simtime_t to wait after recovery before update
+    simtime_t m_currRtt;            //!<  Current Rtt
     uint32_t m_sampleCnt;      //!<  Count of samples for HyStart
 
-  private:
+  protected:
+    virtual TcpStateVariables *createStateVariables() override { return new TcpClassicAlgorithmBaseStateVariables(); }
+
+    void pktsAcked(uint32_t segmentsAcked, const simtime_t& rtt);
+    void increaseWindow(uint32_t segmentsAcked);
+
     /**
      * \brief Reset HyStart parameters
-     * \param tcb Transmission Control Block of the connection
      */
-    void HystartReset(Ptr<const TcpSocketState> tcb);
+    void hystartReset();
 
     /**
      * \brief Reset Cubic parameters
-     * \param tcb Transmission Control Block of the connection
      */
-    void CubicReset(Ptr<const TcpSocketState> tcb);
+    void cubicReset();
 
     /**
      * \brief Cubic window update after a new ack received
-     * \param tcb Transmission Control Block of the connection
      * \returns the congestion window update counter
      */
-    uint32_t Update(Ptr<TcpSocketState> tcb);
+    uint32_t update();
 
     /**
      * \brief Update HyStart parameters
      *
-     * \param tcb Transmission Control Block of the connection
      * \param delay Delay for HyStart algorithm
      */
-    void HystartUpdate(Ptr<TcpSocketState> tcb, const Time& delay);
+    void hystartUpdate(const simtime_t& delay);
 
     /**
      * \brief Clamp time value in a range
@@ -169,13 +163,14 @@ class TcpCubic : public TcpCongestionOps
      * The returned value is t, clamped in a range specified
      * by attributes (HystartDelayMin < t < HystartDelayMax)
      *
-     * \param t Time value to clamp
+     * \param t simtime_t value to clamp
      * \return t itself if it is in range, otherwise the min or max
      * value
      */
-    Time HystartDelayThresh(const Time& t) const;
+    simtime_t hystartDelayThresh(const simtime_t& t) const;
 };
 
-} // namespace ns3
+} // namespace tcp
+} // namespace inet
 
-#endif // TCPCUBIC_H
+#endif // __INET_TCPCUBIC_H
