@@ -95,12 +95,12 @@ void Rfc5681Recovery::receivedDuplicateAck()
         // data in the network.
         //"
 //        uint32_t flightSize = state->snd_max - state->snd_una; // literal RFC version
-        uint32_t flightSize = conn->getTcpAlgorithm()->getBytesInFlight() + state->snd_mss; // Ns-3 validation version: the +1 MSS accounts for the retransmitOneSegment call below
+        uint32_t flightSize = conn->getTcpAlgorithm()->getBytesInFlight() + state->snd_effmss; // Ns-3 validation version: the +1 MSS accounts for the retransmitOneSegment call below
         // TODO move this to a derived class or use function pointer for ssthresh calculation?
         if (TcpCubic *tcpCubic = dynamic_cast<TcpCubic *>(conn->getTcpAlgorithmForUpdate()))
             state->ssthresh = tcpCubic->calculateSsthresh(flightSize);
         else
-            state->ssthresh = std::max(flightSize / 2, 2 * state->snd_mss);
+            state->ssthresh = std::max(flightSize / 2, 2 * state->snd_effmss);
         conn->emit(ssthreshSignal, state->ssthresh);
 
         //"
@@ -110,7 +110,7 @@ void Rfc5681Recovery::receivedDuplicateAck()
         //    left the network and which the receiver has buffered.
         //"
         conn->retransmitOneSegment(false);
-//        state->snd_cwnd = state->ssthresh + 3 * state->snd_mss; // literal RFC version
+//        state->snd_cwnd = state->ssthresh + 3 * state->snd_effmss; // literal RFC version
         state->snd_cwnd = state->ssthresh; // Ns-3 validation version: getBytesInFlight already accounts for the 3 segments in sackedOut
         conn->emit(cwndSignal, state->snd_cwnd);
     }
@@ -121,7 +121,7 @@ void Rfc5681Recovery::receivedDuplicateAck()
     //    has left the network.
     //"
     else if (state->dupacks > state->dupthresh) {
-        state->snd_cwnd += state->snd_mss;
+        state->snd_cwnd += state->snd_effmss;
         conn->emit(cwndSignal, state->snd_cwnd);
     }
     //"
