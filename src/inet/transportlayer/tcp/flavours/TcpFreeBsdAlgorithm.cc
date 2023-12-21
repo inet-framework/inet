@@ -79,6 +79,7 @@ void TcpFreeBsdAlgorithm::copythere()
 {
     auto tcp = cc.ccvc.tcp;
     tcp->t_maxseg = state->snd_mss;
+    tcp->t_effmaxseg = state->snd_effmss;
     tcp->snd_scale = state->snd_wnd_scale;
     tcp->snd_cwnd = state->snd_cwnd;
     tcp->snd_max = state->snd_max;
@@ -102,6 +103,7 @@ void TcpFreeBsdAlgorithm::copyback()
 {
     auto tcp = cc.ccvc.tcp;
     state->snd_mss = tcp->t_maxseg;
+    state->snd_effmss = tcp->t_effmaxseg;
     state->snd_wnd_scale = tcp->snd_scale;
     if (state->snd_cwnd != tcp->snd_cwnd) {
         state->snd_cwnd = tcp->snd_cwnd;

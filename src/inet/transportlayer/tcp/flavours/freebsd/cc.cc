@@ -66,11 +66,11 @@ int tcp_compute_pipe(struct tcpcb *tp)
 }
 
 u_int tcp_maxseg(const struct tcpcb *tp) {
-    return tp->t_maxseg;
+    return tp->t_effmaxseg;
 }
 
 u_int tcp_fixed_maxseg(const struct tcpcb *tp) {
-    return tp->t_maxseg;
+    return tp->t_effmaxseg;
 }
 
 uint32_t tcp_get_srtt(struct tcpcb *tp, int granularity) {
