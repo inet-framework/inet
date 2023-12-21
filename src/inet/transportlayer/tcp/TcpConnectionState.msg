@@ -115,6 +115,7 @@ struct TcpStateVariables
     uint32_t snd_mss = 0;           // sender maximum segment size (without headers, i.e. only segment text); see RFC 2581, page 1.
                                     // This will be set to the minimum of the local smss parameter and the value specified in the
                                     // MSS option received during connection setup.
+    uint32_t snd_effmss = 0;        // effective sender maximum segment size without TCP/IP header options
 
     // send sequence number variables (see RFC 793, "3.2. Terminology")
     uint32_t snd_una = 0;           // send unacknowledged

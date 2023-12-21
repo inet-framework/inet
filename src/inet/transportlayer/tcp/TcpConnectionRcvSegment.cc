@@ -309,6 +309,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
             return TCP_E_IGNORE;
         }
 
+        state->snd_effmss = calculateEffectiveMss();
         // notify tcpAlgorithm and app layer
         tcpAlgorithm->established(false);
 
@@ -1016,6 +1017,7 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
 
             // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
             state->ack_now = true;
+            state->snd_effmss = calculateEffectiveMss();
             tcpAlgorithm->established(true);
             tcpMain->emit(Tcp::tcpConnectionAddedSignal, this);
             sendEstabIndicationToApp();
