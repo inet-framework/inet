@@ -322,6 +322,8 @@ class INET_API TcpConnection : public cSimpleModule
 
     std::string validationInfo() const;
 
+    virtual uint32_t calculateEffectiveMss();
+
   public:
     TcpConnection() {}
     TcpConnection(const TcpConnection& other) {} // FIXME kludge
