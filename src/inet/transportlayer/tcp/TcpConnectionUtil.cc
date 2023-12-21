@@ -1343,7 +1343,13 @@ bool TcpConnection::processMSSOption(const Ptr<const TcpHeader>& tcpHeader, cons
     state->snd_mss = std::min(state->snd_mss, (uint32_t)option.getMaxSegmentSize());
 
     if (state->snd_mss == 0)
-        state->snd_mss = 536;
+        // RFC 9293, section 3.7.1
+        //"
+        // If an MSS Option is not received at connection setup,
+        // TCP implementations MUST assume a default send MSS of
+        // 536 (576 - 40) for IPv4 or 1220 (1280 - 60) for IPv6 (MUST-15).
+        //"
+        state->snd_mss = remoteAddr.getType() == L3Address::IPv4 ? 536 : 1220;
 
     // Store negotiated MSS for PMTUD: this is the value we restore after the probe timeout
     state->pmtudOriginalMss = state->snd_mss;
