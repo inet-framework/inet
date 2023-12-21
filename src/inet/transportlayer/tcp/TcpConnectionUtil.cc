@@ -622,6 +622,7 @@ void TcpConnection::configureStateVariables()
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
+    state->snd_effmss = calculateEffectiveMss();
     state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 1323)
     state->ecnWillingness = tcpMain->par("ecnWillingness"); // if set, current host is willing to use ECN
     state->dupthresh = tcpMain->par("dupthresh");
@@ -1346,6 +1347,7 @@ bool TcpConnection::processMSSOption(const Ptr<const TcpHeader>& tcpHeader, cons
 
     // Store negotiated MSS for PMTUD: this is the value we restore after the probe timeout
     state->pmtudOriginalMss = state->snd_mss;
+    state->snd_effmss = calculateEffectiveMss();
 
     EV_INFO << "Tcp Header Option MSS(=" << option.getMaxSegmentSize() << ") received, SMSS is set to " << state->snd_mss << "\n";
     return true;
@@ -1440,6 +1442,19 @@ bool TcpConnection::processSACKPermittedOption(const Ptr<const TcpHeader>& tcpHe
     state->sack_enabled = state->sack_support && state->snd_sack_perm && state->rcv_sack_perm;
     EV_INFO << "Tcp Header Option SACK_PERMITTED received, SACK (sack_enabled) is set to " << state->sack_enabled << "\n";
     return true;
+}
+
+uint32_t TcpConnection::calculateEffectiveMss()
+{
+    // calculate mss minus TCP options length for cwnd calculations
+    // TCP options used during the handshake is ignored
+    // only TCP options used in established connections are considered
+    // we only support two such options: timestamp and sack options
+    // we only calculate with the timestamp option
+    // the sack option is ignored because it is variable width and
+    // the number of sack blocks is not yet known when this value is needed
+    // also it is not important during recovery and during bidirectional traffic
+    return state->snd_mss - (state->ts_enabled ? 10 + 1 + 1 : 0); // timestamp option + end of options + padding
 }
 
 TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
