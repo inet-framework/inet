@@ -8,9 +8,10 @@
 
 #include <algorithm> // min,max
 
+#include "inet/transportlayer/tcp/flavours/TcpCubic.h"
 #include "inet/transportlayer/tcp/Tcp.h"
-#include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
+#include "inet/transportlayer/tcp/TcpSendQueue.h"
 
 namespace inet {
 namespace tcp {
@@ -95,7 +96,11 @@ void Rfc5681Recovery::receivedDuplicateAck()
         //"
 //        uint32_t flightSize = state->snd_max - state->snd_una; // literal RFC version
         uint32_t flightSize = conn->getTcpAlgorithm()->getBytesInFlight() + state->snd_mss; // Ns-3 validation version: the +1 MSS accounts for the retransmitOneSegment call below
-        state->ssthresh = std::max(flightSize / 2, 2 * state->snd_mss);
+        // TODO move this to a derived class or use function pointer for ssthresh calculation?
+        if (TcpCubic *tcpCubic = dynamic_cast<TcpCubic *>(conn->getTcpAlgorithmForUpdate()))
+            state->ssthresh = tcpCubic->calculateSsthresh(flightSize);
+        else
+            state->ssthresh = std::max(flightSize / 2, 2 * state->snd_mss);
         conn->emit(ssthreshSignal, state->ssthresh);
 
         //"
