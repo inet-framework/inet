@@ -62,6 +62,7 @@
 int hz = 1000;
 int64_t tick = 1000000 / hz;
 
+// NOTE: V_cubic_use_tf was added when ported to INET
 static bool V_cubic_use_tf = false;
 static bool V_tcp_do_newsack = false;
 static uint16_t V_tcp_abc_l_var = 1;
@@ -289,6 +290,7 @@ cubic_ack_received(struct cc_var *ccv, uint16_t type)
 
             ccv->flags &= ~CCF_ABC_SENTAWND;
 
+            // NOTE: V_cubic_use_tf was added when ported to INET
             if (V_cubic_use_tf && W_cubic < W_est) {
                 /*
                  * TCP-friendly region, follow tf
