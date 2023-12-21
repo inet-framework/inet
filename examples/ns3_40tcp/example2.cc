@@ -99,8 +99,10 @@ int main(int argc, char *argv[]) {
 
   GlobalValue::Bind("ChecksumEnabled", BooleanValue(true));
 
+  bool timestampEnabled = socketType == "ns3::TcpCubic";
+
   Config::SetDefault("ns3::TcpSocketBase::Sack", BooleanValue(sack));
-  Config::SetDefault("ns3::TcpSocketBase::Timestamp", BooleanValue(false));
+  Config::SetDefault("ns3::TcpSocketBase::Timestamp", BooleanValue(timestampEnabled));
   Config::SetDefault("ns3::TcpSocket::SegmentSize", UintegerValue(536));
   Config::SetDefault("ns3::TcpSocket::InitialCwnd", UintegerValue(1));
   Config::SetDefault("ns3::TcpSocket::DelAckCount", UintegerValue(delAckCount));
