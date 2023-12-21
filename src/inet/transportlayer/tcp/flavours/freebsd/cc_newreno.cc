@@ -320,7 +320,7 @@ newreno_ack_received(struct cc_var *ccv, uint16_t type)
         /* ABC is on by default, so incr equals 0 frequently. */
         if (incr > 0)
             CCV(ccv, snd_cwnd) = cw + incr;
-        // NOTE: this is commented out because this limit seems arbitrary
+        // NOTE: this was commented out when ported to INET because this limit seems arbitrary
         // this change was required to match the cwnd in Ns-3 and native INET simulations
 //            CCV(ccv, snd_cwnd) = min(cw + incr,
 //                (u_int)TCP_MAXWIN << CCV(ccv, snd_scale));
