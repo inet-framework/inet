@@ -55,6 +55,7 @@ extern int64_t ticks;
 
 struct tcpcb {
     uint32_t t_maxseg;
+    uint32_t t_effmaxseg;
     u_char snd_scale;
     uint32_t snd_cwnd;
     tcp_seq snd_max;
