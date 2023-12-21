@@ -906,7 +906,7 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         return false;
     }
 
-    if (allowedToSend < state->snd_mss && buffered > allowedToSend) {
+    if (allowedToSend < state->snd_effmss && buffered > allowedToSend) {
         EV_WARN << "Not sending to prevent Silly Window Syndrome.\n";
         return false;
     }
@@ -941,9 +941,9 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         // data is acknowledged.
         bool unacknowledgedData = (state->snd_una != state->snd_max);
         bool containsFin = state->send_fin && (state->snd_nxt + bytesToSend) == state->snd_fin_seq;
-        if (allowedToSend < state->snd_mss && buffered > allowedToSend)
+        if (allowedToSend < state->snd_effmss && buffered > allowedToSend)
             EV_WARN << "Not sending to prevent Silly Window Syndrome.\n";
-        else if (state->nagle_enabled && unacknowledgedData && !containsFin && buffered < state->snd_mss)
+        else if (state->nagle_enabled && unacknowledgedData && !containsFin && buffered < state->snd_effmss)
             EV_WARN << "Cannot send (last) segment due to Nagle, not enough data for a full segment\n";
         else
             sendSegment(bytesToSend);
@@ -1013,7 +1013,7 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
     state->snd_nxt = state->snd_una;
 
     // When FIN sent the snd_max - snd_nxt larger than bytes available in queue
-    uint32_t bytes = std::min(std::min(state->snd_mss, state->snd_max - state->snd_nxt),
+    uint32_t bytes = std::min(std::min(state->snd_effmss, state->snd_max - state->snd_nxt),
                 sendQueue->getBytesAvailable(state->snd_nxt));
 
     // FIN (without user data) needs to be resent
@@ -1085,7 +1085,7 @@ void TcpConnection::retransmitData()
 
     // TODO - avoid to send more than allowed - check cwnd and rwnd before retransmitting data!
     while (bytesToSend > 0) {
-        uint32_t bytes = std::min(bytesToSend, state->snd_mss);
+        uint32_t bytes = std::min(bytesToSend, state->snd_effmss);
         bytes = std::min(bytes, sendQueue->getBytesAvailable(state->snd_nxt));
         uint32_t sentBytes = sendSegment(bytes);
 

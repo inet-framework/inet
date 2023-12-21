@@ -49,7 +49,7 @@ void Rfc5681CongestionControl::slowStart(uint32_t numBytesAcked)
     // TCP that increments cwnd by SMSS for each such ACK will
     // inappropriately inflate the amount of data injected into the network.
     //"
-    state->snd_cwnd += std::min(numBytesAcked, state->snd_mss);
+    state->snd_cwnd += std::min(numBytesAcked, state->snd_effmss);
     conn->emit(cwndSignal, state->snd_cwnd);
 }
 
@@ -84,7 +84,7 @@ void Rfc5681CongestionControl::congestionAvoidance(uint32_t numBytesAcked)
     // If the above formula yields 0, the result SHOULD be rounded up to 1
     // byte.
     //"
-    uint32_t i = state->snd_mss * state->snd_mss / state->snd_cwnd;
+    uint32_t i = state->snd_effmss * state->snd_effmss / state->snd_cwnd;
     if (i == 0) i = 1;
     state->snd_cwnd += i;
     conn->emit(cwndSignal, state->snd_cwnd);

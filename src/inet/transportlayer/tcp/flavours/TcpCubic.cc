@@ -90,7 +90,7 @@ void TcpCubic::processRexmitTimer(TcpEventCode& event)
     state->ssthresh = calculateSsthresh(conn->getTcpAlgorithm()->getBytesInFlight());
     conn->emit(ssthreshSignal, state->ssthresh);
 
-    state->snd_cwnd = state->snd_mss;
+    state->snd_cwnd = state->snd_effmss;
     conn->emit(cwndSignal, state->snd_cwnd);
 
     EV_INFO << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
@@ -123,7 +123,7 @@ void TcpCubic::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
     TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
     uint32_t numBytesAcked = state->snd_una - firstSeqAcked;
-    uint32_t numSegmentsAcked = numBytesAcked / state->snd_mss;
+    uint32_t numSegmentsAcked = numBytesAcked / state->snd_effmss;
     pktsAcked(numSegmentsAcked, state->srtt);
     if (state->lossRecovery)
         recovery->receivedAckForUnackedData(numBytesAcked);
@@ -175,7 +175,7 @@ void TcpCubic::increaseWindow(uint32_t segmentsAcked)
         // not reach as large of an initial window as in Linux.  Therefore,
         // we can approximate the effect of QUICKACK by making this slow
         // start phase perform Appropriate Byte Counting (RFC 3465)
-        state->snd_cwnd += segmentsAcked * state->snd_mss;
+        state->snd_cwnd += segmentsAcked * state->snd_effmss;
         conn->emit(cwndSignal, state->snd_cwnd);
         segmentsAcked = 0;
 
@@ -192,7 +192,7 @@ void TcpCubic::increaseWindow(uint32_t segmentsAcked)
          * cannot be updated.
          */
         if (m_cWndCnt >= cnt) {
-            state->snd_cwnd += state->snd_mss;
+            state->snd_cwnd += state->snd_effmss;
             conn->emit(cwndSignal, state->snd_cwnd);
             m_cWndCnt -= cnt;
             EV_INFO << "In CongAvoid, updated to cwnd " << state->snd_cwnd << EV_ENDL;
@@ -209,7 +209,7 @@ uint32_t TcpCubic::update()
     uint32_t bicTarget;
     uint32_t cnt = 0;
     double offs;
-    uint32_t segCwnd = state->snd_cwnd / state->snd_mss;
+    uint32_t segCwnd = state->snd_cwnd / state->snd_effmss;
 
     if (m_epochStart == -1) {
         m_epochStart = simTime(); // record the beginning of an epoch
@@ -285,7 +285,7 @@ void TcpCubic::pktsAcked(uint32_t segmentsAcked, const simtime_t& rtt)
 
     /* hystart triggers when cwnd is larger than some threshold */
     if (m_hystart && state->snd_cwnd <= state->ssthresh &&
-        state->snd_cwnd >= m_hystartLowWindow * state->snd_mss)
+        state->snd_cwnd >= m_hystartLowWindow * state->snd_effmss)
     {
         hystartUpdate(rtt);
     }
@@ -347,8 +347,8 @@ simtime_t TcpCubic::hystartDelayThresh(const simtime_t& t) const
 
 uint32_t TcpCubic::calculateSsthresh(uint32_t bytesInFlight)
 {
-    uint32_t segCwnd = state->snd_cwnd / state->snd_mss;
-    EV_DEBUG << "Loss at cWnd=" << segCwnd << " segments in flight=" << bytesInFlight / state->snd_mss << EV_ENDL;
+    uint32_t segCwnd = state->snd_cwnd / state->snd_effmss;
+    EV_DEBUG << "Loss at cWnd=" << segCwnd << " segments in flight=" << bytesInFlight / state->snd_effmss << EV_ENDL;
 
     /* Wmax and fast convergence */
     if (segCwnd < m_lastMaxCwnd && m_fastConvergence)
@@ -359,7 +359,7 @@ uint32_t TcpCubic::calculateSsthresh(uint32_t bytesInFlight)
     m_epochStart = -1; // end of epoch
 
     /* Formula taken from the Linux kernel */
-    uint32_t ssThresh = std::max(static_cast<uint32_t>(segCwnd * m_beta), 2U) * state->snd_mss;
+    uint32_t ssThresh = std::max(static_cast<uint32_t>(segCwnd * m_beta), 2U) * state->snd_effmss;
 
     EV_DEBUG << "SsThresh = " << ssThresh << EV_ENDL;
 
