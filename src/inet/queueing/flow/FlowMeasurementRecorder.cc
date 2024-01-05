@@ -25,8 +25,10 @@ static bool matchesString(cMatchExpression& matchExpression, const char *string)
 
 FlowMeasurementRecorder::~FlowMeasurementRecorder()
 {
-    packetEventFile.closeArray();
-    packetEventFile.close();
+    if (measurePacketEvent) {
+        packetEventFile.closeArray();
+        packetEventFile.close();
+    }
 }
 
 cGate *FlowMeasurementRecorder::getRegistrationForwardingGate(cGate *gate)
@@ -59,8 +61,10 @@ void FlowMeasurementRecorder::initialize(int stage)
         measureTransmissionTime = matchesString(measureMatcher, "transmissionTime");
         measurePropagationTime = matchesString(measureMatcher, "propagationTime");
         measurePacketEvent = matchesString(measureMatcher, "packetEvent");
-        packetEventFile.open(par("packetEventFileName").stringValue(), std::ios::out);
-        packetEventFile.openArray();
+        if (measurePacketEvent) {
+            packetEventFile.open(par("packetEventFileName").stringValue(), std::ios::out);
+            packetEventFile.openArray();
+        }
     }
 }
 
