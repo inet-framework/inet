@@ -8,6 +8,7 @@
 #include "inet/queueing/flow/FlowMeasurementRecorder.h"
 
 #include "inet/common/FlowTag.h"
+#include "inet/common/INETUtils.h"
 #include "inet/common/PacketEventTag.h"
 
 namespace inet {
@@ -62,7 +63,9 @@ void FlowMeasurementRecorder::initialize(int stage)
         measurePropagationTime = matchesString(measureMatcher, "propagationTime");
         measurePacketEvent = matchesString(measureMatcher, "packetEvent");
         if (measurePacketEvent) {
-            packetEventFile.open(par("packetEventFileName").stringValue(), std::ios::out);
+            const char *fileName = par("packetEventFileName");
+            inet::utils::makePathForFile(fileName);
+            packetEventFile.open(fileName, std::ios::out);
             packetEventFile.openArray();
         }
     }
