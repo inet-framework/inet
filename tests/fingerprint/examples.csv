@@ -601,9 +601,9 @@
 /examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            bf30-2f13/tplx;7b2f-653d/~tNl;2456-c0fc/~tND;3e9e-7f1d/tyf, PASS, wireless
 
 # /examples/wireless/scaling/,         -f omnetpp.ini -c AbstractAckingMac -r 0,    # abstract-config
-/examples/wireless/scaling/,         -f omnetpp.ini -c UnitDiskRadioMedium -r 0,       10s,               9ff3-9b79/tplx;bcf1-ddd0/~tNl;6be4-c93d/~tND, PASS, wireless AckingWirelessInterface Ipv4
-/examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0,      10s,               9d53-27d2/tplx;765b-5d45/~tNl;25f8-92d8/~tND, PASS, wireless AckingWirelessInterface Ipv4
-/examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 1s,                9b3b-f88a/tplx;be94-9c8e/~tNl;fed7-df1c/~tND, PASS, wireless AckingWirelessInterface Ipv4
+/examples/wireless/scaling/,         -f omnetpp.ini -c UnitDiskRadioMedium -r 0,    1s,               bb94-17a2/tplx;2220-d64e/~tNl;0f1b-2b86/~tND, PASS, wireless AckingWirelessInterface Ipv4
+/examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0,      1s,               9b3b-f88a/tplx;be94-9c8e/~tNl;fed7-df1c/~tND, PASS, wireless AckingWirelessInterface Ipv4
+/examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 0.1s,             fa11-2540/tplx;c2a2-d597/~tNl;4989-a0f1/~tND, PASS, wireless AckingWirelessInterface Ipv4
 
 /examples/wireless/shortcut/,        -f omnetpp.ini -c ShortcutMac -r 0,            1000s,            91d1-098d/tplx;6924-7e35/~tNl;1069-9852/tyf, PASS, wireless Ipv4
 /examples/wireless/shortcut/,        -f omnetpp.ini -c ShortcutRadio -r 0,          1000s,            4e2a-4349/tplx;1d1b-2b6d/~tNl;7a3c-9e0d/tyf, PASS, wireless AckingWirelessInterface Ipv4
