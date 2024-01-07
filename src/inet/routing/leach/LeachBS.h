@@ -14,8 +14,8 @@
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
-#include "LeackPkts_m.h"
-#include "Leach.h"
+#include "inet/routing/leach/LeackPkts_m.h"
+#include "inet/routing/leach/Leach.h"
 
 namespace inet {
 

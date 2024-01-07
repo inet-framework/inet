@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "Leach.h"
 
 #include <list>
 #include <vector>
@@ -24,6 +23,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/lifecycle/LifecycleController.h"
+#include "inet/routing/leach/Leach.h"
 
 namespace inet {
 

@@ -22,7 +22,7 @@
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
-#include "LeackPkts_m.h"
+#include "inet/routing/leach/LeackPkts_m.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/mobility/base/StationaryMobilityBase.h"

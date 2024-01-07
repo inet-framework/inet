@@ -11,9 +11,9 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/routing/leach/Leach.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
-#include "LeachBS.h"
+#include "inet/routing/leach/LeachBS.h"
+#include "inet/routing/leach/Leach.h"
 
 using namespace std;
 
