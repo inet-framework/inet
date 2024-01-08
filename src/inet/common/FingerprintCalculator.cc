@@ -40,7 +40,8 @@ bool FingerprintCalculator::addEventIngredient(cEvent *event, cSingleFingerprint
             case NETWORK_COMMUNICATION_FILTER:
                 break;
             case NETWORK_NODE_PATH:
-                if (auto cpacket = dynamic_cast<cPacket *>(event)) {
+                if (event->isPacket()) {
+                    auto cpacket = static_cast<cPacket *>(event);
                     if (auto senderNode = findContainingNode(cpacket->getSenderModule()))
                         hasher_ << senderNode->getFullPath();
                     if (auto arrivalNode = findContainingNode(cpacket->getArrivalModule()))
@@ -48,7 +49,8 @@ bool FingerprintCalculator::addEventIngredient(cEvent *event, cSingleFingerprint
                 }
                 break;
             case NETWORK_INTERFACE_PATH:
-                if (auto cpacket = dynamic_cast<cPacket *>(event)) {
+                if (event->isPacket()) {
+                    auto cpacket = static_cast<cPacket *>(event);
                     if (auto senderInterface = findContainingNicModule(cpacket->getSenderModule()))
                         hasher_ << senderInterface->getInterfaceFullPath();
                     if (auto arrivalInterface = findContainingNicModule(cpacket->getArrivalModule()))
@@ -56,7 +58,8 @@ bool FingerprintCalculator::addEventIngredient(cEvent *event, cSingleFingerprint
                 }
                 break;
             case PACKET_DATA: {
-                if (auto cpacket = dynamic_cast<cPacket *>(event)) {
+                if (event->isPacket()) {
+                    auto cpacket = static_cast<cPacket *>(event);
                     auto packet = dynamic_cast<Packet *>(cpacket);
                     if (packet == nullptr)
                         packet = dynamic_cast<Packet *>(cpacket->getEncapsulatedPacket());
