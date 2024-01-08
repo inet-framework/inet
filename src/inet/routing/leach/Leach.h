@@ -5,13 +5,8 @@
 #ifndef INET_ROUTING_LEACH_LEACH_H_
 #define INET_ROUTING_LEACH_LEACH_H_
 
-#include <list>
-#include <map>
-#include <stdio.h>
 #include <string.h>
 #include <vector>
-#include <algorithm>
-#include <functional>
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"

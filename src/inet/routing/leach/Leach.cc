@@ -2,15 +2,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include <list>
-#include <vector>
-#include <algorithm>
-#include <time.h>
-#include <functional>
-#include <iostream>
-#include <fstream>
-#include <unordered_set>
-
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
