@@ -99,7 +99,7 @@ void LeachBS::handleMessageWhenUp(cMessage *msg) {
 
         // filter packet based on type and run specific functions
         if (msg->arrivedOn("ipIn")) {
-            if (packetType == 5) {
+            if (packetType == BS) {
                 bsPktReceived += 1;
             } else {
                 delete msg;

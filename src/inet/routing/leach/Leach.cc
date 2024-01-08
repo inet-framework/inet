@@ -192,7 +192,7 @@ void Leach::processMessage(cMessage *msg) {
     // filter packet based on type and run specific functions
     if (msg->arrivedOn("ipIn")) {
         // first broadcast from CH to NCH nodes
-        if (packetType == 1) {
+        if (packetType == CH) {
             Ipv4Address CHAddr = receivedCtrlPkt->getSrcAddress();
 
             auto signalPowerInd = receivedPkt->getTag<SignalPowerInd>();
@@ -202,7 +202,7 @@ void Leach::processMessage(cMessage *msg) {
             sendAckToCH(selfAddr, CHAddr);
 
             // ACK packet from NCH node to CH
-        } else if (packetType == 2 && leachState == ch) {
+        } else if (packetType == ACK && leachState == ch) {
             Ipv4Address nodeAddr = receivedCtrlPkt->getSrcAddress();
 
             addToNodeCHMemory(nodeAddr);
@@ -211,7 +211,7 @@ void Leach::processMessage(cMessage *msg) {
             }
 
             // TDMA schedule from CH to NCH
-        } else if (packetType == 3) {
+        } else if (packetType == SCH) {
             Ipv4Address CHAddr = receivedCtrlPkt->getSrcAddress();
 
             int scheduleArraySize = receivedCtrlPkt->getScheduleArraySize();
@@ -240,13 +240,13 @@ void Leach::processMessage(cMessage *msg) {
                 sendDataToCH(selfAddr, CHAddr, receivedTDMADelay);
             }
             // Data packet from NCH to CH
-        } else if (packetType == 4) {
+        } else if (packetType == DATA) {
             Ipv4Address NCHAddr = receivedCtrlPkt->getSrcAddress();
 
             sendDataToBS(selfAddr);
 
             // BS packet from CH to BS - deleted in the case of standard nodes
-        } else if (packetType == 5) {
+        } else if (packetType == BS) {
             delete msg;
         }
     } else {
