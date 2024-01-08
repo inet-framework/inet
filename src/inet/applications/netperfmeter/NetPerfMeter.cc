@@ -1163,6 +1163,8 @@ void NetPerfMeter::sendDataOfTraceFile(const unsigned long long bytesAvailableIn
 // ###### Receive data ######################################################
 void NetPerfMeter::receiveMessage(cMessage *msg)
 {
+    if (!msg->isPacket())
+            return;
     if (const Packet *dataMessage = dynamic_cast<const Packet *>(msg)) {
         unsigned int streamID = 0;
         const auto& smsg = dataMessage->peekData();
