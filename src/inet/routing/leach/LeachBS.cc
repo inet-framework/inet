@@ -18,6 +18,7 @@
 using namespace std;
 
 namespace inet {
+namespace leach {
 
 Define_Module(LeachBS);
 
@@ -112,4 +113,5 @@ void LeachBS::handleMessageWhenUp(cMessage *msg) {
     }
 }
 
+} /* namespace leach */
 } /* namespace inet */

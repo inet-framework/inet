@@ -18,6 +18,7 @@
 #include "inet/routing/leach/Leach.h"
 
 namespace inet {
+namespace leach {
 
 // Base Station of network which acts as data sink
 class INET_API LeachBS: public RoutingProtocolBase {
@@ -54,6 +55,7 @@ protected:
     void stop();
 };
 
+} /* namespace leach */
 } /* namespace inet */
 
 #endif /* INET_ROUTING_LEACH_LEACHBS_H_ */

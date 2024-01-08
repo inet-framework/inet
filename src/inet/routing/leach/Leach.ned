@@ -9,6 +9,7 @@ import inet.routing.contract.IManetRouting;
 simple Leach like IManetRouting
 {
     parameters:
+        @class("leach::Leach");
         @display("i=block/routing");
         string interfaceTableModule;   // The path to the InterfaceTable module
         double maxVariance = default(1); 

@@ -26,8 +26,9 @@
 #include "inet/routing/leach/Leach.h"
 
 namespace inet {
+namespace leach {
 
-Register_Enum(inet::Leach, (Leach::ch, Leach::nch));
+Register_Enum(inet::leach::Leach, (Leach::ch, Leach::nch));
 Define_Module(Leach);
 
 Leach::Leach() {
@@ -466,4 +467,5 @@ void Leach::refreshDisplay() const {
         host->getDisplayString().removeTag("i2");
     }
 }
+} /* namespace leach */
 } /* namespace inet */

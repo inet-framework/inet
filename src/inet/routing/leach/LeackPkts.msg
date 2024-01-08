@@ -6,7 +6,7 @@ import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv4.Ipv4Address;
 
-namespace inet;
+namespace inet::leach;
 
 enum LeachPktType {
     CH = 1;

@@ -9,6 +9,7 @@ import inet.routing.contract.IManetRouting;
 simple LeachBS like IManetRouting
 {
     parameters:
+        @class("leach::LeachBS");
         @display("i=block/routing");
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;

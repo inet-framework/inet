@@ -32,6 +32,7 @@
 using namespace std;
 
 namespace inet {
+namespace leach {
 
 class INET_API Leach: public RoutingProtocolBase {
 
@@ -124,6 +125,7 @@ public:
     Ipv4Address getIdealCH(Ipv4Address nodeAddr, Ipv4Address CHAddr);
 };
 
+} /* namespace leach */
 } /* namespace inet */
 
 #endif /* INET_ROUTING_LEACH_LEACH_H_ */
