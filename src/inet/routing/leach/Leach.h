@@ -37,7 +37,6 @@ namespace leach {
 class INET_API Leach: public RoutingProtocolBase {
 
 private:
-
     NetworkInterface *interface80211ptr = nullptr;
     int interfaceId = -1;
     unsigned int sequencenumber = 0;
@@ -45,6 +44,7 @@ private:
     Ipv4Address idealCH;
     cMessage *event = nullptr;
     int round;
+    const char *netInterface;
 
 protected:
     IInterfaceTable *ift = nullptr;

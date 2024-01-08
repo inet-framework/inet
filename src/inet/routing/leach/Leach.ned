@@ -15,6 +15,7 @@ simple Leach like IManetRouting
         double maxVariance = default(1); 
         int numNodes = default(10);
         double clusterHeadPercentage = default(0.5);
+        string netInterface = default("wlan");
     gates:
         input ipIn;
         output ipOut;

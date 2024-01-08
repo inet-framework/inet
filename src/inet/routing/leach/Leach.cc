@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #include <list>
 #include <vector>
 #include <algorithm>
@@ -52,6 +51,7 @@ void Leach::initialize(int stage) {
 
         clusterHeadPercentage = par("clusterHeadPercentage");
         numNodes = par("numNodes");
+        netInterface = par("netInterface");
 
         roundDuration = dblrand(0) * 10;
         TDMADelayCounter = 1;
@@ -79,7 +79,7 @@ void Leach::start() {
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         ie = ift->getInterface(i);
         name = ie->getInterfaceName();
-        if (strstr(name, "wlan") != nullptr) {
+        if (strstr(name, netInterface) != nullptr) {
             i_face = ie;
             num_802154++;
             interfaceId = i;
