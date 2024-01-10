@@ -175,6 +175,7 @@ class INET_API IMulticastRoute
 
       public:
         InInterface(NetworkInterface *ie) : ie(ie) { ASSERT(ie); }
+        InInterface(const InInterface& other) : ie(other.ie) { }
         virtual ~InInterface() {}
 
         NetworkInterface *getInterface() const { return ie; }
