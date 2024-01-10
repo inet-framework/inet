@@ -1376,7 +1376,6 @@ void PimDm::rpfInterfaceHasChanged(Ipv4MulticastRoute *ipv4Route, Ipv4Route *rou
     UpstreamInterface *oldUpstreamInterface = route->upstreamInterface;
     NetworkInterface *oldRpfInterface = oldUpstreamInterface ? oldUpstreamInterface->ie : nullptr;
     delete oldUpstreamInterface;
-    delete ipv4Route->getInInterface();
     ipv4Route->setInInterface(nullptr);
 
     // set new upstream interface data
