@@ -132,15 +132,15 @@ class INET_API Ipv4Route : public cObject, public IRoute
 class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
 {
   private:
-    IIpv4RoutingTable *rt; ///< the routing table in which this route is inserted, or nullptr
+    IIpv4RoutingTable *rt = nullptr; ///< the routing table in which this route is inserted, or nullptr
     Ipv4Address origin; ///< Source network
     Ipv4Address originNetmask; ///< Source network mask
     Ipv4Address group; ///< Multicast group, if unspecified then matches any
-    InInterface *inInterface; ///< In interface (upstream)
+    InInterface *inInterface = nullptr; ///< In interface (upstream)
     OutInterfaceVector outInterfaces; ///< Out interfaces (downstream)
-    SourceType sourceType; ///< manual, routing prot, etc.
-    cObject *source; ///< Object identifying the source
-    int metric; ///< Metric ("cost" to reach the source)
+    SourceType sourceType = MANUAL; ///< manual, routing prot, etc.
+    cObject *source = nullptr; ///< Object identifying the source
+    int metric = 0; ///< Metric ("cost" to reach the source)
 
   public:
     // field codes for changed()
