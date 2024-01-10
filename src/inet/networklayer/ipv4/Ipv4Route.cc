@@ -113,6 +113,20 @@ IRoutingTable *Ipv4Route::getRoutingTableAsGeneric() const
     return getRoutingTable();
 }
 
+Ipv4MulticastRoute::Ipv4MulticastRoute(const Ipv4MulticastRoute& other) :
+    rt(nullptr),
+    origin(other.origin),
+    originNetmask(other.originNetmask),
+    group(other.group),
+    inInterface(other.inInterface ? new IMulticastRoute::InInterface(*other.inInterface) : nullptr),
+    sourceType(other.sourceType),
+    source(other.source),
+    metric(other.metric)
+{
+    for (const auto& elem : other.outInterfaces)
+        outInterfaces.push_back(new IMulticastRoute::OutInterface(*elem));
+}
+
 Ipv4MulticastRoute::~Ipv4MulticastRoute()
 {
     delete inInterface;
