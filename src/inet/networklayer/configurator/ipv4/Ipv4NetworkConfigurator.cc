@@ -224,16 +224,7 @@ void Ipv4NetworkConfigurator::configureRoutingTable(Node *node)
     }
     for (size_t i = 0; i < node->staticMulticastRoutes.size(); i++) {
         Ipv4MulticastRoute *original = node->staticMulticastRoutes[i];
-        Ipv4MulticastRoute *clone = new Ipv4MulticastRoute();
-        clone->setMetric(original->getMetric());
-        clone->setSourceType(original->getSourceType());
-        clone->setSource(original->getSource());
-        clone->setOrigin(original->getOrigin());
-        clone->setOriginNetmask(original->getOriginNetmask());
-        clone->setInInterface(original->getInInterface());
-        clone->setMulticastGroup(original->getMulticastGroup());
-        for (size_t j = 0; j < original->getNumOutInterfaces(); j++)
-            clone->addOutInterface(new IMulticastRoute::OutInterface(*original->getOutInterface(j)));
+        Ipv4MulticastRoute *clone = new Ipv4MulticastRoute(*original);
         EV_DETAIL << "Configuring multicast route " << *clone << " in " << nodePath << endl;
         node->routingTable->addMulticastRoute(clone);
     }
@@ -266,16 +257,7 @@ void Ipv4NetworkConfigurator::configureRoutingTable(Node *node, NetworkInterface
                 needed = true;
 
         if (needed) {
-            Ipv4MulticastRoute *clone = new Ipv4MulticastRoute();
-            clone->setMetric(original->getMetric());
-            clone->setSourceType(original->getSourceType());
-            clone->setSource(original->getSource());
-            clone->setOrigin(original->getOrigin());
-            clone->setOriginNetmask(original->getOriginNetmask());
-            clone->setInInterface(original->getInInterface());
-            clone->setMulticastGroup(original->getMulticastGroup());
-            for (size_t j = 0; j < original->getNumOutInterfaces(); j++)
-                clone->addOutInterface(new IMulticastRoute::OutInterface(*original->getOutInterface(j)));
+            Ipv4MulticastRoute *clone = new Ipv4MulticastRoute(*original);
             EV_DETAIL << "Configuring multicast route " << *clone << " to " << nodePath << endl;
             node->routingTable->addMulticastRoute(clone);
         }
