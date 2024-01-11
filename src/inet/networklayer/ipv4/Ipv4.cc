@@ -80,8 +80,9 @@ void Ipv4::initialize(int stage)
         fragmentTimeoutTime = par("fragmentTimeout");
         limitedBroadcast = par("limitedBroadcast");
         directBroadcastInterfaces = par("directBroadcastInterfaces").stdstringValue();
-
         directBroadcastInterfaceMatcher.setPattern(directBroadcastInterfaces.c_str(), false, true, false);
+        enableTimestampOption = par("enableTimestampOption");
+        maxLifetime = par("maxLifetime");
 
         curFragmentId = 0;
         lastCheckTime = SIMTIME_ZERO;
@@ -279,6 +280,22 @@ Packet *Ipv4::prepareForForwarding(Packet *packet) const
     ipv4Header->setTimeToLive(ipv4Header->getTimeToLive() - 1);
     insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
     return packet;
+}
+
+bool Ipv4::isLifetimeExpired(const Ptr<const Ipv4Header>& ipv4Header) const
+{
+    if (maxLifetime == -1)
+        return false;
+    else {
+        for (int i = 0; i < ipv4Header->getOptionArraySize(); i++) {
+            if (auto timestampOption = dynamic_cast<const Ipv4OptionTimestamp *>(&ipv4Header->getOption(i))) {
+                simtime_t firstTimestamp = timestampOption->getRecordTimestamp(0);
+                simtime_t lifetime = simTime() - firstTimestamp;
+                return lifetime > maxLifetime;
+            }
+        }
+        return false;
+    }
 }
 
 void Ipv4::preroutingFinish(Packet *packet)
@@ -694,6 +711,17 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
         emit(ipv4DataOnRpfSignal, ipv4Header.get(), const_cast<NetworkInterface *>(fromIE)); // forwarding hook
 
         numForwarded++;
+
+        if (isLifetimeExpired(ipv4Header)) {
+            EV_WARN << "Dropping packet, lifetime expired\n";
+            numDropped++;
+            PacketDropDetails details;
+            details.setReason(LIFETIME_EXPIRED);
+            emit(packetDroppedSignal, packet, &details);
+            delete packet;
+            return;
+        }
+
         // copy original datagram for multiple destinations
         for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++) {
             Ipv4MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
@@ -852,6 +880,15 @@ void Ipv4::fragmentAndSend(Packet *packet)
         emit(packetDroppedSignal, packet, &details);
         EV_WARN << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
         sendIcmpError(packet, -1 /*TODO*/, ICMP_TIME_EXCEEDED, 0);
+        numDropped++;
+        return;
+    }
+
+    if (isLifetimeExpired(ipv4Header)) {
+        PacketDropDetails details;
+        details.setReason(LIFETIME_EXPIRED);
+        emit(packetDroppedSignal, packet, &details);
+        EV_WARN << "Dropping packet, lifetime expired\n";
         numDropped++;
         return;
     }
@@ -1028,8 +1065,15 @@ void Ipv4::encapsulate(Packet *transportPacket)
         default:
             throw cRuntimeError("Unknown CRC mode");
     }
+
+    if (enableTimestampOption) {
+        auto timestampOption = new Ipv4OptionTimestamp();
+        timestampOption->appendRecordAddress(rt->getRouterId());
+        timestampOption->appendRecordTimestamp(simTime());
+        ipv4Header->addOption(timestampOption);
+    }
+
     insertNetworkProtocolHeader(transportPacket, Protocol::ipv4, ipv4Header);
-    // setting Ipv4 options is currently not supported
 }
 
 void Ipv4::sendDatagramToOutput(Packet *packet)
