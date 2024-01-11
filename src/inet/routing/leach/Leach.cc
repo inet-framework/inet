@@ -26,8 +26,8 @@ Leach::Leach() {
 }
 
 Leach::~Leach() {
+    cancelAndDelete(event);
     stop();
-    delete event;
 }
 
 void Leach::initialize(int stage) {
@@ -92,7 +92,7 @@ void Leach::start() {
 }
 
 void Leach::stop() {
-    cancelEvent(event);
+
     nodeMemory.clear();
     nodeCHMemory.clear();
     extractedTDMASchedule.clear();
