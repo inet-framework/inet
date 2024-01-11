@@ -38,7 +38,7 @@ private:
     cModule *host = nullptr;
     Ipv4Address idealCH;
     cMessage *event = nullptr;
-    int round;
+    int round = 0;
     const char *netInterface;
 
 protected:
