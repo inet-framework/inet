@@ -415,32 +415,58 @@ void Ipv4::datagramLocalOut(Packet *packet)
     EV_DETAIL << "Sending datagram '" << packet->getName() << "' with destination = " << destAddr << "\n";
 
     if (ipv4Header->getDestAddress().isMulticast()) {
-        destIE = determineOutgoingInterfaceForMulticastDatagram(ipv4Header, destIE);
-
-        // loop back a copy
-        if (multicastLoop && (!destIE || !destIE->isLoopback())) {
-            const NetworkInterface *loopbackIF = ift->findFirstLoopbackInterface();
-            if (loopbackIF) {
-                auto packetCopy = packet->dup();
-                packetCopy->addTagIfAbsent<InterfaceReq>()->setInterfaceId(loopbackIF->getInterfaceId());
-                packetCopy->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
-                fragmentPostRouting(packetCopy);
-            }
-        }
-
-        if (destIE) {
+        const Ipv4Address srcAddr = ipv4Header->getSrcAddress();
+        const Ipv4MulticastRoute *route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
+        if (route) {
             numMulticast++;
-            packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
-            packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
-            fragmentPostRouting(packet);
+            // copy original datagram for multiple destinations
+            for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++) {
+                Ipv4MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
+                const NetworkInterface *destIE = outInterface->getInterface();
+                if (outInterface->isEnabled()) {
+                    if (outInterface->isLeaf() && !destIE->getProtocolData<Ipv4InterfaceData>()->hasMulticastListener(destAddr))
+                        EV_WARN << "Not sending to " << destIE->getInterfaceName() << " (no listeners)\n";
+                    else {
+                        EV_DETAIL << "Sending out on " << destIE->getInterfaceName() << "\n";
+                        auto packetCopy = packet->dup();
+                        packetCopy->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
+                        packetCopy->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
+                        fragmentPostRouting(packetCopy);
+                    }
+                }
+            }
+
+            // only copies sent, delete original packet
+            delete packet;
         }
         else {
-            EV_ERROR << "No multicast interface, packet dropped\n";
-            numUnroutable++;
-            PacketDropDetails details;
-            details.setReason(NO_INTERFACE_FOUND);
-            emit(packetDroppedSignal, packet, &details);
-            delete packet;
+            destIE = determineOutgoingInterfaceForMulticastDatagram(ipv4Header, destIE);
+
+            // loop back a copy
+            if (multicastLoop && (!destIE || !destIE->isLoopback())) {
+                const NetworkInterface *loopbackIF = ift->findFirstLoopbackInterface();
+                if (loopbackIF) {
+                    auto packetCopy = packet->dup();
+                    packetCopy->addTagIfAbsent<InterfaceReq>()->setInterfaceId(loopbackIF->getInterfaceId());
+                    packetCopy->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
+                    fragmentPostRouting(packetCopy);
+                }
+            }
+
+            if (destIE) {
+                numMulticast++;
+                packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
+                packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
+                fragmentPostRouting(packet);
+            }
+            else {
+                EV_ERROR << "No multicast interface, packet dropped\n";
+                numUnroutable++;
+                PacketDropDetails details;
+                details.setReason(NO_INTERFACE_FOUND);
+                emit(packetDroppedSignal, packet, &details);
+                delete packet;
+            }
         }
     }
     else { // unicast and broadcast
