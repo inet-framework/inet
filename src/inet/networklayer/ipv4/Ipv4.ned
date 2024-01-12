@@ -91,6 +91,7 @@ simple Ipv4 like IIpv4
         double fragmentTimeout @unit(s) = default(60s);
         bool limitedBroadcast = default(false); // send out limited broadcast packets comming from higher layer
         string directBroadcastInterfaces = default("");   // list of interfaces that direct broadcast is enabled (by default direct broadcast is disabled on all interfaces)
+        bool enableLocalOutMulticastRouting = default(false); // enable using the multicast routing table for determining outgoing interfaces for local out packets
         bool enableTimestampOption = default(false); // when enabled IP inserts a timestamp option into the IP header
         double maxLifetime @unit(s) = default(-1s); // packets older than the limit are discarded
         @display("i=block/routing");

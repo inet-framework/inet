@@ -81,6 +81,7 @@ void Ipv4::initialize(int stage)
         limitedBroadcast = par("limitedBroadcast");
         directBroadcastInterfaces = par("directBroadcastInterfaces").stdstringValue();
         directBroadcastInterfaceMatcher.setPattern(directBroadcastInterfaces.c_str(), false, true, false);
+        enableLocalOutMulticastRouting = par("enableLocalOutMulticastRouting");
         enableTimestampOption = par("enableTimestampOption");
         maxLifetime = par("maxLifetime");
 
@@ -432,10 +433,54 @@ void Ipv4::datagramLocalOut(Packet *packet)
     EV_DETAIL << "Sending datagram '" << packet->getName() << "' with destination = " << destAddr << "\n";
 
     if (ipv4Header->getDestAddress().isMulticast()) {
-        const Ipv4Address srcAddr = ipv4Header->getSrcAddress();
-        const Ipv4MulticastRoute *route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
-        if (route) {
+        // RFC 1112, section 6.1
+        //"
+        // Second, for hosts that may be attached to more than one network, the
+        // service interface should provide a way for the upper-layer protocol
+        // to identify which network interface is be used for the multicast
+        // transmission.  Only one interface is used for the initial
+        // transmission; multicast routers are responsible for forwarding to any
+        // other networks, if necessary.  If the upper-layer protocol chooses
+        // not to identify an outgoing interface, a default interface should be
+        // used, preferably under the control of system management.
+        //"
+        // INET also provides optional non-standard behavior to use the multicast
+        // routing table if enabled. This allows multicast packets to go out on
+        // several network interfaces.
+        if (destIE) {
+            // use the interface specified by MULTICAST_IF socket option
             numMulticast++;
+            EV_DETAIL << "multicast packet routed to requested output interface " << destIE->getInterfaceName() << "\n";
+
+            // loop back a copy
+            if (multicastLoop && !destIE->isLoopback()) {
+                const NetworkInterface *loopbackIF = ift->findFirstLoopbackInterface();
+                if (loopbackIF) {
+                    auto packetCopy = packet->dup();
+                    packetCopy->addTagIfAbsent<InterfaceReq>()->setInterfaceId(loopbackIF->getInterfaceId());
+                    packetCopy->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
+                    fragmentPostRouting(packetCopy);
+                }
+            }
+
+            packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
+            packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
+            fragmentPostRouting(packet);
+        }
+        else if (auto route = enableLocalOutMulticastRouting ? rt->findBestMatchingMulticastRoute(ipv4Header->getSrcAddress(), destAddr) : nullptr) {
+            numMulticast++;
+
+            // loop back a copy
+            if (multicastLoop) {
+                const NetworkInterface *loopbackIF = ift->findFirstLoopbackInterface();
+                if (loopbackIF) {
+                    auto packetCopy = packet->dup();
+                    packetCopy->addTagIfAbsent<InterfaceReq>()->setInterfaceId(loopbackIF->getInterfaceId());
+                    packetCopy->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
+                    fragmentPostRouting(packetCopy);
+                }
+            }
+
             // copy original datagram for multiple destinations
             for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++) {
                 Ipv4MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
@@ -457,7 +502,21 @@ void Ipv4::datagramLocalOut(Packet *packet)
             delete packet;
         }
         else {
-            destIE = determineOutgoingInterfaceForMulticastDatagram(ipv4Header, destIE);
+            // try to lookup the multicast address in the unicast routing table
+            if (auto route = rt->findBestMatchingRoute(ipv4Header->getDestAddress())) {
+                destIE = route->getInterface();
+                EV_DETAIL << "multicast packet routed to output interface " << destIE->getInterfaceName() << " by dest address lookup in the unicast routing table\n";
+            }
+            if (!destIE) {
+                destIE = rt->getInterfaceByAddress(ipv4Header->getSrcAddress());
+                if (destIE)
+                    EV_DETAIL << "multicast packet routed to output interface " << destIE->getInterfaceName() << " identified by source address\n";
+            }
+            if (!destIE) {
+                destIE = ift->findFirstMulticastInterface();
+                if (destIE)
+                    EV_DETAIL << "multicast packet routed to the first multicast interface " << destIE->getInterfaceName() << "\n";
+            }
 
             // loop back a copy
             if (multicastLoop && (!destIE || !destIE->isLoopback())) {
@@ -517,39 +576,6 @@ void Ipv4::datagramLocalOut(Packet *packet)
             routeUnicastPacket(packet);
         }
     }
-}
-
-/* Choose the outgoing interface for the muticast datagram:
- *   1. use the interface specified by MULTICAST_IF socket option (received in the control info)
- *   2. lookup the destination address in the routing table
- *   3. if no route, choose the interface according to the source address
- *   4. or if the source address is unspecified, choose the first MULTICAST interface
- */
-const NetworkInterface *Ipv4::determineOutgoingInterfaceForMulticastDatagram(const Ptr<const Ipv4Header>& ipv4Header, const NetworkInterface *multicastIFOption)
-{
-    const NetworkInterface *ie = nullptr;
-    if (multicastIFOption) {
-        ie = multicastIFOption;
-        EV_DETAIL << "multicast packet routed by socket option via output interface " << ie->getInterfaceName() << "\n";
-    }
-    if (!ie) {
-        Ipv4Route *route = rt->findBestMatchingRoute(ipv4Header->getDestAddress());
-        if (route)
-            ie = route->getInterface();
-        if (ie)
-            EV_DETAIL << "multicast packet routed by routing table via output interface " << ie->getInterfaceName() << "\n";
-    }
-    if (!ie) {
-        ie = rt->getInterfaceByAddress(ipv4Header->getSrcAddress());
-        if (ie)
-            EV_DETAIL << "multicast packet routed by source address via output interface " << ie->getInterfaceName() << "\n";
-    }
-    if (!ie) {
-        ie = ift->findFirstMulticastInterface();
-        if (ie)
-            EV_DETAIL << "multicast packet routed via the first multicast interface " << ie->getInterfaceName() << "\n";
-    }
-    return ie;
 }
 
 void Ipv4::routeUnicastPacket(Packet *packet)

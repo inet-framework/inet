@@ -74,6 +74,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     simtime_t fragmentTimeoutTime;
     bool limitedBroadcast = false;
     std::string directBroadcastInterfaces = "";
+    bool enableLocalOutMulticastRouting = false;
     bool enableTimestampOption = false;
     simtime_t maxLifetime = -1;
 
@@ -161,11 +162,6 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
      * When destIE is nullptr, the datagram is broadcasted on each interface.
      */
     virtual void routeLocalBroadcastPacket(Packet *packet);
-
-    /**
-     * Determines the output interface for the given multicast datagram.
-     */
-    virtual const NetworkInterface *determineOutgoingInterfaceForMulticastDatagram(const Ptr<const Ipv4Header>& ipv4Header, const NetworkInterface *multicastIFOption);
 
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
