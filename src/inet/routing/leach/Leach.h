@@ -33,16 +33,14 @@ class INET_API Leach: public RoutingProtocolBase {
 
 private:
     NetworkInterface *interface80211ptr = nullptr;
-    int interfaceId = -1;
     unsigned int sequencenumber = 0;
     cModule *host = nullptr;
     Ipv4Address idealCH;
     cMessage *event = nullptr;
     int round = 0;
-    const char *netInterface;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
 
 protected:
-    IInterfaceTable *ift = nullptr;
     simtime_t dataPktSendDelay;
     simtime_t CHPktSendDelay;
     simtime_t roundDuration;
@@ -87,6 +85,7 @@ public:
 
     void handleSelfMessage(cMessage *msg);
     void processMessage(cMessage *msg);
+    void configureInterfaces();
 
     // lifecycle
     virtual void handleStartOperation(LifecycleOperation *operation) override {

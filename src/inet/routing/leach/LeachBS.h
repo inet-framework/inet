@@ -34,6 +34,7 @@ public:
     IInterfaceTable *ift = nullptr;
     unsigned int sequencenumber = 0;
     cModule *host = nullptr;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
 
 protected:
     virtual int numInitStages() const override {
@@ -41,6 +42,7 @@ protected:
     }
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
+    void configureInterfaces();
 
     virtual void handleStartOperation(LifecycleOperation *operation) override {
         start();

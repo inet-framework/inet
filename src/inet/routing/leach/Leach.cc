@@ -37,12 +37,10 @@ void Leach::initialize(int stage) {
     if (stage == INITSTAGE_LOCAL) {
         sequencenumber = 0;
         host = getContainingNode(this);
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"),
-                this);
+        interfaceTable.reference(this, "interfaceTableModule", true);
 
         clusterHeadPercentage = par("clusterHeadPercentage");
         numNodes = par("numNodes");
-        netInterface = par("netInterface");
 
         roundDuration = dblrand(0) * 10;
         TDMADelayCounter = 1;
@@ -62,28 +60,7 @@ void Leach::initialize(int stage) {
 
 void Leach::start() {
     // Search the 802154 interface
-    int num_802154 = 0;
-    NetworkInterface *ie;
-    NetworkInterface *i_face;
-    const char *name;
-
-    for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        ie = ift->getInterface(i);
-        name = ie->getInterfaceName();
-        if (strstr(name, netInterface) != nullptr) {
-            i_face = ie;
-            num_802154++;
-            interfaceId = i;
-        }
-    }
-
-    // One enabled network interface (in total)
-    if (num_802154 == 1)
-        interface80211ptr = i_face;
-    else
-        throw cRuntimeError("DSDV has found %i 80211 interfaces", num_802154);
-    CHK(interface80211ptr->getProtocolDataForUpdate<Ipv4InterfaceData>())->joinMulticastGroup(
-            Ipv4Address::LL_MANET_ROUTERS);
+    configureInterfaces();
 
     // schedules a random periodic event
     event->setKind(SELF);
@@ -92,11 +69,22 @@ void Leach::start() {
 }
 
 void Leach::stop() {
-
     nodeMemory.clear();
     nodeCHMemory.clear();
     extractedTDMASchedule.clear();
     TDMADelayCounter = 1;
+}
+
+void Leach::configureInterfaces() {
+    int numInterfaces = interfaceTable->getNumInterfaces();
+    for (int i = 0; i < numInterfaces; i++) {
+        NetworkInterface *networkInterface = interfaceTable->getInterface(i);
+        // Only single wireless interface is required
+        if (networkInterface->isWireless()) {
+            interface80211ptr = networkInterface;
+            break;
+        }
+    }
 }
 
 void Leach::handleMessageWhenUp(cMessage *msg) {

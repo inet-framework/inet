@@ -33,8 +33,9 @@ void LeachBS::initialize(int stage) {
     if (stage == INITSTAGE_LOCAL) {
         sequencenumber = 0;
         host = getContainingNode(this);
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"),
-                this);
+//        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"),
+//                this);
+        interfaceTable.reference(this, "interfaceTableModule", true);
 
         bsPktReceived = 0;
 
@@ -45,34 +46,25 @@ void LeachBS::initialize(int stage) {
 }
 
 void LeachBS::start() {
-    /* Search the 80211 interface */
-    int num_80211 = 0;
-    NetworkInterface *ie;
-    NetworkInterface *i_face;
-    const char *name;
+    /* Search the 802154 interface */
+    configureInterfaces();
 
-    for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        ie = ift->getInterface(i);
-        name = ie->getInterfaceName();
-        if (strstr(name, "wlan") != nullptr) {
-            i_face = ie;
-            num_80211++;
-            interfaceId = i;
-        }
-    }
-
-    // One enabled network interface (in total)
-    if (num_80211 == 1)
-        interface80211ptr = i_face;
-    else
-        throw cRuntimeError("DSDV has found %i 80211 interfaces", num_80211);
-
-    CHK(interface80211ptr->getProtocolDataForUpdate<Ipv4InterfaceData>())->joinMulticastGroup(
-            Ipv4Address::LL_MANET_ROUTERS);
 }
 
 void LeachBS::stop() {
 
+}
+
+void LeachBS::configureInterfaces() {
+    int numInterfaces = interfaceTable->getNumInterfaces();
+    for (int i = 0; i < numInterfaces; i++) {
+        NetworkInterface *networkInterface = interfaceTable->getInterface(i);
+        // Only single wireless interface is required
+        if (networkInterface->isWireless()) {
+            interface80211ptr = networkInterface;
+            break;
+        }
+    }
 }
 
 void LeachBS::handleMessageWhenUp(cMessage *msg) {
