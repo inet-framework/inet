@@ -6,13 +6,26 @@ package inet.routing.leach;
 
 import inet.routing.contract.IManetRouting;
 
+//
+// This module provides the data sink implementation of 
+// Low-Energy Adaptive Clustering Hierarchy (LEACH) routing, a hierachical 
+// adhoc routing protocol for Wireless Sensor Networks. 
+// This implementation is designed to use a a single wireless interface and run on
+// the IEEE 802.15.4 standard for MAC and Physical layers.
+// This module simply receives data from the sensor nodes.
+//
+// For more information on the algorithm, see the LEACH paper
+// https://ieeexplore.ieee.org/document/926982
+//
 simple LeachBS like IManetRouting
 {
     parameters:
+        // properties
         @class("leach::LeachBS");
         @display("i=block/routing");
-        string interfaceTableModule;   // The path to the InterfaceTable module
-        string routingTableModule;
+        
+        // context parameters
+        string interfaceTableModule;   
     gates:
         input ipIn;
         output ipOut;
