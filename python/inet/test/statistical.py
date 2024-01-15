@@ -8,13 +8,13 @@ of the simulation project.  For the INET Framework the media folder can be found
 https://github.com/inet-framework/statistics in a separate GitHub repository.
 """
 
-import difflib
 import glob
 import logging
 import math
 import pandas
 import re
 import shutil
+import subprocess
 
 from omnetpp.scave.results import *
 
@@ -31,13 +31,9 @@ def _read_scalar_result_file(file_name):
     return df
 
 def _write_diff_file(a_file_name, b_file_name, diff_file_name):
-    with open(a_file_name, "r") as file:
-        a_file = file.readlines()
-    with open(b_file_name, "r") as file:
-        b_file = file.readlines()
+    diff_command = ["diff", a_file_name, b_file_name]
     with open(diff_file_name, "w") as file:
-        diff = "".join(difflib.unified_diff(a_file, b_file))
-        file.write(diff)
+        subprocess.call(diff_command, stdout=file)
 
 class StatisticalTestTask(SimulationTestTask):
     def __init__(self, simulation_config=None, run_number=0, name="statistical test", task_result_class=SimulationTestTaskResult, **kwargs):
