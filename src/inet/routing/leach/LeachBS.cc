@@ -33,8 +33,6 @@ void LeachBS::initialize(int stage) {
     if (stage == INITSTAGE_LOCAL) {
         sequencenumber = 0;
         host = getContainingNode(this);
-//        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"),
-//                this);
         interfaceTable.reference(this, "interfaceTableModule", true);
 
         bsPktReceived = 0;
