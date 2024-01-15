@@ -177,13 +177,13 @@ ExtLowerUdp::Socket *ExtLowerUdp::open(int socketId)
     auto socket = new Socket(socketId);
     int fd = ::socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0)
-        throw cRuntimeError("Cannot create socket: %d", fd);
+        throw cRuntimeError("Cannot create socket: %d (%s)", sock_errno(), strerror(sock_errno()));
 
     // Setting this option makes it possible to kill the simulations
     // and restart them right away using the same port numbers.
     int enable = 1;
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&enable, sizeof(int)) < 0)
-        throw cRuntimeError("ExtLowerUdp: cannot set socket option");
+        throw cRuntimeError("ExtLowerUdp: cannot set socket option: %d (%s)", sock_errno(), strerror(sock_errno()));
 
     socket->fd = fd;
     socketIdToSocketMap[socketId] = socket;
@@ -209,7 +209,7 @@ void ExtLowerUdp::bind(int socketId, const L3Address& localAddress, int localPor
 #endif
     int n = ::bind(socket->fd, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
     if (n < 0)
-        throw cRuntimeError("Cannot bind socket: %d", sock_errno());
+        throw cRuntimeError("Cannot bind socket: %d (%s)", sock_errno(), strerror(sock_errno()));
 }
 
 void ExtLowerUdp::connect(int socketId, const L3Address& remoteAddress, int remotePort)
@@ -229,7 +229,7 @@ void ExtLowerUdp::connect(int socketId, const L3Address& remoteAddress, int remo
 #endif
     int n = ::connect(socket->fd, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
     if (n < 0)
-        throw cRuntimeError("Cannot connect socket: %d", n);
+        throw cRuntimeError("Cannot connect socket: %d (%s)", sock_errno(), strerror(sock_errno()));
 }
 
 void ExtLowerUdp::close(int socketId)
@@ -270,13 +270,13 @@ void ExtLowerUdp::processPacketFromUpper(Packet *packet)
             // type of buffer in sendto(): win: char *, linux: void *
             int n = ::sendto(socket->fd, (char *)buffer, packetLength, 0, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
             if (n < 0)
-                throw cRuntimeError("Calling sendto failed: %d", n);
+                throw cRuntimeError("Calling sendto failed: %d (%s)", sock_errno(), strerror(sock_errno()));
         }
         else {
             // type of buffer in send(): win: char *, linux: void *
             int n = ::send(socket->fd, (char *)buffer, packetLength, 0);
             if (n < 0)
-                throw cRuntimeError("Calling send failed: %d", n);
+                throw cRuntimeError("Calling send failed: %d (%s)", sock_errno(), strerror(sock_errno()));
         }
         emit(packetSentSignal, packet);
         delete [] buffer;
@@ -297,7 +297,7 @@ void ExtLowerUdp::processPacketFromLower(int fd)
         // type of buffer in recvfrom(): win: char *, linux: void *
         int n = ::recvfrom(fd, (char *)buffer, sizeof(buffer), 0, (struct sockaddr *)&sockaddr, &socklen);
         if (n < 0)
-            throw cRuntimeError("Calling recv failed: %d", n);
+            throw cRuntimeError("Calling recv failed: %d (%s)", sock_errno(), strerror(sock_errno()));
         auto data = makeShared<BytesChunk>(static_cast<const uint8_t *>(buffer), n);
         auto packet = new Packet(nullptr, data);
         packet->addTag<SocketInd>()->setSocketId(socket->socketId);
