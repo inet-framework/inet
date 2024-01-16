@@ -115,22 +115,39 @@ const Ptr<Chunk> FieldsChunk::peekUnchecked(PeekPredicate predicate, PeekConvert
     return converter(const_cast<FieldsChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-std::ostream& FieldsChunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const
+namespace {
+std::ostream& _printFieldsToStream(std::ostream& stream, cClassDescriptor *descriptor, any_ptr object, int level, int evFlags)
 {
-    auto descriptor = getDescriptor();
-    // TODO make this more sophisticated, e.g. add properties to fields to control what is printed
-    if (level <= PRINT_LEVEL_DETAIL) {
+    if (level <= Chunk::PRINT_LEVEL_DETAIL) {
         for (int i = 0; i < descriptor->getFieldCount(); i++) {
             auto fieldDeclaredOn = descriptor->getFieldDeclaredOn(i);
             if (!descriptor->getFieldIsArray(i) &&
-                strcmp("inet::FieldsChunk", fieldDeclaredOn) &&
-                strcmp("inet::Chunk", fieldDeclaredOn) &&
-                strcmp("omnetpp::cObject", fieldDeclaredOn))
+                    strcmp("inet::FieldsChunk", fieldDeclaredOn) &&
+                    strcmp("inet::Chunk", fieldDeclaredOn) &&
+                    strcmp("omnetpp::cObject", fieldDeclaredOn))
             {
-                stream << ", " << EV_BOLD << descriptor->getFieldName(i) << EV_NORMAL << " = " << descriptor->getFieldValueAsString(toAnyPtr(this), i, 0);
+                stream << ", " << EV_BOLD << descriptor->getFieldName(i) << EV_NORMAL << " = ";
+                if (descriptor->getFieldIsCompound(i) && descriptor->getFieldIsCObject(i)) {
+                    any_ptr field = descriptor->getFieldStructValuePointer(object, i, 0);
+                    cClassDescriptor *fieldDescr = fromAnyPtr<cObject>(field)->getDescriptor();
+                    stream << "{ ";
+                    _printFieldsToStream(stream, fieldDescr, field, level, evFlags);
+                    stream << "}";
+                }
+                else
+                    stream << descriptor->getFieldValueAsString(object, i, 0);
             }
         }
     }
+    return stream;
+}
+} // namespace
+
+std::ostream& FieldsChunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const
+{
+    auto descriptor = getDescriptor();
+    auto object = toAnyPtr(this);
+    _printFieldsToStream(stream, descriptor, object, level, evFlags);
     return stream;
 }
 
