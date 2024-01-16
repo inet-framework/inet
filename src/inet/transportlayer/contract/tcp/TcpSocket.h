@@ -206,6 +206,11 @@ class INET_API TcpSocket : public ISocket
     TcpSocket(cMessage *msg);
 
     /**
+     * Copy constructor
+     */
+    TcpSocket(const TcpSocket& other);
+
+    /**
      * Constructor, to be used with forked sockets (see listen()).
      */
     TcpSocket(TcpAvailableInfo *availableInfo);
