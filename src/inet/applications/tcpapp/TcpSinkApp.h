@@ -8,72 +8,44 @@
 #ifndef __INET_TCPSINKAPP_H
 #define __INET_TCPSINKAPP_H
 
-#include "inet/applications/tcpapp/TcpServerHostApp.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/applications/tcpapp/ITcpServerSocketIo.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
 
 /**
- * Accepts any number of incoming connections, and discards whatever arrives
- * on them.
+ * Receives and sinks arrived data.
  */
-class INET_API TcpSinkApp : public TcpServerHostApp
+class INET_API TcpSinkAppThread : public cSimpleModule, public TcpSocket::ICallback, public ITcpServerSocketIo
 {
   protected:
-    long bytesRcvd = 0;
-
-  protected:
-    virtual void initialize(int stage) override;
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void finish() override;
-    virtual void refreshDisplay() const override;
-
-  public:
-    TcpSinkApp();
-    ~TcpSinkApp();
-
-    friend class TcpSinkAppThread;
-};
-
-class INET_API TcpSinkAppThread : public TcpServerThreadBase
-{
-  public:
-    ~TcpSinkAppThread() { cancelAndDelete(readDelayTimer); }
-
-  protected:
-    long bytesRcvd;
-    TcpSinkApp *sinkAppModule = nullptr;
+    TcpSocket *socket = nullptr;
     cMessage *readDelayTimer = nullptr;
+    uint64_t bytesRcvd = 0;
 
-    virtual void initialize(int stage) override;
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+  protected:
+    virtual void initialize() override;
     virtual void handleMessage(cMessage *message) override;
     virtual void refreshDisplay() const override;
 
+  public:
+    virtual ~TcpSinkAppThread();
+
+    virtual TcpSocket *getSocket() override { return socket; }
+    virtual void acceptSocket(TcpAvailableInfo *availableInfo) override;
+    virtual void close() override { socket->close(); }
+    virtual void deleteModule() override { cSimpleModule::deleteModule(); }
+
+    virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override;
+    virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;
+    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketPeerClosed(TcpSocket *socket) override;
+    virtual void socketClosed(TcpSocket *socket) override;
+    virtual void socketFailure(TcpSocket *socket, int code) override;
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override;
+    virtual void socketDeleted(TcpSocket *socket) override;
+
     virtual void sendOrScheduleReadCommandIfNeeded();
-    virtual void read();    // send a read request to the socket
-
-    // TcpServerThreadBase:
-    /**
-     * Called when connection is established.
-     */
-    virtual void established() override;
-
-    /*
-     * Called when a data packet arrives.
-     */
-    virtual void dataArrived(Packet *msg, bool urgent) override;
-
-    /*
-     * Called when a timer (scheduled via scheduleAt()) expires.
-     */
-    virtual void timerExpired(cMessage *timer) override;
-
-    virtual void init(TcpServerHostApp *hostmodule, TcpSocket *socket) override { TcpServerThreadBase::init(hostmodule, socket); sinkAppModule = check_and_cast<TcpSinkApp *>(hostmod); }
-
-    virtual void close() override { hostmod->cancelAndDelete(readDelayTimer); readDelayTimer = nullptr; TcpServerThreadBase::close(); }
 };
 
 } // namespace inet

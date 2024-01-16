@@ -16,78 +16,93 @@
 
 namespace inet {
 
-Define_Module(TcpSinkApp);
 Define_Module(TcpSinkAppThread);
 
-TcpSinkApp::TcpSinkApp()
+TcpSinkAppThread::~TcpSinkAppThread()
 {
+    cancelAndDelete(readDelayTimer);
+    delete socket;
 }
 
-TcpSinkApp::~TcpSinkApp()
+void TcpSinkAppThread::acceptSocket(TcpAvailableInfo *availableInfo)
 {
+    Enter_Method("acceptSocket");
+    bytesRcvd = 0;
+    socket = new TcpSocket(availableInfo);
+    socket->setOutputGate(gate("socketOut"));
+    socket->setCallback(this);
+    socket->accept(availableInfo->getNewSocketId());
 }
 
-void TcpSinkApp::initialize(int stage)
+void TcpSinkAppThread::handleMessage(cMessage *message)
 {
-    TcpServerHostApp::initialize(stage);
-
-    if (stage == INITSTAGE_LOCAL) {
-        bytesRcvd = 0;
-        WATCH(bytesRcvd);
+    if (message->arrivedOn("socketIn")) {
+        ASSERT(socket != nullptr && socket->belongsToSocket(message));
+        socket->processMessage(message);
     }
-}
-
-void TcpSinkApp::refreshDisplay() const
-{
-    ApplicationBase::refreshDisplay();
-
-    char buf[160];
-    sprintf(buf, "threads: %d\nrcvd: %ld bytes", socketMap.size(), bytesRcvd);
-    getDisplayString().setTagArg("t", 0, buf);
-}
-
-void TcpSinkApp::finish()
-{
-    TcpServerHostApp::finish();
-
-    recordScalar("bytesRcvd", bytesRcvd);
-}
-
-void TcpSinkAppThread::initialize(int stage)
-{
-    TcpServerThreadBase::initialize(stage);
-
-    if (stage == INITSTAGE_LOCAL) {
-        bytesRcvd = 0;
-        WATCH(bytesRcvd);
-    }
-}
-
-void TcpSinkAppThread::handleMessage(cMessage *msg)
-{
-    if(msg->isSelfMessage()) {
-        timerExpired(msg);
+    else if (message == readDelayTimer) {
+        if (socket->isOpen())
+            socket->read(par("readSize"));
     }
     else
-        throw cRuntimeError("Received a non-self message.");
+        throw cRuntimeError("Unknown message");
 }
 
-void TcpSinkAppThread::timerExpired(cMessage *timer)
+void TcpSinkAppThread::socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent)
 {
-    ASSERT(getSimulation()->getContext() == this);
+    ASSERT(socket == this->socket);
+    bytesRcvd += packet->getByteLength();
+    emit(packetReceivedSignal, packet);
+    delete packet;
+    sendOrScheduleReadCommandIfNeeded();
+}
 
-    if (timer == readDelayTimer) {
-        // send read message to TCP
-        read();
-    }
-    else
-        throw cRuntimeError("Model error: unknown timer message arrived");
+void TcpSinkAppThread::socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo)
+{
+    throw cRuntimeError("Model error");
+}
+
+void TcpSinkAppThread::socketEstablished(TcpSocket *socket)
+{
+    ASSERT(socket == this->socket);
+    sendOrScheduleReadCommandIfNeeded();
+}
+
+void TcpSinkAppThread::socketPeerClosed(TcpSocket *socket)
+{
+    if (readDelayTimer)
+        cancelEvent(readDelayTimer);
+    socket->close();
+}
+
+void TcpSinkAppThread::socketClosed(TcpSocket *socket)
+{
+    if (readDelayTimer)
+        cancelEvent(readDelayTimer);
+}
+
+void TcpSinkAppThread::socketFailure(TcpSocket *socket, int code)
+{
+    if (readDelayTimer)
+        cancelEvent(readDelayTimer);
+}
+
+void TcpSinkAppThread::socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status)
+{
+}
+
+void TcpSinkAppThread::socketDeleted(TcpSocket *socket)
+{
+    ASSERT(socket == this->socket);
+    if (readDelayTimer)
+        cancelEvent(readDelayTimer);
+    socket = nullptr;
 }
 
 void TcpSinkAppThread::sendOrScheduleReadCommandIfNeeded()
 {
-    if (!sock->getAutoRead() && sock->isOpen()) {
-        simtime_t delay = hostmod->par("readDelay");
+    if (!socket->getAutoRead() && socket->isOpen()) {
+        simtime_t delay = par("readDelay");
         if (delay >= SIMTIME_ZERO) {
             if (readDelayTimer == nullptr) {
                 readDelayTimer = new cMessage("readDelayTimer");
@@ -97,43 +112,22 @@ void TcpSinkAppThread::sendOrScheduleReadCommandIfNeeded()
         }
         else {
             // send read message to TCP
-            read();
+            socket->read(par("readSize"));
         }
     }
 }
 
-void TcpSinkAppThread::established()
+void TcpSinkAppThread::initialize()
 {
-    Enter_Method("established");
     bytesRcvd = 0;
-    sendOrScheduleReadCommandIfNeeded();
-}
-
-void TcpSinkAppThread::dataArrived(Packet *pk, bool urgent)
-{
-    Enter_Method("dataArrived");
-    take(pk);
-    long packetLength = pk->getByteLength();
-    bytesRcvd += packetLength;
-    sinkAppModule->bytesRcvd += packetLength;
-
-    emit(packetReceivedSignal, pk);
-    delete pk;
-    sendOrScheduleReadCommandIfNeeded();
+    WATCH(bytesRcvd);
 }
 
 void TcpSinkAppThread::refreshDisplay() const
 {
     std::ostringstream os;
-    os << (sock ? TcpSocket::stateName(sock->getState()) : "NULL_SOCKET") << "\nrcvd: " << bytesRcvd << " bytes";
+    os << (socket ? TcpSocket::stateName(socket->getState()) : "NULL_SOCKET") << "\nrcvd: " << bytesRcvd << " bytes";
     getDisplayString().setTagArg("t", 0, os.str().c_str());
-}
-
-void TcpSinkAppThread::read()
-{
-    omnetpp::cMethodCallContextSwitcher __ctx(hostmod);
-    __ctx.methodCall("TcpSocket::read");
-    sock->read(hostmod->par("readSize"));
 }
 
 } // namespace inet
