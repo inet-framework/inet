@@ -154,7 +154,7 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
     Ipv4MulticastRoute& operator=(const Ipv4MulticastRoute& obj);
 
   public:
-    Ipv4MulticastRoute() : rt(nullptr), inInterface(nullptr), sourceType(MANUAL), source(nullptr), metric(0) {}
+    Ipv4MulticastRoute() {}
     Ipv4MulticastRoute(const Ipv4MulticastRoute& other);
     virtual ~Ipv4MulticastRoute();
     virtual std::string str() const override;
