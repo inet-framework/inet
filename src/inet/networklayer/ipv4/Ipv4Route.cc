@@ -127,6 +127,13 @@ IRoutingTable *Ipv4Route::getRoutingTableAsGeneric() const
     return getRoutingTable();
 }
 
+void Ipv4Route::setProtocolData(cObject *newProtocolData)
+{
+    delete protocolData;
+    protocolData = newProtocolData;
+    changed(F_PROTOCOLDATA);
+}
+
 Ipv4MulticastRoute::Ipv4MulticastRoute(const Ipv4MulticastRoute& other) :
     rt(nullptr),
     origin(other.origin),

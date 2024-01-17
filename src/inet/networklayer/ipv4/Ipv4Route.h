@@ -33,7 +33,7 @@ class INET_API Ipv4Route : public cObject, public IRoute
     unsigned int adminDist = dUnknown; ///< Cisco like administrative distance
     int metric = 0; ///< Metric ("cost" to reach the destination)
     cObject *source = nullptr; ///< Object identifying the source
-    cObject *protocolData = nullptr; ///< Routing Protocol specific data
+    cObject *protocolData = nullptr; ///< Routing Protocol specific data (owned pointer)
 
   private:
     // copying not supported: following are private and also left undefined
@@ -94,7 +94,7 @@ class INET_API Ipv4Route : public cObject, public IRoute
     cObject *getSource() const override { return source; }
 
     const cObject *getProtocolData() const override { return protocolData; }
-    void setProtocolData(cObject *protocolData) override { this->protocolData = protocolData; }
+    void setProtocolData(cObject *protocolData) override;
 
     virtual IRoutingTable *getRoutingTableAsGeneric() const override;
     virtual void setDestination(const L3Address& dest) override { setDestination(dest.toIpv4()); }

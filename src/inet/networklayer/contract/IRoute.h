@@ -53,6 +53,7 @@ class INET_API IRoute
         F_ADMINDIST,
         F_METRIC,
         F_EXPIRYTIME,
+        F_PROTOCOLDATA,
         F_LAST
     };
 
