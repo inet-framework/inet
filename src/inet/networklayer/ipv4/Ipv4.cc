@@ -506,7 +506,7 @@ void Ipv4::datagramLocalOut(Packet *packet)
                 EV_DETAIL << "multicast packet routed to output interface " << destIE->getInterfaceName() << " by dest address lookup in the unicast routing table\n";
             }
             if (!destIE) {
-                destIE = rt->getInterfaceByAddress(ipv4Header->getSrcAddress());
+                destIE = ift->findInterfaceByAddress(ipv4Header->getSrcAddress());
                 if (destIE)
                     EV_DETAIL << "multicast packet routed to output interface " << destIE->getInterfaceName() << " identified by source address\n";
             }
@@ -1017,7 +1017,7 @@ void Ipv4::encapsulate(Packet *transportPacket)
     // when source address was given, use it; otherwise it'll get the address
     // of the outgoing interface after routing
     if (!src.isUnspecified()) {
-        if (!nonLocalSrcAddress && rt->getInterfaceByAddress(src) == nullptr)
+        if (!nonLocalSrcAddress && ift->findInterfaceByAddress(src) == nullptr)
             // if interface parameter does not match existing interface, do not send datagram
             throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
                     src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());

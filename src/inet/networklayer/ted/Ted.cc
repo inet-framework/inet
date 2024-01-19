@@ -122,7 +122,7 @@ void Ted::initializeTED()
     // extract list of local interface addresses into interfaceAddrs[]
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         NetworkInterface *ie = ift->getInterface(i);
-        NetworkInterface *ie2 = rt->getInterfaceByAddress(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+        NetworkInterface *ie2 = ift->findInterfaceByAddress(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
         if (ie2 != ie)
             throw cRuntimeError("MPLS models assume interfaces to have unique addresses, "
                                 "but address of '%s' (%s) is not unique",
@@ -262,7 +262,7 @@ void Ted::rebuildRoutingTable()
         else {
             entry->setGateway(V[nHop].node);
         }
-        entry->setInterface(rt->getInterfaceByAddress(getInterfaceAddrByPeerAddress(V[nHop].node)));
+        entry->setInterface(ift->findInterfaceByAddress(getInterfaceAddrByPeerAddress(V[nHop].node)));
         entry->setSourceType(IRoute::OSPF);
 
         entry->setNetmask(Ipv4Address::ALLONES_ADDRESS);
@@ -280,7 +280,7 @@ void Ted::rebuildRoutingTable()
 
         entry->setDestination(getPeerByLocalAddress(elem));
         entry->setGateway(Ipv4Address());
-        entry->setInterface(rt->getInterfaceByAddress(elem));
+        entry->setInterface(ift->findInterfaceByAddress(elem));
         entry->setSourceType(IRoute::OSPF);
 
         entry->setNetmask(Ipv4Address::ALLONES_ADDRESS);

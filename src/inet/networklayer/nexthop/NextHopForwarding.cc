@@ -515,7 +515,7 @@ void NextHopForwarding::encapsulate(Packet *transportPacket, const NetworkInterf
     // of the outgoing interface after routing
     if (!src.isUnspecified()) {
         // if interface parameter does not match existing interface, do not send datagram
-        if (routingTable->getInterfaceByAddress(src) == nullptr)
+        if (interfaceTable->findInterfaceByAddress(src) == nullptr)
             throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
                     src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
         header->setSourceAddress(src);

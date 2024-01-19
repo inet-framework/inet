@@ -315,7 +315,7 @@ void Ipv6::handleMessageFromHL(Packet *packet)
     Ipv6Address src = packet->getTag<L3AddressReq>()->getSrcAddress().toIpv6();
     if (!src.isUnspecified()) {
         // if interface parameter does not match existing interface, do not send datagram
-        if (rt->getInterfaceByAddress(src) == nullptr) {
+        if (ift->findInterfaceByAddress(src) == nullptr) {
 #ifdef INET_WITH_xMIPv6
             EV_WARN << "Encapsulation failed - dropping packet." << endl;
             PacketDropDetails details;

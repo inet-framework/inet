@@ -829,7 +829,7 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
 //        bool ER = psb->OutInterface.isUnspecified();
         if (!IR) {
             Ipv4Address localInf = tedmod->getInterfaceAddrByPeerAddress(psb->Previous_Hop_Address);
-            inInterface = rt->getInterfaceByAddress(localInf)->getInterfaceName();
+            inInterface = CHK(ift->findInterfaceByAddress(localInf))->getInterfaceName();
         }
         else
             inInterface = "any";
@@ -845,7 +845,7 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
             lop.label = rsb->FlowDescriptor[i].label;
             outLabel.push_back(lop);
 
-            outInterface = rt->getInterfaceByAddress(psb->OutInterface)->getInterfaceName();
+            outInterface = CHK(ift->findInterfaceByAddress(psb->OutInterface))->getInterfaceName();
         }
         else {
             // egress router
