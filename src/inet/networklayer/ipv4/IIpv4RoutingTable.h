@@ -42,12 +42,6 @@ class INET_API IIpv4RoutingTable : public IRoutingTable
     /** @name Interfaces */
     //@{
     /**
-     * Returns an interface given by its address. Returns nullptr if not found.
-     */
-    virtual NetworkInterface *getInterfaceByAddress(const Ipv4Address& address) const = 0;
-    //@}
-
-    /**
      * Returns routerId.
      */
     virtual Ipv4Address getRouterId() const = 0;
@@ -198,7 +192,6 @@ class INET_API IIpv4RoutingTable : public IRoutingTable
 
   private:
     // mapping IRoute methods to IPv4-specific IIpv4Route methods
-    virtual NetworkInterface *getInterfaceByAddress(const L3Address& address) const override { return getInterfaceByAddress(address.toIpv4()); }
     virtual L3Address getRouterIdAsGeneric() const override { return getRouterId(); }
     virtual bool isLocalAddress(const L3Address& dest) const override { return isLocalAddress(dest.toIpv4()); }
     virtual bool isLocalBroadcastAddress(const L3Address& dest) const override { return isLocalBroadcastAddress(dest.toIpv4()); }

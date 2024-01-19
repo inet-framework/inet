@@ -168,12 +168,6 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     /** @name Interfaces */
     //@{
     /**
-     * Returns an interface given by its address. Returns nullptr if not found.
-     */
-    virtual NetworkInterface *getInterfaceByAddress(const Ipv4Address& address) const override;
-    //@}
-
-    /**
      * AdminDist on/off
      */
     virtual bool isAdminDistEnabled() const override { return useAdminDist; }

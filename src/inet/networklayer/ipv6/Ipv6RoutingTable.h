@@ -131,14 +131,6 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
   public:
-    /** @name Interfaces */
-    //@{
-    /**
-     * Returns an interface given by its address. Returns nullptr if not found.
-     */
-    virtual NetworkInterface *getInterfaceByAddress(const Ipv6Address& address) const;
-    //@}
-
     /**
      * IP forwarding on/off
      */
@@ -379,7 +371,6 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual L3Address getRouterIdAsGeneric() const override { return L3Address(Ipv6Address()); /*TODO getRouterId();*/ }
     virtual bool isLocalAddress(const L3Address& dest) const override { return isLocalAddress(dest.toIpv6()); }
     virtual bool isLocalBroadcastAddress(const L3Address& dest) const override { return false; /*TODO isLocalBroadcastAddress(dest.toIPv6());*/ }
-    virtual NetworkInterface *getInterfaceByAddress(const L3Address& address) const override;
     virtual NetworkInterface *findInterfaceByLocalBroadcastAddress(const L3Address& dest) const { return nullptr; /*TODO findInterfaceByLocalBroadcastAddress(dest.toIPv6());*/ }
     virtual IRoute *findBestMatchingRoute(const L3Address& dest) const override { return const_cast<Ipv6Route *>((const_cast<Ipv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIpv6())); } // FIXME what a name??!! also: remove const; ALSO: THIS DOES NOT UPDATE DESTCACHE LIKE METHODS BUILT ON IT!
     virtual NetworkInterface *getOutputInterfaceForDestination(const L3Address& dest) const override { const Ipv6Route *e = (const_cast<Ipv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIpv6()); return e ? e->getInterface() : nullptr; }

@@ -55,11 +55,6 @@ class INET_API IRoutingTable
     virtual bool isLocalBroadcastAddress(const L3Address& dest) const = 0;
 
     /**
-     * Returns an interface given by its address. Returns nullptr if not found.
-     */
-    virtual NetworkInterface *getInterfaceByAddress(const L3Address& address) const = 0; // TODO should be find..., see next one
-
-    /**
      * Prints the routing table.
      */
     virtual void printRoutingTable() const = 0;

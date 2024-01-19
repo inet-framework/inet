@@ -99,11 +99,6 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
     virtual bool isLocalBroadcastAddress(const L3Address& dest) const override { return false; } // TODO maybe into InterfaceTable?
 
     /**
-     * Returns an interface given by its address. Returns nullptr if not found.
-     */
-    virtual NetworkInterface *getInterfaceByAddress(const L3Address& address) const override; // TODO should be find..., see next one
-
-    /**
      * To be called from route objects whenever a field changes. Used for
      * maintaining internal data structures and firing "routing table changed"
      * notifications.

@@ -392,18 +392,6 @@ void Ipv6RoutingTable::configureTunnelFromXml(cXMLElement *cfg)
     }
 }
 
-NetworkInterface *Ipv6RoutingTable::getInterfaceByAddress(const Ipv6Address& addr) const
-{
-    Enter_Method("getInterfaceByAddress(%s)=?", addr.str().c_str());
-
-    return ift->findInterfaceByAddress(addr);
-}
-
-NetworkInterface *Ipv6RoutingTable::getInterfaceByAddress(const L3Address& address) const
-{
-    return getInterfaceByAddress(address.toIpv6());
-}
-
 bool Ipv6RoutingTable::isLocalAddress(const Ipv6Address& dest) const
 {
     Enter_Method("isLocalAddress(%s)", dest.str().c_str());

@@ -237,13 +237,6 @@ bool NextHopRoutingTable::isLocalAddress(const L3Address& dest) const
     return ift->isLocalAddress(dest);
 }
 
-NetworkInterface *NextHopRoutingTable::getInterfaceByAddress(const L3Address& address) const
-{
-    Enter_Method("getInterfaceByAddress(%s)", address.str().c_str());
-
-    return ift->findInterfaceByAddress(address);
-}
-
 NextHopRoute *NextHopRoutingTable::findBestMatchingRoute(const L3Address& dest) const
 {
     Enter_Method("findBestMatchingRoute(%s)", dest.str().c_str());

@@ -122,7 +122,7 @@ void Ipv4RoutingTable::configureRouterId()
     else { // already configured
            // if there is no interface with routerId yet, assign it to the loopback address;
            // TODO find out if this is a good practice, in which situations it is useful etc.
-        if (getInterfaceByAddress(routerId) == nullptr) {
+        if (ift->findInterfaceByAddress(routerId) == nullptr) {
             NetworkInterface *lo0 = CHK(ift->findFirstLoopbackInterface());
             auto ipv4Data = lo0->getProtocolDataForUpdate<Ipv4InterfaceData>();
             ipv4Data->setIPAddress(routerId);
@@ -290,14 +290,6 @@ std::vector<Ipv4Address> Ipv4RoutingTable::gatherAddresses() const
     for (int i = 0; i < ift->getNumInterfaces(); ++i)
         addressvector.push_back(ift->getInterface(i)->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
     return addressvector;
-}
-
-// ---
-
-NetworkInterface *Ipv4RoutingTable::getInterfaceByAddress(const Ipv4Address& addr) const
-{
-    Enter_Method("getInterfaceByAddress(%u.%u.%u.%u)", addr.getDByte(0), addr.getDByte(1), addr.getDByte(2), addr.getDByte(3)); // note: str().c_str() too slow here
-    return ift->findInterfaceByAddress(addr);
 }
 
 // ---
