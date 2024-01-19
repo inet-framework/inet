@@ -3,8 +3,10 @@
 CCACHE_PREFIX=
 
 EXAMPLE=$1
-if [ "$EXAMPLE" == "" ]; then
-    echo "Usage: ./run <example>"
+NS3_ALGORITHM=$2
+INET_ALGORITHM=$3
+if [ "$EXAMPLE" == "" -o "" == "$NS3_ALGORITHM" -o "$INET_ALGORITHM" == "" ]; then
+    echo "Usage: ./run <example> <ns3-algorithm> <inet-algorithm>"
     exit
 fi
 
@@ -13,9 +15,9 @@ NS_DIR=~/workspace/ns-allinone-3.40/ns-3.40
 rm -f results/pcap-inet.log results/pcap-ns3.log results/pcap-diff.log
 cp $EXAMPLE.cc $NS_DIR/scratch
 $NS_DIR/ns3 build scratch/$EXAMPLE || exit 1
-(cd results; $NS_DIR/build/scratch/ns3.40-$EXAMPLE-debug --ns3::TcpL4Protocol::SocketType=$2 | grep TRACE > stdout-ns3.log) || exit 1
+(cd results; $NS_DIR/build/scratch/ns3.40-$EXAMPLE-debug --ns3::TcpL4Protocol::SocketType=$NS3_ALGORITHM | grep TRACE > stdout-ns3.log) || exit 1
 (cd ../../; make MODE=debug -j16) || exit 1
-(inet_dbg -u Cmdenv -f $EXAMPLE.ini -c $EXAMPLE "--**.tcp.tcpAlgorithmClass=\"$3\"" | grep TRACE > results/stdout-inet.log) || exit 1
+(inet_dbg -u Cmdenv -f $EXAMPLE.ini -c $EXAMPLE "--**.tcp.tcpAlgorithmClass=\"$INET_ALGORITHM\"" | grep TRACE > results/stdout-inet.log) || exit 1
 
 tshark -V -r results/$EXAMPLE-$EXAMPLE.source.ppp\[0\].pcap > results/pcap-inet-source.log
 tshark -V -r results/$EXAMPLE-0-0.pcap > results/pcap-ns3-source.log
