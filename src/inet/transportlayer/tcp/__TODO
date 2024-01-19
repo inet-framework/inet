@@ -1,26 +1,27 @@
 Goal
 
-Modern (latest RFCs) and correct TCP implementation (at least validated)
+ - modernize (latest RFCs) and correct TCP implementation (at least validated to NS-3)
 
-Tasks
+Merge tasks
 
-Move GPL TcpCubic to inet-gpl
-Remove the concept of dup ACKs from TcpConnection
-Move dupacks to TcpAlgorithmBase
-Rename TcpAlgorithm to ITcpAlgorithm
-Take into account the different operation of bbr when designing the architecture
-Use isDuplicateAck from Rfc*Recovery classes and remove dupack check condition from TcpConnection
-Design TcpCongestionControl C++ interface
-Design TcpRecovery C++ interface
-Refactor all existing TCP algorithms to the new architecture using separate congestion control and recovery
-Validate other TCP algorithms against NS-3
-Validate rexmit timer against NS-3
-Implement cubic, bbr TCP algorithms based on NS-3
-Replace old RFC references with new ones and update the corresponding implementation
-Merge the various TcpConnection* files into one
-Merge TcpSendQueue and TcpSackRexmitQueue?
-Merge TcpNewReno2 into TcpAlgorithmBase?
-Implement fast path
-Update NED documentation and README files, etc.
-Create showcases for TCP validation and TCP algorithm operation
-NS-3 vs INET performance comparison, profile and optimize INET
+ - extract ns3 validation example into a real test, commit PCAP files?, commit ns3-patch?
+ - replace old RFC references with new ones and update the corresponding implementation
+ - design ITcpCongestionControl C++ and ITcpRecovery C++ interface
+ - fix broken old congestion control algorithms TcpTahoe, TcpReno, TcpDctcp, etc.
+   refactor all existing TCP algorithms to the new architecture using separate congestion control and recovery
+ - validate other TCP algorithms against NS-3
+ - validate rexmit timer against NS-3
+ - update NED documentation and README files, etc.
+ - accept new fingerprints by checking statistical test results, i.e. differences should be small enough to be acceptable
+ - move GPL TcpCubic to inet-gpl
+
+Future tasks
+
+ - remove the concept of dup ACKs from TcpConnection and move dupacks to TcpAlgorithmBase
+ - rename TcpAlgorithm to ITcpAlgorithm and extract non-virtual methods and fields
+ - implement bbr TCP algorith and take into account the different operation of bbr when designing the TCP interfaces
+ - merge the various TcpConnection* files into one
+ - merge TcpSendQueue and TcpSackRexmitQueue?
+ - implement fast path
+ - NS-3 vs INET performance comparison, profile and optimize INET
+ - create showcases for TCP validation and TCP algorithm operation
