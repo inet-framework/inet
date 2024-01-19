@@ -169,7 +169,7 @@ theoretical_cubic_k(double wmax_pkts)
 
     C = 0.4;
 
-    return (pow((wmax_pkts * 0.3) / C, (1.0 / 3.0)) * pow(2, CUBIC_SHIFT));
+    return (std::pow((wmax_pkts * 0.3) / C, (1.0 / 3.0)) * std::pow(2, CUBIC_SHIFT));
 }
 
 static __inline unsigned long
@@ -181,8 +181,8 @@ theoretical_cubic_cwnd(int ticks_since_epoch, unsigned long wmax, uint32_t smss)
     wmax_pkts = wmax / (double)smss;
 
     return (smss * (wmax_pkts +
-        (C * pow(ticks_since_epoch / (double)hz -
-        theoretical_cubic_k(wmax_pkts) / pow(2, CUBIC_SHIFT), 3.0))));
+        (C * std::pow(ticks_since_epoch / (double)hz -
+        theoretical_cubic_k(wmax_pkts) / std::pow(2, CUBIC_SHIFT), 3.0))));
 }
 
 static __inline unsigned long
