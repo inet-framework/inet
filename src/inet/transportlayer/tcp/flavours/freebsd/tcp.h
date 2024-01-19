@@ -32,6 +32,10 @@
 #ifndef _NETINET_TCP_H_
 #define _NETINET_TCP_H_
 
+#include "inet/common/Endian.h"
+
+#include <cstdint>
+
 #define __BSD_VISIBLE 1
 
 #if __BSD_VISIBLE

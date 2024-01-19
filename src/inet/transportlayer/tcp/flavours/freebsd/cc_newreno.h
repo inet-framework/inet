@@ -27,6 +27,8 @@
 #ifndef _CC_NEWRENO_H
 #define _CC_NEWRENO_H
 
+#include <cstdint>
+
 extern struct cc_algo newreno_cc_algo;
 
 #define CCALGONAME_NEWRENO "newreno"

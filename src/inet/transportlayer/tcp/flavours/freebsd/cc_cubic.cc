@@ -55,6 +55,7 @@
 #include "inet/transportlayer/tcp/flavours/freebsd/tcp_var.h"
 #include "inet/transportlayer/tcp/flavours/freebsd/tcp.h"
 
+#include <cerrno>
 #include <malloc.h>
 
 #define TCP_TMR_GRANULARITY_USEC    2   /* TCP timers are in microseconds */
