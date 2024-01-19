@@ -40,6 +40,9 @@
 #define _NETINET_CC_CUBIC_H_
 
 #include <algorithm>
+#include <climits>
+#include <cmath>
+#include <cstdint>
 
 extern int64_t tick;
 
