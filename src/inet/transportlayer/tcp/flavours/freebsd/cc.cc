@@ -53,6 +53,8 @@
 #include "inet/transportlayer/tcp/flavours/freebsd/cc_module.h"
 #include "inet/transportlayer/tcp/flavours/freebsd/tcp_var.h"
 
+#include <algorithm>
+
 int64_t ticks = 0;
 
 static bool V_newreno_beta = false;

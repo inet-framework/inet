@@ -63,6 +63,8 @@
 #include "inet/transportlayer/tcp/flavours/freebsd/tcp_var.h"
 #include "inet/transportlayer/tcp/flavours/freebsd/tcp.h"
 
+#include <algorithm>
+#include <errno.h>
 #include <malloc.h>
 
 static bool V_cc_do_abe = false;
