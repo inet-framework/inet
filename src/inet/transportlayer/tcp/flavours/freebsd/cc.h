@@ -180,7 +180,7 @@ struct cc_algo {
     int (*mod_destroy)(void);
 
     /* Return the size of the void pointer the CC needs for state */
-    size_t  (*cc_data_sz)(void);
+    std::size_t  (*cc_data_sz)(void);
 
     /*
      * Init CC state for a new control block. The CC
