@@ -81,7 +81,7 @@ void Leach::configureInterfaces() {
         NetworkInterface *networkInterface = interfaceTable->getInterface(i);
         // Only single wireless interface is required
         if (networkInterface->isWireless()) {
-            interface80211ptr = networkInterface;
+            wirelessInterface = networkInterface;
             break;
         }
     }
@@ -133,7 +133,7 @@ void Leach::handleSelfMessage(cMessage *msg) {
 
             // Filling the LeachControlPkt fields
             ctrlPkt->setPacketType(CH);
-            Ipv4Address source = (interface80211ptr->getProtocolData<
+            Ipv4Address source = (wirelessInterface->getProtocolData<
                     Ipv4InterfaceData>()->getIPAddress());
             ctrlPkt->setChunkLength(b(128)); ///size of Hello message in bits
             ctrlPkt->setSrcAddress(source);
@@ -144,7 +144,7 @@ void Leach::handleSelfMessage(cMessage *msg) {
             addressReq->setDestAddress(Ipv4Address(255, 255, 255, 255));
             addressReq->setSrcAddress(source); //let's try the limited broadcast
             packet->addTag<InterfaceReq>()->setInterfaceId(
-                    interface80211ptr->getInterfaceId());
+                    wirelessInterface->getInterfaceId());
             packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
             packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
 
@@ -160,7 +160,7 @@ void Leach::handleSelfMessage(cMessage *msg) {
 
 void Leach::processMessage(cMessage *msg) {
     Ipv4Address selfAddr =
-            (interface80211ptr->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+            (wirelessInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
     auto receivedCtrlPkt =
             staticPtrCast<LeachControlPkt>(
                     check_and_cast<Packet*>(msg)->peekData<LeachControlPkt>()->dupShared());
@@ -323,7 +323,7 @@ void Leach::sendAckToCH(Ipv4Address nodeAddr, Ipv4Address CHAddr) {
     addressReq->setDestAddress(getIdealCH(nodeAddr, CHAddr));
     addressReq->setSrcAddress(nodeAddr);
     ackPacket->addTag<InterfaceReq>()->setInterfaceId(
-            interface80211ptr->getInterfaceId());
+            wirelessInterface->getInterfaceId());
     ackPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     ackPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
 
@@ -350,7 +350,7 @@ void Leach::sendSchToNCH(Ipv4Address selfAddr) {
     scheduleReq->setDestAddress(Ipv4Address(255, 255, 255, 255));
     scheduleReq->setSrcAddress(selfAddr);
     schedulePacket->addTag<InterfaceReq>()->setInterfaceId(
-            interface80211ptr->getInterfaceId());
+            wirelessInterface->getInterfaceId());
     schedulePacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     schedulePacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
 
@@ -376,7 +376,7 @@ void Leach::sendDataToCH(Ipv4Address nodeAddr, Ipv4Address CHAddr,
     addressReq->setDestAddress(getIdealCH(nodeAddr, CHAddr));
     addressReq->setSrcAddress(nodeAddr);
     dataPacket->addTag<InterfaceReq>()->setInterfaceId(
-            interface80211ptr->getInterfaceId());
+            wirelessInterface->getInterfaceId());
     dataPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     dataPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
 
@@ -397,7 +397,7 @@ void Leach::sendDataToBS(Ipv4Address CHAddr) {
     addressReq->setDestAddress(Ipv4Address(10, 0, 0, 1));
     addressReq->setSrcAddress(CHAddr);
     bsPacket->addTag<InterfaceReq>()->setInterfaceId(
-            interface80211ptr->getInterfaceId());
+            wirelessInterface->getInterfaceId());
     bsPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     bsPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
 

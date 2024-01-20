@@ -32,7 +32,7 @@ namespace leach {
 class INET_API Leach: public RoutingProtocolBase {
 
 private:
-    NetworkInterface *interface80211ptr = nullptr;
+    NetworkInterface *wirelessInterface = nullptr;
     unsigned int sequencenumber = 0;
     cModule *host = nullptr;
     Ipv4Address idealCH;
