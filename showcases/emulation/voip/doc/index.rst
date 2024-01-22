@@ -142,9 +142,10 @@ is needed. Here is the relevant configuration:
 Running
 -------
 
-Several setups are provided here. In addition to running the setup over a real
-network, two other setup are also provided that only use the local computer, so
-they are supposedly easier to try out.
+This section presents various configurations for running the VoIP simulation,
+tailored to different testing needs. It includes setups for real network
+environments, simplified local computer scenarios, and Mininet-based
+virtual networks.
 
 Over a Real Network
 ~~~~~~~~~~~~~~~~~~~
@@ -256,6 +257,7 @@ parameter to ``192.168.2.2``.
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: VoipSenderVirtualEth
+   :end-at: net1
 
 You can run the simulations with the following commands:
 
@@ -275,6 +277,96 @@ If you don't want to enter the setup and teardown commands manually, you can use
 the provided :download:`veth_setup<../veth_setup>` and
 :download:`veth_teardown<../veth_teardown>` scripts (with ``sudo``), or use
 :download:`run_veth<../run_veth>` that automates the complete procedure.
+
+In a Mininet Network
+~~~~~~~~~~~~~~~~~~~~
+
+.. TODO: mininet link
+.. https://mininet.org/
+
+.. what is mininet and why is that good
+
+.. - its easy to create the underlying virtual network (kind of the same as the previous)
+.. - easy to create arbitrarily complex network topology for the network part
+
+.. **V1**
+
+.. This configuration builds the 'real' part of the network with `Mininet <https://mininet.org>`__, a tool that can
+.. easily create a realistic virtual network on a host machine. Using Mininet, one can create
+.. a virtual network topology with just a few commands, or alternatively, with its Python API. 
+.. Mininet utilizes network namespaces and virtual network interfaces under the hood.
+.. We just need to specify the network topology
+.. (the number of virtual hosts and switches, and connections between them), 
+.. then Mininet handles the creation of network namespaces, virtual network interfaces, and routes.
+
+.. **V2**
+
+This configuration builds the 'real' part of the network with `Mininet <https://mininet.org>`__, 
+an emulator for rapid prototyping of Software Defined Networks. Using Mininet, one can create a virtual network topology with just a few shell commands. 
+Alternatively, its Python API is also available for this purpose. 
+Mininet utilizes network namespaces and virtual network interfaces under the hood.
+We just need to specify the network topology
+(the number of virtual hosts and switches, and connections between them), 
+then Mininet handles the creation of network namespaces, virtual network interfaces, and routes.
+
+.. note:: - Mininet needs to run with ``sudo``
+          - On Ubuntu and derivatives, install with the following command: ``sudo apt install mininet openvswitch-testcontroller``
+
+In this configuration, we'll use Mininet's Python API to create a similar, but slightly extended network topology than in the previous section.
+We create two Mininet hosts and connect them via a Mininet switch. The setup is the following:
+
+.. figure:: media/setup4.png
+   :align: center
+   :width: 40%
+   
+It is defined in the ``mininet.py`` file:
+
+.. literalinclude:: ../mininet-veth.py
+   :start-at: net = Mininet
+
+.. **What does this do?**
+
+This python script creates the Mininet hosts and connects to the Mininet switch. We use Mininet's ``TCIntf``
+interface type, which allows for configuring packet loss, delay, jitter, etc.
+We configure 10Mbps link bandwidth and some packet loss on the sender host's interface.
+
+.. note:: More complex network topologies can be created conveniently with Mininet's Python API.
+
+After the Mininet network is started, we run commands on each host to load the Voip sender and receiver simulations in Qtenv.
+
+.. Each host has its own
+.. virtual network stack, and we can run commands on these virtual hosts.
+
+.. - each host has its own network namespace
+.. - we can run commands on them
+.. - we can use a TCIntf interface, where we can specify a lossy connection (specify packet loss, delay, jitter, etc)
+
+.. To run the simulation, use the start_mininet.sh wrapper script (this script starts the python script, and passes the $PATH environmental variable to it):
+
+.. To run the simulations, use the start_mininet.sh wrapper script, which runs the pyton file:
+
+To run the simulations, use the ``run_mininet.sh`` wrapper script:
+
+.. You can run the simulations with the following command:
+
+.. code-block:: bash
+
+  $ ./run_mininet.sh
+
+When the simulations in Qtenv are loaded, make sure to start the receiver one first,
+and run both in fast or express mode. After the simulations are finished, exit the Mininet prompt with Ctrl-D to delete the virtual network infrastructure.
+
+.. do the same as the previous one, just with mininet
+
+.. After closing the Qtenv windows, exiting the Mininet prompt with Ctrl+D deletes the virtual network infrastructure.
+
+.. After closing the Qtenv windows, one can explore the virtual network infrastructure in the Mininet command prompt. For example, ping etc -> out of scope.
+
+.. Exiting the Mininet prompt with Ctrl-D deletes the virtual network infrastructure.
+
+.. .. note:: Modify the python script to explore different packet loss and delay values. -> obvious
+
+.. how do we do it
 
 Results
 -------
