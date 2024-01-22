@@ -599,8 +599,8 @@ void TcpAlgorithmBase::restartRexmitTimer()
 bool TcpAlgorithmBase::shouldMarkAck()
 {
 
-    // rfc-3168, pages 19-20:
-    // When TCP receives a CE data packet at the destination end-system, the
+    // RFC 3168, pages 19-20:
+    // "When TCP receives a CE data packet at the destination end-system, the
     // TCP data receiver sets the ECN-Echo flag in the TCP header of the
     // subsequent ACK packet.
     // ...
@@ -609,7 +609,7 @@ bool TcpAlgorithmBase::shouldMarkAck()
     // packets it sends (whether they acknowledge CE data packets or non-CE
     // data packets) until it receives a CWR packet (a packet with the CWR
     // flag set).  After the receipt of the CWR packet, acknowledgments for
-    // subsequent non-CE data packets do not have the ECN-Echo flag set.
+    // subsequent non-CE data packets do not have the ECN-Echo flag set."
 
     if (state && state->ect) {
         if (state->gotCeIndication) {

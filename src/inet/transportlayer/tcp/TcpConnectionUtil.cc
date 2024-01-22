@@ -289,19 +289,19 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
     // ECN:
     // We decided to use ECT(1) to indicate ECN capable transport.
     //
-    // rfc-3168, page 6:
-    // Routers treat the ECT(0) and ECT(1) codepoints
+    // RFC 3168, page 6
+    // "Routers treat the ECT(0) and ECT(1) codepoints
     // as equivalent.  Senders are free to use either the ECT(0) or the
-    // ECT(1) codepoint to indicate ECT.
+    // ECT(1) codepoint to indicate ECT."
     //
-    // rfc-3168, page 20:
-    // For the current generation of TCP congestion control algorithms, pure
+    // RFC 3168, page 20
+    // "For the current generation of TCP congestion control algorithms, pure
     // acknowledgement packets (e.g., packets that do not contain any
-    // accompanying data) MUST be sent with the not-ECT codepoint.
+    // accompanying data) MUST be sent with the not-ECT codepoint."
     //
-    // rfc-3168, page 20:
-    // ECN-capable TCP implementations MUST NOT set either ECT codepoint
-    // (ECT(0) or ECT(1)) in the IP header for retransmitted data packets
+    // RFC 3168, page 20
+    // "ECN-capable TCP implementations MUST NOT set either ECT codepoint
+    // (ECT(0) or ECT(1)) in the IP header for retransmitted data packets"
     tcpSegment->addTagIfAbsent<EcnReq>()->setExplicitCongestionNotification((state->ect && !state->sndAck && !state->rexmit) ? IP_ECN_ECT_1 : IP_ECN_NOT_ECT);
 
     tcpHeader->setCrc(0);
@@ -588,10 +588,10 @@ void TcpConnection::sendSyn()
         EV << "ECN-setup SYN packet sent\n";
     }
     else {
-        // rfc 3168 page 16:
-        // A host that is not willing to use ECN on a TCP connection SHOULD
+        // RFC 3168, page 16
+        // "A host that is not willing to use ECN on a TCP connection SHOULD
         // clear both the ECE and CWR flags in all non-ECN-setup SYN and/or
-        // SYN-ACK packets that it sends to indicate this unwillingness.
+        // SYN-ACK packets that it sends to indicate this unwillingness."
         tcpHeader->setEceBit(false);
         tcpHeader->setCwrBit(false);
         state->ecnSynSent = false;
@@ -637,10 +637,10 @@ void TcpConnection::sendSynAck()
         EV << "both end-points are willing to use ECN... ECN is enabled\n";
     }
     else { // TODO not sure if we have to.
-           // rfc-3168, page 16:
-           // A host that is not willing to use ECN on a TCP connection SHOULD
+           // RFC 3168, page 16
+           // "A host that is not willing to use ECN on a TCP connection SHOULD
            // clear both the ECE and CWR flags in all non-ECN-setup SYN and/or
-           // SYN-ACK packets that it sends to indicate this unwillingness.
+           // SYN-ACK packets that it sends to indicate this unwillingness."
         state->ect = false;
         if (state->endPointIsWillingECN)
             EV << "ECN is disabled\n";
@@ -715,8 +715,8 @@ void TcpConnection::sendAck()
     tcpHeader->setAckNo(state->rcv_nxt);
     tcpHeader->setWindow(updateRcvWnd());
 
-    // rfc-3168, pages 19-20:
-    // When TCP receives a CE data packet at the destination end-system, the
+    // RFC 3168, pages 19-20
+    // "When TCP receives a CE data packet at the destination end-system, the
     // TCP data receiver sets the ECN-Echo flag in the TCP header of the
     // subsequent ACK packet.
     // ...
@@ -725,7 +725,7 @@ void TcpConnection::sendAck()
     // packets it sends (whether they acknowledge CE data packets or non-CE
     // data packets) until it receives a CWR packet (a packet with the CWR
     // flag set).  After the receipt of the CWR packet, acknowledgments for
-    // subsequent non-CE data packets do not have the ECN-Echo flag set.
+    // subsequent non-CE data packets do not have the ECN-Echo flag set."
 
     TcpStateVariables *state = getStateForUpdate();
     if (state && state->ect) {
@@ -739,7 +739,9 @@ void TcpConnection::sendAck()
     writeHeaderOptions(tcpHeader);
     Packet *fp = new Packet("TcpAck");
 
-    // rfc-3168 page 20: pure ack packets must be sent with not-ECT codepoint
+    // RFC 3168, page 20
+    // "pure acknowledgement packets (e.g., packets that do not contain any
+    // accompanying data) MUST be sent with the not-ECT codepoint."
     state->sndAck = true;
 
     // send it
@@ -1001,9 +1003,9 @@ bool TcpConnection::sendProbe()
 
 void TcpConnection::retransmitOneSegment(bool called_at_rto)
 {
-    // rfc-3168, page 20:
-    // ECN-capable TCP implementations MUST NOT set either ECT codepoint
-    // (ECT(0) or ECT(1)) in the IP header for retransmitted data packets
+    // RFC 3168, page 20
+    // "ECN-capable TCP implementations MUST NOT set either ECT codepoint
+    // (ECT(0) or ECT(1)) in the IP header for retransmitted data packets"
     if (state && state->ect)
         state->rexmit = true;
 
@@ -1058,9 +1060,9 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
 
 void TcpConnection::retransmitData()
 {
-    // rfc-3168, page 20:
-    // ECN-capable TCP implementations MUST NOT set either ECT codepoint
-    // (ECT(0) or ECT(1)) in the IP header for retransmitted data packets
+    // RFC 3168, page 20
+    // "ECN-capable TCP implementations MUST NOT set either ECT codepoint
+    // (ECT(0) or ECT(1)) in the IP header for retransmitted data packets"
     if (state && state->ect)
         state->rexmit = true;
 

@@ -80,13 +80,13 @@ import inet.transportlayer.contract.ITcp;
 //   - RFC 2018 - TCP Selective Acknowledgment Options
 //   - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP
 //   - RFC 3042 - Enhancing TCP's Loss Recovery Using Limited Transmit
+//   - RFC 3168 - The Addition of Explicit Congestion Notification (ECN) to IP
 //   - RFC 3390 - Increasing TCP's Initial Window
 //   - RFC 5681 - TCP Congestion Control
 //   - RFC 6582 - The NewReno Modification to TCP's Fast Recovery Algorithm
 //   - RFC 6675 - A Conservative Loss Recovery Algorithm Based on Selective Acknowledgment (SACK) for TCP
 //
 // We want to implement the following RFCs:
-//   - RFC 3168 - The Addition of Explicit Congestion Notification (ECN) to IP
 //   - RFC 7323 - TCP Extensions for High Performance
 //
 // See also:
