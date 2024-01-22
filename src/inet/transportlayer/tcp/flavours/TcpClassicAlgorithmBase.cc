@@ -96,7 +96,7 @@ void TcpClassicAlgorithmBase::processRexmitTimer(TcpEventCode& event)
     // If calling "retransmitData();" there is no rexmit limitation (bytesToSend > snd_cwnd)
     // therefore "sendData();" has been modified and is called to rexmit outstanding data.
     //
-    // RFC 2581, page 5:
+    // RFC 5681, page 8:
     // "Furthermore, upon a timeout cwnd MUST be set to no more than the loss
     // window, LW, which equals 1 full-sized segment (regardless of the
     // value of IW).  Therefore, after retransmitting the dropped segment
@@ -104,15 +104,16 @@ void TcpClassicAlgorithmBase::processRexmitTimer(TcpEventCode& event)
     // from 1 full-sized segment to the new value of ssthresh, at which
     // point congestion avoidance again takes over."
 
-    // RFC 2581, page 4:
+    // RFC 5681, page 7:
     // "When a TCP sender detects segment loss using the retransmission
-    // timer, the value of ssthresh MUST be set to no more than the value
-    // given in equation 3:
+    // timer and the given segment has not yet been resent by way of the
+    // retransmission timer, the value of ssthresh MUST be set to no more
+    // than the value given in equation (4):
     //
-    //   ssthresh = max (FlightSize / 2, 2*SMSS)            (3)
+    //   ssthresh = max (FlightSize / 2, 2*SMSS)            (4)
     //
-    // As discussed above, FlightSize is the amount of outstanding data in
-    // the network."
+    // where, as discussed above, FlightSize is the amount of outstanding
+    // data in the network."
     state->ssthresh = std::max(conn->getTcpAlgorithm()->getBytesInFlight() / 2, 2 * state->snd_mss);
     conn->emit(ssthreshSignal, state->ssthresh);
 

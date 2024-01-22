@@ -147,7 +147,7 @@ void TcpWestwood::receivedAckForUnackedData(uint32_t firstSeqAcked)
         if (state->snd_cwnd < state->ssthresh) {
             EV_DETAIL << "cwnd <= ssthresh: Slow Start: increasing cwnd by one SMSS bytes to ";
 
-            // perform Slow Start. RFC 2581: "During slow start, a TCP increments cwnd
+            // perform Slow Start. RFC 5681: "During slow start, a TCP increments cwnd
             // by at most SMSS bytes for each ACK received that acknowledges new data."
             state->snd_cwnd += state->snd_mss;
 
@@ -167,7 +167,7 @@ void TcpWestwood::receivedAckForUnackedData(uint32_t firstSeqAcked)
             EV_DETAIL << "cwnd=" << state->snd_cwnd << "\n";
         }
         else {
-            // perform Congestion Avoidance (RFC 2581)
+            // perform Congestion Avoidance (RFC 5681)
             uint32_t incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
 
             if (incr == 0)
@@ -178,10 +178,7 @@ void TcpWestwood::receivedAckForUnackedData(uint32_t firstSeqAcked)
             conn->emit(cwndSignal, state->snd_cwnd);
 
             //
-            // Note: some implementations use extra additive constant mss / 8 here
-            // which is known to be incorrect (RFC 2581 p5)
-            //
-            // Note 2: RFC 3465 (experimental) "Appropriate Byte Counting" (ABC)
+            // Note: RFC 3465 (experimental) "Appropriate Byte Counting" (ABC)
             // would require maintaining a bytes_acked variable here which we don't do
             //
 
