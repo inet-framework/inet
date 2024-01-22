@@ -316,8 +316,9 @@ std::vector<Ipv4Address> RoutingTableVisualizerBase::getMulticastGroups()
 void RoutingTableVisualizerBase::addRouteVisualizations(cModule *node, IIpv4RoutingTable *routingTable)
 {
     L3AddressResolver addressResolver;
+    auto interfaceTable = addressResolver.findInterfaceTableOf(node);
     for (auto destination : getDestinations()) {
-        if (!routingTable->isLocalAddress(destination)) {
+        if (!interfaceTable->isLocalAddress(destination)) {
             auto route = routingTable->findBestMatchingRoute(destination);
             if (route != nullptr) {
                 auto gateway = route->getGateway();
