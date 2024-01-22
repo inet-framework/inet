@@ -187,7 +187,7 @@ struct TcpStateVariables
     simtime_t time_last_data_sent;  // time at which the last data segment was sent (needed to compute the IDLE time for PAWS)
 
     // SACK related variables
-    bool sack_support = false;      // set if the host supports selective acknowledgment (header option) (RFC 2018, 2883, 3517)
+    bool sack_support = false;      // set if the host supports selective acknowledgment (header option) (RFC 2018, 2883, 6675)
     bool dsack_enabled = false;      // set if the host supports dsack in sack option (header option) (RFC 2883)
     bool sack_enabled = false;      // set if the connection uses selective acknowledgment (header option)
     bool snd_sack_perm = false;     // set if SACK_PERMITTED has been sent
@@ -197,9 +197,9 @@ struct TcpStateVariables
     bool snd_sack = false;          // set if received vaild out-of-order segment or rcv_nxt changed, but receivedQueue is not empty
     bool snd_dsack = false;         // set if received duplicated segment (sequenceNo+PLength < rcv_nxt) or (segment is not acceptable)
     SackList sacks_array;    // MAX_SACK_BLOCKS is set to 60
-    uint32_t highRxt = 0;    // RFC 3517, page 3: ""HighRxt" is the highest sequence number which has been retransmitted during the current loss recovery phase."
-    uint32_t pipe = 0;    // RFC 3517, page 3: ""Pipe" is a sender's estimate of the number of bytes outstanding in the network."
-    uint32_t recoveryPoint = 0;    // RFC 3517; snd_max when loss recovery started
+    uint32_t highRxt = 0;    // RFC 6675, page 3: ""HighRxt" is the highest sequence number which has been retransmitted during the current loss recovery phase."
+    uint32_t pipe = 0;    // RFC 6675, page 3: ""Pipe" is a sender's estimate of the number of bytes outstanding in the network."
+    uint32_t recoveryPoint = 0;    // RFC 6675; snd_max when loss recovery started
     uint32_t sackedBytes = 0;    // number of sackedBytes
     uint32_t sackedBytes_old = 0;    // old number of sackedBytes - needed for RFC 3042 to check if last dupAck contained new sack information
     bool lossRecovery = false;    // indicates if algorithm is in loss recovery phase
@@ -234,7 +234,7 @@ struct TcpStateVariables
     bool rexmit = false; // set if retransmitting data, used to send not-ECT codepoint (rfc3168, p. 20)
     simtime_t eceReactionTime; // records the time of the last ECE reaction
 
-    uint32_t dupthresh = 0; // used for TcpTahoe, TcpReno and SACK (RFC 3517)
+    uint32_t dupthresh = 0; // used for TcpTahoe, TcpReno and SACK (RFC 6675)
 };
 
 cplusplus(TcpStateVariables) {{

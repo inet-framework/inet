@@ -123,7 +123,7 @@ The :ned:`Tcp` module has the following parameters:
 -  :par:`increasedIWEnabled` Increased Initial Window (RFC 3390)
    enabled/disabled
 
--  :par:`sackSupport` Selective Acknowledgment (RFC 2018, 2883, 3517)
+-  :par:`sackSupport` Selective Acknowledgment (RFC 2018, 2883, 6675)
    support (header option) (SACK will be enabled for a connection if
    both endpoints support it)
 

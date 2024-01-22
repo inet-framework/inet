@@ -82,9 +82,8 @@ import inet.transportlayer.contract.ITcp;
 //   - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP
 //   - RFC 3042 - Enhancing TCP's Loss Recovery Using Limited Transmit
 //   - RFC 3390 - Increasing TCP's Initial Window
-//   - RFC 3517 - A Conservative Selective Acknowledgment (SACK)-based Loss Recovery
-//                Algorithm for TCP
 //   - RFC 3782 - The NewReno Modification to TCP's Fast Recovery Algorithm
+//   - RFC 6675 - A Conservative Loss Recovery Algorithm Based on Selective Acknowledgment (SACK) for TCP
 //
 // We want to implement the following RFCs:
 //   - RFC 2018 - TCP Selective Acknowledgment Options
@@ -94,7 +93,6 @@ import inet.transportlayer.contract.ITcp;
 //   - RFC 3390 - Increasing TCP's Initial Window
 //   - RFC 5681 - TCP Congestion Control
 //   - RFC 6582 - The NewReno Modification to TCP's Fast Recovery Algorithm
-//   - RFC 6675 - A Conservative Loss Recovery Algorithm Based on Selective Acknowledgment (SACK) for TCP
 //   - RFC 7323 - TCP Extensions for High Performance
 //
 // See also:
@@ -109,7 +107,7 @@ import inet.transportlayer.contract.ITcp;
 //    to the user
 //  - CONN-ESTAB timer, SYN-REXMIT timer, 2MSL timer, FIN-WAIT-2 timer
 //  - selective acknowledgements aka. SACK (RFC 2018 and RFC 2883)
-//  - RFC 3517 - SACK-based Loss Recovery algorithm which is a conservative
+//  - RFC 6675 - SACK-based Loss Recovery algorithm which is a conservative
 //    replacement of the fast recovery algorithm (RFC2581) integrated to
 //    TcpReno but not to TcpNewReno, TcpTahoe, TcpNoCongestionControl and DumbTcp.
 //  - changes from RFC 2001 to RFC 2581:
@@ -124,7 +122,7 @@ import inet.transportlayer.contract.ITcp;
 //      - WS: Window Scale option, based on RFC 1323.
 //      - SACK_PERMITTED: SACK can only be used if both nodes sent SACK_-
 //        PERMITTED during connection startup.
-//      - SACK: SACK option, based on RFC 2018, RFC 2883 and RFC 3517.
+//      - SACK: SACK option, based on RFC 2018, RFC 2883 and RFC 6675.
 //      - TS: Timestamps option, based on RFC 1323.
 //  - flow control: finite receive buffer size (initiated by parameter
 //    advertisedWindow). If receive buffer is exhausted (by out-of-order
@@ -174,15 +172,15 @@ simple Tcp like ITcp
         bool nagleEnabled = default(true); // Nagle's algorithm (RFC 896) enabled/disabled
         bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
         bool increasedIWEnabled = default(false); // Increased Initial Window (RFC 3390) enabled/disabled
-        bool sackSupport = default(false); // Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
-        bool dsackEnabled = default(this.sackSupport); // Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
+        bool sackSupport = default(false); // Selective Acknowledgment (RFC 2018, 2883, 6675) support (header option) (SACK will be enabled for a connection if both endpoints support it)
+        bool dsackEnabled = default(this.sackSupport); // Selective Acknowledgment (RFC 2018, 2883, 6675) support (header option) (SACK will be enabled for a connection if both endpoints support it)
         bool windowScalingSupport = default(false); // Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
         int windowScalingFactor = default(-1); // Window Scaling Factor given as a shift count. Valid values are 0..14, and -1 for automatic selection (it chooses the smallest shift count that makes advertisedWindow representable in 16 bits)
         bool timestampSupport = default(false); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
         int mss = default(536); // Maximum Segment Size (RFC 9293) (header option)
         int msl @unit(s) = default(120s);   // Maximum Segment Lifetime
         string tcpAlgorithmClass @enum("TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpReno");
-        int dupthresh = default(3); // used for TcpTahoe, TcpReno and SACK (RFC 3517) DO NOT change unless you really know what you are doing
+        int dupthresh = default(3); // used for TcpTahoe, TcpReno and SACK (RFC 6675) DO NOT change unless you really know what you are doing
         int initialSsthresh = default(0xFFFFFFFF); // initial value for Slow Start threshold used in TahoeRenoFamily. The initial value of ssthresh SHOULD be set arbitrarily high (e.g.,to the size of the largest possible advertised window) Without user interaction there is no limit...
         double stopOperationExtraTime @unit(s) = default(0s);    // extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation

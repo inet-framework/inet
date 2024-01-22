@@ -406,19 +406,19 @@ bool Rfc6675Recovery::isLost(uint32_t seqNum)
 {
     ASSERT(state->sack_enabled);
 
-    // RFC 3517, page 3:
+    // RFC 6675, page 5:
     //"
     // This routine returns whether the given sequence number is
     // considered to be lost.  The routine returns true when either
     // DupThresh discontiguous SACKed sequences have arrived above
-    // 'SeqNum' or (DupThresh * SMSS) bytes with sequence numbers greater
-    // than 'SeqNum' have been SACKed.  Otherwise, the routine returns
-    // false.
+    // 'SeqNum' or more than (DupThresh - 1) * SMSS bytes with
+    // numbers greater than 'SeqNum' have been SACKed.  Otherwise,
+    // the routine returns false.
     //"
     ASSERT(seqGE(seqNum, state->snd_una)); // HighAck = snd_una - 1
 
     bool isLost = (conn->getRexmitQueue()->getNumOfDiscontiguousSacks(seqNum) >= state->dupthresh
-                   || conn->getRexmitQueue()->getAmountOfSackedBytes(seqNum) >= (state->dupthresh * state->snd_mss));
+                   || conn->getRexmitQueue()->getAmountOfSackedBytes(seqNum) >= state->dupthresh * state->snd_mss);
 
     return isLost;
 }
@@ -427,7 +427,7 @@ void Rfc6675Recovery::setPipe()
 {
     ASSERT(state->sack_enabled);
 
-    // RFC 3517, pages 1 and 2:
+    // RFC 6675, page 3:
     //"
     // "HighACK" is the sequence number of the highest byte of data that
     // has been cumulatively ACKed at a given point.
@@ -438,12 +438,20 @@ void Rfc6675Recovery::setPipe()
     // "HighRxt" is the highest sequence number which has been
     // retransmitted during the current loss recovery phase.
     //
+    // "RescueRxt" is the highest sequence number which has been
+    // optimistically retransmitted to prevent stalling of the ACK clock
+    // when there is loss at the end of the window and no new data is
+    // available for transmission.
+    //
     // "Pipe" is a sender's estimate of the number of bytes outstanding
     // in the network.  This is used during recovery for limiting the
     // sender's sending rate.  The pipe variable allows TCP to use a
     // fundamentally different congestion control than specified in
-    // [RFC2581].  The algorithm is often referred to as the "pipe
+    // [RFC5681].  The algorithm is often referred to as the "pipe
     // algorithm".
+    //
+    // "DupAcks" is the number of duplicate acknowledgments received
+    // since the last cumulative acknowledgment.
     //"
     // HighAck = snd_una
     // HighData = snd_max
@@ -454,7 +462,7 @@ void Rfc6675Recovery::setPipe()
     bool sacked; // required for rexmitQueue->checkSackBlock()
     bool rexmitted; // required for rexmitQueue->checkSackBlock()
 
-    // RFC 3517, page 3:
+    // RFC 6675, page 5:
     //"
     // This routine traverses the sequence space from HighACK to HighData
     // and MUST set the "pipe" variable to an estimate of the number of
@@ -467,7 +475,7 @@ void Rfc6675Recovery::setPipe()
         conn->getRexmitQueue()->checkSackBlock(s1, length, sacked, rexmitted);
 
         if (!sacked) {
-            // RFC 3517, page 3:
+            // RFC 6675, page 5:
             //"
             // (a) If IsLost (S1) returns false:
             //
@@ -481,7 +489,7 @@ void Rfc6675Recovery::setPipe()
             if (isLost(s1) == false)
                 state->pipe += length;
 
-            // RFC 3517, pages 3 and 4:
+            // RFC 6675, pages 5:
             //"
             // (b) If S1 <= HighRxt:
             //
@@ -505,7 +513,7 @@ bool Rfc6675Recovery::nextSeg(uint32_t& seqNum)
 {
     ASSERT(state->sack_enabled);
 
-    // RFC 3517, page 5:
+    // RFC 6675, page 6:
     //"
     // This routine uses the scoreboard data structure maintained by the
     // Update() function to determine what to transmit based on the SACK
@@ -526,7 +534,7 @@ bool Rfc6675Recovery::nextSeg(uint32_t& seqNum)
     if (state->ts_enabled)
         shift -= B(TCP_OPTION_TS_SIZE).get();
 
-    // RFC 3517, page 5:
+    // RFC 6675, page 6:
     //"
     // (1) If there exists a smallest unSACKed sequence number 'S2' that
     // meets the following three criteria for determining loss, the
@@ -559,7 +567,7 @@ bool Rfc6675Recovery::nextSeg(uint32_t& seqNum)
         }
     }
 
-    // RFC 3517, page 5
+    // RFC 6675, page 6
     //"
     // (2) If no sequence number 'S2' per rule (1) exists but there
     // exists available unsent data and the receiver's advertised
@@ -581,7 +589,7 @@ bool Rfc6675Recovery::nextSeg(uint32_t& seqNum)
         }
     }
 
-    // RFC 3517, pages 5 and 6
+    // RFC 6675, pages 6 and 7
     //"
     // (3) If the conditions for rules (1) and (2) fail, but there exists
     // an unSACKed sequence number 'S3' that meets the criteria for
@@ -589,27 +597,31 @@ bool Rfc6675Recovery::nextSeg(uint32_t& seqNum)
     // (specifically excluding step (1.c)) then one segment of up to
     // SMSS octets starting with S3 MAY be returned.
     //
-    // Note that rule (3) is a sort of retransmission "last resort".
-    // It allows for retransmission of sequence numbers even when the
+    // (4) If the conditions for (1), (2), and (3) fail, but there exists
+    // outstanding unSACKed data, we provide the opportunity for a
+    // single "rescue" retransmission per entry into loss recovery.
+    // If HighACK is greater than RescueRxt (or RescueRxt is
+    // undefined), then one segment of up to SMSS octets that MUST
+    // include the highest outstanding unSACKed sequence number
+    // SHOULD be returned, and RescueRxt set to RecoveryPoint.
+    // HighRxt MUST NOT be updated.
+    //
+    // Note that rule (3) and (4) are a sort of retransmission "last resort".
+    // They allow for retransmission of sequence numbers even when the
     // sender has less certainty a segment has been lost than as with
-    // rule (1).  Retransmitting segments via rule (3) will help
+    // rule (1).  Retransmitting segments via rule (3) and (4) will help
     // sustain TCP's ACK clock and therefore can potentially help
     // avoid retransmission timeouts.  However, in sending these
-    // segments the sender has two copies of the same data considered
-    // to be in the network (and also in the Pipe estimate).  When an
+    // segments, the sender has two copies of the same data considered
+    // to be in the network (and also in the Pipe estimate, in the case of (3)).  When an
     // ACK or SACK arrives covering this retransmitted segment, the
     // sender cannot be sure exactly how much data left the network
     // (one of the two transmissions of the packet or both
     // transmissions of the packet).  Therefore the sender may
     // underestimate Pipe by considering both segments to have left
     // the network when it is possible that only one of the two has.
-    //
-    // We believe that the triggering of rule (3) will be rare and
-    // that the implications are likely limited to corner cases
-    // relative to the entire recovery algorithm.  Therefore we leave
-    // the decision of whether or not to use rule (3) to
-    // implementors.
     //"
+    // TODO: rule 4 clause
     {
         for (uint32_t s3 = state->highRxt;
              seqLess(s3, state->snd_max) && seqLess(s3, highestSackedSeqNum);
@@ -626,10 +638,10 @@ bool Rfc6675Recovery::nextSeg(uint32_t& seqNum)
         }
     }
 
-    // RFC 3517, page 6:
+    // RFC 6675, page 7:
     //"
-    // (4) If the conditions for each of (1), (2), and (3) are not met,
-    // then NextSeg () MUST indicate failure, and no segment is
+    // (5) If the conditions for each of (1), (2), (3), and (4) are not
+    // met, then NextSeg () MUST indicate failure, and no segment is
     // returned.
     //"
     seqNum = 0;
@@ -641,9 +653,9 @@ void Rfc6675Recovery::sendDataDuringLossRecoveryPhase(uint32_t congestionWindow)
 {
     ASSERT(state->sack_enabled && state->lossRecovery);
 
-    // RFC 3517 pages 7 and 8
+    // RFC 6675, page 9
     //"
-    // (5) In order to take advantage of potential additional available
+    // (4.5) In order to take advantage of potential additional available
     // cwnd, proceed to step (C) below.
     // (...)
     // (C) If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
@@ -652,7 +664,7 @@ void Rfc6675Recovery::sendDataDuringLossRecoveryPhase(uint32_t congestionWindow)
     // (C.5) If cwnd - pipe >= 1 SMSS, return to (C.1)
     //"
     while (((int)congestionWindow - (int)state->pipe) >= (int)state->snd_mss) { // Note: Typecast needed to avoid prohibited transmissions
-        // RFC 3517 pages 7 and 8:
+        // RFC 6675, page 9:
         //"
         // (C.1) The scoreboard MUST be queried via NextSeg () for the
         // sequence number range of the next segment to transmit (if any),
@@ -667,7 +679,7 @@ void Rfc6675Recovery::sendDataDuringLossRecoveryPhase(uint32_t congestionWindow)
             break;
 
         uint32_t sentBytes = sendSegmentDuringLossRecoveryPhase(seqNum);
-        // RFC 3517 page 8:
+        // RFC 6675, page 9:
         //"
         // (C.4) The estimate of the amount of data outstanding in the
         // network must be updated by incrementing pipe by the number of
@@ -697,17 +709,19 @@ uint32_t Rfc6675Recovery::sendSegmentDuringLossRecoveryPhase(uint32_t seqNum)
 
     ASSERT(seqLE(state->snd_nxt, sentSeqNum));
 
-    // RFC 3517 page 8:
+    // RFC 6675, page 9:
     //"
     // (C.2) If any of the data octets sent in (C.1) are below HighData,
     // HighRxt MUST be set to the highest sequence number of the
-    // retransmitted segment.
+    // retransmitted segment unless NextSeg () rule (4) was
+    // invoked for this retransmission.
     //"
+    // TODO: rule 4 clause
     if (seqLess(seqNum, state->snd_max)) { // HighData = snd_max
         state->highRxt = conn->getRexmitQueue()->getHighestRexmittedSeqNum();
     }
 
-    // RFC 3517 page 8:
+    // RFC 6675, page 9:
     //"
     // (C.3) If any of the data octets sent in (C.1) are above HighData,
     // HighData must be updated to reflect the transmission of
@@ -720,27 +734,27 @@ uint32_t Rfc6675Recovery::sendSegmentDuringLossRecoveryPhase(uint32_t seqNum)
 
     conn->emit(unackedSignal, state->snd_max - state->snd_una);
 
-    // RFC 3517, page 9:
+    // RFC 6675, page 11:
     //"
     // 6   Managing the RTO Timer
     //
-    // The standard TCP RTO estimator is defined in [RFC2988].  Due to the
+    // The standard TCP RTO estimator is defined in [RFC6288].  Due to the
     // fact that the SACK algorithm in this document can have an impact on
     // the behavior of the estimator, implementers may wish to consider how
-    // the timer is managed.  [RFC2988] calls for the RTO timer to be
+    // the timer is managed.  [RFC6288] calls for the RTO timer to be
     // re-armed each time an ACK arrives that advances the cumulative ACK
     // point.  Because the algorithm presented in this document can keep the
     // ACK clock going through a fairly significant loss event,
-    // (comparatively longer than the algorithm described in [RFC2581]), on
+    // (comparatively longer than the algorithm described in [RFC5681]), on
     // some networks the loss event could last longer than the RTO.  In this
     // case the RTO timer would expire prematurely and a segment that need
     // not be retransmitted would be resent.
     //
     // Therefore we give implementers the latitude to use the standard
-    // [RFC2988] style RTO management or, optionally, a more careful variant
+    // [RFC6288] style RTO management or, optionally, a more careful variant
     // that re-arms the RTO timer on each retransmission that is sent during
     // recovery MAY be used.  This provides a more conservative timer than
-    // specified in [RFC2988], and so may not always be an attractive
+    // specified in [RFC6288], and so may not always be an attractive
     // alternative.  However, in some cases it may prevent needless
     // retransmissions, go-back-N transmission and further reduction of the
     // congestion window.
@@ -748,7 +762,7 @@ uint32_t Rfc6675Recovery::sendSegmentDuringLossRecoveryPhase(uint32_t seqNum)
     conn->getTcpAlgorithmForUpdate()->ackSent();
 
     if (old_highRxt != state->highRxt) {
-        // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
+        // Note: Restart of REXMIT timer on retransmission is not part of RFC 5681, however optional in RFC 6675 if sent during recovery.
         EV_INFO << "Retransmission sent during recovery, restarting REXMIT timer.\n";
         conn->getTcpAlgorithmForUpdate()->restartRexmitTimer();
     }

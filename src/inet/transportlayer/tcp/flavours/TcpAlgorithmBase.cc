@@ -210,7 +210,7 @@ void TcpAlgorithmBase::processRexmitTimer(TcpEventCode& event)
         conn->getRexmitQueueForUpdate()->resetSackedBit();
         conn->getRexmitQueueForUpdate()->resetRexmittedBit();
 
-        // RFC 3517, page 8: "If an RTO occurs during loss recovery as specified in this document,
+        // RFC 6675, page 10: "If an RTO occurs during loss recovery as specified in this document,
         // RecoveryPoint MUST be set to HighData.  Further, the new value of
         // RecoveryPoint MUST be preserved and the loss recovery algorithm
         // outlined in this document MUST be terminated.  In addition, a new
