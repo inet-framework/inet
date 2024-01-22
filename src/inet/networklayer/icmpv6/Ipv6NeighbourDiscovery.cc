@@ -1936,7 +1936,7 @@ void Ipv6NeighbourDiscovery::processNsForTentativeAddress(Packet *packet, const 
         EV_INFO << "Source Address is UNSPECIFIED. Sender is performing DAD\n";
 
         // Sender performing Duplicate Address Detection
-        if (rt6->isLocalAddress(nsSrcAddr)) // FIXME isLocalAddress(UNSPECIFIED) is always false!!! Must write another check for detecting source is myself/foreign node!!!
+        if (rt6->isLocalIpv6Address(nsSrcAddr)) // FIXME isLocalAddress(UNSPECIFIED) is always false!!! Must write another check for detecting source is myself/foreign node!!!
             EV_INFO << "NS comes from myself. Ignoring NS\n";
         else {
             EV_INFO << "NS comes from another node. Address is duplicate!\n";

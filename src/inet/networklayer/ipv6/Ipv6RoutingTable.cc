@@ -392,7 +392,7 @@ void Ipv6RoutingTable::configureTunnelFromXml(cXMLElement *cfg)
     }
 }
 
-bool Ipv6RoutingTable::isLocalAddress(const Ipv6Address& dest) const
+bool Ipv6RoutingTable::isLocalIpv6Address(const Ipv6Address& dest) const
 {
     Enter_Method("isLocalAddress(%s)", dest.str().c_str());
 

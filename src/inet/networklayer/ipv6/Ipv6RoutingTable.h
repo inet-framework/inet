@@ -169,7 +169,8 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     void setIsMobileNode(bool value) { ismobile_node = value; }
 #endif /* INET_WITH_xMIPv6 */
 
-    bool isLocalAddress(const Ipv6Address& dest) const;
+    // TODO remove it and use instead the InterfaceTable->isLocalAddress()
+    bool isLocalIpv6Address(const Ipv6Address& dest) const;
 
     /** @name Routing functions */
     //@{

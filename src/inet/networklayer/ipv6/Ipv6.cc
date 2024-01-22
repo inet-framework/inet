@@ -337,7 +337,7 @@ void Ipv6::handleMessageFromHL(Packet *packet)
     Ipv6Address destAddress = ipv6Header->getDestAddress();
 
     // check for local delivery
-    if (!destAddress.isMulticast() && rt->isLocalAddress(destAddress)) {
+    if (!destAddress.isMulticast() && rt->isLocalIpv6Address(destAddress)) {
         EV_INFO << "local delivery\n";
         if (ipv6Header->getSrcAddress().isUnspecified()) {
             // allows two apps on the same host to communicate
@@ -383,7 +383,7 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
     EV_INFO << "Routing datagram `" << ipv6Header->getName() << "' with dest=" << destAddress << ", requested nexthop is " << requestedNextHopAddress << " on " << (destIE ? destIE->getFullName() : "unspec") << " interface: \n";
 
     // local delivery of unicast packets
-    if (rt->isLocalAddress(destAddress)) {
+    if (rt->isLocalIpv6Address(destAddress)) {
         if (fromHL)
             throw cRuntimeError("model error: local unicast packet arrived from HL, but handleMessageFromHL() not detected it");
         EV_INFO << "local delivery\n";
@@ -530,7 +530,7 @@ void Ipv6::routeMulticastPacket(Packet *packet, const NetworkInterface *destIE, 
     if (fromIE != nullptr) {
         ASSERT(!fromHL);
         // deliver locally
-        if (rt->isLocalAddress(destAddr)) {
+        if (rt->isLocalIpv6Address(destAddr)) {
             EV_INFO << "local delivery of multicast packet\n";
             numLocalDeliver++;
             localDeliver(packet->dup(), fromIE);

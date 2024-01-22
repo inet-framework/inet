@@ -104,7 +104,7 @@ int Ipv6Tunneling::createTunnel(TunnelType tunnelType,
     // Test for entry and exit point node pointing to same node i.e. localDeliver
     // addresses to prevent loopback encapsulation 4.1.2
     if ((tunnelType == NORMAL || tunnelType == SPLIT || tunnelType == NON_SPLIT) // check does not work for T2RH or HoA_Opt. Why?
-        && rt->isLocalAddress(entry) && rt->isLocalAddress(exit))
+        && rt->isLocalIpv6Address(entry) && rt->isLocalIpv6Address(exit))
     {
         EV_INFO << "Cannot create tunnel with local endpoints (prevents loopback tunneling)" << endl;
         return 0;
