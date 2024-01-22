@@ -692,7 +692,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
             }
         }
 
-        // RFC 2581, page 6:
+        // RFC 5681, page 8:
         // "3.2 Fast Retransmit/Fast Recovery
         // (...)
         // In addition, a TCP receiver SHOULD send an immediate ACK

@@ -78,16 +78,15 @@ import inet.transportlayer.contract.ITcp;
 //   - RFC 1122 - Requirements for Internet Hosts -- Communication Layers
 //   - RFC 1323 - TCP Extensions for High Performance
 //   - RFC 2018 - TCP Selective Acknowledgment Options
-//   - RFC 2581 - TCP Congestion Control
 //   - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP
 //   - RFC 3042 - Enhancing TCP's Loss Recovery Using Limited Transmit
 //   - RFC 3390 - Increasing TCP's Initial Window
 //   - RFC 3782 - The NewReno Modification to TCP's Fast Recovery Algorithm
+//   - RFC 5681 - TCP Congestion Control
 //   - RFC 6675 - A Conservative Loss Recovery Algorithm Based on Selective Acknowledgment (SACK) for TCP
 //
 // We want to implement the following RFCs:
 //   - RFC 3168 - The Addition of Explicit Congestion Notification (ECN) to IP
-//   - RFC 5681 - TCP Congestion Control
 //   - RFC 6582 - The NewReno Modification to TCP's Fast Recovery Algorithm
 //   - RFC 7323 - TCP Extensions for High Performance
 //
@@ -104,17 +103,16 @@ import inet.transportlayer.contract.ITcp;
 //  - CONN-ESTAB timer, SYN-REXMIT timer, 2MSL timer, FIN-WAIT-2 timer
 //  - selective acknowledgements aka. SACK (RFC 2018 and RFC 2883)
 //  - RFC 6675 - SACK-based Loss Recovery algorithm which is a conservative
-//    replacement of the fast recovery algorithm (RFC2581) integrated to
+//    replacement of the fast recovery algorithm (RFC 5681) integrated to
 //    TcpReno but not to TcpNewReno, TcpTahoe, TcpNoCongestionControl and DumbTcp.
-//  - changes from RFC 2001 to RFC 2581:
-//      - ACK generation (ack_now = true) RFC 2581, page 6: "(...) a Tcp receiver SHOULD send an immediate ACK
-//        when the incoming segment fills in all or part of a gap in the sequence space."
+//  - ACK generation (ack_now = true) RFC 5681, page 7: "(...) a Tcp receiver SHOULD send an immediate ACK
+//    when the incoming segment fills in all or part of a gap in the sequence space."
 //  - TCP header options:
 //      - EOL: End of option list.
 //      - NOP: Padding bytes, currently needed for SACK_PERMITTED and SACK.
 //      - MSS: The value of snd_mss (SMSS) is set to the minimum of snd_mss
 //        (local parameter) and the value specified in the MSS option
-//        received during connection startup. Based on [RFC 2581, page 1].
+//        received during connection startup. Based on [RFC 5681].
 //      - WS: Window Scale option, based on RFC 1323.
 //      - SACK_PERMITTED: SACK can only be used if both nodes sent SACK_-
 //        PERMITTED during connection startup.

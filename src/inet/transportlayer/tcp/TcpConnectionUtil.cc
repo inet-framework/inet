@@ -958,7 +958,7 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     tcpAlgorithm->ackSent();
 
     if (state->sack_enabled && state->lossRecovery && old_highRxt != state->highRxt) {
-        // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 6675 if sent during recovery.
+        // Note: Restart of REXMIT timer on retransmission is not part of RFC 5681, however optional in RFC 6675 if sent during recovery.
         EV_DETAIL << "Retransmission sent during recovery, restarting REXMIT timer.\n";
         tcpAlgorithm->restartRexmitTimer();
     }
@@ -1168,15 +1168,15 @@ bool TcpConnection::processMSSOption(const Ptr<const TcpHeader>& tcpHeader, cons
         return false;
     }
 
-    // RFC 2581, page 1:
+    // RFC 5681, page 3:
     // "The SMSS is the size of the largest segment that the sender can transmit.
     // This value can be based on the maximum transmission unit of the network,
-    // the path MTU discovery [MD90] algorithm, RMSS (see next item), or other
+    // the path MTU discovery [RFC1191, RFC4821] algorithm, RMSS (see next item), or other
     // factors.  The size does not include the TCP/IP headers and options."
     //
     // "The RMSS is the size of the largest segment the receiver is willing to accept.
     // This is the value specified in the MSS option sent by the receiver during
-    // connection startup.  Or, if the MSS option is not used, 536 bytes [Bra89].
+    // connection startup.  Or, if the MSS option is not used, it is 536 bytes [RFC1122].
     // The size does not include the TCP/IP headers and options."
     //
     //
@@ -1603,7 +1603,7 @@ void TcpConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32_t congestion
     // segments are transmitted.  Assuming that these new segments and the
     // corresponding ACKs are not dropped, this procedure allows the sender
     // to infer loss using the standard Fast Retransmit threshold of three
-    // duplicate ACKs [RFC2581].  This is more robust to reordered packets
+    // duplicate ACKs [RFC 2581].  This is more robust to reordered packets
     // than if an old packet were retransmitted on the first or second
     // duplicate ACK.
     //

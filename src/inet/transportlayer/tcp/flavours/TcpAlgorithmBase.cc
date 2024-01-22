@@ -106,7 +106,7 @@ void TcpAlgorithmBase::established(bool active)
     // window given in equation (1) above.
     //
     // This upper bound for the initial window size represents a change from
-    // RFC 2581 [RFC2581], which specified that the congestion window be
+    // RFC 2581 [RFC 2581], which specified that the congestion window be
     // initialized to one or two segments.
     // (...)
     // If the SYN or SYN/ACK is
@@ -353,7 +353,7 @@ void TcpAlgorithmBase::rttMeasurementCompleteUsingTS(uint32_t echoedTS)
 
 bool TcpAlgorithmBase::sendData(bool sendCommandInvoked)
 {
-    // RFC 2581, pages 7 and 8: "When TCP has not received a segment for
+    // RFC 5681, page 11: "When TCP has not received a segment for
     // more than one retransmission timeout, cwnd is reduced to the value
     // of the restart window (RW) before transmission begins.
     // For the purposes of this standard, we define RW = IW.
