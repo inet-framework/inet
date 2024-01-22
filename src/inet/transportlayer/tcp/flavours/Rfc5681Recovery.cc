@@ -34,7 +34,7 @@ bool Rfc5681Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloa
     bool c = !tcpHeader->getSynBit() && !tcpHeader->getFinBit();
     //"
     //   (d) the acknowledgment number is equal to the greatest acknowledgment
-    //       received on the given connection (TCP.UNA from [RFC793]) and
+    //       received on the given connection (TCP.UNA from [RFC 793]) and
     //"
     bool d = tcpHeader->getAckNo() == state->snd_una;
     //"

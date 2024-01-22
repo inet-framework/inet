@@ -66,14 +66,14 @@ import inet.transportlayer.contract.ITcp;
 //  - if you do active OPEN, then send data and close before the connection
 //    has reached ESTABLISHED, the connection will go from SYN_SENT to CLOSED
 //    without actually sending the buffered data. This is consistent with
-//    RFC 793 but may not be what you'd expect.
+//    RFC 9293 but may not be what you'd expect.
 //  - handling segments with SYN+FIN bits set (esp. with data too) is
 //    inconsistent across TCPs, so check this one if it's of importance
 //
 // <b>Standards</b>
 //
 // Implementation is based on the following RFCs:
-//   - RFC  793 - Transmission Control Protocol
+//   - RFC 9293 - Transmission Control Protocol (TCP)
 //   - RFC  896 - Congestion Control in IP/TCP Internetworks
 //   - RFC 1122 - Requirements for Internet Hosts -- Communication Layers
 //   - RFC 1323 - TCP Extensions for High Performance
@@ -96,15 +96,14 @@ import inet.transportlayer.contract.ITcp;
 //   - RFC 6582 - The NewReno Modification to TCP's Fast Recovery Algorithm
 //   - RFC 6675 - A Conservative Loss Recovery Algorithm Based on Selective Acknowledgment (SACK) for TCP
 //   - RFC 7323 - TCP Extensions for High Performance
-//   - RFC 9293 - Transmission Control Protocol (TCP)
 //
 // See also:
 //   - RFC 7805 - Moving Outdated TCP Extensions and TCP-Related Documents to Historic or Informational Status
 //
 // Implemented features include the following:
-//  - all RFC 793 TCP states and state transitions
-//  - connection setup and teardown as in RFC 793
-//  - generally, RFC 793 compliant segment processing
+//  - all RFC 9293 TCP states and state transitions
+//  - connection setup and teardown as in RFC 9293
+//  - generally, RFC 9293 compliant segment processing
 //  - all socked commands and indications
 //  - receive buffer to cache above-sequence data and data not yet forwarded
 //    to the user
@@ -180,7 +179,7 @@ simple Tcp like ITcp
         bool windowScalingSupport = default(false); // Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
         int windowScalingFactor = default(-1); // Window Scaling Factor given as a shift count. Valid values are 0..14, and -1 for automatic selection (it chooses the smallest shift count that makes advertisedWindow representable in 16 bits)
         bool timestampSupport = default(false); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
-        int mss = default(536); // Maximum Segment Size (RFC 793) (header option)
+        int mss = default(536); // Maximum Segment Size (RFC 9293) (header option)
         int msl @unit(s) = default(120s);   // Maximum Segment Lifetime
         string tcpAlgorithmClass @enum("TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpReno");
         int dupthresh = default(3); // used for TcpTahoe, TcpReno and SACK (RFC 3517) DO NOT change unless you really know what you are doing

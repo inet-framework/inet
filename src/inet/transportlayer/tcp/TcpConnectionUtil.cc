@@ -476,7 +476,7 @@ void TcpConnection::configureStateVariables()
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
-    state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
+    state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 9293)
     state->snd_effmss = calculateEffectiveMss();
     state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 1323)
     state->ecnWillingness = tcpMain->par("ecnWillingness"); // if set, current host is willing to use ECN
@@ -512,7 +512,7 @@ void TcpConnection::selectInitialSeqNum()
 bool TcpConnection::isSegmentAcceptable(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader) const
 {
     // check that segment entirely falls in receive window
-    // RFC 793, page 69:
+    // RFC 9293, 3.10.7.4. Other States:
     // "There are four cases for the acceptability test for an incoming segment:
     //    Segment Receive  Test
     //    Length  Window
@@ -543,7 +543,7 @@ bool TcpConnection::isSegmentAcceptable(Packet *tcpSegment, const Ptr<const TcpH
                 || (seqLess(state->rcv_nxt, seqNo + len) && seqLE(seqNo + len, rcvWndEnd)); // Accept an ACK on end of window
     }
 
-    // RFC 793, page 25:
+    // RFC 9293, 3.4. Sequence Numbers:
     // "A new acknowledgment (called an "acceptable ack"), is one for which
     // the inequality below holds:
     //    SND.UNA < SEG.ACK =< SND.NXT"

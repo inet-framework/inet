@@ -204,7 +204,7 @@ class TcpConnectInfo extends TcpCommand
 
 //
 // Sent with message kind TCP_I_STATUS, in response to command TCP_C_STATUS.
-// For explanation of variables, see RFC 793 or TcpStateVariables in
+// For explanation of variables, see RFC 9293 or TcpStateVariables in
 // TcpConnection.h.
 //
 // @see ~TcpStatusInd, ~TcpCommandCode, ~ITcp

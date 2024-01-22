@@ -134,7 +134,7 @@ The :ned:`Tcp` module has the following parameters:
 -  :par:`timestampSupport` Timestamps (RFC 1323) support (header option)
    (TS will be enabled for a connection if both endpoints support it)
 
--  :par:`mss` Maximum Segment Size (RFC 793) (header option, default is
+-  :par:`mss` Maximum Segment Size (RFC 9293) (header option, default is
    536)
 
 -  :par:`tcpAlgorithmClass` the name of TCP flavour
@@ -245,7 +245,7 @@ receives a TCP_I_CONNECTION_REFUSED message.
    If you do active OPEN, then send data and close before the connection
    has reached ESTABLISHED, the connection will go from SYN\_SENT to CLOSED
    without actually sending the buffered data. This is consistent with
-   RFC 793 but may not be what you would expect.
+   RFC 9293 but may not be what you would expect.
 
 
 

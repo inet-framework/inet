@@ -38,7 +38,7 @@ void TcpConnection::segmentArrivalWhileClosed(Packet *tcpSegment, const Ptr<cons
 
     EV_INFO << "Segment doesn't belong to any existing connection\n";
 
-    // RFC 793:
+    // RFC 9293:
     //"
     // all data in the incoming segment is discarded.  An incoming
     // segment containing a RST is discarded.  An incoming segment not
@@ -87,8 +87,8 @@ TcpEventCode TcpConnection::process_RCV_SEGMENT(Packet *tcpSegment, const Ptr<co
 
     emit(tcpRcvPayloadBytesSignal, int(tcpSegment->getByteLength() - B(tcpHeader->getHeaderLength()).get()));
     //
-    // Note: this code is organized exactly as RFC 793, section "3.9 Event
-    // Processing", subsection "SEGMENT ARRIVES".
+    // Note: this code is organized exactly as
+    // RFC 9293, section "3.10 Event Processing", subsection "3.10.7. SEGMENT ARRIVES".
     //
     TcpEventCode event;
 
@@ -99,7 +99,7 @@ TcpEventCode TcpConnection::process_RCV_SEGMENT(Packet *tcpSegment, const Ptr<co
         event = processSegmentInSynSent(tcpSegment, tcpHeader, src, dest);
     }
     else {
-        // RFC 793 steps "first check sequence number", "second check the RST bit", etc
+        // RFC 9293 steps "first check sequence number", "second check the RST bit", etc
         event = processSegment1stThru8th(tcpSegment, tcpHeader);
     }
 
@@ -130,7 +130,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
     tcpAlgorithm->processEcnInEstablished();
 
     //
-    // RFC 793: first check sequence number
+    // RFC 9293: "First, check sequence number"
     //
 
     bool acceptable = true;
@@ -202,7 +202,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
     }
 
     //
-    // RFC 793: second check the RST bit,
+    // RFC 9293: "Second, check the RST bit"
     //
     if (tcpHeader->getRstBit()) {
         // Note: if we come from LISTEN, processSegmentInListen() has already handled RST.
@@ -213,11 +213,10 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                 // came from the LISTEN state), then return this connection to
                 // LISTEN state and return.  The user need not be informed.  If
                 // this connection was initiated with an active OPEN (i.e., came
-                // from SYN-SENT state) then the connection was refused, signal
-                // the user "connection refused".  In either case, all segments
-                // on the retransmission queue should be removed.  And in the
-                // active OPEN case, enter the CLOSED state and delete the TCB,
-                // and return.
+                // from SYN-SENT state) then the connection was refused; signal
+                // the user "connection refused".  In either case, the retransmission
+                // queue should be flushed.  And in the active OPEN case, enter
+                // the CLOSED state and delete the TCB, and return.
                 //"
                 return processRstInSynReceived(tcpHeader);
 
@@ -252,11 +251,11 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         }
     }
 
-    // RFC 793: third check security and precedence
+    // RFC 9293: Third, check security
     // This step is ignored.
 
     //
-    // RFC 793: fourth, check the SYN bit,
+    // RFC 9293: Fourth, check the SYN bit
     //
     if (tcpHeader->getSynBit()
             && !(fsm.getState() == TCP_S_SYN_RCVD && tcpHeader->getAckBit())) {
@@ -280,7 +279,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
     }
 
     //
-    // RFC 793: fifth check the ACK field,
+    // RFC 9293: Fifth, check the ACK field
     //
     if (!tcpHeader->getAckBit()) {
         // if the ACK bit is off drop the segment and return
@@ -295,7 +294,11 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
     if (fsm.getState() == TCP_S_SYN_RCVD) {
         //"
         // If SND.UNA =< SEG.ACK =< SND.NXT then enter ESTABLISHED state
-        // and continue processing.
+        // and continue processing with the variables below set to:
+        //
+        //  SND.WND <- SEG.WND
+        //  SND.WL1 <- SEG.SEQ
+        //  SND.WL2 <- SEG.ACK
         //
         // If the segment acknowledgment is not acceptable, form a
         // reset segment,
@@ -325,7 +328,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
 
     uint32_t old_snd_nxt = state->snd_nxt; // later we'll need to see if snd_nxt changed
     // Note: If one of the last data segments is lost while already in LAST-ACK state (e.g. if using TCPEchoApps)
-    // TCP must be able to process acceptable acknowledgments, however please note RFC 793, page 73:
+    // TCP must be able to process acceptable acknowledgments, however please note RFC 9293:
     // "LAST-ACK STATE
     //    The only thing that can arrive in this state is an
     //    acknowledgment of our FIN.  If our FIN is now acknowledged,
@@ -339,16 +342,16 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         // ESTABLISHED processing:
         //"
         //  If SND.UNA < SEG.ACK =< SND.NXT then, set SND.UNA <- SEG.ACK.
-        //  Any segments on the retransmission queue which are thereby
+        //  Any segments on the retransmission queue that are thereby
         //  entirely acknowledged are removed.  Users should receive
-        //  positive acknowledgments for buffers which have been SENT and
+        //  positive acknowledgments for buffers that have been SENT and
         //  fully acknowledged (i.e., SEND buffer should be returned with
         //  "ok" response).  If the ACK is a duplicate
-        //  (SEG.ACK < SND.UNA), it can be ignored.  If the ACK acks
+        //  (SEG.ACK =< SND.UNA), it can be ignored.  If the ACK acks
         //  something not yet sent (SEG.ACK > SND.NXT) then send an ACK,
         //  drop the segment, and return.
         //
-        //  If SND.UNA < SEG.ACK =< SND.NXT, the send window should be
+        //  If SND.UNA =< SEG.ACK =< SND.NXT, the send window should be
         //  updated.  If (SND.WL1 < SEG.SEQ or (SND.WL1 = SEG.SEQ and
         //  SND.WL2 =< SEG.ACK)), set SND.WND <- SEG.WND, set
         //  SND.WL1 <- SEG.SEQ, and set SND.WL2 <- SEG.ACK.
@@ -369,8 +372,8 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         //"
         // FIN-WAIT-1 STATE
         //   In addition to the processing for the ESTABLISHED state, if
-        //   our FIN is now acknowledged then enter FIN-WAIT-2 and continue
-        //   processing in that state.
+        //   the FIN segment is now acknowledged then enter FIN-WAIT-2
+        //   continue processing in that state.
         //"
         event = TCP_E_RCV_ACK; // will trigger transition to FIN-WAIT-2
     }
@@ -427,7 +430,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
     }
 
     //
-    // RFC 793: sixth, check the URG bit,
+    // RFC 9293: Sixth, check the URG bit
     //
     if (tcpHeader->getUrgBit() && (fsm.getState() == TCP_S_ESTABLISHED ||
                                    fsm.getState() == TCP_S_FIN_WAIT_1 || fsm.getState() == TCP_S_FIN_WAIT_2))
@@ -445,7 +448,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
     }
 
     //
-    // RFC 793: seventh, process the segment text,
+    // RFC 9293: Seventh, process the segment text
     //
     uint32_t old_rcv_nxt = state->rcv_nxt; // if rcv_nxt changes, we need to send/schedule an ACK
 
@@ -454,21 +457,25 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
     {
         //"
         // Once in the ESTABLISHED state, it is possible to deliver segment
-        // text to user RECEIVE buffers.  Text from segments can be moved
+        // data to user RECEIVE buffers.  Data from segments can be moved
         // into buffers until either the buffer is full or the segment is
-        // empty.  If the segment empties and carries an PUSH flag, then
+        // empty.  If the segment empties and carries a PUSH flag, then
         // the user is informed, when the buffer is returned, that a PUSH
         // has been received.
         //
         // When the TCP takes responsibility for delivering the data to the
-        // user it must also acknowledge the receipt of the data.
+        // user, it must also acknowledge the receipt of the data.
         //
-        // Once the TCP takes responsibility for the data it advances
+        // Once the TCP takes responsibility for the data, it advances
         // RCV.NXT over the data accepted, and adjusts RCV.WND as
         // appropriate to the current buffer availability.  The total of
         // RCV.NXT and RCV.WND should not be reduced.
         //
-        // Please note the window management suggestions in section 3.7.
+        // A TCP implementation MAY send an ACK segment acknowledging
+        // RCV.NXT when a valid segment arrives that is in the window but
+        // not at the left window edge (MAY-13).
+
+        // Please note the window management suggestions in section 3.8.
         //
         // Send an acknowledgment of the form:
         //
@@ -600,7 +607,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
     }
 
     //
-    // RFC 793: eighth, check the FIN bit,
+    // RFC 9293: Eighth, check the FIN bit
     //
     if (tcpHeader->getFinBit()) {
         state->ack_now = true;
@@ -613,7 +620,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         // user.
         //"
 
-        // Note: seems like RFC 793 is not entirely correct here: if the
+        // Note: seems like RFC 9293 is not entirely correct here: if the
         // segment is "above sequence" (ie. RCV.NXT < SEG.SEQ), we cannot
         // advance RCV.NXT over the FIN. Instead we remember this sequence
         // number and do it later.
@@ -821,7 +828,7 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     receiveQueue->init(state->rcv_nxt); // FIXME may init twice...
     selectInitialSeqNum();
 
-    // although not mentioned in RFC 793, seems like we have to pick up
+    // although not mentioned in RFC 9293, seems like we have to pick up
     // initial snd_wnd from the segment here.
     updateWndInfo(tcpHeader, true);
 
@@ -961,7 +968,7 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
 
             rexmitQueue->discardUpTo(state->snd_una);
 
-            // although not mentioned in RFC 793, seems like we have to pick up
+            // although not mentioned in RFC 9293, seems like we have to pick up
             // initial snd_wnd from the segment here.
             updateWndInfo(tcpHeader, true);
         }

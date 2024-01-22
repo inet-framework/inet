@@ -41,7 +41,7 @@ Overview
 TCP protocol is the most widely used protocol of the Internet. It
 provides reliable, ordered delivery of stream of bytes from one
 application on one computer to another application on another computer.
-The baseline TCP protocol is described in RFC793, but other tens of RFCs
+The baseline TCP protocol is described in RFC 9293, but other tens of RFCs
 contains modifications and extensions to the TCP. As a result, TCP is a
 complex protocol and sometimes it is hard to see how the different
 requirements interact with each other.

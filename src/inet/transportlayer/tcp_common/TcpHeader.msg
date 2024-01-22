@@ -38,9 +38,9 @@ enum TcpConstants {
 //
 enum TcpOptionNumbers
 {
-    TCPOPTION_END_OF_OPTION_LIST = 0;                   // RFC 793, LENGTH: 1 Byte
-    TCPOPTION_NO_OPERATION = 1;                         // RFC 793, LENGTH: 1 Byte
-    TCPOPTION_MAXIMUM_SEGMENT_SIZE = 2;                 // RFC 793, LENGTH: 4 Bytes
+    TCPOPTION_END_OF_OPTION_LIST = 0;                   // RFC 9293, LENGTH: 1 Byte
+    TCPOPTION_NO_OPERATION = 1;                         // RFC 9293, LENGTH: 1 Byte
+    TCPOPTION_MAXIMUM_SEGMENT_SIZE = 2;                 // RFC 9293, LENGTH: 4 Bytes
     TCPOPTION_WINDOW_SCALE = 3;                         // RFC 1323, LENGTH: 3 Bytes
     TCPOPTION_SACK_PERMITTED = 4;                       // RFC 2018, LENGTH: 2 Bytes
     TCPOPTION_SACK = 5;                                 // RFC 2018, LENGTH: N (max. N = 4) 8 * n + 2 Bytes  => 32 + 2 + 2 * NOP = 36 Bytes; If TIMESTAMP option is used with SACK: max. n = 3 => 12 Bytes (for Timestamp) + 28 Bytes (for SACK) = 40 Bytes
@@ -228,7 +228,7 @@ class TcpHeader extends TransportHeaderBase
 cplusplus(TcpHeader) {{
   public:
     /**
-     * Returns RFC 793 specified SEG.LEN:
+     * Returns RFC 9293 specified SEG.LEN:
      *     SEG.LEN = the number of octets occupied by the data in the segment
      *               (counting SYN and FIN)
      *

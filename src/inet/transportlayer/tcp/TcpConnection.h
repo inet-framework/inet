@@ -45,7 +45,7 @@ class TcpAlgorithm;
  * associated with TCP state changes.
  *
  * The implementation largely follows the functional specification at the end
- * of RFC 793. Code comments extensively quote RFC 793 to make it easier
+ * of RFC 9293. Code comments extensively quote RFC 9293 to make it easier
  * to understand.
  *
  * TcpConnection objects are not used alone -- they are instantiated and managed
