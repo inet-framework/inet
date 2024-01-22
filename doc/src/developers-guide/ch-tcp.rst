@@ -127,11 +127,11 @@ The :ned:`Tcp` module has the following parameters:
    support (header option) (SACK will be enabled for a connection if
    both endpoints support it)
 
--  :par:`windowScalingSupport` Window Scale (RFC 1323) support (header
+-  :par:`windowScalingSupport` Window Scale (RFC 7323) support (header
    option) (WS will be enabled for a connection if both endpoints
    support it)
 
--  :par:`timestampSupport` Timestamps (RFC 1323) support (header option)
+-  :par:`timestampSupport` Timestamps (RFC 7323) support (header option)
    (TS will be enabled for a connection if both endpoints support it)
 
 -  :par:`mss` Maximum Segment Size (RFC 9293) (header option, default is

@@ -478,7 +478,7 @@ void TcpConnection::configureStateVariables()
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 9293)
     state->snd_effmss = calculateEffectiveMss();
-    state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 1323)
+    state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 7323)
     state->ecnWillingness = tcpMain->par("ecnWillingness"); // if set, current host is willing to use ECN
     state->dupthresh = tcpMain->par("dupthresh");
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 6675)
@@ -1218,7 +1218,7 @@ bool TcpConnection::processWSOption(const Ptr<const TcpHeader>& tcpHeader, const
     state->snd_wnd_scale = option.getWindowScale();
     EV_INFO << "Tcp Header Option WS(=" << state->snd_wnd_scale << ") received, WS (ws_enabled) is set to " << state->ws_enabled << "\n";
 
-    if (state->snd_wnd_scale > 14) { // RFC 1323, page 11: "the shift count must be limited to 14"
+    if (state->snd_wnd_scale > 14) { // RFC 723, page 10: "the shift count must be limited to 14"
         EV_ERROR << "ERROR: Tcp Header Option WS received but shift count value is exceeding 14\n";
         state->snd_wnd_scale = 14;
     }
@@ -1249,15 +1249,19 @@ bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const
     else
         EV_INFO << "Tcp Header Option TS(TSval=" << option.getSenderTimestamp() << ", TSecr=" << option.getEchoedTimestamp() << ") received\n";
 
-    // RFC 1323, page 35:
-    // "Check whether the segment contains a Timestamps option and bit
-    // Snd.TS.OK is on.  If so:
-    //   If SEG.TSval < TS.Recent, then test whether connection has
-    //   been idle less than 24 days; if both are true, then the
-    //   segment is not acceptable; follow steps below for an
-    //   unacceptable segment.
-    //   If SEG.SEQ is equal to Last.ACK.sent, then save SEG.[TSval] in
-    //   variable TS.Recent."
+    // RFC 7323, page 42:
+    // "Check whether the segment contains a Timestamps option and
+    //  if bit Snd.TS.OK is on.  If so:
+    //
+    //     If SEG.TSval < TS.Recent and the RST bit is off:
+    //
+    //        If the connection has been idle more than 24 days,
+    //        save SEG.TSval in variable TS.Recent, else the segment
+    //        is not acceptable; follow the steps below for an
+    //        unacceptable segment.
+    //
+    //     If SEG.TSval >= TS.Recent and SEG.SEQ <= Last.ACK.sent,
+    //     then save SEG.TSval in variable TS.Recent."
     if (state->ts_enabled) {
         if (seqLess(option.getSenderTimestamp(), state->ts_recent)) {
             if ((simTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH) { // PAWS_IDLE_TIME_THRESH = 24 days
@@ -1333,16 +1337,17 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
             TcpOptionTimestamp *option = new TcpOptionTimestamp();
 
             // Update TS variables
-            // RFC 1323, page 13: "The Timestamp Value field (TSval) contains the current value of the timestamp clock of the Tcp sending the option."
+            // RFC 7323, page 12: "The TSval field contains the current value of the timestamp clock of the Tcp sending the option."
             option->setSenderTimestamp(convertSimtimeToTS(simTime()));
 
-            // RFC 1323, page 16: "(3) When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
-            // RFC 1323, page 13:
-            // "The Timestamp Echo Reply field (TSecr) is only valid if the ACK
-            // bit is set in the Tcp header; if it is valid, it echos a times-
-            // tamp value that was sent by the remote Tcp in the TSval field
-            // of a Timestamps option.  When TSecr is not valid, its value
-            // must be zero."
+            // RFC 7323, page 17: "(3) When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
+            // RFC 7323, page 12:
+            // "The TSecr field is valid if the ACK bit is set in the TCP header.  If
+            // the ACK bit is not set in the outgoing TCP header, the sender of that
+            // segment SHOULD set the TSecr field to zero.  When the ACK bit is set
+            // in an outgoing segment, the sender MUST echo a recently received
+            // TSval sent by the remote TCP in the TSval field of a Timestamps
+            // option."
             option->setEchoedTimestamp(tcpHeader->getAckBit() ? state->ts_recent : 0);
 
             state->snd_initial_ts = true;
@@ -1366,7 +1371,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
                 ulong scaled_rcv_wnd = state->maxRcvBuffer - receiveQueue->getAcknowledgedDataLength();
                 state->rcv_wnd_scale = 0;
 
-                while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) { // RFC 1323, page 11: "the shift count must be limited to 14"
+                while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) { // RFC 7323, page 10: "the shift count must be limited to 14"
                     scaled_rcv_wnd = scaled_rcv_wnd >> 1;
                     state->rcv_wnd_scale++;
                 }
@@ -1415,16 +1420,17 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
             TcpOptionTimestamp *option = new TcpOptionTimestamp();
 
             // Update TS variables
-            // RFC 1323, page 13: "The Timestamp Value field (TSval) contains the current value of the timestamp clock of the Tcp sending the option."
+            // RFC 7323, page 12: "The TSval field contains the current value of the timestamp clock of the Tcp sending the option."
             option->setSenderTimestamp(convertSimtimeToTS(simTime()));
 
-            // RFC 1323, page 16: "(3) When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
-            // RFC 1323, page 13:
-            // "The Timestamp Echo Reply field (TSecr) is only valid if the ACK
-            // bit is set in the Tcp header; if it is valid, it echos a times-
-            // tamp value that was sent by the remote Tcp in the TSval field
-            // of a Timestamps option.  When TSecr is not valid, its value
-            // must be zero."
+            // RFC 7323, page 17: "(3) When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
+            // RFC 7323, page 12:
+            // "The TSecr field is valid if the ACK bit is set in the TCP header.  If
+            // the ACK bit is not set in the outgoing TCP header, the sender of that
+            // segment SHOULD set the TSecr field to zero.  When the ACK bit is set
+            // in an outgoing segment, the sender MUST echo a recently received
+            // TSval sent by the remote TCP in the TSval field of a Timestamps
+            // option."
             option->setEchoedTimestamp(tcpHeader->getAckBit() ? state->ts_recent : 0);
 
             EV_INFO << "Tcp Header Option TS(TSval=" << option->getSenderTimestamp() << ", TSecr=" << option->getEchoedTimestamp() << ") sent\n";
@@ -1528,7 +1534,7 @@ uint16_t TcpConnection::updateRcvWnd()
     // Observe upper limit for advertised window on this connection
     const uint32_t maxWin = (state->ws_enabled && state->rcv_wnd_scale) ? (TCP_MAX_WIN << state->rcv_wnd_scale) : TCP_MAX_WIN; // TCP_MAX_WIN = 65535 (16 bit)
     if (win > maxWin)
-        win = maxWin; // Note: The window size is limited to a 16 bit value in the TCP header if WINDOW SCALE option (RFC 1323) is not used
+        win = maxWin; // Note: The window size is limited to a 16 bit value in the TCP header if WINDOW SCALE option (RFC 7323) is not used
 
     // Note: The order of the "Do not shrink window" and "Observe upper limit" parts has been changed to the order used in FreeBSD Release 7.1
 
@@ -1546,7 +1552,7 @@ uint16_t TcpConnection::updateRcvWnd()
     // scale rcv_wnd:
     uint32_t scaled_rcv_wnd = state->rcv_wnd;
     if (state->ws_enabled && state->rcv_wnd_scale) {
-        ASSERT(state->rcv_wnd_scale <= 14); // RFC 1323, page 11: "the shift count must be limited to 14"
+        ASSERT(state->rcv_wnd_scale <= 14); // RFC 7323, page 10: "the shift count must be limited to 14"
         scaled_rcv_wnd = scaled_rcv_wnd >> state->rcv_wnd_scale;
     }
 
@@ -1558,10 +1564,10 @@ uint16_t TcpConnection::updateRcvWnd()
 void TcpConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways)
 {
     uint32_t true_window = tcpHeader->getWindow();
-    // RFC 1323, page 10:
+    // RFC 7323, page 10
     // "The window field (SEG.WND) in the header of every incoming
-    // segment, with the exception of SYN segments, is left-shifted
-    // by Snd.Wind.Scale bits before updating SND.WND:
+    // segment, with the exception of <SYN> segments, MUST be left-
+    // shifted by Snd.Wind.Shift bits before updating SND.WND:
     //    SND.WND = SEG.WND << Snd.Wind.Scale"
     if (state->ws_enabled && !tcpHeader->getSynBit())
         true_window = tcpHeader->getWindow() << state->snd_wnd_scale;
