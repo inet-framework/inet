@@ -63,9 +63,68 @@ It contains two :ned:`StandardHost`'s. Each host is connected by an :ned:`Ethern
 The sender VLC application will stream the video to the address of the router's ``eth0`` in the simulation.
 The router will perform network address translation to rewrite the destination address to the address of
 the receiver host's EXT/TAP interface.
-
 This is required so that the video packets actually enter the simulated network; if they were sent to the
 receiver host's EXT/TAP interface, they would go through the loopback interface because the host OS optimizes traffic.
+
+In the configuration in omnetpp.ini, the scheduler class is set to ``RealTimeScheduler`` so that
+the simulation can run in the real time of the host OS:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :end-at: sim-time-limit
+
+We need to create TAP devices in the host OS. These will have a corresponding external (Ext) interface in the simulation.
+We will start the scenario using a shell script, which will create the TAP devices and assign IP addresses to them.
+This is detailed in the Running section later in this document.
+
+.. The TAP devices are created by a script used to run the scenario; this is detailed in the Running section below.
+
+
+For the corresponding simulated interfaces, the hosts are configured to have an :ned:`ExtUpperEthernetInterface`, and to use the TAP devices
+present in the host OS. The EXT interfaces are configured to copy the addresses from the TAP devices:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: ExtUpperEthernetInterface
+   :end-at: host2.eth[0].copyConfiguration
+
+The addresses in the network are important; the configurator is set to assign the correct addresses so
+the simulation and the shell script can work together (the VLC sends the video packets to the router, so
+its destination address needs to match as the address assigned to the corresponding TAP devide):
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: configurator
+   :end-at: /config
+
+Also, the CRC and FCS need to be set to ``computed`` to be able to properly serialize/deserialize packets.
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: crcMode
+   :end-at: fcsMode
+
+Running
+-------
+
+We provide two ways for running the emulation scenario. The first only uses shell
+scripts to set up network namespaces, run INET, and start the VLC instances. The
+second makes use of Mininet, a Software Defined Networking tool. These are
+detailed in the next sub-sections.
+
+Before running the emulation scenario in either way, run ``setenv`` in the `omnetpp` and `inet` directories:
+
+.. and run the ``setup.sh`` script in the showcase's folder:
+
+.. code-block:: bash
+
+  $ cd ~/workspace/omnetpp
+  $ . setenv
+  $ cd ~/workspace/inet
+  $ . setenv
+
+Using Shell Scripts
+~~~~~~~~~~~~~~~~~~~
 
 Three shell scripts in the showcase's directory can be used to control the emulation scenario.
 The ``setup.sh`` script creates the TAP interfaces, assigns IP addresses to them, and brings them up:
@@ -83,51 +142,10 @@ The ``run.sh`` script starts the simulation, and both video applications:
 .. literalinclude:: ../run.sh
    :language: bash
 
-In the configuration in omnetpp.ini, the scheduler class is set to ``RealTimeScheduler`` so that
-the simulation can run in the real time of the host OS:
-
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :end-at: sim-time-limit
-
-The hosts are configured to have an :ned:`ExtUpperEthernetInterface`, and to use the TAP devices
-which were created by the setup script. The setup script assigned IP addresses to the TAP interfaces;
-the EXT interfaces are configured to copy the addresses from the TAP interfaces:
-
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :start-at: ExtUpperEthernetInterface
-   :end-at: host2.eth[0].copyConfiguration
-
-The addresses in the network are important; the configurator is set to assign the correct addresses so
-the simulation and the script can work together (the VLC sends the video packets to the router, so
-its address needs to match as the destination address in the script):
-
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :start-at: configurator
-   :end-at: /config
-
-Also, the CRC and FCS need to be set to ``computed`` to be able to properly serialize/deserialize packets.
-
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :start-at: crcMode
-   :end-at: fcsMode
-
-Running/Results
----------------
-
-Before running the emulation scenario, run ``setenv`` in the `omnetpp` and `inet` directories,
-and run the ``setup.sh`` script in the showcase's folder:
+Before starting the scenario, run ``setup.sh``:
 
 .. code-block:: bash
 
-  $ cd ~/workspace/omnetpp
-  $ . setenv
-  $ cd ~/workspace/inet
-  $ . setenv
-  $ cd showcases/emulation/videostreaming
   $ ./setup.sh
 
 To start the simulation and the VLC instances, run the ``run.sh`` script:
@@ -136,7 +154,43 @@ To start the simulation and the VLC instances, run the ``run.sh`` script:
 
   $ ./run.sh
 
-The script starts the simulation in Cmdenv; the streaming VLC client is also started in command line mode.
+With Mininet
+~~~~~~~~~~~~
+
+.. The emulation scenario can also be run with Mininet, an emulator for rapid prototyping of Software Defined Networks.
+.. In this case, the network is simulated in INET, but we use Mininet virtual hosts as the 'real' part of the scenario.
+.. The VLC instances are run on these virtual hosts.
+
+The emulation scenario can also be run with Mininet, an emulator for rapid prototyping of Software Defined Networks.
+Using Mininet’s Python API to set up virtual hosts can be
+convenient in a complex network, for example.
+In this case, we use Mininet virtual hosts as the ‘real’ part of the setup. Instead of
+using the host OS’s IP and UDP layers, each host has its own network stack in
+different network namespaces. The VLC instances are run on these virtual hosts.
+
+To start the scenario with Mininet, first make sure ``setenv`` has been run as described above. Then, use the ``run_mininet.sh`` wrapper script:
+
+.. code-block:: bash
+
+  $ ./run_mininet.sh
+
+.. x
+
+..    This script run the python file, where the whole scenario is defined. no need for setup and teardown scripts.
+
+The script runs the :download:`mininet-tap.py <../mininet-tap.py>` file, which creates (and in the end, destroys) the tap interfaces. It also starts the INET simulation and the VLC instances:
+
+.. literalinclude:: ../mininet-tap.py
+   :language: python
+
+.. Note:: When running with Mininet, no setup and teardown scripts are necessary, as this functionality is included in the ``run_mininet.sh``.
+
+.. In this case, we build the ‘real’ part of the setup with Mininet.
+
+Results
+-------
+
+The simulation is started in Cmdenv; the streaming VLC client is also started in command line mode.
 The received video stream is played by the other VLC instance. The received video is lower quality than
 the original video file,
 because it's downscaled, and the bitrate is reduced, so that the playback is smooth.
