@@ -152,11 +152,11 @@ void DcTcp::receivedAckForUnackedData(uint32_t firstSeqAcked)
     }
 
     if (state->sack_enabled && state->lossRecovery) {
-        // RFC 3517, page 7: "Once a TCP is in the loss recovery phase the following procedure MUST
+        // RFC 6675, page 9: "Once a TCP is in the loss recovery phase, the following procedure MUST
         // be used for each arriving ACK:
         //
         // (A) An incoming cumulative ACK for a sequence number greater than
-        // RecoveryPoint signals the end of loss recovery and the loss
+        // RecoveryPoint signals the end of loss recovery, and the loss
         // recovery phase MUST be terminated.  Any information contained in
         // the scoreboard for sequence numbers greater than the new value of
         // HighACK SHOULD NOT be cleared when leaving the loss recovery
@@ -165,7 +165,7 @@ void DcTcp::receivedAckForUnackedData(uint32_t firstSeqAcked)
             EV_INFO << "Loss Recovery terminated.\n";
             state->lossRecovery = false;
         }
-        // RFC 3517, page 7: "(B) Upon receipt of an ACK that does not cover RecoveryPoint the
+        // RFC 6675, page 9: "(B) Upon receipt of an ACK that does not cover RecoveryPoint the
         // following actions MUST be taken:
         //
         // (B.1) Use Update () to record the new SACK information conveyed
@@ -177,20 +177,20 @@ void DcTcp::receivedAckForUnackedData(uint32_t firstSeqAcked)
             // update of scoreboard (B.1) has already be done in readHeaderOptions()
             check_and_cast<Rfc6675Recovery *>(recovery)->setPipe();
 
-            // RFC 3517, page 7: "(C) If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
+            // RFC 6675, page 9: "(C) If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
             // segments as follows:"
             if (((int)state->snd_cwnd - (int)state->pipe) >= (int)state->snd_mss) // Note: Typecast needed to avoid prohibited transmissions
                 check_and_cast<Rfc6675Recovery *>(recovery)->sendDataDuringLossRecoveryPhase(state->snd_cwnd);
         }
     }
 
-    // RFC 3517, pages 7 and 8: "5.1 Retransmission Timeouts
+    // RFC 6675, page 10: "5.1 Retransmission Timeouts
     // (...)
     // If there are segments missing from the receiver's buffer following
     // processing of the retransmitted segment, the corresponding ACK will
     // contain SACK information.  In this case, a TCP sender SHOULD use this
     // SACK information when determining what data should be sent in each
-    // segment of the slow start.  The exact algorithm for this selection is
+    // segment following an RTO.  The exact algorithm for this selection is
     // not specified in this document (specifically NextSeg () is
     // inappropriate during slow start after an RTO).  A relatively
     // straightforward approach to "filling in" the sequence space reported
