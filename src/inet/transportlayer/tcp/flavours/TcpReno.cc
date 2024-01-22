@@ -276,7 +276,7 @@ void TcpReno::receivedDuplicateAck()
 
         // Do not restart REXMIT timer.
         // Note: Restart of REXMIT timer on retransmission is not part of RFC 5681, however optional in RFC 6675 if sent during recovery.
-        // Resetting the REXMIT timer is discussed in RFC 2582/3782 (NewReno) and RFC 2988.
+        // Resetting the REXMIT timer is discussed in RFC 2582/6582 (NewReno) and RFC 2988.
 
         if (state->sack_enabled) {
             // RFC 6675, page 8: "(4.4) Run SetPipe ()
