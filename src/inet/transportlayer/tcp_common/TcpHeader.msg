@@ -41,12 +41,12 @@ enum TcpOptionNumbers
     TCPOPTION_END_OF_OPTION_LIST = 0;                   // RFC 9293, LENGTH: 1 Byte
     TCPOPTION_NO_OPERATION = 1;                         // RFC 9293, LENGTH: 1 Byte
     TCPOPTION_MAXIMUM_SEGMENT_SIZE = 2;                 // RFC 9293, LENGTH: 4 Bytes
-    TCPOPTION_WINDOW_SCALE = 3;                         // RFC 1323, LENGTH: 3 Bytes
+    TCPOPTION_WINDOW_SCALE = 3;                         // RFC 7323, LENGTH: 3 Bytes
     TCPOPTION_SACK_PERMITTED = 4;                       // RFC 2018, LENGTH: 2 Bytes
     TCPOPTION_SACK = 5;                                 // RFC 2018, LENGTH: N (max. N = 4) 8 * n + 2 Bytes  => 32 + 2 + 2 * NOP = 36 Bytes; If TIMESTAMP option is used with SACK: max. n = 3 => 12 Bytes (for Timestamp) + 28 Bytes (for SACK) = 40 Bytes
 //    TCPOPTION_ECHO = 6;                               // (obsoleted by option 8) RFC 1072 & RFC 6247, LENGTH: 6 Bytes
 //    TCPOPTION_ECHO_REPLY = 7;                         // (obsoleted by option 8) RFC 1072 & RFC 6247, LENGTH: 6 Bytes
-    TCPOPTION_TIMESTAMP = 8;                            // RFC 1323, LENGTH: 10 Bytes
+    TCPOPTION_TIMESTAMP = 8;                            // RFC 7323, LENGTH: 10 Bytes
 //    TCPOPTION_PARTIAL_ORDER_CONNECTION_PERMITTED = 9; // (obsolete) RFC 1693 & RFC 6247, LENGTH: 2 Bytes
 //    TCPOPTION_PARTIAL_ORDER_SERVICE_PROFILE = 10;     // (obsolete) RFC 1693 & RFC 6247, LENGTH: 3 Bytes
 //    TCPOPTION_CC = 11;                                // (obsolete) RFC 1644 & RFC 6247, LENGTH: -

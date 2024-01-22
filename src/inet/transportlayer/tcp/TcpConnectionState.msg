@@ -169,21 +169,21 @@ struct TcpStateVariables
     bool afterRto = false;                      // set at RTO, reset when snd_nxt == snd_max or snd_una == snd_max
 
     // WINDOW_SCALE related variables
-    bool ws_support = false;                    // set if the host supports Window Scale (header option) (RFC 1323)
+    bool ws_support = false;                    // set if the host supports Window Scale (header option) (RFC 7323)
     bool ws_enabled = false;                    // set if the connection uses Window Scale (header option)
     int  ws_manual_scale = -1;                  // the value of scale parameter if it was set manually (-1 otherwise)
     bool snd_ws = false;                        // set if initial WINDOW_SCALE has been sent
     bool rcv_ws = false;                        // set if initial WINDOW_SCALE has been received
-    unsigned int rcv_wnd_scale = 0;             // RFC 1323, page 31: "Receive window scale power"
-    unsigned int snd_wnd_scale = 0;             // RFC 1323, page 31: "Send window scale power"
+    unsigned int rcv_wnd_scale = 0;             // RFC 7323, page 37: "Receive window scale exponent"
+    unsigned int snd_wnd_scale = 0;             // RFC 7323, page 37: "Send window scale exponent"
 
     // TIMESTAMP related variables
     bool ts_support = false;        // set if the host supports Timestamps (header option) (RFC 1322)
     bool ts_enabled = false;        // set if the connection uses Window Scale (header option)
     bool snd_initial_ts = false;    // set if initial TIMESTAMP has been sent
     bool rcv_initial_ts = false;    // set if initial TIMESTAMP has been received
-    uint32_t ts_recent = 0;         // RFC 1323, page 31: "Latest received Timestamp"
-    uint32_t last_ack_sent = 0;     // RFC 1323, page 31: "Last ACK field sent"
+    uint32_t ts_recent = 0;         // RFC 7323, page 37: "Latest received Timestamp"
+    uint32_t last_ack_sent = 0;     // RFC 7323, page 37: "Last ACK field sent"
     simtime_t time_last_data_sent;  // time at which the last data segment was sent (needed to compute the IDLE time for PAWS)
 
     // SACK related variables

@@ -94,7 +94,6 @@ import inet.transportlayer.contract.ITcp;
 //   - RFC 9293 - Transmission Control Protocol (TCP)
 //   - RFC  896 - Congestion Control in IP/TCP Internetworks
 //   - RFC 1122 - Requirements for Internet Hosts -- Communication Layers
-//   - RFC 1323 - TCP Extensions for High Performance
 //   - RFC 2018 - TCP Selective Acknowledgment Options
 //   - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP
 //   - RFC 3042 - Enhancing TCP's Loss Recovery Using Limited Transmit
@@ -103,13 +102,11 @@ import inet.transportlayer.contract.ITcp;
 //   - RFC 5681 - TCP Congestion Control
 //   - RFC 6582 - The `NewReno` Modification to TCP's Fast Recovery Algorithm
 //   - RFC 6675 - A Conservative Loss Recovery Algorithm Based on Selective Acknowledgment (SACK) for TCP
+//   - RFC 7323 - TCP Extensions for High Performance
 //   - RFC 1191 - Path MTU Discovery
 //   - RFC 1981 - Path MTU Discovery for IP version 6
 //   - RFC 3168 - The Addition of Explicit Congestion Notification (ECN) to IP
 //   - RFC 8257 - Data Center TCP (DCTCP): ECN Marking at the Data Sender
-//
-// We want to implement the following RFCs:
-//   - RFC 7323 - TCP Extensions for High Performance
 //
 // See also:
 //   - RFC 7805 - Moving Outdated TCP Extensions and TCP-Related Documents to Historic or Informational Status
@@ -134,11 +131,11 @@ import inet.transportlayer.contract.ITcp;
 //      - MSS: The value of snd_mss (SMSS) is set to the minimum of snd_mss
 //        (local parameter) and the value specified in the MSS option
 //        received during connection startup. Based on [RFC 5681].
-//      - WS: Window Scale option, based on RFC 1323.
+//      - WS: Window Scale option, based on RFC 7323.
 //      - SACK_PERMITTED: SACK can only be used if both nodes sent SACK_-
 //        PERMITTED during connection startup.
 //      - SACK: SACK option, based on RFC 2018, RFC 2883, and RFC 6675.
-//      - TS: Timestamps option, based on RFC 1323.
+//      - TS: Timestamps option, based on RFC 7323.
 //  - flow control: finite receive buffer size (initiated by the parameter
 //    `advertisedWindow`). If the receive buffer is exhausted (by out-of-order
 //    segments) and the payload length of a newly received segment
@@ -200,9 +197,9 @@ simple Tcp extends SimpleModule like ITcp
         bool increasedIWEnabled = default(false); // Increased Initial Window (RFC 3390) enabled/disabled
         bool sackSupport = default(false); // Selective Acknowledgment (RFC 2018, 2883, 6675) support (header option) (SACK will be enabled for a connection if both endpoints support it)
         bool dsackEnabled = default(this.sackSupport); // Selective Acknowledgment (RFC 2018, 2883, 6675) support (header option) (SACK will be enabled for a connection if both endpoints support it)
-        bool windowScalingSupport = default(false); // Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
+        bool windowScalingSupport = default(false); // Window Scale (RFC 7323) support (header option) (WS will be enabled for a connection if both endpoints support it)
         int windowScalingFactor = default(-1); // Window Scaling Factor given as a shift count. Valid values are 0..14, and -1 for automatic selection (it chooses the smallest shift count that makes advertisedWindow representable in 16 bits)
-        bool timestampSupport = default(false); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
+        bool timestampSupport = default(false); // Timestamps (RFC 7323) support (header option) (TS will be enabled for a connection if both endpoints support it)
         int mss = default(536); // Maximum Segment Size (RFC 9293) (header option). Default 536 per RFC 1122.
         int msl @unit(s) = default(120s);   // Maximum Segment Lifetime
         string tcpAlgorithmClass @examples("TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpReno");
