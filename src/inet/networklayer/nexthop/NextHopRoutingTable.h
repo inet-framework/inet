@@ -91,11 +91,6 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
      */
     virtual L3Address getRouterIdAsGeneric() const override;
 
-    /**
-     * Checks if the address is a local one, i.e. one of the host's.
-     */
-    virtual bool isLocalAddress(const L3Address& dest) const override; // TODO maybe into InterfaceTable?
-
     virtual bool isLocalBroadcastAddress(const L3Address& dest) const override { return false; } // TODO maybe into InterfaceTable?
 
     /**

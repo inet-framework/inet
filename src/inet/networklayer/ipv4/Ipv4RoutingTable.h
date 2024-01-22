@@ -195,13 +195,6 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     /** @name Routing functions (query the route table) */
     //@{
     /**
-     * Checks if the address is a local one, i.e. one of the host's.
-     */
-    virtual bool isLocalAddress(const Ipv4Address& dest) const override;
-
-    /** @name Routing functions (query the route table) */
-    //@{
-    /**
      * Checks if the address is a local network broadcast address, i.e. one of the
      * broadcast addresses derived from the interface addresses and netmasks.
      */

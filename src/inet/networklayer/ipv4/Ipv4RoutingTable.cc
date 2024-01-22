@@ -294,12 +294,6 @@ std::vector<Ipv4Address> Ipv4RoutingTable::gatherAddresses() const
 
 // ---
 
-bool Ipv4RoutingTable::isLocalAddress(const Ipv4Address& dest) const
-{
-    Enter_Method("isLocalAddress(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
-    return ift->isLocalAddress(dest);
-}
-
 // JcM add: check if the dest addr is local network broadcast
 bool Ipv4RoutingTable::isLocalBroadcastAddress(const Ipv4Address& dest) const
 {

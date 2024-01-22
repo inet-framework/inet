@@ -44,11 +44,6 @@ class INET_API IRoutingTable
     virtual L3Address getRouterIdAsGeneric() const = 0;
 
     /**
-     * Checks if the address is a local one, i.e. one of the host's.
-     */
-    virtual bool isLocalAddress(const L3Address& dest) const = 0; // TODO maybe into InterfaceTable?
-
-    /**
      * Checks if the address is a local network broadcast address, i.e. one of the
      * broadcast addresses derived from the interface addresses and netmasks.
      */

@@ -54,13 +54,6 @@ class INET_API IIpv4RoutingTable : public IRoutingTable
     /** @name Routing functions (query the route table) */
     //@{
     /**
-     * Checks if the address is a local one, i.e. one of the host's.
-     */
-    virtual bool isLocalAddress(const Ipv4Address& dest) const = 0;
-
-    /** @name Routing functions (query the route table) */
-    //@{
-    /**
      * Checks if the address is a local network broadcast address, i.e. one of the
      * broadcast addresses derived from the interface addresses and netmasks.
      */
@@ -193,7 +186,6 @@ class INET_API IIpv4RoutingTable : public IRoutingTable
   private:
     // mapping IRoute methods to IPv4-specific IIpv4Route methods
     virtual L3Address getRouterIdAsGeneric() const override { return getRouterId(); }
-    virtual bool isLocalAddress(const L3Address& dest) const override { return isLocalAddress(dest.toIpv4()); }
     virtual bool isLocalBroadcastAddress(const L3Address& dest) const override { return isLocalBroadcastAddress(dest.toIpv4()); }
     virtual IRoute *findBestMatchingRoute(const L3Address& dest) const override { return findBestMatchingRoute(dest.toIpv4()); }
     virtual NetworkInterface *getOutputInterfaceForDestination(const L3Address& dest) const override { return getInterfaceForDestAddr(dest.toIpv4()); } // TODO inconsistent names

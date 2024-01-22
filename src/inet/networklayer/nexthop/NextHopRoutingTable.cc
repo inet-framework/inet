@@ -230,13 +230,6 @@ L3Address NextHopRoutingTable::getRouterIdAsGeneric() const
     return routerId;
 }
 
-bool NextHopRoutingTable::isLocalAddress(const L3Address& dest) const
-{
-    Enter_Method("isLocalAddress(%s)", dest.str().c_str());
-
-    return ift->isLocalAddress(dest);
-}
-
 NextHopRoute *NextHopRoutingTable::findBestMatchingRoute(const L3Address& dest) const
 {
     Enter_Method("findBestMatchingRoute(%s)", dest.str().c_str());

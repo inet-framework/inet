@@ -169,14 +169,10 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     void setIsMobileNode(bool value) { ismobile_node = value; }
 #endif /* INET_WITH_xMIPv6 */
 
+    bool isLocalAddress(const Ipv6Address& dest) const;
+
     /** @name Routing functions */
     //@{
-    /**
-     * Checks if the address is one of the host's addresses, i.e.
-     * assigned to one of its interfaces (tentatively or not).
-     */
-    virtual bool isLocalAddress(const Ipv6Address& dest) const;
-
     /**
      * Looks up the given destination address in the Destination Cache,
      * then returns the next-hop address and the interface in the outInterfaceId
@@ -369,7 +365,6 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual bool isForwardingEnabled() const override { return isRouter(); } // TODO inconsistent names
     virtual bool isMulticastForwardingEnabled() const override { return true; /*TODO isMulticastForwardingEnabled();*/ }
     virtual L3Address getRouterIdAsGeneric() const override { return L3Address(Ipv6Address()); /*TODO getRouterId();*/ }
-    virtual bool isLocalAddress(const L3Address& dest) const override { return isLocalAddress(dest.toIpv6()); }
     virtual bool isLocalBroadcastAddress(const L3Address& dest) const override { return false; /*TODO isLocalBroadcastAddress(dest.toIPv6());*/ }
     virtual NetworkInterface *findInterfaceByLocalBroadcastAddress(const L3Address& dest) const { return nullptr; /*TODO findInterfaceByLocalBroadcastAddress(dest.toIPv6());*/ }
     virtual IRoute *findBestMatchingRoute(const L3Address& dest) const override { return const_cast<Ipv6Route *>((const_cast<Ipv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIpv6())); } // FIXME what a name??!! also: remove const; ALSO: THIS DOES NOT UPDATE DESTCACHE LIKE METHODS BUILT ON IT!
