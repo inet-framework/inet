@@ -41,15 +41,16 @@ TcpVegas::TcpVegas()
 // Same as TcpReno
 void TcpVegas::recalculateSlowStartThreshold()
 {
-    // RFC 2581, page 4:
+    // RFC 5681, page 7:
     // "When a TCP sender detects segment loss using the retransmission
-    // timer, the value of ssthresh MUST be set to no more than the value
-    // given in equation 3:
+    // timer and the given segment has not yet been resent by way of the
+    // retransmission timer, the value of ssthresh MUST be set to no more
+    // than the value given in equation 4:
     //
-    //   ssthresh = max (FlightSize / 2, 2*SMSS)            (3)
+    //   ssthresh = max (FlightSize / 2, 2*SMSS)            (4)
     //
-    // As discussed above, FlightSize is the amount of outstanding data in
-    // the network."
+    // where, as discussed above, FlightSize is the amount of outstanding
+    // data in the network."
 
     // set ssthresh to flight size/2, but at least 2 SMSS
     // (the formula below practically amounts to ssthresh=cwnd/2 most of the time)

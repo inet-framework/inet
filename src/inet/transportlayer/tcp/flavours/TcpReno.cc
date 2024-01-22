@@ -24,15 +24,16 @@ TcpReno::TcpReno() : TcpClassicAlgorithmBase(),
 
 void TcpReno::recalculateSlowStartThreshold()
 {
-    // RFC 2581, page 4:
+    // RFC 5681, page 7:
     // "When a TCP sender detects segment loss using the retransmission
-    // timer, the value of ssthresh MUST be set to no more than the value
-    // given in equation 3:
+    // timer and the given segment has not yet been resent by way of the
+    // retransmission timer, the value of ssthresh MUST be set to no more
+    // than the value given in equation 4:
     //
-    //   ssthresh = max (FlightSize / 2, 2*SMSS)            (3)
+    //   ssthresh = max (FlightSize / 2, 2*SMSS)            (4)
     //
-    // As discussed above, FlightSize is the amount of outstanding data in
-    // the network."
+    // where, as discussed above, FlightSize is the amount of outstanding
+    // data in the network."
 
     // set ssthresh to flight size / 2, but at least 2 SMSS
     // (the formula below practically amounts to ssthresh = cwnd / 2 most of the time)
@@ -55,7 +56,7 @@ void TcpReno::processRexmitTimer(TcpEventCode& event)
     // If calling "retransmitData();" there is no rexmit limitation (bytesToSend > snd_cwnd)
     // therefore "sendData();" has been modified and is called to rexmit outstanding data.
     //
-    // RFC 2581, page 5:
+    // RFC 5681, page 8:
     // "Furthermore, upon a timeout cwnd MUST be set to no more than the loss
     // window, LW, which equals 1 full-sized segment (regardless of the
     // value of IW).  Therefore, after retransmitting the dropped segment
@@ -63,7 +64,7 @@ void TcpReno::processRexmitTimer(TcpEventCode& event)
     // from 1 full-sized segment to the new value of ssthresh, at which
     // point congestion avoidance again takes over."
 
-    // begin Slow Start (RFC 2581)
+    // begin Slow Start (RFC 5681)
     recalculateSlowStartThreshold();
     state->snd_cwnd = state->snd_mss;
 
@@ -147,7 +148,7 @@ void TcpReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
             if (state->snd_cwnd < state->ssthresh) {
                 EV_INFO << "cwnd <= ssthresh: Slow Start: increasing cwnd by one SMSS bytes to ";
 
-                // perform Slow Start. RFC 2581: "During slow start, a TCP increments cwnd
+                // perform Slow Start. RFC 5681: "During slow start, a TCP increments cwnd
                 // by at most SMSS bytes for each ACK received that acknowledges new data."
                 state->snd_cwnd += state->snd_mss;
 
@@ -157,7 +158,7 @@ void TcpReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
                 EV_INFO << "cwnd=" << state->snd_cwnd << "\n";
             }
             else {
-                // perform Congestion Avoidance (RFC 2581)
+                // perform Congestion Avoidance (RFC 5681)
                 uint32_t incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
 
                 if (incr == 0)
@@ -169,10 +170,7 @@ void TcpReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
                 conn->emit(ssthreshSignal, state->ssthresh);
 
                 //
-                // Note: some implementations use extra additive constant mss / 8 here
-                // which is known to be incorrect (RFC 2581 p5)
-                //
-                // Note 2: RFC 3465 (experimental) "Appropriate Byte Counting" (ABC)
+                // Note: RFC 3465 (experimental) "Appropriate Byte Counting" (ABC)
                 // would require maintaining a bytes_acked variable here which we don't do
                 //
 
@@ -255,16 +253,17 @@ void TcpReno::receivedDuplicateAck()
                 EV_DETAIL << " recoveryPoint=" << state->recoveryPoint;
             }
         }
-        // RFC 2581, page 5:
+        // RFC 5681, page 9:
         // "After the fast retransmit algorithm sends what appears to be the
         // missing segment, the "fast recovery" algorithm governs the
         // transmission of new data until a non-duplicate ACK arrives.
         // (...) the TCP sender can continue to transmit new
-        // segments (although transmission must continue using a reduced cwnd)."
+        // segments (although transmission must continue using a reduced cwnd,
+        // since loss is an indication of congestion)."
 
         // enter Fast Recovery
         recalculateSlowStartThreshold();
-        // "set cwnd to ssthresh plus 3 * SMSS." (RFC 2581)
+        // "set cwnd to ssthresh plus 3 * SMSS." (RFC 5681)
         state->snd_cwnd = state->ssthresh + 3 * state->snd_mss; // 20051129 (1)
 
         conn->emit(cwndSignal, state->snd_cwnd);
@@ -276,7 +275,7 @@ void TcpReno::receivedDuplicateAck()
         conn->retransmitOneSegment(false);
 
         // Do not restart REXMIT timer.
-        // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 6675 if sent during recovery.
+        // Note: Restart of REXMIT timer on retransmission is not part of RFC 5681, however optional in RFC 6675 if sent during recovery.
         // Resetting the REXMIT timer is discussed in RFC 2582/3782 (NewReno) and RFC 2988.
 
         if (state->sack_enabled) {
@@ -300,7 +299,7 @@ void TcpReno::receivedDuplicateAck()
                 // alternative.  However, in some cases it may prevent needless
                 // retransmissions, go-back-N transmission and further reduction of the
                 // congestion window."
-                // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 6675 if sent during recovery.
+                // Note: Restart of REXMIT timer on retransmission is not part of RFC 5681, however optional in RFC 6675 if sent during recovery.
                 EV_INFO << "Retransmission sent during recovery, restarting REXMIT timer.\n";
                 restartRexmitTimer();
 
@@ -311,7 +310,7 @@ void TcpReno::receivedDuplicateAck()
             }
         }
 
-        // try to transmit new segments (RFC 2581)
+        // try to transmit new segments (RFC 5681)
         sendData(false);
     }
     else if (state->dupacks > state->dupthresh) {
