@@ -53,10 +53,10 @@ struct TcpAlgorithmBaseStateVariables extends TcpStateVariables
     uint32_t numRtos = 0; ///< total number of RTOs
     //@}
 
-    /// RFC 3782 variables
+    /// RFC 6582 variables
     //@{
-    uint32_t recover = iss; ///< recover (RFC 3782)
-    bool firstPartialACK = false; ///< first partial acknowledgement (RFC 3782)
+    uint32_t recover = iss; ///< recover (RFC 6582)
+    bool firstPartialACK = false; ///< first partial acknowledgement (RFC 6582)
     //@}
 };
 
