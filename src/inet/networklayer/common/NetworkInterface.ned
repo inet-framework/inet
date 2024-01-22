@@ -13,6 +13,13 @@ import inet.common.packet.recorder.PcapRecorder;
 //
 // This module serves as the base module for all network interfaces.
 //
+// Display string directives:
+// - %i: interface ID
+// - %m: MAC address
+// - %n: interface name
+// - %a: network address
+//
+//
 module NetworkInterface
 {
     parameters:
