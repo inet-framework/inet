@@ -14,7 +14,7 @@ sudo ip netns exec host1 ip link set dev tap1 up
 sudo ip netns exec host2 ip link set dev tap2 up
 
 # assign IP addresses to interface
-sudo ip netns exec host0 ip addr add 192.168.2.1/32 dev tap0
-sudo ip netns exec host1 ip addr add 192.168.3.1/32 dev tap1
-sudo ip netns exec host2 ip addr add 192.168.4.1/32 dev tap2
+sudo ip netns exec host0 ip addr add 192.168.2.1/30 dev tap0
+sudo ip netns exec host1 ip addr add 192.168.3.1/30 dev tap1
+sudo ip netns exec host2 ip addr add 192.168.4.1/30 dev tap2
 
