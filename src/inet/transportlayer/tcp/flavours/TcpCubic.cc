@@ -76,7 +76,7 @@ void TcpCubic::processRexmitTimer(TcpEventCode& event)
     if (event == TCP_E_ABORT)
         return;
 
-//    // RFC 3782, page 6:
+//    // RFC 6582, page 6:
 //    // "6)  Retransmit timeouts:
 //    // After a retransmit timeout, record the highest sequence number
 //    // transmitted in the variable "recover" and exit the Fast Recovery
