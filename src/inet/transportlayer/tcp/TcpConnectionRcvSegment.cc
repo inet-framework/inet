@@ -1197,10 +1197,10 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         if (seqLess(state->snd_nxt, state->snd_una))
             state->snd_nxt = state->snd_una;
 
-        // RFC 1323, page 36:
-        // "If SND.UNA < SEG.ACK =< SND.NXT then, set SND.UNA <- SEG.ACK.
+        // RFC 7323, page 43
+        // "If SND.UNA < SEG.ACK <= SND.NXT then, set SND.UNA <- SEG.ACK.
         // Also compute a new estimate of round-trip time.  If Snd.TS.OK
-        // bit is on, use my.TSclock - SEG.TSecr; otherwise use the
+        // bit is on, use Snd.TSclock - SEG.TSecr; otherwise use the
         // elapsed time since the first segment in the retransmission
         // queue was sent.  Any segments on the retransmission queue
         // which are thereby entirely acknowledged."
