@@ -25,6 +25,21 @@ def checkIntf( intf ):
                'and is probably in use!\n' )
         exit( 1 )
 
+def setupHost(host, netns, tap_intf, ip):
+    "Creates TAP interface in the host OS, assigns IP address to it, creates Mininet host and attaches TAP interface to it."
+    info( '*** Adding host', host, 'to Mininet network', '\n' )
+    python_host = net.addHost(host)
+    info( '*** Adding tap interface', tap_intf, 'in host OS', '\n' )
+    subprocess.run(['bash', '-c', f'sudo tunctl -t {tap_intf} -u $SAVED_USER -g $SAVED_GROUP && sudo ip link set dev {tap_intf} up'])
+    info( '*** Checking', tap_intf, '\n' )
+    checkIntf( tap_intf )
+    info( '*** Adding hardware interface', tap_intf, 'to Mininet host', host, '\n' )
+    _intf = Intf( tap_intf, node=python_host, ip=ip )
+    info( '*** Attaching mininet tap interface to host OS tap interface', tap_intf, '\n' )
+    host_pid = python_host.pid
+    subprocess.run(['bash', '-c', f'sudo ip netns attach {netns} {host_pid}'])
+    return python_host
+
 
 setLogLevel( 'info' )
 
@@ -33,38 +48,8 @@ subprocess.run(['sudo', 'ip', '-all', 'netns', 'delete'])
 info( '*** Creating network\n' )
 net = Mininet( topo=LinearTopo( k=0, n=2 ), controller=None)
 
-host1 = net.addHost('h1')
-host2 = net.addHost('h2')
-
-# create tap interfaces
-subprocess.run(['bash', '-c', 'sudo tunctl -t tapa -u $SAVED_USER -g $SAVED_GROUP && sudo ip link set dev tapa up'])
-subprocess.run(['bash', '-c', 'sudo tunctl -t tapb -u $SAVED_USER -g $SAVED_GROUP && sudo ip link set dev tapb up'])
-
-info( '*** Checking', 'tapa', '\n' )
-checkIntf( 'tapa' )
-
-info( '*** Checking', 'tapb', '\n' )
-checkIntf( 'tapb' )
-
-info( '*** Adding hardware interface', 'tapa', 'to host',
-      host1.name, '\n' )
-_intf = Intf( 'tapa', node=host1, ip='192.168.2.20/24' )
-
-info( '*** Adding hardware interface', 'tapb', 'to host',
-      host2.name, '\n' )
-_intf = Intf( 'tapb', node=host2, ip='192.168.3.20/24' )
-
-info( '*** Note: you may need to reconfigure the interfaces for '
-      'the Mininet hosts:\n', net.hosts, '\n' )
-
-pid1 = net.hosts[0].pid
-pid2 = net.hosts[1].pid
-
-cmd1 = """sudo ip netns attach host1 """ + str(pid1)
-cmd2 = """sudo ip netns attach host2 """ + str(pid2)
-
-subprocess.run(['bash', '-c', str(cmd1)])
-subprocess.run(['bash', '-c', str(cmd2)])
+host1 = setupHost(host='h1', netns='host1', tap_intf='tapa', ip='192.168.2.20/24')
+host2 = setupHost(host='h2', netns='host2', tap_intf='tapb', ip='192.168.3.20/24')
 
 net.start()
 
