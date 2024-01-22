@@ -96,8 +96,9 @@ void TcpReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
     else {
         bool performSsCa = true; // Stands for: "perform slow start and congestion avoidance"
         if (state && state->ect && state->gotEce) {
-            // halve cwnd and reduce ssthresh and do not increase cwnd (rfc-3168, page 18):
-            //   If the sender receives an ECN-Echo (ECE) ACK
+            // halve cwnd and reduce ssthresh and do not increase cwnd
+            // RFC 3168, page 18
+            // "If the sender receives an ECN-Echo (ECE) ACK
             // packet (that is, an ACK packet with the ECN-Echo flag set in the TCP
             // header), then the sender knows that congestion was encountered in the
             // network on the path from the sender to the receiver.  The indication
@@ -115,7 +116,7 @@ void TcpReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
             // only once in response to a series of dropped and/or CE packets from a
             // single window of data.  In addition, the TCP source should not decrease
             // the slow-start threshold, ssthresh, if it has been decreased
-            // within the last round trip time.
+            // within the last round trip time."
             if (simTime() - state->eceReactionTime > state->srtt) {
                 state->ssthresh = state->snd_cwnd / 2;
                 state->snd_cwnd = std::max(state->snd_cwnd / 2, uint32_t(1));
@@ -126,9 +127,9 @@ void TcpReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
                 EV_INFO << "cwnd /= 2: received ECN-Echo ACK... new cwnd = "
                         << state->snd_cwnd << "\n";
 
-                // rfc-3168 page 18:
-                // The sending TCP MUST reset the retransmit timer on receiving
-                // the ECN-Echo packet when the congestion window is one.
+                // RFC 3168, page 18
+                // "The sending TCP MUST reset the retransmit timer on receiving
+                // the ECN-Echo packet when the congestion window is one."
                 if (state->snd_cwnd == 1) {
                     restartRexmitTimer();
                     EV_INFO << "cwnd = 1... reset retransmit timer.\n";

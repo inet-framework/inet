@@ -226,12 +226,12 @@ struct TcpStateVariables
     bool sndCwr = false; // set if ECE was handled
     bool gotEce = false; // set if packet with ECE arrived
     bool gotCeIndication = false; // set if CE was set in controlInfo from IP
-    bool ect = false; // set if this connection is ECN Capable (ECT stands for ECN-Capable transport - rfc-3168)
+    bool ect = false; // set if this connection is ECN Capable (ECT stands for ECN-Capable transport, RFC 3168)
     bool endPointIsWillingECN = false; // set if the other end-point is willing to use ECN
     bool ecnSynSent = false; // set if ECN-setup SYN packet was sent
     bool ecnWillingness = false; // set if current host is willing to use ECN
     bool sndAck = false; // set if sending Ack packet, used to set relevant info in controlInfo.
-    bool rexmit = false; // set if retransmitting data, used to send not-ECT codepoint (rfc3168, p. 20)
+    bool rexmit = false; // set if retransmitting data, used to send not-ECT codepoint (RFC 3168, page 20)
     simtime_t eceReactionTime; // records the time of the last ECE reaction
 
     uint32_t dupthresh = 0; // used for TcpTahoe, TcpReno and SACK (RFC 6675)
