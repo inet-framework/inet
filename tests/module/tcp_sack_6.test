@@ -77,7 +77,7 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.sackSupport = true                            # Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
 *.*_tcp.windowScalingSupport = false                  # Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
 *.*_tcp.timestampSupport = false                      # Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
-*.*_tcp.mss = 500                                     # Maximum Segment Size (RFC 793) (header option)
+*.*_tcp.mss = 500                                     # Maximum Segment Size (RFC 9293) (header option)
 *.*_tcp.tcpAlgorithmClass = "TcpReno"                 # TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl/DumbTcp
 
 %#--------------------------------------------------------------------------------------------------------------

@@ -262,7 +262,7 @@ void TcpConnection::process_CLOSE(TcpEventCode& event, TcpCommand *tcpCommand, c
         case TCP_S_CLOSING:
         case TCP_S_LAST_ACK:
         case TCP_S_TIME_WAIT:
-            // RFC 793 is not entirely clear on how to handle a duplicate close request.
+            // RFC 9293 is not entirely clear on how to handle a duplicate close request.
             // Here we treat it as an error.
             throw cRuntimeError(tcpMain, "Duplicate CLOSE command: connection already closing");
     }
