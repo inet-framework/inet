@@ -40,17 +40,17 @@ class INET_API Rfc6675Recovery : public ITcpRecovery
 
     virtual bool processSACKOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionSack& option);
     /**
-     * For SACK TCP. RFC 3517, page 3: "This routine returns whether the given
+     * For SACK TCP. RFC 6675, page 5: "This routine returns whether the given
      * sequence number is considered to be lost.  The routine returns true when
      * either DupThresh discontiguous SACKed sequences have arrived above
-     * 'SeqNum' or (DupThresh * SMSS) bytes with sequence numbers greater
+     * 'SeqNum' or (DupThresh - 1) * SMSS bytes with sequence numbers greater
      * than 'SeqNum' have been SACKed.  Otherwise, the routine returns
      * false."
      */
     virtual bool isLost(uint32_t seqNum);
 
     /**
-     * For SACK TCP. RFC 3517, page 3: "This routine traverses the sequence
+     * For SACK TCP. RFC 6675, page 5: "This routine traverses the sequence
      * space from HighACK to HighData and MUST set the "pipe" variable to an
      * estimate of the number of octets that are currently in transit between
      * the TCP sender and the TCP receiver."
@@ -58,7 +58,7 @@ class INET_API Rfc6675Recovery : public ITcpRecovery
     virtual void setPipe();
 
     /**
-     * For SACK TCP. RFC 3517, page 3: "This routine uses the scoreboard data
+     * For SACK TCP. RFC 6675, page 6: "This routine uses the scoreboard data
      * structure maintained by the Update() function to determine what to transmit
      * based on the SACK information that has arrived from the data receiver
      * (and hence been marked in the scoreboard).  NextSeg () MUST return the

@@ -626,11 +626,11 @@ void TcpConnection::configureStateVariables()
     state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 1323)
     state->ecnWillingness = tcpMain->par("ecnWillingness"); // if set, current host is willing to use ECN
     state->dupthresh = tcpMain->par("dupthresh");
-    state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
+    state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 6675)
     state->pmtudEnabled = tcpMain->par("pmtudEnabled"); // Path MTU Discovery (RFC 1191, RFC 1981)
     state->pmtudTimeout = tcpMain->par("pmtudTimeout"); // time after which original MSS is restored
     state->pmtudLastMssReduction = -1; // never reduced yet
-    state->dsack_enabled = tcpMain->par("dsackEnabled"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
+    state->dsack_enabled = tcpMain->par("dsackEnabled"); // if set, this means that current host supports SACK (RFC 2018, 2883, 6675)
 
     if (state->sack_support) {
         std::string algorithmName1 = "TcpReno";
@@ -1117,7 +1117,7 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     tcpAlgorithm->ackSent();
 
     if (state->sack_enabled && state->lossRecovery && old_highRxt != state->highRxt) {
-        // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
+        // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 6675 if sent during recovery.
         EV_DETAIL << "Retransmission sent during recovery, restarting REXMIT timer.\n";
         tcpAlgorithm->restartRexmitTimer();
     }
@@ -1202,10 +1202,11 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
         tcpAlgorithm->ackSent();
 
         if (state->sack_enabled) {
-            // RFC 3517, page 7: "(3) Retransmit the first data segment presumed dropped -- the segment
+            // RFC 6675, page 8: "(4.3) Retransmit the first data segment presumed dropped -- the segment
             // starting with sequence number HighACK + 1.  To prevent repeated
-            // retransmission of the same data, set HighRxt to the highest
-            // sequence number in the retransmitted segment."
+            // retransmission of the same data or a premature rescue retransmission,
+            // set both HighRxt and RescueRxt to the highest sequence number in
+            // the retransmitted segment."
             state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
         }
     }

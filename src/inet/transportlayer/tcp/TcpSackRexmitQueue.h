@@ -154,7 +154,7 @@ class INET_API TcpSackRexmitQueue
     virtual void resetRexmittedBit();
 
     /**
-     * Returns total amount of sacked bytes. Corresponds to update() function from RFC 3517.
+     * Returns total amount of sacked bytes. Corresponds to update() function from RFC 6675.
      */
     virtual uint32_t getTotalAmountOfSackedBytes() const;
 
