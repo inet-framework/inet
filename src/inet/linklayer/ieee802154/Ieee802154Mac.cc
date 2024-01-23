@@ -805,7 +805,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
               << " dst=" << dest << " myAddr="
               << address << endl;
 
-    if (dest == address) {
+    if (networkInterface->isLocalMacAddress(dest)) {
         if (!useMACAcks) {
             EV_DETAIL << "Received a data packet addressed to me." << endl;
 //            nbRxFrames++;
@@ -827,7 +827,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
                 if (ackMessage != nullptr)
                     delete ackMessage;
                 auto csmaHeader = makeShared<Ieee802154MacHeader>();
-                csmaHeader->setSrcAddr(address);
+                csmaHeader->setSrcAddr(dest);
                 csmaHeader->setDestAddr(src);
                 csmaHeader->setChunkLength(b(ackLength));
                 ackMessage = new Packet("CSMA-Ack");

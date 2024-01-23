@@ -178,7 +178,7 @@ bool RadioMedium::matchesMacAddressFilter(const IRadio *radio, const Packet *pac
     IInterfaceTable *interfaceTable = check_and_cast<IInterfaceTable *>(host->getSubmodule("interfaceTable"));
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
         const NetworkInterface *interface = interfaceTable->getInterface(i);
-        if (interface && interface->getMacAddress() == address)
+        if (interface && interface->isLocalMacAddress(address))
             return true;
     }
     return false;

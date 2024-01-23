@@ -269,9 +269,10 @@ void XMac::handleStateEvent(cMessage *msg)
             // schedule the timeout.
             else if (kind == XMAC_PREAMBLE) {
                 auto incoming_preamble = check_and_cast<Packet *>(msg)->peekAtFront<XMacControlFrame>();
+                auto destAddr = incoming_preamble->getDestAddr();
 
                 // preamble is for me
-                if (incoming_preamble->getDestAddr() == address || incoming_preamble->getDestAddr().isBroadcast() || incoming_preamble->getDestAddr().isMulticast()) {
+                if (networkInterface->isLocalMacAddress(destAddr) || destAddr.isBroadcast() || destAddr.isMulticast()) {
                     cancelEvent(cca_timeout);
                     nbRxPreambles++;
                     EV << "node " << address << " : State CCA, message XMAC_PREAMBLE received, new state SEND_ACK" << endl;
@@ -308,7 +309,7 @@ void XMac::handleStateEvent(cMessage *msg)
                 auto incoming_data = check_and_cast<Packet *>(msg)->peekAtFront<XMacDataFrameHeader>();
 
                 // packet is for me
-                if (incoming_data->getDestAddr() == address) {
+                if (networkInterface->isLocalMacAddress(incoming_data->getDestAddr())) {
                     EV << "node " << address << " : State CCA, received XMAC_DATA, accepting it, new state WAIT_DATA." << endl;
                     cancelEvent(cca_timeout);
                     cancelEvent(switch_preamble_phase);

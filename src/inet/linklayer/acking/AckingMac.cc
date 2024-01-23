@@ -218,7 +218,7 @@ bool AckingMac::dropFrameNotForUs(Packet *packet)
     // All frames must be passed to the upper layer if the interface is
     // in promiscuous mode.
 
-    if (macHeader->getDest().equals(networkInterface->getMacAddress()))
+    if (networkInterface->isLocalMacAddress(macHeader->getDest()))
         return false;
 
     if (macHeader->getDest().isBroadcast())

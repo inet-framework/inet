@@ -259,7 +259,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                     findNewSlot();
                 }
 
-                if (dest == address || dest.isBroadcast()) {
+                if (networkInterface->isLocalMacAddress(dest) || dest.isBroadcast()) {
                     EV_DETAIL << "I need to stay awake.\n";
                     if (timeout->isScheduled())
                         cancelEvent(timeout);

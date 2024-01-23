@@ -416,13 +416,12 @@ void BMac::handleSelfMessage(cMessage *msg)
                 return;
             }
             if (msg->getKind() == BMAC_DATA) {
-                MacAddress address = networkInterface->getMacAddress();
                 nbRxDataPackets++;
                 auto packet = check_and_cast<Packet *>(msg);
                 const auto bmacHeader = packet->peekAtFront<BMacDataFrameHeader>();
                 const MacAddress& dest = bmacHeader->getDestAddr();
                 const MacAddress& src = bmacHeader->getSrcAddr();
-                if ((dest == address) || dest.isBroadcast()) {
+                if (networkInterface->isLocalMacAddress(dest) || dest.isBroadcast()) {
                     EV_DETAIL << "Local delivery " << packet << endl;
                     decapsulate(packet);
                     sendUp(packet);
@@ -438,7 +437,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                 }
 
                 cancelEvent(data_timeout);
-                if ((useMacAcks) && (dest == address)) {
+                if ((useMacAcks) && networkInterface->isLocalMacAddress(dest)) {
                     EV_DETAIL << "State WAIT_DATA, message BMAC_DATA, new state"
                                  " SEND_ACK" << endl;
                     macState = SEND_ACK;

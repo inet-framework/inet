@@ -139,7 +139,7 @@ NetworkInterface *InterfaceTable::findInterfaceByAddress(const L3Address& addres
 #endif // ifdef INET_WITH_IPv6
 
                     case L3Address::MAC:
-                        if (ie->getMacAddress() == address.toMac())
+                        if (ie->isLocalMacAddress(address.toMac()))
                             return ie;
                         break;
 

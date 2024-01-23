@@ -600,7 +600,7 @@ bool CsmaCaMac::isBroadcast(Packet *frame)
 bool CsmaCaMac::isForUs(Packet *frame)
 {
     const auto& macHeader = frame->peekAtFront<CsmaCaMacHeader>();
-    return macHeader->getReceiverAddress() == networkInterface->getMacAddress();
+    return networkInterface->isLocalMacAddress(macHeader->getReceiverAddress());
 }
 
 bool CsmaCaMac::isFcsOk(Packet *frame)
