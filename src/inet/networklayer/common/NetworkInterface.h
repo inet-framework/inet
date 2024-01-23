@@ -242,6 +242,7 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     bool isWireless() const { return wireless; }
     double getDatarate() const { return datarate; }
     const MacAddress& getMacAddress() const { return macAddr; }
+    bool isLocalMacAddress(const MacAddress& macAddress) const { return macAddress == this->macAddr; }
     const InterfaceToken& getInterfaceToken() const { return token; }
     //@}
 

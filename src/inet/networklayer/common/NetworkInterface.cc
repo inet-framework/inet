@@ -485,7 +485,7 @@ bool NetworkInterface::hasNetworkAddress(const L3Address& address) const
 #endif // ifdef INET_WITH_IPv6
     }
     case L3Address::MAC: {
-        return getMacAddress() == address.toMac();
+        return isLocalMacAddress(address.toMac());
     }
     case L3Address::MODULEID: {
 #ifdef INET_WITH_NEXTHOP
