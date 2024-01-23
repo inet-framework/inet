@@ -124,7 +124,7 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     double datarate = 0; ///< data rate in bit/s
     MacAddress macAddr; ///< link-layer address (for now, only IEEE 802 MAC addresses are supported)
     InterfaceToken token; ///< for Ipv6 stateless autoconfig (RFC 1971), interface identifier (RFC 2462)
-    std::vector<MacAddress> multicastAddresses;
+    std::vector<MacAddress> multicastMacAddresses;
 
     TagSet protocolDataSet;
     std::vector<MacEstimateCostProcess *> estimateCostProcessArray;

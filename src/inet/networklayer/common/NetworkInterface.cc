@@ -423,22 +423,22 @@ bool NetworkInterface::matchesMacAddress(const MacAddress& address) const
 
 bool NetworkInterface::matchesMulticastMacAddress(const MacAddress& address) const
 {
-    return address.isMulticast() && contains(multicastAddresses, address);
+    return address.isMulticast() && contains(multicastMacAddresses, address);
 }
 
 void NetworkInterface::addMulticastMacAddress(const MacAddress& address)
 {
-    if (contains(multicastAddresses, address))
+    if (contains(multicastMacAddresses, address))
         throw cRuntimeError("Multicast MacAddress already added: '%s'", address.str().c_str());
-    multicastAddresses.push_back(address);
+    multicastMacAddresses.push_back(address);
 }
 
 void NetworkInterface::removeMulticastMacAddress(const MacAddress& address)
 {
-    auto it = find(multicastAddresses, address);
-    if (it == multicastAddresses.end())
+    auto it = find(multicastMacAddresses, address);
+    if (it == multicastMacAddresses.end())
         throw cRuntimeError("Multicast MacAddress not found: '%s'", address.str().c_str());
-    multicastAddresses.erase(it);
+    multicastMacAddresses.erase(it);
 }
 
 const L3Address NetworkInterface::getNetworkAddress() const
