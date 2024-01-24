@@ -39,6 +39,8 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
 
     virtual void processRexmitTimer(TcpEventCode& event) override;
 
+    virtual bool processEce();
+
   public:
     /** Ctor */
     TcpClassicAlgorithmBase();
