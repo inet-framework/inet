@@ -73,7 +73,7 @@ cmdenv-log-prefix="[%c]: "
 # tcp settings
 *.*_tcp.advertisedWindow = 5000                       # in bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
 *.*_tcp.delayedAcksEnabled = false                    # delayed ACK algorithm (RFC 1122) enabled/disabled
-*.*_tcp.nagleEnabled = true                           # Nagle's algorithm (RFC 896) enabled/disabled
+*.*_tcp.nagleEnabled = true                           # Nagle's algorithm (RFC 1122) enabled/disabled
 *.*_tcp.limitedTransmitEnabled = false                # Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
 *.*_tcp.increasedIWEnabled = false                    # Increased Initial Window (RFC 3390) enabled/disabled
 *.*_tcp.sackSupport = true                            # Selective Acknowledgment (RFC 2018, 2883, 6675) support (header option) (SACK will be enabled for a connection if both endpoints support it)

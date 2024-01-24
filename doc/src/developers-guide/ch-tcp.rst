@@ -111,10 +111,9 @@ The :ned:`Tcp` module has the following parameters:
   receiver buffer capacity (Note: normally, NIC queues should be at
   least this size, default is 14*mss)
 
-- :par:`delayedAcksEnabled` delayed ACK algorithm (RFC 1122)
-  enabled/disabled
+- :par:`delayedAcksEnabled` delayed ACK algorithm (RFC 1122) enabled/disabled
 
-- :par:`nagleEnabled` Nagle’s algorithm (RFC 896) enabled/disabled
+- :par:`nagleEnabled` Nagle's algorithm (RFC 1122) enabled/disabled
 
 - :par:`limitedTransmitEnabled` Limited Transmit algorithm (RFC 3042)
   enabled/disabled (can be used for
