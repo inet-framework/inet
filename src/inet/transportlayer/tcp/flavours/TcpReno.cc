@@ -94,55 +94,7 @@ void TcpReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
         conn->emit(cwndSignal, state->snd_cwnd);
     }
     else {
-        bool performSsCa = true; // Stands for: "perform slow start and congestion avoidance"
-        if (state && state->ect && state->gotEce) {
-            performSsCa = false;
-            // halve cwnd and reduce ssthresh and do not increase cwnd
-            // RFC 3168, page 18
-            // "If the sender receives an ECN-Echo (ECE) ACK
-            // packet (that is, an ACK packet with the ECN-Echo flag set in the TCP
-            // header), then the sender knows that congestion was encountered in the
-            // network on the path from the sender to the receiver.  The indication
-            // of congestion should be treated just as a congestion loss in non-
-            // ECN-Capable TCP. That is, the TCP source halves the congestion window
-            // "cwnd" and reduces the slow start threshold "ssthresh".  The sending
-            // TCP SHOULD NOT increase the congestion window in response to the
-            // receipt of an ECN-Echo ACK packet.
-            // ...
-            //   The value of the congestion window is bounded below by a value of one MSS.
-            // ...
-            //   TCP should not react to congestion indications more than once every
-            // window of data (or more loosely, more than once every round-trip
-            // time). That is, the TCP sender's congestion window should be reduced
-            // only once in response to a series of dropped and/or CE packets from a
-            // single window of data.  In addition, the TCP source should not decrease
-            // the slow-start threshold, ssthresh, if it has been decreased
-            // within the last round trip time."
-            if (simTime() - state->eceReactionTime > state->srtt) {
-                state->ssthresh = state->snd_cwnd / 2;
-                state->snd_cwnd = std::max(state->snd_cwnd / 2, uint32_t(state->snd_mss));
-                state->sndCwr = true;
-                EV_INFO << "ssthresh = cwnd/2: received ECN-Echo ACK... new ssthresh = "
-                        << state->ssthresh << "\n";
-                EV_INFO << "cwnd /= 2: received ECN-Echo ACK... new cwnd = "
-                        << state->snd_cwnd << "\n";
-
-                // RFC 3168, page 18
-                // "The sending TCP MUST reset the retransmit timer on receiving
-                // the ECN-Echo packet when the congestion window is one."
-                if (state->snd_cwnd == state->snd_mss) {
-                    restartRexmitTimer();
-                    EV_INFO << "cwnd = 1 MSS... reset retransmit timer.\n";
-                }
-                state->eceReactionTime = simTime();
-                conn->emit(cwndSignal, state->snd_cwnd);
-                conn->emit(ssthreshSignal, state->ssthresh);
-            }
-            else
-                EV_INFO << "multiple ECN-Echo ACKs in less than rtt... no ECN reaction\n";
-            state->gotEce = false;
-        }
-        if (performSsCa) {
+        if (!processEce()) {
             // If ECN is not enabled or if ECN is enabled and received multiple ECE-Acks in
             // less than RTT, then perform slow start and congestion avoidance.
 
