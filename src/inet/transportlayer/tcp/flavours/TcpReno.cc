@@ -120,7 +120,7 @@ void TcpReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
             // within the last round trip time."
             if (simTime() - state->eceReactionTime > state->srtt) {
                 state->ssthresh = state->snd_cwnd / 2;
-                state->snd_cwnd = std::max(state->snd_cwnd / 2, uint32_t(1));
+                state->snd_cwnd = std::max(state->snd_cwnd / 2, uint32_t(state->snd_mss));
                 state->sndCwr = true;
                 EV_INFO << "ssthresh = cwnd/2: received ECN-Echo ACK... new ssthresh = "
                         << state->ssthresh << "\n";
@@ -130,9 +130,9 @@ void TcpReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
                 // RFC 3168, page 18
                 // "The sending TCP MUST reset the retransmit timer on receiving
                 // the ECN-Echo packet when the congestion window is one."
-                if (state->snd_cwnd == 1) {
+                if (state->snd_cwnd == state->snd_mss) {
                     restartRexmitTimer();
-                    EV_INFO << "cwnd = 1... reset retransmit timer.\n";
+                    EV_INFO << "cwnd = 1 MSS... reset retransmit timer.\n";
                 }
                 state->eceReactionTime = simTime();
                 conn->emit(cwndSignal, state->snd_cwnd);
