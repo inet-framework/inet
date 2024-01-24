@@ -112,15 +112,13 @@ void TcpAlgorithmBase::established(bool active)
     // If the SYN or SYN/ACK is
     // lost, the initial window used by a sender after a correctly
     // transmitted SYN MUST be one segment consisting of MSS bytes."
+    // TODO isn't increased_IW_enabled always true according to the newer RFCs?
     if (state->increased_IW_enabled && state->syn_rexmit_count == 0) {
         state->snd_cwnd = std::min(4 * state->snd_effmss, std::max(2 * state->snd_effmss, (uint32_t)4380));
         EV_DETAIL << "Enabled Increased Initial Window, CWND is set to " << state->snd_cwnd << "\n";
     }
-    // RFC 2001, page 3:
-    // " 1.  Initialization for a given connection sets cwnd to one segment
-    // and ssthresh to 65535 bytes."
     else
-        state->snd_cwnd = state->snd_effmss; // RFC 2001
+        state->snd_cwnd = state->snd_effmss;
 
     if (active) {
         // finish connection setup with ACK (possibly piggybacked on data)

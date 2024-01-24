@@ -46,7 +46,7 @@ import inet.transportlayer.contract.ITcp;
 //      Limited Transmit algorithm (RFC 3042).
 //
 //   -# The increasedIWEnabled parameter can be used to change the initial window
-//      from one segment (RFC 2001) (based on MSS) to maximal four segments
+//      from two segment (RFC 5681) (based on MSS) to maximum of four segments
 //      (min(4*MSS, max (2*MSS, 4380 bytes))) (RFC 3390).
 //
 //   -# The advertisedWindow parameter defines the amount of data TCP can
@@ -84,6 +84,8 @@ import inet.transportlayer.contract.ITcp;
 //   - RFC 6582 - The NewReno Modification to TCP's Fast Recovery Algorithm
 //   - RFC 6675 - A Conservative Loss Recovery Algorithm Based on Selective Acknowledgment (SACK) for TCP
 //   - RFC 7323 - TCP Extensions for High Performance
+//   - RFC 8257 - Data Center TCP (DCTCP): TCP Congestion Control for Data Centers
+//   - RFC 8312 - CUBIC for Fast Long-Distance Networks
 //
 // See also:
 //   - RFC 7805 - Moving Outdated TCP Extensions and TCP-Related Documents to Historic or Informational Status

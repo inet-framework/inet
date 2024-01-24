@@ -178,7 +178,7 @@ struct TcpStateVariables
     unsigned int snd_wnd_scale = 0;             // RFC 7323, page 37: "Send window scale exponent"
 
     // TIMESTAMP related variables
-    bool ts_support = false;        // set if the host supports Timestamps (header option) (RFC 1322)
+    bool ts_support = false;        // set if the host supports Timestamps (header option) (RFC 1122)
     bool ts_enabled = false;        // set if the connection uses Window Scale (header option)
     bool snd_initial_ts = false;    // set if initial TIMESTAMP has been sent
     bool rcv_initial_ts = false;    // set if initial TIMESTAMP has been received

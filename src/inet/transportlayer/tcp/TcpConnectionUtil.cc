@@ -466,7 +466,7 @@ void TcpConnection::configureStateVariables()
     state->rcv_adv = advertisedWindow;
 
     if (state->ws_support && advertisedWindow > TCP_MAX_WIN) {
-        state->rcv_wnd = TCP_MAX_WIN; // we cannot to guarantee that the other end is also supporting the Window Scale (header option) (RFC 1322)
+        state->rcv_wnd = TCP_MAX_WIN; // we cannot to guarantee that the other end is also supporting the Window Scale (header option) (RFC 1122)
         state->rcv_adv = TCP_MAX_WIN; // therefore TCP_MAX_WIN is used as initial value for rcv_wnd and rcv_adv
     }
 
@@ -1218,7 +1218,7 @@ bool TcpConnection::processWSOption(const Ptr<const TcpHeader>& tcpHeader, const
     state->snd_wnd_scale = option.getWindowScale();
     EV_INFO << "Tcp Header Option WS(=" << state->snd_wnd_scale << ") received, WS (ws_enabled) is set to " << state->ws_enabled << "\n";
 
-    if (state->snd_wnd_scale > 14) { // RFC 723, page 10: "the shift count must be limited to 14"
+    if (state->snd_wnd_scale > 14) { // RFC 7323, page 10: "the shift count must be limited to 14"
         EV_ERROR << "ERROR: Tcp Header Option WS received but shift count value is exceeding 14\n";
         state->snd_wnd_scale = 14;
     }
