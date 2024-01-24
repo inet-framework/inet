@@ -96,6 +96,7 @@ void TcpReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
     else {
         bool performSsCa = true; // Stands for: "perform slow start and congestion avoidance"
         if (state && state->ect && state->gotEce) {
+            performSsCa = false;
             // halve cwnd and reduce ssthresh and do not increase cwnd
             // RFC 3168, page 18
             // "If the sender receives an ECN-Echo (ECE) ACK
@@ -121,7 +122,6 @@ void TcpReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
                 state->ssthresh = state->snd_cwnd / 2;
                 state->snd_cwnd = std::max(state->snd_cwnd / 2, uint32_t(1));
                 state->sndCwr = true;
-                performSsCa = false;
                 EV_INFO << "ssthresh = cwnd/2: received ECN-Echo ACK... new ssthresh = "
                         << state->ssthresh << "\n";
                 EV_INFO << "cwnd /= 2: received ECN-Echo ACK... new cwnd = "
