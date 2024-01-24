@@ -5,7 +5,6 @@ Goal
 Merge tasks
 
  - extract ns3 validation example into a real test, commit PCAP files?, commit ns3-patch?
- - replace old RFC references with new ones and update the corresponding implementation
  - design ITcpCongestionControl C++ and ITcpRecovery C++ interface
  - fix broken old congestion control algorithms TcpTahoe, TcpReno, TcpDctcp, etc.
    refactor all existing TCP algorithms to the new architecture using separate congestion control and recovery
