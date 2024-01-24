@@ -150,7 +150,7 @@ struct TcpStateVariables
     bool fin_rcvd = false;          // whether FIN received or not
     uint32_t rcv_fin_seq = 0;       // if fin_rcvd: sequence number of received FIN
 
-    bool nagle_enabled = false;                 // set if Nagle's algorithm (RFC 896) is enabled
+    bool nagle_enabled = false;                 // set if Nagle's algorithm (RFC 1122) is enabled
     bool delayed_acks_enabled = false;          // set if delayed ACK algorithm (RFC 1122) is enabled
     bool limited_transmit_enabled = false;      // set if Limited Transmit algorithm (RFC 3042) is enabled
     bool increased_IW_enabled = false;          // set if Increased Initial Window (RFC 3390) is enabled

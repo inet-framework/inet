@@ -74,7 +74,6 @@ import inet.transportlayer.contract.ITcp;
 //
 // Implementation is based on the following RFCs:
 //   - RFC 9293 - Transmission Control Protocol (TCP)
-//   - RFC  896 - Congestion Control in IP/TCP Internetworks
 //   - RFC 1122 - Requirements for Internet Hosts -- Communication Layers
 //   - RFC 2018 - TCP Selective Acknowledgment Options
 //   - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP
@@ -122,7 +121,7 @@ import inet.transportlayer.contract.ITcp;
 //
 // The TcpNewReno, TcpReno and TcpTahoe algorithms implement:
 //  - RFC 1122 - delayed ACK algorithm (optional) with 200ms timeout
-//  - RFC 896 - Nagle's algorithm (optional)
+//  - RFC 1122 - Nagle's algorithm (optional)
 //  - Jacobson's and Karn's algorithms for round-trip time measurement and
 //    adaptive retransmission
 //  - TcpTahoe (Fast Retransmit), TcpReno (Fast Retransmit and Fast Recovery),
@@ -148,7 +147,7 @@ import inet.transportlayer.contract.ITcp;
 //
 // TcpNewReno/TcpReno/TcpTahoe issues and missing features:
 //  - KEEP-ALIVE not implemented (idle connections never time out)
-//  - Nagle's algorithm (RFC 896) possibly not precisely implemented
+//  - Nagle's algorithm (RFC 1122) possibly not precisely implemented
 //
 // The above problems should be relatively easy to fix.
 //
@@ -159,7 +158,7 @@ simple Tcp like ITcp
         int advertisedWindow = default(14*this.mss); // in bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
         bool delayedAcksEnabled = default(false); // delayed ACK algorithm (RFC 1122) enabled/disabled
         int delayedAckFrameCount = default(2); // number of frames after delayed acks are sent
-        bool nagleEnabled = default(true); // Nagle's algorithm (RFC 896) enabled/disabled
+        bool nagleEnabled = default(true); // Nagle's algorithm (RFC 1122) enabled/disabled
         bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
         bool increasedIWEnabled = default(false); // Increased Initial Window (RFC 3390) enabled/disabled
         bool sackSupport = default(false); // Selective Acknowledgment (RFC 2018, 2883, 6675) support (header option) (SACK will be enabled for a connection if both endpoints support it)
