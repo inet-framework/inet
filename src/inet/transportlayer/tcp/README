@@ -2,7 +2,7 @@ TCP
 ===
 
 This folder contains the "base part" of TCP, basically the operation
-described in RFC 793. This base algorithm can be extended and customized via
+described in RFC 9293. This base algorithm can be extended and customized via
 "flavour" and "queue" classes that implement the TCPAlgorith, TCPSendQueue
 and TCPReceiveQueue classes, and are selected via TCP's NED parameters.
 This implementation supports:

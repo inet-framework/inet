@@ -47,7 +47,7 @@ import inet.transportlayer.contract.ITcp;
 //      Limited Transmit algorithm (RFC 3042).
 //
 //   -# The `increasedIWEnabled` parameter can be used to change the initial window
-//      from one segment (RFC 2001) (based on MSS) to maximal four segments
+//      from two segments (RFC 5681) (based on MSS) to a maximum of four segments
 //      (min(4*MSS, max (2*MSS, 4380 bytes))) (RFC 3390).
 //
 //   -# The `advertisedWindow` parameter defines the amount of data TCP can
@@ -105,7 +105,8 @@ import inet.transportlayer.contract.ITcp;
 //   - RFC 1191 - Path MTU Discovery
 //   - RFC 1981 - Path MTU Discovery for IP version 6
 //   - RFC 3168 - The Addition of Explicit Congestion Notification (ECN) to IP
-//   - RFC 8257 - Data Center TCP (DCTCP): ECN Marking at the Data Sender
+//   - RFC 8257 - Data Center TCP (DCTCP): TCP Congestion Control for Data Centers
+//   - RFC 8312 - CUBIC for Fast Long-Distance Networks
 //
 // See also:
 //   - RFC 7805 - Moving Outdated TCP Extensions and TCP-Related Documents to Historic or Informational Status
