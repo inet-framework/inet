@@ -23,7 +23,6 @@ class INET_API EthernetModes
   public:
     struct EthernetMode {
         double bitrate;
-        double halfBitTime; // transmission time of a half bit
         // for half-duplex operation:
         short int maxFrameCountInBurst;
         B maxBytesInBurst; // including IFG and preamble, etc.

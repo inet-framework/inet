@@ -67,6 +67,7 @@ class INET_API EthernetMacBase : public MacProtocolBase, public queueing::IActiv
     bool sendRawBytes = false;
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
     const EthernetModes::EthernetMode *curEtherDescr = nullptr; // constants for the current Ethernet mode, e.g. txrate
+    simtime_t halfBitTime = SIMTIME_ZERO; // transmission time of a half bit
     bool connected = false; // true if connected to a network, set automatically by exploring the network configuration
     bool promiscuous = false; // if true, passes up all received frames
     bool duplexMode = false; // true if operating in full-duplex mode

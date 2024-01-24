@@ -303,7 +303,7 @@ void EthernetCsmaMac::processMsgFromNetwork(EthernetSignalBase *signal)
         updateRxSignals(signal, endRxTime);
         changeReceptionState(RECEIVING_STATE);
     }
-    else if (!signal->isUpdate() && receiveState == RECEIVING_STATE && endRxTimer->getArrivalTime() - simTime() < curEtherDescr->halfBitTime) {
+    else if (!signal->isUpdate() && receiveState == RECEIVING_STATE && endRxTimer->getArrivalTime() - simTime() < halfBitTime) {
         // With the above condition we filter out "false" collisions that may occur with
         // back-to-back frames. That is: when "beginning of frame" message (this one) occurs
         // BEFORE "end of previous frame" event (endRxMsg) -- same simulation time,

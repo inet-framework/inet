@@ -406,6 +406,7 @@ void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
     bool dataratesDiffer;
     if (!connected) {
         curEtherDescr = &EthernetModes::nullEthernetMode;
+        halfBitTime = SIMTIME_ZERO;
         dataratesDiffer = false;
         if (!outTrChannel)
             transmissionChannel = nullptr;
@@ -429,6 +430,7 @@ void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
     if (connected) {
         // Check valid speeds
         curEtherDescr = &EthernetModes::getEthernetMode(txRate);
+        halfBitTime = 0.5 / txRate;
         if (networkInterface) {
             networkInterface->setCarrier(true);
             networkInterface->setDatarate(txRate);
