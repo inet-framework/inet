@@ -120,7 +120,7 @@ class INET_API TcpAlgorithm : public cObject
     /**
      * Called after receiving data which are in the window, but not at its
      * left edge (seq != rcv_nxt). This indicates that either segments got
-     * re-ordered in the way, or one segment was lost. RFC 1122 and RFC 2001
+     * re-ordered in the way, or one segment was lost. RFC 1122 and RFC 5681
      * recommend sending an immediate ACK here (Fast Retransmit relies on
      * that).
      */
