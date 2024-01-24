@@ -22,7 +22,7 @@ namespace tcp {
  * Implements:
  *   - delayed ACK algorithm (RFC 1122)
  *   - Jacobson's and Karn's algorithms for adaptive retransmission
- *   - Nagle's algorithm (RFC 896) to prevent silly window syndrome
+ *   - Nagle's algorithm (RFC 1122) to prevent silly window syndrome
  *   - Increased Initial Window (RFC 3390)
  *   - PERSIST timer
  *
