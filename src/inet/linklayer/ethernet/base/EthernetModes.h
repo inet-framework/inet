@@ -28,7 +28,7 @@ class INET_API EthernetModes
         B maxBytesInBurst; // including IFG and preamble, etc.
         B halfDuplexFrameMinBytes; // minimal frame length in half-duplex mode; -1 means half duplex is not supported
         B frameInBurstMinBytes; // minimal frame length in burst mode, after first frame
-        double slotTime; // slot time
+        uint16_t slotBitLength; // slot time specified in bitcount
         double maxPropagationDelay; // used for detecting longer cables than allowed
     };
 

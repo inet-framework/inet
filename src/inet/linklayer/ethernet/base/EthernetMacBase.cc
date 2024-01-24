@@ -446,7 +446,7 @@ void EthernetMacBase::printParameters()
               << (duplexMode ? "full-duplex" : "half-duplex") << endl
               << "bitTime: " << 1e9 / curEtherDescr->bitrate << " ns" << endl
               << "frameBursting: " << (frameBursting ? "on" : "off") << endl
-              << "slotTime: " << curEtherDescr->slotTime << endl
+              << "slotBitLength: " << curEtherDescr->slotBitLength << endl
               << "interFrameGap: " << INTERFRAME_GAP_BITS / curEtherDescr->bitrate << endl
               << endl;
 }

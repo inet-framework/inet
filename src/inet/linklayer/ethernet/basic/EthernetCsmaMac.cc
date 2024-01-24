@@ -628,7 +628,7 @@ void EthernetCsmaMac::handleRetransmission()
     int slotNumber = intuniform(0, backoffRange - 1);
     EV_DETAIL << "Executing backoff procedure (slotNumber=" << slotNumber << ", backoffRange=[0," << backoffRange - 1 << "]" << endl;
 
-    scheduleAfter(slotNumber * curEtherDescr->slotTime, endBackoffTimer);
+    scheduleAfter(slotNumber * curEtherDescr->slotBitLength / curEtherDescr->bitrate, endBackoffTimer);
     changeTransmissionState(BACKOFF_STATE);
     emit(backoffSlotsGeneratedSignal, slotNumber);
 

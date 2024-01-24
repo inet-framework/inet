@@ -17,7 +17,7 @@ const EthernetModes::EthernetMode EthernetModes::nullEthernetMode = {
     B(0),
     B(0),
     B(0),
-    0.0,
+    0,
     0.0
 };
 
@@ -28,7 +28,7 @@ const EthernetModes::EthernetMode EthernetModes::ethernetModes[NUM_OF_ETHERNETMO
         B(0),
         MIN_ETHERNET_FRAME_BYTES,
         MIN_ETHERNET_FRAME_BYTES,
-        512 / ETHERNET_TXRATE,
+        512,
         2500 /*m*/ / SPEED_OF_LIGHT_IN_CABLE
     },
     {
@@ -37,7 +37,7 @@ const EthernetModes::EthernetMode EthernetModes::ethernetModes[NUM_OF_ETHERNETMO
         B(0),
         MIN_ETHERNET_FRAME_BYTES,
         MIN_ETHERNET_FRAME_BYTES,
-        512 / FAST_ETHERNET_TXRATE,
+        512,
         250 /*m*/ / SPEED_OF_LIGHT_IN_CABLE
     },
     {
@@ -46,7 +46,7 @@ const EthernetModes::EthernetMode EthernetModes::ethernetModes[NUM_OF_ETHERNETMO
         GIGABIT_MAX_BURST_BYTES,
         GIGABIT_MIN_FRAME_BYTES_WITH_EXT,
         MIN_ETHERNET_FRAME_BYTES,
-        4096 / GIGABIT_ETHERNET_TXRATE,
+        4096,
         250 /*m*/ / SPEED_OF_LIGHT_IN_CABLE
     },
     {
@@ -55,7 +55,7 @@ const EthernetModes::EthernetMode EthernetModes::ethernetModes[NUM_OF_ETHERNETMO
         B(0),
         B(-1), // half-duplex is not supported
         B(0),
-        0.0,
+        0,
         0.0
     },
     {
@@ -64,7 +64,7 @@ const EthernetModes::EthernetMode EthernetModes::ethernetModes[NUM_OF_ETHERNETMO
         B(0),
         B(-1), // half-duplex is not supported
         B(0),
-        0.0,
+        0,
         0.0
     },
     {
@@ -73,7 +73,7 @@ const EthernetModes::EthernetMode EthernetModes::ethernetModes[NUM_OF_ETHERNETMO
         B(0),
         B(-1), // half-duplex is not supported
         B(0),
-        0.0,
+        0,
         0.0
     },
     {
@@ -82,7 +82,7 @@ const EthernetModes::EthernetMode EthernetModes::ethernetModes[NUM_OF_ETHERNETMO
         B(0),
         B(-1), // half-duplex is not supported
         B(0),
-        0.0,
+        0,
         0.0
     },
     {
@@ -91,7 +91,7 @@ const EthernetModes::EthernetMode EthernetModes::ethernetModes[NUM_OF_ETHERNETMO
         B(0),
         B(-1), // half-duplex is not supported
         B(0),
-        0.0,
+        0,
         0.0
     },
     {
@@ -100,7 +100,7 @@ const EthernetModes::EthernetMode EthernetModes::ethernetModes[NUM_OF_ETHERNETMO
         B(0),
         B(-1), // half-duplex is not supported
         B(0),
-        0.0,
+        0,
         0.0
     },
     {
@@ -109,7 +109,7 @@ const EthernetModes::EthernetMode EthernetModes::ethernetModes[NUM_OF_ETHERNETMO
         B(0),
         B(-1), // half-duplex is not supported
         B(0),
-        0.0,
+        0,
         0.0
     },
     {
@@ -118,7 +118,7 @@ const EthernetModes::EthernetMode EthernetModes::ethernetModes[NUM_OF_ETHERNETMO
         B(0),
         B(-1), // half-duplex is not supported
         B(0),
-        0.0,
+        0,
         0.0
     }
 };
