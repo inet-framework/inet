@@ -120,6 +120,7 @@ void TcpAlgorithmBase::established(bool active)
     else
         state->snd_cwnd = state->snd_effmss;
 
+    // TODO we should send the ACK from TcpConnection instead of TcpAlgorithmBase, this is standard TCP behavior
     if (active) {
         // finish connection setup with ACK (possibly piggybacked on data)
         EV_INFO << "Completing connection setup by sending ACK (possibly piggybacked on data)\n";
