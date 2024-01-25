@@ -29,6 +29,7 @@ void DcTcp::initialize()
 {
     TcpReno::initialize();
     state->dctcp_gamma = conn->getTcpMain()->par("dctcpGamma");
+    state->ecnMarkAll = true;
 }
 
 void DcTcp::receivedAckForUnackedData(uint32_t firstSeqAcked)

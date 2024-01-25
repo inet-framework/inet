@@ -227,6 +227,7 @@ struct TcpStateVariables
     bool gotEce = false; // set if packet with ECE arrived
     bool gotCeIndication = false; // set if CE was set in controlInfo from IP
     bool ect = false; // set if this connection is ECN Capable (ECT stands for ECN-Capable transport, RFC 3168)
+    bool ecnMarkAll = false; // marks all packets, including pure ACKs, retransmissions, etc. with ECN
     bool endPointIsWillingECN = false; // set if the other end-point is willing to use ECN
     bool ecnSynSent = false; // set if ECN-setup SYN packet was sent
     bool ecnWillingness = false; // set if current host is willing to use ECN
