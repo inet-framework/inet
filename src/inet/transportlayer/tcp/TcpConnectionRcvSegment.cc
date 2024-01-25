@@ -1025,9 +1025,6 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
             // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
             state->ack_now = true;
             state->snd_effmss = calculateEffectiveMss();
-            tcpAlgorithm->established(true);
-            tcpMain->emit(Tcp::tcpConnectionAddedSignal, this);
-            sendEstabIndicationToApp();
 
             // ECN
             if (state->ecnSynSent) {
@@ -1046,6 +1043,10 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
                 if (tcpHeader->getEceBit() && !tcpHeader->getCwrBit())
                     EV << "ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
             }
+
+            tcpAlgorithm->established(true);
+            tcpMain->emit(Tcp::tcpConnectionAddedSignal, this);
+            sendEstabIndicationToApp();
 
             // This will trigger transition to ESTABLISHED. Timers and notifying
             // app will be taken care of in stateEntered().
