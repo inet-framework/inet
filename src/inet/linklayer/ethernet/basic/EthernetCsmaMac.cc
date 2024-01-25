@@ -215,7 +215,7 @@ void EthernetCsmaMac::handleSignalFromNetwork(EthernetSignalBase *signal)
     // detect cable length violation in half-duplex mode
     if (!duplexMode) {
         simtime_t propagationTime = simTime() - signal->getSendingTime();
-        if (propagationTime >= curEtherDescr->maxPropagationDelay) {
+        if (propagationTime >= curEtherDescr->csmaMaxPropagationDelayInBits / curEtherDescr->bitrate) {
             throw cRuntimeError("Very long frame propagation time detected, maybe cable exceeds "
                                 "maximum allowed length? (%s s corresponds to an approx. %s m cable)",
                     SIMTIME_STR(propagationTime),
