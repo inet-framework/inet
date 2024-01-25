@@ -48,7 +48,6 @@ simsignal_t EthernetMacBase::receptionStateChangedSignal = registerSignal("recep
 EthernetMacBase::EthernetMacBase()
 {
     lastTxFinishTime = -1.0; // never equals to current simtime
-    curEtherDescr = &EthernetModes::nullEthernetMode;
 }
 
 EthernetMacBase::~EthernetMacBase()
@@ -405,7 +404,7 @@ void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
 
     bool dataratesDiffer;
     if (!connected) {
-        curEtherDescr = &EthernetModes::nullEthernetMode;
+        curEtherDescr = EthernetModes::nullEthernetMode;
         halfBitTime = SIMTIME_ZERO;
         dataratesDiffer = false;
         if (!outTrChannel)
@@ -429,7 +428,7 @@ void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
 
     if (connected) {
         // Check valid speeds
-        curEtherDescr = &EthernetModes::getEthernetMode(txRate);
+        curEtherDescr = EthernetModes::getEthernetMode(txRate);
         halfBitTime = 0.5 / txRate;
         if (networkInterface) {
             networkInterface->setCarrier(true);
@@ -442,12 +441,12 @@ void EthernetMacBase::printParameters()
 {
     // Dump parameters
     EV_DETAIL << "MAC address: " << getMacAddress() << (promiscuous ? ", promiscuous mode" : "") << endl
-              << "txrate: " << curEtherDescr->bitrate << " bps, "
+              << "txrate: " << curEtherDescr.bitrate << " bps, "
               << (duplexMode ? "full-duplex" : "half-duplex") << endl
-              << "bitTime: " << 1e9 / curEtherDescr->bitrate << " ns" << endl
+              << "bitTime: " << 1e9 / curEtherDescr.bitrate << " ns" << endl
               << "frameBursting: " << (frameBursting ? "on" : "off") << endl
-              << "slotBitLength: " << curEtherDescr->slotBitLength << endl
-              << "interFrameGap: " << INTERFRAME_GAP_BITS / curEtherDescr->bitrate << endl
+              << "slotBitLength: " << curEtherDescr.slotBitLength << endl
+              << "interFrameGap: " << INTERFRAME_GAP_BITS / curEtherDescr.bitrate << endl
               << endl;
 }
 

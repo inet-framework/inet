@@ -110,7 +110,7 @@ void EthernetCsmaMac::processConnectDisconnect()
         if (!duplexMode) {
             // start RX_RECONNECT_STATE
             changeReceptionState(RX_RECONNECT_STATE);
-            simtime_t reconnectEndTime = simTime() + b(MAX_ETHERNET_FRAME_BYTES + JAM_SIGNAL_BYTES).get() / curEtherDescr->bitrate;
+            simtime_t reconnectEndTime = simTime() + b(MAX_ETHERNET_FRAME_BYTES + JAM_SIGNAL_BYTES).get() / curEtherDescr.bitrate;
             for (auto& rx : rxSignals)
                 delete rx.signal;
             rxSignals.clear();
@@ -127,8 +127,8 @@ void EthernetCsmaMac::readChannelParameters(bool errorWhenAsymmetric)
     EthernetMacBase::readChannelParameters(errorWhenAsymmetric);
 
     if (connected && !duplexMode) {
-        if (curEtherDescr->halfDuplexFrameMinBytes < B(0))
-            throw cRuntimeError("%g bps Ethernet only supports full-duplex links", curEtherDescr->bitrate);
+        if (curEtherDescr.halfDuplexFrameMinBytes < B(0))
+            throw cRuntimeError("%g bps Ethernet only supports full-duplex links", curEtherDescr.bitrate);
     }
 }
 
@@ -215,7 +215,7 @@ void EthernetCsmaMac::handleSignalFromNetwork(EthernetSignalBase *signal)
     // detect cable length violation in half-duplex mode
     if (!duplexMode) {
         simtime_t propagationTime = simTime() - signal->getSendingTime();
-        if (propagationTime >= curEtherDescr->csmaMaxPropagationDelayInBits / curEtherDescr->bitrate) {
+        if (propagationTime >= curEtherDescr.csmaMaxPropagationDelayInBits / curEtherDescr.bitrate) {
             throw cRuntimeError("Very long frame propagation time detected, maybe cable exceeds "
                                 "maximum allowed length? (%s s corresponds to an approx. %s m cable)",
                     SIMTIME_STR(propagationTime),
@@ -376,7 +376,7 @@ void EthernetCsmaMac::handleEndIFGPeriod()
 B EthernetCsmaMac::calculateMinFrameLength()
 {
     bool inBurst = frameBursting && framesSentInBurst;
-    B minFrameLength = duplexMode ? MIN_ETHERNET_FRAME_BYTES : (inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->halfDuplexFrameMinBytes);
+    B minFrameLength = duplexMode ? MIN_ETHERNET_FRAME_BYTES : (inBurst ? curEtherDescr.frameInBurstMinBytes : curEtherDescr.halfDuplexFrameMinBytes);
 
     return minFrameLength;
 }
@@ -406,7 +406,7 @@ void EthernetCsmaMac::startFrameTransmission()
     EV_INFO << "Transmission of " << frame << " started.\n";
     auto signal = new EthernetSignal(frame->getName());
     signal->setSrcMacFullDuplex(duplexMode);
-    signal->setBitrate(curEtherDescr->bitrate);
+    signal->setBitrate(curEtherDescr.bitrate);
     if (sendRawBytes) {
         auto bytes = frame->peekDataAsBytes();
         frame->eraseAll();
@@ -414,7 +414,7 @@ void EthernetCsmaMac::startFrameTransmission()
     }
     signal->encapsulate(frame);
     signal->addByteLength(extensionLength.get());
-    simtime_t duration = signal->getBitLength() / this->curEtherDescr->bitrate;
+    simtime_t duration = signal->getBitLength() / this->curEtherDescr.bitrate;
 
     sendSignal(signal, duration);
 
@@ -586,9 +586,9 @@ void EthernetCsmaMac::sendJamSignal()
     // send JAM
     EthernetJamSignal *jam = new EthernetJamSignal("JAM_SIGNAL");
     jam->setByteLength(B(JAM_SIGNAL_BYTES).get());
-    jam->setBitrate(curEtherDescr->bitrate);
+    jam->setBitrate(curEtherDescr.bitrate);
 //    emit(packetSentToLowerSignal, jam);
-    duration = jam->getBitLength() / this->curEtherDescr->bitrate;
+    duration = jam->getBitLength() / this->curEtherDescr.bitrate;
     sendSignal(jam, duration);
 
     scheduleAfter(duration, endJammingTimer);
@@ -628,7 +628,7 @@ void EthernetCsmaMac::handleRetransmission()
     int slotNumber = intuniform(0, backoffRange - 1);
     EV_DETAIL << "Executing backoff procedure (slotNumber=" << slotNumber << ", backoffRange=[0," << backoffRange - 1 << "]" << endl;
 
-    scheduleAfter(slotNumber * curEtherDescr->slotBitLength / curEtherDescr->bitrate, endBackoffTimer);
+    scheduleAfter(slotNumber * curEtherDescr.slotBitLength / curEtherDescr.bitrate, endBackoffTimer);
     changeTransmissionState(BACKOFF_STATE);
     emit(backoffSlotsGeneratedSignal, slotNumber);
 
@@ -794,7 +794,7 @@ void EthernetCsmaMac::scheduleEndIFGPeriod()
 {
     bytesSentInBurst = B(0);
     framesSentInBurst = 0;
-    simtime_t ifgTime = b(INTERFRAME_GAP_BITS).get() / curEtherDescr->bitrate;
+    simtime_t ifgTime = b(INTERFRAME_GAP_BITS).get() / curEtherDescr.bitrate;
     scheduleAfter(ifgTime, endIfgTimer);
     changeTransmissionState(WAIT_IFG_STATE);
 }
@@ -804,9 +804,9 @@ void EthernetCsmaMac::fillIFGInBurst()
     EV_TRACE << "fillIFGInBurst(): t=" << simTime() << ", framesSentInBurst=" << framesSentInBurst << ", bytesSentInBurst=" << bytesSentInBurst << endl;
 
     EthernetFilledIfgSignal *gap = new EthernetFilledIfgSignal("FilledIFG");
-    gap->setBitrate(curEtherDescr->bitrate);
+    gap->setBitrate(curEtherDescr.bitrate);
     bytesSentInBurst += B(gap->getByteLength());
-    simtime_t duration = gap->getBitLength() / this->curEtherDescr->bitrate;
+    simtime_t duration = gap->getBitLength() / this->curEtherDescr.bitrate;
     sendSignal(gap, duration);
     scheduleAfter(duration, endIfgTimer);
     changeTransmissionState(SEND_IFG_STATE);
@@ -814,11 +814,11 @@ void EthernetCsmaMac::fillIFGInBurst()
 
 bool EthernetCsmaMac::canContinueBurst(b remainingGapLength)
 {
-    if ((frameBursting && framesSentInBurst > 0) && (framesSentInBurst < curEtherDescr->maxFrameCountInBurst)) {
+    if ((frameBursting && framesSentInBurst > 0) && (framesSentInBurst < curEtherDescr.maxFrameCountInBurst)) {
         if (Packet *pk = txQueue->canPullPacket(gate(upperLayerInGateId)->getPathStartGate())) {
             // TODO before/after FilledIfg!!!
             B pkLength = std::max(MIN_ETHERNET_FRAME_BYTES, B(pk->getDataLength()));
-            return (bytesSentInBurst + remainingGapLength + PREAMBLE_BYTES + SFD_BYTES + pkLength) <= curEtherDescr->maxBytesInBurst;
+            return (bytesSentInBurst + remainingGapLength + PREAMBLE_BYTES + SFD_BYTES + pkLength) <= curEtherDescr.maxBytesInBurst;
         }
     }
     return false;
@@ -827,7 +827,7 @@ bool EthernetCsmaMac::canContinueBurst(b remainingGapLength)
 void EthernetCsmaMac::scheduleEndPausePeriod(int pauseUnits)
 {
     // length is interpreted as 512-bit-time units
-    simtime_t pausePeriod = pauseUnits * PAUSE_UNIT_BITS / curEtherDescr->bitrate;
+    simtime_t pausePeriod = pauseUnits * PAUSE_UNIT_BITS / curEtherDescr.bitrate;
     scheduleAfter(pausePeriod, endPauseTimer);
     changeTransmissionState(PAUSE_STATE);
 }
