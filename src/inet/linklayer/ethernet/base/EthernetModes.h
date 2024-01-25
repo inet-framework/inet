@@ -44,7 +44,7 @@ class INET_API EthernetModes
     static const EthernetMode nullEthernetMode;
 
   public:
-    static const EthernetModes::EthernetMode& getEthernetMode(double txRate);
+    static EthernetModes::EthernetMode getEthernetMode(double txRate, bool allowNonstandardBitrate = false);
 };
 
 } // namespace inet

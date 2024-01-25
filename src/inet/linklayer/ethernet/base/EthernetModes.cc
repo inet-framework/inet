@@ -123,11 +123,21 @@ const EthernetModes::EthernetMode EthernetModes::ethernetModes[NUM_OF_ETHERNETMO
     }
 };
 
-const EthernetModes::EthernetMode& EthernetModes::getEthernetMode(double txRate)
+EthernetModes::EthernetMode EthernetModes::getEthernetMode(double txRate, bool allowNonstandardBitrate)
 {
     for (auto& ethernetMode : ethernetModes) {
         if (txRate == ethernetMode.bitrate)
             return ethernetMode;
+        if (allowNonstandardBitrate && txRate < ethernetMode.bitrate) {
+            EthernetMode nonStandardEthMode = ethernetMode;
+            nonStandardEthMode.bitrate = txRate;
+            return nonStandardEthMode;
+        }
+    }
+    if (allowNonstandardBitrate) {
+        EthernetMode nonStandardEthMode = ethernetModes[NUM_OF_ETHERNETMODES -1];
+        nonStandardEthMode.bitrate = txRate;
+        return nonStandardEthMode;
     }
     throw cRuntimeError("Invalid ethernet transmission rate %g bps", txRate);
 }
