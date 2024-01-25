@@ -287,7 +287,7 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
     addresses->setDestAddress(remoteAddr);
 
     // ECN:
-    // We decided to use ECT(1) to indicate ECN capable transport.
+    // We decided to use ECT(0) to indicate ECN capable transport.
     //
     // RFC 3168, page 6
     // "Routers treat the ECT(0) and ECT(1) codepoints
@@ -302,7 +302,10 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
     // RFC 3168, page 20
     // "ECN-capable TCP implementations MUST NOT set either ECT codepoint
     // (ECT(0) or ECT(1)) in the IP header for retransmitted data packets"
-    tcpSegment->addTagIfAbsent<EcnReq>()->setExplicitCongestionNotification((state->ect && !state->sndAck && !state->rexmit) ? IP_ECN_ECT_1 : IP_ECN_NOT_ECT);
+    if (state->ect || state->ecnWillingness) {
+        if (state->ecnMarkAll || (!state->sndAck && !state->rexmit))
+            tcpSegment->addTagIfAbsent<EcnReq>()->setExplicitCongestionNotification(IP_ECN_ECT_0);
+    }
 
     tcpHeader->setCrc(0);
     tcpHeader->setCrcMode(tcpMain->crcMode);
