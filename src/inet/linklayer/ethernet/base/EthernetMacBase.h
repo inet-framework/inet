@@ -65,6 +65,7 @@ class INET_API EthernetMacBase : public MacProtocolBase, public queueing::IActiv
     // configuration
     const char *displayStringTextFormat = nullptr;
     bool sendRawBytes = false;
+    bool allowNonstandardBitrate = true;
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
     EthernetModes::EthernetMode curEtherDescr = EthernetModes::nullEthernetMode; // constants for the current Ethernet mode, e.g. txrate
     simtime_t halfBitTime = SIMTIME_ZERO; // transmission time of a half bit

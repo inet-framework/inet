@@ -106,6 +106,7 @@ module EthernetCsmaMac like IEtherMac
                                             // ones with matching destination MAC address
         bool duplexMode;                    // selects full-duplex (true) or half-duplex (false) operation
         bool frameBursting = default(true); // enable/disable frame bursting mode in Gigabit Ethernet
+        bool allowNonstandardBitrate = default(false); // allows any bitrate and uses first larger bitrate specified parameters
         int mtu @unit(B) = default(1500B);
         string fcsMode @enum("declared","computed");
         @lifecycleSupport;

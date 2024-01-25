@@ -113,6 +113,7 @@ module EthernetMac like IEtherMac
                                             // ones with matching destination MAC address
         bool duplexMode;                    // must be set to "true", as EthernetMac does not support half-duplex operation
                                             // (parameter is present to reduce the risk of accidental misconfiguration)
+        bool allowNonstandardBitrate = default(false); // allows any bitrate and uses first larger bitrate specified parameters
         int mtu @unit(B) = default(1500B);
         string fcsMode @enum("declared","computed");
         @lifecycleSupport;

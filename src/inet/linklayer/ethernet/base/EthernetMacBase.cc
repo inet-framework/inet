@@ -63,6 +63,7 @@ void EthernetMacBase::initialize(int stage)
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         fcsMode = parseFcsMode(par("fcsMode"));
+        allowNonstandardBitrate = par("allowNonstandardBitrate");
         physInGate = gate("phys$i");
         physOutGate = gate("phys$o");
         lowerLayerInGateId = physInGate->getId();
@@ -428,7 +429,7 @@ void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
 
     if (connected) {
         // Check valid speeds
-        curEtherDescr = EthernetModes::getEthernetMode(txRate);
+        curEtherDescr = EthernetModes::getEthernetMode(txRate, allowNonstandardBitrate);
         halfBitTime = 0.5 / txRate;
         if (networkInterface) {
             networkInterface->setCarrier(true);
