@@ -16,11 +16,11 @@ jobs:
         mode: ["release"]
       fail-fast: false
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: omnetpp/omnetpp
           path: omnetpp
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           path: inet
       - run: mkdir -p /home/runner/work/ccache
