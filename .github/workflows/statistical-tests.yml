@@ -60,7 +60,7 @@ jobs:
           echo "::group::Running statistical tests"
           inet_run_statistical_tests -m release
           echo "::endgroup::"
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always() # even if the test failed, of course
         with:
           name: statistical-test-results

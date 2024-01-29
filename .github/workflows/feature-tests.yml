@@ -57,7 +57,7 @@ jobs:
           # this indirectly calls the script named simply "inet", which handles the MODE envvar internally
           ./featuretest
           echo "::endgroup::"
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always() # even if the test failed, of course
         with:
           name: log-${{ matrix.split }}
