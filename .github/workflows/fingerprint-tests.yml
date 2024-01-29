@@ -27,7 +27,7 @@ jobs:
         with:
           path: inet
       - run: mkdir -p /home/runner/work/ccache
-      - uses: actions/cache/restore@v3
+      - uses: actions/cache/restore@v4
         with:
           path: /home/runner/work/ccache
           key: native-${{ matrix.mode }}-ccache-${{ github.run_id }}

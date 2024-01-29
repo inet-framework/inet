@@ -19,7 +19,7 @@ jobs:
       - name: Pull Docker image
         run: docker pull ghcr.io/inet-framework/ci-inet:6.0.1-230503
       - run: mkdir /home/runner/work/ccache
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: /home/runner/work/ccache
           # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
