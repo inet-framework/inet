@@ -1,5 +1,5 @@
-./run example1
-./run example2
-./run example3
-./run example4
-./run example5
+./run example1 ns3::TcpNewReno TcpNewReno
+./run example2 ns3::TcpNewReno TcpNewReno
+./run example3 ns3::TcpNewReno TcpNewReno
+./run example4 ns3::TcpNewReno TcpNewReno
+./run example5 ns3::TcpNewReno TcpNewReno
