@@ -491,23 +491,27 @@ void PimDm::processJoinPrunePacket(Packet *pk)
     int numRpfNeighbors = pimNbt->getNumNeighbors(incomingInterface->getInterfaceId());
 
     for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++) {
-        JoinPruneGroup group = pkt->getJoinPruneGroups(i);
-        Ipv4Address groupAddr = group.getGroupAddress().groupAddress.toIpv4();
+        JoinPruneGroup joinPruneGroup = pkt->getJoinPruneGroups(i);
+        Ipv4Address group = joinPruneGroup.getGroupAddress().groupAddress.toIpv4();
 
         // go through list of joined sources
-        for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++) {
-            const auto& source = group.getJoinedSourceAddress(j);
-            Route *route = findRoute(source.sourceAddress.toIpv4(), groupAddr);
-            ASSERT(route);
-            processJoin(route, incomingInterface->getInterfaceId(), numRpfNeighbors, upstreamNeighborAddress);
+        for (unsigned int j = 0; j < joinPruneGroup.getJoinedSourceAddressArraySize(); j++) {
+            Ipv4Address source = joinPruneGroup.getJoinedSourceAddress(j).sourceAddress.toIpv4();
+            Route *route = findRoute(source, group);
+            if (route != nullptr)
+                processJoin(route, incomingInterface->getInterfaceId(), numRpfNeighbors, upstreamNeighborAddress);
+            else
+                EV_WARN << "Route not found for join" << EV_FIELD(source) << EV_FIELD(group) << std::endl;
         }
 
         // go through list of pruned sources
-        for (unsigned int j = 0; j < group.getPrunedSourceAddressArraySize(); j++) {
-            const auto& source = group.getPrunedSourceAddress(j);
-            Route *route = findRoute(source.sourceAddress.toIpv4(), groupAddr);
-            ASSERT(route);
-            processPrune(route, incomingInterface->getInterfaceId(), pkt->getHoldTime(), numRpfNeighbors, upstreamNeighborAddress);
+        for (unsigned int j = 0; j < joinPruneGroup.getPrunedSourceAddressArraySize(); j++) {
+            Ipv4Address source = joinPruneGroup.getPrunedSourceAddress(j).sourceAddress.toIpv4();
+            Route *route = findRoute(source, group);
+            if (route != nullptr)
+                processPrune(route, incomingInterface->getInterfaceId(), pkt->getHoldTime(), numRpfNeighbors, upstreamNeighborAddress);
+            else
+                EV_WARN << "Route not found for prune" << EV_FIELD(source) << EV_FIELD(group) << std::endl;
         }
     }
 
@@ -713,7 +717,10 @@ void PimDm::processGraft(Ipv4Address source, Ipv4Address group, Ipv4Address send
     EV_DEBUG << "Processing Graft(S=" << source << ", G=" << group << "), sender=" << sender << "incoming if=" << incomingInterfaceId << endl;
 
     Route *route = findRoute(source, group);
-    ASSERT(route);
+    if (route == nullptr) {
+        EV_WARN << "Route not found for graft" << EV_FIELD(source) << EV_FIELD(group) << std::endl;
+        return;
+    }
 
     UpstreamInterface *upstream = route->upstreamInterface;
 
@@ -1288,7 +1295,10 @@ void PimDm::multicastPacketArrivedOnRpfInterface(int interfaceId, Ipv4Address gr
     EV_DETAIL << "Multicast datagram arrived: source=" << source << ", group=" << group << ".\n";
 
     Route *route = findRoute(source, group);
-    ASSERT(route);
+    if (route == nullptr) {
+        EV_WARN << "Route not found for packet on RPF interface" << EV_FIELD(source) << EV_FIELD(group) << std::endl;
+        return;
+    }
     UpstreamInterface *upstream = route->upstreamInterface;
 
     // RFC 3973 4.5.2.2
