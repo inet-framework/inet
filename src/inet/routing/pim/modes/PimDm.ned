@@ -39,16 +39,16 @@ simple PimDm
         string pimNeighborTableModule;
 
         volatile double triggeredHelloDelay @unit(s) = uniform(0s,5s);
-        double helloPeriod @unit(s) = 30s;
-        double holdTime @unit(s) = default(3.5 * helloPeriod);
-        double pruneInterval @unit(s) = 180s;
-        double pruneLimitInterval @unit(s) = 210s;
-        double overrideInterval @unit(s) = 2.5s;
+        double helloPeriod @unit(s) = 30s; // "Hello_Period: Periodic interval for hello messages"
+        double holdTime @unit(s) = default(3.5 * helloPeriod); // "The Hold Time in the Hello Message should be set to a value that can reasonably be expected to keep the Hello active until a new Hello message is received.  On most links, this will be 3.5 times the value of Hello_Period."
+        double pruneInterval @unit(s) = 180s; // "The Prune Timer expires, indicating that it is again time to flood data from S addressed to group G onto interface I."
+        double pruneLimitInterval @unit(s) = 210s; // "t_limit: Used to prevent Prune storms on a LAN"
+        double overrideInterval @unit(s) = 2.5s; // "J/P_Override_Interval: Short time after a Prune to allow other routers on the LAN to send a Join"
         double propagationDelay @unit(s) = 0.5s;
-        double graftRetryInterval @unit(s) = 3s;
-        double sourceActiveInterval @unit(s) = 210s;
-        double stateRefreshInterval @unit(s) = 60s;
-        double assertTime @unit(s) = 180s;
+        double graftRetryInterval @unit(s) = 3s; // "Graft_Retry_Period: In the absence of receipt of a GraftAck message, the time before retransmission of a Graft message"
+        double sourceActiveInterval @unit(s) = 210s; // "SourceLifetime: Period of time after receiving a multicast message a directly attached router will continue to send State Refresh messages"
+        double stateRefreshInterval @unit(s) = 60s; // "RefreshInterval: Interval between successive state refresh messages"
+        double assertTime @unit(s) = 180s; // "Assert Time: Period after last assert before assert state is timed out"
 
         @signal[sentHelloPk](type=cPacket);
         @signal[rcvdHelloPk](type=cPacket);
