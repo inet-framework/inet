@@ -185,9 +185,6 @@ class INET_API IMulticastRoute
 
         const NetworkInterface *getInterface() const { return ie; }
         bool isLeaf() const { return _isLeaf; }
-
-        // to disable forwarding on this interface (e.g. pruned by PIM)
-        virtual bool isEnabled() { return true; }
     };
 
     typedef std::vector<OutInterface *> OutInterfaceVector;
