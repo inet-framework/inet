@@ -1246,6 +1246,7 @@ void PimDm::multicastPacketArrivedOnNonRpfInterface(Ipv4Address group, Ipv4Addre
 
             // if there is no outgoing interface, Prune msg has to be sent on upstream
             if (route->isOilistNull()) {
+                processOlistEmptyEvent(route);
                 EV << "Route is not forwarding any more, send Prune to upstream" << endl;
                 upstream->graftPruneState = UpstreamInterface::PRUNED;
                 if (!upstream->isSourceDirectlyConnected()) {
