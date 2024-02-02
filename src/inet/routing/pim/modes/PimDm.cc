@@ -1844,6 +1844,9 @@ PimDm::DownstreamInterface *PimDm::Route::removeDownstreamInterface(int interfac
 
 bool PimDm::Route::isOlistNull()
 {
+    // the multicast tree cannot be pruned if local delivery is needed, so we pretend there's an out interface
+    if (static_cast<PimDm *>(owner)->isMulticastGroupJoined(group))
+        return false;
     for (auto& elem : downstreamInterfaces) {
         if (elem->isInOlist())
             return false;
