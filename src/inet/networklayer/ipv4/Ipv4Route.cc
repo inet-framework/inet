@@ -179,10 +179,8 @@ std::string Ipv4MulticastRoute::str() const
     for (auto& elem : outInterfaces) {
         if (!first)
             out << ",";
-        if (elem->isEnabled()) {
-            out << elem->getInterface()->getInterfaceName();
-            first = false;
-        }
+        out << elem->getInterface()->getInterfaceName();
+        first = false;
     }
 
     out << " " << IMulticastRoute::sourceTypeName(sourceType);

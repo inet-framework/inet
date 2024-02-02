@@ -485,16 +485,14 @@ void Ipv4::datagramLocalOut(Packet *packet)
             for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++) {
                 Ipv4MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
                 const NetworkInterface *destIE = outInterface->getInterface();
-                if (outInterface->isEnabled()) {
-                    if (outInterface->isLeaf() && !destIE->getProtocolData<Ipv4InterfaceData>()->hasMulticastListener(destAddr))
-                        EV_WARN << "Not sending to " << destIE->getInterfaceName() << " (no listeners)\n";
-                    else {
-                        EV_DETAIL << "Sending out on " << destIE->getInterfaceName() << "\n";
-                        auto packetCopy = packet->dup();
-                        packetCopy->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
-                        packetCopy->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
-                        fragmentPostRouting(packetCopy);
-                    }
+                if (outInterface->isLeaf() && !destIE->getProtocolData<Ipv4InterfaceData>()->hasMulticastListener(destAddr))
+                    EV_WARN << "Not sending to " << destIE->getInterfaceName() << " (no listeners)\n";
+                else {
+                    EV_DETAIL << "Sending out on " << destIE->getInterfaceName() << "\n";
+                    auto packetCopy = packet->dup();
+                    packetCopy->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
+                    packetCopy->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
+                    fragmentPostRouting(packetCopy);
                 }
             }
 
@@ -752,7 +750,7 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
         for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++) {
             Ipv4MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
             const NetworkInterface *destIE = outInterface->getInterface();
-            if (destIE != fromIE && outInterface->isEnabled()) {
+            if (destIE != fromIE) {
                 int ttlThreshold = destIE->getProtocolData<Ipv4InterfaceData>()->getMulticastTtlThreshold();
                 if (ipv4Header->getTimeToLive() <= ttlThreshold)
                     EV_WARN << "Not forwarding to " << destIE->getInterfaceName() << " (ttl threshold reached)\n";

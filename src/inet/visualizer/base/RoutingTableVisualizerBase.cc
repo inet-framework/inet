@@ -318,21 +318,19 @@ void RoutingTableVisualizerBase::addRouteVisualizations(IIpv4RoutingTable *routi
             if (route != nullptr) {
                 for (int i = 0; i < route->getNumOutInterfaces(); i++) {
                     auto outInterface = route->getOutInterface(i);
-                    if (outInterface->isEnabled()) {
-                        auto interface = const_cast<NetworkInterface *>(outInterface->getInterface());
-                        auto channel = interface->getTxTransmissionChannel();
-                        if (channel != nullptr) {
-                            auto endGate = channel->getSourceGate()->getPathEndGate();
-                            if (endGate != nullptr) {
-                                auto nextHop = getContainingNode(endGate->getOwnerModule());
-                                if (nextHop != nullptr) {
-                                    auto routeVisualization = getMulticastRouteVisualization(displayRoutesIndividually ? route : nullptr, node->getId(), nextHop->getId());
-                                    if (routeVisualization == nullptr)
-                                        addMulticastRouteVisualization(createMulticastRouteVisualization(displayRoutesIndividually ? route : nullptr, node, nextHop));
-                                    else {
-                                        routeVisualization->numRoutes++;
-                                        refreshMulticastRouteVisualization(routeVisualization);
-                                    }
+                    auto interface = const_cast<NetworkInterface *>(outInterface->getInterface());
+                    auto channel = interface->getTxTransmissionChannel();
+                    if (channel != nullptr) {
+                        auto endGate = channel->getSourceGate()->getPathEndGate();
+                        if (endGate != nullptr) {
+                            auto nextHop = getContainingNode(endGate->getOwnerModule());
+                            if (nextHop != nullptr) {
+                                auto routeVisualization = getMulticastRouteVisualization(displayRoutesIndividually ? route : nullptr, node->getId(), nextHop->getId());
+                                if (routeVisualization == nullptr)
+                                    addMulticastRouteVisualization(createMulticastRouteVisualization(displayRoutesIndividually ? route : nullptr, node, nextHop));
+                                else {
+                                    routeVisualization->numRoutes++;
+                                    refreshMulticastRouteVisualization(routeVisualization);
                                 }
                             }
                         }
