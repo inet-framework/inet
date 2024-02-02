@@ -1121,11 +1121,12 @@ void PimDm::unroutableMulticastPacketArrived(Ipv4Address source, Ipv4Address gro
         bool hasPIMNeighbors = pimNbt->getNumNeighbors(pimInterface->getInterfaceId()) > 0;
         bool hasConnectedReceivers = pimInterface->getInterfacePtr()->getProtocolData<Ipv4InterfaceData>()->hasMulticastListener(group);
 
+        // create new outgoing interface
+        DownstreamInterface *downstream = route->createDownstreamInterface(pimInterface->getInterfacePtr());
+        downstream->setHasConnectedReceivers(hasConnectedReceivers);
+
         // if there are neighbors on interface, we will forward
         if (hasPIMNeighbors || hasConnectedReceivers) {
-            // create new outgoing interface
-            DownstreamInterface *downstream = route->createDownstreamInterface(pimInterface->getInterfacePtr());
-            downstream->setHasConnectedReceivers(hasConnectedReceivers);
             allDownstreamInterfacesArePruned = false;
         }
     }
