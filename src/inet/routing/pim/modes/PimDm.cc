@@ -1648,6 +1648,16 @@ void PimDm::sendToIP(Packet *packet, Ipv4Address srcAddr, Ipv4Address destAddr, 
 //           Helpers
 //----------------------------------------------------------------------------
 
+bool PimDm::isMulticastGroupJoined(Ipv4Address group)
+{
+    for (int i = 0; i < ift->getNumInterfaces(); i++) {
+        auto ipv4InterfaceData = ift->getInterface(i)->getProtocolData<Ipv4InterfaceData>();
+        if (ipv4InterfaceData != nullptr && ipv4InterfaceData->isMemberOfMulticastGroup(group))
+            return true;
+    }
+    return false;
+}
+
 // The set of interfaces defined by the olist(S,G) macro becomes
 // null, indicating that traffic from S addressed to group G should
 // no longer be forwarded.

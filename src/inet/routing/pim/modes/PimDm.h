@@ -219,6 +219,7 @@ class INET_API PimDm : public PimBase, protected cListener
     void sendToIP(Packet *packet, Ipv4Address source, Ipv4Address dest, int outInterfaceId);
 
     // helpers
+    bool isMulticastGroupJoined(Ipv4Address address);
     void restartTimer(cMessage *timer, double interval);
     void cancelAndDeleteTimer(cMessage *& timer);
     PimInterface *getIncomingInterface(NetworkInterface *fromIE);
