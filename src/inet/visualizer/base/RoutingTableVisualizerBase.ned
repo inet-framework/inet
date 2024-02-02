@@ -37,6 +37,9 @@ simple RoutingTableVisualizerBase extends VisualizerBase
 
         string destinationFilter @mutable = default("*"); // which destinations are considered, matches all destinations by default
         string nodeFilter @mutable = default("*"); // which nodes are considered, matches all nodes by default
+        string multicastSourceNodeFilter @mutable = default("*"); // which multicast source nodes are considered, matches all nodes by default
+        string multicastSourceAddressFilter @mutable = default("*"); // which multicast source addresses are considered, matches all addresses by default
+        string multicastGroupFilter @mutable = default("*"); // which multicast group addresses are considered, matches all group addresses by default
 
         string lineColor = default("black"); // route line color, black by default
         string lineStyle = default("solid"); // route line style (solid, dashed, dotted)

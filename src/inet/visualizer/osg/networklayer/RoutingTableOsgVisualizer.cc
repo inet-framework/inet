@@ -25,6 +25,12 @@ RoutingTableOsgVisualizer::RouteOsgVisualization::RouteOsgVisualization(osg::Nod
 {
 }
 
+RoutingTableOsgVisualizer::MulticastRouteOsgVisualization::MulticastRouteOsgVisualization(osg::Node *node, const Ipv4MulticastRoute *route, int nodeModuleId, int nextHopModuleId) :
+    MulticastRouteVisualization(route, nodeModuleId, nextHopModuleId),
+    node(node)
+{
+}
+
 void RoutingTableOsgVisualizer::initialize(int stage)
 {
     RoutingTableVisualizerBase::initialize(stage);
@@ -70,6 +76,44 @@ void RoutingTableOsgVisualizer::refreshRouteVisualization(const RouteVisualizati
     // TODO
 //    auto routeOsgVisualization = static_cast<const RouteOsgVisualization *>(routeVisualization);
 //    auto text = getRouteVisualizationText(routeVisualization->route);
+}
+
+
+const RoutingTableVisualizerBase::MulticastRouteVisualization *RoutingTableOsgVisualizer::createMulticastRouteVisualization(Ipv4MulticastRoute *route, cModule *node, cModule *nextHop) const
+{
+    auto nodePosition = getPosition(node);
+    auto nextHopPosition = getPosition(nextHop);
+    auto osgNode = inet::osg::createLine(nodePosition, nextHopPosition, cFigure::ARROW_NONE, cFigure::ARROW_BARBED);
+    auto stateSet = inet::osg::createStateSet(lineColor, 1.0, false);
+    stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+    auto lineWidth = new osg::LineWidth();
+    lineWidth->setWidth(this->lineWidth);
+    stateSet->setAttributeAndModes(lineWidth, osg::StateAttribute::ON);
+    osgNode->setStateSet(stateSet);
+    return new MulticastRouteOsgVisualization(osgNode, route, node->getId(), nextHop->getId());
+}
+
+void RoutingTableOsgVisualizer::addMulticastRouteVisualization(const MulticastRouteVisualization *routeVisualization)
+{
+    RoutingTableVisualizerBase::addMulticastRouteVisualization(routeVisualization);
+    auto routeOsgVisualization = static_cast<const MulticastRouteOsgVisualization *>(routeVisualization);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
+    scene->addChild(routeOsgVisualization->node);
+}
+
+void RoutingTableOsgVisualizer::removeMulticastRouteVisualization(const MulticastRouteVisualization *routeVisualization)
+{
+    RoutingTableVisualizerBase::removeMulticastRouteVisualization(routeVisualization);
+    auto routeOsgVisualization = static_cast<const MulticastRouteOsgVisualization *>(routeVisualization);
+    auto node = routeOsgVisualization->node;
+    node->getParent(0)->removeChild(node);
+}
+
+void RoutingTableOsgVisualizer::refreshMulticastRouteVisualization(const MulticastRouteVisualization *routeVisualization) const
+{
+    // TODO
+//    auto routeOsgVisualization = static_cast<const MulticastRouteOsgVisualization *>(routeVisualization);
+//    auto text = getMulticastRouteVisualizationText(routeVisualization->route);
 }
 
 } // namespace visualizer

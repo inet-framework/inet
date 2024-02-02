@@ -24,6 +24,12 @@ RoutingTableVisualizerBase::RouteVisualization::RouteVisualization(const Ipv4Rou
 {
 }
 
+RoutingTableVisualizerBase::MulticastRouteVisualization::MulticastRouteVisualization(const Ipv4MulticastRoute *route, int nodeModuleId, int nextHopModuleId) :
+    ModuleLine(nodeModuleId, nextHopModuleId),
+    route(route)
+{
+}
+
 std::string RoutingTableVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
 {
     switch (directive) {
@@ -37,6 +43,20 @@ std::string RoutingTableVisualizerBase::DirectiveResolver::resolveDirective(char
             return std::to_string(route->getMetric());
         case 'n':
             return route->getInterface()->getInterfaceName();
+        case 'i':
+            return route->str();
+        case 's':
+            return route->str();
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+}
+
+std::string RoutingTableVisualizerBase::MulticastDirectiveResolver::resolveDirective(char directive) const
+{
+    switch (directive) {
+        case 'e':
+            return std::to_string(route->getMetric());
         case 'i':
             return route->str();
         case 's':
@@ -63,6 +83,9 @@ void RoutingTableVisualizerBase::initialize(int stage)
         displayRoutesIndividually = par("displayRoutesIndividually");
         displayLabels = par("displayLabels");
         destinationFilter.setPattern(par("destinationFilter"));
+        multicastSourceNodeFilter.setPattern(par("multicastSourceNodeFilter"));
+        multicastSourceAddressFilter.setPattern(par("multicastSourceAddressFilter"), false, true, true);
+        multicastGroupFilter.setPattern(par("multicastGroupFilter"), false, true, true);
         nodeFilter.setPattern(par("nodeFilter"));
         lineColor = cFigure::Color(par("lineColor"));
         lineStyle = cFigure::parseLineStyle(par("lineStyle"));
@@ -86,6 +109,8 @@ void RoutingTableVisualizerBase::handleParameterChange(const char *name)
         destinationFilter.setPattern(par("destinationFilter"));
     else if (!strcmp(name, "nodeFilter"))
         nodeFilter.setPattern(par("nodeFilter"));
+    else if (!strcmp(name, "multicastSourceNodeFilter"))
+        multicastSourceNodeFilter.setPattern(par("multicastSourceNodeFilter"));
     else if (!strcmp(name, "labelFormat"))
         labelFormat.parseFormat(par("labelFormat"));
     updateAllRouteVisualizations();
@@ -96,6 +121,9 @@ void RoutingTableVisualizerBase::subscribe()
     visualizationSubjectModule->subscribe(routeAddedSignal, this);
     visualizationSubjectModule->subscribe(routeDeletedSignal, this);
     visualizationSubjectModule->subscribe(routeChangedSignal, this);
+    visualizationSubjectModule->subscribe(mrouteAddedSignal, this);
+    visualizationSubjectModule->subscribe(mrouteDeletedSignal, this);
+    visualizationSubjectModule->subscribe(mrouteChangedSignal, this);
     visualizationSubjectModule->subscribe(interfaceIpv4ConfigChangedSignal, this);
 }
 
@@ -107,6 +135,9 @@ void RoutingTableVisualizerBase::unsubscribe()
         visualizationSubjectModule->unsubscribe(routeAddedSignal, this);
         visualizationSubjectModule->unsubscribe(routeDeletedSignal, this);
         visualizationSubjectModule->unsubscribe(routeChangedSignal, this);
+        visualizationSubjectModule->unsubscribe(mrouteAddedSignal, this);
+        visualizationSubjectModule->unsubscribe(mrouteDeletedSignal, this);
+        visualizationSubjectModule->unsubscribe(mrouteChangedSignal, this);
         visualizationSubjectModule->unsubscribe(interfaceIpv4ConfigChangedSignal, this);
     }
 }
@@ -115,7 +146,9 @@ void RoutingTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t s
 {
     Enter_Method("%s", cComponent::getSignalName(signal));
 
-    if (signal == routeAddedSignal || signal == routeDeletedSignal || signal == routeChangedSignal) {
+    if (signal == routeAddedSignal || signal == routeDeletedSignal || signal == routeChangedSignal ||
+        signal == mrouteAddedSignal || signal == mrouteDeletedSignal || signal == mrouteChangedSignal)
+    {
         auto routingTable = check_and_cast<IIpv4RoutingTable *>(source);
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode))
@@ -155,6 +188,34 @@ void RoutingTableVisualizerBase::removeRouteVisualization(const RouteVisualizati
     routeVisualizations.erase(routeVisualizations.find(key));
 }
 
+const RoutingTableVisualizerBase::MulticastRouteVisualization *RoutingTableVisualizerBase::getMulticastRouteVisualization(Ipv4MulticastRoute *route, int nodeModuleId, int nextHopModuleId)
+{
+    Ipv4Address routerId;
+    if (route != nullptr)
+        routerId = route->getRoutingTable()->getRouterId();
+    auto key = std::make_tuple(routerId, nodeModuleId, nextHopModuleId);
+    auto it = multicastRouteVisualizations.find(key);
+    return it == multicastRouteVisualizations.end() ? nullptr : it->second;
+}
+
+void RoutingTableVisualizerBase::addMulticastRouteVisualization(const MulticastRouteVisualization *routeVisualization)
+{
+    Ipv4Address routerId;
+    if (routeVisualization->route != nullptr)
+        routerId = routeVisualization->route->getRoutingTable()->getRouterId();
+    auto key = std::make_tuple(routerId, routeVisualization->sourceModuleId, routeVisualization->destinationModuleId);
+    multicastRouteVisualizations[key] = routeVisualization;
+}
+
+void RoutingTableVisualizerBase::removeMulticastRouteVisualization(const MulticastRouteVisualization *routeVisualization)
+{
+    Ipv4Address routerId;
+    if (routeVisualization->route != nullptr)
+        routerId = routeVisualization->route->getRoutingTable()->getRouterId();
+    auto key = std::make_tuple(routerId, routeVisualization->sourceModuleId, routeVisualization->destinationModuleId);
+    multicastRouteVisualizations.erase(multicastRouteVisualizations.find(key));
+}
+
 std::vector<Ipv4Address> RoutingTableVisualizerBase::getDestinations()
 {
     L3AddressResolver addressResolver;
@@ -174,6 +235,57 @@ std::vector<Ipv4Address> RoutingTableVisualizerBase::getDestinations()
         }
     }
     return destinations;
+}
+
+std::vector<Ipv4Address> RoutingTableVisualizerBase::getMulticastSources()
+{
+    L3AddressResolver addressResolver;
+    std::vector<Ipv4Address> multicastSources;
+    for (cModule::SubmoduleIterator it(visualizationSubjectModule); !it.end(); it++) {
+        auto networkNode = *it;
+        if (isNetworkNode(networkNode) && multicastSourceNodeFilter.matches(networkNode)) {
+            auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
+            if (interfaceTable != nullptr) {
+                for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
+                    auto interface = interfaceTable->getInterface(i);
+                    cMatchableString matchableAddress(interface->getIpv4Address().str().c_str());
+                    if (!interface->isLoopback() && multicastSourceAddressFilter.matches(&matchableAddress)) {
+                        auto address = interface->getIpv4Address();
+                        if (!address.isUnspecified())
+                            multicastSources.push_back(address);
+                    }
+                }
+            }
+        }
+    }
+    return multicastSources;
+}
+
+std::vector<Ipv4Address> RoutingTableVisualizerBase::getMulticastGroups()
+{
+    L3AddressResolver addressResolver;
+    std::set<Ipv4Address> multicastGroups;
+    for (cModule::SubmoduleIterator it(visualizationSubjectModule); !it.end(); it++) {
+        auto networkNode = *it;
+        if (isNetworkNode(networkNode)) {
+            auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
+            if (interfaceTable != nullptr) {
+                for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
+                    auto interface = interfaceTable->getInterface(i);
+                    auto protocolData = interface->findProtocolData<Ipv4InterfaceData>();
+                    if (protocolData != nullptr) {
+                        for (int j = 0; j < protocolData->getNumOfJoinedMulticastGroups(); j++) {
+                            auto multicastGroup = protocolData->getJoinedMulticastGroup(j);
+                            cMatchableString matchableGroup(multicastGroup.str().c_str());
+                            if (multicastGroupFilter.matches(&matchableGroup))
+                                multicastGroups.insert(multicastGroup);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return std::vector(multicastGroups.begin(), multicastGroups.end());
 }
 
 void RoutingTableVisualizerBase::addRouteVisualizations(IIpv4RoutingTable *routingTable)
@@ -198,6 +310,37 @@ void RoutingTableVisualizerBase::addRouteVisualizations(IIpv4RoutingTable *routi
             }
         }
     }
+    auto multicastSources = getMulticastSources();
+    auto multicastGroups = getMulticastGroups();
+    for (auto source : multicastSources) {
+        for (auto group : multicastGroups) {
+            auto route = const_cast<Ipv4MulticastRoute *>(routingTable->findBestMatchingMulticastRoute(source, group));
+            if (route != nullptr) {
+                for (int i = 0; i < route->getNumOutInterfaces(); i++) {
+                    auto outInterface = route->getOutInterface(i);
+                    if (outInterface->isEnabled()) {
+                        auto interface = const_cast<NetworkInterface *>(outInterface->getInterface());
+                        auto channel = interface->getTxTransmissionChannel();
+                        if (channel != nullptr) {
+                            auto endGate = channel->getSourceGate()->getPathEndGate();
+                            if (endGate != nullptr) {
+                                auto nextHop = getContainingNode(endGate->getOwnerModule());
+                                if (nextHop != nullptr) {
+                                    auto routeVisualization = getMulticastRouteVisualization(displayRoutesIndividually ? route : nullptr, node->getId(), nextHop->getId());
+                                    if (routeVisualization == nullptr)
+                                        addMulticastRouteVisualization(createMulticastRouteVisualization(displayRoutesIndividually ? route : nullptr, node, nextHop));
+                                    else {
+                                        routeVisualization->numRoutes++;
+                                        refreshMulticastRouteVisualization(routeVisualization);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 void RoutingTableVisualizerBase::removeRouteVisualizations(IIpv4RoutingTable *routingTable)
@@ -211,6 +354,14 @@ void RoutingTableVisualizerBase::removeRouteVisualizations(IIpv4RoutingTable *ro
         removeRouteVisualization(it);
         delete it;
     }
+    std::vector<const MulticastRouteVisualization *> removedMulticastRouteVisualizations;
+    for (auto it : multicastRouteVisualizations)
+        if (std::get<1>(it.first) == networkNode->getId() && it.second)
+            removedMulticastRouteVisualizations.push_back(it.second);
+    for (auto it : removedMulticastRouteVisualizations) {
+        removeMulticastRouteVisualization(it);
+        delete it;
+    }
 }
 
 void RoutingTableVisualizerBase::removeAllRouteVisualizations()
@@ -220,6 +371,13 @@ void RoutingTableVisualizerBase::removeAllRouteVisualizations()
         removedRouteVisualizations.push_back(it.second);
     for (auto it : removedRouteVisualizations) {
         removeRouteVisualization(it);
+        delete it;
+    }
+    std::vector<const MulticastRouteVisualization *> removedMulticastRouteVisualizations;
+    for (auto it : multicastRouteVisualizations)
+        removedMulticastRouteVisualizations.push_back(it.second);
+    for (auto it : removedMulticastRouteVisualizations) {
+        removeMulticastRouteVisualization(it);
         delete it;
     }
 }
@@ -247,6 +405,12 @@ void RoutingTableVisualizerBase::updateAllRouteVisualizations()
 std::string RoutingTableVisualizerBase::getRouteVisualizationText(const Ipv4Route *route) const
 {
     DirectiveResolver directiveResolver(route);
+    return labelFormat.formatString(&directiveResolver);
+}
+
+std::string RoutingTableVisualizerBase::getMulticastRouteVisualizationText(const Ipv4MulticastRoute *route) const
+{
+    MulticastDirectiveResolver directiveResolver(route);
     return labelFormat.formatString(&directiveResolver);
 }
 

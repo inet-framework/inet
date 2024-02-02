@@ -28,6 +28,15 @@ class INET_API RoutingTableCanvasVisualizer : public RoutingTableVisualizerBase
         virtual ~RouteCanvasVisualization();
     };
 
+    class INET_API MulticastRouteCanvasVisualization : public MulticastRouteVisualization {
+      public:
+        LabeledLineFigure *figure = nullptr;
+
+      public:
+        MulticastRouteCanvasVisualization(LabeledLineFigure *figure, const Ipv4MulticastRoute *route, int nodeModuleId, int nextHopModuleId);
+        virtual ~MulticastRouteCanvasVisualization();
+    };
+
   protected:
     double zIndex = NaN;
     const CanvasProjection *canvasProjection = nullptr;
@@ -41,6 +50,11 @@ class INET_API RoutingTableCanvasVisualizer : public RoutingTableVisualizerBase
     virtual void addRouteVisualization(const RouteVisualization *routeVisualization) override;
     virtual void removeRouteVisualization(const RouteVisualization *routeVisualization) override;
     virtual void refreshRouteVisualization(const RouteVisualization *routeVisualization) const override;
+
+    virtual const MulticastRouteVisualization *createMulticastRouteVisualization(Ipv4MulticastRoute *route, cModule *node, cModule *nextHop) const override;
+    virtual void addMulticastRouteVisualization(const MulticastRouteVisualization *routeVisualization) override;
+    virtual void removeMulticastRouteVisualization(const MulticastRouteVisualization *routeVisualization) override;
+    virtual void refreshMulticastRouteVisualization(const MulticastRouteVisualization *routeVisualization) const override;
 };
 
 } // namespace visualizer
