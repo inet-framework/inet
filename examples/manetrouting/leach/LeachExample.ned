@@ -15,18 +15,18 @@ network LeachExample
 {
     parameters:
         int numNodes;
-        @display("bgb=200.8119,200.0099;bgg=100,1,grey95");
+        @display("bgb=200,200;bgg=100,1,grey95");
         @figure[title](type=label; pos=0,-1; anchor=sw; color=darkblue);
         
     submodules:
         configurator: Ipv4NetworkConfigurator {
-            @display("p=512.39996,181.17");
+            @display("p=100,100");
         }
         radioMedium: <default("UnitDiskRadioMedium")> like IRadioMedium {
-            @display("p=512.39996,289.13998");
+            @display("p=100,100");
         }
         physicalEnvironment: PhysicalEnvironment {
-            @display("p=512.39996,441.02997");
+            @display("p=100,100");
         }
         host[numNodes]: <default("WirelessHost")> like INetworkNode {
             @display("i=misc/sensor2");
