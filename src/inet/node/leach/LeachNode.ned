@@ -8,9 +8,9 @@ import inet.node.inet.AdhocHost;
 import inet.routing.leach.Leach;
 
 //
-// This module provides the sensor node implementation of 
-// Low-Energy Adaptive Clustering Hierarchy (LEACH) routing, a hierachical 
-// adhoc routing protocol for Wireless Sensor Networks. 
+// This module provides Low-Energy Adaptive Clustering Hierarchy (LEACH) 
+// routing protocol for sensor nodes. 
+// LEACH is a hierachical adhoc routing protocol for Wireless Sensor Networks. 
 // This implementation is designed to use a a single wireless interface and run on
 // the IEEE 802.15.4 standard for MAC and Physical layers.
 // Therefore the standard TDMA scheduling system has been implemented 
