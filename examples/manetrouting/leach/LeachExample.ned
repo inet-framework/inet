@@ -11,7 +11,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 import inet.environment.common.PhysicalEnvironment;
 
-network Leach
+network LeachExample
 {
     parameters:
         int numNodes;
