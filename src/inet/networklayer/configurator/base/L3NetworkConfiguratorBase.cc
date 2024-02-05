@@ -318,7 +318,11 @@ double L3NetworkConfiguratorBase::computeNodeWeight(Node *node, const char *metr
 
 double L3NetworkConfiguratorBase::computeLinkWeight(Link *link, const char *metric, cXMLElement *parameters)
 {
-    if ((link->sourceInterfaceInfo && link->sourceInterfaceInfo->networkInterface->isWireless()) ||
+    if (link->sourceInterfaceInfo != nullptr && (!link->sourceInterfaceInfo->networkInterface->isUp() || !link->sourceInterfaceInfo->networkInterface->hasCarrier()))
+        return std::numeric_limits<double>::infinity();
+    else if (link->destinationInterfaceInfo != nullptr && (!link->destinationInterfaceInfo->networkInterface->isUp() || !link->destinationInterfaceInfo->networkInterface->hasCarrier()))
+        return std::numeric_limits<double>::infinity();
+    else if ((link->sourceInterfaceInfo && link->sourceInterfaceInfo->networkInterface->isWireless()) ||
         (link->destinationInterfaceInfo && link->destinationInterfaceInfo->networkInterface->isWireless()))
         return computeWirelessLinkWeight(link, metric, parameters);
     else
