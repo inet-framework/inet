@@ -1842,7 +1842,7 @@ void Ipv4NetworkConfigurator::addStaticMulticastRoutes(Topology& topology)
             auto sourceNode = findNode(topology, sourceAddress);
             if (!sourceNode)
                 throw cRuntimeError("Multicast group source node %s not found", sourceAttr);
-            topology.calculateUnweightedSingleShortestPathsTo(sourceNode);
+            topology.calculateWeightedSingleShortestPathsTo(sourceNode);
             Matcher hostMatcher(hostAttr);
             for (int i = 0; i < topology.getNumNodes(); i++) {
                 Node *receiverNode = (Node *)topology.getNode(i);
@@ -1864,7 +1864,7 @@ void Ipv4NetworkConfigurator::addStaticMulticastRoutes(Topology& topology, Node 
     InterfaceInfo *inInterfaceInfo = nullptr;
     InterfaceInfo *outInterfaceInfo = nullptr;
     Node *node = receiverNode;
-    while (node != sourceNode) {
+    while (node != sourceNode && node->getNumPaths() > 0) {
         auto link = (Link *)node->getPath(0);
         outInterfaceInfo = static_cast<InterfaceInfo *>(link->destinationInterfaceInfo);
         node = (Node *)link->getLinkOutRemoteNode();
