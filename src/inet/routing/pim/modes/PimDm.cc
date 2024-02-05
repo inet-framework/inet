@@ -1392,7 +1392,7 @@ void PimDm::rpfInterfaceHasChanged(Ipv4MulticastRoute *ipv4Route, Ipv4Route *rou
     }
 
     // old RPF interface should be now a downstream interface if it is not down
-    if (oldRpfInterface && oldRpfInterface->isUp()) {
+    if (oldRpfInterface && oldRpfInterface->isUp() && oldRpfInterface->hasCarrier()) {
         DownstreamInterface *downstream = route->createDownstreamInterface(oldRpfInterface);
         ipv4Route->addOutInterface(new PimDmOutInterface(oldRpfInterface, downstream));
     }

@@ -112,7 +112,7 @@ void Ospfv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
         auto fieldId = change->getFieldId();
         if (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER) {
             const NetworkInterface *ie = change->getNetworkInterface();
-            if (!ie->isUp())
+            if (!ie->isUp() || !ie->hasCarrier())
                 handleInterfaceDown(ie);
             else {
                 // interface went back online. Do nothing!

@@ -161,7 +161,7 @@ void Ipv4NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalI
         auto fieldId = ieChangeDetails->getFieldId();
         if (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER) {
             auto *entry = ieChangeDetails->getNetworkInterface();
-            if (entry->isUp() && networkConfigurator) {
+            if (entry->isUp() && entry->hasCarrier() && networkConfigurator) {
                 networkConfigurator->configureInterface(entry);
                 if (par("configureRoutingTable"))
                     networkConfigurator->configureRoutingTable(routingTable, entry);

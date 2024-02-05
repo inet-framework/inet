@@ -181,7 +181,7 @@ void EigrpIpv4Pdm::processIfaceStateChange(NetworkInterface *iface)
     Ipv4Address ifAddress = iface->getIpv4Address().doAnd(ifMask);
     int networkId;
 
-    if (iface->isUp()) { // an interface goes up
+    if (iface->isUp() && iface->hasCarrier()) { // an interface goes up
         if (routingForNetworks->isInterfaceIncluded(ifAddress, ifMask, &networkId)) { // Interface is included in EIGRP
             if ((eigrpIface = getInterfaceById(ifaceId)) == nullptr) { // Create EIGRP interface
                 eigrpIface = new EigrpInterface(iface, networkId, false);
