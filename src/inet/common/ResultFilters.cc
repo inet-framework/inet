@@ -49,6 +49,82 @@ class INET_API PacketRegionValue : public cObject
     cValue value;
 };
 
+Register_ResultFilter("duplicatePacket", DuplicatePacketFilter);
+
+void DuplicatePacketFilter::init(Context *ctx)
+{
+    cObjectResultFilter::init(ctx);
+    std::string fullPath = ctx->component->getFullPath() + "." + ctx->attrsProperty->getIndex() + ".duplicatePacket";
+    cConfiguration *cfg = getEnvir()->getConfig();
+    auto sizeLimitValue = cfg->getPerObjectConfigValue(fullPath.c_str(), "sizeLimit");
+    sizeLimit = cfg->parseDouble(sizeLimitValue, nullptr, nullptr, 100);
+}
+
+void DuplicatePacketFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    auto packet = check_and_cast<Packet *>(object);
+    const char *packetName = packet->getFullName();
+    const char *packetIndexAsString = strrchr(packetName, '-');
+    if (packetIndexAsString != nullptr) {
+        int packetIndex = atoi(packetIndexAsString + 1);
+        if (packetIndices.find(packetIndex) != packetIndices.end())
+            fire(this, t, object, details);
+        packetIndices.insert(packetIndex);
+        if (packetIndices.size() > sizeLimit)
+            packetIndices.erase(packetIndices.begin());
+    }
+    else
+        throw cRuntimeError("Cannot find index in packet name: '%s'", packetName);
+}
+
+Register_ResultFilter("outOfOrderPacket", OutOfOrderPacketFilter);
+
+void OutOfOrderPacketFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    auto packet = check_and_cast<Packet *>(object);
+    const char *packetName = packet->getFullName();
+    const char *packetIndexAsString = strrchr(packetName, '-');
+    if (packetIndexAsString != nullptr) {
+        int packetIndex = atoi(packetIndexAsString + 1);
+        if (packetIndex != maxIndex + 1)
+            fire(this, t, object, details);
+        maxIndex = std::max(packetIndex, maxIndex);
+    }
+    else
+        throw cRuntimeError("Cannot find index in packet name: '%s'", packetName);
+}
+
+Register_ResultFilter("missingPacketIndex", MissingPacketIndexFilter);
+
+void MissingPacketIndexFilter::init(Context *ctx)
+{
+    cObjectResultFilter::init(ctx);
+    std::string fullPath = ctx->component->getFullPath() + "." + ctx->attrsProperty->getIndex() + ".missingPacketIndex";
+    cConfiguration *cfg = getEnvir()->getConfig();
+    auto sizeLimitValue = cfg->getPerObjectConfigValue(fullPath.c_str(), "sizeLimit");
+    sizeLimit = cfg->parseDouble(sizeLimitValue, nullptr, nullptr, 100);
+}
+
+void MissingPacketIndexFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    auto packet = check_and_cast<Packet *>(object);
+    const char *packetName = packet->getFullName();
+    const char *packetIndexAsString = strrchr(packetName, '-');
+    if (packetIndexAsString != nullptr) {
+        int packetIndex = atoi(packetIndexAsString + 1);
+        packetIndices.insert(packetIndex);
+        if (packetIndices.size() > sizeLimit) {
+            int removedIndex = *packetIndices.erase(packetIndices.begin());
+            if (lastRemovedIndex != -1)
+                for (int i = lastRemovedIndex + 1; i < removedIndex; i++)
+                    fire(this, t, (intval_t)i, details);
+            lastRemovedIndex = removedIndex;
+        }
+    }
+    else
+        throw cRuntimeError("Cannot find index in packet name: '%s'", packetName);
+}
+
 Register_ResultFilter("dataAge", DataAgeFilter);
 
 void DataAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
