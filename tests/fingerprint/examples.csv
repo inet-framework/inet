@@ -328,9 +328,9 @@
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           a39a-669a/tplx;ad75-e817/~tNl;ca30-d6dc/tyf, PASS,
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            1607-36dd/tplx;9c89-c7c1/~tNl;0e90-dcad/~tND;f4ae-8bb4/tyf, PASS,
 
-/examples/manetrouting/dsdv/,        -f omnetpp.ini -c IPv4 -r 0,                   10s,             cd11-7c78/tplx;1ba1-8398/~tNl;04ca-d934/~tND;6388-bbad/tyf, PASS,  wireless adhoc Ipv4
-/examples/manetrouting/dsdv/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             94c8-51dd/tplx;e9e8-7d0b/~tNl;e9f0-b256/~tND;e86f-d3fa/tyf, PASS,  wireless adhoc Ipv4
-/examples/manetrouting/dsdv/,        -f omnetpp.ini -c DynamicIPv4 -r 0,            22s,             6699-04d7/tplx;3e2c-1eee/~tNl;eecc-7593/~tND;90d2-3ffa/tyf, PASS,  wireless adhoc Ipv4
+/examples/manetrouting/dsdv/,        -f omnetpp.ini -c IPv4 -r 0,                   10s,             2d1b-0515/tplx;1ba1-8398/~tNl;04ca-d934/~tND;6388-bbad/tyf, PASS,  wireless adhoc Ipv4
+/examples/manetrouting/dsdv/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             4d24-d5b6/tplx;e9e8-7d0b/~tNl;e9f0-b256/~tND;e86f-d3fa/tyf, PASS,  wireless adhoc Ipv4
+/examples/manetrouting/dsdv/,        -f omnetpp.ini -c DynamicIPv4 -r 0,            22s,             b5fe-a1b2/tplx;3e2c-1eee/~tNl;eecc-7593/~tND;90d2-3ffa/tyf, PASS,  wireless adhoc Ipv4
 
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c _IPv4 -r 0      # abstract-config
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv4 -r 0,                   10s,             1a85-cb5d/tplx;dfe8-11b9/~tNl;483b-544e/tyf, PASS,  wireless adhoc Ipv4

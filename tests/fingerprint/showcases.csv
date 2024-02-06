@@ -40,7 +40,7 @@
 
 # /showcases/routing/manet/,           -f omnetpp.ini -c MobileNodesBase -r 0,        100s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,   # MobileNodesBase extended
 /showcases/routing/manet/,           -f omnetpp.ini -c Aodv -r 0,                   100s,         d4f1-1c35/tplx;c268-fae7/~tNl;0d5b-c7a9/~tND;e74e-6ba9/tyf, PASS,    wireless Ipv4
-/showcases/routing/manet/,           -f omnetpp.ini -c Dsdv -r 0,                   100s,         4eff-8dbc/tplx;bdad-9a28/~tNl;cdce-1d3c/~tND;0fca-2874/tyf, PASS,    wireless Ipv4
+/showcases/routing/manet/,           -f omnetpp.ini -c Dsdv -r 0,                   100s,         84f0-9aea/tplx;bdad-9a28/~tNl;cdce-1d3c/~tND;0fca-2874/tyf, PASS,    wireless Ipv4
 /showcases/routing/manet/,           -f omnetpp.ini -c Gpsr -r 0,                   100s,         53c9-5456/tplx;5452-5da6/~tNl;9c5c-ecb8/tyf, PASS,    wireless Ipv4
 
 /showcases/tsn/combiningfeatures/fpandtas/, -f omnetpp.ini -c General -r 0,         10ms,       ba97-42a3/tplx;9c73-6822/~tNl;063b-8262/~tND;d75b-92b0/tyf, PASS,
