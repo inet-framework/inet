@@ -62,7 +62,7 @@ std::string NetworkInterfaceChangeDetails::str() const
 }
 
 bool NetworkInterface::LocalGate::deliver(cMessage *msg, const SendOptions &options, simtime_t t) {
-    if (networkInterface->isDown()) {
+    if (!networkInterface->isUp()) {
         if (networkInterface->upperLayerIn == this) {
             auto packet = check_and_cast<Packet*>(msg);
             EV_WARN << "Network interface is down, dropping packet" << EV_FIELD(packet) << EV_ENDL;
@@ -209,7 +209,7 @@ void NetworkInterface::pushPacket(Packet *packet, const cGate *gate)
     Enter_Method("pushPacket");
     take(packet);
     if (gate == upperLayerIn) {
-        if (isDown()) {
+        if (!isUp()) {
             EV_WARN << "Network interface is down, dropping packet" << EV_FIELD(packet) << EV_ENDL;
             dropPacket(packet, INTERFACE_DOWN);
         }
@@ -233,7 +233,7 @@ void NetworkInterface::pushPacketStart(Packet *packet, const cGate *gate, bps da
     Enter_Method("pushPacket");
     take(packet);
     if (gate == upperLayerIn) {
-        if (isDown()) {
+        if (!isUp()) {
             EV_WARN << "Network interface is down, dropping packet" << EV_FIELD(packet) << EV_ENDL;
             dropPacket(packet, INTERFACE_DOWN);
         }
@@ -258,7 +258,7 @@ void NetworkInterface::pushPacketEnd(Packet *packet, const cGate *gate)
     Enter_Method("pushPacketEnd");
     take(packet);
     if (gate == upperLayerIn) {
-        if (isDown()) {
+        if (!isUp()) {
             EV_WARN << "Network interface is down, dropping packet" << EV_FIELD(packet) << EV_ENDL;
             dropPacket(packet, INTERFACE_DOWN);
         }

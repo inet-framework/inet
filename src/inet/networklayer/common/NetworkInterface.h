@@ -234,7 +234,6 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     int getMtu() const { return mtu; }
     bool hasCarrier() const { return carrier; }
     bool isUp() const { return state == UP; }
-    bool isDown() const { return state != UP; }
     bool isBroadcast() const { return broadcast; }
     bool isMulticast() const { return multicast; }
     bool isPointToPoint() const { return pointToPoint; }
