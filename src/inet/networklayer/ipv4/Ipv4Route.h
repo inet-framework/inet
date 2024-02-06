@@ -211,12 +211,10 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
     cObject *getSource() const override { return source; }
 
     virtual IRoutingTable *getRoutingTableAsGeneric() const override;
-    virtual void setEnabled(bool enabled) override { /*TODO setEnabled(enabled);*/ }
     virtual void setOrigin(const L3Address& origin) override { setOrigin(origin.toIpv4()); }
     virtual void setPrefixLength(int len) override { setOriginNetmask(Ipv4Address::makeNetmask(len)); } // TODO inconsistent naming
     virtual void setMulticastGroup(const L3Address& group) override { setMulticastGroup(group.toIpv4()); }
 
-    virtual bool isEnabled() const override { return true; /*TODO isEnabled();*/ }
     virtual bool isExpired() const override { return !isValid(); } // TODO rename Ipv4 method
     virtual L3Address getOriginAsGeneric() const override { return getOrigin(); }
     virtual int getPrefixLength() const override { return getOriginNetmask().getNetmaskLength(); } // TODO inconsistent naming
