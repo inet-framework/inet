@@ -221,9 +221,6 @@ class INET_API IMulticastRoute
     virtual void setSourceType(SourceType type) = 0;
     virtual void setMetric(int metric) = 0;
 
-    /** Expired entries are ignored by routing, and may be periodically purged. */
-    virtual bool isExpired() const = 0;
-
     /** Source address prefix to match */
     virtual L3Address getOriginAsGeneric() const = 0;
 

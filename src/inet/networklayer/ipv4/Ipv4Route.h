@@ -215,7 +215,6 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
     virtual void setPrefixLength(int len) override { setOriginNetmask(Ipv4Address::makeNetmask(len)); } // TODO inconsistent naming
     virtual void setMulticastGroup(const L3Address& group) override { setMulticastGroup(group.toIpv4()); }
 
-    virtual bool isExpired() const override { return !isValid(); } // TODO rename Ipv4 method
     virtual L3Address getOriginAsGeneric() const override { return getOrigin(); }
     virtual int getPrefixLength() const override { return getOriginNetmask().getNetmaskLength(); } // TODO inconsistent naming
     virtual L3Address getMulticastGroupAsGeneric() const override { return getMulticastGroup(); }
