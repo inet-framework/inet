@@ -1,3 +1,29 @@
+Routing table handling questions:
+ - what should happen when an interface goes down or carrier is lost?
+   - with interface routes?
+   - with static routes added by network configurator?
+   - with routes added by routing protocols?
+ - what should happen when an interface comes back up or carrier is back?
+ - what happens when a route added by a routing protocol is expired?
+
+General routing table considerations:
+ - the module that adds a route is responsible for removing it and re-adding it
+ - routing table doesn't check if a route is active, valid, expired, enabled, interface is up, interface has carrier, etc. it checks NOTHING
+   - if a route is present in the routing table it is used, period
+   - routes are added/removed to/from the routing table by external modules
+     - network configurator
+     - routing protocol
+     - manual routing configuration
+ - routing table doesn't add/remove routes on its own EVER
+ - network interface adds/removes network interface routes ONLY, other routes are not affected
+   - when the interface is up and has carrier the network interface route is added, otherwise it is removed
+ - network configurator adds/removes routes for shortest path or manual routes
+   - it can act on interface up/down and carrier up/down
+ - routing file configuration module
+   - adds routes to routing table during initialize
+   - removes routes if the interface goes down or carrier is lost
+   - re-adds routes if the interface comes back up or carrier is back
+
 INET 4.5 release
 ================
 
