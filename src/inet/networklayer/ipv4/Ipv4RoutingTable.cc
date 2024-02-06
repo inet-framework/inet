@@ -397,20 +397,16 @@ Ipv4Route *Ipv4RoutingTable::findBestMatchingRoute(const Ipv4Address& dest) cons
     Enter_Method("findBestMatchingRoute(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
 
     auto it = routingCache.find(dest);
-    if (it != routingCache.end()) {
-        if (it->second == nullptr || it->second->isValid())
-            return it->second;
-    }
+    if (it != routingCache.end())
+        return it->second;
 
     // find best match (one with longest prefix)
     // default route has zero prefix length, so (if exists) it'll be selected as last resort
     Ipv4Route *bestRoute = nullptr;
     for (auto e : routes) {
-        if (e->isValid()) {
-            if (Ipv4Address::maskedAddrAreEqual(dest, e->getDestination(), e->getNetmask())) { // match
-                bestRoute = const_cast<Ipv4Route *>(e);
-                break;
-            }
+        if (Ipv4Address::maskedAddrAreEqual(dest, e->getDestination(), e->getNetmask())) { // match
+            bestRoute = const_cast<Ipv4Route *>(e);
+            break;
         }
     }
 
@@ -443,7 +439,7 @@ const Ipv4MulticastRoute *Ipv4RoutingTable::findBestMatchingMulticastRoute(const
     // TODO caching?
 
     for (auto e : multicastRoutes) {
-        if (e->isValid() && e->matches(origin, group))
+        if (e->matches(origin, group))
             return e;
     }
 
@@ -459,12 +455,8 @@ Ipv4Route *Ipv4RoutingTable::getRoute(int k) const
 
 Ipv4Route *Ipv4RoutingTable::getDefaultRoute() const
 {
-    // if exists default route entry, it is the last valid entry
-    for (RouteVector::const_reverse_iterator i = routes.rbegin(); i != routes.rend() && (*i)->getNetmask().isUnspecified(); ++i) {
-        if ((*i)->isValid())
-            return *i;
-    }
-    return nullptr;
+    // if exists default route entry, it is the last entry
+    return !routes.empty() && (*routes.rbegin())->getNetmask().isUnspecified() ? *routes.rbegin() : nullptr;
 }
 
 // The 'routes' vector stores the routes in this order.

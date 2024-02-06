@@ -58,9 +58,6 @@ class INET_API Ipv4Route : public cObject, public IRoute
     virtual void setRoutingTable(IIpv4RoutingTable *rt) { this->rt = rt; }
     IIpv4RoutingTable *getRoutingTable() const { return rt; }
 
-    /** test validity of route entry, e.g. check expiry */
-    virtual bool isValid() const { return true; }
-
     virtual void setDestination(Ipv4Address _dest) { if (dest != _dest) { dest = _dest; changed(F_DESTINATION); } }
     virtual void setNetmask(Ipv4Address _netmask) { if (netmask != _netmask) { netmask = _netmask; changed(F_PREFIX_LENGTH); } }
     virtual void setGateway(Ipv4Address _gateway) { if (gateway != _gateway) { gateway = _gateway; changed(F_NEXTHOP); } }
@@ -166,9 +163,6 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
     /** To be called by the routing table when this route is added or removed from it */
     virtual void setRoutingTable(IIpv4RoutingTable *rt) { this->rt = rt; }
     IIpv4RoutingTable *getRoutingTable() const { return rt; }
-
-    /** test validity of route entry, e.g. check expiry */
-    virtual bool isValid() const { return true; }
 
     virtual bool matches(const Ipv4Address& origin, const Ipv4Address& group) const;
 
