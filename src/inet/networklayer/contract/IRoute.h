@@ -77,14 +77,6 @@ class INET_API IRoute
         dUnknown           = 255
     };
 
-    // TODO maybe:
-//    virtual std::string info() const;
-//    virtual std::string detailedInfo() const;
-//
-//    bool operator==(const IRoute& route) const { return equals(route); }
-//    bool operator!=(const IRoute& route) const { return !equals(route); }
-//    bool equals(const IRoute& route) const;
-
     virtual ~IRoute() {}
 
     /** The routing table in which this route is inserted, or nullptr. */
@@ -200,10 +192,7 @@ class INET_API IMulticastRoute
 
     typedef std::vector<OutInterface *> OutInterfaceVector;
 
-    // TODO maybe:
-//    virtual std::string info() const;
-//    virtual std::string detailedInfo() const;
-
+  public:
     virtual ~IMulticastRoute() {}
 
     /** The routing table in which this route is inserted, or nullptr. */
