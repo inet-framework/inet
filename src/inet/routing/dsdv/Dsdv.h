@@ -76,6 +76,8 @@ class INET_API Dsdv : public RoutingProtocolBase
 
     void handleSelfMessage(cMessage *msg);
 
+    void purge();
+
     // lifecycle
     virtual void handleStartOperation(LifecycleOperation *operation) override { start(); }
     virtual void handleStopOperation(LifecycleOperation *operation) override { stop(); }
@@ -94,7 +96,7 @@ class INET_API DsdvIpv4Route : public Ipv4Route
     simtime_t expiryTime; // time the routing entry is valid until
 
   public:
-    virtual bool isValid() const override { return expiryTime == 0 || expiryTime > simTime(); }
+    bool isValid() const { return expiryTime == 0 || expiryTime > simTime(); }
 
     simtime_t getExpiryTime() const { return expiryTime; }
     void setExpiryTime(simtime_t time) { expiryTime = time; }

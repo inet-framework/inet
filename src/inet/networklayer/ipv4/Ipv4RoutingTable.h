@@ -329,12 +329,6 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     virtual bool deleteMulticastRoute(Ipv4MulticastRoute *entry) override;
 
     /**
-     * Deletes invalid routes from the routing table. Invalid routes are those
-     * where the isValid() method returns false.
-     */
-    virtual void purge() override;
-
-    /**
      * Utility function: Returns a vector of all addresses of the node.
      */
     virtual std::vector<Ipv4Address> gatherAddresses() const override;

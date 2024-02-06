@@ -361,37 +361,6 @@ bool Ipv4RoutingTable::isLocalMulticastAddress(const Ipv4Address& dest) const
     return false;
 }
 
-void Ipv4RoutingTable::purge()
-{
-    // purge unicast routes
-    for (auto it = routes.begin(); it != routes.end();) {
-        Ipv4Route *route = *it;
-        if (route->isValid())
-            ++it;
-        else {
-            it = routes.erase(it);
-            invalidateCache();
-            ASSERT(route->getRoutingTable() == this); // still filled in, for the listeners' benefit
-            emit(routeDeletedSignal, route);
-            delete route;
-        }
-    }
-
-    // purge multicast routes
-    for (auto it = multicastRoutes.begin(); it != multicastRoutes.end();) {
-        Ipv4MulticastRoute *route = *it;
-        if (route->isValid())
-            ++it;
-        else {
-            it = multicastRoutes.erase(it);
-            invalidateCache();
-            ASSERT(route->getRoutingTable() == this); // still filled in, for the listeners' benefit
-            emit(mrouteDeletedSignal, route);
-            delete route;
-        }
-    }
-}
-
 Ipv4Route *Ipv4RoutingTable::findBestMatchingRoute(const Ipv4Address& dest) const
 {
     Enter_Method("findBestMatchingRoute(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here

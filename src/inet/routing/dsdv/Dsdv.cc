@@ -131,7 +131,7 @@ void Dsdv::handleSelfMessage(cMessage *msg)
     if (msg == event) {
         auto hello = makeShared<DsdvHello>();
 
-        rt->purge();
+        purge();
 
         // count non-loopback interfaces
 //        int numIntf = 0;
@@ -326,6 +326,17 @@ void Dsdv::handleMessageWhenUp(cMessage *msg)
     }
     else
         throw cRuntimeError("Message not supported %s", msg->getName());
+}
+
+void Dsdv::purge()
+{
+    for (int i = 0; i < rt->getNumRoutes();) {
+        auto route = dynamic_cast<DsdvIpv4Route *>(rt->getRoute(i));
+        if (route && !route->isValid())
+            rt->deleteRoute(route);
+        else
+            i++;
+    }
 }
 
 } // namespace inet
