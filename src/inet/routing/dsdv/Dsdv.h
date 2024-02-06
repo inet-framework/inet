@@ -52,6 +52,7 @@ class INET_API Dsdv : public RoutingProtocolBase
 
     bool isForwardHello = false;
     cMessage *event = nullptr;
+    cMessage *purgeTimer = nullptr;
     cPar *broadcastDelay = nullptr;
     std::list<ForwardEntry *> *forwardList = nullptr;
     NetworkInterface *interface80211ptr = nullptr;
@@ -76,6 +77,7 @@ class INET_API Dsdv : public RoutingProtocolBase
 
     void handleSelfMessage(cMessage *msg);
 
+    void reschedulePurgeTimer();
     void purge();
 
     // lifecycle
@@ -96,7 +98,7 @@ class INET_API DsdvIpv4Route : public Ipv4Route
     simtime_t expiryTime; // time the routing entry is valid until
 
   public:
-    bool isValid() const { return expiryTime == 0 || expiryTime > simTime(); }
+    bool isExpired() const { return expiryTime != 0 && expiryTime <= simTime(); }
 
     simtime_t getExpiryTime() const { return expiryTime; }
     void setExpiryTime(simtime_t time) { expiryTime = time; }
