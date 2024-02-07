@@ -1,7 +1,7 @@
 # working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
 # /examples/adhoc/idealwireless/,      -f .qtenv.ini -c General -r 0
 /examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0,                100s,            87cf-952a/tplx;48c6-665e/~tNl;e8e2-932a/~tND;ef88-5542/tyf, PASS, wireless adhoc Ipv4
-/examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,            3e42-6e3c/tplx;d8ca-e3f9/~tNl;0c2d-6d2e/~tND;bd32-4b81/tyf, PASS, wireless adhoc Ipv4
+/examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,            3e42-6e3c/tplx;d8ca-e3f9/~tNl;f3cd-6929/~tND;bd32-4b81/tyf, PASS, wireless adhoc Ipv4
 # /examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping2 -r 0,                   100s,           0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, ERROR, wireless adhoc # interactive config, needed a *.numHosts parameter
 /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  1000s,           26e4-a191/tplx;ff15-2e9f/~tNl;afea-362d/~tND;132a-f75d/tyf, PASS, wireless adhoc Ipv4
 # /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0,                  100s,            0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, ERROR, wireless adhoc # [Config Ping2]    # interactive config, needed a *.numHosts parameter
@@ -502,7 +502,7 @@
 
 /examples/wireless/crosstalk/,       -f omnetpp.ini -c General -r 0,                2s,           0a4f-e755/tplx;7ef5-c624/~tNl;105a-8a94/~tND;4b4c-0831/tyf, PASS, wireless Ipv4
 
-/examples/wireless/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         4b91-925c/tplx;2b55-3ab9/~tNl;944e-11b0/~tND;c39c-a7b0/tyf, PASS, wireless Ipv4
+/examples/wireless/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         4b91-925c/tplx;2b55-3ab9/~tNl;1ab2-bb7c/~tND;c39c-a7b0/tyf, PASS, wireless Ipv4
 
 /examples/wireless/errorrate/,       -f omnetpp.ini -c General -r 0,                100s,         0bb3-adca/tplx;b0b7-4a84/~tNl;1c49-63dd/~tND;ac68-ada4/tyf, PASS, wireless Ipv4
 
@@ -563,9 +563,9 @@
 # /examples/wireless/nic/,             -f omnetpp.ini -c AbstractApskDimensionalRadio -r 0,       # abstract-config
 # /examples/wireless/nic/,             -f omnetpp.ini -c AbstractIeee80211ScalarRadio -r 0,       # abstract-config
 # /examples/wireless/nic/,             -f omnetpp.ini -c AbstractIeee80211DimensionalRadio -r 0   # abstract-config
-/examples/wireless/nic/,             -f omnetpp.ini -c AckingMacWithUnitDiskRadio -r 0,           100s,     aa02-d13c/tplx;6268-2984/~tNl;1486-5ece/~tND;2fdc-a5d4/tyf, PASS, wireless AckingWirelessInterface Ipv4
-/examples/wireless/nic/,             -f omnetpp.ini -c AckingMacWithApskScalarRadio -r 0,         100s,     aa02-d13c/tplx;6268-2984/~tNl;97bb-e537/~tND;5fb3-0e09/tyf, PASS, wireless AckingWirelessInterface Ipv4
-/examples/wireless/nic/,             -f omnetpp.ini -c AckingMacWithApskDimensionalRadio -r 0,    100s,     aa02-d13c/tplx;6268-2984/~tNl;97bb-e537/~tND;5fb3-0e09/tyf, PASS, wireless AckingWirelessInterface Ipv4
+/examples/wireless/nic/,             -f omnetpp.ini -c AckingMacWithUnitDiskRadio -r 0,           100s,     aa02-d13c/tplx;6268-2984/~tNl;a686-55e2/~tND;2fdc-a5d4/tyf, PASS, wireless AckingWirelessInterface Ipv4
+/examples/wireless/nic/,             -f omnetpp.ini -c AckingMacWithApskScalarRadio -r 0,         100s,     aa02-d13c/tplx;6268-2984/~tNl;05bb-ec13/~tND;5fb3-0e09/tyf, PASS, wireless AckingWirelessInterface Ipv4
+/examples/wireless/nic/,             -f omnetpp.ini -c AckingMacWithApskDimensionalRadio -r 0,    100s,     aa02-d13c/tplx;6268-2984/~tNl;05bb-ec13/~tND;5fb3-0e09/tyf, PASS, wireless AckingWirelessInterface Ipv4
 /examples/wireless/nic/,             -f omnetpp.ini -c LMacWithUnitDiskRadio -r 0,                100s,     ae44-849a/tplx;a263-5bef/~tNl;cd2e-fed3/tyf, PASS, wireless Ipv4
 /examples/wireless/nic/,             -f omnetpp.ini -c LMacWithApskScalarRadio -r 0,              100s,     340e-9ace/tplx;f8ab-769b/~tNl;9567-1b81/tyf, PASS, wireless Ipv4
 /examples/wireless/nic/,             -f omnetpp.ini -c LMacWithApskDimensionalRadio -r 0,         100s,     340e-9ace/tplx;f8ab-769b/~tNl;9567-1b81/tyf, PASS, wireless Ipv4
@@ -601,9 +601,9 @@
 /examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            bf30-2f13/tplx;7b2f-653d/~tNl;2456-c0fc/~tND;3e9e-7f1d/tyf, PASS, wireless
 
 # /examples/wireless/scaling/,         -f omnetpp.ini -c AbstractAckingMac -r 0,    # abstract-config
-/examples/wireless/scaling/,         -f omnetpp.ini -c UnitDiskRadioMedium -r 0,    1s,               bb94-17a2/tplx;2220-d64e/~tNl;0f1b-2b86/~tND, PASS, wireless AckingWirelessInterface Ipv4
-/examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0,      1s,               9b3b-f88a/tplx;be94-9c8e/~tNl;fed7-df1c/~tND, PASS, wireless AckingWirelessInterface Ipv4
-/examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 0.1s,             fa11-2540/tplx;c2a2-d597/~tNl;4989-a0f1/~tND, PASS, wireless AckingWirelessInterface Ipv4
+/examples/wireless/scaling/,         -f omnetpp.ini -c UnitDiskRadioMedium -r 0,    1s,               bb94-17a2/tplx;2220-d64e/~tNl;a868-09d0/~tND, PASS, wireless AckingWirelessInterface Ipv4
+/examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0,      1s,               9b3b-f88a/tplx;be94-9c8e/~tNl;ff47-27c4/~tND, PASS, wireless AckingWirelessInterface Ipv4
+/examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 0.1s,             fa11-2540/tplx;c2a2-d597/~tNl;89ae-8e19/~tND, PASS, wireless AckingWirelessInterface Ipv4
 
 /examples/wireless/shortcut/,        -f omnetpp.ini -c ShortcutMac -r 0,            1000s,            91d1-098d/tplx;6924-7e35/~tNl;1069-9852/tyf, PASS, wireless Ipv4
 /examples/wireless/shortcut/,        -f omnetpp.ini -c ShortcutRadio -r 0,          1000s,            4e2a-4349/tplx;1d1b-2b6d/~tNl;7a3c-9e0d/tyf, PASS, wireless AckingWirelessInterface Ipv4
