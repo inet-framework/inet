@@ -98,6 +98,14 @@ class INET_API L3NetworkConfiguratorBase : public cSimpleModule, public L3Addres
       public:
         virtual ~Topology() { for (auto& linkInfo : linkInfos) delete linkInfo; }
 
+        void clear() {
+            inet::Topology::clear();
+            for (auto linkInfo : linkInfos)
+                delete linkInfo;
+            linkInfos.clear();
+            interfaceInfos.clear();
+        }
+
       protected:
         virtual Node *createNode(cModule *module) override { return new L3NetworkConfiguratorBase::Node(module); }
         virtual Link *createLink() override { return new L3NetworkConfiguratorBase::Link(); }
