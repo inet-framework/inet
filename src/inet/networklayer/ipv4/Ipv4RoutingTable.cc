@@ -175,10 +175,7 @@ void Ipv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
         const auto *ieChangeDetails = check_and_cast<const NetworkInterfaceChangeDetails *>(obj);
         auto fieldId = ieChangeDetails->getFieldId();
         if (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER) {
-            const auto *entry = ieChangeDetails->getNetworkInterface();
             updateNetmaskRoutes();
-            if (!entry->isUp() || !entry->hasCarrier())
-                deleteInterfaceRoutes(entry);
             invalidateCache();
         }
     }
