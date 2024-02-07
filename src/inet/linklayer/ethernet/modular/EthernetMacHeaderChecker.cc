@@ -58,6 +58,9 @@ bool EthernetMacHeaderChecker::matchesPacket(const Packet *packet) const
     const auto& header = packet->peekAtFront<EthernetMacHeader>();
     auto interfaceInd = packet->getTag<InterfaceInd>();
     auto networkInterface = interfaceTable->getInterfaceById(interfaceInd->getInterfaceId());
+    EV<<"Here is the network interface and networkinterface mac address"<<networkInterface<<networkInterface->getMacAddress()<<endl;
+    EV<<"Here is the destination MAC address"<<header->getDest()<<endl;
+    //EV<<"Here is the MAC address of the interface"<<networkInterface-<<endl;
     if (!promiscuous && !networkInterface->matchesMacAddress(header->getDest()))
         return false;
     else {
@@ -72,6 +75,7 @@ bool EthernetMacHeaderChecker::matchesPacket(const Packet *packet) const
 void EthernetMacHeaderChecker::dropPacket(Packet *packet)
 {
     // TODO or PacketFilterBase::dropPacket(packet, NO_PROTOCOL_FOUND);
+    EV<<"Here is the packet protocol"<<packet->findTag<PacketProtocolTag>();
     PacketFilterBase::dropPacket(packet, NOT_ADDRESSED_TO_US);
 }
 

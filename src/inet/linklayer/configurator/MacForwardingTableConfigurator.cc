@@ -74,6 +74,10 @@ void MacForwardingTableConfigurator::extendConfiguration(Node *destinationNode, 
     topology->calculateWeightedSingleShortestPathsTo(destinationNode);
     for (int j = 0; j < topology->getNumNodes(); j++) {
         Node *sourceNode = (Node *)topology->getNode(j);
+        auto cellularDeviceName = destinationNode->module->getDisplayName(); //Devika
+        if (!destinationInterface){ //Devika
+            break;
+        }
         if (sourceNode != destinationNode && isBridgeNode(sourceNode) && sourceNode->getNumPaths() != 0) {
             auto firstLink = (Link *)sourceNode->getPath(0);
             auto firstInterface = static_cast<Interface *>(firstLink->sourceInterface);
