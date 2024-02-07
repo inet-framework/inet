@@ -1857,7 +1857,7 @@ Ipv4MulticastRoute *PimSm::createIpv4Route(Route *route)
     unsigned int numOutInterfaces = route->downstreamInterfaces.size();
     for (unsigned int i = 0; i < numOutInterfaces; ++i) {
         DownstreamInterface *downstream = route->downstreamInterfaces[i];
-        newRoute->addOutInterface(new PimSmOutInterface(downstream));
+        newRoute->addOutInterface(new Ipv4MulticastRoute::OutInterface(downstream->ie));
     }
     return newRoute;
 }

@@ -1134,7 +1134,7 @@ void PimDm::unroutableMulticastPacketArrived(Ipv4Address source, Ipv4Address gro
     newRoute->setInInterface(new IMulticastRoute::InInterface(route->upstreamInterface->ie));
     for (auto& elem : route->downstreamInterfaces) {
         DownstreamInterface *downstream = elem;
-        newRoute->addOutInterface(new PimDmOutInterface(downstream->ie, downstream));
+        newRoute->addOutInterface(new Ipv4MulticastRoute::OutInterface(downstream->ie));
     }
 
     rt->addMulticastRoute(newRoute);
@@ -1177,7 +1177,7 @@ void PimDm::multicastReceiverAdded(NetworkInterface *ie, Ipv4Address group)
             // create new downstream data
             EV << "Interface is not on list of outgoing interfaces yet, it will be added" << endl;
             downstream = route->createDownstreamInterface(ie);
-            ipv4Route->addOutInterface(new PimDmOutInterface(ie, downstream));
+            ipv4Route->addOutInterface(new Ipv4MulticastRoute::OutInterface(ie));
         }
 
         downstream->setHasConnectedReceivers(true);
@@ -1404,8 +1404,8 @@ void PimDm::rpfInterfaceHasChanged(Ipv4MulticastRoute *ipv4Route, Ipv4Route *rou
 
     // old RPF interface should be now a downstream interface if it is not down
     if (oldRpfInterface && oldRpfInterface->isUp() && oldRpfInterface->hasCarrier()) {
-        DownstreamInterface *downstream = route->createDownstreamInterface(oldRpfInterface);
-        ipv4Route->addOutInterface(new PimDmOutInterface(oldRpfInterface, downstream));
+        route->createDownstreamInterface(oldRpfInterface);
+        ipv4Route->addOutInterface(new Ipv4MulticastRoute::OutInterface(oldRpfInterface));
     }
 
     bool isOlistNull = route->isOlistNull();

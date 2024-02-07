@@ -109,15 +109,6 @@ class INET_API PimSm : public PimBase, protected cListener
 
     typedef std::vector<DownstreamInterface *> DownstreamInterfaceVector;
 
-    class PimSmOutInterface : public IMulticastRoute::OutInterface {
-        DownstreamInterface *downstream;
-
-      public:
-        PimSmOutInterface(DownstreamInterface *downstream)
-            : OutInterface(downstream->ie), downstream(downstream) {}
-        virtual bool isEnabled() override { return downstream->isInInheritedOlist(); }
-    };
-
     enum RouteType {
         RP, // (*,*,RP)
         G, // (*,G)

@@ -139,16 +139,6 @@ class INET_API PimDm : public PimBase, protected cListener
 
     typedef std::map<SourceAndGroup, Route *> RoutingTable;
 
-    // for updating the forwarding state of the route when the state of the downstream interface changes
-    class PimDmOutInterface : public IMulticastRoute::OutInterface {
-        DownstreamInterface *downstream;
-
-      public:
-        PimDmOutInterface(NetworkInterface *ie, DownstreamInterface *downstream)
-            : IMulticastRoute::OutInterface(ie), downstream(downstream) {}
-        virtual bool isEnabled() override { return downstream->isInOlist(); }
-    };
-
   private:
     // parameters
     double pruneInterval = 0;
