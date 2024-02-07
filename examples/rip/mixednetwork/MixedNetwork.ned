@@ -53,6 +53,7 @@ network MixedNetwork
                 +"<interface hosts='rRouter[0]' towards='bRouter' address='10.0.x.x' netmask='255.255.x.x' add-static-route='off'/>"
                 +"<interface among='rRouter[*]' address='10.2.x.x' netmask='255.255.x.x' add-static-route='off'/>"
                 +"<interface among='rRouter[*] rHost' address='10.2.x.x' netmask='255.255.x.x'/>"
+                +"<autoroute sourceHosts='cHost[*] cRouter bRouter rHost'/>"
                 +"<route hosts='rRouter[0]' destination='10.1.0.0' netmask='255.255.0.0' gateway='bRouter'/>"
                 +"</config>");
         }

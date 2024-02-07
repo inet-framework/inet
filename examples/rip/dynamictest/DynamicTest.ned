@@ -63,6 +63,7 @@ network DynamicTest
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=100,100;is=s");
+                addStaticRoutes = false;
                 config = xml("<config>"
                         + "<interface among='H1 R1' address='192.168.1.x' netmask='255.255.255.x' />"
                         + "<interface among='H2 R2' address='192.168.2.x' netmask='255.255.255.x' />"

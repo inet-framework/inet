@@ -36,6 +36,7 @@ network RIPInfinityCountTest
         }
         configurator: Ipv4NetworkConfigurator {
             @display("p=100,100;is=s");
+            addStaticRoutes = false;
             config = xml("<config>"
                             +"<interface among='cRouter bRouter' address='10.0.0.x' netmask='255.255.255.x' add-static-route='off'/>"
                             +"<interface among='bRouter rRouter[0]' address='10.1.0.x' netmask='255.255.255.x' add-static-route='off'/>"
