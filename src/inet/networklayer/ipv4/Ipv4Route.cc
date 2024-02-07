@@ -21,6 +21,20 @@ namespace inet {
 Register_Class(Ipv4Route);
 Register_Class(Ipv4MulticastRoute);
 
+Ipv4Route::Ipv4Route(const Ipv4Route& other) :
+    rt(other.rt),
+    dest(other.dest),
+    netmask(other.netmask),
+    gateway(other.gateway),
+    interfacePtr(other.interfacePtr),
+    sourceType(other.sourceType),
+    adminDist(other.adminDist),
+    metric(other.metric),
+    source(other.source),
+    protocolData(other.protocolData)
+{
+}
+
 Ipv4Route::~Ipv4Route()
 {
     delete protocolData;
