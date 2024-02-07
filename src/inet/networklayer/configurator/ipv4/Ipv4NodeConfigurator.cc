@@ -24,6 +24,7 @@ void Ipv4NodeConfigurator::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        _configureRoutingTable = par("configureRoutingTable");
         cModule *node = getContainingNode(this);
         const char *networkConfiguratorPath = par("networkConfiguratorModule");
         nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
@@ -131,7 +132,7 @@ void Ipv4NodeConfigurator::configureAllInterfaces()
 void Ipv4NodeConfigurator::configureRoutingTable()
 {
     ASSERT(networkConfigurator);
-    if (par("configureRoutingTable"))
+    if (_configureRoutingTable)
         networkConfigurator->configureRoutingTable(routingTable);
 }
 
@@ -157,16 +158,21 @@ void Ipv4NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalI
         // The RoutingTable deletes routing entries of interface
     }
     else if (signalID == interfaceStateChangedSignal) {
-        const auto *ieChangeDetails = check_and_cast<const NetworkInterfaceChangeDetails *>(obj);
-        auto fieldId = ieChangeDetails->getFieldId();
+        const auto *networkInterfaceChangeDetails = check_and_cast<const NetworkInterfaceChangeDetails *>(obj);
+        auto fieldId = networkInterfaceChangeDetails->getFieldId();
         if (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER) {
-            auto *entry = ieChangeDetails->getNetworkInterface();
-            if (entry->isUp() && entry->hasCarrier() && networkConfigurator) {
-                networkConfigurator->configureInterface(entry);
-                if (par("configureRoutingTable"))
-                    networkConfigurator->configureRoutingTable(routingTable, entry);
+            auto networkInterface = networkInterfaceChangeDetails->getNetworkInterface();
+            if (networkConfigurator != nullptr) {
+                if (networkInterface->isUp() && networkInterface->hasCarrier()) {
+                    networkConfigurator->configureInterface(networkInterface);
+                    if (_configureRoutingTable)
+                        networkConfigurator->addConfigurationToRoutingTable(routingTable, networkInterface);
+                }
+                else {
+                    if (_configureRoutingTable)
+                        networkConfigurator->removeConfigurationFromRoutingTable(routingTable, networkInterface);
+                }
             }
-            // otherwise the RoutingTable deletes routing entries of interface entry
         }
     }
 }
