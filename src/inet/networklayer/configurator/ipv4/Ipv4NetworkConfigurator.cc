@@ -1061,6 +1061,7 @@ void Ipv4NetworkConfigurator::readManualRouteConfiguration(Topology& topology)
                         // create and add route
                         Ipv4Route *route = new Ipv4Route();
                         route->setSourceType(IRoute::MANUAL);
+                        route->setSource(this);
                         route->setDestination(destination);
                         route->setNetmask(netmask);
                         route->setGateway(gateway); // may be unspecified
@@ -1151,6 +1152,7 @@ void Ipv4NetworkConfigurator::readManualMulticastRouteConfiguration(Topology& to
                             // create and add route
                             Ipv4MulticastRoute *route = new Ipv4MulticastRoute();
                             route->setSourceType(IMulticastRoute::MANUAL);
+                            route->setSource(this);
                             route->setOrigin(source);
                             route->setOriginNetmask(netmask);
                             route->setMulticastGroup(group);
@@ -1393,6 +1395,7 @@ void Ipv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                 route->setNetmask(sourceInterfaceInfo->getNetmask());
                 route->setInterface(sourceNetworkInterface);
                 route->setSourceType(Ipv4Route::MANUAL);
+                route->setSource(this);
                 EV_DEBUG << "Adding direct route " << *route << " to " << sourceNode->module->getFullPath() << endl;
                 sourceNode->staticRoutes.push_back(route);
             }
@@ -1405,6 +1408,7 @@ void Ipv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
             route->setGateway(gateway);
             route->setInterface(sourceNetworkInterface);
             route->setSourceType(Ipv4Route::MANUAL);
+            route->setSource(this);
             EV_DEBUG << "Adding default route " << *route << " to " << sourceNode->module->getFullPath() << endl;
             sourceNode->staticRoutes.push_back(route);
 
@@ -1470,6 +1474,7 @@ void Ipv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                             if (gatewayAddress != destinationAddress)
                                 route->setGateway(gatewayAddress);
                             route->setSourceType(Ipv4Route::MANUAL);
+                            route->setSource(this);
                             if (containsRoute(sourceNode->staticRoutes, route))
                                 delete route;
                             else if (!addDirectRoutesParameter && route->getGateway().isUnspecified())
@@ -1795,6 +1800,7 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
         optimizedRoute->setInterface(routeColor->getInterface());
         optimizedRoute->setGateway(routeColor->getGateway());
         optimizedRoute->setSourceType(routeColor->getSourceType());
+        optimizedRoute->setSource(routeColor->getSource());
         optimizedRoute->setMetric(routeColor->getMetric());
         optimizedRoutes.push_back(optimizedRoute);
         delete routeInfo;
@@ -1891,6 +1897,7 @@ void Ipv4NetworkConfigurator::addStaticMulticastRoutes(Topology& topology, Node 
         if (route == nullptr) {
             route = new Ipv4MulticastRoute();
             route->setSourceType(IMulticastRoute::MANUAL);
+            route->setSource(this);
             route->setOrigin(origin);
             route->setOriginNetmask(originNetmask);
             route->setMulticastGroup(multicastGroup);
