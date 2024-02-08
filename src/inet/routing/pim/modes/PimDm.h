@@ -132,7 +132,7 @@ class INET_API PimDm : public PimBase, protected cListener
         DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId) const;
         DownstreamInterface *createDownstreamInterface(NetworkInterface *ie);
         DownstreamInterface *removeDownstreamInterface(int interfaceId);
-        bool isOilistNull();
+        bool isOlistNull();
     };
 
     friend std::ostream& operator<<(std::ostream& out, const PimDm::Route& sourceGroup);
