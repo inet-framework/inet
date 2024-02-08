@@ -47,6 +47,7 @@ protected:
 
     int numNodes = 0;
     double clusterHeadPercentage = 0.0;
+    int roundDurationVariance = 0;
 
     // object for storing CH data per node in vector array
     struct nodeMemoryObject {

@@ -41,11 +41,11 @@ void Leach::initialize(int stage) {
 
         clusterHeadPercentage = par("clusterHeadPercentage");
         numNodes = par("numNodes");
+        roundDurationVariance = par("roundDurationVariance");
 
-        roundDuration = dblrand(0) * 10;
+        roundDuration = dblrand(0) * roundDurationVariance;
         TDMADelayCounter = 1;
         event = new cMessage("event");
-        roundDuration = dblrand(0) * 10;
         wasCH = false;
 
         vector<nodeMemoryObject> nodeMemory(numNodes); // Localized NCH node memory with CH data

@@ -32,6 +32,7 @@ simple Leach like IManetRouting
         double maxVariance = default(1);
         int numNodes = default(10);
         double clusterHeadPercentage = default(0.5);
+        int roundDurationVariance = default(10);
     gates:
         input ipIn;
         output ipOut;
