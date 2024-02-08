@@ -256,6 +256,14 @@ void Ipv4MulticastRoute::removeOutInterface(unsigned int i)
     changed(F_OUT);
 }
 
+bool Ipv4MulticastRoute::hasOutInterface(const NetworkInterface *networkInterface) const
+{
+    for (int i = 0; i < outInterfaces.size(); i++)
+        if (outInterfaces.at(i)->getInterface() == networkInterface)
+            return true;
+    return false;
+}
+
 void Ipv4MulticastRoute::changed(int fieldCode)
 {
     if (rt)

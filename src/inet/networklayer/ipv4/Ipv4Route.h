@@ -195,6 +195,8 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
     /** The kth out interface */
     OutInterface *getOutInterface(unsigned int k) const { return outInterfaces.at(k); }
 
+    bool hasOutInterface(const NetworkInterface *networkInterface) const;
+
     /** Source of route. MANUAL (read from file), from routing protocol, etc */
     SourceType getSourceType() const override { return sourceType; }
 
