@@ -285,7 +285,7 @@ std::vector<Ipv4Address> RoutingTableVisualizerBase::getMulticastGroups()
             }
         }
     }
-    return std::vector(multicastGroups.begin(), multicastGroups.end());
+    return std::vector<Ipv4Address>(multicastGroups.begin(), multicastGroups.end());
 }
 
 void RoutingTableVisualizerBase::addRouteVisualizations(IIpv4RoutingTable *routingTable)
