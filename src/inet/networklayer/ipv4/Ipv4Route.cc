@@ -232,6 +232,9 @@ void Ipv4MulticastRoute::addOutInterface(OutInterface *outInterface)
     }
 
     outInterfaces.push_back(outInterface);
+    std::sort(outInterfaces.begin(), outInterfaces.end(), [] (const OutInterface *i1, const OutInterface *i2) {
+        return strcmp(i1->getInterface()->getInterfaceName(), i2->getInterface()->getInterfaceName()) <= 0;
+    });
     changed(F_OUT);
 }
 
