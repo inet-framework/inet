@@ -171,6 +171,8 @@ class INET_API PimSm : public PimBase, protected cListener
         void startKeepAliveTimer(double keepAlivePeriod);
         void startRegisterStopTimer(double interval);
         void startJoinTimer(double joinPrunePeriod);
+
+        void updateIpv4Route();
     };
 
     friend std::ostream& operator<<(std::ostream& out, const PimSm::Route& sourceGroup);

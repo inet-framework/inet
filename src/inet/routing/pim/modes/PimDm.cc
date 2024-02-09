@@ -1803,6 +1803,22 @@ bool PimDm::Route::isOlistNull()
     return true;
 }
 
+void PimDm::Route::updateIpv4Route()
+{
+    Ipv4MulticastRoute *ipv4Route = static_cast<PimDm *>(owner)->findIpv4MulticastRoute(group, source);
+    // make sure that all interfaces are included in the Ipv4MulticastRoute iff the downstream interface is in the olist
+    for (auto downstreamInterface : downstreamInterfaces) {
+        bool isInOlist = downstreamInterface->isInOlist();
+        bool hasOutInterface = ipv4Route->hasOutInterface(downstreamInterface->ie);
+        if (isInOlist && !hasOutInterface)
+            // add missing interface to the Ipv4MulticastRoute if it is in the olist
+            ipv4Route->addOutInterface(new Ipv4MulticastRoute::OutInterface(downstreamInterface->ie));
+        else if (!isInOlist && hasOutInterface)
+            // remove interface from the Ipv4MulticastRoute if it is not in the olist
+            ipv4Route->removeOutInterface(downstreamInterface->ie);
+    }
+}
+
 PimDm::UpstreamInterface::~UpstreamInterface()
 {
     owner->owner->cancelAndDelete(stateRefreshTimer);

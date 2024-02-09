@@ -2025,6 +2025,22 @@ void PimSm::Route::removeDownstreamInterface(unsigned int i)
     delete outInterface;
 }
 
+void PimSm::Route::updateIpv4Route()
+{
+    Ipv4MulticastRoute *ipv4Route = static_cast<PimSm *>(owner)->findIpv4Route(source, group);
+    // make sure that all interfaces are included in the Ipv4MulticastRoute iff the downstream interface is in the inheritedOlist
+    for (auto downstreamInterface : downstreamInterfaces) {
+        bool isInInheritedOlist = downstreamInterface->isInInheritedOlist();
+        bool hasOutInterface = ipv4Route->hasOutInterface(downstreamInterface->ie);
+        if (isInInheritedOlist && !hasOutInterface)
+            // add missing interface to the Ipv4MulticastRoute if it is in the olist
+            ipv4Route->addOutInterface(new Ipv4MulticastRoute::OutInterface(downstreamInterface->ie));
+        else if (!isInInheritedOlist && hasOutInterface)
+            // remove interface from the Ipv4MulticastRoute if it is not in the olist
+            ipv4Route->removeOutInterface(downstreamInterface->ie);
+    }
+}
+
 PimSm::PimsmInterface::PimsmInterface(Route *owner, NetworkInterface *ie)
     : Interface(owner, ie), expiryTimer(nullptr)
 {
