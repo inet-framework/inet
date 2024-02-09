@@ -1146,12 +1146,8 @@ void PimDm::unroutableMulticastPacketArrived(Ipv4Address source, Ipv4Address gro
     newRoute->setSourceType(IMulticastRoute::PIM_DM);
     newRoute->setSource(this);
     newRoute->setInInterface(new IMulticastRoute::InInterface(route->upstreamInterface->ie));
-    for (auto& elem : route->downstreamInterfaces) {
-        DownstreamInterface *downstream = elem;
-        newRoute->addOutInterface(new Ipv4MulticastRoute::OutInterface(downstream->ie));
-    }
-
     rt->addMulticastRoute(newRoute);
+    route->updateIpv4Route();
     EV_DETAIL << "New route was added to the multicast routing table.\n";
 }
 
