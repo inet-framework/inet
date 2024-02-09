@@ -564,6 +564,7 @@ void PimSm::processRegisterPacket(Packet *pk)
             restartTimer(routeSG->keepAliveTimer, KAT);
         }
 
+        routeG->updateIpv4Route();
         if (!routeG->isInheritedOlistNull()) { // we have some active receivers
             routeSG->clearFlag(Route::PRUNED);
 
@@ -926,6 +927,7 @@ void PimSm::processExpiryTimer(cMessage *timer)
         delete timer;
 
         // upstream state machine
+        route->updateIpv4Route();
         if (route->isInheritedOlistNull()) {
             route->setFlags(Route::PRUNED);
             if (route->type == G && !IamRP(route->rpAddr))
@@ -960,6 +962,7 @@ void PimSm::processJoinTimer(cMessage *timer)
     ASSERT(timer == route->joinTimer);
     Ipv4Address joinAddr = route->type == G ? route->rpAddr : route->source;
 
+    route->updateIpv4Route();
     if (!route->isInheritedOlistNull()) {
         sendPIMJoin(route->group, joinAddr, route->upstreamInterface->nextHop, route->type);
         restartTimer(route->joinTimer, joinPrunePeriod);
@@ -1150,6 +1153,7 @@ void PimSm::multicastPacketArrivedOnRpfInterface(Route *route)
 {
     if (route->type == SG) { // (S,G) route
         // set KeepAlive timer
+        route->updateIpv4Route();
         if ( /*DirectlyConnected(route->source) ||*/
             (!route->isFlagSet(Route::PRUNED) && !route->isInheritedOlistNull()))
         {
@@ -1562,6 +1566,7 @@ void PimSm::updateJoinDesired(Route *route)
 {
     bool oldValue = route->joinDesired();
     bool newValue = false;
+    route->updateIpv4Route();
     if (route->type == RP)
         newValue = !route->isImmediateOlistNull();
     if (route->type == G)
