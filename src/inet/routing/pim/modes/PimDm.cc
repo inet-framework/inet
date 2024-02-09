@@ -264,6 +264,30 @@ void PimDm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         for (auto it : routes)
             it.second->updateIpv4Route();
     }
+    else if (signalID == interfaceStateChangedSignal) {
+        const auto *ieChangeDetails = check_and_cast<const NetworkInterfaceChangeDetails *>(obj);
+        auto fieldId = ieChangeDetails->getFieldId();
+        if (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER) {
+            auto ie = ieChangeDetails->getNetworkInterface();
+            for (auto it : routes) {
+                auto route = it.second;
+                auto& dis = route->downstreamInterfaces;
+                auto predicate = [&] (const DownstreamInterface *di) { return di->ie == ie; };
+                if (ie->isUp() && ie->hasCarrier()) {
+                    // mark the interface as pruned
+                    if (std::find_if(dis.begin(), dis.end(), predicate) == dis.end()) {
+                        DownstreamInterface *downstream = route->createDownstreamInterface(ie);
+                        downstream->pruneState = DownstreamInterface::PRUNED;
+                        downstream->startPruneTimer(pruneInterval);
+                    }
+                }
+                else {
+                    // delete PIM state to avoid using it when interface comes back UP again
+                    dis.erase(std::remove_if(dis.begin(), dis.end(), predicate), dis.end());
+                }
+            }
+        }
+    }
 }
 
 // ---- handle timers ----
