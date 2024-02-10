@@ -22,6 +22,12 @@ ProtocolGroup::ProtocolGroup(const char *name, const Protocols& protocolNumberTo
     }
 }
 
+ProtocolGroup::~ProtocolGroup()
+{
+    for (auto p : dynamicallyAddedProtocols)
+        delete p;
+}
+
 const Protocol *ProtocolGroup::findProtocol(int protocolNumber) const
 {
     auto it = protocolNumberToProtocol.find(protocolNumber);
@@ -57,6 +63,8 @@ void ProtocolGroup::addProtocol(int protocolId, const Protocol *protocol)
     protocols.push_back(protocol);
     protocolNumberToProtocol[protocolId] = protocol;
     protocolToProtocolNumber[protocol] = protocolId;
+
+    dynamicallyAddedProtocols.push_back(protocol);  // assume it was dynamically allocated
 }
 
 // FIXME use constants instead of numbers
@@ -85,6 +93,8 @@ static const ProtocolGroup::Protocols ethertypeProtocols {
     { ETHERTYPE_IEEE8021AE, &Protocol::ieee8021ae },
     { ETHERTYPE_TTETH, &Protocol::tteth },
     { ETHERTYPE_IEEE8021_R_TAG, &Protocol::ieee8021rTag },
+    { ETHERTYPE_8021Q_CFM, &Protocol::ieee8021qCFM },
+    { ETHERTYPE_MRP, &Protocol::mrp },
 };
 
 // excerpt from http://www.iana.org/assignments/ppp-numbers/ppp-numbers.xhtml
@@ -111,8 +121,6 @@ static const ProtocolGroup::Protocols ipProtocols {
     { IP_PROT_XTP, &Protocol::xtp },
     { IP_PROT_IPv6, &Protocol::ipv6 },
     { IP_PROT_RSVP, &Protocol::rsvpTe },
-    { IP_PROT_ESP, &Protocol::ipsecEsp },
-    { IP_PROT_AH, &Protocol::ipsecAh },
     { IP_PROT_DSR, &Protocol::dsr },
     { IP_PROT_IPv6_ICMP, &Protocol::icmpv6 },
     { IP_PROT_EIGRP, &Protocol::eigrp },

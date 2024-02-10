@@ -83,6 +83,7 @@ class INET_API Protocol
     static const Protocol ieee802154;
     static const Protocol ieee8021ae;
     static const Protocol ieee8021qCTag;
+    static const Protocol ieee8021qCFM;
     static const Protocol ieee8021qSTag;
     static const Protocol ieee8021rTag;
     static const Protocol ieee8022llc;
@@ -92,8 +93,6 @@ class INET_API Protocol
     static const Protocol igp;
     static const Protocol ipv4;
     static const Protocol ipv6;
-    static const Protocol ipsecAh;
-    static const Protocol ipsecEsp;
     static const Protocol isis;
     static const Protocol l2isis;
     static const Protocol lldp;
@@ -101,6 +100,7 @@ class INET_API Protocol
     static const Protocol manet;
     static const Protocol mobileipv6;
     static const Protocol mpls;
+    static const Protocol mrp;
     static const Protocol ospf;
     static const Protocol pim;
     static const Protocol ppp;
@@ -131,7 +131,7 @@ class INET_API Protocol
     static const Protocol probabilistic;
     static const Protocol shortcutMac;
     static const Protocol shortcutPhy;
-    static const Protocol genericPhy;
+    static const Protocol unitDisk;
     static const Protocol unknown;
     static const Protocol wiseRoute;
 };
