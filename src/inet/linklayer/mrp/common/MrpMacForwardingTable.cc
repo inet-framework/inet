@@ -1,8 +1,5 @@
-//
-// Copyright (C) 2013 OpenSim Ltd.
-//
+// Copyright (C) 2024 Daniel Zeitler
 // SPDX-License-Identifier: LGPL-3.0-or-later
-//
 
 
 #include "inet/linklayer/mrp/common/MrpMacForwardingTable.h"
