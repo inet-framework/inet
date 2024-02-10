@@ -1,9 +1,5 @@
-/*
- * MrpInterfaceData.h
- *
- *  Created on: 22.06.2023
- *      Author: Daniel Zeitler
- */
+// Copyright (C) 2024 Daniel Zeitler
+// SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef __INET_MRPINTERFACEDATA_H
 #define __INET_MRPINTERFACEDATA_H
