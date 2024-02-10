@@ -1,5 +1,5 @@
+// Copyright (C) 2024 Daniel Zeitler
 // SPDX-License-Identifier: LGPL-3.0-or-later
-//
 
 #include "MediaRedundancyNode.h"
 
