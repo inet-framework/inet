@@ -12,7 +12,9 @@
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#endif
 
 namespace inet {
 
@@ -272,6 +274,7 @@ std::vector<Ipv4Address> RoutingTableVisualizerBase::getMulticastGroups()
             if (interfaceTable != nullptr) {
                 for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
                     auto interface = interfaceTable->getInterface(i);
+#ifdef INET_WITH_IPv4
                     auto protocolData = interface->findProtocolData<Ipv4InterfaceData>();
                     if (protocolData != nullptr) {
                         for (int j = 0; j < protocolData->getNumOfJoinedMulticastGroups(); j++) {
@@ -281,6 +284,7 @@ std::vector<Ipv4Address> RoutingTableVisualizerBase::getMulticastGroups()
                                 multicastGroups.insert(multicastGroup);
                         }
                     }
+#endif
                 }
             }
         }
