@@ -24,16 +24,16 @@ class IIpv4RoutingTable;
 class INET_API Ipv4Route : public cObject, public IRoute
 {
   private:
-    IIpv4RoutingTable *rt; ///< the routing table in which this route is inserted, or nullptr
+    IIpv4RoutingTable *rt = nullptr; ///< the routing table in which this route is inserted, or nullptr
     Ipv4Address dest; ///< Destination
     Ipv4Address netmask; ///< Route mask
     Ipv4Address gateway; ///< Next hop
-    NetworkInterface *interfacePtr; ///< interface
-    SourceType sourceType; ///< manual, routing prot, etc.
-    unsigned int adminDist; ///< Cisco like administrative distance
-    int metric; ///< Metric ("cost" to reach the destination)
-    cObject *source; ///< Object identifying the source
-    cObject *protocolData; ///< Routing Protocol specific data
+    NetworkInterface *interfacePtr = nullptr; ///< interface
+    SourceType sourceType = MANUAL; ///< manual, routing prot, etc.
+    unsigned int adminDist = dUnknown; ///< Cisco like administrative distance
+    int metric = 0; ///< Metric ("cost" to reach the destination)
+    cObject *source = nullptr; ///< Object identifying the source
+    cObject *protocolData = nullptr; ///< Routing Protocol specific data
 
   private:
     // copying not supported: following are private and also left undefined
@@ -43,8 +43,7 @@ class INET_API Ipv4Route : public cObject, public IRoute
     void changed(int fieldCode);
 
   public:
-    Ipv4Route() : rt(nullptr), interfacePtr(nullptr), sourceType(MANUAL), adminDist(dUnknown),
-        metric(0), source(nullptr), protocolData(nullptr) {}
+    Ipv4Route() {}
     Ipv4Route(const Ipv4Route& obj);
     virtual ~Ipv4Route();
     virtual std::string str() const override;
