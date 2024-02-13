@@ -95,8 +95,10 @@ bool NodeStatus::handleOperationStage(LifecycleOperation *operation, IDoneCallba
 
 void NodeStatus::setState(State s)
 {
-    state = s;
-    emit(nodeStatusChangedSignal, this);
+    if (state != s) {
+        state = s;
+        emit(nodeStatusChangedSignal, this);
+    }
 }
 
 void NodeStatus::refreshDisplay() const
