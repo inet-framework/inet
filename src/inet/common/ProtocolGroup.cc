@@ -22,12 +22,6 @@ ProtocolGroup::ProtocolGroup(const char *name, const Protocols& protocolNumberTo
     }
 }
 
-ProtocolGroup::~ProtocolGroup()
-{
-    for (auto p : dynamicallyAddedProtocols)
-        delete p;
-}
-
 const Protocol *ProtocolGroup::findProtocol(int protocolNumber) const
 {
     auto it = protocolNumberToProtocol.find(protocolNumber);
@@ -63,8 +57,6 @@ void ProtocolGroup::addProtocol(int protocolId, const Protocol *protocol)
     protocols.push_back(protocol);
     protocolNumberToProtocol[protocolId] = protocol;
     protocolToProtocolNumber[protocol] = protocolId;
-
-    dynamicallyAddedProtocols.push_back(protocol);  // assume it was dynamically allocated
 }
 
 // FIXME use constants instead of numbers
