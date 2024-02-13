@@ -56,6 +56,9 @@ protected:
         HIGHEST = 0x0000,
         HIGH = 0x4000,
         DEFAULT = 0x8000,
+        MRAHIGHEST = 0x9000,
+        MRADEFAULT = 0xA000,
+        MRALOWEST = 0xFFFF,
     };
 
     enum nodeState{
@@ -220,12 +223,12 @@ protected:
     virtual void setupTopologyChangeReq(uint32_t Interval);
     virtual void setupContinuityCheck(int RingPort);
     virtual void testRingReq(double Time);
-    virtual void testMgrNackReq(mrpPriority ManagerPrio, MacAddress SourceAddress);
-    virtual void testPropagateReq(mrpPriority ManagerPrio, MacAddress SourceAddress);
+    virtual void testMgrNackReq(int RingPort, mrpPriority ManagerPrio, MacAddress SourceAddress);
+    virtual void testPropagateReq(int RingPort, mrpPriority ManagerPrio, MacAddress SourceAddress);
     virtual void topologyChangeReq(double Time);
     virtual void linkChangeReq(int RingPort, uint16_t LinkState);
     virtual void setupLinkChangeReq(int RingPort, uint16_t LinkState, double Time);
-    virtual void testRingInd(MacAddress SourceAddress, mrpPriority ManagerPrio);
+    virtual void testRingInd(int RingPort, MacAddress SourceAddress, mrpPriority ManagerPrio);
     virtual void topologyChangeInd(MacAddress SourceAddress, double Time);
     virtual void linkChangeInd(uint16_t PortMode, uint16_t LinkState);
     virtual void testMgrNackInd(int RingPort, MacAddress SourceAddress, mrpPriority ManagerPrio, MacAddress BestMRMSourceAddress);

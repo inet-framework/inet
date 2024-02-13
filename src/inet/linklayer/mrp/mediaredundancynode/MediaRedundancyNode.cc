@@ -354,7 +354,6 @@ void MediaRedundancyNode::read()
 void MediaRedundancyNode::mrcInit()
 {
     linkChangeCount=linkMaxChange;
-    currentRingState = UNDEFINED;
     mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPort,static_cast<MacAddress>(MC_CONTROL), vlanID);
     mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPort,static_cast<MacAddress>(MC_CONTROL),vlanID);
     mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPort,static_cast<MacAddress>(MC_TEST), vlanID);
@@ -372,6 +371,7 @@ void MediaRedundancyNode::mrcInit()
         mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPort, static_cast<MacAddress>(MC_INTEST), vlanID);
     }
     if (expectedRole == CLIENT){
+        currentRingState = UNDEFINED;
         currentState = AC_STAT1; //only for client, managerAuto is keeping the current state
     }
     mauTypeChangeInd(primaryRingPort, getPortNetworkInterface(primaryRingPort)->getState());
@@ -395,7 +395,7 @@ void MediaRedundancyNode::mrmInit()
     if (expectedRole== MANAGER)
         currentState = AC_STAT1;
     if (expectedRole == MANAGER_AUTO){
-        //in managerRole no Forwarding on RingPorts may take place
+        //case: switching from Client to manager. in managerRole no Forwarding on RingPorts may take place
         mrpMacForwardingTable->removeMrpForwardingInterface(primaryRingPort, static_cast<MacAddress>(MC_TEST), vlanID);
         mrpMacForwardingTable->removeMrpForwardingInterface(secondaryRingPort, static_cast<MacAddress>(MC_TEST), vlanID);
         mrpMacForwardingTable->removeMrpForwardingInterface(primaryRingPort, static_cast<MacAddress>(MC_CONTROL), vlanID);
@@ -407,7 +407,7 @@ void MediaRedundancyNode::mrmInit()
 
 void MediaRedundancyNode::mraInit()
 {
-    managerPrio = DEFAULT;
+    managerPrio = MRADEFAULT;
     currentRingState = OPEN;
     addTest = false;
     testRetransmissionCount = 0;
@@ -552,7 +552,7 @@ void MediaRedundancyNode::handleMrpPDU(Packet *packet)
         if (ringID){
             if (sequence > lastTestId){
                 lastTestId = sequence;
-                testRingInd(testTLV->getSa(), static_cast<mrpPriority>(testTLV->getPrio()));
+                testRingInd(RingPort, testTLV->getSa(), static_cast<mrpPriority>(testTLV->getPrio()));
                 int ringTime = simTime().inUnit(SIMTIME_MS) - testTLV->getTimeStamp();
                 auto lastTestFrameSent = testFrameSent.find(sequence);
                 if (lastTestFrameSent != testFrameSent.end()){
@@ -1202,7 +1202,7 @@ void MediaRedundancyNode::setupLinkChangeReq(int RingPort, uint16_t LinkState, d
     emit(LinkChangeSignal, simTime().inUnit(SIMTIME_US));
 }
 
-void MediaRedundancyNode::testMgrNackReq(mrpPriority ManagerPrio, MacAddress SourceAddress)
+void MediaRedundancyNode::testMgrNackReq(int RingPort, mrpPriority ManagerPrio, MacAddress SourceAddress)
 {
     //Create MRP-PDU according MRP_Option and Suboption2 MRP-TestMgrNack
     auto Version = makeShared<mrpVersionField>();
@@ -1214,7 +1214,7 @@ void MediaRedundancyNode::testMgrNackReq(mrpPriority ManagerPrio, MacAddress Sou
     TestMgrTLV->setSubType(subTlvHeaderType::TEST_MGR_NACK);
     TestMgrTLV->setPrio(managerPrio);
     TestMgrTLV->setSa(sourceAddress);
-    TestMgrTLV->setOtherMRMPrio(ManagerPrio);
+    TestMgrTLV->setOtherMRMPrio(0x00);
     TestMgrTLV->setOtherMRMSa(SourceAddress);
 
     OptionTLV->setHeaderLength(OptionTLV->getHeaderLength()+TestMgrTLV->getSubHeaderLength()+2);
@@ -1231,20 +1231,11 @@ void MediaRedundancyNode::testMgrNackReq(mrpPriority ManagerPrio, MacAddress Sou
     packet1->insertAtBack(CommonTLV);
     packet1->insertAtBack(EndTLV);
 
-    Packet* packet2 = new Packet("mrpTestMgrNackFrame");
-    packet2->insertAtBack(Version);
-    packet2->insertAtBack(OptionTLV);
-    packet2->insertAtBack(TestMgrTLV);
-    packet2->insertAtBack(CommonTLV);
-    packet2->insertAtBack(EndTLV);
-
-    MacAddress SourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
-    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
-    MacAddress SourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
-    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress2, priority, MRP_LT ,packet2);
+    MacAddress SourceAddress1 = getPortNetworkInterface(RingPort)->getMacAddress();
+    sendFrameReq(RingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
 }
 
-void MediaRedundancyNode::testPropagateReq(mrpPriority ManagerPrio, MacAddress SourceAddress)
+void MediaRedundancyNode::testPropagateReq(int RingPort, mrpPriority ManagerPrio, MacAddress SourceAddress)
 {
     //Create MRP-PDU according MRP_Option and Suboption2 MRP-TestPropagate
     auto Version = makeShared<mrpVersionField>();
@@ -1272,20 +1263,11 @@ void MediaRedundancyNode::testPropagateReq(mrpPriority ManagerPrio, MacAddress S
     packet1->insertAtBack(CommonTLV);
     packet1->insertAtBack(EndTLV);
 
-    Packet* packet2 = new Packet("mrpTestPropagateFrame");
-    packet2->insertAtBack(Version);
-    packet2->insertAtBack(OptionTLV);
-    packet2->insertAtBack(TestMgrTLV);
-    packet2->insertAtBack(CommonTLV);
-    packet2->insertAtBack(EndTLV);
-
-    MacAddress SourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
-    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
-    MacAddress SourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
-    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress2, priority, MRP_LT ,packet2);
+    MacAddress SourceAddress1 = getPortNetworkInterface(RingPort)->getMacAddress();
+    sendFrameReq(RingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
 }
 
-void MediaRedundancyNode::testRingInd(MacAddress SourceAddress, mrpPriority ManagerPrio)
+void MediaRedundancyNode::testRingInd(int RingPort, MacAddress SourceAddress, mrpPriority ManagerPrio)
 {
     switch (currentState)
     {
@@ -1304,7 +1286,7 @@ void MediaRedundancyNode::testRingInd(MacAddress SourceAddress, mrpPriority Mana
             emit(RingStateChangedSignal, simTime().inUnit(SIMTIME_US));
         }
         else if(expectedRole == MANAGER_AUTO && (ManagerPrio > managerPrio || (ManagerPrio == managerPrio && SourceAddress >sourceAddress))){
-            testMgrNackReq(ManagerPrio,SourceAddress);
+            testMgrNackReq(RingPort,ManagerPrio,SourceAddress);
         }
         //all other cases: ignore
         break;
@@ -1328,7 +1310,7 @@ void MediaRedundancyNode::testRingInd(MacAddress SourceAddress, mrpPriority Mana
             emit(RingStateChangedSignal, simTime().inUnit(SIMTIME_US));
         }
         else if (expectedRole == MANAGER_AUTO && (ManagerPrio > managerPrio || (ManagerPrio == managerPrio && SourceAddress >sourceAddress))){
-            testMgrNackReq(ManagerPrio, SourceAddress);
+            testMgrNackReq(RingPort,ManagerPrio, SourceAddress);
         }
         //all other cases: ignore
         break;
@@ -1339,7 +1321,7 @@ void MediaRedundancyNode::testRingInd(MacAddress SourceAddress, mrpPriority Mana
             noTopologyChange= false;
         }
         else if (expectedRole == MANAGER_AUTO && (ManagerPrio > managerPrio || (ManagerPrio == managerPrio && SourceAddress >sourceAddress))){
-            testMgrNackReq(ManagerPrio, SourceAddress);
+            testMgrNackReq(RingPort,ManagerPrio, SourceAddress);
         }
         break;
     case DE:
@@ -1532,7 +1514,7 @@ void MediaRedundancyNode::testMgrNackInd(int RingPort, MacAddress SourceAddress,
             }
             cancelEvent(topologyChangeTimer);
             mrcInit();
-            testPropagateReq(hostBestMRMPriority, hostBestMRMSourceAddress);
+            testPropagateReq(RingPort,hostBestMRMPriority, hostBestMRMSourceAddress);
             currentState= DE_IDLE;
             EV_INFO << "Switching State from PRM_UP to DE_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         }
@@ -1545,7 +1527,7 @@ void MediaRedundancyNode::testMgrNackInd(int RingPort, MacAddress SourceAddress,
             }
             cancelEvent(topologyChangeTimer);
             mrcInit();
-            testPropagateReq(hostBestMRMPriority, hostBestMRMSourceAddress);
+            testPropagateReq(RingPort,hostBestMRMPriority, hostBestMRMSourceAddress);
             currentState= PT_IDLE;
             EV_INFO << "Switching State from CHK_RO to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         }
@@ -1558,7 +1540,7 @@ void MediaRedundancyNode::testMgrNackInd(int RingPort, MacAddress SourceAddress,
             }
             cancelEvent(topologyChangeTimer);
             mrcInit();
-            testPropagateReq(hostBestMRMPriority, hostBestMRMSourceAddress);
+            testPropagateReq(RingPort,hostBestMRMPriority, hostBestMRMSourceAddress);
             setPortState(secondaryRingPort, MrpInterfaceData::FORWARDING);
             currentState= PT_IDLE;
             EV_INFO << "Switching State from CHK_RC to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
