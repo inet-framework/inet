@@ -5,7 +5,6 @@
 //
 
 
-#include "inet/physicallayer/common/Signal.h"
 #include "inet/visualizer/base/ChannelVisualizerBase.h"
 
 namespace inet {
@@ -172,7 +171,7 @@ void ChannelVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal
 {
     if (signal == messageSentSignal) {
         auto messageSentSignalValue = check_and_cast<cChannel::MessageSentSignalValue *>(object);
-        auto signal = check_and_cast<inet::physicallayer::Signal *>(messageSentSignalValue->msg);
+        auto signal = check_and_cast<cPacket *>(messageSentSignalValue->msg);
         auto packet = check_and_cast<Packet *>(signal->getEncapsulatedPacket());
         auto channel = check_and_cast<cChannel *>(source);
         cModule *sourceNode = getContainingNode(channel->getSourceGate()->getOwnerModule());
