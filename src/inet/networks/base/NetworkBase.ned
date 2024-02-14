@@ -9,9 +9,10 @@ package inet.networks.base;
 
 import inet.common.packet.recorder.PcapRecorder;
 import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
+import inet.networks.contract.INetwork;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
-network NetworkBase
+network NetworkBase like INetwork
 {
     parameters:
         bool recordPcap = default(false);

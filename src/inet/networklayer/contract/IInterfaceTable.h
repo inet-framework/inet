@@ -12,6 +12,7 @@
 
 namespace inet {
 
+class INetworkInterface;
 class NetworkInterface;
 class NetworkInterfaceChangeDetails;
 
@@ -43,6 +44,8 @@ class INET_API IInterfaceTable
 
   public:
     virtual ~IInterfaceTable() {}
+
+    virtual INetworkInterface *createNetworkInterface() const = 0;
 
     /**
      * Module path name

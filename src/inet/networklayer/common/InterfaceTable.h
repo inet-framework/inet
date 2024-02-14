@@ -102,6 +102,8 @@ class INET_API InterfaceTable : public OperationalBase, public IInterfaceTable, 
     virtual void handleMessageWhenUp(cMessage *) override;
 
   public:
+    virtual INetworkInterface *createNetworkInterface() const override;
+
     /**
      * Called by the signal handler whenever a change of a category
      * occurs to which this client has subscribed.

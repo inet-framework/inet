@@ -16,6 +16,7 @@
 #include "inet/common/StringFormat.h"
 #include "inet/common/TagBase.h"
 #include "inet/linklayer/common/MacAddress.h"
+#include "inet/linklayer/contract/INetworkInterface.h"
 #include "inet/networklayer/common/InterfaceToken.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -86,7 +87,7 @@ class INET_API NetworkInterfaceChangeDetails : public cObject
  *
  * @see IInterfaceTable
  */
-class INET_API NetworkInterface : public queueing::PacketProcessorBase, public queueing::IPassivePacketSink, public ILifecycle, public cListener
+class INET_API NetworkInterface : public INetworkInterface, public queueing::PacketProcessorBase, public queueing::IPassivePacketSink, public ILifecycle, public cListener
 {
     friend class InterfaceProtocolData; // to call protocolDataChanged()
 
@@ -207,7 +208,11 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     /**
      * Returns the IInterfaceTable this interface is in, or nullptr
      */
-    IInterfaceTable *getInterfaceTable() const { return interfaceTable; }
+    virtual IInterfaceTable *getInterfaceTable() const override { return interfaceTable; }
+
+    virtual void startup() const override;
+    virtual void shutdown() const override;
+    virtual void crash() const override;
 
     /**
      * Returns the requested state of this interface.
