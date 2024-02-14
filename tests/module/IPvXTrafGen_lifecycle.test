@@ -22,6 +22,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.sender[0].*.initialStatus = "down"
 *.recip.*.initialStatus = "down"
 **.scenarioManager.script = xmldoc("scenario.xml")
+*.configurator.updateRoutes = true
 
 # app config
 **.sender[*].trafGenType = "IpvxTrafGen"
