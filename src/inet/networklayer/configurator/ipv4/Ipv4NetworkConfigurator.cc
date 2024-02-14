@@ -22,6 +22,8 @@ namespace inet {
 
 Define_Module(Ipv4NetworkConfigurator);
 
+simsignal_t Ipv4NetworkConfigurator::networkConfigurationChangedSignal = cComponent::registerSignal("networkConfigurationChanged");
+
 #define ADDRLEN_BITS    32
 
 Ipv4NetworkConfigurator::InterfaceInfo::InterfaceInfo(Node *node, LinkInfo *linkInfo, NetworkInterface *networkInterface) :
@@ -105,6 +107,7 @@ void Ipv4NetworkConfigurator::computeConfiguration()
         }
         TIME(addStaticMulticastRoutes(topology));
     }
+    emit(networkConfigurationChangedSignal, this);
     printElapsedTime("computeConfiguration", initializeStartTime);
 }
 

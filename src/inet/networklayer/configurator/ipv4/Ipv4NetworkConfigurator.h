@@ -27,6 +27,9 @@ namespace inet {
  */
 class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase, public cListener
 {
+  public:
+    static simsignal_t networkConfigurationChangedSignal;
+
   protected:
     /**
      * Represents a node in the network.
