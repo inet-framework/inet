@@ -288,11 +288,8 @@ void Ipv4NetworkConfigurator::receiveSignal(cComponent *source, simsignal_t sign
         const auto *networkInterfaceChangeDetails = check_and_cast<const NetworkInterfaceChangeDetails *>(obj);
         auto fieldId = networkInterfaceChangeDetails->getFieldId();
         if (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER) {
-            if (updateRoutesParameter) {
+            if (updateRoutesParameter)
                 computeConfiguration();
-                configureAllInterfaces();
-                configureAllRoutingTables();
-            }
         }
     }
 }
