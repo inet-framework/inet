@@ -60,7 +60,7 @@ bool Ipv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, I
     Enter_Method("handleOperationStage");
     int stage = operation->getCurrentStage();
     if (dynamic_cast<ModuleStartOperation *>(operation)) {
-        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_LINK_LAYER)
+        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_LOCAL)
             prepareAllInterfaces();
         else if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_NETWORK_LAYER) {
             if (networkConfigurator != nullptr) {
