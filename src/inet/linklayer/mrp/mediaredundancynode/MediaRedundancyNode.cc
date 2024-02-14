@@ -1233,6 +1233,23 @@ void MediaRedundancyNode::testMgrNackReq(int RingPort, mrpPriority ManagerPrio, 
 
     MacAddress SourceAddress1 = getPortNetworkInterface(RingPort)->getMacAddress();
     sendFrameReq(RingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
+
+/*  Currently function definition in standard request sending frame out both ring ports, but voting process description talks about
+ * answering testMgrNack frame. As the second frame for the other ring port is not necessary for function it is omitted, but code will
+ * stay in place for easier restoration of standard compliance
+ *
+ *  Packet* packet2 = new Packet("mrpTestMgrNackFrame");
+    packet2->insertAtBack(Version);
+    packet2->insertAtBack(OptionTLV);
+    packet2->insertAtBack(TestMgrTLV);
+    packet2->insertAtBack(CommonTLV);
+    packet2->insertAtBack(EndTLV);
+
+    MacAddress SourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
+    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
+    MacAddress SourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
+    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress2, priority, MRP_LT ,packet2);
+    */
 }
 
 void MediaRedundancyNode::testPropagateReq(int RingPort, mrpPriority ManagerPrio, MacAddress SourceAddress)
@@ -1265,6 +1282,24 @@ void MediaRedundancyNode::testPropagateReq(int RingPort, mrpPriority ManagerPrio
 
     MacAddress SourceAddress1 = getPortNetworkInterface(RingPort)->getMacAddress();
     sendFrameReq(RingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
+
+
+/*  Currently function definition in standard request sending frame out both ring ports, but voting process description talks about
+ * answering testMgrNack frame. As the second frame for the other ring port is not necessary for function it is omitted, but code will
+ * stay in place for easier restoration of standard compliance
+ *
+ *  Packet* packet2 = new Packet("mrpTestPropagateFrame");
+    packet2->insertAtBack(Version);
+    packet2->insertAtBack(OptionTLV);
+    packet2->insertAtBack(TestMgrTLV);
+    packet2->insertAtBack(CommonTLV);
+    packet2->insertAtBack(EndTLV);
+
+    MacAddress SourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
+    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
+    MacAddress SourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
+    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress2, priority, MRP_LT ,packet2);
+    */
 }
 
 void MediaRedundancyNode::testRingInd(int RingPort, MacAddress SourceAddress, mrpPriority ManagerPrio)
