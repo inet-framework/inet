@@ -575,7 +575,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_show" value="false"/>
             <property name="include_fields" value="true"/>
             <property name="simplify" value="false"/>
-            <property name="yaxis_max" value=""/>
+            <property name="yaxis_max" value="0.25"/>
             <property name="Plot.Antialias" value="true"/>
             <property name="image_export_width" value="9"/>
         </chart>

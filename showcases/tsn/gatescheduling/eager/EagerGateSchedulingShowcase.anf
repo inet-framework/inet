@@ -5,7 +5,7 @@
         <input pattern="/inet/showcases/tsn/gatescheduling/eager/results/Eager-*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="489326974" name="Application End-to-End Delay" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1635758751" name="Application End-to-End Delay" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -655,7 +655,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value=""/>
+            <property name="xaxis_max" value="0.2"/>
             <property name="image_export_width" value="9"/>
             <property name="include_fields" value="false"/>
         </chart>

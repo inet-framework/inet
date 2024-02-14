@@ -5,7 +5,7 @@
         <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="269701792" name="Sources and Sinks Data Rate" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1061945849" name="Sources and Sinks Data Rate" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -690,7 +690,7 @@ utils.export_image_if_needed(props)
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.230207-439c415f65" icon="icons/full/obj/linechart.png" id="275682336" name="Sources and Sinks Data Rate + Filter Dropped Data Rate" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="489489044" name="Sources and Sinks Data Rate + Filter Dropped Data Rate" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -1340,7 +1340,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True&#10;figure.autolayout : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1050877792" name="Queueing Time" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="502917789" name="Queueing Time" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -1914,10 +1914,10 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value=""/>
+            <property name="xaxis_max" value="10"/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="560175043" name="Queue Length" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1647516909" name="Queue Length" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -2494,7 +2494,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value="10"/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="333942677" name="Stream 0 Data Rate" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="833724080" name="Stream 0 Data Rate" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -3136,7 +3136,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="9"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="672261058" name="Stream 1 Data Rate" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="974782743" name="Stream 1 Data Rate" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -3778,7 +3778,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="9"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="225490785" name="Stream 2 Data Rate" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="878299958" name="Stream 2 Data Rate" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 

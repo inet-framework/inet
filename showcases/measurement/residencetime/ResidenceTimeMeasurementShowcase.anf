@@ -5,7 +5,7 @@
         <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart createdWith="" icon="icons/full/obj/histogramchart.png" id="49379541" name="Source packet residence time, histogram" resultTypes="" template="histogramchart_native" type="HISTOGRAM">
+        <chart icon="icons/full/obj/histogramchart.png" id="49379541" name="Source packet residence time, histogram" template="histogramchart_native" type="HISTOGRAM">
             <script><![CDATA[from omnetpp.scave import results, chart, utils
 
 # get chart properties
@@ -570,7 +570,7 @@ Show over_underflow cell?
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="$name"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1902823577" name="Source packet residence time, vector" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1902823577" name="Source packet residence time, vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -1202,7 +1202,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value=""/>
+            <property name="xaxis_max" value="1"/>
             <property name="image_export_width" value="9"/>
             <property name="legend_prefer_module_display_paths" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
@@ -1211,7 +1211,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="meanBitResidenceTimePerPacket:vector"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/histogramchart.png" id="4" name="Switch packet residence time, histogram" resultTypes="" template="histogramchart_native" type="HISTOGRAM">
+        <chart icon="icons/full/obj/histogramchart.png" id="4" name="Switch packet residence time, histogram" template="histogramchart_native" type="HISTOGRAM">
             <script><![CDATA[from omnetpp.scave import results, chart, utils
 
 # get chart properties
@@ -1777,7 +1777,7 @@ Show over_underflow cell?
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="$name"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="5" name="Switch packet residence time, vector" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="5" name="Switch packet residence time, vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -2409,7 +2409,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value=""/>
+            <property name="xaxis_max" value="1"/>
             <property name="image_export_width" value="9"/>
             <property name="legend_prefer_module_display_paths" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
@@ -2418,7 +2418,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="meanBitResidenceTimePerPacket:vector"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/histogramchart.png" id="726181049" name="Destination packet residence time, histogram" resultTypes="" template="histogramchart_native" type="HISTOGRAM">
+        <chart icon="icons/full/obj/histogramchart.png" id="726181049" name="Destination packet residence time, histogram" template="histogramchart_native" type="HISTOGRAM">
             <script><![CDATA[from omnetpp.scave import results, chart, utils
 
 # get chart properties
@@ -2983,7 +2983,7 @@ Show over_underflow cell?
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="$name"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1308848667" name="Destination packet residence time, vector" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1308848667" name="Destination packet residence time, vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -3615,7 +3615,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value=""/>
+            <property name="xaxis_max" value="1"/>
             <property name="image_export_width" value="9"/>
             <property name="legend_prefer_module_display_paths" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
