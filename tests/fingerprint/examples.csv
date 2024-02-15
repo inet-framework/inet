@@ -461,10 +461,10 @@
 /examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            f1d5-1f6d/tplx;f190-9d17/~tNl;09be-cb28/~tND;492f-8b01/tyf, PASS, EthernetMac Ipv4
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            5639-8b29/tplx;04c6-2330/~tNl;6587-d7a7/~tND;ccd0-29d5/tyf, PASS, EthernetMac Ipv4
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic2 -r 0,               500s,            f08d-0e77/tplx;1d39-ec2f/~tNl;feb0-0be3/~tND;866d-7f23/tyf, PASS, EthernetMac Ipv4
-/examples/rip/infinitycount/,        -f omnetpp.ini -c General -r 0,                100s,            7374-2b6c/tplx;4e21-2489/~tNl;78b0-b1cc/~tND;667e-69cf/tyf, PASS, EthernetMac Ipv4
-/examples/rip/mixednetwork/,         -f omnetpp.ini -c stable -r 0,                 100s,            fdd7-4fac/tplx;2a20-65bd/~tNl;fc0c-03f0/~tND;0db6-cf44/tyf, PASS, EthernetMac Ipv4
-/examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,            714b-08c3/tplx;45f8-ee91/~tNl;6e09-01e3/~tND;802c-7da4/tyf, PASS, EthernetMac Ipv4
-/examples/rip/mixednetwork/,         -f omnetpp.ini -c shutdown-restart -r 0,       100s,            c986-2e8e/tplx;4bd0-fb89/~tNl;491a-5843/~tND;8d3d-707a/tyf, PASS, EthernetMac Ipv4
+/examples/rip/infinitycount/,        -f omnetpp.ini -c General -r 0,                100s,            5878-d58e/tplx;0950-446c/~tNl;c02f-fb11/~tND;667e-69cf/tyf, PASS, EthernetMac Ipv4
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c stable -r 0,                 100s,            35e8-eae8/tplx;ac42-7d89/~tNl;f22a-a86c/~tND;0db6-cf44/tyf, PASS, EthernetMac Ipv4
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,            d035-1a3e/tplx;1cb5-061d/~tNl;d60c-354c/~tND;802c-7da4/tyf, PASS, EthernetMac Ipv4
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c shutdown-restart -r 0,       100s,            491a-4e12/tplx;4acf-e6db/~tNl;aea7-3d26/~tND;8d3d-707a/tyf, PASS, EthernetMac Ipv4
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   100s,            3502-ef95/tplx;3b66-8f6c/~tNl;fe16-d2ea/~tND;e10a-1435/tyf, PASS, EthernetMac Ipv4
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,            8a7b-b692/tplx;92ce-7549/~tNl;4c96-1800/tyf, PASS, EthernetMac
 /examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,            732f-46d1/tplx;4854-3d14/~tNl;673d-9d99/~tND;a22a-ccdd/tyf, PASS, EthernetMac Ipv4
