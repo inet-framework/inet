@@ -29,7 +29,7 @@ simple Leach like IManetRouting
         string interfaceTableModule; 
         
         // LEACH parameter group
-        double maxVariance = default(1);
+        volatile double startupDelay @unit(s) = default(uniform(0s, 1s));
         int numNodes = default(10);
         double clusterHeadPercentage = default(0.5);
         int roundDurationVariance = default(10);

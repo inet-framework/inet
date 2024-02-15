@@ -64,7 +64,7 @@ void Leach::start() {
 
     // schedules a random periodic event
     event->setKind(SELF);
-    scheduleAt(simTime() + uniform(0.0, par("maxVariance").doubleValue()),
+    scheduleAt(simTime() + uniform(0.0, par("startupDelay").doubleValue()),
             event);
 }
 
