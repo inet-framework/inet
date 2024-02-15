@@ -239,6 +239,13 @@ class SimulationProject:
                 result = result + list(map(simulation_project.get_full_path, simulation_project.get_dynamic_libraries_for_running()))
         return result
 
+    def get_ned_folders_for_running(self):
+        result = self.ned_folders
+        for used_project in self.used_projects:
+            simulation_project = get_simulation_project(used_project, None)
+            result = result + list(map(simulation_project.get_full_path, simulation_project.get_ned_folders_for_running()))
+        return result
+
     def get_multiple_args(self, option, elements):
         args = []
         for element in elements:
@@ -250,7 +257,7 @@ class SimulationProject:
         return self.get_multiple_args(option, map(self.get_full_path, paths))
 
     def get_default_args(self):
-        return [*self.get_full_path_args("-l", self.get_dynamic_libraries_for_running()), *self.get_full_path_args("-n", self.ned_folders), *self.get_multiple_args("-x", self.ned_exclusions), *self.get_full_path_args("--image-path", self.image_folders)]
+        return [*self.get_full_path_args("-l", self.get_dynamic_libraries_for_running()), *self.get_full_path_args("-n", self.get_ned_folders_for_running()), *self.get_multiple_args("-x", self.ned_exclusions), *self.get_full_path_args("--image-path", self.image_folders)]
 
     def get_direct_include_folders(self):
         return list(map(lambda include_folder: self.get_full_path(include_folder), self.include_folders))
