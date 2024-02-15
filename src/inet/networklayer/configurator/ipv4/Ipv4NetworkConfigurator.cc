@@ -178,8 +178,10 @@ void Ipv4NetworkConfigurator::configureRoutingTable(IIpv4RoutingTable *routingTa
     // TODO avoid linear search
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
-        if (node->routingTable == routingTable)
+        if (node->routingTable == routingTable) {
             configureRoutingTable(node);
+            break;
+        }
     }
 }
 
@@ -1973,8 +1975,10 @@ void Ipv4NetworkConfigurator::addStaticMulticastRoutes(Topology& topology, Node 
 
         bool foundOutInterface = false;
         for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++)
-            if (route->getOutInterface(i)->getInterface() == outInterfaceInfo->networkInterface)
+            if (route->getOutInterface(i)->getInterface() == outInterfaceInfo->networkInterface) {
                 foundOutInterface = true;
+                break;
+            }
         if (!foundOutInterface) {
             route->addOutInterface(new Ipv4MulticastRoute::OutInterface(outInterfaceInfo->networkInterface, false /*TODOisLeaf*/));
             EV_INFO << "Extending static multicast route " << *route << " in " << node->module->getFullPath() << endl;
