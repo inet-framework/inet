@@ -190,7 +190,7 @@ void Ipv4NetworkConfigurator::addConfigurationToRoutingTable(IIpv4RoutingTable *
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         if (node->routingTable == routingTable) {
-            node->configuredNetworkInterfaces.push_back(networkInterface);
+            node->routingTableNetworkInterfaces.push_back(networkInterface);
             configureRoutingTable(node);
             break;
         }
@@ -204,7 +204,7 @@ void Ipv4NetworkConfigurator::removeConfigurationFromRoutingTable(IIpv4RoutingTa
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         if (node->routingTable == routingTable) {
-            remove(node->configuredNetworkInterfaces, networkInterface);
+            remove(node->routingTableNetworkInterfaces, networkInterface);
             configureRoutingTable(node);
             break;
         }
@@ -243,7 +243,7 @@ void Ipv4NetworkConfigurator::configureRoutingTable(Node *node)
         auto route = check_and_cast<Ipv4Route *>(routingTable->getRoute(i));
         if (route->getSourceType() == IRoute::MANUAL && route->getSource() == this) {
             auto predicate = [&] (const Ipv4Route *other) { return equalRoutes(route, other); };
-            if (contains(node->configuredNetworkInterfaces, route->getInterface()) &&
+            if (contains(node->routingTableNetworkInterfaces, route->getInterface()) &&
                 std::find_if(node->staticRoutes.begin(), node->staticRoutes.end(), predicate) != node->staticRoutes.end())
             {
                 i++;
@@ -269,7 +269,7 @@ void Ipv4NetworkConfigurator::configureRoutingTable(Node *node)
     EV_DETAIL << "Adding missing routes to routing table" << EV_FIELD(nodePath) << endl;
     for (size_t i = 0; i < node->staticRoutes.size(); i++) {
         Ipv4Route *original = node->staticRoutes[i];
-        if (contains(node->configuredNetworkInterfaces, original->getInterface())) {
+        if (contains(node->routingTableNetworkInterfaces, original->getInterface())) {
             bool found = false;
             for (int j = 0; j < routingTable->getNumRoutes(); j++) {
                 if (equalRoutes(original, check_and_cast<Ipv4Route *>(routingTable->getRoute(j)))) {
@@ -287,14 +287,14 @@ void Ipv4NetworkConfigurator::configureRoutingTable(Node *node)
     EV_DETAIL << "Adding all routes to multicast routing table" << EV_FIELD(nodePath) << endl;
     for (size_t i = 0; i < node->staticMulticastRoutes.size(); i++) {
         Ipv4MulticastRoute *original = node->staticMulticastRoutes[i];
-        bool used = original->getInInterface() && contains(node->configuredNetworkInterfaces, original->getInInterface()->getInterface());
+        bool used = original->getInInterface() && contains(node->routingTableNetworkInterfaces, original->getInInterface()->getInterface());
         for (size_t j = 0; !used && j < original->getNumOutInterfaces(); j++)
-            if (original->getOutInterface(j) && contains(node->configuredNetworkInterfaces, original->getOutInterface(j)->getInterface()))
+            if (original->getOutInterface(j) && contains(node->routingTableNetworkInterfaces, original->getOutInterface(j)->getInterface()))
                 used = true;
         if (used) {
             Ipv4MulticastRoute *route = new Ipv4MulticastRoute(*original);
             for (int j = 0; j < route->getNumOutInterfaces();) {
-                if (!contains(node->configuredNetworkInterfaces, route->getOutInterface(j)->getInterface()))
+                if (!contains(node->routingTableNetworkInterfaces, route->getOutInterface(j)->getInterface()))
                     route->removeOutInterface(j);
                 else
                     j++;
@@ -1123,7 +1123,7 @@ void Ipv4NetworkConfigurator::readManualRouteConfiguration(Topology& topology)
                             route->setMetric(atoi(metricAttr));
                         EV_INFO << "Adding manual route " << *route << " to " << node->module->getFullPath() << endl;
                         node->staticRoutes.push_back(route);
-                        node->configuredNetworkInterfaces.push_back(route->getInterface());
+                        node->routingTableNetworkInterfaces.push_back(route->getInterface());
                     }
                 }
             }
@@ -1212,12 +1212,12 @@ void Ipv4NetworkConfigurator::readManualMulticastRouteConfiguration(Topology& to
                             route->setMulticastGroup(group);
                             route->setInInterface(parent ? new Ipv4MulticastRoute::InInterface(parent) : nullptr);
                             if (parent)
-                                node->configuredNetworkInterfaces.push_back(parent);
+                                node->routingTableNetworkInterfaces.push_back(parent);
                             if (!opp_isempty(metricAttr))
                                 route->setMetric(atoi(metricAttr));
                             for (auto& child : children) {
                                 route->addOutInterface(new Ipv4MulticastRoute::OutInterface(child, false /*TODOisLeaf*/));
-                                node->configuredNetworkInterfaces.push_back(child);
+                                node->routingTableNetworkInterfaces.push_back(child);
                             }
                             EV_INFO << "Adding manual multicast route " << *route << " to " << node->module->getFullPath() << endl;
                             node->staticMulticastRoutes.push_back(route);
@@ -1456,7 +1456,7 @@ void Ipv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                 route->setSource(this);
                 EV_DEBUG << "Adding direct route " << *route << " to " << sourceNode->module->getFullPath() << endl;
                 sourceNode->staticRoutes.push_back(route);
-                sourceNode->configuredNetworkInterfaces.push_back(route->getInterface());
+                sourceNode->routingTableNetworkInterfaces.push_back(route->getInterface());
             }
 
             // add a default route towards the only one gateway
@@ -1470,7 +1470,7 @@ void Ipv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
             route->setSource(this);
             EV_DEBUG << "Adding default route " << *route << " to " << sourceNode->module->getFullPath() << endl;
             sourceNode->staticRoutes.push_back(route);
-            sourceNode->configuredNetworkInterfaces.push_back(route->getInterface());
+            sourceNode->routingTableNetworkInterfaces.push_back(route->getInterface());
 
             // skip building and optimizing the whole routing table
             EV_DEBUG << "Adding default routes to " << sourceNode->getModule()->getFullPath() << ", node has only one (non-loopback) interface" << endl;
@@ -1541,7 +1541,7 @@ void Ipv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                                 delete route;
                             else {
                                 sourceNode->staticRoutes.push_back(route);
-                                sourceNode->configuredNetworkInterfaces.push_back(route->getInterface());
+                                sourceNode->routingTableNetworkInterfaces.push_back(route->getInterface());
                                 EV_DEBUG << "Adding route " << sourceNetworkInterface->getInterfaceFullPath() << " -> " << destinationNetworkInterface->getInterfaceFullPath() << " as " << route->str() << endl;
                             }
                         }
@@ -1964,7 +1964,7 @@ void Ipv4NetworkConfigurator::addStaticMulticastRoutes(Topology& topology, Node 
             route->setMulticastGroup(multicastGroup);
             route->setInInterface(inInterfaceInfo != nullptr ? new Ipv4MulticastRoute::InInterface(inInterfaceInfo->networkInterface) : nullptr);
             if (inInterfaceInfo != nullptr)
-                node->configuredNetworkInterfaces.push_back(inInterfaceInfo->networkInterface);
+                node->routingTableNetworkInterfaces.push_back(inInterfaceInfo->networkInterface);
 //            if (!opp_isempty(metricAttr))
 //                route->setMetric(atoi(metricAttr));
 //            EV_INFO << "Adding static multicast route " << *route << " to " << node->module->getFullPath() << endl;

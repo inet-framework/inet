@@ -38,7 +38,7 @@ class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase, publi
       public:
         std::vector<Ipv4Route *> staticRoutes;
         std::vector<Ipv4MulticastRoute *> staticMulticastRoutes;
-        std::vector<const NetworkInterface *> configuredNetworkInterfaces;
+        std::vector<const NetworkInterface *> routingTableNetworkInterfaces;
 
       public:
         Node(cModule *module) : L3NetworkConfiguratorBase::Node(module) {}
