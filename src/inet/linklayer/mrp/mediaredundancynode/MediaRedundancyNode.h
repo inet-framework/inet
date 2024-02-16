@@ -90,7 +90,7 @@ protected:
     mrpRole expectedRole = DISABLED;
     nodeState currentState = POWER_ON;
     bool interconnectionLinkCheckAware = true;
-    bool interConnectionRingCheckAware = true;
+    bool interconnectionRingCheckAware = true;
     bool enableLinkCheckOnRing = false;
     MacAddress sourceAddress;
 
@@ -170,8 +170,7 @@ protected:
     double linkDetectionDelayMean = 385000;
     double linkDetectionDelayDev = 325000;
 
-    uint16_t lastTestId =0;
-    uint16_t lastTopologyId =0;
+    uint16_t lastTopologyId = 0;
 
     typedef std::map<uint16_t, int64_t> FrameSentDatabase;
     FrameSentDatabase testFrameSent;
@@ -215,6 +214,8 @@ protected:
     virtual void handleTopologyChangeTimer();
     virtual void clearLocalFDB();
     virtual void clearLocalFDBDelayed();
+    virtual bool isBetterThanOwnPrio(mrpPriority RemotePrio, MacAddress RemoteAddress);
+    virtual bool isBetterThanBestPrio(mrpPriority RemotePrio, MacAddress RemoteAddress);
     virtual void handleTestTimer();
     virtual void handleLinkUpTimer();
     virtual void handleLinkDownTimer();
