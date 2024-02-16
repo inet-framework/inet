@@ -243,8 +243,11 @@ void Ipv4NetworkConfigurator::configureRoutingTable(Node *node)
         auto route = check_and_cast<Ipv4Route *>(routingTable->getRoute(i));
         if (route->getSourceType() == IRoute::MANUAL && route->getSource() == this) {
             auto predicate = [&] (const Ipv4Route *other) { return equalRoutes(route, other); };
-            if (std::find_if(node->staticRoutes.begin(), node->staticRoutes.end(), predicate) != node->staticRoutes.end())
+            if (contains(node->configuredNetworkInterfaces, route->getInterface()) &&
+                std::find_if(node->staticRoutes.begin(), node->staticRoutes.end(), predicate) != node->staticRoutes.end())
+            {
                 i++;
+            }
             else {
                 EV_DETAIL << "Removing route" << EV_FIELD(route) << EV_FIELD(nodePath) << endl;
                 routingTable->deleteRoute(route);
