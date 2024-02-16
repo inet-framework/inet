@@ -74,7 +74,6 @@ class INET_API InterconnectionNode : public MediaRedundancyNode
     inNodeState inState = POWER_ON;
     inRoleState inRole = INTERCONNECTION_CLIENT;
     uint16_t lastPollId = 0;
-    uint16_t lastInTestId = 0;
     uint16_t lastInTopologyId = 0;
     interConnectionState currentInterconnectionState = OPEN;
     FrameSentDatabase inTestFrameSent;
@@ -101,7 +100,6 @@ class INET_API InterconnectionNode : public MediaRedundancyNode
     virtual void handleInTopologyChangeTimer();
     virtual void handleInLinkUpTimer();
     virtual void handleInLinkDownTimer();
-    virtual bool hasPassedInterConnRing(uint16_t PortRole,int RingPort);
     virtual void interconnTestReq(double Time);
     virtual void interconnTopologyChangeReq(double Time);
     virtual void interconnLinkChangeReq(uint16_t LinkState, double Time);

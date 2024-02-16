@@ -76,16 +76,16 @@ void MrpRelay::handleLowerPacket(Packet *incomingPacket)
     macAddressReq->setSrcAddress(sourceAddress);
     macAddressReq->setDestAddress(destinationAddress);
 
-    if (mrpInterfaceData->getRole() != MrpInterfaceData::NOTASSIGNED && destinationAddress.isMulticast()) {
+    if (mrpInterfaceData->getRole() != MrpInterfaceData::NOTASSIGNED && isMrpMulticast(destinationAddress)) {
         //Mrp-Multicast Handling, forwarding to RingPort in any Case, send up if registered
         //it is a Mrp-Address registered in this relays database for forwarding on ring or to upper layer
         auto outgoingInterfaceIds = mrpMacForwardingTable->getMrpForwardingInterfaces(destinationAddress,vlanId);
         EV_DEBUG << "Mrp-Multicast-DataBase:" << EV_FIELD(outgoingInterfaceIds.size()) << EV_ENDL;
-        if (outgoingInterfaceIds.size() > 0){
+        if (outgoingInterfaceIds.size() > 0 && !mrpMacForwardingTable->isMrpIngressFilterInterface(incomingInterfaceId,destinationAddress,vlanId)){
             EV_DETAIL << "Deliver Mrp-Multicast according to entries in FDB" << EV_ENDL;
             for (auto outgoingInterfaceId : outgoingInterfaceIds) {
                 if (interfaceInd != nullptr && outgoingInterfaceId == incomingInterfaceId)
-                    EV_DETAIL << "Ignoring outgoing interface because it is the same as incoming interface or currently not forwarding" << EV_FIELD(destinationAddress) << EV_FIELD(incomingInterface) << EV_FIELD(incomingPacket) << EV_ENDL;
+                    EV_DETAIL << "Ignoring outgoing interface because it is the same as incoming interface or currently not forwarding"  << EV_FIELD(incomingInterface) << EV_ENDL;
                 else {
                     auto outgoingInterface = interfaceTable->getInterfaceById(outgoingInterfaceId);
                     sendPacket(outgoingPacket->dup(), destinationAddress, outgoingInterface);
@@ -94,7 +94,6 @@ void MrpRelay::handleLowerPacket(Packet *incomingPacket)
             numDispatchedMRPFrames++;
         }
         if (in_range(registeredMacAddresses, destinationAddress)){
-            EV_DETAIL << "Deliver to MRP Node" << EV_ENDL;
             sendUp(incomingPacket);
             numDeliveredPDUsToMRP++;
         }
@@ -202,6 +201,13 @@ int MrpRelay::getCcmLevel(Packet *packet)
 {
     const auto& ccm=packet->peekAtFront<continuityCheckMessage>();
     return ccm->getMdLevel();
+}
+
+bool MrpRelay::isMrpMulticast(MacAddress DestinationAddress)
+{
+    if (DestinationAddress.getAddressByte(0) & 0x01 && DestinationAddress.getAddressByte(1) & 0x15 && DestinationAddress.getAddressByte(2) & 0x4E)
+        return true;
+    return false;
 }
 
 void MrpRelay::handleUpperPacket(Packet *packet)
