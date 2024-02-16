@@ -17,6 +17,7 @@ class INET_API Cable : public cDatarateChannel
   protected:
     const char *enabledLineStyle = nullptr;
     const char *disabledLineStyle = nullptr;
+    cIconFigure *disabledFigure = nullptr;
 
   protected:
     virtual void initialize() override;

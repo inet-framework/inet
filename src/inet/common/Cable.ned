@@ -14,5 +14,6 @@ channel Cable extends DatarateChannel
     parameters:
         string enabledLineStyle = default("solid");
         string disabledLineStyle = default("dashed");
+        string disabledIcon = default("status/cross");
         @class(Cable);
 }
