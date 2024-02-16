@@ -170,7 +170,7 @@ void MediaRedundancyNode::initialize(int stage)
         timingProfile = par("timingProfile");
         ccmInterval = par("ccmInterval");
         interconnectionLinkCheckAware = par("interconnectionLinkCheckAware");
-        interConnectionRingCheckAware = par("interconnectionRingCheckAware");
+        interconnectionRingCheckAware = par("interconnectionRingCheckAware");
         enableLinkCheckOnRing = par("enableLinkCheckOnRing");
         //manager variables
         nonBlockingMRC=par("nonBlockingMRC");
@@ -255,7 +255,7 @@ void MediaRedundancyNode::initContinuityCheck()
                 checkTimer->setPort(interfaceId);
                 checkTimer->setKind(1);
                 scheduleAt(simTime()+portData->getContinuityCheckInterval(), checkTimer);
-                EV_DETAIL << "Next CCM-Interval:" <<EV_FIELD(simTime()+portData->getContinuityCheckInterval()) <<EV_ENDL;
+                EV_DEBUG << "Next CCM-Interval:" <<EV_FIELD(simTime()+portData->getContinuityCheckInterval()) <<EV_ENDL;
             }
         }
     }
@@ -360,12 +360,12 @@ void MediaRedundancyNode::mrcInit()
     mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPort,static_cast<MacAddress>(MC_TEST), vlanID);
     relay->registerAddress(static_cast<MacAddress>(MC_CONTROL));
 
-    if(interConnectionRingCheckAware || interconnectionLinkCheckAware)
+    if(interconnectionRingCheckAware || interconnectionLinkCheckAware)
     {
         mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPort, static_cast<MacAddress>(MC_INCONTROL),vlanID);
         mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPort, static_cast<MacAddress>(MC_INCONTROL),vlanID);
     }
-    if(interConnectionRingCheckAware)
+    if(interconnectionRingCheckAware)
     {
         mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPort, static_cast<MacAddress>(MC_INTEST), vlanID);
         mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPort, static_cast<MacAddress>(MC_INTEST), vlanID);
@@ -386,9 +386,9 @@ void MediaRedundancyNode::mrmInit()
     testRetransmissionCount = 0;
     relay->registerAddress(static_cast<MacAddress>(MC_TEST));
     relay->registerAddress(static_cast<MacAddress>(MC_CONTROL));
-    if (interConnectionRingCheckAware || interconnectionLinkCheckAware)
+    if (interconnectionRingCheckAware || interconnectionLinkCheckAware)
         relay->registerAddress(static_cast<MacAddress>(MC_INCONTROL));
-    if (interConnectionRingCheckAware)
+    if (interconnectionRingCheckAware)
         relay->registerAddress(static_cast<MacAddress>(MC_INTEST));
     testMaxRetransmissionCount=testMonitoringCount -1;
     testRetransmissionCount = 0;
@@ -413,9 +413,9 @@ void MediaRedundancyNode::mraInit()
     testRetransmissionCount = 0;
     relay->registerAddress(static_cast<MacAddress>(MC_TEST));
     relay->registerAddress(static_cast<MacAddress>(MC_CONTROL));
-    if (interConnectionRingCheckAware || interconnectionLinkCheckAware)
+    if (interconnectionRingCheckAware || interconnectionLinkCheckAware)
         relay->registerAddress(static_cast<MacAddress>(MC_INCONTROL));
-    if (interConnectionRingCheckAware)
+    if (interconnectionRingCheckAware)
         relay->registerAddress(static_cast<MacAddress>(MC_INTEST));
     testMaxRetransmissionCount=testMonitoringCount -1;
     testRetransmissionCount = 0;
@@ -550,21 +550,20 @@ void MediaRedundancyNode::handleMrpPDU(Packet *packet)
         EV_DETAIL << "Received Test-Frame" << EV_ENDL;
         auto testTLV = dynamicPtrCast<const testFrame>(firstTLV);
         if (ringID){
-            if (sequence > lastTestId){
-                lastTestId = sequence;
+                if (testTLV->getSa() == sourceAddress){
+                    auto ringTime = simTime().inUnit(SIMTIME_MS) - testTLV->getTimeStamp();
+                    auto lastTestFrameSent = testFrameSent.find(sequence);
+                    if (lastTestFrameSent != testFrameSent.end()){
+                        int64_t ringTimePrecise = simTime().inUnit(SIMTIME_US) - lastTestFrameSent->second;
+                        emit(ReceivedTestSignal,ringTimePrecise);
+                        EV_DETAIL << "RingTime" <<EV_FIELD(ringTime) <<EV_FIELD(ringTimePrecise) << EV_ENDL;
+                    }
+                    else{
+                        emit(ReceivedTestSignal,ringTime*1000);
+                        EV_DETAIL << "RingTime" <<EV_FIELD(ringTime) << EV_ENDL;
+                    }
+                }
                 testRingInd(RingPort, testTLV->getSa(), static_cast<mrpPriority>(testTLV->getPrio()));
-                int ringTime = simTime().inUnit(SIMTIME_MS) - testTLV->getTimeStamp();
-                auto lastTestFrameSent = testFrameSent.find(sequence);
-                if (lastTestFrameSent != testFrameSent.end()){
-                    int64_t ringTimePrecise = simTime().inUnit(SIMTIME_US) - lastTestFrameSent->second;
-                    emit(ReceivedTestSignal,ringTimePrecise);
-                    EV_DETAIL << "RingTime" <<EV_FIELD(ringTime) <<EV_FIELD(ringTimePrecise) << EV_ENDL;
-                }
-                else{
-                    emit(ReceivedTestSignal,ringTime*1000);
-                    EV_DETAIL << "RingTime" <<EV_FIELD(ringTime) << EV_ENDL;
-                }
-            }
         }
         else{
             EV_DETAIL << "Received packet from other Mrp-Domain" << EV_FIELD(incomingInterface) << EV_FIELD(packet) << EV_ENDL;
@@ -577,10 +576,13 @@ void MediaRedundancyNode::handleMrpPDU(Packet *packet)
         auto topologyTLV = dynamicPtrCast<const topologyChangeFrame>(firstTLV);
         if (ringID){
             if (sequence > lastTopologyId){
-                lastTopologyId = sequence;
                 topologyChangeInd(topologyTLV->getSa(), topologyTLV->getInterval());
+                emit(ReceivedChangeSignal,topologyTLV->getInterval());
             }
-            emit(ReceivedChangeSignal,topologyTLV->getInterval());
+            else{
+                EV_DETAIL << "Received same Frame already" << EV_ENDL;
+                delete packet;
+            }
         }
         else{
             EV_DETAIL << "Received packet from other Mrp-Domain" << EV_FIELD(incomingInterface) << EV_FIELD(packet) << EV_ENDL;
@@ -778,7 +780,7 @@ void MediaRedundancyNode::handleContinuityCheckMessage(Packet *packet)
         }
     }
     portData->setNextUpdate(simTime() + portData->getContinuityCheckInterval()*3.5);
-    EV_DETAIL <<"new ccm-Data" <<EV_FIELD(portData->getNextUpdate()) <<EV_FIELD(portData->getCfmEndpointID()) <<EV_FIELD(SourceAddress) <<EV_FIELD(incomingInterface->getMacAddress()) <<EV_ENDL;
+    EV_DEBUG <<"new ccm-Data" <<EV_FIELD(portData->getNextUpdate()) <<EV_FIELD(portData->getCfmEndpointID()) <<EV_FIELD(SourceAddress) <<EV_FIELD(incomingInterface->getMacAddress()) <<EV_ENDL;
     mauTypeChangeInd(RingPort, NetworkInterface::UP);
     emit(ReceivedContinuityCheckSignal,RingPort);
     delete packet;
@@ -786,7 +788,7 @@ void MediaRedundancyNode::handleContinuityCheckMessage(Packet *packet)
 
 void MediaRedundancyNode::handleDelayTimer(int interfaceId, int field)
 {
-    EV_INFO << "handling DelayTimer" << EV_ENDL;
+    EV_DETAIL << "handling DelayTimer" << EV_ENDL;
     auto interface = getPortNetworkInterface(interfaceId);
     if (field == NetworkInterface::F_STATE || (field == NetworkInterface::F_CARRIER && interface->isUp())){
         auto portData = getPortInterfaceDataForUpdate(interfaceId);
@@ -794,7 +796,7 @@ void MediaRedundancyNode::handleDelayTimer(int interfaceId, int field)
             auto nextUpdate =simTime()+portData->getContinuityCheckInterval()*3.5;
             portData->setNextUpdate(nextUpdate);
         }
-        if (interface->isUp())
+        if (interface->isUp() && interface->hasCarrier())
             mauTypeChangeInd(interfaceId,  NetworkInterface::UP);
         else
             mauTypeChangeInd(interfaceId, NetworkInterface::DOWN);
@@ -803,8 +805,6 @@ void MediaRedundancyNode::handleDelayTimer(int interfaceId, int field)
 
 void MediaRedundancyNode::clearLocalFDB()
 {
-    //mrpMacForwardingTable->removeForwardingInterface(primaryRingPort);
-    //mrpMacForwardingTable->removeForwardingInterface(secondaryRingPort);
     EV_DETAIL << "clearing FDB" << EV_ENDL;
     if (fdbClearDelay->isScheduled())
         cancelEvent(fdbClearDelay);
@@ -819,17 +819,36 @@ void MediaRedundancyNode::clearLocalFDBDelayed()
     EV_DETAIL << "FDB cleared" << EV_ENDL;
 }
 
+bool MediaRedundancyNode::isBetterThanOwnPrio(mrpPriority RemotePrio, MacAddress RemoteAddress)
+{
+    if (RemotePrio < managerPrio){
+        return true;
+    }
+    if (RemotePrio == managerPrio && RemoteAddress < sourceAddress){
+        return true;
+    }
+    return false;
+}
+
+bool MediaRedundancyNode::isBetterThanBestPrio(mrpPriority RemotePrio, MacAddress RemoteAddress)
+{
+    if (RemotePrio < hostBestMRMPriority)
+        return true;
+    if (RemotePrio == hostBestMRMPriority && RemoteAddress < hostBestMRMSourceAddress)
+        return true;
+    return false;
+}
+
 void MediaRedundancyNode::handleContinuityCheckTimer(int RingPort)
 {
     auto portData = getPortInterfaceDataForUpdate(RingPort);
-    EV_DETAIL <<"Checktimer:" <<EV_FIELD(simTime()) <<EV_FIELD(portData->getNextUpdate())<<EV_ENDL;
+    EV_DETAIL <<"Checktimer:" <<EV_FIELD(simTime()) <<EV_FIELD(RingPort) <<EV_FIELD(portData->getNextUpdate()) <<EV_ENDL;
     if (simTime() >= portData->getNextUpdate()){
         //no Message received within Lifetime
-        EV_DETAIL <<"Checktimer: Link considered down" <<EV_FIELD(simTime()) <<EV_FIELD(portData->getNextUpdate())<<EV_ENDL;
+        EV_DETAIL <<"Checktimer: Link considered down" <<EV_ENDL;
         mauTypeChangeInd(RingPort, NetworkInterface::DOWN);
     }
     setupContinuityCheck(RingPort);
-    EV_DETAIL <<"Checktimer:" <<EV_FIELD(RingPort) <<EV_ENDL;
     class continuityCheckTimer* checkTimer = new continuityCheckTimer("continuityCheckTimer");
     checkTimer->setPort(RingPort);
     checkTimer->setKind(1);
@@ -865,7 +884,7 @@ void MediaRedundancyNode::handleTestTimer()
             }
             testRingReq(defaultTestInterval);
             currentState = CHK_RO;
-            EV_INFO << "Switching State from CHK_RC to CHK_RO" << EV_FIELD(currentState) << EV_ENDL;
+            EV_DETAIL << "Switching State from CHK_RC to CHK_RO" << EV_FIELD(currentState) << EV_ENDL;
             currentRingState = OPEN;
             emit(RingStateChangedSignal, simTime().inUnit(SIMTIME_US));
         }else{
@@ -884,7 +903,7 @@ void MediaRedundancyNode::handleTestTimer()
             else{
                 mrmInit();
                 currentState = PRM_UP;
-                EV_INFO << "Switching State from DE_IDLE to PRM_UP" << EV_FIELD(currentState) << EV_ENDL;
+                EV_DETAIL << "Switching State from DE_IDLE to PRM_UP" << EV_FIELD(currentState) << EV_ENDL;
             }
         }
         break;
@@ -897,7 +916,7 @@ void MediaRedundancyNode::handleTestTimer()
             else{
                 mrmInit();
                 currentState = CHK_RC;
-                EV_INFO << "Switching State from PT to CHK_RC" << EV_FIELD(currentState) << EV_ENDL;
+                EV_DETAIL << "Switching State from PT to CHK_RC" << EV_FIELD(currentState) << EV_ENDL;
             }
         }
         break;
@@ -910,7 +929,7 @@ void MediaRedundancyNode::handleTestTimer()
             else{
                 mrmInit();
                 currentState = CHK_RO;
-                EV_INFO << "Switching State from PT_IDLE to CHK_RO" << EV_FIELD(currentState) << EV_ENDL;
+                EV_DETAIL << "Switching State from PT_IDLE to CHK_RO" << EV_FIELD(currentState) << EV_ENDL;
             }
         }
         break;
@@ -941,7 +960,7 @@ void MediaRedundancyNode::handleLinkUpTimer()
             setPortState(secondaryRingPort,MrpInterfaceData::FORWARDING);
             linkChangeCount= linkMaxChange;
             currentState = PT_IDLE;
-            EV_INFO << "Switching State from PT to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
+            EV_DETAIL << "Switching State from PT to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         }
         else{
             linkChangeReq(primaryRingPort, NetworkInterface::UP);
@@ -969,7 +988,7 @@ void MediaRedundancyNode::handleLinkDownTimer()
         if (linkChangeCount == 0){
             linkChangeCount = linkMaxChange;
             currentState = DE_IDLE;
-            EV_INFO << "Switching State from DE to DE_IDLE" << EV_FIELD(currentState) << EV_ENDL;
+            EV_DETAIL << "Switching State from DE to DE_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         }
         else{
             linkChangeReq(primaryRingPort,NetworkInterface::DOWN);
@@ -1009,7 +1028,6 @@ void MediaRedundancyNode::setupContinuityCheck(int RingPort)
     }
     CCM->setEndpointIdentifier(portData->getCfmEndpointID());
     auto name = portData->getCfmName();
-    EV_INFO << "CCM-Name" << EV_FIELD(name)<< EV_ENDL;
     CCM->setMessageName(name.c_str());
     auto packet = new Packet("ContinuityCheck", CCM);
     sendCCM(RingPort, packet);
@@ -1018,27 +1036,27 @@ void MediaRedundancyNode::setupContinuityCheck(int RingPort)
 
 void MediaRedundancyNode::testRingReq(double Time)
 {
-    setupTestRingReq();
+    if (addTest)
+        cancelEvent(testTimer);
     if (!testTimer->isScheduled()){
         scheduleAt(simTime()+SimTime(Time,SIMTIME_MS), testTimer);
-    }
-    else if (addTest){
-        cancelEvent(testTimer);
-        scheduleAt(simTime()+SimTime(Time,SIMTIME_MS), testTimer);
+        setupTestRingReq();
     }
     else
-        EV_INFO << "Testtimer already scheduled" << EV_ENDL;
+        EV_DETAIL << "Testtimer already scheduled" << EV_ENDL;
 }
 
 void MediaRedundancyNode::topologyChangeReq(double Time)
 {
-    setupTopologyChangeReq(Time*topologyChangeMaxRepeatCount);
     if (Time == 0){
         clearLocalFDB();
     }
-    else {
+    else if (!topologyChangeTimer->isScheduled()){
         scheduleAt(simTime() + SimTime(Time,SIMTIME_MS), topologyChangeTimer);
+        setupTopologyChangeReq(Time*topologyChangeMaxRepeatCount);
     }
+    else
+        EV_DETAIL << "inTopologyChangeTimer already scheduled" << EV_ENDL;
 }
 
 void MediaRedundancyNode::linkChangeReq(int RingPort, uint16_t LinkState)
@@ -1070,8 +1088,8 @@ void MediaRedundancyNode::setupTestRingReq()
     auto CommonTLV = makeShared<commonHeader>();
     auto EndTLV = makeShared<tlvHeader>();
 
-    uint32_t timestamp= simTime().inUnit(SIMTIME_MS);
-    int64_t lastTestFrameSent = simTime().inUnit(SIMTIME_US);
+    auto timestamp= simTime().inUnit(SIMTIME_MS);
+    auto lastTestFrameSent = simTime().inUnit(SIMTIME_US);
     testFrameSent.insert({sequenceID, lastTestFrameSent});
 
     TestTLV1->setPrio(managerPrio);
@@ -1231,14 +1249,13 @@ void MediaRedundancyNode::testMgrNackReq(int RingPort, mrpPriority ManagerPrio, 
     packet1->insertAtBack(CommonTLV);
     packet1->insertAtBack(EndTLV);
 
-    MacAddress SourceAddress1 = getPortNetworkInterface(RingPort)->getMacAddress();
-    sendFrameReq(RingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
+    //Standard request sending out both packets, but defines a handshake.
+    //sending the answer back would be enough
+    //Code will remain comment out for easy optimization
+    //MacAddress SourceAddress1 = getPortNetworkInterface(RingPort)->getMacAddress();
+    //sendFrameReq(RingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
 
-/*  Currently function definition in standard request sending frame out both ring ports, but voting process description talks about
- * answering testMgrNack frame. As the second frame for the other ring port is not necessary for function it is omitted, but code will
- * stay in place for easier restoration of standard compliance
- *
- *  Packet* packet2 = new Packet("mrpTestMgrNackFrame");
+    Packet* packet2 = new Packet("mrpTestMgrNackFrame");
     packet2->insertAtBack(Version);
     packet2->insertAtBack(OptionTLV);
     packet2->insertAtBack(TestMgrTLV);
@@ -1249,7 +1266,6 @@ void MediaRedundancyNode::testMgrNackReq(int RingPort, mrpPriority ManagerPrio, 
     sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
     MacAddress SourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
     sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress2, priority, MRP_LT ,packet2);
-    */
 }
 
 void MediaRedundancyNode::testPropagateReq(int RingPort, mrpPriority ManagerPrio, MacAddress SourceAddress)
@@ -1280,15 +1296,13 @@ void MediaRedundancyNode::testPropagateReq(int RingPort, mrpPriority ManagerPrio
     packet1->insertAtBack(CommonTLV);
     packet1->insertAtBack(EndTLV);
 
-    MacAddress SourceAddress1 = getPortNetworkInterface(RingPort)->getMacAddress();
-    sendFrameReq(RingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
+    //Standard request sending out both packets, but defines a handshake.
+    //sending the answer back would be enough
+    //Code will remain comment out for easy optimization
+    //MacAddress SourceAddress1 = getPortNetworkInterface(RingPort)->getMacAddress();
+    //sendFrameReq(RingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
 
-
-/*  Currently function definition in standard request sending frame out both ring ports, but voting process description talks about
- * answering testMgrNack frame. As the second frame for the other ring port is not necessary for function it is omitted, but code will
- * stay in place for easier restoration of standard compliance
- *
- *  Packet* packet2 = new Packet("mrpTestPropagateFrame");
+    Packet* packet2 = new Packet("mrpTestPropagateFrame");
     packet2->insertAtBack(Version);
     packet2->insertAtBack(OptionTLV);
     packet2->insertAtBack(TestMgrTLV);
@@ -1299,7 +1313,6 @@ void MediaRedundancyNode::testPropagateReq(int RingPort, mrpPriority ManagerPrio
     sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
     MacAddress SourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
     sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress2, priority, MRP_LT ,packet2);
-    */
 }
 
 void MediaRedundancyNode::testRingInd(int RingPort, MacAddress SourceAddress, mrpPriority ManagerPrio)
@@ -1316,12 +1329,12 @@ void MediaRedundancyNode::testRingInd(int RingPort, MacAddress SourceAddress, mr
             noTopologyChange = false;
             testRingReq(defaultTestInterval);
             currentState = CHK_RC;
-            EV_INFO << "Switching State from PRM_UP to CHK_RC" << EV_FIELD(currentState) << EV_ENDL;
+            EV_DETAIL << "Switching State from PRM_UP to CHK_RC" << EV_FIELD(currentState) << EV_ENDL;
             currentRingState = CLOSED;
             emit(RingStateChangedSignal, simTime().inUnit(SIMTIME_US));
         }
-        else if(expectedRole == MANAGER_AUTO && (ManagerPrio > managerPrio || (ManagerPrio == managerPrio && SourceAddress >sourceAddress))){
-            testMgrNackReq(RingPort,ManagerPrio,SourceAddress);
+        else if(expectedRole == MANAGER_AUTO && !isBetterThanOwnPrio(ManagerPrio, SourceAddress)){
+            testMgrNackReq(RingPort, ManagerPrio,SourceAddress);
         }
         //all other cases: ignore
         break;
@@ -1340,12 +1353,12 @@ void MediaRedundancyNode::testRingInd(int RingPort, MacAddress SourceAddress, mr
                 topologyChangeReq(Time);
             }
             currentState= CHK_RC;
-            EV_INFO << "Switching State from CHK_RO to CHK_RC" << EV_FIELD(currentState) << EV_ENDL;
+            EV_DETAIL << "Switching State from CHK_RO to CHK_RC" << EV_FIELD(currentState) << EV_ENDL;
             currentRingState = CLOSED;
             emit(RingStateChangedSignal, simTime().inUnit(SIMTIME_US));
         }
-        else if (expectedRole == MANAGER_AUTO && (ManagerPrio > managerPrio || (ManagerPrio == managerPrio && SourceAddress >sourceAddress))){
-            testMgrNackReq(RingPort,ManagerPrio, SourceAddress);
+        else if (expectedRole == MANAGER_AUTO && !isBetterThanOwnPrio(ManagerPrio, SourceAddress)){
+            testMgrNackReq(RingPort, ManagerPrio, SourceAddress);
         }
         //all other cases: ignore
         break;
@@ -1355,8 +1368,8 @@ void MediaRedundancyNode::testRingInd(int RingPort, MacAddress SourceAddress, mr
             testRetransmissionCount = 0;
             noTopologyChange= false;
         }
-        else if (expectedRole == MANAGER_AUTO && (ManagerPrio > managerPrio || (ManagerPrio == managerPrio && SourceAddress >sourceAddress))){
-            testMgrNackReq(RingPort,ManagerPrio, SourceAddress);
+        else if (expectedRole == MANAGER_AUTO && !isBetterThanOwnPrio(ManagerPrio, SourceAddress)){
+            testMgrNackReq(RingPort, ManagerPrio, SourceAddress);
         }
         break;
     case DE:
@@ -1395,21 +1408,21 @@ void MediaRedundancyNode::topologyChangeInd(MacAddress SourceAddress, double Tim
         setPortState(secondaryRingPort, MrpInterfaceData::FORWARDING);
         clearFDB(Time);
         currentState = PT_IDLE;
-        EV_INFO << "Switching State from PT to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
+        EV_DETAIL << "Switching State from PT to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         break;
     case DE:
         linkChangeCount = linkMaxChange;
         cancelEvent(linkDownTimer);
         clearFDB(Time);
         currentState=DE_IDLE;
-        EV_INFO << "Switching State from DE to DE_IDLE" << EV_FIELD(currentState) << EV_ENDL;
+        EV_DETAIL << "Switching State from DE to DE_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         break;
     case DE_IDLE:
         clearFDB(Time);
         if (expectedRole == MANAGER_AUTO && linkUpHysterisisTimer->isScheduled()){
             setPortState(secondaryRingPort, MrpInterfaceData::FORWARDING);
             currentState=PT_IDLE;
-            EV_INFO << "Switching State from DE_IDLE to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
+            EV_DETAIL << "Switching State from DE_IDLE to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         }
     case PT_IDLE:
         clearFDB(Time);
@@ -1476,7 +1489,7 @@ void MediaRedundancyNode::linkChangeInd(uint16_t PortState, uint16_t LinkState)
                     currentState = CHK_RC;
                     currentRingState = CLOSED;
                     emit(RingStateChangedSignal, simTime().inUnit(SIMTIME_US));
-                    EV_INFO << "Switching State from CHK_RO to CHK_RC" << EV_FIELD(currentState) << EV_ENDL;
+                    EV_DETAIL << "Switching State from CHK_RO to CHK_RC" << EV_FIELD(currentState) << EV_ENDL;
                 }
             }
         }
@@ -1491,7 +1504,7 @@ void MediaRedundancyNode::linkChangeInd(uint16_t PortState, uint16_t LinkState)
                 currentState = CHK_RC;
                 currentRingState = CLOSED;
                 emit(RingStateChangedSignal, simTime().inUnit(SIMTIME_US));
-                EV_INFO << "Switching State from CHK_RO to CHK_RC" << EV_FIELD(currentState) << EV_ENDL;
+                EV_DETAIL << "Switching State from CHK_RO to CHK_RC" << EV_FIELD(currentState) << EV_ENDL;
             }
         }
         //all other cases: ignore
@@ -1505,7 +1518,7 @@ void MediaRedundancyNode::linkChangeInd(uint16_t PortState, uint16_t LinkState)
                 currentState = CHK_RO;
                 currentRingState = OPEN;
                 emit(RingStateChangedSignal, simTime().inUnit(SIMTIME_US));
-                EV_INFO << "Switching State from CHK_RC to CHK_RO" << EV_FIELD(currentState) << EV_ENDL;
+                EV_DETAIL << "Switching State from CHK_RC to CHK_RO" << EV_FIELD(currentState) << EV_ENDL;
                 break;
             }
             else if (LinkState ==NetworkInterface::UP){
@@ -1543,42 +1556,42 @@ void MediaRedundancyNode::testMgrNackInd(int RingPort, MacAddress SourceAddress,
         break;
     case PRM_UP:
         if (expectedRole == MANAGER_AUTO && SourceAddress != sourceAddress && BestMRMSourceAddress == sourceAddress){
-            if (ManagerPrio < hostBestMRMPriority || (ManagerPrio == hostBestMRMPriority && SourceAddress < sourceAddress)){
+            if (isBetterThanBestPrio(ManagerPrio, SourceAddress)){
                 hostBestMRMSourceAddress = SourceAddress;
                 hostBestMRMPriority = ManagerPrio;
             }
             cancelEvent(topologyChangeTimer);
             mrcInit();
-            testPropagateReq(RingPort,hostBestMRMPriority, hostBestMRMSourceAddress);
+            testPropagateReq(RingPort, hostBestMRMPriority, hostBestMRMSourceAddress);
             currentState= DE_IDLE;
-            EV_INFO << "Switching State from PRM_UP to DE_IDLE" << EV_FIELD(currentState) << EV_ENDL;
+            EV_DETAIL << "Switching State from PRM_UP to DE_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         }
         break;
     case CHK_RO:
         if (expectedRole == MANAGER_AUTO && SourceAddress != sourceAddress && BestMRMSourceAddress == sourceAddress){
-            if (ManagerPrio < hostBestMRMPriority || (ManagerPrio == hostBestMRMPriority && SourceAddress < sourceAddress)){
+            if (isBetterThanBestPrio(ManagerPrio, SourceAddress)){
                 hostBestMRMSourceAddress = SourceAddress;
                 hostBestMRMPriority = ManagerPrio;
             }
             cancelEvent(topologyChangeTimer);
             mrcInit();
-            testPropagateReq(RingPort,hostBestMRMPriority, hostBestMRMSourceAddress);
+            testPropagateReq(RingPort, hostBestMRMPriority, hostBestMRMSourceAddress);
             currentState= PT_IDLE;
-            EV_INFO << "Switching State from CHK_RO to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
+            EV_DETAIL << "Switching State from CHK_RO to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         }
         break;
     case CHK_RC:
         if (expectedRole== MANAGER_AUTO && SourceAddress != sourceAddress && BestMRMSourceAddress == sourceAddress){
-            if (ManagerPrio < hostBestMRMPriority || (ManagerPrio == hostBestMRMPriority && SourceAddress < sourceAddress)){
+            if (isBetterThanBestPrio(ManagerPrio, SourceAddress)){
                 hostBestMRMSourceAddress = SourceAddress;
                 hostBestMRMPriority = ManagerPrio;
             }
             cancelEvent(topologyChangeTimer);
             mrcInit();
-            testPropagateReq(RingPort,hostBestMRMPriority, hostBestMRMSourceAddress);
+            testPropagateReq(RingPort, hostBestMRMPriority, hostBestMRMSourceAddress);
             setPortState(secondaryRingPort, MrpInterfaceData::FORWARDING);
             currentState= PT_IDLE;
-            EV_INFO << "Switching State from CHK_RC to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
+            EV_DETAIL << "Switching State from CHK_RC to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         }
         break;
     default:
@@ -1623,14 +1636,14 @@ void MediaRedundancyNode::mauTypeChangeInd(int RingPort, uint16_t LinkState)
             if (LinkState == NetworkInterface::UP){
                 if (RingPort == primaryRingPort){
                     setPortState(primaryRingPort, MrpInterfaceData::FORWARDING);
-                    EV_INFO << "Switching State from AC_STAT1 to DE_IDLE" << EV_ENDL;
+                    EV_DETAIL << "Switching State from AC_STAT1 to DE_IDLE" << EV_ENDL;
                     currentState=DE_IDLE;
                     break;
                 }
                 else if (RingPort == secondaryRingPort){
                     toggleRingPorts();
                     setPortState(primaryRingPort, MrpInterfaceData::FORWARDING);
-                    EV_INFO << "Switching State from AC_STAT1 to DE_IDLE" << EV_ENDL;
+                    EV_DETAIL << "Switching State from AC_STAT1 to DE_IDLE" << EV_ENDL;
                     currentState=DE_IDLE;
                     break;
                 }
@@ -1644,7 +1657,7 @@ void MediaRedundancyNode::mauTypeChangeInd(int RingPort, uint16_t LinkState)
                 if (RingPort == primaryRingPort){
                     setPortState(primaryRingPort, MrpInterfaceData::FORWARDING);
                     testRingReq(defaultTestInterval);
-                    EV_INFO << "Switching State from AC_STAT1 to PRM_UP" << EV_ENDL;
+                    EV_DETAIL << "Switching State from AC_STAT1 to PRM_UP" << EV_ENDL;
                     currentState = PRM_UP;
                     currentRingState = OPEN;
                     emit(RingStateChangedSignal, simTime().inUnit(SIMTIME_US));
@@ -1654,7 +1667,7 @@ void MediaRedundancyNode::mauTypeChangeInd(int RingPort, uint16_t LinkState)
                     toggleRingPorts();
                     setPortState(primaryRingPort, MrpInterfaceData::FORWARDING);
                     testRingReq(defaultTestInterval);
-                    EV_INFO << "Switching State from AC_STAT1 to PRM_UP" << EV_ENDL;
+                    EV_DETAIL << "Switching State from AC_STAT1 to PRM_UP" << EV_ENDL;
                     currentState = PRM_UP;
                     currentRingState = OPEN;
                     emit(RingStateChangedSignal, simTime().inUnit(SIMTIME_US));
@@ -1673,7 +1686,7 @@ void MediaRedundancyNode::mauTypeChangeInd(int RingPort, uint16_t LinkState)
             currentState = AC_STAT1;
             currentRingState = OPEN;
             emit(RingStateChangedSignal, simTime().inUnit(SIMTIME_US));
-            EV_INFO << "Switching State from PRM_UP to AC_STAT1" << EV_FIELD(currentState) << EV_ENDL;
+            EV_DETAIL << "Switching State from PRM_UP to AC_STAT1" << EV_FIELD(currentState) << EV_ENDL;
             break;
         }
         if (RingPort == secondaryRingPort && LinkState == NetworkInterface::UP){
@@ -1684,7 +1697,7 @@ void MediaRedundancyNode::mauTypeChangeInd(int RingPort, uint16_t LinkState)
             currentState = CHK_RC;
             currentRingState = CLOSED;
             emit(RingStateChangedSignal, simTime().inUnit(SIMTIME_US));
-            EV_INFO << "Switching State from PRM_UP to CHK_RC" << EV_FIELD(currentState) << EV_ENDL;
+            EV_DETAIL << "Switching State from PRM_UP to CHK_RC" << EV_FIELD(currentState) << EV_ENDL;
             break;
         }
         //all other Cases: ignore
@@ -1699,7 +1712,7 @@ void MediaRedundancyNode::mauTypeChangeInd(int RingPort, uint16_t LinkState)
                 currentState= PRM_UP;
                 currentRingState = OPEN;
                 emit(RingStateChangedSignal, simTime().inUnit(SIMTIME_US));
-                EV_INFO << "Switching State from CHK_RO to PRM_UP" << EV_FIELD(currentState) << EV_ENDL;
+                EV_DETAIL << "Switching State from CHK_RO to PRM_UP" << EV_FIELD(currentState) << EV_ENDL;
                 break;
             }
             if (RingPort == secondaryRingPort){
@@ -1707,7 +1720,7 @@ void MediaRedundancyNode::mauTypeChangeInd(int RingPort, uint16_t LinkState)
                 currentState = PRM_UP;
                 currentRingState = OPEN;
                 emit(RingStateChangedSignal, simTime().inUnit(SIMTIME_US));
-                EV_INFO << "Switching State from CHK_RO to PRM_UP" << EV_FIELD(currentState) << EV_ENDL;
+                EV_DETAIL << "Switching State from CHK_RO to PRM_UP" << EV_FIELD(currentState) << EV_ENDL;
                 break;
             }
         }
@@ -1722,14 +1735,14 @@ void MediaRedundancyNode::mauTypeChangeInd(int RingPort, uint16_t LinkState)
                 currentState=PRM_UP;
                 currentRingState = OPEN;
                 emit(RingStateChangedSignal, simTime().inUnit(SIMTIME_US));
-                EV_INFO << "Switching State from CHK_RC to PRM_UP" << EV_FIELD(currentState) << EV_ENDL;
+                EV_DETAIL << "Switching State from CHK_RC to PRM_UP" << EV_FIELD(currentState) << EV_ENDL;
                 break;
             }
             if (RingPort == secondaryRingPort){
                 currentState= PRM_UP;
                 currentRingState = OPEN;
                 emit(RingStateChangedSignal, simTime().inUnit(SIMTIME_US));
-                EV_INFO << "Switching State from CHK_RC to PRM_UP" << EV_FIELD(currentState) << EV_ENDL;
+                EV_DETAIL << "Switching State from CHK_RC to PRM_UP" << EV_FIELD(currentState) << EV_ENDL;
             }
         }
         //all other Cases: ignore
@@ -1738,12 +1751,12 @@ void MediaRedundancyNode::mauTypeChangeInd(int RingPort, uint16_t LinkState)
         if (RingPort == secondaryRingPort && LinkState == NetworkInterface::UP){
             linkChangeReq(primaryRingPort, NetworkInterface::UP);
             currentState=PT;
-            EV_INFO << "Switching State from DE_IDLE to PT" << EV_FIELD(currentState) << EV_ENDL;
+            EV_DETAIL << "Switching State from DE_IDLE to PT" << EV_FIELD(currentState) << EV_ENDL;
         }
         if (RingPort == primaryRingPort && LinkState == NetworkInterface::DOWN){
             setPortState(primaryRingPort, MrpInterfaceData::BLOCKED);
             currentState=AC_STAT1;
-            EV_INFO << "Switching State from DE_IDLE to AC_STAT1" << EV_FIELD(currentState) << EV_ENDL;
+            EV_DETAIL << "Switching State from DE_IDLE to AC_STAT1" << EV_FIELD(currentState) << EV_ENDL;
         }
         //all other cases: ignore
         break;
@@ -1754,7 +1767,7 @@ void MediaRedundancyNode::mauTypeChangeInd(int RingPort, uint16_t LinkState)
                 setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
                 linkChangeReq(primaryRingPort,NetworkInterface::DOWN);
                 currentState=DE;
-                EV_INFO << "Switching State from PT to DE" << EV_FIELD(currentState) << EV_ENDL;
+                EV_DETAIL << "Switching State from PT to DE" << EV_FIELD(currentState) << EV_ENDL;
                 break;
             }
             if (RingPort == primaryRingPort){
@@ -1764,7 +1777,7 @@ void MediaRedundancyNode::mauTypeChangeInd(int RingPort, uint16_t LinkState)
                 setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
                 linkChangeReq(primaryRingPort,NetworkInterface::DOWN);
                 currentState=DE;
-                EV_INFO << "Switching State from PT to DE" << EV_FIELD(currentState) << EV_ENDL;
+                EV_DETAIL << "Switching State from PT to DE" << EV_FIELD(currentState) << EV_ENDL;
                 break;
             }
         }
@@ -1775,14 +1788,14 @@ void MediaRedundancyNode::mauTypeChangeInd(int RingPort, uint16_t LinkState)
             cancelEvent(linkDownTimer);
             linkChangeReq(primaryRingPort,NetworkInterface::UP);
             currentState=PT;
-            EV_INFO << "Switching State from DE to PT" << EV_FIELD(currentState) << EV_ENDL;
+            EV_DETAIL << "Switching State from DE to PT" << EV_FIELD(currentState) << EV_ENDL;
             break;
         }
         if (RingPort == primaryRingPort && LinkState == NetworkInterface::DOWN){
             linkChangeCount = linkMaxChange;
             setPortState(primaryRingPort, MrpInterfaceData::BLOCKED);
             currentState=AC_STAT1;
-            EV_INFO << "Switching State from DE to AC_STAT1" << EV_FIELD(currentState) << EV_ENDL;
+            EV_DETAIL << "Switching State from DE to AC_STAT1" << EV_FIELD(currentState) << EV_ENDL;
         }
         //all other cases: ignore
         break;
@@ -1792,7 +1805,7 @@ void MediaRedundancyNode::mauTypeChangeInd(int RingPort, uint16_t LinkState)
                 setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
                 linkChangeReq(primaryRingPort,NetworkInterface::DOWN);
                 currentState = DE;
-                EV_INFO << "Switching State from PT_IDLE to DE" << EV_FIELD(currentState) << EV_ENDL;
+                EV_DETAIL << "Switching State from PT_IDLE to DE" << EV_FIELD(currentState) << EV_ENDL;
                 break;
             }
             if (RingPort == primaryRingPort){
@@ -1801,7 +1814,7 @@ void MediaRedundancyNode::mauTypeChangeInd(int RingPort, uint16_t LinkState)
                 setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
                 linkChangeReq(primaryRingPort,NetworkInterface::DOWN);
                 currentState = DE;
-                EV_INFO << "Switching State from PT_IDLE to DE" << EV_FIELD(currentState) << EV_ENDL;
+                EV_DETAIL << "Switching State from PT_IDLE to DE" << EV_FIELD(currentState) << EV_ENDL;
                 break;
             }
         }
@@ -1814,77 +1827,108 @@ void MediaRedundancyNode::mauTypeChangeInd(int RingPort, uint16_t LinkState)
 
 void MediaRedundancyNode::interconnTopologyChangeInd(MacAddress SourceAddress, double Time, uint16_t InID, int RingPort, Packet* packet)
 {
-    if (expectedRole==CLIENT && interConnectionRingCheckAware){
+    switch (currentState){
+    case POWER_ON:
+    case AC_STAT1:
+    case DE_IDLE:
+    case PT:
+    case PT_IDLE:
+        break;
+    case PRM_UP:
+    case CHK_RC:
+        if(!topologyChangeTimer->isScheduled()){
+            topologyChangeReq(Time);
+        }
+        break;
+    case CHK_RO:
+        if(!topologyChangeTimer->isScheduled()){
+            topologyChangeReq(Time);
+        }
         if (RingPort == primaryRingPort){
             interconnForwardReq(secondaryRingPort, packet);
         }
         else if (RingPort == secondaryRingPort){
             interconnForwardReq(primaryRingPort, packet);
         }
-    }else{
-        switch (currentState){
-        case POWER_ON:
-        case AC_STAT1:
-        case DE_IDLE:
-        case PT:
-        case PT_IDLE:
-            break;
-        case PRM_UP:
-        case CHK_RO:
-        case CHK_RC:
-            if(!topologyChangeTimer->isScheduled()){
-                topologyChangeReq(Time);
-            }
-            break;
-        default:
-            throw cRuntimeError("Unknown NodeState");
-        }
-        delete packet;
+        break;
+    default:
+        throw cRuntimeError("Unknown NodeState");
     }
+    delete packet;
 }
 
 void MediaRedundancyNode::interconnLinkChangeInd(uint16_t InID, uint16_t Linkstate,int RingPort, Packet* packet)
 {
-    if ((expectedRole==CLIENT && interConnectionRingCheckAware) || currentState == CHK_RO){
+    switch (currentState){
+    case POWER_ON:
+    case AC_STAT1:
+    case DE_IDLE:
+    case PT:
+    case PT_IDLE:
+    case PRM_UP:
+    case CHK_RC:
+        delete packet;
+        break;
+    case CHK_RO:
         if (RingPort == primaryRingPort){
             interconnForwardReq(secondaryRingPort, packet);
         }
         else if (RingPort == secondaryRingPort){
             interconnForwardReq(primaryRingPort, packet);
         }
-    }
-    else{
-        delete packet;
+        break;
+    default:
+        throw cRuntimeError("Unknown NodeState");
     }
 }
 
 void MediaRedundancyNode::interconnLinkStatusPollInd(uint16_t InID, int RingPort, Packet* packet)
 {
-    if ((expectedRole==CLIENT && interConnectionRingCheckAware) || currentState==CHK_RO){
+    switch (currentState){
+    case POWER_ON:
+    case AC_STAT1:
+    case DE_IDLE:
+    case PT:
+    case PT_IDLE:
+    case PRM_UP:
+    case CHK_RC:
+        delete packet;
+        break;
+    case CHK_RO:
         if (RingPort == primaryRingPort){
             interconnForwardReq(secondaryRingPort, packet);
         }
         else if (RingPort == secondaryRingPort){
             interconnForwardReq(primaryRingPort, packet);
         }
-    }
-    else{
-        delete packet;
+        break;
+    default:
+        throw cRuntimeError("Unknown NodeState");
     }
 }
 
 void MediaRedundancyNode::interconnTestInd(MacAddress SourceAddress, int RingPort, uint16_t InID, Packet* packet)
 {
-    if ((expectedRole==CLIENT && interConnectionRingCheckAware) || currentState == CHK_RO){
+    switch (currentState){
+    case POWER_ON:
+    case AC_STAT1:
+    case DE_IDLE:
+    case PT:
+    case PT_IDLE:
+    case PRM_UP:
+    case CHK_RC:
+        delete packet;
+        break;
+    case CHK_RO:
         if (RingPort == primaryRingPort){
             interconnForwardReq(secondaryRingPort, packet);
         }
         else if (RingPort == secondaryRingPort){
             interconnForwardReq(primaryRingPort, packet);
         }
-    }
-    else{
-        delete packet;
+        break;
+    default:
+        throw cRuntimeError("Unknown NodeState");
     }
 }
 

@@ -69,6 +69,50 @@ void MrpMacForwardingTable::removeMrpForwardingInterface(int interfaceId, const 
     remove(it->second.interfaceIds, interfaceId);
 }
 
+bool MrpMacForwardingTable::isMrpIngressFilterInterface(int interfaceId, const MacAddress& address, unsigned int vid) const
+{
+    Enter_Method("isMrpIngressFilterInterface");
+    ASSERT(address.isMulticast());
+    ForwardingTableKey key(vid, address);
+    auto it = mrpIngressFilterTable.find(key);
+    if (it == mrpIngressFilterTable.end())
+        return false;
+    else if (contains(it->second.interfaceIds, interfaceId))
+        return true;
+    return false;
+}
+
+
+void MrpMacForwardingTable::addMrpIngressFilterInterface(int interfaceId, const MacAddress& address, unsigned int vid)
+{
+    Enter_Method("addMrpIngressFilterInterface");
+    ASSERT(address.isMulticast());
+    ForwardingTableKey key(vid, address);
+    auto it = mrpIngressFilterTable.find(key);
+    if (it == mrpIngressFilterTable.end())
+        mrpIngressFilterTable[key] = MulticastAddressEntry(vid, {interfaceId});
+    else {
+        if (!contains(it->second.interfaceIds, interfaceId))
+            it->second.interfaceIds.push_back(interfaceId);
+        else
+            //throw cRuntimeError("Already contains interface");
+            EV_DEBUG << "Already contains interface" << EV_ENDL;
+    }
+}
+
+void MrpMacForwardingTable::removeMrpIngressFilterInterface(int interfaceId, const MacAddress& address, unsigned int vid)
+{
+    Enter_Method("removeMrpIngressFilterInterface");
+    ASSERT(address.isMulticast());
+    ForwardingTableKey key(vid, address);
+    auto it = mrpIngressFilterTable.find(key);
+    if (it == mrpIngressFilterTable.end())
+        throw cRuntimeError("Cannot find entry");
+    if (!contains(it->second.interfaceIds, interfaceId))
+        throw cRuntimeError("Cannot find interface");
+    remove(it->second.interfaceIds, interfaceId);
+}
+
 void MrpMacForwardingTable::clearTable()
 {
     forwardingTable.clear();
