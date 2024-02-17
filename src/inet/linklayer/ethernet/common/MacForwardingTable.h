@@ -44,7 +44,7 @@ class INET_API MacForwardingTable : public OperationalBase, public IMacForwardin
     friend std::ostream& operator<<(std::ostream& os, const MulticastAddressEntry& entry);
 
     struct MacCompare {
-        bool operator()(const MacAddress &u1, const MacAddress &u2) const { return u1.compareTo(u2) < 0; }
+        bool operator()(const MacAddress& u1, const MacAddress& u2) const { return u1.compareTo(u2) < 0; }
     };
 
     typedef std::pair<unsigned int, MacAddress> ForwardingTableKey;
@@ -58,7 +58,7 @@ class INET_API MacForwardingTable : public OperationalBase, public IMacForwardin
     MulticastForwardingTable multicastForwardingTable;
     ModuleRefByPar<IInterfaceTable> ifTable;
 
- protected:
+  protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
@@ -84,7 +84,7 @@ class INET_API MacForwardingTable : public OperationalBase, public IMacForwardin
     virtual void removeForwardingInterface(int interfaceId) override;
     virtual void replaceForwardingInterface(int oldInterfaceId, int newInterfaceId) override;
 
-    protected:
+ protected:
     /**
      *  @brief Prints cached data
      */
