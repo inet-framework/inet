@@ -36,19 +36,19 @@ class INET_API MacForwardingTable : public OperationalBase, public IMacForwardin
     struct MulticastAddressEntry {
         std::vector<int> interfaceIds;
         MulticastAddressEntry() {}
-        MulticastAddressEntry(unsigned int vid, const std::vector<int> &interfaceIds) :
+        MulticastAddressEntry(unsigned int vid, const std::vector<int>& interfaceIds) :
             interfaceIds(interfaceIds) {}
     };
 
-    friend std::ostream& operator<<(std::ostream &os, const AddressEntry &entry);
-    friend std::ostream& operator<<(std::ostream &os, const MulticastAddressEntry &entry);
+    friend std::ostream& operator<<(std::ostream& os, const AddressEntry& entry);
+    friend std::ostream& operator<<(std::ostream& os, const MulticastAddressEntry& entry);
 
     struct MacCompare {
         bool operator()(const MacAddress &u1, const MacAddress &u2) const { return u1.compareTo(u2) < 0; }
     };
 
     typedef std::pair<unsigned int, MacAddress> ForwardingTableKey;
-    friend std::ostream& operator<<(std::ostream& os, const ForwardingTableKey &key);
+    friend std::ostream& operator<<(std::ostream& os, const ForwardingTableKey& key);
     typedef std::map<ForwardingTableKey, AddressEntry> ForwardingTable;
     typedef std::map<ForwardingTableKey, MulticastAddressEntry> MulticastForwardingTable;
 
@@ -58,7 +58,7 @@ class INET_API MacForwardingTable : public OperationalBase, public IMacForwardin
     MulticastForwardingTable multicastForwardingTable;
     ModuleRefByPar<IInterfaceTable> ifTable;
 
-  protected:
+ protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
