@@ -7,8 +7,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::mrp, MrpProtocolDissector);
 
-void MrpProtocolDissector::dissect(Packet *packet, const Protocol *protocol,
-        ICallback &callback) const {
+void MrpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback &callback) const {
     /**
      auto version = packet->popAtFront<mrpVersionField>();
      auto firstTLV=packet->popAtFront<tlvHeader>();
