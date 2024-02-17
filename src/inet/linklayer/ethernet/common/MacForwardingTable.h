@@ -22,7 +22,7 @@ namespace inet {
  * NOTE that interfaceIds (interfaceId parameters) are actually the corresponding ID of the port interface.
  * i.e. this is an interfaceId and NOT an index of the some kind in a gate vector.
  */
-class INET_API MacForwardingTable: public OperationalBase, public IMacForwardingTable, public StringFormat::IDirectiveResolver
+class INET_API MacForwardingTable : public OperationalBase, public IMacForwardingTable, public StringFormat::IDirectiveResolver
 {
   protected:
     struct AddressEntry {
@@ -30,27 +30,25 @@ class INET_API MacForwardingTable: public OperationalBase, public IMacForwarding
         simtime_t insertionTime;
         AddressEntry() {}
         AddressEntry(unsigned int vid, int interfaceId, simtime_t insertionTime) :
-                interfaceId(interfaceId), insertionTime(insertionTime) {}
+            interfaceId(interfaceId), insertionTime(insertionTime) {}
     };
 
     struct MulticastAddressEntry {
         std::vector<int> interfaceIds;
         MulticastAddressEntry() {}
         MulticastAddressEntry(unsigned int vid, const std::vector<int> &interfaceIds) :
-                interfaceIds(interfaceIds) {}
+            interfaceIds(interfaceIds) {}
     };
 
     friend std::ostream& operator<<(std::ostream &os, const AddressEntry &entry);
     friend std::ostream& operator<<(std::ostream &os, const MulticastAddressEntry &entry);
 
     struct MacCompare {
-        bool operator()(const MacAddress &u1, const MacAddress &u2) const {
-            return u1.compareTo(u2) < 0;
-        }
+        bool operator()(const MacAddress &u1, const MacAddress &u2) const { return u1.compareTo(u2) < 0; }
     };
 
     typedef std::pair<unsigned int, MacAddress> ForwardingTableKey;
-    friend std::ostream& operator<<(std::ostream &os, const ForwardingTableKey &key);
+    friend std::ostream& operator<<(std::ostream& os, const ForwardingTableKey &key);
     typedef std::map<ForwardingTableKey, AddressEntry> ForwardingTable;
     typedef std::map<ForwardingTableKey, MulticastAddressEntry> MulticastForwardingTable;
 
@@ -74,19 +72,19 @@ class INET_API MacForwardingTable: public OperationalBase, public IMacForwarding
 
   public:
     // IMacForwardingTable
-    virtual int getUnicastAddressForwardingInterface(const MacAddress &address, unsigned int vid = 0) const override;
-    virtual void setUnicastAddressForwardingInterface(int interfaceId, const MacAddress &address, unsigned int vid = 0) override;
-    virtual void removeUnicastAddressForwardingInterface(int interfaceId, const MacAddress &address, unsigned int vid = 0) override;
-    virtual void learnUnicastAddressForwardingInterface(int interfaceId, const MacAddress &address, unsigned int vid = 0) override;
+    virtual int getUnicastAddressForwardingInterface(const MacAddress& address, unsigned int vid = 0) const override;
+    virtual void setUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
+    virtual void removeUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
+    virtual void learnUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
 
-    virtual std::vector<int> getMulticastAddressForwardingInterfaces(const MacAddress &address, unsigned int vid = 0) const override;
-    virtual void addMulticastAddressForwardingInterface(int interfaceId, const MacAddress &address, unsigned int vid = 0) override;
-    virtual void removeMulticastAddressForwardingInterface(int interfaceId, const MacAddress &address, unsigned int vid = 0) override;
+    virtual std::vector<int> getMulticastAddressForwardingInterfaces(const MacAddress& address, unsigned int vid = 0) const override;
+    virtual void addMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
+    virtual void removeMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
 
     virtual void removeForwardingInterface(int interfaceId) override;
     virtual void replaceForwardingInterface(int oldInterfaceId, int newInterfaceId) override;
 
-protected:
+    protected:
     /**
      *  @brief Prints cached data
      */
@@ -124,24 +122,12 @@ protected:
     virtual void setAgingTime(simtime_t agingTime) override;
 
     //@{ For lifecycle
-    virtual void handleStartOperation(LifecycleOperation *operation) override {
-        initializeTable();
-    }
-    virtual void handleStopOperation(LifecycleOperation *operation) override {
-        clearTable();
-    }
-    virtual void handleCrashOperation(LifecycleOperation *operation) override {
-        clearTable();
-    }
-    virtual bool isInitializeStage(int stage) const override {
-        return stage == INITSTAGE_LINK_LAYER;
-    }
-    virtual bool isModuleStartStage(int stage) const override {
-        return stage == ModuleStartOperation::STAGE_LINK_LAYER;
-    }
-    virtual bool isModuleStopStage(int stage) const override {
-        return stage == ModuleStopOperation::STAGE_LINK_LAYER;
-    }
+    virtual void handleStartOperation(LifecycleOperation *operation) override { initializeTable(); }
+    virtual void handleStopOperation(LifecycleOperation *operation) override { clearTable(); }
+    virtual void handleCrashOperation(LifecycleOperation *operation) override { clearTable(); }
+    virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
     //@}
 };
 
