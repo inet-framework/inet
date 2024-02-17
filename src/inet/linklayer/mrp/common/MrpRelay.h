@@ -37,14 +37,10 @@ protected:
     virtual void handleUpperPacket(Packet *packet) override;
     virtual void handleLowerPacket(Packet *packet) override;
     virtual int getCcmLevel(Packet *packet);
-    virtual void updatePeerAddress(NetworkInterface *incomingInterface,
-            MacAddress sourceAddress, unsigned int vlanId) override;
-    virtual bool isForwardingInterface(NetworkInterface *networkInterface) const
-            override;
+    virtual void updatePeerAddress(NetworkInterface *incomingInterface, MacAddress sourceAddress, unsigned int vlanId) override;
+    virtual bool isForwardingInterface(NetworkInterface *networkInterface) const override;
     virtual bool isMrpMulticast(MacAddress DestinationAddress);
-    virtual void sendPacket(Packet *packet,
-            const MacAddress &destinationAddress,
-            NetworkInterface *outgoingInterface) override;
+    virtual void sendPacket(Packet *packet, const MacAddress &destinationAddress, NetworkInterface *outgoingInterface) override;
 
     //@{ For lifecycle
     virtual void handleStartOperation(LifecycleOperation *operation) override;

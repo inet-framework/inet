@@ -40,7 +40,9 @@ protected:
     };
 
     enum ringState : uint16_t {
-        OPEN = 0x0000, CLOSED = 0x0001, UNDEFINED = 0x0003,
+        OPEN = 0x0000,
+        CLOSED = 0x0001,
+        UNDEFINED = 0x0003,
     };
 
     enum mrpRole : uint16_t {
@@ -61,7 +63,8 @@ protected:
     };
 
     enum nodeState {
-        POWER_ON, AC_STAT1, //waiting for the first Link Up at one of its ring ports, starting test monitoring of the ring
+        POWER_ON,
+        AC_STAT1, //waiting for the first Link Up at one of its ring ports, starting test monitoring of the ring
 
         //Manager States
         PRM_UP, //only the primary ring port has a link. The MRM shall send MRP_Test frames periodically through both ring ports
@@ -192,26 +195,20 @@ protected:
     virtual void initInterfacedata(unsigned int interfaceId);
     virtual void toggleRingPorts();
     virtual void setPortRole(int InterfaceId, MrpInterfaceData::PortRole Role);
-    virtual void setPortState(int InterfaceId,
-            MrpInterfaceData::PortState State);
+    virtual void setPortState(int InterfaceId, MrpInterfaceData::PortState State);
     virtual MrpInterfaceData::PortState getPortState(int InterfaceId);
     virtual MrpInterfaceData::PortRole getPortRole(int InterfaceId);
-    virtual NetworkInterface* getPortNetworkInterface(
-            unsigned int interfaceId) const;
-    virtual MrpInterfaceData* getPortInterfaceDataForUpdate(
-            unsigned int interfaceId);
-    virtual const MrpInterfaceData* getPortInterfaceData(
-            unsigned int interfaceId) const;
-    virtual void handleMrpPDU(Packet *packet);
-    virtual void handleContinuityCheckMessage(Packet *packet);
+    virtual NetworkInterface* getPortNetworkInterface(unsigned int interfaceId) const;
+    virtual MrpInterfaceData* getPortInterfaceDataForUpdate(unsigned int interfaceId);
+    virtual const MrpInterfaceData* getPortInterfaceData(unsigned int interfaceId) const;
+    virtual void handleMrpPDU(Packet* Packet);
+    virtual void handleContinuityCheckMessage(Packet* Packet);
     virtual void handleDelayTimer(int interfaceId, int field);
     virtual void handleTopologyChangeTimer();
     virtual void clearLocalFDB();
     virtual void clearLocalFDBDelayed();
-    virtual bool isBetterThanOwnPrio(mrpPriority RemotePrio,
-            MacAddress RemoteAddress);
-    virtual bool isBetterThanBestPrio(mrpPriority RemotePrio,
-            MacAddress RemoteAddress);
+    virtual bool isBetterThanOwnPrio(mrpPriority RemotePrio, MacAddress RemoteAddress);
+    virtual bool isBetterThanBestPrio(mrpPriority RemotePrio, MacAddress RemoteAddress);
     virtual void handleTestTimer();
     virtual void handleLinkUpTimer();
     virtual void handleLinkDownTimer();
@@ -220,39 +217,26 @@ protected:
     virtual void setupTopologyChangeReq(uint32_t Interval);
     virtual void setupContinuityCheck(int RingPort);
     virtual void testRingReq(double Time);
-    virtual void testMgrNackReq(int RingPort, mrpPriority ManagerPrio,
-            MacAddress SourceAddress);
-    virtual void testPropagateReq(int RingPort, mrpPriority ManagerPrio,
-            MacAddress SourceAddress);
+    virtual void testMgrNackReq(int RingPort, mrpPriority ManagerPrio, MacAddress SourceAddress);
+    virtual void testPropagateReq(int RingPort, mrpPriority ManagerPrio, MacAddress SourceAddress);
     virtual void topologyChangeReq(double Time);
     virtual void linkChangeReq(int RingPort, uint16_t LinkState);
-    virtual void setupLinkChangeReq(int RingPort, uint16_t LinkState,
-            double Time);
-    virtual void testRingInd(int RingPort, MacAddress SourceAddress,
-            mrpPriority ManagerPrio);
+    virtual void setupLinkChangeReq(int RingPort, uint16_t LinkState, double Time);
+    virtual void testRingInd(int RingPort, MacAddress SourceAddress, mrpPriority ManagerPrio);
     virtual void topologyChangeInd(MacAddress SourceAddress, double Time);
     virtual void linkChangeInd(uint16_t PortMode, uint16_t LinkState);
-    virtual void testMgrNackInd(int RingPort, MacAddress SourceAddress,
-            mrpPriority ManagerPrio, MacAddress BestMRMSourceAddress);
-    virtual void testPropagateInd(int RingPort, MacAddress SourceAddress,
-            mrpPriority ManagerPrio, MacAddress BestMRMSourceAddress,
-            mrpPriority BestMRMPrio);
+    virtual void testMgrNackInd(int RingPort, MacAddress SourceAddress, mrpPriority ManagerPrio, MacAddress BestMRMSourceAddress);
+    virtual void testPropagateInd(int RingPort, MacAddress SourceAddress, mrpPriority ManagerPrio, MacAddress BestMRMSourceAddress, mrpPriority BestMRMPrio);
     virtual void mauTypeChangeInd(int RingPort, uint16_t LinkState);
-    virtual void interconnTopologyChangeInd(MacAddress SourceAddress,
-            double Time, uint16_t InID, int RingPort, Packet *packet);
-    virtual void interconnLinkChangeInd(uint16_t InID, uint16_t Linkstate,
-            int RingPort, Packet *packet);
-    virtual void interconnLinkStatusPollInd(uint16_t InID, int RingPort,
-            Packet *packet);
-    virtual void interconnTestInd(MacAddress SourceAddress, int RingPort,
-            uint16_t InID, Packet *packet);
-    virtual void interconnForwardReq(int RingPort, Packet *Packet);
-    virtual void sendFrameReq(int portId, const MacAddress &DestinationAddress,
-            const MacAddress &SourceAddress, int Prio, uint16_t LT,
-            Packet *MRPPDU);
-    virtual void sendCCM(int PortId, Packet *CCM);
+    virtual void interconnTopologyChangeInd(MacAddress SourceAddress, double Time, uint16_t InID, int RingPort, Packet* Packet);
+    virtual void interconnLinkChangeInd(uint16_t InID, uint16_t Linkstate, int RingPort, Packet* Packet);
+    virtual void interconnLinkStatusPollInd(uint16_t InID, int RingPort, Packet* Packet);
+    virtual void interconnTestInd(MacAddress SourceAddress, int RingPort, uint16_t InID, Packet* Packet);
+    virtual void interconnForwardReq(int RingPort, Packet* Packet);
+    virtual void sendFrameReq(int portId, const MacAddress& DestinationAddress, const MacAddress& SourceAddress, int Prio, uint16_t LT, Packet* MRPPDU);
+    virtual void sendCCM(int PortId, Packet* CCM);
     virtual void clearFDB(double Time);
-    virtual void colorLink(NetworkInterface *ie, bool forwarding) const;
+    virtual void colorLink(NetworkInterface* ie, bool forwarding) const;
     virtual void refreshDisplay() const override;
 
 public:
@@ -261,24 +245,15 @@ public:
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID,
-            cObject *obj, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void setTimingProfile(int maxRecoveryTime);
     virtual void setRingInterfaces(int InterfaceIndex1, int InterfaceIndex2);
     virtual void setRingInterface(int InterfaceNumber, int InterfaceIndex);
     virtual void handleMessageWhenUp(cMessage *msg) override;
-    virtual bool isInitializeStage(int stage) const override {
-        return stage == INITSTAGE_LINK_LAYER;
-    }
-    virtual bool isModuleStartStage(int stage) const override {
-        return stage == ModuleStartOperation::STAGE_LAST;
-    }
-    virtual bool isModuleStopStage(int stage) const override {
-        return stage == ModuleStopOperation::STAGE_LINK_LAYER;
-    }
-    virtual int numInitStages() const override {
-        return NUM_INIT_STAGES;
-    }
+    virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LAST; }
+    virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 };
 
 } // namespace inet

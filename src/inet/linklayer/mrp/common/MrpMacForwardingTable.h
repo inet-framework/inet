@@ -31,38 +31,24 @@ protected:
     virtual void initialize(int stage) override;
 
 public:
-    virtual std::vector<int> getMrpForwardingInterfaces(
-            const MacAddress &address, unsigned int vid = 0) const;
-    virtual void addMrpForwardingInterface(int interfaceId,
-            const MacAddress &address, unsigned int vid = 0);
-    virtual void removeMrpForwardingInterface(int interfaceId,
-            const MacAddress &address, unsigned int vid = 0);
-    virtual bool isMrpIngressFilterInterface(int interfaceId,
-            const MacAddress &address, unsigned int vid = 0) const;
-    virtual void addMrpIngressFilterInterface(int interfaceId,
-            const MacAddress &address, unsigned int vid = 0);
-    virtual void removeMrpIngressFilterInterface(int interfaceId,
-            const MacAddress &address, unsigned int vid = 0);
+    virtual std::vector<int> getMrpForwardingInterfaces(const MacAddress &address, unsigned int vid = 0) const;
+    virtual void addMrpForwardingInterface(int interfaceId, const MacAddress &address, unsigned int vid = 0);
+    virtual void removeMrpForwardingInterface(int interfaceId, const MacAddress &address, unsigned int vid = 0);
+    virtual bool isMrpIngressFilterInterface(int interfaceId, const MacAddress &address, unsigned int vid = 0) const;
+    virtual void addMrpIngressFilterInterface(int interfaceId, const MacAddress &address, unsigned int vid = 0);
+    virtual void removeMrpIngressFilterInterface(int interfaceId, const MacAddress &address, unsigned int vid = 0);
     virtual void clearTable() override;
     virtual void clearMrpTable();
 
 protected:
 
     //@{ For lifecycle
-    virtual void handleStartOperation(LifecycleOperation *operation) override {
-        initializeTable();
-    }
+    virtual void handleStartOperation(LifecycleOperation *operation) override { initializeTable(); }
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
-    virtual bool isInitializeStage(int stage) const override {
-        return stage == INITSTAGE_LINK_LAYER;
-    }
-    virtual bool isModuleStartStage(int stage) const override {
-        return stage == ModuleStartOperation::STAGE_LINK_LAYER;
-    }
-    virtual bool isModuleStopStage(int stage) const override {
-        return stage == ModuleStopOperation::STAGE_LINK_LAYER;
-    }
+    virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
     //@}
 };
 

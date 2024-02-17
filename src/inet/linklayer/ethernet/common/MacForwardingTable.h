@@ -24,31 +24,24 @@ namespace inet {
 class INET_API MacForwardingTable: public OperationalBase,
         public IMacForwardingTable,
         public StringFormat::IDirectiveResolver {
-protected:
+  protected:
     struct AddressEntry {
         int interfaceId = -1;
         simtime_t insertionTime;
-        AddressEntry() {
-        }
+        AddressEntry() {}
         AddressEntry(unsigned int vid, int interfaceId, simtime_t insertionTime) :
-                interfaceId(interfaceId), insertionTime(insertionTime) {
-        }
+                interfaceId(interfaceId), insertionTime(insertionTime) {}
     };
 
     struct MulticastAddressEntry {
         std::vector<int> interfaceIds;
-        MulticastAddressEntry() {
-        }
-        MulticastAddressEntry(unsigned int vid,
-                const std::vector<int> &interfaceIds) :
-                interfaceIds(interfaceIds) {
-        }
+        MulticastAddressEntry() {}
+        MulticastAddressEntry(unsigned int vid, const std::vector<int> &interfaceIds) :
+                interfaceIds(interfaceIds) {}
     };
 
-    friend std::ostream& operator<<(std::ostream &os,
-            const AddressEntry &entry);
-    friend std::ostream& operator<<(std::ostream &os,
-            const MulticastAddressEntry &entry);
+    friend std::ostream& operator<<(std::ostream &os, const AddressEntry &entry);
+    friend std::ostream& operator<<(std::ostream &os, const MulticastAddressEntry &entry);
 
     struct MacCompare {
         bool operator()(const MacAddress &u1, const MacAddress &u2) const {
@@ -57,8 +50,7 @@ protected:
     };
 
     typedef std::pair<unsigned int, MacAddress> ForwardingTableKey;
-    friend std::ostream& operator<<(std::ostream &os,
-            const ForwardingTableKey &key);
+    friend std::ostream& operator<<(std::ostream &os, const ForwardingTableKey &key);
     typedef std::map<ForwardingTableKey, AddressEntry> ForwardingTable;
     typedef std::map<ForwardingTableKey, MulticastAddressEntry> MulticastForwardingTable;
 
@@ -68,10 +60,8 @@ protected:
     MulticastForwardingTable multicastForwardingTable;
     ModuleRefByPar<IInterfaceTable> ifTable;
 
-protected:
-    virtual int numInitStages() const override {
-        return NUM_INIT_STAGES;
-    }
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
     virtual void handleMessage(cMessage *msg) override;
@@ -82,27 +72,19 @@ protected:
 
     virtual void parseForwardingTableParameter();
 
-public:
+  public:
     // IMacForwardingTable
-    virtual int getUnicastAddressForwardingInterface(const MacAddress &address,
-            unsigned int vid = 0) const override;
-    virtual void setUnicastAddressForwardingInterface(int interfaceId,
-            const MacAddress &address, unsigned int vid = 0) override;
-    virtual void removeUnicastAddressForwardingInterface(int interfaceId,
-            const MacAddress &address, unsigned int vid = 0) override;
-    virtual void learnUnicastAddressForwardingInterface(int interfaceId,
-            const MacAddress &address, unsigned int vid = 0) override;
+    virtual int getUnicastAddressForwardingInterface(const MacAddress &address, unsigned int vid = 0) const override;
+    virtual void setUnicastAddressForwardingInterface(int interfaceId, const MacAddress &address, unsigned int vid = 0) override;
+    virtual void removeUnicastAddressForwardingInterface(int interfaceId, const MacAddress &address, unsigned int vid = 0) override;
+    virtual void learnUnicastAddressForwardingInterface(int interfaceId, const MacAddress &address, unsigned int vid = 0) override;
 
-    virtual std::vector<int> getMulticastAddressForwardingInterfaces(
-            const MacAddress &address, unsigned int vid = 0) const override;
-    virtual void addMulticastAddressForwardingInterface(int interfaceId,
-            const MacAddress &address, unsigned int vid = 0) override;
-    virtual void removeMulticastAddressForwardingInterface(int interfaceId,
-            const MacAddress &address, unsigned int vid = 0) override;
+    virtual std::vector<int> getMulticastAddressForwardingInterfaces(const MacAddress &address, unsigned int vid = 0) const override;
+    virtual void addMulticastAddressForwardingInterface(int interfaceId, const MacAddress &address, unsigned int vid = 0) override;
+    virtual void removeMulticastAddressForwardingInterface(int interfaceId, const MacAddress &address, unsigned int vid = 0) override;
 
     virtual void removeForwardingInterface(int interfaceId) override;
-    virtual void replaceForwardingInterface(int oldInterfaceId,
-            int newInterfaceId) override;
+    virtual void replaceForwardingInterface(int oldInterfaceId, int newInterfaceId) override;
 
 protected:
     /**
