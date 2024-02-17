@@ -1,7 +1,6 @@
 // Copyright (C) 2024 Daniel Zeitler
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-
 #include "inet/linklayer/mrp/common/MrpMacForwardingTable.h"
 
 #include <map>
@@ -16,19 +15,18 @@ namespace inet {
 
 Define_Module(MrpMacForwardingTable);
 
-void MrpMacForwardingTable::initialize(int stage)
-{
+void MrpMacForwardingTable::initialize(int stage) {
     MacForwardingTable::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        agingTime = SimTime(3,SIMTIME_S);
+        agingTime = SimTime(3, SIMTIME_S);
         lastPurge = SIMTIME_ZERO;
         //ifTable.reference(this, "interfaceTableModule", true);
         //WATCH_MAP(mrpForwardingTable);
     }
 }
 
-std::vector<int> MrpMacForwardingTable::getMrpForwardingInterfaces(const MacAddress& address, unsigned int vid) const
-{
+std::vector<int> MrpMacForwardingTable::getMrpForwardingInterfaces(
+        const MacAddress &address, unsigned int vid) const {
     Enter_Method("getMrpAddressForwardingInterfaces");
     ASSERT(address.isMulticast());
     ForwardingTableKey key(vid, address);
@@ -39,14 +37,14 @@ std::vector<int> MrpMacForwardingTable::getMrpForwardingInterfaces(const MacAddr
         return it->second.interfaceIds;
 }
 
-void MrpMacForwardingTable::addMrpForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid)
-{
+void MrpMacForwardingTable::addMrpForwardingInterface(int interfaceId,
+        const MacAddress &address, unsigned int vid) {
     Enter_Method("addMrpForwardingInterface");
     ASSERT(address.isMulticast());
     ForwardingTableKey key(vid, address);
     auto it = mrpForwardingTable.find(key);
     if (it == mrpForwardingTable.end())
-        mrpForwardingTable[key] = MulticastAddressEntry(vid, {interfaceId});
+        mrpForwardingTable[key] = MulticastAddressEntry(vid, { interfaceId });
     else {
         if (!contains(it->second.interfaceIds, interfaceId))
             it->second.interfaceIds.push_back(interfaceId);
@@ -56,8 +54,8 @@ void MrpMacForwardingTable::addMrpForwardingInterface(int interfaceId, const Mac
     }
 }
 
-void MrpMacForwardingTable::removeMrpForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid)
-{
+void MrpMacForwardingTable::removeMrpForwardingInterface(int interfaceId,
+        const MacAddress &address, unsigned int vid) {
     Enter_Method("removeMrpForwardingInterface");
     ASSERT(address.isMulticast());
     ForwardingTableKey key(vid, address);
@@ -69,8 +67,8 @@ void MrpMacForwardingTable::removeMrpForwardingInterface(int interfaceId, const 
     remove(it->second.interfaceIds, interfaceId);
 }
 
-bool MrpMacForwardingTable::isMrpIngressFilterInterface(int interfaceId, const MacAddress& address, unsigned int vid) const
-{
+bool MrpMacForwardingTable::isMrpIngressFilterInterface(int interfaceId,
+        const MacAddress &address, unsigned int vid) const {
     Enter_Method("isMrpIngressFilterInterface");
     ASSERT(address.isMulticast());
     ForwardingTableKey key(vid, address);
@@ -82,15 +80,15 @@ bool MrpMacForwardingTable::isMrpIngressFilterInterface(int interfaceId, const M
     return false;
 }
 
-
-void MrpMacForwardingTable::addMrpIngressFilterInterface(int interfaceId, const MacAddress& address, unsigned int vid)
-{
+void MrpMacForwardingTable::addMrpIngressFilterInterface(int interfaceId,
+        const MacAddress &address, unsigned int vid) {
     Enter_Method("addMrpIngressFilterInterface");
     ASSERT(address.isMulticast());
     ForwardingTableKey key(vid, address);
     auto it = mrpIngressFilterTable.find(key);
     if (it == mrpIngressFilterTable.end())
-        mrpIngressFilterTable[key] = MulticastAddressEntry(vid, {interfaceId});
+        mrpIngressFilterTable[key] = MulticastAddressEntry(vid,
+                { interfaceId });
     else {
         if (!contains(it->second.interfaceIds, interfaceId))
             it->second.interfaceIds.push_back(interfaceId);
@@ -100,8 +98,8 @@ void MrpMacForwardingTable::addMrpIngressFilterInterface(int interfaceId, const 
     }
 }
 
-void MrpMacForwardingTable::removeMrpIngressFilterInterface(int interfaceId, const MacAddress& address, unsigned int vid)
-{
+void MrpMacForwardingTable::removeMrpIngressFilterInterface(int interfaceId,
+        const MacAddress &address, unsigned int vid) {
     Enter_Method("removeMrpIngressFilterInterface");
     ASSERT(address.isMulticast());
     ForwardingTableKey key(vid, address);
@@ -113,25 +111,22 @@ void MrpMacForwardingTable::removeMrpIngressFilterInterface(int interfaceId, con
     remove(it->second.interfaceIds, interfaceId);
 }
 
-void MrpMacForwardingTable::clearTable()
-{
+void MrpMacForwardingTable::clearTable() {
     forwardingTable.clear();
     multicastForwardingTable.clear();
 }
 
-void MrpMacForwardingTable::clearMrpTable()
-{
+void MrpMacForwardingTable::clearMrpTable() {
     mrpForwardingTable.clear();
 }
 
-void MrpMacForwardingTable::handleStopOperation(LifecycleOperation *operation)
-{
+void MrpMacForwardingTable::handleStopOperation(LifecycleOperation *operation) {
     clearTable();
     clearMrpTable();
 }
 
-void MrpMacForwardingTable::handleCrashOperation(LifecycleOperation *operation)
-{
+void MrpMacForwardingTable::handleCrashOperation(
+        LifecycleOperation *operation) {
     clearTable();
     clearMrpTable();
 }
