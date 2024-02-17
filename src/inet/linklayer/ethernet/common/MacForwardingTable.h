@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
+
 #ifndef __INET_MACFORWARDINGTABLE_H
 #define __INET_MACFORWARDINGTABLE_H
 
@@ -21,9 +22,8 @@ namespace inet {
  * NOTE that interfaceIds (interfaceId parameters) are actually the corresponding ID of the port interface.
  * i.e. this is an interfaceId and NOT an index of the some kind in a gate vector.
  */
-class INET_API MacForwardingTable: public OperationalBase,
-        public IMacForwardingTable,
-        public StringFormat::IDirectiveResolver {
+class INET_API MacForwardingTable: public OperationalBase, public IMacForwardingTable, public StringFormat::IDirectiveResolver
+{
   protected:
     struct AddressEntry {
         int interfaceId = -1;
