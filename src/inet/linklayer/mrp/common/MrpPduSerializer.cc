@@ -22,14 +22,12 @@ Register_Serializer(manufacturerFktHeader, mrpSubTlvSerializer);
 Register_Serializer(subTlvTestFrame, mrpSubTlvSerializer);
 Register_Serializer(mrpVersionField, mrpVersionFieldSerializer);
 
-void mrpVersionFieldSerializer::serialize(MemoryOutputStream &stream,
-        const Ptr<const Chunk> &chunk) const {
+void mrpVersionFieldSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const {
     const auto &version = staticPtrCast<const mrpVersionField>(chunk);
     stream.writeUint16Be(version->getVersion());
 }
 
-void mrpTlvSerializer::serialize(MemoryOutputStream &stream,
-        const Ptr<const Chunk> &chunk) const {
+void mrpTlvSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const {
     const auto &tlv = staticPtrCast<const tlvHeader>(chunk);
     stream.writeUint8(tlv->getHeaderType());
     stream.writeUint8(tlv->getHeaderLength());
@@ -119,8 +117,7 @@ void mrpTlvSerializer::serialize(MemoryOutputStream &stream,
     }
 }
 
-void mrpSubTlvSerializer::serialize(MemoryOutputStream &stream,
-        const Ptr<const Chunk> &chunk) const {
+void mrpSubTlvSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const {
     const auto &subTlv = staticPtrCast<const subTlvHeader>(chunk);
     stream.writeUint8(subTlv->getSubType());
     stream.writeUint8(subTlv->getSubHeaderLength());
@@ -144,15 +141,13 @@ void mrpSubTlvSerializer::serialize(MemoryOutputStream &stream,
     }
 }
 
-const Ptr<Chunk> mrpVersionFieldSerializer::deserialize(
-        MemoryInputStream &stream) const {
+const Ptr<Chunk> mrpVersionFieldSerializer::deserialize(MemoryInputStream &stream) const {
     auto mrpVersion = makeShared<mrpVersionField>();
     mrpVersion->setVersion(stream.readUint16Be());
     return mrpVersion;
 }
 
-const Ptr<Chunk> mrpTlvSerializer::deserialize(
-        MemoryInputStream &stream) const {
+const Ptr<Chunk> mrpTlvSerializer::deserialize(MemoryInputStream &stream) const {
     auto headerType = static_cast<tlvHeaderType>(stream.readUint16Be());
     switch (headerType) {
     case END: {
@@ -182,7 +177,6 @@ const Ptr<Chunk> mrpTlvSerializer::deserialize(
         tlv->setTimeStamp(stream.readUint32Be());
         return tlv;
     }
-
     case TOPOLOGYCHANGE: {
         auto tlv = makeShared<topologyChangeFrame>();
         tlv->setHeaderType(headerType);
@@ -193,7 +187,6 @@ const Ptr<Chunk> mrpTlvSerializer::deserialize(
         tlv->setInterval(stream.readUint16Be());
         return tlv;
     }
-
     case LINKDOWN:
     case LINKUP: {
         auto tlv = makeShared<linkChangeFrame>();
@@ -205,7 +198,6 @@ const Ptr<Chunk> mrpTlvSerializer::deserialize(
         tlv->setBlocked(stream.readUint16Be());
         return tlv;
     }
-
     case INTEST: {
         auto tlv = makeShared<inTestFrame>();
         tlv->setHeaderType(headerType);
@@ -218,7 +210,6 @@ const Ptr<Chunk> mrpTlvSerializer::deserialize(
         tlv->setTimeStamp(stream.readUint32Be());
         return tlv;
     }
-
     case INTOPOLOGYCHANGE: {
         auto tlv = makeShared<inTopologyChangeFrame>();
         tlv->setHeaderType(headerType);
@@ -228,7 +219,6 @@ const Ptr<Chunk> mrpTlvSerializer::deserialize(
         tlv->setInterval(stream.readUint16Be());
         return tlv;
     }
-
     case INLINKDOWN:
     case INLINKUP: {
         auto tlv = makeShared<inLinkChangeFrame>();
@@ -241,7 +231,6 @@ const Ptr<Chunk> mrpTlvSerializer::deserialize(
         tlv->setLinkInfo(stream.readUint16Be());
         return tlv;
     }
-
     case INLINKSTATUSPOLL: {
         auto tlv = makeShared<inLinkStatusPollFrame>();
         tlv->setHeaderType(headerType);
@@ -251,7 +240,6 @@ const Ptr<Chunk> mrpTlvSerializer::deserialize(
         tlv->setInID(stream.readUint16Be());
         return tlv;
     }
-
     case OPTION: {
         auto tlv = makeShared<optionHeader>();
         tlv->setHeaderType(headerType);
@@ -260,15 +248,13 @@ const Ptr<Chunk> mrpTlvSerializer::deserialize(
         tlv->setEd1Type(stream.readUint8());
         return tlv;
     }
-
     default:
         throw cRuntimeError("Unknown Header TYPE value: %d",
                 static_cast<int>(headerType));
     }
 }
 
-const Ptr<Chunk> mrpSubTlvSerializer::deserialize(
-        MemoryInputStream &stream) const {
+const Ptr<Chunk> mrpSubTlvSerializer::deserialize(MemoryInputStream &stream) const {
     auto subType = static_cast<subTlvHeaderType>(stream.readUint8());
     switch (subType) {
     case RESERVED: {

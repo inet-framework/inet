@@ -113,6 +113,8 @@ static const ProtocolGroup::Protocols ipProtocols {
     { IP_PROT_XTP, &Protocol::xtp },
     { IP_PROT_IPv6, &Protocol::ipv6 },
     { IP_PROT_RSVP, &Protocol::rsvpTe },
+    { IP_PROT_ESP, &Protocol::ipsecEsp },
+    { IP_PROT_AH, &Protocol::ipsecAh },
     { IP_PROT_DSR, &Protocol::dsr },
     { IP_PROT_IPv6_ICMP, &Protocol::icmpv6 },
     { IP_PROT_EIGRP, &Protocol::eigrp },
