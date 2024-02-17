@@ -16,8 +16,7 @@ namespace inet {
 // This module forward frames (~EtherFrame) based on their destination MAC addresses to appropriate interfaces.
 // See the NED definition for details.
 //
-class INET_API MrpRelay : public Ieee8021dRelay
-{
+class INET_API MrpRelay: public Ieee8021dRelay {
 protected:
     ModuleRefByPar<MrpMacForwardingTable> mrpMacForwardingTable;
 
@@ -38,10 +37,14 @@ protected:
     virtual void handleUpperPacket(Packet *packet) override;
     virtual void handleLowerPacket(Packet *packet) override;
     virtual int getCcmLevel(Packet *packet);
-    virtual void updatePeerAddress(NetworkInterface *incomingInterface, MacAddress sourceAddress, unsigned int vlanId) override;
-    virtual bool isForwardingInterface(NetworkInterface *networkInterface) const override;
+    virtual void updatePeerAddress(NetworkInterface *incomingInterface,
+            MacAddress sourceAddress, unsigned int vlanId) override;
+    virtual bool isForwardingInterface(NetworkInterface *networkInterface) const
+            override;
     virtual bool isMrpMulticast(MacAddress DestinationAddress);
-    virtual void sendPacket(Packet *packet, const MacAddress& destinationAddress, NetworkInterface *outgoingInterface) override;
+    virtual void sendPacket(Packet *packet,
+            const MacAddress &destinationAddress,
+            NetworkInterface *outgoingInterface) override;
 
     //@{ For lifecycle
     virtual void handleStartOperation(LifecycleOperation *operation) override;
