@@ -100,21 +100,15 @@ protected:
     virtual void interconnTopologyChangeReq(double Time);
     virtual void interconnLinkChangeReq(uint16_t LinkState, double Time);
     virtual void interconnLinkStatusPollReq(double Time);
-    virtual void inTransferReq(tlvHeaderType HeaderType, int RingPort,
-            frameType FrameType, Packet *packet);
-    virtual void mrpForwardReq(tlvHeaderType HeaderType, int Ringport,
-            frameType FrameType, Packet *packet);
+    virtual void inTransferReq(tlvHeaderType HeaderType, int RingPort, frameType FrameType, Packet *packet);
+    virtual void mrpForwardReq(tlvHeaderType HeaderType, int Ringport, frameType FrameType, Packet *packet);
     virtual void setupInterconnTestReq();
     virtual void setupInterconnTopologyChangeReq(double Time);
     virtual void setupInterconnLinkStatusPollReq();
-    virtual void interconnTestInd(MacAddress SourceAddress, int RingPort,
-            uint16_t InID, Packet *packet) override;
-    virtual void interconnTopologyChangeInd(MacAddress SourceAddress,
-            double Time, uint16_t InID, int RingPort, Packet *packet) override;
-    virtual void interconnLinkChangeInd(uint16_t InID, uint16_t LinkState,
-            int RingPort, Packet *packet) override;
-    virtual void interconnLinkStatusPollInd(uint16_t InID, int RingPort,
-            Packet *packet) override;
+    virtual void interconnTestInd(MacAddress SourceAddress, int RingPort, uint16_t InID, Packet *packet) override;
+    virtual void interconnTopologyChangeInd(MacAddress SourceAddress, double Time, uint16_t InID, int RingPort, Packet *packet) override;
+    virtual void interconnLinkChangeInd(uint16_t InID, uint16_t LinkState, int RingPort, Packet *packet) override;
+    virtual void interconnLinkStatusPollInd(uint16_t InID, int RingPort, Packet *packet) override;
     virtual void mauTypeChangeInd(int RingPort, uint16_t LinkState) override;
 
 public:
@@ -126,18 +120,10 @@ public:
     virtual void setInterconnectionInterface(int InterfaceId);
     virtual void setTimingProfile(int maxRecoveryTime) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
-    virtual bool isInitializeStage(int stage) const override {
-        return stage == INITSTAGE_LINK_LAYER;
-    }
-    virtual bool isModuleStartStage(int stage) const override {
-        return stage == ModuleStartOperation::STAGE_LAST;
-    }
-    virtual bool isModuleStopStage(int stage) const override {
-        return stage == ModuleStopOperation::STAGE_LINK_LAYER;
-    }
-    virtual int numInitStages() const override {
-        return NUM_INIT_STAGES;
-    }
+    virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LAST; }
+    virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 };
 
 } // namespace inet
