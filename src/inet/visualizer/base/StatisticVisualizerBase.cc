@@ -113,6 +113,7 @@ void StatisticVisualizerBase::addResultRecorder(cComponent *source, simsignal_t 
     auto recordingMode = getRecordingMode();
     statisticTemplateProperty.addKey("record");
     statisticTemplateProperty.setValue("record", 0, recordingMode.c_str());
+    statisticTemplateProperty.setIndex("visualizer");
     statisticBuilder.addResultRecorders(source, signal, statisticName, &statisticTemplateProperty);
 }
 
