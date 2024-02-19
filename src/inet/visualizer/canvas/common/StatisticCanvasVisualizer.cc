@@ -24,6 +24,12 @@ StatisticCanvasVisualizer::StatisticCanvasVisualization::StatisticCanvasVisualiz
 {
 }
 
+StatisticCanvasVisualizer::StatisticCanvasVisualization::~StatisticCanvasVisualization()
+{
+    delete figure;
+    figure = nullptr;
+}
+
 void StatisticCanvasVisualizer::initialize(int stage)
 {
     StatisticVisualizerBase::initialize(stage);
