@@ -119,8 +119,10 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
 
     virtual void addRouteVisualizations(IIpv4RoutingTable *routingTable);
     virtual void removeRouteVisualizations(IIpv4RoutingTable *routingTable);
-    virtual void removeAllRouteVisualizations();
     virtual void updateRouteVisualizations(IIpv4RoutingTable *routingTable);
+
+    virtual void addAllRouteVisualizations();
+    virtual void removeAllRouteVisualizations();
     virtual void updateAllRouteVisualizations();
 
     virtual std::string getRouteVisualizationText(const Ipv4Route *route) const;
