@@ -52,6 +52,7 @@ void RoutingTableCanvasVisualizer::initialize(int stage)
 
 void RoutingTableCanvasVisualizer::refreshDisplay() const
 {
+    RoutingTableVisualizerBase::refreshDisplay();
     auto simulation = getSimulation();
     for (auto it : routeVisualizations) {
         auto routeVisualization = it.second;

@@ -115,7 +115,20 @@ void RoutingTableVisualizerBase::handleParameterChange(const char *name)
         multicastSourceNodeFilter.setPattern(par("multicastSourceNodeFilter"));
     else if (!strcmp(name, "labelFormat"))
         labelFormat.parseFormat(par("labelFormat"));
-    updateAllRouteVisualizations();
+    allRoutingTableVisualizationsAreInvalid = true;
+}
+
+void RoutingTableVisualizerBase::refreshDisplay() const
+{
+    auto nonConstThisPtr = const_cast<RoutingTableVisualizerBase *>(this);
+    if (allRoutingTableVisualizationsAreInvalid) {
+        nonConstThisPtr->updateAllRouteVisualizations();
+        nonConstThisPtr->allRoutingTableVisualizationsAreInvalid = false;
+    }
+    else
+        for (auto routingTable : invalidRoutingTableVisualizations)
+            nonConstThisPtr->updateRouteVisualizations(routingTable);
+    nonConstThisPtr->invalidRoutingTableVisualizations.clear();
 }
 
 void RoutingTableVisualizerBase::subscribe()
@@ -153,11 +166,13 @@ void RoutingTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t s
     {
         auto routingTable = check_and_cast<IIpv4RoutingTable *>(source);
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
-        if (nodeFilter.matches(networkNode))
-            updateRouteVisualizations(routingTable);
+        if (nodeFilter.matches(networkNode)) {
+            removeRouteVisualizations(routingTable);
+            invalidRoutingTableVisualizations.insert(routingTable);
+        }
     }
     else if (signal == interfaceIpv4ConfigChangedSignal)
-        updateAllRouteVisualizations();
+        allRoutingTableVisualizationsAreInvalid = true;
     else
         throw cRuntimeError("Unknown signal");
 }

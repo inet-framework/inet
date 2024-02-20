@@ -87,6 +87,8 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     cFigure::Color labelColor;
     //@}
 
+    bool allRoutingTableVisualizationsAreInvalid = true;
+    std::set<IIpv4RoutingTable *> invalidRoutingTableVisualizations;
     LineManager *lineManager = nullptr;
 
     // key is router ID, source module ID, destination module ID
@@ -99,6 +101,7 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
     virtual void preDelete(cComponent *root) override;
+    virtual void refreshDisplay() const override;
 
     virtual void subscribe();
     virtual void unsubscribe();
