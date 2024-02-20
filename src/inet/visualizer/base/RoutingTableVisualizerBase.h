@@ -128,6 +128,8 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     virtual void removeAllRouteVisualizations();
     virtual void updateAllRouteVisualizations();
 
+    virtual void updateRouteVisualizations();
+
     virtual std::string getRouteVisualizationText(const Ipv4Route *route) const;
     virtual std::string getMulticastRouteVisualizationText(const Ipv4MulticastRoute *route) const;
 

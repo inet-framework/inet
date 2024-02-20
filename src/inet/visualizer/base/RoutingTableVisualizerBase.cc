@@ -120,15 +120,21 @@ void RoutingTableVisualizerBase::handleParameterChange(const char *name)
 
 void RoutingTableVisualizerBase::refreshDisplay() const
 {
-    auto nonConstThisPtr = const_cast<RoutingTableVisualizerBase *>(this);
+    if (displayRoutingTables)
+        // KLUDGE TODO
+        const_cast<RoutingTableVisualizerBase *>(this)->updateRouteVisualizations();
+}
+
+void RoutingTableVisualizerBase::updateRouteVisualizations()
+{
     if (allRoutingTableVisualizationsAreInvalid) {
-        nonConstThisPtr->updateAllRouteVisualizations();
-        nonConstThisPtr->allRoutingTableVisualizationsAreInvalid = false;
+        updateAllRouteVisualizations();
+        allRoutingTableVisualizationsAreInvalid = false;
     }
     else
         for (auto routingTable : invalidRoutingTableVisualizations)
-            nonConstThisPtr->updateRouteVisualizations(routingTable);
-    nonConstThisPtr->invalidRoutingTableVisualizations.clear();
+            updateRouteVisualizations(routingTable);
+    invalidRoutingTableVisualizations.clear();
 }
 
 void RoutingTableVisualizerBase::subscribe()
