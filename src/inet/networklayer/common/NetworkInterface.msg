@@ -20,6 +20,7 @@ class NetworkInterface extends cSimpleModule
     @implements(cIListener);
     @descriptor(readonly);
     bool up @getter("isUp");
+    bool carrier @getter("hasCarrier");
     bool broadcast @getter("isBroadcast");
     bool multicast @getter("isMulticast");
     bool pointToPoint @getter("isPointToPoint");
