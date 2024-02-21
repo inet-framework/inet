@@ -30,7 +30,7 @@ simple Leach like IManetRouting
 
         // LEACH parameter group
         volatile double startupDelay @unit(s) = default(uniform(0s, 1s));
-        double clusterHeadRatio @unit(pct) = default(5pct); 	// Determines ratio of cluster heads in network, which is used for threshold function
+        double clusterHeadRatio @unit(ratio) = default(0.05ratio); 	// Determines ratio of cluster heads in network, which is used for threshold function
         int roundDurationVariance = default(10);
     gates:
         input ipIn;
