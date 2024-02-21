@@ -45,7 +45,6 @@ protected:
     simtime_t CHPktSendDelay;
     simtime_t roundDuration;
 
-    int numNodes = 0;
     double clusterHeadPercentage = 0.0;
     int roundDurationVariance = 0;
 

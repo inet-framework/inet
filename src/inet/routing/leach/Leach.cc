@@ -40,7 +40,6 @@ void Leach::initialize(int stage) {
         interfaceTable.reference(this, "interfaceTableModule", true);
 
         clusterHeadPercentage = par("clusterHeadPercentage");
-        numNodes = par("numNodes");
         roundDurationVariance = par("roundDurationVariance");
 
         roundDuration = dblrand(0) * roundDurationVariance;
@@ -48,9 +47,9 @@ void Leach::initialize(int stage) {
         event = new cMessage("event");
         wasCH = false;
 
-        vector<nodeMemoryObject> nodeMemory(numNodes); // Localized NCH node memory with CH data
-        vector<TDMAScheduleEntry> nodeCHMemory(numNodes); // Localized CH memory
-        vector<TDMAScheduleEntry> extractedTDMASchedule(numNodes); // Localized NCH node memory with extracted TDMA data
+        vector<nodeMemoryObject> nodeMemory; // Localized NCH node memory with CH data
+        vector<TDMAScheduleEntry> nodeCHMemory; // Localized CH memory
+        vector<TDMAScheduleEntry> extractedTDMASchedule; // Localized NCH node memory with extracted TDMA data
 
     } else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerService(Protocol::manet, nullptr, gate("ipIn"));
