@@ -60,9 +60,9 @@ protected:
         double TDMAdelay;
     };
 
-    vector<nodeMemoryObject> nodeMemory; // NCH nodes store data about CH broadcasts
-    vector<TDMAScheduleEntry> nodeCHMemory; // CH store data about CH acknowledgements
-    vector<TDMAScheduleEntry> extractedTDMASchedule;
+    vector<nodeMemoryObject> nodeMemory; // Localized Non CH node memory with CH data
+    vector<TDMAScheduleEntry> nodeCHMemory; // Localized CH memory to store NCH acknowledgements
+    vector<TDMAScheduleEntry> extractedTDMASchedule; // Localized NCH node memory for extracted TDMA slot data
     bool wasCH;
 
 public:
