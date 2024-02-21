@@ -45,7 +45,7 @@ protected:
     simtime_t CHPktSendDelay;
     simtime_t roundDuration;
 
-    double clusterHeadPercentage = 0.0;
+    double clusterHeadRatio = 0.0;
     int roundDurationVariance = 0;
 
     // object for storing CH data per node in vector array

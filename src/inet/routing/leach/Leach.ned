@@ -24,13 +24,13 @@ simple Leach like IManetRouting
         // properties
         @class("leach::Leach");
         @display("i=block/routing");
-        
+
         // context parameters
-        string interfaceTableModule; 
-        
+        string interfaceTableModule;
+
         // LEACH parameter group
         volatile double startupDelay @unit(s) = default(uniform(0s, 1s));
-        double clusterHeadPercentage = default(0.5);
+        double clusterHeadRatio @unit(pct) = default(5pct); 	// Determines ratio of cluster heads in network, which is used for threshold function
         int roundDurationVariance = default(10);
     gates:
         input ipIn;

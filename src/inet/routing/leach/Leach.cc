@@ -39,7 +39,7 @@ void Leach::initialize(int stage) {
         host = getContainingNode(this);
         interfaceTable.reference(this, "interfaceTableModule", true);
 
-        clusterHeadPercentage = par("clusterHeadPercentage");
+        clusterHeadRatio = par("clusterHeadRatio");
         roundDurationVariance = par("roundDurationVariance");
 
         roundDuration = dblrand(0) * roundDurationVariance;
@@ -99,7 +99,7 @@ void Leach::handleMessageWhenUp(cMessage *msg) {
         }
 
         round += 1;
-        int intervalLength = 1.0 / clusterHeadPercentage;
+        int intervalLength = 1.0 / clusterHeadRatio;
         if (fmod(round, intervalLength) == 0) { // reset values at end of number of subintervals
             wasCH = false;
             nodeMemory.clear();
@@ -246,9 +246,9 @@ void Leach::handleCrashOperation(LifecycleOperation *operation) {
 
 // Threshold value for CH selection
 double Leach::Leach::generateThresholdValue(int round) {
-    int intervalLength = 1.0 / clusterHeadPercentage;
-    double threshold = (clusterHeadPercentage
-            / (1 - clusterHeadPercentage * (fmod(round, intervalLength))));
+    int intervalLength = 1.0 / clusterHeadRatio;
+    double threshold = (clusterHeadRatio
+            / (1 - clusterHeadRatio * (fmod(round, intervalLength))));
 
     return threshold;
 }
