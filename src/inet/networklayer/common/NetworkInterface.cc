@@ -126,8 +126,10 @@ void NetworkInterface::initialize(int stage)
         upperLayerOutConsumer.reference(upperLayerOut, false, 1);
         interfaceTable.reference(this, "interfaceTableModule", false);
         setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
-        setCarrier(computeCarrier());
-        setDatarate(computeDatarate());
+        bool carrier = computeCarrier();
+        if (carrier)
+            setDatarate(computeDatarate());
+        setCarrier(carrier);
         WATCH(mtu);
         WATCH(state);
         WATCH(carrier);
@@ -325,7 +327,10 @@ void NetworkInterface::receiveSignal(cComponent *source, simsignal_t signal, cOb
                     rxTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
                 if (txTransmissionChannel != nullptr && !txTransmissionChannel->isSubscribed(POST_MODEL_CHANGE, this))
                     txTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
-                setCarrier(computeCarrier());
+                bool carrier = computeCarrier();
+                if (carrier)
+                    setDatarate(computeDatarate());
+                setCarrier(carrier);
             }
         }
         else if (auto notification = dynamic_cast<cPostPathCutNotification *>(obj)) {
@@ -338,8 +343,10 @@ void NetworkInterface::receiveSignal(cComponent *source, simsignal_t signal, cOb
         else if (auto notification = dynamic_cast<cPostParameterChangeNotification *>(obj)) {
             auto owner = notification->par->getOwner();
             if (owner == rxTransmissionChannel || owner == txTransmissionChannel) {
-                setCarrier(computeCarrier());
-                setDatarate(computeDatarate());
+                bool carrier = computeCarrier();
+                if (carrier)
+                    setDatarate(computeDatarate());
+                setCarrier(carrier);
             }
         }
     }
@@ -675,7 +682,10 @@ void NetworkInterface::handleStartOperation(LifecycleOperation *operation)
 {
     setState(State::UP);
     // TODO carrier and UP/DOWN state is independent
-    setCarrier(true);
+    bool carrier = computeCarrier();
+    if (carrier)
+        setDatarate(computeDatarate());
+    setCarrier(carrier);
 }
 
 void NetworkInterface::handleStopOperation(LifecycleOperation *operation)
