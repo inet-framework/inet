@@ -75,7 +75,6 @@ class INET_API EthernetMacBase : public MacProtocolBase, public queueing::IActiv
     bool frameBursting = false; // frame bursting on/off (Gigabit Ethernet)
 
     // gate pointers, etc.
-    cChannel *transmissionChannel = nullptr; // transmission channel
     cGate *physInGate = nullptr; // pointer to the "phys$i" gate
     cGate *physOutGate = nullptr; // pointer to the "phys$o" gate
 

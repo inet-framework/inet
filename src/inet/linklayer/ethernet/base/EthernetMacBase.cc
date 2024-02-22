@@ -20,6 +20,7 @@
 #include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/linklayer/ethernet/common/EthernetControlFrame_m.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
+#include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wired/ethernet/EthernetPhyHeader_m.h"
 #include "inet/physicallayer/wired/ethernet/EthernetSignal_m.h"
@@ -68,7 +69,6 @@ void EthernetMacBase::initialize(int stage)
         physOutGate = gate("phys$o");
         lowerLayerInGateId = physInGate->getId();
         lowerLayerOutGateId = physOutGate->getId();
-        transmissionChannel = nullptr;
         txQueue = getQueue(gate(upperLayerInGateId));
 
         initializeFlags();
@@ -89,14 +89,17 @@ void EthernetMacBase::initialize(int stage)
         // initialize pause
         pauseUnitsRequested = 0;
 
-        subscribe(POST_MODEL_CHANGE, this);
-
         WATCH(transmitState);
         WATCH(receiveState);
         WATCH(connected);
         WATCH(frameBursting);
         WATCH(promiscuous);
         WATCH(pauseUnitsRequested);
+    }
+    else if (stage == 1) { // KLUDGE TODO
+        InterfaceTable *ift = check_and_cast<InterfaceTable *>(networkInterface->getInterfaceTable());
+        ift->subscribe(interfaceStateChangedSignal, this);
+        ift->subscribe(interfaceConfigChangedSignal, this);
     }
 }
 
@@ -153,20 +156,16 @@ void EthernetMacBase::configureNetworkInterface()
 
 void EthernetMacBase::handleStartOperation(LifecycleOperation *operation)
 {
-    networkInterface->setState(NetworkInterface::State::UP);
     initializeFlags();
     readChannelParameters(true);
 }
 
 void EthernetMacBase::handleStopOperation(LifecycleOperation *operation)
 {
-    if (currentTxFrame != nullptr || !txQueue->isEmpty()) {
-        networkInterface->setState(NetworkInterface::State::GOING_DOWN);
+    if (curTxSignal != nullptr || currentTxFrame != nullptr || !txQueue->isEmpty()) {
         delayActiveOperationFinish(par("stopOperationTimeout"));
     }
     else {
-        networkInterface->setCarrier(false);
-        networkInterface->setState(NetworkInterface::State::DOWN);
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
     }
 }
@@ -175,21 +174,18 @@ void EthernetMacBase::handleCrashOperation(LifecycleOperation *operation)
 {
 //    clearQueue();
     connected = false;
-    networkInterface->setCarrier(false);
     processConnectDisconnect();
-    networkInterface->setState(NetworkInterface::State::DOWN);
 }
 
 // TODO this method should be renamed and called where processing is finished on the current frame (i.e. curTxFrame becomes nullptr)
 void EthernetMacBase::processAtHandleMessageFinished()
 {
     if (operationalState == State::STOPPING_OPERATION) {
-        if (currentTxFrame == nullptr && txQueue->isEmpty()) {
+        if (curTxSignal == nullptr && currentTxFrame == nullptr && txQueue->isEmpty()) {
             EV << "Ethernet Queue is empty, MAC stopped\n";
-            connected = false;
-            networkInterface->setCarrier(false);
-            processConnectDisconnect();
-            networkInterface->setState(NetworkInterface::State::DOWN);
+            // processConnectDisconnect();
+            cancelEvent(endIfgTimer);
+            cancelEvent(endPauseTimer);
             startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
         }
     }
@@ -201,20 +197,15 @@ void EthernetMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cO
 
     MacProtocolBase::receiveSignal(source, signalID, obj, details);
 
-    if (signalID == POST_MODEL_CHANGE) {
-        if (auto gcobj = dynamic_cast<cPostPathCreateNotification *>(obj)) {
-            if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
-                refreshConnection();
-        }
-        else if (auto gcobj = dynamic_cast<cPostPathCutNotification *>(obj)) {
-            if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
-                refreshConnection();
-        }
-        else if (transmissionChannel && dynamic_cast<cPostParameterChangeNotification *>(obj)) { // note: we are subscribed to the channel object too
-            cPostParameterChangeNotification *gcobj = static_cast<cPostParameterChangeNotification *>(obj);
-            if (transmissionChannel == gcobj->par->getOwner())
-                refreshConnection();
-        }
+    if (signalID == interfaceStateChangedSignal) {
+        NetworkInterfaceChangeDetails *info = check_and_cast<NetworkInterfaceChangeDetails*>(obj);
+        if (info->getNetworkInterface() == networkInterface && (info->getFieldId() == NetworkInterface::F_STATE || info->getFieldId() == NetworkInterface::F_CARRIER))
+            refreshConnection();
+    }
+    else if (signalID == interfaceConfigChangedSignal) {
+        NetworkInterfaceChangeDetails *info = check_and_cast<NetworkInterfaceChangeDetails*>(obj);
+        if (info->getNetworkInterface() == networkInterface && (info->getFieldId() == NetworkInterface::F_DATARATE))
+            refreshConnection();
     }
 }
 
@@ -377,64 +368,17 @@ bool EthernetMacBase::dropFrameNotForUs(Packet *packet, const Ptr<const Ethernet
 
 void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
 {
-    // When the connected channels change at runtime, we'll receive
-    // two separate notifications (one for the rx channel and one for the tx one),
-    // so we cannot immediately raise an error when they differ. Rather, we'll need
-    // to verify at the next opportunity (event) that the two channels have eventually
-    // been set to the same value.
+    double txRate = networkInterface->getDatarate();
+    connected = networkInterface->isUp() && networkInterface->hasCarrier();
 
-    cDatarateChannel *outTrChannel = check_and_cast_nullable<cDatarateChannel *>(physOutGate->findTransmissionChannel());
-    cDatarateChannel *inTrChannel = check_and_cast_nullable<cDatarateChannel *>(physInGate->findIncomingTransmissionChannel());
-
-    connected = physOutGate->getPathEndGate()->isConnected() && physInGate->getPathStartGate()->isConnected();
-
-    if (connected && ((!outTrChannel) || (!inTrChannel)))
-        throw cRuntimeError("Ethernet phys gate must be connected using a transmission channel");
-
-    double txRate = outTrChannel ? outTrChannel->getNominalDatarate() : 0.0;
-    double rxRate = inTrChannel ? inTrChannel->getNominalDatarate() : 0.0;
-
-    bool rxDisabled = !inTrChannel || inTrChannel->isDisabled();
-    bool txDisabled = !outTrChannel || outTrChannel->isDisabled();
-
-    if (errorWhenAsymmetric && (rxDisabled != txDisabled))
-        throw cRuntimeError("The enablements of the input/output channels differ (rx=%s vs tx=%s)", rxDisabled ? "off" : "on", txDisabled ? "off" : "on");
-
-    if (txDisabled)
-        connected = false;
-
-    bool dataratesDiffer;
     if (!connected) {
         curEtherDescr = EthernetModes::nullEthernetMode;
         halfBitTime = SIMTIME_ZERO;
-        dataratesDiffer = false;
-        if (!outTrChannel)
-            transmissionChannel = nullptr;
-        if (networkInterface) {
-            networkInterface->setCarrier(false);
-            networkInterface->setDatarate(0);
-        }
     }
     else {
-        if (outTrChannel && !transmissionChannel)
-            outTrChannel->subscribe(POST_MODEL_CHANGE, this);
-        transmissionChannel = outTrChannel;
-        dataratesDiffer = (txRate != rxRate);
-    }
-
-    channelsDiffer = dataratesDiffer || (rxDisabled != txDisabled);
-
-    if (errorWhenAsymmetric && dataratesDiffer)
-        throw cRuntimeError("The input/output datarates differ (rx=%g bps vs tx=%g bps)", rxRate, txRate);
-
-    if (connected) {
         // Check valid speeds
         curEtherDescr = EthernetModes::getEthernetMode(txRate, allowNonstandardBitrate);
         halfBitTime = 0.5 / txRate;
-        if (networkInterface) {
-            networkInterface->setCarrier(true);
-            networkInterface->setDatarate(txRate);
-        }
     }
 }
 
@@ -505,11 +449,11 @@ void EthernetMacBase::refreshDisplay() const
             case 'q':
                 return txQueue != nullptr ? std::to_string(txQueue->getNumPackets()) : "";
             case 'b':
-                if (transmissionChannel == nullptr)
+                if (!networkInterface->isUp())
                     return "not connected";
                 else {
                     char datarateText[40];
-                    double datarate = transmissionChannel->getNominalDatarate();
+                    double datarate = networkInterface->getDatarate();
                     if (datarate >= 1e9)
                         sprintf(datarateText, "%gGbps", datarate / 1e9);
                     else if (datarate >= 1e6)
