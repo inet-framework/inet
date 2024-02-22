@@ -59,7 +59,6 @@ void Leach::start() {
     configureInterfaces();
 
     // schedules a random periodic event
-    event->setKind(SELF);
     scheduleAt(simTime() + uniform(0.0, par("startupDelay").doubleValue()),
             event);
 }
@@ -107,7 +106,6 @@ void Leach::handleMessageWhenUp(cMessage *msg) {
         }
 
         // schedule another self message every time new one is received by node
-        event->setKind(SELF);
         scheduleAt(simTime() + roundDuration, event);
         // if node is receiving message
     } else if (check_and_cast<Packet*>(msg)->getTag<PacketProtocolTag>()->getProtocol()
@@ -125,7 +123,6 @@ void Leach::handleMessageWhenDown(cMessage *msg) {
 
 void Leach::handleSelfMessage(cMessage *msg) {
     if (msg == event) {
-        if (event->getKind() == SELF) {
             auto ctrlPkt = makeShared<LeachControlPkt>();
 
             // Filling the LeachControlPkt fields
@@ -149,7 +146,6 @@ void Leach::handleSelfMessage(cMessage *msg) {
             send(packet, "ipOut");
             packet = nullptr;
             ctrlPkt = nullptr;
-        }
     } else {
         delete msg;
     }
