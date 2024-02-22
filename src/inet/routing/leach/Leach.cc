@@ -41,6 +41,7 @@ void Leach::initialize(int stage) {
 
         clusterHeadRatio = par("clusterHeadRatio");
         roundDurationVariance = par("roundDurationVariance");
+        interfaces = par("interfaces");
 
         roundDuration = dblrand(0) * roundDurationVariance;
         TDMADelayCounter = 1;
@@ -71,13 +72,14 @@ void Leach::stop() {
 }
 
 void Leach::configureInterfaces() {
+    cPatternMatcher interfaceMatcher(interfaces, false, true, false);
     int numInterfaces = interfaceTable->getNumInterfaces();
     for (int i = 0; i < numInterfaces; i++) {
         NetworkInterface *networkInterface = interfaceTable->getInterface(i);
-        // Only single wireless interface is required
-        if (networkInterface->isWireless()) {
+        if (networkInterface->isMulticast()
+                && interfaceMatcher.matches(
+                        networkInterface->getInterfaceName())) {
             wirelessInterface = networkInterface;
-            break;
         }
     }
 }

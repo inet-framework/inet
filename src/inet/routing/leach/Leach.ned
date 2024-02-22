@@ -29,6 +29,7 @@ simple Leach like IManetRouting
         string interfaceTableModule;
 
         // LEACH parameter group
+        string interfaces = default("*"); // Only single wireless interface is required
         volatile double startupDelay @unit(s) = default(uniform(0s, 1s));
         double clusterHeadRatio @unit(ratio) = default(0.05ratio); 	// Determines ratio of cluster heads in network, which is used for threshold function
         int roundDurationVariance = default(10);

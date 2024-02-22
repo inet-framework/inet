@@ -39,6 +39,7 @@ private:
     cMessage *event = nullptr;
     int round = 0;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
+    const char *interfaces  = nullptr;
 
 protected:
     simtime_t dataPktSendDelay;
