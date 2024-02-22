@@ -50,7 +50,7 @@ module TcpClientApp like IApp
         }
         io: TcpClientSocketIo {
             parameters:
-                @display("p=150,300");
+                @display("p=350,600");
         }
     connections allowunconnected:
         source.out --> tagger.in if exists(source);
