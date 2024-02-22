@@ -94,7 +94,7 @@ void Ieee802154UwbIrTransmitter::generateSyncPreamble(std::map<simsec, WpHz>& da
 
 void Ieee802154UwbIrTransmitter::generateSFD(std::map<simsec, WpHz>& data, simtime_t& time, const simtime_t startTime) const
 {
-    const simtime_t sfdStart = cfg.NSync * cfg.sync_symbol_duration;
+    const simtime_t sfdStart = static_cast<int>(cfg.NSync) * cfg.sync_symbol_duration;
     for (short n = 0; n < 8; n = n + 1) {
         if (Ieee802154UwbIrMode::shortSFD[n] != 0) {
             for (short pos = 0; pos < cfg.CLength; pos = pos + 1) {
