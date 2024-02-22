@@ -680,6 +680,12 @@ bool NetworkInterface::handleOperationStage(LifecycleOperation *operation, IDone
 
 void NetworkInterface::handleStartOperation(LifecycleOperation *operation)
 {
+    rxTransmissionChannel = rxIn ? rxIn->findIncomingTransmissionChannel() : nullptr;
+    if (rxTransmissionChannel != nullptr && !rxTransmissionChannel->isSubscribed(POST_MODEL_CHANGE, this))
+        rxTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
+    txTransmissionChannel = txOut ? txOut->findTransmissionChannel() : nullptr;
+    if (txTransmissionChannel != nullptr && !txTransmissionChannel->isSubscribed(POST_MODEL_CHANGE, this))
+        txTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
     setState(State::UP);
     // TODO carrier and UP/DOWN state is independent
     bool carrier = computeCarrier();
