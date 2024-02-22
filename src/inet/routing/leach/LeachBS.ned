@@ -22,9 +22,12 @@ simple LeachBS like IManetRouting
         // properties
         @class("leach::LeachBS");
         @display("i=block/routing");
-        
+
         // context parameters
-        string interfaceTableModule;   
+        string interfaceTableModule;
+
+        // Leach base station parameter group
+        string interfaces = default("*"); // Only single wireless interface is required        
     gates:
         input ipIn;
         output ipOut;

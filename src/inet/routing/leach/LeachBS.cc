@@ -31,9 +31,9 @@ void LeachBS::initialize(int stage) {
 
     //reads from omnetpp.ini
     if (stage == INITSTAGE_LOCAL) {
-        sequencenumber = 0;
         host = getContainingNode(this);
         interfaceTable.reference(this, "interfaceTableModule", true);
+        interfaces = par("interfaces");
 
         bsPktReceived = 0;
 
@@ -54,20 +54,21 @@ void LeachBS::stop() {
 }
 
 void LeachBS::configureInterfaces() {
+    cPatternMatcher interfaceMatcher(interfaces, false, true, false);
     int numInterfaces = interfaceTable->getNumInterfaces();
     for (int i = 0; i < numInterfaces; i++) {
         NetworkInterface *networkInterface = interfaceTable->getInterface(i);
-        // Only single wireless interface is required
-        if (networkInterface->isWireless()) {
-            interface80211ptr = networkInterface;
-            break;
+        if (networkInterface->isMulticast()
+                && interfaceMatcher.matches(
+                        networkInterface->getInterfaceName())) {
+            wirelessInterface = networkInterface;
         }
     }
 }
 
 void LeachBS::handleMessageWhenUp(cMessage *msg) {
     Ipv4Address nodeAddr =
-            (interface80211ptr->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+            (wirelessInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
     // if node is sending message
     if (msg->isSelfMessage()) {
         delete msg;

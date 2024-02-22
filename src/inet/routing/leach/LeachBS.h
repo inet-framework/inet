@@ -30,11 +30,10 @@ public:
     virtual ~LeachBS();
 
     int interfaceId = -1;
-    NetworkInterface *interface80211ptr = nullptr;
-    IInterfaceTable *ift = nullptr;
-    unsigned int sequencenumber = 0;
+    NetworkInterface *wirelessInterface = nullptr;
     cModule *host = nullptr;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
+    const char *interfaces  = nullptr;
 
 protected:
     virtual int numInitStages() const override {
