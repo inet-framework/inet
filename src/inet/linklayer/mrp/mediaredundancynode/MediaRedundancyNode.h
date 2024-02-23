@@ -95,8 +95,8 @@ protected:
     double processingDelay = 0;
     double processingDelayMean = 100;
     double processingDelayDev = 80;
-    double linkDetectionDelayMean = 385000;
-    double linkDetectionDelayDev = 325000;
+    double linkDetectionDelayMean = 385;
+    double linkDetectionDelayDev = 325;
     mrpRole expectedRole = DISABLED;
 
     nodeState currentState = POWER_ON;
@@ -191,7 +191,7 @@ protected:
     virtual void mraInit();
     virtual void initPortTable();
     virtual void initRingPorts();
-    virtual void initContinuityCheck();
+    virtual void startContinuityCheck();
     virtual void initInterfacedata(unsigned int interfaceId);
     virtual void toggleRingPorts();
     virtual void setPortRole(int InterfaceId, MrpInterfaceData::PortRole Role);
