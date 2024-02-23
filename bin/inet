@@ -68,13 +68,13 @@ fi
 
 if [ "$MODE" = "" ]; then
   if [ -f $OUT/INET ]; then
-    $TOOL $OUT/INET $INET_OMNETPP_OPTIONS
+    $TOOL $OUT/INET $INET_OMNETPP_OPTIONS "$@"
   elif [ -f $OUT/INET_dbg ]; then
-    $TOOL $OUT/INET_dbg $INET_OMNETPP_OPTIONS
+    $TOOL $OUT/INET_dbg $INET_OMNETPP_OPTIONS "$@"
   elif [ -f $OUT/INET.exe ]; then
-    $TOOL $OUT/INET.exe $INET_OMNETPP_OPTIONS
+    $TOOL $OUT/INET.exe $INET_OMNETPP_OPTIONS "$@"
   elif [ -f $OUT/INET_dbg.exe ]; then
-    $TOOL $OUT/INET_dbg.exe $INET_OMNETPP_OPTIONS
+    $TOOL $OUT/INET_dbg.exe $INET_OMNETPP_OPTIONS "$@"
   elif [ -f $OUT/libINET.so ] || [ -f $OUT/INET.dll ] || [ -f $OUT/libINET.dll ] || [ -f $OUT/libINET.dylib ]; then
     $TOOL $OPP_RUN_RELEASE -l $OUT/../src/INET $INET_OMNETPP_OPTIONS "$@"
   elif [ -f $OUT/libINET_dbg.so ] || [ -f $OUT/INET_dbg.dll ] || [ -f $OUT/libINET_dbg.dll ] || [ -f $OUT/libINET_dbg.dylib ]; then
@@ -85,9 +85,9 @@ if [ "$MODE" = "" ]; then
   fi
 elif [ "$MODE" = "release" ]; then
   if [ -f $OUT/INET ]; then
-    $TOOL $OUT/INET $INET_OMNETPP_OPTIONS
+    $TOOL $OUT/INET $INET_OMNETPP_OPTIONS "$@"
   elif [ -f $OUT/INET.exe ]; then
-    $TOOL $OUT/INET.exe $INET_OMNETPP_OPTIONS
+    $TOOL $OUT/INET.exe $INET_OMNETPP_OPTIONS "$@"
   elif [ -f $OUT/libINET.so ] || [ -f $OUT/INET.dll ] || [ -f $OUT/libINET.dll ] || [ -f $OUT/libINET.dylib ]; then
     $TOOL $OPP_RUN_RELEASE -l $OUT/../src/INET $INET_OMNETPP_OPTIONS "$@"
   else
@@ -96,9 +96,9 @@ elif [ "$MODE" = "release" ]; then
   fi
 elif [ "$MODE" = "debug" ]; then
   if [ -f $OUT/INET_dbg ]; then
-    $TOOL $OUT/INET_dbg $INET_OMNETPP_OPTIONS
+    $TOOL $OUT/INET_dbg $INET_OMNETPP_OPTIONS "$@"
   elif [ -f $OUT/INET_dbg.exe ]; then
-    $TOOL $OUT/INET_dbg.exe $INET_OMNETPP_OPTIONS
+    $TOOL $OUT/INET_dbg.exe $INET_OMNETPP_OPTIONS "$@"
   elif [ -f $OUT/libINET_dbg.so ] || [ -f $OUT/INET_dbg.dll ] || [ -f $OUT/libINET_dbg.dll ] || [ -f $OUT/libINET_dbg.dylib ]; then
     $TOOL $OPP_RUN_DBG -l $OUT/../src/INET $INET_OMNETPP_OPTIONS "$@"
   else
@@ -107,9 +107,9 @@ elif [ "$MODE" = "debug" ]; then
   fi
 elif [ "$MODE" = "sanitize" ]; then
   if [ -f $OUT/INET_sanitize ]; then
-    $TOOL $OUT/INET_sanitize $INET_OMNETPP_OPTIONS
+    $TOOL $OUT/INET_sanitize $INET_OMNETPP_OPTIONS "$@"
   elif [ -f $OUT/INET_sanitize.exe ]; then
-    $TOOL $OUT/INET_sanitize.exe $INET_OMNETPP_OPTIONS
+    $TOOL $OUT/INET_sanitize.exe $INET_OMNETPP_OPTIONS "$@"
   elif [ -f $OUT/libINET_sanitize.so ] || [ -f $OUT/INET_sanitize.dll ] || [ -f $OUT/libINET_sanitize.dll ] || [ -f $OUT/libINET_sanitize.dylib ]; then
     $TOOL $OPP_RUN_SANITIZE -l $OUT/../src/INET $INET_OMNETPP_OPTIONS "$@"
   else
