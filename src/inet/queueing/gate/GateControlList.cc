@@ -26,7 +26,7 @@ void GateControlList::initialize(int stage)
         parseGcl();
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        for (int i = 0; i < numGates; ++i) {
+        for (size_t i = 0; i < numGates; ++i) {
             std::string modulePath = "^.transmissionGate[" + std::to_string(i) + "]";
             PeriodicGate *periodicGate = check_and_cast<PeriodicGate *>(getModuleByPath(modulePath.c_str()));
             periodicGate->par("initiallyOpen").setBoolValue(initiallyOpens[i]);
@@ -41,7 +41,7 @@ void GateControlList::initialize(int stage)
 void GateControlList::parseGcl()
 {
     initiallyOpens = parseGclLine(gateStates->get(0).stringValue());
-    for (int i = 0; i < numGates; ++i) {
+    for (size_t i = 0; i < numGates; ++i) {
         offsets.push_back(0);
         gateDurations.push_back(new cValueArray());
     }
@@ -50,7 +50,7 @@ void GateControlList::parseGcl()
     for (int i = 0; i < gateStates->size(); ++i) {
         double duration = durations->get(i).doubleValueInUnit("s");
         std::vector<bool> entry = parseGclLine(gateStates->get(i).stringValue());
-        for (int j = 0; j < numGates; ++j) {
+        for (size_t j = 0; j < numGates; ++j) {
             if (entry.at(j) != currentGateStates.at(j)) {
                 gateDurations.at(j)->add(cValue(currentDuration[j], "s"));
                 currentGateStates[j] = !currentGateStates[j];
@@ -59,7 +59,7 @@ void GateControlList::parseGcl()
             currentDuration[j] += duration;
         }
     }
-    for (int i = 0; i < numGates; ++i) {
+    for (size_t i = 0; i < numGates; ++i) {
         auto durations = gateDurations.at(i);
         if (durations->size() % 2 != 0)
             durations->add(cValue(currentDuration[i], "s"));
@@ -75,10 +75,10 @@ std::vector<bool> GateControlList::parseGclLine(const char *gateStates)
     std::vector<bool> result(numGates);
     if (strlen(gateStates) != numGates)
         throw cRuntimeError("The length of the entry is not equal to numGates");
-    for (int i = 0; i < numGates; ++i) {
+    for (size_t i = 0; i < numGates; ++i) {
         char ch = *(gateStates + i);
         int index = mapping[i] - '0';
-        if (index < 0 || index >= numGates)
+        if (index < 0 || (size_t)index >= numGates)
             throw cRuntimeError("Invalid gate index %d in mapping", index);
         if (ch == '1')
             result[index] = true;

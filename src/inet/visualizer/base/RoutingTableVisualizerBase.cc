@@ -341,7 +341,7 @@ void RoutingTableVisualizerBase::addRouteVisualizations(IIpv4RoutingTable *routi
         for (auto group : multicastGroups) {
             auto route = const_cast<Ipv4MulticastRoute *>(routingTable->findBestMatchingMulticastRoute(source, group));
             if (route != nullptr) {
-                for (int i = 0; i < route->getNumOutInterfaces(); i++) {
+                for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++) {
                     auto outInterface = route->getOutInterface(i);
                     auto interface = const_cast<NetworkInterface *>(outInterface->getInterface());
                     auto channel = interface->getTxTransmissionChannel();

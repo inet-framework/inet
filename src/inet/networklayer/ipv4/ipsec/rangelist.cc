@@ -36,7 +36,7 @@ std::vector<std::pair<std::string,std::string>> rangelist_preparse(const std::st
 {
     std::vector<std::pair<std::string,std::string>> res;
     for (std::string elem : cStringTokenizer(text.c_str(), ",").asVector()) {
-        int pos = elem.find("-");
+        auto pos = elem.find("-");
         if (pos == std::string::npos)
             res.push_back(std::make_pair(trim(elem),""));
         else

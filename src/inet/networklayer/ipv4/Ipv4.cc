@@ -288,7 +288,7 @@ bool Ipv4::isLifetimeExpired(const Ptr<const Ipv4Header>& ipv4Header) const
     if (maxLifetime == -1)
         return false;
     else {
-        for (int i = 0; i < ipv4Header->getOptionArraySize(); i++) {
+        for (unsigned int i = 0; i < ipv4Header->getOptionArraySize(); i++) {
             if (auto timestampOption = dynamic_cast<const Ipv4OptionTimestamp *>(&ipv4Header->getOption(i))) {
                 simtime_t firstTimestamp = timestampOption->getRecordTimestamp(0);
                 simtime_t lifetime = simTime() - firstTimestamp;
