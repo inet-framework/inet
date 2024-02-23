@@ -763,7 +763,7 @@ Register_ResultFilter("interarrivalTime", InterarrivalTimeFilter);
 
 void InterarrivalTimeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
-    if (auto packet = dynamic_cast<cPacket *>(object)) {
+    if (dynamic_cast<cPacket *>(object)) {
 
         if (prevArrivalTime > 0){
             // Time spacing between the two arrivals
