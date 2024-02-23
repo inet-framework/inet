@@ -60,8 +60,5 @@ module ExtInterface extends NetworkInterface like IExternalInterface
         *.device = default(this.device);
         *.namespace = default(this.namespace);
         @class(ExtInterface);
-    gates:
-        input upperLayerIn @loose;
-        output upperLayerOut @loose;
 }
 
