@@ -134,6 +134,8 @@ void MediaRedundancyNode::initialize(int stage) {
         relay.reference(this, "mrpRelayModule", true);
         int expectedRoleByNum = par("expectedRoleByNum");
         expectedRole = static_cast<mrpRole>(expectedRoleByNum);
+        int managerPrioByNum = par("mrpPriority");
+        managerPrio = static_cast<mrpPriority>(managerPrioByNum);
         LinkChangeSignal = registerSignal("LinkChangeSignal");
         TopologyChangeSignal = registerSignal("TopologyChangeSignal");
         TestSignal = registerSignal("TestSignal");
@@ -217,7 +219,7 @@ void MediaRedundancyNode::initRingPorts() {
     ifd->setContinuityCheckInterval(SimTime(ccmInterval, SIMTIME_MS));
 }
 
-void MediaRedundancyNode::initContinuityCheck() {
+void MediaRedundancyNode::startContinuityCheck() {
     for (unsigned int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
         auto ie = interfaceTable->getInterface(i);
         if (!ie->isLoopback() && ie->isWired() && ie->isMulticast()
@@ -292,8 +294,8 @@ void MediaRedundancyNode::start() {
     linkUpHysterisisTimer = new cMessage("linkUpHysterisisTimer");
     setTimingProfile(timingProfile);
     topologyChangeRepeatCount = topologyChangeMaxRepeatCount - 1;
-    if (enableLinkCheckOnRing || interconnectionLinkCheckAware) {
-        initContinuityCheck();
+    if (enableLinkCheckOnRing) {
+        startContinuityCheck();
     }
     //Client
     if (expectedRole == CLIENT) {
@@ -423,11 +425,14 @@ void MediaRedundancyNode::receiveSignal(cComponent *source, simsignal_t signalID
             DelayTimer->setKind(0);
             if (field == NetworkInterface::F_STATE
                     || field == NetworkInterface::F_CARRIER) {
-                linkDetectionDelay = truncnormal(linkDetectionDelayMean, linkDetectionDelayDev);
+                if (interface->isUp() && interface->hasCarrier())
+                    linkDetectionDelay = 1; //linkUP is handled faster than linkDown
+                else
+                    linkDetectionDelay = truncnormal(linkDetectionDelayMean, linkDetectionDelayDev);
                 if (linkUpHysterisisTimer->isScheduled())
                     cancelEvent(linkUpHysterisisTimer);
-                scheduleAt(simTime() + SimTime(linkDetectionDelay, SIMTIME_US), linkUpHysterisisTimer);
-                scheduleAt(simTime() + SimTime(linkDetectionDelay, SIMTIME_US), DelayTimer);
+                scheduleAt(simTime() + SimTime(linkDetectionDelay, SIMTIME_MS), linkUpHysterisisTimer);
+                scheduleAt(simTime() + SimTime(linkDetectionDelay, SIMTIME_MS), DelayTimer);
             }
         }
     }
@@ -985,11 +990,13 @@ void MediaRedundancyNode::testRingReq(double Time) {
 void MediaRedundancyNode::topologyChangeReq(double Time) {
     if (Time == 0) {
         clearLocalFDB();
+        setupTopologyChangeReq(Time * topologyChangeMaxRepeatCount);
     } else if (!topologyChangeTimer->isScheduled()) {
         scheduleAt(simTime() + SimTime(Time, SIMTIME_MS), topologyChangeTimer);
         setupTopologyChangeReq(Time * topologyChangeMaxRepeatCount);
     } else
-        EV_DETAIL << "inTopologyChangeTimer already scheduled" << EV_ENDL;
+        EV_DETAIL << "TopologyChangeTimer already scheduled" << EV_ENDL;
+
 }
 
 void MediaRedundancyNode::linkChangeReq(int RingPort, uint16_t LinkState) {
@@ -1749,16 +1756,19 @@ void MediaRedundancyNode::interconnTopologyChangeInd(MacAddress SourceAddress, d
     case DE_IDLE:
     case PT:
     case PT_IDLE:
+        delete Packet;
         break;
     case PRM_UP:
     case CHK_RC:
         if (!topologyChangeTimer->isScheduled()) {
             topologyChangeReq(Time);
         }
+        delete Packet;
         break;
     case CHK_RO:
         if (!topologyChangeTimer->isScheduled()) {
             topologyChangeReq(Time);
+            delete Packet;
         }
         if (RingPort == primaryRingPort) {
             interconnForwardReq(secondaryRingPort, Packet);
@@ -1769,7 +1779,7 @@ void MediaRedundancyNode::interconnTopologyChangeInd(MacAddress SourceAddress, d
     default:
         throw cRuntimeError("Unknown NodeState");
     }
-    delete Packet;
+
 }
 
 void MediaRedundancyNode::interconnLinkChangeInd(uint16_t InID, uint16_t Linkstate, int RingPort, Packet *Packet) {
@@ -1842,12 +1852,12 @@ void MediaRedundancyNode::interconnTestInd(MacAddress SourceAddress, int RingPor
 }
 
 void MediaRedundancyNode::interconnForwardReq(int RingPort, Packet *Packet) {
-    auto macAddressInd = Packet->getTag<MacAddressInd>();
-    auto sourceAddress = macAddressInd->getSrcAddress();
-    auto destinationAddress = macAddressInd->getDestAddress();
+    auto macAddressInd = Packet->findTag<MacAddressInd>();
+    auto SourceAddress = macAddressInd->getSrcAddress();
+    auto DestinationAddress = macAddressInd->getDestAddress();
     Packet->trim();
     Packet->clearTags();
-    sendFrameReq(RingPort, destinationAddress, sourceAddress, priority, MRP_LT, Packet);
+    sendFrameReq(RingPort, DestinationAddress, SourceAddress, priority, MRP_LT, Packet);
 }
 
 void MediaRedundancyNode::sendFrameReq(int portId, const MacAddress &DestinationAddress, const MacAddress &SourceAddress, int Prio, uint16_t LT, Packet *MRPPDU) {

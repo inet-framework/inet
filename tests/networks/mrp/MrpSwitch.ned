@@ -24,6 +24,11 @@ import inet.networklayer.common.InterfaceTable;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.protocolelement.contract.IProtocolLayer;
 
+//
+// Model of an Ethernet switch which is able to utilize the mrp protocol.
+// 
+// @see ~MediaRedundancyNode, ~InterconnectionNode
+
 module MrpSwitch like IEthernetNetworkNode
 {
     parameters:
@@ -71,9 +76,6 @@ module MrpSwitch like IEthernetNetworkNode
         l2NodeConfigurator: L2NodeConfigurator if hasMrp {
             @display("p=100,300;is=s");
         }
-        //        l2NodeConfiguratorMrp: L2NodeConfigurator if hasMrp {
-        //            @display("p=100,300;is=s");
-        //        }
         status: NodeStatus if hasStatus {
             @display("p=100,400;is=s");
         }
