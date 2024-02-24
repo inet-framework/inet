@@ -18,9 +18,9 @@ cleanup 2>/dev/null
 sudo tc qdisc add dev lo root netem loss 1% corrupt 5% delay 10ms 1ms || exit 1
 
 # run the simulations
-inet -s -u Cmdenv -c VoipReceiverLoopback &
+inet -s -u Cmdenv voipreceiver.ini -c Loopback &
 sleep 1
-inet -s -u Cmdenv -c VoipSenderLoopback || exit 1
+inet -s -u Cmdenv voipsender.ini -c Loopback || exit 1
 wait
 
 

@@ -17,8 +17,8 @@ cleanup 2>/dev/null
 sudo ./veth_setup || exit 1
 
 # run both simulations
-inet -s -u Cmdenv -c VoipReceiverVirtualEth &
+inet -s -u Cmdenv -c voipreceiver.ini -c VirtualEth &
 sleep 1
-inet -s -u Cmdenv -c VoipSenderVirtualEth || exit 1
+inet -s -u Cmdenv -c voipsender.ini -c VirtualEth || exit 1
 wait
 

@@ -159,7 +159,7 @@ First, run the following command on the receiver side:
 
 .. code-block:: bash
 
-   $ inet -u Cmdenv -c VoipReceiver
+   $ inet -u Cmdenv voipreceiver.ini
 
 Once the receiver is running, enter the following command on the sender side
 (replace ``10.0.0.8`` with the IP address of the host the receiver side is
@@ -167,7 +167,7 @@ running on):
 
 .. code-block:: bash
 
-   $ inet -u Cmdenv -c VoipSender '--*.app.destAddress="10.0.0.8"'
+   $ inet -u Cmdenv voipsender.ini '--*.app.destAddress="10.0.0.8"'
 
 That's all. When the receiver-side simulation exits, you'll find the received
 audio file in ``results/received.wav``. You may need to raise the CPU time limit
@@ -193,8 +193,8 @@ You can run this scenario in the same way as the previous one, just specify
 
 .. code-block:: bash
 
-   $ inet -u Cmdenv -c VoipReceiver &
-   $ inet -u Cmdenv -c VoipSender '--*.app.destAddress="127.0.0.1"'
+   $ inet -u Cmdenv voipreceiver.ini &
+   $ inet -u Cmdenv voipsender.ini '--*.app.destAddress="127.0.0.1"'
 
 Loopback Interface with Realistic Network Conditions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -256,17 +256,26 @@ In the simulation configurations, we need to tell the :ned:`ExtLowerUdp` modules
 to use the ``net0`` / ``net1`` namespaces, and set the sender's ``destAddress``
 parameter to ``192.168.2.2``.
 
-.. literalinclude:: ../omnetpp.ini
+In ``voipsender.ini``:
+
+.. literalinclude:: ../voipsender.ini
    :language: ini
-   :start-at: VoipSenderVirtualEth
+   :start-at: VirtualEth
+   :end-at: net0
+
+In ``voipreceiver.ini``:
+
+.. literalinclude:: ../voipreceiver.ini
+   :language: ini
+   :start-at: VirtualEth
    :end-at: net1
 
 You can run the simulations with the following commands:
 
 .. code-block:: bash
 
-   $ inet -s -u Cmdenv -c VoipReceiverVirtualEth &
-   $ inet -s -u Cmdenv -c VoipSenderVirtualEth
+   $ inet -s -u Cmdenv voipreceiver.ini -c VirtualEth &
+   $ inet -s -u Cmdenv voipsender.ini -c VirtualEth
 
 When you are finished, you can remove the virtual Ethernet interfaces by
 deleting the namespaces with the following commands (also to be run as *root*):
@@ -317,7 +326,9 @@ The quality would be nearly as good as the original file. (To reduce burstiness
 and keep the packet order, a data rate can be specified in the ``netem`` command,
 e.g. ``rate 1000kbps``. This eliminates reordering in this scenario.)
 
-Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`AppContainer.ned <../AppContainer.ned>`,
+Sources: :download:`voipsender.ini <../voipsender.ini>`,
+:download:`voipreceiver.ini <../voipreceiver.ini>`,
+:download:`AppContainer.ned <../AppContainer.ned>`,
 :download:`run_loopback <../run_loopback>`, :download:`run_veth <../run_veth>`,
 :download:`veth_setup <../veth_setup>`, :download:`veth_teardown <../veth_teardown>`
 

@@ -28,8 +28,8 @@ net.start()
 info('*** Starting INET simulations\n')
 # Note: sudo is needed because Mininet runs as root, but we want to run the simulation as the normal user.
 # We also need to restore the original PATH which is overwritten by 'sudo'.
-h1.cmd('sudo -E -u $SAVED_USER bash -c "export PATH=$SAVED_PATH && inet -s -c VoipSenderMininet &"')
-h2.cmd('sudo -E -u $SAVED_USER bash -c "export PATH=$SAVED_PATH && inet -s -c VoipReceiverMininet &"')
+h1.cmd('sudo -E -u $SAVED_USER bash -c "export PATH=$SAVED_PATH && inet -s voipsender.ini -c Mininet &"')
+h2.cmd('sudo -E -u $SAVED_USER bash -c "export PATH=$SAVED_PATH && inet -s voipreceiver.ini -c Mininet &"')
 
 info('*** Running CLI\n')
 CLI(net)
