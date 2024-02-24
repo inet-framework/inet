@@ -17,6 +17,7 @@ the simulations (NED, ini and other files) and the web pages are in the
 
 Latest changes:
 
+- :doc:`emulation/voip/doc/mininet` added (2024-02-26)
 - :doc:`tsn/trafficshaping/underthehood/doc/index` updated (2023-07-28)
 - :doc:`tsn/trafficshaping/cbsandtas/doc/index` released (2023-07-28)
 - :doc:`tsn/trafficshaping/cbsandats/doc/index` updated (2023-07-28)
