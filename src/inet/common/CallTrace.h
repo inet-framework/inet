@@ -8,7 +8,7 @@
 #ifndef __INET_CALLTRACE_H
 #define __INET_CALLTRACE_H
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(_WIN32)
 
 #include "inet/common/INETDefs.h"
 

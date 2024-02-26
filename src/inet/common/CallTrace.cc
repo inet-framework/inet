@@ -7,7 +7,7 @@
 
 #include "inet/common/CallTrace.h"
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(_WIN32)
 
 #include <cxxabi.h>
 #include <dlfcn.h>
