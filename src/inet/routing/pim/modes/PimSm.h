@@ -279,7 +279,7 @@ class INET_API PimSm : public PimBase, protected cListener
     void updateAssertTrackingDesired(PimsmInterface *interface);
 
     // helpers
-    bool IamRP(Ipv4Address rpAddr) { return rt->isLocalAddress(rpAddr); }
+    bool IamRP(Ipv4Address rpAddr) { return ift->isLocalAddress(rpAddr); }
     bool IamDR(NetworkInterface *ie);
     PimInterface *getIncomingInterface(NetworkInterface *fromIE);
     bool deleteMulticastRoute(Route *route);

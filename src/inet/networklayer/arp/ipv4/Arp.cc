@@ -215,7 +215,7 @@ void Arp::requestTimedOut(cMessage *selfmsg)
 
 bool Arp::addressRecognized(Ipv4Address destAddr, NetworkInterface *ie)
 {
-    if (rt->isLocalAddress(destAddr))
+    if (ift->isLocalAddress(destAddr))
         return true;
     else {
         // if proxy ARP is enables in interface ie

@@ -246,7 +246,7 @@ void NextHopForwarding::routePacket(Packet *datagram, const NetworkInterface *de
     EV_INFO << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddr << ": ";
 
     // check for local delivery
-    if (routingTable->isLocalAddress(destAddr)) {
+    if (interfaceTable->isLocalAddress(destAddr)) {
         EV_INFO << "local delivery\n";
         if (fromHL && header->getSourceAddress().isUnspecified()) {
             datagram->trimFront();

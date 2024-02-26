@@ -189,7 +189,7 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram)
     const L3Address& destAddr = networkHeader->getDestinationAddress();
     const L3Address& sourceAddr = networkHeader->getSourceAddress();
 
-    if (destAddr.isBroadcast() || routingTable->isLocalAddress(destAddr) || destAddr.isMulticast())
+    if (destAddr.isBroadcast() || interfaceTable->isLocalAddress(destAddr) || destAddr.isMulticast())
         return ACCEPT;
     else {
         EV_INFO << "Finding route for source " << sourceAddr << " with destination " << destAddr << endl;
@@ -1511,8 +1511,8 @@ INetfilter::IHook::Result Aodv::datagramForwardHook(Packet *datagram)
     const L3Address& sourceAddr = networkHeader->getSourceAddress();
     IRoute *ipSource = routingTable->findBestMatchingRoute(sourceAddr);
 
-    if (destAddr.isBroadcast() || routingTable->isLocalAddress(destAddr) || destAddr.isMulticast()) {
-        if (routingTable->isLocalAddress(destAddr) && ipSource && ipSource->getSource() == this)
+    if (destAddr.isBroadcast() || interfaceTable->isLocalAddress(destAddr) || destAddr.isMulticast()) {
+        if (interfaceTable->isLocalAddress(destAddr) && ipSource && ipSource->getSource() == this)
             updateValidRouteLifeTime(ipSource->getNextHopAsGeneric(), simTime() + activeRouteTimeout);
 
         return ACCEPT;

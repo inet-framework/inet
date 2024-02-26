@@ -160,7 +160,7 @@ INetfilter::IHook::Result SctpNatHook::datagramPreRoutingHook(Packet *datagram)
     }
 
     natTable->printNatTable();
-    bool local = ((rt->isLocalAddress(dgram->getDestinationAddress())) && (SctpAssociation::getAddressLevel(dgram->getSourceAddress()) == 3));
+    bool local = ((ift->isLocalAddress(dgram->getDestinationAddress())) && (SctpAssociation::getAddressLevel(dgram->getSourceAddress()) == 3));
     auto& sctpMsg = datagram->removeAtFront<SctpHeader>();
     Ptr<SctpHeader> sctp = staticPtrCast<SctpHeader>(sctpMsg->dupShared());
     unsigned int numberOfChunks = sctpMsg->getSctpChunksArraySize();

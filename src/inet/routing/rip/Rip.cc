@@ -728,7 +728,7 @@ bool Rip::isValidResponse(Packet *packet)
     L3Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
 
     // check that it is not our response (received own multicast message)
-    if (rt->isLocalAddress(srcAddr)) {
+    if (ift->isLocalAddress(srcAddr)) {
         EV_WARN << "received own response\n";
         return false;
     }

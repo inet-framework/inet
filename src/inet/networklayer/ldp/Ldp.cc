@@ -839,7 +839,7 @@ std::string Ldp::findInterfaceFromPeerAddr(Ipv4Address peerIP)
     // Rely on port index to find the interface name
 
     // this function is a misnomer, we must recognize our own address too
-    if (rt->isLocalAddress(peerIP))
+    if (ift->isLocalAddress(peerIP))
         return "lo0";
 
     NetworkInterface *ie = rt->getInterfaceForDestAddr(peerIP);

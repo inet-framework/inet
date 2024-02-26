@@ -754,7 +754,7 @@ INetfilter::IHook::Result Gpsr::datagramPreRoutingHook(Packet *datagram)
     Enter_Method("datagramPreRoutingHook");
     const auto& networkHeader = getNetworkProtocolHeader(datagram);
     const L3Address& destination = networkHeader->getDestinationAddress();
-    if (destination.isMulticast() || destination.isBroadcast() || routingTable->isLocalAddress(destination))
+    if (destination.isMulticast() || destination.isBroadcast() || interfaceTable->isLocalAddress(destination))
         return ACCEPT;
     else {
         // KLUDGE this allows overwriting the GPSR option inside
@@ -768,7 +768,7 @@ INetfilter::IHook::Result Gpsr::datagramLocalOutHook(Packet *packet)
     Enter_Method("datagramLocalOutHook");
     const auto& networkHeader = getNetworkProtocolHeader(packet);
     const L3Address& destination = networkHeader->getDestinationAddress();
-    if (destination.isMulticast() || destination.isBroadcast() || routingTable->isLocalAddress(destination))
+    if (destination.isMulticast() || destination.isBroadcast() || interfaceTable->isLocalAddress(destination))
         return ACCEPT;
     else {
         GpsrOption *gpsrOption = createGpsrOption(networkHeader->getDestinationAddress());

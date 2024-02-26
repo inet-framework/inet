@@ -343,7 +343,7 @@ void Ipv4::preroutingFinish(Packet *packet)
 
         // check for local delivery; we must accept also packets coming from the interfaces that
         // do not yet have an IP address assigned. This happens during DHCP requests.
-        if (rt->isLocalAddress(destAddr) || fromIE->getProtocolData<Ipv4InterfaceData>()->getIPAddress().isUnspecified()) {
+        if (ift->isLocalAddress(destAddr) || fromIE->getProtocolData<Ipv4InterfaceData>()->getIPAddress().isUnspecified()) {
             reassembleAndDeliver(packet);
         }
         else if (destAddr.isLimitedBroadcastAddress() || (broadcastIE = rt->findInterfaceByLocalBroadcastAddress(destAddr))) {
@@ -545,7 +545,7 @@ void Ipv4::datagramLocalOut(Packet *packet)
     }
     else { // unicast and broadcast
            // check for local delivery
-        if (rt->isLocalAddress(destAddr)) {
+        if (ift->isLocalAddress(destAddr)) {
             EV_INFO << "Delivering " << packet << " locally.\n";
             if (destIE && !destIE->isLoopback()) {
                 EV_DETAIL << "datagram destination address is local, ignoring destination interface specified in the control info\n";

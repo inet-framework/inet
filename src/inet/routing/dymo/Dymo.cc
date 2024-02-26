@@ -1313,7 +1313,7 @@ L3Address Dymo::getSelfAddress()
 
 bool Dymo::isClientAddress(const L3Address& address)
 {
-    if (routingTable->isLocalAddress(address))
+    if (interfaceTable->isLocalAddress(address))
         return true;
     else {
         for (auto& elem : clientAddressAndPrefixLengthPairs)
@@ -1378,7 +1378,7 @@ INetfilter::IHook::Result Dymo::ensureRouteForDatagram(Packet *datagram)
     const auto& networkHeader = getNetworkProtocolHeader(datagram);
     const L3Address& source = networkHeader->getSourceAddress();
     const L3Address& destination = networkHeader->getDestinationAddress();
-    if (destination.isMulticast() || destination.isBroadcast() || routingTable->isLocalAddress(destination))
+    if (destination.isMulticast() || destination.isBroadcast() || interfaceTable->isLocalAddress(destination))
         return ACCEPT;
     else {
         EV_DETAIL << "Finding route: source = " << source << ", destination = " << destination << endl;
