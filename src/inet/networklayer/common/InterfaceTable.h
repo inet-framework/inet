@@ -30,7 +30,7 @@ namespace inet {
  *
  * Interfaces are dynamically registered: at the start of the simulation,
  * every L2 module adds its own NetworkInterface to the table; after that,
- * Ipv4's IIpv4RoutingTable and Ipv6's Ipv6RoutingTable (an possibly, further
+ * Ipv4's Ipv4RoutingTable and Ipv6's Ipv6RoutingTable (an possibly, further
  * L3 protocols) add protocol-specific data on each NetworkInterface
  * (see Ipv4InterfaceData, Ipv6InterfaceData, and NetworkInterface::setIPv4Data(),
  * NetworkInterface::setIPv6Data())

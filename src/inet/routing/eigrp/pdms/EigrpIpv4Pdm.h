@@ -29,7 +29,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/eigrp/EigrpDeviceConfigurator.h"
@@ -76,7 +76,7 @@ class INET_API EigrpIpv4Pdm : public cSimpleModule, public IEigrpModule<Ipv4Addr
     EigrpStub eigrpStub;        /**< EIGRP stub configuration */
 
     ModuleRefByPar<IInterfaceTable> ift;
-    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<Ipv4RoutingTable> rt;
 
     EigrpDual<Ipv4Address> *eigrpDual;
     EigrpMetricHelper *eigrpMetric;

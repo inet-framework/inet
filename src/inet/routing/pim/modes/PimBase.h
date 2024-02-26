@@ -12,7 +12,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/pim/Pim.h"
 #include "inet/routing/pim/PimPacket_m.h"
@@ -143,7 +143,7 @@ class INET_API PimBase : public RoutingProtocolBase
     static const Ipv4Address ALL_PIM_ROUTERS_MCAST;
 
   protected:
-    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<Ipv4RoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<PimInterfaceTable> pimIft;
     ModuleRefByPar<PimNeighborTable> pimNbt;

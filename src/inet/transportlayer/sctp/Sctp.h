@@ -18,7 +18,7 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/sctp/SctpCrcInsertionHook.h"

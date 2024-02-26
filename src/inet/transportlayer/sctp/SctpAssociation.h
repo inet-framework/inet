@@ -19,7 +19,7 @@
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/transportlayer/sctp/Sctp.h"
 #include "inet/transportlayer/sctp/SctpGapList.h"

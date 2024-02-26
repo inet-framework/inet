@@ -56,7 +56,7 @@ void HostAutoConfigurator::setupNetworkLayer()
         throw cRuntimeError("Generated IP address is out of specified address range");
 
     // get our routing table
-    IIpv4RoutingTable *routingTable = L3AddressResolver().getIpv4RoutingTableOf(host);
+    Ipv4RoutingTable *routingTable = L3AddressResolver().getIpv4RoutingTableOf(host);
     if (!routingTable)
         throw cRuntimeError("No routing table found");
 

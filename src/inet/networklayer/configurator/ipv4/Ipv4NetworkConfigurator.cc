@@ -16,7 +16,7 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 
 namespace inet {
 
@@ -172,7 +172,7 @@ void Ipv4NetworkConfigurator::configureAllRoutingTables()
     }
 }
 
-void Ipv4NetworkConfigurator::configureRoutingTable(IIpv4RoutingTable *routingTable)
+void Ipv4NetworkConfigurator::configureRoutingTable(Ipv4RoutingTable *routingTable)
 {
     ensureConfigurationComputed(topology);
     // TODO avoid linear search
@@ -185,7 +185,7 @@ void Ipv4NetworkConfigurator::configureRoutingTable(IIpv4RoutingTable *routingTa
     }
 }
 
-void Ipv4NetworkConfigurator::addConfigurationToRoutingTable(IIpv4RoutingTable *routingTable, NetworkInterface *networkInterface)
+void Ipv4NetworkConfigurator::addConfigurationToRoutingTable(Ipv4RoutingTable *routingTable, NetworkInterface *networkInterface)
 {
     ensureConfigurationComputed(topology);
     // TODO avoid linear search
@@ -199,7 +199,7 @@ void Ipv4NetworkConfigurator::addConfigurationToRoutingTable(IIpv4RoutingTable *
     }
 }
 
-void Ipv4NetworkConfigurator::removeConfigurationFromRoutingTable(IIpv4RoutingTable *routingTable, NetworkInterface *networkInterface)
+void Ipv4NetworkConfigurator::removeConfigurationFromRoutingTable(Ipv4RoutingTable *routingTable, NetworkInterface *networkInterface)
 {
     ensureConfigurationComputed(topology);
     // TODO avoid linear search
@@ -859,9 +859,9 @@ void Ipv4NetworkConfigurator::dumpRoutes(Topology& topology)
         Node *node = (Node *)topology.getNode(i);
         if (node->routingTable) {
             EV_INFO << "Node " << node->module->getFullPath() << endl;
-            check_and_cast<IIpv4RoutingTable *>(node->routingTable)->printRoutingTable();
+            check_and_cast<Ipv4RoutingTable *>(node->routingTable)->printRoutingTable();
             if (node->routingTable->getNumMulticastRoutes() > 0)
-                check_and_cast<IIpv4RoutingTable *>(node->routingTable)->printMulticastRoutingTable();
+                check_and_cast<Ipv4RoutingTable *>(node->routingTable)->printMulticastRoutingTable();
         }
     }
 }
@@ -942,7 +942,7 @@ void Ipv4NetworkConfigurator::dumpConfig(Topology& topology)
     // routes
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
-        IIpv4RoutingTable *routingTable = dynamic_cast<IIpv4RoutingTable *>(node->routingTable);
+        Ipv4RoutingTable *routingTable = dynamic_cast<Ipv4RoutingTable *>(node->routingTable);
         if (routingTable) {
             for (int j = 0; j < routingTable->getNumRoutes(); j++) {
                 Ipv4Route *route = routingTable->getRoute(j);
@@ -974,7 +974,7 @@ void Ipv4NetworkConfigurator::dumpConfig(Topology& topology)
     // multicast routes
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
-        IIpv4RoutingTable *routingTable = dynamic_cast<IIpv4RoutingTable *>(node->routingTable);
+        Ipv4RoutingTable *routingTable = dynamic_cast<Ipv4RoutingTable *>(node->routingTable);
         if (routingTable) {
             for (int j = 0; j < routingTable->getNumMulticastRoutes(); j++) {
                 Ipv4MulticastRoute *route = routingTable->getMulticastRoute(j);

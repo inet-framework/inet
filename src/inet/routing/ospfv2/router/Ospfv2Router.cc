@@ -14,7 +14,7 @@ namespace inet {
 
 namespace ospfv2 {
 
-Router::Router(cSimpleModule *containingModule, IInterfaceTable *ift, IIpv4RoutingTable *rt) :
+Router::Router(cSimpleModule *containingModule, IInterfaceTable *ift, Ipv4RoutingTable *rt) :
     ift(ift),
     rt(rt),
     routerID(rt->getRouterId()),
@@ -1376,7 +1376,7 @@ void Router::updateExternalRoute(Ipv4Address networkAddress, const Ospfv2AsExter
             entry->setInterface(ift->getInterfaceById(ifIndex));
             entry->setSourceType(IRoute::MANUAL);
             entry->setMetric(externalRouteContents.getExternalTOSInfo(0).routeCost);
-            rt->addRoute(entry); // IIpv4RoutingTable deletes entry pointer
+            rt->addRoute(entry); // Ipv4RoutingTable deletes entry pointer
         }
         else {
             ASSERT(entry);

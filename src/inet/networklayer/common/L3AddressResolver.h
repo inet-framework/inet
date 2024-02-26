@@ -18,7 +18,7 @@ namespace inet {
 // Forward declarations:
 class IInterfaceTable;
 class NetworkInterface;
-class IIpv4RoutingTable;
+class Ipv4RoutingTable;
 class Ipv6RoutingTable;
 class NextHopRoutingTable;
 
@@ -110,7 +110,7 @@ class INET_API L3AddressResolver
     /**
      * Returns Ipv4 or Ipv6 address of the given host or router.
      *
-     * This function uses routingTableOf() to find the IIpv4RoutingTable module,
+     * This function uses routingTableOf() to find the Ipv4RoutingTable module,
      * then invokes getAddressFrom() to extract the IP address.
      */
     virtual L3Address addressOf(cModule *host, int addrType = DEFAULT_ADDR_TYPE);
@@ -130,7 +130,7 @@ class INET_API L3AddressResolver
 
     /**
      * Returns the router Id of the given router. Router Id is obtained from
-     * the getRouterId() method of the IIpv4RoutingTable submodule.
+     * the getRouterId() method of the Ipv4RoutingTable submodule.
      */
     virtual L3Address routerIdOf(cModule *host);
 
@@ -153,11 +153,11 @@ class INET_API L3AddressResolver
     virtual IInterfaceTable *interfaceTableOf(cModule *host);
 
     /**
-     * The function tries to look up the IIpv4RoutingTable module as submodule
+     * The function tries to look up the Ipv4RoutingTable module as submodule
      * <tt>"routingTable"</tt> or <tt>"networkLayer.routingTable"</tt> within
      * the host/router module. Throws an error if not found.
      */
-    virtual IIpv4RoutingTable *getIpv4RoutingTableOf(cModule *host);
+    virtual Ipv4RoutingTable *getIpv4RoutingTableOf(cModule *host);
 
     /**
      * The function tries to look up the Ipv6RoutingTable module as submodule
@@ -174,7 +174,7 @@ class INET_API L3AddressResolver
     /**
      * Like routingTableOf(), but doesn't throw error if not found.
      */
-    virtual IIpv4RoutingTable *findIpv4RoutingTableOf(cModule *host);
+    virtual Ipv4RoutingTable *findIpv4RoutingTableOf(cModule *host);
 
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.

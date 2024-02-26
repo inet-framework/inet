@@ -88,7 +88,7 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     //@}
 
     bool allRoutingTableVisualizationsAreInvalid = true;
-    std::set<IIpv4RoutingTable *> invalidRoutingTableVisualizations;
+    std::set<Ipv4RoutingTable *> invalidRoutingTableVisualizations;
     LineManager *lineManager = nullptr;
 
     // key is router ID, source module ID, destination module ID
@@ -120,9 +120,9 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     virtual std::vector<Ipv4Address> getMulticastSources();
     virtual std::vector<Ipv4Address> getMulticastGroups();
 
-    virtual void addRouteVisualizations(cModule *node, IIpv4RoutingTable *routingTable);
-    virtual void removeRouteVisualizations(cModule *node, IIpv4RoutingTable *routingTable);
-    virtual void updateRouteVisualizations(cModule *node, IIpv4RoutingTable *routingTable);
+    virtual void addRouteVisualizations(cModule *node, Ipv4RoutingTable *routingTable);
+    virtual void removeRouteVisualizations(cModule *node, Ipv4RoutingTable *routingTable);
+    virtual void updateRouteVisualizations(cModule *node, Ipv4RoutingTable *routingTable);
 
     virtual void addAllRouteVisualizations();
     virtual void removeAllRouteVisualizations();

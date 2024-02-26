@@ -20,7 +20,7 @@
 namespace inet {
 
 class IInterfaceTable;
-class IIpv4RoutingTable;
+class Ipv4RoutingTable;
 
 class INET_API Igmpv2 : public cSimpleModule, public DefaultProtocolRegistrationListener, public cListener
 {
@@ -128,7 +128,7 @@ class INET_API Igmpv2 : public cSimpleModule, public DefaultProtocolRegistration
     };
 
   protected:
-    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<Ipv4RoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
 
     bool enabled;

@@ -28,7 +28,7 @@ namespace inet {
 class ArpPacket;
 class IInterfaceTable;
 class NetworkInterface;
-class IIpv4RoutingTable;
+class Ipv4RoutingTable;
 
 /**
  * ARP implementation.
@@ -72,7 +72,7 @@ class INET_API Arp : public OperationalBase, public IArp
     ArpCache arpCache;
 
     ModuleRefByPar<IInterfaceTable> ift;
-    ModuleRefByPar<IIpv4RoutingTable> rt; // for answering ProxyARP requests
+    ModuleRefByPar<Ipv4RoutingTable> rt; // for answering ProxyARP requests
 
   protected:
     // Maps an IP multicast address to an Ethernet multicast address.

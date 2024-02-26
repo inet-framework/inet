@@ -15,7 +15,7 @@
 #include "inet/common/stlutils.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ted/Ted.h"
 
@@ -39,7 +39,7 @@ void LinkStateRouting::initialize(int stage)
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         tedmod.reference(this, "tedModule", true);
 
-        IIpv4RoutingTable *rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
+        Ipv4RoutingTable *rt = getModuleFromPar<Ipv4RoutingTable>(par("routingTableModule"), this);
         routerId = rt->getRouterId();
 
         // listen for TED modifications

@@ -27,7 +27,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
 {
   private:
     IInterfaceTable *ift = nullptr;
-    IIpv4RoutingTable *rt = nullptr;
+    Ipv4RoutingTable *rt = nullptr;
     cSimpleModule *bgpModule = nullptr;
     ospfv2::Ospfv2 *ospfModule = nullptr;
     AsId myAsId = 0;
@@ -59,7 +59,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
 
   public:
     enum { TCP_PORT = 179 };
-    BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt);
+    BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, Ipv4RoutingTable *rt);
     virtual ~BgpRouter();
 
     RouterId getRouterId() { return rt->getRouterId(); }
@@ -117,7 +117,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     void getScheduleAt(simtime_t t, cMessage *msg) { bgpModule->scheduleAt(t, msg); }
     void getCancelAndDelete(cMessage *msg) { bgpModule->cancelAndDelete(msg); }
     cMessage *getCancelEvent(cMessage *msg) { return bgpModule->cancelEvent(msg); }
-    IIpv4RoutingTable *getIPRoutingTable() { return rt; }
+    Ipv4RoutingTable *getIPRoutingTable() { return rt; }
     std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() { return bgpRoutingTable; }
 
     /**
@@ -164,11 +164,11 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     bool isInASList(std::vector<AsId> ASList, BgpRoutingTableEntry *entry);
     unsigned long isInTable(std::vector<BgpRoutingTableEntry *> rtTable, BgpRoutingTableEntry *entry);
 
-    bool ospfExist(IIpv4RoutingTable *rtTable);
+    bool ospfExist(Ipv4RoutingTable *rtTable);
     // check if the route is in OSPF external Ipv4RoutingTable
     int checkExternalRoute(const Ipv4Route *ospfRoute) { return ospfModule->checkExternalRoute(ospfRoute->getDestination()); }
     BgpProcessResult asLoopDetection(BgpRoutingTableEntry *entry, AsId myAS);
-    int isInRoutingTable(IIpv4RoutingTable *rtTable, Ipv4Address addr);
+    int isInRoutingTable(Ipv4RoutingTable *rtTable, Ipv4Address addr);
     SessionId findIdFromPeerAddr(std::map<SessionId, BgpSession *> sessions, Ipv4Address peerAddr);
     SessionId findIdFromSocketConnId(std::map<SessionId, BgpSession *> sessions, int connId);
     bool isRouteExcluded(const Ipv4Route& rtEntry);

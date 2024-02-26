@@ -10,7 +10,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/XMLUtils.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/networklayer/mpls/LibTable.h"
 #include "inet/networklayer/rsvpte/RsvpTe.h"
 
@@ -30,7 +30,7 @@ void RsvpClassifier::initialize(int stage)
     }
     // TODO INITSTAGE
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        IIpv4RoutingTable *rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
+        Ipv4RoutingTable *rt = getModuleFromPar<Ipv4RoutingTable>(par("routingTableModule"), this);
         routerId = rt->getRouterId();
 
         lt.reference(this, "libTableModule", true);

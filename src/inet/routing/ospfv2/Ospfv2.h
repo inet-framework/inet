@@ -11,7 +11,7 @@
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/ospfv2/Ospfv2Packet_m.h"
 #include "inet/routing/ospfv2/router/Ospfv2Router.h"
@@ -27,7 +27,7 @@ class INET_API Ospfv2 : public RoutingProtocolBase, protected cListener
 {
   private:
     cModule *host = nullptr; // the host module that owns this module
-    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<Ipv4RoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
     Router *ospfRouter = nullptr; // root object of the OSPF data structure
     cMessage *startupTimer = nullptr; // timer for delayed startup

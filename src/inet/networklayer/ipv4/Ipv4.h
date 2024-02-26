@@ -29,7 +29,7 @@ namespace inet {
 class ArpPacket;
 class IcmpHeader;
 class IInterfaceTable;
-class IIpv4RoutingTable;
+class Ipv4RoutingTable;
 
 /**
  * Implements the Ipv4 protocol.
@@ -62,7 +62,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     };
 
   protected:
-    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<Ipv4RoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<IArp> arp;
     ModuleRefByPar<Icmp> icmp;

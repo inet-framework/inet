@@ -107,7 +107,7 @@ public:
     TcpSocket *getSocket() const { return _info.socket; }
     TcpSocket *getSocketListen() const { return _info.socketListen; }
     int getEbgpMultihop() const { return _info.ebgpMultihop; }
-    IIpv4RoutingTable *getIPRoutingTable() const { return bgpRouter.getIPRoutingTable(); }
+    Ipv4RoutingTable *getIPRoutingTable() const { return bgpRouter.getIPRoutingTable(); }
     std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() const { return bgpRouter.getBGPRoutingTable(); }
     Macho::Machine<fsm::TopState>& getFSM() const { return *_fsm; }
     void updateSendProcess(BgpRoutingTableEntry *entry) const { return bgpRouter.updateSendProcess(NEW_SESSION_ESTABLISHED, _info.sessionID, entry); }

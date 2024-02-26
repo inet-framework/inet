@@ -28,13 +28,13 @@ class INET_API RoutingTableParser
 {
   protected:
     IInterfaceTable *ift;
-    IIpv4RoutingTable *rt;
+    Ipv4RoutingTable *rt;
 
   public:
     /**
      * Constructor
      */
-    RoutingTableParser(IInterfaceTable *ift, IIpv4RoutingTable *rt) : ift(ift), rt(rt) {}
+    RoutingTableParser(IInterfaceTable *ift, Ipv4RoutingTable *rt) : ift(ift), rt(rt) {}
 
     /**
      * Destructor

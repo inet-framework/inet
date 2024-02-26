@@ -14,7 +14,7 @@
 
 #ifdef INET_WITH_IPv4
 #include "inet/networklayer/configurator/ipv4/Ipv4NetworkConfigurator.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #endif // ifdef INET_WITH_IPv4
 
 #ifdef INET_WITH_IPv6
@@ -189,7 +189,7 @@ bool L3AddressResolver::tryResolve(const char *s, L3Address& result, int addrTyp
 L3Address L3AddressResolver::routerIdOf(cModule *host)
 {
 #ifdef INET_WITH_IPv4
-    IIpv4RoutingTable *rt = getIpv4RoutingTableOf(host);
+    Ipv4RoutingTable *rt = getIpv4RoutingTableOf(host);
     return L3Address(rt->getRouterId());
 #else // ifdef INET_WITH_IPv4
     throw cRuntimeError("INET was compiled without Ipv4 support");
@@ -464,11 +464,11 @@ IInterfaceTable *L3AddressResolver::interfaceTableOf(cModule *host)
     return check_and_cast<IInterfaceTable *>(mod);
 }
 
-IIpv4RoutingTable *L3AddressResolver::getIpv4RoutingTableOf(cModule *host)
+Ipv4RoutingTable *L3AddressResolver::getIpv4RoutingTableOf(cModule *host)
 {
-    IIpv4RoutingTable *mod = findIpv4RoutingTableOf(host);
+    Ipv4RoutingTable *mod = findIpv4RoutingTableOf(host);
     if (!mod)
-        throw cRuntimeError("L3AddressResolver: IIpv4RoutingTable not found as submodule "
+        throw cRuntimeError("L3AddressResolver: Ipv4RoutingTable not found as submodule "
                             " `routingTable' in host/router `%s'", host->getFullPath().c_str());
     return mod;
 }
@@ -488,10 +488,10 @@ IInterfaceTable *L3AddressResolver::findInterfaceTableOf(cModule *host)
     return dynamic_cast<IInterfaceTable *>(host->getSubmodule("interfaceTable"));
 }
 
-IIpv4RoutingTable *L3AddressResolver::findIpv4RoutingTableOf(cModule *host)
+Ipv4RoutingTable *L3AddressResolver::findIpv4RoutingTableOf(cModule *host)
 {
 #ifdef INET_WITH_IPv4
-    return dynamic_cast<IIpv4RoutingTable *>(host->findModuleByPath(".ipv4.routingTable"));
+    return dynamic_cast<Ipv4RoutingTable *>(host->findModuleByPath(".ipv4.routingTable"));
 #else // ifdef INET_WITH_IPv4
     return nullptr;
 #endif // ifdef INET_WITH_IPv4

@@ -39,7 +39,7 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     MacAddress macAddress; // client's MAC address
     cModule *host = nullptr; // containing host module (@networkNode)
     NetworkInterface *ie = nullptr; // interface to configure
-    ModuleRefByPar<IIpv4RoutingTable> irt; // routing table to update
+    ModuleRefByPar<Ipv4RoutingTable> irt; // routing table to update
 
     // state
     cMessage *timerT1 = nullptr; // time at which the client enters the RENEWING state

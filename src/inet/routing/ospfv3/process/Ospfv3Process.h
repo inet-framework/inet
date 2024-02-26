@@ -14,7 +14,7 @@
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6Route.h"
@@ -59,7 +59,7 @@ class INET_API Ospfv3Process : protected cListener, public cSimpleModule
      * input address , false otherwise.
      * @param addressRange [in] The IPv6 address  to look for.
      */
-    int isInRoutingTable(IIpv4RoutingTable *rtTable, Ipv4Address addr);
+    int isInRoutingTable(Ipv4RoutingTable *rtTable, Ipv4Address addr);
     int isInRoutingTable6(Ipv6RoutingTable *rtTable, Ipv6Address addr);
     int isInInterfaceTable(IInterfaceTable *ifTable, Ipv4Address addr);
     int isInInterfaceTable6(IInterfaceTable *ifTable, Ipv6Address addr);
@@ -70,7 +70,7 @@ class INET_API Ospfv3Process : protected cListener, public cSimpleModule
   public:
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<Ipv6RoutingTable> rt6;
-    ModuleRefByPar<IIpv4RoutingTable> rt4;
+    ModuleRefByPar<Ipv4RoutingTable> rt4;
     opp_component_ptr<cModule> containingModule;
 
   private:

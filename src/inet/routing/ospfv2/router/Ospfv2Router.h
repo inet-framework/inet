@@ -31,7 +31,7 @@ class INET_API Router
 {
   private:
     IInterfaceTable *ift = nullptr;
-    IIpv4RoutingTable *rt = nullptr;
+    Ipv4RoutingTable *rt = nullptr;
     RouterId routerID; ///< The router ID assigned by the IP layer.
     std::map<AreaId, Ospfv2Area *> areasByID; ///< A map of the contained areas with the AreaId as key.
     std::vector<Ospfv2Area *> areas; ///< A list of the contained areas.
@@ -48,7 +48,7 @@ class INET_API Router
      * Constructor.
      * Initializes internal variables, adds a MessageHandler and starts the Database Age timer.
      */
-    Router(cSimpleModule *containingModule, IInterfaceTable *ift, IIpv4RoutingTable *rt);
+    Router(cSimpleModule *containingModule, IInterfaceTable *ift, Ipv4RoutingTable *rt);
 
     /**
      * Destructor.

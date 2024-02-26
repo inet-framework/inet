@@ -10,7 +10,7 @@
 #include <memory.h>
 
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/routing/ospfv2/Ospfv2Packet_m.h"
 #include "inet/routing/ospfv2/router/Lsa.h"
 #include "inet/routing/ospfv2/router/Ospfv2Common.h"

@@ -12,7 +12,7 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 namespace inet {
@@ -108,7 +108,7 @@ void Ipv4FlatNetworkConfigurator::addDefaultRoutes(Topology& topo, NodeInfoVecto
             continue;
 
         IInterfaceTable *ift = nodeInfo[i].ift;
-        IIpv4RoutingTable *rt = nodeInfo[i].rt;
+        Ipv4RoutingTable *rt = nodeInfo[i].rt;
 
         // count non-loopback interfaces
         int numIntf = 0;
@@ -180,7 +180,7 @@ void Ipv4FlatNetworkConfigurator::fillRoutingTables(Topology& topo, NodeInfoVect
             EV_INFO << " towards " << destModName << "=" << Ipv4Address(destAddr) << " interface " << ie->getInterfaceName() << endl;
 
             // add route
-            IIpv4RoutingTable *rt = nodeInfo[j].rt;
+            Ipv4RoutingTable *rt = nodeInfo[j].rt;
             Ipv4Route *e = new Ipv4Route();
             e->setDestination(destAddr);
             e->setNetmask(Ipv4Address(255, 255, 255, 255)); // full match needed

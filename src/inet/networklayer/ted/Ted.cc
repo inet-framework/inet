@@ -15,7 +15,7 @@
 #include "inet/common/stlutils.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 namespace inet {
@@ -87,7 +87,7 @@ void Ted::initializeTED()
         }
         if (!g) // not connected
             continue;
-        IIpv4RoutingTable *destRt = L3AddressResolver().findIpv4RoutingTableOf(destNode);
+        Ipv4RoutingTable *destRt = L3AddressResolver().findIpv4RoutingTableOf(destNode);
         if (!destRt) // switch, hub, bus, accesspoint, etc
             continue;
         Ipv4Address destRouterId = destRt->getRouterId();

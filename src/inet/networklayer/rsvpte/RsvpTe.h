@@ -22,7 +22,7 @@
 namespace inet {
 
 class RsvpClassifier;
-class IIpv4RoutingTable;
+class Ipv4RoutingTable;
 class IInterfaceTable;
 class Ted;
 class LibTable;
@@ -159,7 +159,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
 
   protected:
     ModuleRefByPar<Ted> tedmod;
-    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<Ipv4RoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<LibTable> lt;
     ModuleRefByPar<IRsvpClassifier> rpct;

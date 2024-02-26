@@ -36,7 +36,7 @@ const B LDP_BASEHEADER_BYTES = B(10);
 const B LDP_HEADER_BYTES = LDP_BASEHEADER_BYTES + B(20);
 
 class IInterfaceTable;
-class IIpv4RoutingTable;
+class Ipv4RoutingTable;
 class LibTable;
 class Ted;
 
@@ -106,7 +106,7 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     // other variables:
     //
     ModuleRefByPar<IInterfaceTable> ift;
-    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<Ipv4RoutingTable> rt;
     ModuleRefByPar<LibTable> lt;
     ModuleRefByPar<Ted> tedmod;
 

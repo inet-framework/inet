@@ -14,7 +14,7 @@
 namespace inet {
 namespace bgp {
 
-BgpRouter::BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt)
+BgpRouter::BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, Ipv4RoutingTable *rt)
 {
     this->bgpModule = bgpModule;
     this->ift = ift;
@@ -793,7 +793,7 @@ bool BgpRouter::deleteBGPRoutingEntry(BgpRoutingTableEntry *entry)
 }
 
 /*return index of the Ipv4 table if the route is found, -1 else*/
-int BgpRouter::isInRoutingTable(IIpv4RoutingTable *rtTable, Ipv4Address addr)
+int BgpRouter::isInRoutingTable(Ipv4RoutingTable *rtTable, Ipv4Address addr)
 {
     for (int i = 0; i < rtTable->getNumRoutes(); i++) {
         const Ipv4Route *entry = rtTable->getRoute(i);
@@ -846,7 +846,7 @@ bool BgpRouter::isInASList(std::vector<AsId> ASList, BgpRoutingTableEntry *entry
 }
 
 /*return true if OSPF exists, false else*/
-bool BgpRouter::ospfExist(IIpv4RoutingTable *rtTable)
+bool BgpRouter::ospfExist(Ipv4RoutingTable *rtTable)
 {
     for (int i = 0; i < rtTable->getNumRoutes(); i++) {
         if (rtTable->getRoute(i)->getSourceType() == IRoute::OSPF) {

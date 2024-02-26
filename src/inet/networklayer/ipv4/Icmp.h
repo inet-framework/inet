@@ -13,7 +13,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 
@@ -30,7 +30,7 @@ class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationLi
     std::set<int> transportProtocols; // where to send up packets
     CrcMode crcMode = CRC_MODE_UNDEFINED;
     B quoteLength;
-    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<Ipv4RoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
     uint64_t& ctr = SIMULATION_SHARED_COUNTER(ctr);
 

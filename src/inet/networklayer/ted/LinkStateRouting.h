@@ -17,7 +17,7 @@ namespace inet {
 #define TED_TRAFFIC    1
 
 class Ted;
-class IIpv4RoutingTable;
+class Ipv4RoutingTable;
 class IInterfaceTable;
 class NetworkInterface;
 

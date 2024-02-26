@@ -90,7 +90,7 @@ void Ospfv3Process::handleMessage(cMessage *msg)
 } // handleMessage
 
 /*return index of the Ipv4 table if the route is found, -1 else*/
-int Ospfv3Process::isInRoutingTable(IIpv4RoutingTable *rtTable, Ipv4Address addr)
+int Ospfv3Process::isInRoutingTable(Ipv4RoutingTable *rtTable, Ipv4Address addr)
 {
     for (int i = 0; i < rtTable->getNumRoutes(); i++) {
         const Ipv4Route *entry = rtTable->getRoute(i);

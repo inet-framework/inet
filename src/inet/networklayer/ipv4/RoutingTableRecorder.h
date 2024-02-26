@@ -8,7 +8,7 @@
 #ifndef __INET_ROUTINGTABLERECORDER_H
 #define __INET_ROUTINGTABLERECORDER_H
 
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 
 namespace inet {
 

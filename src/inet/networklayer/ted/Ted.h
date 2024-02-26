@@ -14,7 +14,7 @@
 
 namespace inet {
 
-class IIpv4RoutingTable;
+class Ipv4RoutingTable;
 class IInterfaceTable;
 class NetworkInterface;
 
@@ -87,7 +87,7 @@ class INET_API Ted : public RoutingProtocolBase
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   protected:
-    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<Ipv4RoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
     Ipv4Address routerId;
 
