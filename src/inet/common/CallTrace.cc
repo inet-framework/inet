@@ -16,24 +16,22 @@ namespace inet {
 
 CallTrace::State CallTrace::state;
 
-CallTrace::CallTrace(const char *name, int maxLevel, const char *filter)
+CallTrace::CallTrace(bool enabled, const char *name, int maxLevel, const char *filter)
 {
-    state.enabled = true;
-    state.level = 1;
+    oldState = state;
+    state.enabled = enabled;
     state.name = name;
     state.maxLevel = maxLevel;
     state.filter = std::regex(filter);
-    printf("TRACE -> %s\n", state.name);
+    printf("TRACE %s-> %s\n", std::string(state.level * 2, ' ').c_str(), state.name);
+    state.level++;
 }
 
 CallTrace::~CallTrace()
 {
-    printf("TRACE <- %s\n", state.name);
-    state.enabled = false;
-    state.level = -1;
-    state.name = nullptr;
-    state.maxLevel = -1;
-    state.filter = std::regex();
+    state.level--;
+    printf("TRACE %s<- %s\n", std::string(state.level * 2, ' ').c_str(), state.name);
+    state = oldState;
 }
 
 std::string CallTrace::demangle(const char* mangledName) {
@@ -60,16 +58,14 @@ void __cyg_profile_func_enter(void* func, void* caller)
     auto& state = inet::CallTrace::state;
     if (state.enabled) {
         state.enabled = false;
-        if (1 <= state.level && state.level <= state.maxLevel) {
+        if (state.level < state.maxLevel) {
             Dl_info info;
             if (dladdr(func, &info)) {
                 std::string functionName = inet::CallTrace::demangle(info.dli_sname);
                 if (functionName != "CallTrace::~CallTrace()" &&
                     std::regex_match(functionName, state.filter))
                 {
-                    printf("TRACE %s-> %s\n",
-                           std::string(state.level * 2, ' ').c_str(),
-                           info.dli_sname ? functionName.c_str() : "?");
+                    printf("TRACE %s-> %s\n", std::string(state.level * 2, ' ').c_str(), info.dli_sname ? functionName.c_str() : "?");
                     state.level++;
                 }
             }
@@ -83,7 +79,7 @@ void __cyg_profile_func_exit(void* func, void* caller)
     auto& state = inet::CallTrace::state;
     if (state.enabled) {
         state.enabled = false;
-        if (1 <= state.level && state.level <= state.maxLevel) {
+        if (state.level < state.maxLevel) {
             Dl_info info;
             if (dladdr(func, &info)) {
                 std::string functionName = inet::CallTrace::demangle(info.dli_sname);
@@ -91,9 +87,7 @@ void __cyg_profile_func_exit(void* func, void* caller)
                     std::regex_match(functionName, state.filter))
                 {
                     state.level--;
-                    printf("TRACE %s<- %s\n",
-                           std::string(state.level * 2, ' ').c_str(),
-                           info.dli_sname ? functionName.c_str() : "?");
+                    printf("TRACE %s<- %s\n", std::string(state.level * 2, ' ').c_str(), info.dli_sname ? functionName.c_str() : "?");
                 }
             }
         }
