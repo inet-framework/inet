@@ -21,11 +21,9 @@ module ExtLowerEthernetInterface extends ExtInterface like IEthernetInterface
         string protocol = default("ethernetmac");
         double bitrate @unit(bps) = default(nan bps);
     gates:
-        input upperLayerIn @loose;
-        output upperLayerOut @loose;
         input cutthroughIn @loose;
         output cutthroughOut @loose;
-        inout phys @loose; // unused -- packets go via the real network device
+        inout phys @loose;
     submodules:
         socket: ExtEthernetSocket {
             parameters:

@@ -25,6 +25,8 @@ module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
         double bitrate @unit(bps) = default(nan bps);
         @display("bgb=450,400");
     gates:
+        input cutthroughIn @loose;
+        output cutthroughOut @loose;
         inout phys @labels(EthernetSignal);
     submodules:
         tap: ExtEthernetTapDevice {
