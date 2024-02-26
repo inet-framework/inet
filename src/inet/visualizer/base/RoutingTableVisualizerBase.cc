@@ -133,7 +133,7 @@ void RoutingTableVisualizerBase::updateRouteVisualizations()
     }
     else
         for (auto routingTable : invalidRoutingTableVisualizations)
-            updateRouteVisualizations(routingTable);
+            updateRouteVisualizations(routingTable->getHostModule(), routingTable);
     invalidRoutingTableVisualizations.clear();
 }
 
@@ -173,7 +173,7 @@ void RoutingTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t s
         auto routingTable = check_and_cast<IIpv4RoutingTable *>(source);
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode)) {
-            removeRouteVisualizations(routingTable);
+            removeRouteVisualizations(networkNode, routingTable);
             invalidRoutingTableVisualizations.insert(routingTable);
         }
     }
@@ -313,10 +313,9 @@ std::vector<Ipv4Address> RoutingTableVisualizerBase::getMulticastGroups()
     return std::vector<Ipv4Address>(multicastGroups.begin(), multicastGroups.end());
 }
 
-void RoutingTableVisualizerBase::addRouteVisualizations(IIpv4RoutingTable *routingTable)
+void RoutingTableVisualizerBase::addRouteVisualizations(cModule *node, IIpv4RoutingTable *routingTable)
 {
     L3AddressResolver addressResolver;
-    auto node = getContainingNode(check_and_cast<cModule *>(routingTable));
     for (auto destination : getDestinations()) {
         if (!routingTable->isLocalAddress(destination)) {
             auto route = routingTable->findBestMatchingRoute(destination);
@@ -366,9 +365,8 @@ void RoutingTableVisualizerBase::addRouteVisualizations(IIpv4RoutingTable *routi
     }
 }
 
-void RoutingTableVisualizerBase::removeRouteVisualizations(IIpv4RoutingTable *routingTable)
+void RoutingTableVisualizerBase::removeRouteVisualizations(cModule *networkNode, IIpv4RoutingTable *routingTable)
 {
-    auto networkNode = getContainingNode(check_and_cast<cModule *>(routingTable));
     std::vector<const RouteVisualization *> removedRouteVisualizations;
     for (auto it : routeVisualizations)
         if (std::get<1>(it.first) == networkNode->getId() && it.second)
@@ -395,15 +393,15 @@ void RoutingTableVisualizerBase::addAllRouteVisualizations()
             L3AddressResolver addressResolver;
             auto routingTable = addressResolver.findIpv4RoutingTableOf(networkNode);
             if (routingTable != nullptr)
-                addRouteVisualizations(routingTable);
+                addRouteVisualizations(networkNode, routingTable);
         }
     }
 }
 
-void RoutingTableVisualizerBase::updateRouteVisualizations(IIpv4RoutingTable *routingTable)
+void RoutingTableVisualizerBase::updateRouteVisualizations(cModule *networkNode, IIpv4RoutingTable *routingTable)
 {
-    removeRouteVisualizations(routingTable);
-    addRouteVisualizations(routingTable);
+    removeRouteVisualizations(networkNode, routingTable);
+    addRouteVisualizations(networkNode, routingTable);
 }
 
 void RoutingTableVisualizerBase::removeAllRouteVisualizations()
