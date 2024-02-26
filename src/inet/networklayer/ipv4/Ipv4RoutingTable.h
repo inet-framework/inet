@@ -21,8 +21,9 @@
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4Route.h" // not strictly required, but most clients will need it anyway
 
 namespace inet {
 
@@ -60,7 +61,7 @@ class IRoutingTable;
  *
  * @see NetworkInterface, Ipv4InterfaceData, Ipv4Route
  */
-class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable, protected cListener, public ILifecycle
+class INET_API Ipv4RoutingTable : public cSimpleModule, public IRoutingTable, protected cListener, public ILifecycle
 {
   protected:
     ModuleRefByPar<IInterfaceTable> ift;
@@ -158,12 +159,12 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     /**
      * For debugging
      */
-    virtual void printMulticastRoutingTable() const override;
+    virtual void printMulticastRoutingTable() const;
 
     /**
      * Returns the host or router this routing table lives in.
      */
-    virtual cModule *getHostModule() override;
+    virtual cModule *getHostModule();
 
     /** @name Interfaces */
     //@{
@@ -185,12 +186,12 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     /**
      * Returns routerId.
      */
-    virtual Ipv4Address getRouterId() const override { return routerId; }
+    virtual Ipv4Address getRouterId() const { return routerId; }
 
     /**
      * Sets routerId.
      */
-    virtual void setRouterId(Ipv4Address a) override;
+    virtual void setRouterId(Ipv4Address a);
 
     /** @name Routing functions (query the route table) */
     //@{
@@ -198,20 +199,20 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
      * Checks if the address is a local network broadcast address, i.e. one of the
      * broadcast addresses derived from the interface addresses and netmasks.
      */
-    virtual bool isLocalBroadcastAddress(const Ipv4Address& dest) const override;
+    virtual bool isLocalBroadcastAddress(const Ipv4Address& dest) const;
 
     /**
      * Returns the interface entry having the specified address
      * as its local broadcast address.
      */
-    virtual NetworkInterface *findInterfaceByLocalBroadcastAddress(const Ipv4Address& dest) const override;
+    virtual NetworkInterface *findInterfaceByLocalBroadcastAddress(const Ipv4Address& dest) const;
 
     /**
      * The routing function. Performs longest prefix match for the given
      * destination address, and returns the resulting route. Returns nullptr
      * if there is no matching route.
      */
-    virtual Ipv4Route *findBestMatchingRoute(const Ipv4Address& dest) const override;
+    virtual Ipv4Route *findBestMatchingRoute(const Ipv4Address& dest) const;
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -219,7 +220,7 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
      * Returns the output interface for the packets with dest as destination
      * address, or nullptr if the destination is not in routing table.
      */
-    virtual NetworkInterface *getInterfaceForDestAddr(const Ipv4Address& dest) const override;
+    virtual NetworkInterface *getInterfaceForDestAddr(const Ipv4Address& dest) const;
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -228,7 +229,7 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
      * address if the destination is not in routing table or the gateway field
      * is not filled in in the route.
      */
-    virtual Ipv4Address getGatewayForDestAddr(const Ipv4Address& dest) const override;
+    virtual Ipv4Address getGatewayForDestAddr(const Ipv4Address& dest) const;
     //@}
 
     /** @name Multicast routing functions */
@@ -238,12 +239,12 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
      * Checks if the address is in one of the local multicast group
      * address list.
      */
-    virtual bool isLocalMulticastAddress(const Ipv4Address& dest) const override;
+    virtual bool isLocalMulticastAddress(const Ipv4Address& dest) const;
 
     /**
      * Returns route for a multicast source and multicast group.
      */
-    virtual const Ipv4MulticastRoute *findBestMatchingMulticastRoute(const Ipv4Address& origin, const Ipv4Address& group) const override;
+    virtual const Ipv4MulticastRoute *findBestMatchingMulticastRoute(const Ipv4Address& origin, const Ipv4Address& group) const;
     //@}
 
     /** @name Route table manipulation */
@@ -270,20 +271,20 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
      * while in the routing table. (There is a notification mechanism that
      * allows routing table internals to be updated on a routing entry change.)
      */
-    virtual void addRoute(Ipv4Route *entry) override;
+    virtual void addRoute(Ipv4Route *entry);
 
     /**
      * Removes the given route from the routing table, and returns it.
      * nullptr is returned of the route was not in the routing table.
      */
-    virtual Ipv4Route *removeRoute(Ipv4Route *entry) override;
+    virtual Ipv4Route *removeRoute(Ipv4Route *entry);
 
     /**
      * Removes the given route from the routing table, and delete it.
      * Returns true if the route was deleted, and false if it was
      * not in the routing table.
      */
-    virtual bool deleteRoute(Ipv4Route *entry) override;
+    virtual bool deleteRoute(Ipv4Route *entry);
 
     /**
      * Returns the total number of multicast routes.
@@ -300,39 +301,39 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
      * while in the routing table. (There is a notification mechanism that
      * allows routing table internals to be updated on a routing entry change.)
      */
-    virtual void addMulticastRoute(Ipv4MulticastRoute *entry) override;
+    virtual void addMulticastRoute(Ipv4MulticastRoute *entry);
 
     /**
      * Removes the given route from the routing table, and returns it.
      * nullptr is returned of the route was not in the routing table.
      */
-    virtual Ipv4MulticastRoute *removeMulticastRoute(Ipv4MulticastRoute *entry) override;
+    virtual Ipv4MulticastRoute *removeMulticastRoute(Ipv4MulticastRoute *entry);
 
     /**
      * Deletes the given multicast route from the routing table.
      * Returns true if the route was deleted, and false if it was
      * not in the routing table.
      */
-    virtual bool deleteMulticastRoute(Ipv4MulticastRoute *entry) override;
+    virtual bool deleteMulticastRoute(Ipv4MulticastRoute *entry);
 
     /**
      * Utility function: Returns a vector of all addresses of the node.
      */
-    virtual std::vector<Ipv4Address> gatherAddresses() const override;
+    virtual std::vector<Ipv4Address> gatherAddresses() const;
 
     /**
      * To be called from route objects whenever a field changes. Used for
      * maintaining internal data structures and firing "routing table changed"
      * notifications.
      */
-    virtual void routeChanged(Ipv4Route *entry, int fieldCode) override;
+    virtual void routeChanged(Ipv4Route *entry, int fieldCode);
 
     /**
      * To be called from multicast route objects whenever a field changes. Used for
      * maintaining internal data structures and firing "routing table changed"
      * notifications.
      */
-    virtual void multicastRouteChanged(Ipv4MulticastRoute *entry, int fieldCode) override;
+    virtual void multicastRouteChanged(Ipv4MulticastRoute *entry, int fieldCode);
     //@}
 
     /**
@@ -343,7 +344,20 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     virtual IRoute *createRoute() override { return new Ipv4Route(); }
 
   private:
-
+    // mapping IRoute methods to IPv4-specific IIpv4Route methods
+    virtual L3Address getRouterIdAsGeneric() const override { return getRouterId(); }
+    virtual bool isLocalBroadcastAddress(const L3Address& dest) const override { return isLocalBroadcastAddress(dest.toIpv4()); }
+    virtual IRoute *findBestMatchingRoute(const L3Address& dest) const override { return findBestMatchingRoute(dest.toIpv4()); }
+    virtual NetworkInterface *getOutputInterfaceForDestination(const L3Address& dest) const override { return getInterfaceForDestAddr(dest.toIpv4()); } // TODO inconsistent names
+    virtual L3Address getNextHopForDestination(const L3Address& dest) const override { return getGatewayForDestAddr(dest.toIpv4()); } // TODO inconsistent names
+    virtual bool isLocalMulticastAddress(const L3Address& dest) const override { return isLocalMulticastAddress(dest.toIpv4()); }
+    virtual IMulticastRoute *findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const override { return const_cast<Ipv4MulticastRoute *>(findBestMatchingMulticastRoute(origin.toIpv4(), group.toIpv4())); } // TODO remove 'const' from Ipv4 method?
+    virtual void addRoute(IRoute *entry) override { addRoute(check_and_cast<Ipv4Route *>(entry)); }
+    virtual IRoute *removeRoute(IRoute *entry) override { return removeRoute(check_and_cast<Ipv4Route *>(entry)); }
+    virtual bool deleteRoute(IRoute *entry) override { return deleteRoute(check_and_cast<Ipv4Route *>(entry)); }
+    virtual void addMulticastRoute(IMulticastRoute *entry) override { addMulticastRoute(check_and_cast<Ipv4MulticastRoute *>(entry)); }
+    virtual IMulticastRoute *removeMulticastRoute(IMulticastRoute *entry) override { return removeMulticastRoute(check_and_cast<Ipv4MulticastRoute *>(entry)); }
+    virtual bool deleteMulticastRoute(IMulticastRoute *entry) override { return deleteMulticastRoute(check_and_cast<Ipv4MulticastRoute *>(entry)); }
 };
 
 } // namespace inet
