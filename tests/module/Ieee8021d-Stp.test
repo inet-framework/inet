@@ -9,7 +9,7 @@ import inet.node.ethernet.Eth1G;
 import inet.node.ethernet.EthernetHost;
 import inet.node.ethernet.EthernetSwitch;
 import inet.common.scenario.ScenarioManager;
-import inet.linklayer.configurator.L2NetworkConfigurator;
+import inet.linklayer.configurator.common.L2NetworkConfigurator;
 import inet.linklayer.ieee8021d.tester.StpTester;
 
 network LargeNet
