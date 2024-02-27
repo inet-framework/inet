@@ -926,6 +926,24 @@
         linkerFlags = ""
         />
     <feature
+        id = "OtherExamples"
+        name = "Other examples"
+        description = "A collection of unsorted examples"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.examples.communicationcache
+                       inet.examples.manetrouting
+                       inet.examples.openstreetmap
+                       inet.examples.seaport
+                       inet.examples.timing
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "PhysicalEnvironment"
         name = "Physical environment"
         description = "Support for the modeling of physical objects in the physical environment
