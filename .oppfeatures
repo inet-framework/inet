@@ -609,6 +609,20 @@
         linkerFlags = ""
         />
     <feature
+        id = "Loopback"
+        name = "Loopback"
+        description = "Loopback network interface."
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.loopback
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Mobility"
         name = "Mobility"
         description = "Mobility support for wireless simulations."
