@@ -5,7 +5,7 @@
 //
 
 
-package inet.linklayer.configurator;
+package inet.linklayer.configurator.common;
 
 //
 // This module allows to configure network scenarios at layer 2.

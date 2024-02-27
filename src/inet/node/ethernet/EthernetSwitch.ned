@@ -13,7 +13,7 @@ import inet.common.IMeasurer;
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.common.packet.recorder.PcapRecorder;
-import inet.linklayer.configurator.L2NodeConfigurator;
+import inet.linklayer.configurator.common.L2NodeConfigurator;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IMacForwardingTable;
 import inet.linklayer.contract.ISpanningTree;

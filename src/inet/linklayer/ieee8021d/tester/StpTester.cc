@@ -8,7 +8,7 @@
 #include "inet/linklayer/ieee8021d/tester/StpTester.h"
 
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
+#include "inet/linklayer/ieee8021d/common/Ieee8021dInterfaceData.h"
 
 namespace inet {
 

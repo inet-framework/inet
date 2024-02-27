@@ -5,11 +5,11 @@
 //
 
 
-#include "inet/linklayer/configurator/MacForwardingTableConfigurator.h"
+#include "inet/linklayer/configurator/common/MacForwardingTableConfigurator.h"
 
 #include "inet/common/MatchableObject.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/configurator/StreamRedundancyConfigurator.h"
+#include "inet/linklayer/configurator/common/StreamRedundancyConfigurator.h"
 #include "inet/networklayer/arp/ipv4/GlobalArp.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 

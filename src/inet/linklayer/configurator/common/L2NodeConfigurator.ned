@@ -5,7 +5,7 @@
 //
 
 
-package inet.linklayer.configurator;
+package inet.linklayer.configurator.common;
 
 //
 // This module has one instance per network node, and it acts like a bridge

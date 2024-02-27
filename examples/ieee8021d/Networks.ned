@@ -6,7 +6,7 @@
 package inet.examples.ieee8021d;
 
 import inet.common.scenario.ScenarioManager;
-import inet.linklayer.configurator.L2NetworkConfigurator;
+import inet.linklayer.configurator.common.L2NetworkConfigurator;
 import inet.linklayer.ieee8021d.tester.StpTester;
 import inet.node.ethernet.Eth1G;
 import inet.node.ethernet.EthernetHost;

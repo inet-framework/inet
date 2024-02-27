@@ -5,10 +5,10 @@
 //
 
 
-#include "inet/linklayer/configurator/FailureProtectionConfigurator.h"
+#include "inet/linklayer/configurator/common/FailureProtectionConfigurator.h"
 
 #include "inet/common/MatchableObject.h"
-#include "inet/linklayer/configurator/StreamRedundancyConfigurator.h"
+#include "inet/linklayer/configurator/common/StreamRedundancyConfigurator.h"
 
 namespace inet {
 

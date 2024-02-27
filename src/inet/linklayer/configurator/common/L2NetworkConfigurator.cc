@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/linklayer/configurator/L2NetworkConfigurator.h"
+#include "inet/linklayer/configurator/common/L2NetworkConfigurator.h"
 
 #include <queue>
 #include <set>

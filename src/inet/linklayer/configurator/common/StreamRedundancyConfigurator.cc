@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/linklayer/configurator/StreamRedundancyConfigurator.h"
+#include "inet/linklayer/configurator/common/StreamRedundancyConfigurator.h"
 
 namespace inet {
 

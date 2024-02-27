@@ -10,7 +10,7 @@
 
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/linklayer/configurator/L2NetworkConfigurator.h"
+#include "inet/linklayer/configurator/common/L2NetworkConfigurator.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {

@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/linklayer/configurator/L2NodeConfigurator.h"
+#include "inet/linklayer/configurator/common/L2NodeConfigurator.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"

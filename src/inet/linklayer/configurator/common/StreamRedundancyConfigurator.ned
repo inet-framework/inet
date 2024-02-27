@@ -5,7 +5,7 @@
 //
 
 
-package inet.linklayer.configurator;
+package inet.linklayer.configurator.common;
 
 import inet.networklayer.configurator.contract.INetworkConfigurator;
 
