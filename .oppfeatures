@@ -1419,7 +1419,6 @@
                        inet.common.figures
                        inet.visualizer.base
                        inet.visualizer.common
-                       inet.visualizer.contract
                        inet.visualizer.util
                       "
         extraSourceFolders = ""
