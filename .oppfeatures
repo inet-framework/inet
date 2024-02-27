@@ -651,6 +651,20 @@
         linkerFlags = ""
         />
     <feature
+        id = "LinkLayerConfiguratorsCommon"
+        name = "Link layer configurators common"
+        description = "Various link layer configurators"
+        initiallyEnabled = "true"
+        requires = "Ieee8021d"
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.configurator.common
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "LMac"
         name = "L-MAC"
         description = "L-MAC, a lightweight MAC protocol for wireless sensor networks."
