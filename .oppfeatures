@@ -1337,6 +1337,20 @@
         linkerFlags = ""
         />
     <feature
+        id = "TSNTests"
+        name = "TSN Tests"
+        description = "Tests for Time-Sensitive Networking (TSN)."
+        initiallyEnabled = "false"
+        requires = "TSN"
+        labels = ""
+        nedPackages = "
+                       inet.validation.tsn
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Tun"
         name = "TUN/TAP virtual network interface"
         description = "TUN/TAP virtual network interface."
