@@ -944,6 +944,21 @@
         linkerFlags = ""
         />
     <feature
+        id = "OtherApplications"
+        name = "Other applications"
+        description = "A collection of unsorted applications"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.applications.generic
+                       inet.applications.netperfmeter
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "PhysicalEnvironment"
         name = "Physical environment"
         description = "Support for the modeling of physical objects in the physical environment
