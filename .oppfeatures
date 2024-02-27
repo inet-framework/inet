@@ -770,6 +770,20 @@
         linkerFlags = ""
         />
     <feature
+        id = "OspfCommon"
+        name = "OSPF common"
+        description = "OSPF common."
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.routing.ospf_common
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Ospfv2"
         name = "OSPFv2 routing"
         description = "OSPFv2 routing."
