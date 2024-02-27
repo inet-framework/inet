@@ -10,7 +10,6 @@
 
 #include "inet/common/IVisitor.h"
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/common/figures/TrailFigure.h"
 #include "inet/environment/contract/IPhysicalEnvironment.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/TracingObstacleLossBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
