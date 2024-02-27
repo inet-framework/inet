@@ -288,6 +288,7 @@
         nedPackages = "
                        inet.applications.ethernet
                        inet.linklayer.ethernet
+                       inet.networks.ethernet
                        inet.node.ethernet
                        inet.physicallayer.wired.ethernet
                       "
