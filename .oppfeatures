@@ -301,7 +301,7 @@
         name = "Ethernet examples"
         description = "Examples for Ethernet."
         requires = "Ethernet Ipv4 TcpInet"
-        labels = "protocols"
+        labels = ""
         nedPackages = "
                        inet.examples.ethernet
                       "
@@ -1157,7 +1157,7 @@
         description = "Examples for SCTP."
         initiallyEnabled = "true"
         requires = "Ipv4 Sctp"
-        labels = "protocols"
+        labels = ""
         nedPackages = "
                        inet.examples.sctp
                       "
@@ -1552,7 +1552,7 @@
         description = "Examples for Mobile IPv6 support (xMIPv6)."
         initiallyEnabled = "true"
         requires = "Ethernet Ieee80211 Mobility Ppp TcpInet Udp Xmipv6"
-        labels = "protocols"
+        labels = ""
         nedPackages = "
                        inet.examples.mobileipv6
                       "
