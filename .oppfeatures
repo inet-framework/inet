@@ -472,6 +472,21 @@
         linkerFlags = ""
         />
     <feature
+        id = "Ieee8021asExamples"
+        name = "IEEE 802.1as examples"
+        description = "Provides IEEE 802.1as examples."
+        initiallyEnabled = "true"
+        requires = "Ieee8021as"
+        labels = ""
+        nedPackages = "
+                       inet.examples.gptp
+                       inet.examples.ieee8021as
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Ieee8021d"
         name = "IEEE 802.1d"
         description = "STP and RSTP (Spanning Tree Protocol, Rapid Spanning Tree Protocol)."
