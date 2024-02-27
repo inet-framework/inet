@@ -553,6 +553,7 @@
         requires = ""
         labels = ""
         nedPackages = "
+                       inet.applications.ipapp
                        inet.networklayer.arp.ipv4
                        inet.networklayer.configurator.ipv4
                        inet.networklayer.ipv4
