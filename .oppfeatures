@@ -310,6 +310,19 @@
         linkerFlags = ""
         />
     <feature
+        id = "EthernetTests"
+        name = "Ethernet tests"
+        description = "Tests for Ethernet."
+        requires = "Ethernet Ipv4 TcpInet"
+        labels = ""
+        nedPackages = "
+                       inet.tests.ethernet
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Flooding"
         name = "Flooding"
         description = "Provides network layer support for deterministic and probabilistic flooding."
