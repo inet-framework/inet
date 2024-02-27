@@ -12,6 +12,8 @@ package inet.routing.contract;
 moduleinterface IEigrp
 {
     parameters:
+        bool enableIPv4;
+        bool enableIPv6;
         @display("i=block/network");
     gates:
         input ipIn @labels(Ipv4ControlInfo/up,Ipv6ControlInfo/up);
