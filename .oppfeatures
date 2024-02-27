@@ -1416,6 +1416,7 @@
         requires = "Queueing"
         labels = "information"
         nedPackages = "
+                       inet.common.figures
                        inet.visualizer.base
                        inet.visualizer.common
                        inet.visualizer.contract
