@@ -650,6 +650,20 @@
         linkerFlags = ""
         />
     <feature
+        id = "MeasurementShowcases"
+        name = "Measurement showcases"
+        description = "Showcases that demonstrate various common measurements."
+        initiallyEnabled = "true"
+        requires = "Ethernet Ieee80211 Ipv4 Udp"
+        labels = ""
+        nedPackages = "
+                       inet.showcases.measurement
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Mobility"
         name = "Mobility"
         description = "Mobility support for wireless simulations."
