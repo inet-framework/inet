@@ -323,6 +323,20 @@
         linkerFlags = ""
         />
     <feature
+        id = "FingerprintTutorial"
+        name = "Fingerprint tutorial"
+        description = "A step-by-step tutorial for fingerprint testing."
+        initiallyEnabled = "true"
+        requires = "Ethernet Ieee80211 Ipv4 Udp"
+        labels = "tutorial"
+        nedPackages = "
+                       inet.tutorials.fingerprint
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Flooding"
         name = "Flooding"
         description = "Provides network layer support for deterministic and probabilistic flooding."
