@@ -399,6 +399,20 @@
         linkerFlags = ""
         />
     <feature
+        id = "Ieee802"
+        name = "IEEE 802"
+        description = "IEEE 802 common"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.ieee802
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Ieee80211"
         name = "IEEE 802.11"
         description = "Provides IEEE 802.11 (a/b/g/e/p/n) Ad-hoc and Infrastucture mode NICs."
