@@ -21,6 +21,7 @@ module PacketHistory like IPassivePacketSink, IActivePacketSource
 {
     parameters:
         int size = default(100); // the number of packets to remember
+        queue.packetCapacity = default(size);
         @display("i=block/passiveq");
     gates:
         input in @labels(push);
@@ -32,7 +33,6 @@ module PacketHistory like IPassivePacketSink, IActivePacketSource
         }
         queue: <default("DropHeadQueue")> like IPacketQueue {
             parameters:
-                packetCapacity = default(size);
                 @display("p=100,200");
         }
     connections:
