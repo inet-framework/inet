@@ -1015,6 +1015,20 @@
         linkerFlags = ""
         />
     <feature
+        id = "PingApplication"
+        name = "Ping application"
+        description = "Ping application for IPv4 and IPv6 networks"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.applications.pingapp
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Pim"
         name = "PIM routing"
         description = "PIM support."
