@@ -254,6 +254,7 @@
         requires = "Ipv4 Ipv6"
         labels = ""
         nedPackages = "
+                       inet.node.eigrp
                        inet.routing.eigrp
                       "
         extraSourceFolders = ""
