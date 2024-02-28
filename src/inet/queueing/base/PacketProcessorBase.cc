@@ -8,7 +8,7 @@
 #include "inet/queueing/base/PacketProcessorBase.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/queueing/common/ProgressTag_m.h"
+#include "inet/common/ProgressTag_m.h"
 
 namespace inet {
 namespace queueing {
