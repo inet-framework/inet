@@ -13,7 +13,7 @@ import inet.common.IMeasurer;
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.common.packet.recorder.PcapRecorder;
-import inet.linklayer.configurator.common.L2NodeConfigurator;
+import inet.linklayer.configurator.contract.IL2NodeConfigurator;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IMacForwardingTable;
 import inet.linklayer.contract.ISpanningTree;
@@ -70,7 +70,7 @@ module EthernetSwitch like IEthernetNetworkNode
         interfaceTable: InterfaceTable {
             @display("p=100,200;is=s");
         }
-        l2NodeConfigurator: L2NodeConfigurator if hasStp {
+        l2NodeConfigurator: <default("L2NodeConfigurator")> like IL2NodeConfigurator if hasStp {
             @display("p=100,300;is=s");
         }
         status: NodeStatus if hasStatus {
