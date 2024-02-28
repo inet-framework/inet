@@ -7,8 +7,6 @@
 
 package inet.linklayer.ieee8021as;
 
-import inet.applications.contract.IApp;
-
 //
 // This module implements the IEEE 802.1as protocol also known as gPTP. It
 // measures link delays to neighboring gPTP network nodes periodically. The
@@ -16,7 +14,7 @@ import inet.applications.contract.IApp;
 // and their roles in the time synchronization domain. The time synchronization
 // is done periodically and the clock module is set.
 //
-simple Gptp like IApp
+simple Gptp like IGptp
 {
     parameters:
         string clockModule = default(""); // relative path of a module that implements IClock; optional

@@ -7,7 +7,6 @@
 
 package inet.linklayer.ieee8021as;
 
-import inet.applications.contract.IApp;
 import inet.queueing.classifier.PacketClassifier;
 import inet.queueing.common.PacketMultiplexer;
 
@@ -19,7 +18,7 @@ import inet.queueing.common.PacketMultiplexer;
 //
 // @see ~MultiClock
 //
-module MultiDomainGptp like IApp
+module MultiDomainGptp like IGptp
 {
     parameters:
         string clockModule; // relative module path of the multi clock
@@ -31,7 +30,7 @@ module MultiDomainGptp like IApp
         input socketIn;
         output socketOut;
     submodules:
-        domain[numDomains]: <default("Gptp")> like IApp {
+        domain[numDomains]: <default("Gptp")> like IGptp {
             gptpNodeType = default(parent.gptpNodeType);
             clockModule = default(absPath(parent.clockModule) + ".clock[" + string(this.index) + "]");
             interfaceTableModule = default(absPath(parent.interfaceTableModule));
