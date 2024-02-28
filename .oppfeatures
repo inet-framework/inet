@@ -1175,6 +1175,7 @@
         labels = ""
         nedPackages = "
                        inet.queueing.buffer
+                       inet.queueing.common
                        inet.queueing.classifier
                        inet.queueing.filter
                        inet.queueing.flow
