@@ -7,10 +7,6 @@
 
 package inet.linklayer.ethernet.modular;
 
-import inet.linklayer.ethernet.LayeredEthernetInterface;
-import inet.linklayer.ethernet.contract.IEthernetMacLayer;
-import inet.physicallayer.wired.ethernet.IEthernetPhyLayer;
-
 //
 // This module represents an Ethernet network interface with Ethernet cut-through
 // switching support. In contrast with store-and-forward switching, Ethernet

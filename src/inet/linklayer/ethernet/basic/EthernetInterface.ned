@@ -5,7 +5,7 @@
 //
 
 
-package inet.linklayer.ethernet;
+package inet.linklayer.ethernet.basic;
 
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
