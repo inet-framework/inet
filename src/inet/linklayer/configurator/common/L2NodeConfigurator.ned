@@ -7,6 +7,8 @@
 
 package inet.linklayer.configurator.common;
 
+import inet.linklayer.configurator.contract.IL2NodeConfigurator;
+
 //
 // This module has one instance per network node, and it acts like a bridge
 // between the node and the network's global configurator module,
@@ -23,7 +25,7 @@ package inet.linklayer.configurator.common;
 // a restart, because being a global module, it doesn't know about node
 // lifecycle events.
 //
-simple L2NodeConfigurator
+simple L2NodeConfigurator like IL2NodeConfigurator
 {
     parameters:
         @display("i=block/cogwheel");
