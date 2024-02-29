@@ -110,7 +110,7 @@ void EthernetMacBase::initializeFlags()
     duplexMode = true;
 
     // initialize connected flag
-    connected = physOutGate->getPathEndGate()->isConnected() && physInGate->getPathStartGate()->isConnected();
+    connected = networkInterface->isUp() && networkInterface->hasCarrier() && networkInterface->getDatarate() != 0.0;
 
     if (!connected)
         EV_WARN << "MAC not connected to a network.\n";
@@ -369,7 +369,7 @@ bool EthernetMacBase::dropFrameNotForUs(Packet *packet, const Ptr<const Ethernet
 void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
 {
     double txRate = networkInterface->getDatarate();
-    connected = networkInterface->isUp() && networkInterface->hasCarrier();
+    connected = networkInterface->isUp() && networkInterface->hasCarrier() && networkInterface->getDatarate() != 0.0;
 
     if (!connected) {
         curEtherDescr = EthernetModes::nullEthernetMode;
