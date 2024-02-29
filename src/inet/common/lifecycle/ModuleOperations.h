@@ -26,6 +26,7 @@ class INET_API ModuleStartOperation : public LifecycleOperation
         STAGE_LOCAL, // for changes that don't depend on other modules
         STAGE_PHYSICAL_LAYER,
         STAGE_LINK_LAYER,
+        STAGE_LINK_LAYER_MAC,
         STAGE_NETWORK_LAYER,
         STAGE_TRANSPORT_LAYER,
         STAGE_ROUTING_PROTOCOLS,
@@ -51,6 +52,7 @@ class INET_API ModuleStopOperation : public LifecycleOperation
         STAGE_ROUTING_PROTOCOLS,
         STAGE_TRANSPORT_LAYER,
         STAGE_NETWORK_LAYER,
+        STAGE_LINK_LAYER_MAC,
         STAGE_LINK_LAYER,
         STAGE_PHYSICAL_LAYER,
         STAGE_LAST // for changes that others shouldn't depend on
