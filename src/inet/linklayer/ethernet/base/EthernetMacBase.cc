@@ -71,9 +71,6 @@ void EthernetMacBase::initialize(int stage)
         lowerLayerOutGateId = physOutGate->getId();
         txQueue = getQueue(gate(upperLayerInGateId));
 
-        initializeFlags();
-
-        initializeStatistics();
 
         lastTxFinishTime = -1.0; // not equals with current simtime.
 
@@ -96,10 +93,13 @@ void EthernetMacBase::initialize(int stage)
         WATCH(promiscuous);
         WATCH(pauseUnitsRequested);
     }
-    else if (stage == 1) { // KLUDGE TODO
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         InterfaceTable *ift = check_and_cast<InterfaceTable *>(networkInterface->getInterfaceTable());
         ift->subscribe(interfaceStateChangedSignal, this);
         ift->subscribe(interfaceConfigChangedSignal, this);
+
+        initializeFlags();
+        initializeStatistics();
     }
 }
 
