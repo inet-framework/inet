@@ -5,7 +5,7 @@
 //
 
 
-package inet.linklayer.ethernet.contract;
+package inet.linklayer.contract;
 
 moduleinterface IEthernetLayer
 {

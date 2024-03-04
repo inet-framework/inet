@@ -5,7 +5,7 @@
 //
 
 
-package inet.linklayer.ieee8022;
+package inet.linklayer.contract;
 
 moduleinterface IIeee8022Llc
 {

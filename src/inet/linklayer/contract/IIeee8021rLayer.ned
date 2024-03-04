@@ -5,11 +5,11 @@
 //
 
 
-package inet.linklayer.ieee8021q;
+package inet.linklayer.contract;
 
 import inet.protocolelement.contract.IProtocolLayer;
 
-moduleinterface IIeee8021qLayer extends IProtocolLayer
+moduleinterface IIeee8021rLayer extends IProtocolLayer
 {
     parameters:
         @display("i=block/layer");
