@@ -18,6 +18,7 @@ import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IMacForwardingTable;
 import inet.linklayer.contract.ISpanningTree;
 import inet.linklayer.contract.IEthernetLayer;
+import inet.linklayer.contract.IGptp;
 import inet.linklayer.contract.IIeee8021qLayer;
 import inet.linklayer.contract.IIeee8021rLayer;
 import inet.linklayer.contract.IIeee8022Llc;
@@ -88,7 +89,7 @@ module EthernetSwitch like IEthernetNetworkNode
         stp: <spanningTreeProtocol> like ISpanningTree if hasStp {
             @display("p=500,75");
         }
-        gptp: <default("Gptp")> like IApp if hasGptp {
+        gptp: <default("Gptp")> like IGptp if hasGptp {
             @display("p=700,75");
             gptpNodeType = default("BRIDGE_NODE"); // @enum("gptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE
         }
