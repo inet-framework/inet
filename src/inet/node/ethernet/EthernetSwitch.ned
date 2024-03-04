@@ -15,17 +15,16 @@ import inet.common.lifecycle.NodeStatus;
 import inet.common.packet.recorder.PcapRecorder;
 import inet.linklayer.configurator.contract.IL2NodeConfigurator;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.contract.IMacForwardingTable;
-import inet.linklayer.contract.ISpanningTree;
 import inet.linklayer.contract.IEthernetLayer;
 import inet.linklayer.contract.IGptp;
 import inet.linklayer.contract.IIeee8021qLayer;
 import inet.linklayer.contract.IIeee8021rLayer;
 import inet.linklayer.contract.IIeee8022Llc;
+import inet.linklayer.contract.IMacForwardingTable;
+import inet.linklayer.contract.ISpanningTree;
 import inet.networklayer.common.InterfaceTable;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.protocolelement.contract.IProtocolLayer;
-
 
 //
 // Model of an Ethernet switch.

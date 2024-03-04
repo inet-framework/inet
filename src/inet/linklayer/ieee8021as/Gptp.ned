@@ -7,6 +7,8 @@
 
 package inet.linklayer.ieee8021as;
 
+import inet.linklayer.contract.IGptp;
+
 //
 // This module implements the IEEE 802.1as protocol also known as gPTP. It
 // measures link delays to neighboring gPTP network nodes periodically. The

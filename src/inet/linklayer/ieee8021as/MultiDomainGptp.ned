@@ -7,6 +7,7 @@
 
 package inet.linklayer.ieee8021as;
 
+import inet.linklayer.contract.IGptp;
 import inet.queueing.classifier.PacketClassifier;
 import inet.queueing.common.PacketMultiplexer;
 
