@@ -7,7 +7,7 @@
 
 package inet.linklayer.ethernet.basic;
 
-import inet.linklayer.ethernet.contract.IEthernetLayer;
+import inet.linklayer.contract.IEthernetLayer;
 
 //
 // Performs Ethernet II or Ethernet with LLC/SNAP encapsulation/decapsulation.

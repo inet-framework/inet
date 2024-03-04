@@ -7,7 +7,7 @@
 
 package inet.linklayer.ethernet.modular;
 
-import inet.linklayer.ethernet.contract.IEthernetLayer;
+import inet.linklayer.contract.IEthernetLayer;
 import inet.protocolelement.contract.IProtocolHeaderChecker;
 import inet.protocolelement.contract.IProtocolHeaderInserter;
 import inet.queueing.contract.IPacketFilter;

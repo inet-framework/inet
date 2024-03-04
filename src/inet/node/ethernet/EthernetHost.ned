@@ -11,8 +11,8 @@ import inet.applications.ethernet.EtherAppServer;
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.ethernet.contract.IEthernetLayer;
-import inet.linklayer.ieee8022.IIeee8022Llc;
+import inet.linklayer.contract.IEthernetLayer;
+import inet.linklayer.contract.IIeee8022Llc;
 import inet.networklayer.common.InterfaceTable;
 
 

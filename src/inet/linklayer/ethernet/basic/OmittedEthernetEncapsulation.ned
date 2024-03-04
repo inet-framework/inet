@@ -7,7 +7,7 @@
 
 package inet.linklayer.ethernet.basic;
 
-import inet.linklayer.ethernet.contract.IEthernetLayer;
+import inet.linklayer.contract.IEthernetLayer;
 
 //
 // This module implements the module given interface and can be used as an omitted
