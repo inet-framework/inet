@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-package inet.linklayer.ieee8021as;
+package inet.linklayer.contract;
 
 import inet.applications.contract.IApp;
 
