@@ -249,6 +249,7 @@ void ScenarioManager::setParamFromXml(cPar& param, const cXMLElement *node)
         throw cRuntimeError("<%s>: required any '%s' or '%s' attribute", node->getTagName(), ATTR_VALUE, ATTR_EXPR);
     if (valueAttr && exprAttr)
         throw cRuntimeError("<%s>: required only one from '%s' and '%s' attributes", node->getTagName(), ATTR_VALUE, ATTR_EXPR);
+    EV_DEBUG << "Start setting param " << param.getFullPath() << " = " << param.str() << "\n";
     if (exprAttr)
         param.parse(exprAttr);
     else {
@@ -258,6 +259,7 @@ void ScenarioManager::setParamFromXml(cPar& param, const cXMLElement *node)
             default:           param.parse(valueAttr); break;
         }
     }
+    EV_DEBUG << "End setting param " << param.getFullPath() << " = " << param.str() << "\n";
 }
 
 void ScenarioManager::processSetParamCommand(const cXMLElement *node)
