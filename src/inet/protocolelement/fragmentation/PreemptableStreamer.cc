@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/protocolelement/common/PreemptableStreamer.h"
+#include "inet/protocolelement/fragmentation/PreemptableStreamer.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"

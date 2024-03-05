@@ -5,7 +5,7 @@
 //
 
 
-package inet.protocolelement.common;
+package inet.protocolelement.fragmentation;
 
 import inet.queueing.base.PacketProcessorBase;
 import inet.queueing.contract.IPacketFlow;
