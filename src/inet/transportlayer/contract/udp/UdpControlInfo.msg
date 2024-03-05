@@ -14,7 +14,7 @@ namespace inet;
 // Udp command codes, sent by the application to ~Udp. These constants
 // should be set as message kind on messages sent to the ~Udp entity.
 //
-// @see ~UdpControlInfo, ~UdpStatusInd, ~Udp
+// @see ~UdpCommandBase, ~UdpStatusInd, ~Udp
 //
 enum UdpCommandCode
 {
@@ -48,7 +48,7 @@ enum UdpSetOptionSubcode
 // Udp indications, sent by ~Udp to the application. ~Udp will set these
 // constants as message kind on messages it sends to the application.
 //
-// @see ~UdpControlInfo, ~UdpCommandCode, ~Udp
+// @see ~UdpCommandBase, ~UdpCommandCode, ~Udp
 //
 enum UdpStatusInd
 {
@@ -63,7 +63,7 @@ enum UdpStatusInd
 //
 // @see ~UdpCommandCode
 //
-class UdpControlInfo extends cObject
+class UdpCommandBase extends cObject
 {
 }
 
@@ -77,7 +77,7 @@ class UdpControlInfo extends cObject
 //
 // @see ~UdpCommandCode
 //
-class UdpBindCommand extends UdpControlInfo
+class UdpBindCommand extends UdpCommandBase
 {
     L3Address localAddr;
     int localPort = -1;
@@ -93,7 +93,7 @@ class UdpBindCommand extends UdpControlInfo
 //
 // @see ~UdpCommandCode
 //
-class UdpConnectCommand extends UdpControlInfo
+class UdpConnectCommand extends UdpCommandBase
 {
     L3Address remoteAddr;
     int remotePort = -1;
@@ -117,7 +117,7 @@ class UdpConnectCommand extends UdpControlInfo
 //
 // @see ~UdpCommandCode
 //
-class UdpCloseCommand extends UdpControlInfo
+class UdpCloseCommand extends UdpCommandBase
 {
 }
 
@@ -127,7 +127,7 @@ class UdpCloseCommand extends UdpControlInfo
 //
 // @see ~UdpCommandCode
 //
-class UdpSocketClosedIndication extends UdpControlInfo
+class UdpSocketClosedIndication extends UdpCommandBase
 {
 }
 
@@ -137,7 +137,7 @@ class UdpSocketClosedIndication extends UdpControlInfo
 //
 // @see ~UdpCommandCode
 //
-class UdpDestroyCommand extends UdpControlInfo
+class UdpDestroyCommand extends UdpCommandBase
 {
 }
 
@@ -155,14 +155,14 @@ class UdpDestroyCommand extends UdpControlInfo
 //
 // @see ~UdpCommandCode
 //
-class UdpErrorIndication extends UdpControlInfo
+class UdpErrorIndication extends UdpCommandBase
 {
 }
 
 //
 // Base class for UDP socket option control info classes.
 //
-class UdpSetOptionCommand extends UdpControlInfo
+class UdpSetOptionCommand extends UdpCommandBase
 {
     UdpSetOptionSubcode optionCode = static_cast<UdpSetOptionSubcode>(-1);
 }
