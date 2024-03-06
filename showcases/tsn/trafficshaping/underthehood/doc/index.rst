@@ -191,7 +191,7 @@ The next chart shows the queue length:
    :align: center
 
 The maximum number of packets that can accumulate in the queue from each stream
-is 20, calculated as follows: `average production interval / max residence time
+is 20, calculated as follows: `max residence time / average production interval
 = 10ms / 0.5ms = 20`. Since the traffic pattern is different for the three
 streams, the 20 packets/stream limit is reached at different times for each of
 them. We can observe on the chart as the queue becomes satured for each stream
