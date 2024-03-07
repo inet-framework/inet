@@ -16,6 +16,14 @@ from inet.simulation.project import *
 
 _logger = logging.getLogger(__name__)
 
+def make_makefiles(simulation_project=None, capture_output=True, **kwargs):
+    if simulation_project is None:
+        simulation_project = get_default_simulation_project()
+    args = ["make", "makefiles"]
+    subprocess_result = subprocess.run(args, cwd=simulation_project.get_full_path("."), capture_output=capture_output)
+    if subprocess_result.returncode != 0:
+        raise Exception(f"Making {simulation_project.get_name()} makefiles failed")
+
 def build_project(build_mode="makefile", **kwargs):
     """
     Builds all output files of a simulation project using either :py:func:`build_project_using_makefile` or :py:func:`build_project_using_tasks`.
