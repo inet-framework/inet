@@ -257,7 +257,10 @@ class SimulationProject:
         return self.get_multiple_args(option, map(self.get_full_path, paths))
 
     def get_default_args(self):
-        return [*self.get_full_path_args("-l", self.get_dynamic_libraries_for_running()), *self.get_full_path_args("-n", self.get_ned_folders_for_running()), *self.get_multiple_args("-x", self.ned_exclusions), *self.get_full_path_args("--image-path", self.image_folders)]
+        return [*self.get_full_path_args("-l", self.get_dynamic_libraries_for_running()), *self.get_full_path_args("-n", self.get_ned_folders_for_running()), *self.get_multiple_args("-x", self.ned_exclusions or self.get_ned_exclusions()), *self.get_full_path_args("--image-path", self.image_folders)]
+
+    def get_ned_exclusions(self):
+        return [s.strip() for s in open(self.get_full_path(".nedexclusions")).readlines()]
 
     def get_direct_include_folders(self):
         return list(map(lambda include_folder: self.get_full_path(include_folder), self.include_folders))
