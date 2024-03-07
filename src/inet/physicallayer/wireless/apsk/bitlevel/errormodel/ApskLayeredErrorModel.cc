@@ -7,7 +7,7 @@
 
 #include "inet/physicallayer/wireless/apsk/bitlevel/errormodel/ApskLayeredErrorModel.h"
 
-#include "inet/physicallayer/wireless/apsk/bitlevel/ApskSymbol.h"
+#include "inet/physicallayer/wireless/common/modulation/ApskSymbol.h"
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
 #include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarTransmissionAnalogModel.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"

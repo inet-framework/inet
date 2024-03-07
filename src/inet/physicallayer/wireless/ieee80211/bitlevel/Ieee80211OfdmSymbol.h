@@ -8,7 +8,7 @@
 #ifndef __INET_IEEE80211OFDMSYMBOL_H
 #define __INET_IEEE80211OFDMSYMBOL_H
 
-#include "inet/physicallayer/wireless/apsk/bitlevel/ApskSymbol.h"
+#include "inet/physicallayer/wireless/common/modulation/ApskSymbol.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISymbol.h"
 
 namespace inet {

@@ -6,7 +6,7 @@
 
 #include "inet/physicallayer/wireless/common/base/bitlevel/LayeredErrorModelBase.h"
 
-#include "inet/physicallayer/wireless/apsk/bitlevel/ApskSymbol.h"
+#include "inet/physicallayer/wireless/common/modulation/ApskSymbol.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
