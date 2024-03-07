@@ -99,7 +99,7 @@ module EthernetSwitch like IEthernetNetworkNode
         sc: MessageDispatcher {
             @display("p=800,150;b=1200,5");
         }
-        llc: <default("Ieee8022Llc")> like IIeee8022Llc if typename != "" {
+        llc: <default("")> like IIeee8022Llc if typename != "" {
             @display("p=700,225");
         }
         cb: MessageDispatcher {
@@ -114,10 +114,10 @@ module EthernetSwitch like IEthernetNetworkNode
         ethernet: <default("EthernetEncapsulation")> like IEthernetLayer if typename != "" {
             @display("p=500,525");
         }
-        ieee8021q: <default("Ieee8021qProtocol")> like IIeee8021qLayer if typename != "" {
+        ieee8021q: <default("")> like IIeee8021qLayer if typename != "" {
             @display("p=700,525");
         }
-        ieee8021r: <default("Ieee8021rProtocol")> like IIeee8021rLayer if typename != "" {
+        ieee8021r: <default("")> like IIeee8021rLayer if typename != "" {
             @display("p=900,525");
         }
         li: MessageDispatcher {
