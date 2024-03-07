@@ -1,15 +1,333 @@
+import pathlib
 import logging
+import subprocess
+import xml
 
+from inet.common.summary import *
+from inet.project.inet import *
+from inet.simulation.build import *
+from inet.simulation.task import *
 from inet.test.simulation import *
+
+# TODO force at least setting up interactive/emulation simulations
+# TODO add ifdefs around includes in C++ where the dependency is meant to be optional
 
 __sphinx_mock__ = True # ignore this module in documentation
 
 _logger = logging.getLogger(__name__)
 
-def run_feature_test(**kwargs):
-    # TODO
-    pass
+def disable_features(feature):
+    args = ["opp_featuretool", "disable", "-f", feature]
+    subprocess.run(args)
+
+def enable_features(feature):
+    args = ["opp_featuretool", "enable", "-f", feature]
+    subprocess.run(args)
+
+class FeatureTestTask(TestTask):
+    def __init__(self, simulation_project, feature, packages, **kwargs):
+        super().__init__(**kwargs)
+        self.locals = locals()
+        self.locals.pop("self")
+        self.kwargs = kwargs
+        self.simulation_project = simulation_project
+        self.feature = feature
+        self.packages = packages
+        self.multiple_simulation_tasks = self.get_multiple_simulation_tasks()
+
+    def get_multiple_simulation_tasks(self):
+        folders = []
+        for package in self.packages:
+             folder = get_package_folder(package)
+             folders.append(folder)
+             folders.append(folder + "/.*")
+        working_directory_filter = "|".join(folders)
+        multiple_simulation_tasks = get_simulation_tasks(working_directory_filter=working_directory_filter, full_match=True, run_number=0)
+        if len(multiple_simulation_tasks.tasks) == 0:
+            multiple_simulation_tasks = get_simulation_tasks(working_directory_filter="examples/empty", full_match=True, run_number=0)
+        return multiple_simulation_tasks
+
+    def get_parameters_string(self, **kwargs):
+        return self.feature
+
+    def run_protected(self, capture_output=True, **kwargs):
+        disable_features("all")
+        enable_features(self.feature)
+        make_makefiles(simulation_project=self.simulation_project)
+        clean_project(simulation_project=self.simulation_project)
+        build_project(simulation_project=self.simulation_project, capture_output=False)
+        multiple_simulation_tasks_result = self.multiple_simulation_tasks.run(**kwargs)
+        result="PASS" if multiple_simulation_tasks_result.result == "DONE" else "FAIL" if multiple_simulation_tasks_result.result == "FAIL" else "ERROR"
+        return self.task_result_class(self, result=result)
+
+class MultipleFeatureTestTasks(MultipleTestTasks):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.locals = locals()
+        self.locals.pop("self")
+        self.kwargs = kwargs
+
+    def get_total_simulation_task_count(self):
+        count = 0
+        for task in self.tasks:
+            count += len(list(filter(lambda task: task.simulation_config.working_directory != "examples/empty", task.multiple_simulation_tasks.tasks)))
+        return count
+
+    def run_protected(self, **kwargs):
+        _logger.info("Collected " + str(self.get_total_simulation_task_count()) + " simulations in total")
+        multiple_test_tasks_result = super().run_protected(**kwargs)
+        _logger.info("Run " + str(self.get_total_simulation_task_count()) + " simulations in total")
+        return multiple_test_tasks_result
+
+
+def get_feature_test_tasks(simulation_project=None, filter=".*", full_match=False, **kwargs):
+    if simulation_project is None:
+        simulation_project = get_default_simulation_project()
+    oppfeatures = read_xml_file(simulation_project.get_full_path(".oppfeatures"))
+    features = get_features(oppfeatures)
+    feature_to_packages = get_feature_to_packages(oppfeatures)
+    def create_test_task(feature):
+        return FeatureTestTask(simulation_project, feature, feature_to_packages[feature], task_result_class=TestTaskResult, **kwargs)
+    test_features = list(builtins.filter(lambda feature: matches_filter(feature, filter, None, full_match), features))
+    test_tasks = list(map(create_test_task, test_features))
+    return MultipleFeatureTestTasks(tasks=test_tasks, multiple_task_results_class=MultipleTestTaskResults, concurrent=False, **kwargs)
 
 def run_feature_tests(**kwargs):
-    logger.info("Running feature tests")
-    # TODO
+    multiple_test_tasks = get_feature_test_tasks(**kwargs)
+    return multiple_test_tasks.run(**kwargs)
+
+def read_xml_file(filename, repair_hint=None):
+    try:
+        f = open(filename, "r")
+        dom_tree = xml.dom.minidom.parse(f)
+        f.close()
+        return dom_tree
+    except (IOError, OSError) as e:
+        fail("Cannot read '{}': {}".format(filename, e))
+    except Exception as e:
+        fail("Cannot parse XML file '{}': {}".format(filename, e), repair_hint)
+
+def get_package_folder(package):
+    if re.search("inet.examples", package):
+        return re.sub("inet/", "", re.sub("\\.", "/", package))
+    elif re.search("inet.showcases", package):
+        return re.sub("inet/", "", re.sub("\\.", "/", package))
+    elif re.search("inet.tutorials", package):
+        return re.sub("inet/", "", re.sub("\\.", "/", package))
+    elif re.search("inet.tests", package):
+        return re.sub("inet/", "", re.sub("\\.", "/", package))
+    elif re.search("inet.validation", package):
+        return re.sub("inet/", "tests/", re.sub("\\.", "/", package))
+    else:
+        return "src/" + re.sub("\\.", "/", package)
+
+def get_features(oppfeatures):
+    result = []
+    for feature_dom in oppfeatures.documentElement.getElementsByTagName("feature"):
+        id = str(feature_dom.getAttribute("id"))
+        result.append(id)
+    result.sort()
+    return result
+
+def get_feature_to_packages(oppfeatures):
+    result = dict()
+    for feature_dom in oppfeatures.documentElement.getElementsByTagName("feature"):
+        id = str(feature_dom.getAttribute("id"))
+        packages = feature_dom.getAttribute("nedPackages").split()
+        result[id] = sorted(packages)
+    return result
+
+def get_packages(oppfeatures):
+    result = []
+    for feature_dom in oppfeatures.documentElement.getElementsByTagName("feature"):
+        packages = feature_dom.getAttribute("nedPackages").split()
+        result += packages
+    result = list(set(result))
+    result.sort()
+    return result
+
+def get_package_to_defined_types(simulation_project, packages):
+    result = dict()
+    for package in packages:
+        folder = get_package_folder(package)
+        modules = list(map(lambda module: "inet." + module, collect_modules(simulation_project, folder)))
+        chunks = list(map(lambda chunk: package + "." + chunk, collect_chunks(simulation_project, folder)))
+        tags = list(map(lambda tag: package + "." + tag, collect_tags(simulation_project, folder)))
+        result[package] = sorted(modules + chunks + tags)
+    return result
+
+def get_defined_types(package_to_defined_types):
+    result = []
+    for key, value in package_to_defined_types.items():
+        result += value
+    result = list(set(result))
+    result.sort()
+    return result
+
+def get_defined_type_to_package(package_to_defined_types):
+    result = dict()
+    for package, defined_types in package_to_defined_types.items():
+        for defined_type in defined_types:
+            result[defined_type] = package
+    return result
+
+def get_package_to_feature(feature_to_packages):
+    result = dict()
+    for feature, packages in feature_to_packages.items():
+        for package in packages:
+            result[package] = feature
+    return result
+
+def get_defined_types_to_feature(package_to_defined_types, feature_to_packages):
+    result = dict()
+    defined_types = get_defined_types(package_to_defined_types)
+    defined_type_to_package = get_defined_type_to_package(package_to_defined_types)
+    package_to_feature = get_package_to_feature(feature_to_packages)
+    for defined_type in defined_types:
+        package = defined_type_to_package[defined_type]
+        feature = package_to_feature[package]
+        result[defined_type] = feature
+    return result
+
+def get_folder_to_simulations(simulation_results):
+    result = {}
+    for simulation_result in simulation_results.results:
+        simulation_task = simulation_result.task
+        path = pathlib.Path(simulation_task.simulation_config.working_directory)
+        while str(path) != ".":
+            folder = str(path)
+            if folder in result:
+                result[folder].append(simulation_task)
+            else:
+                result[folder] = [simulation_task]
+            path = path.parent
+    return result
+
+def get_simulation_to_used_types(simulation_results):
+    result = {}
+    for simulation_result in simulation_results.results:
+        result[simulation_result.task] = simulation_result.used_types
+    return result
+
+def get_package_to_used_types(packages):
+    result = dict()
+    for package in packages:
+        used_types = []
+        folder = get_package_folder(package)
+        for file_name in glob.glob(folder + "/**/*.ned", recursive=True):
+            with open(file_name, "r") as file:
+                for line in file:
+                    match = re.match(r"^import ([\w\.]+)", line)
+                    if match:
+                        used_types.append(match.group(1))
+        for file_name in glob.glob(folder + "/**/*.msg", recursive=True):
+            with open(file_name, "r") as file:
+                for line in file:
+                    match = re.match(r"^import ([\w\.]+)", line)
+                    if match:
+                        used_types.append(match.group(1))
+        result[package] = sorted(list(set(used_types)))
+    return result
+
+def get_package_to_used_headers(packages):
+    result = dict()
+    for package in packages:
+        used_headers = []
+        folder = get_package_folder(package)
+        for file_name in glob.glob(folder + "/**/*.cc", recursive=True) + glob.glob(folder + "/**/*.h", recursive=True):
+            with open(file_name, "r") as file:
+                if_counter = 0
+                for line in file:
+                    if re.search("^#if[ d]", line):
+                        if_counter += 1
+                    elif re.search("^#endif", line):
+                        if_counter -= 1
+                    if if_counter == 0:
+                        match = re.match(r"^#include \"([\w\.\/]+)\"", line)
+                        if match:
+                            used_headers.append("src/" + match.group(1))
+        result[package] = sorted(list(set(used_headers)))
+    return result
+
+def get_header_to_feature(features, feature_to_packages):
+    result = dict()
+    for feature in features:
+        for package in feature_to_packages[feature]:
+            folder = get_package_folder(package)
+            for file_name in glob.glob(folder + "/**/*.h", recursive=True):
+                result[file_name] = feature
+    return result
+
+def get_feature_to_required_features(simulation_project, features, feature_to_packages, package_to_used_types, package_to_used_headers, defined_types_to_feature, folder_to_simulations, simulation_to_used_types):
+    result = {}
+    header_to_feature = get_header_to_feature(features, feature_to_packages)
+    for feature in features:
+        required_features = []
+        packages = feature_to_packages[feature]
+        for package in packages:
+            used_headers = package_to_used_headers[package]
+            for used_header in used_headers:
+                if used_header in header_to_feature:
+                    used_feature = header_to_feature[used_header]
+                    if feature != used_feature:
+                        required_features.append(used_feature)
+        folders = list(map(get_package_folder, packages))
+        folders.sort()
+        used_types = []
+        for package in packages:
+            used_types += package_to_used_types[package]
+        for folder in folders:
+            if folder in folder_to_simulations:
+                simulations = folder_to_simulations[folder]
+                for simulation in simulations:
+                    used_types += simulation_to_used_types[simulation]
+        used_types = list(set(used_types))
+        for used_type in used_types:
+            if used_type in defined_types_to_feature:
+                used_feature = defined_types_to_feature[used_type]
+                if feature != used_feature:
+                    required_features.append(used_feature)
+        required_features = list(set(required_features))
+        result[feature] = sorted(required_features)
+    return result
+
+def get_feature_to_required_features_for_simulation_project(simulation_project, simulation_results):
+    oppfeatures = read_xml_file(simulation_project.get_full_path(".oppfeatures"))
+    features = get_features(oppfeatures)
+    feature_to_packages = get_feature_to_packages(oppfeatures)
+    packages = get_packages(oppfeatures)
+    package_to_used_types = get_package_to_used_types(packages)
+    package_to_used_headers = get_package_to_used_headers(packages)
+    package_to_defined_types = get_package_to_defined_types(simulation_project, packages)
+    defined_types_to_feature = get_defined_types_to_feature(package_to_defined_types, feature_to_packages)
+    folder_to_simulations = get_folder_to_simulations(simulation_results)
+    simulation_to_used_types = get_simulation_to_used_types(simulation_results)
+    return get_feature_to_required_features(simulation_project, features, feature_to_packages, package_to_used_types, package_to_used_headers, defined_types_to_feature, folder_to_simulations, simulation_to_used_types)
+
+def update_oppfeatures_file(simulation_project, feature_to_required_features):
+    file_name = simulation_project.get_full_path(".oppfeatures")
+    with open(file_name, "r") as file:
+        lines = []
+        for line in file:
+            match = re.search(r"id *= *\"(.*?)\"", line)
+            if match:
+                feature = match.group(1)
+            match = re.search(r"( *requires *= *\").*?(\")", line)
+            if match:
+                lines.append(match.group(1) + " ".join(feature_to_required_features[feature]) + match.group(2) + "\n")
+            else:
+                lines.append(line)
+    with open(file_name, "w") as file:
+        file.write("".join(lines))
+
+def update_oppfeatures(simulation_project=None, simulation_results=None):
+    if simulation_project is None:
+        simulation_project = get_default_simulation_project()
+    enable_features("all")
+    make_makefiles(simulation_project=simulation_project)
+    clean_project(simulation_project=simulation_project)
+    build_project(simulation_project=simulation_project, capture_output=False)
+    if simulation_results is None:
+        simulation_results = run_simulations(simulation_project=simulation_project, run_number=0)
+    feature_to_required_features = get_feature_to_required_features_for_simulation_project(simulation_project, simulation_results)
+    update_oppfeatures_file(simulation_project, feature_to_required_features)
