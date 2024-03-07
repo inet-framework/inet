@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
+#include "inet/routing/leach/LeachDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
@@ -23,6 +24,7 @@
 #include "inet/mobility/base/StationaryMobilityBase.h"
 #include "inet/power/contract/ICcEnergyStorage.h"
 #include "inet/common/lifecycle/LifecycleController.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 
 using namespace std;
 
@@ -103,11 +105,14 @@ public:
 
     double generateThresholdValue(int subInterval);
 
+    void broadcastCtrlToNCH();
     void sendDataToCH(Ipv4Address nodeAddr, Ipv4Address CHAddr,
             double TDMAslot);
     void sendDataToBS(Ipv4Address CHAddr);
     void sendAckToCH(Ipv4Address nodeAddr, Ipv4Address CHAddr);
     void sendSchToNCH(Ipv4Address selfAddr);
+
+    void sendUdpPacket(Packet *packet);
 
     void addToNodeMemory(Ipv4Address nodeAddr, Ipv4Address CHAddr,
             double energy);

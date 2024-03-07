@@ -14,6 +14,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/lifecycle/LifecycleController.h"
 #include "inet/routing/leach/Leach.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 
 namespace inet {
 namespace leach {
@@ -107,12 +108,9 @@ void Leach::handleMessageWhenUp(cMessage *msg) {
 
         // schedule another self message every time new one is received by node
         scheduleAt(simTime() + roundDuration, event);
-        // if node is receiving message
-    } else if (check_and_cast<Packet*>(msg)->getTag<PacketProtocolTag>()->getProtocol()
-            == &Protocol::manet) {
-        processMessage(msg);
     } else {
-        throw cRuntimeError("Message not supported %s", msg->getName());
+        // if node is receiving message
+        processMessage(msg);
     }
 }
 
@@ -123,29 +121,7 @@ void Leach::handleMessageWhenDown(cMessage *msg) {
 
 void Leach::handleSelfMessage(cMessage *msg) {
     if (msg == event) {
-            auto ctrlPkt = makeShared<LeachControlPkt>();
-
-            // Filling the LeachControlPkt fields
-            ctrlPkt->setPacketType(CH);
-            Ipv4Address source = (wirelessInterface->getProtocolData<
-                    Ipv4InterfaceData>()->getIPAddress());
-            ctrlPkt->setChunkLength(b(128)); ///size of Hello message in bits
-            ctrlPkt->setSrcAddress(source);
-
-            //new control info for LeachControlPkt
-            auto packet = new Packet("LEACHControlPkt", ctrlPkt);
-            auto addressReq = packet->addTag<L3AddressReq>();
-            addressReq->setDestAddress(Ipv4Address(255, 255, 255, 255));
-            addressReq->setSrcAddress(source); //let's try the limited broadcast
-            packet->addTag<InterfaceReq>()->setInterfaceId(
-                    wirelessInterface->getInterfaceId());
-            packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
-            packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-
-            //broadcast to other nodes the hello message
-            send(packet, "ipOut");
-            packet = nullptr;
-            ctrlPkt = nullptr;
+        broadcastCtrlToNCH();
     } else {
         delete msg;
     }
@@ -154,18 +130,18 @@ void Leach::handleSelfMessage(cMessage *msg) {
 void Leach::processMessage(cMessage *msg) {
     Ipv4Address selfAddr =
             (wirelessInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
-    auto receivedCtrlPkt =
-            staticPtrCast<LeachControlPkt>(
-                    check_and_cast<Packet*>(msg)->peekData<LeachControlPkt>()->dupShared());
+    auto receivedCtrlPkt = dynamic_cast<Packet*>(msg);
+    receivedCtrlPkt->popAtFront<UdpHeader>();
+
     Packet *receivedPkt = check_and_cast<Packet*>(msg);
-    auto &leachControlPkt = receivedPkt->popAtFront<LeachControlPkt>();
+    auto &leachControlPkt = receivedCtrlPkt->peekAtFront<LeachControlPkt>();
     auto packetType = leachControlPkt->getPacketType();
 
     // filter packet based on type and run specific functions
     if (msg->arrivedOn("ipIn")) {
         // first broadcast from CH to NCH nodes
         if (packetType == CH) {
-            Ipv4Address CHAddr = receivedCtrlPkt->getSrcAddress();
+            Ipv4Address CHAddr = leachControlPkt->getSrcAddress();
 
             auto signalPowerInd = receivedPkt->getTag<SignalPowerInd>();
             double rxPower = signalPowerInd->getPower().get();
@@ -175,7 +151,7 @@ void Leach::processMessage(cMessage *msg) {
 
             // ACK packet from NCH node to CH
         } else if (packetType == ACK && leachState == ch) {
-            Ipv4Address nodeAddr = receivedCtrlPkt->getSrcAddress();
+            Ipv4Address nodeAddr = leachControlPkt->getSrcAddress();
 
             addToNodeCHMemory(nodeAddr);
             if (nodeCHMemory.size() > 2) {
@@ -184,12 +160,12 @@ void Leach::processMessage(cMessage *msg) {
 
             // TDMA schedule from CH to NCH
         } else if (packetType == SCH) {
-            Ipv4Address CHAddr = receivedCtrlPkt->getSrcAddress();
+            Ipv4Address CHAddr = leachControlPkt->getSrcAddress();
 
-            int scheduleArraySize = receivedCtrlPkt->getScheduleArraySize();
+            int scheduleArraySize = leachControlPkt->getScheduleArraySize();
             // Traverses through schedule array in packets and sets values into a vector in local node memory
             for (int counter = 0; counter < scheduleArraySize; counter++) {
-                ScheduleEntry tempScheduleEntry = receivedCtrlPkt->getSchedule(
+                ScheduleEntry tempScheduleEntry = leachControlPkt->getSchedule(
                         counter);
                 TDMAScheduleEntry extractedTDMAScheduleEntry;
                 extractedTDMAScheduleEntry.nodeAddress =
@@ -213,7 +189,7 @@ void Leach::processMessage(cMessage *msg) {
             }
             // Data packet from NCH to CH
         } else if (packetType == DATA) {
-            Ipv4Address NCHAddr = receivedCtrlPkt->getSrcAddress();
+            Ipv4Address NCHAddr = leachControlPkt->getSrcAddress();
 
             sendDataToBS(selfAddr);
 
@@ -303,6 +279,34 @@ void Leach::setLeachState(LeachState ls) {
     leachState = ls;
 }
 
+void Leach::broadcastCtrlToNCH() {
+    Packet *udpPacket = new Packet("LeachCtrlPkt");
+
+    auto udpHeader = makeShared<UdpHeader>();
+    udpHeader->setSourcePort(LEACH_UDP_PORT);
+    udpHeader->setDestinationPort(LEACH_UDP_PORT);
+    udpHeader->setCrcMode(CRC_DISABLED);
+    udpPacket->insertAtFront(udpHeader);
+
+    auto ctrlPayload = makeShared<LeachControlPkt>();
+    ctrlPayload->setPacketType(CH);
+    ctrlPayload->setChunkLength(b(128));
+    Ipv4Address source =
+            (wirelessInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+    ctrlPayload->setSrcAddress(source);
+    udpPacket->insertAtBack(ctrlPayload);
+
+    auto addressReq = udpPacket->addTag<L3AddressReq>();
+    addressReq->setDestAddress(Ipv4Address(255, 255, 255, 255));
+    addressReq->setSrcAddress(source);
+    udpPacket->addTag<InterfaceReq>()->setInterfaceId(
+            wirelessInterface->getInterfaceId());
+    udpPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
+    udpPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+
+    send(udpPacket, "ipOut");
+}
+
 // Send broadcast acknowledgement to CH from non CH nodes
 void Leach::sendAckToCH(Ipv4Address nodeAddr, Ipv4Address CHAddr) {
     auto ackPkt = makeShared<LeachAckPkt>();
@@ -353,27 +357,35 @@ void Leach::sendSchToNCH(Ipv4Address selfAddr) {
 // Sends data to CH node
 void Leach::sendDataToCH(Ipv4Address nodeAddr, Ipv4Address CHAddr,
         double TDMAslot) {
-    auto dataPkt = makeShared<LeachDataPkt>();
-    dataPkt->setPacketType(DATA);
+    Packet *udpPacket = new Packet("LeachDataPkt");
+
+    auto udpHeader = makeShared<UdpHeader>();
+    udpHeader->setSourcePort(LEACH_UDP_PORT);
+    udpHeader->setDestinationPort(LEACH_UDP_PORT);
+    udpHeader->setCrcMode(CRC_DISABLED);
+    udpPacket->insertAtFront(udpHeader);
+
+    auto leachData = makeShared<LeachDataPkt>();
+    leachData->setPacketType(DATA);
+
+    leachData->setChunkLength(b(128));
     double temperature = (double) rand() / RAND_MAX;
     double humidity = (double) rand() / RAND_MAX;
+    leachData->setTemperature(temperature);
+    leachData->setHumidity(humidity);
+    leachData->setSrcAddress(nodeAddr);
+    udpPacket->insertAtBack(leachData);
 
-    dataPkt->setChunkLength(b(128));
-    dataPkt->setTemperature(temperature);
-    dataPkt->setHumidity(humidity);
-    dataPkt->setSrcAddress(nodeAddr);
-
-    auto dataPacket = new Packet("LEACHDataPkt", dataPkt);
-    auto addressReq = dataPacket->addTag<L3AddressReq>();
+    auto addressReq = udpPacket->addTag<L3AddressReq>();
 
     addressReq->setDestAddress(getIdealCH(nodeAddr, CHAddr));
     addressReq->setSrcAddress(nodeAddr);
-    dataPacket->addTag<InterfaceReq>()->setInterfaceId(
+    udpPacket->addTag<InterfaceReq>()->setInterfaceId(
             wirelessInterface->getInterfaceId());
-    dataPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
-    dataPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    udpPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
+    udpPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
 
-    sendDelayed(dataPacket, TDMAslot, "ipOut");
+    sendDelayed(udpPacket, TDMAslot, "ipOut");
 }
 
 // CH sends data to BS
@@ -396,6 +408,10 @@ void Leach::sendDataToBS(Ipv4Address CHAddr) {
 
     sendDelayed(bsPacket, TDMADelayCounter, "ipOut");
     setLeachState(nch);     // Set state for GUI visualization
+}
+
+void Leach::sendUdpPacket(Packet *packet) {
+    send(packet, "ipOut");
 }
 
 // Selects the ideal CH based on RSSI signal
