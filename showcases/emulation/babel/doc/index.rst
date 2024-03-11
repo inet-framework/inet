@@ -15,9 +15,29 @@ the Babel routing protocol (Babel daemon). We'll run a simulation of a mobile ad
 hoc network, where mobility and wireless connectivity will be simulated using
 INET, and the routes will be managed by multiple instances of the Babel daemon.
 
-Note that the emulation example only runs on Linux. For a comprehensive
+The emulation example only runs on Linux. For a comprehensive
 understanding of emulation in INET, read the :doc:`Emulation section
 </users-guide/ch-emulation>` in the User's Guide.
+
+.. note:: The CAP_SYS_ADMIN privilege is required for using network namespaces in INET. Refer to the :ref:`User's Guide <ug:sec:emulation:preparation>` for instructions.
+
+.. note:: The CAP_SYS_ADMIN privilege is required for using network namespaces in INET. See :ref:`here <ug:sec:emulation:preparation>` for instructions.
+
+.. .. note:: The CAP_SYS_ADMIN privilege is required for using network namespaces in INET. Run the following commands to add the CAP_SYS_ADMIN privilege to opp_run:
+
+..          .. code-block:: text
+         
+..             sudo setcap cap_sys_admin+ep /${your-omnetpp-root}/bin/opp_run_release
+..             sudo setcap cap_sys_admin+ep /${your-omnetpp-root}/bin/opp_run_dbg
+
+..          To remove extra privileges after you're finished using network namespaces, use the following commands:
+
+..          .. code-block:: text
+         
+..             sudo setcap -r /${your-omnetpp-root}/bin/opp_run_release
+..             sudo setcap -r /${your-omnetpp-root}/bin/opp_run_dbg
+          
+.. The capabilities need to be set on the executable only once, and they are presistent.
 
 | INET version: ``4.1``
 | Source files location: `inet/showcases/emulation/babel <https://github.com/inet-framework/inet/tree/master/showcases/emulation/babel>`__

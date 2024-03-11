@@ -144,12 +144,13 @@ changed in the *Project \| Project Features...* dialog in the IDE.)
    (type ``SOCK_RAW``), which, on many systems, is only allowed for
    processes that have root (administrator) privileges.
 
-Also, in order to be able to send packets through raw sockets
-applications require special permissions. There
-are two ways to achieve this under Linux.
-
+Also, in order to be able to send packets through raw sockets or use network namespaces,
+applications require special permissions. 
 The suggested solution is to use setcap to set the application
-permissions:
+permissions. To use raw sockets (required by modules with ``ExtLower~`` prefix), the following commands add the necessary permissions:
+
+.. There
+   are two ways to achieve this under Linux.
 
 .. code::
 
@@ -157,19 +158,26 @@ permissions:
    $ sudo setcap cap_net_raw,cap_net_admin=eip /path/to/opp_run_dbg
    $ sudo setcap cap_net_raw,cap_net_admin=eip /path/to/opp_run_release
 
-This solution makes running the examples from the IDE possible.
-Alternatively, the application can be started with root privileges from
-command line:
-
+For using network namespaces (required by modules with ``ExtUpper~`` prefix), the following commands add permissions:
 
 .. code::
 
-   $ sudo `inet_dbg -p -u Cmdenv`
+   $ sudo setcap cap_sys_admin+ep /path/to/opp_run
+   $ sudo setcap cap_sys_admin+ep /path/to/opp_run_dbg
+   $ sudo setcap cap_sys_admin+ep /path/to/opp_run_release
 
-.. note:: In any case, it's generally a bad idea to start the IDE as superuser.
-          Doing so may silently change the file ownership for certain IDE
-          configuration files, and it may prevent the IDE to start up for the
-          normal user afterwards.
+This solution makes running the examples from the IDE possible.
+
+.. note:: Alternatively, the application can be started with root privileges from command line:
+
+   .. code::
+
+      $ sudo `inet_dbg -p -u Cmdenv`
+
+   However, this is not recommended. In any case, it's generally a bad idea to start the IDE as superuser.
+   Doing so may silently change the file ownership for certain IDE
+   configuration files, and it may prevent the IDE to start up for the
+   normal user afterwards.
 
 .. _ug:sec:emulation:configuring:
 
