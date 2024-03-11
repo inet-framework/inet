@@ -83,6 +83,7 @@ network = LargeNet
 
 **.visualize = true
 
+**.switch*.llc.typename = "Ieee8022Llc"
 **.switch*.eth[*].encap.typename = "EthernetEncapsulation"
 
 **.switch1.**.address="AAAAAA000001"
