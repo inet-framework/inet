@@ -35,7 +35,7 @@ double RayleighFading::computePathLoss(mps propagationSpeed, Hz frequency, m dis
     double freeSpacePathLoss = computeFreeSpacePathLoss(waveLength, distance, alpha, systemLoss);
     double x = normal(0, 1);
     double y = normal(0, 1);
-    return freeSpacePathLoss * 0.5 * (x * x + y * y);
+    return freeSpacePathLoss * sqrt(x * x + y * y);
 }
 
 } // namespace physicallayer
