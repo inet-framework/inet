@@ -15,7 +15,7 @@
 #include "inet/common/socket/ISocket.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/transportlayer/contract/udp/UdpControlInfo.h"
+#include "inet/transportlayer/contract/udp/UdpCommand_m.h"
 
 namespace inet {
 
@@ -267,7 +267,7 @@ class INET_API UdpSocket : public ISocket
     //@{
     /**
      * Returns true if the message belongs to this socket instance (message
-     * has a UdpControlInfo as getControlInfo(), and the socketId in it matches
+     * has an UdpCommand as getControlInfo(), and the socketId in it matches
      * that of the socket.)
      */
     virtual bool belongsToSocket(cMessage *msg) const override;

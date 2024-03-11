@@ -28,8 +28,8 @@ simple ExtLowerUdp like IUdp
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     gates:
-        input appIn @labels(UdpControlInfo/down);
+        input appIn @labels(UdpCommand/down);
         input ipIn @labels(UdpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up) @loose;
-        output appOut @labels(UdpControlInfo/up);
+        output appOut @labels(UdpCommand/up);
         output ipOut @labels(UdpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down) @loose;
 }

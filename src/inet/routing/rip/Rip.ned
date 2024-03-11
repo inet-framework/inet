@@ -91,7 +91,7 @@ simple Rip like IApp
         @statistic[badResponse](title="bad response received"; source=badResponse; record=count,"vector(constant1)"; interpolationmode=none);
         @statistic[numRoutes](title="number of routes"; source=numRoutes; record=last,vector; interpolationmode=none);
     gates:
-        input socketIn @labels(UdpControlInfo/up);
-        output socketOut @labels(UdpControlInfo/down);
+        input socketIn @labels(UdpCommand/up);
+        output socketOut @labels(UdpCommand/down);
 }
 
