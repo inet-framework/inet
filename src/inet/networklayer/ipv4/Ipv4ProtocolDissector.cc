@@ -36,7 +36,8 @@ void Ipv4ProtocolDissector::dissect(Packet *packet, const Protocol *protocol, IC
         // TODO Fragmentation
         callback.dissectPacket(packet, nullptr);
     }
-    if (incorrect && packet->getDataLength() > b(0))
+    if (packet->getDataLength() > b(0))
+        // Transport layer padding
         callback.dissectPacket(packet, nullptr);
     ASSERT(incorrect || packet->getDataLength() == b(0));
     packet->setFrontOffset(ipv4EndOffset);
