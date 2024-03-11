@@ -156,3 +156,19 @@
 .,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 24ec-79f6/tplx;46d9-4a08/~tNl;5dff-04db/~tND;8a5b-9b21/tyf, PASS, EthernetMac
 .,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 2a42-7fd4/tplx;46d9-4a08/~tNl;5dff-04db/~tND;754a-5ee7/tyf, PASS, EthernetMac
 
+.,  -f ethernet-nonstandardspeed.ini -r '$datarate==500kbps && $duplex==true ', , 594e-364b/tplx;0372-864c/~tNl;d42b-5170/~tND;deb8-da23/tyf, PASS, EthernetMac
+.,  -f ethernet-nonstandardspeed.ini -r '$datarate==500kbps && $duplex==false', , ae4d-3946/tplx;27e3-a549/~tNl;2bba-0ead/~tND;4bac-bbfe/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-nonstandardspeed.ini -r '$datarate==5Mbps   && $duplex==true ', , c208-a550/tplx;c754-0add/~tNl;924c-2442/~tND;feae-8747/tyf, PASS, EthernetMac
+.,  -f ethernet-nonstandardspeed.ini -r '$datarate==5Mbps   && $duplex==false', , 767d-facb/tplx;167e-d47d/~tNl;4e74-10da/~tND;205a-4015/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-nonstandardspeed.ini -r '$datarate==50Mbps  && $duplex==true ', , e750-206e/tplx;5d78-1688/~tNl;0dfe-7ab6/~tND;c3d1-3720/tyf, PASS, EthernetMac
+.,  -f ethernet-nonstandardspeed.ini -r '$datarate==50Mbps  && $duplex==false', , 89dd-9a25/tplx;b2f5-f24a/~tNl;3c90-c66b/~tND;5558-cfe4/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-nonstandardspeed.ini -r '$datarate==500Mbps && $duplex==true ', , 8e8e-b190/tplx;0e63-81df/~tNl;1d06-9191/~tND;f5c4-83dd/tyf, PASS, EthernetMac
+.,  -f ethernet-nonstandardspeed.ini -r '$datarate==500Mbps && $duplex==false', , 6561-f103/tplx;4a2e-c821/~tNl;cf96-a933/~tND;f57a-925a/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-nonstandardspeed.ini -r '$datarate==5Gbps   && $duplex==true ', , 075e-84ca/tplx;f034-588d/~tNl;1344-50ea/~tND;e176-17e7/tyf, PASS, EthernetMac
+.,  -f ethernet-nonstandardspeed.ini -r '$datarate==5Gbps   && $duplex==false', , 440f-48d2/tplx;968b-aa6f/~tNl;20ab-844f/~tND;35a9-4790/tyf, ERROR, EthernetCsmaMac  # <!> Error: 5e+09 bps Ethernet only supports full-duplex links
+.,  -f ethernet-nonstandardspeed.ini -r '$datarate==20Gbps  && $duplex==true ', , ba9f-8f59/tplx;7b92-4267/~tNl;99a5-f34d/~tND;61da-524b/tyf, PASS, EthernetMac
+.,  -f ethernet-nonstandardspeed.ini -r '$datarate==30Gbps  && $duplex==true ', , 3524-db7d/tplx;6652-ad44/~tNl;e1f3-4eff/~tND;2fc8-546f/tyf, PASS, EthernetMac
+.,  -f ethernet-nonstandardspeed.ini -r '$datarate==50Gbps  && $duplex==true ', , ba9a-0f9d/tplx;f8da-ab54/~tNl;1040-ff48/~tND;82b4-6827/tyf, PASS, EthernetMac
+.,  -f ethernet-nonstandardspeed.ini -r '$datarate==150Gbps && $duplex==true ', , 4c3f-b47a/tplx;0beb-ad7e/~tNl;4de2-073b/~tND;9028-a818/tyf, PASS, EthernetMac
+.,  -f ethernet-nonstandardspeed.ini -r '$datarate==300Gbps && $duplex==true ', , 55af-53ff/tplx;0f8f-e95a/~tNl;d294-200a/~tND;8011-6fa5/tyf, PASS, EthernetMac
+.,  -f ethernet-nonstandardspeed.ini -r '$datarate==500Gbps && $duplex==true ', , 23b0-9fd7/tplx;758b-a8fc/~tNl;f717-59c1/~tND;23a5-e7bc/tyf, PASS, EthernetMac
