@@ -42,11 +42,12 @@ void ExtEthernetTapDevice::initialize(int stage)
         device = par("device").stdstringValue();
         packetNameFormat = par("packetNameFormat");
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
-        openTap(device);
         numSent = numReceived = 0;
         WATCH(numSent);
         WATCH(numReceived);
     }
+    else if (stage == INITSTAGE_EXTERNAL)
+        openTap(device);
 }
 
 void ExtEthernetTapDevice::handleMessage(cMessage *msg)
