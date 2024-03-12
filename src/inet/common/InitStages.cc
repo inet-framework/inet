@@ -13,6 +13,9 @@ namespace inet {
 
 Define_InitStage(LOCAL);
 
+Define_InitStage(EXTERNAL);
+Define_InitStage_Dependency(EXTERNAL, LOCAL);
+
 Define_InitStage(CLOCK);
 Define_InitStage_Dependency(CLOCK, LOCAL);
 
