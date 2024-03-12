@@ -182,8 +182,9 @@ cEvent *RealTimeScheduler::takeNextEvent()
     else {
         // we're behind -- customized versions of this class may
         // alert if we're too much behind, whatever that means
-        int64_t diffTime = curTime - targetTime;
-        EV_TRACE << "We are behind: " << diffTime * 1e-9 << " seconds\n";
+        // NOTE: this is commented out because it generates too much noise by default
+//        int64_t diffTime = curTime - targetTime;
+//        EV_TRACE << "We are behind: " << diffTime * 1e-9 << " seconds\n";
     }
     cEvent *tmp = sim->getFES()->removeFirst();
     ASSERT(tmp == event);
