@@ -1,0 +1,39 @@
+%description:
+
+Tests that ending a simulation with time limit terminates an external process.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.common.ExternalProcess;
+
+network TestNetwork
+{
+    parameters:
+        int numProcesses;
+    submodules:
+        externalProcess[numProcesses]: ExternalProcess;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+scheduler-class = "inet::RealTimeScheduler"
+
+sim-time-limit = 1s
+
+*.numProcesses = 1
+*.externalProcess[0].command = "ping index.hu"
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+64 bytes .*? icmp_seq=1 ttl=58 time=.*? ms
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

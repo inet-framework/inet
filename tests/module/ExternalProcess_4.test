@@ -1,0 +1,53 @@
+%description:
+
+Tests running multiple simulation runs in the same process and each time restarting the external process.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.common.ExternalProcess;
+
+network TestNetwork
+{
+    parameters:
+        int numProcesses;
+    submodules:
+        externalProcess[numProcesses]: ExternalProcess;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+scheduler-class = "inet::RealTimeScheduler"
+
+sim-time-limit = 1s
+
+*.numProcesses = ${1,1,1,1}
+*.externalProcess[0].command = "ping index.hu"
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+Preparing for running configuration General, run #0...
+.*?
+64 bytes .*? icmp_seq=1 ttl=58 time=.*? ms
+.*?
+Preparing for running configuration General, run #1...
+.*?
+64 bytes .*? icmp_seq=1 ttl=58 time=.*? ms
+.*?
+Preparing for running configuration General, run #2...
+.*?
+64 bytes .*? icmp_seq=1 ttl=58 time=.*? ms
+.*?
+Preparing for running configuration General, run #3...
+.*?
+64 bytes .*? icmp_seq=1 ttl=58 time=.*? ms
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

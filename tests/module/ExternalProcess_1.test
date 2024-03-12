@@ -1,0 +1,40 @@
+%description:
+
+Tests running a simulation until an external process terminates.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.common.ExternalProcess;
+
+network TestNetwork
+{
+    parameters:
+        int numProcesses;
+    submodules:
+        externalProcess[numProcesses]: ExternalProcess;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+scheduler-class = "inet::RealTimeScheduler"
+
+*.externalProcess[*].printStdout = true
+
+*.numProcesses = 1
+*.externalProcess[0].command = "ping -c 1 index.hu"
+*.externalProcess[0].onExit = "terminateSimulation"
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+1 packets transmitted, 1 received, 0% packet loss, time .*?ms
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
