@@ -42,11 +42,12 @@ void ExtEthernetSocket::initialize(int stage)
         device = par("device");
         packetNameFormat = par("packetNameFormat");
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
-        openSocket();
         numSent = numReceived = 0;
         WATCH(numSent);
         WATCH(numReceived);
     }
+    else if (stage == INITSTAGE_EXTERNAL)
+        openSocket();
 }
 
 void ExtEthernetSocket::handleMessage(cMessage *message)
