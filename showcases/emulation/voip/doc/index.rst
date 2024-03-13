@@ -22,9 +22,13 @@ send realistic VoIP traffic (contents of an audio file) over the host network.
 The received audio is saved to a file, which can be compared to the original to
 assess the impact of network transmission on audio quality.
 
-Please note that the ``VoipStream`` and ``NetworkEmulationSupport`` features of the INET
-Framework must be enabled for this demonstration (they are disabled by default),
-and it is only compatible with Linux systems.
+.. note:: - The ``VoipStream`` and ``NetworkEmulationSupport`` features of
+            the INET Framework must be enabled for this demonstration (they are disabled by
+            default), and it is only compatible with Linux systems. 
+          - Additionally, The
+            CAP_NET_RAW and CAP_NET_ADMIN privileges are required for using raw sockets in
+            INET. Refer to the :ref:`User's Guide <ug:sec:emulation:preparation>` for
+            instructions.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/emulation/voip <https://github.com/inet-framework/inet/tree/master/showcases/emulation/voip>`__

@@ -7,6 +7,10 @@ Goals
 This showcase builds upon the previous one, :doc:`index`, and demonstrates how
 setting up the virtual network can be vastly simplified using Mininet.
 
+.. note:: The CAP_NET_RAW and CAP_NET_ADMIN privileges are required for using raw sockets in INET. 
+          Refer to the :ref:`User's Guide <ug:sec:emulation:preparation>` for
+          instructions.
+
 | INET version: ``4.5``
 | Source files location: `inet/showcases/emulation/voip <https://github.com/inet-framework/inet/tree/master/showcases/emulation/voip>`__
 

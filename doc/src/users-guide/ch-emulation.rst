@@ -168,16 +168,9 @@ For using network namespaces (required by modules with ``ExtUpper~`` prefix), th
 
 This solution makes running the examples from the IDE possible.
 
-.. note:: Alternatively, the application can be started with root privileges from command line:
-
-   .. code::
-
-      $ sudo `inet_dbg -p -u Cmdenv`
-
-   However, this is not recommended. In any case, it's generally a bad idea to start the IDE as superuser.
-   Doing so may silently change the file ownership for certain IDE
-   configuration files, and it may prevent the IDE to start up for the
-   normal user afterwards.
+.. note:: Alternatively, the simulation could be run with ``sudo``. However, this
+   practice is not recommended as it may result in certain files' ownership
+   being changed to ``root``.
 
 .. _ug:sec:emulation:configuring:
 

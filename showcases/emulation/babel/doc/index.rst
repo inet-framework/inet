@@ -21,8 +21,6 @@ understanding of emulation in INET, read the :doc:`Emulation section
 
 .. note:: The CAP_SYS_ADMIN privilege is required for using network namespaces in INET. Refer to the :ref:`User's Guide <ug:sec:emulation:preparation>` for instructions.
 
-.. note:: The CAP_SYS_ADMIN privilege is required for using network namespaces in INET. See :ref:`here <ug:sec:emulation:preparation>` for instructions.
-
 .. .. note:: The CAP_SYS_ADMIN privilege is required for using network namespaces in INET. Run the following commands to add the CAP_SYS_ADMIN privilege to opp_run:
 
 ..          .. code-block:: text
