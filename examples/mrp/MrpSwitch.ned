@@ -1,7 +1,7 @@
 // Copyright (C) 2024 Daniel Zeitler
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-package inet.tests.mrp;
+package inet.examples.mrp;
 
 
 import inet.applications.contract.IApp;

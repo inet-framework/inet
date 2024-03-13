@@ -1,9 +1,6 @@
 // Copyright (C) 2024 Daniel Zeitler
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "InterconnectionNode.h"
-
-#include "../mediaredundancynode/MediaRedundancyNode.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
@@ -13,33 +10,32 @@
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/linklayer/mrp/common/MrpPdu_m.h"
+#include "MrpInterconnection.h"
+#include "../mediaredundancy/Mrp.h"
 
 namespace inet {
 
-Define_Module(InterconnectionNode);
+Define_Module(MrpInterconnection);
 
-InterconnectionNode::InterconnectionNode() {
+MrpInterconnection::MrpInterconnection() {
 }
 
-InterconnectionNode::~InterconnectionNode() {
+MrpInterconnection::~MrpInterconnection() {
     cancelAndDelete(inLinkStatusPollTimer);
     cancelAndDelete(inLinkTestTimer);
     cancelAndDelete(inTopologyChangeTimer);
     cancelAndDelete(inLinkDownTimer);
     cancelAndDelete(inLinkUpTimer);
-    //MediaRedundancyNode::~MediaRedundancyNode();
+    //Mrp::~Mrp();
 }
 
-void InterconnectionNode::initialize(int stage) {
-
-    MediaRedundancyNode::initialize(stage);
-
+void MrpInterconnection::initialize(int stage) {
+    Mrp::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        expectedRole = CLIENT;
-        int inRoleById = par("inRole");
-        inRole = static_cast<inRoleState>(inRoleById);
-        interConnectionID = par("interConnectionID");
-        interconnectionPort = par("InterconnectionPort");
+        interconnectionName = par("InterconnectionName").stdstringValue();
+        inRole = static_cast<inRoleState>(par("interconnectionRole").intValue());
+        interConnectionID = par("interconnectionID");
+        interconnectionPort = par("interconnectionPort");
         linkCheckEnabled = par("linkCheckEnabled");
         ringCheckEnabled = par("ringCheckEnabled");
 
@@ -52,14 +48,14 @@ void InterconnectionNode::initialize(int stage) {
         InStatusPollSignal = registerSignal("InStatusPollSignal");
         ReceivedInStatusPollSignal = registerSignal("ReceivedInStatusPollSignal");
     }
-    if (stage == INITSTAGE_LAST) {
+    if (stage == INITSTAGE_LINK_LAYER) {
+        EV_DETAIL << "Initialize Interconnection Stage link layer" << EV_ENDL;
         setInterconnectionInterface(interconnectionPort);
-        interconnectionPort = interconnectionInterface->getInterfaceId();
         initInterconnectionPort();
     }
 }
 
-void InterconnectionNode::initInterconnectionPort() {
+void MrpInterconnection::initInterconnectionPort() {
     if (interconnectionInterface == nullptr)
         setInterconnectionInterface(interconnectionPort);
     auto ifd = getPortInterfaceDataForUpdate(interconnectionInterface->getInterfaceId());
@@ -73,8 +69,8 @@ void InterconnectionNode::initInterconnectionPort() {
               << EV_ENDL;
 }
 
-void InterconnectionNode::start() {
-    MediaRedundancyNode::start();
+void MrpInterconnection::start() {
+    Mrp::start();
     setTimingProfile(timingProfile);
     intopologyChangeRepeatCount = inTopologyChangeMaxRepeatCount - 1;
     inLinkStatusPollCount = inLinkStatusPollMaxCount - 1;
@@ -82,7 +78,6 @@ void InterconnectionNode::start() {
     inTopologyChangeTimer = new cMessage("inTopologyChangeTimer");
     inLinkUpTimer = new cMessage("inLinkUpTimer");
     inLinkDownTimer = new cMessage("inLinkDownTimer");
-
     if (inRole == INTERCONNECTION_MANAGER)
         mimInit();
     else if (inRole == INTERCONNECTION_CLIENT)
@@ -91,20 +86,20 @@ void InterconnectionNode::start() {
         throw cRuntimeError("Unknown Interconnection Role");
 }
 
-void InterconnectionNode::stop() {
+void MrpInterconnection::stop() {
     cancelAndDelete(inLinkStatusPollTimer);
     cancelAndDelete(inLinkTestTimer);
     cancelAndDelete(inTopologyChangeTimer);
     cancelAndDelete(inLinkDownTimer);
     cancelAndDelete(inLinkUpTimer);
-    MediaRedundancyNode::stop();
+    Mrp::stop();
 }
 
-void InterconnectionNode::read() {
+void MrpInterconnection::read() {
     //todo
 }
 
-void InterconnectionNode::mimInit() {
+void MrpInterconnection::mimInit() {
     mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPort, static_cast<MacAddress>(MC_INCONTROL), vlanID);
     mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPort, static_cast<MacAddress>(MC_INCONTROL), vlanID);
     //MIM may not forward mrp frames received on Interconnection Port to Ring, adding Filter
@@ -128,7 +123,7 @@ void InterconnectionNode::mimInit() {
     mauTypeChangeInd(interconnectionPort, getPortNetworkInterface(interconnectionPort)->getState());
 }
 
-void InterconnectionNode::micInit() {
+void MrpInterconnection::micInit() {
     if (ringCheckEnabled) {
         mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPort, static_cast<MacAddress>(MC_INTEST), vlanID);
         mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPort, static_cast<MacAddress>(MC_INTEST), vlanID);
@@ -153,20 +148,18 @@ void InterconnectionNode::micInit() {
     mauTypeChangeInd(interconnectionPort, getPortNetworkInterface(interconnectionPort)->getState());
 }
 
-void InterconnectionNode::setInterconnectionInterface(int InterfaceIndex) {
+void MrpInterconnection::setInterconnectionInterface(int InterfaceIndex) {
     interconnectionInterface = interfaceTable->getInterface(InterfaceIndex);
     if (interconnectionInterface->isLoopback()) {
         interconnectionInterface = nullptr;
+        EV_DEBUG << "Chosen Interface is Loopback-Interface" << EV_ENDL;
     } else {
-        auto ifd = getPortInterfaceDataForUpdate(interconnectionInterface->getInterfaceId());
-        ifd->setRole(MrpInterfaceData::INTERCONNECTION);
-        ifd->setState(MrpInterfaceData::BLOCKED);
-        ifd->setContinuityCheck(linkCheckEnabled);
+        interconnectionPort = interconnectionInterface->getInterfaceId();
     }
 }
 
-void InterconnectionNode::setTimingProfile(int maxRecoveryTime) {
-    MediaRedundancyNode::setTimingProfile(maxRecoveryTime);
+void MrpInterconnection::setTimingProfile(int maxRecoveryTime) {
+    Mrp::setTimingProfile(maxRecoveryTime);
     switch (maxRecoveryTime) {
     case 500:
         inLinkChangeInterval = 20;
@@ -197,26 +190,28 @@ void InterconnectionNode::setTimingProfile(int maxRecoveryTime) {
     }
 }
 
-void InterconnectionNode::handleStartOperation(LifecycleOperation *operation) {
+void MrpInterconnection::handleStartOperation(LifecycleOperation *operation) {
+    //start();
 }
 
-void InterconnectionNode::handleStopOperation(LifecycleOperation *operation) {
+void MrpInterconnection::handleStopOperation(LifecycleOperation *operation) {
     stop();
 }
 
-void InterconnectionNode::handleCrashOperation(LifecycleOperation *operation) {
+void MrpInterconnection::handleCrashOperation(LifecycleOperation *operation) {
     stop();
 }
 
-void InterconnectionNode::handleMessageWhenUp(cMessage *msg) {
+void MrpInterconnection::handleMessageWhenUp(cMessage *msg) {
     if (!msg->isSelfMessage()) {
         msg->setKind(2);
         EV_INFO << "Received Message on InterConnectionNode, Rescheduling:"
                        << EV_FIELD(msg) << EV_ENDL;
-        processingDelay = truncnormal(processingDelayMean, processingDelayDev);
-        scheduleAt(simTime() + SimTime(processingDelay, SIMTIME_US), msg);
+        processingDelay = SimTime(par("processingDelay").doubleValue(), SIMTIME_US);
+        scheduleAt(simTime() + processingDelay, msg);
     } else {
         EV_INFO << "Received Self-Message:" << EV_FIELD(msg) << EV_ENDL;
+        EV_DEBUG << "State:" << EV_FIELD(inState) << EV_ENDL;
         if (msg == inLinkStatusPollTimer)
             handleInLinkStatusPollTimer();
         else if (msg == inLinkTestTimer)
@@ -270,7 +265,7 @@ void InterconnectionNode::handleMessageWhenUp(cMessage *msg) {
     }
 }
 
-void InterconnectionNode::handleInTestTimer() {
+void MrpInterconnection::handleInTestTimer() {
     switch (inState) {
     case CHK_IO:
         interconnTestReq(inTestDefaultInterval);
@@ -297,7 +292,7 @@ void InterconnectionNode::handleInTestTimer() {
     }
 }
 
-void InterconnectionNode::handleInLinkStatusPollTimer() {
+void MrpInterconnection::handleInLinkStatusPollTimer() {
     if (inLinkStatusPollCount > 0) {
         inLinkStatusPollCount--;
         scheduleAt(simTime() + SimTime(inLinkStatusPollInterval, SIMTIME_MS), inLinkStatusPollTimer);
@@ -307,7 +302,7 @@ void InterconnectionNode::handleInLinkStatusPollTimer() {
     setupInterconnLinkStatusPollReq();
 }
 
-void InterconnectionNode::handleInTopologyChangeTimer() {
+void MrpInterconnection::handleInTopologyChangeTimer() {
     if (intopologyChangeRepeatCount > 0) {
         setupInterconnTopologyChangeReq(intopologyChangeRepeatCount * inTopologyChangeInterval);
         intopologyChangeRepeatCount--;
@@ -319,7 +314,7 @@ void InterconnectionNode::handleInTopologyChangeTimer() {
     }
 }
 
-void InterconnectionNode::handleInLinkUpTimer() {
+void MrpInterconnection::handleInLinkUpTimer() {
     inLinkChangeCount--;
     switch (inState) {
     case PT:
@@ -343,7 +338,7 @@ void InterconnectionNode::handleInLinkUpTimer() {
     }
 }
 
-void InterconnectionNode::handleInLinkDownTimer() {
+void MrpInterconnection::handleInLinkDownTimer() {
     inLinkChangeCount--;
     switch (inState) {
     case AC_STAT1:
@@ -367,7 +362,7 @@ void InterconnectionNode::handleInLinkDownTimer() {
     }
 }
 
-void InterconnectionNode::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
+void MrpInterconnection::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
     if (RingPort == interconnectionPort) {
         switch (inState) {
         case AC_STAT1:
@@ -454,11 +449,11 @@ void InterconnectionNode::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
             throw cRuntimeError("Unknown Node State");
         }
     } else {
-        MediaRedundancyNode::mauTypeChangeInd(RingPort, LinkState);
+        Mrp::mauTypeChangeInd(RingPort, LinkState);
     }
 }
 
-void InterconnectionNode::interconnTopologyChangeInd(MacAddress SourceAddress, double Time, uint16_t InID, int RingPort, Packet *packet) {
+void MrpInterconnection::interconnTopologyChangeInd(MacAddress SourceAddress, double Time, uint16_t InID, int RingPort, Packet *packet) {
     if (InID == interConnectionID) {
         auto offset = B(2);
         const auto &firstTLV = packet->peekDataAt<inTopologyChangeFrame>(offset);
@@ -528,7 +523,7 @@ void InterconnectionNode::interconnTopologyChangeInd(MacAddress SourceAddress, d
     }
 }
 
-void InterconnectionNode::interconnLinkChangeInd(uint16_t InID, uint16_t LinkState, int RingPort, Packet *packet) {
+void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, uint16_t LinkState, int RingPort, Packet *packet) {
     if (InID == interConnectionID) {
         auto firstTLV = packet->peekDataAt<inLinkChangeFrame>(B(2));
         emit(ReceivedInChangeSignal, firstTLV->getInterval());
@@ -611,7 +606,7 @@ void InterconnectionNode::interconnLinkChangeInd(uint16_t InID, uint16_t LinkSta
     }
 }
 
-void InterconnectionNode::interconnLinkStatusPollInd(uint16_t InID, int RingPort, Packet *packet) {
+void MrpInterconnection::interconnLinkStatusPollInd(uint16_t InID, int RingPort, Packet *packet) {
     if (InID == interConnectionID) {
         b offset = B(2);
         auto firstTLV = packet->peekDataAt<inLinkStatusPollFrame>(offset);
@@ -660,7 +655,7 @@ void InterconnectionNode::interconnLinkStatusPollInd(uint16_t InID, int RingPort
     }
 }
 
-void InterconnectionNode::interconnTestInd(MacAddress SourceAddress, int RingPort, uint16_t InID, Packet *packet) {
+void MrpInterconnection::interconnTestInd(MacAddress SourceAddress, int RingPort, uint16_t InID, Packet *packet) {
     if (InID == interConnectionID) {
         b offset = B(2);
         auto firstTLV = packet->peekDataAt<inTestFrame>(offset);
@@ -735,7 +730,7 @@ void InterconnectionNode::interconnTestInd(MacAddress SourceAddress, int RingPor
     }
 }
 
-void InterconnectionNode::interconnTestReq(double Time) {
+void MrpInterconnection::interconnTestReq(double Time) {
     if (!inLinkTestTimer->isScheduled()) {
         scheduleAt(simTime() + SimTime(Time, SIMTIME_MS), inLinkTestTimer);
         setupInterconnTestReq();
@@ -743,7 +738,7 @@ void InterconnectionNode::interconnTestReq(double Time) {
         EV_DETAIL << "inTest already scheduled" << EV_ENDL;
 }
 
-void InterconnectionNode::setupInterconnTestReq() {
+void MrpInterconnection::setupInterconnTestReq() {
     //Create MRP-PDU according MRP_InTest
     auto Version = makeShared<mrpVersionField>();
     auto InTestTLV1 = makeShared<inTestFrame>();
@@ -808,7 +803,7 @@ void InterconnectionNode::setupInterconnTestReq() {
     emit(InTestSignal, lastInTestFrameSent);
 }
 
-void InterconnectionNode::interconnTopologyChangeReq(double Time) {
+void MrpInterconnection::interconnTopologyChangeReq(double Time) {
     if (Time == 0) {
         clearLocalFDB();
         setupInterconnTopologyChangeReq(inTopologyChangeMaxRepeatCount * Time);
@@ -819,7 +814,7 @@ void InterconnectionNode::interconnTopologyChangeReq(double Time) {
         EV_DETAIL << "inTopologyChangeTimer already scheduled" << EV_ENDL;
 }
 
-void InterconnectionNode::setupInterconnTopologyChangeReq(double Time) {
+void MrpInterconnection::setupInterconnTopologyChangeReq(double Time) {
     //Create MRP-PDU according MRP_InTopologyChange
     auto Version = makeShared<mrpVersionField>();
     auto InTopologyChangeTLV = makeShared<inTopologyChangeFrame>();
@@ -865,7 +860,7 @@ void InterconnectionNode::setupInterconnTopologyChangeReq(double Time) {
     emit(InTopologyChangeSignal, simTime().inUnit(SIMTIME_US));
 }
 
-void InterconnectionNode::interconnLinkChangeReq(uint16_t LinkState, double Time) {
+void MrpInterconnection::interconnLinkChangeReq(uint16_t LinkState, double Time) {
     //Create MRP-PDU according MRP_InLinkUp or MRP_InLinkDown
     auto Version = makeShared<mrpVersionField>();
     auto InLinkChangeTLV1 = makeShared<inLinkChangeFrame>();
@@ -940,7 +935,7 @@ void InterconnectionNode::interconnLinkChangeReq(uint16_t LinkState, double Time
     emit(InLinkChangeSignal, simTime().inUnit(SIMTIME_US));
 }
 
-void InterconnectionNode::interconnLinkStatusPollReq(double Time) {
+void MrpInterconnection::interconnLinkStatusPollReq(double Time) {
     if (!inLinkStatusPollTimer->isScheduled() && Time > 0) {
         scheduleAt(simTime() + SimTime(Time, SIMTIME_MS), inLinkStatusPollTimer);
     } else
@@ -948,7 +943,7 @@ void InterconnectionNode::interconnLinkStatusPollReq(double Time) {
     setupInterconnLinkStatusPollReq();
 }
 
-void InterconnectionNode::setupInterconnLinkStatusPollReq() {
+void MrpInterconnection::setupInterconnLinkStatusPollReq() {
     //Create MRP-PDU according MRP_In_LinkStatusPollRequest
     auto Version = makeShared<mrpVersionField>();
     auto InLinkStatusPollTLV1 = makeShared<inLinkStatusPollFrame>();
@@ -1000,7 +995,7 @@ void InterconnectionNode::setupInterconnLinkStatusPollReq() {
     emit(InStatusPollSignal, simTime().inUnit(SIMTIME_US));
 }
 
-void InterconnectionNode::inTransferReq(tlvHeaderType HeaderType, int RingPort, frameType FrameType, Packet *packet) {
+void MrpInterconnection::inTransferReq(tlvHeaderType HeaderType, int RingPort, frameType FrameType, Packet *packet) {
     auto macAddressInd = packet->getTag<MacAddressInd>();
     auto sourceAddress = macAddressInd->getSrcAddress();
     packet->trim();
@@ -1009,7 +1004,7 @@ void InterconnectionNode::inTransferReq(tlvHeaderType HeaderType, int RingPort, 
     sendFrameReq(interconnectionPort, static_cast<MacAddress>(FrameType), sourceAddress, priority, MRP_LT, packet);
 }
 
-void InterconnectionNode::mrpForwardReq(tlvHeaderType HeaderType, int Ringport, frameType FrameType, Packet *packet) {
+void MrpInterconnection::mrpForwardReq(tlvHeaderType HeaderType, int Ringport, frameType FrameType, Packet *packet) {
     auto macAddressInd = packet->getTag<MacAddressInd>();
     auto SourceAddress = macAddressInd->getSrcAddress();
     packet->trim();

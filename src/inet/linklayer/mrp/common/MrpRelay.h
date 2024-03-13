@@ -26,9 +26,7 @@ protected:
     int numDeliveredPDUsToMRP = 0;
     int numDispatchedNonMRPFrames = 0;
     int numDispatchedMRPFrames = 0;
-    double switchingDelay = 0;
-    double switchingDelayMean = 9;
-    double switchingDelayDev = 6;
+    simtime_t switchingDelay;
 
 protected:
     virtual void initialize(int stage) override;

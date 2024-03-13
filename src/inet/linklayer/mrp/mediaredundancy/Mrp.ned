@@ -23,23 +23,22 @@
 //
 
 
-package inet.linklayer.mrp.mediaredundancynode;
+package inet.linklayer.mrp.mediaredundancy;
 
 import inet.linklayer.contract.IMediaRedundancy;
 
-simple MediaRedundancyNode like IMediaRedundancy
+simple Mrp like IMediaRedundancy
 {
     parameters:
+        @class(Mrp);
         //switches do not detect a link change immediatly. this parameter sets mean time and deviation in milliseconds for
         //the simulated delay of a link change event
-        object linkDetectionDelayMean = default(385);
-        object linkDetectionDelayDev = default(325);
+        volatile double linkDetectionDelay @unit(ms) = default(truncnormal(385ms,325ms));
         
         //switches take a certain amount of time for processing each received packet.
         //this parameter sets the mean processsing delay and deviation in microseconds
         //and is applied in handleMessageWhenUp()
-        object processingDelayMean = default(100);
-        object processingDelayDev = default(80);
+        volatile double processingDelay @unit(us) = default(truncnormal(100us,80us));
         
         // MRP defines 4 Maximum Recovery Time settings for ring: 500 ms , 200 ms, 30 ms or 10 ms
         // this time provides a hard upper time limit guaranteed by 
@@ -53,12 +52,13 @@ simple MediaRedundancyNode like IMediaRedundancy
         // MRAs are able to vote which node shall take MRM role by priority and MAC address value, all other nodes 
         // dynamicly switch to MRC role. Do not mix MRM and MRA! although it is possible, either choose a specific node as explicit MRM
         // or set one or more nodes to MRA role
-        int expectedRoleByNum = default(0);       
+        //"DISABLED" == 0, "CLIENT" == 1, "MANAGER" == 2, "MANAGER_AUTO_COMP" == 3, "MANAGER_AUTO" == 4
+        int mrpRole = default(0);
         
         //Each MRP node has exactly 2 ring interfaces, which have to be set by the network administrator
-        //PortNumber of ringport1
+        //PortIndexNumber of ringport1
         int ringPort1 = default(0);
-		//PortNumber of ringport2
+		//PortIndexNumber of ringport2
 		int ringPort2 = default(1);
 		
 		//A mrp ring has a UUID, in 2 64-Bit parts
@@ -73,14 +73,27 @@ simple MediaRedundancyNode like IMediaRedundancy
 		
 		// CCM link check can be done every 3.3 ms or every 10 ms
         double ccmInterval @unit(ms) = default(10ms);
-        
-        //mrp rings can be redundantly connected by interconnection nodes
+        	
+		//mrp rings can be redundantly connected by interconnection nodes
         //in order to handle the necessary communication, normal mrp nodes
         //should be aware of the used check methods. Check can be done either by RingCheck (similar to ring test mechanism)
         //or by link check on layer 2 
 		bool interconnectionRingCheckAware = default(true);
         bool interconnectionLinkCheckAware = default(true);
-			
+		
+        // Shows the ring by coloring connections in the network graphics.
+        // Label ethernet interface with port role and status
+        bool visualize = default(true);
+        
+        // The path to the InterfaceTable module
+        string interfaceTableModule;
+        
+        // The path to the MacForwardingTable module
+        string macTableModule;
+        
+        // The path to the MrpRelay module
+        string mrpRelayModule;
+        
 		//manager variables
 		// A MRM or MRA can have higher or lower priority. 0x0000 is the highest possible value, 0xFFFF the lowest
 		// MRM should be assigned with on of the following values: HIGHEST = 0x0000, HIGH = 0x4000, DEFAULT = 0x8000
@@ -104,29 +117,17 @@ simple MediaRedundancyNode like IMediaRedundancy
         // enables the client to set one of his ring ports to BLOCKED, if advised by manager via topology change frame
         bool blockedStateSupported = default(true);
         
-        // The path to the InterfaceTable module
-        string interfaceTableModule;
-        
-        // The path to the MacForwardingTable module
-        string macTableModule;
-        
-        // The path to the MrpRelay module
-        string mrpRelayModule;
-        
-        // Shows the ring by coloring connections in the network graphics.
-        // Label ethernet interface with port role and status
-        bool visualize = default(true);
         @display("i=block/network2");
         @signal[TestSignal](type="long");
-        @signal[TopologyChangeSignal](type="long");
-        @signal[LinkChangeSignal](type="long");
+        @signal[TopologyChangeSignal](type="unsigned long");
+        @signal[LinkChangeSignal](type="double");
         @signal[ContinuityCheckSignal](type="long");
-        @signal[ClearFDBSignal](type="long");
-        @signal[ReceivedTestSignal](type="long");
+        @signal[ClearFDBSignal](type="double");
+        @signal[ReceivedTestSignal](type="unsigned long");
         @signal[ReceivedChangeSignal](type="unsigned long");
         @signal[ReceivedContinuityCheckSignal](type="long");
-        @signal[RingStateChangedSignal](type="long");
-        @signal[PortStateChangedSignal](type="long");
+        @signal[RingStateChangedSignal](type="unsigned long");
+        @signal[PortStateChangedSignal](type="unsigned long");
         @statistic[TestFrameSignal](title="Testframes sent"; source="TestSignal"; record=count,vector; interpolationmode=none);
 	    @statistic[LinkChangeSignal](title="LinkChangeSignal in us"; source="LinkChangeSignal"; record=count,vector; interpolationmode=none);
 	    @statistic[TopologyChangeSignal](title="TopologyChangeSignal in us"; source="TopologyChangeSignal"; record=count,vector; interpolationmode=none);

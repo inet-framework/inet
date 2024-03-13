@@ -15,7 +15,7 @@ moduleinterface IMediaRedundancy
     parameters:
         @display("i=block/network2");
         double ccmInterval @unit(ms);
-        int expectedRoleByNum;
+        int mrpRole;
         int timingProfile @unit(ms);
         int uuid0;
 		int uuid1;

@@ -3,7 +3,6 @@
 
 #include "MrpRelay.h"
 
-#include "../mediaredundancynode/MediaRedundancyNode.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/DirectionTag_m.h"
@@ -19,6 +18,8 @@
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include <algorithm>
 #include <vector>
+
+#include "../mediaredundancy/Mrp.h"
 
 namespace inet {
 
@@ -286,15 +287,14 @@ void MrpRelay::sendPacket(Packet *packet, const MacAddress &destinationAddress, 
     else
         packet->removeTagIfPresent<DispatchProtocolReq>();
     emit(packetSentToLowerSignal, packet);
-    //send(packet, "lowerLayerOut");
-    switchingDelay = truncnormal(switchingDelayMean, switchingDelayDev);
+    switchingDelay = SimTime(par("switchingDelay").doubleValue(), SIMTIME_US);
     if (packet->findTag<MacAddressReq>() == nullptr) {
         auto &macAddressReq = packet->addTag<MacAddressReq>();
         macAddressReq->setDestAddress(destinationAddress);
         const MacAddress &sourceAddress = outgoingInterface->getMacAddress();
         macAddressReq->setSrcAddress(sourceAddress);
     }
-    sendDelayed(packet, SimTime(switchingDelay, SIMTIME_US), "lowerLayerOut");
+    sendDelayed(packet, switchingDelay, "lowerLayerOut");
 }
 
 MacAddress MrpRelay::getBridgeAddress() {

@@ -21,11 +21,9 @@ simple MrpRelay extends Ieee8021dRelay like IMacRelayUnit
 {
     parameters:
         @class(MrpRelay);
-        
         //switches take a certain amount of time for processing each packet.
         //this parameter sets the mean processsing delay and deviation in microseconds
         //the delay is applied beofre sending packets out.
-        object switchingDelayMean = default(8.61);
-    	object switchingDelayDev = default(5.42);
+    	volatile double switchingDelay @unit(us) = default(truncnormal(8.61us,5.42us));       
 }
 

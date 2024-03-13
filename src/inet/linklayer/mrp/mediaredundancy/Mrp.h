@@ -1,8 +1,8 @@
 // Copyright (C) 2024 Daniel Zeitler
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef __INET_MRPNODE_H
-#define __INET_MRPNODE_H
+#ifndef __INET_MRP_H
+#define __INET_MRP_H
 
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
@@ -21,7 +21,7 @@ namespace inet {
  * Base class for MRC and MRM.
  */
 
-class INET_API MediaRedundancyNode: public OperationalBase, public cListener {
+class INET_API Mrp: public OperationalBase, public cListener {
 protected:
     typedef std::map<uint16_t, int64_t> FrameSentDatabase;
 
@@ -91,12 +91,8 @@ protected:
     bool interconnectionLinkCheckAware = true;
     bool interconnectionRingCheckAware = true;
     bool enableLinkCheckOnRing = false;
-    double linkDetectionDelay = 0;
-    double processingDelay = 0;
-    double processingDelayMean = 100;
-    double processingDelayDev = 80;
-    double linkDetectionDelayMean = 385;
-    double linkDetectionDelayDev = 325;
+    simtime_t linkDetectionDelay;
+    simtime_t processingDelay;
     mrpRole expectedRole = DISABLED;
 
     nodeState currentState = POWER_ON;
@@ -240,8 +236,8 @@ protected:
     virtual void refreshDisplay() const override;
 
 public:
-    MediaRedundancyNode();
-    virtual ~MediaRedundancyNode();
+    Mrp();
+    virtual ~Mrp();
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;

@@ -1,10 +1,10 @@
 // Copyright (C) 2024 Daniel Zeitler
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef __INET_INTERCONNECTIONNODE_H
-#define __INET_INTERCONNECTIONNODE_H
+#ifndef __INET_MRPINTERCONNECTION_H
+#define __INET_MRPINTERCONNECTION_H
 
-#include "../mediaredundancynode/MediaRedundancyNode.h"
+#include "../mediaredundancy/Mrp.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/linklayer/common/MacAddress.h"
@@ -17,7 +17,7 @@ namespace inet {
 /**
  * Base class for MIC and MIM.
  */
-class INET_API InterconnectionNode: public MediaRedundancyNode {
+class INET_API MrpInterconnection: public Mrp {
 protected:
     enum inNodeState : uint16_t {
         POWER_ON, AC_STAT1, //waiting for the first Link Up at one of its ring ports, starting test monitoring of the ring
@@ -51,7 +51,7 @@ protected:
     uint16_t lastInTopologyId = 0;
     FrameSentDatabase inTestFrameSent;
     opp_component_ptr<NetworkInterface> interconnectionInterface = nullptr;
-    int interconnectionPort = 2;
+    int interconnectionPort;
 
     double inLinkChangeInterval;
     double inTopologyChangeInterval;
@@ -112,8 +112,8 @@ protected:
     virtual void mauTypeChangeInd(int RingPort, uint16_t LinkState) override;
 
 public:
-    InterconnectionNode();
-    virtual ~InterconnectionNode();
+    MrpInterconnection();
+    virtual ~MrpInterconnection();
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
