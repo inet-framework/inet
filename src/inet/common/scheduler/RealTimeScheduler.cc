@@ -85,31 +85,31 @@ void RealTimeScheduler::advanceSimTime()
 bool RealTimeScheduler::receiveWithTimeout(int64_t timeout)
 {
 #ifdef __linux__
-    bool found = false;
     timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = timeout / 1000;
 
-    int32_t fdVec[FD_SETSIZE], maxfd;
+    int32_t maxfd = -1;
     fd_set rdfds;
     FD_ZERO(&rdfds);
-    maxfd = -1;
-    for (uint16_t i = 0; i < callbackEntries.size(); i++) {
-        fdVec[i] = callbackEntries.at(i).fd;
-        if (fdVec[i] > maxfd)
-            maxfd = fdVec[i];
-        FD_SET(fdVec[i], &rdfds);
+    // needs to be copied because notify() calls can modify the callbacks
+    std::vector<Entry> callbackEntriesCopy = callbackEntries;
+    for (auto& entry : callbackEntriesCopy) {
+        if (entry.fd > maxfd)
+            maxfd = entry.fd;
+        FD_SET(entry.fd, &rdfds);
     }
     if (select(maxfd + 1, &rdfds, nullptr, nullptr, &tv) < 0)
-        return found;
+        return false;
     advanceSimTime();
-    for (uint16_t i = 0; i < callbackEntries.size(); i++) {
-        if (!(FD_ISSET(fdVec[i], &rdfds)))
-            continue;
-        if (callbackEntries.at(i).callback->notify(fdVec[i]))
-            found = true;
+    bool eventInserted = false;
+    for (auto& entry : callbackEntriesCopy) {
+        if (FD_ISSET(entry.fd, &rdfds)) {
+            if (entry.callback->notify(entry.fd))
+                eventInserted = true;
+        }
     }
-    return found;
+    return eventInserted;
 #else
     bool found = false;
     timeval tv;
