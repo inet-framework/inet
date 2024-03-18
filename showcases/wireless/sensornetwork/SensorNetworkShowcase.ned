@@ -5,7 +5,7 @@ import inet.node.ethernet.Eth100M;
 import inet.node.inet.SensorNode;
 import inet.node.inet.StandardHost;
 import inet.physicallayer.wireless.common.medium.RadioMedium;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 network SensorNetworkShowcaseA
 {
@@ -14,7 +14,7 @@ network SensorNetworkShowcaseA
         configurator: Ipv4NetworkConfigurator {
             @display("p=3.4662657,4.033473");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=3.4662657,9.264383");
         }
         radioMedium: RadioMedium {
@@ -49,7 +49,7 @@ network SensorNetworkShowcaseB
         configurator: Ipv4NetworkConfigurator {
             @display("p=4.0722203,4.0722203");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=4.0722203,9.346079");
         }
         radioMedium: RadioMedium {

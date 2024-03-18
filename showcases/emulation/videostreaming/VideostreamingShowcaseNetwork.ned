@@ -5,7 +5,7 @@ import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 
 network VideoStreamingShowcase
@@ -17,7 +17,7 @@ network VideoStreamingShowcase
             parameters:
                 @display("p=100,100;is=s");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             parameters:
                 @display("p=100,200;is=s");
         }

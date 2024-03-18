@@ -9,7 +9,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.WirelessHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 
 network MediumActivityDisplayingSignalsTransmissionsReceptionsShowcase
@@ -22,7 +22,7 @@ network MediumActivityDisplayingSignalsTransmissionsReceptionsShowcase
         configurator: Ipv4NetworkConfigurator {
             @display("p=853.545,46.2");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=853.545,123.585");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
@@ -38,7 +38,7 @@ network MediumActivityMultipleNodesShowcase
     parameters:
         @display("bgb=1000,500");
     submodules:
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             parameters:
                 @display("p=100,100");
         }
@@ -69,7 +69,7 @@ network MediumActivityInterferingSignalsShowcase
     parameters:
         @display("bgb=1000,500");
     submodules:
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             parameters:
                 @display("p=100,100");
         }

@@ -7,7 +7,7 @@ package inet.showcases.visualizer.canvas.instrumentfigures;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 network InstrumentShowcase
 {
@@ -44,7 +44,7 @@ network InstrumentShowcase
         radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=61,110");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=62,170");
         }
         client: AdhocHost {

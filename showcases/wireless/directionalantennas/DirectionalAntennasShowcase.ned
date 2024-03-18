@@ -3,7 +3,7 @@ package inet.showcases.wireless.directionalantennas;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 
 network DirectionalAntennasShowcase
@@ -14,7 +14,7 @@ network DirectionalAntennasShowcase
         configurator: Ipv4NetworkConfigurator {
             @display("p=62,43;is=s");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=62,121;is=s");
         }
         radioMedium: Ieee80211ScalarRadioMedium {

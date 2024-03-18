@@ -1,7 +1,7 @@
 package inet.showcases.mobility.basic;
 
 import inet.node.inet.StandardHost;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 network BasicMobilityShowcase
 {
@@ -12,7 +12,7 @@ network BasicMobilityShowcase
         host[numHosts]: StandardHost {
             @display("i=misc/smartphone");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=50,50");
         }
 }

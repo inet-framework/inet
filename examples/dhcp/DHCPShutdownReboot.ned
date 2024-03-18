@@ -11,7 +11,7 @@ import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth10M;
 import inet.node.inet.StandardHost;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 
 network DHCPShutdownReboot
@@ -25,7 +25,7 @@ network DHCPShutdownReboot
                 config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
                 @display("p=100,125;is=s");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=100,50;is=s");
         }
 

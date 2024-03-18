@@ -11,7 +11,7 @@ import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 network RoutingTableVisualizationDisplayingAllShowcase
 {
@@ -23,7 +23,7 @@ network RoutingTableVisualizationDisplayingAllShowcase
         hostB: StandardHost {
             @display("p=510.72,247.04");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=701.44,168.96");
         }
         configurator: Ipv4NetworkConfigurator {
@@ -60,7 +60,7 @@ network RoutingTableVisualizationFilteringShowcase
         router: Router {
             @display("p=476.16,302.08");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=759.04,51.2");
         }
         configurator: Ipv4NetworkConfigurator {
@@ -102,7 +102,7 @@ network RoutingTableVisualizationDynamicShowcase
         configurator: Ipv4NetworkConfigurator {
             @display("p=556,101");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=556,179");
         }
         radioMedium: Ieee80211ScalarRadioMedium {

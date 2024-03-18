@@ -8,8 +8,8 @@ import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.physicallayer.wireless.noise.NoiseSource;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 import inet.visualizer.common.IntegratedMultiVisualizer;
-import inet.visualizer.common.IntegratedVisualizer;
 
 network AnalogModelShowcaseRoutingNetwork
 {
@@ -101,7 +101,7 @@ network AnalogModelShowcaseNoiseNetwork
         radioMedium: Ieee80211DimensionalRadioMedium {
             @display("p=32,113");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=37,185");
         }
         host1: AdhocHost {

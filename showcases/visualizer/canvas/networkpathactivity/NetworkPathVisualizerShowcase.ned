@@ -14,7 +14,7 @@ import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 import inet.visualizer.common.NetworkRouteVisualizer;
 
 network NetworkPathSimpleShowcase
@@ -44,7 +44,7 @@ network NetworkPathComplexShowcase
 {
     @display("bgb=1050,720");
     submodules:
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             parameters:
                 @display("p=100,50");
         }
@@ -129,7 +129,7 @@ network NetworkPathMobileShowcase
 {
     @display("bgb=660,630");
     submodules:
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=100,50");
         }
         configurator: Ipv4NetworkConfigurator {
@@ -165,7 +165,7 @@ network NetworkPathRIPShowcase
 {
     @display("bgb=1100,680");
     submodules:
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             parameters:
                 @display("p=100,50");
         }
