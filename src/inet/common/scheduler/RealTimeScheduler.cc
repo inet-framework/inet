@@ -173,11 +173,12 @@ cEvent *RealTimeScheduler::takeNextEvent()
     int64_t curTime = opp_get_monotonic_clock_nsecs();
 
     if (targetTime > curTime) {
-        int status = receiveUntil(targetTime);
-        if (status == -1)
-            return nullptr; // interrupted by user
-        if (status == 1)
-            event = sim->getFES()->peekFirst(); // received something
+        switch (receiveUntil(targetTime)) {
+            case -1: return nullptr; // interrupted by user
+            case 0:  break; // nothing to do
+            case 1:  event = sim->getFES()->peekFirst(); break; // received something
+            default: ASSERT(false); break;
+        }
     }
     else {
         // we're behind -- customized versions of this class may
