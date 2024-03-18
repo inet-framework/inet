@@ -365,7 +365,7 @@ class SimulationProject:
                         result.stdout = re.sub("INI dependency: (.*)", "", result.stdout.decode("utf-8"))
                         num_runs = int(result.stdout)
                     else:
-                        _logger.warn("Cannot determine number of runs: " + result.stderr.decode("utf-8"))
+                        _logger.warn("Cannot determine number of runs: " + result.stderr.decode("utf-8") + " in " + working_directory)
                         continue
             sim_time_limit = get_sim_time_limit(config_dicts, config)
             description = config_dict["description"]
