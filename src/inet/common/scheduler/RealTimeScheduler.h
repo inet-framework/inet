@@ -27,6 +27,11 @@ class INET_API RealTimeScheduler : public cScheduler
     class INET_API ICallback {
       public:
         virtual ~ICallback() {}
+
+        /**
+         * Notifies the callback about new available data for the registered file descriptor.
+         * Returns true if a new event has been inserted into the future event set.
+         */
         virtual bool notify(int fd) = 0;
     };
 
@@ -55,7 +60,22 @@ class INET_API RealTimeScheduler : public cScheduler
 
   protected:
     virtual void advanceSimTime();
+
+    /**
+     * Reads all registered file descriptors and notifies the corresponding
+     * callback interfaces with the give timeout. Returns true if a new event
+     * has been inserted into the future event set.
+     */
     virtual bool receiveWithTimeout(int64_t timeout);
+
+    /**
+     * Reads all registered file descriptors and notifies the corresponding
+     * callback interfaces until target time is reached.
+     * Returns:
+     *  +1 means something received, must continue
+     *   0 means target time reached
+     *  -1 means interrupted by user
+     */
     virtual int receiveUntil(int64_t targetTime); // in nanoseconds, as returned by opp_get_monotonic_clock_nsecs()
 
   public:
