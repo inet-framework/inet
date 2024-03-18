@@ -21,7 +21,7 @@
 #endif // if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 
 #ifdef __linux__
-#define UI_REFRESH_TIME    100000000
+#define UI_REFRESH_TIME    100000000L
 #else
 #define UI_REFRESH_TIME    500000
 #endif
@@ -128,23 +128,21 @@ bool RealTimeScheduler::receiveWithTimeout(int64_t timeout)
 
 int RealTimeScheduler::receiveUntil(int64_t targetTime)
 {
-    // if there's more than 2*UI_REFRESH_TIME to wait, wait in UI_REFRESH_TIME chunks
-    // in order to keep UI responsiveness by invoking getEnvir()->idle()
-    int64_t curTime = opp_get_monotonic_clock_nsecs();
-
-    while ((targetTime - curTime) >= 2 * UI_REFRESH_TIME) {
-        if (receiveWithTimeout(UI_REFRESH_TIME))
+    int64_t currentTime = opp_get_monotonic_clock_nsecs();
+    while (targetTime > currentTime) {
+        // if there's more than UI_REFRESH_TIME to wait, wait in UI_REFRESH_TIME chunks
+        // in order to keep UI responsiveness by invoking getEnvir()->idle()
+        int64_t timeout = std::min(UI_REFRESH_TIME, targetTime - currentTime);
+        if (receiveWithTimeout(timeout))
             return 1;
-        if (getEnvir()->idle())
-            return -1;
-        curTime = opp_get_monotonic_clock_nsecs();
+        // if we have enough time left we can refresh the UI, because we expect the refresh
+        // to take less time than UI_REFRESH_TIME, we waited at most UI_REFRESH_TIME above
+        if (targetTime - currentTime > 2 * UI_REFRESH_TIME) {
+            if (getEnvir()->idle())
+                return -1;
+        }
+        currentTime = opp_get_monotonic_clock_nsecs();
     }
-
-    // difference is now at most UI_REFRESH_TIME, do it at once
-    int64_t remaining = targetTime - curTime;
-    if (remaining > 0)
-        if (receiveWithTimeout(remaining))
-            return 1;
     return 0;
 }
 
