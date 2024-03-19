@@ -376,10 +376,10 @@ void Gptp::processFollowUp(Packet *packet, const GptpFollowUp* gptp)
 void Gptp::synchronize()
 {
     simtime_t now = simTime();
-    clocktime_t origNow = clock->getClockTime();
-    clocktime_t residenceTime = origNow - syncIngressTimestamp;
+    clocktime_t oldLocalTimeAtTimeSync = clock->getClockTime();
+    clocktime_t residenceTime = oldLocalTimeAtTimeSync - syncIngressTimestamp;
 
-    emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(origNow) - now);
+    emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(oldLocalTimeAtTimeSync) - now);
 
     /************** Time synchronization *****************************************
      * Local time is adjusted using peer delay, correction field, residence time *
@@ -393,19 +393,20 @@ void Gptp::synchronize()
     if (oldPeerSentTimeSync == -1)
         gmRateRatio = 1;
     else
-        gmRateRatio = (peerSentTimeSync - oldPeerSentTimeSync) / (origNow - newLocalTimeAtTimeSync) ;
+        gmRateRatio = (peerSentTimeSync - oldPeerSentTimeSync) / (syncIngressTimestamp - receivedTimeSync);
 
     auto settableClock = check_and_cast<SettableClock *>(clock.get());
     ppm newOscillatorCompensation = unit(gmRateRatio * (1 + unit(settableClock->getOscillatorCompensation()).get()) - 1);
     settableClock->setClockTime(newTime, newOscillatorCompensation, true);
 
-    oldLocalTimeAtTimeSync = origNow;
     newLocalTimeAtTimeSync = clock->getClockTime();
+    timeDiffAtTimeSync = newLocalTimeAtTimeSync - oldLocalTimeAtTimeSync;
     receivedTimeSync = syncIngressTimestamp;
 
     // adjust local timestamps, too
-    pdelayRespEventIngressTimestamp += newLocalTimeAtTimeSync - oldLocalTimeAtTimeSync;
-    pdelayReqEventEgressTimestamp += newLocalTimeAtTimeSync - oldLocalTimeAtTimeSync;
+    adjustLocalTimestamp(pdelayRespEventIngressTimestamp);
+    adjustLocalTimestamp(pdelayReqEventEgressTimestamp);
+    adjustLocalTimestamp(receivedTimeSync);
 
     /************** Rate ratio calculation *************************************
      * It is calculated based on interval between two successive Sync messages *
