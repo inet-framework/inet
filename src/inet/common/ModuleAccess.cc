@@ -56,5 +56,29 @@ cModule *findModuleUnderContainingNode(const cModule *from)
     return nullptr;
 }
 
+cNEDValue nedf_nodeFullName(cComponent *context, cNEDValue argv[], int argc)
+{
+    cModule *node = getContainingNode(check_and_cast<cModule *>(context));
+    return node->getFullName();
+}
+
+Define_NED_Function2(nedf_nodeFullName,
+        "string nodeFullName()",
+        "node",
+        "Returns the full name of the containing network node"
+        );
+
+cNEDValue nedf_nodeIndex(cComponent *context, cNEDValue argv[], int argc)
+{
+    cModule *node = getContainingNode(check_and_cast<cModule *>(context));
+    return node->getIndex();
+}
+
+Define_NED_Function2(nedf_nodeIndex,
+        "int nodeIndex()",
+        "node",
+        "Returns the submodule index of the containing network node"
+        );
+
 } // namespace inet
 
