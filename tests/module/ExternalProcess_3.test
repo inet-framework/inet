@@ -24,7 +24,7 @@ ned-path = .;../../../../src
 scheduler-class = "inet::RealTimeScheduler"
 
 *.numProcesses = 2
-*.externalProcess[0].command = "ping index.hu"
+*.externalProcess[0].command = "ping localhost"
 *.externalProcess[0].onExit = "terminateSimulation"
 *.externalProcess[1].command = "killall ping"
 *.externalProcess[1].startTime = 1s
@@ -32,9 +32,9 @@ scheduler-class = "inet::RealTimeScheduler"
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event #1  t=0   TestNetwork.externalProcess\[0\] \(ExternalProcess, id=2\)
-Starting process: ping index.hu
-PING .*? 56 data bytes
-64 bytes .*? icmp_seq=1 ttl=58 time=.*? ms
+Starting process: ping localhost
+PING localhost.*?
+64 bytes .*? icmp_seq=1 ttl=64 time=.*? ms
 \*\* Event #2  t=1   TestNetwork.externalProcess\[1\] \(ExternalProcess, id=3\)
 Starting process: killall ping
 

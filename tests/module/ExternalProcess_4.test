@@ -26,25 +26,25 @@ scheduler-class = "inet::RealTimeScheduler"
 sim-time-limit = 1s
 
 *.numProcesses = ${1,1,1,1}
-*.externalProcess[0].command = "ping index.hu"
+*.externalProcess[0].command = "ping localhost"
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 Preparing for running configuration General, run #0...
 .*?
-64 bytes .*? icmp_seq=1 ttl=58 time=.*? ms
+64 bytes .*? icmp_seq=1 ttl=64 time=.*? ms
 .*?
 Preparing for running configuration General, run #1...
 .*?
-64 bytes .*? icmp_seq=1 ttl=58 time=.*? ms
+64 bytes .*? icmp_seq=1 ttl=64 time=.*? ms
 .*?
 Preparing for running configuration General, run #2...
 .*?
-64 bytes .*? icmp_seq=1 ttl=58 time=.*? ms
+64 bytes .*? icmp_seq=1 ttl=64 time=.*? ms
 .*?
 Preparing for running configuration General, run #3...
 .*?
-64 bytes .*? icmp_seq=1 ttl=58 time=.*? ms
+64 bytes .*? icmp_seq=1 ttl=64 time=.*? ms
 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
