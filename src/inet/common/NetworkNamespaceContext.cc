@@ -95,7 +95,7 @@ NetworkNamespaceContext::NetworkNamespaceContext(const char *name)
                 throw cRuntimeError("Cannot open network namespace: %s, errno=%d (%s)", name, errno, strerror(errno));
             global = true;
         }
-        EV_INFO << "Switching to network namespace" << EV_FIELD(name) << EV_FIELD(newFd) << std::endl;
+        EV_TRACE << "Switching to network namespace" << EV_FIELD(name) << EV_FIELD(newFd) << std::endl;
         if (setns(newFd, 0) != 0)
             throw cRuntimeError("Cannot switch to network namespace: %s, errno=%d (%s)", name, errno, strerror(errno));
 #else
@@ -108,7 +108,7 @@ NetworkNamespaceContext::~NetworkNamespaceContext()
 {
     if (newFd != -1) {
 #ifdef __linux__
-        EV_INFO << "Switching back to network namespace" << EV_FIELD(name) << EV_FIELD(oldFd) << std::endl;
+        EV_TRACE << "Switching back to network namespace" << EV_FIELD(name) << EV_FIELD(oldFd) << std::endl;
         if (setns(oldFd, 0) != 0)
             EV_FATAL << "Cannot switch to network namespace: " << name << ", errno=" << errno << " (" << strerror(errno) << ")" << EV_ENDL;
         if (global) {
