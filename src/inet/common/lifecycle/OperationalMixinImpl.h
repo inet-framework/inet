@@ -74,8 +74,8 @@ void OperationalMixin<T>::handleMessageWhenDown(cMessage *message)
         throw cRuntimeError("Self message '%s' received when %s is down", message->getName(), T::getComponentType()->getName());
     else if (simTime() == lastChange)
         EV_WARN << T::getComponentType()->getName() << " is down, dropping '" << message->getName() << "' message\n";
-    else
-        throw cRuntimeError("Message '%s' received when %s is down", message->getName(), T::getComponentType()->getName());
+//    else
+//        throw cRuntimeError("Message '%s' received when %s is down", message->getName(), T::getComponentType()->getName());
     delete message;
 }
 
