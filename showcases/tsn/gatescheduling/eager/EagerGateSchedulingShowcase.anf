@@ -644,7 +644,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="legend_format" value="$module"/>
-            <property name="filter" value="* AND name =~ meanBitLifeTimePerPacket:vector"/>
+            <property name="filter" value="type =~ vector AND name =~ meanBitLifeTimePerPacket:vector&#10;AND NOT (type =~ vector AND runattr:experiment =~ Eager AND runattr:replication =~ &quot;#0&quot; AND name =~ meanBitLifeTimePerPacket:vector AND (&#10;    (module =~ &quot;TsnDumbbellNetwork.server1.app[2].sink&quot;) OR&#10;    (module =~ &quot;TsnDumbbellNetwork.server1.app[3].sink&quot;) OR&#10;    (module =~ &quot;TsnDumbbellNetwork.server2.app[0].sink&quot;) OR&#10;    (module =~ &quot;TsnDumbbellNetwork.server2.app[1].sink&quot;)&#10;))"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
