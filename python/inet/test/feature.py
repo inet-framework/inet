@@ -206,6 +206,8 @@ def get_folder_to_simulations(simulation_results):
 def get_simulation_to_used_types(simulation_results):
     result = {}
     for simulation_result in simulation_results.results:
+        if len(simulation_result.used_types) == 0:
+            raise Exception("The number of used NED types in the simulation result is 0. Did you forget to recompile omnetpp with defining PRINT_MODULE_TYPES_USED macro?")
         result[simulation_result.task] = simulation_result.used_types
     return result
 
