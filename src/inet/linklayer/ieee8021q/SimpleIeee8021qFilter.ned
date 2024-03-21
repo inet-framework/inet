@@ -35,27 +35,31 @@ module SimpleIeee8021qFilter like IPacketFilter
             defaultGateIndex = default(parent.hasDefaultPath ? 0 : -1);
             @display("p=100,100");
         }
-        gate[numStreams]: <default("InteractiveGate")> like IPacketGate {
+        gateClosedFilter[numStreams]: <default("BackPressureBasedFilter")> like IPacketFilter {
             @display("p=300,$startY,column,150");
         }
-        meter[numStreams]: <default("DualRateThreeColorMeter")> like IPacketMeter {
+        gate[numStreams]: <default("InteractiveGate")> like IPacketGate {
             @display("p=500,$startY,column,150");
+        }
+        meter[numStreams]: <default("DualRateThreeColorMeter")> like IPacketMeter {
+            @display("p=700,$startY,column,150");
         }
         filter[numStreams]: <default("LabelFilter")> like IPacketFilter {
             labelFilter = default("green");
-            @display("p=700,$startY,column,150");
+            @display("p=900,$startY,column,150");
         }
         multiplexer: PacketMultiplexer {
-            @display("p=900,100");
+            @display("p=1100,100");
         }
         barrier: BackPressureBarrier {
-            @display("p=1100,100");
+            @display("p=1300,100");
         }
     connections:
         in --> { @display("m=w"); } --> classifier.in;
         classifier.out++ --> multiplexer.in++ if hasDefaultPath;
         for i=0..numStreams-1 {
-            classifier.out++ --> gate[i].in;
+            classifier.out++ --> gateClosedFilter[i].in;
+            gateClosedFilter[i].out --> gate[i].in;
             gate[i].out --> meter[i].in;
             meter[i].out --> filter[i].in;
             filter[i].out --> multiplexer.in++;
