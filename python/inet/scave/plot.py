@@ -736,7 +736,7 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order=None):
                     pattern = re.compile(i[0])
                     match = re.fullmatch(pattern, df[order_column][j])
                     if match != None:
-                        df['order'][j] = i[1]
+                        df.loc[j, 'order'] = i[1]
         else:
             order_column = order[0]
             order_list = order[1:]
@@ -747,7 +747,7 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order=None):
                     pattern = re.compile(order_list[order])
                     match = re.fullmatch(pattern, df[order_column][j])
                     if match != None:
-                        df['order'][j] = order
+                        df.loc[j, 'order'] = order
 
                     
         # if debug: 
