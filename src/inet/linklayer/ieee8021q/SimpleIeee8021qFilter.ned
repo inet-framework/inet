@@ -35,7 +35,7 @@ module SimpleIeee8021qFilter like IPacketFilter
             defaultGateIndex = default(parent.hasDefaultPath ? 0 : -1);
             @display("p=100,100");
         }
-        gateClosedFilter[numStreams]: <default("BackPressureBasedFilter")> like IPacketFilter {
+        gateFilter[numStreams]: <default("BackPressureBasedFilter")> like IPacketFilter {
             @display("p=300,$startY,column,150");
         }
         gate[numStreams]: <default("InteractiveGate")> like IPacketGate {
@@ -58,8 +58,8 @@ module SimpleIeee8021qFilter like IPacketFilter
         in --> { @display("m=w"); } --> classifier.in;
         classifier.out++ --> multiplexer.in++ if hasDefaultPath;
         for i=0..numStreams-1 {
-            classifier.out++ --> gateClosedFilter[i].in;
-            gateClosedFilter[i].out --> gate[i].in;
+            classifier.out++ --> gateFilter[i].in;
+            gateFilter[i].out --> gate[i].in;
             gate[i].out --> meter[i].in;
             meter[i].out --> filter[i].in;
             filter[i].out --> multiplexer.in++;

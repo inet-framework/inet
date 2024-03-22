@@ -49,7 +49,7 @@ module Ieee8021qFilter like IPacketFilter
             displayStringTextFormat = default("");
             @display("p=500,100,column,150");
         }
-        gateClosedFilter[numGates]: <default("BackPressureBasedFilter")> like IPacketFilter {
+        gateFilter[numGates]: <default("BackPressureBasedFilter")> like IPacketFilter {
             @display("p=700,100,column,150");
         }
         gate[numGates]: <default("InteractiveGate")> like IPacketGate {
@@ -85,8 +85,8 @@ module Ieee8021qFilter like IPacketFilter
             streamFilter[i].out --> sm[j].in++ if streamFilterTable.get(i).get("gate") == j;
         }
         for i=0..numGates-1 {
-            sm[i].out --> gateClosedFilter[i].in;
-            gateClosedFilter[i].out --> gate[i].in;
+            sm[i].out --> gateFilter[i].in;
+            gateFilter[i].out --> gate[i].in;
             gate[i].out --> gc[i].in;
         }
         for i=0..numGates-1, for j=0..numMeters-1 {
