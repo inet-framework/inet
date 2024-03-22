@@ -688,9 +688,9 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order=None):
     
     if default_dict is not None:    
         for i in range(0,len(df)):
-#            if (df['additional_style'][i] == None):
+#            if (df.loc[i, 'additional_style'] == None):
             logger.debug('adding default stuff')
-            df['additional_style'][i] = str(default_dict)
+            df.loc[i, 'additional_style'] = str(default_dict)
             
     if style_tuple_list is not None:
         for i in style_tuple_list:
@@ -710,16 +710,17 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order=None):
                     #     print("    value:", value)
                     #     print("    match:", match.group())
                     logger.debug(f"MATCH FOUND:\n    column: {column}\n    value: {value}\n    match: {match.group()}")
-                    if (df['additional_style'][i] == None):
-                        df['additional_style'][i] = str(style_tuple)
+                    if (df.loc[i, 'additional_style'] == None):
+                        df.loc[i, 'additional_style'] = str(style_tuple)
                         logger.debug(f"Adding style tuple: {str(style_tuple)}\n")
                     else:
-                        orig_style_dict = ast.literal_eval(df['additional_style'][i])       # convert already added style to dict
+                        orig_style_dict = ast.literal_eval(df.loc[i, 'additional_style'])       # convert already added style to dict
                         logger.debug(f"Adding style tuple to existing style dict {orig_style_dict}, {type(orig_style_dict)}")
                         orig_style_dict.update(style_tuple)                                 # add new style to dict
                         logger.debug(f"New style dict {orig_style_dict}, {type(orig_style_dict)}")
                         # if debug: add_separator()
-                        df['additional_style'][i] = str(orig_style_dict)                    # add to dataframe as string
+                        # df.loc[i, 'additional_style'] = str(orig_style_dict)                    # add to dataframe as string
+                        df.loc[i, 'additional_style'] = str(orig_style_dict)
             
     if order is not None:
         # order the dataframe
