@@ -1933,13 +1933,11 @@ void Ipv4NetworkConfigurator::addStaticMulticastRoutes(Topology& topology, Node 
     InterfaceInfo *inInterfaceInfo = nullptr;
     InterfaceInfo *outInterfaceInfo = nullptr;
     Node *node = receiverNode;
-    while (node != sourceNode && node->getNumPaths() > 0) {
+    while (true) {
         auto link = (Link *)node->getPath(0);
-        outInterfaceInfo = static_cast<InterfaceInfo *>(link->destinationInterfaceInfo);
-        node = (Node *)link->getLinkOutRemoteNode();
-        inInterfaceInfo = node == sourceNode ? nullptr : static_cast<InterfaceInfo *>(((Link *)node->getPath(0))->sourceInterfaceInfo);
+        inInterfaceInfo = node == sourceNode ? nullptr : static_cast<InterfaceInfo *>(link->sourceInterfaceInfo);
         ASSERT(inInterfaceInfo == nullptr || inInterfaceInfo->node == node);
-        ASSERT(outInterfaceInfo->node == node);
+        ASSERT(outInterfaceInfo == nullptr || outInterfaceInfo->node == node);
 
         Ipv4Address origin = Ipv4Address::UNSPECIFIED_ADDRESS;
         Ipv4Address originNetmask = Ipv4Address::UNSPECIFIED_ADDRESS;
@@ -1973,15 +1971,25 @@ void Ipv4NetworkConfigurator::addStaticMulticastRoutes(Topology& topology, Node 
             node->staticMulticastRoutes.push_back(route);
         }
 
-        bool foundOutInterface = false;
-        for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++)
-            if (route->getOutInterface(i)->getInterface() == outInterfaceInfo->networkInterface) {
-                foundOutInterface = true;
-                break;
+        if (outInterfaceInfo != nullptr) {
+            bool foundOutInterface = false;
+            for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++) {
+                if (route->getOutInterface(i)->getInterface() == outInterfaceInfo->networkInterface) {
+                    foundOutInterface = true;
+                    break;
+                }
             }
-        if (!foundOutInterface) {
-            route->addOutInterface(new Ipv4MulticastRoute::OutInterface(outInterfaceInfo->networkInterface, false /*TODOisLeaf*/));
-            EV_INFO << "Extending static multicast route " << *route << " in " << node->module->getFullPath() << endl;
+            if (!foundOutInterface) {
+                route->addOutInterface(new Ipv4MulticastRoute::OutInterface(outInterfaceInfo->networkInterface, false /*TODOisLeaf*/));
+                EV_INFO << "Extending static multicast route " << *route << " in " << node->module->getFullPath() << endl;
+            }
+        }
+
+        if (node == sourceNode || node->getNumPaths() == 0)
+            break;
+        else {
+            outInterfaceInfo = static_cast<InterfaceInfo *>(link->destinationInterfaceInfo);
+            node = (Node *)link->getLinkOutRemoteNode();
         }
     }
 }
