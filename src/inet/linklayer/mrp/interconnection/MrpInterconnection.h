@@ -96,20 +96,20 @@ protected:
     virtual void handleInTopologyChangeTimer();
     virtual void handleInLinkUpTimer();
     virtual void handleInLinkDownTimer();
-    virtual void interconnTestReq(double Time);
-    virtual void interconnTopologyChangeReq(double Time);
-    virtual void interconnLinkChangeReq(uint16_t LinkState, double Time);
-    virtual void interconnLinkStatusPollReq(double Time);
-    virtual void inTransferReq(TlvHeaderType HeaderType, int RingPort, FrameType FrameType, Packet *packet);
-    virtual void mrpForwardReq(TlvHeaderType HeaderType, int Ringport, FrameType FrameType, Packet *packet);
+    virtual void interconnTestReq(double time);
+    virtual void interconnTopologyChangeReq(double time);
+    virtual void interconnLinkChangeReq(uint16_t linkState, double time);
+    virtual void interconnLinkStatusPollReq(double time);
+    virtual void inTransferReq(TlvHeaderType headerType, int ringPort, FrameType frameType, Packet *packet);
+    virtual void mrpForwardReq(TlvHeaderType headerType, int ringport, FrameType frameType, Packet *packet);
     virtual void setupInterconnTestReq();
-    virtual void setupInterconnTopologyChangeReq(double Time);
+    virtual void setupInterconnTopologyChangeReq(double time);
     virtual void setupInterconnLinkStatusPollReq();
-    virtual void interconnTestInd(MacAddress SourceAddress, int RingPort, uint16_t InID, Packet *packet) override;
-    virtual void interconnTopologyChangeInd(MacAddress SourceAddress, double Time, uint16_t InID, int RingPort, Packet *packet) override;
-    virtual void interconnLinkChangeInd(uint16_t InID, uint16_t LinkState, int RingPort, Packet *packet) override;
-    virtual void interconnLinkStatusPollInd(uint16_t InID, int RingPort, Packet *packet) override;
-    virtual void mauTypeChangeInd(int RingPort, uint16_t LinkState) override;
+    virtual void interconnTestInd(MacAddress sourceAddress, int ringPort, uint16_t inId, Packet *packet) override;
+    virtual void interconnTopologyChangeInd(MacAddress sourceAddress, double time, uint16_t inId, int ringPort, Packet *packet) override;
+    virtual void interconnLinkChangeInd(uint16_t inId, uint16_t linkState, int ringPort, Packet *packet) override;
+    virtual void interconnLinkStatusPollInd(uint16_t inId, int ringPort, Packet *packet) override;
+    virtual void mauTypeChangeInd(int ringPort, uint16_t linkState) override;
 
 public:
     MrpInterconnection();
