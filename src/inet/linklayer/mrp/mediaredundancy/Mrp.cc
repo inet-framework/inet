@@ -42,7 +42,7 @@ Mrp::~Mrp() {
     cancelAndDelete(topologyChangeTimer);
     cancelAndDelete(testTimer);
     cancelAndDelete(startUpTimer);
-    cancelAndDelete(linkUpHysterisisTimer);
+    cancelAndDelete(linkUpHysteresisTimer);
 }
 
 void Mrp::setRingInterfaces(int InterfaceIndex1, int InterfaceIndex2) {
@@ -178,7 +178,7 @@ void Mrp::initialize(int stage) {
         sourceAddress = relay->getBridgeAddress();
         initRingPorts();
         EV_DETAIL << "Initialize MRP link layer" << EV_ENDL;
-        linkUpHysterisisTimer = new cMessage("linkUpHysterisisTimer");
+        linkUpHysteresisTimer = new cMessage("linkUpHysteresisTimer");
         startUpTimer = new cMessage("startUpTimer");
         scheduleAt(SimTime(0, SIMTIME_MS), startUpTimer);
     }
@@ -321,7 +321,7 @@ void Mrp::stop() {
     cancelAndDelete(testTimer);
     cancelAndDelete(linkDownTimer);
     cancelAndDelete(linkUpTimer);
-    cancelAndDelete(linkUpHysterisisTimer);
+    cancelAndDelete(linkUpHysteresisTimer);
     cancelAndDelete(startUpTimer);
 }
 
@@ -431,9 +431,9 @@ void Mrp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
                     linkDetectionDelay = SimTime(1, SIMTIME_US); //linkUP is handled faster than linkDown
                 else
                     linkDetectionDelay = SimTime(par("linkDetectionDelay").doubleValue(), SIMTIME_MS);
-                if (linkUpHysterisisTimer->isScheduled())
-                    cancelEvent(linkUpHysterisisTimer);
-                scheduleAt(simTime() + linkDetectionDelay, linkUpHysterisisTimer);
+                if (linkUpHysteresisTimer->isScheduled())
+                    cancelEvent(linkUpHysteresisTimer);
+                scheduleAt(simTime() + linkDetectionDelay, linkUpHysteresisTimer);
                 scheduleAt(simTime() + linkDetectionDelay, DelayTimer);
             }
         }
@@ -462,8 +462,8 @@ void Mrp::handleMessageWhenUp(cMessage *msg) {
             clearLocalFDBDelayed();
         else if (msg == startUpTimer) {
             start();
-        } else if (msg == linkUpHysterisisTimer) {
-            //action done by handleDelayTimer, linkUpHysterisisTimer requested by standard
+        } else if (msg == linkUpHysteresisTimer) {
+            //action done by handleDelayTimer, linkUpHysteresisTimer requested by standard
             //but not further descripted
         } else if (msg->getKind() == 0) {
             ProcessDelayTimer *timer = check_and_cast<ProcessDelayTimer*>(msg);
@@ -1350,7 +1350,7 @@ void Mrp::topologyChangeInd(MacAddress SourceAddress, double Time) {
     case DE_IDLE:
         clearFDB(Time);
         if (expectedRole == MANAGER_AUTO
-                && linkUpHysterisisTimer->isScheduled()) {
+                && linkUpHysteresisTimer->isScheduled()) {
             setPortState(secondaryRingPort, MrpInterfaceData::FORWARDING);
             currentState = PT_IDLE;
             EV_DETAIL << "Switching State from DE_IDLE to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
