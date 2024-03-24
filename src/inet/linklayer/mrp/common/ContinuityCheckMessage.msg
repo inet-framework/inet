@@ -6,10 +6,10 @@ import inet.common.packet.chunk.Chunk;
 
 namespace inet;
 
-class continuityCheckMessage extends FieldsChunk {
+class ContinuityCheckMessage extends FieldsChunk {
     chunkLength = B(38);
     uint8_t mdLevel = 0;
-    uint8_t OpCode = 1;
+    uint8_t opCode = 1;
     uint8_t flags = 0x00000001; //RDI 1 bit,, Traffic 1 bit, Reserved 3 bit, CCM interval 3 bit
     uint8_t firstTLVoffset = 0;
     uint32_t sequenceNumber = 0;
@@ -25,12 +25,12 @@ class continuityCheckMessage extends FieldsChunk {
     uint8_t endTlv = 0;  
 }
 
-message continuityCheckTimer
+message ContinuityCheckTimer
 {
     int port;
 }
 
-message processDelayTimer
+message ProcessDelayTimer
 {
     int port;
     int field;

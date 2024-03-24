@@ -240,13 +240,13 @@ void MrpInterconnection::handleMessageWhenUp(cMessage *msg) {
             //action done by handleDelayTimer, linkUpHysterisisTimer requested by standard
             //but not further descripted
         } else if (msg->getKind() == 0) {
-            processDelayTimer *timer = dynamic_cast<processDelayTimer*>(msg);
+            ProcessDelayTimer *timer = dynamic_cast<ProcessDelayTimer*>(msg);
             if (timer != nullptr) {
                 handleDelayTimer(timer->getPort(), timer->getField());
                 delete timer;
             }
         } else if (msg->getKind() == 1) {
-            continuityCheckTimer *timer = dynamic_cast<continuityCheckTimer*>(msg);
+            ContinuityCheckTimer *timer = dynamic_cast<ContinuityCheckTimer*>(msg);
             if (timer != nullptr) {
                 handleContinuityCheckTimer(timer->getPort());
                 delete timer;
