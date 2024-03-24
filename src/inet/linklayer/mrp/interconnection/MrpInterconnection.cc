@@ -470,14 +470,14 @@ void MrpInterconnection::interconnTopologyChangeInd(MacAddress SourceAddress, do
                 if (inRole == INTERCONNECTION_CLIENT) {
                     cancelEvent(inLinkDownTimer);
                 } else if (inRole == INTERCONNECTION_MANAGER
-                        && SourceAddress == sourceAddress) {
+                        && SourceAddress == localBridgeAddress) {
                     clearFDB(Time);
                 }
                 delete packet;
                 break;
             case CHK_IO:
             case CHK_IC:
-                if (SourceAddress == sourceAddress) {
+                if (SourceAddress == localBridgeAddress) {
                     clearFDB(Time);
                 }
                 delete packet;
@@ -676,7 +676,7 @@ void MrpInterconnection::interconnTestInd(MacAddress SourceAddress, int RingPort
         switch (inState) {
         case AC_STAT1:
             if (inRole == INTERCONNECTION_MANAGER
-                    && SourceAddress == sourceAddress) {
+                    && SourceAddress == localBridgeAddress) {
                 setPortState(interconnectionPort, MrpInterfaceData::BLOCKED);
                 inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
                 inTestRetransmissionCount = 0;
@@ -688,7 +688,7 @@ void MrpInterconnection::interconnTestInd(MacAddress SourceAddress, int RingPort
             delete packet;
             break;
         case CHK_IO:
-            if (SourceAddress == sourceAddress) {
+            if (SourceAddress == localBridgeAddress) {
                 setPortState(interconnectionPort, MrpInterfaceData::BLOCKED);
                 interconnTopologyChangeReq(inTopologyChangeInterval);
                 inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
@@ -699,7 +699,7 @@ void MrpInterconnection::interconnTestInd(MacAddress SourceAddress, int RingPort
             delete packet;
             break;
         case CHK_IC:
-            if (SourceAddress == sourceAddress) {
+            if (SourceAddress == localBridgeAddress) {
                 inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
                 inTestRetransmissionCount = 0;
             }
@@ -752,21 +752,21 @@ void MrpInterconnection::setupInterconnTestReq() {
     inTestFrameSent.insert( { sequenceID, lastInTestFrameSent });
 
     InTestTLV1->setInID(interConnectionID);
-    InTestTLV1->setSa(sourceAddress);
+    InTestTLV1->setSa(localBridgeAddress);
     InTestTLV1->setInState(currentInterconnectionState);
     InTestTLV1->setTransition(transition);
     InTestTLV1->setTimeStamp(timestamp);
     InTestTLV1->setPortRole(MrpInterfaceData::INTERCONNECTION);
 
     InTestTLV2->setInID(interConnectionID);
-    InTestTLV2->setSa(sourceAddress);
+    InTestTLV2->setSa(localBridgeAddress);
     InTestTLV2->setInState(currentInterconnectionState);
     InTestTLV2->setTransition(transition);
     InTestTLV2->setTimeStamp(timestamp);
     InTestTLV2->setPortRole(MrpInterfaceData::PRIMARY);
 
     InTestTLV3->setInID(interConnectionID);
-    InTestTLV3->setSa(sourceAddress);
+    InTestTLV3->setSa(localBridgeAddress);
     InTestTLV3->setInState(currentInterconnectionState);
     InTestTLV3->setTransition(transition);
     InTestTLV3->setTimeStamp(timestamp);
@@ -822,7 +822,7 @@ void MrpInterconnection::setupInterconnTopologyChangeReq(double Time) {
     auto EndTLV = makeShared<TlvHeader>();
 
     InTopologyChangeTLV->setInID(interConnectionID);
-    InTopologyChangeTLV->setSa(sourceAddress);
+    InTopologyChangeTLV->setSa(localBridgeAddress);
     InTopologyChangeTLV->setInterval(Time);
 
     CommonTLV->setSequenceID(sequenceID);
@@ -878,21 +878,21 @@ void MrpInterconnection::interconnLinkChangeReq(uint16_t LinkState, double Time)
 
     InLinkChangeTLV1->setHeaderType(type);
     InLinkChangeTLV1->setInID(interConnectionID);
-    InLinkChangeTLV1->setSa(sourceAddress);
+    InLinkChangeTLV1->setSa(localBridgeAddress);
     InLinkChangeTLV1->setPortRole(MrpInterfaceData::PRIMARY);
     InLinkChangeTLV1->setInterval(Time);
     InLinkChangeTLV1->setLinkInfo(LinkState);
 
     InLinkChangeTLV2->setHeaderType(type);
     InLinkChangeTLV2->setInID(interConnectionID);
-    InLinkChangeTLV2->setSa(sourceAddress);
+    InLinkChangeTLV2->setSa(localBridgeAddress);
     InLinkChangeTLV2->setPortRole(MrpInterfaceData::SECONDARY);
     InLinkChangeTLV2->setInterval(Time);
     InLinkChangeTLV2->setLinkInfo(LinkState);
 
     InLinkChangeTLV3->setHeaderType(type);
     InLinkChangeTLV3->setInID(interConnectionID);
-    InLinkChangeTLV3->setSa(sourceAddress);
+    InLinkChangeTLV3->setSa(localBridgeAddress);
     InLinkChangeTLV3->setPortRole(MrpInterfaceData::INTERCONNECTION);
     InLinkChangeTLV3->setInterval(Time);
     InLinkChangeTLV3->setLinkInfo(LinkState);
@@ -953,15 +953,15 @@ void MrpInterconnection::setupInterconnLinkStatusPollReq() {
     auto EndTLV = makeShared<TlvHeader>();
 
     InLinkStatusPollTLV1->setInID(interConnectionID);
-    InLinkStatusPollTLV1->setSa(sourceAddress);
+    InLinkStatusPollTLV1->setSa(localBridgeAddress);
     InLinkStatusPollTLV1->setPortRole(MrpInterfaceData::INTERCONNECTION);
 
     InLinkStatusPollTLV2->setInID(interConnectionID);
-    InLinkStatusPollTLV2->setSa(sourceAddress);
+    InLinkStatusPollTLV2->setSa(localBridgeAddress);
     InLinkStatusPollTLV2->setPortRole(MrpInterfaceData::PRIMARY);
 
     InLinkStatusPollTLV3->setInID(interConnectionID);
-    InLinkStatusPollTLV3->setSa(sourceAddress);
+    InLinkStatusPollTLV3->setSa(localBridgeAddress);
     InLinkStatusPollTLV3->setPortRole(MrpInterfaceData::SECONDARY);
 
     CommonTLV->setSequenceID(sequenceID);

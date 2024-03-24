@@ -175,7 +175,7 @@ void Mrp::initialize(int stage) {
         initPortTable();
         //set interface and change Port-Indexes to Port-IDs
         setRingInterfaces(primaryRingPort, secondaryRingPort);
-        sourceAddress = relay->getBridgeAddress();
+        localBridgeAddress = relay->getBridgeAddress();
         initRingPorts();
         EV_DETAIL << "Initialize MRP link layer" << EV_ENDL;
         linkUpHysteresisTimer = new cMessage("linkUpHysteresisTimer");
@@ -517,7 +517,7 @@ void Mrp::handleMrpPDU(Packet* Packet) {
         EV_DETAIL << "Received Test-Frame" << EV_ENDL;
         auto testTLV = dynamicPtrCast<const TestFrame>(firstTLV);
         if (ringID) {
-            if (testTLV->getSa() == sourceAddress) {
+            if (testTLV->getSa() == localBridgeAddress) {
                 auto ringTime = simTime().inUnit(SIMTIME_MS) - testTLV->getTimeStamp();
                 auto lastTestFrameSent = testFrameSent.find(sequence);
                 if (lastTestFrameSent != testFrameSent.end()) {
@@ -787,7 +787,7 @@ void Mrp::clearLocalFDBDelayed() {
 bool Mrp::isBetterThanOwnPrio(MrpPriority RemotePrio, MacAddress RemoteAddress) {
     if (RemotePrio < managerPrio)
         return true;
-    if (RemotePrio == managerPrio && RemoteAddress < sourceAddress)
+    if (RemotePrio == managerPrio && RemoteAddress < localBridgeAddress)
         return true;
     return false;
 }
@@ -1031,14 +1031,14 @@ void Mrp::setupTestRingReq() {
     testFrameSent.insert( { sequenceID, lastTestFrameSent });
 
     TestTLV1->setPrio(managerPrio);
-    TestTLV1->setSa(sourceAddress);
+    TestTLV1->setSa(localBridgeAddress);
     TestTLV1->setPortRole(MrpInterfaceData::PRIMARY);
     TestTLV1->setRingState(currentRingState);
     TestTLV1->setTransition(transition);
     TestTLV1->setTimeStamp(timestamp);
 
     TestTLV2->setPrio(managerPrio);
-    TestTLV2->setSa(sourceAddress);
+    TestTLV2->setSa(localBridgeAddress);
     TestTLV2->setPortRole(MrpInterfaceData::PRIMARY);
     TestTLV2->setRingState(currentRingState);
     TestTLV2->setTransition(transition);
@@ -1089,12 +1089,12 @@ void Mrp::setupTopologyChangeReq(uint32_t Interval) {
     auto EndTLV = makeShared<TlvHeader>();
 
     TopologyChangeTLV->setPrio(managerPrio);
-    TopologyChangeTLV->setSa(sourceAddress);
+    TopologyChangeTLV->setSa(localBridgeAddress);
     TopologyChangeTLV->setPortRole(MrpInterfaceData::PRIMARY);
     TopologyChangeTLV->setInterval(Interval);
     TopologyChangeTLV2->setPrio(managerPrio);
     TopologyChangeTLV2->setPortRole(MrpInterfaceData::SECONDARY);
-    TopologyChangeTLV2->setSa(sourceAddress);
+    TopologyChangeTLV2->setSa(localBridgeAddress);
     TopologyChangeTLV2->setInterval(Interval);
 
     CommonTLV->setSequenceID(sequenceID);
@@ -1134,7 +1134,7 @@ void Mrp::setupLinkChangeReq(int RingPort, uint16_t LinkState, double Time) {
     } else {
         throw cRuntimeError("Unknown LinkState in linkChangeRequest");
     }
-    LinkChangeTLV->setSa(sourceAddress);
+    LinkChangeTLV->setSa(localBridgeAddress);
     LinkChangeTLV->setPortRole(getPortRole(RingPort));
     LinkChangeTLV->setInterval(Time);
     LinkChangeTLV->setBlocked(LinkState);
@@ -1164,7 +1164,7 @@ void Mrp::testMgrNackReq(int RingPort, MrpPriority ManagerPrio, MacAddress Sourc
 
     TestMgrTLV->setSubType(SubTlvHeaderType::TEST_MGR_NACK);
     TestMgrTLV->setPrio(managerPrio);
-    TestMgrTLV->setSa(sourceAddress);
+    TestMgrTLV->setSa(localBridgeAddress);
     TestMgrTLV->setOtherMRMPrio(0x00);
     TestMgrTLV->setOtherMRMSa(SourceAddress);
 
@@ -1210,7 +1210,7 @@ void Mrp::testPropagateReq(int RingPort, MrpPriority ManagerPrio, MacAddress Sou
     auto EndTLV = makeShared<TlvHeader>();
 
     TestMgrTLV->setPrio(managerPrio);
-    TestMgrTLV->setSa(sourceAddress);
+    TestMgrTLV->setSa(localBridgeAddress);
     TestMgrTLV->setOtherMRMPrio(ManagerPrio);
     TestMgrTLV->setOtherMRMSa(SourceAddress);
 
@@ -1253,7 +1253,7 @@ void Mrp::testRingInd(int RingPort, MacAddress SourceAddress, MrpPriority Manage
     case AC_STAT1:
         break;
     case PRM_UP:
-        if (SourceAddress == sourceAddress) {
+        if (SourceAddress == localBridgeAddress) {
             testMaxRetransmissionCount = testMonitoringCount - 1;
             testRetransmissionCount = 0;
             noTopologyChange = false;
@@ -1269,7 +1269,7 @@ void Mrp::testRingInd(int RingPort, MacAddress SourceAddress, MrpPriority Manage
         //all other cases: ignore
         break;
     case CHK_RO:
-        if (SourceAddress == sourceAddress) {
+        if (SourceAddress == localBridgeAddress) {
             setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
             testMaxRetransmissionCount = testMonitoringCount - 1;
             testRetransmissionCount = 0;
@@ -1292,7 +1292,7 @@ void Mrp::testRingInd(int RingPort, MacAddress SourceAddress, MrpPriority Manage
         //all other cases: ignore
         break;
     case CHK_RC:
-        if (SourceAddress == sourceAddress) {
+        if (SourceAddress == localBridgeAddress) {
             testMaxRetransmissionCount = testMonitoringCount - 1;
             testRetransmissionCount = 0;
             noTopologyChange = false;
@@ -1305,11 +1305,11 @@ void Mrp::testRingInd(int RingPort, MacAddress SourceAddress, MrpPriority Manage
     case DE_IDLE:
     case PT:
     case PT_IDLE:
-        if (expectedRole == MANAGER_AUTO && SourceAddress != sourceAddress
+        if (expectedRole == MANAGER_AUTO && SourceAddress != localBridgeAddress
                 && SourceAddress == hostBestMRMSourceAddress) {
             if (ManagerPrio < managerPrio
                     || (ManagerPrio == managerPrio
-                            && SourceAddress < sourceAddress)) {
+                            && SourceAddress < localBridgeAddress)) {
                 monNReturn = 0;
             }
             hostBestMRMPriority = ManagerPrio;
@@ -1328,7 +1328,7 @@ void Mrp::topologyChangeInd(MacAddress SourceAddress, double Time) {
     case PRM_UP:
     case CHK_RO:
     case CHK_RC:
-        if (SourceAddress != sourceAddress) {
+        if (SourceAddress != localBridgeAddress) {
             clearFDB(Time);
         }
         break;
@@ -1476,8 +1476,8 @@ void Mrp::testMgrNackInd(int RingPort, MacAddress SourceAddress, MrpPriority Man
     case PT_IDLE:
         break;
     case PRM_UP:
-        if (expectedRole == MANAGER_AUTO && SourceAddress != sourceAddress
-                && BestMRMSourceAddress == sourceAddress) {
+        if (expectedRole == MANAGER_AUTO && SourceAddress != localBridgeAddress
+                && BestMRMSourceAddress == localBridgeAddress) {
             if (isBetterThanBestPrio(ManagerPrio, SourceAddress)) {
                 hostBestMRMSourceAddress = SourceAddress;
                 hostBestMRMPriority = ManagerPrio;
@@ -1490,8 +1490,8 @@ void Mrp::testMgrNackInd(int RingPort, MacAddress SourceAddress, MrpPriority Man
         }
         break;
     case CHK_RO:
-        if (expectedRole == MANAGER_AUTO && SourceAddress != sourceAddress
-                && BestMRMSourceAddress == sourceAddress) {
+        if (expectedRole == MANAGER_AUTO && SourceAddress != localBridgeAddress
+                && BestMRMSourceAddress == localBridgeAddress) {
             if (isBetterThanBestPrio(ManagerPrio, SourceAddress)) {
                 hostBestMRMSourceAddress = SourceAddress;
                 hostBestMRMPriority = ManagerPrio;
@@ -1504,8 +1504,8 @@ void Mrp::testMgrNackInd(int RingPort, MacAddress SourceAddress, MrpPriority Man
         }
         break;
     case CHK_RC:
-        if (expectedRole == MANAGER_AUTO && SourceAddress != sourceAddress
-                && BestMRMSourceAddress == sourceAddress) {
+        if (expectedRole == MANAGER_AUTO && SourceAddress != localBridgeAddress
+                && BestMRMSourceAddress == localBridgeAddress) {
             if (isBetterThanBestPrio(ManagerPrio, SourceAddress)) {
                 hostBestMRMSourceAddress = SourceAddress;
                 hostBestMRMPriority = ManagerPrio;
@@ -1535,7 +1535,7 @@ void Mrp::testPropagateInd(int RingPort, MacAddress SourceAddress, MrpPriority M
     case DE_IDLE:
     case PT:
     case PT_IDLE:
-        if (expectedRole == MANAGER_AUTO && SourceAddress != sourceAddress
+        if (expectedRole == MANAGER_AUTO && SourceAddress != localBridgeAddress
                 && SourceAddress == hostBestMRMSourceAddress) {
             hostBestMRMSourceAddress = BestMRMSourceAddress;
             hostBestMRMPriority = BestMRMPrio;
