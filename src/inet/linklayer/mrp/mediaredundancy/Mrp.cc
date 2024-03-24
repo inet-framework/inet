@@ -147,7 +147,7 @@ void Mrp::initialize(int stage) {
         interconnectionRingCheckAware = par("interconnectionRingCheckAware");
         enableLinkCheckOnRing = par("enableLinkCheckOnRing");
         //manager variables
-        managerPrio = static_cast<MrpPriority>(par("mrpPriority").intValue());
+        localManagerPrio = static_cast<MrpPriority>(par("mrpPriority").intValue());
         nonBlockingMRC = par("nonBlockingMRC");
         reactOnLinkChange = par("reactOnLinkChange");
         checkMediaRedundancy = par("checkMediaRedundancy");
@@ -354,7 +354,7 @@ void Mrp::mrcInit() {
 }
 
 void Mrp::mrmInit() {
-    managerPrio = DEFAULT;
+    localManagerPrio = DEFAULT;
     currentRingState = OPEN;
     addTest = false;
     testRetransmissionCount = 0;
@@ -380,7 +380,7 @@ void Mrp::mrmInit() {
 }
 
 void Mrp::mraInit() {
-    managerPrio = MRADEFAULT;
+    localManagerPrio = MRADEFAULT;
     currentRingState = OPEN;
     addTest = false;
     testRetransmissionCount = 0;
@@ -785,9 +785,9 @@ void Mrp::clearLocalFDBDelayed() {
 }
 
 bool Mrp::isBetterThanOwnPrio(MrpPriority RemotePrio, MacAddress RemoteAddress) {
-    if (RemotePrio < managerPrio)
+    if (RemotePrio < localManagerPrio)
         return true;
-    if (RemotePrio == managerPrio && RemoteAddress < localBridgeAddress)
+    if (RemotePrio == localManagerPrio && RemoteAddress < localBridgeAddress)
         return true;
     return false;
 }
@@ -1030,14 +1030,14 @@ void Mrp::setupTestRingReq() {
     auto lastTestFrameSent = simTime().inUnit(SIMTIME_US);
     testFrameSent.insert( { sequenceID, lastTestFrameSent });
 
-    TestTLV1->setPrio(managerPrio);
+    TestTLV1->setPrio(localManagerPrio);
     TestTLV1->setSa(localBridgeAddress);
     TestTLV1->setPortRole(MrpInterfaceData::PRIMARY);
     TestTLV1->setRingState(currentRingState);
     TestTLV1->setTransition(transition);
     TestTLV1->setTimeStamp(timestamp);
 
-    TestTLV2->setPrio(managerPrio);
+    TestTLV2->setPrio(localManagerPrio);
     TestTLV2->setSa(localBridgeAddress);
     TestTLV2->setPortRole(MrpInterfaceData::PRIMARY);
     TestTLV2->setRingState(currentRingState);
@@ -1088,11 +1088,11 @@ void Mrp::setupTopologyChangeReq(uint32_t Interval) {
     auto CommonTLV = makeShared<CommonHeader>();
     auto EndTLV = makeShared<TlvHeader>();
 
-    TopologyChangeTLV->setPrio(managerPrio);
+    TopologyChangeTLV->setPrio(localManagerPrio);
     TopologyChangeTLV->setSa(localBridgeAddress);
     TopologyChangeTLV->setPortRole(MrpInterfaceData::PRIMARY);
     TopologyChangeTLV->setInterval(Interval);
-    TopologyChangeTLV2->setPrio(managerPrio);
+    TopologyChangeTLV2->setPrio(localManagerPrio);
     TopologyChangeTLV2->setPortRole(MrpInterfaceData::SECONDARY);
     TopologyChangeTLV2->setSa(localBridgeAddress);
     TopologyChangeTLV2->setInterval(Interval);
@@ -1163,7 +1163,7 @@ void Mrp::testMgrNackReq(int RingPort, MrpPriority ManagerPrio, MacAddress Sourc
     auto EndTLV = makeShared<TlvHeader>();
 
     TestMgrTLV->setSubType(SubTlvHeaderType::TEST_MGR_NACK);
-    TestMgrTLV->setPrio(managerPrio);
+    TestMgrTLV->setPrio(localManagerPrio);
     TestMgrTLV->setSa(localBridgeAddress);
     TestMgrTLV->setOtherMRMPrio(0x00);
     TestMgrTLV->setOtherMRMSa(SourceAddress);
@@ -1209,7 +1209,7 @@ void Mrp::testPropagateReq(int RingPort, MrpPriority ManagerPrio, MacAddress Sou
     auto CommonTLV = makeShared<CommonHeader>();
     auto EndTLV = makeShared<TlvHeader>();
 
-    TestMgrTLV->setPrio(managerPrio);
+    TestMgrTLV->setPrio(localManagerPrio);
     TestMgrTLV->setSa(localBridgeAddress);
     TestMgrTLV->setOtherMRMPrio(ManagerPrio);
     TestMgrTLV->setOtherMRMSa(SourceAddress);
@@ -1307,8 +1307,8 @@ void Mrp::testRingInd(int RingPort, MacAddress SourceAddress, MrpPriority Manage
     case PT_IDLE:
         if (expectedRole == MANAGER_AUTO && SourceAddress != localBridgeAddress
                 && SourceAddress == hostBestMRMSourceAddress) {
-            if (ManagerPrio < managerPrio
-                    || (ManagerPrio == managerPrio
+            if (ManagerPrio < localManagerPrio
+                    || (ManagerPrio == localManagerPrio
                             && SourceAddress < localBridgeAddress)) {
                 monNReturn = 0;
             }
