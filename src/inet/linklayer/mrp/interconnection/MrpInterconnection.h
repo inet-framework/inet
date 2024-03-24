@@ -74,14 +74,14 @@ protected:
     cMessage *inLinkTestTimer = nullptr;
     cMessage *inTopologyChangeTimer = nullptr;
 
-    simsignal_t InLinkChangeSignal;
-    simsignal_t InTopologyChangeSignal;
-    simsignal_t InStatusPollSignal;
-    simsignal_t InTestSignal;
-    simsignal_t ReceivedInChangeSignal;
-    simsignal_t ReceivedInTestSignal;
-    simsignal_t ReceivedInStatusPollSignal;
-    simsignal_t InterconnectionStateChangedSignal;
+    simsignal_t inLinkChangeSignal;
+    simsignal_t inTopologyChangeSignal;
+    simsignal_t inStatusPollSignal;
+    simsignal_t inTestSignal;
+    simsignal_t receivedInChangeSignal;
+    simsignal_t receivedInTestSignal;
+    simsignal_t receivedInStatusPollSignal;
+    simsignal_t interconnectionStateChangedSignal;
 
 protected:
     virtual void start() override;
