@@ -33,7 +33,7 @@ void MrpInterconnection::initialize(int stage) {
     Mrp::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         interconnectionName = par("InterconnectionName").stdstringValue();
-        inRole = static_cast<inRoleState>(par("interconnectionRole").intValue());
+        inRole = static_cast<InRoleState>(par("interconnectionRole").intValue());
         interConnectionID = par("interconnectionID");
         interconnectionPort = par("interconnectionPort");
         linkCheckEnabled = par("linkCheckEnabled");
@@ -995,7 +995,7 @@ void MrpInterconnection::setupInterconnLinkStatusPollReq() {
     emit(InStatusPollSignal, simTime().inUnit(SIMTIME_US));
 }
 
-void MrpInterconnection::inTransferReq(TlvHeaderType HeaderType, int RingPort, frameType FrameType, Packet *packet) {
+void MrpInterconnection::inTransferReq(TlvHeaderType HeaderType, int RingPort, FrameType FrameType, Packet *packet) {
     auto macAddressInd = packet->getTag<MacAddressInd>();
     auto sourceAddress = macAddressInd->getSrcAddress();
     packet->trim();
@@ -1004,7 +1004,7 @@ void MrpInterconnection::inTransferReq(TlvHeaderType HeaderType, int RingPort, f
     sendFrameReq(interconnectionPort, static_cast<MacAddress>(FrameType), sourceAddress, priority, MRP_LT, packet);
 }
 
-void MrpInterconnection::mrpForwardReq(TlvHeaderType HeaderType, int Ringport, frameType FrameType, Packet *packet) {
+void MrpInterconnection::mrpForwardReq(TlvHeaderType HeaderType, int Ringport, FrameType FrameType, Packet *packet) {
     auto macAddressInd = packet->getTag<MacAddressInd>();
     auto SourceAddress = macAddressInd->getSrcAddress();
     packet->trim();

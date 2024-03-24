@@ -11,34 +11,34 @@ namespace inet {
 /**
  * Converts between PDU and binary (network byte order) MRP PDU packets.
  */
-class INET_API mrpTlvSerializer: public FieldsChunkSerializer {
+class INET_API MrpTlvSerializer: public FieldsChunkSerializer {
 protected:
     virtual void serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream &stream) const override;
 
 public:
-    mrpTlvSerializer() :
+    MrpTlvSerializer() :
             FieldsChunkSerializer() {
     }
 };
 
-class INET_API mrpVersionFieldSerializer: public FieldsChunkSerializer {
+class INET_API MrpVersionFieldSerializer: public FieldsChunkSerializer {
 protected:
     virtual void serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream &stream) const override;
 
 public:
-    mrpVersionFieldSerializer() :
+    MrpVersionFieldSerializer() :
             FieldsChunkSerializer() {
     }
 };
-class INET_API mrpSubTlvSerializer: public FieldsChunkSerializer {
+class INET_API MrpSubTlvSerializer: public FieldsChunkSerializer {
 protected:
     virtual void serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream &stream) const override;
 
 public:
-    mrpSubTlvSerializer() :
+    MrpSubTlvSerializer() :
             FieldsChunkSerializer() {
     }
 };
