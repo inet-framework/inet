@@ -102,7 +102,7 @@ protected:
     uint16_t lastTopologyId = 0;
     uint16_t ccm1ID = 0;
     uint16_t ccm2ID = 0;
-    MacAddress sourceAddress;
+    MacAddress localBridgeAddress;
     opp_component_ptr<NetworkInterface> ringInterface1 = nullptr;
     opp_component_ptr<NetworkInterface> ringInterface2 = nullptr;
     int primaryRingPort;
