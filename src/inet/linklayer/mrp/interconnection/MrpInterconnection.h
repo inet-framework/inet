@@ -19,7 +19,7 @@ namespace inet {
  */
 class INET_API MrpInterconnection: public Mrp {
 protected:
-    enum inNodeState : uint16_t {
+    enum InNodeState : uint16_t {
         POWER_ON, AC_STAT1, //waiting for the first Link Up at one of its ring ports, starting test monitoring of the ring
 
         //InterconnectionManager States
@@ -31,11 +31,11 @@ protected:
         IP_IDLE,
     };
 
-    enum inRoleState : uint16_t {
+    enum InRoleState : uint16_t {
         INTERCONNECTION_CLIENT = 1, INTERCONNECTION_MANAGER = 2,
     };
 
-    enum interConnectionState : uint16_t {
+    enum InterConnectionState : uint16_t {
         OPEN = 0x0000, CLOSED = 0x0001,
     };
 
@@ -43,10 +43,10 @@ protected:
     std::string interconnectionName;
     bool linkCheckEnabled = true;
     bool ringCheckEnabled = false;
-    inRoleState inRole = INTERCONNECTION_CLIENT;
+    InRoleState inRole = INTERCONNECTION_CLIENT;
 
-    inNodeState inState = POWER_ON;
-    interConnectionState currentInterconnectionState = OPEN;
+    InNodeState inState = POWER_ON;
+    InterConnectionState currentInterconnectionState = OPEN;
     uint16_t lastPollId = 0;
     uint16_t lastInTopologyId = 0;
     FrameSentDatabase inTestFrameSent;
@@ -100,8 +100,8 @@ protected:
     virtual void interconnTopologyChangeReq(double Time);
     virtual void interconnLinkChangeReq(uint16_t LinkState, double Time);
     virtual void interconnLinkStatusPollReq(double Time);
-    virtual void inTransferReq(TlvHeaderType HeaderType, int RingPort, frameType FrameType, Packet *packet);
-    virtual void mrpForwardReq(TlvHeaderType HeaderType, int Ringport, frameType FrameType, Packet *packet);
+    virtual void inTransferReq(TlvHeaderType HeaderType, int RingPort, FrameType FrameType, Packet *packet);
+    virtual void mrpForwardReq(TlvHeaderType HeaderType, int Ringport, FrameType FrameType, Packet *packet);
     virtual void setupInterconnTestReq();
     virtual void setupInterconnTopologyChangeReq(double Time);
     virtual void setupInterconnLinkStatusPollReq();

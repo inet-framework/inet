@@ -8,26 +8,26 @@
 
 namespace inet {
 
-Register_Serializer(TlvHeader, mrpTlvSerializer);
-Register_Serializer(TestFrame, mrpTlvSerializer);
-Register_Serializer(TopologyChangeFrame, mrpTlvSerializer);
-Register_Serializer(LinkChangeFrame, mrpTlvSerializer);
-Register_Serializer(InLinkChangeFrame, mrpTlvSerializer);
-Register_Serializer(InLinkStatusPollFrame, mrpTlvSerializer);
-Register_Serializer(InTopologyChangeFrame, mrpTlvSerializer);
-Register_Serializer(CommonHeader, mrpTlvSerializer);
-Register_Serializer(OptionHeader, mrpTlvSerializer);
-Register_Serializer(SubTlvHeader, mrpSubTlvSerializer);
-Register_Serializer(ManufacturerFktHeader, mrpSubTlvSerializer);
-Register_Serializer(SubTlvTestFrame, mrpSubTlvSerializer);
-Register_Serializer(MrpVersionField, mrpVersionFieldSerializer);
+Register_Serializer(TlvHeader, MrpTlvSerializer);
+Register_Serializer(TestFrame, MrpTlvSerializer);
+Register_Serializer(TopologyChangeFrame, MrpTlvSerializer);
+Register_Serializer(LinkChangeFrame, MrpTlvSerializer);
+Register_Serializer(InLinkChangeFrame, MrpTlvSerializer);
+Register_Serializer(InLinkStatusPollFrame, MrpTlvSerializer);
+Register_Serializer(InTopologyChangeFrame, MrpTlvSerializer);
+Register_Serializer(CommonHeader, MrpTlvSerializer);
+Register_Serializer(OptionHeader, MrpTlvSerializer);
+Register_Serializer(SubTlvHeader, MrpSubTlvSerializer);
+Register_Serializer(ManufacturerFktHeader, MrpSubTlvSerializer);
+Register_Serializer(SubTlvTestFrame, MrpSubTlvSerializer);
+Register_Serializer(MrpVersionField, MrpVersionFieldSerializer);
 
-void mrpVersionFieldSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const {
+void MrpVersionFieldSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const {
     const auto &version = staticPtrCast<const MrpVersionField>(chunk);
     stream.writeUint16Be(version->getVersion());
 }
 
-void mrpTlvSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const {
+void MrpTlvSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const {
     const auto &tlv = staticPtrCast<const TlvHeader>(chunk);
     stream.writeUint8(tlv->getHeaderType());
     stream.writeUint8(tlv->getHeaderLength());
@@ -117,7 +117,7 @@ void mrpTlvSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chu
     }
 }
 
-void mrpSubTlvSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const {
+void MrpSubTlvSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const {
     const auto &subTlv = staticPtrCast<const SubTlvHeader>(chunk);
     stream.writeUint8(subTlv->getSubType());
     stream.writeUint8(subTlv->getSubHeaderLength());
@@ -141,13 +141,13 @@ void mrpSubTlvSerializer::serialize(MemoryOutputStream &stream, const Ptr<const 
     }
 }
 
-const Ptr<Chunk> mrpVersionFieldSerializer::deserialize(MemoryInputStream &stream) const {
+const Ptr<Chunk> MrpVersionFieldSerializer::deserialize(MemoryInputStream &stream) const {
     auto mrpVersion = makeShared<MrpVersionField>();
     mrpVersion->setVersion(stream.readUint16Be());
     return mrpVersion;
 }
 
-const Ptr<Chunk> mrpTlvSerializer::deserialize(MemoryInputStream &stream) const {
+const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const {
     auto headerType = static_cast<TlvHeaderType>(stream.readUint16Be());
     switch (headerType) {
     case END: {
@@ -254,7 +254,7 @@ const Ptr<Chunk> mrpTlvSerializer::deserialize(MemoryInputStream &stream) const 
     }
 }
 
-const Ptr<Chunk> mrpSubTlvSerializer::deserialize(MemoryInputStream &stream) const {
+const Ptr<Chunk> MrpSubTlvSerializer::deserialize(MemoryInputStream &stream) const {
     auto subType = static_cast<SubTlvHeaderType>(stream.readUint8());
     switch (subType) {
     case RESERVED: {
