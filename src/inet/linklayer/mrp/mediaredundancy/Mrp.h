@@ -121,7 +121,7 @@ protected:
     bool reactOnLinkChange = true;
     bool checkMediaRedundancy = false;
     bool noTopologyChange = false;
-    MrpPriority managerPrio = DEFAULT;
+    MrpPriority localManagerPrio = DEFAULT;
 
     //Variables needed for Automanager
     MacAddress hostBestMRMSourceAddress;
