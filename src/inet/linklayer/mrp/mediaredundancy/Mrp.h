@@ -25,7 +25,7 @@ class INET_API Mrp: public OperationalBase, public cListener {
 protected:
     typedef std::map<uint16_t, int64_t> FrameSentDatabase;
 
-    enum frameType : uint64_t {
+    enum FrameType : uint64_t {
         MC_RESERVED = 0x000001154E000000,
         MC_TEST = 0x000001154E000001,
         MC_CONTROL = 0x000001154E000002,
@@ -39,13 +39,13 @@ protected:
         uint64_t uuid1 = 0;
     };
 
-    enum ringState : uint16_t {
+    enum RingState : uint16_t {
         OPEN = 0x0000,
         CLOSED = 0x0001,
         UNDEFINED = 0x0003,
     };
 
-    enum mrpRole : uint16_t {
+    enum MrpRole : uint16_t {
         DISABLED = 0,
         CLIENT = 1,
         MANAGER = 2,
@@ -53,7 +53,7 @@ protected:
         MANAGER_AUTO = 4,
     };
 
-    enum mrpPriority : uint16_t {
+    enum MrpPriority : uint16_t {
         HIGHEST = 0x0000,
         HIGH = 0x4000,
         DEFAULT = 0x8000,
@@ -62,7 +62,7 @@ protected:
         MRALOWEST = 0xFFFF,
     };
 
-    enum nodeState {
+    enum NodeState {
         POWER_ON,
         AC_STAT1, //waiting for the first Link Up at one of its ring ports, starting test monitoring of the ring
 
@@ -93,10 +93,10 @@ protected:
     bool enableLinkCheckOnRing = false;
     simtime_t linkDetectionDelay;
     simtime_t processingDelay;
-    mrpRole expectedRole = DISABLED;
+    MrpRole expectedRole = DISABLED;
 
-    nodeState currentState = POWER_ON;
-    ringState currentRingState = OPEN;
+    NodeState currentState = POWER_ON;
+    RingState currentRingState = OPEN;
     uint16_t transition = 0;
     uint16_t sequenceID = 0;
     uint16_t lastTopologyId = 0;
@@ -121,11 +121,11 @@ protected:
     bool reactOnLinkChange = true;
     bool checkMediaRedundancy = false;
     bool noTopologyChange = false;
-    mrpPriority managerPrio = DEFAULT;
+    MrpPriority managerPrio = DEFAULT;
 
     //Variables needed for Automanager
     MacAddress hostBestMRMSourceAddress;
-    mrpPriority hostBestMRMPriority;
+    MrpPriority hostBestMRMPriority;
     uint16_t monNReturn;
     uint16_t monNRmax = 5;
     cMessage *linkUpHysterisisTimer = nullptr; //LNKUP_HYST_TIMER_RUNNING
@@ -203,8 +203,8 @@ protected:
     virtual void handleTopologyChangeTimer();
     virtual void clearLocalFDB();
     virtual void clearLocalFDBDelayed();
-    virtual bool isBetterThanOwnPrio(mrpPriority RemotePrio, MacAddress RemoteAddress);
-    virtual bool isBetterThanBestPrio(mrpPriority RemotePrio, MacAddress RemoteAddress);
+    virtual bool isBetterThanOwnPrio(MrpPriority RemotePrio, MacAddress RemoteAddress);
+    virtual bool isBetterThanBestPrio(MrpPriority RemotePrio, MacAddress RemoteAddress);
     virtual void handleTestTimer();
     virtual void handleLinkUpTimer();
     virtual void handleLinkDownTimer();
@@ -213,16 +213,16 @@ protected:
     virtual void setupTopologyChangeReq(uint32_t Interval);
     virtual void setupContinuityCheck(int RingPort);
     virtual void testRingReq(double Time);
-    virtual void testMgrNackReq(int RingPort, mrpPriority ManagerPrio, MacAddress SourceAddress);
-    virtual void testPropagateReq(int RingPort, mrpPriority ManagerPrio, MacAddress SourceAddress);
+    virtual void testMgrNackReq(int RingPort, MrpPriority ManagerPrio, MacAddress SourceAddress);
+    virtual void testPropagateReq(int RingPort, MrpPriority ManagerPrio, MacAddress SourceAddress);
     virtual void topologyChangeReq(double Time);
     virtual void linkChangeReq(int RingPort, uint16_t LinkState);
     virtual void setupLinkChangeReq(int RingPort, uint16_t LinkState, double Time);
-    virtual void testRingInd(int RingPort, MacAddress SourceAddress, mrpPriority ManagerPrio);
+    virtual void testRingInd(int RingPort, MacAddress SourceAddress, MrpPriority ManagerPrio);
     virtual void topologyChangeInd(MacAddress SourceAddress, double Time);
     virtual void linkChangeInd(uint16_t PortMode, uint16_t LinkState);
-    virtual void testMgrNackInd(int RingPort, MacAddress SourceAddress, mrpPriority ManagerPrio, MacAddress BestMRMSourceAddress);
-    virtual void testPropagateInd(int RingPort, MacAddress SourceAddress, mrpPriority ManagerPrio, MacAddress BestMRMSourceAddress, mrpPriority BestMRMPrio);
+    virtual void testMgrNackInd(int RingPort, MacAddress SourceAddress, MrpPriority ManagerPrio, MacAddress BestMRMSourceAddress);
+    virtual void testPropagateInd(int RingPort, MacAddress SourceAddress, MrpPriority ManagerPrio, MacAddress BestMRMSourceAddress, MrpPriority BestMRMPrio);
     virtual void mauTypeChangeInd(int RingPort, uint16_t LinkState);
     virtual void interconnTopologyChangeInd(MacAddress SourceAddress, double Time, uint16_t InID, int RingPort, Packet* Packet);
     virtual void interconnLinkChangeInd(uint16_t InID, uint16_t Linkstate, int RingPort, Packet* Packet);

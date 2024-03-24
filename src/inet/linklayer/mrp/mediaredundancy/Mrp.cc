@@ -135,7 +135,7 @@ void Mrp::initialize(int stage) {
 
         //parameters
         visualize = par("visualize");
-        expectedRole = static_cast<mrpRole>(par("mrpRole").intValue());
+        expectedRole = static_cast<MrpRole>(par("mrpRole").intValue());
         //currently only inferfaceIndex
         primaryRingPort = par("ringPort1");
         secondaryRingPort = par("ringPort2");
@@ -147,7 +147,7 @@ void Mrp::initialize(int stage) {
         interconnectionRingCheckAware = par("interconnectionRingCheckAware");
         enableLinkCheckOnRing = par("enableLinkCheckOnRing");
         //manager variables
-        managerPrio = static_cast<mrpPriority>(par("mrpPriority").intValue());
+        managerPrio = static_cast<MrpPriority>(par("mrpPriority").intValue());
         nonBlockingMRC = par("nonBlockingMRC");
         reactOnLinkChange = par("reactOnLinkChange");
         checkMediaRedundancy = par("checkMediaRedundancy");
@@ -395,7 +395,7 @@ void Mrp::mraInit() {
     addTest = false;
     reactOnLinkChange = false;
     hostBestMRMSourceAddress = static_cast<MacAddress>(0xFFFFFFFFFFFF);
-    hostBestMRMPriority = static_cast<mrpPriority>(0xFFFF);
+    hostBestMRMPriority = static_cast<MrpPriority>(0xFFFF);
     monNReturn = 0;
     currentState = AC_STAT1;
     mauTypeChangeInd(primaryRingPort, getPortNetworkInterface(primaryRingPort)->getState());
@@ -529,7 +529,7 @@ void Mrp::handleMrpPDU(Packet* Packet) {
                     EV_DETAIL << "RingTime" << EV_FIELD(ringTime) << EV_ENDL;
                 }
             }
-            testRingInd(RingPort, testTLV->getSa(), static_cast<mrpPriority>(testTLV->getPrio()));
+            testRingInd(RingPort, testTLV->getSa(), static_cast<MrpPriority>(testTLV->getPrio()));
         } else {
             EV_DETAIL << "Received packet from other Mrp-Domain"
                              << EV_FIELD(incomingInterface) << EV_FIELD(Packet)
@@ -606,14 +606,14 @@ void Mrp::handleMrpPDU(Packet* Packet) {
                 case TEST_MGR_NACK: {
                     if (expectedRole == MANAGER_AUTO) {
                         auto subOptionTLV = dynamicPtrCast<const SubTlvTestFrame>(subTLV);
-                        testMgrNackInd(RingPort, subOptionTLV->getSa(), static_cast<mrpPriority>(subOptionTLV->getPrio()), subOptionTLV->getOtherMRMSa());
+                        testMgrNackInd(RingPort, subOptionTLV->getSa(), static_cast<MrpPriority>(subOptionTLV->getPrio()), subOptionTLV->getOtherMRMSa());
                     }
                     break;
                 }
                 case TEST_PROPAGATE: {
                     if (expectedRole == MANAGER_AUTO) {
                         auto subOptionTLV = dynamicPtrCast<const SubTlvTestFrame>(subTLV);
-                        testPropagateInd(RingPort, subOptionTLV->getSa(), static_cast<mrpPriority>(subOptionTLV->getPrio()), subOptionTLV->getOtherMRMSa(), static_cast<mrpPriority>(subOptionTLV->getOtherMRMPrio()));
+                        testPropagateInd(RingPort, subOptionTLV->getSa(), static_cast<MrpPriority>(subOptionTLV->getPrio()), subOptionTLV->getOtherMRMSa(), static_cast<MrpPriority>(subOptionTLV->getOtherMRMPrio()));
                     }
                     break;
                 }
@@ -698,14 +698,14 @@ void Mrp::handleMrpPDU(Packet* Packet) {
             case TEST_MGR_NACK: {
                 if (expectedRole == MANAGER_AUTO) {
                     auto subOptionTLV = dynamicPtrCast<const SubTlvTestFrame>(subTLV);
-                    testMgrNackInd(RingPort, subOptionTLV->getSa(), static_cast<mrpPriority>(subOptionTLV->getPrio()), subOptionTLV->getOtherMRMSa());
+                    testMgrNackInd(RingPort, subOptionTLV->getSa(), static_cast<MrpPriority>(subOptionTLV->getPrio()), subOptionTLV->getOtherMRMSa());
                 }
                 break;
             }
             case TEST_PROPAGATE: {
                 if (expectedRole == MANAGER_AUTO) {
                     auto subOptionTLV = dynamicPtrCast<const SubTlvTestFrame>(subTLV);
-                    testPropagateInd(RingPort, subOptionTLV->getSa(), static_cast<mrpPriority>(subOptionTLV->getPrio()), subOptionTLV->getOtherMRMSa(), static_cast<mrpPriority>(subOptionTLV->getOtherMRMPrio()));
+                    testPropagateInd(RingPort, subOptionTLV->getSa(), static_cast<MrpPriority>(subOptionTLV->getPrio()), subOptionTLV->getOtherMRMSa(), static_cast<MrpPriority>(subOptionTLV->getOtherMRMPrio()));
                 }
                 break;
             }
@@ -784,7 +784,7 @@ void Mrp::clearLocalFDBDelayed() {
     EV_DETAIL << "FDB cleared" << EV_ENDL;
 }
 
-bool Mrp::isBetterThanOwnPrio(mrpPriority RemotePrio, MacAddress RemoteAddress) {
+bool Mrp::isBetterThanOwnPrio(MrpPriority RemotePrio, MacAddress RemoteAddress) {
     if (RemotePrio < managerPrio)
         return true;
     if (RemotePrio == managerPrio && RemoteAddress < sourceAddress)
@@ -792,7 +792,7 @@ bool Mrp::isBetterThanOwnPrio(mrpPriority RemotePrio, MacAddress RemoteAddress) 
     return false;
 }
 
-bool Mrp::isBetterThanBestPrio(mrpPriority RemotePrio, MacAddress RemoteAddress) {
+bool Mrp::isBetterThanBestPrio(MrpPriority RemotePrio, MacAddress RemoteAddress) {
     if (RemotePrio < hostBestMRMPriority)
         return true;
     if (RemotePrio == hostBestMRMPriority && RemoteAddress < hostBestMRMSourceAddress)
@@ -1154,7 +1154,7 @@ void Mrp::setupLinkChangeReq(int RingPort, uint16_t LinkState, double Time) {
     emit(LinkChangeSignal, Time);
 }
 
-void Mrp::testMgrNackReq(int RingPort, mrpPriority ManagerPrio, MacAddress SourceAddress) {
+void Mrp::testMgrNackReq(int RingPort, MrpPriority ManagerPrio, MacAddress SourceAddress) {
     //Create MRP-PDU according MRP_Option and Suboption2 MRP-TestMgrNack
     auto Version = makeShared<MrpVersionField>();
     auto OptionTLV = makeShared<OptionHeader>();
@@ -1201,7 +1201,7 @@ void Mrp::testMgrNackReq(int RingPort, mrpPriority ManagerPrio, MacAddress Sourc
     sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress2, priority, MRP_LT, packet2);
 }
 
-void Mrp::testPropagateReq(int RingPort, mrpPriority ManagerPrio, MacAddress SourceAddress) {
+void Mrp::testPropagateReq(int RingPort, MrpPriority ManagerPrio, MacAddress SourceAddress) {
     //Create MRP-PDU according MRP_Option and Suboption2 MRP-TestPropagate
     auto Version = makeShared<MrpVersionField>();
     auto OptionTLV = makeShared<OptionHeader>();
@@ -1247,7 +1247,7 @@ void Mrp::testPropagateReq(int RingPort, mrpPriority ManagerPrio, MacAddress Sou
     sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress2, priority, MRP_LT, packet2);
 }
 
-void Mrp::testRingInd(int RingPort, MacAddress SourceAddress, mrpPriority ManagerPrio) {
+void Mrp::testRingInd(int RingPort, MacAddress SourceAddress, MrpPriority ManagerPrio) {
     switch (currentState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1466,7 +1466,7 @@ void Mrp::linkChangeInd(uint16_t PortState, uint16_t LinkState) {
     }
 }
 
-void Mrp::testMgrNackInd(int RingPort, MacAddress SourceAddress, mrpPriority ManagerPrio, MacAddress BestMRMSourceAddress) {
+void Mrp::testMgrNackInd(int RingPort, MacAddress SourceAddress, MrpPriority ManagerPrio, MacAddress BestMRMSourceAddress) {
     switch (currentState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1523,7 +1523,7 @@ void Mrp::testMgrNackInd(int RingPort, MacAddress SourceAddress, mrpPriority Man
     }
 }
 
-void Mrp::testPropagateInd(int RingPort, MacAddress SourceAddress, mrpPriority ManagerPrio, MacAddress BestMRMSourceAddress, mrpPriority BestMRMPrio) {
+void Mrp::testPropagateInd(int RingPort, MacAddress SourceAddress, MrpPriority ManagerPrio, MacAddress BestMRMSourceAddress, MrpPriority BestMRMPrio) {
     switch (currentState) {
     case POWER_ON:
     case AC_STAT1:
