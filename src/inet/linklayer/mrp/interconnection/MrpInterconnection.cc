@@ -869,7 +869,7 @@ void MrpInterconnection::interconnLinkChangeReq(uint16_t LinkState, double Time)
     auto CommonTLV = makeShared<CommonHeader>();
     auto EndTLV = makeShared<TlvHeader>();
 
-    tlvHeaderType type = INLINKDOWN;
+    TlvHeaderType type = INLINKDOWN;
     if (LinkState == NetworkInterface::UP) {
         type = INLINKUP;
     } else if (LinkState == NetworkInterface::DOWN) {
@@ -995,7 +995,7 @@ void MrpInterconnection::setupInterconnLinkStatusPollReq() {
     emit(InStatusPollSignal, simTime().inUnit(SIMTIME_US));
 }
 
-void MrpInterconnection::inTransferReq(tlvHeaderType HeaderType, int RingPort, frameType FrameType, Packet *packet) {
+void MrpInterconnection::inTransferReq(TlvHeaderType HeaderType, int RingPort, frameType FrameType, Packet *packet) {
     auto macAddressInd = packet->getTag<MacAddressInd>();
     auto sourceAddress = macAddressInd->getSrcAddress();
     packet->trim();
@@ -1004,7 +1004,7 @@ void MrpInterconnection::inTransferReq(tlvHeaderType HeaderType, int RingPort, f
     sendFrameReq(interconnectionPort, static_cast<MacAddress>(FrameType), sourceAddress, priority, MRP_LT, packet);
 }
 
-void MrpInterconnection::mrpForwardReq(tlvHeaderType HeaderType, int Ringport, frameType FrameType, Packet *packet) {
+void MrpInterconnection::mrpForwardReq(TlvHeaderType HeaderType, int Ringport, frameType FrameType, Packet *packet) {
     auto macAddressInd = packet->getTag<MacAddressInd>();
     auto SourceAddress = macAddressInd->getSrcAddress();
     packet->trim();
