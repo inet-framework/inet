@@ -100,8 +100,8 @@ protected:
     virtual void interconnTopologyChangeReq(double Time);
     virtual void interconnLinkChangeReq(uint16_t LinkState, double Time);
     virtual void interconnLinkStatusPollReq(double Time);
-    virtual void inTransferReq(tlvHeaderType HeaderType, int RingPort, frameType FrameType, Packet *packet);
-    virtual void mrpForwardReq(tlvHeaderType HeaderType, int Ringport, frameType FrameType, Packet *packet);
+    virtual void inTransferReq(TlvHeaderType HeaderType, int RingPort, frameType FrameType, Packet *packet);
+    virtual void mrpForwardReq(TlvHeaderType HeaderType, int Ringport, frameType FrameType, Packet *packet);
     virtual void setupInterconnTestReq();
     virtual void setupInterconnTopologyChangeReq(double Time);
     virtual void setupInterconnLinkStatusPollReq();

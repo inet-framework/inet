@@ -148,7 +148,7 @@ const Ptr<Chunk> mrpVersionFieldSerializer::deserialize(MemoryInputStream &strea
 }
 
 const Ptr<Chunk> mrpTlvSerializer::deserialize(MemoryInputStream &stream) const {
-    auto headerType = static_cast<tlvHeaderType>(stream.readUint16Be());
+    auto headerType = static_cast<TlvHeaderType>(stream.readUint16Be());
     switch (headerType) {
     case END: {
         auto tlv = makeShared<TlvHeader>();
@@ -244,7 +244,7 @@ const Ptr<Chunk> mrpTlvSerializer::deserialize(MemoryInputStream &stream) const 
         auto tlv = makeShared<OptionHeader>();
         tlv->setHeaderType(headerType);
         tlv->setHeaderLength(stream.readUint8());
-        tlv->setOuiType(static_cast<mrpOuiType>(stream.readUint24Be()));
+        tlv->setOuiType(static_cast<MrpOuiType>(stream.readUint24Be()));
         tlv->setEd1Type(stream.readUint8());
         return tlv;
     }
@@ -255,7 +255,7 @@ const Ptr<Chunk> mrpTlvSerializer::deserialize(MemoryInputStream &stream) const 
 }
 
 const Ptr<Chunk> mrpSubTlvSerializer::deserialize(MemoryInputStream &stream) const {
-    auto subType = static_cast<subTlvHeaderType>(stream.readUint8());
+    auto subType = static_cast<SubTlvHeaderType>(stream.readUint8());
     switch (subType) {
     case RESERVED: {
         auto subTlv = makeShared<ManufacturerFktHeader>();

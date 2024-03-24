@@ -8,13 +8,13 @@ import inet.linklayer.common.MacAddress;
 namespace inet;
 
 //vendor Part of mac-Adress
-enum mrpOuiType {
+enum MrpOuiType {
     OUI = 0x000000;
     IEC = 0x00154E;
 };
 
 
-enum ed1DataLength {
+enum Ed1DataLength {
     LENGTH0 = 2; 	//tpye ed1 0x00
     LENGTH13 = 0; //type ed1 0x01-0x03
     LENGTH4 = 26; //type ed1 0x04
@@ -23,7 +23,7 @@ enum ed1DataLength {
 };
     
 
-enum tlvHeaderType {
+enum TlvHeaderType {
     END = 0x00;
     COMMON = 0x01;
     TEST = 0x02;
@@ -38,7 +38,7 @@ enum tlvHeaderType {
     OPTION = 0x7F;
 };
 
-enum subTlvHeaderType
+enum SubTlvHeaderType
 {
     RESERVED = 0x00;
 	TEST_MGR_NACK= 0x01;
@@ -49,9 +49,8 @@ enum subTlvHeaderType
 class TlvHeader extends FieldsChunk //equals endHeader
 {
     chunkLength = B(2);
-    tlvHeaderType headerType = END; 
+    TlvHeaderType headerType = END; 
     uint8_t headerLength = 0;
-	                          
 }
 
 class TestFrame extends TlvHeader
@@ -147,7 +146,7 @@ class CommonHeader extends TlvHeader
 class SubTlvHeader extends FieldsChunk //equals to suboption2 and Mrp_AutoMgr
 {
     chunkLength = B(2);
-    subTlvHeaderType subType = AUTOMGR;  //default set to automanager
+    SubTlvHeaderType subType = AUTOMGR;  //default set to automanager
     uint8_t subHeaderLength = 0;	
 }
 
@@ -176,7 +175,7 @@ class OptionHeader extends TlvHeader
     chunkLength = B(6);
     headerType = OPTION;
     headerLength = 4;
-    mrpOuiType ouiType = IEC;
+    MrpOuiType ouiType = IEC;
     //suboption1
     uint8_t ed1Type = 0xFF;
     //followed by ManufacturerData of length 2 for ed1Type 0x00 and length 26 for ed1Type 0x04
