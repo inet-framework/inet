@@ -39,14 +39,14 @@ void MrpInterconnection::initialize(int stage) {
         linkCheckEnabled = par("linkCheckEnabled");
         ringCheckEnabled = par("ringCheckEnabled");
 
-        InLinkChangeSignal = registerSignal("InLinkChangeSignal");
-        InTopologyChangeSignal = registerSignal("InTopologyChangeSignal");
-        InTestSignal = registerSignal("InTestSignal");
-        ReceivedInChangeSignal = registerSignal("ReceivedInChangeSignal");
-        ReceivedInTestSignal = registerSignal("ReceivedInTestSignal");
-        InterconnectionStateChangedSignal = registerSignal("InterconnectionStateChangedSignal");
-        InStatusPollSignal = registerSignal("InStatusPollSignal");
-        ReceivedInStatusPollSignal = registerSignal("ReceivedInStatusPollSignal");
+        inLinkChangeSignal = registerSignal("InLinkChangeSignal");
+        inTopologyChangeSignal = registerSignal("InTopologyChangeSignal");
+        inTestSignal = registerSignal("InTestSignal");
+        receivedInChangeSignal = registerSignal("ReceivedInChangeSignal");
+        receivedInTestSignal = registerSignal("ReceivedInTestSignal");
+        interconnectionStateChangedSignal = registerSignal("InterconnectionStateChangedSignal");
+        inStatusPollSignal = registerSignal("InStatusPollSignal");
+        receivedInStatusPollSignal = registerSignal("ReceivedInStatusPollSignal");
     }
     if (stage == INITSTAGE_LINK_LAYER) {
         EV_DETAIL << "Initialize Interconnection Stage link layer" << EV_ENDL;
@@ -381,7 +381,7 @@ void MrpInterconnection::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
                     EV_DETAIL << "Switching InState from AC_STAT1 to CHK_IC"
                                      << EV_FIELD(inState) << EV_ENDL;
                     currentInterconnectionState = CLOSED;
-                    emit(InterconnectionStateChangedSignal, simTime().inUnit(SIMTIME_US));
+                    emit(interconnectionStateChangedSignal, simTime().inUnit(SIMTIME_US));
                 } else if (inRole == INTERCONNECTION_CLIENT) {
                     inLinkChangeCount = inLinkMaxChange;
                     cancelEvent(inLinkDownTimer);
@@ -464,7 +464,7 @@ void MrpInterconnection::interconnTopologyChangeInd(MacAddress SourceAddress, do
         //it is not necessary to react after the first frame
         if (sequence > lastInTopologyId) {
             lastInTopologyId = sequence;
-            emit(ReceivedInChangeSignal, firstTLV->getInterval());
+            emit(receivedInChangeSignal, firstTLV->getInterval());
             switch (inState) {
             case AC_STAT1:
                 if (inRole == INTERCONNECTION_CLIENT) {
@@ -526,7 +526,7 @@ void MrpInterconnection::interconnTopologyChangeInd(MacAddress SourceAddress, do
 void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, uint16_t LinkState, int RingPort, Packet *packet) {
     if (InID == interConnectionID) {
         auto firstTLV = packet->peekDataAt<InLinkChangeFrame>(B(2));
-        emit(ReceivedInChangeSignal, firstTLV->getInterval());
+        emit(receivedInChangeSignal, firstTLV->getInterval());
         switch (inState) {
         case CHK_IO:
             if (linkCheckEnabled) {
@@ -539,7 +539,7 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, uint16_t LinkStat
                     EV_DETAIL << "Switching InState from CHK_IO to CHK_IC"
                                      << EV_FIELD(inState) << EV_ENDL;
                     currentInterconnectionState = CLOSED;
-                    emit(InterconnectionStateChangedSignal, simTime().inUnit(SIMTIME_US));
+                    emit(interconnectionStateChangedSignal, simTime().inUnit(SIMTIME_US));
                 } else if (LinkState == NetworkInterface::DOWN) {
                     setPortState(interconnectionPort, MrpInterfaceData::FORWARDING);
                 }
@@ -562,7 +562,7 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, uint16_t LinkStat
                     EV_DETAIL << "Switching InState from CHK_IC to CHK_IO"
                                      << EV_FIELD(inState) << EV_ENDL;
                     currentInterconnectionState = OPEN;
-                    emit(InterconnectionStateChangedSignal, simTime().inUnit(SIMTIME_US));
+                    emit(interconnectionStateChangedSignal, simTime().inUnit(SIMTIME_US));
                 }
             }
             if (ringCheckEnabled && LinkState == NetworkInterface::UP) {
@@ -617,7 +617,7 @@ void MrpInterconnection::interconnLinkStatusPollInd(uint16_t InID, int RingPort,
         //it is not necessary to react after the first frame
         if (sequence > lastPollId) {
             lastPollId = sequence;
-            emit(ReceivedInStatusPollSignal, simTime().inUnit(SIMTIME_US));
+            emit(receivedInStatusPollSignal, simTime().inUnit(SIMTIME_US));
             switch (inState) {
             case AC_STAT1:
                 if (inRole == INTERCONNECTION_CLIENT) {
@@ -666,11 +666,11 @@ void MrpInterconnection::interconnTestInd(MacAddress SourceAddress, int RingPort
         auto lastInTestFrameSent = inTestFrameSent.find(sequence);
         if (lastInTestFrameSent != inTestFrameSent.end()) {
             int64_t ringTimePrecise = simTime().inUnit(SIMTIME_US) - lastInTestFrameSent->second;
-            emit(ReceivedInTestSignal, ringTimePrecise);
+            emit(receivedInTestSignal, ringTimePrecise);
             EV_DETAIL << "InterconnectionRingTime" << EV_FIELD(ringTime)
                              << EV_FIELD(ringTimePrecise) << EV_ENDL;
         } else {
-            emit(ReceivedInTestSignal, ringTime * 1000);
+            emit(receivedInTestSignal, ringTime * 1000);
             EV_DETAIL << "InterconnectionRingTime" << EV_FIELD(ringTime) << EV_ENDL;
         }
         switch (inState) {
@@ -800,7 +800,7 @@ void MrpInterconnection::setupInterconnTestReq() {
     packet3->insertAtBack(EndTLV);
     MacAddress SourceAddress3 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
     sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_INTEST), SourceAddress3, priority, MRP_LT, packet3);
-    emit(InTestSignal, lastInTestFrameSent);
+    emit(inTestSignal, lastInTestFrameSent);
 }
 
 void MrpInterconnection::interconnTopologyChangeReq(double Time) {
@@ -857,7 +857,7 @@ void MrpInterconnection::setupInterconnTopologyChangeReq(double Time) {
     } else {
         sendFrameReq(interconnectionPort, static_cast<MacAddress>(MC_INCONTROL), SourceAddress3, priority, MRP_LT, packet3);
     }
-    emit(InTopologyChangeSignal, simTime().inUnit(SIMTIME_US));
+    emit(inTopologyChangeSignal, simTime().inUnit(SIMTIME_US));
 }
 
 void MrpInterconnection::interconnLinkChangeReq(uint16_t LinkState, double Time) {
@@ -932,7 +932,7 @@ void MrpInterconnection::interconnLinkChangeReq(uint16_t LinkState, double Time)
     } else {
         sendFrameReq(interconnectionPort, static_cast<MacAddress>(MC_INCONTROL), SourceAddress3, priority, MRP_LT, packet3);
     }
-    emit(InLinkChangeSignal, simTime().inUnit(SIMTIME_US));
+    emit(inLinkChangeSignal, simTime().inUnit(SIMTIME_US));
 }
 
 void MrpInterconnection::interconnLinkStatusPollReq(double Time) {
@@ -992,7 +992,7 @@ void MrpInterconnection::setupInterconnLinkStatusPollReq() {
     packet3->insertAtBack(EndTLV);
     MacAddress SourceAddress3 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
     sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_INCONTROL), SourceAddress3, priority, MRP_LT, packet3);
-    emit(InStatusPollSignal, simTime().inUnit(SIMTIME_US));
+    emit(inStatusPollSignal, simTime().inUnit(SIMTIME_US));
 }
 
 void MrpInterconnection::inTransferReq(TlvHeaderType HeaderType, int RingPort, FrameType FrameType, Packet *packet) {
