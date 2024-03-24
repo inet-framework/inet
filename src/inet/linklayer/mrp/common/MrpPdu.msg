@@ -61,8 +61,8 @@ class TestFrame extends TlvHeader
     uint16_t prio= 0x8000;
     MacAddress sa;
     uint16_t portRole;
-    uint16_t RingState;
-    uint16_t Transition;
+    uint16_t ringState;
+    uint16_t transition;
     uint32_t timeStamp;
 }
 
@@ -97,7 +97,7 @@ class InTestFrame extends TlvHeader
     MacAddress sa;
     uint16_t portRole;
     uint16_t inState;
-    uint16_t Transition;
+    uint16_t transition;
     uint32_t timeStamp;
 }
 
@@ -138,7 +138,7 @@ class CommonHeader extends TlvHeader
     chunkLength = B(20);
     headerType = COMMON;
     headerLength = 18;
-    uint16_t SequenceID;
+    uint16_t sequenceID;
     uint64_t uuid0;
     uint64_t uuid1;
 }
