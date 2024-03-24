@@ -128,7 +128,7 @@ protected:
     MrpPriority hostBestMRMPriority;
     uint16_t monNReturn;
     uint16_t monNRmax = 5;
-    cMessage *linkUpHysterisisTimer = nullptr; //LNKUP_HYST_TIMER_RUNNING
+    cMessage *linkUpHysteresisTimer = nullptr; //LNKUP_HYST_TIMER_RUNNING
 
     //Variables needed for Client
     bool blockedStateSupported;
