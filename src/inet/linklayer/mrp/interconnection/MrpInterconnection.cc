@@ -236,8 +236,8 @@ void MrpInterconnection::handleMessageWhenUp(cMessage *msg) {
             clearLocalFDBDelayed();
         else if (msg == startUpTimer) {
             start();
-        } else if (msg == linkUpHysterisisTimer) {
-            //action done by handleDelayTimer, linkUpHysterisisTimer requested by standard
+        } else if (msg == linkUpHysteresisTimer) {
+            //action done by handleDelayTimer, linkUpHysteresisTimer requested by standard
             //but not further descripted
         } else if (msg->getKind() == 0) {
             ProcessDelayTimer *timer = dynamic_cast<ProcessDelayTimer*>(msg);
