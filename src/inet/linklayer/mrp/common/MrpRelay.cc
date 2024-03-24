@@ -210,7 +210,7 @@ bool MrpRelay::isForwardingInterface(NetworkInterface *networkInterface) const {
 }
 
 int MrpRelay::getCcmLevel(Packet *packet) {
-    const auto &ccm = packet->peekAtFront<continuityCheckMessage>();
+    const auto &ccm = packet->peekAtFront<ContinuityCheckMessage>();
     return ccm->getMdLevel();
 }
 

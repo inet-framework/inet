@@ -237,7 +237,7 @@ void Mrp::startContinuityCheck() {
                 portData->setCfmName(namePort);
                 EV_DETAIL << "CFM-name port set:" << EV_FIELD(portData->getCfmName()) << EV_ENDL;
                 setupContinuityCheck(interfaceId);
-                class continuityCheckTimer *checkTimer = new continuityCheckTimer("continuityCheckTimer");
+                class ContinuityCheckTimer *checkTimer = new ContinuityCheckTimer("continuityCheckTimer");
                 checkTimer->setPort(interfaceId);
                 checkTimer->setKind(1);
                 scheduleAt(simTime() + portData->getContinuityCheckInterval(), checkTimer);
@@ -421,7 +421,7 @@ void Mrp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
         auto interfaceId = interface->getInterfaceId();
         EV_DETAIL << "Received Signal:" << EV_FIELD(field) << EV_FIELD(interfaceId) << EV_ENDL;
         if (interfaceId >= 0) {
-            processDelayTimer *DelayTimer = new processDelayTimer("DelayTimer");
+            ProcessDelayTimer *DelayTimer = new ProcessDelayTimer("DelayTimer");
             DelayTimer->setPort(interface->getInterfaceId());
             DelayTimer->setField(field);
             DelayTimer->setKind(0);
@@ -466,13 +466,13 @@ void Mrp::handleMessageWhenUp(cMessage *msg) {
             //action done by handleDelayTimer, linkUpHysterisisTimer requested by standard
             //but not further descripted
         } else if (msg->getKind() == 0) {
-            processDelayTimer *timer = check_and_cast<processDelayTimer*>(msg);
+            ProcessDelayTimer *timer = check_and_cast<ProcessDelayTimer*>(msg);
             if (timer != nullptr) {
                 handleDelayTimer(timer->getPort(), timer->getField());
             }
             delete timer;
         } else if (msg->getKind() == 1) {
-            continuityCheckTimer *timer = check_and_cast<continuityCheckTimer*>(msg);
+            ContinuityCheckTimer *timer = check_and_cast<ContinuityCheckTimer*>(msg);
             handleContinuityCheckTimer(timer->getPort());
             delete timer;
         } else if (msg->getKind() == 2) {
@@ -731,7 +731,7 @@ void Mrp::handleContinuityCheckMessage(Packet* Packet) {
     auto SourceAddress = macAddressInd->getSrcAddress();
     int RingPort = interfaceInd->getInterfaceId();
     auto incomingInterface = interfaceTable->getInterfaceById(RingPort);
-    auto ccm = Packet->popAtFront<continuityCheckMessage>();
+    auto ccm = Packet->popAtFront<ContinuityCheckMessage>();
     auto portData = getPortInterfaceDataForUpdate(RingPort);
     if (ccm->getEndpointIdentifier() == portData->getCfmEndpointID()) {
         int i = SourceAddress.compareTo(incomingInterface->getMacAddress());
@@ -810,7 +810,7 @@ void Mrp::handleContinuityCheckTimer(int RingPort) {
         mauTypeChangeInd(RingPort, NetworkInterface::DOWN);
     }
     setupContinuityCheck(RingPort);
-    class continuityCheckTimer *checkTimer = new continuityCheckTimer("continuityCheckTimer");
+    class ContinuityCheckTimer *checkTimer = new ContinuityCheckTimer("continuityCheckTimer");
     checkTimer->setPort(RingPort);
     checkTimer->setKind(1);
     scheduleAt(simTime() + portData->getContinuityCheckInterval(), checkTimer);
@@ -957,7 +957,7 @@ void Mrp::handleLinkDownTimer() {
 }
 
 void Mrp::setupContinuityCheck(int RingPort) {
-    auto CCM = makeShared<continuityCheckMessage>();
+    auto CCM = makeShared<ContinuityCheckMessage>();
     auto portData = getPortInterfaceDataForUpdate(RingPort);
     if (portData->getContinuityCheckInterval() == 3.3) {
         CCM->setFlags(0x00000001);
