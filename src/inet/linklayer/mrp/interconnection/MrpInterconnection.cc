@@ -362,13 +362,13 @@ void MrpInterconnection::handleInLinkDownTimer() {
     }
 }
 
-void MrpInterconnection::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
-    if (RingPort == interconnectionPort) {
+void MrpInterconnection::mauTypeChangeInd(int ringPort, uint16_t linkState) {
+    if (ringPort == interconnectionPort) {
         switch (inState) {
         case AC_STAT1:
-            if (LinkState == NetworkInterface::UP) {
+            if (linkState == NetworkInterface::UP) {
                 if (inRole == INTERCONNECTION_MANAGER) {
-                    setPortState(RingPort, MrpInterfaceData::BLOCKED);
+                    setPortState(ringPort, MrpInterfaceData::BLOCKED);
                     if (linkCheckEnabled) {
                         interconnLinkStatusPollReq(inLinkStatusPollInterval);
                     }
@@ -394,8 +394,8 @@ void MrpInterconnection::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
             }
             break;
         case CHK_IO:
-            if (LinkState == NetworkInterface::DOWN) {
-                setPortState(RingPort, MrpInterfaceData::BLOCKED);
+            if (linkState == NetworkInterface::DOWN) {
+                setPortState(ringPort, MrpInterfaceData::BLOCKED);
                 if (linkCheckEnabled) {
                     interconnLinkStatusPollReq(inLinkStatusPollInterval);
                 }
@@ -409,8 +409,8 @@ void MrpInterconnection::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
             }
             break;
         case CHK_IC:
-            if (LinkState == NetworkInterface::DOWN) {
-                setPortState(RingPort, MrpInterfaceData::BLOCKED);
+            if (linkState == NetworkInterface::DOWN) {
+                setPortState(ringPort, MrpInterfaceData::BLOCKED);
                 if (ringCheckEnabled) {
                     interconnTopologyChangeReq(inTopologyChangeInterval);
                     interconnTestReq(inTestDefaultInterval);
@@ -421,10 +421,10 @@ void MrpInterconnection::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
             }
             break;
         case PT:
-            if (LinkState == NetworkInterface::DOWN) {
+            if (linkState == NetworkInterface::DOWN) {
                 inLinkChangeCount = inLinkMaxChange;
                 cancelEvent(inLinkUpTimer);
-                setPortState(RingPort, MrpInterfaceData::BLOCKED);
+                setPortState(ringPort, MrpInterfaceData::BLOCKED);
                 scheduleAt(simTime() + SimTime(inLinkChangeInterval, SIMTIME_MS), inLinkDownTimer);
                 interconnLinkChangeReq(NetworkInterface::DOWN, inLinkChangeCount * inLinkChangeInterval);
                 inState = AC_STAT1;
@@ -433,9 +433,9 @@ void MrpInterconnection::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
             }
             break;
         case IP_IDLE:
-            if (LinkState == NetworkInterface::DOWN) {
+            if (linkState == NetworkInterface::DOWN) {
                 inLinkChangeCount = inLinkMaxChange;
-                setPortState(RingPort, MrpInterfaceData::BLOCKED);
+                setPortState(ringPort, MrpInterfaceData::BLOCKED);
                 scheduleAt(simTime() + SimTime(inLinkChangeInterval, SIMTIME_MS), inLinkDownTimer);
                 interconnLinkChangeReq(NetworkInterface::DOWN, inLinkChangeCount * inLinkChangeInterval);
                 inState = AC_STAT1;
@@ -449,11 +449,11 @@ void MrpInterconnection::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
             throw cRuntimeError("Unknown Node State");
         }
     } else {
-        Mrp::mauTypeChangeInd(RingPort, LinkState);
+        Mrp::mauTypeChangeInd(ringPort, linkState);
     }
 }
 
-void MrpInterconnection::interconnTopologyChangeInd(MacAddress SourceAddress, double Time, uint16_t InID, int RingPort, Packet *packet) {
+void MrpInterconnection::interconnTopologyChangeInd(MacAddress sourceAddress, double time, uint16_t InID, int ringPort, Packet *packet) {
     if (InID == interConnectionID) {
         auto offset = B(2);
         const auto &firstTLV = packet->peekDataAt<InTopologyChangeFrame>(offset);
@@ -470,15 +470,15 @@ void MrpInterconnection::interconnTopologyChangeInd(MacAddress SourceAddress, do
                 if (inRole == INTERCONNECTION_CLIENT) {
                     cancelEvent(inLinkDownTimer);
                 } else if (inRole == INTERCONNECTION_MANAGER
-                        && SourceAddress == localBridgeAddress) {
-                    clearFDB(Time);
+                        && sourceAddress == localBridgeAddress) {
+                    clearFDB(time);
                 }
                 delete packet;
                 break;
             case CHK_IO:
             case CHK_IC:
-                if (SourceAddress == localBridgeAddress) {
-                    clearFDB(Time);
+                if (sourceAddress == localBridgeAddress) {
+                    clearFDB(time);
                 }
                 delete packet;
                 break;
@@ -489,22 +489,22 @@ void MrpInterconnection::interconnTopologyChangeInd(MacAddress SourceAddress, do
                 inState = IP_IDLE;
                 EV_DETAIL << "Switching InState from PT to IP_IDLE"
                                  << EV_FIELD(inState) << EV_ENDL;
-                if (RingPort != interconnectionPort) {
+                if (ringPort != interconnectionPort) {
                     if (linkCheckEnabled)
                         inTransferReq(INTOPOLOGYCHANGE, interconnectionPort, MC_INTRANSFER, packet);
                     else
                         inTransferReq(INTOPOLOGYCHANGE, interconnectionPort, MC_INCONTROL, packet);
                 } else
-                    mrpForwardReq(INTOPOLOGYCHANGE, RingPort, MC_INCONTROL, packet);
+                    mrpForwardReq(INTOPOLOGYCHANGE, ringPort, MC_INCONTROL, packet);
                 break;
             case IP_IDLE:
-                if (RingPort != interconnectionPort) {
+                if (ringPort != interconnectionPort) {
                     if (linkCheckEnabled)
                         inTransferReq(INTOPOLOGYCHANGE, interconnectionPort, MC_INTRANSFER, packet);
                     else
                         inTransferReq(INTOPOLOGYCHANGE, interconnectionPort, MC_INCONTROL, packet);
                 } else
-                    mrpForwardReq(INTOPOLOGYCHANGE, RingPort, MC_INCONTROL, packet);
+                    mrpForwardReq(INTOPOLOGYCHANGE, ringPort, MC_INCONTROL, packet);
                 break;
             case POWER_ON:
                 delete packet;
@@ -523,14 +523,14 @@ void MrpInterconnection::interconnTopologyChangeInd(MacAddress SourceAddress, do
     }
 }
 
-void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, uint16_t LinkState, int RingPort, Packet *packet) {
+void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, uint16_t linkState, int ringPort, Packet *packet) {
     if (InID == interConnectionID) {
         auto firstTLV = packet->peekDataAt<InLinkChangeFrame>(B(2));
         emit(receivedInChangeSignal, firstTLV->getInterval());
         switch (inState) {
         case CHK_IO:
             if (linkCheckEnabled) {
-                if (LinkState == NetworkInterface::UP) {
+                if (linkState == NetworkInterface::UP) {
                     setPortState(interconnectionPort, MrpInterfaceData::BLOCKED);
                     cancelEvent(inLinkStatusPollTimer);
                     interconnTopologyChangeReq(inTopologyChangeInterval);
@@ -540,19 +540,19 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, uint16_t LinkStat
                                      << EV_FIELD(inState) << EV_ENDL;
                     currentInterconnectionState = CLOSED;
                     emit(interconnectionStateChangedSignal, simTime().inUnit(SIMTIME_US));
-                } else if (LinkState == NetworkInterface::DOWN) {
+                } else if (linkState == NetworkInterface::DOWN) {
                     setPortState(interconnectionPort, MrpInterfaceData::FORWARDING);
                 }
             }
             if (ringCheckEnabled) {
-                if (LinkState == NetworkInterface::UP) {
+                if (linkState == NetworkInterface::UP) {
                     interconnTestReq(inTestDefaultInterval);
                 }
             }
             delete packet;
             break;
         case CHK_IC:
-            if (LinkState == NetworkInterface::DOWN) {
+            if (linkState == NetworkInterface::DOWN) {
                 setPortState(interconnectionPort, MrpInterfaceData::FORWARDING);
                 interconnTopologyChangeReq(inTopologyChangeInterval);
                 if (linkCheckEnabled) {
@@ -565,7 +565,7 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, uint16_t LinkStat
                     emit(interconnectionStateChangedSignal, simTime().inUnit(SIMTIME_US));
                 }
             }
-            if (ringCheckEnabled && LinkState == NetworkInterface::UP) {
+            if (ringCheckEnabled && linkState == NetworkInterface::UP) {
                 inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
                 interconnTopologyChangeReq(inTopologyChangeInterval);
             }
@@ -573,19 +573,19 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, uint16_t LinkStat
             break;
         case PT:
         case IP_IDLE:
-            if (RingPort == interconnectionPort && linkCheckEnabled) {
-                if (LinkState == NetworkInterface::UP) {
-                    mrpForwardReq(INLINKUP, RingPort, MC_INCONTROL, packet);
-                } else if (LinkState == NetworkInterface::DOWN) {
-                    mrpForwardReq(INLINKDOWN, RingPort, MC_INCONTROL, packet);
+            if (ringPort == interconnectionPort && linkCheckEnabled) {
+                if (linkState == NetworkInterface::UP) {
+                    mrpForwardReq(INLINKUP, ringPort, MC_INCONTROL, packet);
+                } else if (linkState == NetworkInterface::DOWN) {
+                    mrpForwardReq(INLINKDOWN, ringPort, MC_INCONTROL, packet);
                 } else
                     delete packet;
-            } else if (RingPort != interconnectionPort) {
+            } else if (ringPort != interconnectionPort) {
                 if (ringCheckEnabled) {
                     interconnForwardReq(interconnectionPort, packet);
-                } else if (LinkState == NetworkInterface::UP) {
+                } else if (linkState == NetworkInterface::UP) {
                     inTransferReq(INLINKUP, interconnectionPort, MC_INTRANSFER, packet);
-                } else if (LinkState == NetworkInterface::DOWN) {
+                } else if (linkState == NetworkInterface::DOWN) {
                     inTransferReq(INLINKDOWN, interconnectionPort, MC_INTRANSFER, packet);
                 } else
                     delete packet;
@@ -601,7 +601,7 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, uint16_t LinkStat
         }
     } else {
         EV_INFO << "Received Frame from other InterConnectionID"
-                       << EV_FIELD(RingPort) << EV_FIELD(InID) << EV_ENDL;
+                       << EV_FIELD(ringPort) << EV_FIELD(InID) << EV_ENDL;
         delete packet;
     }
 }
@@ -655,7 +655,7 @@ void MrpInterconnection::interconnLinkStatusPollInd(uint16_t InID, int RingPort,
     }
 }
 
-void MrpInterconnection::interconnTestInd(MacAddress SourceAddress, int RingPort, uint16_t InID, Packet *packet) {
+void MrpInterconnection::interconnTestInd(MacAddress sourceAddress, int RingPort, uint16_t InID, Packet *packet) {
     if (InID == interConnectionID) {
         b offset = B(2);
         auto firstTLV = packet->peekDataAt<InTestFrame>(offset);
@@ -676,7 +676,7 @@ void MrpInterconnection::interconnTestInd(MacAddress SourceAddress, int RingPort
         switch (inState) {
         case AC_STAT1:
             if (inRole == INTERCONNECTION_MANAGER
-                    && SourceAddress == localBridgeAddress) {
+                    && sourceAddress == localBridgeAddress) {
                 setPortState(interconnectionPort, MrpInterfaceData::BLOCKED);
                 inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
                 inTestRetransmissionCount = 0;
@@ -688,7 +688,7 @@ void MrpInterconnection::interconnTestInd(MacAddress SourceAddress, int RingPort
             delete packet;
             break;
         case CHK_IO:
-            if (SourceAddress == localBridgeAddress) {
+            if (sourceAddress == localBridgeAddress) {
                 setPortState(interconnectionPort, MrpInterfaceData::BLOCKED);
                 interconnTopologyChangeReq(inTopologyChangeInterval);
                 inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
@@ -699,7 +699,7 @@ void MrpInterconnection::interconnTestInd(MacAddress SourceAddress, int RingPort
             delete packet;
             break;
         case CHK_IC:
-            if (SourceAddress == localBridgeAddress) {
+            if (sourceAddress == localBridgeAddress) {
                 inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
                 inTestRetransmissionCount = 0;
             }
@@ -730,9 +730,9 @@ void MrpInterconnection::interconnTestInd(MacAddress SourceAddress, int RingPort
     }
 }
 
-void MrpInterconnection::interconnTestReq(double Time) {
+void MrpInterconnection::interconnTestReq(double time) {
     if (!inLinkTestTimer->isScheduled()) {
-        scheduleAt(simTime() + SimTime(Time, SIMTIME_MS), inLinkTestTimer);
+        scheduleAt(simTime() + SimTime(time, SIMTIME_MS), inLinkTestTimer);
         setupInterconnTestReq();
     } else
         EV_DETAIL << "inTest already scheduled" << EV_ENDL;
@@ -740,204 +740,204 @@ void MrpInterconnection::interconnTestReq(double Time) {
 
 void MrpInterconnection::setupInterconnTestReq() {
     //Create MRP-PDU according MRP_InTest
-    auto Version = makeShared<MrpVersionField>();
-    auto InTestTLV1 = makeShared<InTestFrame>();
-    auto InTestTLV2 = makeShared<InTestFrame>();
-    auto InTestTLV3 = makeShared<InTestFrame>();
-    auto CommonTLV = makeShared<CommonHeader>();
-    auto EndTLV = makeShared<TlvHeader>();
+    auto version = makeShared<MrpVersionField>();
+    auto inTestTLV1 = makeShared<InTestFrame>();
+    auto inTestTLV2 = makeShared<InTestFrame>();
+    auto inTestTLV3 = makeShared<InTestFrame>();
+    auto commonTLV = makeShared<CommonHeader>();
+    auto endTLV = makeShared<TlvHeader>();
 
     uint32_t timestamp = simTime().inUnit(SIMTIME_MS);
     int64_t lastInTestFrameSent = simTime().inUnit(SIMTIME_US);
     inTestFrameSent.insert( { sequenceID, lastInTestFrameSent });
 
-    InTestTLV1->setInID(interConnectionID);
-    InTestTLV1->setSa(localBridgeAddress);
-    InTestTLV1->setInState(currentInterconnectionState);
-    InTestTLV1->setTransition(transition);
-    InTestTLV1->setTimeStamp(timestamp);
-    InTestTLV1->setPortRole(MrpInterfaceData::INTERCONNECTION);
+    inTestTLV1->setInID(interConnectionID);
+    inTestTLV1->setSa(localBridgeAddress);
+    inTestTLV1->setInState(currentInterconnectionState);
+    inTestTLV1->setTransition(transition);
+    inTestTLV1->setTimeStamp(timestamp);
+    inTestTLV1->setPortRole(MrpInterfaceData::INTERCONNECTION);
 
-    InTestTLV2->setInID(interConnectionID);
-    InTestTLV2->setSa(localBridgeAddress);
-    InTestTLV2->setInState(currentInterconnectionState);
-    InTestTLV2->setTransition(transition);
-    InTestTLV2->setTimeStamp(timestamp);
-    InTestTLV2->setPortRole(MrpInterfaceData::PRIMARY);
+    inTestTLV2->setInID(interConnectionID);
+    inTestTLV2->setSa(localBridgeAddress);
+    inTestTLV2->setInState(currentInterconnectionState);
+    inTestTLV2->setTransition(transition);
+    inTestTLV2->setTimeStamp(timestamp);
+    inTestTLV2->setPortRole(MrpInterfaceData::PRIMARY);
 
-    InTestTLV3->setInID(interConnectionID);
-    InTestTLV3->setSa(localBridgeAddress);
-    InTestTLV3->setInState(currentInterconnectionState);
-    InTestTLV3->setTransition(transition);
-    InTestTLV3->setTimeStamp(timestamp);
-    InTestTLV3->setPortRole(MrpInterfaceData::SECONDARY);
+    inTestTLV3->setInID(interConnectionID);
+    inTestTLV3->setSa(localBridgeAddress);
+    inTestTLV3->setInState(currentInterconnectionState);
+    inTestTLV3->setTransition(transition);
+    inTestTLV3->setTimeStamp(timestamp);
+    inTestTLV3->setPortRole(MrpInterfaceData::SECONDARY);
 
-    CommonTLV->setSequenceID(sequenceID);
+    commonTLV->setSequenceID(sequenceID);
     sequenceID++;
-    CommonTLV->setUuid0(domainID.uuid0);
-    CommonTLV->setUuid1(domainID.uuid1);
+    commonTLV->setUuid0(domainID.uuid0);
+    commonTLV->setUuid1(domainID.uuid1);
 
     auto packet1 = new Packet("InterconnTest");
-    packet1->insertAtBack(Version);
-    packet1->insertAtBack(InTestTLV1);
-    packet1->insertAtBack(CommonTLV);
-    packet1->insertAtBack(EndTLV);
-    MacAddress SourceAddress1 = getPortNetworkInterface(interconnectionPort)->getMacAddress();
-    sendFrameReq(interconnectionPort, static_cast<MacAddress>(MC_INTEST), SourceAddress1, priority, MRP_LT, packet1);
+    packet1->insertAtBack(version);
+    packet1->insertAtBack(inTestTLV1);
+    packet1->insertAtBack(commonTLV);
+    packet1->insertAtBack(endTLV);
+    MacAddress sourceAddress1 = getPortNetworkInterface(interconnectionPort)->getMacAddress();
+    sendFrameReq(interconnectionPort, static_cast<MacAddress>(MC_INTEST), sourceAddress1, priority, MRP_LT, packet1);
 
     auto packet2 = new Packet("InterconnTest");
-    packet2->insertAtBack(Version);
-    packet2->insertAtBack(InTestTLV2);
-    packet2->insertAtBack(CommonTLV);
-    packet2->insertAtBack(EndTLV);
-    MacAddress SourceAddress2 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
-    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_INTEST), SourceAddress2, priority, MRP_LT, packet2);
+    packet2->insertAtBack(version);
+    packet2->insertAtBack(inTestTLV2);
+    packet2->insertAtBack(commonTLV);
+    packet2->insertAtBack(endTLV);
+    MacAddress sourceAddress2 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
+    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_INTEST), sourceAddress2, priority, MRP_LT, packet2);
 
     auto packet3 = new Packet("InterconnTest");
-    packet3->insertAtBack(Version);
-    packet3->insertAtBack(InTestTLV3);
-    packet3->insertAtBack(CommonTLV);
-    packet3->insertAtBack(EndTLV);
-    MacAddress SourceAddress3 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
-    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_INTEST), SourceAddress3, priority, MRP_LT, packet3);
+    packet3->insertAtBack(version);
+    packet3->insertAtBack(inTestTLV3);
+    packet3->insertAtBack(commonTLV);
+    packet3->insertAtBack(endTLV);
+    MacAddress sourceAddress3 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
+    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_INTEST), sourceAddress3, priority, MRP_LT, packet3);
     emit(inTestSignal, lastInTestFrameSent);
 }
 
-void MrpInterconnection::interconnTopologyChangeReq(double Time) {
-    if (Time == 0) {
+void MrpInterconnection::interconnTopologyChangeReq(double time) {  //TODO see comments for the similar code in Mrp.cc
+    if (time == 0) {
         clearLocalFDB();
-        setupInterconnTopologyChangeReq(inTopologyChangeMaxRepeatCount * Time);
+        setupInterconnTopologyChangeReq(inTopologyChangeMaxRepeatCount * time);
     } else if (!inTopologyChangeTimer->isScheduled()) {
         scheduleAt(simTime() + SimTime(inTopologyChangeInterval, SIMTIME_MS), inTopologyChangeTimer);
-        setupInterconnTopologyChangeReq(inTopologyChangeMaxRepeatCount * Time);
+        setupInterconnTopologyChangeReq(inTopologyChangeMaxRepeatCount * time);
     } else
         EV_DETAIL << "inTopologyChangeTimer already scheduled" << EV_ENDL;
 }
 
-void MrpInterconnection::setupInterconnTopologyChangeReq(double Time) {
+void MrpInterconnection::setupInterconnTopologyChangeReq(double time) {
     //Create MRP-PDU according MRP_InTopologyChange
-    auto Version = makeShared<MrpVersionField>();
-    auto InTopologyChangeTLV = makeShared<InTopologyChangeFrame>();
-    auto CommonTLV = makeShared<CommonHeader>();
-    auto EndTLV = makeShared<TlvHeader>();
+    auto version = makeShared<MrpVersionField>();
+    auto inTopologyChangeTLV = makeShared<InTopologyChangeFrame>();
+    auto commonTLV = makeShared<CommonHeader>();
+    auto endTLV = makeShared<TlvHeader>();
 
-    InTopologyChangeTLV->setInID(interConnectionID);
-    InTopologyChangeTLV->setSa(localBridgeAddress);
-    InTopologyChangeTLV->setInterval(Time);
+    inTopologyChangeTLV->setInID(interConnectionID);
+    inTopologyChangeTLV->setSa(localBridgeAddress);
+    inTopologyChangeTLV->setInterval(time);
 
-    CommonTLV->setSequenceID(sequenceID);
+    commonTLV->setSequenceID(sequenceID);
     sequenceID++;
-    CommonTLV->setUuid0(domainID.uuid0);
-    CommonTLV->setUuid1(domainID.uuid1);
+    commonTLV->setUuid0(domainID.uuid0);
+    commonTLV->setUuid1(domainID.uuid1);
 
     auto packet1 = new Packet("InterconnTopologyChange");
-    packet1->insertAtBack(Version);
-    packet1->insertAtBack(InTopologyChangeTLV);
-    packet1->insertAtBack(CommonTLV);
-    packet1->insertAtBack(EndTLV);
-    MacAddress SourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
-    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_INCONTROL), SourceAddress1, priority, MRP_LT, packet1);
+    packet1->insertAtBack(version);
+    packet1->insertAtBack(inTopologyChangeTLV);
+    packet1->insertAtBack(commonTLV);
+    packet1->insertAtBack(endTLV);
+    MacAddress sourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
+    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_INCONTROL), sourceAddress1, priority, MRP_LT, packet1);
 
     auto packet2 = new Packet("InterconnTopologyChange");
-    packet2->insertAtBack(Version);
-    packet2->insertAtBack(InTopologyChangeTLV);
-    packet2->insertAtBack(CommonTLV);
-    packet2->insertAtBack(EndTLV);
-    MacAddress SourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
-    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_INCONTROL), SourceAddress2, priority, MRP_LT, packet2);
+    packet2->insertAtBack(version);
+    packet2->insertAtBack(inTopologyChangeTLV);
+    packet2->insertAtBack(commonTLV);
+    packet2->insertAtBack(endTLV);
+    MacAddress sourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
+    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_INCONTROL), sourceAddress2, priority, MRP_LT, packet2);
 
     auto packet3 = new Packet("InterconnTopologyChange");
-    packet3->insertAtBack(Version);
-    packet3->insertAtBack(InTopologyChangeTLV);
-    packet3->insertAtBack(CommonTLV);
-    packet3->insertAtBack(EndTLV);
-    MacAddress SourceAddress3 = getPortNetworkInterface(interconnectionPort)->getMacAddress();
+    packet3->insertAtBack(version);
+    packet3->insertAtBack(inTopologyChangeTLV);
+    packet3->insertAtBack(commonTLV);
+    packet3->insertAtBack(endTLV);
+    MacAddress sourceAddress3 = getPortNetworkInterface(interconnectionPort)->getMacAddress();
     if (linkCheckEnabled) {
-        sendFrameReq(interconnectionPort, static_cast<MacAddress>(MC_INTRANSFER), SourceAddress3, priority, MRP_LT, packet3);
+        sendFrameReq(interconnectionPort, static_cast<MacAddress>(MC_INTRANSFER), sourceAddress3, priority, MRP_LT, packet3);
     } else {
-        sendFrameReq(interconnectionPort, static_cast<MacAddress>(MC_INCONTROL), SourceAddress3, priority, MRP_LT, packet3);
+        sendFrameReq(interconnectionPort, static_cast<MacAddress>(MC_INCONTROL), sourceAddress3, priority, MRP_LT, packet3);
     }
     emit(inTopologyChangeSignal, simTime().inUnit(SIMTIME_US));
 }
 
-void MrpInterconnection::interconnLinkChangeReq(uint16_t LinkState, double Time) {
+void MrpInterconnection::interconnLinkChangeReq(uint16_t linkState, double time) {
     //Create MRP-PDU according MRP_InLinkUp or MRP_InLinkDown
-    auto Version = makeShared<MrpVersionField>();
-    auto InLinkChangeTLV1 = makeShared<InLinkChangeFrame>();
-    auto InLinkChangeTLV2 = makeShared<InLinkChangeFrame>();
-    auto InLinkChangeTLV3 = makeShared<InLinkChangeFrame>();
-    auto CommonTLV = makeShared<CommonHeader>();
-    auto EndTLV = makeShared<TlvHeader>();
+    auto version = makeShared<MrpVersionField>();
+    auto inLinkChangeTLV1 = makeShared<InLinkChangeFrame>();
+    auto inLinkChangeTLV2 = makeShared<InLinkChangeFrame>();
+    auto inLinkChangeTLV3 = makeShared<InLinkChangeFrame>();
+    auto commonTLV = makeShared<CommonHeader>();
+    auto endTLV = makeShared<TlvHeader>();
 
     TlvHeaderType type = INLINKDOWN;
-    if (LinkState == NetworkInterface::UP) {
+    if (linkState == NetworkInterface::UP) {
         type = INLINKUP;
-    } else if (LinkState == NetworkInterface::DOWN) {
+    } else if (linkState == NetworkInterface::DOWN) {
         type = INLINKDOWN;
     }
 
-    InLinkChangeTLV1->setHeaderType(type);
-    InLinkChangeTLV1->setInID(interConnectionID);
-    InLinkChangeTLV1->setSa(localBridgeAddress);
-    InLinkChangeTLV1->setPortRole(MrpInterfaceData::PRIMARY);
-    InLinkChangeTLV1->setInterval(Time);
-    InLinkChangeTLV1->setLinkInfo(LinkState);
+    inLinkChangeTLV1->setHeaderType(type);
+    inLinkChangeTLV1->setInID(interConnectionID);
+    inLinkChangeTLV1->setSa(localBridgeAddress);
+    inLinkChangeTLV1->setPortRole(MrpInterfaceData::PRIMARY);
+    inLinkChangeTLV1->setInterval(time);
+    inLinkChangeTLV1->setLinkInfo(linkState);
 
-    InLinkChangeTLV2->setHeaderType(type);
-    InLinkChangeTLV2->setInID(interConnectionID);
-    InLinkChangeTLV2->setSa(localBridgeAddress);
-    InLinkChangeTLV2->setPortRole(MrpInterfaceData::SECONDARY);
-    InLinkChangeTLV2->setInterval(Time);
-    InLinkChangeTLV2->setLinkInfo(LinkState);
+    inLinkChangeTLV2->setHeaderType(type);
+    inLinkChangeTLV2->setInID(interConnectionID);
+    inLinkChangeTLV2->setSa(localBridgeAddress);
+    inLinkChangeTLV2->setPortRole(MrpInterfaceData::SECONDARY);
+    inLinkChangeTLV2->setInterval(time);
+    inLinkChangeTLV2->setLinkInfo(linkState);
 
-    InLinkChangeTLV3->setHeaderType(type);
-    InLinkChangeTLV3->setInID(interConnectionID);
-    InLinkChangeTLV3->setSa(localBridgeAddress);
-    InLinkChangeTLV3->setPortRole(MrpInterfaceData::INTERCONNECTION);
-    InLinkChangeTLV3->setInterval(Time);
-    InLinkChangeTLV3->setLinkInfo(LinkState);
+    inLinkChangeTLV3->setHeaderType(type);
+    inLinkChangeTLV3->setInID(interConnectionID);
+    inLinkChangeTLV3->setSa(localBridgeAddress);
+    inLinkChangeTLV3->setPortRole(MrpInterfaceData::INTERCONNECTION);
+    inLinkChangeTLV3->setInterval(time);
+    inLinkChangeTLV3->setLinkInfo(linkState);
 
-    CommonTLV->setSequenceID(sequenceID);
+    commonTLV->setSequenceID(sequenceID);
     sequenceID++;
-    CommonTLV->setUuid0(domainID.uuid0);
-    CommonTLV->setUuid1(domainID.uuid1);
+    commonTLV->setUuid0(domainID.uuid0);
+    commonTLV->setUuid1(domainID.uuid1);
 
     auto packet1 = new Packet("interconnLinkChange");
-    packet1->insertAtBack(Version);
-    packet1->insertAtBack(InLinkChangeTLV1);
-    packet1->insertAtBack(CommonTLV);
-    packet1->insertAtBack(EndTLV);
-    MacAddress SourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
-    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_INCONTROL), SourceAddress1, priority, MRP_LT, packet1);
+    packet1->insertAtBack(version);
+    packet1->insertAtBack(inLinkChangeTLV1);
+    packet1->insertAtBack(commonTLV);
+    packet1->insertAtBack(endTLV);
+    MacAddress sourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
+    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_INCONTROL), sourceAddress1, priority, MRP_LT, packet1);
 
     auto packet2 = new Packet("interconnLinkChange");
-    packet2->insertAtBack(Version);
-    packet2->insertAtBack(InLinkChangeTLV2);
-    packet2->insertAtBack(CommonTLV);
-    packet2->insertAtBack(EndTLV);
-    MacAddress SourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
-    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_INCONTROL), SourceAddress2, priority, MRP_LT, packet2);
+    packet2->insertAtBack(version);
+    packet2->insertAtBack(inLinkChangeTLV2);
+    packet2->insertAtBack(commonTLV);
+    packet2->insertAtBack(endTLV);
+    MacAddress sourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
+    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_INCONTROL), sourceAddress2, priority, MRP_LT, packet2);
 
     //sending out change notification to Interface which just changed.....
     //in text declaration of standard not requested
     //in function description explicitly requested
     auto packet3 = new Packet("interconnLinkChange");
-    packet3->insertAtBack(Version);
-    packet3->insertAtBack(InLinkChangeTLV3);
-    packet3->insertAtBack(CommonTLV);
-    packet3->insertAtBack(EndTLV);
-    MacAddress SourceAddress3 = getPortNetworkInterface(interconnectionPort)->getMacAddress();
+    packet3->insertAtBack(version);
+    packet3->insertAtBack(inLinkChangeTLV3);
+    packet3->insertAtBack(commonTLV);
+    packet3->insertAtBack(endTLV);
+    MacAddress sourceAddress3 = getPortNetworkInterface(interconnectionPort)->getMacAddress();
     if (linkCheckEnabled) {
-        sendFrameReq(interconnectionPort, static_cast<MacAddress>(MC_INTRANSFER), SourceAddress3, priority, MRP_LT, packet3);
+        sendFrameReq(interconnectionPort, static_cast<MacAddress>(MC_INTRANSFER), sourceAddress3, priority, MRP_LT, packet3);
     } else {
-        sendFrameReq(interconnectionPort, static_cast<MacAddress>(MC_INCONTROL), SourceAddress3, priority, MRP_LT, packet3);
+        sendFrameReq(interconnectionPort, static_cast<MacAddress>(MC_INCONTROL), sourceAddress3, priority, MRP_LT, packet3);
     }
     emit(inLinkChangeSignal, simTime().inUnit(SIMTIME_US));
 }
 
-void MrpInterconnection::interconnLinkStatusPollReq(double Time) {
-    if (!inLinkStatusPollTimer->isScheduled() && Time > 0) {
-        scheduleAt(simTime() + SimTime(Time, SIMTIME_MS), inLinkStatusPollTimer);
+void MrpInterconnection::interconnLinkStatusPollReq(double time) {
+    if (!inLinkStatusPollTimer->isScheduled() && time > 0) {
+        scheduleAt(simTime() + SimTime(time, SIMTIME_MS), inLinkStatusPollTimer);
     } else
         EV_DETAIL << "inLinkStatusPoll already scheduled" << EV_ENDL;
     setupInterconnLinkStatusPollReq();
@@ -945,73 +945,73 @@ void MrpInterconnection::interconnLinkStatusPollReq(double Time) {
 
 void MrpInterconnection::setupInterconnLinkStatusPollReq() {
     //Create MRP-PDU according MRP_In_LinkStatusPollRequest
-    auto Version = makeShared<MrpVersionField>();
-    auto InLinkStatusPollTLV1 = makeShared<InLinkStatusPollFrame>();
-    auto InLinkStatusPollTLV2 = makeShared<InLinkStatusPollFrame>();
-    auto InLinkStatusPollTLV3 = makeShared<InLinkStatusPollFrame>();
-    auto CommonTLV = makeShared<CommonHeader>();
-    auto EndTLV = makeShared<TlvHeader>();
+    auto version = makeShared<MrpVersionField>();
+    auto inLinkStatusPollTLV1 = makeShared<InLinkStatusPollFrame>();
+    auto inLinkStatusPollTLV2 = makeShared<InLinkStatusPollFrame>();
+    auto inLinkStatusPollTLV3 = makeShared<InLinkStatusPollFrame>();
+    auto commonTLV = makeShared<CommonHeader>();
+    auto endTLV = makeShared<TlvHeader>();
 
-    InLinkStatusPollTLV1->setInID(interConnectionID);
-    InLinkStatusPollTLV1->setSa(localBridgeAddress);
-    InLinkStatusPollTLV1->setPortRole(MrpInterfaceData::INTERCONNECTION);
+    inLinkStatusPollTLV1->setInID(interConnectionID);
+    inLinkStatusPollTLV1->setSa(localBridgeAddress);
+    inLinkStatusPollTLV1->setPortRole(MrpInterfaceData::INTERCONNECTION);
 
-    InLinkStatusPollTLV2->setInID(interConnectionID);
-    InLinkStatusPollTLV2->setSa(localBridgeAddress);
-    InLinkStatusPollTLV2->setPortRole(MrpInterfaceData::PRIMARY);
+    inLinkStatusPollTLV2->setInID(interConnectionID);
+    inLinkStatusPollTLV2->setSa(localBridgeAddress);
+    inLinkStatusPollTLV2->setPortRole(MrpInterfaceData::PRIMARY);
 
-    InLinkStatusPollTLV3->setInID(interConnectionID);
-    InLinkStatusPollTLV3->setSa(localBridgeAddress);
-    InLinkStatusPollTLV3->setPortRole(MrpInterfaceData::SECONDARY);
+    inLinkStatusPollTLV3->setInID(interConnectionID);
+    inLinkStatusPollTLV3->setSa(localBridgeAddress);
+    inLinkStatusPollTLV3->setPortRole(MrpInterfaceData::SECONDARY);
 
-    CommonTLV->setSequenceID(sequenceID);
+    commonTLV->setSequenceID(sequenceID);
     sequenceID++;
-    CommonTLV->setUuid0(domainID.uuid0);
-    CommonTLV->setUuid1(domainID.uuid1);
+    commonTLV->setUuid0(domainID.uuid0);
+    commonTLV->setUuid1(domainID.uuid1);
 
     auto packet1 = new Packet("InterconnLinkStatusPoll");
-    packet1->insertAtBack(Version);
-    packet1->insertAtBack(InLinkStatusPollTLV1);
-    packet1->insertAtBack(CommonTLV);
-    packet1->insertAtBack(EndTLV);
-    MacAddress SourceAddress1 = getPortNetworkInterface(interconnectionPort)->getMacAddress();
-    sendFrameReq(interconnectionPort, static_cast<MacAddress>(MC_INTRANSFER), SourceAddress1, priority, MRP_LT, packet1);
+    packet1->insertAtBack(version);
+    packet1->insertAtBack(inLinkStatusPollTLV1);
+    packet1->insertAtBack(commonTLV);
+    packet1->insertAtBack(endTLV);
+    MacAddress sourceAddress1 = getPortNetworkInterface(interconnectionPort)->getMacAddress();
+    sendFrameReq(interconnectionPort, static_cast<MacAddress>(MC_INTRANSFER), sourceAddress1, priority, MRP_LT, packet1);
 
     auto packet2 = new Packet("InterconnLinkStatusPoll");
-    packet2->insertAtBack(Version);
-    packet2->insertAtBack(InLinkStatusPollTLV2);
-    packet2->insertAtBack(CommonTLV);
-    packet2->insertAtBack(EndTLV);
-    MacAddress SourceAddress2 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
-    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_INCONTROL), SourceAddress2, priority, MRP_LT, packet2);
+    packet2->insertAtBack(version);
+    packet2->insertAtBack(inLinkStatusPollTLV2);
+    packet2->insertAtBack(commonTLV);
+    packet2->insertAtBack(endTLV);
+    MacAddress sourceAddress2 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
+    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_INCONTROL), sourceAddress2, priority, MRP_LT, packet2);
 
     auto packet3 = new Packet("InterconnLinkStatusPoll");
-    packet3->insertAtBack(Version);
-    packet3->insertAtBack(InLinkStatusPollTLV3);
-    packet3->insertAtBack(CommonTLV);
-    packet3->insertAtBack(EndTLV);
-    MacAddress SourceAddress3 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
-    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_INCONTROL), SourceAddress3, priority, MRP_LT, packet3);
+    packet3->insertAtBack(version);
+    packet3->insertAtBack(inLinkStatusPollTLV3);
+    packet3->insertAtBack(commonTLV);
+    packet3->insertAtBack(endTLV);
+    MacAddress sourceAddress3 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
+    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_INCONTROL), sourceAddress3, priority, MRP_LT, packet3);
     emit(inStatusPollSignal, simTime().inUnit(SIMTIME_US));
 }
 
-void MrpInterconnection::inTransferReq(TlvHeaderType HeaderType, int RingPort, FrameType FrameType, Packet *packet) {
+void MrpInterconnection::inTransferReq(TlvHeaderType headerType, int ringPort, FrameType frameType, Packet *packet) {
     auto macAddressInd = packet->getTag<MacAddressInd>();
     auto sourceAddress = macAddressInd->getSrcAddress();
     packet->trim();
     packet->clearTags();
     EV_INFO << "Received Frame from Ring. forwarding on InterConnection" << EV_FIELD(packet) << EV_ENDL;
-    sendFrameReq(interconnectionPort, static_cast<MacAddress>(FrameType), sourceAddress, priority, MRP_LT, packet);
+    sendFrameReq(interconnectionPort, static_cast<MacAddress>(frameType), sourceAddress, priority, MRP_LT, packet);
 }
 
-void MrpInterconnection::mrpForwardReq(TlvHeaderType HeaderType, int Ringport, FrameType FrameType, Packet *packet) {
+void MrpInterconnection::mrpForwardReq(TlvHeaderType headerType, int ringport, FrameType frameType, Packet *packet) {
     auto macAddressInd = packet->getTag<MacAddressInd>();
-    auto SourceAddress = macAddressInd->getSrcAddress();
+    auto sourceAddress = macAddressInd->getSrcAddress();
     packet->trim();
     packet->clearTags();
     EV_INFO << "Received Frame from InterConnection. forwarding on Ring" << EV_FIELD(packet) << EV_ENDL;
-    sendFrameReq(primaryRingPort, static_cast<MacAddress>(FrameType), SourceAddress, priority, MRP_LT, packet->dup());
-    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(FrameType), SourceAddress, priority, MRP_LT, packet);
+    sendFrameReq(primaryRingPort, static_cast<MacAddress>(frameType), sourceAddress, priority, MRP_LT, packet->dup());
+    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(frameType), sourceAddress, priority, MRP_LT, packet);
 }
 
 } // namespace inet
