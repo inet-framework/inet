@@ -456,9 +456,9 @@ void MrpInterconnection::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
 void MrpInterconnection::interconnTopologyChangeInd(MacAddress SourceAddress, double Time, uint16_t InID, int RingPort, Packet *packet) {
     if (InID == interConnectionID) {
         auto offset = B(2);
-        const auto &firstTLV = packet->peekDataAt<inTopologyChangeFrame>(offset);
+        const auto &firstTLV = packet->peekDataAt<InTopologyChangeFrame>(offset);
         offset = offset + firstTLV->getChunkLength();
-        const auto &secondTLV = packet->peekDataAt<commonHeader>(offset);
+        const auto &secondTLV = packet->peekDataAt<CommonHeader>(offset);
         uint16_t sequence = secondTLV->getSequenceID();
         //Poll is reaching Node from Primary, Secondary and Interconnection Port
         //it is not necessary to react after the first frame
@@ -525,7 +525,7 @@ void MrpInterconnection::interconnTopologyChangeInd(MacAddress SourceAddress, do
 
 void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, uint16_t LinkState, int RingPort, Packet *packet) {
     if (InID == interConnectionID) {
-        auto firstTLV = packet->peekDataAt<inLinkChangeFrame>(B(2));
+        auto firstTLV = packet->peekDataAt<InLinkChangeFrame>(B(2));
         emit(ReceivedInChangeSignal, firstTLV->getInterval());
         switch (inState) {
         case CHK_IO:
@@ -609,9 +609,9 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, uint16_t LinkStat
 void MrpInterconnection::interconnLinkStatusPollInd(uint16_t InID, int RingPort, Packet *packet) {
     if (InID == interConnectionID) {
         b offset = B(2);
-        auto firstTLV = packet->peekDataAt<inLinkStatusPollFrame>(offset);
+        auto firstTLV = packet->peekDataAt<InLinkStatusPollFrame>(offset);
         offset = offset + firstTLV->getChunkLength();
-        auto secondTLV = packet->peekDataAt<commonHeader>(offset);
+        auto secondTLV = packet->peekDataAt<CommonHeader>(offset);
         uint16_t sequence = secondTLV->getSequenceID();
         //Poll is reaching Node from Primary, Secondary and Interconnection Port
         //it is not necessary to react after the first frame
@@ -658,9 +658,9 @@ void MrpInterconnection::interconnLinkStatusPollInd(uint16_t InID, int RingPort,
 void MrpInterconnection::interconnTestInd(MacAddress SourceAddress, int RingPort, uint16_t InID, Packet *packet) {
     if (InID == interConnectionID) {
         b offset = B(2);
-        auto firstTLV = packet->peekDataAt<inTestFrame>(offset);
+        auto firstTLV = packet->peekDataAt<InTestFrame>(offset);
         offset = offset + firstTLV->getChunkLength();
-        auto secondTLV = packet->peekDataAt<commonHeader>(offset);
+        auto secondTLV = packet->peekDataAt<CommonHeader>(offset);
         uint16_t sequence = secondTLV->getSequenceID();
         int ringTime = simTime().inUnit(SIMTIME_MS) - firstTLV->getTimeStamp();
         auto lastInTestFrameSent = inTestFrameSent.find(sequence);
@@ -740,12 +740,12 @@ void MrpInterconnection::interconnTestReq(double Time) {
 
 void MrpInterconnection::setupInterconnTestReq() {
     //Create MRP-PDU according MRP_InTest
-    auto Version = makeShared<mrpVersionField>();
-    auto InTestTLV1 = makeShared<inTestFrame>();
-    auto InTestTLV2 = makeShared<inTestFrame>();
-    auto InTestTLV3 = makeShared<inTestFrame>();
-    auto CommonTLV = makeShared<commonHeader>();
-    auto EndTLV = makeShared<tlvHeader>();
+    auto Version = makeShared<MrpVersionField>();
+    auto InTestTLV1 = makeShared<InTestFrame>();
+    auto InTestTLV2 = makeShared<InTestFrame>();
+    auto InTestTLV3 = makeShared<InTestFrame>();
+    auto CommonTLV = makeShared<CommonHeader>();
+    auto EndTLV = makeShared<TlvHeader>();
 
     uint32_t timestamp = simTime().inUnit(SIMTIME_MS);
     int64_t lastInTestFrameSent = simTime().inUnit(SIMTIME_US);
@@ -816,10 +816,10 @@ void MrpInterconnection::interconnTopologyChangeReq(double Time) {
 
 void MrpInterconnection::setupInterconnTopologyChangeReq(double Time) {
     //Create MRP-PDU according MRP_InTopologyChange
-    auto Version = makeShared<mrpVersionField>();
-    auto InTopologyChangeTLV = makeShared<inTopologyChangeFrame>();
-    auto CommonTLV = makeShared<commonHeader>();
-    auto EndTLV = makeShared<tlvHeader>();
+    auto Version = makeShared<MrpVersionField>();
+    auto InTopologyChangeTLV = makeShared<InTopologyChangeFrame>();
+    auto CommonTLV = makeShared<CommonHeader>();
+    auto EndTLV = makeShared<TlvHeader>();
 
     InTopologyChangeTLV->setInID(interConnectionID);
     InTopologyChangeTLV->setSa(sourceAddress);
@@ -862,12 +862,12 @@ void MrpInterconnection::setupInterconnTopologyChangeReq(double Time) {
 
 void MrpInterconnection::interconnLinkChangeReq(uint16_t LinkState, double Time) {
     //Create MRP-PDU according MRP_InLinkUp or MRP_InLinkDown
-    auto Version = makeShared<mrpVersionField>();
-    auto InLinkChangeTLV1 = makeShared<inLinkChangeFrame>();
-    auto InLinkChangeTLV2 = makeShared<inLinkChangeFrame>();
-    auto InLinkChangeTLV3 = makeShared<inLinkChangeFrame>();
-    auto CommonTLV = makeShared<commonHeader>();
-    auto EndTLV = makeShared<tlvHeader>();
+    auto Version = makeShared<MrpVersionField>();
+    auto InLinkChangeTLV1 = makeShared<InLinkChangeFrame>();
+    auto InLinkChangeTLV2 = makeShared<InLinkChangeFrame>();
+    auto InLinkChangeTLV3 = makeShared<InLinkChangeFrame>();
+    auto CommonTLV = makeShared<CommonHeader>();
+    auto EndTLV = makeShared<TlvHeader>();
 
     tlvHeaderType type = INLINKDOWN;
     if (LinkState == NetworkInterface::UP) {
@@ -945,12 +945,12 @@ void MrpInterconnection::interconnLinkStatusPollReq(double Time) {
 
 void MrpInterconnection::setupInterconnLinkStatusPollReq() {
     //Create MRP-PDU according MRP_In_LinkStatusPollRequest
-    auto Version = makeShared<mrpVersionField>();
-    auto InLinkStatusPollTLV1 = makeShared<inLinkStatusPollFrame>();
-    auto InLinkStatusPollTLV2 = makeShared<inLinkStatusPollFrame>();
-    auto InLinkStatusPollTLV3 = makeShared<inLinkStatusPollFrame>();
-    auto CommonTLV = makeShared<commonHeader>();
-    auto EndTLV = makeShared<tlvHeader>();
+    auto Version = makeShared<MrpVersionField>();
+    auto InLinkStatusPollTLV1 = makeShared<InLinkStatusPollFrame>();
+    auto InLinkStatusPollTLV2 = makeShared<InLinkStatusPollFrame>();
+    auto InLinkStatusPollTLV3 = makeShared<InLinkStatusPollFrame>();
+    auto CommonTLV = makeShared<CommonHeader>();
+    auto EndTLV = makeShared<TlvHeader>();
 
     InLinkStatusPollTLV1->setInID(interConnectionID);
     InLinkStatusPollTLV1->setSa(sourceAddress);
