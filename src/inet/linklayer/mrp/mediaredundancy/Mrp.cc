@@ -575,27 +575,27 @@ void Mrp::handleMrpPDU(Packet* Packet) {
             auto optionTLV = dynamicPtrCast<const OptionHeader>(firstTLV);
             b subOffset = version->getChunkLength() + optionTLV->getChunkLength();
             //handle if manufactorerData is present
-            if (optionTLV->getOuiType() != mrpOuiType::IEC
+            if (optionTLV->getOuiType() != MrpOuiType::IEC
                     && (optionTLV->getEd1Type() == 0x00
                             || optionTLV->getEd1Type() == 0x04)) {
                 if (optionTLV->getEd1Type() == 0x00) {
                     auto dataChunk = Packet->peekDataAt<FieldsChunk>(subOffset);
-                    subOffset = subOffset + B(ed1DataLength::LENGTH0);
+                    subOffset = subOffset + B(Ed1DataLength::LENGTH0);
                 } else if (optionTLV->getEd1Type() == 0x04) {
                     auto dataChunk = Packet->peekDataAt<FieldsChunk>(subOffset);
-                    subOffset = subOffset + B(ed1DataLength::LENGTH4);
+                    subOffset = subOffset + B(Ed1DataLength::LENGTH4);
                 }
             }
 
             //handle suboption2 if present
-            if ((optionTLV->getOuiType() == mrpOuiType::IEC
+            if ((optionTLV->getOuiType() == MrpOuiType::IEC
                     && optionTLV->getHeaderLength() > 4)
                     || (optionTLV->getEd1Type() == 0x00
                             && optionTLV->getHeaderLength()
-                                    > (4 + ed1DataLength::LENGTH0))
+                                    > (4 + Ed1DataLength::LENGTH0))
                     || (optionTLV->getEd1Type() == 0x04
                             && optionTLV->getHeaderLength()
-                                    > (4 + ed1DataLength::LENGTH4))) {
+                                    > (4 + Ed1DataLength::LENGTH4))) {
                 auto subTLV = Packet->peekDataAt<SubTlvHeader>(subOffset);
                 switch (subTLV->getSubType()) {
                 case RESERVED: {
@@ -667,27 +667,27 @@ void Mrp::handleMrpPDU(Packet* Packet) {
         auto optionTLV = dynamicPtrCast<const OptionHeader>(thirdTLV);
         b subOffset = offset + optionTLV->getChunkLength();
         //handle if manufactorerData is present
-        if (optionTLV->getOuiType() != mrpOuiType::IEC
+        if (optionTLV->getOuiType() != MrpOuiType::IEC
                 && (optionTLV->getEd1Type() == 0x00
                         || optionTLV->getEd1Type() == 0x04)) {
             if (optionTLV->getEd1Type() == 0x00) {
                 auto dataChunk = Packet->peekDataAt<FieldsChunk>(subOffset);
-                subOffset = subOffset + B(ed1DataLength::LENGTH0);
+                subOffset = subOffset + B(Ed1DataLength::LENGTH0);
             } else if (optionTLV->getEd1Type() == 0x04) {
                 auto dataChunk = Packet->peekDataAt<FieldsChunk>(subOffset);
-                subOffset = subOffset + B(ed1DataLength::LENGTH4);
+                subOffset = subOffset + B(Ed1DataLength::LENGTH4);
             }
         }
 
         //handle suboption2 if present
-        if ((optionTLV->getOuiType() == mrpOuiType::IEC
+        if ((optionTLV->getOuiType() == MrpOuiType::IEC
                 && optionTLV->getHeaderLength() > 4)
                 || (optionTLV->getEd1Type() == 0x00
                         && optionTLV->getHeaderLength()
-                                > (4 + ed1DataLength::LENGTH0))
+                                > (4 + Ed1DataLength::LENGTH0))
                 || (optionTLV->getEd1Type() == 0x04
                         && optionTLV->getHeaderLength()
-                                > (4 + ed1DataLength::LENGTH4))) {
+                                > (4 + Ed1DataLength::LENGTH4))) {
             auto subTLV = Packet->peekDataAt<SubTlvHeader>(subOffset);
             switch (subTLV->getSubType()) {
             case RESERVED: {
@@ -1162,7 +1162,7 @@ void Mrp::testMgrNackReq(int RingPort, mrpPriority ManagerPrio, MacAddress Sourc
     auto CommonTLV = makeShared<CommonHeader>();
     auto EndTLV = makeShared<TlvHeader>();
 
-    TestMgrTLV->setSubType(subTlvHeaderType::TEST_MGR_NACK);
+    TestMgrTLV->setSubType(SubTlvHeaderType::TEST_MGR_NACK);
     TestMgrTLV->setPrio(managerPrio);
     TestMgrTLV->setSa(sourceAddress);
     TestMgrTLV->setOtherMRMPrio(0x00);
