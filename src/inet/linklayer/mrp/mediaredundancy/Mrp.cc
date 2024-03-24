@@ -402,12 +402,12 @@ void Mrp::mraInit() {
     mauTypeChangeInd(secondaryRingPort, getPortNetworkInterface(secondaryRingPort)->getState());
 }
 
-void Mrp::clearFDB(double Time) {
+void Mrp::clearFDB(double time) {
     if (!fdbClearTimer->isScheduled())
-        scheduleAt(simTime() + SimTime(Time, SIMTIME_MS), fdbClearTimer);
-    else if (fdbClearTimer->getArrivalTime() > (simTime() + SimTime(Time, SIMTIME_MS))) {
+        scheduleAt(simTime() + SimTime(time, SIMTIME_MS), fdbClearTimer);
+    else if (fdbClearTimer->getArrivalTime() > (simTime() + SimTime(time, SIMTIME_MS))) {
         cancelEvent(fdbClearTimer);
-        scheduleAt(simTime() + SimTime(Time, SIMTIME_MS), fdbClearTimer);
+        scheduleAt(simTime() + SimTime(time, SIMTIME_MS), fdbClearTimer);
     }
 }
 
@@ -421,10 +421,10 @@ void Mrp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
         auto interfaceId = interface->getInterfaceId();
         EV_DETAIL << "Received Signal:" << EV_FIELD(field) << EV_FIELD(interfaceId) << EV_ENDL;
         if (interfaceId >= 0) {
-            ProcessDelayTimer *DelayTimer = new ProcessDelayTimer("DelayTimer");
-            DelayTimer->setPort(interface->getInterfaceId());
-            DelayTimer->setField(field);
-            DelayTimer->setKind(0);
+            ProcessDelayTimer *delayTimer = new ProcessDelayTimer("DelayTimer");
+            delayTimer->setPort(interface->getInterfaceId());
+            delayTimer->setField(field);
+            delayTimer->setKind(0);
             if (field == NetworkInterface::F_STATE
                     || field == NetworkInterface::F_CARRIER) {
                 if (interface->isUp() && interface->hasCarrier())
@@ -434,7 +434,7 @@ void Mrp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
                 if (linkUpHysteresisTimer->isScheduled())
                     cancelEvent(linkUpHysteresisTimer);
                 scheduleAt(simTime() + linkDetectionDelay, linkUpHysteresisTimer);
-                scheduleAt(simTime() + linkDetectionDelay, DelayTimer);
+                scheduleAt(simTime() + linkDetectionDelay, delayTimer);
             }
         }
     }
@@ -489,36 +489,36 @@ void Mrp::handleMessageWhenUp(cMessage *msg) {
     }
 }
 
-void Mrp::handleMrpPDU(Packet* Packet) {
-    auto interfaceInd = Packet->findTag<InterfaceInd>();
-    auto macAddressInd = Packet->findTag<MacAddressInd>();
-    auto SourceAddress = macAddressInd->getSrcAddress();
-    auto DestinationAddress = macAddressInd->getDestAddress();
-    int RingPort = interfaceInd->getInterfaceId();
-    auto incomingInterface = interfaceTable->getInterfaceById(RingPort);
+void Mrp::handleMrpPDU(Packet* packet) {
+    auto interfaceInd = packet->findTag<InterfaceInd>();
+    auto macAddressInd = packet->findTag<MacAddressInd>();
+    auto sourceAddress = macAddressInd->getSrcAddress();
+    auto destinationAddress = macAddressInd->getDestAddress();
+    int ringPort = interfaceInd->getInterfaceId();
+    auto incomingInterface = interfaceTable->getInterfaceById(ringPort);
     //unsigned int vlanId = 0;
     //if (auto vlanInd = Packet->findTag<VlanInd>())
     //    vlanId = vlanInd->getVlanId();
 
-    auto version = Packet->peekAtFront<MrpVersionField>();
+    auto version = packet->peekAtFront<MrpVersionField>();
     auto offset = version->getChunkLength();
-    auto firstTLV = Packet->peekDataAt<TlvHeader>(offset);
-    offset = offset + B(firstTLV->getHeaderLength()) + B(2);
-    auto commonTLV = Packet->peekDataAt<CommonHeader>(offset);
-    auto sequence = commonTLV->getSequenceID();
+    auto firstTlv = packet->peekDataAt<TlvHeader>(offset);
+    offset = offset + B(firstTlv->getHeaderLength()) + B(2);
+    auto commonTlv = packet->peekDataAt<CommonHeader>(offset);
+    auto sequence = commonTlv->getSequenceID();
     bool ringID = false;
-    if (commonTLV->getUuid0() == domainID.uuid0
-            && commonTLV->getUuid1() == domainID.uuid1)
+    if (commonTlv->getUuid0() == domainID.uuid0
+            && commonTlv->getUuid1() == domainID.uuid1)
         ringID = true;
-    offset = offset + commonTLV->getChunkLength();
+    offset = offset + commonTlv->getChunkLength();
 
-    switch (firstTLV->getHeaderType()) {
+    switch (firstTlv->getHeaderType()) {
     case TEST: {
         EV_DETAIL << "Received Test-Frame" << EV_ENDL;
-        auto testTLV = dynamicPtrCast<const TestFrame>(firstTLV);
+        auto testTlv = dynamicPtrCast<const TestFrame>(firstTlv);
         if (ringID) {
-            if (testTLV->getSa() == localBridgeAddress) {
-                auto ringTime = simTime().inUnit(SIMTIME_MS) - testTLV->getTimeStamp();
+            if (testTlv->getSa() == localBridgeAddress) {
+                auto ringTime = simTime().inUnit(SIMTIME_MS) - testTlv->getTimeStamp();
                 auto lastTestFrameSent = testFrameSent.find(sequence);
                 if (lastTestFrameSent != testFrameSent.end()) {
                     int64_t ringTimePrecise = simTime().inUnit(SIMTIME_US) - lastTestFrameSent->second;
@@ -529,28 +529,28 @@ void Mrp::handleMrpPDU(Packet* Packet) {
                     EV_DETAIL << "RingTime" << EV_FIELD(ringTime) << EV_ENDL;
                 }
             }
-            testRingInd(RingPort, testTLV->getSa(), static_cast<MrpPriority>(testTLV->getPrio()));
+            testRingInd(ringPort, testTlv->getSa(), static_cast<MrpPriority>(testTlv->getPrio()));
         } else {
             EV_DETAIL << "Received packet from other Mrp-Domain"
-                             << EV_FIELD(incomingInterface) << EV_FIELD(Packet)
+                             << EV_FIELD(incomingInterface) << EV_FIELD(packet)
                              << EV_ENDL;
         }
         break;
     }
     case TOPOLOGYCHANGE: {
         EV_DETAIL << "Received TopologyChange-Frame" << EV_ENDL;
-        auto topologyTLV = dynamicPtrCast<const TopologyChangeFrame>(firstTLV);
+        auto topologyTlv = dynamicPtrCast<const TopologyChangeFrame>(firstTlv);
         if (ringID) {
             if (sequence > lastTopologyId) {
-                topologyChangeInd(topologyTLV->getSa(), topologyTLV->getInterval());
-                emit(receivedChangeSignal, topologyTLV->getInterval());
+                topologyChangeInd(topologyTlv->getSa(), topologyTlv->getInterval());
+                emit(receivedChangeSignal, topologyTlv->getInterval());
             } else {
                 EV_DETAIL << "Received same Frame already" << EV_ENDL;
-                delete Packet;
+                delete packet;
             }
         } else {
             EV_DETAIL << "Received packet from other Mrp-Domain"
-                             << EV_FIELD(incomingInterface) << EV_FIELD(Packet)
+                             << EV_FIELD(incomingInterface) << EV_FIELD(packet)
                              << EV_ENDL;
         }
         break;
@@ -558,13 +558,13 @@ void Mrp::handleMrpPDU(Packet* Packet) {
     case LINKDOWN:
     case LINKUP: {
         EV_DETAIL << "Received LinkChange-Frame" << EV_ENDL;
-        auto linkTLV = dynamicPtrCast<const LinkChangeFrame>(firstTLV);
+        auto linkTlv = dynamicPtrCast<const LinkChangeFrame>(firstTlv);
         if (ringID) {
-            linkChangeInd(linkTLV->getPortRole(), linkTLV->getBlocked());
-            emit(receivedChangeSignal, linkTLV->getInterval());
+            linkChangeInd(linkTlv->getPortRole(), linkTlv->getBlocked());
+            emit(receivedChangeSignal, linkTlv->getInterval());
         } else {
             EV_DETAIL << "Received packet from other Mrp-Domain"
-                             << EV_FIELD(incomingInterface) << EV_FIELD(Packet)
+                             << EV_FIELD(incomingInterface) << EV_FIELD(packet)
                              << EV_ENDL;
         }
         break;
@@ -572,48 +572,48 @@ void Mrp::handleMrpPDU(Packet* Packet) {
     case OPTION: {
         EV_DETAIL << "Received Option-Frame" << EV_ENDL;
         if (ringID) {
-            auto optionTLV = dynamicPtrCast<const OptionHeader>(firstTLV);
-            b subOffset = version->getChunkLength() + optionTLV->getChunkLength();
+            auto optionTlv = dynamicPtrCast<const OptionHeader>(firstTlv);
+            b subOffset = version->getChunkLength() + optionTlv->getChunkLength();
             //handle if manufactorerData is present
-            if (optionTLV->getOuiType() != MrpOuiType::IEC
-                    && (optionTLV->getEd1Type() == 0x00
-                            || optionTLV->getEd1Type() == 0x04)) {
-                if (optionTLV->getEd1Type() == 0x00) {
-                    auto dataChunk = Packet->peekDataAt<FieldsChunk>(subOffset);
+            if (optionTlv->getOuiType() != MrpOuiType::IEC
+                    && (optionTlv->getEd1Type() == 0x00
+                            || optionTlv->getEd1Type() == 0x04)) {
+                if (optionTlv->getEd1Type() == 0x00) {
+                    auto dataChunk = packet->peekDataAt<FieldsChunk>(subOffset);
                     subOffset = subOffset + B(Ed1DataLength::LENGTH0);
-                } else if (optionTLV->getEd1Type() == 0x04) {
-                    auto dataChunk = Packet->peekDataAt<FieldsChunk>(subOffset);
+                } else if (optionTlv->getEd1Type() == 0x04) {
+                    auto dataChunk = packet->peekDataAt<FieldsChunk>(subOffset);
                     subOffset = subOffset + B(Ed1DataLength::LENGTH4);
                 }
             }
 
             //handle suboption2 if present
-            if ((optionTLV->getOuiType() == MrpOuiType::IEC
-                    && optionTLV->getHeaderLength() > 4)
-                    || (optionTLV->getEd1Type() == 0x00
-                            && optionTLV->getHeaderLength()
+            if ((optionTlv->getOuiType() == MrpOuiType::IEC
+                    && optionTlv->getHeaderLength() > 4)
+                    || (optionTlv->getEd1Type() == 0x00
+                            && optionTlv->getHeaderLength()
                                     > (4 + Ed1DataLength::LENGTH0))
-                    || (optionTLV->getEd1Type() == 0x04
-                            && optionTLV->getHeaderLength()
+                    || (optionTlv->getEd1Type() == 0x04
+                            && optionTlv->getHeaderLength()
                                     > (4 + Ed1DataLength::LENGTH4))) {
-                auto subTLV = Packet->peekDataAt<SubTlvHeader>(subOffset);
-                switch (subTLV->getSubType()) {
+                auto subTlv = packet->peekDataAt<SubTlvHeader>(subOffset);
+                switch (subTlv->getSubType()) {
                 case RESERVED: {
-                    auto subOptionTLV = dynamicPtrCast<const ManufacturerFktHeader>(subTLV);
+                    auto subOptionTlv = dynamicPtrCast<const ManufacturerFktHeader>(subTlv);
                     //not implemented
                     break;
                 }
                 case TEST_MGR_NACK: {
                     if (expectedRole == MANAGER_AUTO) {
-                        auto subOptionTLV = dynamicPtrCast<const SubTlvTestFrame>(subTLV);
-                        testMgrNackInd(RingPort, subOptionTLV->getSa(), static_cast<MrpPriority>(subOptionTLV->getPrio()), subOptionTLV->getOtherMRMSa());
+                        auto subOptionTlv = dynamicPtrCast<const SubTlvTestFrame>(subTlv);
+                        testMgrNackInd(ringPort, subOptionTlv->getSa(), static_cast<MrpPriority>(subOptionTlv->getPrio()), subOptionTlv->getOtherMRMSa());
                     }
                     break;
                 }
                 case TEST_PROPAGATE: {
                     if (expectedRole == MANAGER_AUTO) {
-                        auto subOptionTLV = dynamicPtrCast<const SubTlvTestFrame>(subTLV);
-                        testPropagateInd(RingPort, subOptionTLV->getSa(), static_cast<MrpPriority>(subOptionTLV->getPrio()), subOptionTLV->getOtherMRMSa(), static_cast<MrpPriority>(subOptionTLV->getOtherMRMPrio()));
+                        auto subOptionTlv = dynamicPtrCast<const SubTlvTestFrame>(subTlv);
+                        testPropagateInd(ringPort, subOptionTlv->getSa(), static_cast<MrpPriority>(subOptionTlv->getPrio()), subOptionTlv->getOtherMRMSa(), static_cast<MrpPriority>(subOptionTlv->getOtherMRMPrio()));
                     }
                     break;
                 }
@@ -623,89 +623,89 @@ void Mrp::handleMrpPDU(Packet* Packet) {
                     break;
                 }
                 default:
-                    throw cRuntimeError("unknown subTLV TYPE: %d", subTLV->getSubType());
+                    throw cRuntimeError("unknown subTlv TYPE: %d", subTlv->getSubType());
                 }
             }
         } else {
-            EV_DETAIL << "Received packet from other Mrp-Domain" << EV_FIELD(incomingInterface) << EV_FIELD(Packet) << EV_ENDL;
+            EV_DETAIL << "Received packet from other Mrp-Domain" << EV_FIELD(incomingInterface) << EV_FIELD(packet) << EV_ENDL;
         }
         break;
     }
     case INTEST: {
         EV_DETAIL << "Received inTest-Frame" << EV_ENDL;
-        auto inTestTLV = dynamicPtrCast<const InTestFrame>(firstTLV);
-        interconnTestInd(inTestTLV->getSa(), RingPort, inTestTLV->getInID(), Packet->dup());
+        auto inTestTlv = dynamicPtrCast<const InTestFrame>(firstTlv);
+        interconnTestInd(inTestTlv->getSa(), ringPort, inTestTlv->getInID(), packet->dup());
         break;
     }
     case INTOPOLOGYCHANGE: {
         EV_DETAIL << "Received inTopologyChange-Frame" << EV_ENDL;
-        auto inTopologyTLV = dynamicPtrCast<const InTopologyChangeFrame>(firstTLV);
-        interconnTopologyChangeInd(inTopologyTLV->getSa(), inTopologyTLV->getInterval(), inTopologyTLV->getInID(), RingPort, Packet->dup());
+        auto inTopologyTlv = dynamicPtrCast<const InTopologyChangeFrame>(firstTlv);
+        interconnTopologyChangeInd(inTopologyTlv->getSa(), inTopologyTlv->getInterval(), inTopologyTlv->getInID(), ringPort, packet->dup());
         break;
     }
     case INLINKDOWN:
     case INLINKUP: {
         EV_DETAIL << "Received inLinkChange-Frame" << EV_ENDL;
-        auto inLinkTLV = dynamicPtrCast<const InLinkChangeFrame>(firstTLV);
-        interconnLinkChangeInd(inLinkTLV->getInID(), inLinkTLV->getLinkInfo(), RingPort, Packet->dup());
+        auto inLinkTlv = dynamicPtrCast<const InLinkChangeFrame>(firstTlv);
+        interconnLinkChangeInd(inLinkTlv->getInID(), inLinkTlv->getLinkInfo(), ringPort, packet->dup());
         break;
     }
     case INLINKSTATUSPOLL: {
         EV_DETAIL << "Received inLinkStatusPoll" << EV_ENDL;
-        auto inLinkStatusTLV = dynamicPtrCast<const InLinkStatusPollFrame>(firstTLV);
-        interconnLinkStatusPollInd(inLinkStatusTLV->getInID(), RingPort, Packet->dup());
+        auto inLinkStatusTlv = dynamicPtrCast<const InLinkStatusPollFrame>(firstTlv);
+        interconnLinkStatusPollInd(inLinkStatusTlv->getInID(), ringPort, packet->dup());
         break;
     }
     default:
-        throw cRuntimeError("unknown TLV TYPE: %d", firstTLV->getHeaderType());
+        throw cRuntimeError("unknown Tlv TYPE: %d", firstTlv->getHeaderType());
     }
 
     //addtional Option-Frame
-    auto thirdTLV = Packet->peekDataAt<TlvHeader>(offset);
-    if (thirdTLV->getHeaderType() != END && ringID) {
+    auto thirdTlv = packet->peekDataAt<TlvHeader>(offset);
+    if (thirdTlv->getHeaderType() != END && ringID) {
         EV_DETAIL << "Received additional Option-Frame" << EV_ENDL;
-        auto optionTLV = dynamicPtrCast<const OptionHeader>(thirdTLV);
-        b subOffset = offset + optionTLV->getChunkLength();
+        auto optionTlv = dynamicPtrCast<const OptionHeader>(thirdTlv);
+        b subOffset = offset + optionTlv->getChunkLength();
         //handle if manufactorerData is present
-        if (optionTLV->getOuiType() != MrpOuiType::IEC
-                && (optionTLV->getEd1Type() == 0x00
-                        || optionTLV->getEd1Type() == 0x04)) {
-            if (optionTLV->getEd1Type() == 0x00) {
-                auto dataChunk = Packet->peekDataAt<FieldsChunk>(subOffset);
+        if (optionTlv->getOuiType() != MrpOuiType::IEC
+                && (optionTlv->getEd1Type() == 0x00
+                        || optionTlv->getEd1Type() == 0x04)) {
+            if (optionTlv->getEd1Type() == 0x00) {
+                auto dataChunk = packet->peekDataAt<FieldsChunk>(subOffset);
                 subOffset = subOffset + B(Ed1DataLength::LENGTH0);
-            } else if (optionTLV->getEd1Type() == 0x04) {
-                auto dataChunk = Packet->peekDataAt<FieldsChunk>(subOffset);
+            } else if (optionTlv->getEd1Type() == 0x04) {
+                auto dataChunk = packet->peekDataAt<FieldsChunk>(subOffset);
                 subOffset = subOffset + B(Ed1DataLength::LENGTH4);
             }
         }
 
         //handle suboption2 if present
-        if ((optionTLV->getOuiType() == MrpOuiType::IEC
-                && optionTLV->getHeaderLength() > 4)
-                || (optionTLV->getEd1Type() == 0x00
-                        && optionTLV->getHeaderLength()
+        if ((optionTlv->getOuiType() == MrpOuiType::IEC
+                && optionTlv->getHeaderLength() > 4)
+                || (optionTlv->getEd1Type() == 0x00
+                        && optionTlv->getHeaderLength()
                                 > (4 + Ed1DataLength::LENGTH0))
-                || (optionTLV->getEd1Type() == 0x04
-                        && optionTLV->getHeaderLength()
+                || (optionTlv->getEd1Type() == 0x04
+                        && optionTlv->getHeaderLength()
                                 > (4 + Ed1DataLength::LENGTH4))) {
-            auto subTLV = Packet->peekDataAt<SubTlvHeader>(subOffset);
-            switch (subTLV->getSubType()) {
+            auto subTlv = packet->peekDataAt<SubTlvHeader>(subOffset);
+            switch (subTlv->getSubType()) {
             case RESERVED: {
-                auto subOptionTLV = dynamicPtrCast<const ManufacturerFktHeader>(subTLV);
+                auto subOptionTlv = dynamicPtrCast<const ManufacturerFktHeader>(subTlv);
                 //not implemented
                 break;
             }
             case TEST_MGR_NACK: {
                 if (expectedRole == MANAGER_AUTO) {
-                    auto subOptionTLV = dynamicPtrCast<const SubTlvTestFrame>(subTLV);
-                    testMgrNackInd(RingPort, subOptionTLV->getSa(), static_cast<MrpPriority>(subOptionTLV->getPrio()), subOptionTLV->getOtherMRMSa());
+                    auto subOptionTlv = dynamicPtrCast<const SubTlvTestFrame>(subTlv);
+                    testMgrNackInd(ringPort, subOptionTlv->getSa(), static_cast<MrpPriority>(subOptionTlv->getPrio()), subOptionTlv->getOtherMRMSa());
                 }
                 break;
             }
             case TEST_PROPAGATE: {
                 if (expectedRole == MANAGER_AUTO) {
-                    auto subOptionTLV = dynamicPtrCast<const SubTlvTestFrame>(subTLV);
-                    testPropagateInd(RingPort, subOptionTLV->getSa(), static_cast<MrpPriority>(subOptionTLV->getPrio()), subOptionTLV->getOtherMRMSa(), static_cast<MrpPriority>(subOptionTLV->getOtherMRMPrio()));
+                    auto subOptionTlv = dynamicPtrCast<const SubTlvTestFrame>(subTlv);
+                    testPropagateInd(ringPort, subOptionTlv->getSa(), static_cast<MrpPriority>(subOptionTlv->getPrio()), subOptionTlv->getOtherMRMSa(), static_cast<MrpPriority>(subOptionTlv->getOtherMRMPrio()));
                 }
                 break;
             }
@@ -715,26 +715,26 @@ void Mrp::handleMrpPDU(Packet* Packet) {
                 break;
             }
             default:
-                throw cRuntimeError("unknown subTLV TYPE: %d", subTLV->getSubType());
+                throw cRuntimeError("unknown subTlv TYPE: %d", subTlv->getSubType());
             }
         }
-        offset = offset + B(thirdTLV->getHeaderLength()) + B(2);
+        offset = offset + B(thirdTlv->getHeaderLength()) + B(2);
     }
-    //auto endTLV=Packet->peekDataAt<TlvHeader>(offset);
-    delete Packet;
+    //auto endTlv=Packet->peekDataAt<TlvHeader>(offset);
+    delete packet;
 }
 
-void Mrp::handleContinuityCheckMessage(Packet* Packet) {
+void Mrp::handleContinuityCheckMessage(Packet* packet) {
     EV_DETAIL << "Handling CCM" << EV_ENDL;
-    auto interfaceInd = Packet->getTag<InterfaceInd>();
-    auto macAddressInd = Packet->getTag<MacAddressInd>();
-    auto SourceAddress = macAddressInd->getSrcAddress();
-    int RingPort = interfaceInd->getInterfaceId();
-    auto incomingInterface = interfaceTable->getInterfaceById(RingPort);
-    auto ccm = Packet->popAtFront<ContinuityCheckMessage>();
-    auto portData = getPortInterfaceDataForUpdate(RingPort);
+    auto interfaceInd = packet->getTag<InterfaceInd>();
+    auto macAddressInd = packet->getTag<MacAddressInd>();
+    auto sourceAddress = macAddressInd->getSrcAddress();
+    int ringPort = interfaceInd->getInterfaceId();
+    auto incomingInterface = interfaceTable->getInterfaceById(ringPort);
+    auto ccm = packet->popAtFront<ContinuityCheckMessage>();
+    auto portData = getPortInterfaceDataForUpdate(ringPort);
     if (ccm->getEndpointIdentifier() == portData->getCfmEndpointID()) {
-        int i = SourceAddress.compareTo(incomingInterface->getMacAddress());
+        int i = sourceAddress.compareTo(incomingInterface->getMacAddress());
         if (i == -1) {
             portData->setCfmEndpointID(2);
             MacAddress address = incomingInterface->getMacAddress();
@@ -745,12 +745,12 @@ void Mrp::handleContinuityCheckMessage(Packet* Packet) {
     portData->setNextUpdate(simTime() + portData->getContinuityCheckInterval() * 3.5);
     EV_DEBUG << "new ccm-Data" << EV_FIELD(portData->getNextUpdate())
             << EV_FIELD(portData->getCfmEndpointID())
-            << EV_FIELD(SourceAddress)
+            << EV_FIELD(sourceAddress)
             << EV_FIELD(incomingInterface->getMacAddress())
             << EV_ENDL;
-    mauTypeChangeInd(RingPort, NetworkInterface::UP);
-    emit(receivedContinuityCheckSignal, RingPort);
-    delete Packet;
+    mauTypeChangeInd(ringPort, NetworkInterface::UP);
+    emit(receivedContinuityCheckSignal, ringPort);
+    delete packet;
 }
 
 void Mrp::handleDelayTimer(int interfaceId, int field) {
@@ -784,34 +784,34 @@ void Mrp::clearLocalFDBDelayed() {
     EV_DETAIL << "FDB cleared" << EV_ENDL;
 }
 
-bool Mrp::isBetterThanOwnPrio(MrpPriority RemotePrio, MacAddress RemoteAddress) {
-    if (RemotePrio < localManagerPrio)
+bool Mrp::isBetterThanOwnPrio(MrpPriority remotePrio, MacAddress remoteAddress) {
+    if (remotePrio < localManagerPrio)
         return true;
-    if (RemotePrio == localManagerPrio && RemoteAddress < localBridgeAddress)
-        return true;
-    return false;
-}
-
-bool Mrp::isBetterThanBestPrio(MrpPriority RemotePrio, MacAddress RemoteAddress) {
-    if (RemotePrio < hostBestMRMPriority)
-        return true;
-    if (RemotePrio == hostBestMRMPriority && RemoteAddress < hostBestMRMSourceAddress)
+    if (remotePrio == localManagerPrio && remoteAddress < localBridgeAddress)
         return true;
     return false;
 }
 
-void Mrp::handleContinuityCheckTimer(int RingPort) {
-    auto portData = getPortInterfaceDataForUpdate(RingPort);
-    EV_DETAIL << "Checktimer:" << EV_FIELD(simTime()) << EV_FIELD(RingPort)
+bool Mrp::isBetterThanBestPrio(MrpPriority remotePrio, MacAddress remoteAddress) {
+    if (remotePrio < hostBestMRMPriority)
+        return true;
+    if (remotePrio == hostBestMRMPriority && remoteAddress < hostBestMRMSourceAddress)
+        return true;
+    return false;
+}
+
+void Mrp::handleContinuityCheckTimer(int ringPort) {
+    auto portData = getPortInterfaceDataForUpdate(ringPort);
+    EV_DETAIL << "Checktimer:" << EV_FIELD(simTime()) << EV_FIELD(ringPort)
                      << EV_FIELD(portData->getNextUpdate()) << EV_ENDL;
     if (simTime() >= portData->getNextUpdate()) {
         //no Message received within Lifetime
         EV_DETAIL << "Checktimer: Link considered down" << EV_ENDL;
-        mauTypeChangeInd(RingPort, NetworkInterface::DOWN);
+        mauTypeChangeInd(ringPort, NetworkInterface::DOWN);
     }
-    setupContinuityCheck(RingPort);
-    class ContinuityCheckTimer *checkTimer = new ContinuityCheckTimer("continuityCheckTimer");
-    checkTimer->setPort(RingPort);
+    setupContinuityCheck(ringPort);
+    ContinuityCheckTimer *checkTimer = new ContinuityCheckTimer("continuityCheckTimer");
+    checkTimer->setPort(ringPort);
     checkTimer->setKind(1);
     scheduleAt(simTime() + portData->getContinuityCheckInterval(), checkTimer);
 }
@@ -956,59 +956,59 @@ void Mrp::handleLinkDownTimer() {
     }
 }
 
-void Mrp::setupContinuityCheck(int RingPort) {
-    auto CCM = makeShared<ContinuityCheckMessage>();
-    auto portData = getPortInterfaceDataForUpdate(RingPort);
+void Mrp::setupContinuityCheck(int ringPort) {
+    auto ccm = makeShared<ContinuityCheckMessage>();
+    auto portData = getPortInterfaceDataForUpdate(ringPort);
     if (portData->getContinuityCheckInterval() == 3.3) {
-        CCM->setFlags(0x00000001);
+        ccm->setFlags(0x00000001);
     } else if (portData->getContinuityCheckInterval() == 10) {
-        CCM->setFlags(0x00000002);
+        ccm->setFlags(0x00000002);
     }
-    if (RingPort == primaryRingPort) {
-        CCM->setSequenceNumber(sequenceCCM1);
+    if (ringPort == primaryRingPort) {
+        ccm->setSequenceNumber(sequenceCCM1);
         sequenceCCM1++;
-    } else if (RingPort == secondaryRingPort) {
-        CCM->setSequenceNumber(sequenceCCM2);
+    } else if (ringPort == secondaryRingPort) {
+        ccm->setSequenceNumber(sequenceCCM2);
         sequenceCCM2++;
     }
-    CCM->setEndpointIdentifier(portData->getCfmEndpointID());
+    ccm->setEndpointIdentifier(portData->getCfmEndpointID());
     auto name = portData->getCfmName();
-    CCM->setMessageName(name.c_str());
-    auto packet = new Packet("ContinuityCheck", CCM);
-    sendCCM(RingPort, packet);
-    emit(continuityCheckSignal, RingPort);
+    ccm->setMessageName(name.c_str());
+    auto packet = new Packet("ContinuityCheck", ccm);
+    sendCCM(ringPort, packet);
+    emit(continuityCheckSignal, ringPort);
 }
 
-void Mrp::testRingReq(double Time) {
+void Mrp::testRingReq(double time) {
     if (addTest)
         cancelEvent(testTimer);
     if (!testTimer->isScheduled()) {
-        scheduleAt(simTime() + SimTime(Time, SIMTIME_MS), testTimer);
+        scheduleAt(simTime() + SimTime(time, SIMTIME_MS), testTimer);
         setupTestRingReq();
     } else
         EV_DETAIL << "Testtimer already scheduled" << EV_ENDL;
 }
 
-void Mrp::topologyChangeReq(double Time) {
-    if (Time == 0) {
+void Mrp::topologyChangeReq(double time) {
+    if (time == 0) {
         clearLocalFDB();
-        setupTopologyChangeReq(Time * topologyChangeMaxRepeatCount);
+        setupTopologyChangeReq(time * topologyChangeMaxRepeatCount);
     } else if (!topologyChangeTimer->isScheduled()) {
-        scheduleAt(simTime() + SimTime(Time, SIMTIME_MS), topologyChangeTimer);
-        setupTopologyChangeReq(Time * topologyChangeMaxRepeatCount);
+        scheduleAt(simTime() + SimTime(time, SIMTIME_MS), topologyChangeTimer);
+        setupTopologyChangeReq(time * topologyChangeMaxRepeatCount);
     } else
         EV_DETAIL << "TopologyChangeTimer already scheduled" << EV_ENDL;
 
 }
 
-void Mrp::linkChangeReq(int RingPort, uint16_t LinkState) {
-    if (LinkState == NetworkInterface::DOWN) {
+void Mrp::linkChangeReq(int ringPort, uint16_t linkState) {
+    if (linkState == NetworkInterface::DOWN) {
         if (!linkDownTimer->isScheduled()) {
             scheduleAt(simTime() + SimTime(linkDownInterval, SIMTIME_MS), linkDownTimer);
             setupLinkChangeReq(primaryRingPort, NetworkInterface::DOWN, linkChangeCount * linkDownInterval);
             linkChangeCount--;
         }
-    } else if (LinkState == NetworkInterface::UP) {
+    } else if (linkState == NetworkInterface::UP) {
         if (!linkUpTimer->isScheduled()) {
             scheduleAt(simTime() + SimTime(linkUpInterval, SIMTIME_MS), linkUpTimer);
             setupLinkChangeReq(primaryRingPort, NetworkInterface::UP, linkChangeCount * linkUpInterval);
@@ -1020,167 +1020,167 @@ void Mrp::linkChangeReq(int RingPort, uint16_t LinkState) {
 
 void Mrp::setupTestRingReq() {
     //Create MRP-PDU according MRP_Test
-    auto Version = makeShared<MrpVersionField>();
-    auto TestTLV1 = makeShared<TestFrame>();
-    auto TestTLV2 = makeShared<TestFrame>();
-    auto CommonTLV = makeShared<CommonHeader>();
-    auto EndTLV = makeShared<TlvHeader>();
+    auto version = makeShared<MrpVersionField>();
+    auto testTlv1 = makeShared<TestFrame>();
+    auto testTlv2 = makeShared<TestFrame>();
+    auto commonTlv = makeShared<CommonHeader>();
+    auto endTlv = makeShared<TlvHeader>();
 
     auto timestamp = simTime().inUnit(SIMTIME_MS);
     auto lastTestFrameSent = simTime().inUnit(SIMTIME_US);
     testFrameSent.insert( { sequenceID, lastTestFrameSent });
 
-    TestTLV1->setPrio(localManagerPrio);
-    TestTLV1->setSa(localBridgeAddress);
-    TestTLV1->setPortRole(MrpInterfaceData::PRIMARY);
-    TestTLV1->setRingState(currentRingState);
-    TestTLV1->setTransition(transition);
-    TestTLV1->setTimeStamp(timestamp);
+    testTlv1->setPrio(localManagerPrio);
+    testTlv1->setSa(localBridgeAddress);
+    testTlv1->setPortRole(MrpInterfaceData::PRIMARY);
+    testTlv1->setRingState(currentRingState);
+    testTlv1->setTransition(transition);
+    testTlv1->setTimeStamp(timestamp);
 
-    TestTLV2->setPrio(localManagerPrio);
-    TestTLV2->setSa(localBridgeAddress);
-    TestTLV2->setPortRole(MrpInterfaceData::PRIMARY);
-    TestTLV2->setRingState(currentRingState);
-    TestTLV2->setTransition(transition);
-    TestTLV2->setTimeStamp(timestamp);
+    testTlv2->setPrio(localManagerPrio);
+    testTlv2->setSa(localBridgeAddress);
+    testTlv2->setPortRole(MrpInterfaceData::PRIMARY);
+    testTlv2->setRingState(currentRingState);
+    testTlv2->setTransition(transition);
+    testTlv2->setTimeStamp(timestamp);
 
-    CommonTLV->setSequenceID(sequenceID);
+    commonTlv->setSequenceID(sequenceID);
     sequenceID++;
-    CommonTLV->setUuid0(domainID.uuid0);
-    CommonTLV->setUuid1(domainID.uuid1);
+    commonTlv->setUuid0(domainID.uuid0);
+    commonTlv->setUuid1(domainID.uuid1);
 
     Packet *packet1 = new Packet("mrpTestFrame");
-    packet1->insertAtBack(Version);
-    packet1->insertAtBack(TestTLV1);
-    packet1->insertAtBack(CommonTLV);
+    packet1->insertAtBack(version);
+    packet1->insertAtBack(testTlv1);
+    packet1->insertAtBack(commonTlv);
 
     Packet *packet2 = new Packet("mrpTestFrame");
-    packet2->insertAtBack(Version);
-    packet2->insertAtBack(TestTLV2);
-    packet2->insertAtBack(CommonTLV);
+    packet2->insertAtBack(version);
+    packet2->insertAtBack(testTlv2);
+    packet2->insertAtBack(commonTlv);
 
     //MRA only
     if (expectedRole == MANAGER_AUTO) {
-        auto OptionTLV = makeShared<OptionHeader>();
-        auto AutoMgrTLV = makeShared<SubTlvHeader>();
-        uint8_t headerLength = OptionTLV->getHeaderLength() + AutoMgrTLV->getSubHeaderLength() + 2;
-        OptionTLV->setHeaderLength(headerLength);
-        packet1->insertAtBack(OptionTLV);
-        packet1->insertAtBack(AutoMgrTLV);
-        packet2->insertAtBack(OptionTLV);
-        packet2->insertAtBack(AutoMgrTLV);
+        auto optionTlv = makeShared<OptionHeader>();
+        auto autoMgrTlv = makeShared<SubTlvHeader>();
+        uint8_t headerLength = optionTlv->getHeaderLength() + autoMgrTlv->getSubHeaderLength() + 2;
+        optionTlv->setHeaderLength(headerLength);
+        packet1->insertAtBack(optionTlv);
+        packet1->insertAtBack(autoMgrTlv);
+        packet2->insertAtBack(optionTlv);
+        packet2->insertAtBack(autoMgrTlv);
     }
-    packet1->insertAtBack(EndTLV);
-    MacAddress SourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
-    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT, packet1);
+    packet1->insertAtBack(endTlv);
+    MacAddress sourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
+    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_TEST), sourceAddress1, priority, MRP_LT, packet1);
 
-    packet2->insertAtBack(EndTLV);
-    MacAddress SourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
-    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress2, priority, MRP_LT, packet2);
+    packet2->insertAtBack(endTlv);
+    MacAddress sourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
+    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_TEST), sourceAddress2, priority, MRP_LT, packet2);
     emit(testSignal, lastTestFrameSent);
 }
 
 void Mrp::setupTopologyChangeReq(uint32_t Interval) {
     //Create MRP-PDU according MRP_TopologyChange
-    auto Version = makeShared<MrpVersionField>();
-    auto TopologyChangeTLV = makeShared<TopologyChangeFrame>();
-    auto TopologyChangeTLV2 = makeShared<TopologyChangeFrame>();
-    auto CommonTLV = makeShared<CommonHeader>();
-    auto EndTLV = makeShared<TlvHeader>();
+    auto version = makeShared<MrpVersionField>();
+    auto topologyChangeTlv = makeShared<TopologyChangeFrame>();
+    auto topologyChangeTlv2 = makeShared<TopologyChangeFrame>();
+    auto commonTlv = makeShared<CommonHeader>();
+    auto endTlv = makeShared<TlvHeader>();
 
-    TopologyChangeTLV->setPrio(localManagerPrio);
-    TopologyChangeTLV->setSa(localBridgeAddress);
-    TopologyChangeTLV->setPortRole(MrpInterfaceData::PRIMARY);
-    TopologyChangeTLV->setInterval(Interval);
-    TopologyChangeTLV2->setPrio(localManagerPrio);
-    TopologyChangeTLV2->setPortRole(MrpInterfaceData::SECONDARY);
-    TopologyChangeTLV2->setSa(localBridgeAddress);
-    TopologyChangeTLV2->setInterval(Interval);
+    topologyChangeTlv->setPrio(localManagerPrio);
+    topologyChangeTlv->setSa(localBridgeAddress);
+    topologyChangeTlv->setPortRole(MrpInterfaceData::PRIMARY);
+    topologyChangeTlv->setInterval(Interval);
+    topologyChangeTlv2->setPrio(localManagerPrio);
+    topologyChangeTlv2->setPortRole(MrpInterfaceData::SECONDARY);
+    topologyChangeTlv2->setSa(localBridgeAddress);
+    topologyChangeTlv2->setInterval(Interval);
 
-    CommonTLV->setSequenceID(sequenceID);
+    commonTlv->setSequenceID(sequenceID);
     sequenceID++;
-    CommonTLV->setUuid0(domainID.uuid0);
-    CommonTLV->setUuid1(domainID.uuid1);
+    commonTlv->setUuid0(domainID.uuid0);
+    commonTlv->setUuid1(domainID.uuid1);
 
     auto packet1 = new Packet("mrpTopologyChange");
-    packet1->insertAtBack(Version);
-    packet1->insertAtBack(TopologyChangeTLV);
-    packet1->insertAtBack(CommonTLV);
-    packet1->insertAtBack(EndTLV);
-    MacAddress SourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
-    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_CONTROL), SourceAddress1, priority, MRP_LT, packet1);
+    packet1->insertAtBack(version);
+    packet1->insertAtBack(topologyChangeTlv);
+    packet1->insertAtBack(commonTlv);
+    packet1->insertAtBack(endTlv);
+    MacAddress sourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
+    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_CONTROL), sourceAddress1, priority, MRP_LT, packet1);
 
     auto packet2 = new Packet("mrpTopologyChange");
-    packet2->insertAtBack(Version);
-    packet2->insertAtBack(TopologyChangeTLV2);
-    packet2->insertAtBack(CommonTLV);
-    packet2->insertAtBack(EndTLV);
-    MacAddress SourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
-    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_CONTROL), SourceAddress2, priority, MRP_LT, packet2);
+    packet2->insertAtBack(version);
+    packet2->insertAtBack(topologyChangeTlv2);
+    packet2->insertAtBack(commonTlv);
+    packet2->insertAtBack(endTlv);
+    MacAddress sourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
+    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_CONTROL), sourceAddress2, priority, MRP_LT, packet2);
     emit(topologyChangeSignal, Interval);
 }
 
-void Mrp::setupLinkChangeReq(int RingPort, uint16_t LinkState, double Time) {
+void Mrp::setupLinkChangeReq(int ringPort, uint16_t linkState, double time) {
     //Create MRP-PDU according MRP_LinkChange
-    auto Version = makeShared<MrpVersionField>();
-    auto LinkChangeTLV = makeShared<LinkChangeFrame>();
-    auto CommonTLV = makeShared<CommonHeader>();
-    auto EndTLV = makeShared<TlvHeader>();
+    auto version = makeShared<MrpVersionField>();
+    auto linkChangeTlv = makeShared<LinkChangeFrame>();
+    auto commonTlv = makeShared<CommonHeader>();
+    auto endTlv = makeShared<TlvHeader>();
 
-    if (LinkState == NetworkInterface::UP) {
-        LinkChangeTLV->setHeaderType(LINKUP);
-    } else if (LinkState == NetworkInterface::DOWN) {
-        LinkChangeTLV->setHeaderType(LINKDOWN);
+    if (linkState == NetworkInterface::UP) {
+        linkChangeTlv->setHeaderType(LINKUP);
+    } else if (linkState == NetworkInterface::DOWN) {
+        linkChangeTlv->setHeaderType(LINKDOWN);
     } else {
         throw cRuntimeError("Unknown LinkState in linkChangeRequest");
     }
-    LinkChangeTLV->setSa(localBridgeAddress);
-    LinkChangeTLV->setPortRole(getPortRole(RingPort));
-    LinkChangeTLV->setInterval(Time);
-    LinkChangeTLV->setBlocked(LinkState);
+    linkChangeTlv->setSa(localBridgeAddress);
+    linkChangeTlv->setPortRole(getPortRole(ringPort));
+    linkChangeTlv->setInterval(time);
+    linkChangeTlv->setBlocked(linkState);
 
-    CommonTLV->setSequenceID(sequenceID);
+    commonTlv->setSequenceID(sequenceID);
     sequenceID++;
-    CommonTLV->setUuid0(domainID.uuid0);
-    CommonTLV->setUuid1(domainID.uuid1);
+    commonTlv->setUuid0(domainID.uuid0);
+    commonTlv->setUuid1(domainID.uuid1);
 
     auto packet1 = new Packet("mrpLinkChange");
-    packet1->insertAtBack(Version);
-    packet1->insertAtBack(LinkChangeTLV);
-    packet1->insertAtBack(CommonTLV);
-    packet1->insertAtBack(EndTLV);
-    MacAddress SourceAddress1 = getPortNetworkInterface(RingPort)->getMacAddress();
-    sendFrameReq(RingPort, static_cast<MacAddress>(MC_CONTROL), SourceAddress1, priority, MRP_LT, packet1);
-    emit(linkChangeSignal, Time);
+    packet1->insertAtBack(version);
+    packet1->insertAtBack(linkChangeTlv);
+    packet1->insertAtBack(commonTlv);
+    packet1->insertAtBack(endTlv);
+    MacAddress sourceAddress1 = getPortNetworkInterface(ringPort)->getMacAddress();
+    sendFrameReq(ringPort, static_cast<MacAddress>(MC_CONTROL), sourceAddress1, priority, MRP_LT, packet1);
+    emit(linkChangeSignal, time);
 }
 
-void Mrp::testMgrNackReq(int RingPort, MrpPriority ManagerPrio, MacAddress SourceAddress) {
+void Mrp::testMgrNackReq(int ringPort, MrpPriority managerPrio, MacAddress sourceAddress) {
     //Create MRP-PDU according MRP_Option and Suboption2 MRP-TestMgrNack
-    auto Version = makeShared<MrpVersionField>();
-    auto OptionTLV = makeShared<OptionHeader>();
-    auto TestMgrTLV = makeShared<SubTlvTestFrame>();
-    auto CommonTLV = makeShared<CommonHeader>();
-    auto EndTLV = makeShared<TlvHeader>();
+    auto version = makeShared<MrpVersionField>();
+    auto optionTlv = makeShared<OptionHeader>();
+    auto testMgrTlv = makeShared<SubTlvTestFrame>();
+    auto commonTlv = makeShared<CommonHeader>();
+    auto endTlv = makeShared<TlvHeader>();
 
-    TestMgrTLV->setSubType(SubTlvHeaderType::TEST_MGR_NACK);
-    TestMgrTLV->setPrio(localManagerPrio);
-    TestMgrTLV->setSa(localBridgeAddress);
-    TestMgrTLV->setOtherMRMPrio(0x00);
-    TestMgrTLV->setOtherMRMSa(SourceAddress);
+    testMgrTlv->setSubType(SubTlvHeaderType::TEST_MGR_NACK);
+    testMgrTlv->setPrio(localManagerPrio);
+    testMgrTlv->setSa(localBridgeAddress);
+    testMgrTlv->setOtherMRMPrio(0x00);
+    testMgrTlv->setOtherMRMSa(sourceAddress);
 
-    OptionTLV->setHeaderLength(OptionTLV->getHeaderLength() + TestMgrTLV->getSubHeaderLength() + 2);
+    optionTlv->setHeaderLength(optionTlv->getHeaderLength() + testMgrTlv->getSubHeaderLength() + 2);
 
-    CommonTLV->setSequenceID(sequenceID);
+    commonTlv->setSequenceID(sequenceID);
     sequenceID++;
-    CommonTLV->setUuid0(domainID.uuid0);
-    CommonTLV->setUuid1(domainID.uuid1);
+    commonTlv->setUuid0(domainID.uuid0);
+    commonTlv->setUuid1(domainID.uuid1);
 
     Packet *packet1 = new Packet("mrpTestMgrNackFrame");
-    packet1->insertAtBack(Version);
-    packet1->insertAtBack(OptionTLV);
-    packet1->insertAtBack(TestMgrTLV);
-    packet1->insertAtBack(CommonTLV);
-    packet1->insertAtBack(EndTLV);
+    packet1->insertAtBack(version);
+    packet1->insertAtBack(optionTlv);
+    packet1->insertAtBack(testMgrTlv);
+    packet1->insertAtBack(commonTlv);
+    packet1->insertAtBack(endTlv);
 
     //Standard request sending out both packets, but defines a handshake.
     //sending the answer back would be enough
@@ -1189,44 +1189,44 @@ void Mrp::testMgrNackReq(int RingPort, MrpPriority ManagerPrio, MacAddress Sourc
     //sendFrameReq(RingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
 
     Packet *packet2 = new Packet("mrpTestMgrNackFrame");
-    packet2->insertAtBack(Version);
-    packet2->insertAtBack(OptionTLV);
-    packet2->insertAtBack(TestMgrTLV);
-    packet2->insertAtBack(CommonTLV);
-    packet2->insertAtBack(EndTLV);
+    packet2->insertAtBack(version);
+    packet2->insertAtBack(optionTlv);
+    packet2->insertAtBack(testMgrTlv);
+    packet2->insertAtBack(commonTlv);
+    packet2->insertAtBack(endTlv);
 
-    MacAddress SourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
-    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT, packet1);
-    MacAddress SourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
-    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress2, priority, MRP_LT, packet2);
+    MacAddress sourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
+    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_TEST), sourceAddress1, priority, MRP_LT, packet1);
+    MacAddress sourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
+    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_TEST), sourceAddress2, priority, MRP_LT, packet2);
 }
 
-void Mrp::testPropagateReq(int RingPort, MrpPriority ManagerPrio, MacAddress SourceAddress) {
+void Mrp::testPropagateReq(int ringPort, MrpPriority managerPrio, MacAddress sourceAddress) {
     //Create MRP-PDU according MRP_Option and Suboption2 MRP-TestPropagate
-    auto Version = makeShared<MrpVersionField>();
-    auto OptionTLV = makeShared<OptionHeader>();
-    auto TestMgrTLV = makeShared<SubTlvTestFrame>();
-    auto CommonTLV = makeShared<CommonHeader>();
-    auto EndTLV = makeShared<TlvHeader>();
+    auto version = makeShared<MrpVersionField>();
+    auto optionTlv = makeShared<OptionHeader>();
+    auto testMgrTlv = makeShared<SubTlvTestFrame>();
+    auto commonTlv = makeShared<CommonHeader>();
+    auto endTlv = makeShared<TlvHeader>();
 
-    TestMgrTLV->setPrio(localManagerPrio);
-    TestMgrTLV->setSa(localBridgeAddress);
-    TestMgrTLV->setOtherMRMPrio(ManagerPrio);
-    TestMgrTLV->setOtherMRMSa(SourceAddress);
+    testMgrTlv->setPrio(localManagerPrio);
+    testMgrTlv->setSa(localBridgeAddress);
+    testMgrTlv->setOtherMRMPrio(managerPrio);
+    testMgrTlv->setOtherMRMSa(sourceAddress);
 
-    OptionTLV->setHeaderLength(OptionTLV->getHeaderLength() + TestMgrTLV->getSubHeaderLength() + 2);
+    optionTlv->setHeaderLength(optionTlv->getHeaderLength() + testMgrTlv->getSubHeaderLength() + 2);
 
-    CommonTLV->setSequenceID(sequenceID);
+    commonTlv->setSequenceID(sequenceID);
     sequenceID++;
-    CommonTLV->setUuid0(domainID.uuid0);
-    CommonTLV->setUuid1(domainID.uuid1);
+    commonTlv->setUuid0(domainID.uuid0);
+    commonTlv->setUuid1(domainID.uuid1);
 
     Packet *packet1 = new Packet("mrpTestPropagateFrame");
-    packet1->insertAtBack(Version);
-    packet1->insertAtBack(OptionTLV);
-    packet1->insertAtBack(TestMgrTLV);
-    packet1->insertAtBack(CommonTLV);
-    packet1->insertAtBack(EndTLV);
+    packet1->insertAtBack(version);
+    packet1->insertAtBack(optionTlv);
+    packet1->insertAtBack(testMgrTlv);
+    packet1->insertAtBack(commonTlv);
+    packet1->insertAtBack(endTlv);
 
     //Standard request sending out both packets, but defines a handshake.
     //sending the answer back would be enough
@@ -1235,25 +1235,25 @@ void Mrp::testPropagateReq(int RingPort, MrpPriority ManagerPrio, MacAddress Sou
     //sendFrameReq(RingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
 
     Packet *packet2 = new Packet("mrpTestPropagateFrame");
-    packet2->insertAtBack(Version);
-    packet2->insertAtBack(OptionTLV);
-    packet2->insertAtBack(TestMgrTLV);
-    packet2->insertAtBack(CommonTLV);
-    packet2->insertAtBack(EndTLV);
+    packet2->insertAtBack(version);
+    packet2->insertAtBack(optionTlv);
+    packet2->insertAtBack(testMgrTlv);
+    packet2->insertAtBack(commonTlv);
+    packet2->insertAtBack(endTlv);
 
-    MacAddress SourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
-    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT, packet1);
-    MacAddress SourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
-    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_TEST), SourceAddress2, priority, MRP_LT, packet2);
+    MacAddress sourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
+    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_TEST), sourceAddress1, priority, MRP_LT, packet1);
+    MacAddress sourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
+    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_TEST), sourceAddress2, priority, MRP_LT, packet2);
 }
 
-void Mrp::testRingInd(int RingPort, MacAddress SourceAddress, MrpPriority ManagerPrio) {
+void Mrp::testRingInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio) {
     switch (currentState) {
     case POWER_ON:
     case AC_STAT1:
         break;
     case PRM_UP:
-        if (SourceAddress == localBridgeAddress) {
+        if (sourceAddress == localBridgeAddress) {
             testMaxRetransmissionCount = testMonitoringCount - 1;
             testRetransmissionCount = 0;
             noTopologyChange = false;
@@ -1263,13 +1263,13 @@ void Mrp::testRingInd(int RingPort, MacAddress SourceAddress, MrpPriority Manage
             currentRingState = CLOSED;
             emit(ringStateChangedSignal, currentRingState);
         } else if (expectedRole == MANAGER_AUTO
-                && !isBetterThanOwnPrio(ManagerPrio, SourceAddress)) {
-            testMgrNackReq(RingPort, ManagerPrio, SourceAddress);
+                && !isBetterThanOwnPrio(managerPrio, sourceAddress)) {
+            testMgrNackReq(ringPort, managerPrio, sourceAddress);
         }
         //all other cases: ignore
         break;
     case CHK_RO:
-        if (SourceAddress == localBridgeAddress) {
+        if (sourceAddress == localBridgeAddress) {
             setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
             testMaxRetransmissionCount = testMonitoringCount - 1;
             testRetransmissionCount = 0;
@@ -1278,41 +1278,41 @@ void Mrp::testRingInd(int RingPort, MacAddress SourceAddress, MrpPriority Manage
             if (!reactOnLinkChange) {
                 topologyChangeReq(topologyChangeInterval);
             } else {
-                double Time = 0;
-                topologyChangeReq(Time);
+                double time = 0;
+                topologyChangeReq(time);
             }
             currentState = CHK_RC;
             EV_DETAIL << "Switching State from CHK_RO to CHK_RC" << EV_FIELD(currentState) << EV_ENDL;
             currentRingState = CLOSED;
             emit(ringStateChangedSignal, currentRingState);
         } else if (expectedRole == MANAGER_AUTO
-                && !isBetterThanOwnPrio(ManagerPrio, SourceAddress)) {
-            testMgrNackReq(RingPort, ManagerPrio, SourceAddress);
+                && !isBetterThanOwnPrio(managerPrio, sourceAddress)) {
+            testMgrNackReq(ringPort, managerPrio, sourceAddress);
         }
         //all other cases: ignore
         break;
     case CHK_RC:
-        if (SourceAddress == localBridgeAddress) {
+        if (sourceAddress == localBridgeAddress) {
             testMaxRetransmissionCount = testMonitoringCount - 1;
             testRetransmissionCount = 0;
             noTopologyChange = false;
         } else if (expectedRole == MANAGER_AUTO
-                && !isBetterThanOwnPrio(ManagerPrio, SourceAddress)) {
-            testMgrNackReq(RingPort, ManagerPrio, SourceAddress);
+                && !isBetterThanOwnPrio(managerPrio, sourceAddress)) {
+            testMgrNackReq(ringPort, managerPrio, sourceAddress);
         }
         break;
     case DE:
     case DE_IDLE:
     case PT:
     case PT_IDLE:
-        if (expectedRole == MANAGER_AUTO && SourceAddress != localBridgeAddress
-                && SourceAddress == hostBestMRMSourceAddress) {
-            if (ManagerPrio < localManagerPrio
-                    || (ManagerPrio == localManagerPrio
-                            && SourceAddress < localBridgeAddress)) {
+        if (expectedRole == MANAGER_AUTO && sourceAddress != localBridgeAddress
+                && sourceAddress == hostBestMRMSourceAddress) {
+            if (managerPrio < localManagerPrio
+                    || (managerPrio == localManagerPrio
+                            && sourceAddress < localBridgeAddress)) {
                 monNReturn = 0;
             }
-            hostBestMRMPriority = ManagerPrio;
+            hostBestMRMPriority = managerPrio;
         }
         break;
     default:
@@ -1320,7 +1320,7 @@ void Mrp::testRingInd(int RingPort, MacAddress SourceAddress, MrpPriority Manage
     }
 }
 
-void Mrp::topologyChangeInd(MacAddress SourceAddress, double Time) {
+void Mrp::topologyChangeInd(MacAddress sourceAddress, double time) {
     switch (currentState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1328,27 +1328,27 @@ void Mrp::topologyChangeInd(MacAddress SourceAddress, double Time) {
     case PRM_UP:
     case CHK_RO:
     case CHK_RC:
-        if (SourceAddress != localBridgeAddress) {
-            clearFDB(Time);
+        if (sourceAddress != localBridgeAddress) {
+            clearFDB(time);
         }
         break;
     case PT:
         linkChangeCount = linkMaxChange;
         cancelEvent(linkUpTimer);
         setPortState(secondaryRingPort, MrpInterfaceData::FORWARDING);
-        clearFDB(Time);
+        clearFDB(time);
         currentState = PT_IDLE;
         EV_DETAIL << "Switching State from PT to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         break;
     case DE:
         linkChangeCount = linkMaxChange;
         cancelEvent(linkDownTimer);
-        clearFDB(Time);
+        clearFDB(time);
         currentState = DE_IDLE;
         EV_DETAIL << "Switching State from DE to DE_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         break;
     case DE_IDLE:
-        clearFDB(Time);
+        clearFDB(time);
         if (expectedRole == MANAGER_AUTO
                 && linkUpHysteresisTimer->isScheduled()) {
             setPortState(secondaryRingPort, MrpInterfaceData::FORWARDING);
@@ -1356,14 +1356,14 @@ void Mrp::topologyChangeInd(MacAddress SourceAddress, double Time) {
             EV_DETAIL << "Switching State from DE_IDLE to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         }
     case PT_IDLE:
-        clearFDB(Time);
+        clearFDB(time);
         break;
     default:
         throw cRuntimeError("Unknown NodeState");
     }
 }
 
-void Mrp::linkChangeInd(uint16_t PortState, uint16_t LinkState) {
+void Mrp::linkChangeInd(uint16_t portState, uint16_t linkState) {
     switch (currentState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1378,17 +1378,17 @@ void Mrp::linkChangeInd(uint16_t PortState, uint16_t LinkState) {
                 addTest = true;
                 testRingReq(shortTestInterval);
                 break;
-            } else if (LinkState == NetworkInterface::UP) {
+            } else if (linkState == NetworkInterface::UP) {
                 addTest = true;
                 testRingReq(shortTestInterval);
-                double Time = 0;
-                topologyChangeReq(Time);
+                double time = 0;
+                topologyChangeReq(time);
                 break;
             }
         } else {
-            if (!nonBlockingMRC && LinkState == NetworkInterface::UP) { //18
-                double Time = 0;
-                topologyChangeReq(Time);
+            if (!nonBlockingMRC && linkState == NetworkInterface::UP) { //18
+                double time = 0;
+                topologyChangeReq(time);
             }
             break;
         }
@@ -1396,11 +1396,11 @@ void Mrp::linkChangeInd(uint16_t PortState, uint16_t LinkState) {
         break;
     case CHK_RO:
         if (!addTest) {
-            if (LinkState == NetworkInterface::DOWN) {
+            if (linkState == NetworkInterface::DOWN) {
                 addTest = true;
                 testRingReq(shortTestInterval);
                 break;
-            } else if (LinkState == NetworkInterface::UP) {
+            } else if (linkState == NetworkInterface::UP) {
                 if (nonBlockingMRC) {
                     addTest = true;
                     testRingReq(shortTestInterval);
@@ -1410,8 +1410,8 @@ void Mrp::linkChangeInd(uint16_t PortState, uint16_t LinkState) {
                     testRetransmissionCount = 0;
                     addTest = true;
                     testRingReq(shortTestInterval);
-                    double Time = 0;
-                    topologyChangeReq(Time);
+                    double time = 0;
+                    topologyChangeReq(time);
                     currentState = CHK_RC;
                     currentRingState = CLOSED;
                     emit(ringStateChangedSignal, currentRingState);
@@ -1419,13 +1419,13 @@ void Mrp::linkChangeInd(uint16_t PortState, uint16_t LinkState) {
                 }
             }
         } else {
-            if (!nonBlockingMRC && LinkState == NetworkInterface::UP) {
+            if (!nonBlockingMRC && linkState == NetworkInterface::UP) {
                 setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
                 testMaxRetransmissionCount = testMonitoringExtendedCount - 1;
                 testRetransmissionCount = 0;
                 testRingReq(defaultTestInterval);
-                double Time = 0;
-                topologyChangeReq(Time);
+                double time = 0;
+                topologyChangeReq(time);
                 currentState = CHK_RC;
                 currentRingState = CLOSED;
                 emit(ringStateChangedSignal, currentRingState);
@@ -1436,23 +1436,23 @@ void Mrp::linkChangeInd(uint16_t PortState, uint16_t LinkState) {
         break;
     case CHK_RC:
         if (reactOnLinkChange) {
-            if (LinkState == NetworkInterface::DOWN) {
+            if (linkState == NetworkInterface::DOWN) {
                 setPortState(secondaryRingPort, MrpInterfaceData::FORWARDING);
-                double Time = 0;
-                topologyChangeReq(Time);
+                double time = 0;
+                topologyChangeReq(time);
                 currentState = CHK_RO;
                 currentRingState = OPEN;
                 emit(ringStateChangedSignal, currentRingState);
                 EV_DETAIL << "Switching State from CHK_RC to CHK_RO" << EV_FIELD(currentState) << EV_ENDL;
                 break;
-            } else if (LinkState == NetworkInterface::UP) {
+            } else if (linkState == NetworkInterface::UP) {
                 if (nonBlockingMRC) {
                     testMaxRetransmissionCount = testMonitoringCount - 1;
                 } else {
                     testMaxRetransmissionCount = testMonitoringExtendedCount - 1;
                 }
-                double Time = 0;
-                topologyChangeReq(Time);
+                double time = 0;
+                topologyChangeReq(time);
             }
         } else if (nonBlockingMRC) {
             if (!addTest) {
@@ -1466,7 +1466,7 @@ void Mrp::linkChangeInd(uint16_t PortState, uint16_t LinkState) {
     }
 }
 
-void Mrp::testMgrNackInd(int RingPort, MacAddress SourceAddress, MrpPriority ManagerPrio, MacAddress BestMRMSourceAddress) {
+void Mrp::testMgrNackInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio, MacAddress bestMRMSourceAddress) {
     switch (currentState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1476,43 +1476,43 @@ void Mrp::testMgrNackInd(int RingPort, MacAddress SourceAddress, MrpPriority Man
     case PT_IDLE:
         break;
     case PRM_UP:
-        if (expectedRole == MANAGER_AUTO && SourceAddress != localBridgeAddress
-                && BestMRMSourceAddress == localBridgeAddress) {
-            if (isBetterThanBestPrio(ManagerPrio, SourceAddress)) {
-                hostBestMRMSourceAddress = SourceAddress;
-                hostBestMRMPriority = ManagerPrio;
+        if (expectedRole == MANAGER_AUTO && sourceAddress != localBridgeAddress
+                && bestMRMSourceAddress == localBridgeAddress) {
+            if (isBetterThanBestPrio(managerPrio, sourceAddress)) {
+                hostBestMRMSourceAddress = sourceAddress;
+                hostBestMRMPriority = managerPrio;
             }
             cancelEvent(topologyChangeTimer);
             mrcInit();
-            testPropagateReq(RingPort, hostBestMRMPriority, hostBestMRMSourceAddress);
+            testPropagateReq(ringPort, hostBestMRMPriority, hostBestMRMSourceAddress);
             currentState = DE_IDLE;
             EV_DETAIL << "Switching State from PRM_UP to DE_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         }
         break;
     case CHK_RO:
-        if (expectedRole == MANAGER_AUTO && SourceAddress != localBridgeAddress
-                && BestMRMSourceAddress == localBridgeAddress) {
-            if (isBetterThanBestPrio(ManagerPrio, SourceAddress)) {
-                hostBestMRMSourceAddress = SourceAddress;
-                hostBestMRMPriority = ManagerPrio;
+        if (expectedRole == MANAGER_AUTO && sourceAddress != localBridgeAddress
+                && bestMRMSourceAddress == localBridgeAddress) {
+            if (isBetterThanBestPrio(managerPrio, sourceAddress)) {
+                hostBestMRMSourceAddress = sourceAddress;
+                hostBestMRMPriority = managerPrio;
             }
             cancelEvent(topologyChangeTimer);
             mrcInit();
-            testPropagateReq(RingPort, hostBestMRMPriority, hostBestMRMSourceAddress);
+            testPropagateReq(ringPort, hostBestMRMPriority, hostBestMRMSourceAddress);
             currentState = PT_IDLE;
             EV_DETAIL << "Switching State from CHK_RO to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         }
         break;
     case CHK_RC:
-        if (expectedRole == MANAGER_AUTO && SourceAddress != localBridgeAddress
-                && BestMRMSourceAddress == localBridgeAddress) {
-            if (isBetterThanBestPrio(ManagerPrio, SourceAddress)) {
-                hostBestMRMSourceAddress = SourceAddress;
-                hostBestMRMPriority = ManagerPrio;
+        if (expectedRole == MANAGER_AUTO && sourceAddress != localBridgeAddress
+                && bestMRMSourceAddress == localBridgeAddress) {
+            if (isBetterThanBestPrio(managerPrio, sourceAddress)) {
+                hostBestMRMSourceAddress = sourceAddress;
+                hostBestMRMPriority = managerPrio;
             }
             cancelEvent(topologyChangeTimer);
             mrcInit();
-            testPropagateReq(RingPort, hostBestMRMPriority, hostBestMRMSourceAddress);
+            testPropagateReq(ringPort, hostBestMRMPriority, hostBestMRMSourceAddress);
             setPortState(secondaryRingPort, MrpInterfaceData::FORWARDING);
             currentState = PT_IDLE;
             EV_DETAIL << "Switching State from CHK_RC to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
@@ -1523,7 +1523,7 @@ void Mrp::testMgrNackInd(int RingPort, MacAddress SourceAddress, MrpPriority Man
     }
 }
 
-void Mrp::testPropagateInd(int RingPort, MacAddress SourceAddress, MrpPriority ManagerPrio, MacAddress BestMRMSourceAddress, MrpPriority BestMRMPrio) {
+void Mrp::testPropagateInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio, MacAddress bestMRMSourceAddress, MrpPriority bestMRMPrio) {
     switch (currentState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1535,10 +1535,10 @@ void Mrp::testPropagateInd(int RingPort, MacAddress SourceAddress, MrpPriority M
     case DE_IDLE:
     case PT:
     case PT_IDLE:
-        if (expectedRole == MANAGER_AUTO && SourceAddress != localBridgeAddress
-                && SourceAddress == hostBestMRMSourceAddress) {
-            hostBestMRMSourceAddress = BestMRMSourceAddress;
-            hostBestMRMPriority = BestMRMPrio;
+        if (expectedRole == MANAGER_AUTO && sourceAddress != localBridgeAddress
+                && sourceAddress == hostBestMRMSourceAddress) {
+            hostBestMRMSourceAddress = bestMRMSourceAddress;
+            hostBestMRMPriority = bestMRMPrio;
             monNReturn = 0;
         }
         break;
@@ -1547,7 +1547,7 @@ void Mrp::testPropagateInd(int RingPort, MacAddress SourceAddress, MrpPriority M
     }
 }
 
-void Mrp::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
+void Mrp::mauTypeChangeInd(int ringPort, uint16_t linkState) {
     switch (currentState) {
     case POWER_ON:
         //all cases: ignore
@@ -1555,13 +1555,13 @@ void Mrp::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
     case AC_STAT1:
         //Client
         if (expectedRole == CLIENT) {
-            if (LinkState == NetworkInterface::UP) {
-                if (RingPort == primaryRingPort) {
+            if (linkState == NetworkInterface::UP) {
+                if (ringPort == primaryRingPort) {
                     setPortState(primaryRingPort, MrpInterfaceData::FORWARDING);
                     EV_DETAIL << "Switching State from AC_STAT1 to DE_IDLE" << EV_ENDL;
                     currentState = DE_IDLE;
                     break;
-                } else if (RingPort == secondaryRingPort) {
+                } else if (ringPort == secondaryRingPort) {
                     toggleRingPorts();
                     setPortState(primaryRingPort, MrpInterfaceData::FORWARDING);
                     EV_DETAIL << "Switching State from AC_STAT1 to DE_IDLE" << EV_ENDL;
@@ -1574,8 +1574,8 @@ void Mrp::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
         }
         //Manager
         if (expectedRole == MANAGER || expectedRole == MANAGER_AUTO) {
-            if (LinkState == NetworkInterface::UP) {
-                if (RingPort == primaryRingPort) {
+            if (linkState == NetworkInterface::UP) {
+                if (ringPort == primaryRingPort) {
                     setPortState(primaryRingPort, MrpInterfaceData::FORWARDING);
                     testRingReq(defaultTestInterval);
                     EV_DETAIL << "Switching State from AC_STAT1 to PRM_UP" << EV_ENDL;
@@ -1583,7 +1583,7 @@ void Mrp::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
                     currentRingState = OPEN;
                     emit(ringStateChangedSignal, currentRingState);
                     break;
-                } else if (RingPort == secondaryRingPort) {
+                } else if (ringPort == secondaryRingPort) {
                     toggleRingPorts();
                     setPortState(primaryRingPort, MrpInterfaceData::FORWARDING);
                     testRingReq(defaultTestInterval);
@@ -1600,8 +1600,8 @@ void Mrp::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
         //all other roles: ignore
         break;
     case PRM_UP:
-        if (RingPort == primaryRingPort
-                && LinkState == NetworkInterface::DOWN) {
+        if (ringPort == primaryRingPort
+                && linkState == NetworkInterface::DOWN) {
             cancelEvent(testTimer);
             setPortState(primaryRingPort, MrpInterfaceData::BLOCKED);
             currentState = AC_STAT1;
@@ -1610,8 +1610,8 @@ void Mrp::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
             EV_DETAIL << "Switching State from PRM_UP to AC_STAT1" << EV_FIELD(currentState) << EV_ENDL;
             break;
         }
-        if (RingPort == secondaryRingPort
-                && LinkState == NetworkInterface::UP) {
+        if (ringPort == secondaryRingPort
+                && linkState == NetworkInterface::UP) {
             testMaxRetransmissionCount = testMonitoringCount - 1;
             testRetransmissionCount = 0;
             noTopologyChange = true;
@@ -1625,8 +1625,8 @@ void Mrp::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
         //all other Cases: ignore
         break;
     case CHK_RO:
-        if (LinkState == NetworkInterface::DOWN) {
-            if (RingPort == primaryRingPort) {
+        if (linkState == NetworkInterface::DOWN) {
+            if (ringPort == primaryRingPort) {
                 toggleRingPorts();
                 setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
                 testRingReq(defaultTestInterval);
@@ -1637,7 +1637,7 @@ void Mrp::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
                 EV_DETAIL << "Switching State from CHK_RO to PRM_UP" << EV_FIELD(currentState) << EV_ENDL;
                 break;
             }
-            if (RingPort == secondaryRingPort) {
+            if (ringPort == secondaryRingPort) {
                 setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
                 currentState = PRM_UP;
                 currentRingState = OPEN;
@@ -1649,8 +1649,8 @@ void Mrp::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
         //all other cases: ignore
         break;
     case CHK_RC:
-        if (LinkState == NetworkInterface::DOWN) {
-            if (RingPort == primaryRingPort) {
+        if (linkState == NetworkInterface::DOWN) {
+            if (ringPort == primaryRingPort) {
                 toggleRingPorts();
                 testRingReq(defaultTestInterval);
                 topologyChangeReq(topologyChangeInterval);
@@ -1660,7 +1660,7 @@ void Mrp::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
                 EV_DETAIL << "Switching State from CHK_RC to PRM_UP" << EV_FIELD(currentState) << EV_ENDL;
                 break;
             }
-            if (RingPort == secondaryRingPort) {
+            if (ringPort == secondaryRingPort) {
                 currentState = PRM_UP;
                 currentRingState = OPEN;
                 emit(ringStateChangedSignal, currentRingState);
@@ -1670,14 +1670,14 @@ void Mrp::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
         //all other Cases: ignore
         break;
     case DE_IDLE:
-        if (RingPort == secondaryRingPort
-                && LinkState == NetworkInterface::UP) {
+        if (ringPort == secondaryRingPort
+                && linkState == NetworkInterface::UP) {
             linkChangeReq(primaryRingPort, NetworkInterface::UP);
             currentState = PT;
             EV_DETAIL << "Switching State from DE_IDLE to PT" << EV_FIELD(currentState) << EV_ENDL;
         }
-        if (RingPort == primaryRingPort
-                && LinkState == NetworkInterface::DOWN) {
+        if (ringPort == primaryRingPort
+                && linkState == NetworkInterface::DOWN) {
             setPortState(primaryRingPort, MrpInterfaceData::BLOCKED);
             currentState = AC_STAT1;
             EV_DETAIL << "Switching State from DE_IDLE to AC_STAT1" << EV_FIELD(currentState) << EV_ENDL;
@@ -1685,8 +1685,8 @@ void Mrp::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
         //all other cases: ignore
         break;
     case PT:
-        if (LinkState == NetworkInterface::DOWN) {
-            if (RingPort == secondaryRingPort) {
+        if (linkState == NetworkInterface::DOWN) {
+            if (ringPort == secondaryRingPort) {
                 cancelEvent(linkUpTimer);
                 setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
                 linkChangeReq(primaryRingPort, NetworkInterface::DOWN);
@@ -1694,7 +1694,7 @@ void Mrp::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
                 EV_DETAIL << "Switching State from PT to DE" << EV_FIELD(currentState) << EV_ENDL;
                 break;
             }
-            if (RingPort == primaryRingPort) {
+            if (ringPort == primaryRingPort) {
                 cancelEvent(linkUpTimer);
                 toggleRingPorts();
                 setPortState(primaryRingPort, MrpInterfaceData::FORWARDING);
@@ -1708,16 +1708,16 @@ void Mrp::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
         //all other cases: ignore
         break;
     case DE:
-        if (RingPort == secondaryRingPort
-                && LinkState == NetworkInterface::UP) {
+        if (ringPort == secondaryRingPort
+                && linkState == NetworkInterface::UP) {
             cancelEvent(linkDownTimer);
             linkChangeReq(primaryRingPort, NetworkInterface::UP);
             currentState = PT;
             EV_DETAIL << "Switching State from DE to PT" << EV_FIELD(currentState) << EV_ENDL;
             break;
         }
-        if (RingPort == primaryRingPort
-                && LinkState == NetworkInterface::DOWN) {
+        if (ringPort == primaryRingPort
+                && linkState == NetworkInterface::DOWN) {
             linkChangeCount = linkMaxChange;
             setPortState(primaryRingPort, MrpInterfaceData::BLOCKED);
             currentState = AC_STAT1;
@@ -1726,17 +1726,17 @@ void Mrp::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
         //all other cases: ignore
         break;
     case PT_IDLE:
-        if (LinkState == NetworkInterface::DOWN) {
-            if (RingPort == secondaryRingPort) {
+        if (linkState == NetworkInterface::DOWN) {
+            if (ringPort == secondaryRingPort) {
                 setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
                 linkChangeReq(primaryRingPort, NetworkInterface::DOWN);
                 currentState = DE;
                 EV_DETAIL << "Switching State from PT_IDLE to DE" << EV_FIELD(currentState) << EV_ENDL;
                 break;
             }
-            if (RingPort == primaryRingPort) {
+            if (ringPort == primaryRingPort) {
                 primaryRingPort = secondaryRingPort;
-                secondaryRingPort = RingPort;
+                secondaryRingPort = ringPort;
                 setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
                 linkChangeReq(primaryRingPort, NetworkInterface::DOWN);
                 currentState = DE;
@@ -1751,40 +1751,39 @@ void Mrp::mauTypeChangeInd(int RingPort, uint16_t LinkState) {
     }
 }
 
-void Mrp::interconnTopologyChangeInd(MacAddress SourceAddress, double Time, uint16_t InID, int RingPort, Packet *Packet) {
+void Mrp::interconnTopologyChangeInd(MacAddress sourceAddress, double time, uint16_t inID, int ringPort, Packet *packet) {
     switch (currentState) {
     case POWER_ON:
     case AC_STAT1:
     case DE_IDLE:
     case PT:
     case PT_IDLE:
-        delete Packet;
+        delete packet;
         break;
     case PRM_UP:
     case CHK_RC:
         if (!topologyChangeTimer->isScheduled()) {
-            topologyChangeReq(Time);
+            topologyChangeReq(time);
         }
-        delete Packet;
+        delete packet;
         break;
     case CHK_RO:
         if (!topologyChangeTimer->isScheduled()) {
-            topologyChangeReq(Time);
-            delete Packet;
+            topologyChangeReq(time);
+            delete packet;
         }
-        if (RingPort == primaryRingPort) {
-            interconnForwardReq(secondaryRingPort, Packet);
-        } else if (RingPort == secondaryRingPort) {
-            interconnForwardReq(primaryRingPort, Packet);
+        if (ringPort == primaryRingPort) {
+            interconnForwardReq(secondaryRingPort, packet);
+        } else if (ringPort == secondaryRingPort) {
+            interconnForwardReq(primaryRingPort, packet);
         }
         break;
     default:
         throw cRuntimeError("Unknown NodeState");
     }
-
 }
 
-void Mrp::interconnLinkChangeInd(uint16_t InID, uint16_t Linkstate, int RingPort, Packet *Packet) {
+void Mrp::interconnLinkChangeInd(uint16_t inID, uint16_t linkstate, int ringPort, Packet *packet) {
     switch (currentState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1793,13 +1792,13 @@ void Mrp::interconnLinkChangeInd(uint16_t InID, uint16_t Linkstate, int RingPort
     case PT_IDLE:
     case PRM_UP:
     case CHK_RC:
-        delete Packet;
+        delete packet;
         break;
     case CHK_RO:
-        if (RingPort == primaryRingPort) {
-            interconnForwardReq(secondaryRingPort, Packet);
-        } else if (RingPort == secondaryRingPort) {
-            interconnForwardReq(primaryRingPort, Packet);
+        if (ringPort == primaryRingPort) {
+            interconnForwardReq(secondaryRingPort, packet);
+        } else if (ringPort == secondaryRingPort) {
+            interconnForwardReq(primaryRingPort, packet);
         }
         break;
     default:
@@ -1807,7 +1806,7 @@ void Mrp::interconnLinkChangeInd(uint16_t InID, uint16_t Linkstate, int RingPort
     }
 }
 
-void Mrp::interconnLinkStatusPollInd(uint16_t InID, int RingPort, Packet *Packet) {
+void Mrp::interconnLinkStatusPollInd(uint16_t inID, int ringPort, Packet *packet) {
     switch (currentState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1816,13 +1815,13 @@ void Mrp::interconnLinkStatusPollInd(uint16_t InID, int RingPort, Packet *Packet
     case PT_IDLE:
     case PRM_UP:
     case CHK_RC:
-        delete Packet;
+        delete packet;
         break;
     case CHK_RO:
-        if (RingPort == primaryRingPort) {
-            interconnForwardReq(secondaryRingPort, Packet);
-        } else if (RingPort == secondaryRingPort) {
-            interconnForwardReq(primaryRingPort, Packet);
+        if (ringPort == primaryRingPort) {
+            interconnForwardReq(secondaryRingPort, packet);
+        } else if (ringPort == secondaryRingPort) {
+            interconnForwardReq(primaryRingPort, packet);
         }
         break;
     default:
@@ -1830,7 +1829,7 @@ void Mrp::interconnLinkStatusPollInd(uint16_t InID, int RingPort, Packet *Packet
     }
 }
 
-void Mrp::interconnTestInd(MacAddress SourceAddress, int RingPort, uint16_t InID, Packet *Packet) {
+void Mrp::interconnTestInd(MacAddress sourceAddress, int ringPort, uint16_t InID, Packet *packet) {
     switch (currentState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1839,13 +1838,13 @@ void Mrp::interconnTestInd(MacAddress SourceAddress, int RingPort, uint16_t InID
     case PT_IDLE:
     case PRM_UP:
     case CHK_RC:
-        delete Packet;
+        delete packet;
         break;
     case CHK_RO:
-        if (RingPort == primaryRingPort) {
-            interconnForwardReq(secondaryRingPort, Packet);
-        } else if (RingPort == secondaryRingPort) {
-            interconnForwardReq(primaryRingPort, Packet);
+        if (ringPort == primaryRingPort) {
+            interconnForwardReq(secondaryRingPort, packet);
+        } else if (ringPort == secondaryRingPort) {
+            interconnForwardReq(primaryRingPort, packet);
         }
         break;
     default:
@@ -1853,35 +1852,35 @@ void Mrp::interconnTestInd(MacAddress SourceAddress, int RingPort, uint16_t InID
     }
 }
 
-void Mrp::interconnForwardReq(int RingPort, Packet *Packet) {
-    auto macAddressInd = Packet->findTag<MacAddressInd>();
-    auto SourceAddress = macAddressInd->getSrcAddress();
-    auto DestinationAddress = macAddressInd->getDestAddress();
-    Packet->trim();
-    Packet->clearTags();
-    sendFrameReq(RingPort, DestinationAddress, SourceAddress, priority, MRP_LT, Packet);
+void Mrp::interconnForwardReq(int ringPort, Packet *packet) {
+    auto macAddressInd = packet->findTag<MacAddressInd>();
+    auto sourceAddress = macAddressInd->getSrcAddress();
+    auto destinationAddress = macAddressInd->getDestAddress();
+    packet->trim();
+    packet->clearTags();
+    sendFrameReq(ringPort, destinationAddress, sourceAddress, priority, MRP_LT, packet);
 }
 
-void Mrp::sendFrameReq(int portId, const MacAddress &DestinationAddress, const MacAddress &SourceAddress, int Prio, uint16_t LT, Packet *MRPPDU) {
-    MRPPDU->addTag<InterfaceReq>()->setInterfaceId(portId);
-    MRPPDU->addTag<PacketProtocolTag>()->setProtocol(&Protocol::mrp);
-    MRPPDU->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
-    auto macAddressReq = MRPPDU->addTag<MacAddressReq>();
-    macAddressReq->setSrcAddress(SourceAddress);
-    macAddressReq->setDestAddress(DestinationAddress);
-    EV_INFO << "Sending packet down" << EV_FIELD(MRPPDU) << EV_FIELD(DestinationAddress) << EV_ENDL;
-    send(MRPPDU, "relayOut");
+void Mrp::sendFrameReq(int portId, const MacAddress &destinationAddress, const MacAddress &sourceAddress, int prio, uint16_t lt, Packet *mrpPDU) {
+    mrpPDU->addTag<InterfaceReq>()->setInterfaceId(portId);
+    mrpPDU->addTag<PacketProtocolTag>()->setProtocol(&Protocol::mrp);
+    mrpPDU->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
+    auto macAddressReq = mrpPDU->addTag<MacAddressReq>();
+    macAddressReq->setSrcAddress(sourceAddress);
+    macAddressReq->setDestAddress(destinationAddress);
+    EV_INFO << "Sending packet down" << EV_FIELD(mrpPDU) << EV_FIELD(destinationAddress) << EV_ENDL;
+    send(mrpPDU, "relayOut");
 }
 
-void Mrp::sendCCM(int PortId, Packet *CCM) {
-    CCM->addTag<InterfaceReq>()->setInterfaceId(PortId);
-    CCM->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee8021qCFM);
-    CCM->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
-    auto macAddressReq = CCM->addTag<MacAddressReq>();
-    macAddressReq->setSrcAddress(getPortNetworkInterface(PortId)->getMacAddress());
+void Mrp::sendCCM(int portId, Packet *ccm) {
+    ccm->addTag<InterfaceReq>()->setInterfaceId(portId);
+    ccm->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee8021qCFM);
+    ccm->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
+    auto macAddressReq = ccm->addTag<MacAddressReq>();
+    macAddressReq->setSrcAddress(getPortNetworkInterface(portId)->getMacAddress());
     macAddressReq->setDestAddress(ccmMulticastAddress);
-    EV_INFO << "Sending packet down" << EV_FIELD(CCM) << EV_ENDL;
-    send(CCM, "relayOut");
+    EV_INFO << "Sending packet down" << EV_FIELD(ccm) << EV_ENDL;
+    send(ccm, "relayOut");
 }
 
 void Mrp::handleStartOperation(LifecycleOperation *operation) {
