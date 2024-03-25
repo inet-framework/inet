@@ -1,8 +1,9 @@
+//
 // Copyright (C) 2024 Daniel Zeitler
 // SPDX-License-Identifier: LGPL-3.0-or-later
+//
 
-package inet.examples.mrp;
-
+package inet.node.mrp;
 
 import inet.applications.contract.IApp;
 import inet.clock.contract.IClock;
@@ -25,10 +26,10 @@ import inet.node.contract.IEthernetNetworkNode;
 import inet.protocolelement.contract.IProtocolLayer;
 
 //
-// Model of an Ethernet switch which is able to utilize the mrp protocol.
-// 
+// Model of an Ethernet switch which is able to utilize the MRP protocol.
+//
 // @see ~Mrp, ~MrpInterconnection
-
+//
 module MrpSwitch like IEthernetNetworkNode
 {
     parameters:
@@ -192,6 +193,4 @@ module MrpSwitch like IEthernetNetworkNode
             app[i].socketOut --> sc.in++;
             app[i].socketIn <-- sc.out++;
         }
-
-
 }
