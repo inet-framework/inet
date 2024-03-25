@@ -129,8 +129,6 @@ NetworkNamespaceContext::~NetworkNamespaceContext()
         }
         oldFd = -1;
         newFd = -1;
-#else
-        throw cRuntimeError("Network namespaces are only supported on Linux");
 #endif
     }
 }
