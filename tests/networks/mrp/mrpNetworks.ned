@@ -9,7 +9,7 @@ import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth10M;
 import inet.node.ethernet.EthernetHost;
 import inet.common.scenario.ScenarioManager;
-import inet.linklayer.configurator.L2NetworkConfigurator;
+import inet.linklayer.configurator.common.L2NetworkConfigurator;
 
 network Mrp4
 {
