@@ -21,9 +21,9 @@
 #endif // if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 
 #ifdef __linux__
-#define UI_REFRESH_TIME    100000000L
+#define UI_REFRESH_TIME    (int64_t)100000000L
 #else
-#define UI_REFRESH_TIME    500000
+#define UI_REFRESH_TIME    (int64_t)500000
 #endif
 
 namespace inet {
