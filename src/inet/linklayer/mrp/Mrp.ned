@@ -1,6 +1,12 @@
 // Copyright (C) 2024 Daniel Zeitler
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
+
+
+package inet.linklayer.mrp;
+
+import inet.linklayer.contract.IMediaRedundancy;
+
 //
 // The Media Redundancy Protocol (MRP) is a network protocol similar to STP and RSTP that ensures a loop-free
 // topology for an Ethernet local area network. It is defined in IEC 62439-2. The basic function of MRP
@@ -21,12 +27,6 @@
 //
 // @see ~L2NetworkConfigurator, ~InterfaceTable
 //
-
-
-package inet.linklayer.mrp;
-
-import inet.linklayer.contract.IMediaRedundancy;
-
 simple Mrp like IMediaRedundancy
 {
     parameters:
