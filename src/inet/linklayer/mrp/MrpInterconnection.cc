@@ -10,6 +10,7 @@
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/linklayer/mrp/MrpPdu_m.h"
+#include "inet/linklayer/mrp/Timers_m.h"
 #include "MrpInterconnection.h"
 #include "Mrp.h"
 

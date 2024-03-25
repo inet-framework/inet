@@ -21,6 +21,7 @@
 #include "inet/linklayer/mrp/MrpPdu_m.h"
 #include "inet/linklayer/mrp/ContinuityCheckMessage_m.h"
 #include "inet/linklayer/mrp/MrpRelay.h"
+#include "inet/linklayer/mrp/Timers_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 

@@ -24,14 +24,3 @@ class ContinuityCheckMessage extends FieldsChunk {
     uint64_t ituInfo2 = 0;
     uint8_t endTlv = 0;  
 }
-
-message ContinuityCheckTimer
-{
-    int port;
-}
-
-message ProcessDelayTimer
-{
-    int port;
-    int field;
-}
