@@ -26,7 +26,7 @@
 // @see ~L2NetworkConfigurator, ~InterfaceTable
 //
 
-package inet.linklayer.mrp.interconnection;
+package inet.linklayer.mrp;
 
 import inet.linklayer.contract.IMediaRedundancy;
 import inet.linklayer.mrp.mediaredundancy.Mrp;

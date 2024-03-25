@@ -8,12 +8,12 @@
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/common/MacForwardingTable.h"
-#include "inet/linklayer/mrp/common/MrpMacForwardingTable.h"
+#include "inet/linklayer/mrp/MrpMacForwardingTable.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/linklayer/configurator/MrpInterfaceData.h"
-#include "inet/linklayer/mrp/common/MrpRelay.h"
-#include "inet/linklayer/mrp/common/MrpPdu_m.h"
-#include "inet/linklayer/mrp/common/ContinuityCheckMessage_m.h"
+#include "inet/linklayer/mrp/MrpRelay.h"
+#include "inet/linklayer/mrp/MrpPdu_m.h"
+#include "inet/linklayer/mrp/ContinuityCheckMessage_m.h"
 
 namespace inet {
 

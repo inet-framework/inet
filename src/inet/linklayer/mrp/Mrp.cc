@@ -18,9 +18,9 @@
 #include "inet/linklayer/configurator/MrpInterfaceData.h"
 #include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/linklayer/ethernet/contract/IMacForwardingTable.h"
-#include "inet/linklayer/mrp/common/MrpPdu_m.h"
-#include "inet/linklayer/mrp/common/ContinuityCheckMessage_m.h"
-#include "inet/linklayer/mrp/common/MrpRelay.h"
+#include "inet/linklayer/mrp/MrpPdu_m.h"
+#include "inet/linklayer/mrp/ContinuityCheckMessage_m.h"
+#include "inet/linklayer/mrp/MrpRelay.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 

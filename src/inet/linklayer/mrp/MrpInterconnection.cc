@@ -9,9 +9,9 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/linklayer/mrp/common/MrpPdu_m.h"
+#include "inet/linklayer/mrp/MrpPdu_m.h"
 #include "MrpInterconnection.h"
-#include "../mediaredundancy/Mrp.h"
+#include "Mrp.h"
 
 namespace inet {
 
