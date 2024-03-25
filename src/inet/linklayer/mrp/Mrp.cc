@@ -501,11 +501,11 @@ void Mrp::handleMrpPDU(Packet* packet) {
     //if (auto vlanInd = Packet->findTag<VlanInd>())
     //    vlanId = vlanInd->getVlanId();
 
-    auto version = packet->peekAtFront<MrpVersionField>();
+    auto version = packet->peekAtFront<MrpVersion>();
     auto offset = version->getChunkLength();
-    auto firstTlv = packet->peekDataAt<TlvHeader>(offset);
+    auto firstTlv = packet->peekDataAt<MrpTlvHeader>(offset);
     offset = offset + B(firstTlv->getHeaderLength()) + B(2);
-    auto commonTlv = packet->peekDataAt<CommonHeader>(offset);
+    auto commonTlv = packet->peekDataAt<MrpCommon>(offset);
     auto sequence = commonTlv->getSequenceID();
     bool ringID = false;
     if (commonTlv->getUuid0() == domainID.uuid0
@@ -516,7 +516,7 @@ void Mrp::handleMrpPDU(Packet* packet) {
     switch (firstTlv->getHeaderType()) {
     case TEST: {
         EV_DETAIL << "Received Test-Frame" << EV_ENDL;
-        auto testTlv = dynamicPtrCast<const TestFrame>(firstTlv);
+        auto testTlv = dynamicPtrCast<const MrpTest>(firstTlv);
         if (ringID) {
             if (testTlv->getSa() == localBridgeAddress) {
                 auto ringTime = simTime().inUnit(SIMTIME_MS) - testTlv->getTimeStamp();
@@ -540,7 +540,7 @@ void Mrp::handleMrpPDU(Packet* packet) {
     }
     case TOPOLOGYCHANGE: {
         EV_DETAIL << "Received TopologyChange-Frame" << EV_ENDL;
-        auto topologyTlv = dynamicPtrCast<const TopologyChangeFrame>(firstTlv);
+        auto topologyTlv = dynamicPtrCast<const MrpTopologyChange>(firstTlv);
         if (ringID) {
             if (sequence > lastTopologyId) {
                 topologyChangeInd(topologyTlv->getSa(), topologyTlv->getInterval());
@@ -559,7 +559,7 @@ void Mrp::handleMrpPDU(Packet* packet) {
     case LINKDOWN:
     case LINKUP: {
         EV_DETAIL << "Received LinkChange-Frame" << EV_ENDL;
-        auto linkTlv = dynamicPtrCast<const LinkChangeFrame>(firstTlv);
+        auto linkTlv = dynamicPtrCast<const MrpLinkChange>(firstTlv);
         if (ringID) {
             linkChangeInd(linkTlv->getPortRole(), linkTlv->getBlocked());
             emit(receivedChangeSignal, linkTlv->getInterval());
@@ -573,7 +573,7 @@ void Mrp::handleMrpPDU(Packet* packet) {
     case OPTION: {
         EV_DETAIL << "Received Option-Frame" << EV_ENDL;
         if (ringID) {
-            auto optionTlv = dynamicPtrCast<const OptionHeader>(firstTlv);
+            auto optionTlv = dynamicPtrCast<const MrpOption>(firstTlv);
             b subOffset = version->getChunkLength() + optionTlv->getChunkLength();
             //handle if manufactorerData is present
             if (optionTlv->getOuiType() != MrpOuiType::IEC
@@ -597,23 +597,23 @@ void Mrp::handleMrpPDU(Packet* packet) {
                     || (optionTlv->getEd1Type() == 0x04
                             && optionTlv->getHeaderLength()
                                     > (4 + Ed1DataLength::LENGTH4))) {
-                auto subTlv = packet->peekDataAt<SubTlvHeader>(subOffset);
+                auto subTlv = packet->peekDataAt<MrpSubTlvHeader>(subOffset);
                 switch (subTlv->getSubType()) {
                 case RESERVED: {
-                    auto subOptionTlv = dynamicPtrCast<const ManufacturerFktHeader>(subTlv);
+                    auto subOptionTlv = dynamicPtrCast<const MrpManufacturerFkt>(subTlv);
                     //not implemented
                     break;
                 }
                 case TEST_MGR_NACK: {
                     if (expectedRole == MANAGER_AUTO) {
-                        auto subOptionTlv = dynamicPtrCast<const SubTlvTestFrame>(subTlv);
+                        auto subOptionTlv = dynamicPtrCast<const MrpSubTlvTest>(subTlv);
                         testMgrNackInd(ringPort, subOptionTlv->getSa(), static_cast<MrpPriority>(subOptionTlv->getPrio()), subOptionTlv->getOtherMRMSa());
                     }
                     break;
                 }
                 case TEST_PROPAGATE: {
                     if (expectedRole == MANAGER_AUTO) {
-                        auto subOptionTlv = dynamicPtrCast<const SubTlvTestFrame>(subTlv);
+                        auto subOptionTlv = dynamicPtrCast<const MrpSubTlvTest>(subTlv);
                         testPropagateInd(ringPort, subOptionTlv->getSa(), static_cast<MrpPriority>(subOptionTlv->getPrio()), subOptionTlv->getOtherMRMSa(), static_cast<MrpPriority>(subOptionTlv->getOtherMRMPrio()));
                     }
                     break;
@@ -634,26 +634,26 @@ void Mrp::handleMrpPDU(Packet* packet) {
     }
     case INTEST: {
         EV_DETAIL << "Received inTest-Frame" << EV_ENDL;
-        auto inTestTlv = dynamicPtrCast<const InTestFrame>(firstTlv);
+        auto inTestTlv = dynamicPtrCast<const MrpInTest>(firstTlv);
         interconnTestInd(inTestTlv->getSa(), ringPort, inTestTlv->getInID(), packet->dup());
         break;
     }
     case INTOPOLOGYCHANGE: {
         EV_DETAIL << "Received inTopologyChange-Frame" << EV_ENDL;
-        auto inTopologyTlv = dynamicPtrCast<const InTopologyChangeFrame>(firstTlv);
+        auto inTopologyTlv = dynamicPtrCast<const MrpInTopologyChange>(firstTlv);
         interconnTopologyChangeInd(inTopologyTlv->getSa(), inTopologyTlv->getInterval(), inTopologyTlv->getInID(), ringPort, packet->dup());
         break;
     }
     case INLINKDOWN:
     case INLINKUP: {
         EV_DETAIL << "Received inLinkChange-Frame" << EV_ENDL;
-        auto inLinkTlv = dynamicPtrCast<const InLinkChangeFrame>(firstTlv);
+        auto inLinkTlv = dynamicPtrCast<const MrpInLinkChange>(firstTlv);
         interconnLinkChangeInd(inLinkTlv->getInID(), inLinkTlv->getLinkInfo(), ringPort, packet->dup());
         break;
     }
     case INLINKSTATUSPOLL: {
         EV_DETAIL << "Received inLinkStatusPoll" << EV_ENDL;
-        auto inLinkStatusTlv = dynamicPtrCast<const InLinkStatusPollFrame>(firstTlv);
+        auto inLinkStatusTlv = dynamicPtrCast<const MrpInLinkStatusPoll>(firstTlv);
         interconnLinkStatusPollInd(inLinkStatusTlv->getInID(), ringPort, packet->dup());
         break;
     }
@@ -662,10 +662,10 @@ void Mrp::handleMrpPDU(Packet* packet) {
     }
 
     //addtional Option-Frame
-    auto thirdTlv = packet->peekDataAt<TlvHeader>(offset);
+    auto thirdTlv = packet->peekDataAt<MrpTlvHeader>(offset);
     if (thirdTlv->getHeaderType() != END && ringID) {
         EV_DETAIL << "Received additional Option-Frame" << EV_ENDL;
-        auto optionTlv = dynamicPtrCast<const OptionHeader>(thirdTlv);
+        auto optionTlv = dynamicPtrCast<const MrpOption>(thirdTlv);
         b subOffset = offset + optionTlv->getChunkLength();
         //handle if manufactorerData is present
         if (optionTlv->getOuiType() != MrpOuiType::IEC
@@ -689,23 +689,23 @@ void Mrp::handleMrpPDU(Packet* packet) {
                 || (optionTlv->getEd1Type() == 0x04
                         && optionTlv->getHeaderLength()
                                 > (4 + Ed1DataLength::LENGTH4))) {
-            auto subTlv = packet->peekDataAt<SubTlvHeader>(subOffset);
+            auto subTlv = packet->peekDataAt<MrpSubTlvHeader>(subOffset);
             switch (subTlv->getSubType()) {
             case RESERVED: {
-                auto subOptionTlv = dynamicPtrCast<const ManufacturerFktHeader>(subTlv);
+                auto subOptionTlv = dynamicPtrCast<const MrpManufacturerFkt>(subTlv);
                 //not implemented
                 break;
             }
             case TEST_MGR_NACK: {
                 if (expectedRole == MANAGER_AUTO) {
-                    auto subOptionTlv = dynamicPtrCast<const SubTlvTestFrame>(subTlv);
+                    auto subOptionTlv = dynamicPtrCast<const MrpSubTlvTest>(subTlv);
                     testMgrNackInd(ringPort, subOptionTlv->getSa(), static_cast<MrpPriority>(subOptionTlv->getPrio()), subOptionTlv->getOtherMRMSa());
                 }
                 break;
             }
             case TEST_PROPAGATE: {
                 if (expectedRole == MANAGER_AUTO) {
-                    auto subOptionTlv = dynamicPtrCast<const SubTlvTestFrame>(subTlv);
+                    auto subOptionTlv = dynamicPtrCast<const MrpSubTlvTest>(subTlv);
                     testPropagateInd(ringPort, subOptionTlv->getSa(), static_cast<MrpPriority>(subOptionTlv->getPrio()), subOptionTlv->getOtherMRMSa(), static_cast<MrpPriority>(subOptionTlv->getOtherMRMPrio()));
                 }
                 break;
@@ -1021,11 +1021,11 @@ void Mrp::linkChangeReq(int ringPort, uint16_t linkState) {
 
 void Mrp::setupTestRingReq() {
     //Create MRP-PDU according MRP_Test
-    auto version = makeShared<MrpVersionField>();
-    auto testTlv1 = makeShared<TestFrame>();
-    auto testTlv2 = makeShared<TestFrame>();
-    auto commonTlv = makeShared<CommonHeader>();
-    auto endTlv = makeShared<EndHeader>();
+    auto version = makeShared<MrpVersion>();
+    auto testTlv1 = makeShared<MrpTest>();
+    auto testTlv2 = makeShared<MrpTest>();
+    auto commonTlv = makeShared<MrpCommon>();
+    auto endTlv = makeShared<MrpEnd>();
 
     auto timestamp = simTime().inUnit(SIMTIME_MS);
     auto lastTestFrameSent = simTime().inUnit(SIMTIME_US);
@@ -1062,8 +1062,8 @@ void Mrp::setupTestRingReq() {
 
     //MRA only
     if (expectedRole == MANAGER_AUTO) {
-        auto optionTlv = makeShared<OptionHeader>();
-        auto autoMgrTlv = makeShared<SubTlvHeader>();
+        auto optionTlv = makeShared<MrpOption>();
+        auto autoMgrTlv = makeShared<MrpSubTlvHeader>();
         uint8_t headerLength = optionTlv->getHeaderLength() + autoMgrTlv->getSubHeaderLength() + 2;
         optionTlv->setHeaderLength(headerLength);
         packet1->insertAtBack(optionTlv);
@@ -1083,11 +1083,11 @@ void Mrp::setupTestRingReq() {
 
 void Mrp::setupTopologyChangeReq(uint32_t Interval) {
     //Create MRP-PDU according MRP_TopologyChange
-    auto version = makeShared<MrpVersionField>();
-    auto topologyChangeTlv = makeShared<TopologyChangeFrame>();
-    auto topologyChangeTlv2 = makeShared<TopologyChangeFrame>();
-    auto commonTlv = makeShared<CommonHeader>();
-    auto endTlv = makeShared<EndHeader>();
+    auto version = makeShared<MrpVersion>();
+    auto topologyChangeTlv = makeShared<MrpTopologyChange>();
+    auto topologyChangeTlv2 = makeShared<MrpTopologyChange>();
+    auto commonTlv = makeShared<MrpCommon>();
+    auto endTlv = makeShared<MrpEnd>();
 
     topologyChangeTlv->setPrio(localManagerPrio);
     topologyChangeTlv->setSa(localBridgeAddress);
@@ -1123,10 +1123,10 @@ void Mrp::setupTopologyChangeReq(uint32_t Interval) {
 
 void Mrp::setupLinkChangeReq(int ringPort, uint16_t linkState, double time) {
     //Create MRP-PDU according MRP_LinkChange
-    auto version = makeShared<MrpVersionField>();
-    auto linkChangeTlv = makeShared<LinkChangeFrame>();
-    auto commonTlv = makeShared<CommonHeader>();
-    auto endTlv = makeShared<EndHeader>();
+    auto version = makeShared<MrpVersion>();
+    auto linkChangeTlv = makeShared<MrpLinkChange>();
+    auto commonTlv = makeShared<MrpCommon>();
+    auto endTlv = makeShared<MrpEnd>();
 
     if (linkState == NetworkInterface::UP) {
         linkChangeTlv->setHeaderType(LINKUP);
@@ -1157,11 +1157,11 @@ void Mrp::setupLinkChangeReq(int ringPort, uint16_t linkState, double time) {
 
 void Mrp::testMgrNackReq(int ringPort, MrpPriority managerPrio, MacAddress sourceAddress) {
     //Create MRP-PDU according MRP_Option and Suboption2 MRP-TestMgrNack
-    auto version = makeShared<MrpVersionField>();
-    auto optionTlv = makeShared<OptionHeader>();
-    auto testMgrTlv = makeShared<SubTlvTestFrame>();
-    auto commonTlv = makeShared<CommonHeader>();
-    auto endTlv = makeShared<EndHeader>();
+    auto version = makeShared<MrpVersion>();
+    auto optionTlv = makeShared<MrpOption>();
+    auto testMgrTlv = makeShared<MrpSubTlvTest>();
+    auto commonTlv = makeShared<MrpCommon>();
+    auto endTlv = makeShared<MrpEnd>();
 
     testMgrTlv->setSubType(SubTlvHeaderType::TEST_MGR_NACK);
     testMgrTlv->setPrio(localManagerPrio);
@@ -1204,11 +1204,11 @@ void Mrp::testMgrNackReq(int ringPort, MrpPriority managerPrio, MacAddress sourc
 
 void Mrp::testPropagateReq(int ringPort, MrpPriority managerPrio, MacAddress sourceAddress) {
     //Create MRP-PDU according MRP_Option and Suboption2 MRP-TestPropagate
-    auto version = makeShared<MrpVersionField>();
-    auto optionTlv = makeShared<OptionHeader>();
-    auto testMgrTlv = makeShared<SubTlvTestFrame>();
-    auto commonTlv = makeShared<CommonHeader>();
-    auto endTlv = makeShared<EndHeader>();
+    auto version = makeShared<MrpVersion>();
+    auto optionTlv = makeShared<MrpOption>();
+    auto testMgrTlv = makeShared<MrpSubTlvTest>();
+    auto commonTlv = makeShared<MrpCommon>();
+    auto endTlv = makeShared<MrpEnd>();
 
     testMgrTlv->setPrio(localManagerPrio);
     testMgrTlv->setSa(localBridgeAddress);
