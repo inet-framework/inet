@@ -46,12 +46,18 @@ enum SubTlvHeaderType
 	AUTOMGR = 0x03;
 };
 
+//
+// MRP_TLVHeader
+//
 class MrpTlvHeader extends FieldsChunk
 {
     TlvHeaderType headerType;
     uint8_t headerLength;
 }
 
+//
+// MRP_End
+//
 class MrpEnd extends MrpTlvHeader
 {
     chunkLength = B(2);
@@ -59,6 +65,9 @@ class MrpEnd extends MrpTlvHeader
     headerLength = 0;
 }
 
+//
+// MRP_Test
+//
 class MrpTest extends MrpTlvHeader
 {
     chunkLength = B(20);
@@ -72,6 +81,9 @@ class MrpTest extends MrpTlvHeader
     uint32_t timeStamp;
 }
 
+//
+// MRP_TopologyChange
+//
 class MrpTopologyChange extends MrpTlvHeader
 {
     chunkLength = B(16);
@@ -83,6 +95,9 @@ class MrpTopologyChange extends MrpTlvHeader
     uint16_t interval;
 }
 
+//
+// MRP_LinkChange
+//
 class MrpLinkChange extends MrpTlvHeader
 {
     chunkLength = B(16);
@@ -94,6 +109,9 @@ class MrpLinkChange extends MrpTlvHeader
     uint16_t blocked;
 }
 
+//
+// MRP_InTest
+//
 class MrpInTest extends MrpTlvHeader
 {
     chunkLength = B(20);
@@ -107,6 +125,9 @@ class MrpInTest extends MrpTlvHeader
     uint32_t timeStamp;
 }
 
+//
+// MRP_InLinkChange
+//
 class MrpInLinkChange extends MrpTlvHeader
 {
     chunkLength = B(16);
@@ -119,6 +140,9 @@ class MrpInLinkChange extends MrpTlvHeader
     uint16_t LinkInfo;
 }
 
+//
+// MRP_InLinkStatusPoll
+//
 class MrpInLinkStatusPoll extends MrpTlvHeader
 {
 	chunkLength = B(12);
@@ -129,6 +153,9 @@ class MrpInLinkStatusPoll extends MrpTlvHeader
 	uint16_t inID;
 }
 
+//
+// MRP_InTopologyChange
+//
 class MrpInTopologyChange extends MrpTlvHeader
 {
     chunkLength = B(12);
@@ -139,6 +166,9 @@ class MrpInTopologyChange extends MrpTlvHeader
     uint16_t interval;
 }
 
+//
+// MRP_Common
+//
 class MrpCommon extends MrpTlvHeader
 {
     chunkLength = B(20);
@@ -149,6 +179,9 @@ class MrpCommon extends MrpTlvHeader
     uint64_t uuid1;
 }
 
+//
+// MRP_SubTLVHeader
+//
 class MrpSubTlvHeader extends FieldsChunk //equals to suboption2 and Mrp_AutoMgr
 {
     chunkLength = B(2);
@@ -156,6 +189,9 @@ class MrpSubTlvHeader extends FieldsChunk //equals to suboption2 and Mrp_AutoMgr
     uint8_t subHeaderLength = 0;	
 }
 
+//
+// MRP_ManufacturerFkt
+//
 class MrpManufacturerFkt extends MrpSubTlvHeader
 {
     chunkLength = B(2);
@@ -165,6 +201,9 @@ class MrpManufacturerFkt extends MrpSubTlvHeader
     //BytesChunk manufacturerData;
 }
 
+//
+// MRP_SubTLVTest
+//
 class MrpSubTlvTest extends MrpSubTlvHeader
 {
     chunkLength = B(18);
@@ -176,6 +215,9 @@ class MrpSubTlvTest extends MrpSubTlvHeader
     MacAddress otherMRMSa;
 }
 
+//
+// MRP_Option
+//
 class MrpOption extends MrpTlvHeader
 {
     chunkLength = B(6);
@@ -189,6 +231,9 @@ class MrpOption extends MrpTlvHeader
 	//subTlvHeader subOption2;
 }
 
+//
+// MRP_Version (non-TLV field) 
+//
 class MrpVersion extends FieldsChunk
 {
     chunkLength = B(2);
