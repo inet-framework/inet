@@ -39,14 +39,14 @@ void MrpInterconnection::initialize(int stage) {
         linkCheckEnabled = par("linkCheckEnabled");
         ringCheckEnabled = par("ringCheckEnabled");
 
-        inLinkChangeSignal = registerSignal("inLinkChangeSignal");
-        inTopologyChangeSignal = registerSignal("inTopologyChangeSignal");
-        inTestSignal = registerSignal("inTestSignal");
-        receivedInChangeSignal = registerSignal("receivedInChangeSignal");
-        receivedInTestSignal = registerSignal("receivedInTestSignal");
-        interconnectionStateChangedSignal = registerSignal("interconnectionStateChangedSignal");
-        inStatusPollSignal = registerSignal("inStatusPollSignal");
-        receivedInStatusPollSignal = registerSignal("receivedInStatusPollSignal");
+        inLinkChangeSignal = registerSignal("inLinkChange");
+        inTopologyChangeSignal = registerSignal("inTopologyChange");
+        inTestSignal = registerSignal("inTest");
+        receivedInChangeSignal = registerSignal("receivedInChange");
+        receivedInTestSignal = registerSignal("receivedInTest");
+        interconnectionStateChangedSignal = registerSignal("interconnectionStateChanged");
+        inStatusPollSignal = registerSignal("inStatusPoll");
+        receivedInStatusPollSignal = registerSignal("receivedInStatusPoll");
     }
     if (stage == INITSTAGE_LINK_LAYER) {
         EV_DETAIL << "Initialize Interconnection Stage link layer" << EV_ENDL;
