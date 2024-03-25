@@ -96,10 +96,6 @@ void MrpInterconnection::stop() {
     Mrp::stop();
 }
 
-void MrpInterconnection::read() {
-    //todo
-}
-
 void MrpInterconnection::mimInit() {
     mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPort, static_cast<MacAddress>(MC_INCONTROL), vlanID);
     mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPort, static_cast<MacAddress>(MC_INCONTROL), vlanID);

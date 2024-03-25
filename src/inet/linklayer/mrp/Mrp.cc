@@ -326,10 +326,6 @@ void Mrp::stop() {
     cancelAndDelete(startUpTimer);
 }
 
-void Mrp::read() {
-    //TODO
-}
-
 void Mrp::mrcInit() {
     linkChangeCount = linkMaxChange;
     mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPort, static_cast<MacAddress>(MC_CONTROL), vlanID);
