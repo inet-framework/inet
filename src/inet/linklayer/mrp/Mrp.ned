@@ -33,13 +33,13 @@ simple Mrp like IMediaRedundancy
         @class(Mrp);
         //switches do not detect a link change immediatly. this parameter sets mean time and deviation in milliseconds for
         //the simulated delay of a link change event
-        volatile double linkDetectionDelay @unit(ms) = default(truncnormal(385ms,325ms));
-        
+        volatile double linkDetectionDelay @unit(s) = default(truncnormal(385ms,325ms));
+
         //switches take a certain amount of time for processing each received packet.
         //this parameter sets the mean processsing delay and deviation in microseconds
         //and is applied in handleMessageWhenUp()
-        volatile double processingDelay @unit(us) = default(truncnormal(100us,80us));
-        
+        volatile double processingDelay @unit(s) = default(truncnormal(100us,80us));
+
         // MRP defines 4 Maximum Recovery Time settings for ring: 500 ms , 200 ms, 30 ms or 10 ms
         // this time provides a hard upper time limit guaranteed by 
         // Depending on this parameter the interval for test frames, topology and link change times are adapted
