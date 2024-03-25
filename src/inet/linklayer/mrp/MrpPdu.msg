@@ -46,11 +46,17 @@ enum SubTlvHeaderType
 	AUTOMGR = 0x03;
 };
 
-class TlvHeader extends FieldsChunk //equals endHeader
+class TlvHeader extends FieldsChunk
+{
+    TlvHeaderType headerType;
+    uint8_t headerLength;
+}
+
+class EndHeader extends TlvHeader
 {
     chunkLength = B(2);
-    TlvHeaderType headerType = END; 
-    uint8_t headerLength = 0;
+    headerType = END;
+    headerLength = 0;
 }
 
 class TestFrame extends TlvHeader
@@ -182,7 +188,6 @@ class OptionHeader extends TlvHeader
 	//BytesChunk manufacturerData;
 	//subTlvHeader subOption2;
 }
-
 
 class MrpVersionField extends FieldsChunk
 {

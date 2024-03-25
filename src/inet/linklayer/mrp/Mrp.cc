@@ -1025,7 +1025,7 @@ void Mrp::setupTestRingReq() {
     auto testTlv1 = makeShared<TestFrame>();
     auto testTlv2 = makeShared<TestFrame>();
     auto commonTlv = makeShared<CommonHeader>();
-    auto endTlv = makeShared<TlvHeader>();
+    auto endTlv = makeShared<EndHeader>();
 
     auto timestamp = simTime().inUnit(SIMTIME_MS);
     auto lastTestFrameSent = simTime().inUnit(SIMTIME_US);
@@ -1087,7 +1087,7 @@ void Mrp::setupTopologyChangeReq(uint32_t Interval) {
     auto topologyChangeTlv = makeShared<TopologyChangeFrame>();
     auto topologyChangeTlv2 = makeShared<TopologyChangeFrame>();
     auto commonTlv = makeShared<CommonHeader>();
-    auto endTlv = makeShared<TlvHeader>();
+    auto endTlv = makeShared<EndHeader>();
 
     topologyChangeTlv->setPrio(localManagerPrio);
     topologyChangeTlv->setSa(localBridgeAddress);
@@ -1126,7 +1126,7 @@ void Mrp::setupLinkChangeReq(int ringPort, uint16_t linkState, double time) {
     auto version = makeShared<MrpVersionField>();
     auto linkChangeTlv = makeShared<LinkChangeFrame>();
     auto commonTlv = makeShared<CommonHeader>();
-    auto endTlv = makeShared<TlvHeader>();
+    auto endTlv = makeShared<EndHeader>();
 
     if (linkState == NetworkInterface::UP) {
         linkChangeTlv->setHeaderType(LINKUP);
@@ -1161,7 +1161,7 @@ void Mrp::testMgrNackReq(int ringPort, MrpPriority managerPrio, MacAddress sourc
     auto optionTlv = makeShared<OptionHeader>();
     auto testMgrTlv = makeShared<SubTlvTestFrame>();
     auto commonTlv = makeShared<CommonHeader>();
-    auto endTlv = makeShared<TlvHeader>();
+    auto endTlv = makeShared<EndHeader>();
 
     testMgrTlv->setSubType(SubTlvHeaderType::TEST_MGR_NACK);
     testMgrTlv->setPrio(localManagerPrio);
@@ -1208,7 +1208,7 @@ void Mrp::testPropagateReq(int ringPort, MrpPriority managerPrio, MacAddress sou
     auto optionTlv = makeShared<OptionHeader>();
     auto testMgrTlv = makeShared<SubTlvTestFrame>();
     auto commonTlv = makeShared<CommonHeader>();
-    auto endTlv = makeShared<TlvHeader>();
+    auto endTlv = makeShared<EndHeader>();
 
     testMgrTlv->setPrio(localManagerPrio);
     testMgrTlv->setSa(localBridgeAddress);
