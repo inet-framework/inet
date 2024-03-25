@@ -20,6 +20,7 @@ std::map<std::string, int> localNetworkNamespaces; // network namespace which ar
 
 void createNetworkNamespace(const char *name, bool global)
 {
+#ifdef __linux__
     if (global) {
         std::string fullPath = std::string("/var/run/netns/") + name;
         int fd = open(fullPath.c_str(), O_RDONLY | O_CREAT | O_EXCL, 0);
@@ -40,10 +41,14 @@ void createNetworkNamespace(const char *name, bool global)
         // switch back to the original namespace that was used before unshare
         setns(oldFd, 0);
     }
+#else
+    throw cRuntimeError("Network namespaces are only supported on Linux");
+#endif
 }
 
 bool existsNetworkNamespace(const char *name)
 {
+#ifdef __linux__
     auto it = localNetworkNamespaces.find(name);
     if (it != localNetworkNamespaces.end())
         return true;
@@ -56,9 +61,13 @@ bool existsNetworkNamespace(const char *name)
         }
     }
     return false;
+#else
+    throw cRuntimeError("Network namespaces are only supported on Linux");
+#endif
 }
 
 void deleteNetworkNamespace(const char *name) {
+#ifdef __linux__
     auto it = localNetworkNamespaces.find(name);
     if (it != localNetworkNamespaces.end()) {
         auto it = localNetworkNamespaces.find(name);
@@ -72,6 +81,9 @@ void deleteNetworkNamespace(const char *name) {
         if (unlink(path.c_str()) != 0)
             throw cRuntimeError("Cannot unlink file: %s", path.c_str());
     }
+#else
+    throw cRuntimeError("Network namespaces are only supported on Linux");
+#endif
 }
 
 NetworkNamespaceContext::NetworkNamespaceContext(const char *name)
@@ -117,6 +129,8 @@ NetworkNamespaceContext::~NetworkNamespaceContext()
         }
         oldFd = -1;
         newFd = -1;
+#else
+        throw cRuntimeError("Network namespaces are only supported on Linux");
 #endif
     }
 }
