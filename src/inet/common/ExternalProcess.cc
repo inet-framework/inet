@@ -77,6 +77,7 @@ bool ExternalProcess::notify(int fd)
 
 void ExternalProcess::startProcess()
 {
+#ifdef __linux__
     NetworkNamespaceContext context(par("namespace"));
     EV_DEBUG << "Starting process: " << command << std::endl;
     int stdout_pipe[2];
@@ -123,6 +124,9 @@ void ExternalProcess::startProcess()
         rtScheduler->addCallback(processStdout, this);
         rtScheduler->addCallback(processStderr, this);
     }
+#else
+        throw cRuntimeError("External processes are only supported on Linux");
+#endif
 }
 
 void ExternalProcess::stopProcess()
