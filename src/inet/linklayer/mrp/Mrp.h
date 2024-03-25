@@ -180,7 +180,6 @@ public:
 protected:
     virtual void start();
     virtual void stop();
-    virtual void read();
     virtual void initialize(int stage) override;
     virtual void mrcInit();
     virtual void mrmInit();

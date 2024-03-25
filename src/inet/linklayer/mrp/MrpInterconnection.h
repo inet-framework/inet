@@ -85,7 +85,6 @@ protected:
 protected:
     virtual void start() override;
     virtual void stop() override;
-    virtual void read() override;
     virtual void initialize(int stage) override;
     void initInterconnectionPort();
     void micInit();
