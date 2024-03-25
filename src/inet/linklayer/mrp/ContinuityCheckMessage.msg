@@ -6,6 +6,12 @@ import inet.common.packet.chunk.Chunk;
 
 namespace inet;
 
+//
+// Protocol header for the Continuity Check protocol (CC), which is a fundamental
+// component of the Connectivity Fault Management (CFM) protocol suite for managing
+// connectivity at the Ethernet service level. CFM is defined within the
+// IEEE Std 802.1Q-2018 standard, later IEEE 802.1ag and ITU Y.1731.
+//
 class ContinuityCheckMessage extends FieldsChunk {
     chunkLength = B(38);
     uint8_t mdLevel = 0;
