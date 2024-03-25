@@ -12,7 +12,10 @@
 
 #include <cstdio>
 #include <fcntl.h>
+
+#ifdef __linux__
 #include <sys/mount.h>
+#endif
 
 namespace inet {
 

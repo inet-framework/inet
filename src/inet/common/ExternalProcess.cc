@@ -125,7 +125,7 @@ void ExternalProcess::startProcess()
         rtScheduler->addCallback(processStderr, this);
     }
 #else
-        throw cRuntimeError("External processes are only supported on Linux");
+    throw cRuntimeError("External processes are only supported on Linux");
 #endif
 }
 
