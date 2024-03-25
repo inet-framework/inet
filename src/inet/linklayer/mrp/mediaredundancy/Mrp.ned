@@ -70,10 +70,11 @@ simple Mrp like IMediaRedundancy
 		//link check is based on 802.1q-CFM
 		//Keep the additional load on node and network in mind!
 		bool enableLinkCheckOnRing = default(false);
+
 		
 		// CCM link check can be done every 3.3 ms or every 10 ms
-        double ccmInterval @unit(ms) = default(10ms);
-        	
+        double ccmInterval @unit(s) = default(10ms);
+
 		//mrp rings can be redundantly connected by interconnection nodes
         //in order to handle the necessary communication, normal mrp nodes
         //should be aware of the used check methods. Check can be done either by RingCheck (similar to ring test mechanism)
