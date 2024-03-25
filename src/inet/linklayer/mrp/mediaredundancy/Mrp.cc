@@ -156,16 +156,16 @@ void Mrp::initialize(int stage) {
         blockedStateSupported = par("blockedStateSupported");
 
         //signals
-        linkChangeSignal = registerSignal("LinkChangeSignal");
-        topologyChangeSignal = registerSignal("TopologyChangeSignal");
-        testSignal = registerSignal("TestSignal");
-        continuityCheckSignal = registerSignal("ContinuityCheckSignal");
-        receivedChangeSignal = registerSignal("ReceivedChangeSignal");
-        receivedTestSignal = registerSignal("ReceivedTestSignal");
-        receivedContinuityCheckSignal = registerSignal("ReceivedContinuityCheckSignal");
-        ringStateChangedSignal = registerSignal("RingStateChangedSignal");
-        portStateChangedSignal = registerSignal("PortStateChangedSignal");
-        clearFDBSignal = registerSignal("ClearFDBSignal");
+        linkChangeSignal = registerSignal("linkChangeSignal");
+        topologyChangeSignal = registerSignal("topologyChangeSignal");
+        testSignal = registerSignal("testSignal");
+        continuityCheckSignal = registerSignal("continuityCheckSignal");
+        receivedChangeSignal = registerSignal("receivedChangeSignal");
+        receivedTestSignal = registerSignal("receivedTestSignal");
+        receivedContinuityCheckSignal = registerSignal("receivedContinuityCheckSignal");
+        ringStateChangedSignal = registerSignal("ringStateChangedSignal");
+        portStateChangedSignal = registerSignal("portStateChangedSignal");
+        clearFDBSignal = registerSignal("clearFDBSignal");
         switchModule->subscribe(interfaceStateChangedSignal, this);
 
     }
