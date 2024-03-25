@@ -207,7 +207,7 @@ void MrpInterconnection::handleMessageWhenUp(cMessage *msg) {
         msg->setKind(2);
         EV_INFO << "Received Message on InterConnectionNode, Rescheduling:"
                        << EV_FIELD(msg) << EV_ENDL;
-        processingDelay = SimTime(par("processingDelay").doubleValue(), SIMTIME_US);
+        processingDelay = par("processingDelay").doubleValue();
         scheduleAt(simTime() + processingDelay, msg);
     } else {
         EV_INFO << "Received Self-Message:" << EV_FIELD(msg) << EV_ENDL;
