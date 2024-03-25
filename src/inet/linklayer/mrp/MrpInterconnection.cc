@@ -746,7 +746,7 @@ void MrpInterconnection::setupInterconnTestReq() {
     auto inTestTLV2 = makeShared<InTestFrame>();
     auto inTestTLV3 = makeShared<InTestFrame>();
     auto commonTLV = makeShared<CommonHeader>();
-    auto endTLV = makeShared<TlvHeader>();
+    auto endTLV = makeShared<EndHeader>();
 
     uint32_t timestamp = simTime().inUnit(SIMTIME_MS);
     int64_t lastInTestFrameSent = simTime().inUnit(SIMTIME_US);
@@ -820,7 +820,7 @@ void MrpInterconnection::setupInterconnTopologyChangeReq(double time) {
     auto version = makeShared<MrpVersionField>();
     auto inTopologyChangeTLV = makeShared<InTopologyChangeFrame>();
     auto commonTLV = makeShared<CommonHeader>();
-    auto endTLV = makeShared<TlvHeader>();
+    auto endTLV = makeShared<EndHeader>();
 
     inTopologyChangeTLV->setInID(interConnectionID);
     inTopologyChangeTLV->setSa(localBridgeAddress);
@@ -868,7 +868,7 @@ void MrpInterconnection::interconnLinkChangeReq(uint16_t linkState, double time)
     auto inLinkChangeTLV2 = makeShared<InLinkChangeFrame>();
     auto inLinkChangeTLV3 = makeShared<InLinkChangeFrame>();
     auto commonTLV = makeShared<CommonHeader>();
-    auto endTLV = makeShared<TlvHeader>();
+    auto endTLV = makeShared<EndHeader>();
 
     TlvHeaderType type = INLINKDOWN;
     if (linkState == NetworkInterface::UP) {
@@ -951,7 +951,7 @@ void MrpInterconnection::setupInterconnLinkStatusPollReq() {
     auto inLinkStatusPollTLV2 = makeShared<InLinkStatusPollFrame>();
     auto inLinkStatusPollTLV3 = makeShared<InLinkStatusPollFrame>();
     auto commonTLV = makeShared<CommonHeader>();
-    auto endTLV = makeShared<TlvHeader>();
+    auto endTLV = makeShared<EndHeader>();
 
     inLinkStatusPollTLV1->setInID(interConnectionID);
     inLinkStatusPollTLV1->setSa(localBridgeAddress);
