@@ -143,7 +143,7 @@ void Mrp::initialize(int stage) {
         domainID.uuid0 = par("uuid0");
         domainID.uuid1 = par("uuid1");
         timingProfile = par("timingProfile");
-        ccmInterval = par("ccmInterval");
+        ccmInterval = par("ccmInterval").doubleValue() * 1000;
         interconnectionLinkCheckAware = par("interconnectionLinkCheckAware");
         interconnectionRingCheckAware = par("interconnectionRingCheckAware");
         enableLinkCheckOnRing = par("enableLinkCheckOnRing");
