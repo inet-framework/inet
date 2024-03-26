@@ -78,7 +78,7 @@ class MrpTest extends MrpTlvHeader
     uint16_t portRole;
     uint16_t ringState;
     uint16_t transition;
-    uint32_t timeStamp;
+    uint32_t timeStamp; // in milliseconds
 }
 
 //
@@ -92,7 +92,7 @@ class MrpTopologyChange extends MrpTlvHeader
     uint16_t prio;
     MacAddress sa;
     uint16_t portRole;
-    uint16_t interval;
+    uint16_t interval; // in milliseconds
 }
 
 //
@@ -105,7 +105,7 @@ class MrpLinkChange extends MrpTlvHeader
     headerLength = 14;
     MacAddress sa;  
     uint16_t portRole;
-    uint16_t interval; 
+    uint16_t interval; // in milliseconds 
     uint16_t blocked;
 }
 
@@ -122,7 +122,7 @@ class MrpInTest extends MrpTlvHeader
     uint16_t portRole;
     uint16_t inState;
     uint16_t transition;
-    uint32_t timeStamp;
+    uint32_t timeStamp;  // in milliseconds
 }
 
 //
@@ -136,7 +136,7 @@ class MrpInLinkChange extends MrpTlvHeader
     MacAddress sa;  
     uint16_t portRole;
     uint16_t inID;
-    uint16_t interval; 
+    uint16_t interval; // in milliseconds 
     uint16_t LinkInfo;
 }
 
@@ -163,7 +163,7 @@ class MrpInTopologyChange extends MrpTlvHeader
     headerLength = 10;
     MacAddress sa;
     uint16_t inID;
-    uint16_t interval;
+    uint16_t interval; // in milliseconds
 }
 
 //
