@@ -287,7 +287,7 @@ void MrpRelay::sendPacket(Packet *packet, const MacAddress &destinationAddress, 
     else
         packet->removeTagIfPresent<DispatchProtocolReq>();
     emit(packetSentToLowerSignal, packet);
-    switchingDelay = SimTime(par("switchingDelay").doubleValue(), SIMTIME_US);
+    switchingDelay = SimTime((int64_t)(par("switchingDelay").doubleValue()), SIMTIME_US);
     if (packet->findTag<MacAddressReq>() == nullptr) {
         auto &macAddressReq = packet->addTag<MacAddressReq>();
         macAddressReq->setDestAddress(destinationAddress);

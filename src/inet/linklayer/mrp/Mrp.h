@@ -97,8 +97,8 @@ protected:
     bool interconnectionLinkCheckAware = true;
     bool interconnectionRingCheckAware = true;
     bool enableLinkCheckOnRing = false;
-    simtime_t linkDetectionDelay;
-    simtime_t processingDelay;
+    cPar *linkDetectionDelayPar;
+    cPar *processingDelayPar;
     MrpRole expectedRole = DISABLED;
 
     NodeState currentState = POWER_ON;
