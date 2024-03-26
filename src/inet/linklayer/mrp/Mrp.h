@@ -184,6 +184,7 @@ protected:
     virtual void start();
     virtual void stop();
     virtual void initialize(int stage) override;
+    virtual MrpRole parseMrpRole(const char *mrpRole) const;
     virtual void mrcInit();
     virtual void mrmInit();
     virtual void mraInit();

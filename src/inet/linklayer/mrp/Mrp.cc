@@ -136,7 +136,7 @@ void Mrp::initialize(int stage) {
 
         //parameters
         visualize = par("visualize");
-        expectedRole = static_cast<MrpRole>(par("mrpRole").intValue());
+        expectedRole = parseMrpRole(par("mrpRole"));
         //currently only inferfaceIndex
         primaryRingPort = par("ringPort1");
         secondaryRingPort = par("ringPort2");
@@ -248,6 +248,22 @@ void Mrp::startContinuityCheck() {
         }
     }
     relay->registerAddress(ccmMulticastAddress);
+}
+
+Mrp::MrpRole Mrp::parseMrpRole(const char *mrpRole) const
+{
+    if (!strcmp(mrpRole, "disabled"))
+        return DISABLED;
+    else if (!strcmp(mrpRole, "MRC"))
+        return CLIENT;
+    else if (!strcmp(mrpRole, "MRM"))
+        return MANAGER;
+    else if (!strcmp(mrpRole, "MRA"))
+        return MANAGER_AUTO;
+    else if (!strcmp(mrpRole, "MRAc"))
+        return MANAGER_AUTO_COMP;
+    else
+        throw cRuntimeError("Unknown MRP role '%s'", mrpRole);
 }
 
 void Mrp::setTimingProfile(int maxRecoveryTime) {
