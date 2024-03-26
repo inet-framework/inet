@@ -7,12 +7,18 @@ import inet.linklayer.common.MacAddress;
 
 namespace inet;
 
+//TODO namespace inet::mrp 
+
+//TODO what is SubTLVTest? No such thing in the spec
+
 //vendor Part of mac-Adress
 enum MrpOuiType {
     OUI = 0x000000;
     IEC = 0x00154E;
 };
 
+
+//TODO what is this? 
 
 enum Ed1DataLength {
     LENGTH0 = 2; 	//tpye ed1 0x00
@@ -96,12 +102,12 @@ class MrpTopologyChange extends MrpTlvHeader
 }
 
 //
-// MRP_LinkChange
+// MRP_LinkChange: MRP_LinkUp or MRP_LinkDown (depends on headerType)
 //
 class MrpLinkChange extends MrpTlvHeader
 {
     chunkLength = B(16);
-    headerType = LINKDOWN;
+    headerType = LINKDOWN; // LINKUP or LINKDOWN
     headerLength = 14;
     MacAddress sa;  
     uint16_t portRole;
@@ -126,12 +132,12 @@ class MrpInTest extends MrpTlvHeader
 }
 
 //
-// MRP_InLinkChange
+// MRP_InLinkChange: MRP_InLinkDown or MRP_InLinkUp
 //
 class MrpInLinkChange extends MrpTlvHeader
 {
     chunkLength = B(16);
-    headerType = INLINKDOWN;
+    headerType = INLINKDOWN; // INLINKDOWN or INLINKUP
     headerLength = 14;
     MacAddress sa;  
     uint16_t portRole;

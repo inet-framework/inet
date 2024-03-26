@@ -32,6 +32,11 @@ static const char *DISABLED_LINK_COLOR = "#888888";
 
 Define_Module(Mrp);
 
+//TODO take MacAddress args by const ref everywhere
+//TODO since MrpEnd and MrpVersion are immutable, we could use a single shared copy for all packets
+//TODO topologyChangeReq(double time) -> maybe rename method to scheduleTopologyChangeReq()?
+//TODO review values emitted for signals: user should be able to infer from signal name what is the value; or simply use constant "1" for signals that are emitted for events
+
 Mrp::Mrp() {
 }
 
@@ -443,7 +448,7 @@ void Mrp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
                     || field == NetworkInterface::F_CARRIER) {
                 simtime_t linkDetectionDelay;
                 if (interface->isUp() && interface->hasCarrier())
-                    linkDetectionDelay = SimTime(1, SIMTIME_US); //linkUP is handled faster than linkDown
+                    linkDetectionDelay = SimTime(1, SIMTIME_US); //linkUP is handled faster than linkDown --TODO parameter!
                 else
                     linkDetectionDelay = linkDetectionDelayPar->doubleValue();
                 if (linkUpHysteresisTimer->isScheduled())
@@ -473,6 +478,8 @@ void Mrp::handleMessageWhenUp(cMessage *msg) {
             handleLinkDownTimer();
         else if (msg == fdbClearTimer)
             clearLocalFDB();
+        // TODO what is the difference between fdbClearTimer (above) and fdbClearDelay? they seem to be poorly named
+        // TODO fdbClearDelay is poorly named: it is NOT a "delay", it is a timer! (delay is the amount in simtime_t)
         else if (msg == fdbClearDelay)
             clearLocalFDBDelayed();
         else if (msg == startUpTimer) {
@@ -787,7 +794,7 @@ void Mrp::handleDelayTimer(int interfaceId, int field) {
     }
 }
 
-void Mrp::clearLocalFDB() {
+void Mrp::clearLocalFDB() {  //TODO this only *schedules* clearing the FDB, and does not actually do itm right? rename to scheduleClearLocalFDB()?
     EV_DETAIL << "clearing FDB" << EV_ENDL;
     if (fdbClearDelay->isScheduled())
         cancelEvent(fdbClearDelay);
@@ -796,7 +803,7 @@ void Mrp::clearLocalFDB() {
     emit(clearFDBSignal, processingDelay.dbl());
 }
 
-void Mrp::clearLocalFDBDelayed() {
+void Mrp::clearLocalFDBDelayed() {  //TODO this actually does the clearing and not delays it, right? rename to clearLocalFDB()
     mrpMacForwardingTable->clearTable();
     EV_DETAIL << "FDB cleared" << EV_ENDL;
 }

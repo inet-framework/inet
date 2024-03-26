@@ -16,6 +16,8 @@
 
 namespace inet {
 
+//TODO what are these "double time" arguments in methods?
+
 Define_Module(MrpInterconnection);
 
 MrpInterconnection::MrpInterconnection() {

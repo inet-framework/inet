@@ -18,6 +18,7 @@ namespace inet {
  */
 class INET_API MrpInterconnection: public Mrp {
 protected:
+    //TODO into displayTextFormat
     enum InNodeState : uint16_t {
         POWER_ON, AC_STAT1, //waiting for the first Link Up at one of its ring ports, starting test monitoring of the ring
 
@@ -52,7 +53,6 @@ protected:
     opp_component_ptr<NetworkInterface> interconnectionInterface = nullptr;
     int interconnectionPort;
 
-    //TODO simtime_t
     simtime_t inLinkChangeInterval;
     simtime_t inTopologyChangeInterval;
     simtime_t inLinkStatusPollInterval;
