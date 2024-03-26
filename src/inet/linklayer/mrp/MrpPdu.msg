@@ -137,7 +137,7 @@ class MrpInLinkChange extends MrpTlvHeader
     uint16_t portRole;
     uint16_t inID;
     uint16_t interval; // in milliseconds 
-    uint16_t LinkInfo;
+    uint16_t linkInfo; // additional link info such as reason for failure
 }
 
 //
