@@ -218,19 +218,19 @@ protected:
     virtual void linkChangeReq(int ringPort, uint16_t linkState);
     virtual void setupLinkChangeReq(int ringPort, uint16_t linkState, simtime_t time);
     virtual void testRingInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio);
-    virtual void topologyChangeInd(MacAddress sourceAddress, double time);
+    virtual void topologyChangeInd(MacAddress sourceAddress, simtime_t time);
     virtual void linkChangeInd(uint16_t portMode, uint16_t linkState);
     virtual void testMgrNackInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio, MacAddress bestMRMSourceAddress);
     virtual void testPropagateInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio, MacAddress bestMRMSourceAddress, MrpPriority bestMRMPrio);
     virtual void mauTypeChangeInd(int ringPort, uint16_t linkState);
-    virtual void interconnTopologyChangeInd(MacAddress sourceAddress, double time, uint16_t inId, int ringPort, Packet* packet);
+    virtual void interconnTopologyChangeInd(MacAddress sourceAddress, simtime_t time, uint16_t inId, int ringPort, Packet* packet);
     virtual void interconnLinkChangeInd(uint16_t inId, uint16_t linkstate, int ringPort, Packet* packet);
     virtual void interconnLinkStatusPollInd(uint16_t inId, int ringPort, Packet* packet);
     virtual void interconnTestInd(MacAddress sourceAddress, int ringPort, uint16_t inId, Packet* packet);
     virtual void interconnForwardReq(int ringPort, Packet* packet);
     virtual void sendFrameReq(int portId, const MacAddress& destinationAddress, const MacAddress& sourceAddress, int prio, uint16_t lt, Packet* MRPPDU);
     virtual void sendCCM(int portId, Packet* CCM);
-    virtual void clearFDB(double time);
+    virtual void clearFDB(simtime_t time);
     virtual void colorLink(NetworkInterface* ie, bool forwarding) const;
     virtual void refreshDisplay() const override;
 

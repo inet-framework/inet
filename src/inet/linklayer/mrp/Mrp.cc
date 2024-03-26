@@ -399,12 +399,12 @@ void Mrp::mraInit() {
     mauTypeChangeInd(secondaryRingPort, getPortNetworkInterface(secondaryRingPort)->getState());
 }
 
-void Mrp::clearFDB(double time_ms) {
+void Mrp::clearFDB(simtime_t time) {
     if (!fdbClearTimer->isScheduled())
-        scheduleAt(simTime() + SimTime(time_ms, SIMTIME_MS), fdbClearTimer);
-    else if (fdbClearTimer->getArrivalTime() > (simTime() + SimTime(time_ms, SIMTIME_MS))) {
+        scheduleAt(simTime() + time, fdbClearTimer);
+    else if (fdbClearTimer->getArrivalTime() > (simTime() + time)) {
         cancelEvent(fdbClearTimer);
-        scheduleAt(simTime() + SimTime(time_ms, SIMTIME_MS), fdbClearTimer);
+        scheduleAt(simTime() + time, fdbClearTimer);
     }
 }
 
@@ -539,7 +539,7 @@ void Mrp::handleMrpPDU(Packet* packet) {
         auto topologyTlv = dynamicPtrCast<const MrpTopologyChange>(firstTlv);
         if (ringID) {
             if (sequence > lastTopologyId) {
-                topologyChangeInd(topologyTlv->getSa(), topologyTlv->getInterval());
+                topologyChangeInd(topologyTlv->getSa(), SimTime(topologyTlv->getInterval(), SIMTIME_MS));
                 emit(receivedChangeSignal, topologyTlv->getInterval());
             } else {
                 EV_DETAIL << "Received same Frame already" << EV_ENDL;
@@ -1317,7 +1317,7 @@ void Mrp::testRingInd(int ringPort, MacAddress sourceAddress, MrpPriority manage
     }
 }
 
-void Mrp::topologyChangeInd(MacAddress sourceAddress, double time_ms) {
+void Mrp::topologyChangeInd(MacAddress sourceAddress, simtime_t time) {
     switch (currentState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1326,26 +1326,26 @@ void Mrp::topologyChangeInd(MacAddress sourceAddress, double time_ms) {
     case CHK_RO:
     case CHK_RC:
         if (sourceAddress != localBridgeAddress) {
-            clearFDB(time_ms);
+            clearFDB(time);
         }
         break;
     case PT:
         linkChangeCount = linkMaxChange;
         cancelEvent(linkUpTimer);
         setPortState(secondaryRingPort, MrpInterfaceData::FORWARDING);
-        clearFDB(time_ms);
+        clearFDB(time);
         currentState = PT_IDLE;
         EV_DETAIL << "Switching State from PT to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         break;
     case DE:
         linkChangeCount = linkMaxChange;
         cancelEvent(linkDownTimer);
-        clearFDB(time_ms);
+        clearFDB(time);
         currentState = DE_IDLE;
         EV_DETAIL << "Switching State from DE to DE_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         break;
     case DE_IDLE:
-        clearFDB(time_ms);
+        clearFDB(time);
         if (expectedRole == MANAGER_AUTO
                 && linkUpHysteresisTimer->isScheduled()) {
             setPortState(secondaryRingPort, MrpInterfaceData::FORWARDING);
@@ -1353,7 +1353,7 @@ void Mrp::topologyChangeInd(MacAddress sourceAddress, double time_ms) {
             EV_DETAIL << "Switching State from DE_IDLE to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         }
     case PT_IDLE:
-        clearFDB(time_ms);
+        clearFDB(time);
         break;
     default:
         throw cRuntimeError("Unknown NodeState");
@@ -1748,7 +1748,7 @@ void Mrp::mauTypeChangeInd(int ringPort, uint16_t linkState) {
     }
 }
 
-void Mrp::interconnTopologyChangeInd(MacAddress sourceAddress, double time_ms, uint16_t inID, int ringPort, Packet *packet) {
+void Mrp::interconnTopologyChangeInd(MacAddress sourceAddress, simtime_t time, uint16_t inID, int ringPort, Packet *packet) {
     switch (currentState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1760,13 +1760,13 @@ void Mrp::interconnTopologyChangeInd(MacAddress sourceAddress, double time_ms, u
     case PRM_UP:
     case CHK_RC:
         if (!topologyChangeTimer->isScheduled()) {
-            topologyChangeReq(time_ms);
+            topologyChangeReq(time);
         }
         delete packet;
         break;
     case CHK_RO:
         if (!topologyChangeTimer->isScheduled()) {
-            topologyChangeReq(time_ms);
+            topologyChangeReq(time);
             delete packet;
         }
         if (ringPort == primaryRingPort) {
