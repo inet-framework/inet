@@ -138,7 +138,7 @@ protected:
     double topologyChangeInterval_ms; //MRP_TOPchgT
     double shortTestInterval_ms; //MRP_TSTshortT
     double defaultTestInterval_ms; //MRP_TSTdefaultT
-    double ccmInterval_ms = 10; // time in milliseconds. either 3.3 or 10 ms
+    simtime_t ccmInterval = SimTime(10, SIMTIME_MS); // time in milliseconds. either 3.3 or 10 ms
 
     uint16_t topologyChangeMaxRepeatCount = 3; //MRP_TOPNRmax
     uint16_t topologyChangeRepeatCount = 0; //MRP_TOPNReturn

@@ -143,7 +143,7 @@ void Mrp::initialize(int stage) {
         domainID.uuid0 = par("uuid0");
         domainID.uuid1 = par("uuid1");
         timingProfile = par("timingProfile");
-        ccmInterval_ms = par("ccmInterval").doubleValue() * 1000;
+        ccmInterval = par("ccmInterval");
         interconnectionLinkCheckAware = par("interconnectionLinkCheckAware");
         interconnectionRingCheckAware = par("interconnectionRingCheckAware");
         enableLinkCheckOnRing = par("enableLinkCheckOnRing");
@@ -201,9 +201,9 @@ void Mrp::initInterfacedata(unsigned int interfaceId) {
     ifd->setRole(MrpInterfaceData::NOTASSIGNED);
     ifd->setState(MrpInterfaceData::FORWARDING);
     ifd->setLostPDU(0);
-    ifd->setContinuityCheckInterval(SimTime(ccmInterval_ms, SIMTIME_MS));
+    ifd->setContinuityCheckInterval(ccmInterval);
     ifd->setContinuityCheck(false);
-    ifd->setNextUpdate(SimTime(ccmInterval_ms * 3.5, SIMTIME_MS));
+    ifd->setNextUpdate(ccmInterval * 3.5);
 }
 
 void Mrp::initRingPorts() {
@@ -215,13 +215,13 @@ void Mrp::initRingPorts() {
     ifd->setRole(MrpInterfaceData::PRIMARY);
     ifd->setState(MrpInterfaceData::BLOCKED);
     ifd->setContinuityCheck(enableLinkCheckOnRing);
-    ifd->setContinuityCheckInterval(SimTime(ccmInterval_ms, SIMTIME_MS));
+    ifd->setContinuityCheckInterval(ccmInterval);
 
     ifd = getPortInterfaceDataForUpdate(ringInterface2->getInterfaceId());
     ifd->setRole(MrpInterfaceData::SECONDARY);
     ifd->setState(MrpInterfaceData::BLOCKED);
     ifd->setContinuityCheck(enableLinkCheckOnRing);
-    ifd->setContinuityCheckInterval(SimTime(ccmInterval_ms, SIMTIME_MS));
+    ifd->setContinuityCheckInterval(ccmInterval);
 }
 
 void Mrp::startContinuityCheck() {
