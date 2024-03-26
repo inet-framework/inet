@@ -43,6 +43,7 @@ module TsnSwitch extends EthernetSwitch
         bridging.streamFilter.typename = default(hasIngressTrafficFiltering ? "StreamFilterLayer" : ""); // enable stream filtering when ingress per-stream filtering is enabled
         bridging.streamFilter.ingress.typename = default(hasIngressTrafficFiltering ? "SimpleIeee8021qFilter" : ""); // use 802.1 Qci ingress filtering when ingress per-stream filtering is enabled
         bridging.streamCoder.typename = default(hasIncomingStreams || hasOutgoingStreams || hasIngressTrafficFiltering || hasStreamRedundancy ? "StreamCoderLayer" : ""); // enable stream endocing/decoding when stream redundancy is enabled
+        bridging.interfaceRelay.learner.typename = default(hasIncomingStreams || hasOutgoingStreams ? "" : "RelayInterfaceLearner"); // disable learning MAC addresses in the MAC forwarding table because it would change static TSN stream configuration
         ieee8021q.typename = default("Ieee8021qProtocol");
         ieee8021r.typename = default("Ieee8021rProtocol");
 }
