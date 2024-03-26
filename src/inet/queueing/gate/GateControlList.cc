@@ -63,7 +63,7 @@ void GateControlList::parseGcl()
         auto durations = gateDurations.at(i);
         if (durations->size() % 2 != 0)
             durations->add(cValue(currentDuration[i], "s"));
-        else {
+        else if (durations->size() != 0) {
             durations->set(0, cValue(durations->get(0).doubleValueInUnit("s") + currentDuration[i], "s"));
             offsets[i] = currentDuration[i];
         }
