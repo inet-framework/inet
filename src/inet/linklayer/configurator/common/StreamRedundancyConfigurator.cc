@@ -182,7 +182,9 @@ void StreamRedundancyConfigurator::computeStreamEncodings(cValueMap *streamConfi
                 for (size_t k = 0; k < receiverNetworkNodeNames.size(); k++) {
                     auto receiverNetworkNodeName = receiverNetworkNodeNames[k];
                     EV_DEBUG << "Assigning VLAN id" << EV_FIELD(streamName) << EV_FIELD(networkNodeName) << EV_FIELD(receiverNetworkNodeName) << EV_FIELD(destinationAddress) << EV_FIELD(vlanId) << EV_ENDL;
-                    assignedVlanIds[{networkNodeName, receiverNetworkNodeName, destinationAddress, streamName}] = vlanId;
+                    std::tuple<std::string, std::string, std::string, std::string> key = {networkNodeName, receiverNetworkNodeName, destinationAddress, streamName};
+                    ASSERT(assignedVlanIds.find(key) == assignedVlanIds.end());
+                    assignedVlanIds[key] = vlanId;
                     StreamEncoding streamEncoding;
                     streamEncoding.name = outputStreamName;
                     streamEncoding.networkInterface = streamNode.interfaces[j][k];
@@ -217,7 +219,7 @@ void StreamRedundancyConfigurator::computeStreamPolicyConfigurations(cValueMap *
         for (auto senderNetworkNodeName : streamNode.senders) {
             auto inputStreamName = streamNode.senders.size() == 1 ? streamName : streamName + "_" + senderNetworkNodeName;
             auto linkIn = findLinkIn(node, senderNetworkNodeName.c_str());
-            auto vlanId = assignedVlanIds[{senderNetworkNodeName, networkNodeName, destinationAddress, streamName}];
+            auto vlanId = assignedVlanIds.at({senderNetworkNodeName, networkNodeName, destinationAddress, streamName});
             StreamDecoding streamDecoding;
             streamDecoding.name = inputStreamName;
             streamDecoding.networkInterface = linkIn->destinationInterface->networkInterface;
