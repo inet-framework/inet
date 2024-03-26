@@ -877,21 +877,21 @@ void MrpInterconnection::interconnLinkChangeReq(uint16_t linkState, double time_
     inLinkChangeTLV1->setSa(localBridgeAddress);
     inLinkChangeTLV1->setPortRole(MrpInterfaceData::PRIMARY);
     inLinkChangeTLV1->setInterval(time_ms);
-    inLinkChangeTLV1->setLinkInfo(linkState);
+    inLinkChangeTLV1->setLinkInfo(0x00); // "sent from the primary link"
 
     inLinkChangeTLV2->setHeaderType(type);
     inLinkChangeTLV2->setInID(interConnectionID);
     inLinkChangeTLV2->setSa(localBridgeAddress);
     inLinkChangeTLV2->setPortRole(MrpInterfaceData::SECONDARY);
     inLinkChangeTLV2->setInterval(time_ms);
-    inLinkChangeTLV2->setLinkInfo(linkState);
+    inLinkChangeTLV2->setLinkInfo(0x01); // "sent from the secondary link"
 
     inLinkChangeTLV3->setHeaderType(type);
     inLinkChangeTLV3->setInID(interConnectionID);
     inLinkChangeTLV3->setSa(localBridgeAddress);
     inLinkChangeTLV3->setPortRole(MrpInterfaceData::INTERCONNECTION);
     inLinkChangeTLV3->setInterval(time_ms);
-    inLinkChangeTLV3->setLinkInfo(linkState);
+    inLinkChangeTLV3->setLinkInfo(0x00); //TODO or maybe 0x01? -- see "Table 39 – MRP_LinkInfo"
 
     commonTLV->setSequenceID(sequenceID);
     sequenceID++;
