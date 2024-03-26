@@ -28,6 +28,7 @@ class INET_API StreamRedundancyConfigurator : public NetworkConfiguratorBase
         NetworkInterface *networkInterface = nullptr;
         int vlanId = -1;
         std::string name;
+        std::string destination;
     };
 
     class INET_API StreamMerging

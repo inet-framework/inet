@@ -224,6 +224,7 @@ void StreamRedundancyConfigurator::computeStreamPolicyConfigurations(cValueMap *
             streamDecoding.name = inputStreamName;
             streamDecoding.networkInterface = linkIn->destinationInterface->networkInterface;
             streamDecoding.vlanId = vlanId;
+            streamDecoding.destination = destinationAddress;
             if (streamDecoding.vlanId > maxVlanId)
                 throw cRuntimeError("Cannot assign VLAN ID in the available range");
             node->streamDecodings.push_back(streamDecoding);
@@ -300,6 +301,7 @@ void StreamRedundancyConfigurator::configureStreams(Node *node)
             value->set("interface", streamDecoding.networkInterface->getInterfaceName());
             value->set("vlan", streamDecoding.vlanId);
             value->set("stream", streamDecoding.name.c_str());
+            value->set("destination", streamDecoding.destination.c_str());
             parameterValue->add(value);
         }
         EV_INFO << "Configuring stream decoding" << EV_FIELD(networkNode) << EV_FIELD(streamDecoder) << EV_FIELD(parameterValue) << EV_ENDL;
