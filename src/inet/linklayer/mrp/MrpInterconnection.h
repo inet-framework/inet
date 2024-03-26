@@ -56,7 +56,7 @@ protected:
     double inLinkChangeInterval_ms;
     double inTopologyChangeInterval_ms;
     double inLinkStatusPollInterval_ms;
-    double inTestDefaultInterval_ms;
+    simtime_t inTestDefaultInterval;
 
     uint16_t inTestMonitoringCount = 8; //MRP_IN_TSTNRmax
     uint16_t inTestMaxRetransmissionCount = 0; //MRP_MIM_NRmax
@@ -95,7 +95,7 @@ protected:
     virtual void handleInTopologyChangeTimer();
     virtual void handleInLinkUpTimer();
     virtual void handleInLinkDownTimer();
-    virtual void interconnTestReq(double time);
+    virtual void interconnTestReq(simtime_t time);
     virtual void interconnTopologyChangeReq(double time);
     virtual void interconnLinkChangeReq(uint16_t linkState, double time);
     virtual void interconnLinkStatusPollReq(double time);
