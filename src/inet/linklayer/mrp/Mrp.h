@@ -139,8 +139,8 @@ protected:
     double linkDownInterval_ms = 20; //MRP_LNKdownT
     double linkUpInterval_ms = 20; //MRP_LNKupT
     double topologyChangeInterval_ms; //MRP_TOPchgT
-    double shortTestInterval_ms; //MRP_TSTshortT
-    double defaultTestInterval_ms; //MRP_TSTdefaultT
+    simtime_t shortTestInterval; //MRP_TSTshortT
+    simtime_t defaultTestInterval; //MRP_TSTdefaultT
     double ccmInterval_ms = 10; // time in milliseconds. either 3.3 or 10 ms
 
     uint16_t topologyChangeMaxRepeatCount = 3; //MRP_TOPNRmax
@@ -214,7 +214,7 @@ protected:
     virtual void setupTestRingReq();
     virtual void setupTopologyChangeReq(uint32_t interval);
     virtual void setupContinuityCheck(int ringPort);
-    virtual void testRingReq(double time);
+    virtual void testRingReq(simtime_t time);
     virtual void testMgrNackReq(int ringPort, MrpPriority managerPrio, MacAddress sourceAddress);
     virtual void testPropagateReq(int ringPort, MrpPriority managerPrio, MacAddress sourceAddress);
     virtual void topologyChangeReq(double time);
