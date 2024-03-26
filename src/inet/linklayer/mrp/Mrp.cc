@@ -147,6 +147,9 @@ void Mrp::initialize(int stage) {
         interconnectionLinkCheckAware = par("interconnectionLinkCheckAware");
         interconnectionRingCheckAware = par("interconnectionRingCheckAware");
         enableLinkCheckOnRing = par("enableLinkCheckOnRing");
+        linkDetectionDelayPar = &par("linkDetectionDelay");
+        processingDelayPar = &par("processingDelay");
+
         //manager variables
         localManagerPrio = static_cast<MrpPriority>(par("mrpPriority").intValue());
         nonBlockingMRC = par("nonBlockingMRC");
@@ -424,10 +427,11 @@ void Mrp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
             delayTimer->setKind(0);
             if (field == NetworkInterface::F_STATE
                     || field == NetworkInterface::F_CARRIER) {
+                simtime_t linkDetectionDelay;
                 if (interface->isUp() && interface->hasCarrier())
                     linkDetectionDelay = SimTime(1, SIMTIME_US); //linkUP is handled faster than linkDown
                 else
-                    linkDetectionDelay = par("linkDetectionDelay").doubleValue();
+                    linkDetectionDelay = linkDetectionDelayPar->doubleValue();
                 if (linkUpHysteresisTimer->isScheduled())
                     cancelEvent(linkUpHysteresisTimer);
                 scheduleAfter(linkDetectionDelay, linkUpHysteresisTimer);
@@ -441,7 +445,7 @@ void Mrp::handleMessageWhenUp(cMessage *msg) {
     if (!msg->isSelfMessage()) {
         msg->setKind(2);
         EV_INFO << "Received Message on MrpNode, Rescheduling:" << EV_FIELD(msg) << EV_ENDL;
-        processingDelay = par("processingDelay").doubleValue();
+        simtime_t processingDelay = processingDelayPar->doubleValue();
         scheduleAfter(processingDelay, msg);
     } else {
         EV_INFO << "Received Self-Message:" << EV_FIELD(msg) << EV_ENDL;
@@ -771,7 +775,7 @@ void Mrp::clearLocalFDB() {
     EV_DETAIL << "clearing FDB" << EV_ENDL;
     if (fdbClearDelay->isScheduled())
         cancelEvent(fdbClearDelay);
-    processingDelay = par("processingDelay").doubleValue();
+    simtime_t processingDelay = processingDelayPar->doubleValue();
     scheduleAfter(processingDelay, fdbClearDelay);
     emit(clearFDBSignal, processingDelay.dbl());
 }
