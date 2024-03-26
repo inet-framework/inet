@@ -161,25 +161,25 @@ void MrpInterconnection::setTimingProfile(int maxRecoveryTime) {
     case 500:
         inLinkChangeInterval_ms = 20;
         inTopologyChangeInterval_ms = 20;
-        inLinkStatusPollInterval_ms = 20;
+        inLinkStatusPollInterval = SimTime(20, SIMTIME_MS);
         inTestDefaultInterval = SimTime(50, SIMTIME_MS);
         break;
     case 200:
         inLinkChangeInterval_ms = 20;
         inTopologyChangeInterval_ms = 10;
-        inLinkStatusPollInterval_ms = 20;
+        inLinkStatusPollInterval = SimTime(20, SIMTIME_MS);
         inTestDefaultInterval = SimTime(20, SIMTIME_MS);
         break;
     case 30:
         inLinkChangeInterval_ms = 3;
         inTopologyChangeInterval_ms = 1;
-        inLinkStatusPollInterval_ms = 3;
+        inLinkStatusPollInterval = SimTime(3, SIMTIME_MS);
         inTestDefaultInterval = SimTime(3, SIMTIME_MS);
         break;
     case 10:
         inLinkChangeInterval_ms = 3;
         inTopologyChangeInterval_ms = 1;
-        inLinkStatusPollInterval_ms = 3;
+        inLinkStatusPollInterval = SimTime(3, SIMTIME_MS);
         inTestDefaultInterval = SimTime(3, SIMTIME_MS);
         break;
     default:
@@ -292,7 +292,7 @@ void MrpInterconnection::handleInTestTimer() {
 void MrpInterconnection::handleInLinkStatusPollTimer() {
     if (inLinkStatusPollCount > 0) {
         inLinkStatusPollCount--;
-        scheduleAt(simTime() + SimTime(inLinkStatusPollInterval_ms, SIMTIME_MS), inLinkStatusPollTimer);
+        scheduleAt(simTime() + inLinkStatusPollInterval, inLinkStatusPollTimer);
     } else if (inLinkStatusPollCount == 0) {
         inLinkStatusPollCount = inLinkStatusPollMaxCount - 1;
     }
@@ -367,7 +367,7 @@ void MrpInterconnection::mauTypeChangeInd(int ringPort, uint16_t linkState) {
                 if (inRole == INTERCONNECTION_MANAGER) {
                     setPortState(ringPort, MrpInterfaceData::BLOCKED);
                     if (linkCheckEnabled) {
-                        interconnLinkStatusPollReq(inLinkStatusPollInterval_ms);
+                        interconnLinkStatusPollReq(inLinkStatusPollInterval);
                     }
                     if (ringCheckEnabled) {
                         inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
@@ -394,7 +394,7 @@ void MrpInterconnection::mauTypeChangeInd(int ringPort, uint16_t linkState) {
             if (linkState == NetworkInterface::DOWN) {
                 setPortState(ringPort, MrpInterfaceData::BLOCKED);
                 if (linkCheckEnabled) {
-                    interconnLinkStatusPollReq(inLinkStatusPollInterval_ms);
+                    interconnLinkStatusPollReq(inLinkStatusPollInterval);
                 }
                 if (ringCheckEnabled) {
                     interconnTopologyChangeReq(inTopologyChangeInterval_ms);
@@ -932,9 +932,9 @@ void MrpInterconnection::interconnLinkChangeReq(uint16_t linkState, double time_
     emit(inLinkChangeSignal, simTime().inUnit(SIMTIME_US));
 }
 
-void MrpInterconnection::interconnLinkStatusPollReq(double time_ms) {
-    if (!inLinkStatusPollTimer->isScheduled() && time_ms > 0) {
-        scheduleAt(simTime() + SimTime(time_ms, SIMTIME_MS), inLinkStatusPollTimer);
+void MrpInterconnection::interconnLinkStatusPollReq(simtime_t time) {
+    if (!inLinkStatusPollTimer->isScheduled() && time > 0) {
+        scheduleAt(simTime() + time, inLinkStatusPollTimer);
     } else
         EV_DETAIL << "inLinkStatusPoll already scheduled" << EV_ENDL;
     setupInterconnLinkStatusPollReq();
