@@ -561,7 +561,8 @@ void Mrp::handleMrpPDU(Packet* packet) {
         EV_DETAIL << "Received LinkChange-Frame" << EV_ENDL;
         auto linkTlv = dynamicPtrCast<const MrpLinkChange>(firstTlv);
         if (ringID) {
-            linkChangeInd(linkTlv->getPortRole(), linkTlv->getBlocked());
+            uint16_t linkState = linkTlv->getHeaderType() == LINKDOWN ? NetworkInterface::DOWN : NetworkInterface::UP;
+            linkChangeInd(linkTlv->getPortRole(), linkState);
             emit(receivedChangeSignal, linkTlv->getInterval());
         } else {
             EV_DETAIL << "Received packet from other Mrp-Domain"
@@ -648,7 +649,8 @@ void Mrp::handleMrpPDU(Packet* packet) {
     case INLINKUP: {
         EV_DETAIL << "Received inLinkChange-Frame" << EV_ENDL;
         auto inLinkTlv = dynamicPtrCast<const MrpInLinkChange>(firstTlv);
-        interconnLinkChangeInd(inLinkTlv->getInID(), inLinkTlv->getLinkInfo(), ringPort, packet->dup());
+        uint16_t linkState = inLinkTlv->getHeaderType() == INLINKDOWN ? NetworkInterface::DOWN : NetworkInterface::UP;
+        interconnLinkChangeInd(inLinkTlv->getInID(), linkState, ringPort, packet->dup());
         break;
     }
     case INLINKSTATUSPOLL: {
@@ -1138,7 +1140,7 @@ void Mrp::setupLinkChangeReq(int ringPort, uint16_t linkState, simtime_t time) {
     linkChangeTlv->setSa(localBridgeAddress);
     linkChangeTlv->setPortRole(getPortRole(ringPort));
     linkChangeTlv->setInterval(time.inUnit(SIMTIME_MS));
-    linkChangeTlv->setBlocked(linkState);
+    linkChangeTlv->setBlocked(1);
 
     commonTlv->setSequenceID(sequenceID);
     sequenceID++;
