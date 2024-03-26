@@ -14,7 +14,7 @@
 namespace inet {
 
 /**
- * Base class for MIC and MIM.
+ * Adds interconnection support to Mrp, i.e. roles MIC and MIM.
  */
 class INET_API MrpInterconnection: public Mrp {
 protected:
@@ -55,7 +55,6 @@ protected:
     opp_component_ptr<NetworkInterface> interconnectionInterface = nullptr;
     int interconnectionPort;
 
-    //TODO simtime_t
     simtime_t inLinkChangeInterval;
     simtime_t inTopologyChangeInterval;
     simtime_t inLinkStatusPollInterval;

@@ -96,12 +96,12 @@ class MrpTopologyChange extends MrpTlvHeader
 }
 
 //
-// MRP_LinkChange
+// MRP_LinkChange: MRP_LinkUp or MRP_LinkDown (depends on headerType)
 //
 class MrpLinkChange extends MrpTlvHeader
 {
     chunkLength = B(16);
-    headerType = LINKDOWN;
+    headerType = LINKDOWN; // LINKUP or LINKDOWN
     headerLength = 14;
     MacAddress sa;  
     uint16_t portRole;
@@ -126,12 +126,12 @@ class MrpInTest extends MrpTlvHeader
 }
 
 //
-// MRP_InLinkChange
+// MRP_InLinkChange: MRP_InLinkDown or MRP_InLinkUp
 //
 class MrpInLinkChange extends MrpTlvHeader
 {
     chunkLength = B(16);
-    headerType = INLINKDOWN;
+    headerType = INLINKDOWN; // INLINKDOWN or INLINKUP
     headerLength = 14;
     MacAddress sa;  
     uint16_t portRole;
