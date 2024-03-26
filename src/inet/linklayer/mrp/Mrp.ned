@@ -47,13 +47,13 @@ simple Mrp like IMediaRedundancy
         int timingProfile @unit(ms) = default(500ms);
         
         // Each MRP node can either be disabled (value 0, no mrp function), MediaRedundancyClient (value 1, MRC)
-        // MediaRedundancyManager (value 1, MRM) or MediaRedundancyAutoManager (value 2, MRA)
+        // MediaRedundancyManager (value 2, MRM) or MediaRedundancyAutoManager (value 4, MRA).
+        // (Note: The model does not support backward-compatible MRA (value 3), see Annex A, as it would be pointless.) 
         // Each Network may have only 1 MRM, all other nodes have to be in MRC role
         // MRAs are able to vote which node shall take MRM role by priority and MAC address value, all other nodes 
         // dynamicly switch to MRC role. Do not mix MRM and MRA! although it is possible, either choose a specific node as explicit MRM
         // or set one or more nodes to MRA role
-        //"DISABLED" == 0, "CLIENT" == 1, "MANAGER" == 2, "MANAGER_AUTO_COMP" == 3, "MANAGER_AUTO" == 4
-        int mrpRole = default(0);
+        string mrpRole @enum("disabled", "MRC", "MRM", "MRA") = default("disabled");
         
         //Each MRP node has exactly 2 ring interfaces, which have to be set by the network administrator
         //PortIndexNumber of ringport1
