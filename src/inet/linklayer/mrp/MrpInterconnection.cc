@@ -321,7 +321,7 @@ void MrpInterconnection::handleInLinkUpTimer() {
             inState = IP_IDLE;
         } else {
             scheduleAfter(inLinkChangeInterval, inLinkUpTimer);
-            interconnLinkChangeReq(NetworkInterface::UP, inLinkChangeCount * inLinkChangeInterval);
+            interconnLinkChangeReq(LinkState::UP, inLinkChangeCount * inLinkChangeInterval);
         }
         break;
     case IP_IDLE:
@@ -344,7 +344,7 @@ void MrpInterconnection::handleInLinkDownTimer() {
                 inLinkChangeCount = inLinkMaxChange;
             } else {
                 scheduleAfter(inLinkChangeInterval, inLinkDownTimer);
-                interconnLinkChangeReq(NetworkInterface::DOWN, inLinkChangeCount * inLinkChangeInterval);
+                interconnLinkChangeReq(LinkState::DOWN, inLinkChangeCount * inLinkChangeInterval);
             }
         }
         break;
@@ -359,11 +359,11 @@ void MrpInterconnection::handleInLinkDownTimer() {
     }
 }
 
-void MrpInterconnection::mauTypeChangeInd(int ringPort, uint16_t linkState) {
+void MrpInterconnection::mauTypeChangeInd(int ringPort, LinkState linkState) {
     if (ringPort == interconnectionPort) {
         switch (inState) {
         case AC_STAT1:
-            if (linkState == NetworkInterface::UP) {
+            if (linkState == LinkState::UP) {
                 if (inRole == INTERCONNECTION_MANAGER) {
                     setPortState(ringPort, MrpInterfaceData::BLOCKED);
                     if (linkCheckEnabled) {
@@ -383,7 +383,7 @@ void MrpInterconnection::mauTypeChangeInd(int ringPort, uint16_t linkState) {
                     inLinkChangeCount = inLinkMaxChange;
                     cancelEvent(inLinkDownTimer);
                     scheduleAfter(inLinkChangeInterval, inLinkUpTimer);
-                    interconnLinkChangeReq(NetworkInterface::UP, inLinkChangeCount * inLinkChangeInterval);
+                    interconnLinkChangeReq(LinkState::UP, inLinkChangeCount * inLinkChangeInterval);
                     inState = PT;
                     EV_DETAIL << "Switching InState from AC_STAT1 to PT"
                                      << EV_FIELD(inState) << EV_ENDL;
@@ -391,7 +391,7 @@ void MrpInterconnection::mauTypeChangeInd(int ringPort, uint16_t linkState) {
             }
             break;
         case CHK_IO:
-            if (linkState == NetworkInterface::DOWN) {
+            if (linkState == LinkState::DOWN) {
                 setPortState(ringPort, MrpInterfaceData::BLOCKED);
                 if (linkCheckEnabled) {
                     interconnLinkStatusPollReq(inLinkStatusPollInterval);
@@ -406,7 +406,7 @@ void MrpInterconnection::mauTypeChangeInd(int ringPort, uint16_t linkState) {
             }
             break;
         case CHK_IC:
-            if (linkState == NetworkInterface::DOWN) {
+            if (linkState == LinkState::DOWN) {
                 setPortState(ringPort, MrpInterfaceData::BLOCKED);
                 if (ringCheckEnabled) {
                     interconnTopologyChangeReq(inTopologyChangeInterval);
@@ -418,23 +418,23 @@ void MrpInterconnection::mauTypeChangeInd(int ringPort, uint16_t linkState) {
             }
             break;
         case PT:
-            if (linkState == NetworkInterface::DOWN) {
+            if (linkState == LinkState::DOWN) {
                 inLinkChangeCount = inLinkMaxChange;
                 cancelEvent(inLinkUpTimer);
                 setPortState(ringPort, MrpInterfaceData::BLOCKED);
                 scheduleAfter(inLinkChangeInterval, inLinkDownTimer);
-                interconnLinkChangeReq(NetworkInterface::DOWN, inLinkChangeCount * inLinkChangeInterval);
+                interconnLinkChangeReq(LinkState::DOWN, inLinkChangeCount * inLinkChangeInterval);
                 inState = AC_STAT1;
                 EV_DETAIL << "Switching InState from PT to AC_STAT1"
                                  << EV_FIELD(inState) << EV_ENDL;
             }
             break;
         case IP_IDLE:
-            if (linkState == NetworkInterface::DOWN) {
+            if (linkState == LinkState::DOWN) {
                 inLinkChangeCount = inLinkMaxChange;
                 setPortState(ringPort, MrpInterfaceData::BLOCKED);
                 scheduleAfter(inLinkChangeInterval, inLinkDownTimer);
-                interconnLinkChangeReq(NetworkInterface::DOWN, inLinkChangeCount * inLinkChangeInterval);
+                interconnLinkChangeReq(LinkState::DOWN, inLinkChangeCount * inLinkChangeInterval);
                 inState = AC_STAT1;
                 EV_DETAIL << "Switching InState from IP_IDLE to AC_STAT1"
                                  << EV_FIELD(inState) << EV_ENDL;
@@ -520,14 +520,14 @@ void MrpInterconnection::interconnTopologyChangeInd(MacAddress sourceAddress, si
     }
 }
 
-void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, uint16_t linkState, int ringPort, Packet *packet) {
+void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, LinkState linkState, int ringPort, Packet *packet) {
     if (InID == interConnectionID) {
         auto firstTLV = packet->peekDataAt<MrpInLinkChange>(B(2));
         emit(receivedInChangeSignal, firstTLV->getInterval());
         switch (inState) {
         case CHK_IO:
             if (linkCheckEnabled) {
-                if (linkState == NetworkInterface::UP) {
+                if (linkState == LinkState::UP) {
                     setPortState(interconnectionPort, MrpInterfaceData::BLOCKED);
                     cancelEvent(inLinkStatusPollTimer);
                     interconnTopologyChangeReq(inTopologyChangeInterval);
@@ -537,19 +537,19 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, uint16_t linkStat
                                      << EV_FIELD(inState) << EV_ENDL;
                     currentInterconnectionState = CLOSED;
                     emit(interconnectionStateChangedSignal, simTime().inUnit(SIMTIME_US));
-                } else if (linkState == NetworkInterface::DOWN) {
+                } else if (linkState == LinkState::DOWN) {
                     setPortState(interconnectionPort, MrpInterfaceData::FORWARDING);
                 }
             }
             if (ringCheckEnabled) {
-                if (linkState == NetworkInterface::UP) {
+                if (linkState == LinkState::UP) {
                     interconnTestReq(inTestDefaultInterval);
                 }
             }
             delete packet;
             break;
         case CHK_IC:
-            if (linkState == NetworkInterface::DOWN) {
+            if (linkState == LinkState::DOWN) {
                 setPortState(interconnectionPort, MrpInterfaceData::FORWARDING);
                 interconnTopologyChangeReq(inTopologyChangeInterval);
                 if (linkCheckEnabled) {
@@ -562,7 +562,7 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, uint16_t linkStat
                     emit(interconnectionStateChangedSignal, simTime().inUnit(SIMTIME_US));
                 }
             }
-            if (ringCheckEnabled && linkState == NetworkInterface::UP) {
+            if (ringCheckEnabled && linkState == LinkState::UP) {
                 inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
                 interconnTopologyChangeReq(inTopologyChangeInterval);
             }
@@ -571,18 +571,18 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, uint16_t linkStat
         case PT:
         case IP_IDLE:
             if (ringPort == interconnectionPort && linkCheckEnabled) {
-                if (linkState == NetworkInterface::UP) {
+                if (linkState == LinkState::UP) {
                     mrpForwardReq(INLINKUP, ringPort, MC_INCONTROL, packet);
-                } else if (linkState == NetworkInterface::DOWN) {
+                } else if (linkState == LinkState::DOWN) {
                     mrpForwardReq(INLINKDOWN, ringPort, MC_INCONTROL, packet);
                 } else
                     delete packet;
             } else if (ringPort != interconnectionPort) {
                 if (ringCheckEnabled) {
                     interconnForwardReq(interconnectionPort, packet);
-                } else if (linkState == NetworkInterface::UP) {
+                } else if (linkState == LinkState::UP) {
                     inTransferReq(INLINKUP, interconnectionPort, MC_INTRANSFER, packet);
-                } else if (linkState == NetworkInterface::DOWN) {
+                } else if (linkState == LinkState::DOWN) {
                     inTransferReq(INLINKDOWN, interconnectionPort, MC_INTRANSFER, packet);
                 } else
                     delete packet;
@@ -618,13 +618,13 @@ void MrpInterconnection::interconnLinkStatusPollInd(uint16_t InID, int RingPort,
             switch (inState) {
             case AC_STAT1:
                 if (inRole == INTERCONNECTION_CLIENT) {
-                    interconnLinkChangeReq(NetworkInterface::DOWN, 0);
+                    interconnLinkChangeReq(LinkState::DOWN, 0);
                 }
                 delete packet;
                 break;
             case PT:
             case IP_IDLE:
-                interconnLinkChangeReq(NetworkInterface::UP, 0);
+                interconnLinkChangeReq(LinkState::UP, 0);
                 if (RingPort != interconnectionPort) {
                     if (linkCheckEnabled)
                         inTransferReq(INLINKSTATUSPOLL, interconnectionPort, MC_INTRANSFER, packet);
@@ -857,7 +857,7 @@ void MrpInterconnection::setupInterconnTopologyChangeReq(simtime_t time) {
     emit(inTopologyChangeSignal, simTime().inUnit(SIMTIME_US));
 }
 
-void MrpInterconnection::interconnLinkChangeReq(uint16_t linkState, simtime_t time) {
+void MrpInterconnection::interconnLinkChangeReq(LinkState linkState, simtime_t time) {
     //Create MRP-PDU according MRP_InLinkUp or MRP_InLinkDown
     auto version = makeShared<MrpVersion>();
     auto inLinkChangeTLV1 = makeShared<MrpInLinkChange>();
@@ -867,9 +867,9 @@ void MrpInterconnection::interconnLinkChangeReq(uint16_t linkState, simtime_t ti
     auto endTLV = makeShared<MrpEnd>();
 
     TlvHeaderType type = INLINKDOWN;
-    if (linkState == NetworkInterface::UP) {
+    if (linkState == LinkState::UP) {
         type = INLINKUP;
-    } else if (linkState == NetworkInterface::DOWN) {
+    } else if (linkState == LinkState::DOWN) {
         type = INLINKDOWN;
     }
 
