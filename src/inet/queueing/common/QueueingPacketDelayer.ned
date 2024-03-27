@@ -16,8 +16,7 @@ module QueueingPacketDelayer like IPacketDelayer
     parameters:
         string clockModule = default(""); // relative path of a module that implements IClock; optional
         volatile double delay @unit(s);
-        *.clockModule = default(absPath("^" + clockModule));
-        @class(PacketDelayer);
+        *.clockModule = default(absPath(this.clockModule));
         @display("i=block/delay");
     gates:
         input in @labels(push);
