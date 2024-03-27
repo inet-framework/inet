@@ -70,11 +70,14 @@ void ScenarioManager::initialize()
         simtime_t t = SimTime::parse(tAttr);
         auto msg = new ScenarioTimer("scenario-event");
         msg->setXmlNode(node);
-        scheduleAt(t, msg);
+        msg->setArrivalTime(t);
+        localFes.insert(msg);
 
         // count it
         numChanges++;
     }
+
+    scheduleNext();
 }
 
 void ScenarioManager::handleMessage(cMessage *msg)
@@ -85,6 +88,15 @@ void ScenarioManager::handleMessage(cMessage *msg)
     processCommand(node);
 
     numDone++;
+
+    scheduleNext();
+}
+
+void ScenarioManager::scheduleNext()
+{
+    cEvent *event = localFes.removeFirst();
+    if (event)
+        scheduleAt(event->getArrivalTime(), dynamic_cast<cMessage*>(event));
 }
 
 void ScenarioManager::processCommand(const cXMLElement *node)

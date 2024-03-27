@@ -44,6 +44,7 @@ class INET_API ScenarioManager : public cSimpleModule, public LifecycleControlle
     // total number of changes, and number of changes already done
     int numChanges = 0;
     int numDone = 0;
+    cEventHeap localFes;
 
   protected:
     // utilities
@@ -71,8 +72,10 @@ class INET_API ScenarioManager : public cSimpleModule, public LifecycleControlle
     virtual void processModuleSpecificCommand(const cXMLElement *node);
     virtual void processLifecycleCommand(const cXMLElement *node);
 
+    virtual void scheduleNext();
+
   public:
-    ScenarioManager() {}
+    ScenarioManager() : localFes("localFes", 4) {}
 
   protected:
     virtual void initialize() override;
