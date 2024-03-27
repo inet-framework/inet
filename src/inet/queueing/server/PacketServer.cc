@@ -90,6 +90,16 @@ void PacketServer::endProcessingPacket()
     packet = nullptr;
 }
 
+cGate *PacketServer::getRegistrationForwardingGate(cGate *gate)
+{
+    if (gate == outputGate)
+        return inputGate;
+    else if (gate == inputGate)
+        return outputGate;
+    else
+        throw cRuntimeError("Unknown gate");
+}
+
 void PacketServer::handleCanPushPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
