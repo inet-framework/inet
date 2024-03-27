@@ -28,7 +28,7 @@ module QueueingPacketDelayer like IPacketDelayer
         }
         server: <default("PacketServer")> like IPacketServer {
             parameters:
-                processingTime = default(delay);
+                processingTime = default(parent.delay);
                 @display("p=350,100");
         }
     connections:
