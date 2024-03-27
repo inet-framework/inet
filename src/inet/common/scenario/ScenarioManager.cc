@@ -54,11 +54,11 @@ static const char *OP_RESUME = "resume";
 
 void ScenarioManager::initialize()
 {
-    cXMLElement *script = par("script");
-
-    numChanges = numDone = 0;
+    WATCH(nextEvent);
     WATCH(numChanges);
     WATCH(numDone);
+
+    cXMLElement *script = par("script");
 
     for (cXMLElement *node = script->getFirstChild(); node; node = node->getNextSibling()) {
         // check attr t is present
@@ -94,9 +94,9 @@ void ScenarioManager::handleMessage(cMessage *msg)
 
 void ScenarioManager::scheduleNext()
 {
-    cEvent *event = localFes.removeFirst();
-    if (event)
-        scheduleAt(event->getArrivalTime(), dynamic_cast<cMessage*>(event));
+    nextEvent = dynamic_cast<cMessage*>(localFes.removeFirst());
+    if (nextEvent)
+        scheduleAt(nextEvent->getArrivalTime(), nextEvent);
 }
 
 void ScenarioManager::processCommand(const cXMLElement *node)

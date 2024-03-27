@@ -45,6 +45,7 @@ class INET_API ScenarioManager : public cSimpleModule, public LifecycleControlle
     int numChanges = 0;
     int numDone = 0;
     cEventHeap localFes;
+    cMessage *nextEvent; // already scheduled
 
   protected:
     // utilities
