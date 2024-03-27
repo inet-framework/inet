@@ -3,13 +3,12 @@
 
 package inet.examples.mrp;
 
-import inet.node.mrp.MrpSwitch;
-import inet.node.ethernet.Eth1G;
-import inet.node.ethernet.Eth100M;
-import inet.node.ethernet.Eth10M;
-import inet.node.ethernet.EthernetHost;
 import inet.common.scenario.ScenarioManager;
-import inet.linklayer.configurator.common.L2NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetHost;
+import inet.node.mrp.MrpSwitch;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+
 
 network Mrp4
 {
@@ -29,6 +28,9 @@ network Mrp4
         }
         scenarioManager: ScenarioManager {
             @display("p=81,51;is=s");
+        }
+        visualizer: IntegratedCanvasVisualizer {
+            @display("p=80,100;is=s");
         }
     connections:
         node0.ethg[0] <--> Eth100M <--> node1.ethg[1];
@@ -132,6 +134,9 @@ network Mrp50
     submodules:
         scenarioManager: ScenarioManager {
             @display("p=95,48;is=s");
+        }
+        visualizer: IntegratedCanvasVisualizer {
+            @display("p=95,100;is=s");
         }
         nodeO[25]: MrpSwitch {
             @display("p=,,ri,360,360");
