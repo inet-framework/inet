@@ -3,8 +3,7 @@ package inet.showcases.routing.manet;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.ManetRouter;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.common.IntegratedMultiVisualizer;
-
+import inet.visualizer.canvas.integrated.IntegratedMultiCanvasVisualizer;
 
 network ManetprotocolsShowcaseA
 {
@@ -26,7 +25,7 @@ network ManetprotocolsShowcaseA
         radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=100,100");
         }
-        visualizer: IntegratedMultiVisualizer {
+        visualizer: IntegratedMultiCanvasVisualizer {
             @display("p=100,200");
         }
         configurator: Ipv4NetworkConfigurator {
@@ -116,7 +115,7 @@ network ManetprotocolsShowcaseB
         configurator: Ipv4NetworkConfigurator {
             @display("p=38.461544,66.863914");
         }
-        visualizer: IntegratedMultiVisualizer {
+        visualizer: IntegratedMultiCanvasVisualizer {
             @display("p=38.461544,106.50889");
         }
 }

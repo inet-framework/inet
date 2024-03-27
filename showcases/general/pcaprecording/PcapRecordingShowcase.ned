@@ -6,8 +6,7 @@ import inet.node.inet.AdhocHost;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.common.IntegratedMultiVisualizer;
-
+import inet.visualizer.canvas.integrated.IntegratedMultiCanvasVisualizer;
 
 network PcapRecordingShowcase
 {
@@ -16,7 +15,7 @@ network PcapRecordingShowcase
         configurator: Ipv4NetworkConfigurator {
             @display("p=87,57");
         }
-        visualizer: IntegratedMultiVisualizer {
+        visualizer: IntegratedMultiCanvasVisualizer {
             @display("p=87,130");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
