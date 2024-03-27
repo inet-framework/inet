@@ -33,8 +33,10 @@ simple InfoVisualizerBase extends VisualizerBase
         string format @mutable = default("%t"); // determines what is displayed on network nodes
 
         string font = default("<default>"); // info text font, automatic by default
-        string textColor = default("black"); // info text font color, black by default
-        string backgroundColor = default("white"); // info text background color, white by default
+        string textColor = default("black"); // info text font color
+        string textAlignment @enum("left", "right", "center") = default("left"); // alignment of multi-line text
+        string backgroundColor = default("white"); // text box fill color, specify empty string for no fill
+        string lineColor = default("black"); // text box outline color, specify empty string for no line
         double opacity = default(1.0); // opacity of the visualization
         string placementHint = default("top"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double placementPriority = default(0); // determines the order of annotation positioning

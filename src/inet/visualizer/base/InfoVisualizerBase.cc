@@ -50,7 +50,11 @@ void InfoVisualizerBase::initialize(int stage)
         format.parseFormat(par("format"));
         font = cFigure::parseFont(par("font"));
         textColor = cFigure::Color(par("textColor"));
-        backgroundColor = cFigure::Color(par("backgroundColor"));
+        textAlignment = cFigure::parseAlignment(par("textAlignment"));
+        backgroundColor = cFigure::Color(opp_emptytodefault(par("backgroundColor"), "white"));
+        lineColor = cFigure::Color(opp_emptytodefault(par("lineColor"), "black"));
+        filled = !opp_isempty(par("backgroundColor"));
+        outlined = !opp_isempty(par("lineColor"));
         opacity = par("opacity");
         placementHint = parsePlacement(par("placementHint"));
         placementPriority = par("placementPriority");
