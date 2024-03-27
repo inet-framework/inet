@@ -6,6 +6,7 @@
 
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/StringFormat.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/common/MacForwardingTable.h"
 #include "inet/linklayer/mrp/MrpMacForwardingTable.h"
@@ -21,7 +22,7 @@ namespace inet {
  * Base class for MRC and MRM.
  */
 
-class INET_API Mrp: public OperationalBase, public cListener {
+class INET_API Mrp: public OperationalBase, public cListener, public StringFormat::IDirectiveResolver {
 protected:
     typedef std::map<uint16_t, int64_t> FrameSentDatabase;
 
@@ -233,6 +234,11 @@ protected:
     virtual void clearFDB(double time);
     virtual void colorLink(NetworkInterface* ie, bool forwarding) const;
     virtual void refreshDisplay() const override;
+    virtual void updateDisplayString() const;
+    virtual std::string resolveDirective(char directive) const override;
+    static const char *getMrpRoleName(MrpRole role);
+    static const char *getNodeStateName(NodeState state);
+    static const char *getRingStateName(RingState state);
 
 public:
     Mrp();

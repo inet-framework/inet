@@ -1926,6 +1926,8 @@ void Mrp::colorLink(NetworkInterface *ie, bool forwarding) const {
 }
 
 void Mrp::refreshDisplay() const {
+    updateDisplayString();
+
     if (visualize) {
         for (unsigned int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
             NetworkInterface *ie = interfaceTable->getInterface(i);
@@ -1949,6 +1951,63 @@ void Mrp::refreshDisplay() const {
                 }
             }
         }
+    }
+}
+
+void Mrp::updateDisplayString() const
+{
+    if (getEnvir()->isGUI()) {
+        auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
+        getDisplayString().setTagArg("t", 0, text.c_str());
+    }
+}
+
+std::string Mrp::resolveDirective(char directive) const
+{
+    switch (directive) {
+        case 'r':
+            return getMrpRoleName(expectedRole);
+        case 'n':
+            return getNodeStateName(currentState);
+        case 'g':
+            return getRingStateName(currentRingState);
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+}
+
+const char *Mrp::getMrpRoleName(MrpRole role) {
+    switch (role) {
+        case DISABLED: return "DISABLED";
+        case CLIENT: return "CLIENT";
+        case MANAGER: return "MANAGER";
+        case MANAGER_AUTO_COMP: return "MANAGER_AUTO_COMP";
+        case MANAGER_AUTO: return "MANAGER_AUTO";
+        default: return "???";
+    }
+}
+
+const char *Mrp::getNodeStateName(NodeState state) {
+    switch (state) {
+        case POWER_ON: return "POWER_ON";
+        case AC_STAT1: return "AC_STAT1";
+        case PRM_UP: return "PRM_UP";
+        case CHK_RO: return "CHK_RO";
+        case CHK_RC: return "CHK_RC";
+        case DE_IDLE: return "DE_IDLE";
+        case PT: return "PT";
+        case DE: return "DE";
+        case PT_IDLE: return "PT_IDLE";
+        default: return "???";
+    }
+}
+
+const char *Mrp::getRingStateName(RingState state) {
+    switch (state) {
+        case OPEN: return "OPEN";
+        case CLOSED: return "CLOSED";
+        case UNDEFINED: return "UNDEFINED";
+        default: return "???";
     }
 }
 
