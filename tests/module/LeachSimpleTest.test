@@ -1,0 +1,107 @@
+%description:
+This example tests a simple run of the LEACH routing protocol 
+on IEEE 802.15.4 standard with 100 nodes
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.contract.INetworkNode;
+import inet.node.inet.SensorNode;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium;
+import inet.visualizer.contract.IIntegratedVisualizer;
+import inet.environment.common.PhysicalEnvironment;
+
+network SimpleNet
+{
+    parameters:
+        int numNodes;
+        @display("bgb=200.8119,200.0099;bgg=100,1,grey95");
+        @figure[title](type=label; pos=0,-1; anchor=sw; color=darkblue);
+
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            @display("p=512.39996,181.17");
+        }
+        radioMedium: <default("UnitDiskRadioMedium")> like IRadioMedium {
+            @display("p=512.39996,289.13998");
+        }
+        physicalEnvironment: PhysicalEnvironment {
+            @display("p=512.39996,441.02997");
+        }
+        host[numNodes]: <default("WirelessHost")> like INetworkNode {
+            @display("i=misc/sensor2");
+        }
+        baseStation: <default("WirelessHost")> like INetworkNode {
+            @display("p=50,50;i=misc/sensorgateway");
+        }
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = Leach
+
+num-rngs = 2
+rng-class = omnetpp::cMersenneTwister
+seed-0-mt= 4900 # used for node layout generation
+seed-1-mt = 7 # used for threshold comparison
+
+**.arp.typename = "GlobalArp"
+
+*.radioMedium.typename = "Ieee802154NarrowbandScalarRadioMedium"
+*.radioMedium.backgroundNoise.power = -100dBm
+*.radioMedium.mediumLimitCache.centerFrequency = 2GHz
+
+*.host*.hasStatus = true
+*.visualizer.energyStorageVisualizer.displayEnergyStorages = true
+
+*.configurator.config = xmldoc ("address.xml")
+
+*.baseStation.typename = "LeachBS"
+*.host*.typename = "LeachNode"
+*.host*.LEACHnode.clusterHeadPercentage = 0.05
+*.host*.LEACHnode.numNodes = 100 # set number of nodes to be injected into LEACH module
+
+*.numNodes = 100 #100
+*.host*.mobility.typename = "StationaryMobility"
+*.host*.mobility.rng-0 = 0	# random number generator mapping
+
+*.host[*].mobility.initFromDisplayString = false
+
+**.constraintAreaMinX = 1m			
+**.constraintAreaMaxX = 100m	
+**.constraintAreaMinY = 1m				
+**.constraintAreaMaxY = 100m			
+
+*.host*.wlan[0].typename = "Ieee802154NarrowbandInterface"
+*.host*.wlan[0].radio.typename = "ApskScalarRadio"
+*.host*.wlan[0].radio.centerFrequency = 2.5GHz # based on TI CC2520	 	
+*.host*.wlan[0].radio.bandwidth = 2MHz
+*.host*.wlan[0].radio.transmitter.power = 60.5mW # determines communication range - based on CC2520
+*.host*.wlan[0].radio.transmitter.preambleDuration = 192us # based on TI CC2520		
+*.host*.wlan[0].radio.transmitter.headerLength = 6B # based on TI CC2520		
+*.host*.wlan[0].radio.receiver.sensitivity = -98dBm # based on TI CC2520
+*.host*.wlan[0].radio.receiver.energyDetection = -85dBm
+*.host*.wlan[0].radio.receiver.snirThreshold = 4dB 
+*.host*.wlan[0].radio.displayCommunicationRange = true
+
+
+*.baseStation.wlan[0].typename = "Ieee802154NarrowbandInterface"
+*.baseStation.wlan[0].radio.typename = "ApskScalarRadio"
+*.baseStation.wlan[0].radio.centerFrequency = 2.5GHz			
+*.baseStation.wlan[0].radio.bandwidth = 2MHz
+*.baseStation.wlan[0].radio.transmitter.power = 60.5mW				
+*.baseStation.wlan[0].radio.transmitter.preambleDuration = 192us	
+*.baseStation.wlan[0].radio.transmitter.headerLength = 6B
+*.baseStation.wlan[0].radio.receiver.sensitivity = -98dBm
+*.baseStation.wlan[0].radio.receiver.energyDetection = -85dBm
+*.baseStation.wlan[0].radio.receiver.snirThreshold = 4dB
+*.baseStation.wlan[0].radio.displayCommunicationRange = true
+
+*.host*.**.bitrate = 250kbps # based on TI CC2520	
+*.baseStation.**.bitrate = 250kbps
+
+%#--------------------------------------------------------------------------------------------------------------
+%file-exists: results/General-#0.sca
+
