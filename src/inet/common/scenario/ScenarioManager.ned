@@ -116,7 +116,7 @@ simple ScenarioManager
 
         // Format for the text displayed above the module icon.
         // Directives: %c: numChanges, %d: numDone, %l: numLeft, %t: nextEventTime, %n: nextEventName
-        string displayStringTextFormat = default("total %c changes, %l left");
+        string displayStringTextFormat = default("total %c changes, %l left\nnext at: %t");
 
         @display("i=block/control");
         @labels(node,mpls-node);
