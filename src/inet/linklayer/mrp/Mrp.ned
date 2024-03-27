@@ -117,6 +117,8 @@ simple Mrp like IMediaRedundancy
         // enables the client to set one of his ring ports to BLOCKED, if advised by manager via topology change frame
         bool blockedStateSupported = default(true);
         
+        // Format for the text displayed above the module icon. Directives: %r: MRP role, %n: node state, %g: ring state
+        string displayStringTextFormat = default("role: %r\nnode: %n\nring: %g");
         @display("i=block/network2");
         @signal[test](type="long");
         @signal[topologyChange](type="unsigned long");
