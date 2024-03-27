@@ -14,6 +14,12 @@ network Mrp4
 {
     @display("bgb=500,500");
     submodules:
+        scenarioManager: ScenarioManager {
+            @display("p=80,60;is=s");
+        }
+        visualizer: IntegratedCanvasVisualizer {
+            @display("p=80,110;is=s");
+        }
         node0: MrpSwitch {
             @display("p=250,100");
         }
@@ -25,12 +31,6 @@ network Mrp4
         }
         node3: MrpSwitch {
             @display("p=150,200");
-        }
-        scenarioManager: ScenarioManager {
-            @display("p=81,51;is=s");
-        }
-        visualizer: IntegratedCanvasVisualizer {
-            @display("p=80,100;is=s");
         }
     connections:
         node0.ethg[0] <--> Eth100M <--> node1.ethg[1];
@@ -130,7 +130,6 @@ network Mrp8 extends Mrp4
 
 network Mrp50
 {
-    @display("bgb=1154,954");
     submodules:
         scenarioManager: ScenarioManager {
             @display("p=95,48;is=s");
