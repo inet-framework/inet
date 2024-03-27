@@ -328,19 +328,19 @@ void Mrp::stop() {
 
 void Mrp::mrcInit() {
     linkChangeCount = linkMaxChange;
-    mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPort, static_cast<MacAddress>(MC_CONTROL), vlanID);
-    mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPort, static_cast<MacAddress>(MC_CONTROL), vlanID);
-    mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPort, static_cast<MacAddress>(MC_TEST), vlanID);
-    mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPort, static_cast<MacAddress>(MC_TEST), vlanID);
-    relay->registerAddress(static_cast<MacAddress>(MC_CONTROL));
+    mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPort, MacAddress(MC_CONTROL), vlanID);
+    mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPort, MacAddress(MC_CONTROL), vlanID);
+    mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPort, MacAddress(MC_TEST), vlanID);
+    mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPort, MacAddress(MC_TEST), vlanID);
+    relay->registerAddress(MacAddress(MC_CONTROL));
 
     if (interconnectionRingCheckAware || interconnectionLinkCheckAware) {
-        mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPort, static_cast<MacAddress>(MC_INCONTROL), vlanID);
-        mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPort, static_cast<MacAddress>(MC_INCONTROL), vlanID);
+        mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPort, MacAddress(MC_INCONTROL), vlanID);
+        mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPort, MacAddress(MC_INCONTROL), vlanID);
     }
     if (interconnectionRingCheckAware) {
-        mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPort, static_cast<MacAddress>(MC_INTEST), vlanID);
-        mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPort, static_cast<MacAddress>(MC_INTEST), vlanID);
+        mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPort, MacAddress(MC_INTEST), vlanID);
+        mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPort, MacAddress(MC_INTEST), vlanID);
     }
     if (expectedRole == CLIENT) {
         currentRingState = UNDEFINED;
@@ -355,22 +355,22 @@ void Mrp::mrmInit() {
     currentRingState = OPEN;
     addTest = false;
     testRetransmissionCount = 0;
-    relay->registerAddress(static_cast<MacAddress>(MC_TEST));
-    relay->registerAddress(static_cast<MacAddress>(MC_CONTROL));
+    relay->registerAddress(MacAddress(MC_TEST));
+    relay->registerAddress(MacAddress(MC_CONTROL));
     if (interconnectionRingCheckAware || interconnectionLinkCheckAware)
-        relay->registerAddress(static_cast<MacAddress>(MC_INCONTROL));
+        relay->registerAddress(MacAddress(MC_INCONTROL));
     if (interconnectionRingCheckAware)
-        relay->registerAddress(static_cast<MacAddress>(MC_INTEST));
+        relay->registerAddress(MacAddress(MC_INTEST));
     testMaxRetransmissionCount = testMonitoringCount - 1;
     testRetransmissionCount = 0;
     if (expectedRole == MANAGER)
         currentState = AC_STAT1;
     if (expectedRole == MANAGER_AUTO) {
         //case: switching from Client to manager. in managerRole no Forwarding on RingPorts may take place
-        mrpMacForwardingTable->removeMrpForwardingInterface(primaryRingPort, static_cast<MacAddress>(MC_TEST), vlanID);
-        mrpMacForwardingTable->removeMrpForwardingInterface(secondaryRingPort, static_cast<MacAddress>(MC_TEST), vlanID);
-        mrpMacForwardingTable->removeMrpForwardingInterface(primaryRingPort, static_cast<MacAddress>(MC_CONTROL), vlanID);
-        mrpMacForwardingTable->removeMrpForwardingInterface(secondaryRingPort, static_cast<MacAddress>(MC_CONTROL), vlanID);
+        mrpMacForwardingTable->removeMrpForwardingInterface(primaryRingPort, MacAddress(MC_TEST), vlanID);
+        mrpMacForwardingTable->removeMrpForwardingInterface(secondaryRingPort, MacAddress(MC_TEST), vlanID);
+        mrpMacForwardingTable->removeMrpForwardingInterface(primaryRingPort, MacAddress(MC_CONTROL), vlanID);
+        mrpMacForwardingTable->removeMrpForwardingInterface(secondaryRingPort, MacAddress(MC_CONTROL), vlanID);
     }
     mauTypeChangeInd(primaryRingPort, getPortNetworkInterface(primaryRingPort)->getState());
     mauTypeChangeInd(secondaryRingPort, getPortNetworkInterface(secondaryRingPort)->getState());
@@ -381,17 +381,17 @@ void Mrp::mraInit() {
     currentRingState = OPEN;
     addTest = false;
     testRetransmissionCount = 0;
-    relay->registerAddress(static_cast<MacAddress>(MC_TEST));
-    relay->registerAddress(static_cast<MacAddress>(MC_CONTROL));
+    relay->registerAddress(MacAddress(MC_TEST));
+    relay->registerAddress(MacAddress(MC_CONTROL));
     if (interconnectionRingCheckAware || interconnectionLinkCheckAware)
-        relay->registerAddress(static_cast<MacAddress>(MC_INCONTROL));
+        relay->registerAddress(MacAddress(MC_INCONTROL));
     if (interconnectionRingCheckAware)
-        relay->registerAddress(static_cast<MacAddress>(MC_INTEST));
+        relay->registerAddress(MacAddress(MC_INTEST));
     testMaxRetransmissionCount = testMonitoringCount - 1;
     testRetransmissionCount = 0;
     addTest = false;
     reactOnLinkChange = false;
-    hostBestMRMSourceAddress = static_cast<MacAddress>(0xFFFFFFFFFFFF);
+    hostBestMRMSourceAddress = MacAddress(0xFFFFFFFFFFFF);
     hostBestMRMPriority = static_cast<MrpPriority>(0xFFFF);
     monNReturn = 0;
     currentState = AC_STAT1;
@@ -1069,11 +1069,11 @@ void Mrp::setupTestRingReq() {
     }
     packet1->insertAtBack(endTlv);
     MacAddress sourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
-    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_TEST), sourceAddress1, priority, MRP_LT, packet1);
+    sendFrameReq(primaryRingPort, MacAddress(MC_TEST), sourceAddress1, priority, MRP_LT, packet1);
 
     packet2->insertAtBack(endTlv);
     MacAddress sourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
-    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_TEST), sourceAddress2, priority, MRP_LT, packet2);
+    sendFrameReq(secondaryRingPort, MacAddress(MC_TEST), sourceAddress2, priority, MRP_LT, packet2);
     emit(testSignal, lastTestFrameSent);
 }
 
@@ -1105,7 +1105,7 @@ void Mrp::setupTopologyChangeReq(uint32_t Interval) {
     packet1->insertAtBack(commonTlv);
     packet1->insertAtBack(endTlv);
     MacAddress sourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
-    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_CONTROL), sourceAddress1, priority, MRP_LT, packet1);
+    sendFrameReq(primaryRingPort, MacAddress(MC_CONTROL), sourceAddress1, priority, MRP_LT, packet1);
 
     auto packet2 = new Packet("mrpTopologyChange");
     packet2->insertAtBack(version);
@@ -1113,7 +1113,7 @@ void Mrp::setupTopologyChangeReq(uint32_t Interval) {
     packet2->insertAtBack(commonTlv);
     packet2->insertAtBack(endTlv);
     MacAddress sourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
-    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_CONTROL), sourceAddress2, priority, MRP_LT, packet2);
+    sendFrameReq(secondaryRingPort, MacAddress(MC_CONTROL), sourceAddress2, priority, MRP_LT, packet2);
     emit(topologyChangeSignal, Interval);
 }
 
@@ -1147,7 +1147,7 @@ void Mrp::setupLinkChangeReq(int ringPort, uint16_t linkState, double time) {
     packet1->insertAtBack(commonTlv);
     packet1->insertAtBack(endTlv);
     MacAddress sourceAddress1 = getPortNetworkInterface(ringPort)->getMacAddress();
-    sendFrameReq(ringPort, static_cast<MacAddress>(MC_CONTROL), sourceAddress1, priority, MRP_LT, packet1);
+    sendFrameReq(ringPort, MacAddress(MC_CONTROL), sourceAddress1, priority, MRP_LT, packet1);
     emit(linkChangeSignal, time);
 }
 
@@ -1183,7 +1183,7 @@ void Mrp::testMgrNackReq(int ringPort, MrpPriority managerPrio, MacAddress sourc
     //sending the answer back would be enough
     //Code will remain comment out for easy optimization
     //MacAddress SourceAddress1 = getPortNetworkInterface(RingPort)->getMacAddress();
-    //sendFrameReq(RingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
+    //sendFrameReq(RingPort, MacAddress(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
 
     Packet *packet2 = new Packet("mrpTestMgrNackFrame");
     packet2->insertAtBack(version);
@@ -1193,9 +1193,9 @@ void Mrp::testMgrNackReq(int ringPort, MrpPriority managerPrio, MacAddress sourc
     packet2->insertAtBack(endTlv);
 
     MacAddress sourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
-    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_TEST), sourceAddress1, priority, MRP_LT, packet1);
+    sendFrameReq(primaryRingPort, MacAddress(MC_TEST), sourceAddress1, priority, MRP_LT, packet1);
     MacAddress sourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
-    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_TEST), sourceAddress2, priority, MRP_LT, packet2);
+    sendFrameReq(secondaryRingPort, MacAddress(MC_TEST), sourceAddress2, priority, MRP_LT, packet2);
 }
 
 void Mrp::testPropagateReq(int ringPort, MrpPriority managerPrio, MacAddress sourceAddress) {
@@ -1229,7 +1229,7 @@ void Mrp::testPropagateReq(int ringPort, MrpPriority managerPrio, MacAddress sou
     //sending the answer back would be enough
     //Code will remain comment out for easy optimization
     //MacAddress SourceAddress1 = getPortNetworkInterface(RingPort)->getMacAddress();
-    //sendFrameReq(RingPort, static_cast<MacAddress>(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
+    //sendFrameReq(RingPort, MacAddress(MC_TEST), SourceAddress1, priority, MRP_LT , packet1);
 
     Packet *packet2 = new Packet("mrpTestPropagateFrame");
     packet2->insertAtBack(version);
@@ -1239,9 +1239,9 @@ void Mrp::testPropagateReq(int ringPort, MrpPriority managerPrio, MacAddress sou
     packet2->insertAtBack(endTlv);
 
     MacAddress sourceAddress1 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
-    sendFrameReq(primaryRingPort, static_cast<MacAddress>(MC_TEST), sourceAddress1, priority, MRP_LT, packet1);
+    sendFrameReq(primaryRingPort, MacAddress(MC_TEST), sourceAddress1, priority, MRP_LT, packet1);
     MacAddress sourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
-    sendFrameReq(secondaryRingPort, static_cast<MacAddress>(MC_TEST), sourceAddress2, priority, MRP_LT, packet2);
+    sendFrameReq(secondaryRingPort, MacAddress(MC_TEST), sourceAddress2, priority, MRP_LT, packet2);
 }
 
 void Mrp::testRingInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio) {
