@@ -28,7 +28,7 @@
 namespace inet {
 
 static const char *ENABLED_LINK_COLOR = "#000000";
-static const char *DISABLED_LINK_COLOR = "#bbbbbb";
+static const char *DISABLED_LINK_COLOR = "#888888";
 
 Define_Module(Mrp);
 
