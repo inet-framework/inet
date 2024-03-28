@@ -40,13 +40,13 @@ simple MrpInterconnection extends Mrp like IMediaRedundancy
         // each interconnection node has to take over one of two possible roles regarding interconection: 
         // interconnection client or interconnection manager
         // only one of the needed four nodes may have manager role (value 2), the other three nodes shall be in client role (value 1)
-        int interconnectionRole = default(1);
+        int interconnectionRole = default(1); //TODO enum
  
         //PortNumber of interconnectionPort
-        int interconnectionPort = default(2);       
+        int interconnectionPort = default(2);
              
         //each interconnection has an name assigned, for human readable identification
-        string InterconnectionName = default("interconnection1");
+        string InterconnectionName = default("interconnection1");  //TODO lowercase!!!
         
         //each interconnection has an unique indentifier, assign a value from 0 - 65535
         int interconnectionID = default(1);  

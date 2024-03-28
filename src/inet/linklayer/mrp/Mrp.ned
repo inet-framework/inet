@@ -64,8 +64,8 @@ simple Mrp like IMediaRedundancy
 		
 		//A mrp ring has a UUID, in 2 64-Bit parts
 		//every node in a ring has to be set to the same UUID
-		int uuid0 = default(33333);
-		int uuid1 = default(33333);	
+		int uuid0;
+		int uuid1;	
 		
 		//it is possible to enable an active link check on layer 2 for each ring port
 		//link check is based on 802.1q-CFM

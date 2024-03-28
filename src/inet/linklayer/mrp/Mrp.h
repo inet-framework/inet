@@ -24,7 +24,7 @@ namespace inet {
 
 class INET_API Mrp: public OperationalBase, public cListener, public StringFormat::IDirectiveResolver {
 protected:
-    typedef std::map<uint16_t, int64_t> FrameSentDatabase;
+    typedef std::map<uint16_t, int64_t> FrameSentDatabase;  // TODO what does it contain?
 
     enum FrameType : uint64_t {
         MC_RESERVED = 0x000001154E000000,

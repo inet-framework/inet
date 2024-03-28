@@ -88,7 +88,7 @@ void Mrp::setRingInterface(int InterfaceNumber, int InterfaceIndex) {
 void Mrp::setPortState(int interfaceId, MrpInterfaceData::PortState State) {
     auto portData = getPortInterfaceDataForUpdate(interfaceId);
     portData->setState(State);
-    emit(portStateChangedSignal, portData->getState());
+    emit(portStateChangedSignal, portData->getState());  //TODO 2 or 3 signals
     EV_INFO << "Setting Port State" << EV_FIELD(interfaceId) << EV_FIELD(State) << EV_ENDL;
 }
 
@@ -102,7 +102,7 @@ MrpInterfaceData::PortState Mrp::getPortState(int interfaceId) {
     return portData->getState();
 }
 
-const MrpInterfaceData* Mrp::getPortInterfaceData(unsigned int interfaceId) const {
+const MrpInterfaceData* Mrp::getPortInterfaceData(unsigned int interfaceId) const {  //TODO why unsigned
     return getPortNetworkInterface(interfaceId)->getProtocolData<MrpInterfaceData>();
 }
 
@@ -543,9 +543,9 @@ void Mrp::handleMrpPDU(Packet* packet) {
                 auto ringTime = simTime().inUnit(SIMTIME_MS) - testTlv->getTimeStamp();
                 auto lastTestFrameSent = testFrameSent.find(sequence);
                 if (lastTestFrameSent != testFrameSent.end()) {
-                    int64_t ringTimePrecise = simTime().inUnit(SIMTIME_US) - lastTestFrameSent->second;
-                    emit(receivedTestSignal, sequence);
-                    EV_DETAIL << "RingTime" << EV_FIELD(ringTime) << EV_FIELD(ringTimePrecise) << EV_ENDL;
+                    int64_t ringTimePrecise = simTime().inUnit(SIMTIME_US) - lastTestFrameSent->second;  //TODO simtime_t
+                    emit(receivedTestSignal, sequence); //TODO emit the packet instead!
+                    EV_DETAIL << "RingTime" << EV_FIELD(ringTime) << EV_FIELD(ringTimePrecise) << EV_ENDL;  //TODO emit ringtime
                 } else {
                     emit(receivedTestSignal, sequence);
                     EV_DETAIL << "RingTime" << EV_FIELD(ringTime) << EV_ENDL;
@@ -565,7 +565,7 @@ void Mrp::handleMrpPDU(Packet* packet) {
         if (ringID) {
             if (sequence > lastTopologyId) {
                 topologyChangeInd(topologyTlv->getSa(), SimTime(topologyTlv->getInterval(), SIMTIME_MS));
-                emit(receivedChangeSignal, topologyTlv->getInterval());
+                emit(receivedChangeSignal, topologyTlv->getInterval()); //TODO remove signal
             } else {
                 EV_DETAIL << "Received same Frame already" << EV_ENDL;
                 delete packet;
@@ -574,6 +574,7 @@ void Mrp::handleMrpPDU(Packet* packet) {
             EV_DETAIL << "Received packet from other Mrp-Domain"
                              << EV_FIELD(incomingInterface) << EV_FIELD(packet)
                              << EV_ENDL;
+            //TODO leak pkt?
         }
         break;
     }
@@ -584,7 +585,7 @@ void Mrp::handleMrpPDU(Packet* packet) {
         if (ringID) {
             LinkState linkState = linkTlv->getHeaderType() == LINKDOWN ? LinkState::DOWN : LinkState::UP;
             linkChangeInd(linkTlv->getPortRole(), linkState);
-            emit(receivedChangeSignal, linkTlv->getInterval());
+            emit(receivedChangeSignal, linkTlv->getInterval());  //TODO remove signal
         } else {
             EV_DETAIL << "Received packet from other Mrp-Domain"
                              << EV_FIELD(incomingInterface) << EV_FIELD(packet)
@@ -773,7 +774,7 @@ void Mrp::handleContinuityCheckMessage(Packet* packet) {
             << EV_FIELD(incomingInterface->getMacAddress())
             << EV_ENDL;
     mauTypeChangeInd(ringPort, LinkState::UP);
-    emit(receivedContinuityCheckSignal, ringPort);
+    emit(receivedContinuityCheckSignal, ringPort);  // TODO remove
     delete packet;
 }
 
@@ -800,7 +801,7 @@ void Mrp::clearLocalFDB() {  //TODO this only *schedules* clearing the FDB, and 
         cancelEvent(fdbClearDelay);
     simtime_t processingDelay = processingDelayPar->doubleValue();
     scheduleAfter(processingDelay, fdbClearDelay);
-    emit(clearFDBSignal, processingDelay.dbl());
+    emit(clearFDBSignal, processingDelay.dbl()); //TODO remove signal
 }
 
 void Mrp::clearLocalFDBDelayed() {  //TODO this actually does the clearing and not delays it, right? rename to clearLocalFDB()
@@ -866,10 +867,10 @@ void Mrp::handleTestTimer() {
                 topologyChangeReq(topologyChangeInterval);
             }
             testRingReq(defaultTestInterval);
-            currentState = CHK_RO;
+            currentState = CHK_RO;  //TODO emit
             EV_DETAIL << "Switching State from CHK_RC to CHK_RO" << EV_FIELD(currentState) << EV_ENDL;
             currentRingState = OPEN;
-            emit(ringStateChangedSignal, currentRingState);
+            emit(ringStateChangedSignal, currentRingState);  //TODO check if always done
         } else {
             testRetransmissionCount++;
             addTest = false;
@@ -1000,7 +1001,7 @@ void Mrp::setupContinuityCheck(int ringPort) {
     ccm->setMessageName(name.c_str());
     auto packet = new Packet("ContinuityCheck", ccm);
     sendCCM(ringPort, packet);
-    emit(continuityCheckSignal, ringPort);
+    emit(continuityCheckSignal, ringPort);  //TODO remove
 }
 
 void Mrp::testRingReq(simtime_t time) {
@@ -1101,7 +1102,7 @@ void Mrp::setupTestRingReq() {
     packet2->insertAtBack(endTlv);
     MacAddress sourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
     sendFrameReq(secondaryRingPort, MacAddress(MC_TEST), sourceAddress2, priority, MRP_LT, packet2);
-    emit(testSignal, lastTestFrameSent);
+    emit(testSignal, lastTestFrameSent);  //TODO remove
 }
 
 void Mrp::setupTopologyChangeReq(simtime_t interval) {
@@ -1141,7 +1142,7 @@ void Mrp::setupTopologyChangeReq(simtime_t interval) {
     packet2->insertAtBack(endTlv);
     MacAddress sourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
     sendFrameReq(secondaryRingPort, MacAddress(MC_CONTROL), sourceAddress2, priority, MRP_LT, packet2);
-    emit(topologyChangeSignal, (uint64_t)interval.inUnit(SIMTIME_MS));
+    emit(topologyChangeSignal, (uint64_t)interval.inUnit(SIMTIME_MS));  //TODO remove
 }
 
 void Mrp::setupLinkChangeReq(int ringPort, LinkState linkState, simtime_t time) {
@@ -1175,7 +1176,7 @@ void Mrp::setupLinkChangeReq(int ringPort, LinkState linkState, simtime_t time) 
     packet1->insertAtBack(endTlv);
     MacAddress sourceAddress1 = getPortNetworkInterface(ringPort)->getMacAddress();
     sendFrameReq(ringPort, MacAddress(MC_CONTROL), sourceAddress1, priority, MRP_LT, packet1);
-    emit(linkChangeSignal, (double)time.inUnit(SIMTIME_MS));
+    emit(linkChangeSignal, (double)time.inUnit(SIMTIME_MS));  //TODO remove
 }
 
 void Mrp::testMgrNackReq(int ringPort, MrpPriority managerPrio, MacAddress sourceAddress) {

@@ -97,7 +97,7 @@ class MrpTopologyChange extends MrpTlvHeader
     headerLength = 14;
     uint16_t prio;
     MacAddress sa;
-    uint16_t portRole;
+    uint16_t portRole; //TODO enum, plus for other similar fields too
     uint16_t interval; // in milliseconds
 }
 

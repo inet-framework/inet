@@ -35,7 +35,7 @@ module MrpSwitch like IEthernetNetworkNode
 {
     parameters:
         bool hasMrp = default(true);
-        string MediaRedundancy = default("Mrp");
+        string MediaRedundancy = default("Mrp");  //TODO typename instead!
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/switch");
