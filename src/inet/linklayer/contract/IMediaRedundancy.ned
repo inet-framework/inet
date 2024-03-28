@@ -23,7 +23,6 @@ moduleinterface IMediaRedundancy
 		int ringPort2;
 		bool interconnectionLinkCheckAware;
 		bool interconnectionRingCheckAware;
-       	bool blockedStateSupported;
        	bool nonBlockingMRC;
         bool reactOnLinkChange;
         bool checkMediaRedundancy;
