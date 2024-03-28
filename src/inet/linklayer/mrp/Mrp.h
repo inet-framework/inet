@@ -229,7 +229,7 @@ protected:
     virtual void interconnTestInd(MacAddress sourceAddress, int ringPort, uint16_t inId, Packet* packet);
     virtual void interconnForwardReq(int ringPort, Packet* packet);
     virtual void sendFrameReq(int portId, const MacAddress& destinationAddress, const MacAddress& sourceAddress, int prio, uint16_t lt, Packet* MRPPDU);
-    virtual void sendCCM(int portId, Packet* CCM);
+    virtual void sendCCM(int portId, Packet* ccm);
     virtual void clearFDB(double time);
     virtual void colorLink(NetworkInterface* ie, bool forwarding) const;
     virtual void refreshDisplay() const override;
