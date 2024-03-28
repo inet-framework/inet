@@ -86,7 +86,8 @@ uint64_t& SharedDataManager::getSharedCounter(const char *name, uint64_t initial
 void SharedDataManager::clear()
 {
     for (auto& item : sharedVariables)
-        item.second(); // call stored destructor
+        if (item.second)
+            item.second(); // call stored destructor
     sharedVariables.clear();
     sharedCounters.clear();
     sharedCounters.resize(MAX_NUM_COUNTERS, INVALID);
