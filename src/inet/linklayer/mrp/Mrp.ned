@@ -113,10 +113,6 @@ simple Mrp like IMediaRedundancy
         //defines, if manager is able to set his own secondary ring port to FORWARDING and therefore change the ring topology
         bool noTopologyChange = default(false);
         
-        //client variables
-        // enables the client to set one of his ring ports to BLOCKED, if advised by manager via topology change frame
-        bool blockedStateSupported = default(true);
-        
         // Format for the text displayed above the module icon. Directives: %r: MRP role, %n: node state, %g: ring state
         string displayStringTextFormat = default("role: %r\nnode: %n\nring: %g");
         @display("i=block/network2");

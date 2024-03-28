@@ -153,8 +153,6 @@ void Mrp::initialize(int stage) {
         reactOnLinkChange = par("reactOnLinkChange");
         checkMediaRedundancy = par("checkMediaRedundancy");
         noTopologyChange = par("noTopologyChange");
-        //client variables
-        blockedStateSupported = par("blockedStateSupported");
 
         //signals
         linkChangeSignal = registerSignal("linkChange");
