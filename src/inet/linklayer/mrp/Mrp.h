@@ -133,9 +133,6 @@ protected:
     uint16_t monNRmax = 5;
     cMessage *linkUpHysteresisTimer = nullptr; //LNKUP_HYST_TIMER_RUNNING
 
-    //Variables needed for Client
-    bool blockedStateSupported;
-
     simtime_t linkDownInterval = 20; //MRP_LNKdownT
     simtime_t linkUpInterval = 20; //MRP_LNKupT
     simtime_t topologyChangeInterval; //MRP_TOPchgT
