@@ -144,8 +144,8 @@ void MrpInterconnection::micInit() {
     mauTypeChangeInd(interconnectionPort, getPortNetworkInterface(interconnectionPort)->getState());
 }
 
-void MrpInterconnection::setInterconnectionInterface(int InterfaceIndex) {
-    interconnectionInterface = interfaceTable->getInterface(InterfaceIndex);
+void MrpInterconnection::setInterconnectionInterface(int interfaceIndex) {
+    interconnectionInterface = interfaceTable->getInterface(interfaceIndex);
     if (interconnectionInterface->isLoopback()) {
         interconnectionInterface = nullptr;
         EV_DEBUG << "Chosen Interface is Loopback-Interface" << EV_ENDL;
@@ -449,8 +449,8 @@ void MrpInterconnection::mauTypeChangeInd(int ringPort, LinkState linkState) {
     }
 }
 
-void MrpInterconnection::interconnTopologyChangeInd(MacAddress sourceAddress, double time_ms, uint16_t InID, int ringPort, Packet *packet) {
-    if (InID == interConnectionID) {
+void MrpInterconnection::interconnTopologyChangeInd(MacAddress sourceAddress, double time_ms, uint16_t inID, int ringPort, Packet *packet) {
+    if (inID == interConnectionID) {
         auto offset = B(2);
         const auto &firstTLV = packet->peekDataAt<MrpInTopologyChange>(offset);
         offset = offset + firstTLV->getChunkLength();
@@ -514,7 +514,7 @@ void MrpInterconnection::interconnTopologyChangeInd(MacAddress sourceAddress, do
         }
     } else {
         EV_INFO << "Received Frame from other InterConnectionID"
-                       << EV_FIELD(InID) << EV_ENDL;
+                       << EV_FIELD(inID) << EV_ENDL;
         delete packet;
     }
 }
@@ -602,8 +602,8 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, LinkState linkSta
     }
 }
 
-void MrpInterconnection::interconnLinkStatusPollInd(uint16_t InID, int RingPort, Packet *packet) {
-    if (InID == interConnectionID) {
+void MrpInterconnection::interconnLinkStatusPollInd(uint16_t inID, int ringPort, Packet *packet) {
+    if (inID == interConnectionID) {
         b offset = B(2);
         auto firstTLV = packet->peekDataAt<MrpInLinkStatusPoll>(offset);
         offset = offset + firstTLV->getChunkLength();
@@ -624,13 +624,13 @@ void MrpInterconnection::interconnLinkStatusPollInd(uint16_t InID, int RingPort,
             case PT:
             case IP_IDLE:
                 interconnLinkChangeReq(LinkState::UP, 0);
-                if (RingPort != interconnectionPort) {
+                if (ringPort != interconnectionPort) {
                     if (linkCheckEnabled)
                         inTransferReq(INLINKSTATUSPOLL, interconnectionPort, MC_INTRANSFER, packet);
                     else
                         inTransferReq(INLINKSTATUSPOLL, interconnectionPort, MC_INCONTROL, packet);
                 } else
-                    mrpForwardReq(INLINKSTATUSPOLL, RingPort, MC_INCONTROL, packet);
+                    mrpForwardReq(INLINKSTATUSPOLL, ringPort, MC_INCONTROL, packet);
                 break;
             case POWER_ON:
             case CHK_IO:
@@ -646,13 +646,13 @@ void MrpInterconnection::interconnLinkStatusPollInd(uint16_t InID, int RingPort,
         }
     } else {
         EV_INFO << "Received Frame from other InterConnectionID"
-                       << EV_FIELD(RingPort) << EV_FIELD(InID) << EV_ENDL;
+                       << EV_FIELD(ringPort) << EV_FIELD(inID) << EV_ENDL;
         delete packet;
     }
 }
 
-void MrpInterconnection::interconnTestInd(MacAddress sourceAddress, int RingPort, uint16_t InID, Packet *packet) {
-    if (InID == interConnectionID) {
+void MrpInterconnection::interconnTestInd(MacAddress sourceAddress, int ringPort, uint16_t inID, Packet *packet) {
+    if (inID == interConnectionID) {
         b offset = B(2);
         auto firstTLV = packet->peekDataAt<MrpInTest>(offset);
         offset = offset + firstTLV->getChunkLength();
@@ -721,7 +721,7 @@ void MrpInterconnection::interconnTestInd(MacAddress sourceAddress, int RingPort
         }
     } else {
         EV_INFO << "Received Frame from other InterConnectionID"
-                       << EV_FIELD(RingPort) << EV_FIELD(InID) << EV_ENDL;
+                       << EV_FIELD(ringPort) << EV_FIELD(inID) << EV_ENDL;
         delete packet;
     }
 }

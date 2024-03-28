@@ -80,20 +80,20 @@ void Mrp::setRingInterface(int InterfaceNumber, int InterfaceIndex) {
         EV_DEBUG << "only 2 MRP Ring-Interfaces per Node allowed" << EV_ENDL;
 }
 
-void Mrp::setPortState(int InterfaceId, MrpInterfaceData::PortState State) {
-    auto portData = getPortInterfaceDataForUpdate(InterfaceId);
+void Mrp::setPortState(int interfaceId, MrpInterfaceData::PortState State) {
+    auto portData = getPortInterfaceDataForUpdate(interfaceId);
     portData->setState(State);
     emit(portStateChangedSignal, portData->getState());
-    EV_INFO << "Setting Port State" << EV_FIELD(InterfaceId) << EV_FIELD(State) << EV_ENDL;
+    EV_INFO << "Setting Port State" << EV_FIELD(interfaceId) << EV_FIELD(State) << EV_ENDL;
 }
 
-void Mrp::setPortRole(int InterfaceId, MrpInterfaceData::PortRole Role) {
-    auto portData = getPortInterfaceDataForUpdate(InterfaceId);
+void Mrp::setPortRole(int interfaceId, MrpInterfaceData::PortRole Role) {
+    auto portData = getPortInterfaceDataForUpdate(interfaceId);
     portData->setRole(Role);
 }
 
-MrpInterfaceData::PortState Mrp::getPortState(int InterfaceId) {
-    auto portData = getPortInterfaceDataForUpdate(InterfaceId);
+MrpInterfaceData::PortState Mrp::getPortState(int interfaceId) {
+    auto portData = getPortInterfaceDataForUpdate(interfaceId);
     return portData->getState();
 }
 
@@ -112,8 +112,8 @@ NetworkInterface* Mrp::getPortNetworkInterface(unsigned int interfaceId) const {
     return gateIfEntry;
 }
 
-MrpInterfaceData::PortRole Mrp::getPortRole(int InterfaceId) {
-    auto portData = getPortInterfaceDataForUpdate(InterfaceId);
+MrpInterfaceData::PortRole Mrp::getPortRole(int interfaceId) {
+    auto portData = getPortInterfaceDataForUpdate(interfaceId);
     return portData->getRole();
 }
 
@@ -1826,7 +1826,7 @@ void Mrp::interconnLinkStatusPollInd(uint16_t inID, int ringPort, Packet *packet
     }
 }
 
-void Mrp::interconnTestInd(MacAddress sourceAddress, int ringPort, uint16_t InID, Packet *packet) {
+void Mrp::interconnTestInd(MacAddress sourceAddress, int ringPort, uint16_t inID, Packet *packet) {
     switch (currentState) {
     case POWER_ON:
     case AC_STAT1:
