@@ -41,10 +41,10 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
         *.fcsMode = this.fcsMode;
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
         ethernet.registerProtocol = default(true);
-        @figure[linkLayer](type=rectangle; pos=250,458; size=1000,284; fillColor=#0000ff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
+        @figure[linkLayer](type=rectangle; pos=250,458; size=1000,434; fillColor=#0000ff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
         @figure[linkLayer.title](type=text; pos=1245,463; anchor=ne; text="link layer");
-        @figure[interfaceLayer](type=rectangle; pos=250,758; size=1000,360; fillColor=#00ffff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
-        @figure[interfaceLayer.title](type=text; pos=1245,763; anchor=ne; text="interface layer");
+        @figure[interfaceLayer](type=rectangle; pos=250,908; size=1000,210; fillColor=#00ffff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
+        @figure[interfaceLayer.title](type=text; pos=1245,913; anchor=ne; text="interface layer");
     gates:
         input radioIn[numWlanInterfaces] @directIn;
         inout pppg[numPppInterfaces] @labels(PppFrame-conn) @allowUnconnected;
