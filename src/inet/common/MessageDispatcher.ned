@@ -20,7 +20,7 @@ import inet.queueing.base.PacketProcessorBase;
 //  - protocols must register by calling registerService and/or registerProtocol
 //  - interfaces must register by calling registerInterface
 //  - sockets must register by sending socket messages
-//  - packets must have tags attached which specifie the destination protocol, interface or socket
+//  - packets must have tags attached which specify the destination protocol, interface or socket
 //
 simple MessageDispatcher extends PacketProcessorBase
 {
