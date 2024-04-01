@@ -153,6 +153,7 @@ void Gptp::handleSelfMessage(cMessage *msg)
         case GPTP_SELF_MSG_PDELAY_REQ:
         // slaveport:
             sendPdelayReq(); //TODO on slaveports only
+            sendReqEndTimeStamp = clock->getClockTime();
             scheduleClockEventAfter(pdelayInterval, selfMsgDelayReq);
             break;
 
@@ -172,6 +173,10 @@ void Gptp::handleMessage(cMessage *msg)
         auto gptpMessageType = gptp->getMessageType();
         auto incomingNicId = packet->getTag<InterfaceInd>()->getInterfaceId();
         int incomingDomainNumber = gptp->getDomainNumber();
+
+        // Get the time when the very first Pdelay_Req message is received
+        if (gptpMessageType == GPTPTYPE_PDELAY_REQ)
+            receiveReqStartTimestamp = clock->getClockTime(); // -> tr1
 
         if (incomingDomainNumber != domainNumber) {
             EV_ERROR << "Message " << msg->getClassAndFullName() << " arrived with foreign domainNumber " << incomingDomainNumber << ", dropped\n";
@@ -327,11 +332,11 @@ void Gptp::sendPdelayReq()
     lastSentPdelayReqSequenceId = sequenceId++;
     gptp->setSequenceId(lastSentPdelayReqSequenceId);
     packet->insertAtFront(gptp);
-    pdelayReqEventEgressTimestamp = clock->getClockTime();
+    pdelayReqEventEgressTimestamp = clock->getClockTime(); // -> ti1
     rcvdPdelayResp = false;
+//    sendReqStartTimestamp = clock->getClockTime();
     sendPacketToNIC(packet, slavePortId);
 }
-
 
 void Gptp::processSync(Packet *packet, const GptpSync* gptp)
 {
@@ -380,6 +385,10 @@ void Gptp::synchronize()
     clocktime_t residenceTime = oldLocalTimeAtTimeSync - syncIngressTimestamp;
 
     emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(oldLocalTimeAtTimeSync) - now);
+
+    // Calculate the neighbor rate ratio
+    neighborRateRatio = (pdelayReqEventEgressTimestamp - sendReqStartTimestamp) /
+            (receiveReqEndTimestamp - receiveReqStartTimestamp);
 
     /************** Time synchronization *****************************************
      * Local time is adjusted using peer delay, correction field, residence time *
@@ -438,6 +447,7 @@ void Gptp::processPdelayReq(Packet *packet, const GptpPdelayReq* gptp)
     resp->setIngressTimestamp(packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime());
     resp->setSourcePortIdentity(gptp->getSourcePortIdentity());
     resp->setSequenceId(gptp->getSequenceId());
+    receiveReqEndTimestamp = resp->getIngressTimestamp(); // TODO: check if this is correct
 
     scheduleClockEventAfter(pDelayReqProcessingTime, resp);
 }

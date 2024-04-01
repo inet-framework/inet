@@ -48,8 +48,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     clocktime_t peerDelay;
     clocktime_t peerRequestReceiptTimestamp;  // pdelayReqIngressTimestamp from peer (received in GptpPdelayResp)
     clocktime_t peerResponseOriginTimestamp; // pdelayRespEgressTimestamp from peer (received in GptpPdelayRespFollowUp)
-    clocktime_t pdelayRespEventIngressTimestamp;  // receiving time of last GptpPdelayResp
-    clocktime_t pdelayReqEventEgressTimestamp;   // sending time of last GptpPdelayReq
+    clocktime_t pdelayRespEventIngressTimestamp;  // receiving time of last GptpPdelayResp -> ti2'
+    clocktime_t pdelayReqEventEgressTimestamp;   // sending time of last GptpPdelayReq -> ti1'
     clocktime_t pDelayReqProcessingTime;  // processing time between arrived PDelayReq and send of PDelayResp
     bool rcvdPdelayResp = false;
 
@@ -69,6 +69,12 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     ClockEvent* selfMsgSync = nullptr;
     ClockEvent* selfMsgDelayReq = nullptr;
     ClockEvent* requestMsg = nullptr;
+
+    // Neighbor rate ratio calculation parameters
+    clocktime_t sendReqStartTimestamp; // ti1
+    clocktime_t receiveReqStartTimestamp; // tr1
+    clocktime_t receiveReqEndTimestamp; // tr1'
+    static double neighborRateRatio;
 
     // Statistics information: // TODO remove, and replace with emit() calls
     static simsignal_t localTimeSignal;
@@ -91,7 +97,6 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     virtual ~Gptp();
   protected:
     void sendPacketToNIC(Packet *packet, int portId);
-
     void sendSync();
     void sendFollowUp(int portId, const GptpSync *sync, clocktime_t preciseOriginTimestamp);
     void sendPdelayReq();
