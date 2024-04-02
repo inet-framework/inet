@@ -22,6 +22,7 @@ module Ieee8021qProtocol like IIeee8021qLayer
         *.vlanTagType = default(this.vlanTagType);
         *.socketTableModule = default(absPath(".socketTable"));
         @display("i=block/layer");
+        @class(Ieee8021qProtocol);
     gates:
         input upperLayerIn;
         output upperLayerOut;

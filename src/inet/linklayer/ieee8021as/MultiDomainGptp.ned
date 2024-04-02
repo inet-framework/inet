@@ -26,6 +26,7 @@ module MultiDomainGptp like IGptp
         string interfaceTableModule; // relative module path of the interface table
         int numDomains; // number of time synchronization domains
         string gptpNodeType; // @enum("GptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE
+        @class(MultiDomainGptp);
         @display("i=block/app");
     gates:
         input socketIn;
