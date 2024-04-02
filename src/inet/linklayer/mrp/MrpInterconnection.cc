@@ -33,7 +33,6 @@ MrpInterconnection::~MrpInterconnection() {
 void MrpInterconnection::initialize(int stage) {
     Mrp::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        interconnectionName = par("InterconnectionName").stdstringValue();
         inRole = static_cast<InRoleState>(par("interconnectionRole").intValue());
         interConnectionID = par("interconnectionID");
         interconnectionPort = par("interconnectionPort");

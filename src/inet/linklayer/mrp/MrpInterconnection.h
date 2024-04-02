@@ -39,7 +39,6 @@ protected:
     };
 
     uint16_t interConnectionID;
-    std::string interconnectionName;
     bool linkCheckEnabled = true;
     bool ringCheckEnabled = false;
     InRoleState inRole = INTERCONNECTION_CLIENT;
