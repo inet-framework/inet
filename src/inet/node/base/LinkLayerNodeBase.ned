@@ -63,7 +63,7 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
             @display("p=750,600;b=1000,5");
         }
         bridging: <default("")> like IProtocolLayer if typename != "" {
-            @display("p=750,675");
+            @display("p=675,675");
         }
         bl: MessageDispatcher {
             @display("p=750,750;b=1000,5");
@@ -109,8 +109,8 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
         bridging.lowerLayerOut --> bl.in++ if exists(bridging);
         bl.out++ --> bridging.lowerLayerIn if exists(bridging);
 
-        cb.out++ --> bl.in++ if !exists(bridging);
-        bl.out++ --> cb.in++ if !exists(bridging);
+        cb.out++ --> bl.in++;
+        bl.out++ --> cb.in++;
 
         bl.out++ --> li.in++;
         li.out++ --> bl.in++;
