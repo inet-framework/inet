@@ -1020,4 +1020,49 @@ void MrpInterconnection::mrpForwardReq(TlvHeaderType headerType, int ringport, F
     sendFrameReq(secondaryRingPort, MacAddress(frameType), sourceAddress, priority, MRP_LT, packet);
 }
 
+std::string MrpInterconnection::resolveDirective(char directive) const
+{
+    switch (directive) {
+        case 'R':
+            return getInterconnectionRoleName(inRole);
+        case 'N':
+            return getInterconnectionNodeStateName(inState);
+        case 'I':
+            return getInterconnectionStateName(currentInterconnectionState);
+        default:
+            return Mrp::resolveDirective(directive);
+    }
+}
+
+const char *MrpInterconnection::getInterconnectionRoleName(InRoleState role)
+{
+    switch (role) {
+        case INTERCONNECTION_CLIENT: return "INTERCONNECTION_CLIENT";
+        case INTERCONNECTION_MANAGER: return "INTERCONNECTION_MANAGER";
+        default: return "???";
+    }
+}
+
+const char *MrpInterconnection::getInterconnectionNodeStateName(InNodeState state)
+{
+    switch (state) {
+        case POWER_ON: return "POWER_ON";
+        case AC_STAT1: return "AC_STAT1";
+        case CHK_IO: return "CHK_IO";
+        case CHK_IC: return "CHK_IC";
+        case PT: return "PT";
+        case IP_IDLE: return "IP_IDLE";
+        default: return "???";
+    }
+}
+
+const char *MrpInterconnection::getInterconnectionStateName(InterConnectionState state)
+{
+    switch (state) {
+        case OPEN: return "OPEN";
+        case CLOSED: return "CLOSED";
+        default: return "???";
+    }
+}
+
 } // namespace inet

@@ -59,6 +59,8 @@ simple MrpInterconnection extends Mrp like IMediaRedundancy
         //and interconnection manager set its interconnection port to FORWARDING
         bool ringCheckEnabled = default(false);
 
+        // Format for the text displayed above the module icon. Directives: %r: MRP role, %n: node state, %g: ring state
+        displayStringTextFormat = default("role: %r, %R\nnode: %n, %N\nring: %g %I");
 
         @display("i=block/network2");
         @signal[inTopologyChange](type="long");
