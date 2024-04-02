@@ -9,10 +9,12 @@
 
 #include <string.h>
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/ldp/Ldp.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
 #include "inet/networklayer/rsvpte/Utils.h"
@@ -291,42 +293,6 @@ void Mpls::sendToL3(Packet *msg)
     ASSERT(msg->findTag<InterfaceInd>());
     ASSERT(msg->findTag<DispatchProtocolReq>());
     send(msg, "upperLayerOut");
-}
-
-void Mpls::handleRegisterInterface(const NetworkInterface& interface, cGate *out, cGate *in)
-{
-    if (!strcmp("lowerLayerIn", in->getBaseName()))
-        registerInterface(interface, gate("upperLayerIn"), gate("upperLayerOut"));
-}
-
-void Mpls::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterService");
-    if (g->isName("lowerLayerOut"))
-        registerService(protocol, gate("upperLayerIn"), servicePrimitive);
-    else if (g->isName("lowerLayerIn"))
-        ;
-    else if (g->isName("upperLayerOut"))
-        registerService(protocol, gate("lowerLayerIn"), servicePrimitive);
-    else if (g->isName("upperLayerIn"))
-        ;
-    else
-        throw cRuntimeError("Unknown gate: %s", g->getName());
-}
-
-void Mpls::handleRegisterProtocol(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    if (g->isName("lowerLayerIn"))
-        registerProtocol(protocol, gate("upperLayerOut"), servicePrimitive);
-    else if (g->isName("lowerLayerOut"))
-        ;
-    else if (g->isName("upperLayerOut"))
-        registerProtocol(protocol, gate("lowerLayerIn"), servicePrimitive);
-    else if (g->isName("upperLayerIn"))
-        ; // void
-    else
-        throw cRuntimeError("Unknown gate: %s", g->getName());
 }
 
 } // namespace inet
