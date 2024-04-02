@@ -106,7 +106,7 @@ module EthernetSwitch like IEthernetNetworkNode
             @display("p=800,300;b=1200,5");
         }
         bridging: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IProtocolLayer {
-            @display("p=800,375;is=m");
+            @display("p=700,375");
         }
         bl: MessageDispatcher {
             @display("p=800,450;b=1200,5");
@@ -147,6 +147,9 @@ module EthernetSwitch like IEthernetNetworkNode
 
         cb.out++ --> llc.lowerLayerIn if exists(llc);
         llc.lowerLayerOut --> cb.in++ if exists(llc);
+
+        cb.out++ --> bl.in++;
+        bl.out++ --> cb.in++;
 
         cb.out++ --> bridging.upperLayerIn;
         bridging.upperLayerOut --> cb.in++;
