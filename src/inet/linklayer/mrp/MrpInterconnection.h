@@ -34,7 +34,7 @@ protected:
         INTERCONNECTION_CLIENT = 1, INTERCONNECTION_MANAGER = 2,
     };
 
-    enum InterConnectionState : uint16_t {
+    enum InterConnectionState : uint16_t {  //TODO why capital C?
         OPEN = 0x0000, CLOSED = 0x0001,
     };
 
@@ -43,8 +43,8 @@ protected:
     bool ringCheckEnabled = false;
     InRoleState inRole = INTERCONNECTION_CLIENT;
 
-    InNodeState inState = POWER_ON;
-    InterConnectionState currentInterconnectionState = OPEN;
+    InNodeState inState = POWER_ON;  //TODO why not inNodeState?
+    InterConnectionState currentInterconnectionState = OPEN;   //TODO why not inState?
     uint16_t lastPollId = 0;
     uint16_t lastInTopologyId = 0;
     FrameSentDatabase inTestFrameSent;
@@ -109,6 +109,10 @@ protected:
     virtual void interconnLinkChangeInd(uint16_t inId, LinkState linkState, int ringPort, Packet *packet) override;
     virtual void interconnLinkStatusPollInd(uint16_t inId, int ringPort, Packet *packet) override;
     virtual void mauTypeChangeInd(int ringPort, LinkState linkState) override;
+    virtual std::string resolveDirective(char directive) const override;
+    static const char *getInterconnectionRoleName(InRoleState role);
+    static const char *getInterconnectionNodeStateName(InNodeState state);
+    static const char *getInterconnectionStateName(InterConnectionState state);
 
 public:
     MrpInterconnection();
