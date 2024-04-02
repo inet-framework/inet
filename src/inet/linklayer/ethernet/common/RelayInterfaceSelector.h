@@ -8,7 +8,6 @@
 #ifndef __INET_RELAYINTERFACESELECTOR_H
 #define __INET_RELAYINTERFACESELECTOR_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/ethernet/contract/IMacForwardingTable.h"
 #include "inet/networklayer/common/NetworkInterface.h"
@@ -19,7 +18,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API RelayInterfaceSelector : public PacketPusherBase, public TransparentProtocolRegistrationListener
+class INET_API RelayInterfaceSelector : public PacketPusherBase
 {
   protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
@@ -35,16 +34,6 @@ class INET_API RelayInterfaceSelector : public PacketPusherBase, public Transpar
     virtual bool isForwardingInterface(NetworkInterface *networkInterface) const { return !networkInterface->isLoopback() && networkInterface->isBroadcast(); }
     virtual void broadcastPacket(Packet *packet, const MacAddress& destinationAddress, NetworkInterface *incomingInterface);
     virtual void sendPacket(Packet *packet, const MacAddress& destinationAddress, NetworkInterface *outgoingInterface);
-
-    virtual bool isForwardingService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) const override { return servicePrimitive == SP_REQUEST; }
-    virtual bool isForwardingServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) const override { return servicePrimitive == SP_REQUEST; }
-    virtual bool isForwardingAnyService(cGate *gate, ServicePrimitive servicePrimitive) const override { return servicePrimitive == SP_REQUEST; }
-
-    virtual bool isForwardingProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) const override { return false; }
-    virtual bool isForwardingProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) const override { return false; }
-    virtual bool isForwardingAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) const override { return false; }
-
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 
 } // namespace inet

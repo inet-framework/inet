@@ -7,21 +7,18 @@
 #ifndef __INET_BACKPRESSUREBASEDFILTER_H
 #define __INET_BACKPRESSUREBASEDFILTER_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PacketFilterBase.h"
 
 namespace inet {
 namespace queueing {
 
-class BackPressureBasedFilter : public PacketFilterBase, public TransparentProtocolRegistrationListener
+class BackPressureBasedFilter : public PacketFilterBase
 {
   protected:
     virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
     virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
 
     virtual bool matchesPacket(const Packet *packet) const override;
-
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 
 } //namespace queueing

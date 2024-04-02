@@ -12,16 +12,6 @@ namespace queueing {
 
 Define_Module(BackPressureBarrier);
 
-cGate *BackPressureBarrier::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 Packet *BackPressureBarrier::canPullPacket(const cGate *gate) const
 {
     auto packet = provider.canPullPacket();

@@ -9,7 +9,6 @@
 #define __INET_ELIGIBILITYTIMEFILTER_H
 
 #include "inet/common/clock/ClockUserModuleMixin.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PacketFilterBase.h"
 
 namespace inet {
@@ -18,15 +17,13 @@ using namespace inet::queueing;
 
 extern template class ClockUserModuleMixin<PacketFilterBase>;
 
-class INET_API EligibilityTimeFilter : public ClockUserModuleMixin<PacketFilterBase>, public TransparentProtocolRegistrationListener
+class INET_API EligibilityTimeFilter : public ClockUserModuleMixin<PacketFilterBase>
 {
   protected:
     clocktime_t maxResidenceTime = -1;
 
   protected:
     virtual void initialize(int stage) override;
-
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
     virtual bool matchesPacket(const Packet *packet) const override;
 };

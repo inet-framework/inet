@@ -24,16 +24,6 @@ void EthernetSocketPacketProcessor::initialize(int stage)
         socketTable.reference(this, "socketTableModule", true);
 }
 
-cGate *EthernetSocketPacketProcessor::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 void EthernetSocketPacketProcessor::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");

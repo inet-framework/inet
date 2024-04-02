@@ -8,17 +8,13 @@
 #ifndef __INET_BACKPRESSUREBARRIER_H
 #define __INET_BACKPRESSUREBARRIER_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API BackPressureBarrier : public PacketFlowBase, public TransparentProtocolRegistrationListener
+class INET_API BackPressureBarrier : public PacketFlowBase
 {
-  protected:
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
-
   public:
     virtual void processPacket(Packet *packet) override {}
 

@@ -8,14 +8,13 @@
 #ifndef __INET_STREAMENCODER_H
 #define __INET_STREAMENCODER_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
 namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API StreamEncoder : public PacketFlowBase, public TransparentProtocolRegistrationListener
+class INET_API StreamEncoder : public PacketFlowBase
 {
   protected:
     class INET_API Mapping
@@ -34,7 +33,6 @@ class INET_API StreamEncoder : public PacketFlowBase, public TransparentProtocol
     virtual void processPacket(Packet *packet) override;
 
     virtual void configureMappings();
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 
 } // namespace inet

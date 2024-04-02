@@ -8,14 +8,13 @@
 #ifndef __INET_STREAMSPLITTER_H
 #define __INET_STREAMSPLITTER_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PacketDuplicatorBase.h"
 
 namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API StreamSplitter : public PacketDuplicatorBase, public TransparentProtocolRegistrationListener
+class INET_API StreamSplitter : public PacketDuplicatorBase
 {
   protected:
     cValueMap *mapping = nullptr;
@@ -26,8 +25,6 @@ class INET_API StreamSplitter : public PacketDuplicatorBase, public TransparentP
     virtual void pushPacket(Packet *packet, const cGate *gate) override;
 
     virtual int getNumPacketDuplicates(Packet *packet) override;
-
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 
 } // namespace inet

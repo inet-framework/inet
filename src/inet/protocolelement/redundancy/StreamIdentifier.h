@@ -8,14 +8,13 @@
 #ifndef __INET_STREAMIDENTIFIER_H
 #define __INET_STREAMIDENTIFIER_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
 namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API StreamIdentifier : public PacketFlowBase, public TransparentProtocolRegistrationListener
+class INET_API StreamIdentifier : public PacketFlowBase
 {
   protected:
     bool hasSequenceNumbering = false;
@@ -28,8 +27,6 @@ class INET_API StreamIdentifier : public PacketFlowBase, public TransparentProto
     virtual void handleParameterChange(const char *name) override;
     virtual void processPacket(Packet *packet) override;
     virtual int incrementSequenceNumber(const char *stream);
-
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 
 } // namespace inet

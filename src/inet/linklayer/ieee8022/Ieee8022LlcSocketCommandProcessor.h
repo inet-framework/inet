@@ -8,7 +8,6 @@
 #ifndef __INET_IEEE8022LLCSOCKETCOMMANDPROCESSOR_H
 #define __INET_IEEE8022LLCSOCKETCOMMANDPROCESSOR_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Message.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocketTable.h"
@@ -16,7 +15,7 @@
 
 namespace inet {
 
-class INET_API Ieee8022LlcSocketCommandProcessor : public queueing::PacketFlowBase, public TransparentProtocolRegistrationListener
+class INET_API Ieee8022LlcSocketCommandProcessor : public queueing::PacketFlowBase
 {
   protected:
     ModuleRefByPar<Ieee8022LlcSocketTable> socketTable;
@@ -26,8 +25,6 @@ class INET_API Ieee8022LlcSocketCommandProcessor : public queueing::PacketFlowBa
     virtual void handleMessage(cMessage *message) override;
     virtual void handleCommand(Request *request);
     virtual void processPacket(Packet *packet) override {}
-
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 
 } // namespace inet

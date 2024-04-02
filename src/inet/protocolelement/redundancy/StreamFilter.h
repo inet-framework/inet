@@ -8,7 +8,6 @@
 #ifndef __INET_STREAMFILTER_H
 #define __INET_STREAMFILTER_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/PatternMatcher.h"
 #include "inet/queueing/base/PacketFilterBase.h"
 
@@ -16,7 +15,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API StreamFilter : public PacketFilterBase, public TransparentProtocolRegistrationListener
+class INET_API StreamFilter : public PacketFilterBase
 {
   protected:
     const char *mode = nullptr;
@@ -24,8 +23,6 @@ class INET_API StreamFilter : public PacketFilterBase, public TransparentProtoco
 
   protected:
     virtual void initialize(int stage) override;
-
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
     virtual bool matchesPacket(const Packet *packet) const override;
 };

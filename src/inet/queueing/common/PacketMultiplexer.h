@@ -8,7 +8,6 @@
 #ifndef __INET_PACKETMULTIPLEXER_H
 #define __INET_PACKETMULTIPLEXER_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/common/ActivePacketSourceRef.h"
 #include "inet/queueing/common/PassivePacketSinkRef.h"
@@ -17,7 +16,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketMultiplexer : public PacketProcessorBase, public virtual IPassivePacketSink, public virtual IActivePacketSource, public TransparentProtocolRegistrationListener
+class INET_API PacketMultiplexer : public PacketProcessorBase, public virtual IPassivePacketSink, public virtual IActivePacketSource
 {
   protected:
     bool forwardServiceRegistration;
@@ -34,8 +33,6 @@ class INET_API PacketMultiplexer : public PacketProcessorBase, public virtual IP
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
-
-    virtual void mapRegistrationForwardingGates(cGate *gate, std::function<void(cGate *)> f) override;
 
     virtual bool isStreamingPacket() const { return inProgressStreamId != -1; }
     virtual void startPacketStreaming(Packet *packet);
@@ -60,9 +57,6 @@ class INET_API PacketMultiplexer : public PacketProcessorBase, public virtual IP
 
     virtual void handleCanPushPacketChanged(const cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
-
-    virtual bool isForwardingService(cGate *gate, ServicePrimitive servicePrimitive) const override { return forwardServiceRegistration; }
-    virtual bool isForwardingProtocol(cGate *gate, ServicePrimitive servicePrimitive) const override { return forwardProtocolRegistration; }
 };
 
 } // namespace queueing
