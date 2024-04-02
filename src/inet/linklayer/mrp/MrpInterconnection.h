@@ -18,33 +18,37 @@ namespace inet {
  */
 class INET_API MrpInterconnection: public Mrp {
 protected:
-    enum InNodeState : uint16_t {
-        POWER_ON, AC_STAT1, //waiting for the first Link Up at one of its ring ports, starting test monitoring of the ring
+    enum InterconnectionNodeState : uint16_t {
+        POWER_ON,
+        AC_STAT1, //waiting for the first Link Up at one of its ring ports, starting test monitoring of the ring
 
         //InterconnectionManager States
         CHK_IO, //Check Interconnection, Interconnection Open State
         CHK_IC, //Check Interconnection, Interconnection Closed State
 
         //InterConnectionClient States
-        PT,
-        IP_IDLE,
+        PT,  // Pass Through
+        IP_IDLE, // Interconnection Port Idle
+
     };
 
-    enum InRoleState : uint16_t {  //TODO RoleState???
-        INTERCONNECTION_CLIENT = 1, INTERCONNECTION_MANAGER = 2,
+    enum InterconnectionRole : uint16_t {
+        INTERCONNECTION_CLIENT = 1,
+        INTERCONNECTION_MANAGER = 2,
     };
 
-    enum InterConnectionState : uint16_t {  //TODO why capital C?
-        OPEN = 0x0000, CLOSED = 0x0001,
+    enum InterconnectionTopologyState : uint16_t {
+        OPEN = 0x0000,
+        CLOSED = 0x0001,
     };
 
     uint16_t interConnectionID;
-    bool linkCheckEnabled = true;
-    bool ringCheckEnabled = false;
-    InRoleState inRole = INTERCONNECTION_CLIENT;
+    bool linkCheckEnabled = true;  // LC_MODE
+    bool ringCheckEnabled = false;  // RC_MODE
 
-    InNodeState inState = POWER_ON;  //TODO why not inNodeState?
-    InterConnectionState currentInterconnectionState = OPEN;   //TODO why not inState?
+    InterconnectionRole inRole = INTERCONNECTION_CLIENT;
+    InterconnectionNodeState inNodeState = POWER_ON;
+    InterconnectionTopologyState inTopologyState = OPEN;
     uint16_t lastPollId = 0;
     uint16_t lastInTopologyId = 0;
     FrameSentDatabase inTestFrameSent;
@@ -86,7 +90,7 @@ protected:
     virtual void start() override;
     virtual void stop() override;
     virtual void initialize(int stage) override;
-    InRoleState parseInterconnectionRole(const char *role) const;
+    InterconnectionRole parseInterconnectionRole(const char *role) const;
     void initInterconnectionPort();
     void micInit();
     void mimInit();
@@ -110,9 +114,9 @@ protected:
     virtual void interconnLinkStatusPollInd(uint16_t inId, int ringPort, Packet *packet) override;
     virtual void mauTypeChangeInd(int ringPort, LinkState linkState) override;
     virtual std::string resolveDirective(char directive) const override;
-    static const char *getInterconnectionRoleName(InRoleState role);
-    static const char *getInterconnectionNodeStateName(InNodeState state);
-    static const char *getInterconnectionStateName(InterConnectionState state);
+    static const char *getInterconnectionRoleName(InterconnectionRole role);
+    static const char *getInterconnectionNodeStateName(InterconnectionNodeState state);
+    static const char *getInterconnectionStateName(InterconnectionTopologyState state);
 
 public:
     MrpInterconnection();
