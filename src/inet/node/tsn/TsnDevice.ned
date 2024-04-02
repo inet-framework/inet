@@ -47,6 +47,8 @@ module TsnDevice extends StandardHost
         bridging.streamCoder.typename = default(hasIncomingStreams || hasOutgoingStreams || hasStreamRedundancy ? "StreamCoderLayer" : ""); // enable stream endocing/decoding when stream redundancy is enabled
         ieee8021r.typename = default(hasStreamRedundancy ? "Ieee8021rProtocol" : "");
         ieee8021q.typename = default(hasIncomingStreams || hasOutgoingStreams || hasStreamRedundancy ? "Ieee8021qProtocol" : "");
+        cb.serviceMapping = default(hasBridging ? {"ethernetmac": "bridging"} : {});
+        bl.protocolMapping = default(hasBridging ? {"ipv4": "bridging", "ipv6": "bridging"} : {});
         @display("i=device/card"); // change icon to emphasise hardware device
     submodules:
         gptp: <default("Gptp")> like IApp if hasTimeSynchronization {

@@ -38,6 +38,7 @@ module TsnSwitch extends EthernetSwitch
         eth[*].phyLayer.typename = default(hasCutthroughSwitching ? "EthernetStreamThroughPhyLayer" : (hasFramePreemption ? "EthernetPreemptingPhyLayer" : "EthernetPhyLayer")); // use packet streaming when cut-through switching is enabled
         bridging.typename = default("BridgingLayer"); // switch to modular bridging
         bridging.directionReverser.cutthroughBarrier.typename = default(hasCutthroughSwitching ? "EthernetCutthroughBarrier" : ""); // enable cut-through barrier when cut-through switching is enabled
+        bridging.directionReverser.fork.protocolMapping = default({"ipv4": "reverser", "ipv6": "reverser"});
         bridging.streamIdentifier.typename = default(hasOutgoingStreams || hasStreamRedundancy ? "StreamIdentifierLayer" : ""); // enable stream identification when stream redundancy is enabled
         bridging.streamRelay.typename = default(hasStreamRedundancy ? "StreamRelayLayer" : ""); // enable stream merging and stream splitting when stream redundancy is enabled
         bridging.streamFilter.typename = default(hasIngressTrafficFiltering ? "StreamFilterLayer" : ""); // enable stream filtering when ingress per-stream filtering is enabled
@@ -46,4 +47,6 @@ module TsnSwitch extends EthernetSwitch
         bridging.interfaceRelay.learner.typename = default(hasIncomingStreams || hasOutgoingStreams ? "" : "RelayInterfaceLearner"); // disable learning MAC addresses in the MAC forwarding table because it would change static TSN stream configuration
         ieee8021q.typename = default("Ieee8021qProtocol");
         ieee8021r.typename = default("Ieee8021rProtocol");
+        cb.serviceMapping = default({"ethernetmac": "bridging"});
+        bl.protocolMapping = default({"ipv4": "bridging", "ipv6": "bridging", "gptp": "bridging"});
 }
