@@ -12,6 +12,8 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+
 #ifdef INET_WITH_QUEUEING
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
@@ -33,7 +35,7 @@ class INET_API MessageDispatcher :
 {
   public:
     class INET_API Key {
-      protected:
+      public:
         int protocolId;
         int servicePrimitive;
 
@@ -55,6 +57,7 @@ class INET_API MessageDispatcher :
   protected:
     bool forwardServiceRegistration;
     bool forwardProtocolRegistration;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
 
     std::map<int, int> socketIdToGateIndex;
     std::map<int, int> interfaceIdToGateIndex;
@@ -68,6 +71,8 @@ class INET_API MessageDispatcher :
     virtual void arrived(cMessage *message, cGate *gate, const SendOptions& options, simtime_t time) override;
     virtual cGate *handlePacket(Packet *packet, const cGate *inGate);
     virtual cGate *handleMessage(Message *request, cGate *inGate);
+
+    int getGateIndexToConnectedModule(const char *moduleName);
 
   public:
 #ifdef INET_WITH_QUEUEING

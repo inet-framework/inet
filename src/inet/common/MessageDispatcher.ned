@@ -25,8 +25,12 @@ import inet.queueing.base.PacketProcessorBase;
 simple MessageDispatcher extends PacketProcessorBase
 {
     parameters:
+        string interfaceTableModule;
         bool forwardServiceRegistration = default(true);
         bool forwardProtocolRegistration = default(true);
+        object interfaceMapping = default({}); // maps interface names to submodule names to override automatically learned dispatching (e.g. {"eth0", "bridging"}); * means all learned interfaces, ? means all other interfaces
+        object serviceMapping = default({}); // maps protocols to submodule names to override automatically learned dispatching (e.g. {"ethernetmac": "bridging"}); * means all learned services, ? means all other services
+        object protocolMapping = default({}); // maps protocols to submodule names to override automatically learned dispatching (e.g. {"ipv4": "bridging"}); * means all learned protocols, ? means all other protocols
         @class(MessageDispatcher);
         @display("i=-;b=100,5,,,,1;");
     gates:

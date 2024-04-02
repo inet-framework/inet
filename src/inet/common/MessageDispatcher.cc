@@ -28,10 +28,72 @@ void MessageDispatcher::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         forwardServiceRegistration = par("forwardServiceRegistration");
         forwardProtocolRegistration = par("forwardProtocolRegistration");
+        interfaceTable.reference(this, "interfaceTableModule", true);
         WATCH_MAP(socketIdToGateIndex);
         WATCH_MAP(interfaceIdToGateIndex);
         WATCH_MAP(serviceToGateIndex);
         WATCH_MAP(protocolToGateIndex);
+    }
+    else if (stage == INITSTAGE_LAST) {
+        cValueMap *interfaceMapping = check_and_cast<cValueMap *>(par("interfaceMapping").objectValue());
+        for (int i = 0; i < interfaceMapping->size(); i++) {
+            auto& entry = interfaceMapping->getEntry(i);
+            auto moduleName = entry.second.stringValue();
+            auto gateIndex = getGateIndexToConnectedModule(moduleName);
+            auto interfaceName = entry.first;
+            if (interfaceName == "*") {
+                for (auto& entry : interfaceIdToGateIndex)
+                    entry.second = gateIndex;
+            }
+            else if (interfaceName == "?")
+                interfaceIdToGateIndex[-1] = gateIndex;
+            else {
+                auto networkInterface = interfaceTable->findInterfaceByName(interfaceName.c_str());
+                if (networkInterface == nullptr)
+                    throw cRuntimeError("Cannot find interface: %s", interfaceName.c_str());
+                interfaceIdToGateIndex[networkInterface->getInterfaceId()] = gateIndex;
+            }
+        }
+        cValueMap *serviceMapping = check_and_cast<cValueMap *>(par("serviceMapping").objectValue());
+        for (int i = 0; i < serviceMapping->size(); i++) {
+            auto& entry = serviceMapping->getEntry(i);
+            auto moduleName = entry.second.stringValue();
+            auto gateIndex = getGateIndexToConnectedModule(moduleName);
+            auto protocolName = entry.first;
+            if (protocolName == "*") {
+                for (auto& entry : serviceToGateIndex)
+                    if (entry.first.servicePrimitive == SP_REQUEST)
+                        entry.second = gateIndex;
+            }
+            else if (protocolName == "?") {
+                Key key(-1, SP_REQUEST);
+                serviceToGateIndex[key] = gateIndex;
+            }
+            else {
+                Key key(Protocol::getProtocol(protocolName.c_str())->getId(), SP_REQUEST);
+                serviceToGateIndex[key] = gateIndex;
+            }
+        }
+        cValueMap *protocolMapping = check_and_cast<cValueMap *>(par("protocolMapping").objectValue());
+        for (int i = 0; i < protocolMapping->size(); i++) {
+            auto& entry = protocolMapping->getEntry(i);
+            auto moduleName = entry.second.stringValue();
+            auto gateIndex = getGateIndexToConnectedModule(moduleName);
+            auto protocolName = entry.first;
+            if (protocolName == "*") {
+                for (auto& entry : protocolToGateIndex)
+                    if (entry.first.servicePrimitive == SP_INDICATION)
+                        entry.second = gateIndex;
+            }
+            else if (protocolName == "?") {
+                Key key(-1, SP_INDICATION);
+                protocolToGateIndex[key] = gateIndex;
+            }
+            else {
+                Key key(Protocol::getProtocol(protocolName.c_str())->getId(), SP_INDICATION);
+                protocolToGateIndex[key] = gateIndex;
+            }
+        }
     }
 }
 
@@ -200,8 +262,16 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, const cGate *inGate)
             EV_INFO << "Dispatching packet to interface" << EV_FIELD(interfaceId) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(packet) << EV_ENDL;
             return outGate;
         }
-        else
-            throw cRuntimeError("handlePacket(): Unknown interface: interfaceId = %d, pathStartGate = %s, pathEndGate = %s", interfaceId, inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
+        else {
+            auto it = interfaceIdToGateIndex.find(-1);
+            if (it != interfaceIdToGateIndex.end()) {
+                auto outGate = gate("out", it->second);
+                EV_INFO << "Dispatching packet to interface" << EV_FIELD(interfaceId) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(packet) << EV_ENDL;
+                return outGate;
+            }
+            else
+                throw cRuntimeError("handlePacket(): Unknown interface: interfaceId = %d, pathStartGate = %s, pathEndGate = %s", interfaceId, inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
+        }
     }
     throw cRuntimeError("handlePacket(): Unknown packet: %s(%s), pathStartGate = %s, pathEndGate = %s", packet->getName(), packet->getClassName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
 }
@@ -414,6 +484,20 @@ void MessageDispatcher::handleRegisterInterface(const NetworkInterface& interfac
             if (i != in->getIndex())
                 registerInterface(interface, gate("in", i), gate("out", i));
     }
+}
+
+int MessageDispatcher::getGateIndexToConnectedModule(const char *moduleName)
+{
+    int size = gateSize("out");
+    for (int i = 0; i < size; i++) {
+        auto g = gate("out", i);
+        while (g != nullptr) {
+            if (!strcmp(g->getOwnerModule()->getFullName(), moduleName))
+                return i;
+            g = g->getNextGate();
+        }
+    }
+    throw cRuntimeError("Cannot find module: %s", moduleName);
 }
 
 } // namespace inet
