@@ -12,25 +12,25 @@ import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 network Mrp4
 {
-    @display("bgb=500,500");
+    @display("bgb=640,520");
     submodules:
         scenarioManager: ScenarioManager {
-            @display("p=80,60;is=s");
+            @display("p=80,80;is=s");
         }
         visualizer: IntegratedCanvasVisualizer {
-            @display("p=80,110;is=s");
+            @display("p=80,160;is=s");
         }
         node0: MrpSwitch {
-            @display("p=250,100");
+            @display("p=350,150");
         }
         node1: MrpSwitch {
-            @display("p=350,200");
+            @display("p=450,250");
         }
         node2: MrpSwitch {
-            @display("p=250,300");
+            @display("p=350,350");
         }
         node3: MrpSwitch {
-            @display("p=150,200");
+            @display("p=250,250");
         }
     connections:
         node0.ethg[0] <--> Eth100M <--> node1.ethg[1];
@@ -41,32 +41,32 @@ network Mrp4
 
 network Mrp4withHosts extends Mrp4
 {
-    @display("bgb=573,425");
+    @display("bgb=720,520");
     submodules:
         host1: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
-                @display("p=244,43");
+                @display("p=350,50");
         }
         host2: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
-                @display("p=460,201");
+                @display("p=550,250");
         }
 
         host3: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
-                @display("p=250,375");
+                @display("p=350,450");
         }
         host4: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
-                @display("p=63,201");
+                @display("p=150,250");
         }
     connections:
         node0.ethg[2] <--> Eth100M <--> host1.ethg;
@@ -77,43 +77,43 @@ network Mrp4withHosts extends Mrp4
 
 network Mrp8 extends Mrp4
 {
-    @display("bgb=1000,500");
+    @display("bgb=980,500");
     submodules:
         node4: MrpSwitch {
-            @display("p=690.25,99.145");
+            @display("p=700,150");
         }
         node5: MrpSwitch {
-            @display("p=837.08496,199.545");
+            @display("p=800,250");
         }
         node6: MrpSwitch {
-            @display("p=690.25,299.94498");
+            @display("p=700,350");
         }
         node7: MrpSwitch {
-            @display("p=557.22,199.545");
+            @display("p=600,250");
         }
         host1: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
-                @display("p=50,201");
+                @display("p=150,250");
         }
         host2: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
-                @display("p=459.33,251");
-        }  
+                @display("p=450,400");
+        }
         host3: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
-                @display("p=948.77997,200.79999");
+                @display("p=900,250");
         }
         host4: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
-                @display("p=459.33,159.385");
+                @display("p=600,400");
         }
     connections:
         node4.ethg[0] <--> Eth100M <--> node5.ethg[1];
@@ -167,7 +167,7 @@ network Mrp50
         nodeO[24].ethg[0] <--> Eth100M <--> nodeI[24].ethg[1];
         nodeI[24].ethg[0] <--> Eth100M <--> nodeO[0].ethg[1];
         for i=0..24 {
-                hostO[i].ethg <--> Eth100M <--> nodeO[i].ethg[2];
-                hostI[i].ethg <--> Eth100M <--> nodeI[i].ethg[2];
+            hostO[i].ethg <--> Eth100M <--> nodeO[i].ethg[2];
+            hostI[i].ethg <--> Eth100M <--> nodeI[i].ethg[2];
         }
 }
