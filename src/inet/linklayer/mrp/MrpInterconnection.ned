@@ -44,9 +44,6 @@ simple MrpInterconnection extends Mrp like IMediaRedundancy
  
         //PortNumber of interconnectionPort
         int interconnectionPort = default(2);       
-             
-        //each interconnection has an name assigned, for human readable identification
-        string InterconnectionName = default("interconnection1");
         
         //each interconnection has an unique indentifier, assign a value from 0 - 65535
         int interconnectionID = default(1);  
