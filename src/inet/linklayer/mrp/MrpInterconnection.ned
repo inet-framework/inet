@@ -39,9 +39,9 @@ simple MrpInterconnection extends Mrp like IMediaRedundancy
         
         // each interconnection node has to take over one of two possible roles regarding interconection: 
         // interconnection client or interconnection manager
-        // only one of the needed four nodes may have manager role (value 2), the other three nodes shall be in client role (value 1)
-        int interconnectionRole = default(1);
- 
+        // only one of the needed four nodes may have manager role (MIM, value 2), the other three nodes shall be in client role (MIC, value 1)
+        string interconnectionRole @enum("MIC", "MIM");
+  
         //PortNumber of interconnectionPort
         int interconnectionPort = default(2);       
         

@@ -30,7 +30,7 @@ protected:
         IP_IDLE,
     };
 
-    enum InRoleState : uint16_t {
+    enum InRoleState : uint16_t {  //TODO RoleState???
         INTERCONNECTION_CLIENT = 1, INTERCONNECTION_MANAGER = 2,
     };
 
@@ -86,6 +86,7 @@ protected:
     virtual void start() override;
     virtual void stop() override;
     virtual void initialize(int stage) override;
+    InRoleState parseInterconnectionRole(const char *role) const;
     void initInterconnectionPort();
     void micInit();
     void mimInit();

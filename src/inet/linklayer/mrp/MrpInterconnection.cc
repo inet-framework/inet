@@ -33,7 +33,7 @@ MrpInterconnection::~MrpInterconnection() {
 void MrpInterconnection::initialize(int stage) {
     Mrp::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        inRole = static_cast<InRoleState>(par("interconnectionRole").intValue());
+        inRole = parseInterconnectionRole(par("interconnectionRole"));
         interConnectionID = par("interconnectionID");
         interconnectionPort = par("interconnectionPort");
         linkCheckEnabled = par("linkCheckEnabled");
@@ -67,6 +67,16 @@ void MrpInterconnection::initInterconnectionPort() {
               << EV_FIELD(ifd->getRole())
               << EV_FIELD(ifd->getState())
               << EV_ENDL;
+}
+
+MrpInterconnection::InRoleState MrpInterconnection::parseInterconnectionRole(const char *role) const
+{
+    if (!strcmp(role, "MIC"))
+        return INTERCONNECTION_CLIENT;
+    else if (!strcmp(role, "MIM"))
+        return INTERCONNECTION_MANAGER;
+    else
+        throw cRuntimeError("Unknown MRP Interconnection role '%s'", role);
 }
 
 void MrpInterconnection::start() {
