@@ -33,9 +33,6 @@ void Ieee8021dRelay::initialize(int stage)
         WATCH(numDeliveredBDPUsToSTP);
         WATCH(numDispatchedNonBPDUFrames);
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
-        registerService(Protocol::ethernetMac, gate("upperLayerIn"), gate("upperLayerOut"));
-    }
 }
 
 void Ieee8021dRelay::registerAddress(MacAddress mac)

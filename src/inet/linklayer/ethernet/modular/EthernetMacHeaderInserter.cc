@@ -25,8 +25,6 @@ void EthernetMacHeaderInserter::initialize(int stage)
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         interfaceTable.reference(this, "interfaceTableModule", true);
-    else if (stage == INITSTAGE_LINK_LAYER)
-        registerService(Protocol::ethernetMac, inputGate, nullptr);
 }
 
 void EthernetMacHeaderInserter::processPacket(Packet *packet)
