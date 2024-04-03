@@ -1978,24 +1978,20 @@ void Mrp::updateDisplayString() const
 std::string Mrp::resolveDirective(char directive) const
 {
     switch (directive) {
-        case 'r':
-            return getMrpRoleName(expectedRole);
-        case 'n':
-            return getNodeStateName(currentState);
-        case 'g':
-            return getRingStateName(currentRingState);
-        default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+        case 'r': return getMrpRoleName(expectedRole, true);
+        case 'n': return getNodeStateName(currentState);
+        case 'g': return getRingStateName(currentRingState);
+        default: throw cRuntimeError("Unknown directive: %c", directive);
     }
 }
 
-const char *Mrp::getMrpRoleName(MrpRole role) {
+const char *Mrp::getMrpRoleName(MrpRole role, bool acronym) {
     switch (role) {
         case DISABLED: return "DISABLED";
-        case CLIENT: return "CLIENT";
-        case MANAGER: return "MANAGER";
-        case MANAGER_AUTO_COMP: return "MANAGER_AUTO_COMP";
-        case MANAGER_AUTO: return "MANAGER_AUTO";
+        case CLIENT: return acronym ? "MRC" : "CLIENT";
+        case MANAGER: return acronym ? "MRM" : "MANAGER";
+        case MANAGER_AUTO_COMP: return acronym ? "MRA-C" : "MANAGER_AUTO_COMP";
+        case MANAGER_AUTO: return acronym ? "MRA" : "MANAGER_AUTO";
         default: return "???";
     }
 }

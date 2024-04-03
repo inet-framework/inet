@@ -239,7 +239,7 @@ protected:
     virtual void refreshDisplay() const override;
     virtual void updateDisplayString() const;
     virtual std::string resolveDirective(char directive) const override;
-    static const char *getMrpRoleName(MrpRole role);
+    static const char *getMrpRoleName(MrpRole role, bool acronym);
     static const char *getNodeStateName(NodeState state);
     static const char *getRingStateName(RingState state);
 
