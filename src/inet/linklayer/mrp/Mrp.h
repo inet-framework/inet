@@ -84,13 +84,10 @@ protected:
     typedef std::map<uint16_t, int64_t> FrameSentDatabase;  // test frame sequence -> time sent
     typedef NetworkInterface::State LinkState;
 
-    const static uint16_t VLAN_LT = 0x8100;
-    const static uint8_t TAG_CONTROL_PRIO = 0x07;
     const static uint16_t MRP_LT = 0x88E3;
 
     bool visualize = false;
     Uuid domainID;
-    std::string domainName[241];
     int timingProfile;
     uint16_t vlanID = 0;
     uint8_t priority = 7;
@@ -107,8 +104,6 @@ protected:
     uint16_t transition = 0;
     uint16_t sequenceID = 0;
     uint16_t lastTopologyId = 0;
-    uint16_t ccm1ID = 0;
-    uint16_t ccm2ID = 0;
     MacAddress localBridgeAddress;
     opp_component_ptr<NetworkInterface> ringInterface1 = nullptr;
     opp_component_ptr<NetworkInterface> ringInterface2 = nullptr;
@@ -116,8 +111,6 @@ protected:
     int secondaryRingPort;
 
     //CCM
-    int maintenanceDomain;
-    int maintenanceAssociation;
     int sequenceCCM1 = 0;
     int sequenceCCM2 = 0;
     const MacAddress ccmMulticastAddress = MacAddress("01:80:C2:00:00:30");
