@@ -1023,22 +1023,18 @@ void MrpInterconnection::mrpForwardReq(TlvHeaderType headerType, int ringport, F
 std::string MrpInterconnection::resolveDirective(char directive) const
 {
     switch (directive) {
-        case 'R':
-            return getInterconnectionRoleName(inRole);
-        case 'N':
-            return getInterconnectionNodeStateName(inNodeState);
-        case 'I':
-            return getInterconnectionStateName(inTopologyState);
-        default:
-            return Mrp::resolveDirective(directive);
+        case 'R': return getInterconnectionRoleName(inRole, true);
+        case 'N': return getInterconnectionNodeStateName(inNodeState);
+        case 'I': return getInterconnectionStateName(inTopologyState);
+        default: return Mrp::resolveDirective(directive);
     }
 }
 
-const char *MrpInterconnection::getInterconnectionRoleName(InterconnectionRole role)
+const char *MrpInterconnection::getInterconnectionRoleName(InterconnectionRole role, bool acronym)
 {
     switch (role) {
-        case INTERCONNECTION_CLIENT: return "INTERCONNECTION_CLIENT";
-        case INTERCONNECTION_MANAGER: return "INTERCONNECTION_MANAGER";
+        case INTERCONNECTION_CLIENT: return acronym ? "MIC" : "INTERCONNECTION_CLIENT";
+        case INTERCONNECTION_MANAGER: return acronym ? "MIM" : "INTERCONNECTION_MANAGER";
         default: return "???";
     }
 }
