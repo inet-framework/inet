@@ -100,8 +100,8 @@ protected:
     cPar *processingDelayPar;
     MrpRole expectedRole = DISABLED;
 
-    NodeState currentState = POWER_ON;
-    RingState currentRingState = OPEN;
+    NodeState nodeState = POWER_ON;
+    RingState ringState = OPEN;
     uint16_t transition = 0;
     uint16_t sequenceID = 0;
     uint16_t lastTopologyId = 0;
