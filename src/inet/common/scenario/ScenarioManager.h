@@ -8,8 +8,11 @@
 #ifndef __INET_SCENARIOMANAGER_H
 #define __INET_SCENARIOMANAGER_H
 
+#include <list>
+
 #include "inet/common/lifecycle/LifecycleController.h"
 #include "inet/common/scenario/IScriptable.h"
+#include "inet/common/scenario/ScenarioTimer_m.h"
 
 namespace inet {
 
@@ -44,6 +47,7 @@ class INET_API ScenarioManager : public cSimpleModule, public LifecycleControlle
     // total number of changes, and number of changes already done
     int numChanges = 0;
     int numDone = 0;
+    std::list<ScenarioTimer *> scheduledEvents;  // list of scheduled events ordered by scheduling
 
   protected:
     // utilities
