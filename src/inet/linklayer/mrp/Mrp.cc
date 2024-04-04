@@ -32,6 +32,9 @@ static const char *DISABLED_LINK_COLOR = "#888888";
 
 Define_Module(Mrp);
 
+Register_Enum(Mrp::RingState, (Mrp::OPEN, Mrp::CLOSED, Mrp::UNDEFINED));
+Register_Enum(Mrp::NodeState, (Mrp::POWER_ON, Mrp::AC_STAT1, Mrp::PRM_UP, Mrp::CHK_RO, Mrp::CHK_RC, Mrp::DE_IDLE, Mrp::PT, Mrp::DE, Mrp::PT_IDLE));
+
 Mrp::Mrp() {
 }
 
@@ -158,6 +161,9 @@ void Mrp::initialize(int stage) {
         noTopologyChange = par("noTopologyChange");
 
         //signals
+        ringState.addEmitCallback(this, registerSignal("ringState"));
+        nodeState.addEmitCallback(this, registerSignal("nodeState"));
+
         linkChangeSignal = registerSignal("linkChange");
         topologyChangeSignal = registerSignal("topologyChange");
         testSignal = registerSignal("test");
