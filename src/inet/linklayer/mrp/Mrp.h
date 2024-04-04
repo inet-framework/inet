@@ -98,10 +98,11 @@ protected:
     bool enableLinkCheckOnRing = false;
     cPar *linkDetectionDelayPar;
     cPar *processingDelayPar;
-    MrpRole expectedRole = DISABLED;
 
+    MrpRole role = DISABLED;
     NodeState nodeState = POWER_ON;
     RingState ringState = OPEN;
+
     uint16_t transition = 0;
     uint16_t sequenceID = 0;
     uint16_t lastTopologyId = 0;

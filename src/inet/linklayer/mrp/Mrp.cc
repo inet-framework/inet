@@ -136,7 +136,7 @@ void Mrp::initialize(int stage) {
 
         //parameters
         visualize = par("visualize");
-        expectedRole = parseMrpRole(par("mrpRole"));
+        role = parseMrpRole(par("mrpRole"));
         //currently only inferfaceIndex
         primaryRingPort = par("ringPort1");
         secondaryRingPort = par("ringPort2");
@@ -318,11 +318,11 @@ void Mrp::start() {
     if (enableLinkCheckOnRing) {
         startContinuityCheck();
     }
-    if (expectedRole == CLIENT) {
+    if (role == CLIENT) {
         mrcInit();
-    } else if (expectedRole == MANAGER) {
+    } else if (role == MANAGER) {
         mrmInit();
-    } else if (expectedRole == MANAGER_AUTO) {
+    } else if (role == MANAGER_AUTO) {
         mraInit();
     }
 }
@@ -332,7 +332,7 @@ void Mrp::stop() {
     setPortRole(secondaryRingPort, MrpInterfaceData::NOTASSIGNED);
     setPortState(primaryRingPort, MrpInterfaceData::DISABLED);
     setPortState(secondaryRingPort, MrpInterfaceData::DISABLED);
-    expectedRole = DISABLED;
+    role = DISABLED;
     cancelAndDelete(fdbClearTimer);
     cancelAndDelete(fdbClearDelay);
     cancelAndDelete(topologyChangeTimer);
@@ -359,7 +359,7 @@ void Mrp::mrcInit() {
         mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPort, MacAddress(MC_INTEST), vlanID);
         mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPort, MacAddress(MC_INTEST), vlanID);
     }
-    if (expectedRole == CLIENT) {
+    if (role == CLIENT) {
         ringState = UNDEFINED;
         nodeState = AC_STAT1; //only for client, managerAuto is keeping the current state
     }
@@ -380,9 +380,9 @@ void Mrp::mrmInit() {
         relay->registerAddress(MacAddress(MC_INTEST));
     testMaxRetransmissionCount = testMonitoringCount - 1;
     testRetransmissionCount = 0;
-    if (expectedRole == MANAGER)
+    if (role == MANAGER)
         nodeState = AC_STAT1;
-    if (expectedRole == MANAGER_AUTO) {
+    if (role == MANAGER_AUTO) {
         //case: switching from Client to manager. in managerRole no Forwarding on RingPorts may take place
         mrpMacForwardingTable->removeMrpForwardingInterface(primaryRingPort, MacAddress(MC_TEST), vlanID);
         mrpMacForwardingTable->removeMrpForwardingInterface(secondaryRingPort, MacAddress(MC_TEST), vlanID);
@@ -620,14 +620,14 @@ void Mrp::handleMrpPDU(Packet* packet) {
                     break;
                 }
                 case TEST_MGR_NACK: {
-                    if (expectedRole == MANAGER_AUTO) {
+                    if (role == MANAGER_AUTO) {
                         auto subOptionTlv = dynamicPtrCast<const MrpSubTlvTest>(subTlv);
                         testMgrNackInd(ringPort, subOptionTlv->getSa(), static_cast<MrpPriority>(subOptionTlv->getPrio()), subOptionTlv->getOtherMRMSa());
                     }
                     break;
                 }
                 case TEST_PROPAGATE: {
-                    if (expectedRole == MANAGER_AUTO) {
+                    if (role == MANAGER_AUTO) {
                         auto subOptionTlv = dynamicPtrCast<const MrpSubTlvTest>(subTlv);
                         testPropagateInd(ringPort, subOptionTlv->getSa(), static_cast<MrpPriority>(subOptionTlv->getPrio()), subOptionTlv->getOtherMRMSa(), static_cast<MrpPriority>(subOptionTlv->getOtherMRMPrio()));
                     }
@@ -713,14 +713,14 @@ void Mrp::handleMrpPDU(Packet* packet) {
                 break;
             }
             case TEST_MGR_NACK: {
-                if (expectedRole == MANAGER_AUTO) {
+                if (role == MANAGER_AUTO) {
                     auto subOptionTlv = dynamicPtrCast<const MrpSubTlvTest>(subTlv);
                     testMgrNackInd(ringPort, subOptionTlv->getSa(), static_cast<MrpPriority>(subOptionTlv->getPrio()), subOptionTlv->getOtherMRMSa());
                 }
                 break;
             }
             case TEST_PROPAGATE: {
-                if (expectedRole == MANAGER_AUTO) {
+                if (role == MANAGER_AUTO) {
                     auto subOptionTlv = dynamicPtrCast<const MrpSubTlvTest>(subTlv);
                     testPropagateInd(ringPort, subOptionTlv->getSa(), static_cast<MrpPriority>(subOptionTlv->getPrio()), subOptionTlv->getOtherMRMSa(), static_cast<MrpPriority>(subOptionTlv->getOtherMRMPrio()));
                 }
@@ -837,7 +837,7 @@ void Mrp::handleTestTimer() {
     switch (nodeState) {
     case POWER_ON:
     case AC_STAT1:
-        if (expectedRole == MANAGER) {
+        if (role == MANAGER) {
             mauTypeChangeInd(primaryRingPort, getPortNetworkInterface(primaryRingPort)->getState());
         }
         break;
@@ -871,7 +871,7 @@ void Mrp::handleTestTimer() {
         break;
     case DE:
     case DE_IDLE:
-        if (expectedRole == MANAGER_AUTO) {
+        if (role == MANAGER_AUTO) {
             scheduleAfter(trunc_msec(shortTestInterval), testTimer);
             if (monNReturn <= monNRmax) {
                 monNReturn++;
@@ -883,7 +883,7 @@ void Mrp::handleTestTimer() {
         }
         break;
     case PT:
-        if (expectedRole == MANAGER_AUTO) {
+        if (role == MANAGER_AUTO) {
             scheduleAfter(trunc_msec(shortTestInterval), testTimer);
             if (monNReturn <= monNRmax) {
                 monNReturn++;
@@ -895,7 +895,7 @@ void Mrp::handleTestTimer() {
         }
         break;
     case PT_IDLE:
-        if (expectedRole == MANAGER_AUTO) {
+        if (role == MANAGER_AUTO) {
             scheduleAfter(trunc_msec(shortTestInterval), testTimer);
             if (monNReturn <= monNRmax) {
                 monNReturn++;
@@ -1077,7 +1077,7 @@ void Mrp::setupTestRingReq() {
     packet2->insertAtBack(commonTlv);
 
     //MRA only
-    if (expectedRole == MANAGER_AUTO) {
+    if (role == MANAGER_AUTO) {
         auto optionTlv = makeShared<MrpOption>();
         auto autoMgrTlv = makeShared<MrpSubTlvHeader>();
         uint8_t headerLength = optionTlv->getHeaderLength() + autoMgrTlv->getSubHeaderLength() + 2;
@@ -1279,7 +1279,7 @@ void Mrp::testRingInd(int ringPort, MacAddress sourceAddress, MrpPriority manage
             EV_DETAIL << "Switching State from PRM_UP to CHK_RC" << EV_FIELD(nodeState) << EV_ENDL;
             ringState = CLOSED;
             emit(ringStateChangedSignal, ringState);
-        } else if (expectedRole == MANAGER_AUTO
+        } else if (role == MANAGER_AUTO
                 && !isBetterThanOwnPrio(managerPrio, sourceAddress)) {
             testMgrNackReq(ringPort, managerPrio, sourceAddress);
         }
@@ -1301,7 +1301,7 @@ void Mrp::testRingInd(int ringPort, MacAddress sourceAddress, MrpPriority manage
             EV_DETAIL << "Switching State from CHK_RO to CHK_RC" << EV_FIELD(nodeState) << EV_ENDL;
             ringState = CLOSED;
             emit(ringStateChangedSignal, ringState);
-        } else if (expectedRole == MANAGER_AUTO
+        } else if (role == MANAGER_AUTO
                 && !isBetterThanOwnPrio(managerPrio, sourceAddress)) {
             testMgrNackReq(ringPort, managerPrio, sourceAddress);
         }
@@ -1312,7 +1312,7 @@ void Mrp::testRingInd(int ringPort, MacAddress sourceAddress, MrpPriority manage
             testMaxRetransmissionCount = testMonitoringCount - 1;
             testRetransmissionCount = 0;
             noTopologyChange = false;
-        } else if (expectedRole == MANAGER_AUTO
+        } else if (role == MANAGER_AUTO
                 && !isBetterThanOwnPrio(managerPrio, sourceAddress)) {
             testMgrNackReq(ringPort, managerPrio, sourceAddress);
         }
@@ -1321,7 +1321,7 @@ void Mrp::testRingInd(int ringPort, MacAddress sourceAddress, MrpPriority manage
     case DE_IDLE:
     case PT:
     case PT_IDLE:
-        if (expectedRole == MANAGER_AUTO && sourceAddress != localBridgeAddress
+        if (role == MANAGER_AUTO && sourceAddress != localBridgeAddress
                 && sourceAddress == hostBestMRMSourceAddress) {
             if (managerPrio < localManagerPrio
                     || (managerPrio == localManagerPrio
@@ -1365,7 +1365,7 @@ void Mrp::topologyChangeInd(MacAddress sourceAddress, simtime_t time) {
         break;
     case DE_IDLE:
         clearFDB(time);
-        if (expectedRole == MANAGER_AUTO
+        if (role == MANAGER_AUTO
                 && linkUpHysteresisTimer->isScheduled()) {
             setPortState(secondaryRingPort, MrpInterfaceData::FORWARDING);
             nodeState = PT_IDLE;
@@ -1486,7 +1486,7 @@ void Mrp::testMgrNackInd(int ringPort, MacAddress sourceAddress, MrpPriority man
     case PT_IDLE:
         break;
     case PRM_UP:
-        if (expectedRole == MANAGER_AUTO && sourceAddress != localBridgeAddress
+        if (role == MANAGER_AUTO && sourceAddress != localBridgeAddress
                 && bestMRMSourceAddress == localBridgeAddress) {
             if (isBetterThanBestPrio(managerPrio, sourceAddress)) {
                 hostBestMRMSourceAddress = sourceAddress;
@@ -1500,7 +1500,7 @@ void Mrp::testMgrNackInd(int ringPort, MacAddress sourceAddress, MrpPriority man
         }
         break;
     case CHK_RO:
-        if (expectedRole == MANAGER_AUTO && sourceAddress != localBridgeAddress
+        if (role == MANAGER_AUTO && sourceAddress != localBridgeAddress
                 && bestMRMSourceAddress == localBridgeAddress) {
             if (isBetterThanBestPrio(managerPrio, sourceAddress)) {
                 hostBestMRMSourceAddress = sourceAddress;
@@ -1514,7 +1514,7 @@ void Mrp::testMgrNackInd(int ringPort, MacAddress sourceAddress, MrpPriority man
         }
         break;
     case CHK_RC:
-        if (expectedRole == MANAGER_AUTO && sourceAddress != localBridgeAddress
+        if (role == MANAGER_AUTO && sourceAddress != localBridgeAddress
                 && bestMRMSourceAddress == localBridgeAddress) {
             if (isBetterThanBestPrio(managerPrio, sourceAddress)) {
                 hostBestMRMSourceAddress = sourceAddress;
@@ -1545,7 +1545,7 @@ void Mrp::testPropagateInd(int ringPort, MacAddress sourceAddress, MrpPriority m
     case DE_IDLE:
     case PT:
     case PT_IDLE:
-        if (expectedRole == MANAGER_AUTO && sourceAddress != localBridgeAddress
+        if (role == MANAGER_AUTO && sourceAddress != localBridgeAddress
                 && sourceAddress == hostBestMRMSourceAddress) {
             hostBestMRMSourceAddress = bestMRMSourceAddress;
             hostBestMRMPriority = bestMRMPrio;
@@ -1564,7 +1564,7 @@ void Mrp::mauTypeChangeInd(int ringPort, LinkState linkState) {
         break;
     case AC_STAT1:
         //Client
-        if (expectedRole == CLIENT) {
+        if (role == CLIENT) {
             if (linkState == LinkState::UP) {
                 if (ringPort == primaryRingPort) {
                     setPortState(primaryRingPort, MrpInterfaceData::FORWARDING);
@@ -1583,7 +1583,7 @@ void Mrp::mauTypeChangeInd(int ringPort, LinkState linkState) {
             break;
         }
         //Manager
-        if (expectedRole == MANAGER || expectedRole == MANAGER_AUTO) {
+        if (role == MANAGER || role == MANAGER_AUTO) {
             if (linkState == LinkState::UP) {
                 if (ringPort == primaryRingPort) {
                     setPortState(primaryRingPort, MrpInterfaceData::FORWARDING);
@@ -1978,7 +1978,7 @@ void Mrp::updateDisplayString() const
 std::string Mrp::resolveDirective(char directive) const
 {
     switch (directive) {
-        case 'r': return getMrpRoleName(expectedRole, true);
+        case 'r': return getMrpRoleName(role, true);
         case 'n': return getNodeStateName(nodeState);
         case 'g': return getRingStateName(ringState);
         default: throw cRuntimeError("Unknown directive: %c", directive);
