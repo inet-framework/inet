@@ -7,6 +7,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/StringFormat.h"
+#include "inet/common/Traced.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/common/MacForwardingTable.h"
 #include "inet/linklayer/mrp/MrpMacForwardingTable.h"
@@ -25,9 +26,7 @@ inline simtime_t trunc_msec(simtime_t t) { return t.trunc(SIMTIME_MS); }
  * Implements the base part of the MRP protocol, i.e. roles MRC, MRM and MRA.
  */
 class INET_API Mrp: public OperationalBase, public cListener, public StringFormat::IDirectiveResolver {
-protected:
-    typedef std::map<uint16_t, int64_t> FrameSentDatabase;  // test frame sequence -> time sent
-
+public:
     enum FrameType : uint64_t {
         MC_RESERVED = 0x000001154E000000,
         MC_TEST = 0x000001154E000001,
@@ -42,13 +41,13 @@ protected:
         uint64_t uuid1 = 0;
     };
 
-    enum RingState : uint16_t {
+    enum RingState {
         OPEN = 0x0000,
         CLOSED = 0x0001,
         UNDEFINED = 0x0003,
     };
 
-    enum MrpRole : uint16_t {
+    enum MrpRole {
         DISABLED = 0,
         CLIENT = 1,
         MANAGER = 2,
@@ -81,6 +80,8 @@ protected:
         PT_IDLE, //Pass Through Idle: both ring ports have a link and their port states are set to FORWARDING
     };
 
+protected:
+    typedef std::map<uint16_t, int64_t> FrameSentDatabase;  // test frame sequence -> time sent
     typedef NetworkInterface::State LinkState;
 
     const static uint16_t VLAN_LT = 0x8100;
@@ -99,9 +100,9 @@ protected:
     cPar *linkDetectionDelayPar;
     cPar *processingDelayPar;
 
-    MrpRole role = DISABLED;
-    NodeState nodeState = POWER_ON;
-    RingState ringState = OPEN;
+    Traced<MrpRole> role = DISABLED;
+    Traced<NodeState> nodeState = POWER_ON;
+    Traced<RingState> ringState = OPEN;
 
     uint16_t transition = 0;
     uint16_t sequenceID = 0;
