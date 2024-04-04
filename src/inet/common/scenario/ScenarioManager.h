@@ -10,7 +10,6 @@
 
 #include "inet/common/lifecycle/LifecycleController.h"
 #include "inet/common/scenario/IScriptable.h"
-#include "inet/common/StringFormat.h"
 
 namespace inet {
 
@@ -39,14 +38,12 @@ class INET_API cPostModuleInitNotification : public cModelChangeNotification
  *
  * @see IScriptable
  */
-class INET_API ScenarioManager : public cSimpleModule, public LifecycleController, public StringFormat::IDirectiveResolver
+class INET_API ScenarioManager : public cSimpleModule, public LifecycleController
 {
   protected:
     // total number of changes, and number of changes already done
     int numChanges = 0;
     int numDone = 0;
-    cEventHeap localFes;
-    cMessage *nextEvent; // already scheduled
 
   protected:
     // utilities
@@ -74,11 +71,8 @@ class INET_API ScenarioManager : public cSimpleModule, public LifecycleControlle
     virtual void processModuleSpecificCommand(const cXMLElement *node);
     virtual void processLifecycleCommand(const cXMLElement *node);
 
-    virtual void scheduleNext();
-    virtual std::string resolveDirective(char directive) const override;
-
   public:
-    ScenarioManager() : localFes("localFes", 4) {}
+    ScenarioManager() {}
 
   protected:
     virtual void initialize() override;

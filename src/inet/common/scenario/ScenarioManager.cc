@@ -54,11 +54,11 @@ static const char *OP_RESUME = "resume";
 
 void ScenarioManager::initialize()
 {
-    WATCH(nextEvent);
+    cXMLElement *script = par("script");
+
+    numChanges = numDone = 0;
     WATCH(numChanges);
     WATCH(numDone);
-
-    cXMLElement *script = par("script");
 
     for (cXMLElement *node = script->getFirstChild(); node; node = node->getNextSibling()) {
         // check attr t is present
@@ -70,14 +70,11 @@ void ScenarioManager::initialize()
         simtime_t t = SimTime::parse(tAttr);
         auto msg = new ScenarioTimer("scenario-event");
         msg->setXmlNode(node);
-        msg->setArrivalTime(t);
-        localFes.insert(msg);
+        scheduleAt(t, msg);
 
         // count it
         numChanges++;
     }
-
-    scheduleNext();
 }
 
 void ScenarioManager::handleMessage(cMessage *msg)
@@ -88,15 +85,6 @@ void ScenarioManager::handleMessage(cMessage *msg)
     processCommand(node);
 
     numDone++;
-
-    scheduleNext();
-}
-
-void ScenarioManager::scheduleNext()
-{
-    nextEvent = dynamic_cast<cMessage*>(localFes.removeFirst());
-    if (nextEvent)
-        scheduleAt(nextEvent->getArrivalTime(), nextEvent);
 }
 
 void ScenarioManager::processCommand(const cXMLElement *node)
@@ -489,28 +477,10 @@ void ScenarioManager::processLifecycleCommand(const cXMLElement *node)
 
 void ScenarioManager::refreshDisplay() const
 {
-    auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-    getDisplayString().setTagArg("t", 0, text.c_str());
+    char buf[80];
+    sprintf(buf, "total %d changes, %d left", numChanges, numChanges - numDone);
+    getDisplayString().setTagArg(ATTR_T, 0, buf);
 }
-
-std::string ScenarioManager::resolveDirective(char directive) const
-{
-    switch (directive) {
-        case 'c':
-            return std::to_string(numChanges);
-        case 'd':
-            return std::to_string(numDone);
-        case 'l':
-            return std::to_string(numChanges - numDone); // "numLeft"
-        case 't':
-            return nextEvent ? nextEvent->getArrivalTime().str() + "s" : "n/a";
-        case 'n':
-            return nextEvent ? nextEvent->getName() : "n/a";
-        default:
-            throw cRuntimeError("Unknown directive: %c", directive);
-    }
-}
-
 
 } // namespace inet
 
