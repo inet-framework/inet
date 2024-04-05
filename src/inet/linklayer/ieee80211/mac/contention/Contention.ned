@@ -26,6 +26,6 @@ simple Contention like IContention
         @statistic[backoffPeriodGenerated](title="backoff periods"; record=vector; interpolationmode=none);
         @statistic[backoffActive](title="backoff active"; source=warmup(count(backoffStarted)-count(backoffStopped)); record=vector; interpolationmode=sample-hold; autoWarmupFilter=false);
         @statistic[channelAccessGranted](title="channel access granted"; record=count,vector?);
-        @statistic[stateChanged](title="contention state"; enumname=inet::ieee80211::Contention::State; record=count,vector; interpolationmode=none);
-        @defaultStatistic(stateChanged:vector);
+        @statistic[state](source=stateChanged; title="contention state"; enumname=inet::ieee80211::Contention::State; record=count,vector; interpolationmode=none);
+        @defaultStatistic(state:vector);
 }
