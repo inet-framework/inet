@@ -43,7 +43,7 @@ simple TcpConnection {
         @signal[calcLoad];    // will record calcLoad (currently only with DcTcp)
         @signal[markingProb];   // will record marking probability (currently only with DcTcp)
 
-        @statistic[state](record=vector; interpolationmode=sample-hold);
+        @statistic[state](record=vector; enumname=inet::tcp::TcpState; interpolationmode=sample-hold);
         @statistic[sndWnd](record=vector; interpolationmode=sample-hold);    // snd_wnd
         @statistic[rcvWnd](record=vector; interpolationmode=sample-hold);    // rcv_wnd
         @statistic[rcvAdv](record=vector; interpolationmode=sample-hold);    // current advertised window (=rcv_adv)

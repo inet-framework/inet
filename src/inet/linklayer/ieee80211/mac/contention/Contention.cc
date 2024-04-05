@@ -16,7 +16,7 @@ namespace ieee80211 {
 
 simsignal_t Contention::stateChangedSignal = registerSignal("stateChanged");
 
-// for @statistic; don't forget to keep synchronized the C++ enum and the runtime enum definition
+// for @statistic
 Register_Enum(Contention::State,
         (Contention::IDLE,
          Contention::DEFER,
