@@ -480,10 +480,28 @@ void ScenarioManager::processLifecycleCommand(const cXMLElement *node)
 
 void ScenarioManager::refreshDisplay() const
 {
-    char buf[80];
-    sprintf(buf, "total %d changes, %d left", numChanges, numChanges - numDone);
-    getDisplayString().setTagArg(ATTR_T, 0, buf);
+    auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
+    getDisplayString().setTagArg("t", 0, text.c_str());
 }
+
+std::string ScenarioManager::resolveDirective(char directive) const
+{
+    switch (directive) {
+        case 'c':
+            return std::to_string(numChanges);
+        case 'd':
+            return std::to_string(numDone);
+        case 'l':
+            return std::to_string(numChanges - numDone); // "numLeft"
+        case 't':
+            return scheduledEvents.empty() ? "n/a" : scheduledEvents.front()->getArrivalTime().str() + "s";
+        case 'n':
+            return scheduledEvents.empty() ? "n/a" : scheduledEvents.front()->getName();
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+}
+
 
 } // namespace inet
 

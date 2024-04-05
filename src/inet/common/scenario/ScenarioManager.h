@@ -13,6 +13,7 @@
 #include "inet/common/lifecycle/LifecycleController.h"
 #include "inet/common/scenario/IScriptable.h"
 #include "inet/common/scenario/ScenarioTimer_m.h"
+#include "inet/common/StringFormat.h"
 
 namespace inet {
 
@@ -41,7 +42,7 @@ class INET_API cPostModuleInitNotification : public cModelChangeNotification
  *
  * @see IScriptable
  */
-class INET_API ScenarioManager : public cSimpleModule, public LifecycleController
+class INET_API ScenarioManager : public cSimpleModule, public LifecycleController, public StringFormat::IDirectiveResolver
 {
   protected:
     // total number of changes, and number of changes already done
@@ -74,6 +75,8 @@ class INET_API ScenarioManager : public cSimpleModule, public LifecycleControlle
     virtual void processDisconnectCommand(const cXMLElement *node);
     virtual void processModuleSpecificCommand(const cXMLElement *node);
     virtual void processLifecycleCommand(const cXMLElement *node);
+
+    virtual std::string resolveDirective(char directive) const override;
 
   public:
     ScenarioManager() {}
