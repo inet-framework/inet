@@ -24,7 +24,8 @@
 
 namespace inet {
 
-Register_Enum(inet::NodeStatus, (NodeStatus::UP, NodeStatus::DOWN, NodeStatus::GOING_UP, NodeStatus::GOING_DOWN));
+Register_Enum(NodeStatus::State, ( NodeStatus::UP, NodeStatus::DOWN, NodeStatus::GOING_UP, NodeStatus::GOING_DOWN ) );
+
 Define_Module(NodeStatus);
 
 simsignal_t NodeStatus::nodeStatusChangedSignal = registerSignal("nodeStatusChanged");
