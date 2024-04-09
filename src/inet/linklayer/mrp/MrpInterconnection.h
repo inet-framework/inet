@@ -51,10 +51,11 @@ protected:
     opp_component_ptr<NetworkInterface> interconnectionInterface = nullptr;
     int interconnectionPort;
 
-    double inLinkChangeInterval;
-    double inTopologyChangeInterval;
-    double inLinkStatusPollInterval;
-    double inTestDefaultInterval;
+    //TODO simtime_t
+    double inLinkChangeInterval_ms;
+    double inTopologyChangeInterval_ms;
+    double inLinkStatusPollInterval_ms;
+    double inTestDefaultInterval_ms;
 
     uint16_t inTestMonitoringCount = 8; //MRP_IN_TSTNRmax
     uint16_t inTestMaxRetransmissionCount = 0; //MRP_MIM_NRmax
