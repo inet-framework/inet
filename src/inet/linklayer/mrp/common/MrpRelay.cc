@@ -15,7 +15,7 @@
 #include "inet/linklayer/ethernet/basic/EthernetEncapsulation.h"
 #include "inet/linklayer/mrp/common/MrpPdu_m.h"
 #include "inet/linklayer/mrp/common/ContinuityCheckMessage_m.h"
-#include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
+#include "inet/linklayer/ieee8021d/common/Ieee8021dInterfaceData.h"
 #include <algorithm>
 #include <vector>
 
