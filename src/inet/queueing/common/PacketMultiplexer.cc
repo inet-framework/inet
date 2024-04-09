@@ -18,8 +18,6 @@ void PacketMultiplexer::initialize(int stage)
 {
     PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        forwardServiceRegistration = par("forwardServiceRegistration");
-        forwardProtocolRegistration = par("forwardProtocolRegistration");
         for (int i = 0; i < gateSize("in"); i++) {
             auto inputGate = gate("in", i);
             inputGates.push_back(inputGate);
