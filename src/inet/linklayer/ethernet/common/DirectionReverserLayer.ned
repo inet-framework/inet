@@ -34,7 +34,6 @@ module DirectionReverserLayer like IProtocolLayer
             @display("p=100,150");
         }
         fork: MessageDispatcher {
-            forwardServiceRegistration = false;
             @display("p=100,300;i=-;b=10,10,oval,grey,,1");
         }
         delayer: <default("")> like IPacketDelayer {
@@ -44,7 +43,6 @@ module DirectionReverserLayer like IProtocolLayer
             @display("p=500,300");
         }
         join: PacketMultiplexer {
-            forwardProtocolRegistration = false;
             @display("p=700,300");
         }
     connections:
