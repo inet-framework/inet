@@ -103,12 +103,14 @@ module EthernetSwitch like IEthernetNetworkNode
             @display("p=700,225");
         }
         cb: MessageDispatcher {
+            serviceMapping = default({"ethernetmac": "bridging"});
             @display("p=800,300;b=1200,5");
         }
         bridging: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IProtocolLayer {
             @display("p=700,375");
         }
         bl: MessageDispatcher {
+            protocolMapping = default({"arp": "bridging", "ipv4": "bridging", "ipv6": "bridging", "ieee8022llc": "bridging"});
             @display("p=800,450;b=1200,5");
         }
         ethernet: <default("EthernetEncapsulation")> like IEthernetLayer if typename != "" {
