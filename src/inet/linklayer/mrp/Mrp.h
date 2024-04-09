@@ -79,6 +79,8 @@ protected:
         PT_IDLE, //Pass Through Idle: both ring ports have a link and their port states are set to FORWARDING
     };
 
+    typedef NetworkInterface::State LinkState;
+
     const static uint16_t VLAN_LT = 0x8100;
     const static uint8_t TAG_CONTROL_PRIO = 0x07;
     const static uint16_t MRP_LT = 0x88E3;
@@ -213,16 +215,16 @@ protected:
     virtual void testMgrNackReq(int ringPort, MrpPriority managerPrio, MacAddress sourceAddress);
     virtual void testPropagateReq(int ringPort, MrpPriority managerPrio, MacAddress sourceAddress);
     virtual void topologyChangeReq(double time);
-    virtual void linkChangeReq(int ringPort, uint16_t linkState);
-    virtual void setupLinkChangeReq(int ringPort, uint16_t linkState, double time);
+    virtual void linkChangeReq(int ringPort, LinkState linkState);
+    virtual void setupLinkChangeReq(int ringPort, LinkState linkState, double time);
     virtual void testRingInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio);
     virtual void topologyChangeInd(MacAddress sourceAddress, double time);
-    virtual void linkChangeInd(uint16_t portMode, uint16_t linkState);
+    virtual void linkChangeInd(uint16_t portMode, LinkState linkState);
     virtual void testMgrNackInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio, MacAddress bestMRMSourceAddress);
     virtual void testPropagateInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio, MacAddress bestMRMSourceAddress, MrpPriority bestMRMPrio);
-    virtual void mauTypeChangeInd(int ringPort, uint16_t linkState);
+    virtual void mauTypeChangeInd(int ringPort, LinkState linkState);
     virtual void interconnTopologyChangeInd(MacAddress sourceAddress, double time, uint16_t inId, int ringPort, Packet* packet);
-    virtual void interconnLinkChangeInd(uint16_t inId, uint16_t linkstate, int ringPort, Packet* packet);
+    virtual void interconnLinkChangeInd(uint16_t inId, LinkState linkstate, int ringPort, Packet* packet);
     virtual void interconnLinkStatusPollInd(uint16_t inId, int ringPort, Packet* packet);
     virtual void interconnTestInd(MacAddress sourceAddress, int ringPort, uint16_t inId, Packet* packet);
     virtual void interconnForwardReq(int ringPort, Packet* packet);

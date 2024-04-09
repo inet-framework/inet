@@ -555,7 +555,7 @@ void Mrp::handleMrpPDU(Packet* packet) {
         EV_DETAIL << "Received LinkChange-Frame" << EV_ENDL;
         auto linkTlv = dynamicPtrCast<const MrpLinkChange>(firstTlv);
         if (ringID) {
-            uint16_t linkState = linkTlv->getHeaderType() == LINKDOWN ? NetworkInterface::DOWN : NetworkInterface::UP;
+            LinkState linkState = linkTlv->getHeaderType() == LINKDOWN ? LinkState::DOWN : LinkState::UP;
             linkChangeInd(linkTlv->getPortRole(), linkState);
             emit(receivedChangeSignal, linkTlv->getInterval());
         } else {
@@ -643,7 +643,7 @@ void Mrp::handleMrpPDU(Packet* packet) {
     case INLINKUP: {
         EV_DETAIL << "Received inLinkChange-Frame" << EV_ENDL;
         auto inLinkTlv = dynamicPtrCast<const MrpInLinkChange>(firstTlv);
-        uint16_t linkState = inLinkTlv->getHeaderType() == INLINKDOWN ? NetworkInterface::DOWN : NetworkInterface::UP;
+        LinkState linkState = inLinkTlv->getHeaderType() == INLINKDOWN ? LinkState::DOWN : LinkState::UP;
         interconnLinkChangeInd(inLinkTlv->getInID(), linkState, ringPort, packet->dup());
         break;
     }
@@ -745,7 +745,7 @@ void Mrp::handleContinuityCheckMessage(Packet* packet) {
             << EV_FIELD(sourceAddress)
             << EV_FIELD(incomingInterface->getMacAddress())
             << EV_ENDL;
-    mauTypeChangeInd(ringPort, NetworkInterface::UP);
+    mauTypeChangeInd(ringPort, LinkState::UP);
     emit(receivedContinuityCheckSignal, ringPort);
     delete packet;
 }
@@ -761,9 +761,9 @@ void Mrp::handleDelayTimer(int interfaceId, int field) {
             portData->setNextUpdate(nextUpdate);
         }
         if (interface->isUp() && interface->hasCarrier())
-            mauTypeChangeInd(interfaceId, NetworkInterface::UP);
+            mauTypeChangeInd(interfaceId, LinkState::UP);
         else
-            mauTypeChangeInd(interfaceId, NetworkInterface::DOWN);
+            mauTypeChangeInd(interfaceId, LinkState::DOWN);
     }
 }
 
@@ -804,7 +804,7 @@ void Mrp::handleContinuityCheckTimer(int ringPort) {
     if (simTime() >= portData->getNextUpdate()) {
         //no Message received within Lifetime
         EV_DETAIL << "Checktimer: Link considered down" << EV_ENDL;
-        mauTypeChangeInd(ringPort, NetworkInterface::DOWN);
+        mauTypeChangeInd(ringPort, LinkState::DOWN);
     }
     setupContinuityCheck(ringPort);
     ContinuityCheckTimer *checkTimer = new ContinuityCheckTimer("continuityCheckTimer");
@@ -911,7 +911,7 @@ void Mrp::handleLinkUpTimer() {
             currentState = PT_IDLE;
             EV_DETAIL << "Switching State from PT to PT_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         } else {
-            linkChangeReq(primaryRingPort, NetworkInterface::UP);
+            linkChangeReq(primaryRingPort, LinkState::UP);
         }
         break;
     case DE:
@@ -936,7 +936,7 @@ void Mrp::handleLinkDownTimer() {
             currentState = DE_IDLE;
             EV_DETAIL << "Switching State from DE to DE_IDLE" << EV_FIELD(currentState) << EV_ENDL;
         } else {
-            linkChangeReq(primaryRingPort, NetworkInterface::DOWN);
+            linkChangeReq(primaryRingPort, LinkState::DOWN);
         }
         break;
     case POWER_ON:
@@ -998,17 +998,17 @@ void Mrp::topologyChangeReq(double time_ms) {
 
 }
 
-void Mrp::linkChangeReq(int ringPort, uint16_t linkState) {
-    if (linkState == NetworkInterface::DOWN) {
+void Mrp::linkChangeReq(int ringPort, LinkState linkState) {
+    if (linkState == LinkState::DOWN) {
         if (!linkDownTimer->isScheduled()) {
             scheduleAt(simTime() + SimTime(linkDownInterval_ms, SIMTIME_MS), linkDownTimer);
-            setupLinkChangeReq(primaryRingPort, NetworkInterface::DOWN, linkChangeCount * linkDownInterval_ms);
+            setupLinkChangeReq(primaryRingPort, LinkState::DOWN, linkChangeCount * linkDownInterval_ms);
             linkChangeCount--;
         }
-    } else if (linkState == NetworkInterface::UP) {
+    } else if (linkState == LinkState::UP) {
         if (!linkUpTimer->isScheduled()) {
             scheduleAt(simTime() + SimTime(linkUpInterval_ms, SIMTIME_MS), linkUpTimer);
-            setupLinkChangeReq(primaryRingPort, NetworkInterface::UP, linkChangeCount * linkUpInterval_ms);
+            setupLinkChangeReq(primaryRingPort, LinkState::UP, linkChangeCount * linkUpInterval_ms);
             linkChangeCount--;
         }
     } else
@@ -1117,16 +1117,16 @@ void Mrp::setupTopologyChangeReq(uint32_t interval_ms) {
     emit(topologyChangeSignal, interval_ms);
 }
 
-void Mrp::setupLinkChangeReq(int ringPort, uint16_t linkState, double time_ms) {
+void Mrp::setupLinkChangeReq(int ringPort, LinkState linkState, double time_ms) {
     //Create MRP-PDU according MRP_LinkChange
     auto version = makeShared<MrpVersion>();
     auto linkChangeTlv = makeShared<MrpLinkChange>();
     auto commonTlv = makeShared<MrpCommon>();
     auto endTlv = makeShared<MrpEnd>();
 
-    if (linkState == NetworkInterface::UP) {
+    if (linkState == LinkState::UP) {
         linkChangeTlv->setHeaderType(LINKUP);
-    } else if (linkState == NetworkInterface::DOWN) {
+    } else if (linkState == LinkState::DOWN) {
         linkChangeTlv->setHeaderType(LINKDOWN);
     } else {
         throw cRuntimeError("Unknown LinkState in linkChangeRequest");
@@ -1360,7 +1360,7 @@ void Mrp::topologyChangeInd(MacAddress sourceAddress, double time_ms) {
     }
 }
 
-void Mrp::linkChangeInd(uint16_t portState, uint16_t linkState) {
+void Mrp::linkChangeInd(uint16_t portState, LinkState linkState) {
     switch (currentState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1375,7 +1375,7 @@ void Mrp::linkChangeInd(uint16_t portState, uint16_t linkState) {
                 addTest = true;
                 testRingReq(shortTestInterval_ms);
                 break;
-            } else if (linkState == NetworkInterface::UP) {
+            } else if (linkState == LinkState::UP) {
                 addTest = true;
                 testRingReq(shortTestInterval_ms);
                 double time = 0;
@@ -1383,7 +1383,7 @@ void Mrp::linkChangeInd(uint16_t portState, uint16_t linkState) {
                 break;
             }
         } else {
-            if (!nonBlockingMRC && linkState == NetworkInterface::UP) { //18
+            if (!nonBlockingMRC && linkState == LinkState::UP) { //18
                 double time = 0;
                 topologyChangeReq(time);
             }
@@ -1393,11 +1393,11 @@ void Mrp::linkChangeInd(uint16_t portState, uint16_t linkState) {
         break;
     case CHK_RO:
         if (!addTest) {
-            if (linkState == NetworkInterface::DOWN) {
+            if (linkState == LinkState::DOWN) {
                 addTest = true;
                 testRingReq(shortTestInterval_ms);
                 break;
-            } else if (linkState == NetworkInterface::UP) {
+            } else if (linkState == LinkState::UP) {
                 if (nonBlockingMRC) {
                     addTest = true;
                     testRingReq(shortTestInterval_ms);
@@ -1416,7 +1416,7 @@ void Mrp::linkChangeInd(uint16_t portState, uint16_t linkState) {
                 }
             }
         } else {
-            if (!nonBlockingMRC && linkState == NetworkInterface::UP) {
+            if (!nonBlockingMRC && linkState == LinkState::UP) {
                 setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
                 testMaxRetransmissionCount = testMonitoringExtendedCount - 1;
                 testRetransmissionCount = 0;
@@ -1433,7 +1433,7 @@ void Mrp::linkChangeInd(uint16_t portState, uint16_t linkState) {
         break;
     case CHK_RC:
         if (reactOnLinkChange) {
-            if (linkState == NetworkInterface::DOWN) {
+            if (linkState == LinkState::DOWN) {
                 setPortState(secondaryRingPort, MrpInterfaceData::FORWARDING);
                 double time = 0;
                 topologyChangeReq(time);
@@ -1442,7 +1442,7 @@ void Mrp::linkChangeInd(uint16_t portState, uint16_t linkState) {
                 emit(ringStateChangedSignal, currentRingState);
                 EV_DETAIL << "Switching State from CHK_RC to CHK_RO" << EV_FIELD(currentState) << EV_ENDL;
                 break;
-            } else if (linkState == NetworkInterface::UP) {
+            } else if (linkState == LinkState::UP) {
                 if (nonBlockingMRC) {
                     testMaxRetransmissionCount = testMonitoringCount - 1;
                 } else {
@@ -1544,7 +1544,7 @@ void Mrp::testPropagateInd(int ringPort, MacAddress sourceAddress, MrpPriority m
     }
 }
 
-void Mrp::mauTypeChangeInd(int ringPort, uint16_t linkState) {
+void Mrp::mauTypeChangeInd(int ringPort, LinkState linkState) {
     switch (currentState) {
     case POWER_ON:
         //all cases: ignore
@@ -1552,7 +1552,7 @@ void Mrp::mauTypeChangeInd(int ringPort, uint16_t linkState) {
     case AC_STAT1:
         //Client
         if (expectedRole == CLIENT) {
-            if (linkState == NetworkInterface::UP) {
+            if (linkState == LinkState::UP) {
                 if (ringPort == primaryRingPort) {
                     setPortState(primaryRingPort, MrpInterfaceData::FORWARDING);
                     EV_DETAIL << "Switching State from AC_STAT1 to DE_IDLE" << EV_ENDL;
@@ -1571,7 +1571,7 @@ void Mrp::mauTypeChangeInd(int ringPort, uint16_t linkState) {
         }
         //Manager
         if (expectedRole == MANAGER || expectedRole == MANAGER_AUTO) {
-            if (linkState == NetworkInterface::UP) {
+            if (linkState == LinkState::UP) {
                 if (ringPort == primaryRingPort) {
                     setPortState(primaryRingPort, MrpInterfaceData::FORWARDING);
                     testRingReq(defaultTestInterval_ms);
@@ -1598,7 +1598,7 @@ void Mrp::mauTypeChangeInd(int ringPort, uint16_t linkState) {
         break;
     case PRM_UP:
         if (ringPort == primaryRingPort
-                && linkState == NetworkInterface::DOWN) {
+                && linkState == LinkState::DOWN) {
             cancelEvent(testTimer);
             setPortState(primaryRingPort, MrpInterfaceData::BLOCKED);
             currentState = AC_STAT1;
@@ -1608,7 +1608,7 @@ void Mrp::mauTypeChangeInd(int ringPort, uint16_t linkState) {
             break;
         }
         if (ringPort == secondaryRingPort
-                && linkState == NetworkInterface::UP) {
+                && linkState == LinkState::UP) {
             testMaxRetransmissionCount = testMonitoringCount - 1;
             testRetransmissionCount = 0;
             noTopologyChange = true;
@@ -1622,7 +1622,7 @@ void Mrp::mauTypeChangeInd(int ringPort, uint16_t linkState) {
         //all other Cases: ignore
         break;
     case CHK_RO:
-        if (linkState == NetworkInterface::DOWN) {
+        if (linkState == LinkState::DOWN) {
             if (ringPort == primaryRingPort) {
                 toggleRingPorts();
                 setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
@@ -1646,7 +1646,7 @@ void Mrp::mauTypeChangeInd(int ringPort, uint16_t linkState) {
         //all other cases: ignore
         break;
     case CHK_RC:
-        if (linkState == NetworkInterface::DOWN) {
+        if (linkState == LinkState::DOWN) {
             if (ringPort == primaryRingPort) {
                 toggleRingPorts();
                 testRingReq(defaultTestInterval_ms);
@@ -1668,13 +1668,13 @@ void Mrp::mauTypeChangeInd(int ringPort, uint16_t linkState) {
         break;
     case DE_IDLE:
         if (ringPort == secondaryRingPort
-                && linkState == NetworkInterface::UP) {
-            linkChangeReq(primaryRingPort, NetworkInterface::UP);
+                && linkState == LinkState::UP) {
+            linkChangeReq(primaryRingPort, LinkState::UP);
             currentState = PT;
             EV_DETAIL << "Switching State from DE_IDLE to PT" << EV_FIELD(currentState) << EV_ENDL;
         }
         if (ringPort == primaryRingPort
-                && linkState == NetworkInterface::DOWN) {
+                && linkState == LinkState::DOWN) {
             setPortState(primaryRingPort, MrpInterfaceData::BLOCKED);
             currentState = AC_STAT1;
             EV_DETAIL << "Switching State from DE_IDLE to AC_STAT1" << EV_FIELD(currentState) << EV_ENDL;
@@ -1682,11 +1682,11 @@ void Mrp::mauTypeChangeInd(int ringPort, uint16_t linkState) {
         //all other cases: ignore
         break;
     case PT:
-        if (linkState == NetworkInterface::DOWN) {
+        if (linkState == LinkState::DOWN) {
             if (ringPort == secondaryRingPort) {
                 cancelEvent(linkUpTimer);
                 setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
-                linkChangeReq(primaryRingPort, NetworkInterface::DOWN);
+                linkChangeReq(primaryRingPort, LinkState::DOWN);
                 currentState = DE;
                 EV_DETAIL << "Switching State from PT to DE" << EV_FIELD(currentState) << EV_ENDL;
                 break;
@@ -1696,7 +1696,7 @@ void Mrp::mauTypeChangeInd(int ringPort, uint16_t linkState) {
                 toggleRingPorts();
                 setPortState(primaryRingPort, MrpInterfaceData::FORWARDING);
                 setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
-                linkChangeReq(primaryRingPort, NetworkInterface::DOWN);
+                linkChangeReq(primaryRingPort, LinkState::DOWN);
                 currentState = DE;
                 EV_DETAIL << "Switching State from PT to DE" << EV_FIELD(currentState) << EV_ENDL;
                 break;
@@ -1706,15 +1706,15 @@ void Mrp::mauTypeChangeInd(int ringPort, uint16_t linkState) {
         break;
     case DE:
         if (ringPort == secondaryRingPort
-                && linkState == NetworkInterface::UP) {
+                && linkState == LinkState::UP) {
             cancelEvent(linkDownTimer);
-            linkChangeReq(primaryRingPort, NetworkInterface::UP);
+            linkChangeReq(primaryRingPort, LinkState::UP);
             currentState = PT;
             EV_DETAIL << "Switching State from DE to PT" << EV_FIELD(currentState) << EV_ENDL;
             break;
         }
         if (ringPort == primaryRingPort
-                && linkState == NetworkInterface::DOWN) {
+                && linkState == LinkState::DOWN) {
             linkChangeCount = linkMaxChange;
             setPortState(primaryRingPort, MrpInterfaceData::BLOCKED);
             currentState = AC_STAT1;
@@ -1723,10 +1723,10 @@ void Mrp::mauTypeChangeInd(int ringPort, uint16_t linkState) {
         //all other cases: ignore
         break;
     case PT_IDLE:
-        if (linkState == NetworkInterface::DOWN) {
+        if (linkState == LinkState::DOWN) {
             if (ringPort == secondaryRingPort) {
                 setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
-                linkChangeReq(primaryRingPort, NetworkInterface::DOWN);
+                linkChangeReq(primaryRingPort, LinkState::DOWN);
                 currentState = DE;
                 EV_DETAIL << "Switching State from PT_IDLE to DE" << EV_FIELD(currentState) << EV_ENDL;
                 break;
@@ -1735,7 +1735,7 @@ void Mrp::mauTypeChangeInd(int ringPort, uint16_t linkState) {
                 primaryRingPort = secondaryRingPort;
                 secondaryRingPort = ringPort;
                 setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
-                linkChangeReq(primaryRingPort, NetworkInterface::DOWN);
+                linkChangeReq(primaryRingPort, LinkState::DOWN);
                 currentState = DE;
                 EV_DETAIL << "Switching State from PT_IDLE to DE" << EV_FIELD(currentState) << EV_ENDL;
                 break;
@@ -1780,7 +1780,7 @@ void Mrp::interconnTopologyChangeInd(MacAddress sourceAddress, double time_ms, u
     }
 }
 
-void Mrp::interconnLinkChangeInd(uint16_t inID, uint16_t linkstate, int ringPort, Packet *packet) {
+void Mrp::interconnLinkChangeInd(uint16_t inID, LinkState linkstate, int ringPort, Packet *packet) {
     switch (currentState) {
     case POWER_ON:
     case AC_STAT1:
