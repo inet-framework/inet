@@ -154,5 +154,8 @@ module LdpMplsRouter
         mpls.upperLayerOut --> nm.in++;
         mpls.lowerLayerOut --> ml.in++;
         ml.out++ --> mpls.lowerLayerIn;
+
+        nm.out++ --> ml.in++;
+        ml.out++ --> nm.in++;
 }
 

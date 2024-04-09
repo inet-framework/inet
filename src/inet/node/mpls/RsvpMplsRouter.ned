@@ -132,5 +132,8 @@ module RsvpMplsRouter
         ml.out++ --> mpls.lowerLayerIn;
         nm.out++ --> mpls.upperLayerIn;
         mpls.upperLayerOut --> nm.in++;
+
+        nm.out++ --> ml.in++;
+        ml.out++ --> nm.in++;
 }
 
