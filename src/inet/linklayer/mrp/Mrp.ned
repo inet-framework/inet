@@ -23,7 +23,7 @@
 //
 
 
-package inet.linklayer.mrp.mediaredundancy;
+package inet.linklayer.mrp;
 
 import inet.linklayer.contract.IMediaRedundancy;
 

@@ -11,7 +11,7 @@
 // @see EtherFrame, MrpMacForwardingTable, Stp, Rstp, MediaRedundancyNode, InterconnectionNode
 //
 
-package inet.linklayer.mrp.common;
+package inet.linklayer.mrp;
 
 import inet.linklayer.base.MacRelayUnitBase;
 import inet.linklayer.contract.IMacRelayUnit;

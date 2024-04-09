@@ -1,7 +1,7 @@
-#include "inet/linklayer/mrp/common/MrpProtocolDissector.h"
+#include "inet/linklayer/mrp/MrpProtocolDissector.h"
 
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/linklayer/mrp/common/MrpPdu_m.h"
+#include "inet/linklayer/mrp/MrpPdu_m.h"
 
 namespace inet {
 
