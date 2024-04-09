@@ -1,8 +1,9 @@
+//
 // Copyright (C) 2024 Daniel Zeitler
 // SPDX-License-Identifier: LGPL-3.0-or-later
+//
 
-package inet.tests.mrp;
-
+package inet.node.mrp;
 
 import inet.applications.contract.IApp;
 import inet.clock.contract.IClock;
@@ -10,25 +11,25 @@ import inet.common.IMeasurer;
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.common.packet.recorder.PcapRecorder;
-import inet.linklayer.configurator.L2NodeConfigurator;
+import inet.linklayer.configurator.common.L2NodeConfigurator;
 import inet.linklayer.contract.IEthernetInterface;
+import inet.linklayer.contract.IEthernetLayer;
+import inet.linklayer.contract.IIeee8021qLayer;
+import inet.linklayer.contract.IIeee8021rLayer;
+import inet.linklayer.contract.IIeee8022Llc;
 import inet.linklayer.contract.IMacForwardingTable;
 import inet.linklayer.contract.IMediaRedundancy;
 import inet.linklayer.contract.ISpanningTree;
-import inet.linklayer.ethernet.contract.IEthernetLayer;
-import inet.linklayer.ieee8021q.IIeee8021qLayer;
-import inet.linklayer.ieee8021r.IIeee8021rLayer;
-import inet.linklayer.ieee8022.IIeee8022Llc;
-import inet.protocolelement.measurement.IMeasurementLayer;
 import inet.networklayer.common.InterfaceTable;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.protocolelement.contract.IProtocolLayer;
+import inet.protocolelement.measurement.IMeasurementLayer;
 
 //
-// Model of an Ethernet switch which is able to utilize the mrp protocol.
-// 
+// Model of an Ethernet switch which is able to utilize the MRP protocol.
+//
 // @see ~Mrp, ~MrpInterconnection
-
+//
 module MrpSwitch like IEthernetNetworkNode
 {
     parameters:
@@ -131,10 +132,10 @@ module MrpSwitch like IEthernetNetworkNode
         }
     connections:
         if hasMrp {
-                mrp.relayIn <-- mrpMeasurementLayer.upperLayerOut;
-                mrp.relayOut --> mrpMeasurementLayer.upperLayerIn;
-                mrpMeasurementLayer.lowerLayerOut --> sc.in++;
-                mrpMeasurementLayer.lowerLayerIn <-- sc.out++;
+            mrp.relayIn <-- mrpMeasurementLayer.upperLayerOut;
+            mrp.relayOut --> mrpMeasurementLayer.upperLayerIn;
+            mrpMeasurementLayer.lowerLayerOut --> sc.in++;
+            mrpMeasurementLayer.lowerLayerIn <-- sc.out++;
         }
         ethernet.lowerLayerOut --> li.in++ if exists(ethernet);
         li.out++ --> ethernet.lowerLayerIn if exists(ethernet);
@@ -192,6 +193,4 @@ module MrpSwitch like IEthernetNetworkNode
             app[i].socketOut --> sc.in++;
             app[i].socketIn <-- sc.out++;
         }
-
-
 }

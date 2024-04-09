@@ -3,7 +3,7 @@
 
 package inet.tests.mrp;
 
-import inet.tests.mrp.MrpSwitch;
+import inet.node.mrp.MrpSwitch;
 import inet.node.ethernet.Eth1G;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth10M;
