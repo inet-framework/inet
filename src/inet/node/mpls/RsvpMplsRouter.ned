@@ -83,6 +83,7 @@ module RsvpMplsRouter
         }
         nm: MessageDispatcher {
             parameters:
+                interfaceMapping = default({"*": "mpls", "lo0": "lo[0]"});
                 @display("p=450,320;b=500,5,,,,1");
         }
         lo[numLoInterfaces]: <default("LoopbackInterface")> like ILoopbackInterface {
@@ -103,6 +104,7 @@ module RsvpMplsRouter
         }
         ml: MessageDispatcher {
             parameters:
+                protocolMapping = default({"ipv4": "mpls"});
                 @display("p=450,480;b=500,5,,,,1");
         }
     connections allowunconnected:

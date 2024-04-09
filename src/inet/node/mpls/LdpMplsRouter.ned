@@ -91,6 +91,7 @@ module LdpMplsRouter
         }
         nm: MessageDispatcher {
             parameters:
+                interfaceMapping = default({"*": "mpls", "lo0": "lo[0]"});
                 @display("p=700,400;b=1000,5,,,,1");
         }
         lo[numLoInterfaces]: <default("LoopbackInterface")> like ILoopbackInterface {
@@ -113,6 +114,7 @@ module LdpMplsRouter
 
         ml: MessageDispatcher {
             parameters:
+                protocolMapping = default({"ipv4": "mpls"});
                 @display("p=700,560;b=1000,5,,,,1");
         }
     connections allowunconnected:
