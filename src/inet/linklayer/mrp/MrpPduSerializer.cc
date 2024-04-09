@@ -1,10 +1,10 @@
 // Copyright (C) 2024 Daniel Zeitler
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "inet/linklayer/mrp/common/MrpPduSerializer.h"
+#include "inet/linklayer/mrp/MrpPduSerializer.h"
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/linklayer/mrp/common/MrpPdu_m.h"
+#include "inet/linklayer/mrp/MrpPdu_m.h"
 
 namespace inet {
 

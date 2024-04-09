@@ -4,13 +4,12 @@
 #ifndef __INET_MRPINTERCONNECTION_H
 #define __INET_MRPINTERCONNECTION_H
 
-#include "../mediaredundancy/Mrp.h"
+#include "Mrp.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/contract/IMacForwardingTable.h"
-//#include "inet/networklayer/common/InterfaceTable.h"
-#include "inet/linklayer/mrp/common/MrpPdu_m.h"
+#include "inet/linklayer/mrp/MrpPdu_m.h"
 
 namespace inet {
 

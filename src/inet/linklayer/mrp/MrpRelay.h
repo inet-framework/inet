@@ -5,7 +5,7 @@
 #define __INET_MRPRELAY_H
 
 #include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
-#include "inet/linklayer/mrp/common/MrpMacForwardingTable.h"
+#include "inet/linklayer/mrp/MrpMacForwardingTable.h"
 #include "inet/common/stlutils.h"
 #include <algorithm>
 #include <vector>

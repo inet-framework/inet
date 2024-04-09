@@ -1,7 +1,7 @@
 // Copyright (C) 2024 Daniel Zeitler
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-package inet.linklayer.mrp.common;
+package inet.linklayer.mrp;
 
 import inet.linklayer.contract.IMacForwardingTable;
 

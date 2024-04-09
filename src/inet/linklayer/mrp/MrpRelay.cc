@@ -13,13 +13,13 @@
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/configurator/MrpInterfaceData.h"
 #include "inet/linklayer/ethernet/basic/EthernetEncapsulation.h"
-#include "inet/linklayer/mrp/common/MrpPdu_m.h"
-#include "inet/linklayer/mrp/common/ContinuityCheckMessage_m.h"
+#include "inet/linklayer/mrp/MrpPdu_m.h"
+#include "inet/linklayer/mrp/ContinuityCheckMessage_m.h"
 #include "inet/linklayer/ieee8021d/common/Ieee8021dInterfaceData.h"
 #include <algorithm>
 #include <vector>
 
-#include "../mediaredundancy/Mrp.h"
+#include "Mrp.h"
 
 namespace inet {
 
