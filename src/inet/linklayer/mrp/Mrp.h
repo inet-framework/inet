@@ -131,12 +131,12 @@ protected:
     uint16_t monNRmax = 5;
     cMessage *linkUpHysteresisTimer = nullptr; //LNKUP_HYST_TIMER_RUNNING
 
-    double linkDownInterval = 20; //MRP_LNKdownT
-    double linkUpInterval = 20; //MRP_LNKupT
-    double topologyChangeInterval; //MRP_TOPchgT
-    double shortTestInterval; //MRP_TSTshortT
-    double defaultTestInterval; //MRP_TSTdefaultT
-    double ccmInterval = 10; // time in milliseconds. either 3.3 or 10 ms
+    double linkDownInterval_ms = 20; //MRP_LNKdownT
+    double linkUpInterval_ms = 20; //MRP_LNKupT
+    double topologyChangeInterval_ms; //MRP_TOPchgT
+    double shortTestInterval_ms; //MRP_TSTshortT
+    double defaultTestInterval_ms; //MRP_TSTdefaultT
+    double ccmInterval_ms = 10; // time in milliseconds. either 3.3 or 10 ms
 
     uint16_t topologyChangeMaxRepeatCount = 3; //MRP_TOPNRmax
     uint16_t topologyChangeRepeatCount = 0; //MRP_TOPNReturn
