@@ -96,7 +96,7 @@ protected:
     virtual void handleInLinkDownTimer();
     virtual void interconnTestReq(double time);
     virtual void interconnTopologyChangeReq(double time);
-    virtual void interconnLinkChangeReq(uint16_t linkState, double time);
+    virtual void interconnLinkChangeReq(LinkState linkState, double time);
     virtual void interconnLinkStatusPollReq(double time);
     virtual void inTransferReq(TlvHeaderType headerType, int ringPort, FrameType frameType, Packet *packet);
     virtual void mrpForwardReq(TlvHeaderType headerType, int ringport, FrameType frameType, Packet *packet);
@@ -105,9 +105,9 @@ protected:
     virtual void setupInterconnLinkStatusPollReq();
     virtual void interconnTestInd(MacAddress sourceAddress, int ringPort, uint16_t inId, Packet *packet) override;
     virtual void interconnTopologyChangeInd(MacAddress sourceAddress, double time, uint16_t inId, int ringPort, Packet *packet) override;
-    virtual void interconnLinkChangeInd(uint16_t inId, uint16_t linkState, int ringPort, Packet *packet) override;
+    virtual void interconnLinkChangeInd(uint16_t inId, LinkState linkState, int ringPort, Packet *packet) override;
     virtual void interconnLinkStatusPollInd(uint16_t inId, int ringPort, Packet *packet) override;
-    virtual void mauTypeChangeInd(int ringPort, uint16_t linkState) override;
+    virtual void mauTypeChangeInd(int ringPort, LinkState linkState) override;
 
 public:
     MrpInterconnection();
