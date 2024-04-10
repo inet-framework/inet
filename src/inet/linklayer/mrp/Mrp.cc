@@ -1279,8 +1279,7 @@ void Mrp::testRingInd(int ringPort, MacAddress sourceAddress, MrpPriority manage
             if (!reactOnLinkChange) {
                 topologyChangeReq(topologyChangeInterval);
             } else {
-                double time = 0;
-                topologyChangeReq(time);
+                topologyChangeReq(SIMTIME_ZERO);
             }
             currentState = CHK_RC;
             EV_DETAIL << "Switching State from CHK_RO to CHK_RC" << EV_FIELD(currentState) << EV_ENDL;
@@ -1382,14 +1381,12 @@ void Mrp::linkChangeInd(uint16_t portState, LinkState linkState) {
             } else if (linkState == LinkState::UP) {
                 addTest = true;
                 testRingReq(shortTestInterval);
-                double time = 0;
-                topologyChangeReq(time);
+                topologyChangeReq(SIMTIME_ZERO);
                 break;
             }
         } else {
             if (!nonBlockingMRC && linkState == LinkState::UP) { //18
-                double time = 0;
-                topologyChangeReq(time);
+                topologyChangeReq(SIMTIME_ZERO);
             }
             break;
         }
@@ -1411,8 +1408,7 @@ void Mrp::linkChangeInd(uint16_t portState, LinkState linkState) {
                     testRetransmissionCount = 0;
                     addTest = true;
                     testRingReq(shortTestInterval);
-                    double time = 0;
-                    topologyChangeReq(time);
+                    topologyChangeReq(SIMTIME_ZERO);
                     currentState = CHK_RC;
                     currentRingState = CLOSED;
                     emit(ringStateChangedSignal, currentRingState);
@@ -1425,8 +1421,7 @@ void Mrp::linkChangeInd(uint16_t portState, LinkState linkState) {
                 testMaxRetransmissionCount = testMonitoringExtendedCount - 1;
                 testRetransmissionCount = 0;
                 testRingReq(defaultTestInterval);
-                double time = 0;
-                topologyChangeReq(time);
+                topologyChangeReq(SIMTIME_ZERO);
                 currentState = CHK_RC;
                 currentRingState = CLOSED;
                 emit(ringStateChangedSignal, currentRingState);
@@ -1439,8 +1434,7 @@ void Mrp::linkChangeInd(uint16_t portState, LinkState linkState) {
         if (reactOnLinkChange) {
             if (linkState == LinkState::DOWN) {
                 setPortState(secondaryRingPort, MrpInterfaceData::FORWARDING);
-                double time = 0;
-                topologyChangeReq(time);
+                topologyChangeReq(SIMTIME_ZERO);
                 currentState = CHK_RO;
                 currentRingState = OPEN;
                 emit(ringStateChangedSignal, currentRingState);
@@ -1452,8 +1446,7 @@ void Mrp::linkChangeInd(uint16_t portState, LinkState linkState) {
                 } else {
                     testMaxRetransmissionCount = testMonitoringExtendedCount - 1;
                 }
-                double time = 0;
-                topologyChangeReq(time);
+                topologyChangeReq(SIMTIME_ZERO);
             }
         } else if (nonBlockingMRC) {
             if (!addTest) {
