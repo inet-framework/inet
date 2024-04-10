@@ -239,7 +239,7 @@ void Mrp::startContinuityCheck() {
                 class ContinuityCheckTimer *checkTimer = new ContinuityCheckTimer("continuityCheckTimer");
                 checkTimer->setPort(interfaceId);
                 checkTimer->setKind(1);
-                scheduleAt(simTime() + portData->getContinuityCheckInterval(), checkTimer);
+                scheduleAfter(portData->getContinuityCheckInterval(), checkTimer);
                 EV_DEBUG << "Next CCM-Interval:" << EV_FIELD(simTime() + portData->getContinuityCheckInterval()) << EV_ENDL;
             }
         }
@@ -399,10 +399,10 @@ void Mrp::mraInit() {
 
 void Mrp::clearFDB(simtime_t time) {
     if (!fdbClearTimer->isScheduled())
-        scheduleAt(simTime() + time, fdbClearTimer);
+        scheduleAfter(time, fdbClearTimer);
     else if (fdbClearTimer->getArrivalTime() > (simTime() + time)) {
         cancelEvent(fdbClearTimer);
-        scheduleAt(simTime() + time, fdbClearTimer);
+        scheduleAfter(time, fdbClearTimer);
     }
 }
 
@@ -428,8 +428,8 @@ void Mrp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
                     linkDetectionDelay = SimTime(par("linkDetectionDelay").doubleValue() * 1e3, SIMTIME_MS);
                 if (linkUpHysteresisTimer->isScheduled())
                     cancelEvent(linkUpHysteresisTimer);
-                scheduleAt(simTime() + linkDetectionDelay, linkUpHysteresisTimer);
-                scheduleAt(simTime() + linkDetectionDelay, delayTimer);
+                scheduleAfter(linkDetectionDelay, linkUpHysteresisTimer);
+                scheduleAfter(linkDetectionDelay, delayTimer);
             }
         }
     }
@@ -440,7 +440,7 @@ void Mrp::handleMessageWhenUp(cMessage *msg) {
         msg->setKind(2);
         EV_INFO << "Received Message on MrpNode, Rescheduling:" << EV_FIELD(msg) << EV_ENDL;
         processingDelay = SimTime(par("processingDelay").doubleValue() * 1e6, SIMTIME_US);
-        scheduleAt(simTime() + processingDelay, msg);
+        scheduleAfter(processingDelay, msg);
     } else {
         EV_INFO << "Received Self-Message:" << EV_FIELD(msg) << EV_ENDL;
         if (msg == testTimer)
@@ -772,7 +772,7 @@ void Mrp::clearLocalFDB() {
     if (fdbClearDelay->isScheduled())
         cancelEvent(fdbClearDelay);
     processingDelay = SimTime(par("processingDelay").doubleValue() * 1e6, SIMTIME_US);
-    scheduleAt(simTime() + processingDelay, fdbClearDelay);
+    scheduleAfter(processingDelay, fdbClearDelay);
     emit(clearFDBSignal, processingDelay.dbl());
 }
 
@@ -810,7 +810,7 @@ void Mrp::handleContinuityCheckTimer(int ringPort) {
     ContinuityCheckTimer *checkTimer = new ContinuityCheckTimer("continuityCheckTimer");
     checkTimer->setPort(ringPort);
     checkTimer->setKind(1);
-    scheduleAt(simTime() + portData->getContinuityCheckInterval(), checkTimer);
+    scheduleAfter(portData->getContinuityCheckInterval(), checkTimer);
 }
 
 void Mrp::handleTestTimer() {
@@ -852,7 +852,7 @@ void Mrp::handleTestTimer() {
     case DE:
     case DE_IDLE:
         if (expectedRole == MANAGER_AUTO) {
-            scheduleAt(simTime() + trunc_msec(shortTestInterval), testTimer);
+            scheduleAfter(trunc_msec(shortTestInterval), testTimer);
             if (monNReturn <= monNRmax) {
                 monNReturn++;
             } else {
@@ -864,7 +864,7 @@ void Mrp::handleTestTimer() {
         break;
     case PT:
         if (expectedRole == MANAGER_AUTO) {
-            scheduleAt(simTime() + trunc_msec(shortTestInterval), testTimer);
+            scheduleAfter(trunc_msec(shortTestInterval), testTimer);
             if (monNReturn <= monNRmax) {
                 monNReturn++;
             } else {
@@ -876,7 +876,7 @@ void Mrp::handleTestTimer() {
         break;
     case PT_IDLE:
         if (expectedRole == MANAGER_AUTO) {
-            scheduleAt(simTime() + trunc_msec(shortTestInterval), testTimer);
+            scheduleAfter(trunc_msec(shortTestInterval), testTimer);
             if (monNReturn <= monNRmax) {
                 monNReturn++;
             } else {
@@ -895,7 +895,7 @@ void Mrp::handleTopologyChangeTimer() {
     if (topologyChangeRepeatCount > 0) {
         setupTopologyChangeReq(topologyChangeRepeatCount * topologyChangeInterval);
         topologyChangeRepeatCount--;
-        scheduleAt(simTime() + trunc_msec(topologyChangeInterval), topologyChangeTimer);
+        scheduleAfter(trunc_msec(topologyChangeInterval), topologyChangeTimer);
     } else {
         topologyChangeRepeatCount = topologyChangeMaxRepeatCount - 1;
         clearLocalFDB();
@@ -980,7 +980,7 @@ void Mrp::testRingReq(simtime_t time) {
     if (addTest)
         cancelEvent(testTimer);
     if (!testTimer->isScheduled()) {
-        scheduleAt(simTime() + trunc_msec(time), testTimer);
+        scheduleAfter(trunc_msec(time), testTimer);
         setupTestRingReq();
     } else
         EV_DETAIL << "Testtimer already scheduled" << EV_ENDL;
@@ -991,7 +991,7 @@ void Mrp::topologyChangeReq(simtime_t time) {
         clearLocalFDB();
         setupTopologyChangeReq(time * topologyChangeMaxRepeatCount);
     } else if (!topologyChangeTimer->isScheduled()) {
-        scheduleAt(simTime() + trunc_msec(time), topologyChangeTimer);
+        scheduleAfter(trunc_msec(time), topologyChangeTimer);
         setupTopologyChangeReq(time * topologyChangeMaxRepeatCount);
     } else
         EV_DETAIL << "TopologyChangeTimer already scheduled" << EV_ENDL;
@@ -1001,13 +1001,13 @@ void Mrp::topologyChangeReq(simtime_t time) {
 void Mrp::linkChangeReq(int ringPort, LinkState linkState) {
     if (linkState == LinkState::DOWN) {
         if (!linkDownTimer->isScheduled()) {
-            scheduleAt(simTime() + linkDownInterval, linkDownTimer);
+            scheduleAfter(linkDownInterval, linkDownTimer);
             setupLinkChangeReq(primaryRingPort, LinkState::DOWN, linkChangeCount * linkDownInterval);
             linkChangeCount--;
         }
     } else if (linkState == LinkState::UP) {
         if (!linkUpTimer->isScheduled()) {
-            scheduleAt(simTime() + linkUpInterval, linkUpTimer);
+            scheduleAfter(linkUpInterval, linkUpTimer);
             setupLinkChangeReq(primaryRingPort, LinkState::UP, linkChangeCount * linkUpInterval);
             linkChangeCount--;
         }
