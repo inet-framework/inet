@@ -104,7 +104,7 @@ protected:
     virtual void setupInterconnTopologyChangeReq(simtime_t time);
     virtual void setupInterconnLinkStatusPollReq();
     virtual void interconnTestInd(MacAddress sourceAddress, int ringPort, uint16_t inId, Packet *packet) override;
-    virtual void interconnTopologyChangeInd(MacAddress sourceAddress, double time, uint16_t inId, int ringPort, Packet *packet) override;
+    virtual void interconnTopologyChangeInd(MacAddress sourceAddress, simtime_t time, uint16_t inId, int ringPort, Packet *packet) override;
     virtual void interconnLinkChangeInd(uint16_t inId, LinkState linkState, int ringPort, Packet *packet) override;
     virtual void interconnLinkStatusPollInd(uint16_t inId, int ringPort, Packet *packet) override;
     virtual void mauTypeChangeInd(int ringPort, LinkState linkState) override;
