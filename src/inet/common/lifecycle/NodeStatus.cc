@@ -44,7 +44,7 @@ NodeStatus::State NodeStatus::getStateByName(const char *name)
 {
     std::string temp = name;
     std::transform(temp.begin(), temp.end(), temp.begin(), ::toupper);
-    cEnum *e = cEnum::get("inet::NodeStatus");
+    cEnum *e = cEnum::get("inet::NodeStatus::State");
     int state = e->lookup(temp.c_str(), -1);
     if (state == -1)
         throw cRuntimeError("Invalid state name '%s'", name);
