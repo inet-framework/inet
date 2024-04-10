@@ -251,7 +251,7 @@ void Mrp::setTimingProfile(int maxRecoveryTime) {
     //maxrecoverytime in ms,
     switch (maxRecoveryTime) {
     case 500:
-        topologyChangeInterval_ms = 20;
+        topologyChangeInterval = SimTime(20, SIMTIME_MS);
         shortTestInterval = SimTime(30, SIMTIME_MS);
         defaultTestInterval = SimTime(50, SIMTIME_MS);
         testMonitoringCount = 5;
@@ -259,7 +259,7 @@ void Mrp::setTimingProfile(int maxRecoveryTime) {
         linkDownInterval_ms = 20;
         break;
     case 200:
-        topologyChangeInterval_ms = 10;
+        topologyChangeInterval = SimTime(10, SIMTIME_MS);
         shortTestInterval = SimTime(10, SIMTIME_MS);
         defaultTestInterval = SimTime(20, SIMTIME_MS);
         testMonitoringCount = 3;
@@ -267,7 +267,7 @@ void Mrp::setTimingProfile(int maxRecoveryTime) {
         linkDownInterval_ms = 20;
         break;
     case 30:
-        topologyChangeInterval_ms = 0.5;
+        topologyChangeInterval = SimTime(500, SIMTIME_US);
         shortTestInterval = SimTime(1, SIMTIME_MS);
         defaultTestInterval = SimTime(3500, SIMTIME_US);
         testMonitoringCount = 3;
@@ -275,7 +275,7 @@ void Mrp::setTimingProfile(int maxRecoveryTime) {
         linkDownInterval_ms = 3;
         break;
     case 10:
-        topologyChangeInterval_ms = 0.5;
+        topologyChangeInterval = SimTime(500, SIMTIME_US);
         shortTestInterval = SimTime(500, SIMTIME_US);
         defaultTestInterval = SimTime(1, SIMTIME_MS);
         testMonitoringCount = 3;
@@ -836,7 +836,7 @@ void Mrp::handleTestTimer() {
             testRetransmissionCount = 0;
             addTest = false;
             if (!noTopologyChange) {
-                topologyChangeReq(topologyChangeInterval_ms);
+                topologyChangeReq(topologyChangeInterval);
             }
             testRingReq(defaultTestInterval);
             currentState = CHK_RO;
@@ -893,9 +893,9 @@ void Mrp::handleTestTimer() {
 
 void Mrp::handleTopologyChangeTimer() {
     if (topologyChangeRepeatCount > 0) {
-        setupTopologyChangeReq(topologyChangeRepeatCount * topologyChangeInterval_ms);
+        setupTopologyChangeReq(topologyChangeRepeatCount * topologyChangeInterval);
         topologyChangeRepeatCount--;
-        scheduleAt(simTime() + SimTime(topologyChangeInterval_ms, SIMTIME_MS), topologyChangeTimer);
+        scheduleAt(simTime() + trunc_msec(topologyChangeInterval), topologyChangeTimer);
     } else {
         topologyChangeRepeatCount = topologyChangeMaxRepeatCount - 1;
         clearLocalFDB();
@@ -986,13 +986,13 @@ void Mrp::testRingReq(simtime_t time) {
         EV_DETAIL << "Testtimer already scheduled" << EV_ENDL;
 }
 
-void Mrp::topologyChangeReq(double time_ms) {
-    if (time_ms == 0) {
+void Mrp::topologyChangeReq(simtime_t time) {
+    if (time == 0) {
         clearLocalFDB();
-        setupTopologyChangeReq(time_ms * topologyChangeMaxRepeatCount);
+        setupTopologyChangeReq(time * topologyChangeMaxRepeatCount);
     } else if (!topologyChangeTimer->isScheduled()) {
-        scheduleAt(simTime() + SimTime(time_ms, SIMTIME_MS), topologyChangeTimer);
-        setupTopologyChangeReq(time_ms * topologyChangeMaxRepeatCount);
+        scheduleAt(simTime() + trunc_msec(time), topologyChangeTimer);
+        setupTopologyChangeReq(time * topologyChangeMaxRepeatCount);
     } else
         EV_DETAIL << "TopologyChangeTimer already scheduled" << EV_ENDL;
 
@@ -1077,7 +1077,7 @@ void Mrp::setupTestRingReq() {
     emit(testSignal, lastTestFrameSent);
 }
 
-void Mrp::setupTopologyChangeReq(uint32_t interval_ms) {
+void Mrp::setupTopologyChangeReq(simtime_t interval) {
     //Create MRP-PDU according MRP_TopologyChange
     auto version = makeShared<MrpVersion>();
     auto topologyChangeTlv = makeShared<MrpTopologyChange>();
@@ -1088,11 +1088,11 @@ void Mrp::setupTopologyChangeReq(uint32_t interval_ms) {
     topologyChangeTlv->setPrio(localManagerPrio);
     topologyChangeTlv->setSa(localBridgeAddress);
     topologyChangeTlv->setPortRole(MrpInterfaceData::PRIMARY);
-    topologyChangeTlv->setInterval(interval_ms);
+    topologyChangeTlv->setInterval(interval.inUnit(SIMTIME_MS));
     topologyChangeTlv2->setPrio(localManagerPrio);
     topologyChangeTlv2->setPortRole(MrpInterfaceData::SECONDARY);
     topologyChangeTlv2->setSa(localBridgeAddress);
-    topologyChangeTlv2->setInterval(interval_ms);
+    topologyChangeTlv2->setInterval(interval.inUnit(SIMTIME_MS));
 
     commonTlv->setSequenceID(sequenceID);
     sequenceID++;
@@ -1114,7 +1114,7 @@ void Mrp::setupTopologyChangeReq(uint32_t interval_ms) {
     packet2->insertAtBack(endTlv);
     MacAddress sourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
     sendFrameReq(secondaryRingPort, MacAddress(MC_CONTROL), sourceAddress2, priority, MRP_LT, packet2);
-    emit(topologyChangeSignal, interval_ms);
+    emit(topologyChangeSignal, (uint64_t)interval.inUnit(SIMTIME_MS));
 }
 
 void Mrp::setupLinkChangeReq(int ringPort, LinkState linkState, double time_ms) {
@@ -1273,7 +1273,7 @@ void Mrp::testRingInd(int ringPort, MacAddress sourceAddress, MrpPriority manage
             noTopologyChange = false;
             testRingReq(defaultTestInterval);
             if (!reactOnLinkChange) {
-                topologyChangeReq(topologyChangeInterval_ms);
+                topologyChangeReq(topologyChangeInterval);
             } else {
                 double time = 0;
                 topologyChangeReq(time);
@@ -1627,7 +1627,7 @@ void Mrp::mauTypeChangeInd(int ringPort, LinkState linkState) {
                 toggleRingPorts();
                 setPortState(secondaryRingPort, MrpInterfaceData::BLOCKED);
                 testRingReq(defaultTestInterval);
-                topologyChangeReq(topologyChangeInterval_ms);
+                topologyChangeReq(topologyChangeInterval);
                 currentState = PRM_UP;
                 currentRingState = OPEN;
                 emit(ringStateChangedSignal, currentRingState);
@@ -1650,7 +1650,7 @@ void Mrp::mauTypeChangeInd(int ringPort, LinkState linkState) {
             if (ringPort == primaryRingPort) {
                 toggleRingPorts();
                 testRingReq(defaultTestInterval);
-                topologyChangeReq(topologyChangeInterval_ms);
+                topologyChangeReq(topologyChangeInterval);
                 currentState = PRM_UP;
                 currentRingState = OPEN;
                 emit(ringStateChangedSignal, currentRingState);
@@ -1760,13 +1760,13 @@ void Mrp::interconnTopologyChangeInd(MacAddress sourceAddress, double time_ms, u
     case PRM_UP:
     case CHK_RC:
         if (!topologyChangeTimer->isScheduled()) {
-            topologyChangeReq(time_ms);
+            topologyChangeReq(SimTime(time_ms)/1000.0);
         }
         delete packet;
         break;
     case CHK_RO:
         if (!topologyChangeTimer->isScheduled()) {
-            topologyChangeReq(time_ms);
+            topologyChangeReq(SimTime(time_ms)/1000.0);
             delete packet;
         }
         if (ringPort == primaryRingPort) {
