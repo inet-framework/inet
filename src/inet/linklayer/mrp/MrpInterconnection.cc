@@ -158,25 +158,25 @@ void MrpInterconnection::setTimingProfile(int maxRecoveryTime) {
     Mrp::setTimingProfile(maxRecoveryTime);
     switch (maxRecoveryTime) {
     case 500:
-        inLinkChangeInterval_ms = 20;
+        inLinkChangeInterval = SimTime(20, SIMTIME_MS);
         inTopologyChangeInterval = SimTime(20, SIMTIME_MS);
         inLinkStatusPollInterval = SimTime(20, SIMTIME_MS);
         inTestDefaultInterval = SimTime(50, SIMTIME_MS);
         break;
     case 200:
-        inLinkChangeInterval_ms = 20;
+        inLinkChangeInterval = SimTime(20, SIMTIME_MS);
         inTopologyChangeInterval = SimTime(10, SIMTIME_MS);
         inLinkStatusPollInterval = SimTime(20, SIMTIME_MS);
         inTestDefaultInterval = SimTime(20, SIMTIME_MS);
         break;
     case 30:
-        inLinkChangeInterval_ms = 3;
+        inLinkChangeInterval = SimTime(3, SIMTIME_MS);
         inTopologyChangeInterval = SimTime(1, SIMTIME_MS);
         inLinkStatusPollInterval = SimTime(3, SIMTIME_MS);
         inTestDefaultInterval = SimTime(3, SIMTIME_MS);
         break;
     case 10:
-        inLinkChangeInterval_ms = 3;
+        inLinkChangeInterval = SimTime(3, SIMTIME_MS);
         inTopologyChangeInterval = SimTime(1, SIMTIME_MS);
         inLinkStatusPollInterval = SimTime(3, SIMTIME_MS);
         inTestDefaultInterval = SimTime(3, SIMTIME_MS);
@@ -319,8 +319,8 @@ void MrpInterconnection::handleInLinkUpTimer() {
             setPortState(interconnectionPort, MrpInterfaceData::FORWARDING);
             inState = IP_IDLE;
         } else {
-            scheduleAt(simTime() + SimTime(inLinkChangeInterval_ms, SIMTIME_MS), inLinkUpTimer);
-            interconnLinkChangeReq(LinkState::UP, inLinkChangeCount * inLinkChangeInterval_ms);
+            scheduleAt(simTime() + inLinkChangeInterval, inLinkUpTimer);
+            interconnLinkChangeReq(LinkState::UP, inLinkChangeCount * inLinkChangeInterval);
         }
         break;
     case IP_IDLE:
@@ -342,8 +342,8 @@ void MrpInterconnection::handleInLinkDownTimer() {
             if (inLinkChangeCount == 0) {
                 inLinkChangeCount = inLinkMaxChange;
             } else {
-                scheduleAt(simTime() + SimTime(inLinkChangeInterval_ms, SIMTIME_MS), inLinkDownTimer);
-                interconnLinkChangeReq(LinkState::DOWN, inLinkChangeCount * inLinkChangeInterval_ms);
+                scheduleAt(simTime() + inLinkChangeInterval, inLinkDownTimer);
+                interconnLinkChangeReq(LinkState::DOWN, inLinkChangeCount * inLinkChangeInterval);
             }
         }
         break;
@@ -381,8 +381,8 @@ void MrpInterconnection::mauTypeChangeInd(int ringPort, LinkState linkState) {
                 } else if (inRole == INTERCONNECTION_CLIENT) {
                     inLinkChangeCount = inLinkMaxChange;
                     cancelEvent(inLinkDownTimer);
-                    scheduleAt(simTime() + SimTime(inLinkChangeInterval_ms, SIMTIME_MS), inLinkUpTimer);
-                    interconnLinkChangeReq(LinkState::UP, inLinkChangeCount * inLinkChangeInterval_ms);
+                    scheduleAt(simTime() + inLinkChangeInterval, inLinkUpTimer);
+                    interconnLinkChangeReq(LinkState::UP, inLinkChangeCount * inLinkChangeInterval);
                     inState = PT;
                     EV_DETAIL << "Switching InState from AC_STAT1 to PT"
                                      << EV_FIELD(inState) << EV_ENDL;
@@ -421,8 +421,8 @@ void MrpInterconnection::mauTypeChangeInd(int ringPort, LinkState linkState) {
                 inLinkChangeCount = inLinkMaxChange;
                 cancelEvent(inLinkUpTimer);
                 setPortState(ringPort, MrpInterfaceData::BLOCKED);
-                scheduleAt(simTime() + SimTime(inLinkChangeInterval_ms, SIMTIME_MS), inLinkDownTimer);
-                interconnLinkChangeReq(LinkState::DOWN, inLinkChangeCount * inLinkChangeInterval_ms);
+                scheduleAt(simTime() + inLinkChangeInterval, inLinkDownTimer);
+                interconnLinkChangeReq(LinkState::DOWN, inLinkChangeCount * inLinkChangeInterval);
                 inState = AC_STAT1;
                 EV_DETAIL << "Switching InState from PT to AC_STAT1"
                                  << EV_FIELD(inState) << EV_ENDL;
@@ -432,8 +432,8 @@ void MrpInterconnection::mauTypeChangeInd(int ringPort, LinkState linkState) {
             if (linkState == LinkState::DOWN) {
                 inLinkChangeCount = inLinkMaxChange;
                 setPortState(ringPort, MrpInterfaceData::BLOCKED);
-                scheduleAt(simTime() + SimTime(inLinkChangeInterval_ms, SIMTIME_MS), inLinkDownTimer);
-                interconnLinkChangeReq(LinkState::DOWN, inLinkChangeCount * inLinkChangeInterval_ms);
+                scheduleAt(simTime() + inLinkChangeInterval, inLinkDownTimer);
+                interconnLinkChangeReq(LinkState::DOWN, inLinkChangeCount * inLinkChangeInterval);
                 inState = AC_STAT1;
                 EV_DETAIL << "Switching InState from IP_IDLE to AC_STAT1"
                                  << EV_FIELD(inState) << EV_ENDL;
@@ -856,7 +856,7 @@ void MrpInterconnection::setupInterconnTopologyChangeReq(simtime_t time) {
     emit(inTopologyChangeSignal, simTime().inUnit(SIMTIME_US));
 }
 
-void MrpInterconnection::interconnLinkChangeReq(LinkState linkState, double time_ms) {
+void MrpInterconnection::interconnLinkChangeReq(LinkState linkState, simtime_t time) {
     //Create MRP-PDU according MRP_InLinkUp or MRP_InLinkDown
     auto version = makeShared<MrpVersion>();
     auto inLinkChangeTLV1 = makeShared<MrpInLinkChange>();
@@ -876,21 +876,21 @@ void MrpInterconnection::interconnLinkChangeReq(LinkState linkState, double time
     inLinkChangeTLV1->setInID(interConnectionID);
     inLinkChangeTLV1->setSa(localBridgeAddress);
     inLinkChangeTLV1->setPortRole(MrpInterfaceData::PRIMARY);
-    inLinkChangeTLV1->setInterval(time_ms);
+    inLinkChangeTLV1->setInterval(time.inUnit(SIMTIME_MS));
     inLinkChangeTLV1->setLinkInfo(0x00); // "sent from the primary link"
 
     inLinkChangeTLV2->setHeaderType(type);
     inLinkChangeTLV2->setInID(interConnectionID);
     inLinkChangeTLV2->setSa(localBridgeAddress);
     inLinkChangeTLV2->setPortRole(MrpInterfaceData::SECONDARY);
-    inLinkChangeTLV2->setInterval(time_ms);
+    inLinkChangeTLV2->setInterval(time.inUnit(SIMTIME_MS));
     inLinkChangeTLV2->setLinkInfo(0x01); // "sent from the secondary link"
 
     inLinkChangeTLV3->setHeaderType(type);
     inLinkChangeTLV3->setInID(interConnectionID);
     inLinkChangeTLV3->setSa(localBridgeAddress);
     inLinkChangeTLV3->setPortRole(MrpInterfaceData::INTERCONNECTION);
-    inLinkChangeTLV3->setInterval(time_ms);
+    inLinkChangeTLV3->setInterval(time.inUnit(SIMTIME_MS));
     inLinkChangeTLV3->setLinkInfo(0x00); //TODO or maybe 0x01? -- see "Table 39 – MRP_LinkInfo"
 
     commonTLV->setSequenceID(sequenceID);
