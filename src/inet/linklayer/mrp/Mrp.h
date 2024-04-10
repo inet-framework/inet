@@ -136,8 +136,8 @@ protected:
     uint16_t monNRmax = 5;
     cMessage *linkUpHysteresisTimer = nullptr; //LNKUP_HYST_TIMER_RUNNING
 
-    double linkDownInterval_ms = 20; //MRP_LNKdownT
-    double linkUpInterval_ms = 20; //MRP_LNKupT
+    simtime_t linkDownInterval = SimTime(20, SIMTIME_MS); //MRP_LNKdownT
+    simtime_t linkUpInterval = SimTime(20, SIMTIME_MS); //MRP_LNKupT
     simtime_t topologyChangeInterval; //MRP_TOPchgT
     simtime_t shortTestInterval; //MRP_TSTshortT
     simtime_t defaultTestInterval; //MRP_TSTdefaultT
@@ -219,7 +219,7 @@ protected:
     virtual void testPropagateReq(int ringPort, MrpPriority managerPrio, MacAddress sourceAddress);
     virtual void topologyChangeReq(simtime_t time);
     virtual void linkChangeReq(int ringPort, LinkState linkState);
-    virtual void setupLinkChangeReq(int ringPort, LinkState linkState, double time);
+    virtual void setupLinkChangeReq(int ringPort, LinkState linkState, simtime_t time);
     virtual void testRingInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio);
     virtual void topologyChangeInd(MacAddress sourceAddress, double time);
     virtual void linkChangeInd(uint16_t portMode, LinkState linkState);

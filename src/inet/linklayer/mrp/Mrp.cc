@@ -255,32 +255,32 @@ void Mrp::setTimingProfile(int maxRecoveryTime) {
         shortTestInterval = SimTime(30, SIMTIME_MS);
         defaultTestInterval = SimTime(50, SIMTIME_MS);
         testMonitoringCount = 5;
-        linkUpInterval_ms = 20;
-        linkDownInterval_ms = 20;
+        linkUpInterval = SimTime(20, SIMTIME_MS);
+        linkDownInterval = SimTime(20, SIMTIME_MS);
         break;
     case 200:
         topologyChangeInterval = SimTime(10, SIMTIME_MS);
         shortTestInterval = SimTime(10, SIMTIME_MS);
         defaultTestInterval = SimTime(20, SIMTIME_MS);
         testMonitoringCount = 3;
-        linkUpInterval_ms = 20;
-        linkDownInterval_ms = 20;
+        linkUpInterval = SimTime(20, SIMTIME_MS);
+        linkDownInterval = SimTime(20, SIMTIME_MS);
         break;
     case 30:
         topologyChangeInterval = SimTime(500, SIMTIME_US);
         shortTestInterval = SimTime(1, SIMTIME_MS);
         defaultTestInterval = SimTime(3500, SIMTIME_US);
         testMonitoringCount = 3;
-        linkUpInterval_ms = 3;
-        linkDownInterval_ms = 3;
+        linkUpInterval = SimTime(3, SIMTIME_MS);
+        linkDownInterval = SimTime(3, SIMTIME_MS);
         break;
     case 10:
         topologyChangeInterval = SimTime(500, SIMTIME_US);
         shortTestInterval = SimTime(500, SIMTIME_US);
         defaultTestInterval = SimTime(1, SIMTIME_MS);
         testMonitoringCount = 3;
-        linkUpInterval_ms = 1;
-        linkDownInterval_ms = 1;
+        linkUpInterval = SimTime(1, SIMTIME_MS);
+        linkDownInterval = SimTime(1, SIMTIME_MS);
         break;
     default:
         throw cRuntimeError("Only RecoveryTimes 500, 200, 30 and 10 ms are defined!");
@@ -1001,14 +1001,14 @@ void Mrp::topologyChangeReq(simtime_t time) {
 void Mrp::linkChangeReq(int ringPort, LinkState linkState) {
     if (linkState == LinkState::DOWN) {
         if (!linkDownTimer->isScheduled()) {
-            scheduleAt(simTime() + SimTime(linkDownInterval_ms, SIMTIME_MS), linkDownTimer);
-            setupLinkChangeReq(primaryRingPort, LinkState::DOWN, linkChangeCount * linkDownInterval_ms);
+            scheduleAt(simTime() + linkDownInterval, linkDownTimer);
+            setupLinkChangeReq(primaryRingPort, LinkState::DOWN, linkChangeCount * linkDownInterval);
             linkChangeCount--;
         }
     } else if (linkState == LinkState::UP) {
         if (!linkUpTimer->isScheduled()) {
-            scheduleAt(simTime() + SimTime(linkUpInterval_ms, SIMTIME_MS), linkUpTimer);
-            setupLinkChangeReq(primaryRingPort, LinkState::UP, linkChangeCount * linkUpInterval_ms);
+            scheduleAt(simTime() + linkUpInterval, linkUpTimer);
+            setupLinkChangeReq(primaryRingPort, LinkState::UP, linkChangeCount * linkUpInterval);
             linkChangeCount--;
         }
     } else
@@ -1117,7 +1117,7 @@ void Mrp::setupTopologyChangeReq(simtime_t interval) {
     emit(topologyChangeSignal, (uint64_t)interval.inUnit(SIMTIME_MS));
 }
 
-void Mrp::setupLinkChangeReq(int ringPort, LinkState linkState, double time_ms) {
+void Mrp::setupLinkChangeReq(int ringPort, LinkState linkState, simtime_t time) {
     //Create MRP-PDU according MRP_LinkChange
     auto version = makeShared<MrpVersion>();
     auto linkChangeTlv = makeShared<MrpLinkChange>();
@@ -1133,7 +1133,7 @@ void Mrp::setupLinkChangeReq(int ringPort, LinkState linkState, double time_ms) 
     }
     linkChangeTlv->setSa(localBridgeAddress);
     linkChangeTlv->setPortRole(getPortRole(ringPort));
-    linkChangeTlv->setInterval(time_ms);
+    linkChangeTlv->setInterval(time.inUnit(SIMTIME_MS));
     linkChangeTlv->setBlocked(1);
 
     commonTlv->setSequenceID(sequenceID);
@@ -1148,7 +1148,7 @@ void Mrp::setupLinkChangeReq(int ringPort, LinkState linkState, double time_ms) 
     packet1->insertAtBack(endTlv);
     MacAddress sourceAddress1 = getPortNetworkInterface(ringPort)->getMacAddress();
     sendFrameReq(ringPort, MacAddress(MC_CONTROL), sourceAddress1, priority, MRP_LT, packet1);
-    emit(linkChangeSignal, time_ms);
+    emit(linkChangeSignal, time.dbl() * 1000.0); // emit in ms
 }
 
 void Mrp::testMgrNackReq(int ringPort, MrpPriority managerPrio, MacAddress sourceAddress) {
