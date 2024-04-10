@@ -449,7 +449,7 @@ void MrpInterconnection::mauTypeChangeInd(int ringPort, LinkState linkState) {
     }
 }
 
-void MrpInterconnection::interconnTopologyChangeInd(MacAddress sourceAddress, double time_ms, uint16_t inID, int ringPort, Packet *packet) {
+void MrpInterconnection::interconnTopologyChangeInd(MacAddress sourceAddress, simtime_t time, uint16_t inID, int ringPort, Packet *packet) {
     if (inID == interConnectionID) {
         auto offset = B(2);
         const auto &firstTLV = packet->peekDataAt<MrpInTopologyChange>(offset);
@@ -467,14 +467,14 @@ void MrpInterconnection::interconnTopologyChangeInd(MacAddress sourceAddress, do
                     cancelEvent(inLinkDownTimer);
                 } else if (inRole == INTERCONNECTION_MANAGER
                         && sourceAddress == localBridgeAddress) {
-                    clearFDB(time_ms);
+                    clearFDB(time);
                 }
                 delete packet;
                 break;
             case CHK_IO:
             case CHK_IC:
                 if (sourceAddress == localBridgeAddress) {
-                    clearFDB(time_ms);
+                    clearFDB(time);
                 }
                 delete packet;
                 break;
