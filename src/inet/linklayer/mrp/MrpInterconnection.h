@@ -54,7 +54,7 @@ protected:
     //TODO simtime_t
     double inLinkChangeInterval_ms;
     double inTopologyChangeInterval_ms;
-    double inLinkStatusPollInterval_ms;
+    simtime_t inLinkStatusPollInterval;
     simtime_t inTestDefaultInterval;
 
     uint16_t inTestMonitoringCount = 8; //MRP_IN_TSTNRmax
@@ -97,7 +97,7 @@ protected:
     virtual void interconnTestReq(simtime_t time);
     virtual void interconnTopologyChangeReq(double time);
     virtual void interconnLinkChangeReq(LinkState linkState, double time);
-    virtual void interconnLinkStatusPollReq(double time);
+    virtual void interconnLinkStatusPollReq(simtime_t time);
     virtual void inTransferReq(TlvHeaderType headerType, int ringPort, FrameType frameType, Packet *packet);
     virtual void mrpForwardReq(TlvHeaderType headerType, int ringport, FrameType frameType, Packet *packet);
     virtual void setupInterconnTestReq();
