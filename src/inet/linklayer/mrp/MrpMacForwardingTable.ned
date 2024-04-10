@@ -8,6 +8,12 @@ package inet.linklayer.mrp;
 
 import inet.linklayer.contract.IMacForwardingTable;
 
+//
+// This is a variant of ~MacForwardingTable, with added support for the Media
+// Redundancy Protocol (MRP) defined in IEC 62439-2.
+//
+// @see ~MrpRelay, ~Mrp, ~MrpInterconnection
+//
 simple MrpMacForwardingTable like IMacForwardingTable
 {
     parameters:
