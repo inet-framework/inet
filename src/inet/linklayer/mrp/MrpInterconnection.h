@@ -53,7 +53,7 @@ protected:
 
     //TODO simtime_t
     double inLinkChangeInterval_ms;
-    double inTopologyChangeInterval_ms;
+    simtime_t inTopologyChangeInterval;
     simtime_t inLinkStatusPollInterval;
     simtime_t inTestDefaultInterval;
 
@@ -95,13 +95,13 @@ protected:
     virtual void handleInLinkUpTimer();
     virtual void handleInLinkDownTimer();
     virtual void interconnTestReq(simtime_t time);
-    virtual void interconnTopologyChangeReq(double time);
+    virtual void interconnTopologyChangeReq(simtime_t time);
     virtual void interconnLinkChangeReq(LinkState linkState, double time);
     virtual void interconnLinkStatusPollReq(simtime_t time);
     virtual void inTransferReq(TlvHeaderType headerType, int ringPort, FrameType frameType, Packet *packet);
     virtual void mrpForwardReq(TlvHeaderType headerType, int ringport, FrameType frameType, Packet *packet);
     virtual void setupInterconnTestReq();
-    virtual void setupInterconnTopologyChangeReq(double time);
+    virtual void setupInterconnTopologyChangeReq(simtime_t time);
     virtual void setupInterconnLinkStatusPollReq();
     virtual void interconnTestInd(MacAddress sourceAddress, int ringPort, uint16_t inId, Packet *packet) override;
     virtual void interconnTopologyChangeInd(MacAddress sourceAddress, double time, uint16_t inId, int ringPort, Packet *packet) override;

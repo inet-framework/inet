@@ -159,25 +159,25 @@ void MrpInterconnection::setTimingProfile(int maxRecoveryTime) {
     switch (maxRecoveryTime) {
     case 500:
         inLinkChangeInterval_ms = 20;
-        inTopologyChangeInterval_ms = 20;
+        inTopologyChangeInterval = SimTime(20, SIMTIME_MS);
         inLinkStatusPollInterval = SimTime(20, SIMTIME_MS);
         inTestDefaultInterval = SimTime(50, SIMTIME_MS);
         break;
     case 200:
         inLinkChangeInterval_ms = 20;
-        inTopologyChangeInterval_ms = 10;
+        inTopologyChangeInterval = SimTime(10, SIMTIME_MS);
         inLinkStatusPollInterval = SimTime(20, SIMTIME_MS);
         inTestDefaultInterval = SimTime(20, SIMTIME_MS);
         break;
     case 30:
         inLinkChangeInterval_ms = 3;
-        inTopologyChangeInterval_ms = 1;
+        inTopologyChangeInterval = SimTime(1, SIMTIME_MS);
         inLinkStatusPollInterval = SimTime(3, SIMTIME_MS);
         inTestDefaultInterval = SimTime(3, SIMTIME_MS);
         break;
     case 10:
         inLinkChangeInterval_ms = 3;
-        inTopologyChangeInterval_ms = 1;
+        inTopologyChangeInterval = SimTime(1, SIMTIME_MS);
         inLinkStatusPollInterval = SimTime(3, SIMTIME_MS);
         inTestDefaultInterval = SimTime(3, SIMTIME_MS);
         break;
@@ -272,7 +272,7 @@ void MrpInterconnection::handleInTestTimer() {
             setPortState(interconnectionPort, MrpInterfaceData::FORWARDING);
             inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
             inTestRetransmissionCount = 0;
-            interconnTopologyChangeReq(inTopologyChangeInterval_ms);
+            interconnTopologyChangeReq(inTopologyChangeInterval);
             inState = CHK_IO;
         } else {
             inTestRetransmissionCount = inTestRetransmissionCount + 1;
@@ -300,9 +300,9 @@ void MrpInterconnection::handleInLinkStatusPollTimer() {
 
 void MrpInterconnection::handleInTopologyChangeTimer() {
     if (intopologyChangeRepeatCount > 0) {
-        setupInterconnTopologyChangeReq(intopologyChangeRepeatCount * inTopologyChangeInterval_ms);
+        setupInterconnTopologyChangeReq(intopologyChangeRepeatCount * inTopologyChangeInterval);
         intopologyChangeRepeatCount--;
-        scheduleAt(simTime() + SimTime(inTopologyChangeInterval_ms, SIMTIME_MS), inTopologyChangeTimer);
+        scheduleAt(simTime() + inTopologyChangeInterval, inTopologyChangeTimer);
     } else if (intopologyChangeRepeatCount == 0) {
         intopologyChangeRepeatCount = inTopologyChangeMaxRepeatCount - 1;
         clearFDB(0);
@@ -396,7 +396,7 @@ void MrpInterconnection::mauTypeChangeInd(int ringPort, LinkState linkState) {
                     interconnLinkStatusPollReq(inLinkStatusPollInterval);
                 }
                 if (ringCheckEnabled) {
-                    interconnTopologyChangeReq(inTopologyChangeInterval_ms);
+                    interconnTopologyChangeReq(inTopologyChangeInterval);
                     interconnTestReq(inTestDefaultInterval);
                 }
                 inState = AC_STAT1;
@@ -408,7 +408,7 @@ void MrpInterconnection::mauTypeChangeInd(int ringPort, LinkState linkState) {
             if (linkState == LinkState::DOWN) {
                 setPortState(ringPort, MrpInterfaceData::BLOCKED);
                 if (ringCheckEnabled) {
-                    interconnTopologyChangeReq(inTopologyChangeInterval_ms);
+                    interconnTopologyChangeReq(inTopologyChangeInterval);
                     interconnTestReq(inTestDefaultInterval);
                 }
                 inState = AC_STAT1;
@@ -529,7 +529,7 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, LinkState linkSta
                 if (linkState == LinkState::UP) {
                     setPortState(interconnectionPort, MrpInterfaceData::BLOCKED);
                     cancelEvent(inLinkStatusPollTimer);
-                    interconnTopologyChangeReq(inTopologyChangeInterval_ms);
+                    interconnTopologyChangeReq(inTopologyChangeInterval);
                     EV_INFO << "Interconnection Ring closed" << EV_ENDL;
                     inState = CHK_IC;
                     EV_DETAIL << "Switching InState from CHK_IO to CHK_IC"
@@ -550,7 +550,7 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, LinkState linkSta
         case CHK_IC:
             if (linkState == LinkState::DOWN) {
                 setPortState(interconnectionPort, MrpInterfaceData::FORWARDING);
-                interconnTopologyChangeReq(inTopologyChangeInterval_ms);
+                interconnTopologyChangeReq(inTopologyChangeInterval);
                 if (linkCheckEnabled) {
                     cancelEvent(inLinkStatusPollTimer);
                     EV_INFO << "Interconnection Ring open" << EV_ENDL;
@@ -563,7 +563,7 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, LinkState linkSta
             }
             if (ringCheckEnabled && linkState == LinkState::UP) {
                 inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
-                interconnTopologyChangeReq(inTopologyChangeInterval_ms);
+                interconnTopologyChangeReq(inTopologyChangeInterval);
             }
             delete packet;
             break;
@@ -686,7 +686,7 @@ void MrpInterconnection::interconnTestInd(MacAddress sourceAddress, int ringPort
         case CHK_IO:
             if (sourceAddress == localBridgeAddress) {
                 setPortState(interconnectionPort, MrpInterfaceData::BLOCKED);
-                interconnTopologyChangeReq(inTopologyChangeInterval_ms);
+                interconnTopologyChangeReq(inTopologyChangeInterval);
                 inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
                 inTestRetransmissionCount = 0;
                 interconnTestReq(inTestDefaultInterval);
@@ -799,18 +799,18 @@ void MrpInterconnection::setupInterconnTestReq() {
     emit(inTestSignal, lastInTestFrameSent);
 }
 
-void MrpInterconnection::interconnTopologyChangeReq(double time_ms) {  //TODO see comments for the similar code in Mrp.cc
-    if (time_ms == 0) {
+void MrpInterconnection::interconnTopologyChangeReq(simtime_t time) {
+    if (time == 0) {
         clearLocalFDB();
-        setupInterconnTopologyChangeReq(inTopologyChangeMaxRepeatCount * time_ms);
+        setupInterconnTopologyChangeReq(inTopologyChangeMaxRepeatCount * time);
     } else if (!inTopologyChangeTimer->isScheduled()) {
-        scheduleAt(simTime() + SimTime(inTopologyChangeInterval_ms, SIMTIME_MS), inTopologyChangeTimer);
-        setupInterconnTopologyChangeReq(inTopologyChangeMaxRepeatCount * time_ms);
+        scheduleAt(simTime() + inTopologyChangeInterval, inTopologyChangeTimer);
+        setupInterconnTopologyChangeReq(inTopologyChangeMaxRepeatCount * time);
     } else
         EV_DETAIL << "inTopologyChangeTimer already scheduled" << EV_ENDL;
 }
 
-void MrpInterconnection::setupInterconnTopologyChangeReq(double time_ms) {
+void MrpInterconnection::setupInterconnTopologyChangeReq(simtime_t time) {
     //Create MRP-PDU according MRP_InTopologyChange
     auto version = makeShared<MrpVersion>();
     auto inTopologyChangeTLV = makeShared<MrpInTopologyChange>();
@@ -819,7 +819,7 @@ void MrpInterconnection::setupInterconnTopologyChangeReq(double time_ms) {
 
     inTopologyChangeTLV->setInID(interConnectionID);
     inTopologyChangeTLV->setSa(localBridgeAddress);
-    inTopologyChangeTLV->setInterval(time_ms);
+    inTopologyChangeTLV->setInterval(time.inUnit(SIMTIME_MS));
 
     commonTLV->setSequenceID(sequenceID);
     sequenceID++;
