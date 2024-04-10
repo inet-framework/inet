@@ -10,59 +10,77 @@ package inet.linklayer.mrp;
 import inet.linklayer.contract.IMediaRedundancy;
 import inet.linklayer.mrp.Mrp;
 
-
 //
-// The Media Redundancy Protocol (MRP) is a network protocol similar to STP and RSTP that ensures a loop-free
-// topology for an Ethernet local area network. It is defined in IEC 62439-2. The basic function of MRP
-// is to prevent bridge loops by building up a logical line topology based on a physical ring topology.
-// MRP nodes have to be connected directly to each other with a maximum of 50 nodes per ring defined in standard.
-// In case of a network, link or node error, a node in manager role is able to change the topology and enable 
-// his second ring port and reestablish a working network within a guaranteed upper time limit.
-// A mrp node may be a switch or single device. 
+// Implements ring interconnection support for the Media Redundancy Protocol
+// (MRP) as specified in IEC 62439-2. This is an extension of the ~Mrp module
+// with the Media Redundancy Interconnection Manager (MIM) and Media Redundancy
+// Interconnection Client (MIC) roles. This module should be used instead of
+// ~Mrp in MRP nodes that are also ring interconnection nodes.
 //
-// Interconnection nodes build up a redundant interconnection of two independent mrp rings by forming an interconnection ring
-// consisting of exactly 4 interconnection nodes. One interconnection node has to be in role interconnection manager, the other three
-// nodes are in role interconnection client. Two of these interconnection nodes are part of mrp ring 1, the other 2 nodes are 
-// part of mrp ring 2. 
-// Each interconnection node is also a normal mrp node and therefore has exactly two port which are part of the mrp ring.
-// Additonally interconnection nodes have exactly one interconnection port. All other ports act like normal switch ports.
-// Interconnection ring health is checked either by a periodic interconnection test frame sent by node in manager role (ring check)
-// or by local, active link check on layer 2 of each interconnection node (link check).
+// As per IEC 62439-2, it is possible to redundantly interconnect two or more
+// MRP rings via the Media Redundancy Protocol (MRP) Interconnection Protocol.
+// An MRP Interconnection setup consists at a minimum of two rings and two
+// redundant interconnection links between these rings. The redundant
+// interconnection links are provided by four dedicated devices supporting the
+// MRP Interconnection protocol. The roles of these four devices must be one
+// Media Redundancy Interconnection Manager (MIM) and three Media Redundancy
+// Interconnection Clients (MIC). All four devices must additionally take one of
+// the basic operational MRP roles, MRC or MRM, as they are also part of the MRP
+// rings. The MRP Interconnect protocol may use either or ring check (RC) mode
+// (MRP_InTest frames) or link check (LC) mode (IEEE802.1q CFM-based) to find
+// the failure in the network among these 4 devices.
 //
-// MRP makes use of per-port configuration data defining role and state.
-// They can be set using ~L2NetworkConfigurator. Port state is kept in the switch's
-// ~InterfaceTable.
+// To configure an MRP Interconnection in a network, follow these steps:
 //
-// @see ~L2NetworkConfigurator, ~InterfaceTable
+// 1. Identify the 2+2 nodes that interconnect the two rings with two direct
+//    links. Ensure that the MRP components in them are of the type
+//    ~MrpInterconnection and not plain ~Mrp. Using the `interconnectionID`
+//    parameter, assign a unique interconnection ID to the four nodes.
+//
+// 2. Assign Interconnection Ports: Configure the `interconnectionPort`
+//    parameter. If you already set up the network topology so the
+//    interconnection ports are index 2, the default setting will suffice.
+//
+// 3. Set Node Roles: Use the `interconnectionRole` parameter, designate one of
+//    the four interconnection nodes as the Media Redundancy Interconnection
+//    Manager (MIM) and the other three as Media Redundancy Interconnection
+//    Clients (MIC).
+//
+// 4. Adjust Features: Modify optional feature flags and settings as needed.
+//
+// @see ~Mrp, ~MrpRelay, ~MrpMacForwardingTable, ~L2NetworkConfigurator, ~InterfaceTable
 //
 simple MrpInterconnection extends Mrp like IMediaRedundancy
 {
     parameters:
-        @class(MrpInterconnection);        
-        
-        // each interconnection node has to take over one of two possible roles regarding interconection: 
-        // interconnection client or interconnection manager
-        // only one of the needed four nodes may have manager role (MIM, value 2), the other three nodes shall be in client role (MIC, value 1)
+        @class(MrpInterconnection);
+
+        // Specifies the interconnection role for each node within the redundancy setup:
+        // Interconnection Client (MIC, value 1) or Interconnection Manager (MIM, value 2).
+        // Only one of the four required nodes can assume the manager role (MIM),
+        // while the other three should be clients (MIC).
         string interconnectionRole @enum("MIC", "MIM");
-  
-        //PortNumber of interconnectionPort
-        int interconnectionPort = default(2);       
-        
-        //each interconnection has an unique indentifier, assign a value from 0 - 65535
-        int interconnectionID = default(1);  
-        
-        //two methods exist to verifiy the interconnection ring state, link check and ring check
-        //It is possible to enable both methods on manager, but it is not recommend
-        //this parameter defines if an active layer 2 link check based on 802.1q-CFM is enabled on interconnection port
-        //on manager it also enables the link status poll on start-up.
+
+        // Port number of the interconnection port.
+        int interconnectionPort = default(2);
+
+        // Unique identifier for the interconnection, ranging from 0 to 65535.
+        int interconnectionID = default(1);
+
+        // Determines whether to enable active Layer 2 link checks based on 802.1q-CFM (CCM messages)
+        // on the interconnection port. For managers, it also triggers the link status poll at start-up.
+        // Enabling both link check and ring check methods is possible but not recommended.
         bool linkCheckEnabled = default(true);
-        
-        //this parameter enables a periodic interconnection test frame sent out by interconnection manager
-        //if this frame is not received within 5 interconnection test intervals, the interconnection ring is assumed broken
-        //and interconnection manager set its interconnection port to FORWARDING
+
+        // Enables periodic interconnection test frames sent by the interconnection manager.
+        // If not received within five interconnection test intervals, the interconnection ring
+        // is assumed broken, and the manager changes its interconnection port from BLOCKING
+        // to FORWARDING.
         bool ringCheckEnabled = default(false);
 
-        // Format for the text displayed above the module icon. Directives: %r: MRP role, %n: node state, %g: ring state
+        // Format for the text displayed above the module icon.
+        // Directives: `%r`: MRP role, `%n`: node state, `%g`: ring state,
+        // `%R`: interconnection role, `%N`: interconnection node state, `%I`: interconnection state.
         displayStringTextFormat = default("role: %r, %R\nstate: %n, in: %N\nring: %g in: %I");
 
         @display("i=block/network2");

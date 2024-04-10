@@ -10,115 +10,157 @@ package inet.linklayer.mrp;
 
 import inet.linklayer.contract.IMediaRedundancy;
 
+
 //
-// The Media Redundancy Protocol (MRP) is a network protocol similar to STP and RSTP that ensures a loop-free
-// topology for an Ethernet local area network. It is defined in IEC 62439-2. The basic function of MRP
-// is to prevent bridge loops by building up a logical line topology based on a physical ring topology.
-// MRP nodes have to be connected directly to each other with a maximum of 50 nodes per ring defined in standard.
-// In case of a network, link or node error, a node in manager role is able to change the topology and enable 
-// his second ring port and reestablish a working network within a guaranteed upper time limit.
-// A mrp node may be a switch or single device. Each node has exactly two ports which are part of the mrp ring, all 
-// other ports act like normal switch ports.
-// Ring health is checked by a periodic test frame sent by node in manager role. If this test frame is not received 
-// within 5 test intervals, topology change is initiated. Ring failure may also be recognized by clients, which are 
-// able to detect link error locally. In this case, client is sending a link change frame, upon which the manager may 
-// react with a topology change. 
+// Implements the Media Redundancy Protocol (MRP) as specified in IEC 62439-2.
+// MRP is used for managing redundancy in ring network topologies commonly found
+// in industrial network settings. MRP is similar in its function to STP and
+// RSTP, in that it ensures a loop-free topology for an Ethernet local area
+// network. This module implements the Media Redundancy Manager (MRM), Media
+// Redundancy Client (MRC), and Media Redundancy Automanager (MRA) roles. This
+// model also includes support for detecting link errors with the help of
+// Continuity Check Messages (CCM) messages defined in 802.1q CFM.
 //
-// MRP makes use of per-port configuration data defining role and state.
-// They can be set using ~L2NetworkConfigurator. Port state is kept in the switch's
+// Note: Support for interconnecting rings, i.e. for the Media Redundancy
+// Interconnection Manager (MIM) and Media Redundancy Interconnection Client
+// (MIC) roles, is implemented in the ~MrpInterconnection module.
+//
+// The basic function of MRP is to prevent bridge loops by establishing a
+// logical line topology based on a physical ring topology. MRP nodes must be
+// directly connected to each other, with a maximum of 50 nodes per ring as
+// defined in the standard. In the event of a network, link, or node error, a
+// node in the manager role can alter the topology by activating its secondary
+// ring port to reestablish a functioning network within a guaranteed maximum
+// time limit.
+//
+// An MRP node can be either a switch or a single device. Each node has exactly
+// two ports that are part of the MRP ring, while all other ports function as
+// normal switch ports.
+//
+// The health of the ring is monitored by periodic test frames sent by the node
+// in the manager role. If a test frame is not received on the opposite ring
+// port of the node within five test intervals, a topology change is initiated.
+// Ring failures may also be detected by clients, which can locally identify
+// link errors with the help of 802.1q CCM messages. In such cases, a client
+// sends a link change frame, prompting the manager to potentially initiate a
+// topology change.
+//
+// MRP makes use of per-port configuration data defining role and state. They
+// can be set using ~L2NetworkConfigurator. Port state is kept in the switch's
 // ~InterfaceTable.
 //
-// @see ~L2NetworkConfigurator, ~InterfaceTable
+// To configure MRP in a network, follow these steps:
+//
+// 1. Identify and Configure Rings: Assign a unique ring ID to all nodes within the
+//    same ring using the `uuid0` and `uuid1` parameters. This ensures that each node
+//    is correctly recognized as part of the ring topology.
+//
+// 2. Assign Ring Ports: Configure the `ringPort1` and `ringPort2` parameters.
+//    If you already set up the network topology so the ring ports are index 0
+//    and 1, these parameters do not need to be touched as the default values will suffice.
+//
+// 3. Set Node Roles: Use the `mrpRole` parameter to assign roles within the ring.
+//    Designate one node as the Media Redundancy Manager (MRM) and the others as
+//    Media Redundancy Clients (MRC). Alternatively, you can set all nodes to Media
+//    Redundancy Automanager (MRA).
+//
+// 4. Adjust Features: Modify optional feature flags and settings as needed.
+//
+// @see ~MrpInterconnection, ~MrpRelay, ~MrpMacForwardingTable, ~L2NetworkConfigurator, ~InterfaceTable
 //
 simple Mrp like IMediaRedundancy
 {
     parameters:
         @class(Mrp);
-        //switches do not detect a link change immediatly. this parameter sets mean time and deviation in milliseconds for
-        //the simulated delay of a link change event
+
+        // Switches do not detect a link change immediately. This parameter sets
+        // the simulated delay of a "link down" event. Note: the delay for "link
+        // up" is hardcoded to 1us in the code.
         volatile double linkDetectionDelay @unit(s) = default(truncnormal(385ms,325ms));
 
-        //switches take a certain amount of time for processing each received packet.
-        //this parameter sets the mean processsing delay and deviation in microseconds
-        //and is applied in handleMessageWhenUp()
+        // Switches require a certain amount of time to process each received packet.
+        // This parameter sets the processing delay; it is applied in handleMessageWhenUp().
         volatile double processingDelay @unit(s) = default(truncnormal(100us,80us));
 
-        // MRP defines 4 Maximum Recovery Time settings for ring: 500 ms , 200 ms, 30 ms or 10 ms
-        // this time provides a hard upper time limit guaranteed by 
-        // Depending on this parameter the interval for test frames, topology and link change times are adapted
-        // should be set to the same value on all nodes per ring
+        // MRP defines four Maximum Recovery Time settings for rings: 500 ms, 200 ms, 30 ms, or 10 ms.
+        // This parameter sets a hard upper time limit guaranteed by the protocol,
+        // and the interval for test frames, topology changes, and link change times are adapted accordingly.
+        // It should be set to the same value on all nodes within a ring.
         int timingProfile @unit(ms) = default(500ms);
-        
-        // Each MRP node can either be disabled (value 0, no mrp function), MediaRedundancyClient (value 1, MRC)
-        // MediaRedundancyManager (value 2, MRM) or MediaRedundancyAutoManager (value 4, MRA).
-        // (Note: The model does not support backward-compatible MRA (value 3), see Annex A, as it would be pointless.) 
-        // Each Network may have only 1 MRM, all other nodes have to be in MRC role
-        // MRAs are able to vote which node shall take MRM role by priority and MAC address value, all other nodes 
-        // dynamicly switch to MRC role. Do not mix MRM and MRA! although it is possible, either choose a specific node as explicit MRM
-        // or set one or more nodes to MRA role
-        string mrpRole @enum("disabled", "MRC", "MRM", "MRA") = default("disabled");
-        
-        //Each MRP node has exactly 2 ring interfaces, which have to be set by the network administrator
-        //PortIndexNumber of ringport1
-        int ringPort1 = default(0);
-		//PortIndexNumber of ringport2
-		int ringPort2 = default(1);
-		
-		//A mrp ring has a UUID, in 2 64-Bit parts
-		//every node in a ring has to be set to the same UUID
-		int uuid0 = default(33333);
-		int uuid1 = default(33333);	
-		
-		//it is possible to enable an active link check on layer 2 for each ring port
-		//link check is based on 802.1q-CFM
-		//Keep the additional load on node and network in mind!
-		bool enableLinkCheckOnRing = default(false);
 
-		
-		// CCM link check can be done every 3.3 ms or every 10 ms
+        // Each MRP node can either be disabled (value 0, no MRP function), be a MediaRedundancyClient (MRC, value 1),
+        // a MediaRedundancyManager (MRM, value 2), or a MediaRedundancyAutoManager (MRA, value 4).
+        // The model does not support the backward-compatible MRA (value 3) as it would be redundant.
+        // Each network may have only one MRM; all other nodes must assume the MRC role.
+        // MRAs can vote on which node should take the MRM role based on priority and MAC address value; other nodes
+        // dynamically switch to the MRC role. Mixing MRM and MRA is possible but not recommended.
+        string mrpRole @enum("disabled", "MRC", "MRM", "MRA") = default("disabled");
+
+        // Each MRP node has exactly two ring interfaces, which must be configured by
+        // the network administrator. The ringPort1 and ringPort2 parameters define
+        // the port index of the first and second ring port, respectively.
+        int ringPort1 = default(0);
+        int ringPort2 = default(1);
+
+        // An MRP ring has a UUID, split into two 64-bit parts.
+        // Every node in a ring must be configured with the same UUID.
+        int uuid0;
+        int uuid1;
+
+        // It is possible to enable active link checks on Layer 2 for each ring port,
+        // using CCM (Connectivity Check Message) messages defined in 802.1q Continuity
+        // Fault Management (CFM). Consider the additional load on the node and network
+        // when enabling this feature.
+        bool enableLinkCheckOnRing = default(false);
+
+        // CCM (Connectivity Check Message) link checks can be performed every 3.3 ms or every 10 ms.
         double ccmInterval @unit(s) = default(10ms);
 
-		//mrp rings can be redundantly connected by interconnection nodes
-        //in order to handle the necessary communication, normal mrp nodes
-        //should be aware of the used check methods. Check can be done either by RingCheck (similar to ring test mechanism)
-        //or by link check on layer 2 
-		bool interconnectionRingCheckAware = default(true);
+        // MRP rings can be redundantly connected by interconnection nodes.
+        // To manage necessary communication, normal MRP nodes should be aware of the
+        // check methods used. Checks can be performed either by ring check (similar to the
+        // ring test mechanism) or by link check on Layer 2 (CCM messages).
+        bool interconnectionRingCheckAware = default(true);
         bool interconnectionLinkCheckAware = default(true);
-		
-        // Shows the ring by coloring connections in the network graphics.
-        // Label ethernet interface with port role and status
+
+        // Visualizes the ring by coloring connections in the network graphics.
+        // Labels the Ethernet interface with port role and status.
         bool visualize = default(true);
-        
-        // The path to the InterfaceTable module
+
+        // The path to the InterfaceTable module.
         string interfaceTableModule;
-        
-        // The path to the MacForwardingTable module
+
+        // The path to the MacForwardingTable module.
         string macTableModule;
-        
-        // The path to the MrpRelay module
+
+        // The path to the MrpRelay module.
         string mrpRelayModule;
-        
-		//manager variables
-		// A MRM or MRA can have higher or lower priority. 0x0000 is the highest possible value, 0xFFFF the lowest
-		// MRM should be assigned with on of the following values: HIGHEST = 0x0000, HIGH = 0x4000, DEFAULT = 0x8000
-		// If the node is a MRA, assign one of these: MRAHIGHEST = 0x9000, MRADEFAULT = 0xA000, MRALOWEST = 0xFFFF
-		// Depending on Priority and Macaddress MRAs define the acting manager 
-		int mrpPriority = default(0xA000);
-		
-		// a mrm may or may not support clients that are able to block their ring ports
-		bool nonBlockingMRC = default(true);
-		
-		// defines, if manager reacts on link change frames sent by client or if manager relies only on ring tests
+
+        // A MRM or MRA can have a priority ranging from the highest (0x0000) to the lowest (0xFFFF).
+        // MRMs should be assigned one of the following values: HIGHEST = 0x0000, HIGH = 0x4000, DEFAULT = 0x8000.
+        // If the node is an MRA, assign one of these: MRAHIGHEST = 0x9000, MRADEFAULT = 0xA000, MRALOWEST = 0xFFFF.
+        // MRAs determine the acting manager based on priority and MAC address.
+        int mrpPriority = default(0xA000);
+
+        // In MRM role: Defines whether a MRM supports clients that can block their ring ports.
+        bool nonBlockingMRC = default(true);
+
+        // In MRM role: Determines if the manager reacts to link change frames sent
+        // by clients or if it solely relies on ring tests for status updates.
         bool reactOnLinkChange = default(true);
-        
-        //defines, if manager activly tests the ring, or only relies on the link change frames sent by client
+
+        // In MRM role: Specifies whether the manager actively conducts ring tests or
+        // depends exclusively on link change frames sent by clients for redundancy checks.
         bool checkMediaRedundancy = default(true);
-        
-        //defines, if manager is able to set his own secondary ring port to FORWARDING and therefore change the ring topology
+
+        // In MRM role: Controls whether the manager can set its own secondary ring port to
+        // FORWARDING, thereby altering the ring topology.
         bool noTopologyChange = default(false);
-        
-        // Format for the text displayed above the module icon. Directives: %r: MRP role, %n: node state, %g: ring state
+
+        // Format for the text displayed above the module icon.
+        // Directives: `%r`: MRP role, `%n`: node state, `%g`: ring state
         string displayStringTextFormat = default("role: %r\nnode: %n\nring: %g");
+
         @display("i=block/network2");
         @signal[ringState](type=long);
         @signal[nodeState](type=long);
