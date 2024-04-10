@@ -161,25 +161,25 @@ void MrpInterconnection::setTimingProfile(int maxRecoveryTime) {
         inLinkChangeInterval_ms = 20;
         inTopologyChangeInterval_ms = 20;
         inLinkStatusPollInterval_ms = 20;
-        inTestDefaultInterval_ms = 50;
+        inTestDefaultInterval = SimTime(50, SIMTIME_MS);
         break;
     case 200:
         inLinkChangeInterval_ms = 20;
         inTopologyChangeInterval_ms = 10;
         inLinkStatusPollInterval_ms = 20;
-        inTestDefaultInterval_ms = 20;
+        inTestDefaultInterval = SimTime(20, SIMTIME_MS);
         break;
     case 30:
         inLinkChangeInterval_ms = 3;
         inTopologyChangeInterval_ms = 1;
         inLinkStatusPollInterval_ms = 3;
-        inTestDefaultInterval_ms = 3;
+        inTestDefaultInterval = SimTime(3, SIMTIME_MS);
         break;
     case 10:
         inLinkChangeInterval_ms = 3;
         inTopologyChangeInterval_ms = 1;
         inLinkStatusPollInterval_ms = 3;
-        inTestDefaultInterval_ms = 3;
+        inTestDefaultInterval = SimTime(3, SIMTIME_MS);
         break;
     default:
         throw cRuntimeError("Only RecoveryTimes 500, 200, 30 and 10 ms are defined!");
@@ -264,10 +264,10 @@ void MrpInterconnection::handleMessageWhenUp(cMessage *msg) {
 void MrpInterconnection::handleInTestTimer() {
     switch (inState) {
     case CHK_IO:
-        interconnTestReq(inTestDefaultInterval_ms);
+        interconnTestReq(inTestDefaultInterval);
         break;
     case CHK_IC:
-        interconnTestReq(inTestDefaultInterval_ms);
+        interconnTestReq(inTestDefaultInterval);
         if (inTestRetransmissionCount >= inTestMaxRetransmissionCount) {
             setPortState(interconnectionPort, MrpInterfaceData::FORWARDING);
             inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
@@ -371,7 +371,7 @@ void MrpInterconnection::mauTypeChangeInd(int ringPort, LinkState linkState) {
                     if (ringCheckEnabled) {
                         inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
                         inTestRetransmissionCount = 0;
-                        interconnTestReq(inTestDefaultInterval_ms);
+                        interconnTestReq(inTestDefaultInterval);
                     }
                     inState = CHK_IC;
                     EV_DETAIL << "Switching InState from AC_STAT1 to CHK_IC"
@@ -397,7 +397,7 @@ void MrpInterconnection::mauTypeChangeInd(int ringPort, LinkState linkState) {
                 }
                 if (ringCheckEnabled) {
                     interconnTopologyChangeReq(inTopologyChangeInterval_ms);
-                    interconnTestReq(inTestDefaultInterval_ms);
+                    interconnTestReq(inTestDefaultInterval);
                 }
                 inState = AC_STAT1;
                 EV_DETAIL << "Switching InState from CHK_IO to AC_STAT1"
@@ -409,7 +409,7 @@ void MrpInterconnection::mauTypeChangeInd(int ringPort, LinkState linkState) {
                 setPortState(ringPort, MrpInterfaceData::BLOCKED);
                 if (ringCheckEnabled) {
                     interconnTopologyChangeReq(inTopologyChangeInterval_ms);
-                    interconnTestReq(inTestDefaultInterval_ms);
+                    interconnTestReq(inTestDefaultInterval);
                 }
                 inState = AC_STAT1;
                 EV_DETAIL << "Switching InState from CHK_IC to AC_STAT1"
@@ -542,7 +542,7 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, LinkState linkSta
             }
             if (ringCheckEnabled) {
                 if (linkState == LinkState::UP) {
-                    interconnTestReq(inTestDefaultInterval_ms);
+                    interconnTestReq(inTestDefaultInterval);
                 }
             }
             delete packet;
@@ -676,7 +676,7 @@ void MrpInterconnection::interconnTestInd(MacAddress sourceAddress, int ringPort
                 setPortState(interconnectionPort, MrpInterfaceData::BLOCKED);
                 inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
                 inTestRetransmissionCount = 0;
-                interconnTestReq(inTestDefaultInterval_ms);
+                interconnTestReq(inTestDefaultInterval);
                 inState = CHK_IC;
                 EV_DETAIL << "Switching InState from AC_STAT1 to CHK_IC"
                                  << EV_FIELD(inState) << EV_ENDL;
@@ -689,7 +689,7 @@ void MrpInterconnection::interconnTestInd(MacAddress sourceAddress, int ringPort
                 interconnTopologyChangeReq(inTopologyChangeInterval_ms);
                 inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
                 inTestRetransmissionCount = 0;
-                interconnTestReq(inTestDefaultInterval_ms);
+                interconnTestReq(inTestDefaultInterval);
                 inState = CHK_IC;
             }
             delete packet;
@@ -726,9 +726,9 @@ void MrpInterconnection::interconnTestInd(MacAddress sourceAddress, int ringPort
     }
 }
 
-void MrpInterconnection::interconnTestReq(double time_ms) {
+void MrpInterconnection::interconnTestReq(simtime_t time) {
     if (!inLinkTestTimer->isScheduled()) {
-        scheduleAt(simTime() + SimTime(time_ms, SIMTIME_MS), inLinkTestTimer);
+        scheduleAt(simTime() + time, inLinkTestTimer);
         setupInterconnTestReq();
     } else
         EV_DETAIL << "inTest already scheduled" << EV_ENDL;
