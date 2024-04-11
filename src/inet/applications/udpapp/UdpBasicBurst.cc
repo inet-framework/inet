@@ -19,6 +19,8 @@
 
 namespace inet {
 
+Define_Module(UdpBasicBurst);
+
 Register_Enum(UdpBasicBurst::ChooseDestAddrMode, (UdpBasicBurst::ONCE, UdpBasicBurst::PER_BURST, UdpBasicBurst::PER_SEND));
 
 simsignal_t UdpBasicBurst::outOfOrderPkSignal = registerSignal("outOfOrderPk");
@@ -57,7 +59,7 @@ void UdpBasicBurst::initialize(int stage)
         destAddrRNG = par("destAddrRNG");
         const char *addrModeStr = par("chooseDestAddrMode");
         std::string addrModeEnumStr = opp_replacesubstring(opp_strupper(addrModeStr), "PER", "PER_", false);
-        int addrMode = cEnum::get("inet::ChooseDestAddrMode")->lookup(addrModeEnumStr.c_str());
+        int addrMode = cEnum::get(opp_typename(typeid(ChooseDestAddrMode)))->lookup(addrModeEnumStr.c_str());
         if (addrMode == -1)
             throw cRuntimeError("Invalid chooseDestAddrMode: '%s'", addrModeStr);
         chooseDestAddrMode = static_cast<ChooseDestAddrMode>(addrMode);
