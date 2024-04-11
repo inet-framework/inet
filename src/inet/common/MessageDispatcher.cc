@@ -50,7 +50,7 @@ void MessageDispatcher::initialize(int stage)
             else {
                 auto networkInterface = interfaceTable->findInterfaceByName(interfaceName.c_str());
                 if (networkInterface == nullptr)
-                    throw cRuntimeError("Cannot find interface: %s", interfaceName.c_str());
+                    throw cRuntimeError("Cannot find network interface: %s", interfaceName.c_str());
                 interfaceIdToGateIndex[networkInterface->getInterfaceId()] = gateIndex;
             }
         }
@@ -229,7 +229,7 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, const cGate *inGate)
                     return outGate;
                 }
                 else
-                    throw cRuntimeError("handlePacket(): Unknown protocol: protocolId = %d, protocolName = %s, servicePrimitive = REQUEST, pathStartGate = %s, pathEndGate = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
+                    throw cRuntimeError("handlePacket(): Unknown service: protocolId = %d, protocolName = %s, servicePrimitive = REQUEST, pathStartGate = %s, pathEndGate = %s\nConnected protocols can register using registerService() or the serviceMapping parameter can be used to specify the output gate", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
             }
         }
         else if (servicePrimitive == SP_INDICATION) {
@@ -247,7 +247,7 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, const cGate *inGate)
                     return outGate;
                 }
                 else
-                    throw cRuntimeError("handlePacket(): Unknown protocol: protocolId = %d, protocolName = %s, servicePrimitive = INDICATION, pathStartGate = %s, pathEndGate = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
+                    throw cRuntimeError("handlePacket(): Unknown protocol: protocolId = %d, protocolName = %s, servicePrimitive = INDICATION, pathStartGate = %s, pathEndGate = %s\nConnected protocols can register using registerProtocol() or the protocolMapping parameter can be used to specify the output gate", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
             }
         }
         else
@@ -259,18 +259,18 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, const cGate *inGate)
         auto it = interfaceIdToGateIndex.find(interfaceId);
         if (it != interfaceIdToGateIndex.end()) {
             auto outGate = gate("out", it->second);
-            EV_INFO << "Dispatching packet to interface" << EV_FIELD(interfaceId) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(packet) << EV_ENDL;
+            EV_INFO << "Dispatching packet to network interface" << EV_FIELD(interfaceId) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(packet) << EV_ENDL;
             return outGate;
         }
         else {
             auto it = interfaceIdToGateIndex.find(-1);
             if (it != interfaceIdToGateIndex.end()) {
                 auto outGate = gate("out", it->second);
-                EV_INFO << "Dispatching packet to interface" << EV_FIELD(interfaceId) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(packet) << EV_ENDL;
+                EV_INFO << "Dispatching packet to network interface" << EV_FIELD(interfaceId) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(packet) << EV_ENDL;
                 return outGate;
             }
             else
-                throw cRuntimeError("handlePacket(): Unknown interface: interfaceId = %d, pathStartGate = %s, pathEndGate = %s", interfaceId, inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
+                throw cRuntimeError("handlePacket(): Unknown network interface: interfaceId = %d, pathStartGate = %s, pathEndGate = %s\nConnected network interfaces can register using registerInterface() or the interfaceMapping parameter can be used to specify the output gate", interfaceId, inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
         }
     }
     throw cRuntimeError("handlePacket(): Unknown packet: %s(%s), pathStartGate = %s, pathEndGate = %s", packet->getName(), packet->getClassName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
@@ -321,7 +321,7 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
                     return outGate;
                 }
                 else
-                    throw cRuntimeError("handleMessage(): Unknown protocol: protocolId = %d, protocolName = %s, servicePrimitive = REQUEST, pathStartGate = %s, pathEndGate = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
+                    throw cRuntimeError("handleMessage(): Unknown service: protocolId = %d, protocolName = %s, servicePrimitive = REQUEST, pathStartGate = %s, pathEndGate = %s\nConnected protocols can register using registerService() or the serviceMapping parameter can be used to specify the output gate", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
             }
         }
         else if (servicePrimitive == SP_INDICATION) {
@@ -339,7 +339,7 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
                     return outGate;
                 }
                 else
-                    throw cRuntimeError("handleMessage(): Unknown protocol: protocolId = %d, protocolName = %s, servicePrimitive = INDICATION, pathStartGate = %s, pathEndGate = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
+                    throw cRuntimeError("handleMessage(): Unknown protocol: protocolId = %d, protocolName = %s, servicePrimitive = INDICATION, pathStartGate = %s, pathEndGate = %s\nConnected protocols can register using registerProtocol() or the protocolMapping parameter can be used to specify the output gate", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
             }
         }
         else
@@ -351,11 +351,11 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
         auto it = interfaceIdToGateIndex.find(interfaceId);
         if (it != interfaceIdToGateIndex.end()) {
             auto outGate = gate("out", it->second);
-            EV_INFO << "Dispatching message to interface" << EV_FIELD(interfaceId) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(message) << EV_ENDL;
+            EV_INFO << "Dispatching message to network interface" << EV_FIELD(interfaceId) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(message) << EV_ENDL;
             return outGate;
         }
         else
-            throw cRuntimeError("handleMessage(): Unknown interface: interfaceId = %d, pathStartGate = %s, pathEndGate = %s", interfaceId, inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
+            throw cRuntimeError("handleMessage(): Unknown network interface: interfaceId = %d, pathStartGate = %s, pathEndGate = %s\nConnected network interfaces can register using registerInterface() or the interfaceMapping parameter can be used to specify the output gate", interfaceId, inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
     }
     throw cRuntimeError("handleMessage(): Unknown message: %s(%s), pathStartGate = %s, pathEndGate = %s", message->getName(), message->getClassName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
 }
