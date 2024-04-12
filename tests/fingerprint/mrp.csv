@@ -15,7 +15,6 @@
 /examples/mrp/,     -f omnetpp.ini -c LargeNetwork -r 13,                 3s,            52fb-2123/tplx;8063-9f95/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c LargeNetwork -r 14,                 3s,            3c9a-65e2/tplx;e3b5-00ec/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c LargeNetwork -r 15,                 3s,            3b86-76ad/tplx;4649-e490/~tNl, PASS, Mrp
-/examples/mrp/,     -f omnetpp.ini -c LargeNetwork -r 16,                 3s,            0000-0000/tplx;0000-0000/~tNl, ERROR, Mrp
 
 /examples/mrp/,     -f omnetpp.ini -c LargeNetworkWithHosts -r  0,                 3s,            76ad-de85/tplx;f13e-e48f/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c LargeNetworkWithHosts -r  1,                 3s,            a6c8-0046/tplx;ecf7-0b4f/~tNl, PASS, Mrp
@@ -33,7 +32,6 @@
 /examples/mrp/,     -f omnetpp.ini -c LargeNetworkWithHosts -r 13,                 3s,            9f9e-14a3/tplx;2de1-2da9/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c LargeNetworkWithHosts -r 14,                 3s,            1f67-d8e1/tplx;e42b-6c0f/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c LargeNetworkWithHosts -r 15,                 3s,            a35d-6612/tplx;d20b-0860/~tNl, PASS, Mrp
-/examples/mrp/,     -f omnetpp.ini -c LargeNetworkWithHosts -r 16,                 3s,            0000-0000/tplx;0000-0000/~tNl, ERROR, Mrp
 
 /examples/mrp/,     -f omnetpp.ini -c MediumNetwork -r  0,                 3s,            e289-7c61/tplx;9d70-d5af/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c MediumNetwork -r  1,                 3s,            ba59-9c50/tplx;7610-d017/~tNl, PASS, Mrp
@@ -41,7 +39,6 @@
 /examples/mrp/,     -f omnetpp.ini -c MediumNetwork -r  3,                 3s,            eaeb-3fb3/tplx;b88a-a2a0/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c MediumNetwork -r  4,                 3s,            49a4-966d/tplx;7601-651c/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c MediumNetwork -r  5,                 3s,            4193-75c8/tplx;0014-2ed5/~tNl, PASS, Mrp
-/examples/mrp/,     -f omnetpp.ini -c MediumNetwork -r  6,                 3s,            0000-0000/tplx;0000-0000/~tNl, ERROR, Mrp
 
 /examples/mrp/,     -f omnetpp.ini -c MediumNetworkRC -r  0,                 3s,            e545-ebce/tplx;c07f-4143/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c MediumNetworkRC -r  1,                 3s,            0b37-fb4f/tplx;73d6-f3e8/~tNl, PASS, Mrp
@@ -49,7 +46,6 @@
 /examples/mrp/,     -f omnetpp.ini -c MediumNetworkRC -r  3,                 3s,            1307-8c82/tplx;63ba-8c6a/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c MediumNetworkRC -r  4,                 3s,            df2e-f9fc/tplx;6374-27aa/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c MediumNetworkRC -r  5,                 3s,            a660-67b7/tplx;1dc2-2cd3/~tNl, PASS, Mrp
-/examples/mrp/,     -f omnetpp.ini -c MediumNetworkRC -r  6,                 3s,            0000-0000/tplx;0000-0000/~tNl, ERROR, Mrp
 
 /examples/mrp/,     -f omnetpp.ini -c MediumNetworkWithHosts -r  0,                 3s,            c007-d46b/tplx;81b4-ff69/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c MediumNetworkWithHosts -r  1,                 3s,            1c5e-da93/tplx;ad1d-061d/~tNl, PASS, Mrp
@@ -57,7 +53,6 @@
 /examples/mrp/,     -f omnetpp.ini -c MediumNetworkWithHosts -r  3,                 3s,            e8b9-90ae/tplx;2c70-bcf7/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c MediumNetworkWithHosts -r  4,                 3s,            3dc5-d08e/tplx;3e07-e3ff/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c MediumNetworkWithHosts -r  5,                 3s,            54f3-bb69/tplx;30a7-12b2/~tNl, PASS, Mrp
-/examples/mrp/,     -f omnetpp.ini -c MediumNetworkWithHosts -r  6,                 3s,            0000-0000/tplx;0000-0000/~tNl, ERROR, Mrp
 
 /examples/mrp/,     -f omnetpp.ini -c SmallNetwork -r  0,                 3s,            c790-5339/tplx;ed61-db7f/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c SmallNetwork -r  1,                 3s,            2fb5-2d03/tplx;6ce6-3fdf/~tNl, PASS, Mrp
@@ -75,7 +70,6 @@
 /examples/mrp/,     -f omnetpp.ini -c SmallNetwork -r 13,                 3s,            893c-9c5a/tplx;5fa9-42f3/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c SmallNetwork -r 14,                 3s,            6c7c-f2d4/tplx;9553-9f8f/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c SmallNetwork -r 15,                 3s,            338a-02d0/tplx;60df-34da/~tNl, PASS, Mrp
-/examples/mrp/,     -f omnetpp.ini -c SmallNetwork -r 16,                 3s,            0000-0000/tplx;0000-0000/~tNl, ERROR, Mrp
 
 /examples/mrp/,     -f omnetpp.ini -c SmallNetworkMRA -r  0,                 3s,            a187-a905/tplx;89d0-430b/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c SmallNetworkMRA -r  1,                 3s,            ebe6-ce3d/tplx;d669-7c30/~tNl, PASS, Mrp
@@ -93,7 +87,6 @@
 /examples/mrp/,     -f omnetpp.ini -c SmallNetworkMRA -r 13,                 3s,            658e-ee9d/tplx;962c-022d/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c SmallNetworkMRA -r 14,                 3s,            c558-81c3/tplx;86c7-a74d/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c SmallNetworkMRA -r 15,                 3s,            e7e0-3aba/tplx;ee96-2674/~tNl, PASS, Mrp
-/examples/mrp/,     -f omnetpp.ini -c SmallNetworkMRA -r 16,                 3s,            0000-0000/tplx;0000-0000/~tNl, ERROR, Mrp
 
 /examples/mrp/,     -f omnetpp.ini -c SmallNetworkWithHosts -r  0,                 3s,            3124-bcc5/tplx;40a2-0334/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c SmallNetworkWithHosts -r  1,                 3s,            20e3-c172/tplx;87e6-d8b9/~tNl, PASS, Mrp
@@ -111,7 +104,6 @@
 /examples/mrp/,     -f omnetpp.ini -c SmallNetworkWithHosts -r 13,                 3s,            77e4-d98c/tplx;981f-3c94/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c SmallNetworkWithHosts -r 14,                 3s,            ef6a-21ad/tplx;b297-9927/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c SmallNetworkWithHosts -r 15,                 3s,            b2c2-33e1/tplx;5eee-1449/~tNl, PASS, Mrp
-/examples/mrp/,     -f omnetpp.ini -c SmallNetworkWithHosts -r 16,                 3s,            0000-0000/tplx;0000-0000/~tNl, ERROR, Mrp
 
 /examples/mrp/,     -f omnetpp.ini -c SmallNetworkMRAWithHosts -r  0,                 3s,            aca0-fccf/tplx;948f-2903/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c SmallNetworkMRAWithHosts -r  1,                 3s,            048a-5b65/tplx;fb47-8186/~tNl, PASS, Mrp
@@ -129,5 +121,4 @@
 /examples/mrp/,     -f omnetpp.ini -c SmallNetworkMRAWithHosts -r 13,                 3s,            c497-b39a/tplx;15af-7cc3/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c SmallNetworkMRAWithHosts -r 14,                 3s,            643e-274e/tplx;5bb2-3097/~tNl, PASS, Mrp
 /examples/mrp/,     -f omnetpp.ini -c SmallNetworkMRAWithHosts -r 15,                 3s,            6511-bb77/tplx;dfed-5d42/~tNl, PASS, Mrp
-/examples/mrp/,     -f omnetpp.ini -c SmallNetworkMRAWithHosts -r 16,                 3s,            0000-0000/tplx;0000-0000/~tNl, ERROR, Mrp
 
