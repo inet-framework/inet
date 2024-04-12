@@ -35,6 +35,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     double gmRateRatio = 1.0;
     double receivedRateRatio = 1.0;
 
+
     clocktime_t originTimestamp; // last outgoing timestamp
 
     clocktime_t receivedTimeSync;
@@ -43,13 +44,27 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     clocktime_t pdelayInterval;
 
     uint16_t sequenceId = 0;
+
+
+    /* Neighbor Rate Ratio Calculation */
+    double neighborRateRatio = 1.0;
+    clocktime_t pdelayReqEventEgressTimestamp;   // sending time of pdelay_req (SLAVE)
+    clocktime_t pdelayReqEventEgressTimestampLast;   // sending time of last pdelay_req (SLAVE)
+    clocktime_t pdelayReqEventIngressTimestamp;  // receiving time of pdelay_req (MASTER)
+    clocktime_t pdelayReqEventIngressTimestampLast; //receiving time of last pdelay_req (MASTER)
+
+    /* Propagation Delay */
+    clocktime_t PD;
+    clocktime_t pdelayRespEventEgressTimestamp; // sending time of pdelay_resp (MASTER)
+    clocktime_t pdelayRespEventIngressTimestamp;// receiving time of pdelay_resp (SLAVE)
+
+
     /* Slave port - Variables is used for Peer Delay Measurement */
     uint16_t lastSentPdelayReqSequenceId = 0;
     clocktime_t peerDelay;
     clocktime_t peerRequestReceiptTimestamp;  // pdelayReqIngressTimestamp from peer (received in GptpPdelayResp)
     clocktime_t peerResponseOriginTimestamp; // pdelayRespEgressTimestamp from peer (received in GptpPdelayRespFollowUp)
-    clocktime_t pdelayRespEventIngressTimestamp;  // receiving time of last GptpPdelayResp -> ti2'
-    clocktime_t pdelayReqEventEgressTimestamp;   // sending time of last GptpPdelayReq -> ti1'
+
     clocktime_t pDelayReqProcessingTime;  // processing time between arrived PDelayReq and send of PDelayResp
     bool rcvdPdelayResp = false;
 
@@ -69,12 +84,6 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     ClockEvent* selfMsgSync = nullptr;
     ClockEvent* selfMsgDelayReq = nullptr;
     ClockEvent* requestMsg = nullptr;
-
-    // Neighbor rate ratio calculation parameters
-    clocktime_t sendReqStartTimestamp; // ti1
-    clocktime_t receiveReqStartTimestamp; // tr1
-    clocktime_t receiveReqEndTimestamp; // tr1'
-    static double neighborRateRatio;
 
     // Statistics information: // TODO remove, and replace with emit() calls
     static simsignal_t localTimeSignal;
