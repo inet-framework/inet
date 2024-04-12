@@ -6,6 +6,7 @@ the source and the sink.
 
 %file: TestSource.cc
 #include "inet/common/ModuleRefByGate.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/queueing/contract/IPassivePacketSource.h"
 #include "inet/queueing/scheduler/PriorityScheduler.h"
 
