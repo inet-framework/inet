@@ -157,12 +157,9 @@
 /showcases/visualizer/canvas/physicallinkactivity/, -f omnetpp.ini -c Filtering -r 0,                                  250s,            1642-3498/tplx;02c5-9eab/~tNl;bc54-d5aa/~tND;494d-a1bc/tyf, PASS,    wireless Ipv4
 /showcases/visualizer/canvas/physicallinkactivity/, -f omnetpp.ini -c Mobile -r 0,                                     500s,            73db-6871/tplx;83b6-6632/~tNl;f169-62d0/~tND;d862-14b5/tyf, PASS, wireless Ipv4
 
-# /showcases/visualizer/canvas/radiomediumactivity/,  -f omnetpp.ini -c DisplayingSignalsTransmissionsReceptions -r 0,       500s,            f98f-dd46/tplx;0000-0000/~tNl;0000-0000/~tND, PASS, wireless # unfinished
-# /showcases/visualizer/canvas/radiomediumactivity/,  -f omnetpp.ini -c DisplayingPropagationTransmissionsReceptionsV2 -r 0,       500s,            f98f-dd46/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,    wireless
-# /showcases/visualizer/canvas/radiomediumactivity/,  -f omnetpp.ini -c MultipleNodes -r 0,                                      500s,            2654-40b2/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,    wireless
-# /showcases/visualizer/canvas/radiomediumactivity/,  -f omnetpp.ini -c InterferingSignals -r 0,                                 500s,            1dc2-eb9c/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,    wireless
-# /showcases/visualizer/canvas/radiomediumactivity/, -f omnetpp.ini -c Propagation4 -r 0,    100s,         3601-6e71/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,    wireless
-# /showcases/visualizer/canvas/radiomediumactivity/, -f omnetpp.ini -c Propagation5 -r 0,    100s,         1b6b-74c0/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,    wireless
+/showcases/visualizer/canvas/radiomediumactivity/,  -f omnetpp.ini -c DisplayingSignalsTransmissionsReceptions -r 0,       500s,            771b-bffb/tplx;ca1b-c59c/~tNl;cdc6-2172/~tND, PASS, wireless # unfinished
+/showcases/visualizer/canvas/radiomediumactivity/,  -f omnetpp.ini -c MultipleNodes -r 0,                                      500s,            d609-0855/tplx;c3dc-e8b6/~tNl;0c8c-55e5/~tND, PASS,    wireless
+/showcases/visualizer/canvas/radiomediumactivity/,  -f omnetpp.ini -c InterferingSignals -r 0,                                 500s,            0c15-ccd5/tplx;5a8d-56aa/~tNl;2d50-a655/~tND, PASS,    wireless
 
 /showcases/visualizer/canvas/routingtable/, -f omnetpp.ini -c DisplayingAll -r 0,                            500s,            0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;4c45-0ad4/tyf, PASS,
 /showcases/visualizer/canvas/routingtable/, -f omnetpp.ini -c Unfiltered -r 0,                               500s,            0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;4e2e-816e/tyf, PASS,
