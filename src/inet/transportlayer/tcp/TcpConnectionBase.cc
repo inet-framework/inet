@@ -583,6 +583,7 @@ bool TcpConnection::performStateTransition(const TcpEventCode& event)
     if (oldState != fsm.getState()) {
         EV_INFO << "Transition: " << stateName(oldState) << " --> " << stateName(fsm.getState()) << "  (event was: " << eventName(event) << ")\n";
         EV_DEBUG_C("testing") << tcpMain->getName() << ": " << stateName(oldState) << " --> " << stateName(fsm.getState()) << "  (on " << eventName(event) << ")\n";
+        emit(stateSignal, fsm.getState());
 
         // cancel timers, etc.
         stateEntered(fsm.getState(), oldState, event);

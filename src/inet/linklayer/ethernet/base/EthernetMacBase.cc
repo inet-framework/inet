@@ -167,6 +167,7 @@ void EthernetMacBase::handleStopOperation(LifecycleOperation *operation)
     else {
         networkInterface->setCarrier(false);
         networkInterface->setState(NetworkInterface::State::DOWN);
+        connected = false;
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
     }
 }
@@ -190,6 +191,7 @@ void EthernetMacBase::processAtHandleMessageFinished()
             networkInterface->setCarrier(false);
             processConnectDisconnect();
             networkInterface->setState(NetworkInterface::State::DOWN);
+            connected = false;
             startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
         }
     }
