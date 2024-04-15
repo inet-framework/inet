@@ -52,7 +52,7 @@ namespace inet {
             domainNumber = par("domainNumber");
             syncInterval = par("syncInterval");
             pDelayReqProcessingTime = par("pDelayReqProcessingTime");
-            std::hash <std::string> strHash;
+            std::hash<std::string> strHash;
             clockIdentity = strHash(getFullPath());
         }
         if (stage == INITSTAGE_LINK_LAYER) {
@@ -366,14 +366,18 @@ namespace inet {
         else
             neighborRateRatio = (pdelayReqEventEgressTimestamp - pdelayReqEventEgressTimestampLast) /
                                 (pdelayReqEventIngressTimestamp - pdelayReqEventIngressTimestampLast);
-    }
+
+        rateRatio = rateRatio * neighborRateRatio;
+//rateRatio.insert(slavePortId, rateRatio);
 
 //calculate Propagation Delay (also named as Peer Delay by original author)
-    void Gptp::calculatePD() {
         PD = ((pdelayRespEventIngressTimestamp - pdelayReqEventEgressTimestamp) / neighborRateRatio -
               (pdelayRespEventEgressTimestamp - pdelayReqEventIngressTimestamp)) / 2
-    }
 
+        //correction field
+        correctionFieldLast = correctionField;
+        correctionField = correctionFieldLast + PD + rateRatio * residenceTime;
+    }
 
     void Gptp::synchronize() {
         simtime_t now = simTime();
@@ -477,7 +481,6 @@ namespace inet {
         }
 
         calculateNRR();
-        calculatePD();
 
         peerResponseOriginTimestamp = gptp->getResponseOriginTimestamp();
 

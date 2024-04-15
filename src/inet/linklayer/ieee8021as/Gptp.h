@@ -18,6 +18,8 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/linklayer/ieee8021as/GptpPacket_m.h"
 
+#include <vector>
+
 namespace inet {
 
 class INET_API Gptp : public ClockUserModuleBase, public cListener
@@ -48,15 +50,19 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     /* Neighbor Rate Ratio Calculation */
     double neighborRateRatio = 1.0;
+//    std::vector<double> rateRatio;
+    double rateRatio = 1.0;
     clocktime_t pdelayReqEventEgressTimestamp;   // sending time of pdelay_req (SLAVE)
     clocktime_t pdelayReqEventEgressTimestampLast;   // sending time of last pdelay_req (SLAVE)
     clocktime_t pdelayReqEventIngressTimestamp;  // receiving time of pdelay_req (MASTER)
     clocktime_t pdelayReqEventIngressTimestampLast; //receiving time of last pdelay_req (MASTER)
 
-    /* Propagation Delay */
-    clocktime_t PD;
+    clocktime_t PD;   // Propagation Delay
     clocktime_t pdelayRespEventEgressTimestamp; // sending time of pdelay_resp (MASTER)
     clocktime_t pdelayRespEventIngressTimestamp;// receiving time of pdelay_resp (SLAVE)
+
+    clocktime_t correctionFieldLast;
+    clocktime_t correctionField;
 
 
     /* Slave port - Variables is used for Peer Delay Measurement */
