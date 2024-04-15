@@ -11,7 +11,6 @@
 #include "inet/common/XMLUtils.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/scenario/ScenarioTimer_m.h"
 
 namespace inet {
 
@@ -54,7 +53,7 @@ static const char *OP_RESUME = "resume";
 
 void ScenarioManager::initialize()
 {
-    WATCH(nextEvent);
+    WATCH_PTRLIST(scheduledEvents);
     WATCH(numChanges);
     WATCH(numDone);
 
@@ -70,33 +69,25 @@ void ScenarioManager::initialize()
         simtime_t t = SimTime::parse(tAttr);
         auto msg = new ScenarioTimer("scenario-event");
         msg->setXmlNode(node);
-        msg->setArrivalTime(t);
-        localFes.insert(msg);
+        scheduleAt(t, msg);
+        scheduledEvents.push_back(msg);
 
         // count it
         numChanges++;
     }
-
-    scheduleNext();
 }
 
 void ScenarioManager::handleMessage(cMessage *msg)
 {
-    auto node = check_and_cast<ScenarioTimer *>(msg)->getXmlNode();
-    delete msg;
+    auto scenarioTimer = check_and_cast<ScenarioTimer *>(msg);
+    if (scheduledEvents.empty() || scenarioTimer != scheduledEvents.front())
+        throw cRuntimeError("Model error: arrived non-expected message '%s': '%s'", scenarioTimer->getName(), scenarioTimer->str().c_str());
 
-    processCommand(node);
+    scheduledEvents.pop_front();
+    processCommand(scenarioTimer->getXmlNode());
+    delete scenarioTimer;
 
     numDone++;
-
-    scheduleNext();
-}
-
-void ScenarioManager::scheduleNext()
-{
-    nextEvent = dynamic_cast<cMessage*>(localFes.removeFirst());
-    if (nextEvent)
-        scheduleAt(nextEvent->getArrivalTime(), nextEvent);
 }
 
 void ScenarioManager::processCommand(const cXMLElement *node)
@@ -503,9 +494,9 @@ std::string ScenarioManager::resolveDirective(char directive) const
         case 'l':
             return std::to_string(numChanges - numDone); // "numLeft"
         case 't':
-            return nextEvent ? nextEvent->getArrivalTime().str() + "s" : "n/a";
+            return scheduledEvents.empty() ? "n/a" : scheduledEvents.front()->getArrivalTime().str() + "s";
         case 'n':
-            return nextEvent ? nextEvent->getName() : "n/a";
+            return scheduledEvents.empty() ? "n/a" : scheduledEvents.front()->getName();
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
