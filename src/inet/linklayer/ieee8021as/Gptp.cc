@@ -238,6 +238,7 @@ namespace inet {
             originTimestamp = clock->getClockTime();
         }
         //gptp->setOriginTimestamp(CLOCKTIME_ZERO);
+
         gptp->setSequenceId(sequenceId++);
 
         sentTimeSyncSync = clock->getClockTime();
@@ -326,6 +327,17 @@ namespace inet {
 
         // peerSentTimeSync = gptp->getOriginTimestamp();  // TODO this is unfilled in two-step mode
         syncIngressTimestamp = packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime();
+
+        //correction field
+        correctionFieldLast = correctionField;
+        correctionField = correctionFieldLast + PD + rateRatio * residenceTime;
+
+        //relative time delay
+        //marked as theta in the paper and the definition is shown in header file
+        syncSentTimeFromMaster = gptp->getOriginTimestamp();
+        timeOffset = syncIngressTimestamp - (syncSentTimeFromMaster + correctionField + PD) / rateRatio;
+
+
     }
 
     void Gptp::processFollowUp(Packet *packet, const GptpFollowUp *gptp) {
@@ -358,8 +370,8 @@ namespace inet {
         rcvdGptpSync = false;
     }
 
-//calculate Neighbor Rate Ratio
-//called in processPdelayRespFollowUp()
+    //calculate Neighbor Rate Ratio
+    //called in processPdelayRespFollowUp()
     void Gptp::calculateNRR() {
         if (pdelayReqEventEgressTimestamp == -1)
             neighborRateRatio = 1.0;
@@ -368,15 +380,11 @@ namespace inet {
                                 (pdelayReqEventIngressTimestamp - pdelayReqEventIngressTimestampLast);
 
         rateRatio = rateRatio * neighborRateRatio;
-//rateRatio.insert(slavePortId, rateRatio);
+        //rateRatio.insert(slavePortId, rateRatio);
 
-//calculate Propagation Delay (also named as Peer Delay by original author)
+        //calculate Propagation Delay (also named as Peer Delay by original author)
         PD = ((pdelayRespEventIngressTimestamp - pdelayReqEventEgressTimestamp) / neighborRateRatio -
               (pdelayRespEventEgressTimestamp - pdelayReqEventIngressTimestamp)) / 2
-
-        //correction field
-        correctionFieldLast = correctionField;
-        correctionField = correctionFieldLast + PD + rateRatio * residenceTime;
     }
 
     void Gptp::synchronize() {

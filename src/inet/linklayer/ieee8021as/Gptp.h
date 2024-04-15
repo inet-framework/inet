@@ -22,10 +22,11 @@
 
 namespace inet {
 
-class INET_API Gptp : public ClockUserModuleBase, public cListener
-{
+    class INET_API Gptp
+
+    : public ClockUserModuleBase, public cListener {
     //parameters:
-    ModuleRefByPar<IInterfaceTable> interfaceTable;
+    ModuleRefByPar <IInterfaceTable> interfaceTable;
 
     GptpNodeType gptpNodeType;
     int domainNumber = -1;
@@ -64,6 +65,10 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     clocktime_t correctionFieldLast;
     clocktime_t correctionField;
 
+    clocktime_t timeOffset; // time difference between "the slave's time when receives the sync packet" and "the projection of master's time onto slave's time axis when the sync packet is received by slave i". Should be 0 after synchronize
+    clocktime_t syncSentTimeFromMaster; // the time when the sync was sent from the Grand Master
+
+
 
     /* Slave port - Variables is used for Peer Delay Measurement */
     uint16_t lastSentPdelayReqSequenceId = 0;
@@ -87,48 +92,79 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     uint16_t lastReceivedGptpSyncSequenceId = 0xffff;
 
     // self timers:
-    ClockEvent* selfMsgSync = nullptr;
-    ClockEvent* selfMsgDelayReq = nullptr;
-    ClockEvent* requestMsg = nullptr;
+    ClockEvent *selfMsgSync = nullptr;
+    ClockEvent *selfMsgDelayReq = nullptr;
+    ClockEvent *requestMsg = nullptr;
 
     // Statistics information: // TODO remove, and replace with emit() calls
     static simsignal_t localTimeSignal;
     static simsignal_t timeDifferenceSignal;
     static simsignal_t rateRatioSignal;
     static simsignal_t peerDelaySignal;
-  public:
+    public:
     static const MacAddress GPTP_MULTICAST_ADDRESS;
 
-  protected:
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
+    protected:
 
-    virtual void handleSelfMessage(cMessage *msg);
-    void handleDelayOrSendFollowUp(const GptpBase *gptp, omnetpp::cComponent *source);
-    const GptpBase *extractGptpHeader(Packet *packet);
+    virtual int numInitStages() const
 
-  public:
-    virtual ~Gptp();
-  protected:
-    void sendPacketToNIC(Packet *packet, int portId);
-    void sendSync();
-    void sendFollowUp(int portId, const GptpSync *sync, clocktime_t preciseOriginTimestamp);
-    void sendPdelayReq();
-    void sendPdelayResp(GptpReqAnswerEvent *req);
-    void sendPdelayRespFollowUp(int portId, const GptpPdelayResp* resp);
+    override {
+    return
+    NUM_INIT_STAGES;
+}
 
-    void processSync(Packet *packet, const GptpSync* gptp);
-    void processFollowUp(Packet *packet, const GptpFollowUp* gptp);
-    void processPdelayReq(Packet *packet, const GptpPdelayReq* gptp);
-    void processPdelayResp(Packet *packet, const GptpPdelayResp* gptp);
-    void processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowUp* gptp);
+virtual void initialize(int stage)
 
-    clocktime_t getCalculatedDrift(IClock *clock, clocktime_t value) { return CLOCKTIME_ZERO; }
-    void synchronize();
-    inline void adjustLocalTimestamp(clocktime_t& time) { time += timeDiffAtTimeSync; }
+override;
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
+virtual void handleMessage(cMessage *msg)
+
+override;
+
+virtual void handleSelfMessage(cMessage *msg);
+
+void handleDelayOrSendFollowUp(const GptpBase *gptp, omnetpp::cComponent *source);
+
+const GptpBase *extractGptpHeader(Packet *packet);
+
+public:
+virtual ~
+
+Gptp();
+
+protected:
+
+void sendPacketToNIC(Packet *packet, int portId);
+
+void sendSync();
+
+void sendFollowUp(int portId, const GptpSync *sync, clocktime_t preciseOriginTimestamp);
+
+void sendPdelayReq();
+
+void sendPdelayResp(GptpReqAnswerEvent *req);
+
+void sendPdelayRespFollowUp(int portId, const GptpPdelayResp *resp);
+
+void processSync(Packet *packet, const GptpSync *gptp);
+
+void processFollowUp(Packet *packet, const GptpFollowUp *gptp);
+
+void processPdelayReq(Packet *packet, const GptpPdelayReq *gptp);
+
+void processPdelayResp(Packet *packet, const GptpPdelayResp *gptp);
+
+void processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowUp *gptp);
+
+clocktime_t getCalculatedDrift(IClock *clock, clocktime_t value) { return CLOCKTIME_ZERO; }
+
+void synchronize();
+
+inline void adjustLocalTimestamp(clocktime_t &time) { time += timeDiffAtTimeSync; }
+
+virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details)
+
+override;
 };
 
 }
