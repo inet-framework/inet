@@ -201,8 +201,6 @@ namespace inet {
             } else if (masterPortIds.find(incomingNicId) != masterPortIds.end()) {
                 // master port
                 if (gptpMessageType == GPTPTYPE_PDELAY_REQ) {
-                    pdelayReqEventIngressTimestampLast = pdelayReqEventIngressTimestamp; // store the old value
-                    pdelayReqEventIngressTimestamp = clock->getClockTime(); //should cover with the current time of master. Question: will "getColckTime()" function return the current time of master or slave?
                     processPdelayReq(packet, check_and_cast<const GptpPdelayReq *>(gptp.get()));
                 } else {
                     throw cRuntimeError("Unaccepted gPTP type: %d", (int) (gptpMessageType));
@@ -436,7 +434,10 @@ namespace inet {
         resp->setIngressTimestamp(packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime());
         resp->setSourcePortIdentity(gptp->getSourcePortIdentity());
         resp->setSequenceId(gptp->getSequenceId());
-        receiveReqEndTimestamp = resp->getIngressTimestamp(); // TODO: check if this is correct
+//        receiveReqEndTimestamp = resp->getIngressTimestamp(); // TODO: check if this is correct
+
+        pdelayReqEventIngressTimestampLast = pdelayReqEventIngressTimestamp; // store the old value
+        pdelayReqEventIngressTimestamp = resp->getIngressTimestamp();
 
         scheduleClockEventAfter(pDelayReqProcessingTime, resp);
     }
