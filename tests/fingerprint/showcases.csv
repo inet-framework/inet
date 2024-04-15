@@ -11,7 +11,7 @@
 /showcases/measurement/datarate/,         -f omnetpp.ini -c General -r 0,           1s,           7af9-93b4/tplx;2d48-cf54/~tNl;ce00-3055/~tND;101c-ea79/tyf, PASS, Ipv4
 /showcases/measurement/endtoenddelay/,    -f omnetpp.ini -c General -r 0,           1s,           a6ec-9c0d/tplx;5632-17e6/~tNl;3b24-2f2d/~tND;05e3-3f36/tyf, PASS, Ipv4
 /showcases/measurement/flow/,             -f omnetpp.ini -c Basic -r 0,             1s,           d7da-78a3/tplx;59f8-2338/~tNl;d6e9-4044/~tND;727c-f192/tyf, PASS, Ipv4
-# /showcases/measurement/flow/,             -f omnetpp.ini -c AnyLocation -r 0,       1s,           1211-c17f/tplx;0000-0000/~tNl;0000-0000/~tND;497e-9125/tyf, PASS,
+/showcases/measurement/flow/,             -f omnetpp.ini -c AnyLocation -r 0,       1s,           e566-d0a6/tplx;5f32-069f/~tNl;0fcc-36d6/~tND;497e-9125/tyf, PASS, Ipv4
 /showcases/measurement/jitter/,           -f omnetpp.ini -c General -r 0,           1s,           4ad0-0f73/tplx;238c-7bbd/~tNl;b0ce-ce9d/~tND;03b9-42b3/tyf, PASS, Ipv4
 /showcases/measurement/propagationtime/,  -f omnetpp.ini -c General -r 0,           1s,           fcd3-5507/tplx;b0ce-ce9d/~tNl;985f-f759/~tND;c577-f9d5/tyf, PASS, Ipv4
 /showcases/measurement/queueingtime/,     -f omnetpp.ini -c General -r 0,           1s,           e724-f098/tplx;48cf-7d5a/~tNl;7458-c75a/~tND;03b9-42b3/tyf, PASS, Ipv4
