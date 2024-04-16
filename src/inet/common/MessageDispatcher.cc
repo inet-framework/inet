@@ -26,8 +26,6 @@ void MessageDispatcher::initialize(int stage)
     PacketProcessorBase::initialize(stage);
 #endif // #ifdef INET_WITH_QUEUEING
     if (stage == INITSTAGE_LOCAL) {
-        forwardServiceRegistration = par("forwardServiceRegistration");
-        forwardProtocolRegistration = par("forwardProtocolRegistration");
         interfaceTable.reference(this, "interfaceTableModule", true);
         WATCH_MAP(socketIdToGateIndex);
         WATCH_MAP(interfaceIdToGateIndex);
@@ -378,12 +376,10 @@ void MessageDispatcher::handleRegisterService(const Protocol& protocol, cGate *g
         }
         else {
             serviceToGateIndex[key] = g->getIndex();
-            if (forwardServiceRegistration) {
-                auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
-                int size = gateSize(gateName);
-                for (int i = 0; i < size; i++)
-                    registerService(protocol, gate(gateName, i), servicePrimitive);
-            }
+            auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
+            int size = gateSize(gateName);
+            for (int i = 0; i < size; i++)
+                registerService(protocol, gate(gateName, i), servicePrimitive);
         }
         registeringProtocol = nullptr;
     }
@@ -403,12 +399,10 @@ void MessageDispatcher::handleRegisterAnyService(cGate *g, ServicePrimitive serv
         }
         else {
             serviceToGateIndex[key] = g->getIndex();
-            if (forwardServiceRegistration) {
-                auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
-                int size = gateSize(gateName);
-                for (int i = 0; i < size; i++)
-                    registerAnyService(gate(gateName, i), servicePrimitive);
-            }
+            auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
+            int size = gateSize(gateName);
+            for (int i = 0; i < size; i++)
+                registerAnyService(gate(gateName, i), servicePrimitive);
         }
         registeringAny = false;
     }
@@ -432,12 +426,10 @@ void MessageDispatcher::handleRegisterProtocol(const Protocol& protocol, cGate *
         }
         else {
             protocolToGateIndex[key] = g->getIndex();
-            if (forwardProtocolRegistration) {
-                auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
-                int size = gateSize(gateName);
-                for (int i = 0; i < size; i++)
-                    registerProtocol(protocol, gate(gateName, i), servicePrimitive);
-            }
+            auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
+            int size = gateSize(gateName);
+            for (int i = 0; i < size; i++)
+                registerProtocol(protocol, gate(gateName, i), servicePrimitive);
         }
         registeringProtocol = nullptr;
     }
@@ -457,12 +449,10 @@ void MessageDispatcher::handleRegisterAnyProtocol(cGate *g, ServicePrimitive ser
         }
         else {
             protocolToGateIndex[key] = g->getIndex();
-            if (forwardProtocolRegistration) {
-                auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
-                int size = gateSize(gateName);
-                for (int i = 0; i < size; i++)
-                    registerAnyProtocol(gate(gateName, i), servicePrimitive);
-            }
+            auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
+            int size = gateSize(gateName);
+            for (int i = 0; i < size; i++)
+                registerAnyProtocol(gate(gateName, i), servicePrimitive);
         }
         registeringAny = false;
     }
