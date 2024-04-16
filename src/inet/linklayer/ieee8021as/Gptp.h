@@ -32,7 +32,6 @@ namespace inet {
     int domainNumber = -1;
     int slavePortId = -1; // interface ID of slave port
     std::set<int> masterPortIds; // interface IDs of master ports
-    clocktime_t correctionField;
     uint64_t clockIdentity = 0;
 
     double gmRateRatio = 1.0;
@@ -63,9 +62,9 @@ namespace inet {
     clocktime_t pdelayRespEventIngressTimestamp;// receiving time of pdelay_resp (SLAVE)
 
     clocktime_t correctionFieldLast;
-    clocktime_t correctionField;
+    clocktime_t correctionField = CLOCKTIME_ZERO;
 
-    clocktime_t timeOffset; // time difference between "the slave's time when receives the sync packet" and "the projection of master's time onto slave's time axis when the sync packet is received by slave i". Should be 0 after synchronize
+    clocktime_t timeOffset; // time difference between "the slave's time when receives the sync packet" and "the projection of master's time onto slave's time axis when the sync packet is received by slave". Should be 0 after synchronize
     clocktime_t syncSentTimeFromMaster; // the time when the sync was sent from the Grand Master
 
 

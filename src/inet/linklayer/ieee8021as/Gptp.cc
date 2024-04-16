@@ -268,7 +268,7 @@ namespace inet {
              *******************************************************************************************/
             gptp->setCorrectionField(syncTxEndTimestamp - originTimestamp);
         }
-        gptp->getFollowUpInformationTLVForUpdate().setRateRatio(gmRateRatio);
+        gptp->getFollowUpInformationTLVForUpdate().setRateRatio(rateRatio);
         packet->insertAtFront(gptp);
         sendPacketToNIC(packet, portId);
     }
@@ -335,7 +335,7 @@ namespace inet {
         //relative time delay
         //marked as theta in the paper and the definition is shown in header file
         syncSentTimeFromMaster = gptp->getOriginTimestamp();
-        timeOffset = syncIngressTimestamp - (syncSentTimeFromMaster + correctionField + PD) / rateRatio;
+        timeOffset = syncIngressTimestamp - (syncSentTimeFromMaster + correctionField + PD) * rateRatio;
 
 
     }
@@ -376,11 +376,12 @@ namespace inet {
         if (pdelayReqEventEgressTimestamp == -1)
             neighborRateRatio = 1.0;
         else
-            neighborRateRatio = (pdelayReqEventEgressTimestamp - pdelayReqEventEgressTimestampLast) /
-                                (pdelayReqEventIngressTimestamp - pdelayReqEventIngressTimestampLast);
+            neighborRateRatio = (pdelayReqEventIngressTimestamp - pdelayReqEventIngressTimestampLast) / (pdelayReqEventEgressTimestamp - pdelayReqEventEgressTimestampLast);
 
-        rateRatio = rateRatio * neighborRateRatio;
+
+        rateRatio = receivedRateRatio * neighborRateRatio;
         //rateRatio.insert(slavePortId, rateRatio);
+        //
 
         //calculate Propagation Delay (also named as Peer Delay by original author)
         PD = ((pdelayRespEventIngressTimestamp - pdelayReqEventEgressTimestamp) / neighborRateRatio -
