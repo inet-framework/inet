@@ -233,6 +233,8 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     localPort = listenerConn->localPort;
     autoRead = listenerConn->autoRead;
 
+    callback = listenerConn->callback;
+
     FSM_Goto(fsm, TCP_S_LISTEN);
 }
 

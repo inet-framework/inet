@@ -130,6 +130,7 @@ class INET_API TcpConnection : public cSimpleModule
     int32_t maxByteCountRequested = 0;  // from READ requests
 
     Tcp *tcpMain = nullptr; // Tcp module
+    ITcp::ICallback *callback = nullptr;
 
     // TCP state machine
     cFSM fsm;
@@ -479,6 +480,8 @@ class INET_API TcpConnection : public cSimpleModule
      * Utility: checks if send queue is empty (no data to send).
      */
     virtual bool isSendQueueEmpty();
+
+    virtual void setCallback(ITcp::ICallback *callback) { this->callback = callback; }
 
     friend class Tcp;
 };
