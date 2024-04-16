@@ -848,6 +848,40 @@
         compileFlags = ""
         linkerFlags = ""
         />
+
+    <feature
+        id = "Mrp"
+        name = "MRP (Media Redundancy Protocol)"
+        description = "Implementation of the Media Redundancy Protocol on Ethernet networks."
+        initiallyEnabled = "true"
+        requires = ""
+        recommended = ""
+        labels = "protocols"
+        nedPackages = "
+                       inet.linklayer.mrp
+                       inet.node.mrp
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_MRP"
+        linkerFlags = ""
+        />
+
+    <feature
+        id = "MrpExamples"
+        name = "MRP examples"
+        description = "Examples for MRP."
+        initiallyEnabled = "true"
+        requires = "Ethernet Mrp"
+        recommended = ""
+        labels = "protocols"
+        nedPackages = "
+                       inet.examples.mrp
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+
     <feature
         id = "NetworkEmulationSupport"
         name = "Network emulation support"
