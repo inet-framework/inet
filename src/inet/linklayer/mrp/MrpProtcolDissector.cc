@@ -1,3 +1,10 @@
+//
+// Copyright (C) 2024 Daniel Zeitler
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
+//
+
+
 #include "inet/linklayer/mrp/MrpProtocolDissector.h"
 
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
