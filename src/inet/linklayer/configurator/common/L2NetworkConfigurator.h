@@ -14,7 +14,7 @@
 #include "inet/common/PatternMatcher.h"
 #include "inet/common/Topology.h"
 #include "inet/linklayer/ieee8021d/common/Ieee8021dInterfaceData.h"
-#include "inet/linklayer/configurator/MrpInterfaceData.h"
+#include "inet/linklayer/mrp/MrpInterfaceData.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {

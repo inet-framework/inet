@@ -14,7 +14,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
-#include "inet/linklayer/configurator/MrpInterfaceData.h"
+#include "inet/linklayer/mrp/MrpInterfaceData.h"
 #include "inet/linklayer/ethernet/basic/EthernetEncapsulation.h"
 #include "inet/linklayer/mrp/MrpPdu_m.h"
 #include "inet/linklayer/mrp/ContinuityCheckMessage_m.h"
