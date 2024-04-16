@@ -56,8 +56,8 @@ namespace inet {
             clockIdentity = strHash(getFullPath());
         }
         if (stage == INITSTAGE_LINK_LAYER) {
-            peerDelay = 0;
-            receivedTimeSync = CLOCKTIME_ZERO;
+          meanLinkDelay = 0;
+          syncIngressTimestampLast = CLOCKTIME_ZERO;
 
             interfaceTable.reference(this, "interfaceTableModule", true);
 
@@ -111,7 +111,7 @@ namespace inet {
                 selfMsgSync = new ClockEvent("selfMsgSync", GPTP_SELF_MSG_SYNC);
 
                 clocktime_t scheduleSync = par("syncInitialOffset");
-                originTimestamp = clock->getClockTime() + scheduleSync;
+                preciseOriginTimestamp = clock->getClockTime() + scheduleSync;
                 scheduleClockEventAfter(scheduleSync, selfMsgSync);
             }
             if (slavePortId != -1) {
@@ -123,7 +123,7 @@ namespace inet {
                 pdelayInterval = par("pdelayInterval");
                 scheduleClockEventAfter(par("pdelayInitialOffset"), selfMsgDelayReq);
             }
-            WATCH(peerDelay);
+            WATCH(meanLinkDelay);
         }
     }
 
@@ -141,7 +141,6 @@ namespace inet {
 
             case GPTP_SELF_REQ_ANSWER_KIND:
                 // masterport:
-                pdelayRespEventEgressTimestamp = clock->getClockTime(); //should this time information be included in the packet of pdelay_resp_followup?
                 sendPdelayResp(check_and_cast<GptpReqAnswerEvent *>(msg));
                 delete msg;
                 break;
@@ -149,7 +148,6 @@ namespace inet {
             case GPTP_SELF_MSG_PDELAY_REQ:
                 // slaveport:
                 sendPdelayReq(); //TODO on slaveports only
-                sendReqEndTimeStamp = clock->getClockTime();
                 scheduleClockEventAfter(pdelayInterval, selfMsgDelayReq);
                 break;
 
@@ -235,13 +233,15 @@ namespace inet {
         gptp->setDomainNumber(domainNumber);
         /* OriginTimestamp always get Sync departure time from grand master */
         if (gptpNodeType == MASTER_NODE) {
-            originTimestamp = clock->getClockTime();
+          preciseOriginTimestamp = clock->getClockTime();
         }
         //gptp->setOriginTimestamp(CLOCKTIME_ZERO);
 
         gptp->setSequenceId(sequenceId++);
-
-        sentTimeSyncSync = clock->getClockTime();
+        // Correction field for Sync message is zero for two-step mode
+        // See Table 11-6 in IEEE 802.1AS-2020
+        // Change when implementing CMLDS
+        gptp->setCorrectionField(CLOCKTIME_ZERO);
         packet->insertAtFront(gptp);
 
         for (auto port: masterPortIds)
@@ -251,24 +251,23 @@ namespace inet {
         // The sendFollowUp(portId) called by receiveSignal(), when GptpSync sent
     }
 
-    void Gptp::sendFollowUp(int portId, const GptpSync *sync, clocktime_t syncTxEndTimestamp) {
+    void Gptp::sendFollowUp(int portId, const GptpSync *sync, clocktime_t syncEgressTimestampOwn) {
         auto packet = new Packet("GptpFollowUp");
         packet->addTag<MacAddressReq>()->setDestAddress(GPTP_MULTICAST_ADDRESS);
         auto gptp = makeShared<GptpFollowUp>();
         gptp->setDomainNumber(domainNumber);
-        gptp->setPreciseOriginTimestamp(originTimestamp);
+        gptp->setPreciseOriginTimestamp(preciseOriginTimestamp);
         gptp->setSequenceId(sync->getSequenceId());
 
         if (gptpNodeType == MASTER_NODE) {
-            gptp->setCorrectionField(syncTxEndTimestamp - originTimestamp);
+            gptp->setCorrectionField(syncEgressTimestampOwn - preciseOriginTimestamp);
         } else if (gptpNodeType == BRIDGE_NODE) {
-            /**************** Correction field calculation *********************************************
-             * It is calculated by adding peer delay, residence time and packet transmission time      *
-             * correctionField(i)=correctionField(i-1)+peerDelay+(timeReceivedSync-timeSentSync)*(1-f) *
-             *******************************************************************************************/
-            gptp->setCorrectionField(syncTxEndTimestamp - originTimestamp);
+          // TODO: Check which rate ratio we should use here
+          auto residenceTime = syncEgressTimestampOwn - syncIngressTimestamp;
+            auto newCorrectionField = correctionField + meanLinkDelay + gmRateRatio * residenceTime;
+            gptp->setCorrectionField(newCorrectionField);
         }
-        gptp->getFollowUpInformationTLVForUpdate().setRateRatio(rateRatio);
+    gptp->getFollowUpInformationTLVForUpdate().setRateRatio(gmRateRatio);
         packet->insertAtFront(gptp);
         sendPacketToNIC(packet, portId);
     }
@@ -278,6 +277,12 @@ namespace inet {
         auto packet = new Packet("GptpPdelayResp");
         packet->addTag<MacAddressReq>()->setDestAddress(GPTP_MULTICAST_ADDRESS);
         auto gptp = makeShared<GptpPdelayResp>();
+
+        // Correction field for Pdelay_Resp contains fractional nanoseconds
+        // according to the standard, we do not need this in INET.
+        // See Table 11-6 in IEEE 802.1AS-2020
+        gptp->setCorrectionField(CLOCKTIME_ZERO);
+
         gptp->setDomainNumber(domainNumber);
         gptp->setRequestingPortIdentity(req->getSourcePortIdentity());
         gptp->setSequenceId(req->getSequenceId());
@@ -291,9 +296,19 @@ namespace inet {
         auto packet = new Packet("GptpPdelayRespFollowUp");
         packet->addTag<MacAddressReq>()->setDestAddress(GPTP_MULTICAST_ADDRESS);
         auto gptp = makeShared<GptpPdelayRespFollowUp>();
-        auto now = clock->getClockTime();
         gptp->setDomainNumber(domainNumber);
+
+        // Correction field for Pdelay_Resp contains fractional nanoseconds
+        // according to the standard, we do not need this in INET.
+        // See Table 11-6 in IEEE 802.1AS-2020
+        gptp->setCorrectionField(CLOCKTIME_ZERO);
+
+        // We can set this to now, because this function is called directly
+        // after the transmissionEnded signal for the pdelayResp packet
+        // is received
+        auto now = clock->getClockTime();
         gptp->setResponseOriginTimestamp(now);
+
         gptp->setRequestingPortIdentity(resp->getRequestingPortIdentity());
         gptp->setSequenceId(resp->getSequenceId());
         packet->insertAtFront(gptp);
@@ -306,7 +321,11 @@ namespace inet {
         packet->addTag<MacAddressReq>()->setDestAddress(GPTP_MULTICAST_ADDRESS);
         auto gptp = makeShared<GptpPdelayReq>();
         gptp->setDomainNumber(domainNumber);
+
+        // Correction field for Pdelay_Req message is zero for two-step mode
+        // See Table 11-6 in IEEE 802.1AS-2020
         gptp->setCorrectionField(CLOCKTIME_ZERO);
+
         //save and send IDs
         PortIdentity portId;
         portId.clockIdentity = clockIdentity;
@@ -315,7 +334,6 @@ namespace inet {
         lastSentPdelayReqSequenceId = sequenceId++;
         gptp->setSequenceId(lastSentPdelayReqSequenceId);
         packet->insertAtFront(gptp);
-        pdelayReqEventEgressTimestamp = clock->getClockTime();
         rcvdPdelayResp = false;
 //    sendReqStartTimestamp = clock->getClockTime();
         sendPacketToNIC(packet, slavePortId);
@@ -327,17 +345,6 @@ namespace inet {
 
         // peerSentTimeSync = gptp->getOriginTimestamp();  // TODO this is unfilled in two-step mode
         syncIngressTimestamp = packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime();
-
-        //correction field
-        correctionFieldLast = correctionField;
-        correctionField = correctionFieldLast + PD + rateRatio * residenceTime;
-
-        //relative time delay
-        //marked as theta in the paper and the definition is shown in header file
-        syncSentTimeFromMaster = gptp->getOriginTimestamp();
-        timeOffset = syncIngressTimestamp - (syncSentTimeFromMaster + correctionField + PD) * rateRatio;
-
-
     }
 
     void Gptp::processFollowUp(Packet *packet, const GptpFollowUp *gptp) {
@@ -352,40 +359,23 @@ namespace inet {
             return;
         }
 
-        originTimestamp = gptp->getPreciseOriginTimestamp();
+        preciseOriginTimestamp = gptp->getPreciseOriginTimestamp();
         correctionField = gptp->getCorrectionField();
-        peerSentTimeSync = gptp->getPreciseOriginTimestamp() + gptp->getCorrectionField();
+        syncEgressTimestampMaster = gptp->getPreciseOriginTimestamp() + gptp->getCorrectionField();
         receivedRateRatio = gptp->getFollowUpInformationTLV().getRateRatio();
 
         synchronize();
 
         EV_INFO << "############## FOLLOW_UP ################################" << endl;
-        EV_INFO << "RECEIVED TIME AFTER SYNC - " << newLocalTimeAtTimeSync << endl;
-        EV_INFO << "ORIGIN TIME SYNC         - " << originTimestamp << endl;
-        EV_INFO << "CORRECTION FIELD         - " << correctionField << endl;
-        EV_INFO << "PROPAGATION DELAY        - " << peerDelay << endl;
-        EV_INFO << "peerSentTimeSync         - " << peerSentTimeSync << endl;
-        EV_INFO << "receivedRateRatio        - " << receivedRateRatio << endl;
+        EV_INFO << "RECEIVED TIME AFTER SYNC  - " << newLocalTimeAtTimeSync << endl;
+        EV_INFO << "ORIGIN TIME SYNC          - " << preciseOriginTimestamp
+                << endl;
+        EV_INFO << "CORRECTION FIELD          - " << correctionField << endl;
+        EV_INFO << "PROPAGATION DELAY         - " << meanLinkDelay << endl;
+        EV_INFO << "syncEgressTimestampMaster - " << syncEgressTimestampMaster << endl;
+        EV_INFO << "receivedRateRatio         - " << receivedRateRatio << endl;
 
         rcvdGptpSync = false;
-    }
-
-    //calculate Neighbor Rate Ratio
-    //called in processPdelayRespFollowUp()
-    void Gptp::calculateNRR() {
-        if (pdelayReqEventEgressTimestamp == -1)
-            neighborRateRatio = 1.0;
-        else
-            neighborRateRatio = (pdelayReqEventIngressTimestamp - pdelayReqEventIngressTimestampLast) / (pdelayReqEventEgressTimestamp - pdelayReqEventEgressTimestampLast);
-
-
-        rateRatio = receivedRateRatio * neighborRateRatio;
-        //rateRatio.insert(slavePortId, rateRatio);
-        //
-
-        //calculate Propagation Delay (also named as Peer Delay by original author)
-        PD = ((pdelayRespEventIngressTimestamp - pdelayReqEventEgressTimestamp) / neighborRateRatio -
-              (pdelayRespEventEgressTimestamp - pdelayReqEventIngressTimestamp)) / 2
     }
 
     void Gptp::synchronize() {
@@ -400,9 +390,16 @@ namespace inet {
          * Local time is adjusted using peer delay, correction field, residence time *
          * and packet transmission time based departure time of Sync message from GM *
          *****************************************************************************/
-        clocktime_t newTime = originTimestamp + correctionField + peerDelay + residenceTime;
+        // TODO: This should be the offset calculation and should include the rate ratio
+        clocktime_t newTime = preciseOriginTimestamp + correctionField + meanLinkDelay + residenceTime;
 
         ASSERT(gptpNodeType != MASTER_NODE);
+
+    // TODO validate the following expression with the standard
+    if (syncEgressTimestampMasterLast == -1)
+        gmRateRatio = 1;
+    else
+        gmRateRatio = (syncEgressTimestampMaster - syncEgressTimestampMasterLast) / (syncIngressTimestamp - syncIngressTimestampLast);
 
         auto settableClock = check_and_cast<SettableClock *>(clock.get());
         ppm newOscillatorCompensation = unit(
@@ -411,12 +408,15 @@ namespace inet {
 
         newLocalTimeAtTimeSync = clock->getClockTime();
         timeDiffAtTimeSync = newLocalTimeAtTimeSync - oldLocalTimeAtTimeSync;
-        receivedTimeSync = syncIngressTimestamp;
+        syncIngressTimestampLast = syncIngressTimestamp;
 
+        // TODO: What does this do, what does it mean?
+        // TODO: Check which timestamps we really need to adjust.
         // adjust local timestamps, too
-        adjustLocalTimestamp(pdelayRespEventIngressTimestamp);
+        //adjustLocalTimestamp(pdelayRespEventIngressTimestamp);
 //    adjustLocalTimestamp(pdelayReqEventEgressTimestamp);
-        adjustLocalTimestamp(receivedTimeSync);
+        //adjustLocalTimestamp(syncIngressTimestampLast);
+
 
         /************** Rate ratio calculation *************************************
          * It is calculated based on interval between two successive Sync messages *
@@ -426,15 +426,15 @@ namespace inet {
         EV_INFO << "LOCAL TIME BEFORE SYNC     - " << oldLocalTimeAtTimeSync << endl;
         EV_INFO << "LOCAL TIME AFTER SYNC      - " << newLocalTimeAtTimeSync << endl;
         EV_INFO << "CURRENT SIMTIME            - " << now << endl;
-        EV_INFO << "ORIGIN TIME SYNC           - " << peerSentTimeSync << endl;
-        EV_INFO << "PREV ORIGIN TIME SYNC      - " << oldPeerSentTimeSync << endl;
+        EV_INFO << "ORIGIN TIME SYNC           - " << syncEgressTimestampMaster << endl;
+        EV_INFO << "PREV ORIGIN TIME SYNC      - " << syncEgressTimestampMasterLast << endl;
         EV_INFO << "RESIDENCE TIME             - " << residenceTime << endl;
         EV_INFO << "CORRECTION FIELD           - " << correctionField << endl;
-        EV_INFO << "PROPAGATION DELAY          - " << peerDelay << endl;
+        EV_INFO << "PROPAGATION DELAY          - " << meanLinkDelay << endl;
         EV_INFO << "TIME DIFFERENCE TO SIMTIME - " << CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now << endl;
         EV_INFO << "GM RATE RATIO              - " << gmRateRatio << endl;
 
-        oldPeerSentTimeSync = peerSentTimeSync;
+        syncEgressTimestampMasterLast = syncEgressTimestampMaster;
 
         emit(rateRatioSignal, gmRateRatio);
         emit(localTimeSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync));
@@ -447,10 +447,6 @@ namespace inet {
         resp->setIngressTimestamp(packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime());
         resp->setSourcePortIdentity(gptp->getSourcePortIdentity());
         resp->setSequenceId(gptp->getSequenceId());
-//        receiveReqEndTimestamp = resp->getIngressTimestamp(); // TODO: check if this is correct
-
-        pdelayReqEventIngressTimestampLast = pdelayReqEventIngressTimestamp; // store the old value
-        pdelayReqEventIngressTimestamp = resp->getIngressTimestamp();
 
         scheduleClockEventAfter(pDelayReqProcessingTime, resp);
     }
@@ -468,9 +464,10 @@ namespace inet {
         }
 
         rcvdPdelayResp = true;
-        pdelayRespEventIngressTimestamp = packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime();
-        peerRequestReceiptTimestamp = gptp->getRequestReceiptTimestamp();
-        peerResponseOriginTimestamp = CLOCKTIME_ZERO;
+        pDelayRespIngressTimestamp = packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime();
+        pDelayReqIngressTimestamp = gptp->getRequestReceiptTimestamp();
+        pDelayRespEgressTimestampLast = pDelayRespEgressTimestamp;
+        pDelayRespEgressTimestamp = -1;
     }
 
     void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowUp *gptp) {
@@ -489,21 +486,35 @@ namespace inet {
             return;
         }
 
-        calculateNRR();
+        pDelayRespEgressTimestamp = gptp->getResponseOriginTimestamp();
 
-        peerResponseOriginTimestamp = gptp->getResponseOriginTimestamp();
+        // Note, that the standard defines the usage of the correction field
+        // for the following two calculations.
+        // However, these contain fractional nanoseconds, which we do not
+        // use in INET.
+        // See 11.2.19.3.3 computePdelayRateRatio() in IEEE 802.1AS-2020
+        if (pDelayRespEgressTimestampLast == -1 || pDelayRespIngressTimestampLast == -1)
+            neighborRateRatio = 1.0;
+        else
+          neighborRateRatio = (pDelayRespEgressTimestamp - pDelayRespEgressTimestampLast) / (pDelayRespIngressTimestamp - pDelayRespIngressTimestampLast);
 
-        // computePropTime():
-//    peerDelay = (gmRateRatio * (pdelayRespEventIngressTimestamp - pdelayReqEventEgressTimestamp) - (peerResponseOriginTimestamp - peerRequestReceiptTimestamp)) / 2.0;
+        // See 11.2.19.3.4 computePropTime() and Figure11-1 in IEEE 802.1AS-2020
+        auto t4 = pDelayRespIngressTimestamp;
+        auto t1 = pDelayReqEgressTimestamp;
 
-        EV_INFO << "RATE RATIO                       - " << gmRateRatio << endl;
-        EV_INFO << "pdelayReqEventEgressTimestamp    - " << pdelayReqEventEgressTimestamp << endl;
-        EV_INFO << "peerResponseOriginTimestamp      - " << peerResponseOriginTimestamp << endl;
-        EV_INFO << "pdelayRespEventIngressTimestamp  - " << pdelayRespEventIngressTimestamp << endl;
-        EV_INFO << "peerRequestReceiptTimestamp      - " << peerRequestReceiptTimestamp << endl;
-        EV_INFO << "PEER DELAY                       - " << peerDelay << endl;
+        auto t2 = pDelayReqIngressTimestamp;
+        auto t3 = pDelayRespEgressTimestamp;
 
-        emit(peerDelaySignal, CLOCKTIME_AS_SIMTIME(peerDelay));
+        meanLinkDelay = (neighborRateRatio * (t4 - t1) - (t3 - t2)) / 2;
+
+        EV_INFO << "RATE RATIO                  - " << gmRateRatio << endl;
+        EV_INFO << "pDelayReqEgressTimestamp    - " << pDelayReqEgressTimestamp << endl;
+        EV_INFO << "pDelayReqIngressTimestamp   - " << pDelayReqIngressTimestamp << endl;
+        EV_INFO << "pDelayRespEgressTimestamp   - " << pDelayRespEgressTimestamp << endl;
+        EV_INFO << "pDelayRespIngressTimestamp  - " << pDelayRespIngressTimestamp << endl;
+        EV_INFO << "PEER DELAY                  - " << meanLinkDelay << endl;
+
+        emit(peerDelaySignal, CLOCKTIME_AS_SIMTIME(meanLinkDelay));
     }
 
     const GptpBase *Gptp::extractGptpHeader(Packet *packet) {
@@ -559,9 +570,9 @@ namespace inet {
                 break;
             }
             case GPTPTYPE_PDELAY_REQ:
-                if (portId == slavePortId)
-                    pdelayReqEventEgressTimestampLast = pdelayReqEventEgressTimestamp; //store the old value
-                pdelayReqEventEgressTimestamp = clock->getClockTime();  // cover the value with new current time of slave
+                if (portId == slavePortId) {
+                    pDelayReqEgressTimestamp = clock->getClockTime();
+                }
                 break;
             default:
                 break;
