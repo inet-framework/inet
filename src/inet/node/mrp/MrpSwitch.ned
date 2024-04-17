@@ -33,8 +33,6 @@ import inet.protocolelement.measurement.IMeasurementLayer;
 module MrpSwitch like IEthernetNetworkNode
 {
     parameters:
-        bool hasMrp = default(true);
-        string MediaRedundancy = default("Mrp");
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/switch");
@@ -43,10 +41,10 @@ module MrpSwitch like IEthernetNetworkNode
         int numApps = default(0);
         bool hasStatus = default(false);
         bool hasStp = default(false);
+        bool hasMrp = default(true);
         bool hasGptp = default(false);
         bool hasCutthroughSwitching = default(false);
         string fcsMode @enum("declared","computed") = default("declared");
-        string spanningTreeProtocol = default("Stp");
         int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
         eth[*].encap.typename = default("");
         *.fcsMode = this.fcsMode;
@@ -62,10 +60,7 @@ module MrpSwitch like IEthernetNetworkNode
     gates:
         inout ethg[numEthInterfaces] @labels(EtherFrame-conn);
     submodules:
-        mrp: <MediaRedundancy> like IMediaRedundancy if hasMrp {
-            @display("p=516,49");
-        }
-        mrpMeasurementLayer: <default("")> like IMeasurementLayer {
+        mrpMeasurementLayer: <default("")> like IMeasurementLayer {  //TODO delete
             @display("p=604,100");
         }
         macTable: <default("MrpMacForwardingTable")> like IMacForwardingTable {
@@ -89,7 +84,10 @@ module MrpSwitch like IEthernetNetworkNode
         measurer: <default("")> like IMeasurer if typename != "" {
             @display("p=125,700;is=s");
         }
-        stp: <spanningTreeProtocol> like ISpanningTree if hasStp {
+        mrp: <default("Mrp")> like IMediaRedundancy if hasMrp {
+            @display("p=516,49");
+        }
+        stp: <default("Stp")> like ISpanningTree if hasStp {
             @display("p=678,49");
         }
         gptp: <default("Gptp")> like IApp if hasGptp {
