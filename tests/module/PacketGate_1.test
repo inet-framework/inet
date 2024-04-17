@@ -5,6 +5,7 @@ ends the packet streaming in both the source and the sink.
 
 %file: TestSource.cc
 #include "inet/common/ModuleRefByGate.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/queueing/contract/IPacketSource.h"
 #include "inet/queueing/gate/PacketGate.h"
 

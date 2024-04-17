@@ -29,13 +29,14 @@ module TsnDevice extends StandardHost
         bool hasOutgoingStreams = default(false); // enable IEEE 802.1 stream identification and stream encoding
         bool hasFramePreemption = default(false); // enable IEEE 802.1 Qbu frame preemption
         bool hasCutthroughSwitching = default(false); // enable cut-through switching support
+        bool hasBridging = default(hasIncomingStreams || hasOutgoingStreams || hasStreamRedundancy || hasIngressTrafficFiltering || hasEgressTrafficFiltering);
         clock.typename = default(hasTimeSynchronization ? "SettableClock" : ""); // enable explicit local clock model
         ethernet.typename = default("EthernetLayer"); // use Ethernet protocol layer outside of network interfaces
         eth[*].typename = default("LayeredEthernetInterface"); // switch to modular Ethernet interface
         eth[*].macLayer.typename = default(hasFramePreemption ? "EthernetPreemptingMacLayer" : "EthernetMacLayer");
         eth[*].macLayer.queue.typename = default(hasEgressTrafficShaping ? "Ieee8021qTimeAwareShaper" : (hasFramePreemption ? "" : "PacketQueue")); // use priority queue having multiple subqueues controlled by separate gates
         eth[*].phyLayer.typename = default(hasCutthroughSwitching ? "EthernetStreamingPhyLayer" : (hasFramePreemption ? "EthernetPreemptingPhyLayer" : "EthernetPhyLayer")); // use packet streaming when cut-through switching is enabled
-        bridging.typename = default(hasIncomingStreams || hasOutgoingStreams || hasStreamRedundancy || hasIngressTrafficFiltering || hasEgressTrafficFiltering ? "BridgingLayer" : ""); // switch to modular bridging
+        bridging.typename = default(hasBridging ? "BridgingLayer" : ""); // switch to modular bridging
         bridging.interfaceRelay.typename = default(""); // disable frame relaying
         bridging.streamIdentifier.typename = default(hasOutgoingStreams || hasStreamRedundancy ? "StreamIdentifierLayer" : ""); // enable stream identification when stream redundancy is enabled
         bridging.streamIdentifier.identifier.hasSequenceNumbering = default(hasStreamRedundancy); // enable sequence numberinf if stream redundancy is enabled
