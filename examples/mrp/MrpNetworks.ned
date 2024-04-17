@@ -128,8 +128,10 @@ network Mrp8 extends Mrp4
         host4.ethg <--> Eth100M <--> node7.ethg[2];
 }
 
-network Mrp50
+network MrpRing
 {
+    parameters:
+        int numNodes;
     submodules:
         scenarioManager: ScenarioManager {
             @display("p=95,48;is=s");
@@ -137,37 +139,18 @@ network Mrp50
         visualizer: IntegratedCanvasVisualizer {
             @display("p=95,100;is=s");
         }
-        nodeO[25]: MrpSwitch {
-            @display("p=,,ri,360,360");
+        node[numNodes]: MrpSwitch {
             gates:
                 ethg[3];
         }
-        nodeI[25]: MrpSwitch {
-            @display("p=,,ri,275,275");
-            gates:
-                ethg[3];
-        }
-        hostI[25]: EthernetHost {
+        host[numNodes]: EthernetHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
-                @display("p=,,ri,200,200");
-        }
-        hostO[25]: EthernetHost {
-            parameters:
-                csmacdSupport = false;
-                eth.duplexMode = true;
-                @display("p=,,ri,435,435");
         }
     connections:
-        for i=0..23 {
-            nodeO[i].ethg[0] <--> Eth100M <--> nodeI[i].ethg[1];
-            nodeI[i].ethg[0] <--> Eth100M <--> nodeO[i+1].ethg[1];
-        }
-        nodeO[24].ethg[0] <--> Eth100M <--> nodeI[24].ethg[1];
-        nodeI[24].ethg[0] <--> Eth100M <--> nodeO[0].ethg[1];
-        for i=0..24 {
-            hostO[i].ethg <--> Eth100M <--> nodeO[i].ethg[2];
-            hostI[i].ethg <--> Eth100M <--> nodeI[i].ethg[2];
+        for i=0..numNodes-1 {
+            node[i].ethg[0] <--> Eth100M <--> node[(i+1) % numNodes].ethg[1];
+            host[i].ethg <--> Eth100M <--> node[i].ethg[2];
         }
 }
