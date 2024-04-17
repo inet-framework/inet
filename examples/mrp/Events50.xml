@@ -1,10 +1,10 @@
 <script>
     <at t="1s">
-        <disconnect src-module="nodeI[12]" src-gate="ethg[1]" />
+        <disconnect src-module="node[12]" src-gate="ethg[0]" />
     </at>
     <at t="2s">
-        <connect src-module="nodeI[12]" src-gate="ethg[1]"
-                 dest-module="nodeO[12]" dest-gate="ethg[0]" 
+        <connect src-module="node[12]" src-gate="ethg[0]"
+                 dest-module="node[13]" dest-gate="ethg[1]" 
                  channel-type="inet.node.ethernet.Eth100M">
         </connect>
     </at>
