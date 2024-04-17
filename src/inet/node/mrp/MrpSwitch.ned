@@ -60,9 +60,6 @@ module MrpSwitch like IEthernetNetworkNode
     gates:
         inout ethg[numEthInterfaces] @labels(EtherFrame-conn);
     submodules:
-        mrpMeasurementLayer: <default("")> like IMeasurementLayer {  //TODO delete
-            @display("p=604,100");
-        }
         macTable: <default("MrpMacForwardingTable")> like IMacForwardingTable {
             @display("p=100,100;is=s");
         }
@@ -129,12 +126,6 @@ module MrpSwitch like IEthernetNetworkNode
             @display("p=250,750,row,150;q=txQueue");
         }
     connections:
-        if hasMrp {
-            mrp.relayIn <-- mrpMeasurementLayer.upperLayerOut;
-            mrp.relayOut --> mrpMeasurementLayer.upperLayerIn;
-            mrpMeasurementLayer.lowerLayerOut --> sc.in++;
-            mrpMeasurementLayer.lowerLayerIn <-- sc.out++;
-        }
         ethernet.lowerLayerOut --> li.in++ if exists(ethernet);
         li.out++ --> ethernet.lowerLayerIn if exists(ethernet);
 
@@ -175,6 +166,11 @@ module MrpSwitch like IEthernetNetworkNode
             li.out++ --> eth[i].upperLayerIn;
             li.in++ <-- eth[i].upperLayerOut;
             eth[i].phys <--> { @display("m=s"); } <--> ethg[i];
+        }
+
+        if hasMrp {
+            mrp.relayIn <-- sc.out++;
+            mrp.relayOut --> sc.in++;
         }
 
         if hasStp {
