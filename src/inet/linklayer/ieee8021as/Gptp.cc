@@ -265,7 +265,7 @@ void Gptp::sendSync()
     // The sendFollowUp(portId) called by receiveSignal(), when GptpSync sent
 }
 
-void Gptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_t& syncEgressTimestampOwn)
+void Gptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syncEgressTimestampOwn)
 {
     auto packet = new Packet("GptpFollowUp");
     packet->addTag<MacAddressReq>()->setDestAddress(GPTP_MULTICAST_ADDRESS);
@@ -409,18 +409,19 @@ void Gptp::synchronize()
      * Local time is adjusted using peer delay, correction field, residence time *
      * and packet transmission time based departure time of Sync message from GM *
      *****************************************************************************/
+
+    ASSERT(gptpNodeType != MASTER_NODE);
+
+    if (true || preciseOriginTimestampLast == -1 || syncIngressTimestampLast == -1)
+        gmRateRatio = 1;
+    else
+        gmRateRatio =
+            (preciseOriginTimestamp - preciseOriginTimestampLast) / (syncIngressTimestamp - syncIngressTimestampLast);
+
     // preciseOriginTimestamp and correctionField are in the grandmaster's time base
     // meanLinkDelay and residence time are in the local time base
     // Thus, we need to multiply the meanLinkDelay and residenceTime with the gmRateRatio
     clocktime_t newTime = preciseOriginTimestamp + correctionField + gmRateRatio * (meanLinkDelay + residenceTime);
-
-    ASSERT(gptpNodeType != MASTER_NODE);
-
-    if (preciseOriginTimestampLast == -1 || syncIngressTimestampLast == -1)
-        gmRateRatio = 1;
-    else
-        gmRateRatio = (preciseOriginTimestamp - preciseOriginTimestampLast) /
-                      (syncIngressTimestamp - syncIngressTimestampLast);
 
     // TODO: Add a clock servo model to INET in the future
     auto settableClock = check_and_cast<SettableClock *>(clock.get());
@@ -430,18 +431,6 @@ void Gptp::synchronize()
 
     newLocalTimeAtTimeSync = clock->getClockTime();
     timeDiffAtTimeSync = newLocalTimeAtTimeSync - oldLocalTimeAtTimeSync;
-
-    // TODO: What does this do, what does it mean?
-    // TODO: Check which timestamps we really need to adjust.
-    // adjust local timestamps, too
-    //adjustLocalTimestamp(pDelayReqEgressTimestamp);
-    //adjustLocalTimestamp(pDelayReqIngressTimestamp);
-    //adjustLocalTimestamp(pDelayRespEgressTimestamp);
-    //adjustLocalTimestamp(pDelayRespEgressTimestampLast);
-    //adjustLocalTimestamp(pDelayRespIngressTimestamp);
-    //adjustLocalTimestamp(pDelayRespIngressTimestampLast);
-    //adjustLocalTimestamp(syncIngressTimestampLast);
-    //adjustLocalTimestamp()
 
     /************** Rate ratio calculation *************************************
      * It is calculated based on interval between two successive Sync messages *
@@ -460,6 +449,22 @@ void Gptp::synchronize()
     EV_INFO << "PROPAGATION DELAY          - " << meanLinkDelay << endl;
     EV_INFO << "TIME DIFFERENCE TO SIMTIME - " << CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now << endl;
     EV_INFO << "GM RATE RATIO              - " << gmRateRatio << endl;
+
+    // TODO: What does this do, what does it mean?
+    // TODO: Check which timestamps we really need to adjust.
+    // TODO: What to do with -1 timestamps?
+    // adjust local timestamps, too
+    adjustLocalTimestamp(syncIngressTimestamp);
+    //adjustLocalTimestamp(pDelayReqEgressTimestamp);
+    //adjustLocalTimestamp(pDelayReqIngressTimestamp);
+    //adjustLocalTimestamp(pDelayRespEgressTimestamp);
+    //adjustLocalTimestamp(pDelayRespEgressTimestampLast);
+    //adjustLocalTimestamp(pDelayRespIngressTimestamp);
+    //adjustLocalTimestamp(pDelayRespIngressTimestampLast);
+    //adjustLocalTimestamp(syncIngressTimestamp);
+    //adjustLocalTimestamp(syncIngressTimestampLast);
+    //adjustLocalTimestamp(preciseOriginTimestamp);
+    //adjustLocalTimestamp(preciseOriginTimestampLast);
 
     syncIngressTimestampLast = syncIngressTimestamp;
     preciseOriginTimestampLast = preciseOriginTimestamp;
@@ -539,10 +544,13 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
     auto t2 = pDelayReqIngressTimestamp;
     auto t3 = pDelayRespEgressTimestamp;
 
-    meanLinkDelay = (neighborRateRatio * (t4 - t1) - (t3 - t2)) / 2;
+    auto meanLinkDelayInResponderTimebase = (neighborRateRatio * (t4 - t1) - (t3 - t2)) / 2;
+
+    // Regarding NOTE 1 in 11.2.19.3.4, we need to device by the nrr to get the meanLinkDelay in the current time base
+    meanLinkDelay = meanLinkDelayInResponderTimebase / neighborRateRatio;
 
     EV_INFO << "GM RATE RATIO               - " << gmRateRatio << endl;
-    EV_INFO << "NEIGHBOR RATE RATIO         - " << gmRateRatio << endl;
+    EV_INFO << "NEIGHBOR RATE RATIO         - " << neighborRateRatio << endl;
     EV_INFO << "pDelayReqEgressTimestamp    - " << pDelayReqEgressTimestamp << endl;
     EV_INFO << "pDelayReqIngressTimestamp   - " << pDelayReqIngressTimestamp << endl;
     EV_INFO << "pDelayRespEgressTimestamp   - " << pDelayRespEgressTimestamp << endl;
