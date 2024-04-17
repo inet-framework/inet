@@ -145,7 +145,14 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     void synchronize();
 
-    inline void adjustLocalTimestamp(clocktime_t &time) { time += timeDiffAtTimeSync; }
+    inline void adjustLocalTimestamp(clocktime_t &time) {
+        if (time != -1) {
+            time += timeDiffAtTimeSync;
+        }
+        else {
+            EV_WARN << "Timestamp is -1, cannot adjust it." << endl;
+        }
+    }
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details)
 

@@ -412,11 +412,14 @@ void Gptp::synchronize()
 
     ASSERT(gptpNodeType != MASTER_NODE);
 
-    if (true || preciseOriginTimestampLast == -1 || syncIngressTimestampLast == -1)
-        gmRateRatio = 1;
-    else
-        gmRateRatio =
-            (preciseOriginTimestamp - preciseOriginTimestampLast) / (syncIngressTimestamp - syncIngressTimestampLast);
+    // TODO Check which gmRateRatio calculation we need/want to use
+    //if (true || preciseOriginTimestampLast == -1 || syncIngressTimestampLast == -1)
+    //    gmRateRatio = 1;
+    //else
+    //    gmRateRatio =
+    //        (preciseOriginTimestamp - preciseOriginTimestampLast) / (syncIngressTimestamp - syncIngressTimestampLast);
+
+    gmRateRatio = receivedRateRatio * neighborRateRatio;
 
     // preciseOriginTimestamp and correctionField are in the grandmaster's time base
     // meanLinkDelay and residence time are in the local time base
@@ -455,12 +458,12 @@ void Gptp::synchronize()
     // TODO: What to do with -1 timestamps?
     // adjust local timestamps, too
     adjustLocalTimestamp(syncIngressTimestamp);
-    //adjustLocalTimestamp(pDelayReqEgressTimestamp);
-    //adjustLocalTimestamp(pDelayReqIngressTimestamp);
-    //adjustLocalTimestamp(pDelayRespEgressTimestamp);
-    //adjustLocalTimestamp(pDelayRespEgressTimestampLast);
-    //adjustLocalTimestamp(pDelayRespIngressTimestamp);
-    //adjustLocalTimestamp(pDelayRespIngressTimestampLast);
+    adjustLocalTimestamp(pDelayReqEgressTimestamp);
+    adjustLocalTimestamp(pDelayReqIngressTimestamp);
+    adjustLocalTimestamp(pDelayRespEgressTimestamp);
+    adjustLocalTimestamp(pDelayRespEgressTimestampLast);
+    adjustLocalTimestamp(pDelayRespIngressTimestamp);
+    adjustLocalTimestamp(pDelayRespIngressTimestampLast);
     //adjustLocalTimestamp(syncIngressTimestamp);
     //adjustLocalTimestamp(syncIngressTimestampLast);
     //adjustLocalTimestamp(preciseOriginTimestamp);
@@ -500,6 +503,7 @@ void Gptp::processPdelayResp(Packet *packet, const GptpPdelayResp *gptp)
     }
 
     rcvdPdelayResp = true;
+    pDelayRespIngressTimestampLast = pDelayRespIngressTimestamp;
     pDelayRespIngressTimestamp = packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime();
     pDelayReqIngressTimestamp = gptp->getRequestReceiptTimestamp();
     pDelayRespEgressTimestampLast = pDelayRespEgressTimestamp;
@@ -531,11 +535,13 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
     // However, these contain fractional nanoseconds, which we do not
     // use in INET.
     // See 11.2.19.3.3 computePdelayRateRatio() in IEEE 802.1AS-2020
-    if (true || pDelayRespEgressTimestampLast == -1 || pDelayRespIngressTimestampLast == -1)
+    if (pDelayRespEgressTimestampLast == -1 || pDelayRespIngressTimestampLast == -1)
         neighborRateRatio = 1.0;
     else
         neighborRateRatio = (pDelayRespEgressTimestamp - pDelayRespEgressTimestampLast) /
                             (pDelayRespIngressTimestamp - pDelayRespIngressTimestampLast);
+    // TODO: Check why nrr is always 1
+
 
     // See 11.2.19.3.4 computePropTime() and Figure11-1 in IEEE 802.1AS-2020
     auto t4 = pDelayRespIngressTimestamp;
