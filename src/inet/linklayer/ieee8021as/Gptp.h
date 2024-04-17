@@ -65,10 +65,9 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     // Unsure why this is also configurable with a parameter (TODO: Check)
     clocktime_t correctionField = CLOCKTIME_ZERO;
 
-    clocktime_t preciseOriginTimestamp; // timestamp when the last sync message was generated at the GM
+    clocktime_t preciseOriginTimestamp = -1; // timestamp when the last sync message was generated at the GM
+    clocktime_t preciseOriginTimestampLast = -1; // timestamp when the last sync message was generated at the GM
 
-    clocktime_t syncEgressTimestampMaster = -1;     // egress time of Sync at master
-    clocktime_t syncEgressTimestampMasterLast = -1; // egress time of previous Sync at master
     clocktime_t syncIngressTimestamp = -1;          // ingress time of Sync at slave (this node)
     clocktime_t syncIngressTimestampLast = -1;      // ingress time of previous Sync at slave (this node)
 

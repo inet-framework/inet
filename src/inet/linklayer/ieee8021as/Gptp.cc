@@ -278,9 +278,11 @@ void Gptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_t& syn
         gptp->setCorrectionField(syncEgressTimestampOwn - preciseOriginTimestamp);
     }
     else if (gptpNodeType == BRIDGE_NODE) {
-        // TODO: Check which rate ratio we should use here
         auto residenceTime = syncEgressTimestampOwn - syncIngressTimestamp;
-        auto newCorrectionField = correctionField + meanLinkDelay + gmRateRatio * residenceTime;
+        // meanLinkDelay and residence time are in the local time base
+        // In the correctionField we need to express it in the grandmaster's time base
+        // Thus, we need to multiply the meanLinkDelay and residenceTime with the gmRateRatio
+        auto newCorrectionField = correctionField + gmRateRatio * (meanLinkDelay + residenceTime);
         gptp->setCorrectionField(newCorrectionField);
     }
     gptp->getFollowUpInformationTLVForUpdate().setRateRatio(gmRateRatio);
@@ -363,9 +365,6 @@ void Gptp::processSync(Packet *packet, const GptpSync *gptp)
 {
     rcvdGptpSync = true;
     lastReceivedGptpSyncSequenceId = gptp->getSequenceId();
-
-    // peerSentTimeSync = gptp->getOriginTimestamp();
-    // TODO this is unfilled in two-step mode
     syncIngressTimestamp = packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime();
 }
 
@@ -384,7 +383,6 @@ void Gptp::processFollowUp(Packet *packet, const GptpFollowUp *gptp)
 
     preciseOriginTimestamp = gptp->getPreciseOriginTimestamp();
     correctionField = gptp->getCorrectionField();
-    syncEgressTimestampMaster = gptp->getPreciseOriginTimestamp() + gptp->getCorrectionField();
     receivedRateRatio = gptp->getFollowUpInformationTLV().getRateRatio();
 
     synchronize();
@@ -394,7 +392,6 @@ void Gptp::processFollowUp(Packet *packet, const GptpFollowUp *gptp)
     EV_INFO << "ORIGIN TIME SYNC          - " << preciseOriginTimestamp << endl;
     EV_INFO << "CORRECTION FIELD          - " << correctionField << endl;
     EV_INFO << "PROPAGATION DELAY         - " << meanLinkDelay << endl;
-    EV_INFO << "syncEgressTimestampMaster - " << syncEgressTimestampMaster << endl;
     EV_INFO << "receivedRateRatio         - " << receivedRateRatio << endl;
 
     rcvdGptpSync = false;
@@ -412,19 +409,20 @@ void Gptp::synchronize()
      * Local time is adjusted using peer delay, correction field, residence time *
      * and packet transmission time based departure time of Sync message from GM *
      *****************************************************************************/
-    // TODO: This should be the offset calculation and should include the rate
-    // ratio
-    clocktime_t newTime = preciseOriginTimestamp + correctionField + meanLinkDelay + residenceTime;
+    // preciseOriginTimestamp and correctionField are in the grandmaster's time base
+    // meanLinkDelay and residence time are in the local time base
+    // Thus, we need to multiply the meanLinkDelay and residenceTime with the gmRateRatio
+    clocktime_t newTime = preciseOriginTimestamp + correctionField + gmRateRatio * (meanLinkDelay + residenceTime);
 
     ASSERT(gptpNodeType != MASTER_NODE);
 
-    // TODO validate the following expression with the standard
-    if (syncEgressTimestampMasterLast == -1)
+    if (preciseOriginTimestampLast == -1 || syncIngressTimestampLast == -1)
         gmRateRatio = 1;
     else
-        gmRateRatio = (syncEgressTimestampMaster - syncEgressTimestampMasterLast) /
+        gmRateRatio = (preciseOriginTimestamp - preciseOriginTimestampLast) /
                       (syncIngressTimestamp - syncIngressTimestampLast);
 
+    // TODO: Add a clock servo model to INET in the future
     auto settableClock = check_and_cast<SettableClock *>(clock.get());
     ppm newOscillatorCompensation =
         unit(gmRateRatio * (1 + unit(settableClock->getOscillatorCompensation()).get()) - 1);
@@ -432,14 +430,18 @@ void Gptp::synchronize()
 
     newLocalTimeAtTimeSync = clock->getClockTime();
     timeDiffAtTimeSync = newLocalTimeAtTimeSync - oldLocalTimeAtTimeSync;
-    syncIngressTimestampLast = syncIngressTimestamp;
 
     // TODO: What does this do, what does it mean?
     // TODO: Check which timestamps we really need to adjust.
     // adjust local timestamps, too
-    // adjustLocalTimestamp(pdelayRespEventIngressTimestamp);
-    //    adjustLocalTimestamp(pdelayReqEventEgressTimestamp);
-    // adjustLocalTimestamp(syncIngressTimestampLast);
+    //adjustLocalTimestamp(pDelayReqEgressTimestamp);
+    //adjustLocalTimestamp(pDelayReqIngressTimestamp);
+    //adjustLocalTimestamp(pDelayRespEgressTimestamp);
+    //adjustLocalTimestamp(pDelayRespEgressTimestampLast);
+    //adjustLocalTimestamp(pDelayRespIngressTimestamp);
+    //adjustLocalTimestamp(pDelayRespIngressTimestampLast);
+    //adjustLocalTimestamp(syncIngressTimestampLast);
+    //adjustLocalTimestamp()
 
     /************** Rate ratio calculation *************************************
      * It is calculated based on interval between two successive Sync messages *
@@ -449,15 +451,18 @@ void Gptp::synchronize()
     EV_INFO << "LOCAL TIME BEFORE SYNC     - " << oldLocalTimeAtTimeSync << endl;
     EV_INFO << "LOCAL TIME AFTER SYNC      - " << newLocalTimeAtTimeSync << endl;
     EV_INFO << "CURRENT SIMTIME            - " << now << endl;
-    EV_INFO << "ORIGIN TIME SYNC           - " << syncEgressTimestampMaster << endl;
-    EV_INFO << "PREV ORIGIN TIME SYNC      - " << syncEgressTimestampMasterLast << endl;
+    EV_INFO << "ORIGIN TIME SYNC           - " << preciseOriginTimestamp << endl;
+    EV_INFO << "PREV ORIGIN TIME SYNC      - " << preciseOriginTimestampLast << endl;
+    EV_INFO << "SYNC INGRESS TIME          - " << syncIngressTimestamp << endl;
+    EV_INFO << "SYNC INGRESS TIME LAST     - " << syncIngressTimestampLast << endl;
     EV_INFO << "RESIDENCE TIME             - " << residenceTime << endl;
     EV_INFO << "CORRECTION FIELD           - " << correctionField << endl;
     EV_INFO << "PROPAGATION DELAY          - " << meanLinkDelay << endl;
     EV_INFO << "TIME DIFFERENCE TO SIMTIME - " << CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now << endl;
     EV_INFO << "GM RATE RATIO              - " << gmRateRatio << endl;
 
-    syncEgressTimestampMasterLast = syncEgressTimestampMaster;
+    syncIngressTimestampLast = syncIngressTimestamp;
+    preciseOriginTimestampLast = preciseOriginTimestamp;
 
     emit(rateRatioSignal, gmRateRatio);
     emit(localTimeSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync));
@@ -521,7 +526,7 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
     // However, these contain fractional nanoseconds, which we do not
     // use in INET.
     // See 11.2.19.3.3 computePdelayRateRatio() in IEEE 802.1AS-2020
-    if (pDelayRespEgressTimestampLast == -1 || pDelayRespIngressTimestampLast == -1)
+    if (true || pDelayRespEgressTimestampLast == -1 || pDelayRespIngressTimestampLast == -1)
         neighborRateRatio = 1.0;
     else
         neighborRateRatio = (pDelayRespEgressTimestamp - pDelayRespEgressTimestampLast) /
