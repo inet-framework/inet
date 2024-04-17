@@ -29,6 +29,11 @@ static const char *DISABLED_LINK_COLOR = "#888888";
 
 Define_Module(Mrp);
 
+//TODO take MacAddress args by const ref everywhere
+//TODO since MrpEnd and MrpVersion are immutable, we could use a single shared copy for all packets
+//TODO topologyChangeReq(double time) -> maybe rename method to scheduleTopologyChangeReq()?
+//TODO review values emitted for signals: user should be able to infer from signal name what is the value; or simply use constant "1" for signals that are emitted for events
+
 Register_Enum(Mrp::RingState, (Mrp::OPEN, Mrp::CLOSED, Mrp::UNDEFINED));
 Register_Enum(Mrp::NodeState, (Mrp::POWER_ON, Mrp::AC_STAT1, Mrp::PRM_UP, Mrp::CHK_RO, Mrp::CHK_RC, Mrp::DE_IDLE, Mrp::PT, Mrp::DE, Mrp::PT_IDLE));
 
@@ -406,7 +411,7 @@ void Mrp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
                     || field == NetworkInterface::F_CARRIER) {
                 simtime_t linkDetectionDelay;
                 if (interface->isUp() && interface->hasCarrier())
-                    linkDetectionDelay = SimTime(1, SIMTIME_US); //linkUP is handled faster than linkDown
+                    linkDetectionDelay = SimTime(1, SIMTIME_US); //linkUP is handled faster than linkDown --TODO parameter!
                 else
                     linkDetectionDelay = SimTime(linkDetectionDelayPar->doubleValue() * 1e3, SIMTIME_MS);
                 if (linkUpHysteresisTimer->isScheduled())
@@ -436,6 +441,8 @@ void Mrp::handleMessageWhenUp(cMessage *msg) {
             handleLinkDownTimer();
         else if (msg == fdbClearTimer)
             clearLocalFDB();
+        // TODO what is the difference between fdbClearTimer (above) and fdbClearDelay? they seem to be poorly named
+        // TODO fdbClearDelay is poorly named: it is NOT a "delay", it is a timer! (delay is the amount in simtime_t)
         else if (msg == fdbClearDelay)
             clearLocalFDBDelayed();
         else if (msg == startUpTimer) {
@@ -521,7 +528,7 @@ void Mrp::handleMrpPDU(Packet* packet) {
         if (ringID) {
             if (sequence > lastTopologyId) {
                 topologyChangeInd(topologyTlv->getSa(), SimTime(topologyTlv->getInterval(), SIMTIME_MS));
-                emit(receivedChangeSignal, topologyTlv->getInterval());
+                emit(receivedChangeSignal, topologyTlv->getInterval()); //TODO remove signal
             } else {
                 EV_DETAIL << "Received same Frame already" << EV_ENDL;
                 delete packet;
@@ -530,6 +537,7 @@ void Mrp::handleMrpPDU(Packet* packet) {
             EV_DETAIL << "Received packet from other Mrp-Domain"
                              << EV_FIELD(incomingInterface) << EV_FIELD(packet)
                              << EV_ENDL;
+            //TODO leak pkt?
         }
         break;
     }
@@ -540,7 +548,7 @@ void Mrp::handleMrpPDU(Packet* packet) {
         if (ringID) {
             LinkState linkState = linkTlv->getHeaderType() == LINKDOWN ? LinkState::DOWN : LinkState::UP;
             linkChangeInd(linkTlv->getPortRole(), linkState);
-            emit(receivedChangeSignal, linkTlv->getInterval());
+            emit(receivedChangeSignal, linkTlv->getInterval());  //TODO remove signal
         } else {
             EV_DETAIL << "Received packet from other Mrp-Domain"
                              << EV_FIELD(incomingInterface) << EV_FIELD(packet)
@@ -729,7 +737,7 @@ void Mrp::handleContinuityCheckMessage(Packet* packet) {
             << EV_FIELD(incomingInterface->getMacAddress())
             << EV_ENDL;
     mauTypeChangeInd(ringPort, LinkState::UP);
-    emit(receivedContinuityCheckSignal, ringPort);
+    emit(receivedContinuityCheckSignal, ringPort);  // TODO remove
     delete packet;
 }
 
@@ -750,16 +758,16 @@ void Mrp::handleDelayTimer(int interfaceId, int field) {
     }
 }
 
-void Mrp::clearLocalFDB() {
+void Mrp::clearLocalFDB() {  //TODO this only *schedules* clearing the FDB, and does not actually do itm right? rename to scheduleClearLocalFDB()?
     EV_DETAIL << "clearing FDB" << EV_ENDL;
     if (fdbClearDelay->isScheduled())
         cancelEvent(fdbClearDelay);
     simtime_t processingDelay = SimTime(processingDelayPar->doubleValue() * 1e6, SIMTIME_US);
     scheduleAfter(processingDelay, fdbClearDelay);
-    emit(clearFDBSignal, processingDelay.dbl());
+    emit(clearFDBSignal, processingDelay.dbl()); //TODO remove signal
 }
 
-void Mrp::clearLocalFDBDelayed() {
+void Mrp::clearLocalFDBDelayed() {  //TODO this actually does the clearing and not delays it, right? rename to clearLocalFDB()
     mrpMacForwardingTable->clearTable();
     EV_DETAIL << "FDB cleared" << EV_ENDL;
 }
@@ -825,7 +833,7 @@ void Mrp::handleTestTimer() {
             nodeState = CHK_RO;
             EV_DETAIL << "Switching State from CHK_RC to CHK_RO" << EV_FIELD(nodeState) << EV_ENDL;
             ringState = OPEN;
-            emit(ringStateChangedSignal, ringState);
+            emit(ringStateChangedSignal, ringState); //TODO now redundant, remove
         } else {
             testRetransmissionCount++;
             addTest = false;
@@ -956,7 +964,7 @@ void Mrp::setupContinuityCheck(int ringPort) {
     ccm->setMessageName(name.c_str());
     auto packet = new Packet("ContinuityCheck", ccm);
     sendCCM(ringPort, packet);
-    emit(continuityCheckSignal, ringPort);
+    emit(continuityCheckSignal, ringPort);  //TODO remove
 }
 
 void Mrp::testRingReq(simtime_t time) {
@@ -966,14 +974,14 @@ void Mrp::testRingReq(simtime_t time) {
         scheduleAfter(trunc_msec(time), testTimer);
         setupTestRingReq();
     } else
-        EV_DETAIL << "Testtimer already scheduled" << EV_ENDL;
+        EV_DETAIL << "Testtimer already scheduled" << EV_ENDL; //TODO this should never happen -- spec contains TestTimer.start() only in "TestTimer expired" event handlers
 }
 
-void Mrp::topologyChangeReq(simtime_t time) {
+void Mrp::topologyChangeReq(simtime_t time) {  //TODO apparently time can only be ZERO or topologyChangeInterval -- so this should be something like "bool repeatedly" ?
     if (time == 0) {
         clearLocalFDB();
         setupTopologyChangeReq(time * topologyChangeMaxRepeatCount);
-    } else if (!topologyChangeTimer->isScheduled()) {
+    } else if (!topologyChangeTimer->isScheduled()) {  //TODO spec says "TopTimer.start()" -- so what happens if it is already running???
         scheduleAfter(trunc_msec(time), topologyChangeTimer);
         setupTopologyChangeReq(time * topologyChangeMaxRepeatCount);
     } else
@@ -1059,7 +1067,7 @@ void Mrp::setupTestRingReq() {
     emit(testSignal, simTime());
 }
 
-void Mrp::setupTopologyChangeReq(simtime_t interval) {
+void Mrp::setupTopologyChangeReq(simtime_t interval) {  //TODO why "setup"? why not "sendTopologyChange" instead?
     //Create MRP-PDU according MRP_TopologyChange
     auto version = makeShared<MrpVersion>();
     auto topologyChangeTlv = makeShared<MrpTopologyChange>();
@@ -1130,7 +1138,7 @@ void Mrp::setupLinkChangeReq(int ringPort, LinkState linkState, simtime_t time) 
     packet1->insertAtBack(endTlv);
     MacAddress sourceAddress1 = getPortNetworkInterface(ringPort)->getMacAddress();
     sendFrameReq(ringPort, MacAddress(MC_CONTROL), sourceAddress1, priority, MRP_LT, packet1);
-    emit(linkChangeSignal, time.dbl() * 1000.0); // emit in ms
+    emit(linkChangeSignal, time.dbl() * 1000.0); //TODO remove
 }
 
 void Mrp::testMgrNackReq(int ringPort, MrpPriority managerPrio, MacAddress sourceAddress) {
@@ -1833,7 +1841,7 @@ void Mrp::interconnForwardReq(int ringPort, Packet *packet) {
     sendFrameReq(ringPort, destinationAddress, sourceAddress, priority, MRP_LT, packet);
 }
 
-void Mrp::sendFrameReq(int portId, const MacAddress &destinationAddress, const MacAddress &sourceAddress, int prio, uint16_t lt, Packet *mrpPDU) {
+void Mrp::sendFrameReq(int portId, const MacAddress &destinationAddress, const MacAddress &sourceAddress, int prio, uint16_t lt, Packet *mrpPDU) { //TODO lt is unused
     mrpPDU->addTag<InterfaceReq>()->setInterfaceId(portId);
     mrpPDU->addTag<PacketProtocolTag>()->setProtocol(&Protocol::mrp);
     mrpPDU->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);

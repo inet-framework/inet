@@ -76,7 +76,7 @@ simple Mrp like IMediaRedundancy
         // Switches do not detect a link change immediately. This parameter sets
         // the simulated delay of a "link down" event. Note: the delay for "link
         // up" is hardcoded to 1us in the code.
-        volatile double linkDetectionDelay @unit(s) = default(truncnormal(385ms,325ms));
+        volatile double linkDetectionDelay @unit(s) = default(truncnormal(385ms,325ms)); //TODO split to 2 parameters
 
         // Switches require a certain amount of time to process each received packet.
         // This parameter sets the processing delay; it is applied in handleMessageWhenUp().
@@ -86,7 +86,7 @@ simple Mrp like IMediaRedundancy
         // This parameter sets a hard upper time limit guaranteed by the protocol,
         // and the interval for test frames, topology changes, and link change times are adapted accordingly.
         // It should be set to the same value on all nodes within a ring.
-        int timingProfile @unit(ms) = default(500ms);
+        int timingProfile @unit(ms) = default(500ms);   //TODO rename + use unit(s)?
 
         // Each MRP node can either be disabled (value 0, no MRP function), be a MediaRedundancyClient (MRC, value 1),
         // a MediaRedundancyManager (MRM, value 2), or a MediaRedundancyAutoManager (MRA, value 4).
@@ -120,7 +120,7 @@ simple Mrp like IMediaRedundancy
         // To manage necessary communication, normal MRP nodes should be aware of the
         // check methods used. Checks can be performed either by ring check (similar to the
         // ring test mechanism) or by link check on Layer 2 (CCM messages).
-        bool interconnectionRingCheckAware = default(true);
+        bool interconnectionRingCheckAware = default(true);   //TODO join into 1 param, as the two seem exclusive?
         bool interconnectionLinkCheckAware = default(true);
 
         // Visualizes the ring by coloring connections in the network graphics.
@@ -140,7 +140,7 @@ simple Mrp like IMediaRedundancy
         // MRMs should be assigned one of the following values: HIGHEST = 0x0000, HIGH = 0x4000, DEFAULT = 0x8000.
         // If the node is an MRA, assign one of these: MRAHIGHEST = 0x9000, MRADEFAULT = 0xA000, MRALOWEST = 0xFFFF.
         // MRAs determine the acting manager based on priority and MAC address.
-        int mrpPriority = default(0xA000);
+        int mrpPriority = default(0xA000);  //TODO use enum?
 
         // In MRM role: Defines whether a MRM supports clients that can block their ring ports.
         bool nonBlockingMRC = default(true);
@@ -161,6 +161,7 @@ simple Mrp like IMediaRedundancy
         // Directives: `%r`: MRP role, `%n`: node state, `%g`: ring state
         string displayStringTextFormat = default("role: %r\nnode: %n\nring: %g");
 
+        //TODO some statistics titles are not descriptive enough, or out of date
         @display("i=block/network2");
         @signal[ringState](type=long);
         @signal[nodeState](type=long);

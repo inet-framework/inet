@@ -19,6 +19,8 @@
 
 namespace inet {
 
+//TODO what are these "double time" arguments in methods?
+
 Define_Module(MrpInterconnection);
 
 MrpInterconnection::MrpInterconnection() {
@@ -390,7 +392,7 @@ void MrpInterconnection::mauTypeChangeInd(int ringPort, LinkState linkState) {
                     EV_DETAIL << "Switching InState from AC_STAT1 to CHK_IC"
                                      << EV_FIELD(inNodeState) << EV_ENDL;
                     inTopologyState = CLOSED;
-                    emit(interconnectionStateChangedSignal, simTime().inUnit(SIMTIME_US));
+                    emit(interconnectionStateChangedSignal, simTime().inUnit(SIMTIME_US));  //TODO emit the state instead
                 } else if (inRole == INTERCONNECTION_CLIENT) {
                     inLinkChangeCount = inLinkMaxChange;
                     cancelEvent(inLinkDownTimer);
@@ -473,7 +475,7 @@ void MrpInterconnection::interconnTopologyChangeInd(MacAddress sourceAddress, si
         //it is not necessary to react after the first frame
         if (sequence > lastInTopologyId) {
             lastInTopologyId = sequence;
-            emit(receivedInChangeSignal, firstTLV->getInterval());
+            emit(receivedInChangeSignal, firstTLV->getInterval());  //TODO remove
             switch (inNodeState) {
             case AC_STAT1:
                 if (inRole == INTERCONNECTION_CLIENT) {
@@ -626,7 +628,7 @@ void MrpInterconnection::interconnLinkStatusPollInd(uint16_t inID, int ringPort,
         //it is not necessary to react after the first frame
         if (sequence > lastPollId) {
             lastPollId = sequence;
-            emit(receivedInStatusPollSignal, simTime().inUnit(SIMTIME_US));
+            emit(receivedInStatusPollSignal, simTime().inUnit(SIMTIME_US));  //TODO remove
             switch (inNodeState) {
             case AC_STAT1:
                 if (inRole == INTERCONNECTION_CLIENT) {
@@ -744,7 +746,7 @@ void MrpInterconnection::interconnTestReq(simtime_t time) {
         scheduleAfter(time, inLinkTestTimer);
         setupInterconnTestReq();
     } else
-        EV_DETAIL << "inTest already scheduled" << EV_ENDL;
+        EV_DETAIL << "inTest already scheduled" << EV_ENDL;  //TODO error instead?
 }
 
 void MrpInterconnection::setupInterconnTestReq() {
@@ -865,7 +867,7 @@ void MrpInterconnection::setupInterconnTopologyChangeReq(simtime_t time) {
     } else {
         sendFrameReq(interconnectionPort, MacAddress(MC_INCONTROL), sourceAddress3, priority, MRP_LT, packet3);
     }
-    emit(inTopologyChangeSignal, simTime().inUnit(SIMTIME_US));
+    emit(inTopologyChangeSignal, simTime().inUnit(SIMTIME_US));  //TODO
 }
 
 void MrpInterconnection::interconnLinkChangeReq(LinkState linkState, simtime_t time) {
@@ -940,7 +942,7 @@ void MrpInterconnection::interconnLinkChangeReq(LinkState linkState, simtime_t t
     } else {
         sendFrameReq(interconnectionPort, MacAddress(MC_INCONTROL), sourceAddress3, priority, MRP_LT, packet3);
     }
-    emit(inLinkChangeSignal, simTime().inUnit(SIMTIME_US));
+    emit(inLinkChangeSignal, simTime().inUnit(SIMTIME_US)); //TODO remove
 }
 
 void MrpInterconnection::interconnLinkStatusPollReq(simtime_t time) {

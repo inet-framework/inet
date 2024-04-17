@@ -58,7 +58,7 @@ protected:
     opp_component_ptr<NetworkInterface> interconnectionInterface = nullptr;
     int interconnectionPort;
 
-    simtime_t inLinkChangeInterval;
+    simtime_t inLinkChangeInterval;  // MRP_IN_LNKupT
     simtime_t inTopologyChangeInterval;
     simtime_t inLinkStatusPollInterval;
     simtime_t inTestDefaultInterval;
@@ -75,7 +75,7 @@ protected:
 
     cMessage *inLinkStatusPollTimer = nullptr;
     cMessage *inLinkDownTimer = nullptr;
-    cMessage *inLinkUpTimer = nullptr;
+    cMessage *inLinkUpTimer = nullptr;  //TODO is this the same as  InterconnUpTimer in the spec?
     cMessage *inLinkTestTimer = nullptr;
     cMessage *inTopologyChangeTimer = nullptr;
 
