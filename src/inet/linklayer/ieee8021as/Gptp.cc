@@ -24,8 +24,7 @@ namespace inet {
 Define_Module(Gptp);
 
 simsignal_t Gptp::localTimeSignal = cComponent::registerSignal("localTime");
-simsignal_t Gptp::timeDifferenceSignal =
-    cComponent::registerSignal("timeDifference");
+simsignal_t Gptp::timeDifferenceSignal = cComponent::registerSignal("timeDifference");
 simsignal_t Gptp::rateRatioSignal = cComponent::registerSignal("rateRatio");
 simsignal_t Gptp::peerDelaySignal = cComponent::registerSignal("peerDelay");
 
@@ -52,8 +51,7 @@ void Gptp::initialize(int stage)
     ClockUserModuleBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        gptpNodeType = static_cast<GptpNodeType>(
-            cEnum::get("GptpNodeType", "inet")->resolve(par("gptpNodeType")));
+        gptpNodeType = static_cast<GptpNodeType>(cEnum::get("GptpNodeType", "inet")->resolve(par("gptpNodeType")));
         domainNumber = par("domainNumber");
         syncInterval = par("syncInterval");
         pDelayReqProcessingTime = par("pDelayReqProcessingTime");
@@ -69,22 +67,18 @@ void Gptp::initialize(int stage)
         const char *str = par("slavePort");
         if (*str) {
             if (gptpNodeType == MASTER_NODE)
-                throw cRuntimeError(
-                    "Parameter inconsistency: MASTER_NODE with slave port");
+                throw cRuntimeError("Parameter inconsistency: MASTER_NODE with slave port");
             auto nic = CHK(interfaceTable->findInterfaceByName(str));
             slavePortId = nic->getInterfaceId();
             nic->subscribe(transmissionEndedSignal, this);
             nic->subscribe(receptionEndedSignal, this);
         }
         else if (gptpNodeType != MASTER_NODE)
-            throw cRuntimeError("Parameter error: Missing slave port for %s",
-                                par("gptpNodeType").stringValue());
+            throw cRuntimeError("Parameter error: Missing slave port for %s", par("gptpNodeType").stringValue());
 
-        auto v = check_and_cast<cValueArray *>(par("masterPorts").objectValue())
-                     ->asStringVector();
+        auto v = check_and_cast<cValueArray *>(par("masterPorts").objectValue())->asStringVector();
         if (v.empty() and gptpNodeType != SLAVE_NODE)
-            throw cRuntimeError("Parameter error: Missing any master port for %s",
-                                par("gptpNodeType").stringValue());
+            throw cRuntimeError("Parameter error: Missing any master port for %s", par("gptpNodeType").stringValue());
         for (const auto &p : v) {
             auto nic = CHK(interfaceTable->findInterfaceByName(p.c_str()));
             int portId = nic->getInterfaceId();
@@ -126,13 +120,11 @@ void Gptp::initialize(int stage)
             scheduleClockEventAfter(scheduleSync, selfMsgSync);
         }
         if (slavePortId != -1) {
-            requestMsg =
-                new ClockEvent("requestToSendSync", GPTP_REQUEST_TO_SEND_SYNC);
+            requestMsg = new ClockEvent("requestToSendSync", GPTP_REQUEST_TO_SEND_SYNC);
 
             // Schedule Pdelay_Req message is sent by slave port
             // without depending on node type which is grandmaster or bridge
-            selfMsgDelayReq =
-                new ClockEvent("selfMsgPdelay", GPTP_SELF_MSG_PDELAY_REQ);
+            selfMsgDelayReq = new ClockEvent("selfMsgPdelay", GPTP_SELF_MSG_PDELAY_REQ);
             pdelayInterval = par("pdelayInterval");
             scheduleClockEventAfter(par("pdelayInitialOffset"), selfMsgDelayReq);
         }
@@ -166,8 +158,8 @@ void Gptp::handleSelfMessage(cMessage *msg)
         break;
 
     default:
-        throw cRuntimeError("Unknown self message (%s)%s, kind=%d",
-                            msg->getClassName(), msg->getName(), msg->getKind());
+        throw cRuntimeError("Unknown self message (%s)%s, kind=%d", msg->getClassName(), msg->getName(),
+                            msg->getKind());
     }
 }
 
@@ -184,9 +176,8 @@ void Gptp::handleMessage(cMessage *msg)
         int incomingDomainNumber = gptp->getDomainNumber();
 
         if (incomingDomainNumber != domainNumber) {
-            EV_ERROR << "Message " << msg->getClassAndFullName()
-                     << " arrived with foreign domainNumber " << incomingDomainNumber
-                     << ", dropped\n";
+            EV_ERROR << "Message " << msg->getClassAndFullName() << " arrived with foreign domainNumber "
+                     << incomingDomainNumber << ", dropped\n";
             PacketDropDetails details;
             details.setReason(NOT_ADDRESSED_TO_US);
             emit(packetDroppedSignal, packet, &details);
@@ -198,8 +189,7 @@ void Gptp::handleMessage(cMessage *msg)
                 processSync(packet, check_and_cast<const GptpSync *>(gptp.get()));
                 break;
             case GPTPTYPE_FOLLOW_UP:
-                processFollowUp(packet,
-                                check_and_cast<const GptpFollowUp *>(gptp.get()));
+                processFollowUp(packet, check_and_cast<const GptpFollowUp *>(gptp.get()));
                 // Send a request to send Sync message
                 // through other gptp Ethernet interfaces
                 if (gptpNodeType == BRIDGE_NODE)
@@ -207,23 +197,19 @@ void Gptp::handleMessage(cMessage *msg)
                 break;
             case GPTPTYPE_PDELAY_RESP:
 
-                processPdelayResp(packet,
-                                  check_and_cast<const GptpPdelayResp *>(gptp.get()));
+                processPdelayResp(packet, check_and_cast<const GptpPdelayResp *>(gptp.get()));
                 break;
             case GPTPTYPE_PDELAY_RESP_FOLLOW_UP:
-                processPdelayRespFollowUp(
-                    packet, check_and_cast<const GptpPdelayRespFollowUp *>(gptp.get()));
+                processPdelayRespFollowUp(packet, check_and_cast<const GptpPdelayRespFollowUp *>(gptp.get()));
                 break;
             default:
-                throw cRuntimeError("Unknown gPTP packet type: %d",
-                                    (int)(gptpMessageType));
+                throw cRuntimeError("Unknown gPTP packet type: %d", (int)(gptpMessageType));
             }
         }
         else if (masterPortIds.find(incomingNicId) != masterPortIds.end()) {
             // master port
             if (gptpMessageType == GPTPTYPE_PDELAY_REQ) {
-                processPdelayReq(packet,
-                                 check_and_cast<const GptpPdelayReq *>(gptp.get()));
+                processPdelayReq(packet, check_and_cast<const GptpPdelayReq *>(gptp.get()));
             }
             else {
                 throw cRuntimeError("Unaccepted gPTP type: %d", (int)(gptpMessageType));
@@ -231,8 +217,8 @@ void Gptp::handleMessage(cMessage *msg)
         }
         else {
             // passive port
-            EV_ERROR << "Message " << msg->getClassAndFullName()
-                     << " arrived on passive port " << incomingNicId << ", dropped\n";
+            EV_ERROR << "Message " << msg->getClassAndFullName() << " arrived on passive port " << incomingNicId
+                     << ", dropped\n";
         }
         delete msg;
     }
@@ -241,9 +227,7 @@ void Gptp::handleMessage(cMessage *msg)
 void Gptp::sendPacketToNIC(Packet *packet, int portId)
 {
     auto networkInterface = interfaceTable->getInterfaceById(portId);
-    EV_INFO << "Sending " << packet
-            << " to output interface = " << networkInterface->getInterfaceName()
-            << ".\n";
+    EV_INFO << "Sending " << packet << " to output interface = " << networkInterface->getInterfaceName() << ".\n";
     packet->addTag<InterfaceReq>()->setInterfaceId(portId);
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::gptp);
     packet->addTag<DispatchProtocolInd>()->setProtocol(&Protocol::gptp);
@@ -281,8 +265,7 @@ void Gptp::sendSync()
     // The sendFollowUp(portId) called by receiveSignal(), when GptpSync sent
 }
 
-void Gptp::sendFollowUp(int portId, const GptpSync *sync,
-                        clocktime_t syncEgressTimestampOwn)
+void Gptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_t& syncEgressTimestampOwn)
 {
     auto packet = new Packet("GptpFollowUp");
     packet->addTag<MacAddressReq>()->setDestAddress(GPTP_MULTICAST_ADDRESS);
@@ -297,8 +280,7 @@ void Gptp::sendFollowUp(int portId, const GptpSync *sync,
     else if (gptpNodeType == BRIDGE_NODE) {
         // TODO: Check which rate ratio we should use here
         auto residenceTime = syncEgressTimestampOwn - syncIngressTimestamp;
-        auto newCorrectionField =
-            correctionField + meanLinkDelay + gmRateRatio * residenceTime;
+        auto newCorrectionField = correctionField + meanLinkDelay + gmRateRatio * residenceTime;
         gptp->setCorrectionField(newCorrectionField);
     }
     gptp->getFollowUpInformationTLVForUpdate().setRateRatio(gmRateRatio);
@@ -384,8 +366,7 @@ void Gptp::processSync(Packet *packet, const GptpSync *gptp)
 
     // peerSentTimeSync = gptp->getOriginTimestamp();
     // TODO this is unfilled in two-step mode
-    syncIngressTimestamp =
-        packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime();
+    syncIngressTimestamp = packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime();
 }
 
 void Gptp::processFollowUp(Packet *packet, const GptpFollowUp *gptp)
@@ -403,20 +384,17 @@ void Gptp::processFollowUp(Packet *packet, const GptpFollowUp *gptp)
 
     preciseOriginTimestamp = gptp->getPreciseOriginTimestamp();
     correctionField = gptp->getCorrectionField();
-    syncEgressTimestampMaster =
-        gptp->getPreciseOriginTimestamp() + gptp->getCorrectionField();
+    syncEgressTimestampMaster = gptp->getPreciseOriginTimestamp() + gptp->getCorrectionField();
     receivedRateRatio = gptp->getFollowUpInformationTLV().getRateRatio();
 
     synchronize();
 
-    EV_INFO << "############## FOLLOW_UP ################################"
-            << endl;
+    EV_INFO << "############## FOLLOW_UP ################################" << endl;
     EV_INFO << "RECEIVED TIME AFTER SYNC  - " << newLocalTimeAtTimeSync << endl;
     EV_INFO << "ORIGIN TIME SYNC          - " << preciseOriginTimestamp << endl;
     EV_INFO << "CORRECTION FIELD          - " << correctionField << endl;
     EV_INFO << "PROPAGATION DELAY         - " << meanLinkDelay << endl;
-    EV_INFO << "syncEgressTimestampMaster - " << syncEgressTimestampMaster
-            << endl;
+    EV_INFO << "syncEgressTimestampMaster - " << syncEgressTimestampMaster << endl;
     EV_INFO << "receivedRateRatio         - " << receivedRateRatio << endl;
 
     rcvdGptpSync = false;
@@ -428,8 +406,7 @@ void Gptp::synchronize()
     clocktime_t oldLocalTimeAtTimeSync = clock->getClockTime();
     clocktime_t residenceTime = oldLocalTimeAtTimeSync - syncIngressTimestamp;
 
-    emit(timeDifferenceSignal,
-         CLOCKTIME_AS_SIMTIME(oldLocalTimeAtTimeSync) - now);
+    emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(oldLocalTimeAtTimeSync) - now);
 
     /************** Time synchronization *****************************************
      * Local time is adjusted using peer delay, correction field, residence time *
@@ -437,8 +414,7 @@ void Gptp::synchronize()
      *****************************************************************************/
     // TODO: This should be the offset calculation and should include the rate
     // ratio
-    clocktime_t newTime =
-        preciseOriginTimestamp + correctionField + meanLinkDelay + residenceTime;
+    clocktime_t newTime = preciseOriginTimestamp + correctionField + meanLinkDelay + residenceTime;
 
     ASSERT(gptpNodeType != MASTER_NODE);
 
@@ -451,9 +427,7 @@ void Gptp::synchronize()
 
     auto settableClock = check_and_cast<SettableClock *>(clock.get());
     ppm newOscillatorCompensation =
-        unit(gmRateRatio *
-                 (1 + unit(settableClock->getOscillatorCompensation()).get()) -
-             1);
+        unit(gmRateRatio * (1 + unit(settableClock->getOscillatorCompensation()).get()) - 1);
     settableClock->setClockTime(newTime, newOscillatorCompensation, true);
 
     newLocalTimeAtTimeSync = clock->getClockTime();
@@ -471,37 +445,30 @@ void Gptp::synchronize()
      * It is calculated based on interval between two successive Sync messages *
      ***************************************************************************/
 
-    EV_INFO << "############## SYNC #####################################"
-            << endl;
+    EV_INFO << "############## SYNC #####################################" << endl;
     EV_INFO << "LOCAL TIME BEFORE SYNC     - " << oldLocalTimeAtTimeSync << endl;
     EV_INFO << "LOCAL TIME AFTER SYNC      - " << newLocalTimeAtTimeSync << endl;
     EV_INFO << "CURRENT SIMTIME            - " << now << endl;
-    EV_INFO << "ORIGIN TIME SYNC           - " << syncEgressTimestampMaster
-            << endl;
-    EV_INFO << "PREV ORIGIN TIME SYNC      - " << syncEgressTimestampMasterLast
-            << endl;
+    EV_INFO << "ORIGIN TIME SYNC           - " << syncEgressTimestampMaster << endl;
+    EV_INFO << "PREV ORIGIN TIME SYNC      - " << syncEgressTimestampMasterLast << endl;
     EV_INFO << "RESIDENCE TIME             - " << residenceTime << endl;
     EV_INFO << "CORRECTION FIELD           - " << correctionField << endl;
     EV_INFO << "PROPAGATION DELAY          - " << meanLinkDelay << endl;
-    EV_INFO << "TIME DIFFERENCE TO SIMTIME - "
-            << CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now << endl;
+    EV_INFO << "TIME DIFFERENCE TO SIMTIME - " << CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now << endl;
     EV_INFO << "GM RATE RATIO              - " << gmRateRatio << endl;
 
     syncEgressTimestampMasterLast = syncEgressTimestampMaster;
 
     emit(rateRatioSignal, gmRateRatio);
     emit(localTimeSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync));
-    emit(timeDifferenceSignal,
-         CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now);
+    emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now);
 }
 
 void Gptp::processPdelayReq(Packet *packet, const GptpPdelayReq *gptp)
 {
-    auto resp =
-        new GptpReqAnswerEvent("selfMsgPdelayResp", GPTP_SELF_REQ_ANSWER_KIND);
+    auto resp = new GptpReqAnswerEvent("selfMsgPdelayResp", GPTP_SELF_REQ_ANSWER_KIND);
     resp->setPortId(packet->getTag<InterfaceInd>()->getInterfaceId());
-    resp->setIngressTimestamp(
-        packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime());
+    resp->setIngressTimestamp(packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime());
     resp->setSourcePortIdentity(gptp->getSourcePortIdentity());
     resp->setSequenceId(gptp->getSequenceId());
 
@@ -512,7 +479,8 @@ void Gptp::processPdelayResp(Packet *packet, const GptpPdelayResp *gptp)
 {
     // verify IDs
     if (gptp->getRequestingPortIdentity().clockIdentity != clockIdentity ||
-        gptp->getRequestingPortIdentity().portNumber != slavePortId) {
+        gptp->getRequestingPortIdentity().portNumber != slavePortId)
+    {
         EV_WARN << "GptpPdelayResp arrived with invalid PortIdentity, dropped";
         return;
     }
@@ -522,15 +490,13 @@ void Gptp::processPdelayResp(Packet *packet, const GptpPdelayResp *gptp)
     }
 
     rcvdPdelayResp = true;
-    pDelayRespIngressTimestamp =
-        packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime();
+    pDelayRespIngressTimestamp = packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime();
     pDelayReqIngressTimestamp = gptp->getRequestReceiptTimestamp();
     pDelayRespEgressTimestampLast = pDelayRespEgressTimestamp;
     pDelayRespEgressTimestamp = -1;
 }
 
-void Gptp::processPdelayRespFollowUp(Packet *packet,
-                                     const GptpPdelayRespFollowUp *gptp)
+void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowUp *gptp)
 {
     if (!rcvdPdelayResp) {
         EV_WARN << "GptpPdelayRespFollowUp arrived without GptpPdelayResp, dropped";
@@ -538,14 +504,13 @@ void Gptp::processPdelayRespFollowUp(Packet *packet,
     }
     // verify IDs
     if (gptp->getRequestingPortIdentity().clockIdentity != clockIdentity ||
-        gptp->getRequestingPortIdentity().portNumber != slavePortId) {
-        EV_WARN
-            << "GptpPdelayRespFollowUp arrived with invalid PortIdentity, dropped";
+        gptp->getRequestingPortIdentity().portNumber != slavePortId)
+    {
+        EV_WARN << "GptpPdelayRespFollowUp arrived with invalid PortIdentity, dropped";
         return;
     }
     if (gptp->getSequenceId() != lastSentPdelayReqSequenceId) {
-        EV_WARN
-            << "GptpPdelayRespFollowUp arrived with invalid sequence ID, dropped";
+        EV_WARN << "GptpPdelayRespFollowUp arrived with invalid sequence ID, dropped";
         return;
     }
 
@@ -556,13 +521,11 @@ void Gptp::processPdelayRespFollowUp(Packet *packet,
     // However, these contain fractional nanoseconds, which we do not
     // use in INET.
     // See 11.2.19.3.3 computePdelayRateRatio() in IEEE 802.1AS-2020
-    if (pDelayRespEgressTimestampLast == -1 ||
-        pDelayRespIngressTimestampLast == -1)
+    if (pDelayRespEgressTimestampLast == -1 || pDelayRespIngressTimestampLast == -1)
         neighborRateRatio = 1.0;
     else
-        neighborRateRatio =
-            (pDelayRespEgressTimestamp - pDelayRespEgressTimestampLast) /
-            (pDelayRespIngressTimestamp - pDelayRespIngressTimestampLast);
+        neighborRateRatio = (pDelayRespEgressTimestamp - pDelayRespEgressTimestampLast) /
+                            (pDelayRespIngressTimestamp - pDelayRespIngressTimestampLast);
 
     // See 11.2.19.3.4 computePropTime() and Figure11-1 in IEEE 802.1AS-2020
     auto t4 = pDelayRespIngressTimestamp;
@@ -575,14 +538,10 @@ void Gptp::processPdelayRespFollowUp(Packet *packet,
 
     EV_INFO << "GM RATE RATIO               - " << gmRateRatio << endl;
     EV_INFO << "NEIGHBOR RATE RATIO         - " << gmRateRatio << endl;
-    EV_INFO << "pDelayReqEgressTimestamp    - " << pDelayReqEgressTimestamp
-            << endl;
-    EV_INFO << "pDelayReqIngressTimestamp   - " << pDelayReqIngressTimestamp
-            << endl;
-    EV_INFO << "pDelayRespEgressTimestamp   - " << pDelayRespEgressTimestamp
-            << endl;
-    EV_INFO << "pDelayRespIngressTimestamp  - " << pDelayRespIngressTimestamp
-            << endl;
+    EV_INFO << "pDelayReqEgressTimestamp    - " << pDelayReqEgressTimestamp << endl;
+    EV_INFO << "pDelayReqIngressTimestamp   - " << pDelayReqIngressTimestamp << endl;
+    EV_INFO << "pDelayRespEgressTimestamp   - " << pDelayRespEgressTimestamp << endl;
+    EV_INFO << "pDelayRespIngressTimestamp  - " << pDelayRespIngressTimestamp << endl;
     EV_INFO << "PEER DELAY                  - " << meanLinkDelay << endl;
 
     emit(peerDelaySignal, CLOCKTIME_AS_SIMTIME(meanLinkDelay));
@@ -594,10 +553,8 @@ const GptpBase *Gptp::extractGptpHeader(Packet *packet)
     if (*protocol != Protocol::ethernetPhy)
         return nullptr;
 
-    const auto &ethPhyHeader =
-        packet->peekAtFront<physicallayer::EthernetPhyHeader>();
-    const auto &ethMacHeader =
-        packet->peekDataAt<EthernetMacHeader>(ethPhyHeader->getChunkLength());
+    const auto &ethPhyHeader = packet->peekAtFront<physicallayer::EthernetPhyHeader>();
+    const auto &ethMacHeader = packet->peekDataAt<EthernetMacHeader>(ethPhyHeader->getChunkLength());
     if (ethMacHeader->getTypeOrLength() != ETHERTYPE_GPTP)
         return nullptr;
 
@@ -605,8 +562,7 @@ const GptpBase *Gptp::extractGptpHeader(Packet *packet)
     return packet->peekDataAt<GptpBase>(offset).get();
 }
 
-void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal,
-                         cObject *obj, cObject *details)
+void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(simSignal));
 
@@ -614,8 +570,7 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal,
         return;
 
     auto ethernetSignal = check_and_cast<cPacket *>(obj);
-    auto packet = check_and_cast_nullable<Packet *>(
-        ethernetSignal->getEncapsulatedPacket());
+    auto packet = check_and_cast_nullable<Packet *>(ethernetSignal->getEncapsulatedPacket());
     if (!packet)
         return;
 
@@ -627,16 +582,14 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal,
         return;
 
     if (simSignal == receptionEndedSignal)
-        packet->addTagIfAbsent<GptpIngressTimeInd>()->setArrivalClockTime(
-            clock->getClockTime());
+        packet->addTagIfAbsent<GptpIngressTimeInd>()->setArrivalClockTime(clock->getClockTime());
     else if (simSignal == transmissionEndedSignal)
         handleDelayOrSendFollowUp(gptp, source);
 }
 
 void Gptp::handleDelayOrSendFollowUp(const GptpBase *gptp, cComponent *source)
 {
-    int portId = getContainingNicModule(check_and_cast<cModule *>(source))
-                     ->getInterfaceId();
+    int portId = getContainingNicModule(check_and_cast<cModule *>(source))->getInterfaceId();
 
     switch (gptp->getMessageType()) {
     case GPTPTYPE_PDELAY_RESP: {

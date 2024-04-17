@@ -47,10 +47,10 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     // == Propagation Delay Measurement Procedure ==
     // Timestamps corresponding to the PDelayRequest and PDelayResponse mechanism
-    clocktime_t pDelayReqEgressTimestamp = -1;       // egress time of pdelay_req at initiator (this node)
-    clocktime_t pDelayReqIngressTimestamp = -1;      // ingress time of pdelay_req at responder
-    clocktime_t pDelayRespEgressTimestamp = -1;      // egress time of pdelay_resp at responder (received in PDelayRespFollowUp)
-    clocktime_t pDelayRespEgressTimestampLast = -1;  // egress time of previous pdelay_resp at responder (received in PDelayRespFollowUp)
+    clocktime_t pDelayReqEgressTimestamp = -1;  // egress time of pdelay_req at initiator (this node)
+    clocktime_t pDelayReqIngressTimestamp = -1; // ingress time of pdelay_req at responder
+    clocktime_t pDelayRespEgressTimestamp = -1; // egress time of pdelay_resp at responder (received in PDelayRespFollowUp)
+    clocktime_t pDelayRespEgressTimestampLast = -1; // egress time of previous pdelay_resp at responder (received in PDelayRespFollowUp)
     clocktime_t pDelayRespIngressTimestamp = -1;     // ingress time of pdelay_resp at initiator (this node)
     clocktime_t pDelayRespIngressTimestampLast = -1; // ingress time of previous pdelay_resp at initiator (this node)
 
@@ -110,8 +110,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     virtual void handleSelfMessage(cMessage *msg);
 
-    void handleDelayOrSendFollowUp(const GptpBase *gptp,
-                                   omnetpp::cComponent *source);
+    void handleDelayOrSendFollowUp(const GptpBase *gptp, omnetpp::cComponent *source);
 
     const GptpBase *extractGptpHeader(Packet *packet);
 
@@ -125,8 +124,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     void sendSync();
 
-    void sendFollowUp(int portId, const GptpSync *sync,
-                      clocktime_t syncEgressTimestampOwn);
+    void sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syncEgressTimestampOwn);
 
     void sendPdelayReq();
 
@@ -142,23 +140,15 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     void processPdelayResp(Packet *packet, const GptpPdelayResp *gptp);
 
-    void processPdelayRespFollowUp(Packet *packet,
-                                   const GptpPdelayRespFollowUp *gptp);
+    void processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowUp *gptp);
 
-    clocktime_t getCalculatedDrift(IClock *clock, clocktime_t value)
-    {
-        return CLOCKTIME_ZERO;
-    }
+    clocktime_t getCalculatedDrift(IClock *clock, clocktime_t value) { return CLOCKTIME_ZERO; }
 
     void synchronize();
 
-    inline void adjustLocalTimestamp(clocktime_t &time)
-    {
-        time += timeDiffAtTimeSync;
-    }
+    inline void adjustLocalTimestamp(clocktime_t &time) { time += timeDiffAtTimeSync; }
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signal,
-                               cObject *obj, cObject *details)
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details)
 
         override;
 };
