@@ -62,7 +62,7 @@ void Gptp::initialize(int stage)
     }
     if (stage == INITSTAGE_LINK_LAYER) {
         meanLinkDelay = 0;
-        syncIngressTimestampLast = CLOCKTIME_ZERO;
+        syncIngressTimestampLast = -1;
 
         interfaceTable.reference(this, "interfaceTableModule", true);
 
@@ -573,7 +573,8 @@ void Gptp::processPdelayRespFollowUp(Packet *packet,
 
     meanLinkDelay = (neighborRateRatio * (t4 - t1) - (t3 - t2)) / 2;
 
-    EV_INFO << "RATE RATIO                  - " << gmRateRatio << endl;
+    EV_INFO << "GM RATE RATIO               - " << gmRateRatio << endl;
+    EV_INFO << "NEIGHBOR RATE RATIO         - " << gmRateRatio << endl;
     EV_INFO << "pDelayReqEgressTimestamp    - " << pDelayReqEgressTimestamp
             << endl;
     EV_INFO << "pDelayReqIngressTimestamp   - " << pDelayReqIngressTimestamp
