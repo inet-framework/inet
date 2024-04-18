@@ -162,16 +162,13 @@ protected:
     ModuleRefByPar<MrpRelay> relay;
 
     FrameSentDatabase testFrameSent;
-    simsignal_t linkChangeSignal;
-    simsignal_t topologyChangeSignal;
-    simsignal_t testSignal;
-    simsignal_t continuityCheckSignal;
-    simsignal_t receivedChangeSignal;
-    simsignal_t receivedTestSignal;
-    simsignal_t receivedContinuityCheckSignal;
-    simsignal_t ringStateChangedSignal;
-    simsignal_t portStateChangedSignal;
-    simsignal_t clearFDBSignal;
+
+    simsignal_t ringPort1StateChangedSignal;
+    simsignal_t ringPort2StateChangedSignal;
+    simsignal_t topologyChangeAnnouncedSignal;
+    simsignal_t fdbClearedSignal;
+    simsignal_t linkChangeDetectedSignal;
+    simsignal_t testFrameLatencySignal;
 
 public:
     typedef MrpInterfaceData::PortInfo PortInfo;

@@ -84,6 +84,7 @@ simple MrpInterconnection extends Mrp like IMediaRedundancy
         // `%R`: interconnection role, `%N`: interconnection node state, `%I`: interconnection state.
         displayStringTextFormat = default("role: %r, %R\nstate: %n, in: %N\nring: %g in: %I");
 
+		//TODO
         @display("i=block/network2");
         @signal[inTopologyChange](type="long");
         @signal[inLinkChange](type="long");
