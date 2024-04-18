@@ -8,6 +8,9 @@
 
 namespace inet {
 
+Register_Enum(MrpInterfaceData::PortRole, (MrpInterfaceData::PRIMARY, MrpInterfaceData::SECONDARY, MrpInterfaceData::INTERCONNECTION, MrpInterfaceData::NOTASSIGNED));
+Register_Enum(MrpInterfaceData::PortState, (MrpInterfaceData::BLOCKED, MrpInterfaceData::FORWARDING, MrpInterfaceData::DISABLED));
+
 MrpInterfaceData::MrpInterfaceData()
     : InterfaceProtocolData(NetworkInterface::F_MRP_DATA)
 {

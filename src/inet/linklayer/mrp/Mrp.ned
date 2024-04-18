@@ -162,32 +162,23 @@ simple Mrp like IMediaRedundancy
         string displayStringTextFormat = default("role: %r\nnode: %n\nring: %g");
 
         @display("i=block/network2");
-        @signal[ringState](type=long);
-        @signal[nodeState](type=long);
-        @signal[test](type="simtime_t");
-        @signal[topologyChange](type="unsigned long");
-        @signal[linkChange](type="double");
-        @signal[continuityCheck](type="long");
-        @signal[clearFDB](type="double");
-        @signal[receivedTest](type="unsigned long");
-        @signal[receivedChange](type="unsigned long");
-        @signal[receivedContinuityCheck](type="long");
-        @signal[ringStateChanged](type="long");
-        @signal[portStateChanged](type="unsigned long");
+        @signal[ringStateChanged](type=long);
+        @signal[nodeStateChanged](type=long);
+        @signal[ringPort1StateChanged](type=unsigned long);
+        @signal[ringPort2StateChanged](type=unsigned long);
+        @signal[topologyChangeAnnounced](type=long); // emitted by MRM only with value = constant 1
+        @signal[fdbCleared](type=long);  // value = constant 1
+        @signal[linkChangeDetected](type=long);  // emitted by the node that detected the link change; value = constant 0 or 1 (for down/up)
+        @signal[testFrameLatency](type=simtime_t); // emitted by the MRM only, upon receiving a Test frame --TODO rename to ringTime?
+        @statistic[ringState](title="Ring state"; source=ringStateChanged; record=vector; interpolationmode=sample-hold; enumname=inet::Mrp::RingState);
+        @statistic[nodeState](title="Node state"; source=nodeStateChanged; record=vector; interpolationmode=sample-hold; enumname=inet::Mrp::NodeState);
+        @statistic[ringPort1State](title="State of Primary Ring Port"; source=ringPort1StateChanged; record=vector; interpolationmode=sample-hold; enumname=inet::MrpInterfaceData::PortState);
+        @statistic[ringPort2State](title="State of Secondary Ring Port"; source=ringPort2StateChanged; record=vector; interpolationmode=sample-hold; enumname=inet::MrpInterfaceData::PortState);
+        @statistic[topologyChangeAnnouncements](title="Topology Change Announcements by MRM"; source=topologyChangeAnnounced; record=vector; interpolationmode=none);
+        @statistic[fdbClearedEvents](title="FDB Cleared Events"; source=fdbCleared; record=vector; interpolationmode=none);
+        @statistic[linkChangeDetections](title="Link Up/Down Detection Events"; source=linkChangeDetected; record=vector; interpolationmode=none);
+        @statistic[testFrameLatency](title="Latency of Received Test Frames"; source=testFrameLatency; record=vector; interpolationmode=none);
 
-        @statistic[ringState](title="Ring state"; record=vector; interpolationmode=sample-hold; enumname=inet::Mrp::RingState);
-        @statistic[nodeState](title="Node state"; record=vector; interpolationmode=sample-hold; enumname=inet::Mrp::NodeState);
-
-        @statistic[testFrame](title="Testframes sent"; source="test"; record=count,vector; interpolationmode=none);
-        @statistic[linkChange](title="LinkChange in us"; source="linkChange"; record=count,vector; interpolationmode=none);
-        @statistic[topologyChange](title="TopologyChange in us"; source="topologyChange"; record=count,vector; interpolationmode=none);
-        @statistic[fDBCleared](title="FDB cleared in us"; source="clearFDB"; record=count,vector; interpolationmode=none);
-        @statistic[ringTime](title="T Ring in us"; source="receivedTest"; record=vector,stats,histogram; interpolationmode=none);
-        @statistic[timeToChange](title="Time till announced Change in ms"; source="receivedChange"; record=vector,stats,histogram; interpolationmode=none);
-        @statistic[sentContinuityCheck](title="Sent Continuity Checks"; source="continuityCheck"; record=count,vector; interpolationmode=none);
-        @statistic[receivedContinuityCheck](title="Received Continuity Checks"; source="receivedContinuityCheck"; record=count,vector; interpolationmode=none);
-        @statistic[portStateChanged](title="Time of Port State Change in us"; source="portStateChanged"; record=count,vector; interpolationmode=none);
-        @statistic[ringStateChanged](title="Time of Ring State Change in us"; source="ringStateChanged"; record=count,vector; interpolationmode=none);
     gates:
         input relayIn;
         output relayOut;
