@@ -84,7 +84,7 @@ public:
     };
 
 protected:
-    typedef std::map<uint16_t, int64_t> FrameSentDatabase;  // test frame sequence -> time sent
+    typedef std::map<uint16_t, simtime_t> FrameSentDatabase;  // test frame sequence -> time sent
     typedef NetworkInterface::State LinkState;
 
     const static uint16_t MRP_LT = 0x88E3;

@@ -536,10 +536,10 @@ void Mrp::handleMrpPDU(Packet* packet) {
         auto testTlv = dynamicPtrCast<const MrpTest>(firstTlv);
         if (ringID) {
             if (testTlv->getSa() == localBridgeAddress) {
-                auto ringTime = simTime().inUnit(SIMTIME_MS) - testTlv->getTimeStamp();
-                auto lastTestFrameSent = testFrameSent.find(sequence);
-                if (lastTestFrameSent != testFrameSent.end()) {
-                    int64_t ringTimePrecise = simTime().inUnit(SIMTIME_US) - lastTestFrameSent->second;
+                simtime_t ringTime = simTime() - SimTime(testTlv->getTimeStamp(), SIMTIME_MS);
+                auto it = testFrameSent.find(sequence);
+                if (it != testFrameSent.end()) {
+                    simtime_t ringTimePrecise = simTime() - it->second;
                     emit(receivedTestSignal, sequence);
                     EV_DETAIL << "RingTime" << EV_FIELD(ringTime) << EV_FIELD(ringTimePrecise) << EV_ENDL;
                 } else {
@@ -1047,8 +1047,7 @@ void Mrp::setupTestRingReq() {
     auto endTlv = makeShared<MrpEnd>();
 
     auto timestamp = simTime().inUnit(SIMTIME_MS);
-    auto lastTestFrameSent = simTime().inUnit(SIMTIME_US);
-    testFrameSent.insert( { sequenceID, lastTestFrameSent });
+    testFrameSent.insert( { sequenceID, simTime() });
 
     testTlv1->setPrio(localManagerPrio);
     testTlv1->setSa(localBridgeAddress);
@@ -1097,7 +1096,7 @@ void Mrp::setupTestRingReq() {
     packet2->insertAtBack(endTlv);
     MacAddress sourceAddress2 = getPortNetworkInterface(secondaryRingPort)->getMacAddress();
     sendFrameReq(secondaryRingPort, MacAddress(MC_TEST), sourceAddress2, priority, MRP_LT, packet2);
-    emit(testSignal, lastTestFrameSent);
+    emit(testSignal, simTime());
 }
 
 void Mrp::setupTopologyChangeReq(simtime_t interval) {

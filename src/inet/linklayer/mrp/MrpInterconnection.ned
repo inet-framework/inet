@@ -87,11 +87,11 @@ simple MrpInterconnection extends Mrp like IMediaRedundancy
         @display("i=block/network2");
         @signal[inTopologyChange](type="long");
         @signal[inLinkChange](type="long");
-        @signal[receivedInTest](type="long");
+        @signal[receivedInTest](type="simtime_t");
         @signal[receivedInChange](type="unsigned long");
         @signal[inStatusPoll](type="long");
         @signal[receivedInStatusPoll](type="long");
-        @signal[inTest](type="long");
+        @signal[inTest](type="simtime_t");
         @signal[interconnectionStateChanged](type="long");
         @signal[test](type="long");
         @signal[topologyChange](type="unsigned long");

@@ -164,7 +164,7 @@ simple Mrp like IMediaRedundancy
         @display("i=block/network2");
         @signal[ringState](type=long);
         @signal[nodeState](type=long);
-        @signal[test](type="long");
+        @signal[test](type="simtime_t");
         @signal[topologyChange](type="unsigned long");
         @signal[linkChange](type="double");
         @signal[continuityCheck](type="long");
