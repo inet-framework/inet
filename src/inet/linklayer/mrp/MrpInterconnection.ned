@@ -67,16 +67,17 @@ simple MrpInterconnection extends Mrp like IMediaRedundancy
         // Unique identifier for the interconnection, ranging from 0 to 65535.
         int interconnectionID = default(1);
 
-        // Determines whether to enable active Layer 2 link checks based on 802.1q-CFM (CCM messages)
-        // on the interconnection port. For managers, it also triggers the link status poll at start-up.
-        // Enabling both link check and ring check methods is possible but not recommended.
-        bool linkCheckEnabled = default(true);
-
-        // Enables periodic interconnection test frames sent by the interconnection manager.
-        // If not received within five interconnection test intervals, the interconnection ring
-        // is assumed broken, and the manager changes its interconnection port from BLOCKING
-        // to FORWARDING.
-        bool ringCheckEnabled = default(false);
+        // Defines how to check the integrity of the interconnection.
+        // - RC (Ring Check) mode: MIM sends periodic interconnection test
+        //   frames on its interconnection and ring ports, which be received on
+        //   the opposite port. If not received within five interconnection test
+        //   intervals, the interconnection ring is assumed broken, and the MIM
+        //   changes its interconnection port from BLOCKING to FORWARDING.
+        // - LC (Link Check) mode: Nodes check their attached links using 802.1q-CFM
+        //   (CCM messages) on the interconnection port, and report changes to the MIM.
+        //   The MIM also perform a link status poll at start-up.
+        // Enabling both link check and ring check is possible but not recommended.
+        string interconnectionCheckMode @enum("RC", "LC", "RC_AND_LC") = default("RC");
 
         // Format for the text displayed above the module icon.
         // Directives: `%r`: MRP role, `%n`: node state, `%g`: ring state,

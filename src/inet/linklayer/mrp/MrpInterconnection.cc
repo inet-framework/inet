@@ -30,7 +30,6 @@ MrpInterconnection::~MrpInterconnection() {
     cancelAndDelete(inTopologyChangeTimer);
     cancelAndDelete(inLinkDownTimer);
     cancelAndDelete(inLinkUpTimer);
-    //Mrp::~Mrp();
 }
 
 void MrpInterconnection::initialize(int stage) {
@@ -39,8 +38,9 @@ void MrpInterconnection::initialize(int stage) {
         inRole = parseInterconnectionRole(par("interconnectionRole"));
         interConnectionID = par("interconnectionID");
         interconnectionPort = par("interconnectionPort");
-        linkCheckEnabled = par("linkCheckEnabled");
-        ringCheckEnabled = par("ringCheckEnabled");
+        std::string interconnectionCheckMode = par("interconnectionCheckMode");
+        linkCheckEnabled = interconnectionCheckMode.find("LC") != std::string::npos;
+        ringCheckEnabled = interconnectionCheckMode.find("RC") != std::string::npos;
 
         inLinkChangeSignal = registerSignal("inLinkChange");
         inTopologyChangeSignal = registerSignal("inTopologyChange");
