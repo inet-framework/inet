@@ -671,15 +671,15 @@ void MrpInterconnection::interconnTestInd(MacAddress sourceAddress, int ringPort
         offset = offset + firstTLV->getChunkLength();
         auto secondTLV = packet->peekDataAt<MrpCommon>(offset);
         uint16_t sequence = secondTLV->getSequenceID();
-        int ringTime = simTime().inUnit(SIMTIME_MS) - firstTLV->getTimeStamp();
-        auto lastInTestFrameSent = inTestFrameSent.find(sequence);
-        if (lastInTestFrameSent != inTestFrameSent.end()) {
-            int64_t ringTimePrecise = simTime().inUnit(SIMTIME_US) - lastInTestFrameSent->second;
+        simtime_t ringTime = simTime() - SimTime(firstTLV->getTimeStamp(), SIMTIME_MS);
+        auto it = inTestFrameSent.find(sequence);
+        if (it != inTestFrameSent.end()) {
+            simtime_t ringTimePrecise = simTime() - it->second;
             emit(receivedInTestSignal, ringTimePrecise);
             EV_DETAIL << "InterconnectionRingTime" << EV_FIELD(ringTime)
                              << EV_FIELD(ringTimePrecise) << EV_ENDL;
         } else {
-            emit(receivedInTestSignal, ringTime * 1000);
+            emit(receivedInTestSignal, ringTime);
             EV_DETAIL << "InterconnectionRingTime" << EV_FIELD(ringTime) << EV_ENDL;
         }
         switch (inNodeState) {
@@ -757,8 +757,7 @@ void MrpInterconnection::setupInterconnTestReq() {
     auto endTLV = makeShared<MrpEnd>();
 
     uint32_t timestamp = simTime().inUnit(SIMTIME_MS);
-    int64_t lastInTestFrameSent = simTime().inUnit(SIMTIME_US);
-    inTestFrameSent.insert( { sequenceID, lastInTestFrameSent });
+    inTestFrameSent.insert( { sequenceID, simTime() });
 
     inTestTLV1->setInID(interConnectionID);
     inTestTLV1->setSa(localBridgeAddress);
@@ -809,7 +808,7 @@ void MrpInterconnection::setupInterconnTestReq() {
     packet3->insertAtBack(endTLV);
     MacAddress sourceAddress3 = getPortNetworkInterface(primaryRingPort)->getMacAddress();
     sendFrameReq(secondaryRingPort, MacAddress(MC_INTEST), sourceAddress3, priority, MRP_LT, packet3);
-    emit(inTestSignal, lastInTestFrameSent);
+    emit(inTestSignal, simTime());
 }
 
 void MrpInterconnection::interconnTopologyChangeReq(simtime_t time) {
