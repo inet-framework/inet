@@ -305,7 +305,7 @@ void Gptp::sendPdelayResp(GptpReqAnswerEvent *req)
     gptp->setDomainNumber(domainNumber);
     gptp->setRequestingPortIdentity(req->getSourcePortIdentity());
     gptp->setSequenceId(req->getSequenceId());
-    gptp->setRequestReceiptTimestamp(req->getIngressTimestamp());
+    gptp->setRequestReceiptTimestamp(req->getIngressTimestamp());//t2
     packet->insertAtFront(gptp);
     sendPacketToNIC(packet, portId);
     // The sendPdelayRespFollowUp(portId) called by receiveSignal(), when
@@ -328,7 +328,7 @@ void Gptp::sendPdelayRespFollowUp(int portId, const GptpPdelayResp *resp)
     // after the transmissionEnded signal for the pdelayResp packet
     // is received
     auto now = clock->getClockTime();
-    gptp->setResponseOriginTimestamp(now);
+    gptp->setResponseOriginTimestamp(now);//t3
 
     gptp->setRequestingPortIdentity(resp->getRequestingPortIdentity());
     gptp->setSequenceId(resp->getSequenceId());
@@ -481,7 +481,7 @@ void Gptp::processPdelayReq(Packet *packet, const GptpPdelayReq *gptp)
 {
     auto resp = new GptpReqAnswerEvent("selfMsgPdelayResp", GPTP_SELF_REQ_ANSWER_KIND);
     resp->setPortId(packet->getTag<InterfaceInd>()->getInterfaceId());
-    resp->setIngressTimestamp(packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime());
+    resp->setIngressTimestamp(packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime());//t2
     resp->setSourcePortIdentity(gptp->getSourcePortIdentity());
     resp->setSequenceId(gptp->getSequenceId());
 
@@ -503,11 +503,9 @@ void Gptp::processPdelayResp(Packet *packet, const GptpPdelayResp *gptp)
     }
 
     rcvdPdelayResp = true;
-    pDelayRespIngressTimestampLast = pDelayRespIngressTimestamp;
-    pDelayRespIngressTimestamp = packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime();
-    pDelayReqIngressTimestamp = gptp->getRequestReceiptTimestamp();
-    pDelayRespEgressTimestampLast = pDelayRespEgressTimestamp;
-    pDelayRespEgressTimestamp = -1;
+    pDelayRespIngressTimestampLast = pDelayRespIngressTimestamp; //t4 last
+    pDelayRespIngressTimestamp = packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime(); //t4 now
+    pDelayReqIngressTimestamp = gptp->getRequestReceiptTimestamp(); //t2
 }
 
 void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowUp *gptp)
@@ -528,7 +526,8 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
         return;
     }
 
-    pDelayRespEgressTimestamp = gptp->getResponseOriginTimestamp();
+    pDelayRespEgressTimestampLast = pDelayRespEgressTimestamp; //t3 last
+    pDelayRespEgressTimestamp = gptp->getResponseOriginTimestamp(); //t3 now
 
     // Note, that the standard defines the usage of the correction field
     // for the following two calculations.
