@@ -80,16 +80,16 @@ void Mrp::setRingInterface(int InterfaceNumber, int InterfaceIndex) {
         EV_DEBUG << "only 2 MRP Ring-Interfaces per Node allowed" << EV_ENDL;
 }
 
-void Mrp::setPortState(int interfaceId, MrpInterfaceData::PortState State) {
+void Mrp::setPortState(int interfaceId, MrpInterfaceData::PortState state) {
     auto portData = getPortInterfaceDataForUpdate(interfaceId);
-    portData->setState(State);
+    portData->setState(state);
     emit(portStateChangedSignal, portData->getState());
-    EV_INFO << "Setting Port State" << EV_FIELD(interfaceId) << EV_FIELD(State) << EV_ENDL;
+    EV_INFO << "Setting Port State" << EV_FIELD(interfaceId) << EV_FIELD(state) << EV_ENDL;
 }
 
-void Mrp::setPortRole(int interfaceId, MrpInterfaceData::PortRole Role) {
+void Mrp::setPortRole(int interfaceId, MrpInterfaceData::PortRole role) {
     auto portData = getPortInterfaceDataForUpdate(interfaceId);
-    portData->setRole(Role);
+    portData->setRole(role);
 }
 
 MrpInterfaceData::PortState Mrp::getPortState(int interfaceId) {
@@ -97,15 +97,15 @@ MrpInterfaceData::PortState Mrp::getPortState(int interfaceId) {
     return portData->getState();
 }
 
-const MrpInterfaceData* Mrp::getPortInterfaceData(unsigned int interfaceId) const {
+const MrpInterfaceData* Mrp::getPortInterfaceData(int interfaceId) const {
     return getPortNetworkInterface(interfaceId)->getProtocolData<MrpInterfaceData>();
 }
 
-MrpInterfaceData* Mrp::getPortInterfaceDataForUpdate(unsigned int interfaceId) {
+MrpInterfaceData* Mrp::getPortInterfaceDataForUpdate(int interfaceId) {
     return getPortNetworkInterface(interfaceId)->getProtocolDataForUpdate<MrpInterfaceData>();
 }
 
-NetworkInterface* Mrp::getPortNetworkInterface(unsigned int interfaceId) const {
+NetworkInterface* Mrp::getPortNetworkInterface(int interfaceId) const {
     NetworkInterface *gateIfEntry = interfaceTable->getInterfaceById(interfaceId);
     if (!gateIfEntry)
         throw cRuntimeError("gate's Interface is nullptr");
@@ -200,7 +200,7 @@ void Mrp::initPortTable() {
     }
 }
 
-void Mrp::initInterfacedata(unsigned int interfaceId) {
+void Mrp::initInterfacedata(int interfaceId) {
     auto ifd = getPortInterfaceDataForUpdate(interfaceId);
     ifd->setRole(MrpInterfaceData::NOTASSIGNED);
     ifd->setState(MrpInterfaceData::FORWARDING);
