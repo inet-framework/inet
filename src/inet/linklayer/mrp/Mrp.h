@@ -190,8 +190,8 @@ protected:
     virtual void toggleRingPorts();
     virtual void setPortRole(int interfaceId, MrpInterfaceData::PortRole role);
     virtual void setPortState(int interfaceId, MrpInterfaceData::PortState state);
-    virtual MrpInterfaceData::PortState getPortState(int interfaceId);
-    virtual MrpInterfaceData::PortRole getPortRole(int interfaceId);
+    virtual MrpInterfaceData::PortState getPortState(int interfaceId) const;
+    virtual MrpInterfaceData::PortRole getPortRole(int interfaceId) const;
     virtual NetworkInterface* getPortNetworkInterface(int interfaceId) const;
     virtual MrpInterfaceData* getPortInterfaceDataForUpdate(int interfaceId);
     virtual const MrpInterfaceData* getPortInterfaceData(int interfaceId) const;

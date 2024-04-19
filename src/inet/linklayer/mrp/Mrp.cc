@@ -61,13 +61,15 @@ void Mrp::setPortState(int interfaceId, MrpInterfaceData::PortState state) {
 }
 
 void Mrp::setPortRole(int interfaceId, MrpInterfaceData::PortRole role) {
-    auto portData = getPortInterfaceDataForUpdate(interfaceId);
-    portData->setRole(role);
+    getPortInterfaceDataForUpdate(interfaceId)->setRole(role);
 }
 
-MrpInterfaceData::PortState Mrp::getPortState(int interfaceId) {
-    auto portData = getPortInterfaceDataForUpdate(interfaceId);
-    return portData->getState();
+MrpInterfaceData::PortState Mrp::getPortState(int interfaceId) const {
+    return getPortInterfaceData(interfaceId)->getState();
+}
+
+MrpInterfaceData::PortRole Mrp::getPortRole(int interfaceId) const {
+    return getPortInterfaceData(interfaceId)->getRole();
 }
 
 const MrpInterfaceData* Mrp::getPortInterfaceData(int interfaceId) const {
@@ -83,11 +85,6 @@ NetworkInterface* Mrp::getPortNetworkInterface(int interfaceId) const {
     if (!gateIfEntry)
         throw cRuntimeError("gate's Interface is nullptr");
     return gateIfEntry;
-}
-
-MrpInterfaceData::PortRole Mrp::getPortRole(int interfaceId) {
-    auto portData = getPortInterfaceDataForUpdate(interfaceId);
-    return portData->getRole();
 }
 
 void Mrp::toggleRingPorts() {
