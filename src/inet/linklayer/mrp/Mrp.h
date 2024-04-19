@@ -110,8 +110,8 @@ protected:
     MacAddress localBridgeAddress;
     opp_component_ptr<NetworkInterface> ringInterface1 = nullptr;
     opp_component_ptr<NetworkInterface> ringInterface2 = nullptr;
-    int primaryRingPort;
-    int secondaryRingPort;
+    int primaryRingPortId = -1; // interface Id
+    int secondaryRingPortId = -1; // interface Id
 
     //CCM
     int sequenceCCM1 = 0;
