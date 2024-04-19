@@ -24,18 +24,14 @@ class INET_API MrpInterfaceData : public InterfaceProtocolData
 
     class INET_API PortInfo {
       public:
-        PortState state;
-        PortRole role;
+        PortState state = FORWARDING;
+        PortRole role = NOTASSIGNED;
         simtime_t continuityCheckInterval; // The time interval between the generation of Link-Check-Frames
         simtime_t nextUpdate;
         bool continuityCheck;
         uint16_t cfmEndpointID = 1;
         std::string cfmName = "CFM CCM 000000000000";
-        unsigned int lostPDU;
         unsigned int portNum; // The number of the switch port (i.e. EthernetSwitch ethg[] gate index).
-
-      public:
-        PortInfo();
     };
 
   protected:
@@ -63,10 +59,6 @@ class INET_API MrpInterfaceData : public InterfaceProtocolData
 
     bool getContinuityCheck() const { return portData.continuityCheck; }
     void setContinuityCheck(bool continuityCheck) { portData.continuityCheck = continuityCheck; }
-
-    unsigned int getLostPDU() const { return portData.lostPDU; }
-
-    void setLostPDU(unsigned int lostPDU) { portData.lostPDU = lostPDU; }
 
     const char *getRoleName() const { return getRoleName(getRole()); }
     const char *getStateName() const { return getStateName(getState()); }
