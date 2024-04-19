@@ -8,13 +8,6 @@
 
 namespace inet {
 
-MrpInterfaceData::PortInfo::PortInfo()
-{
-    state = FORWARDING;
-    role = NOTASSIGNED;
-    lostPDU = 0;
-}
-
 MrpInterfaceData::MrpInterfaceData()
     : InterfaceProtocolData(NetworkInterface::F_MRP_DATA)
 {

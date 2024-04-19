@@ -175,7 +175,6 @@ void Mrp::initInterfacedata(int interfaceId) {
     auto ifd = getPortInterfaceDataForUpdate(interfaceId);
     ifd->setRole(MrpInterfaceData::NOTASSIGNED);
     ifd->setState(MrpInterfaceData::FORWARDING);
-    ifd->setLostPDU(0);
     ifd->setContinuityCheckInterval(trunc_msec(ccmInterval));
     ifd->setContinuityCheck(false);
     ifd->setNextUpdate(trunc_msec(ccmInterval * 3.5));
