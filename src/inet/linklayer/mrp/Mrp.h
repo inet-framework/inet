@@ -108,8 +108,6 @@ protected:
     uint16_t sequenceID = 0;
     uint16_t lastTopologyId = 0;
     MacAddress localBridgeAddress;
-    opp_component_ptr<NetworkInterface> ringInterface1 = nullptr;
-    opp_component_ptr<NetworkInterface> ringInterface2 = nullptr;
     int primaryRingPortId = -1; // interface Id
     int secondaryRingPortId = -1; // interface Id
 
@@ -186,7 +184,7 @@ protected:
     virtual void mrmInit();
     virtual void mraInit();
     virtual void initPortTable();
-    virtual void initRingPorts();
+    virtual void initRingPort(int interfaceId, MrpInterfaceData::PortRole role);
     virtual void startContinuityCheck();
     virtual void initInterfacedata(int interfaceId);
     virtual void toggleRingPorts();
@@ -248,8 +246,7 @@ public:
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void setTimingProfile(int maxRecoveryTime);
-    virtual void setRingInterfaces(int interfaceIndex1, int interfaceIndex2);
-    virtual void setRingInterface(int interfaceNumber, int interfaceIndex);
+    virtual int resolveInterfaceIndex(int interfaceIndex);
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }
     virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LAST; }

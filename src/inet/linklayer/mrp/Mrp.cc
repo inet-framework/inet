@@ -46,44 +46,17 @@ Mrp::~Mrp() {
     cancelAndDelete(linkUpHysteresisTimer);
 }
 
-void Mrp::setRingInterfaces(int InterfaceIndex1, int InterfaceIndex2) {
-    ringInterface1 = interfaceTable->getInterface(InterfaceIndex1);
-    if (ringInterface1->isLoopback()) {
-        ringInterface1 = nullptr;
-        EV_DEBUG << "Chosen Interface is Loopback-Interface" << EV_ENDL;
-    } else
-        primaryRingPortId = ringInterface1->getInterfaceId();
-    ringInterface2 = interfaceTable->getInterface(InterfaceIndex2);
-    if (ringInterface2->isLoopback()) {
-        ringInterface2 = nullptr;
-        EV_DEBUG << "Chosen Interface is Loopback-Interface" << EV_ENDL;
-    } else
-        secondaryRingPortId = ringInterface2->getInterfaceId();
-}
-
-void Mrp::setRingInterface(int InterfaceNumber, int InterfaceIndex) {
-    if (InterfaceNumber == 1) {
-        ringInterface1 = interfaceTable->getInterface(InterfaceIndex);
-        if (ringInterface1->isLoopback()) {
-            ringInterface1 = nullptr;
-            EV_DEBUG << "Chosen Interface is Loopback-Interface" << EV_ENDL;
-        } else
-            primaryRingPortId = ringInterface1->getInterfaceId();
-    } else if (InterfaceNumber == 2) {
-        ringInterface2 = interfaceTable->getInterface(InterfaceIndex);
-        if (ringInterface2->isLoopback()) {
-            ringInterface2 = nullptr;
-            EV_DEBUG << "Chosen Interface is Loopback-Interface" << EV_ENDL;
-        } else
-            secondaryRingPortId = ringInterface2->getInterfaceId();
-    } else
-        EV_DEBUG << "only 2 MRP Ring-Interfaces per Node allowed" << EV_ENDL;
+int Mrp::resolveInterfaceIndex(int interfaceIndex) {
+    NetworkInterface *interface = interfaceTable->getInterface(interfaceIndex);
+    if (interface->isLoopback())
+        throw cRuntimeError("Chosen interface %d is a loopback interface", interfaceIndex);
+    return interface->getInterfaceId();
 }
 
 void Mrp::setPortState(int interfaceId, MrpInterfaceData::PortState state) {
     auto portData = getPortInterfaceDataForUpdate(interfaceId);
     portData->setState(state);
-    emit(portStateChangedSignal, portData->getState());
+    //emit(portStateChangedSignal, portData->getState());
     EV_INFO << "Setting Port State" << EV_FIELD(interfaceId) << EV_FIELD(state) << EV_ENDL;
 }
 
@@ -137,9 +110,6 @@ void Mrp::initialize(int stage) {
         //parameters
         visualize = par("visualize");
         role = parseMrpRole(par("mrpRole"));
-        //currently only inferfaceIndex
-        primaryRingPortId = par("ringPort1");
-        secondaryRingPortId = par("ringPort2");
         domainID.uuid0 = par("uuid0");
         domainID.uuid1 = par("uuid1");
         timingProfile = par("timingProfile");
@@ -178,10 +148,11 @@ void Mrp::initialize(int stage) {
         registerProtocol(Protocol::mrp, gate("relayOut"), gate("relayIn"), nullptr, nullptr);
         registerProtocol(Protocol::ieee8021qCFM, gate("relayOut"), gate("relayIn"), nullptr, nullptr);
         initPortTable();
-        //set interface and change Port-Indexes to Port-IDs
-        setRingInterfaces(primaryRingPortId, secondaryRingPortId);
+        primaryRingPortId = resolveInterfaceIndex(par("ringPort1"));
+        secondaryRingPortId = resolveInterfaceIndex(par("ringPort2"));
+        initRingPort(primaryRingPortId, MrpInterfaceData::PRIMARY);
+        initRingPort(secondaryRingPortId, MrpInterfaceData::SECONDARY);
         localBridgeAddress = relay->getBridgeAddress();
-        initRingPorts();
         EV_DETAIL << "Initialize MRP link layer" << EV_ENDL;
         linkUpHysteresisTimer = new cMessage("linkUpHysteresisTimer");
         startUpTimer = new cMessage("startUpTimer");
@@ -210,19 +181,9 @@ void Mrp::initInterfacedata(int interfaceId) {
     ifd->setNextUpdate(trunc_msec(ccmInterval * 3.5));
 }
 
-void Mrp::initRingPorts() {
-    if (ringInterface1 == nullptr)
-        setRingInterface(1, primaryRingPortId);
-    if (ringInterface2 == nullptr)
-        setRingInterface(2, secondaryRingPortId);
-    auto ifd = getPortInterfaceDataForUpdate(ringInterface1->getInterfaceId());
-    ifd->setRole(MrpInterfaceData::PRIMARY);
-    ifd->setState(MrpInterfaceData::BLOCKED);
-    ifd->setContinuityCheck(enableLinkCheckOnRing);
-    ifd->setContinuityCheckInterval(trunc_msec(ccmInterval));
-
-    ifd = getPortInterfaceDataForUpdate(ringInterface2->getInterfaceId());
-    ifd->setRole(MrpInterfaceData::SECONDARY);
+void Mrp::initRingPort(int interfaceId, MrpInterfaceData::PortRole role) {
+    auto ifd = getPortInterfaceDataForUpdate(interfaceId);
+    ifd->setRole(role);
     ifd->setState(MrpInterfaceData::BLOCKED);
     ifd->setContinuityCheck(enableLinkCheckOnRing);
     ifd->setContinuityCheckInterval(trunc_msec(ccmInterval));
