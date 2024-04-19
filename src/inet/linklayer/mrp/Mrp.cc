@@ -169,18 +169,17 @@ void Mrp::initPortTable() {
 }
 
 void Mrp::initInterfacedata(int interfaceId) {
+    setPortRole(interfaceId, MrpInterfaceData::NOTASSIGNED);
+    setPortState(interfaceId, MrpInterfaceData::FORWARDING);
     auto ifd = getPortInterfaceDataForUpdate(interfaceId);
-    ifd->setRole(MrpInterfaceData::NOTASSIGNED);
-    ifd->setState(MrpInterfaceData::FORWARDING);
-    ifd->setContinuityCheckInterval(trunc_msec(ccmInterval));
     ifd->setContinuityCheck(false);
-    ifd->setNextUpdate(trunc_msec(ccmInterval * 3.5));
+    ifd->setContinuityCheckInterval(trunc_msec(ccmInterval));
 }
 
 void Mrp::initRingPort(int interfaceId, MrpInterfaceData::PortRole role) {
+    setPortRole(interfaceId, role);
+    setPortState(interfaceId, MrpInterfaceData::BLOCKED);
     auto ifd = getPortInterfaceDataForUpdate(interfaceId);
-    ifd->setRole(role);
-    ifd->setState(MrpInterfaceData::BLOCKED);
     ifd->setContinuityCheck(enableLinkCheckOnRing);
     ifd->setContinuityCheckInterval(trunc_msec(ccmInterval));
 }
