@@ -50,17 +50,17 @@ void MacRelayUnit::handleLowerPacket(Packet *incomingPacket)
     else if (destinationAddress.isMulticast()) {
         auto outgoingInterfaceIds = macForwardingTable->getMulticastAddressForwardingInterfaces(destinationAddress, vlanId);
         if (outgoingInterfaceIds.size() == 0)
-            broadcastPacket(incomingPacket, destinationAddress, incomingInterface);
+            broadcastPacket(outgoingPacket, destinationAddress, incomingInterface);
         else {
             for (auto outgoingInterfaceId : outgoingInterfaceIds) {
                 if (interfaceInd != nullptr && outgoingInterfaceId == interfaceInd->getInterfaceId())
                     EV_WARN << "Ignoring outgoing interface because it is the same as incoming interface" << EV_FIELD(destinationAddress) << EV_FIELD(incomingInterface) << EV_FIELD(incomingPacket) << EV_ENDL;
                 else {
                     auto outgoingInterface = interfaceTable->getInterfaceById(outgoingInterfaceId);
-                    sendPacket(incomingPacket->dup(), destinationAddress, outgoingInterface);
+                    sendPacket(outgoingPacket->dup(), destinationAddress, outgoingInterface);
                 }
             }
-            delete incomingPacket;
+            delete outgoingPacket;
         }
     }
     else {

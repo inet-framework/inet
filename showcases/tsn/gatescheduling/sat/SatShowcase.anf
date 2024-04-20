@@ -5,7 +5,7 @@
         <input pattern="/inet/showcases/tsn/gatescheduling/eager/results/Eager-#0.vec"/>
     </inputs>
     <charts>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="290703123" name="Application End-to-End Delay" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1196566184" name="Application End-to-End Delay" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -650,7 +650,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="legend_format" value="$module"/>
-            <property name="filter" value="type =~ vector AND name =~ meanBitLifeTimePerPacket:vector AND runattr:configname =~ &quot;SAT&quot;"/>
+            <property name="filter" value="type =~ vector AND runattr:experiment =~ SAT AND runattr:replication =~ &quot;#0&quot; AND name =~ meanBitLifeTimePerPacket:vector AND (&#10;    (module =~ &quot;TsnDumbbellNetwork.server1.app[0].sink&quot;) OR&#10;    (module =~ &quot;TsnDumbbellNetwork.server1.app[1].sink&quot;) OR&#10;    (module =~ &quot;TsnDumbbellNetwork.server2.app[2].sink&quot;) OR&#10;    (module =~ &quot;TsnDumbbellNetwork.server2.app[3].sink&quot;)&#10;)"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
@@ -661,11 +661,11 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value=""/>
+            <property name="xaxis_max" value="0.2"/>
             <property name="image_export_width" value="9"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1701145797" name="Application End-to-End Delay, Comparison of Eager and SAT" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1252043118" name="Application End-to-End Delay, Comparison of Eager and SAT" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -684,8 +684,18 @@ filter_expression = props["filter"]
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
 
-filter_expr_sat = """name =~ meanBitLifeTimePerPacket:vector AND runattr:configname =~ "SAT" """
-filter_expr_eager = """name =~ meanBitLifeTimePerPacket:vector AND runattr:configname =~ "Eager" """
+filter_expr_sat = """type =~ vector AND runattr:experiment =~ SAT AND runattr:replication =~ "#0" AND name =~ meanBitLifeTimePerPacket:vector AND (
+    (module =~ "TsnDumbbellNetwork.server1.app[0].sink") OR
+    (module =~ "TsnDumbbellNetwork.server1.app[1].sink") OR
+    (module =~ "TsnDumbbellNetwork.server2.app[2].sink") OR
+    (module =~ "TsnDumbbellNetwork.server2.app[3].sink")
+) """
+filter_expr_eager = """type =~ vector AND runattr:experiment =~ Eager AND runattr:replication =~ "#0" AND name =~ meanBitLifeTimePerPacket:vector AND (
+    (module =~ "TsnDumbbellNetwork.server1.app[0].sink") OR
+    (module =~ "TsnDumbbellNetwork.server1.app[1].sink") OR
+    (module =~ "TsnDumbbellNetwork.server2.app[2].sink") OR
+    (module =~ "TsnDumbbellNetwork.server2.app[3].sink")
+) """
 
 # query vector data into a data frame
 try:

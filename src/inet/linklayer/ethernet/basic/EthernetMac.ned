@@ -113,6 +113,7 @@ module EthernetMac like IEtherMac
                                             // ones with matching destination MAC address
         bool duplexMode;                    // must be set to "true", as EthernetMac does not support half-duplex operation
                                             // (parameter is present to reduce the risk of accidental misconfiguration)
+        bool allowNonstandardBitrate = default(false); // allows any bitrate and uses first larger bitrate specified parameters
         int mtu @unit(B) = default(1500B);
         string fcsMode @enum("declared","computed");
         @lifecycleSupport;
@@ -137,6 +138,9 @@ module EthernetMac like IEtherMac
         @signal[transmissionEnded](type=inet::physicallayer::EthernetSignalBase);
         @signal[receptionEnded](type=inet::physicallayer::Signal);
 
+        @statistic[transmitting](title="transmitting state"; type=int; source=count(transmissionStarted) - count(transmissionEnded); record=vector; interpolationmode=sample-hold);
+        @statistic[throughput](title="throughput"; unit=bps; source=throughput(transmissionEnded); record=vector,histogram; interpolationmode=linear);
+        @statistic[utilization](title="utilization"; unit=%; source=100 * utilization(count(transmissionStarted) - count(transmissionEnded)); record=vector,histogram; interpolationmode=linear);
         @statistic[txPk](title="packets transmitted"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rxPkOk](title="packets received OK"; source=rxPkOk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

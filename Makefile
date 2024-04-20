@@ -53,7 +53,8 @@ checkmakefiles:
 
 # generate an include file that contains all the WITH_FEATURE macros according to the current enablement of features
 $(FEATURES_H): $(wildcard .oppfeaturestate) .oppfeatures
-	@$(FEATURETOOL) defines >$(FEATURES_H)
+	@$(FEATURETOOL) defines >$(FEATURES_H).tmp
+	@mv $(FEATURES_H).tmp $(FEATURES_H)
 
 doc:
 	@cd doc/src && $(MAKE)

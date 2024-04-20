@@ -232,7 +232,7 @@ class INET_API MemoryInputStream
             position += length;
         }
         else {
-            for (size_t i = 0; i < B(length).get(); i++)
+            for (B::value_type i = 0; i < B(length).get(); i++)
                 bytes.push_back(readByte());
         }
         return length;
@@ -252,7 +252,7 @@ class INET_API MemoryInputStream
             position += length;
         }
         else {
-            for (size_t i = 0; i < B(length).get(); i++)
+            for (B::value_type i = 0; i < B(length).get(); i++)
                 *buffer++ = readByte();
         }
         return length;

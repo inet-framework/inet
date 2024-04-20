@@ -34,7 +34,7 @@ class INET_API VoidPtrWrapper : public cObject
 class INET_API DuplicatePacketFilter : public cObjectResultFilter
 {
   protected:
-    int sizeLimit = -1;
+    size_t sizeLimit = -1;
     std::set<int> packetIndices; // index of the last N packets
 
   protected:
@@ -64,7 +64,7 @@ class INET_API OutOfOrderPacketFilter : public cObjectResultFilter
 class INET_API MissingPacketIndexFilter : public cObjectResultFilter
 {
   protected:
-    int sizeLimit = -1;
+    size_t sizeLimit = 0;
     int lastRemovedIndex = -1;
     std::set<int> packetIndices; // index of the last N packets
 

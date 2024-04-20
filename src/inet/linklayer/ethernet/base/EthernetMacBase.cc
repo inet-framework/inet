@@ -48,7 +48,6 @@ simsignal_t EthernetMacBase::receptionStateChangedSignal = registerSignal("recep
 EthernetMacBase::EthernetMacBase()
 {
     lastTxFinishTime = -1.0; // never equals to current simtime
-    curEtherDescr = &EthernetModes::nullEthernetMode;
 }
 
 EthernetMacBase::~EthernetMacBase()
@@ -64,6 +63,7 @@ void EthernetMacBase::initialize(int stage)
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         fcsMode = parseFcsMode(par("fcsMode"));
+        allowNonstandardBitrate = par("allowNonstandardBitrate");
         physInGate = gate("phys$i");
         physOutGate = gate("phys$o");
         lowerLayerInGateId = physInGate->getId();
@@ -167,6 +167,7 @@ void EthernetMacBase::handleStopOperation(LifecycleOperation *operation)
     else {
         networkInterface->setCarrier(false);
         networkInterface->setState(NetworkInterface::State::DOWN);
+        connected = false;
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
     }
 }
@@ -190,6 +191,7 @@ void EthernetMacBase::processAtHandleMessageFinished()
             networkInterface->setCarrier(false);
             processConnectDisconnect();
             networkInterface->setState(NetworkInterface::State::DOWN);
+            connected = false;
             startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
         }
     }
@@ -405,7 +407,8 @@ void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
 
     bool dataratesDiffer;
     if (!connected) {
-        curEtherDescr = &EthernetModes::nullEthernetMode;
+        curEtherDescr = EthernetModes::nullEthernetMode;
+        halfBitTime = SIMTIME_ZERO;
         dataratesDiffer = false;
         if (!outTrChannel)
             transmissionChannel = nullptr;
@@ -428,7 +431,8 @@ void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
 
     if (connected) {
         // Check valid speeds
-        curEtherDescr = &EthernetModes::getEthernetMode(txRate);
+        curEtherDescr = EthernetModes::getEthernetMode(txRate, allowNonstandardBitrate);
+        halfBitTime = 0.5 / txRate;
         if (networkInterface) {
             networkInterface->setCarrier(true);
             networkInterface->setDatarate(txRate);
@@ -440,12 +444,12 @@ void EthernetMacBase::printParameters()
 {
     // Dump parameters
     EV_DETAIL << "MAC address: " << getMacAddress() << (promiscuous ? ", promiscuous mode" : "") << endl
-              << "txrate: " << curEtherDescr->bitrate << " bps, "
+              << "txrate: " << curEtherDescr.bitrate << " bps, "
               << (duplexMode ? "full-duplex" : "half-duplex") << endl
-              << "bitTime: " << 1e9 / curEtherDescr->bitrate << " ns" << endl
+              << "bitTime: " << 1e9 / curEtherDescr.bitrate << " ns" << endl
               << "frameBursting: " << (frameBursting ? "on" : "off") << endl
-              << "slotTime: " << curEtherDescr->slotTime << endl
-              << "interFrameGap: " << INTERFRAME_GAP_BITS / curEtherDescr->bitrate << endl
+              << "slotBitLength: " << curEtherDescr.slotBitLength << endl
+              << "interFrameGap: " << INTERFRAME_GAP_BITS / curEtherDescr.bitrate << endl
               << endl;
 }
 

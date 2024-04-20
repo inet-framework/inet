@@ -30,8 +30,10 @@ void Ipv4NodeConfigurator::initialize(int stage)
         nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
         interfaceTable.reference(this, "interfaceTableModule", true);
         routingTable.reference(this, "routingTableModule", true);
-        if (networkConfiguratorPath[0])
+        if (networkConfiguratorPath[0]) {
             networkConfigurator.reference(this, "networkConfiguratorModule", false);
+            networkConfigurator->subscribe(Ipv4NetworkConfigurator::networkConfigurationChangedSignal, this);
+        }
     }
     else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP)
@@ -58,7 +60,7 @@ bool Ipv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, I
     Enter_Method("handleOperationStage");
     int stage = operation->getCurrentStage();
     if (dynamic_cast<ModuleStartOperation *>(operation)) {
-        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_LINK_LAYER)
+        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_LOCAL)
             prepareAllInterfaces();
         else if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_NETWORK_LAYER) {
             if (networkConfigurator != nullptr) {
@@ -173,6 +175,12 @@ void Ipv4NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalI
                         networkConfigurator->removeConfigurationFromRoutingTable(routingTable, networkInterface);
                 }
             }
+        }
+    }
+    else if (signalID == Ipv4NetworkConfigurator::networkConfigurationChangedSignal) {
+        if ((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) && networkConfigurator) {
+            configureAllInterfaces();
+            configureRoutingTable();
         }
     }
 }

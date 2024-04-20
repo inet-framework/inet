@@ -38,7 +38,7 @@ def collect_modules(simulation_project, path="src"):
             if match:
                 package = match.group(1)
                 package = re.sub("^\w+?\.", "", package)
-            match = re.match(r"^(simple|module) (\w+)\b", line)
+            match = re.match(r"^(simple|module|network) (\w+)\b", line)
             if match:
                 module = match.group(2)
                 modules.append(package + "." + module if package else module)

@@ -7,6 +7,7 @@
 
 package inet.linklayer.ieee8021q;
 
+import inet.linklayer.contract.IIeee8021qLayer;
 import inet.protocolelement.contract.IProtocolLayer;
 
 module Ieee8021qLayer like IIeee8021qLayer

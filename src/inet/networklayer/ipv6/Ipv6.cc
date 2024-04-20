@@ -1017,42 +1017,48 @@ bool Ipv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
     // walk through all extension headers
     for (int i = 0; i < noExtHeaders; i++) {
         const Ipv6ExtensionHeader *eh = ipv6Header->getExtensionHeader(i);
+        switch (eh->getExtensionType()) {
+            case IP_PROT_IPv6EXT_ROUTING: {
+                const Ipv6RoutingHeader *rh = check_and_cast<const Ipv6RoutingHeader *>(eh);
+                EV_DETAIL << "Routing Header with type=" << rh->getRoutingType() << endl;
 
-        if (const Ipv6RoutingHeader *rh = dynamic_cast<const Ipv6RoutingHeader *>(eh)) {
-            EV_DETAIL << "Routing Header with type=" << rh->getRoutingType() << endl;
+                // type 2 routing header should be processed by MIPv6 module
+                // if no MIP support, ignore the header
+                if (rt->hasMipv6Support() && rh->getRoutingType() == 2) {
+                    // for simplicity, we set a context pointer on the datagram
+                    packet->setContextPointer((void *)rh);
+                    EV_INFO << "Sending datagram with RH2 to MIPv6 module" << endl;
+                    send(packet, "xMIPv6Out");
+                    return false;
+                }
+                else {
+                    EV_INFO << "Ignoring unknown routing header" << endl;
+                }
+                break;
+            }
+            case IP_PROT_IPv6EXT_DEST: {
+                (void)check_and_cast<const Ipv6DestinationOptionsHeader *>(eh);
+                // Ipv6DestinationOptionsHeader* doh = (Ipv6DestinationOptionsHeader*) (eh);
+                // EV << "object of type=" << typeid(eh).name() << endl;
 
-            // type 2 routing header should be processed by MIPv6 module
-            // if no MIP support, ignore the header
-            if (rt->hasMipv6Support() && rh->getRoutingType() == 2) {
-                // for simplicity, we set a context pointer on the datagram
-                packet->setContextPointer((void *)rh);
-                EV_INFO << "Sending datagram with RH2 to MIPv6 module" << endl;
-                send(packet, "xMIPv6Out");
-                return false;
+                if (rt->hasMipv6Support() && dynamic_cast<const HomeAddressOption *>(eh)) {
+                    packet->setContextPointer((void *)eh);
+                    EV_INFO << "Sending datagram with HoA Option to MIPv6 module" << endl;
+                    send(packet, "xMIPv6Out");
+                    return false;
+                }
+                else {
+                    // delete eh;
+                    EV_INFO << "Ignoring unknown destination options header" << endl;
+                }
+                break;
             }
-            else {
-                EV_INFO << "Ignoring unknown routing header" << endl;
-            }
+            default:
+                // delete eh;
+                EV_INFO << "Ignoring unknown extension header" << endl;
+                break;
         }
-        else if (dynamic_cast<const Ipv6DestinationOptionsHeader *>(eh)) {
-//            Ipv6DestinationOptionsHeader* doh = (Ipv6DestinationOptionsHeader*) (eh);
-//            EV << "object of type=" << typeid(eh).name() << endl;
 
-            if (rt->hasMipv6Support() && dynamic_cast<const HomeAddressOption *>(eh)) {
-                packet->setContextPointer((void *)eh);
-                EV_INFO << "Sending datagram with HoA Option to MIPv6 module" << endl;
-                send(packet, "xMIPv6Out");
-                return false;
-            }
-            else {
-//                delete eh;
-                EV_INFO << "Ignoring unknown destination options header" << endl;
-            }
-        }
-        else {
-//            delete eh;
-            EV_INFO << "Ignoring unknown extension header" << endl;
-        }
     }
 
     // we have processed no extension headers -> the Ipv6 module can continue

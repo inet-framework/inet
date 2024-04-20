@@ -257,13 +257,8 @@ void Ipv6RoutingTable::assignRequiredNodeAddresses(NetworkInterface *ie)
     }
     // o  Its required Link-Local Address for each interface.
 
-#ifndef INET_WITH_xMIPv6
-//    Ipv6Address linkLocalAddr = Ipv6Address().formLinkLocalAddress(ie->getInterfaceToken());
-//    ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(linkLocalAddr, true, 0, 0);
-#else /* INET_WITH_xMIPv6 */
     Ipv6Address linkLocalAddr = Ipv6Address().formLinkLocalAddress(ie->getInterfaceToken());
-    ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(linkLocalAddr, true, SIMTIME_ZERO, SIMTIME_ZERO);
-#endif /* INET_WITH_xMIPv6 */
+    ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(linkLocalAddr, true, 0, 0);
 
     /*o  Any additional Unicast and Anycast Addresses that have been configured
        for the node's interfaces (manually or automatically).*/

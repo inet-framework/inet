@@ -15,7 +15,7 @@ moduleinterface IMediaRedundancy
     parameters:
         @display("i=block/network2");
         double ccmInterval @unit(ms);
-        int mrpRole;
+        string mrpRole;
         int timingProfile @unit(ms);
         int uuid0;
 		int uuid1;
@@ -23,7 +23,6 @@ moduleinterface IMediaRedundancy
 		int ringPort2;
 		bool interconnectionLinkCheckAware;
 		bool interconnectionRingCheckAware;
-       	bool blockedStateSupported;
        	bool nonBlockingMRC;
         bool reactOnLinkChange;
         bool checkMediaRedundancy;

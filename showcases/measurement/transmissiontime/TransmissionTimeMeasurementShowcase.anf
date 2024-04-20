@@ -5,7 +5,7 @@
         <input pattern="/inet/showcases/measurement/transmissiontime/results/General-*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="189" name="Source transmission time, vector" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="783497009" name="Source transmission time, vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -578,10 +578,10 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value=""/>
+            <property name="xaxis_max" value="1"/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/histogramchart.png" id="190" name="Source transmission time, histogram" template="histogramchart_native" type="HISTOGRAM">
+        <chart icon="icons/full/obj/histogramchart.png" id="146005671" name="Source transmission time, histogram" template="histogramchart_native" type="HISTOGRAM">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties

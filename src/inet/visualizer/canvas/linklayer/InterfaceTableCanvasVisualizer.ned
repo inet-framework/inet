@@ -20,6 +20,7 @@ simple InterfaceTableCanvasVisualizer extends InterfaceTableVisualizerBase like 
 {
     parameters:
         double zIndex = default(10); // determines the drawing order of figures relative to other visualizers
+        string anchor @enum("l","r","t") = default("l"); // specifies beginning/end/middle
         @class(InterfaceTableCanvasVisualizer);
 }
 

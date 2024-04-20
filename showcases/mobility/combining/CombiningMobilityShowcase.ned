@@ -2,8 +2,7 @@ package inet.showcases.mobility.combining;
 
 import inet.node.inet.StandardHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.common.IntegratedMultiVisualizer;
-
+import inet.visualizer.canvas.integrated.IntegratedMultiCanvasVisualizer;
 
 network CombiningMobilityShowcase
 {
@@ -14,11 +13,10 @@ network CombiningMobilityShowcase
         host[numHosts]: StandardHost {
             @display("i=misc/smartphone");
         }
-        visualizer: IntegratedMultiVisualizer {
+        visualizer: IntegratedMultiCanvasVisualizer {
             @display("p=47,39");
         }
 }
-
 
 network AntennaOrientation
 {
@@ -29,7 +27,7 @@ network AntennaOrientation
         rover: StandardHost {
             @display("p=247.632,395.568;b=100,64,rect,$minus,$minus;i=misc/car3");
         }
-        visualizer: IntegratedMultiVisualizer {
+        visualizer: IntegratedMultiCanvasVisualizer {
             @display("p=61.104,57.888");
         }
         radioMedium: Ieee80211ScalarRadioMedium {

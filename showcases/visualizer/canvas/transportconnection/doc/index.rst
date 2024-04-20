@@ -66,7 +66,7 @@ the visualizer's :par:`displayTransportConnections` parameter:
 
 .. code-block:: none
 
-   *.visualizer.*.displayTransportConnections = true
+   *.visualizer.displayTransportConnections = true
 
 After the simulation is run for a while and the TCP connection is
 established, the icons representing the endpoints of the TCP connection
@@ -106,7 +106,7 @@ destination port 80:
 
 .. code-block:: none
 
-   *.visualizer.*.transportConnectionVisualizer.destinationPortFilter = "80"
+   *.visualizer.transportConnectionVisualizer.destinationPortFilter = "80"
 
 When the simulation is run, and the connections are established, the
 network will look like the following. Note that there are several icons

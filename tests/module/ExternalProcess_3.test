@@ -1,0 +1,47 @@
+%description:
+
+Tests that killing an external process terminates the simulation.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.common.ExternalProcess;
+
+network TestNetwork
+{
+    parameters:
+        int numProcesses;
+    submodules:
+        externalProcess[numProcesses]: ExternalProcess;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+scheduler-class = "inet::RealTimeScheduler"
+
+*.numProcesses = 2
+*.externalProcess[0].command = "ping localhost"
+*.externalProcess[0].onExit = "terminateSimulation"
+*.externalProcess[1].command = "killall ping"
+*.externalProcess[1].startTime = 1s
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+\*\* Event #1  t=0   TestNetwork.externalProcess\[0\] \(ExternalProcess, id=2\)
+Starting process: ping localhost
+PING localhost.*?
+64 bytes .*? icmp_seq=1 ttl=64 time=.*? ms
+\*\* Event #2  t=1   TestNetwork.externalProcess\[1\] \(ExternalProcess, id=3\)
+Starting process: killall ping
+
+<!> External process finished -- in module \(inet::ExternalProcess\) TestNetwork.externalProcess\[0\] \(id=2\), at t=.*?, event #2
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

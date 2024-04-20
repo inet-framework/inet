@@ -21,9 +21,9 @@
 #endif // if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 
 #ifdef __linux__
-#define UI_REFRESH_TIME    100000000
+#define UI_REFRESH_TIME    (int64_t)100000000L
 #else
-#define UI_REFRESH_TIME    500000
+#define UI_REFRESH_TIME    (int64_t)500000
 #endif
 
 namespace inet {
@@ -85,31 +85,31 @@ void RealTimeScheduler::advanceSimTime()
 bool RealTimeScheduler::receiveWithTimeout(int64_t timeout)
 {
 #ifdef __linux__
-    bool found = false;
     timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = timeout / 1000;
 
-    int32_t fdVec[FD_SETSIZE], maxfd;
+    int32_t maxfd = -1;
     fd_set rdfds;
     FD_ZERO(&rdfds);
-    maxfd = -1;
-    for (uint16_t i = 0; i < callbackEntries.size(); i++) {
-        fdVec[i] = callbackEntries.at(i).fd;
-        if (fdVec[i] > maxfd)
-            maxfd = fdVec[i];
-        FD_SET(fdVec[i], &rdfds);
+    // needs to be copied because notify() calls can modify the callbacks
+    std::vector<Entry> callbackEntriesCopy = callbackEntries;
+    for (auto& entry : callbackEntriesCopy) {
+        if (entry.fd > maxfd)
+            maxfd = entry.fd;
+        FD_SET(entry.fd, &rdfds);
     }
     if (select(maxfd + 1, &rdfds, nullptr, nullptr, &tv) < 0)
-        return found;
+        return false;
     advanceSimTime();
-    for (uint16_t i = 0; i < callbackEntries.size(); i++) {
-        if (!(FD_ISSET(fdVec[i], &rdfds)))
-            continue;
-        if (callbackEntries.at(i).callback->notify(fdVec[i]))
-            found = true;
+    bool eventInserted = false;
+    for (auto& entry : callbackEntriesCopy) {
+        if (FD_ISSET(entry.fd, &rdfds)) {
+            if (entry.callback->notify(entry.fd))
+                eventInserted = true;
+        }
     }
-    return found;
+    return eventInserted;
 #else
     bool found = false;
     timeval tv;
@@ -128,23 +128,21 @@ bool RealTimeScheduler::receiveWithTimeout(int64_t timeout)
 
 int RealTimeScheduler::receiveUntil(int64_t targetTime)
 {
-    // if there's more than 2*UI_REFRESH_TIME to wait, wait in UI_REFRESH_TIME chunks
-    // in order to keep UI responsiveness by invoking getEnvir()->idle()
-    int64_t curTime = opp_get_monotonic_clock_nsecs();
-
-    while ((targetTime - curTime) >= 2 * UI_REFRESH_TIME) {
-        if (receiveWithTimeout(UI_REFRESH_TIME))
+    int64_t currentTime = opp_get_monotonic_clock_nsecs();
+    while (targetTime > currentTime) {
+        // if there's more than UI_REFRESH_TIME to wait, wait in UI_REFRESH_TIME chunks
+        // in order to keep UI responsiveness by invoking getEnvir()->idle()
+        int64_t timeout = std::min(UI_REFRESH_TIME, targetTime - currentTime);
+        if (receiveWithTimeout(timeout))
             return 1;
-        if (getEnvir()->idle())
-            return -1;
-        curTime = opp_get_monotonic_clock_nsecs();
+        // if we have enough time left we can refresh the UI, because we expect the refresh
+        // to take less time than UI_REFRESH_TIME, we waited at most UI_REFRESH_TIME above
+        if (targetTime - currentTime > 2 * UI_REFRESH_TIME) {
+            if (getEnvir()->idle())
+                return -1;
+        }
+        currentTime = opp_get_monotonic_clock_nsecs();
     }
-
-    // difference is now at most UI_REFRESH_TIME, do it at once
-    int64_t remaining = targetTime - curTime;
-    if (remaining > 0)
-        if (receiveWithTimeout(remaining))
-            return 1;
     return 0;
 }
 
@@ -173,17 +171,19 @@ cEvent *RealTimeScheduler::takeNextEvent()
     int64_t curTime = opp_get_monotonic_clock_nsecs();
 
     if (targetTime > curTime) {
-        int status = receiveUntil(targetTime);
-        if (status == -1)
-            return nullptr; // interrupted by user
-        if (status == 1)
-            event = sim->getFES()->peekFirst(); // received something
+        switch (receiveUntil(targetTime)) {
+            case -1: return nullptr; // interrupted by user
+            case 0:  break; // nothing to do
+            case 1:  event = sim->getFES()->peekFirst(); break; // received something
+            default: ASSERT(false); break;
+        }
     }
     else {
         // we're behind -- customized versions of this class may
         // alert if we're too much behind, whatever that means
-        int64_t diffTime = curTime - targetTime;
-        EV_TRACE << "We are behind: " << diffTime * 1e-9 << " seconds\n";
+        // NOTE: this is commented out because it generates too much noise by default
+//        int64_t diffTime = curTime - targetTime;
+//        EV_TRACE << "We are behind: " << diffTime * 1e-9 << " seconds\n";
     }
     cEvent *tmp = sim->getFES()->removeFirst();
     ASSERT(tmp == event);

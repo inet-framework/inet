@@ -5,13 +5,13 @@
 package inet.showcases.visualizer.canvas.mobility;
 
 import inet.node.inet.AdhocHost;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 network MobilityVisualizerShowcase
 {
     @display("bgb=800,600");
     submodules:
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             parameters:
                 @display("p=100,50");
         }

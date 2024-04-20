@@ -47,7 +47,11 @@ InfoVisualizerBase::InfoVisualization *InfoCanvasVisualizer::createInfoVisualiza
     figure->setFont(font);
     figure->setText(getInfoVisualizationText(module).c_str());
     figure->setLabelColor(textColor);
+    figure->setAlignment(textAlignment);
     figure->setBackgroundColor(backgroundColor);
+    figure->setLineColor(lineColor);
+    figure->setFilled(filled);
+    figure->setOutlined(outlined);
     figure->setOpacity(opacity);
     auto networkNode = getContainingNode(module);
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);

@@ -314,11 +314,15 @@ def get_calculated_fingerprint(simulation_result, ingredients):
     if match:
         value = match.groups()[0]
     else:
-        match = re.search("Fingerprint mismatch! calculated:.*? ([0-9a-f]{4}-[0-9a-f]{4})/" + ingredients + ".*expected", stderr)
+        match = re.search("Fingerprint mismatch! calculated:.*? ([0-9a-f]{4}-[0-9a-f]{4})/" + ingredients + ".*expected", stdout)
         if match:
             value = match.groups()[0]
         else:
-            return None
+            match = re.search("Fingerprint mismatch! calculated:.*? ([0-9a-f]{4}-[0-9a-f]{4})/" + ingredients + ".*expected", stderr)
+            if match:
+                value = match.groups()[0]
+            else:
+                return None
     return Fingerprint(value, ingredients)
 
 def check_fingerprint_test_group(simulation_result, fingerprint_test_group, **kwargs):

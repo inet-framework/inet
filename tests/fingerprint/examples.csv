@@ -102,9 +102,9 @@
 
 /examples/geometry/,                 -f omnetpp.ini -c General -r 0,                100s,            75d0-cba9/tplx;ce1d-d136/~tNl;51b3-9d40/~tND;900d-aaeb/tyf, PASS, wireless Ipv4
 
-/examples/ieee8021as/,               -f omnetpp.ini -c Network -r 0,                     200s,       1415-776b/tplx;71e8-0ad4/~tNl;0ae6-86e4/~tND;2f64-3e50/tyf, PASS, gptp
-/examples/ieee8021as/,               -f omnetpp.ini -c Network_with_cross_traffic -r 0,  200s,       8f0f-0156/tplx;d994-07a5/~tNl;868f-fd0d/~tND;8d31-254b/tyf, PASS, gptp Ipv4
-/examples/ieee8021as/,               -f omnetpp.ini -c Network_daisy_chain -r 0,         200s,       5570-c31b/tplx;235a-595e/~tNl;358e-383e/~tND;6ff7-a656/tyf, PASS, gptp
+/examples/ieee8021as/,               -f omnetpp.ini -c Network -r 0,                     200s,       0a4c-a794/tplx;6aae-53b2/~tNl;ac2f-3420/~tND;2f64-3e50/tyf, PASS, gptp
+/examples/ieee8021as/,               -f omnetpp.ini -c Network_with_cross_traffic -r 0,  200s,       60a8-5ab3/tplx;1f03-d915/~tNl;c238-33ce/~tND;8d31-254b/tyf, PASS, gptp Ipv4
+/examples/ieee8021as/,               -f omnetpp.ini -c Network_daisy_chain -r 0,         200s,       59c5-f301/tplx;72b9-b32f/~tNl;d606-aec0/~tND;6ff7-a656/tyf, PASS, gptp
 
 # /examples/ieee8021d/,                -f omnetpp.ini -c LargeNet -r 0,               100s,            0, ERROR,   # abstract-config
 # /examples/ieee8021d/,                -f omnetpp.ini -c RSTP -r 0,                   100s,            0, ERROR,   # abstract-config
@@ -461,10 +461,10 @@
 /examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            f1d5-1f6d/tplx;f190-9d17/~tNl;09be-cb28/~tND;492f-8b01/tyf, PASS, EthernetMac Ipv4
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            5639-8b29/tplx;04c6-2330/~tNl;6587-d7a7/~tND;ccd0-29d5/tyf, PASS, EthernetMac Ipv4
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic2 -r 0,               500s,            f08d-0e77/tplx;1d39-ec2f/~tNl;feb0-0be3/~tND;866d-7f23/tyf, PASS, EthernetMac Ipv4
-/examples/rip/infinitycount/,        -f omnetpp.ini -c General -r 0,                100s,            7374-2b6c/tplx;4e21-2489/~tNl;78b0-b1cc/~tND;667e-69cf/tyf, PASS, EthernetMac Ipv4
-/examples/rip/mixednetwork/,         -f omnetpp.ini -c stable -r 0,                 100s,            fdd7-4fac/tplx;2a20-65bd/~tNl;fc0c-03f0/~tND;0db6-cf44/tyf, PASS, EthernetMac Ipv4
-/examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,            714b-08c3/tplx;45f8-ee91/~tNl;6e09-01e3/~tND;802c-7da4/tyf, PASS, EthernetMac Ipv4
-/examples/rip/mixednetwork/,         -f omnetpp.ini -c shutdown-restart -r 0,       100s,            c986-2e8e/tplx;4bd0-fb89/~tNl;491a-5843/~tND;8d3d-707a/tyf, PASS, EthernetMac Ipv4
+/examples/rip/infinitycount/,        -f omnetpp.ini -c General -r 0,                100s,            5878-d58e/tplx;0950-446c/~tNl;c02f-fb11/~tND;667e-69cf/tyf, PASS, EthernetMac Ipv4
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c stable -r 0,                 100s,            35e8-eae8/tplx;ac42-7d89/~tNl;f22a-a86c/~tND;0db6-cf44/tyf, PASS, EthernetMac Ipv4
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,            d035-1a3e/tplx;1cb5-061d/~tNl;d60c-354c/~tND;802c-7da4/tyf, PASS, EthernetMac Ipv4
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c shutdown-restart -r 0,       100s,            491a-4e12/tplx;4acf-e6db/~tNl;aea7-3d26/~tND;8d3d-707a/tyf, PASS, EthernetMac Ipv4
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   100s,            3502-ef95/tplx;3b66-8f6c/~tNl;fe16-d2ea/~tND;e10a-1435/tyf, PASS, EthernetMac Ipv4
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,            8a7b-b692/tplx;92ce-7549/~tNl;4c96-1800/tyf, PASS, EthernetMac
 /examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,            732f-46d1/tplx;4854-3d14/~tNl;673d-9d99/~tND;a22a-ccdd/tyf, PASS, EthernetMac Ipv4

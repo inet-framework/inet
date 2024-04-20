@@ -9,6 +9,7 @@
 #define __INET_PACKETSERVER_H
 
 #include "inet/common/clock/ClockUserModuleMixin.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PacketServerBase.h"
 
 namespace inet {
@@ -17,7 +18,7 @@ extern template class ClockUserModuleMixin<queueing::PacketServerBase>;
 
 namespace queueing {
 
-class INET_API PacketServer : public ClockUserModuleMixin<PacketServerBase>
+class INET_API PacketServer : public ClockUserModuleMixin<PacketServerBase>, public TransparentProtocolRegistrationListener
 {
   protected:
     cMessage *serveTimer = nullptr;
@@ -34,6 +35,8 @@ class INET_API PacketServer : public ClockUserModuleMixin<PacketServerBase>
 
   public:
     virtual ~PacketServer();
+
+    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
     virtual void handleCanPushPacketChanged(const cGate *gate) override;
     virtual void handleCanPullPacketChanged(const cGate *gate) override;

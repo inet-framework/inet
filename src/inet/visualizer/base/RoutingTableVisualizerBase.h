@@ -87,6 +87,8 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     cFigure::Color labelColor;
     //@}
 
+    bool allRoutingTableVisualizationsAreInvalid = true;
+    std::set<IIpv4RoutingTable *> invalidRoutingTableVisualizations;
     LineManager *lineManager = nullptr;
 
     // key is router ID, source module ID, destination module ID
@@ -99,6 +101,7 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
     virtual void preDelete(cComponent *root) override;
+    virtual void refreshDisplay() const override;
 
     virtual void subscribe();
     virtual void unsubscribe();
@@ -119,9 +122,13 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
 
     virtual void addRouteVisualizations(IIpv4RoutingTable *routingTable);
     virtual void removeRouteVisualizations(IIpv4RoutingTable *routingTable);
-    virtual void removeAllRouteVisualizations();
     virtual void updateRouteVisualizations(IIpv4RoutingTable *routingTable);
+
+    virtual void addAllRouteVisualizations();
+    virtual void removeAllRouteVisualizations();
     virtual void updateAllRouteVisualizations();
+
+    virtual void updateRouteVisualizations();
 
     virtual std::string getRouteVisualizationText(const Ipv4Route *route) const;
     virtual std::string getMulticastRouteVisualizationText(const Ipv4MulticastRoute *route) const;

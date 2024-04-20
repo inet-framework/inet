@@ -13,18 +13,18 @@ import inet.common.IMeasurer;
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.common.packet.recorder.PcapRecorder;
-import inet.linklayer.configurator.L2NodeConfigurator;
+import inet.linklayer.configurator.contract.IL2NodeConfigurator;
 import inet.linklayer.contract.IEthernetInterface;
+import inet.linklayer.contract.IEthernetLayer;
+import inet.linklayer.contract.IGptp;
+import inet.linklayer.contract.IIeee8021qLayer;
+import inet.linklayer.contract.IIeee8021rLayer;
+import inet.linklayer.contract.IIeee8022Llc;
 import inet.linklayer.contract.IMacForwardingTable;
 import inet.linklayer.contract.ISpanningTree;
-import inet.linklayer.ethernet.contract.IEthernetLayer;
-import inet.linklayer.ieee8021q.IIeee8021qLayer;
-import inet.linklayer.ieee8021r.IIeee8021rLayer;
-import inet.linklayer.ieee8022.IIeee8022Llc;
 import inet.networklayer.common.InterfaceTable;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.protocolelement.contract.IProtocolLayer;
-
 
 //
 // Model of an Ethernet switch.
@@ -70,7 +70,7 @@ module EthernetSwitch like IEthernetNetworkNode
         interfaceTable: InterfaceTable {
             @display("p=100,200;is=s");
         }
-        l2NodeConfigurator: L2NodeConfigurator if hasStp {
+        l2NodeConfigurator: <default("L2NodeConfigurator")> like IL2NodeConfigurator if hasStp {
             @display("p=100,300;is=s");
         }
         status: NodeStatus if hasStatus {
@@ -88,7 +88,7 @@ module EthernetSwitch like IEthernetNetworkNode
         stp: <spanningTreeProtocol> like ISpanningTree if hasStp {
             @display("p=500,75");
         }
-        gptp: <default("Gptp")> like IApp if hasGptp {
+        gptp: <default("Gptp")> like IGptp if hasGptp {
             @display("p=700,75");
             gptpNodeType = default("BRIDGE_NODE"); // @enum("gptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE
         }
@@ -99,7 +99,7 @@ module EthernetSwitch like IEthernetNetworkNode
         sc: MessageDispatcher {
             @display("p=800,150;b=1200,5");
         }
-        llc: <default("Ieee8022Llc")> like IIeee8022Llc if typename != "" {
+        llc: <default("")> like IIeee8022Llc if typename != "" {
             @display("p=700,225");
         }
         cb: MessageDispatcher {
@@ -114,10 +114,10 @@ module EthernetSwitch like IEthernetNetworkNode
         ethernet: <default("EthernetEncapsulation")> like IEthernetLayer if typename != "" {
             @display("p=500,525");
         }
-        ieee8021q: <default("Ieee8021qProtocol")> like IIeee8021qLayer if typename != "" {
+        ieee8021q: <default("")> like IIeee8021qLayer if typename != "" {
             @display("p=700,525");
         }
-        ieee8021r: <default("Ieee8021rProtocol")> like IIeee8021rLayer if typename != "" {
+        ieee8021r: <default("")> like IIeee8021rLayer if typename != "" {
             @display("p=900,525");
         }
         li: MessageDispatcher {

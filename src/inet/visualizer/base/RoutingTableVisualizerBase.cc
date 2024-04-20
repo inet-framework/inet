@@ -12,7 +12,9 @@
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#endif
 
 namespace inet {
 
@@ -113,7 +115,26 @@ void RoutingTableVisualizerBase::handleParameterChange(const char *name)
         multicastSourceNodeFilter.setPattern(par("multicastSourceNodeFilter"));
     else if (!strcmp(name, "labelFormat"))
         labelFormat.parseFormat(par("labelFormat"));
-    updateAllRouteVisualizations();
+    allRoutingTableVisualizationsAreInvalid = true;
+}
+
+void RoutingTableVisualizerBase::refreshDisplay() const
+{
+    if (displayRoutingTables)
+        // KLUDGE TODO
+        const_cast<RoutingTableVisualizerBase *>(this)->updateRouteVisualizations();
+}
+
+void RoutingTableVisualizerBase::updateRouteVisualizations()
+{
+    if (allRoutingTableVisualizationsAreInvalid) {
+        updateAllRouteVisualizations();
+        allRoutingTableVisualizationsAreInvalid = false;
+    }
+    else
+        for (auto routingTable : invalidRoutingTableVisualizations)
+            updateRouteVisualizations(routingTable);
+    invalidRoutingTableVisualizations.clear();
 }
 
 void RoutingTableVisualizerBase::subscribe()
@@ -151,11 +172,13 @@ void RoutingTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t s
     {
         auto routingTable = check_and_cast<IIpv4RoutingTable *>(source);
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
-        if (nodeFilter.matches(networkNode))
-            updateRouteVisualizations(routingTable);
+        if (nodeFilter.matches(networkNode)) {
+            removeRouteVisualizations(routingTable);
+            invalidRoutingTableVisualizations.insert(routingTable);
+        }
     }
     else if (signal == interfaceIpv4ConfigChangedSignal)
-        updateAllRouteVisualizations();
+        allRoutingTableVisualizationsAreInvalid = true;
     else
         throw cRuntimeError("Unknown signal");
 }
@@ -272,6 +295,7 @@ std::vector<Ipv4Address> RoutingTableVisualizerBase::getMulticastGroups()
             if (interfaceTable != nullptr) {
                 for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
                     auto interface = interfaceTable->getInterface(i);
+#ifdef INET_WITH_IPv4
                     auto protocolData = interface->findProtocolData<Ipv4InterfaceData>();
                     if (protocolData != nullptr) {
                         for (int j = 0; j < protocolData->getNumOfJoinedMulticastGroups(); j++) {
@@ -281,6 +305,7 @@ std::vector<Ipv4Address> RoutingTableVisualizerBase::getMulticastGroups()
                                 multicastGroups.insert(multicastGroup);
                         }
                     }
+#endif
                 }
             }
         }
@@ -316,7 +341,7 @@ void RoutingTableVisualizerBase::addRouteVisualizations(IIpv4RoutingTable *routi
         for (auto group : multicastGroups) {
             auto route = const_cast<Ipv4MulticastRoute *>(routingTable->findBestMatchingMulticastRoute(source, group));
             if (route != nullptr) {
-                for (int i = 0; i < route->getNumOutInterfaces(); i++) {
+                for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++) {
                     auto outInterface = route->getOutInterface(i);
                     auto interface = const_cast<NetworkInterface *>(outInterface->getInterface());
                     auto channel = interface->getTxTransmissionChannel();
@@ -362,6 +387,25 @@ void RoutingTableVisualizerBase::removeRouteVisualizations(IIpv4RoutingTable *ro
     }
 }
 
+void RoutingTableVisualizerBase::addAllRouteVisualizations()
+{
+    for (cModule::SubmoduleIterator it(visualizationSubjectModule); !it.end(); it++) {
+        auto networkNode = *it;
+        if (isNetworkNode(networkNode) && nodeFilter.matches(networkNode)) {
+            L3AddressResolver addressResolver;
+            auto routingTable = addressResolver.findIpv4RoutingTableOf(networkNode);
+            if (routingTable != nullptr)
+                addRouteVisualizations(routingTable);
+        }
+    }
+}
+
+void RoutingTableVisualizerBase::updateRouteVisualizations(IIpv4RoutingTable *routingTable)
+{
+    removeRouteVisualizations(routingTable);
+    addRouteVisualizations(routingTable);
+}
+
 void RoutingTableVisualizerBase::removeAllRouteVisualizations()
 {
     std::vector<const RouteVisualization *> removedRouteVisualizations;
@@ -380,24 +424,10 @@ void RoutingTableVisualizerBase::removeAllRouteVisualizations()
     }
 }
 
-void RoutingTableVisualizerBase::updateRouteVisualizations(IIpv4RoutingTable *routingTable)
-{
-    removeRouteVisualizations(routingTable);
-    addRouteVisualizations(routingTable);
-}
-
 void RoutingTableVisualizerBase::updateAllRouteVisualizations()
 {
     removeAllRouteVisualizations();
-    for (cModule::SubmoduleIterator it(visualizationSubjectModule); !it.end(); it++) {
-        auto networkNode = *it;
-        if (isNetworkNode(networkNode) && nodeFilter.matches(networkNode)) {
-            L3AddressResolver addressResolver;
-            auto routingTable = addressResolver.findIpv4RoutingTableOf(networkNode);
-            if (routingTable != nullptr)
-                addRouteVisualizations(routingTable);
-        }
-    }
+    addAllRouteVisualizations();
 }
 
 std::string RoutingTableVisualizerBase::getRouteVisualizationText(const Ipv4Route *route) const

@@ -11,9 +11,9 @@ import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.StandardHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedMultiCanvasVisualizer;
 import inet.visualizer.common.DataLinkVisualizer;
-import inet.visualizer.common.IntegratedMultiVisualizer;
-import inet.visualizer.common.IntegratedVisualizer;
 
 network DataLinkVisualizerEnablingWiredShowcase
 {
@@ -66,7 +66,7 @@ network DataLinkVisualizerActivityLevelShowcase
 {
     @display("bgb=700,250");
     submodules:
-        visualizer: IntegratedMultiVisualizer {
+        visualizer: IntegratedMultiCanvasVisualizer {
             parameters:
                 @display("p=100,50");
         }
@@ -93,7 +93,7 @@ network DataLinkVisualizerFilteringShowcase
 {
     @display("bgb=900,600");
     submodules:
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=80,50");
         }
         configurator: Ipv4NetworkConfigurator {
@@ -146,7 +146,7 @@ network DataLinkVisualizerMobileShowcase
 {
     @display("bgb=620,500");
     submodules:
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=70,50");
         }
         configurator: Ipv4NetworkConfigurator {

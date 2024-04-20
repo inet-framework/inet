@@ -45,6 +45,7 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
 
       public:
         StatisticVisualization(int moduleId, simsignal_t signal, const char *unit);
+        virtual ~StatisticVisualization() {}
     };
 
     class INET_API DirectiveResolver : public StringFormat::IDirectiveResolver {

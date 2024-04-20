@@ -11,7 +11,7 @@ import inet.node.inet.AdhocHost;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 import inet.visualizer.common.TransportRouteVisualizer;
 
 network TransportPathVisualizerSimpleWiredShowcase
@@ -60,7 +60,7 @@ network TransportPathVisualizerFilteringShowcase
 {
     @display("bgb=1024,700");
     submodules:
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             parameters:
                 @display("p=80,50");
         }

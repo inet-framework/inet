@@ -25,6 +25,11 @@ namespace inet {
 extern INET_API const InitStage INITSTAGE_LOCAL;
 
 /**
+ * Initialization of external host OS dependent components.
+ */
+extern INET_API const InitStage INITSTAGE_EXTERNAL;
+
+/**
  * Initialization of clocks.
  */
 extern INET_API const InitStage INITSTAGE_CLOCK;

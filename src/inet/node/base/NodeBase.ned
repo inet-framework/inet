@@ -8,6 +8,7 @@
 package inet.node.base;
 
 import inet.clock.contract.IClock;
+import inet.common.ExternalEnvironment;
 import inet.common.IMeasurer;
 import inet.common.lifecycle.NodeStatus;
 import inet.mobility.contract.IMobility;
@@ -28,6 +29,7 @@ module NodeBase like INetworkNode
         @networkNode;
         @labels(node,ethernet-node,wireless-node);
         bool hasStatus = default(false);
+        bool hasEnvironment = default(false);
         string osgModel = default(""); // 3D model for OSG visualization, no 3D model by default
         string osgModelColor = default(""); // tint color, no colorization by default
         string canvasImage = default(""); // image for canvas visualization, no image by default
@@ -61,6 +63,9 @@ module NodeBase like INetworkNode
         }
         measurer: <default("")> like IMeasurer if typename != "" {
             @display("p=125,640;is=s");
+        }
+        environment: ExternalEnvironment if hasEnvironment {
+            @display("p=125,800;is=s");
         }
 }
 

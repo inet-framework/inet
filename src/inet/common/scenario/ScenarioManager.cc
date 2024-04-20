@@ -11,7 +11,6 @@
 #include "inet/common/XMLUtils.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/scenario/ScenarioTimer_m.h"
 
 namespace inet {
 
@@ -54,11 +53,11 @@ static const char *OP_RESUME = "resume";
 
 void ScenarioManager::initialize()
 {
-    cXMLElement *script = par("script");
-
-    numChanges = numDone = 0;
+    WATCH_PTRLIST(scheduledEvents);
     WATCH(numChanges);
     WATCH(numDone);
+
+    cXMLElement *script = par("script");
 
     for (cXMLElement *node = script->getFirstChild(); node; node = node->getNextSibling()) {
         // check attr t is present
@@ -71,6 +70,7 @@ void ScenarioManager::initialize()
         auto msg = new ScenarioTimer("scenario-event");
         msg->setXmlNode(node);
         scheduleAt(t, msg);
+        scheduledEvents.push_back(msg);
 
         // count it
         numChanges++;
@@ -79,10 +79,13 @@ void ScenarioManager::initialize()
 
 void ScenarioManager::handleMessage(cMessage *msg)
 {
-    auto node = check_and_cast<ScenarioTimer *>(msg)->getXmlNode();
-    delete msg;
+    auto scenarioTimer = check_and_cast<ScenarioTimer *>(msg);
+    if (scheduledEvents.empty() || scenarioTimer != scheduledEvents.front())
+        throw cRuntimeError("Model error: arrived non-expected message '%s': '%s'", scenarioTimer->getName(), scenarioTimer->str().c_str());
 
-    processCommand(node);
+    scheduledEvents.pop_front();
+    processCommand(scenarioTimer->getXmlNode());
+    delete scenarioTimer;
 
     numDone++;
 }
@@ -477,10 +480,28 @@ void ScenarioManager::processLifecycleCommand(const cXMLElement *node)
 
 void ScenarioManager::refreshDisplay() const
 {
-    char buf[80];
-    sprintf(buf, "total %d changes, %d left", numChanges, numChanges - numDone);
-    getDisplayString().setTagArg(ATTR_T, 0, buf);
+    auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
+    getDisplayString().setTagArg("t", 0, text.c_str());
 }
+
+std::string ScenarioManager::resolveDirective(char directive) const
+{
+    switch (directive) {
+        case 'c':
+            return std::to_string(numChanges);
+        case 'd':
+            return std::to_string(numDone);
+        case 'l':
+            return std::to_string(numChanges - numDone); // "numLeft"
+        case 't':
+            return scheduledEvents.empty() ? "n/a" : scheduledEvents.front()->getArrivalTime().str() + "s";
+        case 'n':
+            return scheduledEvents.empty() ? "n/a" : scheduledEvents.front()->getName();
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+}
+
 
 } // namespace inet
 

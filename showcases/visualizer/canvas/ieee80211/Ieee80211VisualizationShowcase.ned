@@ -5,7 +5,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 
 network Ieee80211VisualizationDisplayingAssociationsShowcase
@@ -21,7 +21,7 @@ network Ieee80211VisualizationDisplayingAssociationsShowcase
         configurator: Ipv4NetworkConfigurator {
             @display("p=409,32");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=409,78");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
@@ -33,7 +33,7 @@ network Ieee80211VisualizationAdvancedFeaturesShowcase
 {
     @display("bgb=574,468");
     submodules:
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             parameters:
                 @display("p=100,50");
         }
@@ -90,7 +90,7 @@ network Ieee80211VisualizationVisualizingHandoverShowcase
         configurator: Ipv4NetworkConfigurator {
             @display("p=100,344");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=203,344");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
@@ -105,7 +105,7 @@ network Ieee80211VisualizationSignalLevelsShowcase
 {
     @display("bgb=574,468");
     submodules:
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             parameters:
                 @display("p=100,50");
         }

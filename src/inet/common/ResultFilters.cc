@@ -57,7 +57,7 @@ void DuplicatePacketFilter::init(Context *ctx)
     std::string fullPath = ctx->component->getFullPath() + "." + ctx->attrsProperty->getIndex() + ".duplicatePacket";
     cConfiguration *cfg = getEnvir()->getConfig();
     auto sizeLimitValue = cfg->getPerObjectConfigValue(fullPath.c_str(), "sizeLimit");
-    sizeLimit = cfg->parseDouble(sizeLimitValue, nullptr, nullptr, 100);
+    sizeLimit = cfg->parseLong(sizeLimitValue, nullptr, 100);
 }
 
 void DuplicatePacketFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
@@ -763,8 +763,7 @@ Register_ResultFilter("interarrivalTime", InterarrivalTimeFilter);
 
 void InterarrivalTimeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
-    if (auto packet = dynamic_cast<cPacket *>(object)) {
-
+    if (dynamic_cast<cPacket *>(object)) {
         if (prevArrivalTime > 0){
             // Time spacing between the two arrivals
             simtime_t interArrivalTime = simTime() - prevArrivalTime;

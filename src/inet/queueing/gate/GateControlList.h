@@ -16,7 +16,7 @@ namespace queueing {
 class INET_API GateControlList : public cSimpleModule
 {
   protected:
-    int numGates = -1;
+    size_t numGates = 0;
     const char *mapping = nullptr;
     cValueArray *durations = nullptr;
     cValueArray *gateStates = nullptr;

@@ -76,6 +76,9 @@ class StatisticalTestTask(SimulationTestTask):
                     df["relative_error"] = df.apply(lambda row: row["absolute_error"] / abs(row["value_stored"]) if row["value_stored"] != 0 else (float("inf") if row["value_current"] != 0 else 0), axis=1)
                     df = df[df.apply(lambda row: matches_filter(row["name"], result_name_filter, exclude_result_name_filter, full_match) and \
                                                  matches_filter(row["module"], result_module_filter, exclude_result_module_filter, full_match), axis=1)]
+                    sorted_df = df.sort_values(by="relative_error", ascending=False)
+                    scalar_result_csv_file_name = re.sub(".sca$", ".csv", stored_scalar_result_file_name)
+                    sorted_df.to_csv(scalar_result_csv_file_name, float_format="%.15g")
                     id = df["relative_error"].idxmax()
                     if math.isnan(id):
                         id = next(iter(df.index), None)

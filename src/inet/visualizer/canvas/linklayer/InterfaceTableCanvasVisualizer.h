@@ -33,6 +33,7 @@ class INET_API InterfaceTableCanvasVisualizer : public InterfaceTableVisualizerB
 
   protected:
     double zIndex = NaN;
+    const char *anchor = nullptr;
     ModuleRefByPar<NetworkNodeCanvasVisualizer> networkNodeVisualizer;
 
   protected:

@@ -5,7 +5,7 @@
         <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="208" name="Packet jitter, vector" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="613418784" name="Packet jitter, vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -578,10 +578,10 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value=""/>
+            <property name="xaxis_max" value="5"/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/histogramchart.png" id="209" name="Packet jitter, histogram" resultTypes="" template="histogramchart_native" type="HISTOGRAM">
+        <chart icon="icons/full/obj/histogramchart.png" id="870484180" name="Packet jitter, histogram" template="histogramchart_native" type="HISTOGRAM">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -1079,7 +1079,7 @@ Show over_underflow cell?
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="210" name="Packet delay difference to mean, vector" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="927827692" name="Packet delay difference to mean, vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -1652,10 +1652,10 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value=""/>
+            <property name="xaxis_max" value="5"/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/histogramchart.png" id="211" name="Packet delay difference to mean, histogram" resultTypes="" template="histogramchart_native" type="HISTOGRAM">
+        <chart icon="icons/full/obj/histogramchart.png" id="254352706" name="Packet delay difference to mean, histogram" template="histogramchart_native" type="HISTOGRAM">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties
@@ -2156,7 +2156,7 @@ Show over_underflow cell?
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="213" name="Packet delay variation, vector" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1050681317" name="Packet delay variation, vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -2729,10 +2729,10 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value=""/>
+            <property name="xaxis_max" value="5"/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/histogramchart.png" id="212" name="Packet delay variation, histogram" resultTypes="" template="histogramchart_native" type="HISTOGRAM">
+        <chart icon="icons/full/obj/histogramchart.png" id="202094384" name="Packet delay variation, histogram" template="histogramchart_native" type="HISTOGRAM">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
 
 # get chart properties

@@ -14,7 +14,8 @@
 
 namespace inet {
 
-Register_Enum(inet::NodeStatus, (NodeStatus::UP, NodeStatus::DOWN, NodeStatus::GOING_UP, NodeStatus::GOING_DOWN));
+Register_Enum(NodeStatus::State, ( NodeStatus::UP, NodeStatus::DOWN, NodeStatus::GOING_UP, NodeStatus::GOING_DOWN ) );
+
 Define_Module(NodeStatus);
 
 simsignal_t NodeStatus::nodeStatusChangedSignal = registerSignal("nodeStatusChanged");
@@ -33,7 +34,7 @@ NodeStatus::State NodeStatus::getStateByName(const char *name)
 {
     std::string temp = name;
     std::transform(temp.begin(), temp.end(), temp.begin(), ::toupper);
-    cEnum *e = cEnum::get("inet::NodeStatus");
+    cEnum *e = cEnum::get("inet::NodeStatus::State");
     int state = e->lookup(temp.c_str(), -1);
     if (state == -1)
         throw cRuntimeError("Invalid state name '%s'", name);
@@ -95,8 +96,10 @@ bool NodeStatus::handleOperationStage(LifecycleOperation *operation, IDoneCallba
 
 void NodeStatus::setState(State s)
 {
-    state = s;
-    emit(nodeStatusChangedSignal, this);
+    if (state != s) {
+        state = s;
+        emit(nodeStatusChangedSignal, this);
+    }
 }
 
 void NodeStatus::refreshDisplay() const

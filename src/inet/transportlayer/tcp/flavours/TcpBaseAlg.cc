@@ -608,7 +608,6 @@ void TcpBaseAlg::restartRexmitTimer()
 
 bool TcpBaseAlg::shouldMarkAck()
 {
-
     // rfc-3168, pages 19-20:
     // When TCP receives a CE data packet at the destination end-system, the
     // TCP data receiver sets the ECN-Echo flag in the TCP header of the

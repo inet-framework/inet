@@ -10,13 +10,12 @@ package inet.node.wireless;
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.IEthernetInterface;
+import inet.linklayer.contract.IEthernetLayer;
 import inet.linklayer.contract.IMacForwardingTable;
 import inet.linklayer.contract.IMacRelayUnit;
 import inet.linklayer.contract.IWirelessInterface;
-import inet.linklayer.ethernet.contract.IEthernetLayer;
 import inet.mobility.contract.IMobility;
 import inet.networklayer.common.InterfaceTable;
-
 
 //
 // A generic access point supporting multiple wireless radios, and

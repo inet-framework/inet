@@ -8,8 +8,8 @@ package inet.tests.ethernet;
 
 import inet.applications.ethernet.EtherTrafGen;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.ethernet.contract.IEthernetLayer;
-import inet.linklayer.ieee8022.IIeee8022Llc;
+import inet.linklayer.contract.IEthernetLayer;
+import inet.linklayer.contract.IIeee8022Llc;
 import inet.networklayer.common.InterfaceTable;
 
 

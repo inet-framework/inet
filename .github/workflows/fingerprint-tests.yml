@@ -23,6 +23,7 @@ jobs:
         with:
           repository: omnetpp/omnetpp
           path: omnetpp
+          ref: omnetpp-6.x
       - uses: actions/checkout@v4
         with:
           path: inet

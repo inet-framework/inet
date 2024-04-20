@@ -8,7 +8,7 @@
 #include "inet/visualizer/canvas/configurator/FailureProtectionConfigurationCanvasVisualizer.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/configurator/FailureProtectionConfigurator.h"
+#include "inet/linklayer/configurator/common/FailureProtectionConfigurator.h"
 
 namespace inet {
 

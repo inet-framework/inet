@@ -36,6 +36,7 @@ void InterfaceTableCanvasVisualizer::initialize(int stage)
         return;
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
+        anchor = par("anchor");
         networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
 }
@@ -85,7 +86,7 @@ void InterfaceTableCanvasVisualizer::addInterfaceVisualization(const InterfaceVi
         if (gate != nullptr && gate->getChannel()) {
             cDisplayString& displayString = gate->getDisplayString();
             displayString.setTagArg("t", 0, getVisualizationText(getNetworkInterface(interfaceVisualization)).c_str());
-            displayString.setTagArg("t", 1, "l");
+            displayString.setTagArg("t", 1, anchor);
         }
     }
     else
@@ -114,7 +115,7 @@ void InterfaceTableCanvasVisualizer::refreshInterfaceVisualization(const Interfa
         if (gate != nullptr && gate->getChannel()) {
             cDisplayString& displayString = gate->getDisplayString();
             displayString.setTagArg("t", 0, getVisualizationText(networkInterface).c_str());
-            displayString.setTagArg("t", 1, "l");
+            displayString.setTagArg("t", 1, anchor);
         }
     }
     else {

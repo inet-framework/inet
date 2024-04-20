@@ -3,8 +3,7 @@ package inet.showcases.wireless.ieee802154;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.SensorNode;
 import inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandScalarRadioMedium;
-import inet.visualizer.common.IntegratedMultiVisualizer;
-
+import inet.visualizer.canvas.integrated.IntegratedMultiCanvasVisualizer;
 
 network Ieee802154Showcase
 {
@@ -58,7 +57,7 @@ network Ieee802154Showcase
         radioMedium: Ieee802154NarrowbandScalarRadioMedium {
             @display("p=18,2.25");
         }
-        visualizer: IntegratedMultiVisualizer {
+        visualizer: IntegratedMultiCanvasVisualizer {
             @display("p=18,3.75");
         }
 }

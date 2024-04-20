@@ -8,7 +8,7 @@
 #ifndef __INET_APSKDEMODULATOR_H
 #define __INET_APSKDEMODULATOR_H
 
-#include "inet/physicallayer/wireless/apsk/bitlevel/ApskSymbol.h"
+#include "inet/physicallayer/wireless/common/modulation/ApskSymbol.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/IDemodulator.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalBitModel.h"

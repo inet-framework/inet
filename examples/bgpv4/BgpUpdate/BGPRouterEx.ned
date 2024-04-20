@@ -10,7 +10,7 @@ import inet.common.MessageDispatcher;
 import inet.common.misc.MessageChecker;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IPppInterface;
-import inet.linklayer.ethernet.contract.IEthernetLayer;
+import inet.linklayer.contract.IEthernetLayer;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.Ipv4NetworkLayer;
 import inet.routing.bgpv4.Bgp;

@@ -129,7 +129,7 @@ void FlowMeasurementRecorder::endMeasurements(Packet *packet)
             packetEventFile.writeInt("offset", b(o).get());
             packetEventFile.writeInt("length", b(l).get());
             packetEventFile.openArray("events");
-            for (int i = 0; i < packetEventTag->getPacketEventsArraySize(); i++) {
+            for (size_t i = 0; i < packetEventTag->getPacketEventsArraySize(); i++) {
                 auto packetEvent = packetEventTag->getPacketEvents(i);
                 auto kind = packetEvent->getKind();
                 auto kindName = cEnum::get("inet::PacketEventKind")->getStringFor(kind);

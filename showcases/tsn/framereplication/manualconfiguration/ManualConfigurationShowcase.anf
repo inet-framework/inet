@@ -5,7 +5,7 @@
         <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart createdWith="" icon="icons/full/obj/barchart.png" id="511307131" name="Number of packets sent and received" resultTypes="" template="barchart_native" type="BAR">
+        <chart icon="icons/full/obj/barchart.png" id="1960698929" name="Number of packets sent and received" template="barchart_native" type="BAR">
             <script><![CDATA[from omnetpp.scave import results, chart, utils
 
 # get chart properties
@@ -575,7 +575,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_format" value="$title"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="533216182" name="Number of packets received / number of packets sent" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1835076605" name="Number of packets received / number of packets sent" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import numpy as np
@@ -1224,7 +1224,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value=""/>
+            <property name="xaxis_max" value="0.1"/>
             <property name="image_export_width" value="9"/>
             <property name="legend_prefer_module_display_paths" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
@@ -1233,7 +1233,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="$title"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="2109867572" name="Application traffic" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1591618381" name="Application traffic" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -1803,7 +1803,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1125981132" name="s1 throughput" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="721191368" name="s1 throughput" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -2373,7 +2373,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1016894730" name="s2a and s2b throughput" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="2024430172" name="s2a and s2b throughput" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -2943,7 +2943,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="382693145" name="s3a and s3b throughput" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="129471626" name="s3a and s3b throughput" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -3513,7 +3513,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/barchart.png" id="3131470" name="Number of outgoing packets" resultTypes="" template="barchart_native" type="BAR">
+        <chart icon="icons/full/obj/barchart.png" id="629271612" name="Number of outgoing packets" template="barchart_native" type="BAR">
             <script><![CDATA[from omnetpp.scave import results, chart, utils
 
 # get chart properties

@@ -63,14 +63,13 @@ network SimpleTest
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
+                addStaticRoutes = false;
                 config = xml("<config>"+
                             "<interface among='H1 R1' address='192.168.1.x' netmask='255.255.255.0' />"+
                             "<interface among='H2 R2' address='192.168.2.x' netmask='255.255.255.0' />"+
                             "<interface among='R1 R2' address='192.168.60.x' netmask='255.255.255.0' />"+
                             "<route hosts='H1 H2' destination='*' netmask='0.0.0.0' interface='eth0' />"+
                             "</config>");
-                addStaticRoutes = false;
-                addDefaultRoutes = false;
                 @display("p=100,100;is=s");
         }
         configurator6: Ipv6FlatNetworkConfigurator {

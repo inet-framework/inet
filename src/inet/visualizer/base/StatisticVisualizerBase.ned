@@ -30,7 +30,7 @@ simple StatisticVisualizerBase extends VisualizerBase
     parameters:
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // the network node visualizer module, refers to a sibling submodule by default
 
-        bool displayStatistics = default(true);
+        bool displayStatistics = default(false);
 
         string signalName = default(""); // signal name to subscribe, no signal name by default
         string statisticName = default(signalName); // statistic name to get the value, signal name by default

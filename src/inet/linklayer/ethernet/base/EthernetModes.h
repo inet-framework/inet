@@ -23,14 +23,13 @@ class INET_API EthernetModes
   public:
     struct EthernetMode {
         double bitrate;
-        double halfBitTime; // transmission time of a half bit
         // for half-duplex operation:
         short int maxFrameCountInBurst;
         B maxBytesInBurst; // including IFG and preamble, etc.
         B halfDuplexFrameMinBytes; // minimal frame length in half-duplex mode; -1 means half duplex is not supported
         B frameInBurstMinBytes; // minimal frame length in burst mode, after first frame
-        double slotTime; // slot time
-        double maxPropagationDelay; // used for detecting longer cables than allowed
+        uint16_t slotBitLength; // slot time specified in bitcount
+        uint16_t csmaMaxPropagationDelayInBits; // used for detecting longer cables than allowed, maxPropagationDelay [s] = csmaMaxPropagationDelayInBits [b] / bitrate [bps]
     };
 
   protected:
@@ -45,7 +44,7 @@ class INET_API EthernetModes
     static const EthernetMode nullEthernetMode;
 
   public:
-    static const EthernetModes::EthernetMode& getEthernetMode(double txRate);
+    static EthernetModes::EthernetMode getEthernetMode(double txRate, bool allowNonstandardBitrate = false);
 };
 
 } // namespace inet

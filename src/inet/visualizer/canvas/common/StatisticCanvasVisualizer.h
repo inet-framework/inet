@@ -27,6 +27,7 @@ class INET_API StatisticCanvasVisualizer : public StatisticVisualizerBase
 
       public:
         StatisticCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, cFigure *figure, int moduleId, simsignal_t signal, const char *unit);
+        virtual ~StatisticCanvasVisualization();
     };
 
   protected:

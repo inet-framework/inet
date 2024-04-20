@@ -402,8 +402,6 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 simple Ipv4NetworkConfigurator extends L3NetworkConfiguratorBase
 {
     parameters:
-        @class(Ipv4NetworkConfigurator);
-        @display("i=block/cogwheel");
         xml config = default(xml("<config><interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/></config>")); // XML configuration parameters for IP address assignment and adding manual routes
         bool assignAddresses = default(true); // assign IP addresses to all interfaces in the network
         bool assignUniqueAddresses = default(true); // avoid using the same address and raise an error if not possible
@@ -419,5 +417,8 @@ simple Ipv4NetworkConfigurator extends L3NetworkConfiguratorBase
         bool dumpAddresses = default(false); // print assigned IP addresses for all interfaces to the module output
         bool dumpRoutes = default(false);    // print configured and optimized routing tables for all nodes to the module output
         string dumpConfig = default("");     // write configuration into the given config file that can be fed back to speed up subsequent runs (network configurations)
+        @class(Ipv4NetworkConfigurator);
+        @display("i=block/cogwheel");
+        @signal[networkConfigurationChanged];
 }
 

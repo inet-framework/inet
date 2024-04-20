@@ -9,7 +9,7 @@ import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 network InterfaceTableVisualizationEnablingVisualizationShowcase
 {
@@ -21,7 +21,7 @@ network InterfaceTableVisualizationEnablingVisualizationShowcase
         hostB: StandardHost {
             @display("p=284,203");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=328,38");
         }
         configurator: Ipv4NetworkConfigurator {
@@ -59,7 +59,7 @@ network InterfaceTableVisualizationAdvancedFeaturesShowcase
         configurator: Ipv4NetworkConfigurator {
             @display("p=631,50");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=631,122");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
