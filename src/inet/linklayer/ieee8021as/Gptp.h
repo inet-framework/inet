@@ -85,7 +85,9 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     // Statistics information: // TODO remove, and replace with emit() calls
     static simsignal_t localTimeSignal;
     static simsignal_t timeDifferenceSignal;
-    static simsignal_t rateRatioSignal;
+    static simsignal_t gmRateRatioSignal;
+    static simsignal_t receivedRateRatioSignal;
+    static simsignal_t neighborRateRatioSignal;
     static simsignal_t peerDelaySignal;
 
   public:

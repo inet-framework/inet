@@ -25,7 +25,9 @@ Define_Module(Gptp);
 
 simsignal_t Gptp::localTimeSignal = cComponent::registerSignal("localTime");
 simsignal_t Gptp::timeDifferenceSignal = cComponent::registerSignal("timeDifference");
-simsignal_t Gptp::rateRatioSignal = cComponent::registerSignal("rateRatio");
+simsignal_t Gptp::gmRateRatioSignal = cComponent::registerSignal("gmRateRatio");
+simsignal_t Gptp::receivedRateRatioSignal = cComponent::registerSignal("receivedRateRatio");
+simsignal_t Gptp::neighborRateRatioSignal = cComponent::registerSignal("neighborRateRatio");
 simsignal_t Gptp::peerDelaySignal = cComponent::registerSignal("peerDelay");
 
 // MAC address:
@@ -474,7 +476,8 @@ void Gptp::synchronize()
     syncIngressTimestampLast = syncIngressTimestamp;
     preciseOriginTimestampLast = preciseOriginTimestamp;
 
-    emit(rateRatioSignal, gmRateRatio);
+    emit(receivedRateRatioSignal, receivedRateRatio);
+    emit(gmRateRatioSignal, gmRateRatio);
     emit(localTimeSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync));
     emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now);
 }
@@ -564,6 +567,7 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
     EV_INFO << "pDelayRespIngressTimestamp  - " << pDelayRespIngressTimestamp << endl;
     EV_INFO << "PEER DELAY                  - " << meanLinkDelay << endl;
 
+    emit(neighborRateRatioSignal, neighborRateRatio);
     emit(peerDelaySignal, CLOCKTIME_AS_SIMTIME(meanLinkDelay));
 }
 
