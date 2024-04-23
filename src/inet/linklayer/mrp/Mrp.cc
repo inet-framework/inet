@@ -147,8 +147,8 @@ void Mrp::initialize(int stage) {
         initPortTable();
         primaryRingPortId = resolveInterfaceIndex(par("ringPort1"));
         secondaryRingPortId = resolveInterfaceIndex(par("ringPort2"));
-        initRingPort(primaryRingPortId, MrpInterfaceData::PRIMARY);
-        initRingPort(secondaryRingPortId, MrpInterfaceData::SECONDARY);
+        initRingPort(primaryRingPortId, MrpInterfaceData::PRIMARY, enableLinkCheckOnRing);
+        initRingPort(secondaryRingPortId, MrpInterfaceData::SECONDARY, enableLinkCheckOnRing);
         localBridgeAddress = relay->getBridgeAddress();
         EV_DETAIL << "Initialize MRP link layer" << EV_ENDL;
         linkUpHysteresisTimer = new cMessage("linkUpHysteresisTimer");
@@ -176,11 +176,11 @@ void Mrp::initInterfacedata(int interfaceId) {
     ifd->setContinuityCheckInterval(trunc_msec(ccmInterval));
 }
 
-void Mrp::initRingPort(int interfaceId, MrpInterfaceData::PortRole role) {
+void Mrp::initRingPort(int interfaceId, MrpInterfaceData::PortRole role, bool enableLinkCheck) {
     setPortRole(interfaceId, role);
     setPortState(interfaceId, MrpInterfaceData::BLOCKED);
     auto ifd = getPortInterfaceDataForUpdate(interfaceId);
-    ifd->setContinuityCheck(enableLinkCheckOnRing);
+    ifd->setContinuityCheck(enableLinkCheck);
     ifd->setContinuityCheckInterval(trunc_msec(ccmInterval));
 }
 

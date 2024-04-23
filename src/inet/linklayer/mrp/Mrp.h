@@ -184,7 +184,7 @@ protected:
     virtual void mrmInit();
     virtual void mraInit();
     virtual void initPortTable();
-    virtual void initRingPort(int interfaceId, MrpInterfaceData::PortRole role);
+    virtual void initRingPort(int interfaceId, MrpInterfaceData::PortRole role, bool enableLinkCheck);
     virtual void startContinuityCheck();
     virtual void initInterfacedata(int interfaceId);
     virtual void toggleRingPorts();

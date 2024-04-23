@@ -56,7 +56,7 @@ protected:
     uint16_t lastInTopologyId = 0;
     FrameSentDatabase inTestFrameSent;
     opp_component_ptr<NetworkInterface> interconnectionInterface = nullptr;
-    int interconnectionPort;
+    int interconnectionPortId;
 
     simtime_t inLinkChangeInterval;
     simtime_t inTopologyChangeInterval;
@@ -93,7 +93,6 @@ protected:
     virtual void stop() override;
     virtual void initialize(int stage) override;
     InterconnectionRole parseInterconnectionRole(const char *role) const;
-    void initInterconnectionPort();
     void micInit();
     void mimInit();
     virtual void handleInTestTimer();
@@ -126,7 +125,6 @@ public:
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
-    virtual void setInterconnectionInterface(int InterfaceId);
     virtual void setTimingProfile(int maxRecoveryTime) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }

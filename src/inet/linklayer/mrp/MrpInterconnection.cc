@@ -37,7 +37,6 @@ void MrpInterconnection::initialize(int stage) {
     if (stage == INITSTAGE_LOCAL) {
         inRole = parseInterconnectionRole(par("interconnectionRole"));
         interconnectionID = par("interconnectionID");
-        interconnectionPort = par("interconnectionPort");
         std::string interconnectionCheckMode = par("interconnectionCheckMode");
         linkCheckEnabled = interconnectionCheckMode.find("LC") != std::string::npos;
         ringCheckEnabled = interconnectionCheckMode.find("RC") != std::string::npos;
@@ -53,23 +52,10 @@ void MrpInterconnection::initialize(int stage) {
     }
     if (stage == INITSTAGE_LINK_LAYER) {
         EV_DETAIL << "Initialize Interconnection Stage link layer" << EV_ENDL;
-        setInterconnectionInterface(interconnectionPort);
-        initInterconnectionPort();
-    }
-}
 
-void MrpInterconnection::initInterconnectionPort() {
-    if (interconnectionInterface == nullptr)
-        setInterconnectionInterface(interconnectionPort);
-    auto ifd = getPortInterfaceDataForUpdate(interconnectionInterface->getInterfaceId());
-    ifd->setRole(MrpInterfaceData::INTERCONNECTION);
-    ifd->setState(MrpInterfaceData::BLOCKED);
-    ifd->setContinuityCheck(linkCheckEnabled);
-    EV_DETAIL << "Initialize InterconnectionPort:"
-              << EV_FIELD(ifd->getContinuityCheck())
-              << EV_FIELD(ifd->getRole())
-              << EV_FIELD(ifd->getState())
-              << EV_ENDL;
+        interconnectionPortId = resolveInterfaceIndex(par("interconnectionPort"));
+        initRingPort(interconnectionPortId, MrpInterfaceData::INTERCONNECTION, linkCheckEnabled);
+    }
 }
 
 MrpInterconnection::InterconnectionRole MrpInterconnection::parseInterconnectionRole(const char *role) const
@@ -112,8 +98,8 @@ void MrpInterconnection::mimInit() {
     mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPortId, MacAddress(MC_INCONTROL), vlanID);
     mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPortId, MacAddress(MC_INCONTROL), vlanID);
     //MIM may not forward mrp frames received on Interconnection Port to Ring, adding Filter
-    mrpMacForwardingTable->addMrpIngressFilterInterface(interconnectionPort, MacAddress(MC_INCONTROL), vlanID);
-    mrpMacForwardingTable->addMrpIngressFilterInterface(interconnectionPort, MacAddress(MC_INTEST), vlanID);
+    mrpMacForwardingTable->addMrpIngressFilterInterface(interconnectionPortId, MacAddress(MC_INCONTROL), vlanID);
+    mrpMacForwardingTable->addMrpIngressFilterInterface(interconnectionPortId, MacAddress(MC_INTEST), vlanID);
 
     relay->registerAddress(MacAddress(MC_INCONTROL));
     if (linkCheckEnabled) {
@@ -129,14 +115,14 @@ void MrpInterconnection::mimInit() {
     inNodeState = AC_STAT1;
     EV_DETAIL << "Interconnection Manager is started, Switching InState from POWER_ON to AC_STAT1"
                      << EV_FIELD(inNodeState) << EV_ENDL;
-    mauTypeChangeInd(interconnectionPort, getPortNetworkInterface(interconnectionPort)->getState());
+    mauTypeChangeInd(interconnectionPortId, getPortNetworkInterface(interconnectionPortId)->getState());
 }
 
 void MrpInterconnection::micInit() {
     if (ringCheckEnabled) {
         mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPortId, MacAddress(MC_INTEST), vlanID);
         mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPortId, MacAddress(MC_INTEST), vlanID);
-        mrpMacForwardingTable->addMrpForwardingInterface(interconnectionPort, MacAddress(MC_INTEST), vlanID);
+        mrpMacForwardingTable->addMrpForwardingInterface(interconnectionPortId, MacAddress(MC_INTEST), vlanID);
         /*
          *Ingress filter can now be set by MRP, therefore not need for forwarding on mrp level
          //frames received on Interconnection port are not forwarded on relay level (ingress) filter
@@ -154,17 +140,7 @@ void MrpInterconnection::micInit() {
     relay->registerAddress(MacAddress(MC_INCONTROL));
     inNodeState = AC_STAT1;
     EV_DETAIL << "Interconnection Client is started, Switching InState from POWER_ON to AC_STAT1" << EV_FIELD(inNodeState) << EV_ENDL;
-    mauTypeChangeInd(interconnectionPort, getPortNetworkInterface(interconnectionPort)->getState());
-}
-
-void MrpInterconnection::setInterconnectionInterface(int interfaceIndex) {
-    interconnectionInterface = interfaceTable->getInterface(interfaceIndex);
-    if (interconnectionInterface->isLoopback()) {
-        interconnectionInterface = nullptr;
-        EV_DEBUG << "Chosen Interface is Loopback-Interface" << EV_ENDL;
-    } else {
-        interconnectionPort = interconnectionInterface->getInterfaceId();
-    }
+    mauTypeChangeInd(interconnectionPortId, getPortNetworkInterface(interconnectionPortId)->getState());
 }
 
 void MrpInterconnection::setTimingProfile(int maxRecoveryTime) {
@@ -282,7 +258,7 @@ void MrpInterconnection::handleInTestTimer() {
     case CHK_IC:
         interconnTestReq(inTestDefaultInterval);
         if (inTestRetransmissionCount >= inTestMaxRetransmissionCount) {
-            setPortState(interconnectionPort, MrpInterfaceData::FORWARDING);
+            setPortState(interconnectionPortId, MrpInterfaceData::FORWARDING);
             inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
             inTestRetransmissionCount = 0;
             interconnTopologyChangeReq(inTopologyChangeInterval);
@@ -329,7 +305,7 @@ void MrpInterconnection::handleInLinkUpTimer() {
     case PT:
         if (inLinkChangeCount == 0) {
             inLinkChangeCount = inLinkMaxChange;
-            setPortState(interconnectionPort, MrpInterfaceData::FORWARDING);
+            setPortState(interconnectionPortId, MrpInterfaceData::FORWARDING);
             inNodeState = IP_IDLE;
         } else {
             scheduleAfter(inLinkChangeInterval, inLinkUpTimer);
@@ -372,7 +348,7 @@ void MrpInterconnection::handleInLinkDownTimer() {
 }
 
 void MrpInterconnection::mauTypeChangeInd(int ringPort, LinkState linkState) {
-    if (ringPort == interconnectionPort) {
+    if (ringPort == interconnectionPortId) {
         switch (inNodeState) {
         case AC_STAT1:
             if (linkState == LinkState::UP) {
@@ -494,24 +470,24 @@ void MrpInterconnection::interconnTopologyChangeInd(MacAddress sourceAddress, si
             case PT:
                 inLinkChangeCount = inLinkMaxChange;
                 cancelEvent(inLinkUpTimer);
-                setPortState(interconnectionPort, MrpInterfaceData::FORWARDING);
+                setPortState(interconnectionPortId, MrpInterfaceData::FORWARDING);
                 inNodeState = IP_IDLE;
                 EV_DETAIL << "Switching InState from PT to IP_IDLE"
                                  << EV_FIELD(inNodeState) << EV_ENDL;
-                if (ringPort != interconnectionPort) {
+                if (ringPort != interconnectionPortId) {
                     if (linkCheckEnabled)
-                        inTransferReq(INTOPOLOGYCHANGE, interconnectionPort, MC_INTRANSFER, packet);
+                        inTransferReq(INTOPOLOGYCHANGE, interconnectionPortId, MC_INTRANSFER, packet);
                     else
-                        inTransferReq(INTOPOLOGYCHANGE, interconnectionPort, MC_INCONTROL, packet);
+                        inTransferReq(INTOPOLOGYCHANGE, interconnectionPortId, MC_INCONTROL, packet);
                 } else
                     mrpForwardReq(INTOPOLOGYCHANGE, ringPort, MC_INCONTROL, packet);
                 break;
             case IP_IDLE:
-                if (ringPort != interconnectionPort) {
+                if (ringPort != interconnectionPortId) {
                     if (linkCheckEnabled)
-                        inTransferReq(INTOPOLOGYCHANGE, interconnectionPort, MC_INTRANSFER, packet);
+                        inTransferReq(INTOPOLOGYCHANGE, interconnectionPortId, MC_INTRANSFER, packet);
                     else
-                        inTransferReq(INTOPOLOGYCHANGE, interconnectionPort, MC_INCONTROL, packet);
+                        inTransferReq(INTOPOLOGYCHANGE, interconnectionPortId, MC_INCONTROL, packet);
                 } else
                     mrpForwardReq(INTOPOLOGYCHANGE, ringPort, MC_INCONTROL, packet);
                 break;
@@ -540,7 +516,7 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, LinkState linkSta
         case CHK_IO:
             if (linkCheckEnabled) {
                 if (linkState == LinkState::UP) {
-                    setPortState(interconnectionPort, MrpInterfaceData::BLOCKED);
+                    setPortState(interconnectionPortId, MrpInterfaceData::BLOCKED);
                     cancelEvent(inLinkStatusPollTimer);
                     interconnTopologyChangeReq(inTopologyChangeInterval);
                     EV_INFO << "Interconnection Ring closed" << EV_ENDL;
@@ -550,7 +526,7 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, LinkState linkSta
                     inTopologyState = CLOSED;
                     emit(interconnectionStateChangedSignal, simTime().inUnit(SIMTIME_US));
                 } else if (linkState == LinkState::DOWN) {
-                    setPortState(interconnectionPort, MrpInterfaceData::FORWARDING);
+                    setPortState(interconnectionPortId, MrpInterfaceData::FORWARDING);
                 }
             }
             if (ringCheckEnabled) {
@@ -562,7 +538,7 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, LinkState linkSta
             break;
         case CHK_IC:
             if (linkState == LinkState::DOWN) {
-                setPortState(interconnectionPort, MrpInterfaceData::FORWARDING);
+                setPortState(interconnectionPortId, MrpInterfaceData::FORWARDING);
                 interconnTopologyChangeReq(inTopologyChangeInterval);
                 if (linkCheckEnabled) {
                     cancelEvent(inLinkStatusPollTimer);
@@ -582,20 +558,20 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, LinkState linkSta
             break;
         case PT:
         case IP_IDLE:
-            if (ringPort == interconnectionPort && linkCheckEnabled) {
+            if (ringPort == interconnectionPortId && linkCheckEnabled) {
                 if (linkState == LinkState::UP) {
                     mrpForwardReq(INLINKUP, ringPort, MC_INCONTROL, packet);
                 } else if (linkState == LinkState::DOWN) {
                     mrpForwardReq(INLINKDOWN, ringPort, MC_INCONTROL, packet);
                 } else
                     delete packet;
-            } else if (ringPort != interconnectionPort) {
+            } else if (ringPort != interconnectionPortId) {
                 if (ringCheckEnabled) {
-                    interconnForwardReq(interconnectionPort, packet);
+                    interconnForwardReq(interconnectionPortId, packet);
                 } else if (linkState == LinkState::UP) {
-                    inTransferReq(INLINKUP, interconnectionPort, MC_INTRANSFER, packet);
+                    inTransferReq(INLINKUP, interconnectionPortId, MC_INTRANSFER, packet);
                 } else if (linkState == LinkState::DOWN) {
-                    inTransferReq(INLINKDOWN, interconnectionPort, MC_INTRANSFER, packet);
+                    inTransferReq(INLINKDOWN, interconnectionPortId, MC_INTRANSFER, packet);
                 } else
                     delete packet;
             } else
@@ -637,11 +613,11 @@ void MrpInterconnection::interconnLinkStatusPollInd(uint16_t inID, int ringPort,
             case PT:
             case IP_IDLE:
                 interconnLinkChangeReq(LinkState::UP, 0);
-                if (ringPort != interconnectionPort) {
+                if (ringPort != interconnectionPortId) {
                     if (linkCheckEnabled)
-                        inTransferReq(INLINKSTATUSPOLL, interconnectionPort, MC_INTRANSFER, packet);
+                        inTransferReq(INLINKSTATUSPOLL, interconnectionPortId, MC_INTRANSFER, packet);
                     else
-                        inTransferReq(INLINKSTATUSPOLL, interconnectionPort, MC_INCONTROL, packet);
+                        inTransferReq(INLINKSTATUSPOLL, interconnectionPortId, MC_INCONTROL, packet);
                 } else
                     mrpForwardReq(INLINKSTATUSPOLL, ringPort, MC_INCONTROL, packet);
                 break;
@@ -686,7 +662,7 @@ void MrpInterconnection::interconnTestInd(MacAddress sourceAddress, int ringPort
         case AC_STAT1:
             if (inRole == INTERCONNECTION_MANAGER
                     && sourceAddress == localBridgeAddress) {
-                setPortState(interconnectionPort, MrpInterfaceData::BLOCKED);
+                setPortState(interconnectionPortId, MrpInterfaceData::BLOCKED);
                 inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
                 inTestRetransmissionCount = 0;
                 interconnTestReq(inTestDefaultInterval);
@@ -698,7 +674,7 @@ void MrpInterconnection::interconnTestInd(MacAddress sourceAddress, int ringPort
             break;
         case CHK_IO:
             if (sourceAddress == localBridgeAddress) {
-                setPortState(interconnectionPort, MrpInterfaceData::BLOCKED);
+                setPortState(interconnectionPortId, MrpInterfaceData::BLOCKED);
                 interconnTopologyChangeReq(inTopologyChangeInterval);
                 inTestMaxRetransmissionCount = inTestMonitoringCount - 1;
                 inTestRetransmissionCount = 0;
@@ -790,8 +766,8 @@ void MrpInterconnection::setupInterconnTestReq() {
     packet1->insertAtBack(inTestTLV1);
     packet1->insertAtBack(commonTLV);
     packet1->insertAtBack(endTLV);
-    MacAddress sourceAddress1 = getPortNetworkInterface(interconnectionPort)->getMacAddress();
-    sendFrameReq(interconnectionPort, MacAddress(MC_INTEST), sourceAddress1, priority, MRP_LT, packet1);
+    MacAddress sourceAddress1 = getPortNetworkInterface(interconnectionPortId)->getMacAddress();
+    sendFrameReq(interconnectionPortId, MacAddress(MC_INTEST), sourceAddress1, priority, MRP_LT, packet1);
 
     auto packet2 = new Packet("InterconnTest");
     packet2->insertAtBack(version);
@@ -859,11 +835,11 @@ void MrpInterconnection::setupInterconnTopologyChangeReq(simtime_t time) {
     packet3->insertAtBack(inTopologyChangeTLV);
     packet3->insertAtBack(commonTLV);
     packet3->insertAtBack(endTLV);
-    MacAddress sourceAddress3 = getPortNetworkInterface(interconnectionPort)->getMacAddress();
+    MacAddress sourceAddress3 = getPortNetworkInterface(interconnectionPortId)->getMacAddress();
     if (linkCheckEnabled) {
-        sendFrameReq(interconnectionPort, MacAddress(MC_INTRANSFER), sourceAddress3, priority, MRP_LT, packet3);
+        sendFrameReq(interconnectionPortId, MacAddress(MC_INTRANSFER), sourceAddress3, priority, MRP_LT, packet3);
     } else {
-        sendFrameReq(interconnectionPort, MacAddress(MC_INCONTROL), sourceAddress3, priority, MRP_LT, packet3);
+        sendFrameReq(interconnectionPortId, MacAddress(MC_INCONTROL), sourceAddress3, priority, MRP_LT, packet3);
     }
     emit(inTopologyChangeSignal, simTime().inUnit(SIMTIME_US));
 }
@@ -934,11 +910,11 @@ void MrpInterconnection::interconnLinkChangeReq(LinkState linkState, simtime_t t
     packet3->insertAtBack(inLinkChangeTLV3);
     packet3->insertAtBack(commonTLV);
     packet3->insertAtBack(endTLV);
-    MacAddress sourceAddress3 = getPortNetworkInterface(interconnectionPort)->getMacAddress();
+    MacAddress sourceAddress3 = getPortNetworkInterface(interconnectionPortId)->getMacAddress();
     if (linkCheckEnabled) {
-        sendFrameReq(interconnectionPort, MacAddress(MC_INTRANSFER), sourceAddress3, priority, MRP_LT, packet3);
+        sendFrameReq(interconnectionPortId, MacAddress(MC_INTRANSFER), sourceAddress3, priority, MRP_LT, packet3);
     } else {
-        sendFrameReq(interconnectionPort, MacAddress(MC_INCONTROL), sourceAddress3, priority, MRP_LT, packet3);
+        sendFrameReq(interconnectionPortId, MacAddress(MC_INCONTROL), sourceAddress3, priority, MRP_LT, packet3);
     }
     emit(inLinkChangeSignal, simTime().inUnit(SIMTIME_US));
 }
@@ -982,8 +958,8 @@ void MrpInterconnection::setupInterconnLinkStatusPollReq() {
     packet1->insertAtBack(inLinkStatusPollTLV1);
     packet1->insertAtBack(commonTLV);
     packet1->insertAtBack(endTLV);
-    MacAddress sourceAddress1 = getPortNetworkInterface(interconnectionPort)->getMacAddress();
-    sendFrameReq(interconnectionPort, MacAddress(MC_INTRANSFER), sourceAddress1, priority, MRP_LT, packet1);
+    MacAddress sourceAddress1 = getPortNetworkInterface(interconnectionPortId)->getMacAddress();
+    sendFrameReq(interconnectionPortId, MacAddress(MC_INTRANSFER), sourceAddress1, priority, MRP_LT, packet1);
 
     auto packet2 = new Packet("InterconnLinkStatusPoll");
     packet2->insertAtBack(version);
@@ -1009,7 +985,7 @@ void MrpInterconnection::inTransferReq(TlvHeaderType headerType, int ringPort, F
     packet->trim();
     packet->clearTags();
     EV_INFO << "Received Frame from Ring. forwarding on InterConnection" << EV_FIELD(packet) << EV_ENDL;
-    sendFrameReq(interconnectionPort, MacAddress(frameType), sourceAddress, priority, MRP_LT, packet);
+    sendFrameReq(interconnectionPortId, MacAddress(frameType), sourceAddress, priority, MRP_LT, packet);
 }
 
 void MrpInterconnection::mrpForwardReq(TlvHeaderType headerType, int ringport, FrameType frameType, Packet *packet) {
