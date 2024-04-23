@@ -94,3 +94,4 @@ xxx
 /.computed/
 *.DS_Store
 .idea/
+.cproject
