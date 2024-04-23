@@ -451,6 +451,8 @@ void Gptp::synchronize()
     EV_INFO << "CORRECTION FIELD           - " << correctionField << endl;
     EV_INFO << "PROPAGATION DELAY          - " << meanLinkDelay << endl;
     EV_INFO << "TIME DIFFERENCE TO SIMTIME - " << CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now << endl;
+    EV_INFO << "NEIGHBOR RATE RATIO        - " << neighborRateRatio << endl;
+    EV_INFO << "RECIEVED RATE RATIO        - " << receivedRateRatio << endl;
     EV_INFO << "GM RATE RATIO              - " << gmRateRatio << endl;
 
     // TODO: What does this do, what does it mean?
