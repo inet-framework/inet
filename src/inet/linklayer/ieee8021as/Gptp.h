@@ -44,7 +44,9 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     double neighborRateRatio = 1.0; // the rate ratio to the neighbor
 
     uint16_t sequenceId = 0;
-
+    int timeInterval = 10; // This should be dynamically set as needed
+    std::vector<clocktime_t> pDelayRespIngressTimestampIntervals;
+    std::vector<clocktime_t> pDelayRespEgressTimestampIntervals;
     // == Propagation Delay Measurement Procedure ==
     // Timestamps corresponding to the PDelayRequest and PDelayResponse mechanism
     clocktime_t pDelayReqEgressTimestamp = -1;  // egress time of pdelay_req at initiator (this node)

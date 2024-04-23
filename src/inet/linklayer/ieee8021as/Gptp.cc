@@ -59,6 +59,8 @@ void Gptp::initialize(int stage)
         pDelayReqProcessingTime = par("pDelayReqProcessingTime");
         std::hash<std::string> strHash;
         clockIdentity = strHash(getFullPath());
+        pDelayRespEgressTimestampIntervals.resize(timeInterval, -1);
+        pDelayRespIngressTimestampIntervals.resize(timeInterval, -1);
     }
     if (stage == INITSTAGE_LINK_LAYER) {
         meanLinkDelay = 0;
@@ -508,10 +510,17 @@ void Gptp::processPdelayResp(Packet *packet, const GptpPdelayResp *gptp)
     }
 
     rcvdPdelayResp = true;
-    if (pDelayRespIngressTimestampLast == -1) {
-        pDelayRespIngressTimestampLast = pDelayRespIngressTimestamp; // t4 last
+
+    pDelayRespIngressTimestampIntervals.pop_back();
+    pDelayRespIngressTimestampIntervals.insert(pDelayRespIngressTimestampIntervals.begin(), pDelayRespIngressTimestamp);
+    EV_INFO << "***** Ingress Time Stamp Intervals Vector *****" << endl;
+    for (auto val: pDelayRespIngressTimestampIntervals){
+        EV_INFO << val << endl;
     }
-    pDelayRespIngressTimestampLast = pDelayRespIngressTimestamp; //t4 last
+//    if (pDelayRespIngressTimestampLast == -1) {
+//        pDelayRespIngressTimestampLast = pDelayRespIngressTimestamp; // t4 last
+//    }
+
     pDelayRespIngressTimestamp = packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime(); //t4 now
     pDelayReqIngressTimestamp = gptp->getRequestReceiptTimestamp(); //t2
 }
@@ -534,9 +543,16 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
         return;
     }
 
-    if (pDelayRespEgressTimestampLast == -1) {
-        pDelayRespEgressTimestampLast = pDelayRespEgressTimestamp; //t3 last
+    pDelayRespEgressTimestampIntervals.pop_back();
+    pDelayRespEgressTimestampIntervals.insert(pDelayRespEgressTimestampIntervals.begin(), pDelayRespEgressTimestamp);
+    EV_INFO << "***** Egress Time Stamp Intervals Vector *****" << endl;
+    for (auto val: pDelayRespEgressTimestampIntervals){
+        EV_INFO << val << endl;
     }
+//    if (pDelayRespEgressTimestampLast == -1) {
+//        pDelayRespEgressTimestampLast = pDelayRespEgressTimestamp; //t3 last
+//    }
+
     pDelayRespEgressTimestamp = gptp->getResponseOriginTimestamp(); //t3 now
 
     // Note, that the standard defines the usage of the correction field
@@ -544,11 +560,24 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
     // However, these contain fractional nanoseconds, which we do not
     // use in INET.
     // See 11.2.19.3.3 computePdelayRateRatio() in IEEE 802.1AS-2020
+    for (int last = timeInterval - 1; last >= 0; last--){
+        if(pDelayRespIngressTimestampIntervals[last] != -1 && pDelayRespEgressTimestampIntervals[last] != -1){
+            pDelayRespIngressTimestampLast = pDelayRespIngressTimestampIntervals[last];
+            pDelayRespEgressTimestampLast = pDelayRespEgressTimestampIntervals[last];
+            break;
+        }
+        else{
+            pDelayRespIngressTimestampLast = -1;
+            pDelayRespEgressTimestampLast = -1;
+        }
+    }
+
     if (pDelayRespEgressTimestampLast == -1 || pDelayRespIngressTimestampLast == -1)
         neighborRateRatio = 1.0;
-    else
+    else {
         neighborRateRatio = (pDelayRespEgressTimestamp - pDelayRespEgressTimestampLast) /
                             (pDelayRespIngressTimestamp - pDelayRespIngressTimestampLast);
+    }
     // TODO: Check why nrr is always 1
 
 
