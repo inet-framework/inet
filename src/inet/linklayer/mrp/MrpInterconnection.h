@@ -20,7 +20,7 @@ namespace inet {
  * Adds interconnection support to Mrp, i.e. roles MIC and MIM.
  */
 class INET_API MrpInterconnection: public Mrp {
-protected:
+public:
     enum InterconnectionNodeState : uint16_t {
         POWER_ON,
         AC_STAT1, //waiting for the first Link Up at one of its ring ports, starting test monitoring of the ring
@@ -45,13 +45,14 @@ protected:
         CLOSED = 0x0001,
     };
 
+protected:
     uint16_t interconnectionID;
     bool linkCheckEnabled = true;  // LC_MODE
     bool ringCheckEnabled = false;  // RC_MODE
 
-    InterconnectionRole inRole = INTERCONNECTION_CLIENT;
-    InterconnectionNodeState inNodeState = POWER_ON;
-    InterconnectionTopologyState inTopologyState = OPEN;
+    Traced<InterconnectionRole> inRole = INTERCONNECTION_CLIENT;
+    Traced<InterconnectionNodeState> inNodeState = POWER_ON;
+    Traced<InterconnectionTopologyState> inTopologyState = OPEN;
     uint16_t lastPollId = 0;
     uint16_t lastInTopologyId = 0;
     FrameSentDatabase inTestFrameSent;
@@ -79,14 +80,11 @@ protected:
     cMessage *inLinkTestTimer = nullptr;
     cMessage *inTopologyChangeTimer = nullptr;
 
-    simsignal_t inLinkChangeSignal;
-    simsignal_t inTopologyChangeSignal;
-    simsignal_t inStatusPollSignal;
-    simsignal_t inTestSignal;
-    simsignal_t receivedInChangeSignal;
-    simsignal_t receivedInTestSignal;
-    simsignal_t receivedInStatusPollSignal;
-    simsignal_t interconnectionStateChangedSignal;
+    simsignal_t inPortStateChangedSignal;  //TODO emit
+    simsignal_t inTopologyChangeAnnouncedSignal;
+    simsignal_t inStatusPollSentSignal;
+    simsignal_t inLinkChangeDetectedSignal;
+    simsignal_t inTestFrameLatencySignal;
 
 protected:
     virtual void start() override;

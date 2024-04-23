@@ -84,42 +84,21 @@ simple MrpInterconnection extends Mrp like IMediaRedundancy
         // `%R`: interconnection role, `%N`: interconnection node state, `%I`: interconnection state.
         displayStringTextFormat = default("role: %r, %R\nstate: %n, in: %N\nring: %g in: %I");
 
-        @display("i=block/network2");
-        @signal[inTopologyChange](type="long");
-        @signal[inLinkChange](type="long");
-        @signal[receivedInTest](type="simtime_t");
-        @signal[receivedInChange](type="unsigned long");
-        @signal[inStatusPoll](type="long");
-        @signal[receivedInStatusPoll](type="long");
-        @signal[inTest](type="simtime_t");
-        @signal[interconnectionStateChanged](type="long");
-        @signal[test](type="long");
-        @signal[topologyChange](type="unsigned long");
-        @signal[linkChange](type="double");
-        @signal[continuityCheck](type="long");
-        @signal[clearFDB](type="double");
-        @signal[receivedTest](type="unsigned long");
-        @signal[receivedChange](type="unsigned long");
-        @signal[receivedContinuityCheck](type="long");
-        @signal[ringStateChanged](type="unsigned long");
-        @signal[portStateChanged](type="unsigned long");
-        @statistic[testFrame](title="Testframes sent"; source="test"; record=count,vector; interpolationmode=none);
-        @statistic[linkChange](title="LinkChange in us"; source="linkChange"; record=count,vector; interpolationmode=none);
-        @statistic[topologyChange](title="TopologyChange in us"; source="topologyChange"; record=count,vector; interpolationmode=none);
-        @statistic[fdbcleared](title="FDB cleared in us"; source="clearFDB"; record=count,vector; interpolationmode=none);
-        @statistic[ringTime](title="T Ring in us"; source="receivedTest"; record=vector,stats,histogram; interpolationmode=none);
-        @statistic[timeToChange](title="Time till announced Change in ms"; source="receivedChange"; record=vector,stats,histogram; interpolationmode=none);
-        @statistic[sentContinuityCheck](title="Sent Continuity Checks"; source="continuityCheck"; record=count,vector; interpolationmode=none);
-        @statistic[receivedContinuityCheck](title="Received Continuity Checks"; source="receivedContinuityCheck"; record=count,vector; interpolationmode=none);
-        @statistic[portStateChanged](title="Time of Port State Change in us"; source="portStateChanged"; record=count,vector; interpolationmode=none);
-        @statistic[ringStateChanged](title="Time of Ring State Change in us"; source="ringStateChanged"; record=count,vector; interpolationmode=none);
-        @statistic[inTopologyChangeSent](title="InterconnectionTopologyChange sent"; source="inTopologyChange"; record=count,vector; interpolationmode=none);
-        @statistic[inLinkChange](title="InterconnectionLinkChange sent"; source="inLinkChange"; record=count,vector; interpolationmode=none);
-        @statistic[interconnectionRingTime](title="T InterconnectionRing in us"; source="receivedInTest"; record=count,vector; interpolationmode=none);
-        @statistic[timeToInterconnectionChange](title="Time till announced InterconnectionChange"; source="receivedInChange"; record=vector,stats,histogram; interpolationmode=none);
-        @statistic[inStatusPollSent](title="Interconnection Status Poll Sent in us"; source="inStatusPoll"; record=count,vector; interpolationmode=none);
-        @statistic[receivedInStatusPoll](title="Interconnection Status Poll received in us"; source="receivedInStatusPoll"; record=count,vector; interpolationmode=none);
-        @statistic[inTestFramesSent](title="Interconnection Test Frames Sent in us"; source="inTest"; record=count,vector; interpolationmode=none);
-        @statistic[interconnectionStateChanged](title="Time of Interconnection State Change"; source="interconnectionStateChanged"; record=count,vector; interpolationmode=none);
+        @signal[inRoleChanged](type="long");
+        @signal[inNodeStateChanged](type="unsigned long");
+        @signal[inTopologyStateChanged](type="unsigned long");
+        @signal[inPortStateChanged](type="unsigned long");
+        @signal[inTopologyChangeAnnounced](type=long); // emitted by MIM only with value = constant 1
+        @signal[inStatusPollSent](type=long); // emitted by MIM only with value = constant 1
+        @signal[inLinkChangeDetected](type=long);  // emitted by the node that detected the link change; value = constant 0 or 1 (for down/up)
+        @signal[inTestFrameLatency](type=simtime_t); // emitted by the MIM only, upon receiving an InTest frame
+        @statistic[inRole](title="Interconnection Role"; source=inRoleChanged; record=vector; interpolationmode=sample-hold; enumname=inet::MrpInterconnection::InterconnectionRole);
+        @statistic[inNodeState](title="Interconnection Node State"; source=inNodeStateChanged; record=vector; interpolationmode=sample-hold; enumname=inet::MrpInterconnection::InterconnectionNodeState);
+        @statistic[inTopologyState](title="Interconnection Topology State"; source=inTopologyStateChanged; record=vector; interpolationmode=sample-hold; enumname=inet::MrpInterconnection::InterconnectionTopologyState);
+        @statistic[inPortState](title="State of Interconnection Port"; source=inPortStateChanged; record=vector; interpolationmode=sample-hold; enumname=inet::MrpInterfaceData::PortState);
+        @statistic[inTopologyChangeAnnouncements](title="Interconnection Topology Change Announcements by MIM"; source=inTopologyChangeAnnounced; record=vector; interpolationmode=none);
+        @statistic[inStatusPollSent](title="Interconnection Status Polls Sent by MIM"; source=inStatusPollSent; record=vector; interpolationmode=none);
+        @statistic[inLinkChangeDetections](title="Interconnection Link Up/Down Detection Events"; source=inLinkChangeDetected; record=vector; interpolationmode=none);
+        @statistic[inTestFrameLatency](title="Latency of Received inTest Frames"; source=inTestFrameLatency; record=vector; interpolationmode=none);
 }
 
