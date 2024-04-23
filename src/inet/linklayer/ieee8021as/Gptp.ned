@@ -33,7 +33,7 @@ simple Gptp like IGptp
 
         // following parameters are used to schedule follow_up and pdelay_resp messages.
         // These numbers must be enough large to prevent creating queue in MAC layer.
-        // It means it should be large than transmission time of message sent before
+        // It means it should be larger than transmission time of message sent before
         double pDelayReqProcessingTime @unit(s) = default(8us);  // processing time between arrived PDelayReq and send of PDelayResp
         double followUpInterval @unit(s) = default(7us);
 

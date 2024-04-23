@@ -276,11 +276,15 @@ void Gptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syn
     gptp->setPreciseOriginTimestamp(preciseOriginTimestamp);
     gptp->setSequenceId(sync->getSequenceId());
 
+    clocktime_t residenceTime;
     if (gptpNodeType == MASTER_NODE) {
-        gptp->setCorrectionField(syncEgressTimestampOwn - preciseOriginTimestamp);
+        residenceTime = syncEgressTimestampOwn - preciseOriginTimestamp;
+        gptp->setCorrectionField(residenceTime);
     }
     else if (gptpNodeType == BRIDGE_NODE) {
-        auto residenceTime = syncEgressTimestampOwn - syncIngressTimestamp;
+        // TODO: Residence time calculation does not work correctly (maybe wrong timestamps)
+        // See event #406 and #508
+        residenceTime = syncEgressTimestampOwn - syncIngressTimestamp;
         // meanLinkDelay and residence time are in the local time base
         // In the correctionField we need to express it in the grandmaster's time base
         // Thus, we need to multiply the meanLinkDelay and residenceTime with the gmRateRatio
@@ -289,6 +293,13 @@ void Gptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syn
     }
     gptp->getFollowUpInformationTLVForUpdate().setRateRatio(gmRateRatio);
     packet->insertAtFront(gptp);
+
+    EV_INFO << "############## SEND FOLLOW_UP ################################" << endl;
+    EV_INFO << "Correction Field              - " << gptp->getCorrectionField() << endl;
+    EV_INFO << "gmRateRatio                   - " << gmRateRatio << endl;
+    EV_INFO << "meanLinkDelay                 - " << meanLinkDelay << endl;
+    EV_INFO << "residenceTime                 - " << residenceTime << endl;
+
     sendPacketToNIC(packet, portId);
 }
 
@@ -511,7 +522,6 @@ void Gptp::processPdelayResp(Packet *packet, const GptpPdelayResp *gptp)
     if (pDelayRespIngressTimestampLast == -1) {
         pDelayRespIngressTimestampLast = pDelayRespIngressTimestamp; // t4 last
     }
-    pDelayRespIngressTimestampLast = pDelayRespIngressTimestamp; //t4 last
     pDelayRespIngressTimestamp = packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime(); //t4 now
     pDelayReqIngressTimestamp = gptp->getRequestReceiptTimestamp(); //t2
 }
