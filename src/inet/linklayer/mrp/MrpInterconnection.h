@@ -45,7 +45,7 @@ protected:
         CLOSED = 0x0001,
     };
 
-    uint16_t interConnectionID;
+    uint16_t interconnectionID;
     bool linkCheckEnabled = true;  // LC_MODE
     bool ringCheckEnabled = false;  // RC_MODE
 
