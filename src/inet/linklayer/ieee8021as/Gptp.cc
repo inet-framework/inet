@@ -508,6 +508,9 @@ void Gptp::processPdelayResp(Packet *packet, const GptpPdelayResp *gptp)
     }
 
     rcvdPdelayResp = true;
+    if (pDelayRespIngressTimestampLast == -1) {
+        pDelayRespIngressTimestampLast = pDelayRespIngressTimestamp; // t4 last
+    }
     pDelayRespIngressTimestampLast = pDelayRespIngressTimestamp; //t4 last
     pDelayRespIngressTimestamp = packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime(); //t4 now
     pDelayReqIngressTimestamp = gptp->getRequestReceiptTimestamp(); //t2
@@ -531,7 +534,9 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
         return;
     }
 
-    pDelayRespEgressTimestampLast = pDelayRespEgressTimestamp; //t3 last
+    if (pDelayRespEgressTimestampLast == -1) {
+        pDelayRespEgressTimestampLast = pDelayRespEgressTimestamp; //t3 last
+    }
     pDelayRespEgressTimestamp = gptp->getResponseOriginTimestamp(); //t3 now
 
     // Note, that the standard defines the usage of the correction field
