@@ -47,8 +47,8 @@ public:
 
 protected:
     uint16_t interconnectionID;
-    bool linkCheckEnabled = true;  // LC_MODE
-    bool ringCheckEnabled = false;  // RC_MODE
+    bool inLinkCheckEnabled = true;  // LC_MODE
+    bool inRingCheckEnabled = false;  // RC_MODE
 
     Traced<InterconnectionRole> inRole = INTERCONNECTION_CLIENT;
     Traced<InterconnectionNodeState> inNodeState = POWER_ON;
