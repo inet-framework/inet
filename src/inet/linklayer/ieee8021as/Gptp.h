@@ -41,20 +41,20 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     // Rate Ratios
     double gmRateRatio = 1.0;
     double receivedRateRatio = 1.0;
-    double neighborRateRatio = 1.0; // the rate ratio to the neighbor
+    double neighborRateRatio = 1.0;
+    bool hasNewRateRatioForOscillatorCompensation = false;
 
     uint16_t sequenceId = 0;
-    int timeInterval = 10; // This should be dynamically set as needed
-    std::vector<clocktime_t> pDelayRespIngressTimestampIntervals;
-    std::vector<clocktime_t> pDelayRespEgressTimestampIntervals;
     // == Propagation Delay Measurement Procedure ==
     // Timestamps corresponding to the PDelayRequest and PDelayResponse mechanism
     clocktime_t pDelayReqEgressTimestamp = -1;  // egress time of pdelay_req at initiator (this node)
     clocktime_t pDelayReqIngressTimestamp = -1; // ingress time of pdelay_req at responder
     clocktime_t pDelayRespEgressTimestamp = -1; // egress time of pdelay_resp at responder (received in PDelayRespFollowUp)
-    clocktime_t pDelayRespEgressTimestampLast = -1; // egress time of previous pdelay_resp at responder (received in PDelayRespFollowUp)
+    clocktime_t pDelayRespEgressTimestampSetStart = -1; // egress time of previous pdelay_resp at responder (received in PDelayRespFollowUp)
     clocktime_t pDelayRespIngressTimestamp = -1;     // ingress time of pdelay_resp at initiator (this node)
-    clocktime_t pDelayRespIngressTimestampLast = -1; // ingress time of previous pdelay_resp at initiator (this node)
+    clocktime_t pDelayRespIngressTimestampSetStart = -1; // ingress time of previous pdelay_resp at initiator (this node)
+    int nrrCalculationSetMaximum = 3; // TODO: Make this a settable parameter
+    int nrrCalculationSetCurrent = 0;
 
     bool rcvdPdelayResp = false;
     uint16_t lastSentPdelayReqSequenceId = 0;

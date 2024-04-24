@@ -59,8 +59,6 @@ void Gptp::initialize(int stage)
         pDelayReqProcessingTime = par("pDelayReqProcessingTime");
         std::hash<std::string> strHash;
         clockIdentity = strHash(getFullPath());
-        pDelayRespEgressTimestampIntervals.resize(timeInterval, -1);
-        pDelayRespIngressTimestampIntervals.resize(timeInterval, -1);
     }
     if (stage == INITSTAGE_LINK_LAYER) {
         meanLinkDelay = 0;
@@ -157,7 +155,7 @@ void Gptp::handleSelfMessage(cMessage *msg)
 
     case GPTP_SELF_MSG_PDELAY_REQ:
         // slaveport:
-        sendPdelayReq(); // TODO on slaveports only
+        sendPdelayReq();
         scheduleClockEventAfter(pdelayInterval, selfMsgDelayReq);
         break;
 
@@ -284,8 +282,6 @@ void Gptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syn
         gptp->setCorrectionField(residenceTime);
     }
     else if (gptpNodeType == BRIDGE_NODE) {
-        // TODO: Residence time calculation does not work correctly (maybe wrong timestamps)
-        // See event #406 and #508
         residenceTime = syncEgressTimestampOwn - syncIngressTimestamp;
         // meanLinkDelay and residence time are in the local time base
         // In the correctionField we need to express it in the grandmaster's time base
@@ -320,7 +316,7 @@ void Gptp::sendPdelayResp(GptpReqAnswerEvent *req)
     gptp->setDomainNumber(domainNumber);
     gptp->setRequestingPortIdentity(req->getSourcePortIdentity());
     gptp->setSequenceId(req->getSequenceId());
-    gptp->setRequestReceiptTimestamp(req->getIngressTimestamp());//t2
+    gptp->setRequestReceiptTimestamp(req->getIngressTimestamp()); // t2
     packet->insertAtFront(gptp);
     sendPacketToNIC(packet, portId);
     // The sendPdelayRespFollowUp(portId) called by receiveSignal(), when
@@ -343,7 +339,7 @@ void Gptp::sendPdelayRespFollowUp(int portId, const GptpPdelayResp *resp)
     // after the transmissionEnded signal for the pdelayResp packet
     // is received
     auto now = clock->getClockTime();
-    gptp->setResponseOriginTimestamp(now);//t3
+    gptp->setResponseOriginTimestamp(now); // t3
 
     gptp->setRequestingPortIdentity(resp->getRequestingPortIdentity());
     gptp->setSequenceId(resp->getSequenceId());
@@ -427,13 +423,6 @@ void Gptp::synchronize()
 
     ASSERT(gptpNodeType != MASTER_NODE);
 
-    // TODO Check which gmRateRatio calculation we need/want to use
-    //if (true || preciseOriginTimestampLast == -1 || syncIngressTimestampLast == -1)
-    //    gmRateRatio = 1;
-    //else
-    //    gmRateRatio =
-    //        (preciseOriginTimestamp - preciseOriginTimestampLast) / (syncIngressTimestamp - syncIngressTimestampLast);
-
     gmRateRatio = receivedRateRatio * neighborRateRatio;
 
     // preciseOriginTimestamp and correctionField are in the grandmaster's time base
@@ -441,13 +430,24 @@ void Gptp::synchronize()
     // Thus, we need to multiply the meanLinkDelay and residenceTime with the gmRateRatio
     clocktime_t newTime = preciseOriginTimestamp + correctionField + gmRateRatio * (meanLinkDelay + residenceTime);
 
-    // TODO: Add a clock servo model to INET in the future
+
     auto settableClock = check_and_cast<SettableClock *>(clock.get());
-    ppm newOscillatorCompensation =
-        unit(gmRateRatio * (1 + unit(settableClock->getOscillatorCompensation()).get()) - 1);
+
+    // Only change the oscillator if we have new information about our nrr
+    // TODO: We should change this to a clock servo model in the future anyways!
+    ppm newOscillatorCompensation;
+    if (!hasNewRateRatioForOscillatorCompensation) {
+        newOscillatorCompensation = unit(settableClock->getOscillatorCompensation());
+    }
+    else {
+        newOscillatorCompensation =
+            unit(gmRateRatio * (1 + unit(settableClock->getOscillatorCompensation()).get()) - 1);
+        hasNewRateRatioForOscillatorCompensation = false;
+    }
     settableClock->setClockTime(newTime, newOscillatorCompensation, true);
 
     newLocalTimeAtTimeSync = clock->getClockTime();
+    // new=5 - old=4 = +1
     timeDiffAtTimeSync = newLocalTimeAtTimeSync - oldLocalTimeAtTimeSync;
 
     /************** Rate ratio calculation *************************************
@@ -470,21 +470,16 @@ void Gptp::synchronize()
     EV_INFO << "RECIEVED RATE RATIO        - " << receivedRateRatio << endl;
     EV_INFO << "GM RATE RATIO              - " << gmRateRatio << endl;
 
-    // TODO: What does this do, what does it mean?
-    // TODO: Check which timestamps we really need to adjust.
-    // TODO: What to do with -1 timestamps?
-    // adjust local timestamps, too
     adjustLocalTimestamp(syncIngressTimestamp);
     adjustLocalTimestamp(pDelayReqEgressTimestamp);
-    adjustLocalTimestamp(pDelayReqIngressTimestamp);
-    adjustLocalTimestamp(pDelayRespEgressTimestamp);
-    adjustLocalTimestamp(pDelayRespEgressTimestampLast);
     adjustLocalTimestamp(pDelayRespIngressTimestamp);
-    adjustLocalTimestamp(pDelayRespIngressTimestampLast);
-    //adjustLocalTimestamp(syncIngressTimestamp);
-    //adjustLocalTimestamp(syncIngressTimestampLast);
-    //adjustLocalTimestamp(preciseOriginTimestamp);
-    //adjustLocalTimestamp(preciseOriginTimestampLast);
+    adjustLocalTimestamp(pDelayRespIngressTimestampSetStart);
+    // NOTE: Do not pDelayReqIngressTimestamp and pDelayRespEgressTimestamp, because they are based on neighbor clock
+
+    // adjustLocalTimestamp(syncIngressTimestamp);
+    // adjustLocalTimestamp(syncIngressTimestampLast);
+    // adjustLocalTimestamp(preciseOriginTimestamp);
+    // adjustLocalTimestamp(preciseOriginTimestampLast);
 
     syncIngressTimestampLast = syncIngressTimestamp;
     preciseOriginTimestampLast = preciseOriginTimestamp;
@@ -499,7 +494,7 @@ void Gptp::processPdelayReq(Packet *packet, const GptpPdelayReq *gptp)
 {
     auto resp = new GptpReqAnswerEvent("selfMsgPdelayResp", GPTP_SELF_REQ_ANSWER_KIND);
     resp->setPortId(packet->getTag<InterfaceInd>()->getInterfaceId());
-    resp->setIngressTimestamp(packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime());//t2
+    resp->setIngressTimestamp(packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime()); // t2
     resp->setSourcePortIdentity(gptp->getSourcePortIdentity());
     resp->setSequenceId(gptp->getSequenceId());
 
@@ -522,19 +517,12 @@ void Gptp::processPdelayResp(Packet *packet, const GptpPdelayResp *gptp)
 
     rcvdPdelayResp = true;
 
-    pDelayRespIngressTimestampIntervals.pop_back();
-    pDelayRespIngressTimestampIntervals.insert(pDelayRespIngressTimestampIntervals.begin(), pDelayRespIngressTimestamp);
-    EV_INFO << "***** Ingress Time Stamp Intervals Vector *****" << endl;
-    for (auto val: pDelayRespIngressTimestampIntervals){
-        EV_INFO << val << endl;
+    if (pDelayRespIngressTimestampSetStart == -1) {
+        pDelayRespIngressTimestampSetStart = pDelayRespIngressTimestamp; // t4 last
     }
-    
-//    if (pDelayRespIngressTimestampLast == -1) {
-//        pDelayRespIngressTimestampLast = pDelayRespIngressTimestamp; // t4 last
-//    }
 
-    pDelayRespIngressTimestamp = packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime(); //t4 now
-    pDelayReqIngressTimestamp = gptp->getRequestReceiptTimestamp(); //t2
+    pDelayRespIngressTimestamp = packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime(); // t4 now
+    pDelayReqIngressTimestamp = gptp->getRequestReceiptTimestamp();                           // t2
 }
 
 void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowUp *gptp)
@@ -555,24 +543,21 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
         return;
     }
 
-    pDelayRespEgressTimestampIntervals.pop_back();
-    pDelayRespEgressTimestampIntervals.insert(pDelayRespEgressTimestampIntervals.begin(), pDelayRespEgressTimestamp);
-    EV_INFO << "***** Egress Time Stamp Intervals Vector *****" << endl;
-    for (auto val: pDelayRespEgressTimestampIntervals){
-        EV_INFO << val << endl;
+    if (pDelayRespEgressTimestampSetStart == -1) {
+        pDelayRespEgressTimestampSetStart = pDelayRespEgressTimestamp; // t3 last
     }
-//    if (pDelayRespEgressTimestampLast == -1) {
-//        pDelayRespEgressTimestampLast = pDelayRespEgressTimestamp; //t3 last
-//    }
 
-    pDelayRespEgressTimestamp = gptp->getResponseOriginTimestamp(); //t3 now
+    pDelayRespEgressTimestamp = gptp->getResponseOriginTimestamp(); // t3 now
 
     // Note, that the standard defines the usage of the correction field
     // for the following two calculations.
     // However, these contain fractional nanoseconds, which we do not
     // use in INET.
     // See 11.2.19.3.3 computePdelayRateRatio() in IEEE 802.1AS-2020
-    for (int last = timeInterval - 1; last >= 0; last--){
+    clocktime_t prevRespRegress = -1;
+    clocktime_t prevRespIngress = -1;
+
+    /*for (int last = timeInterval - 1; last >= 0; last--) {
         if(pDelayRespIngressTimestampIntervals[last] != -1 && pDelayRespEgressTimestampIntervals[last] != -1){
             pDelayRespIngressTimestampLast = pDelayRespIngressTimestampIntervals[last];
             pDelayRespEgressTimestampLast = pDelayRespEgressTimestampIntervals[last];
@@ -582,16 +567,19 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
             pDelayRespIngressTimestampLast = -1;
             pDelayRespEgressTimestampLast = -1;
         }
-    }
+    }*/
 
-    if (pDelayRespEgressTimestampLast == -1 || pDelayRespIngressTimestampLast == -1)
-        neighborRateRatio = 1.0;
+    if (nrrCalculationSetCurrent == nrrCalculationSetMaximum) {
+        neighborRateRatio = (pDelayRespEgressTimestamp - pDelayRespEgressTimestampSetStart) /
+                            (pDelayRespIngressTimestamp - pDelayRespIngressTimestampSetStart);
+        hasNewRateRatioForOscillatorCompensation = true;
+        pDelayRespEgressTimestampSetStart = -1;
+        pDelayRespIngressTimestampSetStart = -1;
+        nrrCalculationSetCurrent = 0;
+    }
     else {
-        neighborRateRatio = (pDelayRespEgressTimestamp - pDelayRespEgressTimestampLast) /
-                            (pDelayRespIngressTimestamp - pDelayRespIngressTimestampLast);
+        nrrCalculationSetCurrent++;
     }
-    // TODO: Check why nrr is always 1
-
 
     // See 11.2.19.3.4 computePropTime() and Figure11-1 in IEEE 802.1AS-2020
     auto t4 = pDelayRespIngressTimestamp;
