@@ -149,10 +149,6 @@ simple Mrp like IMediaRedundancy
         // by clients or if it solely relies on ring tests for status updates.
         bool reactOnLinkChange = default(true);
 
-        // In MRM role: Specifies whether the manager actively conducts ring tests or
-        // depends exclusively on link change frames sent by clients for redundancy checks.
-        bool checkMediaRedundancy = default(true);
-
         // In MRM role: Controls whether the manager can set its own secondary ring port to
         // FORWARDING, thereby altering the ring topology.
         bool noTopologyChange = default(false);

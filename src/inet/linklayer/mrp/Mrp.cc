@@ -125,7 +125,6 @@ void Mrp::initialize(int stage) {
         localManagerPrio = static_cast<MrpPriority>(par("mrpPriority").intValue());
         nonBlockingMRC = par("nonBlockingMRC");
         reactOnLinkChange = par("reactOnLinkChange");
-        checkMediaRedundancy = par("checkMediaRedundancy");
         noTopologyChange = par("noTopologyChange");
 
         //signals

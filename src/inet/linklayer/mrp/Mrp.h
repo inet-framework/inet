@@ -120,7 +120,6 @@ protected:
     bool addTest = false;
     bool nonBlockingMRC = true;
     bool reactOnLinkChange = true;
-    bool checkMediaRedundancy = false;
     bool noTopologyChange = false;
     MrpPriority localManagerPrio = DEFAULT;
 
