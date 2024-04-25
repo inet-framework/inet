@@ -48,8 +48,8 @@ Mrp::~Mrp() {
 
 int Mrp::resolveInterfaceIndex(int interfaceIndex) {
     NetworkInterface *interface = interfaceTable->getInterface(interfaceIndex);
-    if (interface->isLoopback())
-        throw cRuntimeError("Chosen interface %d is a loopback interface", interfaceIndex);
+    if (interface->getProtocol() != &Protocol::ethernetMac)
+        throw cRuntimeError("Chosen interface %d is not an Ethernet interface", interfaceIndex);
     return interface->getInterfaceId();
 }
 
@@ -161,8 +161,7 @@ void Mrp::initPortTable() {
     EV_DEBUG << "MRP Interface Data initialization. Setting port infos to the protocol defaults." << EV_ENDL;
     for (unsigned int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
         auto ie = interfaceTable->getInterface(i);
-        if (!ie->isLoopback() && ie->isWired() && ie->isMulticast()
-                && ie->getProtocol() == &Protocol::ethernetMac) {
+        if (ie->getProtocol() == &Protocol::ethernetMac) {
             initInterfacedata(ie->getInterfaceId());
         }
     }
@@ -187,8 +186,7 @@ void Mrp::initRingPort(int interfaceId, MrpInterfaceData::PortRole role, bool en
 void Mrp::startContinuityCheck() {
     for (unsigned int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
         auto ie = interfaceTable->getInterface(i);
-        if (!ie->isLoopback() && ie->isWired() && ie->isMulticast()
-                && ie->getProtocol() == &Protocol::ethernetMac) {
+        if (ie->getProtocol() == &Protocol::ethernetMac) {
             int interfaceId = ie->getInterfaceId();
             auto portData = getPortInterfaceDataForUpdate(interfaceId);
             if (portData->getContinuityCheck()) {
