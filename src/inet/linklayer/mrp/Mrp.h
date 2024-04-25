@@ -118,7 +118,7 @@ protected:
 
     //Variables need for Manager
     bool addTest = false;
-    bool nonBlockingMRC = true;
+    bool nonblockingMrcSupported = true;  // "Non-blocking MRC supported"
     bool reactOnLinkChange = true;
     bool noTopologyChange = false;  // NO_TC variable
     MrpPriority localManagerPrio = DEFAULT;

@@ -142,8 +142,9 @@ simple Mrp like IMediaRedundancy
         // MRAs determine the acting manager based on priority and MAC address.
         int mrpPriority = default(0xA000);
 
-        // In MRM role: Defines whether a MRM supports clients that can block their ring ports.
-        bool nonBlockingMRC = default(true);
+        // In MRM role: Specifies whether non-blocking MRCs are supported by the MRM,
+        // i.e. those that are not capable of setting a ring port to BLOCKED state.
+        bool nonblockingMrcSupported = default(true);
 
         // In MRM role: Determines if the manager reacts to link change frames sent
         // by clients or if it solely relies on ring tests for status updates.

@@ -123,7 +123,7 @@ void Mrp::initialize(int stage) {
 
         //manager variables
         localManagerPrio = static_cast<MrpPriority>(par("mrpPriority").intValue());
-        nonBlockingMRC = par("nonBlockingMRC");
+        nonblockingMrcSupported = par("nonblockingMrcSupported");
         reactOnLinkChange = par("reactOnLinkChange");
 
         //signals
@@ -1338,7 +1338,7 @@ void Mrp::linkChangeInd(uint16_t portState, LinkState linkState) {
         break;
     case PRM_UP:
         if (!addTest) {
-            if (nonBlockingMRC) { //15
+            if (nonblockingMrcSupported) { //15
                 addTest = true;
                 testRingReq(shortTestInterval);
                 break;
@@ -1349,7 +1349,7 @@ void Mrp::linkChangeInd(uint16_t portState, LinkState linkState) {
                 break;
             }
         } else {
-            if (!nonBlockingMRC && linkState == LinkState::UP) { //18
+            if (!nonblockingMrcSupported && linkState == LinkState::UP) { //18
                 topologyChangeReq(SIMTIME_ZERO);
             }
             break;
@@ -1363,7 +1363,7 @@ void Mrp::linkChangeInd(uint16_t portState, LinkState linkState) {
                 testRingReq(shortTestInterval);
                 break;
             } else if (linkState == LinkState::UP) {
-                if (nonBlockingMRC) {
+                if (nonblockingMrcSupported) {
                     addTest = true;
                     testRingReq(shortTestInterval);
                 } else {
@@ -1379,7 +1379,7 @@ void Mrp::linkChangeInd(uint16_t portState, LinkState linkState) {
                 }
             }
         } else {
-            if (!nonBlockingMRC && linkState == LinkState::UP) {
+            if (!nonblockingMrcSupported && linkState == LinkState::UP) {
                 setPortState(secondaryRingPortId, MrpInterfaceData::BLOCKED);
                 testMaxRetransmissionCount = testMonitoringExtendedCount - 1;
                 testRetransmissionCount = 0;
@@ -1402,14 +1402,14 @@ void Mrp::linkChangeInd(uint16_t portState, LinkState linkState) {
                 EV_DETAIL << "Switching State from CHK_RC to CHK_RO" << EV_FIELD(nodeState) << EV_ENDL;
                 break;
             } else if (linkState == LinkState::UP) {
-                if (nonBlockingMRC) {
+                if (nonblockingMrcSupported) {
                     testMaxRetransmissionCount = testMonitoringCount - 1;
                 } else {
                     testMaxRetransmissionCount = testMonitoringExtendedCount - 1;
                 }
                 topologyChangeReq(SIMTIME_ZERO);
             }
-        } else if (nonBlockingMRC) {
+        } else if (nonblockingMrcSupported) {
             if (!addTest) {
                 addTest = true;
                 testRingReq(shortTestInterval);

@@ -18,12 +18,12 @@ moduleinterface IMediaRedundancy
         string mrpRole;
         int timingProfile @unit(ms);
         int uuid0;
-		int uuid1;
-		int ringPort1;
-		int ringPort2;
-		bool interconnectionLinkCheckAware;
-		bool interconnectionRingCheckAware;
-       	bool nonBlockingMRC;
+        int uuid1;
+        int ringPort1;
+        int ringPort2;
+        bool interconnectionLinkCheckAware;
+        bool interconnectionRingCheckAware;
+        bool nonblockingMrcSupported;
         bool reactOnLinkChange;
         bool visualize;
     gates:
