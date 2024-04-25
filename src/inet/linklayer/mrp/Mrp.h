@@ -120,7 +120,7 @@ protected:
     bool addTest = false;
     bool nonBlockingMRC = true;
     bool reactOnLinkChange = true;
-    bool noTopologyChange = false;
+    bool noTopologyChange = false;  // NO_TC variable
     MrpPriority localManagerPrio = DEFAULT;
 
     //Variables needed for Automanager

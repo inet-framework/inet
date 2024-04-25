@@ -125,7 +125,6 @@ void Mrp::initialize(int stage) {
         localManagerPrio = static_cast<MrpPriority>(par("mrpPriority").intValue());
         nonBlockingMRC = par("nonBlockingMRC");
         reactOnLinkChange = par("reactOnLinkChange");
-        noTopologyChange = par("noTopologyChange");
 
         //signals
         simsignal_t ringStateChangedSignal = registerSignal("ringStateChanged");

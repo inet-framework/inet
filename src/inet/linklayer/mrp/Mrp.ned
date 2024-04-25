@@ -149,10 +149,6 @@ simple Mrp like IMediaRedundancy
         // by clients or if it solely relies on ring tests for status updates.
         bool reactOnLinkChange = default(true);
 
-        // In MRM role: Controls whether the manager can set its own secondary ring port to
-        // FORWARDING, thereby altering the ring topology.
-        bool noTopologyChange = default(false);
-
         // Format for the text displayed above the module icon.
         // Directives: `%r`: MRP role, `%n`: node state, `%g`: ring state
         string displayStringTextFormat = default("role: %r\nnode: %n\nring: %g");

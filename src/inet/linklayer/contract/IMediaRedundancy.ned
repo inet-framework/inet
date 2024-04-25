@@ -25,7 +25,6 @@ moduleinterface IMediaRedundancy
 		bool interconnectionRingCheckAware;
        	bool nonBlockingMRC;
         bool reactOnLinkChange;
-        bool noTopologyChange;	
         bool visualize;
     gates:
         input relayIn;
