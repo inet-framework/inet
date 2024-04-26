@@ -1,0 +1,49 @@
+<root>
+
+    <!-- Simulates disconnecting an Ethernet cable. In the simulation, this will result in an
+         interface state change notification, so MRP will immediately know about the link break. -->
+    <script id="SmallNetwork-disconnect">
+        <at t="1s">
+            <disconnect src-module="node2" src-gate="ethg[1]" />
+        </at>
+        <at t="2s">
+            <connect src-module="node2" src-gate="ethg[1]" dest-module="node1" dest-gate="ethg[0]" channel-type="inet.node.ethernet.Eth100M" />
+        </at>
+    </script>
+
+    <!-- This simulates a faulty Ethernet cable, where almost all frames suffer bit errors and are
+         discarded by the receiver. MRP will detect the problem from the loss of CCM and Test frames. -->
+    <script id="SmallNetwork-faulty-link">
+        <at t="1s">
+            <set-channel-param src-module="node2" src-gate="ethg[1]" par="per" value="0.999" />
+        </at>
+        <at t="2s">
+            <set-channel-param src-module="node2" src-gate="ethg[1]" par="per" value="0" />
+        </at>
+    </script>
+
+    <script id="MediumNetwork-disconnect">
+        <at t="750ms">
+            <disconnect src-module="node2" src-gate="ethg[1]" />
+        </at>
+        <at t="1250ms">
+            <connect src-module="node2" src-gate="ethg[1]" dest-module="node1" dest-gate="ethg[0]" channel-type="inet.node.ethernet.Eth100M" />
+        </at>
+        <at t="1750ms">
+            <disconnect src-module="node2" src-gate="ethg[2]" />
+        </at>
+        <at t="2500ms">
+            <connect src-module="node2" src-gate="ethg[2]" dest-module="node6" dest-gate="ethg[2]" channel-type="inet.node.ethernet.Eth100M" />
+        </at>
+    </script>
+
+    <script id="LargeNetwork-disconnect">
+        <at t="1s">
+            <disconnect src-module="node[12]" src-gate="ethg[0]" />
+        </at>
+        <at t="2s">
+            <connect src-module="node[12]" src-gate="ethg[0]" dest-module="node[13]" dest-gate="ethg[1]" channel-type="inet.node.ethernet.Eth100M" />
+        </at>
+    </script>
+
+</root>
