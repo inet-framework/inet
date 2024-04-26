@@ -3,15 +3,12 @@
         <disconnect src-module="node2" src-gate="ethg[1]" />
     </at>
     <at t="1250ms">
-        <connect src-module="node2" src-gate="ethg[1]"
-                 dest-module="node1" dest-gate="ethg[0]" 
-                 channel-type="inet.node.ethernet.Eth100M">
-        </connect>
+        <connect src-module="node2" src-gate="ethg[1]" dest-module="node1" dest-gate="ethg[0]" channel-type="inet.node.ethernet.Eth100M" />
     </at>
     <at t="1750ms">
-    	<disconnect src-gate="ethg[2]" src-module="node2"></disconnect></at>
+        <disconnect src-module="node2" src-gate="ethg[2]" />
+    </at>
     <at t="2500ms">
-    	<connect channel-type="inet.node.ethernet.Eth100M" dest-gate="ethg[2]" dest-module="node6" src-gate="ethg[2]"
-    		src-module="node2">
-    	</connect></at>
+        <connect src-module="node2" src-gate="ethg[2]" dest-module="node6" dest-gate="ethg[2]" channel-type="inet.node.ethernet.Eth100M" />
+    </at>
 </script>

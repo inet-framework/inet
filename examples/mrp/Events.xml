@@ -3,9 +3,6 @@
         <disconnect src-module="node2" src-gate="ethg[1]" />
     </at>
     <at t="2s">
-        <connect src-module="node2" src-gate="ethg[1]"
-                 dest-module="node1" dest-gate="ethg[0]" 
-                 channel-type="inet.node.ethernet.Eth100M">
-        </connect>
+        <connect src-module="node2" src-gate="ethg[1]" dest-module="node1" dest-gate="ethg[0]" channel-type="inet.node.ethernet.Eth100M" />
     </at>
 </script>
