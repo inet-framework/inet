@@ -66,10 +66,12 @@ void PIControlClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompen
     Enter_Method("setClockTime");
     clocktime_t oldClockTime = getClockTime();
     if (newClockTime != oldClockTime) {
-            err = newClockTime - oldClockTime;
-            integral += err;
-            clocktime_t clockDelta = 0;
-            clockDelta = kp*err + ki*integral;
+
+            float weight = 0.1;
+            ClockTime delta= 0;
+            offset = newClockTime - oldClockTime;
+            delta=weight*(kp*offset+ki*integral);
+
 
         emit(timeChangedSignal, oldClockTime.asSimTime());
         if (resetOscillator) {
@@ -81,7 +83,9 @@ void PIControlClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompen
         EV_DEBUG << "Setting clock time from " << oldClockTime << " to " << newClockTime << " at simtime " << currentSimTime << ".\n";
         originSimulationTime = simTime();
         originClockTime = newClockTime;
-        this->oscillatorCompensation = oscillatorCompensation;
+        this->oscillatorCompensation = delta;
+
+
         ASSERT(newClockTime == getClockTime());
 //        clocktime_t clockDelta = newClockTime - oldClockTime;
         for (auto event : events) {

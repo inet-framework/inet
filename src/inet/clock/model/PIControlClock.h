@@ -40,7 +40,7 @@ class INET_API PIControlClock : public OscillatorBasedClock, public IScriptable
 
     double kp;
     double ki;
-    clocktime_t err;
+    clocktime_t offset;
     clocktime_t integral;
 
 };
