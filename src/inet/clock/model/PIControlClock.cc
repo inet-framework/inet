@@ -29,10 +29,6 @@ void PIControlClock::initialize(int stage)
             throw cRuntimeError("Unknown defaultOverdueClockEventHandlingMode parameter value");
     }
 
-    kp=0.1;
-    ki=0.1;
-    err=0;
-    integral=0;
 }
 
 OverdueClockEventHandlingMode PIControlClock::getOverdueClockEventHandlingMode(ClockEvent *event) const
@@ -61,18 +57,37 @@ simtime_t PIControlClock::handleOverdueClockEvent(ClockEvent *event, simtime_t t
     }
 }
 
+ppm PIControlClock::PISlopeCompensation(clocktime_t timeDiff)
+{
+      float kp = -0.1;
+      float ki = 0.1;
+      ppm slope;
+      ppm slopeMax;
+      ppm slopeMin;
+      clocktime_t accumulatedTimeDiff = 0;
+
+
+      accumulatedTimeDiff += timeDiff;
+      //slope = kp * timeDiff + ki * accumulatedT
+
+//      slope = unit(gmRateRatio * (1 + unit(piControlClock->getOscillatorCompensation()).get()) - 1)
+      if (slope > slopeMax)
+          slope = slopeMax;
+      else if (slope < slopeMin)
+          slope = slopeMin;
+      else
+          // cannot assign value from type clocktime_t to type ppm
+          slope = kp * timeDiff + ki * accumulatedTimeDiff;
+
+      return slope;
+    }
+
+
 void PIControlClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompensation, bool resetOscillator)
 {
     Enter_Method("setClockTime");
     clocktime_t oldClockTime = getClockTime();
     if (newClockTime != oldClockTime) {
-
-            float weight = 0.1;
-            ClockTime delta= 0;
-            offset = newClockTime - oldClockTime;
-            delta=weight*(kp*offset+ki*integral);
-
-
         emit(timeChangedSignal, oldClockTime.asSimTime());
         if (resetOscillator) {
             if (auto constantDriftOscillator = dynamic_cast<ConstantDriftOscillator *>(oscillator))
@@ -81,13 +96,17 @@ void PIControlClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompen
 
         simtime_t currentSimTime = simTime();
         EV_DEBUG << "Setting clock time from " << oldClockTime << " to " << newClockTime << " at simtime " << currentSimTime << ".\n";
+
+
+        clocktime_t timeDiff = oldClockTime - newClockTime;
         originSimulationTime = simTime();
-        originClockTime = newClockTime;
-        this->oscillatorCompensation = delta;
+        originClockTime = oldClockTime;
+        this->oscillatorCompensation = PISlopeCompensation(timeDiff);
+
 
 
         ASSERT(newClockTime == getClockTime());
-//        clocktime_t clockDelta = newClockTime - oldClockTime;
+        clocktime_t clockDelta = newClockTime - oldClockTime;
         for (auto event : events) {
             if (event->getRelative())
                 // NOTE: the simulation time of event execution is not affected

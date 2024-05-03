@@ -37,11 +37,12 @@ class INET_API PIControlClock : public OscillatorBasedClock, public IScriptable
      * compensation factor means the clock measures time faster.
      */
     virtual void setClockTime(clocktime_t time, ppm oscillatorCompensation, bool resetOscillator);
+    virtual ppm PISlopeCompensation(clocktime_t timeDiff);
 
-    double kp;
-    double ki;
-    clocktime_t offset;
-    clocktime_t integral;
+//    double kp;
+//    double ki;
+//    clocktime_t offset;
+//    clocktime_t integral;
 
 };
 

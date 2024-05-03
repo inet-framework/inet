@@ -431,7 +431,7 @@ void Gptp::synchronize()
     // Thus, we need to multiply the meanLinkDelay and residenceTime with the gmRateRatio
     clocktime_t newTime = preciseOriginTimestamp + correctionField + gmRateRatio * (meanLinkDelay + residenceTime);
 
-    auto piControlClock = check_and_cast<PIControlClock *>(clock.get());
+    auto piControlClock = check_and_cast<SettableClock *>(clock.get());
 
     // Only change the oscillator if we have new information about our nrr
     // TODO: We should change this to a clock servo model in the future anyways!
@@ -445,6 +445,10 @@ void Gptp::synchronize()
         hasNewRateRatioForOscillatorCompensation = false;
     }
     piControlClock->setClockTime(newTime, newOscillatorCompensation, true);
+    EV_INFO << "############## TIME #####################################" << endl;
+    EV_INFO << "newTime " << newTime << endl;
+    EV_INFO << "newOscillatorCompensation " << newOscillatorCompensation << endl;
+
 
     newLocalTimeAtTimeSync = clock->getClockTime();
     // new=5 - old=4 = +1
