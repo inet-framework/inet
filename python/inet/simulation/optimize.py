@@ -1,7 +1,11 @@
 import math
-import optimparallel
 import scipy.optimize
 import time
+
+import importlib.util
+
+if importlib.util.find_spec('optimparallel'):
+    import optimparallel
 
 from omnetpp.scave.results import *
 
