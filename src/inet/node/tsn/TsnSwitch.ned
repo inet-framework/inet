@@ -30,7 +30,7 @@ module TsnSwitch extends EthernetSwitch
         hasGptp = default(hasTimeSynchronization); // enable gPTP protocol
         gptp.gptpNodeType = default("BRIDGE_NODE"); // configure gPTP bridge node type
         gptp.slavePort = default("eth0"); // configure default gPTP bridge slave port
-        clock.typename = default(hasTimeSynchronization ? "SettableClock" : ""); // enable explicit local clock model when time synchronization is enabled
+        clock.typename = default(hasTimeSynchronization ? "PiClock" : ""); // enable explicit local clock model when time synchronization is enabled
         ethernet.typename = default("EthernetLayer"); // use Ethernet protocol layer outside of network interfaces
         eth[*].typename = default(hasCutthroughSwitching ? "EthernetCutthroughInterface" : "LayeredEthernetInterface"); // switch to modular Ethernet interface
         eth[*].macLayer.typename = default(hasFramePreemption ? "EthernetPreemptingMacLayer" : "EthernetMacLayer");

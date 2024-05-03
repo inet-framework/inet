@@ -30,7 +30,7 @@ module TsnDevice extends StandardHost
         bool hasFramePreemption = default(false); // enable IEEE 802.1 Qbu frame preemption
         bool hasCutthroughSwitching = default(false); // enable cut-through switching support
         bool hasBridging = default(hasIncomingStreams || hasOutgoingStreams || hasStreamRedundancy || hasIngressTrafficFiltering || hasEgressTrafficFiltering);
-        clock.typename = default(hasTimeSynchronization ? "SettableClock" : ""); // enable explicit local clock model
+        clock.typename = default(hasTimeSynchronization ? "PiClock" : ""); // enable explicit local clock model
         ethernet.typename = default("EthernetLayer"); // use Ethernet protocol layer outside of network interfaces
         eth[*].typename = default("LayeredEthernetInterface"); // switch to modular Ethernet interface
         eth[*].macLayer.typename = default(hasFramePreemption ? "EthernetPreemptingMacLayer" : "EthernetMacLayer");

@@ -53,7 +53,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     clocktime_t pDelayRespEgressTimestampSetStart = -1; // egress time of previous pdelay_resp at responder (received in PDelayRespFollowUp)
     clocktime_t pDelayRespIngressTimestamp = -1;     // ingress time of pdelay_resp at initiator (this node)
     clocktime_t pDelayRespIngressTimestampSetStart = -1; // ingress time of previous pdelay_resp at initiator (this node)
-    int nrrCalculationSetMaximum = 3; // TODO: Make this a settable parameter
+    int nrrCalculationSetMaximum = 1; // TODO: Make this a settable parameter
     int nrrCalculationSetCurrent = 0;
 
     bool rcvdPdelayResp = false;

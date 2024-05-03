@@ -13,12 +13,15 @@
 
 namespace inet {
 
-class INET_API PIControlClock : public OscillatorBasedClock, public IScriptable
+class INET_API PiClock : public OscillatorBasedClock, public IScriptable
 {
   protected:
     OverdueClockEventHandlingMode defaultOverdueClockEventHandlingMode = UNSPECIFIED;
     ppm oscillatorCompensation = ppm(0); // 0 means no compensation, higher value means faster clock, e.g. 100 ppm value means the clock compensates 100 microseconds for every second in clock time
                                          // 100 ppm value means the oscillator tick length is compensated to be smaller by a factor of (1 / (1 + 100 / 1E+6)) than the actual tick length measured in clock time
+    double kp = 0.7; // proportional gain
+    double ki = 0.3; // integral gain
+    clocktime_t drift = 0;
 
   protected:
     virtual void initialize(int stage) override;
@@ -36,14 +39,13 @@ class INET_API PIControlClock : public OscillatorBasedClock, public IScriptable
      * Sets the clock time immediately to the given value. Greater than 1 oscillator
      * compensation factor means the clock measures time faster.
      */
-    virtual void setClockTime(clocktime_t time, ppm oscillatorCompensation, bool resetOscillator);
-    virtual ppm PISlopeCompensation(clocktime_t timeDiff);
 
 //    double kp;
 //    double ki;
 //    clocktime_t offset;
 //    clocktime_t integral;
 
+    void setClockTime(clocktime_t newClockTime);
 };
 
 } // namespace inet
