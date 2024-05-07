@@ -15,8 +15,8 @@ simple QosClassifier like IIeee8021dQosClassifier
 {
     parameters:
         string ipProtocolUpMap = default("1 BE 58 BE");
-        string udpPortUpMap @enum() = default("21 BK 80 BE 4000 VI 5000 VO");
-        string tcpPortUpMap @enum() = default("21 BK 80 BE 4000 VI 5000 VO");
+        string udpPortUpMap = default("21 BK 80 BE 4000 VI 5000 VO");
+        string tcpPortUpMap = default("21 BK 80 BE 4000 VI 5000 VO");
         string defaultUp = default("BE");
         @display("i=block/classifier");
     gates:
