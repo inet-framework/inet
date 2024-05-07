@@ -14,5 +14,4 @@ module EthernetSinkApp extends EthernetApp
 {
     parameters:
         source.typename = "";
-        io.destPort = -1;
 }
