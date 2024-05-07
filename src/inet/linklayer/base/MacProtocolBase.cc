@@ -7,7 +7,6 @@
 
 #include "inet/linklayer/base/MacProtocolBase.h"
 
-#include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 

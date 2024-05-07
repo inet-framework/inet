@@ -468,24 +468,6 @@ void MessageDispatcher::handleRegisterAnyProtocol(cGate *g, ServicePrimitive ser
     }
 }
 
-void MessageDispatcher::handleRegisterInterface(const NetworkInterface& interface, cGate *out, cGate *in)
-{
-    Enter_Method("handleRegisterInterface");
-    EV_INFO << "Handling interface registration" << EV_FIELD(interface) << EV_FIELD(out, out) << EV_FIELD(in) << EV_ENDL;
-    auto it = interfaceIdToGateIndex.find(interface.getInterfaceId());
-    if (it != interfaceIdToGateIndex.end()) {
-        if (it->second != out->getIndex())
-            throw cRuntimeError("handleRegisterInterface(): interface is already registered: interfaceId = %d, interfaceName = %s, pathStartGate = %s, pathEndGate = %s", interface.getInterfaceId(), interface.str().c_str(), out->getPathStartGate()->getFullPath().c_str(), out->getPathEndGate()->getFullPath().c_str());
-    }
-    else {
-        interfaceIdToGateIndex[interface.getInterfaceId()] = out->getIndex();
-        int size = gateSize("out");
-        for (int i = 0; i < size; i++)
-            if (i != in->getIndex())
-                registerInterface(interface, gate("in", i), gate("out", i));
-    }
-}
-
 int MessageDispatcher::getGateIndexToConnectedModule(const char *moduleName)
 {
     int size = gateSize("out");
