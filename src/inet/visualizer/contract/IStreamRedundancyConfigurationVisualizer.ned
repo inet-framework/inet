@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 //
 // @see ~StreamRedundancyConfigurationCanvasVisualizer
 //
-moduleinterface IStreamRedundancyConfigurationVisualizer
+moduleinterface IStreamRedundancyConfigurationVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

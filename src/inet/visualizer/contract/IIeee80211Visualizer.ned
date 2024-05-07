@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 //
 // @see ~Ieee80211CanvasVisualizer, ~Ieee80211OsgVisualizer, ~Ieee80211Visualizer, ~Ieee80211VisualizerBase
 //
-moduleinterface IIeee80211Visualizer
+moduleinterface IIeee80211Visualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

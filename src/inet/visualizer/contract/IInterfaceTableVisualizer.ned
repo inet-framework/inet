@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 //
 // @see ~InterfaceTableCanvasVisualizer, ~InterfaceTableOsgVisualizer, ~InterfaceTableVisualizer, ~InterfaceTableVisualizerBase
 //
-moduleinterface IInterfaceTableVisualizer
+moduleinterface IInterfaceTableVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

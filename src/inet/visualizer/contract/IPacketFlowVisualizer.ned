@@ -7,7 +7,7 @@
 
 package inet.visualizer.contract;
 
-moduleinterface IPacketFlowVisualizer
+moduleinterface IPacketFlowVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 //
 // @see ~TransportConnectionCanvasVisualizer, ~TransportConnectionOsgVisualizer, ~TransportConnectionVisualizer, ~TransportConnectionVisualizerBase
 //
-moduleinterface ITransportConnectionVisualizer
+moduleinterface ITransportConnectionVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");
