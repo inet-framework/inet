@@ -32,7 +32,7 @@ simple Ieee80211VisualizerBase extends VisualizerBase
         double maxPower @unit(dBm) = default(-50dBm); // maximum expeceted signal power
 
         string icons = default("misc/signal_power_0 misc/signal_power_1 misc/signal_power_2 misc/signal_power_3"); // wireless network visualization icon for different signal powers
-        string iconColor @enum("light", "dark") = default("dark"); // wireless network icon color is a list of colors, a set of dark colors by default
+        string iconColor = default("dark"); // wireless network icon color is a list of colors or a color group name (e.g. dark, light), a set of dark colors by default
         string labelFont = default("<default>"); // label font, automatic by default
         string labelColor = default("black"); // label color, black by default
         string placementHint = default("top"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.

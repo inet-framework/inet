@@ -46,7 +46,7 @@ simple PathVisualizerBase extends VisualizerBase
         string nodeFilter @mutable = default("*"); // which nodes are considered, matches all nodes by default
         object packetFilter @mutable = default("*"); // which packets are considered, matches all packets by default
 
-        string lineColor @enum("light", "dark") = default("dark"); // route color is a list of colors, a set of dark colors by default
+        string lineColor = default("dark"); // route color is a list of colors or a color group name (e.g. dark, light), a set of dark colors by default
         string lineStyle = default("solid"); // route line style (solid, dashed, dotted)
         double lineWidth = default(3); // route line width
         bool lineSmooth = default(false); // when true polylines are displayed as curves

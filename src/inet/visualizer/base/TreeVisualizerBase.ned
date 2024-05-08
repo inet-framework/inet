@@ -12,7 +12,7 @@ simple TreeVisualizerBase extends VisualizerBase
     parameters:
         bool displayTrees = default(false); // display a set of polyline arrows for trees, disabled by default
 
-        string lineColor @enum("light", "dark") = default("dark"); // line color is a list of colors, a set of dark colors by default
+        string lineColor = default("dark"); // line color is a list of colors or a color group name (e.g. dark, light), a set of dark colors by default
         string lineStyle = default("solid"); // line style (solid, dashed, dotted)
         double lineWidth = default(3); // line width
         bool lineSmooth = default(false); // when true polylines are displayed as curves

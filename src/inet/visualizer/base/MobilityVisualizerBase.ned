@@ -28,8 +28,8 @@ simple MobilityVisualizerBase extends VisualizerBase
         bool displayPositions = default(false); // display a circle indicating the current position, disabled by default
         double positionCircleRadius = default(4); // radius of the circle
         double positionCircleLineWidth = default(1); // line width of the circle
-        string positionCircleLineColor @enum("light", "dark") = default("dark"); // position circle line color is a list of colors, a set of dark colors by default
-        string positionCircleFillColor @enum("light", "dark") = default("dark"); // position circle fill color is a list of colors, a set of dark colors by default
+        string positionCircleLineColor = default("dark"); // position circle line color is a list of colors or a color group name (e.g. dark, light), a set of dark colors by default
+        string positionCircleFillColor = default("dark"); // position circle fill color is a list of colors or a color group name (e.g. dark, light), a set of dark colors by default
 
         bool displayOrientations = default(false); // display a pie indicating the current orientation, disabled by default
         double orientationPieRadius = default(32); // radius of the pie
@@ -47,7 +47,7 @@ simple MobilityVisualizerBase extends VisualizerBase
         double velocityLineWidth = default(1); // velocity line width
 
         bool displayMovementTrails = default(false); // display a line along the recent path of mobilities, disabled by default
-        string movementTrailLineColor @enum("light", "dark") = default("dark"); // movement trail line color is a list of colors, a set of dark colors by default
+        string movementTrailLineColor = default("dark"); // movement trail line color is a list of colors or a color group name (e.g. dark, light), a set of dark colors by default
         string movementTrailLineStyle = default("solid"); // movement trail line style (solid, dashed, dotted)
         double movementTrailLineWidth = default(1); // movement trail line width
         int trailLength = default(100); // number of sections in the trail
