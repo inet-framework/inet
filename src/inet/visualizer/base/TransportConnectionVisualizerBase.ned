@@ -32,7 +32,7 @@ simple TransportConnectionVisualizerBase extends VisualizerBase
         string destinationPortFilter @mutable = default("*"); // which destination ports are considered to display connections, matches all ports by default
 
         string icon = default("misc/marker_s"); // transport connection visualization icon
-        string iconColor @enum("light", "dark") = default("dark"); // transport connection icon color is a list of colors, a set of dark colors by default
+        string iconColor = default("dark"); // transport connection icon color is a list of colors or a color group name (e.g. dark, light), a set of dark colors by default
         string labelFont = default("<default>"); // label font, automatic by default
         string labelColor = default("black"); // label color, black by default
         string placementHint = default("top"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
