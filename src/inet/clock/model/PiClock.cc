@@ -66,13 +66,30 @@ void PiClock::setClockTime(clocktime_t newClockTime)
     if (newClockTime != oldClockTime) {
         emit(timeChangedSignal, oldClockTime.asSimTime());
 
+        auto offsetNs = offset.inUnit(SIMTIME_NS);
+
         originSimulationTime = simTime();
         originClockTime = oldClockTime;
 
         auto lastOscillatorCompensation = oscillatorCompensation;
-        auto ki_term = ki * offset;
-        auto newOscillatorSpeed = kp * offset + drift + ki_term;
-        drift += ki_term;
+
+        ppm kp_term = ppm (kp * offsetNs);
+        ppm kp_max = ppm (1000000);
+        ppm kp_min = ppm (-1000000);
+        if (kp_term > kp_max){
+            kp_term = kp_max;
+        }
+        else if (kp_term < kp_min){
+            kp_term = kp_min;
+        };
+        this->oscillatorCompensation = kp_term;
+
+
+        EV_INFO <<"offsetNs"<<offsetNs;
+        EV_INFO<<"kp_term"<<kp_term;
+
+
+
 
         emit(timeChangedSignal, newClockTime.asSimTime());
     }
