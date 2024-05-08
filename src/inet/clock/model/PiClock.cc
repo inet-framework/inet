@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
+#include <algorithm>
 #include "inet/clock/model/PiClock.h"
 
 #include "inet/clock/oscillator/ConstantDriftOscillator.h"
@@ -62,33 +63,29 @@ void PiClock::setClockTime(clocktime_t newClockTime)
 {
     Enter_Method("setClockTime");
     clocktime_t oldClockTime = getClockTime();
-    clocktime_t offset = newClockTime - oldClockTime;
+
     if (newClockTime != oldClockTime) {
         emit(timeChangedSignal, oldClockTime.asSimTime());
-
-        auto offsetNs = offset.inUnit(SIMTIME_NS);
 
         originSimulationTime = simTime();
         originClockTime = oldClockTime;
 
-        auto lastOscillatorCompensation = oscillatorCompensation;
+        offset_prev = offset;
+        offset = newClockTime - oldClockTime;
+        accumulatedOffset += offset;
 
-        ppm kp_term = ppm (kp * offsetNs);
-        ppm kp_max = ppm (1000000);
-        ppm kp_min = ppm (-1000000);
-        if (kp_term > kp_max){
-            kp_term = kp_max;
-        }
-        else if (kp_term < kp_min){
-            kp_term = kp_min;
-        };
-        this->oscillatorCompensation = kp_term;
+        offsetNanosecond_prev = offset_prev.inUnit(SIMTIME_NS);
+        offsetNanosecond = offset.inUnit(SIMTIME_NS);
+        accumulatedOffsetNanosecond += offsetNanosecond;
 
+        kpTerm = ppm (kp * offsetNanosecond);
+        kiTerm = ppm (ki * accumulatedOffsetNanosecond);
 
-        EV_INFO <<"offsetNs"<<offsetNs;
-        EV_INFO<<"kp_term"<<kp_term;
+        kpTerm = std::max(kpTermMin, std::min(kpTermMax, kpTerm));
+        kiTerm = std::max(kiTermMin, std::min(kiTermMax, kiTerm));
 
-
+        this->oscillatorCompensation = kpTerm + kiTerm;
+//        this->oscillatorCompensation = ppm(0);
 
 
         emit(timeChangedSignal, newClockTime.asSimTime());

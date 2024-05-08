@@ -435,19 +435,19 @@ void Gptp::synchronize()
 
     // Only change the oscillator if we have new information about our nrr
     // TODO: We should change this to a clock servo model in the future anyways!
-    ppm newOscillatorCompensation;
-    if (!hasNewRateRatioForOscillatorCompensation) {
-        newOscillatorCompensation = unit(piControlClock->getOscillatorCompensation());
-    }
-    else {
-        newOscillatorCompensation =
-            unit(gmRateRatio * (1 + unit(piControlClock->getOscillatorCompensation()).get()) - 1);
-        hasNewRateRatioForOscillatorCompensation = false;
-    }
+//    ppm newOscillatorCompensation;
+//    if (!hasNewRateRatioForOscillatorCompensation) {
+//        newOscillatorCompensation = unit(piControlClock->getOscillatorCompensation());
+//    }
+//    else {
+//        newOscillatorCompensation =
+//            unit(gmRateRatio * (1 + unit(piControlClock->getOscillatorCompensation()).get()) - 1);
+//        hasNewRateRatioForOscillatorCompensation = false;
+//    }
     piControlClock->setClockTime(newTime);
     EV_INFO << "############## TIME #####################################" << endl;
     EV_INFO << "newTime " << newTime << endl;
-    EV_INFO << "newOscillatorCompensation " << newOscillatorCompensation << endl;
+//    EV_INFO << "newOscillatorCompensation " << newOscillatorCompensation << endl;
 
 
     newLocalTimeAtTimeSync = clock->getClockTime();
