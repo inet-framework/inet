@@ -81,8 +81,8 @@ seed-1-mt = 7 # used for threshold comparison
 *.host*.wlan[0].radio.transmitter.power = 60.5mW # determines communication range - based on CC2520
 *.host*.wlan[0].radio.transmitter.preambleDuration = 192us # based on TI CC2520		
 *.host*.wlan[0].radio.transmitter.headerLength = 6B # based on TI CC2520		
-*.host*.wlan[0].radio.receiver.sensitivity = -98dBm # based on TI CC2520
-*.host*.wlan[0].radio.receiver.energyDetection = -85dBm
+*.host*.wlan[0].radio.receiver.sensitivity = -110dBm 
+*.host*.wlan[0].radio.receiver.energyDetection = -110dBm
 *.host*.wlan[0].radio.receiver.snirThreshold = 4dB 
 *.host*.wlan[0].radio.displayCommunicationRange = true
 
@@ -94,8 +94,8 @@ seed-1-mt = 7 # used for threshold comparison
 *.baseStation.wlan[0].radio.transmitter.power = 60.5mW				
 *.baseStation.wlan[0].radio.transmitter.preambleDuration = 192us	
 *.baseStation.wlan[0].radio.transmitter.headerLength = 6B
-*.baseStation.wlan[0].radio.receiver.sensitivity = -98dBm
-*.baseStation.wlan[0].radio.receiver.energyDetection = -85dBm
+*.baseStation.wlan[0].radio.receiver.sensitivity = -110dBm
+*.baseStation.wlan[0].radio.receiver.energyDetection = -110dBm
 *.baseStation.wlan[0].radio.receiver.snirThreshold = 4dB
 *.baseStation.wlan[0].radio.displayCommunicationRange = true
 
