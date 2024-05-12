@@ -56,7 +56,8 @@ def apply_command_to_files(file_list, context_file_list, command_text):
         with open(context_file_path, 'r', encoding='utf-8') as file:
             context.append(file.read())
     context = "\n".join(context)
-    for file_path in file_list:
+    for i, file_path in enumerate(file_list):
+        print(f"{i}/{len(file_list)} {file_path}:")
         # Read the file content
         with open(file_path, 'r', encoding='utf-8') as file:
             file_content = file.read()
