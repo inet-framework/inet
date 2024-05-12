@@ -30,19 +30,22 @@ def collect_matching_file_paths(directory, name_pattern, content_pattern):
     """
     matching_file_paths = []
     name_regex = re.compile(name_pattern)
-    content_regex = re.compile(content_pattern)
+    content_regex = re.compile(content_pattern) if content_pattern else None
 
     for root, _, files in os.walk(directory):
         for file in files:
             if name_regex.match(file):
                 file_path = os.path.join(root, file)
-                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                    try:
-                        content = f.read()
-                        if content_regex.search(content):
-                            matching_file_paths.append(file_path)
-                    except Exception as e:
-                        print(f"Could not read file {file_path}: {e}")
+                if not content_regex:
+                    matching_file_paths.append(file_path)
+                else:
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        try:
+                            content = f.read()
+                            if content_regex.search(content):
+                                matching_file_paths.append(file_path)
+                        except Exception as e:
+                            print(f"Could not read file {file_path}: {e}")
 
     return matching_file_paths
 
@@ -84,23 +87,32 @@ Respond with the updated file verbatim without any additional text. Here is the 
 
         print(f"Modified {file_path} successfully.")
 
+inet_root = "/home/andras/projects/inet"
+
 def test1():
-    file_list = ['/home/levy/workspace/inet/src/inet/networklayer/ipv4/Ipv4.h']
-    context_file_list = ['/home/levy/workspace/inet/src/inet/queueing/contract/IPassivePacketSink.h']
+    file_list = [inet_root + '/src/inet/networklayer/ipv4/Ipv4.h']
+    context_file_list = [inet_root + '/src/inet/queueing/contract/IPassivePacketSink.h']
     command_text = "Remove all methods that implement the IPassivePacketSink interface."
     apply_command_to_files(file_list, context_file_list, command_text)
 
 def test2():
-    file_list = collect_matching_file_paths("/home/levy/workspace/inet/src/inet", ".*\.h", "IPassivePacketSink")
+    file_list = collect_matching_file_paths(inet_root + "/src/inet", ".*\.h", "IPassivePacketSink")
     file_list = file_list + [file[:-2] + '.cc' if file.endswith('.h') else file for file in file_list]
-    context_file_list = ['/home/levy/workspace/inet/src/inet/queueing/contract/IPassivePacketSink.h']
+    context_file_list = [inet_root + '/src/inet/queueing/contract/IPassivePacketSink.h']
     command_text = "Remove all methods that implement the IPassivePacketSink interface."
     apply_command_to_files(file_list, context_file_list, command_text)
 
 def test3():
-    file_list = ['/home/levy/workspace/inet/src/inet/networklayer/ipv4/Ipv4.h']
-    context_file_list = ['/home/levy/workspace/inet/commit']
+    file_list = [inet_root + '/src/inet/networklayer/ipv4/Ipv4.h']
+    context_file_list = [inet_root + '/commit']
     command_text = "Based on the changes in the context remove obsolete include statements, base classes and methods."
     apply_command_to_files(file_list, context_file_list, command_text)
 
-test3()
+def proofread_ned_comments():
+    file_list = collect_matching_file_paths(inet_root + "/src", r".*.ned$", None)
+    print(f"{file_list=}")
+    context_file_list = []
+    command_text = "Here is an OMNeT++ NED file, fix any English mistakes in the comments (lines starting with `//`) in it."
+    apply_command_to_files(file_list, context_file_list, command_text)
+
+proofread_ned_comments()
