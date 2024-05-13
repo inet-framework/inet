@@ -71,5 +71,17 @@ void TcpServerSocketIo::sendOrScheduleReadCommandIfNeeded()
     }
 }
 
+void TcpServerSocketIo::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("trafficIn"))
+        socket->send(packet);
+    else if (gate->isName("socketIn"))
+        socket->processMessage(packet);
+    else
+        throw cRuntimeError("Unknown packet");
+}
+
 } // namespace inet
 

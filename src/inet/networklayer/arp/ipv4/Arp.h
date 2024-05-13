@@ -30,10 +30,12 @@ class IInterfaceTable;
 class NetworkInterface;
 class IIpv4RoutingTable;
 
+using namespace inet::queueing;
+
 /**
  * ARP implementation.
  */
-class INET_API Arp : public OperationalBase, public IArp
+class INET_API Arp : public OperationalBase, public IArp, public IPassivePacketSink
 {
   public:
     class ArpCacheEntry;
@@ -90,6 +92,13 @@ class INET_API Arp : public OperationalBase, public IArp
 
     void sendArpGratuitous(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode = ARP_REQUEST);
     void sendArpProbe(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Address probedAddr);
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("ifIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("ifIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
   protected:
     virtual void initialize(int stage) override;

@@ -141,5 +141,22 @@ void UdpSocketIo::handleCrashOperation(LifecycleOperation *operation)
     socket.destroy();
 }
 
+void UdpSocketIo::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("trafficIn")) {
+        if (dontFragment)
+            packet->addTagIfAbsent<FragmentationReq>()->setDontFragment(true);
+        socket.send(packet);
+        numSent++;
+        emit(packetSentSignal, packet);
+    }
+    else {
+        if (socket.belongsToSocket(packet))
+            socket.processMessage(packet);
+    }
+}
+
 } // namespace inet
 

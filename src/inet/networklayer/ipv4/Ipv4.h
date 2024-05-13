@@ -26,6 +26,8 @@
 
 namespace inet {
 
+using namespace inet::queueing;
+
 class ArpPacket;
 class IcmpHeader;
 class IInterfaceTable;
@@ -34,7 +36,7 @@ class IIpv4RoutingTable;
 /**
  * Implements the Ipv4 protocol.
  */
-class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetworkProtocol, public DefaultProtocolRegistrationListener, public cListener
+class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetworkProtocol, public DefaultProtocolRegistrationListener, public cListener, public IPassivePacketSink
 {
   public:
     /**
@@ -283,6 +285,13 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
 
     /// cListener method
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
   protected:
     virtual void start();

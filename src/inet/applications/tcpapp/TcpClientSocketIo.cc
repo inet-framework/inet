@@ -111,4 +111,19 @@ void TcpClientSocketIo::sendOrScheduleReadCommandIfNeeded()
     }
 }
 
+void TcpClientSocketIo::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("trafficIn")) {
+        if (!socket.isOpen())
+            open();
+        socket.send(packet);
+    }
+    else if (gate->isName("socketIn"))
+        socket.processMessage(packet);
+    else
+        throw cRuntimeError("Unknown packet");
+}
+
 } // namespace inet

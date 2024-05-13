@@ -343,6 +343,16 @@ void EthernetEncapsulation::handleRegisterAnyProtocol(cGate *gate, ServicePrimit
         anyUpperProtocols = true;
 }
 
+void EthernetEncapsulation::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("upperLayerIn"))
+        processPacketFromHigherLayer(packet);
+    else
+        processPacketFromMac(packet);
+}
+
 void EthernetEncapsulation::bind(int socketId, int interfaceId, const MacAddress &localAddress, const MacAddress &remoteAddress, const Protocol *protocol, bool steal)
 {
     Enter_Method("bind");
