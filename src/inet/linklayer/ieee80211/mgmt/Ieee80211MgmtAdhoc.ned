@@ -22,7 +22,7 @@ simple Ieee80211MgmtAdhoc like IIeee80211Mgmt
     gates:
         input macIn @labels(Ieee80211MacHeader);
         output macOut @labels(Ieee80211MacHeader);
-        input agentIn @loose;   // unused dummy to statisfy the IIeee80211Mgmt interface
-        output agentOut @loose; // unused dummy to statisfy the IIeee80211Mgmt interface
+        input agentIn @loose;   // Unused dummy to statisfy the IIeee80211Mgmt interface
+        output agentOut @loose; // Unused dummy to statisfy the IIeee80211Mgmt interface
 }
 

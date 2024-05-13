@@ -19,7 +19,7 @@ simple PcpClassifier extends PacketClassifierBase like IPacketClassifier
 {
     parameters:
         string mode @enum("req", "ind", "both") = default("both");
-        object pcpToGateIndex; // specifies the gate index for all PCP values in ascending order
-        int defaultGateIndex = default(0); // default gate index if no PCP found
+        object pcpToGateIndex; // Specifies the gate index for all PCP values in ascending order
+        int defaultGateIndex = default(0); // Default gate index if no PCP found
         @class(PcpClassifier);
 }

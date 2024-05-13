@@ -29,8 +29,8 @@ simple Igmpv3 like IIgmp
         @selfMessageKinds(inet::IgmpTimerKind);
 
     gates:
-        input ipIn @labels(Ipv4ControlInfo/up);  // delivered IGMP packets
-        output ipOut @labels(Ipv4ControlInfo/down); // to ~Ipv4
+        input ipIn @labels(Ipv4ControlInfo/up);  // Delivered IGMP packets
+        output ipOut @labels(Ipv4ControlInfo/down); // To ~Ipv4
 
         input routerIn @labels(Ipv4ControlInfo/up);
         output routerOut @labels(Ipv4ControlInfo/down);

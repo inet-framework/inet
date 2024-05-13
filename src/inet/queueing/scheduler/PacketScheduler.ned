@@ -21,6 +21,6 @@ import inet.queueing.contract.IPacketScheduler;
 simple PacketScheduler extends PacketSchedulerBase like IPacketScheduler
 {
     parameters:
-        string schedulerClass; // determines the input queue of the packet, the parameter must be the name of a C++ class which implements the IPacketSchedulerFunction interface and is registered via Register_Class
+        string schedulerClass; // Determines the input queue of the packet, the parameter must be the name of a C++ class which implements the IPacketSchedulerFunction interface and is registered via Register_Class
         @class(PacketScheduler);
 }

@@ -32,20 +32,20 @@ package inet.common.packet.recorder;
 simple PcapRecorder
 {
     parameters:
-        bool verbose = default(true);  // whether to log packets on the module output
-        string pcapFile = default(""); // the PCAP file to be written
+        bool verbose = default(true);  // Whether to log packets on the module output
+        string pcapFile = default(""); // The PCAP file to be written
         string fileFormat @enum("pcap", "pcapng") = default("pcapng");
-        int snaplen = default(65535);  // maximum number of bytes to record per packet
-        int timePrecision = default(6); // Time precison in recorded file. pcap supports only 6 (usec) or 9 (nanosec), pcapng supports more values (see 'if_tsresol' option in pcapng file format). 
-        bool dumpBadFrames = default(true); // enable dump of frames with hasBitError
-        string moduleNamePatterns = default("wlan[*] eth[*] ppp[*]"); // space-separated list of sibling module names to listen on
-        string sendingSignalNames = default("packetSentToLower"); // space-separated list of outbound packet signals to subscribe to
-        string receivingSignalNames = default("packetReceivedFromLower"); // space-separated list of inbound packet signals to subscribe to
-        string dumpProtocols = default("ethernetmac ppp ieee80211mac"); // space-separated list of protocol names as defined in the Protocol class
-        object packetFilter = default("*"); // which packets are considered, matches all packets by default
-        string helpers = default("");    // usable PcapRecorder::IHelper helpers for accept packettype and store/convert packet as specified linktype
+        int snaplen = default(65535);  // Maximum number of bytes to record per packet
+        int timePrecision = default(6); // Time precison in recorded file. pcap supports only 6 (usec) or 9 (nanosec), pcapng supports more values (see 'if_tsresol' option in pcapng file format).
+        bool dumpBadFrames = default(true); // Enable dump of frames with hasBitError
+        string moduleNamePatterns = default("wlan[*] eth[*] ppp[*]"); // Space-separated list of sibling module names to listen on
+        string sendingSignalNames = default("packetSentToLower"); // Space-separated list of outbound packet signals to subscribe to
+        string receivingSignalNames = default("packetReceivedFromLower"); // Space-separated list of inbound packet signals to subscribe to
+        string dumpProtocols = default("ethernetmac ppp ieee80211mac"); // Space-separated list of protocol names as defined in the Protocol class
+        object packetFilter = default("*"); // Which packets are considered, matches all packets by default
+        string helpers = default("");    // Usable PcapRecorder::IHelper helpers for accept packettype and store/convert packet as specified linktype
                                          // currently available: "inet::AckingMacToEthernetPcapRecorderHelper"
-        bool alwaysFlush = default(false); // flush the pcapFile after each write to ensure that all packets are captured in case of a crash
+        bool alwaysFlush = default(false); // Flush the pcapFile after each write to ensure that all packets are captured in case of a crash
         string displayStringTextFormat = default("rec: %n pks");
         @display("i=block/blackboard");
         @signal[packetRecorded](type=Packet);

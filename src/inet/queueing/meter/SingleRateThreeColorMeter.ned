@@ -25,11 +25,11 @@ package inet.queueing.meter;
 simple SingleRateThreeColorMeter extends MultiTokenBucketMeter
 {
     parameters:
-        double committedInformationRate @unit(bps); // committed information rate
-        int committedBurstSize @unit(b); // committed burst size
-        int excessBurstSize @unit(b); // excess burst size
-        int bitsPerToken = default(8); // how many bits are represented by 1 token
-        bool colorAware = default(false); // enables color-aware mode where packets can only be demoted
+        double committedInformationRate @unit(bps); // Committed information rate
+        int committedBurstSize @unit(b); // Committed burst size
+        int excessBurstSize @unit(b); // Excess burst size
+        int bitsPerToken = default(8); // How many bits are represented by 1 token
+        bool colorAware = default(false); // Enables color-aware mode where packets can only be demoted
         buckets = [{initialNumTokens: dropUnit(committedBurstSize) / bitsPerToken, maxNumTokens: dropUnit(committedBurstSize) / bitsPerToken, tokenProductionRate: dropUnit(committedInformationRate) / bitsPerToken, label: "green"},
                    {initialNumTokens: dropUnit(excessBurstSize) / bitsPerToken, maxNumTokens: dropUnit(excessBurstSize) / bitsPerToken, tokenProductionRate: 0, label: "yellow"}];
         tokenConsumptionPerBit = 1 / bitsPerToken;

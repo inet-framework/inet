@@ -56,7 +56,7 @@ simple Dymo like IManetRouting
         // double CONTROL_TRAFFIC_LIMIT
 
         // Dymo extension parameters
-        double maxJitter @unit(s) = default(10ms); // see IETF RFC5148 (Jitter Considerations in MANET)
+        double maxJitter @unit(s) = default(10ms); // See IETF RFC5148 (Jitter Considerations in MANET)
         bool sendIntermediateRREP = default(true);
         int minHopLimit = default(5);
         int maxHopLimit = default(10);

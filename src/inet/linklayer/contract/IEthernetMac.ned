@@ -37,14 +37,14 @@ package inet.linklayer.contract;
 moduleinterface IEtherMac
 {
     parameters:
-        bool promiscuous;       // if true, all packets are received, otherwise only the
+        bool promiscuous;       // If true, all packets are received, otherwise only the
                                 // ones with matching destination MAC address
-        bool duplexMode;        // selects full-duplex (true) or half-duplex (false) operation
+        bool duplexMode;        // Selects full-duplex (true) or half-duplex (false) operation
         int mtu @unit(B);
         @display("i=block/rxtx");
     gates:
-        input upperLayerIn @labels(EtherFrame);    // to ~EthernetEncapsulation or ~IMacRelayUnit
-        output upperLayerOut @labels(EtherFrame);  // to ~EthernetEncapsulation or ~IMacRelayUnit
-        inout phys @labels(EthernetSignal); // to the network
+        input upperLayerIn @labels(EtherFrame);    // To ~EthernetEncapsulation or ~IMacRelayUnit
+        output upperLayerOut @labels(EtherFrame);  // To ~EthernetEncapsulation or ~IMacRelayUnit
+        inout phys @labels(EthernetSignal); // To the network
 }
 

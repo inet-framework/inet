@@ -26,7 +26,7 @@ simple Ieee80211MgmtSta like IIeee80211Mgmt
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
-        int numChannels = default(1);  // number of channels to scan
+        int numChannels = default(1);  // Number of channels to scan
         string mibModule;
         string macModule;               // The path to the MAC module
         @display("i=block/cogwheel");
@@ -35,7 +35,7 @@ simple Ieee80211MgmtSta like IIeee80211Mgmt
     gates:
         input macIn @labels(Ieee80211MacHeader);
         output macOut @labels(Ieee80211MacHeader);
-        input agentIn;   // used for attaching an agent algorithm
-        output agentOut; // used for attaching an agent algorithm
+        input agentIn;   // Used for attaching an agent algorithm
+        output agentOut; // Used for attaching an agent algorithm
 }
 

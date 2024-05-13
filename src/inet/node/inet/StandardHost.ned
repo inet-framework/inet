@@ -31,8 +31,8 @@ module StandardHost extends ApplicationLayerNodeBase
     parameters:
         @display("i=device/pc2");
         @figure[submodules];
-        forwarding = default(false);  // disable routing by default
-        ipv4.arp.proxyArpInterfaces = default(""); // proxy arp is disabled on hosts by default
+        forwarding = default(false);  // Disable routing by default
+        ipv4.arp.proxyArpInterfaces = default(""); // Proxy arp is disabled on hosts by default
         *.routingTableModule = default("^.ipv4.routingTable");
 }
 

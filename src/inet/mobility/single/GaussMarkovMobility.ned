@@ -28,9 +28,9 @@ simple GaussMarkovMobility extends MovingMobilityBase
         @class(GaussMarkovMobility);
         double alpha = default(0.5); // [0;1], 0 - brown motion, 1 - linear motion
         double speed @unit(mps);
-        double speedStdDev @unit(mps);     // speed standard deviation
+        double speedStdDev @unit(mps);     // Speed standard deviation
         double angle @unit(deg) = default(uniform(0deg, 360deg));
-        double angleStdDev @unit(deg);     // angle standard deviation
+        double angleStdDev @unit(deg);     // Angle standard deviation
         double margin @unit(m);
 }
 

@@ -18,8 +18,8 @@ import inet.visualizer.contract.INetworkConnectionVisualizer;
 simple NetworkConnectionCanvasVisualizer extends NetworkConnectionVisualizerBase like INetworkConnectionVisualizer
 {
     parameters:
-        double zIndex = default(0); // determines the drawing order of figures relative to other visualizers
-        nodeFilter = default(""); // disabled because omnetpp displays network connections by default
+        double zIndex = default(0); // Determines the drawing order of figures relative to other visualizers
+        nodeFilter = default(""); // Disabled because omnetpp displays network connections by default
         @class(NetworkConnectionCanvasVisualizer);
 }
 

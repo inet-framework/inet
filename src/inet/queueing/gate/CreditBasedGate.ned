@@ -32,14 +32,14 @@ import inet.queueing.contract.IPacketGate;
 simple CreditBasedGate extends PacketGateBase like IPacketGate
 {
     parameters:
-        double idleCreditGainRate; // rate of credit increase while the packets that passed through this gate don't use the physical channel
-        double transmitCreditSpendRate; // rate of credit decrease while the packets that passed through this gate use the physical channel
-        double initialCredit = default(0); // initial number of credits
-        double transmitCreditLimit = default(0); // credit limit above which the gate is open
-        double minCredit = default(-inf); // minimum number of credits
-        double maxCredit = default(inf); // maximum number of credits
-        bool accumulateCreditInGuardBand = default(false); // whether credit increases during implicit guard band when no packets can be sent anymore
-        displayStringTextFormat = default("contains %n cr\nserved %p pk (%l)"); // determines display string text above the submodule
+        double idleCreditGainRate; // Rate of credit increase while the packets that passed through this gate don't use the physical channel
+        double transmitCreditSpendRate; // Rate of credit decrease while the packets that passed through this gate use the physical channel
+        double initialCredit = default(0); // Initial number of credits
+        double transmitCreditLimit = default(0); // Credit limit above which the gate is open
+        double minCredit = default(-inf); // Minimum number of credits
+        double maxCredit = default(inf); // Maximum number of credits
+        bool accumulateCreditInGuardBand = default(false); // Whether credit increases during implicit guard band when no packets can be sent anymore
+        displayStringTextFormat = default("contains %n cr\nserved %p pk (%l)"); // Determines display string text above the submodule
         @class(CreditBasedGate);
         @signal[creditsChanged](type=double);
         @statistic[numCredits](title="number of credits"; source=creditsChanged; record=vector; unit=cr; interpolationmode=linear);

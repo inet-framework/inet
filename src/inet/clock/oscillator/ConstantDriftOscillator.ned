@@ -22,7 +22,7 @@ import inet.clock.contract.IOscillator;
 simple ConstantDriftOscillator extends DriftingOscillatorBase like IOscillator
 {
     parameters:
-        double driftRate @unit(ppm) = default(0ppm); // expressed as a ratio in parts per million
+        double driftRate @unit(ppm) = default(0ppm); // Expressed as a ratio in parts per million
         @class(ConstantDriftOscillator);
 }
 

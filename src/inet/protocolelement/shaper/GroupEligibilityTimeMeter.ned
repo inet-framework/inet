@@ -15,10 +15,10 @@ package inet.protocolelement.shaper;
 //
 // @see ~ATS8021qFilter, ~EligibilityTimeGate, ~EligibilityTimeFilter, ~EligibilityTimeQueue, ~EligibilityTimeTag
 //
- 
+
 simple GroupEligibilityTimeMeter extends EligibilityTimeMeter
 {
-	parameters: 
-        string groupEligibilityTimeTableModule; // relative path to the eligibilityTimeTable
+	parameters:
+        string groupEligibilityTimeTableModule; // Relative path to the eligibilityTimeTable
         @class(inet::MyEligibilityTimeMeter);
 }

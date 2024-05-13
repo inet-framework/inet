@@ -21,7 +21,7 @@ import inet.queueing.contract.IPacketFlow;
 module DirectionReverserLayer like IProtocolLayer
 {
     parameters:
-        string interfaceTableModule; // relative module path of the interface table
+        string interfaceTableModule; // Relative module path of the interface table
         *.interfaceTableModule = default(this.interfaceTableModule);
         @display("i=block/layer");
     gates:

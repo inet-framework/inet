@@ -16,7 +16,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IMediumAnalogMode
 module DimensionalMediumAnalogModel like IMediumAnalogModel
 {
     parameters:
-        bool attenuateWithCenterFrequency = default(true); // true means frequency selectivity will always use the carrier frequencey as opposed to using the frequency where the change in power occurs
+        bool attenuateWithCenterFrequency = default(true); // True means frequency selectivity will always use the carrier frequencey as opposed to using the frequency where the change in power occurs
         @display("i=block/tunnel");
         @class(DimensionalMediumAnalogModel);
 }

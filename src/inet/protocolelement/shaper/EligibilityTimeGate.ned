@@ -23,7 +23,7 @@ import inet.queueing.contract.IPacketGate;
 simple EligibilityTimeGate extends PacketGateBase like IPacketGate
 {
     parameters:
-        string clockModule = default(""); // relative path of a module that implements IClock; optional
+        string clockModule = default(""); // Relative path of a module that implements IClock; optional
         @signal[remainingEligibilityTimeChanged](type=simtime_t);
         @statistic[remainingEligibilityTime](title="remaining eligibility time"; source=remainingEligibilityTimeChanged; record=vector; unit=s; interpolationmode=linear);
         @class(EligibilityTimeGate);

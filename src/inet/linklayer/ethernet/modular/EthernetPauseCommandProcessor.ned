@@ -12,7 +12,7 @@ simple EthernetPauseCommandProcessor
     parameters:
         //@class(EthernetPauseCommandProcessor);
         @display("i=block/inserter");
-        @signal[pauseSent](type=long); // pause units
+        @signal[pauseSent](type=long); // Pause units
         @statistic[pauseSent](title="pause sent";record=count,sum,vector);
     gates:
         input in @labels(send);

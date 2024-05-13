@@ -32,7 +32,7 @@ package inet.networklayer.mpls;
 simple LibTable
 {
     parameters:
-        xml config = default(xml("<libtable/>")); // table contents to be loaded on startup
+        xml config = default(xml("<libtable/>")); // Table contents to be loaded on startup
         @display("i=block/table2");
 }
 

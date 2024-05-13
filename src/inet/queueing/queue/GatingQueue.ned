@@ -26,7 +26,7 @@ module GatingQueue extends CompoundPacketQueueBase
     parameters:
         double bitrate @unit(bps);
         *.bitrate = default(this.bitrate);
-        *.extraLength = default(64b); // overhead for Ethernet PHY header
+        *.extraLength = default(64b); // Overhead for Ethernet PHY header
     submodules:
         queue: <default("PacketQueue")> like IPacketQueue {
             @display("p=300,100,column,125");

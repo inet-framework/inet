@@ -21,11 +21,11 @@ simple OpenStreetMapSceneCanvasVisualizer extends SceneVisualizerBase like IScen
 {
     parameters:
         @class(OpenStreetMapSceneCanvasVisualizer);
-        string coordinateSystemModule = default("coordinateSystem"); // the geographic coordinate system, refers to a top level module by default
+        string coordinateSystemModule = default("coordinateSystem"); // The geographic coordinate system, refers to a top level module by default
 
         xml mapFile; // OpenStreetMap map file, e.g. one exported from openstreetmap.org
 
-        double zIndex = default(0); // determines the drawing order of figures relative to other visualizers
-        bool adjustBackgroundBox = default(true); // if true, sets background box (bgb tag) to match map bounds
+        double zIndex = default(0); // Determines the drawing order of figures relative to other visualizers
+        bool adjustBackgroundBox = default(true); // If true, sets background box (bgb tag) to match map bounds
 }
 

@@ -142,7 +142,7 @@ simple Ospfv2 like IOspf
         string interfaceTableModule;
         string routingTableModule;
         string crcMode @enum("declared", "computed") = default("declared");
-        volatile double startupTime @unit(s) = default(0s); // delay before starting OSPF
+        volatile double startupTime @unit(s) = default(0s); // Delay before starting OSPF
         // xml containing the full OSPF AS configuration
         xml ospfConfig = default(xml("<OSPFASConfig> \
                 <Router name='**' RFC1583Compatible='true'> \
@@ -154,23 +154,23 @@ simple Ospfv2 like IOspf
 
         int routerPriority = default(1);  // Priority in DR/BDR election (Specify 0 to exclude the router from the election)
         string areaID = default("0.0.0.0");
-        bool RFC1583Compatible = default(false); // if 'false', prune the set of routing table entries for the ASBR (RFC 3101)
-        bool DistributeDefaultRoute = default(false); // distribute the default route (if exists) using AS-External LSA
+        bool RFC1583Compatible = default(false); // If 'false', prune the set of routing table entries for the ASBR (RFC 3101)
+        bool DistributeDefaultRoute = default(false); // Distribute the default route (if exists) using AS-External LSA
 
-        int helloInterval @unit(s) = default(10s);  // specifies the time in seconds between hello packets that the other router sends on an interface
-        int pollInterval @unit(s) = default(120s);  // specifies the length of time, in seconds, between OSPF packets that the router send before adjacency is established with a neighbor
-        int routerDeadInterval @unit(s) = default(40s);  // the interval during which at least one hello packet must be received from a neighbor before the router declares that neighbor as down
+        int helloInterval @unit(s) = default(10s);  // Specifies the time in seconds between hello packets that the other router sends on an interface
+        int pollInterval @unit(s) = default(120s);  // Specifies the length of time, in seconds, between OSPF packets that the router send before adjacency is established with a neighbor
+        int routerDeadInterval @unit(s) = default(40s);  // The interval during which at least one hello packet must be received from a neighbor before the router declares that neighbor as down
         int retransmissionInterval @unit(s) = default(5s);  // The time between OSPF LSA retransmissions for adjacencies that belongs to the interface
         int interfaceTransmissionDelay @unit(s) = default(1s);  // The number of seconds required to transmit a link state update packet. Valid values are 1 to 65535
         string interfaceMode @enum("Active","Passive","NoOSPF") = default("Active"); // NoOSPF: the interface is not advertized by OSPF
                                                                                      // Passive: the interface is advertised, but no OSPF message is send out
 
-        int referenceBandwidth @unit(bps) = default(1e8bps);   // reference bandwidth for cost calculation
-        int interfaceOutputCost = default(0);  // cost of link on the interface (1-1000), 0 means use reference bandwidth
-        int externalInterfaceOutputCost = default(1);  // cost of link (1-1000)
+        int referenceBandwidth @unit(bps) = default(1e8bps);   // Reference bandwidth for cost calculation
+        int interfaceOutputCost = default(0);  // Cost of link on the interface (1-1000), 0 means use reference bandwidth
+        int externalInterfaceOutputCost = default(1);  // Cost of link (1-1000)
         string externalInterfaceOutputType = default("Type2");  // Type1|Type2
         string forwardingAddress = default("0.0.0.0");
-        int linkCost = default(1);  // cost of link (1-1000) for HostInterface and LoopbackInterface only
+        int linkCost = default(1);  // Cost of link (1-1000) for HostInterface and LoopbackInterface only
 
         string authenticationType @enum("SimplePasswordType","CrytographicType","NullType") = default("NullType");
         string authenticationKey = default("0x00");  // 0xnn..nn

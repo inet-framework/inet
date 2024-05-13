@@ -16,6 +16,6 @@ import inet.queueing.contract.IPacketMarker;
 simple PacketTagger extends PacketTaggerBase like IPacketMarker
 {
     parameters:
-        string filterClass = default("inet::queueing::AnyPacketFilter"); // determines which packets are tagged
+        string filterClass = default("inet::queueing::AnyPacketFilter"); // Determines which packets are tagged
         @class(PacketTagger);
 }

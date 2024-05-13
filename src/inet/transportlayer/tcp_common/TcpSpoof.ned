@@ -19,13 +19,13 @@ import inet.transportlayer.contract.ITcp;
 simple TcpSpoof like ITcp
 {
     parameters:
-        string srcAddress = default("");  // local address; may be left empty ("")
-        string destAddress = default(""); // destination address
-        int srcPort; // local port number
-        int destPort; // destination port number
-        int seqNo; // sequence number (-1 for TCP ISS)
-        bool isSYN = default(true); // whether to set SYN bit on packet
-        double t @unit(s); // simulation time to send at
+        string srcAddress = default("");  // Local address; may be left empty ("")
+        string destAddress = default(""); // Destination address
+        int srcPort; // Local port number
+        int destPort; // Destination port number
+        int seqNo; // Sequence number (-1 for TCP ISS)
+        bool isSYN = default(true); // Whether to set SYN bit on packet
+        double t @unit(s); // Simulation time to send at
         @display("i=block/square");
         @signal[packetSent](type=cPacket);
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

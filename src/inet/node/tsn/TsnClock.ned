@@ -17,10 +17,10 @@ import inet.linklayer.ieee8021as.GptpMaster;
 module TsnClock extends GptpMaster
 {
     parameters:
-        bool hasCutthroughSwitching = default(false); // enable cut-through switching support
-        clock.typename = default("OscillatorBasedClock"); // master clocks cannot be set
-        ethernet.typename = default("EthernetLayer"); // use Ethernet protocol layer outside of network interfaces
-        eth[*].typename = default("LayeredEthernetInterface"); // switch to modular Ethernet interface
-        eth[*].phyLayer.typename = default(hasCutthroughSwitching ? "EthernetStreamingPhyLayer" : "EthernetPhyLayer"); // use packet streaming when cut-through switching is enabled
-        @display("i=device/card"); // change icon to emphasise hardware device
+        bool hasCutthroughSwitching = default(false); // Enable cut-through switching support
+        clock.typename = default("OscillatorBasedClock"); // Master clocks cannot be set
+        ethernet.typename = default("EthernetLayer"); // Use Ethernet protocol layer outside of network interfaces
+        eth[*].typename = default("LayeredEthernetInterface"); // Switch to modular Ethernet interface
+        eth[*].phyLayer.typename = default(hasCutthroughSwitching ? "EthernetStreamingPhyLayer" : "EthernetPhyLayer"); // Use packet streaming when cut-through switching is enabled
+        @display("i=device/card"); // Change icon to emphasise hardware device
 }

@@ -24,7 +24,7 @@ import inet.visualizer.contract.INetworkRouteVisualizer;
 simple NetworkRouteCanvasVisualizer extends PathVisualizerBase like INetworkRouteVisualizer
 {
     parameters:
-        double zIndex = default(3); // determines the drawing order of figures relative to other visualizers
+        double zIndex = default(3); // Determines the drawing order of figures relative to other visualizers
         @class(NetworkRouteCanvasVisualizer);
 }
 

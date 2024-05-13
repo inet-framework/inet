@@ -21,6 +21,6 @@ import inet.queueing.contract.IPacketFilter;
 simple ContentBasedFilter extends PacketFilterBase like IPacketFilter
 {
     parameters:
-        object packetFilter = default("*"); // packet filter expressions, matches all packets by default
+        object packetFilter = default("*"); // Packet filter expressions, matches all packets by default
         @class(ContentBasedFilter);
 }

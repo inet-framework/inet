@@ -19,7 +19,7 @@ import inet.queueing.contract.IPassivePacketSink;
 simple PacketDuplicator extends PacketDuplicatorBase like IPassivePacketSink, IActivePacketSource
 {
     parameters:
-        volatile int numDuplicates = default(1); // number of duplicates, 0 means only the original packet is forwarded
+        volatile int numDuplicates = default(1); // Number of duplicates, 0 means only the original packet is forwarded
         @class(PacketDuplicator);
         @display("i=block/star");
     gates:

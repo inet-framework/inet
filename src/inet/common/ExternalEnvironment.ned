@@ -21,11 +21,11 @@ package inet.common;
 simple ExternalEnvironment
 {
     parameters:
-        int initStage = default(0); // initialization stage for the setup command
-        bool globalNamespace = default(false); // create new network namespaces under /var/run/netns/ (Linux only)
-        string namespace = default(""); // name of the host OS network namespace (optional) (Linux only)
-        string setupCommand = default(""); // a host OS system command
-        string teardownCommand = default(""); // a host OS system command
+        int initStage = default(0); // Initialization stage for the setup command
+        bool globalNamespace = default(false); // Create new network namespaces under /var/run/netns/ (Linux only)
+        string namespace = default(""); // Name of the host OS network namespace (optional) (Linux only)
+        string setupCommand = default(""); // A host OS system command
+        string teardownCommand = default(""); // A host OS system command
         @display("i=block/app");
 }
 

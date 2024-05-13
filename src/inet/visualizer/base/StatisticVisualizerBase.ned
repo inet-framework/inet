@@ -28,25 +28,25 @@ package inet.visualizer.base;
 simple StatisticVisualizerBase extends VisualizerBase
 {
     parameters:
-        string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // the network node visualizer module, refers to a sibling submodule by default
+        string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // The network node visualizer module, refers to a sibling submodule by default
 
         bool displayStatistics = default(false);
 
-        string signalName = default(""); // signal name to subscribe, no signal name by default
-        string statisticName = default(signalName); // statistic name to get the value, signal name by default
-        string statisticUnit = default(""); // statistic unit, undefined by default
-        string statisticExpression = default(""); // statistic expression, received value by default
-        string sourceFilter @mutable = default("**"); // pattern that must match the signal source, no source filter by default
+        string signalName = default(""); // Signal name to subscribe, no signal name by default
+        string statisticName = default(signalName); // Statistic name to get the value, signal name by default
+        string statisticUnit = default(""); // Statistic unit, undefined by default
+        string statisticExpression = default(""); // Statistic expression, received value by default
+        string sourceFilter @mutable = default("**"); // Pattern that must match the signal source, no source filter by default
 
-        string format @mutable = default("%n: %v %u"); // determines what is displayed, info by default
-        string unit = default(""); // display the value in one of the specified units, statistic unit by default
+        string format @mutable = default("%n: %v %u"); // Determines what is displayed, info by default
+        string unit = default(""); // Display the value in one of the specified units, statistic unit by default
 
-        string font = default("<default>"); // statistic value font, automatic by default
-        string textColor = default("black"); // statistic value font color, black by default
-        string backgroundColor = default("white"); // statistic value background color, white by default
-        double opacity = default(1.0); // opacity of the visualization
-        string placementHint = default("top"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
-        double placementPriority = default(0); // determines the order of annotation positioning
+        string font = default("<default>"); // Statistic value font, automatic by default
+        string textColor = default("black"); // Statistic value font color, black by default
+        string backgroundColor = default("white"); // Statistic value background color, white by default
+        double opacity = default(1.0); // Opacity of the visualization
+        string placementHint = default("top"); // Annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        double placementPriority = default(0); // Determines the order of annotation positioning
 
         @class(StatisticVisualizerBase);
 }

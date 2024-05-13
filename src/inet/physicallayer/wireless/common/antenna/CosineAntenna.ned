@@ -27,7 +27,7 @@ import inet.physicallayer.wireless.common.base.packetlevel.AntennaBase;
 module CosineAntenna extends AntennaBase
 {
     parameters:
-        double maxGain @unit(dB);    // gain at the antenna boresight
+        double maxGain @unit(dB);    // Gain at the antenna boresight
         double beamWidth @unit(deg); // 3dB beam width
         @class(CosineAntenna);
 }

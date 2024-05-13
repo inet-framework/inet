@@ -23,7 +23,7 @@ simple Ieee80211MgmtAp like IIeee80211Mgmt
     parameters:
         string ssid = default("SSID");
         double beaconInterval @unit(s) = default(100ms);
-        int numAuthSteps = default(4); // use 2 for Open System auth, 4 for WEP
+        int numAuthSteps = default(4); // Use 2 for Open System auth, 4 for WEP
         string interfaceTableModule;
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
         string mibModule;
@@ -32,9 +32,9 @@ simple Ieee80211MgmtAp like IIeee80211Mgmt
         @signal[l2ApAssociated](type="inet::ieee80211::Ieee80211MgmtAp::NotificationInfoSta");
         @signal[l2ApDisassociated](type="inet::ieee80211::Ieee80211MgmtAp::NotificationInfoSta");
     gates:
-        input macIn @labels(Ieee80211MacHeader); // from ~Ieee80211Mac
-        output macOut @labels(Ieee80211MacHeader); // to ~Ieee80211Mac
-        input agentIn @loose;   // unused dummy to statisfy the IIeee80211Mgmt interface
-        output agentOut @loose; // unused dummy to statisfy the IIeee80211Mgmt interface
+        input macIn @labels(Ieee80211MacHeader); // From ~Ieee80211Mac
+        output macOut @labels(Ieee80211MacHeader); // To ~Ieee80211Mac
+        input agentIn @loose;   // Unused dummy to statisfy the IIeee80211Mgmt interface
+        output agentOut @loose; // Unused dummy to statisfy the IIeee80211Mgmt interface
 }
 

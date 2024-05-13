@@ -19,7 +19,7 @@ simple StreamIdentifier extends PacketFlowBase like IPacketFlow
 {
     parameters:
         bool hasSequenceNumbering = default(true);
-        object mapping @mutable = default([]); // array of objects, where each object specifies a stream name and a packetFilter, for example [{stream: "s0", packetFilter: "*"}, ...]
+        object mapping @mutable = default([]); // Array of objects, where each object specifies a stream name and a packetFilter, for example [{stream: "s0", packetFilter: "*"}, ...]
         @class(StreamIdentifier);
         @display("i=block/blackboard");
 }

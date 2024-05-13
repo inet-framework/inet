@@ -16,18 +16,18 @@ simple RtpApplication
 {
     parameters:
         @display("i=block/app");
-        string commonName;  // the common name (CNAME) of this host
-        string profileName;  // which rtp profile is to be used (usually RtpAvProfile)
-        double bandwidth;  // bandwidth in bytes per second for this session
-        string destinationAddress;  // destination address (the L3AddressResolver class is used to resolve the address)
-        int portNumber;  // used port
-        string fileName;    // fileName of file to be transmitted, "" means this system acts only as a receiver
-        int payloadType;  // payload type of file to transmit
-        double sessionEnterDelay @unit(s);  // delay before starts a new session
-        double transmissionStartDelay @unit(s); // delay before start transmission (related to "sender module created")
-        double transmissionStopDelay @unit(s);  // delay before stops transmission (related to "start transmission")
-        double sessionLeaveDelay @unit(s); // delay before leave session (related to "file transmission finished/stopped" or "session entered" when fileName is "")
-        @selfMessageKinds(inet::RtpAppSelfMsgKinds);    // kind used in self messages
+        string commonName;  // The common name (CNAME) of this host
+        string profileName;  // Which rtp profile is to be used (usually RtpAvProfile)
+        double bandwidth;  // Bandwidth in bytes per second for this session
+        string destinationAddress;  // Destination address (the L3AddressResolver class is used to resolve the address)
+        int portNumber;  // Used port
+        string fileName;    // FileName of file to be transmitted, "" means this system acts only as a receiver
+        int payloadType;  // Payload type of file to transmit
+        double sessionEnterDelay @unit(s);  // Delay before starts a new session
+        double transmissionStartDelay @unit(s); // Delay before start transmission (related to "sender module created")
+        double transmissionStopDelay @unit(s);  // Delay before stops transmission (related to "start transmission")
+        double sessionLeaveDelay @unit(s); // Delay before leave session (related to "file transmission finished/stopped" or "session entered" when fileName is "")
+        @selfMessageKinds(inet::RtpAppSelfMsgKinds);    // Kind used in self messages
 
     gates:
         output rtpOut @labels(RtpInterfacePacket/down);

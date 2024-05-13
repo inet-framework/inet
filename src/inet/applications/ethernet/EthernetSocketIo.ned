@@ -13,14 +13,14 @@ package inet.applications.ethernet;
 simple EthernetSocketIo
 {
     parameters:
-        string interfaceTableModule; // relative module path of the interface table
-        string interface = default(""); // network interface name
-        string protocol = default(""); // bind the socket to this protocol if specified
-        string localAddress = default(""); // local Ethernet MAC address
-        string remoteAddress = default(""); // remove Ethernet MAC address
-        bool steal = default(false); // steal packets
-        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
-        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        string interfaceTableModule; // Relative module path of the interface table
+        string interface = default(""); // Network interface name
+        string protocol = default(""); // Bind the socket to this protocol if specified
+        string localAddress = default(""); // Local Ethernet MAC address
+        string remoteAddress = default(""); // Remove Ethernet MAC address
+        bool steal = default(false); // Steal packets
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
         @lifecycleSupport();
         @display("i=block/socket");
         @signal[packetSent](type=inet::Packet);

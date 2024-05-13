@@ -26,13 +26,13 @@ import inet.applications.contract.IApp;
 simple TcpServerHostApp like IApp
 {
     parameters:
-        string localAddress = default(""); // may be left empty ("")
-        int localPort = default(1000); // port number to listen on
-        string serverThreadModuleType; // module type of "thread" module to launch on incoming connections
+        string localAddress = default(""); // May be left empty ("")
+        int localPort = default(1000); // Port number to listen on
+        string serverThreadModuleType; // Module type of "thread" module to launch on incoming connections
         @display("i=block/app");
         @lifecycleSupport;
-        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
-        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
     gates:
         input socketIn @labels(TcpCommand/up);
         output socketOut @labels(TcpCommand/down);

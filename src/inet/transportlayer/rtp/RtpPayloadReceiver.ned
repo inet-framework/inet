@@ -16,8 +16,8 @@ package inet.transportlayer.rtp;
 moduleinterface IRTPPayloadReceiver
 {
     parameters:
-        string outputFileName;  // use an empty string to disable this logging
-        string outputLogFileName;   // use an empty string to disable this logging
+        string outputFileName;  // Use an empty string to disable this logging
+        string outputLogFileName;   // Use an empty string to disable this logging
 
     gates:
         input profileIn @labels(RtpInnerPacket);

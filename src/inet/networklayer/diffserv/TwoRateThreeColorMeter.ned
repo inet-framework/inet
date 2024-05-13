@@ -1,4 +1,4 @@
-// 
+//
 // Copyright (C) 2012 OpenSim Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
@@ -33,11 +33,11 @@ simple TwoRateThreeColorMeter
     parameters:
         @display("i=block/timer");
         string interfaceTableModule;   // The path to the InterfaceTable module
-        string pir;       // peak information rate, either absolute bitrate (e.g. "100kbps"), or relative to the link's datarate (e.g. "20%")
-        int pbs @unit(B); // peak burst size
-        string cir;       // committed information rate, either absolute or relative bitrate; must be smaller than pir
-        int cbs @unit(B); // committed burst size
-        bool colorAwareMode = default(false); // enables color-aware mode
+        string pir;       // Peak information rate, either absolute bitrate (e.g. "100kbps"), or relative to the link's datarate (e.g. "20%")
+        int pbs @unit(B); // Peak burst size
+        string cir;       // Committed information rate, either absolute or relative bitrate; must be smaller than pir
+        int cbs @unit(B); // Committed burst size
+        bool colorAwareMode = default(false); // Enables color-aware mode
     gates:
         input in;
         output greenOut;

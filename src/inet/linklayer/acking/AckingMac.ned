@@ -32,7 +32,7 @@ module AckingMac extends MacProtocolBase like ILinkLayer, IMacProtocol
         int mtu @unit(B) = default(4470B);
         int headerLength @unit(B) = default(16B); // AckingMacHeader length
         bool promiscuous = default(false);
-        bool fullDuplex = default(true);    // allows transmitting and receiving simultaneously (transceiver radio mode)
+        bool fullDuplex = default(true);    // Allows transmitting and receiving simultaneously (transceiver radio mode)
         bool useAck = default(true);
         double ackTimeout @unit(s) = default(100ms);
 

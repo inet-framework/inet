@@ -16,7 +16,7 @@ import inet.physicallayer.wireless.common.base.packetlevel.AntennaBase;
 module ConstantGainAntenna extends AntennaBase
 {
     parameters:
-        double gain @unit(dB); // antenna gain indepent of transmission or reception direction
+        double gain @unit(dB); // Antenna gain indepent of transmission or reception direction
         @class(ConstantGainAntenna);
 }
 

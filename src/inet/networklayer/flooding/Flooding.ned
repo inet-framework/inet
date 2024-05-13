@@ -43,8 +43,8 @@ simple Flooding extends NetworkProtocolBase like INetworkProtocol
 {
     parameters:
         @display("i=block/fork");
-        int headerLength @unit(b) = default(96b); // length of the network packet header (in bits)
-        bool plainFlooding = default(true); // flag whether to use plain flooding
+        int headerLength @unit(b) = default(96b); // Length of the network packet header (in bits)
+        bool plainFlooding = default(true); // Flag whether to use plain flooding
         // Max number of entries in the list of already broadcasted messages
         int bcMaxEntries = default(100);
         // Time after which an entry for an already broadcasted msg can be deleted

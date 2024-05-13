@@ -14,7 +14,7 @@ import inet.queueing.contract.IPacketServer;
 module QueueingPacketDelayer like IPacketDelayer
 {
     parameters:
-        string clockModule = default(""); // relative path of a module that implements IClock; optional
+        string clockModule = default(""); // Relative path of a module that implements IClock; optional
         volatile double delay @unit(s);
         *.clockModule = default(absPath(this.clockModule));
         @display("i=block/delay");

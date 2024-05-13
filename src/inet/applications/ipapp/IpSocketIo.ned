@@ -17,8 +17,8 @@ simple IpSocketIo
         string localAddress = default("");
         string destAddress = default("");
         string protocol = default("");
-        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
-        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
         @lifecycleSupport();
         @display("i=block/socket");
         @signal[packetSent](type=inet::Packet);

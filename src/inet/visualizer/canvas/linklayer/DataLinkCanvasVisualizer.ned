@@ -24,7 +24,7 @@ import inet.visualizer.contract.IDataLinkVisualizer;
 simple DataLinkCanvasVisualizer extends DataLinkVisualizerBase like IDataLinkVisualizer
 {
     parameters:
-        double zIndex = default(2); // determines the drawing order of figures relative to other visualizers
+        double zIndex = default(2); // Determines the drawing order of figures relative to other visualizers
         @class(DataLinkCanvasVisualizer);
 }
 

@@ -64,21 +64,21 @@ simple Rip like IApp
         string mode @enum("RIPv2", "RIPng") = default("RIPv2");
         int udpPort = (mode == "RIPng" ? 521 : 520);
 
-        volatile double startupTime @unit(s) = default(uniform(0s,5s)); // delay before starting RIP
-        double shutdownTime @unit(s) = default(1s); // delay before shutting down RIP
+        volatile double startupTime @unit(s) = default(uniform(0s,5s)); // Delay before starting RIP
+        double shutdownTime @unit(s) = default(1s); // Delay before shutting down RIP
 
         // RIP timers
         double updateInterval @unit(s) = default(30s);   // 30s timer or update timer
-        double routeExpiryTime @unit(s) = default(180s); // invalid timer
-        double routePurgeTime @unit(s) = default(120s);  // garbage collection timer or flush timer
-        double holdDownTime @unit(s) = default(0s);      // hold-down timer (not defined in RFC). 0s means not active
+        double routeExpiryTime @unit(s) = default(180s); // Invalid timer
+        double routePurgeTime @unit(s) = default(120s);  // Garbage collection timer or flush timer
+        double holdDownTime @unit(s) = default(0s);      // Hold-down timer (not defined in RFC). 0s means not active
 
-        bool triggeredUpdate = default(true);  // sending triggered updates on route changes
+        bool triggeredUpdate = default(true);  // Sending triggered updates on route changes
         volatile double triggeredUpdateDelay @unit(s) = default(uniform(1s,5s));
 
         @lifecycleSupport;
-        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
-        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
 
         @signal[sentRequest](type=cPacket);
         @signal[sentUpdate](type=cPacket);

@@ -21,6 +21,6 @@ import inet.queueing.contract.IPacketFilter;
 simple PacketFilter extends PacketFilterBase like IPacketFilter
 {
     parameters:
-        string filterClass; // determines the packets which pass the filter, the parameter must be the name of a C++ class which implements the IPacketFilterFunction interface and is registered via Register_Class
+        string filterClass; // Determines the packets which pass the filter, the parameter must be the name of a C++ class which implements the IPacketFilterFunction interface and is registered via Register_Class
         @class(PacketFilter);
 }

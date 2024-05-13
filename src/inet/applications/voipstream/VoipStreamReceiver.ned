@@ -27,13 +27,13 @@ simple VoipStreamReceiver like IApp
         int localPort;
         double playoutDelay @unit(s) = default(20ms);
         string resultFile;
-        @signal[packetReceived](type=inet::Packet); // expected type=VoipStreamPacket
+        @signal[packetReceived](type=inet::Packet); // Expected type=VoipStreamPacket
         @signal[packetDropped](type=inet::Packet);
         @signal[lostSamples](type=long);
         @signal[lostPackets](type=long);
         @signal[packetHasVoice](type=long);  // 1=yes, 0=no
         @signal[connState](type=long);  // 1=open, -1=close
-        @signal[delay](type=simtime_t);  // total time lag of voice transmission
+        @signal[delay](type=simtime_t);  // Total time lag of voice transmission
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[dropPk](title="packets dropped"; source=packetDropped; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[lostSamples](title="lost samples"; interpolationmode=none; record=vector,stats);

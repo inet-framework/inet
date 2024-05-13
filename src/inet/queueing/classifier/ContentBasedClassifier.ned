@@ -20,7 +20,7 @@ import inet.queueing.contract.IPacketClassifier;
 simple ContentBasedClassifier extends PacketClassifierBase like IPacketClassifier
 {
     parameters:
-        int defaultGateIndex = default(0); // default gate index if no matching labels are found
-        object packetFilters; // array of packet filter expressions
+        int defaultGateIndex = default(0); // Default gate index if no matching labels are found
+        object packetFilters; // Array of packet filter expressions
         @class(ContentBasedClassifier);
 }

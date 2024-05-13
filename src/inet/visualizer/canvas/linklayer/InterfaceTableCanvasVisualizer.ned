@@ -19,8 +19,8 @@ import inet.visualizer.contract.IInterfaceTableVisualizer;
 simple InterfaceTableCanvasVisualizer extends InterfaceTableVisualizerBase like IInterfaceTableVisualizer
 {
     parameters:
-        double zIndex = default(10); // determines the drawing order of figures relative to other visualizers
-        string anchor @enum("l","r","t") = default("l"); // specifies beginning/end/middle
+        double zIndex = default(10); // Determines the drawing order of figures relative to other visualizers
+        string anchor @enum("l","r","t") = default("l"); // Specifies beginning/end/middle
         @class(InterfaceTableCanvasVisualizer);
 }
 

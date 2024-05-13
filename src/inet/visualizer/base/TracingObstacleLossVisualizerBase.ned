@@ -17,19 +17,19 @@ package inet.visualizer.base;
 simple TracingObstacleLossVisualizerBase extends VisualizerBase
 {
     parameters:
-        bool displayIntersections = default(false); // display instersections of transmissions and physical objects, disabled by default
+        bool displayIntersections = default(false); // Display instersections of transmissions and physical objects, disabled by default
         string intersectionLineColor = default("red");
         string intersectionLineStyle = default("solid");
         double intersectionLineWidth = default(1);
 
-        bool displayFaceNormalVectors = default(false); // display face normal vectors of instersections, disabled by default
+        bool displayFaceNormalVectors = default(false); // Display face normal vectors of instersections, disabled by default
         string faceNormalLineColor = default("grey");
         string faceNormalLineStyle = default("solid");
         double faceNormalLineWidth = default(1);
 
-        string fadeOutMode @enum("realTime", "animationTime", "simulationTime") = default("realTime"); // specifies how inactive obstacle losses fade out
-        double fadeOutTime @unit(s) = default(1s); // how quickly link breaks fade away, 1 second by default
-        double fadeOutAnimationSpeed = default(0); // animation speed while there are obstacle losses, value must be in the range (0, +inf)
+        string fadeOutMode @enum("realTime", "animationTime", "simulationTime") = default("realTime"); // Specifies how inactive obstacle losses fade out
+        double fadeOutTime @unit(s) = default(1s); // How quickly link breaks fade away, 1 second by default
+        double fadeOutAnimationSpeed = default(0); // Animation speed while there are obstacle losses, value must be in the range (0, +inf)
 
         @class(TracingObstacleLossVisualizerBase);
 }

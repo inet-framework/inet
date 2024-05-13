@@ -23,10 +23,10 @@ import inet.queueing.base.TokenGeneratorBase;
 simple QueueBasedTokenGenerator extends TokenGeneratorBase
 {
     parameters:
-        string queueModule; // module path of the observed packet queue
+        string queueModule; // Module path of the observed packet queue
         int minNumPackets = default(1);
         int minTotalLength @unit(b) = default(0 b);
-        volatile double numTokens = default(1); // number of tokens generated when the queue becomes empty
+        volatile double numTokens = default(1); // Number of tokens generated when the queue becomes empty
         @class(QueueBasedTokenGenerator);
         @display("i=block/control");
 }

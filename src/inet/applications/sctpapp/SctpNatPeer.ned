@@ -12,20 +12,20 @@ import inet.applications.contract.IApp;
 simple SctpNatPeer like IApp
 {
     parameters:
-        string localAddress = default(""); // comma separated list of addresses
-        int localPort = default(0); // port number to listen on
-        string connectAddress;  // server address (may be symbolic)
-        int connectPort; // port number to connect to
-        double startTime @unit(s) = default(1s); // time first session begins
-        int numRequestsPerSession = default(1);  // number of requests sent per session
+        string localAddress = default(""); // Comma separated list of addresses
+        int localPort = default(0); // Port number to listen on
+        string connectAddress;  // Server address (may be symbolic)
+        int connectPort; // Port number to connect to
+        double startTime @unit(s) = default(1s); // Time first session begins
+        int numRequestsPerSession = default(1);  // Number of requests sent per session
         int numPacketsToReceive = default(0);
-        int requestLength = default(1452); // length of a request (bytes)
-        double thinkTime @unit(s) = default(0s); // time gap between requests
+        int requestLength = default(1452); // Length of a request (bytes)
+        double thinkTime @unit(s) = default(0s); // Time gap between requests
         double waitToClose @unit(s) = default(0s); //time to wait between last message sent and abort
-        //# double reconnectInterval @unit(s) = default(0);  // if connection breaks, waits this much before trying to reconnect
+        //# double reconnectInterval @unit(s) = default(0);  // If connection breaks, waits this much before trying to reconnect
         int outboundStreams = default(1);
         int inboundStreams = default(1);
-        bool echo = default(false);  // echoes received packages when true
+        bool echo = default(false);  // Echoes received packages when true
         bool ordered = default(true);
         int queueSize = default(0);
         int prMethod = default(0);  //0=NONE, 1=PR_TTL, 2=PR_RTX, 3=PR_PRIO, 4=PR_STRRST
@@ -37,7 +37,7 @@ simple SctpNatPeer like IApp
         //double stopTime @unit(s) = default(0s);
         double echoDelay @unit(s) = default(0s);
         double delayFirstRead @unit(s) = default(0s);
-        int numPacketsToSendPerClient = default(0);  // number of requests sent per session
+        int numPacketsToSendPerClient = default(0);  // Number of requests sent per session
         int numPacketsToReceivePerClient = default(1);
         int ownName = default(0);
         int peerName = default(0);

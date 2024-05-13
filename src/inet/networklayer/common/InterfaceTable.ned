@@ -24,7 +24,7 @@ package inet.networklayer.common;
 simple InterfaceTable
 {
     parameters:
-        bool displayAddresses = default(false);  // whether to display IP addresses on links
+        bool displayAddresses = default(false);  // Whether to display IP addresses on links
         @display("i=block/table");
         @signal[interfaceCreated](type=inet::NetworkInterface);
         @signal[interfaceDeleted](type=inet::NetworkInterface);

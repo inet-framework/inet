@@ -42,19 +42,19 @@ import inet.power.contract.IEnergyConsumer;
 module Radio extends PhysicalLayerBase like IRadio
 {
     parameters:
-        string radioMediumModule = default("radioMedium"); // module path of the medium module where this radio communicates
-        string energySourceModule = default("");           // module path of the energy source module which provides energy to the radio
+        string radioMediumModule = default("radioMedium"); // Module path of the medium module where this radio communicates
+        string energySourceModule = default("");           // Module path of the energy source module which provides energy to the radio
 
         string initialRadioMode @enum("off","sleep","receiver","transmitter","transceiver") = default("off");
-        string switchingTimes = default("ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"); // time parameters to switch between radio modes
+        string switchingTimes = default("ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"); // Time parameters to switch between radio modes
 
-        bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out
+        bool sendRawBytes = default(false); // When true packets are serialized into a sequence of bytes before sending out
 
-        bool separateTransmissionParts = default(false); // when enabled the transmission of preamble, header and data part are simulated separately
-        bool separateReceptionParts = default(false);    // when enabled the reception of preamble, header and data part are simulated separately
+        bool separateTransmissionParts = default(false); // When enabled the transmission of preamble, header and data part are simulated separately
+        bool separateReceptionParts = default(false);    // When enabled the reception of preamble, header and data part are simulated separately
 
-        bool displayCommunicationRange = default(false); // if true communication range is displayed as a blue circle around the node
-        bool displayInterferenceRange = default(false);  // if true interference range is displayed as a gray circle around the node
+        bool displayCommunicationRange = default(false); // If true communication range is displayed as a blue circle around the node
+        bool displayInterferenceRange = default(false);  // If true interference range is displayed as a gray circle around the node
 
         string signalAnalogRepresentation @enum("unitDisk", "scalar", "dimensional") = default("scalar");
 

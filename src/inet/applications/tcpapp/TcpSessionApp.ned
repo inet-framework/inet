@@ -79,26 +79,26 @@ simple TcpSessionApp like IApp
 {
     parameters:
         string localAddress = default("");
-        int localPort = default(-1);  // local port
+        int localPort = default(-1);  // Local port
         bool active = default(true);
         string connectAddress;
         int connectPort = default(1000);
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
-        bool autoRead = default(true); // whether to use "autoread" or "explicit-read" mode for TCP connection
-        volatile int readSize @unit(B) = default(-1B);    // used only with autoRead==false
-        volatile double readDelay @unit(s) = default(-1s);    // used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay
+        bool autoRead = default(true); // Whether to use "autoread" or "explicit-read" mode for TCP connection
+        volatile int readSize @unit(B) = default(-1B);    // Used only with autoRead==false
+        volatile double readDelay @unit(s) = default(-1s);    // Used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay
         double tOpen @unit(s) = default(1s);
         double tSend @unit(s) = default(1s);
         int sendBytes @unit(B) = default(1MiB);
         string sendScript = default("");
         double tClose @unit(s) = default(2s);
-        int timeToLive = default(-1); // if not -1, set the TTL (IPv4) or Hop Limit (IPv6) field of sent packets to this value
-        int dscp = default(-1); // if not -1, set the DSCP (IPv4/IPv6) field of sent packets to this value
-        int tos = default(-1); // if not -1, set the Type Of Service (IPv4) / Traffic Class (IPv6) field of sent packets to this value
+        int timeToLive = default(-1); // If not -1, set the TTL (IPv4) or Hop Limit (IPv6) field of sent packets to this value
+        int dscp = default(-1); // If not -1, set the DSCP (IPv4/IPv6) field of sent packets to this value
+        int tos = default(-1); // If not -1, set the Type Of Service (IPv4) / Traffic Class (IPv6) field of sent packets to this value
         @display("i=block/app");
         @lifecycleSupport;
-        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
-        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
         @signal[connect](type=long);
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);

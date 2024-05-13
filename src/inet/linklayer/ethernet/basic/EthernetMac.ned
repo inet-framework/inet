@@ -108,17 +108,17 @@ module EthernetMac like IEtherMac
     parameters:
         string interfaceTableModule;        // The path to the InterfaceTable module
         string displayStringTextFormat = default("rate: %b\nsent: %s, rcvd: %r\nqueue: %q, drop: %d");
-        bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out
-        bool promiscuous = default(false);  // if true, all packets are received, otherwise only the
+        bool sendRawBytes = default(false); // When true packets are serialized into a sequence of bytes before sending out
+        bool promiscuous = default(false);  // If true, all packets are received, otherwise only the
                                             // ones with matching destination MAC address
-        bool duplexMode;                    // must be set to "true", as EthernetMac does not support half-duplex operation
+        bool duplexMode;                    // Must be set to "true", as EthernetMac does not support half-duplex operation
                                             // (parameter is present to reduce the risk of accidental misconfiguration)
-        bool allowNonstandardBitrate = default(false); // allows any bitrate and uses first larger bitrate specified parameters
+        bool allowNonstandardBitrate = default(false); // Allows any bitrate and uses first larger bitrate specified parameters
         int mtu @unit(B) = default(1500B);
         string fcsMode @enum("declared","computed");
         @lifecycleSupport;
-        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
-        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
         @class(EthernetMac);
         @display("i=block/rxtx");
 
@@ -132,8 +132,8 @@ module EthernetMac like IEtherMac
         @signal[packetReceivedFromLower](type=inet::Packet);
         @signal[packetSentToUpper](type=inet::Packet);
         @signal[packetReceivedFromUpper](type=inet::Packet);
-        @signal[transmissionStateChanged](type=long); // enum=MacTransmitState
-        @signal[receptionStateChanged](type=long); // enum=MacReceiveState
+        @signal[transmissionStateChanged](type=long); // Enum=MacTransmitState
+        @signal[receptionStateChanged](type=long); // Enum=MacReceiveState
         @signal[transmissionStarted](type=inet::physicallayer::EthernetSignalBase);
         @signal[transmissionEnded](type=inet::physicallayer::EthernetSignalBase);
         @signal[receptionEnded](type=inet::physicallayer::Signal);
@@ -152,8 +152,8 @@ module EthernetMac like IEtherMac
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 
     gates:
-        input upperLayerIn @labels(EtherFrame);    // to ~EthernetEncapsulation or ~IMacRelayUnit
-        output upperLayerOut @labels(EtherFrame);  // to ~EthernetEncapsulation or ~IMacRelayUnit
-        inout phys @labels(EthernetSignal);        // to the network
+        input upperLayerIn @labels(EtherFrame);    // To ~EthernetEncapsulation or ~IMacRelayUnit
+        output upperLayerOut @labels(EtherFrame);  // To ~EthernetEncapsulation or ~IMacRelayUnit
+        inout phys @labels(EthernetSignal);        // To the network
 }
 

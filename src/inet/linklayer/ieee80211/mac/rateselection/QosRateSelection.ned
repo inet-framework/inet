@@ -18,11 +18,11 @@ simple QosRateSelection
         double responseBlockAckFrameBitrate @unit(bps) = default(-1bps);
         double responseCtsFrameBitrate @unit(bps) = default(-1bps);
 
-        double dataFrameBitrate @unit(bps) = default(-1bps); // fastest
-        double dataFrameBandwidth @unit(Hz) = default(nan Hz); // unspecified by default
-        int dataFrameNumSpatialStreams = default(-1); // unspecified by default
+        double dataFrameBitrate @unit(bps) = default(-1bps); // Fastest
+        double dataFrameBandwidth @unit(Hz) = default(nan Hz); // Unspecified by default
+        int dataFrameNumSpatialStreams = default(-1); // Unspecified by default
 
-        double mgmtFrameBitrate @unit(bps) = default(-1bps); // fastest
+        double mgmtFrameBitrate @unit(bps) = default(-1bps); // Fastest
         double controlFrameBitrate @unit(bps) = default(-1bps);
         @display("i=block/cogwheel");
 }

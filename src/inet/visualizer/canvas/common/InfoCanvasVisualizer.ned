@@ -19,7 +19,7 @@ import inet.visualizer.contract.IInfoVisualizer;
 simple InfoCanvasVisualizer extends InfoVisualizerBase like IInfoVisualizer
 {
     parameters:
-        double zIndex = default(10); // determines the drawing order of figures relative to other visualizers
+        double zIndex = default(10); // Determines the drawing order of figures relative to other visualizers
         @class(InfoCanvasVisualizer);
 }
 

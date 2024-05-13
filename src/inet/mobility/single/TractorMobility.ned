@@ -36,7 +36,7 @@ simple TractorMobility extends MovingMobilityBase
         double y1 @unit(m);
         double x2 @unit(m);
         double y2 @unit(m);
-        int rowCount; // the number of rows on the field
+        int rowCount; // The number of rows on the field
         @class(TractorMobility);
 }
 

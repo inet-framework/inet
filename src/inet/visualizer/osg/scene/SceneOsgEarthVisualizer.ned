@@ -24,7 +24,7 @@ simple SceneOsgEarthVisualizer extends SceneOsgVisualizerBase like ISceneVisuali
 {
     parameters:
         @class(SceneOsgEarthVisualizer);
-        string coordinateSystemModule = default("coordinateSystem"); // the geographic coordinate system, refers to a top level module by default
-        string mapFile; // map file, e.g. some part of the earth, mandatory parameter
+        string coordinateSystemModule = default("coordinateSystem"); // The geographic coordinate system, refers to a top level module by default
+        string mapFile; // Map file, e.g. some part of the earth, mandatory parameter
 }
 

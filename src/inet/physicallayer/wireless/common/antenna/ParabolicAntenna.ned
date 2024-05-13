@@ -21,8 +21,8 @@ import inet.physicallayer.wireless.common.base.packetlevel.AntennaBase;
 module ParabolicAntenna extends AntennaBase
 {
     parameters:
-        double maxGain @unit(dB);    // maximum gain of the antenna radiation pattern
-        double minGain @unit(dB);    // minimum gain of the antenna radiation pattern
+        double maxGain @unit(dB);    // Maximum gain of the antenna radiation pattern
+        double minGain @unit(dB);    // Minimum gain of the antenna radiation pattern
         double beamWidth @unit(deg); // 3dB beam width
         @class(ParabolicAntenna);
 }

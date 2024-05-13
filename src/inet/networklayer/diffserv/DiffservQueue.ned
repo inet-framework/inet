@@ -49,7 +49,7 @@ module DiffservQueue extends CompoundPacketQueueBase
             @display("p=100,330");
         }
         efMeter: TokenBucketMeter {
-            cir = default("10%"); // reserved EF bandwith as percentage of datarate of the interface
+            cir = default("10%"); // Reserved EF bandwith as percentage of datarate of the interface
             cbs = default(5000B); // 5 1000B packets
             @display("p=250,130");
         }
@@ -57,7 +57,7 @@ module DiffservQueue extends CompoundPacketQueueBase
             @display("p=400,80");
         }
         efQueue: DropTailQueue {
-            packetCapacity = default(5); // keep low, for low delay and jitter
+            packetCapacity = default(5); // Keep low, for low delay and jitter
             @display("p=400,180");
         }
         af1xQueue: AFxyQueue {

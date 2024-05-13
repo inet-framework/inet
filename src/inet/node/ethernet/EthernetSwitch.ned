@@ -49,7 +49,7 @@ module EthernetSwitch like IEthernetNetworkNode
         bool hasCutthroughSwitching = default(false);
         string fcsMode @enum("declared","computed") = default("declared");
         string spanningTreeProtocol = default("Stp");
-        int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
+        int numEthInterfaces = default(0);  // Minimum number of ethernet interfaces
         eth[*].encap.typename = default("");
         *.fcsMode = this.fcsMode;
         **.interfaceTableModule = default(absPath(".interfaceTable"));

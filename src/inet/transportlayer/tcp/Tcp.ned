@@ -154,8 +154,8 @@ simple Tcp like ITcp
 {
     parameters:
         string crcMode @enum("declared", "computed") = default("declared");
-        int advertisedWindow = default(14*this.mss); // in bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
-        bool delayedAcksEnabled = default(false); // delayed ACK algorithm (RFC 1122) enabled/disabled
+        int advertisedWindow = default(14*this.mss); // In bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
+        bool delayedAcksEnabled = default(false); // Delayed ACK algorithm (RFC 1122) enabled/disabled
         bool nagleEnabled = default(true); // Nagle's algorithm (RFC 896) enabled/disabled
         bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
         bool increasedIWEnabled = default(false); // Increased Initial Window (RFC 3390) enabled/disabled
@@ -166,11 +166,11 @@ simple Tcp like ITcp
         int mss = default(536); // Maximum Segment Size (RFC 793) (header option)
         int msl @unit(s) = default(120s);   // Maximum Segment Lifetime
         string tcpAlgorithmClass @examples("TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpReno");
-        int dupthresh = default(3); // used for TcpTahoe, TcpReno and SACK (RFC 3517) DO NOT change unless you really know what you are doing
-        int initialSsthresh = default(0xFFFFFFFF); // initial value for Slow Start threshold used in TahoeRenoFamily. The initial value of ssthresh SHOULD be set arbitrarily high (e.g.,to the size of the largest possible advertised window) Without user interaction there is no limit...
-        double stopOperationExtraTime @unit(s) = default(0s);    // extra time after lifecycle stop operation finished
-        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
-        bool ecnWillingness = default(false); // true if willing to use ECN
+        int dupthresh = default(3); // Used for TcpTahoe, TcpReno and SACK (RFC 3517) DO NOT change unless you really know what you are doing
+        int initialSsthresh = default(0xFFFFFFFF); // Initial value for Slow Start threshold used in TahoeRenoFamily. The initial value of ssthresh SHOULD be set arbitrarily high (e.g.,to the size of the largest possible advertised window) Without user interaction there is no limit...
+        double stopOperationExtraTime @unit(s) = default(0s);    // Extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
+        bool ecnWillingness = default(false); // True if willing to use ECN
         double dctcpGamma = default(0.0625); // A fixed estimation gain for calculating dctcp_alpha (RFC 8257 4.2)
         @display("i=block/wheelbarrow");
         @signal[tcpConnectionAdded];

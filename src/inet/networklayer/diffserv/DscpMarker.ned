@@ -20,7 +20,7 @@ import inet.queueing.base.PacketProcessorBase;
 simple DscpMarker extends PacketProcessorBase
 {
     parameters:
-        string dscps; // space separated list if dscp values; both names (e.g. AF11, EF) and numbers (0x0A,0b101110) can be used
+        string dscps; // Space separated list if dscp values; both names (e.g. AF11, EF) and numbers (0x0A,0b101110) can be used
         @class(DscpMarker);
         @display("i=block/star");
         @signal[packetMarked](type=cPacket);

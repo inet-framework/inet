@@ -26,9 +26,9 @@ import inet.visualizer.contract.IStatisticVisualizer;
 simple StatisticCanvasVisualizer extends StatisticVisualizerBase like IStatisticVisualizer
 {
     parameters:
-        double zIndex = default(10); // determines the drawing order of figures relative to other visualizers
-        string propertyName = default(""); // optional property name of a figure template along the module path of the visualizer
-        string propertyIndex = default(""); // optional property index of a figure template along the module path of the visualizer
+        double zIndex = default(10); // Determines the drawing order of figures relative to other visualizers
+        string propertyName = default(""); // Optional property name of a figure template along the module path of the visualizer
+        string propertyIndex = default(""); // Optional property index of a figure template along the module path of the visualizer
         @class(StatisticCanvasVisualizer);
 }
 

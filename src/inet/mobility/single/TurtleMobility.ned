@@ -99,7 +99,7 @@ import inet.mobility.base.MovingMobilityBase;
 simple TurtleMobility extends MovingMobilityBase
 {
     parameters:
-        xml turtleScript; // describes the movement
+        xml turtleScript; // Describes the movement
         @class(TurtleMobility);
 }
 

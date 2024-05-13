@@ -20,6 +20,6 @@ import inet.queueing.contract.IPacketMeter;
 simple ExponentialRateMeter extends PacketMeterBase like IPacketMeter
 {
     parameters:
-        double alpha; // parameter in the range of (0, 1) for the exponential weight decrease
+        double alpha; // Parameter in the range of (0, 1) for the exponential weight decrease
         @class(ExponentialRateMeter);
 }

@@ -12,7 +12,7 @@ import inet.queueing.base.PacketProcessorBase;
 simple PacketTransmitterBase extends PacketProcessorBase
 {
     parameters:
-        string clockModule = default(""); // relative path of a module that implements IClock; optional
+        string clockModule = default(""); // Relative path of a module that implements IClock; optional
         volatile double datarate @unit(bps);
         @class(PacketTransmitterBase);
         @display("i=block/wtx");

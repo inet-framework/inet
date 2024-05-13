@@ -37,13 +37,13 @@ simple EthernetEncapsulation like IEthernetLayer
         string interfaceTableModule;   // The path to the InterfaceTable module
         string fcsMode @enum("declared","computed") = default("declared");
         @lifecycleSupport;
-        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
-        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
         @class(EthernetEncapsulation);
         @display("i=block/layer");
         @signal[encapPk](type=cPacket);
         @signal[decapPk](type=cPacket);
-        @signal[pauseSent](type=long); // pause units
+        @signal[pauseSent](type=long); // Pause units
         @signal[packetDropped](type=inet::Packet);
         @statistic[encapPk](title="packets encapsulated"; source=encapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[decapPk](title="packets decapsulated"; source=decapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

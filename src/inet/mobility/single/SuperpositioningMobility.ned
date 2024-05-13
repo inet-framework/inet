@@ -24,10 +24,10 @@ import inet.mobility.contract.IMobility;
 module SuperpositioningMobility extends MobilityBase
 {
     parameters:
-        int numElements; // number of combined mobility modules
+        int numElements; // Number of combined mobility modules
         string positionComposition @enum("zero", "sum", "average") = default("sum");
         string orientationComposition @enum("zero", "sum", "average", "faceForward") = default("sum");
-        element[*].subjectModule = default(""); // disable visual subject module of superposition elements by default
+        element[*].subjectModule = default(""); // Disable visual subject module of superposition elements by default
         @class(SuperpositioningMobility);
     submodules:
         element[numElements]: <> like IMobility {

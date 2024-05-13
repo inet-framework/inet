@@ -28,9 +28,9 @@ import inet.mobility.base.MovingMobilityBase;
 simple BonnMotionMobility extends MovingMobilityBase
 {
     parameters:
-        bool is3D = default(false); // whether the trace file contains triplets or quadruples
-        string traceFile; // the BonnMotion trace file
-        int nodeId; // selects line in trace file; -1 gets substituted to parent module's index
+        bool is3D = default(false); // Whether the trace file contains triplets or quadruples
+        string traceFile; // The BonnMotion trace file
+        int nodeId; // Selects line in trace file; -1 gets substituted to parent module's index
         @class(BonnMotionMobility);
 }
 

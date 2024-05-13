@@ -23,7 +23,7 @@ module GatingPriorityQueue extends CompoundPacketQueueBase
         int numQueues;
         double bitrate @unit(bps);
         *.bitrate = default(this.bitrate);
-        *.extraLength = default(64b); // overhead for Ethernet PHY header
+        *.extraLength = default(64b); // Overhead for Ethernet PHY header
     submodules:
         buffer: <default("")> like IPacketBuffer if typename != "" {
             parameters:

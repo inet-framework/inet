@@ -22,9 +22,9 @@ import inet.queueing.common.PacketMultiplexer;
 module MultiDomainGptp like IGptp
 {
     parameters:
-        string clockModule; // relative module path of the multi clock
-        string interfaceTableModule; // relative module path of the interface table
-        int numDomains; // number of time synchronization domains
+        string clockModule; // Relative module path of the multi clock
+        string interfaceTableModule; // Relative module path of the interface table
+        int numDomains; // Number of time synchronization domains
         string gptpNodeType; // @enum("GptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE
         @display("i=block/app");
     gates:

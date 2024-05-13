@@ -15,7 +15,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IPropagation;
 module PropagationBase like IPropagation
 {
     parameters:
-        double propagationSpeed @unit(mps) = default(299792458mps); // the theoretical propagation speed of signals on the medium (used by path loss models)
+        double propagationSpeed @unit(mps) = default(299792458mps); // The theoretical propagation speed of signals on the medium (used by path loss models)
         @display("i=block/timer");
 }
 

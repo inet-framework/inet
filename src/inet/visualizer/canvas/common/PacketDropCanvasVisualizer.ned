@@ -20,9 +20,9 @@ import inet.visualizer.contract.IPacketDropVisualizer;
 simple PacketDropCanvasVisualizer extends PacketDropVisualizerBase like IPacketDropVisualizer
 {
     parameters:
-        double zIndex = default(10); // determines the drawing order of figures relative to other visualizers
-        double dx = default(32); // specifies how far the animation turns over along the X axis
-        double dy = default(64); // specifies how far the animation turns over along the Y axis
+        double zIndex = default(10); // Determines the drawing order of figures relative to other visualizers
+        double dx = default(32); // Specifies how far the animation turns over along the X axis
+        double dy = default(64); // Specifies how far the animation turns over along the Y axis
         @class(PacketDropCanvasVisualizer);
 }
 

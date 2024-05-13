@@ -25,19 +25,19 @@ import inet.visualizer.contract.IMediumVisualizer;
 simple MediumOsgVisualizer extends MediumVisualizerBase like IMediumVisualizer
 {
     parameters:
-        string signalShape @enum("ring", "sphere", "both") = default("ring"); // shape for displaying signals
-        string signalPlane @enum("camera","xy","xz","yz") = default("xy"); // plane for 2 dimensional signal shapes
-        double signalFadingDistance @unit(m) = default(100m); // distance parameter for exponential opacity decreasing
-        double signalFadingFactor = default(1.5); // factor parameter for exponential opacity decreasing, value must be in the range (1.0, +inf)
-        double signalWaveLength @unit(m) = default(100m); // distance between signal waves, value must be in the range (0, +inf)
-        double signalWaveAmplitude = default(0.5); // relative opacity amplitude of signal waves, value must be in the range [0, 1]
-        double signalWaveFadingAnimationSpeedFactor = default(1.0); // value must be in the range [0, 1]
+        string signalShape @enum("ring", "sphere", "both") = default("ring"); // Shape for displaying signals
+        string signalPlane @enum("camera","xy","xz","yz") = default("xy"); // Plane for 2 dimensional signal shapes
+        double signalFadingDistance @unit(m) = default(100m); // Distance parameter for exponential opacity decreasing
+        double signalFadingFactor = default(1.5); // Factor parameter for exponential opacity decreasing, value must be in the range (1.0, +inf)
+        double signalWaveLength @unit(m) = default(100m); // Distance between signal waves, value must be in the range (0, +inf)
+        double signalWaveAmplitude = default(0.5); // Relative opacity amplitude of signal waves, value must be in the range [0, 1]
+        double signalWaveFadingAnimationSpeedFactor = default(1.0); // Value must be in the range [0, 1]
 
-        string transmissionPlane @enum("camera","xy","xz","yz") = default("camera"); // plane for transmission image
-        string receptionPlane @enum("camera","xy","xz","yz") = default("camera"); // plane for reception image
+        string transmissionPlane @enum("camera","xy","xz","yz") = default("camera"); // Plane for transmission image
+        string receptionPlane @enum("camera","xy","xz","yz") = default("camera"); // Plane for reception image
 
-        string communicationRangePlane @enum("camera","xy","xz","yz") = default("xy"); // plane for the transmission range circle
-        string interferenceRangePlane @enum("camera","xy","xz","yz") = default("xy"); // plane for the interference range circle
+        string communicationRangePlane @enum("camera","xy","xz","yz") = default("xy"); // Plane for the transmission range circle
+        string interferenceRangePlane @enum("camera","xy","xz","yz") = default("xy"); // Plane for the interference range circle
 
         @class(MediumOsgVisualizer);
 }

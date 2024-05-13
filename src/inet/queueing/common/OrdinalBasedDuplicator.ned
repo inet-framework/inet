@@ -17,7 +17,7 @@ import inet.queueing.base.PacketDuplicatorBase;
 simple OrdinalBasedDuplicator extends PacketDuplicatorBase
 {
     parameters:
-        string duplicatesVector = default(""); // the duplicatesVector format is "<packetNumber>;<packetNumber>;...;"
+        string duplicatesVector = default(""); // The duplicatesVector format is "<packetNumber>;<packetNumber>;...;"
                                                // packet numbers in ascending order e.g. "5;6;12;13;"
         @display("i=block/control");
         @class(OrdinalBasedDuplicator);

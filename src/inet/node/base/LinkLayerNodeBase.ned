@@ -30,8 +30,8 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
         int numPcapRecorders = default(recordPcap ? 1 : 0);
         int numLoInterfaces = default(1);
         int numWlanInterfaces = default(0);
-        int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
-        int numPppInterfaces = default(0);  // minimum number of PPP interfaces
+        int numEthInterfaces = default(0);  // Minimum number of ethernet interfaces
+        int numPppInterfaces = default(0);  // Minimum number of PPP interfaces
         int numTunInterfaces = default(0);
         int numVirtInterfaces = default(0);
         string fcsMode @enum("declared","computed") = default("declared");

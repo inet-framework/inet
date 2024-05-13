@@ -23,11 +23,11 @@ import inet.queueing.contract.IPacketMeter;
 simple EligibilityTimeMeter extends PacketMeterBase like IPacketMeter
 {
     parameters:
-        string clockModule = default(""); // relative path of a module that implements IClock; optional
-        int packetOverheadLength @unit(b) = default(0b); // extra packet length taken into account, can be used to represent overhead added by lower layers
-        double committedInformationRate @unit(bps); // committed information rate of the packet flow
-        int committedBurstSize @unit(b); // committed burst size of the packet flow
-        double maxResidenceTime @unit(s) = default(-1s); // maximum packet residence time measured from the packet arrival time to the meter module to the transmission eligiblity time, not used by default
+        string clockModule = default(""); // Relative path of a module that implements IClock; optional
+        int packetOverheadLength @unit(b) = default(0b); // Extra packet length taken into account, can be used to represent overhead added by lower layers
+        double committedInformationRate @unit(bps); // Committed information rate of the packet flow
+        int committedBurstSize @unit(b); // Committed burst size of the packet flow
+        double maxResidenceTime @unit(s) = default(-1s); // Maximum packet residence time measured from the packet arrival time to the meter module to the transmission eligiblity time, not used by default
         @class(EligibilityTimeMeter);
         @signal[tokensChanged](type=double);
         @statistic[numTokens](title="number of tokens"; source=tokensChanged; record=vector; unit=tk; interpolationmode=linear);

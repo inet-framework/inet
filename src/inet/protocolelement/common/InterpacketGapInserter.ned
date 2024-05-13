@@ -12,8 +12,8 @@ import inet.queueing.base.PacketProcessorBase;
 simple InterpacketGapInserter extends PacketProcessorBase
 {
     parameters:
-        string clockModule = default(""); // relative path of a module that implements IClock; optional
-        bool initialChannelBusy = default(false); // assume that channel was busy before the simulation started
+        string clockModule = default(""); // Relative path of a module that implements IClock; optional
+        bool initialChannelBusy = default(false); // Assume that channel was busy before the simulation started
         volatile double duration @unit(s);
         displayStringTextFormat = default("delayed %p pk (%l)\nifg: %g");
         @display("i=block/timer");

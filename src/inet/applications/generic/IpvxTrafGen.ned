@@ -22,13 +22,13 @@ package inet.applications.generic;
 simple IpvxTrafGen like IIpvxTrafficGenerator
 {
     parameters:
-        double startTime @unit(s) = default(1s); // time of sending the first packet
-        double stopTime @unit(s) = default(-1s);  // time of finishing sending, negative values mean forever
-        volatile double sendInterval @unit(s) = default(10ms); // may be a random value, e.g. exponential(1)
-        int numPackets = default(-1); // max number of packets to generate, -1 means forever
-        int protocol; // value for IPv4, IPv6 protocol field, accepts only between 143 and 254
-        volatile int packetLength @unit(B); // packet length in bytes
-        string destAddresses = default(""); // list of destination addresses, separated by spaces
+        double startTime @unit(s) = default(1s); // Time of sending the first packet
+        double stopTime @unit(s) = default(-1s);  // Time of finishing sending, negative values mean forever
+        volatile double sendInterval @unit(s) = default(10ms); // May be a random value, e.g. exponential(1)
+        int numPackets = default(-1); // Max number of packets to generate, -1 means forever
+        int protocol; // Value for IPv4, IPv6 protocol field, accepts only between 143 and 254
+        volatile int packetLength @unit(B); // Packet length in bytes
+        string destAddresses = default(""); // List of destination addresses, separated by spaces
         @lifecycleSupport;
         @display("i=block/source");
         @signal[packetSent](type=inet::Packet);

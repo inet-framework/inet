@@ -20,7 +20,7 @@ import inet.visualizer.contract.ITracingObstacleLossVisualizer;
 simple TracingObstacleLossCanvasVisualizer extends TracingObstacleLossVisualizerBase like ITracingObstacleLossVisualizer
 {
     parameters:
-        double zIndex = default(0); // determines the drawing order of figures relative to other visualizers
+        double zIndex = default(0); // Determines the drawing order of figures relative to other visualizers
         @class(TracingObstacleLossCanvasVisualizer);
 }
 

@@ -33,6 +33,6 @@ channel ThruputMeteringChannel extends ned.DatarateChannel
 {
     @class(ThruputMeteringChannel);
     bool displayAsTooltip = default(false);
-    string thruputDisplayFormat = default("");  // the format string for display on the link. Leave empty to disable display
+    string thruputDisplayFormat = default("");  // The format string for display on the link. Leave empty to disable display
 }
 

@@ -5,15 +5,15 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 package inet.networklayer.ipv4.ipsec;
 
@@ -36,9 +36,9 @@ package inet.networklayer.ipv4.ipsec;
 // - Transport mode only. Tunnel mode is not supported.
 // - Multicast traffic is not supported. (Any multicast packet is let through unchanged.)
 // - Anti-replay mechanism is not implemented.
-// - DSCP-based SA selection is not implemented. 
+// - DSCP-based SA selection is not implemented.
 //
-// 
+//
 // <b>Configuration:</b>
 //
 // Security policies and security associations are defined using XML. The XML
@@ -55,7 +55,7 @@ package inet.networklayer.ipv4.ipsec;
 // Structural elements (notation: ?=optional, *=zero or more):
 //
 // - root: SecurityPolicy*
-// - SecurityPolicy: Selector, Direction, Action, Protection?, EspMode?, 
+// - SecurityPolicy: Selector, Direction, Action, Protection?, EspMode?,
 //   EncryptionAlg?, AuthenticationAlg?, MaxTfcPadLength?, SecurityAssociation*
 // - Selector: LocalAddress?, RemoteAddress?, Protocol?, LocalPort?, RemotePort?, ICMPType?, ICMPCode?
 // - SecurityAssociation: SPI, Selector?
@@ -77,7 +77,7 @@ package inet.networklayer.ipv4.ipsec;
 //   and authentication is in use (protection is AH, or ESP with mode INTEGRITY or COMBINED).
 //   Possible values are: NONE, HMAC_MD5_96, HMAC_SHA1, AES_128_GMAC, AES_192_GMAC,
 //   AES_256_GMAC, HMAC_SHA2_256_128, HMAC_SHA2_384_192, HMAC_SHA2_512_256.
-// - MaxTfcPadLength: Maximum length of random Traffic Confidentiality (TFC) padding. 
+// - MaxTfcPadLength: Maximum length of random Traffic Confidentiality (TFC) padding.
 //   The actual TFC pad length will be drawn with uniform distribution over [0,max].
 // - LocalAddress, RemoteAddress: comma-separated list of addresses / address ranges
 // - Protocol: comma-separated list of protocol names/numbers and/or their ranges.
@@ -173,30 +173,30 @@ package inet.networklayer.ipv4.ipsec;
 // is processed in the POST_ROUTING hook, and ingress traffic in the LOCAL_IN
 // hook.
 //
-// @see ~SecurityPolicyDatabase, ~SecurityAssociationDatabase 
+// @see ~SecurityPolicyDatabase, ~SecurityAssociationDatabase
 //
 simple IPsec
 {
     parameters:
 		@display("i=block/control;is=s");
-        
+
         string networkProtocolModule = default("^.ip");
         string interfaceTableModule;
 		string spdModule = default("^.spd");
 		string sadModule = default("^.sad");
 		xml spdConfig;
 
-		string defaultProtection = default("");  // if not "": value to use where <Protection> element is absent from the configuration          
-		string defaultEspMode = default(""); // if not "": value to use where <EspMode> element is absent from the configuration         
-		string defaultEncryptionAlg = default(""); // if not "": value to use where <EncryptionAlg> element is absent from the configuration          
-		string defaultAuthenticationAlg = default(""); // if not "": value to use where <defaultAuthenticationAlg> element is absent from the configuration          
-		int defaultMaxTfcPadLength = default(0); // value to use where <MaxTfcPadLength> element is absent from the configuration           
-          
+		string defaultProtection = default("");  // If not "": value to use where <Protection> element is absent from the configuration
+		string defaultEspMode = default(""); // If not "": value to use where <EspMode> element is absent from the configuration
+		string defaultEncryptionAlg = default(""); // If not "": value to use where <EncryptionAlg> element is absent from the configuration
+		string defaultAuthenticationAlg = default(""); // If not "": value to use where <defaultAuthenticationAlg> element is absent from the configuration
+		int defaultMaxTfcPadLength = default(0); // Value to use where <MaxTfcPadLength> element is absent from the configuration
+
         volatile double ahProtectOutDelay @unit(s) = default(0.0s);
         volatile double ahProtectInDelay @unit(s) = default(0.0s);
         volatile double espProtectOutDelay @unit(s) = default(0.0s);
         volatile double espProtectInDelay @unit(s) = default(0.0s);
-        
+
         @signal[inProtectedAccept](type=long);
         @signal[inProtectedDrop](type=long);
         @signal[inUnprotectedBypass](type=long);
@@ -206,7 +206,7 @@ simple IPsec
         @signal[outDrop](type=long);
         @signal[inProcessDelay](type=double);
         @signal[outProcessDelay](type=double);
-            
+
         @statistic[inProtectedAccept](title="Incoming Protected Packet Accepted"; record=count,vector);
         @statistic[inProtectedDrop](title="Incoming Protected Packet Dropped"; record=count,vector);
         @statistic[inUnprotectedBypass](title="Incoming Unprotected Packet Bypassed"; record=count,vector);

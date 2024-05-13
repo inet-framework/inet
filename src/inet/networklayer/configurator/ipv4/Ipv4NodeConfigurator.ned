@@ -31,8 +31,8 @@ simple Ipv4NodeConfigurator like IIpv4NodeConfigurator
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         // TODO eventually rename to networkConfigurator
-        string networkConfiguratorModule = default("configurator"); // the absolute path to the Ipv4NetworkConfigurator; use "" if there is no configurator
-        bool configureRoutingTable = default(true);     // add routing entries to routing table (uses the configurator module)
+        string networkConfiguratorModule = default("configurator"); // The absolute path to the Ipv4NetworkConfigurator; use "" if there is no configurator
+        bool configureRoutingTable = default(true);     // Add routing entries to routing table (uses the configurator module)
         @display("i=block/cogwheel");
 }
 

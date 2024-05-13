@@ -20,8 +20,8 @@ import inet.clock.contract.IClock;
 module MultiClock like IClock
 {
     parameters:
-        int numClocks; // number of subclocks
-        int activeClockIndex @mutable = default(0); // the currently active subclock
+        int numClocks; // Number of subclocks
+        int activeClockIndex @mutable = default(0); // The currently active subclock
         @display("i=block/timer");
         @class(MultiClock);
         @signal[timeChanged](type=simtime_t);

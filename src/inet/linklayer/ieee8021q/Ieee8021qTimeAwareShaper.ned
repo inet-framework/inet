@@ -21,11 +21,11 @@ import inet.queueing.queue.CompoundPacketQueueBase;
 module Ieee8021qTimeAwareShaper extends CompoundPacketQueueBase
 {
     parameters:
-        int numTrafficClasses = default(8); // number of traffic categories
+        int numTrafficClasses = default(8); // Number of traffic categories
         double bitrate @unit(bps);
         bool hasGcl = default(false);
         *.bitrate = default(this.bitrate);
-        *.extraLength = default(64b); // overhead for Ethernet PHY header
+        *.extraLength = default(64b); // Overhead for Ethernet PHY header
     submodules:
         buffer: <default("")> like IPacketBuffer if typename != "" {
             parameters:

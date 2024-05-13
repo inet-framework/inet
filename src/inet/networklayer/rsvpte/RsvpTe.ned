@@ -1,7 +1,7 @@
 //
 // Copyright (C) 2005 Vojtech Janota
 //
-// SPDX-License-Identifier: LGPL-3.0-or-later 
+// SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
 package inet.networklayer.rsvpte;
@@ -87,8 +87,8 @@ simple RsvpTe
         string libTableModule;
         string tedModule;
         string classifierModule; // The path to the module which implements the IIngressClassifier C++ interface
-        xml traffic = default(xml("<sessions/>")); // specifies paths to set up
-        string peers; // names of the interfaces towards RSVP peers
+        xml traffic = default(xml("<sessions/>")); // Specifies paths to set up
+        string peers; // Names of the interfaces towards RSVP peers
         double helloInterval @unit(s);
         double helloTimeout @unit(s);
         @display("i=block/control");

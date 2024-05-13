@@ -31,6 +31,6 @@ module PcpTrafficClassClassifier extends PacketClassifierBase like IPacketClassi
                                   [0, 1, 1, 2, 2, 3, 4, 5],   // VO voice
                                   [0, 1, 2, 3, 3, 4, 5, 6],   // IC internetwork control
                                   [0, 1, 2, 3, 4, 5, 6, 7]]); // NC network control
-        int defaultGateIndex = default(0); // default gate index if no PCP found
+        int defaultGateIndex = default(0); // Default gate index if no PCP found
         @class(PcpTrafficClassClassifier);
 }

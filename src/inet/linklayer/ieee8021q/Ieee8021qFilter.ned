@@ -28,10 +28,10 @@ import inet.queueing.contract.IPacketMeter;
 module Ieee8021qFilter like IPacketFilter
 {
     parameters:
-        int numStreams; // number of different streams to filter for
-        int numGates; // number of gates
-        int numMeters; // number of traffic meters
-        object streamFilterTable; // an array of objects where each object contains a stream name, gate index and meter index, for example: [{stream: "s0", gate: 0, meter: 0}, ...]
+        int numStreams; // Number of different streams to filter for
+        int numGates; // Number of gates
+        int numMeters; // Number of traffic meters
+        object streamFilterTable; // An array of objects where each object contains a stream name, gate index and meter index, for example: [{stream: "s0", gate: 0, meter: 0}, ...]
         @display("i=block/filter");
     gates:
         input in;

@@ -26,10 +26,10 @@ import inet.queueing.contract.IActivePacketSource;
 simple ActivePacketSource extends ActivePacketSourceBase like IActivePacketSource
 {
     parameters:
-        string clockModule = default(""); // relative path of a module that implements IClock; optional
-        double initialProductionOffset @mutable @unit(s) = default(-1s); // initial duration before which packets are not produced. When negative, then produce packet in initialize()
-        volatile double productionInterval @unit(s); // elapsed time between subsequent packets pushed to the connected packet consumer
-        bool scheduleForAbsoluteTime = default(true); // when a clock is used relative means that setting the clock will not affect the simulation time of the event
+        string clockModule = default(""); // Relative path of a module that implements IClock; optional
+        double initialProductionOffset @mutable @unit(s) = default(-1s); // Initial duration before which packets are not produced. When negative, then produce packet in initialize()
+        volatile double productionInterval @unit(s); // Elapsed time between subsequent packets pushed to the connected packet consumer
+        bool scheduleForAbsoluteTime = default(true); // When a clock is used relative means that setting the clock will not affect the simulation time of the event
         @class(ActivePacketSource);
     gates:
         output out @labels(push);

@@ -17,7 +17,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IBackgroundNoise;
 module IsotropicScalarBackgroundNoise like IBackgroundNoise
 {
     parameters:
-        double power @unit(dBm); // noise power
+        double power @unit(dBm); // Noise power
         double bandwidth @unit(Hz) = default(nan Hz);
         @class(IsotropicScalarBackgroundNoise);
         @display("i=block/mac");

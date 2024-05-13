@@ -31,9 +31,9 @@ module NodeBase like INetworkNode
         bool hasStatus = default(false);
         bool hasEnvironment = default(false);
         string osgModel = default(""); // 3D model for OSG visualization, no 3D model by default
-        string osgModelColor = default(""); // tint color, no colorization by default
-        string canvasImage = default(""); // image for canvas visualization, no image by default
-        string canvasImageColor = default(""); // tint color, no colorization by default
+        string osgModelColor = default(""); // Tint color, no colorization by default
+        string canvasImage = default(""); // Image for canvas visualization, no image by default
+        string canvasImageColor = default(""); // Tint color, no colorization by default
         mobility.subjectModule = default("^");
         *.mobilityModule = default(exists(mobility) ? absPath(".mobility") : "");
         *.energySourceModule = default(exists(energyStorage) ? absPath(".energyStorage") : "");

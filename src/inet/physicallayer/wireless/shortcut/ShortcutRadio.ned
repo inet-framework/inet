@@ -23,11 +23,11 @@ simple ShortcutRadio extends PhysicalLayerBase like IRadio
     parameters:
         string interfaceTableModule;
         double bitrate @unit(bps);
-        volatile int lengthOverhead @unit(b) = default(0b); // extra length added to packets
-        volatile double durationOverhead @unit(s) = default(0s); // extra transmission duration added to packets
-        volatile double propagationDelay @unit(s) = default(0s); // propagation time to all destinations
-        volatile double packetLoss = default(0); // packet loss probability
+        volatile int lengthOverhead @unit(b) = default(0b); // Extra length added to packets
+        volatile double durationOverhead @unit(s) = default(0s); // Extra transmission duration added to packets
+        volatile double propagationDelay @unit(s) = default(0s); // Propagation time to all destinations
+        volatile double packetLoss = default(0); // Packet loss probability
         @class(ShortcutRadio);
-        @signal[transmissionStateChanged](type=long);    // type=inet::physicallayer::TransmissionState
+        @signal[transmissionStateChanged](type=long);    // Type=inet::physicallayer::TransmissionState
 }
 

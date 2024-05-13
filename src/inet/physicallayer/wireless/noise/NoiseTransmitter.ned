@@ -27,7 +27,7 @@ module NoiseTransmitter extends TransmitterBase like ITransmitter
         volatile double centerFrequency @unit(Hz) = default(nan Hz);
         volatile double bandwidth @unit(Hz) = default(0Hz);
         volatile double power @unit(W);
-        int gainFunctionCacheLimit = default(0); // limits the number of gain functions cached for a given duration, centerFrequency and bandwidth
+        int gainFunctionCacheLimit = default(0); // Limits the number of gain functions cached for a given duration, centerFrequency and bandwidth
         @class(NoiseTransmitter);
         @display("i=block/wtx");
 }

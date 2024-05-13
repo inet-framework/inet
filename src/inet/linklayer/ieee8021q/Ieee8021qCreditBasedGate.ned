@@ -16,8 +16,8 @@ import inet.queueing.gate.CreditBasedGate;
 simple Ieee8021qCreditBasedGate extends CreditBasedGate
 {
     parameters:
-        double idleSlope @unit(bps); // data rate of the accumulated credits when the transmission channel is idle
-        double sendSlope @unit(bps) = default(idleSlope - bitrate); // data rate of the spent credits when the transmission channel is in use
+        double idleSlope @unit(bps); // Data rate of the accumulated credits when the transmission channel is idle
+        double sendSlope @unit(bps) = default(idleSlope - bitrate); // Data rate of the spent credits when the transmission channel is in use
         double maxInterferenceSize @unit(b) = default(inf b);
         idleCreditGainRate = default(dropUnit(idleSlope));
         transmitCreditSpendRate = default(-dropUnit(sendSlope));

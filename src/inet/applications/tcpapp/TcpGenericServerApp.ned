@@ -33,16 +33,16 @@ import inet.applications.contract.IApp;
 simple TcpGenericServerApp like IApp
 {
     parameters:
-        string localAddress = default(""); // local address; may be left empty ("")
-        int localPort = default(1000);     // localPort number to listen on
-        bool autoRead = default(true); // whether to use "autoread" or "explicit-read" mode for TCP connection
-        volatile int readSize @unit(B) = default(-1B);    // used only with autoRead==false
-        volatile double readDelay @unit(s) = default(-1s);    // used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay
+        string localAddress = default(""); // Local address; may be left empty ("")
+        int localPort = default(1000);     // LocalPort number to listen on
+        bool autoRead = default(true); // Whether to use "autoread" or "explicit-read" mode for TCP connection
+        volatile int readSize @unit(B) = default(-1B);    // Used only with autoRead==false
+        volatile double readDelay @unit(s) = default(-1s);    // Used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay
         double replyDelay @unit(s) = default(0s);
         @display("i=block/app");
         @lifecycleSupport;
-        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
-        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

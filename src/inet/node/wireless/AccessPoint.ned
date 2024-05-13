@@ -38,7 +38,7 @@ module AccessPoint
         @networkNode();
         @labels(node,ethernet-node,wireless-node);
         @display("i=device/accesspoint");
-        int numWlanInterfaces = default(1);               // the number of radios in the access point
+        int numWlanInterfaces = default(1);               // The number of radios in the access point
         bool hasStatus = default(false);
         string fcsMode @enum("declared","computed") = default("declared");
         wlan[*].protocol = default("ethernetmac");

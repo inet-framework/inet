@@ -15,18 +15,18 @@ package inet.visualizer.base;
 simple EnergyStorageVisualizerBase extends VisualizerBase
 {
     parameters:
-        string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // module path to the network node visualizer module, refers to a sibling submodule by default
+        string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // Module path to the network node visualizer module, refers to a sibling submodule by default
 
         bool displayEnergyStorages = default(false);
 
-        string energyStorageFilter = default("**"); // which energy storages are considered, matches all energy storages by default
+        string energyStorageFilter = default("**"); // Which energy storages are considered, matches all energy storages by default
 
         string color = default("green");
         double width = default(8);
         double height = default(24);
         double spacing = default(2);
-        string placementHint = default("right"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
-        double placementPriority = default(0); // determines the order of annotation positioning
+        string placementHint = default("right"); // Annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        double placementPriority = default(0); // Determines the order of annotation positioning
 
         @class(EnergyStorageVisualizerBase);
 }
