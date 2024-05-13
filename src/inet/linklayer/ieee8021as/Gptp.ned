@@ -12,7 +12,7 @@ import inet.linklayer.contract.IGptp;
 //
 // This module implements the IEEE 802.1as protocol also known as gPTP. It
 // measures link delays to neighboring gPTP network nodes periodically. The
-// slave and master ports specify where are the connected gPTP network nodes
+// slave and master ports specify where the connected gPTP network nodes
 // and their roles in the time synchronization domain. The time synchronization
 // is done periodically and the clock module is set.
 //

@@ -19,20 +19,20 @@ import inet.routing.contract.IEigrp;
 // By default, no wireless and external interfaces are added; the number of
 // Ethernet and PPP ports depends on the external connections.
 //
-// - Can be connected via ethernet interface to other nodes using
-//   the ethg gate. By default full-duplex connections are supported
+// - Can be connected via an Ethernet interface to other nodes using
+//   the ethg gate. By default, full-duplex connections are supported
 //   only (twisted pair). Set **.eth.typename="EthernetInterface" for
-//   a full/half-duplex CSMA/CD implementation (coaxial cable)
-// - By default contains no wireless cards, however it can be configured
-//   by the numWlanInterfaces parameter. Wirless card type is configured by the
-//   **.wlan.typename parameter. see:  inet.linklayer.ieee80211 or other
-//   modules implementing ~IWirelessInterface
-// - Also external interfaces can be configured for HW in the loop simulation
+//   a full/half-duplex CSMA/CD implementation (coaxial cable).
+// - By default, it contains no wireless cards; however, it can be configured
+//   by the numWlanInterfaces parameter. Wireless card type is configured by the
+//   **.wlan.typename parameter. See: inet.linklayer.ieee80211 or other
+//   modules implementing ~IWirelessInterface.
+// - Also, external interfaces can be configured for HW-in-the-loop simulation
 //   using the numEthInterfaces parameter and setting the type using
-//   **.ext.typename in the INI file. see: ~ExtInterface derived modules and ~IExternalInterface
-// - PPP queueing type can be set using **.ppp.queue.typename see: ~PppInterface
-// - If wireless card is present, node mobility can be set using **.mobility.typename
-//   see: inet.mobility and ~IMobility
+//   **.ext.typename in the INI file. See: ~ExtInterface derived modules and ~IExternalInterface.
+// - PPP queueing type can be set using **.ppp.queue.typename. See: ~PppInterface.
+// - If a wireless card is present, node mobility can be set using **.mobility.typename.
+//   See: inet.mobility and ~IMobility.
 //
 // By default, dynamic routing is not supported. Specific routing protocols can
 // be added by setting the hasOspf/hasRip/hasBgp parameters.

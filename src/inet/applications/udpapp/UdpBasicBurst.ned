@@ -16,28 +16,28 @@ import inet.applications.contract.IApp;
 //
 // <b>Addressing:</b>
 //
-// The destAddresses parameter can contain zero, one or more destination
+// The destAddresses parameter can contain zero, one, or more destination
 // addresses, separated by spaces. If there is no destination address given,
-// the module will act as packet sink. If there are more than one addresses,
+// the module will act as a packet sink. If there are more than one addresses,
 // one of them is randomly chosen, either for the whole simulation run,
 // or for each burst, or for each packet, depending on the value of the
 // chooseDestAddrMode parameter. The destAddrRNG parameter controls which
 // (local) RNG is used for randomized address selection.
 // The own addresses will be ignored.
 //
-// An address may be given in the dotted decimal notation, or with the module
+// An address may be given in the dotted decimal notation or with the module
 // name. (The L3AddressResolver class is used to resolve the address.)
-// You can use the "Broadcast" string as address for sending broadcast messages.
+// You can use the "Broadcast" string as an address for sending broadcast messages.
 //
 // INET also defines several NED functions that can be useful:
 //    - moduleListByPath("pattern",...):
-//          Returns a space-separated list of the modulenames.
-//          All modules whole getFullPath() matches one of the pattern parameters will get included.
-//          The patterns may contain wilcards in the same syntax as in ini files.
+//          Returns a space-separated list of the module names.
+//          All modules whose getFullPath() matches one of the pattern parameters will get included.
+//          The patterns may contain wildcards in the same syntax as in ini files.
 //          See cTopology::extractByModulePath() function
 //          example: destaddresses = moduleListByPath("**.host[*]", "**.fixhost[*]")
 //    - moduleListByNedType("fully.qualified.ned.type",...):
-//          Returns a space-separated list of the modulenames with the given NED type(s).
+//          Returns a space-separated list of the module names with the given NED type(s).
 //          All modules whose getNedTypeName() is listed in the given parameters will get included.
 //          The NED type name is fully qualified.
 //          See cTopology::extractByNedTypeName() function
@@ -50,7 +50,7 @@ import inet.applications.contract.IApp;
 // The first burst starts at startTime. Bursts start by immediately sending
 // a packet; subsequent packets are sent at sendInterval intervals. The
 // sendInterval parameter can be a random value, e.g. exponential(10ms).
-// A constant interval with jitter can be specified as 1s+uniform(-0.01s,0.01s)
+// A constant interval with jitter can be specified as 1s + uniform(-0.01s,0.01s)
 // or uniform(0.99s,1.01s). The length of the burst is controlled by the
 // burstDuration parameter. (Note that if sendInterval is greater than
 // burstDuration, the burst will consist of one packet only.) The time between
@@ -58,7 +58,7 @@ import inet.applications.contract.IApp;
 // allowed for sendInterval.) The zero burstDuration is implemented as infinity.
 //
 // The zero value in burstDuration or sendInterval parameters generates a runtime error.
-// The sleepDuration parameter accepts zero value.
+// The sleepDuration parameter accepts a zero value.
 //
 // <b>Packets</b>
 //
@@ -67,7 +67,7 @@ import inet.applications.contract.IApp;
 // The module adds two parameters to packets before sending:
 //  - sourceID: source module ID
 //  - msgId: incremented by 1 after send any packet.
-// When received packet has this parameters, the module checks the order of received packets.
+// When received packet has these parameters, the module checks the order of received packets.
 //
 // <b>Operation as sink</b>
 //
@@ -80,11 +80,11 @@ import inet.applications.contract.IApp;
 //
 // Statistics are collected on incoming packets:
 //  - outOfOrderPk: statistics of out of order packets.
-//        The packet is out of order, when has msgId and sourceId parameters and module
-//        received bigger msgId from same sourceID.
+//        The packet is out of order when it has msgId and sourceId parameters, and the module
+//        received a bigger msgId from the same sourceID.
 //  - dropPk: statistics of dropped packets.
-//        The packet is dropped when not out-of-order packet and delay time is larger than
-//        delayLimit parameter. The delayLimit=0 is infinity.
+//        The packet is dropped when not an out-of-order packet and delay time is larger than
+//        the delayLimit parameter. The delayLimit = 0 is infinity.
 //  - packetReceived: statistics of not dropped, not out-of-order packets.
 //  - endToEndDelay: end to end delay statistics of not dropped, not out-of-order packets.
 //

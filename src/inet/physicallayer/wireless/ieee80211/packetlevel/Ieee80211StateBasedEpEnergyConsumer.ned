@@ -12,7 +12,7 @@ import inet.physicallayer.wireless.common.energyconsumer.StateBasedEpEnergyConsu
 //
 // This module provides a radio power consumer model for IEEE 802.11 radios.
 // Default values are roughly based on CC3220 transceiver. The power consumption is
-// determined by the radio mode, the transmitter state and the receiver state
+// determined by the radio mode, the transmitter state, and the receiver state
 // using constant parameters.
 //
 simple Ieee80211StateBasedEpEnergyConsumer extends StateBasedEpEnergyConsumer

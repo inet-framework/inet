@@ -22,7 +22,7 @@ import inet.linklayer.configurator.contract.IL2NodeConfigurator;
 //
 // This module is needed because of failure/restart scenarios:
 // ~L2NetworkConfigurator would not be able to configure the node after
-// a restart, because being a global module, it doesn't know about node
+// a restart, because, being a global module, it doesn't know about node
 // lifecycle events.
 //
 simple L2NodeConfigurator like IL2NodeConfigurator

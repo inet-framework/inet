@@ -10,9 +10,9 @@ package inet.node.tsn;
 import inet.linklayer.ieee8021as.GptpMaster;
 
 //
-// This module represents a hardware device containing a high precision hardware
+// This module represents a hardware device containing a high-precision hardware
 // clock. The device also contains a gPTP protocol implementation and acts as a
-// gPTP master node in the network.
+// gPTP master node on the network.
 //
 module TsnClock extends GptpMaster
 {

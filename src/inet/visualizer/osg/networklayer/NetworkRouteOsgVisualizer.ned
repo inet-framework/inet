@@ -11,7 +11,7 @@ import inet.visualizer.base.PathVisualizerBase;
 import inet.visualizer.contract.INetworkRouteVisualizer;
 
 //
-// This module visualizes network routes on a 3D osg scene. It displays an
+// This module visualizes network routes on a 3D osg scene. It displays a
 // polyline for each active route in the network. See the documentation of the
 // base module for what constitutes an active route. Each polyline fades out
 // over time until the route becomes inactive unless it is reinforced by another

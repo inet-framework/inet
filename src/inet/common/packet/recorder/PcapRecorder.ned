@@ -14,10 +14,10 @@ package inet.common.packet.recorder;
 // the same host. By default, it records frames sent/received by L2 modules
 // of ~StandardHost and ~Router. The output filename is expected in the
 // pcapFile parameter. The PcapRecorder module can also print tcpdump-like
-// textual information to on the log (EV); this functionality can be
+// textual information on the log (EV); this functionality can be
 // controlled by the verbose parameter.
 //
-// <b>Which modules to record:</b> The list of modules can to be specified in
+// <b>Which modules to record:</b> The list of modules can be specified in
 // the moduleNamePatterns parameter. It is a space-separated list of module
 // names, which will be interpreted as children of the PcapRecorder's parent
 // module. To record elements of a module vector, add "[*]" to the name

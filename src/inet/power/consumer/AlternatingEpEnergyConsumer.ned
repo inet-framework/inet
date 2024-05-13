@@ -11,8 +11,8 @@ import inet.power.base.EpEnergyConsumerBase;
 
 //
 // This energy consumer model alternates between two modes called consumption
-// and sleep mode. In consumption mode it consumes a randomly selected constant
-// power for a random time interval. In sleep mode it doesn't consume energy for
+// and sleep mode. In consumption mode, it consumes a randomly selected constant
+// power for a random time interval. In sleep mode, it doesn't consume energy for
 // another random time interval.
 //
 // @see ~AlternatingEpEnergyGenerator

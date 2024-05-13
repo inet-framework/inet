@@ -8,7 +8,7 @@
 package inet.common.lifecycle;
 
 //
-// Keeps track of the status of network node (up, down, etc.) for other
+// Keeps track of the status of the network node (up, down, etc.) for other
 // modules, and also displays it as a small overlay icon on this module
 // and on the module of the network node.
 //

@@ -10,7 +10,7 @@ package inet.physicallayer.wireless.common.antenna;
 import inet.physicallayer.wireless.common.base.packetlevel.AntennaBase;
 
 //
-// Models a hypotetical antenna with a cosine-based radiation pattern.
+// Models a hypothetical antenna with a cosine-based radiation pattern.
 // This antenna model is commonly used in the real world to approximate
 // various directional antennas.
 //

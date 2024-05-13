@@ -13,7 +13,7 @@ import inet.queueing.contract.IPacketMeter;
 //
 // This module is a packet meter which measures the packet flow that is passing
 // through and optionally attaches an ~EligibilityTimeTag to the packets. The
-// tag contains the calculated simulation time when the packet becomes eligibile
+// tag contains the calculated simulation time when the packet becomes eligible
 // for transmission according to the asynchronous shaper algorithm.
 //
 // This module is part of the asynchronous shaper infrastructure.

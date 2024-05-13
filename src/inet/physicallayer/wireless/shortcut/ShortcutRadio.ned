@@ -16,7 +16,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 // other radio module without any physical layer processing in the radio medium.
 // Packets received from the upper layer protocols may be lost. Physical layer
 // overhead is simply simulated by physical header bits, preamble transmission
-// duration and a propagation delay.
+// duration, and a propagation delay.
 //
 simple ShortcutRadio extends PhysicalLayerBase like IRadio
 {

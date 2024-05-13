@@ -10,9 +10,9 @@ package inet.physicallayer.wireless.common.communicationcache;
 import inet.physicallayer.wireless.common.contract.packetlevel.ICommunicationCache;
 
 //
-// This communication cache model allows validating other implementations. It
+// This communication cache model allows validation of other implementations. It
 // can be used to provide a reference for communication logs, simulation
-// fingerprints, and statistical results that can be compared with results of
+// fingerprints, and statistical results that can be compared with the results of
 // other communication cache implementations.
 //
 module ReferenceCommunicationCache like ICommunicationCache

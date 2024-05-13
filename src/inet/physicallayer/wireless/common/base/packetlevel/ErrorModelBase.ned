@@ -10,7 +10,7 @@ package inet.physicallayer.wireless.common.base.packetlevel;
 import inet.physicallayer.wireless.common.contract.packetlevel.IErrorModel;
 
 //
-// This module servces as the base module for error models.
+// This module serves as the base module for error models.
 //
 module ErrorModelBase like IErrorModel
 {

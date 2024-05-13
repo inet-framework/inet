@@ -13,13 +13,13 @@ package inet.routing.pim.modes;
 // Implementation of PIM-SM protocol (RFC 4601).
 //
 // PIM-SM is a multicast routing protocol which
-// build a shared multicast forwarding three rooted at a Rendezvous Point (RP)
-// per group, and a source specific forwarding trees from the sources to the RP.
-// It is also capable to switch to a shortest path tree, so that traffic from
-// sources to receivers do not have to pass through the RP.
+// builds a shared multicast forwarding tree rooted at a Rendezvous Point (RP)
+// per group, and a source specific forwarding tree from the sources to the RP.
+// It is also capable of switching to a shortest path tree, so that traffic from
+// sources to receivers does not have to pass through the RP.
 //
 // The module must access the ~PimInterfaceTable and ~PimNeighborTable
-// modules, their path is given as the 'pimInterfaceTableModule' and
+// modules; their path is given as the 'pimInterfaceTableModule' and
 // 'pimNeighborTableModule' parameters.
 //
 // The 'RP' parameter specifies the address of the Rendezvous Point.
@@ -28,7 +28,7 @@ package inet.routing.pim.modes;
 // If there are multiple PIM routers on a multi-access LAN, only one
 // of them will be responsible for forwarding datagrams to the LAN.
 // This will be the router with the highest IP address except if
-// all routers has 'designatedRouterPriority' set, in which case
+// all routers have 'designatedRouterPriority' set, in which case
 // the highest priority wins (or highest IP address on ties).
 //
 // Other parameters set the time constants to the values specified
@@ -36,7 +36,7 @@ package inet.routing.pim.modes;
 //
 // Limitations:
 // - Only one global RP is supported and it must be specified statically.
-//   PIM Bootstrap and RP discovery is not yet implemented.
+//   PIM Bootstrap and RP discovery are not yet implemented.
 // - Switchover to the shortest path tree is not supported.
 // - Source specific excludes in the shared tree are not supported.
 //

@@ -18,7 +18,7 @@ import inet.applications.contract.IApp;
 // receive messages of class ~GenericAppMsg on it. A message should contain how
 // large the reply should be (number of bytes). For each received
 // ~GenericAppMsg, ~TcpGenericServerApp will create another ~GenericAppMsg with
-// the requested length as response, and send it back. The reply can be delayed
+// the requested length as a response and send it back. The reply can be delayed
 // by a constant time (replyDelay parameter).
 //
 // By default, the server does not impose rate limiting on data reads from the

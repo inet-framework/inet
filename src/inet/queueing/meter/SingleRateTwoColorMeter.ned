@@ -10,7 +10,7 @@ package inet.queueing.meter;
 //
 // This packet meter module measures the packet flow that is passing through
 // using one token bucket. The meter attaches a ~LabelsTag to each packet with
-// either green or red color depending on whether the token bucket contains the
+// either a green or red color depending on whether the token bucket contains the
 // required number of tokens for the packet.
 //
 // By default, packets consume 1 token per byte.

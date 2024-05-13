@@ -13,8 +13,8 @@ import inet.power.base.EpEnergyStorageBase;
 // This energy storage model maintains a residual energy capacity by integrating
 // the difference between the total consumed power and the total generated power
 // over time. It initiates node crash when the residual energy capacity reaches
-// zero. This model doesn't have various properties such as self-discharge, memory
-// effect, overcharging, temperature-dependence, etc. that real world batteries
+// zero. This model does not have various properties such as self-discharge, memory
+// effect, overcharging, temperature-dependence, etc. that real-world batteries
 // have. See the base module for signals and statistics.
 //
 // @see ~SimpleEpEnergyManagement

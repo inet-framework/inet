@@ -7,14 +7,14 @@
 package inet.common;
 
 //
-// Executes a setup command on the host OS during initialize and another teardown
+// Executes a setup command on the host OS during initialization and another teardown
 // command during module destruction. For example, it can be used to configure
 // virtual network interfaces.
 //
 // The commands can be executed in the context of a network namespace (Linux only).
 // The network namespace may already exist in the host OS before the simulation
 // starts, or it can be created as a global namespace under /var/run/netns/, or
-// it can be created as a process local namespace.
+// it can be created as a process-local namespace.
 //
 // @see ~ExternalApp, ~ExternalProcess
 //

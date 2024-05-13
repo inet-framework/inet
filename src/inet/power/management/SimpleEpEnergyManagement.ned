@@ -10,7 +10,7 @@ package inet.power.management;
 import inet.power.contract.IEpEnergyManagement;
 
 //
-// This energy mangement model estimates the residual energy capacity of the
+// This energy management model estimates the residual energy capacity of the
 // energy source model by actually querying it. It is only useful when the
 // estimation process is not important. This model initiates node shutdown
 // when the residual capacity decreases below a threshold, and it also

@@ -14,7 +14,7 @@ import inet.queueing.common.PacketMultiplexer;
 //
 // This module combines multiple ~Gptp modules, one per time domain into a multi
 // time domain time synchronization module. Each gPTP time domain is automatically
-// configured to use the corresponding subclock of the clock passed in to this
+// configured to use the corresponding subclock of the clock passed into this
 // module.
 //
 // @see ~MultiClock

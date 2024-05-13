@@ -17,18 +17,18 @@ import inet.transportlayer.contract.IUdp;
 // <b>Communication with clients (applications)</b>
 //
 // The module can (should) be connected to several applications.
-// For sending an UDP packet, the application should attach an ~UdpControlInfo
-// object to the payload, and send it to ~Udp.
+// For sending a UDP packet, the application should attach an ~UdpControlInfo
+// object to the payload and send it to ~Udp.
 // ~Udp will also attach an ~UdpControlInfo object to any payload
-// message in sends up to the application.
+// message it sends up to the application.
 //
-// For receiving Udp packets, the connected applications should first
+// For receiving UDP packets, the connected applications should first
 // "bind" to the given UDP port. This can be done by sending an
 // arbitrary message with message kind UDP_C_BIND and an ~UdpControlInfo
 // attached with srcPort filled in.
 //
 // When UDP receives an ICMP error (~IcmpHeader or ~Icmpv6Header)
-// that refers to an UDP socket, it reports the error to the corresponding
+// that refers to a UDP socket, it reports the error to the corresponding
 // application by sending a message with kind UDP_I_ERROR.
 //
 // <b>Communication with the IP (IPv4/IPv6) layer</b>
@@ -39,7 +39,7 @@ import inet.transportlayer.contract.IUdp;
 // CRC operation modes for outgoing UDP packets (crcMode parameter in UDP module):
 //  - "disabled" means the outgoing packet will have its CRC set to 0 (serializable)
 //  - "declared" means the outgoing packet will have the correct CRC declared
-//     without actually computing it, the value is set to 0xC00D (not serializable)
+//     without actually computing it; the value is set to 0xC00D (not serializable)
 //  - "computed" means the outgoing packet will have the correctly computed CRC
 //     as defined by the RFC (serializable)
 // CRC operation modes for incoming UDP packets (crcMode field in ~UdpHeader chunk):

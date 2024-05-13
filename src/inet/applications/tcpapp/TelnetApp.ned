@@ -10,11 +10,11 @@ package inet.applications.tcpapp;
 import inet.applications.contract.IApp;
 
 //
-// Models Telnet sessions with a specific user behaviour.
+// Models Telnet sessions with a specific user behavior.
 // The server app should be ~TcpGenericServerApp.
 // Compatible with both ~Ipv4 and ~Ipv6.
 //
-// NOTE: This module emulates a very specific user behaviour, and as such,
+// NOTE: This module emulates a very specific user behavior, and as such,
 // it should be viewed as an example rather than a generic Telnet model.
 // If you want to model realistic Telnet traffic, you are encouraged
 // to gather statistics from packet traces on a real network, and

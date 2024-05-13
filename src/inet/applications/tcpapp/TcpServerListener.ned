@@ -14,11 +14,11 @@ import inet.applications.contract.IApp;
 // connections, and dynamically creates modules to handle them. The type of
 // modules to be created can be specified in a parameter. The new modules
 // will be appended to the connection[] submodule array of the parent of
-// this module, i.e. they will be siblings of this module.
+// this module, i.e., they will be siblings of this module.
 //
 // Accepted TCP connections will inherit the autoRead setting of this module. To
 // allow rate limiting on the connections, set autoRead=false here, and use
-// corresponding parameters of the connection handling module (e.g. readSize and
+// corresponding parameters of the connection handling module (e.g., readSize and
 // readDelay) to set a rate limit. This will allow TCP flow control to come into
 // effect.
 //

@@ -13,7 +13,7 @@ package inet.visualizer.base;
 // interfaces are not displayed by default, see module parameters for how to
 // enable the visualization.
 //
-// This module subscribes for interfaceCreated, interfaceDeleted,
+// This module subscribes to interfaceCreated, interfaceDeleted,
 // interfaceConfigChanged, and interfaceIpv4ConfigChanged on the
 // module determined by the visualizationSubjectModule parameter.
 //

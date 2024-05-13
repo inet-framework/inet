@@ -24,7 +24,7 @@ package inet.networklayer.ipv6;
 //
 // ~Ipv6 can serve several higher-layer protocols. The higher layer protocols
 // should call registerProtocol with their gate towards the IPv6 module,
-// for fill up the protocol-to-gateindex map. When delivering packets to them,
+// to fill up the protocol-to-gateindex map. When delivering packets to them,
 // the output gate is determined from the Protocol field in the IPv6 header.
 //
 // <b>Routing and interfacing with lower layers</b>

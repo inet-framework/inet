@@ -11,14 +11,12 @@ import inet.queueing.base.PacketClassifierBase;
 import inet.queueing.contract.IPacketClassifier;
 
 //
-// This module implements weighted round-robin classifier.
+// This module implements a weighted round-robin classifier.
 //
 // There is a weight associated with each output gate.
-// Initially each output gate gets as many tokens as their
-// weight. When a packet is pushed then the first output
-// gate is selected that has a packet and enough tokens,
-// and one token is consumed. When there is not enough
-// tokens to classify a packet, then each token bucket
+// Initially, each output gate gets as many tokens as its weight.
+// When a packet is pushed, the first output gate is selected that has a packet and enough tokens,
+// and one token is consumed. When there are not enough tokens to classify a packet, then each token bucket
 // is filled up.
 //
 simple WrrClassifier extends PacketClassifierBase like IPacketClassifier

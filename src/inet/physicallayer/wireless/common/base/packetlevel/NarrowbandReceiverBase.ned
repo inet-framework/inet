@@ -11,7 +11,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IErrorModel;
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
 
 //
-// This module servces as a base module for narrowband receiver models.
+// This module serves as a base module for narrowband receiver models.
 //
 module NarrowbandReceiverBase extends SnirReceiverBase like IReceiver
 {

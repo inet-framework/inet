@@ -11,16 +11,16 @@ import inet.linklayer.contract.IEtherMac;
 
 //
 // Ethernet MAC which supports full-duplex operation ONLY.
-// See the ~IEtherMac for general informations.
+// See the ~IEtherMac for general information.
 //
-// Most of today's Ethernet networks are switched, and operate
+// Most of today's Ethernet networks are switched and operate
 // in full-duplex mode. Full-duplex transmission can be used for
 // point-to-point connections only. Since full-duplex connections
 // cannot be shared, collisions are eliminated. This setup eliminates
 // most of the need for the CSMA/CD access control mechanism because
 // there is no need to determine whether the connection is already
 // being used. This allows for a much simpler simulation model
-// for MAC. (In "traditional" Ethernet simulations, most of the code
+// for the MAC. (In "traditional" Ethernet simulations, most of the code
 // deals with the shared medium and the CSMA/CD mechanism.)
 // ~EthernetMac implements Ethernet without shared medium and CSMA/CD.
 // (If you need half-duplex operation, see ~EthernetCsmaMac which is for a full-blown
@@ -45,10 +45,10 @@ import inet.linklayer.contract.IEtherMac;
 // <b>Operation</b>
 //
 // Processing of frames received from higher layers:
-// - if src address in the frame is empty, fill it out
+// - if the source address in the frame is empty, fill it out
 // - frames get queued up until transmission
 // - transmits the frame when the transmitter is ready
-// - can send PAUSE message if requested by higher layers (PAUSE protocol,
+// - can send a PAUSE message if requested by higher layers (PAUSE protocol,
 //   used in switches).
 //
 // Processing of frames incoming from the network:
@@ -65,11 +65,11 @@ import inet.linklayer.contract.IEtherMac;
 // When a frame is received from the higher layers, it must be an ~EtherFrame,
 // and with all protocol fields filled out
 // (including the destination MAC address). The source address, if left empty,
-// will be filled in. Then frame is queued and transmitted.
+// will be filled in. Then the frame is queued and transmitted.
 //
 // Data frames received from the network are EtherFrames. They are passed to
 // the higher layers without modification.
-// Also, the module properly responds to PAUSE frames, but never sends them
+// Also, the module properly responds to PAUSE frames but never sends them
 // by itself -- however, it transmits PAUSE frames received from upper layers.
 // See <a href="ether-pause.html">PAUSE handling</a> for more info.
 //
@@ -86,7 +86,7 @@ import inet.linklayer.contract.IEtherMac;
 // <b>Queueing</b>
 //
 // In routers, MAC relies on an external queue module (see ~IPacketQueue)
-// to model finite buffer, implement QoS and/or RED, and requests packets
+// to model finite buffer, implement QoS, and/or RED, and requests packets
 // from this external queue one-by-one.
 //
 // In hosts, no such queue is used, so MAC contains an internal

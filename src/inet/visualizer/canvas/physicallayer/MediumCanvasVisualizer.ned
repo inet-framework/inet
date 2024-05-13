@@ -14,7 +14,7 @@ import inet.visualizer.contract.IMediumVisualizer;
 // This module visualizes a medium on a 2D canvas. It displays communication
 // ranges and interference ranges as circles around network nodes. It displays
 // an image at network nodes which are currently transmitting, and a different
-// image at other network nodes whcih are currently receiving. It also displays
+// image at other network nodes which are currently receiving. It also displays
 // radio signals as a 2D ring or a 3D sphere as they propagate through the
 // medium.
 //

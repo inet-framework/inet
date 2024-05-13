@@ -13,7 +13,7 @@ package inet.visualizer.base;
 // default, see module parameters for how to enable the visualization. The
 // actual visualization of packet drops is done in derived modules.
 //
-// This module subscribes for packetDropped on the module determined by the
+// This module subscribes to packetDropped on the module determined by the
 // visualizationSubjectModule parameter. If the visualizer receives a packet dropped
 // signal, then it stores the dropped packet and starts the visualization.
 //

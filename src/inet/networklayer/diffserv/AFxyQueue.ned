@@ -12,18 +12,18 @@ import inet.queueing.filter.RedDropper;
 import inet.queueing.queue.PacketQueue;
 
 //
-// This is an example queue, that implements
+// This is an example queue that implements
 // one class of the Assured Forwarding PHB group (RFC 2597).
 //
-// Packets with the same AFx class, but different drop priorities
+// Packets with the same AFx class but different drop priorities
 // arrive at the afx1In, afx2In, and afx3In gates. The received
 // packets are stored in the same queue. Before the packet
 // is enqueued, a RED dropping algorithm may decide to selectively
-// drop them, based on the average length of the queue and the RED parameters
+// drop them based on the average length of the queue and the RED parameters
 // of the drop priority of the packet.
 //
 // The afxyMinth, afxyMaxth, and afxyMaxp parameters must have values that
-// ensures that packets with lower drop priorities are dropped with lower
+// ensure that packets with lower drop priorities are dropped with lower
 // or equal probability than packets with higher drop priorities.
 //
 // @see ~DiffservQueue

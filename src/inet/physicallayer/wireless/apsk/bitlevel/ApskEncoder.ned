@@ -15,7 +15,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IScrambler;
 //
 // This module is part of a simple hypothetical layered transmitter. It computes
 // the bit domain representation from the packet domain representation by applying
-// the configured scrambling, forward errror correction encoding, and interleaving.
+// the configured scrambling, forward error correction encoding, and interleaving.
 //
 // @see ~ApskDecoder, ~ApskLayeredReceiver.
 //

@@ -13,7 +13,7 @@ package inet.queueing.base;
 //
 // Available display string text format directives:
 // - %p - number of processed packets
-// - %l - processed total packet length
+// - %l - total processed packet length
 //
 simple PacketProcessorBase
 {

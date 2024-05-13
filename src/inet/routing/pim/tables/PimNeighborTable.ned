@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-// Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
+// Authors: Veronika Rybová, Vladimir Veselý (ivesely@fit.vutbr.cz),
 //          Tamas Borbely (tomi@omnetpp.org)
 
 package inet.routing.pim.tables;

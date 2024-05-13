@@ -17,7 +17,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
 
 //
 // This receiver model is part of a simple hypothetical layered radio. It
-// receives detailed transmissions that have separate representation for
+// receives detailed transmissions that have a separate representation for
 // all simulated domains. The levelOfDetail parameter controls which domains
 // are actually simulated, but all parameters relevant to the error model are
 // expected to be set on the reception.
@@ -26,7 +26,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
 //  - a separate packet to represent the PHY frame
 //  - precise bit representation of the whole packet
 //  - precise bit representation before descrambling, fec decoding, and deinterleaving
-//  - precise symbol representation of the whole packet including physical header
+//  - precise symbol representation of the whole packet including the physical header
 //  - narrowband analog representation using scalar transmission power
 //
 // NOTE: the current implementation doesn't support pulse filtering and analog

@@ -39,7 +39,7 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 // can be configured in a single XML file for the whole network.
 //
 // Modules that represent network nodes (host, hub, bus, switch, access point,
-// router, etc.) are expected to have the @networkNode property, becaue that's how the
+// router, etc.) are expected to have the @networkNode property, because that's how the
 // configurator recognizes them in the model. All nodes must have their
 // interface table (~InterfaceTable module) as their "interfaceTable" submodule.
 // All routers must have their routing table (~Ipv4RoutingTable module) as their
@@ -63,7 +63,7 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //     Ethernet hubs, etc.) It also assigns weights to vertices and edges that
 //     will be used by the shortest path algorithm when setting up routes.
 //     Weights will be infinite for IP nodes that have IP forwarding disabled
-///    (to prevent routes from transiting them), and zero for all other nodes
+//     (to prevent routes from transiting them), and zero for all other nodes
 //     (routers and and L2 devices). Edge weights are chosen to be inversely
 //     proportional to the bitrate of the link, so that the configurator
 //     prefers connections with higher bandwidth. For internal purposes,
@@ -88,7 +88,7 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //     subnet it, will optimize for allocating the longest possible netmask.
 //     The configurator might fail to assign netmasks and addresses according
 //     to the given configuration parameters; if that happens, the assignment
-//     process stops and an error is signalled.
+//     process stops and an error is signaled.
 //
 //  -# Adds the manual routes that are specified in the configuration.
 //
@@ -109,12 +109,12 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //     configuring larger networks with smaller memory footprint and makes the
 //     routing table lookup faster. The resulting routing table might be
 //     different in that it will route packets that the original routing table
-//     did not. Nevertheless the following invariant holds: any packet routed
+//     did not. Nevertheless, the following invariant holds: any packet routed
 //     by the original routing table (has matching route) will still be routed
 //     the same way by the optimized routing table.
 //
-//  -# Finally it dumps the requested results of the configuration. It can
-//     dump network topology, assigned IP addresses, routing tables and its
+//  -# Finally, it dumps the requested results of the configuration. It can
+//     dump network topology, assigned IP addresses, routing tables, and its
 //     own configuration format.
 //
 // The following example configures all interfaces in the IPv4 address range
@@ -141,7 +141,7 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 // </pre>
 //
 // The XML configuration must contain exactly one <config> element. Under the
-// root element there can be multiple of the following elements.
+// root element, there can be multiple of the following elements.
 //
 //  - <interface>
 //    The interface element provides configuration parameters for one or more
@@ -167,9 +167,9 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //      Optional selector attribute that specifies a list of host name patterns.
 //      Only interfaces connected towards the specified hosts are affected. The
 //      specified name will be matched against the names of hosts that are on
-//      the same LAN with the one that is being configured. This works even if
+//      the same LAN as the one that is being configured. This works even if
 //      there's a switch between the configured host and the one specified here.
-//      For wired networks it might be easier to specify this parameter instead
+//      For wired networks, it might be easier to specify this parameter instead
 //      of specifying the interface names. The default value is "*".
 //      e.g. "ap" or "server" or "client*"
 //
@@ -181,28 +181,28 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //
 //    - @address
 //      Optional parameter attribute that limits the range of assignable
-//      addresses. Wildcards are allowed with using 'x' as part of the address
-//      in place of a byte. Unspecified parts will be filled automatically be
+//      addresses. Wildcards are allowed by using 'x' as part of the address
+//      in place of a byte. Unspecified parts will be filled automatically by
 //      the configurator. The default value "" means that the address will not
 //      be configured. Unconfigured interfaces still have allocated addresses
-//      in their subnets allowing them to become configured later very easily.
+//      in their subnets, allowing them to become configured later very easily.
 //      e.g. "192.168.1.1" or "10.0.x.x"
 //
 //    - @netmask
 //      Optional parameter attribute that limits the range of assignable
-//      netmasks. Wildcards are allowed with using 'x' as part of the netmask
-//      in place of a byte. Unspecified parts will be filled automatically be
+//      netmasks. Wildcards are allowed by using 'x' as part of the netmask
+//      in place of a byte. Unspecified parts will be filled automatically by
 //      the configurator. The default value "" means that any netmask can be
 //      configured.
 //      e.g. "255.255.255.0" or "/24" or "255.255.x.x" or "255.255.x.0"
 //
 //    - @mtu                number
 //      Optional parameter attribute to set the MTU parameter in the interface.
-//      When unspecified the interface parameter is left unchanged.
+//      When unspecified, the interface parameter is left unchanged.
 //
 //    - @metric                number
 //      Optional parameter attribute to set the Metric parameter in the interface.
-//      When unspecified the interface parameter is left unchanged.
+//      When unspecified, the interface parameter is left unchanged.
 //
 //    - @groups
 //      Optional parameter attribute; it may contain a list of (multicast)
@@ -211,15 +211,15 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //
 //    - @add-static-route
 //      Optional bool parameter (default=true).
-//      Add static route to the routing table.
+//      Add a static route to the routing table.
 //
 //    - @add-default-route
 //      Optional bool parameter (default=true).
-//      Add default route to the routing table if the node has only one non-loopback interface.
+//      Add a default route to the routing table if the node has only one non-loopback interface.
 //
 //    - @add-subnet-route
 //      Optional bool parameter (default=true).
-//      Add subnet route to the routing table.
+//      Add a subnet route to the routing table.
 //
 //  - <wireless>
 //    The wireless element specifies the members of a wireless network. It is
@@ -227,7 +227,7 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //    the SSID parameters.
 //
 //    - @id (optional)
-//      identifies wireless network, unique value used if missed
+//      Identifies the wireless network. If it is unspecified, an automatic value is used.
 //
 //    - @hosts
 //      Optional selector attribute that specifies a list of host name patterns.
@@ -297,13 +297,13 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //
 //    - @gateway
 //      Optional parameter attribute that specifies the gateway (next-hop)
-//      address in the route (L3AddressResolver syntax). When unspecified
+//      address in the route (L3AddressResolver syntax). When unspecified,
 //      the interface parameter must be specified. The default value is "*".
 //      e.g. "192.168.1.254" or "subnet.router" or "*"
 //
 //    - @interface
 //      Optional parameter attribute that specifies the output interface name
-//      in the route. When unspecified the gateway parameter must be specified.
+//      in the route. When unspecified, the gateway parameter must be specified.
 //      This parameter has no default value.
 //      e.g. "eth0"
 //
@@ -339,7 +339,7 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //      Optional parameter attribute that specifies the name of the interface
 //      the multicast datagrams are expected to arrive. When a datagram arrives
 //      on the parent interface, it will be forwarded towards the child interfaces;
-//      otherwise it will be dropped. The default value is the interface on the
+//      otherwise, it will be dropped. The default value is the interface on the
 //      shortest path towards the source of the datagram.
 //
 //    - @children
@@ -347,7 +347,7 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //      patterns:
 //       - a name pattern (e.g. "ppp*") matches the name of the interface
 //       - a 'towards' pattern (starting with ">", e.g. ">router*") matches the interface
-//         by naming one of the neighbour nodes on its link.
+//         by naming one of the neighbor nodes on its link.
 //      Incoming multicast datagrams are forwarded to each child interface except the
 //      one they arrived in.
 //
@@ -373,8 +373,8 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //      and "errorRate". The default value is "hopCount".
 //
 //    - <node>
-//      The node optional subelement specifies cost parameters for the shortest
-//      path algorithm. If this subelement is not specified then the configurator
+//      The node optional sub-element specifies cost parameters for the shortest
+//      path algorithm. If this sub-element is not specified then the configurator
 //      determines cost by default according to the selected metric.
 //
 //      - @hosts
@@ -386,8 +386,8 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //        "infinite" and numbers.
 //
 //    - <link>
-//      The node subelement specifies cost parameters for the shortest path algorithm.
-//      If this subelement is not specified then the configurator determines link
+//      The node sub-element specifies cost parameters for the shortest path algorithm.
+//      If this sub-element is not specified then the configurator determines link
 //      cost by default according to the selected metric.
 //
 //      - @interfaces

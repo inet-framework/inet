@@ -10,9 +10,9 @@ package inet.common;
 //
 // This module measures the residence time of packet data in network nodes. The
 // measurement is done by tracking every bit individually using their unique
-// identity. For each bit the measurement starts when the incoming enclosing
+// identity. For each bit, the measurement starts when the incoming enclosing
 // packet reception ends (or starts) in the network node. Similarly, for each
-// bit the measurement ends when the outgoing enclosing packet transmission
+// bit, the measurement ends when the outgoing enclosing packet transmission
 // starts (or ends) in the network node.
 //
 simple ResidenceTimeMeasurer like IMeasurer

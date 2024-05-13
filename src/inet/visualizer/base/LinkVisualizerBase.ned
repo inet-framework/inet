@@ -9,13 +9,13 @@ package inet.visualizer.base;
 
 //
 // This is a base module for link visualizer simple modules. It keeps track of
-// active links in a network. A link between two network node is considered
-// active if a packet is sent recently between the corresponding layers. Active
+// active links in a network. A link between two network nodes is considered
+// active if a packet has been sent recently between the corresponding layers. Active
 // links are not displayed by default, see the module parameters for how to
 // enable the visualization. The actual visualization of active links is done
 // in derived modules.
 //
-// This module subscribes for signals at the provided subscription module. When
+// This module subscribes to signals at the provided subscription module. When
 // determining active links, it only considers packets matched by the provided
 // filters. The filters use the format of cMatchExpression with the packet name
 // as the default attribute.

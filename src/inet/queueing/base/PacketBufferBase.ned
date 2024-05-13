@@ -12,7 +12,7 @@ package inet.queueing.base;
 // statistics.
 //
 // Available display string format directives:
-// - %p - number of packet
+// - %p - number of packets
 // - %l - total length
 // - %a - number of added packets
 // - %r - number of removed packets

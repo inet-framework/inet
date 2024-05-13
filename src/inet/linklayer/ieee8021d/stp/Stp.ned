@@ -15,7 +15,7 @@ import inet.linklayer.contract.ISpanningTree;
 // is to prevent bridge loops and the broadcast radiation that results from them.
 // Spanning tree also allows a network design to include spare (redundant) links to
 // provide automatic backup paths if an active link fails, without the danger of
-// bridge loops, or the need for manual enabling/disabling of these backup links.
+// bridge loops or the need for manually enabling/disabling these backup links.
 //
 // There are various versions of Spanning Tree algorithm and protocol. This module
 // implements it according to the IEEE 802.1D-1998 specification.

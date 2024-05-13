@@ -14,10 +14,10 @@ import inet.visualizer.contract.IMediumVisualizer;
 // This module visualizes a medium using a 3D osg scene. It displays
 // communication ranges and interference ranges as circles around network nodes.
 // It displays an image at network nodes which are currently transmitting, and
-// a different image at other network nodes whcih are currently receiving. It
+// a different image at other network nodes which are currently receiving. It
 // also displays radio signals as a growing 2D ring or a 3D sphere as they
 // propagate through the medium. All 2D shapes such as circles, rings, and
-// images can be displayed in 4 different planes: camera, xy, xz and yz. It's
+// images can be displayed in 4 different planes: camera, xy, xz, and yz. It's
 // also possible to use animated images.
 //
 // @see ~MediumOsgVisualizer, ~MediumVisualizer, ~MediumVisualizerBase, ~IMediumVisualizer

@@ -10,7 +10,7 @@ package inet.physicallayer.wireless.common.base.packetlevel;
 import inet.physicallayer.wireless.common.radio.packetlevel.Radio;
 
 //
-// This module servces as a base module for narrowband radio models.
+// This module serves as a base module for narrowband radio models.
 //
 module NarrowbandRadioBase extends Radio
 {

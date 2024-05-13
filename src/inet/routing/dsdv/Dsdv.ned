@@ -12,7 +12,7 @@ import inet.routing.contract.IManetRouting;
 //
 // Implements Destination-Sequenced Distance Vector.
 //
-// The host using this routing algoritm is required to have a SINGLE interface
+// The host using this routing algorithm is required to have a SINGLE interface
 // which has "wlan" in its name.
 //
 // NOTE:

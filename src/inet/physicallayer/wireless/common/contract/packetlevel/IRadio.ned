@@ -26,10 +26,10 @@ package inet.physicallayer.wireless.common.contract.packetlevel;
 // <b>Reception</b>
 //
 // Received WirelessSignal messages get delivered to the radioIn gate of the radio
-// module. If it was found to have been received correctly, it gets decapsulated
-// and the frame sent to the upper layer.
+// module. If they were found to have been received correctly, they get decapsulated
+// and the frame is sent to the upper layer.
 //
-// Note: currently the packet is also sent up if it was NOT received correctly,
+// Note: currently, the packet is also sent up if it was NOT received correctly,
 // with its error flag set to true.
 //
 moduleinterface IRadio extends IPhysicalLayer

@@ -11,7 +11,7 @@ import inet.power.contract.ICcEnergyConsumer;
 
 //
 // This module provides a radio energy consumer model. The current consumption is
-// determined by the radio mode, the transmitter state and the receiver state
+// determined by the radio mode, the transmitter state, and the receiver state
 // using constant parameters.
 //
 simple StateBasedCcEnergyConsumer like ICcEnergyConsumer

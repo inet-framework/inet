@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Georg Lutz, Institut fuer Telematik, University of Karlsruhe
+// Copyright (C) 2005 Georg Lutz, Institut für Telematik, University of Karlsruhe
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
@@ -18,12 +18,12 @@ import inet.mobility.base.MovingMobilityBase;
 // value will be drawn for each line segment; it is customary to specify it as
 // uniform(minSpeed, maxSpeed). When the node reaches the target position,
 // it waits for the time waitTime which can also be defined as a variate.
-// After this time the the algorithm calculates a new random position, etc.
+// After this time, the algorithm calculates a new random position, etc.
 //
 // This model was originally written by Georg Lutz (GeorgLutz AT gmx DOT de) for
-// his diploma thesis "Effizientes Modell fuer Funkverbindungen in 4G-Netzen fuer
+// his diploma thesis "Effizientes Modell für Funkverbindungen in 4G-Netzen für
 // OMNeT++" (Efficient model for radio links in 4G networks for OMNeT++)
-// at Institut fuer Telematik, Universitaet Karlsruhe (Institute for
+// at Institut für Telematik, Universität Karlsruhe (Institute for
 // Telematics, University Karlsruhe, Germany), 2005-06-21.
 //
 // @author Georg Lutz

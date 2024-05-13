@@ -12,21 +12,20 @@ package inet.networklayer.diffserv;
 //
 // IP packets are classified according to three parameters,
 // Committed Information Rate (cir), Committed Burst Size (cbs),
-// and Excess Burst Size (ebs), to be either green, yellow or red.
+// and Excess Burst Size (ebs), to be either green, yellow, or red.
 //
 // The green traffic is guaranteed to be under (in bits)
 // <pre>
 //    cir * (t1 - t0) + 8 * cbs
 // </pre>
-// and green+yellow traffic to be under
+// and the green+yellow traffic is guaranteed to be under
 // <pre>
 //    cir * (t1 - t0) + 8 * (cbs + ebs)
 // </pre>
 // in every [t0,t1] interval.
 //
 // When operating in color-aware mode, the meter does not recolor
-// a packet that was colored by a previous marker to a lesser
-// conforming color.
+// a packet that was colored by a previous marker to a lesser conforming color.
 //
 simple SingleRateThreeColorMeter
 {

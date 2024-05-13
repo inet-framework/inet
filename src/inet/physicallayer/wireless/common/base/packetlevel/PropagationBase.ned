@@ -10,7 +10,7 @@ package inet.physicallayer.wireless.common.base.packetlevel;
 import inet.physicallayer.wireless.common.contract.packetlevel.IPropagation;
 
 //
-// This module servces as a base module for propagation models.
+// This module serves as a base module for propagation models.
 //
 module PropagationBase like IPropagation
 {

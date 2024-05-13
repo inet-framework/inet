@@ -16,7 +16,7 @@ import inet.physicallayer.wireless.common.base.packetlevel.AntennaBase;
 // George Calcev and Matt Dillon, "Antenna Tilt Control in CDMA Networks"
 // in Proc. of the 2nd Annual International Wireless Internet Conference (WICON), 2006
 //
-// though the latter addresses also the elevation plane, which the present model doesn't.
+// although the latter also addresses the elevation plane, which the present model doesn't.
 //
 module ParabolicAntenna extends AntennaBase
 {

@@ -35,7 +35,7 @@ import inet.applications.contract.IApp;
 //
 // Every ping request is sent out with a sequence number, and replies are
 // expected to arrive in the same order. Whenever there's a jump in the
-// in the received ping responses' sequence number (e.g. 1, 2, 3, 5), then
+// received ping responses' sequence number (e.g. 1, 2, 3, 5), then
 // the missing pings (number 4 in this example) is counted as lost.
 // Then if it still arrives later (that is, a reply with a sequence number
 // smaller than the largest one received so far) it will be counted as

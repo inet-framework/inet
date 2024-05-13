@@ -20,8 +20,8 @@ import inet.queueing.contract.IActivePacketSource;
 // interval timer always starts after the module pushes a packet out.
 //
 // Invariants:
-//  - two subsequent packets are always pushed out at least productionInterval time apart
-//  - backpressure prevents packets from being pushed out
+//  - Two subsequent packets are always pushed out at least productionInterval time apart
+//  - Backpressure prevents packets from being pushed out
 //
 simple ActivePacketSource extends ActivePacketSourceBase like IActivePacketSource
 {

@@ -12,7 +12,7 @@ import inet.queueing.contract.IPacketClassifier;
 
 //
 // This module classifies packets into the first bucket that contains the required
-// number of tokens. The packet is forwarded on the output gate that corresponds to
+// number of tokens. The packet is forwarded to the output gate that corresponds to
 // the selected bucket.
 //
 simple MultiTokenBucketClassifier extends PacketClassifierBase like IPacketClassifier

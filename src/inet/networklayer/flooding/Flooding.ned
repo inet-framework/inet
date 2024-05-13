@@ -12,7 +12,7 @@
 // *
 // *
 // ***************************************************************************
-// * part of:     framework implementation developed by tkn
+// * part of:     framework implementation developed by TKN
 // * description: a simple flooding protocol
 // *              the user can decide whether to use plain flooding or not
 // ***************************************************************************
@@ -27,14 +27,13 @@ import inet.networklayer.contract.INetworkProtocol;
 //
 // This implementation uses plain flooding, i.e. it "remembers"
 // (stores) already broadcasted messages in a list and does not
-// rebroadcast them again, if it gets another copy of that message.
+// rebroadcast them again if it gets another copy of that message.
 //
 // The maximum number of entries for that list can be defined in the
 // .ini file (bcMaxEntries parameter) as well as the time after which an entry
 // is deleted (bcDelTime parameter).
 //
-// If you prefere a memory-less version you should set to false the
-// plainFlooding bool parameter.
+// If you prefer a memory-less version, you should set the plainFlooding bool parameter to false.
 //
 // @author Daniel Willkomm
 //

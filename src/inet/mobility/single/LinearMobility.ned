@@ -12,7 +12,7 @@ package inet.mobility.single;
 import inet.mobility.base.MovingMobilityBase;
 
 //
-// This is a linear mobility model with speed, angle and acceleration parameters.
+// This is a linear mobility model with speed, angle, and acceleration parameters.
 // Angle only changes when the mobile node hits a wall: then it reflects
 // off the wall at the same angle.
 //

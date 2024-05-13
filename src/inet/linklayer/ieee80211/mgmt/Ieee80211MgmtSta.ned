@@ -15,9 +15,9 @@ package inet.linklayer.ieee80211.mgmt;
 // out the requested action by sending/receiving management frames, switching
 // channels, etc.
 //
-// It implementes both active and passive scanning (where active means sending
+// It implements both active and passive scanning (where active means sending
 // Probe frames). The authentication process is simulated by exchanging dummy
-// messages, i.e. there is no actual cryptography or not its detailed simulation
+// messages, i.e. there is no actual cryptography or its detailed simulation
 // involved.
 //
 // Relies on the MAC layer (~Ieee80211Mac) for reception and transmission of frames.

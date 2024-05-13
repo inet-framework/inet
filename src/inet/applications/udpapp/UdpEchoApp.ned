@@ -10,7 +10,7 @@ package inet.applications.udpapp;
 import inet.applications.contract.IApp;
 
 //
-// Listens on an UDP port, and sends back each received packet to its sender.
+// Listens on a UDP port and sends back each received packet to its sender.
 // Note: when used together with ~UdpBasicApp, ~UdpBasicApp's "received packet
 // lifetime" statistic will record round-trip times.
 //

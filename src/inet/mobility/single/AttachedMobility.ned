@@ -11,8 +11,8 @@ import inet.mobility.base.MobilityBase;
 
 //
 // This module provides a mobility that is attached to another mobility at a
-// given offset. The position, velocity and acceleration are all affectred by
-// the respective quantites and the orientation of the mobility where this one
+// given offset. The position, velocity, and acceleration are all affected by
+// the respective quantities and the orientation of the mobility where this one
 // is attached.
 //
 simple AttachedMobility extends MobilityBase

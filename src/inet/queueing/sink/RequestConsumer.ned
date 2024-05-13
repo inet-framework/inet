@@ -14,7 +14,7 @@ import inet.queueing.contract.IPacketServer;
 
 //
 // This module processes incoming packets one by one in the order they arrive.
-// First it classifies a packet according to the configured classifier function,
+// First, it classifies a packet according to the configured classifier function,
 // then it generates tokens for the selected category in the configured response
 // producer.
 //

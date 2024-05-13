@@ -19,9 +19,9 @@ import inet.applications.contract.IApp;
 // memory overhead, low network utilization, and determines unicast
 // routes to destinations within the ad hoc network.
 //
-// This routing protocol communicates over UDP and used in ~AodvRouter
+// This routing protocol communicates over UDP and is used in ~AodvRouter
 // nodes as a routing submodule. ~AodvRouter is just a ~WirelessHost
-// extended with ~Aodv submodule.
+// extended with an ~Aodv submodule.
 //
 // This implementation is based on RFC 3561. For more information, you may
 // refer to the following link: https://tools.ietf.org/html/rfc3561.html.

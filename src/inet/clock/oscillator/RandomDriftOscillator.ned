@@ -11,7 +11,7 @@ import inet.clock.base.DriftingOscillatorBase;
 import inet.clock.contract.IOscillator;
 
 //
-// This oscillator changes drift rate over time. The drift rate is the sum of
+// This oscillator changes the drift rate over time. The drift rate is the sum of
 // a distribution that is evaluated periodically and a random walk process.
 //
 simple RandomDriftOscillator extends DriftingOscillatorBase like IOscillator

@@ -13,7 +13,7 @@ import inet.applications.contract.IApp;
 // Video streaming client.
 //
 // This module sends one "video streaming request" to serverAddress:serverPort at time startTime
-// and receives stream from ~UdpVideoStreamServer server.
+// and receives a stream from the ~UdpVideoStreamServer server.
 //
 // @see ~UdpVideoStreamServer
 //

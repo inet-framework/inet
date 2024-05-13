@@ -14,7 +14,7 @@ import inet.linklayer.ieee80211.mac.contract.IDs;
 // responsible for distributing correctly received frames to the higher
 // layer, to the wireless LAN, etc.
 //
-// This is the default implementation of ~IDs.
+// This is the default implementation of the ~IDs module interface.
 //
 simple Ds like IDs
 {

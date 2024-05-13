@@ -11,7 +11,7 @@ package inet.emulation.linklayer.ethernet;
 // This module provides a bidirectional connection to a real TAP device of the
 // host computer which is running the simulation. It writes the packets arrived
 // on 'lowerLayerIn' gate to the specified real TAP device, and sends out packets
-// arrived from real TAP device on 'lowerLayerOut' gate.
+// arrived from the real TAP device on 'lowerLayerOut' gate.
 //
 simple ExtEthernetTapDevice
 {

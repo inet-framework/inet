@@ -8,7 +8,7 @@
 package inet.linklayer.ieee8021as;
 
 //
-// This module provide a gPTP slave network node.
+// This module provides a gPTP slave network node.
 //
 module GptpSlave extends GptpEndstation
 {

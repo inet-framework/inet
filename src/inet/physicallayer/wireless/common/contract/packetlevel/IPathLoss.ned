@@ -8,7 +8,7 @@
 package inet.physicallayer.wireless.common.contract.packetlevel;
 
 //
-// The path loss model  describes the reduction of power as the signal
+// The path loss model describes the reduction of power as the signal
 // propagates through space.
 //
 moduleinterface IPathLoss

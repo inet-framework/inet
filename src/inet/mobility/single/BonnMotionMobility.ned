@@ -22,7 +22,7 @@ import inet.mobility.base.MovingMobilityBase;
 //
 // t1 x1 y1 z1 t2 x2 y2 z2 t3 x3 y3 z3 t4 x4 y4 z4...
 //
-// The meaning is that the given node gets to (xk,yk) at tk. There's no
+// The meaning is that the given node gets to (xk, yk) at tk. There's no
 // separate notation for wait, so x and y coordinates will be repeated there.
 //
 simple BonnMotionMobility extends MovingMobilityBase

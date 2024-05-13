@@ -25,7 +25,7 @@ moduleinterface IIpv4
 // <b>Interfacing with higher layer protocols</b>
 //
 // To send a packet over IPv4 from a higher layer protocol, the module should
-// fill in an ~L3AddressReq object, attach it to the packet with the Packets's
+// fill in an ~L3AddressReq object, attach it to the packet with the Packet's
 // addTag() method, then send the packet to the ~Ipv4 module.
 //
 // When ~Ipv4 sends up a packet to a higher layer protocol, it will also attach
@@ -34,7 +34,7 @@ moduleinterface IIpv4
 //
 // ~Ipv4 can serve several higher-layer protocols. The higher layer protocols
 // should call registerProtocol with their gate towards the ~Ipv4 module,
-// for fill up the protocol-to-gateindex map. When delivering packets to them,
+// to fill up the protocol-to-gateindex map. When delivering packets to them,
 // the output gate is determined from the Protocol in the IPv4 header.
 //
 // <b>Routing and interfacing with lower layers</b>
@@ -51,29 +51,29 @@ moduleinterface IIpv4
 // Routing protocol implementations (e.g. OSPF and ISIS) can also query
 // and manipulate the route table by calling ~Ipv4RoutingTable's methods in C++.
 //
-// <b>Working with Arp</b>
+// <b>Working with ARP</b>
 //
-// Ipv4 module subscribe to arpResolutionCompleted and arpResolutionFailed signals on Arp module.
-// The ~Arp module accessed via arpOut gate, should not insert any module between ~Ipv4 and ~Arp.
-// Before Ipv4 module send down a packet to lower layer, ask MacAddress of next hop from Arp via
-// method call. If MacAddress unspecified, then start address resolution via Arp method call and
-// insert packet to a queue specified by next hop addr.
-// When received a arpResolutionCompleted, then send packets from queue of next hop addr.
-// When received a arpResolutionFailed, then drop packets from queue of next hop addr.
-// When Ipv4 module received an ARP packet from Lower Layer on some queueIn gate,
-// then send out this packet on arpOut gate. When received a packet on arpIn gate,
-// then send out this packet on the specified queueOut gate.
+// Ipv4 module subscribes to arpResolutionCompleted and arpResolutionFailed signals on Arp module.
+// The ~Arp module accessed via arpOut gate should not insert any module between ~Ipv4 and ~Arp.
+// Before Ipv4 module sends down a packet to the lower layer, it asks for the MacAddress of the next hop from Arp via
+// a method call. If the MacAddress is unspecified, then start address resolution via an Arp method call and
+// insert the packet to a queue specified by the next hop address.
+// When it receives an arpResolutionCompleted signal, it sends the packets from the queue of the next hop address.
+// When it receives an arpResolutionFailed signal, it drops the packets from the queue of the next hop address.
+// When the Ipv4 module receives an ARP packet from the lower layer on some queueIn gate,
+// it sends out this packet on the arpOut gate. When it receives a packet on the arpIn gate,
+// it sends out this packet on the specified queueOut gate.
 //
 // <b>Performance model, QoS</b>
 //
-// In the current form, ~Ipv4 contains a FIFO which queues up Ipv4 datagrams;
+// In its current form, ~Ipv4 contains a FIFO which queues up Ipv4 datagrams;
 // datagrams are processed in order. The processing time is determined by the
 // procDelay module parameter.
 //
 // The current performance model comes from the QueueBase C++ base class.
 // If you need a more sophisticated performance model, you may change the
 // module implementation (the Ipv4 class), and: (1) override the startService()
-// method which determines processing time for a packet, or (2) use a
+// method which determines the processing time for a packet, or (2) use a
 // different base class.
 //
 // @see ~Ipv4RoutingTable, ~Arp

@@ -15,7 +15,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IPulseShaper;
 
 //
 // This transmitter model is part of a simple hypothetical layered radio. It
-// produces detailed transmissions that have separate representation for
+// produces detailed transmissions that have a separate representation for
 // all simulated domains. The levelOfDetail parameter controls which domains
 // are actually simulated, but all parameters relevant to the error model are
 // always set on the transmission.
@@ -23,9 +23,9 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IPulseShaper;
 // With the highest level of detail, the produced transmission contains the
 // following:
 //  - a separate packet to represent the PHY frame
-//  - precise bit representation of the whole packet
-//  - precise bit representation after scrambling, fec encoding, and interleaving
-//  - precise symbol representation of the whole packet including physical header
+//  - precise bit representation of the entire packet
+//  - precise bit representation after scrambling, FEC encoding, and interleaving
+//  - precise symbol representation of the entire packet including the physical header
 //  - narrowband analog representation using scalar transmission power
 //
 // NOTE: the current implementation doesn't support pulse shaping and digital

@@ -11,7 +11,7 @@ package inet.applications.generic;
 // Sends IP or IPv6 datagrams to the given address at the given sendInterval.
 // The sendInterval can be a constant or a random value (e.g. exponential(1)).
 // If the destAddresses parameter contains more than one address, one
-// of them is randomly for each packet. An address may be given in the
+// of them is randomly chosen for each packet. An address may be given in the
 // dotted decimal notation (or, for IPv6, in the usual notation with colons),
 // or with the module name. (The L3AddressResolver class is used to resolve
 // the address.) To disable the model, set destAddresses to "".

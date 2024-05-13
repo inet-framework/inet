@@ -8,7 +8,7 @@
 package inet.common.misc;
 
 //
-// This channels adds support for thruput metering to the datarate channel.
+// This channel adds support for throughput metering to the datarate channel.
 // A cDatarateChannel extended with throughput calculation. Values
 // are displayed on the link, using the connection's "t=" or "tt=" display
 // string tag.

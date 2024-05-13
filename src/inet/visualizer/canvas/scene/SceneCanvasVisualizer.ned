@@ -13,7 +13,7 @@ import inet.visualizer.contract.ISceneVisualizer;
 //
 // This module visualizes the scene on a 2D canvas. It provides the 3D coordinate
 // system's 2D orthographic projection for other visualizers. This is used to get
-// a consistent visualization accross all visualizers. It can also display the
+// a consistent visualization across all visualizers. It can also display the
 // coordinate system axes.
 //
 // @see ~SceneOsgVisualizer, ~SceneVisualizer, ~SceneVisualizerBase, ~ISceneVisualizer

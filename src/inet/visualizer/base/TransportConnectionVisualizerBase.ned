@@ -14,7 +14,7 @@ package inet.visualizer.base;
 // visualization. The actual visualization of transport connections is done
 // in derived modules.
 //
-// This module subscribes for tcpConnectionAdded and tcpConnectionRemoved on the
+// This module subscribes to tcpConnectionAdded and tcpConnectionRemoved on the
 // module determined by the visualizationSubjectModule parameter.
 //
 // @see ~TransportConnectionCanvasVisualizer, ~TransportConnectionOsgVisualizer, ~ITransportConnectionVisualizer, ~VisualizerBase

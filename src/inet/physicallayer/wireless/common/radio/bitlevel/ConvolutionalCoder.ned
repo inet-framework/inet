@@ -14,7 +14,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder;
 // transferFunctionMatrix = "133 171" means a simple vector with two elements:
 // [133, 171]. We use the standard octal representation of the industry-standard
 // generators of the 1/2 convolutional encoder. You also have to define your own
-// polynomials in octal number system!
+// polynomials in the octal number system!
 // transferFunctionMatrix = "3 1 3; 1 2 2" means a k-by-n matrix:
 // <pre>
 // | 3 1 3 |
@@ -25,9 +25,9 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder;
 // <b>Puncturing (bool) matrix and punctureK, punctureN parameters</b>
 //
 // The same rule applies to the puncturing matrix representation.
-// A puncturing matrix only consists boolean values represented with
+// A puncturing matrix only consists of boolean values represented with
 // 0 or 1.
-// By default we set it to
+// By default, we set it to
 // <pre>
 // | 1 |
 // | 1 |
@@ -56,7 +56,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder;
 //                  and ends with the best metric.
 //  - "terminated": The trellis graph traceback path always starts and ends in the all-zeros
 //                  state.
-// The encoding process works in accordance with the industry-standards and starts
+// The encoding process works in accordance with the industry standards and starts
 // in the all-zeros state.
 //
 module ConvolutionalCoder like IFecCoder

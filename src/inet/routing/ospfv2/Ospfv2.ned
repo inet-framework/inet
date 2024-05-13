@@ -50,7 +50,7 @@ import inet.routing.contract.IOspf;
 //     - @interfaceTransmissionDelay - An optional integer
 //     - @helloInterval - An optional integer that must be the same for all router interfaces attached to the same network
 //     - @routerDeadInterval - An optional integer that must be the same for all router interfaces attached to the same network
-//     - @authenticationType - Optional OSPF packet authentication protocol (SimplePasswordType | CrytographicType | NullType)
+//     - @authenticationType - Optional OSPF packet authentication protocol (SimplePasswordType | CryptographicType | NullType)
 //     - @authenticationKey - Optional 8 byte hexadecimal value e.g. 0x5D8ABDAEDFCB8BEE
 //
 //   - <BroadcastInterface> - Describes the parameters of a broadcast interface. It is identified in
@@ -64,7 +64,7 @@ import inet.routing.contract.IOspf;
 //     - @interfaceTransmissionDelay - An optional integer
 //     - @helloInterval - An optional integer that must be the same for all router interfaces attached to the same network
 //     - @routerDeadInterval - An optional integer that must be the same for all router interfaces attached to the same network
-//     - @authenticationType - Optional OSPF packet authentication protocol (SimplePasswordType | CrytographicType | NullType)
+//     - @authenticationType - Optional OSPF packet authentication protocol (SimplePasswordType | CryptographicType | NullType)
 //     - @authenticationKey - Optional 8 byte hexadecimal value e.g. 0x5D8ABDAEDFCB8BEE
 //     - @routerPriority - Optional integer specifying the priority in DR/BDR election. Set to 0 to exclude the router from the election.
 //
@@ -80,7 +80,7 @@ import inet.routing.contract.IOspf;
 //     - @interfaceTransmissionDelay - An optional integer
 //     - @helloInterval - An optional integer that must be the same for all router interfaces attached to the same network
 //     - @routerDeadInterval - An optional integer that must be the same for all router interfaces attached to the same network
-//     - @authenticationType - Optional OSPF packet authentication protocol (SimplePasswordType | CrytographicType | NullType)
+//     - @authenticationType - Optional OSPF packet authentication protocol (SimplePasswordType | CryptographicType | NullType)
 //     - @authenticationKey - Optional 8 byte hexadecimal value e.g. 0x5D8ABDAEDFCB8BEE
 //     - <PointToMultiPointNeighborList>
 //       - <PointToMultiPointNeighbor> - the content of the element is a string resolvable to an IPv4 address
@@ -106,7 +106,7 @@ import inet.routing.contract.IOspf;
 //     - @interfaceTransmissionDelay - An optional integer
 //     - @helloInterval - An optional integer that must be the same for all router interfaces attached to the same network
 //     - @routerDeadInterval - An optional integer that must be the same for all router interfaces attached to the same network
-//     - @authenticationType - Optional OSPF packet authentication protocol (SimplePasswordType | CrytographicType | NullType)
+//     - @authenticationType - Optional OSPF packet authentication protocol (SimplePasswordType | CryptographicType | NullType)
 //     - @authenticationKey - Optional 8 byte hexadecimal value e.g. 0x5D8ABDAEDFCB8BEE
 //     - @routerPriority - Optional integer specifying the priority in DR/BDR election. Set to 0 to exclude the router from the election.
 //     - @pollInterval - Optional integer that specifies the length of time, in seconds, between
@@ -128,12 +128,12 @@ import inet.routing.contract.IOspf;
 //
 //   - <VirtualLink>
 //     - @endPointRouterID - the router ID of the endpoint of the virtual link (required)
-//     - @transitAreaID - the ID of the area which is used for tansit
+//     - @transitAreaID - the ID of the area which is used for transit
 //     - @retransmissionInterval - An optional integer
 //     - @interfaceTransmissionDelay - An optional integer
 //     - @helloInterval - An optional integer that must be the same for all router interfaces attached to the same network
 //     - @routerDeadInterval - An optional integer that must be the same for all router interfaces attached to the same network
-//     - @authenticationType - Optional OSPF packet authentication protocol (SimplePasswordType | CrytographicType | NullType)
+//     - @authenticationType - Optional OSPF packet authentication protocol (SimplePasswordType | CryptographicType | NullType)
 //     - @authenticationKey - Optional 8 byte hexadecimal value e.g. 0x5D8ABDAEDFCB8BEE
 //
 simple Ospfv2 like IOspf

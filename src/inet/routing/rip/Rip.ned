@@ -38,7 +38,7 @@ import inet.applications.contract.IApp;
 // Each <interface> element configures one or more interfaces;
 // the @hosts, @names, @towards, @among attributes select the
 // configured interfaces (see ~Ipv4NetworkConfigurator).
-// The other attributes sets parameters of the selected interfaces:
+// The other attributes set parameters of the selected interfaces:
 //
 // - @metric: metric assigned to the link, default value is 1.
 //            This value is added to the metric of a learned route,
@@ -49,7 +49,7 @@ import inet.applications.contract.IApp;
 //     - 'NoRIP': no RIP messages are sent or received on this interface
 //     - 'NoSplitHorizon': no split horizon filtering; send all routes to
 //                         neighbors.
-//     - 'SplitHorizon':   do not sent routes whose next hop is the neighbor
+//     - 'SplitHorizon':   do not send routes whose next hop is the neighbor
 //     - 'SplitHorizonPoisonedReverse': if the next hop is the neighbor, then
 //                         set the metric of the route to infinity.
 simple Rip like IApp

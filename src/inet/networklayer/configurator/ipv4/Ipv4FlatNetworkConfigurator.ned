@@ -14,7 +14,7 @@ import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 // "flat" meaning that all hosts and routers will have the same
 // network address and will only differ in the host part.
 //
-// This module does't connect to any other modules (it has no gates),
+// This module doesn't connect to any other modules (it has no gates),
 // and should have only one instance in the whole model. The module
 // will only run once, at the beginning of the simulation.
 // When it runs, it will:
@@ -23,17 +23,16 @@ import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 //       routers will be in the same network (same network address).
 //       For simplicity, it will assign the same address to all interfaces
 //       of a router;
-//   -#  then it'll discover the topology of the network (using OMNeT++'s
+//   -#  then it'll discover the topology of the network (using OMNeT++'
 //       cTopology class), and calculate shortest paths;
 //   -#  finally, it will add routes which correspond to the shortest
 //       paths to the routing tables (see Ipv4RoutingTable::addRoutingEntry()).
 //
-// How does it know which modules are routers, hosts, et.c that need to
+// How does it know which modules are routers, hosts, etc. that need to
 // be configured, and what is the network topology? The configurator
-// picks all modules which have a @networkNode property and their connections,
-// and builds a graph from it. Then it runs Dijstra's
-// shortest path algorithm on it, and configures all modules which are
-// IPv4 nodes.
+// picks all modules that have a @networkNode property and their connections,
+// and builds a graph from it. Then it runs Dijstra's shortest path algorithm
+// on it and configures all modules that are IPv4 nodes.
 //
 // It is assumed that the routing table (~Ipv4RoutingTable module) is the
 // "routingTable" or "networkLayer.routingTable" submodule in all hosts
@@ -44,7 +43,7 @@ import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 // no routes are set up manually. Practically, routing files (.irt, .mrt)
 // should be absent or empty.
 //
-// All the above takes place in initialization stage 2. (In stage 0,
+// All of the above takes place in initialization stage 2. (In stage 0,
 // interfaces register themselves in the ~InterfaceTable modules, and
 // in stage 1, routing files are read.)
 //

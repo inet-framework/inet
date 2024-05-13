@@ -14,7 +14,7 @@ import inet.visualizer.contract.IStatisticVisualizer;
 // This module visualizes a statistic on a 3D osg scene. See the base module for
 // how to configure which statistic is displayed. If configured properly, then
 // it displays the last value of the statistic just above the visualization of
-// the corresponding network node. The value and the unit is wrapped in a filled
+// the corresponding network node. The value and the unit are wrapped in a filled
 // rectangle.
 //
 // @see ~StatisticCanvasVisualizer, ~StatisticVisualizer, ~StatisticVisualizerBase, ~IStatisticVisualizer

@@ -1,4 +1,4 @@
-//
+// 
 // Copyright (C) 2012 OpenSim Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
@@ -12,15 +12,15 @@ package inet.networklayer.diffserv;
 //
 // It classifies IP packets based on two rates, Peak Information Rate (PIR)
 // and Committed Information Rate (CIR), and their associated burst sizes
-// to be either green, yellow or red.
+// to be either green, yellow, or red.
 //
 // The green traffic is guaranteed to be under (in bits)
 // <pre>
-//   pir * (t1 - t0) + 8 * pbs and cir * (t1 - t0) + 8 * cbs
+//   PIR * (t1 - t0) + 8 * PBS and CIR * (t1 - t0) + 8 * CBS
 // </pre>
 // and yellow traffic to be under
 // <pre>
-//   pir * (t1 - t0) + 8 * pbs
+//   PIR * (t1 - t0) + 8 * PBS
 // </pre>
 // in every [t0,t1] interval.
 //

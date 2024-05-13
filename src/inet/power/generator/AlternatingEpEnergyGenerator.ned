@@ -11,8 +11,8 @@ import inet.power.base.EpEnergyGeneratorBase;
 
 //
 // This energy generator model alternates between two modes called generation
-// and sleep mode. In generation mode it generates a randomly selected constant
-// power for a random time interval. In sleep mode it doesn't generate energy
+// and sleep mode. In generation mode, it generates a randomly selected constant
+// power for a random time interval. In sleep mode, it doesn't generate energy
 // for another random time interval.
 //
 // @see ~AlternatingEpEnergyConsumer

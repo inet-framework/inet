@@ -13,7 +13,7 @@ import inet.visualizer.contract.IMobilityVisualizer;
 //
 // This module visualizes multiple mobilities on a 2D canvas. It moves visual
 // representations according to their mobility model. It also displays recent
-// movement as a polyline, current velocity vector and current orientation.
+// movement as a polyline, current velocity vector, and current orientation.
 //
 // @see ~MobilityOsgVisualizer, ~MobilityVisualizer, ~MobilityVisualizerBase, ~MobilityVisualizer
 //

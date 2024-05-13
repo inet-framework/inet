@@ -11,7 +11,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitterAnalo
 
 //
 // This transmitter analog model produces signals which are described with a few
-// distance based parameters.
+// distance-based parameters.
 //
 // @see ~UnitDiskRadioMedium, ~UnitDiskMediumAnalogModel, ~UnitDiskReceiverAnalogModel.
 //

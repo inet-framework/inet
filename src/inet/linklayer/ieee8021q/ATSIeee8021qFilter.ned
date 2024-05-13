@@ -10,7 +10,7 @@ import inet.linklayer.ieee8021q.SimpleIeee8021qFilter;
 import inet.protocolelement.shaper.GroupEligibilityTimeTable;
 
 // This module implements a filtering module for the asynchronous traffic shaper
-// taking scheduler groups into account. 
+// taking scheduler groups into account.
 //
 // This module is part of the asynchronous shaper infrastructure.
 //

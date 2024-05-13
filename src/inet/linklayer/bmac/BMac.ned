@@ -13,7 +13,7 @@ import inet.linklayer.contract.IMacProtocol;
 
 
 //
-// Implementation of B-MAC (called also Berkeley MAC, Low Power Listening or
+// Implementation of B-MAC (also called Berkeley MAC, Low Power Listening, or
 // LPL).
 // See C++ documentation for details.
 //

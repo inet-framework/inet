@@ -19,8 +19,8 @@ import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigur
 // This configurator computes the gate schedule by creating SAT variables for
 // the transmission start/end times and reception start/end times for each packet
 // for each flow in all network interfaces along the path. All communication
-// network specific constraints such as transmission duration, propagation time,
-// subsequent transmissions along the flow, queueing to avoid reordering packets,
+// network-specific constraints such as transmission duration, propagation time,
+// subsequent transmissions along the flow, queuing to avoid reordering packets,
 // and taking traffic class priority into consideration are translated into SAT
 // constraints among the above variables. All additional user constraints such
 // as the maximum end-to-end delay and maximum jitter are also added to the model.

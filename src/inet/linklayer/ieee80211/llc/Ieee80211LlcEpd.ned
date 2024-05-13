@@ -8,7 +8,7 @@ package inet.linklayer.ieee80211.llc;
 
 //
 // An LLC implementation that encapsulates packets with the IEEE 802 EtherType
-// Protocol Discrimination (EPD) header, as defined in the section 9.2 EtherTypes
+// Protocol Discrimination (EPD) header, as defined in section 9.2 EtherTypes
 // of the IEEE Std 802-2014 standard. See ~Ieee802EpdHeader.
 //
 simple Ieee80211LlcEpd like IIeee80211Llc

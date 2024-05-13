@@ -10,7 +10,7 @@ package inet.power.base;
 import inet.power.contract.IEpEnergyConsumer;
 
 //
-// This is an abstract base module for power based energy consumer models.
+// This is an abstract base module for power-based energy consumer models.
 // It defines shared signals and statistics.
 //
 // @see ~EpEnergySourceBase, ~EpEnergyGeneratorBase, ~EpEnergySinkBase, ~EpEnergyStorageBase

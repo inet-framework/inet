@@ -21,7 +21,7 @@ import inet.applications.contract.IApp;
 // Regarding the type of opening the connection, the application may
 // be either a client or a server. When active=false, the application
 // will listen on the given local localPort, and wait for an incoming connection.
-// When active=true, the application will bind to given local localAddress:localPort,
+// When active=true, the application will bind to the given localAddress:localPort,
 // and connect to the connectAddress:connectPort. To use an ephemeral port
 // as local port, set the localPort parameter to -1.
 //
@@ -35,7 +35,7 @@ import inet.applications.contract.IApp;
 //
 // Regardless of the type of OPEN, the application can be made to send
 // data. One way of specifying sending is via the tSend, sendBytes
-// parameters, the other way is sendScript. With the former, sendBytes
+// parameters, the other way is with sendScript. With the former, sendBytes
 // bytes will be sent at tSend. With sendScript, the format is
 // "<time> <numBytes>;<time> <numBytes>;..."
 //
@@ -50,11 +50,11 @@ import inet.applications.contract.IApp;
 // limiting, set autoRead=false, and use the readSize and readDelay parameters
 // to set a rate limit. This will allow TCP flow control to come into effect.
 //
-// <b>Configuring App</b>
+// <b>Configuring the App</b>
 //
 // Currently you have three dataTransferMode choices:
 //
-//   -# set them to "bytecount".
+//   -# Set them to "bytecount".
 //      This mode manages "virtual bytes", that is, only byte counts are
 //      transmitted over the TCP connection and no actual data. cMessage
 //      contents, and even message boundaries are not preserved with these
@@ -62,18 +62,18 @@ import inet.applications.contract.IApp;
 //      length = 1 megabyte over TCP, the receiver-side client will see a
 //      sequence of MSS-sized messages.
 //
-//   -# use "object", which transmits
+//   -# Use "object", which transmits
 //      cMessage objects (and subclasses) over a TCP connection. The same
 //      message object sequence that was sent by the client to the
 //      sender-side TCP entity will be reproduced on the receiver side.
 //      If a client sends a cMessage with length = 1 megabyte, the
 //      receiver-side client will receive the same message object (or a clone)
 //      after the TCP entities have completed simulating the transmission
-//      of 1 megabyte over the connection. This is a different behaviour
+//      of 1 megabyte over the connection. This is a different behavior
 //      from TCPVirtualDataSendQueue/RcvQueue.
 //      This mode is not implemented in ~TcpNsc yet.
 //
-//   -# use "bytestream", which transmits real bytes of messages.
+//   -# Use "bytestream", which transmits real bytes of messages.
 //
 simple TcpSessionApp like IApp
 {

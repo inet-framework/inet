@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.INetworkConnectionVisualizer;
 
 //
-// This module integrates canvas and osg connection visualizers into a single module.
+// This module integrates canvas and OSG connection visualizers into a single module.
 //
 // @see ~NetworkConnectionCanvasVisualizer, ~NetworkConnectionOsgVisualizer, ~NetworkConnectionVisualizerBase, ~INetworkConnectionVisualizer
 //

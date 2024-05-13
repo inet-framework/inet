@@ -8,8 +8,8 @@
 package inet.applications.tcpapp;
 
 //
-// This module opens a TCP connection to a given address and port, and lets the
-// module connected to its the trafficIn and trafficOut gates send and receive
+// This module opens a TCP connection to a given address and port and lets the
+// module connected to its trafficIn and trafficOut gates send and receive
 // data over that connection. When data is received on the trafficIn gate, it is
 // forwarded on the TCP connection via the socketOut gate, and vice versa. This
 // module simplifies the task of data exchange over a TCP connection. The TCP

@@ -38,7 +38,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 // The INET User Guide elaborates on the possibilities.
 //
 // The type of the management submodule is also configurable. The type of this
-// submodule decides whether the interfaces acts an AP, a STA, or is in ad hoc mode.
+// submodule decides whether the interfaces acts as an AP, a STA, or is in ad hoc mode.
 // Use ~Ieee80211MgmtSta or ~Ieee80211MgmtStaSimplified for STA,
 // ~Ieee80211MgmtAp or ~Ieee80211MgmtApSimplified for AP, and
 // ~Ieee80211MgmtAdhoc for ad hoc mode.
@@ -49,7 +49,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 // The LLC submodule is responsible for adding/removing the LLC header on packets.
 //
 // A classifier is responsible for assigning a 802.1d User Priority (UP) to
-// packets, and is only needed if QoS is involved.
+// packets and is only needed if QoS is involved.
 //
 // The clock submodule would allow clock skew modeling -- this is currently not used.
 //

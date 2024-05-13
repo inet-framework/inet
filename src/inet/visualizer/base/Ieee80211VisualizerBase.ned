@@ -12,7 +12,7 @@ package inet.visualizer.base;
 // It keeps track of wireless interface associations by subscribing to a number
 // of signals at the provided subscription module.
 //
-// This module subscribes for l2Associated, l2Disassociated,
+// This module subscribes to l2Associated, l2Disassociated,
 // l2ApAssociated, l2ApDisassociated on the module determined by the
 // visualizationSubjectModule parameter.
 //

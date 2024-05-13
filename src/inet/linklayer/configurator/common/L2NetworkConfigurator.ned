@@ -13,7 +13,7 @@ package inet.linklayer.configurator.common;
 // and the "is-edge" flag can be configured with XML files.
 //
 // This module is based on ~Ipv4NetworkConfigurator. The optional selector
-// attributes: @hosts, @names, @towards, @among are also comes with this
+// attributes: @hosts, @names, @towards, @among also come with this
 // configurator and each of them behaves similarly to its ~Ipv4NetworkConfigurator equivalent.
 // @ports selector added to configuring per-port parameters in Ieee8021dInterfaceData.
 //

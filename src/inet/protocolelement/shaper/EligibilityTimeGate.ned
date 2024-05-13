@@ -13,8 +13,8 @@ import inet.queueing.contract.IPacketGate;
 //
 // This module is a packet gate that operates based on the ~EligibilityTimeTag
 // attached to the next packet waiting to be pulled through. The gate is closed
-// if the eligibility time is greater than the current simulation time, it is
-// open otherwise.
+// if the eligibility time is greater than the current simulation time, otherwise, it is
+// open.
 //
 // This module is part of the asynchronous shaper architecture.
 //

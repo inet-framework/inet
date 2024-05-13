@@ -13,7 +13,7 @@ package inet.common.scenario;
 // like changing a parameter value, changing the bit error rate of
 // a connection, removing or adding connections, removing or
 // adding routes in a routing table, etc, so that you can observe the
-// transient behaviour.
+// transient behavior.
 //
 // ~ScenarioManager executes a script specified in XML. It has a few
 // built-in commands, while other commands are dispatched to be carried out
@@ -65,17 +65,17 @@ package inet.common.scenario;
 //       module: path to module (required)
 //       par: name of settable parameter of module (required)
 //       value: new value for parameter
-//       expr: expression for calculate new value of parameter
-//       Note: value and expr are exclusive, required one
+//       expr: expression to calculate new value of parameter
+//       Note: value and expr are exclusive, one is required
 // - <set-channel-param>: src-module, src-gate|dest-module, par, value|expr.
 //       src-module: path to source module (required)
 //       src-gate: name of source gate
 //       dest-module: path to destination module
 //       par: name of settable parameter of module (required)
 //       value: new value for parameter
-//       expr: expression for calculate new value of parameter
-//       Note: src-gate and dest-module are exclusive, required one;
-//             value and expr are exclusive, required one;
+//       expr: expression to calculate new value of parameter
+//       Note: src-gate and dest-module are exclusive, one is required;
+//             value and expr are exclusive, one is required;
 //             if dest-module is present, there must be exactly one connection
 //             between src-module and dest-module (which may be bidirectional);
 //             if src-gate references an inout gate, the parameter will be set
@@ -85,26 +85,26 @@ package inet.common.scenario;
 //       src-gate: name of source gate (required)
 //       dest-module: path to destination module (required)
 //       dest-gate: name of destination gate (required)
-//       channel-type: full qualified ned type of connection channel (required), e.g. "ned.DatarateChannel"
+//       channel-type: fully qualified NED type of connection channel (required), e.g., "ned.DatarateChannel"
 //     - <param>: name, value|expr
 //       name: name of settable parameter of channel (required)
 //       value: new value for parameter
-//       expr: expression for calculate new value of parameter
-//       Note: value and expr are exclusive, required one
+//       expr: expression to calculate new value of parameter
+//       Note: value and expr are exclusive, one is required
 // - <disconnect>: src-module, src-gate|dest-module
 //       src-module: path to source module (required)
 //       src-gate: name of source gate
 //       dest-module: path to destination module
-//       Note: src-gate and dest-module are exclusive, required one;
+//       Note: src-gate and dest-module are exclusive, one is required;
 //       if dest-module is present, there must be exactly one connection
 //       between src-module and dest-module (which may be bidirectional);
 //       if src-gate references an inout gate, both directions will be disconnected.
 // - <create-module>: parent, submodule, type, vector
 //       parent: parent module path (required)
 //       submodule: name of created module (required)
-//       type: NED type of created module (required), e.g. "inet.applications.pingapp.PingApp"
-//       vector: boolean, if true, the module created as vector element with next index,
-//               if false, the module created as a single module,
+//       type: NED type of created module (required), e.g., "inet.applications.pingapp.PingApp"
+//       vector: boolean, if true, the module is created as a vector element with the next index,
+//               if false, the module is created as a single module,
 //               if missing, detects existing vector by submodule name
 // - <delete-module>: module
 //       module: path to module (required)

@@ -18,8 +18,8 @@ import inet.power.contract.IEnergyManagement;
 import inet.power.contract.IEnergyStorage;
 
 //
-// This module contains the most basic infrastructure for network nodes that is
-// not strictly communication protocol related.
+// This module contains the most basic infrastructure for network nodes that are
+// not strictly communication protocol-related.
 //
 // See derived modules: ~StandardHost, ~WirelessHost, ~AdhocHost, ~Router, etc.
 //

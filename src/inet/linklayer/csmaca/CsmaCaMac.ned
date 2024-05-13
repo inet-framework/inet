@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) 2016 OpenSim Limited
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
@@ -32,13 +32,13 @@ import inet.linklayer.contract.IMacProtocol;
 // On the receiver side, the change is quite simple: when the MAC correctly
 // receives a data frame addressed to it, it responds with an ACK frame after
 // a fixed-length gap (SIFS). If the originator of the data frame does not
-// receive the ACK correctly within due time, it will initiate a
+// receive the ACK correctly within the due time, it will initiate a
 // retransmission. The contention window (from which the random backoff period is
 // drawn) will be doubled for each retransmission until it reaches the maximum
 // (and then it will stay constant for further retransmissions). After a given
 // number of unsuccessful retries, the MAC will give up and discard the data
-// frame, and will take the next data frame from the queue. The next frame
-// will start with a clean slate (i.e. the contention window and the retry
+// frame and will take the next data frame from the queue. The next frame
+// will start with a clean slate (i.e., the contention window and the retry
 // count will be reset). Giving up a frame will cause a link break signal
 // to be emitted.
 //

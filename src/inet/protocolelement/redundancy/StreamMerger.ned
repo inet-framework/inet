@@ -12,8 +12,8 @@ import inet.queueing.contract.IPacketFilter;
 
 //
 // This module merges the packets of the same stream by removing duplicates. In
-// addition it also replaces the stream name on the packet based on the mapping
-// parameter. For merging it maintains a separate finite buffer per stream with
+// addition, it also replaces the stream name on the packet based on the mapping
+// parameter. For merging, it maintains a separate finite buffer per stream with
 // the last seen sequence numbers.
 //
 simple StreamMerger extends PacketFilterBase like IPacketFilter

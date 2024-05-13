@@ -13,7 +13,7 @@ package inet.networklayer.internetcloud;
 // Delays or drops the packets based on which interface card the packet
 // has arrived on and on which interface it is leaving the cloud.
 // This module registers self to ~Ipv4 module as an INetfilter::IHook hook
-// and uses the datagramForwardHook for delay/drop packets
+// and uses the datagramForwardHook for delay/drop packets.
 //
 // @see ~InternetCloud
 //

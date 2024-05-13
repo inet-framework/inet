@@ -13,7 +13,7 @@ import inet.queueing.contract.IPacketGate;
 //
 // This module is a packet gate that operates based on the number of credits
 // it contains. The gate is open if the number of credits is greater than the
-// configured transmit credit limit, it is closed otherwise. The module attaches
+// configured transmit credit limit, otherwise it is closed. The module attaches
 // a ~CreditGateTag to all packets that pass through. The attached tag allows
 // the gate module to determine if a packet belongs to it when the packet is
 // eventually transmitted.
@@ -25,7 +25,7 @@ import inet.queueing.contract.IPacketGate;
 // down to the transmit credit limit if no more packets are available after the
 // network interface finishes a transmission from this gate.
 //
-// This module is part of the credit based shaper infrastructure.
+// This module is part of the credit-based shaper infrastructure.
 //
 // @see ~CreditGateTag, ~PacketQueue
 //

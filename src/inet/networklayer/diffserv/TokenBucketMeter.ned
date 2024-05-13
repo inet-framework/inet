@@ -12,16 +12,16 @@ package inet.networklayer.diffserv;
 //
 // IP packets are classified according to two parameters,
 // Committed Information Rate (cir), Committed Burst Size (cbs),
-// to be either green, or red.
+// to be either green or red.
 //
 // Green traffic is guaranteed to be under (in bits)
 // <pre>
 //     cir * (t1 - t0) + 8 * cbs
 // </pre>
-// in every [t0,t1] interval.
+// in every [t0, t1] interval.
 //
 // When operating in color-aware mode, the meter does not classify
-// a packet to be green, if it was marked with a higher color
+// a packet to be green if it was marked with a higher color
 // by a previous meter.
 //
 simple TokenBucketMeter

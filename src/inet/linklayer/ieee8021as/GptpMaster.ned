@@ -8,7 +8,7 @@
 package inet.linklayer.ieee8021as;
 
 //
-// This module provide a gPTP master network node.
+// This module provides a gPTP master network node.
 //
 module GptpMaster extends GptpEndstation
 {

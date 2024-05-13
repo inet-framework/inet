@@ -8,7 +8,7 @@
 package inet.common;
 
 //
-// Generic module that can be inserted in some points in the model
+// Generic module that can be inserted at some points in the model
 //
 moduleinterface IHook
 {

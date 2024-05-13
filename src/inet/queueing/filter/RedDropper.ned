@@ -21,12 +21,12 @@ import inet.queueing.base.PacketFilterBase;
 // the packet won't be dropped, if above a maximum threshold,
 // it will be dropped, if it is between the minimum and
 // maximum threshold, it will be dropped by a given probability.
-// This probability determined by a linear function which is
+// This probability is determined by a linear function which is
 // 0 at the minth and maxp at maxth.
 //
 // The queue length can be smoothed by specifying the 'wq'
 // parameter. The average queue length used in the tests
-// are computed by the formula:
+// is computed by the formula:
 //
 //  avg = (1-wq)*avg + wq*qlen
 //

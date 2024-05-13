@@ -10,8 +10,8 @@ package inet.physicallayer.wireless.common.antenna;
 import inet.physicallayer.wireless.common.base.packetlevel.AntennaBase;
 
 // This antenna model computes the antenna gain from the direction using linear
-// interpolation. The gain parameter contains a sequence of angle [degree] and
-// gain [dB] pairs. The first pair must be at 0 [degree].
+// interpolation. The gain parameter contains a sequence of angles [degrees] and
+// gains [dB] pairs. The first pair must be at 0 [degrees].
 //
 module AxiallySymmetricAntenna extends AntennaBase
 {

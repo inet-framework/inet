@@ -25,9 +25,9 @@ package inet.routing.pim.tables;
 //                   If it is "true", then the router will send SR messages
 //                   on this interface.
 //
-// Additionally each <interface> element may contain
+// Additionally, each <interface> element may contain
 // @hosts, @names, @towards, @among attributes to select the
-// interfaces which the PIM parameters are applied to (see ~Ipv4NetworkConfigurator).
+// interfaces to which the PIM parameters are applied (see ~Ipv4NetworkConfigurator).
 //
 simple PimInterfaceTable
 {

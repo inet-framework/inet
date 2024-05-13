@@ -10,9 +10,9 @@ package inet.mobility.single;
 import inet.mobility.base.MovingMobilityBase;
 
 //
-// Moves a tractor through a field with a certain amount of rows.
+// Moves a tractor through a field with a certain number of rows.
 // Since the tractor also moves around the field, the tractor travels
-// the number of rows PLUS one rows. Consider the following piece of
+// the number of rows PLUS one row. Consider the following piece of
 // ascii-art for rows=2.
 //
 // <pre>

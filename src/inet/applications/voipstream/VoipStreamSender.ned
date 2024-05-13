@@ -14,7 +14,7 @@ import inet.applications.contract.IApp;
 // input, and will transmit the file's contents as voice traffic over UDP n
 // times (by default once). For transmission, the audio is resampled at the
 // specified frequency and depth, and encoded with the specified codec at the
-// specified bit rate, and chopped into packets that each carry specified
+// specified bit rate, and chopped into packets that each carry a specified
 // number of milliseconds of voice. Those values come from module parameters.
 // Packets that are all silence (all samples are below a given threshold in
 // absolute value) are transmitted as special "silence" packets. The module

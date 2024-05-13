@@ -10,7 +10,7 @@ package inet.linklayer.ieee80211.mgmt;
 //
 // Used in 802.11 infrastructure mode in an access point (AP).
 //
-// This module expects ~Ieee80211MgmtSta modules to be resent in the stations.
+// This module expects ~Ieee80211MgmtSta modules to be present in the stations.
 //
 // This module never switches channels, that is, it will operate on the channel
 // the physical layer is configured for (see channelNumber in ~Ieee80211Radio).

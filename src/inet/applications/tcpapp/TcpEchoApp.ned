@@ -17,7 +17,7 @@ package inet.applications.tcpapp;
 //
 // The reply can also be delayed by a constant time (echoDelay parameter).
 //
-// By default, reading from the socket is not rate limited. To allow rate
+// By default, reading from the socket is not rate-limited. To allow rate
 // limiting, set autoRead=false, and use the readSize and readDelay parameters
 // to set a rate limit. This will allow TCP flow control to come into effect.
 //

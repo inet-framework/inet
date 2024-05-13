@@ -13,7 +13,7 @@ import inet.linklayer.contract.IEtherMac;
 
 //
 // Ethernet MAC layer. MAC performs transmission and reception of frames.
-// See the ~IEtherMac for the Ethernet MAC layer general informations.
+// See the ~IEtherMac for the Ethernet MAC layer general information.
 // Doesn't do encapsulation/decapsulation; see ~Ieee8022Llc and ~EthernetEncapsulation for
 // that.
 //
@@ -37,7 +37,7 @@ import inet.linklayer.contract.IEtherMac;
 // <b>Operation</b>
 //
 // Processing of frames received from higher layers:
-// - if src address in the frame is empty, fill it out
+// - if the source address in the frame is empty, fill it out
 // - frames get queued up until transmission
 // - transmit according to the CSMA/CD protocol
 // - can send PAUSE message if requested by higher layers (PAUSE protocol,
@@ -78,7 +78,7 @@ import inet.linklayer.contract.IEtherMac;
 //
 // <b>Queueing</b>
 //
-// In routers, MAC relies on an external queue module (see ~IPacketQueue)
+// In routers, the MAC relies on an external queue module (see ~IPacketQueue)
 // to model finite buffer, implement QoS and/or RED, and requests packets
 // from this external queue one-by-one.
 //

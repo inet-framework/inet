@@ -19,7 +19,7 @@ package inet.transportlayer.contract;
 // and its subclasses are used as control info.
 //
 // To open a connection from a client app, send a cMessage to TCP with
-// TCP_C_OPEN_ACTIVE as message kind and a ~TcpOpenCommand object filled in
+// TCP_C_OPEN_ACTIVE as the message kind and a ~TcpOpenCommand object filled in
 // and attached to it as control info. (The peer TCP will have to be LISTENing;
 // the server app can achieve this with a similar cMessage but TCP_C_OPEN_PASSIVE
 // message kind.) With passive open, there's a possibility to cause the connection

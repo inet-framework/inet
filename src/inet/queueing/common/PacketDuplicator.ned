@@ -14,7 +14,7 @@ import inet.queueing.contract.IPassivePacketSink;
 //
 // This module connects one packet producer to one packet consumer. It can be
 // pushed with packets from the connected packet producer. When this happens,
-// one or more copy of the packet is pushed to the output gate.
+// one or more copies of the packet are pushed to the output gate.
 //
 simple PacketDuplicator extends PacketDuplicatorBase like IPassivePacketSink, IActivePacketSource
 {

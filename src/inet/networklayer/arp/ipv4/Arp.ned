@@ -17,18 +17,18 @@ import inet.networklayer.contract.IArp;
 // ARP packets are represented by the ~ArpPacket class.
 //
 // Communication Between ARP and IPv4 modules:
-// IPv4 module call the ARP::getMACAddressFor(ipv4Address) method for get the MACAddress
-// of next hop. If this method could not resolve an IPv4 address to MAC address, then IPv4
+// IPv4 module calls the ARP::getMACAddressFor(ipv4Address) method to get the MACAddress
+// of the next hop. If this method could not resolve an IPv4 address to a MAC address, then IPv4
 // uses the Arp::startAddressResolution() method.
-// ARP emit a arpResolutionCompleted signal, when added/modified an entry in ARP table.
-// ARP emit a arpResolutionFailed signal when an ARP request failed (ARP request sent
+// ARP emits an arpResolutionCompleted signal when it adds/modifies an entry in the ARP table.
+// ARP emits an arpResolutionFailed signal when an ARP request fails (ARP request sent
 // retryCount times and retryTimeout elapsed).
 //
-// ARP resolution is used over <i>broadcast</i> interfaces only,
-// that is, over interfaces that have the <tt>isBroadcast()</tt> flag set in
+// ARP resolution is used on <i>broadcast</i> interfaces only,
+// that is, on interfaces that have the <tt>isBroadcast()</tt> flag set in
 // <tt>NetworkInterface</tt> (see ~InterfaceTable). Since routing files
-// (<tt>.irt</tt> or <tt>.mrt</tt> files, given as parameter to ~Ipv4RoutingTable)
-// may modify the default interface configuration, you must take care that
+// (<tt>.irt</tt> or <tt>.mrt</tt> files, given as parameters to ~Ipv4RoutingTable)
+// may modify the default interface configuration, you must ensure that
 // these files don't contain the word <tt>BROADCAST</tt> e.g. for PPP
 // interfaces.
 //
