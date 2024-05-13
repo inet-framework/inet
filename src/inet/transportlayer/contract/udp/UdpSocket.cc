@@ -77,10 +77,12 @@ void UdpSocket::sendTo(Packet *pk, L3Address destAddr, int destPort)
     sockState = CONNECTED;
 }
 
-void UdpSocket::send(Packet *pk)
+void UdpSocket::send(Packet *packet)
 {
-    pk->setKind(UDP_C_DATA);
-    sendToUDP(pk);
+    packet->setKind(UDP_C_DATA);
+    packet->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::udp);
+    sink.pushPacket(packet);
     sockState = CONNECTED;
 }
 

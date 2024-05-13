@@ -53,6 +53,8 @@ void Tcp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
+        appSink.reference(gate("appOut"), true);
+        ipSink.reference(gate("ipOut"), true);
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
 
@@ -118,7 +120,12 @@ void Tcp::sendFromConn(cMessage *msg, const char *gatename, int gateindex)
 {
     Enter_Method("sendFromConn");
     take(msg);
-    send(msg, gatename, gateindex);
+    if (!strcmp(gatename, "ipOut"))
+        ipSink.pushPacket(check_and_cast<Packet *>(msg));
+    else if (!strcmp(gatename, "appOut"))
+        appSink.pushPacket(check_and_cast<Packet *>(msg));
+    else
+        throw cRuntimeError("Unknown gate: %s", gatename);
 }
 
 void Tcp::handleUpperPacket(Packet *packet)

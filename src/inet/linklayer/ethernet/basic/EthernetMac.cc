@@ -357,7 +357,7 @@ void EthernetMac::processReceivedDataFrame(Packet *packet, const Ptr<const Ether
     emit(packetSentToUpperSignal, packet);
     // pass up to upper layer
     EV_INFO << "Sending " << packet << " to upper layer.\n";
-    send(packet, upperLayerOutGateId);
+    upperLayerSink.pushPacket(packet);
 }
 
 void EthernetMac::processPauseCommand(int pauseUnits)

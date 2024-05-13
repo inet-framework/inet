@@ -18,6 +18,7 @@
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/linklayer/ethernet/contract/IEthernet.h"
 #include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
 
@@ -33,6 +34,8 @@ class INET_API EthernetEncapsulation : public OperationalBase, public DefaultPro
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
     int seqNum;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
+    PassivePacketSinkRef lowerLayerSink;
+    PassivePacketSinkRef upperLayerSink;
 
     // statistics
     long totalFromHigherLayer; // total number of packets received from higher layer

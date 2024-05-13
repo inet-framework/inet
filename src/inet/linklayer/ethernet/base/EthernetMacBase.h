@@ -19,11 +19,13 @@
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wired/ethernet/EthernetSignal_m.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
 
+using namespace inet::queueing;
 using namespace inet::physicallayer;
 
 /**
@@ -75,6 +77,7 @@ class INET_API EthernetMacBase : public MacProtocolBase, public queueing::IActiv
     bool frameBursting = false; // frame bursting on/off (Gigabit Ethernet)
 
     // gate pointers, etc.
+    PassivePacketSinkRef upperLayerSink;
     cChannel *transmissionChannel = nullptr; // transmission channel
     cGate *physInGate = nullptr; // pointer to the "phys$i" gate
     cGate *physOutGate = nullptr; // pointer to the "phys$o" gate

@@ -24,6 +24,7 @@ void MacRelayUnitBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         macForwardingTable.reference(this, "macTableModule", true);
         interfaceTable.reference(this, "interfaceTableModule", true);
+        lowerLayerSink.reference(gate("lowerLayerOut"), true);
         numProcessedFrames = numDroppedFrames = 0;
         WATCH(numProcessedFrames);
         WATCH(numDroppedFrames);
@@ -79,7 +80,7 @@ void MacRelayUnitBase::sendPacket(Packet *packet, const MacAddress& destinationA
     else
         packet->removeTagIfPresent<DispatchProtocolReq>();
     emit(packetSentToLowerSignal, packet);
-    send(packet, "lowerLayerOut");
+    lowerLayerSink.pushPacket(packet);
 }
 
 void MacRelayUnitBase::updatePeerAddress(NetworkInterface *incomingInterface, MacAddress sourceAddress, unsigned int vlanId)
