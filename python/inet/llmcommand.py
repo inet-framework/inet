@@ -9,7 +9,7 @@ import re
 # model.key = ''
 # model = llm.get_model("claude-2")
 
-model = llm.get_model("gpt-4")
+model = llm.get_model("gpt-3.5-turbo-16k")
 # model.key = ''
 model.key = ''
 
@@ -76,11 +76,12 @@ Respond with the updated file verbatim without any additional text. Here is the 
 """
 
         # Send the prompt to the LLM model
-        print("PROMPT ", prompt)
+        #print("PROMPT ", prompt)
         modified_content = model.prompt(prompt)
         result = modified_content.text()
-        result = result.replace("\n```", "")
-        print("RESULT ", result)
+        result = result.replace("\n```", "")  #TODO better parsing
+        #print("RESULT ", result)
+        #TODO save the result into a .reply file!
 
         # Save the modified content back to the file
         with open(file_path, 'w', encoding='utf-8') as file:
@@ -116,4 +117,12 @@ def proofread_ned_comments():
     command_text = "Here is an OMNeT++ NED file, fix any English mistakes in the comments (lines starting with `//`) in it."
     apply_command_to_files(file_list, context_file_list, command_text)
 
-proofread_ned_comments()
+def proofread_rst_files():
+    file_list = collect_matching_file_paths(inet_root, r".*.rst$", None)
+    print(f"{file_list=}")
+    context_file_list = []
+    command_text = "The following reStructuredText file is part of the INET Framework for OMNeT+, fix any English mistakes in its text."
+    apply_command_to_files(file_list, context_file_list, command_text)
+
+#proofread_ned_comments()
+proofread_rst_files()
