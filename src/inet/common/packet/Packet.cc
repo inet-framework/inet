@@ -341,7 +341,7 @@ std::ostream& Packet::printToStream(std::ostream& stream, int level, int evFlags
     if (level <= PRINT_LEVEL_DETAIL)
         stream << EV_FAINT << "(" << className << ")" << EV_NORMAL;
     stream << EV_ITALIC << getName() << EV_NORMAL << " (" << getDataLength() << ") ";
-    content->printToStream(stream, level + 1, evFlags);
+    peekData()->printToStream(stream, level + 1, evFlags);
     return stream;
 }
 
