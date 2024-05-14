@@ -22,22 +22,27 @@ namespace inet {
 
 
         double kp = 0.0015; // proportional gain
-        double ki = 0.0015; // integral gain
+        double ki = 0.0005; // integral gain
+        double kd = 0.002;
 
         ppm kpTerm = ppm(0);
         ppm kiTerm = ppm(0);
+        ppm kdTerm = ppm(0);
 
         ppm kpTermMax = ppm(100);
         ppm kpTermMin = ppm(-100);
         ppm kiTermMax = ppm(100);
         ppm kiTermMin = ppm(-100);
+        ppm kdTermMax = ppm(100);
+        ppm kdTermMin = ppm(-100);
 
         clocktime_t offset = 0;
         clocktime_t offset_prev = 0;
-        clocktime_t accumulatedOffset = 0;
         double offsetNanosecond = 0;
         double offsetNanosecond_prev = 0;
         double accumulatedOffsetNanosecond = 0;
+        double differenceOffsetNanosecond = 0;
+
 
 
     protected:

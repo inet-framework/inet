@@ -73,19 +73,21 @@ void PiClock::setClockTime(clocktime_t newClockTime)
 
         offset_prev = offset;
         offset = newClockTime - oldClockTime;
-        accumulatedOffset += offset;
 
         offsetNanosecond_prev = offset_prev.inUnit(SIMTIME_NS);
         offsetNanosecond = offset.inUnit(SIMTIME_NS);
         accumulatedOffsetNanosecond += offsetNanosecond;
+        differenceOffsetNanosecond = offsetNanosecond - offsetNanosecond_prev;
 
         kpTerm = ppm (kp * offsetNanosecond);
         kiTerm = ppm (ki * accumulatedOffsetNanosecond);
+        kdTerm = ppm (kd * differenceOffsetNanosecond);
 
         kpTerm = std::max(kpTermMin, std::min(kpTermMax, kpTerm));
         kiTerm = std::max(kiTermMin, std::min(kiTermMax, kiTerm));
+        kdTerm = std::max(kdTermMin, std::min(kdTermMax, kdTerm));
 
-        this->oscillatorCompensation = kpTerm + kiTerm;
+        this->oscillatorCompensation = kpTerm + kiTerm + kdTerm;
 
     }
 }
