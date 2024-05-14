@@ -1,20 +1,21 @@
 import llm
+import logging
 import os
 import re
+import subprocess
+import unidiff
 
-# Set your OpenAI API key here
+inet_root = "/home/andras/projects/inet"
+
+_logger = logging.getLogger(__name__)
+
 # model = llm.get_model("orca-mini-3b-gguf2-q4_0")
 # model = llm.get_model("gpt4all-falcon-newbpe-q4_0")
 # model = llm.get_model("claude-3-opus")
-# model.key = ''
 # model = llm.get_model("claude-2")
 
 model = llm.get_model("gpt-3.5-turbo-16k")
-# model.key = ''
 model.key = ''
-
-import os
-import re
 
 def collect_matching_file_paths(directory, name_pattern, content_pattern):
     """
@@ -49,20 +50,18 @@ def collect_matching_file_paths(directory, name_pattern, content_pattern):
 
     return matching_file_paths
 
-def apply_command_to_files(file_list, context_file_list, command_text):
-    context = []
-    for context_file_path in context_file_list:
-        # Read the file content
-        with open(context_file_path, 'r', encoding='utf-8') as file:
-            context.append(file.read())
-    context = "\n".join(context)
-    for i, file_path in enumerate(file_list):
-        print(f"{i}/{len(file_list)} {file_path}:")
-        # Read the file content
+def read_files(file_list):
+    contents = []
+    for file_path in file_list:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            contents.append(file.read())
+    return "\n".join(contents)
+
+def apply_command_to_files(file_list, context, command_text):
+    for file_path in file_list:
+        _logger.info(f"Processing file {file_path}")
         with open(file_path, 'r', encoding='utf-8') as file:
             file_content = file.read()
-
-        # Combine the command and file content
         prompt = f"""
 Update a file based on some context. Here is the context:
 ```
@@ -74,55 +73,68 @@ Respond with the updated file verbatim without any additional text. Here is the 
 {file_content}
 ```
 """
-
-        # Send the prompt to the LLM model
-        #print("PROMPT ", prompt)
+        _logger.debug("Sending prompt to LLM", prompt)
         modified_content = model.prompt(prompt)
         result = modified_content.text()
-        result = result.replace("\n```", "")  #TODO better parsing
-        #print("RESULT ", result)
-        #TODO save the result into a .reply file!
-
-        # Save the modified content back to the file
+        _logger.debug("Received result from LLM", result)
         with open(file_path, 'w', encoding='utf-8') as file:
             file.write(result)
+        _logger.debug(f"Modified {file_path} successfully.")
 
-        print(f"Modified {file_path} successfully.")
+def filter_diff(input_filename, output_filename, keep_lines):
+    keep_lines_regex = re.compile(keep_lines)
+    with open(input_filename, 'r') as diff_file:
+        file_index = 0
+        patch = unidiff.PatchSet(diff_file)
+        for patched_file in list(patch):
+            keep_file = False
+            hunk_index = 0
+            for hunk in list(patched_file):
+                keep = False
+                for line in hunk:
+                    if keep_lines_regex.match(str(line)):
+                        keep = True
+                if not keep:
+                    del patched_file[hunk_index]
+                else:
+                    hunk_index = hunk_index + 1
+                    keep_file = True
+            if not keep_file:
+                del patch[file_index]
+            else:
+                file_index = file_index + 1
+        with open(output_filename, 'w') as output_file:
+            output_file.write(str(patch))
 
-inet_root = "/home/andras/projects/inet"
-
-def test1():
-    file_list = [inet_root + '/src/inet/networklayer/ipv4/Ipv4.h']
-    context_file_list = [inet_root + '/src/inet/queueing/contract/IPassivePacketSink.h']
-    command_text = "Remove all methods that implement the IPassivePacketSink interface."
-    apply_command_to_files(file_list, context_file_list, command_text)
-
-def test2():
-    file_list = collect_matching_file_paths(inet_root + "/src/inet", ".*\.h", "IPassivePacketSink")
-    file_list = file_list + [file[:-2] + '.cc' if file.endswith('.h') else file for file in file_list]
-    context_file_list = [inet_root + '/src/inet/queueing/contract/IPassivePacketSink.h']
-    command_text = "Remove all methods that implement the IPassivePacketSink interface."
-    apply_command_to_files(file_list, context_file_list, command_text)
-
-def test3():
-    file_list = [inet_root + '/src/inet/networklayer/ipv4/Ipv4.h']
-    context_file_list = [inet_root + '/commit']
-    command_text = "Based on the changes in the context remove obsolete include statements, base classes and methods."
-    apply_command_to_files(file_list, context_file_list, command_text)
+def filter_unstaged_changes(keep_lines, file_list):
+    result = subprocess.run(["git", "diff", "HEAD", "-U1", "--output=input.diff"])
+    subprocess.run(["git", "restore", "."])
+    filter_diff("input.diff", "output.diff", keep_lines)
+    subprocess.run(["git", "apply", "output.diff"])
+    os.remove("input.diff")
+    os.remove("output.diff")
 
 def proofread_ned_comments():
     file_list = collect_matching_file_paths(inet_root + "/src", r".*.ned$", None)
     print(f"{file_list=}")
-    context_file_list = []
     command_text = "Here is an OMNeT++ NED file, fix any English mistakes in the comments (lines starting with `//`) in it."
-    apply_command_to_files(file_list, context_file_list, command_text)
+    apply_command_to_files(file_list, [], command_text)
+    filter_unstaged_changes("^[+-]//", file_list)
+
+def add_backticks_in_ned_comments(simulation_project=None, folder="."):
+    if simulation_project is None:
+        simulation_project = get_default_simulation_project()
+    path = simulation_project.get_relative_path(folder)
+    file_list = collect_matching_file_paths(path, r".*.ned$", r".*")
+    command_text = "Here is an OMNeT++ NED file, modify the comment lines (starting with '//') by adding backticks around upper-case identifiers."
+    apply_command_to_files(file_list, [], command_text)
+    filter_unstaged_changes("^[+-]//", file_list)
 
 def proofread_rst_files():
     file_list = collect_matching_file_paths(inet_root, r".*.rst$", None)
     print(f"{file_list=}")
-    context_file_list = []
     command_text = "The following reStructuredText file is part of the INET Framework for OMNeT+, fix any English mistakes in its text."
-    apply_command_to_files(file_list, context_file_list, command_text)
+    apply_command_to_files(file_list, [], command_text)
 
 #proofread_ned_comments()
 proofread_rst_files()
