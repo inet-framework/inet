@@ -500,5 +500,45 @@ int MessageDispatcher::getGateIndexToConnectedModule(const char *moduleName)
     throw cRuntimeError("Cannot find module: %s", moduleName);
 }
 
+cGate *MessageDispatcher::forwardLookupModuleInterface(const cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    cGate *result = nullptr;
+    int size = gateSize(gate->getType() == cGate::INPUT ? "out" : "in");
+    for (int i = 0; i < size; i++) {
+        if (i != gate->getIndex()) {
+            cGate *referencingGate = this->gate(gate->getType() == cGate::INPUT ? "out" : "in", i);
+            cGate *referencedGate = findModuleInterface(referencingGate, type, arguments);
+            if (referencedGate != nullptr) {
+                auto referencedModule = referencedGate->getOwnerModule();
+                if (result != nullptr) {
+                    // KLUDGE: to avoid ambiguity
+                    bool resultIsMessageDispatcher = dynamic_cast<MessageDispatcher *>(result->getOwnerModule());
+                    bool referencedModuleIsMessageDispatcher = dynamic_cast<MessageDispatcher *>(referencedModule);
+                    if (!resultIsMessageDispatcher && referencedModuleIsMessageDispatcher)
+                        break;
+                    else if (referencedModuleIsMessageDispatcher || (!resultIsMessageDispatcher && !referencedModuleIsMessageDispatcher))
+                        throw cRuntimeError("Referenced module is ambiguous for type %s (%s, %s)", opp_typename(type), check_and_cast<cModule *>(result->getOwnerModule())->getFullPath().c_str(), check_and_cast<cModule *>(referencedModule)->getFullPath().c_str());
+                }
+                result = referencedGate;
+            }
+        }
+    }
+    return result;
+}
+
+cGate *MessageDispatcher::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    if (gate->isName("in")) {
+        if (type == typeid(IPassivePacketSink)) { // handle all packets
+            if (arguments == nullptr)
+                return gate;
+            else if (forwardLookupModuleInterface(gate, type, arguments, direction) != nullptr)
+                return gate;
+        }
+    }
+    return forwardLookupModuleInterface(gate, type, arguments, direction); // forward all other interfaces
+}
+
 } // namespace inet
 

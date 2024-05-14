@@ -132,4 +132,20 @@ void TcpClientSocketIo::pushPacket(Packet *packet, const cGate *gate)
         throw cRuntimeError("Unknown packet");
 }
 
+cGate *TcpClientSocketIo::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    if (gate->isName("trafficIn")) {
+        if (type == typeid(IPassivePacketSink))
+            return gate;
+    }
+    else if (gate->isName("socketIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr && socketInd->getSocketId() == socket.getSocketId())
+                return gate;
+        }
+    }
+    return nullptr;
+}
+
 } // namespace inet

@@ -31,7 +31,7 @@ class INET_API MessageDispatcher :
 #else
     public cSimpleModule,
 #endif // #ifdef INET_WITH_QUEUEING
-    public DefaultProtocolRegistrationListener, public IInterfaceRegistrationListener
+    public DefaultProtocolRegistrationListener, public IInterfaceRegistrationListener, public IModuleInterfaceLookup
 {
   public:
     class INET_API Key {
@@ -103,6 +103,9 @@ class INET_API MessageDispatcher :
 
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
     virtual void handleRegisterAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) override;
+
+    cGate * forwardLookupModuleInterface(const cGate *gate, const std::type_info& type, const cObject *arguments, int direction);
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 std::ostream& operator<<(std::ostream& out, const MessageDispatcher::Key& foo) {

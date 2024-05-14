@@ -16,7 +16,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API UdpSocketIo : public ApplicationBase, public UdpSocket::ICallback, public IPassivePacketSink
+class INET_API UdpSocketIo : public ApplicationBase, public UdpSocket::ICallback, public IPassivePacketSink, public IModuleInterfaceLookup
 {
   protected:
     PassivePacketSinkRef trafficSink;
@@ -48,6 +48,8 @@ class INET_API UdpSocketIo : public ApplicationBase, public UdpSocket::ICallback
     virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet

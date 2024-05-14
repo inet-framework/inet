@@ -712,5 +712,25 @@ NetworkInterface *getContainingNicModule(const cModule *from)
     return networkInterface;
 }
 
+cGate *NetworkInterface::lookupModuleInterface(cGate *gate, const std::type_info &type, const cObject *arguments, int direction)
+{
+    if (gate->isName("upperLayerIn")) {
+        // TODO accept outgoing network interface specific packets or outgoing protocol specific packets
+        // TODO getProtocol()
+        if (type == typeid(IPassivePacketSink)) {
+            auto interfaceReq = dynamic_cast<const InterfaceReq *>(arguments);
+            if (interfaceReq != nullptr && interfaceReq->getInterfaceId() == getInterfaceId())
+                return findModuleInterface(gate, type, interfaceReq == nullptr ? arguments : nullptr, 1);
+        }
+    }
+    else if (gate->isName("upperLayerOut")) {
+        if (type == typeid(IPassivePacketSink))
+            return gate;
+    }
+    else if (gate->isName("phys$o"))
+        return findModuleInterface(gate, type, arguments); // forward all other interfaces
+    return nullptr;
+}
+
 } // namespace inet
 
