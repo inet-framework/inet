@@ -17,12 +17,12 @@ configuration (address, state, timeouts, etc.) is held in the node’s
 The :ned:`Ipv6NeighbourDiscovery` module implements all tasks associated
 with neighbor discovery and stateless address autoconfiguration. The
 data structures themselves (destination cache, neighbor cache, prefix
-list) are kept in :ned:`Ipv6RoutingTable`. The rest of ICMPv6’s
-functionality, such as error messages, echo request/reply, etc.) is
+list) are kept in the :ned:`Ipv6RoutingTable`. The rest of ICMPv6’s
+functionality, such as error messages, echo request/reply, etc., is
 implemented in :ned:`Icmpv6`.
 
 Mobile IPv6 support has been contributed to INET by the xMIPv6 project.
 The main module is :ned:`xMIPv6`, which implements Fast MIPv6,
-Hierarchical MIPv6 and Fast Hierarchical MIPv6 (thus,
-:math:`x \in {F, H, FH}`). The binding cache and related data structures
+Hierarchical MIPv6, and Fast Hierarchical MIPv6 (thus,
+:math:`x \in \{F, H, FH\}`). The binding cache and related data structures
 are kept in the :ned:`BindingCache` module.

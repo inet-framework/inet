@@ -53,7 +53,7 @@ modules fall into the following broad categories:
    :ned:`Ipv4NetworkLayer` for :protocol:`IPv4`, and
    :ned:`Ipv6NetworkLayer` for :protocol:`IPv6`. The
    :ned:`Ipv4NetworkLayer` module contains several protocol modules:
-   :ned:`Ipv4`, :ned:`Arp`, :ned:`Icmp` and :ned:`Icmpv6`.
+   :ned:`Ipv4`, :ned:`Arp`, :ned:`Icmp`, and :ned:`Icmpv6`.
 
 -  *Network interfaces* are represented by compound modules which are
    connected to the network layer protocols and other network interfaces
@@ -115,7 +115,7 @@ fashion, and ensure that messages and packets sent from one component
 end up being delivered to the correct component. Dispatchers need no
 manual configuration, as they use discovery and peek into packets.
 
-In there pre-assembled node models, dispatchers allow arbitrary protocol
+In their pre-assembled node models, dispatchers allow arbitrary protocol
 components to talk directly to each other, i.e. not only to ones in
 neighboring layers.
 
@@ -186,7 +186,7 @@ following line to the ini file:
    **.host*.tcp.typename = "TcpLwip"  # use lwIP's TCP implementation
 
 Submodule vectors with parametric types are defined without the use of a
-module parameter to allow elements have different types. An example is
+module parameter to allow elements to have different types. An example is
 how applications are defined in hosts:
 
 .. code-block:: ned
@@ -204,13 +204,12 @@ And applications can be added in the following way:
 Inheritance
 ~~~~~~~~~~~
 
-Inheritance can be use to derive new, specialized node types from
+Inheritance can be used to derive new, specialized node types from
 existing ones. A derived NED type may add new parameters, gates,
-submodules or connections, and may set inherited unassigned parameters
+submodules, or connections, and may set inherited unassigned parameters
 to specific values.
 
-For example, :ned:`WirelessHost` is derived from :ned:`StandardHost` in
-the following way:
+For example, :ned:`WirelessHost` is derived from :ned:`StandardHost` in the following way:
 
 .. code-block:: ned
 

@@ -13,27 +13,27 @@ Overview
 --------
 
 In the early days of the Internet, only best effort service was defined.
-The Internet delivers individually each packet, and delivery time is not
-guaranteed, moreover packets may even be dropped due to congestion at
-the routers of the network. It was assumed that transport protocols, and
+The Internet delivers each packet individually, and delivery time is not
+guaranteed. Moreover, packets may even be dropped due to congestion at
+the routers of the network. It was assumed that transport protocols and
 applications can overcome these deficiencies. This worked until FTP and
-email was the main applications of the Internet, but the newer
+email were the main applications of the Internet, but the newer
 applications such as Internet telephony and video conferencing cannot
 tolerate delay jitter and loss of data.
 
-The first attempt to add QoS capabilities to the IP routing was
+The first attempt to add QoS capabilities to IP routing was
 Integrated Services. Integrated services provide resource assurance
 through resource reservation for individual application flows. An
 application flow is identified by the source and destination addresses
-and ports and the protocol id. Before data packets are sent the
+and ports and the protocol ID. Before data packets are sent, the
 necessary resources must be allocated along the path from the source to
-the destination. At the hops from the source to the destination each
-router must examine the packets, and decide if it belongs to a reserved
-application flow. This could cause a memory and processing demand in the
-routers. Other drawback is that the reservation must be periodically
-refreshed, so there is an overhead during the data transmission too.
+the destination. Each router along the path must examine the packets and
+decide if they belong to a reserved application flow. This could cause a
+memory and processing demand on the routers. Another drawback is that
+the reservation must be periodically refreshed, so there is overhead
+during the data transmission as well.
 
-Differentiated Services is a more scalable approach to offer a better
+Differentiated Services is a more scalable approach that offers a better
 than best-effort service. Differentiated Services do not require
 resource reservation setup. Instead of making per-flow reservations,
 Differentiated Services divides the traffic into a small number of
@@ -46,13 +46,13 @@ when a link is congested, the network will drop packets with the highest
 drop priority first.
 
 In the Differentiated Service architecture, the network is partitioned
-into DiffServ domains. Within each domain the resources of the domain
-are allocated to forwarding classes, taking into account the available
-resources and the traffic flows. There are *service level agreements*
-(SLA) between the users and service providers, and between the domains
+into DiffServ domains. Within each domain, the resources are allocated
+to forwarding classes, taking into account the available resources and
+the traffic flows. There are *service level agreements*
+(SLAs) between the users and service providers, and between the domains
 that describe the mapping of packets to forwarding classes and the
 allowed traffic profile for each class. The routers at the edge of the
-network are responsible for marking the packets and protect the domain
+network are responsible for marking the packets and protecting the domain
 from misbehaving traffic sources. Nonconforming traffic may be dropped,
 delayed, or marked with a different forwarding class.
 
@@ -61,7 +61,7 @@ delayed, or marked with a different forwarding class.
 Implemented Standards
 ~~~~~~~~~~~~~~~~~~~~~
 
-The implementation follows these RFCs below:
+The implementation follows these RFCs:
 
 -  RFC 2474: Definition of the Differentiated Services Field (DS Field)
    in the IPv4 and IPv6 Headers
@@ -100,21 +100,21 @@ Traffic Conditioners
 Traffic conditioners have one input and one output gate as defined in
 the :ned:`ITrafficConditioner` interface. They can transform the
 incoming traffic by dropping or delaying packets. They can also set the
-DSCP field of the packet, or mark them other way, for differentiated
+DSCP field of the packet or mark it in another way for differentiated
 handling in the queues.
 
 Traffic conditioners perform the following actions:
 
--  classify the incoming packets
+-  Classify the incoming packets.
 
--  meter the traffic in each class
+-  Meter the traffic in each class.
 
--  marks/drops packets depending on the result of metering
+-  Mark or drop packets depending on the result of metering.
 
--  shape the traffic by delaying packets to conform to the desired
-   traffic profile
+-  Shape the traffic by delaying packets to conform to the desired
+   traffic profile.
 
-INET provides classifier, meter, and marker modules, that can be
+INET provides classifier, meter, and marker modules that can be
 composed to build a traffic conditioner as a compound module.
 
 .. _ug:sec:diffserv:output-queues:
@@ -136,48 +136,48 @@ Simple modules
 --------------
 
 This section describes the primitive elements from which traffic
-conditioners and output queues can be built. The next sections shows
-some examples, how these queues, schedulers, droppers, classifiers,
-meters, markers can be combined.
+conditioners and output queues can be built. The following sections show
+some examples of how these queues, schedulers, droppers, classifiers,
+meters, and markers can be combined.
 
-The type of the components are:
+The types of the components are:
 
--  ``queue``: container of packets, accessed as FIFO
+-  ``queue``: container of packets, accessed as FIFO.
 
--  ``dropper``: attached to one or more queue, it can limit the queue
-   length below some threshold by selectively dropping packets
+-  ``dropper``: attached to one or more queues, it can limit the queue
+   length below some threshold by selectively dropping packets.
 
--  ``scheduler``: decide which packet is transmitted first, when more
-   packets are available on their inputs
+-  ``scheduler``: decides which packet is transmitted first when more
+   packets are available on their inputs.
 
--  ``classifier``: classify the received packets according to their
-   content (e.g. source/destination, address and port, protocol, dscp
-   field of IP datagrams) and forward them to the corresponding output
+-  ``classifier``: classifies the received packets according to their
+   content (e.g., source/destination address and port, protocol, DSCP
+   field of IP datagrams) and forwards them to the corresponding output
    gate.
 
--  ``meter``: classify the received packets according to the temporal
-   characteristic of their traffic stream
+-  ``meter``: classifies the received packets according to the temporal
+   characteristic of their traffic stream.
 
 -  ``marker``: marks packets by setting their fields to control their
-   further processing
+   further processing.
 
 .. _ug:sec:diffserv:queues:
 
 Queues
 ~~~~~~
 
-When packets arrive at higher rate, than the interface can trasmit, they
-are getting queued.
+When packets arrive at a higher rate than the interface can transmit,
+they are queued.
 
 Queue elements store packets until they can be transmitted. They have
 one input and one output gate. Queues may have one or more thresholds
 associated with them.
 
 Received packets are enqueued and stored until the module connected to
-their output asks a packet by calling the :fun:`requestPacket()`
+their output requests a packet by calling the :fun:`requestPacket()`
 method.
 
-They should be able to notify the module connected to its output about
+They should be able to notify the module connected to their output about
 the arrival of new packets.
 
 .. _ug:sec:diffserv:fifo-queue:
@@ -199,13 +199,13 @@ DropTailQueue
 
 The other primitive queue module is :ned:`DropTailQueue`. Its capacity
 can be specified by the :par:`packetCapacity` parameter. When the number
-of stored packet reached the capacity of the queue, further packets are
+of stored packets reaches the capacity of the queue, further packets are
 dropped. Because this module contains a built-in dropping strategy, it
 cannot be combined with algorithmic droppers as :ned:`PacketQueue` can be.
-However its output can be connected to schedulers.
+However, its output can be connected to schedulers.
 
 This module implements the :ned:`IPacketQueue` interface, so it can be
-used as the queue component of interface card per se.
+used as the queue component of an interface card.
 
 .. _ug:sec:diffserv:droppers:
 
@@ -213,21 +213,21 @@ Droppers
 ~~~~~~~~
 
 Algorithmic droppers selectively drop received packets based on some
-condition. The condition can be either deterministic (e.g. to bound the
-queue length), or probabilistic (e.g. RED queues).
+condition. The condition can be either deterministic (e.g., to bound the
+queue length) or probabilistic (e.g., RED queues).
 
-Other kind of droppers are absolute droppers; they drop each received
-packet. They can be used to discard excess traffic, i.e. packets whose
-arrival rate exceeds the allowed maximum. In INET the :ned:`Sink` module
+Another kind of dropper is an absolute dropper that drops each received
+packet. It can be used to discard excess traffic, i.e. packets whose
+arrival rate exceeds the allowed maximum. In INET, the :ned:`Sink` module
 can be used as an absolute dropper.
 
 The algorithmic droppers in INET are :ned:`ThresholdDropper` and
-:ned:`RedDropper`. These modules has multiple input and multiple output
+:ned:`RedDropper`. These modules have multiple input and multiple output
 gates. Packets that arrive on gate :gate:`in[i]` are forwarded to gate
-:gate:`out[i]` (unless they are dropped). However the queues attached to
+:gate:`out[i]` (unless they are dropped). However, the queues attached to
 the output gates are viewed as a whole, i.e. the queue length parameter
 of the dropping algorithm is the sum of the individual queue lengths.
-This way we can emulate shared buffers of the queues. Note, that it is
+This way, we can emulate shared buffers of the queues. Note that it is
 also possible to connect each output to the same queue module.
 
 .. _ug:sec:diffserv:threshold-dropper:
@@ -235,12 +235,12 @@ also possible to connect each output to the same queue module.
 Threshold Dropper
 ^^^^^^^^^^^^^^^^^
 
-The :ned:`ThresholdDropper` module selectively drops packets, based on
+The :ned:`ThresholdDropper` module selectively drops packets based on
 the available buffer space of the queues attached to its output. The
-buffer space can be specified as the count of packets, or as the size in
+buffer space can be specified as the count of packets or as the size in
 bytes.
 
-The module sums the buffer lengths of its outputs and if enqueuing a
+The module sums the buffer lengths of its outputs, and if enqueuing a
 packet would exceed the configured capacities, then the packet will be
 dropped instead.
 
@@ -293,18 +293,18 @@ implement different packet drop priorities.
 Schedulers
 ~~~~~~~~~~
 
-Scheduler modules decide which queue can send a packet, when the
+Scheduler modules decide which queue can send a packet when the
 interface is ready to transmit one. They have several input gates and
 one output gate.
 
 Modules that are connected to the inputs of a scheduler must implement
-the :cpp:`IPacketQueue` C++ interface. Schedulers also implement
-:cpp:`IPacketQueue`, so they can be cascaded to other schedulers, and
-can be used as the output module of :ned:`IPacketQueue`’s.
+the :cpp:`IPacketQueue` C++ interface. Schedulers also implement the
+:cpp:`IPacketQueue` interface, so they can be cascaded to other
+schedulers and used as the output module of :ned:`IPacketQueue`'s.
 
-There are several possible scheduling discipline (first come/first
+There are several possible scheduling disciplines (first come/first
 served, priority, weighted fair, weighted round-robin, deadline-based,
-rate-based). INET contains implementation of priority and weighted
+rate-based). INET contains an implementation of priority and weighted
 round-robin schedulers.
 
 .. _ug:sec:diffserv:priority-scheduler:
@@ -313,16 +313,16 @@ Priority Scheduler
 ^^^^^^^^^^^^^^^^^^
 
 The :ned:`PriorityScheduler` module implements a strict priority
-scheduler. Packets that arrived on :gate:`in[0]` has the highest
-priority, then packets arrived on :gate:`in[1]`, and so on. If more
-packets available when one is requested, then the one with highest
-priority is chosen. Packets with lower priority are transmitted only
-when there are no packets on the inputs with higher priorities.
+scheduler. Packets that arrive on :gate:`in[0]` have the highest
+priority, then packets that arrive on :gate:`in[1]`, and so on. If
+multiple packets are available when one is requested, then the one with
+the highest priority is chosen. Packets with lower priority are
+transmitted only when there are no packets on the inputs with higher priorities.
 
-:ned:`PriorityScheduler` must be used with care, because a large volume
-of higher packets can starve lower priority packets. Therefore it is
-necessary to limit the rate of higher priority packets to a fraction of
-the output datarate.
+:ned:`PriorityScheduler` must be used with care because a large volume
+of higher priority packets can starve lower priority packets. Therefore,
+it is necessary to limit the rate of higher priority packets to a fraction of
+the output data rate.
 
 :ned:`PriorityScheduler` can be used to implement the ``EF`` PHB.
 
@@ -333,23 +333,23 @@ The :ned:`WrrScheduler` module implements a weighted round-robin
 scheduler. The scheduler visits the input gates in turn and selects the
 number of packets for transmission based on their weight.
 
-For example if the module has three input gates, and the weights are 3,
+For example, if the module has three input gates and the weights are 3,
 2, and 1, then packets are transmitted in this order:
 
 ::
 
    A, A, A, B, B, C, A, A, A, B, B, C, ...
 
-where A packets arrived on :gate:`in[0]`, B packets on :gate:`in[1]`,
-and C packets on :gate:`in[2]`. If there are no packets in the current
-one when a packet is requested, then the next one is chosen that has
-enough tokens.
+where A denotes packets that arrived on :gate:`in[0]`, B denotes packets
+that arrived on :gate:`in[1]`, and C denotes packets that arrived on
+:gate:`in[2]`. If there are no packets in the current one when a packet
+is requested, then the next one is chosen if it has enough tokens.
 
-If the size of the packets are equal, then :ned:`WrrScheduler` divides
-the available bandwith according to the weights. In each case, it
-allocates the bandwith fairly. Each flow receives a guaranteed minimum
-bandwith, which is ensured even if other flows exceed their share (flow
-isolation). It is also efficiently uses the channel, because if some
+If the sizes of the packets are equal, then :ned:`WrrScheduler` divides
+the available bandwidth according to the weights. In each case, it
+allocates the bandwidth fairly. Each flow receives a guaranteed minimum
+bandwidth, which is ensured even if other flows exceed their share (flow
+isolation). It also efficiently uses the channel because if some
 traffic is smaller than its share of bandwidth, then the rest is
 allocated to the other flows.
 
@@ -361,7 +361,7 @@ Classifiers
 ~~~~~~~~~~~
 
 Classifier modules have one input and many output gates. They examine
-the received packets, and forward them to the appropriate output gate
+the received packets and forward them to the appropriate output gate
 based on the content of some portion of the packet header. You can read
 more about classifiers in RFC 2475 and RFC 3290.
 
@@ -375,45 +375,43 @@ Multi-field Classifier
 
 The :ned:`MultiFieldClassifier` module can be used to identify
 micro-flows in the incoming traffic. The flow is identified by the
-source and destination addresses, the protocol id, and the source and
+source and destination addresses, the protocol ID, and the source and
 destination ports of the IP packet.
 
 The classifier can be configured by specifying a list of filters. Each
-filter can specify a source/destination address mask, protocol,
-source/destination port range, and bits of TypeOfService/TrafficClass
+filter can specify a source/destination address mask, a protocol,
+a source/destination port range, and bits of the TypeOfService/TrafficClass
 field to be matched. They also specify the index of the output gate
-matching packet should be forwarded to. The first matching filter
-determines the output gate, if there are no matching filters, then
+to which matching packets should be forwarded. The first matching filter
+determines the output gate; if there are no matching filters, then
 :gate:`defaultOut` is chosen.
 
 The configuration of the module is given as an XML document. The
-document element must contain a list of ``<filter>`` elements. The
-filter element has a mandatory ``@gate`` attribute that gives the
-index of the gate for packets matching the filter. Other attributes are
-optional and specify the condition of matching:
+document element must contain a list of ``<filter>`` elements. Each
+filter must have a mandatory ``@gate`` attribute specifying the index of
+the output gate for packets matching the filter. Other attributes are
+optional and specify the conditions for a match:
 
 -  ``@srcAddress``, ``@srcPrefixLength``: to match the source
-   address of the IP
+   address of the IP.
 
 -  ``@destAddress``, ``@destPrefixLength``:
 
 -  ``@protocol``: matches the protocol field of the IP packet. Its
-   value can be a name (e.g. “udp”, “tcp”), or the numeric code of the
+   value can be a name (e.g., “udp”, “tcp”) or the numeric code of the
    protocol.
 
--  ``@tos``,@tosMask: matches bits of the TypeOfService/TrafficClass
+-  ``@tos``, @tosMask: matches bits of the TypeOfService/TrafficClass
    field of the IP packet.
 
 -  ``@srcPort``: matches the source port of the TCP or UDP packet.
 
--  ``@srcPortMin``, ``@srcPortMax``: matches a range of source
-   ports.
+-  ``@srcPortMin``, ``@srcPortMax``: matches a range of source ports.
 
 -  ``@destPort``: matches the destination port of the TCP or UDP
    packet.
 
--  ``@destPortMin``, ``@destPortMax``: matches a range of
-   destination ports.
+-  ``@destPortMin``, ``@destPortMax``: matches a range of destination ports.
 
 The following example configuration specifies
 
@@ -423,7 +421,7 @@ The following example configuration specifies
 
 -  to transmit packets having CS7 in their DSCP field on gate 2,
 
--  to transmit other packets on :gate:`defaultGate`.
+-  and to transmit other packets on :gate:`defaultGate`.
 
 
 
@@ -439,16 +437,15 @@ Behavior Aggregate Classifier
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The :ned:`BehaviorAggregateClassifier` module can be used to read the
-DSCP field from the IP datagram, and direct the packet to the
+DSCP field from the IP datagram and direct the packet to the
 corresponding output gate. The DSCP value is the lower six bits of the
 TypeOfService/TrafficClass field. Core routers usually use this
 classifier to guide the packet to the appropriate queue.
 
 DSCP values are enumerated in the :par:`dscps` parameter. The first
-value is for gate :gate:`out[0]`, the second for :gate:`out[1]`, so on.
-If the received packet has a DSCP value not enumerated in the
-:par:`dscps` parameter, it will be forwarded to the :gate:`defaultOut`
-gate.
+value is for gate :gate:`out[0]`, the second for :gate:`out[1]`, and so on.
+If the received packet has a DSCP value that is not enumerated in the
+:par:`dscps` parameter, it will be forwarded to the :gate:`defaultOut` gate.
 
 .. _ug:sec:diffserv:meters:
 
@@ -457,99 +454,99 @@ Meters
 
 Meters classify the packets based on the temporal characteristics of
 their arrival. The arrival rate of packets is compared to an allowed
-traffic profile, and packets are decided to be green (in-profile) or red
-(out-of-profile). Some meters apply more than two conformance level,
-e.g. in three color meters the partially conforming packets are
+traffic profile, and packets are either marked as green (in-profile) or
+red (out-of-profile). Some meters apply more than two conformance levels.
+For example, in three-color meters, packets that partially conform are
 classified as yellow.
 
 The allowed traffic profile is usually specified by a token bucket. In
-this model, a bucket is filled in with tokens with a specified rate,
-until it reaches its maximum capacity. When a packet arrives, the bucket
-is examined. If it contains at least as many tokens as the length of the
-packet, then that tokens are removed, and the packet marked as
-conforming to the traffic profile. If the bucket contains less tokens
-than needed, it left unchanged, but the packet marked as non-conforming.
+this model, a bucket is filled with tokens at a specified rate until it
+reaches its maximum capacity. When a packet arrives, the bucket is
+examined. If it contains at least as many tokens as the length of the
+packet, then those tokens are removed, and the packet is marked as
+conforming to the traffic profile. If the bucket contains fewer tokens
+than needed, it is left unchanged, but the packet is marked as
+non-conforming.
 
-Meters has two modes: color-blind and color-aware. In color-blind mode,
-the color assigned by a previous meter does not affect the
-classification of the packet in subsequent meters. In color-aware mode,
-the color of the packet can not be changed to a less conforming color:
-if a packet is classified as non-conforming by a meter, it also handled
-as non-conforming in later meters in the data path.
-
-
+Meters have two modes: color-blind and color-aware. In color-blind mode,
+the color assigned by a previous meter does not affect the classification
+of the packet in subsequent meters. In color-aware mode, the color of the
+packet cannot be changed to a less conforming color. If a packet is
+classified as non-conforming by any meter, it is also handled as
+non-conforming in subsequent meters in the data path.
 
 .. important::
 
-   Meters take into account the length of the IP packet only, L2 headers are omitted
-   from the length calculation. If they receive a packet which is not
+   Meters take into account the length of the IP packet only; L2 headers are omitted
+   from the length calculation. If they receive a packet that is not
    an IP datagram and does not encapsulate an IP datagram, an error occurs.
 
 TokenBucketMeter
 ^^^^^^^^^^^^^^^^
 
 The :ned:`TokenBucketMeter` module implements a simple token bucket
-meter. The module has two output, one for green packets, and one for red
+meter. The module has two outputs: one for green packets and one for red
 packets. When a packet arrives, the gained tokens are added to the
 bucket, and the number of tokens equal to the size of the packet are
 subtracted.
 
-Packets are classified according to two parameters, Committed
-Information Rate (:math:`cir`), Committed Burst Size (:math:`cbs`), to
-be either green, or red.
+Packets are classified according to two parameters: Committed
+Information Rate (:math:`cir`) and Committed Burst Size (:math:`cbs`),
+as either green or red.
 
-Green traffic is guaranteed to be under :math:`cir*(t_1-t_0)+8*cbs` in
+Green traffic is guaranteed to be under :math:`cir \cdot (t_1 - t_0) + 8 \cdot cbs` in
 every :math:`[t_0,t_1]` interval.
 
 SingleRateThreeColorMeter
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The :ned:`SingleRateThreeColorMeter` module implements a Single Rate
-Three Color Meter (RFC 2697). The module has three output for green,
+Three Color Meter (RFC 2697). The module has three outputs: green,
 yellow, and red packets.
 
-Packets are classified according to three parameters, Committed
+Packets are classified according to three parameters: Committed
 Information Rate (:math:`cir`), Committed Burst Size (:math:`cbs`), and
-Excess Burst Size (:math:`ebs`), to be either green, yellow or red. The
-green traffic is guaranteed to be under :math:`cir*(t_1-t_0)+8*cbs`,
-while the green+yellow traffic to be under
-:math:`cir*(t_1-t_0)+8*(cbs+ebs)` in every :math:`[t_0,t_1]` interval.
+Excess Burst Size (:math:`ebs`), as either green, yellow, or red. The
+green traffic is guaranteed to be under :math:`cir \cdot (t_1 - t_0) + 8 \cdot cbs`
+while the green+yellow traffic is guaranteed to be under
+:math:`cir \cdot (t_1 - t_0) + 8 \cdot (cbs + ebs)` in every :math:`[t_0,t_1]` interval.
 
 TwoRateThreeColorMeter
 ^^^^^^^^^^^^^^^^^^^^^^
 
 The :ned:`TwoRateThreeColorMeter` module implements a Two Rate Three
-Color Meter (RFC 2698). The module has three output gates for the green,
+Color Meter (RFC 2698). The module has three output gates for green,
 yellow, and red packets.
 
-It classifies the packets based on two rates, Peak Information Rate
-(:math:`pir`) and Committed Information Rate (:math:`cir`), and their
-associated burst sizes (:math:`pbs` and :math:`cbs`) to be either green,
-yellow or red. The green traffic is under :math:`pir*(t_1-t_0)+8*pbs`
-and :math:`cir*(t_1-t_0)+8*cbs`, the yellow traffic is under
-:math:`pir*(t_1-t_0)+8*pbs` in every :math:`[t_0,t_1]` interval.
+It classifies packets based on two rates: Peak Information Rate
+(:math:`pir`) and Committed Information Rate (:math:`cir`) and their
+associated burst sizes (:math:`pbs` and :math:`cbs`), as either green,
+yellow, or red. The green traffic is guaranteed to be under
+:math:`pir \cdot (t_1 - t_0) + 8 \cdot pbs` and :math:`cir \cdot (t_1 - t_0) + 8 \cdot cbs`,
+the yellow traffic is guaranteed to be under
+:math:`pir \cdot (t_1 - t_0) + 8 \cdot pbs` in every :math:`[t_0,t_1]` interval.
 
 .. _ug:sec:diffserv:markers:
 
 Markers
 ~~~~~~~
 
-DSCP markers sets the codepoint of the crossing packets. The codepoint
+DSCP markers set the codepoint of the crossing packets. The codepoint
 determines the further processing of the packet in the router or in the
 core of the DiffServ domain.
 
-The :ned:`DscpMarker` module sets the DSCP field (lower six bit of
+The :ned:`DscpMarker` module sets the DSCP field (lower six bits of
 TypeOfService/TrafficClass) of IP datagrams to the value specified by
-the :par:`dscps` parameter. The :par:`dscps` parameter is a space
-separated list of codepoints. You can specify a different value for each
-input gate; packets arrived at the :math:`i^{th}` input gate are marked
-with the :math:`i^{th}` value. If there are fewer values, than gates,
-then the last one is used for extra gates.
+the :par:`dscps` parameter. The :par:`dscps` parameter is a space-separated
+list of codepoints. You can specify a different value for each input gate:
+packets arrived at the :math:`i^{th}` input gate are marked with the
+:math:`i^{th}` value. If there are fewer values than gates, the last one
+is used for extra gates.
 
 The DSCP values are enumerated in the :file:`DSCP.msg` file. You can
 use both names and integer values in the :par:`dscps` parameter.
 
-For example the following lines are equivalent:
+For example, the following lines are equivalent:
 
 
 
@@ -560,7 +557,7 @@ For example the following lines are equivalent:
 
 .. _ug:sec:diffserv:compound-modules:
 
-Compound modules
+Compound Modules
 ----------------
 
 .. _ug:sec:diffserv:afxyqueue:
@@ -568,10 +565,10 @@ Compound modules
 AFxyQueue
 ~~~~~~~~~
 
-The :ned:`AFxyQueue` module is an example queue, that implements one
+The :ned:`AFxyQueue` module is an example queue that implements one
 class of the Assured Forwarding PHB group (RFC 2597).
 
-Packets with the same AFx class, but different drop priorities arrive at
+Packets with the same AFx class but different drop priorities arrive at
 the :gate:`afx1In`, :gate:`afx2In`, and :gate:`afx3In` gates. The
 received packets are stored in the same queue. Before the packet is
 enqueued, a RED dropping algorithm may decide to selectively drop them,
@@ -584,28 +581,29 @@ equal probability than packets with higher drop priorities.
 
 .. _ug:sec:diffserv:diffservqeueue:
 
-DiffservQeueue
-~~~~~~~~~~~~~~
+DiffservQueue
+~~~~~~~~~~~~~
 
-The :ned:`DiffservQueue` is an example queue, that can be used in
-interfaces of DS core and edge nodes to support the AFxy (RFC 2597) and
-EF (RFC 3246) PHB’s.
+The :ned:`DiffservQueue` is an example queue that can be used in
+interfaces of DiffServ core and edge nodes to support the AFxy (RFC 2597)
+and EF (RFC 3246) PHBs.
 
 .. figure:: figures/DiffservQueue.*
    :align: center
    :scale: 70 %
 
 The incoming packets are first classified according to their DSCP field.
-DSCP’s other than AFxy and EF are handled as BE (best effort).
+DSCP values other than AFxy and EF are handled as best effort (BE).
 
-EF packets are stored in a dedicated queue, and served first when a
+EF packets are stored in a dedicated queue and served first when a
 packet is requested. Because they can preempt the other queues, the rate
-of the EF packets should be limited to a fraction of the bandwith of the
+of the EF packets should be limited to a fraction of the bandwidth of the
 link. This is achieved by metering the EF traffic with a token bucket
-meter and dropping packets that does not conform to the traffic profile.
+meter and dropping packets that do not conform to the traffic profile.
 
 There are other queues for AFx classes and BE. The AFx queues use RED to
-implement 3 different drop priorities within the class. BE packets are
+implement three different drop priorities within the class. BE packets are
 stored in a drop tail queue. Packets from AFxy and BE queues are
 scheduled by a WRR scheduler, which ensures that the remaining bandwidth
 is allocated among the classes according to the specified weights.
+

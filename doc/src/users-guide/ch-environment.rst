@@ -42,7 +42,7 @@ PhysicalEnvironment
 
 In INET, the physical environment is modeled by the
 :ned:`PhysicalEnvironment` compound module. This module normally has one
-instance in the network, and acts as a database that other parts of the
+instance in the network and acts as a database that other parts of the
 simulation can query at runtime. It contains the following information:
 
 -  geometry and properties of *physical objects* (usually referred to
@@ -58,7 +58,7 @@ an associated C++ class that contains the data structures and implements
 an API that allows other modules to query the data.
 
 Part of :ned:`PhysicalEnvironment`’s functionality is implemented in
-submodules for easy replacement. They are currently the ground model,
+submodules for easy replacement. They are currently the ground model
 and an object cache (for efficient queries):
 
 
@@ -74,12 +74,12 @@ Physical Objects
 ----------------
 
 The most important aspect of the physical environment is the objects
-which are present in it. For example, simulating an indoor Wifi scenario
+that are present in it. For example, simulating an indoor Wifi scenario
 may need to model walls, floors, ceilings, doors, windows, furniture,
-and similar objects, because they all affect signal propagation
+and similar objects because they all affect signal propagation
 (obstacle modeling).
 
-Objects are located in space, and have shapes and materials. The
+Objects are located in space and have shapes and materials. The
 physical environment model supports basic shapes and homogeneous
 materials, which is a simplified description but still allows for a
 reasonable approximation of reality. Physical objects in INET have the
@@ -93,7 +93,7 @@ following properties:
 -  *orientation* determines how the object is rotated relative to its
    default orientation.
 
--  *material* describes material specific physical properties.
+-  *material* describes material-specific physical properties.
 
 -  *graphical properties* provide parameters for better visualization.
 
@@ -109,7 +109,7 @@ Graphical properties include:
 
 -  *tags*: allows filtering objects on the graphical user interface
 
-Physical objects in INET are stationary, they cannot change their
+Physical objects in INET are stationary; they cannot change their
 position or orientation over time. Since the shape of the physical
 objects might be quite diverse, the model is designed to be extensible
 with new shapes. INET provides the following shapes:
@@ -148,21 +148,21 @@ be used:
 Ground Models
 -------------
 
-In inter-vehicle simulations the terrain has profound effects on signal
+In inter-vehicle simulations, the terrain has profound effects on signal
 propagation. For example, vehicles on the opposite sides of a mountain
 cannot directly communicate with each other.
 
 A ground model describes the 3D surface of the terrain. Its main purpose
-is to compute a position on the surface underneath an particular
+is to compute a position on the surface underneath a particular
 position.
 
 INET contains the following built-in ground models implemented as
 OMNeT++ simple modules:
 
--  :ned:`FlatGround` is a trivial model which provides a flat surface
+-  :ned:`FlatGround` is a trivial model that provides a flat surface
    parallel to the XY plane at a certain height.
 
--  :ned:`OsgEarthGround` is a more realistic model (based on ) which
+-  :ned:`OsgEarthGround` is a more realistic model (based on ) that
    provides a terrain surface.
 
 .. _ug:sec:environment:geographic-coordinate-system-models:
@@ -170,8 +170,8 @@ OMNeT++ simple modules:
 Geographic Coordinate System Models
 -----------------------------------
 
-In order to run high fidelity simulations, it is often required to embed
-the communication network into a real world map. With the new OMNeT++ 5
+In order to run high-fidelity simulations, it is often required to embed
+the communication network into a real-world map. With the new OMNeT++ 5
 version, INET already provides support for 3D maps using for
 visualization and as the map provider.
 
@@ -184,7 +184,7 @@ resolved.
 A geographic coordinate system model maps scene coordinates to
 geographic coordinates, and vice versa. Such a model allows positioning
 physical objects and describing network node mobility using geographical
-coordinates (e.g longitude, latitude, altitude).
+coordinates (e.g., longitude, latitude, altitude).
 
 In INET, a geographic coordinate system model is implemented as an
 OMNeT++ simple module:
@@ -221,7 +221,7 @@ propagation may become computationally very expensive. The reason is
 that the transmission medium model must check each line of sight path
 between all transmitter and receiver pairs against all physical objects.
 
-An object cache organizes physical objects into a data structure which
+An object cache organizes physical objects into a data structure that
 provides efficient geometric queries. Its main purpose is to iterate all
 physical objects penetrated by a 3D line segment.
 

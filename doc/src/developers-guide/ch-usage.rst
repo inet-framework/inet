@@ -10,10 +10,10 @@ Getting Started
 Introduction
 ------------
 
-where to put the source files: you can copy and modify the INET
-framework (fork it) in the hope that you’ll contribute back the changes;
-or you can develop in a separate project (create new project in the IDE;
-mark INET as referenced project)
+Where to put the source files: You can copy and modify the INET
+framework (fork it) in the hope that you'll contribute back the changes;
+or you can develop in a separate project (create a new project in the IDE;
+mark INET as a referenced project).
 
 .. _dg:cha:gettingstarted:contributing-to-inet:
 
@@ -22,25 +22,25 @@ Contributing to INET
 
 Workflow:
 
-Fork on Github.
+1. Fork on GitHub.
 
-Check out the INET project from GitHub, and import it into the OMNeT++
+2. Check out the INET project from GitHub, and import it into the OMNeT++
 IDE.
 
-Develop.
+3. Develop.
 
-Submit pull requests.
+4. Submit pull requests.
 
 .. _dg:cha:gettingstarted:setting-up-inet-based:
 
 Setting Up a New INET-Based Project
 -----------------------------------
 
-Create new project in the IDE.
+Create a new project in the IDE.
 
-NED and source files in the same folder; examples under examples/; etc.
+Keep NED and source files in the same folder; examples under examples/; etc.
 
-Set INET as referenced project.
+Set INET as a referenced project.
 
 Set up version control (git, GitHub).
 

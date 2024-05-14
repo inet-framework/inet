@@ -32,11 +32,11 @@ list gives the most commonly used network interfaces.
 
 -  :ned:`PppInterface` is for wired links using :protocol:`PPP`
 
--  :ned:`Ieee80211Interface` represents a Wifi (:protocol:`IEEE 802.11`)
+-  :ned:`Ieee80211Interface` represents a Wi-Fi (:protocol:`IEEE 802.11`)
    interface
 
 -  :ned:`Ieee802154NarrowbandInterface` and :ned:`Ieee802154UwbIrInterface`
-   represent a :protocol:`IEEE 802.15.4` interface
+   represent an :protocol:`IEEE 802.15.4` interface
 
 -  :ned:`BMacInterface`, :ned:`LMacInterface`, :ned:`XMacInterface`
    provide low-power wireless sensor MAC protocols along with a simple
@@ -65,7 +65,7 @@ Typical ingredients are:
 
 -  *Layer 2 protocol implementation*. For some interfaces such as
    :ned:`PppInterface` this is a single module; for others like Ethernet
-   and Wifi it consists of separate modules for MAC, LLC, and possibly
+   and Wi-Fi it consists of separate modules for MAC, LLC, and possibly
    other subcomponents.
 
 -  *PHY model*. Some interfaces also contain separate module(s) that
@@ -103,8 +103,8 @@ a hard limit for the queue length in a module parameter – if this is exceeded,
 the simulation stops with an error.
 
 When the :par:`typename` parameter of the queue module is not empty, it must
-name a NED type that implements the :ned:`IPacketQueue` interface. The
-queue module model allows modeling a finite buffer, or implement various
+name an NED type that implements the :ned:`IPacketQueue` interface. The
+queue module model allows modeling a finite buffer, or implementing various
 queueing policies for QoS and/or RED.
 
 The most frequently used module type for the queue module is
@@ -143,7 +143,7 @@ defined with parametric types, like this:
 
 Traffic conditioners allow one to implement the policing and shaping
 actions of a Diffserv router. They are added to the input or output
-packets paths in the network interface. (On the output path they are
+packets paths in the network interface. (On the output path, they are
 added before the queue module.)
 
 Traffic conditioners must implement the :ned:`ITrafficConditioner`
@@ -152,7 +152,7 @@ components (see chapter :doc:`ch-diffserv`). There is no
 preassembled traffic conditioner in INET, but you can find some in the
 example simulations.
 
-An example configuration with fictituous types:
+An example configuration with fictitious types:
 
 .. code-block:: ini
 
@@ -166,9 +166,9 @@ The Interface Table
 
 Network nodes normally contain an :ned:`InterfaceTable` module. The
 interface table is a sort of registry of all the network interfaces in
-the host. It does not send or receive messages, other modules access it
+the host. It does not send or receive messages; other modules access it
 via C++ function calls. Contents of the interface table can also be
-inspected e.g. in Qtenv.
+inspected, e.g., in Qtenv.
 
 Network interfaces register themselves in the interface table at the
 beginning of the simulation. Registration is usually the task of the MAC
@@ -179,13 +179,13 @@ beginning of the simulation. Registration is usually the task of the MAC
 Wired Network Interfaces
 ------------------------
 
-Wired interfaces have a pair of special purpose OMNeT++ gates which
+Wired interfaces have a pair of special-purpose OMNeT++ gates which
 represent the capability of having an external physical connection to
-another network node (e.g. Ethernet port). In order to make wired
+another network node (e.g., Ethernet port). In order to make wired
 communication work, these gates must be connected with special
 connections which represent the physical cable between the physical
-ports. The connections must use special OMNeT++ channels (e.g.
-:ned:`DatarateChannel`) which determine datarate and delay parameters.
+ports. The connections must use special OMNeT++ channels (e.g.,
+:ned:`DatarateChannel`) which determine data rate and delay parameters.
 
 Wired network interfaces are compound modules that implement the
 :ned:`IWiredInterface` interface. INET has the following wired network
@@ -227,7 +227,7 @@ modeling of the physical layer, a PHY module is an indispensable part of
 a wireless interface.
 
 Wireless network interfaces are compound modules that implement the
-:ned:`IWirelessInterface` interface. In the following sections we give
+:ned:`IWirelessInterface` interface. In the following sections, we give
 an overview of the wireless interfaces available in INET.
 
 .. _ug:sec:interfaces:generic-wireless-interface:
@@ -254,7 +254,7 @@ and the radio modules are fixed to a particular value. One example is
 IEEE 802.11
 ~~~~~~~~~~~
 
-IEEE 802.11 or Wifi network interfaces (:ned:`Ieee80211Interface`),
+IEEE 802.11 or Wi-Fi network interfaces (:ned:`Ieee80211Interface`),
 alongside with models of devices acting as access points (AP), are
 covered in chapter :doc:`ch-80211`.
 
@@ -324,7 +324,7 @@ optional out-of-band acknowledgement mechanism (using C++ function
 calls, not actual wirelessly sent frames), which is turned on by
 default. There is no retransmission: if the acknowledgement does not
 arrive after the first transmission, the MAC gives up and counts the
-packet as failed transmission.
+packet as a failed transmission.
 
 .. _ug:sec:interfaces:shortcut:
 
@@ -354,8 +354,8 @@ Tunnelling
 :ned:`TunInterface` is a virtual network interface that can be used for
 creating tunnels, but it is more powerful than that. It lets an
 application-layer module capture packets sent to the TUN interface and
-do whatever it pleases with it (including sending it to a peer entity in
-an UDP or plain IPv4 packet.)
+do whatever it pleases with them (including sending them to a peer entity in
+a UDP or plain IPv4 packet.)
 
 To set up a tunnel, add an instance of :ned:`TunnelApp` to the node, and
 specify the protocol (IPv4 or UDP) and the remote endpoint of the tunnel
@@ -383,7 +383,7 @@ chapter :doc:`ch-emulation`.
 Custom Network Interfaces
 -------------------------
 
-It’s also possible to build custom network interfaces, the following
+It is also possible to build custom network interfaces. The following
 example shows how to build a custom wireless interface.
 
 .. literalinclude:: lib/Snippets.ned
@@ -395,9 +395,10 @@ example shows how to build a custom wireless interface.
 The above network interface contains very simple hypothetical MAC and
 PHY protocols. The MAC protocol only provides acknowledgment without
 other services (e.g., carrier sense, collision avoidance, collision
-detection), the PHY protocol uses one of the predefined APSK modulations
+detection), and the PHY protocol uses one of the predefined APSK modulations
 for the whole signal (preamble, header, and data) without other services
 (e.g., scrambling, interleaving, forward error correction).
 
 .. [1]
    OMNeT++ ``sendDirect()`` calls
+

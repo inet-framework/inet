@@ -33,7 +33,7 @@ INET supports the following built-in actions:
 ScenarioManager
 ---------------
 
-The :ned:`ScenarioManager` module type is for setting up and controlling
+The :ned:`ScenarioManager` module type is used for setting up and controlling
 simulation experiments. In typical usage, it has only one instance in
 the network:
 
@@ -50,8 +50,6 @@ built-in commands, while other commands are dispatched (in C++) to be
 carried out by other simple modules.
 
 An example script:
-
-
 
 .. code-block:: xml
 
@@ -89,7 +87,7 @@ commands to be carried out at the same simulation time using
 More information can be found in the :ned:`ScenarioManager`
 documentation.
 
-The script is usually placed in a separate file, and specified like
+The script is usually placed in a separate file and specified like
 this:
 
 .. code-block:: ini

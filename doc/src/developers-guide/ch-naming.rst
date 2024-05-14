@@ -40,7 +40,7 @@ Modules
 -  Ieee*: standard specific models
 -  Ep*: energy/power related
 -  Cc*: charge/current related
--  *Source, *Sink, *Queue, *Server, *Buffer, *Filter, *Classifier, *Scheduler, *Gate: queueing model elements
+-  *Source, *Sink, *Queue, *Server, *Buffer, *Filter, *Classifier, *Scheduler, *Gate: queuing model elements
 -  *CanvasVisualizer, *OsgVisualizer: visualizer modules
 -  *Host, *Router: network nodes
 -  *6: IPv6 variants
@@ -50,7 +50,7 @@ C++ Classes
 -----------
 
 -  *Chunk: packet data representation
--  *Serializer: protocol specific header and message serialiers
+-  *Serializer: protocol specific header and message serializers
 -  *ProtocolDissector: protocol specific header and message dissectors
 -  *ProtocolPrinter: protocol specific header and message printers
 -  *Signal: physical layer signals (in contrast with binary data)
@@ -69,9 +69,9 @@ Packets
 
 Tags
 ----
--  *Tag packet specific (meta information)
+-  *Tag: packet specific (meta information)
 -  *Req
--  *Ind packet specific protocol requests and indications (meta information)
+-  *Ind: packet specific protocol requests and indications (meta information)
 
 Signals
 -------

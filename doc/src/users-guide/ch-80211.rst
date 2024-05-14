@@ -10,17 +10,17 @@ Overview
 
 IEEE 802.11 a.k.a. WiFi is the most widely used and universal wireless
 networking standard. Specifications are updated every few years, adding
-more features and ever increasing bit rates.
+more features and ever-increasing bit rates.
 
-In INET, nodes become WiFi-enabled by adding a :ned:`Ieee80211Interface`
+In INET, nodes become WiFi-enabled by adding an :ned:`Ieee80211Interface`
 to them. (As mentioned earlier, :ned:`WirelessHost` and :ned:`AdhocHost`
 already contain one in their default configuration.) APs are represented
 with the :ned:`AccessPoint` node type. WiFi networks require a matching
 transmission medium module to be present in the network, which is
-usually a :ned:`Ieee80211ScalarRadioMedium`.
+usually an :ned:`Ieee80211ScalarRadioMedium`.
 
-Operation mode (infrastructure vs ad hoc) is determined by the
-ingredients of the wireless interface. :ned:`Ieee80211Interface` has the
+The operation mode (infrastructure vs ad hoc) is determined by the
+ingredients of the wireless interface. The :ned:`Ieee80211Interface` has the
 following submodules (incomplete list):
 
 #. *management*: performs association/disassociation with access points,
@@ -45,12 +45,12 @@ their role and level of detail:
 -  :ned:`Ieee80211MgmtAp`, :ned:`Ieee80211MgmtApSimplified`: for access
    points
 
-The “simplified” ones assume that stations are statically associated to
+The "simplified" ones assume that stations are statically associated with
 an access point for the entire duration of the simulation (the
 scan-authenticate-associate process is not simulated), so they cannot be
 used e.g. in experiments involving handover.
 
-:ned:`Ieee80211MgmtSta` is does not take any action by itself, it
+The :ned:`Ieee80211MgmtSta` does not take any action by itself, it
 requires an agent (:ned:`Ieee80211AgentSta` or a custom one) to initiate
 actions.
 
@@ -61,59 +61,84 @@ The following sections examine the above components.
 MAC
 ---
 
-The :ned:`Ieee80211Mac` module type represents the IEEE 802.11 MAC. The structure of the
-implementation closely follows the architecture described in the standard, IEEE 802.11-2012 Part
-11: Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY)
-Specifications.
+The :ned:`Ieee80211Mac` module type represents the IEEE 802.11 MAC. The
+structure of the implementation closely follows the architecture described in
+the standard, IEEE 802.11-2012 Part 11: Wireless LAN Medium Access Control (MAC)
+and Physical Layer (PHY) Specifications.
 
-:ned:`Ieee80211Mac` performs transmission of frames according to the
+The :ned:`Ieee80211Mac` performs transmission of frames according to the
 CSMA/CA protocol. It receives data and management frames from the upper
 layers, and transmits them.
 
 The :ned:`Ieee80211Mac` was designed to be modular to facilitate
-experimenting with new policies, features and algorithms within the MAC
+experimenting with new policies, features, and algorithms within the MAC
 layer. Users can easily replace individual components with their own
-implementations. Policies, which most likely to be experimented with,
+implementations. Policies, which are most likely to be experimented with,
 are extracted into their own modules.
 
-The new model also separates the following components in the 802.11 standard into modules:
+The new model also separates the following components in the 802.11 standard
+into modules:
 
--  Coordination function: :ned:`Dcf`, :ned:`Hcf`. The coordination functions control the medium access as specified by the standard.
+-  Coordination function: :ned:`Dcf`, :ned:`Hcf`. The coordination functions
+   control the medium access as specified by the standard.
 
 -  Channel access method as specified by the standard: :ned:`Edca`
 
--  Channel access function: :ned:`Edcaf`, :ned:`Dcaf`. The channel access function controls channel ownership, etc.
+-  Channel access function: :ned:`Edcaf`, :ned:`Dcaf`. The channel access
+   function controls channel ownership, etc.
 
--  MAC data services: :ned:`OriginatorMacDataService`, :ned:`RecipientMacDataService`, :ned:`OriginatorQosMacDataService`, :ned:`RecipientQosMacDataService`.
-   The MAC data services are implemented as compound modules, which combine functions related to transforming data frames (sequence numbering, duplicate removal, frame reordering, fragmentation, aggregation).
+-  MAC data services: :ned:`OriginatorMacDataService`,
+   :ned:`RecipientMacDataService`, :ned:`OriginatorQosMacDataService`,
+   :ned:`RecipientQosMacDataService`. The MAC data services are implemented as
+   compound modules, which combine functions related to transforming data frames
+   (sequence numbering, duplicate removal, frame reordering, fragmentation,
+   aggregation).
 
--  Aggregation and deaggregation (C++ class in MAC data services): These classes implement aggregation and deaggregation according to the policy modules (see below).
+-  Aggregation and deaggregation (C++ class in MAC data services): These classes
+   implement aggregation and deaggregation according to the policy modules (see
+   below).
 
--  Fragmentation and defragmentation (C++ classes in MAC data services): These classes carry out the task of fragmentation and defragmentation according to the policy modules (see below).
+-  Fragmentation and defragmentation (C++ classes in MAC data services): These
+   classes carry out the task of fragmentation and defragmentation according to
+   the policy modules (see below).
 
--  Block ACK agreements and frame reordering (C++ classes): These classes carry out the task according to the policy modules (see below).
+-  Block ACK agreements and frame reordering (C++ classes): These classes carry
+   out the task according to the policy modules (see below).
 
--  Frame exchange sequences (implemented as C++ classes in coordination functions, like :ned:`Hcf`): These classes strictly follow the standard specifying the valid frame sequences.
+-  Frame exchange sequences (implemented as C++ classes in coordination
+   functions, like :ned:`Hcf`): These classes strictly follow the standard
+   specifying the valid frame sequences.
 
--  TXOP procedure (:ned:`TxopProcedure`): This module implements the transmission opportunity behavior of the standard.
+-  TXOP procedure (:ned:`TxopProcedure`): This module implements the
+   transmission opportunity behavior of the standard.
 
--  Duplicate removal (C++ class in RecipientMacDataService): This class removes duplicate received frames based on sequence numbers.
+-  Duplicate removal (C++ class in RecipientMacDataService): This class removes
+   duplicate received frames based on sequence numbers.
 
--  Rate selection: :ned:`QosRateSelection`. This module controls data rate for all kind of frames, including management and control frames.
+-  Rate selection: :ned:`QosRateSelection`. This module controls the data rate
+   for all kinds of frames, including management and control frames.
 
--  Rate control: :ned:`AarfRateControl`, :ned:`OnoeRateControl`. These modules determine the optimal data rate for data frames.
+-  Rate control: :ned:`AarfRateControl`, :ned:`OnoeRateControl`. These modules
+   determine the optimal data rate for data frames.
 
--  Protection mechanism: :ned:`OriginatorProtectionMechanism`. This module provides channel allocation for frame exchange sequences.
+-  Protection mechanism: :ned:`OriginatorProtectionMechanism`. This module
+   provides channel allocation for frame exchange sequences.
 
--  Recovery procedure: :ned:`NonQosRecoveryProcedure`, :ned:`QosRecoveryProcedure`. These modules determine what to do in case of frame exchange failure.
+-  Recovery procedure: :ned:`NonQosRecoveryProcedure`,
+   :ned:`QosRecoveryProcedure`. These modules determine what to do in case of
+   frame exchange failure.
 
--  Contention: :ned:`Contention`. The contention module implements contention-based channel access, using defer, backoff, etc.
+-  Contention: :ned:`Contention`. The contention module implements
+   contention-based channel access, using defer, backoff, etc.
 
--  :ned:`PendingQueue`: This module is a queue containing frames received from higher layers, waiting for transmission unchanged.
+-  :ned:`PendingQueue`: This module is a queue containing frames received from
+     higher layers, waiting for transmission unchanged.
 
--  :ned:`InProgressFrames`: This modules is a queue containing frames waiting for transmission already processed by the MAC data service.
+-  :ned:`InProgressFrames`: This modules is a queue containing frames waiting
+     for transmission already processed by the MAC data service.
 
--  TX/RX (:ned:`Tx`, :ned:`Rx`). Responsible for simple frame transmission/reception.
+-  TX/RX (:ned:`Tx`, :ned:`Rx`). Responsible for simple frame
+   transmission/reception.
 
 The MAC model has the following replaceable built-in policy submodules by default:
 
@@ -129,15 +154,23 @@ The MAC model has the following replaceable built-in policy submodules by defaul
 
 .. , with the default modules in parentheses:
 
--  ACK policy (e.g. :ned:`OriginatorAckPolicy`, :ned:`RecipientAckPolicy`): controls what kind of acknowledgement is used per-frame (none, normal, block-ack)
+-  ACK policy (e.g. :ned:`OriginatorAckPolicy`, :ned:`RecipientAckPolicy`):
+   controls what kind of acknowledgment is used per-frame (none, normal,
+   block-ack)
 
--  RTS/CTS policy (e.g. :ned:`RtsPolicy`, :ned:`CtsPolicy`): determines which frames are protected by the RTS/CTS mechanism
+-  RTS/CTS policy (e.g. :ned:`RtsPolicy`, :ned:`CtsPolicy`): determines which
+   frames are protected by the RTS/CTS mechanism
 
--  Originator and recipient block ACK agreement policies (e.g. :ned:`OriginatorBlockAckAgreementPolicy`, :ned:`RecipientBlockAckAgreementPolicy`): determine when and what kind of agreements are made
+-  Originator and recipient block ACK agreement policies (e.g.
+   :ned:`OriginatorBlockAckAgreementPolicy`,
+   :ned:`RecipientBlockAckAgreementPolicy`): determine when and what kind of
+   agreements are made
 
--  MSDU aggregation policy (e.g. :ned:`BasicMsduAggregationPolicy`): controls when and which frames are aggregated into an A-MSDU
+-  MSDU aggregation policy (e.g. :ned:`BasicMsduAggregationPolicy`): controls
+   when and which frames are aggregated into an A-MSDU
 
--  Fragmentation policy (e.g. :ned:`BasicFragmentationPolicy`): controls when and how fragmentation happens
+-  Fragmentation policy (e.g. :ned:`BasicFragmentationPolicy`): controls when
+   and how fragmentation happens
 
 .. For example, a lot of these modules are located in the *hcf* submodule of the MAC:
 
@@ -151,7 +184,7 @@ Physical Layer
 
 *The physical layer* modules (:ned:`Ieee80211Radio`) deal with modeling
 transmission and reception of frames. They model the characteristics of
-the radio channel, and determine if a frame was received correctly (that
+the radio channel and determine if a frame was received correctly (that
 is, it did not suffer bit errors due to low signal power or interference
 in the radio channel). Frames received correctly are passed up to the
 MAC.
@@ -174,10 +207,10 @@ Management
 
 *The management layer* exchanges management frames via the MAC with its
 peer management entities in other STAs and APs. Beacon, Probe
-Request/Response, Authentication, Association Request/Response etc
-frames are generated and interpreted by management entities, and
+Request/Response, Authentication, Association Request/Response, etc
+frames are generated and interpreted by management entities and
 transmitted/received via the MAC layer. During scanning, it is the
-management entity that periodically switches channels, and collects
+management entity that periodically switches channels and collects
 information from received beacons and probe responses.
 
 The management layer has several implementations which differ in their
@@ -194,16 +227,16 @@ Agent
 -----
 
 The agent is what instructs the management layer to perform scanning,
-authentication and association. The management layer itself just carries
-out these commands by performing the scanning, authentication and
-association procedures, and reports back the results to the agent.
+authentication, and association. The management layer itself just carries
+out these commands by performing the scanning, authentication, and
+association procedures and reports back the results to the agent.
 
 The agent component is currently only needed with the
 :ned:`Ieee80211MgmtSta` module. The management entities in other NIC
 variants do not have as much freedom as to need an agent to control
 them.
 
-:ned:`Ieee80211MgmtSta` requires a :ned:`Ieee80211AgentSta` or a custom
+:ned:`Ieee80211MgmtSta` requires an :ned:`Ieee80211AgentSta` or a custom
 agent. By modifying or replacing the agent, one can alter the dynamic
-behavior of STAs in the network, for example implement different
+behavior of STAs in the network, for example, implement different
 handover strategies.

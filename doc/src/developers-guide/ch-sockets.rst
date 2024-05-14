@@ -50,7 +50,7 @@ Identifying Sockets
 
 All sockets have a socket identifier which is unique within the network
 node. It is automatically assigned to the sockets when they are created.
-The identifier can accessed with :fun:`getSocketId()` throughout the
+The identifier can be accessed with :fun:`getSocketId()` throughout the
 lifetime of the socket.
 
 The socket identifier is also passed along in :cpp:`SocketReq` and
@@ -113,7 +113,7 @@ In general, sockets can process all incoming messages which were sent by
 the underlying protocol. The received messages must be processed by the
 socket where they belong to.
 
-For example, an application can simply go through each knonwn socket in
+For example, an application can simply go through each known socket in
 any order, and decide which one should process the received message as
 follows:
 
@@ -138,7 +138,7 @@ in general the state of the socket is expected to affect it.
 
 For example, after the socket is properly configured, the application
 can start sending packets without attaching any tags, because the socket
-takes care of the necessary technical details:
+takes cares of the necessary technical details:
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -164,7 +164,7 @@ Closing Sockets
 Sockets must be closed before deleting them. Closing a socket allows the
 underlying communication protocol to release allocated resources. These
 resources are often allocated on the local network node, the remote
-nework node, or potentially somewhere else in the network.
+network node, or potentially somewhere else in the network.
 
 For example, a socket for a connection oriented protocol must be closed
 to release the allocated resources at the peer:
@@ -230,8 +230,8 @@ Configuring Sockets
 ~~~~~~~~~~~~~~~~~~~
 
 For receiving :protocol:`UDP` datagrams on a socket, it must be bound to
-an address and a port. Both the address and port is optional. If the
-address is unspecified, than all :protocol:`UDP` datagrams with any
+an address and a port. Both the address and port are optional. If the
+address is unspecified, then all :protocol:`UDP` datagrams with any
 destination address are received. If the port is -1, then an unused port
 is selected automatically by the :ned:`Udp` module. The address and port
 pair must be unique within the same network node.
@@ -284,7 +284,7 @@ connect to the destination.
 
 The :protocol:`UDP` protocol is in fact connectionless, so when the
 :ned:`Udp` module receives the connect request, it simply remembers the
-remote address and port, and use it as default destination for later
+remote address and port, and uses it as the default destination for later
 sends.
 
 .. literalinclude:: lib/Snippets.cc
@@ -340,7 +340,7 @@ indication:
 Configuring Connections
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-The :ned:`Tcp` module supports several :protocol:`TCP` different
+The :ned:`Tcp` module supports several different :protocol:`TCP`
 congestion algorithms, which can also be configured using the
 :cpp:`TcpSocket`:
 
@@ -351,13 +351,13 @@ congestion algorithms, which can also be configured using the
    :name: TCP socket configure example
 
 Upon setting the individual parameters, the socket immediately sends
-sevice requests to the underlying :ned:`Tcp` protocol module.
+service requests to the underlying :ned:`Tcp` protocol module.
 
 Setting up Connections
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Since :protocol:`TCP` is a connection oriented protocol, a connection
-must be established before applications can exchange data. On the one
+Since :protocol:`TCP` is a connection-oriented protocol, a connection
+must be established before applications can exchange data. On one
 side, the application listens at a local address and port for incoming
 :protocol:`TCP` connections:
 
@@ -380,7 +380,7 @@ Accepting Connections
 ~~~~~~~~~~~~~~~~~~~~~
 
 The :ned:`Tcp` module automatically notifies the :cpp:`TcpSocket` about
-incoming connections. The socket in turn notifies the application using
+incoming connections. The socket, in turn, notifies the application using
 the :fun:`ICallback::socketAvailable` method of the callback interface.
 Finally, incoming :protocol:`TCP` connections must be accepted by the
 application before they can be used:
@@ -482,15 +482,13 @@ specific connection parameters directly:
    :name: SCTP socket configure example
 
 Upon setting the individual parameters, the socket immediately sends
-sevice requests to the underlying :ned:`Sctp` protocol module.
-
-.. _setting-up-connections-1:
+service requests to the underlying :ned:`Sctp` protocol module.
 
 Setting up Connections
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Since :protocol:`SCTP` is a connection oriented protocol, a connection
-must be established before applications can exchange data. On the one
+Since :protocol:`SCTP` is a connection-oriented protocol, a connection
+must be established before applications can exchange data. On one
 side, the application listens at a local address and port for incoming
 :protocol:`SCTP` connections:
 
@@ -515,7 +513,7 @@ Accepting Connections
 ~~~~~~~~~~~~~~~~~~~~~
 
 The :ned:`Sctp` module automatically notifies the :cpp:`SctpSocket`
-about incoming connections. The socket in turn notifies the application
+about incoming connections. The socket, in turn, notifies the application
 using the :fun:`ICallback::socketAvailable` method of the callback
 interface. Finally, incoming :protocol:`SCTP` connections must be
 accepted by the application before they can be used:
@@ -594,9 +592,9 @@ the received data:
 Configuring Sockets
 ~~~~~~~~~~~~~~~~~~~
 
-In order to only receive :protocol:`IPv4` datagrams which are sent to a
-specific local address or contain a specific protocol, the socket can be
-bound to the desired local address or protocol.
+In order to only receive :protocol:`IPv4` datagrams sent to a specific
+local address or containing a specific protocol, the socket can be bound
+to the desired local address or protocol.
 
 For example, the following code fragment shows how the INET
 :ned:`PingApp` binds to the :protocol:`ICMPv4` protocol to receive all
@@ -644,7 +642,7 @@ destination:
 
 The :protocol:`IPv4` protocol is in fact connectionless, so when the
 :ned:`Ipv4` module receives the connect request, it simply remembers the
-remote address, and uses it as the default destination address for later
+remote address and uses it as the default destination address for later
 sends.
 
 The application can call :fun:`connect()` several times on the same
@@ -696,9 +694,9 @@ the received data:
 Configuring Sockets
 ~~~~~~~~~~~~~~~~~~~
 
-In order to only receive :protocol:`IPv6` datagrams which are sent to a
-specific local address or contain a specific protocol, the socket can be
-bound to the desired local address or protocol.
+In order to only receive :protocol:`IPv6` datagrams sent to a specific
+local address or containing a specific protocol, the socket can be bound
+to the desired local address or protocol.
 
 For example, the following code fragment shows how the INET
 :ned:`PingApp` binds to the :protocol:`ICMPv6` protocol to receive all
@@ -744,10 +742,9 @@ destination:
    :end-before: !End
    :name: IPv6 socket send example
 
-The :protocol:`IPv6` protocol is in fact connectionless, so when the
+The :protocol:`IPv6` protocol is, in fact, connectionless, so when the
 :ned:`Ipv6` module receives the connect request, it simply remembers the
-remote address, and uses it as the default destination address for later
-sends.
+remote address and uses it as the default destination for later sends.
 
 The application can call :fun:`connect()` several times on the same
 socket.
@@ -785,7 +782,7 @@ Callback Interface
 ~~~~~~~~~~~~~~~~~~
 
 Messages received from the network protocol module must be processed by
-the associated socket where as shown in the general section. The
+the associated socket as shown in the general section. The
 :cpp:`L3Socket` deconstructs the message and uses the
 :cpp:`L3Socket::ICallback` interface to notify the application about the
 received data:
@@ -858,7 +855,7 @@ destination address, it can optionally connect to the destination:
    :end-before: !End
    :name: L3 socket send example
 
-The network protocols are in fact connectionless, so when the protocol
+The network protocols are, in fact, connectionless, so when the protocol
 module receives the connect request, it simply remembers the remote
 address, and uses it as the default destination address for later sends.
 

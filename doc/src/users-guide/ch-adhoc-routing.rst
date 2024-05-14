@@ -16,7 +16,7 @@ and may announce that it too can reach them. The difficulty of routing
 may be compounded by the fact that nodes may be mobile, which results in
 a changing topology.
 
-Ad hoc routing protocols fall in two broad categories: proactive and
+Ad hoc routing protocols fall into two broad categories: proactive and
 reactive. *Proactive* or *table-driven* protocols maintain fresh lists
 of destinations and their routes by periodically distributing routing
 tables throughout the network. *Reactive* or *on-demand* protocols find
@@ -33,8 +33,6 @@ configured to be an AODV router, a DYMO router, or a router of any other
 supported routing protocol. For example, you can configure
 :ned:`ManetRouter` nodes in the network to use AODV with the following
 ini file line:
-
-
 
 .. code-block:: ini
 
@@ -81,13 +79,13 @@ set to :ned:`Dsdv`.
 DYMO
 ----
 
-The DYMO (Dynamic MANET On-demand) routing protocol is successor to the
-AODV routing protocol. DYMO can work as both a pro-active and as a
+The DYMO (Dynamic MANET On-demand) routing protocol is the successor to the
+AODV routing protocol. DYMO can work as both a proactive and a
 reactive routing protocol, i.e. routes can be discovered just when they
 are needed.
 
 The :ned:`Dymo` module type implements DYMO, based on the IETF draft
-*draft-ietf-manet-dymo-24*.
+"draft-ietf-manet-dymo-24".
 
 :ned:`DymoRouter` is a :ned:`ManetRouter` with the routing module type
 set to :ned:`Dymo`.
@@ -101,8 +99,8 @@ GPSR (Greedy Perimeter Stateless Routing) is a routing protocol for
 mobile wireless networks that uses the geographic positions of nodes to
 make packet forwarding decisions.
 
-The :ned:`Gpsr` module type implements GPSR, based on the paper “GPSR:
-Greedy Perimeter Stateless Routing for Wireless Networks” by Brad Karp
+The :ned:`Gpsr` module type implements GPSR, based on the paper "GPSR:
+Greedy Perimeter Stateless Routing for Wireless Networks" by Brad Karp
 and H. T. Kung, 2000. The implementation supports both GG and RNG
 planarization algorithms.
 

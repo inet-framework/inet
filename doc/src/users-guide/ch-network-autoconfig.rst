@@ -17,21 +17,21 @@ Configuring IPv4 Networks
 
 An IPv4 network is composed of several nodes like hosts, routers,
 switches, hubs, Ethernet buses, or wireless access points. The nodes
-having a IPv4 network layer (hosts and routers) should be configured at
+having an IPv4 network layer (hosts and routers) should be configured at
 the beginning of the simulation. The configuration assigns IP addresses
-to the nodes, and fills their routing tables. If multicast forwarding is
+to the nodes and fills their routing tables. If multicast forwarding is
 simulated, then the multicast routing tables also must be filled in.
 
 The configuration can be manual (each address and route is fully
-specified by the user), or automatic (addresses and routes are generated
+specified by the user) or automatic (addresses and routes are generated
 by a configurator module at startup).
 
-Before version 1.99.4 INET offered :ned:`Ipv4FlatNetworkConfigurator`
+Before version 1.99.4, INET offered :ned:`Ipv4FlatNetworkConfigurator`
 for automatic and routing files for manual configuration. Both had
 serious limitations, so a new configurator has been added in version
 1.99.4: :ned:`Ipv4NetworkConfigurator`. This configurator supports both
 fully manual and fully automatic configuration. It can also be used with
-partially specified manual configurations, the configurator fills in the
+partially specified manual configurations; the configurator fills in the
 gaps automatically.
 
 The next section describes the usage of :ned:`Ipv4NetworkConfigurator`.
@@ -56,32 +56,32 @@ also does routing table optimization that significantly decreases the
 size of routing tables in large networks.
 
 The configuration is performed in stage 2 of the initialization. At this
-point interface modules (e.g. PPP) has already registered their
-interface in the interface table. If an interface is named
+point, interface modules (e.g. PPP) have already registered their
+interfaces in the interface table. If an interface is named
 ``ppp[0]``, then the corresponding interface entry is named
 ``ppp0``. This name can be used in the config file to refer to the
 interface.
 
 The configurator goes through the following steps:
 
-#. Builds a graph representing the network topology. The graph will have
+1. Builds a graph representing the network topology. The graph will have
    a vertex for every module that has a ``@node`` property (this
    includes hosts, routers, and L2 devices like switches, access points,
-   Ethernet hubs, etc.) It also assigns weights to vertices and edges
+   Ethernet hubs, etc.). It also assigns weights to vertices and edges
    that will be used by the shortest path algorithm when setting up
    routes. Weights will be infinite for IP nodes that have IP forwarding
-   disabled (to prevent routes from transiting them), and zero for all
-   other nodes (routers and and L2 devices). Edge weights are chosen to
-   be inversely proportional to the bitrate of the link, so that the
+   disabled (to prevent routes from transiting them) and zero for all
+   other nodes (routers and L2 devices). Edge weights are chosen to be
+   inversely proportional to the bitrate of the link so that the
    configurator prefers connections with higher bandwidth. For internal
    purposes, the configurator also builds a table of all "links" (the
    link data structure consists of the set of network interfaces that
-   are on the same point-to-point link or LAN)
+   are on the same point-to-point link or LAN).
 
-#. Assigns IP addresses to all interfaces of all nodes. The assignment
+2. Assigns IP addresses to all interfaces of all nodes. The assignment
    process takes into consideration the addresses and netmasks already
-   present on the interfaces (possibly set in earlier initialize
-   stages), and the configuration provided in the XML format (described
+   present on the interfaces (possibly set in earlier initialization
+   stages) and the configuration provided in the XML format (described
    below). The configuration can specify "templates" for the address and
    netmask, with parts that are fixed and parts that can be chosen by
    the configurator (e.g. "10.0.x.x"). In the most general case, the
@@ -92,60 +92,60 @@ The configurator goes through the following steps:
    to manual address assignment). There are many possible configuration
    options between these two extremes. The configurator assigns
    addresses in a way that maximizes the number of nodes per subnet.
-   Once it figures out the nodes that belong to a single subnet it, will
+   Once it figures out the nodes that belong to a single subnet, it will
    optimize for allocating the longest possible netmask. The
    configurator might fail to assign netmasks and addresses according to
    the given configuration parameters; if that happens, the assignment
-   process stops and an error is signalled.
+   process stops, and an error is signaled.
 
-#. Adds the manual routes that are specified in the configuration.
+3. Adds the manual routes that are specified in the configuration.
 
-#. Adds static routes to all routing tables in the network. The
+4. Adds static routes to all routing tables in the network. The
    configurator uses Dijkstra’s weighted shortest path algorithm to find
    the desired routes between all possible node pairs. The resulting
    routing tables will have one entry for all destination interfaces in
    the network. The configurator can be safely instructed to add default
    routes where applicable, significantly reducing the size of the host
    routing tables. It can also add subnet routes instead of interface
-   routes further reducing the size of routing tables. Turning on this
+   routes, further reducing the size of routing tables. Turning on this
    option requires careful design to avoid having IP addresses from the
    same subnet on different links. CAVEAT: Using manual routes and
-   static route generation together may have unwanted side effects,
+   static route generation together may have unwanted side effects
    because route generation ignores manual routes.
 
-#. Then it optimizes the routing tables for size. This optimization
-   allows configuring larger networks with smaller memory footprint and
+5. Then it optimizes the routing tables for size. This optimization
+   allows configuring larger networks with a smaller memory footprint and
    makes the routing table lookup faster. The resulting routing table
    might be different in that it will route packets that the original
-   routing table did not. Nevertheless the following invariant holds:
+   routing table did not. Nevertheless, the following invariant holds:
    any packet routed by the original routing table (has matching route)
    will still be routed the same way by the optimized routing table.
 
-#. Finally it dumps the requested results of the configuration. It can
-   dump network topology, assigned IP addresses, routing tables and its
-   own configuration format.
+6. Finally, it dumps the requested results of the configuration. It can
+   dump the network topology, assigned IP addresses, routing tables, and
+   its own configuration format.
 
-The module can dump the result of the configuration in the XML format
-which it can read. This is useful to save the result of a time consuming
-configuration (large network with optimized routes), and use it as the
+The module can dump the result of the configuration in the XML format,
+which it can read. This is useful to save the result of a time-consuming
+configuration (large network with optimized routes) and use it as the
 config file of subsequent runs.
 
 Network topology graph
 ^^^^^^^^^^^^^^^^^^^^^^
 
 The network topology graph is constructed from the nodes of the network.
-The node is a module having a ``@node`` property (this includes
-hosts, routers, and L2 devices like switches, access points, Ethernet
-hubs, etc.). An IP node is a node that contains an :ned:`InterfaceTable`
-and a :ned:`Ipv4RoutingTable`. A router is an IP node that has multiple
+The node is a module having a ``@node`` property (this includes hosts,
+routers, and L2 devices like switches, access points, Ethernet hubs,
+etc.). An IP node is a node that contains an :ned:`InterfaceTable`
+and an :ned:`Ipv4RoutingTable`. A router is an IP node that has multiple
 network interfaces, and IP forwarding is enabled in its routing table
-module. In multicast routers the :par:`forwardMulticast` parameter is
+module. In multicast routers, the :par:`forwardMulticast` parameter is
 also set to ``true``.
 
 A link is a set of interfaces that can send datagrams to each other
 without intervening routers. Each interface belongs to exactly one link.
-For example two interface connected by a point-to-point connection forms
-a link. Ethernet interfaces connected via buses, hubs or switches. The
+For example, two interfaces connected by a point-to-point connection form
+a link. Ethernet interfaces connected via buses, hubs, or switches. The
 configurator identifies links by discovering the connections between the
 IP nodes, buses, hubs, and switches.
 
@@ -160,10 +160,10 @@ configured in the configuration file of :ned:`Ipv4NetworkConfigurator`:
 .. code-block:: xml
 
    <config>
-     <wireless hosts="area1.*" interfaces="wlan*">
+     <wireless hosts="area1.*" interfaces="wlan*"/>
    </config>
 
-puts wlan interfaces of the specified hosts into the same wireless link.
+This puts WLAN interfaces of the specified hosts into the same wireless link.
 
 If a link contains only one router, it is marked as the gateway of the
 link. Each datagram whose destination is outside the link must go
@@ -175,16 +175,16 @@ Address assignment
 Addresses can be set up manually by giving the address and netmask for
 each IP node. If some part of the address or netmask is unspecified,
 then the configurator can fill them automatically. Unspecified fields
-are given as an “x” character in the dotted notation of the address. For
+are given as an "x" character in the dotted notation of the address. For
 example, if the address is specified as 192.168.1.1 and the netmask is
-255.255.255.0, then the node address will be 192.168.1.1 and its subnet
+255.255.255.0, then the node address will be 192.168.1.1, and its subnet
 is 192.168.1.0. If it is given as 192.168.x.x and 255.255.x.x, then the
 configurator chooses a subnet address in the range of 192.168.0.0 -
-192.168.255.252, and an IP address within the chosen subnet. (The
-maximum subnet mask is 255.255.255.252 allows 2 nodes in the subnet.)
+192.168.255.252 and an IP address within the chosen subnet. (The
+maximum subnet mask is 255.255.255.252, which allows 2 nodes in the subnet.)
 
 The following configuration generates network addresses below the
-10.0.0.0 address for each link, and assign unique IP addresses to each
+10.0.0.0 address for each link and assigns unique IP addresses to each
 host:
 
 
@@ -196,11 +196,11 @@ host:
    </config>
 
 The configurator tries to put nodes on the same link into the same
-subnet, so its enough to configure the address of only one node on each
+subnet, so it's enough to configure the address of only one node on each
 link.
 
 The following example configures a hierarchical network in a way that
-keeps routing tables small.
+keeps routing tables small:
 
 
 
@@ -216,7 +216,7 @@ keeps routing tables small.
    </config>
 
 The XML configuration must contain exactly one ``<config>`` element.
-Under the root element there can be multiple of the following elements:
+Under the root element, there can be multiple of the following elements:
 
 The interface element provides configuration parameters for one or more
 interfaces in the network. The selector attributes limit the scope where
@@ -224,71 +224,71 @@ the interface element has effects. The parameter attributes limit the
 range of assignable addresses and netmasks. The ``<interface>`` element
 may contain the following attributes:
 
--  ``@hosts`` Optional selector attribute that specifies a list of
+-  ``@hosts`` is an optional selector attribute that specifies a list of
    host name patterns. Only interfaces in the specified hosts are
    affected. The pattern might be a full path starting from the network,
    or a module name anywhere in the hierarchy, and other patterns
-   similar to ini file keys. The default value is "*" that matches all
-   hosts. e.g. "subnet.client*" or "host\* router[0..3]" or
-   "area*.*.host[0]"
+   similar to ini file keys. The default value is "*", which matches all
+   hosts. For example, "subnet.client*" or "host\* router[0..3]" or
+   "area*.*.host[0]".
 
--  ``@names`` Optional selector attribute that specifies a list of
+-  ``@names`` is an optional selector attribute that specifies a list of
    interface name patterns. Only interfaces with the specified names are
-   affected. The default value is "*" that matches all interfaces. e.g.
-   "eth\* ppp0" or "*"
+   affected. The default value is "*", which matches all interfaces. For
+   example, "eth\* ppp0" or "*".
 
--  ``@towards`` Optional selector attribute that specifies a list of
+-  ``@towards`` is an optional selector attribute that specifies a list of
    host name patterns. Only interfaces connected towards the specified
    hosts are affected. The specified name will be matched against the
-   names of hosts that are on the same LAN with the one that is being
-   configured. This works even if there’s a switch between the
-   configured host and the one specified here. For wired networks it
+   names of hosts that are on the same LAN as the one that is being
+   configured. This works even if there's a switch between the
+   configured host and the one specified here. For wired networks, it
    might be easier to specify this parameter instead of specifying the
-   interface names. The default value is "*". e.g. "ap" or "server" or
-   "client*"
+   interface names. The default value is "*". For example, "ap" or
+   "server" or "client*".
 
--  ``@among`` Optional selector attribute that specifies a list of
+-  ``@among`` is an optional selector attribute that specifies a list of
    host name patterns. Only interfaces in the specified hosts connected
-   towards the specified hosts are affected. The ’among="X Y Z"’ is same
-   as ’hosts="X Y Z" towards="X Y Z"’.
+   towards the specified hosts are affected. The 'among="X Y Z"’ is the same
+   as 'hosts="X Y Z" towards="X Y Z"’.
 
--  ``@address`` Optional parameter attribute that limits the range of
-   assignable addresses. Wildcards are allowed with using ’x’ as part of
+-  ``@address`` is an optional parameter attribute that limits the range of
+   assignable addresses. Wildcards are allowed using the 'x' character as part of
    the address in place of a byte. Unspecified parts will be filled
-   automatically by the configurator. The default value "" means that
-   the address will not be configured. Unconfigured interfaces still
-   have allocated addresses in their subnets allowing them to become
-   configured later very easily. e.g. "192.168.1.1" or "10.0.x.x"
+   automatically by the configurator. The default value is "", which means
+   that the address will not be configured. Unconfigured interfaces still
+   have allocated addresses in their subnets, allowing them to become
+   configured later very easily. For example, "192.168.1.1" or "10.0.x.x".
 
--  ``@netmask`` Optional parameter attribute that limits the range of
-   assignable netmasks. Wildcards are allowed with using ’x’ as part of
+-  ``@netmask`` is an optional parameter attribute that limits the range of
+   assignable netmasks. Wildcards are allowed using the 'x' character as part of
    the netmask in place of a byte. Unspecified parts will be filled
-   automatically be the configurator. The default value "" means that
-   any netmask can be configured. e.g. "255.255.255.0" or "255.255.x.x"
-   or "255.255.x.0"
+   automatically by the configurator. The default value is "", which means
+   that any netmask can be configured. For example, "255.255.255.0" or "255.255.x.x"
+   or "255.255.x.0".
 
--  ``@mtu`` number Optional parameter attribute to set the MTU
-   parameter in the interface. When unspecified the interface parameter
+-  ``@mtu`` is a number optional parameter attribute to set the MTU
+   parameter in the interface. When unspecified, the interface parameter
    is left unchanged.
 
--  ``@metric`` number Optional parameter attribute to set the Metric
-   parameter in the interface. When unspecified the interface parameter
+-  ``@metric`` is a number optional parameter attribute to set the Metric
+   parameter in the interface. When unspecified, the interface parameter
    is left unchanged.
 
 Wireless interfaces can similarly be configured by adding ``<wireless>``
 elements to the configuration. Each ``<wireless>`` element with a
 different id defines a separate subnet.
 
--  ``@id`` (optional) identifies wireless network, unique value used
-   if missed
+-  ``@id`` (optional) identifies a wireless network, a unique value used
+   if missed.
 
--  ``@hosts`` Optional selector attribute that specifies a list of
+-  ``@hosts`` is an optional selector attribute that specifies a list of
    host name patterns. Only interfaces in the specified hosts are
-   affected. The default value is "*" that matches all hosts.
+   affected. The default value is "*", which matches all hosts.
 
--  ``@interfaces`` Optional selector attribute that specifies a list
+-  ``@interfaces`` is an optional selector attribute that specifies a list
    of interface name patterns. Only interfaces with the specified names
-   are affected. The default value is "*" that matches all interfaces.
+   are affected. The default value is "*", which matches all interfaces.
 
 .. _ug:sec:autoconfig:multicast-groups:
 
@@ -296,10 +296,10 @@ Multicast groups
 ^^^^^^^^^^^^^^^^
 
 Multicast groups can be configured by adding ``<multicast-group>``
-elements to the configuration file. Interfaces belongs to a multicast
-group will join to the group automatically.
+elements to the configuration file. Interfaces that belong to a multicast
+group will join the group automatically.
 
-For example,
+For example:
 
 
 
@@ -309,32 +309,32 @@ For example,
      <multicast-group hosts="router*" interfaces="eth*" address="224.0.0.5"/>
    </config>
 
-adds all Ethernet interfaces of nodes whose name starts with “router” to
+This adds all Ethernet interfaces of nodes whose name starts with "router" to
 the 224.0.0.5 multicast group.
 
 The ``<multicast-group>`` element has the following attributes:
 
--  ``@hosts`` Optional selector attribute that specifies a list of
+-  ``@hosts`` is an optional selector attribute that specifies a list of
    host name patterns. Only interfaces in the specified hosts are
-   affected. The default value is "*" that matches all hosts.
+   affected. The default value is "*", which matches all hosts.
 
--  ``@interfaces`` Optional selector attribute that specifies a list
+-  ``@interfaces`` is an optional selector attribute that specifies a list
    of interface name patterns. Only interfaces with the specified names
-   are affected. The default value is "*" that matches all interfaces.
+   are affected. The default value is "*", which matches all interfaces.
 
--  ``@towards`` Optional selector attribute that specifies a list of
+-  ``@towards`` is an optional selector attribute that specifies a list of
    host name patterns. Only interfaces connected towards the specified
    hosts are affected. The default value is "*".
 
--  ``@among`` Optional selector attribute that specifies a list of
+-  ``@among`` is an optional selector attribute that specifies a list of
    host name patterns. Only interfaces in the specified hosts connected
-   towards the specified hosts are affected. The ’among="X Y Z"’ is same
-   as ’hosts="X Y Z" towards="X Y Z"’.
+   towards the specified hosts are affected. The 'among="X Y Z"’ is the same
+   as 'hosts="X Y Z" towards="X Y Z"’.
 
--  ``@address`` Mandatory parameter attribute that specifies a list
+-  ``@address`` is a mandatory parameter attribute that specifies a list
    of multicast group addresses to be assigned. Values must be selected
-   from the valid range of multicast addresses. e.g. "224.0.0.1
-   224.0.1.33"
+   from the valid range of multicast addresses. For example, "224.0.0.1
+   224.0.1.33".
 
 Manual route configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -346,75 +346,77 @@ simulation.
 The ``<route>`` elements of the configuration add a route to the routing
 tables of selected nodes. The element has the following attributes:
 
--  ``@hosts`` Optional selector attribute that specifies a list of
+-  ``@hosts`` is an optional selector attribute that specifies a list of
    host name patterns. Only routing tables in the specified hosts are
-   affected. The default value "" means all hosts will be affected. e.g.
-   "host\* router[0..3]"
+   affected. The default value is "", which means all hosts will be affected. For
+   example, "host\* router[0..3]".
 
--  ``@destination`` Optional parameter attribute that specifies the
+-  ``@destination`` is an optional parameter attribute that specifies the
    destination address in the route (L3AddressResolver syntax). The
-   default value is "*". e.g. "192.168.1.1" or "subnet.client[3]" or
-   "subnet.server(ipv4)" or "*"
+   default value is "*", which means all destinations. For
+   example, "192.168.1.1" or "subnet.client[3]" or
+   "subnet.server(ipv4)" or "*".
 
--  ``@netmask`` Optional parameter attribute that specifies the
-   netmask in the route. The default value is "*". e.g. "255.255.255.0"
-   or "/29" or "*"
+-  ``@netmask`` is an optional parameter attribute that specifies the
+   netmask in the route. The default value is "*", which means all netmasks. For
+   example, "255.255.255.0" or "/29" or "*".
 
--  ``@gateway`` Optional parameter attribute that specifies the
+-  ``@gateway`` is an optional parameter attribute that specifies the
    gateway (next-hop) address in the route (L3AddressResolver syntax).
-   When unspecified the interface parameter must be specified. The
-   default value is "*". e.g. "192.168.1.254" or "subnet.router" or "*"
+   When unspecified, the interface parameter must be specified. The
+   default value is "*", which means all gateways. For example,
+   "192.168.1.254" or "subnet.router" or "*".
 
--  ``@interface`` Optional parameter attribute that specifies the
-   output interface name in the route. When unspecified the gateway
-   parameter must be specified. This parameter has no default value.
-   e.g. "eth0"
+-  ``@interface`` is an optional parameter attribute that specifies the
+   output interface name in the route. When unspecified, the gateway
+   parameter must be specified. This parameter has no default value. For
+   example, "eth0".
 
--  ``@metric`` Optional parameter attribute that specifies the metric
+-  ``@metric`` is an optional parameter attribute that specifies the metric
    in the route. The default value is 0.
 
 Multicast routing tables can similarly be configured by adding
 ``<multicast-route>`` elements to the configuration.
 
--  ``@hosts`` Optional selector attribute that specifies a list of
+-  ``@hosts`` is an optional selector attribute that specifies a list of
    host name patterns. Only routing tables in the specified hosts are
-   affected. e.g. "host\* router[0..3]"
+   affected. For example, "host\* router[0..3]".
 
--  ``@source`` Optional parameter attribute that specifies the
-   address of the source network. The default value is "*" that matches
+-  ``@source`` is an optional parameter attribute that specifies the
+   address of the source network. The default value is "*", which matches
    all sources.
 
--  ``@netmask`` Optional parameter attribute that specifies the
-   netmask of the source network. The default value is "*" that matches
+-  ``@netmask`` is an optional parameter attribute that specifies the
+   netmask of the source network. The default value is "*", which matches
    all sources.
 
--  ``@groups`` Optional List of IPv4 multicast addresses specifying
-   the groups this entry applies to. The default value is "*" that
-   matches all multicast groups. e.g. "225.0.0.1 225.0.1.2".
+-  ``@groups`` is an optional list of IPv4 multicast addresses specifying
+   the groups this entry applies to. The default value is "*", which
+   matches all multicast groups. For example, "225.0.0.1 225.0.1.2".
 
--  ``@metric`` Optional parameter attribute that specifies the metric
+-  ``@metric`` is an optional parameter attribute that specifies the metric
    in the route.
 
--  ``@parent`` Optional parameter attribute that specifies the name
+-  ``@parent`` is an optional parameter attribute that specifies the name
    of the interface the multicast datagrams are expected to arrive. When
    a datagram arrives on the parent interface, it will be forwarded
-   towards the child interfaces; otherwise it will be dropped. The
+   towards the child interfaces; otherwise, it will be dropped. The
    default value is the interface on the shortest path towards the
    source of the datagram.
 
--  ``@children`` Mandatory parameter attribute that specifies a list
+-  ``@children`` is a mandatory parameter attribute that specifies a list
    of interface name patterns:
 
-   -  a name pattern (e.g. "ppp*") matches the name of the interface
+   -  a name pattern (e.g. "ppp*") matches the name of the interface.
 
-   -  a ’towards’ pattern (starting with ">", e.g. ">router*") matches
+   -  a 'towards' pattern (starting with ">", e.g. ">router*") matches
       the interface by naming one of the neighbor nodes on its link.
 
    Incoming multicast datagrams are forwarded to each child interface
    except the one they arrived in.
 
 The following example adds an entry to the multicast routing table of
-``router1``, that instructs the routing algorithm to forward
+``router1`` that instructs the routing algorithm to forward
 multicast datagrams whose source is in the 10.0.1.0 network and whose
 destination address is 225.0.0.1 to send on the ``eth1`` and
 ``eth2`` interfaces assuming it arrived on the ``eth0`` interface:
@@ -440,20 +442,19 @@ network.
 
 The configurator can be safely instructed to add default routes where
 applicable, significantly reducing the size of the host routing tables.
-It can also add subnet routes instead of interface routes further
-reducing the size of routing tables. Turning on this option requires
-careful design to avoid having IP addresses from the same subnet on
-different links.
+It can also add subnet routes instead of destination interface routes,
+further reducing the size of routing tables. Turning on this option
+requires careful design to avoid having IP addresses from the same subnet
+on different links.
 
 
 
 .. caution::
 
-   Using manual routes and static route generation
-   together may have unwanted side effects, because route generation ignores
-   manual routes. Therefore if the configuration file contains
-   manual routes, then the :par:`addStaticRoutes` parameter should be set
-   to ``false``.
+   Using manual routes and static route generation together may have unwanted
+   side effects because route generation ignores manual routes. Therefore,
+   if the configuration file contains manual routes, then the :par:`addStaticRoutes`
+   parameter should be set to ``false``.
 
 Route optimization
 ^^^^^^^^^^^^^^^^^^
@@ -467,7 +468,7 @@ The optimization is performed by merging routes whose gateway and
 outgoing interface is the same by finding a common prefix that matches
 only those routes. The resulting routing table might be different in
 that it will route packets that the original routing table did not.
-Nevertheless the following invariant holds: any packet routed by the
+Nevertheless, the following invariant holds: any packet routed by the
 original routing table (has matching route) will still be routed the
 same way by the optimized routing table.
 
@@ -520,44 +521,41 @@ This list summarize the parameters of the :ned:`Ipv4NetworkConfigurator`:
 Ipv4FlatNetworkConfigurator (Legacy)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The :ned:`Ipv4FlatNetworkConfigurator` module configures IP addresses
-and routes of IP nodes of a network. All assigned addresses share a
-common subnet prefix, the network topology will be ignored. Shortest
-path routes are also generated from any node to any other node of the
-network. The Gateway (next hop) field of the routes is not filled in by
-these configurator, so it relies on proxy ARP if the network spans
-several LANs. It does not perform routing table optimization (i.e.
-merging similar routes into a single, more general route.)
-
-
+The :ned:`Ipv4FlatNetworkConfigurator` module configures IP addresses and routes
+of IP nodes of a network. All assigned addresses share a common subnet
+prefix, and the network topology will be ignored. Shortest path routes
+are also generated from any node to any other node of the network. The
+Gateway (next hop) field of the routes is not filled in by these
+configurators, so it relies on proxy ARP if the network spans several LANs.
+It does not perform routing table optimization (i.e. merging similar routes
+into a single, more general route).
 
 .. warning::
 
-   :ned:`Ipv4FlatNetworkConfigurator` is considered
-   legacy, do not use it for new projects.
+   The :ned:`Ipv4FlatNetworkConfigurator` is considered legacy and should not
+   be used for new projects.
 
-The :ned:`Ipv4FlatNetworkConfigurator` module configures the network
-when it is initialized. The configuration is performed in stage 2, after
-interface tables are filled in. Do not use a
-:ned:`Ipv4FlatNetworkConfigurator` module together with static routing
-files, because they can iterfere with the configurator.
+The :ned:`Ipv4FlatNetworkConfigurator` module configures the network when it
+is initialized. The configuration is performed in stage 2, after interface
+tables are filled in. Do not use an :ned:`Ipv4FlatNetworkConfigurator` module
+together with static routing files because they can interfere with the
+configurator.
 
-The :ned:`Ipv4FlatNetworkConfigurator` searches each IP nodes of the
-network. (IP nodes are those modules that have the @node NED property
-and has a :ned:`Ipv4RoutingTable` submodule named “routingTable”). The
-configurator then assigns IP addresses to the IP nodes, controlled by
-the following module parameters:
+The :ned:`Ipv4FlatNetworkConfigurator` searches each IP node of the network
+(modules that have the @node NED property and have an :ned:`Ipv4RoutingTable`
+submodule named "routingTable"). The configurator then assigns IP addresses
+to the IP nodes, controlled by the following module parameters:
 
--  :par:`netmask` common netmask of the addresses (default is
-   255.255.0.0)
+-  :par:`netmask` - the common netmask of the addresses (default is
+   255.255.0.0).
 
--  :par:`networkAddress` higher bits are the network part of the
-   addresses, lower bits should be 0. (default is 192.168.0.0)
+-  :par:`networkAddress` - higher bits are the network part of the
+   addresses, lower bits should be 0 (default is 192.168.0.0).
 
-With the default parameters the assigned addresses are in the range
-192.168.0.1 - 192.168.255.254, so there can be maximum 65534 nodes in
-the network. The same IP address will be assigned to each interface of
-the node, except the loopback interface which always has address
+With the default parameters, the assigned addresses are in the range
+192.168.0.1 - 192.168.255.254, so there can be a maximum of 65,534 nodes
+in the network. The same IP address will be assigned to each interface of
+the node, except the loopback interface, which always has address
 127.0.0.1 (with 255.0.0.0 mask).
 
 After assigning the IP addresses, the configurator fills in the routing
@@ -705,26 +703,24 @@ is also accepted with the meaning ``0.0.0.0``.
 
 .. important::
 
-   The meaning of the routes where the destination is a multicast address
-   has been changed in version 1.99.4. Earlier these entries was used
-   both to select the outgoing interfaces of multicast datagrams
-   sent by the higher layer (if multicast interface was otherwise unspecified)
-   and to select the outgoing interfaces of datagrams that are received from
-   the network and forwarded by the node.
+   The meaning of the routes where the destination is a multicast address has been
+   changed in version 1.99.4. Earlier, these entries were used both to select the
+   outgoing interfaces of multicast datagrams sent by the higher layer (if multicast
+   interface was otherwise unspecified) and to select the outgoing interfaces of
+   datagrams that are received from the network and forwarded by the node.
 
-   From version 1.99.4 multicast routing applies reverse path forwarding.
-   This requires a separate routing table, that can not be populated from
-   the old routing table entries. Therefore simulations that use multicast
-   forwarding can not use the old configuration files, they should be
-   migrated to use an :ned:`Ipv4NetworkConfigurator` instead.
+   From version 1.99.4, multicast routing applies reverse path forwarding. This
+   requires a separate routing table, which cannot be populated from the old routing
+   table entries. Therefore, simulations that use multicast forwarding cannot use
+   the old configuration files; they should be migrated to use an
+   :ned:`Ipv4NetworkConfigurator` instead.
 
-   Some change is needed in models that use link-local multicast too.
-   Earlier if the IP module received a datagram from the higher layer
-   and multiple routes was given for the multicast group,
-   then IP sent a copy of the datagram on each interface of that routes.
-   From version 1.99.4, only the first matching interface is used (considering
-   longest match). If the application wants to send the multicast datagram
-   on each interface, then it must explicitly loop and specify the multicast
+   Some change is needed in models that use link-local multicast too. Earlier, if the
+   IP module received a datagram from the higher layer and multiple routes were given
+   for the multicast group, then IP sent a copy of the datagram on each interface of
+   that route. From version 1.99.4, only the first matching interface is used
+   (considering the longest match). If the application wants to send the multicast
+   datagram on each interface, then it must explicitly loop and specify the multicast
    interface.
 
 .. _ug:sec:autoconfig:configuring-layer-2:
@@ -753,5 +749,6 @@ and sets cost=19 and priority=32768:
      <interface hosts='**' ports='5' cost='19' priority='32768'/>
    </config>
 
-For more information about the usage of the selector attributes see
+For more information about the usage of the selector attributes, see
 :ned:`Ipv4NetworkConfigurator`.
+

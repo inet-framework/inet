@@ -38,11 +38,11 @@ TCP
 Overview
 ~~~~~~~~
 
-TCP protocol is the most widely used protocol of the Internet. It
-provides reliable, ordered delivery of stream of bytes from one
+The TCP protocol is the most widely used protocol of the Internet. It
+provides reliable, ordered delivery of a stream of bytes from one
 application on one computer to another application on another computer.
 The baseline TCP protocol is described in RFC793, but other tens of RFCs
-contains modifications and extensions to the TCP. As a result, TCP is a
+contain modifications and extensions to TCP. As a result, TCP is a
 complex protocol and sometimes it is hard to see how the different
 requirements interact with each other.
 
@@ -108,7 +108,7 @@ protocol in the INET framework.
 
 -  Delayed ACK algorithm
 
--  Nagle’s algorithm
+-  Nagle's algorithm
 
 -  Silly window avoidance
 
@@ -150,7 +150,7 @@ registering them in C++.
 TcpLwip
 ~~~~~~~
 
-*lwIP* is a light-weight implementation of the TCP/IP protocol suite
+lwIP is a light-weight implementation of the TCP/IP protocol suite
 that was originally written by Adam Dunkels of the Swedish Institute of
 Computer Science. The current development homepage is
 http://savannah.nongnu.org/projects/lwip/.
@@ -166,7 +166,7 @@ Features:
 
 -  delayed ACK
 
--  Nagle’s algorithm
+-  Nagle's algorithm
 
 -  round trip time estimation
 
@@ -202,7 +202,7 @@ Limitations
 TcpNsc
 ~~~~~~
 
-Network Simulation Cradle (NSC) is a tool that allow real-world TCP/IP
+Network Simulation Cradle (NSC) is a tool that allows real-world TCP/IP
 network stacks to be used in simulated networks. The NSC project is
 created by Sam Jansen and available on
 http://research.wand.net.nz/software/nsc.php. NSC currently contains
@@ -284,7 +284,7 @@ SCTP
 
 The :ned:`Sctp` module implements the Stream Control Transmission
 Protocol (SCTP). Like TCP, SCTP provides reliable ordered data delivery
-over an ureliable network. The most prominent feature of SCTP is the
+over an unreliable network. The most prominent feature of SCTP is the
 capability of transmitting multiple streams of data at the same time
 between two end points that have established a connection.
 
@@ -297,7 +297,7 @@ The Real-time Transport Protocol (RTP) is a transport layer protocol for
 delivering audio and video over IP networks. RTP is used extensively in
 communication and entertainment systems that involve streaming media,
 such as telephony, video teleconference applications including WebRTC,
-television services and web-based push-to-talk features.
+television services, and web-based push-to-talk features.
 
 The RTP Control Protocol (RTCP) is a sister protocol of the Real-time
 Transport Protocol (RTP). RTCP provides out-of-band statistics and

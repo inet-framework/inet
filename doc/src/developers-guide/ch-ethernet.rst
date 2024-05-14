@@ -19,10 +19,10 @@
    ------
 
    The INET defines these frames in the :file:`EtherFrame.msg` file.
-   The models supports Ethernet II, 803.2 with LLC header, and 803.3 with
+   The models support Ethernet II, 803.2 with LLC header, and 803.3 with
    LLC and SNAP headers. The corresponding classes are:
    :msg:`EthernetIIFrame`, :msg:`EtherFrameWithLlc` and
-   :msg:`EtherFrameWithSNAP`. They all class from :msg:`EtherFrame` which
+   :msg:`EtherFrameWithSNAP`. They all derive from :msg:`EtherFrame` which
    only represents the basic MAC frame with source and destination
    addresses. :ned:`EthernetCsmaMac` only deals with :msg:`EtherFrame`’s, and does
    not care about the specific subclass.
@@ -71,7 +71,7 @@
    In general, if :ned:`Ieee8022Llc` receives a packet from the higher layers,
    it interprets the message kind as a command. The commands include
    IEEE802CTRL_DATA (send a frame), IEEE802CTRL_REGISTER_DSAP (register
-   highher layer) IEEE802CTRL_DEREGISTER_DSAP (deregister higher layer) and
+   higher layer) IEEE802CTRL_DEREGISTER_DSAP (deregister higher layer) and
    IEEE802CTRL_SENDPAUSE (send PAUSE frame) – see EtherLLC for a more
    complete list.
 
@@ -105,11 +105,11 @@
       the interface packets.
 
    Using a control structure is more efficient than the interface packet
-   approach, because the control structure can be created once inside the
+   approach because the control structure can be created once inside the
    higher layer and be reused for every packet.
 
    It may also appear to be more intuitive in Tkenv because one can observe
-   data packets travelling between the higher layer and Ethernet modules –
+   data packets traveling between the higher layer and Ethernet modules –
    as opposed to "interface" packets.
 
    EtherLLC: SAP Registration
@@ -144,10 +144,10 @@
 
    When frames collide the transmission is aborted – in this case the
    transmitting station transmits a jam signal. Jam signals are represented
-   by a :msg:`EthernetJamSignal` message. The jam message contains the tree
+   by an :msg:`EthernetJamSignal` message. The jam message contains the tree
    identifier of the frame whose transmission is aborted. When the
    :ned:`EthernetCsmaMac` receives a jam signal, it knows that the corresponding
-   transmission ended in jamming and have been aborted. Thus when it
+   transmission ended in jamming and has been aborted. Thus when it
    receives as many jams as collided frames, it can be sure that the
    channel is free again. (Receiving a jam message marks the beginning of
    the jam signal, so actually has to wait for the duration of the
@@ -169,7 +169,7 @@
    ~~~~~~~~
 
    When the transmission line is busy, messages received from the upper
-   layer needs to be queued.
+   layer need to be queued.
 
    In routers, MAC relies on an external queue module (see
    :ned:`PacketQueue`), and requests packets from this external queue
@@ -197,7 +197,7 @@
    resume immediately.
 
    :ned:`EthernetCsmaMac` will properly respond to PAUSE frames it receives
-   (:msg:`EtherPauseFrame` class), however it will never send a PAUSE frame
+   (:msg:`EtherPauseFrame` class), however, it will never send a PAUSE frame
    by itself. (For one thing, it doesn’t have an input buffer that can
    overflow.)
 
