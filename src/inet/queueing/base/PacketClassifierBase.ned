@@ -29,6 +29,6 @@ simple PacketClassifierBase extends PacketProcessorBase
         // the statistical value is the data rate of the classified packets
         @statistic[dataRate](title="data rate"; source=throughput(packetPushed); record=vector; unit=bps; interpolationmode=linear);
     gates:
-        input in;
+        input in @interface[inet::queueing::IPassivePacketSink];
         output out[];
 }

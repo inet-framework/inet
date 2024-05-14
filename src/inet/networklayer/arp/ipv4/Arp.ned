@@ -55,7 +55,7 @@ simple Arp like IArp
     gates:
         input netwIn @labels(ArpPacket+Ieee802Ctrl); // Incoming ARP requests and replies
         output netwOut @labels(ArpPacket+Ieee802Ctrl,Ipv4Header+Ieee802Ctrl);  // Outgoing ARP requests/replies, and datagrams with resolved next hop
-        input ifIn @labels(ArpPacket,Ieee802Ctrl);
+        input ifIn @interface[inet::queueing::IPassivePacketSink](protocol=arp; service=indication) @labels(ArpPacket,Ieee802Ctrl);
         output ifOut @labels(ArpPacket,Ieee802Ctrl);
 }
 
