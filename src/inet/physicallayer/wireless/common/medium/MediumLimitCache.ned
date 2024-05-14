@@ -13,7 +13,7 @@ module MediumLimitCache like IMediumLimitCache
 {
     parameters:
         double centerFrequency @unit(Hz) = default(nan Hz);       // TODO rename to maxRangeCenterFrequency?
-        double maxSpeed @unit(mps) = default(nan mps);             // Maxium speed on the medium, NaN means medium computes using mobility models
+        double maxSpeed @unit(mps) = default(nan mps);             // Maximum speed on the medium, NaN means medium computes using mobility models
         double maxTransmissionPower @unit(W) = default(nan W);     // TODO @unit(W) + dBm/dBW <--> W
         double minInterferencePower @unit(dBm) = default(nan dBm); // TODO @unit(W) + dBm/dBW <--> W
         double minReceptionPower @unit(dBm) = default(nan dBm);    // TODO @unit(W) + dBm/dBW <--> W

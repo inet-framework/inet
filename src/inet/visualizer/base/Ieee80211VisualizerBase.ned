@@ -29,13 +29,13 @@ simple Ieee80211VisualizerBase extends VisualizerBase
         string interfaceFilter @mutable = default("*"); // Which interfaces are considered, matches all interfaces by default
 
         double minPower @unit(dBm) = default(-85dBm); // Minimum expected signal power
-        double maxPower @unit(dBm) = default(-50dBm); // Maximum expeceted signal power
+        double maxPower @unit(dBm) = default(-50dBm); // Maximum expected signal power
 
         string icons = default("misc/signal_power_0 misc/signal_power_1 misc/signal_power_2 misc/signal_power_3"); // Wireless network visualization icon for different signal powers
         string iconColor = default("dark"); // Wireless network icon color is a list of colors or a color group name (e.g. dark, light), a set of dark colors by default
         string labelFont = default("<default>"); // Label font, automatic by default
         string labelColor = default("black"); // Label color, black by default
-        string placementHint = default("top"); // Annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        string placementHint = default("top"); // Annotation placement hint, space-separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double placementPriority = default(0); // Determines the order of annotation positioning
 
         @class(Ieee80211VisualizerBase);

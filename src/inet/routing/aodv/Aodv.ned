@@ -45,7 +45,7 @@ simple Aodv like IApp
         volatile double periodicJitter @unit(s) = default(uniform(0s, maxPeriodicJitter)); // Jitter for externally triggered message generation and message forwarding
 
         // RFC 5148:
-        // need more revise: As well as the decision as to whether
+        // need more revision: As well as the decision as to whether
         // to use jitter being dependent on the medium access control and
         // lower layers, the selection of the MAXJITTER parameter SHOULD
         // be appropriate to those mechanisms.
@@ -54,7 +54,7 @@ simple Aodv like IApp
 
         double helloInterval @unit(s) = default(1s); // Every helloInterval seconds a node broadcasts Hello messages (if it is necessary)
         int allowedHelloLoss = default(2); // AllowedHelloLoss * helloInterval is the lifetime value for Hello messages
-        double activeRouteTimeout @unit(s) = default(3s); // The timeout value for cached routes If Hello messages are used, then the
+        double activeRouteTimeout @unit(s) = default(3s); // The timeout value for cached routes. If Hello messages are used, then the
                                                             // ACTIVE_ROUTE_TIMEOUT parameter value MUST be more than the value
                                                             // (ALLOWED_HELLO_LOSS * HELLO_INTERVAL).
         int netDiameter = default(35); // The maximum possible number of hops between two nodes in the network

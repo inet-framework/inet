@@ -36,7 +36,7 @@ simple PcapRecorder
         string pcapFile = default(""); // The PCAP file to be written
         string fileFormat @enum("pcap", "pcapng") = default("pcapng");
         int snaplen = default(65535);  // Maximum number of bytes to record per packet
-        int timePrecision = default(6); // Time precison in recorded file. pcap supports only 6 (usec) or 9 (nanosec), pcapng supports more values (see 'if_tsresol' option in pcapng file format).
+        int timePrecision = default(6); // Time precision in recorded file. pcap supports only 6 (usec) or 9 (nanosec), pcapng supports more values (see 'if_tsresol' option in pcapng file format).
         bool dumpBadFrames = default(true); // Enable dump of frames with hasBitError
         string moduleNamePatterns = default("wlan[*] eth[*] ppp[*]"); // Space-separated list of sibling module names to listen on
         string sendingSignalNames = default("packetSentToLower"); // Space-separated list of outbound packet signals to subscribe to

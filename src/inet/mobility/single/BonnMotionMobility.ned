@@ -1,3 +1,4 @@
+
 //
 // Copyright (C) 2005 OpenSim Ltd.
 //
@@ -30,7 +31,6 @@ simple BonnMotionMobility extends MovingMobilityBase
     parameters:
         bool is3D = default(false); // Whether the trace file contains triplets or quadruples
         string traceFile; // The BonnMotion trace file
-        int nodeId; // Selects line in trace file; -1 gets substituted to parent module's index
+        int nodeId; // Selects line in the trace file; -1 gets substituted with the parent module's index
         @class(BonnMotionMobility);
 }
-

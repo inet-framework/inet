@@ -44,16 +44,15 @@ simple ProbabilisticBroadcast extends NetworkProtocolBase like INetworkProtocol
         double beta = default(0.8);
         // maximal number of broadcast attempts for each packet.
         int maxNbBcast = default(1);
-        // maximal back-off before first broadcast attempt [seconds].
-        // if don't want to use this parameter, simply set it
+        // maximal back-off before the first broadcast attempt [seconds].
+        // If you don't want to use this parameter, simply set it
         // to a value that is greater than bcperiod.
         double maxFirstBcastBackoff @unit(s) = default(1 s);
 
         double timeToLive @unit(s) = default(10 s);
-        // How many seconds the message should be kept in queue after its died.
+        // How many seconds the message should be kept in the queue after it dies.
         // That way the message is known if the node receives one of its
-        // copy that isn't dead because of TTL de-synchronization due to
-        // MAC backoff, propagation delay and clock drift.
+        // copies that isn't dead because of TTL de-synchronization due to
+        // MAC backoff, propagation delay, and clock drift.
         double timeInQueueAfterDeath @unit(s) = default(60 s);
 }
-

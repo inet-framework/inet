@@ -22,7 +22,6 @@ simple Icmp
     gates:
         input transportIn;
         output transportOut;
-        input ipIn @labels(Ipv4ControlInfo/up);  // Delivered ICMP packets
-        output ipOut @labels(Ipv4ControlInfo/down);  // Towards network
+        input ipIn @labels(Ipv4ControlInfo/up);  // Deliver ICMP packets
+        output ipOut @labels(Ipv4ControlInfo/down);  // Towards the network
 }
-

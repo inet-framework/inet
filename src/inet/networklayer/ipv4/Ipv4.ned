@@ -89,10 +89,10 @@ simple Ipv4 like IIpv4
         int timeToLive = default(32);
         int multicastTimeToLive = default(32);
         double fragmentTimeout @unit(s) = default(60s);
-        bool limitedBroadcast = default(false); // Send out limited broadcast packets comming from higher layer
-        string directBroadcastInterfaces = default("");   // List of interfaces that direct broadcast is enabled (by default direct broadcast is disabled on all interfaces)
+        bool limitedBroadcast = default(false); // Send out limited broadcast packets coming from the higher layer
+        string directBroadcastInterfaces = default("");   // List of interfaces where direct broadcast is enabled (by default direct broadcast is disabled on all interfaces)
         bool enableLocalOutMulticastRouting = default(false); // Enable using the multicast routing table for determining outgoing interfaces for local out packets
-        bool enableTimestampOption = default(false); // When enabled IP inserts a timestamp option into the IP header
+        bool enableTimestampOption = default(false); // When enabled, IP inserts a timestamp option into the IP header
         double maxLifetime @unit(s) = default(-1s); // Packets older than the limit are discarded
         @display("i=block/routing");
         @signal[packetSentToUpper](type=cPacket);

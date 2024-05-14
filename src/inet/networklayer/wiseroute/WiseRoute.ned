@@ -59,8 +59,8 @@ simple WiseRoute extends NetworkProtocolBase like INetworkProtocol
         // RSSI threshold for route selection
         double rssiThreshold @unit(dBm) = default(-50 dBm);
 
-        // If set to zero, this node does not initiates route tree building.
-        // If set to a value larger than zero, this nodes periodically initiates route tree building.
+        // If set to zero, this node does not initiate route tree building.
+        // If set to a value larger than zero, this node periodically initiates route tree building.
         double routeFloodsInterval @unit(s) = default(0 s);
 
         string arpModule; // The path to the ARP module

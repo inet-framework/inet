@@ -34,7 +34,7 @@ package inet.linklayer.configurator.gatescheduling.base;
 simple GateScheduleConfiguratorBase
 {
     parameters:
-        double gateCycleDuration @unit(s); // The globally used gate scheduling period in each PeriodicGate modules
+        double gateCycleDuration @unit(s); // The globally used gate scheduling period in each PeriodicGate module
         object configuration @mutable = default([]); // Array of objects, see ~GateScheduleConfiguratorBase module documentation for more details
                                                      // example: [{name: "s1", type: "unicast", application: "app[0]", pcp: 0, gateIndex: 0, source: "wheel*", destination: "hud", packetLength: 100B, packetInterval: 5ms, maxLatency: 100us, maxJitter: 10us, pathFragments: [["a", "b", "c"]]}]
         @display("i=block/cogwheel");

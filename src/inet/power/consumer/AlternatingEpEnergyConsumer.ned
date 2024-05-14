@@ -20,10 +20,10 @@ import inet.power.base.EpEnergyConsumerBase;
 simple AlternatingEpEnergyConsumer extends EpEnergyConsumerBase
 {
     parameters:
-        string energySourceModule = default("^.energyStorage"); // Module path of energy source
-        volatile double powerConsumption @unit(W); // Amount of power consumed in consumption mode
-        volatile double consumptionInterval @unit(s); // Time interval for consumption mode
-        volatile double sleepInterval @unit(s); // Time interval for sleep mode
+        string energySourceModule = default("^.energyStorage"); // Module path of the energy source
+        volatile double powerConsumption @unit(W); // The amount of power consumed in consumption mode
+        volatile double consumptionInterval @unit(s); // The time interval for the consumption mode
+        volatile double sleepInterval @unit(s); // The time interval for the sleep mode
         @class(AlternatingEpEnergyConsumer);
 }
 

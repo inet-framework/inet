@@ -18,7 +18,7 @@ package inet.visualizer.base;
 simple PhysicalEnvironmentVisualizerBase extends VisualizerBase
 {
     parameters:
-        string physicalEnvironmentModule = default("physicalEnvironment"); // The physical environment module that is displayed, refers to a top level submodule by default
+        string physicalEnvironmentModule = default("physicalEnvironment"); // The physical environment module that is displayed, refers to a top-level sub-module by default
 
         bool displayObjects = default(true);
 

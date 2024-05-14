@@ -22,7 +22,7 @@ simple StreamDecoder extends PacketFlowBase like IPacketFlow
 {
     parameters:
         string interfaceTableModule; // Relative module path of the interface table
-        object mapping @mutable = default([]); // Array of objects, where each object maps a network interface name pattern, a source address, a destination address, a VLAN id and a PCP value to a stream name, for example [{stream: "s1", interface: "eth0", destination: "dest1", pcp: 3}, ...]
+        object mapping @mutable = default([]); // Array of objects, where each object maps a network interface name pattern, a source address, a destination address, a VLAN id, and a PCP value to a stream name, for example [{stream: "s1", interface: "eth0", destination: "dest1", pcp: 3}, ...]
         @class(StreamDecoder);
         @display("i=block/blackboard");
 }

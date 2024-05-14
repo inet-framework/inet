@@ -19,7 +19,7 @@ simple Ieee8022LlcSocketIo
         string remoteAddress = default("");
         int localSap = default(-1);
         int remoteSap = default(-1);
-        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finishes
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
         @lifecycleSupport();
         @display("i=block/socket");

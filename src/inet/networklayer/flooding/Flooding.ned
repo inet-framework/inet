@@ -49,7 +49,6 @@ simple Flooding extends NetworkProtocolBase like INetworkProtocol
         int bcMaxEntries = default(100);
         // Time after which an entry for an already broadcasted msg can be deleted
         double bcDelTime @unit(s) = default(100 s);
-        int defaultTtl = default(10); // Default time-to-live (ttl) used for this module expressed in  number of hops.
+        int defaultTtl = default(10); // Default time-to-live (ttl) used for this module expressed in number of hops.
         @class(Flooding);
 }
-

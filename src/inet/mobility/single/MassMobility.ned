@@ -50,7 +50,7 @@ simple MassMobility extends MovingMobilityBase
         double initialZ @unit(m) = default(nanToZero(uniform(constraintAreaMinZ, constraintAreaMaxZ)));
         double initialMovementHeading @unit(deg) = default(uniform(0deg, 360deg)); // Initial heading
         double initialMovementElevation @unit(deg) = default(0deg); // Initial elevation
-        bool initFromDisplayString = default(true); // Enables one time initialization from the subject module's display string
+        bool initFromDisplayString = default(true); // Enables one-time initialization from the subject module's display string
         volatile double changeInterval @unit(s); // Frequency of changing speed and angle (can be random)
         volatile double angleDelta @unit(deg); // Rotate velocity vector by this much around the rotation axis defined by the rotationAxisAngle parameter (can be random)
         volatile double rotationAxisAngle @unit(deg) = default(0deg); // Defines a vector in the plane perpendicular to the velocity, where 0 deg means the Z axis when bank is zero (can be random)

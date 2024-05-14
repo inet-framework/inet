@@ -24,7 +24,6 @@ simple Ieee80211MgmtApSimplified like IIeee80211Mgmt
     gates:
         input macIn @labels(Ieee80211MacHeader); // From ~Ieee80211Mac
         output macOut @labels(Ieee80211MacHeader); // To ~Ieee80211Mac
-        input agentIn @loose;   // Unused dummy to statisfy the IIeee80211Mgmt interface
-        output agentOut @loose; // Unused dummy to statisfy the IIeee80211Mgmt interface
+        input agentIn @loose;   // Unused dummy to satisfy the IIeee80211Mgmt interface
+        output agentOut @loose; // Unused dummy to satisfy the IIeee80211Mgmt interface
 }
-

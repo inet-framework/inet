@@ -19,7 +19,7 @@ simple NetworkConnectionCanvasVisualizer extends NetworkConnectionVisualizerBase
 {
     parameters:
         double zIndex = default(0); // Determines the drawing order of figures relative to other visualizers
-        nodeFilter = default(""); // Disabled because omnetpp displays network connections by default
+        nodeFilter = default(""); // Disabled because OMNeT++ displays network connections by default
         @class(NetworkConnectionCanvasVisualizer);
 }
 

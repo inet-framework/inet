@@ -23,6 +23,6 @@ simple SceneOsgVisualizer extends SceneOsgVisualizerBase like ISceneVisualizer
 {
     parameters:
         @class(SceneOsgVisualizer);
-        clearColor = default("#FFFFFF"); // Scene background color, white by default
+        clearColor = default("#FFFFFF"); // Scene background color, default is white
 }
 

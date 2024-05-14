@@ -12,7 +12,7 @@ import inet.applications.contract.IApp;
 simple SctpNatPeer like IApp
 {
     parameters:
-        string localAddress = default(""); // Comma separated list of addresses
+        string localAddress = default(""); // Comma-separated list of addresses
         int localPort = default(0); // Port number to listen on
         string connectAddress;  // Server address (may be symbolic)
         int connectPort; // Port number to connect to
@@ -21,8 +21,8 @@ simple SctpNatPeer like IApp
         int numPacketsToReceive = default(0);
         int requestLength = default(1452); // Length of a request (bytes)
         double thinkTime @unit(s) = default(0s); // Time gap between requests
-        double waitToClose @unit(s) = default(0s); //time to wait between last message sent and abort
-        //# double reconnectInterval @unit(s) = default(0);  // If connection breaks, waits this much before trying to reconnect
+        double waitToClose @unit(s) = default(0s); // Time to wait between last message sent and abort
+        //# double reconnectInterval @unit(s) = default(0);  // If the connection breaks, wait this much before trying to reconnect
         int outboundStreams = default(1);
         int inboundStreams = default(1);
         bool echo = default(false);  // Echoes received packages when true

@@ -17,7 +17,7 @@ simple OrdinalBasedDropper extends PacketFilterBase
 {
     parameters:
         string dropsVector = default(""); // The dropsVector format is "<packetNumber>;<packetNumber>;...;"
-                                          // packet numbers in ascending order e.g. "5;6;12;13;"
+                                          // Packet numbers in ascending order e.g. "5;6;12;13;"
         @class(OrdinalBasedDropper);
 }
 

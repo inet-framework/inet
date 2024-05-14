@@ -31,15 +31,15 @@ package inet.visualizer.base;
 simple RoutingTableVisualizerBase extends VisualizerBase
 {
     parameters:
-        bool displayRoutingTables = default(false); // Display routing table data, disabled by default
-        bool displayRoutesIndividually = default(true); // Display routes between the same network nodes individually, enabled by default
-        bool displayLabels = default(true); // Display labels on arrows, enabled by default
+        bool displayRoutingTables = default(false); // Displays routing table data, disabled by default
+        bool displayRoutesIndividually = default(true); // Displays routes between the same network nodes individually, enabled by default
+        bool displayLabels = default(true); // Displays labels on arrows, enabled by default
 
-        string destinationFilter @mutable = default("*"); // Which destinations are considered, matches all destinations by default
-        string nodeFilter @mutable = default("*"); // Which nodes are considered, matches all nodes by default
-        string multicastSourceNodeFilter @mutable = default("*"); // Which multicast source nodes are considered, matches all nodes by default
-        string multicastSourceAddressFilter @mutable = default("*"); // Which multicast source addresses are considered, matches all addresses by default
-        string multicastGroupFilter @mutable = default("*"); // Which multicast group addresses are considered, matches all group addresses by default
+        string destinationFilter @mutable = default("*"); // Determines the destinations that are considered, matches all destinations by default
+        string nodeFilter @mutable = default("*"); // Determines the nodes that are considered, matches all nodes by default
+        string multicastSourceNodeFilter @mutable = default("*"); // Determines the multicast source nodes that are considered, matches all nodes by default
+        string multicastSourceAddressFilter @mutable = default("*"); // Determines the multicast source addresses that are considered, matches all addresses by default
+        string multicastGroupFilter @mutable = default("*"); // Determines the multicast group addresses that are considered, matches all group addresses by default
 
         string lineColor = default("black"); // Route line color, black by default
         string lineStyle = default("solid"); // Route line style (solid, dashed, dotted)

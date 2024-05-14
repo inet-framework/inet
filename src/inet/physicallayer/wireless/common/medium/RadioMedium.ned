@@ -32,13 +32,13 @@ module RadioMedium like IRadioMedium
 
         // filter parameters that control when signals are sent to receiver radios
         string rangeFilter = default("");       // When either set to 'interferenceRange' or 'communicationRange' the radio medium doesn't send signals to a radio if it's outside the provided range
-        bool radioModeFilter = default(false);  // When enabled the radio medium doesn't send signals to a radio if it's neither in receiver nor in transceiver mode
-        bool listeningFilter = default(false);  // When enabled the radio medium doesn't send signals to a radio if it listens on the channel in incompatible mode (e.g. different carrier frequency and bandwidth, different modulation)
-        bool macAddressFilter = default(false); // When enabled the radio medium doesn't send signals to a radio if it the destination mac address differs
+        bool radioModeFilter = default(false);  // When enabled, the radio medium doesn't send signals to a radio if it's neither in receiver nor in transceiver mode
+        bool listeningFilter = default(false);  // When enabled, the radio medium doesn't send signals to a radio if it listens on the channel in an incompatible mode (e.g. different carrier frequency and bandwidth, different modulation)
+        bool macAddressFilter = default(false); // When enabled, the radio medium doesn't send signals to a radio if the destination MAC address differs
 
         // logging parameters
-        bool recordTransmissionLog = default(false); // When enabled the medium writes one line per transmission into the communication log file
-        bool recordReceptionLog = default(false);    // When enabled the medium writes one line per reception into the communication log file
+        bool recordTransmissionLog = default(false); // When enabled, the medium writes one line per transmission into the communication log file
+        bool recordReceptionLog = default(false);    // When enabled, the medium writes one line per reception into the communication log file
 
         @class(RadioMedium);
         @display("i=misc/sun");

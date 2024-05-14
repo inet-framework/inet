@@ -22,7 +22,7 @@ import inet.linklayer.contract.IMacProtocol;
 simple ShortcutMac extends MacProtocolBase like ILinkLayer, IMacProtocol
 {
     parameters:
-        string address @mutable = default("auto");   // MAC address as hex string (12 hex digits), or
+        string address @mutable = default("auto");   // MAC address as a hex string (12 hex digits), or
                                                      // "auto". "auto" values will be replaced by
                                                      // a generated MAC address in init stage 0.
         double bitrate @unit(bps);

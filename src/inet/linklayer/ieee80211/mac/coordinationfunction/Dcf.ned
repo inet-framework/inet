@@ -67,7 +67,7 @@ module Dcf like IDcf
         @statistic[datarateSelected](title="datarates selected"; record=vector; interpolationmode=none);
 
     submodules:
-        // TODO consider merging Dcaf into Dcf, because its not like the relationship between Hcf and Edcaf or
+        // TODO consider merging Dcaf into Dcf because it's not like the relationship between Hcf and Edcaf or
         // TODO maybe move PendingQueue and InProgressFrames in Edcaf?
         channelAccess: Dcaf {
             parameters:

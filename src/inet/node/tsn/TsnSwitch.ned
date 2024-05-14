@@ -27,7 +27,7 @@ module TsnSwitch extends EthernetSwitch
         bool hasIncomingStreams = default(false); // Enable IEEE 802.1 stream decoding
         bool hasOutgoingStreams = default(false); // Enable IEEE 802.1 stream identification and stream encoding
         bool hasFramePreemption = default(false); // Enable IEEE 802.1 Qbu frame preemption
-        hasGptp = default(hasTimeSynchronization); // Enable gPTP protocol
+        bool hasGptp = default(hasTimeSynchronization); // Enable gPTP protocol
         gptp.gptpNodeType = default("BRIDGE_NODE"); // Configure gPTP bridge node type
         gptp.slavePort = default("eth0"); // Configure default gPTP bridge slave port
         clock.typename = default(hasTimeSynchronization ? "SettableClock" : ""); // Enable explicit local clock model when time synchronization is enabled
@@ -42,7 +42,7 @@ module TsnSwitch extends EthernetSwitch
         bridging.streamRelay.typename = default(hasStreamRedundancy ? "StreamRelayLayer" : ""); // Enable stream merging and stream splitting when stream redundancy is enabled
         bridging.streamFilter.typename = default(hasIngressTrafficFiltering ? "StreamFilterLayer" : ""); // Enable stream filtering when ingress per-stream filtering is enabled
         bridging.streamFilter.ingress.typename = default(hasIngressTrafficFiltering ? "SimpleIeee8021qFilter" : ""); // Use 802.1 Qci ingress filtering when ingress per-stream filtering is enabled
-        bridging.streamCoder.typename = default(hasIncomingStreams || hasOutgoingStreams || hasIngressTrafficFiltering || hasStreamRedundancy ? "StreamCoderLayer" : ""); // Enable stream endocing/decoding when stream redundancy is enabled
+        bridging.streamCoder.typename = default(hasIncomingStreams || hasOutgoingStreams || hasIngressTrafficFiltering || hasStreamRedundancy ? "StreamCoderLayer" : ""); // Enable stream encoding/decoding when stream redundancy is enabled
         bridging.interfaceRelay.learner.typename = default(hasIncomingStreams || hasOutgoingStreams ? "" : "RelayInterfaceLearner"); // Disable learning MAC addresses in the MAC forwarding table because it would change static TSN stream configuration
         ieee8021q.typename = default("Ieee8021qProtocol");
         ieee8021r.typename = default("Ieee8021rProtocol");

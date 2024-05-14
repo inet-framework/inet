@@ -24,7 +24,7 @@ simple TcpSpoof like ITcp
         int srcPort; // Local port number
         int destPort; // Destination port number
         int seqNo; // Sequence number (-1 for TCP ISS)
-        bool isSYN = default(true); // Whether to set SYN bit on packet
+        bool isSYN = default(true); // Whether to set the SYN bit on the packet
         double t @unit(s); // Simulation time to send at
         @display("i=block/square");
         @signal[packetSent](type=cPacket);

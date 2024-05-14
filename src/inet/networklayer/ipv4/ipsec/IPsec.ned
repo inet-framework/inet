@@ -182,15 +182,15 @@ simple IPsec
 
         string networkProtocolModule = default("^.ip");
         string interfaceTableModule;
-		string spdModule = default("^.spd");
-		string sadModule = default("^.sad");
-		xml spdConfig;
+        string spdModule = default("^.spd");
+        string sadModule = default("^.sad");
+        xml spdConfig;
 
-		string defaultProtection = default("");  // If not "": value to use where <Protection> element is absent from the configuration
-		string defaultEspMode = default(""); // If not "": value to use where <EspMode> element is absent from the configuration
-		string defaultEncryptionAlg = default(""); // If not "": value to use where <EncryptionAlg> element is absent from the configuration
-		string defaultAuthenticationAlg = default(""); // If not "": value to use where <defaultAuthenticationAlg> element is absent from the configuration
-		int defaultMaxTfcPadLength = default(0); // Value to use where <MaxTfcPadLength> element is absent from the configuration
+        string defaultProtection = default("");  // If not "": value to use where <Protection> element is absent from the configuration
+        string defaultEspMode = default(""); // If not "": value to use where <EspMode> element is absent from the configuration
+        string defaultEncryptionAlg = default(""); // If not "": value to use where <EncryptionAlg> element is absent from the configuration
+        string defaultAuthenticationAlg = default(""); // If not "": value to use where <defaultAuthenticationAlg> element is absent from the configuration
+        int defaultMaxTfcPadLength = default(0); // Value to use where <MaxTfcPadLength> element is absent from the configuration
 
         volatile double ahProtectOutDelay @unit(s) = default(0.0s);
         volatile double ahProtectInDelay @unit(s) = default(0.0s);

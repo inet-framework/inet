@@ -17,7 +17,7 @@ simple SctpNatServer like IApp
         int numPacketsToSendPerClient = default(0);  // Number of requests sent per session
         int numPacketsToReceivePerClient = default(1);
         int requestLength = default(1452); // Length of a request (bytes)
-        double waitToClose @unit(s) = default(0s); //time to wait between last message sent and abort
+        double waitToClose @unit(s) = default(0s); // Time to wait between last message sent and abort
         int outboundStreams = default(1);
         int inboundStreams = default(1);
         bool ordered = default(true);

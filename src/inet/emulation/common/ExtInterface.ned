@@ -50,7 +50,7 @@ module ExtInterface extends NetworkInterface like IExternalInterface
         string interfaceTableModule; // Module path of the interface table module
         string device; // Name of the attached OS device (e.g. tap0, veth0, etc.)
         string namespace = default("");  // Name of the OS network namespace (optional)
-        string copyConfiguration @enum("","copyToExt","copyFromExt") = default(""); // Copy interface configuration such as MAC address, IP address and MTU from/to the external interface.
+        string copyConfiguration @enum("","copyToExt","copyFromExt") = default(""); // Copy interface configuration such as MAC address, IP address, and MTU from/to the external interface.
         string address @mutable = default("auto");
         bool broadcast = default(true);
         bool multicast = default(true);

@@ -22,9 +22,9 @@ module GridObjectCache like IObjectCache
         double cellSizeX @unit(m) = default(nan m); // NaN means use cell count
         double cellSizeY @unit(m) = default(nan m); // NaN means use cell count
         double cellSizeZ @unit(m) = default(nan m); // NaN means use cell count
-        int cellCountX = default(10); // Divide space to so many cells
-        int cellCountY = default(10); // Divide space to so many cells
-        int cellCountZ = default(10); // Divide space to so many cells
+        int cellCountX = default(10); // Divide space into so many cells
+        int cellCountY = default(10); // Divide space into so many cells
+        int cellCountZ = default(10); // Divide space into so many cells
         @display("i=block/table2");
         @class(GridObjectCache);
 }

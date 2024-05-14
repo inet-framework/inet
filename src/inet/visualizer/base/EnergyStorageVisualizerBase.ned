@@ -19,13 +19,13 @@ simple EnergyStorageVisualizerBase extends VisualizerBase
 
         bool displayEnergyStorages = default(false);
 
-        string energyStorageFilter = default("**"); // Which energy storages are considered, matches all energy storages by default
+        string energyStorageFilter = default("**"); // Which energy storages are considered; matches all energy storages by default
 
         string color = default("green");
         double width = default(8);
         double height = default(24);
         double spacing = default(2);
-        string placementHint = default("right"); // Annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        string placementHint = default("right"); // Annotation placement hint; space-separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double placementPriority = default(0); // Determines the order of annotation positioning
 
         @class(EnergyStorageVisualizerBase);

@@ -47,23 +47,23 @@ import inet.applications.contract.IApp;
 simple PingApp like IApp
 {
     parameters:
-        string destAddr = default(""); // Destination address(es), separated by spaces, "*" means all IPv4/IPv6 interfaces in entire simulation
+        string destAddr = default(""); // Destination address(es), separated by spaces, "*" means all IPv4/IPv6 interfaces in the entire simulation
         string srcAddr = default(""); // Source address (useful with multi-homing)
-        int packetSize @unit(B) = default(56B); // Of ping payload, in bytes
+        int packetSize @unit(B) = default(56B); // Size of ping payload, in bytes
         volatile double sendInterval @unit(s) = default(1s); // Time to wait between pings (can be random)
         int hopLimit = default(-1); // TTL or hopLimit for IP packets
-        int count = default(-1); // Number of pings requests sent to a single destination address, -1 means continuously (only first address will be used from destAddr)
-        double startTime @unit(s) = default(uniform(0s, this.sleepDuration + this.sendInterval)); // Send first ping at startTime
+        int count = default(-1); // Number of ping requests sent to a single destination address, -1 means continuously (only first address will be used from destAddr)
+        double startTime @unit(s) = default(uniform(0s, this.sleepDuration + this.sendInterval)); // Send the first ping at startTime
         double stopTime @unit(s) = default(-1s); // Time to finish sending, negative values mean forever
         volatile double sleepDuration @unit(s) = default(0s); // Time spent in sleep between switching destinations
         bool continuous = default(false);  // Whether to continuously ping the destinations in a round-robin fashion
         bool printPing = default(false); // Log to stdout
         string crcMode @enum("declared", "computed") = default("declared");
-        string networkProtocol = default(""); // Uses specified network protocol for communication; uses the address-specified default network protocol when the parameter is empty
+        string networkProtocol = default(""); // Uses the specified network protocol for communication; uses the address-specified default network protocol when the parameter is empty
         @display("i=block/app");
         @lifecycleSupport;
-        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
-        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after the lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for the lifecycle stop operation
         @signal[rtt](type=simtime_t);
         @signal[numLost](type=long);
         @signal[numOutOfOrderArrivals](type=long);

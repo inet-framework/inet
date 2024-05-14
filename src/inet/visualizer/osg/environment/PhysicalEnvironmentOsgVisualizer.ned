@@ -22,6 +22,6 @@ simple PhysicalEnvironmentOsgVisualizer extends PhysicalEnvironmentVisualizerBas
 {
     parameters:
         @class(PhysicalEnvironmentOsgVisualizer);
-        bool enableObjectOpacity = default(true); // Display physical objects potentially transparently as specified in the opacitiy attribute (might cause z-fighting for transparent objects)
+        bool enableObjectOpacity = default(true); // Display physical objects potentially transparently as specified in the opacity attribute (might cause z-fighting for transparent objects)
 }
 

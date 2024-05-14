@@ -49,19 +49,19 @@ import inet.linklayer.contract.IMacProtocol;
 module CsmaCaMac extends MacProtocolBase like IMacProtocol
 {
     parameters:
-        string radioModule = default("^.radio"); // The path to the Radio module  //FIXME remove default value
-        string address @mutable = default("auto"); // MAC address as hex string (12 hex digits), or
+        string radioModule = default("^.radio"); // The path to the Radio module  //FIXME remove the default value
+        string address @mutable = default("auto"); // MAC address as a hex string (12 hex digits) or
                                                    // "auto". "auto" values will be replaced by
                                                    // a generated MAC address in init stage 0.
-        string fcsMode @enum("declared","computed") = default("declared");
+        string fcsMode @enum("declared", "computed") = default("declared");
         bool useAck = default(true);
         double bitrate @unit(bps);
-        int headerLength @unit(B) = default(17B); // Maximum 255 byte, minimum 17B for serializing, see CsmaCaMacDataHeader
-        int ackLength @unit(B) = default(14B); // Maximum 255 byte, minimum 14B for serializing, see CsmaCaMacAckHeader
+        int headerLength @unit(B) = default(17B); // Maximum 255 bytes, minimum 17B for serializing, see CsmaCaMacDataHeader
+        int ackLength @unit(B) = default(14B); // Maximum 255 bytes, minimum 14B for serializing, see CsmaCaMacAckHeader
         double sifsTime @unit(s) = default(10us);
         double slotTime @unit(s) = default(20us);
         double difsTime @unit(s) = default(sifsTime + 2 * slotTime);
-        double ackTimeout @unit(s) = default(dropUnit(ackLength * 8) / dropUnit(bitrate) * 1s + sifsTime + slotTime); // Measured from the end of data transmission; includes sifs, preamble, physical header, mac ack duration, 2x propagation time, by default assumes slot time > preamble + physical header + 2x propagation time
+        double ackTimeout @unit(s) = default(dropUnit(ackLength * 8) / dropUnit(bitrate) * 1s + sifsTime + slotTime); // Measured from the end of data transmission; includes sifs, preamble, physical header, mac ack duration, 2x propagation time; by default, assumes slot time > preamble + physical header + 2x propagation time
         int mtu = default(1500);
         int cwMin = default(31); // Minimum contention window
         int cwMax = default(1023); // Maximum contention window

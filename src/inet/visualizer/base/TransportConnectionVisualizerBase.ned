@@ -24,7 +24,7 @@ simple TransportConnectionVisualizerBase extends VisualizerBase
     parameters:
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // The network node visualizer module, refers to a sibling submodule by default
 
-        bool displayTransportConnections = default(false);// display transport connection end points, disabled by default
+        bool displayTransportConnections = default(false);// display transport connection endpoints, disabled by default
 
         string sourceNodeFilter @mutable = default("*"); // Which source network nodes are considered to display connections, matches no nodes by default
         string sourcePortFilter @mutable = default("*"); // Which source ports are considered to display connections, matches all ports by default

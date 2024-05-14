@@ -14,7 +14,7 @@ simple Igmpv3 like IIgmp
         string interfaceTableModule;
         string routingTableModule;
         string crcMode @enum("declared","computed") = default("declared");
-        int    robustnessVariable = default(2); // IGMP is roboust to (roboustnessVariable-1) packet loss
+        int    robustnessVariable = default(2); // IGMP is robust to (robustnessVariable-1) packet loss
         double queryInterval @unit(s) = default(125s);
         double queryResponseInterval @unit(s) = default(10s);
         double groupMembershipInterval @unit(s) = default((robustnessVariable * queryInterval) + queryResponseInterval);

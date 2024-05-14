@@ -19,8 +19,8 @@ module TsnClock extends GptpMaster
     parameters:
         bool hasCutthroughSwitching = default(false); // Enable cut-through switching support
         clock.typename = default("OscillatorBasedClock"); // Master clocks cannot be set
-        ethernet.typename = default("EthernetLayer"); // Use Ethernet protocol layer outside of network interfaces
+        ethernet.typename = default("EthernetLayer"); // Use the Ethernet protocol layer outside network interfaces
         eth[*].typename = default("LayeredEthernetInterface"); // Switch to modular Ethernet interface
         eth[*].phyLayer.typename = default(hasCutthroughSwitching ? "EthernetStreamingPhyLayer" : "EthernetPhyLayer"); // Use packet streaming when cut-through switching is enabled
-        @display("i=device/card"); // Change icon to emphasise hardware device
+        @display("i=device/card"); // Change icon to emphasize hardware device
 }

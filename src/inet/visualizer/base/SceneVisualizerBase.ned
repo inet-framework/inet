@@ -20,15 +20,15 @@ package inet.visualizer.base;
 simple SceneVisualizerBase extends VisualizerBase
 {
     parameters:
-        string physicalEnvironmentModule = default("physicalEnvironment"); // The physical environment module, refers to a top level submodule by default
+        string physicalEnvironmentModule = default("physicalEnvironment"); // The physical environment module, refers to a top-level submodule by default
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // The network node visualizer, refers to a sibling submodule by default
         double axisLength @mutable @unit(m) = default(nan m); // Length of x, y, and z axes, no axis by default
-        double animationSpeed = default(0); // Always active animation speed independent of any visualization, value must be in the range (0, +inf)
-        double sceneMinX @unit(m) = default(nan m); // Lower bound of x coordinates in scene
-        double sceneMinY @unit(m) = default(nan m); // Lower bound of y coordinates in scene
-        double sceneMinZ @unit(m) = default(nan m); // Lower bound of z coordinates in scene
-        double sceneMaxX @unit(m) = default(nan m); // Upper bound of x coordinates in scene
-        double sceneMaxY @unit(m) = default(nan m); // Upper bound of y coordinates in scene
-        double sceneMaxZ @unit(m) = default(nan m); // Upper bound of z coordinates in scene
+        double animationSpeed = default(0); // Always active animation speed independent of any visualization, the value must be in the range (0, +inf)
+        double sceneMinX @unit(m) = default(nan m); // Lower bound of x coordinates in the scene
+        double sceneMinY @unit(m) = default(nan m); // Lower bound of y coordinates in the scene
+        double sceneMinZ @unit(m) = default(nan m); // Lower bound of z coordinates in the scene
+        double sceneMaxX @unit(m) = default(nan m); // Upper bound of x coordinates in the scene
+        double sceneMaxY @unit(m) = default(nan m); // Upper bound of y coordinates in the scene
+        double sceneMaxZ @unit(m) = default(nan m); // Upper bound of z coordinates in the scene
         @class(SceneVisualizerBase);
 }

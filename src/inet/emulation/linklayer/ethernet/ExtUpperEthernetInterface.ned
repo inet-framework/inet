@@ -21,7 +21,7 @@ import inet.queueing.contract.IPacketQueue;
 module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
 {
     parameters:
-        bool csmacdSupport = default(false);  // By default CSMA/CD is turned off, so only point-to-point duplex links are supported.
+        bool csmacdSupport = default(false);  // By default, CSMA/CD is turned off, so only point-to-point duplex links are supported.
         double bitrate @unit(bps) = default(nan bps);
         *.bitrate = default(bitrate);
         @display("bgb=450,400");

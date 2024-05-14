@@ -20,7 +20,7 @@ simple PassivePacketSink extends PassivePacketSinkBase like IPassivePacketSink
         string clockModule = default(""); // Relative path of a module that implements IClock; optional
         double initialConsumptionOffset @unit(s) = default(0s); // Initial duration before which packets are not consumed
         volatile double consumptionInterval @unit(s) = default(0s); // Elapsed time between subsequent packets allowed to be pushed by the connected packet producer, 0 means any number of packets can be pushed at the same simulation time
-        bool scheduleForAbsoluteTime = default(true); // When a clock is used relative means that setting the clock will not affect the simulation time of the event
+        bool scheduleForAbsoluteTime = default(true); // When a clock is used, "relative" means that setting the clock will not affect the simulation time of the event
         @class(PassivePacketSink);
     gates:
         input in @labels(push);

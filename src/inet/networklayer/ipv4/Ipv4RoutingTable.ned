@@ -46,7 +46,7 @@ simple Ipv4RoutingTable like IRoutingTable
         string netmaskRoutes = default("*"); // Maintain netmask routes for interfaces
         bool forwarding = default(true);  // Turns IP forwarding on/off
         bool multicastForwarding = default(false); // Turns multicast forwarding on/off
-        bool useAdminDist = default(false);     // Use Cisco like administrative distances
+        bool useAdminDist = default(false);     // Use Cisco-like administrative distances
         string routingFile = default("");  // Routing table file name
         @display("i=block/table");
         @signal[routeAdded](type=inet::Ipv4Route);

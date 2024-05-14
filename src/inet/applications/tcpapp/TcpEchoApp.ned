@@ -29,10 +29,10 @@ simple TcpEchoApp extends TcpServerHostApp
         @class(TcpEchoApp);
         bool autoRead = default(true); // Whether to use "autoread" or "explicit-read" mode for TCP connection
         volatile int readSize @unit(B) = default(-1B);    // Used only with autoRead==false
-        volatile double readDelay @unit(s) = default(-1s);    // Used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay
+        volatile double readDelay @unit(s) = default(-1s);    // Used only with autoRead==false; delay for issuing a READ command after the previous READ was satisfied; -1 means immediately, 0 means zero delay
         double echoFactor = default(1);
         double echoDelay @unit(s) = default(0s);
-        serverThreadModuleType = default("inet.applications.tcpapp.TcpEchoAppThread"); // Module type of "thread" module to launch on incoming connections
+        serverThreadModuleType = default("inet.applications.tcpapp.TcpEchoAppThread"); // Module type of the "thread" module to launch on incoming connections
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

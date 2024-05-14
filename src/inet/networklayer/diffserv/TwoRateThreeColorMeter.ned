@@ -33,9 +33,9 @@ simple TwoRateThreeColorMeter
     parameters:
         @display("i=block/timer");
         string interfaceTableModule;   // The path to the InterfaceTable module
-        string pir;       // Peak information rate, either absolute bitrate (e.g. "100kbps"), or relative to the link's datarate (e.g. "20%")
+        string pir;       // Peak information rate, either absolute bitrate (e.g. "100kbps") or relative to the link's datarate (e.g. "20%")
         int pbs @unit(B); // Peak burst size
-        string cir;       // Committed information rate, either absolute or relative bitrate; must be smaller than pir
+        string cir;       // Committed information rate, either absolute or relative bitrate; must be smaller than the PIR
         int cbs @unit(B); // Committed burst size
         bool colorAwareMode = default(false); // Enables color-aware mode
     gates:

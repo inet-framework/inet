@@ -21,7 +21,7 @@ simple UdpSink like IApp
         int localPort; // Local port
         bool receiveBroadcast = default(false); // If true, makes the socket receive broadcast packets
         string multicastGroup = default(""); // If non-empty, makes the socket receive multicast packets sent to that group
-        string multicastSources = default(""); // If non-empty, than the socket receives multicast packets from those sources only
+        string multicastSources = default(""); // If non-empty, then the socket receives multicast packets from those sources only
 
         @display("i=block/sink");
         @lifecycleSupport;

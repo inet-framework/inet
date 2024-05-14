@@ -22,12 +22,12 @@ simple Ieee80211StateBasedEpEnergyConsumer extends StateBasedEpEnergyConsumer
         sleepPowerConsumption = default(0.05mW);
         switchingPowerConsumption = default(100mW);     // Tx/rx calibration mode
         receiverIdlePowerConsumption = default(0.5W);
-        receiverBusyPowerConsumption = default(0.5W);   // No info yet
+        receiverBusyPowerConsumption = default(0.5W);   // No information available yet
         receiverReceivingPowerConsumption = default(1W);
         receiverReceivingPreamblePowerConsumption = default(receiverReceivingPowerConsumption);
         receiverReceivingHeaderPowerConsumption = default(receiverReceivingPowerConsumption);
         receiverReceivingDataPowerConsumption = default(receiverReceivingPowerConsumption);
-        transmitterIdlePowerConsumption = default(1W);  // No info yet
+        transmitterIdlePowerConsumption = default(1W);  // No information available yet
         transmitterTransmittingPowerConsumption = default(2.5W);
         transmitterTransmittingPreamblePowerConsumption = default(transmitterTransmittingPowerConsumption);
         transmitterTransmittingHeaderPowerConsumption = default(transmitterTransmittingPowerConsumption);

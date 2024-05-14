@@ -32,9 +32,9 @@ simple Gptp like IGptp
         double pdelayInitialOffset @unit(s) = default(0s); // Time of first link delay measurement
 
         // following parameters are used to schedule follow_up and pdelay_resp messages.
-        // These numbers must be enough large to prevent creating queue in MAC layer.
-        // It means it should be large than transmission time of message sent before
-        double pDelayReqProcessingTime @unit(s) = default(8us);  // Processing time between arrived PDelayReq and send of PDelayResp
+        // These numbers must be large enough to prevent creating a queue in the MAC layer.
+        // It means they should be larger than the transmission time of the message sent before
+        double pDelayReqProcessingTime @unit(s) = default(8us);  // Processing time between the arrival of PDelayReq and the sending of PDelayResp
         double followUpInterval @unit(s) = default(7us);
 
         @display("i=block/timer");

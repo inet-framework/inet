@@ -43,7 +43,7 @@ module ApskLayeredTransmitter like ITransmitter
     parameters:
         string levelOfDetail @enum("packet", "bit", "symbol", "sample") = default("symbol");
         double bitrate @unit(bps); // Net bitrate of the transmitter
-        double power @unit(W); // Scalar transmission power for the whole signal duration
+        double power @unit(W); // Scalar transmission power for the entire signal duration
         double centerFrequency @unit(Hz); // Center frequency of the narrowband carrier signal
         double bandwidth @unit(Hz); // Bandwidth
         double preambleDuration @unit(s) = default(0s);

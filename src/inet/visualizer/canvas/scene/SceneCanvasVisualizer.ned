@@ -22,7 +22,7 @@ simple SceneCanvasVisualizer extends SceneVisualizerBase like ISceneVisualizer
 {
     parameters:
         double zIndex = default(0); // Determines the drawing order of figures relative to other visualizers
-        string viewAngle @mutable = default("x right y down z out"); // View angle is either ()
+        string viewAngle @mutable = default("x right y down z out"); // View angle is either
                                                                      //   - a valid combination of the words: x, y, z, left/right, up/down, in/out or
                                                                      //   - one of isometric, isometricN (where 0 <= N < 48)
                                                                      //   - 3 rotation angles and leftHanded/rightHanded

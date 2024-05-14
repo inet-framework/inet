@@ -104,7 +104,7 @@ simple UdpBasicBurst like IApp
         volatile int messageLength @unit(B); // Length of messages to generate, in bytes
         volatile double burstDuration @unit(s); // Burst duration time (zero not allowed)
         volatile double sleepDuration @unit(s); // Time between bursts (zero allowed)
-        volatile double sendInterval @unit(s); // Time between messages during bursts; usually a random value, e.g. 0.1s+uniform(-0.001s,0.001s); zero not allowed
+        volatile double sendInterval @unit(s); // Time between messages during bursts; usually a random value, e.g., 0.1s + uniform(-0.001s,0.001s); zero not allowed
         double delayLimit @unit(s) = default(0s); // Maximum accepted delay for a packet; packets with a bigger delay are discarded (dropped), zero value means no limit
         int timeToLive = default(-1); // If not -1, set the TTL (IPv4) or Hop Limit (IPv6) field of sent packets to this value
         bool dontFragment = default(false); // If true, asks IP to not fragment the message during routing

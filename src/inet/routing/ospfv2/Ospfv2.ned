@@ -162,8 +162,8 @@ simple Ospfv2 like IOspf
         int routerDeadInterval @unit(s) = default(40s);  // The interval during which at least one hello packet must be received from a neighbor before the router declares that neighbor as down
         int retransmissionInterval @unit(s) = default(5s);  // The time between OSPF LSA retransmissions for adjacencies that belongs to the interface
         int interfaceTransmissionDelay @unit(s) = default(1s);  // The number of seconds required to transmit a link state update packet. Valid values are 1 to 65535
-        string interfaceMode @enum("Active","Passive","NoOSPF") = default("Active"); // NoOSPF: the interface is not advertized by OSPF
-                                                                                     // Passive: the interface is advertised, but no OSPF message is send out
+        string interfaceMode @enum("Active","Passive","NoOSPF") = default("Active"); // NoOSPF: the interface is not advertised by OSPF
+                                                                                     // Passive: the interface is advertised, but no OSPF message is sent out
 
         int referenceBandwidth @unit(bps) = default(1e8bps);   // Reference bandwidth for cost calculation
         int interfaceOutputCost = default(0);  // Cost of link on the interface (1-1000), 0 means use reference bandwidth
@@ -172,7 +172,7 @@ simple Ospfv2 like IOspf
         string forwardingAddress = default("0.0.0.0");
         int linkCost = default(1);  // Cost of link (1-1000) for HostInterface and LoopbackInterface only
 
-        string authenticationType @enum("SimplePasswordType","CrytographicType","NullType") = default("NullType");
+        string authenticationType @enum("SimplePasswordType","CryptographicType","NullType") = default("NullType");
         string authenticationKey = default("0x00");  // 0xnn..nn
 
         @display("i=block/network2");

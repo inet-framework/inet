@@ -16,7 +16,7 @@ package inet.emulation.linklayer.ethernet;
 simple ExtEthernetTapDevice
 {
     parameters:
-        string device; // Name of existing real tap interface
+        string device; // Name of the existing real tap interface
         string namespace = default("");
         string packetNameFormat = default("Ext-%p-%t-%n");
         @display("i=block/rxtx");

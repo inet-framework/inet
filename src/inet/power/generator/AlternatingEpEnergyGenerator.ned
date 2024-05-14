@@ -20,10 +20,9 @@ import inet.power.base.EpEnergyGeneratorBase;
 simple AlternatingEpEnergyGenerator extends EpEnergyGeneratorBase
 {
     parameters:
-        string energySinkModule = default("^.energyStorage"); // Module path of energy sink
-        volatile double powerGeneration @unit(W); // Amount of power generated in generation mode
-        volatile double generationInterval @unit(s); // Time interval for generation mode
-        volatile double sleepInterval @unit(s); // Time interval for sleep mode
+        string energySinkModule = default("^.energyStorage"); // Module path of the energy sink
+        volatile double powerGeneration @unit(W); // The amount of power generated in the generation mode
+        volatile double generationInterval @unit(s); // The time interval for the generation mode
+        volatile double sleepInterval @unit(s); // The time interval for the sleep mode
         @class(AlternatingEpEnergyGenerator);
 }
-

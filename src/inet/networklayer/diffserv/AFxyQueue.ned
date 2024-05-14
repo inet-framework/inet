@@ -31,7 +31,7 @@ import inet.queueing.queue.PacketQueue;
 module AFxyQueue
 {
     parameters:
-        double wq = default(0.002); // Smoothing factor, i.e.  the weight of the current queue length in the averaged queue length
+        double wq = default(0.002); // Smoothing factor, i.e., the weight of the current queue length in the averaged queue length
 
         double afx1Minth = default(50);  // Minimum queue length thresholds for dropping packets with drop priority 1
         double afx1Maxth = default(100); // Maximum queue length thresholds for dropping packets with drop priority 1

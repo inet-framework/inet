@@ -17,7 +17,7 @@ simple EtherAppServer
     parameters:
         int localSAP = default(0xf1);
         @lifecycleSupport;
-        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation is finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
         @display("i=block/app");
         @signal[packetSent](type=inet::Packet);

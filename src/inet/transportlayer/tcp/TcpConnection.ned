@@ -26,9 +26,9 @@ simple TcpConnection {
         @signal[rcvOooSeg];    // Number of received out-of-order segments
         @signal[rcvNASeg];    // Number of received not acceptable segments
         @signal[sackedBytes];    // Current number of received sacked bytes
-        @signal[tcpRcvQueueBytes];    // Current amount of used bytes in tcp receive queue
-        @signal[tcpRcvQueueDrops];    // Number of drops in tcp receive queue
-        @signal[tcpRcvPayloadBytes];   // Amount of payload bytes received (including duplicates, out of order etc) for TCP throughput
+        @signal[tcpRcvQueueBytes];    // Current amount of used bytes in TCP receive queue
+        @signal[tcpRcvQueueDrops];    // Number of drops in TCP receive queue
+        @signal[tcpRcvPayloadBytes];   // Amount of payload bytes received (including duplicates, out of order, etc.) for TCP throughput
 
         //TcpAlgorithm signals:
         @signal[cwnd];    // Will record changes to snd_cwnd

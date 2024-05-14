@@ -66,10 +66,10 @@ simple Sctp like ISctp
         int swsLimit = default(3000);        // Limit for SWS
         bool udpEncapsEnabled = default(false);
         bool natFriendly = default(false);
-        int bytesToAddPerRcvdChunk = default(0);        // For flowcontrol
-        int bytesToAddPerPeerChunk = default(0);        // For flowcontrol
-        bool tellArwnd = default(false);            // For flowcontrol
-        int messageAcceptLimit = default(0);        // For flowcontrol
+        int bytesToAddPerRcvdChunk = default(0);        // For flow control
+        int bytesToAddPerPeerChunk = default(0);        // For flow control
+        bool tellArwnd = default(false);            // For flow control
+        int messageAcceptLimit = default(0);        // For flow control
         double fairStart @unit(s) = default(0s);
         double fairStop @unit(s) = default(0s);
         string streamsToPaths = default("");

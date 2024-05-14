@@ -101,17 +101,17 @@ module EthernetCsmaMac like IEtherMac
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         string displayStringTextFormat = default("rate: %b\nsent: %s, rcvd: %r\nqueue: %q, drop: %d");
-        bool sendRawBytes = default(false); // When true packets are serialized into a sequence of bytes before sending out
+        bool sendRawBytes = default(false); // When true, packets are serialized into a sequence of bytes before sending out
         bool promiscuous = default(false);  // If true, all packets are received, otherwise only the
                                             // ones with matching destination MAC address
         bool duplexMode;                    // Selects full-duplex (true) or half-duplex (false) operation
         bool frameBursting = default(true); // Enable/disable frame bursting mode in Gigabit Ethernet
-        bool allowNonstandardBitrate = default(false); // Allows any bitrate and uses first larger bitrate specified parameters
+        bool allowNonstandardBitrate = default(false); // Allows any bitrate and uses the first larger bitrate specified parameters
         int mtu @unit(B) = default(1500B);
         string fcsMode @enum("declared","computed");
         @lifecycleSupport;
-        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
-        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after the lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for the lifecycle stop operation
         @class(EthernetCsmaMac);
         @display("i=block/rxtx");
 

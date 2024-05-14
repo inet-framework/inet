@@ -26,7 +26,7 @@ simple MediumOsgVisualizer extends MediumVisualizerBase like IMediumVisualizer
 {
     parameters:
         string signalShape @enum("ring", "sphere", "both") = default("ring"); // Shape for displaying signals
-        string signalPlane @enum("camera","xy","xz","yz") = default("xy"); // Plane for 2 dimensional signal shapes
+        string signalPlane @enum("camera","xy","xz","yz") = default("xy"); // Plane for 2-dimensional signal shapes
         double signalFadingDistance @unit(m) = default(100m); // Distance parameter for exponential opacity decreasing
         double signalFadingFactor = default(1.5); // Factor parameter for exponential opacity decreasing, value must be in the range (1.0, +inf)
         double signalWaveLength @unit(m) = default(100m); // Distance between signal waves, value must be in the range (0, +inf)

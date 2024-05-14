@@ -17,7 +17,7 @@ simple AnsimMobility extends MovingMobilityBase
 {
     parameters:
         xml ansimTrace; // The ANSim trace file in XML
-        int nodeId; // <position_change> elements to match; -1 gets substituted to parent module's index
+        int nodeId; // <position_change> elements to match; -1 gets substituted with the parent module's index
         @class(AnsimMobility);
 }
 

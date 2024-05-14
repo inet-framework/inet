@@ -75,7 +75,6 @@ simple Ipv6
         output upperTunnelingOut;
         input lowerTunnelingIn;
         output lowerTunnelingOut;
-        //the following gates are added by Zarrar Yousaf on 19.06.07
         input xMIPv6In;
         output xMIPv6Out;
 }

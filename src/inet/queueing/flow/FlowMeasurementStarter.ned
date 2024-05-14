@@ -13,7 +13,7 @@ import inet.queueing.contract.IPacketFlow;
 simple FlowMeasurementStarter extends PacketFlowBase like IPacketFlow
 {
     parameters:
-        object packetFilter = default("*"); // Which packets are considered, matches all packets by default
+        object packetFilter = default("*"); // Specifies which packets are considered, matches all packets by default
         int offset @unit(b) = default(0b); // Designates the packet part to be measured
         int length @unit(b) = default(-1b); // Designates the packet part to be measured
         string flowName = default(""); // Use packet flow to separate measurement from other measurements

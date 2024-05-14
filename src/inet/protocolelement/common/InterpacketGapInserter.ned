@@ -13,7 +13,7 @@ simple InterpacketGapInserter extends PacketProcessorBase
 {
     parameters:
         string clockModule = default(""); // Relative path of a module that implements IClock; optional
-        bool initialChannelBusy = default(false); // Assume that channel was busy before the simulation started
+        bool initialChannelBusy = default(false); // Assume that the channel was busy before the simulation started
         volatile double duration @unit(s);
         displayStringTextFormat = default("delayed %p pk (%l)\nifg: %g");
         @display("i=block/timer");

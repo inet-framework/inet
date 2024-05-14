@@ -17,12 +17,12 @@ package inet.visualizer.base;
 simple TracingObstacleLossVisualizerBase extends VisualizerBase
 {
     parameters:
-        bool displayIntersections = default(false); // Display instersections of transmissions and physical objects, disabled by default
+        bool displayIntersections = default(false); // Display intersections of transmissions and physical objects, disabled by default
         string intersectionLineColor = default("red");
         string intersectionLineStyle = default("solid");
         double intersectionLineWidth = default(1);
 
-        bool displayFaceNormalVectors = default(false); // Display face normal vectors of instersections, disabled by default
+        bool displayFaceNormalVectors = default(false); // Display face normal vectors of intersections, disabled by default
         string faceNormalLineColor = default("grey");
         string faceNormalLineStyle = default("solid");
         double faceNormalLineWidth = default(1);

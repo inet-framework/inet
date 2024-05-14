@@ -19,7 +19,7 @@ simple RelayInterfaceLearner extends PacketFlowBase like IPacketFlow
 {
     parameters:
         string macTableModule; // Relative module path of MAC table
-        string interfaceTableModule; // Relative module path of interface table
+        string interfaceTableModule; // Relative module path of the interface table
         @class(RelayInterfaceLearner);
         @display("i=block/blackboard");
 }

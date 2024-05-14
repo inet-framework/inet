@@ -19,7 +19,6 @@ module DipoleAntenna extends AntennaBase
     parameters:
         double length @unit(m); // The length of the dipole antenna
         string wireAxis = default("z"); // Allows matching the antenna radiation pattern (IAntennaGain) to the visual representation, antenna orientation is determined by the antenna's mobility model
-                                        // the default value is Z axis, so that antenna mobility models are not required when antennas are approximately positioned in the same plane
+                                        // The default value is the Z axis, so that antenna mobility models are not required when antennas are approximately positioned in the same plane
         @class(DipoleAntenna);
 }
-

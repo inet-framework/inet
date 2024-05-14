@@ -21,12 +21,12 @@ simple RtpApplication
         double bandwidth;  // Bandwidth in bytes per second for this session
         string destinationAddress;  // Destination address (the L3AddressResolver class is used to resolve the address)
         int portNumber;  // Used port
-        string fileName;    // FileName of file to be transmitted, "" means this system acts only as a receiver
+        string fileName;    // Filename of file to be transmitted, "" means this system acts only as a receiver
         int payloadType;  // Payload type of file to transmit
-        double sessionEnterDelay @unit(s);  // Delay before starts a new session
-        double transmissionStartDelay @unit(s); // Delay before start transmission (related to "sender module created")
-        double transmissionStopDelay @unit(s);  // Delay before stops transmission (related to "start transmission")
-        double sessionLeaveDelay @unit(s); // Delay before leave session (related to "file transmission finished/stopped" or "session entered" when fileName is "")
+        double sessionEnterDelay @unit(s);  // Delay before starting a new session
+        double transmissionStartDelay @unit(s); // Delay before starting transmission (related to "sender module created")
+        double transmissionStopDelay @unit(s);  // Delay before stopping transmission (related to "start transmission")
+        double sessionLeaveDelay @unit(s); // Delay before leaving session (related to "file transmission finished/stopped" or "session entered" when fileName is "")
         @selfMessageKinds(inet::RtpAppSelfMsgKinds);    // Kind used in self messages
 
     gates:

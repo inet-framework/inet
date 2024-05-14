@@ -20,8 +20,8 @@ simple Ipv6Tunneling like IIpv6Tunneling
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
-        string routingTableModule;
-        string xmipv6Module;
+        string routingTableModule;  // The path to the RoutingTable module
+        string xmipv6Module;  // The path to the XMipv6 module
         @display("i=block/tunnel");
     gates:
         input upperLayerIn;

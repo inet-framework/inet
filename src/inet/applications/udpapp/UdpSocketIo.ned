@@ -19,14 +19,14 @@ simple UdpSocketIo
         string destAddress = default("");
         int destPort;
         int timeToLive = default(-1); // If not -1, set the TTL (IPv4) or Hop Limit (IPv6) field of sent packets to this value
-        bool dontFragment = default(false); // If true, asks IP to not fragment the message during routing
+        bool dontFragment = default(false); // If true, ask IP to not fragment the message during routing
         int dscp = default(-1); // If not -1, set the DSCP (IPv4/IPv6) field of sent packets to this value
         int tos = default(-1); // If not -1, set the Type Of Service (IPv4) / Traffic Class (IPv6) field of sent packets to this value
         string multicastInterface = default("");  // If not empty, set the multicast output interface option on the socket (interface name expected)
         object multicastAddresses = default([]); // List of multicast addresses that the application socket joins
-        bool receiveBroadcast = default(false); // If true, makes the socket receive broadcast packets
-        bool joinLocalMulticastGroups = default(false); // If true, makes the socket receive packets from all multicast groups set on local interfaces
-        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
+        bool receiveBroadcast = default(false); // If true, make the socket receive broadcast packets
+        bool joinLocalMulticastGroups = default(false); // If true, make the socket receive packets from all multicast groups set on local interfaces
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finishes
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
         @lifecycleSupport();
         @display("i=block/socket");

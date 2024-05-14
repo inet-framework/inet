@@ -17,7 +17,7 @@ simple EthernetSocketIo
         string interface = default(""); // Network interface name
         string protocol = default(""); // Bind the socket to this protocol if specified
         string localAddress = default(""); // Local Ethernet MAC address
-        string remoteAddress = default(""); // Remove Ethernet MAC address
+        string remoteAddress = default(""); // Remote Ethernet MAC address
         bool steal = default(false); // Steal packets
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation

@@ -23,7 +23,7 @@ module TsnDevice extends StandardHost
         bool hasTimeSynchronization = default(false); // Enable IEEE 802.1 AS time synchronization
         bool hasIngressTrafficFiltering = default(false); // Enable IEEE 802.1 Qci ingress per-stream filtering
         bool hasEgressTrafficFiltering = default(false); // Enable IEEE 802.1 Qci egress per-stream filtering
-        bool hasEgressTrafficShaping = default(false); // Enable IEEE 802.1 egress traffic shaping (credit based shaping, time aware shaping, asynchronous shaping)
+        bool hasEgressTrafficShaping = default(false); // Enable IEEE 802.1 egress traffic shaping (credit based shaping, time-aware shaping, asynchronous shaping)
         bool hasStreamRedundancy = default(false); // Enable IEEE 802.1 CB frame replication and elimination
         bool hasIncomingStreams = default(false); // Enable IEEE 802.1 stream decoding
         bool hasOutgoingStreams = default(false); // Enable IEEE 802.1 stream identification and stream encoding
@@ -39,15 +39,15 @@ module TsnDevice extends StandardHost
         bridging.typename = default(hasBridging ? "BridgingLayer" : ""); // Switch to modular bridging
         bridging.interfaceRelay.typename = default(""); // Disable frame relaying
         bridging.streamIdentifier.typename = default(hasOutgoingStreams || hasStreamRedundancy ? "StreamIdentifierLayer" : ""); // Enable stream identification when stream redundancy is enabled
-        bridging.streamIdentifier.identifier.hasSequenceNumbering = default(hasStreamRedundancy); // Enable sequence numberinf if stream redundancy is enabled
+        bridging.streamIdentifier.identifier.hasSequenceNumbering = default(hasStreamRedundancy); // Enable sequence numbering if stream redundancy is enabled
         bridging.streamRelay.typename = default(hasStreamRedundancy ? "StreamRelayLayer" : ""); // Enable stream merging and stream splitting when stream redundancy is enabled
         bridging.streamFilter.typename = default(hasIngressTrafficFiltering || hasEgressTrafficFiltering ? "StreamFilterLayer" : ""); // Enable stream filtering when ingress or egress per-stream filtering is enabled
         bridging.streamFilter.ingress.typename = default(hasIngressTrafficFiltering ? "SimpleIeee8021qFilter" : ""); // Use IEEE 802.1 Qci ingress filter when ingress per-stream filtering is enabled
         bridging.streamFilter.egress.typename = default(hasEgressTrafficFiltering ? "SimpleIeee8021qFilter" : ""); // Use IEEE 802.1 Qci egress filter when egress per-stream filtering is enabled
-        bridging.streamCoder.typename = default(hasIncomingStreams || hasOutgoingStreams || hasStreamRedundancy ? "StreamCoderLayer" : ""); // Enable stream endocing/decoding when stream redundancy is enabled
+        bridging.streamCoder.typename = default(hasIncomingStreams || hasOutgoingStreams || hasStreamRedundancy ? "StreamCoderLayer" : ""); // Enable stream encoding/decoding when stream redundancy is enabled
         ieee8021r.typename = default(hasStreamRedundancy ? "Ieee8021rProtocol" : "");
         ieee8021q.typename = default(hasIncomingStreams || hasOutgoingStreams || hasStreamRedundancy ? "Ieee8021qProtocol" : "");
-        @display("i=device/card"); // Change icon to emphasise hardware device
+        @display("i=device/card"); // Change icon to emphasize hardware device
     submodules:
         gptp: <default("Gptp")> like IApp if hasTimeSynchronization {
             gptpNodeType = default("SLAVE_NODE");

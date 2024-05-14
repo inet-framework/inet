@@ -22,12 +22,12 @@ simple Ieee80211StateBasedCcEnergyConsumer extends StateBasedCcEnergyConsumer
         sleepCurrentConsumption = default(0.01mA);
         switchingCurrentConsumption = default(100mA);       // Tx/rx calibration mode
         receiverIdleCurrentConsumption = default(100mA);
-        receiverBusyCurrentConsumption = default(100mA);    // No info yet
+        receiverBusyCurrentConsumption = default(100mA);    // No information yet
         receiverReceivingCurrentConsumption = default(100mA);
         receiverReceivingPreambleCurrentConsumption = default(receiverReceivingCurrentConsumption);
         receiverReceivingHeaderCurrentConsumption = default(receiverReceivingCurrentConsumption);
         receiverReceivingDataCurrentConsumption = default(receiverReceivingCurrentConsumption);
-        transmitterIdleCurrentConsumption = default(100mA);    // No info yet
+        transmitterIdleCurrentConsumption = default(100mA);    // No information yet
         transmitterTransmittingCurrentConsumption = default(250mA);
         transmitterTransmittingPreambleCurrentConsumption = default(transmitterTransmittingCurrentConsumption);
         transmitterTransmittingHeaderCurrentConsumption = default(transmitterTransmittingCurrentConsumption);

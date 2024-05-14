@@ -31,7 +31,7 @@ package inet.emulation.linklayer.ethernet;
 simple ExtEthernetSocket
 {
     parameters:
-        string device; // Name of existing real ethernet device
+        string device; // Name of an existing real Ethernet device
         string namespace = default("");
         string packetNameFormat = default("Ext-%p-%t-%n"); // Name of received packets
         @display("i=block/rxtx");

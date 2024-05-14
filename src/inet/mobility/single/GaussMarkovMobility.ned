@@ -26,7 +26,7 @@ simple GaussMarkovMobility extends MovingMobilityBase
 {
     parameters:
         @class(GaussMarkovMobility);
-        double alpha = default(0.5); // [0;1], 0 - brown motion, 1 - linear motion
+        double alpha = default(0.5); // [0;1], 0 - brownian motion, 1 - linear motion
         double speed @unit(mps);
         double speedStdDev @unit(mps);     // Speed standard deviation
         double angle @unit(deg) = default(uniform(0deg, 360deg));
