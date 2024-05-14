@@ -15,7 +15,7 @@ namespace inet {
 class INET_API PiClock : public OscillatorBasedClock, public IScriptable
 {
   protected:
-    static simsignal_t kiSignal;
+    static simsignal_t driftSignal;
     static simsignal_t kpSignal;
     OverdueClockEventHandlingMode defaultOverdueClockEventHandlingMode = UNSPECIFIED;
     ppm oscillatorCompensation = ppm(0); // 0 means no compensation, higher value means faster clock, e.g. 100 ppm value

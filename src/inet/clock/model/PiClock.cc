@@ -15,8 +15,8 @@ namespace inet {
 
 Define_Module(PiClock);
 
-simsignal_t PiClock::kiSignal = cComponent::registerSignal("ki");
 simsignal_t PiClock::kpSignal = cComponent::registerSignal("kp");
+simsignal_t PiClock::driftSignal = cComponent::registerSignal("drift");
 
 void PiClock::initialize(int stage)
 {
@@ -117,17 +117,17 @@ clocktime_t PiClock::setClockTime(clocktime_t newClockTime)
             kiTerm = std::max(kiTermMin, std::min(kiTermMax, kiTerm));
             // kdTerm = std::max(kdTermMin, std::min(kdTermMax, kdTerm));
 
-            emit(kpSignal, kpTerm.get());
-            emit(kiSignal, kiTerm.get());
-
             EV_INFO << "kpTerm: " << kpTerm << " kiTerm: " << kiTerm << " offsetNanosecond: " << offsetNanosecond
                     << " drift: " << drift << "\n";
 
             this->oscillatorCompensation = kpTerm + kiTerm + drift;
             drift += kiTerm;
+
+            emit(kpSignal, kpTerm.get());
             break;
         }
     }
+    emit(driftSignal, drift.get());
     return getClockTime();
 }
 

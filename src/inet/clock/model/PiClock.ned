@@ -20,8 +20,8 @@ module PiClock extends OscillatorBasedClock
         string defaultOverdueClockEventHandlingMode @enum("execute","skip","error") = default("error");
         @signal[kp](type=double);
         @statistic[kp](title="kp value"; record=vector; interpolationmode=linear);
-        @signal[ki](type=double);
-        @statistic[ki](title="ki value"; record=vector; interpolationmode=linear);
+        @signal[drift](type=double);
+        @statistic[drift](title="drift value"; record=vector; interpolationmode=linear);
         @class(PiClock);
 }
 
