@@ -68,6 +68,7 @@ void PiClock::setClockTime(clocktime_t newClockTime)
         emit(timeChangedSignal, oldClockTime.asSimTime());
 
         originSimulationTime = simTime();
+//        originClockTime = oldClockTime;
         originClockTime = oldClockTime;
 
         offset_prev = offset;
@@ -85,10 +86,7 @@ void PiClock::setClockTime(clocktime_t newClockTime)
         kiTerm = std::max(kiTermMin, std::min(kiTermMax, kiTerm));
 
         this->oscillatorCompensation = kpTerm + kiTerm;
-//        this->oscillatorCompensation = ppm(0);
 
-
-        emit(timeChangedSignal, newClockTime.asSimTime());
     }
 }
 

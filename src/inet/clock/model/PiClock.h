@@ -21,8 +21,8 @@ namespace inet {
         // 100 ppm value means the oscillator tick length is compensated to be smaller by a factor of (1 / (1 + 100 / 1E+6)) than the actual tick length measured in clock time
 
 
-        double kp = 0.0160; // proportional gain
-        double ki = 0; // integral gain
+        double kp = 0.0015; // proportional gain
+        double ki = 0.0015; // integral gain
 
         ppm kpTerm = ppm(0);
         ppm kiTerm = ppm(0);
@@ -57,12 +57,6 @@ namespace inet {
          * Sets the clock time immediately to the given value. Greater than 1 oscillator
          * compensation factor means the clock measures time faster.
          */
-
-//    double kp;
-//    double ki;
-//    clocktime_t offset;
-//    clocktime_t integral;
-
         void setClockTime(clocktime_t newClockTime);
     };
 
