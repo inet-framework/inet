@@ -57,7 +57,7 @@ module NodeBase like INetworkNode
         energyGenerator: <default("")> like IEnergyGenerator if typename != "" {
             @display("p=125,560;is=s");
         }
-        // TODO move mobility right after the status to have it in the same order as their positions, change fingerprints
+        // TODO move mobility right after the status to have it in the same order as their positions, it changes fingerprints
         mobility: <default("")> like IMobility if typename != "" {
             @display("p=125,160;is=s");
         }

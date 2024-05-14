@@ -27,7 +27,7 @@ module TsnSwitch extends EthernetSwitch
         bool hasIncomingStreams = default(false); // Enable IEEE 802.1 stream decoding
         bool hasOutgoingStreams = default(false); // Enable IEEE 802.1 stream identification and stream encoding
         bool hasFramePreemption = default(false); // Enable IEEE 802.1 Qbu frame preemption
-        bool hasGptp = default(hasTimeSynchronization); // Enable gPTP protocol
+        hasGptp = default(hasTimeSynchronization); // Enable gPTP protocol
         gptp.gptpNodeType = default("BRIDGE_NODE"); // Configure gPTP bridge node type
         gptp.slavePort = default("eth0"); // Configure default gPTP bridge slave port
         clock.typename = default(hasTimeSynchronization ? "SettableClock" : ""); // Enable explicit local clock model when time synchronization is enabled
