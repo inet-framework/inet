@@ -20,11 +20,11 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
 {
   public:
     static simsignal_t timeChangedSignal;
+    ModuleRefByPar<IClock> referenceClockModule;
 
   protected:
     clocktime_t clockEventTime = -1;
     const char *displayStringTextFormat = nullptr;
-    ModuleRefByPar<IClock> referenceClockModule;
     simtime_t emitClockTimeInterval;
     cMessage *timer = nullptr;
 

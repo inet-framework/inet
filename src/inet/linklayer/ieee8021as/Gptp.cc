@@ -444,15 +444,16 @@ void Gptp::synchronize()
 //            unit(gmRateRatio * (1 + unit(piControlClock->getOscillatorCompensation()).get()) - 1);
 //        hasNewRateRatioForOscillatorCompensation = false;
 //    }
-    piControlClock->setClockTime(newTime);
-    EV_INFO << "############## TIME #####################################" << endl;
-    EV_INFO << "newTime " << newTime << endl;
+    auto clockTimeAfterUpdate = piControlClock->setClockTime(newTime);
 //    EV_INFO << "newOscillatorCompensation " << newOscillatorCompensation << endl;
 
 
     newLocalTimeAtTimeSync = clock->getClockTime();
     // new=5 - old=4 = +1
     timeDiffAtTimeSync = newLocalTimeAtTimeSync - oldLocalTimeAtTimeSync;
+    auto referenceClockTime = piControlClock->referenceClockModule->getClockTime();
+    auto diffReferenceToOldLocal = oldLocalTimeAtTimeSync - referenceClockTime;
+    auto diffReferenceToNewTime = newTime - referenceClockTime;
 
     /************** Rate ratio calculation *************************************
      * It is calculated based on interval between two successive Sync messages *
@@ -461,6 +462,10 @@ void Gptp::synchronize()
     EV_INFO << "############## SYNC #####################################" << endl;
     EV_INFO << "LOCAL TIME BEFORE SYNC     - " << oldLocalTimeAtTimeSync << endl;
     EV_INFO << "LOCAL TIME AFTER SYNC      - " << newLocalTimeAtTimeSync << endl;
+    EV_INFO << "CALCULATED NEW TIME        - " << newTime << endl;
+    EV_INFO << "REFERENCE CLOCK TIME       - " << referenceClockTime << endl;
+    EV_INFO << "DIFF REFERENCE TO OLD TIME - " << diffReferenceToOldLocal << endl;
+    EV_INFO << "DIFF REFERENCE TO NEW TIME - " << diffReferenceToNewTime << endl;
     EV_INFO << "CURRENT SIMTIME            - " << now << endl;
     EV_INFO << "ORIGIN TIME SYNC           - " << preciseOriginTimestamp << endl;
     EV_INFO << "PREV ORIGIN TIME SYNC      - " << preciseOriginTimestampLast << endl;
@@ -474,11 +479,15 @@ void Gptp::synchronize()
     EV_INFO << "RECIEVED RATE RATIO        - " << receivedRateRatio << endl;
     EV_INFO << "GM RATE RATIO              - " << gmRateRatio << endl;
 
-    adjustLocalTimestamp(syncIngressTimestamp);
-    adjustLocalTimestamp(pDelayReqEgressTimestamp);
-    adjustLocalTimestamp(pDelayRespIngressTimestamp);
-    adjustLocalTimestamp(pDelayRespIngressTimestampSetStart);
-    // NOTE: Do not pDelayReqIngressTimestamp and pDelayRespEgressTimestamp, because they are based on neighbor clock
+    if (clockTimeAfterUpdate != oldLocalTimeAtTimeSync) {
+        EV_INFO << "Adjusting timestamps";
+        adjustLocalTimestamp(syncIngressTimestamp);
+        adjustLocalTimestamp(pDelayReqEgressTimestamp);
+        adjustLocalTimestamp(pDelayRespIngressTimestamp);
+        adjustLocalTimestamp(pDelayRespIngressTimestampSetStart);
+        // NOTE: Do not pDelayReqIngressTimestamp and pDelayRespEgressTimestamp, because they are based on neighbor clock
+    }
+
 
     // adjustLocalTimestamp(syncIngressTimestamp);
     // adjustLocalTimestamp(syncIngressTimestampLast);
@@ -584,6 +593,8 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
     else {
         nrrCalculationSetCurrent++;
     }
+
+    neighborRateRatio = 1;
 
     // See 11.2.19.3.4 computePropTime() and Figure11-1 in IEEE 802.1AS-2020
     auto t4 = pDelayRespIngressTimestamp;

@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include <algorithm>
 #include "inet/clock/model/PiClock.h"
+
+#include <algorithm>
 
 #include "inet/clock/oscillator/ConstantDriftOscillator.h"
 #include "inet/common/XMLUtils.h"
@@ -13,6 +14,9 @@
 namespace inet {
 
 Define_Module(PiClock);
+
+simsignal_t PiClock::kiSignal = cComponent::registerSignal("ki");
+simsignal_t PiClock::kpSignal = cComponent::registerSignal("kp");
 
 void PiClock::initialize(int stage)
 {
@@ -28,8 +32,6 @@ void PiClock::initialize(int stage)
         else
             throw cRuntimeError("Unknown defaultOverdueClockEventHandlingMode parameter value");
 
-        double pi_proportional_const = 0.7;
-        double pi_integral_const = 0.3;
     }
 }
 
@@ -59,37 +61,74 @@ simtime_t PiClock::handleOverdueClockEvent(ClockEvent *event, simtime_t t)
     }
 }
 
-void PiClock::setClockTime(clocktime_t newClockTime)
+clocktime_t PiClock::setClockTime(clocktime_t newClockTime)
 {
     Enter_Method("setClockTime");
     clocktime_t oldClockTime = getClockTime();
 
     if (newClockTime != oldClockTime) {
         emit(timeChangedSignal, oldClockTime.asSimTime());
+        clocktime_t offsetNow = newClockTime - oldClockTime;
 
-        originSimulationTime = simTime();
-//        originClockTime = oldClockTime;
-        originClockTime = oldClockTime;
+        int64_t offsetNsPrev, offsetNs, localNsPrev, localNs;
 
-        offset_prev = offset;
-        offset = newClockTime - oldClockTime;
+        switch (phase) {
+        case 0:
+            // Store the offset and the local time
+            offset[0] = newClockTime - oldClockTime;
+            local[0] = oldClockTime;
+            // Do not update frequency or anything to estimate first frequency in next step
+            phase = 1;
+            break;
+        case 1:
+            offset[1] = newClockTime - oldClockTime;
+            local[1] = oldClockTime;
 
-        offsetNanosecond_prev = offset_prev.inUnit(SIMTIME_NS);
-        offsetNanosecond = offset.inUnit(SIMTIME_NS);
-        accumulatedOffsetNanosecond += offsetNanosecond;
-        differenceOffsetNanosecond = offsetNanosecond - offsetNanosecond_prev;
+            offsetNsPrev = offset[0].inUnit(SIMTIME_NS);
+            offsetNs = offset[1].inUnit(SIMTIME_NS);
 
-        kpTerm = ppm (kp * offsetNanosecond);
-        kiTerm = ppm (ki * accumulatedOffsetNanosecond);
-        kdTerm = ppm (kd * differenceOffsetNanosecond);
+            localNsPrev = local[0].inUnit(SIMTIME_NS);
+            localNs = local[1].inUnit(SIMTIME_NS);
 
-        kpTerm = std::max(kpTermMin, std::min(kpTermMax, kpTerm));
-        kiTerm = std::max(kiTermMin, std::min(kiTermMax, kiTerm));
-        kdTerm = std::max(kdTermMin, std::min(kdTermMax, kdTerm));
+            drift = ppm(1e6 * (offsetNsPrev - offsetNs) / (localNsPrev - localNs));
+            EV_INFO << "Drift: " << drift << "\n";
 
-        this->oscillatorCompensation = kpTerm + kiTerm + kdTerm;
+            originSimulationTime = simTime();
+            originClockTime = newClockTime;
 
+            this->oscillatorCompensation = drift;
+            emit(timeChangedSignal, newClockTime.asSimTime());
+            phase = 2;
+            break;
+        case 2:
+            originSimulationTime = simTime();
+            originClockTime = oldClockTime;
+
+            // offsetNanosecond_prev = offset[0].inUnit(SIMTIME_NS);
+            auto offsetNanosecond = offsetNow.inUnit(SIMTIME_NS);
+            // differenceOffsetNanosecond = offsetNanosecond - offsetNanosecond_prev;
+
+            // As our timestamps is in nanoseconds, to get ppm we need to multiply by 1e-3
+            kpTerm = ppm(1e-3 * kp * offsetNanosecond);
+            kiTerm = ppm(1e-3 * ki * offsetNanosecond);
+            // kdTerm = ppm (kd * differenceOffsetNanosecond);
+
+            kpTerm = std::max(kpTermMin, std::min(kpTermMax, kpTerm));
+            kiTerm = std::max(kiTermMin, std::min(kiTermMax, kiTerm));
+            // kdTerm = std::max(kdTermMin, std::min(kdTermMax, kdTerm));
+
+            emit(kpSignal, kpTerm.get());
+            emit(kiSignal, kiTerm.get());
+
+            EV_INFO << "kpTerm: " << kpTerm << " kiTerm: " << kiTerm << " offsetNanosecond: " << offsetNanosecond
+                    << " drift: " << drift << "\n";
+
+            this->oscillatorCompensation = kpTerm + kiTerm + drift;
+            drift += kiTerm;
+            break;
+        }
     }
+    return getClockTime();
 }
 
 void PiClock::processCommand(const cXMLElement &node)
