@@ -44,6 +44,7 @@ void EthernetSocket::sendOut(Packet *packet)
 void EthernetSocket::bind(const MacAddress& localAddress, const MacAddress& remoteAddress, const Protocol *protocol, bool steal)
 {
     isOpen_ = true;
+    EV_INFO << "Binding socket" << EV_FIELD(socketId) << EV_FIELD(networkInterface) << EV_FIELD(localAddress) << EV_FIELD(remoteAddress) << EV_FIELD(protocol) << EV_FIELD(steal) << EV_ENDL;
     ethernet->bind(socketId, networkInterface->getInterfaceId(), localAddress, remoteAddress, protocol, steal);
 }
 
