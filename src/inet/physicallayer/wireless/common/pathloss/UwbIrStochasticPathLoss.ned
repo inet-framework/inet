@@ -12,12 +12,12 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IPathLoss;
 module UwbIrStochasticPathLoss like IPathLoss
 {
     parameters:
-        double PL0;
-        double muGamma;
-        double muSigma;
-        double sigmaGamma;
-        double sigmaSigma;
-        bool shadowing;
+        double PL0; // Reference path loss at reference distance
+        double muGamma; // Mean path loss exponent
+        double muSigma; // Mean standard deviation of shadowing [dB]
+        double sigmaGamma; // Standard deviation of path loss exponent
+        double sigmaSigma; // Standard deviation of shadowing
+        bool shadowing; // Enable/disable shadowing
         @class(UwbIrStochasticPathLoss);
         @display("i=block/control");
 }
