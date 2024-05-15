@@ -27,9 +27,11 @@ class INET_API PiClock : public OscillatorBasedClock, public IScriptable
     clocktime_t offset[2];
     clocktime_t local[2];
 
-    double kp = 2; // proportional gain
-    double ki = 0.5; // integral gain
-    double kd = 0.002;
+    cPar *offsetThreshold;
+
+    double kp;   // proportional gain
+    double ki; // integral gain
+    double kd = 0;
 
     ppm kpTerm = ppm(0);
     ppm kiTerm = ppm(0);

@@ -18,6 +18,9 @@ module PiClock extends OscillatorBasedClock
 {
     parameters:
         string defaultOverdueClockEventHandlingMode @enum("execute","skip","error") = default("error");
+        double offsetThreshold @unit(s) = default(0s); // Clock will perform a time jump if the offset is greater than this value, 0.0 disables this feature
+        double kp = default(8);
+        double ki = default(4);
         @signal[kp](type=double);
         @statistic[kp](title="kp value"; record=vector; interpolationmode=linear);
         @signal[drift](type=double);

@@ -22,6 +22,10 @@ void PiClock::initialize(int stage)
 {
     OscillatorBasedClock::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        offsetThreshold = &par("offsetThreshold");
+        kp = par("kp");
+        ki = par("ki");
+
         const char *text = par("defaultOverdueClockEventHandlingMode");
         if (!strcmp(text, "execute"))
             defaultOverdueClockEventHandlingMode = EXECUTE;
@@ -71,6 +75,14 @@ clocktime_t PiClock::setClockTime(clocktime_t newClockTime)
         clocktime_t offsetNow = newClockTime - oldClockTime;
 
         int64_t offsetNsPrev, offsetNs, localNsPrev, localNs;
+        auto offsetUs = 1e-3 * offsetNow.inUnit(SIMTIME_NS);
+
+        auto offsetThresholdUs = offsetThreshold->doubleValueInUnit("us");
+        if (phase == 2 && (offsetThresholdUs != 0 && fabs(offsetUs) >= offsetThresholdUs)) {
+            EV_INFO << "Offset is too large, resetting phase\n";
+            EV_INFO << "Offset: " << offsetUs << " maxOffset: " << offsetThresholdUs << "\n";
+            phase = 0;
+        }
 
         switch (phase) {
         case 0:
@@ -90,7 +102,7 @@ clocktime_t PiClock::setClockTime(clocktime_t newClockTime)
             localNsPrev = local[0].inUnit(SIMTIME_NS);
             localNs = local[1].inUnit(SIMTIME_NS);
 
-            drift = ppm(1e6 * (offsetNsPrev - offsetNs) / (localNsPrev - localNs));
+            drift += ppm(1e6 * (offsetNsPrev - offsetNs) / (localNsPrev - localNs));
             EV_INFO << "Drift: " << drift << "\n";
 
             originSimulationTime = simTime();
@@ -101,23 +113,23 @@ clocktime_t PiClock::setClockTime(clocktime_t newClockTime)
             phase = 2;
             break;
         case 2:
+            // offsetNanosecond_prev = offset[0].inUnit(SIMTIME_NS);
+
+            // differenceOffsetNanosecond = offsetNanosecond - offsetNanosecond_prev;
+
             originSimulationTime = simTime();
             originClockTime = oldClockTime;
 
-            // offsetNanosecond_prev = offset[0].inUnit(SIMTIME_NS);
-            auto offsetNanosecond = offsetNow.inUnit(SIMTIME_NS);
-            // differenceOffsetNanosecond = offsetNanosecond - offsetNanosecond_prev;
-
             // As our timestamps is in nanoseconds, to get ppm we need to multiply by 1e-3
-            kpTerm = ppm(1e-3 * kp * offsetNanosecond);
-            kiTerm = ppm(1e-3 * ki * offsetNanosecond);
+            kpTerm = ppm(kp * offsetUs);
+            kiTerm = ppm(ki * offsetUs);
             // kdTerm = ppm (kd * differenceOffsetNanosecond);
 
             kpTerm = std::max(kpTermMin, std::min(kpTermMax, kpTerm));
             kiTerm = std::max(kiTermMin, std::min(kiTermMax, kiTerm));
             // kdTerm = std::max(kdTermMin, std::min(kdTermMax, kdTerm));
 
-            EV_INFO << "kpTerm: " << kpTerm << " kiTerm: " << kiTerm << " offsetNanosecond: " << offsetNanosecond
+            EV_INFO << "kpTerm: " << kpTerm << " kiTerm: " << kiTerm << " offsetUs: " << offsetUs
                     << " drift: " << drift << "\n";
 
             this->oscillatorCompensation = kpTerm + kiTerm + drift;
