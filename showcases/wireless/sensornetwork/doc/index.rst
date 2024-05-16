@@ -159,7 +159,7 @@ the simulation.
 
 The wireless interface in the sensor nodes and the gateway is specified
 in :download:`omnetpp.ini <../omnetpp.ini>` to be the generic
-:ned:`WirelessInterface`(instead of the IEEE 802.15.4 specific
+:ned:`WirelessInterface` (instead of the IEEE 802.15.4 specific
 :ned:`Ieee802154NarrowbandInterface`, which is the default WLAN interface
 in :ned:`SensorNode`). The radio type is set to :ned:`ApskScalarRadio`.
 
