@@ -12,7 +12,7 @@ comprehensive network setup.
 
 In this showcase, we demonstrate the creation of a fully operational
 Asynchronous Traffic Shaper (ATS) by directly interconnecting its individual
-components. Next, we construct a straightforward queueing network by linking the
+components. Next, we construct a straightforward queuing network by linking the
 ATS to traffic sources and traffic sinks. The key highlight is the observation
 of traffic shaping within the network, achieved by plotting the generated
 traffic both before and after the shaping process.
@@ -31,7 +31,7 @@ four essential modules:
 - :ned:`EligibilityTimeMeter`: Calculates the transmission eligibility time, determining when a packet becomes eligible for transmission.
 - :ned:`EligibilityTimeFilter`: Filters out expired packets, those that would wait excessively before becoming eligible for transmission.
 - :ned:`EligibilityTimeQueue`: Stores packets in order of their transmission eligibility time.
-- :ned:`EligibilityTimeGate`: Opens at the transmission eligibility time for the next packet
+- :ned:`EligibilityTimeGate`: Opens at the transmission eligibility time for the next packet.
 
 In a complete network setup, these modules are typically distributed across
 various components of a network node, such as an Ethernet switch. Specifically,
@@ -67,7 +67,7 @@ used outside INET network nodes. The network is depicted in the following image:
 .. figure:: media/network3.png
    :align: center
 
-The queueing network includes three independent packet sources, each linked to an
+The queuing network includes three independent packet sources, each linked to an
 :ned:`EligibilityTimeMeter`, ensuring individual data rate metering for each packet
 stream. These meters are then connected to a single :ned:`EligibilityTimeFilter`
 module that drops expired packets.
@@ -194,7 +194,7 @@ The maximum number of packets that can accumulate in the queue from each stream
 is 20, calculated as follows: `max residence time / average production interval
 = 10ms / 0.5ms = 20`. Since the traffic pattern is different for the three
 streams, the 20 packets/stream limit is reached at different times for each of
-them. We can observe on the chart as the queue becomes satured for each stream
+them. We can observe on the chart as the queue becomes saturated for each stream
 individually. The maximum of the queue length is 60, when all streams reach
 their maximum packet count in the queue.
 

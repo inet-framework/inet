@@ -23,8 +23,8 @@ networks, which can be used for creating wireless sensor networks
 (WSNs), Internet-of-things applications, etc. It defines multiple
 physical layer specifications (PHYs), based on different modulations,
 such as Direct Sequence Spread Spectrum (DSSS), Chirp Spread Spectrum
-(CSS), Ultra-wideband (UWB). It defines CSMA-CA and ALOHA MAC-layer
-protocols as well.
+(CSS), and Ultra-wideband (UWB). It also defines CSMA-CA and ALOHA MAC-layer
+protocols.
 
 The INET implementation
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -41,7 +41,7 @@ DSSS-OQPSK modulation and operates at 2.45 GHz. By default, signals
 are transmitted with a bandwidth of 2.8 MHz using 2.24 mW transmission
 power. The model uses the scalar analog model.
 
-The :ned:`Ieee802154NarrowbandInterface` module contains a
+The :ned:`Ieee802154NarrowbandInterface` module contains an
 :ned:`Ieee802154NarrowbandScalarRadio` and the corresponding
 :ned:`Ieee802154NarrowbandMac`. The radio medium module required by
 the radio is :ned:`Ieee802154NarrowbandScalarRadioMedium`. As per the name, the

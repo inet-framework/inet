@@ -4,8 +4,8 @@ Automatic Multipath Stream Configuration
 Goals
 -----
 
-In this example we demonstrate the automatic stream redundancy configuration based
-on multiple paths from source to destination.
+In this example, we demonstrate the automatic stream redundancy configuration based
+on multiple paths from the source to the destination.
 
 | INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/framereplication/automaticmultipathconfiguration <https://github.com/inet-framework/inet/tree/master/showcases/tsn/framereplication/automaticmultipathconfiguration>`__
@@ -13,10 +13,10 @@ on multiple paths from source to destination.
 The Model
 ---------
 
-In this case we use an automatic stream redundancy configurator that takes the
+In this case, we use an automatic stream redundancy configurator that takes the
 different paths for each redundant stream as an argument. The automatic configurator
 sets the parameters of all stream identification, stream merging, stream splitting,
-string encoding and stream decoding components of all network nodes.
+string encoding, and stream decoding components of all network nodes.
 
 Here is the network:
 
@@ -31,7 +31,7 @@ Here is the configuration:
 Results
 -------
 
-Here is the number of received and sent packets:
+Here are the number of received and sent packets:
 
 .. figure:: media/packetsreceivedsent.svg
    :align: center

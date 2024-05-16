@@ -34,15 +34,15 @@ In theory, a network could have up to 64 (i.e. 2^6) different traffic
 classes using different DSCPs. In practice, however, most networks use
 the following commonly defined per-hop behaviors:
 
--  *Default PHB* typically maps to best-effort traffic.
--  *Expedited Forwarding (EF) PHB* is dedicated to low-loss, low-latency
-   traffic.
--  *Assured Forwarding (AF) PHBs* give assurance of delivery under
-   prescribed conditions; there are four classes and three drop
-   probabilities, yielding twelve separate DSCP encodings from AF11
-   through AF43.
--  *Class Selector PHBs* provide backward compatibility with the
-   IP Precedence field.
+- *Default PHB* typically maps to best-effort traffic.
+- *Expedited Forwarding (EF) PHB* is dedicated to low-loss, low-latency
+  traffic.
+- *Assured Forwarding (AF) PHBs* give assurance of delivery under
+  prescribed conditions; there are four classes and three drop
+  probabilities, yielding twelve separate DSCP encodings from AF11
+  through AF43.
+- *Class Selector PHBs* provide backward compatibility with the
+  IP Precedence field.
 
 As EF is often used for carrying VoIP traffic, we'll also configure our
 example network to do that.
@@ -86,15 +86,15 @@ Configuration and Behavior
 
 The showcase contains three different configurations:
 
--  ``VoIP_WithoutQoS``: The queue in the router's PPP interface is
-   overloaded and packets are dropped.
--  ``VoIP_WithPolicing``: The VoIP traffic is classified as EF
-   traffic and others as AF. AF traffic is rate
-   limited using Token Bucket to 70% of the link's capacity.
--  ``VoIP_WithPolicingAndQueuing``: This is the same as the previous
-   configuration, except the router's queue is configured so that EF
-   packets are prioritized over other packets, so lower delays are
-   expected.
+- ``VoIP_WithoutQoS``: The queue in the router's PPP interface is
+  overloaded and packets are dropped.
+- ``VoIP_WithPolicing``: The VoIP traffic is classified as EF
+  traffic and others as AF. AF traffic is rate
+  limited using Token Bucket to 70% of the link's capacity.
+- ``VoIP_WithPolicingAndQueuing``: This is the same as the previous
+  configuration, except the router's queue is configured so that EF
+  packets are prioritized over other packets, so lower delays are
+  expected.
 
 The router's PPP interface contains the key elements of Differentiated
 Services in this network: a queue (``queue``) and a traffic conditioner (``egressTC``).

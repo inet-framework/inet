@@ -4,7 +4,7 @@ Measuring Queueing Time
 Goals
 -----
 
-In this example we explore the queueing time statistics of queue modules of
+In this example, we explore the queueing time statistics of queue modules of
 network interfaces.
 
 | INET version: ``4.4``
@@ -17,7 +17,7 @@ The queueing time is measured from the moment a packet is enqueued up to the
 moment the same packet is dequeued from the queue. Simple packet queue modules
 are also often used to build more complicated queues such as a priority queue
 or even traffic shapers. The queueing time statistics are automatically collected
-for each of one these cases too.
+for each of these cases too.
 
 Here is the network:
 

@@ -23,15 +23,15 @@ movement in three dimensions.
 
 One way to generate spatial movement is to use mobility models
 that support it out of the box, for example, :ned:`LinearMobility`,
-:ned:`RandomWaypointMobility`, :ned:`MassMobility`, :ned:`TurtleMobility`
+:ned:`RandomWaypointMobility`, :ned:`MassMobility`, :ned:`TurtleMobility`,
 or :ned:`BonnMotionMobility`. Spatial movement can also be produced using
-superposition of several mobility models (where at least one of them
+a superposition of several mobility models (where at least one of them
 must support movement in the Z axis). We show an example for both approaches.
 
 In these example simulations, we'll make use of 3D visualization based on
 OpenSceneGraph (OSG). To try these examples yourself, make sure that your
 OMNeT++ installation has been compiled with OSG support. If it is not,
-you won't be able to switch to 3D view using the globe icon on the Qtenv toolbar.
+you won't be able to switch to the 3D view using the globe icon on the Qtenv toolbar.
 
 .. figure:: media/QtenvToolbar.png
    :scale: 100%
@@ -57,17 +57,17 @@ scene in 3D:
 
 By default, :ned:`IntegratedVisualizer` only contains an :ned:`IntegratedCanvasVisualizer`
 as submodule, but no OSG visualizer. To add it, we need to set the ``osgVisualizer`` submodule
-type to :ned:`IntegratedOsgVisualizer`. We use the ``desert`` image as ground,
-and set the background color (:par:`clearColor`) set to ``skyblue``.
+type to :ned:`IntegratedOsgVisualizer`. We use the ``desert`` image as the ground,
+and set the background color (:par:`clearColor`) to ``skyblue``.
 The coordinate axes can be displayed by setting the :par:`axisLength` parameter.
 Additional settings (not shown above) stretch the rendered scene a little larger
 than the constraint area of the mobility models to enhance visual appearance.
 
 Further settings enable various effects in the mobility visualization. Note, however, that
-at the time of writing, not all features are implemented in :ned:`MobilityOsgVisualizer`
+at the time of writing, not all features are implemented in the :ned:`MobilityOsgVisualizer`
 (practically, only trail visualization is).
 
-When simulations are run, the scene looks like the following in 3D view:
+When simulations are run, the scene looks like the following in the 3D view:
 
 .. figure:: media/3DPlayground.png
    :scale: 100%
@@ -82,7 +82,7 @@ Spiral
 
 The first example simulation is run using only one host. The 3D model of the host
 can be set with the :par:`osgModel` parameter. In this example, we use ``glider.osgb``.
-For better visibility, the glider is scaled up to 100 times of its original size. It
+For better visibility, the glider is scaled up to 100 times its original size. It
 is also rotated by 180 degrees so that it faces forward as it moves.
 
 .. literalinclude:: ../omnetpp.ini
@@ -110,9 +110,9 @@ The following video shows the resulting spiral motion:
 Drones
 ~~~~~~
 
-In this example we simulate the movement of 10 drones. The :par:`constraintAreaMinZ`
+In this example, we simulate the movement of 10 drones. The :par:`constraintAreaMinZ`
 is set to 200 meters only because we do not want the drones to reach the ground.
-In this example we use the ``drone.ive`` as the 3D OSG model of the hosts:
+In this example, we use the ``drone.ive`` as the 3D OSG model of the hosts:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini

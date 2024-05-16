@@ -40,22 +40,22 @@ The model
 ---------
 
 The 2.4 GHz frequency range in 802.11g, for example, can use a limited
-number of channels (13 in the EU.) The bandwidth of transmissions in
+number of channels (13 in the EU). The bandwidth of transmissions in
 802.11g is 20MHz, and channels are spaced 5MHz apart. Thus adjacent
 channels overlap, and transmissions on these channels can interfere. There can
 be a few independent channels, where there is no cross-channel
-interference, e.g. Channels 1, 6, and 11, as illustrated below.
+interference, e.g., Channels 1, 6, and 11, as illustrated below.
 
 .. figure:: media/channels.png
    :width: 100%
    :align: center
 
-In INET, the scalar analog model represents signals with a scalar signal power, 
-and a constant center frequency and bandwidth. The scalar model can only handle 
-situations when the spectra of two concurrent signals are identical or don’t 
-overlap at all. When using the dimensional analog model, signal power can change 
-in both time and frequency; more realistic signal shapes can be specified. 
-This model is also able to calculate the interference of signals whose spectra 
+In INET, the scalar analog model represents signals with a scalar signal power,
+and a constant center frequency and bandwidth. The scalar model can only handle
+situations when the spectra of two concurrent signals are identical or don't
+overlap at all. When using the dimensional analog model, signal power can change
+in both time and frequency; more realistic signal shapes can be specified.
+This model is also able to calculate the interference of signals whose spectra
 partially overlap.
 
 There are example simulations for the three cases outlined in the Goals
@@ -100,9 +100,9 @@ of the ``General`` configuration, so it's empty:
    :language: ini
 
 Since the frequency and bandwidth of transmissions for all
-hosts is exactly the same, inferring which transmissions interfere is
+hosts are exactly the same, inferring which transmissions interfere is
 obvious (all of them). In this case, a scalar analog model is sufficient.
-The following video shows the node-pairs communicating, the number of
+The following video shows the node-pairs communicating; the number of
 sent/received packets is displayed above the nodes, as well as the state
 of the contention modules of the transmitting hosts.
 
@@ -112,7 +112,7 @@ of the contention modules of the transmitting hosts.
 
    <!--internal video recording, animation speed none, playback speed 0.59, zoom 1.69, display message name and message class off, run until event 141-->
 
-At first the two source nodes, ``host1`` and ``host3``, start
+At first, the two source nodes, ``host1`` and ``host3``, start
 transmitting at the same time. The transmissions collide, and neither
 destination host is able to receive any of them correctly. The collision
 avoidance mechanism takes effect, and ``host3`` wins channel access.
@@ -122,7 +122,7 @@ Independent Frequency Bands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In this case, we are modeling host-pairs that are communicating on
-different, non-overlapping Wifi channels (e.g. Channels 1 and 6.) Since
+different, non-overlapping Wifi channels (e.g., Channels 1 and 6). Since
 the channels are independent, it is obvious that there won't be any
 interference. The scalar analog model is sufficient for this case.
 
@@ -137,7 +137,7 @@ to use the non-overlapping Channels 1 and 6:
    :end-at: 6
    :language: ini
 
-.. note:: The channel numbers are set to 0 and 5 because in INET’s 802.11 model, the channels are numbered from 0, so that this setting corresponds to Wifi Channels 1 and 6.
+.. note:: The channel numbers are set to 0 and 5 because in INET's 802.11 model, the channels are numbered from 0, so that this setting corresponds to Wifi Channels 1 and 6.
 
 The video below shows the hosts communicating:
 
@@ -231,7 +231,7 @@ Even though they are on different channels, the transmissions interfere.
 In the beginning, ``host1`` and ``host3`` transmit simultaneously,
 and neither transmission can be successfully received.
 Due to the collision avoidance mechanism, one of the transmitting hosts
-defer from transmitting, and the subsequent transmissions are successful.
+defers from transmitting, and the subsequent transmissions are successful.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`Crosstalk.ned <../Crosstalk.ned>`
 

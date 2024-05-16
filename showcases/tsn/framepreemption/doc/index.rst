@@ -5,13 +5,13 @@ Goals
 -----
 
 Ethernet frame preemption is a feature specified in the 802.1Qbu standard that
-allows higher priority frames to interrupt the transmission of lower priority
+allows higher priority frames to interrupt the transmission of lower-priority
 frames at the Media Access Control (MAC) layer of an Ethernet network. This can
 be useful for time-critical applications that require low latency for
 high-priority frames. For example, in a Time-Sensitive Networking (TSN)
 application, high-priority frames may contain time-critical data that must be
 delivered with minimal delay. Frame preemption can help ensure that these
-high-priority frames are given priority over lower priority frames, reducing the
+high-priority frames are given priority over lower-priority frames, reducing the
 latency of their transmission.
 
 In this showcase, we will demonstrate Ethernet frame preemption and examine the
@@ -29,14 +29,14 @@ Overview
 ~~~~~~~~
 
 In time-sensitive networking applications, Ethernet preemption can significantly reduce latency. 
-When a high-priority frame becomes available for transmission during the transmission of a low priority frame, 
-the Ethernet MAC can interrupt the transmission of the low priority frame, and start sending the 
+When a high-priority frame becomes available for transmission during the transmission of a low-priority frame, 
+the Ethernet MAC can interrupt the transmission of the low-priority frame and start sending the 
 high-priority frame immediately. When the high-priority frame finishes, the MAC can continue 
-transmission of the low priority frame from where it left off, eventually sending the low priority 
+the transmission of the low-priority frame from where it left off, eventually sending the low-priority 
 frame in two (or more) fragments. 
 
 Preemption is a feature of INET's composable Ethernet model. It uses INET's packet streaming API, 
-so that packet transmission is represented as an interruptable stream. Preemption requires the 
+so that packet transmission is represented as an interruptible stream. Preemption requires the 
 :ned:`LayeredEthernetInterface`, which contains a MAC and a PHY layer, displayed below:
 
 .. figure:: media/LayeredEthernetInterface2.png
@@ -53,8 +53,8 @@ MAC layers, a preemptable (:ned:`EthernetFragmentingMacLayer`) and an express MA
    :align: center
 
 The :ned:`EthernetPreemptingMacLayer` uses intra-node packet streaming. Discrete packets 
-enter the MAC module from the higher layers, but leave the sub-MAC-layers (express and preemptable) 
-as packet streams. Packets exit the MAC layer as a stream, and are represented as such through 
+enter the MAC module from the higher layers but leave the sub-MAC-layers (express and preemptable) 
+as packet streams. Packets exit the MAC layer as a stream and are represented as such through 
 the PHY layer and the link.
 
 In the case of preemption, packets initially stream from the preemptable sub-MAC-layer. 
@@ -77,18 +77,18 @@ The simulation uses the following network:
 .. figure:: media/network.png
    :align: center
 
-It contains two :ned:`StandardHost`'s connected with 100Mbps Ethernet, and also a :ned:`PcapRecorder` 
+It contains two :ned:`StandardHost`'s connected with 100Mbps Ethernet and also a :ned:`PcapRecorder` 
 to record PCAP traces; ``host1`` periodically generates packets for ``host2``.
 
 Primarily, we want to compare the end-to-end delay, so we run simulations with the same packet length 
 for the low and high-priority traffic in the following three configurations in omnetpp.ini: 
 
-- ``FifoQueueing``: The baseline configuration; doesn't use priority queue or preemption.
-- ``PriorityQueueing``: Uses priority queue in the Ethernet MAC to lower the delay of high-priority frames.
+- ``FifoQueueing``: The baseline configuration; doesn't use a priority queue or preemption.
+- ``PriorityQueueing``: Uses a priority queue in the Ethernet MAC to lower the delay of high-priority frames.
 - ``FramePreemption``: Uses preemption for high-priority frames for a very low delay with a guaranteed upper bound.
 
-Additionally, we demonstrate the use of priority queue and preemption with more realistic traffic: 
-longer and more frequent low priority frames and shorter, less frequent high-priority frames. 
+Additionally, we demonstrate the use of a priority queue and preemption with more realistic traffic: 
+longer and more frequent low-priority frames and shorter, less frequent high-priority frames. 
 These simulations are the extension of the three configurations mentioned above, and are defined 
 in the ini file as the configurations with the ``Realistic`` prefix.
 
@@ -100,8 +100,8 @@ instead of the default, which must be disabled:
    :end-at: LayeredEthernetInterface
    :language: ini
 
-We also want to record a PCAP trace, so we can examine the traffic in Wireshark. We enable PCAP recording, 
-and set the PCAP recorder to dump Ethernet PHY frames, because preemption is visible in the PHY header:
+We also want to record a PCAP trace, so we can examine the traffic in Wireshark. We enable PCAP recording 
+and set the PCAP recorder to dump Ethernet PHY frames because preemption is visible in the PHY header:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: recordPcap
@@ -116,11 +116,11 @@ Here is the configuration of traffic generation in ``host1``:
    :language: ini
 
 There are two :ned:`UdpApp`'s in ``host1``, one is generating background traffic (low priority) 
-and the other, high-priority traffic. The UDP apps put VLAN tags on the packets, and the Ethernet 
+and the other high-priority traffic. The UDP apps put VLAN tags on the packets, and the Ethernet 
 MAC uses the VLAN ID contained in the tags to classify the traffic into high and low priorities.
 
 We set up a high-bitrate background traffic (96 Mbps) and a lower-bitrate high-priority traffic 
-(9.6 Mbps); both with 1200B packets. Their sum is intentionally higher than the 100 Mbps link capacity 
+(9.6 Mbps), both with 1200B packets. Their sum is intentionally higher than the 100 Mbps link capacity 
 (we want non-empty queues); excess packets will be dropped.
 
 .. literalinclude:: ../omnetpp.ini
@@ -128,21 +128,21 @@ We set up a high-bitrate background traffic (96 Mbps) and a lower-bitrate high-p
    :end-at: app[1].source.productionInterval
    :language: ini
 
-The ``FifoQueueing`` configuration uses no preemption or priority queue, the configuration just limits 
+The ``FifoQueueing`` configuration uses no preemption or priority queue. The configuration just limits 
 the :ned:`EthernetMac`'s queue length to 4. 
 
 In all three cases, the queues need to be short to decrease the queueing time's effect on the 
 measured delay. However, if they are too short, they might be empty too often, which renders 
 the priority queue useless (it cannot prioritize if it contains just one packet, for example). 
 The queue length of 4 is an arbitrary choice. The queue type is set to :ned:`DropTailQueue` 
-so that it can drop packets if the queue is full:
+so that it can drop packets if the queue is full.
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: Config FifoQueueing
    :end-before: Config
    :language: ini
 
-In the ``PriorityQueueing`` configuration, we change the queue type in the Mac layer from the 
+In the ``PriorityQueueing`` configuration, we change the queue type in the MAC layer from the 
 default :ned:`PacketQueue` to :ned:`PriorityQueue`:
 
 .. literalinclude:: ../omnetpp.ini
@@ -150,9 +150,9 @@ default :ned:`PacketQueue` to :ned:`PriorityQueue`:
    :end-before: Config
    :language: ini
 
-The priority queue utilizes two internal queues, for the two traffic categories. To limit 
+The priority queue utilizes two internal queues for the two traffic categories. To limit 
 the queueing time's effect on the measured end-to-end delay, we also limit the length of 
-internal queues to 4. We also disable the shared buffer, and set the queue type to 
+internal queues to 4. We also disable the shared buffer and set the queue type to 
 :ned:`DropTailQueue`. We use the priority queue's classifier to put packets into the 
 two traffic categories.
 
@@ -166,13 +166,13 @@ which support preemption.
    :end-at: DropTailQueue
    :language: ini
 
-There is no priority queue in this configuration, the two MAC submodules both have their own queues.
-We also limit the queue length to 4, and configure the queue type to be :ned:`DropTailQueue`.
+There is no priority queue in this configuration. The two MAC submodules both have their own queues.
+We also limit the queue length to 4 and configure the queue type to be :ned:`DropTailQueue`.
 
 .. note:: We could also have just one shared priority queue in the EthernetPreemptableMac module, 
 but this is not covered here.
 
-We use the following traffic for the ``RealisticFifoQueueing``, ``RealisticPriorityQueueing`` 
+We use the following traffic for the ``RealisticFifoQueueing``, ``RealisticPriorityQueueing``, 
 and ``RealisticFramePreemption`` configurations:
 
 .. literalinclude:: ../omnetpp.ini
@@ -180,40 +180,40 @@ and ``RealisticFramePreemption`` configurations:
    :end-before: Config RealisticFifoQueueing
    :language: ini
 
-In this traffic configuration, high-priority packets are 100 times less frequent, 
+In this traffic configuration, high-priority packets are 100 times less frequent 
 and are 1/10th the size of low-priority packets.
 
 Transmission on the Wire
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 In order to make sense of how frame preemptions are represented in the OMNeT++ GUI 
-(in Qtenv's animation and packet log, and in the Sequence Chart in the IDE), it is 
+(in Qtenv's animation and packet log and in the Sequence Chart in the IDE), it is 
 necessary to understand how packet transmissions are modeled in OMNeT++.
 
 Traditionally, transmitting a frame on a link is represented in OMNeT++ by sending a "packet".  
-The "packet" is a C++ object (i.e. data structure) which is of, or is subclassed from, the 
-OMNeT++ class ``cPacket``. The sending time corresponds to the start of the transmission. 
-The packet data structure contains the length of the frame in bytes, and also the (more 
+The "packet" is a C++ object (i.e., a data structure) which is of or is subclassed from 
+the OMNeT++ class ``cPacket``. The sending time corresponds to the start of the transmission. 
+The packet data structure contains the length of the frame in bytes and also the (more 
 or less abstracted) frame content. The end of the transmission is implicit: it is 
-computed as *start time* + *duration*, where *duration* is either explicit, or derived 
-from the frame size and the link bitrate. This approach in vanilla form is of course 
-not suitable for Ethernet frame preemption, because it is not known in advance whether 
-or not a frame transmission will be preempted, and at which point.
+computed as *start time* + *duration*, where *duration* is either explicit or derived 
+from the frame size and the link bitrate. This approach in vanilla form is, of course, 
+not suitable for Ethernet frame preemption because it is not known in advance whether 
+or not a frame transmission will be preempted and at which point.
 
-Instead, in OMNeT++ 6.0 the above approach was modified to accommodate new use cases. 
+Instead, in OMNeT++ 6.0, the above approach was modified to accommodate new use cases. 
 In the new approach, the original packet sending remains, but its interpretation changes slightly. 
-It now represents a *prediction*: "this is a frame whose transmission will go through, unless 
+It now represents a *prediction*: "this is a frame whose transmission will go through unless 
 we say otherwise". Namely, while the transmission is ongoing, it is possible to send 
-*transmission updates*, which modifies the prediction about the remaining part of the transmission. 
+*transmission updates*, which modify the prediction about the remaining part of the transmission. 
 A *transmission update* packet essentially says "ignore what I said previously about the total 
 frame size/content and transmission time, here's how much time the remaining transmission 
 is going to take according to the current state of affairs, and here's the updated frame length/content". 
 
-A transmission update may truncate, shorten or extend a transmission (and the frame). 
+A transmission update may truncate, shorten, or extend a transmission (and the frame). 
 For technical reasons, the transmission update packet carries the full frame size and 
 content (not just the remaining part), but it must be crafted by the sender in a way 
 that it is consistent with what has already been transmitted (it cannot alter the past). 
-For example, truncation is done by indicating zero remaining time, and setting the frame 
+For example, truncation is done by indicating zero remaining time and setting the frame 
 content to what has been transmitted up to that point. An updated transmission may be 
 further modified by subsequent transmission updates. The end of the transmission is 
 still implicit (it finishes according to the last transmission update), but it is 
@@ -228,7 +228,7 @@ are all packets.
 
 - The first one is the original packet, which contains the full frame size/content and carries the prediction that the frame transmission will go through uninterrupted.
 - The second one is sent at the time the decision is made inside the node that the frame is going to be preempted. At that time, the node computes the truncated frame and the remaining transmission time, taking into account that at least the current octet and FCS need to be transmitted, and there is a minimum frame size requirement as well. The packet represents the size/content of the truncated frame, including FCS.
-- In the current implementation, the Ethernet model also sends an explicit end-transmission update, with zero remaining transmission duration and identical frame size/content as the previous one. This would not be strictly necessary, and may change in future INET releases.
+- In the current implementation, the Ethernet model also sends an explicit end-transmission update with zero remaining transmission duration and identical frame size/content as the previous one. This would not be strictly necessary and may change in future INET releases.
 
 The above packets are distinguished using name suffixes: ``:progress`` and ``:end`` are 
 appended to the original packet name for transmission updates and for the explicit end-transmission, 
@@ -237,8 +237,6 @@ etc. to its name, to make frame fragments distinguishable from each other. For e
 a frame called ``background3`` may be followed by ``background3-frag0:progress`` and 
 ``background3-frag0:end``. After the intervening express frame has also completed transmission, 
 ``background3-frag1`` will follow (see video in the next section).
-
-
 
 Results
 -------
@@ -253,7 +251,7 @@ Here is a video of the frame preemption behavior:
 	 :align: center
 
 The Ethernet MAC in ``host1`` starts transmitting ``background-3``. During the transmission, 
-a high-priority frame (``ts-1``) arrives at the MAC. The MAC interrupts the transmission of  
+a high-priority frame (``ts-1``) arrives at the MAC. The MAC interrupts the transmission of 
 ``background-3``; in the animation, ``background-3`` is first displayed as a whole frame, 
 then changes to ``background-3-frag0:progress`` when the high-priority frame is available. 
 After transmitting the high-priority frame, the remaining fragment of ``background-3-frag1`` 
@@ -269,7 +267,7 @@ As mentioned in the previous section, a preempted frame appears multiple times
 in the packet log, as updates to the frame are logged. At first, ``background-3`` 
 is logged as an uninterrupted frame. When the high-priority frame becomes available, 
 the frame name changes to ``background-3-frag0``, and it is logged separately. 
-Actually, only  one frame named ``background-3-frag0`` was sent before ``ts-1``, 
+Actually, only one frame named ``background-3-frag0`` was sent before ``ts-1``, 
 but with three separate packet updates.
 
 The same frame sequence is displayed on a sequence chart on the following images, 
@@ -283,7 +281,7 @@ the timeline is non-linear:
 Just as in the packet log, the sequence chart contains the originally intended, 
 uninterrupted ``background-3`` frame as it is logged when its transmission is started. 
 
-.. note:: You can think of it as there are actually two time dimensions present on the sequence chart: the events and messages as they happen at the moment, and what the modules "think" about the future, i.e. how long will a transmission take. In reality, the transmission might be interrupted and so both the original (``background-3``) and the "updated" (``background-3-frag0``) is present on the chart.
+.. note:: You can think of it as there are actually two time dimensions present on the sequence chart: the events and messages as they happen at the moment, and what the modules "think" about the future, i.e., how long will a transmission take. In reality, the transmission might be interrupted, and so both the original (``background-3``) and the "updated" (``background-3-frag0``) is present on the chart.
 
 Here is the frame sequence on a linear timeline, with the ``background-3-frag0`` frame highlighted:
 
@@ -315,7 +313,7 @@ Here is ``background-3-frag1`` displayed in Qtenv's packet inspector:
    :align: center
    :width: 100%
 
-This fragment does not contain a MAC header, because it is the second part of the original Ethernet frame.
+This fragment does not contain a MAC header because it is the second part of the original Ethernet frame.
 
 .. **TODO** without highlight
 
@@ -328,7 +326,7 @@ The paths which the high and low priority (express and preemptable) packets take
 .. figure:: media/express2.png
    :align: center
 
-Analyzing End-to-end Delay
+Analyzing End-to-End Delay
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Simulation Results
@@ -344,12 +342,12 @@ configuration is distinguished using different line styles and the traffic categ
 
 The chart shows that in the case of the default configuration, the delay for the 
 two traffic categories is about the same. The use of the priority queue significantly 
-decreases the delay for the high priority frames, and marginally increases the 
+decreases the delay for the high-priority frames and marginally increases the 
 delay of the background frames compared to the baseline default configuration. 
-Preemption causes an even greater decrease for high priority frames at the cost 
+Preemption causes an even greater decrease for high-priority frames at the cost 
 of a slight increase for background frames.
 
-Estimating the End-to-end delay
+Estimating the End-to-End Delay
 +++++++++++++++++++++++++++++++
 
 In the next section, we will examine the credibility of these results by doing some 
@@ -366,10 +364,10 @@ transmission time of 4 frames. Looking at the queue length statistics (see anf f
 we can see that the average queue length is ~2.6, so packets suffer an average queueing 
 delay of 2.6 frame transmission durations.
 
-The end-to-end delay is rougly the transmission duration of a frame + queueing delay + interframe gap.
+The end-to-end delay is roughly the transmission duration of a frame + queueing delay + interframe gap.
 The transmission duration for a 1200B frame on 100Mbps Ethernet is about 0.1ms. 
 On average, there are two frames in the queue so frames wait two frame transmission 
-durations in the queue. The interframe gap for 100Mbps Ethernet is 0.96us, so we assume it negligable:
+durations in the queue. The interframe gap for 100Mbps Ethernet is 0.96us, so we assume it negligible:
 
 ``delay ~= txDuration + 2.6 * txDuration + IFG = 3.6 * txDuration = 0.36ms``
 
@@ -379,10 +377,10 @@ PriorityQueueing Configuration
 For the ``PriorityQueueing`` configuration, high-priority frames have their own sub-queue in 
 the PriorityQueue module in the MAC. When a high-priority frame arrives at the queue, the 
 MAC will finish the ongoing low-priority transmission (if there is any) before beginning 
-the transmission of the high-priority frame.  Thus high-priority frames can be delayed, 
+the transmission of the high-priority frame. Thus high-priority frames can be delayed, 
 as the transmission of the current frame needs to be finished first. Still, using a priority 
 queue decreases the delay of the high-priority frames and increases that of the background 
-frames, compared to just using one queue for all frames.
+frames compared to just using one queue for all frames.
 
 Due to high background traffic, a frame is always present in the background queue. 
 A high-priority frame needs to wait until the current background frame transmission 
@@ -395,7 +393,7 @@ FramePreemption Configuration
 *****************************
 
 For the ``FramePreemption`` configuration, the high-priority frames have their own queue in the MAC.
-When a high priority frame becomes available, the current background frame transmission 
+When a high-priority frame becomes available, the current background frame transmission 
 is almost immediately stopped.
 
 The delay is roughly the duration of an FCS + transmission duration + interframe gap. 
@@ -416,7 +414,7 @@ The mean end-to-end delay for the realistic traffic case is plotted on the follo
    :width: 80%
 
 The range indicated by the rectangle on the chart above is shown zoomed in on the chart below, 
-so that its more visible:
+so that it's more visible:
 
 .. figure:: media/realisticdelay_zoomed.png
    :align: center
@@ -424,12 +422,12 @@ so that its more visible:
 
 As described above, the end-to-end delay of high-priority frames when using preemption 
 is independent of the length of background frames. The delay is approximately the 
-transmission duration of a high-priority frame (apperent in the case of both the 
+transmission duration of a high-priority frame (apparent in the case of both the 
 realistic and the comparable length traffic results). 
 
-In case of realistic traffic, the delay of the background frames is not affected by 
-either the use of a priority queue or preemption. The delay of the high-priority 
-frames is reduced significantly, because the traffic is different (originally, 
+In the case of realistic traffic, the delay of the background frames is not affected 
+by either the use of a priority queue or preemption. The delay of the high-priority 
+frames is reduced significantly because the traffic is different (originally, 
 both the background and high-priority packets had the same length, so they could 
 be compared for better demonstration).
 

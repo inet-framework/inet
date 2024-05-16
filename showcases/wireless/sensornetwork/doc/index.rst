@@ -20,7 +20,7 @@ Part 1: Demonstrating the MAC protocols
    <!-- V1
 
    The devices that make up wireless sensor networks (WSNs) are often power constrained,
-   and the networks have high latency and low throughput, as compared to WLANs, for example.
+   and the networks have high latency and low throughput, compared to WLANs for example.
    There are two main categories of MAC protocols for WSNs: time-division multiple access based
    (TDMA), such as LMAC, and carrier-sense multiple access (CSMA) based, such as B-MAC and X-MAC. -->
 
@@ -32,7 +32,7 @@ how the MAC manages when certain nodes can communicate on the channel:
    their time slot, thus eliminating contention. Examples of this kind
    of MAC protocols include LMAC, TRAMA, etc.
 -  ``Carrier-sense multiple access (CSMA) based``: These protocols use
-   carrier sensing and backoffs to avoid collisions, similarly to IEEE
+   carrier sensing and backoffs to avoid collisions, similar to IEEE
    802.11. Examples include B-MAC, SMAC, TMAC, X-MAC.
 
 This showcase demonstrates the WSN MAC protocols available in INET:
@@ -42,46 +42,44 @@ briefly.
 B-MAC
 ~~~~~
 
-B-MAC (short for Berkeley MAC) is a widely used WSN MAC protocol; it is
-part of TinyOS. It employs low-power listening (LPL) to minimize power
+B-MAC (short for Berkeley MAC) is a widely used WSN MAC protocol; it
+is part of TinyOS. It employs low-power listening (LPL) to minimize power
 consumption due to idle listening. Nodes have a sleep period, after
 which they wake up and sense the medium for preambles (clear channel
 assessment - CCA.) If none is detected, the nodes go back to sleep. If
 there is a preamble, the nodes stay awake and receive the data packet
 after the preamble. If a node wants to send a message, it first sends a
-preamble for at least the sleep period in order for all nodes to detect
+preamble for at least the sleep period to allow all nodes to detect
 it. After the preamble, it sends the data packet. There are optional
 acknowledgments as well. After the data packet (or data packet + ACK)
 exchange, the nodes go back to sleep. Note that the preamble doesn't
 contain addressing information. Since the recipient's address is
 contained in the data packet, all nodes receive the preamble and the
-data packet in the sender's communication range (not just the intended
-recipient of the data packet.)
+data packet within the sender's communication range (not just the
+intended recipient of the data packet.)
 
 X-MAC
 ~~~~~
 
 X-MAC is a development on B-MAC and aims to improve on some of B-MAC's
 shortcomings. In B-MAC, the entire preamble is transmitted, regardless of
-whether the destination node awoke at the beginning of the preamble or
+whether the destination node woke up at the beginning of the preamble or
 the end. Furthermore, with B-MAC, all nodes receive both the preamble
 and the data packet. X-MAC employs a strobed preamble, i.e. sending the
-same length preamble as B-MAC, but as shorter bursts, with pauses in
-between. The pauses are long enough that the destination node can send
-an acknowledgment if it is already awake. When the sender receives the
-acknowledgment, it stops sending preambles and sends the data packet.
-This mechanism can save time because potentially, the sender doesn't have to send
-the whole length preamble. Also, the preamble contains the address of the
-destination node. Nodes can wake up, receive the preamble, and go back
+preamble in shorter bursts with pauses in between. The pauses are long enough
+that the destination node can send an acknowledgment if it is already awake.
+When the sender receives the acknowledgment, it stops sending preambles and
+sends the data packet. This mechanism can save time because potentially, the sender
+doesn't have to send the whole length of the preamble. Also, the preamble contains the
+address of the destination node. Nodes can wake up, receive the preamble, and go back
 to sleep if the packet is not addressed to them. These features improve
-B-MAC's power efficiency by decreasing nodes' time spent in idle
-listening.
+B-MAC's power efficiency by reducing the nodes' time spent in idle listening.
 
 LMAC
 ~~~~
 
-LMAC (short for lightweight MAC) is a TDMA-based MAC protocol. There are
-data transfer timeframes, which are divided into time slots. The number
+LMAC (short for lightweight MAC) is a TDMA-based MAC protocol. It uses
+timeframes divided into time slots for data transmission. The number
 of time slots in a timeframe is configurable according to the number of
 nodes in the network. Each node has its own time slot, in which only
 that particular node can transmit. This feature saves power, as there are no
@@ -91,9 +89,9 @@ the data, the length of the data unit, and information about which time
 slots are occupied. All nodes wake up at the beginning of each time
 slot. If there is no transmission, the time slot is assumed to be empty
 (not owned by any nodes), and the nodes go back to sleep. If there is a
-transmission, after receiving the control message, nodes that are not
-the recipient go back to sleep. The recipient node and the sender node
-goes back to sleep after receiving/sending the transmission. Only one
+transmission, upon receiving the control message, nodes that are not
+the intended recipient go back to sleep. The recipient node and the sender node
+go back to sleep after receiving/sending the transmission. Only one
 message can be sent in each time slot. In the first five timeframes, the
 network is set up and no data packets are sent. The network is set up by
 nodes claiming a time slot. They send a control message in the time slot
@@ -109,42 +107,42 @@ The three MACs are implemented in INET as the :ned:`BMac`, :ned:`XMac`, and
 :ned:`LMac` modules. They have parameters to adapt the MAC protocol to the
 size of the network and the traffic intensity, such as slot time, clear
 channel assessment duration, bitrate, etc. The parameters have default
-values, thus the MAC modules can be used without setting any of their
+values, so the MAC modules can be used without setting any of their
 parameters. Check the NED files of the MAC modules (``BMac.ned``,
 ``XMac.ned``, and ``LMac.ned``) to see all parameters.
 
 The MACs don't have corresponding physical layer models. They can be
 used with existing generic radio models in INET, such as
-:ned:`GenericRadio` or :ned:`ApskRadio`. We're using :ned:`ApskRadio` in this
-showcase because it is more realistic than :ned:`GenericRadio`.
+:ned:`GenericRadio` or :ned:`ApskRadio`. This showcase uses :ned:`ApskRadio`
+because it is more realistic than :ned:`GenericRadio`.
 
 INET doesn't have WSN routing protocol models (such as Collection Tree
-Protocol), so we're using Ipv4 and static routing.
+Protocol), so IPv4 and static routing are used in this showcase.
 
 Configuration
 ~~~~~~~~~~~~~
 
-The showcase contains three example simulations, which demonstrate the
+The showcase contains three example simulations that demonstrate the
 three MACs in a wireless sensor network. The scenario is that there are
 wireless sensor nodes in a refrigerated warehouse, monitoring the
 temperature at their location. They periodically transmit temperature
 data wirelessly to a gateway node, which forwards the data to a server
 via a wired connection.
 
-Note that in WSN terminology, the gateway would be called sink. Ideally,
+Note that in WSN terminology, the gateway would be called a sink. Ideally,
 there should be a specific application in the gateway node called
-``sink``, which would receive the data from the WSN, and send it to the
-server over IP. Thus the node would act as a gateway between the WSN and
-the external IP network. In the example simulations, the gateway just
+``sink``, which receives the data from the WSN and sends it to the
+server over IP. Thus the node acts as a gateway between the WSN and
+the external IP network. In the example simulations, the gateway only
 forwards the data packets over IP.
 
-To run the example simulations, choose the :ned:`BMac`, :ned:`LMac` and
+To run the example simulations, choose the :ned:`BMac`, :ned:`LMac`, and
 :ned:`XMac` configurations from :download:`omnetpp.ini <../omnetpp.ini>`.
-Most of the configuration keys in the ini file are shared between the
+Most of the configuration keys in the .ini file are shared between the
 three simulations (they are defined in the ``General`` configuration),
 except for the MAC protocol-specific settings. All three simulations
 will use the same network, :ned:`SensorNetworkShowcaseA`, defined in
-:download:`SensorNetworkShowcase.ned <../SensorNetworkShowcase.ned>`:
+:download:`SensorNetworkShowcase.ned <../SensorNetworkShowcase.ned>`.
 
 .. figure:: media/network.png
    :width: 100%
@@ -157,13 +155,13 @@ and an :ned:`ScalarRadioMedium` module. The nodes are placed against
 the backdrop of a warehouse floorplan. The scene size is 60x30
 meters. The warehouse is just a background image providing context.
 Obstacle loss is not modeled, so the background image doesn't affect
-the simulation in any way.
+the simulation.
 
 The wireless interface in the sensor nodes and the gateway is specified
 in :download:`omnetpp.ini <../omnetpp.ini>` to be the generic
-:ned:`WirelessInterface` (instead of the Ieee802154 specific
-:ned:`Ieee802154NarrowbandInterface`, which is the default wlan interface
-in :ned:`SensorNode`). The radio type is set to :ned:`ApskScalarRadio`:
+:ned:`WirelessInterface`(instead of the IEEE 802.15.4 specific
+:ned:`Ieee802154NarrowbandInterface`, which is the default WLAN interface
+in :ned:`SensorNode`). The radio type is set to :ned:`ApskScalarRadio`.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -172,18 +170,17 @@ in :ned:`SensorNode`). The radio type is set to :ned:`ApskScalarRadio`:
 
 Note that the wireless interface module's name is ``wlan`` in all host
 types that have a wireless interface. The term doesn't imply that it's
-Wifi but stands for wireless LAN.
+WiFi but stands for wireless LAN.
 
 We are using :ned:`ApskScalarRadio` here because it is a relatively
 simple, generic radio. It uses amplitude and phase-shift keying
 modulations (e.g. BPSK, QAM-16 or QAM-64, BPSK by default), without
 additional features such as forward error correction, interleaving or
 spreading. We set the bitrate in
-:download:`omnetpp.ini <../omnetpp.ini>` to 19200 bps, to match the
-default for the MAC bitrates (we'll use the default bitrate in the MACs,
-which is 19200 bps for all three MAC types.) The :par:`preambleDuration` is
-set to be very short for better compatibility with the MACs. We also set
-some other parameters of the radio to arbitrary values:
+:download:`omnetpp.ini <../omnetpp.ini>` to 19200 bps to match the
+default MAC bitrates (which is 19200 bps for all three MAC types).
+The :par:`preambleDuration` is set to be very short for better compatibility with the MACs.
+We also set some other parameters of the radio to arbitrary values.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -193,19 +190,19 @@ some other parameters of the radio to arbitrary values:
 Routes are set up according to a star topology, with the gateway at the
 center. This is achieved by dumping the full configuration of
 :ned:`Ipv4NetworkConfigurator` (which was generated with the configurator's
-default settings), and then modifying it. The modified configuration is
+default settings) and then modifying it. The modified configuration is
 in the :download:`config.xml <../config.xml>` file. The following
-image shows the routes:
+image shows the routes.
 
 .. figure:: media/routes.png
    :width: 100%
 
-Each sensor node will send an UDP packet with a 10-byte payload
+Each sensor node will send a UDP packet with a 10-byte payload
 ("temperature data") every second to the server, with a random start
 time around 1s. The packets will have an 8-byte UDP header and a 20-byte
-Ipv4 header, so they will be 38 bytes at the MAC level. The packets will
+IPv4 header, so they will be 38 bytes at the MAC level. The packets will
 be routed via the gateway. Here are the application settings in
-:download:`omnetpp.ini <../omnetpp.ini>`:
+:download:`omnetpp.ini <../omnetpp.ini>`.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -217,9 +214,9 @@ individual MACs.
 
 For B-MAC, the wireless interface's :par:`macType` parameter is set to
 :ned:`BMac`. Also, the :par:`slotDuration` parameter is set to 0.025s (an
-arbitrary value.) This parameter is essentially the nodes' sleep
+arbitrary value). This parameter is essentially the nodes' sleep
 duration. Here is the configuration in
-:download:`omnetpp.ini <../omnetpp.ini>`:
+:download:`omnetpp.ini <../omnetpp.ini>`.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -235,9 +232,8 @@ the destination node. The design of X-MAC allows setting different sleep
 intervals for different nodes, as long as the sender node's sleep
 interval is greater than the receiver's. We set the slot duration
 of the gateway to a shorter value because it has to receive and relay
-data from all sensors, thus it has more traffic. Here is the
-configuration in :download:`omnetpp.ini <../omnetpp.ini>`:
-
+data from all sensors, so it has more traffic. Here is the
+configuration in :download:`omnetpp.ini <../omnetpp.ini>`.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -246,15 +242,15 @@ configuration in :download:`omnetpp.ini <../omnetpp.ini>`:
 
 For LMAC, the wireless interface's :par:`macType` parameter is set to
 :ned:`LMac`. The :par:`numSlots` parameter is set to 8, as it is sufficient
-(there are only five nodes in the wireless sensor network.) The
+(there are only five nodes in the wireless sensor network). The
 :par:`reservedMobileSlots` parameter reserves some of the slots for mobile
 nodes; these slots are not chosen by any of the nodes during network
-setup. The parameter's default value is 2, but it is set to 0. The
+setup. The parameter's default value is 2, but here it is set to 0. The
 :par:`slotDuration` parameter's default value is 100ms, but we set it to
 50ms to decrease the network setup time. The duration of a timeframe
-will be 400ms (number of slots \* slot duration.) The network is set up
-in the first five frames, i.e. in the first 2 seconds. Here is the
-configuration in :download:`omnetpp.ini <../omnetpp.ini>`:
+will be 400ms (number of slots \* slot duration). The network is set up
+in the first five frames, i.e. the first 2 seconds. Here is the
+configuration in :download:`omnetpp.ini <../omnetpp.ini>`.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -266,7 +262,7 @@ The next sections demonstrate the three simulations.
 B-MAC
 ~~~~~
 
-The following video shows sensor nodes sending data to the server:
+The following video shows sensor nodes sending data to the server.
 
 .. video:: media/BMac2.mp4
    :width: 100%
@@ -275,17 +271,17 @@ The following video shows sensor nodes sending data to the server:
 
 :ned:`BMac` actually sends multiple shorter preambles instead of a long
 one, so that waking nodes can receive the one that starts after they
-woke up. ``sensor3`` starts sending preambles, while the other nodes are
+wake up. ``sensor3`` starts sending preambles while the other nodes are
 asleep. All of them wake up before the end of the preamble transmission.
-When the nodes are awake, they receive the preamble, and receive the
-data packet as well, at the physical layer (the mac discards it if it is
-not for them.) Then the gateway sends it to the server. Note that all
-nodes receive the preambles and the data packet as well.
+When the nodes are awake, they receive the preamble and the
+data packet at the physical layer (the MAC discards it if it is not
+intended for them). Then the gateway sends it to the server. Note that all
+nodes receive the preambles and the data packet.
 
 X-MAC
 ~~~~~
 
-In the following video, the sensors send data to the server:
+In the following video, the sensors send data to the server.
 
 .. video:: media/XMac2.mp4
    :width: 100%
@@ -303,7 +299,7 @@ server.
 LMAC
 ~~~~
 
-In the following video, sensor nodes send data to the server:
+In the following video, sensor nodes send data to the server.
 
 .. video:: media/LMac5.mp4
    :width: 100%
@@ -321,15 +317,15 @@ Part 2: Optimizing for packet loss and comparing power consumption
 In this section, we'll compare the three MAC protocols in terms of a few
 statistics, such as the number of UDP packets carried by the network,
 and power consumption. In order to compare the three protocols, we want
-to find the parameter values for each MAC, which lead to the best
+to find the parameter values for each MAC that lead to the best
 performance of the network in a particular scenario. We'll optimize for
 the number of packets received by the server, i.e. we want to minimize
 packet loss.
 
-The scenario will be the same as in the :ned:`BMac`, :ned:`XMac` and :ned:`LMac`
+The scenario will be the same as in the :ned:`BMac`, :ned:`XMac`, and :ned:`LMac`
 configurations (each sensor sending data every second to the server),
 except that it will use a similar, but more generic network layout
-instead of the warehouse network:
+instead of the warehouse network.
 
 .. figure:: media/statisticnetwork.png
    :width: 60%
@@ -351,7 +347,7 @@ server.
 
 The parameter study configurations for the three MAC protocols will
 extend the ``StatisticBase`` config (as well as the ``General``
-configuration):
+configuration).
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -370,7 +366,7 @@ Optimizing B-MAC
 The goal is to optimize :ned:`BMac`'s :par:`slotTime` parameter for the number
 of packets received by the server. The configuration in
 :download:`omnetpp.ini <../omnetpp.ini>` for this is
-``StatisticBMac``. Here is the configuration:
+``StatisticBMac``. Here is the configuration.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -378,16 +374,16 @@ of packets received by the server. The configuration in
    :end-at: slotDuration
 
 In the study, :par:`slotDuration` will run from 10ms to 1s in 10ms
-increments (the default of :par:`slotDuration` is 100ms.) The number of
+increments (the default of :par:`slotDuration` is 100ms). The number of
 packets received by the server for each :par:`slotDuration` value is shown
-on the following image (time in seconds):
+on the following image (time in seconds).
 
 .. figure:: media/bmac.png
    :width: 100%
 
 The sensors send 25 packets each during the 25s, thus
-100 packets total. It is apparent from the results that the network
-cannot carry all traffic in this scenario. The results also outline a
+100 packets in total. It is apparent from the results that the network
+cannot carry all the traffic in this scenario. The results also outline a
 smooth curve. The best performing value for
 :par:`slotDuration` is 0.19s.
 
@@ -398,7 +394,7 @@ Again, we optimize the :par:`slotTime` parameter for the number of packets
 received by the server. As in the :ned:`XMac` configuration, the
 ``slotTime`` for the gateway will be shorter than for the sensors. The
 configuration in :download:`omnetpp.ini <../omnetpp.ini>` for this is
-``StatisticXMac``. Here is the configuration:
+``StatisticXMac``. Here is the configuration.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -408,8 +404,8 @@ configuration in :download:`omnetpp.ini <../omnetpp.ini>` for this is
 The default of :par:`slotDuration` for :ned:`XMac` is 100ms. In the study, the
 gateway's :par:`slotDuration` will run from 10ms to 1s in 10ms increments,
 similarly to the parameter study for B-MAC. The :par:`slotDuration` for the
-sensors will be 2.5 times that of the gateway (an arbitrary value.) Here
-are the results (time in seconds):
+sensors will be 2.5 times that of the gateway (an arbitrary value). Here
+are the results (time in seconds).
 
 .. figure:: media/xmac.png
    :width: 100%
@@ -423,7 +419,7 @@ Optimizing LMAC
 We'll optimize the :par:`slotDuration` parameter for the number of packets
 received by the server. The configuration for this study in
 :download:`omnetpp.ini <../omnetpp.ini>` is ``StatisticLMac``. 
-Here is the configuration:
+Here is the configuration.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -432,15 +428,15 @@ Here is the configuration:
 
 We set :par:`reservedMobileSlots` to 0, and :par:`numSlots` to 8. The
 :par:`slotDuration` parameter will run from 10ms to 1s in 10ms steps. The
-number of received packets are displayed on the following image (time in
-seconds):
+number of received packets is displayed on the following image (time in
+seconds).
 
 .. figure:: media/lmac.png
    :width: 100%
 
 It is apparent from the results that the network can carry almost all
 the traffic in this scenario (as opposed to the :ned:`XMac` and :ned:`LMac`
-results.) The best performing value for :par:`slotDuration` is 40ms. Note
+results). The best performing value for :par:`slotDuration` is 40ms. Note
 that the lowest :par:`slotDuration` values up until 120ms yield
 approximately the same results (around 100 packets), with the 40ms
 value performing marginally better. Choosing the higher :par:`slotDuration`
@@ -573,16 +569,16 @@ statistics:
    packets. As there are 100 packets, this value is also the successful packet reception in percent,
    and indirectly, packet loss.
 -  ``Network total power consumption``: The sum of the power consumption
-   of the four sensors and the gateway (values in Joules.)
+   of the four sensors and the gateway (values in Joules).
 -  ``Power consumption per packet``: Network total power consumption /
    Total number of packets received, thus power consumption per packet
-   in the entire network (values in Joules.)
+   in the entire network (values in Joules).
 
 .. -  ``Packet loss``: Total number of packets received / total number of
    packets sent, thus how many packets from the 100 sent are lost. **TODO** not sure its needed
 
 Note that the values for the ``residualEnergyCapacity`` statistic are
-negative, so it is inverted in the anf file. Here are the results:
+negative, so they are inverted in the graph. Here are the results.
 
 .. figure:: media/packetsreceived.png
    :width: 100%

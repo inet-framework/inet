@@ -43,7 +43,7 @@ The Setup
 
 To recap, the goal of this showcase is to simulate transmission of a VoIP stream
 over a virtual network, where both the VoIP sender and receiver are simulations
-that are run in realtime. We use Mininet to a similar, but slightly extended
+that are run in real-time. We use Mininet to set up a similar, but slightly extended
 network topology than in the previous showcase: two hosts connected via a
 switch. The simulations that run the VoIP sender and receiver are the same as in
 the previous showcase.

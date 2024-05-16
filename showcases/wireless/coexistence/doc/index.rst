@@ -370,7 +370,7 @@ if the signal power for one of the transmissions were significantly higher than
 the other, the lower power transmission might not be correctly receivable.)
 
 In the video, ``wifiHost1`` and ``wpanHost1`` transmit concurrently. The Wifi
-transmission is correctly received and successfuly ACKED. Then, ``wifiHost2``
+transmission is correctly received and successfully ACKED. Then, ``wifiHost2``
 senses the ongoing WPAN transmission, and defers from transmitting. The WPAN
 tranmission is correctly received by ``wpanHost2``. When the transmission is over,
 ``wifiHost1`` sends its next frame; since ACKs are not protected by CCA,

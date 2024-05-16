@@ -5,10 +5,10 @@ Goals
 -----
 
 This showcase demonstrates adding a map in the simulation. Displaying a map in a
-network simulation provides a real-world context and can help to improve the
-visual appeal of the simulation. It also helps to place network nodes in a
+network simulation provides a real-world context and can help improve the
+visual appeal of the simulation. It also helps place network nodes in a
 geographic context and allows the addition of objects, such as buildings. The
-map doesn't have any effect on the simulation, it only alters the visuals of the
+map doesn't have any effect on the simulation; it only alters the visuals of the
 network.
 
 It contains three example configurations of increasing complexity, each
@@ -51,19 +51,19 @@ By default, the type of the scene visualizer module in
 :ned:`IntegratedVisualizer` is :ned:`SceneOsgVisualizer`. Inserting the map
 requires the :ned:`SceneOsgEarthVisualizer` module, thus, the default OSG
 scene visualizer is replaced. The :ned:`SceneOsgEarthVisualizer`
-provides the same functionality as :ned:`SceneOsgVisualizer`, and adds
+provides the same functionality as :ned:`SceneOsgVisualizer` and adds
 support for the osgEarth map.
 
 To display the map, the visualizer requires a ``.earth`` file. This is an
-XML file that specifies how the source data is turned into a map, and
+XML file that specifies how the source data is turned into a map and
 how to fetch the necessary data from the Internet. In this
 configuration, we use the ``boston.earth`` file that contains
 `OpenStreetMap <https://www.openstreetmap.org>`__ configured
 as map data source. More ``.earth`` files can be found at
-`osgearth.org <http://osgearth.org>`__, and there are also instructions
+`osgearth.org <http://osgearth.org>`__ and there are also instructions
 there on how to create ``.earth`` files.
 
-Locations on the map are identified with geographical coordinates, i.e.
+Locations on the map are identified with geographical coordinates, i.e.,
 longitude and latitude. In INET, locations of nodes and objects are
 represented internally by Cartesian coordinates relative
 to the simulation scene's origin, and the
@@ -106,7 +106,7 @@ floor is not visible.
 Adding Physical Objects
 -----------------------
 
-The map doesn't affect simulations in any way, it just gives a real-world
+The map doesn't affect simulations in any way; it just gives a real-world
 context to them. For network nodes to interact with their environment,
 physical objects have to be added. The example configuration for this
 section can be run by selecting the ``PhysicalObjects`` configuration

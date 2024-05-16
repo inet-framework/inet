@@ -9,7 +9,7 @@ in the temporal, spectral, and spatial dimensions in various forms. This visuali
 can help you understand, for example, why a particular signal was received or not received
 successfully in the presence of interference from other signals or noise.
 
-The visualization can take the form of spectrums, spectrograms and heatmaps representing
+The visualization can take the form of spectrums, spectrograms, and heatmaps representing
 spatial power density. This showcase demonstrates such visualizations with three example
 simulations.
 
@@ -56,7 +56,7 @@ and the power density is displayed in units of `dBmWpMHz`, i.e. dBmW/MHz. The vi
 is enabled with the visualizer's :par:`displaySpectrums` parameter.
 
 The spectrum plots are color coded. By default, the total power density of all signals is
-shown at the given position (blue curve), except for the transmitting and receiveing nodes,
+shown at the given position (blue curve), except for the transmitting and receiving nodes,
 where the transmitted/received signal (green curve) is displayed separately from interfering
 signals/noises (red curve).
 
@@ -74,13 +74,13 @@ The visualizer's :par:`spectrumMode` parameter specifies what to display in the 
 - ``signal``: display the power density of the transmitted or received signal in green (only visualizes signals at the transmitting and receiving nodes)
 - ``auto`` (default): display the transmitted/received signals in green and interfering signals/noise in red if there is an ongoing transmission or reception at the given node, otherwise display the total power density in blue (visualizes signals at every node)
 
-All spectrum figures, spectrograms and power density maps in the network share the scales
-of power density, frequency and time axes, so the visualizations can be compared. The scales
+All spectrum figures, spectrograms, and power density maps in the network share the scales
+of power density, frequency, and time axes, so the visualizations can be compared. The scales
 are automatic by default, and they're determined by the signals which have been seen in the
-network so far. Therefore automatic scales can extend over time as new signals are transmitted,
+network so far. Therefore, automatic scales can extend over time as new signals are transmitted,
 but they don't contract.
 
-The scales of power density, frequency and time axes can also be specified manually by a set
+The scales of power density, frequency, and time axes can also be specified manually by a set
 of parameters. There are three parameters for each axis: a minimum and a maximum value, and
 a switch for auto configuration. For the complete list of parameters shared between the figures,
 see the NED documentation of :ned:`MediumVisualizerBase`.
@@ -96,10 +96,10 @@ the following network:
 The analog model needs to be dimensional to properly represent the spectral components
 of signals, thus the radio medium module is :ned:`Ieee80211DimensionalRadioMedium`.
 
-In the ``General`` configuration the background noise (:ned:`IsotropicDimensionalBackgroundNoise`
+In the ``General`` configuration, the background noise (:ned:`IsotropicDimensionalBackgroundNoise`
 by default due to using the dimensional radio medium) is set up. By default, this module uses
 the power parameter. However, directly specifying power can only be used when all signals have
-the same center frequency and bandwidth; otherwise the noise power density parameter needs to
+the same center frequency and bandwidth; otherwise, the noise power density parameter needs to
 be specified.
 
 .. literalinclude:: ../omnetpp.ini
@@ -107,7 +107,7 @@ be specified.
    :end-at: backgroundNoise.powerSpectralDensity
    :language: ini
 
-The following sets the radio type to dimensional, and configures a more realistic signal
+The following sets the radio type to dimensional and configures a more realistic signal
 shape in frequency (the spectral mask in the 802.11 standard):
 
 .. figure:: media/spectralmask_wifi.png
@@ -122,7 +122,7 @@ shape in frequency (the spectral mask in the 802.11 standard):
 .. note:: We're using linear interpolation instead of log-linear when defining the signal
           shape, so the specified signal shape is not exactly the same as the spectral mask.
 
-These lines configure the Wifi channels (the host-pairs are on different, but interfering channels):
+These lines configure the Wifi channels (the host-pairs are on different but interfering channels):
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: channelNumber = 0
@@ -154,7 +154,7 @@ spectrum figures display the isotropic background noise at the bottom of the plo
 is dragged around, the signal of the host it is closer to appears as the stronger signal on
 the spectrum figure. Note that the power density axis scale keeps changing as the transmitted
 signals reach the other hosts. The scale also depends on where the probe is dragged;
-when its dragged further, smaller signal power density is encountered, and the lower boundary
+when it's dragged further, smaller signal power density is encountered, and the lower boundary
 of the scale extends.
 
 Spectrogram
@@ -177,7 +177,7 @@ The visualization is enabled with the visualizer's :par:`displaySpectrograms` pa
 +---------------------+---------------------+
 
 Similarly to the spectrum figure, the :par:`spectrogramMode` parameter specifies what to
-display (``total``, ``signal`` or the default ``auto``). The pixmap's resolution can be
+display (``total``, ``signal``, or the default ``auto``). The pixmap's resolution can be
 tuned by additional parameters.
 
 Interference is visualized on the spectrogram as a mix of green and red colors; as such,
@@ -209,8 +209,8 @@ Here is a video of the simulation:
    :align: center
 
 In the video, the two hosts start transmitting simultaneously. Similarly to the previous
-simulation, the spectrograms of the hosts displays the transmitted/received signal separately
-from the interference. The signal and interference is displayed as the green and red color
+simulation, the spectrograms of the hosts display the transmitted/received signal separately
+from the interference. The signal and interference are displayed as the green and red color
 channel of the spectrogram.
 The probe displays the total power density in blue.
 
@@ -218,11 +218,11 @@ The playback speed is lowered a bit before the probe is dragged (the signal bloc
 upwards slower on the spectrogram). Note the change in saturation on the different sides
 of the spectrogram as the probe is dragged closer to each transmitting host.
 
-The blue signal blocks on the spectrograms of ``host2`` and ``host4`` represents both
-transmitted signals before being received. When ``host2`` and ``host4`` starts receiving
-their respective signal, the blocks turns to a combination of green and red.
+The blue signal blocks on the spectrograms of ``host2`` and ``host4`` represent both
+transmitted signals before being received. When ``host2`` and ``host4`` start receiving
+their respective signal, the blocks turn to a combination of green and red.
 At ``host2``, the right side of the signal block is green, the left is red; at ``host4``,
-it's the other way around, because the two hosts are receiving different signals.
+it's the other way around because the two hosts are receiving different signals.
 
 When the transmissions are over, the signal blocks change from green/red to blue at the
 transmitting hosts, as the signals are no longer transmitted. When the end of the signal
@@ -230,7 +230,7 @@ reaches the receiving hosts, their blocks change to blue as well.
 
 It is apparent that the ACK is much shorter than the data frame. Also, the data frame is
 received at a much lower power than the ACK is transmitted. At ``host2`` and ``host4``,
-the signal block representing the ACK has a more saturated color, and appears wider;
+the signal block representing the ACK has a more saturated color and appears wider;
 in fact, the ACK has the same bandwidth as the data frame, but since the data frame's
 power is lower at the receiving node, its block fades into white at the sides.
 
@@ -253,12 +253,12 @@ saturation represents the magnitude. This feature has two distinct visualization
 which are enabled and configured independently:
 
 - **Main power density map**: displays the total power density of the wireless medium within the network's boundaries (or in some limited but fixed boundary).
-- **Per-node power density map**: displays the power density in the vicinity of network nodes; similarly to the other figures, the :par:`powerDensityMapMode` parameter specifies what to display (``total``, ``signal`` or the default ``auto``).
+- **Per-node power density map**: displays the power density in the vicinity of network nodes; similarly to the other figures, the :par:`powerDensityMapMode` parameter specifies what to display (``total``, ``signal``, or the default ``auto``).
 
 The power density map displays the power density at a specific frequency, which is the
 center of the frequency axis by default. The frequency can also be specified manually
 be the :par:`powerDensityMapCenterFrequency` parameter. This parameter (and some others)
-can be changed from Qtenv and they take effect immediately (whether the simulation is running or stopped).
+can be changed from Qtenv, and they take effect immediately (whether the simulation is running or stopped).
 
 The power density map uses the same color coding as the other figures (green/red and blue).
 As with the spectrogram, the saturation of the heatmap's pixels depends on the scale of
@@ -285,7 +285,7 @@ Mean is the slowest, but the most accurate. Note that the :par:`powerDensityMapP
 pertains both to the main and the per-node figures; ``mean`` by default.
 Similarly, the spectrogram figure has the :par:`SpectrogramPixelMode` parameter.
 
-.. note:: The power density map feature is very CPU-intensive but the visualization can use multiple CPU cores. For multi-core support, INET needs to be compiled with OpenMP.
+.. note:: The power density map feature is very CPU-intensive, but the visualization can use multiple CPU cores. For multi-core support, INET needs to be compiled with OpenMP.
 
 The ``PowerDensityMap`` configuration uses a similar network as the previous examples,
 but without a probe module. The network also contains physical objects which represent

@@ -4,19 +4,18 @@ Statistical Policing
 Goals
 -----
 
-In this example we combine a sliding window rate meter with a probabilistic packet
-dropper to achieve a simple statistical policing.
+In this example, we combine a sliding window rate meter with a probabilistic packet
+dropper to achieve simple statistical policing.
 
 | INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/streamfiltering/statistical <https://github.com/inet-framework/inet/tree/master/showcases/tsn/streamfiltering/statistical>`__
 
 The Model
 ---------
-
-In this configuration we use a sliding window rate meter in combination with a
-statistical rate limiter. The former measures the thruput by summing up the
+In this configuration, we use a sliding window rate meter in combination with a
+statistical rate limiter. The former measures the throughput by summing up the
 packet bytes over the time window, the latter drops packets in a probabilistic
-way by comparing the measured datarate to the maximum allowed datarate.
+way by comparing the measured data rate to the maximum allowed data rate.
 
 Here is the network:
 
