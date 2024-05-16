@@ -16,13 +16,13 @@ import inet.applications.contract.IApp;
 // ~SimpleVoipReceiver.
 //
 // The source alternates between two states: talk and silence. The length
-// the module spends in each state is controlled by the talkspurtDuration and
-// silenceDuration parameters. In the talk state, the module acts as a CBR source,
-// and sends packets of size talkPacketSize every packetizationInterval seconds
+// the module spends in each state is controlled by the `talkspurtDuration` and
+// `silenceDuration` parameters. In the talk state, the module acts as a CBR source,
+// and sends packets of size `talkPacketSize` every `packetizationInterval` seconds
 // to the destination over UDP. Silence is implicit: in the silence state, no packets
 // are sent, and there is no explicit signaling of silence either.
 //
-// Packets are of type SimpleVoipPacket. In addition to packet ID and timestamp,
+// Packets are of type `SimpleVoipPacket`. In addition to packet ID and timestamp,
 // packets also contain a talkspurt ID and the total number of packets in the
 // talkspurt to facilitate statistics on the receiver's side. (It allows the receiver
 // to detect the loss of packets at the end of a talkspurt; a full talkspurt can still

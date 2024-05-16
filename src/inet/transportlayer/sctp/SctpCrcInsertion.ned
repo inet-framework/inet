@@ -8,7 +8,7 @@
 package inet.transportlayer.sctp;
 
 //
-// SctpCrcInsertion module.
+// Inserts SCTP CRC into packets.
 //
 simple SctpCrcInsertion
 {

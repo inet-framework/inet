@@ -18,14 +18,14 @@ package inet.transportlayer.rtp;
 // See ~RtpProfile, ~RtpAvProfile
 //
 //# TODO Translate:
-//# The Rtp module receives the following messages from the application through the appIn gate:
+//# The Rtp module receives the following messages from the application through the `appIn` gate:
 //# a msg containing a ~RtpControlInfo derived controlinfo.
 //#   - ~RtpCiEnterSession: Enter new session
 //#         Create and initialize an ~RtpProfile module for the session.
-//#         params: profileName, commonName, bandwidth, destinationAddress, port
+//#         params: `profileName`, `commonName`, bandwidth, `destinationAddress`, port
 //#   - ~RtpCiCreateSenderModule:
-//#         Send a msg to the profile to create a new module for sending the fileName file.
-//#         params: ssrc, payloadType, fileName
+//#         Send a msg to the profile to create a new module for sending the `fileName` file.
+//#         params: ssrc, `payloadType`, `fileName`
 //#   - ~RtpCiDeleteSenderModule:
 //#         Send a msg to the profile to delete the sender module.
 //#         params: ssrc
@@ -36,7 +36,7 @@ package inet.transportlayer.rtp;
 //#         Delete ~RtpProfile module.
 //#         params: ---
 //#   -
-//# The Rtp module sends the following messages to the application through the appOut gate:
+//# The Rtp module sends the following messages to the application through the `appOut` gate:
 //# A ~RtpControlMsg msg containing a ~RtpControlInfo derived:
 //#   - ~RtpCiSenderModuleCreated:
 //#         Sends the ssrc associated with the created module to the App.
@@ -46,7 +46,7 @@ package inet.transportlayer.rtp;
 //#         params: ssrc
 //#   - ~RtpCiSenderStatus:
 //#         Sends the module status to the App. (PLAYING, FINISHED, STOPPED, PAUSED)
-//#         params: ssrc, status (see ~RtpSenderStatus), timeStamp
+//#         params: ssrc, status (see ~RtpSenderStatus), `timeStamp`
 //#   - ~RtpCiSessionEntered:
 //#         Notifies the App that a new session (~RtpProfile) has been created.
 //#         params: ssrc

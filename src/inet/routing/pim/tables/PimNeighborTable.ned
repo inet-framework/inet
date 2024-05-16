@@ -10,7 +10,7 @@
 package inet.routing.pim.tables;
 
 //
-// The PimNeighborTable module contains information about neighboring PIM routers.
+// The `PimNeighborTable` module contains information about neighboring PIM routers.
 //
 simple PimNeighborTable
 {

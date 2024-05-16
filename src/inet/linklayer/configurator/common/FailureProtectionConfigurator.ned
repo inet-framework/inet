@@ -15,7 +15,7 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 // and stream merging) configuration, the other one is used to provide the gate
 // scheduling configuration.
 //
-// The key parameters are the linkFailureProtection and nodeFailureProtection
+// The key parameters are the `linkFailureProtection` and `nodeFailureProtection`
 // fields of the individual configuration entries. Both of these take a number
 // and a set of links or nodes respectively. The former specifies the number of
 // failed links or nodes from the given set against which the stream must be

@@ -12,9 +12,9 @@ import inet.queueing.contract.IPacketPusher;
 
 //
 // This module duplicates incoming packets based on the stream they are part of.
-// The stream is determined by the StreamReq tag that is attached to the packet.
+// The stream is determined by the `StreamReq` tag that is attached to the packet.
 // The number of outgoing packets is determined by the mapping parameter. Each
-// outgoing packet will have an attached StreamReq with the tag name taken from
+// outgoing packet will have an attached `StreamReq` with the tag name taken from
 // the mapping parameter.
 //
 // @see ~StreamMerger

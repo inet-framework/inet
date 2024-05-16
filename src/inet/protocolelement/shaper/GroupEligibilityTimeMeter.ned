@@ -7,7 +7,7 @@
 package inet.protocolelement.shaper;
 
 //
-// This module extends the EligibilityTimeMeter with scheduler groups.
+// This module extends the `EligibilityTimeMeter` with scheduler groups.
 // The calculation of the eligibility time takes into account the eligibility times of all
 // streams of the same group.
 //

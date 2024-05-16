@@ -16,7 +16,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IPulseShaper;
 //
 // This transmitter model is part of a simple hypothetical layered radio. It
 // produces detailed transmissions that have a separate representation for
-// all simulated domains. The levelOfDetail parameter controls which domains
+// all simulated domains. The `levelOfDetail` parameter controls which domains
 // are actually simulated, but all parameters relevant to the error model are
 // always set on the transmission.
 //

@@ -13,12 +13,12 @@ import inet.applications.contract.IApp;
 // This module hosts TCP-based server applications. It dynamically creates
 // and launches a new "thread" object for each incoming connection.
 //
-// Server threads should be subclassed from the TcpServerThreadBase
+// Server threads should be subclassed from the `TcpServerThreadBase`
 // C++ class, registered in the C++ code using the Define_Module() macro,
-// and the module type should be specified in the serverThreadModuleType
+// and the module type should be specified in the `serverThreadModuleType`
 // parameter of ~TcpServerHostApp. The thread object will receive events
-// via a callback interface (methods like established(), dataArrived(),
-// peerClosed(), timerExpired()), and can send packets via TcpSocket's send()
+// via a callback interface (methods like established(), `dataArrived()`,
+// `peerClosed()`, `timerExpired()`), and can send packets via `TcpSocket`'s send()
 // method.
 //
 // Compatible with both ~Ipv4 and ~Ipv6.

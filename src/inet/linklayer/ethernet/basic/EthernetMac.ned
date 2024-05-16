@@ -67,7 +67,7 @@ import inet.linklayer.contract.IEtherMac;
 // (including the destination MAC address). The source address, if left empty,
 // will be filled in. Then the frame is queued and transmitted.
 //
-// Data frames received from the network are EtherFrames. They are passed to
+// Data frames received from the network are `EtherFrames`. They are passed to
 // the higher layers without modification.
 // Also, the module properly responds to PAUSE frames but never sends them
 // by itself -- however, it transmits PAUSE frames received from upper layers.

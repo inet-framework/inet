@@ -9,14 +9,14 @@ package inet.linklayer.contract;
 
 //
 // Interface for Ethernet MAC implementations. All Ethernet MAC implementations
-// should implement this (i.e. declared as: EthernetCsmaMac like IEtherMac).
+// should implement this (i.e. declared as: `EthernetCsmaMac` like `IEtherMac`).
 // The existing implementations are these: ~EthernetCsmaMac and ~EthernetMac.
 //
 // Doesn't do encapsulation/decapsulation; see ~EthernetEncapsulation for that.
 //
 // Expected environment:
 // - phys$i and phys$o should be connected to the "network"
-// - upperLayerIn and upperLayerOut are usually connected to ~EthernetEncapsulation (in hosts)
+// - `upperLayerIn` and `upperLayerOut` are usually connected to ~EthernetEncapsulation (in hosts)
 //   or ~IMacRelayUnit (in a switch)
 //
 // The module does not perform encapsulation or decapsulation of frames --

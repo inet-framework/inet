@@ -11,7 +11,7 @@ import inet.visualizer.base.EnergyStorageVisualizerBase;
 import inet.visualizer.contract.IEnergyStorageVisualizer;
 
 //
-// This module visualizes energyStorages on a 2D canvas.
+// This module visualizes `energyStorages` on a 2D canvas.
 //
 // @see ~EnergyStorageOsgVisualizer, ~EnergyStorageVisualizer, ~EnergyStorageVisualizerBase, ~IEnergyStorageVisualizer
 //

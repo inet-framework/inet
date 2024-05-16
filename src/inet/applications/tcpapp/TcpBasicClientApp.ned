@@ -20,7 +20,7 @@ import inet.applications.contract.IApp;
 // by messages of class ~GenericAppMsg.
 //
 // By default, reading from the socket is not rate limited. To allow rate
-// limiting, set autoRead=false, and use the readSize and readDelay parameters
+// limiting, set autoRead=false, and use the `readSize` and `readDelay` parameters
 // to set a rate limit. This will allow TCP flow control to come into effect.
 //
 // Compatible with both IPv4 (~Ipv4) and IPv6 (~Ipv6).

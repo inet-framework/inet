@@ -18,7 +18,7 @@ package inet.visualizer.base;
 //  - %n module full name
 //  - %p module full path
 //  - %t display string text
-//  - %s cModule::str()
+//  - %s `cModule`::str()
 //
 // @see ~InfoCanvasVisualizer, ~InfoOsgVisualizer, ~IInfoVisualizer, ~VisualizerBase
 //

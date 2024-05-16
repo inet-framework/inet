@@ -13,7 +13,7 @@ package inet.linklayer.ieee80211.mgmt;
 // This module expects ~Ieee80211MgmtSta modules to be present in the stations.
 //
 // This module never switches channels, that is, it will operate on the channel
-// the physical layer is configured for (see channelNumber in ~Ieee80211Radio).
+// the physical layer is configured for (see `channelNumber` in ~Ieee80211Radio).
 //
 // This module relies on a connected ~Ieee80211Mac for actual
 // reception and transmission of frames.

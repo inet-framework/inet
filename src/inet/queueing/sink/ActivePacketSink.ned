@@ -22,7 +22,7 @@ import inet.queueing.contract.IActivePacketSink;
 // All pulled packets are counted and deleted.
 //
 // Invariants:
-//  - two subsequent packets are always pulled in at least collectionInterval time apart
+//  - two subsequent packets are always pulled in at least `collectionInterval` time apart
 //  - backpressure prevents packets from being pulled in
 //
 simple ActivePacketSink extends ActivePacketSinkBase like IActivePacketSink

@@ -16,7 +16,7 @@ import inet.node.ethernet.EthernetSwitch;
 // switching for Ethernet networks. All TSN features are optional and they can
 // be combined with other Ethernet features.
 //
-// TODO move cut-through switching from EthernetSwitch to TsnSwitch?
+// TODO move cut-through switching from `EthernetSwitch` to `TsnSwitch`?
 module TsnSwitch extends EthernetSwitch
 {
     parameters:

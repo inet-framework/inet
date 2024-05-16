@@ -15,9 +15,9 @@ package inet.networklayer.ipv4;
 // Hosts and routers are communicating with each other by sending
 // IGMP messages (see ~IgmpMessage). The IGMP messages are
 // encapsulated and transported by the IP module connected to
-// the 'ipOut' and 'ipIn' gates. If a multicast routing
+// the `ipOut` and `ipIn` gates. If a multicast routing
 // protocol module, which also uses IGMP messages (e.g. DVMRP),
-// is connected to the 'routerOut' and 'routerIn' gates, it can
+// is connected to the `routerOut` and `routerIn` gates, it can
 // send and receive IGMP messages through the IGMP module.
 //
 // This module implements both IGMPv2 host and router logic
@@ -27,7 +27,7 @@ package inet.networklayer.ipv4;
 //
 // When an interface joins a multicast group, the host
 // will send a Membership Report immediately to the group address.
-// This report is repeated after 'unsolicitedReportInterval' to
+// This report is repeated after `unsolicitedReportInterval` to
 // cover the possibility of the first report being lost.
 //
 // When a host's interface leaves a multicast group and it was
@@ -56,29 +56,29 @@ package inet.networklayer.ipv4;
 // the smallest IP address will be the Querier. When other routers
 // observe that they are Non-Queriers (by receiving an IGMP Query
 // with a lower source address), they stop sending IGMP Queries
-// until 'otherQuerierPresentInterval' has elapsed since the last
+// until `otherQuerierPresentInterval` has elapsed since the last
 // received query.
 //
-// Routers periodically ('queryInterval') send a General Query
+// Routers periodically (`queryInterval`) send a General Query
 // on each attached network for which this router is a Querier.
-// On startup, the router sends 'startupQueryCount' queries
-// separated by 'startupQueryInterval'. A General Query
+// On startup, the router sends `startupQueryCount` queries
+// separated by `startupQueryInterval`. A General Query
 // has an unspecified Group Address field, a Max Response Time
-// field set to 'queryResponseInterval', and is sent to the
+// field set to `queryResponseInterval`, and is sent to the
 // all-systems multicast address (224.0.0.1).
 //
 // When a router receives a Membership Report, it will add the
 // reported group to the list of multicast group memberships.
 // At the same time, it will set a timer for the membership
-// to 'groupMembershipInterval'. Repeated reports restart
+// to `groupMembershipInterval`. Repeated reports restart
 // the timer. If the timer expires, the router assumes
 // that the group has no local members, and multicast traffic
 // is no longer forwarded to that interface.
 //
 // When a Querier receives a Leave Group message for a group,
 // it sends a Group-Specific Query to the group being left.
-// It repeats the Query 'lastMemberQueryCount' times separated by
-// 'lastMemberQueryInterval' until a Membership Report is received.
+// It repeats the Query `lastMemberQueryCount` times separated by
+// `lastMemberQueryInterval` until a Membership Report is received.
 // If no Report is received, then the router assumes that the group
 // has no local members.
 //
@@ -106,7 +106,7 @@ simple Igmpv2 like IIgmp
         double lastMemberQueryInterval @unit(s) = default(1s);
         int    lastMemberQueryCount = default(robustnessVariable);
         double unsolicitedReportInterval @unit(s) = default(10s);
-//      double version1RouterPresentInterval @unit(s) = default(400s);
+        //double version1RouterPresentInterval @unit(s) = default(400s);
         @display("i=block/cogwheel");
         @selfMessageKinds(inet::IgmpTimerKind);
 

@@ -13,21 +13,21 @@ package inet.common.packet.recorder;
 // Records PCAP traces of frames sent/received by other modules within
 // the same host. By default, it records frames sent/received by L2 modules
 // of ~StandardHost and ~Router. The output filename is expected in the
-// pcapFile parameter. The PcapRecorder module can also print tcpdump-like
+// `pcapFile` parameter. The `PcapRecorder` module can also print tcpdump-like
 // textual information on the log (EV); this functionality can be
 // controlled by the verbose parameter.
 //
 // <b>Which modules to record:</b> The list of modules can be specified in
-// the moduleNamePatterns parameter. It is a space-separated list of module
-// names, which will be interpreted as children of the PcapRecorder's parent
+// the `moduleNamePatterns` parameter. It is a space-separated list of module
+// names, which will be interpreted as children of the `PcapRecorder`'s parent
 // module. To record elements of a module vector, add "[*]" to the name
 // (example: "eth[*]").
 //
-// <b>Operation:</b> PcapRecorder adds signal listeners to the recorded
-// modules. The signals subscribed to are "packetSentToLower" and
-// "packetReceivedFromLower", but these names can be overridden with the
-// sendingSignalNames and receivingSignalNames parameters. The packets
-// themselves are expected as cPacket* signal values.
+// <b>Operation:</b> `PcapRecorder` adds signal listeners to the recorded
+// modules. The signals subscribed to are `packetSentToLower` and
+// `packetReceivedFromLower`, but these names can be overridden with the
+// `sendingSignalNames` and `receivingSignalNames` parameters. The packets
+// themselves are expected as `cPacket*` signal values.
 //
 simple PcapRecorder
 {

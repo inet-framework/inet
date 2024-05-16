@@ -23,7 +23,7 @@ package inet.transportlayer.contract;
 // For receiving UDP packets, the connected applications should first
 // "bind" to the given UDP port. This can be done by sending an
 // arbitrary message with message kind UDP_C_BIND and an ~UdpControlInfo
-// attached with srcPort filled in.
+// attached with `srcPort` filled in.
 //
 // If there is only one app which doesn't bind to any port, it will
 // receive all packets.

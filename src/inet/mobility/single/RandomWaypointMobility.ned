@@ -16,8 +16,8 @@ import inet.mobility.base.MovingMobilityBase;
 // position (distributed uniformly over the constraint area or volume) and a
 // random speed is chosen. You can define a speed as a variate from which a new
 // value will be drawn for each line segment; it is customary to specify it as
-// uniform(minSpeed, maxSpeed). When the node reaches the target position,
-// it waits for the time waitTime which can also be defined as a variate.
+// `uniform(minSpeed, maxSpeed)`. When the node reaches the target position,
+// it waits for the time `waitTime` which can also be defined as a variate.
 // After this time, the algorithm calculates a new random position, etc.
 //
 // This model was originally written by Georg Lutz (GeorgLutz AT gmx DOT de) for

@@ -13,8 +13,8 @@ package inet.visualizer.base;
 // of signals at the provided subscription module.
 //
 // This module subscribes to l2Associated, l2Disassociated,
-// l2ApAssociated, l2ApDisassociated on the module determined by the
-// visualizationSubjectModule parameter.
+// `l2ApAssociated`, `l2ApDisassociated` on the module determined by the
+// `visualizationSubjectModule` parameter.
 //
 // @see ~Ieee80211CanvasVisualizer, ~Ieee80211OsgVisualizer, ~IIeee80211Visualizer, ~VisualizerBase
 //

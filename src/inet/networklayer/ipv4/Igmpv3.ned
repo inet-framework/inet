@@ -24,7 +24,7 @@ simple Igmpv3 like IIgmp
         double lastMemberQueryInterval @unit(s) = default(1s);
         int    lastMemberQueryCount = default(robustnessVariable);
         double unsolicitedReportInterval @unit(s) = default(10s);
-//      double version1RouterPresentInterval @unit(s) = default(400s);
+        //double version1RouterPresentInterval @unit(s) = default(400s);
         @display("i=block/cogwheel");
         @selfMessageKinds(inet::IgmpTimerKind);
 

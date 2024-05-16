@@ -15,7 +15,7 @@ import inet.linklayer.contract.IMacForwardingTable;
 // Entries are deleted if their age exceeds a certain limit.
 //
 // If needed, address tables can be pre-loaded from text files at the beginning
-// of the simulation; this is controlled by the forwardingTableFile module parameter.
+// of the simulation; this is controlled by the `forwardingTableFile` module parameter.
 // File format:
 //   line oriented table with space or TAB delimited columns.
 //   columns:

@@ -15,7 +15,7 @@ package inet.linklayer.configurator.common;
 // This module is based on ~Ipv4NetworkConfigurator. The optional selector
 // attributes: @hosts, @names, @towards, @among also come with this
 // configurator and each of them behaves similarly to its ~Ipv4NetworkConfigurator equivalent.
-// @ports selector added to configuring per-port parameters in Ieee8021dInterfaceData.
+// @ports selector added to configuring per-port parameters in `Ieee8021dInterfaceData`.
 //
 // The following example configures port 5 (if it exists) on all switches to cost 19 and
 // priority 32768:

@@ -56,7 +56,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 // Note about the implementation:
 //
 // Despite its appearance, Ieee80211Interface is not a plain compound module.
-// It has an underlying custom C++ class that inherits from cModule.
+// It has an underlying custom C++ class that inherits from `cModule`.
 //
 module Ieee80211Interface extends NetworkInterface like IWirelessInterface
 {

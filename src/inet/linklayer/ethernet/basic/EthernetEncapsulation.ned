@@ -13,14 +13,14 @@ import inet.linklayer.contract.IEthernetLayer;
 // Performs Ethernet II or Ethernet with LLC/SNAP encapsulation/decapsulation.
 //
 // Expected environment:
-// - lowerLayerIn, lowerLayerOut gates should be connected to an ~EthernetCsmaMac
-// - upperLayerIn, upperLayerOut gates should be connected to a higher layer
+// - `lowerLayerIn`, `lowerLayerOut` gates should be connected to an ~EthernetCsmaMac
+// - `upperLayerIn`, `upperLayerOut` gates should be connected to a higher layer
 //   protocol or application
 //
 // Functionality:
-// - packets coming from upper layers will be encapsulated in an EthernetII frame
+// - packets coming from upper layers will be encapsulated in an `EthernetII` frame
 //   (~EthernetMacHeader) or Ethernet SNAP frame (~Ieee8022LlcSnapHeader)
-//   depending on the useSNAP module parameter,
+//   depending on the `useSNAP` module parameter,
 //   and sent to the MAC. The ~EtherType is taken from the ~PacketProtocolTag tag
 //   attached to the packet. The source address will be filled in by ~EthernetCsmaMac.
 // - also accepts SENDPAUSE command (message kind=IEEE802CTRL_SENDPAUSE) from

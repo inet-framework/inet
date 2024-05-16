@@ -24,7 +24,7 @@ import inet.applications.contract.IApp;
 // Application model for comparing the performance of various transport
 // protocols.
 //
-// The NetPerfMeter model simultaneously transmits bidirectional flows to an
+// The ~NetPerfMeter model simultaneously transmits bidirectional flows to an
 // endpoint, and measures the resulting flow bandwidths and QoS. Since the
 // application behavior is the same for all underlying transport layer
 // protocols, it allows for comparing the performance of various transport

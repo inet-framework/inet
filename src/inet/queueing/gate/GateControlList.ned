@@ -8,8 +8,8 @@
 package inet.queueing.gate;
 
 //
-// This module configures multiple PeriodicGate modules according to a gate control list.
-// The modules are looked for at ^.transmissionGate[*] relative module path.
+// This module configures multiple `PeriodicGate` modules according to a gate control list.
+// The modules are looked for at the `^.transmissionGate[*]` relative module path.
 //
 simple GateControlList
 {

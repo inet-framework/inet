@@ -19,7 +19,7 @@ import inet.queueing.contract.IPacketMeter;
 // asynchronous packet shaper. Note that the asynchronous packet shaper also has
 // parts in the network interface queue module.
 //
-// @see ~EligibilityTimeQueue, EligibilityTimeGate
+// @see ~EligibilityTimeQueue, ~EligibilityTimeGate
 //
 module DualIeee8021qFilter like IPacketFilter
 {

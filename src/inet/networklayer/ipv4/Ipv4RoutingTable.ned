@@ -13,21 +13,21 @@ import inet.networklayer.contract.IRoutingTable;
 // Stores the routing table. (Per-interface configuration is stored in
 // ~InterfaceTable.)
 //
-// For hosts, the routerId module parameter should be empty (""),
+// For hosts, the `routerId` module parameter should be empty (""),
 // in which case the loopback IPv4 address will be set to 127.0.0.1/8.
-// For routers which have a routerId set, the loopback address will be set to
-// routerId. (See also RFC 2072 "Router Renumbering Guide".)
+// For routers which have a `routerId` set, the loopback address will be set to
+// `routerId`. (See also RFC 2072 "Router Renumbering Guide".)
 //
-// RouterId may also be set to the string <tt>"auto"</tt>, in which case the
-// highest interface address will be chosen as routerId; the loopback address
+// `RouterId` may also be set to the string `"auto"`, in which case the
+// highest interface address will be chosen as `routerId`; the loopback address
 // will remain 127.0.0.1/8.
 //
-// The routing table is read from a file (parameter routingFile);
+// The routing table is read from a file (parameter `routingFile`);
 // the file can also fill in or overwrite interface settings.
 // The file format is documented <a href="irt.html">here</a>.
 //
-// Note that many protocols don't require routerId to be routable, but some
-// others do -- so it is probably a good idea to set up routable routerIds.
+// Note that many protocols don't require `routerId` to be routable, but some
+// others do -- so it is probably a good idea to set up routable `routerIds`.
 //
 // This module has no gates; all functionality can be accessed via member
 // functions of the C++ module class. For detailed info, please see the C++

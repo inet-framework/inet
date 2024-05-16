@@ -39,11 +39,11 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 // can be configured in a single XML file for the whole network.
 //
 // Modules that represent network nodes (host, hub, bus, switch, access point,
-// router, etc.) are expected to have the @networkNode property, because that's how the
+// router, etc.) are expected to have the `@networkNode` property, because that's how the
 // configurator recognizes them in the model. All nodes must have their
-// interface table (~InterfaceTable module) as their "interfaceTable" submodule.
+// interface table (~InterfaceTable module) as their `interfaceTable` submodule.
 // All routers must have their routing table (~Ipv4RoutingTable module) as their
-// "routingTable" or "networkLayer.routingTable" submodule.
+// `routingTable` or `networkLayer.routingTable` submodule.
 //
 // By default all interfaces in all nodes will have a unique IPv4 address
 // assigned. Routing tables will be configured so that there's a route
@@ -58,7 +58,7 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 // The configurator goes through the following configuration steps:
 //
 //  -# Builds a graph representing the network topology. The graph
-//     will have a vertex for every module that has a @networkNode property (this
+//     will have a vertex for every module that has a `@networkNode` property (this
 //     includes hosts, routers, and L2 devices like switches, access points,
 //     Ethernet hubs, etc.) It also assigns weights to vertices and edges that
 //     will be used by the shortest path algorithm when setting up routes.
@@ -140,16 +140,16 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 // </config>
 // </pre>
 //
-// The XML configuration must contain exactly one <config> element. Under the
+// The XML configuration must contain exactly one `<config>` element. Under the
 // root element, there can be multiple of the following elements.
 //
-//  - <interface>
+//  - `<interface>`
 //    The interface element provides configuration parameters for one or more
 //    interfaces in the network. The selector attributes limit the scope where
 //    the interface element has effects. The parameter attributes limit the
 //    range of assignable addresses and netmasks.
 //
-//    - @hosts
+//    - `@hosts`
 //      Optional selector attribute that specifies a list of host name patterns.
 //      Only interfaces in the specified hosts are affected. The pattern might
 //      be a full path starting from the network, or a module name anywhere in
@@ -157,13 +157,13 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //      value is "*" that matches all hosts.
 //      e.g. "subnet.client*" or "host* router[0..3]" or "area*.*.host[0]"
 //
-//    - @names
+//    - `@names`
 //      Optional selector attribute that specifies a list of interface name
 //      patterns. Only interfaces with the specified names are affected. The
 //      default value is "*" that matches all interfaces.
 //      e.g. "eth* ppp0" or "*"
 //
-//    - @towards
+//    - `@towards`
 //      Optional selector attribute that specifies a list of host name patterns.
 //      Only interfaces connected towards the specified hosts are affected. The
 //      specified name will be matched against the names of hosts that are on
@@ -173,13 +173,13 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //      of specifying the interface names. The default value is "*".
 //      e.g. "ap" or "server" or "client*"
 //
-//    - @among
+//    - `@among`
 //      Optional selector attribute that specifies a list of host name patterns.
 //      Only interfaces in the specified hosts connected towards the specified
 //      hosts are affected.
 //      The 'among="X Y Z"' is same as 'hosts="X Y Z" towards="X Y Z"'.
 //
-//    - @address
+//    - `@address`
 //      Optional parameter attribute that limits the range of assignable
 //      addresses. Wildcards are allowed by using 'x' as part of the address
 //      in place of a byte. Unspecified parts will be filled automatically by
@@ -188,7 +188,7 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //      in their subnets, allowing them to become configured later very easily.
 //      e.g. "192.168.1.1" or "10.0.x.x"
 //
-//    - @netmask
+//    - `@netmask`
 //      Optional parameter attribute that limits the range of assignable
 //      netmasks. Wildcards are allowed by using 'x' as part of the netmask
 //      in place of a byte. Unspecified parts will be filled automatically by
@@ -196,45 +196,45 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //      configured.
 //      e.g. "255.255.255.0" or "/24" or "255.255.x.x" or "255.255.x.0"
 //
-//    - @mtu                number
+//    - `@mtu`                number
 //      Optional parameter attribute to set the MTU parameter in the interface.
 //      When unspecified, the interface parameter is left unchanged.
 //
-//    - @metric                number
+//    - `@metric`                number
 //      Optional parameter attribute to set the Metric parameter in the interface.
 //      When unspecified, the interface parameter is left unchanged.
 //
-//    - @groups
+//    - `@groups`
 //      Optional parameter attribute; it may contain a list of (multicast)
 //      IP addresses that will be added to the multicast groups of the interface.
 //      See also the <multicast-group> element.
 //
-//    - @add-static-route
+//    - `@add`-static-route
 //      Optional bool parameter (default=true).
 //      Add a static route to the routing table.
 //
-//    - @add-default-route
+//    - `@add`-default-route
 //      Optional bool parameter (default=true).
 //      Add a default route to the routing table if the node has only one non-loopback interface.
 //
-//    - @add-subnet-route
+//    - `@add`-subnet-route
 //      Optional bool parameter (default=true).
 //      Add a subnet route to the routing table.
 //
-//  - <wireless>
+//  - `<wireless>`
 //    The wireless element specifies the members of a wireless network. It is
 //    primarily useful when the members cannot be automatically determined using
 //    the SSID parameters.
 //
-//    - @id (optional)
+//    - `@id` (optional)
 //      Identifies the wireless network. If it is unspecified, an automatic value is used.
 //
-//    - @hosts
+//    - `@hosts`
 //      Optional selector attribute that specifies a list of host name patterns.
 //      Only interfaces in the specified hosts are affected. The default value
 //      is "*" that matches all hosts.
 //
-//    - @interfaces
+//    - `@interfaces`
 //      Optional selector attribute that specifies a list of interface name
 //      patterns. Only interfaces with the specified names are affected. The
 //      default value is "*" that matches all interfaces.
@@ -243,106 +243,106 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //    The multicast group element provides multicast network addresses for one
 //    or more interfaces in the network.
 //
-//    - @source
+//    - `@source`
 //      Optional attribute that specifies a host name. This specifies the root
 //      of the multicast spanning when static routing is enabled.
 //
-//    - @hosts
+//    - `@hosts`
 //      Optional selector attribute that specifies a list of host name patterns.
 //      Only interfaces in the specified hosts are affected. The default value
 //      is "*" that matches all hosts.
 //
-//    - @interfaces
+//    - `@interfaces`
 //      Optional selector attribute that specifies a list of interface name
 //      patterns. Only interfaces with the specified names are affected. The
 //      default value is "*" that matches all interfaces.
 //
-//    - @towards
+//    - `@towards`
 //      Optional selector attribute that specifies a list of host name patterns.
 //      Only interfaces connected towards the specified hosts are affected.
 //      The default value is "*".
 //
-//    - @among
+//    - `@among`
 //      Optional selector attribute that specifies a list of host name patterns.
 //      Only interfaces in the specified hosts connected towards the specified
 //      hosts are affected.
 //      The 'among="X Y Z"' is same as 'hosts="X Y Z" towards="X Y Z"'.
 //
-//    - @address
+//    - `@address`
 //      Mandatory parameter attribute that specifies a list of multicast group
 //      addresses to be assigned. Values must be selected from the valid range
 //      of multicast addresses.
 //      e.g. "224.0.0.1 224.0.1.33"
 //
-//  - <route>
+//  - `<route>`
 //    The route element provides routing table entries for multiple nodes
 //    in the network. The selector attributes limit the scope where the route
 //    element has effects.
 //
-//    - @hosts
+//    - `@hosts`
 //      Optional selector attribute that specifies a list of host name patterns.
 //      Only routing tables in the specified hosts are affected. The default
 //      value "" means all hosts will be affected.
 //      e.g. "host* router[0..3]"
 //
-//    - @destination
+//    - `@destination`
 //      Optional parameter attribute that specifies the destination address in
-//      the route (L3AddressResolver syntax). The default value is "*".
+//      the route (`L3AddressResolver` syntax). The default value is "*".
 //      e.g. "192.168.1.1" or "subnet.client[3]" or "subnet.server(ipv4)" or "*"
 //
-//    - @netmask
+//    - `@netmask`
 //      Optional parameter attribute that specifies the netmask in the route.
 //      The default value is "*".
 //      e.g. "255.255.255.0" or "/29" or "*"
 //
-//    - @gateway
+//    - `@gateway`
 //      Optional parameter attribute that specifies the gateway (next-hop)
-//      address in the route (L3AddressResolver syntax). When unspecified,
+//      address in the route (`L3AddressResolver` syntax). When unspecified,
 //      the interface parameter must be specified. The default value is "*".
 //      e.g. "192.168.1.254" or "subnet.router" or "*"
 //
-//    - @interface
+//    - `@interface`
 //      Optional parameter attribute that specifies the output interface name
 //      in the route. When unspecified, the gateway parameter must be specified.
 //      This parameter has no default value.
 //      e.g. "eth0"
 //
-//    - @metric
+//    - `@metric`
 //      Optional parameter attribute that specifies the metric in the route.
 //      The default value is 0.
 //
-//  - <multicast-route>
+//  - `<multicast-route>`
 //    The multicast-route elements add entries to multicast routing tables.
 //
-//    - @hosts
+//    - `@hosts`
 //      Optional selector attribute that specifies a list of host name patterns.
 //      Only routing tables in the specified hosts are affected.
 //      e.g. "host* router[0..3]"
 //
-//    - @source
+//    - `@source`
 //      Optional parameter attribute that specifies the address of the source
 //      network. The default value is "*" that matches all sources.
 //
-//    - @netmask
+//    - `@netmask`
 //      Optional parameter attribute that specifies the netmask of the source
 //      network. The default value is "*" that matches all sources.
 //
-//    - @groups
+//    - `@groups`
 //      Optional List of IPv4 multicast addresses specifying the groups this entry
 //      applies to. The default value is "*" that matches all multicast groups.
 //      e.g. "225.0.0.1 225.0.1.2".
 //
-//    - @metric
+//    - `@metric`
 //      Optional parameter attribute that specifies the metric in the route.
 //
-//    - @parent
+//    - `@parent`
 //      Optional parameter attribute that specifies the name of the interface
 //      the multicast datagrams are expected to arrive. When a datagram arrives
 //      on the parent interface, it will be forwarded towards the child interfaces;
 //      otherwise, it will be dropped. The default value is the interface on the
 //      shortest path towards the source of the datagram.
 //
-//    - @children
+//    - `@children`
 //      Mandatory parameter attribute that specifies a list of interface name
 //      patterns:
 //       - a name pattern (e.g. "ppp*") matches the name of the interface
@@ -351,51 +351,51 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //      Incoming multicast datagrams are forwarded to each child interface except the
 //      one they arrived in.
 //
-//  - <autoroute>
+//  - `<autoroute>`
 //    The autoroute element specifies parameters for the automatic static routing.
 //    If this element is not specified then the configurator assumes a default.
 //    The default specifies that all routing tables will be modified and all the
 //    shortest path to all interfaces will be computed.
 //
-//    - @sourceHosts
+//    - `@sourceHosts`
 //      Optional selector attribute that specifies a list of host full path patterns.
 //      It determines the set of routing tables that will be modified. The default
 //      value is "**".
 //
-//    - @destinationInterfaces
+//    - `@destinationInterfaces`
 //      Optional parameter attribute that specifies a list of interface full path
 //      patterns. It determines the set of destination interfaces for which the
 //      shortest path will be computed. The default value is "**".
 //
-//    - @metric
+//    - `@metric`
 //      Optional parameter attribute that determines the metric that is used to
 //      compute the shortest paths. Valid values are: "hopCount", "delay", "dataRate",
 //      and "errorRate". The default value is "hopCount".
 //
-//    - <node>
+//    - `<node>`
 //      The node optional sub-element specifies cost parameters for the shortest
 //      path algorithm. If this sub-element is not specified then the configurator
 //      determines cost by default according to the selected metric.
 //
-//      - @hosts
+//      - `@hosts`
 //        Mandatory selector attribute that specifies a list of node full path
 //        patterns. It determines the affected set of nodes.
 //
-//      - @cost
+//      - `@cost`
 //        Mandatory parameter attribute that specifies the cost. Valid values are
 //        "infinite" and numbers.
 //
-//    - <link>
+//    - `<link>`
 //      The node sub-element specifies cost parameters for the shortest path algorithm.
 //      If this sub-element is not specified then the configurator determines link
 //      cost by default according to the selected metric.
 //
-//      - @interfaces
+//      - `@interfaces`
 //        Mandatory selector attribute that specifies a list of interface full
 //        path patterns. It determines the affected set of links connected to
 //        the given interfaces.
 //
-//      - @cost
+//      - `@cost`
 //        Mandatory parameter attribute that specifies the cost. Valid values are
 //        "infinite" and numbers.
 //

@@ -20,9 +20,9 @@ import inet.linklayer.contract.IMacRelayUnit;
 //     that port; otherwise, it broadcasts it.
 // - STP aware mode (If an ~Stp or ~Rstp module is connected to its STP gate):
 //     Handles BPDU frames.
-//     If relaying a message, it also checks the port's status in the InterfaceTable.
+//     If relaying a message, it also checks the port's status in the `InterfaceTable`.
 //
-// @see EtherFrame, MacForwardingTable, Stp, Rstp
+// @see ~EtherFrame, ~MacForwardingTable, ~Stp, ~Rstp
 //
 simple Ieee8021dRelay extends MacRelayUnitBase like IMacRelayUnit
 {

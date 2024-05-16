@@ -10,10 +10,10 @@ package inet.emulation.linklayer.ethernet;
 //
 // This module provides a bidirectional connection to an Ethernet socket of the
 // host computer which is running the simulation. It writes the packets that arrive
-// on 'upperLayerIn' gate to the specified real socket and sends out packets
-// that arrive from the real socket on the 'upperLayerOut' gate.
+// on `upperLayerIn` gate to the specified real socket and sends out packets
+// that arrive from the real socket on the `upperLayerOut` gate.
 //
-// The CAP_NET_RAW privilege is required for using ExtEthernetSocket.
+// The CAP_NET_RAW privilege is required for using `ExtEthernetSocket`.
 //
 // The next commands add this privilege to opp_run, so all simulations
 // have the CAP_NET_RAW privilege, and all simulations run with this privilege!

@@ -21,15 +21,15 @@ package inet.linklayer.configurator.gatescheduling.base;
 // flow through the network.
 //   - name: the name of the flow
 //   - PCP: the PCP header field of the packets
-//   - gateIndex: the gate index of the traffic class in all network interfaces along the path
+//   - `gateIndex`: the gate index of the traffic class in all network interfaces along the path
 //   - application (optional): the name of the application module in the source where the start time will be configured, not used by default
 //   - source: the network node name of the packet flow source
 //   - destination: the network node name of the packet flow destination
-//   - packetLength: the expected packet length of the packets in the flow (may also be used to have extra margin in the schedule)
-//   - packetInterval: the expected interval between packets
-//   - maxLatency (optional): the allowed maximum end-to-end delay of packets, not used by default
-//   - maxJitter (optional): the allowed maximum jitter among the packets, 0 by default
-//   - pathFragments (optional): array of arrays, where each array contains a list of network node names, supports multicast trees, shortest path is used when omitted
+//   - `packetLength`: the expected packet length of the packets in the flow (may also be used to have extra margin in the schedule)
+//   - `packetInterval`: the expected interval between packets
+//   - `maxLatency` (optional): the allowed maximum end-to-end delay of packets, not used by default
+//   - `maxJitter` (optional): the allowed maximum jitter among the packets, 0 by default
+//   - `pathFragments` (optional): array of arrays, where each array contains a list of network node names, supports multicast trees, shortest path is used when omitted
 //
 simple GateScheduleConfiguratorBase
 {

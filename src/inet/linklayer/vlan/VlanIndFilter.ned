@@ -11,7 +11,7 @@ import inet.queueing.base.PacketFilterBase;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// This module filters out packets based on the attached VlanInd tag.
+// This module filters out packets based on the attached `VlanInd` tag.
 //
 simple VlanIndFilter extends PacketFilterBase like IPacketFilter
 {

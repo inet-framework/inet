@@ -15,11 +15,11 @@ package inet.visualizer.base;
 // to enable the visualization. The actual visualization of active links is done
 // in derived modules.
 //
-// This module subscribes to the packetReceivedFromUpper and packetSentToUpper events
-// on the module determined by the visualizationSubjectModule parameter. If the visualizer
-// receives a packetReceivedFromUpper event from a physical layer module, then it
+// This module subscribes to the `packetReceivedFromUpper` and `packetSentToUpper` events
+// on the module determined by the `visualizationSubjectModule` parameter. If the visualizer
+// receives a `packetReceivedFromUpper` event from a physical layer module, then it
 // stores the corresponding packet id. If later on the visualizer receives a
-// packetSentToUpper event from another physical layer module with the same packet
+// `packetSentToUpper` event from another physical layer module with the same packet
 // id, then it adds an active link between the source and the destination nodes.
 // After a certain amount of time, the link becomes inactive unless it is
 // reinforced by another packet.

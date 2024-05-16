@@ -30,10 +30,10 @@ import inet.networklayer.contract.INetworkProtocol;
 // rebroadcast them again if it gets another copy of that message.
 //
 // The maximum number of entries for that list can be defined in the
-// .ini file (bcMaxEntries parameter) as well as the time after which an entry
-// is deleted (bcDelTime parameter).
+// .ini file (`bcMaxEntries` parameter) as well as the time after which an entry
+// is deleted (`bcDelTime` parameter).
 //
-// If you prefer a memory-less version, you should set the plainFlooding bool parameter to false.
+// If you prefer a memory-less version, you should set the `plainFlooding` bool parameter to false.
 //
 // @author Daniel Willkomm
 //

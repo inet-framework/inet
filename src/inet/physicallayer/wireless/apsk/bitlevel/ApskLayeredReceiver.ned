@@ -18,7 +18,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
 //
 // This receiver model is part of a simple hypothetical layered radio. It
 // receives detailed transmissions that have a separate representation for
-// all simulated domains. The levelOfDetail parameter controls which domains
+// all simulated domains. The `levelOfDetail` parameter controls which domains
 // are actually simulated, but all parameters relevant to the error model are
 // expected to be set on the reception.
 //

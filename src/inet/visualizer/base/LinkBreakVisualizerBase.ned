@@ -13,8 +13,8 @@ package inet.visualizer.base;
 // default, see module parameters for how to enable the visualization. The
 // actual visualization of link breaks is done in derived modules.
 //
-// This module subscribes to linkBroken on the module determined by the
-// visualizationSubjectModule parameter. If the visualizer receives a link break signal,
+// This module subscribes to `linkBroken` on the module determined by the
+// `visualizationSubjectModule` parameter. If the visualizer receives a link break signal,
 // then it stores the broken link and starts the link break visualization.
 //
 // @see ~LinkBreakCanvasVisualizer, ~LinkBreakOsgVisualizer, ~ILinkBreakVisualizer, ~VisualizerBase

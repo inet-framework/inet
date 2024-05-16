@@ -9,7 +9,7 @@ package inet.networklayer.internetcloud;
 
 //
 // Delay module for ~InternetCloud. This is essentially equivalent to a full graph
-// with edges being differently configured DatarateChannels. It delays and/or drops
+// with edges being differently configured `DatarateChannel`'s. It delays and/or drops
 // incoming packets based on rules specified in an xml configuration.
 //
 // Rules are matched by incoming and outgoing neighbor node names, and specify
@@ -38,7 +38,7 @@ package inet.networklayer.internetcloud;
 // - The "symmetric" attribute of <internetCloud> specifies the default value for
 //   the <traffic> entries.
 //
-// @see InternetCloud
+// @see `InternetCloud`
 //
 simple MatrixCloudDelayer like ICloudDelayer
 {

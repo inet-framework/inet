@@ -24,18 +24,18 @@ import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 //       For simplicity, it will assign the same address to all interfaces
 //       of a router;
 //   -#  then it'll discover the topology of the network (using OMNeT++'
-//       cTopology class), and calculate shortest paths;
+//       `cTopology` class), and calculate shortest paths;
 //   -#  finally, it will add routes which correspond to the shortest
-//       paths to the routing tables (see Ipv4RoutingTable::addRoutingEntry()).
+//       paths to the routing tables (see `Ipv4RoutingTable::addRoutingEntry()`).
 //
 // How does it know which modules are routers, hosts, etc. that need to
 // be configured, and what is the network topology? The configurator
-// picks all modules that have a @networkNode property and their connections,
+// picks all modules that have a `@networkNode` property and their connections,
 // and builds a graph from it. Then it runs Dijstra's shortest path algorithm
 // on it and configures all modules that are IPv4 nodes.
 //
 // It is assumed that the routing table (~Ipv4RoutingTable module) is the
-// "routingTable" or "networkLayer.routingTable" submodule in all hosts
+// `routingTable` or `networkLayer.routingTable` submodule in all hosts
 // and routers.
 //
 // To avoid interference with the above algorithm, it's recommended that

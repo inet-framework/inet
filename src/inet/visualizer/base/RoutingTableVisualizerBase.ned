@@ -13,8 +13,8 @@ package inet.visualizer.base;
 // by default, see the module parameters for how to enable the visualization.
 // The actual visualization of routes is done in derived modules.
 //
-// This module subscribes for routeAdded, routeChanged, routeDeleted,
-// interfaceIpv4ConfigChanged on the module determined by the visualizationSubjectModule
+// This module subscribes for `routeAdded`, `routeChanged`, `routeDeleted`,
+// `interfaceIpv4ConfigChanged` on the module determined by the `visualizationSubjectModule`
 // parameter.
 //
 // The format string can contain the following directives:

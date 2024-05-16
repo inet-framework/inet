@@ -25,11 +25,11 @@ import inet.networklayer.contract.INetworkProtocol;
 // This method reduces the number of packets sent on the channel (reducing the
 // broadcast storm problem) at the risk of some nodes not receiving the data.
 // It is particularly interesting for mobile networks.
-// The parameter maxNbBcast sets the maximum number of broadcast transmissions of a packet,
+// The parameter `maxNbBcast` sets the maximum number of broadcast transmissions of a packet,
 // the parameter beta gives the transmission probability for each attempt,
 // the parameter bcperiod sets the time between two transmission attempts.
-// The parameter maxFirstBcastBackoff sets a backoff window before the first transmission attempt,
-// and the parameter timeInQueueAfterDeath sets the time during which a node remembers
+// The parameter `maxFirstBcastBackoff` sets a backoff window before the first transmission attempt,
+// and the parameter `timeInQueueAfterDeath` sets the time during which a node remembers
 // a packet whose time to live (TTL) expired, avoiding retransmitting it in case it comes back
 // in the network because of some problem.
 //

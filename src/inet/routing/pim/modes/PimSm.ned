@@ -19,8 +19,8 @@ package inet.routing.pim.modes;
 // sources to receivers does not have to pass through the RP.
 //
 // The module must access the ~PimInterfaceTable and ~PimNeighborTable
-// modules; their path is given as the 'pimInterfaceTableModule' and
-// 'pimNeighborTableModule' parameters.
+// modules; their path is given as the `pimInterfaceTableModule` and
+// `pimNeighborTableModule` parameters.
 //
 // The 'RP' parameter specifies the address of the Rendezvous Point.
 // Currently only one global RP is supported.
@@ -28,7 +28,7 @@ package inet.routing.pim.modes;
 // If there are multiple PIM routers on a multi-access LAN, only one
 // of them will be responsible for forwarding datagrams to the LAN.
 // This will be the router with the highest IP address except if
-// all routers have 'designatedRouterPriority' set, in which case
+// all routers have `designatedRouterPriority` set, in which case
 // the highest priority wins (or highest IP address on ties).
 //
 // Other parameters set the time constants to the values specified

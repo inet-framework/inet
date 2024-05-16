@@ -15,11 +15,11 @@ package inet.visualizer.base;
 // to enable the visualization. The actual visualization of active links is done
 // in derived modules.
 //
-// This module subscribes for packetReceivedFromUpper and packetSentToUpper on
-// the module determined by the visualizationSubjectModule parameter. If the visualizer
-// receives a packetReceivedFromUpper from a MAC protocol module, then it stores
+// This module subscribes for `packetReceivedFromUpper` and `packetSentToUpper` on
+// the module determined by the `visualizationSubjectModule` parameter. If the visualizer
+// receives a `packetReceivedFromUpper` from a MAC protocol module, then it stores
 // the corresponding packet id. If later on the visualizer receives a
-// packetSentToUpper from another MAC protocol module with the same packet id,
+// `packetSentToUpper` from another MAC protocol module with the same packet id,
 // then it adds an active link between the source and the destination nodes.
 // After a certain amount of time, the link becomes inactive unless it is
 // reinforced by another packet.

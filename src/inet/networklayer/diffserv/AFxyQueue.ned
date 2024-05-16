@@ -22,7 +22,7 @@ import inet.queueing.queue.PacketQueue;
 // drop them based on the average length of the queue and the RED parameters
 // of the drop priority of the packet.
 //
-// The afxyMinth, afxyMaxth, and afxyMaxp parameters must have values that
+// The `afxyMinth`, `afxyMaxth`, and `afxyMaxp` parameters must have values that
 // ensure that packets with lower drop priorities are dropped with lower
 // or equal probability than packets with higher drop priorities.
 //

@@ -7,7 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.queue;
 
-//# TODO rename to InProgressQueue?
+//# TODO rename to `InProgressQueue`?
 simple InProgressFrames
 {
     parameters:

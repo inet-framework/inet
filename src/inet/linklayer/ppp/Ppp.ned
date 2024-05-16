@@ -23,7 +23,7 @@ package inet.linklayer.ppp;
 // In hosts, no such queue is used, so PPP contains an internal
 // queue to store packets waiting for transmission.
 // Conceptually, the queue is of infinite size, but for better diagnostics
-// one can specify a hard limit in the packetCapacity parameter -- if this is
+// one can specify a hard limit in the `packetCapacity` parameter -- if this is
 // exceeded, the simulation stops with an error.
 //
 // There is no buffering done on received packets -- they are just decapsulated

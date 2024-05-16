@@ -15,7 +15,7 @@ package inet.applications.tcpapp;
 // which allows collecting per-connection statistics in a convenient way.
 //
 // By default, reading from the socket is not rate limited. To allow rate
-// limiting, set autoRead=false, and use the readSize and readDelay parameters
+// limiting, set autoRead=false, and use the `readSize` and `readDelay` parameters
 // to set a rate limit. This will allow TCP flow control to come into effect.
 //
 module TcpSinkApp extends TcpServerHostApp

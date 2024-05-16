@@ -14,7 +14,7 @@ package inet.node.inet;
 // and may have TCP/UDP applications installed. It also supports ICMP (ping).
 //
 // - By default, it contains a single wireless card, but it can be configured
-//   using the numWlanInterfaces parameter. The wireless card type is configured by the
+//   using the `numWlanInterfaces` parameter. The wireless card type is configured by the
 //   **.wlan[*].typename parameter. See: inet.linklayer.ieee80211 or other
 //   modules implementing ~IWirelessInterface.
 // - Node mobility can be set using the **.mobility.typename

@@ -12,8 +12,8 @@ import inet.queueing.contract.IPacketClassifier;
 
 //
 // This module classifies packets based on the attached PCP value [0, 7]. The
-// PCP is determined by a PcpReq or a PcpInd or both. The output gate index is
-// the ith value in the pcpToGateIndex parameter.
+// PCP is determined by a `PcpReq` or a `PcpInd` or both. The output gate index is
+// the ith value in the `pcpToGateIndex` parameter.
 //
 simple PcpClassifier extends PacketClassifierBase like IPacketClassifier
 {

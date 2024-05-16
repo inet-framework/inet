@@ -31,7 +31,7 @@ import inet.linklayer.contract.IEtherMac;
 //
 // Expected environment:
 // - phys$i and phys$o should be connected to the "network"
-// - upperLayerIn and upperLayerOut are usually connected to ~EtherLlc (in hosts)
+// - `upperLayerIn` and `upperLayerOut` are usually connected to ~EtherLlc (in hosts)
 //   or ~MacRelayUnit (in a switch)
 //
 // <b>Operation</b>
@@ -60,7 +60,7 @@ import inet.linklayer.contract.IEtherMac;
 // will be filled in. Then frame is queued and transmitted according
 // to the CSMA/CD protocol.
 //
-// Data frames received from the network are EtherFrames. They are passed to
+// Data frames received from the network are `EtherFrames`. They are passed to
 // the higher layers without modification.
 // Also, the module properly responds to PAUSE frames, but never sends them
 // by itself -- however, it transmits PAUSE frames received from upper layers.
@@ -85,7 +85,7 @@ import inet.linklayer.contract.IEtherMac;
 // In hosts, no such queue is used, so MAC contains an internal
 // queue to store packets waiting for transmission.
 // Conceptually, the queue is of infinite size, but for better diagnostics
-// one can specify a hard limit in the packetCapacity parameter -- if this is
+// one can specify a hard limit in the `packetCapacity` parameter -- if this is
 // exceeded, the simulation stops with an error.
 //
 //

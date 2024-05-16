@@ -13,9 +13,9 @@ import inet.queueing.base.PacketClassifierBase;
 // This module reads the DSCP (lower six bits of ToS/TrafficClass) from the
 // received datagram, and forwards the datagram to the corresponding output gate.
 //
-// DSCPs are enumerated in the dscps parameter, first value is for out[0], second
-// for out[1], etc. If the packet has no DSCP, or its value is not enumerated
-// in the dscps parameter, it will be forwarded via the defaultOut gate.
+// DSCPs are enumerated in the `dscps` parameter, first value is for `out[0]`, second
+// for `out[1]`, etc. If the packet has no DSCP, or its value is not enumerated
+// in the `dscps` parameter, it will be forwarded via the `defaultOut` gate.
 //
 simple BehaviorAggregateClassifier extends PacketClassifierBase
 {

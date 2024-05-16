@@ -9,14 +9,14 @@ package inet.applications.tcpapp;
 
 //
 // Manages an established TCP connection. It handles data transmission to and
-// from a module connected via the trafficIn and trafficOut gates. When data is
-// received on the trafficIn gate, it is forwarded on the TCP connection via the
-// socketOut gate, and vice versa. This module simplifies the task of data
+// from a module connected via the `trafficIn` and `trafficOut` gates. When data is
+// received on the `trafficIn` gate, it is forwarded on the TCP connection via the
+// `socketOut` gate, and vice versa. This module simplifies the task of data
 // exchange over an established TCP connection.
 //
 // Note that reading from the socket is only rate limited if the connection was
 // originally created with the autoRead=false setting. Then, you can use the
-// readSize and readDelay parameters to set a rate limit. This will allow TCP
+// `readSize` and `readDelay` parameters to set a rate limit. This will allow TCP
 // flow control to come into effect.
 //
 // @see ~TcpServerConnection, ~TcpServerListener, ~TcpClientSocketIo

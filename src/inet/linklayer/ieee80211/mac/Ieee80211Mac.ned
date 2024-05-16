@@ -61,7 +61,7 @@ import inet.linklayer.ieee80211.mac.contract.ITx;
 // Despite its appearance, Ieee80211Mac is not a plain compound module.
 // Although the bulk of its functionality is outsourced to submodules,
 // it is an active module with an underlying C++ class that subclasses
-// from cSimpleModule, and receives/sends messages on its own behalf.
+// from `cSimpleModule`, and receives/sends messages on its own behalf.
 //
 // Notable omissions:
 //

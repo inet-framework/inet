@@ -22,34 +22,34 @@ import inet.transportlayer.contract.ITcp;
 // To allow arbitrary modules send and receive data over TCP, you can use the
 // ~TcpClientSocketIo and ~TcpServerSocketIo modules. Two module types,
 // ~TcpClientApp and ~TcpServerApp, are extensible compound modules that build
-// on top of the above two SocketIo modules and allow assembling TCP
+// on top of the above two `SocketIo` modules and allow assembling TCP
 // applications from pre-existing queuing components. There are also ready-made
 // application models that use TCP, such as ~TcpSessionApp, ~TcpEchoApp, and
 // ~TcpBasicClientApp/~TcpGenericServerApp.
 //
-// From C++, use the TcpSocket class, or see the Tcp class documentation for
-// details on how to use the Tcp without the TcpSocket utility class.
+// From C++, use the `TcpSocket` class, or see the Tcp class documentation for
+// details on how to use the Tcp without the `TcpSocket` utility class.
 //
 // <b>Configuration Hints</b>
 //
 // TCP can be configured via module parameters. The following notes provide
 // additional information compared to the module parameter documentation.
 //
-//   -# The tcpAlgorithmClass module parameter can be used to set the TCP flavor
-//      to be used (TcpNewReno, TcpReno, TcpTahoe, etc.). Note that this setting
+//   -# The `tcpAlgorithmClass` module parameter can be used to set the TCP flavor
+//      to be used (`TcpNewReno`, `TcpReno`, `TcpTahoe`, etc.). Note that this setting
 //      can be programmatically overridden on a per-connection basis. Also note
-//      that the TcpNoCongestionControl and DumbTcp flavors are intentionally
+//      that the `TcpNoCongestionControl` and `DumbTcp` flavors are intentionally
 //      simplified code that are only provided for testing/educational purposes,
 //      and do not support many TCP features the more advanced ones do.
 //
-//   -# The limitedTransmitEnabled parameter can be used to enable/disable the
+//   -# The `limitedTransmitEnabled` parameter can be used to enable/disable the
 //      Limited Transmit algorithm (RFC 3042).
 //
-//   -# The increasedIWEnabled parameter can be used to change the initial window
+//   -# The `increasedIWEnabled` parameter can be used to change the initial window
 //      from one segment (RFC 2001) (based on MSS) to maximal four segments
 //      (min(4*MSS, max (2*MSS, 4380 bytes))) (RFC 3390).
 //
-//   -# The advertisedWindow parameter defines the amount of data TCP can
+//   -# The `advertisedWindow` parameter defines the amount of data TCP can
 //      receive without the socket being read by the local user. Note that
 //      connections can be opened programmatically in one of two modes,
 //      "autoread" and "explicit-read", and that in "autoread" mode the
@@ -57,10 +57,10 @@ import inet.transportlayer.contract.ITcp;
 //      control. Links with large bandwidth*delay product require large
 //      advertised windows to operate efficiently. If the window size is larger
 //      than 64K, window scaling support needs to be turned on (on both
-//      endpoints) using the windowScalingSupport parameter, and the
-//      windowScalingFactor set to the appropriate shift count.
+//      endpoints) using the `windowScalingSupport` parameter, and the
+//      `windowScalingFactor` set to the appropriate shift count.
 //      windowScalingFactor=-1 sets the shift count automatically to a value
-//      suitable for the advertisedWindow setting.
+//      suitable for the `advertisedWindow` setting.
 //
 // Notes:
 //  - if you do active OPEN, then send data and close before the connection
@@ -84,7 +84,7 @@ import inet.transportlayer.contract.ITcp;
 //   - RFC 3390 - Increasing TCP's Initial Window
 //   - RFC 3517 - A Conservative Selective Acknowledgment (SACK)-based Loss Recovery
 //                Algorithm for TCP
-//   - RFC 3782 - The NewReno Modification to TCP's Fast Recovery Algorithm
+//   - RFC 3782 - The `NewReno` Modification to TCP's Fast Recovery Algorithm
 //
 // Implemented features include the following:
 //  - all RFC 793 TCP states and state transitions
@@ -97,7 +97,7 @@ import inet.transportlayer.contract.ITcp;
 //  - selective acknowledgements aka. SACK (RFC 2018 and RFC 2883)
 //  - RFC 3517 - SACK-based Loss Recovery algorithm which is a conservative
 //    replacement of the fast recovery algorithm (RFC2581) integrated into
-//    TcpReno but not into TcpNewReno, TcpTahoe, TcpNoCongestionControl, and DumbTcp.
+//    `TcpReno` but not into `TcpNewReno`, `TcpTahoe`, `TcpNoCongestionControl`, and `DumbTcp`.
 //  - changes from RFC 2001 to RFC 2581:
 //      - ACK generation (ack_now = true) RFC 2581, page 6: "(...) a Tcp receiver SHOULD send an immediate ACK
 //        when the incoming segment fills in all or part of a gap in the sequence space."
@@ -113,24 +113,24 @@ import inet.transportlayer.contract.ITcp;
 //      - SACK: SACK option, based on RFC 2018, RFC 2883, and RFC 3517.
 //      - TS: Timestamps option, based on RFC 1323.
 //  - flow control: finite receive buffer size (initiated by the parameter
-//    advertisedWindow). If the receive buffer is exhausted (by out-of-order
+//    `advertisedWindow`). If the receive buffer is exhausted (by out-of-order
 //    segments) and the payload length of a newly received segment
 //    is higher than free receiver buffer, the new segment will be dropped.
-//    Such drops are recorded in tcpRcvQueueDropsVector.
+//    Such drops are recorded in `tcpRcvQueueDropsVector`.
 //
-// The TcpNewReno, TcpReno, and TcpTahoe algorithms implement:
+// The `TcpNewReno`, `TcpReno`, and `TcpTahoe` algorithms implement:
 //  - RFC 1122 - delayed ACK algorithm (optional) with 200ms timeout
 //  - RFC 896 - Nagle's algorithm (optional)
 //  - Jacobson's and Karn's algorithms for round-trip time measurement and
 //    adaptive retransmission
-//  - TcpTahoe (Fast Retransmit), TcpReno (Fast Retransmit and Fast Recovery),
-//    TcpNewReno (Fast Retransmit and Fast Recovery)
-//  - RFC 3390 - Increased Initial Window (optional) integrated into TcpBaseAlg
-//    (can be used for TcpNewReno, TcpReno, TcpTahoe, and TcpNoCongestionControl but not
-//    for DumbTcp).
-//  - RFC 3042 - Limited Transmit algorithm (optional) integrated into TcpBaseAlg
-//    (can be used for TcpNewReno, TcpReno, TcpTahoe, and TcpNoCongestionControl but not
-//    for DumbTcp).
+//  - `TcpTahoe` (Fast Retransmit), `TcpReno` (Fast Retransmit and Fast Recovery),
+//    `TcpNewReno` (Fast Retransmit and Fast Recovery)
+//  - RFC 3390 - Increased Initial Window (optional) integrated into `TcpBaseAlg`
+//    (can be used for `TcpNewReno`, `TcpReno`, `TcpTahoe`, and `TcpNoCongestionControl` but not
+//    for `DumbTcp`).
+//  - RFC 3042 - Limited Transmit algorithm (optional) integrated into `TcpBaseAlg`
+//    (can be used for `TcpNewReno`, `TcpReno`, `TcpTahoe`, and `TcpNoCongestionControl` but not
+//    for `DumbTcp`).
 //
 // Missing bits:
 //  - URG and PSH bits not handled. Receiver always acts as if PSH was set
@@ -144,7 +144,7 @@ import inet.transportlayer.contract.ITcp;
 //    implementations) is not simulated
 //  - new ECN flags (CWR and ECE). Need to be added to the header by [RFC 3168].
 //
-// TcpNewReno, TcpReno, and TcpTahoe issues and missing features:
+// `TcpNewReno`, `TcpReno`, and `TcpTahoe` issues and missing features:
 //  - KEEP-ALIVE not implemented (idle connections never time out)
 //  - Nagle's algorithm (RFC 896) possibly not precisely implemented
 //

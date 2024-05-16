@@ -42,11 +42,11 @@ package inet.networklayer.ipv4.ipsec;
 // <b>Configuration:</b>
 //
 // Security policies and security associations are defined using XML. The XML
-// element specified in the spdConfig parameter should contain one or more
-// SecurityPolicy elements. SecurityPolicy elements contain packet filtering
+// element specified in the `spdConfig` parameter should contain one or more
+// `SecurityPolicy` elements. `SecurityPolicy` elements contain packet filtering
 // elements (Selector, Direction), elements that define the action to be taken
 // for matching packets (Action, Protection), and the list of SAs created
-// for that policy (SecurityAssociation).
+// for that policy (`SecurityAssociation`).
 //
 // Note that the order in which security policies and SAs appear in the
 // configuration is significant, as they are searched in first-to-last
@@ -54,11 +54,11 @@ package inet.networklayer.ipv4.ipsec;
 //
 // Structural elements (notation: ?=optional, *=zero or more):
 //
-// - root: SecurityPolicy*
-// - SecurityPolicy: Selector, Direction, Action, Protection?, EspMode?,
-//   EncryptionAlg?, AuthenticationAlg?, MaxTfcPadLength?, SecurityAssociation*
-// - Selector: LocalAddress?, RemoteAddress?, Protocol?, LocalPort?, RemotePort?, ICMPType?, ICMPCode?
-// - SecurityAssociation: SPI, Selector?
+// - root: `SecurityPolicy*`
+// - `SecurityPolicy`: Selector, Direction, Action, Protection?, `EspMode`?,
+//   `EncryptionAlg`?, `AuthenticationAlg`?, `MaxTfcPadLength`?, `SecurityAssociation*`
+// - Selector: `LocalAddress`?, `RemoteAddress`?, Protocol?, `LocalPort`?, `RemotePort`?, ICMPType?, ICMPCode?
+// - `SecurityAssociation`: SPI, Selector?
 //
 // Contained elements may occur in any order.
 //
@@ -66,42 +66,42 @@ package inet.networklayer.ipv4.ipsec;
 // - Direction: IN or OUT
 // - Action: BYPASS, DISCARD, or PROTECT
 // - Protection: AH or ESP. This element is only valid if Action is PROTECT.
-// - EspMode: INTEGRITY, CONFIDENTIALITY, COMBINED. Only valid if Protection is ESP.
-// - EncryptionAlg: Name of the encryption algorithm, only valid for Protection=ESP.
+// - `EspMode`: INTEGRITY, CONFIDENTIALITY, COMBINED. Only valid if Protection is ESP.
+// - `EncryptionAlg`: Name of the encryption algorithm, only valid for Protection=ESP.
 //   Possible values are: AES_CBC_128, AES_CBC_192, AES_CBC_256,
 //   AES_GCM_16_128, AES_GCM_16_192, AES_GCM_16_256,
 //   AES_CCM_8_128, AES_CCM_8_192, AES_CCM_8_256,
 //   AES_CCM_16_128, AES_CCM_16_192, AES_CCM_16_256,
 //   CHACHA20_POLY1305
-// - AuthenticationAlg: Name of the authentication algorithm, only valid if Action is PROTECT,
+// - `AuthenticationAlg`: Name of the authentication algorithm, only valid if Action is PROTECT,
 //   and authentication is in use (protection is AH, or ESP with mode INTEGRITY or COMBINED).
 //   Possible values are: NONE, HMAC_MD5_96, HMAC_SHA1, AES_128_GMAC, AES_192_GMAC,
 //   AES_256_GMAC, HMAC_SHA2_256_128, HMAC_SHA2_384_192, HMAC_SHA2_512_256.
-// - MaxTfcPadLength: Maximum length of random Traffic Confidentiality (TFC) padding.
+// - `MaxTfcPadLength`: Maximum length of random Traffic Confidentiality (TFC) padding.
 //   The actual TFC pad length will be drawn with uniform distribution over [0,max].
-// - LocalAddress, RemoteAddress: comma-separated list of addresses / address ranges
+// - `LocalAddress`, `RemoteAddress`: comma-separated list of addresses / address ranges
 // - Protocol: comma-separated list of protocol names/numbers and/or their ranges.
 //   Recognized names are TCP, UDP, and ICMP.
-// - LocalPort, RemotePort: comma-separated list of port numbers / port number ranges
+// - `LocalPort`, `RemotePort`: comma-separated list of port numbers / port number ranges
 // - ICMPType, ICMPCode: comma-separated list of integers / integer ranges
 //
 // Ranges use "-" as a separator, and both the start and end values are inclusive.
 // Example: "4-6" accepts 4, 5, and 6.
 //
 // Addresses are accepted in the standard dotted notation (10.0.0.5), and in any
-// notation accepted by INET's L3AddressResolver, including module names ("host3")
+// notation accepted by INET's `L3AddressResolver`, including module names ("host3")
 // and module+interface ("host3%eth0"). Example: "host1, 10.0.0.1 - 10.0.0.15".
 //
 // As a rule, an SA inherits its properties from its parent policy. However,
-// the selector can be changed/refined. Elements within SecurityAssociation's
+// the selector can be changed/refined. Elements within `SecurityAssociation`'s
 // Selector override the corresponding elements specified in the parent
-// SecurityPolicy's Selector element.
+// `SecurityPolicy`'s Selector element.
 //
 // Note that an SA needs to be configured at both endpoints to work.
-// (Flip Direction and swap LocalAddress/RemoteAddress and LocalPort/RemotePort
-// in the SecurityPolicy/SecurityAssociation for the other endpoint.)
+// (Flip Direction and swap `LocalAddress`/`RemoteAddress` and `LocalPort`/`RemotePort`
+// in the `SecurityPolicy`/`SecurityAssociation` for the other endpoint.)
 // Also, since an SA defines a simplex channel, you'll need two SAs (2x2=4
-// SecurityAssociation elements) to define a duplex channel.
+// `SecurityAssociation` elements) to define a duplex channel.
 //
 // <pre>
 //    <SecurityPolicy>

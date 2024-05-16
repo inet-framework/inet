@@ -9,11 +9,11 @@ package inet.common.misc;
 
 //
 // This channel adds support for throughput metering to the datarate channel.
-// A cDatarateChannel extended with throughput calculation. Values
+// A `cDatarateChannel` extended with throughput calculation. Values
 // are displayed on the link, using the connection's "t=" or "tt=" display
 // string tag.
 //
-// The display can be customized with the "thruputDisplayFormat" parameter.
+// The display can be customized with the `thruputDisplayFormat` parameter.
 // In the format string, the following characters will get expanded:
 //   - 'N': number of packets
 //   - 'V': volume (in bytes)

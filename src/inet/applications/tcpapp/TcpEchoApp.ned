@@ -9,16 +9,16 @@ package inet.applications.tcpapp;
 
 //
 // Accepts any number of incoming TCP connections, and sends back the data that
-// arrives on them. The echoFactor parameter controls the amount of data to be
+// arrives on them. The `echoFactor` parameter controls the amount of data to be
 // sent back. If echoFactor==1, the received data is echoed back without change.
-// For any other positive value of echoFactor, a message of appropriate length
-// (datalen*echoFactor) without content (see ByteCountChunk C++ class) is sent
+// For any other positive value of `echoFactor`, a message of appropriate length
+// (datalen*`echoFactor`) without content (see `ByteCountChunk` C++ class) is sent
 // back.
 //
-// The reply can also be delayed by a constant time (echoDelay parameter).
+// The reply can also be delayed by a constant time (`echoDelay` parameter).
 //
 // By default, reading from the socket is not rate-limited. To allow rate
-// limiting, set autoRead=false, and use the readSize and readDelay parameters
+// limiting, set autoRead=false, and use the `readSize` and `readDelay` parameters
 // to set a rate limit. This will allow TCP flow control to come into effect.
 //
 // Compatible with both ~Ipv4 and ~Ipv6.

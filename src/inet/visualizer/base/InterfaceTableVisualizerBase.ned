@@ -13,9 +13,9 @@ package inet.visualizer.base;
 // interfaces are not displayed by default, see module parameters for how to
 // enable the visualization.
 //
-// This module subscribes to interfaceCreated, interfaceDeleted,
-// interfaceConfigChanged, and interfaceIpv4ConfigChanged on the
-// module determined by the visualizationSubjectModule parameter.
+// This module subscribes to `interfaceCreated`, `interfaceDeleted`,
+// `interfaceConfigChanged`, and `interfaceIpv4ConfigChanged` on the
+// module determined by the `visualizationSubjectModule` parameter.
 //
 // The format string can contain the following directives:
 //  - %N interface name
@@ -27,8 +27,8 @@ package inet.visualizer.base;
 //  - %g generic address
 //  - %n network address
 //  - %t up or down state
-//  - %i NetworkInterface::info()
-//  - %s NetworkInterface::str()
+//  - %i the result of the `NetworkInterface::info()` call
+//  - %s the result of the `NetworkInterface::str()` call
 //  - %\ conditional newline for wired interfaces
 //  - %/ conditional / for network address
 //

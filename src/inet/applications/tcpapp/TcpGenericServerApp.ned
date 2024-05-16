@@ -19,11 +19,11 @@ import inet.applications.contract.IApp;
 // large the reply should be (number of bytes). For each received
 // ~GenericAppMsg, ~TcpGenericServerApp will create another ~GenericAppMsg with
 // the requested length as a response and send it back. The reply can be delayed
-// by a constant time (replyDelay parameter).
+// by a constant time (`replyDelay` parameter).
 //
 // By default, the server does not impose rate limiting on data reads from the
-// socket. To enable rate limiting, you can set "autoRead" to "false" and
-// configure the "readSize" and "readDelay" parameters, thereby facilitating TCP
+// socket. To enable rate limiting, you can set `autoRead` to "false" and
+// configure the `readSize` and `readDelay` parameters, thereby facilitating TCP
 // flow control.
 //
 // Compatible with both ~Ipv4 and ~Ipv6.

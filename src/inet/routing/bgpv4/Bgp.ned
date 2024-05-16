@@ -11,7 +11,7 @@ import inet.routing.contract.IBgp;
 //
 // Implements BGP Version 4 routing protocol.
 //
-// The bgpConfig parameter can specify an XML file describing the
+// The `bgpConfig` parameter can specify an XML file describing the
 // configuration of all BGP routers and their interfaces in the network.
 //
 //# TODO config file!

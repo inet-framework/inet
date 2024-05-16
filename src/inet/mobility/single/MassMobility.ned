@@ -31,14 +31,14 @@ import inet.mobility.base.MovingMobilityBase;
 // wall at the same angle; in our simulated world, there is little other
 // choice."
 //
-// This implementation can be parameterized further, using the changeInterval
-// and angleDelta parameters. The parameters described above
+// This implementation can be parameterized further, using the `changeInterval`
+// and `angleDelta` parameters. The parameters described above
 // correspond to the following settings:
 // - changeInterval = normal(5, 0.1)
 // - angleDelta = normal(0, 30)
 // - speed = normal(avgSpeed, 0.01)
 //
-// 3D (spatial movement) is also supported using the rotationAxisAngle parameter.
+// 3D (spatial movement) is also supported using the `rotationAxisAngle` parameter.
 //
 // @author Emin Ilker Cetinbas
 //

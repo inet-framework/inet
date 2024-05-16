@@ -1,7 +1,7 @@
 //
 // Copyright (C) 2005 Vojtech Janota
 //
-// SPDX-License-Identifier: LGPL-3.0-or-later 
+// SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
 package inet.networklayer.rsvpte;
@@ -74,7 +74,7 @@ package inet.networklayer.rsvpte;
 // </scenario>
 // </pre>
 //
-// RsvpTe messages are subclassed from ~RsvpMessage and include ~RsvpPathMsg, ~RsvpPathTear, ~RsvpPathError, ~RsvpResvMsg, and ~RsvpHelloMsg.
+// RSVP-TE messages are subclassed from ~RsvpMessage and include ~RsvpPathMsg, ~RsvpPathTear, ~RsvpPathError, ~RsvpResvMsg, and ~RsvpHelloMsg.
 //
 // RSVP-TE communicates with the following components in the system: ~Ted, ~Mpls, and may receive commands from ~ScenarioManager.
 //

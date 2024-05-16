@@ -26,14 +26,14 @@ moduleinterface IIpv4
 //
 // To send a packet over IPv4 from a higher layer protocol, the module should
 // fill in an ~L3AddressReq object, attach it to the packet with the Packet's
-// addTag() method, then send the packet to the ~Ipv4 module.
+// `addTag()` method, then send the packet to the ~Ipv4 module.
 //
 // When ~Ipv4 sends up a packet to a higher layer protocol, it will also attach
 // an ~L3AddressInd to the packet, with the source and destination IPv4 addresses
 // of the IPv4 datagram in which the packet arrived.
 //
 // ~Ipv4 can serve several higher-layer protocols. The higher layer protocols
-// should call registerProtocol with their gate towards the ~Ipv4 module,
+// should call `registerProtocol()` with their gate towards the ~Ipv4 module,
 // to fill up the protocol-to-gateindex map. When delivering packets to them,
 // the output gate is determined from the Protocol in the IPv4 header.
 //
@@ -42,10 +42,10 @@ moduleinterface IIpv4
 // The routing table is stored in the module ~Ipv4RoutingTable. When a datagram
 // needs to be routed, ~Ipv4 queries ~Ipv4RoutingTable for the output interface
 // (or "port") and next hop address of the packet. This is done by directly
-// calling C++ methods (such as findBestMatchingRoute(destAddress)) of ~Ipv4RoutingTable.
+// calling C++ methods (such as `findBestMatchingRoute(destAddress)`) of ~Ipv4RoutingTable.
 // No message exchange with ~Ipv4RoutingTable takes place.
 //
-// A routed datagram will be sent to the queueOut, which is expected to be
+// A routed datagram will be sent to the `queueOut`, which is expected to be
 // connected to ~INetworkInterface modules.
 //
 // Routing protocol implementations (e.g. OSPF and ISIS) can also query
@@ -53,26 +53,26 @@ moduleinterface IIpv4
 //
 // <b>Working with ARP</b>
 //
-// Ipv4 module subscribes to arpResolutionCompleted and arpResolutionFailed signals on Arp module.
-// The ~Arp module accessed via arpOut gate should not insert any module between ~Ipv4 and ~Arp.
-// Before Ipv4 module sends down a packet to the lower layer, it asks for the MacAddress of the next hop from Arp via
-// a method call. If the MacAddress is unspecified, then start address resolution via an Arp method call and
+// Ipv4 module subscribes to `arpResolutionCompleted` and `arpResolutionFailed` signals on Arp module.
+// The ~Arp module accessed via `arpOut` gate should not insert any module between ~Ipv4 and ~Arp.
+// Before Ipv4 module sends down a packet to the lower layer, it asks for the `MacAddress` of the next hop from Arp via
+// a method call. If the `MacAddress` is unspecified, then start address resolution via an Arp method call and
 // insert the packet to a queue specified by the next hop address.
-// When it receives an arpResolutionCompleted signal, it sends the packets from the queue of the next hop address.
-// When it receives an arpResolutionFailed signal, it drops the packets from the queue of the next hop address.
-// When the Ipv4 module receives an ARP packet from the lower layer on some queueIn gate,
-// it sends out this packet on the arpOut gate. When it receives a packet on the arpIn gate,
-// it sends out this packet on the specified queueOut gate.
+// When it receives an `arpResolutionCompleted` signal, it sends the packets from the queue of the next hop address.
+// When it receives an `arpResolutionFailed` signal, it drops the packets from the queue of the next hop address.
+// When the Ipv4 module receives an ARP packet from the lower layer on some `queueIn` gate,
+// it sends out this packet on the `arpOut` gate. When it receives a packet on the `arpIn` gate,
+// it sends out this packet on the specified `queueOut` gate.
 //
 // <b>Performance model, QoS</b>
 //
 // In its current form, ~Ipv4 contains a FIFO which queues up Ipv4 datagrams;
 // datagrams are processed in order. The processing time is determined by the
-// procDelay module parameter.
+// `procDelay` module parameter.
 //
-// The current performance model comes from the QueueBase C++ base class.
+// The current performance model comes from the `QueueBase` C++ base class.
 // If you need a more sophisticated performance model, you may change the
-// module implementation (the Ipv4 class), and: (1) override the startService()
+// module implementation (the Ipv4 class), and: (1) override the `startService()`
 // method which determines the processing time for a packet, or (2) use a
 // different base class.
 //

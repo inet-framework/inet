@@ -12,7 +12,7 @@ package inet.physicallayer.wireless.common.energyconsumer;
 // determined by the radio mode, the transmitter state, and the receiver state
 // using constant parameters.
 //
-// This module extends StateBasedCcEnergyConsumer and provides default values
+// This module extends `StateBasedCcEnergyConsumer` and provides default values
 // suitable for use in low-power wireless sensor nodes. Approximately based on
 // the datasheet for the CC2500 RF transceiver.
 //

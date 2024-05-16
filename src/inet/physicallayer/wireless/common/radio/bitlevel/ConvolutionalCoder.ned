@@ -22,7 +22,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder;
 // </pre>
 // which is a very simple 2/3 encoder.
 //
-// <b>Puncturing (bool) matrix and punctureK, punctureN parameters</b>
+// <b>Puncturing (bool) matrix and `punctureK`, `punctureN` parameters</b>
 //
 // The same rule applies to the puncturing matrix representation.
 // A puncturing matrix only consists of boolean values represented with
@@ -39,7 +39,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder;
 // | 1 0 |
 // </pre>
 // puncturing matrix together with the default settings define a 2/3 encoder,
-// so the correct values for punctureK and punctureN are 2 and 3.
+// so the correct values for `punctureK` and `punctureN` are 2 and 3.
 //
 // <b>Constraint length (integer) vector</b>
 //

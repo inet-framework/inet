@@ -139,13 +139,13 @@ import inet.environment.contract.IPhysicalEnvironment;
 //       ohm per meter. Resistivity is used to compute the dielectric loss
 //       tangent of the material.
 //
-//    - relativePermittivity:
+//    - `relativePermittivity`:
 //       This mandatory attribute specifies the relative permittivity of the
 //       material as a unitless quantity. Relative permittivity is used to
 //       compute the dielectric loss tangent and the refractive index of the
 //       material.
 //
-//    - relativePermeability:
+//    - `relativePermeability`:
 //       This mandatory attribute specifies the relative permeability of the
 //       material as a unitless quantity. Relative permeability is used to
 //       compute the refractive index of the material.

@@ -9,8 +9,8 @@ package inet.visualizer.base;
 
 //
 // This is a base module for mobility visualizer simple modules. It subscribes
-// to the mobilityStateChanged signal in the module determined by the
-// visualizationSubjectModule parameter. The actual visualization of mobility is done in
+// to the `mobilityStateChanged` signal in the module determined by the
+// `visualizationSubjectModule` parameter. The actual visualization of mobility is done in
 // derived modules.
 //
 // @see ~MobilityCanvasVisualizer, ~MobilityOsgVisualizer, ~IMobilityVisualizer, ~VisualizerBase

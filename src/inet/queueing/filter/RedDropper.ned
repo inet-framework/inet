@@ -12,7 +12,7 @@ import inet.queueing.base.PacketFilterBase;
 //
 // This module implements Random Early Detection (RED).
 //
-// It has n input and n output gates (specified by the 'numGates'
+// It has n input and n output gates (specified by the `numGates`
 // parameter). Packets arrived at the ith input gate are
 // forwarded to the ith output gate, or dropped.
 //

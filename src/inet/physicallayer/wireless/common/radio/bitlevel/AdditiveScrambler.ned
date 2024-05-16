@@ -22,7 +22,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IScrambler;
 // polynomial selects two registers: the 7th register and the 4th register,
 // and gives their contents as an input to the modulo 2 adder. The string
 // representation of this polynomial is "0001001". The length of this
-// string equals the degree of the generatorPolynomial and each 1 bit at the ith
+// string equals the degree of the `generatorPolynomial` and each 1 bit at the ith
 // position indicates that the x^i term has a 1 coefficient. Similarly,
 // a 0 bit indicates a zero coefficient.
 //

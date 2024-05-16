@@ -17,7 +17,7 @@ import inet.linklayer.contract.IMacProtocol;
 // The implementation provides packet encapsulation and decapsulation, but it
 // doesn't have a real medium access protocol. It doesn't provide carrier sense
 // mechanism, collision avoidance, or collision detection, but it provides optional
-// out-of-band acknowledgement. Higher layer packets should have MacAddressReq
+// out-of-band acknowledgement. Higher layer packets should have `MacAddressReq`
 // tag.
 //
 // See ~AckingWirelessInterface for rationale and details.

@@ -9,7 +9,7 @@
 package inet.applications.rtpapp;
 
 //
-// An application which uses RTP. It acts as a sender if the parameter fileName is
+// An application which uses RTP. It acts as a sender if the parameter `fileName` is
 // set, and as a receiver if the parameter is empty.
 //
 simple RtpApplication

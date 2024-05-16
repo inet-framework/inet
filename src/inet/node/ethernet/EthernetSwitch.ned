@@ -29,7 +29,7 @@ import inet.protocolelement.contract.IProtocolLayer;
 //
 // Model of an Ethernet switch.
 //
-// The duplexChannel attributes of the MACs must be set according to the
+// The `duplexChannel` attributes of the MACs must be set according to the
 // medium connected to the port; if collisions are possible (it's a bus or hub)
 // it must be set to false, otherwise it can be set to true.
 // By default used half duples CSMA/CD mac

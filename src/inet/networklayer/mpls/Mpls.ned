@@ -19,7 +19,7 @@ import inet.protocolelement.contract.IProtocolLayer;
 //
 // Operations:
 //
-// MPLS packets are represented by the MplsPacket class.
+// MPLS packets are represented by the `MplsPacket` class.
 // The local LIB (Label Information Base) is stored in a ~LibTable module
 // in the LSR.
 //
@@ -28,7 +28,7 @@ import inet.protocolelement.contract.IProtocolLayer;
 // ~Mpls will first extract the incoming interface and incoming label pair, and then
 // look up the local LIB table. If an outgoing label and an outgoing interface
 // can be found, the module will perform appropriate label operations (PUSH,
-// POP, SWAP) based on the "outLabel" vector containing label and operation
+// POP, SWAP) based on the `outLabel` vector containing label and operation
 // pairs.
 //
 // Collaborations:

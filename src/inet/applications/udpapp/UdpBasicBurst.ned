@@ -16,77 +16,77 @@ import inet.applications.contract.IApp;
 //
 // <b>Addressing:</b>
 //
-// The destAddresses parameter can contain zero, one, or more destination
+// The `destAddresses` parameter can contain zero, one, or more destination
 // addresses, separated by spaces. If there is no destination address given,
 // the module will act as a packet sink. If there are more than one addresses,
 // one of them is randomly chosen, either for the whole simulation run,
 // or for each burst, or for each packet, depending on the value of the
-// chooseDestAddrMode parameter. The destAddrRNG parameter controls which
+// `chooseDestAddrMode` parameter. The `destAddrRNG` parameter controls which
 // (local) RNG is used for randomized address selection.
 // The own addresses will be ignored.
 //
 // An address may be given in the dotted decimal notation or with the module
-// name. (The L3AddressResolver class is used to resolve the address.)
+// name. (The `L3AddressResolver` class is used to resolve the address.)
 // You can use the "Broadcast" string as an address for sending broadcast messages.
 //
 // INET also defines several NED functions that can be useful:
-//    - moduleListByPath("pattern",...):
+//    - `moduleListByPath("pattern",...)`:
 //          Returns a space-separated list of the module names.
-//          All modules whose getFullPath() matches one of the pattern parameters will get included.
+//          All modules whose `getFullPath()` matches one of the pattern parameters will get included.
 //          The patterns may contain wildcards in the same syntax as in ini files.
-//          See cTopology::extractByModulePath() function
+//          See `cTopology::extractByModulePath()` function
 //          example: destaddresses = moduleListByPath("**.host[*]", "**.fixhost[*]")
-//    - moduleListByNedType("fully.qualified.ned.type",...):
+//    - `moduleListByNedType("fully.qualified.ned.type",...)`:
 //          Returns a space-separated list of the module names with the given NED type(s).
-//          All modules whose getNedTypeName() is listed in the given parameters will get included.
+//          All modules whose `getNedTypeName()` is listed in the given parameters will get included.
 //          The NED type name is fully qualified.
-//          See cTopology::extractByNedTypeName() function
-//          example: destaddresses = moduleListByNedType("inet.node.inet.StandardHost")
+//          See `cTopology::extractByNedTypeName()` function
+//          example: destaddresses = moduleListByNedType(`inet.node.inet.StandardHost`)
 //
-// The peer can be UdpSink or another UdpBasicBurst.
+// The peer can be `UdpSink` or another `UdpBasicBurst`.
 //
 // <b>Bursts:</b>
 //
-// The first burst starts at startTime. Bursts start by immediately sending
-// a packet; subsequent packets are sent at sendInterval intervals. The
-// sendInterval parameter can be a random value, e.g. exponential(10ms).
+// The first burst starts at `startTime`. Bursts start by immediately sending
+// a packet; subsequent packets are sent at `sendInterval` intervals. The
+// `sendInterval` parameter can be a random value, e.g. exponential(10ms).
 // A constant interval with jitter can be specified as 1s + uniform(-0.01s,0.01s)
 // or uniform(0.99s,1.01s). The length of the burst is controlled by the
-// burstDuration parameter. (Note that if sendInterval is greater than
-// burstDuration, the burst will consist of one packet only.) The time between
-// burst is the sleepDuration parameter; this can be zero (zero is not
-// allowed for sendInterval.) The zero burstDuration is implemented as infinity.
+// `burstDuration` parameter. (Note that if `sendInterval` is greater than
+// `burstDuration`, the burst will consist of one packet only.) The time between
+// burst is the `sleepDuration` parameter; this can be zero (zero is not
+// allowed for `sendInterval`.) The zero `burstDuration` is implemented as infinity.
 //
-// The zero value in burstDuration or sendInterval parameters generates a runtime error.
-// The sleepDuration parameter accepts a zero value.
+// The zero value in `burstDuration` or `sendInterval` parameters generates a runtime error.
+// The `sleepDuration` parameter accepts a zero value.
 //
 // <b>Packets</b>
 //
-// Packet length is controlled by the messageLength parameter.
+// Packet length is controlled by the `messageLength` parameter.
 //
 // The module adds two parameters to packets before sending:
-//  - sourceID: source module ID
-//  - msgId: incremented by 1 after send any packet.
+//  - `sourceID`: source module ID
+//  - `msgId`: incremented by 1 after send any packet.
 // When received packet has these parameters, the module checks the order of received packets.
 //
 // <b>Operation as sink</b>
 //
-// When destAddresses parameter is empty, the module receives packets and makes statistics only.
+// When `destAddresses` parameter is empty, the module receives packets and makes statistics only.
 //
 // <b>Statistics</b>
 //
 // Statistics are collected on outgoing packets:
-//  - packetSent: packet object
+//  - `packetSent`: packet object
 //
 // Statistics are collected on incoming packets:
-//  - outOfOrderPk: statistics of out of order packets.
-//        The packet is out of order when it has msgId and sourceId parameters, and the module
-//        received a bigger msgId from the same sourceID.
-//  - dropPk: statistics of dropped packets.
+//  - `outOfOrderPk`: statistics of out of order packets.
+//        The packet is out of order when it has `msgId` and `sourceId` parameters, and the module
+//        received a bigger `msgId` from the same `sourceID`.
+//  - `dropPk`: statistics of dropped packets.
 //        The packet is dropped when not an out-of-order packet and delay time is larger than
-//        the delayLimit parameter. The delayLimit = 0 is infinity.
-//  - packetReceived: statistics of not dropped, not out-of-order packets.
-//  - endToEndDelay: end to end delay statistics of not dropped, not out-of-order packets.
+//        the `delayLimit` parameter. The delayLimit = 0 is infinity.
+//  - `packetReceived`: statistics of not dropped, not out-of-order packets.
+//  - `endToEndDelay`: end to end delay statistics of not dropped, not out-of-order packets.
 //
 simple UdpBasicBurst like IApp
 {

@@ -28,7 +28,7 @@ import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigur
 // Finally, the SAT solver is used to find a solution that fulfills all constraints,
 // and the result values are extracted and configured in the network.
 //
-// The optimizeSchedule parameter can be used to control whether any solution is
+// The `optimizeSchedule` parameter can be used to control whether any solution is
 // accepted or it should also be optimal with respect to the total end-to-end delay
 // among all packets of all flows in the network.
 //

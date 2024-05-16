@@ -26,10 +26,10 @@ package inet.networklayer.probabilistic;
 // It is particularly interesting for mobile networks.
 // This version of probabilistic broadcast automatically adapts transmission
 // probabilities depending on the estimated number of neighbours.
-// timeInNeighboursTable is its unique parameter, and sets the time
+// `timeInNeighboursTable` is its unique parameter, and sets the time
 // during which the node remembers a neighbour. It is particularly important
 // in mobile networks: in that case, the faster the nodes, the smaller the
-// timeInNeighboursTable parameter.
+// `timeInNeighboursTable` parameter.
 //
 simple AdaptiveProbabilisticBroadcast extends ProbabilisticBroadcast
 {

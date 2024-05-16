@@ -15,14 +15,14 @@ package inet.visualizer.base;
 // enable the visualization. The actual visualization of active routes is done
 // in derived modules.
 //
-// This module subscribes to packetReceivedFromUpper, packetSentToUpper, and
-// packetReceivedFromLower on the module determined by the visualizationSubjectModule
-// parameter. If the visualizer receives a packetReceivedFromUpper from
+// This module subscribes to `packetReceivedFromUpper`, `packetSentToUpper`, and
+// `packetReceivedFromLower` on the module determined by the `visualizationSubjectModule`
+// parameter. If the visualizer receives a `packetReceivedFromUpper` from
 // a protocol module, then it stores the corresponding packet id. If later on,
-// the visualizer receives a packetSentToUpper from another corresponding protocol
+// the visualizer receives a `packetSentToUpper` from another corresponding protocol
 // module with the same packet id, then it adds an active route between the
 // source and the destination nodes. During the route discovery, if the
-// visualizer receives a packetReceivedFromLower from a corresponding protocol
+// visualizer receives a `packetReceivedFromLower` from a corresponding protocol
 // module, then it adds the node to the intermediate nodes of the route. After
 // a certain amount of time, the route becomes inactive unless it is reinforced
 // by another packet.

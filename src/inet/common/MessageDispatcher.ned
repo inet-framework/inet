@@ -25,8 +25,8 @@ import inet.queueing.base.PacketProcessorBase;
 //  - socket mapping specifies which gate should be used when dispatching towards a specific socket
 //
 // To configure the dispatch mechanism:
-//  - protocol modules must register using the registerService() and/or registerProtocol() functions
-//  - network interface modules must register using the registerInterface() function
+//  - protocol modules must register using the `registerService()` and/or `registerProtocol()` functions
+//  - network interface modules must register using the `registerInterface()` function
 //  - sockets must use the ~SocketReq or ~SocketInd tags when sending socket open/close commands
 //  - manual configuration is also possible using the module's mapping parameters
 //

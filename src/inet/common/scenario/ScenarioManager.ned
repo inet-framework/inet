@@ -18,7 +18,7 @@ package inet.common.scenario;
 // ~ScenarioManager executes a script specified in XML. It has a few
 // built-in commands, while other commands are dispatched to be carried out
 // by given simple modules. (The C++ class of these simple modules' needs
-// to implement the ~IScriptable interface, and the processCommand() method
+// to implement the ~IScriptable interface, and the `processCommand()` method
 // must be redefined accordingly).
 //
 // An example script:
@@ -85,7 +85,7 @@ package inet.common.scenario;
 //       src-gate: name of source gate (required)
 //       dest-module: path to destination module (required)
 //       dest-gate: name of destination gate (required)
-//       channel-type: fully qualified NED type of connection channel (required), e.g., "ned.DatarateChannel"
+//       channel-type: fully qualified NED type of connection channel (required), e.g., `ned.DatarateChannel`
 //     - <param>: name, value|expr
 //       name: name of settable parameter of channel (required)
 //       value: new value for parameter
@@ -102,7 +102,7 @@ package inet.common.scenario;
 // - <create-module>: parent, submodule, type, vector
 //       parent: parent module path (required)
 //       submodule: name of created module (required)
-//       type: NED type of created module (required), e.g., "inet.applications.pingapp.PingApp"
+//       type: NED type of created module (required), e.g., `inet.applications.pingapp.PingApp`
 //       vector: boolean, if true, the module is created as a vector element with the next index,
 //               if false, the module is created as a single module,
 //               if missing, detects existing vector by submodule name

@@ -31,8 +31,8 @@ import inet.applications.contract.IApp;
 //
 // The module has the following parameters:
 //   - mode: either "RIPv2" (RFC 2453) or "RIPng" (RFC 2080)
-//   - routingTableModule: path to the routing table module
-//   - ripConfig: an XML configuration file containing per-interface parameters
+//   - `routingTableModule`: path to the routing table module
+//   - `ripConfig`: an XML configuration file containing per-interface parameters
 //
 // The configuration file specifies the per interface parameters.
 // Each <interface> element configures one or more interfaces;
@@ -45,12 +45,12 @@ import inet.applications.contract.IApp;
 //            received on this interface. It must be an integer in
 //            the [1,15] interval.
 // - @mode: mode of the interface; an enumerated value, default is
-//          'SplitHorizonPoisonedReverse'. Accepted values are:
-//     - 'NoRIP': no RIP messages are sent or received on this interface
-//     - 'NoSplitHorizon': no split horizon filtering; send all routes to
+//          `SplitHorizonPoisonedReverse`. Accepted values are:
+//     - `NoRIP`: no RIP messages are sent or received on this interface
+//     - `NoSplitHorizon`: no split horizon filtering; send all routes to
 //                         neighbors.
-//     - 'SplitHorizon':   do not send routes whose next hop is the neighbor
-//     - 'SplitHorizonPoisonedReverse': if the next hop is the neighbor, then
+//     - `SplitHorizon`:   do not send routes whose next hop is the neighbor
+//     - `SplitHorizonPoisonedReverse`: if the next hop is the neighbor, then
 //                         set the metric of the route to infinity.
 simple Rip like IApp
 {

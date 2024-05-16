@@ -23,8 +23,8 @@ package inet.routing.pim.modes;
 // can also cancel the prune by sending a Graft message.
 //
 // The module must access the ~PimInterfaceTable and ~PimNeighborTable
-// modules, their path is given as the 'pimInterfaceTableModule' and
-// 'pimNeighborTableModule' parameters.
+// modules, their path is given as the `pimInterfaceTableModule` and
+// `pimNeighborTableModule` parameters.
 //
 // Other parameters are timer values from the specification.
 // They should not be modified except for testing purposes.

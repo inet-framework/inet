@@ -14,24 +14,24 @@ import inet.applications.contract.IApp;
 // and calculates the packet loss and round trip times of the replies.
 // It works exactly like 'ping' except that it is possible to specify
 // several destination addresses as a space separated list of IP addresses
-// or module names. (The L3AddressResolver class is used to resolve the address.)
+// or module names. (The `L3AddressResolver` class is used to resolve the address.)
 // Specifying '*' allows pinging ALL configured network interfaces in the
 // whole simulation. This is useful to check if a host can reach ALL other
 // hosts in the network (i.e. routing tables were set up properly).
 //
-// Start/stop time, sendInterval etc. can be specified via parameters. An address
+// Start/stop time, `sendInterval` etc. can be specified via parameters. An address
 // may be given in the dotted decimal notation (or, for IPv6, in the usual
 // notation with colons), or with the module name.
-// (The L3AddressResolver class is used to resolve the address.)
+// (The `L3AddressResolver` class is used to resolve the address.)
 //
 // To specify the number of ping requests sent to a single destination address,
 // use the 'count' parameter. After the specified number of ping requests was
-// sent to a destination address, the application goes to sleep for 'sleepDuration'.
+// sent to a destination address, the application goes to sleep for `sleepDuration`.
 // Once the sleep timer has expired, the application switches to the next destination
 // and starts pinging again. The application stops pinging once all destination
-// addresses were tested or the simulation time reaches 'stopTime'.
+// addresses were tested or the simulation time reaches `stopTime`.
 //
-// To disable send, specify empty destAddr.
+// To disable send, specify empty `destAddr`.
 //
 // Every ping request is sent out with a sequence number, and replies are
 // expected to arrive in the same order. Whenever there's a jump in the

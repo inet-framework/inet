@@ -17,7 +17,7 @@ package inet.visualizer.base;
 //
 // This module subscribes to signals at the provided subscription module. When
 // determining active links, it only considers packets matched by the provided
-// filters. The filters use the format of cMatchExpression with the packet name
+// filters. The filters use the format of `cMatchExpression` with the packet name
 // as the default attribute.
 //
 // The format string can contain the following directives:

@@ -11,7 +11,7 @@ package inet.mobility.single;
 import inet.mobility.base.MovingMobilityBase;
 
 //
-// Uses the native file format of BonnMotion.
+// Uses the native file format of the BonnMotion tool.
 //
 // The file is a plain text file, where every line describes the motion
 // of one host. A line consists of one or more (t, x, y, [z]) tuples of real
