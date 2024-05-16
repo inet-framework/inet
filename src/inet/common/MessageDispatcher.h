@@ -53,6 +53,9 @@ class INET_API MessageDispatcher :
     };
 
   protected:
+    std::map<int, cGate *> socketIdMap;
+    std::map<Key, cGate *> protocolIdMap;
+    std::map<int, cGate *> interfaceIdMap;
 
   protected:
     virtual cGate *handlePacket(Packet *packet, const cGate *inGate);

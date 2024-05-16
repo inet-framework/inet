@@ -40,15 +40,64 @@ bool MessageDispatcher::canPushPacket(Packet *packet, const cGate *inGate) const
     return consumer != nullptr && !dynamic_cast<MessageDispatcher *>(consumer) && consumer->canPushPacket(packet, outGate->getPathEndGate());
 }
 
+cGate *MessageDispatcher::handlePacket(Packet *packet, const cGate *inGate)
+{
+    const auto& dispatchProtocolReq = packet->findTag<DispatchProtocolReq>();
+    const auto& interfaceReq = packet->findTag<InterfaceReq>();
+    const auto& socketInd = packet->findTag<SocketInd>();
+    cGate *referencedGate;
+    if (socketInd != nullptr) {
+        auto it = socketIdMap.find(socketInd->getSocketId());
+        if (it != socketIdMap.end())
+            referencedGate = it->second;
+        else {
+            referencedGate = forwardLookupModuleInterface(inGate, typeid(IPassivePacketSink), socketInd.get(), 0);
+            socketIdMap[socketInd->getSocketId()] = referencedGate;
+        }
+    }
+    else if (dispatchProtocolReq != nullptr) {
+        const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();
+        // KLUDGE eliminate this by adding ServicePrimitive to every DispatchProtocolReq
+        DispatchProtocolReq dispatchProtocolReqArgument(*dispatchProtocolReq);
+        if (dispatchProtocolReq->getServicePrimitive() == static_cast<ServicePrimitive>(-1)) {
+            if (packetProtocolTag != nullptr && dispatchProtocolReq->getProtocol() == packetProtocolTag->getProtocol())
+                dispatchProtocolReqArgument.setServicePrimitive(SP_INDICATION);
+            else
+                dispatchProtocolReqArgument.setServicePrimitive(SP_REQUEST);
+        }
+        auto key = Key(dispatchProtocolReq->getProtocol()->getId(), dispatchProtocolReqArgument.getServicePrimitive());
+        auto it = protocolIdMap.find(key);
+        if (it != protocolIdMap.end())
+            referencedGate = it->second;
+        else {
+            referencedGate = forwardLookupModuleInterface(inGate, typeid(IPassivePacketSink), &dispatchProtocolReqArgument, 0);
+            protocolIdMap[key] = referencedGate;
+        }
+    }
+    else if (interfaceReq != nullptr) {
+        auto it = interfaceIdMap.find(interfaceReq->getInterfaceId());
+        if (it != interfaceIdMap.end())
+            referencedGate = it->second;
+        else {
+            referencedGate = forwardLookupModuleInterface(inGate, typeid(IPassivePacketSink), interfaceReq.get(), 0);
+            interfaceIdMap[interfaceReq->getInterfaceId()] = referencedGate;
+        }
+    }
+    else
+        throw cRuntimeError("Dispatch information not found");
+    if (referencedGate == nullptr)
+        throw cRuntimeError("Cannot find referenced module");
+    return referencedGate;
+}
+
 void MessageDispatcher::pushPacket(Packet *packet, const cGate *inGate)
 {
     Enter_Method("pushPacket");
+    ASSERT(inGate->isName("in"));
     take(packet);
-    auto outGate = handlePacket(packet, inGate);
-    queueing::PassivePacketSinkRef consumer;
-    consumer.reference(outGate, false);
-    handlePacketProcessed(packet);
-    pushOrSendPacket(packet, outGate, consumer);
+    auto referencedGate = handlePacket(packet, inGate);
+    auto passivePacketSink = check_and_cast<IPassivePacketSink *>(referencedGate->getOwnerModule());
+    passivePacketSink->pushPacket(packet, referencedGate);
     updateDisplayString();
 }
 
