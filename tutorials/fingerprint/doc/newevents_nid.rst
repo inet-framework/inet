@@ -4,9 +4,9 @@ Adding New Events - Part 2
 .. Using an Alternative Fingerprint Calculator
 
 When a change introduces new events to the simulation and breaks fingerprints, one option is to use an alternative fingerprint calculator instead of the default one.
-INET's fingerprint calculator (:cpp:`inet::FingerprintCalculator`) extends the default calculator, and adds new ingredients that can be used alongside the default ones.
+INET's fingerprint calculator (:cpp:`inet::FingerprintCalculator`) extends the default calculator and adds new ingredients that can be used alongside the default ones.
 This calculator can be used to take into account only the communication between the network nodes when calculating fingerprints.
-Thus protocol implementation details and events inside network nodes don't affect the fingerprints,
+Thus, protocol implementation details and events inside network nodes don't affect the fingerprints,
 only the data of the packets sent between network nodes.
 
 The fingerprint calculator has four new ingredients available:
@@ -31,11 +31,11 @@ The ``~`` ingredient toggles filtering of events to those that are messages betw
 
 .. note:: If the ingredients contain only D (and not t), the fingerprints are defined/affected only by the order of the packets (and the data they contain), the timings are irrelevant.
 
-To filter out the effects of newly added events, run fingerprints with ingredients which only take into account network communication (e.g. ~tID).
+To filter out the effects of newly added events, run fingerprints with ingredients that only take into account network communication (e.g. ~tID).
 
 .. workflow: when deciding which fingerprint to use, a general rule of thumb is that, you should use the most sensitive fingerprint that you think will not change because of the updated model. i.e. it is not sensitive to the model change but sensitive to everything else. Should this go into the general section?
 
-.. Note:: When deciding which fingerprint ingredients to use, a general rule of thumb is that you should use the most sensitive fingerprint that you think will not change because of the updated model, i.e. it is not sensitive to the model change but sensitive to everything else. In this step, we chose ``~tID``: this only takes into account messages between different network nodes; it uses the time, the interface full path and the data in network byte order to calculate the fingerprints.
+.. Note:: When deciding which fingerprint ingredients to use, a general rule of thumb is that you should use the most sensitive fingerprint that you think will not change because of the updated model, i.e. it is not sensitive to the model change but sensitive to everything else. In this step, we chose ``~tID``: this only takes into account messages between different network nodes; it uses the time, the interface full path, and the data in network byte order to calculate the fingerprints.
 
 Here is the workflow:
 
@@ -47,7 +47,7 @@ If fingerprint tests pass, there was no change in the communication between netw
 and the model can be assumed to be correct with respect to the data of the exchanged packets staying the same.
 
 As a simplistic example, we will make the same change to the :ned:`Udp` module as in the previous step.
-We will use only network communication ingredients to calculate fingerprints, and verify the model.
+We will use only network communication ingredients to calculate fingerprints and verify the model.
 
 We replace the default ingredients with ``~tID`` in the .csv file:
 

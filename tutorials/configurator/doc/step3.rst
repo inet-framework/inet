@@ -5,7 +5,7 @@ Goals
 -----
 
 Complex networks often contain several subnetworks, and the user may
-want to assign specific IP address ranges for them. This step
+want to assign specific IP address ranges to them. This step
 demonstrates how to assign a range of IP addresses to subnets.
 
 The model
@@ -15,7 +15,7 @@ This step uses the :ned:`ConfiguratorA` network, as in the previous two
 steps. One switch and the connected hosts as a group will be on the same
 subnet, and there are three such groups in the network.
 
-The configuration is the following:
+The configuration is as follows:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -33,8 +33,8 @@ A brief explanation:
 -  The first three entries assign IP addresses with different network
    prefixes to hosts in the three different subnets.
 
--  The next three entries specify for each router that its interface
-   that connects to a subnet should belong in that subnet. These entries
+-  The next three entries specify, for each router, that its interface
+   connecting to a subnet should belong to that subnet. These entries
    use the ``towards`` selector, which selects the interfaces that are
    connected towards the specified host or hosts.
 
@@ -66,10 +66,10 @@ Another alternative XML configuration is the following:
    :language: xml
 
 This one assigns an address to one host in each of the three subnets. It
-assigns addresses o the interfaces of the routers facing the other
+assigns addresses to the interfaces of the routers facing the other
 routers, and includes a copy of the default configuration. Because
 ``assignDisjunctSubnetAddresses=true``, the configurator puts the
-unspecified hosts, and the subnet facing router interfaces into the same
+unspecified hosts and the subnet-facing router interfaces into the same
 subnet as the specified host.
 
 Results
@@ -82,7 +82,7 @@ The assigned addresses are shown in the following image.
 
 The addresses are assigned as intended. This is useful because it is
 easy to recognize which group a node belongs to just by looking at its
-address (e.g. in the logs.)
+address (e.g., in the logs).
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`ConfiguratorA.ned <../ConfiguratorA.ned>`

@@ -10,10 +10,10 @@ from the first non-empty queue; the earlier queues have priority.
 
 .. In this step, packets are produced at random intervals by an active packet
    source (:ned:`ActivePacketSource`). The packets are collected at random intervals by
-   an active packet sink (ActivePacketSink). The source and the sink is connected
+   an active packet sink (:ned:`ActivePacketSink`). The source and the sink are connected
    by a compound priority queue (ExampleCompoundPriorityQueue) where packets are stored temporarily.
    This queue contains a classifier (:ned:`PacketClassifier`), two queues (:ned:`PacketQueue`),
-   and a priorty scheduler (:ned:`PriorityScheduler`).
+   and a priority scheduler (:ned:`PriorityScheduler`).
 
 In this step, packets are produced at random intervals by an active packet
 source (:ned:`ActivePacketSource`). The source is connected

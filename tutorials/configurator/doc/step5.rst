@@ -78,7 +78,7 @@ Second, note that the ``<route>`` element refers to addresses (e.g.
 element. It is valid to do so because the assignment of IP addresses is
 deterministic, that is, given the same input, it will always produce the
 same result. However, if you change the network topology, for example,
-add, remove or reorder hosts, addresses might be assigned in a different
+add, remove, or reorder hosts, addresses might be assigned in a different
 way. The consequence may be that addresses in the ``<route>`` element no
 longer exist in the modified network or they refer to different
 hosts/routers than originally intended, i.e. the configuration will

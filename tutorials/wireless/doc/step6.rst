@@ -14,8 +14,8 @@ transmissions. This resulted in a lot of collisions and lost packets. We
 improve the communication by using the CSMA protocol, which is based on
 the "sense before transmit" (or "listen before talk") principle.
 
-CSMA (carrier sense multiple access) is a probabilistic MAC protocol in
-which a node verifies the absence of other traffic before transmitting
+CSMA (carrier sense multiple access) is a probabilistic MAC protocol 
+in which a node verifies the absence of other traffic before transmitting
 on the shared transmission medium. CSMA has several variants; we'll use
 CSMA/CA (where CA stands for collision avoidance). In this protocol, a
 node that has data to send first waits for the channel to become idle,
@@ -39,13 +39,13 @@ acknowledgments and a retry mechanism. It has a number of parameters
 for tweaking its operation. With the appropriate parameters, it can
 approximate basic 802.11b ad-hoc mode operation. Parameters include:
 
--  acknowledgments on/off
--  bit rate (this is used for both data and ACK frames)
--  protocol overhead: MAC header length, ACK frame length
--  backoff parameters: minimum/maximum contention window (in slots),
-   slot time, maximum retry count
--  timing: interval to wait before transmitting ACK frame (SIFS) and
-   before data frames in addition to the backoff slots (DIFS)
+- acknowledgments on/off
+- bit rate (this is used for both data and ACK frames)
+- protocol overhead: MAC header length, ACK frame length
+- backoff parameters: minimum/maximum contention window (in slots),
+  slot time, maximum retry count
+- timing: interval to wait before transmitting ACK frame (SIFS) and
+  before data frames in addition to the backoff slots (DIFS)
 
 For now, we do not use an acknowledgment (sending of ACK packets), so we
 can see purely the effect of "listen before talk" and waiting a random
