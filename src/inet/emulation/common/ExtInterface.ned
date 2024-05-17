@@ -15,8 +15,8 @@ import inet.networklayer.common.NetworkInterface;
 // modules that connect the simulation to the network stack of the host OS.
 //
 // Each external interface module is associated with a specific network device
-// on the host OS. The host OS device is identified by the "namespace" and
-// "device" parameters. The "namespace" parameter is optional; when empty, the
+// on the host OS. The host OS device is identified by the `namespace` and
+// `device` parameters. The `namespace` parameter is optional; when empty, the
 // default namespace is used.
 //
 // External interfaces can be mentally visualized as composed of an upper and a
