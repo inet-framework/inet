@@ -24,7 +24,7 @@ import inet.networklayer.common.NetworkInterface;
 // simulation. Therefore, there are two types of external interfaces, which are
 // also reflected in their names:
 //
-// - In `ExtLower` interfaces, the lower part is a host OS device, and the upper
+// - In `ExtLower...` interfaces, the lower part is a host OS device, and the upper
 //   part is in the simulation. Therefore, an `ExtLower` interface module has
 //   `upperLayerIn` and `upperLayerOut` gates for connecting to the upper layers.
 //   The device is typically a "veth" (virtual Ethernet) device. (Using real
