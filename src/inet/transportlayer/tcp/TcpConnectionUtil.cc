@@ -11,6 +11,7 @@
 
 #include <algorithm> // min,max
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
@@ -370,7 +371,9 @@ void TcpConnection::sendAvailableIndicationToApp()
 
     indication->addTag<SocketInd>()->setSocketId(listeningSocketId);
     indication->setControlInfo(ind);
-    sendToApp(indication);
+    if (callback != nullptr)
+        // NOTE: this 0s delay is required to avoid calling the application before TCP completes the processing for the received message
+        schedule("available", simTime(), [=] () { callback->handleAvailable(ind); });
 }
 
 void TcpConnection::sendEstabIndicationToApp()
@@ -385,7 +388,7 @@ void TcpConnection::sendEstabIndicationToApp()
     ind->setAutoRead(autoRead);
     indication->addTag<SocketInd>()->setSocketId(socketId);
     indication->setControlInfo(ind);
-    sendToApp(indication);
+    callback->handleEstablished();
 }
 
 void TcpConnection::sendToApp(cMessage *msg)

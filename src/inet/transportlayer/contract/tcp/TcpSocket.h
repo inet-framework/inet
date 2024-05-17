@@ -15,10 +15,13 @@
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
+#include "inet/transportlayer/contract/ITcp.h"
 
 namespace inet {
 
 using namespace inet::queueing;
+using namespace inet::tcp;
+
 class TcpStatusInfo;
 
 /**
@@ -127,7 +130,7 @@ class TcpStatusInfo;
  *
  * @see SocketMap
  */
-class INET_API TcpSocket : public ISocket
+class INET_API TcpSocket : public ISocket, public ITcp::ICallback
 {
   public:
     /**
@@ -171,6 +174,8 @@ class INET_API TcpSocket : public ISocket
 
   protected:
     PassivePacketSinkRef sink;
+    ModuleRefByGate<ITcp> tcp;
+
     int connId = -1;
     State sockstate = NOT_BOUND;
 
@@ -294,6 +299,7 @@ class INET_API TcpSocket : public ISocket
         dispatchProtocolReq.setProtocol(&Protocol::tcp);
         dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
         sink.reference(toTcp, true, &dispatchProtocolReq);
+        tcp.reference(toTcp, true);
     }
 
     /**
@@ -483,6 +489,14 @@ class INET_API TcpSocket : public ISocket
      */
     void processMessage(cMessage *msg) override;
     //@}
+
+    virtual void handleEstablished() override {
+        cb->socketEstablished(this);
+    }
+
+    virtual void handleAvailable(TcpAvailableInfo *availableInfo) override {
+        cb->socketAvailable(this, availableInfo);
+    }
 };
 
 } // namespace inet

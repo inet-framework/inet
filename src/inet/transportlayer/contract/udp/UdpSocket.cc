@@ -36,33 +36,21 @@ void UdpSocket::bind(int localPort)
     bind(L3Address(), localPort);
 }
 
-void UdpSocket::bind(L3Address localAddr, int localPort)
+void UdpSocket::bind(L3Address localAddress, int localPort)
 {
     if (localPort < -1 || localPort > 65535) // -1: ephemeral port
         throw cRuntimeError("UdpSocket::bind(): invalid port number %d", localPort);
-
-    UdpBindCommand *ctrl = new UdpBindCommand();
-    ctrl->setLocalAddr(localAddr);
-    ctrl->setLocalPort(localPort);
-    auto request = new Request("bind", UDP_C_BIND);
-    request->setControlInfo(ctrl);
-    sendToUDP(request);
+    udp->bind(socketId, localAddress, localPort);
     sockState = CONNECTED;
 }
 
-void UdpSocket::connect(L3Address addr, int port)
+void UdpSocket::connect(L3Address address, int port)
 {
-    if (addr.isUnspecified())
+    if (address.isUnspecified())
         throw cRuntimeError("UdpSocket::connect(): unspecified remote address");
     if (port <= 0 || port > 65535)
         throw cRuntimeError("UdpSocket::connect(): invalid remote port number %d", port);
-
-    UdpConnectCommand *ctrl = new UdpConnectCommand();
-    ctrl->setRemoteAddr(addr);
-    ctrl->setRemotePort(port);
-    auto request = new Request("connect", UDP_C_CONNECT);
-    request->setControlInfo(ctrl);
-    sendToUDP(request);
+    udp->connect(socketId, address, port);
     sockState = CONNECTED;
 }
 
@@ -348,8 +336,11 @@ void UdpSocket::processMessage(cMessage *msg)
 
     switch (msg->getKind()) {
         case UDP_I_DATA:
-            if (cb)
-                cb->socketDataArrived(this, check_and_cast<Packet *>(msg));
+            if (cb) {
+                auto packet = check_and_cast<Packet *>(msg);
+                EV_INFO << "Received packet on socket" << EV_FIELD(socketId) << EV_FIELD(packet) << EV_ENDL;
+                cb->socketDataArrived(this, packet);
+            }
             else
                 delete msg;
             break;
