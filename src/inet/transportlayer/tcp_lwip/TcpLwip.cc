@@ -7,7 +7,6 @@
 
 #include "inet/transportlayer/tcp_lwip/TcpLwip.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -85,8 +84,6 @@ void TcpLwip::initialize(int stage)
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-        registerService(Protocol::tcp, gate("appIn"), gate("appOut"));
-        registerProtocol(Protocol::tcp, gate("ipOut"), gate("ipIn"));
 
         if (crcMode == CRC_COMPUTED) {
             cModuleType *moduleType = cModuleType::get("inet.transportlayer.tcp_common.TcpCrcInsertionHook");

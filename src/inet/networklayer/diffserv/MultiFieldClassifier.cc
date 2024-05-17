@@ -277,14 +277,5 @@ void MultiFieldClassifier::configureFilters(cXMLElement *config)
     }
 }
 
-void MultiFieldClassifier::mapRegistrationForwardingGates(cGate *g, std::function<void(cGate *)> f)
-{
-    if (g == gate("defaultOut")) {
-        f(inputGate);
-    }
-    else
-        PacketClassifierBase::mapRegistrationForwardingGates(g, f);
-}
-
 } // namespace inet
 

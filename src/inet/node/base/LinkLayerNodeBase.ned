@@ -40,7 +40,6 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.fcsMode = this.fcsMode;
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
-        ethernet.registerProtocol = default(true);
         @figure[linkLayer](type=rectangle; pos=250,458; size=1000,434; fillColor=#0000ff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
         @figure[linkLayer.title](type=text; pos=1245,463; anchor=ne; text="link layer");
         @figure[interfaceLayer](type=rectangle; pos=250,908; size=1000,210; fillColor=#00ffff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);

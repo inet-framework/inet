@@ -56,10 +56,8 @@ module EthernetSwitch like IEthernetNetworkNode
         **.macTableModule = default(absPath(".macTable"));
         *.clockModule = default(exists(clock) ? absPath(".clock") : "");
 
-        llc.registerProtocol = true;
         eth[*].mac.promiscuous = default(true);
         ethernet.*.promiscuous = default(true);
-        ethernet.registerProtocol = default(true);
 
     gates:
         inout ethg[numEthInterfaces] @labels(EtherFrame-conn);

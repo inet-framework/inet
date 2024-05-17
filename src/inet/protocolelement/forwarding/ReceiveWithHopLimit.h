@@ -17,7 +17,6 @@ using namespace inet::queueing;
 class INET_API ReceiveWithHopLimit : public PacketFilterBase
 {
   protected:
-    virtual void initialize(int stage) override;
     virtual void processPacket(Packet *packet) override;
 
   public:

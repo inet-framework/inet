@@ -19,7 +19,6 @@
 
 #include <algorithm>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -91,10 +90,6 @@ void EigrpIpv4Pdm::initialize(int stage) {
 
         EigrpDeviceConfigurator conf(par("configData"), ift);
         conf.loadEigrpIPv4Config(this);
-
-        // moved to splitter
-//        registerService(Protocol::eigrp, nullptr, gate("splitterIn"));
-//        registerProtocol(Protocol::eigrp, gate("splitterOut"), nullptr);
 
         WATCH_PTRVECTOR(*routingForNetworks->getAllNetworks());
         WATCH(asNum);

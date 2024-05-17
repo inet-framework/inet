@@ -5,7 +5,6 @@
 //
 
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
@@ -65,8 +64,6 @@ void Tcp::initialize(int stage)
         WATCH_PTRMAP(tcpAppConnMap);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
-        registerService(Protocol::tcp, gate("appIn"), gate("appOut"));
-        registerProtocol(Protocol::tcp, gate("ipOut"), gate("ipIn"));
         if (crcMode == CRC_COMPUTED) {
             cModuleType *moduleType = cModuleType::get("inet.transportlayer.tcp_common.TcpCrcInsertionHook");
             auto crcInsertion = check_and_cast<TcpCrcInsertionHook *>(moduleType->create("crcInsertion", this));

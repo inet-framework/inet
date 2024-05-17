@@ -7,7 +7,6 @@
 
 #include "inet/linklayer/ieee8022/Ieee8022LlcInserter.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
@@ -15,15 +14,6 @@
 namespace inet {
 
 Define_Module(Ieee8022LlcInserter);
-
-void Ieee8022LlcInserter::initialize(int stage)
-{
-    PacketFlowBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        registerService(Protocol::ieee8022llc, inputGate, nullptr);
-        registerProtocol(Protocol::ieee8022llc, outputGate, outputGate);
-    }
-}
 
 void Ieee8022LlcInserter::processPacket(Packet *packet)
 {

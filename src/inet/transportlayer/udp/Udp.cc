@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <string>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -117,8 +116,6 @@ void Udp::initialize(int stage)
                 ipv6->registerHook(0, crcInsertion);
 #endif
         }
-        registerService(Protocol::udp, gate("appIn"), gate("appOut"));
-        registerProtocol(Protocol::udp, gate("ipOut"), gate("ipIn"));
     }
 }
 

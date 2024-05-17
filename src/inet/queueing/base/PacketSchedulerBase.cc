@@ -39,18 +39,6 @@ void PacketSchedulerBase::initialize(int stage)
     }
 }
 
-void PacketSchedulerBase::mapRegistrationForwardingGates(cGate *gate, std::function<void(cGate *)> f)
-{
-    if (gate == outputGate) {
-        for (auto inputGate : inputGates)
-            f(inputGate);
-    }
-    else if (std::find(inputGates.begin(), inputGates.end(), gate) != inputGates.end())
-        f(outputGate);
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 int PacketSchedulerBase::callSchedulePacket() const
 {
     // KLUDGE const_cast

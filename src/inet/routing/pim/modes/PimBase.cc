@@ -9,7 +9,6 @@
 
 #include "inet/routing/pim/modes/PimBase.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"

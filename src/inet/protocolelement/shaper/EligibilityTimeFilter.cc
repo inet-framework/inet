@@ -20,16 +20,6 @@ void EligibilityTimeFilter::initialize(int stage)
         maxResidenceTime = par("maxResidenceTime");
 }
 
-cGate *EligibilityTimeFilter::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 bool EligibilityTimeFilter::matchesPacket(const Packet *packet) const
 {
     clocktime_t arrivalTime = getClockTime();

@@ -7,7 +7,6 @@
 
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -38,8 +37,6 @@ void Icmpv6::initialize(int stage)
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-        registerService(Protocol::icmpv6, gate("transportIn"), gate("transportOut"));
-        registerProtocol(Protocol::icmpv6, gate("ipv6Out"), gate("ipv6In"));
     }
 }
 
@@ -313,21 +310,6 @@ bool Icmpv6::validateDatagramPromptingError(Packet *packet)
 
 void Icmpv6::errorOut(const Ptr<const Icmpv6Header>& icmpv6msg)
 {
-}
-
-void Icmpv6::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterService");
-}
-
-void Icmpv6::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    if (!strcmp("transportOut", gate->getBaseName())) {
-        int protocolNumber = ProtocolGroup::getIpProtocolGroup()->findProtocolNumber(&protocol);
-        if (protocolNumber != -1)
-            transportProtocols.insert(protocolNumber);
-    }
 }
 
 void Icmpv6::insertCrc(CrcMode crcMode, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet)

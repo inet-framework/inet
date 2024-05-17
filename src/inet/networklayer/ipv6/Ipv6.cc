@@ -8,7 +8,6 @@
 #include "inet/networklayer/ipv6/Ipv6.h"
 
 #include "inet/common/INETUtils.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -103,22 +102,7 @@ void Ipv6::initialize(int stage)
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-
-        registerService(Protocol::ipv6, gate("transportIn"), gate("transportOut"));
-        registerProtocol(Protocol::ipv6, gate("queueOut"), gate("queueIn"));
     }
-}
-
-void Ipv6::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterService");
-}
-
-void Ipv6::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    if (gate->isName("transportOut"))
-        upperProtocols.insert(&protocol);
 }
 
 void Ipv6::handleRequest(Request *request)

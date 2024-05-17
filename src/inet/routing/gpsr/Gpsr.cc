@@ -10,7 +10,6 @@
 #include <algorithm>
 
 #include "inet/common/INETUtils.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
@@ -96,7 +95,6 @@ void Gpsr::initialize(int stage)
         globalPositionTable.clear();
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        registerProtocol(Protocol::manet, gate("ipOut"), gate("ipIn"));
         host->subscribe(linkBrokenSignal, this);
         networkProtocol->registerHook(0, this);
         WATCH(neighborTable);

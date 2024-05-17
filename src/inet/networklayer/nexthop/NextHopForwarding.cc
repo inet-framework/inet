@@ -64,22 +64,6 @@ void NextHopForwarding::initialize(int stage)
         WATCH(numUnroutable);
         WATCH(numForwarded);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(Protocol::nextHopForwarding, gate("transportIn"), gate("transportOut"));
-        registerProtocol(Protocol::nextHopForwarding, gate("queueOut"), gate("queueIn"));
-    }
-}
-
-void NextHopForwarding::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterService");
-}
-
-void NextHopForwarding::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    if (!strcmp("transportOut", gate->getBaseName()))
-        upperProtocols.insert(&protocol);
 }
 
 void NextHopForwarding::refreshDisplay() const

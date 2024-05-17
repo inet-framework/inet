@@ -8,7 +8,6 @@
 #ifndef __INET_RELAYINTERFACELEARNER_H
 #define __INET_RELAYINTERFACELEARNER_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/ethernet/contract/IMacForwardingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -18,7 +17,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API RelayInterfaceLearner : public PacketFlowBase, public TransparentProtocolRegistrationListener
+class INET_API RelayInterfaceLearner : public PacketFlowBase
 {
   protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
@@ -29,16 +28,6 @@ class INET_API RelayInterfaceLearner : public PacketFlowBase, public Transparent
 
   protected:
     virtual void processPacket(Packet *packet) override;
-
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
-
-    virtual bool isForwardingService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) const override { return false; }
-    virtual bool isForwardingServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) const override { return false; }
-    virtual bool isForwardingAnyService(cGate *gate, ServicePrimitive servicePrimitive) const override { return false; }
-
-    virtual bool isForwardingProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) const override { return servicePrimitive == SP_INDICATION; }
-    virtual bool isForwardingProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) const override { return servicePrimitive == SP_INDICATION; }
-    virtual bool isForwardingAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) const override { return servicePrimitive == SP_INDICATION; }
 };
 
 } // namespace inet

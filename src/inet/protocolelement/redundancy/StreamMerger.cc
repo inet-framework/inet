@@ -30,16 +30,6 @@ void StreamMerger::handleParameterChange(const char *name)
         mapping = check_and_cast<cValueMap *>(par("mapping").objectValue());
 }
 
-cGate *StreamMerger::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 void StreamMerger::processPacket(Packet *packet)
 {
     const auto& streamInd = packet->findTag<StreamInd>();

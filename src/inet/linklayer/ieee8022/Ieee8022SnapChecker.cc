@@ -7,7 +7,6 @@
 
 #include "inet/linklayer/ieee8022/Ieee8022SnapChecker.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -15,15 +14,6 @@
 namespace inet {
 
 Define_Module(Ieee8022SnapChecker);
-
-void Ieee8022SnapChecker::initialize(int stage)
-{
-    PacketFilterBase::initialize(stage);
-    if (stage == INITSTAGE_LINK_LAYER) {
-        registerService(Protocol::ieee8022snap, nullptr, outputGate);
-        registerProtocol(Protocol::ieee8022snap, nullptr, inputGate);
-    }
-}
 
 bool Ieee8022SnapChecker::matchesPacket(const Packet *packet) const
 {

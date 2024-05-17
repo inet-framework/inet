@@ -13,7 +13,6 @@
 #include <map>
 #include <string>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -44,9 +43,6 @@ void Ospfv2::initialize(int stage)
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
         startupTimer = new cMessage("OSPF-startup");
-    }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) { // interfaces and static routes are already initialized
-        registerProtocol(Protocol::ospf, gate("ipOut"), gate("ipIn"));
     }
 }
 

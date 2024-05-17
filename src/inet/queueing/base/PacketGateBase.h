@@ -8,7 +8,6 @@
 #ifndef __INET_PACKETGATEBASE_H
 #define __INET_PACKETGATEBASE_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/Units.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 #include "inet/queueing/contract/IPacketGate.h"
@@ -18,7 +17,7 @@ namespace queueing {
 
 using namespace units::values;
 
-class INET_API PacketGateBase : public PacketFlowBase, public TransparentProtocolRegistrationListener, public virtual IPacketGate
+class INET_API PacketGateBase : public PacketFlowBase, public virtual IPacketGate
 {
   public:
     static simsignal_t gateStateChangedSignal;
@@ -34,7 +33,6 @@ class INET_API PacketGateBase : public PacketFlowBase, public TransparentProtoco
     virtual void initialize(int stage) override;
     virtual void finish() override;
 
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
     virtual void processPacket(Packet *packet) override;
 
