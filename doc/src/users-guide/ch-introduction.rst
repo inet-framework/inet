@@ -58,11 +58,11 @@ Scope of this Manual
 
 This manual is written for users who are interested in assembling
 simulations using the components provided by the INET Framework. (In
-contrast, if you are interested in modifying INET’s components or plan to
-extend INET with new protocols or other components using C++, we
-recommend the *INET Developers Guide*.)
+contrast, if one is interested in modifying INET’s components or plans to
+extend INET with new protocols or other components using C++, the
+*INET Developers Guide* is recommended.)
 
-This manual does not attempt to be a reference for INET. It concentrates
+This manual does not attempt to be a reference for INET. It focuses
 on conveying the big picture and does not attempt to cover all
 components or try to document the parameters, gates, statistics, or
 precise operation of individual components. For such information, users

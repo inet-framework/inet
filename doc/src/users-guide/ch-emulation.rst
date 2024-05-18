@@ -132,8 +132,8 @@ world (communication). This is achieved in INET as follows:
 Preparation
 -----------
 
-There are a few things that need to be arranged before you can
-successfully run simulations in network emulation mode.
+There are a few things that need to be arranged before simulations can
+be successfully run in network emulation mode.
 
 First, network emulation is a separate *project feature* that needs to
 be enabled before it can be used. (Project features can be reviewed and

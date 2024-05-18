@@ -12,21 +12,21 @@ statistics, please refer to the OMNeT++ manual.
 Recording Statistics
 --------------------
 
-Most INET modules are already equipped with the collection of various statistics.
-You can find these as `@statistic` properties in the corresponding NED files.
+Most INET modules are already equipped with the collection of various statistics,
+defined using the ``@statistic`` properties in the corresponding NED files.
 By default, many of them are already configured to be automatically recorded
 as either scalars, vectors, or histograms depending on the typical usefulness
-of the statistic. Note that it's possible to change the default recording mode
+of the statistic. Note that the default recording mode can be changed
 from INI files as described in the OMNeT++ manual.
 
 If the default statistics provided by the INET modules are not sufficient,
-then you can derive new modules using only NED files and add new statistics
-to them based on the signals already emitted by the module. The emitted signals
-can also be found as @signal properties declared in the corresponding NED files.
+new modules can be derived using only NED files and new statistics
+can be added to them based on the signals emitted by the module. The emitted signals
+can be found as ``@signal`` properties declared in the corresponding NED files.
 
-If even declaring new statistics isn't sufficient, then you can also derive new
-C++ classes from the module implementations and add new signals and/or add new
-statistic collection code to them. This is the most cumbersome way to collect
+If even declaring new statistics isn't sufficient, new
+C++ classes can be derived from the module implementations and new signals and/or
+new statistic collection code can be added to them. This is the most cumbersome way to collect
 new results, but it's also the most expressive, allowing to collect any kind of
 statistic.
 
@@ -97,8 +97,7 @@ of the packet while the packets are in the packet flow. To actually make a
 measurement, a new measurement module must be implemented which processes the
 collected data.
 
-In order to configure one of the above packet flow measurements, you can use
-the following modules:
+In order to configure one of the above packet flow measurements, the following modules can be used:
 
 -  :ned:`FlowMeasurementStarter`: classifies packets to enter packet flows and
    starts timing measurements or packet event collection.

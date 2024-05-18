@@ -36,11 +36,10 @@ There are two network interfaces that differ in the type of radio:
 
 - :ned:`Ieee802154UwbIrInterface` is for use with the UWB-IR radio
 
-To create a wireless node with an 802.15.4 interface, use a node type that has a
+In order to create a wireless node with an 802.15.4 interface, use a node type that has a
 wireless interface and set the interface type to the appropriate type. For
 example, :ned:`WirelessHost` is a node type that is preconfigured to have one
-wireless interface, ``wlan[0]``. ``wlan[0]`` is of parametric type, so if you
-build the network from :ned:`WirelessHost` nodes, you can configure all of them
+wireless interface, ``wlan[0]``. ``wlan[0]`` is of parametric type, so it allows configuring of all the nodes
 to use 802.15.4 with the following line in the ini file:
 
 .. code-block:: ini

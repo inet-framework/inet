@@ -28,11 +28,11 @@ and :protocol:`GPSR`.
 
 The easiest way to add routing to an ad hoc network is to use the
 :ned:`ManetRouter` NED type for nodes. :ned:`ManetRouter` contains a
-submodule named ``routing`` whose type is a parameter, so it can be
-configured to be an AODV router, a DYMO router, or a router of any other
-supported routing protocol. For example, you can configure
-:ned:`ManetRouter` nodes in the network to use AODV with the following
-ini file line:
+submodule named ``routing`` which has parametric type, so it
+can be configured to be an AODV router, a DYMO router, or a router for any
+other supported routing protocol. For example, :ned:`ManetRouter` nodes in the
+network can be configured to use AODV by adding the following line to the ini
+file:
 
 .. code-block:: ini
 

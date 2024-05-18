@@ -194,7 +194,7 @@ In this model, the client repeats the following activity between
 4. If the connection is broken, it is noticed after
    :par:`reconnectInterval`, and the connection is reopened
 
-Each parameter in the above description is “volatile”, so you can use
+All parameters in the above description are marked as ``volatile``, allowing for using
 distributions to emulate random behavior.
 
 .. note::

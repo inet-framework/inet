@@ -15,8 +15,8 @@ To create a wireless node with a specific MAC protocol, use a node type
 that has a wireless interface and set the interface type to the
 appropriate type. For example, :ned:`WirelessHost` is a node type which
 is preconfigured to have one wireless interface, ``wlan[0]``.
-``wlan[0]`` is of parametric type, so if you build the network from
-:ned:`WirelessHost` nodes, you can configure all of them to use, for example,
+``wlan[0]`` is of parametric type, so if the network is built from
+:ned:`WirelessHost` nodes, all of them can be configured to use, for example,
 B-MAC with the following line in the ini file:
 
 .. code-block:: ini

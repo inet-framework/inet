@@ -319,37 +319,30 @@ considered.
 Visualizing Transport Connections
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In a large network with a complex topology, there might be many transport layer
-applications and many nodes communicating. In such a case, it might be difficult
-to see which nodes communicate with which, or if there is any communication at
-all. Transport connection visualization makes it easy to get information about
-the active transport connections in the network at a glance. Visualization makes
-it easy to identify connections by their two endpoints and to tell different
-connections apart. It also gives a quick overview of the number of connections
-in individual nodes and the whole network.
+In a large network with a complex topology, it can be difficult to determine which nodes
+are communicating and if any communication is occurring at all. Visualizing transport
+connections provides an easy way to obtain information about active transport connections
+in the network. It allows for easy identification and differentiation of connections based
+on their endpoints, providing a quick overview of the number of connections in individual
+nodes and the entire network.
 
-The :ned:`TransportConnectionVisualizer` module (also part of
-:ned:`IntegratedVisualizer`) displays color-coded icons above the two endpoints
-of an active, established transport layer level connection. The icons appear
-when the connection is established and disappear when it is closed. Naturally,
-there can be multiple connections open at a node, thus there can be multiple
-icons for each node. Icons have the same color at both ends of the connection.
-In addition to colors, letter codes (A, B, AA, ...) may also be displayed to
-help identify connections. Note that this visualizer does not display the paths
-the packets take. If you are interested in that, take a look at
-:ned:`TransportRouteVisualizer`, covered in section
-:ref:`ug:sec:visualization:transport-path-activity`.
+The :ned:`TransportConnectionVisualizer` module (also part of :ned:`IntegratedVisualizer`)
+displays color-coded icons above the two endpoints of an active, established transport
+layer connection. The icons appear when the connection is established and disappear when
+it is closed. Multiple connections at a node result in multiple icons. Icons for the same
+connection have the same color at both endpoints. Additionally, letter codes can be displayed
+to help identify connections. Note that this visualizer does not display the paths of packets.
+For path visualization, refer to the :ned:`TransportRouteVisualizer` covered in the
+section :ref:`ug:sec:visualization:transport-path-activity`.
 
-The visualization is turned off by default, but it can be turned on by setting
-the :par:`displayTransportConnections` parameter of the visualizer to true.
+The visualization is disabled by default, but it can be enabled by setting the visualizer's
+:par:`displayTransportConnections` parameter to true.
 
-It is possible to filter the connections being visualized. By default, all
-connections are included. Filtering by hosts and port numbers can be achieved by
-setting the :par:`sourcePortFilter`, :par:`destinationPortFilter`,
-:par:`sourceNodeFilter`, and :par:`destinationNodeFilter` parameters.
+Connections to be visualized can be filtered using the :par:`sourcePortFilter`,
+:par:`destinationPortFilter`, :par:`sourceNodeFilter`, and :par:`destinationNodeFilter`
+parameters.
 
-The icon, colors, and other visual properties can be configured by setting the
-visualizer's parameters.
+The icons and other visual properties can be customized using the visualizer's parameters.
 
 .. _ug:sec:visualization:the-infrastructure:
 
@@ -361,29 +354,22 @@ Visualizing The Infrastructure
 Visualizing the Physical Environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The physical environment has a profound effect on the communication of wireless
-devices. Physical objects like walls inside buildings constrain mobility and
-obstruct radio signals, often resulting in packet loss. It's difficult to make
-sense of the simulation without actually seeing where physical objects are.
+The physical environment significantly impacts the communication of wireless devices.
+Objects like walls within buildings limit mobility and obstruct radio signals, often
+causing packet loss. To better understand simulations, it is crucial to visualize the
+physical objects present in the environment.
 
-The visualization of physical objects present in the physical environment is
-essential.
+The visualization of physical objects is achieved using the :ned:`PhysicalEnvironmentVisualizer`
+(also part of :ned:`IntegratedVisualizer`). The objects themselves are provided by the
+PhysicalEnvironment module, defining their geometry, physical properties, and visual appearance
+in the XML configuration of the PhysicalEnvironment module.
 
-The :ned:`PhysicalEnvironmentVisualizer` (also part of
-:ned:`IntegratedVisualizer`) is responsible for displaying the physical objects.
-The objects themselves are provided by the PhysicalEnvironment module; their
-geometry, physical, and visual properties are defined in the XML configuration
-of the PhysicalEnvironment module.
+The two-dimensional projection of physical objects is determined by the :ned:`SceneCanvasVisualizer`
+module. The default view is a top view (z-axis), but side views (x and y axes) or isometric and
+orthographic projections can also be configured.
 
-The two-dimensional projection of physical objects is determined by the
-:ned:`SceneCanvasVisualizer` module. (This is because the projection is also
-needed by other visualizers, for example, :ned:`MobilityVisualizer`). The
-default view is top view (z-axis), but you can also configure a side view (x and
-y axes), or isometric or orthographic projection.
-
-The visualizer also supports OpenGL-based 3D rendering using the OpenSceneGraph
-(OSG) library. If the OMNeT++ installation has been compiled with OSG support,
-you can switch to 3D view using the Qtenv toolbar.
+For 3D rendering using the OpenSceneGraph (OSG) library, the simulation and OMNeT++ both
+need to be compiled with OSG support. The 3D view can be activated using the Qtenv toolbar.
 
 .. _ug:sec:visualization:node-mobility:
 

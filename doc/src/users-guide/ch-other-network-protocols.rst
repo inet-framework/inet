@@ -28,8 +28,6 @@ In the default configuration, only IPv4 is turned on. If you want to use
 an alternative network layer protocol instead of IPv4/IPv6, your
 configuration will look something like this:
 
-
-
 .. code-block:: ini
 
    **.hasIpv4 = false
@@ -73,8 +71,7 @@ addresses, use MAC address as a network address (this is sometimes useful
 in WSNs), or use synthetic addresses that only make sense within the
 simulation.  [1]_
 
-In apps, you need to specify which network layer protocol you want to
-use. For example:
+In apps, the network layer protocol to be used needs to be specified. For example:
 
 
 
@@ -142,7 +139,7 @@ The :par:`sinkAddress` parameter specifies the sink network address,
 low RSSI values) for routing, and :par:`routeFloodsInterval` should be
 set to zero for all nodes except the sink. Each
 :par:`routeFloodsInterval`, the sink restarts the tree building
-procedure. Set it to a large value if you do not want the tree to be
+procedure. Set it to a large value if the tree should not be
 rebuilt.
 
 .. _ug:sec:networkprotocols:nexthopforwarding:

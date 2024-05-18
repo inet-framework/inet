@@ -148,8 +148,8 @@ added before the queue module.)
 
 Traffic conditioners must implement the :ned:`ITrafficConditioner`
 module interface. Traffic conditioners can be assembled from DiffServ
-components (see chapter :doc:`ch-diffserv`). There is no
-preassembled traffic conditioner in INET, but you can find some in the
+components (see chapter :doc:`ch-diffserv`). INET does not provide any
+preassembled traffic conditioners, but some can be found in the
 example simulations.
 
 An example configuration with fictitious types:

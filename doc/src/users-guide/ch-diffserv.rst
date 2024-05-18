@@ -360,10 +360,10 @@ allocated to the other flows.
 Classifiers
 ~~~~~~~~~~~
 
-Classifier modules have one input and many output gates. They examine
-the received packets and forward them to the appropriate output gate
-based on the content of some portion of the packet header. You can read
-more about classifiers in RFC 2475 and RFC 3290.
+Classifier modules have one input gate and multiple output gates. They examine
+received packets and forward them to the appropriate output gate
+based on the contents of specific packet headers. More information
+about classifiers can be found in RFC 2475 and RFC 3290.
 
 The ``inet.networklayer.diffserv`` package contains two classifiers:
 :ned:`MultiFieldClassifier` to classify the packets at the edge routers
@@ -531,20 +531,19 @@ the yellow traffic is guaranteed to be under
 Markers
 ~~~~~~~
 
-DSCP markers set the codepoint of the crossing packets. The codepoint
+DSCP markers set the codepoint (DSCP field) of packets. The codepoint
 determines the further processing of the packet in the router or in the
 core of the DiffServ domain.
 
 The :ned:`DscpMarker` module sets the DSCP field (lower six bits of
-TypeOfService/TrafficClass) of IP datagrams to the value specified by
+the TypeOfService/TrafficClass field) of IP datagrams to the values specified by
 the :par:`dscps` parameter. The :par:`dscps` parameter is a space-separated
-list of codepoints. You can specify a different value for each input gate:
-packets arrived at the :math:`i^{th}` input gate are marked with the
-:math:`i^{th}` value. If there are fewer values than gates, the last one
-is used for extra gates.
+list of codepoints. A different value can be specified for each input gate,
+where the :math:`i^{th}` value is used for packets arriving at the :math:`i^{th}` input gate.
+If there are fewer values than gates, the last value is used for any extra gates.
 
 The DSCP values are enumerated in the :file:`DSCP.msg` file. You can
-use both names and integer values in the :par:`dscps` parameter.
+specify DSCP values using either their names or integer values in the :par:`dscps` parameter.
 
 For example, the following lines are equivalent:
 
