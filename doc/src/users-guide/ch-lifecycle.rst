@@ -9,7 +9,7 @@ Overview
 --------
 
 Simulation is often used to study the effects of unexpected events like
-a router crash on the network. In order to accommodate such scenarios,
+router crashes on the network. In order to accommodate such scenarios,
 INET supports *lifecycle modeling* of network nodes. The up/down status
 of a node is changed via lifecycle operations.
 
@@ -23,7 +23,7 @@ INET supports the following lifecycle operations:
 
 -  *Crash* represents the process of crashing a network node. The
    difference between *crash* and *shutdown* is that for a crash, the
-   network node will not do a graceful shutdown (e.g. routing protocols
+   network node will not perform a graceful shutdown (e.g. routing protocols
    will not have a chance to notify peers about broken routes).
 
 In a real-life router or other network node, a crash or shutdown and
@@ -71,8 +71,8 @@ certain conditions. For example, a node will crash when it runs out of
 power (e.g. its battery depletes); see the chapter on power consumption
 modeling :doc:`ch-power` for details.
 
-In the following sections, we outline the INET components that
-participate in lifecycle modeling and show a usage example.
+In the following sections, the INET components that
+participate in lifecycle modeling are outlined and a usage example is shown.
 
 .. _ug:sec:lifecycle:nodestatus:
 
@@ -119,7 +119,7 @@ The ``module`` attribute should point to the module (host, router,
 network interface, protocol, etc.) to be operated on. The
 ``operation`` attribute should contain the operation to perform:
 ``"shutdown"``, ``"crash"``, or ``"startup"``. ``t`` is the
-simulation time the operation should be initiated at.
+simulation time at which the operation should be initiated.
 
 An alternative, shorter form is to use ``<shutdown>``, ``<crash>``, or
 ``<startup>`` elements instead of the

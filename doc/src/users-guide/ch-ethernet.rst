@@ -14,31 +14,29 @@ introduction in 1980, Ethernet data transfer rates have increased from
 the original 10Mb/s to the latest 400Gb/s. Originally, the technology
 has changed from using coaxial cables and repeaters to using unshielded
 twisted-pair cables with hubs and switches. Today, switched Ethernet is
-prevalent, and most links operate in full duplex mode. The INET
-Framework contains support for all major Ethernet technologies and
-device types.
+prevalent, and most links operate in full duplex mode. Support for all major Ethernet technologies and device types is provided by the INET
+Framework.
 
 In Ethernet networks containing multiple switches, broadcast storms are
 prevented by the use of a spanning tree protocol (STP, RSTP) that disables
-selected links to eliminate cycles from the topology. Ethernet switch
-models in INET contain support for STP and RSTP.
+selected links to eliminate cycles from the topology. STP and RSTP are supported in the Ethernet switch models in INET.
 
 .. _ug:sec:ethernet:nodes:
 
 Nodes
 -----
 
-There are several node models that can be used in an Ethernet network:
+Several node models can be used in an Ethernet network:
 
 -  Node models such as :ned:`StandardHost` and :ned:`Router` are
    Ethernet-capable.
 
--  :ned:`EthernetSwitch` models an Ethernet switch, i.e. a multiport
+-  :ned:`EthernetSwitch` models an Ethernet switch, which is a multiport
    bridging device.
 
 -  :ned:`WireJunction` can model the coaxial cable (10BASE2 or 10BASE5 network segments) on legacy Ethernet networks, or an Ethernet hub/multiport repeater.
 
--  :ned:`EthernetHost` is a sample node which can be used to generate "raw"
+-  :ned:`EthernetHost` is a sample node that can be used to generate "raw"
    Ethernet traffic.
 
 .. _ug:sec:ethernet:etherswitch:
@@ -56,7 +54,7 @@ by full duplex lines, so no collisions are possible. In this case, the
 CSMA/CD is not needed and the channel utilization can be high.
 
 The :par:`duplexMode` parameters of the MACs must be set according to
-the medium connected to the port; if collisions are possible (it’s a bus
+the medium connected to the port; if collisions are possible (it's a bus
 or hub) it must be set to false, otherwise, it can be set to true. By
 default, it uses a half-duplex MAC with CSMA/CD.
 
@@ -143,8 +141,7 @@ of the LLC layer.
 Nowadays, almost all Ethernet networks operate using full-duplex
 point-to-point connections between hosts and switches. This means that
 there are no collisions, and the behavior of the MAC component is much
-simpler than in classic Ethernet that used coaxial cables and hubs. The
-INET framework contains two MAC modules for Ethernet: the
+simpler than in classic Ethernet that used coaxial cables and hubs. Two MAC modules for Ethernet are provided by the INET framework: the
 :ned:`EthernetMac` is simpler to understand and easier to extend,
 because it supports only full-duplex connections. The :ned:`EthernetCsmaMac`
 module implements the full MAC functionality including CSMA/CD, it can

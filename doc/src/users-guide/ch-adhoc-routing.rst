@@ -8,22 +8,22 @@ Ad Hoc Routing
 Overview
 --------
 
-In ad hoc networks, nodes are not familiar with the topology of their
-networks. Instead, they have to discover it: typically, a new node
-announces its presence and listens for announcements broadcast by its
-neighbors. Each node learns about others nearby and how to reach them,
-and may announce that it too can reach them. The difficulty of routing
-may be compounded by the fact that nodes may be mobile, which results in
-a changing topology.
+In ad hoc networks, the topology of the network is not known to the nodes.
+Instead, the topology must be discovered. When a new node joins the network,
+it announces its presence and listens for announcements from its neighbors.
+Each node learns about nearby nodes and how to reach them, and it may also
+announce that it can reach other nodes. The task of routing in ad hoc
+networks is complicated by the fact that nodes may be mobile, resulting in a
+changing topology.
 
-Ad hoc routing protocols fall into two broad categories: proactive and
-reactive. *Proactive* or *table-driven* protocols maintain fresh lists
-of destinations and their routes by periodically distributing routing
-tables throughout the network. *Reactive* or *on-demand* protocols find
-a route on demand by flooding the network with Route Request packets.
+There are two types of ad hoc routing protocols: proactive and reactive.
+*Proactive* or *table-driven* protocols maintain up-to-date lists of
+destinations and their routes by periodically distributing routing tables
+throughout the network. *Reactive* or *on-demand* protocols find a route
+on-demand by flooding the network with Route Request packets.
 
-The INET Framework contains the implementation of several ad hoc routing
-protocols including :protocol:`AODV`, :protocol:`DSDV`, :protocol:`DYMO`
+The INET Framework includes the implementation of several ad hoc routing
+protocols, including :protocol:`AODV`, :protocol:`DSDV`, :protocol:`DYMO`,
 and :protocol:`GPSR`.
 
 The easiest way to add routing to an ad hoc network is to use the
@@ -40,16 +40,17 @@ file:
    **.routing.typename = "Gpsr" # as a routing protocol module
 
 There are also NED types called :ned:`AodvRouter`, :ned:`DymoRouter`,
-:ned:`DsdvRouter`, :ned:`GpsrRouter`, which are all :ned:`ManetRouter`’s
-with the routing protocol submodule type set appropriately.
+:ned:`DsdvRouter`, and :ned:`GpsrRouter`. These types are all based on
+:ned:`ManetRouter` and have the routing protocol submodule type set
+appropriately.
 
 .. _ug:sec:adhocrouting:aodv:
 
 AODV
 ----
 
-AODV (Ad hoc On-Demand Distance Vector Routing) is a routing protocol
-for mobile ad hoc networks and other wireless ad hoc networks. It offers
+AODV (Ad hoc On-Demand Distance Vector Routing) is a routing protocol for
+mobile ad hoc networks and other wireless ad hoc networks. It provides
 quick adaptation to dynamic link conditions, low processing and memory
 overhead, low network utilization, and determines unicast routes to
 destinations within the ad hoc network.

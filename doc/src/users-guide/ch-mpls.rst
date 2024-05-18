@@ -8,9 +8,9 @@ The MPLS Models
 Overview
 --------
 
-Multi-Protocol Label Switching (MPLS) is a "layer 2.5" protocol for high-performance telecommunications networks. MPLS directs data from one network node to the next based on numeric labels instead of network addresses, avoiding complex lookups in a routing table and allowing traffic engineering. The labels identify virtual links (label-switched paths or LSPs, also called MPLS tunnels) between distant nodes rather than endpoints. The routers that make up a label-switched network are called label-switching routers (LSRs) inside the network ("transit nodes"), and label edge routers (LER) on the edges of the network ("ingress" or "egress" nodes).
+Multi-Protocol Label Switching (MPLS) is a "layer 2.5" protocol for high-performance telecommunications networks. MPLS data is directed from one network node to the next using numeric labels instead of network addresses. This avoids complex lookups in a routing table and allows for traffic engineering. The labels identify virtual links (label-switched paths or LSPs, also called MPLS tunnels) between distant nodes, rather than endpoints. The routers that make up a label-switched network are called label-switching routers (LSRs) inside the network ("transit nodes"), and label edge routers (LER) on the edges of the network ("ingress" or "egress" nodes).
 
-A fundamental MPLS concept is that two LSRs must agree on the meaning of the labels used to forward traffic between and through them. This common understanding is achieved by using signaling protocols through which one LSR informs another of label bindings it has made. Such signaling protocols are also called label distribution protocols. The two main label distribution protocols used with MPLS are LDP and RSVP-TE.
+A fundamental MPLS concept is that the meaning of the labels used to forward traffic between and through two LSRs must be agreed upon. This common understanding is achieved by using signaling protocols through which one LSR informs another of label bindings it has made. Such signaling protocols are also called label distribution protocols. The two main label distribution protocols used with MPLS are LDP and RSVP-TE.
 
 INET provides basic support for building MPLS simulations. It provides models for the MPLS, LDP, and RSVP-TE protocols and their associated data structures, and preassembled MPLS-capable router models.
 
@@ -40,11 +40,11 @@ The core modules are:
 Mpls
 ~~~~
 
-The :ned:`Mpls` module implements the MPLS protocol. MPLS is situated between layer 2 and 3, and its main function is to switch packets based on their labels. For that, it relies on the data structure called LIB (Label Information Base). LIB is fundamentally a table with the following columns: *input-interface*, *input-label*, *output-interface*, *label-operation(s)*.
+The MPLS protocol is implemented by the :ned:`Mpls` module. MPLS is situated between layer 2 and 3, and its main function is to switch packets based on their labels. For that purpose, it relies on the data structure called LIB (Label Information Base). LIB is essentially a table with the following columns: *input-interface*, *input-label*, *output-interface*, *label-operation(s)*.
 
-Upon receiving a labeled packet from another LSR, MPLS first extracts the incoming interface and incoming label pair, and then looks it up in the local LIB. If a matching entry is found, it applies the prescribed label operations and forwards the packet to the output interface.
+When receiving a labeled packet from another LSR, MPLS first extracts the incoming interface and incoming label pair, and then looks it up in the local LIB. If a matching entry is found, it applies the prescribed label operations and forwards the packet to the output interface.
 
-The label operations can be the following:
+The label operations can be one of the following:
 
 - *Push* adds a new MPLS label to a packet. (A packet may contain multiple labels, acting as a stack.) When a normal IP packet enters an LSP, the new label will be the first label on the packet.
 
@@ -54,7 +54,7 @@ The label operations can be the following:
 
 In INET, the local LIB is stored in a :ned:`LibTable` module in the router.
 
-Upon receiving an unlabeled (e.g., plain IPv4) packet, MPLS first determines the forwarding equivalence class (FEC) for the packet using an ingress classifier, and then inserts one or more labels in the packet's newly created MPLS header. The packet is then passed on to the next hop router for the LSP.
+When receiving an unlabeled (e.g., plain IPv4) packet, MPLS first determines the forwarding equivalence class (FEC) for the packet using an ingress classifier, and then inserts one or more labels in the packet's newly created MPLS header. The packet is then passed on to the next hop router for the LSP.
 
 The ingress classifier is also a separate module; it is selected depending on the choice of the signaling protocol.
 
@@ -63,7 +63,7 @@ The ingress classifier is also a separate module; it is selected depending on th
 LibTable
 ~~~~~~~~
 
-:ned:`LibTable` stores the LIB (Label Information Base), as described in the previous section. :ned:`LibTable` is expected to have one instance in the router.
+The :ned:`LibTable` module stores the LIB (Label Information Base), as described in the previous section. The router is expected to have one instance of the :ned:`LibTable` module.
 
 LIB is normally filled and maintained by label distribution protocols (RSVP-TE, LDP), but in INET, it is possible to preload it with initial contents.
 
@@ -92,9 +92,9 @@ There can be multiple ``<libentry>`` elements, each describing a row in the tabl
 Ldp
 ~~~
 
-The :ned:`Ldp` module implements the Label Distribution Protocol (LDP). LDP is used to establish LSPs in an MPLS network when traffic engineering is not required. It establishes LSPs that follow the existing IP routing table, and is particularly well suited for establishing a full mesh of LSPs between all of the routers on the network.
+The :ned:`Ldp` module implements the Label Distribution Protocol (LDP). LDP is used to establish LSPs in an MPLS network when traffic engineering is not required. LDP establishes LSPs that follow the existing IP routing table, and is particularly well suited for establishing a full mesh of LSPs between all routers on the network.
 
-LDP relies on the underlying routing information provided by a routing protocol to forward label packets. The router's forwarding information base, or FIB, is responsible for determining the hop-by-hop path through the network.
+LDP relies on the underlying routing information provided by a routing protocol to forward label packets. The router's forwarding information base, or FIB, determines the hop-by-hop path through the network.
 
 In INET, the :ned:`Ldp` module takes routing information from the :ned:`Ted` module. The :ned:`Ted` instance in the network is filled and maintained by a :ned:`LinkStateRouting` module. Unfortunately, it is currently not possible to use other routing protocol implementations such as :ned:`Ospfv2` in conjunction with :ned:`Ldp`.
 
@@ -119,9 +119,9 @@ The :ned:`LinkStateRouting` module provides a simple link-state routing protocol
 RsvpTe
 ~~~~~~
 
-The :ned:`RsvpTe` module implements RSVP-TE (Resource Reservation Protocol – Traffic Engineering), as the signaling protocol for MPLS. RSVP-TE handles bandwidth allocation and allows traffic engineering across an MPLS network. Like LDP, RSVP uses discovery messages and advertisements to exchange LSP path information between all hosts. However, whereas LDP is restricted to using the configured IGP's shortest path as the transit path through the network, RSVP can take into consideration network constraint parameters such as available bandwidth and explicit hops. RSVP uses a combination of the Constrained Shortest Path First (CSPF) algorithm and Explicit Route Objects (EROs) to determine how traffic is routed through the network.
+The :ned:`RsvpTe` module implements RSVP-TE (Resource Reservation Protocol – Traffic Engineering) as the signaling protocol for MPLS. RSVP-TE handles bandwidth allocation and allows traffic engineering across an MPLS network. Like LDP, RSVP uses discovery messages and advertisements to exchange LSP path information between all hosts. However, whereas LDP is restricted to using the configured IGP's shortest path as the transit path through the network, RSVP can take into consideration network constraint parameters such as available bandwidth and explicit hops. RSVP uses a combination of the Constrained Shortest Path First (CSPF) algorithm and Explicit Route Objects (EROs) to determine how traffic is routed through the network.
 
-When :ned:`RsvpTe` is used as the signaling protocol, :ned:`Mpls` needs a separate ingress classifier module, which is usually a :ned:`RsvpClassifier`.
+When :ned:`RsvpTe` is used as the signaling protocol, :ned:`Mpls` requires a separate ingress classifier module, which is usually a :ned:`RsvpClassifier`.
 
 The :ned:`RsvpTe` module allows LSPs to be specified statically in an XML config file. An example ``traffic.xml`` file:
 
@@ -148,7 +148,7 @@ The :ned:`RsvpTe` module allows LSPs to be specified statically in an XML config
        </session>
    </sessions>
 
-In the route, ``<node>`` stands for strict hop, and ``<lnode>`` for loose hop.
+In the route, ``<node>`` stands for a strict hop, and ``<lnode>`` stands for a loose hop.
 
 Paths can also be set up and torn down dynamically with :ned:`ScenarioManager` commands (see chapter :doc:`ch-scenario-scripting`). :ned:`RsvpTe` understands the ``<add-session>`` and ``<del-session>`` :ned:`ScenarioManager` commands. The contents of the ``<add-session>`` element can be the same as the ``<session>`` element for the ``traffic.xml`` above. The ``<del-session>`` element syntax is also similar, but only ``<endpoint>``, ``<tunnel_id>``, and ``<lspid>`` need to be specified.
 
@@ -209,7 +209,7 @@ An example ``fectable.xml`` file:
 MPLS-Enabled Router Models
 --------------------------
 
-INET provides the following pre-assembled MPLS routers:
+INET provides the following preassembled MPLS routers:
 
 - :ned:`LdpMplsRouter` is an MPLS router with the LDP signaling protocol
 

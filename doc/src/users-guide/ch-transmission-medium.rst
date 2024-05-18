@@ -36,10 +36,10 @@ wireless network simulations.
 RadioMedium
 -----------
 
-The standard transmission medium model in INET is :ned:`RadioMedium`.
+The standard transmission medium model in the INET Framework is :ned:`RadioMedium`.
 :ned:`RadioMedium` is an OMNeT++ compound module with several replaceable
-submodules. It contains submodules for each of the above models (signal
-propagation, path loss, etc.), and various caches for efficiency.
+submodules. Submodules for each of the above models (signal
+propagation, path loss, etc.) and various caches for efficiency are included.
 
 Note that :ned:`RadioMedium` is an active compound module, that is, it has an
 associated C++ class that encapsulates the computations.
@@ -68,7 +68,7 @@ There are many preconfigured versions of :ned:`RadioMedium`:
 
 -  For IEEE 802.11: :ned:`Ieee80211ScalarRadioMedium`, :ned:`Ieee80211DimensionalRadioMedium`.
 
--  For IEEE 802.15.4: :ned:`Ieee802154UwbIrRadioMedium`, :ned:`Ieee802154NarrowbandScalarRadioMedium`
+-  For IEEE 802.15.4: :ned:`Ieee802154UwbIrRadioMedium`, :ned:`Ieee802154NarrowbandScalarRadioMedium`.
 
 The following sections describe the parts of the medium model.
 
@@ -77,18 +77,17 @@ The following sections describe the parts of the medium model.
 Propagation Models
 ------------------
 
-When a transmitter starts to transmit a signal, the beginning of the signal
-propagates through the transmission medium. When the transmitter ends the
-transmission, the signal’s end propagates similarly. The propagation model
+When a signal transmitter starts transmission, the signal's start propagates through the transmission medium.
+When the transmitter ends transmission, the signal's end propagates similarly. The propagation model
 describes how a signal moves through space over time. Its main purpose is to
-compute the arrival space-time coordinates at receivers. There are two built-in
-models in INET, implemented as simple modules:
+compute the arrival space-time coordinates at receivers. INET implements two built-in
+models:
 
--  :ned:`ConstantTimePropagation` is a simplistic model where the propagation
+-  :ned:`ConstantTimePropagation`: A simplistic model where the propagation
    time is independent of the travelled distance. The propagation time is simply
    determined by a module parameter.
 
--  :ned:`ConstantSpeedPropagation` is a more realistic model where the
+-  :ned:`ConstantSpeedPropagation`: A more realistic model where the
    propagation time is proportional to the travelled distance. The propagation
    time is independent of the transmitter and receiver movement during both
    signal transmission and propagation. The propagation speed is determined by a
@@ -274,7 +273,7 @@ The following example sets :ned:`QuadTreeNeighborCache` as the neighbor cache:
    :end-before: !End
    :name: Neighbor cache model configuration example
 
-How should one decide which neighbor cache to choose for a given simulation? As
+How should one chose the neighbor cache for a given simulation? As
 the sole purpose of the neighbor cache is to speed up the simulation, one should
 choose the one that leads to the best performance for that particular network.
 Which one performs the best is best determined by experimentation, as it depends

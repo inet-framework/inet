@@ -19,22 +19,22 @@ IEEE 802.15.4 is the basis for the :protocol:`ZigBee`, :protocol:`ISA100.11a`,
 :protocol:`Thread` specifications, each of which further extends the standard by
 developing the upper layers that are not defined in IEEE 802.15.4.
 Alternatively, it can be used with :protocol:`6LoWPAN`, the technology used to
-deliver IPv6 over WPANs, to define the upper layers. (Thread is also
+deliver IPv6 over WPANs, in order to define the upper layers. (Thread is also
 6LoWPAN-based.)
 
-The INET Framework contains a basic implementation of the IEEE 802.15.4
-protocol.
+A basic implementation of the IEEE 802.15.4
+protocol is provided by the INET Framework.
 
 .. _ug:sec:802154:network-interfaces:
 
 Network Interfaces
 ------------------
 
-There are two network interfaces that differ in the type of radio:
+Two network interfaces differing in the type of radio are available:
 
-- :ned:`Ieee802154NarrowbandInterface` is for use with narrowband radios
+- :ned:`Ieee802154NarrowbandInterface` is for use with narrowband radios.
 
-- :ned:`Ieee802154UwbIrInterface` is for use with the UWB-IR radio
+- :ned:`Ieee802154UwbIrInterface` is for use with the UWB-IR radio.
 
 In order to create a wireless node with an 802.15.4 interface, use a node type that has a
 wireless interface and set the interface type to the appropriate type. For
@@ -51,21 +51,18 @@ to use 802.15.4 with the following line in the ini file:
 Physical Layer
 --------------
 
-The IEEE 802.15.4 standard defines several alternative PHYs. There are several
-narrowband radios at various frequency bands using various modulation schemes
-(DSSS, O-QPSK, MPSK, GFSK BPSK, etc.), a Direct Sequence ultra-wideband (UWB),
-and one using chirp spread spectrum (CSS).
+The IEEE 802.15.4 standard defines several alternative PHYs. Various frequency bands, modulation schemes (DSSS, O-QPSK, MPSK, GFSK BPSK, etc.), and  narrowband radios are deployed. The standard also includes a Direct Sequence ultra-wideband (UWB) radio and one using chirp spread spectrum (CSS).
 
 INET provides the following radios:
 
 - :ned:`Ieee802154NarrowbandScalarRadio` is currently a partially parameterized
-  version of the APSK radio. Before using this radio, one must check its
-  parameters and make sure that they correspond to the specification of the
-  802.15.4 narrowband PHY to be simulated.
+  version of the APSK radio. Before using this radio, the radio's parameters must be checked
+  and ensure their correspondence to the specification of the
+  narrowband PHY being simulated.
 
 - :ned:`Ieee802154UwbIrRadio` models the 802.14.5 UWB radio.
 
-One must choose a matching medium model, for example
+To match the radios, a relevant medium model should be chosen. For instance,
 :ned:`Ieee802154UwbIrRadioMedium` for :ned:`Ieee802154UwbIrRadio`, and
 :ned:`Ieee802154NarrowbandScalarRadioMedium` for
 :ned:`Ieee802154NarrowbandScalarRadio`.

@@ -9,33 +9,27 @@ Overview
 --------
 
 Hosts, routers, switches, access points, mobile phones, and other
-network nodes are represented in INET with compound modules. The
-previous chapter has introduced a few node types like
-:ned:`StandardHost`, :ned:`Router`, and showed how to put together
-networks from them. In this chapter, we look at the internals of such
-node models, in order to provide a deeper understanding of their
-customization possibilities and to give some guidance on how custom
-nodes models can be assembled.
+network nodes are represented in INET with compound modules. A few node types like
+:ned:`StandardHost`, :ned:`Router` were introduced in the previous chapter, and networks were demonstrated to be built from them. In this chapter, the internals of these node models will be explored to provide a deeper understanding of their customization possibilities and to give some guidance on assembling custom node models.
 
 .. _ug:sec:nodes:ingredients:
 
 Ingredients
 -----------
 
-Node models are assembled from other modules which represent
+Node models are assembled from other modules representing
 applications, communication protocols, network interfaces, routing
-tables, mobility models, energy models, and other functionality. These
-modules fall into the following broad categories:
+tables, mobility models, energy models, and other functionalities. These
+modules can be categorized into the following:
 
--  *Applications* often model the user behavior as well as the
-   application program (e.g., browser), and the application layer
-   protocol (e.g., :protocol:`HTTP`). Applications typically use
+-  *Applications* often models user behavior, the application program (e.g., browser), and the application layer
+   protocol (e.g., :protocol:`HTTP`). Applications typically utilize
    transport layer protocols (e.g., :protocol:`TCP` and/or
    :protocol:`UDP`), but they may also directly use lower layer
    protocols (e.g., :protocol:`IP` or :protocol:`Ethernet`) via sockets.
 
 -  *Routing protocols* are provided as separate modules:
-   :protocol:`OSPF`, :protocol:`BGP`, or :protocol:`AODV` for MANET
+   :protocol:`OSPF`, :protocol:`BGP`, and :protocol:`AODV` for MANET
    routing. These modules use :protocol:`TCP`, :protocol:`UDP`, and
    :protocol:`IPv4`, and manipulate routes in the
    :ned:`Ipv4RoutingTable` module.
@@ -49,7 +43,7 @@ modules fall into the following broad categories:
    Network Simulation Cradle library.
 
 -  *Network layer protocols* are connected to transport layer protocols
-   and network interfaces. They are usually modeled as compound modules:
+   and network interfaces, usually modeled as compound modules:
    :ned:`Ipv4NetworkLayer` for :protocol:`IPv4`, and
    :ned:`Ipv6NetworkLayer` for :protocol:`IPv6`. The
    :ned:`Ipv4NetworkLayer` module contains several protocol modules:
@@ -57,13 +51,13 @@ modules fall into the following broad categories:
 
 -  *Network interfaces* are represented by compound modules which are
    connected to the network layer protocols and other network interfaces
-   in the wired case. They are often modeled as compound modules
+   in the wired case. They are usually modeled as compound modules
    containing separate modules for queues, classifiers, MAC, and PHY
    protocols.
 
 -  *Link layer protocols* are usually simple modules sitting in network
    interface modules. Some protocols, for example :protocol:`IEEE 802.11 MAC`,
-   are modeled as a compound module themselves due to the complexity of the
+   are modeled as compound modules themselves due to the complexity of the
    protocol.
 
 -  *Physical layer protocols* are compound modules also being part of
@@ -71,12 +65,12 @@ modules fall into the following broad categories:
 
 -  *Interface table* maintains the set of network interfaces (e.g.
    ``eth0``, ``wlan0``) in the network node. Interfaces are registered
-   dynamically during initialization of network interfaces.
+   dynamically during the initialization of network interfaces.
 
 -  *Routing tables* maintain the list of routes for the corresponding
    network protocol (e.g., :ned:`Ipv4RoutingTable` for :ned:`Ipv4`).
    Routes are added by automatic network configurators or routing
-   protocols. Network protocols use the routing tables to find out the
+   protocols. Network protocols use the routing tables to determine the
    best matching route for datagrams.
 
 -  *Mobility modules* are responsible for moving around the network node
@@ -90,13 +84,13 @@ modules fall into the following broad categories:
 
 -  *Energy modules* model energy storage mechanisms, energy consumption
    of devices and software processes, energy generation of devices, and
-   energy management processes which shutdown and startup network nodes.
+   energy management processes that shutdown and startup network nodes.
 
 -  *Status* (:ned:`NodeStatus`) keeps track of the status of the network
    node (up, down, etc.)
 
 -  *Other modules* with particular functionality such as
-   :ned:`PcapRecorder` are also available.
+   :ned:`PcapRecorder`, are also available.
 
 .. _ug:sec:nodes:node-architecture:
 
@@ -108,15 +102,15 @@ communication opportunities between protocols. Packets and messages sent
 on these connections represent software or hardware activity.
 
 Although protocols may also be connected to each other directly, in most
-cases they are connected via *dispatcher modules*. Dispatchers
+cases, they are connected via *dispatcher modules*. Dispatchers
 (:ned:`MessageDispatcher`) are small, low-overhead modules that allow
 protocol components to be connected in one-to-many and many-to-many
-fashion, and ensure that messages and packets sent from one component
-end up being delivered to the correct component. Dispatchers need no
+fashions, ensuring that messages and packets sent from one component
+end up being delivered to the correct component. Dispatchers require no
 manual configuration, as they use discovery and peek into packets.
 
 In their pre-assembled node models, dispatchers allow arbitrary protocol
-components to talk directly to each other, i.e. not only to ones in
+components to communicate directly with each other, not just ones in
 neighboring layers.
 
 .. _ug:sec:nodes:customizing-nodes:
@@ -124,28 +118,28 @@ neighboring layers.
 Customizing Nodes
 -----------------
 
-The built-in network nodes are written to be as versatile and
-customizable as possible. This is achieved in several ways:
+The built-in network nodes are designed to be as versatile and
+customizable as possible. This is achieved through several ways:
 
 Submodule and Gate Vectors
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-One way is the use of gate vectors and submodule vectors. The sizes of
-vectors may come from parameters or derived by the number of external
+One way is the usage of gate vectors and submodule vectors. The sizes of
+vectors may come from parameters or be derived from the number of external
 connections to the network node. For example, a host may have an
 arbitrary number of wireless interfaces, and it will automatically have
 as many :protocol:`Ethernet` interfaces as the number of
 :protocol:`Ethernet` devices connected to it.
 
-For example, wireless interfaces for hosts are defined like this:
+Wireless interfaces for hosts are defined as follows:
 
 .. code-block:: ned
 
    wlan[numWlanInterfaces]: <snip> // wlan interfaces in StandardHost etc al.
 
-Where :par:`numWlanInterfaces` is a module parameter that defaults to
+Where :par:`numWlanInterfaces` is a module parameter with a default value of
 either 0 or 1 (this is different for e.g. :ned:`StandardHost` and
-:ned:`WirelessHost`.) To configure a host to have two interfaces, add
+ned:`WirelessHost`.) To configure a host to have two interfaces, add
 the following line to the ini file:
 
 .. code-block:: ini
@@ -167,11 +161,10 @@ host (it is enabled by default), use the following ini file line:
 Parametric Types
 ~~~~~~~~~~~~~~~~
 
-Another often used way of customization is parametric types, that is,
-the type of a submodule (or a channel) may be specified as a string
+Another often-used way of customization is parametric types, where the type of a submodule (or a channel) may be specified as a string
 parameter. Almost all submodules in the built-in node types have
 parametric types. For example, the :protocol:`TCP` protocol module is
-defined like this:
+defined as follows:
 
 .. code-block:: ned
 
@@ -206,10 +199,10 @@ Inheritance
 
 Inheritance can be used to derive new, specialized node types from
 existing ones. A derived NED type may add new parameters, gates,
-submodules, or connections, and may set inherited unassigned parameters
+submodules, or connections and may set inherited unassigned parameters
 to specific values.
 
-For example, :ned:`WirelessHost` is derived from :ned:`StandardHost` in the following way:
+For example, :ned:`WirelessHost` is derived from :ned:`StandardHost`, as shown below:
 
 .. code-block:: ned
 
@@ -226,12 +219,12 @@ Custom Network Nodes
 
 Despite the many pre-assembled network nodes and the several available
 customization options, sometimes it is just easier to build a network
-node from scratch. The following example shows how easy it is to build a
+node from scratch. The following example demonstrates how easy it is to build a
 simple network node.
 
 This network node already contains a configurable application and
-several standard protocols. It also demonstrates how to use the packet
-dispatching mechanism which is required to connect multiple protocols in
+several standard protocols. It also demonstrates the usage of the packet
+dispatching mechanism that is required to connect multiple protocols in
 a many-to-many relationship.
 
 .. literalinclude:: lib/Snippets.ned

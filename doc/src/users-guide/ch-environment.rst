@@ -8,32 +8,13 @@ The Physical Environment
 Overview
 --------
 
-Wireless networks are heavily affected by the physical environment, and
-the requirements for today’s ubiquitous wireless communication devices
-are increasingly demanding. Cellular networks serve densely populated
-urban areas, wireless LANs need to be able to cover large buildings with
-several offices, low-power wireless sensors must tolerate noisy
-industrial environments, batteries need to remain operational under
-various external conditions, and so on.
+Wireless networks are heavily affected by the physical environment, and the requirements for today’s ubiquitous wireless communication devices are increasingly demanding. Densely populated urban areas are served by cellular networks, large buildings with several offices need to be covered by wireless LANs, low-power wireless sensors must tolerate noisy industrial environments, and batteries need to remain operational under various external conditions, among other things.
 
-The propagation of radio signals, the movement of communicating agents,
-battery exhaustion, etc., depend on the surrounding physical
-environment. For example, signals can be absorbed by objects, can pass
-through objects, can be refracted by surfaces, can be reflected from
-surfaces, or battery capacity might depend on external temperature.
-These effects cannot be ignored in high-fidelity simulations.
+The propagation of radio signals, the movement of communicating agents, battery exhaustion, etc., depend on the surrounding physical environment. For example, objects can absorb or let through signals, surfaces can refract or reflect signals, and battery capacity might depend on external temperature. These effects cannot be ignored in high-fidelity simulations.
 
-In order to help the modeling process, the model of the physical
-environment in the INET Framework is separated from the rest of the
-simulation model. The main goal of the physical environment model is to
-describe buildings, walls, vegetation, terrain, weather, and other
-physical objects and conditions that might have effects on radio signal
-propagation, movement, batteries, etc. This separation makes the model
-reusable by all other simulation models that depend on these
-circumstances.
+To assist in the modeling process, the physical environment model in the INET Framework is separated from the rest of the simulation model. The main goal of the physical environment model is to describe buildings, walls, vegetation, terrain, weather, and other physical objects and conditions that might have effects on radio signal propagation, movement, batteries, etc. This separation allows the model to be reusable by all other simulation models that depend on these circumstances.
 
-The following sections provide a brief overview of the physical
-environment model.
+The following sections provide a brief overview of the physical environment model.
 
 .. _ug:sec:environment:physicalenvironment:
 
@@ -73,11 +54,7 @@ and an object cache (for efficient queries):
 Physical Objects
 ----------------
 
-The most important aspect of the physical environment is the objects
-that are present in it. For example, simulating an indoor Wifi scenario
-may need to model walls, floors, ceilings, doors, windows, furniture,
-and similar objects because they all affect signal propagation
-(obstacle modeling).
+The most important aspect of the physical environment is the objects present within it. For example, simulating an indoor Wifi scenario may require modeling walls, floors, ceilings, doors, windows, furniture, and similar objects because they all affect signal propagation (obstacle modeling).
 
 Objects are located in space and have shapes and materials. The
 physical environment model supports basic shapes and homogeneous
@@ -88,7 +65,7 @@ following properties:
 -  *shape* describes the object in 3D independent of its position and
    orientation.
 
--  *position* determines where the object is located in the 3D space.
+-  *position* determines where the object is located in 3D space.
 
 -  *orientation* determines how the object is rotated relative to its
    default orientation.
@@ -116,7 +93,7 @@ with new shapes. INET provides the following shapes:
 
 -  *sphere* shapes are specified by a radius
 
--  *cuboid* shapes are specified by a length, a width, and a height
+-  *cuboid* shapes are specified by a length, width, and height
 
 -  *prism* shapes are specified by a 2D polygon base and a height
 
@@ -132,10 +109,7 @@ the XML syntax supported by the physical environment:
    :end-before: !End
    :name: Defining physical objects example
 
-In order to load the above XML file, the following configuration could
-be used:
-
-
+To load the above XML file, the following configuration could be used:
 
 .. literalinclude:: lib/Snippets.ini
    :language: ini

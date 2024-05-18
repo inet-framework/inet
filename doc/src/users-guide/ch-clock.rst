@@ -99,7 +99,7 @@ and the corresponding :cpp:`IOscillator` C++ interface.
 
 The following oscillator models are available:
 
--  :ned:`IdealOscillator`: generates ticks periodically with a constant length
+-  :ned:`IdealOscillator`: ticks are generated periodically with a constant length
    (mostly useful for testing).
 -  :ned:`ConstantDriftOscillator`: tick length changes proportionally to the elapsed
    simulation time (clock drift).

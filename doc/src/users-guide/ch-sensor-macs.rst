@@ -11,9 +11,9 @@ Overview
 The INET Framework contains the implementation of several MAC protocols
 for wireless sensor networks (WSNs), including B-MAC, L-MAC, and X-MAC.
 
-To create a wireless node with a specific MAC protocol, use a node type
-that has a wireless interface and set the interface type to the
-appropriate type. For example, :ned:`WirelessHost` is a node type which
+To create a wireless node with a specific MAC protocol, a node type
+that has a wireless interface can be used and the interface type can be set
+to the appropriate type. For example, :ned:`WirelessHost` is a node type which
 is preconfigured to have one wireless interface, ``wlan[0]``.
 ``wlan[0]`` is of parametric type, so if the network is built from
 :ned:`WirelessHost` nodes, all of them can be configured to use, for example,

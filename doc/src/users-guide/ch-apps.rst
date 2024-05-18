@@ -18,8 +18,8 @@ implement very specific behaviors, and generate corresponding traffic patterns
 based on their specific parameters. These applications are implemented as simple
 modules.
 
-In the second category, applications are more generic. They separate traffic
-generation from the usage of the protocol, :ned:`Udp` or :ned:`Tcp` for example.
+In the second category, applications are more generic. Traffic
+generation is separated from the usage of the protocol, such as :ned:`Udp` or :ned:`Tcp`.
 These applications are implemented as compound modules. They contain separate
 configurable traffic source, traffic sink, and protocol input/output submodules.
 This approach allows building complex traffic patterns by composing queuing
@@ -44,7 +44,7 @@ server model can be kept simple and dumb.
 TcpBasicClientApp
 ~~~~~~~~~~~~~~~~~
 
-Client for a generic request-response style protocol over TCP. May be
+A client for a generic request-response style protocol over TCP. It may be
 used as a rough model of HTTP or FTP users.
 
 The model communicates with the server in sessions. During a session,
@@ -91,7 +91,7 @@ sending the response, while in this model, it is the client.
 TcpSinkApp
 ~~~~~~~~~~
 
-Accepts any number of incoming TCP connections and discards whatever
+This module accepts any number of incoming TCP connections and discards whatever
 arrives on them.
 
 .. _ug:sec:apps:tcpgenericserverapp:
@@ -99,7 +99,7 @@ arrives on them.
 TcpGenericServerApp
 ~~~~~~~~~~~~~~~~~~~
 
-Generic server application for modeling TCP-based request-reply style
+A generic server application for modeling TCP-based request-reply style
 protocols or applications.
 
 The module accepts any number of incoming TCP connections and expects
@@ -124,10 +124,10 @@ also be delayed by a constant time (:par:`echoDelay` parameter).
 TcpSessionApp
 ~~~~~~~~~~~~~
 
-Single-connection TCP application: it opens a connection, sends the
+A single-connection TCP application: it opens a connection, sends the
 given number of bytes, and closes. Sending may be one-off, or may be
-controlled by a “script” which is a series of (time, number of bytes)
-pairs. May act either as client or as server. Compatible with both IPv4
+controlled by a "script" which is a series of (time, number of bytes)
+pairs. It may act either as a client or as a server. Compatible with both IPv4
 and IPv6.
 
 Opening the connection
@@ -136,7 +136,7 @@ Opening the connection
 Depending on the type of opening the connection (active/passive), the
 application may be either a client or a server. In passive mode, the
 application will listen on the given local local port and wait for an
-incoming connection. In active mode, the application will bind to given
+incoming connection. In active mode, the application will bind to the given
 local local address and local port and connect to the given address and
 port. It is possible to use an ephemeral port as a local port.
 
@@ -194,8 +194,8 @@ In this model, the client repeats the following activity between
 4. If the connection is broken, it is noticed after
    :par:`reconnectInterval`, and the connection is reopened
 
-All parameters in the above description are marked as ``volatile``, allowing for using
-distributions to emulate random behavior.
+All parameters in the above description are marked as ``volatile``,
+allowing for using distributions to emulate random behavior.
 
 .. note::
 
@@ -349,13 +349,13 @@ broadcast messages.
 INET also defines several NED functions that can be useful:
 
 -  | ``moduleListByPath("pattern",...)``:
-   | Returns a space-separated list of the modulenames. All modules
+   | Returns a space-separated list of the module names. All modules
      whose full path matches one of the pattern parameters will be
-     included. The patterns may contain wilcards in the same syntax as
+     included. The patterns may contain wildcards in the same syntax as
      in ini files. Example:
 
 -  | ``moduleListByNedType("fully.qualified.ned.type",...)``:
-   | Returns a space-separated list of the modulenames with the given
+   | Returns a space-separated list of the module names with the given
      NED type(s). All modules whose NED type name occurs in the
      parameter list will be included. The NED type name is fully
      qualified. Example:
@@ -369,7 +369,7 @@ Examples:
    **.app[0].destAddresses = moduleListByPath("**.host[*]", "**.fixhost[*]")
    **.app[1].destAddresses = moduleListByNedType("inet.nodes.inet.StandardHost")
 
-The peer can be UdpSink or another UdpBasicBurst.
+The peer can be `UdpSink` or another `UdpBasicBurst`.
 
 Bursts
 ^^^^^^
@@ -417,7 +417,7 @@ network layer only; they do not need transport layer protocols. They can
 be used with both IPv4 and IPv6.
 
 :ned:`IIpvxTrafficGenerator` (prototype) sends IP or IPv6 datagrams to
-the given address at the given :par:`sendInterval`. The
+the given address at the specified :par:`sendInterval`. The
 :par:`sendInterval` parameter can be a constant or a random value (e.g.,
 ``exponential(1)``). If the :par:`destAddresses` parameter contains
 more than one address, one of them is randomly chosen for each packet. An

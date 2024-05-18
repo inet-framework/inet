@@ -67,16 +67,16 @@ the standard, IEEE 802.11-2012 Part 11: Wireless LAN Medium Access Control (MAC)
 and Physical Layer (PHY) Specifications.
 
 The :ned:`Ieee80211Mac` performs transmission of frames according to the
-CSMA/CA protocol. It receives data and management frames from the upper
-layers, and transmits them.
+CSMA/CA protocol. Data and management frames are received from the upper
+layers and transmitted using the :ned:`Ieee80211Radio`.
 
-The :ned:`Ieee80211Mac` was designed to be modular to facilitate
-experimenting with new policies, features, and algorithms within the MAC
-layer. Users can easily replace individual components with their own
+The :ned:`Ieee80211Mac` was designed with modularity in mind to facilitate
+experimentation with new policies, features, and algorithms within the MAC
+layer. Individual components can be easily replaced with custom
 implementations. Policies, which are most likely to be experimented with,
 are extracted into their own modules.
 
-The new model also separates the following components in the 802.11 standard
+The new model also separates the following components from the 802.11 standard
 into modules:
 
 -  Coordination function: :ned:`Dcf`, :ned:`Hcf`. The coordination functions
@@ -135,7 +135,7 @@ into modules:
      higher layers, waiting for transmission unchanged.
 
 -  :ned:`InProgressFrames`: This modules is a queue containing frames waiting
-     for transmission already processed by the MAC data service.
+     for transmission that have been processed by the MAC data service.
 
 -  TX/RX (:ned:`Tx`, :ned:`Rx`). Responsible for simple frame
    transmission/reception.
@@ -155,7 +155,7 @@ The MAC model has the following replaceable built-in policy submodules by defaul
 .. , with the default modules in parentheses:
 
 -  ACK policy (e.g. :ned:`OriginatorAckPolicy`, :ned:`RecipientAckPolicy`):
-   controls what kind of acknowledgment is used per-frame (none, normal,
+   controls the type of acknowledgment used per-frame (none, normal,
    block-ack)
 
 -  RTS/CTS policy (e.g. :ned:`RtsPolicy`, :ned:`CtsPolicy`): determines which
@@ -167,12 +167,12 @@ The MAC model has the following replaceable built-in policy submodules by defaul
    agreements are made
 
 -  MSDU aggregation policy (e.g. :ned:`BasicMsduAggregationPolicy`): controls
-   when and which frames are aggregated into an A-MSDU
+   which frames are aggregated into an A-MSDU and when
 
 -  Fragmentation policy (e.g. :ned:`BasicFragmentationPolicy`): controls when
-   and how fragmentation happens
+   and how fragmentation occurs
 
-.. For example, a lot of these modules are located in the *hcf* submodule of the MAC:
+.. For example, many of these modules are located in the *hcf* submodule of the MAC:
 
    .. figure:: figures/hcf.png
       :align: center
@@ -217,7 +217,7 @@ The management layer has several implementations which differ in their
 role (STA/AP/ad-hoc) and level of detail: :ned:`Ieee80211MgmtAdhoc`,
 :ned:`Ieee80211MgmtAp`, :ned:`Ieee80211MgmtApSimplified`,
 :ned:`Ieee80211MgmtSta`, :ned:`Ieee80211MgmtStaSimplified`. The
-..Simplified ones differ from the others in that they do not model the
+..Simplified ones differ from the others in that they do not simulate the
 scan-authenticate-associate process, so they cannot be used in
 experiments involving handover.
 
@@ -233,10 +233,9 @@ association procedures and reports back the results to the agent.
 
 The agent component is currently only needed with the
 :ned:`Ieee80211MgmtSta` module. The management entities in other NIC
-variants do not have as much freedom as to need an agent to control
-them.
+variants do not have as much freedom and do not require an agent.
 
 :ned:`Ieee80211MgmtSta` requires an :ned:`Ieee80211AgentSta` or a custom
 agent. By modifying or replacing the agent, one can alter the dynamic
-behavior of STAs in the network, for example, implement different
+behavior of STAs in the network, for example, implementing different
 handover strategies.

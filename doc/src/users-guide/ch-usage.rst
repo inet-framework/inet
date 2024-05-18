@@ -38,7 +38,7 @@ installation instructions provided with them should be followed.
 Usually, the following procedure works if no specific instructions are
 available:
 
-- First, check if the project root contains a file named
+- First, it should be checked if the project root contains a file named
   :file:`.project`.
 
 - If the file exists, the project can be imported into the IDE by using
@@ -59,14 +59,15 @@ available:
 Getting Familiar with INET
 --------------------------
 
-The INET Framework builds upon OMNeT++, and uses the same concept:
-modules that communicate by message passing. Hosts, routers, switches,
-and other network devices are represented by OMNeT++ compound modules.
-These compound modules are assembled from simple modules that represent
-protocols, applications, and other functional units. A network is again
-an OMNeT++ compound module that contains host, router, and other modules.
+The INET Framework is based on OMNeT++ and follows the same concept of
+modules communicating through message passing. OMNeT++ compound modules
+are used to represent hosts, routers, switches, and other network
+devices. These compound modules are made up of simple modules that
+represent protocols, applications, and other functional units. A network
+consists of an OMNeT++ compound module that contains host, router, and
+other modules.
 
-Modules are organized into a directory structure that roughly follows
+Modules are organized into a directory structure that aligns with the
 OSI layers:
 
 - :file:`src/inet/applications/` – traffic generators and application
@@ -95,8 +96,8 @@ OSI layers:
 
 - :file:`src/inet/common/` – miscellaneous utility components
 
-The OMNeT++ NED language uses hierarchical package names. Packages
-correspond to directories under :file:`src/`, so for example, the
+The hierarchical package names in the OMNeT++ NED language correspond
+to packages in directories under :file:`src/`. For example, the
 :file:`src/inet/transportlayer/tcp` directory corresponds to the
 ``inet.transportlayer.tcp`` NED package.
 

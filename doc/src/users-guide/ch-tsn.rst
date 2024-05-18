@@ -26,22 +26,22 @@ Devices
 TSN networks require additional functionality compared to standard Ethernet.
 To facilitate the configuration of the TSN features, INET provides several TSN
 specific network devices. These are derived from the basic INET network nodes and
-they provide several additional TSN specific parameters. The additional parameters
+provide several additional TSN specific parameters. The additional parameters
 mostly determine the internal module structure of the TSN specific network nodes,
 and also further parameterize the basic network node submodules. The usage of
-these network nodes is completely optional, it is possible to combine the TSN
+these network nodes is completely optional, and it is possible to combine the TSN
 modules in other ways. However, it is advisable to start making TSN simulations
 using them.
 
--  :ned:`TsnClock` models a hardware device that exclusively acts as a gPTP
+-  :ned:`TsnClock` models a hardware device that exclusively operates as a gPTP
    master node for time synchronization
--  :ned:`TsnDevice` models a TSN specific end device capable of running
+-  :ned:`TsnDevice` models a TSN specific end device, capable of running
    multiple applications and all other supported TSN features
--  :ned:`TsnSwitch` models an Ethernet switch capable of all supported TSN
+-  :ned:`TsnSwitch` models an Ethernet switch that is capable of all supported TSN
    features
 
 Using the TSN specific network nodes and having the TSN specific features enabled
-is just the first step for using Time-Sensitve Networking. Most TSN features
+is just the first step for using Time-Sensitive Networking. Most TSN features
 require additional configuration in the corresponding modules.
 
 .. _ug:sec:tsn:timesynchronization:
@@ -59,7 +59,7 @@ included in the TSN specific network nodes.
 If the default TSN specific network nodes are not used, then the following modules
 can still be used to keep track of time in the network nodes.
 
--  :ned:`OscillatorBasedClock` models a clock having potentially drifting
+-  :ned:`OscillatorBasedClock` models a clock that has a potentially drifting
    oscillator
 -  :ned:`SettableClock` extends the previous model with the capability of setting
    the clock time
@@ -76,7 +76,7 @@ network:
 
 In order to implement node failure (e.g. master clock) and link failure (e.g.
 between gPTP bridges) protection, multiple time synchronization domains are
-required. These time domains operate independently of each other and it's up to
+required. These time domains operate independently of each other, and it's up to
 the clock user modules of each network node to decide which clock they are using.
 Typically, they use the active clock of the :ned:`MultiClock`, and there has to
 be some means of changing the active clocks when failover happens. The following
@@ -111,11 +111,11 @@ one of the latter per-stream 3 modules is optional.
 
 When a packet arrives at the input of the :ned:`SimpleIeee8021qFilter`, it first gets
 classified into one of the filtering and policing submodule paths. Then the
-packet meter measures the packet as part of the packet stream that was seen
+packet meter measures the packet as part of the packet stream that has been seen
 so far and attaches the result of the measurement. The result may be as
 simple as a label on the packet. After the metering, the packet filter checks
 if the packet matches the required conditions and either lets the packet go
-through or drops it. Finally, the packet gate allows the automatic time based
+through or drops it. Finally, the packet gate allows for the automatic time based
 or programmatic control of the packet passing through the selected path of the
 policing module. Packets are never enqueued in the :ned:`SimpleIeee8021qFilter`, they
 either pass through or get dropped immediately.
@@ -132,8 +132,8 @@ gate indices. Please note that the stream decoding and identification process
 is not part of the :ned:`SimpleIeee8021qFilter`.
 
 In the second step, the default policing process continues with a packet meter
-module, the :ned:`DualRateThreeColorMeter` by default, that labels the packets either
-as green, yellow or red based on the committed and excess information rate
+module, the :ned:`DualRateThreeColorMeter` by default, that labels the packets as either
+green, yellow, or red based on the committed and excess information rate
 and the committed and excess burst size parameters.
 
 The most commonly used packet meters for per-stream filtering and policing
@@ -141,15 +141,15 @@ are:
 
 -  :ned:`SingleRateTwoColorMeter` labels packets as green or red based on CIR
    and CBS parameters
--  :ned:`SingleRateThreeColorMeter` labels packets as green, yellow or red based
-   on CIR, CBS and EBS parameters
--  :ned:`DualRateThreeColorMeter` labels packets as green, yellow or red based
-   on CIR, CBS, EIR and EBS parameters
+-  :ned:`SingleRateThreeColorMeter` labels packets as green, yellow, or red based
+   on CIR, CBS, and EBS parameters
+-  :ned:`DualRateThreeColorMeter` labels packets as green, yellow, or red based
+   on CIR, CBS, EIR, and EBS parameters
 
 The above modules are based on the following generic token bucket meter
 modules:
 
--  :ned:`TokenBucketMeter` contains a single token bucket and labels packets one
+-  :ned:`TokenBucketMeter` contains a single token bucket and labels packets as one
    of 2 labels
 -  :ned:`MultiTokenBucketMeter` contains an overflowing chain of N token buckets
    and labels packets with one of N+1 labels
@@ -182,9 +182,9 @@ policing are:
 -  :ned:`SingleRateTwoColorClassifier` classifies packets to 2 output gates based
    on CIR and CBS parameters
 -  :ned:`SingleRateThreeColorClassifier` classifies packets to 3 output gates based
-   on CIR, CBS and EBS parameters
+   on CIR, CBS, and EBS parameters
 -  :ned:`DualRateThreeColorClassifier` classifies packets to 3 output gates based
-   on CIR, CBS, EIR and EBS parameters
+   on CIR, CBS, EIR, and EBS parameters
 
 The above modules are derived from the generic token bucket classifier modules.
 These modules can also be used on their own and combined in many different
@@ -342,7 +342,7 @@ the end-to-end latency of application traffic. This effect can be overcome and
 drastically reduced by using cut-through switching. This method starts forwarding
 the incoming frame before the whole frame has been received, usually right after
 the reception of the MAC header. However, cut-through switching is not a standard
-mechanism, and there are all kinds of variants in operation.
+mechanism, and several variants are in operation.
 
 INET provides the following modules related to cut-through switching:
 
@@ -373,7 +373,7 @@ Automatic Network Configuration
 Configuring the features of Time-Sensitive Networking in a complex network that
 contains many applications with different traffic requirements is a difficult
 and error-prone task. To facilitate this task, INET provides three types of
-network level configurators:
+network-level configurators:
 
 -  gate scheduling configurators are capable of configuring the gate control
    lists (i.e., periodic open/close states) for all traffic classes in all network

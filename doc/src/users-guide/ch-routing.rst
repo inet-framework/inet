@@ -12,7 +12,7 @@ The INET Framework has models for several internet routing protocols,
 including RIP, OSPF, and BGP.
 
 The easiest way to add routing to a network is to use the :ned:`Router`
-NED type for routers. :ned:`Router` contains a conditional instance for
+NED type for routers. The :ned:`Router` type contains a conditional instance for
 each of the above protocols. These submodules can be enabled by setting
 the :par:`hasRip`, :par:`hasOspf`, and/or :par:`hasBgp` parameters to
 ``true``.
@@ -24,8 +24,8 @@ Example:
    **.hasRip = true
 
 There are also NED types called :ned:`RipRouter`, :ned:`OspfRouter`,
-:ned:`BgpRouter`, which are all :ned:`Router`’s with an appropriate routing
-protocol enabled.
+and :ned:`BgpRouter`, which are all variants of the :ned:`Router` module with the respective routing
+protocols enabled.
 
 .. _ug:sec:routing:rip:
 
@@ -33,10 +33,9 @@ RIP
 ---
 
 RIP (Routing Information Protocol) is a distance-vector routing protocol
-that employs the hop count as a routing metric. RIP prevents routing
-loops by implementing a limit on the number of hops allowed in a path
-from the source to the destination. RIP uses the *split horizon with poison
-reverse* technique to work around the "count-to-infinity" problem.
+that employs the hop count as a routing metric. Routing loops are prevented
+in RIP by implementing a hop limit in the path from the source to the destination.
+RIP uses the *split horizon with poison reverse* technique to address the "count-to-infinity" problem.
 
 The :ned:`Rip` module implements distance vector routing as specified in
 RFC 2453 (RIPv2) and RFC 2080 (RIPng). The behavior can be selected by
@@ -57,13 +56,13 @@ The following example configures a :ned:`Router` module to use RIPv2:
 The configuration file specifies the per-interface parameters. Each
 ``<interface>`` element configures one or more interfaces; the
 ``hosts``, ``names``, ``towards``, ``among`` attributes
-select the configured interfaces (in a similar way as with
+select the configured interfaces (similar to
 :ned:`Ipv4NetworkConfigurator`). See the :doc:`ch-network-autoconfig` chapter
 for further information.
 
 Additional attributes:
 
--  ``metric``: metric assigned to the link, the default value is 1. This
+-  ``metric``: metric assigned to the link, with a default value of 1. This
    value is added to the metric of a learned route received on this
    interface. It must be an integer in the [1,15] interval.
 
@@ -108,7 +107,7 @@ system (AS).
 The :ned:`Ospfv2` module implements OSPF protocol version 2. Areas and
 routers can be configured using an XML file specified by the
 :par:`ospfConfig` parameter. Various parameters for the network
-interfaces can be specified also in the XML file or as a parameter of
+interfaces can also be specified in the XML file or as a parameter of
 the :ned:`Ospfv2` module.
 
 .. code-block:: ini
@@ -245,4 +244,3 @@ Inside ``<AS>`` elements, various rules can be specified:
 
 -  DenyASOUT: deny routes learned by AS in OUT traffic (AS id must be
    specified as the body of the element.)
-

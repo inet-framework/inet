@@ -34,10 +34,9 @@ Measuring along Packet Flows
 ----------------------------
 
 By default, INET statistics are only capable of collecting results based on the
-data that individual protocol modules and applications can access. Each module
-collects statistics independently of the rest of the network, often rendering
-the statistics less useful in complex scenarios. For example, a TCP protocol
-module that communicates with multiple other TCP modules cannot distinguish
+data that individual protocol modules and applications can access. Statistics are collected
+independently by each module in the network, making them less useful in complex scenarios.
+For example, a TCP protocol module that communicates with multiple other TCP modules cannot distinguish
 between the packets based on the path they took. To overcome this issue, INET
 introduces the notion of packet flows.
 
@@ -50,7 +49,7 @@ along the network topology. Note that a packet flow doesn't necessarily have
 a single entry and a single exit point.
 
 A packet flow is usually defined by active modules that classify certain packets
-(e.g., matching a filter) to be entering the flow, and similarly other modules
+(e.g., matching a filter) to be entering the flow, and similarly, other modules
 that decide when packets leave the flow. Both kinds of modules are inserted into
 the network for this specific purpose, usually at the network interface level.
 While a packet is being part of any number of packet flows, certain INET modules

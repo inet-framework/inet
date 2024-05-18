@@ -8,33 +8,33 @@ Network Emulation
 Motivation
 ----------
 
-In INET, the word *emulation* is used in a broad sense to describe a system which
+In INET, the term *emulation* is used in a broad sense to describe a system which
 is partially implemented in the real world and partially in simulation.
-Emulation is often used for testing and validating a simulation model with
+Emulation is often utilized for testing and validating a simulation model with
 its real-world counterparts, or in a reverse scenario, during the development
-of a real-world protocol implementation or application, for testing it in
-a simulated environment. It may also be used out of necessity, because
-some part of the system only exists in the real world or only as a simulation
-model.
+of a real-world protocol implementation or application, for testing in
+a simulated environment. It may also be necessitated by the fact that
+some parts of the system only exist in the real world or only as simulation
+models.
 
 .. Developing a protocol, a protocol implementation, or an application that heavily
-   relies on network communication is often less expensive, more practical,
+   relies on network communication is often more practical, less expensive,
    and safer using simulation than directly performing experiments in the real world.
    However, there are potential pitfalls: porting simulation code to the target device
-   may be costly and error-prone, and also, a model that performs well in simulation
+   may incur high costs and be error-prone, and also, a model that performs well in simulation
    does not necessarily work equally well when deployed in the real world.
-   INET helps reduce these risks by allowing the researcher to mix
+   INET helps mitigate these risks by allowing the researcher to mix
    simulation and the real world in various ways, thereby reducing the need for porting,
-   and offering more possibilities for testing out the code.
+   and offering more possibilities for testing the code.
 
 .. There are several projects that may benefit from the network emulation
    capabilities of INET, that is, from the ability to mix simulated
    components with real networks. **todo** not just networks
 
 INET provides modules that act as bridges between the
-simulated and real domains; therefore, it is possible to leave one part
+simulated and real domains; hence, it is possible to leave one part
 of the simulation unchanged, while simply extracting the other into the
-real world. Several setups are possible when one can take advantage of the emulation
+real world. Several setups are possible where one can take advantage of the emulation
 capabilities of INET:
 
 - simulated node in a real network
@@ -46,22 +46,22 @@ capabilities of INET:
 
 Some example scenarios:
 
--  Run a simulated component, such as an app or a routing protocol, on
-   nodes of an actual ad-hoc network. This setup would allow testing the
-   component’s behavior under real-life conditions.
+-  A simulated component, such as an app or a routing protocol, can be run
+   on nodes of an actual ad-hoc network. This setup would allow testing the
+   behavior of the component under real-life conditions.
 
--  Test the interoperability of a simulated protocol with its real-world
-   counterparts.
+-  The interoperability of a simulated protocol with its real-world
+   counterparts can be tested.
 
 .. Several setups are possible: simulated node in a real
    network; a simulated subnet in a real network; real-world node in
    simulated network; etc.
 
--  As a means of implementing hybrid simulation. The real network (or a
+-  As a means of implementing hybrid simulation, the real network (or a
    single host OS) may contain several network emulator devices or
    simulations running in emulation mode. Such a setup provides a
    relatively easy way of connecting heterogeneous simulators/emulators
-   with each other, sparing the need for HLA or a custom
+   with each other, eliminating the need for HLA or a custom
    interoperability solution.
 
 .. _ug:sec:emulation:overview:
@@ -176,18 +176,18 @@ the command line:
 Configuring
 -----------
 
-Here we show one configuration example where the network nodes contain
+Here we demonstrate one configuration example where the network nodes contain
 a :ned:`ExtLowerEthernetInterface`.
 
 INET nodes such as :ned:`StandardHost` and :ned:`Router` can be
-configured to have :ned:`ExtLowerEthernetInterface`’s. The simulation
+configured to have :ned:`ExtLowerEthernetInterface`s. The simulation
 may contain several nodes with external interfaces, and one node may
 also have several external interfaces.
 
 .. note::
 
    This is one of the many possible setups. Using other components than
-   :ned:`ExtLowerEthernetInterface`, nodes may be cut into simulated and real
+   :ned:`ExtLowerEthernetInterface`, nodes may be split into simulated and real
    parts at any layer, and either the upper or the lower part may be real.
    See the Showcases for demonstration of some of these use cases.
 

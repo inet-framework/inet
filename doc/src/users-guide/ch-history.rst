@@ -8,7 +8,7 @@ History
 IPSuite to INET Framework (2000-2006)
 -------------------------------------
 
-The predecessor of the INET framework was written by Klaus Wehrle,
+The INET framework's predecessor was written by Klaus Wehrle,
 Jochen Reber, Dirk Holzhausen, Volker Boehm, Verena Kahmann, Ulrich
 Kaage, and others at the University of Karlsruhe during 2000-2001, under
 the name IPSuite.
@@ -20,15 +20,15 @@ Robin Brown. The package consisted of around 10,000 LOCs and was
 published at http://charlie.it.uts.edu.au/tkaphan/xtn/capstone (now
 unavailable).
 
-After a period of IPSuite being unmaintained, Andras Varga took over the
-development in July 2003. Through a series of snapshot releases in
+After a period of IPSuite being unmaintained, the development was taken over by Andras Varga
+in July 2003. Through a series of snapshot releases in
 2003-2004, modules were completely reorganized, documented, and many of
 them were rewritten from scratch. The MPLS models (including RSVP-TE, LDP,
 etc.) were also refactored and merged into the codebase.
 
-During 2004, Andras added a new, modular and extensible TCP
+During 2004, a new, modular and extensible TCP
 implementation, application models, Ethernet implementation, and an
-all-in-one IP model to replace the earlier, modularized one.
+all-in-one IP model were added to replace the earlier, modularized one.
 
 The package was renamed INET Framework in October 2004.
 
@@ -73,4 +73,4 @@ TCP SACK and New Reno implementation were contributed by Thomas Reschka.
 
 Several other people have contributed to the INET Framework by providing
 feedback, reporting bugs, suggesting features, and contributing patches;
-I’d like to acknowledge their help here as well.
+their help is acknowledged here as well.
