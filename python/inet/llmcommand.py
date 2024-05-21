@@ -40,7 +40,7 @@ def read_files(file_list):
             contents.append(f"File `{file_path}`:\n```\n{content}\n```\n\n")
     return "".join(contents)
 
-def apply_command_to_files(file_list, context, command_text, model_name):
+def apply_command_to_files(file_list, context, command_text, model_name, save_prompt=False):
     model = llm.get_model(model_name)
     model.key = ''
 
@@ -48,24 +48,28 @@ def apply_command_to_files(file_list, context, command_text, model_name):
     for i, file_path in enumerate(file_list):
         try:
             print(f"Processing file {i + 1}/{n} {file_path}")
-            apply_command_to_file(file_path, context, command_text, model)
+            apply_command_to_file(file_path, context, command_text, model, save_prompt)
         except Exception as e:
             print(f"-> Exception: {e}")
 
-def apply_command_to_file(file_path, context, command_text, model, max_chunk_size=8000):
+def apply_command_to_file(file_path, context, command_text, model, save_prompt=False):
     with open(file_path, 'r', encoding='utf-8') as file:
         file_content = file.read()
-        modified_content = apply_command_to_content(file_content, context, command_text, model)
+        modified_content = apply_command_to_content(file_content, context, command_text, model, saved_prompt_file = file_path+".prompt" if save_prompt else None)
     with open(file_path, 'w', encoding='utf-8') as file:
         file.write(modified_content)
     _logger.debug(f"Modified {file_path} successfully.")
 
-def apply_command_to_content(content, context, command_text, model):
+def apply_command_to_content(content, context, command_text, model, saved_prompt_file=None):
     prompt = "Update a file based on some context."
     if context:
         prompt += f" Here is the context:\n{context}\n"
     prompt += f"Here is what should be done with the file: {command_text}\n"
     prompt += f"Respond with the updated file verbatim without any additional text. Here is the file that should be updated:\n```\n{content}\n```\n"
+
+    if saved_prompt_file:
+        with open(saved_prompt_file, 'w', encoding='utf-8') as file:
+            file.write(prompt)
 
     _logger.debug(f"Sending prompt to LLM: {prompt}")
     reply = model.prompt(prompt)
@@ -104,7 +108,7 @@ def generate_command_text(task, file_type):
 
     return file_type_commands[file_type] + " " + task_commands[task]
 
-def process_files(paths, context_files, file_type, task, model_name):
+def process_files(paths, context_files, file_type, task, model_name, save_prompt=False):
     file_extension_patterns = {
         "md": r".*.md$",
         "rst": r".*.rst$",
@@ -125,7 +129,7 @@ def process_files(paths, context_files, file_type, task, model_name):
     print("Files to process: " + " ".join(file_list))
     context = read_files(context_files) if context_files else ""
     command_text = generate_command_text(task, file_type)
-    apply_command_to_files(file_list, context, command_text, model_name)
+    apply_command_to_files(file_list, context, command_text, model_name, save_prompt)
 
 def main():
     parser = argparse.ArgumentParser(description="Process and improve specific types of files in a given directory or files.")
@@ -134,9 +138,10 @@ def main():
     parser.add_argument("--task", type=str, choices=["proofread", "improve-language", "eliminate-you-addressing", "neddoc"], required=True, help="The task to perform on the files.")
     parser.add_argument("--model", type=str, default="gpt-3.5-turbo-16k", help="The name of the LLM model to use.")
     parser.add_argument("--context", type=str, nargs='*', help="The context files to be used.")
+    parser.add_argument("--save-prompt", action='store_true', help="Save the LLM prompt for each input file as <filename>.prompt.")
 
     args = parser.parse_args()
-    process_files(args.paths, args.context, args.file_type, args.task, args.model)
+    process_files(args.paths, args.context, args.file_type, args.task, args.model, save_prompt=args.save_prompt)
 
 if __name__ == "__main__":
     main()
