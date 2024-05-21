@@ -27,7 +27,7 @@ module MultiClock like IClock
         @signal[timeChanged](type=simtime_t);
         @statistic[timeChanged](title="Clock time"; source=localSignal(timeChanged); record=vector; interpolationmode=linear);
     submodules:
-        clock[numClocks]: <default("SettableClock")> like IClock {
+        clock[numClocks]: <default("PiClock")> like IClock {
             @display("p=200,200,row,200");
         }
 }

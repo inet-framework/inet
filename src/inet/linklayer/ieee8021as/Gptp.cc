@@ -425,6 +425,7 @@ void Gptp::synchronize()
     ASSERT(gptpNodeType != MASTER_NODE);
 
     gmRateRatio = receivedRateRatio * neighborRateRatio;
+    gmRateRatio = 1.0;
 
     // preciseOriginTimestamp and correctionField are in the grandmaster's time base
     // meanLinkDelay and residence time are in the local time base
@@ -451,9 +452,8 @@ void Gptp::synchronize()
     newLocalTimeAtTimeSync = clock->getClockTime();
     // new=5 - old=4 = +1
     timeDiffAtTimeSync = newLocalTimeAtTimeSync - oldLocalTimeAtTimeSync;
-    auto referenceClockTime = piControlClock->referenceClockModule->getClockTime();
-    auto diffReferenceToOldLocal = oldLocalTimeAtTimeSync - referenceClockTime;
-    auto diffReferenceToNewTime = newTime - referenceClockTime;
+
+
 
     /************** Rate ratio calculation *************************************
      * It is calculated based on interval between two successive Sync messages *
@@ -463,9 +463,14 @@ void Gptp::synchronize()
     EV_INFO << "LOCAL TIME BEFORE SYNC     - " << oldLocalTimeAtTimeSync << endl;
     EV_INFO << "LOCAL TIME AFTER SYNC      - " << newLocalTimeAtTimeSync << endl;
     EV_INFO << "CALCULATED NEW TIME        - " << newTime << endl;
-    EV_INFO << "REFERENCE CLOCK TIME       - " << referenceClockTime << endl;
-    EV_INFO << "DIFF REFERENCE TO OLD TIME - " << diffReferenceToOldLocal << endl;
-    EV_INFO << "DIFF REFERENCE TO NEW TIME - " << diffReferenceToNewTime << endl;
+    if (piControlClock->referenceClockModule != nullptr) {
+        auto referenceClockTime = piControlClock->referenceClockModule->getClockTime();
+        auto diffReferenceToOldLocal = oldLocalTimeAtTimeSync - referenceClockTime;
+        auto diffReferenceToNewTime = newTime - referenceClockTime;
+        EV_INFO << "REFERENCE CLOCK TIME       - " << referenceClockTime << endl;
+        EV_INFO << "DIFF REFERENCE TO OLD TIME - " << diffReferenceToOldLocal << endl;
+        EV_INFO << "DIFF REFERENCE TO NEW TIME - " << diffReferenceToNewTime << endl;
+    }
     EV_INFO << "CURRENT SIMTIME            - " << now << endl;
     EV_INFO << "ORIGIN TIME SYNC           - " << preciseOriginTimestamp << endl;
     EV_INFO << "PREV ORIGIN TIME SYNC      - " << preciseOriginTimestampLast << endl;

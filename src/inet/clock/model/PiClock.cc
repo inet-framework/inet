@@ -20,7 +20,7 @@ simsignal_t PiClock::driftSignal = cComponent::registerSignal("drift");
 
 void PiClock::initialize(int stage)
 {
-    OscillatorBasedClock::initialize(stage);
+    SettableClock::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         offsetThreshold = &par("offsetThreshold");
         kp = par("kp");
@@ -36,32 +36,6 @@ void PiClock::initialize(int stage)
         else
             throw cRuntimeError("Unknown defaultOverdueClockEventHandlingMode parameter value");
 
-    }
-}
-
-OverdueClockEventHandlingMode PiClock::getOverdueClockEventHandlingMode(ClockEvent *event) const
-{
-    auto mode = event->getOverdueClockEventHandlingMode();
-    if (mode == UNSPECIFIED)
-        return defaultOverdueClockEventHandlingMode;
-    else
-        return mode;
-}
-
-simtime_t PiClock::handleOverdueClockEvent(ClockEvent *event, simtime_t t)
-{
-    switch (getOverdueClockEventHandlingMode(event)) {
-    case EXECUTE:
-        EV_WARN << "Scheduling overdue clock event " << event->getName() << " to current simulation time.\n";
-        return t;
-    case SKIP:
-        EV_WARN << "Skipping overdue clock event " << event->getName() << ".\n";
-        cancelClockEvent(event);
-        return -1;
-    case ERROR:
-        throw cRuntimeError("Clock event is overdue");
-    default:
-        throw cRuntimeError("Unknown overdue clock event handling mode");
     }
 }
 
@@ -141,17 +115,6 @@ clocktime_t PiClock::setClockTime(clocktime_t newClockTime)
     }
     emit(driftSignal, drift.get());
     return getClockTime();
-}
-
-void PiClock::processCommand(const cXMLElement &node)
-{
-    Enter_Method("processCommand");
-    if (!strcmp(node.getTagName(), "set-clock")) {
-        clocktime_t time = ClockTime::parse(xmlutils::getMandatoryFilledAttribute(node, "time"));
-        setClockTime(time);
-    }
-    else
-        throw cRuntimeError("Invalid command: %s", node.getTagName());
 }
 
 } // namespace inet

@@ -14,10 +14,9 @@ package inet.clock.model;
 //
 // @see ~ScenarioManager
 //
-module PiClock extends OscillatorBasedClock
+module PiClock extends SettableClock
 {
     parameters:
-        string defaultOverdueClockEventHandlingMode @enum("execute","skip","error") = default("error");
         double offsetThreshold @unit(s) = default(0s); // Clock will perform a time jump if the offset is greater than this value, 0.0 disables this feature
         double kp = default(8);
         double ki = default(4);
