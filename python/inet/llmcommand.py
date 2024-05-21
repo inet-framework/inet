@@ -100,7 +100,7 @@ def generate_command_text(task, file_type):
 
     return file_type_commands[file_type] + " " + task_commands[task]
 
-def process_files(paths, file_type, task, model_name):
+def process_files(paths, context_files, file_type, task, model_name):
     file_extension_patterns = {
         "md": r".*.md$",
         "rst": r".*.rst$",
@@ -119,19 +119,20 @@ def process_files(paths, file_type, task, model_name):
             file_list.append(path)
 
     print("Files to process: " + " ".join(file_list))
+    context = read_files(context_files) if context_files else ""
     command_text = generate_command_text(task, file_type)
-    apply_command_to_files(file_list, "", command_text, model_name)
+    apply_command_to_files(file_list, context, command_text, model_name)
 
 def main():
-    parser = argparse.ArgumentParser(description="Process and improve specific types of files in a given directory.")
+    parser = argparse.ArgumentParser(description="Process and improve specific types of files in a given directory or files.")
     parser.add_argument("paths", type=str, nargs='+', help="The directories or files to process.")
     parser.add_argument("--file-type", type=str, choices=["md", "rst", "tex", "ned"], required=True, help="The type of files to process.")
     parser.add_argument("--task", type=str, choices=["proofread", "improve-language", "eliminate-you-addressing"], required=True, help="The task to perform on the files.")
-    parser.add_argument("--model", type=str, default="gpt-3.5-turbo-16k", help="The name of the LLM model to use. Type `llm models` for a list.")
+    parser.add_argument("--model", type=str, default="gpt-3.5-16k", help="The name of the LLM model to use (default: gpt-3.5-16k).")
+    parser.add_argument("--context", type=str, nargs='*', help="The context files to be used.")
 
     args = parser.parse_args()
-
-    process_files(args.paths, args.file_type, args.task, args.model)
+    process_files(args.paths, args.context, args.file_type, args.task, args.model)
 
 if __name__ == "__main__":
     main()
