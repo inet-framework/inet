@@ -90,8 +90,11 @@ def generate_command_text(task, file_type):
     task_commands = {
         "proofread": "Fix any English mistakes in its text. Keep all markup and line breaks intact as much as possible!",
         "improve-language": "Improve the English in the text. Keep all other markup and line breaks intact as much as possible.",
-        "eliminate-you-addressing": "At places where the text addresses the user as 'you', change it to neutral, e.g., to passive voice or 'one' as subject. Keep all markup and line breaks intact as much as possible."
+        "eliminate-you-addressing": "At places where the text addresses the user as 'you', change it to neutral, e.g., to passive voice or 'one' as subject. Keep all markup and line breaks intact as much as possible.",
+        "neddoc": "Extend or replace the module-level comment."
     }
+
+    #TODO neddoc is only supported for NED files
 
     if file_type not in file_type_commands:
         raise ValueError("Unsupported file type.")
@@ -127,7 +130,7 @@ def main():
     parser = argparse.ArgumentParser(description="Process and improve specific types of files in a given directory or files.")
     parser.add_argument("paths", type=str, nargs='+', help="The directories or files to process.")
     parser.add_argument("--file-type", type=str, choices=["md", "rst", "tex", "ned"], required=True, help="The type of files to process.")
-    parser.add_argument("--task", type=str, choices=["proofread", "improve-language", "eliminate-you-addressing"], required=True, help="The task to perform on the files.")
+    parser.add_argument("--task", type=str, choices=["proofread", "improve-language", "eliminate-you-addressing", "neddoc"], required=True, help="The task to perform on the files.")
     parser.add_argument("--model", type=str, default="gpt-3.5-16k", help="The name of the LLM model to use (default: gpt-3.5-16k).")
     parser.add_argument("--context", type=str, nargs='*', help="The context files to be used.")
 
