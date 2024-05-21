@@ -92,6 +92,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     static simsignal_t neighborRateRatioSignal;
     static simsignal_t peerDelaySignal;
     static simsignal_t residenceTimeSignal;
+    static simsignal_t correctionFieldIngressSignal;
+    static simsignal_t correctionFieldEgressSignal;
 
   public:
     static const MacAddress GPTP_MULTICAST_ADDRESS;
@@ -114,7 +116,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     virtual void handleSelfMessage(cMessage *msg);
 
-    void handleTransmissionEndedSignal(const GptpBase *gptp, omnetpp::cComponent *source);
+    void handleTransmissionStartedSignal(const GptpBase *gptp, omnetpp::cComponent *source);
 
     const GptpBase *extractGptpHeader(Packet *packet);
 

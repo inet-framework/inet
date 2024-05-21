@@ -31,6 +31,8 @@ simsignal_t Gptp::receivedRateRatioSignal = cComponent::registerSignal("received
 simsignal_t Gptp::neighborRateRatioSignal = cComponent::registerSignal("neighborRateRatio");
 simsignal_t Gptp::peerDelaySignal = cComponent::registerSignal("peerDelay");
 simsignal_t Gptp::residenceTimeSignal = cComponent::registerSignal("residenceTime");
+simsignal_t Gptp::correctionFieldIngressSignal = cComponent::registerSignal("correctionFieldIngress");
+simsignal_t Gptp::correctionFieldEgressSignal = cComponent::registerSignal("correctionFieldEgress");
 
 // MAC address:
 //   01-80-C2-00-00-02 for TimeSync (ieee 802.1as-2020, 13.3.1.2)
@@ -74,7 +76,7 @@ void Gptp::initialize(int stage)
                 throw cRuntimeError("Parameter inconsistency: MASTER_NODE with slave port");
             auto nic = CHK(interfaceTable->findInterfaceByName(str));
             slavePortId = nic->getInterfaceId();
-            nic->subscribe(transmissionEndedSignal, this);
+            nic->subscribe(transmissionStartedSignal, this);
             nic->subscribe(receptionEndedSignal, this);
         }
         else if (gptpNodeType != MASTER_NODE)
@@ -91,7 +93,7 @@ void Gptp::initialize(int stage)
                                     "master and slave port",
                                     p.c_str());
             masterPortIds.insert(portId);
-            nic->subscribe(transmissionEndedSignal, this);
+            nic->subscribe(transmissionStartedSignal, this);
             nic->subscribe(receptionEndedSignal, this);
         }
 
@@ -292,6 +294,7 @@ void Gptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syn
         gptp->setCorrectionField(newCorrectionField);
     }
     emit(residenceTimeSignal, residenceTime.asSimTime());
+    emit(correctionFieldEgressSignal, gptp->getCorrectionField().asSimTime());
     gptp->getFollowUpInformationTLVForUpdate().setRateRatio(gmRateRatio);
     packet->insertAtFront(gptp);
 
@@ -398,6 +401,8 @@ void Gptp::processFollowUp(Packet *packet, const GptpFollowUp *gptp)
     preciseOriginTimestamp = gptp->getPreciseOriginTimestamp();
     correctionField = gptp->getCorrectionField();
     receivedRateRatio = gptp->getFollowUpInformationTLV().getRateRatio();
+
+    emit(correctionFieldIngressSignal, correctionField.asSimTime());
 
     synchronize();
 
@@ -645,7 +650,7 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
 {
     Enter_Method("%s", cComponent::getSignalName(simSignal));
 
-    if (simSignal != receptionEndedSignal && simSignal != transmissionEndedSignal)
+    if (simSignal != receptionEndedSignal && simSignal != transmissionStartedSignal)
         return;
 
     auto ethernetSignal = check_and_cast<cPacket *>(obj);
@@ -662,11 +667,11 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
 
     if (simSignal == receptionEndedSignal)
         packet->addTagIfAbsent<GptpIngressTimeInd>()->setArrivalClockTime(clock->getClockTime());
-    else if (simSignal == transmissionEndedSignal)
-        handleTransmissionEndedSignal(gptp, source);
+    else if (simSignal == transmissionStartedSignal)
+        handleTransmissionStartedSignal(gptp, source);
 }
 
-void Gptp::handleTransmissionEndedSignal(const GptpBase *gptp, cComponent *source)
+void Gptp::handleTransmissionStartedSignal(const GptpBase *gptp, cComponent *source)
 {
     int portId = getContainingNicModule(check_and_cast<cModule *>(source))->getInterfaceId();
 
