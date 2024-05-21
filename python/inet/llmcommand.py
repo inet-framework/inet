@@ -1,34 +1,16 @@
-import llm
 import logging
 import os
 import re
 import subprocess
 import unidiff
+import llm
+import argparse
 
-inet_root = "/home/andras/projects/inet"
-
+# Initialize logger
 _logger = logging.getLogger(__name__)
+_logger.setLevel(logging.INFO)
 
-# model = llm.get_model("orca-mini-3b-gguf2-q4_0")
-# model = llm.get_model("gpt4all-falcon-newbpe-q4_0")
-# model = llm.get_model("claude-3-opus")
-# model = llm.get_model("claude-2")
-
-model = llm.get_model("gpt-3.5-turbo-16k")
-model.key = ''
-
-def collect_matching_file_paths(directory, name_pattern, content_pattern):
-    """
-    Collect all file paths in a directory and its subdirectories that match the given regular expressions for file name, extension, and content.
-
-    Args:
-        directory (str): The root directory to start the search from.
-        name_pattern (str): The regular expression pattern to match file names against.
-        content_pattern (str): The regular expression pattern to match file contents against.
-
-    Returns:
-        list: A list of file paths that match the regular expressions.
-    """
+def collect_matching_file_paths(directory, name_pattern, content_pattern=None):
     matching_file_paths = []
     name_regex = re.compile(name_pattern)
     content_regex = re.compile(content_pattern) if content_pattern else None
@@ -54,87 +36,102 @@ def read_files(file_list):
     contents = []
     for file_path in file_list:
         with open(file_path, 'r', encoding='utf-8') as file:
-            contents.append(file.read())
-    return "\n".join(contents)
+            content = file.read()
+            contents.append(f"File `{file_path}`:\n```\n{content}\n```\n\n")
+    return "".join(contents)
 
-def apply_command_to_files(file_list, context, command_text):
-    for file_path in file_list:
-        _logger.info(f"Processing file {file_path}")
-        with open(file_path, 'r', encoding='utf-8') as file:
-            file_content = file.read()
-        prompt = f"""
-Update a file based on some context. Here is the context:
-```
-{context}
-```
-Here is what should be done with the file: {command_text}
-Respond with the updated file verbatim without any additional text. Here is the file that should be updated:
-```
-{file_content}
-```
-"""
-        _logger.debug("Sending prompt to LLM", prompt)
-        modified_content = model.prompt(prompt)
-        result = modified_content.text()
-        _logger.debug("Received result from LLM", result)
-        with open(file_path, 'w', encoding='utf-8') as file:
-            file.write(result)
-        _logger.debug(f"Modified {file_path} successfully.")
+def apply_command_to_files(file_list, context, command_text, model_name):
+    model = llm.get_model(model_name)
+    model.key = ''
 
-def filter_diff(input_filename, output_filename, keep_lines):
-    keep_lines_regex = re.compile(keep_lines)
-    with open(input_filename, 'r') as diff_file:
-        file_index = 0
-        patch = unidiff.PatchSet(diff_file)
-        for patched_file in list(patch):
-            keep_file = False
-            hunk_index = 0
-            for hunk in list(patched_file):
-                keep = False
-                for line in hunk:
-                    if keep_lines_regex.match(str(line)):
-                        keep = True
-                if not keep:
-                    del patched_file[hunk_index]
-                else:
-                    hunk_index = hunk_index + 1
-                    keep_file = True
-            if not keep_file:
-                del patch[file_index]
-            else:
-                file_index = file_index + 1
-        with open(output_filename, 'w') as output_file:
-            output_file.write(str(patch))
+    n = len(file_list)
+    for i, file_path in enumerate(file_list):
+        try:
+            print(f"Processing file {i + 1}/{n} {file_path}")
+            apply_command_to_file(file_path, context, command_text, model)
+        except Exception as e:
+            print(f"-> Exception: {e}")
 
-def filter_unstaged_changes(keep_lines, file_list):
-    result = subprocess.run(["git", "diff", "HEAD", "-U1", "--output=input.diff"])
-    subprocess.run(["git", "restore", "."])
-    filter_diff("input.diff", "output.diff", keep_lines)
-    subprocess.run(["git", "apply", "output.diff"])
-    os.remove("input.diff")
-    os.remove("output.diff")
+def apply_command_to_file(file_path, context, command_text, model, max_chunk_size=8000):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        file_content = file.read()
+        modified_content = apply_command_to_content(file_content, context, command_text, model)
+    with open(file_path, 'w', encoding='utf-8') as file:
+        file.write(modified_content)
+    _logger.debug(f"Modified {file_path} successfully.")
 
-def proofread_ned_comments():
-    file_list = collect_matching_file_paths(inet_root + "/src", r".*.ned$", None)
-    print(f"{file_list=}")
-    command_text = "Here is an OMNeT++ NED file, fix any English mistakes in the comments (lines starting with `//`) in it."
-    apply_command_to_files(file_list, [], command_text)
-    filter_unstaged_changes("^[+-]//", file_list)
+def apply_command_to_content(content, context, command_text, model):
+    prompt = "Update a file based on some context."
+    if context:
+        prompt += f" Here is the context:\n{context}\n"
+    prompt += f"Here is what should be done with the file: {command_text}\n"
+    prompt += f"Respond with the updated file verbatim without any additional text. Here is the file that should be updated:\n```\n{content}\n```\n"
 
-def add_backticks_in_ned_comments(simulation_project=None, folder="."):
-    if simulation_project is None:
-        simulation_project = get_default_simulation_project()
-    path = simulation_project.get_relative_path(folder)
-    file_list = collect_matching_file_paths(path, r".*.ned$", r".*")
-    command_text = "Here is an OMNeT++ NED file, modify the comment lines (starting with '//') by adding backticks around upper-case identifiers."
-    apply_command_to_files(file_list, [], command_text)
-    filter_unstaged_changes("^[+-]//", file_list)
+    _logger.debug(f"Sending prompt to LLM: {prompt}")
+    reply = model.prompt(prompt)
+    modified_content = reply.text()
+    _logger.debug(f"Received result from LLM: {modified_content}")
 
-def proofread_rst_files():
-    file_list = collect_matching_file_paths(inet_root, r".*.rst$", None)
-    print(f"{file_list=}")
-    command_text = "The following reStructuredText file is part of the INET Framework for OMNeT+, fix any English mistakes in its text."
-    apply_command_to_files(file_list, [], command_text)
+    if modified_content.count("```") == 2:
+        modified_content = modified_content.split("```")[1]
 
-#proofread_ned_comments()
-proofread_rst_files()
+    trailing_whitespace_len = len(content) - len(content.rstrip())
+    modified_content = modified_content.rstrip() + content[-trailing_whitespace_len:]
+    return modified_content
+
+def generate_command_text(task, file_type):
+    file_type_commands = {
+        "md": "The following Markdown file belongs to the OMNeT++ project.",
+        "rst": "The following reStructuredText file  belongs to the OMNeT++ project. Blocks starting with '..' are comments, do not touch them!",
+        "tex": "The following LaTeX file belongs to the OMNeT++ project.",
+        "ned": "The following is an OMNeT++ NED file. DO NOT CHANGE ANYTHING IN NON-COMMENT LINES."
+    }
+
+    task_commands = {
+        "proofread": "Fix any English mistakes in its text. Keep all markup and line breaks intact as much as possible!",
+        "improve-language": "Improve the English in the text. Keep all other markup and line breaks intact as much as possible.",
+        "eliminate-you-addressing": "At places where the text addresses the user as 'you', change it to neutral, e.g., to passive voice or 'one' as subject. Keep all markup and line breaks intact as much as possible."
+    }
+
+    if file_type not in file_type_commands:
+        raise ValueError("Unsupported file type.")
+    if task not in task_commands:
+        raise ValueError("Unsupported task for the given file type.")
+
+    return file_type_commands[file_type] + " " + task_commands[task]
+
+def process_files(paths, file_type, task, model_name):
+    file_extension_patterns = {
+        "md": r".*.md$",
+        "rst": r".*.rst$",
+        "tex": r".*.tex$",
+        "ned": r".*.ned$"
+    }
+
+    if file_type not in file_extension_patterns:
+        raise ValueError("Unsupported file type.")
+
+    file_list = []
+    for path in paths:
+        if os.path.isdir(path):
+            file_list.extend(collect_matching_file_paths(path, file_extension_patterns[file_type]))
+        elif os.path.isfile(path) and re.match(file_extension_patterns[file_type], path):
+            file_list.append(path)
+
+    print("Files to process: " + " ".join(file_list))
+    command_text = generate_command_text(task, file_type)
+    apply_command_to_files(file_list, "", command_text, model_name)
+
+def main():
+    parser = argparse.ArgumentParser(description="Process and improve specific types of files in a given directory.")
+    parser.add_argument("paths", type=str, nargs='+', help="The directories or files to process.")
+    parser.add_argument("--file-type", type=str, choices=["md", "rst", "tex", "ned"], required=True, help="The type of files to process.")
+    parser.add_argument("--task", type=str, choices=["proofread", "improve-language", "eliminate-you-addressing"], required=True, help="The task to perform on the files.")
+    parser.add_argument("--model", type=str, default="gpt-3.5-turbo-16k", help="The name of the LLM model to use. Type `llm models` for a list.")
+
+    args = parser.parse_args()
+
+    process_files(args.paths, args.file_type, args.task, args.model)
+
+if __name__ == "__main__":
+    main()
