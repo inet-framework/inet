@@ -102,6 +102,7 @@ clocktime_t PiClock::setClockTime(clocktime_t newClockTime)
             localNsPrev = local[0].inUnit(SIMTIME_NS);
             localNs = local[1].inUnit(SIMTIME_NS);
 
+//            drift = ppm(0);
             drift += ppm(1e6 * (offsetNsPrev - offsetNs) / (localNsPrev - localNs));
             EV_INFO << "Drift: " << drift << "\n";
 
