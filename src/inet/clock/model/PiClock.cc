@@ -70,7 +70,7 @@ clocktime_t PiClock::setClockTime(clocktime_t newClockTime)
     Enter_Method("setClockTime");
     clocktime_t oldClockTime = getClockTime();
 
-    if (newClockTime != oldClockTime) {
+    if (newClockTime != oldClockTime){
         emit(timeChangedSignal, oldClockTime.asSimTime());
         clocktime_t offsetNow = newClockTime - oldClockTime;
 
