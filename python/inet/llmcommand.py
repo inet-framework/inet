@@ -5,6 +5,7 @@ import subprocess
 import unidiff
 import llm
 import argparse
+import tiktoken
 
 # Initialize logger
 _logger = logging.getLogger(__name__)
@@ -60,6 +61,30 @@ def apply_command_to_file(file_path, context, command_text, model, save_prompt=F
         file.write(modified_content)
     _logger.debug(f"Modified {file_path} successfully.")
 
+def get_llm_context_window(model):
+    size = model.default_max_tokens
+    if size:  # it is not always filled in?
+        return size
+    model_name = model.model_id
+    context_window_sizes = {
+        "gpt-3.5-turbo": 4096,
+        "gpt-3.5-turbo-16k": 16384,
+        "gpt-4": 8192,
+        "gpt-4-32k": 32768,
+        "gpt-4o": 128*1024,
+    }
+    if model_name not in context_window_sizes:
+        raise Exception(f"Context window size for llm '{model_name}' is not known, please add it to the table")
+    return context_window_sizes[model_name]
+
+def check_token_count(prompt, model):
+    encoder = tiktoken.encoding_for_model(model.model_id)
+    num_tokens = len(encoder.encode(prompt))
+    max_tokens = get_llm_context_window(model)
+    _logger.info(f"Number of tokens in the prompt: {num_tokens}")
+    if max_tokens and num_tokens > max_tokens:
+        print(f"WARNING: Prompt of {num_tokens} tokens exceeds the model's context window size of {max_tokens} tokens")
+
 def apply_command_to_content(content, context, command_text, model, saved_prompt_file=None):
     prompt = "Update a file based on some context."
     if context:
@@ -70,6 +95,8 @@ def apply_command_to_content(content, context, command_text, model, saved_prompt
     if saved_prompt_file:
         with open(saved_prompt_file, 'w', encoding='utf-8') as file:
             file.write(prompt)
+
+    check_token_count(prompt, model)
 
     _logger.debug(f"Sending prompt to LLM: {prompt}")
     reply = model.prompt(prompt)
@@ -97,7 +124,6 @@ def generate_command_text(task, file_type):
         "eliminate-you-addressing": "At places where the text addresses the user as 'you', change it to neutral, e.g., to passive voice or 'one' as subject. Keep all markup and line breaks intact as much as possible.",
         "neddoc": "Write a new neddoc comment for the module in the NED file."
     }
-
 
     if file_type not in file_type_commands:
         raise ValueError(f'Unsupported file type "{file_type}"')
