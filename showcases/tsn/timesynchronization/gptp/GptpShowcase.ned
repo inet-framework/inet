@@ -14,6 +14,7 @@ import inet.node.tsn.TsnSwitch;
 network OneMasterClockGptpShowcase extends TsnNetworkBase
 {
     submodules:
+        scenarioManager: ScenarioManager;
         tsnClock: TsnClock {
             @display("p=500,150");
         }
