@@ -21,6 +21,7 @@ class INET_API ITcp
       public:
         virtual void handleEstablished() = 0;
         virtual void handleAvailable(TcpAvailableInfo *availableInfo) = 0;
+        virtual void handlePeerClosed() = 0;
     };
 
   public:

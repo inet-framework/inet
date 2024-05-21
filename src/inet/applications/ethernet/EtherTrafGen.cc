@@ -50,6 +50,7 @@ void EtherTrafGen::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         interfaceTable.reference(this, "interfaceTableModule", true);
+        outSink.reference(gate("out"), true);
         sendInterval = &par("sendInterval");
         numPacketsPerBurst = &par("numPacketsPerBurst");
         packetLength = &par("packetLength");
@@ -166,7 +167,7 @@ void EtherTrafGen::sendBurstPackets()
 
         EV_INFO << "Send packet `" << msgname << "' dest=" << destMacAddress << " length=" << len << "B ssap/dsap=" << ssap << "/" << dsap << "\n";
         emit(packetSentSignal, datapacket);
-        send(datapacket, "out");
+        outSink.pushPacket(datapacket);
         packetsSent++;
     }
 }
@@ -184,6 +185,13 @@ void EtherTrafGen::finish()
 {
     cancelAndDelete(timerMsg);
     timerMsg = nullptr;
+}
+
+void EtherTrafGen::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    receivePacket(packet);
 }
 
 } // namespace inet

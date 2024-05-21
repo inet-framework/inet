@@ -35,6 +35,7 @@ void TcpEchoApp::initialize(int stage)
     TcpServerHostApp::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        socketSink.reference(gate("socketOut"), true);
         delay = par("echoDelay");
         echoFactor = par("echoFactor");
 
@@ -51,7 +52,7 @@ void TcpEchoApp::sendDown(Packet *msg)
     bytesSent += msg->getByteLength();
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
     msg->getTag<SocketReq>();
-    send(msg, "socketOut");
+    socketSink.pushPacket(msg);
 }
 
 void TcpEchoApp::refreshDisplay() const
@@ -69,6 +70,26 @@ void TcpEchoApp::finish()
 
     recordScalar("bytesRcvd", bytesRcvd);
     recordScalar("bytesSent", bytesSent);
+}
+
+void TcpEchoApp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    TcpSocket *socket = check_and_cast<TcpSocket *>(socketMap.findSocketFor(packet));
+    socket->processMessage(packet);
+}
+
+cGate *TcpEchoApp::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    if (gate->isName("socketIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr && socketMap.getSocketById(socketInd->getSocketId()) != nullptr)
+                return gate;
+        }
+    }
+    return nullptr;
 }
 
 TcpEchoAppThread::~TcpEchoAppThread()

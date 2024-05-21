@@ -119,8 +119,6 @@ void TcpSocket::connect(L3Address remoteAddress, int remotePort)
     if (remotePort < 0 || remotePort > 65535)
         throw cRuntimeError("TcpSocket::connect(): invalid remote port number %d", remotePort);
 
-    auto request = new Request("ActiveOPEN", TCP_C_OPEN_ACTIVE);
-
     remoteAddr = remoteAddress;
     remotePrt = remotePort;
 

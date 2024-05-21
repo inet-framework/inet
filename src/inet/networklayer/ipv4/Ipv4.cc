@@ -1188,11 +1188,11 @@ void Ipv4::sendPacketToNIC(Packet *packet)
     if (auto networkInterfaceProtocol = networkInterface->getProtocol())
         ensureEncapsulationProtocolReq(packet, networkInterfaceProtocol, true, false);
     setDispatchProtocol(packet);
-    queueSink.pushPacket(packet);
     EV_INFO << "Sending datagram to lower layer";
     if (auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>())
         EV_INFO << EV_FIELD(protocol, *dispatchProtocolReq->getProtocol());
     EV_INFO << EV_FIELD(interface, networkInterface->getInterfaceName()) << EV_FIELD(packet) << EV_ENDL;
+    queueSink.pushPacket(packet);
 }
 
 // NetFilter:

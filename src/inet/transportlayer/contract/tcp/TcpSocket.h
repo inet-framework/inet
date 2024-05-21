@@ -497,6 +497,10 @@ class INET_API TcpSocket : public ISocket, public ITcp::ICallback
     virtual void handleAvailable(TcpAvailableInfo *availableInfo) override {
         cb->socketAvailable(this, availableInfo);
     }
+
+    virtual void handlePeerClosed() override {
+        cb->socketPeerClosed(this);
+    }
 };
 
 } // namespace inet
