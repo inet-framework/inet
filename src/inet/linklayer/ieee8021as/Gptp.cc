@@ -425,6 +425,7 @@ void Gptp::synchronize()
     ASSERT(gptpNodeType != MASTER_NODE);
 
     gmRateRatio = receivedRateRatio * neighborRateRatio;
+    gmRateRatio = 1.0;
 
     // preciseOriginTimestamp and correctionField are in the grandmaster's time base
     // meanLinkDelay and residence time are in the local time base
