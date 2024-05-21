@@ -9,8 +9,8 @@
         <input pattern="results/TwoMasterClocksExploitingNetworkRedundancy-#0.vec"/>
     </inputs>
     <charts>
-        <folder id="824916103" name="One master clock">
-            <chart icon="icons/full/obj/linechart.png" id="1436797666" name="Clock drift - all clocks" template="linechart_native" type="LINE">
+        <folder id="154982709" name="One master clock">
+            <chart icon="icons/full/obj/linechart.png" id="750731093" name="Clock drift - all clocks" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -592,7 +592,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1747381221" name="kp and drift" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1169641013" name="kp and drift" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -1228,7 +1228,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="6"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1460284074" name="peerDelay:vector in OneMasterClockGptpShowcase.tsnDevice1.gptp" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="989551015" name="peerDelay:vector in OneMasterClockGptpShowcase.tsnDevice1.gptp" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -1864,7 +1864,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="6"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="619432999" name="neighborRateRatio:vector" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="8268304" name="neighborRateRatio:vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -2500,7 +2500,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="6"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1592614019" name="gmRateRatio:vector" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1142810107" name="gmRateRatio:vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -3137,8 +3137,8 @@ utils.export_data_if_needed(df, props)
                 <property name="include_fields" value="false"/>
             </chart>
         </folder>
-        <folder id="1999036775" name="Primary and hot-standby master clocks">
-            <chart icon="icons/full/obj/linechart.png" id="969239516" name="Clock drift - master clocks" template="linechart_native" type="LINE">
+        <folder id="1665759968" name="Primary and hot-standby master clocks">
+            <chart icon="icons/full/obj/linechart.png" id="2135721081" name="Clock drift - master clocks" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -3714,7 +3714,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="9"/>
                 <property name="matplotlibrc" value="#savefig.transparent: True"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="361096288" name="Clock drift - time domain 0" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1897051726" name="Clock drift - time domain 0" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -4290,7 +4290,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="9"/>
                 <property name="matplotlibrc" value="savefig.transparent: True"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1804451293" name="Clock drift - time domain 0 - zoomed" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="321639085" name="Clock drift - time domain 0 - zoomed" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -4866,7 +4866,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="9"/>
                 <property name="matplotlibrc" value="savefig.transparent: True"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1394468769" name="Clock drift - time domain 1" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="316491814" name="Clock drift - time domain 1" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -5515,7 +5515,7 @@ utils.export_data_if_needed(df, props)
                 <property name="X.Label.Wrap" value="true"/>
                 <property name="Plot.Antialias" value="true"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="87420159" name="Clock drift - time domain 1 - zoomed" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1578102049" name="Clock drift - time domain 1 - zoomed" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -6165,8 +6165,8 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
             </chart>
         </folder>
-        <folder id="1991473321" name="Exploiting network redundancy">
-            <chart icon="icons/full/obj/linechart.png" id="1804976422" name="Clock drift - master clocks" template="linechart_native" type="LINE">
+        <folder id="1214809342" name="Exploiting network redundancy">
+            <chart icon="icons/full/obj/linechart.png" id="897041874" name="Clock drift - master clocks" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -6808,7 +6808,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="9"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1527393979" name="Clock drift - master clocks - zoomed" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="397734712" name="Clock drift - master clocks - zoomed" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -7450,7 +7450,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="9"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1997795043" name="Clock drift - domain 0" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="570042275" name="Clock drift - domain 0" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -8099,7 +8099,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1732250843" name="Clock drift - domain 0 - zoomed" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1279740335" name="Clock drift - domain 0 - zoomed" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -8748,7 +8748,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="392139497" name="Clock drift - domain 1" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="377779591" name="Clock drift - domain 1" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -9391,7 +9391,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="498238873" name="Clock drift - domain 2" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1837335931" name="Clock drift - domain 2" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -10035,7 +10035,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1882501935" name="Clock drift - domain 2 - zoomed" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1189403602" name="Clock drift - domain 2 - zoomed" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -10685,7 +10685,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="2056853305" name="Clock drift - domain 3" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1937807206" name="Clock drift - domain 3" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -11329,7 +11329,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="938972" name="Clock drift - domain 3 - zoomed" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1437313712" name="Clock drift - domain 3 - zoomed" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -11974,7 +11974,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_format" value=""/>
             </chart>
         </folder>
-        <chart icon="icons/full/obj/linechart.png" id="243188815" name="rateRatio:vector in OneMasterClockGptpShowcase.tsnDevice1.gptp" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1299131852" name="rateRatio:vector in OneMasterClockGptpShowcase.tsnDevice1.gptp" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -12610,7 +12610,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="2059434856" name="peerDelay:vector in OneMasterClockGptpShowcase.tsnDevice1.gptp" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1020793446" name="peerDelay:vector in OneMasterClockGptpShowcase.tsnDevice1.gptp" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -13246,7 +13246,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="733004703" name="timeDifference:vector in OneMasterClockGptpShowcase.tsnDevice1.gptp" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1814237355" name="timeDifference:vector in OneMasterClockGptpShowcase.tsnDevice1.gptp" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 

@@ -44,12 +44,14 @@ simple Gptp like IGptp
         @signal[receivedRateRatio](type=double);
         @signal[neighborRateRatio](type=double);
         @signal[peerDelay](type=simtime_t);
+        @signal[residenceTime](type=simtime_t);
         @statistic[localTime](record=vector; interpolationmode=linear);
         @statistic[timeDifference](record=vector; interpolationmode=linear);
         @statistic[gmRateRatio](record=vector; interpolationmode=sample-hold);
         @statistic[receivedRateRatio](record=vector; interpolationmode=sample-hold);
         @statistic[neighborRateRatio](record=vector; interpolationmode=sample-hold);
         @statistic[peerDelay](record=vector; interpolationmode=sample-hold);
+        @statistic[residenceTime](record=vector;interpolationmode=none);
         @selfMessageKinds(inet::GptpSelfMsgKind);
 
     gates:
