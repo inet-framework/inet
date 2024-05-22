@@ -109,32 +109,32 @@ def get_recommended_model(task):
         raise ValueError(f'No info on which model is recommended for "{task}", specify one explicitly via --model or update the tool')
     return recommended_models[task]
 
-
-def apply_command_to_content(content, context, command_text, model, prompt_file_to_save=None):
-    prompt = create_prompt(content, context, command_text)
-
-    if prompt_file_to_save:
-        with open(prompt_file_to_save, 'w', encoding='utf-8') as file:
-            file.write(prompt)
-
+def invoke_llm(prompt, model):
     check_token_count(prompt, model)
 
     _logger.debug(f"Sending prompt to LLM: {prompt}")
     reply = model.prompt(prompt)
-    modified_content = reply.text()
-    _logger.debug(f"Received result from LLM: {modified_content}")
-
-    if modified_content.count("```") == 2:
-        modified_content = modified_content.split("```")[1]
-
-    trailing_whitespace_len = len(content) - len(content.rstrip())
-    modified_content = modified_content.rstrip() + content[-trailing_whitespace_len:]
-    return modified_content
+    reply_text = reply.text()
+    _logger.debug(f"Received result from LLM: {reply_text}")
+    return reply_text
 
 def apply_command_to_file(file_path, context, command_text, model, save_prompt=False):
     with open(file_path, 'r', encoding='utf-8') as file:
         file_content = file.read()
-        modified_content = apply_command_to_content(file_content, context, command_text, model, prompt_file_to_save = file_path+".prompt" if save_prompt else None)
+
+    prompt = create_prompt(file_content, context, command_text)
+    if save_prompt:
+        with open(file_path+".prompt", 'w', encoding='utf-8') as file:
+            file.write(prompt)
+
+    modified_content = invoke_llm(prompt, model)
+
+    if modified_content.count("```") == 2:
+        modified_content = modified_content.split("```")[1]
+
+    trailing_whitespace_len = len(file_content) - len(file_content.rstrip())
+    reply_text = modified_content.rstrip() + file_content[-trailing_whitespace_len:]
+
     with open(file_path, 'w', encoding='utf-8') as file:
         file.write(modified_content)
     _logger.debug(f"Modified {file_path} successfully.")
@@ -177,7 +177,7 @@ def process_files(paths, context_files, file_type, task, model_name, save_prompt
     print("Using LLM: " + model_name)
     context = read_files(context_files) if context_files else ""
     command_text = generate_command_text(task, file_type)
-    apply_command_to_files(file_list, context, command_text, model_name, save_prompt)
+    apply_command_to_files(file_list, context, command_text, model, save_prompt)
 
 def main():
     parser = argparse.ArgumentParser(description="Process and improve specific types of files in a given directory or files.")
