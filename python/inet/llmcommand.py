@@ -41,26 +41,6 @@ def read_files(file_list):
             contents.append(f"File `{file_path}`:\n```\n{content}\n```\n\n")
     return "".join(contents)
 
-def apply_command_to_files(file_list, context, command_text, model_name, save_prompt=False):
-    model = llm.get_model(model_name)
-    model.key = ''
-
-    n = len(file_list)
-    for i, file_path in enumerate(file_list):
-        try:
-            print(f"Processing file {i + 1}/{n} {file_path}")
-            apply_command_to_file(file_path, context, command_text, model, save_prompt)
-        except Exception as e:
-            print(f"-> Exception: {e}")
-
-def apply_command_to_file(file_path, context, command_text, model, save_prompt=False):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        file_content = file.read()
-        modified_content = apply_command_to_content(file_content, context, command_text, model, prompt_file_to_save = file_path+".prompt" if save_prompt else None)
-    with open(file_path, 'w', encoding='utf-8') as file:
-        file.write(modified_content)
-    _logger.debug(f"Modified {file_path} successfully.")
-
 def get_llm_context_window(model):
     size = model.default_max_tokens
     if size:  # it is not always filled in?
@@ -139,7 +119,27 @@ def apply_command_to_content(content, context, command_text, model, prompt_file_
     modified_content = modified_content.rstrip() + content[-trailing_whitespace_len:]
     return modified_content
 
-def process_files(paths, context_files, file_type, task, model_name, save_prompt=False):
+def apply_command_to_file(file_path, context, command_text, model, save_prompt=False):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        file_content = file.read()
+        modified_content = apply_command_to_content(file_content, context, command_text, model, prompt_file_to_save = file_path+".prompt" if save_prompt else None)
+    with open(file_path, 'w', encoding='utf-8') as file:
+        file.write(modified_content)
+    _logger.debug(f"Modified {file_path} successfully.")
+
+def apply_command_to_files(file_list, context, command_text, model_name, save_prompt=False):
+    model = llm.get_model(model_name)
+    model.key = ''
+
+    n = len(file_list)
+    for i, file_path in enumerate(file_list):
+        try:
+            print(f"Processing file {i + 1}/{n} {file_path}")
+            apply_command_to_file(file_path, context, command_text, model, save_prompt)
+        except Exception as e:
+            print(f"-> Exception: {e}")
+
+def resolve_file_list(paths, file_type):
     file_extension_patterns = {
         "md": r".*.md$",
         "rst": r".*.rst$",
@@ -156,7 +156,10 @@ def process_files(paths, context_files, file_type, task, model_name, save_prompt
             file_list.extend(collect_matching_file_paths(path, file_extension_patterns[file_type]))
         elif os.path.isfile(path) and re.match(file_extension_patterns[file_type], path):
             file_list.append(path)
+    return file_list
 
+def process_files(paths, context_files, file_type, task, model_name, save_prompt=False):
+    file_list = resolve_file_list(paths, file_type)
     print("Files to process: " + " ".join(file_list))
     context = read_files(context_files) if context_files else ""
     command_text = generate_command_text(task, file_type)
