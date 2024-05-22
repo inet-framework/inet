@@ -56,7 +56,7 @@ def apply_command_to_files(file_list, context, command_text, model_name, save_pr
 def apply_command_to_file(file_path, context, command_text, model, save_prompt=False):
     with open(file_path, 'r', encoding='utf-8') as file:
         file_content = file.read()
-        modified_content = apply_command_to_content(file_content, context, command_text, model, saved_prompt_file = file_path+".prompt" if save_prompt else None)
+        modified_content = apply_command_to_content(file_content, context, command_text, model, prompt_file_to_save = file_path+".prompt" if save_prompt else None)
     with open(file_path, 'w', encoding='utf-8') as file:
         file.write(modified_content)
     _logger.debug(f"Modified {file_path} successfully.")
@@ -85,30 +85,14 @@ def check_token_count(prompt, model):
     if max_tokens and num_tokens > max_tokens:
         print(f"WARNING: Prompt of {num_tokens} tokens exceeds the model's context window size of {max_tokens} tokens")
 
-def apply_command_to_content(content, context, command_text, model, saved_prompt_file=None):
+def create_prompt(content, context, command_text):
     prompt = "Update a file based on some context."
     if context:
         prompt += f" Here is the context:\n{context}\n"
     prompt += f"Here is what should be done with the file: {command_text}\n"
-    prompt += f"Respond with the updated file verbatim without any additional text. Here is the file that should be updated:\n```\n{content}\n```\n"
-
-    if saved_prompt_file:
-        with open(saved_prompt_file, 'w', encoding='utf-8') as file:
-            file.write(prompt)
-
-    check_token_count(prompt, model)
-
-    _logger.debug(f"Sending prompt to LLM: {prompt}")
-    reply = model.prompt(prompt)
-    modified_content = reply.text()
-    _logger.debug(f"Received result from LLM: {modified_content}")
-
-    if modified_content.count("```") == 2:
-        modified_content = modified_content.split("```")[1]
-
-    trailing_whitespace_len = len(content) - len(content.rstrip())
-    modified_content = modified_content.rstrip() + content[-trailing_whitespace_len:]
-    return modified_content
+    prompt += f"Respond with the updated file verbatim without any additional text.\n"
+    prompt += f"Here is the file that should be updated:\n```\n{content}\n```\n"
+    return prompt
 
 def generate_command_text(task, file_type):
     file_type_commands = {
@@ -133,6 +117,27 @@ def generate_command_text(task, file_type):
         raise ValueError(f'Task "{task}" is only supported for the "ned" file type')
 
     return file_type_commands[file_type] + " " + task_commands[task]
+
+def apply_command_to_content(content, context, command_text, model, prompt_file_to_save=None):
+    prompt = create_prompt(content, context, command_text)
+
+    if prompt_file_to_save:
+        with open(prompt_file_to_save, 'w', encoding='utf-8') as file:
+            file.write(prompt)
+
+    check_token_count(prompt, model)
+
+    _logger.debug(f"Sending prompt to LLM: {prompt}")
+    reply = model.prompt(prompt)
+    modified_content = reply.text()
+    _logger.debug(f"Received result from LLM: {modified_content}")
+
+    if modified_content.count("```") == 2:
+        modified_content = modified_content.split("```")[1]
+
+    trailing_whitespace_len = len(content) - len(content.rstrip())
+    modified_content = modified_content.rstrip() + content[-trailing_whitespace_len:]
+    return modified_content
 
 def process_files(paths, context_files, file_type, task, model_name, save_prompt=False):
     file_extension_patterns = {
