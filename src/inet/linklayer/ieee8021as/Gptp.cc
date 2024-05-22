@@ -77,7 +77,7 @@ void Gptp::initialize(int stage)
             auto nic = CHK(interfaceTable->findInterfaceByName(str));
             slavePortId = nic->getInterfaceId();
             nic->subscribe(transmissionStartedSignal, this);
-            nic->subscribe(receptionEndedSignal, this);
+            nic->subscribe(receptionStartedSignal, this);
         }
         else if (gptpNodeType != MASTER_NODE)
             throw cRuntimeError("Parameter error: Missing slave port for %s", par("gptpNodeType").stringValue());
@@ -94,7 +94,7 @@ void Gptp::initialize(int stage)
                                     p.c_str());
             masterPortIds.insert(portId);
             nic->subscribe(transmissionStartedSignal, this);
-            nic->subscribe(receptionEndedSignal, this);
+            nic->subscribe(receptionStartedSignal, this);
         }
 
         if (slavePortId != -1) {
@@ -342,7 +342,7 @@ void Gptp::sendPdelayRespFollowUp(int portId, const GptpPdelayResp *resp)
     gptp->setCorrectionField(CLOCKTIME_ZERO);
 
     // We can set this to now, because this function is called directly
-    // after the transmissionEnded signal for the pdelayResp packet
+    // after the transmissionStarted signal for the pdelayResp packet
     // is received
     auto now = clock->getClockTime();
     gptp->setResponseOriginTimestamp(now); // t3
@@ -650,7 +650,7 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
 {
     Enter_Method("%s", cComponent::getSignalName(simSignal));
 
-    if (simSignal != receptionEndedSignal && simSignal != transmissionStartedSignal)
+    if (simSignal != receptionStartedSignal && simSignal != transmissionStartedSignal)
         return;
 
     auto ethernetSignal = check_and_cast<cPacket *>(obj);
@@ -665,8 +665,9 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
     if (gptp->getDomainNumber() != domainNumber)
         return;
 
-    if (simSignal == receptionEndedSignal)
+    if (simSignal == receptionStartedSignal) {
         packet->addTagIfAbsent<GptpIngressTimeInd>()->setArrivalClockTime(clock->getClockTime());
+    }
     else if (simSignal == transmissionStartedSignal)
         handleTransmissionStartedSignal(gptp, source);
 }

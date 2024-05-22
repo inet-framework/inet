@@ -21,6 +21,6 @@ module TsnClock extends GptpMaster
         clock.typename = default("OscillatorBasedClock"); // master clocks cannot be set
         ethernet.typename = default("EthernetLayer"); // use Ethernet protocol layer outside of network interfaces
         eth[*].typename = default("LayeredEthernetInterface"); // switch to modular Ethernet interface
-        eth[*].phyLayer.typename = default(hasCutthroughSwitching ? "EthernetStreamingPhyLayer" : "EthernetPhyLayer"); // use packet streaming when cut-through switching is enabled
+        eth[*].phyLayer.typename = default("EthernetStreamingPhyLayer"); // we need packet streaming to use the receptionStartedSignal
         @display("i=device/card"); // change icon to emphasise hardware device
 }

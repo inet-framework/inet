@@ -35,7 +35,7 @@ module TsnDevice extends StandardHost
         eth[*].typename = default("LayeredEthernetInterface"); // switch to modular Ethernet interface
         eth[*].macLayer.typename = default(hasFramePreemption ? "EthernetPreemptingMacLayer" : "EthernetMacLayer");
         eth[*].macLayer.queue.typename = default(hasEgressTrafficShaping ? "Ieee8021qTimeAwareShaper" : (hasFramePreemption ? "" : "PacketQueue")); // use priority queue having multiple subqueues controlled by separate gates
-        eth[*].phyLayer.typename = default(hasCutthroughSwitching ? "EthernetStreamingPhyLayer" : (hasFramePreemption ? "EthernetPreemptingPhyLayer" : "EthernetPhyLayer")); // use packet streaming when cut-through switching is enabled
+        eth[*].phyLayer.typename = default(hasCutthroughSwitching ? "EthernetStreamThroughPhyLayer" : (hasFramePreemption ? "EthernetPreemptingPhyLayer" : (hasTimeSynchronization ? "EthernetStreamingPhyLayer" : "EthernetPhyLayer"))); // use packet streaming when cut-through switching is enabled
         bridging.typename = default(hasBridging ? "BridgingLayer" : ""); // switch to modular bridging
         bridging.interfaceRelay.typename = default(""); // disable frame relaying
         bridging.streamIdentifier.typename = default(hasOutgoingStreams || hasStreamRedundancy ? "StreamIdentifierLayer" : ""); // enable stream identification when stream redundancy is enabled

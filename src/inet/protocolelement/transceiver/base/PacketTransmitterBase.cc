@@ -7,6 +7,7 @@
 
 #include "inet/protocolelement/transceiver/base/PacketTransmitterBase.h"
 
+#include "inet/linklayer/ieee8021as/GptpPacket_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/PacketEventTag.h"
 #include "inet/common/ProtocolTag_m.h"
