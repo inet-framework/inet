@@ -65,7 +65,8 @@ def check_token_count(prompt, model):
     if max_tokens and num_tokens > max_tokens:
         print(f"WARNING: Prompt of {num_tokens} tokens exceeds the model's context window size of {max_tokens} tokens")
 
-def create_prompt(content, context, command_text):
+def create_prompt(content, context, task, file_type):
+    command_text = generate_command_text(task, file_type)
     prompt = "Update a file based on some context."
     if context:
         prompt += f" Here is the context:\n{context}\n"
@@ -123,9 +124,9 @@ def apply_command_to_file(file_path, context_files, file_type, task, model, save
         file_content = file.read()
 
     context = read_files(context_files) if context_files else ""
-    command_text = generate_command_text(task, file_type)
 
-    prompt = create_prompt(file_content, context, command_text)
+    prompt = create_prompt(file_content, context, task, file_type)
+
     if save_prompt:
         with open(file_path+".prompt", 'w', encoding='utf-8') as file:
             file.write(prompt)
@@ -136,7 +137,7 @@ def apply_command_to_file(file_path, context_files, file_type, task, model, save
         modified_content = modified_content.split("```")[1]
 
     trailing_whitespace_len = len(file_content) - len(file_content.rstrip())
-    reply_text = modified_content.rstrip() + file_content[-trailing_whitespace_len:]
+    modified_content = modified_content.rstrip() + file_content[-trailing_whitespace_len:]
 
     with open(file_path, 'w', encoding='utf-8') as file:
         file.write(modified_content)
