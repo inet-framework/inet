@@ -100,6 +100,19 @@ def get_recommended_model(task):
         raise ValueError(f'No info on which model is recommended for "{task}", specify one explicitly via --model or update the tool')
     return recommended_models[task]
 
+def find_additional_context_files(file_path, file_type, task):
+    context_files = []
+    if task == "neddoc":
+        fname_without_ext = os.path.splitext(os.path.basename(file_path))[0]
+        h_fname = fname_without_ext + ".h"
+        cc_fname = fname_without_ext + ".cc"
+        for root, _, files in os.walk(os.path.dirname(file_path) or "."):
+            if h_fname in files:
+                context_files.append(os.path.join(root, h_fname))
+            if cc_fname in files:
+                context_files.append(os.path.join(root, cc_fname))
+    return context_files
+
 def create_prompt(content, context, task, file_type):
     command_text = generate_command_text(task, file_type)
     prompt = f"Update a file delimited by triple quotes. {command_text}\n\n"
@@ -122,7 +135,10 @@ def apply_command_to_file(file_path, context_files, file_type, task, model, save
     with open(file_path, 'r', encoding='utf-8') as file:
         file_content = file.read()
 
-    context = read_files(context_files) if context_files else ""
+    context_files = context_files or []
+    context_files += find_additional_context_files(file_path, file_type, task)
+    print("   context files: " + " ".join(context_files))
+    context = read_files(context_files)
 
     prompt = create_prompt(file_content, context, task, file_type)
 
@@ -145,11 +161,11 @@ def apply_command_to_file(file_path, context_files, file_type, task, model, save
 def apply_command_to_files(file_list, context_files, file_type, task, model, save_prompt=False):
     n = len(file_list)
     for i, file_path in enumerate(file_list):
-        try:
+        # try:
             print(f"Processing file {i + 1}/{n} {file_path}")
             apply_command_to_file(file_path, context_files, file_type, task, model, save_prompt)
-        except Exception as e:
-            print(f"-> Exception: {e}")
+        # except Exception as e:
+        #     print(f"-> Exception: {e}")
 
 def resolve_file_list(paths, file_type):
     file_extension_patterns = {
