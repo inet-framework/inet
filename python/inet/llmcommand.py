@@ -77,7 +77,12 @@ def generate_command_text(task, file_type):
         "proofread": "Fix any English mistakes in its text. Keep all markup and line breaks intact as much as possible!",
         "improve-language": "Improve the English in the text. Keep all other markup and line breaks intact as much as possible.",
         "eliminate-you-addressing": "At places where the text addresses the user as 'you', change it to neutral, e.g., to passive voice or 'one' as subject. Keep all markup and line breaks intact as much as possible.",
-        "neddoc": "Write a new neddoc comment for the module in the NED file."
+        # "neddoc": "Write a new neddoc comment for the module in the NED file. NED comments use // marks instead of /*..*/."
+        "neddoc": """
+        You are working in the context of OMNeT++ and the INET Framework.
+        Your task is to write a single sentence capturing the most important aspect of the following simple module.
+        Ignore the operational details of the module and focus on the aspects that help the user understand what this module is good for.
+          """
     }
 
     if file_type not in file_type_commands:
