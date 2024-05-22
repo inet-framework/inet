@@ -139,10 +139,7 @@ def apply_command_to_file(file_path, context, command_text, model, save_prompt=F
         file.write(modified_content)
     _logger.debug(f"Modified {file_path} successfully.")
 
-def apply_command_to_files(file_list, context, command_text, model_name, save_prompt=False):
-    model = llm.get_model(model_name)
-    model.key = ''
-
+def apply_command_to_files(file_list, context, command_text, model, save_prompt=False):
     n = len(file_list)
     for i, file_path in enumerate(file_list):
         try:
@@ -173,6 +170,8 @@ def resolve_file_list(paths, file_type):
 def process_files(paths, context_files, file_type, task, model_name, save_prompt=False):
     if not model_name:
         model_name = get_recommended_model(task)
+    model = llm.get_model(model_name)
+    model.key = ''
     file_list = resolve_file_list(paths, file_type)
     print("Files to process: " + " ".join(file_list))
     print("Using LLM: " + model_name)
