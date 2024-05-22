@@ -98,6 +98,18 @@ def generate_command_text(task, file_type):
 
     return file_type_commands[file_type] + " " + task_commands[task]
 
+def get_recommended_model(task):
+    recommended_models = {
+        "proofread": "gpt-3.5-turbo-16k",
+        "improve-language": "gpt-3.5-turbo-16k",
+        "eliminate-you-addressing": "gpt-4o",
+        "neddoc": "gpt-4o"
+    }
+    if task not in recommended_models:
+        raise ValueError(f'No info on which model is recommended for "{task}", specify one explicitly via --model or update the tool')
+    return recommended_models[task]
+
+
 def apply_command_to_content(content, context, command_text, model, prompt_file_to_save=None):
     prompt = create_prompt(content, context, command_text)
 
@@ -159,8 +171,11 @@ def resolve_file_list(paths, file_type):
     return file_list
 
 def process_files(paths, context_files, file_type, task, model_name, save_prompt=False):
+    if not model_name:
+        model_name = get_recommended_model(task)
     file_list = resolve_file_list(paths, file_type)
     print("Files to process: " + " ".join(file_list))
+    print("Using LLM: " + model_name)
     context = read_files(context_files) if context_files else ""
     command_text = generate_command_text(task, file_type)
     apply_command_to_files(file_list, context, command_text, model_name, save_prompt)
@@ -170,7 +185,7 @@ def main():
     parser.add_argument("paths", type=str, nargs='+', help="The directories or files to process.")
     parser.add_argument("--file-type", type=str, choices=["md", "rst", "tex", "ned"], required=True, help="The type of files to process.")
     parser.add_argument("--task", type=str, choices=["proofread", "improve-language", "eliminate-you-addressing", "neddoc"], required=True, help="The task to perform on the files.")
-    parser.add_argument("--model", type=str, default="gpt-3.5-turbo-16k", help="The name of the LLM model to use.")
+    parser.add_argument("--model", type=str, default=None, help="The name of the LLM model to use.")
     parser.add_argument("--context", type=str, nargs='*', help="The context files to be used.")
     parser.add_argument("--save-prompt", action='store_true', help="Save the LLM prompt for each input file as <filename>.prompt.")
 
