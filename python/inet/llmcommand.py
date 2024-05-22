@@ -65,16 +65,6 @@ def check_token_count(prompt, model):
     if max_tokens and num_tokens > max_tokens:
         print(f"WARNING: Prompt of {num_tokens} tokens exceeds the model's context window size of {max_tokens} tokens")
 
-def create_prompt(content, context, task, file_type):
-    command_text = generate_command_text(task, file_type)
-    prompt = "Update a file based on some context."
-    if context:
-        prompt += f" Here is the context:\n{context}\n"
-    prompt += f"Here is what should be done with the file: {command_text}\n"
-    prompt += f"Respond with the updated file verbatim without any additional text.\n"
-    prompt += f"Here is the file that should be updated:\n```\n{content}\n```\n"
-    return prompt
-
 def generate_command_text(task, file_type):
     file_type_commands = {
         "md": "The following Markdown file belongs to the OMNeT++ project.",
@@ -109,6 +99,15 @@ def get_recommended_model(task):
     if task not in recommended_models:
         raise ValueError(f'No info on which model is recommended for "{task}", specify one explicitly via --model or update the tool')
     return recommended_models[task]
+
+def create_prompt(content, context, task, file_type):
+    command_text = generate_command_text(task, file_type)
+    prompt = f"Update a file delimited by triple quotes. {command_text}\n\n"
+    if context:
+        prompt += f"Here is the context:\n{context}\n\n"
+    prompt += f'Here is the file that should be updated:\n\n```\n{content}\n```\n\n'
+    prompt += f"Respond with the updated file verbatim without any additional commentary.\n"
+    return prompt
 
 def invoke_llm(prompt, model):
     check_token_count(prompt, model)
