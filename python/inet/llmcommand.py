@@ -118,9 +118,12 @@ def invoke_llm(prompt, model):
     _logger.debug(f"Received result from LLM: {reply_text}")
     return reply_text
 
-def apply_command_to_file(file_path, context, command_text, model, save_prompt=False):
+def apply_command_to_file(file_path, context_files, file_type, task, model, save_prompt=False):
     with open(file_path, 'r', encoding='utf-8') as file:
         file_content = file.read()
+
+    context = read_files(context_files) if context_files else ""
+    command_text = generate_command_text(task, file_type)
 
     prompt = create_prompt(file_content, context, command_text)
     if save_prompt:
@@ -139,12 +142,12 @@ def apply_command_to_file(file_path, context, command_text, model, save_prompt=F
         file.write(modified_content)
     _logger.debug(f"Modified {file_path} successfully.")
 
-def apply_command_to_files(file_list, context, command_text, model, save_prompt=False):
+def apply_command_to_files(file_list, context_files, file_type, task, model, save_prompt=False):
     n = len(file_list)
     for i, file_path in enumerate(file_list):
         try:
             print(f"Processing file {i + 1}/{n} {file_path}")
-            apply_command_to_file(file_path, context, command_text, model, save_prompt)
+            apply_command_to_file(file_path, context_files, file_type, task, model, save_prompt)
         except Exception as e:
             print(f"-> Exception: {e}")
 
@@ -175,9 +178,7 @@ def process_files(paths, context_files, file_type, task, model_name, save_prompt
     file_list = resolve_file_list(paths, file_type)
     print("Files to process: " + " ".join(file_list))
     print("Using LLM: " + model_name)
-    context = read_files(context_files) if context_files else ""
-    command_text = generate_command_text(task, file_type)
-    apply_command_to_files(file_list, context, command_text, model, save_prompt)
+    apply_command_to_files(file_list, context_files, file_type, task, model, save_prompt=save_prompt)
 
 def main():
     parser = argparse.ArgumentParser(description="Process and improve specific types of files in a given directory or files.")
