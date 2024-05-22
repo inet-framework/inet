@@ -103,14 +103,19 @@ def get_recommended_model(task):
 def find_additional_context_files(file_path, file_type, task):
     context_files = []
     if task == "neddoc":
+        # fname_without_ext = os.path.splitext(os.path.basename(file_path))[0]
+        # h_fname = fname_without_ext + ".h"
+        # cc_fname = fname_without_ext + ".cc"
+        # for root, _, files in os.walk(os.path.dirname(file_path) or "."):
+        #     if h_fname in files:
+        #         context_files.append(os.path.join(root, h_fname))
+        #     if cc_fname in files:
+        #         context_files.append(os.path.join(root, cc_fname))
+
         fname_without_ext = os.path.splitext(os.path.basename(file_path))[0]
-        h_fname = fname_without_ext + ".h"
-        cc_fname = fname_without_ext + ".cc"
-        for root, _, files in os.walk(os.path.dirname(file_path) or "."):
-            if h_fname in files:
-                context_files.append(os.path.join(root, h_fname))
-            if cc_fname in files:
-                context_files.append(os.path.join(root, cc_fname))
+        os.system(f"""rg --heading -g '*.cc' -g '*.h' -g '*.ini' -g '*.ned' -C 10 '{fname_without_ext}' $(git rev-parse --show-toplevel) > {file_path}.ctx""")
+        context_files.append(file_path + ".ctx")
+
     return context_files
 
 def create_prompt(content, context, task, file_type):
