@@ -155,6 +155,19 @@ int MessageDispatcher::getGateIndexToConnectedModule(const char *moduleName)
     throw cRuntimeError("Cannot find module: %s", moduleName);
 }
 
+bool MessageDispatcher::hasLookupModuleInterface(const cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    int size = gateSize(gate->getType() == cGate::INPUT ? "out" : "in");
+    for (int i = 0; i < size; i++) {
+        if (i != gate->getIndex()) {
+            cGate *referencingGate = this->gate(gate->getType() == cGate::INPUT ? "out" : "in", i);
+            if (findModuleInterface(referencingGate, type, arguments) != nullptr)
+                return true;
+        }
+    }
+    return false;
+}
+
 cGate *MessageDispatcher::forwardLookupModuleInterface(const cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     cGate *result = nullptr;
@@ -188,7 +201,7 @@ cGate *MessageDispatcher::lookupModuleInterface(cGate *gate, const std::type_inf
         if (type == typeid(IPassivePacketSink)) { // handle all packets
             if (arguments == nullptr)
                 return gate;
-            else if (forwardLookupModuleInterface(gate, type, arguments, direction) != nullptr)
+            else if (hasLookupModuleInterface(gate, type, arguments, direction))
                 return gate;
         }
     }
