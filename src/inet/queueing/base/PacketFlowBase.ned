@@ -45,5 +45,5 @@ simple PacketFlowBase extends PacketProcessorBase
         @statistic[flowOutgoingDataRate](title="flow specific outgoing data rate"; source=throughput(demuxFlow(merge(packetPushedOut, packetPulledOut))); record=vector; unit=bps; interpolationmode=linear);
     gates:
         input in @interface[inet::queueing::IPassivePacketSink] @labels(send,push,pull,pass,stream);
-        output out @labels(send,push,pull,pass,stream);
+        output out @interface[inet::queueing::IPassivePacketSource] @labels(send,push,pull,pass,stream);
 }
