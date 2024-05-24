@@ -21,6 +21,7 @@ module BridgingLayer like IProtocolLayer
         string interfaceTableModule; // Relative module path of the interface table
         *.macTableModule = default(absPath(this.macTableModule));
         *.interfaceTableModule = default(this.interfaceTableModule);
+        @class(BridgingLayer);
         @display("i=block/layer");
     gates:
         input upperLayerIn;
