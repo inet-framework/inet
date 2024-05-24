@@ -15,6 +15,7 @@ import inet.linklayer.contract.IIeee8021rLayer;
 module Ieee8021rProtocol like IIeee8021rLayer
 {
     parameters:
+        @class(Ieee8021rProtocol);
         @display("i=block/layer");
     gates:
         input upperLayerIn;

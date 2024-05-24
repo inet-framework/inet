@@ -5,6 +5,7 @@
 //
 
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
@@ -119,8 +120,11 @@ void Tcp::sendFromConn(cMessage *msg, const char *gatename, int gateindex)
     take(msg);
     if (!strcmp(gatename, "ipOut"))
         ipSink.pushPacket(check_and_cast<Packet *>(msg));
-    else if (!strcmp(gatename, "appOut"))
-        appSink.pushPacket(check_and_cast<Packet *>(msg));
+    else if (!strcmp(gatename, "appOut")) {
+        schedule("SendData", simTime(), [=] () {
+            appSink.pushPacket(check_and_cast<Packet *>(msg));
+        });
+    }
     else
         throw cRuntimeError("Unknown gate: %s", gatename);
 }

@@ -11,15 +11,19 @@ namespace inet {
 
 cGate *findModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
+    EV_INFO << "Searching for module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
     bool forward = direction > 0 || (direction == 0 && gate->getType() == cGate::OUTPUT);
     while (true) {
         gate = forward ? gate->getNextGate() : gate->getPreviousGate();
-        if (gate == nullptr)
+        if (gate == nullptr) {
+            EV_INFO << "Module interface not found" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
             return nullptr;
+        }
         else if (auto lookup = dynamic_cast<IModuleInterfaceLookup *>(gate->getOwner()))
             return lookup->lookupModuleInterface(gate, type, arguments, direction);
         else {
             // NOTE: default behavior is to look for @interface properties on the gate
+            EV_INFO << "Checking interface by properties" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
             auto properties = gate->getProperties();
             for (auto index : properties->getIndicesFor("interface")) {
                 auto property = properties->get("interface", index);

@@ -197,6 +197,7 @@ cGate *MessageDispatcher::forwardLookupModuleInterface(const cGate *gate, const 
 cGate *MessageDispatcher::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     Enter_Method("lookupModuleInterface");
+    EV_INFO << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
     if (gate->isName("in")) {
         if (type == typeid(IPassivePacketSink)) { // handle all packets
             if (arguments == nullptr)
