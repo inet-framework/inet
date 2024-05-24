@@ -18,8 +18,6 @@ import inet.queueing.contract.IActivePacketSource;
 simple PacketMultiplexer extends PacketProcessorBase like IActivePacketSource // TODO IPassivePacketSink // in gate is vector
 {
     parameters:
-        bool forwardServiceRegistration = default(true);
-        bool forwardProtocolRegistration = default(true);
         displayStringTextFormat = default("passed %p pk (%l)"); // %p number of packets, %l total length
         @class(PacketMultiplexer);
         @display("i=-;b=10,10,oval,grey,,1");
