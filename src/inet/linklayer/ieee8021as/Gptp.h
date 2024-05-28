@@ -95,6 +95,9 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     static simsignal_t correctionFieldIngressSignal;
     static simsignal_t correctionFieldEgressSignal;
 
+    // Packet receive signals:
+    std::map <uint16_t,clocktime_t> ingressTimeMap; // <sequenceId,ingressTime
+
   public:
     static const MacAddress GPTP_MULTICAST_ADDRESS;
 

@@ -669,12 +669,13 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
         return;
 
     if (simSignal == receptionStartedSignal) {
-        auto sequenceId = ethernetSignal->getTransmissionId();
-
+        auto transmissionId = ethernetSignal->getTransmissionId();
+        auto ingressTime = clock->getClockTime();
+        ingressTimeMap[transmissionId] = ingressTime;
         // Save ingress time in map
     } else if (simSignal == receptionEndedSignal) {
-        auto sequenceId = gptp->getSequenceId();
-
+        packet->addTagIfAbsent<GptpIngressTimeInd>()->setArrivalClockTime(ingressTimeMap[ethernetSignal->getTransmissionId()]);
+        ingressTimeMap.erase(ethernetSignal->getTransmissionId());
         // Read ingress time from map
         // Ad tag to packet
     }
