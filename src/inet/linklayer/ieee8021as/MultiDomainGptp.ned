@@ -28,7 +28,7 @@ module MultiDomainGptp like IGptp
         string gptpNodeType; // @enum("GptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE
         @display("i=block/app");
     gates:
-        input socketIn @interface[inet::queueing::IPassivePacketSink](protocol=gptp; service=indication);
+        input socketIn;
         output socketOut;
     submodules:
         domain[numDomains]: <default("Gptp")> like IGptp {
