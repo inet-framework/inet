@@ -30,6 +30,9 @@ simsignal_t Gptp::gmRateRatioSignal = cComponent::registerSignal("gmRateRatio");
 simsignal_t Gptp::receivedRateRatioSignal = cComponent::registerSignal("receivedRateRatio");
 simsignal_t Gptp::neighborRateRatioSignal = cComponent::registerSignal("neighborRateRatio");
 simsignal_t Gptp::peerDelaySignal = cComponent::registerSignal("peerDelay");
+simsignal_t Gptp::residenceTimeSignal = cComponent::registerSignal("residenceTime");
+simsignal_t Gptp::correctionFieldIngressSignal = cComponent::registerSignal("correctionFieldIngress");
+simsignal_t Gptp::correctionFieldEgressSignal = cComponent::registerSignal("correctionFieldEgress");
 
 // MAC address:
 //   01-80-C2-00-00-02 for TimeSync (ieee 802.1as-2020, 13.3.1.2)
@@ -73,7 +76,8 @@ void Gptp::initialize(int stage)
                 throw cRuntimeError("Parameter inconsistency: MASTER_NODE with slave port");
             auto nic = CHK(interfaceTable->findInterfaceByName(str));
             slavePortId = nic->getInterfaceId();
-            nic->subscribe(transmissionEndedSignal, this);
+            nic->subscribe(transmissionStartedSignal, this);
+            nic->subscribe(receptionStartedSignal, this);
             nic->subscribe(receptionEndedSignal, this);
         }
         else if (gptpNodeType != MASTER_NODE)
@@ -90,8 +94,10 @@ void Gptp::initialize(int stage)
                                     "master and slave port",
                                     p.c_str());
             masterPortIds.insert(portId);
-            nic->subscribe(transmissionEndedSignal, this);
+            nic->subscribe(transmissionStartedSignal, this);
+            nic->subscribe(receptionStartedSignal, this);
             nic->subscribe(receptionEndedSignal, this);
+
         }
 
         if (slavePortId != -1) {
@@ -290,6 +296,8 @@ void Gptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syn
         auto newCorrectionField = correctionField + gmRateRatio * (meanLinkDelay + residenceTime);
         gptp->setCorrectionField(newCorrectionField);
     }
+    emit(residenceTimeSignal, residenceTime.asSimTime());
+    emit(correctionFieldEgressSignal, gptp->getCorrectionField().asSimTime());
     gptp->getFollowUpInformationTLVForUpdate().setRateRatio(gmRateRatio);
     packet->insertAtFront(gptp);
 
@@ -337,7 +345,7 @@ void Gptp::sendPdelayRespFollowUp(int portId, const GptpPdelayResp *resp)
     gptp->setCorrectionField(CLOCKTIME_ZERO);
 
     // We can set this to now, because this function is called directly
-    // after the transmissionEnded signal for the pdelayResp packet
+    // after the transmissionStarted signal for the pdelayResp packet
     // is received
     auto now = clock->getClockTime();
     gptp->setResponseOriginTimestamp(now); // t3
@@ -397,6 +405,8 @@ void Gptp::processFollowUp(Packet *packet, const GptpFollowUp *gptp)
     correctionField = gptp->getCorrectionField();
     receivedRateRatio = gptp->getFollowUpInformationTLV().getRateRatio();
 
+    emit(correctionFieldIngressSignal, correctionField.asSimTime());
+
     synchronize();
 
     EV_INFO << "############## FOLLOW_UP ################################" << endl;
@@ -445,12 +455,11 @@ void Gptp::synchronize()
 //            unit(gmRateRatio * (1 + unit(piControlClock->getOscillatorCompensation()).get()) - 1);
 //        hasNewRateRatioForOscillatorCompensation = false;
 //    }
-    auto clockTimeAfterUpdate = piControlClock->setClockTime(newTime);
+    piControlClock->setClockTime(newTime);
 //    EV_INFO << "newOscillatorCompensation " << newOscillatorCompensation << endl;
 
 
     newLocalTimeAtTimeSync = clock->getClockTime();
-    // new=5 - old=4 = +1
     timeDiffAtTimeSync = newLocalTimeAtTimeSync - oldLocalTimeAtTimeSync;
 
 
@@ -484,12 +493,16 @@ void Gptp::synchronize()
     EV_INFO << "RECIEVED RATE RATIO        - " << receivedRateRatio << endl;
     EV_INFO << "GM RATE RATIO              - " << gmRateRatio << endl;
 
-    if (clockTimeAfterUpdate != oldLocalTimeAtTimeSync) {
-        EV_INFO << "Adjusting timestamps";
+    if (newLocalTimeAtTimeSync != oldLocalTimeAtTimeSync) {
         adjustLocalTimestamp(syncIngressTimestamp);
         adjustLocalTimestamp(pDelayReqEgressTimestamp);
         adjustLocalTimestamp(pDelayRespIngressTimestamp);
         adjustLocalTimestamp(pDelayRespIngressTimestampSetStart);
+        EV_INFO << "############## Adjusted times #####################################" << endl;
+        EV_INFO << "SYNC INGRESS TIME          - " << syncIngressTimestamp << endl;
+        EV_INFO << "PDELAY REQ EGRESS TIME      - " << pDelayReqEgressTimestamp << endl;
+        EV_INFO << "PDELAY RESP INGRESS TIME    - " << pDelayRespIngressTimestamp << endl;
+        EV_INFO << "PDELAY RESP INGRESS TIME SET- " << pDelayRespIngressTimestampSetStart << endl;
         // NOTE: Do not pDelayReqIngressTimestamp and pDelayRespEgressTimestamp, because they are based on neighbor clock
     }
 
@@ -644,7 +657,7 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
 {
     Enter_Method("%s", cComponent::getSignalName(simSignal));
 
-    if (simSignal != receptionEndedSignal && simSignal != transmissionEndedSignal)
+    if (simSignal != receptionStartedSignal && simSignal != transmissionStartedSignal && simSignal != receptionEndedSignal)
         return;
 
     auto ethernetSignal = check_and_cast<cPacket *>(obj);
@@ -659,13 +672,22 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
     if (gptp->getDomainNumber() != domainNumber)
         return;
 
-    if (simSignal == receptionEndedSignal)
-        packet->addTagIfAbsent<GptpIngressTimeInd>()->setArrivalClockTime(clock->getClockTime());
-    else if (simSignal == transmissionEndedSignal)
-        handleDelayOrSendFollowUp(gptp, source);
+    if (simSignal == receptionStartedSignal) {
+        auto transmissionId = ethernetSignal->getTransmissionId();
+        auto ingressTime = clock->getClockTime();
+        ingressTimeMap[transmissionId] = ingressTime;
+        // Save ingress time in map
+    } else if (simSignal == receptionEndedSignal) {
+        packet->addTagIfAbsent<GptpIngressTimeInd>()->setArrivalClockTime(ingressTimeMap[ethernetSignal->getTransmissionId()]);
+        ingressTimeMap.erase(ethernetSignal->getTransmissionId());
+        // Read ingress time from map
+        // Ad tag to packet
+    }
+    else if (simSignal == transmissionStartedSignal)
+        handleTransmissionStartedSignal(gptp, source);
 }
 
-void Gptp::handleDelayOrSendFollowUp(const GptpBase *gptp, cComponent *source)
+void Gptp::handleTransmissionStartedSignal(const GptpBase *gptp, cComponent *source)
 {
     int portId = getContainingNicModule(check_and_cast<cModule *>(source))->getInterfaceId();
 

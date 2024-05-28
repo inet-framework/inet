@@ -35,7 +35,6 @@ simple Gptp like IGptp
         // These numbers must be enough large to prevent creating queue in MAC layer.
         // It means it should be larger than transmission time of message sent before
         double pDelayReqProcessingTime @unit(s) = default(8us);  // processing time between arrived PDelayReq and send of PDelayResp
-        double followUpInterval @unit(s) = default(7us);
 
         @display("i=block/timer");
         @signal[localTime](type=simtime_t);  // as clocktime_t
@@ -44,12 +43,18 @@ simple Gptp like IGptp
         @signal[receivedRateRatio](type=double);
         @signal[neighborRateRatio](type=double);
         @signal[peerDelay](type=simtime_t);
+        @signal[residenceTime](type=simtime_t);
+        @signal[correctionFieldIngress](type=simtime_t);
+        @signal[correctionFieldEgress](type=simtime_t);
         @statistic[localTime](record=vector; interpolationmode=linear);
         @statistic[timeDifference](record=vector; interpolationmode=linear);
         @statistic[gmRateRatio](record=vector; interpolationmode=sample-hold);
         @statistic[receivedRateRatio](record=vector; interpolationmode=sample-hold);
         @statistic[neighborRateRatio](record=vector; interpolationmode=sample-hold);
         @statistic[peerDelay](record=vector; interpolationmode=sample-hold);
+        @statistic[residenceTime](record=vector;interpolationmode=none);
+        @statistic[correctionFieldIngress](record=vector; interpolationmode=none);
+        @statistic[correctionFieldEgress](record=vector; interpolationmode=none);
         @selfMessageKinds(inet::GptpSelfMsgKind);
 
     gates:
