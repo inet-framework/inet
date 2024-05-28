@@ -7,7 +7,6 @@
 
 package inet.linklayer.ethernet.common;
 
-import inet.common.MessageDispatcher;
 import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IPacketDelayer;
@@ -33,7 +32,7 @@ module DirectionReverserLayer like IProtocolLayer
         cutthroughBarrier: <default("")> like IPacketDelayer {
             @display("p=100,150");
         }
-        fork: MessageDispatcher {
+        fork: LocalDelivery {
             @display("p=100,300;i=-;b=10,10,oval,grey,,1");
         }
         delayer: <default("")> like IPacketDelayer {
@@ -49,11 +48,11 @@ module DirectionReverserLayer like IProtocolLayer
         upperLayerIn --> { @display("m=n"); } --> join.in++;
         join.out --> { @display("m=s"); } --> lowerLayerOut;
 
-        lowerLayerIn --> { @display("m=s"); } --> fork.in++;
-        fork.out++ --> cutthroughBarrier.in;
+        lowerLayerIn --> { @display("m=s"); } --> fork.in;
+        fork.deliveryOut --> cutthroughBarrier.in;
         cutthroughBarrier.out --> { @display("m=n"); } --> upperLayerOut;
 
-        fork.out++ --> delayer.in;
+        fork.forwardingOut --> delayer.in;
         delayer.out --> reverser.in;
         reverser.out --> join.in++;
 }
