@@ -15,6 +15,6 @@ simple PacketPusherBase extends PacketProcessorBase
     parameters:
         @class(PacketPusherBase);
     gates:
-        input in;
+        input in @interface[inet::queueing::IPassivePacketSink];
         output out;
 }
