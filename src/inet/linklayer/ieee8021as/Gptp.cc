@@ -78,6 +78,7 @@ void Gptp::initialize(int stage)
             slavePortId = nic->getInterfaceId();
             nic->subscribe(transmissionStartedSignal, this);
             nic->subscribe(receptionStartedSignal, this);
+            nic->subscribe(receptionEndedSignal, this);
         }
         else if (gptpNodeType != MASTER_NODE)
             throw cRuntimeError("Parameter error: Missing slave port for %s", par("gptpNodeType").stringValue());
@@ -95,6 +96,8 @@ void Gptp::initialize(int stage)
             masterPortIds.insert(portId);
             nic->subscribe(transmissionStartedSignal, this);
             nic->subscribe(receptionStartedSignal, this);
+            nic->subscribe(receptionEndedSignal, this);
+
         }
 
         if (slavePortId != -1) {
@@ -650,7 +653,7 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
 {
     Enter_Method("%s", cComponent::getSignalName(simSignal));
 
-    if (simSignal != receptionStartedSignal && simSignal != transmissionStartedSignal)
+    if (simSignal != receptionStartedSignal && simSignal != transmissionStartedSignal && simSignal != receptionEndedSignal)
         return;
 
     auto ethernetSignal = check_and_cast<cPacket *>(obj);
@@ -666,7 +669,14 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
         return;
 
     if (simSignal == receptionStartedSignal) {
-        packet->addTagIfAbsent<GptpIngressTimeInd>()->setArrivalClockTime(clock->getClockTime());
+        auto sequenceId = ethernetSignal->getTransmissionId();
+
+        // Save ingress time in map
+    } else if (simSignal == receptionEndedSignal) {
+        auto sequenceId = gptp->getSequenceId();
+
+        // Read ingress time from map
+        // Ad tag to packet
     }
     else if (simSignal == transmissionStartedSignal)
         handleTransmissionStartedSignal(gptp, source);
