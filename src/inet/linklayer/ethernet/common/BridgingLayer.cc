@@ -7,6 +7,7 @@
 
 #include "inet/linklayer/ethernet/common/BridgingLayer.h"
 
+#include "inet/linklayer/ethernet/contract/IEthernet.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
@@ -25,6 +26,8 @@ cGate *BridgingLayer::lookupModuleInterface(cGate *gate, const std::type_info &t
             if (dispatchProtocolReq != nullptr && dispatchProtocolReq->getProtocol() == &Protocol::ethernetMac && dispatchProtocolReq->getServicePrimitive() == SP_REQUEST)
                 return findModuleInterface(gate, type, nullptr, 1);
         }
+        else if (type == typeid(IEthernet))
+            return findModuleInterface(this->gate("lowerLayerOut"), type, arguments);
     }
     else if (gate->isName("upperLayerOut"))
         return findModuleInterface(gate, type, arguments); // forward all other interfaces
