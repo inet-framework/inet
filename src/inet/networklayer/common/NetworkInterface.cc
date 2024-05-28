@@ -717,7 +717,7 @@ NetworkInterface *getContainingNicModule(const cModule *from)
 cGate *NetworkInterface::lookupModuleInterface(cGate *gate, const std::type_info &type, const cObject *arguments, int direction)
 {
     Enter_Method("lookupModuleInterface");
-    EV_INFO << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
     if (gate->isName("upperLayerIn")) {
         // TODO accept outgoing network interface specific packets or outgoing protocol specific packets
         // TODO getProtocol()
