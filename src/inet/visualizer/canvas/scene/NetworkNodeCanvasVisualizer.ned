@@ -12,7 +12,7 @@ import inet.visualizer.contract.INetworkNodeVisualizer;
 
 //
 // This module visualizes multiple network nodes on a 2D canvas. It maintains a
-// NetworkNodeCanvasVisualization figure for each node in the network which can
+// `NetworkNodeCanvasVisualization` figure for each node in the network which can
 // be annotated by other visualizers.
 //
 // @see ~NetworkNodeCanvasVisualizer, ~NetworkNodeVisualizer, ~NetworkNodeVisualizerBase, ~INetworkNodeVisualizer
@@ -20,7 +20,7 @@ import inet.visualizer.contract.INetworkNodeVisualizer;
 simple NetworkNodeCanvasVisualizer extends NetworkNodeVisualizerBase like INetworkNodeVisualizer
 {
     parameters:
-        double zIndex = default(0); // determines the drawing order of figures relative to other visualizers
+        double zIndex = default(0); // Determines the drawing order of figures relative to other visualizers
         @class(NetworkNodeCanvasVisualizer);
 }
 

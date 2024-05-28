@@ -17,15 +17,15 @@ simple Ieee80211AgentSta like IIeee80211Agent
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         string mibModule;
-        bool activeScan = default(true);  // selects between active and passive scanning
-        string channelsToScan = default("");  // list of channel numbers to scan (space delimited); empty means all channels
-        double probeDelay @unit(s) = default(100ms); // delay before sending a probe request during active scanning
-        double minChannelTime @unit(s) = default(150ms); // min interval to spend on a channel during active scanning
-        double maxChannelTime @unit(s) = default(300ms); // channel time for passive scanning, and max channel time for active scanning
-        double authenticationTimeout @unit(s) = default(5s); // timeout for the authentication procedure
-        double associationTimeout @unit(s) = default(5s); // timeout for the association procedure
-        double startingTime @unit(s) = default(-1s); // agent starting time.
-        string defaultSsid = default("SSID"); // default ssid
+        bool activeScan = default(true);  // Selects between active and passive scanning
+        string channelsToScan = default("");  // List of channel numbers to scan (space delimited); empty means all channels
+        double probeDelay @unit(s) = default(100ms); // Delay before sending a probe request during active scanning
+        double minChannelTime @unit(s) = default(150ms); // Min interval to spend on a channel during active scanning
+        double maxChannelTime @unit(s) = default(300ms); // Channel time for passive scanning, and max channel time for active scanning
+        double authenticationTimeout @unit(s) = default(5s); // Timeout for the authentication procedure
+        double associationTimeout @unit(s) = default(5s); // Timeout for the association procedure
+        double startingTime @unit(s) = default(-1s); // Agent starting time.
+        string defaultSsid = default("SSID"); // Default SSID
         @display("i=block/control");
         @signal[sentRequest](type=long); // ENUM! ~Ieee80211PrimRequestCode
         @signal[acceptConfirm](type=long); // ENUM! ~Ieee80211PrimConfirmCode

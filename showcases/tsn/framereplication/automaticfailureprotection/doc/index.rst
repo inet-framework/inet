@@ -4,7 +4,7 @@ Automatic Stream Configuration with Failure Protection
 Goals
 -----
 
-In this example we demonstrate the automatic stream redundancy configuration based
+In this example, we demonstrate the automatic stream redundancy configuration based
 on the link and node failure protection requirements.
 
 | INET version: ``4.4``
@@ -13,8 +13,8 @@ on the link and node failure protection requirements.
 The Model
 ---------
 
-In this case we use a different automatic stream redundancy configurator that
-takes the link and node failure protection requirements for each redundany stream
+In this case, we use a different automatic stream redundancy configurator that
+takes the link and node failure protection requirements for each redundant stream
 as an argument. The automatic configurator computes the different paths that each
 stream must take in order to be protected against any of the listed failures so
 that at least one working path remains.

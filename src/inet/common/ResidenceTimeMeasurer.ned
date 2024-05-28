@@ -10,17 +10,17 @@ package inet.common;
 //
 // This module measures the residence time of packet data in network nodes. The
 // measurement is done by tracking every bit individually using their unique
-// identity. For each bit the measurement starts when the incoming enclosing
+// identity. For each bit, the measurement starts when the incoming enclosing
 // packet reception ends (or starts) in the network node. Similarly, for each
-// bit the measurement ends when the outgoing enclosing packet transmission
+// bit, the measurement ends when the outgoing enclosing packet transmission
 // starts (or ends) in the network node.
 //
 simple ResidenceTimeMeasurer like IMeasurer
 {
     parameters:
-        string subscriptionModule = default("^"); // relative module path where subscription happens
-        string measurementStartSignal = default("receptionEnded"); // subscribed signal for measurement start
-        string measurementEndSignal = default("transmissionStarted"); // subscribed signal for measurement end
+        string subscriptionModule = default("^"); // Relative module path where the subscription happens
+        string measurementStartSignal = default("receptionEnded"); // Subscribed signal for the measurement start
+        string measurementEndSignal = default("transmissionStarted"); // Subscribed signal for the measurement end
         @display("i=block/timer");
         @signal[packetStayed](type=inet::Packet);
         // the statistics value is the maximum residence time for any bit in the outgoing packet

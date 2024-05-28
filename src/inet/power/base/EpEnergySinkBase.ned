@@ -10,7 +10,7 @@ package inet.power.base;
 import inet.power.contract.IEpEnergySink;
 
 //
-// This is an abstract base module for power based energy sink models.
+// This is an abstract base module for power-based energy sink models.
 // It defines signals and statistics.
 //
 // @see ~EpEnergyConsumerBase, ~EpEnergySourceBase, ~EpEnergyGeneratorBase, ~EpEnergyStorageBase

@@ -14,7 +14,7 @@ of incoming packets.
 
 In this example network, packets are produced periodically by an active packet source
 (:ned:`ActivePacketSource`). The packets are pushed into a
-(:ned:`PacketDuplicator`), which creates 0 or 1 copy of them randomly.
+(:ned:`PacketDuplicator`), which randomly creates 0 or 1 copy of them.
 Finally, the packets are all sent into a passive packet
 sink (:ned:`PassivePacketSink`).
 

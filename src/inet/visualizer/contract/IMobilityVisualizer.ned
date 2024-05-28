@@ -15,7 +15,7 @@ package inet.visualizer.contract;
 //
 // @see ~MobilityCanvasVisualizer, ~MobilityOsgVisualizer, ~MobilityVisualizer, ~MobilityVisualizerBase
 //
-moduleinterface IMobilityVisualizer
+moduleinterface IMobilityVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

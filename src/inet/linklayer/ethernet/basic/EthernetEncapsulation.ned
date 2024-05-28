@@ -13,20 +13,20 @@ import inet.linklayer.contract.IEthernetLayer;
 // Performs Ethernet II or Ethernet with LLC/SNAP encapsulation/decapsulation.
 //
 // Expected environment:
-// - lowerLayerIn, lowerLayerOut gates should be connected to an ~EthernetCsmaMac
-// - upperLayerIn, upperLayerOut gates should be connected to higher layer
+// - `lowerLayerIn`, `lowerLayerOut` gates should be connected to an ~EthernetCsmaMac
+// - `upperLayerIn`, `upperLayerOut` gates should be connected to a higher layer
 //   protocol or application
 //
 // Functionality:
-// - packets coming from upper layers will be encapsulated in EthernetII frame
+// - packets coming from upper layers will be encapsulated in an `EthernetII` frame
 //   (~EthernetMacHeader) or Ethernet SNAP frame (~Ieee8022LlcSnapHeader)
-//   depending on the useSNAP module parameter,
-//   and sent to MAC. The ~EtherType is taken from the ~PacketProtocolTag tag
+//   depending on the `useSNAP` module parameter,
+//   and sent to the MAC. The ~EtherType is taken from the ~PacketProtocolTag tag
 //   attached to the packet. The source address will be filled in by ~EthernetCsmaMac.
 // - also accepts SENDPAUSE command (message kind=IEEE802CTRL_SENDPAUSE) from
-//   higher layer: it will send a PAUSE frame, as described in
+//   the higher layer: it will send a PAUSE frame, as described in
 //   <a href="ether-pause.html">PAUSE frames</a>.
-// - Ethernet frames arriving from MAC will be decapsulated, and sent up to the
+// - Ethernet frames arriving from MAC will be decapsulated and sent up to the
 //   higher layers. Accepts ~EthernetMacHeader, ~Ieee8022LlcHeader, and
 //   ~Ieee8022LlcSnapHeader too.
 //
@@ -37,13 +37,13 @@ simple EthernetEncapsulation like IEthernetLayer
         string interfaceTableModule;   // The path to the InterfaceTable module
         string fcsMode @enum("declared","computed") = default("declared");
         @lifecycleSupport;
-        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
-        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after the lifecycle stop operation has finished
+        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for the lifecycle stop operation
         @class(EthernetEncapsulation);
         @display("i=block/layer");
         @signal[encapPk](type=cPacket);
         @signal[decapPk](type=cPacket);
-        @signal[pauseSent](type=long); // pause units
+        @signal[pauseSent](type=long); // Pause units
         @signal[packetDropped](type=inet::Packet);
         @statistic[encapPk](title="packets encapsulated"; source=encapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[decapPk](title="packets decapsulated"; source=decapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

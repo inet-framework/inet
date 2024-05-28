@@ -52,7 +52,7 @@ physical medium model where communication takes place.
 
 Simulating the physical layer is generally a computation-intensive task.
 A detailed simulation of signal propagation, signal fading, signal
-interference, and signal decoding often results in an unacceptable
+interference, and signal decoding often results in unacceptable
 performance. Finding the right abstractions, the right level of detail,
 and the right trade-offs between accuracy and performance is both
 difficult and important.
@@ -77,7 +77,7 @@ Customizability
 ~~~~~~~~~~~~~~~
 
 Real-world communication devices often provide a wide variety of
-configuration options to allow them to be adaped to the physical
+configuration options to allow them to be adapted to the physical
 conditions where they are required to operate. For example, a Wifi
 router’s administration interface often provides parameters to configure
 the transmission power, bitrate, preamble type, carrier frequency, RTS
@@ -130,7 +130,7 @@ Scalable Level of Detail
 There are many possible ways to model various aspects of the physical
 layer. The most important difference lies in the trade-off between
 performance versus accuracy. In order to support the different
-trade-offs the physical layer is designed to be scalable with respect to
+trade-offs, the physical layer is designed to be scalable with respect to
 the simulated level of detail. In other words, it is scalable from
 high-performance less accurate simulations to high fidelity slower
 simulations.
@@ -165,14 +165,14 @@ provides more customization opportunities to replace parts with
 alternative implementations and to do research easier in the area.
 
 The data representation might vary from scalar to multidimensional
-values. In the analog domain of the physical layer data quite often
+values. In the analog domain of the physical layer, data quite often
 changes over time, frequency, space, or any combination thereof. The
 most obvious example is the analog signal power, but there are others
 such as signal phase or the signal to noise ratio.
 
 The number of messages per transmission added to the future event queue
 might vary from one to the number of radios. One message might be
-sufficient, for example, if the transmission is intended to a single
+sufficient, for example, if the transmission is intended for a single
 destination, and other receivers are either not affected, or the effect
 is negligible. On the other hand, it might be necessary to process all
 transmissions by all receivers in order to have the desired effect on
@@ -187,10 +187,10 @@ parallel. The computation of the transmission arrival space-time
 coordinates, the analog signal representation of transmissions and
 receptions, the interfering receptions and noises, the signal to noise
 ratio, the decoded bits, the bit errors, and the physical layer
-indications all provide a good parallelization opportunity, because they
+indications all provide a good parallelization opportunity because they
 dominate the physical layer performance and are independent for each
-receiver. Therefore the physical layer is designed to be able to utilize
-parallel hardware, multi-core CPUs, vector instructions and the highly
+receiver. Therefore, the physical layer is designed to be able to utilize
+parallel hardware, multi-core CPUs, vector instructions, and the highly
 parallel GPU.
 
 The idea is to have a central component in the software architecture
@@ -198,7 +198,7 @@ where parallel computation can happen. This central component is the
 medium model that knows about all radios, transmissions, interferences,
 and receptions anyway. It uses optimistic parallel computation in
 multiple background threads while the main simulation thread continues
-normal execution. When a new transmission enters the channel the already
+normal execution. When a new transmission enters the channel, the already
 computed and affected results are invalidated or updated, and the
 affected ongoing optimistic parallel computations are canceled.
 
@@ -211,7 +211,7 @@ model, a transmitter model, a receiver model, and an energy consumer
 model. The antenna model is shared between the transmitter model and the
 receiver model. The separation of the transmitter model and the receiver
 model allows asymmetric configurations. The energy consumer model is
-optional and it is only used when the simulation of energy consumption
+optional, and it is only used when the simulation of energy consumption
 is necessary.
 
 The radio model has an operational mode that is called the radio mode.
@@ -260,22 +260,22 @@ The signaled receiver states are the following:
 
 When a radio wants to transmit a signal on the medium, it sends direct
 messages to all affected radios with the help of the central medium
-module. The messages contain a shared data structure which describes the
+module. The messages contain a shared data structure that describes the
 transmission the way it entered the medium. The messages arrive at the
-moment when start of the transmission arrive at the receiver. The
+moment when start of the transmission arrives at the receiver. The
 receiver radios also handle the incoming messages with the help of the
 central medium module. This kind of centralization allows the medium to
 do shared computations in a more efficient way and it also makes
 parallel computation possible.
 
-To maintain modularity, the radio module delegates many of is functions
+To maintain modularity, the radio module delegates many of its functions
 to submodules. The following sections describe the parts of the radio
 model.
 
 Antenna Models
 ~~~~~~~~~~~~~~
 
-The antenna model describes the effects of the physical device which
+The antenna model describes the effects of the physical device that
 converts electric signals into radio waves, and vice versa. This model
 captures the antenna characteristics that heavily affect the quality of
 the communication channel. For example, various antenna shapes, antenna
@@ -307,30 +307,30 @@ directory.
 Transmitter Models
 ~~~~~~~~~~~~~~~~~~
 
-The transmitter model describes the physical process which converts
+The transmitter model describes the physical process that converts
 packets into electric signals. In other words, this model converts a MAC
 packet into a signal that is transmitted on the medium. The conversion
-process and the representation of the signal depends on the level of
+process and the representation of the signal depend on the level of
 detail and the physical characteristics of the implemented protocol.
 
-In the flat model the transmitter model skips the symbol domain and the
+In the flat model, the transmitter model skips the symbol domain and the
 sample domain representations, and it directly creates the analog domain
 representation. The bit domain representation is reduced to the bit
-length of the packet and the actual bits are ignored.
+length of the packet, and the actual bits are ignored.
 
-In the layered model the conversion process involves various processing
+In the layered model, the conversion process involves various processing
 steps such as packet serialization, forward error correction encoding,
 scrambling, interleaving, and modulation. This transmitter model
 requires much more computation, but it produces accurate bit domain,
 symbol domain, and sample domain representations.
 
-The various protocol specific transmitter models are in the
+The various protocol-specific transmitter models are in the
 corresponding directories.
 
 Receiver Models
 ~~~~~~~~~~~~~~~
 
-The receiver model describes the physical process which converts
+The receiver model describes the physical process that converts
 electric signals into packets. In other words, this model converts a
 reception, along with an interference computed by the medium model, into
 a MAC packet and a reception indication. It also determines the
@@ -347,19 +347,19 @@ following for each transmission:
    based on the error model and the simulated part of the signal
    decoding
 
-In the flat model the receiver model skips the sample domain, the symbol
+In the flat model, the receiver model skips the sample domain, the symbol
 domain, and the bit domain representations, and it directly creates the
 packet domain representation by copying the packet from the
 transmission. It uses the error model to decide if the reception is
 successful or not.
 
-In the layered model the conversion process involves various processing
+In the layered model, the conversion process involves various processing
 steps such as demodulation, descrambling, deinterleaving, forward error
 correction decoding, and deserialization. This reception model requires
 much more computation, but it produces accurate sample domain, symbol
 domain, and bit domain representations.
 
-The various protocol specific receiver models are in the corresponding
+The various protocol-specific receiver models are in the corresponding
 directories.
 
 Transmission Error Modeling
@@ -367,22 +367,22 @@ Transmission Error Modeling
 
 Determining the reception errors is a crucial part of the reception
 process. There are often several different statistical error models in
-the literature even for a particular physical layer. In order to support
-this diversity the error model is a separate replaceable component of
+the literature, even for a particular physical layer. In order to support
+this diversity, the error model is a separate replaceable component of
 the receiver.
 
-The error model describes how the signal to noise ratio affects the
+The error model describes how the signal-to-noise ratio affects the
 amount of errors at the receiver. The main purpose of this model is to
-determine whether if the received packet has errors or not. It also
+determine whether the received packet has errors or not. It also
 computes various physical layer indications for higher layers such as
 packet error rate, bit error rate, and symbol error rate. For the
-layered reception model it needs to compute the erroneous bits, symbols,
-or samples depending on the lowest simulated physical domain where the
-real decoding starts. The error model is optional, if omitted all
+layered reception model, it needs to compute the erroneous bits, symbols,
+or samples, depending on the lowest simulated physical domain where the
+real decoding starts. The error model is optional; if omitted, all
 receptions are considered successful.
 
 The error models are in the ``src/physicallayer/errormodel/``
-directory and also in the corresponding protocol specific directories.
+directory and also in the corresponding protocol-specific directories.
 
 Power Consumption Models
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -390,15 +390,20 @@ Power Consumption Models
 A substantial part of the energy consumption of communication devices
 comes from transmitting and receiving signals. The energy consumer model
 describes how the radio consumes energy depending on its activity. This
-model is optional, if omitted energy consumption is ignored. The
+model is optional; if omitted, energy consumption is ignored. The
 following list provides some examples:
 
--  :ned:`StateBasedEpEnergyConsumer`: Models energy consuption based on power. The constant power consumption is
-   determined by valid combinations of the radio mode, the transmitter
-   state and the receiver state. To be used with energy generator and storage modules using `energy and power` (denoted with `Ep` in the module name).
--  :ned:`StateBasedCcEnergyConsumer`: Models energy consuption based on current. The constant current consumption is
-   determined by valid combinations of the radio mode, the transmitter
-   state and the receiver state. To be used with energy generator and storage modules using `charge and current` (denoted with `Ep` in the module name).
+-  :ned:`StateBasedEpEnergyConsumer`: Models energy consumption based on power.
+   The constant power consumption is determined by valid combinations of the
+   radio mode, the transmitter state, and the receiver state. To be used with
+   energy generator and storage modules using `energy and power` (denoted with
+   ``Ep`` in the module name).
+
+-  :ned:`StateBasedCcEnergyConsumer`: Models energy consumption based on
+   current. The constant current consumption is determined by valid combinations
+   of the radio mode, the transmitter state, and the receiver state. To be used
+   with energy generator and storage modules using `charge and current` (denoted
+   with ``Ep`` in the module name).
 
 The energy consumer models are in the
 ``src/physicallayer/energyconsumer/`` directory.
@@ -450,10 +455,10 @@ The Medium Model
 The medium model describes the shared physical medium where
 communication takes place. It keeps track of radios, noise sources,
 ongoing transmissions, background noise, and other ongoing noises. The
-medium computes when, where and how transmissions and noises arrive at
+medium computes when, where, and how transmissions and noises arrive at
 receivers. It also efficiently provides the set of interfering
 transmissions and noises for the receivers. It doesn’t send or handle
-messages on its own, it rather acts as a mediator between radios.
+messages on its own; it rather acts as a mediator between radios.
 
 The medium model has a separate chapter devoted to it, see
 :doc:`ch-transmission-medium`.
@@ -461,7 +466,7 @@ The medium model has a separate chapter devoted to it, see
 Signal Representation
 ---------------------
 
-The data structures that represent the transmitted and the received
+The data structures that represent the transmitted and received
 signals might contain many different data depending on the simulated
 level of detail. In addition, the reception data structure might contain
 various physical layer indications, which are computed during the
@@ -487,11 +492,11 @@ reception process. The following list provides some examples:
    power, receive signal strength indication, signal to noise and
    interference ratio, etc.
 
-In simple case the packet domain specifies the MAC packet only, and the
+In a simple case, the packet domain specifies the MAC packet only, and the
 bit domain specifies the bit length and the bitrate. The symbol domain
-specifies the used modulation, and the sample domain is simply ignored.
+specifies the modulation used, and the sample domain is simply ignored.
 The most important part is the analog domain representation, because it
-is indispensable to be able to compute some kind of signal to noise and
+is indispensable to be able to compute some kind of signal-to-noise and
 interference ratio. The following figure shows four different kinds of
 analog domain representations, but other representations are also
 possible.
@@ -504,7 +509,7 @@ possible.
 
    Various analog signal representations
 
-The first representation is called range-based, and it is used by the
+The first representation is called *range-based*, and it is used by the
 unit disc radio. The advantage of this data structure is that it is
 compact, predictable, and provides high performance. The disadvantage is
 that it is very inaccurate in terms of modeling reality. Nevertheless,
@@ -513,26 +518,26 @@ protocol if accurate simulation of packet loss is not important.
 
 The second data structure represents a narrowband signal with a scalar
 signal power, a carrier frequency, and a bandwidth. The advantage of
-this representation is that it allows to compute a real signal to noise
+this representation is that it allows to compute a real signal-to-noise
 ratio, which in turn can be used by the error model to compute bit and
 packet error rates. This representation is most of the time sufficient
 for the simulation of IEEE 802.11 networks.
 
 The third data structure describes a signal power that changes over
-time. In this case the signal power is represented with a
-one-dimensional time dependent value that precisely follows the
+time. In this case, the signal power is represented with a
+one-dimensional time-dependent value that precisely follows the
 transmitted pulses. This representation is used by the IEEE 802.15.4a
 UWB radio.
 
 The last representation uses a multi-dimensional value to describe the
 signal power that changes over both time and frequency. The IEEE 802.11b
 model might use this representation to simulate crosstalk, where one
-channel interferes with another. In order to make it work the frequency
+channel interferes with another. In order to make it work, the frequency
 spectrum of the signal has to follow the real spectrum more precisely at
 both ends of the band.
 
 The flat signal representation uses a single object to simulatenously
-describe all domains of the transmission or the reception. In contrast,
+describe all domains of the transmission or reception. In contrast,
 the layered signal representation uses one object to describe every
 domain seperately. The advantage of the latter is that it is extensible
 with alternative implementations for each domain. The disadvantage is
@@ -543,7 +548,7 @@ Signal Processing
 
 The following figure shows the process of how a MAC packet gets from the
 transmitter radio through the medium to the receiver radio. The figure
-focues on how data flows between the processing components of the
+focuses on how data flows between the processing components of the
 physical layer. The blue boxes represent the data structures, and the
 red boxes represent the processing components.
 
@@ -557,56 +562,56 @@ red boxes represent the processing components.
 
 The transmission process starts in the transmitter radio when it
 receives a MAC packet from the higher layer. The radio must be in
-transmitter or transceiver mode before receiving a MAC packet, otherwise
-it throws an exception. At first the transmitter model creates a data
+transmitter or transceiver mode before receiving a MAC packet; otherwise,
+it throws an exception. At first, the transmitter model creates a data
 structure that describes the transmitted signal based on the received
 MAC packet and the attached transmission request. The resulting data
-structure is immutable, it is not going to be changed in any later
+structure is immutable; it is not going to be changed in any later
 processing step.
 
-Thereafter the propagation model computes the arrival space-time
-coordinates for all receivers. In the next step the medium model
+Thereafter, the propagation model computes the arrival space-time
+coordinates for all receivers. In the next step, the medium model
 determines the set of affected receivers. Which radio constitutes
-affected depends on a number of factors such as the maximum
+affected depends on a number of factors, such as the maximum
 communication range of the transmitter, the radio mode of the receiver,
 the listening mode of the receiver, or potentially the MAC address of
-the receiver. Using the result the medium model sends a separate message
+the receiver. Using the result, the medium model sends a separate message
 with the shared transmission data structure to all affected receivers.
 There’s no need to send a message to all radios on the channel, because
 the computation of interfering signals is independent of this step.
 
-Thereafter the attenuation model computes the reception for the receiver
+Thereafter, the attenuation model computes the reception for the receiver
 using the original transmission and the arrival data structure. It
-applies the path loss model, the obstacle loss model and the multipath
+applies the path loss model, the obstacle loss model, and the multipath
 model to the transmission. The resulting data structure is also
-immutable, it is not going to be changed in any later processing step.
+immutable; it is not going to be changed in any later processing step.
 
-Thereafter the medium model computes the interference for the reception
+Thereafter, the medium model computes the interference for the reception
 by collecting all interfering receptions and noises. Another signal is
-considered interfering if it owerlaps both in time and frequency domains
+considered interfering if it overlaps both in time and frequency domains
 with respect to the minimum interference parameters. The background
 noise model also computes a noise signal that is added to the
 interference.
 
 The reception process starts in the receiver radio when it receives a
 message from the transmitter radio. The radio must be in receiver or
-transceiver mode before the message arrives, otherwise it ignores the
-message. At first the receiver model determines is whether the reception
+transceiver mode before the message arrives; otherwise, it ignores the
+message. At first, the receiver model determines whether the reception
 is actually attempted or not. This decision depends on the reception
 power, whether there’s another ongoing reception process, and capturing
 is enabled or not.
 
-Thereafter the receiver model computes the signal to noise and
+Thereafter, the receiver model computes the signal to noise and
 interference ratio from the reception and the interference. Using the
-result, the bitrate, and the modulation scheme the error model computes
-the necessary error rates. Alternatively the error model might compute
-the erroneous bits, or symbols by altering the corresponding data of the
+result, the bitrate, and the modulation scheme, the error model computes
+the necessary error rates. Alternatively, the error model might compute
+the erroneous bits or symbols by altering the corresponding data of the
 original transmission.
 
-Thereafter the receiver determines the received MAC packet by either
-simply reusing the original, or actually decoding from the lowest
+Thereafter, the receiver determines the received MAC packet by either
+simply reusing the original or actually decoding from the lowest
 represented domain in the reception. Finally, it attaches the physical
-layer indication to the MAC packet, and sends it up to the higher layer.
+layer indication to the MAC packet and sends it up to the higher layer.
 
 The following sections describe the data structures that are created
 during signal processing.
@@ -616,7 +621,7 @@ Transmission Request
 
 This data structure contains parameters that control how the transmitter
 produces the transmission. For example, it might override the default
-transmission power, ot the default bitrate of the transmitter. It is
+transmission power or the default bitrate of the transmitter. It is
 attached as a control info object to the MAC packet sent down from the
 MAC module to the radio.
 
@@ -625,14 +630,14 @@ Transmission
 
 This data structure describes the transmission of a signal. It specifies
 the start/end time, start/end antenna position, start/end antenna
-orientation of the transmitter. In other words, it describes when, where
+orientation of the transmitter. In other words, it describes when, where,
 and how the signal started/ended to interact with the medium. The
 transmitter model creates one transmission instance per MAC packet.
 
 Arrival
 ~~~~~~~
 
-This data structure decscirbes the space and time coordinates of a
+This data structure describes the space and time coordinates of a
 transmission arriving at a particular receiver. It specifies the
 start/end time, start/end antenna position, start/end antenna
 orientation of the receiver. The propagation model creates one arrival
@@ -660,7 +665,7 @@ Noise
 
 This data structure describes a meaningless signal or a meaningless
 composition of multiple signals. All models contain at least the
-start/end time, and start/end position.
+start/end time and start/end position.
 
 Interference
 ~~~~~~~~~~~~
@@ -679,7 +684,7 @@ and interference ratio.
 Reception Decision
 ~~~~~~~~~~~~~~~~~~
 
-This data structure describes whether if the reception of a signal is
+This data structure describes whether the reception of a signal is
 possible or not, is attempted or not, and is successful or not.
 
 Reception Indication
@@ -695,7 +700,7 @@ module.
 Visualization
 -------------
 
-In order to help understanding the communication in the network the
+In order to help understand the communication in the network, the
 physical layer supports visualizing its state. The following list shows
 what can be displayed:
 
@@ -705,9 +710,9 @@ what can be displayed:
 
 -  recent obstacle intersections and surface normal vectors
 
-The ongoing transmissions can be displayed with 3 dimensional spheres or
-with 2 dimensional rings laying in the XY plane. As the signal
-propagates through space the figure grows with it to show where the
+The ongoing transmissions can be displayed with 3-dimensional spheres or
+with 2-dimensional rings laying in the XY plane. As the signal
+propagates through space, the figure grows with it to show where the
 beginning of the signal is. The inner circle of the ring figure shows as
 the end of the signal propagates through space.
 
@@ -731,3 +736,5 @@ TODO: wireless vs. wired medium
 
 Use Cases
 ---------
+
+Describe use cases here.

@@ -16,7 +16,7 @@ import inet.queueing.base.PacketClassifierBase;
 // IP protocol number, source and destination ports, or ToS
 // of the datagram. The first matching filter determines the
 // index of the out gate. If no matching filter is found,
-// then the packet will be sent through the defaultOut gate.
+// then the packet will be sent through the `defaultOut` gate.
 //
 // See RFC 2475 2.3.1, RFC 3290 4.2.2
 //

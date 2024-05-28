@@ -22,7 +22,7 @@ Credit-Based Shaping Overview
 The Credit Based Shaping (CBS) is an algorithm designed for
 network traffic management. Its core function is to limit the bandwidth a
 Traffic Class queue can transmit, ensuring optimal bandwidth distribution.
-It helps smoothing out bursts by delaying the transmission of successive
+It helps smooth out bursts by delaying the transmission of successive
 frames. CBS helps in mitigating network
 congestion in bridges and enhancing overall network performance.
 
@@ -87,7 +87,7 @@ The Model
 The Network
 +++++++++++
 
-We demonstrate the operation of CBS using a network containing a client, a server and a switch.
+We demonstrate the operation of CBS using a network containing a client, a server, and a switch.
 The client and the server (:ned:`TsnDevice`)
 are connected through the switch (:ned:`TsnSwitch`), with 100Mbps Ethernet
 links:
@@ -162,7 +162,7 @@ traffic for the two traffic categories:
 .. figure:: media/client_shaper.png
    :align: center
 
-The client application and shaper incoming traffic is quite similar, but not identical. The shaper's incoming traffic
+The client application and shaper incoming traffic are quite similar, but not identical. The shaper's incoming traffic
 has a slightly higher data rate because of additional protocol overhead that
 wasn't present in the application. Also, the two streams of packets are
 combined in the client's network interface, which can cause some packets to be

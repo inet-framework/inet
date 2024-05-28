@@ -26,11 +26,11 @@ package inet.queueing.classifier;
 simple DualRateThreeColorClassifier extends MultiTokenBucketClassifier
 {
     parameters:
-        double committedInformationRate @unit(bps); // committed information rate
-        double excessInformationRate @unit(bps); // excess information rate
-        int committedBurstSize @unit(b); // committed burst size
-        int excessBurstSize @unit(b); // excess burst size
-        int bitsPerToken = default(8); // how many bits are represented by 1 token
+        double committedInformationRate @unit(bps); // Committed information rate
+        double excessInformationRate @unit(bps); // Excess information rate
+        int committedBurstSize @unit(b); // Committed burst size
+        int excessBurstSize @unit(b); // Excess burst size
+        int bitsPerToken = default(8); // How many bits are represented by 1 token
         buckets = [{initialNumTokens: dropUnit(committedBurstSize) / bitsPerToken, maxNumTokens: dropUnit(committedBurstSize) / bitsPerToken, tokenProductionRate: dropUnit(committedInformationRate) / bitsPerToken},
                    {initialNumTokens: dropUnit(excessBurstSize) / bitsPerToken, maxNumTokens: dropUnit(excessBurstSize) / bitsPerToken, tokenProductionRate: dropUnit(excessInformationRate) / bitsPerToken}];
         tokenConsumptionPerBit = 1 / bitsPerToken;

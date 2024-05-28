@@ -22,16 +22,16 @@ import inet.queueing.contract.IActivePacketSink;
 // All pulled packets are counted and deleted.
 //
 // Invariants:
-//  - two subsequent packets are always pulled in at least collectionInterval time apart
+//  - two subsequent packets are always pulled in at least `collectionInterval` time apart
 //  - backpressure prevents packets from being pulled in
 //
 simple ActivePacketSink extends ActivePacketSinkBase like IActivePacketSink
 {
     parameters:
-        string clockModule = default(""); // relative path of a module that implements IClock; optional
-        double initialCollectionOffset @unit(s) = default(-1s); // initial duration before which packets are not collected, negative value means: try the first collection in initialize()
-        volatile double collectionInterval @unit(s); // elapsed time between subsequent packets pulled from the connected packet provider
-        bool scheduleForAbsoluteTime = default(true); // when a clock is used relative means that setting the clock will not affect the simulation time of the event
+        string clockModule = default(""); // Relative path of a module that implements IClock; optional
+        double initialCollectionOffset @unit(s) = default(-1s); // Initial duration before which packets are not collected, negative value means: try the first collection in initialize()
+        volatile double collectionInterval @unit(s); // Elapsed time between subsequent packets pulled from the connected packet provider
+        bool scheduleForAbsoluteTime = default(true); // When a clock is used, relative means that setting the clock will not affect the simulation time of the event
         @class(ActivePacketSink);
     gates:
         input in @labels(pull);

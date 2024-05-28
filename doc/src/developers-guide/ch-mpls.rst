@@ -16,21 +16,21 @@ The following algorithm is carried out by the MPLS module:
 
 ::
 
-   Step 1: - Check which layer the packet is coming from
+   Step 1: - Check from which layer the packet is coming
    Alternative 1: From layer 3
        Step 1: Find and check the next hop of this packet
        Alternative 1: Next hop belongs to this MPLS cloud
            Step 1: Encapsulate the packet in an MPLS packet with
            IP_NATIVE_LABEL label
-           Step 2: Send to the next hop
+           Step 2: Send it to the next hop
            Step 3: Return
        Alternative 2: Next hop does not belong to this MPLS cloud
            Step 1: Send the packet to the next hop
    Alternative 2: From layer 2
-       Step 1: Record the packet incoming interface
+       Step 1: Record the packet's incoming interface
        Step 2: - Check if the packet is for this LSR
        Alternative 1: Yes
-           Step 1: Check if the packet has label
+           Step 1: Check if the packet has a label
            Alternative 1: Yes
                Step 1: Strip off all labels and send the packet to L3
                Step 2: Return
@@ -43,14 +43,14 @@ The following algorithm is carried out by the MPLS module:
        Alternative 1: The packet is native IP
            Step 1: Check the LSR type
            Alternative 1: The LSR is an Ingress Router
-               Step 1: Look up LIB for outgoing label
+               Step 1: Look up the LIB for the outgoing label
                Alternative 1: Label cannot be found
                    Step 1: Check if the label for this FEC is being requested
                    Alternative 1: Yes
                        Step 1: Return
                    Alternative 2: No
                        Step 1: Store the packet with FEC id
-                       Step 2: Do request the signalling component
+                       Step 2: Request the signalling component
                        Step 3: Return
                Alternative 2: Label found
                    Step 1: Carry out the label operation on the packet
@@ -66,14 +66,14 @@ The following algorithm is carried out by the MPLS module:
                Step 2: Forward the packet to the outgoing interface found
                Step 3: Return
            Alternative 2: The LSR is not an Egress Router
-               Step 1: Look up LIB for outgoing label
+               Step 1: Look up the LIB for the outgoing label
                Alternative 1: Label cannot be found
                    Step 1: Check if the label for this FEC is being requested
                    Alternative 1: Yes
                        Step 1: Return
                    Alternative 2: No
                        Step 1: Store the packet with FEC id
-                       Step 2: Do request the signalling component
+                       Step 2: Request the signalling component
                        Step 3: Return
                Alternative 2: Label found
                    Step 1: Carry out the label operation on the packet
@@ -84,23 +84,23 @@ The following algorithm is carried out by the MPLS module:
 LDP Message Processing
 ----------------------
 
-The simulation follows message processing rules specified in RFC 3036
+The simulation follows the message processing rules specified in RFC 3036
 (LDP Specification). A summary of the algorithm used in the RFC is
 presented below.
 
 Label Request Message processing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An LSR may transmit a Request message under any of the conditions below:
+An LSR may transmit a Request message under any of the following conditions:
 
--  The LSR recognizes a new FEC via the forwarding tale, and the next
+- The LSR recognizes a new FEC via the forwarding table, and the next
    hop is its LDP peer. The LIB of this LSR does not have a mapping from
    the next hop for the given FEC.
 
--  Network topology changes, the next hop to the FEC is no longer valid
+- Network topology changes, and the next hop to the FEC is no longer valid
    and new mapping is not available.
 
--  The LSR receives a Label Request for a FEC from an upstream LDP and
+- The LSR receives a Label Request for a FEC from an upstream LDP, and
    it does not have label binding information for this FEC. The FEC next
    hop is an LDP peer.
 
@@ -124,9 +124,9 @@ performed:
        Alternative 2: There is no match
            Step 1: Construct a Notification message of No route and
                    send this message back to the sender.
-   Step 4: Make query to local LIB to find out the corresponding label.
-       Alternative 1: The label found
-           Step 1: Construct a Label Mapping message and send over
+   Step 4: Make a query to the local LIB to find out the corresponding label.
+       Alternative 1: The label was found
+           Step 1: Construct a Label Mapping message and send it over
                    the incoming interface.
        Alternative 2: The label cannot be found for this FEC
            Step 1: Construct a new Label Request message and send
@@ -149,29 +149,29 @@ performed:
        Alternative 1: This FEC is outstanding
            Step 1: Continue
        Alternative 2: This FEC is not outstanding
-           Step 1: Send back the server an Notification of Error message.
+           Step 1: Send back the server a Notification of Error message.
    Step 3: Install the new label to the local LIB using the extracted label,
-           FEC and the message incoming interface.
+           FEC, and the message's incoming interface.
 
 The CSPF Algorithm
 ------------------
 
 CSPF stands for Constraint Shortest Path First. This constraint-based
-routing is executed online by Ingress Router. The CSPF calculates an
+routing is executed online by the Ingress Router. The CSPF calculates an
 optimum explicit route (ER), based on specific constraints. CSPF relies
 on a Traffic Engineering Database (TED) to do those calculations. The
 resulting route is then used by RSVP-TE.
 
-The CSPF in particular and any constraint based routing process requires
-following inputs:
+The CSPF, in particular, and any constraint-based routing process require
+the following inputs:
 
--  Attributes of the traffic trunks, e.g., bandwidth, link affinities
+- Attributes of the traffic trunks, e.g., bandwidth, link affinities
 
--  Attributes of the links of the network, e.g. bandwidth, delay
+- Attributes of the links of the network, e.g. bandwidth, delay
 
--  Attributes of the LSRs, e.g. types of signaling protocols supported
+- Attributes of the LSRs, e.g. types of signaling protocols supported
 
--  Other topology state information.
+- Other topology state information.
 
 There has been no standard for CSPF so far. The implementation of CSPF
 in the simulation is based on the concept of "induced graph" introduced
@@ -183,7 +183,7 @@ or links that do not match color constraints or configured policy. The
 CSPF algorithm used in the simulation has two phases. In the first
 phase, all the links that do not satisfy the constraints of bandwidth
 are excluded from the network topology. The link affinity is also
-examined in this phase. In the second phase, Dijkstra algorithm is
+examined in this phase. In the second phase, the Dijkstra algorithm is
 performed.
 
 Dijkstra Algorithm:

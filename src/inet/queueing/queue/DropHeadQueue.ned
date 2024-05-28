@@ -8,7 +8,7 @@
 package inet.queueing.queue;
 
 //
-// This is a limited packet queue which drops packets at the head of the queue.
+// This is a limited packet queue that drops packets at the head of the queue.
 //
 simple DropHeadQueue extends PacketQueue
 {

@@ -13,7 +13,7 @@ package inet.clock.base;
 simple OscillatorBase
 {
     parameters:
-        string displayStringTextFormat = default("%n"); // determines the text that is written on top of the submodule
+        string displayStringTextFormat = default("%n"); // Determines the text that is written on top of the submodule
         @class(OscillatorBase);
         @display("i=block/tunnel");
         @signal[driftRateChanged](type=double);

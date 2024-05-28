@@ -31,58 +31,58 @@ import inet.linklayer.contract.IMacProtocol;
 module Ieee802154Mac extends MacProtocolBase like IMacProtocol
 {
     parameters:
-        string address @mutable = default("auto"); // MAC address as hex string (12 hex digits), or
+        string address @mutable = default("auto"); // MAC address as a hex string (12 hex digits), or
                                                    // "auto". "auto" values will be replaced by
                                                    // a generated MAC address in init stage 0.
 
-        // length of MAC header
+        // Length of MAC header
         int headerLength @unit(b) = default(72 b);
         int mtu @unit(B) = default(0B);
-        // bit rate
+        // Bit rate
         double bitrate @unit(bps) = default(250000 bps);
 
         // Clear Channel Assessment detection time
         double ccaDetectionTime @unit(s) = default(0.000128 s); // 8 symbols
-        // Time to setup radio to reception state
+        // Time to set up the radio to the reception state
         double rxSetupTime @unit(s) = default(0 s);
-        // Time to switch radio from Rx to Tx state
+        // Time to switch the radio from Rx to Tx state
         double aTurnaroundTime @unit(s) = default(0.000192 s);    // 12 symbols
 
         // Send/Expect MAC acks for unicast traffic?
         bool useMACAcks;
-        // Maximum number of frame retransmission,
-        // only used when usage of MAC acks is enabled.
+        // Maximum number of frame retransmissions,
+        // only used when the usage of MAC acks is enabled.
         int macMaxFrameRetries = default(3);
         // Time to wait for an acknowledgement after transmitting a unicast frame.
-        // Only used when usage of MAC acks is enabled.
-        // Value is calculated from 1+12+10+12 symbols, which is defined for nonbeacon-enabled PAN.
+        // Only used when the usage of MAC acks is enabled.
+        // The value is calculated from 1+12+10+12 symbols, which is defined for nonbeacon-enabled PAN.
         // In the non-beacon-enabled case, the receiver responds at aTurnaroundTime
         // (i.e. the time for the sender and receiver to both be guaranteed to have
-        // switched from Tx to Rx and vice verse).  This gives the value 192us +
-        // 352us = 544us (there's been some discussion about the "extra" 1 symbol == 16us)
+        // switched from Tx to Rx and vice versa). This gives the value 192us +
+        // 352us = 544us (there has been some discussion about the "extra" 1 symbol == 16us)
         // [section 7.5.6.4.2 of the specification].
         double macAckWaitDuration @unit(s) = default(0.00056 s);
         // Complete MAC ack message length (in bits)
         // (! headerLength is not added to this),
-        // only used when usage of MAC acks is enabled.
+        // only used when the usage of MAC acks is enabled.
         int ackLength @unit(b) = default(40 b);
         // Simple interframe space (12 symbols). Time to wait between receiving a frame and acknowledging it.
         // Should be bigger than the maximum time for switching between Tx and Rx at the receiver.
-        // Only used when usage of MAC acks is enabled.
+        // Only used when the usage of MAC acks is enabled.
         double sifs @unit(s) = default(0.000192 s);
 
-        //Backoff method to use: constant, linear or exponential
+        // Backoff method to use: constant, linear, or exponential
         string backoffMethod = default("linear");
-        // maximum number of extra backoffs (excluding the first unconditional one) before frame drop
+        // Maximum number of extra backoffs (excluding the first unconditional one) before frame drop
         int macMaxCSMABackoffs = default(5);
-        // base unit for all backoff calculations
+        // Base unit for all backoff calculations
         double aUnitBackoffPeriod @unit(s) = default(0.00032 s);
-        // # of backoff periods of the initial contention window
+        // Number of backoff periods of the initial contention window
         // (for linear and constant backoff method only)
         int contentionWindow = default(2);
-        // minimum backoff exponent (for exponential backoff method only)
+        // Minimum backoff exponent (for exponential backoff method only)
         int macMinBE = default(3);
-        // maximum backoff exponent (for exponential backoff method only)
+        // Maximum backoff exponent (for exponential backoff method only)
         int macMaxBE = default(8);
 
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value

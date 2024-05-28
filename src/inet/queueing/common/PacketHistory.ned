@@ -20,7 +20,7 @@ import inet.queueing.contract.IPacketQueue;
 module PacketHistory like IPassivePacketSink, IActivePacketSource
 {
     parameters:
-        int size = default(100); // the number of packets to remember
+        int size = default(100); // The number of packets to remember
         @display("i=block/passiveq");
     gates:
         input in @labels(push);

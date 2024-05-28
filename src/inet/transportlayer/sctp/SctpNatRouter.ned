@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2000 Institut für Telematik, Universität Karlsruhe
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //

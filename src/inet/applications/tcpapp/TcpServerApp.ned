@@ -21,7 +21,7 @@ import inet.common.MessageDispatcher;
 module TcpServerApp like IApp
 {
     parameters:
-        string interfaceTableModule; // relative module path of the interface table
+        string interfaceTableModule; // Relative module path of the interface table
         *.interfaceTableModule = default(this.interfaceTableModule);
         @display("i=block/app");
     gates:

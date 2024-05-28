@@ -11,8 +11,8 @@ package inet.routing.pim;
 
 //
 // ~PimSplitter module dispatches PIM packets received from the network layer
-// according to the PIM mode of the incoming interface. Bu using a ~PimSplitter
-// it is possible to build nodes that operates in Dense Mode on some interfaces,
+// according to the PIM mode of the incoming interface. By using a ~PimSplitter
+// it is possible to build nodes that operate in Dense Mode on some interfaces,
 // and in Sparse Mode on others.
 //
 // See ~Pim module for example usage.

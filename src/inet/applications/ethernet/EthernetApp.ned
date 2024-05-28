@@ -19,7 +19,7 @@ import inet.queueing.contract.IPassivePacketSink;
 module EthernetApp like IApp
 {
     parameters:
-        string interfaceTableModule; // relative module path of the interface table
+        string interfaceTableModule; // Relative module path of the interface table
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         @application;
         @display("i=block/app");

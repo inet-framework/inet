@@ -6,8 +6,8 @@ Goals
 
 INET offers a range of network traffic visualizers that operate at different
 levels of the network stack. In this showcase, we will
-focus on :ned:`TransportRouteVisualizer` that provides graphical representation of
-transport layer traffic between two endpoints by displaying polyline arrow along
+focus on :ned:`TransportRouteVisualizer` that provides a graphical representation of
+transport layer traffic between two endpoints by displaying a polyline arrow along
 the path that fades as the traffic ceases.
 
 This showcase contains two simulation models, each highlighting various aspects
@@ -24,19 +24,19 @@ In INET, transport path activity can be visualized by including a
 :ned:`TransportRouteVisualizer` module in the simulation. Adding an
 :ned:`IntegratedVisualizer` is also an option because it also contains a
 :ned:`TransportRouteVisualizer`. Transport path activity visualization is
-disabled by default; it can be enabled by setting the visualizer's
+disabled by default, and it can be enabled by setting the visualizer's
 :par:`displayRoutes` parameter to true.
 
 :ned:`TransportRouteVisualizer` observes packets that pass through the
-transport layer, i.e. carry data from/to higher layers.
+transport layer, i.e., carry data from/to higher layers.
 
 The activity between two nodes is represented visually by a polyline
 arrow which points from the source node to the destination node.
 :ned:`TransportRouteVisualizer` follows packets throughout their path so
-that the polyline goes through all nodes which are the part of the path
+that the polyline goes through all nodes that are part of the path
 of packets. The arrow appears after the first packet has been received,
 then gradually fades out unless it is reinforced by further packets.
-Color, fading time and other graphical properties can be changed with
+Color, fading time, and other graphical properties can be changed with
 parameters of the visualizer.
 
 By default, all packets and nodes are considered for the visualization.
@@ -59,10 +59,10 @@ The wired network contains two connected :ned:`StandardHost` type nodes:
    :width: 60%
    :align: center
 
-The ``source`` node will be continuously sending UDP packets to the
+The ``source`` node will continuously send UDP packets to the
 ``destination`` node by using a :ned:`UdpBasicApp` application.
 
-In this simulation, ``pathVisualizer's`` type is
+In this simulation, the ``pathVisualizer's`` type is
 :ned:`TransportRouteVisualizer`. It is enabled by setting the
 :par:`displayRoutes` parameter to true.
 
@@ -156,7 +156,7 @@ what happens if :par:`packetFilter` is set.
 .. video:: media/Filtering_PacketFilter_v0615.m4v
    :width: 100%
 
-You can see that although there are both video stream and
+You can see that although there is both video stream and
 ``UDPBasicAppData`` traffic in the network, :ned:`TransportRouteVisualizer`
 displays only the latter, due to the presence of the :par:`packetFilter`
 parameter.

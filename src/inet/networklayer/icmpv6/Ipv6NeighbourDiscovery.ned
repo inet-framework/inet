@@ -8,9 +8,9 @@
 package inet.networklayer.icmpv6;
 
 //
-// Implements IPv6 Neighbour Discovery.
+// Implements IPv6 Neighbor Discovery.
 //
-// An overview of the Ipv6 implementation in the INET Framework is
+// An overview of the IPv6 implementation in the INET Framework is
 // provided <a href="ipv6overview.html">here</a>.
 //
 // @see ~Ipv6, ~Ipv6RoutingTable, ~Icmpv6
@@ -23,10 +23,10 @@ simple Ipv6NeighbourDiscovery
         string icmpv6Module;
         string xmipv6Module;
         string routingTableModule;
-        double minIntervalBetweenRAs @unit(s) = default(30ms); //minRtrAdvInterval:  0.03 sec for MIPv6 , declared as parameter to facilitate testing without recompiling (Zarrar 15.07.07)
-        double maxIntervalBetweenRAs @unit(s) = default(70ms);  //MaxrtrAdvInterval: 0.07 sec for MIPv6, declared as parameter to facilitate testing without recompiling (Zarrar 15.07.07)
+        double minIntervalBetweenRAs @unit(s) = default(30ms); // MinRtrAdvInterval:  0.03 sec for MIPv6
+        double maxIntervalBetweenRAs @unit(s) = default(70ms);  // MaxrtrAdvInterval: 0.07 sec for MIPv6
         @display("i=block/network");
-        @signal[startDad](type=long); // emits value=1
+        @signal[startDad](type=long); // Emits value=1
         @statistic[startDad](title="DAD started";record=count,vector);
     gates:
         input ipv6In;

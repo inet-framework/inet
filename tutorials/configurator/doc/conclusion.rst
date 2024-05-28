@@ -1,9 +1,9 @@
 Conclusion
 ==========
 
-Congratulations, you’ve made it! You should now be able to set up IPv4
+Congratulations, you've made it! You should now be able to set up IPv4
 static autoconfiguration for networks in the INET Framework. Use the
-link below if you have questions or you'd like to help us improve this
+link below if you have any questions or if you'd like to help us improve this
 tutorial.
 
 Discussion

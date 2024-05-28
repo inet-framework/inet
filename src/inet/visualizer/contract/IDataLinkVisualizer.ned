@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 //
 // @see ~DataLinkCanvasVisualizer, ~DataLinkOsgVisualizer, ~DataLinkVisualizer, ~DataLinkVisualizerBase
 //
-moduleinterface IDataLinkVisualizer
+moduleinterface IDataLinkVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

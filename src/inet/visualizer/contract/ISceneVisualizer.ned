@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 //
 // @see ~SceneCanvasVisualizer, ~SceneOsgVisualizer, ~SceneVisualizer, ~SceneVisualizerBase
 //
-moduleinterface ISceneVisualizer
+moduleinterface ISceneVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

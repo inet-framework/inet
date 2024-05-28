@@ -15,16 +15,16 @@ package inet.applications.tcpapp;
 // which allows collecting per-connection statistics in a convenient way.
 //
 // By default, reading from the socket is not rate limited. To allow rate
-// limiting, set autoRead=false, and use the readSize and readDelay parameters
+// limiting, set autoRead=false, and use the `readSize` and `readDelay` parameters
 // to set a rate limit. This will allow TCP flow control to come into effect.
 //
 module TcpSinkApp extends TcpServerHostApp
 {
     parameters:
         serverThreadModuleType = default("inet.applications.tcpapp.TcpSinkAppThread");
-        bool autoRead = default(true); // whether to use "autoread" or "explicit-read" mode for TCP connection
-        volatile int readSize @unit(B) = default(-1B);    // used only with autoRead==false
-        volatile double readDelay @unit(s) = default(-1s);    // used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay
+        bool autoRead = default(true); // Whether to use "autoread" or "explicit-read" mode for TCP connection
+        volatile int readSize @unit(B) = default(-1B);    // Used only with autoRead==false
+        volatile double readDelay @unit(s) = default(-1s);    // Used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay
         @class(TcpSinkApp);
         @display("i=block/sink");
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none; checkSignals=false);

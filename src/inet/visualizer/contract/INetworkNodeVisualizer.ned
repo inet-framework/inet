@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 //
 // @see ~NetworkNodeCanvasVisualizer, ~NetworkNodeOsgVisualizer, ~NetworkNodeVisualizer, ~NetworkNodeVisualizerBase
 //
-moduleinterface INetworkNodeVisualizer
+moduleinterface INetworkNodeVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

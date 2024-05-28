@@ -28,8 +28,9 @@ Extending the PPP Module
 
 TODO how (override handleMessage etc.)
 
-signals:
+Signals:
+---------
 
-Notifications are sent when transmission of a new PPP frame started
-(``NF_PP_TX_BEGIN``), finished (``NF_PP_TX_END``) or when a PPP frame
-received (``NF_PP_RX_END``).
+Notifications are sent when transmission of a new PPP frame starts
+(``NF_PP_TX_BEGIN``), finishes (``NF_PP_TX_END``), or when a PPP frame
+is received (``NF_PP_RX_END``).

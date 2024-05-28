@@ -1,4 +1,3 @@
 package inet;
 
 @namespace(inet);
-

@@ -3,7 +3,7 @@ Content-Based Filtering (Active Source)
 
 The :ned:`ContentBasedFilter` module filters packets according to the configured packet filter
 and packet data filter. Packets that match the filter expressions are pushed/popped on the output;
-non-maching packets are dropped.
+non-matching packets are dropped.
 
 In this example network, an active packet source (:ned:`ActivePacketSource`) generates
 1-byte and 2-byte packets randomly.

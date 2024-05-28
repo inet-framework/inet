@@ -15,7 +15,7 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 // topology. The configurator uses the shortest path algorithm to determine the
 // outgoing network interface for all network nodes and all destination network
 // interfaces. The effect of this configuration is that the network can use the
-// ~GlobalArp module and completely eliminate the ARP protocol messages.
+// the ~GlobalArp module and completely eliminate the ARP protocol messages.
 //
 // @see ~MacForwardingTable
 //

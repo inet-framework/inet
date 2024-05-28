@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 //
 // @see ~MediumCanvasVisualizer, ~MediumOsgVisualizer, ~MediumVisualizer, ~MediumVisualizerBase
 //
-moduleinterface IMediumVisualizer
+moduleinterface IMediumVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

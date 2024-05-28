@@ -11,7 +11,7 @@ import inet.power.contract.IEpEnergyConsumer;
 
 //
 // This module provides a radio power consumer model. The power consumption is
-// determined by the radio mode, the transmitter state and the receiver state
+// determined by the radio mode, the transmitter state, and the receiver state
 // using constant parameters.
 //
 simple StateBasedEpEnergyConsumer like IEpEnergyConsumer

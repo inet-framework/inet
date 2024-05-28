@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 //
 // @see ~TracingObstacleLossCanvasVisualizer, ~TracingObstacleLossOsgVisualizer, ~TracingObstacleLossVisualizer, ~TracingObstacleLossVisualizerBase
 //
-moduleinterface ITracingObstacleLossVisualizer
+moduleinterface ITracingObstacleLossVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

@@ -12,13 +12,13 @@ import inet.queueing.contract.IPacketMarker;
 
 //
 // This module attaches a ~LabelsTag to packets based on the configured filters.
-// For each matching filter a new label is attached.
+// For each matching filter, a new label is attached.
 //
 simple PacketLabeler extends PacketMarkerBase like IPacketMarker
 {
     parameters:
-        string filterClasses = default(""); // determines the packets which are marked, the parameter must be the name of a C++ class which implements the IPacketFilterFunction interface and is registered via Register_Class
-        string labels = default(""); // a space separated list of labels
+        string filterClasses = default(""); // Determines the packets that are marked. The parameter must be the name of a C++ class that implements the IPacketFilterFunction interface and is registered via Register_Class.
+        string labels = default(""); // A space-separated list of labels.
         @display("i=block/star");
         @class(PacketLabeler);
 }

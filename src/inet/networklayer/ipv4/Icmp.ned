@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2000 Institut für Telematik, Universität Karlsruhe
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
@@ -22,7 +22,6 @@ simple Icmp
     gates:
         input transportIn;
         output transportOut;
-        input ipIn @labels(Ipv4ControlInfo/up);  // delivered ICMP packets
-        output ipOut @labels(Ipv4ControlInfo/down);  // towards network
+        input ipIn @labels(Ipv4ControlInfo/up);  // Deliver ICMP packets
+        output ipOut @labels(Ipv4ControlInfo/down);  // Towards the network
 }
-

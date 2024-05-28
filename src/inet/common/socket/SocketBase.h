@@ -36,7 +36,7 @@ class INET_API SocketBase : public ISocket
      * Sets the gate on which to send messages. Must be invoked before socket
      * can be used. Example: <tt>socket.setOutputGate(gate("out"));</tt>
      */
-    void setOutputGate(cGate *gate) { this->outputGate = gate; }
+    virtual void setOutputGate(cGate *gate) { this->outputGate = gate; }
 
     /**
      * Returns the internal socket Id.

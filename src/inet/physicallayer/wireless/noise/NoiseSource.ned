@@ -15,7 +15,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitter;
 module NoiseSource like IRadio
 {
     parameters:
-        string radioMediumModule = default("radioMedium"); // module path of the medium module where this radio communicates
+        string radioMediumModule = default("radioMedium"); // Module path of the medium module where this radio communicates
         volatile double sleepInterval @unit(s);
         *.mobilityModule = default(absPath(".mobility"));
         @networkNode;

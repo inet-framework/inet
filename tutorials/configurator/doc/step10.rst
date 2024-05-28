@@ -9,7 +9,7 @@ static routes. It also demonstrates leaving the routing tables
 unconfigured, so that a dynamic routing protocol can configure them. The step
 consists of three parts:
 
--  **Part A**: Static routing based on error rate metric
+-  **Part A**: Static routing based on the error rate metric
 -  **Part B**: Unconfigured routing tables, prepared for MANET routing
 -  **Part C**: Routing tables configured using AODV protocol
 

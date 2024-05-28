@@ -12,10 +12,10 @@ import inet.visualizer.contract.ITransportRouteVisualizer;
 
 //
 // This module visualizes transport layer routes on a 3D osg scene. It displays
-// an polyline arrow for each active route in the network. See the documentation
+// a polyline arrow for each active route in the network. See the documentation
 // of the base module for what constitutes an active route. The arrow points
 // from the source towards the destination. If a route is used in both directions
-// then there are separate pathes for them. Each polyline fades out over time
+// then there are separate paths for them. Each polyline fades out over time
 // as the route becomes inactive unless it is reinforced by another packet. The
 // polyline automatically follows the movement of mobile nodes.
 //

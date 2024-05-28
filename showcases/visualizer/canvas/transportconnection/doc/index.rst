@@ -3,8 +3,7 @@ Visualizing Transport Connections
 
 Goals
 -----
-
-In a complex network with many applications and large number of nodes communicating,
+In a complex network with many applications and a large number of nodes communicating,
 it can be challenging to keep track of all the active transport layer connections.
 Transport connection visualization makes it easier to identify the two endpoints
 of each connection by displaying a marker above the nodes. The markers appear in
@@ -26,7 +25,7 @@ The icons will appear when the connection is established and disappear
 when it is closed. Naturally, there can be multiple connections open at
 a node, thus there can be multiple icons. Icons have the same color at
 both ends of the connection. In addition to colors, letter codes (A, B,
-AA, ...) may also be displayed to help in identifying connections. Note
+AA, etc.) may also be displayed to help in identifying connections. Note
 that this visualizer does not display the paths the packets take. If you
 are interested in that, take a look at :ned:`TransportRouteVisualizer`,
 covered in the `Visualizing Transport Path
@@ -41,7 +40,7 @@ all connections are included. Filtering by hosts and port numbers can be
 achieved by setting the :par:`sourcePortFilter`, :par:`destinationPortFilter`,
 :par:`sourceNodeFilter`, and :par:`destinationNodeFilter` parameters.
 
-The icon, colors and other visual properties can be configured by
+The icon, colors, and other visual properties can be configured by
 setting the visualizer's parameters.
 
 Enabling the visualization of transport connections
@@ -58,7 +57,7 @@ following network:
 
 The network contains two :ned:`StandardHost`'s connected to each other, each
 containing a TCP application. IP addresses and routing tables are
-configured by a :ned:`Ipv4NetworkConfigurator` module. The visualizer
+configured by an :ned:`Ipv4NetworkConfigurator` module. The visualizer
 module is a :ned:`TransportConnectionVisualizer`. The application in
 ``host1`` is configured to open a TCP connection to ``host2`` and send
 data to it. The visualization of transport connections is enabled with
@@ -90,7 +89,7 @@ configuration from the ini file. It uses the following network:
 
 There are two :ned:`StandardHost`'s connected to a switch, which is
 connected via a router to the server, another :ned:`StandardHost`. IP
-addresses and routing tables are configured by a
+addresses and routing tables are configured by an
 :ned:`Ipv4NetworkConfigurator` module. The visualizer module is an
 :ned:`IntegratedVisualizer`.
 
@@ -102,7 +101,7 @@ The hosts are configured to open TCP connections to the server:
    22
 
 The visualizer is instructed to only visualize connections with
-destination port 80:
+the destination port 80:
 
 .. code-block:: none
 

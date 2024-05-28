@@ -12,7 +12,7 @@ import inet.physicallayer.wireless.common.base.packetlevel.ErrorModelBase;
 //
 // This error model determines packet error rate, bit error rate, and symbol
 // error rate by using the well-known formula that corresponds to the modulation.
-// It assumes no forward error correction or any other techinque is used in the
+// It assumes no forward error correction or any other technique is used in the
 // physical signal.
 //
 module ApskErrorModel extends ErrorModelBase

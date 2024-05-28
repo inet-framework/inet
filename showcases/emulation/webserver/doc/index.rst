@@ -7,7 +7,7 @@ Goals
 The goal of this showcase is to demonstrate the integration and operation of a
 real-world application within an OMNeT++/INET simulation environment.
 Specifically, it involves running a Python-based webserver and executing several
-wget commands from host operating system environments. These are interfaced with
+`wget` commands from host operating system environments. These are interfaced with
 simulated network components, illustrating the capabilities of OMNeT++ in hybrid
 simulations that involve both emulated and simulated network elements.
 
@@ -31,7 +31,7 @@ Here is the NED definition of the network:
 This network consists of a server connected to an Ethernet switch, along with a
 configurable number of clients also connected to the switch. The server will run
 a real Python webserver, and the clients will perform HTTP GET requests using
-wget.
+`wget`.
 
 
 Configuration
@@ -52,16 +52,16 @@ Results
 -------
 
 Upon running the simulation, the webserver on the host OS will respond to HTTP
-GET requests initiated by the wget commands from the simulated clients. The
+GET requests initiated by the `wget` commands from the simulated clients. The
 interaction can be observed in the simulation's event log, and network
 performance metrics such as response time and throughput can be analyzed based
 on the simulation results.
 
-The following terminal screenshot shows the running webserver and wget processes:
+The following terminal screenshot shows the running webserver and `wget` processes:
 
 .. figure:: media/ps.png
 
-The output of the processes appears in the Qtenv log window. Here is the output of one of the wget commands:
+The output of the processes appears in the Qtenv log window. Here is the output of one of the `wget` commands:
 
 .. figure:: media/wget_module_log.png
 

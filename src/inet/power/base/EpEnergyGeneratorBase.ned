@@ -10,7 +10,7 @@ package inet.power.base;
 import inet.power.contract.IEpEnergyGenerator;
 
 //
-// This is an abstract base module for power based energy generator models.
+// This is an abstract base module for power-based energy generator models.
 // It defines shared signals and statistics.
 //
 // @see ~EpEnergyConsumerBase, ~EpEnergySourceBase, ~EpEnergySinkBase, ~EpEnergyStorageBase

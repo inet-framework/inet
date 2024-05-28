@@ -11,7 +11,7 @@ Example: Input Queue Switching
 .. Each host contains a packet source and a packet sink application, connected to
 .. the network level by an interface module (``ExampleInterface``).
 
-.. This example demonstrates input queue switching,
+.. This example demonstrates input queue switching.
 
 In this example, we'll build a network containing three packet sources, a switch, and two packet sinks, from
 queueing components. The queues in the switch are in the input "interfaces". Here is the network, with the conceptual network nodes highlighted:
@@ -25,7 +25,7 @@ packets based on this data to either sink0 or sink1. Input queue switching is su
 i.e. if the first packet in the queue cannot be forwarded for some reason (e.g. the target sink is busy receiving another
 packet), it can delay subsequent packets in the queue that would otherwise be transmittable at the current time.
 
-.. .. note:: Output queue switching isn't susceptible for head-of-line blocking, see the next example.
+.. .. note:: Output queue switching isn't susceptible to head-of-line blocking, see the next example.
 
 .. note:: The next example demonstrates output queue switching, which is not susceptible to head-of-line blocking.
 

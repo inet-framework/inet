@@ -20,5 +20,5 @@ import inet.queueing.queue.PacketQueue;
 simple EligibilityTimeQueue extends PacketQueue
 {
     parameters:
-        comparatorClass = default("inet::PacketEligibilityTimeComparator"); // specifies the class that compares the eligibility time in the ~EligibilityTimeTag of two packets
+        comparatorClass = default("inet::PacketEligibilityTimeComparator"); // Specifies the class that compares the eligibility time in the ~EligibilityTimeTag of two packets
 }

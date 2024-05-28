@@ -15,7 +15,7 @@ simple FailureProtectionConfigurationCanvasVisualizer extends TreeVisualizerBase
     parameters:
         string failureProtectionConfiguratorModule = default("failureProtectionConfigurator");
         string streamFilter = default("*");
-        double zIndex = default(3); // determines the drawing order of figures relative to other visualizers
+        double zIndex = default(3); // Determines the drawing order of figures relative to other visualizers
         @class(FailureProtectionConfigurationCanvasVisualizer);
 }
 

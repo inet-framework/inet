@@ -13,7 +13,7 @@ import inet.visualizer.contract.IChannelVisualizer;
 simple ChannelCanvasVisualizer extends ChannelVisualizerBase like IChannelVisualizer
 {
     parameters:
-        double zIndex = default(1); // determines the drawing order of figures relative to other visualizers
+        double zIndex = default(1); // Determines the drawing order of figures relative to other visualizers.
         @class(ChannelCanvasVisualizer);
 }
 

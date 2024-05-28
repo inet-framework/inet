@@ -13,8 +13,8 @@ package inet.queueing.base;
 simple TokenGeneratorBase extends PacketProcessorBase
 {
     parameters:
-        string storageModule; // module path of the token storage where the tokens are generated via C++ method call
-        displayStringTextFormat = default("generated %t tk\nto %s"); // determines display string text above the submodule
+        string storageModule; // Module path of the token storage where the tokens are generated via C++ method call
+        displayStringTextFormat = default("generated %t tk\nto %s"); // Determines display string text above the submodule
         @class(TokenGeneratorBase);
         @display("i=block/control");
         @signal[tokensCreated](type=double);

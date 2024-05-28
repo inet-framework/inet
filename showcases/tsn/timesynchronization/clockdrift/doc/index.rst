@@ -11,7 +11,7 @@ refers to this gradual deviation. To address the issue of clock drift, time
 synchronization mechanisms can be used to periodically adjust the clocks of
 network devices to ensure that they remain adequately in sync with each other.
 
-The operation of applications and protocols across the network are often very
+The operation of applications and protocols across the network is often very
 sensitive to the accuracy of this local time. Time synchronization is important
 in TSN, for example, as accurate time-keeping is crucial in these networks.
 
@@ -98,7 +98,7 @@ The example configurations are the following:
 
 In the ``General`` configuration, ``source1`` is configured to send UDP packets to ``sink1``, and ``source2`` to ``sink2``.
 
-.. note:: To demonstrate the effects of drifting clocks on the network traffic, we configure the Ethernet MAC layer in ``switch1`` to alternate between forwarding frames from ``source1`` and ``source2`` every 10 us, by using a TSN gating mechamism in ``switch1``. This does not affect the simulation results in the next few sections but becomes important in the `Effects of Clock Drift on End-to-end Delay`_ section. More details about this part of the configuration are provided there.
+.. note:: To demonstrate the effects of drifting clocks on the network traffic, we configure the Ethernet MAC layer in ``switch1`` to alternate between forwarding frames from ``source1`` and ``source2`` every 10 us, by using a TSN gating mechanism in ``switch1``. This does not affect the simulation results in the next few sections but becomes important in the `Effects of Clock Drift on End-to-end Delay` section. More details about this part of the configuration are provided there.
 
 In the next few sections, we present the above examples. In the simulations
 featuring constant clock drift, ``switch1`` always has the same clock drift
@@ -142,7 +142,7 @@ By setting different drift rates for the different clocks, we can control how
 they diverge over time. Note that the drift rate is defined as compared to
 simulation time. Also, we need to explicitly tell the relevant modules (here,
 the UDP apps and ``switch1``'s queue) to use the clock module in the host,
-otherwise they would use the global simulation time by default.
+otherwise, they would use the global simulation time by default.
 
 Here are the drifts (time differences) over time:
 
@@ -154,7 +154,7 @@ drift of ``source1`` and ``source2`` compared to ``switch1`` are different as
 well, i.e. ``source1``'s clock is early and ``source2``'s clock is late compared
 to ``switch1``'s.
 
-.. note:: A `clock time difference to simulation time` chart can be easily produced by plotting the ``timeChanged:vector`` statistic, and applying a linear trend operation with -1 as argument.
+.. note:: A `clock time difference to the simulation time` chart can be easily produced by plotting the ``timeChanged:vector`` statistic and applying a linear trend operation with -1 as the argument.
 
 Example: Out-of-Band Synchronization of Clocks, Constant Drift
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -197,7 +197,7 @@ Let's see the time differences:
 
 The clock of ``switch1`` has a constant drift rate compared to simulation time.
 Since the clock drift rate in all clocks is constant, the drift rate differences
-are compensated for after the first synchronization event, by setting the
+are compensated for after the first synchronization event by setting the
 oscillator compensation in the synchronized clocks. After that, all
 clocks have the same drift rate as the clock of ``switch1``. Let's zoom in on
 the beginning of the above chart:
@@ -235,7 +235,7 @@ Example: Out-of-Band Synchronization of Clocks, Random Drift
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This configuration extends the previous one with a periodic out-of-band
-synchronization mechanism (using cross network node C++ function calls), defined
+synchronization mechanism (using cross-network node C++ function calls), defined
 in the ``OutOfBandSyncBase`` configuration:
 
 .. literalinclude:: ../omnetpp.ini
@@ -243,14 +243,14 @@ in the ``OutOfBandSyncBase`` configuration:
    :start-at: RandomClockDriftOutOfBandSync
    :end-before: RandomClockDriftGptpSync
 
-As with the constant drift rate + out-of-band synchonization case, 
-we specify a small random clock time synchornization error, but no
+As with the constant drift rate + out-of-band synchronization case, 
+we specify a small random clock time synchronization error, but no
 drift rate synchronization error.
 
 .. figure:: media/OutOfBandSyncRandom.png
    :align: center
 
-The clock of switch1 keeps drifting, but the clocks of the sources are
+The clock of ``switch1`` keeps drifting, but the clocks of the sources are
 synchronized to it. Here is the same chart, but zoomed in:
 
 .. figure:: media/OutOfBandSyncRandomZoomed.png
@@ -306,7 +306,7 @@ precision in time synchronization:
    :align: center
 
 When the clocks are synchronized, the drift rate differences are also
-compensated for, by setting the oscillator compensation in clocks. We can
+compensated for by setting the oscillator compensation in clocks. We can
 observe this on the following zoomed-in image:
 
 .. figure:: media/GptpSync_RateAccuracy.png
@@ -324,7 +324,7 @@ compensation errors.
 
 .. note:: - When configuring the :ned:`SimpleClockSynchronizer` with a :par:`synchronizationClockTimeError` of 0, the synchronized time perfectly matches the reference.
    - When configuring the :ned:`SimpleClockSynchronizer` with a :par:`synchronizationOscillatorCompensationError` of 0, the compensated clock drift rate perfectly matches the reference. Otherwise, the error can be specified in PPM.
-   - When using any of the synchonization methods, the clock time difference between the clocks is very small, in the order of microseconds.
+   - When using any of the synchronization methods, the clock time difference between the clocks is very small, in the order of microseconds.
 
 Effects of Clock Drift on End-to-end Delay
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -350,7 +350,7 @@ to contain a GatingPriorityQueue, with two inner queues:
    :language: ini
 
 The inner queues in the GatingPriorityQueue each have their own gate. The gates
-connect to a PriorityScheduler, so the gating piority queue prioritizes packets
+connect to a PriorityScheduler, so the gating priority queue prioritizes packets
 from the first inner queue. Here is a gating priority queue with two inner
 queues:
 
@@ -362,7 +362,7 @@ packets from ``source1`` to the first queue and those from source2 to the
 second, thus the gating priority queue prioritizes packets from ``source1``. The
 gates are configured to open and close every 10us, with the second gate offset
 by a 10us period (so they alternate being open). Furthermore, we align the gate
-schedules with the traffic generation by offsetting the both gate schedules with
+schedules with the traffic generation by offsetting both gate schedules with
 3.118us, the time it takes for a packet to be transmitted from a source to
 ``switch1``. Here is the rest of the gating priority queue configuration:
 
@@ -386,7 +386,7 @@ every 20us, with ``source2`` offset from ``source1`` by 10us:
 Note that only one data packet fits into the send window. However, gPTP packets are small
 and are sent in the same send windows as data packets.
 
-We measure the end-to-end delay of packets from from the source applications to
+We measure the end-to-end delay of packets from the source applications to
 the corresponding sink applications. Let's examine the results below.
 
 .. First, we take a look at the out-of-band synchronization cases. The delay in the
@@ -396,7 +396,7 @@ the corresponding sink applications. Let's examine the results below.
 First, we take a look at the out-of-band synchronization cases. In the case of
 no clock drift, packet generation is perfectly aligned in time with gate
 schedules, thus packets always find the gates open. End-to-end delay is
-constant, as it stems from transmission time only (no queueing delay due to
+constant, as it stems from transmission time only (no queuing delay due to
 closed gates). This delay value is displayed on the charts as a baseline:
 
 .. figure:: media/delay_outofbandsync.png
@@ -413,7 +413,7 @@ cases have periods where the delay is at the baseline level.
 
 .. **TODO** not sure the first one is needed
 
-.. note:: Traffic generation and gate opening and closing times doesn't need to be perfectly in sync for the data points to be at the baseline,
+.. note:: Traffic generation and gate opening and closing times don't need to be perfectly in sync for the data points to be at the baseline,
           because the gates are open for 10us, and a packet transmission takes ~6.4us.
 
 The following chart shows the same data zoomed in:
@@ -424,12 +424,12 @@ The following chart shows the same data zoomed in:
 In the case of the constant clock drift, the drift rate difference is
 compensated perfectly at the first synchronization event, thus the line sections
 are completely horizontal. However, we specified a random error for the time
-difference synchronization, thus the values change at every syhcnonization
+difference synchronization, thus the values change at every synchronization
 event, every 0.5ms.
 
 In the case of the random clock drift, the drift rate is compensated with no
-error at every synchronization event, but the drift rate of the clocks keep
-changing randomly even between synchonization events. This results in
+error at every synchronization event, but the drift rate of the clocks keeps
+changing randomly even between synchronization events. This results in
 fluctuating delay.
 
 Let's see the case where a random clock drift rate oscillator is used with gPTP:
@@ -437,7 +437,7 @@ Let's see the case where a random clock drift rate oscillator is used with gPTP:
 .. figure:: media/delay_gptp.png
    :align: center
 
-The delay distribution is similar to the out-of-band synchonization case, but
+The delay distribution is similar to the out-of-band synchronization case, but
 there are outliers. gPTP needs to send packets over the network for time
 synchronization, as opposed to using an out-of-band mechanism. These gPTP
 messages can sometimes cause delays for packets from ``source1``, causing them
@@ -445,14 +445,14 @@ to wait in the queue.
 
 .. note:: The outliers can be eliminated by giving gPTP packets priority over the source application packets. Ideally, they can have allocated time in the gate schedule as well.
 
-The following chart displays out-of-band synchonization and gPTP, so they can be compared:
+The following chart displays out-of-band synchronization and gPTP, so they can be compared:
 
 .. figure:: media/delay_outofbandsync_gptp.png
    :align: center
 
 In all these cases, the applications send packets in sync with the opening of
 the gates in the queue in ``switch1``. In the no clock drift case, the delay
-depends only on the bitrate and packet length. In the case of
+depends only on the bit rate and packet length. In the case of
 ``OutOfBandSynchronization`` and ``GptpSynchronization``, the clocks drift but
 the drift is periodically eliminated by synchronization, so the delay remains
 bounded.
@@ -465,7 +465,7 @@ Let's see what happens to delay when there is no synchronization:
 The delay keeps changing substantially compared to the other cases.
 
 What's the reason behind these graphs? When there is no clock drift (or it is
-eliminated by synchronization), the end-to-end delay is bounded, because the
+eliminated by synchronization), the end-to-end delay is bounded because the
 packets are generated in the sources in sync with the opening of the
 corresponding gates in ``switch1`` (the send windows). In the constant clock
 drift case, the delay's characteristics depend on the magnitude and direction of
@@ -496,7 +496,7 @@ the packet generation, so the packets arrive just after the gate is closed, and
 they have to wait for a full cycle in the queue before being sent. 
 
 If the packet stream is denser (blue graph), there are more packets to send on
-average than there are send windows in a given amount of time, so packets
+average than the number of send windows in a given amount of time, so packets
 eventually accumulate in the queue. This causes the delay to keep increasing
 indefinitely.
 
@@ -507,7 +507,7 @@ indefinitely.
 
 Thus, if constant clock drift is not eliminated, the network can no longer
 guarantee any bounded delay for the packets. The constant clock drift has a
-predictable repeated pattern, but it still has a huge effect on delay. 
+predictable repeated pattern but still has a significant effect on delay. 
 
 Let's examine the random clock drift case:
 
@@ -521,7 +521,7 @@ The following chart compares the constant and random clock drift rate cases:
 .. figure:: media/delay_constant_random.png
    :align: center
 
-The clocks in the similar plots (e.g. constant drift/sink1 and random
+The clocks in the similar plots (e.g., constant drift/sink1 and random
 drift/sink2) drift in the same direction.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`ClockDriftShowcase.ned <../ClockDriftShowcase.ned>`

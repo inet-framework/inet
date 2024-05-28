@@ -22,15 +22,15 @@ import inet.linklayer.contract.IMacProtocol;
 simple ShortcutMac extends MacProtocolBase like ILinkLayer, IMacProtocol
 {
     parameters:
-        string address @mutable = default("auto");   // MAC address as hex string (12 hex digits), or
+        string address @mutable = default("auto");   // MAC address as a hex string (12 hex digits), or
                                                      // "auto". "auto" values will be replaced by
                                                      // a generated MAC address in init stage 0.
         double bitrate @unit(bps);
         int mtu @unit(B) = default(1500B);
-        volatile int lengthOverhead @unit(b) = default(0b); // extra length added to packets
-        volatile double durationOverhead @unit(s) = default(0s); // extra transmission duration added to packets
-        volatile double propagationDelay @unit(s) = default(0s); // propagation time to all destinations
-        volatile double packetLoss = default(0); // packet loss probability
+        volatile int lengthOverhead @unit(b) = default(0b); // Extra length added to packets
+        volatile double durationOverhead @unit(s) = default(0s); // Extra transmission duration added to packets
+        volatile double propagationDelay @unit(s) = default(0s); // Propagation time to all destinations
+        volatile double packetLoss = default(0); // Packet loss probability
         @class(ShortcutMac);
         @display("i=block/rxtx");
     gates:

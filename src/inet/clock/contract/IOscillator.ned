@@ -14,7 +14,7 @@ package inet.clock.contract;
 //
 // The IOscillator C++ interface provides an API to efficiently simulate the
 // generation of ticks that are usually counted by clocks. The tick period is
-// not necessarily constant, it can change over time.
+// not necessarily constant; it can change over time.
 //
 // @see ~IClock
 //

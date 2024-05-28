@@ -34,7 +34,7 @@ which has a wired connection to the router. However, ``area1host3`` is
 not in the communication range of ``area1host1`` (illustrated on the
 image below.) Thus, ``area1host2`` needs to be configured to forward
 ``area1host1``'s packets to ``area1host3``. The error rate metric,
-rather than hop count, is best suited to configure routes in this LAN.
+rather than the hop count, is best suited to configure routes in this LAN.
 Routes in the rest of the network can be configured properly based on
 the hop count metric.
 
@@ -70,13 +70,13 @@ The global ``addStaticRoutes``, ``addDefaultRoutes`` and
 ``addSubnetRoutes`` parameters can also be specified per interface, with
 attributes of the ``<interface>`` element. The attribute names are
 ``add-static-route``, ``add-default-route`` and ``add-subnet-route``,
-and they are all booleans with true as default value. The global and
+and they are all booleans with true as the default value. The global and
 per-interface settings are in a logical AND relationship, so both have
 to be true to take effect.
 
 The default route assumes there is one gateway, and all nodes on the
-link can reach it directly. This is not the case for area 1, because
-``area1host1`` is out of range of the gateway host. The
+link can reach it directly. This is not the case for area 1 because
+``area1host1`` is out of the range of the gateway host. The
 ``add-default-route`` parameter is set to false for the area 1 hosts.
 
 Results

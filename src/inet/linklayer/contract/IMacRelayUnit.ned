@@ -15,7 +15,7 @@ import inet.protocolelement.contract.IProtocolLayer;
 //
 // Functions:
 // - relays frames based on their dest MAC addresses (dest-->port mapping)
-// - models finite buffer size (drops) and finite processing power (latency, queueing)
+// - models finite buffer size (drops) and finite processing power (latency, queuing)
 //
 // Address caching is modeled by a fixed-size lookup table.
 // When the table is full, the oldest address is kicked out of the cache.
@@ -23,10 +23,10 @@ import inet.protocolelement.contract.IProtocolLayer;
 // Entries are also deleted if their age exceeds a certain limit.
 //
 // If needed, address tables can be pre-loaded from text files at the beginning
-// of the simulation; this controlled by the forwardingTableFile module parameter.
+// of the simulation; this is controlled by the `forwardingTableFile` module parameter.
 //
 // This module is not a concrete implementation, it just defines gates and
-// parameters a ~IMacRelayUnit should have. Concrete inplementations add
+// parameters an ~IMacRelayUnit should have. Concrete implementations add
 // capacity and performance aspects to the model (number of frames processed
 // per second, amount of memory available in the switch, etc.)
 //

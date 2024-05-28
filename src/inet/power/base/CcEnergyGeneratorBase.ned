@@ -10,7 +10,7 @@ package inet.power.base;
 import inet.power.contract.ICcEnergyGenerator;
 
 //
-// This is an abstract base module for current based energy generator models.
+// This is an abstract base module for current-based energy generator models.
 // It defines shared signals and statistics.
 //
 // @see ~CcEnergyConsumerBase, ~CcEnergySourceBase, ~CcEnergySinkBase, ~CcEnergyStorageBase

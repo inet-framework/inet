@@ -10,12 +10,12 @@ package inet.physicallayer.wireless.common.base.packetlevel;
 import inet.physicallayer.wireless.common.contract.packetlevel.IReceiver;
 
 //
-// This module servces as a base module for SNIR receiver models.
+// This module serves as a base module for SNIR receiver models.
 //
 module SnirReceiverBase extends ReceiverBase like IReceiver
 {
     parameters:
-        double snirThreshold @unit(dB);    // reception is not successful if the SNIR is below this threshold (unsuccessful reception)
+        double snirThreshold @unit(dB);    // Reception is not successful if the SNIR is below this threshold (unsuccessful reception)
         string snirThresholdMode @enum("min","mean") = default("min");
         @display("i=block/wrx");
 }

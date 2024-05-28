@@ -11,16 +11,16 @@ import inet.queueing.base.PacketProcessorBase;
 
 //
 // This module sets the DSCP field (lower six bit of Tos/TrafficClass) of IP datagrams
-// to the value specified by the dscps parameter.
+// to the value specified by the `dscps` parameter.
 //
-// The dscps parameter is a space separated list of DSCP values.
-// Packets arrived at gate in[i] are marked with the ith value. If there are fewer
-// dscp values given than input gates, then the last one is repeated.
+// The `dscps` parameter is a space-separated list of DSCP values.
+// Packets arriving at gate `in[i]` are marked with the ith value. If there are fewer
+// DSCP values given than input gates, then the last one is repeated.
 //
 simple DscpMarker extends PacketProcessorBase
 {
     parameters:
-        string dscps; // space separated list if dscp values; both names (e.g. AF11, EF) and numbers (0x0A,0b101110) can be used
+        string dscps; // A space-separated list of DSCP values; both names (e.g., AF11, EF) and numbers (0x0A, 0b101110) can be used
         @class(DscpMarker);
         @display("i=block/star");
         @signal[packetMarked](type=cPacket);

@@ -9,7 +9,7 @@ package inet.linklayer.ieee80211.mac.contract;
 
 //
 // Interface for recipient ACK policies. This policy chooses between
-// no ACK, normal ACK and Block ACK for received frames.
+// no ACK, normal ACK, and Block ACK for received frames.
 //
 moduleinterface IRecipientAckPolicy
 {

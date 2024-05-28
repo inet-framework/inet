@@ -24,16 +24,16 @@ import inet.applications.contract.IApp;
 // Application model for comparing the performance of various transport
 // protocols.
 //
-// The NetPerfMeter model simultaneously transmits bidirectional flows to an
+// The ~NetPerfMeter model simultaneously transmits bidirectional flows to an
 // endpoint, and measures the resulting flow bandwidths and QoS. Since the
-// application behaviour is the same for all underlying transport layer
+// application behavior is the same for all underlying transport layer
 // protocols, it allows for comparing the performance of various transport
 // protocols, e.g. TCP vs. SCTP.
 //
 // The model closely mimics the operation of the real-world NetPerfMeter
 // application (https://www.uni-due.de/~~be0001/netperfmeter/), a tool for
 // measuring UDP, TCP, MPTCP, SCTP and DCCP performance over IPv4 and IPv6.
-// Since the parametrisation and features are similar to the real-world
+// Since the parametrization and features are similar to the real-world
 // application, the model also makes comparisons of simulation results and
 // real-world measurements easy.
 //
@@ -41,10 +41,10 @@ simple NetPerfMeter like IApp
 {
     parameters:
         bool            activeMode               = default(true);      // Server (false) or client (true)
-        string          localAddress             = default("");        // may be left empty ("")
-        int             localPort                = default(9000);      // port number to listen on
-        string          remoteAddress            = default("");        // server address (may be symbolic)
-        int             remotePort               = default(9000);      // port number to connect to
+        string          localAddress             = default("");        // May be left empty ("")
+        int             localPort                = default(9000);      // Port number to listen on
+        string          remoteAddress            = default("");        // Server address (may be symbolic)
+        int             remotePort               = default(9000);      // Port number to connect to
 
         double          connectTime     @unit(s) = default(0s);        // Absolute time to establish connection
         double          startTime       @unit(s) = default(1s);        // Transmission start, relative to "connectTime"
@@ -59,7 +59,7 @@ simple NetPerfMeter like IApp
         int             outboundStreams          = default(1);         // Number of outbound streams (SCTP only)
         int             maxInboundStreams        = default(16);        // Maximum number of inbound streams (SCTP only)
         string          protocol                 = default("SCTP");    // Transport protocol to use
-        string          primaryPath              = default("");        // primary path (may be symbolic; SCTP only)
+        string          primaryPath              = default("");        // Primary path (may be symbolic; SCTP only)
 
         volatile double frameRate      @unit(Hz) = default(1 Hz);      // Outgoing frame rate
         volatile int    frameSize      @unit(B)  = default(1452 B);    // Outgoing frame size

@@ -5,7 +5,7 @@ The :ned:`DropTailQueue` module extends :ned:`PacketQueue` by specifying a packe
 and setting a packet dropper function. By default, the packet capacity is set to 100,
 and packets are dropped from the end of the queue.
 
-In this example network, packets are created at random intervals by an active packet source (:ned:`ActivePacketSource`)
+In this example network, packets are created at random intervals by an active packet source (:ned:`ActivePacketSource`).
 The packets are pushed into a drop-tail queue (:ned:`DropTailQueue`) with a capacity of 4 packets.
 The packets are popped from the queue at random intervals by an active packet sink (:ned:`ActivePacketSink`).
 

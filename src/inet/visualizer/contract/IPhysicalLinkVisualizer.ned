@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 //
 // @see ~PhysicalLinkCanvasVisualizer, ~PhysicalLinkOsgVisualizer, ~PhysicalLinkVisualizer, ~PhysicalLinkVisualizerBase
 //
-moduleinterface IPhysicalLinkVisualizer
+moduleinterface IPhysicalLinkVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

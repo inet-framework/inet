@@ -14,9 +14,9 @@ import inet.visualizer.contract.INetworkNodeVisualizer;
 // This module visualizes multiple network nodes on a 3D osg scene. The visual
 // representation is either a 3D external model or a 2D icon that is rotated
 // automatically towards the camera. The 3D external model is specified in the
-// osgModel module parameter of the network node. The 2D icon is the image
+// `osgModel` module parameter of the network node. The 2D icon is the image
 // specified in the display string of the network node. The visualizer maintains
-// a NetworkNodeOsgVisualization instance for each network node which can be
+// a `NetworkNodeOsgVisualization` instance for each network node which can be
 // annotated by other visualizers.
 //
 // @see ~NetworkNodeCanvasVisualizer, ~NetworkNodeVisualizer, ~NetworkNodeVisualizerBase, ~INetworkNodeVisualizer
@@ -25,6 +25,6 @@ simple NetworkNodeOsgVisualizer extends NetworkNodeVisualizerBase like INetworkN
 {
     parameters:
         @class(NetworkNodeOsgVisualizer);
-        bool displayModuleName = default(true); // display network node name, enabled by default
+        bool displayModuleName = default(true); // Display network node name, enabled by default
 }
 

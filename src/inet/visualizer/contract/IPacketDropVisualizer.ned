@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 //
 // @see ~PacketDropCanvasVisualizer, ~PacketDropOsgVisualizer, ~PacketDropVisualizer, ~PacketDropVisualizerBase
 //
-moduleinterface IPacketDropVisualizer
+moduleinterface IPacketDropVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

@@ -12,7 +12,7 @@ are [2,3], then the first two packets are popped from input 0, the next three fr
 In this example network, packets are created by two passive packet sources (:ned:`PassivePacketSource`).
 The sources are connected to a :ned:`WrrScheduler`. The scheduler is connected to an active packet
 sink (:ned:`ActivePacketSink`), which pops packets from the scheduler periodically. The inputs of the
-scheduler are configured to have the weights [1 3 2], thus the scheduler pops 1, 3 and 2 packet(s)
+scheduler are configured to have the weights [1, 3, 2], thus the scheduler pops 1, 3, and 2 packet(s)
 from the three providers in one round.
 
 .. figure:: media/Scheduler.png

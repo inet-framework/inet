@@ -33,17 +33,17 @@ simple SimpleVoipReceiver like IApp
         int emodelA = default(5);         // Advantage factor
         double emodelRo = default(93.2);  // Basic signal-to-noise ratio
 
-        double playoutDelay @unit(s) = default(0s);      // initial delay for beginning playout after receiving the first packet
-        bool adaptivePlayoutDelay = default(false);      // if true, adjust playoutDelay after each talkspurt
-        int bufferSpace = default(20);      // buffer size in packets
-        double mosSpareTime @unit(s) = default(1s); // spare time before calculating MOS (after calculated playout time of last packet)
+        double playoutDelay @unit(s) = default(0s);      // Initial delay for beginning playout after receiving the first packet
+        bool adaptivePlayoutDelay = default(false);      // If true, adjust playoutDelay after each talkspurt
+        int bufferSpace = default(20);      // Buffer size in packets
+        double mosSpareTime @unit(s) = default(1s); // Spare time before calculating MOS (after calculated playout time of last packet)
 
-        @signal[voipPacketDelay](type="simtime_t");      // when receive a frame
-        @signal[voipPacketLossRate](type="double");      // at end of talkspurt
-        @signal[voipPlayoutDelay](type="simtime_t");    // at end of talkspurt
-        @signal[voipPlayoutLossRate](type="double");    // at end of talkspurt
-        @signal[voipMosRate](type="double");          // at end of talkspurt
-        @signal[voipTaildropLossRate](type="double");   // at end of talkspurt
+        @signal[voipPacketDelay](type="simtime_t");      // When receive a frame
+        @signal[voipPacketLossRate](type="double");      // At end of talkspurt
+        @signal[voipPlayoutDelay](type="simtime_t");    // At end of talkspurt
+        @signal[voipPlayoutLossRate](type="double");    // At end of talkspurt
+        @signal[voipMosRate](type="double");          // At end of talkspurt
+        @signal[voipTaildropLossRate](type="double");   // At end of talkspurt
         @statistic[endToEndDelay](title="VoIP Packet End-to-End Delay"; unit="s"; source="voipPacketDelay"; record=stats,vector);
         @statistic[packetLossRate](title="VoIP Packet Loss"; unit="ratio"; source="voipPacketLossRate"; record=stats,vector);
         @statistic[playoutDelay](title="VoIP Playout Delay"; unit="s"; source="voipPlayoutDelay"; record=stats,vector);

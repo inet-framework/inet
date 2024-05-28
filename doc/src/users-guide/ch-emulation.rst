@@ -8,60 +8,60 @@ Network Emulation
 Motivation
 ----------
 
-In INET, the word *emulation* is used in a broad sense to describe a system which
+In INET, the term *emulation* is used in a broad sense to describe a system which
 is partially implemented in the real world and partially in simulation.
-Emulation is often used for testing and validating a simulation model with
+Emulation is often utilized for testing and validating a simulation model with
 its real-world counterparts, or in a reverse scenario, during the development
-of a real-world protocol implementation or application, for testing it in
-a simulated environment. It may also be used out of necessity, because
-some part of the system only exists in the real world or only as a simulation
-model.
+of a real-world protocol implementation or application, for testing in
+a simulated environment. It may also be necessitated by the fact that
+some parts of the system only exist in the real world or only as simulation
+models.
 
 .. Developing a protocol, a protocol implementation, or an application that heavily
-   relies on network communication is often less expensive, more practical,
+   relies on network communication is often more practical, less expensive,
    and safer using simulation than directly performing experiments in the real world.
    However, there are potential pitfalls: porting simulation code to the target device
-   may be costly and error prone, and also, a model that performs well in simulation
+   may incur high costs and be error-prone, and also, a model that performs well in simulation
    does not necessarily work equally well when deployed in the real world.
-   INET helps reducing these risks by allowing the researcher to mix
-   simulation and real world in various ways, thereby reducing the need for porting,
-   and offering more possibilities for testing out the code.
+   INET helps mitigate these risks by allowing the researcher to mix
+   simulation and the real world in various ways, thereby reducing the need for porting,
+   and offering more possibilities for testing the code.
 
 .. There are several projects that may benefit from the network emulation
    capabilities of INET, that is, from the ability to mix simulated
    components with real networks. **todo** not just networks
 
 INET provides modules that act as bridges between the
-simulated and real domains, therefore it is possible to leave one part
+simulated and real domains; hence, it is possible to leave one part
 of the simulation unchanged, while simply extracting the other into the
-real world. Several setups are possible when one can take advantage of the emulation
+real world. Several setups are possible where one can take advantage of the emulation
 capabilities of INET:
 
 - simulated node in a real network
-- a simulated subnet in real network
-- real-world node in simulated network
+- a simulated subnet in a real network
+- real-world node in a simulated network
 - simulated protocol in a real network node
 - real application in a simulated network node
 - etc.
 
 Some example scenarios:
 
--  Run a simulated component, such as an app or a routing protocol, on
-   nodes of an actual ad-hoc network. This setup would allow testing the
-   component’s behavior under real-life conditions.
+-  A simulated component, such as an app or a routing protocol, can be run
+   on nodes of an actual ad-hoc network. This setup would allow testing the
+   behavior of the component under real-life conditions.
 
--  Test the interoperability of a simulated protocol with its real-world
-   counterparts.
+-  The interoperability of a simulated protocol with its real-world
+   counterparts can be tested.
 
 .. Several setups are possible: simulated node in a real
-   network; a simulated subnet in real network; real-world node in
+   network; a simulated subnet in a real network; real-world node in
    simulated network; etc.
 
--  As a means of implementing hybrid simulation. The real network (or a
+-  As a means of implementing hybrid simulation, the real network (or a
    single host OS) may contain several network emulator devices or
    simulations running in emulation mode. Such a setup provides a
-   relatively easy way for connecting heterogenous simulators/emulators
-   with each other, sparing the need for HLA or a custom
+   relatively easy way of connecting heterogeneous simulators/emulators
+   with each other, eliminating the need for HLA or a custom
    interoperability solution.
 
 .. _ug:sec:emulation:overview:
@@ -73,7 +73,7 @@ For the simulation to act as a network emulator, two major problems need to be s
 On one hand, the simulation must run in real time, or the real clock must be
 configured according to the simulation time (synchronization). On the
 other hand, the simulation must be able to communicate with the real
-world (communication). This is achieved in INET as the following:
+world (communication). This is achieved in INET as follows:
 
 - Synchronization:
 
@@ -81,11 +81,11 @@ world (communication). This is achieved in INET as the following:
     scheduler class responsible for synchronization. Using this method, the
     simulation is run according to real time.
 
--  Communication:
+- Communication:
 
    -  The interface between the real (an interface of the OS) and the
-      simulated parts of the model are represented by `Ext` modules,
-      with names beginning with ``Ext~`` prefix in the
+      simulated parts of the model is represented by `Ext` modules,
+      with names beginning with the ``Ext~`` prefix in the
       simulation (``ExtLowerUdp``, ``ExtUpperEthernetInterface``,
       etc.).
 
@@ -132,8 +132,8 @@ world (communication). This is achieved in INET as the following:
 Preparation
 -----------
 
-There are a few things that need to be arranged before you can
-successfully run simulations in network emulation mode.
+There are a few things that need to be arranged before simulations can
+be successfully run in network emulation mode.
 
 First, network emulation is a separate *project feature* that needs to
 be enabled before it can be used. (Project features can be reviewed and
@@ -144,7 +144,7 @@ changed in the *Project \| Project Features...* dialog in the IDE.)
    (type ``SOCK_RAW``), which, on many systems, is only allowed for
    processes that have root (administrator) privileges.
 
-Also, in order to be able to send packets through raw sockets
+Also, in order to be able to send packets through raw sockets,
 applications require special permissions. There
 are two ways to achieve this under Linux.
 
@@ -159,7 +159,7 @@ permissions:
 
 This solution makes running the examples from the IDE possible.
 Alternatively, the application can be started with root privileges from
-command line:
+the command line:
 
 
 .. code::
@@ -168,7 +168,7 @@ command line:
 
 .. note:: In any case, it's generally a bad idea to start the IDE as superuser.
           Doing so may silently change the file ownership for certain IDE
-          configuration files, and it may prevent the IDE to start up for the
+          configuration files, and it may prevent the IDE from starting up for the
           normal user afterwards.
 
 .. _ug:sec:emulation:configuring:
@@ -176,18 +176,18 @@ command line:
 Configuring
 -----------
 
-Here we show one configuration example where the network nodes contain
+Here we demonstrate one configuration example where the network nodes contain
 a :ned:`ExtLowerEthernetInterface`.
 
 INET nodes such as :ned:`StandardHost` and :ned:`Router` can be
-configured to have :ned:`ExtLowerEthernetInterface`’s. The simulation
+configured to have :ned:`ExtLowerEthernetInterface`s. The simulation
 may contain several nodes with external interfaces, and one node may
 also have several external interfaces.
 
 .. note::
 
    This is one of the many possible setups. Using other components than
-   :ned:`ExtLowerEthernetInterface`, nodes may be cut into simulated and real
+   :ned:`ExtLowerEthernetInterface`, nodes may be split into simulated and real
    parts at any layer, and either the upper or the lower part may be real.
    See the Showcases for demonstration of some of these use cases.
 
@@ -199,14 +199,14 @@ following way:
    **.host1.numEthInterfaces = 1
    **.host1.eth[0].typename = "ExtLowerEthernetInterface"
 
-Also, the simulation must be configured to run under control the of the
+Also, the simulation must be configured to run under the control of the
 appropriate real-time scheduler class:
 
 .. code-block:: ini
 
    scheduler-class = "inet::RealTimeScheduler"
 
-:ned:`ExtLowerEthernetInterface` has two important parameters which need
+:ned:`ExtLowerEthernetInterface` has two important parameters that need
 to be configured. The :par:`device` parameter should be set to the name
 of the real (or virtual) interface on the host OS. The :par:`namespace`
 parameter can be set to utilize the network namespace functionality of
@@ -223,7 +223,7 @@ An example configuration:
 
 .. .. note::
 
-Let us examine the paths outgoing and incoming packets take, and the
+Let us examine the paths outgoing and incoming packets take and the
 necessary configuration requirements to make them work. We assume IPv4
 as network layer protocol, but the picture does not change much with
 other protocols. We assume the external interface is named
@@ -237,7 +237,7 @@ The network layer of the simulated node routes datagrams to its
 
 For that to happen, the routing table needs to contain an entry where
 the interface is set to ``eth[0]``. Such entries are not created
-automatically, one needs to add them to the routing table explicitly,
+automatically; one needs to add them to the routing table explicitly,
 e.g. by using an :ned:`Ipv4NetworkConfigurator` and an appropriate XML
 file.
 
@@ -266,12 +266,13 @@ Incoming path
 First of all, packets intended to be received by the simulation need to
 find their way to the correct interface of the host that runs the
 simulation. For that, IP addresses of simulated hosts must be routable
-in the real network, and routed to the selected interface of the host
+in the real network and routed to the selected interface of the host
 OS. (On Linux, for example, this can be achieved by adding static routes
 with the command.)
 
 As packets are received by the interface of the host OS, they are handed
 over to the simulation. The packets are received from the raw socket with a
-``recv`` system call. After deserialization they pop out of ``eth[0]`` and
+``recv`` system call. After deserialization, they pop out of ``eth[0]`` and
 they are sent up to the network layer. The packets are routed to the simulated
 destination host in the normal way.
+

@@ -14,17 +14,17 @@ import inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211Nis
 // OFDM PHY infrastructure (IEEE 802.11-2012, Clause 18).
 // OFDM means that the physical layer uses OFDM modulation.
 //
-// The Ieee80211OfdmErrorModel, depending of the level of detail
+// The `Ieee80211OfdmErrorModel`, depending on the level of detail
 // (see: ~Ieee80211LayeredOfdmTransmitter and ~Ieee80211LayeredOfdmReceiver),
-// produces erroneous bits, symbols, samples or just simply
+// produces erroneous bits, symbols, samples, or simply
 // determines whether a packet is erroneous or not.
 //
 // The error model has built-in methods to approximate the
-// corresponding error rates as a function of signal-to-noise
-// ratio, bandwidth and other characteristics of the radio
+// corresponding error rates as a function of the signal-to-noise
+// ratio, bandwidth, and other characteristics of the radio
 // channel and the OFDM subcarrier modulations.
 //
-// If you don't want to use these approximations you can set
+// If you don't want to use these approximations, you can set
 // your own error rates for the signal (IEEE 802.11-2012,
 // 18.3.4) and data field (18.3.5).
 //

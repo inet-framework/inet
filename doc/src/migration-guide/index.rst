@@ -9,7 +9,7 @@ Release: |release|
 Network Node Architecture
 -------------------------
 
-The internal structure of network nodes has been changed considerably. With the
+The internal structure of network nodes has been considerably changed. With the
 new architecture, applications can directly talk to any protocol down to the
 link layer, and protocols don't have to deal with dispatching to other protocols.
 
@@ -32,7 +32,7 @@ and commands to the intended receiver module based on various tags:
 
 The :ned:`MessageDispatcher` is also used inside network layer compound modules such
 as the :ned:`Ipv4NetworkLayer`. This usage is not accidental, it solves dispatching
-ARP, ICMP and IPv4 packets to the appropriate protocol modules.
+ARP, ICMP, and IPv4 packets to the appropriate protocol modules.
 
 .. _mg:sec:migrationguide:extendingprotocols:
 
@@ -41,8 +41,8 @@ Extending the Known Protocols
 
 Internally, protocols first must be added to the list of known protocols in the
 Protocol class before they can be used. Some protocols (such as IP) have a mapping
-between protocol specific integer identifiers and actual protocols. These mapping
-should be created as a :cpp:`ProtocolGroup`. Here are some examples how to do this:
+between protocol-specific integer identifiers and actual protocols. These mappings
+should be created as a :cpp:`ProtocolGroup`. Here are some examples of how to do this:
 
 .. code-block:: c++
 
@@ -62,7 +62,7 @@ Registering Protocols for Dispatching
 Modules must register supported protocols with the :ned:`MessageDispatcher` to operate
 properly. This is done by calling ``inet::registerProtocol(...)`` for each supported
 protocol on each gate in ``initialize()``. Interfaces (usually MAC protocols modules)
-must also register with calling ``inet::registerInterface(...)`` for the corresponding
+must also register by calling ``inet::registerInterface(...)`` for the corresponding
 :cpp:`NetworkInterface` and gate in ``initialize()``. On the other hand, sockets are learned
 by the :ned:`MessageDispatcher` automatically on the fly.
 
@@ -73,8 +73,8 @@ Attaching Tags for Dispatching
 
 When a protocol sends a packet or command to another protocol or interface, it
 must attach the appropriate tag for the :ned:`MessageDispatcher`. The dispatcher uses
-the attached tags to lookup the intended receiver in its registration list and
-forwards the message on the appropriate gate. Here are some examples how to do
+the attached tags to look up the intended receiver in its registration list and
+forwards the message on the appropriate gate. Here are some examples of how to do
 this:
 
 .. code-block:: c++
@@ -93,9 +93,9 @@ into a single application vector (``app``). The merged vector can contain all ki
 of applications, which are free to use any protocol they see fit.
 
 This change requires updating the configuration of applications in INI files. In
-the simplest case this can be done by simply replacing the application vector
+the simplest case, this can be done by simply replacing the application vector
 names. If the example uses more than one kind of application in a single network
-node then the submodule vector indexes must be also updated.
+node, then the submodule vector indexes must also be updated.
 
 For example, the existing configuration:
 
@@ -142,14 +142,14 @@ Some notable tag examples:
 - :cpp:`L3AddressReq`, :cpp:`L3AddressInd` specifies source and destination network addresses
 - :cpp:`SignalPowerReq`, :cpp:`SignalPowerInd` specifies send and receive signal power
 - :cpp:`DispatchProtocolReq`, :cpp:`DispatchProtocolInd` specifies intended receiver protocol
-- :cpp:`PacketProtcolTag` specifies protocol of the packet
+- :cpp:`PacketProtcolTag` specifies the protocol of the packet
 
 Tags come in three flavors:
 
-- requests (are called ``SomethingReq``) carry information from higher layer to lower layer protocols
-- indications (are called ``SomethingInd``) carry information from lower layer to higher layer protocols
-- plain tags (are called ``SomethingTag``) contain some meta information
-- base classes (are called ``SomethingTagBase``) must not be attached to packets
+- requests (called ``SomethingReq``) carry information from a higher layer to lower layer protocols
+- indications (called ``SomethingInd``) carry information from a lower layer to higher layer protocols
+- plain tags (called ``SomethingTag``) contain some meta information
+- base classes (called ``SomethingTagBase``) must not be attached to packets
 
 .. _mg:sec:migrationguide:controlinfo:
 
@@ -158,13 +158,13 @@ Splitting Control Infos
 
 When migrating a protocol, the old control info data structures, which were
 attached to packets, must be replaced with a set of tags. Implementors should
-use already existing tags if possible, otherwise they are free to create new
+use already existing tags if possible; otherwise, they are free to create new
 ones as they see fit.
 
-Any code that sets, reads or removes control info objects of packets must be
-replaced with code that adds, reads or removes the appropriate tags.
+Any code that sets, reads, or removes control info objects of packets must be
+replaced with code that adds, reads, or removes the appropriate tags.
 
-Setting control info on commands need not be changed, but may be adapted for
+Setting control info on commands need not be changed but may be adapted for
 consistency.
 
 .. _mg:sec:migrationguide:communicating:
@@ -179,9 +179,9 @@ protocols are free to ignore any tag they wish based on their configuration and
 state.
 
 When a packet is reused for any purpose (e.g. forwarding, loopback interface,
-echo application), most likely all tags on the packet should be removed. The
+echo application), most likely, all tags on the packet should be removed. The
 reason is that the implementor can never be sure what kind of tags are attached
-to a packet, and what unintended effects those tags will have at a later stage
+to a packet and what unintended effects those tags will have at a later stage
 in some protocol.
 
 Finally, it's important to note that tags are not transmitted from one network
@@ -196,13 +196,13 @@ Determining the Protocol of Packets
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 With the new packet API, packets can no longer be differentiated using the C++
-dynamic_cast operator with the desired type. The reason is that all packets are
+`dynamic_cast` operator with the desired type. The reason is that all packets are
 instances of the :cpp:`Packet` class. In fact, this is quite understandable if one
 views packets as a sequence of bytes. Any sequence of bytes, no matter how it
 is represented by a :cpp:`Packet`, can be interpreted by any protocol, even if the
 packet was not intended to be processed by that protocol. Therefore, before a
 protocol is sending out a packet using any of its gates, it must attach a
-:cpp:`PacketProtocolTag` to it. Here is an example how to do this:
+:cpp:`PacketProtocolTag` to it. Here is an example of how to do this:
 
 .. code-block:: c++
 
@@ -214,10 +214,10 @@ Packet API
 ----------
 
 INET provides a new packet API that supports efficient construction, sharing,
-duplication, encapsulation, aggregation, fragmentation and serialization. The
-data structure also supports dual representation by default. That is data can
-be accessed as raw bytes and also as field based classes. Internally, packets
-store their data in different kind of chunks.
+duplication, encapsulation, aggregation, fragmentation, and serialization. The
+data structure also supports dual representation by default. That is, data can
+be accessed as raw bytes and also as field-based classes. Internally, packets
+store their data in different kinds of chunks.
 
 The new API uses the following classes at the chunk level:
 
@@ -248,11 +248,11 @@ The new API uses the following classes for serialization:
 Protocol Header Classes
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-The most substantial change regarding protocols is that protocol specific headers
+The most substantial change regarding protocols is that protocol-specific headers
 (or messages) are no longer subclasses of :cpp:`cPacket`. Protocol headers subclass the
 :cpp:`Chunk` class instead, and they are simply added to Packets during processing.
 Variable references to :cpp:`Chunk` objects must use shared pointers (``Ptr<SomeChunk>``)
-types. Here is an example how to do this:
+types. Here is an example of how to do this:
 
 .. code-block:: c++
 
@@ -265,9 +265,9 @@ types. Here is an example how to do this:
 
 Sometimes processing in a protocol module requires multiple utility functions
 and classes. Some functions may need the packet and the protocol header at the
-same time. Only passing the protocol header is not sufficient, because due to
-the shared nature of chunks they don't have an owner packet. Only passing the
-packet requires the called function to peek the protocol header which might
+same time. Only passing the protocol header is not sufficient because due to
+the shared nature of chunks, they don't have an owner packet. Only passing the
+packet requires the called function to peek at the protocol header, which might
 unnecessarily slow down execution. In such cases, it is a good idea to pass the
 packet and the protocol header in separate parameters. Whether this is desirable
 or not highly depends on the complexity of the protocol and the organization of
@@ -278,22 +278,22 @@ its implementation.
 Immutability of Chunks
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Another important to note difficulty is that chunks can only be added to packets
+Another important difficulty to note is that chunks can only be added to packets
 if they are immutable. This requirement comes from the fact that packets support
 peeking into their data regardless of how the data is represented. The result of
-peek operations are required to stay consistent with the original content of the
+peek operations is required to stay consistent with the original content of the
 packet. Moreover, the content of packets can be arbitrarily shared with other
-packets which may be potentially present in different network nodes. Unfortunately
+packets that may be potentially present in different network nodes. Unfortunately,
 these properties forbid arbitrary changes once the chunk has been added to the
-packet. Of course internally, packets do their best to reuse any chunk data
+packet. Of course, internally, packets do their best to reuse any chunk data
 structure if possible.
 
-When the need arises to change the contents of the packet such as forwarding a
+When the need arises to change the contents of the packet, such as forwarding a
 packet in a network protocol, the best thing to do is the following. Remove the
 part that is to be updated, create a mutable copy, update it according to the
 protocol, and add the updated part back to the packet. In fact, this is like
 saying that forwarding a packet is the same as sending out another packet that
-shares some structure with the received one. Here is an example how to do this:
+shares some structure with the received one. Here is an example of how to do this:
 
 .. code-block:: c++
 
@@ -308,8 +308,8 @@ Serializing Packets
 
 The old packet serializer classes have been replaced with new classes subclassing
 from the :cpp:`ChunkSerializer` class. The old serializers used to not only serialize
-the packet they were responsible for but they recursed into the encapsulated packet.
-This is no longer the case, serializers are only responsible for the corresponding
+the packet they were responsible for but they also recursed into the encapsulated packet.
+This is no longer the case as serializers are only responsible for the corresponding
 chunk that they handle.
 
 Actually transforming a packet to a sequence of bytes doesn't involve directly
@@ -323,10 +323,10 @@ a sequence of bytes is as simple as follows:
    packet->peekAllBytes(); // shorthand
 
 This property of the API greatly simplifies code that serializes packets into
-trace files such as PCAP. Finally, the new API allows testing the protocol
+trace files, such as PCAP. Finally, the new API allows testing the protocol
 implementations for proper emulation support. Configuring all network interfaces
 to send out packets (in place of the original packets) which contain a single
-:cpp:`BytesChunk` only, is easy to do. At the receiver modules, there's no need to change
+:cpp:`BytesChunk` only is easy to do. At the receiver modules, there's no need to change
 anything in the protocol implementations. The reason being that the packet API
 transparently handles the dual representation, and it converts the sequence of
 bytes to the requested chunk types as needed.
@@ -337,13 +337,13 @@ Handling Checksums
 ~~~~~~~~~~~~~~~~~~
 
 The old serializer classes used to compute and verify checksums on the fly. This
-caused some confusion especially with the proper support of pseudo headers. With
-the new API this is no longer the case. The new serializers are only responsible
+caused some confusion, especially with the proper support of pseudo headers. With
+the new API, this is no longer the case. The new serializers are only responsible
 for transforming from one representation (sequence of bytes) to another (fields),
 and vice versa.
 
 Computing and verifying checksums is up to the protocol implementations, and it
 is independent of the actual representation of the header. In general, protocols
-should have parameters to declare the checksum correct/incorrect or actually
-compute and verify it. Of course, for emulation one should enable computing and
+should have parameters to declare the checksum correct/incorrect or to actually
+compute and verify it. Of course, for emulation, one should enable computing and
 verifying checksums.

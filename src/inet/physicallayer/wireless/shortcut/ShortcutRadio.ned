@@ -16,18 +16,18 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 // other radio module without any physical layer processing in the radio medium.
 // Packets received from the upper layer protocols may be lost. Physical layer
 // overhead is simply simulated by physical header bits, preamble transmission
-// duration and a propagation delay.
+// duration, and a propagation delay.
 //
 simple ShortcutRadio extends PhysicalLayerBase like IRadio
 {
     parameters:
         string interfaceTableModule;
         double bitrate @unit(bps);
-        volatile int lengthOverhead @unit(b) = default(0b); // extra length added to packets
-        volatile double durationOverhead @unit(s) = default(0s); // extra transmission duration added to packets
-        volatile double propagationDelay @unit(s) = default(0s); // propagation time to all destinations
-        volatile double packetLoss = default(0); // packet loss probability
+        volatile int lengthOverhead @unit(b) = default(0b); // Extra length added to packets
+        volatile double durationOverhead @unit(s) = default(0s); // Extra transmission duration added to packets
+        volatile double propagationDelay @unit(s) = default(0s); // Propagation time to all destinations
+        volatile double packetLoss = default(0); // Packet loss probability
         @class(ShortcutRadio);
-        @signal[transmissionStateChanged](type=long);    // type=inet::physicallayer::TransmissionState
+        @signal[transmissionStateChanged](type=long);    // Type=inet::physicallayer::TransmissionState
 }
 

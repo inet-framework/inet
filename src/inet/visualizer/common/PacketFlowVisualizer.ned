@@ -13,8 +13,10 @@ module PacketFlowVisualizer like IPacketFlowVisualizer
 {
     parameters:
         @display("i=block/app");
-        *.visualizationTargetModule = default("^.^");
-        *.visualizationSubjectModule = default("^.^");
+        string visualizationTargetModule = default("^");
+        string visualizationSubjectModule = default("^");
+        *.visualizationTargetModule = default(absPath(this.visualizationTargetModule));
+        *.visualizationSubjectModule = default(absPath(this.visualizationSubjectModule));
     submodules:
         canvasVisualizer: <default(firstAvailableOrEmpty("PacketFlowCanvasVisualizer"))> like IPacketFlowVisualizer if typename != "" {
             parameters:

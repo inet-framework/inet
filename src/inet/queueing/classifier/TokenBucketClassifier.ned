@@ -21,12 +21,12 @@ import inet.queueing.contract.IPacketClassifier;
 simple TokenBucketClassifier extends PacketClassifierBase like IPacketClassifier
 {
     parameters:
-        double initialNumTokens = default(0); // initial number of tokens
-        double maxNumTokens = default(inf); // maximum number of tokens
+        double initialNumTokens = default(0); // Initial number of tokens
+        double maxNumTokens = default(inf); // Maximum number of tokens
         double tokenProductionRate;
-        double tokenConsumptionPerPacket = default(0); // how many tokens are consumed per packet
-        double tokenConsumptionPerBit = default(1); // how many tokens are consumed per bit
-        string excessTokenModule = default(""); // specifies the module (~ITokenStorage) that receives the excess tokens that are produced by this module
+        double tokenConsumptionPerPacket = default(0); // How many tokens are consumed per packet
+        double tokenConsumptionPerBit = default(1); // How many tokens are consumed per bit
+        string excessTokenModule = default(""); // Specifies the module (~ITokenStorage) that receives the excess tokens that are produced by this module
         displayStringTextFormat = default("contains %n tk\nmetered %p pk (%l)");
         @signal[tokensChanged](type=double);
         @statistic[numTokens](title="number of tokens"; source=tokensChanged; record=vector; unit=tk; interpolationmode=linear);

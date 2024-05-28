@@ -11,7 +11,8 @@ import inet.linklayer.ieee80211.mac.contract.ITx;
 
 //
 // Responsible for unconditionally transmitting a frame after waiting for
-// a specified inter-frame space. This is the default implementation of ~ITx.
+// a specified inter-frame space. This is the default implementation of the
+// ~ITx module interface.
 //
 simple Tx like ITx
 {

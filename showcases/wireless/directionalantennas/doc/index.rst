@@ -18,7 +18,7 @@ and provide an example simulation that demonstrates the directionality of five
 different antenna models. Four of these models represent well-known antenna
 patterns, while the fifth model is a universal antenna that can be used to model
 any rotationally symmetrical antenna pattern. By the end of this showcase, you
-will understand the different antenna models that are available in INET and how
+will understand the different antenna models available in INET and how
 they can be used to simulate the directionality of antennas.
 
 | INET version: ``4.1``
@@ -69,7 +69,7 @@ Visualizing Antenna Directionality
 
 The :ned:`RadioVisualizer` module can visualize antenna directional characteristics,
 using its antenna lobe visualization feature. For example, the radiation patterns of
-an isotropic and a directional antenna looks like the following:
+an isotropic and a directional antenna look like the following:
 
 .. figure:: media/antennalobe.png
    :width: 100%
@@ -102,7 +102,7 @@ the ``DirectionalAntennasShowcase`` network:
    :width: 60%
    :align: center
 
-The network contains two :ned:`AdhocHost`\ s, named ``source`` and
+The network contains two :ned:`AdhocHost` s, named ``source`` and
 ``destination``. There is also an :ned:`Ipv4NetworkConfigurator`, an
 :ned:`IntegratedVisualizer`, and an :ned:`Ieee80211ScalarRadioMedium` module.
 
@@ -257,7 +257,7 @@ Here is the reception power vs. direction plot:
 Cosine Antenna
 ~~~~~~~~~~~~~~
 
-The :ned:`CosineAntenna` module models a hypotethical antenna with a cosine-based
+The :ned:`CosineAntenna` module models a hypothetical antenna with a cosine-based
 radiation pattern. This antenna model is commonly used in the real world to approximate
 various directional antennas. The module has two parameters, :par:`maxGain`
 and :par:`beamWidth`. The configuration in :download:`omnetpp.ini <../omnetpp.ini>` is the

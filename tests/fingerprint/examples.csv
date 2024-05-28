@@ -93,6 +93,8 @@
 /examples/ethernet/lans/,            -f switch.ini -c SwitchedLanPreconf -r 0,      1000s,           65ca-9091/tplx;2c9a-5fb7/~tNl;bb65-f60d/tyf, PASS, EthernetMac
 /examples/ethernet/lans/,            -f twoHosts.ini -c TwoHosts1 -r 0,             200s,            05a6-a95c/tplx;1ffa-9820/~tNl;f813-f626/tyf, PASS, EthernetCsmaMac
 
+/examples/ethernet/simple/,          -f omnetpp.ini -c General -r 0,                2s,              c09c-eb8a/tplx;c326-8739/~tNl;2707-6318/~tND;f813-f626/tyf, PASS, EthernetMac
+
 /examples/ethernet/vlan/,            -f omnetpp.ini -c NoVlan -r 0,                 10ms,            01d5-50c3/tplx;8cc3-6df5/~tNl;788d-f5d0/~tND;0c03-6f69/tyf, PASS, Ipv4
 /examples/ethernet/vlan/,            -f omnetpp.ini -c BetweenSwitches -r 0,        10ms,            28d6-d4e9/tplx;a820-12c6/~tNl;f35c-2800/~tND;3ff4-9ef5/tyf, PASS, Ipv4
 /examples/ethernet/vlan/,            -f omnetpp.ini -c BetweenHosts -r 0,           10ms,            de56-7cdb/tplx;b725-0790/~tNl;e6ee-f7d4/~tND;b0e4-c4bb/tyf, PASS, Ipv4

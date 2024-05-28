@@ -13,7 +13,7 @@ import inet.queueing.contract.IPacketFilter;
 //
 // This module is a packet filter that operates based on the ~EligibilityTimeTag
 // attached to the packet that is passing through. Packets are dropped if the tag
-// is missing. If the maxResidenceTime parameter is set, then the filter also drops
+// is missing. If the `maxResidenceTime` parameter is set, then the filter also drops
 // the packets for which the eligibility time in the attached ~EligibilityTimeTag
 // is greater than the current simulation time plus the maximum residence time.
 //
@@ -24,7 +24,7 @@ import inet.queueing.contract.IPacketFilter;
 simple EligibilityTimeFilter extends PacketFilterBase like IPacketFilter
 {
     parameters:
-        string clockModule = default(""); // relative path of a module that implements IClock; optional
-        double maxResidenceTime @unit(s) = default(-1s); // optional max residence time limit, not used by default
+        string clockModule = default(""); // Relative path of a module that implements IClock; optional
+        double maxResidenceTime @unit(s) = default(-1s); // Optional max residence time limit, not used by default
         @class(EligibilityTimeFilter);
 }

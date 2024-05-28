@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 // @see ~EnergyStorageCanvasVisualizer, ~EnergyStorageOsgVisualizer,
 // ~EnergyStorageVisualizer, ~EnergyStorageVisualizerBase
 //
-moduleinterface IEnergyStorageVisualizer
+moduleinterface IEnergyStorageVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

@@ -16,8 +16,8 @@ import inet.node.base.NetworkLayerNodeBase;
 // based on which interface card the packet arrived on and on which interface
 // it is leaving the cloud. The delayer module is replaceable.
 //
-// By default the delayer module is ~MatrixCloudDelayer which lets you configure
-// the delay, drop and datarate parameters in an XML file. Packet flows, as defined
+// By default, the delayer module is ~MatrixCloudDelayer which lets you configure
+// the delay, drop, and data rate parameters in an XML file. Packet flows, as defined
 // by incoming and outgoing interface pairs, are independent of each other.
 //
 // The ~InternetCloud module can be used only to model the delay between two hops, but
