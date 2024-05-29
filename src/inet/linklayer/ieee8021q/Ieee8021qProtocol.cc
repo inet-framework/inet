@@ -25,6 +25,8 @@ cGate *Ieee8021qProtocol::lookupModuleInterface(cGate *gate, const std::type_inf
             if (dispatchProtocolReq != nullptr && dispatchProtocolReq->getProtocol() == &Protocol::ieee8021qCTag && dispatchProtocolReq->getServicePrimitive() == SP_REQUEST)
                 return findModuleInterface(gate, type, nullptr, 1);
         }
+        else
+            return findModuleInterface(gate, type, arguments, 1);
     }
     else if (gate->isName("upperLayerOut"))
         return findModuleInterface(gate, type, arguments); // forward all other interfaces
