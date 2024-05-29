@@ -18,6 +18,6 @@ simple VirtualTunnel
         bool steal = default(vlanId != -1);
         @display("i=block/cogwheel");
     gates:
-        input upperLayerIn;
+        input upperLayerIn @interface[inet::queueing::IPassivePacketSink];
         output upperLayerOut;
 }

@@ -8,13 +8,14 @@
 #include "inet/networklayer/common/NetworkInterface.h"
 
 #include "inet/common/INETUtils.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/StringFormat.h"
-#include "inet/common/SubmoduleLayout.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/stlutils.h"
+#include "inet/common/StringFormat.h"
+#include "inet/common/SubmoduleLayout.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
 #ifdef INET_WITH_IPv4
@@ -724,15 +725,17 @@ cGate *NetworkInterface::lookupModuleInterface(cGate *gate, const std::type_info
         if (type == typeid(IPassivePacketSink)) {
             auto interfaceReq = dynamic_cast<const InterfaceReq *>(arguments);
             if (interfaceReq != nullptr && interfaceReq->getInterfaceId() == getInterfaceId())
-                return findModuleInterface(gate, type, interfaceReq == nullptr ? arguments : nullptr, 1);
+                return findModuleInterface(gate, type, nullptr, 1);
             auto packetProtocolTag = dynamic_cast<const PacketProtocolTag *>(arguments);
             if (packetProtocolTag != nullptr && hasPar("protocol") && !strcmp(packetProtocolTag->getProtocol()->getName(), par("protocol")))
-                return findModuleInterface(gate, type, packetProtocolTag == nullptr ? arguments : nullptr, 1);
+                return findModuleInterface(gate, type, nullptr, 1);
         }
     }
     else if (gate->isName("upperLayerOut")) {
         if (type == typeid(IPassivePacketSink))
             return gate;
+        else
+            return findModuleInterface(gate, type, arguments);
     }
     else if (gate->isName("phys$o"))
         return findModuleInterface(gate, type, arguments); // forward all other interfaces

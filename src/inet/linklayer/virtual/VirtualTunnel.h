@@ -63,6 +63,8 @@ class INET_API VirtualTunnel : public queueing::PassivePacketSinkBase
 
   public:
     virtual ~VirtualTunnel() { delete socket; }
+
+//    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet
