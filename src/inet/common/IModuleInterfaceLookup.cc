@@ -16,7 +16,7 @@ cGate *findModuleInterface(cGate *gate, const std::type_info& type, const cObjec
     while (true) {
         gate = forward ? gate->getNextGate() : gate->getPreviousGate();
         if (gate == nullptr) {
-            EV_TRACE << "Module interface not found" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+            EV_TRACE << "Module interface not found" << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
             return nullptr;
         }
         else if (auto lookup = dynamic_cast<IModuleInterfaceLookup *>(gate->getOwner()))
