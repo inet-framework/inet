@@ -447,6 +447,11 @@ void Udp::setReuseAddress(SockDesc *sd, bool reuseAddr)
     sd->reuseAddr = reuseAddr;
 }
 
+void Udp::joinMulticastGroups(int socketId, const std::vector<L3Address>& multicastAddresses, const std::vector<int> interfaceIds)
+{
+    joinMulticastGroups(getOrCreateSocket(socketId), multicastAddresses, interfaceIds);
+}
+
 void Udp::joinMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multicastAddresses, const std::vector<int> interfaceIds)
 {
     for (uint32_t k = 0; k < multicastAddresses.size(); k++) {

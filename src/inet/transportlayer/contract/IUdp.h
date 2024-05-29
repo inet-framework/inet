@@ -16,7 +16,8 @@ class INET_API IUdp
 {
   public:
     virtual void bind(int socketId, const L3Address& localAddr, int localPort) = 0;
-    virtual void connect(int sockId, const L3Address& remoteAddr, int remotePort) = 0;
+    virtual void connect(int socketId, const L3Address& remoteAddr, int remotePort) = 0;
+    virtual void joinMulticastGroups(int socketId, const std::vector<L3Address>& multicastAddresses, const std::vector<int> interfaceIds) = 0;
 };
 
 } // namespace inet

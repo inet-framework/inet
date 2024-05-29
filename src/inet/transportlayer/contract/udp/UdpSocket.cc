@@ -167,14 +167,7 @@ void UdpSocket::setReuseAddress(bool value)
 
 void UdpSocket::joinMulticastGroup(const L3Address& multicastAddr, int interfaceId)
 {
-    auto request = new Request("joinMulticastGroups", UDP_C_SETOPTION);
-    UdpJoinMulticastGroupsCommand *ctrl = new UdpJoinMulticastGroupsCommand();
-    ctrl->setMulticastAddrArraySize(1);
-    ctrl->setMulticastAddr(0, multicastAddr);
-    ctrl->setInterfaceIdArraySize(1);
-    ctrl->setInterfaceId(0, interfaceId);
-    request->setControlInfo(ctrl);
-    sendToUDP(request);
+    udp->joinMulticastGroups(socketId, {multicastAddr}, {interfaceId});
 }
 
 void UdpSocket::leaveMulticastGroup(const L3Address& multicastAddr)

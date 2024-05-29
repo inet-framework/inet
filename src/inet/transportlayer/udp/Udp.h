@@ -156,6 +156,7 @@ class INET_API Udp : public TransportProtocolBase, public IUdp, public IPassiveP
     virtual void setMulticastOutputInterface(SockDesc *sd, int interfaceId);
     virtual void setMulticastLoop(SockDesc *sd, bool loop);
     virtual void setReuseAddress(SockDesc *sd, bool reuseAddr);
+    virtual void joinMulticastGroups(int socketId, const std::vector<L3Address>& multicastAddresses, const std::vector<int> interfaceIds) override;
     virtual void joinMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multicastAddresses, const std::vector<int> interfaceIds);
     virtual void leaveMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multicastAddresses);
     virtual void blockMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList);
