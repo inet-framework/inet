@@ -17,7 +17,6 @@ void ActivePacketSource::initialize(int stage)
     ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         initialProductionOffset = par("initialProductionOffset");
-        initialProductionOffset = 0; // KLUDGE
         productionIntervalParameter = &par("productionInterval");
         productionTimer = new ClockEvent("ProductionTimer");
         scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
