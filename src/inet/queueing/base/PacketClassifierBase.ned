@@ -30,5 +30,5 @@ simple PacketClassifierBase extends PacketProcessorBase
         @statistic[dataRate](title="data rate"; source=throughput(packetPushed); record=vector; unit=bps; interpolationmode=linear);
     gates:
         input in @interface[inet::queueing::IPassivePacketSink];
-        output out[];
+        output out[] @interface[inet::queueing::IActivePacketSource] @labels(push);
 }

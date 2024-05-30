@@ -31,5 +31,5 @@ simple PacketMultiplexer extends PacketProcessorBase like IActivePacketSource //
         @statistic[dataRate](title="data rate"; source=throughput(merge(packetPushed, packetPulled)); record=vector; unit=bps; interpolationmode=linear);
     gates:
         input in[] @interface[inet::queueing::IPassivePacketSink] @labels(push);
-        output out @labels(push);
+        output out @interface[inet::queueing::IActivePacketSource] @labels(push);
 }
