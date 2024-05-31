@@ -63,7 +63,9 @@ void UdpSocket::sendTo(Packet *pk, L3Address destAddr, int destPort)
     addressReq->setDestAddress(destAddr);
     if (destPort != -1)
         pk->addTagIfAbsent<L4PortReq>()->setDestPort(destPort);
-    sendToUDP(pk);
+    pk->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::udp);
+    pk->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    sink.pushPacket(pk);
     sockState = CONNECTED;
 }
 
@@ -81,10 +83,7 @@ void UdpSocket::close()
 {
     if (sockState == CLOSED)
         return;
-    auto request = new Request("close", UDP_C_CLOSE);
-    UdpCloseCommand *ctrl = new UdpCloseCommand();
-    request->setControlInfo(ctrl);
-    sendToUDP(request);
+    udp->close(socketId);
     sockState = CLOSED;
 }
 
@@ -251,18 +250,13 @@ void UdpSocket::setMulticastSourceFilter(int interfaceId, const L3Address& multi
 void UdpSocket::joinLocalMulticastGroups(MulticastGroupList mgl)
 {
     if (mgl.size() > 0) {
-        UdpJoinMulticastGroupsCommand *ctrl = new UdpJoinMulticastGroupsCommand();
-        ctrl->setMulticastAddrArraySize(mgl.size());
-        ctrl->setInterfaceIdArraySize(mgl.size());
-
-        for (unsigned int j = 0; j < mgl.size(); ++j) {
-            ctrl->setMulticastAddr(j, mgl[j].multicastAddr);
-            ctrl->setInterfaceId(j, mgl[j].interfaceId);
+        std::vector<L3Address> multicastAddresses;
+        std::vector<int> interfaceIds;
+        for (auto el : mgl) {
+            multicastAddresses.push_back(el.multicastAddr);
+            interfaceIds.push_back(el.interfaceId);
         }
-
-        auto request = new Request("joinMulticastGroups", UDP_C_SETOPTION);
-        request->setControlInfo(ctrl);
-        sendToUDP(request);
+        udp->joinMulticastGroups(socketId, multicastAddresses, interfaceIds);
     }
 }
 
