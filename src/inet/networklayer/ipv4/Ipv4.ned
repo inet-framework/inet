@@ -112,7 +112,7 @@ simple Ipv4 like IIpv4
         @statistic[packetDropNoRouteFound](title="packet drop: no route found"; source=packetDropReasonIsNoRouteFound(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropUndefined](title="packet drop: undefined"; source=packetDropReasonIsUndefined(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
-        input transportIn @interface[inet::queueing::IPassivePacketSink](protocol=ipv4; service=request) @labels(Ipv4ControlInfo/down,TcpHeader,UdpHeader,SctpHeader);
+        input transportIn @interface[inet::IIpv4] @interface[inet::queueing::IPassivePacketSink](protocol=ipv4; service=request) @labels(Ipv4ControlInfo/down,TcpHeader,UdpHeader,SctpHeader);
         output transportOut @labels(Ipv4ControlInfo/up,TcpHeader,UdpHeader,SctpHeader);
         input queueIn @interface[inet::queueing::IPassivePacketSink](protocol=ipv4; service=indication) @labels(Ipv4Header,ArpPacket,Ieee802Ctrl);
         output queueOut @labels(Ipv4Header,ArpPacket,Ieee802Ctrl);

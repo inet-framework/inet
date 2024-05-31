@@ -20,7 +20,7 @@ simple Icmp
         int quoteLength @mutable @unit(B) = default(8B); // Number of bytes from original packet to quote in ICMP reply
         @display("i=block/control");
     gates:
-        input transportIn;
+        input transportIn @interface[inet::queueing::IPassivePacketSink](protocol=icmpv4; service=indication);
         output transportOut;
         input ipIn @labels(Ipv4ControlInfo/up);  // Deliver ICMP packets
         output ipOut @labels(Ipv4ControlInfo/down);  // Towards the network
