@@ -20,7 +20,7 @@ import inet.power.contract.IEnergyConsumer;
 // transmitter model, a receiver model, and an energy consumer model.
 //
 // The radio model supports changing radio mode, transmission power, or bitrate
-// via ~ConfigureRadioCommand, or with direct C++ function calls.
+// via direct C++ function calls.
 //
 // `switchingTimes` parameter should be regarded as a 5x5 matrix:
 // <pre>

@@ -17,7 +17,7 @@ import inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase;
 //
 // This model provides sensible default values for the radio parameters to be
 // used in IEEE 802.11 simulations. It also supports switching channels via
-// ~ConfigureRadioCommand, or with direct C++ function calls.
+// via direct C++ function calls.
 //
 // @see ~Ieee80211ScalarRadio, ~Ieee80211DimensionalRadio.
 //

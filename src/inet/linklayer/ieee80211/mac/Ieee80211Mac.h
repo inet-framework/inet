@@ -71,8 +71,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase
 
     virtual void handleMessageWhenUp(cMessage *message) override;
 
-    /** @brief Handle commands (msg kind+control info) coming from upper layers */
-    virtual void handleUpperCommand(cMessage *msg) override;
+    virtual void setChannelNumber(int channelNumber);
 
     /** @brief Handle timer self messages */
     virtual void handleSelfMessage(cMessage *msg) override;

@@ -15,9 +15,7 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -206,12 +204,8 @@ void Ieee80211MgmtSta::clearAPList()
 void Ieee80211MgmtSta::changeChannel(int channelNum)
 {
     EV << "Tuning to channel #" << channelNum << "\n";
-
-    Ieee80211ConfigureRadioCommand *configureCommand = new Ieee80211ConfigureRadioCommand();
-    configureCommand->setChannelNumber(channelNum);
-    auto request = new Request("changeChannel", RADIO_C_CONFIGURE);
-    request->setControlInfo(configureCommand);
-    send(request, "macOut");
+    // TODO mac->setChannel(channelNum);
+    throw cRuntimeError("TODO");
 }
 
 void Ieee80211MgmtSta::beaconLost()

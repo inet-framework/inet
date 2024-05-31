@@ -25,7 +25,7 @@
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
@@ -194,38 +194,15 @@ void Ieee80211Mac::handleLowerPacket(Packet *packet)
     }
 }
 
-void Ieee80211Mac::handleUpperCommand(cMessage *msg)
+void Ieee80211Mac::setChannelNumber(int channelNumber)
 {
-    if (msg->getKind() == RADIO_C_CONFIGURE) {
-        EV_DEBUG << "Passing on command " << msg->getName() << " to physical layer\n";
-        if (pendingRadioConfigMsg != nullptr) {
-            // merge contents of the old command into the new one, then delete it
-            Ieee80211ConfigureRadioCommand *oldConfigureCommand = check_and_cast<Ieee80211ConfigureRadioCommand *>(pendingRadioConfigMsg->getControlInfo());
-            Ieee80211ConfigureRadioCommand *newConfigureCommand = check_and_cast<Ieee80211ConfigureRadioCommand *>(msg->getControlInfo());
-            if (newConfigureCommand->getChannelNumber() == -1 && oldConfigureCommand->getChannelNumber() != -1)
-                newConfigureCommand->setChannelNumber(oldConfigureCommand->getChannelNumber());
-            if (std::isnan(newConfigureCommand->getBitrate().get()) && !std::isnan(oldConfigureCommand->getBitrate().get()))
-                newConfigureCommand->setBitrate(oldConfigureCommand->getBitrate());
-            delete pendingRadioConfigMsg;
-            pendingRadioConfigMsg = nullptr;
-        }
-
-        if (rx->isMediumFree()) { // TODO this should be just the physical channel sense!!!!
-            EV_DEBUG << "Sending it down immediately\n";
-//            PhyControlInfo *phyControlInfo = dynamic_cast<PhyControlInfo *>(msg->getControlInfo());
-//            if (phyControlInfo)
-//                phyControlInfo->setAdaptiveSensitivity(true);
-            // end dynamic power
-            sendDown(msg);
-        }
-        else {
-            // TODO waiting potentially indefinitely?! wtf?!
-            EV_DEBUG << "Delaying " << msg->getName() << " until next IDLE or DEFER state\n";
-            pendingRadioConfigMsg = msg;
-        }
+    if (rx->isMediumFree()) { // TODO this should be just the physical channel sense!!!!
+        EV_DEBUG << "Sending it down immediately\n";
+        check_and_cast<Ieee80211Radio *>(radio.get())->setChannelNumber(channelNumber);
     }
     else {
-        throw cRuntimeError("Unrecognized command from mgmt layer: (%s)%s msgkind=%d", msg->getClassName(), msg->getName(), msg->getKind());
+        EV_DEBUG << "Delaying setChannelNumber() until next IDLE or DEFER state\n";
+        throw cRuntimeError("TODO");
     }
 }
 
@@ -328,13 +305,8 @@ void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, intva
 
 void Ieee80211Mac::configureRadioMode(IRadio::RadioMode radioMode)
 {
-    if (radio->getRadioMode() != radioMode) {
-        ConfigureRadioCommand *configureCommand = new ConfigureRadioCommand();
-        configureCommand->setRadioMode(radioMode);
-        auto request = new Request("configureRadioMode", RADIO_C_CONFIGURE);
-        request->setControlInfo(configureCommand);
-        sendDown(request);
-    }
+    if (radio->getRadioMode() != radioMode)
+        radio->setRadioMode(radioMode);
 }
 
 void Ieee80211Mac::sendUp(cMessage *msg)
