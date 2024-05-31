@@ -169,5 +169,12 @@ void UdpSink::handleCrashOperation(LifecycleOperation *operation)
     }
 }
 
+void UdpSink::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    socket.processMessage(packet);
+}
+
 } // namespace inet
 
