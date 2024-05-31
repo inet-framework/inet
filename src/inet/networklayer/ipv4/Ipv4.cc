@@ -832,7 +832,7 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
             EV_INFO << "Sending packet to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);
-            send(packetCopy, "transportOut");
+            transportSink.pushPacket(packetCopy);
             hasSocket = true;
         }
     }
@@ -1466,6 +1466,17 @@ void Ipv4::pushPacket(Packet *packet, const cGate *gate)
         handleIncomingDatagram(packet);
     else
         throw cRuntimeError("Unknown gate");
+}
+
+void Ipv4::bind(int socketId, const Protocol *protocol, Ipv4Address localAddress)
+{
+    SocketDescriptor *descriptor = new SocketDescriptor(socketId, protocol ? protocol->getId() : -1, localAddress);
+    socketIdToSocketDescriptor[socketId] = descriptor;
+}
+
+void Ipv4::connect(int socketId, const Ipv4Address& remoteAddress)
+{
+    socketIdToSocketDescriptor[socketId]->remoteAddress = remoteAddress;
 }
 
 } // namespace inet

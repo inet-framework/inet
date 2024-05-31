@@ -17,9 +17,9 @@
 namespace inet {
 
 Ipv4Socket::Ipv4Socket(cGate *outputGate) :
-    socketId(getActiveSimulationOrEnvir()->getUniqueNumber()),
-    outputGate(outputGate)
+    socketId(getActiveSimulationOrEnvir()->getUniqueNumber())
 {
+    setOutputGate(outputGate);
 }
 
 void Ipv4Socket::setCallback(INetworkSocket::ICallback *callback)
@@ -61,29 +61,22 @@ void Ipv4Socket::processMessage(cMessage *msg)
 void Ipv4Socket::bind(const Protocol *protocol, Ipv4Address localAddress)
 {
     ASSERT(!bound);
-    Ipv4SocketBindCommand *command = new Ipv4SocketBindCommand();
-    command->setProtocol(protocol);
-    command->setLocalAddress(localAddress);
-    auto request = new Request("bind", IPv4_C_BIND);
-    request->setControlInfo(command);
-    sendToOutput(request);
+    ipv4->bind(socketId, protocol, localAddress);
     bound = true;
     isOpen_ = true;
 }
 
 void Ipv4Socket::connect(Ipv4Address remoteAddress)
 {
-    Ipv4SocketConnectCommand *command = new Ipv4SocketConnectCommand();
-    command->setRemoteAddress(remoteAddress);
-    auto request = new Request("connect", IPv4_C_CONNECT);
-    request->setControlInfo(command);
-    sendToOutput(request);
+    ipv4->connect(socketId, remoteAddress);
     isOpen_ = true;
 }
 
 void Ipv4Socket::send(Packet *packet)
 {
-    sendToOutput(packet);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    packet->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    sink.pushPacket(packet);
 }
 
 void Ipv4Socket::sendTo(Packet *packet, Ipv4Address destAddress)
