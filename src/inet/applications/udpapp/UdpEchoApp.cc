@@ -97,5 +97,12 @@ void UdpEchoApp::handleCrashOperation(LifecycleOperation *operation)
     socket.setCallback(nullptr);
 }
 
+void UdpEchoApp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    socket.processMessage(packet);
+}
+
 } // namespace inet
 

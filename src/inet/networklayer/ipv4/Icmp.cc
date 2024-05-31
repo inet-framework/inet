@@ -50,6 +50,7 @@ void Icmp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
+        ipSink.reference(gate("ipOut"), true);
         crcMode = parseCrcMode(par("crcMode"), false);
         parseQuoteLengthParameter();
     }
@@ -321,7 +322,7 @@ void Icmp::sendToIP(Packet *msg)
     EV_INFO << "Sending " << msg << " to lower layer.\n";
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
-    send(msg, "ipOut");
+    ipSink.pushPacket(msg);
 }
 
 void Icmp::insertCrc(CrcMode crcMode, const Ptr<IcmpHeader>& icmpHeader, Packet *packet)
@@ -372,6 +373,13 @@ bool Icmp::verifyCrc(const Packet *packet)
         default:
             throw cRuntimeError("Unknown CRC mode");
     }
+}
+
+void Icmp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    processIcmpMessage(packet);
 }
 
 } // namespace inet
