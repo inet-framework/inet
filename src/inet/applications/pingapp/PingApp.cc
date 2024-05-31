@@ -11,11 +11,12 @@
 
 #include "inet/applications/pingapp/PingApp_m.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/EchoPacket_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
@@ -587,6 +588,32 @@ void PingApp::finish()
         cout << "stddev (ms): " << (rttStat.getStddev() * 1000.0) << "   variance:" << rttStat.getVariance() << endl;
         cout << "--------------------------------------------------------" << endl;
     }
+}
+
+void PingApp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    // KLUDGE: socket
+    socketDataArrived(nullptr, packet);
+}
+
+cGate *PingApp::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("trafficIn")) {
+        if (type == typeid(IPassivePacketSink))
+            return gate;
+    }
+    else if (gate->isName("socketIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr && socketMap.getSocketById(socketInd->getSocketId()) != nullptr)
+                return gate;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace inet
