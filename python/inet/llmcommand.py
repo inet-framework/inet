@@ -142,6 +142,29 @@ def invoke_llm(prompt, model):
     _logger.debug(f"Received result from LLM: {reply_text}")
     return reply_text
 
+def split_content(file_content, file_type):
+    if file_type == "tex":
+        return split_latex_by_sections(file_content)
+    else:
+        return [file_content]
+
+def split_latex_by_sections(latex_source):
+    section_pattern = re.compile(r'(\\section\{.*?\})', re.DOTALL)
+    # Split to list containing both the section headers and section contents
+    parts = section_pattern.split(latex_source)
+    if len(parts) < 2:
+        return [latex_source]
+
+    # Combine the initial content with the first section header and content
+    initial_content = parts[0]
+    sections = []
+    sections.append(initial_content + parts[1] + parts[2])
+
+    # Combine the rest of the section headers with their content
+    for i in range(3, len(parts), 2):
+        sections.append(parts[i] + parts[i+1])
+    return sections
+
 def extract(reply_text, original_content):
     content = reply_text
     if content.count("```") >= 2:
@@ -161,14 +184,16 @@ def apply_command_to_file(file_path, context_files, file_type, task, model, save
     print("   context files: " + " ".join(context_files))
     context = read_files(context_files)
 
-    prompt = create_prompt(file_content, context, task, file_type)
+    modified_content = ""
+    for i, part in enumerate(split_content(file_content, file_type)):
+        prompt = create_prompt(part, context, task, file_type)
 
-    if save_prompt:
-        with open(file_path+".prompt", 'w', encoding='utf-8') as file:
-            file.write(prompt)
+        if save_prompt:
+            with open(file_path+".prompt"+str(i), 'w', encoding='utf-8') as file:
+                file.write(prompt)
 
-    reply_text = invoke_llm(prompt, model)
-    modified_content = extract(reply_text, file_content)
+        reply_text = invoke_llm(prompt, model)
+        modified_content += extract(reply_text, part)
 
     with open(file_path, 'w', encoding='utf-8') as file:
         file.write(modified_content)
