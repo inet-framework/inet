@@ -142,6 +142,16 @@ def invoke_llm(prompt, model):
     _logger.debug(f"Received result from LLM: {reply_text}")
     return reply_text
 
+def extract(reply_text, original_content):
+    content = reply_text
+    if content.count("```") >= 2:
+        content = re.sub(r"^.*```.*?\n(.*\n)```.*$", r"\1", content, 1, re.DOTALL)
+
+    trailing_whitespace_len = len(original_content) - len(original_content.rstrip())
+    original_trailing_whitespace = original_content[-trailing_whitespace_len:]
+    content = content.rstrip() + original_trailing_whitespace
+    return content
+
 def apply_command_to_file(file_path, context_files, file_type, task, model, save_prompt=False):
     with open(file_path, 'r', encoding='utf-8') as file:
         file_content = file.read()
@@ -157,13 +167,8 @@ def apply_command_to_file(file_path, context_files, file_type, task, model, save
         with open(file_path+".prompt", 'w', encoding='utf-8') as file:
             file.write(prompt)
 
-    modified_content = invoke_llm(prompt, model)
-
-    if modified_content.count("```") == 2:
-        modified_content = modified_content.split("```")[1]
-
-    trailing_whitespace_len = len(file_content) - len(file_content.rstrip())
-    modified_content = modified_content.rstrip() + file_content[-trailing_whitespace_len:]
+    reply_text = invoke_llm(prompt, model)
+    modified_content = extract(reply_text, file_content)
 
     with open(file_path, 'w', encoding='utf-8') as file:
         file.write(modified_content)
