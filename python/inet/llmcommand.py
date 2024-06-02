@@ -185,7 +185,10 @@ def apply_command_to_file(file_path, context_files, file_type, task, model, save
     context = read_files(context_files)
 
     modified_content = ""
-    for i, part in enumerate(split_content(file_content, file_type)):
+    parts = split_content(file_content, file_type)
+    for i, part in enumerate(parts):
+        if len(parts) > 1:
+            print(f"   part  {i + 1}/{len(parts)}")
         prompt = create_prompt(part, context, task, file_type)
 
         if save_prompt:
@@ -202,11 +205,11 @@ def apply_command_to_file(file_path, context_files, file_type, task, model, save
 def apply_command_to_files(file_list, context_files, file_type, task, model, save_prompt=False):
     n = len(file_list)
     for i, file_path in enumerate(file_list):
-        # try:
+        try:
             print(f"Processing file {i + 1}/{n} {file_path}")
             apply_command_to_file(file_path, context_files, file_type, task, model, save_prompt)
-        # except Exception as e:
-        #     print(f"-> Exception: {e}")
+        except Exception as e:
+            print(f"-> Exception: {e}")
 
 def resolve_file_list(paths, file_type):
     file_extension_patterns = {
