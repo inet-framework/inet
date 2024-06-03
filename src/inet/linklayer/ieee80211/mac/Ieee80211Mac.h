@@ -71,8 +71,6 @@ class INET_API Ieee80211Mac : public MacProtocolBase
 
     virtual void handleMessageWhenUp(cMessage *message) override;
 
-    virtual void setChannelNumber(int channelNumber);
-
     /** @brief Handle timer self messages */
     virtual void handleSelfMessage(cMessage *msg) override;
 
@@ -95,6 +93,8 @@ class INET_API Ieee80211Mac : public MacProtocolBase
   public:
     Ieee80211Mac();
     virtual ~Ieee80211Mac();
+
+    virtual void setChannelNumber(int channelNumber);
 
     virtual FcsMode getFcsMode() const { return fcsMode; }
     virtual const MacAddress& getAddress() const { return mib->address; }
