@@ -142,40 +142,32 @@ def invoke_llm(prompt, model):
     _logger.debug(f"Received result from LLM: {reply_text}")
     return reply_text
 
-def split_content(file_content, file_type):
+def split_content(file_content, file_type, max_chars):
     if file_type == "tex":
-        return split_latex_by_sections(file_content)
+        return split_latex_by_sections(file_content, max_chars)
     elif file_type == "rst":
-        return split_rst_by_headings(file_content)
+        return split_rst_by_headings(file_content, max_chars)
     else:
         return [file_content]
 
-def split_latex_by_sections(latex_source):
-    section_pattern = re.compile(r'(\\section\{.*?\})', re.DOTALL)
-    # Split to list containing both the section headers and section contents
-    parts = section_pattern.split(latex_source)
-    if len(parts) < 2:
-        return [latex_source]
+def split_latex_by_sections(latex_source, max_chars):
+    # Regex to match section headers
+    pattern = r'(\\section\{.*?\})'
+    return split_by_regex(latex_source, pattern, max_chars)
 
-    # Combine the initial content with the first section header and content
-    initial_content = parts[0]
-    sections = []
-    sections.append(initial_content + parts[1] + parts[2])
-
-    # Combine the rest of the section headers with their content
-    for i in range(3, len(parts), 2):
-        sections.append(parts[i] + parts[i+1])
-    return sections
-
-def split_rst_by_headings(rst_source, max_chars=250):
+def split_rst_by_headings(rst_source, max_chars):
     # Regular expression to match RST headings (title and underline)
-    heading_pattern = re.compile(r'(^.*\n(={3,}|-{3,}|`{3,}|:{3,}|\+{3,}|\*{3,}|\#{3,}|\^{3,}|"{3,}|~{3,})$)', re.MULTILINE)
+    pattern = r'(^.*\n(={3,}|-{3,}|`{3,}|:{3,}|\+{3,}|\*{3,}|\#{3,}|\^{3,}|"{3,}|~{3,})$)'
+    return split_by_regex(rst_source, pattern, max_chars)
 
+def split_by_regex(text, regex_pattern, max_chars):
     # Split to chunks
-    matches = list(heading_pattern.finditer(rst_source))
-    split_indices = [0] + [match.start() for match in matches] + [len(rst_source)]
-    chunks = [rst_source[split_indices[i]:split_indices[i+1]] for i in range(1, len(split_indices)-1)]
+    regex = re.compile(regex_pattern, re.MULTILINE)
+    matches = list(regex.finditer(text))
+    split_indices = [0] + [match.start() for match in matches] + [len(text)]
+    chunks = [text[split_indices[i]:split_indices[i+1]] for i in range(1, len(split_indices)-1)]
 
+    # Merge smaller chunks
     parts = []
     current_part = ""
     for chunk in chunks:
@@ -203,14 +195,16 @@ def apply_command_to_file(file_path, context_files, file_type, task, model, save
 
     context_files = context_files or []
     context_files += find_additional_context_files(file_path, file_type, task)
-    print("   context files: " + " ".join(context_files))
+    if context_files:
+        print("   context files: " + " ".join(context_files))
     context = read_files(context_files)
 
     modified_content = ""
-    parts = split_content(file_content, file_type)
+    context_window = 1000  #TODO
+    parts = split_content(file_content, file_type, context_window)
     for i, part in enumerate(parts):
         if len(parts) > 1:
-            print(f"   part  {i + 1}/{len(parts)}")
+            print(f"   part {i + 1}/{len(parts)}")
         prompt = create_prompt(part, context, task, file_type)
 
         if save_prompt:
