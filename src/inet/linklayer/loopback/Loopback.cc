@@ -81,12 +81,5 @@ void Loopback::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void Loopback::pushPacket(Packet *packet, const cGate *gate)
-{
-    Enter_Method("pushPacket");
-    take(packet);
-    handleUpperPacket(packet);
-}
-
 } // namespace inet
 
