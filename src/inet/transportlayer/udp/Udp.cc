@@ -427,6 +427,11 @@ void Udp::setTos(SockDesc *sd, short tos)
     sd->tos = tos;
 }
 
+void Udp::setBroadcast(int socketId, bool broadcast)
+{
+    setBroadcast(getOrCreateSocket(socketId), broadcast);
+}
+
 void Udp::setBroadcast(SockDesc *sd, bool broadcast)
 {
     sd->isBroadcast = broadcast;
@@ -435,6 +440,11 @@ void Udp::setBroadcast(SockDesc *sd, bool broadcast)
 void Udp::setMulticastOutputInterface(SockDesc *sd, int interfaceId)
 {
     sd->multicastOutputInterfaceId = interfaceId;
+}
+
+void Udp::setMulticastLoop(int socketId, bool loop)
+{
+    setMulticastLoop(getOrCreateSocket(socketId), loop);
 }
 
 void Udp::setMulticastLoop(SockDesc *sd, bool loop)

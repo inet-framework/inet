@@ -130,11 +130,7 @@ void UdpSocket::setTos(short tos)
 
 void UdpSocket::setBroadcast(bool broadcast)
 {
-    auto request = new Request("setBroadcast", UDP_C_SETOPTION);
-    UdpSetBroadcastCommand *ctrl = new UdpSetBroadcastCommand();
-    ctrl->setBroadcast(broadcast);
-    request->setControlInfo(ctrl);
-    sendToUDP(request);
+    udp->setBroadcast(socketId, broadcast);
 }
 
 void UdpSocket::setMulticastOutputInterface(int interfaceId)
@@ -148,11 +144,7 @@ void UdpSocket::setMulticastOutputInterface(int interfaceId)
 
 void UdpSocket::setMulticastLoop(bool value)
 {
-    auto request = new Request("setMulticastLoop", UDP_C_SETOPTION);
-    UdpSetMulticastLoopCommand *ctrl = new UdpSetMulticastLoopCommand();
-    ctrl->setLoop(value);
-    request->setControlInfo(ctrl);
-    sendToUDP(request);
+    udp->setMulticastLoop(socketId, value);
 }
 
 void UdpSocket::setReuseAddress(bool value)

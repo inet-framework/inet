@@ -152,8 +152,10 @@ class INET_API Udp : public TransportProtocolBase, public IUdp, public IPassiveP
     virtual void setTimeToLive(SockDesc *sd, int ttl);
     virtual void setDscp(SockDesc *sd, short dscp);
     virtual void setTos(SockDesc *sd, short tos);
+    virtual void setBroadcast(int socketId, bool broadcast) override;
     virtual void setBroadcast(SockDesc *sd, bool broadcast);
     virtual void setMulticastOutputInterface(SockDesc *sd, int interfaceId);
+    virtual void setMulticastLoop(int socketId, bool loop) override;
     virtual void setMulticastLoop(SockDesc *sd, bool loop);
     virtual void setReuseAddress(SockDesc *sd, bool reuseAddr);
     virtual void joinMulticastGroups(int socketId, const std::vector<L3Address>& multicastAddresses, const std::vector<int> interfaceIds) override;
