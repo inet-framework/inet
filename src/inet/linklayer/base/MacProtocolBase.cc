@@ -42,7 +42,7 @@ void MacProtocolBase::initialize(int stage)
         upperLayerOutGateId = findGate("upperLayerOut");
         lowerLayerInGateId = findGate("lowerLayerIn");
         lowerLayerOutGateId = findGate("lowerLayerOut");
-        upperLayerSink.reference(gate("upperLayerOut"), true);
+        upperLayerSink.reference(gate("upperLayerOut"), false);
         if (hasGate("lowerLayerOut"))
             lowerLayerSink.reference(gate("lowerLayerOut"), true);
         currentTxFrame = nullptr;
