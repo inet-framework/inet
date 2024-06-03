@@ -145,6 +145,8 @@ def invoke_llm(prompt, model):
 def split_content(file_content, file_type):
     if file_type == "tex":
         return split_latex_by_sections(file_content)
+    elif file_type == "rst":
+        return split_rst_by_headings(file_content)
     else:
         return [file_content]
 
@@ -164,6 +166,26 @@ def split_latex_by_sections(latex_source):
     for i in range(3, len(parts), 2):
         sections.append(parts[i] + parts[i+1])
     return sections
+
+def split_rst_by_headings(rst_source, max_chars=250):
+    # Regular expression to match RST headings (title and underline)
+    heading_pattern = re.compile(r'(^.*\n(={3,}|-{3,}|`{3,}|:{3,}|\+{3,}|\*{3,}|\#{3,}|\^{3,}|"{3,}|~{3,})$)', re.MULTILINE)
+
+    # Split to chunks
+    matches = list(heading_pattern.finditer(rst_source))
+    split_indices = [0] + [match.start() for match in matches] + [len(rst_source)]
+    chunks = [rst_source[split_indices[i]:split_indices[i+1]] for i in range(1, len(split_indices)-1)]
+
+    parts = []
+    current_part = ""
+    for chunk in chunks:
+        if len(current_part) + len(chunk) > max_chars:
+            parts.append(current_part)
+            current_part = ""
+        current_part += chunk
+    parts.append(current_part)
+
+    return parts
 
 def extract(reply_text, original_content):
     content = reply_text
