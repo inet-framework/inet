@@ -42,11 +42,13 @@ bool MessageDispatcher::canPushPacket(Packet *packet, const cGate *inGate) const
 
 cGate *MessageDispatcher::handlePacket(Packet *packet, const cGate *inGate)
 {
+    const TagBase *tag = nullptr;
     const auto& dispatchProtocolReq = packet->findTag<DispatchProtocolReq>();
     const auto& interfaceReq = packet->findTag<InterfaceReq>();
     const auto& socketInd = packet->findTag<SocketInd>();
     cGate *referencedGate;
     if (socketInd != nullptr) {
+        tag = socketInd.get();
         auto it = socketIdMap.find(socketInd->getSocketId());
         if (it != socketIdMap.end())
             referencedGate = it->second;
@@ -65,6 +67,7 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, const cGate *inGate)
             else
                 dispatchProtocolReqArgument.setServicePrimitive(SP_REQUEST);
         }
+        tag = &dispatchProtocolReqArgument;
         auto key = Key(dispatchProtocolReq->getProtocol()->getId(), dispatchProtocolReqArgument.getServicePrimitive());
         auto it = protocolIdMap.find(key);
         if (it != protocolIdMap.end())
@@ -75,6 +78,7 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, const cGate *inGate)
         }
     }
     else if (interfaceReq != nullptr) {
+        tag = interfaceReq.get();
         auto it = interfaceIdMap.find(interfaceReq->getInterfaceId());
         if (it != interfaceIdMap.end())
             referencedGate = it->second;
@@ -86,7 +90,7 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, const cGate *inGate)
     else
         throw cRuntimeError("Dispatch information not found");
     if (referencedGate == nullptr)
-        throw cRuntimeError("Cannot find referenced module");
+        throw cRuntimeError("Cannot find referenced module using (%s) %s", tag->getClassName(), tag->str().c_str());
     return referencedGate;
 }
 
