@@ -64,7 +64,7 @@ void Loopback::handleUpperPacket(Packet *packet)
     packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
     packet->addTag<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     emit(packetSentToUpperSignal, packet);
-    send(packet, upperLayerOutGateId);
+    upperLayerSink.pushPacket(packet);
 }
 
 void Loopback::refreshDisplay() const
@@ -79,6 +79,13 @@ void Loopback::refreshDisplay() const
     sprintf(buf, "rcv:%ld snt:%ld", numRcvdOK, numSent);
 
     getDisplayString().setTagArg("t", 0, buf);
+}
+
+void Loopback::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleUpperPacket(packet);
 }
 
 } // namespace inet
