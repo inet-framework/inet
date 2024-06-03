@@ -199,9 +199,9 @@ def apply_command_to_file(file_path, context_files, file_type, task, model, save
         print("   context files: " + " ".join(context_files))
     context = read_files(context_files)
 
+    part_max_chars = get_llm_context_window(model)*2  - len(context) # assume average token length of 2 chars
     modified_content = ""
-    context_window = 1000  #TODO
-    parts = split_content(file_content, file_type, context_window)
+    parts = split_content(file_content, file_type, part_max_chars)
     for i, part in enumerate(parts):
         if len(parts) > 1:
             print(f"   part {i + 1}/{len(parts)}")
