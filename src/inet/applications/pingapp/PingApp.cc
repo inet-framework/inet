@@ -609,7 +609,7 @@ cGate *PingApp::lookupModuleInterface(cGate *gate, const std::type_info& type, c
     else if (gate->isName("socketIn")) {
         if (type == typeid(IPassivePacketSink)) {
             auto socketInd = dynamic_cast<const SocketInd *>(arguments);
-            if (socketInd != nullptr && socketMap.getSocketById(socketInd->getSocketId()) != nullptr)
+            if (socketInd != nullptr && socketMap.findSocketById(socketInd->getSocketId()) != nullptr)
                 return gate;
         }
     }
