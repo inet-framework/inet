@@ -34,7 +34,7 @@ simple UdpSink like IApp
         @statistic[rcvdPkSeqNo](title="received packet sequence number"; source="appPkSeqNo(packetReceived)"; record=vector; interpolationmode=none);
 
     gates:
-        input socketIn @interface[inet::queueing::IPassivePacketSink] @labels(UdpControlInfo/up);
+        input socketIn @labels(UdpControlInfo/up);
         output socketOut @labels(UdpControlInfo/down);
 }
 

@@ -9,6 +9,7 @@
 #define __INET_UDPECHOAPP_H
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
@@ -18,7 +19,7 @@ using namespace inet::queueing;
 /**
  * UDP application. See NED for more info.
  */
-class INET_API UdpEchoApp : public ApplicationBase, public UdpSocket::ICallback, public IPassivePacketSink
+class INET_API UdpEchoApp : public ApplicationBase, public UdpSocket::ICallback, public IPassivePacketSink, public IModuleInterfaceLookup
 {
   protected:
     UdpSocket socket;
@@ -46,6 +47,8 @@ class INET_API UdpEchoApp : public ApplicationBase, public UdpSocket::ICallback,
     virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet
