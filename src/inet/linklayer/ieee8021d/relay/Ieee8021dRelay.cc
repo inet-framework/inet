@@ -23,7 +23,7 @@ void Ieee8021dRelay::initialize(int stage)
 {
     MacRelayUnitBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        upperLayerSink.reference(gate("upperLayerOut"), true);
+        upperLayerSink.reference(gate("upperLayerOut"), false);
         numDispatchedBDPUFrames = numDispatchedNonBPDUFrames = numDeliveredBDPUsToSTP = 0;
         numReceivedBPDUsFromSTP = numReceivedNetworkFrames = 0;
 
