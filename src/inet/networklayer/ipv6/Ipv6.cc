@@ -79,6 +79,8 @@ void Ipv6::initialize(int stage)
         nd.reference(this, "ipv6NeighbourDiscoveryModule", true);
         icmp.reference(this, "icmpv6Module", true);
         tunneling.reference(this, "ipv6TunnelingModule", true);
+        transportSink.reference(gate("transportOut"), true);
+        queueSink.reference(gate("queueOut"), true);
 
         curFragmentId = 0;
         lastCheckTime = SIMTIME_ZERO;
@@ -218,42 +220,46 @@ void Ipv6::handleMessage(cMessage *msg)
         resolveMACAddressAndSendPacket(packet, interfaceId, nextHop, fromHL);
     }
     else {
-        // datagram from network or from ND: localDeliver and/or route
-        auto packet = check_and_cast<Packet *>(msg);
-        auto ipv6Header = packet->peekAtFront<Ipv6Header>();
-        packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::ipv6);
-        packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(ipv6Header);
-        bool fromHL = false;
-        if (packet->getArrivalGate()->isName("ndIn")) {
-            Ipv6NdControlInfo *ctrl = check_and_cast<Ipv6NdControlInfo *>(msg->removeControlInfo());
-            fromHL = ctrl->getFromHL();
-            Ipv6Address nextHop = ctrl->getNextHop();
-            int interfaceId = ctrl->getInterfaceId();
-            delete ctrl;
-            resolveMACAddressAndSendPacket(packet, interfaceId, nextHop, fromHL);
-        }
-        else
-            emit(packetReceivedFromLowerSignal, msg);
+        handleIncomingDatagram(check_and_cast<Packet *>(msg));
+    }
+}
 
-        // Do not handle header biterrors, because
-        // 1. Ipv6 header does not contain checksum for the header fields, each field is
-        //    validated when they are processed.
-        // 2. The Ethernet or PPP frame is dropped by the link-layer if there is a transmission error.
-        ASSERT(!packet->hasBitError());
+void Ipv6::handleIncomingDatagram(Packet *packet)
+{
+    // datagram from network or from ND: localDeliver and/or route
+    auto ipv6Header = packet->peekAtFront<Ipv6Header>();
+    packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::ipv6);
+    packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(ipv6Header);
+    bool fromHL = false;
+    if (packet->getArrivalGate()->isName("ndIn")) {
+        Ipv6NdControlInfo *ctrl = check_and_cast<Ipv6NdControlInfo *>(packet->removeControlInfo());
+        fromHL = ctrl->getFromHL();
+        Ipv6Address nextHop = ctrl->getNextHop();
+        int interfaceId = ctrl->getInterfaceId();
+        delete ctrl;
+        resolveMACAddressAndSendPacket(packet, interfaceId, nextHop, fromHL);
+    }
+    else
+        emit(packetReceivedFromLowerSignal, packet);
 
-        const NetworkInterface *fromIE = getSourceInterfaceFrom(packet);
-        const NetworkInterface *destIE = nullptr;
-        L3Address nextHop(Ipv6Address::UNSPECIFIED_ADDRESS);
-        if (fromHL) {
-            // remove control info
-            delete packet->removeControlInfo();
-            if (datagramLocalOutHook(packet) == INetfilter::IHook::ACCEPT)
-                datagramLocalOut(packet, destIE, nextHop.toIpv6());
-        }
-        else {
-            if (datagramPreRoutingHook(packet) == INetfilter::IHook::ACCEPT)
-                preroutingFinish(packet, fromIE, destIE, nextHop.toIpv6());
-        }
+    // Do not handle header biterrors, because
+    // 1. Ipv6 header does not contain checksum for the header fields, each field is
+    //    validated when they are processed.
+    // 2. The Ethernet or PPP frame is dropped by the link-layer if there is a transmission error.
+    ASSERT(!packet->hasBitError());
+
+    const NetworkInterface *fromIE = getSourceInterfaceFrom(packet);
+    const NetworkInterface *destIE = nullptr;
+    L3Address nextHop(Ipv6Address::UNSPECIFIED_ADDRESS);
+    if (fromHL) {
+        // remove control info
+        delete packet->removeControlInfo();
+        if (datagramLocalOutHook(packet) == INetfilter::IHook::ACCEPT)
+            datagramLocalOut(packet, destIE, nextHop.toIpv6());
+    }
+    else {
+        if (datagramPreRoutingHook(packet) == INetfilter::IHook::ACCEPT)
+            preroutingFinish(packet, fromIE, destIE, nextHop.toIpv6());
     }
 }
 
@@ -680,7 +686,7 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
             EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);
-            send(packetCopy, "transportOut");
+            transportSink.pushPacket(packetCopy);
             hasSocket = true;
         }
     }
@@ -713,7 +719,7 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
     else if (contains(upperProtocols, protocol)) {
         EV_INFO << "Passing up to protocol " << *protocol << "\n";
         emit(packetSentToUpperSignal, packet);
-        send(packet, "transportOut");
+        transportSink.pushPacket(packet);
     }
     else if (!hasSocket) {
         // send ICMP Destination Unreacheable error: protocol unavailable
@@ -734,7 +740,7 @@ void Ipv6::handleReceivedIcmp(Packet *msg)
     }
     else {
         EV_INFO << "ICMPv6 packet: passing it to ICMPv6 module\n";
-        send(msg, "transportOut");
+        transportSink.pushPacket(msg);
     }
 }
 
@@ -949,7 +955,7 @@ void Ipv6::sendDatagramToOutput(Packet *packet, const NetworkInterface *destIE, 
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
     else
         packet->removeTagIfPresent<DispatchProtocolReq>();
-    send(packet, "queueOut");
+    queueSink.pushPacket(packet);
 }
 
 bool Ipv6::determineOutputInterface(const Ipv6Address& destAddress, Ipv6Address& nextHop,
@@ -1250,6 +1256,18 @@ void Ipv6::sendIcmpError(Packet *packet, Icmpv6Type type, int code)
 {
     icmp->sendErrorMessage(packet, type, code);
     delete packet;
+}
+
+void Ipv6::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("transportIn"))
+        handleMessageFromHL(packet);
+    else if (gate->isName("queueIn"))
+        handleIncomingDatagram(packet);
+    else
+        throw cRuntimeError("Unknown gate");
 }
 
 } // namespace inet

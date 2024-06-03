@@ -24,12 +24,14 @@
 
 namespace inet {
 
+using namespace inet::queueing;
+
 class Icmpv6Header;
 
 /**
  * Ipv6 implementation.
  */
-class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public LifecycleUnsupported, public INetworkProtocol
+class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public LifecycleUnsupported, public INetworkProtocol, public IPassivePacketSink
 {
   public:
     /**
@@ -66,6 +68,8 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     ModuleRefByPar<Ipv6NeighbourDiscovery> nd;
     ModuleRefByPar<Icmpv6> icmp;
     ModuleRefByPar<Ipv6Tunneling> tunneling;
+    PassivePacketSinkRef transportSink;
+    PassivePacketSinkRef queueSink;
 
     // working vars
     unsigned int curFragmentId = -1; // counter, used to assign unique fragmentIds to datagrams
@@ -216,12 +220,21 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     virtual void dropQueuedDatagram(const Packet *packet) override;
     virtual void reinjectQueuedDatagram(const Packet *packet) override;
 
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
   protected:
     /**
      * Initialization
      */
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    virtual void handleIncomingDatagram(Packet *packet);
 
     /**
      * Determines the correct interface for the specified destination address.
