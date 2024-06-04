@@ -612,7 +612,7 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
         nrrCalculationSetCurrent++;
     }
 
-    neighborRateRatio = 1;
+//    neighborRateRatio = 1;
 
     // See 11.2.19.3.4 computePropTime() and Figure11-1 in IEEE 802.1AS-2020
     auto t4 = pDelayRespIngressTimestamp;
