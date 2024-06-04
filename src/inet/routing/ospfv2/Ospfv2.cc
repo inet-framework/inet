@@ -228,6 +228,13 @@ void Ospfv2::handleInterfaceDown(const NetworkInterface *ie)
     }
 }
 
+void Ospfv2::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
+}
+
 } // namespace ospfv2
 } // namespace inet
 
