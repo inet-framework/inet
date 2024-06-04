@@ -219,5 +219,12 @@ void MessageChecker::finish()
         throw cRuntimeError("Several message(s) have to be checked");
 }
 
+void MessageChecker::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
+}
+
 } // namespace inet
 

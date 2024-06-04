@@ -7,16 +7,25 @@
 #ifndef __INET_MESSAGECHECKER_H
 #define __INET_MESSAGECHECKER_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 
+using namespace inet::queueing;
+
 #define BUFSIZE    4096
 
-class INET_API MessageChecker : public cSimpleModule
+class INET_API MessageChecker : public cSimpleModule, public IPassivePacketSink
 {
   public:
     MessageChecker();
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("in"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("in"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
   protected:
     void initialize() override;
