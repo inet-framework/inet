@@ -124,6 +124,13 @@ void Bgp::handleTimer(cMessage *timer)
     }
 }
 
+void Bgp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
+}
+
 } // namespace bgp
 } // namespace inet
 

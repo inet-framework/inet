@@ -13,12 +13,15 @@
 #include "inet/routing/bgpv4/BgpCommon.h"
 #include "inet/routing/bgpv4/BgpRouter.h"
 #include "inet/routing/bgpv4/bgpmessage/BgpHeader_m.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 
 namespace bgp {
 
-class INET_API Bgp : public cSimpleModule, protected cListener, public LifecycleUnsupported
+using namespace inet::queueing;
+
+class INET_API Bgp : public cSimpleModule, protected cListener, public LifecycleUnsupported, public IPassivePacketSink
 {
   private:
     ModuleRefByPar<IIpv4RoutingTable> rt;
@@ -30,6 +33,13 @@ class INET_API Bgp : public cSimpleModule, protected cListener, public Lifecycle
   public:
     Bgp();
     virtual ~Bgp();
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
