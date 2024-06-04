@@ -173,12 +173,8 @@ void TcpSocket::close()
 
 void TcpSocket::abort()
 {
-    if (sockstate != NOT_BOUND && sockstate != BOUND && sockstate != CLOSED && sockstate != SOCKERROR) {
-        auto request = new Request("ABORT", TCP_C_ABORT);
-        TcpCommand *cmd = new TcpCommand();
-        request->setControlInfo(cmd);
-        sendToTcp(request);
-    }
+    if (sockstate != NOT_BOUND && sockstate != BOUND && sockstate != CLOSED && sockstate != SOCKERROR)
+        tcp->abort(connId);
     sockstate = CLOSED;
 }
 
@@ -205,11 +201,7 @@ void TcpSocket::requestStatus()
 
 void TcpSocket::setTimeToLive(int ttl)
 {
-    auto request = new Request("setTTL", TCP_C_SETOPTION);
-    TcpSetTimeToLiveCommand *cmd = new TcpSetTimeToLiveCommand();
-    cmd->setTtl(ttl);
-    request->setControlInfo(cmd);
-    sendToTcp(request);
+    tcp->setTimeToLive(connId, ttl);
 }
 
 void TcpSocket::setDscp(short dscp)

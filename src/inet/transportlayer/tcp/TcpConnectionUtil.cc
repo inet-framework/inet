@@ -354,7 +354,12 @@ void TcpConnection::sendIndicationToApp(int code, const int id)
     ind->setUserId(id);
     indication->addTag<SocketInd>()->setSocketId(socketId);
     indication->setControlInfo(ind);
-    sendToApp(indication);
+    if (code == TCP_I_CONNECTION_RESET)
+        callback->handleFailure(id);
+    else if (code == TCP_I_CLOSED)
+        callback->handleClosed();
+    else
+        throw cRuntimeError("TODO");
 }
 
 void TcpConnection::sendAvailableIndicationToApp()

@@ -491,15 +491,28 @@ class INET_API TcpSocket : public ISocket, public ITcp::ICallback
     //@}
 
     virtual void handleEstablished() override {
-        cb->socketEstablished(this);
+        if (cb)
+            cb->socketEstablished(this);
     }
 
     virtual void handleAvailable(TcpAvailableInfo *availableInfo) override {
-        cb->socketAvailable(this, availableInfo);
+        if (cb)
+            cb->socketAvailable(this, availableInfo);
+    }
+
+    virtual void handleClosed() override {
+        if (cb)
+            cb->socketClosed(this);
     }
 
     virtual void handlePeerClosed() override {
-        cb->socketPeerClosed(this);
+        if (cb)
+            cb->socketPeerClosed(this);
+    }
+
+    virtual void handleFailure(int code) override {
+        if (cb)
+            cb->socketFailure(this, code);
     }
 };
 

@@ -615,6 +615,26 @@ void Tcp::close(int socketId)
     handleUpperCommand(request);
 }
 
+void Tcp::abort(int socketId)
+{
+    auto request = new Request("ABORT", TCP_C_ABORT);
+    TcpCommand *cmd = new TcpCommand();
+    request->setControlInfo(cmd);
+    request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleUpperCommand(request);
+}
+
+void Tcp::setTimeToLive(int socketId, int ttl)
+{
+    // KLUDGE: temporarily use the same command mechanism internally, this should be replaced with method calls
+    auto request = new Request("setTTL", TCP_C_SETOPTION);
+    TcpSetTimeToLiveCommand *cmd = new TcpSetTimeToLiveCommand();
+    cmd->setTtl(ttl);
+    request->setControlInfo(cmd);
+    request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleUpperCommand(request);
+}
+
 void Tcp::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
