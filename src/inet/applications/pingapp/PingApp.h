@@ -111,8 +111,8 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
     virtual ~PingApp();
     int getPid() const { return pid; }
 
-    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("trafficIn"); }
-    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("trafficIn"); }
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("socketIn"); }
     virtual void pushPacket(Packet *packet, const cGate *gate) override;
     virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
