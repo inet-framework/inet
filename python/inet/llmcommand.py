@@ -70,19 +70,20 @@ def generate_command_text(task, file_type):
         "md": "The following Markdown file belongs to the OMNeT++ project.",
         "rst": "The following reStructuredText file  belongs to the OMNeT++ project. Blocks starting with '..' are comments, do not touch them!",
         "tex": "The following LaTeX file belongs to the OMNeT++ project.",
-        "ned": "The following is an OMNeT++ NED file. DO NOT CHANGE ANYTHING IN NON-COMMENT LINES."
+        "ned": "The following is an OMNeT++ NED file. DO NOT CHANGE ANYTHING IN NON-COMMENT LINES.",
+        "py":  "The following Python source file belongs to the OMNeT++ project.",
     }
-
+    what = "docstrings" if file_type == "py" else "text"
     task_commands = {
-        "proofread": "Fix any English mistakes in its text. Keep all markup and line breaks intact as much as possible!",
-        "improve-language": "Improve the English in the text. Keep all other markup and line breaks intact as much as possible.",
-        "eliminate-you-addressing": "At places where the text addresses the user as 'you', change it to neutral, e.g., to passive voice or 'one' as subject. Keep all markup and line breaks intact as much as possible.",
-        # "neddoc": "Write a new neddoc comment for the module in the NED file. NED comments use // marks instead of /*..*/."
-        "neddoc": """
-        You are working in the context of OMNeT++ and the INET Framework.
-        Your task is to write a single sentence capturing the most important aspect of the following simple module.
-        Ignore the operational details of the module and focus on the aspects that help the user understand what this module is good for.
-          """
+        "proofread": f"Fix any English mistakes in the {what}. Keep all markup, line breaks and indentation intact as much as possible!",
+        "improve-language": f"Improve the English in the {what}. Keep all other markup and line breaks intact as much as possible.",
+        "eliminate-you-addressing": f"At places where {what} addresses the user as 'you', change it to neutral, e.g., to passive voice or 'one' as subject. Keep all markup and line breaks intact as much as possible.",
+        "neddoc": "Write a new neddoc comment for the module in the NED file. NED comments use // marks instead of /*..*/.",
+        # "neddoc": """
+        # You are working in the context of OMNeT++ and the INET Framework.
+        # Your task is to write a single sentence capturing the most important aspect of the following simple module.
+        # Ignore the operational details of the module and focus on the aspects that help the user understand what this module is good for.
+        #   """
     }
 
     if file_type not in file_type_commands:
@@ -147,6 +148,8 @@ def split_content(file_content, file_type, max_chars):
         return split_latex_by_sections(file_content, max_chars)
     elif file_type == "rst":
         return split_rst_by_headings(file_content, max_chars)
+    elif file_type == "py":
+        return split_python_by_defs(file_content, max_chars)
     else:
         return [file_content]
 
@@ -159,6 +162,11 @@ def split_rst_by_headings(rst_source, max_chars):
     # Regular expression to match RST headings (title and underline)
     pattern = r'(^.*\n(={3,}|-{3,}|`{3,}|:{3,}|\+{3,}|\*{3,}|\#{3,}|\^{3,}|"{3,}|~{3,})$)'
     return split_by_regex(rst_source, pattern, max_chars)
+
+def split_python_by_defs(python_source, max_chars):
+    # Regular expression to match Python toplevel functions and classes
+    pattern = r'(^(def|class) )'
+    return split_by_regex(python_source, pattern, max_chars)
 
 def split_by_regex(text, regex_pattern, max_chars):
     # Split to chunks
@@ -229,10 +237,11 @@ def apply_command_to_files(file_list, context_files, file_type, task, model, sav
 
 def resolve_file_list(paths, file_type):
     file_extension_patterns = {
-        "md": r".*.md$",
+        "md":  r".*.md$",
         "rst": r".*.rst$",
         "tex": r".*.tex$",
-        "ned": r".*.ned$"
+        "ned": r".*.ned$",
+        "py":  r".*.py$"
     }
 
     if file_type not in file_extension_patterns:
@@ -259,7 +268,7 @@ def process_files(paths, context_files, file_type, task, model_name, save_prompt
 def main():
     parser = argparse.ArgumentParser(description="Process and improve specific types of files in a given directory or files.")
     parser.add_argument("paths", type=str, nargs='+', help="The directories or files to process.")
-    parser.add_argument("--file-type", type=str, choices=["md", "rst", "tex", "ned"], required=True, help="The type of files to process.")
+    parser.add_argument("--file-type", type=str, choices=["md", "rst", "tex", "ned", "py"], required=True, help="The type of files to process.")
     parser.add_argument("--task", type=str, choices=["proofread", "improve-language", "eliminate-you-addressing", "neddoc"], required=True, help="The task to perform on the files.")
     parser.add_argument("--model", type=str, default=None, help="The name of the LLM model to use.")
     parser.add_argument("--context", type=str, nargs='*', help="The context files to be used.")
