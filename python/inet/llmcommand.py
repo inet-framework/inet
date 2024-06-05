@@ -119,7 +119,7 @@ def find_additional_context_files(file_path, file_type, task):
         #         context_files.append(os.path.join(root, cc_fname))
 
         fname_without_ext = os.path.splitext(os.path.basename(file_path))[0]
-        grep_command = f"""rg --heading -g '*.cc' -g '*.h' -g '*.ini' -g '*.ned' -g '!{os.path.basename(file_path)}' -C 10 '{fname_without_ext}' $(git rev-parse --show-toplevel) > {file_path}.ctx"""
+        grep_command = f"""rg --heading -g '*.cc' -g '*.h' -g '*.ini' -g '*.ned' -g '!{os.path.basename(file_path)}' -C 20 '{fname_without_ext}' $(git rev-parse --show-toplevel) | head -n 3000 > {file_path}.ctx"""
         os.system(grep_command)
         context_files.append(file_path + ".ctx")
 
