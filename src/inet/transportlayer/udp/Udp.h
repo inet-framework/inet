@@ -146,7 +146,7 @@ class INET_API Udp : public TransportProtocolBase, public IUdp, public IPassiveP
     virtual void bind(int sockId, const L3Address& localAddr, int localPort) override;
     virtual void connect(int sockId, const L3Address& remoteAddr, int remotePort) override;
     virtual void close(int sockId) override;
-    virtual void destroySocket(int sockId);
+    virtual void destroy(int sockId) override;
     void destroySocket(SocketsByIdMap::iterator it);
     virtual void clearAllSockets();
     virtual void setTimeToLive(SockDesc *sd, int ttl);

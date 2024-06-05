@@ -278,7 +278,7 @@ void Udp::handleUpperCommand(cMessage *msg)
 
         case UDP_C_DESTROY: {
             int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
-            destroySocket(socketId);
+            destroy(socketId);
             break;
         }
 
@@ -910,7 +910,7 @@ void Udp::destroySocket(SocketsByIdMap::iterator it)
     delete sd;
 }
 
-void Udp::destroySocket(int sockId)
+void Udp::destroy(int sockId)
 {
     // remove from socketsByIdMap
     auto it = socketsByIdMap.find(sockId);
