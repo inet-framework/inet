@@ -1479,5 +1479,29 @@ void Ipv4::connect(int socketId, const Ipv4Address& remoteAddress)
     socketIdToSocketDescriptor[socketId]->remoteAddress = remoteAddress;
 }
 
+void Ipv4::close(int socketId)
+{
+    auto it = socketIdToSocketDescriptor.find(socketId);
+    if (it != socketIdToSocketDescriptor.end()) {
+        delete it->second;
+        socketIdToSocketDescriptor.erase(it);
+        // TODO KLUDGE
+//        auto indication = new Indication("closed", IPv4_I_SOCKET_CLOSED);
+//        auto ctrl = new Ipv4SocketClosedIndication();
+//        indication->setControlInfo(ctrl);
+//        indication->addTag<SocketInd>()->setSocketId(socketId);
+//        send(indication, "transportOut");
+    }
+}
+
+void Ipv4::destroy(int socketId)
+{
+    auto it = socketIdToSocketDescriptor.find(socketId);
+    if (it != socketIdToSocketDescriptor.end()) {
+        delete it->second;
+        socketIdToSocketDescriptor.erase(it);
+    }
+}
+
 } // namespace inet
 

@@ -89,19 +89,13 @@ void Ipv4Socket::sendTo(Packet *packet, Ipv4Address destAddress)
 void Ipv4Socket::close()
 {
     ASSERT(bound);
-    Ipv4SocketCloseCommand *command = new Ipv4SocketCloseCommand();
-    auto request = new Request("close", IPv4_C_CLOSE);
-    request->setControlInfo(command);
-    sendToOutput(request);
+    ipv4->close(socketId);
 }
 
 void Ipv4Socket::destroy()
 {
     ASSERT(bound);
-    auto command = new Ipv4SocketDestroyCommand();
-    auto request = new Request("destroy", IPv4_C_DESTROY);
-    request->setControlInfo(command);
-    sendToOutput(request);
+    ipv4->destroy(socketId);
 }
 
 void Ipv4Socket::sendToOutput(cMessage *message)

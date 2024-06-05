@@ -17,6 +17,8 @@ class INET_API IIpv4
   public:
     virtual void bind(int socketId, const Protocol *protocol, Ipv4Address localAddress) = 0;
     virtual void connect(int socketId, const Ipv4Address& remoteAddress) = 0;
+    virtual void close(int socketId) = 0;
+    virtual void destroy(int socketId) = 0;
 };
 
 } // namespace inet

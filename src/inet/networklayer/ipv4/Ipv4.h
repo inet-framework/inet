@@ -296,6 +296,8 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public IIpv4
 
     virtual void bind(int socketId, const Protocol *protocol, Ipv4Address localAddress) override;
     virtual void connect(int socketId, const Ipv4Address& remoteAddress) override;
+    virtual void close(int socketId) override;
+    virtual void destroy(int socketId) override;
 
   protected:
     virtual void start();
