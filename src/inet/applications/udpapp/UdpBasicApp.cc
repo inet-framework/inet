@@ -46,6 +46,10 @@ void UdpBasicApp::initialize(int stage)
         dontFragment = par("dontFragment");
         if (stopTime >= CLOCKTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
+
+        socket.setOutputGate(gate("socketOut"));
+        socket.setCallback(this);
+
         selfMsg = new ClockEvent("sendTimer");
     }
 }
@@ -89,7 +93,6 @@ void UdpBasicApp::setSocketOptions()
         MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this)->collectMulticastGroups();
         socket.joinLocalMulticastGroups(mgl);
     }
-    socket.setCallback(this);
 }
 
 L3Address UdpBasicApp::chooseDestAddr()
@@ -121,7 +124,6 @@ void UdpBasicApp::sendPacket()
 
 void UdpBasicApp::processStart()
 {
-    socket.setOutputGate(gate("socketOut"));
     const char *localAddress = par("localAddress");
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
     setSocketOptions();
