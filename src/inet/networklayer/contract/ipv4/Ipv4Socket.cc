@@ -19,7 +19,8 @@ namespace inet {
 Ipv4Socket::Ipv4Socket(cGate *outputGate) :
     socketId(getActiveSimulationOrEnvir()->getUniqueNumber())
 {
-    setOutputGate(outputGate);
+    if (outputGate != nullptr)
+        setOutputGate(outputGate);
 }
 
 void Ipv4Socket::setCallback(INetworkSocket::ICallback *callback)
