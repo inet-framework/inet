@@ -1665,7 +1665,7 @@ void PimDm::sendToIP(Packet *packet, Ipv4Address srcAddr, Ipv4Address destAddr, 
     addresses->setSrcAddress(srcAddr);
     addresses->setDestAddress(destAddr);
     packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
-    send(packet, "ipOut");
+    ipSink.pushPacket(packet);
 }
 
 //----------------------------------------------------------------------------
