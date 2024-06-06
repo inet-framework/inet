@@ -57,10 +57,7 @@ void TunSocket::open(int interfaceId)
 {
     isOpen_ = true;
     this->interfaceId = interfaceId;
-    auto request = new Request("OPEN", TUN_C_OPEN);
-    TunOpenCommand *command = new TunOpenCommand();
-    request->setControlInfo(command);
-    sendToTun(request);
+    tun->open(socketId);
 }
 
 void TunSocket::send(Packet *packet)

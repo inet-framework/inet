@@ -8,8 +8,10 @@
 #ifndef __INET_TUNSOCKET_H
 #define __INET_TUNSOCKET_H
 
+#include "inet/common/ModuleRefByGate.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
+#include "inet/linklayer/tun/ITun.h"
 
 namespace inet {
 
@@ -24,6 +26,7 @@ class INET_API TunSocket : public ISocket
     };
 
   protected:
+    ModuleRefByGate<ITun> tun;
     int socketId = -1;
     int interfaceId = -1;
     ICallback *callback = nullptr;
@@ -42,7 +45,10 @@ class INET_API TunSocket : public ISocket
      * Sets the gate on which to send raw packets. Must be invoked before socket
      * can be used. Example: <tt>socket.setOutputGate(gate("ipOut"));</tt>
      */
-    void setOutputGate(cGate *outputGate) { this->outputGate = outputGate; }
+    void setOutputGate(cGate *outputGate) {
+        this->outputGate = outputGate;
+        tun.reference(outputGate, true);
+    }
 
     /**
      * Sets a callback object, to be used with processMessage().
