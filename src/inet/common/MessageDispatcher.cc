@@ -189,7 +189,12 @@ cGate *MessageDispatcher::forwardLookupModuleInterface(const cGate *gate, const 
                     if (!resultIsMessageDispatcher && referencedModuleIsMessageDispatcher)
                         break;
                     else if (referencedModuleIsMessageDispatcher || (!resultIsMessageDispatcher && !referencedModuleIsMessageDispatcher))
-                        throw cRuntimeError("Referenced module is ambiguous for type %s (%s, %s)", opp_typename(type), check_and_cast<cModule *>(result->getOwnerModule())->getFullPath().c_str(), check_and_cast<cModule *>(referencedModule)->getFullPath().c_str());
+                        throw cRuntimeError("Referenced module is ambiguous for type %s (%s, %s) using (%s) %s",
+                                opp_typename(type),
+                                check_and_cast<cModule *>(result->getOwnerModule())->getFullPath().c_str(),
+                                check_and_cast<cModule *>(referencedModule)->getFullPath().c_str(),
+                                arguments->getClassName(),
+                                arguments->str().c_str());
                 }
                 result = referencedGate;
             }
