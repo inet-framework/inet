@@ -160,12 +160,7 @@ void UdpSocket::joinMulticastGroup(const L3Address& multicastAddr, int interface
 
 void UdpSocket::leaveMulticastGroup(const L3Address& multicastAddr)
 {
-    auto request = new Request("leaveMulticastGroups", UDP_C_SETOPTION);
-    UdpLeaveMulticastGroupsCommand *ctrl = new UdpLeaveMulticastGroupsCommand();
-    ctrl->setMulticastAddrArraySize(1);
-    ctrl->setMulticastAddr(0, multicastAddr);
-    request->setControlInfo(ctrl);
-    sendToUDP(request);
+    udp->leaveMulticastGroups(socketId, {multicastAddr});
 }
 
 void UdpSocket::blockMulticastSources(int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList)

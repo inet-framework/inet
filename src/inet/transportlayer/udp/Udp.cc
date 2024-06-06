@@ -518,6 +518,11 @@ void Udp::addMulticastAddressToInterface(NetworkInterface *ie, const L3Address& 
         ie->joinMulticastGroup(multicastAddr);
 }
 
+void Udp::leaveMulticastGroups(int socketId, const std::vector<L3Address>& multicastAddresses)
+{
+    leaveMulticastGroups(getSocketById(socketId), multicastAddresses);
+}
+
 void Udp::leaveMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multicastAddresses)
 {
     std::vector<L3Address> empty;
