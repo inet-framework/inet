@@ -75,12 +75,12 @@ def generate_command_text(task, file_type):
     }
     what = "docstrings" if file_type == "py" else "text"
     task_commands = {
-        "proofread": f"Fix any English mistakes in the {what}. Keep all markup, line breaks and indentation intact as much as possible!",
-        "improve-language": f"Improve the English in the {what}. Keep all other markup and line breaks intact as much as possible.",
-        "eliminate-you-addressing": f"At places where {what} addresses the user as 'you', change it to neutral, e.g., to passive voice or 'one' as subject. Keep all markup and line breaks intact as much as possible.",
-        "neddoc": "Write a new neddoc comment for the module in the NED file. NED comments use // marks instead of /*..*/.",
+        "proofread": f"You are an editor of technical documentation. You are tireless and diligent. Fix any English mistakes in the {what}. Keep all markup, line breaks and indentation intact as much as possible!",
+        "improve-language": f"You are an editor of technical documentation. You are tireless and diligent. Improve the English in the {what}. Keep all other markup and line breaks intact as much as possible.",
+        "eliminate-you-addressing": f"You are an editor of technical documentation. You are tireless and diligent. At places where {what} addresses the user as 'you', change it to neutral, e.g., to passive voice or 'one' as subject. Keep all markup and line breaks intact as much as possible.",
+        "neddoc": "You are a technical writer. You are tireless and diligent. Write a new neddoc comment for the module in the NED file. NED comments use // marks instead of /*..*/.",
         # "neddoc": """
-        # You are working in the context of OMNeT++ and the INET Framework.
+        # You are a technical writer.  You are tireless and diligent. You are working in the context of OMNeT++ and the INET Framework.
         # Your task is to write a single sentence capturing the most important aspect of the following simple module.
         # Ignore the operational details of the module and focus on the aspects that help the user understand what this module is good for.
         #   """
