@@ -197,7 +197,7 @@ def extract(reply_text, original_content):
     content = content.rstrip() + original_trailing_whitespace
     return content
 
-def apply_command_to_file(file_path, context_files, file_type, task, model, save_prompt=False):
+def apply_command_to_file(file_path, context_files, file_type, task, model, chunk_size=None, save_prompt=False):
     with open(file_path, 'r', encoding='utf-8') as file:
         file_content = file.read()
 
@@ -207,9 +207,10 @@ def apply_command_to_file(file_path, context_files, file_type, task, model, save
         print("   context files: " + " ".join(context_files))
     context = read_files(context_files)
 
-    part_max_chars = get_llm_context_window(model)*2  - len(context) # assume average token length of 2 chars
+    if chunk_size is None:
+        chunk_size = get_llm_context_window(model)*2  - len(context) # assume average token length of 2 chars
     modified_content = ""
-    parts = split_content(file_content, file_type, part_max_chars)
+    parts = split_content(file_content, file_type, chunk_size)
     for i, part in enumerate(parts):
         if len(parts) > 1:
             print(f"   part {i + 1}/{len(parts)}")
@@ -226,12 +227,12 @@ def apply_command_to_file(file_path, context_files, file_type, task, model, save
         file.write(modified_content)
     _logger.debug(f"Modified {file_path} successfully.")
 
-def apply_command_to_files(file_list, context_files, file_type, task, model, save_prompt=False):
+def apply_command_to_files(file_list, context_files, file_type, task, model, chunk_size=None, save_prompt=False):
     n = len(file_list)
     for i, file_path in enumerate(file_list):
         try:
             print(f"Processing file {i + 1}/{n} {file_path}")
-            apply_command_to_file(file_path, context_files, file_type, task, model, save_prompt)
+            apply_command_to_file(file_path, context_files, file_type, task, model, chunk_size=chunk_size, save_prompt=save_prompt)
         except Exception as e:
             print(f"-> Exception: {e}")
 
@@ -255,7 +256,7 @@ def resolve_file_list(paths, file_type):
             file_list.append(path)
     return file_list
 
-def process_files(paths, context_files, file_type, task, model_name, save_prompt=False):
+def process_files(paths, context_files, file_type, task, model_name, chunk_size=None, save_prompt=False):
     if not model_name:
         model_name = get_recommended_model(task)
     model = llm.get_model(model_name)
@@ -263,7 +264,7 @@ def process_files(paths, context_files, file_type, task, model_name, save_prompt
     file_list = resolve_file_list(paths, file_type)
     print("Files to process: " + " ".join(file_list))
     print("Using LLM: " + model_name)
-    apply_command_to_files(file_list, context_files, file_type, task, model, save_prompt=save_prompt)
+    apply_command_to_files(file_list, context_files, file_type, task, model, chunk_size=chunk_size, save_prompt=save_prompt)
 
 def main():
     parser = argparse.ArgumentParser(description="Process and improve specific types of files in a given directory or files.")
@@ -272,10 +273,11 @@ def main():
     parser.add_argument("--task", type=str, choices=["proofread", "improve-language", "eliminate-you-addressing", "neddoc"], required=True, help="The task to perform on the files.")
     parser.add_argument("--model", type=str, default=None, help="The name of the LLM model to use.")
     parser.add_argument("--context", type=str, nargs='*', help="The context files to be used.")
+    parser.add_argument("--chunk-size", type=int, default=None, help="The maximum number of characters to be sent to the LLM model at once.")
     parser.add_argument("--save-prompt", action='store_true', help="Save the LLM prompt for each input file as <filename>.prompt.")
 
     args = parser.parse_args()
-    process_files(args.paths, args.context, args.file_type, args.task, args.model, save_prompt=args.save_prompt)
+    process_files(args.paths, args.context, args.file_type, args.task, args.model, chunk_size=args.chunk_size, save_prompt=args.save_prompt)
 
 if __name__ == "__main__":
     main()
