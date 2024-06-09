@@ -8,13 +8,11 @@
 #ifndef __INET_SETTABLECLOCK_H
 #define __INET_SETTABLECLOCK_H
 
-#include "inet/clock/model/OscillatorBasedClock.h"
-#include "inet/common/scenario/IScriptable.h"
 #include "inet/clock/model/ISettableClock.h"
 
 namespace inet {
 
-class INET_API SettableClock : public OscillatorBasedClock, public IScriptable, public ISettableClock
+class INET_API SettableClock : public ISettableClock
 {
   protected:
     OverdueClockEventHandlingMode defaultOverdueClockEventHandlingMode = UNSPECIFIED;
