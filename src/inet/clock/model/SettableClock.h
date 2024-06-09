@@ -10,10 +10,11 @@
 
 #include "inet/clock/model/OscillatorBasedClock.h"
 #include "inet/common/scenario/IScriptable.h"
+#include "inet/clock/model/ISettableClock.h"
 
 namespace inet {
 
-class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
+class INET_API SettableClock : public OscillatorBasedClock, public IScriptable, public ISettableClock
 {
   protected:
     OverdueClockEventHandlingMode defaultOverdueClockEventHandlingMode = UNSPECIFIED;
@@ -36,7 +37,7 @@ class INET_API SettableClock : public OscillatorBasedClock, public IScriptable
      * Sets the clock time immediately to the given value. Greater than 1 oscillator
      * compensation factor means the clock measures time faster.
      */
-    virtual void setClockTime(clocktime_t time, ppm oscillatorCompensation, bool resetOscillator);
+    virtual void setClockTime(clocktime_t time, ppm oscillatorCompensation, bool resetOscillator) override;
 };
 
 } // namespace inet

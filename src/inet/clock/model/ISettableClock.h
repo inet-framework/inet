@@ -16,12 +16,15 @@
 #ifndef INET_CLOCK_MODEL_ISETTABLECLOCK_H_
 #define INET_CLOCK_MODEL_ISETTABLECLOCK_H_
 
+#include "inet/clock/base/ClockBase.h"
+
 namespace inet {
 
-class ISettableClock {
+class ISettableClock : public ClockBase {
+
 public:
-    ISettableClock();
-    virtual ~ISettableClock();
+
+    virtual void setClockTime(clocktime_t newClockTime) = 0;
 };
 
 } /* namespace inet */

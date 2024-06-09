@@ -17,13 +17,7 @@
 
 namespace inet {
 
-ISettableClock::ISettableClock() {
-    // TODO Auto-generated constructor stub
+    void setClockTime(clocktime_t newClockTime){}
 
-}
-
-ISettableClock::~ISettableClock() {
-    // TODO Auto-generated destructor stub
-}
 
 } /* namespace inet */
