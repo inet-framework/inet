@@ -1,20 +1,14 @@
 //
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+// Copyright (C) 2020 OpenSim Ltd.
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
+//
 
-#ifndef INET_CLOCK_MODEL_ISETTABLECLOCK_H_
-#define INET_CLOCK_MODEL_ISETTABLECLOCK_H_
+#ifndef __INET_ISETTABLECLOCK_H
+#define __INET_ISETTABLECLOCK_H
+
+#include "inet/clock/model/OscillatorBasedClock.h"
+#include "inet/common/scenario/IScriptable.h"
 
 #include "inet/clock/base/ClockBase.h"
 
@@ -22,11 +16,13 @@ namespace inet {
 
 class ISettableClock : public ClockBase {
 
-public:
+protected:
+    virtual void initialize(int stage) override;
 
+public:
     virtual void setClockTime(clocktime_t newClockTime) = 0;
 };
 
 } /* namespace inet */
 
-#endif /* INET_CLOCK_MODEL_ISETTABLECLOCK_H_ */
+#endif

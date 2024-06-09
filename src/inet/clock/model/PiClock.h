@@ -7,13 +7,11 @@
 #ifndef __INET_PICLOCK_H
 #define __INET_PICLOCK_H
 
-#include "inet/clock/model/OscillatorBasedClock.h"
-#include "inet/clock/model/SettableClock.h"
-#include "inet/common/scenario/IScriptable.h"
+#include "inet/clock/model/ISettableClock.h"
 
 namespace inet {
 
-class INET_API PiClock : public SettableClock
+class INET_API PiClock : public ISettableClock
 {
   protected:
     static simsignal_t driftSignal;
