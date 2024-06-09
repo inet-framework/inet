@@ -6,18 +6,13 @@
 
 #include "inet/clock/model/ISettableClock.h"
 
-Define_Module(ISettableClock);
 
 namespace inet {
+    Define_Module(ISettableClock);
 
     void ISettableClock::initialize(int stage)
     {
-        ISettableClock::initialize(stage);
-        if (stage == INITSTAGE_LOCAL) {
-
-        }
+        OscillatorBasedClock::initialize(stage);
     }
-
-    void setClockTime(clocktime_t newClockTime){}
 
 } /* namespace inet */

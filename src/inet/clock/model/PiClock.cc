@@ -20,7 +20,7 @@ simsignal_t PiClock::driftSignal = cComponent::registerSignal("drift");
 
 void PiClock::initialize(int stage)
 {
-    SettableClock::initialize(stage);
+//    ISettableClock::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         offsetThreshold = &par("offsetThreshold");
         kp = par("kp");
