@@ -19,22 +19,13 @@ protected:
     ppm oscillatorCompensation = ppm(0); // 0 means no compensation, higher value means faster clock, e.g. 100 ppm value means the clock compensates 100 microseconds for every second in clock time
                                          // 100 ppm value means the oscillator tick length is compensated to be smaller by a factor of (1 / (1 + 100 / 1E+6)) than the actual tick length measured in clock time
 
-  protected:
+protected:
     virtual void initialize(int stage) override;
-
-    virtual OverdueClockEventHandlingMode getOverdueClockEventHandlingMode(ClockEvent *event) const = 0;
-    virtual simtime_t handleOverdueClockEvent(ClockEvent *event, simtime_t t) = 0;
-
-    // IScriptable implementation
-    virtual void processCommand(const cXMLElement& node) override;
-
-  public:
-    virtual ppm getOscillatorCompensation() const override { return oscillatorCompensation; }
 
 
 public:
-    virtual void setClockTime(clocktime_t newClockTime) = 0;
-    virtual void setClockTime(clocktime_t time, ppm oscillatorCompensation, bool resetOscillator) = 0;
+
+    virtual clocktime_t setClockTime(clocktime_t newClockTime) = 0;
 };
 
 } /* namespace inet */

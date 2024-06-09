@@ -22,8 +22,8 @@ class INET_API SettableClock : public ISettableClock
   protected:
     virtual void initialize(int stage) override;
 
-    virtual OverdueClockEventHandlingMode getOverdueClockEventHandlingMode(ClockEvent *event) const;
-    virtual simtime_t handleOverdueClockEvent(ClockEvent *event, simtime_t t);
+    virtual OverdueClockEventHandlingMode getOverdueClockEventHandlingMode(ClockEvent *event) const ;
+    virtual simtime_t handleOverdueClockEvent(ClockEvent *event, simtime_t t) ;
 
     // IScriptable implementation
     virtual void processCommand(const cXMLElement& node) override;
@@ -35,7 +35,7 @@ class INET_API SettableClock : public ISettableClock
      * Sets the clock time immediately to the given value. Greater than 1 oscillator
      * compensation factor means the clock measures time faster.
      */
-    virtual void setClockTime(clocktime_t time, ppm oscillatorCompensation, bool resetOscillator) override;
+    virtual void setClockTime(clocktime_t time, ppm oscillatorCompensation, bool resetOscillator);
 };
 
 } // namespace inet

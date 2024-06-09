@@ -50,7 +50,7 @@ class INET_API PiClock : public ISettableClock
      * - newClockTime, if the servo is in the initial phase
      * - the old clock time, if the servo is in the PI phase (only the oscillator compensation is updated)
      */
-    clocktime_t setClockTime(clocktime_t newClockTime);
+    clocktime_t setClockTime(clocktime_t newClockTime) override;
 };
 
 } // namespace inet
