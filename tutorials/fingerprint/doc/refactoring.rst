@@ -9,12 +9,12 @@ Easy to Handle Changes
 Some changes in the model don't change fingerprints at all, and are unlikely to cause regressions.
 These changes include renaming C++ classes, functions and variables, and extracting methods or classes, refactoring algorithms.
 
-For example, we extract some part of the ``handleUpperCommand()`` function in the :ned:`Udp` module to a new function:
+For example, we extracted a part of the ``handleUpperCommand()`` function in the :ned:`Udp` module to a new function:
 
 .. literalinclude:: ../sources/Udp.cc.extract
    :diff: ../sources/Udp.cc.orig
 
-The refactoring doesn't change the fingerprint because the code is functionally the same; it doesn't create any new events or data packets, and it doesn't change timing, or anything that the fingerprint calculation takes into account:
+The refactoring doesn't change the fingerprint because the code is functionally the same. It doesn't create any new events or data packets, and it doesn't change timing or anything that the fingerprint calculation takes into account:
 
 .. code-block:: fp
 

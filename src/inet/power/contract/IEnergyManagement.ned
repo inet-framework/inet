@@ -8,8 +8,8 @@
 package inet.power.contract;
 
 //
-// The energy management models monitors an energy storage, estimates its state,
-// and controls the consumers and generators to protect the energy storage from
+// The energy management models monitor an energy storage, estimate its state,
+// and control the consumers and generators to protect the energy storage from
 // operating outside its safe operating area.
 //
 // @see ~IEnergyConsumer, ~IEnergySource, ~IEnergyGenerator, ~IEnergySink, ~IEnergyStorage

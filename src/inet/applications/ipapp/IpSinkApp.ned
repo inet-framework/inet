@@ -8,7 +8,7 @@
 package inet.applications.ipapp;
 
 //
-// This module implements a IP application that only receives packets.
+// This module implements an IP application that only receives packets.
 //
 module IpSinkApp extends IpApp
 {

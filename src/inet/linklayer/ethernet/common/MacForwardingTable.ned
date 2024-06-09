@@ -15,14 +15,14 @@ import inet.linklayer.contract.IMacForwardingTable;
 // Entries are deleted if their age exceeds a certain limit.
 //
 // If needed, address tables can be pre-loaded from text files at the beginning
-// of the simulation; this controlled by the forwardingTableFile module parameter.
+// of the simulation; this is controlled by the `forwardingTableFile` module parameter.
 // File format:
 //   line oriented table with space or TAB delimited columns.
 //   columns:
 //     VLAN ID:      numeric value, 0 means no vlan
-//     MAC address:  string, resolving with ~L3AddressResolver as MAC_ADDR
+//     MAC address:  string, resolved with ~L3AddressResolver as MAC_ADDR
 //     Interface:    interface name, e.g. eth3 (or interface id, e.g. 103)
-//   empty lines and commented out lines starts with '#' are allowed.
+//   empty lines and commented out lines starting with '#' are allowed.
 //
 simple MacForwardingTable like IMacForwardingTable
 {

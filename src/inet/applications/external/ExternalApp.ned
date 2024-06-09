@@ -18,7 +18,7 @@ import inet.common.ExternalProcess;
 module ExternalApp like IApp
 {
     parameters:
-        string namespace = default(""); // name of the host OS network namespace (optional)
+        string namespace = default(""); // Name of the host OS network namespace (optional)
         *.namespace = default(this.namespace);
         @display("i=block/app");
     gates:

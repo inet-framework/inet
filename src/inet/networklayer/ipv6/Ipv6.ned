@@ -16,15 +16,15 @@ package inet.networklayer.ipv6;
 //
 // To send a packet over IPv6 from a higher layer protocol, the module should
 // fill in an ~L3AddressReq object, attach it to the packet with Packet's
-// addTag() method, then send the packet to the ~Ipv6 module.
+// `addTag()` method, then send the packet to the ~Ipv6 module.
 //
 // When ~Ipv6 sends up a packet to a higher layer protocol, it will also attach
 // an ~L3AddressInd to the packet, with the source and destination IPv6 addresses
 // of the ~Ipv6Header in which the packet arrived.
 //
 // ~Ipv6 can serve several higher-layer protocols. The higher layer protocols
-// should call registerProtocol with their gate towards the IPv6 module,
-// for fill up the protocol-to-gateindex map. When delivering packets to them,
+// should call `registerProtocol` with their gate towards the IPv6 module,
+// to fill up the protocol-to-gateindex map. When delivering packets to them,
 // the output gate is determined from the Protocol field in the IPv6 header.
 //
 // <b>Routing and interfacing with lower layers</b>
@@ -44,7 +44,7 @@ package inet.networklayer.ipv6;
 //
 // In the current form, ~Ipv6 contains a FIFO which queues up IPv6 frames;
 // these are processed in order. The processing time is determined by the
-// procDelay module parameter.
+// `procDelay` module parameter.
 //
 // @see ~Ipv6RoutingTable, ~Ipv6NeighbourDiscovery, ~Icmpv6
 //
@@ -75,7 +75,6 @@ simple Ipv6
         output upperTunnelingOut;
         input lowerTunnelingIn;
         output lowerTunnelingOut;
-        //the following gates are added by Zarrar Yousaf on 19.06.07
         input xMIPv6In;
         output xMIPv6Out;
 }

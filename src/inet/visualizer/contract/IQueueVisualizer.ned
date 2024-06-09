@@ -13,7 +13,7 @@ package inet.visualizer.contract;
 //
 // @see ~QueueCanvasVisualizer, ~QueueOsgVisualizer, ~QueueVisualizer, ~QueueVisualizerBase
 //
-moduleinterface IQueueVisualizer
+moduleinterface IQueueVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

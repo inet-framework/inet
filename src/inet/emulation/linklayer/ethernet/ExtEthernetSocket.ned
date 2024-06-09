@@ -8,17 +8,17 @@
 package inet.emulation.linklayer.ethernet;
 
 //
-// This module provides a bidirectional connection to an ethernet socket of the
+// This module provides a bidirectional connection to an Ethernet socket of the
 // host computer which is running the simulation. It writes the packets that arrive
-// on 'upperLayerIn' gate to the specified real socket, and sends out packets
-// that arrive from the real socket on the 'upperLayerOut' gate.
+// on `upperLayerIn` gate to the specified real socket and sends out packets
+// that arrive from the real socket on the `upperLayerOut` gate.
 //
-// The CAP_NET_RAW privilege is required for using ExtEthernetSocket.
+// The CAP_NET_RAW privilege is required for using `ExtEthernetSocket`.
 //
 // The next commands add this privilege to opp_run, so all simulations
 // have the CAP_NET_RAW privilege, and all simulations run with this privilege!
 // This is dangerous because it enables a thousand other things for all
-// running simulations, it becomes a big security hole.
+// running simulations; it becomes a big security hole.
 //
 // $> sudo setcap cap_net_raw+ep /${your-omnetpp-root}/bin/opp_run_release
 // $> sudo setcap cap_net_raw+ep /${your-omnetpp-root}/bin/opp_run_dbg
@@ -31,9 +31,9 @@ package inet.emulation.linklayer.ethernet;
 simple ExtEthernetSocket
 {
     parameters:
-        string device; // name of existing real ethernet device
+        string device; // Name of an existing real Ethernet device
         string namespace = default("");
-        string packetNameFormat = default("Ext-%p-%t-%n"); // name of received packets
+        string packetNameFormat = default("Ext-%p-%t-%n"); // Name of received packets
         @display("i=block/rxtx");
         @signal[packetSentToUpper](type=Packet);
         @signal[packetReceivedFromUpper](type=Packet);

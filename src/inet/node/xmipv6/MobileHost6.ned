@@ -17,7 +17,6 @@ import inet.node.ipv6.StandardHost6;
 module MobileHost6 extends StandardHost6
 {
     ipv6.xMIPv6Support = true;
-    ipv6.mipv6support.isMobileNode = true; //is Mobile Node
-    ipv6.mipv6support.isHomeAgent = false; //is Home Agent
+    ipv6.mipv6support.isMobileNode = true; // Is a Mobile Node
+    ipv6.mipv6support.isHomeAgent = false; // Is a Home Agent
 }
-

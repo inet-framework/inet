@@ -4,7 +4,7 @@ Frame Replication with Time-Aware Shaping
 Goals
 -----
 
-In this example we demonstrate how to automatically configure time-aware shaping
+In this example, we demonstrate how to automatically configure time-aware shaping
 in the presence of frame replication.
 
 | INET version: ``4.4``
@@ -52,4 +52,5 @@ Discussion
 ----------
 
 Use `this <https://github.com/inet-framework/inet/discussions/783>`__ page in the GitHub issue tracker for commenting on this showcase.
+
 

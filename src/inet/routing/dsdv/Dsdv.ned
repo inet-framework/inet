@@ -12,7 +12,7 @@ import inet.routing.contract.IManetRouting;
 //
 // Implements Destination-Sequenced Distance Vector.
 //
-// The host using this routing algoritm is required to have a SINGLE interface
+// The host using this routing algorithm is required to have a SINGLE interface
 // which has "wlan" in its name.
 //
 // NOTE:
@@ -29,10 +29,10 @@ simple Dsdv like IManetRouting
         @display("i=block/routing");
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
-        double helloInterval @unit(s) = default(5s);  // how often hello messages should be sent out
-        string netmask = default("255.255.0.0");  // netmask for the ad-hoc network
+        double helloInterval @unit(s) = default(5s);  // How often hello messages should be sent out
+        string netmask = default("255.255.0.0");  // Netmask for the ad-hoc network
         double maxVariance = default(1); // This is the maximum of a random value to determine when the first hello message will be sent out
-        double routeLifetime @unit(s) = default(5s);  // the expiry time of the routing entries
+        double routeLifetime @unit(s) = default(5s);  // The expiry time of the routing entries
         bool manetPurgeRoutingTables = default(true);
         volatile double broadcastDelay @unit(s) = default(uniform(0s,0.01s));
     gates:

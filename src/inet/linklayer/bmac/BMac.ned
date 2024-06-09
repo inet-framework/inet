@@ -13,16 +13,16 @@ import inet.linklayer.contract.IMacProtocol;
 
 
 //
-// Implementation of B-MAC (called also Berkeley MAC, Low Power Listening or
+// Implementation of B-MAC (also called Berkeley MAC, Low Power Listening, or
 // LPL).
 // See C++ documentation for details.
 //
 module BMac extends MacProtocolBase like IMacProtocol
 {
     parameters:
-        string address @mutable = default("auto"); // MAC address as hex string (12 hex digits), or
-                                                   // "auto". "auto" values will be replaced by
-                                                   // a generated MAC address in init stage 0.
+        string address @mutable = default("auto"); // MAC address as a hex string (12 hex digits), or
+                                                   // "auto". "auto" values will be replaced
+                                                   // by a generated MAC address in init stage 0.
         // BMAC specific parameters
         // how long is one slot?
         double slotDuration @unit(s) = default(0.1s);
@@ -41,12 +41,12 @@ module BMac extends MacProtocolBase like IMacProtocol
         // bit rate
         double bitrate @unit(bps) = default(19200 bps);
 
-        //should mac send and expect acknowledgments?
+        // should the MAC send and expect acknowledgments?
         bool useMACAcks = default(false);
 
-        string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
+        string radioModule = default("^.radio");   // The path to the Radio module  // FIXME remove default value
 
-        int maxTxAttempts = default(2);     //  Maximum transmission attempts per data packet, when ACKs are used
+        int maxTxAttempts = default(2);     // Maximum transmission attempts per data packet, when ACKs are used
 
         @class(BMac);
         @signal[linkBroken](type=inet::Packet);

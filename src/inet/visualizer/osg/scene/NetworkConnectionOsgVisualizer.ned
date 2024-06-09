@@ -11,7 +11,7 @@ import inet.visualizer.base.NetworkConnectionVisualizerBase;
 import inet.visualizer.contract.INetworkConnectionVisualizer;
 
 //
-// This module visualizes multiple network connections on a 3D osg scene.
+// This module visualizes multiple network connections on a 3D OSG scene.
 //
 // @see ~NetworkConnectionCanvasVisualizer, ~NetworkConnectionVisualizer, ~NetworkConnectionVisualizerBase, ~INetworkConnectionVisualizer
 //

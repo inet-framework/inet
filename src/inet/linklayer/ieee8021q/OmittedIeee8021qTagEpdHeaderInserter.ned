@@ -8,8 +8,8 @@
 package inet.linklayer.ieee8021q;
 
 //
-// This module implements the module given interface and can be used as an omitted
-// optional module that removes itself from the module hierarchy during initialize.
+// This module implements the module given by the interface and can be used as an omitted
+// optional module that removes itself from the module hierarchy during initialization.
 //
 module OmittedIeee8021qTagEpdHeaderInserter like IIeee8021qTagEpdHeaderInserter
 {

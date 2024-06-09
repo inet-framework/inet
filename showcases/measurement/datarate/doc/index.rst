@@ -4,7 +4,7 @@ Measuring Data Rate
 Goals
 -----
 
-In this example we explore the data rate statistics of application, queue, and
+In this example, we explore the data rate statistics of application, queue, and
 filter modules inside network nodes.
 
 | INET version: ``4.4``
@@ -13,10 +13,10 @@ filter modules inside network nodes.
 The Model
 ---------
 
-The data rate is measured by observing the packets as they are passing through
+The data rate is measured by observing the packets as they pass through
 over time at a certain point in the node architecture. For example, an application
-source module produces packets over time and this process has its own data rate.
-Similarly, a queue module enqueues and dequeues packets over time and both of
+source module produces packets over time, and this process has its own data rate.
+Similarly, a queue module enqueues and dequeues packets over time, and both of
 these processes have their own data rate. These data rates are different, which
 in turn causes the queue length to increase or decrease over time.
 

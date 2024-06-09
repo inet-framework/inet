@@ -13,7 +13,7 @@ package inet.visualizer.contract;
 //
 // @see ~GateScheduleCanvasVisualizer, ~GateScheduleOsgVisualizer, ~GateScheduleVisualizer, ~GateScheduleVisualizerBase
 //
-moduleinterface IGateScheduleVisualizer
+moduleinterface IGateScheduleVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

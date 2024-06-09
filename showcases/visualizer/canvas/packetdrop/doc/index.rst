@@ -27,9 +27,9 @@ the node icon and fades away.
 The visualization of packet drops can be enabled with the visualizer's
 :par:`displayPacketDrops` parameter. By default, all packet drops at all nodes
 are visualized. This selection can be narrowed with the :par:`nodeFilter`,
-:par:`interfaceFilter` and :par:`packetFilter` parameters, which match for node, interface and packet.
+:par:`interfaceFilter`, and :par:`packetFilter` parameters, which match for node, interface, and packet.
 (The :par:`packetFilter` can filter for packet properties, such as name, fields, chunks, protocol headers, etc.)
-Additionally, and the :par:`detailsFilter` parameter to filter for packet drop reason.
+Additionally, use the :par:`detailsFilter` parameter to filter for packet drop reasons.
 
 The :par:`packetFormat` parameter is a format string and specifies the text displayed with the packet drop animation.
 By default, the dropped packet's name is displayed.
@@ -39,9 +39,9 @@ The format string can contain the following directives:
 - `%c`: packet class
 - `%r`: drop reason
 
-Packets can be dropped for the following reasons, for example:
+Packets can be dropped for the following reasons:
 
-.. For example, some of the reasons packets are dropped for are the following:
+.. For example, packets can be dropped for the following reasons:
 
 -  queue overflow
 -  retry limit exceeded
@@ -50,7 +50,7 @@ Packets can be dropped for the following reasons, for example:
 -  interface down
 
 One can click on the packet drop icon to display information about the
-packet drop in the inspector panel, such as the packet drop reason,
+packet drop in the inspector panel, such as the packet drop reason
 or the module where the packet was dropped:
 
 .. figure:: media/inspector2.png
@@ -59,16 +59,16 @@ or the module where the packet was dropped:
 
 .. todo::
 
-   The color of the icon indicates the reason for the packet drop
-   There is a list of reasons, identified by a number
+   The color of the icon indicates the reason for the packet drop.
+   There is a list of reasons, identified by a number.
 
-The following sections demonstrate some reasons for dropped packets, with example simulations.
+The following sections demonstrate some reasons for dropped packets with example simulations.
 In the simulations, the :ned:`PacketDropVisualizer` is configured to indicate the packet name and the drop reason.
 
 Queue overflow
 --------------
 
-In this section, we present an example for demonstrating packet drops due
+In this section, we present an example demonstrating packet drops due
 to queue overflow. This simulation can be run by choosing the
 ``QueueFull`` configuration from the ini file. The network contains a
 bottleneck link where packets will be dropped due to an overflowing
@@ -83,12 +83,12 @@ It contains a :ned:`StandardHost` named ``source``, an :ned:`EthernetSwitch`, a
 ``destination``. The ``source`` is configured to send a stream of UDP
 packets to ``destination``. The packet stream starts at two seconds
 after ``destination`` got associated with the access point. The
-``source`` is connected to the ``etherSwitch`` via a high speed, 100
+``source`` is connected to the ``etherSwitch`` via a high-speed, 100
 Gbit/s ethernet cable, while the ``etherSwitch`` and the ``router`` are
-connected with a low speed, 10 MBit/s cable. This low speed cable creates a bottleneck
+connected with a low-speed, 10 Mbit/s cable. This low-speed cable creates a bottleneck
 in the network, between the switch and the router. The source host is
 configured to generate more UDP traffic than the 10Mbit/s channel can
-carry. The cause of packet drops, in this case, is that the queue in
+carry. The cause of packet drops in this case is that the queue in
 ``etherSwitch`` fills up.
 
 The queue types in the switch's Ethernet interfaces are set to
@@ -98,7 +98,7 @@ queue of the switch.
 
 The visualization is activated with the ``displayPacketDrops``
 parameter. The visualizer is configured to display the packet name
-and the drop reason, by setting the :par:`labelFormat` parameter.
+and the drop reason by setting the :par:`labelFormat` parameter.
 Also, the fade-out time is set to three seconds, so that the packet
 drop animation is more visible.
 
@@ -165,11 +165,11 @@ file. The configuration uses the following network:
 .. figure:: media/maclimitnetwork.png
    :align: center
 
-It contains two :ned:`AdhocHost`'s, named ``source`` and ``destination``.
-The hosts' communication ranges are set up so they are out of range of
+It contains two :ned:`AdhocHost`'s named ``source`` and ``destination``.
+The hosts' communication ranges are set up, so they are out of range of
 each other. The source host is configured to ping the destination host.
-The reason for packet drops, in this case, is that the hosts are not in
-range, thus they can't reach each other. The ``source`` transmits the
+The reason for packet drops in this case is that the hosts are not in
+range, so they can't reach each other. The ``source`` transmits the
 ping packets, but it doesn't receive any ACK in reply. The ``source's``
 MAC module drops the packets after the retry limit has been reached.
 This scenario is illustrated in the following animation:
@@ -177,7 +177,7 @@ This scenario is illustrated in the following animation:
 .. video:: media/retry.mp4
    :width: 512
 
-These events looks like the following in the logs:
+These events look like the following in the logs:
 
 .. figure:: media/log_macretrylimit_2.png
    :width: 100%
@@ -197,7 +197,7 @@ It contains two connected :ned:`StandardHost`'s. The
 :ned:`Ipv4NetworkConfigurator` is instructed not to add any static routes,
 and ``host1`` is configured to ping ``host2``.
 
-The ping packets can't be routed, thus the IP module drops them. This scenario is
+The ping packets can't be routed, so the IP module drops them. This scenario is
 illustrated in the following video:
 
 .. video:: media/noroute.mp4

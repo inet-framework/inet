@@ -11,36 +11,33 @@ Overview
 Ethernet is the most popular wired LAN technology nowadays, and its use
 is also growing in metropolitan area and wide area networks. Since its
 introduction in 1980, Ethernet data transfer rates have increased from
-the original 10Mb/s to the latest 400Gb/s. Originally, The technology
+the original 10Mb/s to the latest 400Gb/s. Originally, the technology
 has changed from using coaxial cables and repeaters to using unshielded
 twisted-pair cables with hubs and switches. Today, switched Ethernet is
-prevalent, and most links operate in full duplex mode. The INET
-Framework contains support for all major Ethernet technologies and
-device types.
+prevalent, and most links operate in full duplex mode. Support for all major Ethernet technologies and device types is provided by the INET
+Framework.
 
 In Ethernet networks containing multiple switches, broadcast storms are
-prevented by use of a spanning tree protocol (STP, RSTP) that disables
-selected links to eliminate cycles from the topology. Ethernet switch
-models in INET contain support for STP and RSTP.
+prevented by the use of a spanning tree protocol (STP, RSTP) that disables
+selected links to eliminate cycles from the topology. STP and RSTP are supported in the Ethernet switch models in INET.
 
 .. _ug:sec:ethernet:nodes:
 
 Nodes
 -----
 
-There are several node models that can be used in an Ethernet network:
+Several node models can be used in an Ethernet network:
 
 -  Node models such as :ned:`StandardHost` and :ned:`Router` are
-   Ethernet-capable
+   Ethernet-capable.
 
--  :ned:`EthernetSwitch` models an Ethernet switch, i.e. a multiport
-   bridging device
+-  :ned:`EthernetSwitch` models an Ethernet switch, which is a multiport
+   bridging device.
 
--  :ned:`WireJunction` can models the coaxial cable (10BASE2 or 10BASE5 network
-   segments) on legacy Ethernet networks, or an Ethernet hub/multiport repeater
+-  :ned:`WireJunction` can model the coaxial cable (10BASE2 or 10BASE5 network segments) on legacy Ethernet networks, or an Ethernet hub/multiport repeater.
 
--  :ned:`EthernetHost` is a sample node which can be used to generate “raw”
-   Ethernet traffic
+-  :ned:`EthernetHost` is a sample node that can be used to generate "raw"
+   Ethernet traffic.
 
 .. _ug:sec:ethernet:etherswitch:
 
@@ -57,16 +54,16 @@ by full duplex lines, so no collisions are possible. In this case, the
 CSMA/CD is not needed and the channel utilization can be high.
 
 The :par:`duplexMode` parameters of the MACs must be set according to
-the medium connected to the port; if collisions are possible (it’s a bus
-or hub) it must be set to false, otherwise it can be set to true. By
-default it uses half-duplex MAC with CSMA/CD.
+the medium connected to the port; if collisions are possible (it's a bus
+or hub) it must be set to false, otherwise, it can be set to true. By
+default, it uses a half-duplex MAC with CSMA/CD.
 
 .. _ug:sec:ethernet:etherhub:
 
 Ethernet Hub
 ~~~~~~~~~~~~
 
-The :ned:`WireJunction` can model an Ethernet hub. Ethernet hubs are a simple
+The :ned:`WireJunction` can model an Ethernet hub. Ethernet hubs are simple
 broadcast devices. Messages arriving on a port are regenerated and
 broadcast to every other port.
 
@@ -93,8 +90,8 @@ all connected channels must have the same speed.
 The Physical Layer
 ------------------
 
-Stations on an Ethernet networks are connected by coaxial, twisted pair
-or fibre cables. (Coaxial only has historical importance, but is
+Stations on Ethernet networks are connected by coaxial, twisted pair
+or fiber cables. (Coaxial only has historical importance, but is
 supported by INET anyway.) There are several cable types specified in
 the standard.
 
@@ -122,6 +119,7 @@ There is currently no support for 200Gbps and 400Gbps Ethernet.
 :ned:`Eth10M`, :ned:`Eth100M`, :ned:`Eth1G`, :ned:`Eth10G`,
 :ned:`Eth40G`, :ned:`Eth100G`
 
+
 .. _ug:sec:ethernet:ethernet-interface:
 
 Ethernet Interface
@@ -135,20 +133,19 @@ similarly to the :ned:`PppInterface` module.
 
 The Ethernet MAC (Media Access Control) layer transmits the Ethernet
 frames on the physical media. This is a sublayer within the data link
-layer. Because encapsulation/decapsulation is not always needed (e.g.
-switches does not do encapsulation/decapsulation), it is implemented in
-a separate modules (e.g. :ned:`EthernetEncapsulation`) that are part
+layer. Because encapsulation/decapsulation is not always needed (e.g.,
+switches do not do encapsulation/decapsulation), it is implemented in
+separate modules (e.g., :ned:`EthernetEncapsulation`) that are part
 of the LLC layer.
 
-Nowadays almost all Ethernet networks operate using full-duplex
+Nowadays, almost all Ethernet networks operate using full-duplex
 point-to-point connections between hosts and switches. This means that
 there are no collisions, and the behavior of the MAC component is much
-simpler than in classic Ethernet that used coaxial cables and hubs. The
-INET framework contains two MAC modules for Ethernet: the
+simpler than in classic Ethernet that used coaxial cables and hubs. Two MAC modules for Ethernet are provided by the INET framework: the
 :ned:`EthernetMac` is simpler to understand and easier to extend,
 because it supports only full-duplex connections. The :ned:`EthernetCsmaMac`
 module implements the full MAC functionality including CSMA/CD, it can
-operate both half-duplex and full-duplex mode.
+operate in both half-duplex and full-duplex mode.
 
 .. _ug:sec:ethernet:components:
 
@@ -174,11 +171,11 @@ The following components are present in the model:
 EthernetMac
 ~~~~~~~~~~~
 
-From the two MAC implementation :ned:`EthernetMac` is the simpler
+From the two MAC implementations, :ned:`EthernetMac` is the simpler
 one, it operates only in full-duplex mode (its :par:`duplexEnabled`
 parameter fixed to ``true`` in its NED definition). This module does
 not need to implement CSMA/CD, so there is no collision detection,
-retransmission with exponential backoff, carrier extension and frame
+retransmission with exponential backoff, carrier extension, and frame
 bursting.
 
 .. _ug:sec:ethernet:ethermac:
@@ -187,10 +184,10 @@ EthernetCsmaMac
 ~~~~~~~~~~~~~~~
 
 Ethernet MAC layer implementing CSMA/CD. It supports both half-duplex
-and full-duplex operations; in full-duplex mode it behaves as
-:ned:`EthernetMac`. In half-duplex mode it detects collisions,
-sends jam messages and retransmit frames upon collisions using the
-exponential backoff algorithm. In Gigabit Ethernet networks it supports
+and full-duplex operations; in full-duplex mode, it behaves as
+:ned:`EthernetMac`. In half-duplex mode, it detects collisions,
+sends jam messages, and retransmits frames upon collisions using the
+exponential backoff algorithm. In Gigabit Ethernet networks, it supports
 carrier extension and frame bursting. Carrier extension can be turned
 off by setting the :par:`carrierExtension` parameter to ``false``.
 
@@ -207,20 +204,20 @@ encapsulation/decapsulation.
 MacRelayUnit
 ~~~~~~~~~~~~
 
-INET framework ethernet switches are built from :ned:`IMacRelayUnit`
+INET framework Ethernet switches are built from :ned:`IMacRelayUnit`
 components. Each relay unit has N input and output gates for
 sending/receiving Ethernet frames. They should be connected to
 :ned:`EthernetInterface` modules.
 
 The relay unit holds a table for the destination address -> output port
 mapping in a :ned:`MacForwardingTable` module. When the relay unit receives
-a data frame, it updates the table with the source address->input port.
+a data frame, it updates the table with the source address -> input port.
 
 If the destination address is not found in the table, the frame is
-broadcast. The frame is not sent to the same port it was received from,
+broadcasted. The frame is not sent to the same port it was received from,
 because then the target should already have received the original frame.
 
-A simple scheme for sending PAUSE frames is built in (although users
+A simple scheme for sending PAUSE frames is built-in (although users
 will probably change it). When the buffer level goes above a high
 watermark, PAUSE frames are sent on all ports. The watermark and the
 pause time is configurable; use zero values to disable the PAUSE
@@ -235,11 +232,11 @@ The :ned:`MacForwardingTable` module stores the mapping between ports and
 MAC addresses. Entries are deleted if their age exceeds a certain limit.
 
 If needed, address tables can be pre-loaded from text files at the
-beginning of the simulation; this controlled by the
+beginning of the simulation; this is controlled by the
 :par:`forwardingTableFile` module parameter. In the file, each line
 contains a literal 0 (reserved for VLAN id), a hexadecimal MAC address
 and a decimal port number, separated by tabs. Comment lines beginning
-with ’#’ are also allowed:
+with "#" are also allowed:
 
 ::
 
@@ -256,7 +253,7 @@ Ieee8021dRelay
 ~~~~~~~~~~~~~~
 
 :ned:`Ieee8021dRelay` is a MAC relay unit that should be used instead of
-:ned:`MacRelayUnit` that when STP or RSTP is needed.
+:ned:`MacRelayUnit` when STP or RSTP is needed.
 
 .. _ug:sec:ethernet:stp:
 
@@ -269,7 +266,7 @@ Ethernet networks. The basic function of STP is to prevent bridge loops
 and the broadcast radiation that results from them.
 
 STP creates a spanning tree within a network of connected layer-2
-bridges, and disables those links that are not part of the spanning
+bridges and disables those links that are not part of the spanning
 tree, leaving a single active path between any two network nodes.
 
 .. _ug:sec:ethernet:rstp:

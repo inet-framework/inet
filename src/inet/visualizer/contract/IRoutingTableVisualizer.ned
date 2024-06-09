@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 //
 // @see ~RoutingTableCanvasVisualizer, ~RoutingTableOsgVisualizer, ~RoutingTableVisualizer, ~RoutingTableVisualizerBase
 //
-moduleinterface IRoutingTableVisualizer
+moduleinterface IRoutingTableVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

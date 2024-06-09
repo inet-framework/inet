@@ -20,7 +20,7 @@ simple Tun
         @signal[packetReceivedFromUpper](type=cPacket);
 
     gates:
-        input upperLayerIn @messageKinds(inet::TunCommandCode);    // from upper layers
-        output upperLayerOut @messageKinds(inet::TunSocketIndication);  // to upper layers
+        input upperLayerIn @messageKinds(inet::TunCommandCode);    // From upper layers
+        output upperLayerOut @messageKinds(inet::TunSocketIndication);  // To upper layers
 }
 

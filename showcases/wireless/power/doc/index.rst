@@ -42,7 +42,7 @@ will look like when the simulation is run:
 Configuration and behavior
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-All hosts are configured ping ``host[0]`` every second. ``host[0]``
+All hosts are configured to ping ``host[0]`` every second. ``host[0]``
 doesn't send ping requests, just replies to the requests that it
 receives. To reduce the probability of collisions, the ping
 application's start time is chosen randomly for each host as a value
@@ -92,7 +92,7 @@ Radio modes and states
 
 In the :ned:`Ieee80211ScalarRadio` model used in this simulation (and in
 other radio models), there are different modes in which radios operate,
-such as off, sleep, receiver, transmitter. The mode is set by the model
+such as off, sleep, receiver, and transmitter. The mode is set by the model
 and does not depend on external effects. In addition to mode, radios
 have states, which depend on what they are doing in the given mode --
 i.e. listening, receiving a transmission, or transmitting. The state depends
@@ -107,7 +107,7 @@ Radios in the simulation are configured to contain a
 is based on power consumption values for various radio modes and states,
 and the time the radio spends in these states. For example, radios
 consume a small amount of power when they are idle in receive mode, i.e.
-when they are listening for transmissions. They consume more when they
+when they are listening for transmissions. They consume more power when they
 are receiving a transmission, and even more when they are transmitting.
 
 
@@ -199,7 +199,7 @@ The following plot shows a ping request-ping reply exchange (with the
 associated ACKs) between hosts 0 and 3 on the sequence chart and the
 corresponding changes in energy levels of ``host[0]``. Note that
 ``host[0]`` consumes less energy receiving than transmitting. In the
-intervals between the transmissions, the curve is increasing, because
+intervals between the transmissions, the curve is increasing because
 the generator is charging ``host[0]``. This image shows that hosts
 indeed consume more power when transmitting than the generator
 generates. However, transmissions are very short and very rare, so one

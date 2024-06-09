@@ -23,9 +23,9 @@ package inet.queueing.classifier;
 simple SingleRateTwoColorClassifier extends TokenBucketClassifier
 {
     parameters:
-        double committedInformationRate @unit(bps); // committed information rate
-        int committedBurstSize @unit(b); // committed burst size
-        int bitsPerToken = default(8); // how many bits are represented by 1 token
+        double committedInformationRate @unit(bps); // Committed information rate
+        int committedBurstSize @unit(b); // Committed burst size
+        int bitsPerToken = default(8); // How many bits are represented by 1 token
         initialNumTokens = default(maxNumTokens);
         maxNumTokens = dropUnit(committedBurstSize) / bitsPerToken;
         tokenProductionRate = dropUnit(committedInformationRate) / bitsPerToken;

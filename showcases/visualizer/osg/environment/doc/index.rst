@@ -5,11 +5,11 @@ Goals
 -----
 
 The physical environment has a profound effect on the communication of wireless
-devices. For example, physical objects like walls inside buildings constraint
+devices. For example, physical objects like walls inside buildings constrain
 mobility. They also obstruct radio signals, often resulting in packet loss.
 It is difficult to make sense of the simulation without actually seeing where
 physical objects are. INET provides the visualization of these objects to
-help understanding the simulation better. This feature is available both in
+help understand the simulation better. This feature is available both in
 2D and 3D visualization.
 
 This showcase demonstrates the visualization of physical objects through displaying
@@ -33,7 +33,7 @@ properties are defined in the XML configuration of the
 The two-dimensional projection of physical objects is determined by the
 :ned:`SceneCanvasVisualizer` module. (This is because the projection is
 also needed by other visualizers, for example, :ned:`MobilityVisualizer`.)
-The default view is top view (z-axis), but you can also configure side
+The default view is the top view (z-axis), but you can also configure side
 view (x and y axes), or isometric or orthographic projection.
 
 The default view
@@ -54,7 +54,7 @@ The isometric view
 ------------------
 
 In this example configuration (``IsometricView`` in the ini file), the
-view is set to isometric projection, by setting the
+view is set to isometric projection by setting the
 :par:`viewAngle` parameter in :ned:`SceneVisualizer`:
 
 .. literalinclude:: ../omnetpp.ini

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) 2016 OpenSim Limited
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
@@ -32,13 +32,13 @@ import inet.linklayer.contract.IMacProtocol;
 // On the receiver side, the change is quite simple: when the MAC correctly
 // receives a data frame addressed to it, it responds with an ACK frame after
 // a fixed-length gap (SIFS). If the originator of the data frame does not
-// receive the ACK correctly within due time, it will initiate a
+// receive the ACK correctly within the due time, it will initiate a
 // retransmission. The contention window (from which the random backoff period is
 // drawn) will be doubled for each retransmission until it reaches the maximum
 // (and then it will stay constant for further retransmissions). After a given
 // number of unsuccessful retries, the MAC will give up and discard the data
-// frame, and will take the next data frame from the queue. The next frame
-// will start with a clean slate (i.e. the contention window and the retry
+// frame and will take the next data frame from the queue. The next frame
+// will start with a clean slate (i.e., the contention window and the retry
 // count will be reset). Giving up a frame will cause a link break signal
 // to be emitted.
 //
@@ -49,24 +49,24 @@ import inet.linklayer.contract.IMacProtocol;
 module CsmaCaMac extends MacProtocolBase like IMacProtocol
 {
     parameters:
-        string radioModule = default("^.radio"); // The path to the Radio module  //FIXME remove default value
-        string address @mutable = default("auto"); // MAC address as hex string (12 hex digits), or
+        string radioModule = default("^.radio"); // The path to the Radio module  //FIXME remove the default value
+        string address @mutable = default("auto"); // MAC address as a hex string (12 hex digits) or
                                                    // "auto". "auto" values will be replaced by
                                                    // a generated MAC address in init stage 0.
-        string fcsMode @enum("declared","computed") = default("declared");
+        string fcsMode @enum("declared", "computed") = default("declared");
         bool useAck = default(true);
         double bitrate @unit(bps);
-        int headerLength @unit(B) = default(17B); // maximum 255 byte, minimum 17B for serializing, see CsmaCaMacDataHeader
-        int ackLength @unit(B) = default(14B); // maximum 255 byte, minimum 14B for serializing, see CsmaCaMacAckHeader
+        int headerLength @unit(B) = default(17B); // Maximum 255 bytes, minimum 17B for serializing, see CsmaCaMacDataHeader
+        int ackLength @unit(B) = default(14B); // Maximum 255 bytes, minimum 14B for serializing, see CsmaCaMacAckHeader
         double sifsTime @unit(s) = default(10us);
         double slotTime @unit(s) = default(20us);
         double difsTime @unit(s) = default(sifsTime + 2 * slotTime);
-        double ackTimeout @unit(s) = default(dropUnit(ackLength * 8) / dropUnit(bitrate) * 1s + sifsTime + slotTime); // measured from the end of data transmission; includes sifs, preamble, physical header, mac ack duration, 2x propagation time, by default assumes slot time > preamble + physical header + 2x propagation time
+        double ackTimeout @unit(s) = default(dropUnit(ackLength * 8) / dropUnit(bitrate) * 1s + sifsTime + slotTime); // Measured from the end of data transmission; includes sifs, preamble, physical header, mac ack duration, 2x propagation time; by default, assumes slot time > preamble + physical header + 2x propagation time
         int mtu = default(1500);
-        int cwMin = default(31); // minimum contention window
-        int cwMax = default(1023); // maximum contention window
-        int cwMulticast = default(cwMin); // multicast contention window
-        int retryLimit = default(7); // maximum number of retries
+        int cwMin = default(31); // Minimum contention window
+        int cwMax = default(1023); // Maximum contention window
+        int cwMulticast = default(cwMin); // Multicast contention window
+        int retryLimit = default(7); // Maximum number of retries
         @class(CsmaCaMac);
         @signal[linkBroken](type=inet::Packet);
         @statistic[linkBroken](title="link break"; source=linkBroken; record=count; interpolationmode=none);

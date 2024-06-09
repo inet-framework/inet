@@ -7,7 +7,7 @@ Goals
 The hidden node problem occurs when two nodes in a wireless network can
 communicate with a third node, but cannot communicate with each other directly
 due to obstacles or being out of range. This can lead to collisions at the third node
-when both nodes transmit simultaneously. 
+when both nodes transmit simultaneously.
 The RTS/CTS mechanism is used to address this problem by allowing nodes
 to reserve the channel before transmitting.
 
@@ -167,7 +167,7 @@ used, the number of packets received correctly at Host B is
 approximately the same regardless of the presence of the wall.
 
 The number of received packets at Host B (wall removed, RTS/CTS off):
-**1966**\  The number of received packets at Host B (wall removed,
+**1966**\ The number of received packets at Host B (wall removed,
 RTS/CTS on): **1987**
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`HiddenNodeShowcase.ned <../HiddenNodeShowcase.ned>`

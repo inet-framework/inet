@@ -10,7 +10,7 @@ package inet.linklayer.csmaca;
 import inet.linklayer.common.WirelessInterface;
 
 //
-// Module interface for CSMA/MA network interfaces.
+// Module interface for CSMA/CA network interfaces.
 //
 module CsmaCaInterface extends WirelessInterface
 {

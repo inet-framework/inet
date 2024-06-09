@@ -11,7 +11,7 @@ Overview
 In complex simulations, there are usually several statistics that are vital
 for understanding what is happening inside the network. Although statistics
 can also be found and read in Qtenv's object inspector panel, it is often more
-convenient to directly display them on the top-level canvas in a graphical form.
+convenient to display them directly on the top-level canvas in a graphical form.
 INET supports such visualization in the form of inspector figures
 that display various gauges and meters. This chapter covers the usage
 of instrument figures.
@@ -19,7 +19,7 @@ of instrument figures.
 Instrument Types
 ----------------
 
-Some of the instrument figure types available in INET are the following:
+Some of the instrument figure types available in INET are as follows:
 
 - *gauge:* A circular gauge similar to a speedometer or pressure indicator.
 
@@ -55,7 +55,7 @@ Some of the instrument figure types available in INET are the following:
    :width: 40%
    :align: center
 
-- *plot:* An XY chart that plots a statistic in the function of time.
+- *plot:* An XY chart that plots a statistic as a function of time.
 
 .. figure:: figures/instr_plot.png
    :align: center
@@ -68,16 +68,16 @@ Instrument figures visualize statistics derived from signals emitted by
 modules in the network. This statistic is declared in the NED file, with
 the ``@statistic`` property. The property's ``source`` attribute is an
 expression that specifies which signals to use from which modules, and
-the mathematical operations on it, to derive the statistic. The
-``record`` attribute specifies where the values of the statistic is
-recorded into. In the case of instrument figures, this is set to
-``figure``, i.e. ``record=figure``. The ``targetFigure`` attribute
+the mathematical operations on them, to derive the statistic. The
+``record`` attribute specifies where the values of the statistic are
+recorded. In the case of instrument figures, this is set to
+``figure``, i.e., ``record=figure``. The ``targetFigure`` attribute
 selects which figure should display the statistic.
 
 The instrument figure itself is specified in the NED file with the
 ``@figure`` property. The property's ``type`` attribute selects
-the type of the instrument figure (``gauge``, ``thermometer``, etc.),
-and the property's index (i.e. the figure name) should match the
+the type of instrument figure (``gauge``, ``thermometer``, etc.),
+and the property's index (i.e., the figure name) should match the
 name given in the statistic's ``targetFigure`` attribute.
 
 Here is an example NED file:

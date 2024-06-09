@@ -12,7 +12,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IReceiverAnalogMo
 module ReceiverBase
 {
     parameters:
-        bool ignoreInterference = default(false); // true means interfering transmissions are ignored when determining whether a reception is successful or not
+        bool ignoreInterference = default(false); // True means interfering transmissions are ignored when determining whether a reception is successful or not
         string signalAnalogRepresentation @enum("unitDisk","scalar","dimensional") = default("scalar");
         analogModel.typename = default(signalAnalogRepresentation == "unitDisk" ? "UnitDiskReceiverAnalogModel" : signalAnalogRepresentation == "scalar" ? "ScalarReceiverAnalogModel" : "DimensionalReceiverAnalogModel");
         @display("i=block/tx");

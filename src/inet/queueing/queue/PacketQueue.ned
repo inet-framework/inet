@@ -58,12 +58,12 @@ import inet.queueing.contract.IPacketQueue;
 simple PacketQueue extends PacketQueueBase like IPacketQueue
 {
     parameters:
-        int packetCapacity = default(-1); // maximum number of packets in the queue, no limit by default
-        int dataCapacity @unit(b) = default(-1b); // maximum total length of packets in the queue, no limit by default
-        string dropperClass = default(""); // determines which packets are dropped when the queue is overloaded, packets are not dropped by default; the parameter must be the name of a C++ class which implements the IPacketDropperFunction C++ interface and is registered via Register_Class
-        string comparatorClass = default(""); // determines the order of packets in the queue, insertion order by default; the parameter must be the name of a C++ class which implements the IPacketComparatorFunction C++ interface and is registered via Register_Class
-        string bufferModule = default(""); // relative module path to the IPacketBuffer module used by this queue, implicit buffer by default
-        displayStringTextFormat = default("contains %p pk (%l) pushed %u\npulled %o removed %r dropped %d"); // see ~PacketQueueBase for available format specifiers
+        int packetCapacity = default(-1); // Maximum number of packets in the queue, no limit by default
+        int dataCapacity @unit(b) = default(-1b); // Maximum total length of packets in the queue, no limit by default
+        string dropperClass = default(""); // Determines which packets are dropped when the queue is overloaded, packets are not dropped by default; the parameter must be the name of a C++ class which implements the IPacketDropperFunction C++ interface and is registered via Register_Class
+        string comparatorClass = default(""); // Determines the order of packets in the queue, insertion order by default; the parameter must be the name of a C++ class which implements the IPacketComparatorFunction C++ interface and is registered via Register_Class
+        string bufferModule = default(""); // Relative module path to the IPacketBuffer module used by this queue, implicit buffer by default
+        displayStringTextFormat = default("contains %p pk (%l) pushed %u\npulled %o removed %r dropped %d"); // See ~PacketQueueBase for available format specifiers
         @class(PacketQueue);
         @signal[packetPushStarted](type=inet::Packet);
         @signal[packetPushEnded](type=inet::Packet?);

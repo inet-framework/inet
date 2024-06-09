@@ -15,7 +15,7 @@ package inet.routing.pim.modes;
 // PIM-DM is a multicast routing protocol which is designed
 // for networks where the receivers are densely distributed.
 // PIM-DM initially floods the multicast datagrams to all areas
-// of the network. If some areas of the network does not have
+// of the network. If some areas of the network do not have
 // group members, then they will be pruned off the forwarding tree.
 //
 // The prune state of a branch must be confirmed periodically,
@@ -23,8 +23,8 @@ package inet.routing.pim.modes;
 // can also cancel the prune by sending a Graft message.
 //
 // The module must access the ~PimInterfaceTable and ~PimNeighborTable
-// modules, their path is given as the 'pimInterfaceTableModule' and
-// 'pimNeighborTableModule' parameters.
+// modules, their path is given as the `pimInterfaceTableModule` and
+// `pimNeighborTableModule` parameters.
 //
 // Other parameters are timer values from the specification.
 // They should not be modified except for testing purposes.

@@ -13,14 +13,14 @@ import inet.environment.contract.IPhysicalEnvironment;
 
 //
 // The propagation of communication signals, the movement of communicating
-// agents, or battery exhaustion depend on the surrounding physical environment.
+// agents, or battery exhaustion depends on the surrounding physical environment.
 // For example, signals can be absorbed by objects, can pass through objects,
 // can be refracted by surfaces, can be reflected from surfaces, etc.
 //
 // This module represents the physical environment. The physical environment
 // defines a set of physical objects. The physical objects are loaded from an
 // XML configuration file. The file must contain exactly one <config> root
-// element. Under the root element there can be multiple of the following
+// element. Under the root element, there can be multiple of the following
 // elements.
 //
 //  - <object>
@@ -33,14 +33,14 @@ import inet.environment.contract.IPhysicalEnvironment;
 //
 //    - name:
 //       This optional attribute specifies the name of the object. The name need
-//       not be unique, and it might be still useful on the graphical user interface.
+//       not be unique, and it might still be useful on the graphical user interface.
 //
 //    - shape:
 //       TODO
 //
 //    - position:
 //       This mandatory attribute specifies the position of the object. The value
-//       constists of a type followed by 3 coordinates (X, Y, and Z) separated
+//       consists of a type followed by 3 coordinates (X, Y, and Z) separated
 //       by spaces. The type specifier determines which predefined point of the
 //       shape is specified by the coordinates. The supported types are min, max,
 //       and center. The coordinates refer to the respective point of the shape's
@@ -49,13 +49,13 @@ import inet.environment.contract.IPhysicalEnvironment;
 //    - orientation:
 //       This optional attribute specifies the orientation of the object relative
 //       to the default orientation of the shape. The value contains 3 rotation
-//       Euler angles (heading, elevation and bank) respectively. The rotation
+//       Euler angles (heading, elevation, and bank) respectively. The rotation
 //       is done around the center of the shape's bounding box.
 //
 //    - material:
 //       This mandatory attribute specifies the material of the object. The value
-//       contains the name of a predefined material, or refers to a material
-//       defined in the same file. In the latter case the value contains the
+//       contains the name of a predefined material or refers to a material
+//       defined in the same file. In the latter case, the value contains the
 //       identifier or the name of the material.
 //
 //    - line-width:
@@ -99,7 +99,7 @@ import inet.environment.contract.IPhysicalEnvironment;
 //
 //    - type:
 //       This mandatory attribute determines the type of the shape. Valid values
-//       are sphere, cuboid, prism, and polyhedron.
+//       are a sphere, cuboid, prism, and polyhedron.
 //
 //    - size:
 //       This attribute is mandatory for cuboid shapes, it specifies the size in
@@ -117,7 +117,7 @@ import inet.environment.contract.IPhysicalEnvironment;
 //    - points:
 //       This attribute is mandatory for prism and polyhedron shapes, it contains
 //       a sequence of numbers separated by spaces. The value specifies the base
-//       polygon for prisms using 2 coordinates per point, or it specifies the
+//       polygon for prisms using 2 coordinates per point or it specifies the
 //       vertices for polyhedrons using 3 coordinates per point.
 //
 //  - <material>
@@ -131,7 +131,7 @@ import inet.environment.contract.IPhysicalEnvironment;
 //    - name:
 //       This optional attribute specifies the name of the material. This value
 //       might be used in the material attribute of object elements to refer to
-//       this material. The name need not be unique, and it might be still useful
+//       this material. The name need not be unique, and it might still be useful
 //       on the graphical user interface.
 //
 //    - resistivity:
@@ -139,13 +139,13 @@ import inet.environment.contract.IPhysicalEnvironment;
 //       ohm per meter. Resistivity is used to compute the dielectric loss
 //       tangent of the material.
 //
-//    - relativePermittivity:
+//    - `relativePermittivity`:
 //       This mandatory attribute specifies the relative permittivity of the
 //       material as a unitless quantity. Relative permittivity is used to
 //       compute the dielectric loss tangent and the refractive index of the
 //       material.
 //
-//    - relativePermeability:
+//    - `relativePermeability`:
 //       This mandatory attribute specifies the relative permeability of the
 //       material as a unitless quantity. Relative permeability is used to
 //       compute the refractive index of the material.
@@ -153,14 +153,14 @@ import inet.environment.contract.IPhysicalEnvironment;
 module PhysicalEnvironment like IPhysicalEnvironment
 {
     parameters:
-        string coordinateSystemModule = default(""); // module path of the geographic coordinate system module
+        string coordinateSystemModule = default(""); // Module path of the geographic coordinate system module
         double temperature @unit(K) = default(293K);
-        double spaceMinX @unit(m) = default(nan m); // lower bound of x coordinates in space, NaN means determined by physical objects, NaN by default
-        double spaceMinY @unit(m) = default(nan m); // lower bound of y coordinates in space, NaN means determined by physical objects, NaN by default
-        double spaceMinZ @unit(m) = default(nan m); // lower bound of z coordinates in space, NaN means determined by physical objects, NaN by default
-        double spaceMaxX @unit(m) = default(nan m); // upper bound of x coordinates in space, NaN means determined by physical objects, NaN by default
-        double spaceMaxY @unit(m) = default(nan m); // upper bound of y coordinates in space, NaN means determined by physical objects, NaN by default
-        double spaceMaxZ @unit(m) = default(nan m); // upper bound of z coordinates in space, NaN means determined by physical objects, NaN by default
+        double spaceMinX @unit(m) = default(nan m); // Lower bound of x coordinates in space, NaN means determined by physical objects, NaN by default
+        double spaceMinY @unit(m) = default(nan m); // Lower bound of y coordinates in space, NaN means determined by physical objects, NaN by default
+        double spaceMinZ @unit(m) = default(nan m); // Lower bound of z coordinates in space, NaN means determined by physical objects, NaN by default
+        double spaceMaxX @unit(m) = default(nan m); // Upper bound of x coordinates in space, NaN means determined by physical objects, NaN by default
+        double spaceMaxY @unit(m) = default(nan m); // Upper bound of y coordinates in space, NaN means determined by physical objects, NaN by default
+        double spaceMaxZ @unit(m) = default(nan m); // Upper bound of z coordinates in space, NaN means determined by physical objects, NaN by default
         xml config = default(xml("<config/>"));
         @display("i=misc/town");
         @class(PhysicalEnvironment);

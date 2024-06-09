@@ -12,7 +12,7 @@ package inet.queueing.base;
 // statistics.
 //
 // Available display string format directives:
-// - %p - number of packet
+// - %p - number of packets
 // - %l - total length
 // - %a - number of added packets
 // - %r - number of removed packets
@@ -23,7 +23,7 @@ package inet.queueing.base;
 simple PacketBufferBase extends PacketProcessorBase
 {
     parameters:
-        displayStringTextFormat = default("contains %p pk (%l)\nadded %a removed %r dropped %d"); // determines display string text above the submodule
+        displayStringTextFormat = default("contains %p pk (%l)\nadded %a removed %r dropped %d"); // Determines display string text above the submodule
         @display("i=block/buffer");
     gates:
         input in @loose;

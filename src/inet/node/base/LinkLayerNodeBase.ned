@@ -30,8 +30,8 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
         int numPcapRecorders = default(recordPcap ? 1 : 0);
         int numLoInterfaces = default(1);
         int numWlanInterfaces = default(0);
-        int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
-        int numPppInterfaces = default(0);  // minimum number of PPP interfaces
+        int numEthInterfaces = default(0);  // Minimum number of Ethernet interfaces
+        int numPppInterfaces = default(0);  // Minimum number of PPP interfaces
         int numTunInterfaces = default(0);
         int numVirtInterfaces = default(0);
         string fcsMode @enum("declared","computed") = default("declared");
@@ -83,7 +83,7 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
         lo[numLoInterfaces]: <default("LoopbackInterface")> like ILoopbackInterface {
             @display("p=750,975,row,150");
         }
-        // TODO move wlan interfaces after eth interfaces, but it changes IP address assignment and breaks examples/inet/configurator/complex.ini
+        // TODO move WLAN interfaces after Ethernet interfaces, but it changes IP address assignment and breaks examples/inet/configurator/complex.ini
         wlan[numWlanInterfaces]: <default("Ieee80211Interface")> like IWirelessInterface {
             @display("p=375,1000,row,150;q=queue");
         }

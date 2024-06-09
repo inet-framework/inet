@@ -16,18 +16,18 @@ simple EtherAppClient
 {
     parameters:
         string interfaceTableModule;
-        string destAddress = default("");  // destination MAC address, or module path name of destination station; empty means off
-        string interface = default("");  // outgoing interface name; empty accepted only when the destAddress is empty
-        double startTime @unit(s) = default(this.sendInterval);  // time of sending the first request
-        double stopTime @unit(s) = default(-1s);  // time of finishing sending, negative values mean forever
-        int localSAP = default(0xf0);  // local service access point
-        int remoteSAP = default(0xf1);  // remote service access point
-        volatile double sendInterval @unit(s) = default(uniform(0s,1s));  // interval between sending requests
-        volatile int reqLength @unit(B) = default(100B);  // length of request packets
-        volatile int respLength @unit(B) = default(1KiB);  // length of response packets
+        string destAddress = default("");  // Destination MAC address, or module path name of destination station; empty means off
+        string interface = default("");  // Outgoing interface name; empty accepted only when the destAddress is empty
+        double startTime @unit(s) = default(this.sendInterval);  // Time of sending the first request
+        double stopTime @unit(s) = default(-1s);  // Time of finishing sending, negative values mean forever
+        int localSAP = default(0xf0);  // Local service access point
+        int remoteSAP = default(0xf1);  // Remote service access point
+        volatile double sendInterval @unit(s) = default(uniform(0s,1s));  // Interval between sending requests
+        volatile int reqLength @unit(B) = default(100B);  // Length of request packets
+        volatile int respLength @unit(B) = default(1KiB);  // Length of response packets
         @lifecycleSupport;
-        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
-        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
         @display("i=block/app");
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);

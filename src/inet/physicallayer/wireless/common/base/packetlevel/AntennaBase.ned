@@ -11,14 +11,14 @@ import inet.mobility.contract.IMobility;
 import inet.physicallayer.wireless.common.contract.packetlevel.IAntenna;
 
 //
-// This module servces as the base module for antenna models.
+// This module serves as the base module for antenna models.
 //
 module AntennaBase like IAntenna
 {
     parameters:
-        string mobilityModule; // the path to the mobility module relative to this module, only used if no mobility submodule is present
-        int numAntennas = default(1); // the number of antennas in the antenna array
-        mobility.subjectModule = default(""); // disable subject module of mobility submodule by default
+        string mobilityModule; // The path to the mobility module relative to this module, only used if no mobility submodule is present
+        int numAntennas = default(1); // The number of antennas in the antenna array
+        mobility.subjectModule = default(""); // Disable subject module of mobility submodule by default
         @display("i=device/antennatower");
     submodules:
         mobility: <default("")> like IMobility if typename != "" {

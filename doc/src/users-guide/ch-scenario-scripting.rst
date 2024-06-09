@@ -8,10 +8,10 @@ Scenario Scripting
 Overview
 --------
 
-The INET Framework contains scripting support to help the user express
-scenarios that cannot be adequately described using static
-configuration. You can schedule actions to be carried out at specified
-simulation times, for example changing a parameter value, changing the
+The INET Framework contains scripting support to help scenarios that
+cannot be adequately described using static configuration.
+Actions can be scheduled to be carried out at specified
+simulation times, such as changing a parameter value, changing the
 bit error rate of a connection, removing or adding connections, removing
 or adding routes in a routing table, shutting down or crashing routers,
 etc. The aim is usually to observe transient behavior caused by the
@@ -33,7 +33,7 @@ INET supports the following built-in actions:
 ScenarioManager
 ---------------
 
-The :ned:`ScenarioManager` module type is for setting up and controlling
+The :ned:`ScenarioManager` module type is used for setting up and controlling
 simulation experiments. In typical usage, it has only one instance in
 the network:
 
@@ -50,8 +50,6 @@ built-in commands, while other commands are dispatched (in C++) to be
 carried out by other simple modules.
 
 An example script:
-
-
 
 .. code-block:: xml
 
@@ -81,15 +79,15 @@ The built-in commands of :ned:`ScenarioManager` are: ``<connect>``,
 ``<set-param>``, ``<set-channel-attr>``, ``<at>``.
 
 All commands have a ``t`` attribute which carries the simulation time
-at which the command has to be carried out. You can group several
-commands to be carried out at the same simulation time using
+at which the command has to be carried out. Several commands can be grouped
+to be carried out at the same simulation time using
 ``<at>``, and then only the ``<at>`` command needs to have a
 ``t`` attribute.
 
 More information can be found in the :ned:`ScenarioManager`
 documentation.
 
-The script is usually placed in a separate file, and specified like
+The script is usually placed in a separate file and specified like
 this:
 
 .. code-block:: ini

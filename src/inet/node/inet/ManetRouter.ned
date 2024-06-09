@@ -7,7 +7,7 @@ import inet.routing.contract.IManetRouting;
 module ManetRouter extends AdhocHost
 {
     submodules:
-        routingApp: <default("")> like IApp if typename != "" {      // Aodv or other manet routing over UDP/TCP protocol
+        routingApp: <default("")> like IApp if typename != "" {      // AODV or other MANET routing over UDP/TCP protocol
             @display("p=913,75");
         }
         routing: <default("")> like IManetRouting  if typename != "" {

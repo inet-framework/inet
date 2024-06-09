@@ -17,6 +17,6 @@ import inet.queueing.contract.IPacketServer;
 simple InstantServer extends PacketServerBase like IPacketServer
 {
     parameters:
-        int serveSchedulingPriority = default(-1); // specifies the FES scheduling priority for the extra event that is pulling the packet, -1 means no extra event
+        int serveSchedulingPriority = default(-1); // Specifies the FES scheduling priority for the extra event that is pulling the packet, -1 means no extra event
         @class(InstantServer);
 }

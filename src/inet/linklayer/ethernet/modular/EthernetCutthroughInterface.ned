@@ -26,12 +26,12 @@ package inet.linklayer.ethernet.modular;
 // require checking the current FCS and aborting incorrect frames. The Ethernet
 // cut-through implementation also assumes that transmissions are not updated on
 // the channel as is the case for Ethernet frame preemption. The packet contents
-// at the start of the reception is the same as the packet contents at the end of
+// at the start of the reception are the same as the packet contents at the end of
 // the reception.
 //
 // The main reason for these limitations is that with Ethernet cut-through
 // switching a received packet can reach far away both inside the network node
-// and also in the network and the current architecture doesn't support updating
+// and also in the network, and the current architecture doesn't support updating
 // this process.
 //
 module EthernetCutthroughInterface extends LayeredEthernetInterface

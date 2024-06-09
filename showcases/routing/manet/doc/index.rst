@@ -26,7 +26,7 @@ mobile nature of the nodes, the network topology can change over time.
 The nodes create their own network infrastructure: each node also acts
 as a router, forwarding traffic in the network. MANET routing protocols
 need to adapt to changes in the network topology and maintain routing
-information, so that packets can be forwarded to their destinations. Although
+information so that packets can be forwarded to their destinations. Although
 MANET routing protocols are mainly for mobile networks, they can also be
 useful for networks of stationary nodes that lack network
 infrastructure.
@@ -37,7 +37,7 @@ infrastructure.
 
 There are two main types of MANET routing protocols, reactive and
 proactive (although there are others which don't fit into either
-category). ``Reactive`` or on-demand routing protocols update routing
+category). Reactive or on-demand routing protocols update routing
 information when there is an immediate demand for it, i.e. one of the
 nodes wants to send a packet (and there is no working route to the
 destination). Then, they exchange route discovery messages and forward
@@ -46,7 +46,7 @@ packet's forwarding, i.e. the packet cannot be forwarded anymore due to
 a change in the network topology. Examples of reactive MANET routing
 protocols include AODV, DSR, ABR, etc.
 
-``Proactive`` or table-driven routing protocols continuously maintain
+Proactive or table-driven routing protocols continuously maintain
 routing information so the routes in the network are always up to date.
 This update typically involves periodic routing maintenance messages exchanged
 throughout the network. These types of protocols use more maintenance
@@ -69,9 +69,9 @@ features several routing protocols, for MANETs and other uses
 directory for the available routing protocols.
 
 The example simulations in this showcase feature the reactive protocol
-``Ad hoc On-Demand Distance Vector routing`` (AODV), the proactive
-protocol ``Destination-Sequenced Distance Vector routing`` (DSDV), and
-the geo routing protocol ``Greedy Perimeter Stateless Routing`` (GPSR).
+Ad hoc On-Demand Distance Vector routing (AODV), the proactive
+protocol Destination-Sequenced Distance Vector routing (DSDV), and
+the geo routing protocol Greedy Perimeter Stateless Routing (GPSR).
 The following section details these three protocols briefly.
 
 About AODV
@@ -84,28 +84,28 @@ table with the next hop for reaching destinations. Routes time out after
 a while if not used (i.e. no packets are sent on them). AODV features
 the following routing message types:
 
--  ``RREQ``: Route request
--  ``RREP``: Route reply
--  ``RERR``: Route error
+-  RREQ: Route request
+-  RREP: Route reply
+-  RERR: Route error
 
 When a node wants to send a packet, and it doesn't know the route to the
-destination, it initiates route discovery, by sending an ``RREQ``
+destination, it initiates route discovery, by sending an RREQ
 multicast message. The neighboring nodes record where the message came
 from and forward it to their neighbors until the message gets to the
-destination node. The destination node replies with an ``RREP``, which
-gets back to the source on the reverse path along which the ``RREQ``
+destination node. The destination node replies with an RREP, which
+gets back to the source on the reverse path along which the RREQ
 came. Forward routes are set up in the intermediate nodes as the
-``RREP`` travels back to the source. An intermediate node can also send
-an ``RREP`` in reply to a received ``RREQ`` if it knows the route to
+RREP travels back to the source. An intermediate node can also send
+an RREP in reply to a received RREQ if it knows the route to
 the destination, thus nodes can join an existing route. When the
-``RREP`` arrives at the source, and the route is created, communication
+RREP arrives at the source, and the route is created, communication
 can begin between the source and the destination. If a route no longer
 works due to link break, i.e. messages cannot be forwarded on it, a
-``RERR`` message is broadcast by the node which detects the link break.
-Other nodes re-broadcast the message. The ``RERR`` message indicates the
+RERR message is broadcast by the node which detects the link break.
+Other nodes re-broadcast the message. The RERR message indicates the
 destination which is unreachable. Nodes receiving the message make the
-route inactive (and eventually the route is deleted). The next packet to
-be sent triggers route discovery. As a reactive protocol, generally AODV
+route inactive (and eventually, the route is deleted). The next packet to
+be sent triggers route discovery. As a reactive protocol, generally, AODV
 has less overhead (less route maintenance messages) than proactive ones,
 but setting up new routes takes time while packets are waiting to be
 delivered. (Note that the routing protocol overhead depends on the
@@ -121,18 +121,18 @@ turned off in INET's AODV implementation.
 About DSDV
 ~~~~~~~~~~
 
-DSDV is a proactive (or table driven) MANET routing protocol, so it
+DSDV is a proactive (or table-driven) MANET routing protocol, so it
 makes sure routing information in the network is always up-to-date. Each
 node maintains a routing table with the best route to each destination.
-The routing table contains routing entries to all possible destinations
+The routing table contains routing entries for all possible destinations
 known either directly because it's a neighbor, or indirectly through
 neighbors. A routing entry contains the destination's IP address, last
 known sequence number, hop count required to reach the destination, and
-the next hop. Routing information is frequently updated, so all nodes
+the next hop. Routing information is frequently updated so all nodes
 have the best routes in the network. Routing information is updated in
 two ways:
 
--  Nodes broadcast their entire routing tables periodically
+-  Nodes broadcast their entire routing table periodically
    (infrequently)
 -  Nodes broadcast small updates when a change in their routing table
    occurs
@@ -141,21 +141,21 @@ A node updates a routing table entry if it receives a better route. A
 better route is one that has a higher sequence number, or a lower hop
 count if the sequence number is the same.
 
-In general, DSDV has more overhead than reactive routing protocols,
+In general, DSDV has more overhead than reactive routing protocols
 because route maintenance messages are sent all the time. Since the
 routes are always up to date, DSDV has less delay in sending data.
 
 About GPSR
 ~~~~~~~~~~
 
-GPSR is stateless (regarding routes), geographic location based routing
+GPSR is a stateless (regarding routes), geographic location-based routing
 protocol. Each node maintains the addresses and geographical
-co-ordinates of its neighbors, i.e. other nodes in its communication
+coordinates of its neighbors, i.e. other nodes in its communication
 range. Nodes advertise their locations periodically by sending beacons.
 When no beacons are received from a neighboring node for some time, the
 node is assumed to be out of range, and its table entry is deleted. A
 table entry for a node is also deleted after link failure. Nodes attach
-their location data on all sent and forwarded packets as well. Each
+their location data to all sent and forwarded packets as well. Each
 packet transmission resets the beacon timer, reducing the required
 protocol overhead in parts of the network with frequent packet traffic.
 The protocol is stateless in the context of routes. Nodes only have
@@ -165,7 +165,7 @@ about node positions or routes in the network as a whole.
 
 Destination is designated by an IP address, but the destination's
 location is also appended to packets. Packets are routed towards the
-destination's location specified with co-ordinates. IP addresses are
+destination's location specified with coordinates. IP addresses are
 only used to determine whether a receiving node is the destination of a
 packet. The protocol operates in one of two modes:
 

@@ -48,7 +48,7 @@ representing recent successful receptions in the physical layer.
 
 Host B is in the transmission range of host R1, and R1 could potentially
 relay A's packets, but it drops them because routing is not configured
-yet (it will be configured in a later step). Therefore no packets are
+yet (it will be configured in a later step). Therefore, no packets are
 received by host B.
 
 .. figure:: media/wireless-step3-2.png

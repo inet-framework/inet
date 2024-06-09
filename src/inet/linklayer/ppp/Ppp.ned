@@ -23,7 +23,7 @@ package inet.linklayer.ppp;
 // In hosts, no such queue is used, so PPP contains an internal
 // queue to store packets waiting for transmission.
 // Conceptually, the queue is of infinite size, but for better diagnostics
-// one can specify a hard limit in the packetCapacity parameter -- if this is
+// one can specify a hard limit in the `packetCapacity` parameter -- if this is
 // exceeded, the simulation stops with an error.
 //
 // There is no buffering done on received packets -- they are just decapsulated
@@ -36,11 +36,11 @@ simple Ppp
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         string displayStringTextFormat = default("rate: %b\nsent: %s, rcvd: %r\nqueue: %q, drop: %d");
-        bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out
+        bool sendRawBytes = default(false); // When true packets are serialized into a sequence of bytes before sending out
         int mtu @unit(B) = default(4470B);
         @lifecycleSupport;
-        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
-        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
         @class(Ppp);
         @display("i=block/rxtx");
 

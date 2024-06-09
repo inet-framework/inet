@@ -16,6 +16,6 @@ import inet.queueing.contract.IPacketMarker;
 simple ContentBasedTagger extends PacketTaggerBase like IPacketMarker
 {
     parameters:
-        object packetFilter = default("*"); // packet filter expressions, matches all packets by default
+        object packetFilter = default("*"); // Packet filter expressions, matches all packets by default
         @class(ContentBasedTagger);
 }

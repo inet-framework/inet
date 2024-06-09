@@ -13,11 +13,11 @@ package inet.queueing.base;
 //
 // Available display string text format directives:
 // - %p - number of processed packets
-// - %l - processed total packet length
+// - %l - total processed packet length
 //
 simple PacketProcessorBase
 {
     parameters:
-        string displayStringTextFormat = default("processed %p pk (%l)"); // determines the text that is written on top of the submodule
+        string displayStringTextFormat = default("processed %p pk (%l)"); // Determines the text that is written on top of the submodule
         @display("i=block/star");
 }

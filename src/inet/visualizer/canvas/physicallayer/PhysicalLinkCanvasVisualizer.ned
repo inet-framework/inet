@@ -24,7 +24,7 @@ import inet.visualizer.contract.IPhysicalLinkVisualizer;
 simple PhysicalLinkCanvasVisualizer extends PhysicalLinkVisualizerBase like IPhysicalLinkVisualizer
 {
     parameters:
-        double zIndex = default(1); // determines the drawing order of figures relative to other visualizers
+        double zIndex = default(1); // Determines the drawing order of figures relative to other visualizers
         @class(PhysicalLinkCanvasVisualizer);
 }
 

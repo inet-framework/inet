@@ -20,7 +20,7 @@ import inet.queueing.contract.IPacketDelayer;
 simple PacketDelayer extends PacketDelayerBase like IPacketDelayer
 {
     parameters:
-        volatile double delay @unit(s); // specifies delay per packet
-        volatile double bitrate @unit(bps) = default(inf bps); // determines additional delay per bit
+        volatile double delay @unit(s); // Specifies delay per packet
+        volatile double bitrate @unit(bps) = default(inf bps); // Determines additional delay per bit
         @class(PacketDelayer);
 }

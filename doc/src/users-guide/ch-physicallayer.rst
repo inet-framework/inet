@@ -41,7 +41,7 @@ generic, often used implementation of :ned:`IRadio` is the :ned:`Radio`
 NED type. :ned:`Radio` is an active compound module, that is, it has an
 associated C++ class that encapsulates the computations.
 
-:ned:`Radio` contains its antenna, transmitter, receiver and energy
+:ned:`Radio` contains its antenna, transmitter, receiver, and energy
 consumer models as submodules with parametric types:
 
 .. code-block:: ned
@@ -64,11 +64,11 @@ Components of a Radio
 Antenna Models
 ~~~~~~~~~~~~~~
 
-The antenna model describes the effects of the physical device which
+The antenna model describes the effects of the physical device that
 converts electric signals into radio waves, and vice versa. This model
 captures the antenna characteristics that heavily affect the quality of
 the communication channel. For example, various antenna shapes, antenna
-size and geometry, antenna arrays, and antenna orientation causes
+size and geometry, antenna arrays, and antenna orientation cause
 different directional or frequency selectivity.
 
 The antenna model provides a position and an orientation using a
@@ -95,10 +95,10 @@ provides some examples:
 Transmitter Models
 ~~~~~~~~~~~~~~~~~~
 
-The transmitter model describes the physical process which converts
+The transmitter model describes the physical process that converts
 packets into electric signals. In other words, this model converts an L2
 frame into a signal that is transmitted on the medium. The conversion
-process and the representation of the signal depends on the level of
+process and the representation of the signal depend on the level of
 detail and the physical characteristics of the implemented protocol.
 
 There are two main levels of detail (or modeling depths):
@@ -131,13 +131,13 @@ Some of the transmitter types available in INET:
 Receiver Models
 ~~~~~~~~~~~~~~~
 
-The receiver model describes the physical process which converts
+The receiver model describes the physical process that converts
 electric signals into packets. In other words, this model converts a
 reception, along with an interference computed by the medium model, into
 a MAC packet and a reception indication.
 
 For a packet to be received successfully, reception must be *possible*
-(based on reception power, bandwidth, modulation scheme and other
+(based on reception power, bandwidth, modulation scheme, and other
 characteristics), it must be *attempted* (i.e. the receiver must
 synchronize itself on the preamble and start receiving), and it must be
 *successful* (as determined by the error model and the simulated part of
@@ -171,21 +171,20 @@ Some of the receiver types available in INET:
 Error Models
 ~~~~~~~~~~~~
 
-Determining reception errors is a crucial part of the reception process.
-There are often several different statistical error models in the
-literature even for a particular physical layer. In order to support
-this diversity, the error model is a separate replaceable component of
-the receiver.
+Determining reception errors is a crucial part of the reception process. There
+are often several different statistical error models in the literature even for
+a particular physical layer. To support this diversity, the error model is a
+separate replaceable component of the receiver.
 
-The error model describes how the signal to noise ratio affects the
+The error model describes how the signal-to-noise ratio affects the
 amount of errors at the receiver. The main purpose of this model is to
 determine whether the received packet has errors or not. It also
-computes various physical layer indications for higher layers such as
+computes various physical layer indications for higher layers, such as
 packet error rate, bit error rate, and symbol error rate. For the
-layered reception model it needs to compute the erroneous bits, symbols,
+layered reception model, it needs to compute the erroneous bits, symbols,
 or samples depending on the lowest simulated physical domain where the
 real decoding starts. The error model is optional (if omitted, all
-receptions are considered successful.)
+receptions are considered successful).
 
 The following list provides some examples:
 
@@ -206,18 +205,18 @@ Power Consumption Models
 A substantial part of the energy consumption of communication devices
 comes from transmitting and receiving signals. The energy consumer model
 describes how the radio consumes energy depending on its activity. This
-model is optional (if omitted, energy consumption is ignored.)
+model is optional (if omitted, energy consumption is ignored).
 
 The following list provides some examples:
 
 -  :ned:`StateBasedEpEnergyConsumer`: power consumption is determined by
-   the radio state (a combination of radio mode, transmitter state and
+   the radio state (a combination of radio mode, transmitter state, and
    receiver state), and specified in parameters like
    :par:`receiverIdlePowerConsumption` and
    :par:`receiverReceivingDataPowerConsumption`, in watts.
 
 -  :ned:`StateBasedCcEnergyConsumer`: similar to the previous one, but
-   consumption is given in ampères.
+   consumption is given in amperes.
 
 .. _ug:sec:phy:layered-radio-models:
 
@@ -225,7 +224,7 @@ Layered Radio Models
 --------------------
 
 In layered radio models, the transmitter and receiver models are split
-to several stages to allow more fine-grained modeling.
+into several stages to allow more fine-grained modeling.
 
 For transmission, processing steps such as packet serialization, forward
 error correction (FEC) encoding, scrambling, interleaving, and
@@ -322,19 +321,19 @@ APSK Radio
 ~~~~~~~~~~
 
 APSK radio models provide a hypothetical radio that simulates one of the
-well-known ASP, PSK and QAM modulations. (APSK stands for Amplitude and
+well-known APSK, PSK, and QAM modulations. (APSK stands for Amplitude and
 Phase-Shift Keying.)
 
-APSK radio has scalar/dimensional, and flat/layered variants. The flat
-variants, :ned:`ApskScalarRadio` and :ned:`ApskDimensionalRadio` model
-frame transmissons in the selected modulation scheme but without
+APSK radio has scalar/dimensional and flat/layered variants. The flat
+variants, :ned:`ApskScalarRadio` and :ned:`ApskDimensionalRadio`, model
+frame transmissions in the selected modulation scheme but without
 utilizing other techniques such as forward error correction (FEC),
 interleaving, spreading, etc. These radios require matching medium
 models, :ned:`ScalarRadioMedium` and
 :ned:`DimensionalRadioMedium`.
 
-The layered version, :ned:`ApskLayeredRadio` can not only model the processing
-steps missing from their simpler counterparts, they also feature
+The layered version, :ned:`ApskLayeredRadio`, can not only model the processing
+steps missing from their simpler counterparts, but they also feature a
 configurable level of detail: the transmitter and receiver modules have
 :par:`levelOfDetail` parameters that control which domains are actually
 simulated. These radio models must be used in conjunction with

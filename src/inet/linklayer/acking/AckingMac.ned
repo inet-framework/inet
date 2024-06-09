@@ -16,8 +16,8 @@ import inet.linklayer.contract.IMacProtocol;
 //
 // The implementation provides packet encapsulation and decapsulation, but it
 // doesn't have a real medium access protocol. It doesn't provide carrier sense
-// mechanism, collision avoidance, collision detection, but it provides optional
-// out-of-band acknowledgement. Higher layer packets should have MacAddressReq
+// mechanism, collision avoidance, or collision detection, but it provides optional
+// out-of-band acknowledgement. Higher layer packets should have `MacAddressReq`
 // tag.
 //
 // See ~AckingWirelessInterface for rationale and details.
@@ -25,14 +25,14 @@ import inet.linklayer.contract.IMacProtocol;
 module AckingMac extends MacProtocolBase like ILinkLayer, IMacProtocol
 {
     parameters:
-        string address @mutable = default("auto");   // MAC address as hex string (12 hex digits), or
+        string address @mutable = default("auto");   // MAC address as a hex string (12 hex digits), or
                                                      // "auto". "auto" values will be replaced by
                                                      // a generated MAC address in init stage 0.
         double bitrate @unit(bps);
         int mtu @unit(B) = default(4470B);
         int headerLength @unit(B) = default(16B); // AckingMacHeader length
         bool promiscuous = default(false);
-        bool fullDuplex = default(true);    // allows transmitting and receiving simultaneously (transceiver radio mode)
+        bool fullDuplex = default(true);    // Allows transmitting and receiving simultaneously (transceiver radio mode)
         bool useAck = default(true);
         double ackTimeout @unit(s) = default(100ms);
 

@@ -26,9 +26,9 @@ simple SimpleGeographicCoordinateSystem like IGeographicCoordinateSystem
 {
     parameters:
         @display("i=block/table2");
-        double sceneLatitude @unit(deg); // latitude coordinate of the scene origin
-        double sceneLongitude @unit(deg); // longitude coordinate of the scene origin
-        double sceneAltitude @unit(m) = default(0m); // altitude coordinate of the scene origin
+        double sceneLatitude @unit(deg); // Latitude coordinate of the scene origin
+        double sceneLongitude @unit(deg); // Longitude coordinate of the scene origin
+        double sceneAltitude @unit(m) = default(0m); // Altitude coordinate of the scene origin
 }
 
 //
@@ -39,11 +39,11 @@ simple OsgGeographicCoordinateSystem like IGeographicCoordinateSystem
 {
     parameters:
         @display("i=block/table2");
-        double sceneLatitude @unit(deg); // latitude coordinate of the scene origin
-        double sceneLongitude @unit(deg); // longitude coordinate of the scene origin
-        double sceneAltitude @unit(m) = default(0m); // altitude coordinate of the scene origin
-        double sceneHeading @unit(deg) = default(90deg); // geographic heading of the scene (0deg means X axis points north, 90deg means X axis points east)
-        double sceneElevation @unit(deg) = default(0deg); // geographic elevation of the scene (0deg means X axis is horizontal, positive rotates X axis towards the sky)
-        double sceneBank @unit(deg) = default(0deg); // bank of the scene
+        double sceneLatitude @unit(deg); // Latitude coordinate of the scene origin
+        double sceneLongitude @unit(deg); // Longitude coordinate of the scene origin
+        double sceneAltitude @unit(m) = default(0m); // Altitude coordinate of the scene origin
+        double sceneHeading @unit(deg) = default(90deg); // Geographic heading of the scene (0deg means X axis points north, 90deg means X axis points east)
+        double sceneElevation @unit(deg) = default(0deg); // Geographic elevation of the scene (0deg means X axis is horizontal, positive rotates X axis towards the sky)
+        double sceneBank @unit(deg) = default(0deg); // Bank of the scene
 }
 

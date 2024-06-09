@@ -31,7 +31,7 @@ spaces (and contention periods, if not in a TXOP) is also reduced.
 There are two kinds of frame aggregation in 802.11:
 
 - MAC Service Data Unit (MSDU) aggregation: the packets received by the MAC from the upper layer are MSDUs. Each packet gets an MSDU subframe header. Two or more subframes are bundled together and put in an 802.11 MAC frame (header + trailer). The resulting frame is an aggregate-MSDU (a-MSDU). The a-MSDUs are transmitted with a single PHY header by the radio.
-- MAC Protocol Data Unit (MPDU) aggregation: MPDUs are frames passed from the MAC to the PHY layer. Each MPDU has a MAC header and trailer. Multiple MPDU-s are bundled together to create an aggregate MPDU (a-MPDU), which is transmitted with a PHY header by the radio.
+- MAC Protocol Data Unit (MPDU) aggregation: MPDUs are frames passed from the MAC to the PHY layer. Each MPDU has a MAC header and trailer. Multiple MPDUs are bundled together to create an aggregate MPDU (a-MPDU), which is transmitted with a PHY header by the radio.
 
 .. figure:: media/dataunits3.png
    :width: 100%
@@ -53,7 +53,7 @@ This way, the individual data packets sent in the a-MPDU can be
 acknowledged with a block acknowledgment frame, making
 MPDU aggregation more useful in a high error rate environment
 (the performance gain from using a-MSDUs might be negated by
-the higher error rate in a such an environment).
+the higher error rate in such an environment).
 Because a-MSDUs lack a global FCS, they can only be acknowledged with block ACKs.
 
 Here is an a-MSDU of three subframes displayed in qtenv's packet view:
@@ -73,14 +73,14 @@ Aggregation can be controlled by the following parameters of :ned:`BasicMsduAggr
 
 - :par:`subframeNumThreshold`: Specifies the minimum number of frames needed to create an a-MSDU. By default, the number of frames is not checked. Thus, the MAC creates an a-MSDU from any number of packets present in the queue when the MAC decides to transmit.
 - :par:`aggregationLengthThreshold`: Specifies the minimum length for an aggregated payload needed to create an a-MSDU. By default, the length is not checked.
-- :par:`maxAMsduSize`: Specifies the maximum size for an a-MSDU. By default, its 4065 bytes.
+- :par:`maxAMsduSize`: Specifies the maximum size for an a-MSDU. By default, it's 4065 bytes.
 
 When the MAC creates an a-MSDU, the resulting a-MSDU complies with all three of these
 parameters (if it didn't comply with any of them, then no a-MSDU would be created,
 and the frames would be sent without aggregation).
 
 To summarize, by default, the MAC aggregates frames when using HCF
-(``qosStation = true`` in the MAC). It aggregates any number of packets
+(``qosStation=true`` in the MAC). It aggregates any number of packets
 present in the queue at the time it decides to transmit, making sure
 the aggregated frame's length doesn't exceed 4065 bytes. By default,
 the MAC doesn't aggregate when using DCF.
@@ -91,7 +91,7 @@ The Model
 In the example simulation for this showcase, a host sends small UDP
 packets to another host via 802.11. We will run the simulation with and without
 aggregation (and also with and without the use of TXOP), and examine the number
-of received packets, the application-level throughput and the end-to-end delay.
+of received packets, the application-level throughput, and the end-to-end delay.
 
 The Network
 ~~~~~~~~~~~
@@ -128,7 +128,7 @@ Here are the 802.11 settings in the ``General`` configuration in
    :language: ini
 
 We set the mode to 802.11g ERP mode and 54 Mbps to increase the data transfer rate.
-Note that the ``qosStation = true`` key makes the MAC use HCF, but a classifier
+Note that the ``qosStation=true`` key makes the MAC use HCF, but a classifier
 is also needed in order for the MAC to create QoS frames (required for aggregation).
 
 There are three scenarios, defined in the following configurations,
@@ -206,10 +206,10 @@ but the whole aggregate frame has just one MAC header and MAC trailer, and PHY h
 so overhead is smaller. Also, there is no contention between the subframes
 (the MAC still has to contend for channel access before transmitting the aggregate frame).
 There is also a SIFS period and an ACK after each packet transmission (though there
-are less of these compared to the previous case, as ten packets are acknowledged with an ACK).
+are fewer of these compared to the previous case, as ten packets are acknowledged with an ACK).
 
 In the ``VoicePriorityAggregation``, throughput increases by another 190%
-(compared to the ``Aggregation`` case), to about 21Mbps. The MAC doesn't have
+(compared to the ``Aggregation`` case), to about 21 Mbps. The MAC doesn't have
 to contend for channel access during the TXOP, which decreases overhead even more.
 
 The following image shows frame exchanges for the three configurations on a sequence chart,

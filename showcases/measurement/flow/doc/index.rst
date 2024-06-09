@@ -24,11 +24,11 @@ By default, statistics in INET are collected based on local events associated wi
 For timing measurements that are associated with events happening to a packet, `packet flows` can be defined. A packet flow is a logical classification of packets, identified by its name, in the whole network and over the whole duration of the simulation. 
 A packet flow is defined by a label that is added to some packets. The label contains the flow name (the flow's identity), and some specified measurement requests.
 
-Time measurement along packet flows is useful in situations when the timing data to be measured is associated with a packet, rather then the modules it passes through, processed or arrives at. For example, we might want to measure queueing time for a packet at all the modules it passes through, as opposed to measuring queueing time at a queue module for all packets that it processes.
+Time measurement along packet flows is useful in situations when the timing data to be measured is associated with a packet, rather than the modules it passes through, processes, or arrives at. For example, we might want to measure the queueing time for a packet at all the modules it passes through, as opposed to measuring queueing time at a queue module for all packets that it processes.
 
-A packet is associated with the flow by specialized modules called `measurement starters`. These modules attach a label to the packet, that indicates which flow it is part of and what measurements are requested. When the packet travels through the network, certain modules add the measured time (or other data) to the packet as meta-information. Other specialized modules (`measurement recorders`) record the attached data as a statistic associated with that particular flow. These modules can optionally remove the label from the packet (then the packet can continue along its route). 
+A packet is associated with the flow by specialized modules called `measurement starters`. These modules attach a label to the packet that indicates which flow it is part of and what measurements are requested. When the packet travels through the network, certain modules add the measured time (or other data) to the packet as meta-information. Other specialized modules (`measurement recorders`) record the attached data as a statistic associated with that particular flow. These modules can optionally remove the label from the packet (then the packet can continue along its route). 
 
-For example, a label is added to the packet in a measurement starter module specifying the flow name ``flow1``, and the queueing time measurement. As the packet is processed in various queue modules in the network, the queue modules attach the time spent in them to the packet as meta-information. The label is removed at a measurement recorder module, and the queueing time accumulated by the packet is recorded. The data can be found in the analysis tool's browse data tab as the ``flowname:statisticname`` result name of the measurement recorder module (for example, ``flow1:queueingTime:histogram``). By default, :ned:`FlowMeasurementRecorder` records the specified measurements as both vectors and historgrams. The statistics can be plotted, exported and analyzed as any other statistic.
+For example, a label is added to the packet in a measurement starter module specifying the flow name ``flow1`` and the queueing time measurement. As the packet is processed in various queue modules in the network, the queue modules attach the time spent in them to the packet as meta-information. The label is removed at a measurement recorder module, and the queueing time accumulated by the packet is recorded. The data can be found in the analysis tool's browse data tab as the ``flowname:statisticname`` result name of the measurement recorder module (for example, ``flow1:queueingTime:histogram``). By default, :ned:`FlowMeasurementRecorder` records the specified measurements as both vectors and histograms. The statistics can be plotted, exported, and analyzed as any other statistic.
 
 .. in that module as the ``QueueingTime`` statistic associated with ``flow1``.
 
@@ -38,7 +38,7 @@ For example, a label is added to the packet in a measurement starter module spec
 
 Any number of flow labels can be added to a packet (it can be part of multiple flows). Also, the same flow can have multiple start and end points. 
 
-.. note:: A practical problem is that different parts of a packet may have different history, due to fragmentation and reassembly, for example. Therefore, we need to keep track of the measurements for different regions of the packet. For this purpose, each bit in a packet can have its own meta-information associating it to a flow, called a `region tag`. For more information on region tags, check out the :ref:`dg:sec:packets:region-tagging` section of the INET Developer's Guide.
+.. note:: A practical problem is that different parts of a packet may have different history, due to fragmentation and reassembly, for example. Therefore, we need to keep track of the measurements for different regions of the packet. For this purpose, each bit in a packet can have its own meta-information associating it with a flow, called a `region tag`. For more information on region tags, check out the :ref:`dg:sec:packets:region-tagging` section of the INET Developer's Guide.
 
 .. **TODO** for wip branch -> more about the available statistics in FlowMeasurementRecorder.ned ?
 
@@ -49,13 +49,13 @@ The dedicated module responsible for adding flow labels and specifying measureme
 
 The :ned:`FlowMeasurementStarter` and :ned:`FlowMeasurementRecorder` modules have the same set of parameters that specify the flow name (:par:`flowName` parameter), the set of packets that enter or exit the flow (:par:`packetFilter` parameter), and the required measurements (:par:`measure` parameter).
 
-By default, the filters match all packets (``packetFilter = 'true'``). The :par:`measure` parameter is a list containinig elements from the following set, separated by spaces:
+By default, the filters match all packets (``packetFilter = 'true'``). The :par:`measure` parameter is a list containing elements from the following set, separated by spaces:
 
 - ``delayingTime``, ``queueingTime``, ``processingTime``, ``transmissionTime``, ``propagationTime``: Time for the different cases, on a *per-bit* basis
 - ``elapsedTime``: The total elapsed time for the packet being in the flow (see first note below)
 - ``packetEvent``: Record all events that happen to the packet (see second note below)
 
-The :ned:`FlowMeasurementRecorder` module removes flow labels from packets by default. This is contolled by the :par:`endMeasurement` parameter (``true`` by default).
+The :ned:`FlowMeasurementRecorder` module removes flow labels from packets by default. This is controlled by the :par:`endMeasurement` parameter (``true`` by default).
 
 .. note that this not necessarily the sum of all the above durations; see **TODO** the manual
 
@@ -76,7 +76,7 @@ Adding Measurement Modules to the Network
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The FlowMeasurementStarter and FlowMeasurementRecorder modules can be inserted anywhere in the network (inside network nodes or protocol modules, etc.) in NED by editing the NED source of modules or extending them as a new type.
-However, some modules such as the LayeredEthernetInterface, already have built-in :ned:`MeasurementLayer` submodules. This module contains a FlowMeasurementStarter and a FlowMeasurementRecorder, but they are disabled by default (the type is set to empty string). The modules can be enabled from the .INI file (e.g. ``*.host.eth[0].measurementLayer.typename = "MeasurementLayer"``).
+However, some modules such as the LayeredEthernetInterface already have built-in :ned:`MeasurementLayer` submodules. This module contains a FlowMeasurementStarter and a FlowMeasurementRecorder, but they are disabled by default (the type is set to empty string). The modules can be enabled from the .INI file (e.g. ``*.host.eth[0].measurementLayer.typename = "MeasurementLayer"``).
 
 .. figure:: media/Default_MeasurementLayer.png
    :align: center
@@ -86,14 +86,14 @@ However, some modules such as the LayeredEthernetInterface, already have built-i
 Associating Packets to Flows Based on Multiple Criteria
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A measurement module can filter which packets to associate with a flow, using a packet filter and a packet data filter. Packets can be associated to multiple flows based on multiple criteria by using several measurement modules connected in series. The MultiMeasurementLayer module makes this convenient. It can be used in place of a MeasurementLayer module. It contains a variable number of FlowMeasurementStarter and FlowMeasurementRecorder modules; the number of modules is specified with its :par:`numMeasurementModules` parameter. For example, ``numMeasurementModules = 2``:
+A measurement module can filter which packets to associate with a flow, using a packet filter and a packet data filter. Packets can be associated with multiple flows based on multiple criteria by using several measurement modules connected in series. The MultiMeasurementLayer module makes this convenient. It can be used in place of a MeasurementLayer module. It contains a variable number of FlowMeasurementStarter and FlowMeasurementRecorder modules; the number of modules is specified with its :par:`numMeasurementModules` parameter. For example, ``numMeasurementModules = 2``:
 
 The example simulations demonstrate both inserting measurement modules into specific locations (below the :ned:`Udp` module) and using built-in :ned:`MeasurementLayer` submodules.
 
 Limitations
 ~~~~~~~~~~~
 
-Support for fragmentation and frame aggregation is planned for a later release, currently these are not supported.
+Support for fragmentation and frame aggregation is planned for a later release; currently, these are not supported.
 
 Visualizing Packet Flows
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -110,7 +110,7 @@ This showcase contains two simulations. Both simulations use the following netwo
 
    Figure X. The network
 
-The network contains hosts connected via switches (:ned:`EthernetSwitch`) in a dumbbell topology. Note that the host types are parametric (so that they can be configured from the ini file):
+The network contains hosts connected via switches (:ned:`EthernetSwitch`) in a dumbbell topology. Note that the host types are parametric (so that they can be configured from the INI file):
 
 .. literalinclude:: ../FlowMeasurementShowcase.ned
    :start-at: client1

@@ -8,33 +8,31 @@ Ad Hoc Routing
 Overview
 --------
 
-In ad hoc networks, nodes are not familiar with the topology of their
-networks. Instead, they have to discover it: typically, a new node
-announces its presence and listens for announcements broadcast by its
-neighbors. Each node learns about others nearby and how to reach them,
-and may announce that it too can reach them. The difficulty of routing
-may be compounded by the fact that nodes may be mobile, which results in
-a changing topology.
+In ad hoc networks, the topology of the network is not known to the nodes.
+Instead, the topology must be discovered. When a new node joins the network,
+it announces its presence and listens for announcements from its neighbors.
+Each node learns about nearby nodes and how to reach them, and it may also
+announce that it can reach other nodes. The task of routing in ad hoc
+networks is complicated by the fact that nodes may be mobile, resulting in a
+changing topology.
 
-Ad hoc routing protocols fall in two broad categories: proactive and
-reactive. *Proactive* or *table-driven* protocols maintain fresh lists
-of destinations and their routes by periodically distributing routing
-tables throughout the network. *Reactive* or *on-demand* protocols find
-a route on demand by flooding the network with Route Request packets.
+There are two types of ad hoc routing protocols: proactive and reactive.
+*Proactive* or *table-driven* protocols maintain up-to-date lists of
+destinations and their routes by periodically distributing routing tables
+throughout the network. *Reactive* or *on-demand* protocols find a route
+on-demand by flooding the network with Route Request packets.
 
-The INET Framework contains the implementation of several ad hoc routing
-protocols including :protocol:`AODV`, :protocol:`DSDV`, :protocol:`DYMO`
+The INET Framework includes the implementation of several ad hoc routing
+protocols, including :protocol:`AODV`, :protocol:`DSDV`, :protocol:`DYMO`,
 and :protocol:`GPSR`.
 
 The easiest way to add routing to an ad hoc network is to use the
 :ned:`ManetRouter` NED type for nodes. :ned:`ManetRouter` contains a
-submodule named ``routing`` whose type is a parameter, so it can be
-configured to be an AODV router, a DYMO router, or a router of any other
-supported routing protocol. For example, you can configure
-:ned:`ManetRouter` nodes in the network to use AODV with the following
-ini file line:
-
-
+submodule named ``routing`` which has parametric type, so it
+can be configured to be an AODV router, a DYMO router, or a router for any
+other supported routing protocol. For example, :ned:`ManetRouter` nodes in the
+network can be configured to use AODV by adding the following line to the ini
+file:
 
 .. code-block:: ini
 
@@ -42,16 +40,17 @@ ini file line:
    **.routing.typename = "Gpsr" # as a routing protocol module
 
 There are also NED types called :ned:`AodvRouter`, :ned:`DymoRouter`,
-:ned:`DsdvRouter`, :ned:`GpsrRouter`, which are all :ned:`ManetRouter`’s
-with the routing protocol submodule type set appropriately.
+:ned:`DsdvRouter`, and :ned:`GpsrRouter`. These types are all based on
+:ned:`ManetRouter` and have the routing protocol submodule type set
+appropriately.
 
 .. _ug:sec:adhocrouting:aodv:
 
 AODV
 ----
 
-AODV (Ad hoc On-Demand Distance Vector Routing) is a routing protocol
-for mobile ad hoc networks and other wireless ad hoc networks. It offers
+AODV (Ad hoc On-Demand Distance Vector Routing) is a routing protocol for
+mobile ad hoc networks and other wireless ad hoc networks. It provides
 quick adaptation to dynamic link conditions, low processing and memory
 overhead, low network utilization, and determines unicast routes to
 destinations within the ad hoc network.
@@ -81,13 +80,13 @@ set to :ned:`Dsdv`.
 DYMO
 ----
 
-The DYMO (Dynamic MANET On-demand) routing protocol is successor to the
-AODV routing protocol. DYMO can work as both a pro-active and as a
+The DYMO (Dynamic MANET On-demand) routing protocol is the successor to the
+AODV routing protocol. DYMO can work as both a proactive and a
 reactive routing protocol, i.e. routes can be discovered just when they
 are needed.
 
 The :ned:`Dymo` module type implements DYMO, based on the IETF draft
-*draft-ietf-manet-dymo-24*.
+"draft-ietf-manet-dymo-24".
 
 :ned:`DymoRouter` is a :ned:`ManetRouter` with the routing module type
 set to :ned:`Dymo`.
@@ -101,8 +100,8 @@ GPSR (Greedy Perimeter Stateless Routing) is a routing protocol for
 mobile wireless networks that uses the geographic positions of nodes to
 make packet forwarding decisions.
 
-The :ned:`Gpsr` module type implements GPSR, based on the paper “GPSR:
-Greedy Perimeter Stateless Routing for Wireless Networks” by Brad Karp
+The :ned:`Gpsr` module type implements GPSR, based on the paper "GPSR:
+Greedy Perimeter Stateless Routing for Wireless Networks" by Brad Karp
 and H. T. Kung, 2000. The implementation supports both GG and RNG
 planarization algorithms.
 

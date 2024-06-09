@@ -8,8 +8,8 @@
 package inet.linklayer.ieee8022;
 
 //
-// This module implements the module given interface and can be used as an omitted
-// optional module that removes itself from the module hierarchy during initialize.
+// This module implements the given module interface and can be used as an omitted
+// optional module that removes itself from the module hierarchy during initialization.
 //
 module OmittedIeee8022LlcChecker like IIeee8022LlcChecker
 {

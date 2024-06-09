@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 //
 // @see ~FailureProtectionConfigurationCanvasVisualizer
 //
-moduleinterface IFailureProtectionConfigurationVisualizer
+moduleinterface IFailureProtectionConfigurationVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

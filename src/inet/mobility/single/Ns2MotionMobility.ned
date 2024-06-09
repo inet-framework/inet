@@ -12,8 +12,8 @@ import inet.mobility.base.MovingMobilityBase;
 simple Ns2MotionMobility extends MovingMobilityBase
 {
     parameters:
-        string traceFile; // the BonnMotion trace file
-        int nodeId; // selects line in trace file; -1 gets substituted to parent module's index
+        string traceFile; // The BonnMotion trace file
+        int nodeId; // Selects line in trace file; -1 gets substituted to parent module's index
         double scrollX @unit(m) = default(0m);
         double scrollY @unit(m) = default(0m);
         @class(Ns2MotionMobility);

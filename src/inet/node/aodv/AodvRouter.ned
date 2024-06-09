@@ -15,10 +15,10 @@ import inet.routing.aodv.Aodv;
 //
 // AODV is an on-demand MANET routing protocol. Each node
 // works similar to a 'router': they manage their own routing
-// tables, send request for routes and consult the IP layer via
+// tables, send requests for routes, and consult the IP layer via
 // Netfilter hooks for data forwarding.
 //
-// Scenerios where AODV routing is desired use this module as a
+// Scenarios where AODV routing is desired use this module as a
 // host module.
 //
 // The AODV v.2 (known as Dymo) is also implemented: ~Dymo,

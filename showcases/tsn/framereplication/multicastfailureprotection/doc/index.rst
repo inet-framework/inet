@@ -4,7 +4,7 @@ Multicast Streams with Failure Protection
 Goals
 -----
 
-In this example we replicate the multicast stream example from the IEEE 802.1 CB standard.
+In this example, we replicate the multicast stream example from the IEEE 802.1 CB standard.
 
 | INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/framereplication/multicastfailureprotection <https://github.com/inet-framework/inet/tree/master/showcases/tsn/framereplication/multicastfailureprotection>`__
@@ -12,7 +12,7 @@ In this example we replicate the multicast stream example from the IEEE 802.1 CB
 The Model
 ---------
 
-In this configuration we a use a network of TSN switches. A multicast stream is
+In this configuration, we use a network of TSN switches. A multicast stream is
 sent through the network from one of the switches to all other switches.
 
 Here is the network:
@@ -39,7 +39,6 @@ Results
    .. .. figure:: media/results.png
       :align: center
       :width: 100%
-
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`MulticastFailureProtectionShowcase.ned <../MulticastFailureProtectionShowcase.ned>`
 

@@ -4,7 +4,7 @@ Measuring Transmission Time
 Goals
 -----
 
-In this example we explore the packet transmission time statistics of network
+In this example, we explore the packet transmission time statistics of network
 interfaces for wired and wireless transmission mediums.
 
 | INET version: ``4.4``
@@ -16,7 +16,7 @@ The Model
 The packet transmission time is measured from the moment the beginning of the
 physical signal encoding the packet leaves the network interface up to the moment
 the end of the same physical signal leaves the same network interface. This time
-usually equals with the packet reception time that is measured at the receiver
+usually equals to the packet reception time that is measured at the receiver
 network interface from the beginning to the end of the physical signal. The
 exception would be when the receiver is moving relative to the transmitter with
 a relatively high speed compared to the propagation speed of the physical signal,
@@ -26,7 +26,7 @@ Packet transmission time is measured from the beginning of the
 physical signal encoding the packet leaves the network interface up to the moment
 the end of the same physical signal leaves the same network interface. 
 
-Packet transmission time is the time difference between the start and th end of the physical
+Packet transmission time is the time difference between the start and the end of the physical
 signal transmission on the outgoing interface.
 
 Here is the network:

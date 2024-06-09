@@ -9,7 +9,7 @@ package inet.queueing.buffer;
 
 //
 // This buffer drops packets among the connected packet queues based on their
-// module id.
+// module ID.
 //
 simple PriorityBuffer extends PacketBuffer
 {

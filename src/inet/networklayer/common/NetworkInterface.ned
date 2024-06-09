@@ -19,7 +19,6 @@ import inet.common.packet.recorder.PcapRecorder;
 // - %n: interface name
 // - %a: network address
 //
-//
 module NetworkInterface
 {
     parameters:

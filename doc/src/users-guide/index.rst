@@ -4,9 +4,9 @@ Release: |release|
 
 This manual is written for users who are interested in assembling
 simulations using the components provided by the INET Framework. (In
-contrast, if you are interested in modifying INET’s components or plan to
-extend INET with new protocols or other components using C++, we
-recommend the :doc:`INET Developer's Guide </developers-guide/index>`.)
+contrast, if you need to modify INET's components or plan to
+extend INET with new protocols or other components using C++, the
+:doc:`INET Developer's Guide </developers-guide/index>` is recommended.)
 
 .. only:: html
 

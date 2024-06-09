@@ -10,7 +10,7 @@ package inet.clock.model;
 //
 // Models a clock which can be set to a different clock time. The clock time
 // can be set from C++ or using a <set-clock module="..." time="..."/> command
-// in a ScenarioManager script.
+// in a `ScenarioManager` script.
 //
 // @see ~ScenarioManager
 //

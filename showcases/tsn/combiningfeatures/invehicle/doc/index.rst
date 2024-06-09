@@ -4,10 +4,10 @@ In-vehicle Network
 Goals
 -----
 
-In this example we demonstrate the combined features of Time-Sensitive Networking
+In this example, we demonstrate the combined features of Time-Sensitive Networking
 in a complex in-vehicle network. The network utilizes time-aware shaping, automatic
 gate scheduling, clock drift, time synchronization, credit-based shaping, per-stream
-filtering and policying, stream redundancy, unicast and multicast streams, link
+filtering and policing, stream redundancy, unicast and multicast streams, link
 failure protection, frame preemption, and cut-through switching.
 
 | INET version: ``4.4``
@@ -16,7 +16,7 @@ failure protection, frame preemption, and cut-through switching.
 The Model
 ---------
 
-In this showcase we model the communication network inside a vehicle. The network
+In this showcase, we model the communication network inside a vehicle. The network
 consists of several Ethernet switches connected in a redundant way and multiple
 end devices. There are several data flows between the end device applications.
 
@@ -34,13 +34,13 @@ Here is the configuration:
 Standard Ethernet
 -----------------
 
-In this configuration we use only standard Ethernet features to have a baseline
+In this configuration, we use only standard Ethernet features to have a baseline
 of statistical results.
 
 Time-Sensitive Networking
 -------------------------
 
-In this configuration we use advanced Time-Sensitive Networking features to
+In this configuration, we use advanced Time-Sensitive Networking features to
 evaluate their performance.
 
 Results

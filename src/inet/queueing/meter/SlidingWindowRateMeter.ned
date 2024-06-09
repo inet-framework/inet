@@ -11,13 +11,13 @@ import inet.queueing.base.PacketMeterBase;
 import inet.queueing.contract.IPacketMeter;
 
 //
-// This module attaches a ~RateTag to each packet specifying the datarate and
-// packetrate of the received stream of packets. The algorithm takes packets
+// This module attaches a ~RateTag to each packet specifying the data rate and
+// packet rate of the received stream of packets. The algorithm takes packets
 // into account only in the given time window.
 //
 simple SlidingWindowRateMeter extends PacketMeterBase like IPacketMeter
 {
     parameters:
-        double timeWindow @unit(s); // amount of time to look back from the current simulation time
+        double timeWindow @unit(s); // Amount of time to look back from the current simulation time
         @class(SlidingWindowRateMeter);
 }

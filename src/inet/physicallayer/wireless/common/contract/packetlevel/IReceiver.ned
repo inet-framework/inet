@@ -8,7 +8,7 @@
 package inet.physicallayer.wireless.common.contract.packetlevel;
 
 //
-// The receiver model describes the physical process which converts electric
+// The receiver model describes the physical process that converts electric
 // signals into packets.
 //
 moduleinterface IReceiver

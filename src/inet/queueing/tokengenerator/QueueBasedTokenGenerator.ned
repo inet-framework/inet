@@ -11,7 +11,7 @@ import inet.queueing.base.TokenGeneratorBase;
 
 //
 // This module generates tokens for a ~TokenBasedServer based on the observed state
-// changes of a packet queue. It's primary purpose is to allow applications to
+// changes of a packet queue. Its primary purpose is to allow applications to
 // produce traffic which completely utilizes a network interface. This is achieved
 // by generating tokens whenever the observed packet queue becomes empty.
 //
@@ -23,10 +23,10 @@ import inet.queueing.base.TokenGeneratorBase;
 simple QueueBasedTokenGenerator extends TokenGeneratorBase
 {
     parameters:
-        string queueModule; // module path of the observed packet queue
+        string queueModule; // Module path of the observed packet queue
         int minNumPackets = default(1);
         int minTotalLength @unit(b) = default(0 b);
-        volatile double numTokens = default(1); // number of tokens generated when the queue becomes empty
+        volatile double numTokens = default(1); // Number of tokens generated when the queue becomes empty
         @class(QueueBasedTokenGenerator);
         @display("i=block/control");
 }

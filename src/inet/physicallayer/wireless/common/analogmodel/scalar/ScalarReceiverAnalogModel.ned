@@ -14,6 +14,6 @@ simple ScalarReceiverAnalogModel like IReceiverAnalogModel
     parameters:
         double defaultCenterFrequency @unit(Hz) = default(nan Hz);
         double defaultBandwidth @unit(Hz) = default(nan Hz);
-        double defaultSensitivity @unit(dBm) = default(nan dBm);     // reception is not possible if the signal power is below sensitivity (idle or busy states)
+        double defaultSensitivity @unit(dBm) = default(nan dBm);     // Reception is not possible if the signal power is below sensitivity (idle or busy states)
         @display("i=block/tunnel");
 }

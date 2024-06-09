@@ -16,22 +16,22 @@ import inet.queueing.contract.IPacketMeter;
 
 //
 // This module implements the IEEE 802.1Q per-stream filtering and policing.
-// The relationship between streams, gates and meters is not one-to-one. The
-// number of streams, gates and meters can be different and the module will take
-// care about the connections between the submodules based on the streamFilterTable
+// The relationship between streams, gates, and meters is not one-to-one. The
+// number of streams, gates, and meters can be different, and the module will take
+// care of the connections between the submodules based on the `streamFilterTable`
 // parameter.
 //
 // In order to define the behavior of a default path, you can add an entry to the
-// streamFilterTable that matches all streams:
+// `streamFilterTable` that matches all streams:
 // {stream: "*", gate: n, meter: n}
 //
 module Ieee8021qFilter like IPacketFilter
 {
     parameters:
-        int numStreams; // number of different streams to filter for
-        int numGates; // number of gates
-        int numMeters; // number of traffic meters
-        object streamFilterTable; // an array of objects where each object contains a stream name, gate index and meter index, for example: [{stream: "s0", gate: 0, meter: 0}, ...]
+        int numStreams; // The number of different streams to filter for
+        int numGates; // The number of gates
+        int numMeters; // The number of traffic meters
+        object streamFilterTable; // An array of objects where each object contains a stream name, gate index, and meter index, for example: [{stream: "s0", gate: 0, meter: 0}, ...]
         @display("i=block/filter");
     gates:
         input in;

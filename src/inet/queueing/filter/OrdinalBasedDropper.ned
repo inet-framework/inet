@@ -16,8 +16,8 @@ import inet.queueing.base.PacketFilterBase;
 simple OrdinalBasedDropper extends PacketFilterBase
 {
     parameters:
-        string dropsVector = default(""); // the dropsVector format is "<packetNumber>;<packetNumber>;...;"
-                                          // packet numbers in ascending order e.g. "5;6;12;13;"
+        string dropsVector = default(""); // The dropsVector format is "<packetNumber>;<packetNumber>;...;"
+                                          // Packet numbers in ascending order e.g. "5;6;12;13;"
         @class(OrdinalBasedDropper);
 }
 

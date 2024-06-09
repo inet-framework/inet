@@ -13,8 +13,8 @@ import inet.queueing.contract.IPacketPusher;
 
 //
 // This module combines a stream merger and a stream splitter module into a
-// stream relay layer. For incoming packets the identified streams are merged
-// by the stream merger. For outgoing packets the requested streams are split
+// stream relay layer. For incoming packets, the identified streams are merged
+// by the stream merger. For outgoing packets, the requested streams are split
 // by the stream splitter.
 //
 module StreamRelayLayer like IProtocolLayer

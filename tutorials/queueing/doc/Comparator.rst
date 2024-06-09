@@ -3,7 +3,7 @@ Ordering the Packets in the Queue
 
 The :ned:`PacketQueue` module can order the packets it contains using a packet
 comparator function, which makes it suitable for implementing priority
-queueing. (Other ways of implementing priority queueing, for example using
+queuing. (Other ways of implementing priority queueing, for example using
 :ned:`PriorityScheduler`, will be covered in later steps.)
 
 In this example network, an active packet source (:ned:`ActivePacketSource`) creates

@@ -8,7 +8,7 @@
 package inet.applications.ipapp;
 
 //
-// This module implements a IP application that only sends packets.
+// This module implements an IP application that only sends packets.
 //
 module IpSourceApp extends IpApp
 {

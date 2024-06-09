@@ -20,7 +20,7 @@ About 802.11 QoS
 ----------------
 
 When QoS is enabled in 802.11, the MAC uses a technique called `enhanced distributed channel access` (EDCA)
-to provide different treatment to various packets classes. EDCA is part of the hybrid coordination function (HCF).
+to provide different treatment to various packet classes. EDCA is part of the hybrid coordination function (HCF).
 In EDCA, packets are classified into four access categories, each category having a different
 priority. The categories from lowest to highest priority are the following:
 
@@ -237,7 +237,7 @@ The following table summarizes the average jitter for the different access categ
 As with the delay, the jitter is improved in the QoS case for video and voice, and worse
 for background and best effort.
 
-Let us spend a minute on explaning an artifact in the QoS jitter plot, namely
+Let us spend a minute on explaining an artifact in the QoS jitter plot, namely
 some data points forming horizontal lines. Here is a relevant part of the plot, zoomed in:
 
  .. figure:: media/jitter_qos_zoomed.png
@@ -247,7 +247,7 @@ Some jitter data points of best effort and video form two horizontal lines.
 The best effort line is at -0.25 ms; the video line is at -1 ms. The reason
 for these data points is that sometimes, packets belonging to the same access
 category are sent consecutively. The packets are generated every 0.25 and 1 ms,
-but it takes a few microseconds to transmit a frame, thus the consequtive packets
+but it takes a few microseconds to transmit a frame, thus the consecutive packets
 arrive at the receiver at the same time (a few microseconds apart). This results
 in the -0.25 ms and -1 ms jitter.
 

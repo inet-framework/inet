@@ -19,14 +19,14 @@ import inet.queueing.contract.IPacketMeter;
 // asynchronous packet shaper. Note that the asynchronous packet shaper also has
 // parts in the network interface queue module.
 //
-// @see ~EligibilityTimeQueue, EligibilityTimeGate
+// @see ~EligibilityTimeQueue, ~EligibilityTimeGate
 //
 module DualIeee8021qFilter like IPacketFilter
 {
     parameters:
-        int numStreams = default(0); // number of streams
-        bool hasDefaultPath = default(true); // specifies if the non-filtered direct path should exist
-        int startY = default(hasDefaultPath ? 200 : 100); // used for submodule layout
+        int numStreams = default(0); // Number of streams
+        bool hasDefaultPath = default(true); // Specifies if the non-filtered direct path should exist
+        int startY = default(hasDefaultPath ? 200 : 100); // Used for submodule layout
         @display("i=block/filter");
     gates:
         input in;

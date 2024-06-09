@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 //
 // @see ~PhysicalEnvironmentCanvasVisualizer, ~PhysicalEnvironmentOsgVisualizer, ~PhysicalEnvironmentVisualizer, ~PhysicalEnvironmentVisualizerBase
 //
-moduleinterface IPhysicalEnvironmentVisualizer
+moduleinterface IPhysicalEnvironmentVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

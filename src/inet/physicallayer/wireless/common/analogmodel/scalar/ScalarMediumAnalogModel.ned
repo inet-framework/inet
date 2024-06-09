@@ -17,7 +17,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IMediumAnalogMode
 module ScalarMediumAnalogModel like IMediumAnalogModel
 {
     parameters:
-        bool ignorePartialInterference = default(false); // enabled means interference only partially overlapping with the signal being received is ignored, otherwise the simulation stops with an error
+        bool ignorePartialInterference = default(false); // Enabled means interference that only partially overlaps with the signal being received is ignored; otherwise, the simulation stops with an error
         @display("i=block/tunnel");
         @class(ScalarMediumAnalogModel);
 }

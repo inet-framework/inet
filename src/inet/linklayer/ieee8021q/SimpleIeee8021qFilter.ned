@@ -22,8 +22,8 @@ import inet.queueing.contract.IPacketMeter;
 module SimpleIeee8021qFilter like IPacketFilter
 {
     parameters:
-        int numStreams = default(0); // number of different streams to filter for
-        bool hasDefaultPath = default(true); // specifies if the non-filtered direct path should exist
+        int numStreams = default(0); // Number of different streams to filter for
+        bool hasDefaultPath = default(true); // Specifies if the non-filtered direct path should exist
         int startY = default(hasDefaultPath ? 200 : 100);
         @display("i=block/filter");
     gates:

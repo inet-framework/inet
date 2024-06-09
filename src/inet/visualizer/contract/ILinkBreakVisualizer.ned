@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 //
 // @see ~LinkBreakCanvasVisualizer, ~LinkBreakOsgVisualizer, ~LinkBreakVisualizer, ~LinkBreakVisualizerBase
 //
-moduleinterface ILinkBreakVisualizer
+moduleinterface ILinkBreakVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

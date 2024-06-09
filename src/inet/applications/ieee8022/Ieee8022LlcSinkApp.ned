@@ -14,5 +14,4 @@ module Ieee8022LlcSinkApp extends Ieee8022LlcApp
 {
     parameters:
         source.typename = "";
-        io.destPort = -1;
 }

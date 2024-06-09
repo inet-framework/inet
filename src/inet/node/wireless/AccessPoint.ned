@@ -27,10 +27,10 @@ import inet.networklayer.common.InterfaceTable;
 //
 // The wlan[*].mgmt.typename can be configured for different management types
 // currently it can be: ~Ieee80211MgmtApSimplified and ~Ieee80211MgmtAp.
-// By default it is ~Ieee80211MgmtAp. The Simplified version does not
-// support channel scanning, authentication and association .
+// By default, it is ~Ieee80211MgmtAp. The Simplified version does not
+// support channel scanning, authentication, and association.
 // In this case, nodes must explicitly specify the hardware address
-// of the wlan card they want to be associated with.
+// of the WLAN card they want to be associated with.
 //
 module AccessPoint
 {
@@ -38,7 +38,7 @@ module AccessPoint
         @networkNode();
         @labels(node,ethernet-node,wireless-node);
         @display("i=device/accesspoint");
-        int numWlanInterfaces = default(1);               // the number of radios in the access point
+        int numWlanInterfaces = default(1);               // The number of radios in the access point
         bool hasStatus = default(false);
         string fcsMode @enum("declared","computed") = default("declared");
         wlan[*].protocol = default("ethernetmac");

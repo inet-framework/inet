@@ -10,17 +10,17 @@ package inet.node.tsn;
 import inet.linklayer.ieee8021as.GptpMaster;
 
 //
-// This module represents a hardware device containing a high precision hardware
+// This module represents a hardware device containing a high-precision hardware
 // clock. The device also contains a gPTP protocol implementation and acts as a
-// gPTP master node in the network.
+// gPTP master node on the network.
 //
 module TsnClock extends GptpMaster
 {
     parameters:
-        bool hasCutthroughSwitching = default(false); // enable cut-through switching support
-        clock.typename = default("OscillatorBasedClock"); // master clocks cannot be set
-        ethernet.typename = default("EthernetLayer"); // use Ethernet protocol layer outside of network interfaces
-        eth[*].typename = default("LayeredEthernetInterface"); // switch to modular Ethernet interface
-        eth[*].phyLayer.typename = default("EthernetStreamingPhyLayer"); // we need packet streaming to use the receptionStartedSignal
-        @display("i=device/card"); // change icon to emphasise hardware device
+        bool hasCutthroughSwitching = default(false); // Enable cut-through switching support
+        clock.typename = default("OscillatorBasedClock"); // Master clocks cannot be set
+        ethernet.typename = default("EthernetLayer"); // Use the Ethernet protocol layer outside network interfaces
+        eth[*].typename = default("LayeredEthernetInterface"); // Switch to modular Ethernet interface
+        eth[*].phyLayer.typename = default("EthernetStreamingPhyLayer"); // We need packet streaming to use the receptionStartedSignal
+        @display("i=device/card"); // Change icon to emphasize hardware device
 }

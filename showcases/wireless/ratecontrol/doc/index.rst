@@ -33,10 +33,10 @@ About rate control
 The physical layers of IEEE 802.11 devices are capable of transmitting
 at several different rates. The different rates can use different
 channel access methods, like orthogonal frequency division multiplexing
-(OFDM) or directs sequence spread spectrum (DSSS), and different
+(OFDM) or direct sequence spread spectrum (DSSS), and different
 modulation schemes like binary phase shift keying (BPSK) or types of
 quadrature amplitude modulation (QAM). Each of these has different
-tolerances of effects like fading, attenuation, and interference from
+tolerances for effects like fading, attenuation, and interference from
 other radio sources. In varying channel conditions, using the fastest
 rate might not be optimal for performance. Rate control algorithms adapt
 the transmission rate dynamically to the changing channel conditions, so
@@ -54,7 +54,7 @@ Rate control algorithms
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Some rate control algorithms change the transmission rate according to
-packet loss. When too many packets are lost (ie. the ACK for them
+packet loss. When too many packets are lost (i.e. the ACK for them
 doesn't arrive), the transmission rate is lowered. When a number of
 packets are sent without loss, the rate is increased.
 
@@ -144,7 +144,7 @@ Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`RateControlShowcas
 Conclusion
 ~~~~~~~~~~
 
-These results shows that rate control is effective in increasing the performance
+These results show that rate control is effective in increasing the performance
 of the wireless network, as it increases throughput during varying
 channel conditions. Also, throughput is not zero in situations when it
 would be if rate control weren't used.

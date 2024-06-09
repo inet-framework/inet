@@ -8,10 +8,10 @@ Working with Packets
 Overview
 --------
 
-The INET Packet API is designed to ease the implementation of
+The INET Packet API is designed to facilitate the implementation of
 communication protocols and applications by providing many useful C++
-components. In the following sections, we introduce the Packet API in
-detail, and we shed light on many common API usages through examples.
+components. In the following sections, we will introduce the Packet API in
+detail, and we will shed light on many common API usages through examples.
 
 .. note::
 
@@ -23,7 +23,7 @@ detail, and we shed light on many common API usages through examples.
 The representation of packets is essential for
 communication network simulation. Applications and communication
 protocols construct, deconstruct, encapsulate, fragment, aggregate, and
-manipulate packets in many ways. In order to ease the implementation of
+manipulate packets in many ways. In order to facilitate the implementation of
 these behavioral patterns, INET provides a feature-rich general data structure,
 the :cpp:`Packet` class.
 
@@ -33,7 +33,7 @@ packets, :protocol:`TCP` segments, :protocol:`IP` datagrams,
 kinds of digital data. It is designed to provide efficient storage,
 duplication, sharing, encapsulation, aggregation, fragmentation,
 serialization, and data representation selection. Additional functionality,
-such as support for enqueueing data for transmisson and buffering received
+such as support for enqueueing data for transmission and buffering received
 data for reassembly and/or for reordering, is provided as separate C++
 data structures on top of :cpp:`Packet`.
 
@@ -94,7 +94,7 @@ concatenation.
    :end-before: !End
    :name: Chunk concatenation example
 
-Protocols often need to slice data, for example to provide
+Protocols often need to slice data, for example, to provide
 fragmentation, which is also directly supported by the chunk API.
 
 .. literalinclude:: lib/Snippets.cc
@@ -142,7 +142,7 @@ Representing Packets
 
 The :cpp:`Packet` data structure uses a single chunk data structure to
 represent its contents. The contents may be as simple as raw bytes
-(:cpp:`BytesChunk`), but most likely it will be the concatenation
+(:cpp:`BytesChunk`), but most likely, it will be the concatenation
 (:cpp:`SequenceChunk`) of various protocol specific headers (e.g.,
 :cpp:`FieldsChunk` subclasses) and application data (e.g.,
 :cpp:`ByteCountChunk`).
@@ -212,7 +212,7 @@ but computationally expensive solutions.
 
 -  change bits in raw chunks (accurate)
 
-The first example shows how to represent transmission erros on the
+The first example shows how to represent transmission errors on the
 packet level. A packet is marked as erroneous based on its length and
 the associated bit error rate. This representation doesn’t give too much
 chance for a protocol to do anything else than discard an erroneous
@@ -250,7 +250,7 @@ or correct any part based on checksums.
 
 The physical layer models support the above mentioned different error
 representations via configurable parameters. Higher layer protocols
-detect errors by chechking the error bit on packets and chunks, and by
+detect errors by checking the error bit on packets and chunks, and by
 standard CRC mechanisms.
 
 .. _dg:sec:packets:packet-tagging:
@@ -278,7 +278,7 @@ Packet tags are not transmitted from one network node to another. All physical
 layer protocols delete all packet tags from a packet before sending it to the
 connected peer or to the transmission medium.
 
-For more details on what kind of tags are there see the
+For more details on what kinds of tags are there, see the
 
 .. _dg:sec:packets:region-tagging:
 
@@ -322,7 +322,7 @@ Dissecting Packets
 Understanding what’s inside a packet is a very important and often used
 functionality. Simply using the representation may be insufficient,
 because the :cpp:`Packet` may be represented with a :cpp:`BytesChunk`,
-for exmple. The Packet API provides a :cpp:`PacketDissector` class which
+for example. The Packet API provides a :cpp:`PacketDissector` class which
 analyzes a packet solely based on the assigned packet protocol and the
 actual data it contains.
 
@@ -363,12 +363,12 @@ Filtering Packets
 
 Filtering packets based on the actual data they contain is another
 widely used and very important feature. With the help of the packet
-dissector, it is very simple to create arbitrary custom packet filters.
+dissector, it is straightforward to create arbitrary custom packet filters.
 Packet filters are generally used for recording packets and visualizing
-various packet related information.
+various packet-related information.
 
 In order to simplify filtering, the Packet API provides a generic
-expression based packet filter which is implemented in the
+expression-based packet filter that is implemented in the
 :cpp:`PacketFilter` class. The expression syntax is the same as other
 OMNeT++ expressions, and the data filter is matched against individual
 chunks of the packet as found by the packet dissector.
@@ -390,20 +390,18 @@ prefix.
 Printing Packets
 ----------------
 
-During model development, packets often need to be displayed in a human
-readable form. The Packet API provides a :cpp:`PacketPrinter` class
-which is capable of forming a human readable string representation of
-:cpp:`Packet`’s. The :cpp:`PacketPrinter` class relies on small
-registered protocol-specific printer classes (e.g.
-:cpp:`Ipv4ProtocolPrinter` subclassing the required
+During model development, packets often need to be displayed in a human-readable
+form. The Packet API provides a :cpp:`PacketPrinter` class that is capable of
+forming a human-readable string representation of :cpp:`Packet`'s. The
+:cpp:`PacketPrinter` class relies on small registered protocol-specific printer
+classes (e.g. :cpp:`Ipv4ProtocolPrinter`) subclassing the required
 :cpp:`ProtocolPrinter` base class.
 
-The packet printer is automatically used by the OMNeT++ runtime user
-interface to display packets in the packet log window. The packet
-printer contributes several log window columns into the user interface:
-’Source’, ’Destination’, ’Protocol’, ’Length’, and ’Info’. These columns
-display packet data similarly to the well-known Wireshark protocol
-analyzer.
+The packet printer is automatically used by the OMNeT++ runtime user interface
+to display packets in the packet log window. The packet printer contributes
+several log window columns into the user interface: 'Source', 'Destination',
+'Protocol', 'Length', and 'Info'. These columns display packet data similarly to
+the well-known Wireshark protocol analyzer.
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -411,9 +409,8 @@ analyzer.
    :end-before: !End
    :name: Packet printing example
 
-The :cpp:`PacketPrinter` provides a few other functions which have
-additional options to control the details of the resulting human
-readable form.
+The :cpp:`PacketPrinter` provides a few other functions that have additional
+options to control the details of the resulting human readable form.
 
 .. _dg:sec:packets:recording-pcap:
 
@@ -421,9 +418,9 @@ Recording PCAP
 --------------
 
 Exporting the packets from a simulation into a PCAP file allows further
-processing with 3rd party tools. The Packet API provides a
-:cpp:`PcapDump` class for creating PCAP files. Packet filtering can be
-used to reduce the file size and increase performance.
+processing with 3rd party tools. The Packet API provides a :cpp:`PcapDump` class
+for creating PCAP files. Packet filtering can be used to reduce the file size
+and increase performance.
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -437,13 +434,13 @@ Encapsulating Packets
 ---------------------
 
 Many communication protocols work with simple packet encapsulation. They
-encapsulate packets with their own protocol specific headers and trailers at
-the sender node, and they decapsulate packets at the reciver node. The headers
+encapsulate packets with their own protocol-specific headers and trailers at
+the sender node, and they decapsulate packets at the receiver node. The headers
 and trailers carry the information that is required to provide the protocol
 specific service.
 
 For example, the Ethernet MAC protocol encapsulates an IP datagram by prepending
-the packet with an Ethernet MAC header, and also by appending the packet with an
+the packet with an Ethernet MAC header and also by appending the packet with an
 optional padding and an Ethernet FCS. The following example shows how a MAC
 protocol could encapsulate a packet:
 
@@ -454,7 +451,7 @@ protocol could encapsulate a packet:
    :name: Packet encapsulation example
 
 When receiving a packet, the Ethernet MAC protocol removes an Ethernet MAC header
-and an Ethernet FCS from the packet, and passes the resulting IP datagram along.
+and an Ethernet FCS from the packet and passes the resulting IP datagram along.
 The following example shows how a MAC protocol could decapsulate a packet:
 
 .. literalinclude:: lib/Snippets.cc
@@ -464,9 +461,9 @@ The following example shows how a MAC protocol could decapsulate a packet:
    :name: Packet decapsulation example
 
 Although the :fun:`popAtFront` and :fun:`popAtBack` functions change the remaining
-unprocessed part of the packet, they don’t have effect on the actual packet data.
-That is when the packet reaches high level protocol, it still contains all the
-received data but the remaining unprocessed part is smaller.
+unprocessed part of the packet, they do not have an effect on the actual packet data.
+That is when the packet reaches high-level protocol, it still contains all the
+received data, but the remaining unprocessed part is smaller.
 
 .. _dg:sec:packets:fragmenting-packets:
 
@@ -490,7 +487,7 @@ example shows how a MAC protocol could fragment a packet:
    :name: Packet fragmentation example
 
 When receiving fragments, protocols need to collect the coherent
-fragments of the same packet until all fragments becomes available. The
+fragments of the same packet until all fragments become available. The
 following example shows how a MAC protocol could form the original
 packet from a set of coherent fragments:
 
@@ -508,13 +505,13 @@ Aggregating Packets
 Communication protocols often provide aggregation to better utilize the
 communication channel by reducing protocol overhead. They wait for
 several packets to arrive at the sender node, then they form a large
-aggregated packet which is in turn sent at once. At the receiver node
+aggregated packet which is in turn sent at once. At the receiver node,
 the aggregated packet is split into the original packets, and they are
 passed along.
 
 For example, the IEEE 802.11 protocol aggregates packets for better
 channel utilization at both MSDU and MPDU levels. The following example
-shows a version of how a MAC protocol could create an aggregate packet:
+shows how a MAC protocol could create an aggregate packet:
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -522,7 +519,7 @@ shows a version of how a MAC protocol could create an aggregate packet:
    :end-before: !End
    :name: Packet aggregation example
 
-The following example shows a version of how a MAC protocol could
+The following example shows how a MAC protocol could
 disaggregate a packet:
 
 .. literalinclude:: lib/Snippets.cc
@@ -536,11 +533,11 @@ disaggregate a packet:
 Serializing Packets
 -------------------
 
-In real communication systems packets are usually stored as a sequence
+In real communication systems, packets are usually stored as a sequence
 of bytes directly in network byte order. In contrast, INET usually
-stores packets in small field based C++ classes (generated by the
+stores packets in small field-based C++ classes (generated by the
 OMNeT++ MSG compiler) to ease debugging. In order to calculate checksums
-or to communicate with real hardware, all protocol specific parts must
+or to communicate with real hardware, all protocol-specific parts must
 be serializable to a sequence of bytes.
 
 The protocol header serializers are separate classes from the actual
@@ -555,7 +552,7 @@ sequence of bytes:
    :end-before: !End
    :name: Packet serialization example
 
-Deserialization is somewhat more complicated than serialization, because
+Deserialization is somewhat more complicated than serialization because
 it must be prepared to handle incomplete or even incorrect data due to
 errors introduced by the network. The following example shows how a MAC
 protocol header could be deserialized from a sequence of bytes:
@@ -576,10 +573,10 @@ converted to and from a sequence of bytes. The reason is that the
 programming interface of operating systems and external libraries work
 with sending and receiving raw data.
 
-All protocol headers and data chunks which are present in a packet must
+All protocol headers and data chunks that are present in a packet must
 have a registered serializer to be able to create the raw sequence of
 bytes. Protocol modules must also be configured to either disable or
-compute checksums, because serializers cannot carry out the checksum
+compute checksums because serializers cannot carry out the checksum
 calculation.
 
 The following example shows how a packet could be converted to a
@@ -602,11 +599,11 @@ sequence of bytes when receiving from an external interface:
 
 In INET, all protocols automatically support hardware emulation due to
 the dual representation of packets. The above example creates a packet
-which contains a single chunk with a sequence of bytes. As the packet is
-passed through the protocols, they can interpret the data (e.g. by
+that contains a single chunk with a sequence of bytes. As the packet is
+passed through the protocols, they can interpret the data (e.g., by
 calling :fun:`peekAtFront`) as they see fit. The Packet API always
 provides the requested representation, either because it’s already
-available in the packet, or because it gets automatically deserialized.
+available in the packet or because it gets automatically deserialized.
 
 .. _dg:sec:packets:queueing-packets:
 
@@ -615,7 +612,7 @@ Queueing Packets
 
 Some protocols store packet data temporarily at the sender node before
 actual processing can occur. For example, the TCP protocol must store
-the outgoing data received from the application in order to be able to
+the outgoing data received from the application to be able to
 provide transmission flow control.
 
 The following example shows how a transport protocol could store the
@@ -628,8 +625,8 @@ received data temporarily until the data is actually used:
    :name: Packet queueing example
 
 The :cpp:`ChunkQueue` class acts similarly to a binary FIFO queue except
-it works with chunks. Similarly to the :cpp:`Packet` it also
-automatically merge consecutive data and selects the most appropriate
+it works with chunks. Similarly to the :cpp:`Packet`, it also
+automatically merges consecutive data and selects the most appropriate
 representation.
 
 .. _dg:sec:packets:buffering-packets:
@@ -642,22 +639,22 @@ until the actual processing can occur. For example, packets may arrive
 out of order, and the data they contain must be reassembled or reordered
 before it can be passed along.
 
-INET provides a few special purpose C++ classes to support data
+INET provides a few special-purpose C++ classes to support data
 buffering:
 
 -  :cpp:`ChunkBuffer` provides automatic merging for large data chunks
    from out of order smaller data chunks.
 
--  :cpp:`ReassemblyBuffer` provides reassembling for out of order data
+-  :cpp:`ReassemblyBuffer` provides reassembling for out-of-order data
    according to an expected length.
 
--  :cpp:`ReorderBuffer` provides reordering for out of order data into a
+-  :cpp:`ReorderBuffer` provides reordering for out-of-order data into a
    continuous data stream from an expected offset.
 
 All buffers deal with only the data, represented by chunks, instead of
 packets. They automatically merge consecutive data and select the most
 appropriate representation. Protocols using these buffers automatically
-support all data representation provided by INET, and any combination
+support all data representations provided by INET, and any combination
 thereof. For example, :cpp:`ByteCountChunk`, :cpp:`BytesChunk`,
 :cpp:`FieldsChunk`, and :cpp:`SliceChunk` can be freely mixed in the
 same buffer.
@@ -673,7 +670,7 @@ node to be prepared for receiving parts out of order and potentially
 duplicated.
 
 For example, the IP protocol must store incoming fragments at the
-receiver node, because it must wait until the datagram becomes complete,
+receiver node because it must wait until the datagram becomes complete
 before it can be passed along. The IP protocol must also be prepared for
 receiving the individual fragments out of order and potentially
 duplicated.
@@ -703,7 +700,7 @@ to be prepared for receiving parts out of order and potentially
 duplicated.
 
 For example, the TCP protocol must buffer the incoming data at the
-receiver node, because the TCP segments may arrive out of order and
+receiver node because the TCP segments may arrive out of order and
 potentially duplicated or overlapping, and TCP is required to provide
 the data to the application in the correct order and only once.
 

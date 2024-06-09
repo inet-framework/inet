@@ -127,7 +127,7 @@ void NeighborListNeighborCache::updateNeighborLists()
 void NeighborListNeighborCache::removeRadioFromNeighborLists(const IRadio *radio)
 {
     for (auto& elem : radios) {
-        Radios neighborVector = elem->neighborVector;
+        Radios& neighborVector = elem->neighborVector;
         auto it = find(neighborVector, radio);
         if (it != neighborVector.end())
             neighborVector.erase(it);

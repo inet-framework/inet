@@ -36,7 +36,7 @@ simple Gpsr like IManetRouting
         int positionByteLength @unit(B) = default(2 * 4B);
 
         // visualization parameters
-        bool displayBubbles = default(false);   // display bubble messages about changes in routing state for packets
+        bool displayBubbles = default(false);   // Display bubble messages about changes in routing state for packets
     gates:
         input ipIn;
         output ipOut;

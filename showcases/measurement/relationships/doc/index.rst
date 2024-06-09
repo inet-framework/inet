@@ -4,7 +4,7 @@ Understanding Measurement Relationships
 Goals
 -----
 
-In this example we explore the relationships between various measurements that
+In this example, we explore the relationships between various measurements that
 are presented in the measurement showcases.
 
 | INET version: ``4.4``
@@ -14,9 +14,9 @@ The Model
 ---------
 
 The end-to-end delay measured between two applications can be thought of as a sum
-of different time categories such as queueing time, processing time, transmission
+of different time categories such as queuing time, processing time, transmission
 time, propagation time, and so on. Moreover, each one of these specific times can
-be further split up between different network nodes, network interface or even
+be further split up between different network nodes, network interfaces, or even
 smaller submodules.
 
 Here is the network:

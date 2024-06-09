@@ -3,7 +3,7 @@ Enqueueing Packets
 
 This step demonstrates the :ned:`PacketQueue` module, which can store a configurable
 number of packets. By default, it works as a FIFO queue and has unlimited capacity.
-Optionally, the queue can be limited (both by number of packets and byte count),
+Optionally, the queue can be limited (both by the number of packets and byte count),
 and ordering can be specified.
 
 In the following example network, packets are produced at random intervals by an active packet

@@ -19,10 +19,9 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 simple StreamRedundancyConfigurator like INetworkConfigurator
 {
     parameters:
-        int minVlanId = default(0); // lowest available VLAN ID
-        int maxVlanId = default(4095); // highest available VLAN ID
-        object configuration @mutable = default([]); // a vector of objects (e.g. [{...}, {...}]) where each object has the following fields: name, source, destination, packetFilter, paths
-                                                     // here is an example: [{name: "S1", packetFilter: "*", source: "source", destination: "destination", trees: [[["s1", "s2a", "s3a"]], [["s1", "s2b", "s3b"]], [["s1", "s2a", "s2b", "s3b"]], [["s1", "s2b", "s2a", "s3a"]]]}]
+        int minVlanId = default(0); // Lowest available VLAN ID
+        int maxVlanId = default(4095); // Highest available VLAN ID
+        object configuration @mutable = default([]); // A vector of objects (e.g. [{...}, {...}]) where each object has the following fields: name, source, destination, packetFilter, paths
+                                                     // Here is an example: [{name: "S1", packetFilter: "*", source: "source", destination: "destination", trees: [[["s1", "s2a", "s3a"]], [["s1", "s2b", "s3b"]], [["s1", "s2a", "s2b", "s3b"]], [["s1", "s2b", "s2a", "s3a"]]]}]
         @display("i=block/cogwheel");
 }
-
