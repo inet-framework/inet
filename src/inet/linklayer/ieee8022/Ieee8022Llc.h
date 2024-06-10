@@ -15,7 +15,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022SnapHeader_m.h"
-#include "inet/queueing/contract/IPassivePacketSink.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
 
@@ -35,6 +35,9 @@ class INET_API Ieee8022Llc : public OperationalBase, public IPassivePacketSink
 
     friend std::ostream& operator<<(std::ostream& o, const SocketDescriptor& t);
 
+    PassivePacketSinkRef upperLayerSink;
+    PassivePacketSinkRef lowerLayerSink;
+
     std::set<const Protocol *> upperProtocols; // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
 
@@ -48,6 +51,7 @@ class INET_API Ieee8022Llc : public OperationalBase, public IPassivePacketSink
     virtual void decapsulate(Packet *frame);
     virtual void processPacketFromHigherLayer(Packet *msg);
     virtual bool deliverCopyToSockets(Packet *packet);  // return true when delivered to any socket
+    virtual bool hasUpperProtocol(const Protocol *protocol);
     virtual bool isDeliverableToUpperLayer(Packet *packet);
     virtual void processPacketFromMac(Packet *packet);
     virtual void processCommandFromHigherLayer(Request *request);

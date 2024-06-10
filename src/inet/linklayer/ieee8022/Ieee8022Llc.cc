@@ -7,6 +7,7 @@
 
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -30,6 +31,9 @@ void Ieee8022Llc::initialize(int stage)
 {
     OperationalBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        upperLayerSink.reference(gate("upperLayerOut"), true);
+        lowerLayerSink.reference(gate("lowerLayerOut"), true);
+
         // TODO parameterization for llc or snap?
         WATCH_PTRMAP(socketIdToSocketDescriptor);
         WATCH_PTRSET(upperProtocols);
@@ -57,7 +61,7 @@ void Ieee8022Llc::handleMessageWhenUp(cMessage *msg)
 void Ieee8022Llc::processPacketFromHigherLayer(Packet *packet)
 {
     encapsulate(packet);
-    send(packet, "lowerLayerOut");
+    lowerLayerSink.pushPacket(packet);
 }
 
 void Ieee8022Llc::processCommandFromHigherLayer(Request *request)
@@ -113,7 +117,7 @@ bool Ieee8022Llc::deliverCopyToSockets(Packet *packet)
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
                 EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
                 packetCopy->setKind(SOCKET_I_DATA);
-                send(packetCopy, "upperLayerOut");
+                upperLayerSink.pushPacket(packetCopy);
                 isSent = true;
             }
         }
@@ -121,10 +125,29 @@ bool Ieee8022Llc::deliverCopyToSockets(Packet *packet)
     return isSent;
 }
 
+bool Ieee8022Llc::hasUpperProtocol(const Protocol *protocol)
+{
+    if (protocol == nullptr)
+        return false;
+    else if (contains(upperProtocols, protocol))
+        return true;
+    else {
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(protocol);
+        dispatchProtocolReq.setServicePrimitive(SP_INDICATION);
+        if (findModuleInterface(gate("upperLayerOut"), typeid(IPassivePacketSink), &dispatchProtocolReq) == nullptr)
+            return false;
+        else {
+            upperProtocols.insert(protocol);
+            return true;
+        }
+    }
+}
+
 bool Ieee8022Llc::isDeliverableToUpperLayer(Packet *packet)
 {
     const auto& protocolTag = packet->findTag<PacketProtocolTag>();
-    return (protocolTag != nullptr && contains(upperProtocols, protocolTag->getProtocol()));
+    return protocolTag != nullptr && hasUpperProtocol(protocolTag->getProtocol());
 }
 
 void Ieee8022Llc::processPacketFromMac(Packet *packet)
@@ -133,7 +156,7 @@ void Ieee8022Llc::processPacketFromMac(Packet *packet)
     bool isSent = deliverCopyToSockets(packet);
 
     if (isDeliverableToUpperLayer(packet)) {
-        send(packet, "upperLayerOut");
+        upperLayerSink.pushPacket(packet);
     }
     else {
         if (!isSent) {
