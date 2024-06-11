@@ -4,15 +4,15 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#ifndef __INET_ISETTABLECLOCK_H
-#define __INET_ISETTABLECLOCK_H
+#ifndef __INET_SERVOCLOCKBASE_H
+#define __INET_SERVOCLOCKBASE_H
 
 #include "inet/clock/model/OscillatorBasedClock.h"
 #include "inet/common/scenario/IScriptable.h"
 
 namespace inet {
 
-class ISettableClock : public OscillatorBasedClock, public IScriptable {
+class ServoClockBase : public OscillatorBasedClock, public IScriptable {
 
 protected:
     OverdueClockEventHandlingMode defaultOverdueClockEventHandlingMode = UNSPECIFIED;
@@ -21,7 +21,10 @@ protected:
 
 
 protected:
-    virtual void initialize(int stage) override;
+    virtual void adjustClockTime(clocktime_t newClockTime) = 0;
+    virtual void setOscillatorCompensation(ppm oscillatorCompensation) const;
+    virtual void resetOscillator(bool resetOscillator) const;
+    virtual void rescheduleClockEvents(clocktime_t oldClockTime, clocktime_t newClockTime) const;
 
 };
 

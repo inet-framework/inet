@@ -8,11 +8,11 @@
 #ifndef __INET_SETTABLECLOCK_H
 #define __INET_SETTABLECLOCK_H
 
-#include "inet/clock/model/ISettableClock.h"
+#include "inet/clock/model/ServoClockBase.h"
 
 namespace inet {
 
-class INET_API SettableClock : public ISettableClock
+class INET_API SettableClock : public ServoClockBase
 {
 //  protected:
 //    OverdueClockEventHandlingMode defaultOverdueClockEventHandlingMode = UNSPECIFIED;
@@ -35,7 +35,8 @@ class INET_API SettableClock : public ISettableClock
      * Sets the clock time immediately to the given value. Greater than 1 oscillator
      * compensation factor means the clock measures time faster.
      */
-    virtual void setClockTime(clocktime_t time, ppm oscillatorCompensation, bool resetOscillator);
+//    virtual void setClockTime(clocktime_t time, ppm oscillatorCompensation, bool resetOscillator) override;
+    virtual void adjustClockTime(clocktime_t newClockTime) override;
 };
 
 } // namespace inet

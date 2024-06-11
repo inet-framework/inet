@@ -7,11 +7,11 @@
 #ifndef __INET_PICLOCK_H
 #define __INET_PICLOCK_H
 
-#include "inet/clock/model/ISettableClock.h"
+#include "inet/clock/model/ServoClockBase.h"
 
 namespace inet {
 
-class INET_API PiClock : public ISettableClock
+class INET_API PiClock : public ServoClockBase
 {
   protected:
     static simsignal_t driftSignal;
@@ -50,7 +50,8 @@ class INET_API PiClock : public ISettableClock
      * - newClockTime, if the servo is in the initial phase
      * - the old clock time, if the servo is in the PI phase (only the oscillator compensation is updated)
      */
-    clocktime_t setClockTime(clocktime_t newClockTime);
+//    clocktime_t setClockTime(clocktime_t newClockTime) override;
+    void adjustClockTime(clocktime_t newClockTime) override;
 };
 
 } // namespace inet
