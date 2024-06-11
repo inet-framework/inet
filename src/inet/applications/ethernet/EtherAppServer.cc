@@ -133,5 +133,12 @@ void EtherAppServer::finish()
 {
 }
 
+void EtherAppServer::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    llcSocket.processMessage(packet);
+}
+
 } // namespace inet
 
