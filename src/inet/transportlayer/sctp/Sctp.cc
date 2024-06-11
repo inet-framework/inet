@@ -1041,6 +1041,85 @@ void Sctp::finish()
     }
 }
 
+void Sctp::setCallback(int socketId, ICallback *callback)
+{
+    throw cRuntimeError("TODO");
+}
+
+void Sctp::listen(int socketId, const std::vector<L3Address>& localAddresses, int localPort, bool fork, int inboundStreams, int outboundStreams, bool streamReset, uint32_t requests, uint32_t messagesToPush)
+{
+    Request *cmsg = new Request("PassiveOPEN", SCTP_C_OPEN_PASSIVE);
+    auto openCmd = cmsg->addTag<SctpOpenReq>();
+    openCmd->setLocalAddresses(localAddresses);
+    openCmd->setLocalPort(localPort);
+    openCmd->setSocketId(socketId);
+    openCmd->setFork(fork);
+    openCmd->setInboundStreams(inboundStreams);
+    openCmd->setOutboundStreams(outboundStreams);
+    openCmd->setNumRequests(requests);
+    openCmd->setStreamReset(streamReset);
+    openCmd->setMessagesToPush(messagesToPush);
+    cmsg->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleMessage(cmsg);
+}
+
+void Sctp::connect(int socketId, const std::vector<L3Address>& localAddresses, int localPort, L3Address remoteAddress, int32_t remotePort, int inboundStreams, int outboundStreams, bool streamReset, int32_t prMethod, uint32_t numRequests)
+{
+    Request *cmsg = new Request("Associate", SCTP_C_ASSOCIATE);
+    auto openCmd = cmsg->addTag<SctpOpenReq>();
+    openCmd->setSocketId(socketId);
+    openCmd->setLocalAddresses(localAddresses);
+    openCmd->setLocalPort(localPort);
+    openCmd->setRemoteAddr(remoteAddress);
+    openCmd->setRemotePort(remotePort);
+    openCmd->setOutboundStreams(outboundStreams);
+    openCmd->setInboundStreams(inboundStreams);
+    openCmd->setNumRequests(numRequests);
+    openCmd->setPrMethod(prMethod);
+    openCmd->setStreamReset(streamReset);
+    cmsg->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleMessage(cmsg);
+}
+
+void Sctp::abort(int socketId)
+{
+    Request *cmsg = new Request("ABORT", SCTP_C_ABORT);
+    auto cmd = cmsg->addTag<SctpCommandReq>();
+    cmd->setSocketId(socketId);
+    cmsg->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleMessage(cmsg);
+}
+
+void Sctp::close(int socketId, int id)
+{
+    Request *cmsg = new Request("CLOSE", SCTP_C_CLOSE);
+    auto cmd = cmsg->addTag<SctpCommandReq>();
+    if (id == -1)
+        cmd->setSocketId(socketId);
+    else
+        cmd->setFd(id);
+    cmsg->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleMessage(cmsg);
+}
+
+void Sctp::getSocketOptions(int socketId)
+{
+    Request *cmsg = new Request("GetSocketOptions", SCTP_C_GETSOCKETOPTIONS);
+    auto sctpSendReq = cmsg->addTag<SctpSendReq>();
+    sctpSendReq->setSocketId(socketId);
+    sctpSendReq->setSid(0);
+    cmsg->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleMessage(cmsg);
+}
+
+void Sctp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
+}
+
 } // namespace sctp
 
 } // namespace inet
