@@ -6,6 +6,7 @@
 
 
 #include "inet/clock/model/SettableClock.h"
+
 #include "inet/clock/oscillator/ConstantDriftOscillator.h"
 #include "inet/common/XMLUtils.h"
 
