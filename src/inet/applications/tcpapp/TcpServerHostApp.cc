@@ -8,9 +8,10 @@
 #include "inet/applications/tcpapp/TcpServerHostApp.h"
 
 #include "inet/common/INETUtils.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/stlutils.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/socket/SocketTag_m.h"
+#include "inet/common/stlutils.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
@@ -146,6 +147,31 @@ void TcpServerHostApp::threadClosed(TcpServerThreadBase *thread)
 
     // remove thread object
     thread->deleteModule();
+}
+
+void TcpServerHostApp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    auto socketInd = packet->getTag<SocketInd>();
+    if (auto socket = socketMap.findSocketById(socketInd->getSocketId()))
+        socket->processMessage(packet);
+    else
+        serverSocket.processMessage(packet);
+}
+
+cGate *TcpServerHostApp::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("socketIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr && (socketInd->getSocketId() == serverSocket.getSocketId() || socketMap.findSocketById(socketInd->getSocketId()) != nullptr))
+                return gate;
+        }
+    }
+    return nullptr;
 }
 
 void TcpServerThreadBase::socketDeleted(TcpSocket *socket)
