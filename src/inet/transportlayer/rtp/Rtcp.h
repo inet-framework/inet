@@ -8,13 +8,17 @@
 #ifndef __INET_RTCP_H
 #define __INET_RTCP_H
 
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 namespace rtp {
+
+using namespace inet::queueing;
 
 // Forward declarations:
 class RtcpByePacket;
@@ -32,11 +36,20 @@ class RtpSenderInfo;
  * processing of rtcp packets. It also keeps track of this and other
  * Rtp end systems.
  */
-class INET_API Rtcp : public cSimpleModule, public LifecycleUnsupported
+class INET_API Rtcp : public cSimpleModule, public LifecycleUnsupported, public IPassivePacketSink, public IModuleInterfaceLookup
 {
   public:
     Rtcp();
     virtual ~Rtcp();
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("udpIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("udpIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 
   protected:
     /**

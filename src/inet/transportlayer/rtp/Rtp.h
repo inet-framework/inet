@@ -8,8 +8,10 @@
 #ifndef __INET_RTP_H
 #define __INET_RTP_H
 
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
 #include "inet/transportlayer/rtp/RtpInterfacePacket_m.h"
@@ -17,14 +19,26 @@
 namespace inet {
 namespace rtp {
 
+using namespace inet::queueing;
+
 /**
  * An Rtp is the center of the Rtp layer of an endsystem.
  * It creates the profile module, sends and receives Rtp data packets
  * and forwards messages.
  * It also communicates with the application.
  */
-class INET_API Rtp : public cSimpleModule, public LifecycleUnsupported
+class INET_API Rtp : public cSimpleModule, public LifecycleUnsupported, public IPassivePacketSink, public IModuleInterfaceLookup
 {
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("udpIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("udpIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
+
   protected:
     /**
      * Initializes variables.
