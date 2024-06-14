@@ -148,7 +148,7 @@ simple Sctp like ISctp
 
     gates:
         input appIn @interface[inet::sctp::ISctp] @interface[inet::queueing::IPassivePacketSink](protocol=sctp; service=request) @messageKinds(inet::SctpCommandCode);
-        input ipIn @interface[inet::queueing::IPassivePacketSink](protocol=tcp; service=indication);
+        input ipIn @interface[inet::queueing::IPassivePacketSink](protocol=sctp; service=indication);
         output appOut @labels(SctpCommand/up) @messageKinds(inet::SctpStatusInd);
         output ipOut;
 }
