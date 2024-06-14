@@ -358,6 +358,8 @@ void TcpConnection::sendIndicationToApp(int code, const int id)
         callback->handleFailure(id);
     else if (code == TCP_I_CLOSED)
         callback->handleClosed();
+    else if (code == TCP_I_TIMED_OUT)
+        callback->handleFailure(0);
     else
         throw cRuntimeError("TODO");
 }
