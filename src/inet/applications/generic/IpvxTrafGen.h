@@ -15,8 +15,11 @@
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * IP traffic generator application. See NED for more info.
@@ -24,6 +27,8 @@ namespace inet {
 class INET_API IpvxTrafGen : public ApplicationBase
 {
   protected:
+    PassivePacketSinkRef ipSink;
+
     enum Kinds { START = 100, NEXT };
 
     // parameters: see the NED files for more info

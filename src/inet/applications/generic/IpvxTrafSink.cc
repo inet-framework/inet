@@ -86,5 +86,12 @@ void IpvxTrafSink::processPacket(Packet *msg)
     numReceived++;
 }
 
+void IpvxTrafSink::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    processPacket(packet);
+}
+
 } // namespace inet
 
