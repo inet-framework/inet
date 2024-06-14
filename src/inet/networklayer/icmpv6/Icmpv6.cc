@@ -30,6 +30,7 @@ void Icmpv6::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
+        ipv6Sink.reference(gate("ipv6Out"), true);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         bool isOperational;
@@ -243,7 +244,7 @@ void Icmpv6::sendToIP(Packet *msg)
 {
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
-    send(msg, "ipv6Out");
+    ipv6Sink.pushPacket(msg);
 }
 
 Packet *Icmpv6::createDestUnreachableMsg(Icmpv6DestUnav code)
