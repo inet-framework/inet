@@ -22,6 +22,7 @@
 #include <fstream>
 
 #include "inet/applications/netperfmeter/NetPerfMeter_m.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
@@ -32,10 +33,12 @@
 
 namespace inet {
 
+using namespace inet::queueing;
+
 /**
  * Implementation of NetPerfMeter. See NED file for more details.
  */
-class INET_API NetPerfMeter : public cSimpleModule
+class INET_API NetPerfMeter : public cSimpleModule, public IPassivePacketSink, public IModuleInterfaceLookup
 {
   public:
     NetPerfMeter();
@@ -46,6 +49,15 @@ class INET_API NetPerfMeter : public cSimpleModule
     virtual void handleMessage(cMessage *msg) override;
 
     virtual void refreshDisplay() const override;
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 
     void establishConnection();
     void successfullyEstablishedConnection(cMessage *msg, const unsigned int queueSize);
