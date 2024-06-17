@@ -42,6 +42,7 @@ void UdpSocket::bind(L3Address localAddress, int localPort)
         throw cRuntimeError("UdpSocket::bind(): invalid port number %d", localPort);
     EV_INFO << "Binding socket" << EV_FIELD(socketId) << EV_FIELD(localAddress) << EV_FIELD(localPort) << EV_ENDL;
     udp->bind(socketId, localAddress, localPort);
+    udp->setCallback(socketId, this);
     sockState = CONNECTED;
 }
 
@@ -53,6 +54,7 @@ void UdpSocket::connect(L3Address address, int port)
         throw cRuntimeError("UdpSocket::connect(): invalid remote port number %d", port);
     EV_INFO << "Connecting socket" << EV_FIELD(socketId) << EV_FIELD(address) << EV_FIELD(port) << EV_ENDL;
     udp->connect(socketId, address, port);
+    udp->setCallback(socketId, this);
     sockState = CONNECTED;
 }
 
@@ -342,6 +344,18 @@ bool UdpSocket::belongsToSocket(cMessage *msg) const
     auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     const auto& socketInd = tags.findTag<SocketInd>();
     return socketInd != nullptr && socketInd->getSocketId() == socketId;
+}
+
+void UdpSocket::handleClose()
+{
+    if (cb)
+        cb->socketClosed(this);
+}
+
+void UdpSocket::handleError(Indication *indication)
+{
+    if (cb)
+        cb->socketErrorArrived(this, indication);
 }
 
 } // namespace inet

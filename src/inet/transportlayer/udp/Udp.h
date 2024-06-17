@@ -97,6 +97,7 @@ class INET_API Udp : public TransportProtocolBase, public IUdp, public IPassiveP
         short dscp = -1;
         short tos = -1;
         MulticastMembershipTable multicastMembershipTable;
+        IUdp::ICallback *callback = nullptr;
 
         MulticastMembershipTable::iterator findFirstMulticastMembership(const L3Address& multicastAddress);
         MulticastMembership *findMulticastMembership(const L3Address& multicastAddress, int interfaceId);
@@ -143,6 +144,7 @@ class INET_API Udp : public TransportProtocolBase, public IUdp, public IPassiveP
     virtual SockDesc *getSocketById(int sockId);
     virtual SockDesc *getOrCreateSocket(int sockId);
     virtual SockDesc *createSocket(int sockId, const L3Address& localAddr, int localPort);
+    virtual void setCallback(int sockId, ICallback *callback) override;
     virtual void bind(int sockId, const L3Address& localAddr, int localPort) override;
     virtual void connect(int sockId, const L3Address& remoteAddr, int remotePort) override;
     virtual void close(int sockId) override;

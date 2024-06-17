@@ -15,6 +15,14 @@ namespace inet {
 class INET_API IUdp
 {
   public:
+    class ICallback {
+      public:
+        virtual void handleClose() = 0;
+        virtual void handleError(Indication *indication) = 0;
+    };
+
+  public:
+    virtual void setCallback(int socketId, ICallback *callback) = 0;
     virtual void bind(int socketId, const L3Address& localAddr, int localPort) = 0;
     virtual void connect(int socketId, const L3Address& remoteAddr, int remotePort) = 0;
     virtual void setBroadcast(int socketId, bool broadcast) = 0;

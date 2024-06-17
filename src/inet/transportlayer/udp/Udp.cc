@@ -266,13 +266,9 @@ void Udp::handleUpperCommand(cMessage *msg)
 
         case UDP_C_CLOSE: {
             int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
+            auto sd = getSocketById(socketId);
+            sd->callback->handleClose();
             close(socketId);
-            auto indication = new Indication("closed", UDP_I_SOCKET_CLOSED);
-            auto udpCtrl = new UdpSocketClosedIndication();
-            indication->setControlInfo(udpCtrl);
-            indication->addTag<SocketInd>()->setSocketId(socketId);
-            send(indication, "appOut");
-
             break;
         }
 
@@ -288,6 +284,12 @@ void Udp::handleUpperCommand(cMessage *msg)
     }
 
     delete msg; // also deletes control info in it
+}
+
+void Udp::setCallback(int sockId, ICallback *callback)
+{
+    auto sd = socketsByIdMap[sockId];
+    sd->callback = callback;
 }
 
 void Udp::bind(int sockId, const L3Address& localAddr, int localPort)
@@ -1294,8 +1296,7 @@ void Udp::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
     auto ports = indication->addTag<L4PortInd>();
     ports->setSrcPort(sd->localPort);
     ports->setDestPort(remotePort);
-
-    send(indication, "appOut");
+    sd->callback->handleError(indication);
 }
 
 // #############################
