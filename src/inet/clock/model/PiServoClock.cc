@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/clock/model/PiClock.h"
+#include "inet/clock/model/PiServoClock.h"
 
 #include <algorithm>
 
@@ -13,37 +13,26 @@
 
 namespace inet {
 
-Define_Module(PiClock);
+Define_Module(PiServoClock);
 
-simsignal_t PiClock::kpSignal = cComponent::registerSignal("kp");
-simsignal_t PiClock::driftSignal = cComponent::registerSignal("drift");
+simsignal_t PiServoClock::kpSignal = cComponent::registerSignal("kp");
+simsignal_t PiServoClock::driftSignal = cComponent::registerSignal("drift");
 
-void PiClock::initialize(int stage)
+void PiServoClock::initialize(int stage)
 {
     ServoClockBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         offsetThreshold = &par("offsetThreshold");
         kp = par("kp");
         ki = par("ki");
-
-        const char *text = par("defaultOverdueClockEventHandlingMode");
-        if (!strcmp(text, "execute"))
-            defaultOverdueClockEventHandlingMode = EXECUTE;
-        else if (!strcmp(text, "skip"))
-            defaultOverdueClockEventHandlingMode = SKIP;
-        else if (!strcmp(text, "error"))
-            defaultOverdueClockEventHandlingMode = ERROR;
-        else
-            throw cRuntimeError("Unknown defaultOverdueClockEventHandlingMode parameter value");
-
     }
 }
 
-void PiClock::adjustClockTime(clocktime_t newClockTime) {
+void PiServoClock::adjustClockTime(clocktime_t newClockTime) {
     Enter_Method("adjustClockTime");
     clocktime_t oldClockTime = getClockTime();
 
-    if (newClockTime != oldClockTime){
+    if (newClockTime != oldClockTime) {
         emit(timeChangedSignal, oldClockTime.asSimTime());
         clocktime_t offsetNow = newClockTime - oldClockTime;
 
@@ -75,16 +64,11 @@ void PiClock::adjustClockTime(clocktime_t newClockTime) {
             localNsPrev = local[0].inUnit(SIMTIME_NS);
             localNs = local[1].inUnit(SIMTIME_NS);
 
-//            drift = ppm(0);
             drift += ppm(1e6 * (offsetNsPrev - offsetNs) / (localNsPrev - localNs));
             EV_INFO << "Drift: " << drift << "\n";
 
-            originSimulationTime = simTime();
-            originClockTime = newClockTime;
+            setClockTime(newClockTime);
 
-            ASSERT(newClockTime == getClockTime());
-            rescheduleClockEvents(oldClockTime, newClockTime);
-//            this->oscillatorCompensation = drift;
             setOscillatorCompensation(drift);
 
             emit(timeChangedSignal, newClockTime.asSimTime());
@@ -110,7 +94,6 @@ void PiClock::adjustClockTime(clocktime_t newClockTime) {
             EV_INFO << "kpTerm: " << kpTerm << " kiTerm: " << kiTerm << " offsetUs: " << offsetUs
                     << " drift: " << drift << "\n";
 
-//            this->oscillatorCompensation = kpTerm + kiTerm + drift;
             setOscillatorCompensation(kpTerm + kiTerm + drift);
 
             drift += kiTerm;

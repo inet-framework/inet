@@ -14,7 +14,7 @@ package inet.clock.model;
 //
 // @see ~ScenarioManager
 //
-module PiClock extends ServoClockBase
+module PiServoClock extends ServoClockBase
 {
     parameters:
         double offsetThreshold @unit(s) = default(0s); // Clock will perform a time jump if the offset is greater than this value, 0.0 disables this feature
@@ -24,6 +24,6 @@ module PiClock extends ServoClockBase
         @statistic[kp](title="kp value"; record=vector; interpolationmode=linear);
         @signal[drift](type=double);
         @statistic[drift](title="drift value"; record=vector; interpolationmode=linear);
-        @class(PiClock);
+        @class(PiServoClock);
 }
 

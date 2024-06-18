@@ -30,12 +30,12 @@ module TsnSwitch extends EthernetSwitch
         hasGptp = default(hasTimeSynchronization); // Enable gPTP protocol
         gptp.gptpNodeType = default("BRIDGE_NODE"); // Configure gPTP bridge node type
         gptp.slavePort = default("eth0"); // Configure default gPTP bridge slave port
-        clock.typename = default(hasTimeSynchronization ? "PiClock" : ""); // Enable explicit local clock model when time synchronization is enabled
+        clock.typename = default(hasTimeSynchronization ? "PiServoClock" : ""); // Enable explicit local clock model when time synchronization is enabled
         ethernet.typename = default("EthernetLayer"); // Use Ethernet protocol layer outside of network interfaces
         eth[*].typename = default(hasCutthroughSwitching ? "EthernetCutthroughInterface" : "LayeredEthernetInterface"); // Switch to modular Ethernet interface
         eth[*].macLayer.typename = default(hasFramePreemption ? "EthernetPreemptingMacLayer" : "EthernetMacLayer");
         eth[*].macLayer.queue.typename = default(hasEgressTrafficShaping ? "Ieee8021qTimeAwareShaper" : "PacketQueue"); // Use compound priority queue having multiple subqueues controlled by separate gates when egress traffic shaping is enabled
-        eth[*].phyLayer.typename = default(hasCutthroughSwitching ? "EthernetStreamThroughPhyLayer" : (hasFramePreemption ? "EthernetPreemptingPhyLayer" : "EthernetPhyLayer")); // Use packet streaming when cut-through switching is enabled
+        eth[*].phyLayer.typename = default(hasCutthroughSwitching ? "EthernetStreamThroughPhyLayer" : (hasFramePreemption ? "EthernetPreemptingPhyLayer" : (hasTimeSynchronization ? "EthernetStreamingPhyLayer" : "EthernetPhyLayer"))); // Use packet streaming when cut-through switching is enabled
         bridging.typename = default("BridgingLayer"); // Switch to modular bridging
         bridging.directionReverser.cutthroughBarrier.typename = default(hasCutthroughSwitching ? "EthernetCutthroughBarrier" : ""); // Enable cut-through barrier when cut-through switching is enabled
         bridging.streamIdentifier.typename = default(hasOutgoingStreams || hasStreamRedundancy ? "StreamIdentifierLayer" : ""); // Enable stream identification when stream redundancy is enabled

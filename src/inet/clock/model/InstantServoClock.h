@@ -14,7 +14,7 @@
 
 namespace inet {
 
-class INET_API SettableClock : public ServoClockBase
+class INET_API InstantServoClock : public ServoClockBase
 {
   protected:
 

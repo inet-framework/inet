@@ -12,7 +12,7 @@
 
 #include "inet/clock/common/ClockTime.h"
 #include "inet/clock/contract/ClockTime.h"
-#include "inet/clock/model/SettableClock.h"
+#include "inet/clock/model/InstantServoClock.h"
 #include "inet/common/INETDefs.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/clock/ClockUserModuleBase.h"

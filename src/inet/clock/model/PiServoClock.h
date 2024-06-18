@@ -11,7 +11,7 @@
 
 namespace inet {
 
-class INET_API PiClock : public ServoClockBase
+class INET_API PiServoClock : public ServoClockBase
 {
   protected:
     static simsignal_t driftSignal;

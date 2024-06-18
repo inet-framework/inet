@@ -30,12 +30,12 @@ module TsnDevice extends StandardHost
         bool hasFramePreemption = default(false); // Enable IEEE 802.1 Qbu frame preemption
         bool hasCutthroughSwitching = default(false); // Enable cut-through switching support
         bool hasBridging = default(hasIncomingStreams || hasOutgoingStreams || hasStreamRedundancy || hasIngressTrafficFiltering || hasEgressTrafficFiltering);
-        clock.typename = default(hasTimeSynchronization ? "PiClock" : ""); // Enable explicit local clock model
+        clock.typename = default(hasTimeSynchronization ? "PiServoClock" : ""); // Enable explicit local clock model
         ethernet.typename = default("EthernetLayer"); // Use Ethernet protocol layer outside of network interfaces
         eth[*].typename = default("LayeredEthernetInterface"); // Switch to modular Ethernet interface
         eth[*].macLayer.typename = default(hasFramePreemption ? "EthernetPreemptingMacLayer" : "EthernetMacLayer");
         eth[*].macLayer.queue.typename = default(hasEgressTrafficShaping ? "Ieee8021qTimeAwareShaper" : (hasFramePreemption ? "" : "PacketQueue")); // Use priority queue having multiple subqueues controlled by separate gates
-        eth[*].phyLayer.typename = default(hasCutthroughSwitching ? "EthernetStreamingPhyLayer" : (hasFramePreemption ? "EthernetPreemptingPhyLayer" : "EthernetPhyLayer")); // Use packet streaming when cut-through switching is enabled
+        eth[*].phyLayer.typename = default(hasCutthroughSwitching ? "EthernetStreamThroughPhyLayer" : (hasFramePreemption ? "EthernetPreemptingPhyLayer" : (hasTimeSynchronization ? "EthernetStreamingPhyLayer" : "EthernetPhyLayer"))); // use packet streaming when cut-through switching is enabled
         bridging.typename = default(hasBridging ? "BridgingLayer" : ""); // Switch to modular bridging
         bridging.interfaceRelay.typename = default(""); // Disable frame relaying
         bridging.streamIdentifier.typename = default(hasOutgoingStreams || hasStreamRedundancy ? "StreamIdentifierLayer" : ""); // Enable stream identification when stream redundancy is enabled

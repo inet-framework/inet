@@ -14,8 +14,8 @@ package inet.clock.model;
 //
 // @see ~ScenarioManager
 //
-module SettableClock extends ServoClockBase
+module InstantServoClock extends ServoClockBase
 {
     parameters:
-        @class(SettableClock);
+        @class(InstantServoClock);
 }

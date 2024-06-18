@@ -11,7 +11,7 @@
 #include <functional>
 
 #include "inet/applications/base/ApplicationBase.h"
-#include "inet/clock/model/SettableClock.h"
+#include "inet/clock/model/InstantServoClock.h"
 #include "inet/common/ModuleRefByPar.h"
 
 namespace inet {
@@ -21,7 +21,7 @@ class INET_API SimpleClockSynchronizer : public ApplicationBase
   protected:
     cMessage *synhronizationTimer = nullptr;
     ModuleRefByPar<IClock> masterClock;
-    ModuleRefByPar<SettableClock> slaveClock;
+    ModuleRefByPar<InstantServoClock> slaveClock;
     cPar *synchronizationIntervalParameter = nullptr;
     cPar *synchronizationClockTimeErrorParameter = nullptr;
     cPar *synchronizationOscillatorCompensationErrorParameter = nullptr;
