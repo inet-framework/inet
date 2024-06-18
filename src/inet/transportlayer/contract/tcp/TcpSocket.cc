@@ -278,6 +278,8 @@ void TcpSocket::processMessage(cMessage *msg)
     TcpAvailableInfo *availableInfo;
     TcpConnectInfo *connectInfo;
 
+    EV_INFO << "XXX: TcpSocket::processMessage, cb=" << cb << ", msg=" << msg->getName() << ":" << msg->getClassName() << ":" << msg->str() << std::endl;
+
     switch (msg->getKind()) {
         case TCP_I_DATA:
             if (cb)
@@ -315,7 +317,7 @@ void TcpSocket::processMessage(cMessage *msg)
             localPrt = connectInfo->getLocalPort();
             remotePrt = connectInfo->getRemotePort();
             if (cb)
-                cb->socketEstablished(this);
+                cb->socketEstablished(this, check_and_cast<Indication *>(msg));
             delete msg;
             break;
 

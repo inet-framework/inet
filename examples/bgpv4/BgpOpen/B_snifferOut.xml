@@ -11,7 +11,6 @@
         <fieldValue name="BGPIdentifier" value="10.10.10.2"/>
 -->
     </message>
-    <message occurence="1"/> <!-- tcp: ABORT -->
     <message occurence="1">
         <fieldValue name="name" value="BgpKeepAlive"/>
 <!--

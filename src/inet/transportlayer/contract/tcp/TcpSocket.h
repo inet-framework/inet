@@ -147,7 +147,7 @@ class INET_API TcpSocket : public ISocket, public ITcp::ICallback
          */
         virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) = 0;
         virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) = 0;
-        virtual void socketEstablished(TcpSocket *socket) = 0;
+        virtual void socketEstablished(TcpSocket *socket, Indication *indication) = 0;
         virtual void socketPeerClosed(TcpSocket *socket) = 0;
         virtual void socketClosed(TcpSocket *socket) = 0;
         virtual void socketFailure(TcpSocket *socket, int code) = 0;
@@ -490,14 +490,16 @@ class INET_API TcpSocket : public ISocket, public ITcp::ICallback
     void processMessage(cMessage *msg) override;
     //@}
 
-    virtual void handleEstablished() override {
+    virtual void handleEstablished(Indication *indication) override {
         if (cb)
-            cb->socketEstablished(this);
+            cb->socketEstablished(this, indication);
     }
 
     virtual void handleAvailable(TcpAvailableInfo *availableInfo) override {
         if (cb)
             cb->socketAvailable(this, availableInfo);
+        else
+            accept(availableInfo->getNewSocketId());
     }
 
     virtual void handleClosed() override {

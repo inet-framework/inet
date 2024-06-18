@@ -8,7 +8,6 @@
         <fieldValue name="className" value="inet::bgp::BgpOpenMessage"/>
 -->
     </message>
-    <message occurence="1"/> <!-- ABORT -->
     <message occurence="1">
         <fieldValue name="name" value="BgpKeepAlive"/>
 <!--

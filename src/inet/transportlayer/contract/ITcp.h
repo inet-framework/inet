@@ -8,6 +8,7 @@
 #ifndef __INET_ITCP_H
 #define __INET_ITCP_H
 
+#include "inet/common/packet/Message.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 
@@ -19,7 +20,7 @@ class INET_API ITcp
   public:
     class ICallback {
       public:
-        virtual void handleEstablished() = 0;
+        virtual void handleEstablished(Indication *indication) = 0;
         virtual void handleAvailable(TcpAvailableInfo *availableInfo) = 0;
         virtual void handleClosed() = 0;
         virtual void handlePeerClosed() = 0;

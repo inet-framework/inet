@@ -395,7 +395,7 @@ void TcpConnection::sendEstabIndicationToApp()
     ind->setAutoRead(autoRead);
     indication->addTag<SocketInd>()->setSocketId(socketId);
     indication->setControlInfo(ind);
-    callback->handleEstablished();
+    callback->handleEstablished(indication);
 }
 
 void TcpConnection::sendToApp(cMessage *msg)
