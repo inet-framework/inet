@@ -9,7 +9,7 @@
 
 namespace inet {
 
-    Define_Module(ServoClockBase);
+    Register_Abstract_Class(ServoClockBase);
 
     void ServoClockBase::initialize(int stage)
     {

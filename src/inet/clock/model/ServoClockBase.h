@@ -27,6 +27,7 @@ protected:
     virtual simtime_t handleOverdueClockEvent(ClockEvent *event, simtime_t t);
     virtual void initialize(int stage) override;
     virtual void processCommand(const cXMLElement& node) override;
+
 public:
     virtual void adjustClockTime(clocktime_t newClockTime) = 0;
     virtual void setOscillatorCompensation(ppm oscillatorCompensationValue);

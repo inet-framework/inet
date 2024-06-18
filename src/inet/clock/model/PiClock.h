@@ -40,16 +40,6 @@ class INET_API PiClock : public ServoClockBase
     virtual void initialize(int stage) override;
 
   public:
-    /**
-     * Sets the clock time immediately to the given value. Greater than 1 oscillator
-     * compensation factor means the clock measures time faster.
-     *
-     * @param newClockTime the new clock time which should be achieved
-     * @return the clockTime which was set, which is:
-     * - newClockTime, if the servo is in the initial phase
-     * - the old clock time, if the servo is in the PI phase (only the oscillator compensation is updated)
-     */
-//    clocktime_t setClockTime(clocktime_t newClockTime) override;
     void adjustClockTime(clocktime_t newClockTime) override;
 };
 

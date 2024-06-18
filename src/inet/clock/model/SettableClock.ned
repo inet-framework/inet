@@ -17,7 +17,5 @@ package inet.clock.model;
 module SettableClock extends ServoClockBase
 {
     parameters:
-        string defaultOverdueClockEventHandlingMode @enum("execute","skip","error") = default("error");
         @class(SettableClock);
 }
-
