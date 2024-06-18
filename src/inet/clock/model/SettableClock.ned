@@ -14,7 +14,7 @@ package inet.clock.model;
 //
 // @see ~ScenarioManager
 //
-module SettableClock extends OscillatorBasedClock
+module SettableClock extends ServoClockBase
 {
     parameters:
         string defaultOverdueClockEventHandlingMode @enum("execute","skip","error") = default("error");

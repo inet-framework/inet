@@ -5,11 +5,8 @@
 //
 
 #include "inet/clock/model/PiClock.h"
-
 #include <algorithm>
 
-#include "inet/clock/oscillator/ConstantDriftOscillator.h"
-#include "inet/common/XMLUtils.h"
 
 namespace inet {
 
@@ -20,7 +17,7 @@ simsignal_t PiClock::driftSignal = cComponent::registerSignal("drift");
 
 void PiClock::initialize(int stage)
 {
-//    ServoClockBase::initialize(stage);
+//    OscillatorBasedClock::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         offsetThreshold = &par("offsetThreshold");
         kp = par("kp");
@@ -39,9 +36,8 @@ void PiClock::initialize(int stage)
     }
 }
 
-clocktime_t PiClock::setClockTime(clocktime_t newClockTime)
-{
-    Enter_Method("setClockTime");
+void PiClock::adjustClockTime(clocktime_t newClockTime) {
+    Enter_Method("adjustClockTime");
     clocktime_t oldClockTime = getClockTime();
 
     if (newClockTime != oldClockTime){
@@ -83,7 +79,11 @@ clocktime_t PiClock::setClockTime(clocktime_t newClockTime)
             originSimulationTime = simTime();
             originClockTime = newClockTime;
 
-            this->oscillatorCompensation = drift;
+            ASSERT(newClockTime == getClockTime());
+            rescheduleClockEvents(oldClockTime, newClockTime);
+//            this->oscillatorCompensation = drift;
+            setOscillatorCompensation(drift);
+
             emit(timeChangedSignal, newClockTime.asSimTime());
             phase = 2;
             break;
@@ -107,15 +107,18 @@ clocktime_t PiClock::setClockTime(clocktime_t newClockTime)
             EV_INFO << "kpTerm: " << kpTerm << " kiTerm: " << kiTerm << " offsetUs: " << offsetUs
                     << " drift: " << drift << "\n";
 
-            this->oscillatorCompensation = kpTerm + kiTerm + drift;
+//            this->oscillatorCompensation = kpTerm + kiTerm + drift;
+            setOscillatorCompensation(kpTerm + kiTerm + drift);
+
             drift += kiTerm;
 
             emit(kpSignal, kpTerm.get());
             break;
         }
     }
+
     emit(driftSignal, drift.get());
-    return getClockTime();
+//    return getClockTime();
 }
 
 } // namespace inet

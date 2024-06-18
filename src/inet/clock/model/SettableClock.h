@@ -9,6 +9,8 @@
 #define __INET_SETTABLECLOCK_H
 
 #include "inet/clock/model/ServoClockBase.h"
+#include "inet/common/XMLUtils.h"
+
 
 namespace inet {
 
@@ -22,14 +24,17 @@ class INET_API SettableClock : public ServoClockBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual OverdueClockEventHandlingMode getOverdueClockEventHandlingMode(ClockEvent *event) const;
-    virtual simtime_t handleOverdueClockEvent(ClockEvent *event, simtime_t t);
+//    virtual OverdueClockEventHandlingMode getOverdueClockEventHandlingMode(ClockEvent *event) const;
+//    virtual simtime_t handleOverdueClockEvent(ClockEvent *event, simtime_t t);
 
     // IScriptable implementation
     virtual void processCommand(const cXMLElement& node) override;
 
+    ppm oscillatorCompensationValue = ppm(0);
+
+
   public:
-    virtual ppm getOscillatorCompensation() const override { return oscillatorCompensation; }
+//    virtual ppm getOscillatorCompensation() const override { return oscillatorCompensation; }
 
     /**
      * Sets the clock time immediately to the given value. Greater than 1 oscillator
@@ -37,6 +42,7 @@ class INET_API SettableClock : public ServoClockBase
      */
 //    virtual void setClockTime(clocktime_t time, ppm oscillatorCompensation, bool resetOscillator) override;
     virtual void adjustClockTime(clocktime_t newClockTime) override;
+
 };
 
 } // namespace inet

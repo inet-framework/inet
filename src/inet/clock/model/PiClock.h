@@ -16,7 +16,6 @@ class INET_API PiClock : public ServoClockBase
   protected:
     static simsignal_t driftSignal;
     static simsignal_t kpSignal;
-    OverdueClockEventHandlingMode defaultOverdueClockEventHandlingMode = UNSPECIFIED;
 
     int phase = 0;
     clocktime_t offset[2];

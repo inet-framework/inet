@@ -14,7 +14,7 @@ package inet.clock.model;
 //
 // @see ~ScenarioManager
 //
-module PiClock extends SettableClock
+module PiClock extends ServoClockBase
 {
     parameters:
         double offsetThreshold @unit(s) = default(0s); // Clock will perform a time jump if the offset is greater than this value, 0.0 disables this feature
