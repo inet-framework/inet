@@ -5,8 +5,11 @@
 //
 
 #include "inet/clock/model/PiClock.h"
+
 #include <algorithm>
 
+#include "inet/clock/oscillator/ConstantDriftOscillator.h"
+#include "inet/common/XMLUtils.h"
 
 namespace inet {
 
@@ -17,7 +20,7 @@ simsignal_t PiClock::driftSignal = cComponent::registerSignal("drift");
 
 void PiClock::initialize(int stage)
 {
-//    OscillatorBasedClock::initialize(stage);
+    ServoClockBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         offsetThreshold = &par("offsetThreshold");
         kp = par("kp");
