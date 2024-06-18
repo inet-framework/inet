@@ -9,7 +9,7 @@
 #define __INET_SETTABLECLOCK_H
 
 #include "inet/clock/model/ServoClockBase.h"
-#include "inet/common/XMLUtils.h"
+
 
 
 namespace inet {
@@ -28,7 +28,7 @@ class INET_API SettableClock : public ServoClockBase
 //    virtual simtime_t handleOverdueClockEvent(ClockEvent *event, simtime_t t);
 
     // IScriptable implementation
-    virtual void processCommand(const cXMLElement& node) override;
+//    virtual void processCommand(const cXMLElement& node) override;
 
     ppm oscillatorCompensationValue = ppm(0);
 

@@ -10,6 +10,7 @@
 namespace inet {
 
     Define_Module(ServoClockBase);
+
     void ServoClockBase::initialize(int stage)
     {
         OscillatorBasedClock::initialize(stage);
@@ -26,7 +27,6 @@ namespace inet {
         }
     }
 
-
     void ServoClockBase::setOscillatorCompensation(ppm oscillatorCompensationValue)
     {
         this->oscillatorCompensation = oscillatorCompensationValue;
@@ -40,7 +40,7 @@ namespace inet {
 
     }
 
-    void ServoClockBase::rescheduleClockEvents(clocktime_t oldClockTime, clocktime_t newClockTime) const
+    void ServoClockBase::rescheduleClockEvents(clocktime_t oldClockTime, clocktime_t newClockTime)
     {
         clocktime_t clockDelta = newClockTime - oldClockTime;
         simtime_t currentSimTime = simTime();
@@ -83,6 +83,25 @@ namespace inet {
             default:
                 throw cRuntimeError("Unknown overdue clock event handling mode");
         }
+    }
+
+    void ServoClockBase::processCommand(const cXMLElement& node)
+    {
+        Enter_Method("processCommand");
+        if (!strcmp(node.getTagName(), "adjust-clock")) {
+            clocktime_t time = ClockTime::parse(xmlutils::getMandatoryFilledAttribute(node, "time"));
+            ppm oscillatorCompensation = ppm(xmlutils::getAttributeDoubleValue(&node, "oscillator-compensation", 0));
+            bool isResetOscillator = xmlutils::getAttributeBoolValue(&node, "reset-oscillator", true);
+
+            adjustClockTime(time);
+            if (isResetOscillator)
+                resetOscillator();
+            setOscillatorCompensation(oscillatorCompensation);
+
+//        setClockTime(time, oscillatorCompensation, resetOscillator);
+        }
+        else
+            throw cRuntimeError("Invalid command: %s", node.getTagName());
     }
 
 

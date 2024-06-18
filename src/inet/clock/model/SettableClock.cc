@@ -14,21 +14,21 @@ namespace inet {
 
 Define_Module(SettableClock);
 
-void SettableClock::initialize(int stage)
-{
-    OscillatorBasedClock::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        const char *text = par("defaultOverdueClockEventHandlingMode");
-        if (!strcmp(text, "execute"))
-            defaultOverdueClockEventHandlingMode = EXECUTE;
-        else if (!strcmp(text, "skip"))
-            defaultOverdueClockEventHandlingMode = SKIP;
-        else if (!strcmp(text, "error"))
-            defaultOverdueClockEventHandlingMode = ERROR;
-        else
-            throw cRuntimeError("Unknown defaultOverdueClockEventHandlingMode parameter value");
-    }
-}
+//void SettableClock::initialize(int stage)
+//{
+//    OscillatorBasedClock::initialize(stage);
+//    if (stage == INITSTAGE_LOCAL) {
+//        const char *text = par("defaultOverdueClockEventHandlingMode");
+//        if (!strcmp(text, "execute"))
+//            defaultOverdueClockEventHandlingMode = EXECUTE;
+//        else if (!strcmp(text, "skip"))
+//            defaultOverdueClockEventHandlingMode = SKIP;
+//        else if (!strcmp(text, "error"))
+//            defaultOverdueClockEventHandlingMode = ERROR;
+//        else
+//            throw cRuntimeError("Unknown defaultOverdueClockEventHandlingMode parameter value");
+//    }
+//}
 
 //OverdueClockEventHandlingMode SettableClock::getOverdueClockEventHandlingMode(ClockEvent *event) const
 //{
@@ -122,19 +122,19 @@ void SettableClock::adjustClockTime(clocktime_t newClockTime)
 //    }
 //}
 
-void SettableClock::processCommand(const cXMLElement& node)
-{
-    Enter_Method("processCommand");
-    if (!strcmp(node.getTagName(), "set-clock")) {
-        clocktime_t time = ClockTime::parse(xmlutils::getMandatoryFilledAttribute(node, "time"));
-        this->oscillatorCompensationValue = ppm(xmlutils::getAttributeDoubleValue(&node, "oscillator-compensation", 0));
-        this->isResetOscillator = xmlutils::getAttributeBoolValue(&node, "reset-oscillator", true);
-        adjustClockTime(time);
-//        setClockTime(time, oscillatorCompensation, resetOscillator);
-    }
-    else
-        throw cRuntimeError("Invalid command: %s", node.getTagName());
-}
+//void SettableClock::processCommand(const cXMLElement& node)
+//{
+//    Enter_Method("processCommand");
+//    if (!strcmp(node.getTagName(), "set-clock")) {
+//        clocktime_t time = ClockTime::parse(xmlutils::getMandatoryFilledAttribute(node, "time"));
+//        this->oscillatorCompensationValue = ppm(xmlutils::getAttributeDoubleValue(&node, "oscillator-compensation", 0));
+//        this->isResetOscillator = xmlutils::getAttributeBoolValue(&node, "reset-oscillator", true);
+//        adjustClockTime(time);
+////        setClockTime(time, oscillatorCompensation, resetOscillator);
+//    }
+//    else
+//        throw cRuntimeError("Invalid command: %s", node.getTagName());
+//}
 
 } // namespace inet
 
