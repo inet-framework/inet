@@ -8,11 +8,11 @@
 #define __INET_SERVOCLOCKBASE_H
 
 #include "inet/clock/model/OscillatorBasedClock.h"
-#include "inet/common/scenario/IScriptable.h"
+//#include "inet/common/scenario/IScriptable.h"
 
 namespace inet {
 
-class ServoClockBase : public OscillatorBasedClock, public IScriptable {
+class ServoClockBase : public OscillatorBasedClock {
 
 protected:
     OverdueClockEventHandlingMode defaultOverdueClockEventHandlingMode = UNSPECIFIED;
@@ -20,11 +20,11 @@ protected:
     // 100 ppm value means the oscillator tick length is compensated to be smaller by a factor of (1 / (1 + 100 / 1E+6)) than the actual tick length measured in clock time
 
 
-protected:
-    virtual void adjustClockTime(clocktime_t newClockTime) = 0;
-    virtual void setOscillatorCompensation(ppm oscillatorCompensation) const;
-    virtual void resetOscillator(bool resetOscillator) const;
-    virtual void rescheduleClockEvents(clocktime_t oldClockTime, clocktime_t newClockTime) const;
+public:
+    virtual void adjustClockTime(clocktime_t newClockTime) {};
+    virtual void setOscillatorCompensation(ppm oscillatorCompensation);
+    virtual void resetOscillatorOffset() const;
+    virtual void rescheduleClockEvents(clocktime_t oldClockTime, clocktime_t newClockTime);
 
 };
 

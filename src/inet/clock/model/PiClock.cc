@@ -39,7 +39,7 @@ void PiClock::initialize(int stage)
     }
 }
 
-clocktime_t PiClock::setClockTime(clocktime_t newClockTime)
+void PiClock::adjustClockTime(clocktime_t newClockTime)
 {
     Enter_Method("setClockTime");
     clocktime_t oldClockTime = getClockTime();
@@ -115,7 +115,7 @@ clocktime_t PiClock::setClockTime(clocktime_t newClockTime)
         }
     }
     emit(driftSignal, drift.get());
-    return getClockTime();
+    getClockTime();
 }
 
 } // namespace inet

@@ -9,16 +9,19 @@
 #define __INET_SETTABLECLOCK_H
 
 #include "inet/clock/model/ServoClockBase.h"
+#include "inet/common/scenario/IScriptable.h"
 
 namespace inet {
 
-class INET_API SettableClock : public ServoClockBase
+class INET_API SettableClock : public ServoClockBase, public IScriptable
 {
 //  protected:
 //    OverdueClockEventHandlingMode defaultOverdueClockEventHandlingMode = UNSPECIFIED;
 //    ppm oscillatorCompensation = ppm(0); // 0 means no compensation, higher value means faster clock, e.g. 100 ppm value means the clock compensates 100 microseconds for every second in clock time
 //                                         // 100 ppm value means the oscillator tick length is compensated to be smaller by a factor of (1 / (1 + 100 / 1E+6)) than the actual tick length measured in clock time
 
+  protected:
+    bool resetOscillator = false;
   protected:
     virtual void initialize(int stage) override;
 
@@ -37,6 +40,7 @@ class INET_API SettableClock : public ServoClockBase
      */
 //    virtual void setClockTime(clocktime_t time, ppm oscillatorCompensation, bool resetOscillator) override;
     virtual void adjustClockTime(clocktime_t newClockTime) override;
+    virtual void rescheduleClockEvents(clocktime_t oldClockTime, clocktime_t newClockTime) override;
 };
 
 } // namespace inet

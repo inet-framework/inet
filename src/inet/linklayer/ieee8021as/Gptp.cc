@@ -9,7 +9,7 @@
 
 #include "GptpPacket_m.h"
 #include "inet/clock/model/PiClock.h"
-#include "inet/clock/model/SettableClock.h"
+#include "inet/clock/model/ServoClockBase.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/clock/ClockUserModuleBase.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -442,7 +442,7 @@ void Gptp::synchronize()
     // Thus, we need to multiply the meanLinkDelay and residenceTime with the gmRateRatio
     clocktime_t newTime = preciseOriginTimestamp + correctionField + gmRateRatio * (meanLinkDelay + residenceTime);
 
-    auto piControlClock = check_and_cast<PiClock *>(clock.get());
+    auto piControlClock = check_and_cast<ServoClockBase *>(clock.get());
 
     // Only change the oscillator if we have new information about our nrr
     // TODO: We should change this to a clock servo model in the future anyways!
@@ -455,13 +455,12 @@ void Gptp::synchronize()
 //            unit(gmRateRatio * (1 + unit(piControlClock->getOscillatorCompensation()).get()) - 1);
 //        hasNewRateRatioForOscillatorCompensation = false;
 //    }
-    piControlClock->setClockTime(newTime);
+    piControlClock->adjustClockTime(newTime);
 //    EV_INFO << "newOscillatorCompensation " << newOscillatorCompensation << endl;
 
 
     newLocalTimeAtTimeSync = clock->getClockTime();
     timeDiffAtTimeSync = newLocalTimeAtTimeSync - oldLocalTimeAtTimeSync;
-
 
 
     /************** Rate ratio calculation *************************************

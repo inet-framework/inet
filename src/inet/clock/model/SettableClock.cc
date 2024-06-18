@@ -56,42 +56,51 @@ simtime_t SettableClock::handleOverdueClockEvent(ClockEvent *event, simtime_t t)
     }
 }
 
-void SettableClock::setClockTime(clocktime_t newClockTime, ppm oscillatorCompensation, bool resetOscillator)
+void SettableClock::adjustClockTime(clocktime_t newClockTime)
 {
-    Enter_Method("setClockTime");
+    Enter_Method("adjustClockTime");
     clocktime_t oldClockTime = getClockTime();
-    auto diff = newClockTime - oldClockTime;
     if (newClockTime != oldClockTime) {
         emit(timeChangedSignal, oldClockTime.asSimTime());
-        if (resetOscillator) {
-            if (auto constantDriftOscillator = dynamic_cast<ConstantDriftOscillator *>(oscillator))
-                constantDriftOscillator->setTickOffset(0);
+
+        if(resetOscillator){
+            resetOscillatorOffset();
         }
+
         simtime_t currentSimTime = simTime();
-        EV_DEBUG << "Setting clock time from " << oldClockTime << " to " << newClockTime << " at simtime " << currentSimTime << ".\n";
+        EV_DEBUG << "Adjusting clock time from " << oldClockTime << " to " << newClockTime << " at simtime " << currentSimTime << ".\n";
+
         originSimulationTime = simTime();
         originClockTime = newClockTime;
-        this->oscillatorCompensation = oscillatorCompensation;
+        setOscillatorCompensation(oscillatorCompensation);
+
         ASSERT(newClockTime == getClockTime());
-        clocktime_t clockDelta = newClockTime - oldClockTime;
-        for (auto event : events) {
-            if (event->getRelative())
-                // NOTE: the simulation time of event execution is not affected
-                event->setArrivalClockTime(event->getArrivalClockTime() + clockDelta);
-            else {
-                clocktime_t arrivalClockTime = event->getArrivalClockTime();
-                bool isOverdue = arrivalClockTime < newClockTime;
-                simtime_t arrivalSimTime = isOverdue ? -1 : computeSimTimeFromClockTime(arrivalClockTime);
-                if (isOverdue || arrivalSimTime < currentSimTime)
-                    arrivalSimTime = handleOverdueClockEvent(event, currentSimTime);
-                if (event->isScheduled()) {
-                    cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
-                    cContextSwitcher contextSwitcher(targetModule);
-                    targetModule->rescheduleAt(arrivalSimTime, event);
-                }
+
+        rescheduleClockEvents(oldClockTime, newClockTime);
+
+        emit(timeChangedSignal, newClockTime.asSimTime());
+    }
+}
+
+void SettableClock::rescheduleClockEvents(inet::clocktime_t oldClockTime, inet::clocktime_t newClockTime)  {
+    clocktime_t clockDelta = newClockTime - oldClockTime;
+    simtime_t currentSimTime = simTime();
+    for (auto event : events) {
+        if (event->getRelative())
+            // NOTE: the simulation time of event execution is not affected
+            event->setArrivalClockTime(event->getArrivalClockTime() + clockDelta);
+        else {
+            clocktime_t arrivalClockTime = event->getArrivalClockTime();
+            bool isOverdue = arrivalClockTime < newClockTime;
+            simtime_t arrivalSimTime = isOverdue ? -1 : computeSimTimeFromClockTime(arrivalClockTime);
+            if (isOverdue || arrivalSimTime < currentSimTime)
+                arrivalSimTime = handleOverdueClockEvent(event, currentSimTime);
+            if (event->isScheduled()) {
+                cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
+                cContextSwitcher contextSwitcher(targetModule);
+                targetModule->rescheduleAt(arrivalSimTime, event);
             }
         }
-        emit(timeChangedSignal, newClockTime.asSimTime());
     }
 }
 
@@ -100,13 +109,12 @@ void SettableClock::processCommand(const cXMLElement& node)
     Enter_Method("processCommand");
     if (!strcmp(node.getTagName(), "set-clock")) {
         clocktime_t time = ClockTime::parse(xmlutils::getMandatoryFilledAttribute(node, "time"));
-        ppm oscillatorCompensation = ppm(xmlutils::getAttributeDoubleValue(&node, "oscillator-compensation", 0));
-        bool resetOscillator = xmlutils::getAttributeBoolValue(&node, "reset-oscillator", true);
-        setClockTime(time, oscillatorCompensation, resetOscillator);
+        oscillatorCompensation = ppm(xmlutils::getAttributeDoubleValue(&node, "oscillator-compensation", 0));
+        resetOscillator = xmlutils::getAttributeBoolValue(&node, "reset-oscillator", true);
+        adjustClockTime(time);
     }
     else
         throw cRuntimeError("Invalid command: %s", node.getTagName());
 }
 
 } // namespace inet
-
