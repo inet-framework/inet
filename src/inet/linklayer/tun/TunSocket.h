@@ -12,8 +12,11 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
 #include "inet/linklayer/tun/ITun.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 class INET_API TunSocket : public ISocket
 {
@@ -26,6 +29,7 @@ class INET_API TunSocket : public ISocket
     };
 
   protected:
+    PassivePacketSinkRef sink;
     ModuleRefByGate<ITun> tun;
     int socketId = -1;
     int interfaceId = -1;
@@ -47,6 +51,7 @@ class INET_API TunSocket : public ISocket
      */
     void setOutputGate(cGate *outputGate) {
         this->outputGate = outputGate;
+        sink.reference(outputGate, true);
         tun.reference(outputGate, true);
     }
 

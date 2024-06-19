@@ -728,8 +728,13 @@ cGate *NetworkInterface::lookupModuleInterface(cGate *gate, const std::type_info
                 return findModuleInterface(gate, type, nullptr, 1);
             auto packetProtocolTag = dynamic_cast<const PacketProtocolTag *>(arguments);
             if (packetProtocolTag != nullptr && hasPar("protocol") && !strcmp(packetProtocolTag->getProtocol()->getName(), par("protocol")))
-                return findModuleInterface(gate, type, nullptr, 1);
+                return findModuleInterface(gate, type, arguments, 1);
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr)
+                return findModuleInterface(gate, type, arguments, 1);
         }
+        else
+            return findModuleInterface(gate, type, arguments, 1);
     }
     else if (gate->isName("upperLayerOut")) {
         if (type == typeid(IPassivePacketSink))

@@ -120,9 +120,11 @@ void TunnelApp::socketClosed(UdpSocket *socket)
 // Ipv4Socket::ICallback
 void TunnelApp::socketDataArrived(Ipv4Socket *socket, Packet *packet)
 {
+    EV_INFO << "Received packet from IPv4 socket" << EV_FIELD(packet) << EV_ENDL;
     auto packetProtocol = packet->getTag<NetworkProtocolInd>()->getProtocol();
     if (protocol == packetProtocol) {
         packet->clearTags();
+        EV_INFO << "Sending packet to TUN socket" << EV_FIELD(packet) << EV_ENDL;
         tunSocket.send(packet);
     }
     else
@@ -137,15 +139,18 @@ void TunnelApp::socketClosed(Ipv4Socket *socket)
 // TunSocket::ICallback
 void TunnelApp::socketDataArrived(TunSocket *socket, Packet *packet)
 {
+    EV_INFO << "Received packet from TUN socket" << EV_FIELD(packet) << EV_ENDL;
     // InterfaceInd says packet is from tunnel interface and socket id is present and equals to tunSocket
     if (protocol == &Protocol::ipv4) {
         packet->clearTags();
         packet->addTag<L3AddressReq>()->setDestAddress(L3AddressResolver().resolve(destinationAddress));
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        EV_INFO << "Sending packet to IPv4 socket" << EV_FIELD(packet) << EV_ENDL;
         ipv4Socket.send(packet);
     }
     else if (protocol == &Protocol::udp) {
         packet->clearTags();
+        EV_INFO << "Sending packet to UDP socket" << EV_FIELD(packet) << EV_ENDL;
         clientSocket.send(packet);
     }
     else
@@ -170,6 +175,28 @@ void TunnelApp::handleCrashOperation(LifecycleOperation *operation)
     for (auto s : socketMap.getMap())
         s.second->destroy();
     socketMap.deleteSockets();
+}
+
+void TunnelApp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
+}
+
+cGate *TunnelApp::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("socketIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr && socketMap.findSocketById(socketInd->getSocketId()) != nullptr)
+                return gate;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace inet

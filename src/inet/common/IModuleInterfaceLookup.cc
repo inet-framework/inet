@@ -6,6 +6,7 @@
 
 
 #include "inet/common/IModuleInterfaceLookup.h"
+#include "inet/queueing/contract/IActivePacketSink.h"
 
 namespace inet {
 
@@ -49,6 +50,9 @@ cGate *findModuleInterface(cGate *gate, const std::type_info& type, const cObjec
                         else
                             throw cRuntimeError("Unknown service");
                     }
+                    // KLUDGE: TODO: this is needed for the tunnel example, it's used by the PacketQueueBase
+                    if (property->getValue("forward") && !findModuleInterface(gate->getOwnerModule()->gate("out"), typeid(queueing::IActivePacketSink), arguments, direction))
+                        continue;
                     return gate;
                 }
             }

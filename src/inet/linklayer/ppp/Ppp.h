@@ -8,6 +8,7 @@
 #ifndef __INET_PPP_H
 #define __INET_PPP_H
 
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
@@ -24,7 +25,7 @@ using namespace inet::queueing;
 /**
  * PPP implementation.
  */
-class INET_API Ppp : public MacProtocolBase, public queueing::IActivePacketSink
+class INET_API Ppp : public MacProtocolBase, public queueing::IActivePacketSink, public IModuleInterfaceLookup
 {
   protected:
     PassivePacketSinkRef upperLayerSink;
@@ -64,6 +65,8 @@ class INET_API Ppp : public MacProtocolBase, public queueing::IActivePacketSink
 
   public:
     virtual ~Ppp();
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
