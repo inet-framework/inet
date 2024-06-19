@@ -162,6 +162,19 @@ void FlowMeasurementRecorder::endMeasurements(Packet *packet)
         endPacketFlow(this, packet, flowName.c_str());
 }
 
+cGate *FlowMeasurementRecorder::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("in")) {
+        if (type == typeid(IPassivePacketSink)) {
+            if (findModuleInterface(this->gate("out"), type, arguments, 1))
+                return gate;
+        }
+    }
+    return nullptr;
+}
+
 } // namespace queueing
 } // namespace inet
 
