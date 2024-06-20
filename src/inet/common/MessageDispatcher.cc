@@ -193,8 +193,8 @@ cGate *MessageDispatcher::forwardLookupModuleInterface(const cGate *gate, const 
                                 opp_typename(type),
                                 check_and_cast<cModule *>(result->getOwnerModule())->getFullPath().c_str(),
                                 check_and_cast<cModule *>(referencedModule)->getFullPath().c_str(),
-                                arguments->getClassName(),
-                                arguments->str().c_str());
+                                arguments ? arguments->getClassName() : "<none>",
+                                arguments ? arguments->str().c_str() : "nullptr");
                 }
                 result = referencedGate;
             }
