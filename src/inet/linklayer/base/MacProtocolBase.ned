@@ -18,7 +18,7 @@ simple MacProtocolBase extends LayeredProtocolBase
         string interfaceTableModule;
         @display("i=block/rxtx");
     gates:
-        input upperLayerIn @interface[inet::queueing::IActivePacketSink] @labels(INetworkHeader/down);
+        input upperLayerIn @interface[inet::queueing::IActivePacketSink](arguments=null) @labels(INetworkHeader/down);
         output upperLayerOut @labels(INetworkHeader/up);
         input lowerLayerIn @interface[inet::queueing::IPassivePacketSink] @labels(ILinkLayerFrame/up);
         output lowerLayerOut @labels(ILinkLayerFrame/down);
