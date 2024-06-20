@@ -12,7 +12,6 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/stlutils.h"
 #include "inet/common/StringFormat.h"
 #include "inet/common/SubmoduleLayout.h"
@@ -729,12 +728,7 @@ cGate *NetworkInterface::lookupModuleInterface(cGate *gate, const std::type_info
             auto packetProtocolTag = dynamic_cast<const PacketProtocolTag *>(arguments);
             if (packetProtocolTag != nullptr && hasPar("protocol") && !strcmp(packetProtocolTag->getProtocol()->getName(), par("protocol")))
                 return findModuleInterface(gate, type, arguments, 1);
-            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
-            if (socketInd != nullptr)
-                return findModuleInterface(gate, type, arguments, 1);
         }
-        else
-            return findModuleInterface(gate, type, arguments, 1);
     }
     else if (gate->isName("upperLayerOut")) {
         if (type == typeid(IPassivePacketSink))
