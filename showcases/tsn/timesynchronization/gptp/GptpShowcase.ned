@@ -70,6 +70,21 @@ network TwoMasterClocksTreeGptpShowcase extends TsnNetworkBase
         tsnSwitch2.ethg++ <--> EthernetLink <--> tsnDevice4.ethg++;
 }
 
+network SteppingClockGptpShowcase extends TsnNetworkBase
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        tsnClock: TsnClock {
+            @display("p=500,150");
+        }
+        tsnDevice: TsnDevice {
+            @display("p=500,300");
+        }
+
+    connections:
+        tsnClock.ethg++ <--> EthernetLink <--> tsnDevice.ethg++;
+}
+
 network TwoMasterClocksRingGptpShowcase extends TsnNetworkBase
 {
     submodules:

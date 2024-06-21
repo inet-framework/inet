@@ -12,7 +12,7 @@
 
 #include "inet/clock/common/ClockTime.h"
 #include "inet/clock/contract/ClockTime.h"
-#include "inet/clock/model/InstantServoClock.h"
+#include "inet/clock/model/ServoClockBase.h"
 #include "inet/common/INETDefs.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/clock/ClockUserModuleBase.h"
@@ -42,7 +42,6 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     double gmRateRatio = 1.0;
     double receivedRateRatio = 1.0;
     double neighborRateRatio = 1.0;
-    bool hasNewRateRatioForOscillatorCompensation = false;
 
     uint16_t sequenceId = 0;
     // == Propagation Delay Measurement Procedure ==
@@ -51,8 +50,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     clocktime_t pDelayReqIngressTimestamp = -1; // ingress time of pdelay_req at responder
     clocktime_t pDelayRespEgressTimestamp = -1; // egress time of pdelay_resp at responder (received in PDelayRespFollowUp)
     clocktime_t pDelayRespEgressTimestampSetStart = -1; // egress time of previous pdelay_resp at responder (received in PDelayRespFollowUp)
-    clocktime_t pDelayRespIngressTimestamp = -1;     // ingress time of pdelay_resp at initiator (this node)
-    clocktime_t pDelayRespIngressTimestampSetStart = -1; // ingress time of previous pdelay_resp at initiator (this node)
+    clocktime_t pDelayRespIngressTimestamp = -1; // ingress time of pdelay_resp at initiator (this node)
+    clocktime_t pDelayRespIngressTimestampSetStart = -1;  // ingress time of previous pdelay_resp at initiator (this node)
     int nrrCalculationSetMaximum = 1; // TODO: Make this a settable parameter
     int nrrCalculationSetCurrent = 0;
 
@@ -67,17 +66,16 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     // Unsure why this is also configurable with a parameter (TODO: Check)
     clocktime_t correctionField = CLOCKTIME_ZERO;
 
-    clocktime_t preciseOriginTimestamp = -1; // timestamp when the last sync message was generated at the GM
+    clocktime_t preciseOriginTimestamp = -1;     // timestamp when the last sync message was generated at the GM
     clocktime_t preciseOriginTimestampLast = -1; // timestamp when the last sync message was generated at the GM
 
-    clocktime_t syncIngressTimestamp = -1;          // ingress time of Sync at slave (this node)
-    clocktime_t syncIngressTimestampLast = -1;      // ingress time of previous Sync at slave (this node)
+    clocktime_t syncIngressTimestamp = -1;     // ingress time of Sync at slave (this node)
+    clocktime_t syncIngressTimestampLast = -1; // ingress time of previous Sync at slave (this node)
 
     bool rcvdGptpSync = false;
     uint16_t lastReceivedGptpSyncSequenceId = 0xffff;
 
     clocktime_t newLocalTimeAtTimeSync;
-    clocktime_t timeDiffAtTimeSync; // new local time - old local time
 
     // self timers:
     ClockEvent *selfMsgSync = nullptr;
@@ -96,37 +94,28 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     static simsignal_t correctionFieldEgressSignal;
 
     // Packet receive signals:
-    std::map <uint16_t,clocktime_t> ingressTimeMap; // <sequenceId,ingressTime
+    std::map<uint16_t, clocktime_t> ingressTimeMap; // <sequenceId,ingressTime
 
   public:
     static const MacAddress GPTP_MULTICAST_ADDRESS;
 
   protected:
-    virtual int numInitStages() const
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
-        override
-    {
-        return NUM_INIT_STAGES;
-    }
+    virtual void initialize(int stage) override;
 
-    virtual void initialize(int stage)
-
-        override;
-
-    virtual void handleMessage(cMessage *msg)
-
-        override;
+    virtual void handleMessage(cMessage *msg) override;
 
     virtual void handleSelfMessage(cMessage *msg);
+
+    virtual void handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDetails);
 
     void handleTransmissionStartedSignal(const GptpBase *gptp, omnetpp::cComponent *source);
 
     const GptpBase *extractGptpHeader(Packet *packet);
 
   public:
-    virtual ~
-
-        Gptp();
+    virtual ~Gptp();
 
   protected:
     void sendPacketToNIC(Packet *packet, int portId);
@@ -151,22 +140,19 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     void processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowUp *gptp);
 
-    clocktime_t getCalculatedDrift(IClock *clock, clocktime_t value) { return CLOCKTIME_ZERO; }
-
     void synchronize();
 
-    inline void adjustLocalTimestamp(clocktime_t &time) {
-        if (time != -1) {
-            time += timeDiffAtTimeSync;
+    inline void adjustLocalTimestamp(clocktime_t &timestamp, clocktime_t difference)
+    {
+        if (timestamp != -1) {
+            timestamp += difference;
         }
         else {
-            EV_WARN << "Timestamp is -1, cannot adjust it." << endl;
+            EV_INFO << "Timestamp is -1, cannot adjust it." << endl;
         }
     }
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details)
-
-        override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
 };
 
 } // namespace inet

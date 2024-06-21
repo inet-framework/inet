@@ -16,6 +16,14 @@ namespace inet {
 
 class ServoClockBase : public OscillatorBasedClock, public IScriptable
 {
+  public:
+    struct ClockJumpDetails : public cObject {
+        clocktime_t oldClockTime;
+        clocktime_t newClockTime;
+    };
+
+  public:
+    static simsignal_t clockJumpSignal;
 
   protected:
     OverdueClockEventHandlingMode defaultOverdueClockEventHandlingMode = UNSPECIFIED;
@@ -33,8 +41,8 @@ class ServoClockBase : public OscillatorBasedClock, public IScriptable
   public:
     virtual ppm getOscillatorCompensation() const override { return oscillatorCompensation; }
 
-    virtual void adjustClockTime(clocktime_t newClockTime) = 0;
-    virtual void setClockTime(clocktime_t newClockTime);
+    virtual void adjustClockTo(clocktime_t newClockTime) = 0;
+    virtual void jumpClockTo(clocktime_t newClockTime, bool notifyListeners = true);
     virtual void setOscillatorCompensation(ppm oscillatorCompensationValue);
     virtual void resetOscillator() const;
 };

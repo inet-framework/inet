@@ -23,7 +23,7 @@ class INET_API InstantServoClock : public ServoClockBase
      * Sets the clock time immediately to the given value. Greater than 1 oscillator
      * compensation factor means the clock measures time faster.
      */
-    virtual void adjustClockTime(clocktime_t newClockTime) override;
+    virtual void adjustClockTo(clocktime_t newClockTime) override;
 
 };
 

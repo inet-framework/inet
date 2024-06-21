@@ -9,6 +9,7 @@
 namespace inet {
 
 Register_Abstract_Class(ServoClockBase);
+simsignal_t ServoClockBase::clockJumpSignal = cComponent::registerSignal("clockJump");
 
 void ServoClockBase::initialize(int stage)
 {
@@ -87,11 +88,12 @@ void ServoClockBase::processCommand(const cXMLElement &node)
     Enter_Method("processCommand");
     if (!strcmp(node.getTagName(), "adjust-clock")) {
         clocktime_t time = ClockTime::parse(xmlutils::getMandatoryFilledAttribute(node, "time"));
-        adjustClockTime(time);
+        adjustClockTo(time);
     }
     if (!strcmp(node.getTagName(), "set-clock")) {
         clocktime_t time = ClockTime::parse(xmlutils::getMandatoryFilledAttribute(node, "time"));
-        setClockTime(time);
+        bool notifyListeners = xmlutils::getAttributeBoolValue(&node, "notifyListeners", true);
+        jumpClockTo(time, notifyListeners);
     }
     // TODO: Add two more options for the scenario manager here.
     //  One two update the oscillator compensation
@@ -100,7 +102,7 @@ void ServoClockBase::processCommand(const cXMLElement &node)
         throw cRuntimeError("Invalid command: %s", node.getTagName());
 }
 
-void ServoClockBase::setClockTime(clocktime_t newClockTime) {
+void ServoClockBase::jumpClockTo(clocktime_t newClockTime, bool notifyListeners) {
     auto oldClockTime = getClockTime();
 
     if (newClockTime != oldClockTime) {
@@ -113,6 +115,12 @@ void ServoClockBase::setClockTime(clocktime_t newClockTime) {
 
         ASSERT(newClockTime == getClockTime());
         rescheduleClockEvents(oldClockTime, newClockTime);
+        ClockJumpDetails timeJumpDetails = ClockJumpDetails();
+        timeJumpDetails.oldClockTime = oldClockTime;
+        timeJumpDetails.newClockTime = newClockTime;
+        if (notifyListeners) {
+            emit(clockJumpSignal, this, &timeJumpDetails);
+        }
         emit(timeChangedSignal, newClockTime.asSimTime());
     }
 }

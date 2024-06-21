@@ -137,6 +137,10 @@ void Gptp::initialize(int stage)
             pdelayInterval = par("pdelayInterval");
             scheduleClockEventAfter(par("pdelayInitialOffset"), selfMsgDelayReq);
         }
+
+        auto servoClock = check_and_cast<ClockBase *>(clock.get());
+        servoClock->subscribe(ServoClockBase::clockJumpSignal, this);
+
         WATCH(meanLinkDelay);
     }
 }
@@ -442,7 +446,8 @@ void Gptp::synchronize()
     // Thus, we need to multiply the meanLinkDelay and residenceTime with the gmRateRatio
     clocktime_t newTime = preciseOriginTimestamp + correctionField + gmRateRatio * (meanLinkDelay + residenceTime);
 
-    auto piControlClock = check_and_cast<ServoClockBase *>(clock.get());
+
+    auto servoClock = check_and_cast<ServoClockBase *>(clock.get());
 
     // Only change the oscillator if we have new information about our nrr
     // TODO: We should change this to a clock servo model in the future anyways!
@@ -455,12 +460,11 @@ void Gptp::synchronize()
 //            unit(gmRateRatio * (1 + unit(piControlClock->getOscillatorCompensation()).get()) - 1);
 //        hasNewRateRatioForOscillatorCompensation = false;
 //    }
-    piControlClock->adjustClockTime(newTime);
+    servoClock->adjustClockTo(newTime);
 //    EV_INFO << "newOscillatorCompensation " << newOscillatorCompensation << endl;
 
 
     newLocalTimeAtTimeSync = clock->getClockTime();
-    timeDiffAtTimeSync = newLocalTimeAtTimeSync - oldLocalTimeAtTimeSync;
 
 
     /************** Rate ratio calculation *************************************
@@ -471,8 +475,8 @@ void Gptp::synchronize()
     EV_INFO << "LOCAL TIME BEFORE SYNC     - " << oldLocalTimeAtTimeSync << endl;
     EV_INFO << "LOCAL TIME AFTER SYNC      - " << newLocalTimeAtTimeSync << endl;
     EV_INFO << "CALCULATED NEW TIME        - " << newTime << endl;
-    if (piControlClock->referenceClockModule != nullptr) {
-        auto referenceClockTime = piControlClock->referenceClockModule->getClockTime();
+    if (servoClock->referenceClockModule != nullptr) {
+        auto referenceClockTime = servoClock->referenceClockModule->getClockTime();
         auto diffReferenceToOldLocal = oldLocalTimeAtTimeSync - referenceClockTime;
         auto diffReferenceToNewTime = newTime - referenceClockTime;
         EV_INFO << "REFERENCE CLOCK TIME       - " << referenceClockTime << endl;
@@ -491,25 +495,6 @@ void Gptp::synchronize()
     EV_INFO << "NEIGHBOR RATE RATIO        - " << neighborRateRatio << endl;
     EV_INFO << "RECIEVED RATE RATIO        - " << receivedRateRatio << endl;
     EV_INFO << "GM RATE RATIO              - " << gmRateRatio << endl;
-
-    if (newLocalTimeAtTimeSync != oldLocalTimeAtTimeSync) {
-        adjustLocalTimestamp(syncIngressTimestamp);
-        adjustLocalTimestamp(pDelayReqEgressTimestamp);
-        adjustLocalTimestamp(pDelayRespIngressTimestamp);
-        adjustLocalTimestamp(pDelayRespIngressTimestampSetStart);
-        EV_INFO << "############## Adjusted times #####################################" << endl;
-        EV_INFO << "SYNC INGRESS TIME          - " << syncIngressTimestamp << endl;
-        EV_INFO << "PDELAY REQ EGRESS TIME      - " << pDelayReqEgressTimestamp << endl;
-        EV_INFO << "PDELAY RESP INGRESS TIME    - " << pDelayRespIngressTimestamp << endl;
-        EV_INFO << "PDELAY RESP INGRESS TIME SET- " << pDelayRespIngressTimestampSetStart << endl;
-        // NOTE: Do not pDelayReqIngressTimestamp and pDelayRespEgressTimestamp, because they are based on neighbor clock
-    }
-
-
-    // adjustLocalTimestamp(syncIngressTimestamp);
-    // adjustLocalTimestamp(syncIngressTimestampLast);
-    // adjustLocalTimestamp(preciseOriginTimestamp);
-    // adjustLocalTimestamp(preciseOriginTimestampLast);
 
     syncIngressTimestampLast = syncIngressTimestamp;
     preciseOriginTimestampLast = preciseOriginTimestamp;
@@ -602,7 +587,6 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
     if (nrrCalculationSetCurrent == nrrCalculationSetMaximum) {
         neighborRateRatio = (pDelayRespEgressTimestamp - pDelayRespEgressTimestampSetStart) /
                             (pDelayRespIngressTimestamp - pDelayRespIngressTimestampSetStart);
-        hasNewRateRatioForOscillatorCompensation = true;
         pDelayRespEgressTimestampSetStart = -1;
         pDelayRespIngressTimestampSetStart = -1;
         nrrCalculationSetCurrent = 0;
@@ -655,6 +639,13 @@ const GptpBase *Gptp::extractGptpHeader(Packet *packet)
 void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(simSignal));
+
+    auto servoClock = check_and_cast<ClockBase *>(clock.get());
+
+    if (simSignal == ServoClockBase::clockJumpSignal && obj == servoClock) {
+        auto clockJumpDetails = check_and_cast<ServoClockBase::ClockJumpDetails *>(details);
+        handleClockJump(clockJumpDetails);
+    }
 
     if (simSignal != receptionStartedSignal && simSignal != transmissionStartedSignal && simSignal != receptionEndedSignal)
         return;
@@ -711,4 +702,48 @@ void Gptp::handleTransmissionStartedSignal(const GptpBase *gptp, cComponent *sou
     }
 }
 
+void Gptp::handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDetails) {
+    EV_INFO << "############## Adjust local timestamps #################################" << endl;
+    EV_INFO << "BEFORE:" << endl;
+    EV_INFO << "SYNC INGRESS TIME          - " << syncIngressTimestamp << endl;
+    EV_INFO << "SYNC INGRESS TIME LAST     - " << syncIngressTimestampLast << endl;
+    EV_INFO << "PDELAY REQ EGRESS TIME      - " << pDelayReqEgressTimestamp << endl;
+    EV_INFO << "PDELAY RESP INGRESS TIME    - " << pDelayRespIngressTimestamp << endl;
+    EV_INFO << "PDELAY RESP INGRESS TIME SET- " << pDelayRespIngressTimestampSetStart << endl;
+
+    auto timeDiff = clockJumpDetails->newClockTime - clockJumpDetails->oldClockTime;
+    adjustLocalTimestamp(syncIngressTimestamp, timeDiff);
+    adjustLocalTimestamp(syncIngressTimestampLast, timeDiff);
+    adjustLocalTimestamp(pDelayReqEgressTimestamp, timeDiff);
+    adjustLocalTimestamp(pDelayRespIngressTimestamp, timeDiff);
+    adjustLocalTimestamp(pDelayRespIngressTimestampSetStart, timeDiff);
+    // NOTE: Do not pDelayReqIngressTimestamp and pDelayRespEgressTimestamp, because they are based on neighbor clock
+
+    EV_INFO << "AFTER:" << endl;
+    EV_INFO << "SYNC INGRESS TIME          - " << syncIngressTimestamp << endl;
+    EV_INFO << "SYNC INGRESS TIME LAST     - " << syncIngressTimestampLast << endl;
+    EV_INFO << "PDELAY REQ EGRESS TIME      - " << pDelayReqEgressTimestamp << endl;
+    EV_INFO << "PDELAY RESP INGRESS TIME    - " << pDelayRespIngressTimestamp << endl;
+    EV_INFO << "PDELAY RESP INGRESS TIME SET- " << pDelayRespIngressTimestampSetStart << endl;
+
+    // This is a very special case, that only occurs when a clock jump occurs between the receptionStarted and
+    // receptionEnded signal.
+    //
+    // You can see this in action in the SteppingClock showcase (At t=9s we do not notify the gPTP module about the clock
+    // jump, this leads to an incorrect peer delay calculation).
+    // We want to allow the gPTP module to still work correctly in this case, so we make this adjustment here.
+    for (auto &entry : ingressTimeMap) {
+        EV_INFO << " Before Ingress time: " << entry.first << " - " << entry.second << endl;
+        adjustLocalTimestamp(entry.second, timeDiff);
+        EV_INFO << " After Ingress time: " << entry.first << " - " << entry.second << endl;
+    }
+    // NOTE: There is a special case this does not solve. If the time jump would occur between the reception ended
+    // and the processing of the packet in the gPTP module the same problem as described above would occur.
+    // However, this would require a processing delay between the reception ended and the processing of the packet in
+    // the gPTP module, which to my knowledge is currently not configurable in the INET modules.
+    // Should this behavior change in the future, this timestamping adjustment mechanism needs to be changed as well to
+    // somehow also adjust the timestamps already attaches as tags to the gPTP packets.
+}
+
 } // namespace inet
+

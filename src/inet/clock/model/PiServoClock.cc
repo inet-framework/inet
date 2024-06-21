@@ -28,8 +28,8 @@ void PiServoClock::initialize(int stage)
     }
 }
 
-void PiServoClock::adjustClockTime(clocktime_t newClockTime) {
-    Enter_Method("adjustClockTime");
+void PiServoClock::adjustClockTo(clocktime_t newClockTime) {
+    Enter_Method("adjustClockTo");
     clocktime_t oldClockTime = getClockTime();
 
     if (newClockTime != oldClockTime) {
@@ -67,7 +67,7 @@ void PiServoClock::adjustClockTime(clocktime_t newClockTime) {
             drift += ppm(1e6 * (offsetNsPrev - offsetNs) / (localNsPrev - localNs));
             EV_INFO << "Drift: " << drift << "\n";
 
-            setClockTime(newClockTime);
+            jumpClockTo(newClockTime);
 
             setOscillatorCompensation(drift);
 

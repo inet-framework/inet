@@ -40,7 +40,7 @@ class INET_API PiServoClock : public ServoClockBase
     virtual void initialize(int stage) override;
 
   public:
-    void adjustClockTime(clocktime_t newClockTime) override;
+    void adjustClockTo(clocktime_t newClockTime) override;
 };
 
 } // namespace inet

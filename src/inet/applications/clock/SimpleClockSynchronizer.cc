@@ -57,8 +57,8 @@ void SimpleClockSynchronizer::synchronizeSlaveClock()
     ppm oscillatorCompensation = unit(getCurrentRelativeTickLength(slaveClock.get()) / getCurrentRelativeTickLength(masterClock.get())
             * (1 + unit(masterOscillatorBasedClock->getOscillatorCompensation()).get())
             * (1 + unit(ppm(synchronizationOscillatorCompensationErrorParameter->doubleValue())).get()) - 1);
-//    slaveClock->setClockTime(clockTime, oscillatorCompensation, true);
-    slaveClock->adjustClockTime(clockTime);
+//    slaveClock->jumpClockTo(clockTime, oscillatorCompensation, true);
+    slaveClock->adjustClockTo(clockTime);
     slaveClock->resetOscillator();
     slaveClock->setOscillatorCompensation(oscillatorCompensation);
 

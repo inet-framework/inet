@@ -12,10 +12,10 @@ namespace inet {
 Define_Module(InstantServoClock);
 
 
-void InstantServoClock::adjustClockTime(clocktime_t newClockTime)
+void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
 {
-    Enter_Method("adjustClockTime");
-    setClockTime(newClockTime);
+    Enter_Method("adjustClockTo");
+    jumpClockTo(newClockTime);
 
     // TODO: Add a mechanism that estimates the drift rate based on the previous and current local and received
     //  timestamps, similar to case 0 and 1 in PiServoClock
