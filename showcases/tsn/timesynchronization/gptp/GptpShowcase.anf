@@ -11,10 +11,12 @@
         <input pattern="results/OneMasterClockAccumulationError-#0.vec"/>
         <input pattern="results/JumpingClock-#0.sca"/>
         <input pattern="results/JumpingClock-#0.vec"/>
+        <input pattern="results/MultiHop-*#0.sca"/>
+        <input pattern="results/MultiHop-*#0.vec"/>
     </inputs>
     <charts>
-        <folder id="173736304" name="One master clock">
-            <chart icon="icons/full/obj/linechart.png" id="32087892" name="Clock drift - all clocks" template="linechart_native" type="LINE">
+        <folder id="986953387" name="One master clock">
+            <chart icon="icons/full/obj/linechart.png" id="1446664674" name="Clock drift - all clocks" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
@@ -596,7 +598,7 @@ utils.export_data_if_needed(df, props)
                 <property name="xaxis_max" value=""/>
                 <property name="image_export_width" value="9"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="510154853" name="kp and drift" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1694248240" name="kp and drift" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -1232,7 +1234,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="6"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="586784188" name="peerDelay:vector in OneMasterClockGptpShowcase.tsnDevice1.gptp" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="631463948" name="peerDelay:vector in OneMasterClockGptpShowcase.tsnDevice1.gptp" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -1868,7 +1870,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="6"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1073437493" name="neighborRateRatio:vector" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="2104891637" name="neighborRateRatio:vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -2504,7 +2506,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="6"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="2096648844" name="gmRateRatio:vector" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="556092175" name="gmRateRatio:vector" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -3140,7 +3142,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="6"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="854946682" name="experiment=OneMasterClock" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1260340387" name="experiment=OneMasterClock" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -3777,8 +3779,8 @@ utils.export_data_if_needed(df, props)
                 <property name="include_fields" value="false"/>
             </chart>
         </folder>
-        <folder id="508819547" name="Jumping Clock">
-            <chart icon="icons/full/obj/linechart.png" id="58003977" name="ClockDrift" template="linechart_native" type="LINE">
+        <folder id="1932465699" name="Jumping Clock">
+            <chart icon="icons/full/obj/linechart.png" id="98537105" name="ClockDrift" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -4415,8 +4417,8 @@ utils.export_data_if_needed(df, props)
                 <property name="include_fields" value="false"/>
             </chart>
         </folder>
-        <folder id="1422701209" name="Primary and hot-standby master clocks">
-            <chart icon="icons/full/obj/linechart.png" id="430071101" name="Clock drift - master clocks" template="linechart_native" type="LINE">
+        <folder id="1204889432" name="Primary and hot-standby master clocks">
+            <chart icon="icons/full/obj/linechart.png" id="612852966" name="Clock drift - master clocks" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -4992,7 +4994,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="9"/>
                 <property name="matplotlibrc" value="#savefig.transparent: True"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1709308451" name="Clock drift - time domain 0" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="280754094" name="Clock drift - time domain 0" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -5568,7 +5570,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="9"/>
                 <property name="matplotlibrc" value="savefig.transparent: True"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1259185571" name="Clock drift - time domain 0 - zoomed" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1478494564" name="Clock drift - time domain 0 - zoomed" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -6144,7 +6146,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="9"/>
                 <property name="matplotlibrc" value="savefig.transparent: True"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1016040488" name="Clock drift - time domain 1" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1212280265" name="Clock drift - time domain 1" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -6793,7 +6795,7 @@ utils.export_data_if_needed(df, props)
                 <property name="X.Label.Wrap" value="true"/>
                 <property name="Plot.Antialias" value="true"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1615626694" name="Clock drift - time domain 1 - zoomed" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1587766052" name="Clock drift - time domain 1 - zoomed" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -7443,8 +7445,8 @@ utils.export_data_if_needed(df, props)
                 <property name="Plot.Antialias" value="true"/>
             </chart>
         </folder>
-        <folder id="607842596" name="Exploiting network redundancy">
-            <chart icon="icons/full/obj/linechart.png" id="2011254356" name="Clock drift - master clocks" template="linechart_native" type="LINE">
+        <folder id="533917224" name="Exploiting network redundancy">
+            <chart icon="icons/full/obj/linechart.png" id="640178216" name="Clock drift - master clocks" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -8086,7 +8088,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="9"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1639621374" name="Clock drift - master clocks - zoomed" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1663753986" name="Clock drift - master clocks - zoomed" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -8728,7 +8730,7 @@ utils.export_data_if_needed(df, props)
                 <property name="image_export_width" value="9"/>
                 <property name="include_fields" value="false"/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1479357248" name="Clock drift - domain 0" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1847137592" name="Clock drift - domain 0" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -9377,7 +9379,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1803631154" name="Clock drift - domain 0 - zoomed" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="748314108" name="Clock drift - domain 0 - zoomed" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -10026,7 +10028,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1401365090" name="Clock drift - domain 1" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="809203785" name="Clock drift - domain 1" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -10669,7 +10671,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1198797607" name="Clock drift - domain 2" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="2091922175" name="Clock drift - domain 2" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -11313,7 +11315,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="732077201" name="Clock drift - domain 2 - zoomed" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1144154133" name="Clock drift - domain 2 - zoomed" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -11963,7 +11965,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="38185741" name="Clock drift - domain 3" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1159982512" name="Clock drift - domain 3" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -12607,7 +12609,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="148864599" name="Clock drift - domain 3 - zoomed" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="558689119" name="Clock drift - domain 3 - zoomed" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -13252,16 +13254,10 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_format" value=""/>
             </chart>
         </folder>
-        <folder id="850674805" name="Multihop">
-            <chart icon="icons/full/obj/linechart.png" id="633552382" name="Clock drift - all clocks" template="linechart_native" type="LINE">
+        <folder id="1238702611" name="Multihop">
+            <chart icon="icons/full/obj/linechart.png" id="916796118" name="Clock Drift" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
-from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
-
-#workaround start
-#transparency workaround for omnetpp-6.0
-import matplotlib as mpl
-mpl.rcParams['savefig.transparent'] = True
-#workaround end
+from omnetpp.scave import results, chart, utils
 
 # get chart properties
 props = chart.get_properties()
@@ -13274,18 +13270,12 @@ end_time = float(props["vector_end_time"] or math.inf)
 
 # query vector data into a data frame
 try:
-    df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
-except ValueError as e:
+    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
+except results.ResultQueryError as e:
     raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
-
-df['legend'] = df['module']
-
-for i in range(0,len(df)):
-    df['legend'][i] = df['legend'][i].replace("OneMasterClockGptpShowcase.","")
-    df['legend'][i] = df['legend'][i].replace(".clock","")
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
@@ -13298,7 +13288,7 @@ utils.postconfigure_plot(props)
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]></script>
-                <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -13348,7 +13338,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-                <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -13442,7 +13432,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-                <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -13565,13 +13555,6 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalSpan="2"/>
     </button>
 
-    <!-- Display titles or names? -->
-    <label text="Label source:"/>
-    <combo x:id="legend_labels" x:id.default="result titles" x:style="BORDER|READ_ONLY">
-      <add x:p0="result names"/>
-      <add x:p0="result titles"/>
-    </combo>
-
     <!-- Placement -->
     <label text="Placement:"/>
     <combo x:id="legend_placement" x:id.default="upper right" x:style="BORDER|READ_ONLY">
@@ -13607,7 +13590,74 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-                <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang" />
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+  </import>
+  <layout x:class="GridLayout" numColumns="1" />
+  <x:children>
+
+        <group text="Legend labels">
+
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="false" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+          <layout x:class="GridLayout" />
+          <x:children>
+            <button x:id='legend_automatic' text='Automatic' x:style='RADIO' x:id.default="true"/>
+            <composite>
+              <layoutData x:class="GridData" horizontalIndent="30"/>
+              <layout x:class="GridLayout" marginHeight="0" marginBottom="5"/>
+              <x:children>
+                <button x:id='legend_prefer_result_titles' text='Use result title instead of name where available' x:style='CHECK' x:id.default="true" x:id.enablerButton="legend_automatic"/>
+                <button x:id='legend_prefer_module_display_paths' text='Use module display path instead of full path where available' x:style='CHECK' x:id.default="true" x:id.enablerButton="legend_automatic"/>
+              </x:children>
+            </composite>
+
+            <button x:id='legend_manual' text='Manual' x:style='RADIO'/>
+            <composite>
+              <layoutData x:class="GridData" horizontalIndent="30"/>
+              <layout x:class="GridLayout" numColumns="2" marginHeight="0" marginBottom="5"/>
+              <x:children>
+                <label text="Format string:"/>
+                <text x:id="legend_format" x:style="BORDER" x:id.enablerButton="legend_manual" x:id.contentAssist="columns">
+                  <layoutData x:class="GridData" widthHint="200" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="CENTER" grabExcessVerticalSpace="false" />
+                </text>
+                <label text="Hint: Add $name or ${name} to insert content of data frame column; use $$ to insert dollar sign">
+                  <layoutData x:class="GridData" horizontalSpan="2" />
+                </label>
+              </x:children>
+            </composite>
+          </x:children>
+
+        </group>
+
+        <group text="Label tweaking">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+          <layout x:class="GridLayout" numColumns="1" />
+          <x:children>
+            <label text="Sed-style regex replacements inside the labels (/foo/bar/, one per line):" />
+            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL">
+              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+            </styledText>
+            <label text="Hint: Use \1, \2, etc. to refer back to parenthesized groups; data frame colums ($name, ${name}) also recognized"/>
+            <!--
+            <label text="Examples:"/>
+            <label text='- &quot;/tcp/TCP/&quot; ==&gt; change &quot;tcp&quot; to &quot;TCP&quot;'/>
+            <label text='- &quot;/ +/ /&quot; ==&gt; replace multiple spaces with one space'/>
+            <label text="- &quot;/host\[(\d+)\]/in host \1/&quot; ==&gt; change &quot;host[21]&quot; to &quot;in host 21&quot; (note \1,\2 as group reference)"/>
+            <label text='- &quot;/\//:/&quot; or &quot;|\|:|&quot; ==&gt; replace slashes with colons'/>
+            -->
+          </x:children>
+        </group>
+
+
+  </x:children>
+</xswt>]]></dialogPage>
+                <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -13718,7 +13768,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-                <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+                <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -13738,7 +13788,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-                <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -13794,34 +13844,39 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
+                <property name="legend_prefer_module_display_paths" value="true"/>
                 <property name="grid_show" value="true"/>
                 <property name="vector_end_time" value=""/>
                 <property name="linecolor" value=""/>
-                <property name="legend_labels" value="result titles"/>
                 <property name="Plot.Caching" value="true"/>
-                <property name="yaxis_title" value="Clock time difference to simulation time [us]"/>
+                <property name="legend_prefer_result_titles" value="true"/>
+                <property name="legend_manual" value="false"/>
+                <property name="yaxis_title" value=""/>
+                <property name="legend_replacements" value=""/>
                 <property name="Legend.Border" value="false"/>
-                <property name="title" value="Clock drift - all clocks"/>
+                <property name="title" value="Clock Drift"/>
+                <property name="legend_automatic" value="true"/>
                 <property name="Plot.Title.Font" value="Arial-regular-10"/>
                 <property name="vector_operations" value="apply: lineartrend(-1)&#10;apply: multiply_by(1000000)"/>
                 <property name="cycle_seed" value="0"/>
                 <property name="Axis.Title.Font" value="Arial-regular-8"/>
                 <property name="yaxis_log" value="false"/>
-                <property name="image_export_height" value="6"/>
+                <property name="image_export_height" value="4"/>
                 <property name="xaxis_log" value="false"/>
                 <property name="Axis.Label.Font" value="Arial-regular-8"/>
                 <property name="legend_placement" value="upper right"/>
                 <property name="plot.properties" value=""/>
                 <property name="data_export_filename" value=""/>
-                <property name="xaxis_title" value="Simulation time [s]"/>
+                <property name="xaxis_title" value=""/>
                 <property name="Plot.BackgroundColor" value="white"/>
                 <property name="grid_density" value="Major"/>
                 <property name="yaxis_min" value=""/>
                 <property name="Legend.Font" value="Arial-regular-8"/>
-                <property name="image_export_filename" value="OneMasterClock"/>
+                <property name="image_export_filename" value=""/>
                 <property name="xaxis_min" value=""/>
                 <property name="linewidth" value="1.5"/>
-                <property name="filter" value="type =~ vector AND runattr:experiment =~ OneMasterClockAccumulationError AND name =~ timeChanged:vector AND (module =~ &quot;*.tsnClock.clock&quot; OR module =~ &quot;*.tsnDevice.clock&quot;)"/>
+                <property name="legend_format" value=""/>
+                <property name="filter" value="type =~ vector AND runattr:experiment =~ MultiHop AND runattr:replication =~ &quot;#0&quot; AND name =~ timeChanged:vector AND (&#10;    (module =~ &quot;MultiHopGptpShowcase.tsnClock.clock&quot; AND runattr:measurement =~ &quot;$numHops=1&quot;) OR&#10;    (module =~ &quot;MultiHopGptpShowcase.tsnDevice.clock&quot;)&#10;)"/>
                 <property name="X.Label.Wrap" value="true"/>
                 <property name="vector_start_time" value=""/>
                 <property name="linestyle" value="solid"/>
@@ -13833,7 +13888,8 @@ utils.export_data_if_needed(df, props)
                 <property name="yaxis_max" value=""/>
                 <property name="Plot.Antialias" value="true"/>
                 <property name="xaxis_max" value=""/>
-                <property name="image_export_width" value="9"/>
+                <property name="image_export_width" value="6"/>
+                <property name="include_fields" value="false"/>
             </chart>
         </folder>
     </charts>

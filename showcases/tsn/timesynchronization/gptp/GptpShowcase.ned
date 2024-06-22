@@ -49,7 +49,7 @@ network JumpingClockGptpShowcase extends TsnNetworkBase
         tsnClock.ethg++ <--> EthernetLink <--> tsnDevice.ethg++;
 }
 
-network MutliHopGptpShowcase extends TsnNetworkBase
+network MultiHopGptpShowcase extends TsnNetworkBase
 {
     parameters:
         int numSwitches;
@@ -61,7 +61,7 @@ network MutliHopGptpShowcase extends TsnNetworkBase
             @display("p=400,150");
         }
         tsnSwitch[numSwitches]: TsnSwitch {
-            @display("p=400,300,col,100");
+            @display("p=400,300,row,100");
         }
         tsnDevice: TsnDevice {
             @display("p=400,450");
@@ -71,7 +71,7 @@ network MutliHopGptpShowcase extends TsnNetworkBase
         for i=0..sizeof(tsnSwitch)-2 {
             tsnSwitch[i].ethg++ <--> EthernetLink <--> tsnSwitch[i+1].ethg++;
         }
-        tsnSwitch[numSwitch-1].ethg++ <--> EthernetLink <--> tsnDevice.ethg++;
+        tsnSwitch[numSwitches-1].ethg++ <--> EthernetLink <--> tsnDevice.ethg++;
 }
 
 network TwoMasterClocksTreeGptpShowcase extends TsnNetworkBase
