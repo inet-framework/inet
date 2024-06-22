@@ -54,7 +54,7 @@ void ServoClockBase::rescheduleClockEvents(clocktime_t oldClockTime, clocktime_t
             if (isOverdue || arrivalSimTime < currentSimTime)
                 arrivalSimTime = handleOverdueClockEvent(event, currentSimTime);
             if (event->isScheduled()) {
-                cSimpleModule *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
+                auto *targetModule = check_and_cast<cSimpleModule *>(event->getArrivalModule());
                 cContextSwitcher contextSwitcher(targetModule);
                 targetModule->rescheduleAt(arrivalSimTime, event);
             }

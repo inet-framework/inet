@@ -14,7 +14,6 @@ import inet.node.tsn.TsnSwitch;
 network OneMasterClockGptpShowcase extends TsnNetworkBase
 {
     submodules:
-        scenarioManager: ScenarioManager;
         tsnClock: TsnClock {
             @display("p=500,150");
         }
@@ -31,6 +30,48 @@ network OneMasterClockGptpShowcase extends TsnNetworkBase
         tsnClock.ethg++ <--> EthernetLink <--> tsnSwitch.ethg++;
         tsnSwitch.ethg++ <--> EthernetLink <--> tsnDevice1.ethg++;
         tsnSwitch.ethg++ <--> EthernetLink <--> tsnDevice2.ethg++;
+}
+
+network JumpingClockGptpShowcase extends TsnNetworkBase
+{
+    submodules:
+        scenarioManager: ScenarioManager {
+            @display("p=100,500;is=s");
+        }
+        tsnClock: TsnClock {
+            @display("p=500,150");
+        }
+        tsnDevice: TsnDevice {
+            @display("p=500,300");
+        }
+
+    connections:
+        tsnClock.ethg++ <--> EthernetLink <--> tsnDevice.ethg++;
+}
+
+network MutliHopGptpShowcase extends TsnNetworkBase
+{
+    parameters:
+        int numSwitches;
+    submodules:
+        scenarioManager: ScenarioManager {
+            @display("p=100,800;is=s");
+        }
+        tsnClock: TsnClock {
+            @display("p=400,150");
+        }
+        tsnSwitch[numSwitches]: TsnSwitch {
+            @display("p=400,300,col,100");
+        }
+        tsnDevice: TsnDevice {
+            @display("p=400,450");
+        }
+    connections:
+        tsnClock.ethg++ <--> EthernetLink <--> tsnSwitch[0].ethg++;
+        for i=0..sizeof(tsnSwitch)-2 {
+            tsnSwitch[i].ethg++ <--> EthernetLink <--> tsnSwitch[i+1].ethg++;
+        }
+        tsnSwitch[numSwitch-1].ethg++ <--> EthernetLink <--> tsnDevice.ethg++;
 }
 
 network TwoMasterClocksTreeGptpShowcase extends TsnNetworkBase
@@ -70,27 +111,10 @@ network TwoMasterClocksTreeGptpShowcase extends TsnNetworkBase
         tsnSwitch2.ethg++ <--> EthernetLink <--> tsnDevice4.ethg++;
 }
 
-network SteppingClockGptpShowcase extends TsnNetworkBase
-{
-    submodules:
-        scenarioManager: ScenarioManager;
-        tsnClock: TsnClock {
-            @display("p=500,150");
-        }
-        tsnDevice: TsnDevice {
-            @display("p=500,300");
-        }
-
-    connections:
-        tsnClock.ethg++ <--> EthernetLink <--> tsnDevice.ethg++;
-}
 
 network TwoMasterClocksRingGptpShowcase extends TsnNetworkBase
 {
     submodules:
-        scenarioManager: ScenarioManager {
-            @display("p=100,500;is=s");
-        }
         tsnClock1: TsnClock {
             @display("p=500,150");
         }
