@@ -18,9 +18,10 @@ void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
     Enter_Method("adjustClockTo");
     int64_t offsetNsPrev, offsetNs, localNsPrev, localNs;
 
-    if  (newClockTime != oldClockTime)
-    {
-        clocktime_t oldClockTime = getClockTime();
+    clocktime_t oldClockTime = getClockTime();
+
+    if  (newClockTime != oldClockTime) {
+        emit(timeChangedSignal, oldClockTime.asSimTime());
         switch (phase) {
             case 0:
                 offset[0] = newClockTime - oldClockTime;
@@ -42,9 +43,8 @@ void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
                 drift = ppm(1e6 * (offsetNsPrev - offsetNs) / (localNsPrev - localNs));
                 EV_INFO << "Drift: " << drift << "\n";
                 break;
+        }
     }
-
-
 
     jumpClockTo(newClockTime);
 
