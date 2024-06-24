@@ -1,0 +1,23 @@
+# all tests that require the external TCP/IP stacks (NSC / lwip)
+
+# working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
+
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__lwip -r 0,                  50s,            b659-c286/tplx, PASS, Ipv4
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__inet -r 0,                  50s,            8402-9aa9/tplx, PASS, Ipv4
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__lwip -r 0,                  50s,            f1ba-019b/tplx, PASS, Ipv4
+
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c TcpLwip -r 0,                     100s,           0000-0000/tplx, ERROR,    # shutdown/restart not supported by TCP_lwIP
+
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip -r 0,                 100s,            dbac-e55c/tplx, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__inet -r 0,                 100s,            841f-007f/tplx, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__msg -r 0,            100s,            dbac-e55c/tplx, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__stream -r 0,         100s,            dbac-e55c/tplx, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__lwip -r 0,                 100s,            4999-d547/tplx, PASS, Ipv4
+
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,                  50s,            a788-9ebf/tplx, PASS, EthernetMac
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,                  50s,            edc0-0a0c/tplx, PASS, EthernetMac
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__lwip -r 0,                  50s,            7096-04e3/tplx, PASS, EthernetMac
+
+/examples/inet/nclients/,            -f omnetpp.ini -c inet__lwip -r 0,                 200s,            e194-036d/tplx, ERROR,
+/examples/inet/nclients/,            -f omnetpp.ini -c lwip__inet -r 0,                 200s,            0de9-dea9/tplx, ERROR,
+/examples/inet/nclients/,            -f omnetpp.ini -c lwip__lwip -r 0,                 200s,            53b3-7f25/tplx, ERROR,
