@@ -17,7 +17,9 @@ namespace inet {
 class INET_API InstantServoClock : public ServoClockBase
 {
   protected:
-
+    clocktime_t offset[2];
+    clocktime_t local[2];
+    int phase = 0;
   public:
     /**
      * Sets the clock time immediately to the given value. Greater than 1 oscillator

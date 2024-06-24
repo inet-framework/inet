@@ -95,6 +95,14 @@ void ServoClockBase::processCommand(const cXMLElement &node)
         bool notifyListeners = xmlutils::getAttributeBoolValue(&node, "notifyListeners", true);
         jumpClockTo(time, notifyListeners);
     }
+    if (!strcmp(node.getTagName(), "set-oscillator-compensation")) {
+        // is this the right way to get the value?
+        ppm oscillatorCompensationValue = ClockTime::parse(xmlutils::getMandatoryFilledAttribute(node, "value"));
+        setOscillatorCompensation(oscillatorCompensationValue);
+    }
+    if (!strcmp(node.getTagName(), "reset-oscillator")) {
+        resetOscillator();
+    }
     // TODO: Add two more options for the scenario manager here.
     //  One two update the oscillator compensation
     //  One to reset the oscillator
@@ -123,6 +131,7 @@ void ServoClockBase::jumpClockTo(clocktime_t newClockTime, bool notifyListeners)
         }
         emit(timeChangedSignal, newClockTime.asSimTime());
     }
+
 }
 
 } // namespace inet
