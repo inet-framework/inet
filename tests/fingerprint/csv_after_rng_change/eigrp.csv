@@ -1,0 +1,30 @@
+# working directory,                   command line arguments,                                     simulation time limit,  fingerprint,     expected result, tags
+/examples/eigrp/basic/,                -f omnetpp.ini -c EIGRP_unequal_cost_lb -r 0,                         3min,         b18e-5019/tplx;c162-d49f/~tNl;805a-1b0b/tyf,  PASS,  eigrp EthernetMac Ipv4
+/examples/eigrp/basic/,                -f omnetpp.ini -c EIGRP_no_load_balanc -r 0,                          3min,         cb71-f555/tplx;e840-d0a3/~tNl;9cae-ac5e/tyf,  PASS,  eigrp EthernetMac Ipv4
+/examples/eigrp/basic/,                -f omnetpp.ini -c EIGRP_no_split_horizon -r 0,                        3min,         0a79-a6b8/tplx;fb13-6823/~tNl;94f7-06fb/tyf,  PASS,  eigrp EthernetMac Ipv4
+/examples/eigrp/basic/,                -f omnetpp.ini -c EIGRP_passive_interface -r 0,                       3min,         1a38-4993/tplx;390e-d8f1/~tNl;b0b2-0652/tyf,  PASS,  eigrp EthernetMac Ipv4
+/examples/eigrp/basic/,                -f omnetpp.ini -c Scenario1 -r 0,                                     3min,         c677-8207/tplx;decd-8a03/~tNl;8301-58e5/tyf,  PASS,  eigrp EthernetMac Ipv4
+/examples/eigrp/basic/,                -f omnetpp.ini -c Scenario2 -r 0,                                     3min,         f5fd-0d1f/tplx;3706-3958/~tNl;afff-30ba/tyf,  PASS,  eigrp EthernetMac Ipv4
+
+/examples/eigrp/snake/,                -f omnetpp.ini -c General -r 0,                                       3min,         564c-f1c5/tplx;c55f-5c21/~tNl;02c1-5381/tyf,  PASS,  eigrp EthernetMac Ipv4
+
+/examples/eigrp/square_stub/,          -f omnetpp.ini -c General -r 0,                                       3min,         8165-3bb7/tplx;389d-efde/~tNl;f608-880a/tyf,  PASS,  eigrp EthernetMac Ipv4
+
+/examples/eigrp/square_stub_mesh/,     -f omnetpp.ini -c General -r 0,                                       3min,         3fa8-82da/tplx;822c-b2bd/~tNl;c843-4ca4/tyf,  PASS,  eigrp EthernetMac Ipv4
+
+/examples/eigrp/testing_scenario/,     -f omnetpp.ini -c General -r 0,                                       3min,         8435-b374/tplx;58f4-fede/~tNl;f806-b8f1/tyf,  PASS,  eigrp EthernetMac Ipv4
+
+/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp1_bandwidth-change -r 0,              3min,         532a-8a5d/tplx;6c9a-b218/~tNl;ed73-8cd4/tyf,  PASS,  eigrp EthernetMac
+/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down -r 0,                3min,         293f-aca2/tplx;57a2-3ad9/~tNl;0075-3452/tyf,  PASS,  eigrp EthernetMac
+/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp1_bandwidth-change_global-addr -r 0,  3min,         aef5-3d36/tplx;ec5d-2cf1/~tNl;4dd7-1a0d/tyf,  PASS,  eigrp EthernetMac
+/examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down_global-addr -r 0,    3min,         6c40-33af/tplx;0dd3-3d49/~tNl;79bd-c1dc/tyf,  PASS,  eigrp EthernetMac
+
+/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp1_datarate-change -r 0,               3min,         bff2-f865/tplx;1651-3a62/~tNl;b51c-3216/tyf,  PASS,  eigrp EthernetMac Ipv4
+/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down -r 0,                3min,         3c8d-44c3/tplx;1740-6064/~tNl;abd5-d384/tyf,  PASS,  eigrp EthernetMac Ipv4
+/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp1_datarate-change_global-addr -r 0,   3min,         4fe7-2bfe/tplx;aa9c-c9a7/~tNl;8662-03e9/tyf,  PASS,  eigrp EthernetMac Ipv4
+/examples/eigrp/testing_scenario_ds/,  -f omnetpp.ini -c EIGRP-IPv6_exp2_interface-down_global-addr -r 0,    3min,         78e9-b38a/tplx;d916-0f0d/~tNl;87e0-d366/tyf,  PASS,  eigrp EthernetMac Ipv4
+
+/examples/eigrp/two_node/,             -f omnetpp.ini -c General -r 0,                                       3min,         69b1-e907/tplx;2c6a-9db7/~tNl;8cb8-9c83/tyf,  PASS,  eigrp EthernetMac Ipv4
+
+/examples/eigrp/two_node6/,            -f omnetpp.ini -c General -r 0,                                       3min,         8e92-a48f/tplx;6b05-8a56/~tNl;be1d-28a1/tyf,  PASS,  eigrp EthernetMac
+
