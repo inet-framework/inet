@@ -42,6 +42,10 @@ void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
 
                 drift += ppm(1e6 * (offsetNsPrev - offsetNs) / (localNsPrev - localNs));
                 EV_INFO << "Drift: " << drift << "\n";
+                break;
+    }
+
+
 
                 jumpClockTo(newClockTime);
 

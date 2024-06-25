@@ -96,9 +96,10 @@ void ServoClockBase::processCommand(const cXMLElement &node)
         jumpClockTo(time, notifyListeners);
     }
     if (!strcmp(node.getTagName(), "set-oscillator-compensation")) {
-        // is this the right way to get the value?
-//        ppm oscillatorCompensationValue = ClockTime::parse(xmlutils::getMandatoryFilledAttribute(node, "value"));
-//        setOscillatorCompensation(oscillatorCompensationValue);
+        const char* valueStr = xmlutils::getMandatoryFilledAttribute(node, "value");
+        double valueDouble = std::atof(valueStr); // Convert string to double
+        ppm oscillatorCompensationValue = ppm(valueDouble); // Create ppm object from double
+        setOscillatorCompensation(oscillatorCompensationValue);
     }
     if (!strcmp(node.getTagName(), "reset-oscillator")) {
         resetOscillator();
