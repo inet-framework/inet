@@ -20,6 +20,7 @@ class INET_API InstantServoClock : public ServoClockBase
     clocktime_t offset[2];
     clocktime_t local[2];
     int phase = 0;
+    ppm drift = ppm(0);
   public:
     /**
      * Sets the clock time immediately to the given value. Greater than 1 oscillator

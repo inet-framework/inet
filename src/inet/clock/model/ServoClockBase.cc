@@ -97,8 +97,8 @@ void ServoClockBase::processCommand(const cXMLElement &node)
     }
     if (!strcmp(node.getTagName(), "set-oscillator-compensation")) {
         // is this the right way to get the value?
-        ppm oscillatorCompensationValue = ClockTime::parse(xmlutils::getMandatoryFilledAttribute(node, "value"));
-        setOscillatorCompensation(oscillatorCompensationValue);
+//        ppm oscillatorCompensationValue = ClockTime::parse(xmlutils::getMandatoryFilledAttribute(node, "value"));
+//        setOscillatorCompensation(oscillatorCompensationValue);
     }
     if (!strcmp(node.getTagName(), "reset-oscillator")) {
         resetOscillator();

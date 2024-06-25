@@ -5,4 +5,6 @@
     <set-clock t="12s" module="tsnClock.clock" time="12s"/>
     <set-clock t="15s" module="tsnClock.clock" time="15.000001s"/>
     <set-clock t="18s" module="tsnClock.clock" time="18"/>
+    <set-oscillator-compensation t="19s" module="tsnClock.clock" value="100"/>
+    <reset-oscillator t="22s"/>
 </scenario>

@@ -18,6 +18,8 @@ void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
     Enter_Method("adjustClockTo");
     int64_t offsetNsPrev, offsetNs, localNsPrev, localNs;
 
+    clocktime_t oldClockTime = getClockTime();
+
     if  (newClockTime != oldClockTime)
     {
         clocktime_t oldClockTime = getClockTime();
@@ -26,7 +28,6 @@ void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
                 offset[0] = newClockTime - oldClockTime;
                 local[0] = oldClockTime;
                 phase = 1;
-                jumpClockTo(newClockTime);
                 break;
 
             case 1:
@@ -39,14 +40,19 @@ void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
                 localNsPrev = local[0].inUnit(SIMTIME_NS);
                 localNs = local[1].inUnit(SIMTIME_NS);
 
-                drift = ppm(1e6 * (offsetNsPrev - offsetNs) / (localNsPrev - localNs));
+                drift += ppm(1e6 * (offsetNsPrev - offsetNs) / (localNsPrev - localNs));
                 EV_INFO << "Drift: " << drift << "\n";
+
+                jumpClockTo(newClockTime);
+
+                setOscillatorCompensation(drift);
+
+                emit(timeChangedSignal, newClockTime.asSimTime());
+                offset[0] = offset[1];
+                local[0] = local[1];
                 break;
     }
-
-
-
-    jumpClockTo(newClockTime);
+    }
 
     // TODO: Add a mechanism that estimates the drift rate based on the previous and current local and received
     //  timestamps, similar to case 0 and 1 in PiServoClock
