@@ -20,8 +20,7 @@ void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
 
     clocktime_t oldClockTime = getClockTime();
 
-    if  (newClockTime != oldClockTime)
-    {
+    if  (newClockTime != oldClockTime) {
         clocktime_t oldClockTime = getClockTime();
         switch (phase) {
             case 0:
@@ -42,10 +41,6 @@ void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
 
                 drift += ppm(1e6 * (offsetNsPrev - offsetNs) / (localNsPrev - localNs));
                 EV_INFO << "Drift: " << drift << "\n";
-                break;
-    }
-
-
 
                 jumpClockTo(newClockTime);
 
@@ -55,9 +50,8 @@ void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
                 offset[0] = offset[1];
                 local[0] = local[1];
                 break;
+        }
     }
-    }
-
     // TODO: Add a mechanism that estimates the drift rate based on the previous and current local and received
     //  timestamps, similar to case 0 and 1 in PiServoClock
 }
