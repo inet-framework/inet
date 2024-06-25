@@ -4,51 +4,48 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #include "inet/clock/model/InstantServoClock.h"
 
 namespace inet {
 
 Define_Module(InstantServoClock);
 
-
 void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
 {
-    //not tested
+    // not tested
     Enter_Method("adjustClockTo");
     int64_t offsetNsPrev, offsetNs, localNsPrev, localNs;
 
     clocktime_t oldClockTime = getClockTime();
 
-    if  (newClockTime != oldClockTime) {
+    if (newClockTime != oldClockTime) {
         switch (phase) {
-            case 0:
-                offset[0] = newClockTime - oldClockTime;
-                local[0] = oldClockTime;
-                phase = 1;
-                break;
+        case 0:
+            offset[0] = newClockTime - oldClockTime;
+            local[0] = oldClockTime;
+            phase = 1;
+            break;
 
-            case 1:
-                offset[1] = newClockTime - oldClockTime;
-                local[1] = oldClockTime;
+        case 1:
+            offset[1] = newClockTime - oldClockTime;
+            local[1] = oldClockTime;
 
-                offsetNsPrev = offset[0].inUnit(SIMTIME_NS);
-                offsetNs = offset[1].inUnit(SIMTIME_NS);
+            offsetNsPrev = offset[0].inUnit(SIMTIME_NS);
+            offsetNs = offset[1].inUnit(SIMTIME_NS);
 
-                localNsPrev = local[0].inUnit(SIMTIME_NS);
-                localNs = local[1].inUnit(SIMTIME_NS);
+            localNsPrev = local[0].inUnit(SIMTIME_NS);
+            localNs = local[1].inUnit(SIMTIME_NS);
 
-                drift += ppm(1e6 * (offsetNsPrev - offsetNs) / (localNsPrev - localNs));
-                EV_INFO << "Drift: " << drift << "\n";
+            drift += ppm(1e6 * (offsetNsPrev - offsetNs) / (localNsPrev - localNs));
+            EV_INFO << "Drift: " << drift << "\n";
 
-                jumpClockTo(newClockTime);
+            jumpClockTo(newClockTime);
 
-                setOscillatorCompensation(drift);
+            setOscillatorCompensation(drift);
 
-                emit(timeChangedSignal, newClockTime.asSimTime());
-                offset[0] = offset[1];
-                local[0] = newClockTime;
-                break;
+            offset[0] = offset[1];
+            local[0] = local[1];
+            break;
         }
     }
     // TODO: Add a mechanism that estimates the drift rate based on the previous and current local and received
@@ -56,4 +53,3 @@ void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
 }
 
 } // namespace inet
-

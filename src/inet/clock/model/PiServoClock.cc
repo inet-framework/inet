@@ -71,7 +71,6 @@ void PiServoClock::adjustClockTo(clocktime_t newClockTime) {
 
             setOscillatorCompensation(drift);
 
-            emit(timeChangedSignal, newClockTime.asSimTime());
             phase = 2;
             break;
         case 2:
@@ -104,7 +103,6 @@ void PiServoClock::adjustClockTo(clocktime_t newClockTime) {
     }
 
     emit(driftSignal, drift.get());
-//    return getClockTime();
 }
 
 } // namespace inet
