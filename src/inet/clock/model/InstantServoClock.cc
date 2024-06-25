@@ -14,45 +14,30 @@ void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
 {
     // not tested
     Enter_Method("adjustClockTo");
-    int64_t offsetNsPrev, offsetNs, localNsPrev, localNs;
 
     clocktime_t oldClockTime = getClockTime();
 
     if (newClockTime != oldClockTime) {
-        switch (phase) {
-        case 0:
-            offset[0] = newClockTime - oldClockTime;
-            local[0] = oldClockTime;
-            jumpClockTo(newClockTime);
-            phase = 1;
-            break;
+        // At every clock jump we increase the clock time by offset
+        // For our drift estimation, we need to know to keep track of the local times without
+        // offsets and the offsets themselves
+        // This we subtract the offset from the local time to get the local time without the offset
+        // and accumulate the offsets
+        auto local = oldClockTime.inUnit(SIMTIME_NS) - offsetPrev;
+        auto offset = (newClockTime - oldClockTime).inUnit(SIMTIME_NS) + offsetPrev;
 
-        case 1:
-            // TODO: Refactor formula
-            //  It works, but I need to mathematically still understand why
-            offset[1] = newClockTime - oldClockTime + offset[0];
-            local[1] = oldClockTime - offset[0];
+        drift += ppm(1e6 * (offsetPrev - offset) / (localPrev - local));
+        EV_INFO << "Drift: " << drift << "\n";
 
-            offsetNsPrev = offset[0].inUnit(SIMTIME_NS);
-            offsetNs = offset[1].inUnit(SIMTIME_NS);
+        jumpClockTo(newClockTime);
 
-            localNsPrev = local[0].inUnit(SIMTIME_NS);
-            localNs = local[1].inUnit(SIMTIME_NS);
+        setOscillatorCompensation(drift);
 
-            drift += ppm(1e6 * (offsetNsPrev - offsetNs) / (localNsPrev - localNs));
-            EV_INFO << "Drift: " << drift << "\n";
-
-            jumpClockTo(newClockTime);
-
-            setOscillatorCompensation(drift);
-
-            offset[0] = offset[1];
-            local[0] = local[1];
-            break;
-        }
+        offsetPrev = offset;
+        localPrev = local;
     }
-    // TODO: Add a mechanism that estimates the drift rate based on the previous and current local and received
-    //  timestamps, similar to case 0 and 1 in PiServoClock
 }
+// TODO: Add a mechanism that estimates the drift rate based on the previous and current local and received
+//  timestamps, similar to case 0 and 1 in PiServoClock
 
 } // namespace inet
