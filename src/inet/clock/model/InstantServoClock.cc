@@ -23,12 +23,15 @@ void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
         case 0:
             offset[0] = newClockTime - oldClockTime;
             local[0] = oldClockTime;
+            jumpClockTo(newClockTime);
             phase = 1;
             break;
 
         case 1:
-            offset[1] = newClockTime - oldClockTime;
-            local[1] = oldClockTime;
+            // TODO: Refactor formula
+            //  It works, but I need to mathematically still understand why
+            offset[1] = newClockTime - oldClockTime + offset[0];
+            local[1] = oldClockTime - offset[0];
 
             offsetNsPrev = offset[0].inUnit(SIMTIME_NS);
             offsetNs = offset[1].inUnit(SIMTIME_NS);
