@@ -4,20 +4,33 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/clock/model/InstantServoClock.h"
+#include "InstantServoClock.h"
 
 namespace inet {
 
 Define_Module(InstantServoClock);
 
+void InstantServoClock::initialize(int stage)
+{
+    ServoClockBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        adjustClock = par("adjustClock");
+        adjustDrift = par("adjustDrift");
+        if (!adjustClock && adjustDrift) {
+            throw cRuntimeError("Cannot adjust drift without adjusting clock");
+        }
+        offsetPrev = 0;
+        localPrev = 0;
+    }
+}
+
 void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
 {
-    // not tested
     Enter_Method("adjustClockTo");
 
     clocktime_t oldClockTime = getClockTime();
 
-    if (newClockTime != oldClockTime) {
+    if (newClockTime != oldClockTime && adjustClock) {
         // At every clock jump we increase the clock time by offset
         // For our drift estimation, we need to know to keep track of the local times without
         // offsets and the offsets themselves
@@ -26,12 +39,13 @@ void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
         auto local = oldClockTime.inUnit(SIMTIME_NS) - offsetPrev;
         auto offset = (newClockTime - oldClockTime).inUnit(SIMTIME_NS) + offsetPrev;
 
-        drift += ppm(1e6 * (offsetPrev - offset) / (localPrev - local));
-        EV_INFO << "Drift: " << drift << "\n";
-
         jumpClockTo(newClockTime);
 
-        setOscillatorCompensation(drift);
+        if (adjustDrift) {
+            drift += ppm(1e6 * (offsetPrev - offset) / (localPrev - local));
+            EV_INFO << "Drift: " << drift << "\n";
+            setOscillatorCompensation(drift);
+        }
 
         offsetPrev = offset;
         localPrev = local;

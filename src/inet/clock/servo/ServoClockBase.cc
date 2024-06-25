@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/clock/model/ServoClockBase.h"
+#include "ServoClockBase.h"
 
 namespace inet {
 
@@ -96,6 +96,7 @@ void ServoClockBase::processCommand(const cXMLElement &node)
         jumpClockTo(time, notifyListeners);
     }
     if (!strcmp(node.getTagName(), "set-oscillator-compensation")) {
+        // TODO: Refactor to directly read ppm
         const char* valueStr = xmlutils::getMandatoryFilledAttribute(node, "value");
         double valueDouble = std::atof(valueStr); // Convert string to double
         ppm oscillatorCompensationValue = ppm(valueDouble); // Create ppm object from double
@@ -104,9 +105,6 @@ void ServoClockBase::processCommand(const cXMLElement &node)
     if (!strcmp(node.getTagName(), "reset-oscillator")) {
         resetOscillator();
     }
-    // TODO: Add two more options for the scenario manager here.
-    //  One two update the oscillator compensation
-    //  One to reset the oscillator
     else
         throw cRuntimeError("Invalid command: %s", node.getTagName());
 }

@@ -5,15 +5,9 @@
 //
 
 
-package inet.clock.model;
+package inet.clock.servo;
 
-//
-// Models a clock which can be set to a different clock time. The clock time
-// can be set from C++ or using a <set-clock module="..." time="..."/> command
-// in a ScenarioManager script.
-//
-// @see ~ScenarioManager
-//
+// TODO: Write documentation
 module PiServoClock extends ServoClockBase
 {
     parameters:

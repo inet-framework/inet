@@ -7,7 +7,7 @@
 #ifndef __INET_PICLOCK_H
 #define __INET_PICLOCK_H
 
-#include "inet/clock/model/ServoClockBase.h"
+#include "ServoClockBase.h"
 
 namespace inet {
 

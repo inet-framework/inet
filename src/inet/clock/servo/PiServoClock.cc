@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/clock/model/PiServoClock.h"
+#include "PiServoClock.h"
 
 #include <algorithm>
 

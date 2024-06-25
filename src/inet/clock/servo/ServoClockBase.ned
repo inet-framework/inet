@@ -5,15 +5,11 @@
 //
 
 
-package inet.clock.model;
+package inet.clock.servo;
 
-//
-// Models a clock which can be set to a different clock time. The clock time
-// can be set from C++ or using a <set-clock module="..." time="..."/> command
-// in a `ScenarioManager` script.
-//
-// @see ~ScenarioManager
-//
+import inet.clock.model.OscillatorBasedClock;
+
+// TODO: Write documentation
 module ServoClockBase extends OscillatorBasedClock
 {
     parameters:

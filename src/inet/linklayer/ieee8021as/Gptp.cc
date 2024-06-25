@@ -8,8 +8,8 @@
 #include "Gptp.h"
 
 #include "GptpPacket_m.h"
-#include "inet/clock/model/PiServoClock.h"
-#include "inet/clock/model/ServoClockBase.h"
+#include "inet/clock/servo/PiServoClock.h"
+#include "inet/clock/servo/ServoClockBase.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/clock/ClockUserModuleBase.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
