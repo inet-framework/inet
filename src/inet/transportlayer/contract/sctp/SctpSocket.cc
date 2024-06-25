@@ -185,6 +185,7 @@ void SctpSocket::listen(bool fork, bool reset, uint32_t requests, uint32_t messa
     appOptions->streamReset = reset;
     EV_INFO << "Assoc " << socketId << ": PassiveOPEN to SCTP from SctpSocket:listen()\n";
     sctp->listen(socketId, localAddresses, localPrt, fork, appOptions->inboundStreams, appOptions->outboundStreams, reset, requests, messagesToPush);
+    sctp->setCallback(socketId, this);
     sockstate = LISTENING;
 }
 
@@ -240,6 +241,7 @@ void SctpSocket::connect(L3Address remoteAddress, int32_t remotePort, bool strea
     appOptions->streamReset = streamReset;
     EV_INFO << "Socket connect. Assoc=" << socketId << ", sockstate=" << stateName(sockstate) << "\n";
     sctp->connect(socketId, localAddresses, localPrt, remoteAddress, remotePort, appOptions->inboundStreams, appOptions->outboundStreams, streamReset, prMethod, numRequests);
+    sctp->setCallback(socketId, this);
 
     if (oneToOne)
         sockstate = CONNECTING;
@@ -302,11 +304,7 @@ void SctpSocket::accept(int32_t assId, int32_t fd)
 
 void SctpSocket::acceptSocket(int newSockId)
 {
-    Request *cmsg = new Request("SCTP_C_ACCEPT_SOCKET_ID", SCTP_C_ACCEPT_SOCKET_ID);
-    cmsg->addTag<SctpAvailableReq>()->setSocketId(newSockId);
-    cmsg->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
-    cmsg->addTag<SocketReq>()->setSocketId(newSockId);
-    check_and_cast<cSimpleModule *>(gateToSctp->getOwnerModule())->send(cmsg, gateToSctp);
+    sctp->accept(newSockId);
 }
 
 void SctpSocket::connectx(AddressVector remoteAddressList, int32_t remotePort, bool streamReset, int32_t prMethod, uint32_t numRequests)
@@ -335,7 +333,11 @@ void SctpSocket::send(Packet *packet)
         sctpReq->setSid(lastStream);
     }
     packet->setKind(SCTP_C_SEND);
-    sendToSctp(packet);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
+    packet->addTagIfAbsent<SocketReq>()->setSocketId(assocId);
+    if (interfaceIdToTun != -1)
+        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceIdToTun);
+    sink.pushPacket(packet);
 }
 
 void SctpSocket::sendNotification(cMessage *msg)
@@ -350,9 +352,9 @@ void SctpSocket::sendNotification(cMessage *msg)
     sendToSctp(msg);
 }
 
-void SctpSocket::sendRequest(cMessage *msg)
+void SctpSocket::setQueueLimits(int packetCapacity, B dataCapacity)
 {
-    sendToSctp(msg);
+    sctp->setQueueLimits(assocId, packetCapacity, dataCapacity);
 }
 
 void SctpSocket::close(int id)
@@ -366,14 +368,7 @@ void SctpSocket::close(int id)
 void SctpSocket::shutdown(int id)
 {
     EV << "SctpSocket::shutdown()\n";
-
-    Request *msg = new Request("SHUTDOWN", SCTP_C_SHUTDOWN);
-    auto cmd = msg->addTag<SctpCommandReq>();
-    if (id == -1)
-        cmd->setSocketId(assocId);
-    else
-        cmd->setFd(id);
-    sendToSctp(msg);
+    sctp->shutdown(assocId, id);
 }
 
 void SctpSocket::destroy()

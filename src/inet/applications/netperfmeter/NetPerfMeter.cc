@@ -1189,17 +1189,11 @@ void NetPerfMeter::sendSCTPQueueRequest(const unsigned int queueSize)
     // Tell SCTP to limit the send queue to the number of bytes specified.
     // When the queue is able accept more data again, it will be indicated by
     // SCTP_I_SENDQUEUE_ABATED!
-
-    Request *cmsg = new Request("QueueRequest", SCTP_C_QUEUE_BYTES_LIMIT);
-    auto queueInfo = cmsg->addTag<SctpInfoReq>();
-    queueInfo->setText(queueSize);
-    queueInfo->setSocketId(ConnectionID);
-
     if (IncomingSocketSCTP) {
-        IncomingSocketSCTP->sendRequest(cmsg);
+        IncomingSocketSCTP->setQueueLimits(queueSize, B(-1));
     }
     else {
-        SocketSCTP->sendRequest(cmsg);
+        SocketSCTP->setQueueLimits(queueSize, B(-1));
     }
 }
 

@@ -274,11 +274,7 @@ void SctpClient::socketEstablished(SctpSocket *socket, unsigned long int buffer)
 
 void SctpClient::sendQueueRequest()
 {
-    Request *cmsg = new Request("SCTP_C_QUEUE_MSGS_LIMIT", SCTP_C_QUEUE_MSGS_LIMIT);
-    auto qinfo = cmsg->addTag<SctpInfoReq>();
-    qinfo->setText(queueSize);
-    qinfo->setSocketId(socket.getSocketId());
-    socket.sendRequest(cmsg);
+    socket.setQueueLimits(queueSize, B(-1));
 }
 
 void SctpClient::sendRequestArrived(SctpSocket *socket)

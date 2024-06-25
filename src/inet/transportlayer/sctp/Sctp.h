@@ -26,6 +26,7 @@
 #include "inet/transportlayer/sctp/SctpHeader.h"
 #include "inet/transportlayer/sctp/SctpUdpHook.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
 namespace sctp {
@@ -180,6 +181,8 @@ class INET_API Sctp : public cSimpleModule, public IPassivePacketSink, public IS
   protected:
     ModuleRefByPar<IRoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
+    PassivePacketSinkRef ipSink;
+    PassivePacketSinkRef appSink;
 
     int32_t sizeAssocMap;
 
@@ -279,9 +282,12 @@ class INET_API Sctp : public cSimpleModule, public IPassivePacketSink, public IS
     virtual void setCallback(int socketId, ICallback *callback) override;
     virtual void listen(int socketId, const std::vector<L3Address>& localAddresses, int localPort, bool fork, int inboundStreams, int outboundStreams, bool streamReset, uint32_t requests, uint32_t messagesToPush) override;
     virtual void connect(int socketId, const std::vector<L3Address>& localAddresses, int localPort, L3Address remoteAddress, int32_t remotePort, int inboundStreams, int outboundStreams, bool streamReset, int32_t prMethod, uint32_t numRequests) override;
+    virtual void accept(int socketId) override;
     virtual void abort(int socketId) override;
     virtual void close(int socketId, int id) override;
+    virtual void shutdown(int socketId, int id) override;
     virtual void getSocketOptions(int socketId) override;
+    virtual void setQueueLimits(int socketId, int packetCapacity, B dataCapacity) override;
 
     virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }
     virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }

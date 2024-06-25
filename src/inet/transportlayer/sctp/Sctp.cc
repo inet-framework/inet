@@ -86,6 +86,8 @@ void Sctp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
+        ipSink.reference(gate("ipOut"), true);
+        appSink.reference(gate("appOut"), true);
         auth = par("auth");
         pktdrop = par("packetDrop");
         sackNow = par("sackNow");
@@ -271,7 +273,7 @@ void Sctp::handleMessage(cMessage *msg)
             socketOptions = collectSocketOptions();
             cmsg->setContextPointer((void *)socketOptions);
             cmsg->addTag<SocketInd>()->setSocketId(assocId);
-            send(cmsg, "appOut");
+// TODO           send(cmsg, "appOut");
             delete msg;
         }
         else {
@@ -441,7 +443,7 @@ void Sctp::sendShutdownCompleteFromMain(SctpHeader *sctpmsg, L3Address fromAddr,
 void Sctp::send_to_ip(Packet *msg)
 {
     EV_INFO << "send packet " << msg << " to IP\n";
-    send(msg, "ipOut");
+    ipSink.pushPacket(msg);
 }
 
 void Sctp::refreshDisplay() const
@@ -1043,11 +1045,12 @@ void Sctp::finish()
 
 void Sctp::setCallback(int socketId, ICallback *callback)
 {
-    throw cRuntimeError("TODO");
+    getAssoc(socketId)->callback = callback;
 }
 
 void Sctp::listen(int socketId, const std::vector<L3Address>& localAddresses, int localPort, bool fork, int inboundStreams, int outboundStreams, bool streamReset, uint32_t requests, uint32_t messagesToPush)
 {
+    Enter_Method("listen");
     Request *cmsg = new Request("PassiveOPEN", SCTP_C_OPEN_PASSIVE);
     auto openCmd = cmsg->addTag<SctpOpenReq>();
     openCmd->setLocalAddresses(localAddresses);
@@ -1060,11 +1063,13 @@ void Sctp::listen(int socketId, const std::vector<L3Address>& localAddresses, in
     openCmd->setStreamReset(streamReset);
     openCmd->setMessagesToPush(messagesToPush);
     cmsg->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    cmsg->setArrival(getId(), gate("appIn")->getId());
     handleMessage(cmsg);
 }
 
 void Sctp::connect(int socketId, const std::vector<L3Address>& localAddresses, int localPort, L3Address remoteAddress, int32_t remotePort, int inboundStreams, int outboundStreams, bool streamReset, int32_t prMethod, uint32_t numRequests)
 {
+    Enter_Method("connect");
     Request *cmsg = new Request("Associate", SCTP_C_ASSOCIATE);
     auto openCmd = cmsg->addTag<SctpOpenReq>();
     openCmd->setSocketId(socketId);
@@ -1078,20 +1083,34 @@ void Sctp::connect(int socketId, const std::vector<L3Address>& localAddresses, i
     openCmd->setPrMethod(prMethod);
     openCmd->setStreamReset(streamReset);
     cmsg->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    cmsg->setArrival(getId(), gate("appIn")->getId());
+    handleMessage(cmsg);
+}
+
+void Sctp::accept(int socketId)
+{
+    Enter_Method("abort");
+    Request *cmsg = new Request("SCTP_C_ACCEPT_SOCKET_ID", SCTP_C_ACCEPT_SOCKET_ID);
+    cmsg->addTag<SctpAvailableReq>()->setSocketId(socketId);
+    cmsg->addTag<SocketReq>()->setSocketId(socketId);
+    cmsg->setArrival(getId(), gate("appIn")->getId());
     handleMessage(cmsg);
 }
 
 void Sctp::abort(int socketId)
 {
+    Enter_Method("abort");
     Request *cmsg = new Request("ABORT", SCTP_C_ABORT);
     auto cmd = cmsg->addTag<SctpCommandReq>();
     cmd->setSocketId(socketId);
     cmsg->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    cmsg->setArrival(getId(), gate("appIn")->getId());
     handleMessage(cmsg);
 }
 
 void Sctp::close(int socketId, int id)
 {
+    Enter_Method("close");
     Request *cmsg = new Request("CLOSE", SCTP_C_CLOSE);
     auto cmd = cmsg->addTag<SctpCommandReq>();
     if (id == -1)
@@ -1099,17 +1118,57 @@ void Sctp::close(int socketId, int id)
     else
         cmd->setFd(id);
     cmsg->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    cmsg->setArrival(getId(), gate("appIn")->getId());
+    handleMessage(cmsg);
+}
+
+
+void Sctp::shutdown(int socketId, int id)
+{
+    Enter_Method("shutdown");
+    Request *cmsg = new Request("SHUTDOWN", SCTP_C_SHUTDOWN);
+    auto cmd = cmsg->addTag<SctpCommandReq>();
+    if (id == -1)
+        cmd->setSocketId(socketId);
+    else
+        cmd->setFd(id);
+    cmsg->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    cmsg->setArrival(getId(), gate("appIn")->getId());
     handleMessage(cmsg);
 }
 
 void Sctp::getSocketOptions(int socketId)
 {
+    Enter_Method("getSocketOptions");
     Request *cmsg = new Request("GetSocketOptions", SCTP_C_GETSOCKETOPTIONS);
     auto sctpSendReq = cmsg->addTag<SctpSendReq>();
     sctpSendReq->setSocketId(socketId);
     sctpSendReq->setSid(0);
     cmsg->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    cmsg->setArrival(getId(), gate("appIn")->getId());
     handleMessage(cmsg);
+}
+
+void Sctp::setQueueLimits(int socketId, int packetCapacity, B dataCapacity)
+{
+    if (packetCapacity != -1) {
+        Request *cmsg = new Request("SCTP_C_QUEUE_MSGS_LIMIT", SCTP_C_QUEUE_MSGS_LIMIT);
+        auto qinfo = cmsg->addTag<SctpInfoReq>();
+        qinfo->setText(packetCapacity);
+        qinfo->setSocketId(socketId);
+        cmsg->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+        cmsg->setArrival(getId(), gate("appIn")->getId());
+        handleMessage(cmsg);
+    }
+    if (dataCapacity != B(-1)) {
+        Request *cmsg = new Request("SCTP_C_QUEUE_BYTES_LIMIT", SCTP_C_QUEUE_BYTES_LIMIT);
+        auto qinfo = cmsg->addTag<SctpInfoReq>();
+        qinfo->setText(B(dataCapacity).get());
+        qinfo->setSocketId(socketId);
+        cmsg->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+        cmsg->setArrival(getId(), gate("appIn")->getId());
+        handleMessage(cmsg);
+    }
 }
 
 void Sctp::pushPacket(Packet *packet, const cGate *gate)
