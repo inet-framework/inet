@@ -58,6 +58,14 @@ void Gptp::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         gptpNodeType = static_cast<GptpNodeType>(cEnum::get("GptpNodeType", "inet")->resolve(par("gptpNodeType")));
+        useNrr = par("useNrr");
+        gmRateRatioCalculationMethod = static_cast<GmRateRatioCalculationMethod>(
+            cEnum::get("GmRateRatioCalculationMethod", "inet")->resolve(par("gmRateRatioCalculationMethod")));
+        if (!useNrr && gmRateRatioCalculationMethod == GmRateRatioCalculationMethod::NRR) {
+            throw cRuntimeError(
+                "Parameter inconsistency: useNrr=false and gmRateRatioCalculationMethod=NEIGHBOR_RATE_RATIO");
+        }
+
         domainNumber = par("domainNumber");
         syncInterval = par("syncInterval");
         pDelayReqProcessingTime = par("pDelayReqProcessingTime");
@@ -97,7 +105,6 @@ void Gptp::initialize(int stage)
             nic->subscribe(transmissionStartedSignal, this);
             nic->subscribe(receptionStartedSignal, this);
             nic->subscribe(receptionEndedSignal, this);
-
         }
 
         if (slavePortId != -1) {
@@ -438,34 +445,44 @@ void Gptp::synchronize()
 
     ASSERT(gptpNodeType != MASTER_NODE);
 
-    gmRateRatio = receivedRateRatio * neighborRateRatio;
-    gmRateRatio = 1.0;
+    switch (gmRateRatioCalculationMethod) {
+    case GmRateRatioCalculationMethod::NONE:
+        gmRateRatio = 1.0;
+        break;
+    case GmRateRatioCalculationMethod::NRR:
+        gmRateRatio = receivedRateRatio * neighborRateRatio;
+        break;
+    case GmRateRatioCalculationMethod::DIRECT:
+        peerSentTimeSync = preciseOriginTimestamp + correctionField;
+        if (syncIngressTimestampLast != -1) {
+            gmRateRatio = (peerSentTimeSync - peerSentTimeSyncLast) / (syncIngressTimestamp - syncIngressTimestampLast);
+        }
+        peerSentTimeSyncLast = peerSentTimeSync;
+        break;
+    }
 
     // preciseOriginTimestamp and correctionField are in the grandmaster's time base
     // meanLinkDelay and residence time are in the local time base
     // Thus, we need to multiply the meanLinkDelay and residenceTime with the gmRateRatio
     clocktime_t newTime = preciseOriginTimestamp + correctionField + gmRateRatio * (meanLinkDelay + residenceTime);
 
-
     auto servoClock = check_and_cast<ServoClockBase *>(clock.get());
 
     // Only change the oscillator if we have new information about our nrr
     // TODO: We should change this to a clock servo model in the future anyways!
-//    ppm newOscillatorCompensation;
-//    if (!hasNewRateRatioForOscillatorCompensation) {
-//        newOscillatorCompensation = unit(piControlClock->getOscillatorCompensation());
-//    }
-//    else {
-//        newOscillatorCompensation =
-//            unit(gmRateRatio * (1 + unit(piControlClock->getOscillatorCompensation()).get()) - 1);
-//        hasNewRateRatioForOscillatorCompensation = false;
-//    }
+    //    ppm newOscillatorCompensation;
+    //    if (!hasNewRateRatioForOscillatorCompensation) {
+    //        newOscillatorCompensation = unit(piControlClock->getOscillatorCompensation());
+    //    }
+    //    else {
+    //        newOscillatorCompensation =
+    //            unit(gmRateRatio * (1 + unit(piControlClock->getOscillatorCompensation()).get()) - 1);
+    //        hasNewRateRatioForOscillatorCompensation = false;
+    //    }
     servoClock->adjustClockTo(newTime);
-//    EV_INFO << "newOscillatorCompensation " << newOscillatorCompensation << endl;
-
+    //    EV_INFO << "newOscillatorCompensation " << newOscillatorCompensation << endl;
 
     newLocalTimeAtTimeSync = clock->getClockTime();
-
 
     /************** Rate ratio calculation *************************************
      * It is calculated based on interval between two successive Sync messages *
@@ -572,18 +589,6 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
     clocktime_t prevRespRegress = -1;
     clocktime_t prevRespIngress = -1;
 
-    /*for (int last = timeInterval - 1; last >= 0; last--) {
-        if(pDelayRespIngressTimestampIntervals[last] != -1 && pDelayRespEgressTimestampIntervals[last] != -1){
-            pDelayRespIngressTimestampLast = pDelayRespIngressTimestampIntervals[last];
-            pDelayRespEgressTimestampLast = pDelayRespEgressTimestampIntervals[last];
-            break;
-        }
-        else{
-            pDelayRespIngressTimestampLast = -1;
-            pDelayRespEgressTimestampLast = -1;
-        }
-    }*/
-
     if (nrrCalculationSetCurrent == nrrCalculationSetMaximum) {
         neighborRateRatio = (pDelayRespEgressTimestamp - pDelayRespEgressTimestampSetStart) /
                             (pDelayRespIngressTimestamp - pDelayRespIngressTimestampSetStart);
@@ -595,7 +600,9 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
         nrrCalculationSetCurrent++;
     }
 
-    neighborRateRatio = 1;
+    if (!useNrr) {
+        neighborRateRatio = 1.0;
+    }
 
     // See 11.2.19.3.4 computePropTime() and Figure11-1 in IEEE 802.1AS-2020
     auto t4 = pDelayRespIngressTimestamp;
@@ -647,7 +654,8 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
         handleClockJump(clockJumpDetails);
     }
 
-    if (simSignal != receptionStartedSignal && simSignal != transmissionStartedSignal && simSignal != receptionEndedSignal)
+    if (simSignal != receptionStartedSignal && simSignal != transmissionStartedSignal &&
+        simSignal != receptionEndedSignal)
         return;
 
     auto ethernetSignal = check_and_cast<cPacket *>(obj);
@@ -667,8 +675,10 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
         auto ingressTime = clock->getClockTime();
         ingressTimeMap[transmissionId] = ingressTime;
         // Save ingress time in map
-    } else if (simSignal == receptionEndedSignal) {
-        packet->addTagIfAbsent<GptpIngressTimeInd>()->setArrivalClockTime(ingressTimeMap[ethernetSignal->getTransmissionId()]);
+    }
+    else if (simSignal == receptionEndedSignal) {
+        packet->addTagIfAbsent<GptpIngressTimeInd>()->setArrivalClockTime(
+            ingressTimeMap[ethernetSignal->getTransmissionId()]);
         ingressTimeMap.erase(ethernetSignal->getTransmissionId());
         // Read ingress time from map
         // Ad tag to packet
@@ -702,7 +712,8 @@ void Gptp::handleTransmissionStartedSignal(const GptpBase *gptp, cComponent *sou
     }
 }
 
-void Gptp::handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDetails) {
+void Gptp::handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDetails)
+{
     EV_INFO << "############## Adjust local timestamps #################################" << endl;
     EV_INFO << "BEFORE:" << endl;
     EV_INFO << "SYNC INGRESS TIME          - " << syncIngressTimestamp << endl;
@@ -729,9 +740,9 @@ void Gptp::handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDetails) {
     // This is a very special case, that only occurs when a clock jump occurs between the receptionStarted and
     // receptionEnded signal.
     //
-    // You can see this in action in the SteppingClock showcase (At t=9s we do not notify the gPTP module about the clock
-    // jump, this leads to an incorrect peer delay calculation).
-    // We want to allow the gPTP module to still work correctly in this case, so we make this adjustment here.
+    // You can see this in action in the SteppingClock showcase (At t=9s we do not notify the gPTP module about the
+    // clock jump, this leads to an incorrect peer delay calculation). We want to allow the gPTP module to still work
+    // correctly in this case, so we make this adjustment here.
     for (auto &entry : ingressTimeMap) {
         EV_INFO << " Before Ingress time: " << entry.first << " - " << entry.second << endl;
         adjustLocalTimestamp(entry.second, timeDiff);
@@ -746,4 +757,3 @@ void Gptp::handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDetails) {
 }
 
 } // namespace inet
-

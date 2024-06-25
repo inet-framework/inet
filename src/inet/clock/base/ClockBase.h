@@ -16,10 +16,11 @@
 
 namespace inet {
 
-class INET_API ClockBase : public cSimpleModule, public IClock, public StringFormat::IDirectiveResolver
+class INET_API ClockBase : public cSimpleModule, public IClock, public StringFormat::IDirectiveResolver, public cListener
 {
   public:
     static simsignal_t timeChangedSignal;
+    static simsignal_t timeDifferenceToReferenceSignal;
     ModuleRefByPar<IClock> referenceClockModule;
 
   protected:
@@ -51,6 +52,8 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
     virtual void scheduleClockEventAfter(clocktime_t time, ClockEvent *event) override;
     virtual ClockEvent *cancelClockEvent(ClockEvent *event) override;
     virtual void handleClockEvent(ClockEvent *event) override;
+    virtual void receiveSignal(cComponent *source, int signal, const simtime_t& time, cObject *details) override;
+
 
     virtual std::string resolveDirective(char directive) const override;
 };

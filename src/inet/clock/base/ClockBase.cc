@@ -4,13 +4,14 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #include "inet/clock/base/ClockBase.h"
+
 #include "inet/common/ModuleRefByPar.h"
 
 namespace inet {
 
 simsignal_t ClockBase::timeChangedSignal = cComponent::registerSignal("timeChanged");
+simsignal_t ClockBase::timeDifferenceToReferenceSignal = cComponent::registerSignal("timeDifferenceToReference");
 
 void ClockBase::initialize(int stage)
 {
@@ -24,6 +25,14 @@ void ClockBase::initialize(int stage)
     }
     else if (stage == INITSTAGE_LAST) {
         referenceClockModule.reference(this, "referenceClock", false);
+        // Subscribe
+        if (referenceClockModule != nullptr && dynamic_cast<ClockBase *>(referenceClockModule.get()) != nullptr &&
+            this != referenceClockModule)
+        {
+            auto referenceClock = check_and_cast<ClockBase *>(referenceClockModule.get());
+            this->subscribe(ClockBase::timeChangedSignal, this);
+            referenceClock->subscribe(ClockBase::timeChangedSignal, this);
+        }
         updateDisplayString();
         emit(timeChangedSignal, getClockTime().asSimTime());
     }
@@ -39,15 +48,20 @@ void ClockBase::handleMessage(cMessage *msg)
         throw cRuntimeError("Unknown message");
 }
 
-void ClockBase::finish()
+void ClockBase::receiveSignal(cComponent *source, int signal, const simtime_t& time, cObject *details)
 {
-    emit(timeChangedSignal, getClockTime().asSimTime());
+    if (signal == ClockBase::timeChangedSignal) {
+        auto referenceTime = referenceClockModule->getClockTime();
+        auto timeDifference = getClockTime() - referenceTime;
+        emit(timeDifferenceToReferenceSignal, timeDifference.asSimTime());
+    }
+    else
+        throw cRuntimeError("Unknown signal");
 }
 
-void ClockBase::refreshDisplay() const
-{
-    updateDisplayString();
-}
+void ClockBase::finish() { emit(timeChangedSignal, getClockTime().asSimTime()); }
+
+void ClockBase::refreshDisplay() const { updateDisplayString(); }
 
 void ClockBase::updateDisplayString() const
 {
@@ -83,7 +97,8 @@ void ClockBase::scheduleClockEventAfter(clocktime_t clockTimeDelay, ClockEvent *
     clocktime_t nowClock = getClockTime();
     clocktime_t arrivalClockTime = nowClock + clockTimeDelay;
     msg->setArrivalClockTime(arrivalClockTime);
-    simtime_t simTimeDelay = clockTimeDelay.isZero() ? SIMTIME_ZERO : computeSimTimeFromClockTime(arrivalClockTime) - simTime();
+    simtime_t simTimeDelay =
+        clockTimeDelay.isZero() ? SIMTIME_ZERO : computeSimTimeFromClockTime(arrivalClockTime) - simTime();
     targetModule->scheduleAfter(simTimeDelay, msg);
 }
 
@@ -105,16 +120,15 @@ void ClockBase::handleClockEvent(ClockEvent *msg)
 std::string ClockBase::resolveDirective(char directive) const
 {
     switch (directive) {
-        case 't':
-            return getClockTime().str() + " s";
-        case 'T':
-            return getClockTime().ustr();
-        case 'd':
-            return (getClockTime() - referenceClockModule->getClockTime()).ustr();
-        default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+    case 't':
+        return getClockTime().str() + " s";
+    case 'T':
+        return getClockTime().ustr();
+    case 'd':
+        return (getClockTime() - referenceClockModule->getClockTime()).ustr();
+    default:
+        throw cRuntimeError("Unknown directive: %c", directive);
     }
 }
 
 } // namespace inet
-

@@ -19,6 +19,7 @@ module ClockBase
         @class(ClockBase);
         @display("i=block/timer");
         @signal[timeChanged](type=simtime_t);
+        @signal[timeDifferenceToReference](type=simtime_t);
         @statistic[timeChanged](title="Clock time"; record=vector; interpolationmode=linear);
+        @statistic[timeDifferenceToReference](title="Time difference to reference"; record=vector; interpolationmode=linear);
 }
-

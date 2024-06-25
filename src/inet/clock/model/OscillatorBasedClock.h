@@ -16,7 +16,7 @@ namespace inet {
 
 using namespace units::values;
 
-class INET_API OscillatorBasedClock : public ClockBase, public cListener
+class INET_API OscillatorBasedClock : public ClockBase
 {
   protected:
     IOscillator *oscillator = nullptr;

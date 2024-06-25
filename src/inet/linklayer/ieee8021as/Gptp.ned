@@ -22,6 +22,8 @@ simple Gptp like IGptp
         string clockModule = default(""); // Relative path of a module that implements IClock; optional
         string interfaceTableModule; // Relative path of the interface table module
         string gptpNodeType; // @enum("GptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE
+        bool useNrr = default(false); // Use neighbor rate ratio
+        string gmRateRatioCalculationMethod = default("NONE"); // @enum("GptpRateRatioCalculationMethod"): NONE, NRR, DIRECT
         int domainNumber = default(0); // Specifies the time domain number used in gPTP messages
         string slavePort = default(""); // Port for receiving time (empty for MASTER_NODE)
         object masterPorts = default([]); // Ports for sending out time (empty for SLAVE_NODE)

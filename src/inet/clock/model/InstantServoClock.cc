@@ -21,7 +21,6 @@ void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
     clocktime_t oldClockTime = getClockTime();
 
     if  (newClockTime != oldClockTime) {
-        clocktime_t oldClockTime = getClockTime();
         switch (phase) {
             case 0:
                 offset[0] = newClockTime - oldClockTime;
@@ -48,7 +47,7 @@ void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
 
                 emit(timeChangedSignal, newClockTime.asSimTime());
                 offset[0] = offset[1];
-                local[0] = local[1];
+                local[0] = newClockTime;
                 break;
         }
     }

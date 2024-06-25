@@ -48,6 +48,12 @@ enum GptpNodeType
     SLAVE_NODE  = 13;
 }
 
+enum GmRateRatioCalculationMethod {
+    NONE = 0;
+    NRR = 1;
+    DIRECT = 2;
+};
+
 enum GptpPortType
 {
     MASTER_PORT  = 2;

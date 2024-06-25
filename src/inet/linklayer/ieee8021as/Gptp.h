@@ -37,6 +37,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     clocktime_t pdelayInterval;
     clocktime_t pDelayReqProcessingTime; // processing time between arrived
                                          // PDelayReq and send of PDelayResp
+    bool useNrr = false;                 // use neighbor rate ratio
+    GmRateRatioCalculationMethod gmRateRatioCalculationMethod = GmRateRatioCalculationMethod::NONE;
 
     // Rate Ratios
     double gmRateRatio = 1.0;
@@ -68,6 +70,9 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     clocktime_t preciseOriginTimestamp = -1;     // timestamp when the last sync message was generated at the GM
     clocktime_t preciseOriginTimestampLast = -1; // timestamp when the last sync message was generated at the GM
+
+    clocktime_t peerSentTimeSync = -1;       // egress time of Sync at master (this node)
+    clocktime_t peerSentTimeSyncLast = -1;   // egress time of previous Sync at master (this node)
 
     clocktime_t syncIngressTimestamp = -1;     // ingress time of Sync at slave (this node)
     clocktime_t syncIngressTimestampLast = -1; // ingress time of previous Sync at slave (this node)
