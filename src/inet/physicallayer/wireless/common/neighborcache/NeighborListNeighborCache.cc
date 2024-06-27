@@ -96,10 +96,14 @@ void NeighborListNeighborCache::addRadio(const IRadio *radio)
     RadioEntry *newEntry = new RadioEntry(radio);
     radios.push_back(newEntry);
     radioToEntry[radio] = newEntry;
-    updateNeighborLists();
-    maxSpeed = radioMedium->getMediumLimitCache()->getMaxSpeed().get();
-    if (maxSpeed != 0 && !updateNeighborListsTimer->isScheduled() && initialized())
-        scheduleAfter(refillPeriod, updateNeighborListsTimer);
+
+    if (initialized()) {
+        updateNeighborLists();
+        maxSpeed = radioMedium->getMediumLimitCache()->getMaxSpeed().get();
+        if (maxSpeed != 0 && !updateNeighborListsTimer->isScheduled()) {
+            scheduleAfter(refillPeriod, updateNeighborListsTimer);
+        }
+    }
 }
 
 void NeighborListNeighborCache::removeRadio(const IRadio *radio)
@@ -144,4 +148,3 @@ NeighborListNeighborCache::~NeighborListNeighborCache()
 
 } // namespace physicallayer
 } // namespace inet
-
