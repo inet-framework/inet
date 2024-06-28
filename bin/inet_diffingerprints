@@ -39,7 +39,7 @@ def diffingerprint(elog1Fingerprints, elog2Fingerprints):
         elog2Fingerprint = elog2Fingerprints[i]
         if elog1Fingerprint[4] != elog2Fingerprint[4]:
             return i
-    return "No differences"
+    return None
 
 def printref(eventNumber, simulationTime, fingerprint):
     return f"# {eventNumber} t {simulationTime} f {fingerprint}"
@@ -56,12 +56,15 @@ elog2Fingerprints = readFingerprints(elog2File)
 uniqueElog1Fingerprints = computeUniqueFingerprints(elog1Fingerprints)
 uniqueElog2Fingerprints = computeUniqueFingerprints(elog2Fingerprints)
 index = diffingerprint(uniqueElog1Fingerprints, uniqueElog2Fingerprints)
-last1 = printref(uniqueElog1Fingerprints[index - 1][1], uniqueElog1Fingerprints[index - 1][3], uniqueElog1Fingerprints[index - 1][4])
-last2 = printref(uniqueElog2Fingerprints[index - 1][1], uniqueElog2Fingerprints[index - 1][3], uniqueElog2Fingerprints[index - 1][4])
-first1 = printref(uniqueElog1Fingerprints[index][0], uniqueElog1Fingerprints[index][2], uniqueElog1Fingerprints[index][4])
-first2 = printref(uniqueElog2Fingerprints[index][0], uniqueElog2Fingerprints[index][2], uniqueElog2Fingerprints[index][4])
-print(f"Last matching event, {elog1FileName}: {last1}, {elog2FileName}: {last2}")
-print(f"First differing event, {elog1FileName}: {first1}, {elog2FileName}: {first2}")
+if index:
+    last1 = printref(uniqueElog1Fingerprints[index - 1][1], uniqueElog1Fingerprints[index - 1][3], uniqueElog1Fingerprints[index - 1][4])
+    last2 = printref(uniqueElog2Fingerprints[index - 1][1], uniqueElog2Fingerprints[index - 1][3], uniqueElog2Fingerprints[index - 1][4])
+    first1 = printref(uniqueElog1Fingerprints[index][0], uniqueElog1Fingerprints[index][2], uniqueElog1Fingerprints[index][4])
+    first2 = printref(uniqueElog2Fingerprints[index][0], uniqueElog2Fingerprints[index][2], uniqueElog2Fingerprints[index][4])
+    print(f"Last matching event, {elog1FileName}: {last1}, {elog2FileName}: {last2}")
+    print(f"First differing event, {elog1FileName}: {first1}, {elog2FileName}: {first2}")
+else:
+    print("No differences")
 
 elog1File.close()
 elog2File.close()
