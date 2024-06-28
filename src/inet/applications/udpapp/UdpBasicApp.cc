@@ -212,6 +212,7 @@ void UdpBasicApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
 
 void UdpBasicApp::socketClosed(UdpSocket *socket)
 {
+    Enter_Method("socketClosed");
     if (operationalState == State::STOPPING_OPERATION)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }

@@ -58,6 +58,7 @@ void UdpVideoStreamClient::socketErrorArrived(UdpSocket *socket, Indication *ind
 
 void UdpVideoStreamClient::socketClosed(UdpSocket *socket)
 {
+    Enter_Method("socketClosed");
     if (operationalState == State::STOPPING_OPERATION)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }

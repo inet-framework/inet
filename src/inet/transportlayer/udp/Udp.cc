@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <string>
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -884,6 +885,7 @@ uint16_t Udp::computeCrc(const Protocol *networkProtocol, const L3Address& srcAd
 
 void Udp::close(int sockId)
 {
+    Enter_Method("close");
     // remove from socketsByIdMap
     auto it = socketsByIdMap.find(sockId);
     if (it == socketsByIdMap.end()) {
@@ -892,7 +894,8 @@ void Udp::close(int sockId)
     }
 
     EV_INFO << "Closing socket: " << *(it->second) << "\n";
-    it->second->callback->handleClose();
+    auto callback = it->second->callback;
+    schedule("handleClose", simTime(), [=]() { callback->handleClose(); });
 
     destroySocket(it);
 }
