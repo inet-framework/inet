@@ -266,8 +266,6 @@ void Udp::handleUpperCommand(cMessage *msg)
 
         case UDP_C_CLOSE: {
             int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
-            auto sd = getSocketById(socketId);
-            sd->callback->handleClose();
             close(socketId);
             break;
         }
@@ -894,6 +892,7 @@ void Udp::close(int sockId)
     }
 
     EV_INFO << "Closing socket: " << *(it->second) << "\n";
+    it->second->callback->handleClose();
 
     destroySocket(it);
 }
