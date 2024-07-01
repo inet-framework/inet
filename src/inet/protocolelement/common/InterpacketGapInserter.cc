@@ -130,6 +130,7 @@ void InterpacketGapInserter::pushPacket(Packet *packet, const cGate *gate)
     if (packetDelay < 0)
         packetDelay = 0;
     packetStartTime = now + packetDelay;
+    // TODO: duration may be 0 here
     packetEndTime = packetStartTime + SIMTIME_AS_CLOCKTIME(packet->getDuration());
     if (packetDelay == 0) {
         handlePacketProcessed(packet);
@@ -186,6 +187,7 @@ void InterpacketGapInserter::pushPacketProgress(Packet *packet, const cGate *gat
 
 void InterpacketGapInserter::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
 {
+    // TODO: this maybe too late, because the tx end emit signal is done earlier then the handlePushPacketProcessed call
     packetEndTime = getClockTime();
     if (producer != nullptr)
         producer.handlePushPacketProcessed(packet, successful);
@@ -200,6 +202,7 @@ void InterpacketGapInserter::pushOrSendOrSchedulePacketProgress(Packet *packet, 
             packetDelay = 0;
         packetStartTime = now + packetDelay;
     }
+    // TODO: duration may be 0 here
     packetEndTime = packetStartTime + SIMTIME_AS_CLOCKTIME(packet->getDuration());
     if (progress == nullptr || !progress->isScheduled()) {
         if (packet->getDataLength() == position + extraProcessableLength)
