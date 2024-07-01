@@ -55,8 +55,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     opp_component_ptr<Hcf> hcf;
     opp_component_ptr<Mcf> mcf;
 
-    // The last change channel message received and not yet sent to the physical layer, or nullptr.
-    cMessage *pendingRadioConfigMsg = nullptr;
+    int pendingChannelNumber = -1;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -92,7 +91,6 @@ class INET_API Ieee80211Mac : public MacProtocolBase
 
   public:
     Ieee80211Mac();
-    virtual ~Ieee80211Mac();
 
     virtual void setChannelNumber(int channelNumber);
 

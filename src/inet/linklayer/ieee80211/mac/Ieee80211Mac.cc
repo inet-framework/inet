@@ -39,12 +39,6 @@ Ieee80211Mac::Ieee80211Mac()
 {
 }
 
-Ieee80211Mac::~Ieee80211Mac()
-{
-    if (pendingRadioConfigMsg)
-        delete pendingRadioConfigMsg;
-}
-
 void Ieee80211Mac::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
@@ -202,7 +196,8 @@ void Ieee80211Mac::setChannelNumber(int channelNumber)
     }
     else {
         EV_DEBUG << "Delaying setChannelNumber() until next IDLE or DEFER state\n";
-        throw cRuntimeError("TODO");
+        ASSERT(pendingChannelNumber == -1);
+        pendingChannelNumber = channelNumber;
     }
 }
 
@@ -339,9 +334,9 @@ void Ieee80211Mac::sendDownFrame(Packet *frame)
 
 void Ieee80211Mac::sendDownPendingRadioConfigMsg()
 {
-    if (pendingRadioConfigMsg != nullptr) {
-        sendDown(pendingRadioConfigMsg);
-        pendingRadioConfigMsg = nullptr;
+    if (pendingChannelNumber != -1) {
+        check_and_cast<Ieee80211Radio *>(radio.get())->setChannelNumber(pendingChannelNumber);
+        pendingChannelNumber = -1;
     }
 }
 
