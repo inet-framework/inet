@@ -12,12 +12,12 @@ import inet.applications.contract.IApp;
 simple SctpNatServer like IApp
 {
     parameters:
-        string localAddress = default(""); // may be left empty ("")
-        int localPort = default(0); // port number to listen on
-        int numPacketsToSendPerClient = default(0);  // number of requests sent per session
+        string localAddress = default(""); // May be left empty ("")
+        int localPort = default(0); // Port number to listen on
+        int numPacketsToSendPerClient = default(0);  // Number of requests sent per session
         int numPacketsToReceivePerClient = default(1);
-        int requestLength = default(1452); // length of a request (bytes)
-        double waitToClose @unit(s) = default(0s); //time to wait between last message sent and abort
+        int requestLength = default(1452); // Length of a request (bytes)
+        double waitToClose @unit(s) = default(0s); // Time to wait between last message sent and abort
         int outboundStreams = default(1);
         int inboundStreams = default(1);
         bool ordered = default(true);

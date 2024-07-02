@@ -6,15 +6,15 @@ Adding New Events - Part 1
   3. solution
   4. example
 
-Some changes in the model can add new events to the simulation. These events inevitably change the default fingerprints but they don't necessarily invalidate the model. One option is to filter out the modules in which the new events take place, so they are not included in fingerprint calculation. Taking into account the rest of the modules might show that the simulation trajectory in fact stayed that same.
+Some changes in the model can add new events to the simulation. These events inevitably change the default fingerprints, but they don't necessarily invalidate the model. One option is to filter out the modules in which the new events take place, so they are not included in the fingerprint calculation. Taking into account the rest of the modules might show that the simulation trajectory, in fact, stayed the same.
 
-To filter out modules, run the fingerprint test with the ``--fingerprint-modules`` command line option, e.g.:
+To filter out modules, run the fingerprint test with the ``--fingerprint-modules`` command-line option, e.g.:
 
 .. code-block:: bash
 
    $ inet_fingerprinttest -a --fingerprint-modules='"not fullPath=~**.wlan[*].mac.**"'
 
-As a simplistic example, we will make changes to the Udp module's code; the changes add new events, but doesn't alter the module's behavior. However, the fingerprints will change; we will filter out the Udp module from the fingerprint calculation to verify the model. Here is the workflow:
+As a simplistic example, we will make changes to the Udp module's code; the changes add new events but don't alter the module's behavior. However, the fingerprints will change; we will filter out the Udp module from the fingerprint calculation to verify the model. Here is the workflow:
 
 We run the fingerprint tests without taking the Udp module into account (the order of the quotes is important):
 
@@ -30,8 +30,8 @@ We can accept the fingerprints because there was no change in the model
 
    $ mv baseline.csv.UPDATED baseline.csv
 
-Then we add a line to one of the functions in :cpp:`Udp.cc` which schedules a self message;
-we also add a handleSelfMessage() function which just deletes the message when its received:
+Then we add a line to one of the functions in :cpp:`Udp.cc` which schedules a self-message;
+we also add a ``handleSelfMessage()`` function which just deletes the message when it's received:
 
 .. literalinclude:: ../sources/Udp_mod.cc
    :diff: ../sources/Udp_orig.cc
@@ -46,7 +46,7 @@ We run the fingerprint tests again without the Udp module:
 
 The fingerprint tests PASS; the model is verified.
 
-.. note:: The ``-fingerprint-module=""`` command line argument can be added to the .csv file as well.
+.. note:: The ``-fingerprint-module=""`` command-line argument can be added to the .csv file as well.
 
 We can change the ingredients back to ``tplx`` (or some other default), re-run the tests, and accept the new values. This process is described in more detail in the :doc:`accepting` step.
 
@@ -55,7 +55,7 @@ from the fingerprint calculation. This approach is beneficial because alternate 
 with different ingredients are not needed. If only the new event is filtered out, the fingerprints should stay the same.
 
 As a simplistic example, we'll make the same change to the Udp module as before.
-We'll run the tests with the baseline ingredients and filter out the new self message by its id:
+We'll run the tests with the baseline ingredients and filter out the new self-message by its id:
 
 .. code-block:: fp
 
@@ -75,12 +75,12 @@ The tests PASS, and the model is verified.
 
 .. so why is this?
 
-  **because if you filter specifically, then the fingerprints will retain their broad sensitivity, but wont be sensitive
+  **because if you filter specifically, then the fingerprints will retain their broad sensitivity, but won't be sensitive
   to the specific change**
 
-  what i wanna say is
+  what I wanna say is
 
-  - when filtering out something, the best is to filter out very specifically the part of the model which the change affects
+  - when filtering out something, the best is to filter out very specifically the part of the model that the change affects
   - the more specifically one can filter that, the better
   - because then, only that aspect is filtered, and everything else is not
-  - like in the case of the example above...we only filtered out the event which we added. dont need new fingerprints.
+  - like in the case of the example above...we only filtered out the event that we added. Don't need new fingerprints.

@@ -31,7 +31,7 @@ mode operation.
 
 Note that when ACKs (in contrast to data frames) are lost,
 retransmissions will introduce duplicates in the packet stream the MAC
-sends up to to the higher layer protocols in the receiver host. This
+sends up to the higher layer protocols in the receiver host. This
 could be eliminated by adding sequence numbers to frames and maintaining
 per-sender sequence numbers in each receiver, but the :ned:`CsmaCaMac`
 module does not contain such a duplicate detection algorithm in order to
@@ -60,7 +60,7 @@ corresponding ACK from host B.
    :width: 655
    :height: 575
 
-   <!--internal video recording, playback speed 0.65, from #767-->
+.. <!--internal video recording, playback speed 0.65, from #767-->
 
 The UDPData + ACK sequences can be seen in the sequence chart below:
 

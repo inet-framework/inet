@@ -10,7 +10,7 @@
 package inet.routing.pim.tables;
 
 //
-// The PimInterfaceTable module contains the PIM specific configuration
+// The `PimInterfaceTable` module contains the PIM specific configuration
 // parameters and state of the interfaces on which PIM is enabled.
 //
 // PIM routers must contain an instance of this module.
@@ -25,9 +25,9 @@ package inet.routing.pim.tables;
 //                   If it is "true", then the router will send SR messages
 //                   on this interface.
 //
-// Additionally each <interface> element may contain
+// Additionally, each <interface> element may contain
 // @hosts, @names, @towards, @among attributes to select the
-// interfaces which the PIM parameters are applied to (see ~Ipv4NetworkConfigurator).
+// interfaces to which the PIM parameters are applied (see ~Ipv4NetworkConfigurator).
 //
 simple PimInterfaceTable
 {

@@ -11,7 +11,7 @@ package inet.power.contract;
 // This interface extends the corresponding energy model interface. It requires
 // implementations to describe energy consumption and energy generation with
 // current [A], and storage capacity with charge [C] and output voltage [V].
-// The Cc is an abbreviation that is used for charge and current based interfaces.
+// The Cc is an abbreviation that is used for charge and current-based interfaces.
 //
 // @see ~ICcEnergyConsumer, ~ICcEnergySource, ~ICcEnergyGenerator, ~ICcEnergyStorage, ~ICcEnergyManagement
 //

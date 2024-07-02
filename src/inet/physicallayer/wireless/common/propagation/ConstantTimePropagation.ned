@@ -17,7 +17,7 @@ import inet.physicallayer.wireless.common.base.packetlevel.PropagationBase;
 module ConstantTimePropagation extends PropagationBase
 {
     parameters:
-        double propagationTime @unit(s) = default(0s); // the time it takes for a signal to propagate from any transmitter to any receiver
+        double propagationTime @unit(s) = default(0s); // The time it takes for a signal to propagate from any transmitter to any receiver
         @class(ConstantTimePropagation);
 }
 

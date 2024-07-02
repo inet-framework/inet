@@ -10,7 +10,7 @@ Overview
 
 Network layer protocols in INET are not restricted to IPv4 and IPv6.
 INET nodes such as :ned:`Router` and :ned:`StandardHost` can be
-configured to use an alternative network layer protocols instead of, or
+configured to use alternative network layer protocols instead of, or
 in addition to, IPv4 and IPv6.
 
 Node models contain three optional network layers that can be
@@ -24,11 +24,7 @@ individually turned on or off:
    ipv6: <default("Ipv6NetworkLayer")> like INetworkLayer if hasIpv6;
    generic: <default("")> like INetworkLayer if hasGn;
 
-In the default configuration, only IPv4 is turned on. If you want to use
-an alternative network layer protocol instead of IPv4/IPv6, your
-configuration will look something like this:
-
-
+In the default configuration, only IPv4 is turned on. If an alternative network layer protocol is desired instead of IPv4/IPv6, the configuration should look something like this:
 
 .. code-block:: ini
 
@@ -43,7 +39,7 @@ The list of alternative network layers includes:
    concrete protocol type is a parameter
 
 -  :ned:`NextHopNetworkLayer` is a network layer specialized for the
-   “Next-Hop Forwarding Protocol”, an abstract implementation of the
+   "Next-Hop Forwarding Protocol", an abstract implementation of the
    next-hop routing concept
 
 -  :ned:`WiseRouteNetworkLayer` is specialized for the Wise Route
@@ -69,12 +65,11 @@ instance of :ned:`EchoProtocol`, a module type that implements a simple
 *ping*-like protocol.
 
 All the above network protocols can work with IPv4 addresses, IPv6
-addresses, use MAC address as network address (this is sometimes useful
-in WSNs), or use sythetic addresses that only make sense within the
+addresses, use MAC address as a network address (this is sometimes useful
+in WSNs), or use synthetic addresses that only make sense within the
 simulation.  [1]_
 
-In apps, you need to specify which network layer protocol you want to
-use. For example:
+In apps, the network layer protocol to be used needs to be specified. For example:
 
 
 
@@ -93,8 +88,8 @@ Flooding
 ~~~~~~~~
 
 :ned:`Flooding` is a simple flooding protocol for network-level
-broadcast. It remembers already broadcast messages, and does not
-rebroadcast them if it gets another copy of that message.
+broadcast. Already broadcast messages are remembered and not
+rebroadcasted if another copy of that message is received.
 
 .. _ug:sec:networkprotocols:probabilisticbroadcast:
 
@@ -104,7 +99,7 @@ ProbabilisticBroadcast
 :ned:`ProbabilisticBroadcast` is a multi-hop ad-hoc data dissemination
 protocol based on probabilistic broadcast.
 
-This method reduces the number of packets sent on the channel (reducing
+The number of packets sent on the channel is reduced (reducing
 the broadcast storm problem) at the risk of some nodes not receiving the
 data. It is particularly interesting for mobile networks.
 
@@ -128,21 +123,20 @@ WiseRoute
 
 :ned:`WiseRoute` implements Wise Route, a simple loop-free routing
 algorithm that builds a routing tree from a central network point,
-designed for sensor networks and convergecast traffic (WIreless SEnsor
+designed for sensor networks and convergecast traffic (Wireless Sensor
 routing).
 
-The sink (the device at the center of the network) broadcasts a route
-building message. Each network node that receives it selects the sink as
-parent in the routing tree, and rebroadcasts the route building message.
+A route building message is broadcasted by the sink (the device at the center of the network). Each network node that receives it selects the sink as
+a parent in the routing tree and rebroadcasts the route building message.
 This procedure maximizes the probability that all network nodes can join
-the network, and avoids loops.
+the network and avoids loops.
 
 The :par:`sinkAddress` parameter specifies the sink network address,
 :par:`rssiThreshold` is a threshold to avoid using bad links (with too
 low RSSI values) for routing, and :par:`routeFloodsInterval` should be
 set to zero for all nodes except the sink. Each
 :par:`routeFloodsInterval`, the sink restarts the tree building
-procedure. Set it to a large value if you do not want the tree to be
+procedure. Set it to a large value if the tree should not be
 rebuilt.
 
 .. _ug:sec:networkprotocols:nexthopforwarding:
@@ -154,7 +148,7 @@ The :ned:`NextHopForwarding` module is an implementation of the next-hop
 forwarding concept. (It can be thought of as an abstracted version of
 IP.)
 
-The protocol needs an additional module, a :ned:`NextHopRoutingTable`
+The protocol needs an additional module, a :ned:`NextHopRoutingTable`,
 for its operation. The routing table module is included in the
 :ned:`NextHopNetworkLayer` compound module.
 
@@ -175,7 +169,7 @@ The following address types are available:
 
 -  module path
 
-Protocols described in this chapter work with “generic” L3 addresses,
+Protocols described in this chapter work with "generic" L3 addresses;
 they can use any address type.
 
 When choosing IPv4 addresses, an :ned:`Ipv4NetworkConfigurator` global
@@ -193,5 +187,5 @@ IPv4, :ned:`Arp` can be used instead of :ned:`GlobalArp`.
 
 .. [1]
    This is possible because the implementation of these modules simply
-   use the :cpp:`L3Address` C++ class, which is a variant type capable
+   uses the :cpp:`L3Address` C++ class, which is a variant type capable
    of holding several types of L3 addresses.

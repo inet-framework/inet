@@ -22,7 +22,7 @@ import inet.power.contract.IEnergyConsumer;
 // The radio model supports changing radio mode, transmission power, or bitrate
 // via ~ConfigureRadioCommand, or with direct C++ function calls.
 //
-// switchingTimes parameter should be regarded as a 5x5 matrix:
+// `switchingTimes` parameter should be regarded as a 5x5 matrix:
 // <pre>
 //               OFF SLEEP RECEIVER TRANSMITTER TRANSCEIVER
 // OFF           0 0 0 0 0
@@ -31,32 +31,32 @@ import inet.power.contract.IEnergyConsumer;
 // TRANSMITTER   0 0 0 0 0
 // TRANSCEIVER   0 0 0 0 0
 // </pre>
-// The corresponding RadioMode pairs contain the time needed to
+// The corresponding `RadioMode` pairs contain the time needed to
 // switch from one state to another.
 // For example: the 6th number identifies the time needed to switch
 // from SLEEP to OFF.
 //
-// The first entry of the switchingTimes string indicates the
+// The first entry of the `switchingTimes` string indicates the
 // time-related metric prefix and it MUST be s, ms or ns.
 //
 module Radio extends PhysicalLayerBase like IRadio
 {
     parameters:
-        string radioMediumModule = default("radioMedium"); // module path of the medium module where this radio communicates
-        string energySourceModule = default("");           // module path of the energy source module which provides energy to the radio
+        string radioMediumModule = default("radioMedium"); // Module path of the medium module where this radio communicates
+        string energySourceModule = default("");           // Module path of the energy source module which provides energy to the radio
 
         string initialRadioMode @enum("off","sleep","receiver","transmitter","transceiver") = default("off");
-        string switchingTimes = default("ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"); // time parameters to switch between radio modes
+        string switchingTimes = default("ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"); // Time parameters to switch between radio modes
 
-        bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out
+        bool sendRawBytes = default(false); // When true packets are serialized into a sequence of bytes before sending out
 
-        bool separateTransmissionParts = default(false); // when enabled the transmission of preamble, header and data part are simulated separately
-        bool separateReceptionParts = default(false);    // when enabled the reception of preamble, header and data part are simulated separately
+        bool separateTransmissionParts = default(false); // When enabled the transmission of preamble, header and data part are simulated separately
+        bool separateReceptionParts = default(false);    // When enabled the reception of preamble, header and data part are simulated separately
 
-        bool displayCommunicationRange = default(false); // if true communication range is displayed as a blue circle around the node
-        bool displayInterferenceRange = default(false);  // if true interference range is displayed as a gray circle around the node
+        bool displayCommunicationRange = default(false); // If true communication range is displayed as a blue circle around the node
+        bool displayInterferenceRange = default(false);  // If true interference range is displayed as a gray circle around the node
 
-        string signalAnalogRepresentation @enum("unitdisk", "scalar", "dimensional") = default("scalar");
+        string signalAnalogRepresentation @enum("unitDisk", "scalar", "dimensional") = default("scalar");
 
         *.signalAnalogRepresentation = default(this.signalAnalogRepresentation);
         *.energySourceModule = default(absPath(this.energySourceModule));

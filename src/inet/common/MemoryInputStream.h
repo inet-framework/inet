@@ -36,7 +36,7 @@ class INET_API MemoryInputStream
      * the last byte. In other cases some of the lower bits of the last byte are
      * not used.
      */
-    std::vector<uint8_t> data;
+    const std::vector<uint8_t> data;
     /**
      * The length of the bit stream measured in bits.
      */
@@ -45,13 +45,14 @@ class INET_API MemoryInputStream
      * The position of the next bit that will be read measured in bits.
      */
     b position;
+
     /**
      * This flag indicates if the stream has been read beyond the end of data.
      */
     bool isReadBeyondEnd_ = false;
 
   protected:
-    bool isByteAligned() {
+    bool isByteAligned() const {
         return b(position).get() % 8 == 0;
     }
 
@@ -231,7 +232,7 @@ class INET_API MemoryInputStream
             position += length;
         }
         else {
-            for (size_t i = 0; i < B(length).get(); i++)
+            for (B::value_type i = 0; i < B(length).get(); i++)
                 bytes.push_back(readByte());
         }
         return length;
@@ -251,7 +252,7 @@ class INET_API MemoryInputStream
             position += length;
         }
         else {
-            for (size_t i = 0; i < B(length).get(); i++)
+            for (B::value_type i = 0; i < B(length).get(); i++)
                 *buffer++ = readByte();
         }
         return length;

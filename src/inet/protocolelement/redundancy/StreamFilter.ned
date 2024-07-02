@@ -12,12 +12,12 @@ import inet.queueing.contract.IPacketFilter;
 
 //
 // This module implements a packet filter using solely the stream name. The stream
-// name must match the filter criteria in order the packet to pass through the filter.
+// name must match the filter criteria in order for the packet to pass through the filter.
 //
 simple StreamFilter extends PacketFilterBase like IPacketFilter
 {
     parameters:
         string mode @enum("req", "ind", "both") = default("both");
-        string streamNameFilter = default("*"); // filter expression for the stream name
+        string streamNameFilter = default("*"); // Filter expression for the stream name
         @class(StreamFilter);
 }

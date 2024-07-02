@@ -3,7 +3,7 @@ package inet.showcases.visualizer.canvas.statistic;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 
 
@@ -17,7 +17,7 @@ network StatisticVisualizationPingRttShowcase
         radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=68,99");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=69,161");
         }
         source: AdhocHost {
@@ -33,7 +33,7 @@ network StatisticVisualizationPacketErrorRateShowcase
     parameters:
         @display("bgb=901.5187,376.65");
     submodules:
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             parameters:
                 @display("p=64.256,62.247997");
         }

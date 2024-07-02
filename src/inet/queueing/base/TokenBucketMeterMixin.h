@@ -8,8 +8,8 @@
 #ifndef __INET_TOKENBUCKETMETERMIXIN_H
 #define __INET_TOKENBUCKETMETERMIXIN_H
 
+#include "inet/common/LabelsTag_m.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/queueing/common/LabelsTag_m.h"
 
 namespace inet {
 namespace queueing {

@@ -10,7 +10,7 @@ package inet.visualizer.common;
 import inet.visualizer.contract.IEnergyStorageVisualizer;
 
 //
-// This module integrates canvas and osg energyStorage visualizers into a single module.
+// This module integrates canvas and osg `energyStorage` visualizers into a single module.
 //
 // @see ~EnergyStorageCanvasVisualizer, ~EnergyStorageOsgVisualizer, ~EnergyStorageVisualizerBase, ~IEnergyStorageVisualizer
 //
@@ -18,8 +18,10 @@ module EnergyStorageVisualizer like IEnergyStorageVisualizer
 {
     parameters:
         @display("i=block/app");
-        *.visualizationTargetModule = default("^.^");
-        *.visualizationSubjectModule = default("^.^");
+        string visualizationTargetModule = default("^");
+        string visualizationSubjectModule = default("^");
+        *.visualizationTargetModule = default(absPath(this.visualizationTargetModule));
+        *.visualizationSubjectModule = default(absPath(this.visualizationSubjectModule));
     submodules:
         canvasVisualizer: <default(firstAvailableOrEmpty("EnergyStorageCanvasVisualizer"))> like IEnergyStorageVisualizer if typename != "" {
             parameters:

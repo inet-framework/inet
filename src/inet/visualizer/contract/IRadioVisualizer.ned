@@ -13,7 +13,7 @@ package inet.visualizer.contract;
 //
 // @see ~RadioCanvasVisualizer, ~RadioOsgVisualizer, ~RadioVisualizer, ~RadioVisualizerBase
 //
-moduleinterface IRadioVisualizer
+moduleinterface IRadioVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

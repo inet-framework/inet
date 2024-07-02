@@ -17,7 +17,7 @@ simple SignalBasedTokenGenerator extends TokenGeneratorBase
     parameters:
         string subscriptionModule = default("^");
         string signals;
-        volatile double numTokens = default(1); // number of tokens generated repeatedly
+        volatile double numTokens = default(1); // Number of tokens generated repeatedly
         @class(SignalBasedTokenGenerator);
         @display("i=block/control");
 }

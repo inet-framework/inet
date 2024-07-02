@@ -326,7 +326,7 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
         auto fieldId = change->getFieldId();
         if (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER) {
             ie = change->getNetworkInterface();
-            if (!ie->isUp()) {
+            if (!ie->isUp() || !ie->hasCarrier()) {
                 for (auto& elem : ripRoutingTable)
                     if ((elem)->getInterface() == ie) {
                         invalidateRoute(elem);
@@ -441,7 +441,7 @@ void Rip::processUpdate(bool triggered)
         EV_INFO << "sending regular updates on all interfaces\n";
 
     for (auto& ripInterface : ripInterfaces)
-        if (ripInterface.ie->isUp())
+        if (ripInterface.ie->isUp() && ripInterface.ie->hasCarrier())
             sendRoutes(addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, ripInterface, triggered);
 
     // clear changed flags

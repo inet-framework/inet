@@ -21,6 +21,20 @@ namespace inet {
 Register_Class(Ipv4Route);
 Register_Class(Ipv4MulticastRoute);
 
+Ipv4Route::Ipv4Route(const Ipv4Route& other) :
+    rt(other.rt),
+    dest(other.dest),
+    netmask(other.netmask),
+    gateway(other.gateway),
+    interfacePtr(other.interfacePtr),
+    sourceType(other.sourceType),
+    adminDist(other.adminDist),
+    metric(other.metric),
+    source(other.source),
+    protocolData(other.protocolData)
+{
+}
+
 Ipv4Route::~Ipv4Route()
 {
     delete protocolData;
@@ -113,6 +127,20 @@ IRoutingTable *Ipv4Route::getRoutingTableAsGeneric() const
     return getRoutingTable();
 }
 
+Ipv4MulticastRoute::Ipv4MulticastRoute(const Ipv4MulticastRoute& other) :
+    rt(nullptr),
+    origin(other.origin),
+    originNetmask(other.originNetmask),
+    group(other.group),
+    inInterface(other.inInterface ? new IMulticastRoute::InInterface(*other.inInterface) : nullptr),
+    sourceType(other.sourceType),
+    source(other.source),
+    metric(other.metric)
+{
+    for (const auto& elem : other.outInterfaces)
+        outInterfaces.push_back(new IMulticastRoute::OutInterface(*elem));
+}
+
 Ipv4MulticastRoute::~Ipv4MulticastRoute()
 {
     delete inInterface;
@@ -151,10 +179,8 @@ std::string Ipv4MulticastRoute::str() const
     for (auto& elem : outInterfaces) {
         if (!first)
             out << ",";
-        if (elem->isEnabled()) {
-            out << elem->getInterface()->getInterfaceName();
-            first = false;
-        }
+        out << elem->getInterface()->getInterfaceName();
+        first = false;
     }
 
     out << " " << IMulticastRoute::sourceTypeName(sourceType);
@@ -206,6 +232,9 @@ void Ipv4MulticastRoute::addOutInterface(OutInterface *outInterface)
     }
 
     outInterfaces.push_back(outInterface);
+    std::sort(outInterfaces.begin(), outInterfaces.end(), [] (const OutInterface *i1, const OutInterface *i2) {
+        return strcmp(i1->getInterface()->getInterfaceName(), i2->getInterface()->getInterfaceName()) <= 0;
+    });
     changed(F_OUT);
 }
 
@@ -230,10 +259,24 @@ void Ipv4MulticastRoute::removeOutInterface(unsigned int i)
     changed(F_OUT);
 }
 
+bool Ipv4MulticastRoute::hasOutInterface(const NetworkInterface *networkInterface) const
+{
+    for (size_t i = 0; i < outInterfaces.size(); i++)
+        if (outInterfaces.at(i)->getInterface() == networkInterface)
+            return true;
+    return false;
+}
+
 void Ipv4MulticastRoute::changed(int fieldCode)
 {
     if (rt)
         rt->multicastRouteChanged(this, fieldCode);
+}
+
+bool Ipv4MulticastRoute::matches(const Ipv4Address& origin, const Ipv4Address& group) const
+{
+    return (this->group.isUnspecified() || this->group == group) &&
+            Ipv4Address::maskedAddrAreEqual(origin, this->origin, this->originNetmask);
 }
 
 } // namespace inet

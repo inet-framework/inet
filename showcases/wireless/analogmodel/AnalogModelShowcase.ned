@@ -8,8 +8,8 @@ import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.physicallayer.wireless.noise.NoiseSource;
-import inet.visualizer.common.IntegratedMultiVisualizer;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedMultiCanvasVisualizer;
 
 network AnalogModelShowcaseRoutingNetwork
 {
@@ -33,7 +33,7 @@ network AnalogModelShowcaseRoutingNetwork
         configurator: Ipv4NetworkConfigurator {
             @display("p=38.461544,66.863914");
         }
-        visualizer: IntegratedMultiVisualizer {
+        visualizer: IntegratedMultiCanvasVisualizer {
             @display("p=38.461544,106.50889");
         }
 }
@@ -43,7 +43,7 @@ network AnalogModelShowcaseDistanceNetwork
     parameters:
         @display("bgb=901.5187,376.65");
     submodules:
-        visualizer: IntegratedMultiVisualizer {
+        visualizer: IntegratedMultiCanvasVisualizer {
             parameters:
                 @display("p=64.256,62.247997");
         }
@@ -69,7 +69,7 @@ network AnalogModelShowcaseDistanceNetwork_
     parameters:
         @display("bgb=901.5187,376.65");
     submodules:
-        visualizer: IntegratedMultiVisualizer {
+        visualizer: IntegratedMultiCanvasVisualizer {
             parameters:
                 @display("p=64.256,62.247997");
         }
@@ -101,7 +101,7 @@ network AnalogModelShowcaseNoiseNetwork
         radioMedium: Ieee80211DimensionalRadioMedium {
             @display("p=32,113");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=37,185");
         }
         host1: AdhocHost {

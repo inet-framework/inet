@@ -9,13 +9,13 @@
 //*              http://www.es.ele.tue.nl/nes
 //*
 //*
-//* copyright:   (C) 2010 Electronic Systems group(ES),
+//* copyright:   (C) 2010 Electronic Systems group (ES),
 //*              Eindhoven University of Technology (TU/e), the Netherlands.
 //*
 //*
 //***************************************************************************
-//* part of:    MoBAN (Mobility Model for wireless Body Area Networks)
-//* description:     Local module of the MoBAN mobility model
+//* part of:    MoBAN (Mobility Model for Wireless Body Area Networks)
+//* description: Local module of the MoBAN mobility model
 //***************************************************************************
 //* Citation of the following publication is appreciated if you use MoBAN for
 //* a publication of your own.
@@ -40,11 +40,11 @@ package inet.mobility.group;
 
 import inet.mobility.base.MovingMobilityBase;
 
-// This is the local mobility module of MoBAN. It should be instantiated in each node that belongs to a WBAN. The NED parameter "coordinatorIndex"
-// determine to which WBAN (MoBanCoordinator) it belongs.
+// This is the local mobility module of MoBAN. It should be instantiated in each node that belongs to a WBAN. The NED parameter `coordinatorIndex`
+// determines to which WBAN (`MoBanCoordinator`) it belongs.
 // The current implementation uses the Random Walk Mobility Model (RWMM) for individual (local) movement with a sphere around the node, with given speed
-// and sphere radius of the current posture. The reference point of the node it the current posture, the sphere radius, and the speed is given by the
-// corresponding coordinator. RWMM determines the location of node at ant time relative to the given reference point.
+// and sphere radius of the current posture. The reference point of the node is the current posture, the sphere radius, and the speed is given by the
+// corresponding coordinator. RWMM determines the location of a node at any time relative to the given reference point.
 simple MoBanLocal extends MovingMobilityBase
 {
     parameters:

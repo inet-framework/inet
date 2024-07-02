@@ -27,6 +27,14 @@ class INET_API RoutingTableOsgVisualizer : public RoutingTableVisualizerBase
         RouteOsgVisualization(osg::Node *node, const Ipv4Route *route, int nodeModuleId, int nextHopModuleId);
     };
 
+    class INET_API MulticastRouteOsgVisualization : public MulticastRouteVisualization {
+      public:
+        osg::ref_ptr<osg::Node> node;
+
+      public:
+        MulticastRouteOsgVisualization(osg::Node *node, const Ipv4MulticastRoute *route, int nodeModuleId, int nextHopModuleId);
+    };
+
   protected:
     virtual void initialize(int stage) override;
 
@@ -34,6 +42,11 @@ class INET_API RoutingTableOsgVisualizer : public RoutingTableVisualizerBase
     virtual void addRouteVisualization(const RouteVisualization *routeVisualization) override;
     virtual void removeRouteVisualization(const RouteVisualization *routeVisualization) override;
     virtual void refreshRouteVisualization(const RouteVisualization *routeVisualization) const override;
+
+    virtual const MulticastRouteVisualization *createMulticastRouteVisualization(Ipv4MulticastRoute *route, cModule *node, cModule *nextHop) const override;
+    virtual void addMulticastRouteVisualization(const MulticastRouteVisualization *routeVisualization) override;
+    virtual void removeMulticastRouteVisualization(const MulticastRouteVisualization *routeVisualization) override;
+    virtual void refreshMulticastRouteVisualization(const MulticastRouteVisualization *routeVisualization) const override;
 };
 
 } // namespace visualizer

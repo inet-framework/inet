@@ -26,11 +26,11 @@ package inet.physicallayer.wireless.common.base.packetlevel;
 module DimensionalTransmitterBase extends NarrowbandTransmitterBase
 {
     parameters:
-        int gainFunctionCacheLimit = default(0); // limits the number of gain functions cached for a given duration, centerFrequency and bandwidth
-        string timeGains = default("left s 0dB either e 0dB right"); // sequence of interpolation method, time, gain tuples; time can be an expression, gain is in [dB] or [0..inf); default value is a flat signal
-        string timeGainsNormalization @enum("","maximum","integral") = default(""); // determines how the time gains function is normalized, no normalization by default
-        string frequencyGains = default("left s 0dB either e 0dB right"); // sequence of interpolation method, frequency, gain tuples; frequency can be an expression, gain is in [dB] or [0..1]; default value is a flat signal
-        string frequencyGainsNormalization @enum("","maximum","integral") = default("integral"); // determines how the frequency gains function is normalized, integral normalization by default
+        int gainFunctionCacheLimit = default(0); // Limits the number of gain functions cached for a given duration, centerFrequency and bandwidth
+        string timeGains = default("left s 0dB either e 0dB right"); // Sequence of interpolation method, time, gain tuples; time can be an expression, gain is in [dB] or [0..inf); default value is a flat signal
+        string timeGainsNormalization @enum("","maximum","integral") = default(""); // Determines how the time gains function is normalized, no normalization by default
+        string frequencyGains = default("left s 0dB either e 0dB right"); // Sequence of interpolation method, frequency, gain tuples; frequency can be an expression, gain is in [dB] or [0..1]; default value is a flat signal
+        string frequencyGainsNormalization @enum("","maximum","integral") = default("integral"); // Determines how the frequency gains function is normalized, integral normalization by default
         modulation = default("BPSK");
         @class(DimensionalTransmitterBase);
 }

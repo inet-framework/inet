@@ -15,7 +15,7 @@ import inet.queueing.contract.IPacketFlow;
 simple PacketStreamer extends PacketProcessorBase like IPacketFlow
 {
     parameters:
-        string clockModule = default(""); // relative path of a module that implements IClock; optional
+        string clockModule = default(""); // Relative path of a module that implements IClock; optional
         double datarate @unit(bps) = default(nan bps);
         @class(PacketStreamer);
         @display("i=block/cogwheel");

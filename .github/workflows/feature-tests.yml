@@ -18,15 +18,16 @@ jobs:
         total: [16] # keep these in sync!
       fail-fast: false
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: omnetpp/omnetpp
           path: omnetpp
-      - uses: actions/checkout@v3
+          ref: omnetpp-6.x
+      - uses: actions/checkout@v4
         with:
           path: inet
       - run: mkdir -p /home/runner/work/ccache
-      - uses: actions/cache/restore@v3
+      - uses: actions/cache/restore@v4
         with:
           path: /home/runner/work/ccache
           key: native-${{ matrix.mode }}-ccache-${{ github.run_id }}
@@ -57,7 +58,7 @@ jobs:
           # this indirectly calls the script named simply "inet", which handles the MODE envvar internally
           ./featuretest
           echo "::endgroup::"
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always() # even if the test failed, of course
         with:
           name: log-${{ matrix.split }}

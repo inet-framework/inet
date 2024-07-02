@@ -11,22 +11,22 @@ import inet.applications.ethernet.EtherAppServer;
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.ethernet.contract.IEthernetLayer;
-import inet.linklayer.ieee8022.IIeee8022Llc;
+import inet.linklayer.contract.IEthernetLayer;
+import inet.linklayer.contract.IIeee8022Llc;
 import inet.networklayer.common.InterfaceTable;
 
 
 //
 // An example host with one Ethernet port and a traffic generator that
 // generates request-reply traffic directly over Ethernet. This host model
-// does not contain higher layer protocols (IP, TCP). By default it is
+// does not contain higher layer protocols (IP, TCP). By default, it is
 // configured to use half-duplex MAC (CSMA/CD).
 //
 module EthernetHost
 {
     parameters:
         bool hasStatus = default(false);
-        bool csmacdSupport = default(true);  // by default use CSMA/CD
+        bool csmacdSupport = default(true);  // By default, use CSMA/CD
         string fcsMode @enum("declared","computed") = default("declared");
         @networkNode();
         @labels(node,ethernet-node);

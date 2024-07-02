@@ -66,11 +66,11 @@ following visualizer settings:
 
 .. code-block:: none
 
-   *.visualizer.*.mediumVisualizer.displaySignals = true
-   *.visualizer.*.mediumVisualizer.displayReceptions = true
-   *.visualizer.*.mediumVisualizer.displayTransmissions = true
-   *.visualizer.*.mediumVisualizer.displayCommunicationRanges = true
-   *.visualizer.*.mediumVisualizer.displayInterferenceRanges = true
+   *.visualizer.mediumVisualizer.displaySignals = true
+   *.visualizer.mediumVisualizer.displayReceptions = true
+   *.visualizer.mediumVisualizer.displayTransmissions = true
+   *.visualizer.mediumVisualizer.displayCommunicationRanges = true
+   *.visualizer.mediumVisualizer.displayInterferenceRanges = true
 
 When the simulation is run the network looks like this:
 
@@ -258,11 +258,11 @@ The visualizer's configuration keys are the following:
 
 .. code-block:: none
 
-   *.visualizer.*.mediumVisualizer.signalPropagationAnimationSpeed = 500/3e8
-   *.visualizer.*.mediumVisualizer.signalTransmissionAnimationSpeed = 50000/3e8
-   *.visualizer.*.mediumVisualizer.displaySignals = true
-   *.visualizer.*.mediumVisualizer.displayTransmissions = true
-   *.visualizer.*.mediumVisualizer.displayReceptions = true
+   *.visualizer.mediumVisualizer.signalPropagationAnimationSpeed = 500/3e8
+   *.visualizer.mediumVisualizer.signalTransmissionAnimationSpeed = 50000/3e8
+   *.visualizer.mediumVisualizer.displaySignals = true
+   *.visualizer.mediumVisualizer.displayTransmissions = true
+   *.visualizer.mediumVisualizer.displayReceptions = true
 
 The visualization of propagating radio signals is turned on. The
 animation speed for the expansion and recession specified so that the

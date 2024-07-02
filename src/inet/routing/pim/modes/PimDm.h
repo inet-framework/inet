@@ -132,22 +132,13 @@ class INET_API PimDm : public PimBase, protected cListener
         DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId) const;
         DownstreamInterface *createDownstreamInterface(NetworkInterface *ie);
         DownstreamInterface *removeDownstreamInterface(int interfaceId);
-        bool isOilistNull();
+        bool isOlistNull();
+        void updateIpv4Route();
     };
 
     friend std::ostream& operator<<(std::ostream& out, const PimDm::Route& sourceGroup);
 
     typedef std::map<SourceAndGroup, Route *> RoutingTable;
-
-    // for updating the forwarding state of the route when the state of the downstream interface changes
-    class PimDmOutInterface : public IMulticastRoute::OutInterface {
-        DownstreamInterface *downstream;
-
-      public:
-        PimDmOutInterface(NetworkInterface *ie, DownstreamInterface *downstream)
-            : IMulticastRoute::OutInterface(ie), downstream(downstream) {}
-        virtual bool isEnabled() override { return downstream->isInOlist(); }
-    };
 
   private:
     // parameters
@@ -228,6 +219,7 @@ class INET_API PimDm : public PimBase, protected cListener
     void sendToIP(Packet *packet, Ipv4Address source, Ipv4Address dest, int outInterfaceId);
 
     // helpers
+    bool isMulticastGroupJoined(Ipv4Address address);
     void restartTimer(cMessage *timer, double interval);
     void cancelAndDeleteTimer(cMessage *& timer);
     PimInterface *getIncomingInterface(NetworkInterface *fromIE);

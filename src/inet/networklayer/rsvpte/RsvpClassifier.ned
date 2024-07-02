@@ -9,7 +9,7 @@ package inet.networklayer.rsvpte;
 import inet.networklayer.mpls.IIngressClassifier;
 
 //
-// Table-base ingress classifier.
+// Table-based ingress classifier.
 //
 // The XML config file has the following format. <fectable>
 // is the root element. <fectable> may contain any number of

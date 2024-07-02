@@ -4,7 +4,7 @@ Release: |release|
 
 .. only:: html
 
-   This manual is written for developers who intend to extend INET with new components, written in C++.
+   This manual is written for developers who intend to extend INET with new components written in C++.
 
    Table of Contents
 

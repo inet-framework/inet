@@ -18,7 +18,7 @@ simple PacketFlowCanvasVisualizer extends PathVisualizerBase like IPacketFlowVis
         labelFormat = default("%L %p pk (%l)");
         lineStyle = default("dashed");
         fadeOutTime = default(0s);
-        double zIndex = default(4); // determines the drawing order of figures relative to other visualizers
+        double zIndex = default(4); // Determines the drawing order of figures relative to other visualizers
         @class(PacketFlowCanvasVisualizer);
 }
 

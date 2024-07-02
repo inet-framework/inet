@@ -15,8 +15,8 @@ import inet.mobility.base.MovingMobilityBase;
 simple RectangleMobility extends MovingMobilityBase
 {
     parameters:
-        double startPos; // in range [0.0,4.0): topleft=0, topright=1, bottomright=2, bottomleft=3
-        double speed @unit(mps); // speed of the host
+        double startPos; // In range [0.0, 4.0): top left=0, top right=1, bottom right=2, bottom left=3
+        double speed @unit(mps); // Speed of the host
         @class(RectangleMobility);
 }
 

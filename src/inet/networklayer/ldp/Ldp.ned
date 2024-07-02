@@ -38,8 +38,8 @@ simple Ldp like IApp
         double helloInterval @unit(s) = default(5s);
         @display("i=block/control");
         @lifecycleSupport;
-        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
-        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
 
     gates:
         input socketIn @labels(TcpCommand/up,UdpControlInfo/up);

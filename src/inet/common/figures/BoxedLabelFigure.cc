@@ -83,6 +83,16 @@ void BoxedLabelFigure::setBackgroundColor(cFigure::Color color)
     rectangleFigure->setFillColor(color);
 }
 
+const cFigure::Color& BoxedLabelFigure::getLineColor() const
+{
+    return rectangleFigure->getLineColor();
+}
+
+void BoxedLabelFigure::setLineColor(cFigure::Color color)
+{
+    rectangleFigure->setLineColor(color);
+}
+
 const char *BoxedLabelFigure::getText() const
 {
     return labelFigure->getText();
@@ -96,6 +106,16 @@ void BoxedLabelFigure::setText(const char *text)
     labelFigure->setText(text);
 }
 
+cFigure::Alignment BoxedLabelFigure::getAlignment() const
+{
+    return labelFigure->getAlignment();
+}
+
+void BoxedLabelFigure::setAlignment(cFigure::Alignment alignment)
+{
+    labelFigure->setAlignment(alignment);
+}
+
 double BoxedLabelFigure::getOpacity() const
 {
     return rectangleFigure->getFillOpacity();
@@ -106,6 +126,26 @@ void BoxedLabelFigure::setOpacity(double opacity)
     rectangleFigure->setFillOpacity(opacity);
     rectangleFigure->setLineOpacity(opacity);
     labelFigure->setOpacity(opacity);
+}
+
+bool BoxedLabelFigure::isFilled() const
+{
+    return rectangleFigure->isFilled();
+}
+
+void BoxedLabelFigure::setFilled(bool filled)
+{
+    rectangleFigure->setFilled(filled);
+}
+
+bool BoxedLabelFigure::isOutlined() const
+{
+    return rectangleFigure->isOutlined();
+}
+
+void BoxedLabelFigure::setOutlined(bool outlined)
+{
+    rectangleFigure->setOutlined(outlined);
 }
 
 } // namespace inet

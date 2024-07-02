@@ -10,15 +10,15 @@ package inet.node.base;
 import inet.common.MessageDispatcher;
 import inet.common.packet.recorder.PcapRecorder;
 import inet.linklayer.contract.IEthernetInterface;
+import inet.linklayer.contract.IEthernetLayer;
+import inet.linklayer.contract.IIeee8021qLayer;
+import inet.linklayer.contract.IIeee8021rLayer;
+import inet.linklayer.contract.IIeee8022Llc;
 import inet.linklayer.contract.ILoopbackInterface;
 import inet.linklayer.contract.IPppInterface;
 import inet.linklayer.contract.ITunnelInterface;
 import inet.linklayer.contract.IVirtualInterface;
 import inet.linklayer.contract.IWirelessInterface;
-import inet.linklayer.ethernet.contract.IEthernetLayer;
-import inet.linklayer.ieee8021q.IIeee8021qLayer;
-import inet.linklayer.ieee8021r.IIeee8021rLayer;
-import inet.linklayer.ieee8022.IIeee8022Llc;
 import inet.networklayer.common.InterfaceTable;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.protocolelement.contract.IProtocolLayer;
@@ -30,8 +30,8 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
         int numPcapRecorders = default(recordPcap ? 1 : 0);
         int numLoInterfaces = default(1);
         int numWlanInterfaces = default(0);
-        int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
-        int numPppInterfaces = default(0);  // minimum number of PPP interfaces
+        int numEthInterfaces = default(0);  // Minimum number of Ethernet interfaces
+        int numPppInterfaces = default(0);  // Minimum number of PPP interfaces
         int numTunInterfaces = default(0);
         int numVirtInterfaces = default(0);
         string fcsMode @enum("declared","computed") = default("declared");
@@ -41,10 +41,10 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
         *.fcsMode = this.fcsMode;
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
         ethernet.registerProtocol = default(true);
-        @figure[linkLayer](type=rectangle; pos=250,458; size=1000,284; fillColor=#0000ff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
+        @figure[linkLayer](type=rectangle; pos=250,458; size=1000,434; fillColor=#0000ff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
         @figure[linkLayer.title](type=text; pos=1245,463; anchor=ne; text="link layer");
-        @figure[interfaceLayer](type=rectangle; pos=250,758; size=1000,360; fillColor=#00ffff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
-        @figure[interfaceLayer.title](type=text; pos=1245,763; anchor=ne; text="interface layer");
+        @figure[interfaceLayer](type=rectangle; pos=250,908; size=1000,210; fillColor=#00ffff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
+        @figure[interfaceLayer.title](type=text; pos=1245,913; anchor=ne; text="interface layer");
     gates:
         input radioIn[numWlanInterfaces] @directIn;
         inout pppg[numPppInterfaces] @labels(PppFrame-conn) @allowUnconnected;
@@ -83,7 +83,7 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
         lo[numLoInterfaces]: <default("LoopbackInterface")> like ILoopbackInterface {
             @display("p=750,975,row,150");
         }
-        // TODO move wlan interfaces after eth interfaces, but it changes IP address assignment and breaks examples/inet/configurator/complex.ini
+        // TODO move WLAN interfaces after Ethernet interfaces, but it changes IP address assignment and breaks examples/inet/configurator/complex.ini
         wlan[numWlanInterfaces]: <default("Ieee80211Interface")> like IWirelessInterface {
             @display("p=375,1000,row,150;q=queue");
         }

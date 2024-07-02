@@ -42,21 +42,20 @@ import inet.mobility.base.MovingMobilityBase;
 
 // This is the coordinator module of the MoBAN mobility model. It should be instantiated in the top level simulation network in MiXiM, once per WBAN.
 // The coordinator module is the main module that provides the group mobility and correlation between nodes in a WBAN.
-// In the initialization phase, it reads three user defined input files which are the postures specification file, a configuration file which includes all
-// required parameter for specific distributions, and the previously logged mobility pattern, if it is requested to use a logged pattern.
+// In the initialization phase, it reads three user-defined input files which are the posture specification file, a configuration file which includes all
+// required parameters for specific distributions, and the previously logged mobility pattern if it is requested to use a logged pattern.
 // Note that all WBAN instances may use the same input files if they are exactly in the same situation.
 //
-// After the initialization phase, the MoBAN coordinator decides about the posture and the position of the Logical center of the group (WBAN).
+// After the initialization phase, the MoBAN coordinator decides about the posture and the position of the logical center of the group (WBAN).
 // The absolute position of the reference point of each belonging node is calculated by adding the current position of the logical center
-// by the reference point of that node in the selected posture. The coordinator publish the position of the reference point as well as
+// to the reference point of that node in the selected posture. The coordinator publishes the position of the reference point as well as
 // the speed and the radius of the local movement of nodes.
 simple MoBanCoordinator extends MovingMobilityBase
 {
     parameters:
         xml postureSpecFile;        // The input file that includes the specification of all postures
-        xml configFile;             // The configuration file for setting probability vectors, distributions and correlations
+        xml configFile;             // The configuration file for setting probability vectors, distributions, and correlations
         bool useMobilityPattern;    // Set if the logged mobility pattern is used.
-        string mobilityPatternFile; // The input file for mobility pattern if it is going to be used.
+        string mobilityPatternFile; // The input file for the mobility pattern if it is going to be used.
         @class(MoBanCoordinator);
 }
-

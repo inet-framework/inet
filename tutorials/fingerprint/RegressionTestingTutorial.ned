@@ -8,8 +8,8 @@ import inet.node.inet.AdhocHost;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 import inet.visualizer.canvas.integrated.IntegratedMultiCanvasVisualizer;
-import inet.visualizer.common.IntegratedVisualizer;
 
 network RegressionTestingTutorialWireless
 {
@@ -21,7 +21,7 @@ network RegressionTestingTutorialWireless
         radioMedium: <default("Ieee80211ScalarRadioMedium")> like IRadioMedium {
             @display("p=5,10");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=5,15");
         }
         host1: AdhocHost {

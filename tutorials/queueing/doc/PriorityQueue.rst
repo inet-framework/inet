@@ -2,11 +2,11 @@ Priority Queue
 ==============
 
 The :ned:`PriorityQueue` module is a compound module that implements priority queueing
-with the help of a classifier submodule, multiple queues and a scheduler.
+with the help of a classifier submodule, multiple queues, and a scheduler.
 
 It contains a configurable number of :ned:`PacketQueue`'s. A :ned:`PacketClassifier` module
 classifies packets into the queues according to the configured packet classifier function.
-A :ned:`PriorityScheduler` pops packets from the first non-empty queue, thus earlier queues
+A :ned:`PriorityScheduler` pops packets from the first non-empty queue; thus, earlier queues
 have a priority over the later ones.
 
 In this example network, packets are produced at random intervals by an active packet

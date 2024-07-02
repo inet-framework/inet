@@ -14,7 +14,7 @@ import inet.linklayer.ieee80211.mac.contract.IRx;
 // for managing the NAV, and for notifying other processes about the channel
 // state (free or busy).
 //
-// This is the default implementation of ~IRx.
+// This is the default implementation of thr ~IRx module interface.
 //
 simple Rx like IRx
 {

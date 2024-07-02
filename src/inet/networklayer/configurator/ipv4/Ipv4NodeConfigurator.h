@@ -26,6 +26,7 @@ namespace inet {
 class INET_API Ipv4NodeConfigurator : public cSimpleModule, public ILifecycle, protected cListener
 {
   protected:
+    bool _configureRoutingTable = false;
     opp_component_ptr<NodeStatus> nodeStatus;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     ModuleRefByPar<IIpv4RoutingTable> routingTable;

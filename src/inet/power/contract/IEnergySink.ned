@@ -8,7 +8,7 @@
 package inet.power.contract;
 
 //
-// The energy sink models absorb energy from multiple energy generators.
+// The energy sink models absorbs energy from multiple energy generators.
 //
 // @see ~IEnergyConsumer, ~IEnergySource, ~IEnergyGenerator, ~IEnergyStorage, ~IEnergyManagement
 //

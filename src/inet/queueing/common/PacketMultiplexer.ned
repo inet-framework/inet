@@ -20,7 +20,7 @@ simple PacketMultiplexer extends PacketProcessorBase like IActivePacketSource //
     parameters:
         bool forwardServiceRegistration = default(true);
         bool forwardProtocolRegistration = default(true);
-        displayStringTextFormat = default("passed %p pk (%l)"); // %p number of packet, %l total length
+        displayStringTextFormat = default("passed %p pk (%l)"); // %p number of packets, %l total length
         @class(PacketMultiplexer);
         @display("i=-;b=10,10,oval,grey,,1");
         @signal[packetPushed](type=inet::Packet);

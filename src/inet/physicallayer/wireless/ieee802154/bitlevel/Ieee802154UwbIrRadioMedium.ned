@@ -14,7 +14,6 @@ module Ieee802154UwbIrRadioMedium extends RadioMedium
     parameters:
         signalAnalogRepresentation = default("dimensional");
         backgroundNoise.power = default(-110dBm);
-        backgroundNoise.dimensions = default("time");
         mediumLimitCache.centerFrequency = default(2.4GHz);
         mediumLimitCache.minReceptionPower = default(-85dBm);
         mediumLimitCache.minInterferencePower = default(-110dBm);

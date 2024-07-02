@@ -13,7 +13,7 @@ import inet.linklayer.contract.IEtherMac;
 
 //
 // Ethernet MAC layer. MAC performs transmission and reception of frames.
-// See the ~IEtherMac for the Ethernet MAC layer general informations.
+// See the ~IEtherMac for the Ethernet MAC layer general information.
 // Doesn't do encapsulation/decapsulation; see ~Ieee8022Llc and ~EthernetEncapsulation for
 // that.
 //
@@ -31,13 +31,13 @@ import inet.linklayer.contract.IEtherMac;
 //
 // Expected environment:
 // - phys$i and phys$o should be connected to the "network"
-// - upperLayerIn and upperLayerOut are usually connected to ~EtherLlc (in hosts)
+// - `upperLayerIn` and `upperLayerOut` are usually connected to ~EtherLlc (in hosts)
 //   or ~MacRelayUnit (in a switch)
 //
 // <b>Operation</b>
 //
 // Processing of frames received from higher layers:
-// - if src address in the frame is empty, fill it out
+// - if the source address in the frame is empty, fill it out
 // - frames get queued up until transmission
 // - transmit according to the CSMA/CD protocol
 // - can send PAUSE message if requested by higher layers (PAUSE protocol,
@@ -60,7 +60,7 @@ import inet.linklayer.contract.IEtherMac;
 // will be filled in. Then frame is queued and transmitted according
 // to the CSMA/CD protocol.
 //
-// Data frames received from the network are EtherFrames. They are passed to
+// Data frames received from the network are `EtherFrames`. They are passed to
 // the higher layers without modification.
 // Also, the module properly responds to PAUSE frames, but never sends them
 // by itself -- however, it transmits PAUSE frames received from upper layers.
@@ -78,14 +78,14 @@ import inet.linklayer.contract.IEtherMac;
 //
 // <b>Queueing</b>
 //
-// In routers, MAC relies on an external queue module (see ~IPacketQueue)
+// In routers, the MAC relies on an external queue module (see ~IPacketQueue)
 // to model finite buffer, implement QoS and/or RED, and requests packets
 // from this external queue one-by-one.
 //
 // In hosts, no such queue is used, so MAC contains an internal
 // queue to store packets waiting for transmission.
 // Conceptually, the queue is of infinite size, but for better diagnostics
-// one can specify a hard limit in the packetCapacity parameter -- if this is
+// one can specify a hard limit in the `packetCapacity` parameter -- if this is
 // exceeded, the simulation stops with an error.
 //
 //
@@ -101,16 +101,17 @@ module EthernetCsmaMac like IEtherMac
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         string displayStringTextFormat = default("rate: %b\nsent: %s, rcvd: %r\nqueue: %q, drop: %d");
-        bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out
-        bool promiscuous = default(false);  // if true, all packets are received, otherwise only the
+        bool sendRawBytes = default(false); // When true, packets are serialized into a sequence of bytes before sending out
+        bool promiscuous = default(false);  // If true, all packets are received, otherwise only the
                                             // ones with matching destination MAC address
-        bool duplexMode;                    // selects full-duplex (true) or half-duplex (false) operation
-        bool frameBursting = default(true); // enable/disable frame bursting mode in Gigabit Ethernet
+        bool duplexMode;                    // Selects full-duplex (true) or half-duplex (false) operation
+        bool frameBursting = default(true); // Enable/disable frame bursting mode in Gigabit Ethernet
+        bool allowNonstandardBitrate = default(false); // Allows any bitrate and uses the first larger bitrate specified parameters
         int mtu @unit(B) = default(1500B);
         string fcsMode @enum("declared","computed");
         @lifecycleSupport;
-        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
-        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after the lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for the lifecycle stop operation
         @class(EthernetCsmaMac);
         @display("i=block/rxtx");
 
@@ -123,9 +124,9 @@ module EthernetCsmaMac like IEtherMac
         @signal[packetSentToUpper](type=inet::Packet);
         @signal[packetReceivedFromUpper](type=inet::Packet);
         @signal[collision](type=long);
-        @signal[backoffSlotsGenerated](type=long);    // slotNumber value emitted
-        @signal[transmissionStateChanged](type=long); // enum=MacTransmitState
-        @signal[receptionStateChanged](type=long); // enum=MacReceiveState
+        @signal[backoffSlotsGenerated](type=long);    // SlotNumber value emitted
+        @signal[transmissionStateChanged](type=long); // Enum=MacTransmitState
+        @signal[receptionStateChanged](type=long); // Enum=MacReceiveState
         @signal[transmissionStarted](type=inet::physicallayer::EthernetSignalBase);
         @signal[transmissionEnded](type=inet::physicallayer::EthernetSignalBase);
         @signal[receptionStarted](type=inet::physicallayer::EthernetSignalBase);
@@ -144,8 +145,8 @@ module EthernetCsmaMac like IEtherMac
         @statistic[backoffSlotsGenerated](title="backoff"; record=count,vector; interpolationmode=none);
 
     gates:
-        input upperLayerIn @labels(EtherFrame);    // to ~EthernetEncapsulation or ~IMacRelayUnit
-        output upperLayerOut @labels(EtherFrame);  // to ~EthernetEncapsulation or ~IMacRelayUnit
-        inout phys @labels(EthernetSignal); // to the network
+        input upperLayerIn @labels(EtherFrame);    // To ~EthernetEncapsulation or ~IMacRelayUnit
+        output upperLayerOut @labels(EtherFrame);  // To ~EthernetEncapsulation or ~IMacRelayUnit
+        inout phys @labels(EthernetSignal); // To the network
 }
 

@@ -12,7 +12,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.ITransmitterAnalo
 module TransmitterBase
 {
     parameters:
-        string signalAnalogRepresentation @enum("unitDisk","scalar","dimensional") = default("scalar"); // determines the analog domain signal representation of transmissions
+        string signalAnalogRepresentation @enum("unitDisk","scalar","dimensional") = default("scalar"); // Determines the analog domain signal representation of transmissions
         analogModel.typename = default(signalAnalogRepresentation == "unitDisk" ? "UnitDiskTransmitterAnalogModel" : signalAnalogRepresentation == "scalar" ? "ScalarTransmitterAnalogModel" : "DimensionalTransmitterAnalogModel");
         @display("i=block/tx");
     submodules:

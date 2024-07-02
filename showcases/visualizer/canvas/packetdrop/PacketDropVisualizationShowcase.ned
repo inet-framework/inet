@@ -11,7 +11,7 @@ import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 
 network PacketDropQueueOverflowShowcase
@@ -36,7 +36,7 @@ network PacketDropQueueOverflowShowcase
         configurator: Ipv4NetworkConfigurator {
             @display("p=88,37");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=267,37");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
@@ -51,7 +51,7 @@ network PacketDropQueueOverflowShowcase
 network PacketDropArpResolutionFailedShowcase
 {
     submodules:
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             parameters:
                 @display("p=100,50");
         }
@@ -72,7 +72,7 @@ network PacketDropArpResolutionFailedShowcase
 network PacketDropMacRetryLimitReachedShowcase
 {
     submodules:
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             parameters:
                 @display("p=100,50");
         }
@@ -101,7 +101,7 @@ network PacketDropInterfaceNotConnectedShowcase
         configurator: Ipv4NetworkConfigurator {
             @display("p=60,40");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=60,101");
         }
         host1: StandardHost {
@@ -121,7 +121,7 @@ network PacketDropNoRouteToDestinationShowcase
         configurator: Ipv4NetworkConfigurator {
             @display("p=60,40");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=60,101");
         }
         host1: StandardHost {

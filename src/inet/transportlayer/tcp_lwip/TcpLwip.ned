@@ -14,7 +14,7 @@ import inet.transportlayer.contract.ITcp;
 // The original LWIP is available on
 // <a href="http://savannah.nongnu.org/projects/lwip/" target="_blank">this page</a>.
 //
-// See ~ITcp for general TCP layer informations.
+// See ~ITcp for general TCP layer information.
 //
 simple TcpLwip like ITcp
 {

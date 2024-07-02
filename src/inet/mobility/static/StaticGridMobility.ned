@@ -13,9 +13,9 @@ import inet.mobility.base.MobilityBase;
 //
 // Places all hosts in a rectangular grid.
 // The usable area (constraint area minus margins on each side) is split into smaller cells
-// (with separationX,separationY size). Hosts are placed in the middle of each cell.
-// By default, the number of columns and rows follow the aspect ratio of the usable area.
-// By default stepX and stepY are calculated based on the number of columns and rows.
+// (with a `separationX`, `separationY` size). Hosts are placed in the middle of each cell.
+// By default, the number of columns and rows follows the aspect ratio of the usable area.
+// By default, `stepX` and `stepY` are calculated based on the number of columns and rows.
 //
 simple StaticGridMobility extends MobilityBase
 {

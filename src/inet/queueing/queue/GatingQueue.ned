@@ -6,11 +6,11 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program. If not, see http://www.gnu.org/licenses/.
 //
 
 package inet.queueing.queue;
@@ -26,7 +26,7 @@ module GatingQueue extends CompoundPacketQueueBase
     parameters:
         double bitrate @unit(bps);
         *.bitrate = default(this.bitrate);
-        *.extraLength = default(64b); // overhead for Ethernet PHY header
+        *.extraLength = default(64b); // Overhead for Ethernet PHY header
     submodules:
         queue: <default("PacketQueue")> like IPacketQueue {
             @display("p=300,100,column,125");

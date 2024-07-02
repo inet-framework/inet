@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 //
 // @see ~InfoCanvasVisualizer, ~InfoOsgVisualizer, ~InfoVisualizer, ~InfoVisualizerBase
 //
-moduleinterface IInfoVisualizer
+moduleinterface IInfoVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

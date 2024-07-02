@@ -75,8 +75,11 @@ void StatisticVisualizerBase::initialize(int stage)
         opacity = par("opacity");
         placementHint = parsePlacement(par("placementHint"));
         placementPriority = par("placementPriority");
-        if (displayStatistics)
+        if (displayStatistics) {
+            if (opp_isempty(signalName))
+                throw cRuntimeError("The signalName parameter must be not empty");
             subscribe();
+        }
     }
 }
 
@@ -92,18 +95,15 @@ void StatisticVisualizerBase::handleParameterChange(const char *name)
 
 void StatisticVisualizerBase::subscribe()
 {
-    if (*signalName != '\0')
-        visualizationSubjectModule->subscribe(registerSignal(signalName), this);
+    visualizationSubjectModule->subscribe(registerSignal(signalName), this);
 }
 
 void StatisticVisualizerBase::unsubscribe()
 {
     // NOTE: lookup the module again because it may have been deleted first
     auto visualizationSubjectModule = findModuleFromPar<cModule>(par("visualizationSubjectModule"), this);
-    if (visualizationSubjectModule != nullptr) {
-        if (*signalName != '\0')
-            visualizationSubjectModule->unsubscribe(registerSignal(signalName), this);
-    }
+    if (visualizationSubjectModule != nullptr)
+        visualizationSubjectModule->unsubscribe(registerSignal(signalName), this);
 }
 
 void StatisticVisualizerBase::addResultRecorder(cComponent *source, simsignal_t signal)
@@ -113,6 +113,7 @@ void StatisticVisualizerBase::addResultRecorder(cComponent *source, simsignal_t 
     auto recordingMode = getRecordingMode();
     statisticTemplateProperty.addKey("record");
     statisticTemplateProperty.setValue("record", 0, recordingMode.c_str());
+    statisticTemplateProperty.setIndex("visualizer");
     statisticBuilder.addResultRecorders(source, signal, statisticName, &statisticTemplateProperty);
 }
 

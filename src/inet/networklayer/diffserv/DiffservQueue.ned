@@ -14,7 +14,7 @@ import inet.queueing.scheduler.WrrScheduler;
 import inet.queueing.sink.PassivePacketSink;
 
 //
-// This is an example queue, that can be used in
+// This is an example queue that can be used in
 // interfaces of DS core and edge nodes to support
 // the AFxy (RFC 2597) and EF (RFC 3246) PHBs.
 //
@@ -22,18 +22,18 @@ import inet.queueing.sink.PassivePacketSink;
 // their DSCP field. DSCPs other than AFxy and EF are handled
 // as BE (best effort).
 //
-// EF packets are stored in a dedicated queue, and served first
+// EF packets are stored in a dedicated queue and served first
 // when a packet is requested. Because they can preempt the other
 // queues, the rate of the EF packets should be limited to a fraction
-// of the bandwith of the link. This is achieved by metering the EF
+// of the bandwidth of the link. This is achieved by metering the EF
 // traffic with a token bucket meter and dropping packets that
-// does not conform to the traffic profile.
+// do not conform to the traffic profile.
 //
 // There are other queues for AFx classes and BE. The AFx queues
 // use RED to implement 3 different drop priorities within the class.
-// BE packets are stored in a drop tail queue.
-// Packets from AFxy and BE queues are sheduled by a WRR scheduler,
-// which ensures that the remaining bandwith is allocated among the classes
+// BE packets are stored in a drop-tail queue.
+// Packets from AFxy and BE queues are scheduled by a WRR scheduler,
+// which ensures that the remaining bandwidth is allocated among the classes
 // according to the specified weights.
 //
 // @see ~AFxyQueue
@@ -49,7 +49,7 @@ module DiffservQueue extends CompoundPacketQueueBase
             @display("p=100,330");
         }
         efMeter: TokenBucketMeter {
-            cir = default("10%"); // reserved EF bandwith as percentage of datarate of the interface
+            cir = default("10%"); // Reserved EF bandwidth as a percentage of the datarate of the interface
             cbs = default(5000B); // 5 1000B packets
             @display("p=250,130");
         }
@@ -57,7 +57,7 @@ module DiffservQueue extends CompoundPacketQueueBase
             @display("p=400,80");
         }
         efQueue: DropTailQueue {
-            packetCapacity = default(5); // keep low, for low delay and jitter
+            packetCapacity = default(5); // Keep low for low delay and jitter
             @display("p=400,180");
         }
         af1xQueue: AFxyQueue {

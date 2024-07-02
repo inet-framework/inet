@@ -44,6 +44,16 @@ void PacketQueue::initialize(int stage)
         updateDisplayString();
 }
 
+cGate *PacketQueue::getRegistrationForwardingGate(cGate *gate)
+{
+    if (gate == outputGate)
+        return inputGate;
+    else if (gate == inputGate)
+        return outputGate;
+    else
+        throw cRuntimeError("Unknown gate");
+}
+
 IPacketDropperFunction *PacketQueue::createDropperFunction(const char *dropperClass) const
 {
     if (strlen(dropperClass) == 0)

@@ -7,7 +7,7 @@ import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 
 network TransportConnectionVisualizationEnablingShowcase
@@ -23,7 +23,7 @@ network TransportConnectionVisualizationEnablingShowcase
         configurator: Ipv4NetworkConfigurator {
             @display("p=109,290");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=207,290");
         }
     connections:
@@ -52,7 +52,7 @@ network TransportConnectionVisualizationMultipleConnectionsShowcase
         configurator: Ipv4NetworkConfigurator {
             @display("p=531,53");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=531,119");
         }
     connections:
@@ -84,7 +84,7 @@ network Complexer
         configurator: Ipv4NetworkConfigurator {
             @display("p=531,53");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=531,119");
         }
         terminalHost: StandardHost {

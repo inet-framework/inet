@@ -9,6 +9,9 @@ package inet.protocolelement.aggregation.policy;
 
 import inet.protocolelement.aggregation.contract.IAggregatorPolicy;
 
+//
+// A policy for aggregating subpackets based on their length
+//
 simple LengthBasedAggregatorPolicy like IAggregatorPolicy
 {
     parameters:

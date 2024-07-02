@@ -10,7 +10,7 @@ package inet.examples.inet.tcp_eth_reconnect;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 import ned.DatarateChannel;
 
 
@@ -23,7 +23,7 @@ network ClientServerWithSM
             delay = 0.1us;
         }
     submodules:
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=50,50");
         }
         client1: StandardHost {

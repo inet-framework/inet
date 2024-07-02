@@ -15,17 +15,17 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IPulseShaper;
 
 //
 // This transmitter model is part of a simple hypothetical layered radio. It
-// produces detailed transmissions that have separate representation for
-// all simulated domains. The levelOfDetail parameter controls which domains
+// produces detailed transmissions that have a separate representation for
+// all simulated domains. The `levelOfDetail` parameter controls which domains
 // are actually simulated, but all parameters relevant to the error model are
 // always set on the transmission.
 //
 // With the highest level of detail, the produced transmission contains the
 // following:
 //  - a separate packet to represent the PHY frame
-//  - precise bit representation of the whole packet
-//  - precise bit representation after scrambling, fec encoding, and interleaving
-//  - precise symbol representation of the whole packet including physical header
+//  - precise bit representation of the entire packet
+//  - precise bit representation after scrambling, FEC encoding, and interleaving
+//  - precise symbol representation of the entire packet including the physical header
 //  - narrowband analog representation using scalar transmission power
 //
 // NOTE: the current implementation doesn't support pulse shaping and digital
@@ -42,10 +42,10 @@ module ApskLayeredTransmitter like ITransmitter
 {
     parameters:
         string levelOfDetail @enum("packet", "bit", "symbol", "sample") = default("symbol");
-        double bitrate @unit(bps); // net bitrate of the transmitter
-        double power @unit(W); // scalar transmission power for the whole signal duration
-        double centerFrequency @unit(Hz); // center frequency of the narrowband carrier signal
-        double bandwidth @unit(Hz); // bandwidth
+        double bitrate @unit(bps); // Net bitrate of the transmitter
+        double power @unit(W); // Scalar transmission power for the entire signal duration
+        double centerFrequency @unit(Hz); // Center frequency of the narrowband carrier signal
+        double bandwidth @unit(Hz); // Bandwidth
         double preambleDuration @unit(s) = default(0s);
         @display("i=block/wtx");
         @class(ApskLayeredTransmitter);

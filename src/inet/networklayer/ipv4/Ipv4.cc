@@ -80,8 +80,10 @@ void Ipv4::initialize(int stage)
         fragmentTimeoutTime = par("fragmentTimeout");
         limitedBroadcast = par("limitedBroadcast");
         directBroadcastInterfaces = par("directBroadcastInterfaces").stdstringValue();
-
         directBroadcastInterfaceMatcher.setPattern(directBroadcastInterfaces.c_str(), false, true, false);
+        enableLocalOutMulticastRouting = par("enableLocalOutMulticastRouting");
+        enableTimestampOption = par("enableTimestampOption");
+        maxLifetime = par("maxLifetime");
 
         curFragmentId = 0;
         lastCheckTime = SIMTIME_ZERO;
@@ -281,6 +283,22 @@ Packet *Ipv4::prepareForForwarding(Packet *packet) const
     return packet;
 }
 
+bool Ipv4::isLifetimeExpired(const Ptr<const Ipv4Header>& ipv4Header) const
+{
+    if (maxLifetime == -1)
+        return false;
+    else {
+        for (unsigned int i = 0; i < ipv4Header->getOptionArraySize(); i++) {
+            if (auto timestampOption = dynamic_cast<const Ipv4OptionTimestamp *>(&ipv4Header->getOption(i))) {
+                simtime_t firstTimestamp = timestampOption->getRecordTimestamp(0);
+                simtime_t lifetime = simTime() - firstTimestamp;
+                return lifetime > maxLifetime;
+            }
+        }
+        return false;
+    }
+}
+
 void Ipv4::preroutingFinish(Packet *packet)
 {
     const NetworkInterface *fromIE = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
@@ -415,32 +433,114 @@ void Ipv4::datagramLocalOut(Packet *packet)
     EV_DETAIL << "Sending datagram '" << packet->getName() << "' with destination = " << destAddr << "\n";
 
     if (ipv4Header->getDestAddress().isMulticast()) {
-        destIE = determineOutgoingInterfaceForMulticastDatagram(ipv4Header, destIE);
-
-        // loop back a copy
-        if (multicastLoop && (!destIE || !destIE->isLoopback())) {
-            const NetworkInterface *loopbackIF = ift->findFirstLoopbackInterface();
-            if (loopbackIF) {
-                auto packetCopy = packet->dup();
-                packetCopy->addTagIfAbsent<InterfaceReq>()->setInterfaceId(loopbackIF->getInterfaceId());
-                packetCopy->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
-                fragmentPostRouting(packetCopy);
-            }
-        }
-
+        // RFC 1112, section 6.1
+        //"
+        // Second, for hosts that may be attached to more than one network, the
+        // service interface should provide a way for the upper-layer protocol
+        // to identify which network interface is be used for the multicast
+        // transmission.  Only one interface is used for the initial
+        // transmission; multicast routers are responsible for forwarding to any
+        // other networks, if necessary.  If the upper-layer protocol chooses
+        // not to identify an outgoing interface, a default interface should be
+        // used, preferably under the control of system management.
+        //"
+        // INET also provides optional non-standard behavior to use the multicast
+        // routing table if enabled. This allows multicast packets to go out on
+        // several network interfaces.
         if (destIE) {
+            // use the interface specified by MULTICAST_IF socket option
             numMulticast++;
+            EV_DETAIL << "multicast packet routed to requested output interface " << destIE->getInterfaceName() << "\n";
+
+            // loop back a copy
+            if (multicastLoop && !destIE->isLoopback()) {
+                const NetworkInterface *loopbackIF = ift->findFirstLoopbackInterface();
+                if (loopbackIF) {
+                    auto packetCopy = packet->dup();
+                    packetCopy->addTagIfAbsent<InterfaceReq>()->setInterfaceId(loopbackIF->getInterfaceId());
+                    packetCopy->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
+                    fragmentPostRouting(packetCopy);
+                }
+            }
+
             packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
             packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
             fragmentPostRouting(packet);
         }
-        else {
-            EV_ERROR << "No multicast interface, packet dropped\n";
-            numUnroutable++;
-            PacketDropDetails details;
-            details.setReason(NO_INTERFACE_FOUND);
-            emit(packetDroppedSignal, packet, &details);
+        else if (auto route = enableLocalOutMulticastRouting ? rt->findBestMatchingMulticastRoute(ipv4Header->getSrcAddress(), destAddr) : nullptr) {
+            numMulticast++;
+
+            // loop back a copy
+            if (multicastLoop) {
+                const NetworkInterface *loopbackIF = ift->findFirstLoopbackInterface();
+                if (loopbackIF) {
+                    auto packetCopy = packet->dup();
+                    packetCopy->addTagIfAbsent<InterfaceReq>()->setInterfaceId(loopbackIF->getInterfaceId());
+                    packetCopy->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
+                    fragmentPostRouting(packetCopy);
+                }
+            }
+
+            // copy original datagram for multiple destinations
+            for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++) {
+                Ipv4MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
+                const NetworkInterface *destIE = outInterface->getInterface();
+                if (outInterface->isLeaf() && !destIE->getProtocolData<Ipv4InterfaceData>()->hasMulticastListener(destAddr))
+                    EV_WARN << "Not sending to " << destIE->getInterfaceName() << " (no listeners)\n";
+                else {
+                    EV_DETAIL << "Sending out on " << destIE->getInterfaceName() << "\n";
+                    auto packetCopy = packet->dup();
+                    packetCopy->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
+                    packetCopy->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
+                    fragmentPostRouting(packetCopy);
+                }
+            }
+
+            // only copies sent, delete original packet
             delete packet;
+        }
+        else {
+            // try to lookup the multicast address in the unicast routing table
+            if (auto route = rt->findBestMatchingRoute(ipv4Header->getDestAddress())) {
+                destIE = route->getInterface();
+                EV_DETAIL << "multicast packet routed to output interface " << destIE->getInterfaceName() << " by dest address lookup in the unicast routing table\n";
+            }
+            if (!destIE) {
+                destIE = rt->getInterfaceByAddress(ipv4Header->getSrcAddress());
+                if (destIE)
+                    EV_DETAIL << "multicast packet routed to output interface " << destIE->getInterfaceName() << " identified by source address\n";
+            }
+            if (!destIE) {
+                destIE = ift->findFirstMulticastInterface();
+                if (destIE)
+                    EV_DETAIL << "multicast packet routed to the first multicast interface " << destIE->getInterfaceName() << "\n";
+            }
+
+            // loop back a copy
+            if (multicastLoop && (!destIE || !destIE->isLoopback())) {
+                const NetworkInterface *loopbackIF = ift->findFirstLoopbackInterface();
+                if (loopbackIF) {
+                    auto packetCopy = packet->dup();
+                    packetCopy->addTagIfAbsent<InterfaceReq>()->setInterfaceId(loopbackIF->getInterfaceId());
+                    packetCopy->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
+                    fragmentPostRouting(packetCopy);
+                }
+            }
+
+            if (destIE) {
+                numMulticast++;
+                packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
+                packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
+                fragmentPostRouting(packet);
+            }
+            else {
+                EV_ERROR << "No multicast interface, packet dropped\n";
+                numUnroutable++;
+                PacketDropDetails details;
+                details.setReason(NO_INTERFACE_FOUND);
+                emit(packetDroppedSignal, packet, &details);
+                delete packet;
+            }
         }
     }
     else { // unicast and broadcast
@@ -474,39 +574,6 @@ void Ipv4::datagramLocalOut(Packet *packet)
             routeUnicastPacket(packet);
         }
     }
-}
-
-/* Choose the outgoing interface for the muticast datagram:
- *   1. use the interface specified by MULTICAST_IF socket option (received in the control info)
- *   2. lookup the destination address in the routing table
- *   3. if no route, choose the interface according to the source address
- *   4. or if the source address is unspecified, choose the first MULTICAST interface
- */
-const NetworkInterface *Ipv4::determineOutgoingInterfaceForMulticastDatagram(const Ptr<const Ipv4Header>& ipv4Header, const NetworkInterface *multicastIFOption)
-{
-    const NetworkInterface *ie = nullptr;
-    if (multicastIFOption) {
-        ie = multicastIFOption;
-        EV_DETAIL << "multicast packet routed by socket option via output interface " << ie->getInterfaceName() << "\n";
-    }
-    if (!ie) {
-        Ipv4Route *route = rt->findBestMatchingRoute(ipv4Header->getDestAddress());
-        if (route)
-            ie = route->getInterface();
-        if (ie)
-            EV_DETAIL << "multicast packet routed by routing table via output interface " << ie->getInterfaceName() << "\n";
-    }
-    if (!ie) {
-        ie = rt->getInterfaceByAddress(ipv4Header->getSrcAddress());
-        if (ie)
-            EV_DETAIL << "multicast packet routed by source address via output interface " << ie->getInterfaceName() << "\n";
-    }
-    if (!ie) {
-        ie = ift->findFirstMulticastInterface();
-        if (ie)
-            EV_DETAIL << "multicast packet routed via the first multicast interface " << ie->getInterfaceName() << "\n";
-    }
-    return ie;
 }
 
 void Ipv4::routeUnicastPacket(Packet *packet)
@@ -668,11 +735,22 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
         emit(ipv4DataOnRpfSignal, ipv4Header.get(), const_cast<NetworkInterface *>(fromIE)); // forwarding hook
 
         numForwarded++;
+
+        if (isLifetimeExpired(ipv4Header)) {
+            EV_WARN << "Dropping packet, lifetime expired\n";
+            numDropped++;
+            PacketDropDetails details;
+            details.setReason(LIFETIME_EXPIRED);
+            emit(packetDroppedSignal, packet, &details);
+            delete packet;
+            return;
+        }
+
         // copy original datagram for multiple destinations
         for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++) {
             Ipv4MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
             const NetworkInterface *destIE = outInterface->getInterface();
-            if (destIE != fromIE && outInterface->isEnabled()) {
+            if (destIE != fromIE) {
                 int ttlThreshold = destIE->getProtocolData<Ipv4InterfaceData>()->getMulticastTtlThreshold();
                 if (ipv4Header->getTimeToLive() <= ttlThreshold)
                     EV_WARN << "Not forwarding to " << destIE->getInterfaceName() << " (ttl threshold reached)\n";
@@ -826,6 +904,15 @@ void Ipv4::fragmentAndSend(Packet *packet)
         emit(packetDroppedSignal, packet, &details);
         EV_WARN << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
         sendIcmpError(packet, -1 /*TODO*/, ICMP_TIME_EXCEEDED, 0);
+        numDropped++;
+        return;
+    }
+
+    if (isLifetimeExpired(ipv4Header)) {
+        PacketDropDetails details;
+        details.setReason(LIFETIME_EXPIRED);
+        emit(packetDroppedSignal, packet, &details);
+        EV_WARN << "Dropping packet, lifetime expired\n";
         numDropped++;
         return;
     }
@@ -1002,8 +1089,15 @@ void Ipv4::encapsulate(Packet *transportPacket)
         default:
             throw cRuntimeError("Unknown CRC mode");
     }
+
+    if (enableTimestampOption) {
+        auto timestampOption = new Ipv4OptionTimestamp();
+        timestampOption->appendRecordAddress(rt->getRouterId());
+        timestampOption->appendRecordTimestamp(simTime());
+        ipv4Header->addOption(timestampOption);
+    }
+
     insertNetworkProtocolHeader(transportPacket, Protocol::ipv4, ipv4Header);
-    // setting Ipv4 options is currently not supported
 }
 
 void Ipv4::sendDatagramToOutput(Packet *packet)

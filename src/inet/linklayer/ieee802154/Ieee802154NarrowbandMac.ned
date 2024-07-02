@@ -13,7 +13,7 @@ module Ieee802154NarrowbandMac extends Ieee802154Mac
         useMACAcks = true;
 
         // Time needed to switch from sleep to rx.
-        // TODO This is probabily wrong, since it is used to compute
+        // TODO This is probably wrong, since it is used to compute
         //      the time for the CCA (and that might follow an RX state)
         rxSetupTime = 0s;
 

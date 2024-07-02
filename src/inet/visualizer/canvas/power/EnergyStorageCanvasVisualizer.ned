@@ -11,14 +11,14 @@ import inet.visualizer.base.EnergyStorageVisualizerBase;
 import inet.visualizer.contract.IEnergyStorageVisualizer;
 
 //
-// This module visualizes energyStorages on a 2D canvas.
+// This module visualizes `energyStorages` on a 2D canvas.
 //
 // @see ~EnergyStorageOsgVisualizer, ~EnergyStorageVisualizer, ~EnergyStorageVisualizerBase, ~IEnergyStorageVisualizer
 //
 simple EnergyStorageCanvasVisualizer extends EnergyStorageVisualizerBase like IEnergyStorageVisualizer
 {
     parameters:
-        double zIndex = default(10); // determines the drawing order of figures relative to other visualizers
+        double zIndex = default(10); // Determines the drawing order of figures relative to other visualizers
         @class(EnergyStorageCanvasVisualizer);
 }
 

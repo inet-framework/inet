@@ -14,14 +14,14 @@ import inet.visualizer.contract.ILinkBreakVisualizer;
 // This module visualizes link breaks on a 2D canvas. It displays an icon
 // for each link break in the network. See the documentation of the base
 // module for what constitutes a link break. The icon is positioned at the
-// middle point of the link.
+// midpoint of the link.
 //
 // @see ~LinkBreakOsgVisualizer, ~LinkBreakVisualizer, ~LinkBreakVisualizerBase, ~ILinkBreakVisualizer
 //
 simple LinkBreakCanvasVisualizer extends LinkBreakVisualizerBase like ILinkBreakVisualizer
 {
     parameters:
-        double zIndex = default(2); // determines the drawing order of figures relative to other visualizers
+        double zIndex = default(2); // Determines the drawing order of figures relative to other visualizers
         @class(LinkBreakCanvasVisualizer);
 }
 

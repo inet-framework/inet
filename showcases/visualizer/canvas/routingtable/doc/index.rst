@@ -46,7 +46,7 @@ parameter.
 Filtering is also possible. The :par:`nodeFilter` parameter controls which
 nodes' routing tables should be visualized (by default, all nodes), and
 the :par:`destinationFilter` parameter selects the set of destination nodes
-to consider (again, by default all nodes.)
+to consider (again, by default all nodes).
 
 The visualizer reacts to changes. For example, when a routing protocol
 changes a routing entry, or an IP address gets assigned to an interface
@@ -81,7 +81,7 @@ When the simulation is run, the network looks like this:
    :width: 80%
    :align: center
 
-Note that IP addresses are displayed above the nodes. These annotations has nothing
+Note that IP addresses are displayed above the nodes. These annotations have nothing
 to do with the :ned:`RoutingTableVisualizer`; they are displayed because we
 configured it in :ned:`InterfaceTableVisualizer` to improve clarity.
 

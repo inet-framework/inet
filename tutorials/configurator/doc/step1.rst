@@ -7,7 +7,7 @@ Goals
 In the first step, we want to automatically assign addresses in a wired
 network. To make the task a little bit more complicated, the network
 won't be a single LAN, but several LANs connected via routers. We want to
-place nodes on each subnet into a different subnet, but otherwise, we
+place nodes on each subnet into different subnets, but otherwise, we
 don't care how addresses are assigned. We also ignore the question of
 filling routing tables for now -- it will be covered in later steps.
 
@@ -83,7 +83,7 @@ but tell the visualizer to ignore switches and access points, as they
 don't have IP addresses.
 
 Other settings in the ``General`` section, such as the WiFi bit rate,
-are not relevant for the topic of the tutorial.
+are not relevant to the topic of the tutorial.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -107,7 +107,7 @@ parameter.
 Note that the configurator assigned a 29-bit netmask to the hosts and
 the router interfaces connecting to the switches, and a 30-bit netmask
 to the other router interfaces. Three hosts and the router's interface
-towards a switch as a group has four interfaces, thus, a 30-bit netmask
+towards a switch as a group have four interfaces, thus, a 30-bit netmask
 with a 2-bit host identifier would have sufficed. However, the
 configurator doesn't assign addresses where the host identifier is
 all-zeros or all-ones (as they commonly refer to the subnet itself

@@ -17,7 +17,7 @@ package inet.linklayer.ieee80211.mgmt;
 simple Ieee80211MgmtStaSimplified like IIeee80211Mgmt
 {
     parameters:
-        string accessPointAddress; // MAC address of associate AP
+        string accessPointAddress; // MAC address of associated AP
         string interfaceTableModule;
         string mibModule;
         string macModule;               // The path to the MAC module
@@ -25,7 +25,6 @@ simple Ieee80211MgmtStaSimplified like IIeee80211Mgmt
     gates:
         input macIn @labels(Ieee80211MacHeader);
         output macOut @labels(Ieee80211MacHeader);
-        input agentIn @loose;   // unused dummy to statisfy the IIeee80211Mgmt interface
-        output agentOut @loose; // unused dummy to statisfy the IIeee80211Mgmt interface
+        input agentIn @loose;   // Unused dummy to satisfy the IIeee80211Mgmt interface
+        output agentOut @loose; // Unused dummy to satisfy the IIeee80211Mgmt interface
 }
-

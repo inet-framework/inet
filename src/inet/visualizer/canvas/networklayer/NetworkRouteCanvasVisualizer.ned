@@ -11,10 +11,10 @@ import inet.visualizer.base.PathVisualizerBase;
 import inet.visualizer.contract.INetworkRouteVisualizer;
 
 //
-// This module visualizes network routes on a 2D canvas. It displays an
+// This module visualizes network routes on a 2D canvas. It displays a
 // polyline arrow for each active route in the network. See the documentation of
 // the base module for what constitutes an active route. The arrow points from
-// the source towards the destination. If a link is used in both directions then
+// the source towards the destination. If a link is used in both directions, then
 // there are arrowheads on both ends of the arrow. Each polyline fades out over
 // time until the route becomes inactive unless it is reinforced by another
 // packet. The polyline automatically follows the movement of mobile nodes.
@@ -24,7 +24,7 @@ import inet.visualizer.contract.INetworkRouteVisualizer;
 simple NetworkRouteCanvasVisualizer extends PathVisualizerBase like INetworkRouteVisualizer
 {
     parameters:
-        double zIndex = default(3); // determines the drawing order of figures relative to other visualizers
+        double zIndex = default(3); // Determines the drawing order of figures relative to other visualizers
         @class(NetworkRouteCanvasVisualizer);
 }
 

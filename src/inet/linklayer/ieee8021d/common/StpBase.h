@@ -11,8 +11,8 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/linklayer/common/MacAddress.h"
-#include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/linklayer/ethernet/contract/IMacForwardingTable.h"
+#include "inet/linklayer/ieee8021d/common/Ieee8021dInterfaceData.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 
 namespace inet {

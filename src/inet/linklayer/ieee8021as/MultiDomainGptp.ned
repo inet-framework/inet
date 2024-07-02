@@ -7,31 +7,31 @@
 
 package inet.linklayer.ieee8021as;
 
-import inet.applications.contract.IApp;
+import inet.linklayer.contract.IGptp;
 import inet.queueing.classifier.PacketClassifier;
 import inet.queueing.common.PacketMultiplexer;
 
 //
 // This module combines multiple ~Gptp modules, one per time domain into a multi
 // time domain time synchronization module. Each gPTP time domain is automatically
-// configured to use the corresponding subclock of the clock passed in to this
+// configured to use the corresponding subclock of the clock passed into this
 // module.
 //
 // @see ~MultiClock
 //
-module MultiDomainGptp like IApp
+module MultiDomainGptp like IGptp
 {
     parameters:
-        string clockModule; // relative module path of the multi clock
-        string interfaceTableModule; // relative module path of the interface table
-        int numDomains; // number of time synchronization domains
+        string clockModule; // Relative module path of the multi clock
+        string interfaceTableModule; // Relative module path of the interface table
+        int numDomains; // Number of time synchronization domains
         string gptpNodeType; // @enum("GptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE
         @display("i=block/app");
     gates:
         input socketIn;
         output socketOut;
     submodules:
-        domain[numDomains]: <default("Gptp")> like IApp {
+        domain[numDomains]: <default("Gptp")> like IGptp {
             gptpNodeType = default(parent.gptpNodeType);
             clockModule = default(absPath(parent.clockModule) + ".clock[" + string(this.index) + "]");
             interfaceTableModule = default(absPath(parent.interfaceTableModule));

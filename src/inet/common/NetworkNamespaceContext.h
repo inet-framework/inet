@@ -12,14 +12,23 @@
 
 namespace inet {
 
+// TODO: what should happen when using multiple threads?
+extern std::map<std::string, int> localNetworkNamespaces;
+
+void createNetworkNamespace(const char *name, bool global);
+void deleteNetworkNamespace(const char *name);
+bool existsNetworkNamespace(const char *name);
+
 class INET_API NetworkNamespaceContext
 {
   protected:
-    int oldNs = -1;
-    int newNs = -1;
+    std::string name;
+    int oldFd = -1;
+    int newFd = -1;
+    bool global = false;
 
   public:
-    NetworkNamespaceContext(const char *networkNamespace);
+    NetworkNamespaceContext(const char *name);
     ~NetworkNamespaceContext();
 };
 

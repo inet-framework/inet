@@ -10,7 +10,7 @@ package inet.linklayer.ieee8021ae;
 import inet.queueing.base.PacketFlowBase;
 
 //
-// TODO this module is incomplete
+// TODO: this module is incomplete
 //
 simple Ieee8021aeTagEpdHeaderInserter extends PacketFlowBase like IIeee8021aeTagEpdHeaderInserter
 {

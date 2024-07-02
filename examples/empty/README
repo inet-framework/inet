@@ -1,0 +1,3 @@
+This example contains an empty network that can be run with all INET features disabled.
+The simulation still loads and initializes the INET library though. When the simulation
+is executed, it immediately terminates.

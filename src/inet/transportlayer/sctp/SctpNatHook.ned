@@ -9,7 +9,7 @@
 package inet.transportlayer.sctp;
 
 //
-// SctpNatHook module.
+// SCTP NAT hook module.
 //
 simple SctpNatHook
 {

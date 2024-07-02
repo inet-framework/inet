@@ -19,6 +19,16 @@ simple PassivePacketSinkBase extends PacketSinkBase
         @signal[packetPushed](type=inet::Packet);
         // the statistical value is the packet
         @statistic[packets](title="packets"; source=packetPushed; record=count; unit=pk);
+        // the statistical value is the packet, packet name must have an index suffix (e.g. Foo-42)
+        @statistic[duplicatePackets](title="duplicate packets"; source=duplicatePacket(packetPushed); record=count?; unit=pk);
+        // the statistical value is the length of the packet, packet name must have an index suffix (e.g. Foo-42)
+        @statistic[duplicatePacketLengths](title="duplicate packet lengths"; source=packetLength(duplicatePacket(packetPushed)); record=vector?; unit=b; interpolationmode=none);
+        // the statistical value is the packet, packet name must have an index suffix (e.g. Foo-42)
+        @statistic[outOfOrderPackets](title="out of order packets"; source=outOfOrderPacket(packetPushed); record=count?; unit=pk);
+        // the statistical value is the length of the packet, packet name must have an index suffix (e.g. Foo-42)
+        @statistic[outOfOrderPacketLengths](title="out of order packet lenghts"; source=packetLength(outOfOrderPacket(packetPushed)); record=vector?; unit=b; interpolationmode=none);
+        // the statistical value is the packet index, packet name must have an index suffix (e.g. Foo-42)
+        @statistic[missingPacketIndices](title="missing packet indices"; source=missingPacketIndex(packetPushed); record=count?; unit=pk);
         // the statistical value is the length of the packet
         @statistic[packetLengths](title="packet lengths"; source=packetLength(packetPushed); record=sum,histogram,vector; unit=b; interpolationmode=none);
         // the statistical value is the data rate of the packets

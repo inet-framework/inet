@@ -8,7 +8,7 @@
 package inet.transportlayer.sctp;
 
 //
-// SctpNatHook module.
+// SCTP UDP hook module.
 //
 simple SctpUdpHook
 {

@@ -19,14 +19,14 @@ showcase, we will demonstrate cut-through switching and compare it to store-and-
 The Model
 ---------
 
-Cut-through switching reduces switching delay, but skips the FCS check in the switch. The FCS
-is at the end of the Ethernet frame; the FCS check is performed in destination host.
+Cut-through switching reduces the switching delay but skips the FCS check in the switch. The FCS
+is at the end of the Ethernet frame; the FCS check is performed in the destination host.
 (This is because by the time the FCS check could happen, the frame is almost completely transmitted,
 so it makes no sense).
 The delay reduction is more substantial if the packet goes through multiple switches
 (as one packet transmission duration can be saved at each switch).
 
-Cut-through switching makes use of intra-node  packet streaming in INET's modular
+Cut-through switching makes use of intranode packet streaming in INET's modular
 Ethernet model. Packet streaming is required because the frame needs to be processed
 as a stream (as opposed to as a whole packet) in order for the switch to be able to
 start forwarding it before the whole packet is received.
@@ -34,7 +34,7 @@ start forwarding it before the whole packet is received.
 .. note:: The default is store-and-forward behavior in hosts such as :ned:`StandardHost`.
 
 The example simulation contains two :ned:`TsnDevice` nodes connected by two
-:ned:`TsnSwitch`' nodes (all connections are 1 Gbps):
+:ned:`TsnSwitch` nodes (all connections are 1 Gbps):
 
 .. .. figure:: media/Network.png
    :align: center
@@ -60,7 +60,7 @@ parameter to ``true``.
 In addition, all necessary components in the switch need to support packet streaming.
 The cut-through interface in the switches supports packet streaming by default; the default PHY layer in 
 hosts need to be replaced with
-:ned:`EthernetStreamingPhyLayer`, which support packet streaming.
+:ned:`EthernetStreamingPhyLayer`, which supports packet streaming.
 
 Results
 -------
@@ -95,7 +95,7 @@ vs cut-through switching:
    :align: center
    :width: 100%
 
-We can verify that result analytically. In case of store-and-forward, the end-to-end duration
+We can verify that result analytically. In the case of store-and-forward, the end-to-end duration
 is ``3 * (transmission time + propagation time)``, around 25.296 ms. In the case of cut-through,
 the duration is ``1 * transmission time + 3 propagation time + 2 * cut-through delay``, around 8.432 ms.
 

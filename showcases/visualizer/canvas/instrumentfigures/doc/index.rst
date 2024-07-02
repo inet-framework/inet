@@ -96,7 +96,7 @@ We would like the following statistics to be displayed using instrument figures:
    displayed by an ``indexedImage`` figure. IDLE means nothing to send,
    DEFER means the channel is in use, IFS\_AND\_BACKOFF means the channel is
    free and contending to acquire channel;
--  Download progress should be displayed by a ``progessMeter`` figure;
+-  Download progress should be displayed by a ``progressMeter`` figure;
 -  The number of socket data transfers to the client application should be
    displayed by a ``counter`` figure.
 

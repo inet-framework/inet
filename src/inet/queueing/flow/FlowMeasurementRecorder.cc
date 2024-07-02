@@ -8,6 +8,7 @@
 #include "inet/queueing/flow/FlowMeasurementRecorder.h"
 
 #include "inet/common/FlowTag.h"
+#include "inet/common/INETUtils.h"
 #include "inet/common/PacketEventTag.h"
 
 namespace inet {
@@ -25,8 +26,10 @@ static bool matchesString(cMatchExpression& matchExpression, const char *string)
 
 FlowMeasurementRecorder::~FlowMeasurementRecorder()
 {
-    packetEventFile.closeArray();
-    packetEventFile.close();
+    if (measurePacketEvent) {
+        packetEventFile.closeArray();
+        packetEventFile.close();
+    }
 }
 
 cGate *FlowMeasurementRecorder::getRegistrationForwardingGate(cGate *gate)
@@ -59,8 +62,12 @@ void FlowMeasurementRecorder::initialize(int stage)
         measureTransmissionTime = matchesString(measureMatcher, "transmissionTime");
         measurePropagationTime = matchesString(measureMatcher, "propagationTime");
         measurePacketEvent = matchesString(measureMatcher, "packetEvent");
-        packetEventFile.open(par("packetEventFileName").stringValue(), std::ios::out);
-        packetEventFile.openArray();
+        if (measurePacketEvent) {
+            const char *fileName = par("packetEventFileName");
+            inet::utils::makePathForFile(fileName);
+            packetEventFile.open(fileName, std::ios::out);
+            packetEventFile.openArray();
+        }
     }
 }
 
@@ -122,7 +129,7 @@ void FlowMeasurementRecorder::endMeasurements(Packet *packet)
             packetEventFile.writeInt("offset", b(o).get());
             packetEventFile.writeInt("length", b(l).get());
             packetEventFile.openArray("events");
-            for (int i = 0; i < packetEventTag->getPacketEventsArraySize(); i++) {
+            for (size_t i = 0; i < packetEventTag->getPacketEventsArraySize(); i++) {
                 auto packetEvent = packetEventTag->getPacketEvents(i);
                 auto kind = packetEvent->getKind();
                 auto kindName = cEnum::get("inet::PacketEventKind")->getStringFor(kind);

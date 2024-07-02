@@ -116,28 +116,28 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 </scenario>
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: results/General-0.rt
-\+R #\d+  3\.1965\d+s  AODVTest\.intermediateNodeA  145\.236\.0\.2  145\.236\.0\.1/32  145\.236\.0\.1  wlan0
-\+R #\d+  3\.1965\d+s  AODVTest\.intermediateNodeB  145\.236\.0\.3  145\.236\.0\.1/32  145\.236\.0\.1  wlan0
-\+R #\d+  3\.1998\d+s  AODVTest\.sender  145\.236\.0\.1  145\.236\.0\.2/32  145\.236\.0\.2  wlan0
-\+R #\d+  3\.1998\d+s  AODVTest\.intermediateNodeB  145\.236\.0\.3  145\.236\.0\.2/32  145\.236\.0\.2  wlan0
-\+R #\d+  3\.1998\d+s  AODVTest\.receiver  145\.236\.0\.4  145\.236\.0\.2/32  145\.236\.0\.2  wlan0
-\+R #\d+  3\.1998\d+s  AODVTest\.receiver  145\.236\.0\.4  145\.236\.0\.1/32  145\.236\.0\.2  wlan0
-\+R #\d+  3\.2004\d+s  AODVTest\.intermediateNodeA  145\.236\.0\.2  145\.236\.0\.4/32  145\.236\.0\.4  wlan0
-\+R #\d+  3\.2008\d+s  AODVTest\.intermediateNodeA  145\.236\.0\.2  145\.236\.0\.3/32  145\.236\.0\.3  wlan0
-\+R #\d+  3\.2008\d+s  AODVTest\.sender  145\.236\.0\.1  145\.236\.0\.3/32  145\.236\.0\.3  wlan0
-\+R #\d+  3\.2008\d+s  AODVTest\.receiver  145\.236\.0\.4  145\.236\.0\.3/32  145\.236\.0\.3  wlan0
-\+R #\d+  3\.2041\d+s  AODVTest\.sender  145\.236\.0\.1  145\.236\.0\.4/32  145\.236\.0\.2  wlan0
-\-R #\d+  12\.3s  AODVTest\.intermediateNodeA  145\.236\.0\.2  145\.236\.0\.1/32  145\.236\.0\.1  wlan0
-\-R #\d+  12\.3s  AODVTest\.intermediateNodeA  145\.236\.0\.2  145\.236\.0\.3/32  145\.236\.0\.3  wlan0
-\-R #\d+  12\.3s  AODVTest\.intermediateNodeA  145\.236\.0\.2  145\.236\.0\.4/32  145\.236\.0\.4  wlan0
+\+R #\d+  3\.1965\d+s  AODVTest\.intermediateNodeA  145\.236\.0\.2  145\.236\.0\.1/32  145\.236\.0\.1  wlan0 .*?
+\+R #\d+  3\.1965\d+s  AODVTest\.intermediateNodeB  145\.236\.0\.3  145\.236\.0\.1/32  145\.236\.0\.1  wlan0 .*?
+\+R #\d+  3\.1998\d+s  AODVTest\.sender  145\.236\.0\.1  145\.236\.0\.2/32  145\.236\.0\.2  wlan0 .*?
+\+R #\d+  3\.1998\d+s  AODVTest\.intermediateNodeB  145\.236\.0\.3  145\.236\.0\.2/32  145\.236\.0\.2  wlan0 .*?
+\+R #\d+  3\.1998\d+s  AODVTest\.receiver  145\.236\.0\.4  145\.236\.0\.2/32  145\.236\.0\.2  wlan0 .*?
+\+R #\d+  3\.1998\d+s  AODVTest\.receiver  145\.236\.0\.4  145\.236\.0\.1/32  145\.236\.0\.2  wlan0 .*?
+\+R #\d+  3\.2004\d+s  AODVTest\.intermediateNodeA  145\.236\.0\.2  145\.236\.0\.4/32  145\.236\.0\.4  wlan0 .*?
+\+R #\d+  3\.2008\d+s  AODVTest\.intermediateNodeA  145\.236\.0\.2  145\.236\.0\.3/32  145\.236\.0\.3  wlan0 .*?
+\+R #\d+  3\.2008\d+s  AODVTest\.sender  145\.236\.0\.1  145\.236\.0\.3/32  145\.236\.0\.3  wlan0 .*?
+\+R #\d+  3\.2008\d+s  AODVTest\.receiver  145\.236\.0\.4  145\.236\.0\.3/32  145\.236\.0\.3  wlan0 .*?
+\+R #\d+  3\.2041\d+s  AODVTest\.sender  145\.236\.0\.1  145\.236\.0\.4/32  145\.236\.0\.2  wlan0 .*?
+\-R #\d+  12\.3s  AODVTest\.intermediateNodeA  145\.236\.0\.2  145\.236\.0\.1/32  145\.236\.0\.1  wlan0 .*?
+\-R #\d+  12\.3s  AODVTest\.intermediateNodeA  145\.236\.0\.2  145\.236\.0\.3/32  145\.236\.0\.3  wlan0 .*?
+\-R #\d+  12\.3s  AODVTest\.intermediateNodeA  145\.236\.0\.2  145\.236\.0\.4/32  145\.236\.0\.4  wlan0 .*?
 \-R #\d+  12\.3s  AODVTest\.intermediateNodeA  145\.236\.0\.2  145\.236\.0\.0/16  <unspec>  wlan0
 \-R #\d+  12\.3s  AODVTest\.intermediateNodeA  145\.236\.0\.2  127\.0\.0\.0/8  <unspec>  lo0
-\*R #\d+  14\.2008\d+s  AODVTest\.receiver  145\.236\.0\.4  145\.236\.0\.1/32  145\.236\.0\.3  wlan0
-\+R #\d+  14\.2014\d+s  AODVTest\.intermediateNodeB  145\.236\.0\.3  145\.236\.0\.4/32  145\.236\.0\.4  wlan0
-\*R #\d+  14\.2061\d+s  AODVTest\.sender  145\.236\.0\.1  145\.236\.0\.4/32  145\.236\.0\.3  wlan0
-\-R #\d+  21\.1998\d+s  AODVTest\.intermediateNodeB  145\.236\.0\.3  145\.236\.0\.2/32  145\.236\.0\.2  wlan0
-\-R #\d+  28\.2952\d+s  AODVTest\.sender  145\.236\.0\.1  145\.236\.0\.2/32  145\.236\.0\.2  wlan0
-\-R #\d+  30\.1960\d+s  AODVTest\.receiver  145\.236\.0\.4  145\.236\.0\.2/32  145\.236\.0\.2  wlan0
+\*R #\d+  14\.2008\d+s  AODVTest\.receiver  145\.236\.0\.4  145\.236\.0\.1/32  145\.236\.0\.3  wlan0 .*?
+\+R #\d+  14\.2014\d+s  AODVTest\.intermediateNodeB  145\.236\.0\.3  145\.236\.0\.4/32  145\.236\.0\.4  wlan0 .*?
+\*R #\d+  14\.2061\d+s  AODVTest\.sender  145\.236\.0\.1  145\.236\.0\.4/32  145\.236\.0\.3  wlan0 .*?
+\-R #\d+  21\.1998\d+s  AODVTest\.intermediateNodeB  145\.236\.0\.3  145\.236\.0\.2/32  145\.236\.0\.2  wlan0 .*?
+\-R #\d+  28\.2952\d+s  AODVTest\.sender  145\.236\.0\.1  145\.236\.0\.2/32  145\.236\.0\.2  wlan0 .*?
+\-R #\d+  30\.1960\d+s  AODVTest\.receiver  145\.236\.0\.4  145\.236\.0\.2/32  145\.236\.0\.2  wlan0 .*?
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

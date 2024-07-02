@@ -8,13 +8,13 @@ Internet Routing
 Overview
 --------
 
-INET Framework has models for several internet routing protocols,
-including RIP, OSPF and BGP.
+The INET Framework has models for several internet routing protocols,
+including RIP, OSPF, and BGP.
 
 The easiest way to add routing to a network is to use the :ned:`Router`
-NED type for routers. :ned:`Router` contains a conditional instance for
+NED type for routers. The :ned:`Router` type contains a conditional instance for
 each of the above protocols. These submodules can be enabled by setting
-the :par:`hasRip`, :par:`hasOspf` and/or :par:`hasBgp` parameters to
+the :par:`hasRip`, :par:`hasOspf`, and/or :par:`hasBgp` parameters to
 ``true``.
 
 Example:
@@ -24,8 +24,8 @@ Example:
    **.hasRip = true
 
 There are also NED types called :ned:`RipRouter`, :ned:`OspfRouter`,
-:ned:`BgpRouter`, which are all :ned:`Router`’s with appropriate routing
-protocol enabled.
+and :ned:`BgpRouter`, which are all variants of the :ned:`Router` module with the respective routing
+protocols enabled.
 
 .. _ug:sec:routing:rip:
 
@@ -33,17 +33,16 @@ RIP
 ---
 
 RIP (Routing Information Protocol) is a distance-vector routing protocol
-which employs the hop count as a routing metric. RIP prevents routing
-loops by implementing a limit on the number of hops allowed in a path
-from source to destination. RIP uses the *split horizon with poison
-reverse* technique to work around the “count-to-infinity” problem.
+that employs the hop count as a routing metric. Routing loops are prevented
+in RIP by implementing a hop limit in the path from the source to the destination.
+RIP uses the *split horizon with poison reverse* technique to address the "count-to-infinity" problem.
 
 The :ned:`Rip` module implements distance vector routing as specified in
 RFC 2453 (RIPv2) and RFC 2080 (RIPng). The behavior can be selected by
-setting the :par:`mode` parameter to either ``"RIPv2"`` or
-``"RIPng"``. Protocol configuration such as link metrics and
+setting the :par:`mode` parameter to either `RIPv2`` or
+``RIPng``. Protocol configuration such as link metrics and
 per-interface operation mode (such as whether RIP is enabled on the
-interface, and whether to use split horizon) can be specified in XML
+interface and whether to use split horizon) can be specified in XML
 using the :par:`ripConfig` parameter.
 
 The following example configures a :ned:`Router` module to use RIPv2:
@@ -54,17 +53,17 @@ The following example configures a :ned:`Router` module to use RIPv2:
    **.mode = "RIPv2"
    **.ripConfig = xmldoc("RIPConfig.xml")
 
-The configuration file specifies the per interface parameters. Each
+The configuration file specifies the per-interface parameters. Each
 ``<interface>`` element configures one or more interfaces; the
 ``hosts``, ``names``, ``towards``, ``among`` attributes
-select the configured interfaces (in a similar way as with
+select the configured interfaces (similar to
 :ned:`Ipv4NetworkConfigurator`). See the :doc:`ch-network-autoconfig` chapter
 for further information.
 
 Additional attributes:
 
--  ``metric``: metric assigned to the link, default value is 1. This
-   value is added to the metric of a learned route, received on this
+-  ``metric``: metric assigned to the link, with a default value of 1. This
+   value is added to the metric of a learned route received on this
    interface. It must be an integer in the [1,15] interval.
 
 -  ``mode``: mode of the interface.
@@ -77,10 +76,10 @@ The mode attribute can be one of the following:
 -  ``NoSplitHorizon``: no split horizon filtering; send all routes
    to neighbors.
 
--  ``SplitHorizon``: do not sent routes whose next hop is the
+-  ``SplitHorizon``: do not send routes whose next hop is the
    neighbor.
 
--  ``SplitHorizonPoisenedReverse`` (default): if the next hop is
+-  ``SplitHorizonPoisonedReverse`` (default): if the next hop is
    the neighbor, then set the metric of the route to infinity.
 
 The following example sets the link metric between router ``R1`` and
@@ -108,7 +107,7 @@ system (AS).
 The :ned:`Ospfv2` module implements OSPF protocol version 2. Areas and
 routers can be configured using an XML file specified by the
 :par:`ospfConfig` parameter. Various parameters for the network
-interfaces can be specified also in the XML file or as a parameter of
+interfaces can also be specified in the XML file or as a parameter of
 the :ned:`Ospfv2` module.
 
 .. code-block:: ini
@@ -119,11 +118,11 @@ the :ned:`Ospfv2` module.
 
 The ``<OSPFASConfig>`` root element may contain ``<Area>`` and
 ``<Router>`` elements with various attributes specifying the
-parameters for the network interfaces. Most importantly ``<Area>``
+parameters for the network interfaces. Most importantly, ``<Area>``
 contains ``<AddressRange>`` elements enumerating the network
-addresses that should be advertized by the protocol. Also
+addresses that should be advertised by the protocol. Also,
 ``<Router>`` elements may contain data for configuring various
-pont-to-point or broadcast interfaces.
+point-to-point or broadcast interfaces.
 
 .. code-block:: xml
 
@@ -167,13 +166,13 @@ parameter.
 
    **.bgpConfig = xmldoc("BGPConfig.xml")
 
-The configuration file may contain ``<TimerParams>``, ``<AS>`` and
+The configuration file may contain ``<TimerParams>``, ``<AS>``, and
 ``Session`` elements at the top level.
 
 -  ``<TimerParams>``: allows specifying various timing parameters for
    the routers.
 
--  ``<AS>``: defines Autonomous Systems, routers and rules to be
+-  ``<AS>``: defines Autonomous Systems, routers, and rules to be
    applied.
 
 -  ``<Session>``: specifies open sessions between edge routers. It
@@ -226,12 +225,12 @@ The configuration file may contain ``<TimerParams>``, ``<AS>`` and
      </Session>
    </BGPConfig>
 
-Inside ``<AS>`` elements various rules can be sepecified:
+Inside ``<AS>`` elements, various rules can be specified:
 
 -  DenyRoute: deny route in IN and OUT traffic (``Address`` and
    ``Netmask`` attributes must be specified.)
 
--  DenyRouteIN : deny route in IN traffic (``Address`` and
+-  DenyRouteIN: deny route in IN traffic (``Address`` and
    ``Netmask`` attributes must be specified.)
 
 -  DenyRouteOUT: deny route in OUT traffic (``Address`` and
@@ -240,7 +239,7 @@ Inside ``<AS>`` elements various rules can be sepecified:
 -  DenyAS: deny routes learned by AS in IN and OUT traffic (AS id must
    be specified as the body of the element.)
 
--  DenyASIN : deny routes learned by AS in IN traffic (AS id must be
+-  DenyASIN: deny routes learned by AS in IN traffic (AS id must be
    specified as the body of the element.)
 
 -  DenyASOUT: deny routes learned by AS in OUT traffic (AS id must be

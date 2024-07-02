@@ -25,20 +25,20 @@ import inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase;
 module Ieee80211Radio extends FlatRadioBase
 {
     parameters:
-        string opMode @enum("a", "b", "g(erp)", "g(mixed)", "n(mixed-2.4Ghz)", "p", "ac") = default("g(mixed)"); // operation mode
-        string bandName @enum("2.4 GHz", "5 GHz", "5 GHz (20 MHz)", "5 GHz (40 MHz)", "5 GHz (80 MHz)", "5 GHz (160 MHz)", "5.9 GHz") = default("2.4 GHz"); // band name
-        int channelNumber = default(0);                                 // initial channel number within the band (TODO this is offset by 1)
+        string opMode @enum("a", "b", "g(erp)", "g(mixed)", "n(mixed-2.4Ghz)", "p", "ac") = default("g(mixed)"); // Operation mode
+        string bandName @enum("2.4 GHz", "5 GHz", "5 GHz (20 MHz)", "5 GHz (40 MHz)", "5 GHz (80 MHz)", "5 GHz (160 MHz)", "5.9 GHz") = default("2.4 GHz"); // Band name
+        int channelNumber = default(0);                                 // Initial channel number within the band (TODO this is offset by 1)
         string crcMode @enum("declared","computed") = default("declared");
         transmitter.typename = default("Ieee80211Transmitter");
         receiver.typename = default("Ieee80211Receiver");
         receiver.errorModel.typename = default(signalAnalogRepresentation != "unitDisk" ? "Ieee80211NistErrorModel" : "");
-        centerFrequency @unit(Hz) = default(2.412GHz);                 // the center frequency of the band is automatically set by the radio
+        centerFrequency @unit(Hz) = default(2.412GHz);                 // The center frequency of the band is automatically set by the radio
         bandwidth @unit(Hz) = default(nan MHz);
         transmitter.preambleDuration = default(-1 s);
         transmitter.bitrate = default(11Mbps);
         transmitter.headerLength = default(192b);
         transmitter.power = default(20mW);
-        receiver.bandwidth = default(22 MHz); // the highest value
+        receiver.bandwidth = default(22 MHz); // The highest value
         receiver.sensitivity = default(-85dBm);
         receiver.energyDetection = default(-85dBm);
         receiver.snirThreshold = default(4dB);

@@ -21,7 +21,6 @@ simple Ted
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
-        string routingTableModule;
+        string routingTableModule;  // The path to the RoutingTable module
         @display("i=block/table");
 }
-

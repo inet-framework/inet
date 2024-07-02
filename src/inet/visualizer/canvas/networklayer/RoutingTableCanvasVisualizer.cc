@@ -24,6 +24,17 @@ RoutingTableCanvasVisualizer::RouteCanvasVisualization::~RouteCanvasVisualizatio
     delete figure;
 }
 
+RoutingTableCanvasVisualizer::MulticastRouteCanvasVisualization::MulticastRouteCanvasVisualization(LabeledLineFigure *figure, const Ipv4MulticastRoute *route, int nodeModuleId, int nextHopModuleId) :
+    MulticastRouteVisualization(route, nodeModuleId, nextHopModuleId),
+    figure(figure)
+{
+}
+
+RoutingTableCanvasVisualizer::MulticastRouteCanvasVisualization::~MulticastRouteCanvasVisualization()
+{
+    delete figure;
+}
+
 void RoutingTableCanvasVisualizer::initialize(int stage)
 {
     RoutingTableVisualizerBase::initialize(stage);
@@ -41,10 +52,23 @@ void RoutingTableCanvasVisualizer::initialize(int stage)
 
 void RoutingTableCanvasVisualizer::refreshDisplay() const
 {
+    RoutingTableVisualizerBase::refreshDisplay();
     auto simulation = getSimulation();
     for (auto it : routeVisualizations) {
         auto routeVisualization = it.second;
         auto routeCanvasVisualization = static_cast<const RouteCanvasVisualization *>(routeVisualization);
+        auto figure = routeCanvasVisualization->figure;
+        auto sourceModule = simulation->getModule(routeVisualization->sourceModuleId);
+        auto destinationModule = simulation->getModule(routeVisualization->destinationModuleId);
+        auto sourcePosition = getContactPosition(sourceModule, getPosition(destinationModule), lineContactMode, lineContactSpacing);
+        auto destinationPosition = getContactPosition(destinationModule, getPosition(sourceModule), lineContactMode, lineContactSpacing);
+        auto shift = lineManager->getLineShift(routeVisualization->sourceModuleId, routeVisualization->destinationModuleId, sourcePosition, destinationPosition, lineShiftMode, routeVisualization->shiftOffset) * lineShift;
+        figure->setStart(canvasProjection->computeCanvasPoint(sourcePosition + shift));
+        figure->setEnd(canvasProjection->computeCanvasPoint(destinationPosition + shift));
+    }
+    for (auto it : multicastRouteVisualizations) {
+        auto routeVisualization = it.second;
+        auto routeCanvasVisualization = static_cast<const MulticastRouteCanvasVisualization *>(routeVisualization);
         auto figure = routeCanvasVisualization->figure;
         auto sourceModule = simulation->getModule(routeVisualization->sourceModuleId);
         auto destinationModule = simulation->getModule(routeVisualization->destinationModuleId);
@@ -98,6 +122,51 @@ void RoutingTableCanvasVisualizer::refreshRouteVisualization(const RouteVisualiz
     auto routeCanvasVisualization = static_cast<const RouteCanvasVisualization *>(routeVisualization);
     auto labelFigure = routeCanvasVisualization->figure->getLabelFigure();
     auto text = displayRoutesIndividually ? getRouteVisualizationText(routeCanvasVisualization->route) : std::to_string(routeVisualization->numRoutes) + (routeVisualization->numRoutes > 1 ? " routes" : " route");
+    labelFigure->setText(text.c_str());
+}
+
+const RoutingTableVisualizerBase::MulticastRouteVisualization *RoutingTableCanvasVisualizer::createMulticastRouteVisualization(Ipv4MulticastRoute *route, cModule *node, cModule *nextHop) const
+{
+    auto figure = new LabeledLineFigure("routing entry");
+    figure->setTags((std::string("route ") + tags).c_str());
+    figure->setTooltip("This arrow represents a route in a routing table");
+    figure->setAssociatedObject(route);
+    auto lineFigure = figure->getLineFigure();
+    lineFigure->setEndArrowhead(cFigure::ARROW_TRIANGLE);
+    lineFigure->setLineWidth(lineWidth);
+    lineFigure->setLineColor(lineColor);
+    lineFigure->setLineStyle(lineStyle);
+    auto labelFigure = figure->getLabelFigure();
+    labelFigure->setFont(labelFont);
+    labelFigure->setColor(labelColor);
+    labelFigure->setVisible(displayLabels);
+    auto routeVisualization = new MulticastRouteCanvasVisualization(figure, route, node->getId(), nextHop->getId());
+    routeVisualization->shiftPriority = 0.5;
+    refreshMulticastRouteVisualization(routeVisualization);
+    return routeVisualization;
+}
+
+void RoutingTableCanvasVisualizer::addMulticastRouteVisualization(const MulticastRouteVisualization *routeVisualization)
+{
+    RoutingTableVisualizerBase::addMulticastRouteVisualization(routeVisualization);
+    auto routeCanvasVisualization = static_cast<const MulticastRouteCanvasVisualization *>(routeVisualization);
+    lineManager->addModuleLine(routeVisualization);
+    routeGroup->addFigure(routeCanvasVisualization->figure);
+}
+
+void RoutingTableCanvasVisualizer::removeMulticastRouteVisualization(const MulticastRouteVisualization *routeVisualization)
+{
+    RoutingTableVisualizerBase::removeMulticastRouteVisualization(routeVisualization);
+    auto routeCanvasVisualization = static_cast<const MulticastRouteCanvasVisualization *>(routeVisualization);
+    lineManager->removeModuleLine(routeVisualization);
+    routeGroup->removeFigure(routeCanvasVisualization->figure);
+}
+
+void RoutingTableCanvasVisualizer::refreshMulticastRouteVisualization(const MulticastRouteVisualization *routeVisualization) const
+{
+    auto routeCanvasVisualization = static_cast<const MulticastRouteCanvasVisualization *>(routeVisualization);
+    auto labelFigure = routeCanvasVisualization->figure->getLabelFigure();
+    auto text = displayRoutesIndividually ? getMulticastRouteVisualizationText(routeCanvasVisualization->route) : std::to_string(routeVisualization->numRoutes) + (routeVisualization->numRoutes > 1 ? " routes" : " route");
     labelFigure->setText(text.c_str());
 }
 

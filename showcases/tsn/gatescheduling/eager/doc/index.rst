@@ -16,7 +16,7 @@ The Model
   can be set by hand (in the periodic gates in the time aware shapers) but in complex networks this is hard but can be automated by configurators
   (dont repeat everything on the intro page)
 
-.. Q what is eager gate scheduling? this is done by the eager gate schedule configurator which is a simple configurator that sets schedules eagerly
+.. Q what is eager gate scheduling? This is done by the eager gate schedule configurator, which is a simple configurator that sets schedules eagerly.
 
 The simulation uses the following network:
 
@@ -31,7 +31,7 @@ Here is the configuration:
 Results
 -------
 
-A gate cycle duration of 1ms is displayed on the following sequence chart. Note how time efficient the flow of packets from the sources to the sinks are:
+A gate cycle duration of 1ms is displayed on the following sequence chart. Note how time efficient the flow of packets from the sources to the sinks is:
 
 .. figure:: media/seqchart.png
     :align: center
@@ -46,7 +46,7 @@ The following chart displays the delay for individual packets of the different t
 .. figure:: media/delay.png
     :align: center
 
-All delay is within the specified constraints.
+All delays are within the specified constraints.
 
 .. note:: Both video streams and the ``client2 best effort`` stream have two cluster points. This is due to these traffic classes having multiple packets per gate cycle. As the different flows interact, some packets have increased delay.
 

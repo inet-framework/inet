@@ -65,8 +65,10 @@ class INET_API EthernetMacBase : public MacProtocolBase, public queueing::IActiv
     // configuration
     const char *displayStringTextFormat = nullptr;
     bool sendRawBytes = false;
+    bool allowNonstandardBitrate = true;
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
-    const EthernetModes::EthernetMode *curEtherDescr = nullptr; // constants for the current Ethernet mode, e.g. txrate
+    EthernetModes::EthernetMode curEtherDescr = EthernetModes::nullEthernetMode; // constants for the current Ethernet mode, e.g. txrate
+    simtime_t halfBitTime = SIMTIME_ZERO; // transmission time of a half bit
     bool connected = false; // true if connected to a network, set automatically by exploring the network configuration
     bool promiscuous = false; // if true, passes up all received frames
     bool duplexMode = false; // true if operating in full-duplex mode
@@ -119,7 +121,7 @@ class INET_API EthernetMacBase : public MacProtocolBase, public queueing::IActiv
 
     virtual MacAddress getMacAddress() { return networkInterface ? networkInterface->getMacAddress() : MacAddress::UNSPECIFIED_ADDRESS; }
 
-    double getTxRate() { return curEtherDescr->bitrate; }
+    double getTxRate() { return curEtherDescr.bitrate; }
     bool isActive() { return connected; }
 
     MacTransmitState getTransmitState() { return transmitState; }

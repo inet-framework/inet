@@ -20,7 +20,7 @@ import inet.queueing.contract.IPacketFlow;
 simple StreamEncoder extends PacketFlowBase like IPacketFlow
 {
     parameters:
-        object mapping @mutable = default([]); // array of objects, where each object maps a stream name to a VLAN id, and PCP value, for example [{stream: "s1", vlan: 12, pcp: 7}, ...]
+        object mapping @mutable = default([]); // Array of objects, where each object maps a stream name to a VLAN ID and PCP value, for example [{stream: "s1", vlan: 12, pcp: 7}, ...]
         @class(StreamEncoder);
         @display("i=block/blackboard");
 }

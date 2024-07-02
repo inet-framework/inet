@@ -11,7 +11,7 @@ import inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase;
 
 //
 // This radio model provides a hypothetical radio that simply uses one of the
-// well-known modulations without utilizing other techiques such as forward
+// well-known modulations without utilizing other techniques such as forward
 // error correction, interleaving, spreading, etc.
 //
 // @see ~ApskScalarRadio, ~ScalarRadioMedium.

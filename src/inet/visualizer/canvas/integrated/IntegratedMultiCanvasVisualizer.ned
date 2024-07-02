@@ -7,8 +7,10 @@
 
 package inet.visualizer.canvas.integrated;
 
+import inet.visualizer.contract.IChannelVisualizer;
 import inet.visualizer.contract.IDataLinkVisualizer;
 import inet.visualizer.contract.IEnergyStorageVisualizer;
+import inet.visualizer.contract.IFailureProtectionConfigurationVisualizer;
 import inet.visualizer.contract.IGateScheduleVisualizer;
 import inet.visualizer.contract.IIeee80211Visualizer;
 import inet.visualizer.contract.IInfoVisualizer;
@@ -32,7 +34,7 @@ import inet.visualizer.contract.IStreamRedundancyConfigurationVisualizer;
 import inet.visualizer.contract.ITracingObstacleLossVisualizer;
 import inet.visualizer.contract.ITransportConnectionVisualizer;
 import inet.visualizer.contract.ITransportRouteVisualizer;
-import inet.visualizer.contract.IFailureProtectionConfigurationVisualizer;
+
 
 //
 // This module integrates all canvas visualizers into a single module. It
@@ -70,6 +72,7 @@ module IntegratedMultiCanvasVisualizer like IIntegratedVisualizer
         int numTransportConnectionVisualizers = default(1);
         int numFailureProtectionConfigurationVisualizers = default(1);
         int numStreamRedundancyConfigurationVisualizers = default(1);
+        int numChannelVisualizers = default(1);
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
         *.networkNodeVisualizerModule = default(absPath(".networkNodeVisualizer[0]"));
@@ -173,6 +176,10 @@ module IntegratedMultiCanvasVisualizer like IIntegratedVisualizer
         streamRedundancyConfigurationVisualizer[numStreamRedundancyConfigurationVisualizers]: <default("StreamRedundancyConfigurationCanvasVisualizer")> like IStreamRedundancyConfigurationVisualizer {
             parameters:
                 @display("p=750,200");
+        }
+        channelVisualizer[numChannelVisualizers]: <default("ChannelCanvasVisualizer")> like IChannelVisualizer {
+            parameters:
+                @display("p=750,300");
         }
 }
 

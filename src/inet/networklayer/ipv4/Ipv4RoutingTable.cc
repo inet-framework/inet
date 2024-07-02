@@ -175,10 +175,7 @@ void Ipv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
         const auto *ieChangeDetails = check_and_cast<const NetworkInterfaceChangeDetails *>(obj);
         auto fieldId = ieChangeDetails->getFieldId();
         if (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER) {
-            const auto *entry = ieChangeDetails->getNetworkInterface();
             updateNetmaskRoutes();
-            if (!entry->isUp())
-                deleteInterfaceRoutes(entry);
             invalidateCache();
         }
     }
@@ -361,56 +358,21 @@ bool Ipv4RoutingTable::isLocalMulticastAddress(const Ipv4Address& dest) const
     return false;
 }
 
-void Ipv4RoutingTable::purge()
-{
-    // purge unicast routes
-    for (auto it = routes.begin(); it != routes.end();) {
-        Ipv4Route *route = *it;
-        if (route->isValid())
-            ++it;
-        else {
-            it = routes.erase(it);
-            invalidateCache();
-            ASSERT(route->getRoutingTable() == this); // still filled in, for the listeners' benefit
-            emit(routeDeletedSignal, route);
-            delete route;
-        }
-    }
-
-    // purge multicast routes
-    for (auto it = multicastRoutes.begin(); it != multicastRoutes.end();) {
-        Ipv4MulticastRoute *route = *it;
-        if (route->isValid())
-            ++it;
-        else {
-            it = multicastRoutes.erase(it);
-            invalidateCache();
-            ASSERT(route->getRoutingTable() == this); // still filled in, for the listeners' benefit
-            emit(mrouteDeletedSignal, route);
-            delete route;
-        }
-    }
-}
-
 Ipv4Route *Ipv4RoutingTable::findBestMatchingRoute(const Ipv4Address& dest) const
 {
     Enter_Method("findBestMatchingRoute(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
 
     auto it = routingCache.find(dest);
-    if (it != routingCache.end()) {
-        if (it->second == nullptr || it->second->isValid())
-            return it->second;
-    }
+    if (it != routingCache.end())
+        return it->second;
 
     // find best match (one with longest prefix)
     // default route has zero prefix length, so (if exists) it'll be selected as last resort
     Ipv4Route *bestRoute = nullptr;
     for (auto e : routes) {
-        if (e->isValid()) {
-            if (Ipv4Address::maskedAddrAreEqual(dest, e->getDestination(), e->getNetmask())) { // match
-                bestRoute = const_cast<Ipv4Route *>(e);
-                break;
-            }
+        if (Ipv4Address::maskedAddrAreEqual(dest, e->getDestination(), e->getNetmask())) { // match
+            bestRoute = const_cast<Ipv4Route *>(e);
+            break;
         }
     }
 
@@ -443,7 +405,7 @@ const Ipv4MulticastRoute *Ipv4RoutingTable::findBestMatchingMulticastRoute(const
     // TODO caching?
 
     for (auto e : multicastRoutes) {
-        if (e->isValid() && e->matches(origin, group))
+        if (e->matches(origin, group))
             return e;
     }
 
@@ -459,12 +421,8 @@ Ipv4Route *Ipv4RoutingTable::getRoute(int k) const
 
 Ipv4Route *Ipv4RoutingTable::getDefaultRoute() const
 {
-    // if exists default route entry, it is the last valid entry
-    for (RouteVector::const_reverse_iterator i = routes.rbegin(); i != routes.rend() && (*i)->getNetmask().isUnspecified(); ++i) {
-        if ((*i)->isValid())
-            return *i;
-    }
-    return nullptr;
+    // if exists default route entry, it is the last entry
+    return !routes.empty() && (*routes.rbegin())->getNetmask().isUnspecified() ? *routes.rbegin() : nullptr;
 }
 
 // The 'routes' vector stores the routes in this order.
@@ -725,7 +683,7 @@ void Ipv4RoutingTable::updateNetmaskRoutes()
     PatternMatcher interfaceNameMatcher(netmaskRoutes, false, true, true);
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         NetworkInterface *ie = ift->getInterface(i);
-        if (ie->isUp() && interfaceNameMatcher.matches(ie->getFullName())) {
+        if (ie->isUp() && ie->hasCarrier() && interfaceNameMatcher.matches(ie->getFullName())) {
             auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
             if (ipv4Data && ipv4Data->getNetmask() != Ipv4Address::ALLONES_ADDRESS) {
                 Ipv4Route *route = createNewRoute();

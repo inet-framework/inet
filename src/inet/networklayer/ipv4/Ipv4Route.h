@@ -37,7 +37,6 @@ class INET_API Ipv4Route : public cObject, public IRoute
 
   private:
     // copying not supported: following are private and also left undefined
-    Ipv4Route(const Ipv4Route& obj);
     Ipv4Route& operator=(const Ipv4Route& obj);
 
   protected:
@@ -46,6 +45,7 @@ class INET_API Ipv4Route : public cObject, public IRoute
   public:
     Ipv4Route() : rt(nullptr), interfacePtr(nullptr), sourceType(MANUAL), adminDist(dUnknown),
         metric(0), source(nullptr), protocolData(nullptr) {}
+    Ipv4Route(const Ipv4Route& obj);
     virtual ~Ipv4Route();
     virtual std::string str() const override;
     virtual std::string detailedInfo() const;
@@ -57,9 +57,6 @@ class INET_API Ipv4Route : public cObject, public IRoute
     /** To be called by the routing table when this route is added or removed from it */
     virtual void setRoutingTable(IIpv4RoutingTable *rt) { this->rt = rt; }
     IIpv4RoutingTable *getRoutingTable() const { return rt; }
-
-    /** test validity of route entry, e.g. check expiry */
-    virtual bool isValid() const { return true; }
 
     virtual void setDestination(Ipv4Address _dest) { if (dest != _dest) { dest = _dest; changed(F_DESTINATION); } }
     virtual void setNetmask(Ipv4Address _netmask) { if (netmask != _netmask) { netmask = _netmask; changed(F_PREFIX_LENGTH); } }
@@ -154,11 +151,11 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
 
   private:
     // copying not supported: following are private and also left undefined
-    Ipv4MulticastRoute(const Ipv4MulticastRoute& obj);
     Ipv4MulticastRoute& operator=(const Ipv4MulticastRoute& obj);
 
   public:
     Ipv4MulticastRoute() : rt(nullptr), inInterface(nullptr), sourceType(MANUAL), source(nullptr), metric(0) {}
+    Ipv4MulticastRoute(const Ipv4MulticastRoute& other);
     virtual ~Ipv4MulticastRoute();
     virtual std::string str() const override;
     virtual std::string detailedInfo() const;
@@ -167,14 +164,7 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
     virtual void setRoutingTable(IIpv4RoutingTable *rt) { this->rt = rt; }
     IIpv4RoutingTable *getRoutingTable() const { return rt; }
 
-    /** test validity of route entry, e.g. check expiry */
-    virtual bool isValid() const { return true; }
-
-    virtual bool matches(const Ipv4Address& origin, const Ipv4Address& group) const
-    {
-        return (this->group.isUnspecified() || this->group == group) &&
-               Ipv4Address::maskedAddrAreEqual(origin, this->origin, this->originNetmask);
-    }
+    virtual bool matches(const Ipv4Address& origin, const Ipv4Address& group) const;
 
     virtual void setOrigin(Ipv4Address _origin) { if (origin != _origin) { origin = _origin; changed(F_ORIGIN); } }
     virtual void setOriginNetmask(Ipv4Address _netmask) { if (originNetmask != _netmask) { originNetmask = _netmask; changed(F_ORIGINMASK); } }
@@ -205,6 +195,8 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
     /** The kth out interface */
     OutInterface *getOutInterface(unsigned int k) const { return outInterfaces.at(k); }
 
+    bool hasOutInterface(const NetworkInterface *networkInterface) const;
+
     /** Source of route. MANUAL (read from file), from routing protocol, etc */
     SourceType getSourceType() const override { return sourceType; }
 
@@ -215,13 +207,10 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
     cObject *getSource() const override { return source; }
 
     virtual IRoutingTable *getRoutingTableAsGeneric() const override;
-    virtual void setEnabled(bool enabled) override { /*TODO setEnabled(enabled);*/ }
     virtual void setOrigin(const L3Address& origin) override { setOrigin(origin.toIpv4()); }
     virtual void setPrefixLength(int len) override { setOriginNetmask(Ipv4Address::makeNetmask(len)); } // TODO inconsistent naming
     virtual void setMulticastGroup(const L3Address& group) override { setMulticastGroup(group.toIpv4()); }
 
-    virtual bool isEnabled() const override { return true; /*TODO isEnabled();*/ }
-    virtual bool isExpired() const override { return !isValid(); } // TODO rename Ipv4 method
     virtual L3Address getOriginAsGeneric() const override { return getOrigin(); }
     virtual int getPrefixLength() const override { return getOriginNetmask().getNetmaskLength(); } // TODO inconsistent naming
     virtual L3Address getMulticastGroupAsGeneric() const override { return getMulticastGroup(); }

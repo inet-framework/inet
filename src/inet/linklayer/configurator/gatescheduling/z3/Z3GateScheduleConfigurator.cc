@@ -188,7 +188,7 @@ Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateSched
                         auto transmissionEndTimeVariableJ = transmissionEndTimeVariables[j];
                         if (j < receptionEndTimeVariables.size()) {
                             auto receptionEndTimeVariableJ = receptionEndTimeVariables[j];
-                            addAssert(receptionEndTimeVariableI < receptionEndTimeVariableJ == transmissionEndTimeVariableI < transmissionEndTimeVariableJ);
+                            addAssert((receptionEndTimeVariableI < receptionEndTimeVariableJ) == (transmissionEndTimeVariableI < transmissionEndTimeVariableJ));
                         }
                     }
                 }

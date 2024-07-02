@@ -12,7 +12,7 @@ package inet.queueing.contract;
 // connects one input to one output. It can operate in both active and passive
 // mode. Packets can be pushed into its input or packets can be pulled from its
 // output. When processing a packet, a marker attaches some information (such as
-// a label) to the packet based on the data and meta data it contains. The packets
+// a label) to the packet based on the data and metadata it contains. The packets
 // are processed individually.
 //
 moduleinterface IPacketMarker extends IPacketFlow

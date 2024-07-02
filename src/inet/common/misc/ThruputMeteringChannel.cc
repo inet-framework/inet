@@ -52,10 +52,11 @@ cChannel::Result ThruputMeteringChannel::processMessage(cMessage *msg, const Sen
 {
     cChannel::Result result = cDatarateChannel::processMessage(msg, options, t);
 
-    cPacket *pkt = dynamic_cast<cPacket *>(msg);
     // TODO handle disabled state (show with different style?/color? or print "disabled"?)
-    if (!pkt || !fmt || *fmt == 0 || result.discard)
+    if (!msg->isPacket() || !fmt || *fmt == 0 || result.discard)
         return result;
+
+    cPacket *pkt = static_cast<cPacket *>(msg);
 
     // count packets and bits
     numPackets++;

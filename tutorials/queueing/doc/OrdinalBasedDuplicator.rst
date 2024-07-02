@@ -9,8 +9,8 @@ with a classifier and a multiplexer to achieve that.
 
 In this example network, packets are produced periodically by an active packet source
 (:ned:`ActivePacketSource`).
-The packet source pushed packets into a duplicator (:ned:`OrdinalBasedDuplicator`).
-The duplicator is configured to duplicate every second packet on its ordinal number.
+The packet source pushes packets into a duplicator (:ned:`OrdinalBasedDuplicator`).
+The duplicator is configured to duplicate every second packet based on its ordinal number.
 The packets are then consumed by a passive packet sink (:ned:`PassivePacketSink`).
 
 .. figure:: media/OrdinalBasedDuplicator.png

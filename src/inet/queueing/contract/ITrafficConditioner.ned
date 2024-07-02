@@ -12,7 +12,7 @@ package inet.queueing.contract;
 // conditioner connects one input to one output. It operates in passive mode on
 // its input and in active mode on its output. Packets can be pushed into its
 // input and packets can be pulled from its output. A traffic conditioner can
-// drop, delay and reorder packets, but it doesn't modify packets in any way.
+// drop, delay, and reorder packets, but it doesn't modify packets in any way.
 //
 moduleinterface ITrafficConditioner extends IPassivePacketSink, IActivePacketSource
 {

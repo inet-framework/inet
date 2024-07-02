@@ -16,17 +16,16 @@ About TXOP
 
 TXOP is available in QoS mode as part of EDCA (Enhanced Distributed Channel Access),
 and it is a limited time period of contention-free channel access available to the
-channel-owning station. During such a period the station can send multiple frames
+channel-owning station. During such a period, the station can send multiple frames
 that belong to a particular access category.
 
-The benefit of TXOP is that it increases throughput and reduces delay of QoS data
-frames via eliminating contention periods between transmissions. TXOP can be used
+The benefit of TXOP is that it increases throughput and reduces the delay of QoS data
+frames by eliminating contention periods between transmissions. TXOP can be used
 in combination with aggregation and block acknowledgement to further increase throughput.
 
 More precisely, access categories have different channel access parameters,
 such as AIFS (Arbitration Interframe Spacing), duration, contention window size,
-and TXOP limit. In the default EDCA OFDM parameter
-set in the 802.11 standard, these values are set so that higher priority packets are
+and TXOP limit. In the default EDCA OFDM parameter set in the 802.11 standard, these values are set so that higher priority packets are
 favored (the MAC waits less before sending them, the contention window is smaller,
 and they can be sent in a TXOP). The default parameter set specifies a TXOP limit
 of approximately 3 ms for the video category, and 1.5 ms for the voice category.
@@ -75,7 +74,7 @@ such as the transmission of QoS data frames, aggregate frames, RTS and CTS frame
 acks, and block acks.
 
 In the example simulation, one host is configured to send video priority UDP packets
-to the other. The host sends 1200B, 3400B and 3500B packets. The RTS, aggregation
+to the other. The host sends 1200B, 3400B, and 3500B packets. The RTS, aggregation,
 and block ack thresholds are configured appropriately so that we get the following frame exchanges
 for demonstration:
 
@@ -160,7 +159,7 @@ sequence chart:
 
 The gap between the frames is a SIFS;
 the TXOP frame exchange is preceded and followed by a much longer contention period.
-This frame exchange sequence was recorded with 24 Mbps PHY rate. When using higher rates,
+This frame exchange sequence was recorded with a 24 Mbps PHY rate. When using higher rates,
 more frames could fit in a TXOP, as the TXOP duration is independent of the PHY rate.
 
 This frame sequence is just an example. Various combinations of frames can be sent during

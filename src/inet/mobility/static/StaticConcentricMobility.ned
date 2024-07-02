@@ -13,7 +13,7 @@ import inet.mobility.base.MobilityBase;
 //
 // Places all hosts on concentric circles
 //
-//# TODO rename to StaticConcentricCircleMobility?
+//# TODO rename to `StaticConcentricCircleMobility`?
 simple StaticConcentricMobility extends MobilityBase
 {
     parameters:

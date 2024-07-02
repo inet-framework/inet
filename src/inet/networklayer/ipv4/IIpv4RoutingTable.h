@@ -188,12 +188,6 @@ class INET_API IIpv4RoutingTable : public IRoutingTable
     using IRoutingTable::deleteMulticastRoute;
 
     /**
-     * Deletes invalid routes from the routing table. Invalid routes are those
-     * where the isValid() method returns false.
-     */
-    virtual void purge() = 0;
-
-    /**
      * Utility function: Returns a vector of all addresses of the node.
      */
     virtual std::vector<Ipv4Address> gatherAddresses() const = 0;

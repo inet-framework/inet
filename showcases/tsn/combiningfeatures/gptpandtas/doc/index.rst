@@ -4,7 +4,7 @@ Effects of Time Synchronization on Time-Aware Shaping
 Goals
 -----
 
-In this showcase we demonstrate how time synchronization affects end-to-end
+In this showcase, we demonstrate how time synchronization affects end-to-end
 delay in a network that is using time-aware traffic shaping.
 
 .. note:: This showcase builds upon the :doc:`/showcases/tsn/timesynchronization/clockdrift/doc/index`, 
@@ -27,13 +27,13 @@ and recovery in time synchronization affect the delay.
 
 If time synchronization fails for some reason, such as the primary clock going
 offline, time-aware shaping cannot guarantee bounded delays any longer. Time
-synchronization can continue and delay guarantees can be met however, if all
+synchronization can continue, and delay guarantees can be met, however, if all
 network nodes switch over to a secondary master clock.
 
 To demonstrate this, we present three cases, with three configurations:
 
 - **Normal operation**: time synchronization works, and the delay is constant (this is the same case as in the last configuration in the :doc:`/showcases/tsn/timesynchronization/gptp/doc/index` showcase).
-- **Failure of master clock**: the master clock disconnects from the network, and time is not synchronized anymore.
+- **Failure of the master clock**: the master clock disconnects from the network, and time is not synchronized anymore.
 - **Failover to a secondary master clock**: the master clock disconnects from the network, but time synchronization can continue because network nodes switch to the secondary master clock.
 
 The Configuration
@@ -41,7 +41,7 @@ The Configuration
 
 All simulations in the showcase use the same network as in the
 :ref:`sh:tsn:timesync:gptp:redundancy` section of the `Using gPTP` showcase. The
-network constains :ned:`TsnDevice` and :ned:`TsnClock` modules connected to a
+network contains :ned:`TsnDevice` and :ned:`TsnClock` modules connected to a
 ring of switches (:ned:`TsnSwitch`):
 
 .. figure:: media/Network.png
@@ -56,7 +56,7 @@ Traffic
 +++++++
 
 Traffic in the network consists of UDP packets sent between ``tsnDevice1`` and
-``tsnDevice4``, and gPTP messages. sent by all nodes. To generate the UDP
+``tsnDevice4``, and gPTP messages sent by all nodes. To generate the UDP
 application traffic, we configure ``tsnDevice1`` to send 10B UDP packets to
 ``tsnDevice2``:
 
@@ -160,7 +160,7 @@ periodically synchronize their clock time and drift rate to the primary master
 node. However, due to the randomly changing drift rates, they diverge from the
 master clock after some time.
 
-.. note:: The other three gPTP time domains are maintained simultaneously, but not used.
+.. note:: The other three gPTP time domains are maintained simultaneously but not used.
 
 The next chart displays the clock drift for `gPTP time domain 2`, where timing
 information originates from the hot-standby master clock. All bridge and slave
@@ -172,7 +172,7 @@ synchronizes to the primary master (dotted blue line) in another gPTP domain:
 .. figure:: media/NormalOperation_domain2.png
    :align: center
 
-Note that bridge and slave nodes update their time when the hot-standby master node's clock has already drifted from the primary master somewhat.
+Note that bridge and slave nodes update their time when the hot-standby master node's clock has already drifted from the primary master.
 
 The next chart displays the end-to-end delay of application traffic, which is mostly a constant low value:
 
@@ -207,7 +207,7 @@ so the clocks in this time domain keep being synchronized. (the hot-standby mast
 .. figure:: media/LinkFailure_domain2.png
    :align: center
 
-When the primary master node goes offline, the hot-standby master node cannot synchronize to it any more,
+When the primary master node goes offline, the hot-standby master node cannot synchronize to it anymore,
 its clock drifts from the primary master's, shown by the orange and blue lines diverging. The bridge and slave nodes continue to synchronize to the hot-standby master node
 (shown by the other lines following the hot-standby master node).
 
@@ -219,7 +219,7 @@ The next chart shows the delay:
 .. figure:: media/delay_linkfailure.png
    :align: center
 
-After the clock divergence grows above a certain value the end-to-end delay
+After the clock divergence grows above a certain value, the end-to-end delay
 suddenly increases dramatically. The reason is that frames often wait for the
 next gate scheduling cycle because they miss the allocated time slot due to
 improperly synchronized clocks. The delay increases from the nominal
@@ -234,8 +234,8 @@ Failover to Hot-Standby Clock
 
 In this configuration, we take the primary master clock offline just as in the
 previous one, but we also switch the active clock in each node over to the one
-that synchronizes to the hot-standby master (gPTP time domain 2 as mentioned
-previously), so time synchronization can continue to keep the difference of
+that synchronizes with the hot-standby master (gPTP time domain 2 as mentioned
+previously), so time synchronization can continue to keep the difference in
 clocks in the network below the required limit.
 
 .. note:: There is no difference in time synchronization at all in the three configurations. The difference is in which clocks/domains are active.
@@ -256,7 +256,7 @@ primary master node) are displayed on the following chart:
 .. figure:: media/Failover_domain0.png
    :align: center
 
-The clocks begin to diverge from each other after the link break at 2s.
+The clocks begin to diverge after the link break at 2s.
 
 The next chart displays the clock drifts in domain 2 (clock time of the
 hot-standby master node):
@@ -264,10 +264,10 @@ hot-standby master node):
 .. figure:: media/Failover_domain2.png
    :align: center
 
-After the link break, the clocks are synchronized to the hot-standby master's
+After the link break, the clocks are synchronized with the hot-standby master's
 time.
 
-.. note:: The two charts above are exactly the same as the charts for Time Domain 0 and 2 in the Link Failure of Master Clock section, because there is no difference between the two cases in time synchronization and the scheduled link break. The difference is in which one is the active time domain.
+.. note:: The two charts above are exactly the same as the charts for Time Domain 0 and 2 in the Link Failure of Master Clock section because there is no difference between the two cases in time synchronization and the scheduled link break. The difference is in which one is the active time domain.
 
 The next chart displays the clock drift of the active clock in all nodes:
 

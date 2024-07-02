@@ -22,7 +22,7 @@ routing tables, we don't need the statically added routes anymore. We
 only need :ned:`Ipv4NetworkConfigurator` to assign the IP addresses and
 turn all other functions off.
 
-More important, we change the hosts to be instances of :ned:`AodvRouter`.
+More importantly, we change the hosts to be instances of :ned:`AodvRouter`.
 :ned:`AodvRouter` is like :ned:`WirelessHost`, but with an added
 ``AodvRouting`` submodule. This change turns each node into an AODV
 router.
@@ -59,8 +59,8 @@ The configuration:
 Results
 -------
 
-Host R1 moves out of communication range or hosts A and B. The route
-that was established through R1 is broken. Hosts R2 and R3 are at the
+Host R1 moves out of communication range of hosts A and B. The route
+that was established through R1 is broken. Hosts R2 and R3 are in the
 right position to relay host A's packets to host B, and the AODV
 protocol reconfigures the route to go through R2 and R3. The UDP stream
 is re-established using these intermediate hosts to relay host A's
@@ -74,7 +74,7 @@ packets to host B. This can be seen in the animation below.
 
 
 
-   <!--internal video recording, animation time = playback speed = 1, fadeOutMode animationTime, 1s -> 26 sec video, blue arrows only
+.. <!--internal video recording, animation time = playback speed = 1, fadeOutMode animationTime, 1s -> 26 sec video, blue arrows only
    if playback speed = 2 -> 13 sec video, blue and red arrows
    not sure which one is better
    -->
@@ -98,7 +98,7 @@ The number of successfully received packets at host B has roughly
 doubled compared to the previous step. This is because the flow of
 packets doesn't stop when host R1 gets out of communication range of
 host A. Although the AODV protocol adds some overhead, in this
-simulation, it is not significant, the number of received packets still
+simulation, it is not significant, and the number of received packets still
 increases substantially.
 
 **Number of packets received by host B: 956**

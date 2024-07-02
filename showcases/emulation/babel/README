@@ -1,7 +1,4 @@
-To ensure that the babel daemon functions properly, it is necessary to start the simulation first, as this will open the TAP interfaces and assign IPv6 link local addresses.
-
-You can check that the babeld daemon works by looking for UDP packets
-sent to port 6696.
+You can check that the babeld daemon works by looking for UDP packets sent to port 6696.
 
 The CAP_SYS_ADMIN privilege is required for using network namespaces in INET.
 Make sure to read the README file in the showcases/emulation directory for more information.

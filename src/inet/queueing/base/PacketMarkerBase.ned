@@ -9,7 +9,7 @@ package inet.queueing.base;
 
 //
 // This is a base module for various packet marker modules. Derived modules must
-// implement a single markPacket() function which marks the individual packets
+// implement a single `markPacket()` function which marks the individual packets
 // by attaching tags.
 //
 // @see ~IPacketMarker, ~PacketLabeler

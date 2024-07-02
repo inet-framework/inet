@@ -11,7 +11,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IMediumAnalogMode
 
 //
 // This analog model provides a very simple and predictable physical layer
-// behavior. It determines the reception power by categorizing transmissions
+// behaviour. It determines the reception power by categorizing transmissions
 // based on the distance between the transmitter and the receiver.
 //
 // @see ~UnitDiskRadioMedium, ~UnitDiskTransmitterAnalogModel, ~UnitDiskReceiverAnalogModel.

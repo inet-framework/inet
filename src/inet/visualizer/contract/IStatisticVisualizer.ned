@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 //
 // @see ~StatisticCanvasVisualizer, ~StatisticOsgVisualizer, ~StatisticVisualizer, ~StatisticVisualizerBase
 //
-moduleinterface IStatisticVisualizer
+moduleinterface IStatisticVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

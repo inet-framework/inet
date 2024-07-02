@@ -10,8 +10,8 @@ package inet.power.contract;
 //
 // This interface extends the corresponding energy model interface. It requires
 // implementations to describe energy consumption and energy generation with
-// power [W] and storage capacity with energy [J]. The Ep is an abbreviation
-// that is used for energy and power based interfaces.
+// power [W] and storage capacity with energy [J]. The abbreviation Ep is used
+// for energy and power based interfaces.
 //
 // @see ~IEpEnergyConsumer, ~IEpEnergySource, ~IEpEnergyGenerator, ~IEpEnergyStorage, ~IEpEnergyManagement
 //

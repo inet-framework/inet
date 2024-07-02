@@ -24,6 +24,12 @@ StatisticCanvasVisualizer::StatisticCanvasVisualization::StatisticCanvasVisualiz
 {
 }
 
+StatisticCanvasVisualizer::StatisticCanvasVisualization::~StatisticCanvasVisualization()
+{
+    delete figure;
+    figure = nullptr;
+}
+
 void StatisticCanvasVisualizer::initialize(int stage)
 {
     StatisticVisualizerBase::initialize(stage);
@@ -68,7 +74,8 @@ StatisticVisualizerBase::StatisticVisualization *StatisticCanvasVisualizer::crea
             throw cRuntimeError("Cannot create figure with type: %s", property->getValue("type"));
         figure->parse(property);
         figure->setName("statistic");
-        figure->setTooltip("This figure represents the value of a statistic");
+        std::string tooltip = std::string("This figure represents the value of ") + statisticName + " in " + source->getFullPath();
+        figure->setTooltip(tooltip.c_str());
     }
     figure->setTags((std::string("statistic ") + tags).c_str());
     figure->setAssociatedObject(source);

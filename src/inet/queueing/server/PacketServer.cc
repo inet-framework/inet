@@ -64,8 +64,8 @@ void PacketServer::scheduleProcessingTimer()
 
 bool PacketServer::canStartProcessingPacket()
 {
-    return provider.canPullSomePacket() &&
-           consumer.canPushSomePacket();
+    auto packet = provider.canPullPacket();
+    return packet != nullptr && consumer.canPushPacket(packet);
 }
 
 void PacketServer::startProcessingPacket()
@@ -88,6 +88,16 @@ void PacketServer::endProcessingPacket()
     pushOrSendPacket(packet, outputGate, consumer);
     numProcessedPackets++;
     packet = nullptr;
+}
+
+cGate *PacketServer::getRegistrationForwardingGate(cGate *gate)
+{
+    if (gate == outputGate)
+        return inputGate;
+    else if (gate == inputGate)
+        return outputGate;
+    else
+        throw cRuntimeError("Unknown gate");
 }
 
 void PacketServer::handleCanPushPacketChanged(const cGate *gate)

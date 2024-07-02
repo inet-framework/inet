@@ -15,7 +15,7 @@ simple StreamRedundancyConfigurationCanvasVisualizer extends TreeVisualizerBase 
     parameters:
         string streamRedundancyConfiguratorModule = default("streamRedundancyConfigurator");
         string streamFilter = default("*");
-        double zIndex = default(3); // determines the drawing order of figures relative to other visualizers
+        double zIndex = default(3); // Determines the drawing order of figures relative to other visualizers
         @class(StreamRedundancyConfigurationCanvasVisualizer);
 }
 

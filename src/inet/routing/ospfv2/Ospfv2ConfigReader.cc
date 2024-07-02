@@ -458,8 +458,8 @@ void Ospfv2ConfigReader::loadAuthenticationConfig(Ospfv2Interface *intf, const c
     std::string authenticationType = getStrAttrOrPar(ifConfig, "authenticationType");
     if (authenticationType == "SimplePasswordType")
         intf->setAuthenticationType(SIMPLE_PASSWORD_TYPE);
-    else if (authenticationType == "CrytographicType")
-        intf->setAuthenticationType(CRYTOGRAPHIC_TYPE);
+    else if (authenticationType == "CryptographicType")
+        intf->setAuthenticationType(CRYPTOGRAPHIC_TYPE);
     else if (authenticationType == "NullType")
         intf->setAuthenticationType(NULL_TYPE);
     else

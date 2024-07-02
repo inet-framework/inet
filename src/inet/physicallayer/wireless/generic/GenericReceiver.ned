@@ -20,7 +20,7 @@ module GenericReceiver extends SnirReceiverBase like IReceiver
     parameters:
         double energyDetection @unit(dBm) = default(-85 dBm);
         snirThresholdMode = "mean";
-        snirThreshold = -100dB; // to match the previous permissive behavior
+        snirThreshold = -100dB; // To match the previous permissive behavior
         *.ignoreInterference = default(this.ignoreInterference);
         @class(GenericReceiver);
         @display("i=block/wrx");

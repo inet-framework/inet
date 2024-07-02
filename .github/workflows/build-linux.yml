@@ -21,15 +21,16 @@ jobs:
       matrix:
         mode: ["debug", "release"]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: omnetpp/omnetpp
           path: omnetpp
-      - uses: actions/checkout@v3
+          ref: omnetpp-6.x
+      - uses: actions/checkout@v4
         with:
           path: inet
       - run: mkdir -p /home/runner/work/ccache
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: /home/runner/work/ccache
           key: native-${{ matrix.mode }}-ccache-${{ github.run_id }}

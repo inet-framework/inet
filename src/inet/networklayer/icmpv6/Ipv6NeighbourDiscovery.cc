@@ -188,23 +188,29 @@ void Ipv6NeighbourDiscovery::handleMessage(cMessage *msg)
 
 void Ipv6NeighbourDiscovery::processNDMessage(Packet *packet, const Icmpv6Header *icmpv6Header)
 {
-    if (auto rs = dynamic_cast<const Ipv6RouterSolicitation *>(icmpv6Header)) {
-        processRsPacket(packet, rs);
-    }
-    else if (auto ra = dynamic_cast<const Ipv6RouterAdvertisement *>(icmpv6Header)) {
-        processRaPacket(packet, ra);
-    }
-    else if (auto ns = dynamic_cast<const Ipv6NeighbourSolicitation *>(icmpv6Header)) {
-        processNsPacket(packet, ns);
-    }
-    else if (auto na = dynamic_cast<const Ipv6NeighbourAdvertisement *>(icmpv6Header)) {
-        processNaPacket(packet, na);
-    }
-    else if (auto redirect = dynamic_cast<const Ipv6Redirect *>(icmpv6Header)) {
-        processRedirectPacket(redirect);
-    }
-    else {
-        throw cRuntimeError("Unrecognized ND message!");
+    switch(icmpv6Header->getType()) {
+        case ICMPv6_ROUTER_SOL:
+            processRsPacket(packet, check_and_cast<const Ipv6RouterSolicitation *>(icmpv6Header));
+            break;
+
+        case ICMPv6_ROUTER_AD:
+            processRaPacket(packet, check_and_cast<const Ipv6RouterAdvertisement *>(icmpv6Header));
+            break;
+
+        case ICMPv6_NEIGHBOUR_SOL:
+            processNsPacket(packet, check_and_cast<const Ipv6NeighbourSolicitation *>(icmpv6Header));
+            break;
+
+        case ICMPv6_NEIGHBOUR_AD:
+            processNaPacket(packet, check_and_cast<const Ipv6NeighbourAdvertisement *>(icmpv6Header));
+            break;
+
+        case ICMPv6_REDIRECT:
+            processRedirectPacket(check_and_cast<const Ipv6Redirect *>(icmpv6Header));
+            break;
+
+        default:
+            throw cRuntimeError("Unrecognized ND message!");
     }
 }
 

@@ -5,7 +5,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.node.wireless.Probe;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 
 network SpectrumShowcaseSpectrumFigureSpectrogramNetwork
@@ -27,7 +27,7 @@ network SpectrumShowcaseSpectrumFigureSpectrogramNetwork
         configurator: Ipv4NetworkConfigurator {
             @display("p=75,55");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=75,125");
         }
         radioMedium: Ieee80211DimensionalRadioMedium {
@@ -60,7 +60,7 @@ network SpectrumShowcasePowerDensityMapNetwork
         configurator: Ipv4NetworkConfigurator {
             @display("p=75,55");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=75,125");
         }
         radioMedium: Ieee80211DimensionalRadioMedium {

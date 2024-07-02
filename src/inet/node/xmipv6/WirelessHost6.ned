@@ -21,8 +21,7 @@ module WirelessHost6 extends StandardHost6
 {
     numWlanInterfaces = 1;
     ipv6.xMIPv6Support = true;
-    ipv6.mipv6support.isMobileNode = true; //is Mobile Node
-    ipv6.mipv6support.isHomeAgent = false; //is Home Agent
+    ipv6.mipv6support.isMobileNode = true; // Is a Mobile Node
+    ipv6.mipv6support.isHomeAgent = false; // Is a Home Agent
     @display("i=device/wifilaptop");
 }
-

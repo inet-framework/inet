@@ -55,7 +55,7 @@ module Edcaf
             parameters:
                 @display("p=100,300");
         }
-        // TODO consider moving QosRecoveryProcedure and QosAckHandler from Edcaf to Hcf, because they seem to be prepared to handle all ACs?
+        // TODO consider moving QosRecoveryProcedure and QosAckHandler from Edcaf to Hcf, as they seem to be prepared to handle all ACs?
         ackHandler: QosAckHandler {
             parameters:
                 @display("p=100,400");
@@ -64,7 +64,7 @@ module Edcaf
             parameters:
                 @display("p=100,500");
         }
-        // TODO consider moving QosRecoveryProcedure and QosAckHandler from Edcaf to Hcf, because they seem to be prepared to handle all ACs?
+        // TODO consider moving QosRecoveryProcedure and QosAckHandler from Edcaf to Hcf, as they seem to be prepared to handle all ACs?
         recoveryProcedure: QosRecoveryProcedure {
             parameters:
                 cwCalculatorModule = "^";

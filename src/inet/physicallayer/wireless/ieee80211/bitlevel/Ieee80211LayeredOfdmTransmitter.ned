@@ -15,16 +15,16 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IPulseShaper;
 
 //
 // This module implements an IEEE 802.11 OFDM transmitter.
-// The implemenation details are based on the following standard:
-// IEEE Std 802.11-2012 PART 11: WIRELESS LAN MAC AND PHY SPECIFICATIONS
+// The implementation details are based on the following standard:
+// IEEE Std 802.11-2012 PART 11: WIRELESS LAN MAC AND PHY SPECIFICATIONS.
 
-// If the compliant mode is set to true then the transmitter
+// If the compliant mode is set to true, then the transmitter
 // works in compliant IEEE 802.11 modes (can be found in the
 // standard). The current mode depends on the IEEE 802.11 MAC,
 // thus, in this case it is only allowed to set the power.
-// If it is configured to be a non-compliant transmitter then
+// If it is configured to be a non-compliant transmitter, then
 // you can freely set your own submodules: modulator, encoder,
-// etc., or other parameters such as carrier frequency, banwidth,
+// etc., or other parameters such as carrier frequency, bandwidth,
 // etc.
 
 // The level of detail parameter determines which submodules of
@@ -42,18 +42,18 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IPulseShaper;
 // features.
 //
 // Note that if a digital/analog converter is provided for the
-// transmitter then it will be only used at sample level, otherwise,
+// transmitter, then it will be only used at the sample level. Otherwise,
 // since analog representation is obligatory, a simplified, built-in
 // (scalar) analog model is used at all levels.
 //
 // Note that in non-compliant mode, whatever the level of detail is,
 // you must always set all submodules. If the current level of detail
-// does not demand a specific submodule it is necessary and sufficient
+// does not demand a specific submodule, it is necessary and sufficient
 // to implement those methods of that submodule which provide metadata
 // about its settings.
 //
 // For example, if the level of detail is bit level, you don't have to
-// implement a complete modulator, it is enough to implement a dummy
+// implement a complete modulator. It is enough to implement a dummy
 // modulator that can give information about its subcarrier modulation
 // (e.g. BPSK).
 //

@@ -16,18 +16,22 @@ import inet.queueing.contract.IPacketMeter;
 
 //
 // This module implements the IEEE 802.1Q per-stream filtering and policing.
-// The relationship between streams, gates and meters is not one-to-one. The
-// number of streams, gates and meters can be different and the module will take
-// care about the connections between the submodules based on the streamFilterTable
+// The relationship between streams, gates, and meters is not one-to-one. The
+// number of streams, gates, and meters can be different, and the module will take
+// care of the connections between the submodules based on the `streamFilterTable`
 // parameter.
+//
+// In order to define the behavior of a default path, you can add an entry to the
+// `streamFilterTable` that matches all streams:
+// {stream: "*", gate: n, meter: n}
 //
 module Ieee8021qFilter like IPacketFilter
 {
     parameters:
-        int numStreams; // number of different streams to filter for
-        int numGates; // number of gates
-        int numMeters; // number of traffic meters
-        object streamFilterTable; // an array of objects where each object contains a stream name, gate index and meter index, for example: [{stream: "s0", gate: 0, meter: 0}, ...]
+        int numStreams; // The number of different streams to filter for
+        int numGates; // The number of gates
+        int numMeters; // The number of traffic meters
+        object streamFilterTable; // An array of objects where each object contains a stream name, gate index, and meter index, for example: [{stream: "s0", gate: 0, meter: 0}, ...]
         @display("i=block/filter");
     gates:
         input in;
@@ -37,6 +41,7 @@ module Ieee8021qFilter like IPacketFilter
             @display("p=100,100");
         }
         streamFilter[numStreams]: <default("StreamFilter")> like IPacketFilter {
+            backpressure = default(true);
             streamNameFilter = default(parent.streamFilterTable.get(index).get("stream"));
             @display("p=300,100,column,150");
         }
@@ -44,29 +49,32 @@ module Ieee8021qFilter like IPacketFilter
             displayStringTextFormat = default("");
             @display("p=500,100,column,150");
         }
-        gate[numGates]: <default("InteractiveGate")> like IPacketGate {
+        gateFilter[numGates]: <default("BackPressureBasedFilter")> like IPacketFilter {
             @display("p=700,100,column,150");
+        }
+        gate[numGates]: <default("InteractiveGate")> like IPacketGate {
+            @display("p=900,100,column,150");
         }
         gc[numGates]: <default("StreamClassifier")> like IPacketClassifier {
             displayStringTextFormat = default("");
-            @display("p=900,100,column,150;i=-;b=10,10,oval,grey,,1");
+            @display("p=1100,100,column,150;i=-;b=10,10,oval,grey,,1");
         }
         gm[numMeters]: PacketMultiplexer {
             displayStringTextFormat = default("");
-            @display("p=1100,100,column,150");
+            @display("p=1300,100,column,150");
         }
         meter[numMeters]: <default("DualRateThreeColorMeter")> like IPacketMeter {
-            @display("p=1300,100,column,150");
+            @display("p=1500,100,column,150");
         }
         flowFilter[numMeters]: <default("LabelFilter")> like IPacketFilter {
             labelFilter = default("green");
-            @display("p=1500,100,column,150");
+            @display("p=1700,100,column,150");
         }
         multiplexer: PacketMultiplexer {
-            @display("p=1700,100");
+            @display("p=1900,100");
         }
         barrier: BackPressureBarrier {
-            @display("p=1900,100");
+            @display("p=2100,100");
         }
     connections allowunconnected:
         in --> { @display("m=w"); } --> classifier.in;
@@ -77,7 +85,8 @@ module Ieee8021qFilter like IPacketFilter
             streamFilter[i].out --> sm[j].in++ if streamFilterTable.get(i).get("gate") == j;
         }
         for i=0..numGates-1 {
-            sm[i].out --> gate[i].in;
+            sm[i].out --> gateFilter[i].in;
+            gateFilter[i].out --> gate[i].in;
             gate[i].out --> gc[i].in;
         }
         for i=0..numGates-1, for j=0..numMeters-1 {

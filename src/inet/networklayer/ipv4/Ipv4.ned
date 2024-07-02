@@ -25,16 +25,16 @@ moduleinterface IIpv4
 // <b>Interfacing with higher layer protocols</b>
 //
 // To send a packet over IPv4 from a higher layer protocol, the module should
-// fill in an ~L3AddressReq object, attach it to the packet with the Packets's
-// addTag() method, then send the packet to the ~Ipv4 module.
+// fill in an ~L3AddressReq object, attach it to the packet with the Packet's
+// `addTag()` method, then send the packet to the ~Ipv4 module.
 //
 // When ~Ipv4 sends up a packet to a higher layer protocol, it will also attach
 // an ~L3AddressInd to the packet, with the source and destination IPv4 addresses
 // of the IPv4 datagram in which the packet arrived.
 //
 // ~Ipv4 can serve several higher-layer protocols. The higher layer protocols
-// should call registerProtocol with their gate towards the ~Ipv4 module,
-// for fill up the protocol-to-gateindex map. When delivering packets to them,
+// should call `registerProtocol()` with their gate towards the ~Ipv4 module,
+// to fill up the protocol-to-gateindex map. When delivering packets to them,
 // the output gate is determined from the Protocol in the IPv4 header.
 //
 // <b>Routing and interfacing with lower layers</b>
@@ -42,38 +42,38 @@ moduleinterface IIpv4
 // The routing table is stored in the module ~Ipv4RoutingTable. When a datagram
 // needs to be routed, ~Ipv4 queries ~Ipv4RoutingTable for the output interface
 // (or "port") and next hop address of the packet. This is done by directly
-// calling C++ methods (such as findBestMatchingRoute(destAddress)) of ~Ipv4RoutingTable.
+// calling C++ methods (such as `findBestMatchingRoute(destAddress)`) of ~Ipv4RoutingTable.
 // No message exchange with ~Ipv4RoutingTable takes place.
 //
-// A routed datagram will be sent to the queueOut, which is expected to be
+// A routed datagram will be sent to the `queueOut`, which is expected to be
 // connected to ~INetworkInterface modules.
 //
 // Routing protocol implementations (e.g. OSPF and ISIS) can also query
 // and manipulate the route table by calling ~Ipv4RoutingTable's methods in C++.
 //
-// <b>Working with Arp</b>
+// <b>Working with ARP</b>
 //
-// Ipv4 module subscribe to arpResolutionCompleted and arpResolutionFailed signals on Arp module.
-// The ~Arp module accessed via arpOut gate, should not insert any module between ~Ipv4 and ~Arp.
-// Before Ipv4 module send down a packet to lower layer, ask MacAddress of next hop from Arp via
-// method call. If MacAddress unspecified, then start address resolution via Arp method call and
-// insert packet to a queue specified by next hop addr.
-// When received a arpResolutionCompleted, then send packets from queue of next hop addr.
-// When received a arpResolutionFailed, then drop packets from queue of next hop addr.
-// When Ipv4 module received an ARP packet from Lower Layer on some queueIn gate,
-// then send out this packet on arpOut gate. When received a packet on arpIn gate,
-// then send out this packet on the specified queueOut gate.
+// Ipv4 module subscribes to `arpResolutionCompleted` and `arpResolutionFailed` signals on Arp module.
+// The ~Arp module accessed via `arpOut` gate should not insert any module between ~Ipv4 and ~Arp.
+// Before Ipv4 module sends down a packet to the lower layer, it asks for the `MacAddress` of the next hop from Arp via
+// a method call. If the `MacAddress` is unspecified, then start address resolution via an Arp method call and
+// insert the packet to a queue specified by the next hop address.
+// When it receives an `arpResolutionCompleted` signal, it sends the packets from the queue of the next hop address.
+// When it receives an `arpResolutionFailed` signal, it drops the packets from the queue of the next hop address.
+// When the Ipv4 module receives an ARP packet from the lower layer on some `queueIn` gate,
+// it sends out this packet on the `arpOut` gate. When it receives a packet on the `arpIn` gate,
+// it sends out this packet on the specified `queueOut` gate.
 //
 // <b>Performance model, QoS</b>
 //
-// In the current form, ~Ipv4 contains a FIFO which queues up Ipv4 datagrams;
+// In its current form, ~Ipv4 contains a FIFO which queues up Ipv4 datagrams;
 // datagrams are processed in order. The processing time is determined by the
-// procDelay module parameter.
+// `procDelay` module parameter.
 //
-// The current performance model comes from the QueueBase C++ base class.
+// The current performance model comes from the `QueueBase` C++ base class.
 // If you need a more sophisticated performance model, you may change the
-// module implementation (the Ipv4 class), and: (1) override the startService()
-// method which determines processing time for a packet, or (2) use a
+// module implementation (the Ipv4 class), and: (1) override the `startService()`
+// method which determines the processing time for a packet, or (2) use a
 // different base class.
 //
 // @see ~Ipv4RoutingTable, ~Arp
@@ -89,8 +89,11 @@ simple Ipv4 like IIpv4
         int timeToLive = default(32);
         int multicastTimeToLive = default(32);
         double fragmentTimeout @unit(s) = default(60s);
-        bool limitedBroadcast = default(false); // send out limited broadcast packets comming from higher layer
-        string directBroadcastInterfaces = default("");   // list of interfaces that direct broadcast is enabled (by default direct broadcast is disabled on all interfaces)
+        bool limitedBroadcast = default(false); // Send out limited broadcast packets coming from the higher layer
+        string directBroadcastInterfaces = default("");   // List of interfaces where direct broadcast is enabled (by default direct broadcast is disabled on all interfaces)
+        bool enableLocalOutMulticastRouting = default(false); // Enable using the multicast routing table for determining outgoing interfaces for local out packets
+        bool enableTimestampOption = default(false); // When enabled, IP inserts a timestamp option into the IP header
+        double maxLifetime @unit(s) = default(-1s); // Packets older than the limit are discarded
         @display("i=block/routing");
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);
@@ -104,6 +107,7 @@ simple Ipv4 like IIpv4
         @statistic[packetDropAddressResolutionFailed](title="packet drop: address resolution failed"; source=packetDropReasonIsAddressResolutionFailed(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropHopLimitReached](title="packet drop: hop limit reached"; source=packetDropReasonIsHopLimitReached(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropForwardingDisabled](title="packet drop: forwarding disabled"; source=packetDropReasonIsForwardingDisabled(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropLifetimeExpired](title="packet drop: lifetime expired"; source=packetDropReasonIsLifetimeExpired(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNoInterfaceFound](title="packet drop: no interface found"; source=packetDropReasonIsNoInterfaceFound(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNoRouteFound](title="packet drop: no route found"; source=packetDropReasonIsNoRouteFound(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropUndefined](title="packet drop: undefined"; source=packetDropReasonIsUndefined(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

@@ -21,9 +21,9 @@ import inet.queueing.contract.IPacketBuffer;
 simple PacketBuffer extends PacketBufferBase like IPacketBuffer
 {
     parameters:
-        int packetCapacity = default(-1); // maximum number of packets in the queue, no limit by default
-        int dataCapacity @unit(b) = default(-1b); // maximum total length of packets in the queue, no limit by default
-        string dropperClass = default(""); // determines which packets are dropped when the buffer is overloaded, packets are not dropped by default; the parameter must be the name of a C++ class which implements the IPacketDropperFunction C++ interface and is registered via Register_Class
+        int packetCapacity = default(-1); // Maximum number of packets in the queue, no limit by default
+        int dataCapacity @unit(b) = default(-1b); // Maximum total length of packets in the queue, no limit by default
+        string dropperClass = default(""); // Determines which packets are dropped when the buffer is overloaded, packets are not dropped by default; the parameter must be the name of a C++ class which implements the IPacketDropperFunction C++ interface and is registered via Register_Class
         @class(PacketBuffer);
         @display("i=block/buffer");
         @signal[packetAdded](type=inet::Packet);

@@ -18,7 +18,7 @@ import inet.visualizer.contract.IGateScheduleVisualizer;
 simple GateScheduleCanvasVisualizer extends GateScheduleVisualizerBase like IGateScheduleVisualizer
 {
     parameters:
-        double zIndex = default(10); // determines the drawing order of figures relative to other visualizers
+        double zIndex = default(10); // Determines the drawing order of figures relative to other visualizers
         @class(GateScheduleCanvasVisualizer);
 }
 

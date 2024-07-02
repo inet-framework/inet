@@ -74,6 +74,9 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     simtime_t fragmentTimeoutTime;
     bool limitedBroadcast = false;
     std::string directBroadcastInterfaces = "";
+    bool enableLocalOutMulticastRouting = false;
+    bool enableTimestampOption = false;
+    simtime_t maxLifetime = -1;
 
     cPatternMatcher directBroadcastInterfaceMatcher;
 
@@ -161,11 +164,6 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     virtual void routeLocalBroadcastPacket(Packet *packet);
 
     /**
-     * Determines the output interface for the given multicast datagram.
-     */
-    virtual const NetworkInterface *determineOutgoingInterfaceForMulticastDatagram(const Ptr<const Ipv4Header>& ipv4Header, const NetworkInterface *multicastIFOption);
-
-    /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
      */
     virtual void forwardMulticastPacket(Packet *packet);
@@ -207,6 +205,8 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     virtual void sendIcmpError(Packet *packet, int inputInterfaceId, IcmpType type, IcmpCode code);
 
     virtual Packet *prepareForForwarding(Packet *packet) const;
+
+    virtual bool isLifetimeExpired(const Ptr<const Ipv4Header>& ipv4Header) const;
 
   public:
     Ipv4();

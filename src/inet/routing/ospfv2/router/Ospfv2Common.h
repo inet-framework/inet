@@ -58,7 +58,7 @@ typedef unsigned long Metric;
 enum AuthenticationType {
     NULL_TYPE            = 0,
     SIMPLE_PASSWORD_TYPE = 1,
-    CRYTOGRAPHIC_TYPE    = 2
+    CRYPTOGRAPHIC_TYPE   = 2
 };
 
 struct AuthenticationKeyType

@@ -7,6 +7,7 @@
 
 package inet.linklayer.ieee8021q;
 
+import inet.linklayer.contract.IIeee8021qLayer;
 import inet.queueing.contract.IPacketFlow;
 
 //

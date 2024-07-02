@@ -5,7 +5,7 @@
         <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="288" name="Client application traffic" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="35188205" name="Client application traffic" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 import re
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
@@ -574,10 +574,10 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value=""/>
+            <property name="xaxis_max" value="1"/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="327" name="Best effort traffic class filter" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="151170798" name="Best effort traffic class filter" template="linechart_native" type="LINE">
             <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot
@@ -1205,7 +1205,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value=""/>
+            <property name="xaxis_max" value="1"/>
             <property name="image_export_width" value="9"/>
             <property name="legend_prefer_module_display_paths" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
@@ -1214,7 +1214,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="328" name="Video traffic class filter" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="957096888" name="Video traffic class filter" template="linechart_native" type="LINE">
             <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot
@@ -1842,7 +1842,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value=""/>
+            <property name="xaxis_max" value="1"/>
             <property name="image_export_width" value="9"/>
             <property name="legend_prefer_module_display_paths" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
@@ -1851,7 +1851,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="289" name="Server application traffic" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="629968423" name="Server application traffic" template="linechart_native" type="LINE">
             <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
@@ -2420,10 +2420,10 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value=""/>
+            <property name="xaxis_max" value="1"/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="383" name="Token buckets" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1324444938" name="Token buckets" template="linechart_native" type="LINE">
             <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot
@@ -2992,7 +2992,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value=""/>
+            <property name="xaxis_max" value="1"/>
             <property name="image_export_width" value="9"/>
         </chart>
     </charts>

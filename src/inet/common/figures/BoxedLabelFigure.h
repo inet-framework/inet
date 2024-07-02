@@ -43,11 +43,23 @@ class INET_API BoxedLabelFigure : public cGroupFigure
     const cFigure::Color& getBackgroundColor() const;
     void setBackgroundColor(cFigure::Color color);
 
+    const cFigure::Color& getLineColor() const;
+    void setLineColor(cFigure::Color color);
+
     const char *getText() const;
     void setText(const char *text);
 
+    cFigure::Alignment getAlignment() const;
+    void setAlignment(cFigure::Alignment alignment);
+
     double getOpacity() const;
     void setOpacity(double opacity);
+
+    bool isFilled() const;
+    void setFilled(bool filled);
+
+    bool isOutlined() const;
+    void setOutlined(bool outlined);
 };
 
 } // namespace inet

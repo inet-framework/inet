@@ -10,8 +10,8 @@ package inet.emulation.networklayer.ipv4;
 //
 // This module provides a bidirectional connection to a real TUN device of the
 // host computer which is running the simulation. It writes the packets arrived
-// on 'lowerLayerIn' gate to the specified real TUN device, and sends out packets
-// arrived from real TAP device on 'lowerLayerOut' gate.
+// on `lowerLayerIn` gate to the specified real TUN device, and sends out packets
+// arrived from real TAP device on `lowerLayerOut` gate.
 //
 simple ExtIpv4TunDevice
 {

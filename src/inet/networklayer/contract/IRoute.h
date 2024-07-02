@@ -77,14 +77,6 @@ class INET_API IRoute
         dUnknown           = 255
     };
 
-    // TODO maybe:
-//    virtual std::string info() const;
-//    virtual std::string detailedInfo() const;
-//
-//    bool operator==(const IRoute& route) const { return equals(route); }
-//    bool operator!=(const IRoute& route) const { return !equals(route); }
-//    bool equals(const IRoute& route) const;
-
     virtual ~IRoute() {}
 
     /** The routing table in which this route is inserted, or nullptr. */
@@ -175,6 +167,7 @@ class INET_API IMulticastRoute
 
       public:
         InInterface(NetworkInterface *ie) : ie(ie) { ASSERT(ie); }
+        InInterface(const InInterface& other) : ie(other.ie) { }
         virtual ~InInterface() {}
 
         NetworkInterface *getInterface() const { return ie; }
@@ -192,23 +185,16 @@ class INET_API IMulticastRoute
 
         const NetworkInterface *getInterface() const { return ie; }
         bool isLeaf() const { return _isLeaf; }
-
-        // to disable forwarding on this interface (e.g. pruned by PIM)
-        virtual bool isEnabled() { return true; }
     };
 
     typedef std::vector<OutInterface *> OutInterfaceVector;
 
-    // TODO maybe:
-//    virtual std::string info() const;
-//    virtual std::string detailedInfo() const;
-
+  public:
     virtual ~IMulticastRoute() {}
 
     /** The routing table in which this route is inserted, or nullptr. */
     virtual IRoutingTable *getRoutingTableAsGeneric() const = 0;
 
-    virtual void setEnabled(bool enabled) = 0;
     virtual void setOrigin(const L3Address& origin) = 0;
     virtual void setPrefixLength(int len) = 0;
     virtual void setMulticastGroup(const L3Address& group) = 0;
@@ -220,12 +206,6 @@ class INET_API IMulticastRoute
     virtual void setSource(cObject *source) = 0;
     virtual void setSourceType(SourceType type) = 0;
     virtual void setMetric(int metric) = 0;
-
-    /** Disabled entries are ignored by routing until the became enabled again. */
-    virtual bool isEnabled() const = 0;
-
-    /** Expired entries are ignored by routing, and may be periodically purged. */
-    virtual bool isExpired() const = 0;
 
     /** Source address prefix to match */
     virtual L3Address getOriginAsGeneric() const = 0;

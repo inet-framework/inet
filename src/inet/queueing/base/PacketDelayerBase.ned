@@ -10,7 +10,7 @@ package inet.queueing.base;
 simple PacketDelayerBase extends PacketProcessorBase
 {
     parameters:
-        string clockModule = default(""); // relative path of a module that implements IClock; optional
+        string clockModule = default(""); // Relative path of a module that implements IClock; optional
         int schedulingPriority = default(0);
         bool scheduleZeroDelay = default(true);
         @class(PacketDelayerBase);

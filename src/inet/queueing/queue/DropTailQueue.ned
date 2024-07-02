@@ -8,7 +8,7 @@
 package inet.queueing.queue;
 
 //
-// This module is a limited packet queue which drops packets at the tail of the queue.
+// This module is a limited packet queue that drops packets at the tail of the queue.
 //
 simple DropTailQueue extends PacketQueue
 {

@@ -70,6 +70,8 @@ void PimDm::handleStartOperation(LifecycleOperation *operation)
         host->subscribe(ipv4DataOnRpfSignal, this);
         host->subscribe(routeAddedSignal, this);
         host->subscribe(interfaceStateChangedSignal, this);
+        host->subscribe(pimNeighborAddedSignal, this);
+        host->subscribe(pimNeighborDeletedSignal, this);
 
         WATCH_PTRMAP(routes);
     }
@@ -258,6 +260,34 @@ void PimDm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
             }
         }
     }
+    else if (signalID == pimNeighborAddedSignal || signalID == pimNeighborDeletedSignal) {
+        for (auto it : routes)
+            it.second->updateIpv4Route();
+    }
+    else if (signalID == interfaceStateChangedSignal) {
+        const auto *ieChangeDetails = check_and_cast<const NetworkInterfaceChangeDetails *>(obj);
+        auto fieldId = ieChangeDetails->getFieldId();
+        if (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER) {
+            auto ie = ieChangeDetails->getNetworkInterface();
+            for (auto it : routes) {
+                auto route = it.second;
+                auto& dis = route->downstreamInterfaces;
+                auto predicate = [&] (const DownstreamInterface *di) { return di->ie == ie; };
+                if (ie->isUp() && ie->hasCarrier()) {
+                    // mark the interface as pruned
+                    if (std::find_if(dis.begin(), dis.end(), predicate) == dis.end()) {
+                        DownstreamInterface *downstream = route->createDownstreamInterface(ie);
+                        downstream->pruneState = DownstreamInterface::PRUNED;
+                        downstream->startPruneTimer(pruneInterval);
+                    }
+                }
+                else {
+                    // delete PIM state to avoid using it when interface comes back UP again
+                    dis.erase(std::remove_if(dis.begin(), dis.end(), predicate), dis.end());
+                }
+            }
+        }
+    }
 }
 
 // ---- handle timers ----
@@ -285,7 +315,8 @@ void PimDm::processAssertTimer(cMessage *timer)
 
     // upstream state machine transition
     if (interfaceData != upstream) {
-        bool isOlistNull = route->isOilistNull();
+        bool isOlistNull = route->isOlistNull();
+        route->updateIpv4Route();
         if (upstream->graftPruneState == UpstreamInterface::PRUNED && !isOlistNull)
             processOlistNonEmptyEvent(route);
         else if (upstream->graftPruneState != UpstreamInterface::PRUNED && isOlistNull)
@@ -314,7 +345,8 @@ void PimDm::processPruneTimer(cMessage *timer)
     downstream->pruneState = DownstreamInterface::NO_INFO;
 
     // upstream state change if olist become non nullptr
-    if (!route->isOilistNull())
+    route->updateIpv4Route();
+    if (!route->isOlistNull())
         processOlistNonEmptyEvent(route);
 }
 
@@ -357,7 +389,8 @@ void PimDm::processPrunePendingTimer(cMessage *timer)
     // TODO optionally send PruneEcho
 
     // upstream state change if olist become nullptr
-    if (route->isOilistNull())
+    route->updateIpv4Route();
+    if (route->isOlistNull())
         processOlistEmptyEvent(route);
 }
 
@@ -491,23 +524,27 @@ void PimDm::processJoinPrunePacket(Packet *pk)
     int numRpfNeighbors = pimNbt->getNumNeighbors(incomingInterface->getInterfaceId());
 
     for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++) {
-        JoinPruneGroup group = pkt->getJoinPruneGroups(i);
-        Ipv4Address groupAddr = group.getGroupAddress().groupAddress.toIpv4();
+        JoinPruneGroup joinPruneGroup = pkt->getJoinPruneGroups(i);
+        Ipv4Address group = joinPruneGroup.getGroupAddress().groupAddress.toIpv4();
 
         // go through list of joined sources
-        for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++) {
-            const auto& source = group.getJoinedSourceAddress(j);
-            Route *route = findRoute(source.sourceAddress.toIpv4(), groupAddr);
-            ASSERT(route);
-            processJoin(route, incomingInterface->getInterfaceId(), numRpfNeighbors, upstreamNeighborAddress);
+        for (unsigned int j = 0; j < joinPruneGroup.getJoinedSourceAddressArraySize(); j++) {
+            Ipv4Address source = joinPruneGroup.getJoinedSourceAddress(j).sourceAddress.toIpv4();
+            Route *route = findRoute(source, group);
+            if (route != nullptr)
+                processJoin(route, incomingInterface->getInterfaceId(), numRpfNeighbors, upstreamNeighborAddress);
+            else
+                EV_WARN << "Route not found for join" << EV_FIELD(source) << EV_FIELD(group) << std::endl;
         }
 
         // go through list of pruned sources
-        for (unsigned int j = 0; j < group.getPrunedSourceAddressArraySize(); j++) {
-            const auto& source = group.getPrunedSourceAddress(j);
-            Route *route = findRoute(source.sourceAddress.toIpv4(), groupAddr);
-            ASSERT(route);
-            processPrune(route, incomingInterface->getInterfaceId(), pkt->getHoldTime(), numRpfNeighbors, upstreamNeighborAddress);
+        for (unsigned int j = 0; j < joinPruneGroup.getPrunedSourceAddressArraySize(); j++) {
+            Ipv4Address source = joinPruneGroup.getPrunedSourceAddress(j).sourceAddress.toIpv4();
+            Route *route = findRoute(source, group);
+            if (route != nullptr)
+                processPrune(route, incomingInterface->getInterfaceId(), pkt->getHoldTime(), numRpfNeighbors, upstreamNeighborAddress);
+            else
+                EV_WARN << "Route not found for prune" << EV_FIELD(source) << EV_FIELD(group) << std::endl;
         }
     }
 
@@ -550,7 +587,8 @@ void PimDm::processJoin(Route *route, int intId, int numRpfNeighbors, Ipv4Addres
 
     downstream->pruneState = DownstreamInterface::NO_INFO;
 
-    if (upstream->graftPruneState == UpstreamInterface::PRUNED && !route->isOilistNull())
+    route->updateIpv4Route();
+    if (upstream->graftPruneState == UpstreamInterface::PRUNED && !route->isOlistNull())
         processOlistNonEmptyEvent(route); // will send Graft upstream
 
     //
@@ -713,7 +751,10 @@ void PimDm::processGraft(Ipv4Address source, Ipv4Address group, Ipv4Address send
     EV_DEBUG << "Processing Graft(S=" << source << ", G=" << group << "), sender=" << sender << "incoming if=" << incomingInterfaceId << endl;
 
     Route *route = findRoute(source, group);
-    ASSERT(route);
+    if (route == nullptr) {
+        EV_WARN << "Route not found for graft" << EV_FIELD(source) << EV_FIELD(group) << std::endl;
+        return;
+    }
 
     UpstreamInterface *upstream = route->upstreamInterface;
 
@@ -750,6 +791,7 @@ void PimDm::processGraft(Ipv4Address source, Ipv4Address group, Ipv4Address send
             break;
     }
 
+    route->updateIpv4Route();
     if (olistChanged)
         processOlistNonEmptyEvent(route);
 
@@ -958,7 +1000,8 @@ void PimDm::processAssert(Interface *incomingInterface, AssertMetric receivedMet
                 sendPrunePacket(incomingInterface->winnerMetric.address, route->source, route->group, assertTime, incomingInterface->ie->getInterfaceId());
 
             // upstream state machine
-            if (upstream->graftPruneState != UpstreamInterface::PRUNED && route->isOilistNull())
+            route->updateIpv4Route();
+            if (upstream->graftPruneState != UpstreamInterface::PRUNED && route->isOlistNull())
                 processOlistEmptyEvent(route);
         }
         else if (incomingInterface->assertState == Interface::I_WON_ASSERT) {
@@ -978,7 +1021,8 @@ void PimDm::processAssert(Interface *incomingInterface, AssertMetric receivedMet
             sendPrunePacket(incomingInterface->winnerMetric.address, route->source, route->group, assertTime, incomingInterface->ie->getInterfaceId());
 
             // upstream state machine
-            if (upstream->graftPruneState != UpstreamInterface::PRUNED && route->isOilistNull())
+            route->updateIpv4Route();
+            if (upstream->graftPruneState != UpstreamInterface::PRUNED && route->isOlistNull())
                 processOlistEmptyEvent(route);
         }
         else if (incomingInterface->assertState == Interface::I_LOST_ASSERT) {
@@ -1015,7 +1059,8 @@ void PimDm::processAssert(Interface *incomingInterface, AssertMetric receivedMet
             EV_DEBUG << "Assert winner lost best route, going to NO_ASSERT_INFO state.\n";
             incomingInterface->deleteAssertInfo();
             // upstream state machine
-            if (upstream->graftPruneState == UpstreamInterface::PRUNED && !route->isOilistNull())
+            route->updateIpv4Route();
+            if (upstream->graftPruneState == UpstreamInterface::PRUNED && !route->isOlistNull())
                 processOlistNonEmptyEvent(route);
         }
     }
@@ -1100,11 +1145,12 @@ void PimDm::unroutableMulticastPacketArrived(Ipv4Address source, Ipv4Address gro
         bool hasPIMNeighbors = pimNbt->getNumNeighbors(pimInterface->getInterfaceId()) > 0;
         bool hasConnectedReceivers = pimInterface->getInterfacePtr()->getProtocolData<Ipv4InterfaceData>()->hasMulticastListener(group);
 
+        // create new outgoing interface
+        DownstreamInterface *downstream = route->createDownstreamInterface(pimInterface->getInterfacePtr());
+        downstream->setHasConnectedReceivers(hasConnectedReceivers);
+
         // if there are neighbors on interface, we will forward
         if (hasPIMNeighbors || hasConnectedReceivers) {
-            // create new outgoing interface
-            DownstreamInterface *downstream = route->createDownstreamInterface(pimInterface->getInterfacePtr());
-            downstream->setHasConnectedReceivers(hasConnectedReceivers);
             allDownstreamInterfacesArePruned = false;
         }
     }
@@ -1125,12 +1171,8 @@ void PimDm::unroutableMulticastPacketArrived(Ipv4Address source, Ipv4Address gro
     newRoute->setSourceType(IMulticastRoute::PIM_DM);
     newRoute->setSource(this);
     newRoute->setInInterface(new IMulticastRoute::InInterface(route->upstreamInterface->ie));
-    for (auto& elem : route->downstreamInterfaces) {
-        DownstreamInterface *downstream = elem;
-        newRoute->addOutInterface(new PimDmOutInterface(downstream->ie, downstream));
-    }
-
     rt->addMulticastRoute(newRoute);
+    route->updateIpv4Route();
     EV_DETAIL << "New route was added to the multicast routing table.\n";
 }
 
@@ -1170,12 +1212,13 @@ void PimDm::multicastReceiverAdded(NetworkInterface *ie, Ipv4Address group)
             // create new downstream data
             EV << "Interface is not on list of outgoing interfaces yet, it will be added" << endl;
             downstream = route->createDownstreamInterface(ie);
-            ipv4Route->addOutInterface(new PimDmOutInterface(ie, downstream));
+            ipv4Route->addOutInterface(new Ipv4MulticastRoute::OutInterface(ie));
         }
 
         downstream->setHasConnectedReceivers(true);
 
         // fire upstream state machine event
+        route->updateIpv4Route();
         if (upstream->graftPruneState == UpstreamInterface::PRUNED && downstream->isInOlist())
             processOlistNonEmptyEvent(route);
     }
@@ -1207,7 +1250,8 @@ void PimDm::multicastReceiverRemoved(NetworkInterface *ie, Ipv4Address group)
                     EV_DEBUG << "Removed interface '" << ie->getInterfaceName() << "' from the outgoing interface list of route " << route << ".\n";
 
                     // fire upstream state machine event
-                    if (route->isOilistNull())
+                    route->updateIpv4Route();
+                    if (route->isOlistNull())
                         processOlistEmptyEvent(route);
                 }
             }
@@ -1245,7 +1289,9 @@ void PimDm::multicastPacketArrivedOnNonRpfInterface(Ipv4Address group, Ipv4Addre
             downstream->startPruneTimer(pruneInterval);
 
             // if there is no outgoing interface, Prune msg has to be sent on upstream
-            if (route->isOilistNull()) {
+            route->updateIpv4Route();
+            if (route->isOlistNull()) {
+                processOlistEmptyEvent(route);
                 EV << "Route is not forwarding any more, send Prune to upstream" << endl;
                 upstream->graftPruneState = UpstreamInterface::PRUNED;
                 if (!upstream->isSourceDirectlyConnected()) {
@@ -1287,7 +1333,10 @@ void PimDm::multicastPacketArrivedOnRpfInterface(int interfaceId, Ipv4Address gr
     EV_DETAIL << "Multicast datagram arrived: source=" << source << ", group=" << group << ".\n";
 
     Route *route = findRoute(source, group);
-    ASSERT(route);
+    if (route == nullptr) {
+        EV_WARN << "Route not found for packet on RPF interface" << EV_FIELD(source) << EV_FIELD(group) << std::endl;
+        return;
+    }
     UpstreamInterface *upstream = route->upstreamInterface;
 
     // RFC 3973 4.5.2.2
@@ -1318,7 +1367,7 @@ void PimDm::multicastPacketArrivedOnRpfInterface(int interfaceId, Ipv4Address gr
     // upstream state transition
 
     // Data Packet arrives on RPF_Interface(S) AND olist(S,G) == nullptr AND S is NOT directly connected ?
-    if (upstream->ie->getInterfaceId() == interfaceId && route->isOilistNull() && !upstream->isSourceDirectlyConnected()) {
+    if (upstream->ie->getInterfaceId() == interfaceId && route->isOlistNull() && !upstream->isSourceDirectlyConnected()) {
         EV_DETAIL << "Route does not have any outgoing interface and source is not directly connected.\n";
 
         switch (upstream->graftPruneState) {
@@ -1376,7 +1425,6 @@ void PimDm::rpfInterfaceHasChanged(Ipv4MulticastRoute *ipv4Route, Ipv4Route *rou
     UpstreamInterface *oldUpstreamInterface = route->upstreamInterface;
     NetworkInterface *oldRpfInterface = oldUpstreamInterface ? oldUpstreamInterface->ie : nullptr;
     delete oldUpstreamInterface;
-    delete ipv4Route->getInInterface();
     ipv4Route->setInInterface(nullptr);
 
     // set new upstream interface data
@@ -1393,12 +1441,12 @@ void PimDm::rpfInterfaceHasChanged(Ipv4MulticastRoute *ipv4Route, Ipv4Route *rou
     }
 
     // old RPF interface should be now a downstream interface if it is not down
-    if (oldRpfInterface && oldRpfInterface->isUp()) {
-        DownstreamInterface *downstream = route->createDownstreamInterface(oldRpfInterface);
-        ipv4Route->addOutInterface(new PimDmOutInterface(oldRpfInterface, downstream));
+    if (oldRpfInterface && oldRpfInterface->isUp() && oldRpfInterface->hasCarrier()) {
+        route->createDownstreamInterface(oldRpfInterface);
+        ipv4Route->addOutInterface(new Ipv4MulticastRoute::OutInterface(oldRpfInterface));
     }
 
-    bool isOlistNull = route->isOilistNull();
+    bool isOlistNull = route->isOlistNull();
 
     // upstream state transitions
 
@@ -1624,6 +1672,16 @@ void PimDm::sendToIP(Packet *packet, Ipv4Address srcAddr, Ipv4Address destAddr, 
 //           Helpers
 //----------------------------------------------------------------------------
 
+bool PimDm::isMulticastGroupJoined(Ipv4Address group)
+{
+    for (int i = 0; i < ift->getNumInterfaces(); i++) {
+        auto ipv4InterfaceData = ift->getInterface(i)->getProtocolData<Ipv4InterfaceData>();
+        if (ipv4InterfaceData != nullptr && ipv4InterfaceData->isMemberOfMulticastGroup(group))
+            return true;
+    }
+    return false;
+}
+
 // The set of interfaces defined by the olist(S,G) macro becomes
 // null, indicating that traffic from S addressed to group G should
 // no longer be forwarded.
@@ -1784,13 +1842,32 @@ PimDm::DownstreamInterface *PimDm::Route::removeDownstreamInterface(int interfac
     return nullptr;
 }
 
-bool PimDm::Route::isOilistNull()
+bool PimDm::Route::isOlistNull()
 {
+    // the multicast tree cannot be pruned if local delivery is needed, so we pretend there's an out interface
+    if (static_cast<PimDm *>(owner)->isMulticastGroupJoined(group))
+        return false;
     for (auto& elem : downstreamInterfaces) {
         if (elem->isInOlist())
             return false;
     }
     return true;
+}
+
+void PimDm::Route::updateIpv4Route()
+{
+    Ipv4MulticastRoute *ipv4Route = static_cast<PimDm *>(owner)->findIpv4MulticastRoute(group, source);
+    // make sure that all interfaces are included in the Ipv4MulticastRoute iff the downstream interface is in the olist
+    for (auto downstreamInterface : downstreamInterfaces) {
+        bool isInOlist = downstreamInterface->isInOlist();
+        bool hasOutInterface = ipv4Route->hasOutInterface(downstreamInterface->ie);
+        if (isInOlist && !hasOutInterface)
+            // add missing interface to the Ipv4MulticastRoute if it is in the olist
+            ipv4Route->addOutInterface(new Ipv4MulticastRoute::OutInterface(downstreamInterface->ie));
+        else if (!isInOlist && hasOutInterface)
+            // remove interface from the Ipv4MulticastRoute if it is not in the olist
+            ipv4Route->removeOutInterface(downstreamInterface->ie);
+    }
 }
 
 PimDm::UpstreamInterface::~UpstreamInterface()

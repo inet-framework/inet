@@ -10,7 +10,7 @@ package inet.power.contract;
 //
 // The energy generator models describe the energy generation process of devices
 // over time. A solar panel, for example, produces energy based on time, the
-// panel's position on the globe, its orientation towards the sun and the actual
+// panel's position on the globe, its orientation towards the sun, and the actual
 // weather conditions.
 //
 // @see ~IEnergyConsumer, ~IEnergySource, ~IEnergySink, ~IEnergyStorage, ~IEnergyManagement

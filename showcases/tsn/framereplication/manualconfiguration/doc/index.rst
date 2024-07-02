@@ -4,8 +4,8 @@ Manual Stream Configuration
 Goals
 -----
 
-In this example we demonstrate manual configuration of stream identification,
-stream splitting, stream merging, stream encoding and stream decoding to achieve
+In this example, we demonstrate manual configuration of stream identification,
+stream splitting, stream merging, stream encoding, and stream decoding to achieve
 the desired stream redundancy.
 
 | INET version: ``4.4``
@@ -14,8 +14,8 @@ the desired stream redundancy.
 The Model
 ---------
 
-In this configuration we replicate a network topology that is presented in the
-IEEE 802.1 CB amendment. The network contains one source and on destination nodes,
+In this configuration, we replicate a network topology that is presented in the
+IEEE 802.1 CB amendment. The network contains one source and one destination node,
 where the source sends a redundant data stream through five switches. The stream
 is duplicated in three of the switches and merged in two of them.
 
@@ -44,7 +44,7 @@ Here is the ratio of received and sent packets:
    :align: center
 
 The expected number of successfully received packets relative to the number of
-sent packets is verified by the python scripts. The expected result is around 0.657.
+sent packets is verified by the Python scripts. The expected result is around 0.657.
 
 .. The following video shows the behavior in Qtenv:
 

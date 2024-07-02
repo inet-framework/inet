@@ -25,8 +25,11 @@ namespace inet {
  *
  * For more info please see the NED file.
  */
-class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase
+class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase, public cListener
 {
+  public:
+    static simsignal_t networkConfigurationChangedSignal;
+
   protected:
     /**
      * Represents a node in the network.
@@ -35,6 +38,7 @@ class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase
       public:
         std::vector<Ipv4Route *> staticRoutes;
         std::vector<Ipv4MulticastRoute *> staticMulticastRoutes;
+        std::vector<const NetworkInterface *> routingTableNetworkInterfaces;
 
       public:
         Node(cModule *module) : L3NetworkConfiguratorBase::Node(module) {}
@@ -118,6 +122,7 @@ class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase
     bool addDefaultRoutesParameter = false;
     bool addDirectRoutesParameter = false;
     bool optimizeRoutesParameter = false;
+    bool updateRoutesParameter = false;
 
     // internal state
     Topology topology;
@@ -149,10 +154,10 @@ class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase
      */
     virtual void configureRoutingTable(IIpv4RoutingTable *routingTable);
 
-    /**
-     * Configures the provided routing table based on the current network configuration for specified networkInterface.
-     */
-    virtual void configureRoutingTable(IIpv4RoutingTable *routingTable, NetworkInterface *networkInterface);
+    virtual void addConfigurationToRoutingTable(IIpv4RoutingTable *routingTable, NetworkInterface *networkInterface);
+    virtual void removeConfigurationFromRoutingTable(IIpv4RoutingTable *routingTable, NetworkInterface *networkInterface);
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -201,10 +206,13 @@ class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase
      */
     virtual void optimizeRoutes(std::vector<Ipv4Route *>& routes);
 
+    virtual Node *findNode(Topology& topology, Ipv4Address& address);
+    virtual void addStaticMulticastRoutes(Topology& topology);
+    virtual void addStaticMulticastRoutes(Topology& topology, Node *sourceNode, Node *receiverNode, Ipv4Address& multicastGroup);
+
     void ensureConfigurationComputed(Topology& topology);
     void configureInterface(InterfaceInfo *interfaceInfo);
     void configureRoutingTable(Node *node);
-    void configureRoutingTable(Node *node, NetworkInterface *networkInterface);
 
     /**
      * Prints the current network configuration to the module output.

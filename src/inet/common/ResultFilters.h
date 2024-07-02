@@ -28,6 +28,54 @@ class INET_API VoidPtrWrapper : public cObject
 };
 
 /**
+ * Filter that expects a Packet with a name that has an index suffix (e.g. Foo-42),
+ * and outputs the packet if it is a duplicate according to its index.
+ */
+class INET_API DuplicatePacketFilter : public cObjectResultFilter
+{
+  protected:
+    size_t sizeLimit = -1;
+    std::set<int> packetIndices; // index of the last N packets
+
+  protected:
+    virtual void init(Context *ctx) override;
+
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
+ * Filter that expects a Packet with a name that has an index suffix (e.g. Foo-42),
+ * and outputs the packet if it arrived out of order.
+ */
+class INET_API OutOfOrderPacketFilter : public cObjectResultFilter
+{
+  protected:
+    int maxIndex = -1; // highest index ever received
+
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
+ * Filter that expects a Packet with a name that has an index suffix (e.g. Foo-42),
+ * and outputs an integer for the missing packet indices.
+ */
+class INET_API MissingPacketIndexFilter : public cObjectResultFilter
+{
+  protected:
+    size_t sizeLimit = 0;
+    int lastRemovedIndex = -1;
+    std::set<int> packetIndices; // index of the last N packets
+
+  protected:
+    virtual void init(Context *ctx) override;
+
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
  * Filter that expects a Packet and outputs the age of packet data in seconds.
  */
 class INET_API DataAgeFilter : public cObjectResultFilter

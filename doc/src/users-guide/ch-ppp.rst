@@ -32,9 +32,9 @@ connection (LCP) and for configuring different network-layer protocols
 
 The INET implementation only covers encapsulation and decapsulation of
 data into PPP frames. Control protocols, which do not have a significant
-effect on the links’ capacity and latency during normal link operation,
+effect on the link's capacity and latency during normal link operation,
 are not simulated. In addition, header field compressions (PFC and ACFC)
-are also bot supported, so a simulated PPP frame always contains 1-byte
+are also not supported, so a simulated PPP frame always contains 1-byte
 Address and Control fields and a 2-byte Protocol field.
 
 .. _ug:sec:ppp:the-ppp-module:
@@ -43,7 +43,7 @@ The PPP module
 --------------
 
 The PPP module receives packets from the upper layer in the
-:gate:`netwIn` gate, adds a :msg:`PppHeader`, and send
+:gate:`netwIn` gate, adds a :msg:`PppHeader`, and sends
 it to the physical layer through the :gate:`phys` gate. The packet with
 :msg:`PppHeader` is received from the :gate:`phys` and sent to the upper
 layer immediately through the :gate:`netwOut` gate.
@@ -63,8 +63,8 @@ this is exceeded, the simulation stops with an error.
 The module can be used in simulations where the nodes are connected and
 disconnected dynamically. If the channel between the PPP modules is
 down, the messages received from the upper layer are dropped (including
-the messages waiting in the queue). When the connection is restored it
-will poll the queue and transmits the messages again.
+the messages waiting in the queue). When the connection is restored, it
+will poll the queue and transmit the messages again.
 
 The PPP module registers itself in the interface table of the node. The
 :var:`mtu` of the entry can be specified by the :par:`mtu` module
@@ -85,11 +85,11 @@ submodule. It can be set to ``PacketQueue`` or to a module type implementing
 the :ned:`IPacketQueue` interface. There are implementations with QoS and
 RED support.
 
-In typical use of the :ned:`Ppp` module it is augmented with other nodes
+In typical use of the :ned:`Ppp` module, it is augmented with other nodes
 that monitor the traffic or simulate package loss and duplication. The
-:ned:`PppInterface` module abstract that usage by adding :ned:`IHook`
+:ned:`PppInterface` module abstracts that usage by adding :ned:`IHook`
 components to the network input and output of the :ned:`Ppp` component.
-Any number of hook can be added by specifying the :par:`numOutputHooks`
+Any number of hooks can be added by specifying the :par:`numOutputHooks`
 and :par:`numInputHooks` parameters and the types of the
 :var:`outputHook` and :var:`inputHook` components. The hooks are chained
 in their numeric order.

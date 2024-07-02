@@ -14,7 +14,7 @@ package inet.visualizer.contract;
 //
 // @see ~NetworkRouteCanvasVisualizer, ~NetworkRouteOsgVisualizer, ~NetworkRouteVisualizer
 //
-moduleinterface INetworkRouteVisualizer
+moduleinterface INetworkRouteVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");

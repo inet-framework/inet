@@ -181,7 +181,7 @@ void EigrpIpv4Pdm::processIfaceStateChange(NetworkInterface *iface)
     Ipv4Address ifAddress = iface->getIpv4Address().doAnd(ifMask);
     int networkId;
 
-    if (iface->isUp()) { // an interface goes up
+    if (iface->isUp() && iface->hasCarrier()) { // an interface goes up
         if (routingForNetworks->isInterfaceIncluded(ifAddress, ifMask, &networkId)) { // Interface is included in EIGRP
             if ((eigrpIface = getInterfaceById(ifaceId)) == nullptr) { // Create EIGRP interface
                 eigrpIface = new EigrpInterface(iface, networkId, false);
@@ -193,6 +193,14 @@ void EigrpIpv4Pdm::processIfaceStateChange(NetworkInterface *iface)
         }
     }
     else if (!iface->isUp() || !iface->hasCarrier()) { // an interface goes down
+        for (int i = 0; i < rt->getNumRoutes();) {
+            auto route = rt->getRoute(i);
+            if (route->getSourceType() == IRoute::EIGRP && route->getSource() == this && route->getInterface() == iface)
+                rt->deleteRoute(route);
+            else
+                i++;
+        }
+
         eigrpIface = this->eigrpIft->findInterfaceById(ifaceId);
 
         if (eigrpIface != nullptr && eigrpIface->isEnabled()) {
@@ -1189,6 +1197,7 @@ Ipv4Route *EigrpIpv4Pdm::createRTRoute(EigrpRouteSource<Ipv4Address> *successor)
     rtEntry->setDestination(route->getRouteAddress());
     rtEntry->setNetmask(route->getRouteMask());
     rtEntry->setSourceType(IRoute::EIGRP);
+    rtEntry->setSource(this);
     rtEntry->setInterface(ift->getInterfaceById(successor->getIfaceId()));
     rtEntry->setGateway(successor->getNextHop());
     setRTRouteMetric(rtEntry, successor->getMetric());

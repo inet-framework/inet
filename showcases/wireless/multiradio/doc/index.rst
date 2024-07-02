@@ -68,7 +68,7 @@ The following video has been captured from the simulation. Note how
 ``host1`` is pinging ``host2`` through ``accessPoint``. The radio signals are visualized
 as disks, and successful transmissions between nodes' data link layers are visualized by arrows.
 The transmissions for the two different networks (both disks and arrows) are colored
-differently (red for wlan2.4 and blue for wlan5.)
+differently (red for wlan2.4 and blue for wlan5).
 
 .. video:: media/ping3.mp4
    :width: 100%

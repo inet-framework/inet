@@ -64,7 +64,7 @@ simple Rstp like ISpanningTree
         // Label ethernet interface with port role and status. Mark root switch
         bool visualize = default(false);
 
-        // If true, edge ports immediately become designated/forwarding, else it will have to wait to get designated.
+        // If true, edge ports immediately become designated/forwarding, else they will have to wait to get designated.
         bool autoEdge = default(true);
 
         @display("i=block/network2");

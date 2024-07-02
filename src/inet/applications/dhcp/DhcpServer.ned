@@ -20,17 +20,17 @@ import inet.applications.contract.IApp;
 simple DhcpServer like IApp
 {
     parameters:
-        string interfaceTableModule; // the path to the InterfaceTable module
-        string interface = default(""); // interface to listen on; can be left empty if there is only one non-loopback interface
-        int numReservedAddresses; // number of addresses to skip at the start of the network's address range
-        int maxNumClients; // maximum number of clients (IPs) allowed to be leased
-        string gateway = default(""); // gateway to assign, if empty use the interface address
-        int leaseTime @unit(s); // lease time in seconds
-        double startTime @unit(s) = default(0s); // application start time
+        string interfaceTableModule; // The path to the InterfaceTable module
+        string interface = default(""); // Interface to listen on; can be left empty if there is only one non-loopback interface
+        int numReservedAddresses; // Number of addresses to skip at the start of the network's address range
+        int maxNumClients; // Maximum number of clients (IPs) allowed to be leased
+        string gateway = default(""); // Gateway to assign, if empty use the interface address
+        int leaseTime @unit(s); // Lease time in seconds
+        double startTime @unit(s) = default(0s); // Application start time
         @display("i=block/app2");
         @lifecycleSupport;
-        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
-        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
     gates:
         input socketIn @labels(UdpControlInfo/up);
         output socketOut @labels(UdpControlInfo/down);

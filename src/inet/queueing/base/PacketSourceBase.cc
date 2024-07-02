@@ -85,9 +85,14 @@ std::string PacketSourceBase::createPacketName(const Ptr<const Chunk>& data) con
         });
 }
 
+b PacketSourceBase::computePacketLength() const
+{
+    return b(packetLengthParameter->intValue());
+}
+
 Ptr<Chunk> PacketSourceBase::createPacketContent() const
 {
-    auto packetLength = b(packetLengthParameter->intValue());
+    auto packetLength = computePacketLength();
     if (!strcmp(packetRepresentation, "bitCount")) {
         int packetData = packetDataParameter->intValue();
         return packetData == -1 ? makeShared<BitCountChunk>(packetLength) : makeShared<BitCountChunk>(packetLength, packetData);

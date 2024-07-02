@@ -42,14 +42,15 @@ network Test
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /\*\* Signal at.*\n+//
 %#--------------------------------------------------------------------------------------------------------------
-%contains: stdout
+%contains-regex: stdout
 Running simulation...
-** Event #1  t=1   Test.scenarioManager (ScenarioManager, id=2)
+\*\* Event #1  t=1   Test.scenarioManager \(ScenarioManager, id=2\)
 processing <at> command...
 processing <disconnect> command...
-Disconnecting Test.hostA.pppg$o[0] --> Test.hostB.pppg$i[0] and its reverse connection
+Disconnecting Test.hostA.pppg\$o\[0\] --> Test.hostB.pppg\$i\[0\] and its reverse connection
+.*
 processing <disconnect> command...
-Disconnecting Test.hostA.pppg$o[1] --> Test.hostC.pppg$i[0] and its reverse connection
+Disconnecting Test.hostA.pppg\$o\[1\] --> Test.hostC.pppg\$i\[0\] and its reverse connection
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

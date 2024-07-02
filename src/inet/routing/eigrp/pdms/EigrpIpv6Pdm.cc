@@ -154,7 +154,7 @@ void EigrpIpv6Pdm::processIfaceStateChange(NetworkInterface *iface)
     EigrpInterface *eigrpIface;
     int ifaceId = iface->getInterfaceId();
 
-    if (iface->isUp()) { // an interface goes up
+    if (iface->isUp() && iface->hasCarrier()) { // an interface goes up
 
         // add directly-connected routes to RT
         PrefixVector::iterator it;

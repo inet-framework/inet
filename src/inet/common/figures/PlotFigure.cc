@@ -327,11 +327,16 @@ void PlotFigure::layout()
     yAxisLabelFigure->setPosition(Point(-5, b.height / 2));
 
     bounds = backgroundFigure->getBounds();
-    bounds = rectangleUnion(bounds, labelFigure->getBounds());
-    bounds.x -= fontSize;
-    bounds.y -= fontSize;
-    bounds.width += 2 * fontSize;
-    bounds.height += 2 * fontSize;
+    if (!opp_isempty(labelFigure->getText()))
+        bounds = rectangleUnion(bounds, labelFigure->getBounds());
+    if (!yTicks.empty()) {
+        bounds.x -= fontSize;
+        bounds.width += 2 * fontSize;
+    }
+    if (!xTicks.empty()) {
+        bounds.y -= fontSize;
+        bounds.height += 2 * fontSize;
+    }
     invalidLayout = false;
 }
 

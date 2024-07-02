@@ -4,7 +4,8 @@
         name = "Acking MAC"
         description = "Hypothetical wireless MAC protocol that provides ACK frames."
         initiallyEnabled = "true"
-        requires = "Mobility PhysicalLayerWirelessCommon"
+        requires = ""
+        recommended = "Mobility PhysicalLayerWirelessCommon"
         labels = "hypothetical nic wireless"
         nedPackages = "
                        inet.linklayer.acking
@@ -18,7 +19,8 @@
         name = "AODV"
         description = "Ad hoc On-Demand Distance Vector (AODV) Routing."
         initiallyEnabled = "true"
-        requires = "Ieee80211 Ipv4 Udp"
+        requires = "Ipv4 Udp"
+        recommended = "Ieee80211"
         labels = "routing"
         nedPackages = "
                        inet.node.aodv
@@ -33,7 +35,8 @@
         name = "AODV examples"
         description = "Ad hoc On-Demand Distance Vector (AODV) Routing examples."
         initiallyEnabled = "true"
-        requires = "Aodv"
+        requires = "AckingMac Aodv GenericRadio Ipv4 Loopback Mobility PhysicalLayerWirelessCommon PingApplication Queueing TcpInet Udp"
+        recommended = ""
         labels = "routing"
         nedPackages = "
                        inet.examples.aodv
@@ -47,7 +50,8 @@
         name = "APSK radio"
         description = "Hypothetical generic radio for various APSK modulations."
         initiallyEnabled = "true"
-        requires = "Mobility PhysicalLayerWirelessCommon"
+        requires = "PhysicalLayerWirelessCommon"
+        recommended = "Mobility"
         labels = "hypothetical wireless"
         nedPackages = "
                        inet.physicallayer.wireless.apsk
@@ -61,7 +65,8 @@
         name = "BGPv4 routing"
         description = "BGP support."
         initiallyEnabled = "true"
-        requires = "Ipv4 Ospfv2 TcpInet"
+        requires = "Ipv4 Ospfv2"
+        recommended = "TcpInet"
         labels = ""
         nedPackages = "
                        inet.node.bgp
@@ -76,7 +81,8 @@
         name = "BGPv4 routing examples"
         description = "Examples for BGPv4."
         initiallyEnabled = "true"
-        requires = "Bgpv4 Ethernet Ipv4 Ppp TcpInet Udp"
+        requires = "Bgpv4 Ethernet Ieee8021d Ipv4 Loopback Ospfv2 Ppp Queueing TcpInet Udp VisualizationCanvas"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.examples.bgpv4
@@ -91,6 +97,7 @@
         description = "B-MAC, also called the Berkeley MAC, a Low Power Listening (LPL) protocol."
         initiallyEnabled = "true"
         requires = ""
+        recommended = ""
         labels = "wireless"
         nedPackages = "
                        inet.linklayer.bmac
@@ -105,6 +112,7 @@
         description = "Support for the simulation of hardware clocks and clock drifting."
         initiallyEnabled = "true"
         requires = ""
+        recommended = ""
         labels = "oscillator time"
         nedPackages = "
                        inet.applications.clock
@@ -123,6 +131,7 @@
         description = "Examples for clock usage."
         initiallyEnabled = "true"
         requires = "Clock"
+        recommended = ""
         labels = "oscillator time"
         nedPackages = "
                        inet.examples.clock
@@ -136,7 +145,8 @@
         name = "Configurator tutorial"
         description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to automatic IP address and routing table configuartion."
         initiallyEnabled = "true"
-        requires = "Aodv Ethernet Ieee80211 Ipv4 VisualizationCanvas"
+        requires = "Aodv Dhcp Ethernet Ieee80211 Ieee8021d Ipv4 Loopback Mobility PhysicalLayerWirelessCommon PingApplication Queueing TcpInet Udp VisualizationCanvas"
+        recommended = ""
         labels = "tutorial configuration"
         nedPackages = "
                        inet.tutorials.configurator
@@ -152,6 +162,7 @@
                        similar to 802.11b."
         initiallyEnabled = "true"
         requires = ""
+        recommended = ""
         labels = "hypothetical wireless"
         nedPackages = "
                        inet.linklayer.csmaca
@@ -165,7 +176,8 @@
         name = "DHCP"
         description = "DHCP protocol that can be installed as an UDP application."
         initiallyEnabled = "true"
-        requires = "Ipv4 Udp"
+        requires = "Ipv4"
+        recommended = "Udp"
         labels = "configure ipv4 protocols service"
         nedPackages = "
                        inet.applications.dhcp
@@ -179,7 +191,8 @@
         name = "DHCP examples (Ethernet)"
         description = "Examples for DHCP protocol."
         initiallyEnabled = "true"
-        requires = "Dhcp Ethernet Ieee80211 Mobility"
+        requires = "Dhcp Ethernet Ieee80211 Ieee8021d Ipv4 Loopback Mobility PhysicalLayerWirelessCommon PingApplication Queueing TcpInet Udp VisualizationCanvas VisualizationCommon"
+        recommended = ""
         labels = "configure protocols"
         nedPackages = "
                        inet.examples.dhcp
@@ -194,6 +207,7 @@
         description = "Components for implementing Differentiated Services."
         initiallyEnabled = "true"
         requires = "Queueing"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.networklayer.diffserv
@@ -207,7 +221,8 @@
         name = "DiffServ examples"
         description = "DiffServ examples."
         initiallyEnabled = "true"
-        requires = "DiffServ Ethernet Ipv4 Ppp Udp"
+        requires = "DiffServ Ethernet Ieee8021d Ipv4 Loopback Ppp Queueing TcpInet Udp VoipStream"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.examples.diffserv
@@ -221,7 +236,8 @@
         name = "DSDV routing"
         description = "Destination-Sequenced Distance Vector routing."
         initiallyEnabled = "true"
-        requires = "Ieee80211 Ipv4"
+        requires = "Ipv4"
+        recommended = "Ieee80211"
         labels = ""
         nedPackages = "
                        inet.node.dsdv
@@ -236,7 +252,8 @@
         name = "DYMO routing"
         description = "Dynamic MANET On-demand Routing."
         initiallyEnabled = "true"
-        requires = "Ieee80211 Ipv4 Udp"
+        requires = "Ipv4 Udp"
+        recommended = "Ieee80211"
         labels = ""
         nedPackages = "
                        inet.node.dymo
@@ -252,8 +269,10 @@
         description = "EIGRP routing."
         initiallyEnabled = "true"
         requires = "Ipv4 Ipv6"
+        recommended = ""
         labels = ""
         nedPackages = "
+                       inet.node.eigrp
                        inet.routing.eigrp
                       "
         extraSourceFolders = ""
@@ -265,7 +284,8 @@
         name = "EIGRP routing examples"
         description = "EIGRP routing examples."
         initiallyEnabled = "true"
-        requires = "Eigrp Ethernet Ipv4 Ipv6"
+        requires = "Eigrp Ethernet Ipv4 Ipv6 Loopback Queueing TcpInet Udp"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.examples.eigrp
@@ -282,11 +302,13 @@
                        Includes a switch model with various relay unit implementations,
                        and also Ethernet-level traffic generators."
         initiallyEnabled = "true"
-        requires = "Ieee8021q Ieee8022 PhysicalLayerWiredCommon ProtocolElement Queueing VirtualInterface"
+        requires = "Ieee8022 ProtocolElement Queueing"
+        recommended = "Ieee8021q PhysicalLayerWiredCommon VirtualInterface"
         labels = "protocols"
         nedPackages = "
                        inet.applications.ethernet
                        inet.linklayer.ethernet
+                       inet.networks.ethernet
                        inet.node.ethernet
                        inet.physicallayer.wired.ethernet
                       "
@@ -298,10 +320,40 @@
         id = "EthernetExamples"
         name = "Ethernet examples"
         description = "Examples for Ethernet."
-        requires = "Ethernet Ipv4 TcpInet"
-        labels = "protocols"
+        requires = "Ethernet Ieee8021d Ieee8021q Ieee8022 Ipv4 Loopback PhysicalLayerWiredCommon Ppp ProtocolElement Queueing TcpCommon TcpInet Udp VirtualInterface VisualizationCanvas"
+        recommended = ""
+        labels = ""
         nedPackages = "
                        inet.examples.ethernet
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id = "EthernetTests"
+        name = "Ethernet tests"
+        description = "Tests for Ethernet."
+        requires = ""
+        recommended = ""
+        labels = ""
+        nedPackages = "
+                       inet.tests.ethernet
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id = "FingerprintTutorial"
+        name = "Fingerprint tutorial"
+        description = "A step-by-step tutorial for fingerprint testing."
+        initiallyEnabled = "true"
+        requires = "Ethernet Ieee80211 Ieee8021d Ipv4 Loopback Mobility PhysicalLayerWirelessCommon Queueing TcpCommon TcpInet Udp VisualizationCanvas VisualizationCommon"
+        recommended = ""
+        labels = "tutorial"
+        nedPackages = "
+                       inet.tutorials.fingerprint
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -313,6 +365,7 @@
         description = "Provides network layer support for deterministic and probabilistic flooding."
         initiallyEnabled = "true"
         requires = ""
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.networklayer.flooding
@@ -328,6 +381,7 @@
         description = "Gate scheduling configurators for Time-Sensitive Networking (TSN)."
         initiallyEnabled = "true"
         requires = "Queueing"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.linklayer.configurator.gatescheduling.base
@@ -343,9 +397,8 @@
         description = "Showcases that demonstrate features which are independent of any specific
                        network technology."
         initiallyEnabled = "true"
-        requires = "Aodv ApskRadio BMac CsmaCaMac Dhcp DiffServ Dsdv Ethernet Gpsr
-                    Ieee80211 Ieee802154 Ipv4 LMac PhysicalEnvironment Ppp Rip
-                    TcpInet Udp VisualizationCanvas XMac"
+        requires = "DiffServ Ethernet Ieee80211 Ieee8021d Ipv4 Loopback Mobility PhysicalLayerWirelessCommon PingApplication Ppp Queueing TcpCommon TcpInet Udp VisualizationCanvas VisualizationCommon VoipStream"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.showcases.general
@@ -355,11 +408,27 @@
         linkerFlags = ""
         />
     <feature
+        id = "GenericRadio"
+        name = "Generic radio"
+        description = "A simplistic radio wireless model."
+        initiallyEnabled = "true"
+        requires = "PhysicalLayerWirelessCommon"
+        recommended = "Mobility"
+        labels = "nic wireless"
+        nedPackages = "
+                       inet.physicallayer.wireless.generic
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_GENERICRADIO"
+        linkerFlags = ""
+        />
+    <feature
         id = "Gpsr"
         name = "GPSR routing"
         description = "Greedy Perimeter Stateless Routing for Wireless Networks."
         initiallyEnabled = "true"
-        requires = "Ipv4 Udp"
+        requires = "Udp"
+        recommended = "Ipv4"
         labels = "routing"
         nedPackages = "
                        inet.node.gpsr
@@ -370,11 +439,27 @@
         linkerFlags = ""
         />
     <feature
+        id = "Ieee802"
+        name = "IEEE 802"
+        description = "IEEE 802 common"
+        initiallyEnabled = "true"
+        requires = ""
+        recommended = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.ieee802
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Ieee80211"
         name = "IEEE 802.11"
         description = "Provides IEEE 802.11 (a/b/g/e/p/n) Ad-hoc and Infrastucture mode NICs."
         initiallyEnabled = "true"
-        requires = "Ieee8022 Mobility PhysicalLayerWirelessCommon GenericRadio"
+        requires = "Ieee802 Ieee8022 PhysicalLayerWirelessCommon Queueing"
+        recommended = "Mobility"
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee80211
@@ -390,7 +475,8 @@
         name = "IEEE 802.15.4"
         description = "Provides IEEE 802.15.4 Narrowband and Ultra-Wideband NICs."
         initiallyEnabled = "true"
-        requires = "Mobility PhysicalLayerWirelessCommon"
+        requires = "AckingMac PhysicalLayerWirelessCommon"
+        recommended = "Mobility"
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee802154
@@ -405,7 +491,8 @@
         name = "IEEE 802.1ae"
         description = "Provides IEEE 802.1ae."
         initiallyEnabled = "true"
-        requires = "Queueing"
+        requires = ""
+        recommended = "Ethernet"
         labels = "nic"
         nedPackages = "
                        inet.linklayer.ieee8021ae
@@ -419,7 +506,8 @@
         name = "IEEE 802.1as"
         description = "Provides IEEE 802.1as."
         initiallyEnabled = "true"
-        requires = "Clock Ethernet"
+        requires = "Clock Ethernet Queueing"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.linklayer.ieee8021as
@@ -429,11 +517,28 @@
         linkerFlags = ""
         />
     <feature
+        id = "Ieee8021asExamples"
+        name = "IEEE 802.1as examples"
+        description = "Provides IEEE 802.1as examples."
+        initiallyEnabled = "true"
+        requires = "Clock Ethernet Ieee8021as Ieee8021d Ipv4 Loopback ProtocolElement Queueing TcpInet Udp"
+        recommended = ""
+        labels = ""
+        nedPackages = "
+                       inet.examples.gptp
+                       inet.examples.ieee8021as
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Ieee8021d"
         name = "IEEE 802.1d"
         description = "STP and RSTP (Spanning Tree Protocol, Rapid Spanning Tree Protocol)."
         initiallyEnabled = "true"
         requires = "Ethernet"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.linklayer.ieee8021d
@@ -447,7 +552,8 @@
         name = "IEEE 802.1d examples"
         description = "STP and RSTP examples."
         initiallyEnabled = "true"
-        requires = "Ethernet Ieee8021d"
+        requires = "Ethernet Ieee8021d Ieee8022 LinkLayerConfiguratorsCommon ProtocolElement Queueing"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.examples.ieee8021d
@@ -461,7 +567,8 @@
         name = "IEEE 802.1q"
         description = "IEEE 802.1q support."
         initiallyEnabled = "true"
-        requires = "Ieee8022 PhysicalLayerWiredCommon ProtocolElement Queueing"
+        requires = "ProtocolElement Queueing"
+        recommended = "Ethernet Ieee8022 PhysicalLayerWiredCommon"
         labels = "protocols"
         nedPackages = "
                        inet.linklayer.ieee8021q
@@ -477,6 +584,7 @@
         description = "Provides IEEE 802.1r."
         initiallyEnabled = "true"
         requires = ""
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.linklayer.ieee8021r
@@ -491,6 +599,7 @@
         description = ""
         initiallyEnabled = "true"
         requires = "Queueing"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.applications.ieee8022
@@ -506,6 +615,7 @@
         description = "Components for simulating internet cloud."
         initiallyEnabled = "true"
         requires = "Ipv4"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.networklayer.internetcloud
@@ -520,7 +630,8 @@
         name = "Internet cloud examples"
         description = "Internet Cloud examples."
         initiallyEnabled = "true"
-        requires = "Ethernet InternetCloud Ppp"
+        requires = "Ethernet InternetCloud Ipv4 Loopback PingApplication Ppp Queueing TcpInet Udp"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.examples.internetcloud
@@ -534,7 +645,8 @@
         name = "Internet protocol examples"
         description = "Examples for basic internet protocols (IPv4, TCP, UDP, etc.)."
         initiallyEnabled = "true"
-        requires = "Ethernet Ipv4 Ppp TcpInet Udp"
+        requires = "Clock Ethernet Flooding Ieee8021d Ipv4 Ipv6 Loopback Nexthop OtherApplications PhysicalLayerWiredCommon PingApplication Ppp Queueing Sctp TcpCommon TcpInet TcpLwip Tun Udp VisualizationCanvas VisualizationCommon WiseRoute"
+        recommended = ""
         labels = "examples protocols"
         nedPackages = "
                        inet.examples.inet
@@ -549,8 +661,10 @@
         description = "Basic IPv4 support."
         initiallyEnabled = "true"
         requires = ""
+        recommended = ""
         labels = ""
         nedPackages = "
+                       inet.applications.ipapp
                        inet.networklayer.arp.ipv4
                        inet.networklayer.configurator.ipv4
                        inet.networklayer.ipv4
@@ -565,6 +679,7 @@
         description = "Basic IPv6 support."
         initiallyEnabled = "true"
         requires = ""
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.networklayer.configurator.ipv6
@@ -582,10 +697,26 @@
         name = "IPv6 examples"
         description = "Examples for Basic IPv6 support (IPv6)."
         initiallyEnabled = "true"
-        requires = "Ethernet Ipv6 Ppp TcpInet Udp"
+        requires = "Ethernet Ipv6 Loopback Ppp Queueing Sctp TcpCommon TcpInet TcpLwip Udp VisualizationCanvas"
+        recommended = ""
         labels = "protocols examples"
         nedPackages = "
                        inet.examples.ipv6
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id = "LinkLayerConfiguratorsCommon"
+        name = "Link layer configurators common"
+        description = "Various link layer configurators"
+        initiallyEnabled = "true"
+        requires = "Ieee8021d Ipv4"
+        recommended = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.configurator.common
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -597,6 +728,7 @@
         description = "L-MAC, a lightweight MAC protocol for wireless sensor networks."
         initiallyEnabled = "true"
         requires = ""
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.linklayer.lmac
@@ -606,11 +738,42 @@
         linkerFlags = ""
         />
     <feature
+        id = "Loopback"
+        name = "Loopback"
+        description = "Loopback network interface."
+        initiallyEnabled = "true"
+        requires = ""
+        recommended = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.loopback
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id = "MeasurementShowcases"
+        name = "Measurement showcases"
+        description = "Showcases that demonstrate various common measurements."
+        initiallyEnabled = "true"
+        requires = "Ethernet Ieee8021d Ipv4 LinkLayerConfiguratorsCommon Loopback ProtocolElement Queueing TcpCommon TcpInet Udp VisualizationCanvas"
+        recommended = ""
+        labels = ""
+        nedPackages = "
+                       inet.showcases.measurement
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Mobility"
         name = "Mobility"
         description = "Mobility support for wireless simulations."
         initiallyEnabled = "true"
         requires = ""
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.mobility.base
@@ -627,7 +790,8 @@
         name = "Mobility examples"
         description = "Examples for mobility support."
         initiallyEnabled = "true"
-        requires = "Mobility"
+        requires = "Mobility PhysicalEnvironment VisualizationCanvas"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.examples.mobility
@@ -641,7 +805,8 @@
         name = "Mobility showcases"
         description = "Showcases that demonstrate node mobility."
         initiallyEnabled = "true"
-        requires = "Ieee80211 Ipv4 Mobility PhysicalEnvironment VisualizationCanvas"
+        requires = "Ieee80211 Ipv4 Loopback Mobility PhysicalLayerWirelessCommon TcpInet Udp VisualizationCanvas VisualizationCommon"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.showcases.mobility
@@ -654,7 +819,8 @@
         id = "Mpls"
         name = "MPLS routing (incl. LDP and RSVP-TE)"
         description = "MPLS routing (included LDP and RSVP-TE)."
-        requires = "Ipv4 TcpInet Udp"
+        requires = "Ipv4 TcpCommon Udp"
+        recommended = "TcpInet"
         labels = "routing"
         nedPackages = "
                        inet.networklayer.ldp
@@ -672,7 +838,8 @@
         name = "MPLS routing examples"
         description = "Examples for MPLS support."
         initiallyEnabled = "true"
-        requires = "Ethernet Mpls Ppp"
+        requires = "Ipv4 Loopback Mpls Ppp Queueing TcpInet Udp"
+        recommended = ""
         labels = "routing"
         nedPackages = "
                        inet.examples.mpls
@@ -687,7 +854,8 @@
         description = "Support for connecting the simulation to a real network.
                        This feature currently works on Linux systems only."
         initiallyEnabled = "false"
-        requires = "Ethernet Ipv4"
+        requires = "Ethernet Ieee80211 Ipv4"
+        recommended = ""
         labels = "nic"
         nedPackages = "
                        inet.emulation
@@ -701,7 +869,8 @@
         name = "Network emulation support examples"
         description = "Examples for network emulation."
         initiallyEnabled = "false"
-        requires = "Ethernet NetworkEmulationSupport"
+        requires = "Ethernet"
+        recommended = ""
         labels = "nic"
         nedPackages = "
                        inet.examples.emulation
@@ -715,7 +884,8 @@
         name = "Network emulation support showcases"
         description = "Showcases that demonstrate communication with external systems/components."
         initiallyEnabled = "false"
-        requires = " Ethernet NetworkEmulationSupport Ieee80211 VoipStream"
+        requires = "Ethernet Ieee80211 Ipv4 NetworkEmulationSupport VisualizationCommon"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.showcases.emulation
@@ -729,7 +899,8 @@
         name = "Next hop forwarding protocol"
         description = "Conceptual next hop forwarding protocol."
         initiallyEnabled = "true"
-        requires = ""
+        requires = "Ipv4"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.networklayer.configurator.nexthop
@@ -745,8 +916,24 @@
         description = "Open MP support for parallel computation (for speeding up visualization of transmission power spectral density, etc.)."
         initiallyEnabled = "true"
         requires = ""
+        recommended = ""
         labels = ""
         nedPackages = "
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id = "OspfCommon"
+        name = "OSPF common"
+        description = "OSPF common."
+        initiallyEnabled = "true"
+        requires = ""
+        recommended = ""
+        labels = ""
+        nedPackages = "
+                       inet.routing.ospf_common
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -757,7 +944,8 @@
         name = "OSPFv2 routing"
         description = "OSPFv2 routing."
         initiallyEnabled = "true"
-        requires = "Ipv4"
+        requires = "Ipv4 OspfCommon"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.node.ospfv2
@@ -772,7 +960,8 @@
         name = "OSPFv2 routing examples"
         description = "Examples for OSPFv2 routing."
         initiallyEnabled = "true"
-        requires = "Ethernet Ipv4 Ospfv2 Ppp Udp"
+        requires = "Ethernet Ieee8021d Ipv4 Loopback Ospfv2 Queueing TcpInet Udp"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.examples.ospfv2
@@ -786,7 +975,8 @@
         name = "OSPFv3 routing"
         description = "OSPFv3 support."
         initiallyEnabled = "true"
-        requires = "Ipv4 Ipv6"
+        requires = "Ipv4 Ipv6 OspfCommon"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.node.ospfv3
@@ -801,10 +991,46 @@
         name = "OSPFv3 routing examples"
         description = "Examples for OSPFv3."
         initiallyEnabled = "true"
-        requires = "Ethernet Ipv4 Ipv6 Ospfv3 Ppp Udp"
+        requires = "Ethernet Ieee8021d Ipv4 Ipv6 Loopback Ospfv3 Queueing TcpInet Udp"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.examples.ospfv3
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id = "OtherExamples"
+        name = "Other examples"
+        description = "A collection of unsorted examples"
+        initiallyEnabled = "true"
+        requires = "Dsdv Dymo Ethernet Gpsr Ieee80211 Ieee8021d Ipv4 Ipv6 Loopback Mobility Nexthop PhysicalLayerWirelessCommon PingApplication ProtocolElement Queueing TcpCommon TcpInet Udp VisualizationCanvas"
+        recommended = ""
+        labels = ""
+        nedPackages = "
+                       inet.examples.communicationcache
+                       inet.examples.manetrouting
+                       inet.examples.openstreetmap
+                       inet.examples.seaport
+                       inet.examples.timing
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id = "OtherApplications"
+        name = "Other applications"
+        description = "A collection of unsorted applications"
+        initiallyEnabled = "true"
+        requires = ""
+        recommended = ""
+        labels = ""
+        nedPackages = "
+                       inet.applications.generic
+                       inet.applications.netperfmeter
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -817,6 +1043,7 @@
                        for wireless simulations."
         initiallyEnabled = "true"
         requires = ""
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.environment.common
@@ -832,7 +1059,8 @@
         name = "Physical environment examples"
         description = "Examples for demonstrating the usage of the physical environment model."
         initiallyEnabled = "true"
-        requires = "Ieee80211 Ipv4 PhysicalEnvironment"
+        requires = "Ieee80211 Ipv4 Loopback Mobility PhysicalEnvironment PhysicalLayerWirelessCommon PingApplication TcpInet Udp"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.examples.geometry
@@ -849,6 +1077,7 @@
                        models."
         initiallyEnabled = "true"
         requires = ""
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.physicallayer.common
@@ -862,7 +1091,8 @@
         name = "Physical layer wired common"
         description = "Physical layer APIs and data structures shared among wired models."
         initiallyEnabled = "true"
-        requires = "PhysicalLayerCommon"
+        requires = ""
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.physicallayer.wired.common
@@ -877,6 +1107,7 @@
         description = "Physical layer APIs and data structures shared among wireless models."
         initiallyEnabled = "true"
         requires = "PhysicalLayerCommon"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.physicallayer.wireless.common.analogmodel
@@ -900,11 +1131,27 @@
         linkerFlags = ""
         />
     <feature
+        id = "PingApplication"
+        name = "Ping application"
+        description = "Ping application for IPv4 and IPv6 networks"
+        initiallyEnabled = "true"
+        requires = ""
+        recommended = ""
+        labels = ""
+        nedPackages = "
+                       inet.applications.pingapp
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Pim"
         name = "PIM routing"
         description = "PIM support."
         initiallyEnabled = "true"
         requires = "Ipv4"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.routing.pim
@@ -918,7 +1165,8 @@
         name = "PIM routing examples"
         description = "Examples for PIM."
         initiallyEnabled = "true"
-        requires = "Ethernet Pim Ppp"
+        requires = "Ethernet Ieee8021d Ipv4 Loopback Ospfv2 Pim Queueing TcpInet Udp"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.examples.pim
@@ -932,6 +1180,7 @@
         name = "Power"
         description = "Provides energy generator, consumer and storage models such as batteries."
         requires = ""
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.power.base
@@ -950,6 +1199,7 @@
         description = "PPP protocol."
         initiallyEnabled = "true"
         requires = ""
+        recommended = ""
         labels = "protocols"
         nedPackages = "
                        inet.linklayer.ppp
@@ -964,12 +1214,12 @@
         description = "Aggregation, fragmentation, etc."
         initiallyEnabled = "true"
         requires = "PhysicalLayerCommon Queueing"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.protocolelement.acknowledgement
                        inet.protocolelement.aggregation
                        inet.protocolelement.checksum
-                       inet.protocolelement.common
                        inet.protocolelement.cutthrough
                        inet.protocolelement.dispatching
                        inet.protocolelement.forwarding
@@ -995,7 +1245,8 @@
         name = "Protocol tutorial"
         description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to protocol."
         initiallyEnabled = "true"
-        requires = ""
+        requires = "ProtocolElement Queueing"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.tutorials.protocol
@@ -1010,12 +1261,15 @@
         description = "Queues, classifiers, schedulers, servers, etc."
         initiallyEnabled = "true"
         requires = ""
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.queueing.buffer
+                       inet.queueing.common
                        inet.queueing.classifier
                        inet.queueing.filter
                        inet.queueing.flow
+                       inet.queueing.function
                        inet.queueing.gate
                        inet.queueing.marker
                        inet.queueing.meter
@@ -1037,7 +1291,8 @@
         name = "Queueing tutorial"
         description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to queueing."
         initiallyEnabled = "true"
-        requires = ""
+        requires = "ProtocolElement Queueing"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.tutorials.queueing
@@ -1051,7 +1306,8 @@
         name = "RIP routing"
         description = "Routing Information Protocol."
         initiallyEnabled = "true"
-        requires = "Ipv4 Udp"
+        requires = "Udp"
+        recommended = "Ipv4"
         labels = ""
         nedPackages = "
                        inet.node.rip
@@ -1066,7 +1322,8 @@
         name = "RIP routing examples"
         description = "Routing Information Protocol examples."
         initiallyEnabled = "true"
-        requires = "Ethernet Ipv4 Ipv6 Rip Udp"
+        requires = "Ethernet Ieee8021d Ipv4 Ipv6 Loopback Nexthop PingApplication Queueing Rip TcpInet Udp"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.examples.rip
@@ -1080,7 +1337,8 @@
         name = "Routing showcases"
         description = "Showcases that demonstrate routing protocols."
         initiallyEnabled = "true"
-        requires = "Gpsr Ieee80211 Ipv4 PhysicalEnvironment VisualizationCanvas"
+        requires = "Aodv Dsdv Gpsr Ieee80211 Ipv4 Loopback Mobility PhysicalLayerWirelessCommon PingApplication TcpInet Udp VisualizationCanvas VisualizationCommon"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.showcases.routing
@@ -1094,7 +1352,8 @@
         name = "RTP"
         description = "Real Time Protocol support."
         initiallyEnabled = "true"
-        requires = "Ipv4 Udp"
+        requires = "Ipv4"
+        recommended = "Udp"
         labels = ""
         nedPackages = "
                        inet.applications.rtpapp
@@ -1110,7 +1369,8 @@
         name = "RTP examples"
         description = "Examples for Real Time Protocol support (RTP)."
         initiallyEnabled = "true"
-        requires = "Rtp"
+        requires = "Ipv4 Loopback Ppp Queueing Rtp TcpInet Udp"
+        recommended = ""
         labels = "protocols time"
         nedPackages = "
                        inet.examples.rtp
@@ -1124,7 +1384,8 @@
         name = "SCTP"
         description = "SCTP Protocol support."
         initiallyEnabled = "true"
-        requires = "Ipv4 Udp"
+        requires = "Ipv4 Ipv6 Udp"
+        recommended = ""
         labels = "protocols"
         nedPackages = "
                        inet.applications.sctpapp
@@ -1139,8 +1400,9 @@
         name = "SCTP examples"
         description = "Examples for SCTP."
         initiallyEnabled = "true"
-        requires = "Ipv4 Sctp"
-        labels = "protocols"
+        requires = "Ipv4 Loopback Ppp Queueing Sctp TcpInet Udp"
+        recommended = ""
+        labels = ""
         nedPackages = "
                        inet.examples.sctp
                       "
@@ -1154,6 +1416,7 @@
         description = "Simplistic shortcut to peer protocols that completely bypass the lower layers."
         initiallyEnabled = "true"
         requires = "PhysicalLayerWirelessCommon"
+        recommended = ""
         labels = "mac wireless"
         nedPackages = "
                        inet.linklayer.shortcut
@@ -1168,7 +1431,8 @@
         name = "SimpleVoIP"
         description = "A simplified Voice-over-IP model with MOS measurement capability."
         initiallyEnabled = "true"
-        requires = "Udp"
+        requires = ""
+        recommended = "Udp"
         labels = "audio talk voice"
         nedPackages = "
                        inet.applications.voip
@@ -1182,7 +1446,8 @@
         name = "SimpleVoIP examples"
         description = "Example VoIP simulations."
         initiallyEnabled = "true"
-        requires = "Ethernet InternetCloud Ipv4 SimpleVoip"
+        requires = "InternetCloud Ipv4 Loopback Ppp Queueing SimpleVoip TcpInet Udp"
+        recommended = ""
         labels = "audio talk voice"
         nedPackages = "
                        inet.examples.voip
@@ -1196,7 +1461,8 @@
         name = "TCP Common"
         description = "The common part of TCP implementations."
         initiallyEnabled = "true"
-        requires = ""
+        requires = "Queueing"
+        recommended = ""
         labels = "protocols"
         nedPackages = "
                        inet.applications.tcpapp
@@ -1212,6 +1478,7 @@
         description = "TCP implementation (original INET implementation)."
         initiallyEnabled = "true"
         requires = "TcpCommon"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.transportlayer.tcp
@@ -1226,6 +1493,7 @@
         description = "TCP implementation based on lwIP (http://www.sics.se/~adam/lwip)."
         initiallyEnabled = "false"
         requires = "TcpCommon"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.transportlayer.tcp_lwip
@@ -1239,7 +1507,8 @@
         name = "Time-Sensitive Networking (TSN)"
         description = "Provides Time-Sensitive Networking features such as time synchronization, per-stream filtering, traffic shaping, gate scheduling, stream redundancy, failure protection, etc."
         initiallyEnabled = "true"
-        requires = "Clock Ethernet Ieee8021as Ieee8021q Ieee8021r ProtocolElement Queueing"
+        requires = "Ethernet Ieee8021as"
+        recommended = "Clock Ieee8021q Ieee8021r ProtocolElement Queueing"
         labels = ""
         nedPackages = "
                        inet.networks.tsn
@@ -1254,10 +1523,26 @@
         name = "TSN Showcases"
         description = "Showcases that demonstrate Time-Sensitive Networking (TSN)."
         initiallyEnabled = "true"
-        requires = "TSN"
+        requires = "Clock Ethernet GateScheduling Ieee8021as Ieee8021d Ieee8021q Ieee8021r Ipv4 LinkLayerConfiguratorsCommon Loopback ProtocolElement Queueing TSN TcpCommon TcpInet Udp VisualizationCanvas Z3GateSchedulingConfigurator"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.showcases.tsn
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id = "TSNTests"
+        name = "TSN Tests"
+        description = "Tests for Time-Sensitive Networking (TSN)."
+        initiallyEnabled = "false"
+        requires = "Ethernet Ieee8021q Ieee8021r Ipv4 LinkLayerConfiguratorsCommon Loopback ProtocolElement Queueing TSN TcpInet Udp VisualizationCanvas"
+        recommended = ""
+        labels = ""
+        nedPackages = "
+                       inet.validation.tsn
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -1269,6 +1554,7 @@
         description = "TUN/TAP virtual network interface."
         initiallyEnabled = "true"
         requires = ""
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.applications.tunapp
@@ -1284,6 +1570,7 @@
         description = "UDP protocol."
         initiallyEnabled = "true"
         requires = ""
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.applications.udpapp
@@ -1294,25 +1581,12 @@
         linkerFlags = ""
         />
     <feature
-        id = "GenericRadio"
-        name = "Generic radio"
-        description = "A simplistic radio wireless model."
-        initiallyEnabled = "true"
-        requires = "Mobility PhysicalLayerWirelessCommon"
-        labels = "nic wireless"
-        nedPackages = "
-                       inet.physicallayer.wireless.generic
-                      "
-        extraSourceFolders = ""
-        compileFlags = "-DINET_WITH_GENERICRADIO"
-        linkerFlags = ""
-        />
-    <feature
         id = "VirtualInterface"
         name = "Virtual interface"
         description = "Virtual network interface."
         initiallyEnabled = "true"
-        requires = "Ieee8022 PhysicalLayerWiredCommon ProtocolElement Queueing"
+        requires = ""
+        recommended = "Ieee8022 PhysicalLayerWiredCommon ProtocolElement Queueing"
         labels = "nic"
         nedPackages = "
                        inet.linklayer.virtual
@@ -1326,12 +1600,13 @@
         name = "Visualization common"
         description = "Provides support for 2D and 3D visualization"
         initiallyEnabled = "true"
-        requires = "Queueing"
+        requires = "Clock Ipv4"
+        recommended = "Queueing"
         labels = "information"
         nedPackages = "
+                       inet.common.figures
                        inet.visualizer.base
                        inet.visualizer.common
-                       inet.visualizer.contract
                        inet.visualizer.util
                       "
         extraSourceFolders = ""
@@ -1344,7 +1619,8 @@
         description = "Provides network-level 2D visualization features for physical layer,
                        data link layer and network layer communications, and more."
         initiallyEnabled = "true"
-        requires = "VisualizationCommon"
+        requires = "LinkLayerConfiguratorsCommon Queueing VisualizationCommon"
+        recommended = ""
         labels = "information"
         nedPackages = "
                        inet.visualizer.canvas
@@ -1359,7 +1635,8 @@
         description = "Provides network-level 3D visualization features for physical layer,
                        data link layer and network layer communications, and more."
         initiallyEnabled = "false"
-        requires = "VisualizationCommon"
+        requires = "PhysicalEnvironment VisualizationCommon"
+        recommended = ""
         labels = "information"
         nedPackages = "
                        inet.visualizer.osg
@@ -1374,7 +1651,8 @@
         description = "Showcases that demonstrate the 2D visualization of state and behavior
                        of communication networks."
         initiallyEnabled = "true"
-        requires = "Aodv Ethernet Ieee80211 Ipv4 PhysicalEnvironment VisualizationCanvas"
+        requires = "Aodv Dhcp Ethernet Ieee80211 Ieee8021d Ipv4 Loopback Mobility PhysicalEnvironment PhysicalLayerWirelessCommon PingApplication Ppp Queueing Rip TcpCommon TcpInet Udp VisualizationCanvas VisualizationCommon"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.showcases.visualizer.canvas
@@ -1389,7 +1667,8 @@
         description = "Showcases that demonstrate the 3D visualization of state and behavior
                        of communication networks."
         initiallyEnabled = "false"
-        requires = "Aodv Ethernet Ieee80211 Ipv4 PhysicalEnvironment VisualizationCanvas VisualizationOsg"
+        requires = "Ieee80211 Ipv4 Loopback Mobility PhysicalEnvironment TcpInet Udp VisualizationCanvas VisualizationCommon VisualizationOsg"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.showcases.visualizer.osg
@@ -1405,7 +1684,8 @@
                        Required external libraries:
                        libavcodec-dev libavformat-dev libavresample-dev libavutil-dev."
         initiallyEnabled = "false"
-        requires = "Udp"
+        requires = ""
+        recommended = "Udp"
         labels = "applications audio sound talk voice"
         nedPackages = "
                        inet.applications.voipstream
@@ -1419,7 +1699,8 @@
         name = "Voice over IP stream examples"
         description = "Example VoIP simulations."
         initiallyEnabled = "false"
-        requires = "Ethernet Ipv4 VoipStream"
+        requires = "Ethernet Ieee8022 Ipv4 Loopback PhysicalLayerWiredCommon Queueing TcpCommon TcpInet Udp VoipStream"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.examples.voipstream
@@ -1433,7 +1714,8 @@
         name = "Wireless examples"
         description = "Provides various wireless examples."
         initiallyEnabled = "true"
-        requires = "AckingMac Aodv ApskRadio Ethernet Ieee80211 Ieee802154 Ipv4 PhysicalEnvironment TcpInet Udp"
+        requires = "AckingMac Aodv ApskRadio BMac CsmaCaMac Ethernet GenericRadio Ieee80211 Ieee802154 Ieee8021d Ipv4 LMac Loopback Mobility PhysicalEnvironment PhysicalLayerWirelessCommon PingApplication Power Queueing Shortcut TcpCommon TcpInet Udp VisualizationCanvas VisualizationCommon XMac"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.examples.adhoc
@@ -1450,6 +1732,7 @@
         description = "Wireless noise source models."
         initiallyEnabled = "true"
         requires = "PhysicalLayerWirelessCommon"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.physicallayer.wireless.noise
@@ -1463,7 +1746,8 @@
         name = "Wireless showcases"
         description = "Showcases that demonstrate the simulation of wireless networks."
         initiallyEnabled = "true"
-        requires = "Aodv Ieee80211 Ipv4 PhysicalEnvironment VisualizationCanvas"
+        requires = "Aodv ApskRadio BMac Dsdv Ethernet Ieee80211 Ieee802154 Ieee8021d Ipv4 LMac Loopback Mobility PhysicalEnvironment PhysicalLayerWirelessCommon PingApplication Power Queueing TcpInet Udp VisualizationCanvas VisualizationCommon WirelessNoiseSource XMac"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.showcases.wireless
@@ -1477,7 +1761,8 @@
         name = "Wireless tutorial"
         description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to wireless communication networks."
         initiallyEnabled = "true"
-        requires = "AckingMac Aodv ApskRadio Ieee80211 Ipv4 Udp PhysicalEnvironment"
+        requires = "AckingMac Aodv ApskRadio CsmaCaMac GenericRadio Ipv4 Loopback Mobility PhysicalEnvironment PhysicalLayerWirelessCommon Power Queueing TcpInet Udp VisualizationCanvas"
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.tutorials.wireless
@@ -1491,7 +1776,8 @@
         name = "WiseRoute"
         description = "Wiseroute is a simple loop-free routing algorithm that builds a routing tree from a central network point, designed for sensor networks and convergecast traffic."
         initiallyEnabled = "true"
-        requires = ""
+        requires = "Ipv4"
+        recommended = ""
         labels = "routing"
         nedPackages = "
                        inet.networklayer.wiseroute
@@ -1506,6 +1792,7 @@
         description = "X-MAC, a MAC protocol for wireless sensor networks."
         initiallyEnabled = "true"
         requires = ""
+        recommended = ""
         labels = ""
         nedPackages = "
                        inet.linklayer.xmac
@@ -1520,6 +1807,7 @@
         description = "Mobile IPv6 support with Tunneling."
         initiallyEnabled = "true"
         requires = "Ipv6"
+        recommended = ""
         labels = "protocols"
         nedPackages = "
                        inet.networklayer.xmipv6
@@ -1534,8 +1822,9 @@
         name = "xMIPv6 Mobile IPv6 protocol examples"
         description = "Examples for Mobile IPv6 support (xMIPv6)."
         initiallyEnabled = "true"
-        requires = "Ethernet Ieee80211 Mobility Ppp TcpInet Udp Xmipv6"
-        labels = "protocols"
+        requires = "Ethernet Ieee80211 Ieee8021d Ipv6 Loopback Mobility PhysicalLayerWirelessCommon PingApplication Queueing TcpInet Udp Xmipv6"
+        recommended = ""
+        labels = ""
         nedPackages = "
                        inet.examples.mobileipv6
                       "
@@ -1549,6 +1838,7 @@
         description = "For generating documentation based on runtime actions."
         initiallyEnabled = "false"
         requires = ""
+        recommended = ""
         labels = ""
         nedPackages = "
                       inet.common.selfdoc
@@ -1562,7 +1852,8 @@
         name = "Z3 Gate Scheduling Configurator"
         description = "Z3 SAT solver based TSN gate scheduling configurator (requires external libz3-dev or z3-devel installed.)"
         initiallyEnabled = "false"
-        requires = "Ethernet GateScheduling"
+        requires = "GateScheduling"
+        recommended = "Ethernet"
         labels = ""
         nedPackages = "
                        inet.linklayer.configurator.gatescheduling.z3

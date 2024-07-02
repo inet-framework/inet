@@ -16,26 +16,26 @@ package inet.queueing.base;
 // source, application, network node
 // display name or full name, full path
 //
-//  - %a automatic application display name or application full name or module display name or module full name
-//  - %n module display name or module full name
-//  - %m application display name or application full name
-//  - %M network node display name or network node full name
-//  - %p module full path
-//  - %h application full path
-//  - %H network node full path
-//  - %c packet number
-//  - %l packet length
-//  - %d packet data
-//  - %t simulation time
-//  - %e event number
+//  - %a: automatic application display name or application full name or module display name or module full name
+//  - %n: module display name or module full name
+//  - %m: application display name or application full name
+//  - %M: network node display name or network node full name
+//  - %p: module full path
+//  - %h: application full path
+//  - %H: network node full path
+//  - %c: packet number
+//  - %l: packet length
+//  - %d: packet data
+//  - %t: simulation time
+//  - %e: event number
 //
 // @see ~IPacketSource
 //
 simple PacketSourceBase extends PacketProcessorBase
 {
     parameters:
-        string packetNameFormat = default("%a-%c"); // see directives in module documentation
-        string packetRepresentation @units("bitCount","bits","byteCount","bytes","applicationPacket") = default("byteCount"); // determines the chunk of the packet data
+        string packetNameFormat = default("%a-%c"); // See directives in module documentation
+        string packetRepresentation @units("bitCount","bits","byteCount","bytes","applicationPacket") = default("byteCount"); // Determines the chunk of the packet data
         string packetProtocol = default("unknown");
         volatile int packetLength @unit(b);
         volatile int packetData = default(-1);

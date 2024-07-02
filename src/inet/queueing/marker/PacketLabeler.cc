@@ -7,7 +7,7 @@
 
 #include "inet/queueing/marker/PacketLabeler.h"
 
-#include "inet/queueing/common/LabelsTag_m.h"
+#include "inet/common/LabelsTag_m.h"
 
 namespace inet {
 namespace queueing {

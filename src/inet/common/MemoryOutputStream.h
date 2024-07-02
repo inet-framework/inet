@@ -43,7 +43,7 @@ class INET_API MemoryOutputStream
     b length;
 
   protected:
-    bool isByteAligned() {
+    bool isByteAligned() const {
         return b(length).get() % 8 == 0;
     }
 
@@ -159,7 +159,7 @@ class INET_API MemoryOutputStream
             this->length += end - offset;
         }
         else {
-            for (size_t i = B(offset).get(); i < B(end).get(); i++)
+            for (B::value_type i = B(offset).get(); i < B(end).get(); i++)
                 writeByte(bytes.at(i));
         }
     }
@@ -174,7 +174,7 @@ class INET_API MemoryOutputStream
             this->length += length;
         }
         else {
-            for (size_t i = 0; i < B(length).get(); i++)
+            for (B::value_type i = 0; i < B(length).get(); i++)
                 writeByte(buffer[i]);
         }
     }

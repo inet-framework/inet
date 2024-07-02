@@ -110,6 +110,7 @@ class Ipv4OptionRecordRoute extends Ipv4Option
 
 //
 // Option structure: Timestamp
+// RFC 781
 //
 class Ipv4OptionTimestamp extends Ipv4Option
 {

@@ -12,11 +12,11 @@ import inet.queueing.contract.IPacketFilter;
 
 //
 // This packet filter module drops packets that don't match the given packet
-// label filter criteria. The criteria can use wildcards and boolean operators.
+// label filter criteria. The criteria can use wildcards and Boolean operators.
 //
 simple LabelFilter extends PacketFilterBase like IPacketFilter
 {
     parameters:
-        string labelFilter @mutable; // the label filter as a match expression (e.g. green or red)
+        string labelFilter @mutable; // The label filter as a match expression (e.g. green or red)
         @class(LabelFilter);
 }

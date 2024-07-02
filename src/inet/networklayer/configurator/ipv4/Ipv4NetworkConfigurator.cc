@@ -22,6 +22,8 @@ namespace inet {
 
 Define_Module(Ipv4NetworkConfigurator);
 
+simsignal_t Ipv4NetworkConfigurator::networkConfigurationChangedSignal = cComponent::registerSignal("networkConfigurationChanged");
+
 #define ADDRLEN_BITS    32
 
 Ipv4NetworkConfigurator::InterfaceInfo::InterfaceInfo(Node *node, LinkInfo *linkInfo, NetworkInterface *networkInterface) :
@@ -63,9 +65,13 @@ void Ipv4NetworkConfigurator::initialize(int stage)
         addDefaultRoutesParameter = par("addDefaultRoutes");
         addDirectRoutesParameter = par("addDirectRoutes");
         optimizeRoutesParameter = par("optimizeRoutes");
+        updateRoutesParameter = par("updateRoutes");
     }
-    else if (stage == INITSTAGE_NETWORK_CONFIGURATION)
+    else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         ensureConfigurationComputed(topology);
+        if (addStaticRoutesParameter && updateRoutesParameter)
+            getParentModule()->subscribe(interfaceStateChangedSignal, this);
+    }
     else if (stage == INITSTAGE_LAST)
         dumpConfiguration();
 }
@@ -99,7 +105,9 @@ void Ipv4NetworkConfigurator::computeConfiguration()
             for (auto& autorouteElement : autorouteElements)
                 TIME(addStaticRoutes(topology, autorouteElement));
         }
+        TIME(addStaticMulticastRoutes(topology));
     }
+    emit(networkConfigurationChangedSignal, this);
     printElapsedTime("computeConfiguration", initializeStartTime);
 }
 
@@ -170,19 +178,38 @@ void Ipv4NetworkConfigurator::configureRoutingTable(IIpv4RoutingTable *routingTa
     // TODO avoid linear search
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
-        if (node->routingTable == routingTable)
+        if (node->routingTable == routingTable) {
             configureRoutingTable(node);
+            break;
+        }
     }
 }
 
-void Ipv4NetworkConfigurator::configureRoutingTable(IIpv4RoutingTable *routingTable, NetworkInterface *networkInterface)
+void Ipv4NetworkConfigurator::addConfigurationToRoutingTable(IIpv4RoutingTable *routingTable, NetworkInterface *networkInterface)
 {
     ensureConfigurationComputed(topology);
     // TODO avoid linear search
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
-        if (node->routingTable == routingTable)
-            configureRoutingTable(node, networkInterface);
+        if (node->routingTable == routingTable) {
+            node->routingTableNetworkInterfaces.push_back(networkInterface);
+            configureRoutingTable(node);
+            break;
+        }
+    }
+}
+
+void Ipv4NetworkConfigurator::removeConfigurationFromRoutingTable(IIpv4RoutingTable *routingTable, NetworkInterface *networkInterface)
+{
+    ensureConfigurationComputed(topology);
+    // TODO avoid linear search
+    for (int i = 0; i < topology.getNumNodes(); i++) {
+        Node *node = (Node *)topology.getNode(i);
+        if (node->routingTable == routingTable) {
+            remove(node->routingTableNetworkInterfaces, networkInterface);
+            configureRoutingTable(node);
+            break;
+        }
     }
 }
 
@@ -206,77 +233,88 @@ void Ipv4NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
 
 void Ipv4NetworkConfigurator::configureRoutingTable(Node *node)
 {
+    auto equalRoutes = [] (const Ipv4Route *r1, const Ipv4Route *r2) {
+        return r1->getDestination() == r2->getDestination() && r1->getNetmask() == r2->getNetmask() && r1->getGateway() == r2->getGateway() &&
+               r1->getInterface() == r2->getInterface() && r1->getSourceType() == r2->getSourceType() && r1->getMetric() == r2->getMetric();
+    };
+    auto routingTable = node->routingTable;
     auto nodePath = node->getModule()->getFullPath();
-    EV_DETAIL << "Configuring routing table of " << nodePath << endl;
+    EV_DETAIL << "Configuring routing table" << EV_FIELD(nodePath) << endl;
+    EV_DETAIL << "Removing extra routes from routing table" << EV_FIELD(nodePath) << endl;
+    for (int i = 0; i < routingTable->getNumRoutes();) {
+        auto route = check_and_cast<Ipv4Route *>(routingTable->getRoute(i));
+        if (route->getSourceType() == IRoute::MANUAL && route->getSource() == this) {
+            auto predicate = [&] (const Ipv4Route *other) { return equalRoutes(route, other); };
+            if (contains(node->routingTableNetworkInterfaces, route->getInterface()) &&
+                std::find_if(node->staticRoutes.begin(), node->staticRoutes.end(), predicate) != node->staticRoutes.end())
+            {
+                i++;
+            }
+            else {
+                EV_DETAIL << "Removing route" << EV_FIELD(route) << EV_FIELD(nodePath) << endl;
+                routingTable->deleteRoute(route);
+            }
+        }
+        else
+            i++;
+    }
+    EV_DETAIL << "Removing all routes from multicast routing table" << EV_FIELD(nodePath) << endl;
+    for (int i = 0; i < routingTable->getNumMulticastRoutes();) {
+        auto route = routingTable->getMulticastRoute(i);
+        if (route->getSourceType() == IMulticastRoute::MANUAL && route->getSource() == this) {
+            EV_DETAIL << "Removing multicast route" << EV_FIELD(route) << EV_FIELD(nodePath) << endl;
+            routingTable->deleteMulticastRoute(route);
+        }
+        else
+            i++;
+    }
+    EV_DETAIL << "Adding missing routes to routing table" << EV_FIELD(nodePath) << endl;
     for (size_t i = 0; i < node->staticRoutes.size(); i++) {
         Ipv4Route *original = node->staticRoutes[i];
-        Ipv4Route *clone = new Ipv4Route();
-        clone->setMetric(original->getMetric());
-        clone->setSourceType(original->getSourceType());
-        clone->setSource(original->getSource());
-        clone->setDestination(original->getDestination());
-        clone->setNetmask(original->getNetmask());
-        clone->setGateway(original->getGateway());
-        clone->setInterface(original->getInterface());
-        EV_DETAIL << "Configuring route " << *clone << " in " << nodePath << endl;
-        node->routingTable->addRoute(clone);
+        if (contains(node->routingTableNetworkInterfaces, original->getInterface())) {
+            bool found = false;
+            for (int j = 0; j < routingTable->getNumRoutes(); j++) {
+                if (equalRoutes(original, check_and_cast<Ipv4Route *>(routingTable->getRoute(j)))) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                Ipv4Route *route = new Ipv4Route(*original);
+                EV_DETAIL << "Adding route" << EV_FIELD(route) << EV_FIELD(nodePath) << endl;
+                routingTable->addRoute(route);
+            }
+        }
     }
+    EV_DETAIL << "Adding all routes to multicast routing table" << EV_FIELD(nodePath) << endl;
     for (size_t i = 0; i < node->staticMulticastRoutes.size(); i++) {
         Ipv4MulticastRoute *original = node->staticMulticastRoutes[i];
-        Ipv4MulticastRoute *clone = new Ipv4MulticastRoute();
-        clone->setMetric(original->getMetric());
-        clone->setSourceType(original->getSourceType());
-        clone->setSource(original->getSource());
-        clone->setOrigin(original->getOrigin());
-        clone->setOriginNetmask(original->getOriginNetmask());
-        clone->setInInterface(original->getInInterface());
-        clone->setMulticastGroup(original->getMulticastGroup());
-        for (size_t j = 0; j < original->getNumOutInterfaces(); j++)
-            clone->addOutInterface(new IMulticastRoute::OutInterface(*original->getOutInterface(j)));
-        EV_DETAIL << "Configuring multicast route " << *clone << " in " << nodePath << endl;
-        node->routingTable->addMulticastRoute(clone);
+        bool used = original->getInInterface() && contains(node->routingTableNetworkInterfaces, original->getInInterface()->getInterface());
+        for (size_t j = 0; !used && j < original->getNumOutInterfaces(); j++)
+            if (original->getOutInterface(j) && contains(node->routingTableNetworkInterfaces, original->getOutInterface(j)->getInterface()))
+                used = true;
+        if (used) {
+            Ipv4MulticastRoute *route = new Ipv4MulticastRoute(*original);
+            for (unsigned int j = 0; j < route->getNumOutInterfaces();) {
+                if (!contains(node->routingTableNetworkInterfaces, route->getOutInterface(j)->getInterface()))
+                    route->removeOutInterface(j);
+                else
+                    j++;
+            }
+            EV_DETAIL << "Adding multicast route " << EV_FIELD(route) << EV_FIELD(nodePath) << endl;
+            routingTable->addMulticastRoute(route);
+        }
     }
 }
 
-void Ipv4NetworkConfigurator::configureRoutingTable(Node *node, NetworkInterface *networkInterface)
+void Ipv4NetworkConfigurator::receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details)
 {
-    auto nodePath = node->getModule()->getFullPath();
-    EV_DETAIL << "Configuring routing table of " << nodePath << endl;
-    for (size_t i = 0; i < node->staticRoutes.size(); i++) {
-        Ipv4Route *original = node->staticRoutes[i];
-        if (original->getInterface() == networkInterface) {
-            Ipv4Route *clone = new Ipv4Route();
-            clone->setMetric(original->getMetric());
-            clone->setSourceType(original->getSourceType());
-            clone->setSource(original->getSource());
-            clone->setDestination(original->getDestination());
-            clone->setNetmask(original->getNetmask());
-            clone->setGateway(original->getGateway());
-            clone->setInterface(original->getInterface());
-            EV_DETAIL << "Configuring route " << *clone << " in " << nodePath << endl;
-            node->routingTable->addRoute(clone);
-        }
-    }
-    for (size_t i = 0; i < node->staticMulticastRoutes.size(); i++) {
-        Ipv4MulticastRoute *original = node->staticMulticastRoutes[i];
-        bool needed = original->getInInterface() && original->getInInterface()->getInterface() == networkInterface;
-        for (size_t j = 0; !needed && j < original->getNumOutInterfaces(); j++)
-            if (original->getOutInterface(j) && original->getOutInterface(j)->getInterface() == networkInterface)
-                needed = true;
-
-        if (needed) {
-            Ipv4MulticastRoute *clone = new Ipv4MulticastRoute();
-            clone->setMetric(original->getMetric());
-            clone->setSourceType(original->getSourceType());
-            clone->setSource(original->getSource());
-            clone->setOrigin(original->getOrigin());
-            clone->setOriginNetmask(original->getOriginNetmask());
-            clone->setInInterface(original->getInInterface());
-            clone->setMulticastGroup(original->getMulticastGroup());
-            for (size_t j = 0; j < original->getNumOutInterfaces(); j++)
-                clone->addOutInterface(new IMulticastRoute::OutInterface(*original->getOutInterface(j)));
-            EV_DETAIL << "Configuring multicast route " << *clone << " to " << nodePath << endl;
-            node->routingTable->addMulticastRoute(clone);
+    if (signal == interfaceStateChangedSignal) {
+        const auto *networkInterfaceChangeDetails = check_and_cast<const NetworkInterfaceChangeDetails *>(obj);
+        auto fieldId = networkInterfaceChangeDetails->getFieldId();
+        if (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER) {
+            if (updateRoutesParameter)
+                computeConfiguration();
         }
     }
 }
@@ -1078,6 +1116,7 @@ void Ipv4NetworkConfigurator::readManualRouteConfiguration(Topology& topology)
                         // create and add route
                         Ipv4Route *route = new Ipv4Route();
                         route->setSourceType(IRoute::MANUAL);
+                        route->setSource(this);
                         route->setDestination(destination);
                         route->setNetmask(netmask);
                         route->setGateway(gateway); // may be unspecified
@@ -1086,6 +1125,7 @@ void Ipv4NetworkConfigurator::readManualRouteConfiguration(Topology& topology)
                             route->setMetric(atoi(metricAttr));
                         EV_INFO << "Adding manual route " << *route << " to " << node->module->getFullPath() << endl;
                         node->staticRoutes.push_back(route);
+                        node->routingTableNetworkInterfaces.push_back(route->getInterface());
                     }
                 }
             }
@@ -1168,14 +1208,19 @@ void Ipv4NetworkConfigurator::readManualMulticastRouteConfiguration(Topology& to
                             // create and add route
                             Ipv4MulticastRoute *route = new Ipv4MulticastRoute();
                             route->setSourceType(IMulticastRoute::MANUAL);
+                            route->setSource(this);
                             route->setOrigin(source);
                             route->setOriginNetmask(netmask);
                             route->setMulticastGroup(group);
                             route->setInInterface(parent ? new Ipv4MulticastRoute::InInterface(parent) : nullptr);
+                            if (parent)
+                                node->routingTableNetworkInterfaces.push_back(parent);
                             if (!opp_isempty(metricAttr))
                                 route->setMetric(atoi(metricAttr));
-                            for (auto& child : children)
+                            for (auto& child : children) {
                                 route->addOutInterface(new Ipv4MulticastRoute::OutInterface(child, false /*TODOisLeaf*/));
+                                node->routingTableNetworkInterfaces.push_back(child);
+                            }
                             EV_INFO << "Adding manual multicast route " << *route << " to " << node->module->getFullPath() << endl;
                             node->staticMulticastRoutes.push_back(route);
                         }
@@ -1410,8 +1455,10 @@ void Ipv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                 route->setNetmask(sourceInterfaceInfo->getNetmask());
                 route->setInterface(sourceNetworkInterface);
                 route->setSourceType(Ipv4Route::MANUAL);
+                route->setSource(this);
                 EV_DEBUG << "Adding direct route " << *route << " to " << sourceNode->module->getFullPath() << endl;
                 sourceNode->staticRoutes.push_back(route);
+                sourceNode->routingTableNetworkInterfaces.push_back(route->getInterface());
             }
 
             // add a default route towards the only one gateway
@@ -1422,8 +1469,10 @@ void Ipv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
             route->setGateway(gateway);
             route->setInterface(sourceNetworkInterface);
             route->setSourceType(Ipv4Route::MANUAL);
+            route->setSource(this);
             EV_DEBUG << "Adding default route " << *route << " to " << sourceNode->module->getFullPath() << endl;
             sourceNode->staticRoutes.push_back(route);
+            sourceNode->routingTableNetworkInterfaces.push_back(route->getInterface());
 
             // skip building and optimizing the whole routing table
             EV_DEBUG << "Adding default routes to " << sourceNode->getModule()->getFullPath() << ", node has only one (non-loopback) interface" << endl;
@@ -1487,12 +1536,14 @@ void Ipv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                             if (gatewayAddress != destinationAddress)
                                 route->setGateway(gatewayAddress);
                             route->setSourceType(Ipv4Route::MANUAL);
+                            route->setSource(this);
                             if (containsRoute(sourceNode->staticRoutes, route))
                                 delete route;
                             else if (!addDirectRoutesParameter && route->getGateway().isUnspecified())
                                 delete route;
                             else {
                                 sourceNode->staticRoutes.push_back(route);
+                                sourceNode->routingTableNetworkInterfaces.push_back(route->getInterface());
                                 EV_DEBUG << "Adding route " << sourceNetworkInterface->getInterfaceFullPath() << " -> " << destinationNetworkInterface->getInterfaceFullPath() << " as " << route->str() << endl;
                             }
                         }
@@ -1812,6 +1863,7 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
         optimizedRoute->setInterface(routeColor->getInterface());
         optimizedRoute->setGateway(routeColor->getGateway());
         optimizedRoute->setSourceType(routeColor->getSourceType());
+        optimizedRoute->setSource(routeColor->getSource());
         optimizedRoute->setMetric(routeColor->getMetric());
         optimizedRoutes.push_back(optimizedRoute);
         delete routeInfo;
@@ -1823,6 +1875,123 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
 
     // copy optimized routes to original routes and return
     originalRoutes = optimizedRoutes;
+}
+
+Ipv4NetworkConfigurator::Node *Ipv4NetworkConfigurator::findNode(Topology& topology, Ipv4Address& address)
+{
+    for (int i = 0; i < topology.getNumNodes(); i++) {
+        Node *node = (Node *)topology.getNode(i);
+        for (auto& elem : node->interfaceInfos) {
+            InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(elem);
+            if (interfaceInfo->address == address.getInt())
+                return node;
+        }
+    }
+    return nullptr;
+}
+
+void Ipv4NetworkConfigurator::addStaticMulticastRoutes(Topology& topology)
+{
+    cXMLElementList multicastGroupElements = configuration->getChildrenByTagName("multicast-group");
+    for (auto& multicastGroupElement : multicastGroupElements) {
+        const char *sourceAttr = multicastGroupElement->getAttribute("source");
+        if (!opp_isempty(sourceAttr)) {
+            const char *hostAttr = multicastGroupElement->getAttribute("hosts");
+            const char *addressAttr = multicastGroupElement->getAttribute("address");
+            // parse group addresses
+            std::vector<Ipv4Address> multicastGroups;
+            cStringTokenizer tokenizer(addressAttr);
+            while (tokenizer.hasMoreTokens()) {
+                Ipv4Address addr = Ipv4Address(tokenizer.nextToken());
+                if (!addr.isMulticast())
+                    throw cRuntimeError("Non-multicast address %s found in the multicast-group element", addr.str().c_str());
+                multicastGroups.push_back(addr);
+            }
+            Ipv4Address sourceAddress = resolve(sourceAttr, L3AddressResolver::ADDR_IPv4).toIpv4();
+            auto sourceNode = findNode(topology, sourceAddress);
+            if (!sourceNode)
+                throw cRuntimeError("Multicast group source node %s not found", sourceAttr);
+            topology.calculateWeightedSingleShortestPathsTo(sourceNode);
+            Matcher hostMatcher(hostAttr);
+            for (int i = 0; i < topology.getNumNodes(); i++) {
+                Node *receiverNode = (Node *)topology.getNode(i);
+                std::string receiverFullPath = receiverNode->module->getFullPath();
+                std::string hostShortenedFullPath = receiverFullPath.substr(receiverFullPath.find('.') + 1);
+                if ((hostMatcher.matchesAny() || hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(receiverFullPath.c_str())))
+                {
+                    for (Ipv4Address& multicastGroup : multicastGroups) {
+                        addStaticMulticastRoutes(topology, sourceNode, receiverNode, multicastGroup);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void Ipv4NetworkConfigurator::addStaticMulticastRoutes(Topology& topology, Node *sourceNode, Node *receiverNode, Ipv4Address& multicastGroup)
+{
+    InterfaceInfo *inInterfaceInfo = nullptr;
+    InterfaceInfo *outInterfaceInfo = nullptr;
+    Node *node = receiverNode;
+    while (true) {
+        auto link = (Link *)node->getPath(0);
+        inInterfaceInfo = node == sourceNode ? nullptr : static_cast<InterfaceInfo *>(link->sourceInterfaceInfo);
+        ASSERT(inInterfaceInfo == nullptr || inInterfaceInfo->node == node);
+        ASSERT(outInterfaceInfo == nullptr || outInterfaceInfo->node == node);
+
+        Ipv4Address origin = Ipv4Address::UNSPECIFIED_ADDRESS;
+        Ipv4Address originNetmask = Ipv4Address::UNSPECIFIED_ADDRESS;
+        Ipv4MulticastRoute *route = nullptr;
+        for (auto r : node->staticMulticastRoutes) {
+            if (r->getSourceType() == IMulticastRoute::MANUAL &&
+                r->getOrigin() == origin &&
+                r->getOriginNetmask() == originNetmask &&
+                r->getMulticastGroup() == multicastGroup &&
+                ((r->getInInterface() == nullptr && inInterfaceInfo == nullptr) ||
+                 (r->getInInterface() != nullptr && inInterfaceInfo != nullptr && r->getInInterface()->getInterface() == inInterfaceInfo->networkInterface)))
+            {
+                route = r;
+                break;
+            }
+        }
+
+        if (route == nullptr) {
+            route = new Ipv4MulticastRoute();
+            route->setSourceType(IMulticastRoute::MANUAL);
+            route->setSource(this);
+            route->setOrigin(origin);
+            route->setOriginNetmask(originNetmask);
+            route->setMulticastGroup(multicastGroup);
+            route->setInInterface(inInterfaceInfo != nullptr ? new Ipv4MulticastRoute::InInterface(inInterfaceInfo->networkInterface) : nullptr);
+            if (inInterfaceInfo != nullptr)
+                node->routingTableNetworkInterfaces.push_back(inInterfaceInfo->networkInterface);
+//            if (!opp_isempty(metricAttr))
+//                route->setMetric(atoi(metricAttr));
+//            EV_INFO << "Adding static multicast route " << *route << " to " << node->module->getFullPath() << endl;
+            node->staticMulticastRoutes.push_back(route);
+        }
+
+        if (outInterfaceInfo != nullptr) {
+            bool foundOutInterface = false;
+            for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++) {
+                if (route->getOutInterface(i)->getInterface() == outInterfaceInfo->networkInterface) {
+                    foundOutInterface = true;
+                    break;
+                }
+            }
+            if (!foundOutInterface) {
+                route->addOutInterface(new Ipv4MulticastRoute::OutInterface(outInterfaceInfo->networkInterface, false /*TODOisLeaf*/));
+                EV_INFO << "Extending static multicast route " << *route << " in " << node->module->getFullPath() << endl;
+            }
+        }
+
+        if (node == sourceNode || node->getNumPaths() == 0)
+            break;
+        else {
+            outInterfaceInfo = static_cast<InterfaceInfo *>(link->destinationInterfaceInfo);
+            node = (Node *)link->getLinkOutRemoteNode();
+        }
+    }
 }
 
 bool Ipv4NetworkConfigurator::getInterfaceIpv4Address(L3Address& ret, NetworkInterface *networkInterface, bool netmask)

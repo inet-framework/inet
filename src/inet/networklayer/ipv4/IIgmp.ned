@@ -12,12 +12,12 @@ package inet.networklayer.ipv4;
 // An IGMP module sends notifications about multicast group memberships in hosts,
 // and processes these notifications in multicast routers.
 //
-// Currently there are 3 versions specified in RFC 1112 (IGMPv1), RFC 2236 (IGMPv2),
+// Currently, there are 3 versions specified in RFC 1112 (IGMPv1), RFC 2236 (IGMPv2),
 // and RFC 3376 (IGMPv3).
 //
-// IGMP packets are transported by the IP layer connected to the ipIn/ipOut
-// gates. Some multicast routing protocols (e.g. DVMRP) also communitacate with
-// IGMP messages. They must be connected to the routerIn/routerOut gates,
+// IGMP packets are transported by the IP layer connected to the `ipIn`/`ipOut`
+// gates. Some multicast routing protocols (e.g. DVMRP) also communicate with
+// IGMP messages. They must be connected to the `routerIn`/`routerOut` gates,
 // the IGMP module will pass up the unrecognized IGMP packets.
 //
 // @see ~Igmpv2

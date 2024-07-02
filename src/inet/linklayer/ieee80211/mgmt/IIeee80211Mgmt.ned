@@ -20,7 +20,7 @@ moduleinterface IIeee80211Mgmt
     gates:
         input macIn @labels(Ieee80211MacHeader);
         output macOut @labels(Ieee80211MacHeader);
-        input agentIn;   // optional gates used for the agent in stations
-        output agentOut; // optional gates used for the agent in stations
+        input agentIn;   // Optional gates used for the agent in stations
+        output agentOut; // Optional gates used for the agent in stations
 }
 

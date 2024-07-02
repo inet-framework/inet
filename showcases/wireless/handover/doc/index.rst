@@ -103,7 +103,7 @@ indicated by the dotted arrow, which only goes from the AP to the host.
 The host remains associated with AP1 as long as it is within communication
 range, even though it gets into the communication range of AP2 after a
 while (when it enters the area where the two APs' communication range
-circles overlap.) As it leaves AP1's range, the host detects that it no
+circles overlap). As it leaves AP1's range, the host detects that it no
 longer receives AP1's beacon frames. A text bubble appears at the host
 indicating that it has lost the beacon. The scanning process is
 restarted by the host's agent module. This is triggered when several

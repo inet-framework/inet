@@ -31,12 +31,12 @@ eligibility time can be calculated independently for multiple streams. However,
 since packets from these multiple streams may share the same queue, their
 respective transmission times can be affected by one another.
 
-The transmission eligibility time is calculated by the asyncronous shaper
+The transmission eligibility time is calculated by the asynchronous shaper
 algorithm. The shaper has two parameters that can be specified: the `committed
 information rate`, and the `committed burst rate`. The committed information
 rate is similar to the idle slope parameter of the credit-based shaper in that
 it specifies an average outgoing data rate that the traffic is limited to. The
-committed burst rate allows to temporary increase the data rate above the limit.
+committed burst rate allows to temporarily increase the data rate above the limit.
 Additionally, a `max residence time` value can be specified. The shaper ensures
 that packets wait less than this time value in the queue, by dropping packets
 that would exceed it.
@@ -47,7 +47,7 @@ each having its place in the TSN node architecture:
 - :ned:`EligibilityTimeMeter`: calculates transmission eligibility time (in the ingress filter of the bridging layer)
 - :ned:`EligibilityTimeFilter`: filters out packets that would wait for too long in the queue (in the ingress filter of the bridging layer)
 - :ned:`EligibilityTimeQueue`: stores packets ordered by transmission eligibility time (in the network interface)
-- :ned:`EligibilityTimeGate`: prevents packets to pass through the gate before the transmission eligibility time (in the network interface)
+- :ned:`EligibilityTimeGate`: prevents packets from passing through the gate before the transmission eligibility time (in the network interface)
 
 For context, here are the meter and filter modules in the bridging layer (``bridging.streamFilter.ingress``):
 
@@ -61,16 +61,16 @@ Here are the queue and gate modules in the network interface (``eth[*].macLayer.
 
 To enable asynchronous traffic shaping in a TSN switch, the following is required:
 
-- Enable ingress traffic filtering in the switch (this adds a :ned:`StreamFilterLayer` to the bridging layer): 
+- Enable ingress traffic filtering in the switch (this adds a :ned:`StreamFilterLayer` to the bridging layer):
 
   ``*.switch.hasIngressTrafficFiltering = true``
-  
+
 - Set the type of the meter and filter submodules in ``streaminglayer.ingressfilter``:
 
   ``*.switch.bridging.streamFilter.ingress.meter[*].typename = "EligibilityTimeMeter"``
   ``*.switch.bridging.streamFilter.ingress.filter[*].typename = "EligibilityTimeFilter"``
 
-- Enable egress traffic shaping in the switch (this adds a :ned:`Ieee8021qTimeAwareShaper` to all network interfaces): 
+- Enable egress traffic shaping in the switch (this adds a :ned:`Ieee8021qTimeAwareShaper` to all network interfaces):
 
   ``*.switch.hasEgressTrafficShaping = true``
 
@@ -96,7 +96,7 @@ Network
 +++++++
 
 The network contains three network nodes. The client and the server (:ned:`TsnDevice`) are
-connected through the switch (:ned:`TsnSwitch`), with 100Mbps :ned:`EthernetLink` channels: 
+connected through the switch (:ned:`TsnSwitch`), with 100Mbps :ned:`EthernetLink` channels:
 
 .. figure:: media/Network.png
    :align: center
@@ -120,7 +120,7 @@ we want to observe only the effect of the asynchronous shaper on the traffic.
 Thus our goal is for the traffic to only get altered in the traffic shaper, and
 avoid any unintended traffic shaping effect in other parts of the network.
 
-Traffic configuration is the same to the
+Traffic configuration is the same as the
 :doc:`/showcases/tsn/trafficshaping/creditbasedshaper/doc/index` showcase. We
 configure two traffic source applications in the client, creating two
 independent data streams between the client and the server. The data rate of the
@@ -144,8 +144,8 @@ summarize:
 
 In the client:
 
-- We enable IEEE 802.1 stream identification and stream encoding. 
-- We configure the stream identifier module in the bridging layer to assign outgoing packets to named streams by UDP destination port. 
+- We enable IEEE 802.1 stream identification and stream encoding.
+- We configure the stream identifier module in the bridging layer to assign outgoing packets to named streams by UDP destination port.
 - We configure the stream encoder to set the PCP number according to the assigned stream name.
 
 In the switch:
@@ -172,12 +172,12 @@ and configure them:
   layer has an ingress filter (:ned:`SimpleIeee8021qFilter`) submodule that we configure to contain the eligibility-time meters and filters).
 - As we want per-stream filtering, we configure two traffic streams
   in the ingress filter.
-- Configure the mapping in the classifier (:ned:`StreamClassifier`) in the ingress filter. This tells the classifier to send ``best effort`` streams
-  to gate 0, and video streams to gate 1. 
+- Configure the mapping in the classifier (:ned:`StreamClassifier`) in the ingress filter. This tells the classifier to send "best effort" streams
+  to gate 0, and video streams to gate 1.
 - Override the type of the ``meter`` submodules with :ned:`EligibilityTimeMeter`, and configure the committed information rate and committed burst size
-  parameters. Also, we set a max residence time of 10ms in the meter; this ensures that packets waiting more that 10ms in the switch are dropped by the filter
+  parameters. Also, we set a max residence time of 10ms in the meter; this ensures that packets waiting more than 10ms in the switch are dropped by the filter
   submodule that we configure next.
-- Override  the type of the ``meter`` submodules with :ned:`EligibilityTimeFilter`.
+- Override the type of the ``meter`` submodules with :ned:`EligibilityTimeFilter`.
 
 Here is the configuration doing the above:
 
@@ -221,15 +221,15 @@ and the incoming traffic of the shaper's filter module, per-stream:
 .. figure:: media/client_filter.png
    :align: center
 
-The data rate of the client is sinusolidal for both traffic classes, with the
+The data rate of the client is sinusoidal for both traffic classes, with the
 average values of 42 and 21 Mbps. For each stream, the client application
 traffic and the incoming traffic in the shaper's filter module is similar. The
 data rate is higher in the filter because it already includes protocol overhead,
 such as the Ethernet header.
 
-The next chart compares the incoming, outgoing and dropped traffic in the
-filter, so we can observe how the traffic changes. The commited information rate
-(configured in the meter modules) is displayed with the two dashdotted lines:
+The next chart compares the incoming, outgoing, and dropped traffic in the
+filter, so we can observe how the traffic changes. The committed information rate
+(configured in the meter modules) is displayed with the two dash-dotted lines:
 
 .. figure:: media/filter_all.png
    :align: center
@@ -240,9 +240,9 @@ traffic. This is due to the filter, which drops packets that would exceed the
 configured maximum residence time while waiting in the queue for transmission.
 
 This filtering mechanism effectively establishes a virtual queue length limit,
-as it imposes an upper bound on the queueing time. When the queue length
+as it imposes an upper bound on the queuing time. When the queue length
 approaches this virtual limit, any additional packets are discarded to prevent
-excessive wait times. In this case, the filter outgoing data rate equals to the
+excessive wait times. In this case, the filter outgoing data rate equals the
 committed information rate minus some protocol headers.
 
 The next chart displays the queue incoming and outgoing (already shaped) traffic:
@@ -250,8 +250,8 @@ The next chart displays the queue incoming and outgoing (already shaped) traffic
 .. figure:: media/queue_both.png
    :align: center
 
-The shaper allows some bursts, but in general limits the outgoing traffic
-to the committed information rate using the transmission eligibility time. 
+The shaper allows some bursts, but in general, limits the outgoing traffic
+to the committed information rate using the transmission eligibility time.
 
 The next chart displays the shaper outgoing and the server application traffic data rate:
 
@@ -259,7 +259,7 @@ The next chart displays the shaper outgoing and the server application traffic d
    :align: center
 
 The traffic doesn't change significantly in this part of the network. Again, the
-shaper data rate is slighly higher due to protocol overhead. Thus, as per our
+shaper data rate is slightly higher due to protocol overhead. Thus, as per our
 goal, traffic is only altered significantly in the shaper components (filter and
 queue).
 
@@ -288,7 +288,7 @@ starts limiting the outgoing data rate to the committed information rate.
 Meanwhile, the excess incoming traffic is being stored in the queue. As
 described previously, the queue has a virtual limit, as packets that would wait
 more than the configured max residence time are dropped by the filter. When the
-queue is saturated (i.e. it reaches this virtual limit), traffic can only flow
+queue is saturated (i.e., it reaches this virtual limit), traffic can only flow
 into the queue at the same rate as it flows out. Outgoing traffic is limited to
 the committed information rate by traffic shaping, and incoming traffic is
 limited to this same value by the filter dropping excess traffic. When the
@@ -309,10 +309,10 @@ Here is the same chart zoomed in:
 When the line is above the X-axis, the queue is blocked. When a line crosses the
 X-axis from above, the first packet in the queue becomes eligible for
 transmission. When the line goes below the X-axis, the first packet waits more
-than what is absolutely necessary. This can happen do to a higher priority
+than what is absolutely necessary. This can happen due to a higher priority
 traffic class using the channel, as is the case for every other best effort
-packet in the right side of the chart. It can also happen for higher-priority
-packets ocassionally, because there is no frame preemption.
+packet on the right side of the chart. It can also happen for higher-priority
+packets occasionally, because there is no frame preemption.
 
 The following chart connects all the statistics presented above:
 

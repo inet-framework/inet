@@ -12,7 +12,7 @@ import inet.queueing.contract.IPacketClassifier;
 
 //
 // Classifier that forwards Ethernet PAUSE frames
-// to the pauseOut gate, and other frames to the defaultOut
+// to the `pauseOut` gate, and other frames to the `defaultOut`
 // gate.
 //
 // This component can be used to build a QoS queue that gives

@@ -56,9 +56,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     clocktime_t sentTimeSyncSync;
 
     /* Slave port - Variables is used for Rate Ratio. All times are drifted based on constant drift */
-    // clocktime_t sentTimeSync;
     clocktime_t newLocalTimeAtTimeSync;
-    clocktime_t oldLocalTimeAtTimeSync;
+    clocktime_t timeDiffAtTimeSync;  // new local time - old local time
     clocktime_t peerSentTimeSync;  // sending time of last received GptpSync
     clocktime_t oldPeerSentTimeSync = -1;  // sending time of previous received GptpSync
     clocktime_t syncIngressTimestamp;  // receiving time of last incoming GptpSync
@@ -107,6 +106,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     clocktime_t getCalculatedDrift(IClock *clock, clocktime_t value) { return CLOCKTIME_ZERO; }
     void synchronize();
+    inline void adjustLocalTimestamp(clocktime_t& time) { time += timeDiffAtTimeSync; }
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
 };

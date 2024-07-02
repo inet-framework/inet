@@ -217,13 +217,6 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     cChannel *getRxTransmissionChannel() { return rxTransmissionChannel; }
     cChannel *getTxTransmissionChannel() { return txTransmissionChannel; }
 
-    /**
-     * Returns the combined state of the carrier and the interface requested state.
-     */
-    // TODO remove hasCarrier from this function and update all call sites accordingly
-    bool isUp() const { return getState() == UP && hasCarrier(); }
-    bool isDown() const { return getState() != UP; }
-
     void setHasModuleIdAddress(bool value) { hasModuleIdAddress = value; }
     void setHasModulePathAddress(bool value) { hasModulePathAddress = value; }
     const ModuleIdAddress getModuleIdAddress() const { return hasModuleIdAddress ? ModuleIdAddress(getId()) : ModuleIdAddress(0); }
@@ -240,6 +233,7 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     int getNodeInputGateId() const { return nodeInputGateId; }
     int getMtu() const { return mtu; }
     bool hasCarrier() const { return carrier; }
+    bool isUp() const { return state == UP; }
     bool isBroadcast() const { return broadcast; }
     bool isMulticast() const { return multicast; }
     bool isPointToPoint() const { return pointToPoint; }

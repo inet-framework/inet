@@ -30,6 +30,7 @@ class INET_API PacketSourceBase : public PacketProcessorBase
     virtual void initialize(int stage) override;
 
     virtual std::string createPacketName(const Ptr<const Chunk>& data) const;
+    virtual b computePacketLength() const;
     virtual Ptr<Chunk> createPacketContent() const;
     virtual Packet *createPacket();
     virtual const cModule *findContainingApplication() const;

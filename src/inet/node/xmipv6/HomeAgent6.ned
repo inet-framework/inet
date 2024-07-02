@@ -17,7 +17,6 @@ import inet.node.ipv6.Router6;
 module HomeAgent6 extends Router6
 {
     ipv6.xMIPv6Support = true;
-    ipv6.mipv6support.isMobileNode = false; //is Mobile Node
-    ipv6.mipv6support.isHomeAgent = true; //is Home Agent
+    ipv6.mipv6support.isMobileNode = false; // Is Mobile Node
+    ipv6.mipv6support.isHomeAgent = true; // Is Home Agent
 }
-

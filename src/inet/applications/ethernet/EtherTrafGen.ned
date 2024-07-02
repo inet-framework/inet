@@ -15,19 +15,19 @@ package inet.applications.ethernet;
 simple EtherTrafGen
 {
     parameters:
-        string destAddress = default("");  // destination MAC address, or module path name of destination station; empty means off
-        string interface;   // outgoing interface
+        string destAddress = default("");  // Destination MAC address, or module path name of destination station; empty means off
+        string interface;   // Outgoing interface
         string interfaceTableModule;
-        int ssap = default(-1);  // llc ssap to set on outgoing packets
-        int dsap = default(-1);  // llc dsap to set on outgoing packets
-        double startTime @unit(s) = default(this.sendInterval);  // time of sending the first packet
-        double stopTime @unit(s) = default(-1s);  // time of finishing sending, negative values mean forever
-        volatile double sendInterval @unit(s);  // interval between sending bursts
-        volatile int numPacketsPerBurst = default(1);  // number of packets to send per burst (packets within a burst are sent at the same simulation time)
-        volatile int packetLength @unit(B);  // length of packets to send
+        int ssap = default(-1);  // Llc ssap to set on outgoing packets
+        int dsap = default(-1);  // Llc dsap to set on outgoing packets
+        double startTime @unit(s) = default(this.sendInterval);  // Time of sending the first packet
+        double stopTime @unit(s) = default(-1s);  // Time of finishing sending, negative values mean forever
+        volatile double sendInterval @unit(s);  // Interval between sending bursts
+        volatile int numPacketsPerBurst = default(1);  // Number of packets to send per burst (packets within a burst are sent at the same simulation time)
+        volatile int packetLength @unit(B);  // Length of packets to send
         @lifecycleSupport;
-        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
-        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
         @display("i=block/app");
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);

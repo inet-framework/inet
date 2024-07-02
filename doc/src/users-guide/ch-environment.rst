@@ -8,32 +8,13 @@ The Physical Environment
 Overview
 --------
 
-Wireless networks are heavily affected by the physical environment, and
-the requirements for today’s ubiquitous wireless communication devices
-are increasingly demanding. Cellular networks serve densely populated
-urban areas, wireless LANs need to be able to cover large buildings with
-several offices, low-power wireless sensors must tolerate noisy
-industrial environments, batteries need to remain operational under
-various external conditions, and so on.
+Wireless networks are heavily affected by the physical environment, and the requirements for today’s ubiquitous wireless communication devices are increasingly demanding. Densely populated urban areas are served by cellular networks, large buildings with several offices need to be covered by wireless LANs, low-power wireless sensors must tolerate noisy industrial environments, and batteries need to remain operational under various external conditions, among other things.
 
-The propagation of radio signals, the movement of communicating agents,
-battery exhaustion, etc., depend on the surrounding physical
-environment. For example, signals can be absorbed by objects, can pass
-through objects, can be refracted by surfaces, can be reflected from
-surfaces, or battery capacity might depend on external temperature.
-These effects cannot be ignored in high-fidelity simulations.
+The propagation of radio signals, the movement of communicating agents, battery exhaustion, etc., depend on the surrounding physical environment. For example, objects can absorb or let through signals, surfaces can refract or reflect signals, and battery capacity might depend on external temperature. These effects cannot be ignored in high-fidelity simulations.
 
-In order to help the modeling process, the model of the physical
-environment in the INET Framework is separated from the rest of the
-simulation model. The main goal of the physical environment model is to
-describe buildings, walls, vegetation, terrain, weather, and other
-physical objects and conditions that might have effects on radio signal
-propagation, movement, batteries, etc. This separation makes the model
-reusable by all other simulation models that depend on these
-circumstances.
+To assist in the modeling process, the physical environment model in the INET Framework is separated from the rest of the simulation model. The main goal of the physical environment model is to describe buildings, walls, vegetation, terrain, weather, and other physical objects and conditions that might have effects on radio signal propagation, movement, batteries, etc. This separation allows the model to be reusable by all other simulation models that depend on these circumstances.
 
-The following sections provide a brief overview of the physical
-environment model.
+The following sections provide a brief overview of the physical environment model.
 
 .. _ug:sec:environment:physicalenvironment:
 
@@ -42,7 +23,7 @@ PhysicalEnvironment
 
 In INET, the physical environment is modeled by the
 :ned:`PhysicalEnvironment` compound module. This module normally has one
-instance in the network, and acts as a database that other parts of the
+instance in the network and acts as a database that other parts of the
 simulation can query at runtime. It contains the following information:
 
 -  geometry and properties of *physical objects* (usually referred to
@@ -58,7 +39,7 @@ an associated C++ class that contains the data structures and implements
 an API that allows other modules to query the data.
 
 Part of :ned:`PhysicalEnvironment`’s functionality is implemented in
-submodules for easy replacement. They are currently the ground model,
+submodules for easy replacement. They are currently the ground model
 and an object cache (for efficient queries):
 
 
@@ -73,13 +54,9 @@ and an object cache (for efficient queries):
 Physical Objects
 ----------------
 
-The most important aspect of the physical environment is the objects
-which are present in it. For example, simulating an indoor Wifi scenario
-may need to model walls, floors, ceilings, doors, windows, furniture,
-and similar objects, because they all affect signal propagation
-(obstacle modeling).
+The most important aspect of the physical environment is the objects present within it. For example, simulating an indoor Wifi scenario may require modeling walls, floors, ceilings, doors, windows, furniture, and similar objects because they all affect signal propagation (obstacle modeling).
 
-Objects are located in space, and have shapes and materials. The
+Objects are located in space and have shapes and materials. The
 physical environment model supports basic shapes and homogeneous
 materials, which is a simplified description but still allows for a
 reasonable approximation of reality. Physical objects in INET have the
@@ -88,12 +65,12 @@ following properties:
 -  *shape* describes the object in 3D independent of its position and
    orientation.
 
--  *position* determines where the object is located in the 3D space.
+-  *position* determines where the object is located in 3D space.
 
 -  *orientation* determines how the object is rotated relative to its
    default orientation.
 
--  *material* describes material specific physical properties.
+-  *material* describes material-specific physical properties.
 
 -  *graphical properties* provide parameters for better visualization.
 
@@ -109,14 +86,14 @@ Graphical properties include:
 
 -  *tags*: allows filtering objects on the graphical user interface
 
-Physical objects in INET are stationary, they cannot change their
+Physical objects in INET are stationary; they cannot change their
 position or orientation over time. Since the shape of the physical
 objects might be quite diverse, the model is designed to be extensible
 with new shapes. INET provides the following shapes:
 
 -  *sphere* shapes are specified by a radius
 
--  *cuboid* shapes are specified by a length, a width, and a height
+-  *cuboid* shapes are specified by a length, width, and height
 
 -  *prism* shapes are specified by a 2D polygon base and a height
 
@@ -132,10 +109,7 @@ the XML syntax supported by the physical environment:
    :end-before: !End
    :name: Defining physical objects example
 
-In order to load the above XML file, the following configuration could
-be used:
-
-
+To load the above XML file, the following configuration could be used:
 
 .. literalinclude:: lib/Snippets.ini
    :language: ini
@@ -148,21 +122,21 @@ be used:
 Ground Models
 -------------
 
-In inter-vehicle simulations the terrain has profound effects on signal
+In inter-vehicle simulations, the terrain has profound effects on signal
 propagation. For example, vehicles on the opposite sides of a mountain
 cannot directly communicate with each other.
 
 A ground model describes the 3D surface of the terrain. Its main purpose
-is to compute a position on the surface underneath an particular
+is to compute a position on the surface underneath a particular
 position.
 
 INET contains the following built-in ground models implemented as
 OMNeT++ simple modules:
 
--  :ned:`FlatGround` is a trivial model which provides a flat surface
+-  :ned:`FlatGround` is a trivial model that provides a flat surface
    parallel to the XY plane at a certain height.
 
--  :ned:`OsgEarthGround` is a more realistic model (based on ) which
+-  :ned:`OsgEarthGround` is a more realistic model (based on ) that
    provides a terrain surface.
 
 .. _ug:sec:environment:geographic-coordinate-system-models:
@@ -170,8 +144,8 @@ OMNeT++ simple modules:
 Geographic Coordinate System Models
 -----------------------------------
 
-In order to run high fidelity simulations, it is often required to embed
-the communication network into a real world map. With the new OMNeT++ 5
+In order to run high-fidelity simulations, it is often required to embed
+the communication network into a real-world map. With the new OMNeT++ 5
 version, INET already provides support for 3D maps using for
 visualization and as the map provider.
 
@@ -184,7 +158,7 @@ resolved.
 A geographic coordinate system model maps scene coordinates to
 geographic coordinates, and vice versa. Such a model allows positioning
 physical objects and describing network node mobility using geographical
-coordinates (e.g longitude, latitude, altitude).
+coordinates (e.g., longitude, latitude, altitude).
 
 In INET, a geographic coordinate system model is implemented as an
 OMNeT++ simple module:
@@ -221,7 +195,7 @@ propagation may become computationally very expensive. The reason is
 that the transmission medium model must check each line of sight path
 between all transmitter and receiver pairs against all physical objects.
 
-An object cache organizes physical objects into a data structure which
+An object cache organizes physical objects into a data structure that
 provides efficient geometric queries. Its main purpose is to iterate all
 physical objects penetrated by a 3D line segment.
 

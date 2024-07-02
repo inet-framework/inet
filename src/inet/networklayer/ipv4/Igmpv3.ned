@@ -14,7 +14,7 @@ simple Igmpv3 like IIgmp
         string interfaceTableModule;
         string routingTableModule;
         string crcMode @enum("declared","computed") = default("declared");
-        int    robustnessVariable = default(2); // IGMP is roboust to (roboustnessVariable-1) packet loss
+        int    robustnessVariable = default(2); // IGMP is robust to (robustnessVariable-1) packet loss
         double queryInterval @unit(s) = default(125s);
         double queryResponseInterval @unit(s) = default(10s);
         double groupMembershipInterval @unit(s) = default((robustnessVariable * queryInterval) + queryResponseInterval);
@@ -24,13 +24,13 @@ simple Igmpv3 like IIgmp
         double lastMemberQueryInterval @unit(s) = default(1s);
         int    lastMemberQueryCount = default(robustnessVariable);
         double unsolicitedReportInterval @unit(s) = default(10s);
-//      double version1RouterPresentInterval @unit(s) = default(400s);
+        //double version1RouterPresentInterval @unit(s) = default(400s);
         @display("i=block/cogwheel");
         @selfMessageKinds(inet::IgmpTimerKind);
 
     gates:
-        input ipIn @labels(Ipv4ControlInfo/up);  // delivered IGMP packets
-        output ipOut @labels(Ipv4ControlInfo/down); // to ~Ipv4
+        input ipIn @labels(Ipv4ControlInfo/up);  // Delivered IGMP packets
+        output ipOut @labels(Ipv4ControlInfo/down); // To ~Ipv4
 
         input routerIn @labels(Ipv4ControlInfo/up);
         output routerOut @labels(Ipv4ControlInfo/down);

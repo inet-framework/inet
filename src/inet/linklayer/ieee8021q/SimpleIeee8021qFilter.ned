@@ -22,8 +22,8 @@ import inet.queueing.contract.IPacketMeter;
 module SimpleIeee8021qFilter like IPacketFilter
 {
     parameters:
-        int numStreams = default(0); // number of different streams to filter for
-        bool hasDefaultPath = default(true); // specifies if the non-filtered direct path should exist
+        int numStreams = default(0); // Number of different streams to filter for
+        bool hasDefaultPath = default(true); // Specifies if the non-filtered direct path should exist
         int startY = default(hasDefaultPath ? 200 : 100);
         @display("i=block/filter");
     gates:
@@ -35,27 +35,31 @@ module SimpleIeee8021qFilter like IPacketFilter
             defaultGateIndex = default(parent.hasDefaultPath ? 0 : -1);
             @display("p=100,100");
         }
-        gate[numStreams]: <default("InteractiveGate")> like IPacketGate {
+        gateFilter[numStreams]: <default("BackPressureBasedFilter")> like IPacketFilter {
             @display("p=300,$startY,column,150");
         }
-        meter[numStreams]: <default("DualRateThreeColorMeter")> like IPacketMeter {
+        gate[numStreams]: <default("InteractiveGate")> like IPacketGate {
             @display("p=500,$startY,column,150");
+        }
+        meter[numStreams]: <default("DualRateThreeColorMeter")> like IPacketMeter {
+            @display("p=700,$startY,column,150");
         }
         filter[numStreams]: <default("LabelFilter")> like IPacketFilter {
             labelFilter = default("green");
-            @display("p=700,$startY,column,150");
+            @display("p=900,$startY,column,150");
         }
         multiplexer: PacketMultiplexer {
-            @display("p=900,100");
+            @display("p=1100,100");
         }
         barrier: BackPressureBarrier {
-            @display("p=1100,100");
+            @display("p=1300,100");
         }
     connections:
         in --> { @display("m=w"); } --> classifier.in;
         classifier.out++ --> multiplexer.in++ if hasDefaultPath;
         for i=0..numStreams-1 {
-            classifier.out++ --> gate[i].in;
+            classifier.out++ --> gateFilter[i].in;
+            gateFilter[i].out --> gate[i].in;
             gate[i].out --> meter[i].in;
             meter[i].out --> filter[i].in;
             filter[i].out --> multiplexer.in++;

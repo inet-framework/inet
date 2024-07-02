@@ -22,6 +22,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.sender[0].*.initialStatus = "down"
 *.recip.*.initialStatus = "down"
 **.scenarioManager.script = xmldoc("scenario.xml")
+*.configurator.updateRoutes = true
 
 # app config
 **.sender[*].trafGenType = "IpvxTrafGen"
@@ -108,101 +109,101 @@ network Test
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 
-\*\* Event \#\d+  t=1   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-0 .*
-.*
-\*\* Event \#\d+  t=1\.4   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-1 .*
-.*
-?\*\* Event #\d+  t=1\.5   Test\.scenarioManager .*
+\*\* Event \#\d+  t=1   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-0 .*?
+.*?
+\*\* Event \#\d+  t=1\.4   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-1 .*?
+.*?
+?\*\* Event #\d+  t=1\.5   Test\.scenarioManager .*?
 Test\.recip starting up
-.*
+.*?
 Test\.recip started
-.*
-?\*\* Event \#\d+  t=1\.8   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-2 .*
-.*
-?\*\* Event #\d+  t=2   Test\.scenarioManager .*
+.*?
+?\*\* Event \#\d+  t=1\.8   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-2 .*?
+.*?
+?\*\* Event #\d+  t=2   Test\.scenarioManager .*?
 Test\.sender\[0\] starting up
-.*
+.*?
 Test\.sender\[0\] started
-.*
-?\*\* Event \#\d+  t=2   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-0 .*
-.*
-?\*\* Event \#\d+  t=2\.2   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-3 .*
-.*
-?\*\* Event \#\d+  t=2\.4   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-1 .*
-.*
-?\*\* Event \#\d+  t=2\.6   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-4 .*
-.*
-?\*\* Event \#\d+  t=2\.8   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-2 .*
-.*
-?\*\* Event #\d+  t=3   Test\.scenarioManager .*
+.*?
+?\*\* Event \#\d+  t=2   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-0 .*?
+.*?
+?\*\* Event \#\d+  t=2\.2   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-3 .*?
+.*?
+?\*\* Event \#\d+  t=2\.4   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-1 .*?
+.*?
+?\*\* Event \#\d+  t=2\.6   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-4 .*?
+.*?
+?\*\* Event \#\d+  t=2\.8   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-2 .*?
+.*?
+?\*\* Event #\d+  t=3   Test\.scenarioManager .*?
 Test\.recip shutting down
-.*
+.*?
 Test\.recip shut down
-.*
-?\*\* Event \#\d+  t=3   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-5 .*
-.*
-?\*\* Event \#\d+  t=3\.2   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-3 .*
-.*
-?\*\* Event \#\d+  t=3\.4   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-6 .*
-.*
-?\*\* Event \#\d+  t=3\.6   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-4 .*
-.*
-?\*\* Event \#\d+  t=3\.8   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-7 .*
-.*
-?\*\* Event #\d+  t=4   Test\.scenarioManager .*
+.*?
+?\*\* Event \#\d+  t=3   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-5 .*?
+.*?
+?\*\* Event \#\d+  t=3\.2   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-3 .*?
+.*?
+?\*\* Event \#\d+  t=3\.4   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-6 .*?
+.*?
+?\*\* Event \#\d+  t=3\.6   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-4 .*?
+.*?
+?\*\* Event \#\d+  t=3\.8   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-7 .*?
+.*?
+?\*\* Event #\d+  t=4   Test\.scenarioManager .*?
 Test\.recip starting up
-.*
+.*?
 Test\.recip started
-.*
-?\*\* Event \#\d+  t=4   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-5 .*
-.*
-?\*\* Event \#\d+  t=4\.2   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-8 .*
-.*
-?\*\* Event \#\d+  t=4\.4   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-6 .*
-.*
-?\*\* Event \#\d+  t=4\.6   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-9 .*
-.*
-?\*\* Event \#\d+  t=4\.8   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-7 .*
-.*
-?\*\* Event #\d+  t=5   Test\.scenarioManager .*
+.*?
+?\*\* Event \#\d+  t=4   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-5 .*?
+.*?
+?\*\* Event \#\d+  t=4\.2   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-8 .*?
+.*?
+?\*\* Event \#\d+  t=4\.4   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-6 .*?
+.*?
+?\*\* Event \#\d+  t=4\.6   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-9 .*?
+.*?
+?\*\* Event \#\d+  t=4\.8   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-7 .*?
+.*?
+?\*\* Event #\d+  t=5   Test\.scenarioManager .*?
 Test\.sender\[1\] shutting down
-.*
+.*?
 Test\.sender\[1\] shut down
-.*
-?\*\* Event \#\d+  t=5\.2   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-8 .*
-.*
-?\*\* Event \#\d+  t=5\.6   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-9 .*
-.*
-?\*\* Event #\d+  t=6   Test\.scenarioManager .*
+.*?
+?\*\* Event \#\d+  t=5\.2   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-8 .*?
+.*?
+?\*\* Event \#\d+  t=5\.6   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-9 .*?
+.*?
+?\*\* Event #\d+  t=6   Test\.scenarioManager .*?
 Test\.sender\[1\] starting up
-.*
+.*?
 Test\.sender\[1\] started
-.*
-?\*\* Event \#\d+  t=6   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-10 .*
-.*
-?\*\* Event \#\d+  t=6   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
-Sending packet: \(inet::Packet\)appData-10 .*
+.*?
+?\*\* Event \#\d+  t=6   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-10 .*?
+.*?
+?\*\* Event \#\d+  t=6   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*?
+Sending packet: \(inet::Packet\)appData-10 .*?
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca

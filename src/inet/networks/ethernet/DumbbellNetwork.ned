@@ -39,4 +39,3 @@ network DumbbellNetwork extends WiredNetworkBase
         switch2.ethg++ <--> EthernetLink <--> server2.ethg++;
         switch1.ethg++ <--> EthernetLink <--> switch2.ethg++;
 }
-

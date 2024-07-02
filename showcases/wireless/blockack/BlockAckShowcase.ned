@@ -3,7 +3,7 @@ package inet.showcases.wireless.blockack;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 
 network BlockAckShowcase
@@ -16,7 +16,7 @@ network BlockAckShowcase
         radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=50,100");
         }
-        visualizer: IntegratedVisualizer {
+        visualizer: IntegratedCanvasVisualizer {
             @display("p=50,150");
         }
         host1: AdhocHost {

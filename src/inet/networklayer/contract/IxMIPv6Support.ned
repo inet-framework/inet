@@ -12,7 +12,7 @@
 package inet.networklayer.contract;
 
 //
-// Module interface for xMIPv6 (where x = F, H, F-H).
+// Module interface for xMIPv6 modules (where x = F, H, F-H).
 //
 moduleinterface IxMIPv6Support
 {

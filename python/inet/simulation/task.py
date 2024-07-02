@@ -77,6 +77,8 @@ class SimulationTaskResult(TaskResult):
             match = re.search("<!> Error: (.*) -- in module (.*)", stderr)
             self.error_message = match.group(1).strip() if match else None
             self.error_module = match.group(2).strip() if match else None
+            matching_lines = [re.sub("CREATE (.*)", "\\1", line) for line in stdout.split("\n") if re.search("inet\.", line)]
+            self.used_types = sorted(list(set(matching_lines)))
             if self.error_message is None:
                 match = re.search("<!> Error: (.*)", stderr)
                 self.error_message = match.group(1).strip() if match else None
