@@ -119,9 +119,11 @@ void Tcp::sendFromConn(cMessage *msg, const char *gatename, int gateindex)
     Enter_Method("sendFromConn");
     take(msg);
     if (!strcmp(gatename, "ipOut"))
-        ipSink.pushPacket(check_and_cast<Packet *>(msg));
+        schedule("SendToIp", simTime(), [=] () {
+            ipSink.pushPacket(check_and_cast<Packet *>(msg));
+        });
     else if (!strcmp(gatename, "appOut")) {
-        schedule("SendData", simTime(), [=] () {
+        schedule("SendToApp", simTime(), [=] () {
             appSink.pushPacket(check_and_cast<Packet *>(msg));
         });
     }
