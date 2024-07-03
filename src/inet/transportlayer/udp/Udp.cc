@@ -895,6 +895,7 @@ void Udp::close(int sockId)
 
     EV_INFO << "Closing socket: " << *(it->second) << "\n";
     auto callback = it->second->callback;
+    // KLUDGE: this schedule call is here to keep the fingerprints
     schedule("handleClose", simTime(), [=]() { callback->handleClose(); });
 
     destroySocket(it);
