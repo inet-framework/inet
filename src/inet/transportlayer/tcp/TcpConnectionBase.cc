@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
@@ -628,7 +629,8 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
         case TCP_S_FIN_WAIT_2:
         case TCP_S_CLOSING:
             if (!peerClosedSentUp && state == TCP_S_CLOSE_WAIT && this->receiveQueue->getQueueLength() == 0) {
-                callback->handlePeerClosed();
+                // KLUDGE: this schedule call is here to keep the fingerprints
+                schedule("handlePeerClosed", simTime(), [=] () { callback->handlePeerClosed(); });
                 peerClosedSentUp = true;
             }
             // whether connection setup succeeded (ESTABLISHED) or not (others),
