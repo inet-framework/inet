@@ -79,7 +79,8 @@ void Leach::configureInterfaces() {
         if (networkInterface->isMulticast()
                 && interfaceMatcher.matches(
                         networkInterface->getInterfaceName())) {
-            wirelessInterface = networkInterface;
+            wirelessInterface->joinMulticastGroup(
+                    addressType->getLinkLocalManetRoutersMulticastAddress())
         }
     }
 }
