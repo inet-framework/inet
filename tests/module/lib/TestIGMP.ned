@@ -25,7 +25,7 @@ simple TestIGMP like IIgmp
         @display("i=block/cogwheel_s");
 
     gates:
-        input ipIn @labels(Ipv4ControlInfo/up);  // delivered IGMP packets
+        input ipIn @interface[inet::queueing::IPassivePacketSink](protocol=igmp; service=indication) @labels(Ipv4ControlInfo/up);  // delivered IGMP packets
         output ipOut @labels(Ipv4ControlInfo/down); // to ~Ipv4
 
         input routerIn @labels(Ipv4ControlInfo/up);
