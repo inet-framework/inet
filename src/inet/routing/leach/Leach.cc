@@ -50,8 +50,7 @@ void Leach::initialize(int stage) {
         wasCH = false;
 
     } else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        registerService(Protocol::manet, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
+        registerProtocol(Protocol::manet, gate("ipOut"), gate("ipIn"));
     }
 }
 
@@ -79,8 +78,7 @@ void Leach::configureInterfaces() {
         if (networkInterface->isMulticast()
                 && interfaceMatcher.matches(
                         networkInterface->getInterfaceName())) {
-            wirelessInterface->joinMulticastGroup(
-                    addressType->getLinkLocalManetRoutersMulticastAddress())
+            wirelessInterface = networkInterface;
         }
     }
 }
