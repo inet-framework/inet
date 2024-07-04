@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
@@ -1468,34 +1469,40 @@ void Ipv4::pushPacket(Packet *packet, const cGate *gate)
         throw cRuntimeError("Unknown gate");
 }
 
+void Ipv4::setCallback(int socketId, ICallback *callback)
+{
+    Enter_Method("setCallback");
+    socketIdToSocketDescriptor[socketId]->callback = callback;
+}
+
 void Ipv4::bind(int socketId, const Protocol *protocol, Ipv4Address localAddress)
 {
+    Enter_Method("bind");
     SocketDescriptor *descriptor = new SocketDescriptor(socketId, protocol ? protocol->getId() : -1, localAddress);
     socketIdToSocketDescriptor[socketId] = descriptor;
 }
 
 void Ipv4::connect(int socketId, const Ipv4Address& remoteAddress)
 {
+    Enter_Method("connect");
     socketIdToSocketDescriptor[socketId]->remoteAddress = remoteAddress;
 }
 
 void Ipv4::close(int socketId)
 {
+    Enter_Method("close");
     auto it = socketIdToSocketDescriptor.find(socketId);
     if (it != socketIdToSocketDescriptor.end()) {
+        auto callback = it->second->callback;
+        schedule("handleClose", simTime(), [=]() { callback->handleClosed(); });
         delete it->second;
         socketIdToSocketDescriptor.erase(it);
-        // TODO KLUDGE
-//        auto indication = new Indication("closed", IPv4_I_SOCKET_CLOSED);
-//        auto ctrl = new Ipv4SocketClosedIndication();
-//        indication->setControlInfo(ctrl);
-//        indication->addTag<SocketInd>()->setSocketId(socketId);
-//        send(indication, "transportOut");
     }
 }
 
 void Ipv4::destroy(int socketId)
 {
+    Enter_Method("destroy");
     auto it = socketIdToSocketDescriptor.find(socketId);
     if (it != socketIdToSocketDescriptor.end()) {
         delete it->second;

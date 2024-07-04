@@ -63,6 +63,7 @@ void Ipv4Socket::bind(const Protocol *protocol, Ipv4Address localAddress)
 {
     ASSERT(!bound);
     ipv4->bind(socketId, protocol, localAddress);
+    ipv4->setCallback(socketId, this);
     bound = true;
     isOpen_ = true;
 }
@@ -70,6 +71,7 @@ void Ipv4Socket::bind(const Protocol *protocol, Ipv4Address localAddress)
 void Ipv4Socket::connect(Ipv4Address remoteAddress)
 {
     ipv4->connect(socketId, remoteAddress);
+    ipv4->setCallback(socketId, this);
     isOpen_ = true;
 }
 

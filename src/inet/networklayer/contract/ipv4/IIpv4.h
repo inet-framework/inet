@@ -15,6 +15,13 @@ namespace inet {
 class INET_API IIpv4
 {
   public:
+    class ICallback {
+      public:
+        virtual void handleClosed() = 0;
+    };
+
+  public:
+    virtual void setCallback(int socketId, ICallback *callback) = 0;
     virtual void bind(int socketId, const Protocol *protocol, Ipv4Address localAddress) = 0;
     virtual void connect(int socketId, const Ipv4Address& remoteAddress) = 0;
     virtual void close(int socketId) = 0;

@@ -58,6 +58,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public IIpv4
         int protocolId = -1;
         Ipv4Address localAddress;
         Ipv4Address remoteAddress;
+        IIpv4::ICallback *callback = nullptr;
 
         SocketDescriptor(int socketId, int protocolId, Ipv4Address localAddress)
             : socketId(socketId), protocolId(protocolId), localAddress(localAddress) {}
@@ -294,6 +295,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public IIpv4
     virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
+    virtual void setCallback(int socketId, ICallback *callback) override;
     virtual void bind(int socketId, const Protocol *protocol, Ipv4Address localAddress) override;
     virtual void connect(int socketId, const Ipv4Address& remoteAddress) override;
     virtual void close(int socketId) override;
