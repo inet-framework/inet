@@ -10,6 +10,7 @@
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
+#include "inet/linklayer/ieee80211/llc/IIeee80211Llc.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDs.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
@@ -27,7 +28,6 @@ namespace ieee80211 {
 
 class IContention;
 class IRx;
-class IIeee80211Llc;
 class Ieee80211MacHeader;
 
 /**
