@@ -367,7 +367,6 @@ void TcpConnection::sendIndicationToApp(int code, const int id)
 void TcpConnection::sendAvailableIndicationToApp()
 {
     EV_INFO << "Notifying app: " << indicationName(TCP_I_AVAILABLE) << "\n";
-    auto indication = new Indication(indicationName(TCP_I_AVAILABLE), TCP_I_AVAILABLE);
     TcpAvailableInfo *ind = new TcpAvailableInfo();
     ind->setNewSocketId(socketId);
     ind->setLocalAddr(localAddr);
@@ -376,8 +375,6 @@ void TcpConnection::sendAvailableIndicationToApp()
     ind->setRemotePort(remotePort);
     ind->setAutoRead(autoRead);
 
-    indication->addTag<SocketInd>()->setSocketId(listeningSocketId);
-    indication->setControlInfo(ind);
     if (callback != nullptr)
         // NOTE: this 0s delay is required to avoid calling the application before TCP completes the processing for the received message
         schedule("available", simTime(), [=] () { callback->handleAvailable(ind); });
@@ -396,6 +393,7 @@ void TcpConnection::sendEstabIndicationToApp()
     indication->addTag<SocketInd>()->setSocketId(socketId);
     indication->setControlInfo(ind);
     callback->handleEstablished(indication);
+    delete indication;
 }
 
 void TcpConnection::sendToApp(cMessage *msg)
