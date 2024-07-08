@@ -349,11 +349,6 @@ void TcpConnection::signalConnectionTimeout()
 void TcpConnection::sendIndicationToApp(int code, const int id)
 {
     EV_INFO << "Notifying app: " << indicationName(code) << "\n";
-    auto indication = new Indication(indicationName(code), code);
-    TcpCommand *ind = new TcpCommand();
-    ind->setUserId(id);
-    indication->addTag<SocketInd>()->setSocketId(socketId);
-    indication->setControlInfo(ind);
     if (code == TCP_I_CONNECTION_RESET)
         callback->handleFailure(id);
     else if (code == TCP_I_CLOSED)
