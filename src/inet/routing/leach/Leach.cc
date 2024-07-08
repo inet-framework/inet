@@ -402,21 +402,28 @@ void Leach::sendDataToCH(Ipv4Address nodeAddr, Ipv4Address CHAddr,
 
 // CH sends data to BS
 void Leach::sendDataToBS(Ipv4Address CHAddr) {
+    Packet *udpPacket = new Packet("LeachBsPkt");
+
+    auto udpHeader = makeShared<UdpHeader>();
+    udpHeader->setSourcePort(LEACH_UDP_PORT);
+    udpHeader->setDestinationPort(LEACH_UDP_PORT);
+    udpHeader->setCrcMode(CRC_DISABLED);
+    udpPacket->insertAtFront(udpHeader);
+
     auto bsPkt = makeShared<LeachBSPkt>();
     bsPkt->setPacketType(BS);
-
     bsPkt->setChunkLength(b(128));
     bsPkt->setCHAddr(CHAddr);
+    udpPacket->insertAtBack(bsPkt);
 
-    auto bsPacket = new Packet("LEACHBsPkt", bsPkt);
+
     auto addressReq = bsPacket->addTag<L3AddressReq>();
-
     addressReq->setDestAddress(Ipv4Address(10, 0, 0, 1));
     addressReq->setSrcAddress(CHAddr);
-    bsPacket->addTag<InterfaceReq>()->setInterfaceId(
+    udpPacket->addTag<InterfaceReq>()->setInterfaceId(
             wirelessInterface->getInterfaceId());
-    bsPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
-    bsPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    udpPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
+    udpPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
 
     sendDelayed(bsPacket, TDMADelayCounter, "ipOut");
     setLeachState(nch);     // Set state for GUI visualization
