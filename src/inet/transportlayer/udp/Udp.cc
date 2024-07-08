@@ -293,6 +293,7 @@ void Udp::setCallback(int sockId, ICallback *callback)
 
 void Udp::bind(int sockId, const L3Address& localAddr, int localPort)
 {
+    Enter_Method("bind");
     if (sockId == -1)
         throw cRuntimeError("sockId in BIND message not filled in");
 
@@ -343,6 +344,8 @@ Udp::SockDesc *Udp::findFirstSocketByLocalAddress(const L3Address& localAddr, us
 
 Udp::SockDesc *Udp::createSocket(int sockId, const L3Address& localAddr, int localPort)
 {
+    Enter_Method("createSocket");
+
     // create and fill in SockDesc
     SockDesc *sd = new SockDesc(sockId);
     sd->multicastLoop = par("defaultMulticastLoop");
@@ -383,6 +386,7 @@ ushort Udp::getEphemeralPort()
 
 void Udp::connect(int sockId, const L3Address& remoteAddr, int remotePort)
 {
+    Enter_Method("connect");
     if (remoteAddr.isUnspecified())
         throw cRuntimeError("connect: unspecified remote address");
     if (remotePort <= 0 || remotePort > 65535)
