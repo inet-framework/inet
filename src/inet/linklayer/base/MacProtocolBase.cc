@@ -194,6 +194,7 @@ void MacProtocolBase::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
+    emit(packetReceivedFromUpperSignal, packet);
     handleUpperPacket(packet);
 }
 
