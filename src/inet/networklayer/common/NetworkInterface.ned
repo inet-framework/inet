@@ -34,6 +34,7 @@ module NetworkInterface
         @signal[packetDropped](type=inet::Packet);
         @statistic[packetDropInterfaceDown](title="packet drops: interface down"; source=packetDropReasonIsInterfaceDown(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNoCarrier](title="packet drops: no carrier"; source=packetDropReasonIsNoCarrier(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropOther](title="packet drops: other"; source=packetDropReasonIsOther(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     submodules:
         pcapRecorder[numPcapRecorders]: PcapRecorder {
             parameters:
