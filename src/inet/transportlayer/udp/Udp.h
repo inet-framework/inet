@@ -144,11 +144,6 @@ class INET_API Udp : public TransportProtocolBase, public IUdp, public IPassiveP
     virtual SockDesc *getSocketById(int sockId);
     virtual SockDesc *getOrCreateSocket(int sockId);
     virtual SockDesc *createSocket(int sockId, const L3Address& localAddr, int localPort);
-    virtual void setCallback(int sockId, ICallback *callback) override;
-    virtual void bind(int sockId, const L3Address& localAddr, int localPort) override;
-    virtual void connect(int sockId, const L3Address& remoteAddr, int remotePort) override;
-    virtual void close(int sockId) override;
-    virtual void destroy(int sockId) override;
     void destroySocket(SocketsByIdMap::iterator it);
     virtual void clearAllSockets();
     virtual void setTimeToLive(SockDesc *sd, int ttl);
@@ -224,6 +219,12 @@ class INET_API Udp : public TransportProtocolBase, public IUdp, public IPassiveP
     virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    virtual void setCallback(int sockId, ICallback *callback) override;
+    virtual void bind(int sockId, const L3Address& localAddr, int localPort) override;
+    virtual void connect(int sockId, const L3Address& remoteAddr, int remotePort) override;
+    virtual void close(int sockId) override;
+    virtual void destroy(int sockId) override;
 
   protected:
     virtual void initialize(int stage) override;
