@@ -308,22 +308,29 @@ void Leach::broadcastCtrlToNCH() {
 
 // Send broadcast acknowledgement to CH from non CH nodes
 void Leach::sendAckToCH(Ipv4Address nodeAddr, Ipv4Address CHAddr) {
+    Packet *udpPacket = new Packet("LeachAckPkt");
+
+    auto udpHeader = makeShared<UdpHeader>();
+    udpHeader->setSourcePort(LEACH_UDP_PORT);
+    udpHeader->setDestinationPort(LEACH_UDP_PORT);
+    udpHeader->setCrcMode(CRC_DISABLED);
+    udpPacket->insertAtFront(udpHeader);
+
     auto ackPkt = makeShared<LeachAckPkt>();
     ackPkt->setPacketType(ACK);
     ackPkt->setChunkLength(b(128)); ///size of Hello message in bits
     ackPkt->setSrcAddress(nodeAddr);
+    udpPacket->insertAtBack(ackPkt);
 
-    auto ackPacket = new Packet("LeachAckPkt", ackPkt);
-    auto addressReq = ackPacket->addTag<L3AddressReq>();
-
+    auto addressReq = udpPacket->addTag<L3AddressReq>();
     addressReq->setDestAddress(getIdealCH(nodeAddr, CHAddr));
     addressReq->setSrcAddress(nodeAddr);
-    ackPacket->addTag<InterfaceReq>()->setInterfaceId(
+    udpPacket->addTag<InterfaceReq>()->setInterfaceId(
             wirelessInterface->getInterfaceId());
-    ackPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
-    ackPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    udpPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
+    udpPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
 
-    send(ackPacket, "ipOut");
+    send(udpPacket, "ipOut");
 }
 
 // Sends TDMA schedule to non CH nodes
