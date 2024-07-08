@@ -1281,6 +1281,7 @@ void Ipv6::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
+    packet->setArrival(getId(), gate->getId());
     if (gate->isName("transportIn"))
         handleMessageFromHL(packet);
     else if (gate->isName("queueIn"))
