@@ -15,13 +15,14 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022SnapHeader_m.h"
+#include "inet/linklayer/ieee8022/IIeee8022Llc.h"
 #include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API Ieee8022Llc : public OperationalBase, public IPassivePacketSink
+class INET_API Ieee8022Llc : public OperationalBase, public IIeee8022Llc, public IPassivePacketSink
 {
   protected:
     struct SocketDescriptor {
@@ -74,6 +75,8 @@ class INET_API Ieee8022Llc : public OperationalBase, public IPassivePacketSink
   public:
     virtual ~Ieee8022Llc();
     static const Protocol *getProtocol(const Ptr<const Ieee8022LlcHeader>& header);
+
+    virtual void open(int socketId, int interfaceId, int localSap, int remoteSap) override;
 };
 
 } // namespace inet

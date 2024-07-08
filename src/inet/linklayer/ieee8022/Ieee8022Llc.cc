@@ -299,5 +299,15 @@ void Ieee8022Llc::pushPacket(Packet *packet, const cGate *gate)
     handleMessageWhenUp(packet);
 }
 
+void Ieee8022Llc::open(int socketId, int interfaceId, int localSap, int remoteSap)
+{
+    auto request = new Request("LLC_OPEN", SOCKET_C_OPEN);
+    Ieee8022LlcSocketOpenCommand *command = new Ieee8022LlcSocketOpenCommand();
+    command->setLocalSap(localSap);
+    request->setControlInfo(command);
+    request->addTag<SocketReq>()->setSocketId(socketId);
+    processCommandFromHigherLayer(request);
+}
+
 } // namespace inet
 
