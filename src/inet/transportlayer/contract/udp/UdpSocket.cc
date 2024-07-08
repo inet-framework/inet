@@ -141,9 +141,10 @@ void UdpSocket::setMulticastOutputInterface(int interfaceId)
     sendToUDP(request);
 }
 
-void UdpSocket::setMulticastLoop(bool value)
+void UdpSocket::setMulticastLoop(bool multicastLoop)
 {
-    udp->setMulticastLoop(socketId, value);
+    EV_INFO << "Setting multicast loop" << EV_FIELD(socketId) << EV_FIELD(multicastLoop) << EV_ENDL;
+    udp->setMulticastLoop(socketId, multicastLoop);
 }
 
 void UdpSocket::setReuseAddress(bool value)
