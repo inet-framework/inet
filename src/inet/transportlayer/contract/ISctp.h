@@ -27,6 +27,8 @@ class INET_API ISctp
         virtual void handlePeerClosed() = 0;
         virtual void handleFailure(int code) = 0;
         virtual void handleShutdownReceived() = 0;
+        virtual void handleAbandoned() = 0;
+        virtual void handleSendMessage() = 0;
     };
 
   public:

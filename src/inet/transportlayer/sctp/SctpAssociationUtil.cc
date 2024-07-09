@@ -454,6 +454,10 @@ void SctpAssociation::sendIndicationToApp(int32_t code, int32_t value)
         callback->handleFailure(code);
     else if (code == SCTP_I_SHUTDOWN_RECEIVED)
         callback->handleShutdownReceived();
+    else if (code == SCTP_I_ABANDONED)
+        callback->handleAbandoned();
+    else if (code == SCTP_I_SEND_MSG)
+        callback->handleSendMessage();
     else
         throw cRuntimeError("Unknown code");
 }

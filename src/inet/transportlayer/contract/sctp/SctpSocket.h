@@ -410,6 +410,16 @@ class INET_API SctpSocket : public ISocket, public ISctp::ICallback
         if (cb != nullptr)
             cb->shutdownReceivedArrived(this);
     }
+
+    virtual void handleAbandoned() override {
+        if (cb != nullptr)
+            cb->msgAbandonedArrived(this);
+    }
+
+    virtual void handleSendMessage() override {
+        if (cb != nullptr)
+            cb->sendRequestArrived(this);
+    }
 };
 
 } // namespace inet
