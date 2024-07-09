@@ -9,6 +9,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -66,6 +67,7 @@ void TunLoopbackApp::handleMessage(cMessage *message)
 
         delete message->removeControlInfo();
         packet->clearTags();
+        packet->addTag<PacketProtocolTag>()->setProtocol(&packetProtocol);
         tunSocket.send(packet);
         packetsSent++;
     }
@@ -77,6 +79,28 @@ void TunLoopbackApp::finish()
 {
     EV_INFO << "packets sent: " << packetsSent << endl;
     EV_INFO << "packets received: " << packetsReceived << endl;
+}
+
+void TunLoopbackApp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
+}
+
+cGate *TunLoopbackApp::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("socketIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr && socketInd->getSocketId() == tunSocket.getSocketId())
+                return gate;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace inet
