@@ -102,29 +102,17 @@ void UdpSocket::destroy()
 
 void UdpSocket::setTimeToLive(int ttl)
 {
-    auto request = new Request("setTTL", UDP_C_SETOPTION);
-    UdpSetTimeToLiveCommand *ctrl = new UdpSetTimeToLiveCommand();
-    ctrl->setTtl(ttl);
-    request->setControlInfo(ctrl);
-    sendToUDP(request);
+    udp->setTimeToLive(socketId, ttl);
 }
 
 void UdpSocket::setDscp(short dscp)
 {
-    auto request = new Request("setDscp", UDP_C_SETOPTION);
-    auto *ctrl = new UdpSetDscpCommand();
-    ctrl->setDscp(dscp);
-    request->setControlInfo(ctrl);
-    sendToUDP(request);
+    udp->setDscp(socketId, dscp);
 }
 
 void UdpSocket::setTos(short tos)
 {
-    auto request = new Request("setTos", UDP_C_SETOPTION);
-    auto *ctrl = new UdpSetTosCommand();
-    ctrl->setTos(tos);
-    request->setControlInfo(ctrl);
-    sendToUDP(request);
+    udp->setTos(socketId, tos);
 }
 
 void UdpSocket::setBroadcast(bool broadcast)

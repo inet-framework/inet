@@ -417,14 +417,29 @@ Udp::SockDesc *Udp::getOrCreateSocket(int sockId)
 // ###################### set options start ######################
 // ###############################################################
 
+void Udp::setTimeToLive(int socketId, int ttl)
+{
+    setTimeToLive(getOrCreateSocket(socketId), ttl);
+}
+
 void Udp::setTimeToLive(SockDesc *sd, int ttl)
 {
     sd->ttl = ttl;
 }
 
+void Udp::setDscp(int socketId, short dscp)
+{
+    setDscp(getOrCreateSocket(socketId), dscp);
+}
+
 void Udp::setDscp(SockDesc *sd, short dscp)
 {
     sd->dscp = dscp;
+}
+
+void Udp::setTos(int socketId, short tos)
+{
+    setTos(getOrCreateSocket(socketId), tos);
 }
 
 void Udp::setTos(SockDesc *sd, short tos)
