@@ -38,8 +38,7 @@ void LeachBS::initialize(int stage) {
         bsPktReceived = 0;
 
     } else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        registerService(Protocol::manet, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
+        registerProtocol(Protocol::manet, gate("ipOut"), gate("ipIn"));
     }
 }
 
@@ -76,12 +75,10 @@ void LeachBS::handleMessageWhenUp(cMessage *msg) {
     // if node is receiving message
     else if (check_and_cast<Packet*>(msg)->getTag<PacketProtocolTag>()->getProtocol()
             == &Protocol::manet) {
-        auto receivedCtrlPkt =
-                staticPtrCast<LeachControlPkt>(
-                        check_and_cast<Packet*>(msg)->peekData<LeachControlPkt>()->dupShared());
+        auto receivedCtrlPkt = dynamic_cast<Packet*>(msg);
+        receivedCtrlPkt->popAtFront<UdpHeader>();
         Packet *receivedPkt = check_and_cast<Packet*>(msg);
-        auto &leachControlPkt = receivedPkt->popAtFront<LeachControlPkt>();
-
+        auto &leachControlPkt = receivedCtrlPkt->peekAtFront<LeachControlPkt>();
         auto packetType = leachControlPkt->getPacketType();
 
         // filter packet based on type and run specific functions
