@@ -355,7 +355,7 @@ void Leach::sendSchToNCH(Ipv4Address selfAddr) {
     }
     udpPacket->insertAtBack(schedulePkt);
 
-    auto scheduleReq = schedulePacket->addTag<L3AddressReq>();
+    auto scheduleReq = udpPacket->addTag<L3AddressReq>();
     scheduleReq->setDestAddress(Ipv4Address(255, 255, 255, 255));
     scheduleReq->setSrcAddress(selfAddr);
     udpPacket->addTag<InterfaceReq>()->setInterfaceId(
@@ -417,7 +417,7 @@ void Leach::sendDataToBS(Ipv4Address CHAddr) {
     udpPacket->insertAtBack(bsPkt);
 
 
-    auto addressReq = bsPacket->addTag<L3AddressReq>();
+    auto addressReq = udpPacket->addTag<L3AddressReq>();
     addressReq->setDestAddress(Ipv4Address(10, 0, 0, 1));
     addressReq->setSrcAddress(CHAddr);
     udpPacket->addTag<InterfaceReq>()->setInterfaceId(
@@ -425,7 +425,7 @@ void Leach::sendDataToBS(Ipv4Address CHAddr) {
     udpPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     udpPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
 
-    sendDelayed(bsPacket, TDMADelayCounter, "ipOut");
+    sendDelayed(udpPacket, TDMADelayCounter, "ipOut");
     setLeachState(nch);     // Set state for GUI visualization
 }
 
