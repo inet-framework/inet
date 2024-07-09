@@ -60,8 +60,6 @@ class INET_API MessageDispatcher :
   protected:
     virtual cGate *handlePacket(Packet *packet, const cGate *inGate);
 
-    int getGateIndexToConnectedModule(const char *moduleName);
-
   public:
 #ifdef INET_WITH_QUEUEING
     virtual bool supportsPacketSending(const cGate *gate) const override { return true; }

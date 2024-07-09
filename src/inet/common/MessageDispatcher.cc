@@ -145,20 +145,6 @@ void MessageDispatcher::handlePushPacketProcessed(Packet *packet, const cGate *g
 
 #endif // #ifdef INET_WITH_QUEUEING
 
-int MessageDispatcher::getGateIndexToConnectedModule(const char *moduleName)
-{
-    int size = gateSize("out");
-    for (int i = 0; i < size; i++) {
-        auto g = gate("out", i);
-        while (g != nullptr) {
-            if (!strcmp(g->getOwnerModule()->getFullName(), moduleName))
-                return i;
-            g = g->getNextGate();
-        }
-    }
-    throw cRuntimeError("Cannot find module: %s", moduleName);
-}
-
 bool MessageDispatcher::hasLookupModuleInterface(const cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     int size = gateSize(gate->getType() == cGate::INPUT ? "out" : "in");
