@@ -88,9 +88,16 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, const cGate *inGate)
         }
     }
     else
-        throw cRuntimeError("Dispatch information not found");
+        throw cRuntimeError("Cannot forward packet because no dispatch information was found, packet = %s, gate = %s, hint = %s",
+                            printToStringIfPossible(packet, 0).c_str(),
+                            printToStringIfPossible(inGate, 0).c_str(),
+                            "the packet should have a DispatchProtocolReq, an InterfaceReq, or a SocketInd packet tag attached");
     if (referencedGate == nullptr)
-        throw cRuntimeError("Cannot find referenced module using (%s) %s", tag->getClassName(), tag->str().c_str());
+        throw cRuntimeError("Cannot forward packet because no IPassivePacketSink module interface was found, packet = %s, gate = %s, tag = %s, hint = %s",
+                            printToStringIfPossible(packet, 0).c_str(),
+                            printToStringIfPossible(inGate, 0).c_str(),
+                            printToStringIfPossible(tag, 0).c_str(),
+                            "add @interface properties on one of the connected gates or implement the IModuleInterfaceLookup C++ interface with one of the connected modules");
     return referencedGate;
 }
 
@@ -175,12 +182,14 @@ cGate *MessageDispatcher::forwardLookupModuleInterface(const cGate *gate, const 
                     if (!resultIsMessageDispatcher && referencedModuleIsMessageDispatcher)
                         break;
                     else if (referencedModuleIsMessageDispatcher || (!resultIsMessageDispatcher && !referencedModuleIsMessageDispatcher))
-                        throw cRuntimeError("Referenced module is ambiguous for type %s (%s, %s) using (%s) %s",
+                        throw cRuntimeError("Cannot find module interface because the result is ambiguous, candidate1 = %s, candidate2 = %s, module = %s, gate = %s, type = %s, arguments = %s, direction = %s",
+                                printToStringIfPossible(result->getOwnerModule(), 0).c_str(),
+                                printToStringIfPossible(referencedModule, 0).c_str(),
+                                printToStringIfPossible(gate->getOwnerModule(), 0).c_str(),
+                                printToStringIfPossible(gate, 0).c_str(),
                                 opp_typename(type),
-                                check_and_cast<cModule *>(result->getOwnerModule())->getFullPath().c_str(),
-                                check_and_cast<cModule *>(referencedModule)->getFullPath().c_str(),
-                                arguments ? arguments->getClassName() : "<none>",
-                                arguments ? arguments->str().c_str() : "nullptr");
+                                printToStringIfPossible(arguments, 0).c_str(),
+                                printToStringIfPossible(direction, 0).c_str());
                 }
                 result = referencedGate;
             }
