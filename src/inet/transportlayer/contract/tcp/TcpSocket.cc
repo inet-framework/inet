@@ -278,8 +278,6 @@ void TcpSocket::processMessage(cMessage *msg)
     TcpAvailableInfo *availableInfo;
     TcpConnectInfo *connectInfo;
 
-    EV_INFO << "XXX: TcpSocket::processMessage, cb=" << cb << ", msg=" << msg->getName() << ":" << msg->getClassName() << ":" << msg->str() << std::endl;
-
     switch (msg->getKind()) {
         case TCP_I_DATA:
             if (cb)

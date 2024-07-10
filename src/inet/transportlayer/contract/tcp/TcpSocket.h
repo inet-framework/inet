@@ -493,8 +493,7 @@ class INET_API TcpSocket : public ISocket, public ITcp::ICallback
     //@}
 
     virtual void handleEstablished(Indication *indication) override {
-        if (cb)
-            cb->socketEstablished(this, indication);
+        processMessage(indication);
     }
 
     virtual void handleAvailable(TcpAvailableInfo *availableInfo) override {
