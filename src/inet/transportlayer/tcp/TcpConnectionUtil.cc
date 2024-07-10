@@ -387,8 +387,9 @@ void TcpConnection::sendEstabIndicationToApp()
     ind->setAutoRead(autoRead);
     indication->addTag<SocketInd>()->setSocketId(socketId);
     indication->setControlInfo(ind);
-    callback->handleEstablished(indication);
-    delete indication;
+    if (callback != nullptr)
+        // NOTE: this 0s delay is required to avoid calling the application before TCP completes the processing for the received message
+        schedule("established", simTime(), [=] () { callback->handleEstablished(indication); take(indication); delete indication; });
 }
 
 void TcpConnection::sendToApp(cMessage *msg)
