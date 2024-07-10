@@ -193,6 +193,7 @@ void TcpBasicClientApp::close()
 
 void TcpBasicClientApp::socketClosed(TcpSocket *socket)
 {
+    Enter_Method("socketClosed");
     cancelEvent(readDelayTimer);
     TcpAppBase::socketClosed(socket);
 
