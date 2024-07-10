@@ -89,8 +89,12 @@ class INET_API ModuleRefByGate
         referencedGate = findModuleInterface(referencingGate, typeid(T), arguments, direction);
         referencedModule = referencedGate != nullptr ? dynamic_cast<T *>(referencedGate->getOwnerModule()) : nullptr;
         if (mandatory && referencedModule == nullptr)
-            throw cRuntimeError("Cannot find referenced type '%s' referenced by '(%s)%s' through gate '%s'",
-                                opp_typename(typeid(T)), referencingGate->getOwnerModule()->getClassName(), referencingGate->getOwnerModule()->getFullPath().c_str(), referencingGate->getFullName());
+            throw cRuntimeError("Cannot find referenced module interface, module = %s, gate = %s, type = %s, arguments = %s, direction = %s",
+                                printToStringIfPossible(referencingGate->getOwnerModule(), 0).c_str(),
+                                printToStringIfPossible(referencingGate, 0).c_str(),
+                                opp_typename(typeid(T)),
+                                printToStringIfPossible(arguments, 0).c_str(),
+                                printToStringIfPossible(direction, 0).c_str());
     }
 };
 
