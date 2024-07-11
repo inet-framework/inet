@@ -12,6 +12,7 @@
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/queueing/common/PassivePacketSinkRef.h"
+#include "inet/queueing/base/AnimatePacket.h"
 
 namespace inet {
 
@@ -108,6 +109,7 @@ void MessageDispatcher::pushPacket(Packet *packet, const cGate *inGate)
     take(packet);
     auto referencedGate = handlePacket(packet, inGate);
     auto passivePacketSink = check_and_cast<IPassivePacketSink *>(referencedGate->getOwnerModule());
+    queueing::animatePushPacket(packet, const_cast<cGate *>(inGate), referencedGate);
     passivePacketSink->pushPacket(packet, referencedGate);
     updateDisplayString();
 }

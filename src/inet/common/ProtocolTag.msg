@@ -152,6 +152,10 @@ cplusplus(PacketProtocolTag) {{
     }
 }}
 
+class PacketServiceTag extends ProtocolTagBase
+{
+}
+
 //
 // This request determines the transport protocol that should be used to send the packet.
 // It may be present from the application to the transport protocol.

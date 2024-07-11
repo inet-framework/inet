@@ -212,7 +212,8 @@ void TcpTestClient::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
-    socket.processMessage(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
 }
 
 } // namespace inet

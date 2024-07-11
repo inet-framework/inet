@@ -53,8 +53,12 @@ void Tcp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
-        appSink.reference(gate("appOut"), true);
-        ipSink.reference(gate("ipOut"), true);
+        PacketServiceTag packetServiceTag;
+        packetServiceTag.setProtocol(&Protocol::tcp);
+        appSink.reference(gate("appOut"), true, &packetServiceTag);
+        PacketProtocolTag packetProtocolTag;
+        packetProtocolTag.setProtocol(&Protocol::tcp);
+        ipSink.reference(gate("ipOut"), true, &packetProtocolTag);
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
 

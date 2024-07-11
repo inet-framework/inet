@@ -13,7 +13,7 @@ static void runSimulationEventLoop()
 {
     EV_DEBUG << "Running event loop" << EV_ENDL;
     cSimulation::getActiveSimulation()->setGlobalContext();
-    cSimulation::getActiveEnvir()->runEventLoop();
+//    cSimulation::getActiveEnvir()->runEventLoop();
 }
 
 void sleepSimulationTime(simtime_t duration)

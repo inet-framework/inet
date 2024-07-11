@@ -66,6 +66,9 @@ network TcpTestNet2
         tcptester: TCPRandomTester {
             @display("p=198,178");
         }
+        d: DelayChannel {
+            *.delay = 1ms;
+        }
     connections allowunconnected:
         cli_app.socketOut --> cli_tcp.appIn;
         cli_app.socketIn <-- cli_tcp.appOut;
@@ -74,7 +77,10 @@ network TcpTestNet2
 
         cli_tcp.ipOut --> tcptester.in1;
         cli_tcp.ipIn <-- tcptester.out1;
-        tcptester.out2 --> {  delay = 1ms; } --> srv_tcp.ipIn;
-        tcptester.in2 <-- {  delay = 1ms; } <-- srv_tcp.ipOut;
+
+        tcptester.out2 --> d.leftIn;
+        d.rightOut --> srv_tcp.ipIn;
+        tcptester.in2 <-- d.leftOut;
+        d.rightIn <-- srv_tcp.ipOut;
 }
 

@@ -19,8 +19,8 @@ void PacketPusherBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         outputGate = gate("out");
-        producer.reference(inputGate, false);
-        consumer.reference(outputGate, false);
+        producer.reference(inputGate, false); // TODO: lookup with accepting anything ignoring the lookup arguments
+        consumer.reference(outputGate, false); // TODO: lookup with accepting anything ignoring the lookup arguments
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);

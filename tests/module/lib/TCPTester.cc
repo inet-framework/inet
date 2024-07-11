@@ -20,11 +20,10 @@ TCPTesterBase::TCPTesterBase() : cSimpleModule()
 
 void TCPTesterBase::initialize()
 {
-    DispatchProtocolReq dispatchProtocolReq;
-    dispatchProtocolReq.setProtocol(&Protocol::tcp);
-    dispatchProtocolReq.setServicePrimitive(SP_INDICATION);
-    outSink1.reference(gate("out1"), true, &dispatchProtocolReq);
-    outSink2.reference(gate("out2"), true, &dispatchProtocolReq);
+    PacketProtocolTag packetProtocolTag;
+    packetProtocolTag.setProtocol(&Protocol::tcp);
+    outSink1.reference(gate("out1"), true, &packetProtocolTag);
+    outSink2.reference(gate("out2"), true, &packetProtocolTag);
     fromASeq = 0;
     fromBSeq = 0;
     tcpdump.setOutStream(EVSTREAM);

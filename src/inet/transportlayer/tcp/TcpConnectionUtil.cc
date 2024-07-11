@@ -389,7 +389,7 @@ void TcpConnection::sendEstabIndicationToApp()
     indication->setControlInfo(ind);
     if (callback != nullptr)
         // NOTE: this 0s delay is required to avoid calling the application before TCP completes the processing for the received message
-        schedule("established", simTime(), [=] () { callback->handleEstablished(indication); take(indication); delete indication; });
+        schedule("established", simTime(), [=] () { callback->handleEstablished(indication); });
 }
 
 void TcpConnection::sendToApp(cMessage *msg)

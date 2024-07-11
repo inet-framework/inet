@@ -36,8 +36,8 @@ simple TCPScriptableTester
         string script;
         @display("i=device/router");
     gates:
-        input in1 @interface[inet::queueing::IPassivePacketSink];
-        input in2 @interface[inet::queueing::IPassivePacketSink];
+        input in1 @interface[inet::queueing::IPassivePacketSink](protocol=tcp);
+        input in2 @interface[inet::queueing::IPassivePacketSink](protocol=tcp);
         output out1;
         output out2;
 }
@@ -58,8 +58,8 @@ simple TCPRandomTester
         volatile double delayValue;    // related to pdelay and pcopy: delay introduced
         @display("i=device/router");
     gates:
-        input in1 @interface[inet::queueing::IPassivePacketSink];
-        input in2 @interface[inet::queueing::IPassivePacketSink];
+        input in1 @interface[inet::queueing::IPassivePacketSink](protocol=tcp);
+        input in2 @interface[inet::queueing::IPassivePacketSink](protocol=tcp);
         output out1;
         output out2;
 }

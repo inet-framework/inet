@@ -40,7 +40,7 @@ void PacketDelayerBase::processPacket(Packet *packet, simtime_t sendingTime)
     simtime_t delay = simTime() - sendingTime;
     insertPacketEvent(this, packet, PEK_DELAYED, delay / packet->getBitLength(), 0);
     increaseTimeTag<DelayingTimeTag>(packet, delay / packet->getBitLength(), delay);
-    pushOrSendPacket(packet, outputGate, consumer);
+    consumer.pushPacket(packet);
 }
 
 void PacketDelayerBase::pushPacket(Packet *packet, const cGate *gate)
