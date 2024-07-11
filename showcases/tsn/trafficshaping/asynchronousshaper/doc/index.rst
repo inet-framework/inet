@@ -77,7 +77,7 @@ To enable asynchronous traffic shaping in a TSN switch, the following is require
 - Set the type of the ``queue`` and ``transmissionSelectionAlgorithm`` submodules in ``eth[*].macLayer.queue``:
 
   ``*.switch.eth[*].macLayer.queue.queue[*].typename = "EligibilityTimeQueue"``
-  ``*.switch.eth[*].macLayer.queue.transmissionSelectionAlgorithm[*].typename = "Ieee8021qAsynchronousShaper"``
+  ``*.switch.eth[*].macLayer.queue.transmissionSelectionAlgorithm[*].typename = "EligibilityTimeGate"``
 
 - We can override the number of traffic classes (8 by default) in the time-aware shaper modules (``eth[*].macLayer.queue``):
 
