@@ -55,7 +55,7 @@ void Tcp::initialize(int stage)
         crcMode = parseCrcMode(crcModeString, false);
         PacketServiceTag packetServiceTag;
         packetServiceTag.setProtocol(&Protocol::tcp);
-        appSink.reference(gate("appOut"), true, &packetServiceTag);
+        appSink.reference(gate("appOut"), false, &packetServiceTag);
         PacketProtocolTag packetProtocolTag;
         packetProtocolTag.setProtocol(&Protocol::tcp);
         ipSink.reference(gate("ipOut"), true, &packetProtocolTag);
