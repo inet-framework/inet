@@ -96,11 +96,10 @@ void PeriodicGate::initializeGating()
 {
     index = 0;
     isOpen_ = initiallyOpen;
-    if (totalDuration.raw() == 0) {
+    if (totalDuration.raw() == 0)
         offset.setRaw(0);
-    } else {
+    else
         offset.setRaw((initialOffset.raw() % totalDuration.raw() + totalDuration.raw()) % totalDuration.raw());
-    }
     while (offset > CLOCKTIME_ZERO) {
         clocktime_t duration = durations[index];
         if (offset >= duration) {
