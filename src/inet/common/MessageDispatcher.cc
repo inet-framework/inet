@@ -109,7 +109,7 @@ void MessageDispatcher::pushPacket(Packet *packet, const cGate *inGate)
     take(packet);
     auto referencedGate = handlePacket(packet, inGate);
     auto passivePacketSink = check_and_cast<IPassivePacketSink *>(referencedGate->getOwnerModule());
-    queueing::animatePushPacket(packet, const_cast<cGate *>(inGate), referencedGate);
+    queueing::animatePushPacket(packet, referencedGate->getPathStartGate(), referencedGate);
     passivePacketSink->pushPacket(packet, referencedGate);
     updateDisplayString();
 }

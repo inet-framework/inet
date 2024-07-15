@@ -125,10 +125,8 @@ void PacketProcessorBase::checkPacketOperationSupport(cGate *startGate, cGate *e
 
 void PacketProcessorBase::pushOrSendPacket(Packet *packet, cGate *startGate, PassivePacketSinkRef& consumer)
 {
-    if (consumer != nullptr) {
-        animatePushPacket(packet, startGate, consumer.getReferencedGate());
+    if (consumer != nullptr)
         consumer.pushPacket(packet);
-    }
     else
         send(packet, startGate);
 }
