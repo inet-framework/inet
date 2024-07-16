@@ -1,0 +1,106 @@
+%description:
+
+Checks if module interface lookup fails for the IPv4 protocol in the network interfaces.
+
+%file: TestNetwork.ned
+
+import inet.common.MessageDispatcher;
+import inet.mobility.static.StationaryMobility;
+import inet.linklayer.loopback.LoopbackInterface;
+import inet.linklayer.ppp.PppInterface;
+import inet.linklayer.ethernet.basic.EthernetInterface;
+import inet.linklayer.ethernet.modular.LayeredEthernetInterface;
+import inet.linklayer.ieee80211.Ieee80211Interface;
+import inet.networklayer.common.InterfaceTable;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
+
+network TestNetwork
+{
+    parameters:
+        *.interfaceTableModule = absPath(".interfaceTable");
+        mobility.subjectModule = ".";
+        mobility.initialX = 0m;
+        mobility.initialY = 0m;
+        mobility.initialZ = 0m;
+        mobility.initFromDisplayString = false;
+        ethernetInterface*.bitrate = 100Mbps;
+        ieee80211Interface.radio.antenna.mobilityModule = absPath(".mobility");
+        @networkNode;
+    submodules:
+        mobility: StationaryMobility;
+        radioMedium: Ieee80211RadioMedium;
+        messageDispatcher: MessageDispatcher;
+        interfaceTable: InterfaceTable;
+        loopbackInterface: LoopbackInterface;
+        pppInterface: PppInterface;
+        ethernetInterface1: EthernetInterface;
+        ethernetInterface2: LayeredEthernetInterface;
+        ieee80211Interface: Ieee80211Interface;
+        test: Test;
+    connections allowunconnected:
+        messageDispatcher.out++ --> loopbackInterface.upperLayerIn;
+        messageDispatcher.out++ --> pppInterface.upperLayerIn;
+        messageDispatcher.out++ --> ethernetInterface1.upperLayerIn;
+        messageDispatcher.out++ --> ethernetInterface2.upperLayerIn;
+        messageDispatcher.out++ --> ieee80211Interface.upperLayerIn;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 0s
+
+cmdenv-log-prefix = "%>"
+
+#**.queue.typename = "EthernetQosQueue"
+
+%includes
+#include "inet/common/IModuleInterfaceLookup.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
+
+%activity:
+using namespace inet;
+using namespace inet::queueing;
+
+InterfaceReq interfaceReq;
+DispatchProtocolReq dispatchProtocolReq;
+dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
+PacketProtocolTag packetProtocolTag;
+
+auto messageDispatcher = cSimulation::getActiveSimulation()->getSystemModule()->getModuleByPath("messageDispatcher");
+
+// loopback interface accepts packets directed to it
+interfaceReq.setInterfaceId(100);
+ASSERT(findModuleInterface(messageDispatcher->gate("out", 0), typeid(IPassivePacketSink), &interfaceReq, 1));
+
+// PPP network interface accepts PPP service requests (SDUs)
+dispatchProtocolReq.setProtocol(&Protocol::ppp);
+ASSERT(findModuleInterface(messageDispatcher->gate("out", 1), typeid(IPassivePacketSink), &dispatchProtocolReq, 1));
+
+// Ethernet network interface accepts Ethernet packets (PDUs)
+packetProtocolTag.setProtocol(&Protocol::ethernetMac);
+ASSERT(findModuleInterface(messageDispatcher->gate("out", 2), typeid(IPassivePacketSink), &packetProtocolTag, 1));
+ASSERT(findModuleInterface(messageDispatcher->gate("out", 3), typeid(IPassivePacketSink), &packetProtocolTag, 1));
+
+// IEEE 802.11 network interface accelts IEEE 802.2 LLC service requests (SDUs)
+dispatchProtocolReq.setProtocol(&Protocol::ieee8022llc);
+ASSERT(findModuleInterface(messageDispatcher->gate("out", 4), typeid(IPassivePacketSink), &dispatchProtocolReq, 1));
+
+// none of the network interfaces accept IPv4 service requests (SDUs)
+dispatchProtocolReq.setProtocol(&Protocol::ipv4);
+ASSERT(!findModuleInterface(messageDispatcher->gate("out", 0), typeid(IPassivePacketSink), &dispatchProtocolReq, 1));
+ASSERT(!findModuleInterface(messageDispatcher->gate("out", 1), typeid(IPassivePacketSink), &dispatchProtocolReq, 1));
+ASSERT(!findModuleInterface(messageDispatcher->gate("out", 2), typeid(IPassivePacketSink), &dispatchProtocolReq, 1));
+ASSERT(!findModuleInterface(messageDispatcher->gate("out", 3), typeid(IPassivePacketSink), &dispatchProtocolReq, 1));
+ASSERT(!findModuleInterface(messageDispatcher->gate("out", 4), typeid(IPassivePacketSink), &dispatchProtocolReq, 1));
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
