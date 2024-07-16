@@ -239,8 +239,10 @@ void EthernetMacBase::processConnectDisconnect()
                 emit(transmissionEndedSignal, curTxSignal);
                 send(curTxSignal, SendOptions().finishTx(curTxSignal->getId()), physOutGate);
             }
-            else
+            else {
+                emit(transmissionEndedSignal, curTxSignal);
                 delete curTxSignal;
+            }
             curTxSignal = nullptr;
             cancelEvent(endTxTimer);
         }
