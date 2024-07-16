@@ -343,7 +343,7 @@ void InterfaceTable::discoverConnectingGates(NetworkInterface *entry)
             throw cRuntimeError("addInterface(): interface module '%s' is connected only to an 'ifOut' or an 'ifIn' gate, must connect to either both or neither", ifmod->getFullPath().c_str());
         if (nwlayerInGate->getOwnerModule() != nwlayerOutGate->getOwnerModule())
             throw cRuntimeError("addInterface(): interface module '%s' is connected to 'ifOut' and 'ifIn' gates in different modules", ifmod->getFullPath().c_str());
-        if (nwlayerInGate->getIndex() != nwlayerOutGate->getIndex()) // if both are scalar, that's OK too (index==0)
+        if (nwlayerInGate->isVector() && nwlayerOutGate->isVector() && nwlayerInGate->getIndex() != nwlayerOutGate->getIndex()) // if both are scalar, that's OK too (index==0)
             throw cRuntimeError("addInterface(): gate index mismatch: interface module '%s' is connected to different indices in 'ifOut[']/'ifIn[]' gates of the network layer module", ifmod->getFullPath().c_str());
 //        entry->setNetworkLayerGateIndex(nwlayerInGate->getIndex());
     }
