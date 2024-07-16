@@ -282,7 +282,6 @@ void EthernetMacBase::encapsulate(Packet *frame)
 void EthernetMacBase::decapsulate(Packet *packet)
 {
     auto phyHeader = packet->popAtFront<EthernetPhyHeader>();
-    ASSERT(packet->getDataLength() >= MIN_ETHERNET_FRAME_BYTES);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 }
 
