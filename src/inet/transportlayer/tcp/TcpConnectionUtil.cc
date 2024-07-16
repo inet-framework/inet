@@ -387,9 +387,15 @@ void TcpConnection::sendEstabIndicationToApp()
     ind->setAutoRead(autoRead);
     indication->addTag<SocketInd>()->setSocketId(socketId);
     indication->setControlInfo(ind);
-    if (callback != nullptr)
+    if (callback != nullptr) {
+        ASSERT(socketId == check_and_cast<TcpSocket *>(callback)->getSocketId());
         // NOTE: this 0s delay is required to avoid calling the application before TCP completes the processing for the received message
-        schedule("established", simTime(), [=] () { callback->handleEstablished(indication); });
+        schedule("established", simTime(), [=] () {
+            Enter_Method("sendEstabIndicationToApp");
+            ASSERT(socketId == check_and_cast<TcpSocket *>(callback)->getSocketId());
+            callback->handleEstablished(indication);
+        });
+    }
 }
 
 void TcpConnection::sendToApp(cMessage *msg)
