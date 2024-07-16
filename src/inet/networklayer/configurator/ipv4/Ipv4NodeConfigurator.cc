@@ -32,7 +32,8 @@ void Ipv4NodeConfigurator::initialize(int stage)
         routingTable.reference(this, "routingTableModule", true);
         if (networkConfiguratorPath[0]) {
             networkConfigurator.reference(this, "networkConfiguratorModule", false);
-            networkConfigurator->subscribe(Ipv4NetworkConfigurator::networkConfigurationChangedSignal, this);
+            if (networkConfigurator)
+                networkConfigurator->subscribe(Ipv4NetworkConfigurator::networkConfigurationChangedSignal, this);
         }
     }
     else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
