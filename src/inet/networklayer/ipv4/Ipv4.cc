@@ -71,8 +71,12 @@ void Ipv4::initialize(int stage)
         rt.reference(this, "routingTableModule", true);
         arp.reference(this, "arpModule", true);
         icmp.reference(this, "icmpModule", true);
-        transportSink.reference(gate("transportOut"), true);
-        queueSink.reference(gate("queueOut"), true);
+        PacketServiceTag packetServiceTag;
+        packetServiceTag.setProtocol(&Protocol::ipv4);
+        transportSink.reference(gate("transportOut"), false, &packetServiceTag);
+        PacketProtocolTag packetProtocolTag;
+        packetProtocolTag.setProtocol(&Protocol::ipv4);
+        queueSink.reference(gate("queueOut"), true, &packetProtocolTag);
 
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
