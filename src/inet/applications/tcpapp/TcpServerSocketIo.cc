@@ -102,6 +102,9 @@ cGate *TcpServerSocketIo::lookupModuleInterface(cGate *gate, const std::type_inf
             auto socketInd = dynamic_cast<const SocketInd *>(arguments);
             if (socketInd != nullptr && socketInd->getSocketId() == socket->getSocketId())
                 return gate;
+            auto packetServiceTag = dynamic_cast<const PacketServiceTag *>(arguments);
+            if (packetServiceTag != nullptr && packetServiceTag->getProtocol() == &Protocol::tcp)
+                return gate;
         }
     }
     return nullptr;
