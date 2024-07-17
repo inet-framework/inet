@@ -20,5 +20,5 @@ enum EigrpTimerType
 // general timer structure
 message EigrpTimer
 {
-    char timerKind enum(EigrpTimerType);
+    char timerKind @enum(EigrpTimerType);
 };
