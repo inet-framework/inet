@@ -15,7 +15,7 @@
 
 namespace inet {
 
-#define MAX_REPLY_CHUNK_SIZE    1497
+constexpr int MAX_REPLY_CHUNK_SIZE = 1497;
 
 /**
  * Server-side process EtherAppClient.

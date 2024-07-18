@@ -22,7 +22,7 @@ namespace inet {
 class INET_API IpvxTrafSink : public ApplicationBase
 {
   protected:
-    int numReceived;
+    int numReceived = 0;
 
   protected:
     virtual void printPacket(Packet *msg);

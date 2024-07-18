@@ -6,9 +6,9 @@
 
 #include "inet/applications/ethernet/EtherTrafGen.h"
 
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
+#include <cmath>
+#include <cstdio>
+#include <cstring>
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -27,11 +27,11 @@ namespace inet {
 Define_Module(EtherTrafGen);
 
 EtherTrafGen::EtherTrafGen()
+    : sendInterval(nullptr),
+      numPacketsPerBurst(nullptr),
+      packetLength(nullptr),
+      timerMsg(nullptr)
 {
-    sendInterval = nullptr;
-    numPacketsPerBurst = nullptr;
-    packetLength = nullptr;
-    timerMsg = nullptr;
 }
 
 EtherTrafGen::~EtherTrafGen()

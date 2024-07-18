@@ -54,7 +54,7 @@ class INET_API EtherTrafGen : public ApplicationBase
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
 
-    virtual bool isGenerator();
+    virtual bool isGenerator() const;
     virtual void scheduleNextPacket(simtime_t previous);
     virtual void cancelNextPacket();
 

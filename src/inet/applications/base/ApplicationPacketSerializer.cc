@@ -34,7 +34,7 @@ const Ptr<Chunk> ApplicationPacketSerializer::deserialize(MemoryInputStream& str
     applicationPacket->setSequenceNumber(stream.readUint32Be());
     B remainders = dataLength - (stream.getPosition() - startPosition);
     ASSERT(remainders >= B(0));
-    stream.readByteRepeatedly('?', B(remainders).get());
+    stream.readByteRepeatedly('?', remainders.get());
     return applicationPacket;
 }
 

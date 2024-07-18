@@ -18,7 +18,7 @@ void SimpleClockSynchronizer::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        synhronizationTimer = new cMessage("SynchronizationTimer");
+        synchronizationTimer = new cMessage("SynchronizationTimer"); // Fixed typo
         masterClock.reference(this, "masterClockModule", true);
         slaveClock.reference(this, "slaveClockModule", true);
         synchronizationIntervalParameter = &par("synchronizationInterval");
@@ -29,7 +29,7 @@ void SimpleClockSynchronizer::initialize(int stage)
 
 void SimpleClockSynchronizer::handleMessageWhenUp(cMessage *msg)
 {
-    if (msg == synhronizationTimer) {
+    if (msg == synchronizationTimer) { // Fixed typo
         synchronizeSlaveClock();
         scheduleSynchronizationTimer();
     }
@@ -62,7 +62,7 @@ void SimpleClockSynchronizer::synchronizeSlaveClock()
 
 void SimpleClockSynchronizer::scheduleSynchronizationTimer()
 {
-    scheduleAfter(synchronizationIntervalParameter->doubleValue(), synhronizationTimer);
+    scheduleAfter(synchronizationIntervalParameter->doubleValue(), synchronizationTimer); // Fixed typo
 }
 
 } // namespace

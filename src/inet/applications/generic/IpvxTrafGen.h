@@ -45,9 +45,9 @@ class INET_API IpvxTrafGen : public ApplicationBase
   protected:
     virtual void scheduleNextPacket(simtime_t previous);
     virtual void cancelNextPacket();
-    virtual bool isEnabled();
+    virtual bool isEnabled() const;
 
-    virtual L3Address chooseDestAddr();
+    virtual L3Address chooseDestAddr() const;
     virtual void sendPacket();
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -56,7 +56,7 @@ class INET_API IpvxTrafGen : public ApplicationBase
     virtual void refreshDisplay() const override;
     virtual void startApp();
 
-    virtual void printPacket(Packet *msg);
+    virtual void printPacket(const Packet *msg) const;
     virtual void processPacket(Packet *msg);
 
     virtual void handleStartOperation(LifecycleOperation *operation) override;

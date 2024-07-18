@@ -17,8 +17,7 @@
 #ifndef __INET_NETPERFMETER_H
 #define __INET_NETPERFMETER_H
 
-#include <assert.h>
-
+#include <cassert>
 #include <fstream>
 
 #include "inet/applications/netperfmeter/NetPerfMeter_m.h"
@@ -48,14 +47,14 @@ class INET_API NetPerfMeter : public cSimpleModule
     virtual void refreshDisplay() const override;
 
     void establishConnection();
-    void successfullyEstablishedConnection(cMessage *msg, const unsigned int queueSize);
-    void teardownConnection(const bool stopTimeReached = false);
+    void successfullyEstablishedConnection(cMessage *msg, unsigned int queueSize);
+    void teardownConnection(bool stopTimeReached = false);
     void receiveMessage(cMessage *msg);
     void resetStatistics();
     void writeStatistics();
 
-    void sendSCTPQueueRequest(const unsigned int queueSize);
-    void sendTCPQueueRequest(const unsigned int queueSize);
+    void sendSCTPQueueRequest(unsigned int queueSize);
+    void sendTCPQueueRequest(unsigned int queueSize);
 
   protected:
     // ====== Parameters =====================================================
@@ -72,122 +71,122 @@ class INET_API NetPerfMeter : public cSimpleModule
         TIMER_ON       = 7
     };
 
-    Protocol TransportProtocol = static_cast<Protocol>(-1);
-    bool ActiveMode = false;
-    bool SendingAllowed = false;
-    bool HasFinished = false;
-    unsigned int MaxMsgSize = 0;
-    unsigned int QueueSize = 0;
-    double UnorderedMode = NAN;
-    double UnreliableMode = NAN;
-    bool DecoupleSaturatedStreams = false;
-    simtime_t ConnectTime;
-    simtime_t StartTime;
-    simtime_t ResetTime;
-    simtime_t StopTime;
-    cMessage *ConnectTimer = nullptr;
-    cMessage *StartTimer = nullptr;
-    cMessage *StopTimer = nullptr;
-    cMessage *ResetTimer = nullptr;
-    cMessage *OffTimer = nullptr;
-    cMessage *OnTimer = nullptr;
-    unsigned int OnOffCycleCounter = 0;
-    int MaxOnOffCycles = 0;
-    std::vector<NetPerfMeterTransmitTimer *> TransmitTimerVector;
+    Protocol transportProtocol = static_cast<Protocol>(-1);
+    bool activeMode = false;
+    bool sendingAllowed = false;
+    bool hasFinished = false;
+    unsigned int maxMsgSize = 0;
+    unsigned int queueSize = 0;
+    double unorderedMode = NAN;
+    double unreliableMode = NAN;
+    bool decoupleSaturatedStreams = false;
+    simtime_t connectTime;
+    simtime_t startTime;
+    simtime_t resetTime;
+    simtime_t stopTime;
+    cMessage *connectTimer = nullptr;
+    cMessage *startTimer = nullptr;
+    cMessage *stopTimer = nullptr;
+    cMessage *resetTimer = nullptr;
+    cMessage *offTimer = nullptr;
+    cMessage *onTimer = nullptr;
+    unsigned int onOffCycleCounter = 0;
+    int maxOnOffCycles = 0;
+    std::vector<NetPerfMeterTransmitTimer *> transmitTimerVector;
 
-    unsigned int RequestedOutboundStreams = 0;
-    unsigned int MaxInboundStreams = 0;
-    unsigned int ActualOutboundStreams = 0;
-    unsigned int ActualInboundStreams = 0;
-    std::vector<cDynamicExpression> FrameRateExpressionVector;
-    std::vector<cDynamicExpression> FrameSizeExpressionVector;
+    unsigned int requestedOutboundStreams = 0;
+    unsigned int maxInboundStreams = 0;
+    unsigned int actualOutboundStreams = 0;
+    unsigned int actualInboundStreams = 0;
+    std::vector<cDynamicExpression> frameRateExpressionVector;
+    std::vector<cDynamicExpression> frameSizeExpressionVector;
 
     // ====== Sockets and Connection Information =============================
-    SctpSocket *SocketSCTP = nullptr;
-    SctpSocket *IncomingSocketSCTP = nullptr;
-    TcpSocket *SocketTCP = nullptr;
-    TcpSocket *IncomingSocketTCP = nullptr;
-    UdpSocket *SocketUDP = nullptr;
-    int ConnectionID = 0;
-    L3Address PrimaryPath;
+    SctpSocket *socketSCTP = nullptr;
+    SctpSocket *incomingSocketSCTP = nullptr;
+    TcpSocket *socketTCP = nullptr;
+    TcpSocket *incomingSocketTCP = nullptr;
+    UdpSocket *socketUDP = nullptr;
+    int connectionID = 0;
+    L3Address primaryPath;
 
     // ====== Trace File Handling ============================================
     struct TraceEntry {
-        double InterFrameDelay;
-        unsigned int FrameSize;
-        unsigned int StreamID;
+        double interFrameDelay;
+        unsigned int frameSize;
+        unsigned int streamID;
     };
-    std::vector<TraceEntry> TraceVector; // Frame trace from file
-    size_t TraceIndex = 0; // Position in trace file
+    std::vector<TraceEntry> traceVector; // Frame trace from file
+    size_t traceIndex = 0; // Position in trace file
 
     // ====== Timers =========================================================
-    simtime_t TransmissionStartTime; // Absolute transmission start time
-    simtime_t ConnectionEstablishmentTime; // Absolute connection establishment time
-    simtime_t StatisticsResetTime; // Absolute statistics reset time
+    simtime_t transmissionStartTime; // Absolute transmission start time
+    simtime_t connectionEstablishmentTime; // Absolute connection establishment time
+    simtime_t statisticsResetTime; // Absolute statistics reset time
 
     // ====== Variables ======================================================
-    unsigned int LastStreamID = 0; // Stream number of last message being sent
+    unsigned int lastStreamID = 0; // Stream number of last message being sent
 
     // ====== Statistics =====================================================
-    simtime_t StatisticsStartTime; // Absolute start time of statistics recording
+    simtime_t statisticsStartTime; // Absolute start time of statistics recording
 
   private:
     class SenderStatistics {
       public:
         SenderStatistics() { reset(); }
 
-        inline void reset() { SentBytes = 0; SentMessages = 0; }
+        void reset() { sentBytes = 0; sentMessages = 0; }
 
-        unsigned long long SentBytes;
-        unsigned long long SentMessages;
+        unsigned long long sentBytes = 0;
+        unsigned long long sentMessages = 0;
     };
 
     class ReceiverStatistics {
       public:
         ReceiverStatistics() {
-            ReceivedDelayHistogram.setName("Received Message Delay");
+            receivedDelayHistogram.setName("Received Message Delay");
             reset();
         }
 
-        inline void reset() {
-            ReceivedBytes = 0;
-            ReceivedMessages = 0;
-            ReceivedDelayHistogram.clear();
+        void reset() {
+            receivedBytes = 0;
+            receivedMessages = 0;
+            receivedDelayHistogram.clear();
         }
 
-        unsigned long long ReceivedBytes = 0;
-        unsigned long long ReceivedMessages = 0;
-        cHistogram ReceivedDelayHistogram;
+        unsigned long long receivedBytes = 0;
+        unsigned long long receivedMessages = 0;
+        cHistogram receivedDelayHistogram;
     };
 
-    std::map<unsigned int, SenderStatistics *> SenderStatisticsMap;
-    std::map<unsigned int, ReceiverStatistics *> ReceiverStatisticsMap;
+    std::map<unsigned int, SenderStatistics *> senderStatisticsMap;
+    std::map<unsigned int, ReceiverStatistics *> receiverStatisticsMap;
 
-    inline SenderStatistics *getSenderStatistics(const unsigned int streamID) {
-        auto found = SenderStatisticsMap.find(streamID);
-        ASSERT(found != SenderStatisticsMap.end());
+    SenderStatistics *getSenderStatistics(unsigned int streamID) {
+        auto found = senderStatisticsMap.find(streamID);
+        ASSERT(found != senderStatisticsMap.end());
         return found->second;
     }
 
-    inline ReceiverStatistics *getReceiverStatistics(const unsigned int streamID) {
-        auto found = ReceiverStatisticsMap.find(streamID);
-        ASSERT(found != ReceiverStatisticsMap.end());
+    ReceiverStatistics *getReceiverStatistics(unsigned int streamID) {
+        auto found = receiverStatisticsMap.find(streamID);
+        ASSERT(found != receiverStatisticsMap.end());
         return found->second;
     }
 
-    double getFrameRate(const unsigned int streamID);
-    unsigned long getFrameSize(const unsigned int streamID);
+    double getFrameRate(unsigned int streamID);
+    unsigned long getFrameSize(unsigned int streamID);
     void startSending();
     void stopSending();
-    void sendDataOfTraceFile(const unsigned long long bytesAvailableInQueue);
-    void sendDataOfSaturatedStreams(const unsigned long long bytesAvailableInQueue,
-            const Ptr<const SctpSendQueueAbatedReq>& sendQueueAbatedIndication);
+    void sendDataOfTraceFile(unsigned long long bytesAvailableInQueue);
+    void sendDataOfSaturatedStreams(unsigned long long bytesAvailableInQueue,
+                                    const Ptr<const SctpSendQueueAbatedReq>& sendQueueAbatedIndication);
 
-    void sendDataOfNonSaturatedStreams(const unsigned long long bytesAvailableInQueue, const unsigned int streamID);
-    unsigned long transmitFrame(const unsigned int frameSize, const unsigned int streamID);
+    void sendDataOfNonSaturatedStreams(unsigned long long bytesAvailableInQueue, unsigned int streamID);
+    unsigned long transmitFrame(unsigned int frameSize, unsigned int streamID);
     static opp_string format(const char *formatString, ...);
     static void parseExpressionVector(std::vector<cDynamicExpression>& expressionVector,
-            const char *string, const char *delimiters = nullptr);
+                                      const char *string, const char *delimiters = nullptr);
     void createAndBindSocket();
     void handleTimer(cMessage *msg);
 };

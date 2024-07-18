@@ -77,43 +77,23 @@ NetPerfMeter::NetPerfMeter()
 NetPerfMeter::~NetPerfMeter()
 {
     cancelAndDelete(ConnectTimer);
-    ConnectTimer = nullptr;
     cancelAndDelete(StartTimer);
-    StartTimer = nullptr;
     cancelAndDelete(ResetTimer);
-    ResetTimer = nullptr;
     cancelAndDelete(StopTimer);
-    StopTimer = nullptr;
     for (auto& elem : TransmitTimerVector) {
         cancelAndDelete(elem);
-        elem = nullptr;
     }
-    if (SocketUDP != nullptr) {
-        delete SocketUDP;
-        SocketUDP = nullptr;
-    }
-    if (SocketTCP != nullptr) {
-        delete SocketTCP;
-        SocketTCP = nullptr;
-    }
-    if (IncomingSocketTCP != nullptr) {
-        delete IncomingSocketTCP;
-        IncomingSocketTCP = nullptr;
-    }
-    if (SocketSCTP != nullptr) {
-        delete SocketSCTP;
-        SocketSCTP = nullptr;
-    }
-    if (IncomingSocketSCTP != nullptr) {
-        delete IncomingSocketSCTP;
-        IncomingSocketSCTP = nullptr;
-    }
+    delete SocketUDP;
+    delete SocketTCP;
+    delete IncomingSocketTCP;
+    delete SocketSCTP;
+    delete IncomingSocketSCTP;
 }
 
 // ###### Parse vector of cDynamicExpression from string ####################
 void NetPerfMeter::parseExpressionVector(std::vector<cDynamicExpression>& expressionVector,
-                                         const char*                      string,
-                                         const char*                      delimiters)
+                                         const char* string,
+                                         const char* delimiters)
 {
     expressionVector.clear();
     cStringTokenizer tokenizer(string, delimiters);
@@ -179,10 +159,7 @@ void NetPerfMeter::initialize(int stage)
                 throw cRuntimeError("Unable to load trace file");
             }
             while (!traceFile.eof()) {
-                TraceEntry traceEntry;
-                traceEntry.InterFrameDelay = 0;
-                traceEntry.FrameSize = 0;
-                traceEntry.StreamID = 0;
+                TraceEntry traceEntry = {};
 
                 char line[256];
                 traceFile.getline(line, sizeof(line), '\n');
@@ -195,17 +172,13 @@ void NetPerfMeter::initialize(int stage)
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // ====== Initialize and bind socket =====================================
-        SocketSCTP = IncomingSocketSCTP = nullptr;
-        SocketTCP = IncomingSocketTCP = nullptr;
-        SocketUDP = nullptr;
-
         for (unsigned int i = 0; i < RequestedOutboundStreams; i++) {
             SenderStatistics *senderStatistics = new SenderStatistics;
-            SenderStatisticsMap.insert(std::pair<unsigned int, SenderStatistics *>(i, senderStatistics));
+            SenderStatisticsMap[i] = senderStatistics;
         }
         for (unsigned int i = 0; i < MaxInboundStreams; i++) {
             ReceiverStatistics *receiverStatistics = new ReceiverStatistics;
-            ReceiverStatisticsMap.insert(std::pair<unsigned int, ReceiverStatistics *>(i, receiverStatistics));
+            ReceiverStatisticsMap[i] = receiverStatistics;
         }
 
         ConnectTime = par("connectTime");
@@ -226,7 +199,7 @@ void NetPerfMeter::initialize(int stage)
            << "\tStopTime=" << StopTime
            << endl;
 
-        if (ActiveMode == false) {
+        if (!ActiveMode) {
             // Passive mode: create and bind socket immediately.
             // For active mode, the socket will be created just before connect().
             createAndBindSocket();
@@ -248,37 +221,28 @@ void NetPerfMeter::finish()
     else if (TransportProtocol == UDP) {
     }
 
-    std::map<unsigned int, SenderStatistics *>::iterator senderStatisticsIterator = SenderStatisticsMap.begin();
-    while (senderStatisticsIterator != SenderStatisticsMap.end()) {
-        delete senderStatisticsIterator->second;
-        SenderStatisticsMap.erase(senderStatisticsIterator);
-        senderStatisticsIterator = SenderStatisticsMap.begin();
+    for (auto& [key, value] : SenderStatisticsMap) {
+        delete value;
     }
-    std::map<unsigned int, ReceiverStatistics *>::iterator receiverStatisticsIterator = ReceiverStatisticsMap.begin();
-    while (receiverStatisticsIterator != ReceiverStatisticsMap.end()) {
-        delete receiverStatisticsIterator->second;
-        ReceiverStatisticsMap.erase(receiverStatisticsIterator);
-        receiverStatisticsIterator = ReceiverStatisticsMap.begin();
+    SenderStatisticsMap.clear();
+
+    for (auto& [key, value] : ReceiverStatisticsMap) {
+        delete value;
     }
+    ReceiverStatisticsMap.clear();
 }
 
 // ###### Show I/O status ###################################################
 void NetPerfMeter::refreshDisplay() const
 {
     unsigned long long totalSentBytes = 0;
-    for (std::map<unsigned int, SenderStatistics *>::const_iterator iterator = SenderStatisticsMap.begin();
-         iterator != SenderStatisticsMap.end(); iterator++)
-    {
-        const SenderStatistics *senderStatistics = iterator->second;
-        totalSentBytes += senderStatistics->SentBytes;
+    for (const auto& [key, value] : SenderStatisticsMap) {
+        totalSentBytes += value->SentBytes;
     }
 
     unsigned long long totalReceivedBytes = 0;
-    for (std::map<unsigned int, ReceiverStatistics *>::const_iterator iterator = ReceiverStatisticsMap.begin();
-         iterator != ReceiverStatisticsMap.end(); iterator++)
-    {
-        const ReceiverStatistics *receiverStatistics = iterator->second;
-        totalReceivedBytes += receiverStatistics->ReceivedBytes;
+    for (const auto& [key, value] : ReceiverStatisticsMap) {
+        totalReceivedBytes += value->ReceivedBytes;
     }
 
     char status[64];
@@ -292,10 +256,9 @@ void NetPerfMeter::refreshDisplay() const
 void NetPerfMeter::handleTimer(cMessage *msg)
 {
     // ====== Transmit timer =================================================
-    const NetPerfMeterTransmitTimer *transmitTimer = dynamic_cast<NetPerfMeterTransmitTimer *>(msg);
-    if (transmitTimer) {
+    if (auto transmitTimer = dynamic_cast<NetPerfMeterTransmitTimer *>(msg)) {
         TransmitTimerVector[transmitTimer->getStreamID()] = nullptr;
-        if (TraceVector.size() > 0) {
+        if (!TraceVector.empty()) {
             sendDataOfTraceFile(QueueSize);
         }
         else {
@@ -391,11 +354,6 @@ void NetPerfMeter::handleMessage(cMessage *msg)
                 // Data has arrived -> request it from the SCTP module.
                 auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
                 auto dataIndication = tags.getTag<SctpCommandReq>();
-//                SctpInfoReq* command = new SctpInfoReq("SendCommand");
-//                SctpInfoReq *command = new SctpInfoReq();
-//                command->setSocketId(dataIndication->getSocketId());
-//                command->setSid(dataIndication->getSid());
-//                command->setNumMsgs(dataIndication->getNumMsgs());
                 Packet *cmsg = new Packet("ReceiveRequest", SCTP_C_RECEIVE);
                 auto cmd = cmsg->addTag<SctpSendReq>();
                 cmd->setSocketId(dataIndication->getSocketId());
@@ -445,7 +403,7 @@ void NetPerfMeter::handleMessage(cMessage *msg)
                 ASSERT(sendQueueAbatedIndication != nullptr);
                 // Queue is underfull again -> give it more data.
                 SendingAllowed = true;
-                if (TraceVector.size() == 0) {
+                if (TraceVector.empty()) {
                     sendDataOfSaturatedStreams(sendQueueAbatedIndication->getBytesAvailable(), sendQueueAbatedIndication);
                 }
                 break;
@@ -465,14 +423,12 @@ void NetPerfMeter::handleMessage(cMessage *msg)
                 teardownConnection();
                 break;
             default:
-//                printf("SCTP: kind=%d\n", msg->getKind());
                 break;
         }
     }
     // ====== TCP ============================================================
     else if (TransportProtocol == TCP) {
-        short kind = msg->getKind();
-        switch (kind) {
+        switch (msg->getKind()) {
             // ------ Data -----------------------------------------------------
             case TCP_I_DATA:
             case TCP_I_URGENT_DATA:
@@ -503,7 +459,7 @@ void NetPerfMeter::handleMessage(cMessage *msg)
                 // Queue is underfull again -> give it more data.
                 if (SocketTCP != nullptr) { // T.D. 16.11.2011: Ensure that there is still a TCP socket!
                     SendingAllowed = true;
-                    if (TraceVector.size() == 0) {
+                    if (TraceVector.empty()) {
                         sendDataOfSaturatedStreams(tcpCommand->getUserId(), nullptr);
                     }
                 }

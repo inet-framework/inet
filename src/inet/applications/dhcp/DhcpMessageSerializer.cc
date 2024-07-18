@@ -43,30 +43,22 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
 
     const char *sname = dhcpMessage->getSname();
     if (sname != nullptr) {
-        if (strlen(sname) > 64)
+        size_t snameLen = strlen(sname);
+        if (snameLen > 64)
             throw cRuntimeError("Cannot serialize DHCP message: server host name (sname) exceeds the allowed 64 byte limit.");
-        // write the string until '\0'
-        for (e = 0; sname[e] != '\0'; ++e) {
-            stream.writeByte(sname[e]);
-        }
-        // write the '\0'
-        stream.writeByte('\0');
+        stream.writeBytes(reinterpret_cast<const uint8_t*>(sname), snameLen);
         // fill in the remaining bytes
-        stream.writeByteRepeatedly(0, 64 - (e + 1));
+        stream.writeByteRepeatedly(0, 64 - snameLen);
     }
 
     const char *file = dhcpMessage->getFile();
     if (file != nullptr) {
-        if (strlen(file) > 128)
+        size_t fileLen = strlen(file);
+        if (fileLen > 128)
             throw cRuntimeError("Cannot serialize DHCP message: file name (file) exceeds the allowed 128 byte limit.");
-        // write the string until '\0'
-        for (e = 0; file[e] != '\0'; ++e) {
-            stream.writeByte(file[e]);
-        }
-        // write the '\0'
-        stream.writeByte('\0');
+        stream.writeBytes(reinterpret_cast<const uint8_t*>(file), fileLen);
         // fill in the remaining bytes
-        stream.writeByteRepeatedly(0, 128 - (e + 1));
+        stream.writeByteRepeatedly(0, 128 - fileLen);
     }
 
     DhcpOptions options = dhcpMessage->getOptions();
@@ -95,14 +87,11 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
 
     // Host Name Option
     const char *hostName = options.getHostName();
-    // FIXME nullptr and strcmp does not seem to work
-    if (hostName != nullptr && false) {
+    if (hostName != nullptr) {
         stream.writeByte(HOSTNAME);
         uint16_t size = strlen(hostName);
         stream.writeByte(size);
-        for (size_t i = 0; hostName[i] != '\0'; ++i) {
-            stream.writeByte(hostName[i]);
-        }
+        stream.writeBytes(reinterpret_cast<const uint8_t*>(hostName), size);
         length += (2 + size);
     }
 
@@ -190,7 +179,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
         stream.writeByte(RENEWAL_TIME);
         stream.writeByte(4);
         stream.writeUint32Be(options.getRenewalTime().inUnit(SIMTIME_S));
-        length += 2 + 4;
+        length += 6;
     }
 
     // Rebinding (T2) Time Value
@@ -198,7 +187,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
         stream.writeByte(REBIND_TIME);
         stream.writeByte(4);
         stream.writeUint32Be(options.getRebindingTime().inUnit(SIMTIME_S));
-        length += 2 + 4;
+        length += 6;
     }
 
     // IP Address Lease Time
@@ -206,7 +195,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
         stream.writeByte(LEASE_TIME);
         stream.writeByte(4);
         stream.writeUint32Be(options.getLeaseTime().inUnit(SIMTIME_S));
-        length += 2 + 4;
+        length += 6;
     }
 
     // End Option
@@ -241,15 +230,11 @@ const Ptr<Chunk> DhcpMessageSerializer::deserialize(MemoryInputStream& stream) c
     stream.readUint64Be();
 
     char sname[64];
-    for (int i = 0; i < 64; ++i) {
-        sname[i] = stream.readByte();
-    }
+    stream.readBytes(reinterpret_cast<uint8_t*>(sname), 64);
     dhcpMessage->setSname(sname);
 
     char file[128];
-    for (int i = 0; i < 128; ++i) {
-        file[i] = stream.readByte();
-    }
+    stream.readBytes(reinterpret_cast<uint8_t*>(file), 128);
     dhcpMessage->setFile(file);
 
     // The first four octets of the 'options' field of the DHCP message
@@ -276,11 +261,9 @@ const Ptr<Chunk> DhcpMessageSerializer::deserialize(MemoryInputStream& stream) c
             }
             case HOSTNAME: {
                 uint8_t size = stream.readByte();
-                char *hostName = new char[size + 1];
-                stream.readBytes((uint8_t *)hostName, B(size));
-                hostName[size] = '\0';
-                options.setHostName(hostName);
-                delete[] hostName;
+                std::vector<uint8_t> hostName(size);
+                stream.readBytes(hostName.data(), size);
+                options.setHostName(reinterpret_cast<char*>(hostName.data()));
                 length += 2 + size;
                 break;
             }
@@ -379,8 +362,8 @@ const Ptr<Chunk> DhcpMessageSerializer::deserialize(MemoryInputStream& stream) c
             default: {
                 uint8_t size = stream.readByte();
                 dhcpMessage->markIncorrect();
-                std::vector<uint8_t> buffer;
-                stream.readBytes(buffer, B(size));
+                std::vector<uint8_t> buffer(size);
+                stream.readBytes(buffer.data(), size);
                 length += 2 + size;
                 break;
             }

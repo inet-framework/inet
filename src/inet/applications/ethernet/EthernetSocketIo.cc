@@ -37,20 +37,14 @@ void EthernetSocketIo::initialize(int stage)
             L3Address l3Address;
             L3AddressResolver addressResolver;
             addressResolver.tryResolve(localAddressString, l3Address, L3AddressResolver::ADDR_MAC);
-            if (l3Address.getType() == L3Address::MAC)
-                localAddress = l3Address.toMac();
-            else
-                localAddress = MacAddress(localAddressString);
+            localAddress = (l3Address.getType() == L3Address::MAC) ? l3Address.toMac() : MacAddress(localAddressString);
         }
         const char *remoteAddressString = par("remoteAddress");
         if (*remoteAddressString != '\0') {
             L3Address l3Address;
             L3AddressResolver addressResolver;
             addressResolver.tryResolve(remoteAddressString, l3Address, L3AddressResolver::ADDR_MAC);
-            if (l3Address.getType() == L3Address::MAC)
-                remoteAddress = l3Address.toMac();
-            else
-                remoteAddress = MacAddress(remoteAddressString);
+            remoteAddress = (l3Address.getType() == L3Address::MAC) ? l3Address.toMac() : MacAddress(remoteAddressString);
         }
     }
 }

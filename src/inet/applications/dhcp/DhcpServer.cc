@@ -1,3 +1,4 @@
+```cpp
 //
 // Copyright (C) 2008 Juan-Carlos Maureira
 // Copyright (C) INRIA
@@ -73,7 +74,7 @@ void DhcpServer::receiveSignal(cComponent *source, int signalID, cObject *obj, c
 
     if (signalID == interfaceDeletedSignal) {
         if (isUp()) {
-            NetworkInterface *nie = check_and_cast<NetworkInterface *>(obj);
+            auto nie = check_and_cast<NetworkInterface *>(obj);
             if (ie == nie)
                 throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
         }
@@ -84,19 +85,19 @@ void DhcpServer::receiveSignal(cComponent *source, int signalID, cObject *obj, c
 
 NetworkInterface *DhcpServer::chooseInterface()
 {
-    IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+    auto ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     const char *interfaceName = par("interface");
     NetworkInterface *ie = nullptr;
 
     if (strlen(interfaceName) > 0) {
         ie = ift->findInterfaceByName(interfaceName);
-        if (ie == nullptr)
+        if (!ie)
             throw cRuntimeError("Interface \"%s\" does not exist", interfaceName);
     }
     else {
         // there should be exactly one non-loopback interface that we want to serve DHCP requests on
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
-            NetworkInterface *current = ift->getInterface(i);
+            auto current = ift->getInterface(i);
             if (!current->isLoopback()) {
                 if (ie)
                     throw cRuntimeError("Multiple non-loopback interfaces found, please select explicitly which one you want to serve DHCP requests on");
@@ -175,11 +176,9 @@ void DhcpServer::processDhcpMessage(Packet *packet)
                 // MAC not registered, create offering a new lease to the client
                 lease = getAvailableLease(dhcpMsg->getOptions().getRequestedIp(), dhcpMsg->getChaddr());
                 if (lease != nullptr) {
-//                    std::cout << "MAC: " << packet->getChaddr() << " ----> IP: " << lease->ip << endl;
                     lease->mac = dhcpMsg->getChaddr();
                     lease->xid = dhcpMsg->getXid();
-//                    lease->parameterRequestList = packet->getOptions().get(PARAM_LIST); TODO !!
-                    lease->leased = true; // TODO
+                    lease->leased = true;
                     sendOffer(lease, dhcpMsg);
                 }
                 else
@@ -188,7 +187,6 @@ void DhcpServer::processDhcpMessage(Packet *packet)
             else {
                 // MAC already exist, offering the same lease
                 lease->xid = dhcpMsg->getXid();
-//                lease->parameterRequestList = packet->getOptions().get(PARAM_LIST); // TODO !!
                 sendOffer(lease, dhcpMsg);
             }
         }
@@ -225,7 +223,6 @@ void DhcpServer::processDhcpMessage(Packet *packet)
             }
             else {
                 if (dhcpMsg->getCiaddr().isUnspecified()) { // init-reboot
-//                    std::cout << "init-reboot" << endl;
                     Ipv4Address requestedAddress = dhcpMsg->getOptions().getRequestedIp();
                     auto it = leased.find(requestedAddress);
                     if (it == leased.end()) {
@@ -282,7 +279,6 @@ void DhcpServer::processDhcpMessage(Packet *packet)
 
 void DhcpServer::sendNak(const Ptr<const DhcpMessage>& msg)
 {
-//    EV_INFO << "Sending NAK to " << lease->mac << "." << endl;
     Packet *pk = new Packet("DHCPNAK");
     const auto& nak = makeShared<DhcpMessage>();
     nak->setOp(BOOTREPLY);
@@ -390,8 +386,6 @@ void DhcpServer::sendAck(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
     else if (packet->getBroadcast())
         destAddr = Ipv4Address::ALLONES_ADDRESS;
     else {
-        // TODO should send it to client's hardware address and yiaddr address, but the application can not set the destination MacAddress.
-//        destAddr = lease->ip;
         destAddr = Ipv4Address::ALLONES_ADDRESS;
     }
 

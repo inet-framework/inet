@@ -28,7 +28,7 @@ class INET_API EthernetSocketIo : public ApplicationBase, public EthernetSocket:
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessageWhenUp(cMessage *message) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
     virtual void refreshDisplay() const override;
 

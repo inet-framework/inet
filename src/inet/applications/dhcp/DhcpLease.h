@@ -35,7 +35,7 @@ class INET_API DhcpLease
     bool leased = false;
 };
 
-inline std::ostream& operator<<(std::ostream& os, DhcpLease obj)
+inline std::ostream& operator<<(std::ostream& os, const DhcpLease& obj)
 {
     os << " IP: " << obj.ip << " with subnet mask: " << obj.subnetMask
        << " to " << obj.mac;

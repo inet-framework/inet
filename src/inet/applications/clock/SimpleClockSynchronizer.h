@@ -19,7 +19,7 @@ namespace inet {
 class INET_API SimpleClockSynchronizer : public ApplicationBase
 {
   protected:
-    cMessage *synhronizationTimer = nullptr;
+    cMessage *synchronizationTimer = nullptr; // Fixed the typo here
     ModuleRefByPar<IClock> masterClock;
     ModuleRefByPar<SettableClock> slaveClock;
     cPar *synchronizationIntervalParameter = nullptr;
@@ -37,10 +37,10 @@ class INET_API SimpleClockSynchronizer : public ApplicationBase
     virtual void scheduleSynchronizationTimer();
 
   public:
-    virtual ~SimpleClockSynchronizer() { cancelAndDelete(synhronizationTimer); }
+    virtual ~SimpleClockSynchronizer() { cancelAndDelete(synchronizationTimer); } // Fixed the typo here
 };
 
-} // namespace
+} // namespace inet
 
 #endif
 

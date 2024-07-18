@@ -74,13 +74,13 @@ void EtherAppServer::handleMessageWhenUp(cMessage *msg)
 void EtherAppServer::socketDataArrived(Ieee8022LlcSocket *, Packet *msg)
 {
     EV_INFO << "Received packet `" << msg->getName() << "'\n";
-    const auto& req = msg->peekAtFront<EtherAppReq>();
+    auto req = msg->peekAtFront<EtherAppReq>();
     if (req == nullptr)
         throw cRuntimeError("data type error: not an EtherAppReq arrived in packet %s", msg->str().c_str());
     packetsReceived++;
     emit(packetReceivedSignal, msg);
 
-    MacAddress srcAddr = msg->getTag<MacAddressInd>()->getSrcAddress();
+    auto srcAddr = msg->getTag<MacAddressInd>()->getSrcAddress();
     int srcInterfaceId = msg->getTag<InterfaceInd>()->getInterfaceId();
     int srcSap = msg->getTag<Ieee802SapInd>()->getSsap();
     long requestId = req->getRequestId();
@@ -88,14 +88,14 @@ void EtherAppServer::socketDataArrived(Ieee8022LlcSocket *, Packet *msg)
 
     // send back packets asked by EtherAppClient side
     for (int k = 0; replyBytes > 0; k++) {
-        int l = replyBytes > MAX_REPLY_CHUNK_SIZE ? MAX_REPLY_CHUNK_SIZE : replyBytes;
+        int l = std::min(replyBytes, MAX_REPLY_CHUNK_SIZE);
         replyBytes -= l;
 
         std::ostringstream s;
         s << msg->getName() << "-resp-" << k;
 
         Packet *outPacket = new Packet(s.str().c_str(), IEEE802CTRL_DATA);
-        const auto& outPayload = makeShared<EtherAppResp>();
+        auto outPayload = makeShared<EtherAppResp>();
         outPayload->setRequestId(requestId);
         outPayload->setChunkLength(B(l));
         outPayload->addTag<CreationTimeTag>()->setCreationTime(simTime());

@@ -30,7 +30,8 @@ IpvxTrafGen::IpvxTrafGen()
 IpvxTrafGen::~IpvxTrafGen()
 {
     cancelAndDelete(timer);
-    if (ProtocolGroup::getIpProtocolGroup()->findProtocol(par("protocol")) == nullptr)
+    auto ipProtocolGroup = ProtocolGroup::getIpProtocolGroup();
+    if (ipProtocolGroup->findProtocol(par("protocol").intValue()) == nullptr)
         delete protocol;
 }
 
@@ -42,12 +43,16 @@ void IpvxTrafGen::initialize(int stage)
         int protocolId = par("protocol");
         if (protocolId < 143 || protocolId > 254)
             throw cRuntimeError("invalid protocol id %d, accepts only between 143 and 254", protocolId);
-        protocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(protocolId);
+
+        auto ipProtocolGroup = ProtocolGroup::getIpProtocolGroup();
+        protocol = ipProtocolGroup->findProtocol(protocolId);
+
         if (!protocol) {
             std::string name = "prot_" + std::to_string(protocolId);
             protocol = new Protocol(name.c_str(), name.c_str());
-            ProtocolGroup::getIpProtocolGroup()->addProtocol(protocolId, protocol);
+            ipProtocolGroup->addProtocol(protocolId, protocol);
         }
+
         numPackets = par("numPackets");
         startTime = par("startTime");
         stopTime = par("stopTime");
@@ -119,7 +124,7 @@ void IpvxTrafGen::scheduleNextPacket(simtime_t previous)
         timer->setKind(START);
     }
     else {
-        next = previous + *sendIntervalPar;
+        next = previous + sendIntervalPar->doubleValue();
         timer->setKind(NEXT);
     }
     if (stopTime < SIMTIME_ZERO || next < stopTime)
@@ -148,7 +153,7 @@ void IpvxTrafGen::sendPacket()
     sprintf(msgName, "appData-%d", numSent);
 
     Packet *packet = new Packet(msgName);
-    const auto& payload = makeShared<ByteCountChunk>(B(*packetLengthPar));
+    const auto& payload = makeShared<ByteCountChunk>(B(packetLengthPar->intValue()));
     payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     packet->insertAtBack(payload);
 
@@ -175,9 +180,9 @@ void IpvxTrafGen::printPacket(Packet *msg)
         protocol = ProtocolGroup::getIpProtocolGroup()->getProtocolNumber(msg->getTag<PacketProtocolTag>()->getProtocol());
     }
     Ptr<const L3AddressTagBase> addresses = msg->findTag<L3AddressReq>();
-    if (addresses == nullptr)
+    if (!addresses)
         addresses = msg->findTag<L3AddressInd>();
-    if (addresses != nullptr) {
+    if (addresses) {
         src = addresses->getSrcAddress();
         dest = addresses->getDestAddress();
     }
