@@ -5,7 +5,7 @@
         <input pattern="/inet/showcases/tsn/gatescheduling/eager/results/Eager-*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="1635758751" name="Application End-to-End Delay" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1057960291" name="Application End-to-End Delay" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -36,10 +36,10 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-style_tuple_list = [('module', '.*app\[0\].*', {'marker': 'd', 'markersize': 4}), 
-                    ('module', '.*app\[1\].*', {'marker': 'x', 'markersize': 2}),
-                    ('module', '.*app\[2\].*', {'marker': 'd', 'markersize': 4}),
-                    ('module', '.*app\[3\].*', {'marker': 's', 'markersize': 2})]
+style_tuple_list = [('module', '.*app\\[0\\].*', {'marker': 'd', 'markersize': 4}), 
+                    ('module', '.*app\\[1\\].*', {'marker': 'x', 'markersize': 2}),
+                    ('module', '.*app\\[2\\].*', {'marker': 'd', 'markersize': 4}),
+                    ('module', '.*app\\[3\\].*', {'marker': 's', 'markersize': 2})]
 
 order = ['module', {'TsnDumbbellNetwork.server2.app[2].sink': 2,
                     'TsnDumbbellNetwork.server2.app[3].sink': 3,

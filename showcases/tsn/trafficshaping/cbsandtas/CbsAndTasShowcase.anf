@@ -5,7 +5,7 @@
         <input pattern="/inet/showcases/tsn/trafficshaping/cbsandtas/results/General-*.sca"/>
     </inputs>
     <charts>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="398527638" name="data rate" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="398527638" name="data rate" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -38,8 +38,8 @@ print(df)
 
 style_tuple_list = [('name', 'incoming.*', {'linestyle': '--'}),
                     ('name', 'outgoing.*', {'linestyle': '-'}),
-                    ('module', '.*(app\[0\]|queue\[0\]).*', {'color': default_colors[0]}),
-                    ('module', '.*(app\[1\]|queue\[1\]).*', {'color': default_colors[1]})]
+                    ('module', '.*(app\\[0\\]|queue\\[0\\]).*', {'color': default_colors[0]}),
+                    ('module', '.*(app\\[1\\]|queue\\[1\\]).*', {'color': default_colors[1]})]
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
@@ -662,7 +662,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="figure.autolayout : True&#10;savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="790042139" name="gate state" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="790042139" name="gate state" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
@@ -1296,7 +1296,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value=""/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1934124261" name="number of credits" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1934124261" name="number of credits" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -1926,7 +1926,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value=""/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1521539721" name="queue length" resultTypes="vector" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1521539721" name="queue length" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -2556,7 +2556,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value=""/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.qualifier" icon="icons/full/obj/linechart.png" id="1478979375" name="combined" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1478979375" name="combined" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
