@@ -12,6 +12,8 @@ namespace queueing {
 
 void animate(Packet *packet, cGate *startGate, cGate *endGate, const SendOptions& sendOptions, Action action)
 {
+    ASSERT(startGate);
+    ASSERT(endGate);
     packet->setIsUpdate(sendOptions.isUpdate);
     packet->setTransmissionId(sendOptions.transmissionId_);
     if (sendOptions.isUpdate && sendOptions.transmissionId_ == -1)

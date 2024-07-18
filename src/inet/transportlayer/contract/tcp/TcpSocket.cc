@@ -240,12 +240,10 @@ void TcpSocket::sendToTcp(cMessage *msg, int connId)
 
 void TcpSocket::renewSocket()
 {
-    tcp->setCallback(connId, nullptr);
     connId = getActiveSimulationOrEnvir()->getUniqueNumber();
     remoteAddr = localAddr = L3Address();
     remotePrt = localPrt = -1;
     sockstate = NOT_BOUND;
-    tcp->setCallback(connId, this);
 }
 
 bool TcpSocket::isOpen() const

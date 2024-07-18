@@ -6,6 +6,7 @@
 
 
 #include "inet/common/IModuleInterfaceLookup.h"
+#include "inet/common/ProtocolGroup.h"
 #include "inet/queueing/contract/IActivePacketSink.h"
 
 namespace inet {
@@ -29,6 +30,8 @@ cGate *findModuleInterface(cGate *originatorGate, const std::type_info& typeInfo
 {
     auto type = opp_typename(typeInfo);
     auto originator = originatorGate->getOwnerModule();
+    cMethodCallContextSwitcher switcher(originator);
+    switcher.methodCall("findModuleInterface");
     EV_TRACE << "Finding module interface" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
     bool forward = direction > 0 || (direction == 0 && originatorGate->getType() == cGate::OUTPUT);
     auto gate = originatorGate;
@@ -63,6 +66,8 @@ cGate *findModuleInterface(cGate *originatorGate, const std::type_info& typeInfo
                         EV_TRACE << "Module interface not found using @interface gate property, no arguments were expected" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
                         continue;
                     }
+                    auto protocolGroupName = property->getValue("protocolGroup");
+                    auto protocolGroup = protocolGroupName != nullptr ? ProtocolGroup::findProtocolGroup(protocolGroupName) : nullptr;
                     auto protocol = property->getValue("protocol");
                     if (protocol != nullptr) {
                         if (auto dispatchProtocolReq = dynamic_cast<const DispatchProtocolReq *>(arguments)) {
@@ -72,7 +77,20 @@ cGate *findModuleInterface(cGate *originatorGate, const std::type_info& typeInfo
                             }
                         }
                         else if (auto packetProtocolTag = dynamic_cast<const PacketProtocolTag *>(arguments)) {
-                            if (strcmp(protocol, packetProtocolTag->getProtocol()->getName())) {
+                            if (strcmp(protocol, packetProtocolTag->getProtocol()->getName()) && (protocolGroup == nullptr || protocolGroup->findProtocolNumber(packetProtocolTag->getProtocol()) == -1)) {
+                                EV_TRACE << "Module interface not found using @interface gate property, protocol doesn't match" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
+                                continue;
+                            }
+                        }
+                        else if (auto packetServiceTag = dynamic_cast<const PacketServiceTag *>(arguments)) {
+                            int numValues = property->getNumValues("sdu");
+                            bool found = false;
+                            for (int i = 0; i < numValues; i++) {
+                                auto sdu = property->getValue("sdu", i);
+                                if (!strcmp(sdu, packetServiceTag->getProtocol()->getName()))
+                                    found = true;
+                            }
+                            if (!found) {
                                 EV_TRACE << "Module interface not found using @interface gate property, protocol doesn't match" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
                                 continue;
                             }
@@ -101,19 +119,44 @@ cGate *findModuleInterface(cGate *originatorGate, const std::type_info& typeInfo
                             throw cRuntimeError("Unknown service parameter value in @interface gate property, module = %s, gate = %s, property = %s", module->getFullPath().c_str(), gate->getFullName(), property->str().c_str());
                     }
                     // KLUDGE: TODO: this is needed for the tunnel example, it's used by the PacketQueueBase
-                    if (property->getValue("forward") && !findModuleInterface(gate->getOwnerModule()->gate("out"), typeid(queueing::IActivePacketSink), arguments, direction)) {
-                        EV_TRACE << "Module interface not found using @interface gate property, cannot forward" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
-                        continue;
+                    if (auto forwardGateName = property->getValue("forward")) {
+                        if (module->isGateVector(forwardGateName)) {
+                            for (int i = 0; i < module->gateSize(forwardGateName); i++) {
+                                if (!findModuleInterface(module->gate(forwardGateName, i), typeid(queueing::IActivePacketSink), arguments, direction)) {
+                                    EV_TRACE << "Module interface not found using @interface gate property, cannot forward" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
+                                    goto NOT_FOUND;
+                                }
+                            }
+                        }
+                        else {
+                            if (!findModuleInterface(module->gate(forwardGateName), typeid(queueing::IActivePacketSink), arguments, direction)) {
+                                EV_TRACE << "Module interface not found using @interface gate property, cannot forward" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
+                                continue;
+                            }
+                        }
                     }
                     // KLUDGE: TODO: this is needed for the tunnel example, it's used by the PacketDelayerBase
-                    if (property->getValue("forward2") && !findModuleInterface(gate->getOwnerModule()->gate("out"), typeInfo, arguments, direction)) {
-                        EV_TRACE << "Module interface not found using @interface gate property, cannot forward" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
-                        continue;
+                    if (auto forwardGateName = property->getValue("forward2")) {
+                        if (module->isGateVector(forwardGateName)) {
+                            for (int i = 0; i < module->gateSize(forwardGateName); i++) {
+                                if (!findModuleInterface(module->gate(forwardGateName, i), typeInfo, arguments, direction)) {
+                                    EV_TRACE << "Module interface not found using @interface gate property, cannot forward" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
+                                    goto NOT_FOUND;
+                                }
+                            }
+                        }
+                        else {
+                            if (!findModuleInterface(module->gate(forwardGateName), typeInfo, arguments, direction)) {
+                                EV_TRACE << "Module interface not found using @interface gate property, cannot forward" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
+                                continue;
+                            }
+                        }
                     }
                     auto module = gate->getOwnerModule();
                     EV_TRACE << "Module interface found using @interface gate property" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
                     return gate;
                 }
+                NOT_FOUND:;
             }
             EV_TRACE << "Module interface not found using @interface gate properties" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
         }
