@@ -80,7 +80,7 @@ simple Udp like IUdp
 
     gates:
         input appIn @interface[inet::IUdp] @interface[inet::queueing::IPassivePacketSink](protocol=udp; service=request) @labels(UdpControlInfo/down) @messageKinds(inet::UdpCommandCode);
-        input ipIn @interface[inet::queueing::IPassivePacketSink](protocol=udp; service=indication) @labels(UdpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
+        input ipIn @interface[inet::queueing::IPassivePacketSink](protocol=udp; service=indication; sdu=ipv4, ipv6) @labels(UdpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
         output appOut @labels(UdpControlInfo/up) @messageKinds(inet::UdpStatusInd);
         output ipOut @labels(UdpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }

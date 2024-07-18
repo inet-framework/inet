@@ -76,7 +76,7 @@ simple PimSm
         @signal[rcvdAssertPk](type=cPacket);
 
     gates:
-        input ipIn @interface[inet::queueing::IPassivePacketSink](protocol=pim; service=indication);
+        input ipIn @interface[inet::queueing::IPassivePacketSink](protocol=pim; service=indication; sdu=ipv4);
         output ipOut;
 }
 

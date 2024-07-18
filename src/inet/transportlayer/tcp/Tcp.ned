@@ -180,7 +180,7 @@ simple Tcp like ITcp
         @signal[packetDropped](type=inet::Packet);
     gates:
         input appIn @interface[inet::tcp::ITcp] @interface[inet::queueing::IPassivePacketSink](protocol=tcp; service=request) @labels(TcpCommand/down) @messageKinds(inet::TcpCommandCode);
-        input ipIn @interface[inet::queueing::IPassivePacketSink](protocol=tcp; service=indication) @labels(TcpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
+        input ipIn @interface[inet::queueing::IPassivePacketSink](protocol=tcp; service=indication; sdu=ipv4, ipv6) @labels(TcpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
         output appOut @labels(TcpCommand/up) @messageKinds(inet::TcpStatusInd);
         output ipOut @labels(TcpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
