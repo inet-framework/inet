@@ -28,6 +28,8 @@ class INET_API Ieee8022LlcSocketIo : public ApplicationBase, public Ieee8022LlcS
     int numSent = 0;
     int numReceived = 0;
 
+    mutable std::string displayString; // added mutable for caching purposes
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;

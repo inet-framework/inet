@@ -37,6 +37,10 @@ class INET_API IpSocketIo : public ApplicationBase, public Ipv4Socket::ICallback
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
+  public:
+    IpSocketIo() = default;
+    virtual ~IpSocketIo() = default;
 };
 
 } // namespace inet

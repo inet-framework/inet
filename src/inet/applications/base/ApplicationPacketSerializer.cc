@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #include "inet/applications/base/ApplicationPacketSerializer.h"
 
 #include "inet/applications/base/ApplicationPacket_m.h"
@@ -18,11 +17,14 @@ void ApplicationPacketSerializer::serialize(MemoryOutputStream& stream, const Pt
 {
     auto startPosition = stream.getLength();
     const auto& applicationPacket = staticPtrCast<const ApplicationPacket>(chunk);
-    stream.writeUint32Be(B(applicationPacket->getChunkLength()).get());
+    B chunkLength = applicationPacket->getChunkLength();
+    stream.writeUint32Be(chunkLength.get());
     stream.writeUint32Be(applicationPacket->getSequenceNumber());
-    int64_t remainders = B(applicationPacket->getChunkLength() - (stream.getLength() - startPosition)).get();
-    if (remainders < 0)
-        throw cRuntimeError("ApplicationPacket length = %d smaller than required %d bytes", (int)B(applicationPacket->getChunkLength()).get(), (int)B(stream.getLength() - startPosition).get());
+    int64_t remainders = (chunkLength - (stream.getLength() - startPosition)).get();
+    if (remainders < 0) {
+        throw cRuntimeError("ApplicationPacket length = %d smaller than required %d bytes", 
+                            (int)chunkLength.get(), (int)(stream.getLength() - startPosition));
+    }
     stream.writeByteRepeatedly('?', remainders);
 }
 

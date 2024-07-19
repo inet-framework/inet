@@ -65,7 +65,7 @@ class INET_API IpvxTrafGen : public ApplicationBase
 
   public:
     IpvxTrafGen();
-    virtual ~IpvxTrafGen();
+    virtual ~IpvxTrafGen() override;
 };
 
 } // namespace inet

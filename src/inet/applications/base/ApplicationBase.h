@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #ifndef __INET_APPLICATIONBASE_H
 #define __INET_APPLICATIONBASE_H
 
@@ -16,7 +15,8 @@ namespace inet {
 class INET_API ApplicationBase : public OperationalBase
 {
   public:
-    ApplicationBase();
+    ApplicationBase() = default;
+    virtual ~ApplicationBase() override = default; // Ensured override specifier
 
   protected:
     virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_APPLICATION_LAYER; }
@@ -26,5 +26,5 @@ class INET_API ApplicationBase : public OperationalBase
 
 } // namespace inet
 
-#endif
+#endif // __INET_APPLICATIONBASE_H
 

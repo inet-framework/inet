@@ -22,7 +22,7 @@ class INET_API DhcpMessageSerializer : public FieldsChunkSerializer
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
-    DhcpMessageSerializer() : FieldsChunkSerializer() {}
+    DhcpMessageSerializer() = default;
 };
 
 } // namespace inet

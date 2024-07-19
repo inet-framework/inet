@@ -55,7 +55,7 @@ void IpSocketIo::refreshDisplay() const
 {
     ApplicationBase::refreshDisplay();
     char buf[100];
-    sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
+    snprintf(buf, sizeof(buf), "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
     getDisplayString().setTagArg("t", 0, buf);
 }
 

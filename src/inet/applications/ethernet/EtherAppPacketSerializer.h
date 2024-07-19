@@ -22,7 +22,7 @@ class INET_API EtherAppReqSerializer : public FieldsChunkSerializer
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
-    EtherAppReqSerializer() : FieldsChunkSerializer() {}
+    using FieldsChunkSerializer::FieldsChunkSerializer; // Use constructor inheritance
 };
 
 /**
@@ -35,7 +35,7 @@ class INET_API EtherAppRespSerializer : public FieldsChunkSerializer
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
-    EtherAppRespSerializer() : FieldsChunkSerializer() {}
+    using FieldsChunkSerializer::FieldsChunkSerializer; // Use constructor inheritance
 };
 
 } // namespace inet

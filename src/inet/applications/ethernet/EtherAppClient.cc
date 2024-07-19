@@ -151,7 +151,7 @@ void EtherAppClient::sendPacket()
     seqNum++;
 
     char msgname[30];
-    sprintf(msgname, "req-%d-%ld", getId(), seqNum);
+    snprintf(msgname, sizeof(msgname), "req-%d-%ld", getId(), seqNum);
     EV_INFO << "Generating packet `" << msgname << "'\n";
 
     Packet *datapacket = new Packet(msgname);

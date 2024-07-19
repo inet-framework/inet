@@ -72,7 +72,7 @@ void Ieee8022LlcSocketIo::handleMessageWhenUp(cMessage *message)
             packetProtocolTag->setProtocol(&Protocol::unknown);
         }
         auto& macAddressReq = packet->addTag<MacAddressReq>();
-        macAddressReq->setDestAddress(remoteAddress);
+        macAddressReq.setDestAddress(remoteAddress);
         socket.send(packet);
         numSent++;
         emit(packetSentSignal, packet);
@@ -90,7 +90,7 @@ void Ieee8022LlcSocketIo::refreshDisplay() const
 {
     ApplicationBase::refreshDisplay();
     char buf[100];
-    sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
+    snprintf(buf, sizeof(buf), "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
     getDisplayString().setTagArg("t", 0, buf);
 }
 

@@ -72,7 +72,7 @@ class INET_API EtherAppClient : public ApplicationBase, public Ieee8022LlcSocket
 
   public:
     EtherAppClient() {}
-    virtual ~EtherAppClient();
+    virtual ~EtherAppClient() override;
 };
 
 } // namespace inet

@@ -150,7 +150,7 @@ void EtherTrafGen::sendBurstPackets()
         seqNum++;
 
         char msgname[40];
-        sprintf(msgname, "pk-%d-%ld", getId(), seqNum);
+        std::sprintf(msgname, "pk-%d-%ld", getId(), seqNum); // changed to std::sprintf
 
         Packet *datapacket = new Packet(msgname, SOCKET_C_DATA);
         long len = *packetLength;

@@ -23,7 +23,7 @@ namespace inet {
 
 Define_Module(IpvxTrafGen);
 
-IpvxTrafGen::IpvxTrafGen()
+IpvxTrafGen::IpvxTrafGen() : timer(nullptr), protocol(nullptr), numSent(0), numReceived(0)
 {
 }
 

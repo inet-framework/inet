@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #ifndef __INET_APPLICATIONPACKETSERIALIZER_H
 #define __INET_APPLICATIONPACKETSERIALIZER_H
 
@@ -17,15 +16,15 @@ namespace inet {
  */
 class INET_API ApplicationPacketSerializer : public FieldsChunkSerializer
 {
-  protected:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
-
   public:
-    ApplicationPacketSerializer() : FieldsChunkSerializer() {}
+    ApplicationPacketSerializer() = default;
+
+  protected:
+    void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 } // namespace inet
 
-#endif
+#endif // __INET_APPLICATIONPACKETSERIALIZER_H
 

@@ -33,6 +33,8 @@ class INET_API DhcpLease
     simtime_t renewalTime;
     simtime_t rebindTime;
     bool leased = false;
+
+    friend std::ostream& operator<<(std::ostream& os, const DhcpLease& obj);
 };
 
 inline std::ostream& operator<<(std::ostream& os, const DhcpLease& obj)

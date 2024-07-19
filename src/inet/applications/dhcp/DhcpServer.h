@@ -111,8 +111,8 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   public:
-    DhcpServer();
-    virtual ~DhcpServer();
+    DhcpServer() = default;
+    virtual ~DhcpServer() override = default;
 };
 
 } // namespace inet

@@ -33,9 +33,9 @@ void IpvxTrafSink::initialize(int stage)
             throw cRuntimeError("invalid protocol id %d, accepts only between 143 and 254", protocolId);
         auto protocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(protocolId);
         if (!protocol) {
-            char *buff = new char[40];
-            sprintf(buff, "prot_%d", protocolId);
-            protocol = new Protocol(buff, buff);
+            auto buff = std::make_unique<char[]>(40);
+            sprintf(buff.get(), "prot_%d", protocolId);
+            protocol = new Protocol(buff.get(), buff.get());
             ProtocolGroup::getIpProtocolGroup()->addProtocol(protocolId, protocol);
         }
         registerProtocol(*protocol, gate("ipOut"), gate("ipIn"));

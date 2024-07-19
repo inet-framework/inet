@@ -168,8 +168,8 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   public:
-    DhcpClient() {}
-    virtual ~DhcpClient();
+    DhcpClient() = default;
+    virtual ~DhcpClient() override;
 };
 
 } // namespace inet
