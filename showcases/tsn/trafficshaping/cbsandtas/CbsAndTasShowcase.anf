@@ -34,8 +34,6 @@ except results.ResultQueryError as e:
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
-print(df)
-
 style_tuple_list = [('name', 'incoming.*', {'linestyle': '--'}),
                     ('name', 'outgoing.*', {'linestyle': '-'}),
                     ('module', '.*(app\\[0\\]|queue\\[0\\]).*', {'color': default_colors[0]}),
