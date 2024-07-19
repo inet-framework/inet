@@ -69,6 +69,10 @@ ax0, ax1, ax2 = inet.scave.plot.plot_vectors_separate_grouped([df0, df1, df2], p
 
 utils.postconfigure_plot(props)
 
+ax0.set_xticks(range(0,12,2))
+ax1.set_xticks(range(0,12,2))
+ax2.set_xticks(range(0,12,2))
+
 ax0.set_xticklabels(range(0,12,2), visible=False)
 ax1.set_xticklabels(range(0,12,2), visible=False)
 ax2.set_xticklabels(range(0,12,2))

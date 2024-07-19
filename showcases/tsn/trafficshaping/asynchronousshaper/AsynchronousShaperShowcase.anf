@@ -6026,13 +6026,14 @@ ax_queue_vi.set_ylabel("")
 ax_numtokens_vi.set_ylabel("")
 ax_gatestate_vi.set_ylabel("")
 
+ax_gatestate_be.set_yticks([0,1])
+ax_txstate.set_yticks([0,1])
+ax_gatestate_vi.set_yticks([0,1])
+
 ax_gatestate_be.set_yticklabels(['closed', 'open'])
 ax_txstate.set_yticklabels(['idle', 'transmitting'])
 ax_gatestate_vi.set_yticklabels(['closed', 'open'])
 
-ax_gatestate_be.set_yticks([0,1])
-ax_txstate.set_yticks([0,1])
-ax_gatestate_vi.set_yticks([0,1])
 
 plt.subplots_adjust(left = 0.1, right = 0.99, top = 0.95, bottom = 0.1, wspace=0.1, hspace=0.4)
 
@@ -6742,13 +6743,14 @@ ax_queue_vi.set_ylabel("")
 ax_numtokens_vi.set_ylabel("")
 ax_gatestate_vi.set_ylabel("")
 
+ax_gatestate_be.set_yticks([0,1])
+ax_txstate.set_yticks([0,1])
+ax_gatestate_vi.set_yticks([0,1])
+
 ax_gatestate_be.set_yticklabels(['closed', 'open'])
 ax_txstate.set_yticklabels(['idle', 'transmitting'])
 ax_gatestate_vi.set_yticklabels(['closed', 'open'])
 
-ax_gatestate_be.set_yticks([0,1])
-ax_txstate.set_yticks([0,1])
-ax_gatestate_vi.set_yticks([0,1])
 
 plt.subplots_adjust(left = 0.1, right = 0.99, top = 0.95, bottom = 0.1, wspace=0.1, hspace=0.4)
 
