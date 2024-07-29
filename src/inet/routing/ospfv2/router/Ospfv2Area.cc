@@ -937,7 +937,7 @@ RouterLsa *Ospfv2Area::originateRouterLSA()
     }
 
     // update the length field in the LSA header
-    lsaHeader.setLsaLength(calculateLSASize(routerLSA).get());
+    lsaHeader.setLsaLength(calculateLSASize(routerLSA).get<B>());
 
     routerLSA->setSource(LsaTrackingInfo::ORIGINATED);
 

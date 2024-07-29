@@ -74,9 +74,9 @@ class INET_API ByteCountChunk : public Chunk
     virtual bool canInsertAtBack(const Ptr<const Chunk>& chunk) const override;
     virtual bool canInsertAt(const Ptr<const Chunk>& chunk, b offset) const override;
 
-    virtual bool canRemoveAtFront(b length) const override { return b(length).get() % 8 == 0; }
-    virtual bool canRemoveAtBack(b length) const override { return b(length).get() % 8 == 0; }
-    virtual bool canRemoveAt(b offset, b length) const override { return b(offset).get() % 8 == 0 && b(length).get() % 8 == 0; }
+    virtual bool canRemoveAtFront(b length) const override { return length.get<b>() % 8 == 0; }
+    virtual bool canRemoveAtBack(b length) const override { return length.get<b>() % 8 == 0; }
+    virtual bool canRemoveAt(b offset, b length) const override { return offset.get<b>() % 8 == 0 && length.get<b>() % 8 == 0; }
 
     virtual std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     //@}

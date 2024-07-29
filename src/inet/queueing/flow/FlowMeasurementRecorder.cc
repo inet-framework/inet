@@ -116,8 +116,8 @@ void FlowMeasurementRecorder::endMeasurements(Packet *packet)
         packet->peekData()->mapAllTags<CreationTimeTag>(b(0), b(-1), [&] (b o, b l, const Ptr<const CreationTimeTag>& creationTimeTag) {
             simtime_t lifeTime = simTime() - creationTimeTag->getCreationTime();
             packetEventFile.openObject();
-            packetEventFile.writeInt("offset", b(o).get());
-            packetEventFile.writeInt("length", b(l).get());
+            packetEventFile.writeInt("offset", o.get<b>());
+            packetEventFile.writeInt("length", l.get<b>());
             packetEventFile.writeRaw("lifeTime", lifeTime.str());
             packetEventFile.closeObject();
         });
@@ -126,8 +126,8 @@ void FlowMeasurementRecorder::endMeasurements(Packet *packet)
         packet->mapAllRegionTags<PacketEventTag>(offset, length, [&] (b o, b l, const Ptr<const PacketEventTag>& packetEventTag) {
             simtime_t totalDuration = 0;
             packetEventFile.openObject();
-            packetEventFile.writeInt("offset", b(o).get());
-            packetEventFile.writeInt("length", b(l).get());
+            packetEventFile.writeInt("offset", o.get<b>());
+            packetEventFile.writeInt("length", l.get<b>());
             packetEventFile.openArray("events");
             for (size_t i = 0; i < packetEventTag->getPacketEventsArraySize(); i++) {
                 auto packetEvent = packetEventTag->getPacketEvents(i);

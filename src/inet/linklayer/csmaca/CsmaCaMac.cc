@@ -375,7 +375,7 @@ void CsmaCaMac::encapsulate(Packet *frame)
 {
     auto macHeader = makeShared<CsmaCaMacDataHeader>();
     macHeader->setChunkLength(headerLength);
-    macHeader->setHeaderLengthField(B(headerLength).get());
+    macHeader->setHeaderLengthField(headerLength.get<B>());
     auto transportProtocol = frame->getTag<PacketProtocolTag>()->getProtocol();
     auto networkProtocol = ProtocolGroup::getEthertypeProtocolGroup()->getProtocolNumber(transportProtocol);
     macHeader->setNetworkProtocol(networkProtocol);
@@ -510,7 +510,7 @@ void CsmaCaMac::sendAckFrame()
     endSifs->setContextPointer(nullptr);
     auto macHeader = makeShared<CsmaCaMacAckHeader>();
     macHeader->setChunkLength(ackLength);
-    macHeader->setHeaderLengthField(B(ackLength).get());
+    macHeader->setHeaderLengthField(ackLength.get<B>());
     macHeader->setReceiverAddress(frameToAck->peekAtFront<CsmaCaMacHeader>()->getTransmitterAddress());
     auto frame = new Packet("CsmaAck");
     frame->insertAtFront(macHeader);

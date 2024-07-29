@@ -105,8 +105,8 @@ const ITransmissionBitModel *ApskLayeredTransmitter::createBitModel(const ITrans
             if (forwardErrorCorrection == nullptr)
                 return new TransmissionBitModel(netHeaderLength, bitrate, netDataLength, bitrate, nullptr, forwardErrorCorrection, nullptr, nullptr);
             else {
-                b grossHeaderLength = b(forwardErrorCorrection->getEncodedLength(b(netHeaderLength).get()));
-                b grossDataLength = b(forwardErrorCorrection->getEncodedLength(b(netDataLength).get()));
+                b grossHeaderLength = b(forwardErrorCorrection->getEncodedLength(netHeaderLength.get<b>()));
+                b grossDataLength = b(forwardErrorCorrection->getEncodedLength(netDataLength.get<b>()));
                 bps grossBitrate = bitrate / forwardErrorCorrection->getCodeRate();
                 return new TransmissionBitModel(grossHeaderLength, grossBitrate, grossDataLength, grossBitrate, nullptr, forwardErrorCorrection, nullptr, nullptr);
             }

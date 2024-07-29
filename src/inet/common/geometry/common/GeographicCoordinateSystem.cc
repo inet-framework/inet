@@ -29,7 +29,7 @@ void SimpleGeographicCoordinateSystem::initialize(int stage)
 
 Coord SimpleGeographicCoordinateSystem::computeSceneCoordinate(const GeoCoord& geographicCoordinate) const
 {
-    double sceneX = deg(geographicCoordinate.longitude - sceneLongitude).get() * cos(fabs(rad(sceneLatitude).get())) * metersPerDegree;
+    double sceneX = deg(geographicCoordinate.longitude - sceneLongitude).get() * cos(fabs(sceneLatitude.get<rad>())) * metersPerDegree;
     double sceneY = deg(sceneLatitude - geographicCoordinate.latitude).get() * metersPerDegree;
     return Coord(sceneX, sceneY, m(geographicCoordinate.altitude + sceneAltitude).get());
 }
@@ -37,7 +37,7 @@ Coord SimpleGeographicCoordinateSystem::computeSceneCoordinate(const GeoCoord& g
 GeoCoord SimpleGeographicCoordinateSystem::computeGeographicCoordinate(const Coord& sceneCoordinate) const
 {
     auto geograpicLatitude = sceneLatitude - deg(sceneCoordinate.y / metersPerDegree);
-    auto geograpicLongitude = sceneLongitude + deg(sceneCoordinate.x / metersPerDegree / cos(fabs(rad(sceneLatitude).get())));
+    auto geograpicLongitude = sceneLongitude + deg(sceneCoordinate.x / metersPerDegree / cos(fabs(sceneLatitude.get<rad>())));
     return GeoCoord(geograpicLatitude, geograpicLongitude, m(sceneCoordinate.z) - sceneAltitude);
 }
 

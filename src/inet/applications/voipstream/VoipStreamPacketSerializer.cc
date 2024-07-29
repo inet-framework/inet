@@ -61,7 +61,7 @@ const Ptr<Chunk> VoipStreamPacketSerializer::deserialize(MemoryInputStream& stre
         voipStreamPacket->markIncorrect();
         return voipStreamPacket;
     }
-    stream.readByteRepeatedly('?', B(remainders).get());
+    stream.readByteRepeatedly('?', remainders.get<B>());
     return voipStreamPacket;
 }
 

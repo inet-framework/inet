@@ -37,7 +37,7 @@ const Ptr<Chunk> GenericPhyHeaderSerializer::deserialize(MemoryInputStream& stre
     header->setPayloadProtocol(Protocol::findProtocol(stream.readUint16Be()));
     b remainders = dataLength - (stream.getPosition() - startPosition);
     ASSERT(remainders >= b(0));
-    stream.readBitRepeatedly(false, b(remainders).get());
+    stream.readBitRepeatedly(false, remainders.get<b>());
     return header;
 }
 

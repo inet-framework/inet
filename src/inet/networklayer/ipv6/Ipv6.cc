@@ -920,7 +920,7 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
     B fragmentLength = ((B(mtu) - headerLength - IPv6_FRAGMENT_HEADER_LENGTH) / 8) * 8;
     ASSERT(fragmentLength > B(0));
 
-    int noOfFragments = B(payloadLength + fragmentLength - B(1)).get() / B(fragmentLength).get();
+    int noOfFragments = B(payloadLength + fragmentLength - B(1)).get() / fragmentLength.get<B>();
     EV_INFO << "Breaking datagram into " << noOfFragments << " fragments\n";
     std::string fragMsgName = packet->getName();
     fragMsgName += "-frag-";

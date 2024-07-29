@@ -38,7 +38,7 @@ const Ptr<Chunk> EtherAppReqSerializer::deserialize(MemoryInputStream& stream) c
     etherAppReq->setResponseBytes(stream.readUint32Be());
     B remainders = dataLength - (stream.getPosition() - startPosition);
     ASSERT(remainders >= B(0));
-    stream.readByteRepeatedly('?', B(remainders).get());
+    stream.readByteRepeatedly('?', remainders.get<B>());
     return etherAppReq;
 }
 
@@ -65,7 +65,7 @@ const Ptr<Chunk> EtherAppRespSerializer::deserialize(MemoryInputStream& stream) 
     etherAppResp->setNumFrames(stream.readUint32Be());
     B remainders = dataLength - (stream.getPosition() - startPosition);
     ASSERT(remainders >= B(0));
-    stream.readByteRepeatedly('?', B(remainders).get());
+    stream.readByteRepeatedly('?', remainders.get<B>());
     return etherAppResp;
 }
 

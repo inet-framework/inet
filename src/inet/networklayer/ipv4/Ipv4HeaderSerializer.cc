@@ -22,7 +22,7 @@ void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ipv4Heade
     B headerLength = ipv4Header.getHeaderLength();
     ASSERT((headerLength.get() & 3) == 0 && headerLength >= IPv4_MIN_HEADER_LENGTH && headerLength <= IPv4_MAX_HEADER_LENGTH);
     ASSERT(headerLength <= ipv4Header.getTotalLengthField());
-    iphdr.ip_hl = B(headerLength).get() >> 2;
+    iphdr.ip_hl = headerLength.get<B>() >> 2;
     iphdr.ip_v = ipv4Header.getVersion();
     iphdr.ip_tos = ipv4Header.getTypeOfService();
     iphdr.ip_id = htons(ipv4Header.getIdentification());
@@ -152,7 +152,7 @@ const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
 {
     auto position = stream.getPosition();
     B bufsize = stream.getRemainingLength();
-    uint8_t buffer[B(IPv4_MIN_HEADER_LENGTH).get()];
+    uint8_t buffer[IPv4_MIN_HEADER_LENGTH.get<B>()];
     stream.readBytes(buffer, IPv4_MIN_HEADER_LENGTH);
     auto ipv4Header = makeShared<Ipv4Header>();
     const struct ip& iphdr = *static_cast<const struct ip *>((void *)&buffer);

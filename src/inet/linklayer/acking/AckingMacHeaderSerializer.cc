@@ -46,7 +46,7 @@ const Ptr<Chunk> AckingMacHeaderSerializer::deserialize(MemoryInputStream& strea
     macHeader->setSrcModuleId(stream.readUint64Be());
     B remainders = B(length) - (stream.getPosition() - startPosition);
     ASSERT(remainders >= B(0));
-    stream.readByteRepeatedly('?', B(remainders).get());
+    stream.readByteRepeatedly('?', remainders.get<B>());
     return macHeader;
 }
 

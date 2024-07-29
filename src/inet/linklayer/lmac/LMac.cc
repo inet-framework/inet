@@ -52,7 +52,7 @@ void LMac::initialize(int stage)
         slotChange = new cOutVector("slotChange");
 
         // how long does it take to send/receive a control packet
-        controlDuration = (double)(b(headerLength).get() + numSlots + 16) / (double)bitrate; // FIXME replace 16 to a constant
+        controlDuration = (double)(headerLength.get<b>() + numSlots + 16) / (double)bitrate; // FIXME replace 16 to a constant
         EV << "Control packets take : " << controlDuration << " seconds to transmit\n";
 
         txQueue = getQueue(gate(upperLayerInGateId));

@@ -585,7 +585,7 @@ void EthernetCsmaMac::sendJamSignal()
 
     // send JAM
     EthernetJamSignal *jam = new EthernetJamSignal("JAM_SIGNAL");
-    jam->setByteLength(B(JAM_SIGNAL_BYTES).get());
+    jam->setByteLength(JAM_SIGNAL_BYTES.get<B>());
     jam->setBitrate(curEtherDescr.bitrate);
 //    emit(packetSentToLowerSignal, jam);
     duration = jam->getBitLength() / this->curEtherDescr.bitrate;
@@ -794,7 +794,7 @@ void EthernetCsmaMac::scheduleEndIFGPeriod()
 {
     bytesSentInBurst = B(0);
     framesSentInBurst = 0;
-    simtime_t ifgTime = b(INTERFRAME_GAP_BITS).get() / curEtherDescr.bitrate;
+    simtime_t ifgTime = INTERFRAME_GAP_BITS.get<b>() / curEtherDescr.bitrate;
     scheduleAfter(ifgTime, endIfgTimer);
     changeTransmissionState(WAIT_IFG_STATE);
 }

@@ -509,7 +509,7 @@ Packet *Ospfv2Interface::createUpdatePacket(const Ospfv2Lsa *lsa)
             throw cRuntimeError("Invalid LSA type: %d", lsaType);
     }
 
-    updatePacket->setPacketLengthField(B(packetLength).get());
+    updatePacket->setPacketLengthField(packetLength.get<B>());
     updatePacket->setChunkLength(packetLength);
 
     for (int j = 0; j < 8; j++) {

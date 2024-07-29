@@ -62,7 +62,7 @@ const Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverte
         if (b(iterator.getPosition()).get() % 8 == 0 && (length < b(0) || length.get() % 8 == 0)) {
             B startOffset = iterator.getPosition();
             B endOffset = iterator.getPosition() + (length < b(0) ? std::min(-length, chunkLength - iterator.getPosition()) : length);
-            auto chunk = makeShared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + B(startOffset).get(), bytes.begin() + B(endOffset).get()));
+            auto chunk = makeShared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + startOffset.get<B>(), bytes.begin() + endOffset.get<B>()));
             chunk->regionTags.copyTags(regionTags, iterator.getPosition(), b(0), chunk->getChunkLength());
             chunk->markImmutable();
             return chunk;
@@ -151,22 +151,22 @@ void BytesChunk::doInsertAtBack(const Ptr<const Chunk>& chunk)
 void BytesChunk::doInsertAt(const Ptr<const Chunk>& chunk, b offset)
 {
     const auto& bytesChunk = staticPtrCast<const BytesChunk>(chunk);
-    bytes.insert(bytes.begin() + B(offset).get(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
+    bytes.insert(bytes.begin() + offset.get<B>(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
 }
 
 void BytesChunk::doRemoveAtFront(b length)
 {
-    bytes.erase(bytes.begin(), bytes.begin() + B(length).get());
+    bytes.erase(bytes.begin(), bytes.begin() + length.get<B>());
 }
 
 void BytesChunk::doRemoveAtBack(b length)
 {
-    bytes.erase(bytes.end() - B(length).get(), bytes.end());
+    bytes.erase(bytes.end() - length.get<B>(), bytes.end());
 }
 
 void BytesChunk::doRemoveAt(b offset, b length)
 {
-    bytes.erase(bytes.begin() + B(offset).get(), bytes.begin() + B(offset).get() + B(length).get());
+    bytes.erase(bytes.begin() + offset.get<B>(), bytes.begin() + offset.get<B>() + length.get<B>());
 }
 
 std::ostream& BytesChunk::printFieldsToStream(std::ostream& stream, int level, int evFlags) const

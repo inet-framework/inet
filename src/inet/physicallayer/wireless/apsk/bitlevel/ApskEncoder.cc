@@ -62,12 +62,12 @@ const ITransmissionBitModel *ApskEncoder::encode(const ITransmissionPacketModel 
     const auto& apskPhyHeader = packet->peekAtFront<ApskPhyHeader>();
     auto length = packet->getDataLength();
     BitVector *encodedBits;
-    if (b(length).get() % 8 == 0)
+    if (length.get<b>() % 8 == 0)
         encodedBits = new BitVector(packet->peekAllAsBytes()->getBytes());
     else {
         encodedBits = new BitVector();
         const auto& bitsChunk = packet->peekAllAsBits();
-        for (int i = 0; i < b(length).get(); i++)
+        for (int i = 0; i < length.get<b>(); i++)
             encodedBits->appendBit(bitsChunk->getBit(i));
     }
     const IScrambling *scrambling = nullptr;
@@ -92,7 +92,7 @@ const ITransmissionBitModel *ApskEncoder::encode(const ITransmissionPacketModel 
     if (forwardErrorCorrection == nullptr)
         return new TransmissionBitModel(netHeaderLength, packetModel->getDataNetBitrate(), length - netHeaderLength, packetModel->getDataNetBitrate(), encodedBits, forwardErrorCorrection, scrambling, interleaving);
     else {
-        b grossHeaderLength = b(forwardErrorCorrection->getEncodedLength(b(netHeaderLength).get()));
+        b grossHeaderLength = b(forwardErrorCorrection->getEncodedLength(netHeaderLength.get<b>()));
         bps grossBitrate = packetModel->getDataNetBitrate() / forwardErrorCorrection->getCodeRate();
         return new TransmissionBitModel(grossHeaderLength, grossBitrate, length - grossHeaderLength, grossBitrate, encodedBits, forwardErrorCorrection, scrambling, interleaving);
     }

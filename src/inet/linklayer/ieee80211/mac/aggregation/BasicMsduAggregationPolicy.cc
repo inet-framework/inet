@@ -79,7 +79,7 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queuei
         frames->push_back(dataPacket);
         aMsduLength += dataPacket->getDataLength() - dataHeader->getChunkLength() - dataTrailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header
     }
-    if (frames->size() <= 1 || !isAggregationPossible(frames->size(), B(aMsduLength).get())) {
+    if (frames->size() <= 1 || !isAggregationPossible(frames->size(), aMsduLength.get<B>())) {
         EV_DEBUG << "A-MSDU aggregation is not possible, collected " << frames->size() << " packets.\n";
         delete frames;
         return nullptr;

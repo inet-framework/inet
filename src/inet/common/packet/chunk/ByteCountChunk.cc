@@ -32,7 +32,7 @@ ByteCountChunk::ByteCountChunk(B length, uint8_t data) :
 void ByteCountChunk::parsimPack(cCommBuffer *buffer) const
 {
     Chunk::parsimPack(buffer);
-    buffer->pack(B(length).get());
+    buffer->pack(length.get<B>());
     buffer->pack(data);
 }
 

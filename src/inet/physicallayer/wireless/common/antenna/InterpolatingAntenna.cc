@@ -72,7 +72,7 @@ void InterpolatingAntenna::AntennaGain::parseMap(std::map<rad, double>& gainMap,
 
 double InterpolatingAntenna::AntennaGain::computeGain(const std::map<rad, double>& gainMap, rad angle) const
 {
-    angle = rad(fmod(rad(angle).get(), 2 * M_PI));
+    angle = rad(fmod(angle.get<rad>(), 2 * M_PI));
     if (angle < rad(0.0)) angle += rad(2 * M_PI);
     // NOTE: 0 and 2 * M_PI are always in the map
     std::map<rad, double>::const_iterator lowerBound = gainMap.lower_bound(angle);

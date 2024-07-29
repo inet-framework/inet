@@ -128,7 +128,7 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
         tcpHeader->markIncomplete();
     auto length = lengthField < remainingLength ? lengthField : B(remainingLength);
     tcpHeader->setChunkLength(B(length));
-    tcpHeader->setLengthField(B(lengthField).get());
+    tcpHeader->setLengthField(lengthField.get<B>());
     tcpHeader->setSrcPort(stream.readUint16Be());
     tcpHeader->setDestPort(stream.readUint16Be());
     tcpHeader->setCrcMode(CRC_COMPUTED);

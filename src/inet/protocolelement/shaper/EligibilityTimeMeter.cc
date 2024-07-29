@@ -55,7 +55,7 @@ void EligibilityTimeMeter::emitNumTokenChangedSignal(Packet *packet)
     clocktime_t emptyToFullDuration = s(committedBurstSize / committedInformationRate).get();
     double alpha = (getClockTime() - bucketEmptyTime).dbl() / emptyToFullDuration.dbl();
     if (alpha > 1.0) {
-        numTokens = b(committedBurstSize).get();
+        numTokens = committedBurstSize.get<b>();
         cTimestampedValue value(CLOCKTIME_AS_SIMTIME(bucketEmptyTime + emptyToFullDuration), numTokens);
         emit(tokensChangedSignal, &value);
         emit(tokensChangedSignal, numTokens);
@@ -67,7 +67,7 @@ void EligibilityTimeMeter::emitNumTokenChangedSignal(Packet *packet)
         emit(tokensChangedSignal, &value2);
     }
     else {
-        numTokens = b(committedBurstSize).get() * alpha;
+        numTokens = committedBurstSize.get<b>() * alpha;
         emit(tokensChangedSignal, numTokens);
     }
 }

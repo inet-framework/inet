@@ -45,7 +45,7 @@ class INET_API TcpReceiveQueue : public cObject
     {
         B expOffs = reorderBuffer.getExpectedOffset();
         uint32_t expSeq = offsetToSeq(expOffs);
-        return B((seqGE(seq, expSeq)) ? B(expOffs).get() + (seq - expSeq) : B(expOffs).get() - (expSeq - seq));
+        return B((seqGE(seq, expSeq)) ? expOffs.get<B>() + (seq - expSeq) : expOffs.get<B>() - (expSeq - seq));
     }
 
   public:

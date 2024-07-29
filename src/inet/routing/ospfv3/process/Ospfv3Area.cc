@@ -1237,7 +1237,7 @@ void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa *prefLsa, Ospfv3Are
         newLsa->setPrefix(lsa->getPrefix());
         newLsa->setMetric(lsa->getMetric());
 
-        newHeader2.setLsaLength(calculateLSASize(newLsa).get());
+        newHeader2.setLsaLength(calculateLSASize(newLsa).get<B>());
         if (area->installInterAreaPrefixLSA(newLsa))
             area->floodLSA(newLsa);
 
@@ -1279,7 +1279,7 @@ void Ospfv3Area::originateDefaultInterAreaPrefixLSA(Ospfv3Area *toArea)
         newPrefix.addressPrefix = defaultPref;
         packetLength += B(4 * ((0 + 31) / 32)) + OSPFV3_LSA_PREFIX_HEADER_LENGTH;
     }
-    newHeader.setLsaLength(calculateLSASize(newLsa).get());
+    newHeader.setLsaLength(calculateLSASize(newLsa).get<B>());
     toArea->installInterAreaPrefixLSA(newLsa);
     delete newLsa;
 }

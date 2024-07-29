@@ -53,7 +53,7 @@ class BgpHeader extends FieldsChunk
 {
     chunkLength = BGP_HEADER_OCTETS;
     uint8_t marker[16] = 0xFF;
-    uint16_t totalLength = B(BGP_HEADER_OCTETS).get();
+    uint16_t totalLength = BGP_HEADER_OCTETS.get<B>();
     BgpType type = static_cast<BgpType>(-1);
 }
 
