@@ -1,6 +1,6 @@
 %description:
 
-Checks if module interface lookup fails when the Ipv4NetworkLayer module is directly connected to the NetworkInterface module.
+Checks if module interface lookup fails when the Ipv4NetworkLayer module is directly connected to the EthernetInterface module.
 
 %file: test.ned
 

@@ -1,6 +1,6 @@
 %description:
 
-Checks if module interface lookup fails for the IPv4 protocol in the network interfaces.
+Checks module interface lookup for various network interface modules.
 
 %file: TestNetwork.ned
 

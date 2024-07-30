@@ -8,6 +8,7 @@
 #include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/queueing/contract/IActivePacketSink.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 
@@ -147,6 +148,23 @@ cGate *findModuleInterface(cGate *originatorGate, const std::type_info& typeInfo
                         }
                         else {
                             if (!findModuleInterface(module->gate(forwardGateName), typeInfo, arguments, direction)) {
+                                EV_TRACE << "Module interface not found using @interface gate property, cannot forward" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
+                                continue;
+                            }
+                        }
+                    }
+                    // KLUDGE: TODO: this is needed for the tunnel example, it's used by the PacketServerBase
+                    if (auto forwardGateName = property->getValue("forward3")) {
+                        if (module->isGateVector(forwardGateName)) {
+                            for (int i = 0; i < module->gateSize(forwardGateName); i++) {
+                                if (!findModuleInterface(module->gate(forwardGateName, i), typeid(queueing::IPassivePacketSink), arguments, direction)) {
+                                    EV_TRACE << "Module interface not found using @interface gate property, cannot forward" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
+                                    goto NOT_FOUND;
+                                }
+                            }
+                        }
+                        else {
+                            if (!findModuleInterface(module->gate(forwardGateName), typeid(queueing::IPassivePacketSink), arguments, direction)) {
                                 EV_TRACE << "Module interface not found using @interface gate property, cannot forward" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
                                 continue;
                             }

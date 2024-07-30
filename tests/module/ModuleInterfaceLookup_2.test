@@ -1,6 +1,6 @@
 %description:
 
-Checks if module interface lookup works when the application, Tcp, Ipv4NetworkLayer, EthernetEncapsulation, and NetworkInterface modules are connected without MessageDispatcher modules.
+Checks if module interface lookup works when the application, Tcp, Ipv4NetworkLayer, EthernetEncapsulation, and EthernetInterface modules are connected without MessageDispatcher modules.
 
 %file: test.ned
 
