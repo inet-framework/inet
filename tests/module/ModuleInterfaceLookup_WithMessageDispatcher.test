@@ -5,13 +5,14 @@ Checks if module interface lookup works when the application, Tcp, Ipv4NetworkLa
 %file: test.ned
 
 import inet.applications.tcpapp.TcpClientApp;
+import inet.common.MessageDispatcher;
 import inet.linklayer.ethernet.basic.EthernetEncapsulation;
 import inet.linklayer.ethernet.basic.EthernetInterface;
 import inet.networklayer.ipv4.Ipv4NetworkLayer;
 import inet.networklayer.common.InterfaceTable;
 import inet.transportlayer.tcp.Tcp;
 
-network Test
+network TestNetwork
 {
     parameters:
         *.interfaceTableModule = absPath(".interfaceTable");
@@ -21,11 +22,16 @@ network Test
     submodules:
         interfaceTable: InterfaceTable;
         app: TcpClientApp;
+        at: MessageDispatcher;
         tcp: Tcp;
+        ti: MessageDispatcher;
         ip: Ipv4NetworkLayer;
+        ie: MessageDispatcher;
         ethernet: EthernetEncapsulation;
+        ei: MessageDispatcher;
         interface: EthernetInterface;
     connections:
+    xxxx TODO connect message dispatchers
         app.socketOut --> tcp.appIn;
         app.socketIn <-- tcp.appOut;
         tcp.ipOut --> ip.transportIn;
@@ -40,7 +46,7 @@ network Test
 %inifile: omnetpp.ini
 
 [General]
-network = Test
+network = TestNetwork
 ned-path = .;../../../../src
 sim-time-limit = 0s
 

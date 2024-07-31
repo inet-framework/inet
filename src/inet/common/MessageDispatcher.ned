@@ -40,7 +40,6 @@ import inet.queueing.base.PacketProcessorBase;
 simple MessageDispatcher extends PacketProcessorBase
 {
     parameters:
-        string interfaceTableModule; // Module path to the ~InterfaceTable module
         @class(MessageDispatcher);
         @display("i=-;b=100,5,,,,1;");
     gates:
