@@ -1,6 +1,6 @@
 %description:
 
-Check module interface lookup of Tcp module.
+Check module interface lookup of TCP module.
 
 %file: TestNetwork.ned
 
