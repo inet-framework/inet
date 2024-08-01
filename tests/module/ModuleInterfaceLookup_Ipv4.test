@@ -1,6 +1,6 @@
 %description:
 
-TODO
+Check module interface lookup of Ipv4 module.
 
 %file: TestNetwork.ned
 
@@ -46,9 +46,11 @@ cmdenv-log-prefix = "%>"
 using namespace inet;
 using namespace inet::queueing;
 
+#define CHECK(gate, argument) { std::cerr << "gate = " << #gate << ", " << printToStringIfPossible(argument, 0) << " --> " << (findModuleInterface(gate, typeid(IPassivePacketSink), &argument) != nullptr ? "found" : "not found") << std::endl; }
+
 auto messageDispatcher = cSimulation::getActiveSimulation()->getSystemModule()->getModuleByPath("messageDispatcher");
-auto transportInGate = messageDispatcher->gate("out", 0);
-auto ifInGate = messageDispatcher->gate("out", 1);
+auto transportIn = messageDispatcher->gate("out", 0);
+auto ifIn = messageDispatcher->gate("out", 1);
 
 DispatchProtocolReq dispatchProtocolReq;
 dispatchProtocolReq.setProtocol(&Protocol::ipv4);
@@ -60,18 +62,28 @@ PacketServiceTag packetServiceTag;
 packetServiceTag.setProtocol(&Protocol::ipv4);
 
 dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
-ASSERT(findModuleInterface(transportInGate, typeid(IPassivePacketSink), &dispatchProtocolReq));
-ASSERT(!findModuleInterface(ifInGate, typeid(IPassivePacketSink), &dispatchProtocolReq));
+CHECK(transportIn, dispatchProtocolReq);
+CHECK(ifIn, dispatchProtocolReq);
 
 dispatchProtocolReq.setServicePrimitive(SP_INDICATION);
-ASSERT(!findModuleInterface(transportInGate, typeid(IPassivePacketSink), &dispatchProtocolReq));
-ASSERT(findModuleInterface(ifInGate, typeid(IPassivePacketSink), &dispatchProtocolReq));
+CHECK(transportIn, dispatchProtocolReq);
+CHECK(ifIn, dispatchProtocolReq);
 
-// TODO ASSERT(findModuleInterface(transportInGate, typeid(IPassivePacketSink), &packetServiceTag));
-// TODO ASSERT(!findModuleInterface(transportInGate, typeid(IPassivePacketSink), &packetProtocolTag));
+CHECK(transportIn, packetServiceTag);
+CHECK(transportIn, packetProtocolTag);
 
-ASSERT(findModuleInterface(ifInGate, typeid(IPassivePacketSink), &packetProtocolTag));
-ASSERT(!findModuleInterface(ifInGate, typeid(IPassivePacketSink), &packetServiceTag));
+CHECK(ifIn, packetProtocolTag);
+CHECK(ifIn, packetServiceTag);
+
+%contains: stderr
+gate = transportIn, DispatchProtocolReq, protocol = ipv4(38), servicePrimitive = 1 (SP_REQUEST) --> found
+gate = ifIn, DispatchProtocolReq, protocol = ipv4(38), servicePrimitive = 1 (SP_REQUEST) --> not found
+gate = transportIn, DispatchProtocolReq, protocol = ipv4(38), servicePrimitive = 2 (SP_INDICATION) --> not found
+gate = ifIn, DispatchProtocolReq, protocol = ipv4(38), servicePrimitive = 2 (SP_INDICATION) --> found
+gate = transportIn, PacketServiceTag, protocol = ipv4(38) --> found
+gate = transportIn, PacketProtocolTag, protocol = ipv4(38), frontOffset = 0 B, backOffset = 0 B --> not found
+gate = ifIn, PacketProtocolTag, protocol = ipv4(38), frontOffset = 0 B, backOffset = 0 B --> found
+gate = ifIn, PacketServiceTag, protocol = ipv4(38) --> not found
 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true

@@ -24,7 +24,7 @@ network TestNetwork
         mobility.initialZ = 0m;
         mobility.initFromDisplayString = false;
         ethernetInterface*.bitrate = 100Mbps;
-        ieee80211Interface.radio.antenna.mobilityModule = absPath(".mobility");
+        ieee80211terface.radio.antenna.mobilityModule = absPath(".mobility");
         @networkNode;
     submodules:
         mobility: StationaryMobility;
@@ -35,14 +35,14 @@ network TestNetwork
         pppInterface: PppInterface;
         ethernetInterface1: EthernetInterface;
         ethernetInterface2: LayeredEthernetInterface;
-        ieee80211Interface: Ieee80211Interface;
+        ieee80211terface: Ieee80211Interface;
         test: Test;
     connections allowunconnected:
         messageDispatcher.out++ --> loopbackInterface.upperLayerIn;
         messageDispatcher.out++ --> pppInterface.upperLayerIn;
         messageDispatcher.out++ --> ethernetInterface1.upperLayerIn;
         messageDispatcher.out++ --> ethernetInterface2.upperLayerIn;
-        messageDispatcher.out++ --> ieee80211Interface.upperLayerIn;
+        messageDispatcher.out++ --> ieee80211terface.upperLayerIn;
 }
 
 %inifile: omnetpp.ini
@@ -67,6 +67,8 @@ cmdenv-log-prefix = "%>"
 using namespace inet;
 using namespace inet::queueing;
 
+#define CHECK(gate, argument) { std::cerr << "interface = " << #gate << ", " << printToStringIfPossible(argument, 0) << " --> " << (findModuleInterface(gate, typeid(IPassivePacketSink), &argument) != nullptr ? "found" : "not found") << std::endl; }
+
 InterfaceReq interfaceReq;
 DispatchProtocolReq dispatchProtocolReq;
 dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
@@ -74,30 +76,48 @@ PacketProtocolTag packetProtocolTag;
 
 auto messageDispatcher = cSimulation::getActiveSimulation()->getSystemModule()->getModuleByPath("messageDispatcher");
 
+auto loopback = messageDispatcher->gate("out", 0);
+auto ppp = messageDispatcher->gate("out", 1);
+auto ethernetBasic = messageDispatcher->gate("out", 2);
+auto ethernetModular = messageDispatcher->gate("out", 3);
+auto ieee80211 = messageDispatcher->gate("out", 4);
+
 // loopback interface accepts packets directed to it
 interfaceReq.setInterfaceId(100);
-ASSERT(findModuleInterface(messageDispatcher->gate("out", 0), typeid(IPassivePacketSink), &interfaceReq, 1));
+CHECK(loopback, interfaceReq);
 
 // PPP network interface accepts PPP service requests (SDUs)
 dispatchProtocolReq.setProtocol(&Protocol::ppp);
-ASSERT(findModuleInterface(messageDispatcher->gate("out", 1), typeid(IPassivePacketSink), &dispatchProtocolReq, 1));
+CHECK(ppp, dispatchProtocolReq);
 
 // Ethernet network interface accepts Ethernet packets (PDUs)
 packetProtocolTag.setProtocol(&Protocol::ethernetMac);
-ASSERT(findModuleInterface(messageDispatcher->gate("out", 2), typeid(IPassivePacketSink), &packetProtocolTag, 1));
-ASSERT(findModuleInterface(messageDispatcher->gate("out", 3), typeid(IPassivePacketSink), &packetProtocolTag, 1));
+CHECK(ethernetBasic, packetProtocolTag);
+CHECK(ethernetModular, packetProtocolTag);
 
 // IEEE 802.11 network interface accelts IEEE 802.2 LLC service requests (SDUs)
 dispatchProtocolReq.setProtocol(&Protocol::ieee8022llc);
-ASSERT(findModuleInterface(messageDispatcher->gate("out", 4), typeid(IPassivePacketSink), &dispatchProtocolReq, 1));
+CHECK(ieee80211, dispatchProtocolReq);
 
 // none of the network interfaces accept IPv4 service requests (SDUs)
 dispatchProtocolReq.setProtocol(&Protocol::ipv4);
-ASSERT(!findModuleInterface(messageDispatcher->gate("out", 0), typeid(IPassivePacketSink), &dispatchProtocolReq, 1));
-ASSERT(!findModuleInterface(messageDispatcher->gate("out", 1), typeid(IPassivePacketSink), &dispatchProtocolReq, 1));
-ASSERT(!findModuleInterface(messageDispatcher->gate("out", 2), typeid(IPassivePacketSink), &dispatchProtocolReq, 1));
-ASSERT(!findModuleInterface(messageDispatcher->gate("out", 3), typeid(IPassivePacketSink), &dispatchProtocolReq, 1));
-ASSERT(!findModuleInterface(messageDispatcher->gate("out", 4), typeid(IPassivePacketSink), &dispatchProtocolReq, 1));
+CHECK(loopback, dispatchProtocolReq);
+CHECK(ppp, dispatchProtocolReq);
+CHECK(ethernetBasic, dispatchProtocolReq);
+CHECK(ethernetModular, dispatchProtocolReq);
+CHECK(ieee80211, dispatchProtocolReq);
+
+%contains: stderr
+interface = loopback, InterfaceReq, interfaceId = 100 --> found
+interface = ppp, DispatchProtocolReq, protocol = ppp(52), servicePrimitive = 1 (SP_REQUEST) --> found
+interface = ethernetBasic, PacketProtocolTag, protocol = ethernetmac(12), frontOffset = 0 B, backOffset = 0 B --> found
+interface = ethernetModular, PacketProtocolTag, protocol = ethernetmac(12), frontOffset = 0 B, backOffset = 0 B --> found
+interface = ieee80211, DispatchProtocolReq, protocol = ieee8022llc(33), servicePrimitive = 1 (SP_REQUEST) --> found
+interface = loopback, DispatchProtocolReq, protocol = ipv4(38), servicePrimitive = 1 (SP_REQUEST) --> not found
+interface = ppp, DispatchProtocolReq, protocol = ipv4(38), servicePrimitive = 1 (SP_REQUEST) --> not found
+interface = ethernetBasic, DispatchProtocolReq, protocol = ipv4(38), servicePrimitive = 1 (SP_REQUEST) --> not found
+interface = ethernetModular, DispatchProtocolReq, protocol = ipv4(38), servicePrimitive = 1 (SP_REQUEST) --> not found
+interface = ieee80211, DispatchProtocolReq, protocol = ipv4(38), servicePrimitive = 1 (SP_REQUEST) --> not found
 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true

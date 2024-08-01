@@ -1,6 +1,6 @@
 %description:
 
-Checks if module interface lookup works when the application, Tcp, Ipv4NetworkLayer, EthernetEncapsulation, and EthernetInterface modules are connected without MessageDispatcher modules.
+Checks if module interface lookup works when the application, Tcp, Ipv4NetworkLayer, EthernetEncapsulation, and EthernetInterface modules are connected with MessageDispatcher modules.
 
 %file: test.ned
 
@@ -31,15 +31,22 @@ network TestNetwork
         ei: MessageDispatcher;
         interface: EthernetInterface;
     connections:
-    xxxx TODO connect message dispatchers
-        app.socketOut --> tcp.appIn;
-        app.socketIn <-- tcp.appOut;
-        tcp.ipOut --> ip.transportIn;
-        tcp.ipIn <-- ip.transportOut;
-        ip.ifOut --> ethernet.upperLayerIn;
-        ip.ifIn <-- ethernet.upperLayerOut;
-        ethernet.lowerLayerOut --> interface.upperLayerIn;
-        ethernet.lowerLayerIn <-- interface.upperLayerOut;
+        app.socketOut --> at.in++;
+        app.socketIn <-- at.out++;
+        tcp.appOut --> at.in++;
+        tcp.appIn <-- at.out++;
+        tcp.ipOut --> ti.in++;
+        tcp.ipIn <-- ti.out++;
+        ip.transportOut --> ti.in++;
+        ip.transportIn <-- ti.out++;
+        ip.ifOut --> ie.in++;
+        ip.ifIn <-- ie.out++;
+        ethernet.upperLayerOut --> ie.in++;
+        ethernet.upperLayerIn <-- ie.out++;
+        ethernet.lowerLayerOut --> ei.in++;
+        ethernet.lowerLayerIn <-- ei.out++;
+        interface.upperLayerOut --> ei.in++;
+        interface.upperLayerIn <-- ei.out++;
         interface.phys <--> phys;
 }
 
