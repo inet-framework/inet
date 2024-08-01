@@ -25,6 +25,9 @@ cGate *EthernetLayer::lookupModuleInterface(cGate *gate, const std::type_info &t
             auto dispatchProtocolReq = dynamic_cast<const DispatchProtocolReq *>(arguments);
             if (dispatchProtocolReq != nullptr && dispatchProtocolReq->getProtocol() == &Protocol::ethernetMac && dispatchProtocolReq->getServicePrimitive() == SP_REQUEST)
                 return findModuleInterface(gate, type, nullptr, 1);
+            auto packetServiceTag = dynamic_cast<const PacketServiceTag *>(arguments);
+            if (packetServiceTag != nullptr && packetServiceTag->getProtocol() == &Protocol::ethernetMac)
+                return findModuleInterface(gate, type, nullptr, 1);
         }
         else if (type == typeid(IEthernet))
             return findModuleInterface(gate, type, arguments, 1);
@@ -35,6 +38,9 @@ cGate *EthernetLayer::lookupModuleInterface(cGate *gate, const std::type_info &t
         if (type == typeid(IPassivePacketSink)) {
             auto dispatchProtocolReq = dynamic_cast<const DispatchProtocolReq *>(arguments);
             if (dispatchProtocolReq != nullptr && dispatchProtocolReq->getProtocol() == &Protocol::ethernetMac && dispatchProtocolReq->getServicePrimitive() == SP_INDICATION)
+                return findModuleInterface(gate, type, nullptr, 1);
+            auto packetProtocolTag = dynamic_cast<const PacketProtocolTag *>(arguments);
+            if (packetProtocolTag != nullptr && packetProtocolTag->getProtocol() == &Protocol::ethernetMac)
                 return findModuleInterface(gate, type, nullptr, 1);
         }
     }
