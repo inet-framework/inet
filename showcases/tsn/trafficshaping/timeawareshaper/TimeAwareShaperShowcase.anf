@@ -5,7 +5,7 @@
         <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="2046460629" name="Client application traffic and traffic shaper incoming traffic" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1618213748" name="Client application traffic and traffic shaper incoming traffic" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -38,8 +38,8 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-style_tuple_list = [('module', '.*queue\[0\].*', {'color': default_colors[0]}),
-                    ('module', '.*queue\[1\].*', {'color': default_colors[1]}),
+style_tuple_list = [('module', '.*queue\\[0\\].*', {'color': default_colors[0]}),
+                    ('module', '.*queue\\[1\\].*', {'color': default_colors[1]}),
                     ('name', 'dataRate.*', {'linestyle': '--'})]
 
 inet.scave.plot.add_to_dataframe(df, style_tuple_list)
@@ -657,7 +657,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="9"/>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="815420762" name="Shaper Incoming and Outgoing Traffic" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="882358521" name="Shaper Incoming and Outgoing Traffic" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -686,8 +686,8 @@ except results.ResultQueryError as e:
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
-style_tuple_list = [('module', '.*queue\[0\].*', {'color': default_colors[0]}),
-                    ('module', '.*queue\[1\].*', {'color': default_colors[1]}),
+style_tuple_list = [('module', '.*queue\\[0\\].*', {'color': default_colors[0]}),
+                    ('module', '.*queue\\[1\\].*', {'color': default_colors[1]}),
                     ('name', 'incomingDataRate.*', {'linestyle': 'dotted'}),
                     ('name', 'outgoingDataRate.*', {'linestyle': 'solid'})]
 
@@ -1309,7 +1309,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="9"/>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="702949175" name="Traffic Shaper Outgoing Traffic and Server Application Traffic" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="2034792245" name="Traffic Shaper Outgoing Traffic and Server Application Traffic" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -1341,8 +1341,8 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-style_tuple_list = [('module', '.*queue\[0\].*', {'color': default_colors[0]}),
-                    ('module', '.*queue\[1\].*', {'color': default_colors[1]}),
+style_tuple_list = [('module', '.*queue\\[0\\].*', {'color': default_colors[0]}),
+                    ('module', '.*queue\\[1\\].*', {'color': default_colors[1]}),
                     ('name', 'dataRate.*', {'linestyle': '--'})]
 
 inet.scave.plot.add_to_dataframe(df, style_tuple_list)
@@ -1960,7 +1960,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="9"/>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="101697998" name="Traffic shaper queue lengths" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1850832415" name="Traffic shaper queue lengths" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -2601,7 +2601,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="267491531" name="Transmitting state and gate states" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1878941422" name="Transmitting state and gate states" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import re
 import math
 import matplotlib.pyplot as plt
@@ -2631,7 +2631,7 @@ if df.empty:
 df = utils.perform_vector_ops(df, props["vector_operations"])
 df["moduledisplaypath"].fillna(df["module"], inplace=True)
 df["legend"] = df["moduledisplaypath"] + ", " + df["title"]
-df["legend"] = df["legend"].apply(lambda legend: re.sub(".*\.(.*) dilated.*", "\\1", str(legend)))
+df["legend"] = df["legend"].apply(lambda legend: re.sub(".*\\.(.*) dilated.*", "\\1", str(legend)))
 df["title"] = df["legend"]
 
 # plot
@@ -3240,7 +3240,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1225528403" name="Traffic shaping" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="357540503" name="Traffic shaping" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import re
 import numpy
 import math
@@ -3271,7 +3271,7 @@ if df.empty:
 df = utils.perform_vector_ops(df, props["vector_operations"])
 df["moduledisplaypath"].fillna(df["module"], inplace=True)
 df["legend"] = df["moduledisplaypath"] + ", " + df["title"]
-df["legend"] = df["legend"].apply(lambda legend: re.sub(".*\.(.*) dilated.*", "\\1", str(legend)))
+df["legend"] = df["legend"].apply(lambda legend: re.sub(".*\\.(.*) dilated.*", "\\1", str(legend)))
 df["title"] = df["legend"]
 
 # plot

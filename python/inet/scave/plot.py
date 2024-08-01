@@ -665,7 +665,7 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order=None):
         or
     order = ['configname', 'Advanced_config', 'Default_config', 'Manual_config']
     
-    Note that the value parameter in style_tuple_list and the order can contain regex (e.g. .*foo). Make sure to escape regex characters such as [ and ] with \
+    Note that the value parameter in style_tuple_list and the order can contain regex (e.g. .*foo). Make sure to escape regex characters such as [ and ] with \\
     """
     
     
@@ -700,8 +700,8 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order=None):
             
             for i in range(0,len(df)):
                 pattern = re.compile(value)
-                logger.debug(f"value: {value}, pattern: {pattern}, df[column][i] {df[column][i]}")
-                match = re.fullmatch(pattern, df[column][i])
+                logger.debug(f"value: {value}, pattern: {pattern}, df.loc[i, column] {df.loc[i, column]}")
+                match = re.fullmatch(pattern, df.loc[i, column])
                 logger.debug(f"match: {match}")
                 if match != None:
                     # if debug:
@@ -732,9 +732,9 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order=None):
             logger.debug(f'order_column: {order_column}, order_dict {order_dict}')
             for i in order_dict.items():
                 for j in range(0,len(df)):
-                    # if df[order_column][j] == i[0]:
+                    # if df.loc[j, order_column] == i[0]:
                     pattern = re.compile(i[0])
-                    match = re.fullmatch(pattern, df[order_column][j])
+                    match = re.fullmatch(pattern, df.loc[j, order_column])
                     if match != None:
                         df.loc[j, 'order'] = i[1]
         else:
@@ -743,9 +743,9 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order=None):
             logger.debug(f'order_column: {order_column}, order_list {order_list}')
             for order in range(0, len(order_list)):
                 for j in range(0,len(df)):
-                    # if df[order_column][j] == i[0]:
+                    # if df.loc[j, order_column] == i[0]:
                     pattern = re.compile(order_list[order])
-                    match = re.fullmatch(pattern, df[order_column][j])
+                    match = re.fullmatch(pattern, df.loc[j, order_column])
                     if match != None:
                         df.loc[j, 'order'] = order
 

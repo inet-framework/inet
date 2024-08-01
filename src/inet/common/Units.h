@@ -105,6 +105,12 @@ class value
         return ss.str();
     }
 
+    template<typename V>
+    value_type get() const
+    {
+        return internal::convert<Units, typename V::unit>::fn(m_rep);
+    }
+
     const value_type& get() const
     {
         return m_rep;

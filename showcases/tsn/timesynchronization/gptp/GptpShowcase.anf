@@ -41,8 +41,8 @@ if df.empty:
 df['legend'] = df['module']
 
 for i in range(0,len(df)):
-    df['legend'][i] = df['legend'][i].replace("OneMasterClockGptpShowcase.","")
-    df['legend'][i] = df['legend'][i].replace(".clock","")
+    df.loc[i, 'legend'] = df.loc[i, 'legend'].replace("OneMasterClockGptpShowcase.","")
+    df.loc[i, 'legend'] = df.loc[i, 'legend'].replace(".clock","")
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
@@ -628,8 +628,8 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 df['legend'] = df['module']
 
 for i in range(0,len(df)):
-    df['legend'][i] = df['legend'][i].replace("TwoMasterClocksTreeGptpShowcase.","")
-#    df['legend'][i] = df['legend'][i].replace(".clock","")
+    df.loc[i, 'legend'] = df.loc[i, 'legend'].replace("TwoMasterClocksTreeGptpShowcase.","")
+#    df.loc[i, 'legend'] = df.loc[i, 'legend'].replace(".clock","")
 
 # plot
 utils.plot_vectors(df, props)
@@ -1204,8 +1204,8 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 df['legend'] = df['module']
 
 for i in range(0,len(df)):
-    df['legend'][i] = df['legend'][i].replace("TwoMasterClocksTreeGptpShowcase.","")
-#    df['legend'][i] = df['legend'][i].replace(".clock[0]","")
+    df.loc[i, 'legend'] = df.loc[i, 'legend'].replace("TwoMasterClocksTreeGptpShowcase.","")
+#    df.loc[i, 'legend'] = df.loc[i, 'legend'].replace(".clock[0]","")
 
 # plot
 utils.plot_vectors(df, props)
@@ -1780,8 +1780,8 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 df['legend'] = df['module']
 
 for i in range(0,len(df)):
-    df['legend'][i] = df['legend'][i].replace("TwoMasterClocksTreeGptpShowcase.","")
-#    df['legend'][i] = df['legend'][i].replace(".clock[0]","")
+    df.loc[i, 'legend'] = df.loc[i, 'legend'].replace("TwoMasterClocksTreeGptpShowcase.","")
+#    df.loc[i, 'legend'] = df.loc[i, 'legend'].replace(".clock[0]","")
 
 # plot
 utils.plot_vectors(df, props)
