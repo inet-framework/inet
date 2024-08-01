@@ -16,4 +16,6 @@ simple EthernetMacHeaderInserter extends PacketFlowBase like IProtocolHeaderInse
         string interfaceTableModule;
         @class(EthernetMacHeaderInserter);
         @display("i=block/inserter");
+    gates:
+        in @interface[inet::queueing::IPassivePacketSink](protocol=ethernet; service=request; sdu=ethernetMac);
 }

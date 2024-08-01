@@ -16,5 +16,5 @@ simple EthernetPhyHeaderInserter extends PacketFlowBase like IPacketFlow
         @class(EthernetPhyHeaderInserter);
         @display("i=block/inserter");
     gates:
-        in @interface[inet::queueing::IPassivePacketSink](protocol=ethernetmac);
+        in @interface[inet::queueing::IPassivePacketSink](pdu=ethernetmac);
 }

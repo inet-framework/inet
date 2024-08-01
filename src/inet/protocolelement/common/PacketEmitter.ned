@@ -21,5 +21,5 @@ simple PacketEmitter extends PacketFlowBase like IPacketFlow
         @signal[packetSentToLower](type=Packet);
         @signal[packetReceivedFromLower](type=Packet);
     gates:
-        in @interface[inet::queueing::IPassivePacketSink](forward2=out);
+        in @interface[inet::queueing::IPassivePacketSink](forward=out);
 }
