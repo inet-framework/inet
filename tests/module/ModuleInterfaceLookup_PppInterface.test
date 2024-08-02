@@ -64,11 +64,17 @@ CHECK(pppInterface, dispatchProtocolReq);
 dispatchProtocolReq.setProtocol(&Protocol::ipv4);
 CHECK(pppInterface, dispatchProtocolReq);
 
+dispatchProtocolReq.setServicePrimitive(SP_INDICATION);
+
+dispatchProtocolReq.setProtocol(&Protocol::ethernetMac);
+CHECK(pppInterface, dispatchProtocolReq);
+
 %contains: stderr
 InterfaceReq, interfaceId = 100 --> found
 DispatchProtocolReq, protocol = ppp(52), servicePrimitive = 1 (SP_REQUEST) --> found
 DispatchProtocolReq, protocol = ethernetmac(12), servicePrimitive = 1 (SP_REQUEST) --> not found
 DispatchProtocolReq, protocol = ipv4(38), servicePrimitive = 1 (SP_REQUEST) --> not found
+DispatchProtocolReq, protocol = ethernetmac(12), servicePrimitive = 2 (SP_INDICATION) --> not found
 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true

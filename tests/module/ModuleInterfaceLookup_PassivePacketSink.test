@@ -56,8 +56,8 @@ packetServiceTag.setProtocol(&Protocol::ipv4);
 CHECK(in, packetServiceTag);
 
 %contains: stderr
-DispatchProtocolReq, protocol = ipv4(38), servicePrimitive = 1 (SP_REQUEST) --> not found
-DispatchProtocolReq, protocol = ipv4(38), servicePrimitive = 2 (SP_INDICATION) --> not found
+DispatchProtocolReq, protocol = ipv4(38), servicePrimitive = 1 (SP_REQUEST) --> found
+DispatchProtocolReq, protocol = ipv4(38), servicePrimitive = 2 (SP_INDICATION) --> found
 PacketProtocolTag, protocol = ipv4(38), frontOffset = 0 B, backOffset = 0 B --> found
 PacketServiceTag, protocol = ipv4(38) --> found
 
