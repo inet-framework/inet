@@ -49,5 +49,7 @@ simple RedDropper extends PacketFilterBase
         @display("i=block/downarrow");
         @signal[packetDropped](type=inet::Packet);
         @statistic[packetDropCongestion](title="packet drop: congestion"; source=packetDropReasonIsCongestion(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+    gates:
+        in @interface[inet::queueing::IPassivePacketSink](forward=out) @interface[inet::queueing::IActivePacketSink](forward=out);
 }
 
