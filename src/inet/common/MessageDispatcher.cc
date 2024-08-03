@@ -47,6 +47,8 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, const cGate *inGate)
     const auto& dispatchProtocolReq = packet->findTag<DispatchProtocolReq>();
     const auto& interfaceReq = packet->findTag<InterfaceReq>();
     const auto& socketInd = packet->findTag<SocketInd>();
+    // KLUDGE eliminate this by adding ServicePrimitive to every DispatchProtocolReq
+    DispatchProtocolReq dispatchProtocolReqArgument;
     cGate *referencedGate;
     if (socketInd != nullptr) {
         tag = socketInd.get();
@@ -61,7 +63,7 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, const cGate *inGate)
     else if (dispatchProtocolReq != nullptr) {
         const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();
         // KLUDGE eliminate this by adding ServicePrimitive to every DispatchProtocolReq
-        DispatchProtocolReq dispatchProtocolReqArgument(*dispatchProtocolReq);
+        dispatchProtocolReqArgument = *dispatchProtocolReq;
         if (dispatchProtocolReq->getServicePrimitive() == static_cast<ServicePrimitive>(-1)) {
             if (packetProtocolTag != nullptr && dispatchProtocolReq->getProtocol() == packetProtocolTag->getProtocol())
                 dispatchProtocolReqArgument.setServicePrimitive(SP_INDICATION);

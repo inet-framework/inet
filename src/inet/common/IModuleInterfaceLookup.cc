@@ -7,6 +7,7 @@
 
 #include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/ProtocolGroup.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
 
@@ -64,7 +65,11 @@ cGate *findModuleInterface(cGate *originatorGate, const std::type_info& typeInfo
                 if (!strcmp(opp_typename(typeInfo), fullyQualifiedType.c_str())) {
                     if (auto forwardGateName = property->getValue("forward")) {
                         auto typeName = property->getValue("forward", 1);
-                        const std::type_info& forwardTypeInfo = typeName == nullptr ? typeInfo : !strcmp(typeName, "inet::queueing::IPassivePacketSink") ? typeid(inet::queueing::IPassivePacketSink) : !strcmp(typeName, "inet::queueing::IActivePacketSink") ? typeid(inet::queueing::IActivePacketSink) : throw cRuntimeError("Unknown type name: %s", typeName);
+                        const std::type_info& forwardTypeInfo =
+                                typeName == nullptr ? typeInfo :
+                                !strcmp(typeName, "inet::queueing::IPassivePacketSink") ? typeid(inet::queueing::IPassivePacketSink) :
+                                !strcmp(typeName, "inet::queueing::IActivePacketSink") ? typeid(inet::queueing::IActivePacketSink) :
+                                throw cRuntimeError("Unknown type name: %s", typeName);
                         if (module->isGateVector(forwardGateName)) {
                             for (int i = 0; i < module->gateSize(forwardGateName); i++) {
                                 if (!findModuleInterface(module->gate(forwardGateName, i), forwardTypeInfo, arguments, direction)) {
@@ -88,60 +93,74 @@ cGate *findModuleInterface(cGate *originatorGate, const std::type_info& typeInfo
                         }
                     }
                     else if (auto dispatchProtocolReq = dynamic_cast<const DispatchProtocolReq *>(arguments)) {
-                        auto protocol = property->getValue("protocol");
-                        if (protocol == nullptr || strcmp(protocol, dispatchProtocolReq->getProtocol()->getName())) {
-                            EV_TRACE << "Module interface not found using @interface gate property, protocol doesn't match" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
-                            continue;
-                        }
-                        auto service = property->getValue("service");
-                        if (service == nullptr) {
-                            EV_TRACE << "Module interface not found using @interface gate property, service doesn't match" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
-                            continue;
-                        }
-                        else if (!strcmp(service, "request")) {
-                            if (dispatchProtocolReq->getServicePrimitive() != SP_REQUEST) {
+                        if (property->getNumKeys() != 0) {
+                            auto protocol = property->getValue("protocol");
+                            if (protocol == nullptr || strcmp(protocol, dispatchProtocolReq->getProtocol()->getName())) {
+                                EV_TRACE << "Module interface not found using @interface gate property, protocol doesn't match" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
+                                continue;
+                            }
+                            auto service = property->getValue("service");
+                            if (service == nullptr) {
                                 EV_TRACE << "Module interface not found using @interface gate property, service doesn't match" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
                                 continue;
                             }
-                        }
-                        else if (!strcmp(service, "indication")) {
-                            if (dispatchProtocolReq->getServicePrimitive() != SP_INDICATION) {
-                                EV_TRACE << "Module interface not found using @interface gate property, service doesn't match" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
-                                continue;
+                            else if (!strcmp(service, "request")) {
+                                if (dispatchProtocolReq->getServicePrimitive() != SP_REQUEST) {
+                                    EV_TRACE << "Module interface not found using @interface gate property, service doesn't match" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
+                                    continue;
+                                }
                             }
+                            else if (!strcmp(service, "indication")) {
+                                if (dispatchProtocolReq->getServicePrimitive() != SP_INDICATION) {
+                                    EV_TRACE << "Module interface not found using @interface gate property, service doesn't match" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
+                                    continue;
+                                }
+                            }
+                            else
+                                throw cRuntimeError("Unknown service parameter value in @interface gate property, module = %s, gate = %s, property = %s", module->getFullPath().c_str(), gate->getFullName(), property->str().c_str());
                         }
-                        else
-                            throw cRuntimeError("Unknown service parameter value in @interface gate property, module = %s, gate = %s, property = %s", module->getFullPath().c_str(), gate->getFullName(), property->str().c_str());
                     }
                     else if (auto packetProtocolTag = dynamic_cast<const PacketProtocolTag *>(arguments)) {
-                        int numValues = property->getNumValues("pdu");
-                        auto protocolGroupName = property->getValue("protocolGroup");
-                        auto protocolGroup = protocolGroupName != nullptr ? ProtocolGroup::findProtocolGroup(protocolGroupName) : nullptr;
-                        bool found = property->getNumKeys() == 0 || (protocolGroup != nullptr && protocolGroup->findProtocolNumber(packetProtocolTag->getProtocol()) != -1);
-                        for (int i = 0; i < numValues; i++) {
-                            auto pdu = property->getValue("pdu", i);
-                            if (!strcmp(pdu, packetProtocolTag->getProtocol()->getName()))
-                                found = true;
-                        }
-                        if (!found) {
-                            EV_TRACE << "Module interface not found using @interface gate property, protocol doesn't match" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
-                            continue;
+                        if (property->getNumKeys() != 0) {
+                            int numValues = property->getNumValues("pdu");
+                            auto protocolGroupName = property->getValue("protocolGroup");
+                            auto protocolGroup = protocolGroupName != nullptr ? ProtocolGroup::findProtocolGroup(protocolGroupName) : nullptr;
+                            bool found = protocolGroup != nullptr && protocolGroup->findProtocolNumber(packetProtocolTag->getProtocol()) != -1;
+                            for (int i = 0; i < numValues; i++) {
+                                auto pdu = property->getValue("pdu", i);
+                                if (!strcmp(pdu, packetProtocolTag->getProtocol()->getName()))
+                                    found = true;
+                            }
+                            if (!found) {
+                                EV_TRACE << "Module interface not found using @interface gate property, protocol doesn't match" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
+                                continue;
+                            }
                         }
                     }
                     else if (auto packetServiceTag = dynamic_cast<const PacketServiceTag *>(arguments)) {
-                        int numValues = property->getNumValues("sdu");
-                        auto protocolGroupName = property->getValue("protocolGroup");
-                        auto protocolGroup = protocolGroupName != nullptr ? ProtocolGroup::findProtocolGroup(protocolGroupName) : nullptr;
-                        bool found = property->getNumKeys() == 0 || (protocolGroup != nullptr && protocolGroup->findProtocolNumber(packetServiceTag->getProtocol()) != -1);
-                        for (int i = 0; i < numValues; i++) {
-                            auto sdu = property->getValue("sdu", i);
-                            if (!strcmp(sdu, packetServiceTag->getProtocol()->getName()))
-                                found = true;
+                        if (property->getNumKeys() != 0) {
+                            int numValues = property->getNumValues("sdu");
+                            auto protocolGroupName = property->getValue("protocolGroup");
+                            auto protocolGroup = protocolGroupName != nullptr ? ProtocolGroup::findProtocolGroup(protocolGroupName) : nullptr;
+                            bool found = protocolGroup != nullptr && protocolGroup->findProtocolNumber(packetServiceTag->getProtocol()) != -1;
+                            for (int i = 0; i < numValues; i++) {
+                                auto sdu = property->getValue("sdu", i);
+                                if (!strcmp(sdu, packetServiceTag->getProtocol()->getName()))
+                                    found = true;
+                            }
+                            if (!found) {
+                                EV_TRACE << "Module interface not found using @interface gate property, protocol doesn't match" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
+                                continue;
+                            }
                         }
-                        if (!found) {
-                            EV_TRACE << "Module interface not found using @interface gate property, protocol doesn't match" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
-                            continue;
-                        }
+                    }
+                    else if (dynamic_cast<const SocketInd *>(arguments) != nullptr) {
+                        EV_TRACE << "Module interface not found using @interface gate property, socket cannot be matched" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
+                        continue;
+                    }
+                    else {
+                        EV_TRACE << "Module interface not found using @interface gate property, arguments doesn't match" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;
+                        continue;
                     }
                     auto module = gate->getOwnerModule();
                     EV_TRACE << "Module interface found using @interface gate property" << EV_FIELD(originator) << EV_FIELD(originatorGate) << EV_FIELD(module) << EV_FIELD(gate) << EV_FIELD(type) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_FIELD(property) << EV_ENDL;

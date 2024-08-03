@@ -731,7 +731,7 @@ cGate *NetworkInterface::lookupModuleInterface(cGate *gate, const std::type_info
             if (interfaceReq != nullptr && interfaceReq->getInterfaceId() == getInterfaceId() && findModuleInterface(gate, type, nullptr, 1) != nullptr)
                 return gate;
             auto packetProtocolTag = dynamic_cast<const PacketProtocolTag *>(arguments);
-            if (packetProtocolTag != nullptr && hasPar("protocol") && !strcmp(packetProtocolTag->getProtocol()->getName(), par("protocol")) && findModuleInterface(gate, type, arguments, 1) != nullptr)
+            if (packetProtocolTag != nullptr && (!hasPar("protocol") || !strcmp(packetProtocolTag->getProtocol()->getName(), par("protocol"))) && findModuleInterface(gate, type, arguments, 1) != nullptr)
                 return gate;
             auto dispatchProtocolReq = dynamic_cast<const DispatchProtocolReq *>(arguments);
             if (dispatchProtocolReq != nullptr && findModuleInterface(gate, type, arguments, 1) != nullptr)

@@ -235,6 +235,8 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     autoRead = listenerConn->autoRead;
 
     callback = listenerConn->callback;
+//    callback = nullptr;
+//    ASSERT(callback == nullptr || socketId == check_and_cast<TcpSocket *>(callback)->getSocketId());
 
     FSM_Goto(fsm, TCP_S_LISTEN);
 }

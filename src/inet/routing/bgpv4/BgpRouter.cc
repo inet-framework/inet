@@ -286,9 +286,6 @@ void BgpRouter::processMessageFromTCP(cMessage *msg)
 
 TcpSocket *BgpRouter::ensureSocket(cMessage *msg)
 {
-    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
-    int connId = tags.getTag<SocketInd>()->getSocketId();
-    EV_INFO << "XXX: processMessageFromTCP(), connId=" << connId << ", msg=" << msg->getName() << ":" << msg->getClassName() << ":" << msg->str() << std::endl;
     TcpSocket *socket = check_and_cast_nullable<TcpSocket *>(_socketMap.findSocketFor(msg));
     if (!socket) {
         socket = new TcpSocket(msg);
@@ -391,7 +388,6 @@ void BgpRouter::openTCPConnectionToPeer(SessionId sessionID)
 
 void BgpRouter::socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo)
 {
-    EV_INFO << "XXX: socketAvailable() " << socket->getSocketId() << " " << availableInfo->getNewSocketId() << std::endl;
     socket->accept(availableInfo->getNewSocketId());
 }
 
@@ -399,7 +395,6 @@ void BgpRouter::socketEstablished(TcpSocket *socket, Indication *indication)
 {
     ensureSocket(indication);
     int connId = indication->getTag<SocketInd>()->getSocketId();
-    EV_INFO << "XXX: socketEstablished() " << connId << std::endl;
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
     if (_currSessionId == static_cast<SessionId>(-1)) {
         throw cRuntimeError("socket id=%d is not established", connId);
