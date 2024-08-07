@@ -1,6 +1,15 @@
 Recent changes in the INET Framework
 ====================================
 
+INET 4.4.2 (Aug 2024) - Stable
+------------------------------
+
+This is a minor bugfix release containing OMNeT++ 6.1 compatibility fixes,
+minor issues in pcapng Reader/Writer and an incorrect formula used in
+Rayleigh pathloss computation (NOTE: This change may alter a simulation's results
+if it used the Rayleigh pathloss model).
+
+
 INET 4.4.1 (July 2022) - Stable
 -------------------------------
 

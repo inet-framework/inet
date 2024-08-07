@@ -1,5 +1,25 @@
 ====== inet-4.x ======
 
+2024-04-08  Andras Varga
+
+	misc: fix incorrect enum declarations (required for OMNeT++ 6.1)
+
+2022-05-24  Zoltan Bojthe
+
+	PcapngWriter: timestamp fix
+
+2022-05-23  Philipp Meyer
+
+	Fix PcapngWriter timestamps
+
+2022-06-17  Levente Mészáros
+
+	ResultFilters: Added check for the flow name in *PerRegionFilters.
+
+	When these filters come after a DemuxFlowFilter, then the flow name must
+	be taken into account and data that doesn't belong to the given flow
+	should not be forwarded.
+
 2022-07-27  ------ inet-4.4.1 released ------
 
 2022-05-13  ------ inet-4.4.0 released ------

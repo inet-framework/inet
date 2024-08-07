@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-11-22  Zoltan Bojthe
+
+	voipstream: follow ffmpeg changes
+
 2022-07-27  ------ inet-4.4.1 released ------
 
 2022-05-13  ------ inet-4.4.0 released ------

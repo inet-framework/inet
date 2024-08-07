@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2024-04-08  Andras Varga
+
+	misc: fix incorrect enum declarations (required for OMNeT++ 6.1)
+
 2022-07-27  ------ inet-4.4.1 released ------
 
 2022-05-13  ------ inet-4.4.0 released ------
