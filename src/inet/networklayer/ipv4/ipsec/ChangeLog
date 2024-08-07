@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2024-08-07  ------ inet-3.8.4 released ------
+
 2023-05-22  Zoltan Bojthe
 
 	IPsec: fixed TFC support: TFC padding enabled only when the transmit
