@@ -9,14 +9,11 @@ import string
 import subprocess
 
 # configuration
-since = '2023-03-14'  # empty means "since last entry in the ChangeLog file"
-fromtag = '' # alternative for 'since': from the given tag or branch
+since = ''  # empty means "since last entry in the ChangeLog file"
+fromtag = 'v4.5.2' # alternative for 'since': from the given tag or branch
 
 entriesToIgnore = [
-"""2017-03-03  Rudolf Hornig
-
-        doc: changelogs updated and tagged
-
+"""
 """,
 ]
 addMarker = True
@@ -26,12 +23,12 @@ isMSYS = isWindows and ('OSTYPE' in os.environ) and os.environ['OSTYPE']=='msys'
 changedFiles = []
 
 def formatChangeLog(txt):
-    txt = re.sub('(?m)^    (    )?', "\t", txt) # spaces-to-tab
-    txt = re.sub('(?m)^\s+X-Committed-on-Branch:.*$', '', txt)  # remove X-Committed-on-Branch lines
-    txt = re.sub('(?m)^    (    )?', "\t", txt) # spaces-to-tab
-    txt = re.sub('(?m)[ \t]+$', '', txt)     # remove end-line spaces
-    txt = re.sub("(?s)\n\n+", "\n\n", txt)   # remove multiple blank lines
-    txt = txt.strip()+"\n"             # remove leading/trailing blank
+    txt = re.sub(r"(?m)^    (    )?", "\t", txt) # spaces-to-tab
+    txt = re.sub(r"(?m)^\s+X-Committed-on-Branch:.*$", '', txt)  # remove X-Committed-on-Branch lines
+    txt = re.sub(r"(?m)^    (    )?", "\t", txt) # spaces-to-tab
+    txt = re.sub(r"(?m)[ \t]+$", '', txt)     # remove end-line spaces
+    txt = re.sub(r"(?s)\n\n+", "\n\n", txt)   # remove multiple blank lines
+    txt = txt.strip()+r"\n"             # remove leading/trailing blank
     return txt
 
 def updateChangeLogIn(dir):

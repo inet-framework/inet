@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2024-04-08  Andras Varga
+
+	misc: fix incorrect enum declarations (required for OMNeT++ 6.1)
+
+2024-03-11  Rudolf Hornig
+
+	pathloss: fix#956 - Rayleigh pathloss computation was incorrect
+
 2023-08-29  ------ inet-4.5.2 released ------
 
 2023-08-24  ------ inet-4.5.1 released ------
@@ -1324,4 +1332,4 @@
 	receptionStarted
 	receptionEnded
 	transmissionStarted
-	transmissionEnded
+	transmissionEnded\n
