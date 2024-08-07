@@ -1,5 +1,21 @@
 ====== inet-3.x ======
 
+2023-05-22  Zoltan Bojthe
+
+	IPsec: fixed TFC support: TFC padding enabled only when the transmit
+	protocol has packet length field.
+
+	The TFC padding feature can hide the length of the original packet, and
+	might affect the packet encapsulation and de-encapsulation performance.
+	This feature takes effect on UDP packets encapsulated by ESP in transport
+	mode and on original IP packets encapsulated by ESP in tunnel mode.
+
+	See RFC 4303 2.7
+
+2023-05-22  Zoltan Bojthe
+
+	IPsec: typo: rename tcfPadding to tfcPadding
+
 2022-04-28  ------ inet-3.8.3 released ------
 
 2022-02-08  ------ inet-3.8.2 released ------
