@@ -216,6 +216,9 @@ void Tcp::removeConnection(TcpConnection *conn)
 
     emit(tcpConnectionRemovedSignal, conn);
     conn->deleteModule();
+
+    if (operationalState == State::STOPPING_OPERATION && tcpAppConnMap.empty())
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
 TcpConnection *Tcp::findConnForSegment(const Ptr<const TcpHeader>& tcpHeader, L3Address srcAddr, L3Address destAddr)
@@ -371,10 +374,26 @@ void Tcp::handleStartOperation(LifecycleOperation *operation)
 
 void Tcp::handleStopOperation(LifecycleOperation *operation)
 {
-    // FIXME close connections??? yes, because the applications may not close them!!!
-    reset();
-    delayActiveOperationFinish(par("stopOperationTimeout"));
-    startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+    if (tcpAppConnMap.empty())
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+    else {
+        for (auto& elem : tcpAppConnMap) {
+            auto connection = elem.second;
+            auto state = connection->getFsmState();
+            if (state != TCP_S_FIN_WAIT_1 &&
+                state != TCP_S_FIN_WAIT_2 &&
+                state != TCP_S_CLOSING &&
+                state != TCP_S_LAST_ACK &&
+                state != TCP_S_TIME_WAIT)
+            {
+                auto request = new Request("CLOSE", TCP_C_CLOSE);
+                TcpCommand *cmd = new TcpCommand();
+                request->setControlInfo(cmd);
+                connection->processAppCommand(request);
+            }
+        }
+        delayActiveOperationFinish(par("stopOperationTimeout"));
+    }
 }
 
 void Tcp::handleCrashOperation(LifecycleOperation *operation)
