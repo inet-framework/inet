@@ -14,6 +14,9 @@
 #include "inet/common/PatternMatcher.h"
 #include "inet/common/Topology.h"
 #include "inet/linklayer/ieee8021d/common/Ieee8021dInterfaceData.h"
+#ifdef INET_WITH_MRP
+#include "inet/linklayer/mrp/MrpInterfaceData.h"
+#endif
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
@@ -26,6 +29,9 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
   public:
     L2NetworkConfigurator() {}
     typedef Ieee8021dInterfaceData::PortInfo PortInfo;
+#ifdef INET_WITH_MRP
+    typedef MrpInterfaceData::PortInfo MrpPortInfo;
+#endif
 
   protected:
     class InterfaceInfo;
@@ -53,6 +59,9 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
         Node *childNode;
         NetworkInterface *networkInterface;
         PortInfo portData;
+#ifdef INET_WITH_MRP
+        MrpPortInfo mrpData;
+#endif
 
       public:
         InterfaceInfo(Node *node, Node *childNode, NetworkInterface *networkInterface);

@@ -238,6 +238,19 @@ Define_NED_Function2(nedf_intWithUnit,
     "conversion",
     "Converts x to an integer (C++ long), and returns the result. A boolean argument becomes 0 or 1; a double is converted using floor(); a string or an XML argument causes an error.");
 
+cNEDValue nedf_par(cComponent *context, cNEDValue argv[], int argc)
+{
+    const char *modulePath = argv[0].stringValue();
+    cModule *module = context->getModuleByPath(modulePath);
+    const char *paramName = argv[1].stringValue();
+    return module->par(paramName).getValue();
+}
+
+Define_NED_Function2(nedf_par,
+    "any par(string modulePath, string parameterName)",
+    "string",
+    "Returns the value of the module parameter. The module path may be absolute, or relative to the evaluation context.");
+
 cNedValue nedf_xmlattr(cComponent *context, cNedValue argv[], int argc)
 {
 #if OMNETPP_BUILDNUM < 1527
