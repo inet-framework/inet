@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2024-08-07  ------ inet-4.4.2 released ------
+
 2024-04-08  Andras Varga
 
 	misc: fix incorrect enum declarations (required for OMNeT++ 6.1)

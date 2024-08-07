@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2024-08-07  ------ inet-4.4.2 released ------
+
 2022-06-17  Levente Mészáros
 
 	FlowMeasurementRecorder: Removed obsolete unused code.

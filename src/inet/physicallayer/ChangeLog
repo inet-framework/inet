@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2024-08-07  ------ inet-4.4.2 released ------
+
 2024-03-11  Rudolf Hornig
 
 	pathloss: fix#956 - Rayleigh pathloss computation was incorrect
