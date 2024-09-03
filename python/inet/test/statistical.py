@@ -54,7 +54,7 @@ class StatisticalTestTask(SimulationTestTask):
         stored_scalar_result_file_name = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory, self.get_scalar_file_name()))
         _logger.debug(f"Reading result file {current_scalar_result_file_name}")
         current_df = _read_scalar_result_file(current_scalar_result_file_name)
-        scalar_result_diff_file_name = re.sub(".sca$", ".diff", stored_scalar_result_file_name)
+        scalar_result_diff_file_name = re.sub(r".sca$", ".diff", stored_scalar_result_file_name)
         if os.path.exists(scalar_result_diff_file_name):
             os.remove(scalar_result_diff_file_name)
         if os.path.exists(stored_scalar_result_file_name):
@@ -77,14 +77,14 @@ class StatisticalTestTask(SimulationTestTask):
                     df = df[df.apply(lambda row: matches_filter(row["name"], result_name_filter, exclude_result_name_filter, full_match) and \
                                                  matches_filter(row["module"], result_module_filter, exclude_result_module_filter, full_match), axis=1)]
                     sorted_df = df.sort_values(by="relative_error", ascending=False)
-                    scalar_result_csv_file_name = re.sub(".sca$", ".csv", stored_scalar_result_file_name)
+                    scalar_result_csv_file_name = re.sub(r".sca$", ".csv", stored_scalar_result_file_name)
                     sorted_df.to_csv(scalar_result_csv_file_name, float_format="%.15g")
                     id = df["relative_error"].idxmax()
                     if math.isnan(id):
                         id = next(iter(df.index), None)
                     reason = df.loc[id].to_string()
-                    reason = re.sub(" +", " = ", reason)
-                    reason = re.sub("\\n", ", ", reason)
+                    reason = re.sub(r" +", " = ", reason)
+                    reason = re.sub(r"\\n", ", ", reason)
                     return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="FAIL", reason=reason)
             else:
                 return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="PASS")
@@ -154,7 +154,7 @@ class StatisticalResultsUpdateTask(SimulationUpdateTask):
         stored_scalar_result_file_name = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory, self.get_scalar_file_name()))
         _logger.debug(f"Reading result file {current_scalar_result_file_name}")
         current_df = _read_scalar_result_file(current_scalar_result_file_name)
-        scalar_result_diff_file_name = re.sub(".sca$", ".diff", stored_scalar_result_file_name)
+        scalar_result_diff_file_name = re.sub(r".sca$", ".diff", stored_scalar_result_file_name)
         if os.path.exists(scalar_result_diff_file_name):
             os.remove(scalar_result_diff_file_name)
         if not os.path.exists(stored_scalar_result_file_name):

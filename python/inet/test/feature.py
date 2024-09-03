@@ -108,18 +108,18 @@ def read_xml_file(filename, repair_hint=None):
         fail("Cannot parse XML file '{}': {}".format(filename, e), repair_hint)
 
 def get_package_folder(package):
-    if re.search("inet.examples", package):
-        return re.sub("inet/", "", re.sub("\\.", "/", package))
-    elif re.search("inet.showcases", package):
-        return re.sub("inet/", "", re.sub("\\.", "/", package))
-    elif re.search("inet.tutorials", package):
-        return re.sub("inet/", "", re.sub("\\.", "/", package))
-    elif re.search("inet.tests", package):
-        return re.sub("inet/", "", re.sub("\\.", "/", package))
-    elif re.search("inet.validation", package):
-        return re.sub("inet/", "tests/", re.sub("\\.", "/", package))
+    if re.search(r"inet.examples", package):
+        return re.sub(r"inet/", "", re.sub(r"\\.", "/", package))
+    elif re.search(r"inet.showcases", package):
+        return re.sub(r"inet/", "", re.sub(r"\\.", "/", package))
+    elif re.search(r"inet.tutorials", package):
+        return re.sub(r"inet/", "", re.sub(r"\\.", "/", package))
+    elif re.search(r"inet.tests", package):
+        return re.sub(r"inet/", "", re.sub(r"\\.", "/", package))
+    elif re.search(r"inet.validation", package):
+        return re.sub(r"inet/", "tests/", re.sub(r"\\.", "/", package))
     else:
-        return "src/" + re.sub("\\.", "/", package)
+        return "src/" + re.sub(r"\\.", "/", package)
 
 def get_features(oppfeatures):
     result = []
@@ -240,9 +240,9 @@ def get_package_to_used_headers(packages):
             with open(file_name, "r") as file:
                 if_counter = 0
                 for line in file:
-                    if re.search("^#if[ d]", line):
+                    if re.search(r"^#if[ d]", line):
                         if_counter += 1
-                    elif re.search("^#endif", line):
+                    elif re.search(r"^#endif", line):
                         if_counter -= 1
                     if if_counter == 0:
                         match = re.match(r"^#include \"([\w\.\/]+)\"", line)

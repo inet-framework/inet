@@ -117,8 +117,8 @@ class MultipleMsgCompileTasks(MultipleTasks):
         self.simulation_project = simulation_project
         self.mode = mode
         self.input_files = list(map(lambda input_file: self.simulation_project.get_full_path(input_file), self.simulation_project.get_msg_files()))
-        self.output_files = list(map(lambda output_file: re.sub("\\.msg", "_m.cc", output_file), self.input_files)) + \
-                            list(map(lambda output_file: re.sub("\\.msg", "_m.h", output_file), self.input_files))
+        self.output_files = list(map(lambda output_file: re.sub(r"\\.msg", "_m.cc", output_file), self.input_files)) + \
+                            list(map(lambda output_file: re.sub(r"\\.msg", "_m.h", output_file), self.input_files))
 
     def get_description(self):
         return self.simulation_project.get_name() + " " + super().get_description()
@@ -165,7 +165,7 @@ class MultipleCppCompileTasks(MultipleTasks):
         object_files = []
         for cpp_folder in self.simulation_project.cpp_folders:
             file_paths = glob.glob(self.simulation_project.get_full_path(os.path.join(cpp_folder, "**/*.cc")), recursive=True)
-            object_files = object_files + list(map(lambda file_path: os.path.join(output_folder, self.simulation_project.get_relative_path(re.sub("\\.cc", ".o", file_path))), file_paths))
+            object_files = object_files + list(map(lambda file_path: os.path.join(output_folder, self.simulation_project.get_relative_path(re.sub(r"\\.cc", ".o", file_path))), file_paths))
         return object_files
 
     def is_up_to_date(self):
@@ -280,7 +280,7 @@ class BuildSimulationProjectTask(MultipleTasks):
             os.makedirs(output_folder)
         msg_compile_tasks = list(map(lambda msg_file: MsgCompileTask(simulation_project=self.simulation_project, file_path=msg_file, mode=self.mode), self.simulation_project.get_msg_files()))
         multiple_msg_compile_tasks = MultipleMsgCompileTasks(simulation_project=self.simulation_project, mode=self.mode, tasks=msg_compile_tasks, concurrent=self.concurrent_child_tasks)
-        msg_cpp_compile_tasks = list(map(lambda msg_file: CppCompileTask(simulation_project=self.simulation_project, file_path=re.sub("\\.msg", "_m.cc", msg_file), mode=self.mode), self.simulation_project.get_msg_files()))
+        msg_cpp_compile_tasks = list(map(lambda msg_file: CppCompileTask(simulation_project=self.simulation_project, file_path=re.sub(r"\\.msg", "_m.cc", msg_file), mode=self.mode), self.simulation_project.get_msg_files()))
         cpp_compile_tasks = list(map(lambda cpp_file: CppCompileTask(simulation_project=self.simulation_project, file_path=cpp_file, mode=self.mode), self.simulation_project.get_cpp_files()))
         all_cpp_compile_tasks = msg_cpp_compile_tasks + cpp_compile_tasks
         multiple_cpp_compile_tasks = MultipleCppCompileTasks(simulation_project=self.simulation_project, mode=self.mode, tasks=all_cpp_compile_tasks, concurrent=self.concurrent_child_tasks)

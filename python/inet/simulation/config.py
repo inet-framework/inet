@@ -144,7 +144,7 @@ class SimulationConfig:
         _logger.info("Cleaning simulation results, folder = " + self.working_directory)
         simulation_project = self.simulation_project
         path = os.path.join(simulation_project.get_full_path(self.working_directory), "results")
-        if not re.search(".*/home/.*", path):
+        if not re.search(r".*/home/.*", path):
             raise Exception("Path is not in home")
         if os.path.exists(path):
             shutil.rmtree(path)

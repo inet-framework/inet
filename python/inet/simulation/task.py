@@ -74,16 +74,16 @@ class SimulationTaskResult(TaskResult):
             self.last_event_number = int(match.group(2)) if match else None
             self.last_simulation_time = match.group(1) if match else None
             self.elapsed_cpu_time = None # TODO
-            match = re.search("<!> Error: (.*) -- in module (.*)", stderr)
+            match = re.search(r"<!> Error: (.*) -- in module (.*)", stderr)
             self.error_message = match.group(1).strip() if match else None
             self.error_module = match.group(2).strip() if match else None
-            matching_lines = [re.sub("CREATE (.*)", "\\1", line) for line in stdout.split("\n") if re.search("inet\.", line)]
+            matching_lines = [re.sub(r"CREATE (.*)", "\\1", line) for line in stdout.split("\n") if re.search(r"inet\.", line)]
             self.used_types = sorted(list(set(matching_lines)))
             if self.error_message is None:
-                match = re.search("<!> Error: (.*)", stderr)
+                match = re.search(r"<!> Error: (.*)", stderr)
                 self.error_message = match.group(1).strip() if match else None
             if self.error_message:
-                if re.search("The simulation attempted to prompt for user input", self.error_message):
+                if re.search(r"The simulation attempted to prompt for user input", self.error_message):
                     self.result = "SKIP"
                     self.color = COLOR_CYAN
                     self.expected_result = "SKIP"
@@ -303,18 +303,18 @@ class SimulationTask(Task):
     #     ned_dependency_file_paths = []
     #     cpp_dependency_file_paths = []
     #     for line in stdout.splitlines():
-    #         match = re.match("INI dependency: (.*)", line)
+    #         match = re.match(r"INI dependency: (.*)", line)
     #         if match:
     #             ini_full_path = simulation_project.get_full_path(os.path.join(self.simulation_config.working_directory, match.group(1)))
     #             if not ini_full_path in ini_dependency_file_paths:
     #                 ini_dependency_file_paths.append(ini_full_path)
-    #         match = re.match("NED dependency: (.*)", line)
+    #         match = re.match(r"NED dependency: (.*)", line)
     #         if match:
     #             ned_full_path = match.group(1)
     #             if os.path.exists(ned_full_path):
     #                 if not ned_full_path in ned_dependency_file_paths:
     #                     ned_dependency_file_paths.append(ned_full_path)
-    #         match = re.match("CC dependency: (.*)", line)
+    #         match = re.match(r"CC dependency: (.*)", line)
     #         if match:
     #             cpp_full_path = match.group(1)
     #             if not cpp_full_path in cpp_dependency_file_paths:
@@ -328,7 +328,7 @@ class SimulationTask(Task):
     #     while True:
     #         file_names_copy = file_names.copy()
     #         for file_name in file_names_copy:
-    #             full_file_path = simulation_project.get_full_path(f"out/clang-{self.mode}/" + re.sub(".cc", ".o.d", file_name))
+    #             full_file_path = simulation_project.get_full_path(f"out/clang-{self.mode}/" + re.sub(r".cc", ".o.d", file_name))
     #             if os.path.exists(full_file_path):
     #                 dependency = read_dependency_file(full_file_path)
     #                 for key, depends_on_file_names in dependency.items():
