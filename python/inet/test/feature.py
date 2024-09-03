@@ -109,17 +109,17 @@ def read_xml_file(filename, repair_hint=None):
 
 def get_package_folder(package):
     if re.search(r"inet.examples", package):
-        return re.sub(r"inet/", "", re.sub(r"\\.", "/", package))
+        return re.sub(r"inet/", "", re.sub(r"\.", "/", package))
     elif re.search(r"inet.showcases", package):
-        return re.sub(r"inet/", "", re.sub(r"\\.", "/", package))
+        return re.sub(r"inet/", "", re.sub(r"\.", "/", package))
     elif re.search(r"inet.tutorials", package):
-        return re.sub(r"inet/", "", re.sub(r"\\.", "/", package))
+        return re.sub(r"inet/", "", re.sub(r"\.", "/", package))
     elif re.search(r"inet.tests", package):
-        return re.sub(r"inet/", "", re.sub(r"\\.", "/", package))
+        return re.sub(r"inet/", "", re.sub(r"\.", "/", package))
     elif re.search(r"inet.validation", package):
-        return re.sub(r"inet/", "tests/", re.sub(r"\\.", "/", package))
+        return re.sub(r"inet/", "tests/", re.sub(r"\.", "/", package))
     else:
-        return "src/" + re.sub(r"\\.", "/", package)
+        return "src/" + re.sub(r"\.", "/", package)
 
 def get_features(oppfeatures):
     result = []

@@ -271,14 +271,14 @@ class SimulationProject:
     def get_cpp_files(self):
         cpp_files = []
         for cpp_folder in self.cpp_folders:
-            file_paths = list(filter(lambda file_path: not re.search(r"_m\\.cc", file_path), glob.glob(self.get_full_path(os.path.join(cpp_folder, "**/*.cc")), recursive=True)))
+            file_paths = list(filter(lambda file_path: not re.search(r"_m\.cc", file_path), glob.glob(self.get_full_path(os.path.join(cpp_folder, "**/*.cc")), recursive=True)))
             cpp_files = cpp_files + list(map(lambda file_path: self.get_relative_path(file_path), file_paths))
         return cpp_files
 
     def get_header_files(self):
         header_files = []
         for cpp_folder in self.cpp_folders:
-            file_paths = list(filter(lambda file_path: not re.search(r"_m\\.h", file_path), glob.glob(self.get_full_path(os.path.join(cpp_folder, "**/*.h")), recursive=True)))
+            file_paths = list(filter(lambda file_path: not re.search(r"_m\.h", file_path), glob.glob(self.get_full_path(os.path.join(cpp_folder, "**/*.h")), recursive=True)))
             header_files = header_files + list(map(lambda file_path: self.get_relative_path(file_path), file_paths))
         return header_files
 
@@ -313,7 +313,7 @@ class SimulationProject:
         config_dicts = {"General": create_config_dict("General")}
         config_dict = {}
         for line in file:
-            match = re.match(r"\\[(Config +)?(.*?)\\]", line)
+            match = re.match(r"\[(Config +)?(.*?)\]", line)
             if match:
                 config = match.group(2) or match.group(3)
                 config_dict = create_config_dict(config)
