@@ -16,7 +16,7 @@ def computeUniqueFingerprints(fingerprints):
 
 def readFingerprints1(eventlogFile):
     "RegExp version"
-    regExp = re.compile("^E # ([0-9]+) t ((?:[0-9]*\.)?[0-9]+) m [0-9]+ ce [0-9]+ msg [0-9]+ f (?:\"([^\"]*)\"|(\S+))$")
+    regExp = re.compile(r"^E # ([0-9]+) t ((?:[0-9]*\.)?[0-9]+) m [0-9]+ ce [0-9]+ msg [0-9]+ f (?:\"([^\"]*)\"|(\S+))$")
     fingerprints = list()
     for line in eventlogFile:
         match = regExp.match(line)

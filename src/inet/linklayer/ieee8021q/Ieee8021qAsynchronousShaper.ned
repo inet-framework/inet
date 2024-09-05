@@ -11,6 +11,7 @@ import inet.protocolelement.shaper.EligibilityTimeGate;
 
 //
 // This module implements the IEEE 802.1Q asynchronous shaper.
+// This module is an alias for the EligibilityTimeGate module.
 //
 module Ieee8021qAsynchronousShaper extends EligibilityTimeGate
 {

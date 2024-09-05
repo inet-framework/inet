@@ -48,8 +48,8 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 
 df['legend'] = df['module']
 for i in range(0,len(df['legend'])):
-    df['legend'][i] = df['module'][i].replace('ClockDriftShowcase.','')
-    df['legend'][i] = df['legend'][i].replace('.clock','')
+    df.loc[i, 'legend'] = df.loc[i, 'module'].replace('ClockDriftShowcase.','')
+    df.loc[i, 'legend'] = df.loc[i, 'legend'].replace('.clock','')
 
 # plot
 utils.plot_vectors(df, props)
@@ -629,8 +629,8 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 
 df['legend'] = df['module']
 for i in range(0,len(df['legend'])):
-    df['legend'][i] = df['module'][i].replace('ClockDriftShowcase.','')
-    df['legend'][i] = df['legend'][i].replace('.clock','')
+    df.loc[i, 'legend'] = df.loc[i, 'module'].replace('ClockDriftShowcase.','')
+    df.loc[i, 'legend'] = df.loc[i, 'legend'].replace('.clock','')
 
 # plot
 utils.plot_vectors(df, props)
@@ -1210,8 +1210,8 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 
 df['legend'] = df['module']
 for i in range(0,len(df['legend'])):
-    df['legend'][i] = df['module'][i].replace('ClockDriftShowcase.','')
-    df['legend'][i] = df['legend'][i].replace('.clock','')
+    df.loc[i, 'legend'] = df.loc[i, 'module'].replace('ClockDriftShowcase.','')
+    df.loc[i, 'legend'] = df.loc[i, 'legend'].replace('.clock','')
 
 # plot
 utils.plot_vectors(df, props)
@@ -1791,8 +1791,8 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 
 df['legend'] = df['module']
 for i in range(0,len(df['legend'])):
-    df['legend'][i] = df['module'][i].replace('ClockDriftShowcase.','')
-    df['legend'][i] = df['legend'][i].replace('.clock','')
+    df.loc[i, 'legend'] = df.loc[i, 'module'].replace('ClockDriftShowcase.','')
+    df.loc[i, 'legend'] = df.loc[i, 'legend'].replace('.clock','')
 
 # plot
 utils.plot_vectors(df, props)
@@ -2372,8 +2372,8 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 
 df['legend'] = df['module']
 for i in range(0,len(df['legend'])):
-    df['legend'][i] = df['module'][i].replace('ClockDriftShowcase.','')
-    df['legend'][i] = df['legend'][i].replace('.clock','')
+    df.loc[i, 'legend'] = df.loc[i, 'module'].replace('ClockDriftShowcase.','')
+    df.loc[i, 'legend'] = df.loc[i, 'legend'].replace('.clock','')
 
 # plot
 utils.plot_vectors(df, props)
@@ -2953,8 +2953,8 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 
 df['legend'] = df['module']
 for i in range(0,len(df['legend'])):
-    df['legend'][i] = df['module'][i].replace('ClockDriftShowcase.','')
-    df['legend'][i] = df['legend'][i].replace('.clock','')
+    df.loc[i, 'legend'] = df.loc[i, 'module'].replace('ClockDriftShowcase.','')
+    df.loc[i, 'legend'] = df.loc[i, 'legend'].replace('.clock','')
 
 # plot
 utils.plot_vectors(df, props)
@@ -3534,8 +3534,8 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 
 df['legend'] = df['module']
 for i in range(0,len(df['legend'])):
-    df['legend'][i] = df['module'][i].replace('ClockDriftShowcase.','')
-    df['legend'][i] = df['legend'][i].replace('.clock','')
+    df.loc[i, 'legend'] = df.loc[i, 'module'].replace('ClockDriftShowcase.','')
+    df.loc[i, 'legend'] = df.loc[i, 'legend'].replace('.clock','')
 
 # plot
 utils.plot_vectors(df, props)
@@ -4117,8 +4117,8 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 
 df['legend'] = df['module']
 for i in range(0,len(df['legend'])):
-    df['legend'][i] = df['module'][i].replace('ClockDriftShowcase.','')
-    df['legend'][i] = df['legend'][i].replace('.clock','')
+    df.loc[i, 'legend'] = df.loc[i, 'module'].replace('ClockDriftShowcase.','')
+    df.loc[i, 'legend'] = df.loc[i, 'legend'].replace('.clock','')
 
 # plot
 utils.plot_vectors(df, props)
@@ -4698,8 +4698,8 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 
 df['legend'] = df['module']
 for i in range(0,len(df['legend'])):
-    df['legend'][i] = df['module'][i].replace('ClockDriftShowcase.','')
-    df['legend'][i] = df['legend'][i].replace('.clock','')
+    df.loc[i, 'legend'] = df.loc[i, 'module'].replace('ClockDriftShowcase.','')
+    df.loc[i, 'legend'] = df.loc[i, 'legend'].replace('.clock','')
 
 # plot
 utils.plot_vectors(df, props)

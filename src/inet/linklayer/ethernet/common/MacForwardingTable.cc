@@ -339,10 +339,14 @@ void MacForwardingTable::readForwardingTable(const char *fileName)
             throw cRuntimeError("error in line %d in address table file `%s': interface '%s' not found", lineno, fileName, interfaceName);
         interfaceId = ie->getInterfaceId();
 
-        // Create an entry with address and interfaceId and insert into table
-        AddressEntry entry(vlanId, interfaceId, 0);
-        ForwardingTableKey key(vlanId, macAddress);
-        forwardingTable[key] = entry;
+        if (macAddress.isMulticast()) {
+            addMulticastAddressForwardingInterface(interfaceId, macAddress, vlanId);
+        } else {
+            // Create an entry with address and interfaceId and insert into table
+            AddressEntry entry(vlanId, interfaceId, 0);
+            ForwardingTableKey key(vlanId, macAddress);
+            forwardingTable[key] = entry;
+        }
     }
     fclose(fp);
 }

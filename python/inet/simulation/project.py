@@ -271,14 +271,14 @@ class SimulationProject:
     def get_cpp_files(self):
         cpp_files = []
         for cpp_folder in self.cpp_folders:
-            file_paths = list(filter(lambda file_path: not re.search("_m\\.cc", file_path), glob.glob(self.get_full_path(os.path.join(cpp_folder, "**/*.cc")), recursive=True)))
+            file_paths = list(filter(lambda file_path: not re.search(r"_m\.cc", file_path), glob.glob(self.get_full_path(os.path.join(cpp_folder, "**/*.cc")), recursive=True)))
             cpp_files = cpp_files + list(map(lambda file_path: self.get_relative_path(file_path), file_paths))
         return cpp_files
 
     def get_header_files(self):
         header_files = []
         for cpp_folder in self.cpp_folders:
-            file_paths = list(filter(lambda file_path: not re.search("_m\\.h", file_path), glob.glob(self.get_full_path(os.path.join(cpp_folder, "**/*.h")), recursive=True)))
+            file_paths = list(filter(lambda file_path: not re.search(r"_m\.h", file_path), glob.glob(self.get_full_path(os.path.join(cpp_folder, "**/*.h")), recursive=True)))
             header_files = header_files + list(map(lambda file_path: self.get_relative_path(file_path), file_paths))
         return header_files
 
@@ -313,34 +313,34 @@ class SimulationProject:
         config_dicts = {"General": create_config_dict("General")}
         config_dict = {}
         for line in file:
-            match = re.match("\\[(Config +)?(.*?)\\]", line)
+            match = re.match(r"\[(Config +)?(.*?)\]", line)
             if match:
                 config = match.group(2) or match.group(3)
                 config_dict = create_config_dict(config)
                 config_dicts[config] = config_dict
-            match = re.match("#? *abstract-config *= *(\w+)", line)
+            match = re.match(r"#? *abstract-config *= *(\w+)", line)
             if match:
                 config_dict["abstract_config"] = bool(match.group(1))
-            match = re.match("#? *emulation *= *(\w+)", line)
+            match = re.match(r"#? *emulation *= *(\w+)", line)
             if match:
                 config_dict["emulation"] = bool(match.group(1))
-            match = re.match("#? *expected-result *= *\"(\w+)\"", line)
+            match = re.match(r"#? *expected-result *= *\"(\w+)\"", line)
             if match:
                 config_dict["expected_result"] = match.group(1)
-            line = re.sub("(.*)#.*", "//1", line).strip()
-            match = re.match(" *extends *= *(\w+)", line)
+            line = re.sub(r"(.*)#.*", "//1", line).strip()
+            match = re.match(r" *extends *= *(\w+)", line)
             if match:
                 config_dict["extends"] = match.group(1)
-            match = re.match(" *user-interface *= \"*(\w+)\"", line)
+            match = re.match(r" *user-interface *= \"*(\w+)\"", line)
             if match:
                 config_dict["user_interface"] = match.group(1)
-            match = re.match("description *= *\"(.*)\"", line)
+            match = re.match(r"description *= *\"(.*)\"", line)
             if match:
                 config_dict["description"] = match.group(1)
-            match = re.match("network *= *(.*)", line)
+            match = re.match(r"network *= *(.*)", line)
             if match:
                 config_dict["network"] = match.group(1)
-            match = re.match("sim-time-limit *= *(.*)", line)
+            match = re.match(r"sim-time-limit *= *(.*)", line)
             if match:
                 config_dict["sim_time_limit"] = match.group(1)
         general_config_dict = config_dicts["General"]
@@ -362,14 +362,14 @@ class SimulationProject:
                     result = subprocess.run(args, cwd=working_directory, capture_output=True, env=self.get_env())
                     if result.returncode == 0:
                         # KLUDGE: this was added to test source dependency based task result caching
-                        result.stdout = re.sub("INI dependency: (.*)", "", result.stdout.decode("utf-8"))
+                        result.stdout = re.sub(r"INI dependency: (.*)", "", result.stdout.decode("utf-8"))
                         num_runs = int(result.stdout)
                     else:
                         _logger.warn("Cannot determine number of runs: " + result.stderr.decode("utf-8") + " in " + working_directory)
                         continue
             sim_time_limit = get_sim_time_limit(config_dicts, config)
             description = config_dict["description"]
-            description_abstract = (re.search("\((a|A)bstract\)", description) is not None) if description else False
+            description_abstract = (re.search(r"\((a|A)bstract\)", description) is not None) if description else False
             abstract = (config_dict["network"] is None and config_dict["config"] == "General") or config_dict["abstract_config"] or description_abstract
             emulation = config_dict["emulation"]
             expected_result = config_dict["expected_result"]
@@ -420,7 +420,7 @@ class SimulationProject:
         file_paths.append(self.get_executable(mode="release"))
         file_paths.append(self.get_executable(mode="debug"))
         file_paths += list(glob.glob(get_omnetpp_relative_path("lib/*.so")))
-        file_paths += list(filter(lambda path: not re.search("formatter", path), glob.glob(get_omnetpp_relative_path("python/**/*.py"), recursive=True)))
+        file_paths += list(filter(lambda path: not re.search(r"formatter", path), glob.glob(get_omnetpp_relative_path("python/**/*.py"), recursive=True)))
         append_file_if_exists(self.get_full_path(".omnetpp"))
         append_file_if_exists(self.get_full_path(".nedfolders"))
         append_file_if_exists(self.get_full_path(".nedexclusions"))
@@ -432,7 +432,7 @@ class SimulationProject:
             append_file_if_exists(self.get_full_path(os.path.join(self.library_folder, "lib" + dynamic_library + ".so")))
             append_file_if_exists(self.get_full_path(os.path.join(self.library_folder, "lib" + dynamic_library + "_dbg.so")))
         for ned_folder in self.ned_folders:
-            if not re.search("test", ned_folder):
+            if not re.search(r"test", ned_folder):
                 file_paths += glob.glob(self.get_full_path(os.path.join(ned_folder, "**/*.ini")), recursive=True)
                 file_paths += glob.glob(self.get_full_path(os.path.join(ned_folder, "**/*.ned")), recursive=True)
         for python_folder in self.python_folders:

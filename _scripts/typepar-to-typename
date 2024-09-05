@@ -30,7 +30,7 @@ for root, dirs, files in os.walk(rootPath):
 
                 containsIf = re.search(r"(?s)if +" + typeParam + r" *!=", content)
                 if not containsIf and typeParamValue=='default("")':
-                    print "WARNING: ", filename, ": ", typeParam, " default value is empty but corresponding submodule is not conditional (or does not exist)"
+                    print(f"WARNING: {filename}: {typeParam} default value is empty but corresponding submodule is not conditional (or does not exist)")
 
                 # remove fooType parameter
                 content = re.sub(r"(?s)( *)string +" + typeParam + r"\b.*?\n", "", content)
@@ -41,7 +41,7 @@ for root, dirs, files in os.walk(rootPath):
                 # replace 'if fooType!=""' with 'if typename!=""'
                 content = re.sub(r"(?s)( like +\w+ +)if +" + typeParam + r' *!= *""', r'\1if typename!=""', content)
 
-                print filename, ": ", typeParam, " declaration: ", mm.group(0), ", default is >>", typeParamValue, "<<"
+                print(f"{filename}: {typeParam} declaration: {mm.group(0)}, default is >>{typeParamValue}<<")
 
         # replace assignments on inherited type parameters
         content = re.sub(r"(?m)^( +\w+)Type( *=)", r"\1.typename\2", content)
@@ -65,7 +65,7 @@ for root, dirs, files in os.walk(rootPath):
         content = f.read()
         origContent = content
         for m in re.finditer(r"\.([a-zA-Z]+Type) *= *(.*?) *#.*", content):
-            print m.group(1), " ---> ", m.group(2)
+            print(m.group(1), "--->", m.group(2))
         content = re.sub(r"(?m)\.([a-zA-Z]+)Type( *=.*?)$", r".\1.typename\2 #TODO autoconverted", content)
         if content != origContent:
             #print content

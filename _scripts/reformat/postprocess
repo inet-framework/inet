@@ -1,12 +1,8 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # This script fixes newlines around namespace blocks in src folder and subdirectories
-#
 
 import re
-import string
 import sys
-import fnmatch
-import os
 
 
 def processFile(filecontent):
@@ -15,14 +11,14 @@ def processFile(filecontent):
     filecontent = re.sub(r'(\n +class( INET_API)? \w+( : public \w+(::\w+)*)?)( //[^\n])\n +\{', r'\1 {\5', filecontent, 0, re.MULTILINE)  # remove \n from inner class declarations
     return filecontent
 
-# configuration parameters
 
+# configuration parameters
 filelist = open(sys.argv[1], 'r')
 
 for line in filelist:
     fullpath = line.rstrip('\n\r')
     if fullpath.endswith(('.h', '.cc')):
-        print "Postprocess", fullpath
+        print("Postprocess", fullpath)
         f = open(fullpath, 'r')
         content = f.read()
         f.close()
@@ -31,5 +27,4 @@ for line in filelist:
             f2 = open(fullpath, 'w')
             f2.write(newContent)
             f2.close()
-            print "---Updated", fullpath
-
+            print("---Updated", fullpath)

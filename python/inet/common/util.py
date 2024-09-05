@@ -74,7 +74,7 @@ def coalesce(*values):
 
 def convert_to_seconds(s):
     seconds_per_unit = {"ps": 1E-12, "ns": 1E-9, "us": 1E-6, "ms": 1E-3, "s": 1, "second": 1, "m": 60, "min": 60, "h": 3600, "hour": 3600, "d": 86400, "day": 86400, "w": 604800, "week": 604800}
-    match = re.match("(-?[0-9]*\.?[0-9]*) *([a-zA-Z]+)", s)
+    match = re.match(r"(-?[0-9]*\.?[0-9]*) *([a-zA-Z]+)", s)
     return float(match.group(1)) * seconds_per_unit[match.group(2)]
 
 def write_object(file_name, object):
@@ -276,7 +276,7 @@ class DebugLevel(LoggerLevel):
 def collect_existing_ned_types():
     types = set()
     for ini_file_path in glob.glob(get_inet_relative_path("**/*.ned"), recursive=True):
-        if not re.search("doc/src/_deploy", ini_file_path):
+        if not re.search(r"doc/src/_deploy", ini_file_path):
             with open(ini_file_path, "r") as f:
                 text = f.read()
                 for type in re.findall("^simple (\\w+)", text, re.M):
@@ -294,17 +294,17 @@ def collect_existing_ned_types():
 def collect_referenced_ned_types():
     types = set()
     for ini_file_path in glob.glob(get_inet_relative_path("**/*.ini"), recursive=True):
-        if not re.search("doc/src/_deploy", ini_file_path):
+        if not re.search(r"doc/src/_deploy", ini_file_path):
             with open(ini_file_path, "r") as f:
                 for type in re.findall("typename = \"(\\w+?)\"", f.read()):
                     types.add(type)
     for ned_file_path in glob.glob(get_inet_relative_path("**/*.ned"), recursive=True):
-        if not re.search("doc/src/_deploy", ini_file_path):
+        if not re.search(r"doc/src/_deploy", ini_file_path):
             with open(ned_file_path, "r") as f:
                 for type in re.findall("~(\\w+)", f.read()):
                     types.add(type)
     for rst_file_path in glob.glob(get_inet_relative_path("**/*.rst"), recursive=True):
-        if not re.search("doc/src/_deploy", ini_file_path):
+        if not re.search(r"doc/src/_deploy", ini_file_path):
             with open(rst_file_path, "r") as f:
                 for type in re.findall(":ned:`(\\w+?)`", f.read()):
                     types.add(type)
@@ -313,12 +313,12 @@ def collect_referenced_ned_types():
 def collect_ned_type_reference_file_paths(type):
     references = []
     for ini_file_path in glob.glob(get_inet_relative_path("**/*.ini"), recursive=True):
-        if not re.search("doc/src/_deploy", ini_file_path):
+        if not re.search(r"doc/src/_deploy", ini_file_path):
             with open(ini_file_path, "r") as f:
                 if re.search(f"typename = \"{type}\"", f.read()):
                     references.append(ini_file_path)
     for rst_file_path in glob.glob(get_inet_relative_path("**/*.rst"), recursive=True):
-        if not re.search("doc/src/_deploy", ini_file_path):
+        if not re.search(r"doc/src/_deploy", ini_file_path):
             with open(rst_file_path, "r") as f:
                 if re.search(f":ned:`{type}`", f.read()):
                     references.append(rst_file_path)
@@ -327,7 +327,7 @@ def collect_ned_type_reference_file_paths(type):
 def collect_existing_msg_types():
     types = set()
     for ini_file_path in glob.glob(get_inet_relative_path("**/*.msg"), recursive=True):
-        if not re.search("doc/src/_deploy", ini_file_path):
+        if not re.search(r"doc/src/_deploy", ini_file_path):
             with open(ini_file_path, "r") as f:
                 text = f.read()
                 for type in re.findall("^class (\\w+)", text, re.M):
@@ -339,7 +339,7 @@ def collect_existing_msg_types():
 def collect_existing_cpp_types():
     types = set()
     for ini_file_path in glob.glob(get_inet_relative_path("**/*.h"), recursive=True):
-        if not re.search("doc/src/_deploy", ini_file_path):
+        if not re.search(r"doc/src/_deploy", ini_file_path):
             with open(ini_file_path, "r") as f:
                 text = f.read()
                 for type in re.findall("^class INET_API (\\w+)", text, re.M):
@@ -347,7 +347,7 @@ def collect_existing_cpp_types():
                 for type in re.findall("^enum (\\w+)", text, re.M):
                     types.add(type)
     for ini_file_path in glob.glob(get_inet_relative_path("**/*.cc"), recursive=True):
-        if not re.search("doc/src/_deploy", ini_file_path):
+        if not re.search(r"doc/src/_deploy", ini_file_path):
             with open(ini_file_path, "r") as f:
                 text = f.read()
                 for type in re.findall("Register_Packet_Dropper_Function\\((\\w+),", text, re.M):

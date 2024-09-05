@@ -239,8 +239,10 @@ void EthernetMacBase::processConnectDisconnect()
                 emit(transmissionEndedSignal, curTxSignal);
                 send(curTxSignal, SendOptions().finishTx(curTxSignal->getId()), physOutGate);
             }
-            else
+            else {
+                emit(transmissionEndedSignal, curTxSignal);
                 delete curTxSignal;
+            }
             curTxSignal = nullptr;
             cancelEvent(endTxTimer);
         }
@@ -282,7 +284,6 @@ void EthernetMacBase::encapsulate(Packet *frame)
 void EthernetMacBase::decapsulate(Packet *packet)
 {
     auto phyHeader = packet->popAtFront<EthernetPhyHeader>();
-    ASSERT(packet->getDataLength() >= MIN_ETHERNET_FRAME_BYTES);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 }
 

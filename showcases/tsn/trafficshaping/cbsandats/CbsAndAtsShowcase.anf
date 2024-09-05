@@ -5,7 +5,7 @@
         <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="793412994" name="Shaper Incoming And Outgoing Traffic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="587404414" name="Shaper Incoming And Outgoing Traffic" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -37,9 +37,9 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-style_tuple_list = [('source', 'throughput\(packetPushStarted\)', {'linestyle': 'dashed'}),
-                    ('module', '.*(app\[0\]|queue\[0\]).*', {'color': default_colors[0]}),
-                    ('module', '.*(app\[1\]|queue\[1\]).*', {'color': default_colors[1]})]
+style_tuple_list = [('source', 'throughput\\(packetPushStarted\\)', {'linestyle': 'dashed'}),
+                    ('module', '.*(app\\[0\\]|queue\\[0\\]).*', {'color': default_colors[0]}),
+                    ('module', '.*(app\\[1\\]|queue\\[1\\]).*', {'color': default_colors[1]})]
 
 inet.scave.plot.add_to_dataframe(df, style_tuple_list)
 

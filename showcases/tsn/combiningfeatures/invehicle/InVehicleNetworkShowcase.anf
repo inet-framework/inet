@@ -4624,7 +4624,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df['legend'] = df['module'].map(lambda module: re.sub(".*\.(.*)\..*", "\\1", module))
+df['legend'] = df['module'].map(lambda module: re.sub(".*\\.(.*)\\..*", "\\1", module))
 
 # plot
 utils.plot_vectors(df, props)
@@ -5198,7 +5198,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df['legend'] = df['module'].map(lambda module: re.sub(".*\.(.*)\..*", "\\1", module))
+df['legend'] = df['module'].map(lambda module: re.sub(".*\\.(.*)\\..*", "\\1", module))
 
 # plot
 utils.plot_vectors(df, props)

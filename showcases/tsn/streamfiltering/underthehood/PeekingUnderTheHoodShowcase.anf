@@ -30,7 +30,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df['title'] = df['title'].map(lambda title: re.sub("\, vector.*", "", title))
+df['title'] = df['title'].map(lambda title: re.sub("\\, vector.*", "", title))
 
 # plot
 utils.plot_vectors(df, props)
@@ -667,7 +667,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df['title'] = df['title'].map(lambda title: re.sub("\, vector.*", "", title))
+df['title'] = df['title'].map(lambda title: re.sub("\\, vector.*", "", title))
 
 # plot
 utils.plot_vectors(df, props)
@@ -1304,7 +1304,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df['title'] = df['title'].map(lambda title: re.sub("\, vector.*", "", title))
+df['title'] = df['title'].map(lambda title: re.sub("\\, vector.*", "", title))
 
 # plot
 utils.plot_vectors(df, props)

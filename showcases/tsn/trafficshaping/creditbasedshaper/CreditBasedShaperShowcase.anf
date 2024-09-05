@@ -5,7 +5,7 @@
         <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="855854605" name="Client Application Traffic and Shaper Incoming Traffic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="334386820" name="Client Application Traffic and Shaper Incoming Traffic" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 import matplotlib.pyplot as plt
@@ -38,12 +38,12 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-style_tuple_list = [('module','TsnLinearNetwork.client.app\[0\].source', {'color': default_colors[0]}),
-                    ('module','TsnLinearNetwork.client.app\[1\].source', {'color': default_colors[1]}), 
-                    ('module','TsnLinearNetwork.switch.eth\[1\].macLayer.queue.queue\[0\]', {'color': default_colors[0]}),
-                    ('module','TsnLinearNetwork.switch.eth\[1\].macLayer.queue.queue\[1\]', {'color': default_colors[1]}),
-                    ('source','throughput\(packetPushed\)', {'linestyle': 'dashed'}),
-                    ('source','throughput\(packetPushStarted\)', {'linestyle': 'solid'})]
+style_tuple_list = [('module','TsnLinearNetwork.client.app\\[0\\].source', {'color': default_colors[0]}),
+                    ('module','TsnLinearNetwork.client.app\\[1\\].source', {'color': default_colors[1]}), 
+                    ('module','TsnLinearNetwork.switch.eth\\[1\\].macLayer.queue.queue\\[0\\]', {'color': default_colors[0]}),
+                    ('module','TsnLinearNetwork.switch.eth\\[1\\].macLayer.queue.queue\\[1\\]', {'color': default_colors[1]}),
+                    ('source','throughput\\(packetPushed\\)', {'linestyle': 'dashed'}),
+                    ('source','throughput\\(packetPushStarted\\)', {'linestyle': 'solid'})]
 
 inet.scave.plot.add_to_dataframe(df, style_tuple_list)
 
@@ -663,7 +663,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1811761918" name="Traffic shaper queue lengths" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1461564623" name="Traffic shaper queue lengths" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -1304,7 +1304,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_prefer_module_display_paths" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.230207-439c415f65" icon="icons/full/obj/linechart.png" id="2033231119" name="Traffic shaper number of credits" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1224189292" name="Traffic shaper number of credits" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
@@ -1945,7 +1945,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="OMNeT++ 7.0.0.230207-439c415f65" icon="icons/full/obj/linechart.png" id="1706026915" name="Traffic shaper number of credits - zoomed" resultTypes="vector" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1611721812" name="Traffic shaper number of credits - zoomed" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
@@ -2586,7 +2586,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="370252675" name="Transmitting state and gate states" resultTypes="" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="62910124" name="Transmitting state and gate states" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import re
 import math
 import matplotlib.pyplot as plt
@@ -2616,7 +2616,7 @@ if df.empty:
 df = utils.perform_vector_ops(df, props["vector_operations"])
 df["moduledisplaypath"].fillna(df["module"], inplace=True)
 df["legend"] = df["moduledisplaypath"] + ", " + df["title"]
-df["legend"] = df["legend"].apply(lambda legend: re.sub(".*\.(.*) dilated.*", "\\1", str(legend)))
+df["legend"] = df["legend"].apply(lambda legend: re.sub(".*\\.(.*) dilated.*", "\\1", str(legend)))
 df["title"] = df["legend"]
 
 # plot
@@ -3231,7 +3231,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value=""/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="2061666085" name="Traffic shaping" resultTypes="" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="203873503" name="Traffic shaping" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import re
 import numpy
 import math
@@ -3262,7 +3262,7 @@ if df.empty:
 df = utils.perform_vector_ops(df, props["vector_operations"])
 df["moduledisplaypath"].fillna(df["module"], inplace=True)
 df["legend"] = df["moduledisplaypath"] + ", " + df["title"]
-df["legend"] = df["legend"].apply(lambda legend: re.sub(".*\.(.*) dilated.*", "\\1", str(legend)))
+df["legend"] = df["legend"].apply(lambda legend: re.sub(".*\\.(.*) dilated.*", "\\1", str(legend)))
 df["title"] = df["legend"]
 
 # plot
@@ -3883,7 +3883,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1560523997" name="Shaper Incoming and Outgoing Traffic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1640861623" name="Shaper Incoming and Outgoing Traffic" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import os
@@ -3912,8 +3912,8 @@ except results.ResultQueryError as e:
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
-style_tuple_list = [('module', 'TsnLinearNetwork.switch.eth\[1\].macLayer.queue.queue\[0\]', {'color': default_colors[0]}), 
-                    ('module', 'TsnLinearNetwork.switch.eth\[1\].macLayer.queue.queue\[1\]', {'color': default_colors[1]}),
+style_tuple_list = [('module', 'TsnLinearNetwork.switch.eth\\[1\\].macLayer.queue.queue\\[0\\]', {'color': default_colors[0]}), 
+                    ('module', 'TsnLinearNetwork.switch.eth\\[1\\].macLayer.queue.queue\\[1\\]', {'color': default_colors[1]}),
                     ('name', 'incomingDataRate:vector', {'linestyle': 'dotted'}),
                     ('name', 'outgoingDataRate:vector', {'linestyle': '-'})]
 
@@ -4539,7 +4539,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="65236125" name="Shaper Outgoing Traffic and Server Application Traffic" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="450804235" name="Shaper Outgoing Traffic and Server Application Traffic" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -4572,10 +4572,10 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-style_tuple_list = [('module', 'TsnLinearNetwork.switch.eth\[1\].macLayer.queue.queue\[0\]', {'color': default_colors[0]}), 
-                    ('module', 'TsnLinearNetwork.switch.eth\[1\].macLayer.queue.queue\[1\]', {'color': default_colors[1]}),
-                    ('source', 'throughput\(packetPushed\)', {'linestyle': 'dashed'}),
-                    ('source', 'throughput\(packetPulled\)', {'linestyle': '-'})]
+style_tuple_list = [('module', 'TsnLinearNetwork.switch.eth\\[1\\].macLayer.queue.queue\\[0\\]', {'color': default_colors[0]}), 
+                    ('module', 'TsnLinearNetwork.switch.eth\\[1\\].macLayer.queue.queue\\[1\\]', {'color': default_colors[1]}),
+                    ('source', 'throughput\\(packetPushed\\)', {'linestyle': 'dashed'}),
+                    ('source', 'throughput\\(packetPulled\\)', {'linestyle': '-'})]
 
 inet.scave.plot.add_to_dataframe(df, style_tuple_list)
 

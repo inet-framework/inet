@@ -59,7 +59,7 @@ def process_run_tasks_arguments(args):
     if not has_filter_kwarg and not args.simulation_project:
         kwargs["working_directory_filter"] = os.path.relpath(os.getcwd(), os.path.realpath(simulation_project.get_full_path(".")))
     if "working_directory_filter" in kwargs:
-        kwargs["working_directory_filter"] = re.sub("(.*)/$", "\\1", kwargs["working_directory_filter"])
+        kwargs["working_directory_filter"] = re.sub(r"(.*)/$", "\\1", kwargs["working_directory_filter"])
     if args.simulation_runner == "inprocess":
         import omnetpp.cffi
     del kwargs["hosts"]
