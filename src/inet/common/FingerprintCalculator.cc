@@ -41,17 +41,17 @@ bool FingerprintCalculator::addEventIngredient(cEvent *event, cSingleFingerprint
             case NETWORK_NODE_PATH:
                 if (auto cpacket = dynamic_cast<cPacket *>(event)) {
                     if (auto senderNode = findContainingNode(cpacket->getSenderModule()))
-                        hasher_ << senderNode->getFullPath();
+                        OMNETPP6_CODE(hasher_.) OMNETPP5_CODE(hasher->)add(senderNode->getFullPath().c_str());
                     if (auto arrivalNode = findContainingNode(cpacket->getArrivalModule()))
-                        hasher_ << arrivalNode->getFullPath();
+                        OMNETPP6_CODE(hasher_.) OMNETPP5_CODE(hasher->)add(arrivalNode->getFullPath().c_str());
                 }
                 break;
             case NETWORK_INTERFACE_PATH:
                 if (auto cpacket = dynamic_cast<cPacket *>(event)) {
                     if (auto senderInterface = findContainingNicModule(cpacket->getSenderModule()))
-                        hasher_ << senderInterface->getFullPath();
+                        OMNETPP6_CODE(hasher_.) OMNETPP5_CODE(hasher->)add(senderInterface->getFullPath().c_str());
                     if (auto arrivalInterface = findContainingNicModule(cpacket->getArrivalModule()))
-                        hasher_ << arrivalInterface->getFullPath();
+                        OMNETPP6_CODE(hasher_.) OMNETPP5_CODE(hasher->)add(arrivalInterface->getFullPath().c_str());
                 }
                 break;
             default:
@@ -69,7 +69,7 @@ void FingerprintCalculator::addEvent(cEvent *event)
             static_cast<cPacket *>(event) : nullptr;
 
         if (packetUpdateFilter) {
-            if (cpacket != nullptr && cpacket->isUpdate())
+            if (cpacket != nullptr && OMNETPP6_CODE(cpacket->isUpdate()) OMNETPP5_CODE(false))
                 return;
         }
 
