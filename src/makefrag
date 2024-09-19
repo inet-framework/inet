@@ -73,10 +73,14 @@ endif
 #
 WITH_VISUALIZERS := $(shell (cd .. && ./inet_featuretool -q isenabled visualization && echo enabled) )
 ifeq ($(WITH_VISUALIZERS), enabled)
-  ifeq ($(WITH_OSGEARTH), yes)
-      OMNETPP_LIBS += -lOpenThreads -losg -losgText -losgDB -losgEarth -losgEarthUtil
+  ifeq ($(WITH_OSG), yes)
+    OMNETPP_LIBS += -losg -losgText -losgDB -losgGA -losgViewer -losgUtil -lOpenThreads # TODO: use $(OSG_LIBS) from Makefile.inc? Does that include -losgText? Why not?
+    ifeq ($(WITH_OSGEARTH), yes)
+      OMNETPP_LIBS += -losgEarth -losgEarthUtil # TODO: use $(OSGEARTH_LIBS) from Makefile.inc? -lgeos_c might also be needed. Is that included? Should it be?
+    endif
   endif
 endif
+
 
 # uncomment this if you want to run the NS3 vs INET 802.11 cross validation tests in the 'tests/misc/ns3' folder.
 # CFLAGS += -DNS3_VALIDATION
