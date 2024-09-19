@@ -19,6 +19,8 @@
 
 namespace inet {
 
+Define_Module(UdpBasicBurst);
+
 Register_Enum(UdpBasicBurst::ChooseDestAddrMode, (UdpBasicBurst::ONCE, UdpBasicBurst::PER_BURST, UdpBasicBurst::PER_SEND));
 
 simsignal_t UdpBasicBurst::outOfOrderPkSignal = registerSignal("outOfOrderPk");
