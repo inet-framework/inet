@@ -1568,7 +1568,7 @@ void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
 }
 
 #ifndef WITH_xMIPv6
-void IPv6NeighbourDiscovery::processRAPrefixInfoForAddrAutoConf(IPv6NDPrefixInformation& prefixInfo, InterfaceEntry *ie)
+void IPv6NeighbourDiscovery::processRAPrefixInfoForAddrAutoConf(const IPv6NDPrefixInformation& prefixInfo, InterfaceEntry *ie)
 {
     EV_INFO << "Processing Prefix Info for address auto-configuration.\n";
     IPv6Address prefix = prefixInfo.getPrefix();
