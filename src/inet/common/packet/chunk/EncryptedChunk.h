@@ -34,7 +34,7 @@ class INET_API EncryptedChunk : public Chunk
   protected:
     Chunk *_getChunk() const { return chunk.get(); } // only for class descriptor
 
-    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
+    const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -43,14 +43,14 @@ class INET_API EncryptedChunk : public Chunk
     EncryptedChunk(const EncryptedChunk& other) = default;
     EncryptedChunk(const Ptr<Chunk>& chunk, b length);
 
-    virtual EncryptedChunk *dup() const override { return new EncryptedChunk(*this); }
-    virtual const Ptr<Chunk> dupShared() const override { return makeShared<EncryptedChunk>(*this); }
+    EncryptedChunk *dup() const override { return new EncryptedChunk(*this); }
+    const Ptr<Chunk> dupShared() const override { return makeShared<EncryptedChunk>(*this); }
 
-    virtual void parsimPack(cCommBuffer *buffer) const override;
-    virtual void parsimUnpack(cCommBuffer *buffer) override;
+    void parsimPack(cCommBuffer *buffer) const override;
+    void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
-    virtual void forEachChild(cVisitor *v) override;
+    void forEachChild(cVisitor *v) override;
 
     /** @name Field accessor functions */
     //@{
@@ -63,27 +63,27 @@ class INET_API EncryptedChunk : public Chunk
 
     /** @name Overridden flag functions */
     //@{
-    virtual bool isMutable() const override { return Chunk::isMutable() || chunk->isMutable(); }
-    virtual bool isImmutable() const override { return Chunk::isImmutable() && chunk->isImmutable(); }
+    bool isMutable() const override { return Chunk::isMutable() || chunk->isMutable(); }
+    bool isImmutable() const override { return Chunk::isImmutable() && chunk->isImmutable(); }
 
-    virtual bool isComplete() const override { return Chunk::isComplete() && chunk->isComplete(); }
-    virtual bool isIncomplete() const override { return Chunk::isIncomplete() || chunk->isIncomplete(); }
+    bool isComplete() const override { return Chunk::isComplete() && chunk->isComplete(); }
+    bool isIncomplete() const override { return Chunk::isIncomplete() || chunk->isIncomplete(); }
 
-    virtual bool isCorrect() const override { return Chunk::isCorrect() && chunk->isCorrect(); }
-    virtual bool isIncorrect() const override { return Chunk::isIncorrect() || chunk->isIncorrect(); }
+    bool isCorrect() const override { return Chunk::isCorrect() && chunk->isCorrect(); }
+    bool isIncorrect() const override { return Chunk::isIncorrect() || chunk->isIncorrect(); }
 
-    virtual bool isProperlyRepresented() const override { return Chunk::isProperlyRepresented() && chunk->isProperlyRepresented(); }
-    virtual bool isImproperlyRepresented() const override { return Chunk::isImproperlyRepresented() || chunk->isImproperlyRepresented(); }
+    bool isProperlyRepresented() const override { return Chunk::isProperlyRepresented() && chunk->isProperlyRepresented(); }
+    bool isImproperlyRepresented() const override { return Chunk::isImproperlyRepresented() || chunk->isImproperlyRepresented(); }
     //@}
 
     /** @name Overridden chunk functions */
     //@{
-    virtual ChunkType getChunkType() const override { return CT_ENCRYPTED; }
-    virtual b getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(length >= b(0)); return length; }
+    ChunkType getChunkType() const override { return CT_ENCRYPTED; }
+    b getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(length >= b(0)); return length; }
 
-    virtual bool containsSameData(const Chunk& other) const override;
+    bool containsSameData(const Chunk& other) const override;
 
-    virtual std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+    std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     //@}
 };
 

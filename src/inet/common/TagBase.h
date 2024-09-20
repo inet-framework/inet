@@ -23,14 +23,14 @@ class INET_API TagBase : public cObject, public SharedBase<TagBase>, public IPri
 
     virtual const Ptr<TagBase> changeRegion(b offsetDelta, b lengthDelta) const { return const_cast<TagBase *>(this)->shared_from_this(); }
 
-    virtual void parsimPack(cCommBuffer *buffer) const override {}
-    virtual void parsimUnpack(cCommBuffer *buffer) override {}
+    void parsimPack(cCommBuffer *buffer) const override {}
+    void parsimUnpack(cCommBuffer *buffer) override {}
 
-    virtual std::ostream& printToStream(std::ostream &stream, int level, int evFlags) const override;
+    std::ostream& printToStream(std::ostream &stream, int level, int evFlags) const override;
 
     virtual std::ostream& printFieldsToStream(std::ostream &stream, int level, int evFlags) const;
 
-    virtual std::string str() const override;
+    std::string str() const override;
 };
 
 } // namespace inet

@@ -71,7 +71,7 @@ class INET_API InterfaceTable : public OperationalBase, public IInterfaceTable, 
 
   protected:
     // displays summary above the icon
-    virtual void refreshDisplay() const override;
+    void refreshDisplay() const override;
 
     // displays the interface Ipv4/Ipv6 address on the outgoing link that corresponds to the interface
     virtual void updateLinkDisplayString(NetworkInterface *entry) const;
@@ -80,7 +80,7 @@ class INET_API InterfaceTable : public OperationalBase, public IInterfaceTable, 
     virtual void discoverConnectingGates(NetworkInterface *entry);
 
     // called from NetworkInterface
-    virtual void interfaceChanged(simsignal_t signalID, const NetworkInterfaceChangeDetails *details) override;
+    void interfaceChanged(simsignal_t signalID, const NetworkInterfaceChangeDetails *details) override;
 
     // internal
     virtual void invalidateTmpInterfaceList();
@@ -89,45 +89,45 @@ class INET_API InterfaceTable : public OperationalBase, public IInterfaceTable, 
 
   public:
     InterfaceTable();
-    virtual ~InterfaceTable();
-    virtual std::string getFullPath() const override { return cSimpleModule::getFullPath(); }
+    ~InterfaceTable() override;
+    std::string getFullPath() const override { return cSimpleModule::getFullPath(); }
 
   protected:
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage) override;
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override;
 
     /**
      * Raises an error.
      */
-    virtual void handleMessageWhenUp(cMessage *) override;
+    void handleMessageWhenUp(cMessage *) override;
 
   public:
     /**
      * Called by the signal handler whenever a change of a category
      * occurs to which this client has subscribed.
      */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     /**
      * Returns the host or router this interface table lives in.
      */
-    virtual cModule *getHostModule() const override;
+    cModule *getHostModule() const override;
 
     /**
      * Checks if the address is a local one, i.e. one of the host's.
      */
-    virtual bool isLocalAddress(const L3Address& address) const override;
+    bool isLocalAddress(const L3Address& address) const override;
 
     /**
      * Checks if the address is on the network of one of the interfaces,
      * but not local.
      */
-    virtual bool isNeighborAddress(const L3Address& address) const override;
+    bool isNeighborAddress(const L3Address& address) const override;
 
     /**
      * Returns an interface given by its address. Returns nullptr if not found.
      */
-    virtual NetworkInterface *findInterfaceByAddress(const L3Address& address) const override;
+    NetworkInterface *findInterfaceByAddress(const L3Address& address) const override;
 
     /**
      * Adds an interface. The entry->getInterfaceModule() will be used
@@ -135,19 +135,19 @@ class INET_API InterfaceTable : public OperationalBase, public IInterfaceTable, 
      * and getNodeInputGateId() in NetworkInterface. It should be nullptr if this is
      * a virtual interface (e.g. loopback).
      */
-    virtual void addInterface(NetworkInterface *entry) override;
+    void addInterface(NetworkInterface *entry) override;
 
     /**
      * Deletes the given interface from the table. Indices of existing
      * interfaces (see getInterface(int)) may change. It is an error if
      * the given interface is not in the table.
      */
-    virtual void deleteInterface(NetworkInterface *entry) override;
+    void deleteInterface(NetworkInterface *entry) override;
 
     /**
      * Returns the number of interfaces.
      */
-    virtual int getNumInterfaces() const override;
+    int getNumInterfaces() const override;
 
     /**
      * Returns the NetworkInterface specified by an index 0..numInterfaces-1.
@@ -158,82 +158,82 @@ class INET_API InterfaceTable : public OperationalBase, public IInterfaceTable, 
      * so cannot be used to reliably identify the interface. Use interfaceId
      * to refer to interfaces from other modules or from messages/packets.
      */
-    virtual NetworkInterface *getInterface(int pos) const override;
+    NetworkInterface *getInterface(int pos) const override;
 
     /**
      * Returns an interface by its Id. Ids are guaranteed to be invariant
      * to interface deletions/additions. Returns nullptr if there is no such
      * interface (This allows detecting stale IDs without raising an error.)
      */
-    virtual NetworkInterface *findInterfaceById(int id) const override;
+    NetworkInterface *findInterfaceById(int id) const override;
 
     /**
      * Returns an interface by its Id. Ids are guaranteed to be invariant
      * to interface deletions/additions. Throws an error if there is no such
      * interface.
      */
-    virtual NetworkInterface *getInterfaceById(int id) const override;
+    NetworkInterface *getInterfaceById(int id) const override;
 
     /**
      * Returns the biggest interface Id.
      */
-    virtual int getBiggestInterfaceId() const override;
+    int getBiggestInterfaceId() const override;
 
     /**
      * Returns an interface given by its getNodeOutputGateId().
      * Returns nullptr if not found.
      */
-    virtual NetworkInterface *findInterfaceByNodeOutputGateId(int id) const override;
+    NetworkInterface *findInterfaceByNodeOutputGateId(int id) const override;
 
     /**
      * Returns an interface given by its getNodeInputGateId().
      * Returns nullptr if not found.
      */
-    virtual NetworkInterface *findInterfaceByNodeInputGateId(int id) const override;
+    NetworkInterface *findInterfaceByNodeInputGateId(int id) const override;
 
     /**
      * Returns an interface by one of its component module (e.g. PPP).
      * Returns nullptr if not found.
      */
-    virtual NetworkInterface *findInterfaceByInterfaceModule(cModule *ifmod) const override;
+    NetworkInterface *findInterfaceByInterfaceModule(cModule *ifmod) const override;
 
     /**
      * Returns an interface given by its name. Returns nullptr if not found.
      */
-    virtual NetworkInterface *findInterfaceByName(const char *name) const override;
+    NetworkInterface *findInterfaceByName(const char *name) const override;
 
     /**
      * Returns the first interface with the isLoopback flag set.
      * If there's no loopback, it returns nullptr.
      */
-    virtual NetworkInterface *findFirstLoopbackInterface() const override;
+    NetworkInterface *findFirstLoopbackInterface() const override;
 
     /**
      * Returns the first interface with the isLoopback flag unset.
      * If there's no non-loopback, it returns nullptr.
      */
-    virtual NetworkInterface *findFirstNonLoopbackInterface() const override;
+    NetworkInterface *findFirstNonLoopbackInterface() const override;
 
     /**
      * Returns the first multicast capable interface.
      * If there is no such interface, then returns nullptr.
      */
-    virtual NetworkInterface *findFirstMulticastInterface() const override;
+    NetworkInterface *findFirstMulticastInterface() const override;
 
     /**
      * Lifecycle method
      */
-    virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }
-    virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
-    virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
-    virtual void handleStartOperation(LifecycleOperation *operation) override;
-    virtual void handleStopOperation(LifecycleOperation *operation) override;
-    virtual void handleCrashOperation(LifecycleOperation *operation) override;
+    bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }
+    bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
+    bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
+    void handleStartOperation(LifecycleOperation *operation) override;
+    void handleStopOperation(LifecycleOperation *operation) override;
+    void handleCrashOperation(LifecycleOperation *operation) override;
 
     /**
      * Returns all multicast group address, with it's interfaceId
      */
-    virtual MulticastGroupList collectMulticastGroups() const override;
+    MulticastGroupList collectMulticastGroups() const override;
 };
 
 } // namespace inet

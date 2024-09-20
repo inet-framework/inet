@@ -37,7 +37,7 @@ class INET_API L3NetworkConfiguratorBase : public cSimpleModule, public L3Addres
 
       public:
         Node(cModule *module) : inet::Topology::Node(module->getId()), module(module) {}
-        virtual ~Node() { for (auto& interfaceInfo : interfaceInfos) delete interfaceInfo; }
+        ~Node() override { for (auto& interfaceInfo : interfaceInfos) delete interfaceInfo; }
     };
 
     /**
@@ -70,7 +70,7 @@ class INET_API L3NetworkConfiguratorBase : public cSimpleModule, public L3Addres
       public:
         InterfaceInfo(Node *node, LinkInfo *linkInfo, NetworkInterface *networkInterface);
 
-        virtual std::string getFullPath() const override { return networkInterface->getInterfaceFullPath(); }
+        std::string getFullPath() const override { return networkInterface->getInterfaceFullPath(); }
     };
 
     /**
@@ -96,11 +96,11 @@ class INET_API L3NetworkConfiguratorBase : public cSimpleModule, public L3Addres
         std::map<int, InterfaceInfo *> interfaceInfos; // all interfaces in the network
 
       public:
-        virtual ~Topology() { for (auto& linkInfo : linkInfos) delete linkInfo; }
+        ~Topology() override { for (auto& linkInfo : linkInfos) delete linkInfo; }
 
       protected:
-        virtual Node *createNode(cModule *module) override { return new L3NetworkConfiguratorBase::Node(module); }
-        virtual Link *createLink() override { return new L3NetworkConfiguratorBase::Link(); }
+        Node *createNode(cModule *module) override { return new L3NetworkConfiguratorBase::Node(module); }
+        Link *createLink() override { return new L3NetworkConfiguratorBase::Link(); }
     };
 
     class INET_API Matcher {
@@ -137,9 +137,9 @@ class INET_API L3NetworkConfiguratorBase : public cSimpleModule, public L3Addres
     cXMLElement *configuration = nullptr;
 
   protected:
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override;
+    void handleMessage(cMessage *msg) override { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
 
     /**
      * Extracts network topology by walking through the module hierarchy.

@@ -26,16 +26,16 @@ class INET_API LinearMobility : public MovingMobilityBase
     double speed;
 
   protected:
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /** @brief Initializes mobility model parameters.*/
-    virtual void initialize(int stage) override;
+    void initialize(int stage) override;
 
     /** @brief Move the host*/
-    virtual void move() override;
+    void move() override;
 
   public:
-    virtual double getMaxSpeed() const override { return speed; }
+    double getMaxSpeed() const override { return speed; }
     LinearMobility();
 };
 

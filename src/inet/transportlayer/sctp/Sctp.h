@@ -186,7 +186,7 @@ class INET_API Sctp : public cSimpleModule
     int32_t findAssocForFd(int32_t fd);
     void sendAbortFromMain(SctpHeader *sctpMsg, L3Address fromAddr, L3Address toAddr);
     void sendShutdownCompleteFromMain(SctpHeader *sctpMsg, L3Address fromAddr, L3Address toAddr);
-    virtual void refreshDisplay() const override;
+    void refreshDisplay() const override;
 
   public:
     void printInfoAssocMap();
@@ -206,11 +206,11 @@ class INET_API Sctp : public cSimpleModule
     CrcMode crcMode = CRC_MODE_UNDEFINED;
 
   public:
-    virtual ~Sctp();
-    virtual void initialize(int stage) override;
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) override;
-    virtual void finish() override;
+    ~Sctp() override;
+    void initialize(int stage) override;
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void handleMessage(cMessage *msg) override;
+    void finish() override;
     virtual void send_to_ip(Packet *msg);
 
     AssocStat *getAssocStat(uint32_t assocId)

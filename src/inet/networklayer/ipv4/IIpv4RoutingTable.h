@@ -27,7 +27,7 @@ namespace inet {
 class INET_API IIpv4RoutingTable : public IRoutingTable
 {
   public:
-    virtual ~IIpv4RoutingTable() {}
+    ~IIpv4RoutingTable() override {}
 
     /**
      * For debugging
@@ -129,12 +129,12 @@ class INET_API IIpv4RoutingTable : public IRoutingTable
     /**
      * Returns the kth route.
      */
-    virtual Ipv4Route *getRoute(int k) const override = 0;
+    Ipv4Route *getRoute(int k) const override = 0;
 
     /**
      * Finds and returns the default route, or nullptr if it doesn't exist
      */
-    virtual Ipv4Route *getDefaultRoute() const override = 0;
+    Ipv4Route *getDefaultRoute() const override = 0;
 
     /**
      * Adds a route to the routing table. Routes are allowed to be modified
@@ -162,7 +162,7 @@ class INET_API IIpv4RoutingTable : public IRoutingTable
     /**
      * Returns the kth multicast route.
      */
-    virtual Ipv4MulticastRoute *getMulticastRoute(int k) const override = 0;
+    Ipv4MulticastRoute *getMulticastRoute(int k) const override = 0;
 
     /**
      * Adds a multicast route to the routing table. Routes are allowed to be modified

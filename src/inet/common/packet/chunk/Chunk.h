@@ -435,10 +435,10 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
      * Returns a mutable copy of this chunk in a shared pointer.
      */
     virtual const Ptr<Chunk> dupShared() const { return Ptr<Chunk>(static_cast<Chunk *>(dup())); }
-    virtual void forEachChild(cVisitor *v) override;
+    void forEachChild(cVisitor *v) override;
 
-    virtual void parsimPack(cCommBuffer *buffer) const override;
-    virtual void parsimUnpack(cCommBuffer *buffer) override;
+    void parsimPack(cCommBuffer *buffer) const override;
+    void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     /** @name Mutability related functions */
@@ -688,7 +688,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     /**
      * Returns all region tags.
      */
-    virtual SharingRegionTagSet& getRegionTags() override { return regionTags; }
+    SharingRegionTagSet& getRegionTags() override { return regionTags; }
 
     /**
      * Returns the number of chunk tags.
@@ -819,7 +819,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
      * Prints an optinally formatted human readable string representation of
      * the data present in this chunk to the given stream.
      */
-    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+    std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     /**
      * Prints an optinally formatted human readable string representation of
@@ -831,7 +831,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
      * Returns a human readable string representation of the data present in
      * this chunk.
      */
-    virtual std::string str() const override;
+    std::string str() const override;
     //@}
 
   public:

@@ -40,11 +40,11 @@ const uint16_t UDP_MAX_MESSAGE_SIZE = 65535; // bytes
 class INET_API UdpCrcInsertionHook : public cSimpleModule, public NetfilterBase::HookBase
 {
   public:
-    virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }
-    virtual Result datagramForwardHook(Packet *packet) override { return ACCEPT; }
-    virtual Result datagramPostRoutingHook(Packet *packet) override;
-    virtual Result datagramLocalInHook(Packet *packet) override { return ACCEPT; }
-    virtual Result datagramLocalOutHook(Packet *packet) override { return ACCEPT; }
+    Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }
+    Result datagramForwardHook(Packet *packet) override { return ACCEPT; }
+    Result datagramPostRoutingHook(Packet *packet) override;
+    Result datagramLocalInHook(Packet *packet) override { return ACCEPT; }
+    Result datagramLocalOutHook(Packet *packet) override { return ACCEPT; }
 };
 
 /**
@@ -130,7 +130,7 @@ class INET_API Udp : public TransportProtocolBase
 
   protected:
     // utility: show current statistics above the icon
-    virtual void refreshDisplay() const override;
+    void refreshDisplay() const override;
 
     // socket handling
     virtual SockDesc *getSocketById(int sockId);
@@ -177,21 +177,21 @@ class INET_API Udp : public TransportProtocolBase
     virtual void processUDPPacket(Packet *udpPacket);
 
     // process packets from application
-    virtual void handleUpperPacket(Packet *appData) override;
+    void handleUpperPacket(Packet *appData) override;
 
     // process packets from network layr
-    virtual void handleLowerPacket(Packet *appData) override;
+    void handleLowerPacket(Packet *appData) override;
 
     // process commands from application
-    virtual void handleUpperCommand(cMessage *msg) override;
+    void handleUpperCommand(cMessage *msg) override;
 
     // create a blank Udp packet; override to subclass UdpHeader
     virtual UdpHeader *createUDPPacket();
 
     // ILifeCycle:
-    virtual void handleStartOperation(LifecycleOperation *operation) override;
-    virtual void handleStopOperation(LifecycleOperation *operation) override;
-    virtual void handleCrashOperation(LifecycleOperation *operation) override;
+    void handleStartOperation(LifecycleOperation *operation) override;
+    void handleStopOperation(LifecycleOperation *operation) override;
+    void handleCrashOperation(LifecycleOperation *operation) override;
 
   public:
     // crc
@@ -201,13 +201,13 @@ class INET_API Udp : public TransportProtocolBase
 
   public:
     Udp();
-    virtual ~Udp();
+    ~Udp() override;
 
     static bool isCorrectPacket(Packet *packet, const Ptr<const UdpHeader>& udpHeader);
 
   protected:
-    virtual void initialize(int stage) override;
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override;
+    int numInitStages() const override { return NUM_INIT_STAGES; }
 };
 
 } // namespace inet

@@ -41,15 +41,15 @@ class INET_API SliceChunk : public Chunk
   protected:
     Chunk *_getChunk() const { return chunk.get(); } // only for class descriptor
 
-    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
+    const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
 
     static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags);
 
-    virtual void doInsertAtFront(const Ptr<const Chunk>& chunk) override;
-    virtual void doInsertAtBack(const Ptr<const Chunk>& chunk) override;
+    void doInsertAtFront(const Ptr<const Chunk>& chunk) override;
+    void doInsertAtBack(const Ptr<const Chunk>& chunk) override;
 
-    virtual void doRemoveAtFront(b length) override;
-    virtual void doRemoveAtBack(b length) override;
+    void doRemoveAtFront(b length) override;
+    void doRemoveAtBack(b length) override;
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -58,14 +58,14 @@ class INET_API SliceChunk : public Chunk
     SliceChunk(const SliceChunk& other) = default;
     SliceChunk(const Ptr<Chunk>& chunk, b offset, b length);
 
-    virtual SliceChunk *dup() const override { return new SliceChunk(*this); }
-    virtual const Ptr<Chunk> dupShared() const override { return makeShared<SliceChunk>(*this); }
+    SliceChunk *dup() const override { return new SliceChunk(*this); }
+    const Ptr<Chunk> dupShared() const override { return makeShared<SliceChunk>(*this); }
 
-    virtual void parsimPack(cCommBuffer *buffer) const override;
-    virtual void parsimUnpack(cCommBuffer *buffer) override;
+    void parsimPack(cCommBuffer *buffer) const override;
+    void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
-    virtual void forEachChild(cVisitor *v) override;
+    void forEachChild(cVisitor *v) override;
 
     /** @name Field accessor functions */
     //@{
@@ -81,33 +81,33 @@ class INET_API SliceChunk : public Chunk
 
     /** @name Overridden flag functions */
     //@{
-    virtual bool isMutable() const override { return Chunk::isMutable() || chunk->isMutable(); }
-    virtual bool isImmutable() const override { return Chunk::isImmutable() && chunk->isImmutable(); }
+    bool isMutable() const override { return Chunk::isMutable() || chunk->isMutable(); }
+    bool isImmutable() const override { return Chunk::isImmutable() && chunk->isImmutable(); }
 
-    virtual bool isComplete() const override { return Chunk::isComplete() && chunk->isComplete(); }
-    virtual bool isIncomplete() const override { return Chunk::isIncomplete() || chunk->isIncomplete(); }
+    bool isComplete() const override { return Chunk::isComplete() && chunk->isComplete(); }
+    bool isIncomplete() const override { return Chunk::isIncomplete() || chunk->isIncomplete(); }
 
-    virtual bool isCorrect() const override { return Chunk::isCorrect() && chunk->isCorrect(); }
-    virtual bool isIncorrect() const override { return Chunk::isIncorrect() || chunk->isIncorrect(); }
+    bool isCorrect() const override { return Chunk::isCorrect() && chunk->isCorrect(); }
+    bool isIncorrect() const override { return Chunk::isIncorrect() || chunk->isIncorrect(); }
 
-    virtual bool isProperlyRepresented() const override { return Chunk::isProperlyRepresented() && chunk->isProperlyRepresented(); }
-    virtual bool isImproperlyRepresented() const override { return Chunk::isImproperlyRepresented() || chunk->isImproperlyRepresented(); }
+    bool isProperlyRepresented() const override { return Chunk::isProperlyRepresented() && chunk->isProperlyRepresented(); }
+    bool isImproperlyRepresented() const override { return Chunk::isImproperlyRepresented() || chunk->isImproperlyRepresented(); }
     //@}
 
     /** @name Overridden chunk functions */
     //@{
-    virtual ChunkType getChunkType() const override { return CT_SLICE; }
-    virtual b getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(length >= b(0)); return length; }
+    ChunkType getChunkType() const override { return CT_SLICE; }
+    b getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(length >= b(0)); return length; }
 
-    virtual bool containsSameData(const Chunk& other) const override;
+    bool containsSameData(const Chunk& other) const override;
 
-    virtual bool canInsertAtFront(const Ptr<const Chunk>& chunk) const override;
-    virtual bool canInsertAtBack(const Ptr<const Chunk>& chunk) const override;
+    bool canInsertAtFront(const Ptr<const Chunk>& chunk) const override;
+    bool canInsertAtBack(const Ptr<const Chunk>& chunk) const override;
 
-    virtual bool canRemoveAtFront(b length) const override { return false; }
-    virtual bool canRemoveAtBack(b length) const override { return false; }
+    bool canRemoveAtFront(b length) const override { return false; }
+    bool canRemoveAtBack(b length) const override { return false; }
 
-    virtual std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+    std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     //@}
 };
 

@@ -41,8 +41,8 @@ class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationLi
     virtual void sendToIP(Packet *, const Ipv4Address& dest);
     virtual void sendToIP(Packet *msg);
     virtual bool possiblyLocalBroadcast(const Ipv4Address& addr, int interfaceId);
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
   public:
     /**
@@ -58,10 +58,10 @@ class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationLi
     bool verifyCrc(const Packet *packet);
 
   protected:
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
-    virtual void handleParameterChange(const char *name) override;
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override;
+    void handleMessage(cMessage *msg) override;
+    void handleParameterChange(const char *name) override;
     virtual void parseQuoteLengthParameter();
     virtual bool maySendErrorMessage(Packet *packet, int inputInterfaceId);
     virtual void sendOrProcessIcmpPacket(Packet *packet, Ipv4Address origSrcAddr);

@@ -21,11 +21,11 @@ class INET_API SctpUdpHook : public cSimpleModule, public NetfilterBase::HookBas
     SctpUdpHook() {}
 
   public:
-    virtual Result datagramPreRoutingHook(Packet *packet) override;
-    virtual Result datagramForwardHook(Packet *packet) override { return ACCEPT; }
-    virtual Result datagramPostRoutingHook(Packet *packet) override { return ACCEPT; }
-    virtual Result datagramLocalInHook(Packet *packet) override { return ACCEPT; }
-    virtual Result datagramLocalOutHook(Packet *packet) override { return ACCEPT; }
+    Result datagramPreRoutingHook(Packet *packet) override;
+    Result datagramForwardHook(Packet *packet) override { return ACCEPT; }
+    Result datagramPostRoutingHook(Packet *packet) override { return ACCEPT; }
+    Result datagramLocalInHook(Packet *packet) override { return ACCEPT; }
+    Result datagramLocalOutHook(Packet *packet) override { return ACCEPT; }
 };
 
 } // namespace sctp

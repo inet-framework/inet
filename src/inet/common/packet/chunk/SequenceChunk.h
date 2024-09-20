@@ -47,15 +47,15 @@ class INET_API SequenceChunk : public Chunk
 
     std::deque<Ptr<const Chunk>> dupChunks() const;
 
-    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
+    const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
 
     static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags);
 
-    virtual void doInsertAtFront(const Ptr<const Chunk>& chunk) override;
-    virtual void doInsertAtBack(const Ptr<const Chunk>& chunk) override;
+    void doInsertAtFront(const Ptr<const Chunk>& chunk) override;
+    void doInsertAtBack(const Ptr<const Chunk>& chunk) override;
 
-    virtual void doRemoveAtFront(b length) override;
-    virtual void doRemoveAtBack(b length) override;
+    void doRemoveAtFront(b length) override;
+    void doRemoveAtBack(b length) override;
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -64,16 +64,16 @@ class INET_API SequenceChunk : public Chunk
     SequenceChunk(const SequenceChunk& other);
     SequenceChunk(const std::deque<Ptr<const Chunk>>& chunks);
 
-    virtual SequenceChunk *dup() const override { return new SequenceChunk(*this); }
-    virtual const Ptr<Chunk> dupShared() const override { return makeShared<SequenceChunk>(*this); }
+    SequenceChunk *dup() const override { return new SequenceChunk(*this); }
+    const Ptr<Chunk> dupShared() const override { return makeShared<SequenceChunk>(*this); }
 
-    virtual void parsimPack(cCommBuffer *buffer) const override;
-    virtual void parsimUnpack(cCommBuffer *buffer) override;
+    void parsimPack(cCommBuffer *buffer) const override;
+    void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
-    virtual void forEachChild(cVisitor *v) override;
+    void forEachChild(cVisitor *v) override;
 
-    virtual bool containsSameData(const Chunk& other) const override;
+    bool containsSameData(const Chunk& other) const override;
 
     /** @name Field accessor functions */
     const std::deque<Ptr<const Chunk>>& getChunks() const { return chunks; }
@@ -82,42 +82,42 @@ class INET_API SequenceChunk : public Chunk
 
     /** @name Overridden flag functions */
     //@{
-    virtual bool isComplete() const override { return !isIncomplete(); }
-    virtual bool isIncomplete() const override;
+    bool isComplete() const override { return !isIncomplete(); }
+    bool isIncomplete() const override;
 
-    virtual bool isCorrect() const override { return !isIncorrect(); }
-    virtual bool isIncorrect() const override;
+    bool isCorrect() const override { return !isIncorrect(); }
+    bool isIncorrect() const override;
 
-    virtual bool isProperlyRepresented() const override { return !isImproperlyRepresented(); }
-    virtual bool isImproperlyRepresented() const override;
+    bool isProperlyRepresented() const override { return !isImproperlyRepresented(); }
+    bool isImproperlyRepresented() const override;
     //@}
 
     /** @name Iteration related functions */
     //@{
-    virtual void moveIterator(Iterator& iterator, b length) const override;
-    virtual void seekIterator(Iterator& iterator, b offset) const override;
+    void moveIterator(Iterator& iterator, b length) const override;
+    void seekIterator(Iterator& iterator, b offset) const override;
     //@}
 
     /** @name Filling with data related functions */
     //@{
-    virtual bool canInsertAtFront(const Ptr<const Chunk>& chunk) const override { return true; }
-    virtual bool canInsertAtBack(const Ptr<const Chunk>& chunk) const override { return true; }
+    bool canInsertAtFront(const Ptr<const Chunk>& chunk) const override { return true; }
+    bool canInsertAtBack(const Ptr<const Chunk>& chunk) const override { return true; }
     //@}
 
     /** @name Removing data related functions */
     //@{
-    virtual bool canRemoveAtFront(b length) const override { return true; }
-    virtual bool canRemoveAtBack(b length) const override { return true; }
+    bool canRemoveAtFront(b length) const override { return true; }
+    bool canRemoveAtBack(b length) const override { return true; }
     //@}
 
     /** @name Querying data related functions */
     //@{
-    virtual ChunkType getChunkType() const override { return CT_SEQUENCE; }
-    virtual b getChunkLength() const override;
-    virtual bool isEmpty() const override { return chunks.size() != 0; }
+    ChunkType getChunkType() const override { return CT_SEQUENCE; }
+    b getChunkLength() const override;
+    bool isEmpty() const override { return chunks.size() != 0; }
     //@}
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+    std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };
 
 } // namespace

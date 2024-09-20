@@ -78,7 +78,7 @@ class INET_API NetworkInterfaceChangeDetails : public cObject
     NetworkInterfaceChangeDetails(NetworkInterface *ie, int field) : ie(ie), field(field) { ASSERT(ie); }
     NetworkInterface *getNetworkInterface() const { return ie; }
     int getFieldId() const { return field; }
-    virtual std::string str() const override;
+    std::string str() const override;
 };
 
 /**
@@ -135,7 +135,7 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
       public:
         LocalGate(NetworkInterface *networkInterface) : networkInterface(networkInterface) { }
 
-        virtual bool deliver(cMessage *msg, const SendOptions &options, simtime_t t) override;
+        bool deliver(cMessage *msg, const SendOptions &options, simtime_t t) override;
     };
 
   private:
@@ -159,14 +159,14 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     virtual void stateChanged(int fieldId) { changed(interfaceStateChangedSignal, fieldId); }
     virtual void changed(simsignal_t signalID, int fieldId);
 
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage) override;
-    virtual void handleParameterChange(const char *name) override;
-    virtual void refreshDisplay() const override;
-    virtual void updateDisplayString() const override;
-    virtual std::string resolveDirective(char directive) const override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
-    virtual cGate *createGateObject(cGate::Type type) override {
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override;
+    void handleParameterChange(const char *name) override;
+    void refreshDisplay() const override;
+    void updateDisplayString() const override;
+    std::string resolveDirective(char directive) const override;
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
+    cGate *createGateObject(cGate::Type type) override {
         return type == cGate::INPUT ? new LocalGate(this) : cModule::createGateObject(type);
     }
 
@@ -179,28 +179,28 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     virtual void resetInterface();
 
   protected:
-    virtual std::string getFullPath() const override { return cModule::getFullPath(); }
-    virtual const char *getName() const override { return cModule::getName(); }
+    std::string getFullPath() const override { return cModule::getFullPath(); }
+    const char *getName() const override { return cModule::getName(); }
 
-    virtual void arrived(cMessage *message, cGate *gate, const SendOptions& options, simtime_t time) override;
+    void arrived(cMessage *message, cGate *gate, const SendOptions& options, simtime_t time) override;
 
   public:
     NetworkInterface();
-    virtual ~NetworkInterface();
-    virtual std::string str() const override;
+    ~NetworkInterface() override;
+    std::string str() const override;
     virtual std::string getInterfaceFullPath() const;
 
-    virtual bool supportsPacketSending(cGate *gate) const override { return true; }
-    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
-    virtual bool supportsPacketPassing(cGate *gate) const override { return true; }
-    virtual bool supportsPacketStreaming(cGate *gate) const override { return false; }
-    virtual bool canPushSomePacket(cGate *gate) const override;
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
-    virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override;
-    virtual void pushPacketEnd(Packet *packet, cGate *gate) override;
-    virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
+    bool supportsPacketSending(cGate *gate) const override { return true; }
+    bool supportsPacketPushing(cGate *gate) const override { return true; }
+    bool supportsPacketPulling(cGate *gate) const override { return false; }
+    bool supportsPacketPassing(cGate *gate) const override { return true; }
+    bool supportsPacketStreaming(cGate *gate) const override { return false; }
+    bool canPushSomePacket(cGate *gate) const override;
+    bool canPushPacket(Packet *packet, cGate *gate) const override;
+    void pushPacket(Packet *packet, cGate *gate) override;
+    void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override;
+    void pushPacketEnd(Packet *packet, cGate *gate) override;
+    void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
 
     /**
      * Returns the IInterfaceTable this interface is in, or nullptr
@@ -392,7 +392,7 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
 
     // for lifecycle:
     //@{
-    virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
     virtual void handleStartOperation(LifecycleOperation *operation);
     virtual void handleStopOperation(LifecycleOperation *operation);
     virtual void handleCrashOperation(LifecycleOperation *operation);

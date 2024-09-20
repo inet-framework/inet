@@ -60,7 +60,7 @@ class INET_API SharedDataManager : public omnetpp::cISimulationLifecycleListener
 
   protected:
     SharedDataManager();
-    virtual void lifecycleEvent(omnetpp::SimulationLifecycleEventType eventType, omnetpp::cObject *details) override;
+    void lifecycleEvent(omnetpp::SimulationLifecycleEventType eventType, omnetpp::cObject *details) override;
     void clear();
 
   public:

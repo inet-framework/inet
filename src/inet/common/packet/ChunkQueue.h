@@ -63,7 +63,7 @@ class INET_API ChunkQueue : public cNamedObject
     ChunkQueue(const char *name = nullptr, const Ptr<const Chunk>& content = makeShared<EmptyChunk>());
     ChunkQueue(const ChunkQueue& other);
 
-    virtual ChunkQueue *dup() const override { return new ChunkQueue(*this); }
+    ChunkQueue *dup() const override { return new ChunkQueue(*this); }
     //@}
 
     /** @name Length querying related functions */
@@ -197,7 +197,7 @@ class INET_API ChunkQueue : public cNamedObject
     /**
      * Returns a human readable string representation.
      */
-    virtual std::string str() const override;
+    std::string str() const override;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const ChunkQueue *queue) { return os << queue->str(); }

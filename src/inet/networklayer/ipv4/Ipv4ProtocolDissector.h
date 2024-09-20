@@ -15,7 +15,7 @@ namespace inet {
 class INET_API Ipv4ProtocolDissector : public ProtocolDissector
 {
   public:
-    virtual void dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const override;
+    void dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const override;
 };
 
 } // namespace inet

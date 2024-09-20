@@ -38,7 +38,7 @@ class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase
 
       public:
         Node(cModule *module) : L3NetworkConfiguratorBase::Node(module) {}
-        ~Node() {
+        ~Node() override {
             for (size_t i = 0; i < staticRoutes.size(); i++) delete staticRoutes[i];
             for (size_t i = 0; i < staticMulticastRoutes.size(); i++) delete staticMulticastRoutes[i];
         }
@@ -46,7 +46,7 @@ class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase
 
     class INET_API Topology : public L3NetworkConfiguratorBase::Topology {
       protected:
-        virtual Node *createNode(cModule *module) override { return new Ipv4NetworkConfigurator::Node(module); }
+        Node *createNode(cModule *module) override { return new Ipv4NetworkConfigurator::Node(module); }
     };
 
     /**
@@ -155,9 +155,9 @@ class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase
     virtual void configureRoutingTable(IIpv4RoutingTable *routingTable, NetworkInterface *networkInterface);
 
   protected:
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
-    virtual void initialize(int stage) override;
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void handleMessage(cMessage *msg) override { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
+    void initialize(int stage) override;
 
     /**
      * Reads interface elements from the configuration file and stores result.
@@ -216,14 +216,14 @@ class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase
     virtual void dumpConfig(Topology& topology);
 
     // helper functions
-    virtual InterfaceInfo *createInterfaceInfo(L3NetworkConfiguratorBase::Topology& topology, L3NetworkConfiguratorBase::Node *node, LinkInfo *linkInfo, NetworkInterface *networkInterface) override;
+    InterfaceInfo *createInterfaceInfo(L3NetworkConfiguratorBase::Topology& topology, L3NetworkConfiguratorBase::Node *node, LinkInfo *linkInfo, NetworkInterface *networkInterface) override;
     virtual void parseAddressAndSpecifiedBits(const char *addressAttr, uint32_t& outAddress, uint32_t& outAddressSpecifiedBits);
     virtual bool linkContainsMatchingHostExcept(LinkInfo *linkInfo, Matcher *hostMatcher, cModule *exceptModule);
     virtual void resolveInterfaceAndGateway(Node *node, const char *interfaceAttr, const char *gatewayAttr, NetworkInterface *& outIE, Ipv4Address& outGateway, Topology& topology);
     virtual InterfaceInfo *findInterfaceOnLinkByNode(LinkInfo *linkInfo, cModule *node);
     virtual InterfaceInfo *findInterfaceOnLinkByNodeAddress(LinkInfo *linkInfo, Ipv4Address address);
     virtual LinkInfo *findLinkOfInterface(Topology& topology, NetworkInterface *networkInterface);
-    virtual IRoutingTable *findRoutingTable(L3NetworkConfiguratorBase::Node *node) override;
+    IRoutingTable *findRoutingTable(L3NetworkConfiguratorBase::Node *node) override;
     virtual void assignAddresses(std::vector<LinkInfo *> links);
 
     // helpers for address assignment

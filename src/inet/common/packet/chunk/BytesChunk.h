@@ -28,17 +28,17 @@ class INET_API BytesChunk : public Chunk
     std::vector<uint8_t> bytes;
 
   protected:
-    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
+    const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
 
     static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags);
 
-    virtual void doInsertAtFront(const Ptr<const Chunk>& chunk) override;
-    virtual void doInsertAtBack(const Ptr<const Chunk>& chunk) override;
-    virtual void doInsertAt(const Ptr<const Chunk>& chunk, b offset) override;
+    void doInsertAtFront(const Ptr<const Chunk>& chunk) override;
+    void doInsertAtBack(const Ptr<const Chunk>& chunk) override;
+    void doInsertAt(const Ptr<const Chunk>& chunk, b offset) override;
 
-    virtual void doRemoveAtFront(b length) override;
-    virtual void doRemoveAtBack(b length) override;
-    virtual void doRemoveAt(b offset, b length) override;
+    void doRemoveAtFront(b length) override;
+    void doRemoveAtBack(b length) override;
+    void doRemoveAt(b offset, b length) override;
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -48,11 +48,11 @@ class INET_API BytesChunk : public Chunk
     BytesChunk(const std::vector<uint8_t>& bytes);
     BytesChunk(const uint8_t *buffer, size_t bufLen) : Chunk(), bytes(buffer, buffer + bufLen) {}
 
-    virtual BytesChunk *dup() const override { return new BytesChunk(*this); }
-    virtual const Ptr<Chunk> dupShared() const override { return makeShared<BytesChunk>(*this); }
+    BytesChunk *dup() const override { return new BytesChunk(*this); }
+    const Ptr<Chunk> dupShared() const override { return makeShared<BytesChunk>(*this); }
 
-    virtual void parsimPack(cCommBuffer *buffer) const override;
-    virtual void parsimUnpack(cCommBuffer *buffer) override;
+    void parsimPack(cCommBuffer *buffer) const override;
+    void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     /** @name Field accessor functions */
@@ -73,20 +73,20 @@ class INET_API BytesChunk : public Chunk
 
     /** @name Overridden chunk functions */
     //@{
-    virtual ChunkType getChunkType() const override { return CT_BYTES; }
-    virtual b getChunkLength() const override { return B(bytes.size()); }
+    ChunkType getChunkType() const override { return CT_BYTES; }
+    b getChunkLength() const override { return B(bytes.size()); }
 
-    virtual bool containsSameData(const Chunk& other) const override;
+    bool containsSameData(const Chunk& other) const override;
 
-    virtual bool canInsertAtFront(const Ptr<const Chunk>& chunk) const override;
-    virtual bool canInsertAtBack(const Ptr<const Chunk>& chunk) const override;
-    virtual bool canInsertAt(const Ptr<const Chunk>& chunk, b offset) const override;
+    bool canInsertAtFront(const Ptr<const Chunk>& chunk) const override;
+    bool canInsertAtBack(const Ptr<const Chunk>& chunk) const override;
+    bool canInsertAt(const Ptr<const Chunk>& chunk, b offset) const override;
 
-    virtual bool canRemoveAtFront(b length) const override { return b(length).get() % 8 == 0; }
-    virtual bool canRemoveAtBack(b length) const override { return b(length).get() % 8 == 0; }
-    virtual bool canRemoveAt(b offset, b length) const override { return b(offset).get() % 8 == 0 && b(length).get() % 8 == 0; }
+    bool canRemoveAtFront(b length) const override { return b(length).get() % 8 == 0; }
+    bool canRemoveAtBack(b length) const override { return b(length).get() % 8 == 0; }
+    bool canRemoveAt(b offset, b length) const override { return b(offset).get() % 8 == 0 && b(length).get() % 8 == 0; }
 
-    virtual std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+    std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     //@}
 };
 

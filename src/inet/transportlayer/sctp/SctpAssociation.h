@@ -269,7 +269,7 @@ class INET_API SctpPathVariables : public cObject
 {
   public:
     SctpPathVariables(const L3Address& addr, SctpAssociation *assoc, const IRoutingTable *rt);
-    ~SctpPathVariables();
+    ~SctpPathVariables() override;
 
     SctpAssociation *association;
     L3Address remoteAddress;
@@ -414,7 +414,7 @@ class INET_API SctpDataVariables : public cObject
 {
   public:
     SctpDataVariables();
-    ~SctpDataVariables();
+    ~SctpDataVariables() override;
 
     void setInitialDestination(SctpPathVariables *path)
     {
@@ -530,7 +530,7 @@ class INET_API SctpStateVariables : public cObject
 {
   public:
     SctpStateVariables();
-    ~SctpStateVariables();
+    ~SctpStateVariables() override;
 
   public:
     void setPrimaryPath(SctpPathVariables *path)
@@ -990,7 +990,7 @@ class INET_API SctpAssociation : public cObject
     /**
      * Destructor.
      */
-    ~SctpAssociation();
+    ~SctpAssociation() override;
     /**
      * Utility: Send data from sendQueue.
      */

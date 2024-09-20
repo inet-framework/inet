@@ -19,12 +19,12 @@ class INET_API Signal : public cPacket, public IPrintableObject
     explicit Signal(const char *name = nullptr, short kind = 0, int64_t bitLength = 0);
     Signal(const Signal& other);
 
-    virtual Signal *dup() const override { return new Signal(*this); }
+    Signal *dup() const override { return new Signal(*this); }
 
-    virtual const char *getFullName() const override;
+    const char *getFullName() const override;
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
-    virtual std::string str() const override;
+    std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+    std::string str() const override;
 };
 
 } // namespace physicallayer

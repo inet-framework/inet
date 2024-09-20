@@ -109,7 +109,7 @@ class INET_API SharingRegionTagSet : public cObject
         const Ptr<const T>& getTag() const { return tag; }
         void setTag(const Ptr<const T>& tag) { this->tag = tag; }
 
-        virtual std::string str() const override {
+        std::string str() const override {
             using std::operator<<; // KLUDGE but whyyyyyyyy?
             std::stringstream stream;
             stream << "(" << getStartOffset() << ", " << getEndOffset() << ") " << (tag != nullptr ? tag->str() : "<nullptr>");
@@ -151,8 +151,8 @@ class INET_API SharingRegionTagSet : public cObject
     inline SharingRegionTagSet& operator=(const SharingRegionTagSet& other);
     inline SharingRegionTagSet& operator=(SharingRegionTagSet&& other);
 
-    virtual void parsimPack(cCommBuffer *buffer) const override;
-    virtual void parsimUnpack(cCommBuffer *buffer) override;
+    void parsimPack(cCommBuffer *buffer) const override;
+    void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     /** @name Type independent functions */

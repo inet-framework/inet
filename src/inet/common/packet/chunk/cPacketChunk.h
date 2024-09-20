@@ -24,20 +24,20 @@ class INET_API cPacketChunk : public Chunk
     cPacket *packet;
 
   protected:
-    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
+    const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
 
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
     cPacketChunk(cPacket *packet = nullptr);
     cPacketChunk(const cPacketChunk& other);
-    ~cPacketChunk();
+    ~cPacketChunk() override;
 
-    virtual cPacketChunk *dup() const override { return new cPacketChunk(*this); }
-    virtual const Ptr<Chunk> dupShared() const override { return makeShared<cPacketChunk>(*this); }
+    cPacketChunk *dup() const override { return new cPacketChunk(*this); }
+    const Ptr<Chunk> dupShared() const override { return makeShared<cPacketChunk>(*this); }
 
-    virtual void parsimPack(cCommBuffer *buffer) const override;
-    virtual void parsimUnpack(cCommBuffer *buffer) override;
+    void parsimPack(cCommBuffer *buffer) const override;
+    void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     /** @name Field accessor functions */
@@ -48,12 +48,12 @@ class INET_API cPacketChunk : public Chunk
 
     /** @name Overridden chunk functions */
     //@{
-    virtual ChunkType getChunkType() const override { return CT_CPACKET; }
-    virtual b getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(packet->getBitLength() >= 0); return b(packet->getBitLength()); }
+    ChunkType getChunkType() const override { return CT_CPACKET; }
+    b getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(packet->getBitLength() >= 0); return b(packet->getBitLength()); }
 
-    virtual bool containsSameData(const Chunk& other) const override;
+    bool containsSameData(const Chunk& other) const override;
 
-    virtual std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+    std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     //@}
 };
 

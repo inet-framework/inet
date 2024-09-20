@@ -20,7 +20,7 @@ class INET_API EmptyChunk : public Chunk
     friend class Chunk;
 
   protected:
-    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
+    const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
 
     static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags);
 
@@ -30,16 +30,16 @@ class INET_API EmptyChunk : public Chunk
     EmptyChunk();
     EmptyChunk(const EmptyChunk& other);
 
-    virtual EmptyChunk *dup() const override { return new EmptyChunk(*this); }
-    virtual const Ptr<Chunk> dupShared() const override { return makeShared<EmptyChunk>(*this); }
+    EmptyChunk *dup() const override { return new EmptyChunk(*this); }
+    const Ptr<Chunk> dupShared() const override { return makeShared<EmptyChunk>(*this); }
     //@}
 
     /** @name Overridden chunk functions */
     //@{
-    virtual ChunkType getChunkType() const override { return CT_EMPTY; }
-    virtual b getChunkLength() const override { return b(0); }
+    ChunkType getChunkType() const override { return CT_EMPTY; }
+    b getChunkLength() const override { return b(0); }
 
-    virtual std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream; }
+    std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream; }
     //@}
 
     static const Ptr<Chunk> getEmptyChunk(int flags) {

@@ -34,7 +34,7 @@ class INET_API ModuleStartOperation : public LifecycleOperation
     };
 
   public:
-    virtual int getNumStages() const override { return STAGE_LAST + 1; }
+    int getNumStages() const override { return STAGE_LAST + 1; }
 };
 
 /**
@@ -57,7 +57,7 @@ class INET_API ModuleStopOperation : public LifecycleOperation
     };
 
   public:
-    virtual int getNumStages() const override { return STAGE_LAST + 1; }
+    int getNumStages() const override { return STAGE_LAST + 1; }
 };
 
 /**
@@ -78,7 +78,7 @@ class INET_API ModuleCrashOperation : public LifecycleOperation
     };
 
   public:
-    virtual int getNumStages() const override { return STAGE_LAST + 1; }
+    int getNumStages() const override { return STAGE_LAST + 1; }
 };
 
 } // namespace inet

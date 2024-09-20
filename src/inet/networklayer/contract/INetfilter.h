@@ -118,7 +118,7 @@ class INET_API NetfilterBase : public INetfilter
         std::vector<INetfilter *> netfilters;
 
       public:
-        virtual ~HookBase() { for (auto netfilter : netfilters) netfilter->unregisterHook(this); }
+        ~HookBase() override { for (auto netfilter : netfilters) netfilter->unregisterHook(this); }
 
         void registeredTo(INetfilter *nf) { ASSERT(!isRegisteredHook(nf)); netfilters.push_back(nf); }
         void unregisteredFrom(INetfilter *nf) { ASSERT(isRegisteredHook(nf)); remove(netfilters, nf); }
@@ -129,17 +129,17 @@ class INET_API NetfilterBase : public INetfilter
     std::multimap<int, IHook *> hooks;
 
   public:
-    virtual ~NetfilterBase() {
+    ~NetfilterBase() override {
         for (auto hook : hooks)
             check_and_cast<HookBase *>(hook.second)->unregisteredFrom(this);
     }
 
-    virtual void registerHook(int priority, INetfilter::IHook *hook) override {
+    void registerHook(int priority, INetfilter::IHook *hook) override {
         hooks.insert(std::pair<int, INetfilter::IHook *>(priority, hook));
         check_and_cast<HookBase *>(hook)->registeredTo(this);
     }
 
-    virtual void unregisterHook(INetfilter::IHook *hook) override {
+    void unregisterHook(INetfilter::IHook *hook) override {
         for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
             if (iter->second == hook) {
                 hooks.erase(iter);

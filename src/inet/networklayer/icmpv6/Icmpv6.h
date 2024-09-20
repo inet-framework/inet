@@ -58,14 +58,14 @@ class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported, publi
     /**
      * Initialization
      */
-    virtual void initialize(int stage) override;
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override;
+    int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /**
      *  Processing of messages that arrive in this module. Messages arrived here
      *  could be for ICMP ping requests or ICMPv6 messages that require processing.
      */
-    virtual void handleMessage(cMessage *msg) override;
+    void handleMessage(cMessage *msg) override;
     virtual void processICMPv6Message(Packet *packet);
 
     /**
@@ -85,8 +85,8 @@ class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported, publi
 
     virtual void errorOut(const Ptr<const Icmpv6Header>& header);
 
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
   public:
     static void insertCrc(CrcMode crcMode, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet);

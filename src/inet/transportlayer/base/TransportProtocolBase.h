@@ -19,12 +19,12 @@ class INET_API TransportProtocolBase : public LayeredProtocolBase
     TransportProtocolBase() {};
 
   protected:
-    virtual bool isUpperMessage(cMessage *message) const override;
-    virtual bool isLowerMessage(cMessage *message) const override;
+    bool isUpperMessage(cMessage *message) const override;
+    bool isLowerMessage(cMessage *message) const override;
 
-    virtual bool isInitializeStage(int stage) const override;
-    virtual bool isModuleStartStage(int stage) const override;
-    virtual bool isModuleStopStage(int stage) const override;
+    bool isInitializeStage(int stage) const override;
+    bool isModuleStartStage(int stage) const override;
+    bool isModuleStopStage(int stage) const override;
 };
 
 } // namespace inet

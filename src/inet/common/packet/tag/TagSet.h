@@ -44,7 +44,7 @@ class INET_API TagSet : public cObject
     TagSet();
     TagSet(const TagSet& other);
     TagSet(TagSet&& other);
-    ~TagSet();
+    ~TagSet() override;
 
     TagSet& operator=(const TagSet& other);
     TagSet& operator=(TagSet&& other);

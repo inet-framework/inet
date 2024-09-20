@@ -351,7 +351,7 @@ class INET_API Topology : public cOwnedObject
     /**
      * Destructor.
      */
-    virtual ~Topology();
+    ~Topology() override;
 
     /**
      * Assignment operator. The name member is not copied; see cNamedObject's operator=() for more details.
@@ -366,27 +366,27 @@ class INET_API Topology : public cOwnedObject
      * Creates and returns an exact copy of this object.
      * See cObject for more details.
      */
-    virtual Topology *dup() const override { return new Topology(*this); }
+    Topology *dup() const override { return new Topology(*this); }
 
     /**
      * Produces a one-line description of the object's contents.
      * See cObject for more details.
      */
-    virtual std::string str() const override;
+    std::string str() const override;
 
     /**
      * Serializes the object into an MPI send buffer.
      * Used by the simulation kernel for parallel execution.
      * See cObject for more details.
      */
-    virtual void parsimPack(cCommBuffer *buffer) const override;
+    void parsimPack(cCommBuffer *buffer) const override;
 
     /**
      * Deserializes the object from an MPI receive buffer
      * Used by the simulation kernel for parallel execution.
      * See cObject for more details.
      */
-    virtual void parsimUnpack(cCommBuffer *buffer) override;
+    void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     /** @name Extracting the topology from a network.

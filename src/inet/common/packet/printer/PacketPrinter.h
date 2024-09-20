@@ -41,7 +41,7 @@ class INET_API PacketPrinter : public cMessagePrinter
       public:
         DirectiveResolver(const Context& context, const int numPacket) : context(context), numPacket(numPacket) {}
 
-        virtual std::string resolveDirective(char directive) const override;
+        std::string resolveDirective(char directive) const override;
     };
 
   protected:
@@ -64,14 +64,14 @@ class INET_API PacketPrinter : public cMessagePrinter
     virtual void printLengthColumn(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, Context& context) const;
 
   public:
-    virtual int getScoreFor(cMessage *msg) const override;
+    int getScoreFor(cMessage *msg) const override;
 
-    virtual std::set<std::string> getSupportedTags() const override;
-    virtual std::set<std::string> getDefaultEnabledTags() const override;
-    virtual std::vector<std::string> getColumnNames(const Options *options) const override;
+    std::set<std::string> getSupportedTags() const override;
+    std::set<std::string> getDefaultEnabledTags() const override;
+    std::vector<std::string> getColumnNames(const Options *options) const override;
 
     virtual void printMessage(std::ostream& stream, cMessage *message) const;
-    virtual void printMessage(std::ostream& stream, cMessage *message, const Options *options) const override;
+    void printMessage(std::ostream& stream, cMessage *message, const Options *options) const override;
 
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
     virtual void printSignal(std::ostream& stream, physicallayer::Signal *signal) const;

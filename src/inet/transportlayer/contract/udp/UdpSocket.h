@@ -96,7 +96,7 @@ class INET_API UdpSocket : public ISocket
     /**
      * Destructor
      */
-    ~UdpSocket() {}
+    ~UdpSocket() override {}
 
     void *getUserData() const { return userData; }
     void setUserData(void *userData) { this->userData = userData; }
@@ -252,16 +252,16 @@ class INET_API UdpSocket : public ISocket
      * Sends a data packet to the address and port specified previously
      * in a connect() call.
      */
-    virtual void send(Packet *msg) override;
+    void send(Packet *msg) override;
 
     /**
      * Unbinds the socket. Once closed, a closed socket may be bound to another
      * (or the same) port, and reused.
      */
-    virtual void close() override;
+    void close() override;
     //@}
 
-    virtual void destroy() override;
+    void destroy() override;
 
     /** @name Handling of messages arriving from UDP */
     //@{
@@ -270,7 +270,7 @@ class INET_API UdpSocket : public ISocket
      * has a UdpControlInfo as getControlInfo(), and the socketId in it matches
      * that of the socket.)
      */
-    virtual bool belongsToSocket(cMessage *msg) const override;
+    bool belongsToSocket(cMessage *msg) const override;
 
     /**
      * Sets a callback object, to be used with processMessage().
@@ -288,9 +288,9 @@ class INET_API UdpSocket : public ISocket
      */
     void setCallback(ICallback *cb);
 
-    virtual void processMessage(cMessage *msg) override;
+    void processMessage(cMessage *msg) override;
 
-    virtual bool isOpen() const override { return sockState != CLOSED; }
+    bool isOpen() const override { return sockState != CLOSED; }
 
     /**
      * Utility function: returns a line of information about a packet received via UDP.

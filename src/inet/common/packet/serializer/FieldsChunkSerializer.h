@@ -29,8 +29,8 @@ class INET_API FieldsChunkSerializer : public ChunkSerializer
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const = 0;
 
   public:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
+    void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const override;
+    const Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
 };
 
 } // namespace

@@ -72,10 +72,10 @@ class INET_API SctpServer : public cSimpleModule, public LifecycleUnsupported
     ServerAssocStatMap serverAssocStatMap;
 
   protected:
-    virtual void initialize(int stage) override;
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) override;
-    virtual void finish() override;
+    void initialize(int stage) override;
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void handleMessage(cMessage *msg) override;
+    void finish() override;
     void handleTimer(cMessage *msg);
     void sendOrSchedule(cMessage *msg);
     void sendOrSchedule(Message *msg);
@@ -87,7 +87,7 @@ class INET_API SctpServer : public cSimpleModule, public LifecycleUnsupported
     void generateAndSend();
 
   public:
-    virtual ~SctpServer();
+    ~SctpServer() override;
     SctpServer();
 };
 

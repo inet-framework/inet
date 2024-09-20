@@ -81,9 +81,9 @@ class INET_API Ipv6Route : public cObject, public IRoute
         _protocolData = nullptr;
     }
 
-    virtual ~Ipv6Route() { delete _protocolData; }
+    ~Ipv6Route() override { delete _protocolData; }
 
-    virtual std::string str() const override;
+    std::string str() const override;
     virtual std::string detailedInfo() const;
 
     /** To be called by the routing table when this route is added or removed from it */
@@ -96,27 +96,27 @@ class INET_API Ipv6Route : public cObject, public IRoute
     void setAdminDist(unsigned int adminDist) override { if (_adminDist != adminDist) { _adminDist = adminDist; changed(F_ADMINDIST); } }
 
     const Ipv6Address& getDestPrefix() const { return _destPrefix; }
-    virtual int getPrefixLength() const override { return _prefixLength; }
-    virtual SourceType getSourceType() const override { return _sourceType; }
+    int getPrefixLength() const override { return _prefixLength; }
+    SourceType getSourceType() const override { return _sourceType; }
     const Ipv6Address& getNextHop() const { return _nextHop; }
     simtime_t getExpiryTime() const { return _expiryTime; }
-    virtual int getMetric() const override { return _metric; }
+    int getMetric() const override { return _metric; }
     unsigned int getAdminDist() const { return _adminDist; }
-    virtual IRoutingTable *getRoutingTableAsGeneric() const override;
+    IRoutingTable *getRoutingTableAsGeneric() const override;
 
-    virtual void setDestination(const L3Address& dest) override { if (_destPrefix != dest.toIpv6()) { _destPrefix = dest.toIpv6(); changed(F_DESTINATION); } }
-    virtual void setPrefixLength(int prefixLength) override { if (_prefixLength != prefixLength) { _prefixLength = prefixLength; changed(F_PREFIX_LENGTH); } }
-    virtual void setNextHop(const L3Address& nextHop) override { if (_nextHop != nextHop.toIpv6()) { _nextHop = nextHop.toIpv6(); changed(F_NEXTHOP); } }
-    virtual void setSource(cObject *source) override { if (_source != source) { _source = source; changed(F_SOURCE); } }
-    virtual void setSourceType(SourceType type) override { if (_sourceType != type) { _sourceType = type; changed(F_TYPE); } }
+    void setDestination(const L3Address& dest) override { if (_destPrefix != dest.toIpv6()) { _destPrefix = dest.toIpv6(); changed(F_DESTINATION); } }
+    void setPrefixLength(int prefixLength) override { if (_prefixLength != prefixLength) { _prefixLength = prefixLength; changed(F_PREFIX_LENGTH); } }
+    void setNextHop(const L3Address& nextHop) override { if (_nextHop != nextHop.toIpv6()) { _nextHop = nextHop.toIpv6(); changed(F_NEXTHOP); } }
+    void setSource(cObject *source) override { if (_source != source) { _source = source; changed(F_SOURCE); } }
+    void setSourceType(SourceType type) override { if (_sourceType != type) { _sourceType = type; changed(F_TYPE); } }
     const char *getSourceTypeAbbreviation() const;
-    virtual L3Address getDestinationAsGeneric() const override { return getDestPrefix(); } // TODO rename Ipv6 method
-    virtual L3Address getNextHopAsGeneric() const override { return getNextHop(); }
-    virtual NetworkInterface *getInterface() const override { return _interfacePtr; }
-    virtual void setInterface(NetworkInterface *ie) override { if (_interfacePtr != ie) { _interfacePtr = ie; changed(F_IFACE); } }
-    virtual cObject *getSource() const override { return _source; }
-    virtual cObject *getProtocolData() const override { return _protocolData; }
-    virtual void setProtocolData(cObject *protocolData) override { _protocolData = protocolData; }
+    L3Address getDestinationAsGeneric() const override { return getDestPrefix(); } // TODO rename Ipv6 method
+    L3Address getNextHopAsGeneric() const override { return getNextHop(); }
+    NetworkInterface *getInterface() const override { return _interfacePtr; }
+    void setInterface(NetworkInterface *ie) override { if (_interfacePtr != ie) { _interfacePtr = ie; changed(F_IFACE); } }
+    cObject *getSource() const override { return _source; }
+    cObject *getProtocolData() const override { return _protocolData; }
+    void setProtocolData(cObject *protocolData) override { _protocolData = protocolData; }
 };
 
 } // namespace inet

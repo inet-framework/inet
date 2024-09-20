@@ -66,7 +66,7 @@ class INET_API ProtocolDissector : public cObject
 class INET_API DefaultProtocolDissector : public ProtocolDissector
 {
   public:
-    virtual void dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const override;
+    void dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const override;
 };
 
 } // namespace

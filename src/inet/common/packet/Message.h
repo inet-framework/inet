@@ -31,14 +31,14 @@ class INET_API Message : public cMessage, public IPrintableObject, public ITagge
     explicit Message(const char *name = nullptr, short kind = 0);
     Message(const Message& other);
 
-    virtual Message *dup() const override { return new Message(*this); }
+    Message *dup() const override { return new Message(*this); }
 
     /** @name Tag related functions */
     //@{
     /**
      * Returns all tags.
      */
-    virtual SharingTagSet& getTags() override { return tags; }
+    SharingTagSet& getTags() override { return tags; }
 
     /**
      * Returns the number of message tags.
@@ -128,7 +128,7 @@ class INET_API Message : public cMessage, public IPrintableObject, public ITagge
 
     /** @name Utility functions */
     //@{
-    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+    std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     //@}
 };
 
@@ -138,7 +138,7 @@ class INET_API Request : public Message
     explicit Request(const char *name = "Req", short kind = 0);
     Request(const Request& other);
 
-    virtual Request *dup() const override { return new Request(*this); }
+    Request *dup() const override { return new Request(*this); }
 };
 
 class INET_API Indication : public Message
@@ -147,7 +147,7 @@ class INET_API Indication : public Message
     explicit Indication(const char *name = "Ind", short kind = 0);
     Indication(const Indication& other);
 
-    virtual Indication *dup() const override { return new Indication(*this); }
+    Indication *dup() const override { return new Indication(*this); }
 };
 
 } // namespace

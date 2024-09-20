@@ -38,15 +38,15 @@ class INET_API OperationalMixin : public T, public ILifecycle
     cMessage *activeOperationExtraTimer = nullptr;
 
   protected:
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage) override;
-    virtual void refreshDisplay() const override;
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override;
+    void refreshDisplay() const override;
 
-    virtual void handleMessage(cMessage *msg) override;
+    void handleMessage(cMessage *msg) override;
     virtual void handleMessageWhenDown(cMessage *msg);
     virtual void handleMessageWhenUp(cMessage *msg) = 0;
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
     virtual void handleStartOperation(LifecycleOperation *operation) = 0;
     virtual void handleStopOperation(LifecycleOperation *operation) = 0;
     virtual void handleCrashOperation(LifecycleOperation *operation) = 0;
@@ -76,7 +76,7 @@ class INET_API OperationalMixin : public T, public ILifecycle
     /// }@
 
   public:
-    virtual ~OperationalMixin();
+    ~OperationalMixin() override;
 };
 
 } // namespace inet

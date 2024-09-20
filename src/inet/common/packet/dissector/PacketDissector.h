@@ -68,11 +68,11 @@ class INET_API PacketDissector
       public:
         ProtocolDissectorCallback(const PacketDissector& packetDissector);
 
-        virtual void startProtocolDataUnit(const Protocol *protocol) override;
-        virtual void endProtocolDataUnit(const Protocol *protocol) override;
-        virtual void markIncorrect() override;
-        virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
-        virtual void dissectPacket(Packet *packet, const Protocol *protocol) override;
+        void startProtocolDataUnit(const Protocol *protocol) override;
+        void endProtocolDataUnit(const Protocol *protocol) override;
+        void markIncorrect() override;
+        void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
+        void dissectPacket(Packet *packet, const Protocol *protocol) override;
     };
 
     class INET_API ProtocolDataUnit : public Chunk {
@@ -86,15 +86,15 @@ class INET_API PacketDissector
         ProtocolDataUnit(int level, const Protocol *protocol);
 
         int getLevel() const { return level; }
-        bool isCorrect() const { return isCorrect_; }
+        bool isCorrect() const override { return isCorrect_; }
         const Protocol *getProtocol() const { return protocol; }
         const std::deque<Ptr<const Chunk>>& getChunks() const { return chunks; }
 
-        virtual ChunkType getChunkType() const { throw cRuntimeError("Invalid operation"); }
-        virtual b getChunkLength() const;
-        virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const { throw cRuntimeError("Invalid operation"); }
+        ChunkType getChunkType() const override { throw cRuntimeError("Invalid operation"); }
+        b getChunkLength() const override;
+        const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override { throw cRuntimeError("Invalid operation"); }
 
-        void markIncorrect() { isCorrect_ = false; }
+        void markIncorrect() override { isCorrect_ = false; }
         void insert(const Ptr<const Chunk>& chunk) { chunks.push_back(chunk); }
     };
 
@@ -105,11 +105,11 @@ class INET_API PacketDissector
       public:
         const Ptr<const Chunk> getContent() { return content; }
 
-        virtual bool shouldDissectProtocolDataUnit(const Protocol *protocol) override { return true; }
-        virtual void startProtocolDataUnit(const Protocol *protocol) override {}
-        virtual void endProtocolDataUnit(const Protocol *protocol) override {}
-        virtual void markIncorrect() override {}
-        virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
+        bool shouldDissectProtocolDataUnit(const Protocol *protocol) override { return true; }
+        void startProtocolDataUnit(const Protocol *protocol) override {}
+        void endProtocolDataUnit(const Protocol *protocol) override {}
+        void markIncorrect() override {}
+        void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
     };
 
     class INET_API PduTreeBuilder : public PacketDissector::ICallback {
@@ -126,11 +126,11 @@ class INET_API PacketDissector
         const Ptr<ProtocolDataUnit>& getTopLevelPdu() const { return topLevelPdu; }
         const Ptr<Chunk>& getRemainingJunk() const { return remainingJunk; }
 
-        virtual bool shouldDissectProtocolDataUnit(const Protocol *protocol) override { return true; }
-        virtual void startProtocolDataUnit(const Protocol *protocol) override;
-        virtual void endProtocolDataUnit(const Protocol *protocol) override;
-        virtual void markIncorrect() override;
-        virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
+        bool shouldDissectProtocolDataUnit(const Protocol *protocol) override { return true; }
+        void startProtocolDataUnit(const Protocol *protocol) override;
+        void endProtocolDataUnit(const Protocol *protocol) override;
+        void markIncorrect() override;
+        void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
     };
 
   protected:

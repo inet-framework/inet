@@ -38,7 +38,7 @@ class INET_API SctpSendStream : public cObject
   public:
 
     SctpSendStream(SctpAssociation *assoc, const uint16_t id);
-    ~SctpSendStream();
+    ~SctpSendStream() override;
 
     cPacketQueue *getStreamQ() const { return streamQ; };
     cPacketQueue *getUnorderedStreamQ() const { return uStreamQ; };

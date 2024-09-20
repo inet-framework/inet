@@ -176,20 +176,20 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
 
     /** @name Supported cPacket interface functions */
     //@{
-    virtual Packet *dup() const override { return new Packet(*this); }
-    virtual void forEachChild(cVisitor *v) override;
-    virtual bool hasBitError() const override { return cPacket::hasBitError() || content->isIncorrect(); }
-    virtual void parsimPack(cCommBuffer *buffer) const override;
-    virtual void parsimUnpack(cCommBuffer *buffer) override;
+    Packet *dup() const override { return new Packet(*this); }
+    void forEachChild(cVisitor *v) override;
+    bool hasBitError() const override { return cPacket::hasBitError() || content->isIncorrect(); }
+    void parsimPack(cCommBuffer *buffer) const override;
+    void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
     /** @name Unsupported cPacket interface functions */
     //@{
-    virtual void encapsulate(cPacket *packet) override { throw cRuntimeError("Invalid operation"); }
-    virtual cPacket *decapsulate() override { throw cRuntimeError("Invalid operation"); }
-    virtual cPacket *getEncapsulatedPacket() const override { return nullptr; }
-    virtual void setControlInfo(cObject *p) override { throw cRuntimeError("Invalid operation"); }
-    virtual void setBitLength(int64_t value) override { throw cRuntimeError("Invalid operation"); }
+    void encapsulate(cPacket *packet) override { throw cRuntimeError("Invalid operation"); }
+    cPacket *decapsulate() override { throw cRuntimeError("Invalid operation"); }
+    cPacket *getEncapsulatedPacket() const override { return nullptr; }
+    void setControlInfo(cObject *p) override { throw cRuntimeError("Invalid operation"); }
+    void setBitLength(int64_t value) override { throw cRuntimeError("Invalid operation"); }
     //@}
 
     /** @name Length querying functions */
@@ -204,7 +204,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * Returns the length in bits between the front and back offsets.
      * The returned value is in the range [0, +infinity).
      */
-    virtual int64_t getBitLength() const override { return b(getDataLength()).get(); }
+    int64_t getBitLength() const override { return b(getDataLength()).get(); }
 
     /**
      * Returns the current length of the data part of the packet. This is the
@@ -1254,7 +1254,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
     /**
      * Returns all tags.
      */
-    virtual SharingTagSet& getTags() override { return tags; }
+    SharingTagSet& getTags() override { return tags; }
 
     /**
      * Returns the number of packet tags.
@@ -1354,7 +1354,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
     /**
      * Returns all region tags.
      */
-    virtual SharingRegionTagSet& getRegionTags() override { return regionTags; }
+    SharingRegionTagSet& getRegionTags() override { return regionTags; }
 
     /**
      * Returns the number of region tags.
@@ -1475,19 +1475,19 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * Returns the full name of the packet. The full name consists of packet
      * name followed by either 'start', 'progress', or 'end'.
      */
-    virtual const char *getFullName() const override;
+    const char *getFullName() const override;
 
     /**
      * Prints a human readable string representation to the output stream. The
      * level argument controls the printed level of detail. The flags argument
      * allows formatted and multiline output.
      */
-    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+    std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     /**
      * Returns a human readable string representation.
      */
-    virtual std::string str() const override;
+    std::string str() const override;
     //@}
 };
 

@@ -44,7 +44,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
       public:
         DirectiveResolver(IMobility *mobility) : mobility(mobility) {}
 
-        virtual std::string resolveDirective(char directive) const override;
+        std::string resolveDirective(char directive) const override;
     };
 
   public:
@@ -80,13 +80,13 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
   protected:
     MobilityBase();
 
-    virtual int getId() const override { return cSimpleModule::getId(); }
+    int getId() const override { return cSimpleModule::getId(); }
 
     /** @brief Returns the required number of initialize stages. */
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /** @brief Initializes mobility model parameters. */
-    virtual void initialize(int stage) override;
+    void initialize(int stage) override;
 
     /** @brief Initializes mobility position. */
     virtual void initializePosition();
@@ -101,14 +101,14 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     virtual void initializeOrientation();
 
     /** @brief Moves the visual representation module's icon to the new position on the screen. */
-    virtual void refreshDisplay() const override;
+    void refreshDisplay() const override;
     virtual void updateDisplayStringFromMobilityState() const;
 
     /** @brief Allows changing parameters from the GUI. */
-    virtual void handleParameterChange(const char *name) override;
+    void handleParameterChange(const char *name) override;
 
     /** @brief This modules should only receive self-messages. */
-    virtual void handleMessage(cMessage *msg) override;
+    void handleMessage(cMessage *msg) override;
 
     /** @brief Called upon arrival of a self messages, subclasses must override. */
     virtual void handleSelfMessage(cMessage *msg) = 0;
@@ -163,10 +163,10 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     virtual void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& heading, rad& elevation, Quaternion& quaternion);
 
   public:
-    virtual double getMaxSpeed() const override { return NaN; }
+    double getMaxSpeed() const override { return NaN; }
 
-    virtual const Coord& getConstraintAreaMax() const override { return constraintAreaMax; }
-    virtual const Coord& getConstraintAreaMin() const override { return constraintAreaMin; }
+    const Coord& getConstraintAreaMax() const override { return constraintAreaMax; }
+    const Coord& getConstraintAreaMin() const override { return constraintAreaMin; }
 };
 
 } // namespace inet

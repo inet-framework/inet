@@ -15,21 +15,21 @@ namespace inet {
 class INET_API StationaryMobilityBase : public MobilityBase
 {
   protected:
-    virtual void handleSelfMessage(cMessage *message) override { throw cRuntimeError("Invalid operation"); }
+    void handleSelfMessage(cMessage *message) override { throw cRuntimeError("Invalid operation"); }
 
   public:
-    virtual const Quaternion& getCurrentAngularPosition() override { return lastOrientation; }
-    virtual const Quaternion& getCurrentAngularVelocity() override { return Quaternion::IDENTITY; }
-    virtual const Quaternion& getCurrentAngularAcceleration() override { return Quaternion::IDENTITY; }
+    const Quaternion& getCurrentAngularPosition() override { return lastOrientation; }
+    const Quaternion& getCurrentAngularVelocity() override { return Quaternion::IDENTITY; }
+    const Quaternion& getCurrentAngularAcceleration() override { return Quaternion::IDENTITY; }
 
-    virtual const Coord& getCurrentPosition() override { return lastPosition; }
-    virtual const Coord& getCurrentVelocity() override { return Coord::ZERO; }
-    virtual const Coord& getCurrentAcceleration() override { return Coord::ZERO; }
+    const Coord& getCurrentPosition() override { return lastPosition; }
+    const Coord& getCurrentVelocity() override { return Coord::ZERO; }
+    const Coord& getCurrentAcceleration() override { return Coord::ZERO; }
 
-    virtual double getMaxSpeed() const override { return 0; }
+    double getMaxSpeed() const override { return 0; }
 
-    virtual const Coord& getConstraintAreaMax() const override { return lastPosition; }
-    virtual const Coord& getConstraintAreaMin() const override { return lastPosition; }
+    const Coord& getConstraintAreaMax() const override { return lastPosition; }
+    const Coord& getConstraintAreaMin() const override { return lastPosition; }
 };
 
 } // namespace inet

@@ -37,7 +37,7 @@ class INET_API StreamBufferChunk : public Chunk
   protected:
     Chunk *_getStreamData() const { return streamData.get(); } // only for class descriptor
 
-    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
+    const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -46,14 +46,14 @@ class INET_API StreamBufferChunk : public Chunk
     StreamBufferChunk(const StreamBufferChunk& other) = default;
     StreamBufferChunk(const Ptr<Chunk>& chunk, simtime_t startTime, bps datarate);
 
-    virtual StreamBufferChunk *dup() const override { return new StreamBufferChunk(*this); }
-    virtual const Ptr<Chunk> dupShared() const override { return makeShared<StreamBufferChunk>(*this); }
+    StreamBufferChunk *dup() const override { return new StreamBufferChunk(*this); }
+    const Ptr<Chunk> dupShared() const override { return makeShared<StreamBufferChunk>(*this); }
 
-    virtual void parsimPack(cCommBuffer *buffer) const override;
-    virtual void parsimUnpack(cCommBuffer *buffer) override;
+    void parsimPack(cCommBuffer *buffer) const override;
+    void parsimUnpack(cCommBuffer *buffer) override;
     //@}
 
-    virtual void forEachChild(cVisitor *v) override;
+    void forEachChild(cVisitor *v) override;
 
     /** @name Field accessor functions */
     //@{
@@ -69,28 +69,28 @@ class INET_API StreamBufferChunk : public Chunk
 
     /** @name Overridden flag functions */
     //@{
-    virtual bool isMutable() const override { return Chunk::isMutable() || streamData->isMutable(); }
-    virtual bool isImmutable() const override { return Chunk::isImmutable() && streamData->isImmutable(); }
+    bool isMutable() const override { return Chunk::isMutable() || streamData->isMutable(); }
+    bool isImmutable() const override { return Chunk::isImmutable() && streamData->isImmutable(); }
 
-    virtual bool isComplete() const override { return Chunk::isComplete() && streamData->isComplete(); }
-    virtual bool isIncomplete() const override { return Chunk::isIncomplete() || streamData->isIncomplete(); }
+    bool isComplete() const override { return Chunk::isComplete() && streamData->isComplete(); }
+    bool isIncomplete() const override { return Chunk::isIncomplete() || streamData->isIncomplete(); }
 
-    virtual bool isCorrect() const override { return Chunk::isCorrect() && streamData->isCorrect(); }
-    virtual bool isIncorrect() const override { return Chunk::isIncorrect() || streamData->isIncorrect(); }
+    bool isCorrect() const override { return Chunk::isCorrect() && streamData->isCorrect(); }
+    bool isIncorrect() const override { return Chunk::isIncorrect() || streamData->isIncorrect(); }
 
-    virtual bool isProperlyRepresented() const override { return Chunk::isProperlyRepresented() && streamData->isProperlyRepresented(); }
-    virtual bool isImproperlyRepresented() const override { return Chunk::isImproperlyRepresented() || streamData->isImproperlyRepresented(); }
+    bool isProperlyRepresented() const override { return Chunk::isProperlyRepresented() && streamData->isProperlyRepresented(); }
+    bool isImproperlyRepresented() const override { return Chunk::isImproperlyRepresented() || streamData->isImproperlyRepresented(); }
     //@}
 
     /** @name Overridden chunk functions */
     //@{
-    virtual ChunkType getChunkType() const override { return CT_STREAM; }
+    ChunkType getChunkType() const override { return CT_STREAM; }
 
-    virtual b getChunkLength() const override { return streamData->getChunkLength(); }
+    b getChunkLength() const override { return streamData->getChunkLength(); }
 
-    virtual bool containsSameData(const Chunk& other) const override;
+    bool containsSameData(const Chunk& other) const override;
 
-    virtual std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+    std::ostream& printFieldsToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     //@}
 };
 

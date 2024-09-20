@@ -69,18 +69,18 @@ class INET_API SctpClient : public cSimpleModule, public SctpSocket::ICallback, 
     static simsignal_t echoedPkSignal;
 
   protected:
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
-    virtual void finish() override;
-    virtual void refreshDisplay() const override;
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override;
+    void handleMessage(cMessage *msg) override;
+    void finish() override;
+    void refreshDisplay() const override;
 
     void connect();
     void close();
     void handleTimer(cMessage *msg);
 
     /* SctpSocket::ICallback callback methods */
-    virtual void socketAvailable(SctpSocket *socket, Indication *indication) override { throw cRuntimeError("Model error, this module doesn't use any listener SCTP sockets"); }
+    void socketAvailable(SctpSocket *socket, Indication *indication) override { throw cRuntimeError("Model error, this module doesn't use any listener SCTP sockets"); }
     void socketEstablished(SctpSocket *socket, unsigned long int buffer) override; // TODO needs a better name
     void socketDataArrived(SctpSocket *socket, Packet *msg, bool urgent) override; // TODO needs a better name
     void socketDataNotificationArrived(SctpSocket *socket, Message *msg) override;
@@ -100,7 +100,7 @@ class INET_API SctpClient : public cSimpleModule, public SctpSocket::ICallback, 
 
   public:
     SctpClient();
-    virtual ~SctpClient();
+    ~SctpClient() override;
 };
 
 } // namespace inet

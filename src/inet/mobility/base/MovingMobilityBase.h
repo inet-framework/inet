@@ -50,13 +50,13 @@ class INET_API MovingMobilityBase : public MobilityBase
   protected:
     MovingMobilityBase();
 
-    virtual ~MovingMobilityBase();
+    ~MovingMobilityBase() override;
 
-    virtual void initialize(int stage) override;
+    void initialize(int stage) override;
 
-    virtual void initializePosition() override;
+    void initializePosition() override;
 
-    virtual void handleSelfMessage(cMessage *message) override;
+    void handleSelfMessage(cMessage *message) override;
 
     /** @brief Schedules the move timer that will update the mobility state. */
     void scheduleUpdate();
@@ -74,13 +74,13 @@ class INET_API MovingMobilityBase : public MobilityBase
     virtual void orient();
 
   public:
-    virtual const Coord& getCurrentPosition() override;
-    virtual const Coord& getCurrentVelocity() override;
-    virtual const Coord& getCurrentAcceleration() override { throw cRuntimeError("Invalid operation"); }
+    const Coord& getCurrentPosition() override;
+    const Coord& getCurrentVelocity() override;
+    const Coord& getCurrentAcceleration() override { throw cRuntimeError("Invalid operation"); }
 
-    virtual const Quaternion& getCurrentAngularPosition() override;
-    virtual const Quaternion& getCurrentAngularVelocity() override;
-    virtual const Quaternion& getCurrentAngularAcceleration() override { throw cRuntimeError("Invalid operation"); }
+    const Quaternion& getCurrentAngularPosition() override;
+    const Quaternion& getCurrentAngularVelocity() override;
+    const Quaternion& getCurrentAngularAcceleration() override { throw cRuntimeError("Invalid operation"); }
 };
 
 } // namespace inet

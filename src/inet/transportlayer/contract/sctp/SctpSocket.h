@@ -125,7 +125,7 @@ class INET_API SctpSocket : public ISocket
     /**
      * Destructor
      */
-    ~SctpSocket();
+    ~SctpSocket() override;
 
     void *getUserData() const { return userData; }
     void setUserData(void *userData) { this->userData = userData; }
@@ -267,7 +267,7 @@ class INET_API SctpSocket : public ISocket
     /**
      * Send data message
      */
-    virtual void send(Packet *packet) override;
+    void send(Packet *packet) override;
 
     /**
      * Send notification.
@@ -287,7 +287,7 @@ class INET_API SctpSocket : public ISocket
      */
     void close(int id);
 
-    virtual void close() override { close(-1); }
+    void close() override { close(-1); }
 
     /**
      * Aborts the association.
@@ -311,7 +311,7 @@ class INET_API SctpSocket : public ISocket
      * has a SctpCommand as controlInfo(), and the assocId in it matches
      * that of the socket.)
      */
-    virtual bool belongsToSocket(cMessage *msg) const override;
+    bool belongsToSocket(cMessage *msg) const override;
 
     /**
      * Sets a callback object, to be used with processMessage().
@@ -353,9 +353,9 @@ class INET_API SctpSocket : public ISocket
 
     int getTunInterface() { return interfaceIdToTun; };
 
-    virtual void destroy() override;
+    void destroy() override;
 
-    virtual bool isOpen() const override;
+    bool isOpen() const override;
 };
 
 } // namespace inet

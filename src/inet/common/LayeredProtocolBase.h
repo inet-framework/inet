@@ -16,7 +16,7 @@ namespace inet {
 class INET_API LayeredProtocolBase : public OperationalBase
 {
   protected:
-    virtual void handleMessageWhenUp(cMessage *message) override;
+    void handleMessageWhenUp(cMessage *message) override;
     virtual void handleSelfMessage(cMessage *message);
 
     virtual void handleUpperMessage(cMessage *message);

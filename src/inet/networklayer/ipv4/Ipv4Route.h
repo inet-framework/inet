@@ -46,8 +46,8 @@ class INET_API Ipv4Route : public cObject, public IRoute
   public:
     Ipv4Route() : rt(nullptr), interfacePtr(nullptr), sourceType(MANUAL), adminDist(dUnknown),
         metric(0), source(nullptr), protocolData(nullptr) {}
-    virtual ~Ipv4Route();
-    virtual std::string str() const override;
+    ~Ipv4Route() override;
+    std::string str() const override;
     virtual std::string detailedInfo() const;
 
     bool operator==(const Ipv4Route& route) const { return equals(route); }
@@ -64,11 +64,11 @@ class INET_API Ipv4Route : public cObject, public IRoute
     virtual void setDestination(Ipv4Address _dest) { if (dest != _dest) { dest = _dest; changed(F_DESTINATION); } }
     virtual void setNetmask(Ipv4Address _netmask) { if (netmask != _netmask) { netmask = _netmask; changed(F_PREFIX_LENGTH); } }
     virtual void setGateway(Ipv4Address _gateway) { if (gateway != _gateway) { gateway = _gateway; changed(F_NEXTHOP); } }
-    virtual void setInterface(NetworkInterface *_interfacePtr) override { if (interfacePtr != _interfacePtr) { interfacePtr = _interfacePtr; changed(F_IFACE); } }
-    virtual void setSourceType(SourceType _source) override { if (sourceType != _source) { sourceType = _source; changed(F_SOURCE); } }
+    void setInterface(NetworkInterface *_interfacePtr) override { if (interfacePtr != _interfacePtr) { interfacePtr = _interfacePtr; changed(F_IFACE); } }
+    void setSourceType(SourceType _source) override { if (sourceType != _source) { sourceType = _source; changed(F_SOURCE); } }
     const char *getSourceTypeAbbreviation() const;
-    virtual void setAdminDist(unsigned int _adminDist) override { if (adminDist != _adminDist) { adminDist = _adminDist; changed(F_ADMINDIST); } }
-    virtual void setMetric(int _metric) override { if (metric != _metric) { metric = _metric; changed(F_METRIC); } }
+    void setAdminDist(unsigned int _adminDist) override { if (adminDist != _adminDist) { adminDist = _adminDist; changed(F_ADMINDIST); } }
+    void setMetric(int _metric) override { if (metric != _metric) { metric = _metric; changed(F_METRIC); } }
 
     /** Destination address prefix to match */
     const Ipv4Address& getDestination() const { return dest; }
@@ -100,14 +100,14 @@ class INET_API Ipv4Route : public cObject, public IRoute
     cObject *getProtocolData() const override { return protocolData; }
     void setProtocolData(cObject *protocolData) override { this->protocolData = protocolData; }
 
-    virtual IRoutingTable *getRoutingTableAsGeneric() const override;
-    virtual void setDestination(const L3Address& dest) override { setDestination(dest.toIpv4()); }
-    virtual void setPrefixLength(int len) override { setNetmask(Ipv4Address::makeNetmask(len)); }
-    virtual void setNextHop(const L3Address& nextHop) override { setGateway(nextHop.toIpv4()); } // TODO rename Ipv4 method
+    IRoutingTable *getRoutingTableAsGeneric() const override;
+    void setDestination(const L3Address& dest) override { setDestination(dest.toIpv4()); }
+    void setPrefixLength(int len) override { setNetmask(Ipv4Address::makeNetmask(len)); }
+    void setNextHop(const L3Address& nextHop) override { setGateway(nextHop.toIpv4()); } // TODO rename Ipv4 method
 
-    virtual L3Address getDestinationAsGeneric() const override { return getDestination(); }
-    virtual int getPrefixLength() const override { return getNetmask().getNetmaskLength(); }
-    virtual L3Address getNextHopAsGeneric() const override { return getGateway(); } // TODO rename Ipv4 method
+    L3Address getDestinationAsGeneric() const override { return getDestination(); }
+    int getPrefixLength() const override { return getNetmask().getNetmaskLength(); }
+    L3Address getNextHopAsGeneric() const override { return getGateway(); } // TODO rename Ipv4 method
 };
 
 /**
@@ -159,8 +159,8 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
 
   public:
     Ipv4MulticastRoute() : rt(nullptr), inInterface(nullptr), sourceType(MANUAL), source(nullptr), metric(0) {}
-    virtual ~Ipv4MulticastRoute();
-    virtual std::string str() const override;
+    ~Ipv4MulticastRoute() override;
+    std::string str() const override;
     virtual std::string detailedInfo() const;
 
     /** To be called by the routing table when this route is added or removed from it */
@@ -179,13 +179,13 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
     virtual void setOrigin(Ipv4Address _origin) { if (origin != _origin) { origin = _origin; changed(F_ORIGIN); } }
     virtual void setOriginNetmask(Ipv4Address _netmask) { if (originNetmask != _netmask) { originNetmask = _netmask; changed(F_ORIGINMASK); } }
     virtual void setMulticastGroup(Ipv4Address _group) { if (group != _group) { group = _group; changed(F_MULTICASTGROUP); } }
-    virtual void setInInterface(InInterface *_inInterface) override;
-    virtual void clearOutInterfaces() override;
-    virtual void addOutInterface(OutInterface *outInterface) override;
-    virtual bool removeOutInterface(const NetworkInterface *ie) override;
-    virtual void removeOutInterface(unsigned int i) override;
-    virtual void setSourceType(SourceType _source) override { if (sourceType != _source) { sourceType = _source; changed(F_SOURCE); } }
-    virtual void setMetric(int _metric) override { if (metric != _metric) { metric = _metric; changed(F_METRIC); } }
+    void setInInterface(InInterface *_inInterface) override;
+    void clearOutInterfaces() override;
+    void addOutInterface(OutInterface *outInterface) override;
+    bool removeOutInterface(const NetworkInterface *ie) override;
+    void removeOutInterface(unsigned int i) override;
+    void setSourceType(SourceType _source) override { if (sourceType != _source) { sourceType = _source; changed(F_SOURCE); } }
+    void setMetric(int _metric) override { if (metric != _metric) { metric = _metric; changed(F_METRIC); } }
 
     /** Source address prefix to match */
     Ipv4Address getOrigin() const { return origin; }
@@ -214,17 +214,17 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
     void setSource(cObject *_source) override { source = _source; }
     cObject *getSource() const override { return source; }
 
-    virtual IRoutingTable *getRoutingTableAsGeneric() const override;
-    virtual void setEnabled(bool enabled) override { /*TODO setEnabled(enabled);*/ }
-    virtual void setOrigin(const L3Address& origin) override { setOrigin(origin.toIpv4()); }
-    virtual void setPrefixLength(int len) override { setOriginNetmask(Ipv4Address::makeNetmask(len)); } // TODO inconsistent naming
-    virtual void setMulticastGroup(const L3Address& group) override { setMulticastGroup(group.toIpv4()); }
+    IRoutingTable *getRoutingTableAsGeneric() const override;
+    void setEnabled(bool enabled) override { /*TODO setEnabled(enabled);*/ }
+    void setOrigin(const L3Address& origin) override { setOrigin(origin.toIpv4()); }
+    void setPrefixLength(int len) override { setOriginNetmask(Ipv4Address::makeNetmask(len)); } // TODO inconsistent naming
+    void setMulticastGroup(const L3Address& group) override { setMulticastGroup(group.toIpv4()); }
 
-    virtual bool isEnabled() const override { return true; /*TODO isEnabled();*/ }
-    virtual bool isExpired() const override { return !isValid(); } // TODO rename Ipv4 method
-    virtual L3Address getOriginAsGeneric() const override { return getOrigin(); }
-    virtual int getPrefixLength() const override { return getOriginNetmask().getNetmaskLength(); } // TODO inconsistent naming
-    virtual L3Address getMulticastGroupAsGeneric() const override { return getMulticastGroup(); }
+    bool isEnabled() const override { return true; /*TODO isEnabled();*/ }
+    bool isExpired() const override { return !isValid(); } // TODO rename Ipv4 method
+    L3Address getOriginAsGeneric() const override { return getOrigin(); }
+    int getPrefixLength() const override { return getOriginNetmask().getNetmaskLength(); } // TODO inconsistent naming
+    L3Address getMulticastGroupAsGeneric() const override { return getMulticastGroup(); }
 };
 
 } // namespace inet

@@ -143,7 +143,7 @@ class INET_API TcpSocket : public ISocket
       public:
         virtual void socketDataArrived(TcpSocket *socket) = 0;
 
-        virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override {
+        void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override {
             socket->getReceiveQueue()->push(packet->peekData());
             delete packet;
             socketDataArrived(socket);
@@ -196,7 +196,7 @@ class INET_API TcpSocket : public ISocket
     /**
      * Destructor
      */
-    ~TcpSocket();
+    ~TcpSocket() override;
 
     /**
      * Returns the internal connection Id. TCP uses the (gate index, connId) pair
@@ -298,7 +298,7 @@ class INET_API TcpSocket : public ISocket
     /**
      * Sends data packet.
      */
-    virtual void send(Packet *msg) override;
+    void send(Packet *msg) override;
 
     /**
      * Sends command.
@@ -321,7 +321,7 @@ class INET_API TcpSocket : public ISocket
     /**
      * Destroy the connection.
      */
-    virtual void destroy() override;
+    void destroy() override;
 
     /**
      * Causes TCP to reply with a fresh TcpStatusInfo, attached to a dummy
@@ -368,7 +368,7 @@ class INET_API TcpSocket : public ISocket
      */
     void renewSocket();
 
-    virtual bool isOpen() const override;
+    bool isOpen() const override;
     //@}
 
     /** @name Handling of messages arriving from TCP */
@@ -378,7 +378,7 @@ class INET_API TcpSocket : public ISocket
      * has a TcpCommand as getControlInfo(), and the connId in it matches
      * that of the socket.)
      */
-    virtual bool belongsToSocket(cMessage *msg) const override;
+    bool belongsToSocket(cMessage *msg) const override;
 
     /**
      * Sets a callback object, to be used with processMessage().

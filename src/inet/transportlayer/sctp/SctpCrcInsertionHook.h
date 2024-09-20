@@ -29,11 +29,11 @@ class INET_API SctpCrcInsertion : public cSimpleModule, public NetfilterBase::Ho
     uint32_t checksum(unsigned char const *, unsigned int);
 
   public:
-    virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }
-    virtual Result datagramForwardHook(Packet *packet) override { return ACCEPT; }
-    virtual Result datagramPostRoutingHook(Packet *packet) override;
-    virtual Result datagramLocalInHook(Packet *packet) override { return ACCEPT; }
-    virtual Result datagramLocalOutHook(Packet *packet) override { return ACCEPT; }
+    Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }
+    Result datagramForwardHook(Packet *packet) override { return ACCEPT; }
+    Result datagramPostRoutingHook(Packet *packet) override;
+    Result datagramLocalInHook(Packet *packet) override { return ACCEPT; }
+    Result datagramLocalOutHook(Packet *packet) override { return ACCEPT; }
 };
 
 } // namespace tcp

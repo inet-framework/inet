@@ -47,7 +47,7 @@ class INET_API SctpQueue : public cObject
     /**
      * Virtual destructor.
      */
-    ~SctpQueue();
+    ~SctpQueue() override;
 
     bool checkAndInsertChunk(const uint32_t key, SctpDataVariables *chunk);
     /* returns true if new data is inserted and false if data was present */

@@ -31,9 +31,9 @@ class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacke
     b processedTotalLength = b(-1);
 
   protected:
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage) override;
-    virtual void refreshDisplay() const override;
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override;
+    void refreshDisplay() const override;
     virtual void handlePacketProcessed(Packet *packet);
 
     virtual void checkPacketOperationSupport(cGate *gate) const;
@@ -76,11 +76,11 @@ class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacke
     virtual void updateDisplayString() const;
 
   public:
-    virtual bool supportsPacketSending(cGate *gate) const override { return true; }
-    virtual bool supportsPacketPassing(cGate *gate) const override { return true; }
-    virtual bool supportsPacketStreaming(cGate *gate) const override { return false; }
+    bool supportsPacketSending(cGate *gate) const override { return true; }
+    bool supportsPacketPassing(cGate *gate) const override { return true; }
+    bool supportsPacketStreaming(cGate *gate) const override { return false; }
 
-    virtual std::string resolveDirective(char directive) const override;
+    std::string resolveDirective(char directive) const override;
 };
 
 } // namespace queueing

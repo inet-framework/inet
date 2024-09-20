@@ -37,7 +37,7 @@ class INET_API ProtocolPrinter : public cObject
 class INET_API DefaultProtocolPrinter : public ProtocolPrinter
 {
   public:
-    virtual void print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const override;
+    void print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const override;
 };
 
 } // namespace

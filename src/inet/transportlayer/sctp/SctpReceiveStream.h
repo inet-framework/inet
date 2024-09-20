@@ -37,7 +37,7 @@ class INET_API SctpReceiveStream : public cObject
     /**
      * Virtual dtor.
      */
-    ~SctpReceiveStream();
+    ~SctpReceiveStream() override;
     SctpQueue *getDeliveryQ() const { return deliveryQ; };
     SctpQueue *getOrderedQ() const { return orderedQ; };
     SctpQueue *getUnorderedQ() const { return unorderedQ; };
