@@ -13,7 +13,7 @@ import io
 import logging
 import matplotlib
 import numpy
-import sewar
+import importlib.util
 
 import omnetpp
 import omnetpp.scave
@@ -25,6 +25,25 @@ from inet.test.statistical import *
 from inet.test.task import *
 
 _logger = logging.getLogger(__name__)
+
+
+def sewar_rmse(a, b):
+    a,b = sewar_initial_check(a,b)
+    return numpy.sqrt(numpy.mean((a.astype(numpy.float64)-b.astype(numpy.float64))**2))
+
+def sewar_initial_check(GT,P):
+	assert GT.shape == P.shape, "Supplied images have different sizes " + \
+	str(GT.shape) + " and " + str(P.shape)
+	if GT.dtype != P.dtype:
+		msg = "Supplied images have different dtypes " + \
+			str(GT.dtype) + " and " + str(P.dtype)
+		_logger.warn(msg)
+
+	if len(GT.shape) == 2:
+		GT = GT[:,:,numpy.newaxis]
+		P = P[:,:,numpy.newaxis]
+
+	return GT.astype(numpy.float64),P.astype(numpy.float64)
 
 class ChartTestTask(TestTask):
     def __init__(self, analysis_file_name, id, chart_name, simulation_project=None, name="chart test", **kwargs):
@@ -58,7 +77,7 @@ class ChartTestTask(TestTask):
                 if os.path.exists(old_file_name):
                     new_image = matplotlib.image.imread(new_file_name)
                     old_image = matplotlib.image.imread(old_file_name)
-                    metric = sewar.rmse(old_image, new_image)
+                    metric = sewar_rmse(old_image, new_image)
                     if metric == 0 or not keep_charts:
                         os.remove(new_file_name)
                     else:
@@ -164,7 +183,7 @@ class ChartUpdateTask(UpdateTask):
                 if os.path.exists(old_file_name):
                     new_image = matplotlib.image.imread(new_file_name)
                     old_image = matplotlib.image.imread(old_file_name)
-                    metric = sewar.rmse(old_image, new_image)
+                    metric = sewar_rmse(old_image, new_image)
                     if metric == 0:
                         os.remove(new_file_name)
                     else:
