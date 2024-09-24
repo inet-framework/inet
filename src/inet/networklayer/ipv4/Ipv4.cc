@@ -271,7 +271,7 @@ void Ipv4::handleIncomingDatagram(Packet *packet)
         }
     }
 
-    EV_DETAIL << "Received datagram `" << ipv4Header->getName() << "' with dest=" << ipv4Header->getDestAddress() << "\n";
+    EV_INFO << "Received datagram from lower layer" << EV_FIELD(packet) << EV_ENDL;
 
     if (datagramPreRoutingHook(packet) == INetfilter::IHook::ACCEPT)
         preroutingFinish(packet);
@@ -383,7 +383,7 @@ void Ipv4::preroutingFinish(Packet *packet)
 
 void Ipv4::handlePacketFromHL(Packet *packet)
 {
-    EV_INFO << "Received " << packet << " from upper layer.\n";
+    EV_INFO << "Received packet from upper layer" << EV_FIELD(packet) << EV_ENDL;
     emit(packetReceivedFromUpperSignal, packet);
 
     auto socketReq = packet->findTag<SocketReq>();
@@ -431,8 +431,6 @@ void Ipv4::datagramLocalOut(Packet *packet)
 
     // send
     Ipv4Address destAddr = ipv4Header->getDestAddress();
-
-    EV_DETAIL << "Sending datagram '" << packet->getName() << "' with destination = " << destAddr << "\n";
 
     if (ipv4Header->getDestAddress().isMulticast()) {
         // RFC 1112, section 6.1
@@ -548,7 +546,7 @@ void Ipv4::datagramLocalOut(Packet *packet)
     else { // unicast and broadcast
            // check for local delivery
         if (rt->isLocalAddress(destAddr)) {
-            EV_INFO << "Delivering " << packet << " locally.\n";
+            EV_INFO << "Delivering datagram locally" << EV_FIELD(packet) << EV_ENDL;
             if (destIE && !destIE->isLoopback()) {
                 EV_DETAIL << "datagram destination address is local, ignoring destination interface specified in the control info\n";
                 destIE = nullptr;
@@ -586,7 +584,7 @@ void Ipv4::routeUnicastPacket(Packet *packet)
 
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     Ipv4Address destAddr = ipv4Header->getDestAddress();
-    EV_INFO << "Routing " << packet << " with destination = " << destAddr << ", ";
+    EV_INFO << "Routing datagram" << EV_FIELD(destination, destAddr) << EV_FIELD(packet) << EV_ENDL;
 
     // if output port was explicitly requested, use that, otherwise use Ipv4 routing
     if (destIE) {
@@ -634,7 +632,7 @@ void Ipv4::routeUnicastPacket(Packet *packet)
 
 void Ipv4::routeUnicastPacketFinish(Packet *packet)
 {
-    EV_INFO << "output interface = " << getDestInterface(packet)->getInterfaceName() << ", next hop address = " << getNextHop(packet) << "\n";
+    EV_INFO << "Made routing decision" << EV_FIELD(interface, getDestInterface(packet)->getInterfaceName()) << EV_FIELD(nextHopAddress, getNextHop(packet)) << EV_ENDL;
     numForwarded++;
     fragmentPostRouting(packet);
 }
@@ -778,7 +776,7 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
 
 void Ipv4::reassembleAndDeliver(Packet *packet)
 {
-    EV_INFO << "Delivering " << packet << " locally.\n";
+    EV_INFO << "Delivering datagram locally" << EV_FIELD(packet) << EV_ENDL;
 
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     if (ipv4Header->getSrcAddress().isUnspecified())
@@ -829,14 +827,14 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
             auto *packetCopy = packet->dup();
             packetCopy->setKind(IPv4_I_DATA);
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
-            EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
+            EV_INFO << "Sending packet to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);
             send(packetCopy, "transportOut");
             hasSocket = true;
         }
     }
     if (contains(upperProtocols, protocol)) {
-        EV_INFO << "Passing up to protocol " << *protocol << "\n";
+        EV_INFO << "Sending packet to protocol" << EV_FIELD(protocol, *protocol) << EV_FIELD(packet) << EV_ENDL;
         emit(packetSentToUpperSignal, packet);
         transportSink.pushPacket(packet);
         numLocalDeliver++;
@@ -1182,13 +1180,16 @@ MacAddress Ipv4::resolveNextHopMacAddress(cPacket *packet, Ipv4Address nextHopAd
 void Ipv4::sendPacketToNIC(Packet *packet)
 {
     auto networkInterface = ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
-    EV_INFO << "Sending " << packet << " to output interface = " << networkInterface->getInterfaceName() << ".\n";
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
     packet->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv4);
     if (auto networkInterfaceProtocol = networkInterface->getProtocol())
         ensureEncapsulationProtocolReq(packet, networkInterfaceProtocol, true, false);
     setDispatchProtocol(packet);
     queueSink.pushPacket(packet);
+    EV_INFO << "Sending datagram to lower layer";
+    if (auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>())
+        EV_INFO << EV_FIELD(protocol, *dispatchProtocolReq->getProtocol());
+    EV_INFO << EV_FIELD(interface, networkInterface->getInterfaceName()) << EV_FIELD(packet) << EV_ENDL;
 }
 
 // NetFilter:

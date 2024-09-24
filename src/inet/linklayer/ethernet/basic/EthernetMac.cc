@@ -92,7 +92,6 @@ void EthernetMac::handleSelfMessage(cMessage *msg)
 void EthernetMac::startFrameTransmission()
 {
     ASSERT(currentTxFrame);
-    EV_DETAIL << "Transmitting a copy of frame " << currentTxFrame << endl;
 
     Packet *frame = currentTxFrame->dup(); // note: we need to duplicate the frame because we emit a signal with it in endTxPeriod()
     const auto& hdr = frame->peekAtFront<EthernetMacHeader>(); // note: we need to duplicate the frame because we emit a signal with it in endTxPeriod()
@@ -119,7 +118,6 @@ void EthernetMac::startFrameTransmission()
     frame->clearTags();
     auto newPacketProtocolTag = frame->addTag<PacketProtocolTag>();
     *newPacketProtocolTag = *oldPacketProtocolTag;
-    EV_INFO << "Transmission of " << frame << " started.\n";
     auto signal = new EthernetSignal(frame->getName());
     signal->setSrcMacFullDuplex(duplexMode);
     signal->setBitrate(curEtherDescr.bitrate);
@@ -129,6 +127,7 @@ void EthernetMac::startFrameTransmission()
         frame->insertAtFront(bytes);
     }
     signal->encapsulate(frame);
+    EV_INFO << "Transmission started" << EV_FIELD(signal) << EV_ENDL;
     ASSERT(curTxSignal == nullptr);
     curTxSignal = signal->dup();
     emit(transmissionStartedSignal, signal);
@@ -140,7 +139,7 @@ void EthernetMac::startFrameTransmission()
 void EthernetMac::handleUpperPacket(Packet *packet)
 {
     //ASSERT2(false, "using EthernetMac");
-    EV_INFO << "Received " << packet << " from upper layer." << endl;
+    EV_INFO << "Received packet from upper layer" << EV_FIELD(packet) << EV_ENDL;
 
     numFramesFromHL++;
 
@@ -177,7 +176,7 @@ void EthernetMac::handleUpperPacket(Packet *packet)
 
 void EthernetMac::processMsgFromNetwork(Signal *signal)
 {
-    EV_INFO << signal << " received." << endl;
+    EV_INFO << "Reception ended" << EV_FIELD(signal) << EV_ENDL;
 
     if (!connected) {
         EV_WARN << "Interface is not connected -- dropping signal " << signal << endl;
@@ -248,7 +247,7 @@ void EthernetMac::processMsgFromNetwork(Signal *signal)
         }
     }
     else {
-        EV_INFO << "Reception of " << EV_FIELD(packet) << " successfully completed." << endl;
+        EV_INFO << "Reception successfully completed" << EV_FIELD(packet) << EV_ENDL;
         processReceivedDataFrame(packet, frame);
     }
 }
@@ -260,7 +259,7 @@ void EthernetMac::handleEndIFGPeriod()
         throw cRuntimeError("Not in WAIT_IFG_STATE at the end of IFG period");
 
     // End of IFG period, okay to transmit
-    EV_DETAIL << "IFG elapsed" << endl;
+    EV_DETAIL << "Ending IFG period" << EV_ENDL;
     changeTransmissionState(TX_IDLE_STATE);
 
     if (canDequeuePacket()) {
@@ -295,7 +294,7 @@ void EthernetMac::handleEndTxPeriod()
         }
     }
 
-    EV_INFO << "Transmission of " << currentTxFrame << " successfully completed.\n";
+    EV_INFO << "Transmission successfully completed" << EV_FIELD(packet, currentTxFrame) << EV_ENDL;
     deleteCurrentTxFrame();
     lastTxFinishTime = simTime();
 
@@ -307,7 +306,7 @@ void EthernetMac::handleEndTxPeriod()
         pauseUnitsRequested = 0;
     }
     else {
-        EV_DETAIL << "Start IFG period\n";
+        EV_DETAIL << "Starting IFG period" << EV_ENDL;
         scheduleEndIFGPeriod();
     }
 }
@@ -356,7 +355,7 @@ void EthernetMac::processReceivedDataFrame(Packet *packet, const Ptr<const Ether
     numFramesPassedToHL++;
     emit(packetSentToUpperSignal, packet);
     // pass up to upper layer
-    EV_INFO << "Sending " << packet << " to upper layer.\n";
+    EV_INFO << "Sending packet to upper layer" << EV_FIELD(packet) << EV_ENDL;
     upperLayerSink.pushPacket(packet);
 }
 
