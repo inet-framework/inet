@@ -1,3 +1,151 @@
+Intra-node inter-module communication
+=====================================
+
+detailed classification of currently used means of communication
+
+Problems
+--------
+
+ - non-transparent bridging/mpls layer breaks protocol registration and dispatching, so all modules should be transparent in bridging?
+ - inserting a PCAP recorder module into the path between protocols breaks protocol registration and dispatching
+ - inserting a bypass connection for bridging/mpls layer creates ambiguity in dispatching, because bridging/mpls needs to be transparent to protocol registration, see above
+ - socket to socket handler communication, socket method calls are translated into message/packet sends towards the protocol, messages cannot pass through queueing modules, see below
+ - queueing modules don't handle messages, socket commands cannot pass through them
+ - reordering of synchronous C++ method calls vs asynchronous message/packet sends
+   - send packet, close socket
+   - configure radio, send packet
+
+Classes of problems
+-------------------
+
+ - forwarding inter-module communication (aka. internal routing)
+ - ordering of synchronous vs asynchronous inter-module communication
+   - solution: everything is synchronous unless simulation time is involved
+ - delaying synchronous calls while keeping ordering
+
+Solutions
+---------
+
+ - to fix the above problems
+   - forward messages in queueing like modules?
+   - forward protocol registrations in queueing like modules?
+   - forward both messages and protocol registrations using omitted type connections?
+
+ - using another module always starts with an interface lookup which will return a pointer to a module implementing the interface
+   - by parameter
+   - by gate
+
+Abstractions
+------------
+
+ - modules are the means of abstractions
+ - simple modules are atomic and cannot be further divided
+ - compound modules combine other modules, simple or compound
+ - modules can communicate with other modules using module interfaces
+   - modules reachable through connections
+   - modules found using module path parameters
+   - (submodules?)
+   - (parent module?)
+ - communication between modules starts with a module lookup which results in a module reference
+ - module lookup can be forwarded to other modules resulting in a different module reference
+ - actual communication is done by calling C++ methods on a module reference found by lookup
+
+Possible means of communication
+-------------------------------
+
+ - send message/packet on connection (direct sends are not allowed)
+   - receiver module is directly connected
+   - receiver module is indirectly connected through MessageDispatcher modules
+     - send to network interface using InterfaceReq
+     - send to protocol using DispatchProtocolReq
+     - send to application using SocketInd
+ - direct C++ method call
+   - lookup target module
+     - by submodule name
+     - based on module path parameter
+     - find specific C++ interface along connection chain
+   - using callback interface
+ - subscribe/emit/receiveSignal
+   - using simsignals
+
+Current solution
+----------------
+
+ - modules or classes which send messages: *Socket, socket protocol handler modules, various SCTP modules, Radio using modules
+ - socket requests: open, close, bind, connect, listen, SetSocketOptions, GetSocketOptions, read
+ - socket indications: closed, available, error
+ - queueing modules don't handle messages, only packets
+ - application sockets send messages and packets
+ - socket handlers can be separated from applications using queueing modules
+ - many-to-many protocol combinations use message dispatchers with protocol registration
+
+Alternative solutions
+---------------------
+
+ - make all socket handler modules reachable through message dispatchers only
+   - problem: inserting a PCAP recorder or a measurement module into the path doesn't forward socket commands
+     - solution: add message dispatchers that allow bypassing the PCAP or measurement module
+       - problem: messages and packets must go through the same path to keep the order
+       - problem: the NED files become unnecessarily complicated
+ - except for send/receive all socket method calls are synchronous, they are asynchronously send packets
+   - problem: send() then close(), close may be processed first incorrectly because the packet suffers 0s delay
+     - solution: send directly calls the socket handler to tell how much data is expected
+
+Architectural considerations
+----------------------------
+
+ - connections are only used for packets and not for messages/commands
+ - module nesting and composition
+ - protocol registration and protocol registration forwarding
+ - using MessageDispatchers
+   - no loops are allowed
+
+Use-cases, problems
+-------------------
+
+ - open/close socket (e.g. open TCPSocket::open())
+   doesn't work: EthernetApp <--> BridgingLayer <--> EthernetLayer <--> EthernetInterface
+   open socket raw Ethernet socket (message) can't pass through the BridgingLayer to the EthernetLayer
+
+ - send down a packet (e.g. send IPv4 PDU/Ethernet SDU) for encapsulation
+   doesn't work when non-protocol registration transparent bridging layer is present
+
+ - send up a packet (e.g. send IPv4 PDU/Ethernet SDU) for decapsulation
+
+ - call protocol specific function (e.g. IArp::resolveL3Address())
+ - emit protocol specific signal (e.g. Ieee80211Mac linkBreakSignal)
+
+Rules of thumb for composition
+------------------------------
+
+ - a module that does nothing with in/out gates should be as simple as handleMessage() { send(); }
+   no need to implement interfaces and derive from specific base classes
+ - all packets passed between modules must be sent along a connection
+   may be a push/pull represented by a virtual packet send
+
+Questions
+---------
+
+synchronous/asynchronous communication?
+remove all transparent protocol registration from queueing modules?
+remove all transparent interface registration from queueing modules?
+how should we forward socket bind/open/close/configure commands through/around queueing modules
+add direct connection next to the bridging layer/mpls/etc. to allow bypassing them?
+
+Requirements
+------------
+
+inserting a measurement or PCAP recorder module next to a protocol module should not break a working simulation
+bridging layer bypassing connection must be present
+ethernet switch must forward all ethernet frames by default except frames sent to the switch
+manual protocol dispatching INI file configuration should be none or minimal whatever that means
+
+the bridging layers don't register themselves as a receiver of any protocol
+the direction reverser doesn't register itself as a receiver of any protocol
+the message dispatcher can't forward packets from link layer protocols to the bridging layer by default, it needs to be configured
+the message dispatcher can't forward packets from upper layer protocols to the bridging layer by default, it needs to be configured
+the Ethernet switch doesn't forward all protocols encapsulated into Ethernet frames by default, is it a problem?
+
 INET 4.5 release
 ================
 
