@@ -12,14 +12,20 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/ieee80211/llc/IIeee80211Llc.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
 
 namespace ieee80211 {
 
+using namespace inet::queueing;
+
 class INET_API Ieee80211Portal : public cSimpleModule, public IIeee80211Llc
 {
   protected:
+    PassivePacketSinkRef lowerLayerSink;
+    PassivePacketSinkRef upperLayerSink;
+
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
     bool upperLayerOutConnected = false;
 

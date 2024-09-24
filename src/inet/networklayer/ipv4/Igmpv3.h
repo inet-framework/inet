@@ -23,8 +23,11 @@
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/IgmpMessage.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 class IInterfaceTable;
 class IRoutingTable;
@@ -191,6 +194,7 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
   protected:
     ModuleRefByPar<IRoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
+    PassivePacketSinkRef ipSink;
 
     bool enabled;
     int robustness;

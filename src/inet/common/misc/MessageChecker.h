@@ -7,9 +7,12 @@
 #ifndef __INET_MESSAGECHECKER_H
 #define __INET_MESSAGECHECKER_H
 
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/common/INETDefs.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 #define BUFSIZE    4096
 
@@ -36,6 +39,7 @@ class INET_API MessageChecker : public cSimpleModule
     void checkFieldType(any_ptr object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attrList, int i = 0) const;
     int findFieldIndex(any_ptr object, cClassDescriptor *descriptor, const std::string& fieldName) const;
 
+    PassivePacketSinkRef outSink;
     cXMLElementList m_checkingInfo; // List of checking information
     cXMLElementList::iterator m_iterChk; // Interator of the list of chacking information
     unsigned forwardedMsg; // Number of received and forwarded messages

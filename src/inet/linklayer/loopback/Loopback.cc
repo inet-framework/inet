@@ -64,7 +64,7 @@ void Loopback::handleUpperPacket(Packet *packet)
     packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
     packet->addTag<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     emit(packetSentToUpperSignal, packet);
-    send(packet, upperLayerOutGateId);
+    upperLayerSink.pushPacket(packet);
 }
 
 void Loopback::refreshDisplay() const

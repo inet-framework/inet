@@ -19,6 +19,7 @@
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/INetfilter.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/transportlayer/base/TransportProtocolBase.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
@@ -34,6 +35,8 @@
 #endif
 
 namespace inet {
+
+using namespace inet::queueing;
 
 const uint16_t UDP_MAX_MESSAGE_SIZE = 65535; // bytes
 
@@ -121,6 +124,8 @@ class INET_API Udp : public TransportProtocolBase
 #ifdef INET_WITH_IPv6
     opp_component_ptr<Icmpv6> icmpv6;
 #endif
+    PassivePacketSinkRef ipSink;
+    PassivePacketSinkRef appSink;
 
     // statistics
     int numSent = 0;

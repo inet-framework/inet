@@ -86,6 +86,8 @@ void Sctp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
+        ipSink.reference(gate("ipOut"), true);
+        appSink.reference(gate("appOut"), true);
         auth = par("auth");
         pktdrop = par("packetDrop");
         sackNow = par("sackNow");
@@ -441,7 +443,7 @@ void Sctp::sendShutdownCompleteFromMain(SctpHeader *sctpmsg, L3Address fromAddr,
 void Sctp::send_to_ip(Packet *msg)
 {
     EV_INFO << "send packet " << msg << " to IP\n";
-    send(msg, "ipOut");
+    ipSink.pushPacket(msg);
 }
 
 void Sctp::refreshDisplay() const

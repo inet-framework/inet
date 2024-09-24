@@ -11,9 +11,12 @@
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 // foreign declarations:
 class Ipv6Address;
@@ -89,6 +92,9 @@ class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported
     void insertCrc(const Ptr<Icmpv6Header>& icmpHeader, Packet *packet) { insertCrc(crcMode, icmpHeader, packet); }
 
   protected:
+    PassivePacketSinkRef ipv6Sink;
+    PassivePacketSinkRef transportSink;
+
     CrcMode crcMode = CRC_MODE_UNDEFINED;
     typedef std::map<long, int> PingMap;
     PingMap pingMap;

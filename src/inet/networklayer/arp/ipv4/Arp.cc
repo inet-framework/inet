@@ -50,8 +50,8 @@ void Arp::initialize(int stage)
         retryCount = par("retryCount");
         cacheTimeout = par("cacheTimeout");
         proxyArpInterfaces = par("proxyArpInterfaces").stdstringValue();
-
         proxyArpInterfacesMatcher.setPattern(proxyArpInterfaces.c_str(), false, true, false);
+        ifOutSink.reference(gate("ifOut"), true);
 
         // init statistics
         numRequestsSent = numRepliesSent = 0;
@@ -181,7 +181,7 @@ void Arp::sendArpRequest(const NetworkInterface *ie, Ipv4Address ipAddress)
     // send out
     EV_INFO << "Sending " << packet << " to network protocol.\n";
     emit(arpRequestSentSignal, packet);
-    send(packet, "ifOut");
+    ifOutSink.pushPacket(packet);
     numRequestsSent++;
 }
 
@@ -347,7 +347,7 @@ void Arp::processArpPacket(Packet *packet)
                 // send out
                 EV_INFO << "Sending " << outPk << " to network protocol.\n";
                 emit(arpReplySentSignal, outPk);
-                send(outPk, "ifOut");
+                ifOutSink.pushPacket(outPk);
                 numRepliesSent++;
                 break;
             }
@@ -488,7 +488,7 @@ void Arp::sendArpGratuitous(const NetworkInterface *ie, MacAddress srcAddr, Ipv4
     // updateARPCache(entry, srcAddr); //FIXME
 
     // send out
-    send(packet, "ifOut");
+    ifOutSink.pushPacket(packet);
 }
 
 // A client should send out 'ARP Probe' to probe the newly received IPv4 address.
@@ -521,7 +521,7 @@ void Arp::sendArpProbe(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Addre
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
 
     // send out
-    send(packet, "ifOut");
+    ifOutSink.pushPacket(packet);
 }
 
 } // namespace inet

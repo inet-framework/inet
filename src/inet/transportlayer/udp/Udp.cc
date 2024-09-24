@@ -67,6 +67,8 @@ void Udp::initialize(int stage)
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
         ift.reference(this, "interfaceTableModule", true);
+        appSink.reference(gate("appOut"), true);
+        ipSink.reference(gate("ipOut"), true);
 #ifdef INET_WITH_IPv4
         icmp = nullptr;
 #endif
@@ -792,7 +794,7 @@ void Udp::handleUpperPacket(Packet *packet)
     EV_INFO << "Sending app packet " << packet->getName() << " over " << l3Protocol->getName() << ".\n";
     emit(packetSentSignal, packet);
     emit(packetSentToLowerSignal, packet);
-    send(packet, "ipOut");
+    ipSink.pushPacket(packet);
     numSent++;
 }
 
@@ -1134,7 +1136,7 @@ void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, us
     payload->addTagIfAbsent<L4PortInd>()->setDestPort(destPort);
 
     emit(packetSentToUpperSignal, payload);
-    send(payload, "appOut");
+    appSink.pushPacket(payload);
     numPassedUp++;
 }
 

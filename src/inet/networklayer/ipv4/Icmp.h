@@ -15,8 +15,11 @@
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 class Ipv4Header;
 
@@ -26,6 +29,8 @@ class Ipv4Header;
 class INET_API Icmp : public cSimpleModule
 {
   protected:
+    PassivePacketSinkRef ipSink;
+
     std::set<int> transportProtocols; // where to send up packets
     CrcMode crcMode = CRC_MODE_UNDEFINED;
     B quoteLength;

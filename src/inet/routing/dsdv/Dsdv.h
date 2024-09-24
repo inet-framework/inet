@@ -31,10 +31,13 @@
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/dsdv/DsdvHello_m.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * DSDV protocol implementation.
@@ -65,6 +68,7 @@ class INET_API Dsdv : public RoutingProtocolBase
     simtime_t helloInterval;
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<IIpv4RoutingTable> rt;
+    PassivePacketSinkRef ipSink;
 
   public:
     Dsdv();

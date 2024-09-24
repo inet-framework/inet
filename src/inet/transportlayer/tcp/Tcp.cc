@@ -5,6 +5,7 @@
 //
 
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
@@ -52,6 +53,12 @@ void Tcp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
+        PacketServiceTag packetServiceTag;
+        packetServiceTag.setProtocol(&Protocol::tcp);
+        appSink.reference(gate("appOut"), false, &packetServiceTag);
+        PacketProtocolTag packetProtocolTag;
+        packetProtocolTag.setProtocol(&Protocol::tcp);
+        ipSink.reference(gate("ipOut"), true, &packetProtocolTag);
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
 
@@ -115,7 +122,19 @@ void Tcp::sendFromConn(cMessage *msg, const char *gatename, int gateindex)
 {
     Enter_Method("sendFromConn");
     take(msg);
-    send(msg, gatename, gateindex);
+    if (!strcmp(gatename, "ipOut"))
+        // KLUDGE: this schedule call is here to keep the fingerprints
+        inet::scheduleAfter("SendToIp", 0, [=] () {
+            ipSink.pushPacket(check_and_cast<Packet *>(msg));
+        });
+    else if (!strcmp(gatename, "appOut")) {
+        // KLUDGE: this schedule call is here to keep the fingerprints
+        inet::scheduleAfter("SendToApp", 0, [=] () {
+            appSink.pushPacket(check_and_cast<Packet *>(msg));
+        });
+    }
+    else
+        throw cRuntimeError("Unknown gate: %s", gatename);
 }
 
 void Tcp::handleUpperPacket(Packet *packet)

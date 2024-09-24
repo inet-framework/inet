@@ -17,12 +17,16 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/linklayer/ieee8021as/GptpPacket_m.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 class INET_API Gptp : public ClockUserModuleBase, public cListener
 {
     //parameters:
+    PassivePacketSinkRef socketSink;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
 
     GptpNodeType gptpNodeType;

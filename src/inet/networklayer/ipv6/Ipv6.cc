@@ -79,6 +79,8 @@ void Ipv6::initialize(int stage)
         nd.reference(this, "ipv6NeighbourDiscoveryModule", true);
         icmp.reference(this, "icmpv6Module", true);
         tunneling.reference(this, "ipv6TunnelingModule", true);
+        transportSink.reference(gate("transportOut"), true);
+        queueSink.reference(gate("queueOut"), true);
 
         curFragmentId = 0;
         lastCheckTime = SIMTIME_ZERO;
@@ -680,7 +682,7 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
             EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);
-            send(packetCopy, "transportOut");
+            transportSink.pushPacket(packetCopy);
             hasSocket = true;
         }
     }
@@ -713,7 +715,7 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
     else if (contains(upperProtocols, protocol)) {
         EV_INFO << "Passing up to protocol " << *protocol << "\n";
         emit(packetSentToUpperSignal, packet);
-        send(packet, "transportOut");
+        transportSink.pushPacket(packet);
     }
     else if (!hasSocket) {
         // send ICMP Destination Unreacheable error: protocol unavailable
@@ -734,7 +736,7 @@ void Ipv6::handleReceivedIcmp(Packet *msg)
     }
     else {
         EV_INFO << "ICMPv6 packet: passing it to ICMPv6 module\n";
-        send(msg, "transportOut");
+        transportSink.pushPacket(msg);
     }
 }
 
@@ -949,7 +951,7 @@ void Ipv6::sendDatagramToOutput(Packet *packet, const NetworkInterface *destIE, 
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
     else
         packet->removeTagIfPresent<DispatchProtocolReq>();
-    send(packet, "queueOut");
+    queueSink.pushPacket(packet);
 }
 
 bool Ipv6::determineOutputInterface(const Ipv6Address& destAddress, Ipv6Address& nextHop,

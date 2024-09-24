@@ -18,6 +18,8 @@
 
 namespace inet {
 
+using namespace inet::queueing;
+
 class IInterfaceTable;
 class IIpv4RoutingTable;
 
@@ -129,6 +131,8 @@ class INET_API Igmpv2 : public cSimpleModule, public cListener
   protected:
     ModuleRefByPar<IIpv4RoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
+    PassivePacketSinkRef ipSink;
+    PassivePacketSinkRef routerSink;
 
     bool enabled;
     bool externalRouter;

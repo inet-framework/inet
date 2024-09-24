@@ -14,8 +14,11 @@
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * Simple traffic generator for the Ethernet model.
@@ -26,6 +29,7 @@ class INET_API EtherTrafGen : public ApplicationBase
     enum Kinds { START = 100, NEXT };
 
     ModuleRefByPar<IInterfaceTable> interfaceTable;
+    PassivePacketSinkRef outSink;
 
     long seqNum = 0;
 

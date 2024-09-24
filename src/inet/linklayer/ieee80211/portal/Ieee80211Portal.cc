@@ -29,6 +29,8 @@ Define_Module(Ieee80211Portal);
 void Ieee80211Portal::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
+        upperLayerSink.reference(gate("upperLayerOut"), true);
+        lowerLayerSink.reference(gate("lowerLayerOut"), true);
         upperLayerOutConnected = gate("upperLayerOut")->getPathEndGate()->isConnected();
 #ifdef INET_WITH_ETHERNET
         fcsMode = parseFcsMode(par("fcsMode"));
@@ -41,13 +43,13 @@ void Ieee80211Portal::handleMessage(cMessage *message)
     if (message->arrivedOn("upperLayerIn")) {
         auto packet = check_and_cast<Packet *>(message);
         encapsulate(packet);
-        send(packet, "lowerLayerOut");
+        lowerLayerSink.pushPacket(packet);
     }
     else if (message->arrivedOn("lowerLayerIn")) {
         auto packet = check_and_cast<Packet *>(message);
         decapsulate(packet);
         if (upperLayerOutConnected)
-            send(packet, "upperLayerOut");
+            upperLayerSink.pushPacket(packet);
         else
             delete packet;
     }
