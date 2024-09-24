@@ -17,7 +17,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API EthernetSocketIo : public ApplicationBase, public EthernetSocket::ICallback, public IPassivePacketSink
+class INET_API EthernetSocketIo : public ApplicationBase, public EthernetSocket::ICallback, public IPassivePacketSink, public IModuleInterfaceLookup
 {
   protected:
     PassivePacketSinkRef trafficSink;
@@ -52,6 +52,8 @@ class INET_API EthernetSocketIo : public ApplicationBase, public EthernetSocket:
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
+    virtual cGate* lookupModuleInterface(cGate* gate, const std::type_info& type, const cObject* arguments, int direction) override;
 };
 
 } // namespace inet
