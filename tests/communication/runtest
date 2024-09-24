@@ -1,0 +1,11 @@
+#! /bin/sh
+
+./communication -u Cmdenv -c TcpNetwork1
+./communication -u Cmdenv -c TcpNetwork2
+./communication -u Cmdenv -c TcpNetwork3
+./communication -u Cmdenv -c TcpNetwork4
+./communication -u Cmdenv -c TcpNetwork5
+./communication -u Cmdenv -c TcpNetwork6
+./communication -u Cmdenv -c TcpNetwork7
+./communication -u Cmdenv -c TcpNetwork8
+./communication -u Cmdenv -c TcpNetwork9
