@@ -8,7 +8,6 @@
 #ifndef __INET_MESSAGEDISPATCHER_H
 #define __INET_MESSAGEDISPATCHER_H
 
-#include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
@@ -31,7 +30,7 @@ class INET_API MessageDispatcher :
 #else
     public cSimpleModule,
 #endif // #ifdef INET_WITH_QUEUEING
-    public DefaultProtocolRegistrationListener, public IInterfaceRegistrationListener
+    public DefaultProtocolRegistrationListener
 {
   public:
     class INET_API Key {
@@ -95,8 +94,6 @@ class INET_API MessageDispatcher :
     virtual void handleCanPushPacketChanged(const cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
 #endif // #ifdef INET_WITH_QUEUEING
-
-    virtual void handleRegisterInterface(const NetworkInterface& interface, cGate *out, cGate *in) override;
 
     virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
     virtual void handleRegisterAnyService(cGate *gate, ServicePrimitive servicePrimitive) override;

@@ -293,12 +293,6 @@ void Mpls::sendToL3(Packet *msg)
     send(msg, "upperLayerOut");
 }
 
-void Mpls::handleRegisterInterface(const NetworkInterface& interface, cGate *out, cGate *in)
-{
-    if (!strcmp("lowerLayerIn", in->getBaseName()))
-        registerInterface(interface, gate("upperLayerIn"), gate("upperLayerOut"));
-}
-
 void Mpls::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
