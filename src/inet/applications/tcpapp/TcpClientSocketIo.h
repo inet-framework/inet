@@ -12,7 +12,9 @@
 
 namespace inet {
 
-class INET_API TcpClientSocketIo : public cSimpleModule, public TcpSocket::ICallback
+using namespace inet::queueing;
+
+class INET_API TcpClientSocketIo : public cSimpleModule, public TcpSocket::ICallback, public IPassivePacketSink
 {
   protected:
     TcpSocket socket;
@@ -35,6 +37,13 @@ class INET_API TcpClientSocketIo : public cSimpleModule, public TcpSocket::ICall
     virtual void socketDeleted(TcpSocket *socket) override;
 
     virtual void sendOrScheduleReadCommandIfNeeded();
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("trafficIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("trafficIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace inet

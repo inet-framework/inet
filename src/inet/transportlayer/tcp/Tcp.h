@@ -14,6 +14,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 #include "inet/transportlayer/base/TransportProtocolBase.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 #include "inet/transportlayer/contract/ITcp.h"
@@ -23,6 +24,8 @@
 
 namespace inet {
 namespace tcp {
+
+using namespace inet::queueing;
 
 // Forward declarations:
 class TcpConnection;
@@ -125,7 +128,7 @@ class TcpReceiveQueue;
  * The concrete TcpAlgorithm class to use can be chosen per connection (in OPEN)
  * or in a module parameter.
  */
-class INET_API Tcp : public TransportProtocolBase, public ITcp
+class INET_API Tcp : public TransportProtocolBase, public ITcp, public IPassivePacketSink
 {
   public:
     static simsignal_t tcpConnectionAddedSignal;
@@ -245,6 +248,13 @@ class INET_API Tcp : public TransportProtocolBase, public ITcp
     virtual void connect(int socketId, const L3Address &localAddr, int localPort, const L3Address &remoteAddr, int remotePort, bool autoRead, std::string tcpAlgorithmClass) override;
     virtual void accept(int socketId) override;
     virtual void close(int socketId) override;
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace tcp

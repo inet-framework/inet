@@ -1489,6 +1489,18 @@ bool Udp::MulticastMembership::isSourceAllowed(L3Address sourceAddr)
            (filterMode == UDP_EXCLUDE_MCAST_SOURCES && it == sourceList.end());
 }
 
+void Udp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("appIn"))
+        handleUpperPacket(packet);
+    else if (gate->isName("ipIn"))
+        handleLowerPacket(packet);
+    else
+        throw cRuntimeError("Unknown gate: %s", gate->getFullName());
+}
+
 // unused functions!
 
 UdpHeader *Udp::createUDPPacket()
