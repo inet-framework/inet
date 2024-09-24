@@ -212,6 +212,8 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
 
     virtual bool isLifetimeExpired(const Ptr<const Ipv4Header>& ipv4Header) const;
 
+    virtual bool hasUpperProtocol(const Protocol *protocol);
+
   public:
     Ipv4();
     virtual ~Ipv4();
