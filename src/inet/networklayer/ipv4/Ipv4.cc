@@ -71,6 +71,12 @@ void Ipv4::initialize(int stage)
         rt.reference(this, "routingTableModule", true);
         arp.reference(this, "arpModule", true);
         icmp.reference(this, "icmpModule", true);
+        PacketServiceTag packetServiceTag;
+        packetServiceTag.setProtocol(&Protocol::ipv4);
+        transportSink.reference(gate("transportOut"), false, &packetServiceTag);
+        PacketProtocolTag packetProtocolTag;
+        packetProtocolTag.setProtocol(&Protocol::ipv4);
+        queueSink.reference(gate("queueOut"), true, &packetProtocolTag);
 
         const char *checksumModeString = par("checksumMode");
         checksumMode = parseChecksumMode(checksumModeString, false);
@@ -851,14 +857,14 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
             EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);
-            send(packetCopy, "transportOut");
+            transportSink.pushPacket(packetCopy);
             hasSocket = true;
         }
     }
     if (contains(upperProtocols, protocol)) {
         EV_INFO << "Passing up to protocol " << *protocol << "\n";
         emit(packetSentToUpperSignal, packet);
-        send(packet, "transportOut");
+        transportSink.pushPacket(packet);
         numLocalDeliver++;
     }
     else if (hasSocket) {
@@ -1209,7 +1215,7 @@ void Ipv4::sendPacketToNIC(Packet *packet)
     if (auto networkInterfaceProtocol = networkInterface->getProtocol())
         ensureEncapsulationProtocolReq(packet, networkInterfaceProtocol, true, false);
     setDispatchProtocol(packet);
-    send(packet, "queueOut");
+    queueSink.pushPacket(packet);
 }
 
 // NetFilter:

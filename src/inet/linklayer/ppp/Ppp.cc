@@ -39,6 +39,7 @@ void Ppp::initialize(int stage)
 
     // all initialization is done in the first stage
     if (stage == INITSTAGE_LOCAL) {
+        upperLayerSink.reference(gate("upperLayerOut"), true);
         sendRawBytes = par("sendRawBytes");
         endTransmissionEvent = new cMessage("pppEndTxEvent");
         lowerLayerInGateId = findGate("phys$i");
@@ -274,7 +275,7 @@ void Ppp::handleLowerPacket(Packet *packet)
         numRcvdOK++;
         emit(packetSentToUpperSignal, packet);
         EV_INFO << "Sending " << packet << " to upper layer.\n";
-        send(packet, "upperLayerOut");
+        upperLayerSink.pushPacket(packet);
     }
 }
 

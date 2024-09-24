@@ -24,6 +24,7 @@
 #include "inet/transportlayer/sctp/SctpChecksumInsertionHook.h"
 #include "inet/transportlayer/sctp/SctpHeader.h"
 #include "inet/transportlayer/sctp/SctpUdpHook.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
 namespace sctp {
@@ -137,6 +138,8 @@ class INET_API Sctp : public SimpleModule
   protected:
     ModuleRefByPar<IRoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
+    PassivePacketSinkRef ipSink;
+    PassivePacketSinkRef appSink;
 
     int32_t sizeAssocMap;
 

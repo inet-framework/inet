@@ -52,6 +52,7 @@ void Gptp::initialize(int stage)
         pdelayInterval = par("pdelayInterval");
         pdelaySmoothingFactor = par("pdelaySmoothingFactor");
         clockIdentity = std::hash<std::string>()(getFullPath());
+        socketSink.reference(gate("socketOut"), true);
     }
     if (stage == INITSTAGE_LINK_LAYER) {
         registerProtocol(Protocol::gptp, gate("socketOut"), gate("socketIn"));
@@ -493,7 +494,7 @@ void Gptp::sendPacketToNic(Packet *packet, int portId)
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
     else
         packet->removeTagIfPresent<DispatchProtocolReq>();
-    send(packet, "socketOut");
+    socketSink.pushPacket(packet);
 }
 
 const GptpBase *Gptp::extractGptpMessage(Packet *packet)

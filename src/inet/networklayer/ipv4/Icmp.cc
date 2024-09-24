@@ -52,6 +52,7 @@ void Icmp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
+        ipSink.reference(gate("ipOut"), true);
         checksumMode = parseChecksumMode(par("checksumMode"), false);
         parseQuoteLengthParameter();
     }
@@ -355,7 +356,7 @@ void Icmp::sendToIP(Packet *msg)
     EV_INFO << "Sending " << msg << " to lower layer.\n";
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
-    send(msg, "ipOut");
+    ipSink.pushPacket(msg);
 }
 
 void Icmp::insertChecksum(ChecksumMode checksumMode, const Ptr<IcmpHeader>& icmpHeader, Packet *packet)

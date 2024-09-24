@@ -13,8 +13,11 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/queueing/contract/IPacketQueue.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
 {
@@ -30,6 +33,8 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
     opp_component_ptr<NetworkInterface> networkInterface;
 
     opp_component_ptr<cModule> hostModule;
+    PassivePacketSinkRef lowerLayerSink;
+    PassivePacketSinkRef upperLayerSink;
 
     /** Currently transmitted frame if any */
     Packet *currentTxFrame = nullptr;

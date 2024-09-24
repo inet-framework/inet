@@ -67,6 +67,8 @@ class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public Lifecycl
     ModuleRefByPar<Ipv6NeighbourDiscovery> nd;
     ModuleRefByPar<Icmpv6> icmp;
     ModuleRefByPar<Ipv6Tunneling> tunneling;
+    PassivePacketSinkRef transportSink;
+    PassivePacketSinkRef queueSink;
 
     // working vars
     unsigned int curFragmentId = -1; // counter, used to assign unique fragmentIds to datagrams

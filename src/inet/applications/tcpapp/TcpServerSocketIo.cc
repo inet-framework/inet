@@ -14,6 +14,12 @@ namespace inet {
 
 Define_Module(TcpServerSocketIo);
 
+void TcpServerSocketIo::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+        trafficSink.reference(gate("trafficOut"), true);
+}
+
 void TcpServerSocketIo::acceptSocket(TcpAvailableInfo *availableInfo)
 {
     Enter_Method("acceptSocket");
@@ -43,7 +49,7 @@ void TcpServerSocketIo::socketDataArrived(TcpSocket *socket, Packet *packet, boo
 {
     ASSERT(socket == this->socket);
     packet->removeTag<SocketInd>();
-    send(packet, "trafficOut");
+    trafficSink.pushPacket(packet);
     sendOrScheduleReadCommandIfNeeded();
 }
 

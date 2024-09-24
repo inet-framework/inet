@@ -58,7 +58,7 @@ void Tun::handleUpperPacket(Packet *packet)
         packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         emit(packetSentToUpperSignal, packet);
-        send(packet, "upperLayerOut");
+        upperLayerSink.pushPacket(packet);
     }
     else {
         for (int socketId : socketIds) {
@@ -71,7 +71,7 @@ void Tun::handleUpperPacket(Packet *packet)
             auto npTag = packet->getTag<NetworkProtocolInd>();
             auto newnpTag = copy->addTag<NetworkProtocolInd>();
             *newnpTag = *npTag;
-            send(copy, "upperLayerOut");
+            upperLayerSink.pushPacket(copy);
         }
         delete packet;
     }

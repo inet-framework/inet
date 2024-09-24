@@ -17,13 +17,17 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/ieee8021as/GptpPacket_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 class INET_API Gptp : public ClockUserModuleBase, public cListener
 {
   protected:
     static const MacAddress GPTP_MULTICAST_ADDRESS;
+    PassivePacketSinkRef socketSink;
 
     struct PdelayMeasurementRequesterProcess {
         enum class State {

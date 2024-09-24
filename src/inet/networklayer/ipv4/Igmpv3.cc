@@ -64,6 +64,9 @@ void Igmpv3::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
+        PacketProtocolTag packetProtocolTag;
+        packetProtocolTag.setProtocol(&Protocol::igmp);
+        ipSink.reference(gate("ipOut"), true, &packetProtocolTag);
 
         enabled = par("enabled");
         robustness = par("robustnessVariable");
@@ -1015,7 +1018,7 @@ void Igmpv3::sendReportToIP(Packet *msg, NetworkInterface *ie, Ipv4Address dest)
     msg->addTag<Ipv4OptionsReq>()->appendOption(raOption);
     // TODO set Type of Service to 0xc0
 //    msg->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(0xc0 >> 2);
-    send(msg, "ipOut");
+    ipSink.pushPacket(msg);
 }
 
 void Igmpv3::sendQueryToIP(Packet *msg, NetworkInterface *ie, Ipv4Address dest)
@@ -1034,7 +1037,7 @@ void Igmpv3::sendQueryToIP(Packet *msg, NetworkInterface *ie, Ipv4Address dest)
     msg->addTag<Ipv4OptionsReq>()->appendOption(raOption);
     // set Type of Service to 0xc0
     msg->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(0xc0 >> 2);
-    send(msg, "ipOut");
+    ipSink.pushPacket(msg);
 }
 
 // --- Utility Methods for SourceRecord ---

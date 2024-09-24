@@ -14,8 +14,11 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/common/checksum/ChecksumMode_m.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 // foreign declarations:
 class Ipv6Address;
@@ -91,6 +94,9 @@ class INET_API Icmpv6 : public SimpleModule, public LifecycleUnsupported
     void insertChecksum(const Ptr<Icmpv6Header>& icmpHeader, Packet *packet) { insertChecksum(checksumMode, icmpHeader, packet); }
 
   protected:
+    PassivePacketSinkRef ipv6Sink;
+    PassivePacketSinkRef transportSink;
+
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     typedef std::map<long, int> PingMap;
     PingMap pingMap;

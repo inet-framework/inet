@@ -16,8 +16,11 @@
 #include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * Performs Ethernet II encapsulation/decapsulation. More info in the NED file.
@@ -29,6 +32,8 @@ class INET_API EthernetEncapsulation : public OperationalBase
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
     int seqNum;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
+    PassivePacketSinkRef lowerLayerSink;
+    PassivePacketSinkRef upperLayerSink;
 
     // statistics
     long totalFromHigherLayer; // total number of packets received from higher layer

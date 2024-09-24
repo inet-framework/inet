@@ -40,6 +40,7 @@ void IpvxTrafGen::initialize(int stage)
     ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        ipSink.reference(gate("ipOut"), true);
         int protocolNumber = par("protocol");
         if (protocolNumber < 143 || protocolNumber > 254)
             throw cRuntimeError("invalid protocol number %d, accepts only between 143 and 254", protocolNumber);
@@ -159,7 +160,7 @@ void IpvxTrafGen::sendPacket()
     EV_INFO << "Sending packet: ";
     printPacket(packet);
     emit(packetSentSignal, packet);
-    send(packet, "ipOut");
+    ipSink.pushPacket(packet);
     numSent++;
 }
 

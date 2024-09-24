@@ -148,6 +148,8 @@ void Igmpv2::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
+        ipSink.reference(gate("ipOut"), true);
+        routerSink.reference(gate("routerOut"), true);
 
         externalRouter = false;
         enabled = par("enabled");
@@ -354,7 +356,7 @@ void Igmpv2::handleMessage(cMessage *msg)
         }
     }
     else if (!strcmp(msg->getArrivalGate()->getName(), "routerIn"))
-        send(msg, "ipOut");
+        ipSink.pushPacket(check_and_cast<Packet *>(msg));
     else {
         auto packet = check_and_cast<Packet *>(msg);
         processIgmpMessage(packet);
@@ -465,7 +467,7 @@ void Igmpv2::processIgmpMessage(Packet *packet)
 
         default:
             if (externalRouter)
-                send(packet, "routerOut");
+                routerSink.pushPacket(packet);
             else {
 //                delete msg;
                 throw cRuntimeError("Igmpv2: Unhandled message type (%d) in packet %s", igmp->getType(), packet->getName());
@@ -506,7 +508,7 @@ void Igmpv2::processQuery(NetworkInterface *ie, Packet *packet)
 
     if (rt->isMulticastForwardingEnabled()) {
         if (externalRouter) {
-            send(packet, "routerOut");
+            routerSink.pushPacket(packet);
             return;
         }
 
@@ -572,7 +574,7 @@ void Igmpv2::processV2Report(NetworkInterface *ie, Packet *packet)
 
     if (rt->isMulticastForwardingEnabled()) {
         if (externalRouter) {
-            send(packet, "routerOut");
+            routerSink.pushPacket(packet);
             return;
         }
 
@@ -620,7 +622,7 @@ void Igmpv2::processLeave(NetworkInterface *ie, Packet *packet)
 
     if (rt->isMulticastForwardingEnabled()) {
         if (externalRouter) {
-            send(packet, "routerOut");
+            routerSink.pushPacket(packet);
             return;
         }
 
@@ -720,7 +722,7 @@ void Igmpv2::sendToIP(Packet *msg, NetworkInterface *ie, const Ipv4Address& dest
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
     msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
 
-    send(msg, "ipOut");
+    ipSink.pushPacket(msg);
 }
 
 // --- Utility Methods for Group Data ---

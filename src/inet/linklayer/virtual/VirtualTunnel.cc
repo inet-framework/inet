@@ -27,6 +27,7 @@ void VirtualTunnel::initialize(int stage)
         const char *protocolAsString = par("protocol");
         if (*protocolAsString != '\0')
             protocol = Protocol::findProtocol(protocolAsString);
+        upperLayerSink.reference(gate("upperLayerOut"), true);
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
@@ -102,7 +103,7 @@ void VirtualTunnel::socketDataArrived(EthernetSocket *socket, Packet *packet)
 {
     packet->removeTag<SocketInd>();
     packet->getTagForUpdate<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
-    send(packet, "upperLayerOut");
+    upperLayerSink.pushPacket(packet);
 }
 #endif
 
@@ -111,7 +112,7 @@ void VirtualTunnel::socketDataArrived(Ieee8021qSocket *socket, Packet *packet)
 {
     packet->removeTag<SocketInd>();
     packet->getTagForUpdate<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
-    send(packet, "upperLayerOut");
+    upperLayerSink.pushPacket(packet);
 }
 #endif
 
