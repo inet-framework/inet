@@ -42,6 +42,7 @@ void PimBase::initialize(int stage)
         rt.reference(this, "routingTableModule", true);
         pimIft.reference(this, "pimInterfaceTableModule", true);
         pimNbt.reference(this, "pimNeighborTableModule", true);
+        ipSink.reference(gate("ipOut"), true);
 
         cModule *host = findContainingNode(this);
         if (!host)
@@ -146,7 +147,7 @@ void PimBase::sendHelloPacket(PimInterface *pimInterface)
 
     emit(sentHelloPkSignal, pk);
 
-    send(pk, "ipOut");
+    ipSink.pushPacket(pk);
 }
 
 void PimBase::processHelloPacket(Packet *packet)

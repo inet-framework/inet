@@ -20,6 +20,7 @@ void UdpSocketIo::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        trafficSink.reference(gate("trafficOut"), false);
         dontFragment = par("dontFragment");
         numSent = 0;
         numReceived = 0;
@@ -104,7 +105,7 @@ void UdpSocketIo::socketDataArrived(UdpSocket *socket, Packet *packet)
     EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(packet) << endl;
     numReceived++;
     packet->removeTag<SocketInd>();
-    send(packet, "trafficOut");
+    trafficSink.pushPacket(packet);
 }
 
 void UdpSocketIo::socketErrorArrived(UdpSocket *socket, Indication *indication)

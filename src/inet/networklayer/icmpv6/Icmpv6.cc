@@ -30,6 +30,8 @@ void Icmpv6::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
+        ipv6Sink.reference(gate("ipv6Out"), true);
+        transportSink.reference(gate("transportOut"), true);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         bool isOperational;
@@ -82,7 +84,7 @@ void Icmpv6::processICMPv6Message(Packet *packet)
             auto dispatchProtocolReq = packet->addTagIfAbsent<DispatchProtocolReq>();
             dispatchProtocolReq->setServicePrimitive(SP_INDICATION);
             dispatchProtocolReq->setProtocol(ProtocolGroup::getIpProtocolGroup()->getProtocol(transportProtocol));
-            send(packet, "transportOut");
+            transportSink.pushPacket(packet);
         }
     }
     else {
@@ -243,7 +245,7 @@ void Icmpv6::sendToIP(Packet *msg)
 {
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
-    send(msg, "ipv6Out");
+    ipv6Sink.pushPacket(msg);
 }
 
 Packet *Icmpv6::createDestUnreachableMsg(Icmpv6DestUnav code)

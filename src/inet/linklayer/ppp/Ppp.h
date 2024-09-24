@@ -13,10 +13,13 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/ppp/PppFrame_m.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * PPP implementation.
@@ -24,6 +27,7 @@ namespace inet {
 class INET_API Ppp : public MacProtocolBase, public queueing::IActivePacketSink
 {
   protected:
+    PassivePacketSinkRef upperLayerSink;
     const char *displayStringTextFormat = nullptr;
     bool sendRawBytes = false;
     cGate *physOutGate = nullptr;

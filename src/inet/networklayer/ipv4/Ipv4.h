@@ -25,6 +25,8 @@
 
 namespace inet {
 
+using namespace inet::queueing;
+
 class ArpPacket;
 class IcmpHeader;
 class IInterfaceTable;
@@ -65,6 +67,8 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<IArp> arp;
     ModuleRefByPar<Icmp> icmp;
+    PassivePacketSinkRef transportSink;
+    PassivePacketSinkRef queueSink;
 
     // config
     CrcMode crcMode = CRC_MODE_UNDEFINED;

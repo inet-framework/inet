@@ -56,6 +56,7 @@ void Gptp::initialize(int stage)
         pDelayReqProcessingTime = par("pDelayReqProcessingTime");
         std::hash<std::string> strHash;
         clockIdentity = strHash(getFullPath());
+        socketSink.reference(gate("socketOut"), true);
     }
     if (stage == INITSTAGE_LINK_LAYER) {
         peerDelay = 0;
@@ -229,7 +230,7 @@ void Gptp::sendPacketToNIC(Packet *packet, int portId)
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
     else
         packet->removeTagIfPresent<DispatchProtocolReq>();
-    send(packet, "socketOut");
+    socketSink.pushPacket(packet);
 }
 
 void Gptp::sendSync()

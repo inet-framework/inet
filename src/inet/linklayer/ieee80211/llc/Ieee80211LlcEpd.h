@@ -10,12 +10,19 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee802/Ieee802EpdHeader_m.h"
 #include "inet/linklayer/ieee80211/llc/IIeee80211Llc.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
 namespace ieee80211 {
 
+using namespace inet::queueing;
+
 class INET_API Ieee80211LlcEpd : public cSimpleModule, public IIeee80211Llc
 {
+  protected:
+    PassivePacketSinkRef lowerLayerSink;
+    PassivePacketSinkRef upperLayerSink;
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;

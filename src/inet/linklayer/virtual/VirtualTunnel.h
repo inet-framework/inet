@@ -12,6 +12,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
 #include "inet/queueing/base/PassivePacketSinkBase.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 #ifdef INET_WITH_ETHERNET
 #include "inet/linklayer/ethernet/common/EthernetSocket.h"
@@ -34,6 +35,7 @@ class INET_API VirtualTunnel : public queueing::PassivePacketSinkBase
 #endif
 {
   protected:
+    PassivePacketSinkRef upperLayerSink;
     NetworkInterface *realNetworkInterface = nullptr;
     NetworkInterface *networkInterface = nullptr;
     const Protocol *protocol = nullptr;

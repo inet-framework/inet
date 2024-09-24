@@ -8,9 +8,12 @@
 #ifndef __INET_QOSCLASSIFIER_H
 #define __INET_QOSCLASSIFIER_H
 
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/common/INETDefs.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * This module classifies and assigns User Priority to packets.
@@ -18,6 +21,8 @@ namespace inet {
 class INET_API QosClassifier : public cSimpleModule
 {
   protected:
+    PassivePacketSinkRef outSink;
+
     int defaultUp;
     std::map<int, int> ipProtocolUpMap;
     std::map<int, int> udpPortUpMap;

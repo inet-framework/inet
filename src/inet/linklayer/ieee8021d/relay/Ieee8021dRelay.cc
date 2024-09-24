@@ -23,6 +23,7 @@ void Ieee8021dRelay::initialize(int stage)
 {
     MacRelayUnitBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        upperLayerSink.reference(gate("upperLayerOut"), false);
         numDispatchedBDPUFrames = numDispatchedNonBPDUFrames = numDeliveredBDPUsToSTP = 0;
         numReceivedBPDUsFromSTP = numReceivedNetworkFrames = 0;
 
@@ -211,7 +212,7 @@ void Ieee8021dRelay::updatePeerAddress(NetworkInterface *incomingInterface, MacA
 void Ieee8021dRelay::sendUp(Packet *packet)
 {
     EV_INFO << "Sending frame to the upper layer" << EV_FIELD(packet) << EV_ENDL;
-    send(packet, "upperLayerOut");
+    upperLayerSink.pushPacket(packet);
 }
 
 void Ieee8021dRelay::handleStartOperation(LifecycleOperation *operation)

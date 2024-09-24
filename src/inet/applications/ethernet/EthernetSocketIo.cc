@@ -26,6 +26,7 @@ void EthernetSocketIo::initialize(int stage)
         const char *protocolAsString = par("protocol");
         if (!opp_isempty(protocolAsString))
             protocol = Protocol::getProtocol(protocolAsString);
+        trafficSink.reference(gate("trafficOut"), false);
         numSent = 0;
         numReceived = 0;
         WATCH(numSent);
@@ -109,7 +110,7 @@ void EthernetSocketIo::socketDataArrived(EthernetSocket *socket, Packet *packet)
     EV_INFO << "Received packet: " << packet << endl;
     numReceived++;
     packet->removeTag<SocketInd>();
-    send(packet, "trafficOut");
+    trafficSink.pushPacket(packet);
 }
 
 void EthernetSocketIo::socketErrorArrived(EthernetSocket *socket, Indication *indication)

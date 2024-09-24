@@ -7,6 +7,7 @@
 #ifndef __INET_MESSAGEHANDLER_H
 #define __INET_MESSAGEHANDLER_H
 
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
 #include "inet/routing/ospfv2/messagehandler/DatabaseDescriptionHandler.h"
 #include "inet/routing/ospfv2/messagehandler/HelloHandler.h"
@@ -18,10 +19,13 @@
 namespace inet {
 namespace ospfv2 {
 
+using namespace inet::queueing;
+
 class INET_API MessageHandler : public IMessageHandler
 {
   private:
     cSimpleModule *ospfModule;
+    PassivePacketSinkRef ipSink;
 
     HelloHandler helloHandler;
     DatabaseDescriptionHandler ddHandler;

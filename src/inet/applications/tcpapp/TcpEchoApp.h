@@ -10,9 +10,12 @@
 
 #include "inet/applications/tcpapp/TcpServerHostApp.h"
 #include "inet/common/INETMath.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * Accepts any number of incoming connections, and sends back whatever
@@ -21,6 +24,8 @@ namespace inet {
 class INET_API TcpEchoApp : public TcpServerHostApp
 {
   protected:
+    PassivePacketSinkRef socketSink;
+
     simtime_t delay;
     double echoFactor = NaN;
 

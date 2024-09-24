@@ -23,8 +23,11 @@
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/networklayer/nexthop/NextHopForwardingHeader_m.h"
 #include "inet/networklayer/nexthop/NextHopRoutingTable.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * Implements a next hop forwarding protocol that routes datagrams through the network.
@@ -65,6 +68,8 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     ModuleRefByPar<NextHopRoutingTable> routingTable;
     ModuleRefByPar<IArp> arp;
+    PassivePacketSinkRef queueSink;
+    PassivePacketSinkRef transportSink;
 
     // config
     int defaultHopLimit;

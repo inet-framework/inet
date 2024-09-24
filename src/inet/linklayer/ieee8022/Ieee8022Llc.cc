@@ -30,6 +30,11 @@ void Ieee8022Llc::initialize(int stage)
 {
     OperationalBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        upperLayerSink.reference(gate("upperLayerOut"), true);
+        PacketProtocolTag packetProtocolTag;
+        packetProtocolTag.setProtocol(&Protocol::ieee8022llc);
+        lowerLayerSink.reference(gate("lowerLayerOut"), true, &packetProtocolTag);
+
         // TODO parameterization for llc or snap?
         WATCH_PTRMAP(socketIdToSocketDescriptor);
         WATCH_PTRSET(upperProtocols);
@@ -57,7 +62,7 @@ void Ieee8022Llc::handleMessageWhenUp(cMessage *msg)
 void Ieee8022Llc::processPacketFromHigherLayer(Packet *packet)
 {
     encapsulate(packet);
-    send(packet, "lowerLayerOut");
+    lowerLayerSink.pushPacket(packet);
 }
 
 void Ieee8022Llc::processCommandFromHigherLayer(Request *request)
@@ -113,7 +118,7 @@ bool Ieee8022Llc::deliverCopyToSockets(Packet *packet)
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
                 EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
                 packetCopy->setKind(SOCKET_I_DATA);
-                send(packetCopy, "upperLayerOut");
+                upperLayerSink.pushPacket(packetCopy);
                 isSent = true;
             }
         }
@@ -133,7 +138,7 @@ void Ieee8022Llc::processPacketFromMac(Packet *packet)
     bool isSent = deliverCopyToSockets(packet);
 
     if (isDeliverableToUpperLayer(packet)) {
-        send(packet, "upperLayerOut");
+        upperLayerSink.pushPacket(packet);
     }
     else {
         if (!isSent) {

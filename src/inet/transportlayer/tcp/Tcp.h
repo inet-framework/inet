@@ -14,6 +14,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/transportlayer/base/TransportProtocolBase.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
@@ -22,6 +23,8 @@
 
 namespace inet {
 namespace tcp {
+
+using namespace inet::queueing;
 
 // Forward declarations:
 class TcpConnection;
@@ -157,6 +160,8 @@ class INET_API Tcp : public TransportProtocolBase
   protected:
     typedef std::map<int /*socketId*/, TcpConnection *> TcpAppConnMap;
     typedef std::map<SockPair, TcpConnection *> TcpConnMap;
+    PassivePacketSinkRef appSink;
+    PassivePacketSinkRef ipSink;
     TcpAppConnMap tcpAppConnMap;
     TcpConnMap tcpConnMap;
 

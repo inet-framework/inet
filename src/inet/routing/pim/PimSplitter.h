@@ -13,10 +13,13 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/routing/pim/PimPacket_m.h"
 #include "inet/routing/pim/tables/PimInterfaceTable.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * PimSplitter register itself for PIM protocol (103) in the network layer,
@@ -30,6 +33,9 @@ class INET_API PimSplitter : public cSimpleModule
   private:
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<PimInterfaceTable> pimIft;
+    PassivePacketSinkRef ipSink;
+    PassivePacketSinkRef pimDMSink;
+    PassivePacketSinkRef pimSMSink;
 
     cGate *ipIn = nullptr;
     cGate *ipOut = nullptr;
