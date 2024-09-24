@@ -7,7 +7,6 @@
 
 #include "inet/networklayer/common/NetworkInterface.h"
 
-#include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/StringFormat.h"
@@ -171,7 +170,6 @@ void NetworkInterface::initialize(int stage)
             setPointToPoint(par("pointToPoint"));
         if (interfaceTable)
             interfaceTable->addInterface(this);
-        inet::registerInterface(*this, gate("upperLayerIn"), gate("upperLayerOut"));
     }
     else if (stage == INITSTAGE_LAST)
         layoutSubmodulesWithoutGates(this);
