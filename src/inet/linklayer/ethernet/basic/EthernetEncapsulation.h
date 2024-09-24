@@ -16,6 +16,7 @@
 #include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
+#include "inet/linklayer/ethernet/contract/IEthernet.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
@@ -23,7 +24,7 @@ namespace inet {
 /**
  * Performs Ethernet II encapsulation/decapsulation. More info in the NED file.
  */
-class INET_API EthernetEncapsulation : public OperationalBase, public DefaultProtocolRegistrationListener
+class INET_API EthernetEncapsulation : public OperationalBase, public DefaultProtocolRegistrationListener, public IEthernet
 {
   protected:
     std::set<const Protocol *> upperProtocols; // where to send packets after decapsulation
@@ -80,6 +81,8 @@ class INET_API EthernetEncapsulation : public OperationalBase, public DefaultPro
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
+    virtual void bind(int socketId, int interfaceId, const MacAddress& localAddress, const MacAddress& remoteAddress, const Protocol* protocol, bool steal) override;
 };
 
 } // namespace inet

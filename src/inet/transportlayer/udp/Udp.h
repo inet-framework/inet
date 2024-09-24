@@ -22,6 +22,7 @@
 #include "inet/transportlayer/base/TransportProtocolBase.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
+#include "inet/transportlayer/contract/IUdp.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
@@ -52,7 +53,7 @@ class INET_API UdpCrcInsertionHook : public cSimpleModule, public NetfilterBase:
  *
  * More info in the NED file.
  */
-class INET_API Udp : public TransportProtocolBase
+class INET_API Udp : public TransportProtocolBase, public IUdp
 {
   public:
 
@@ -136,8 +137,8 @@ class INET_API Udp : public TransportProtocolBase
     virtual SockDesc *getSocketById(int sockId);
     virtual SockDesc *getOrCreateSocket(int sockId);
     virtual SockDesc *createSocket(int sockId, const L3Address& localAddr, int localPort);
-    virtual void bind(int sockId, const L3Address& localAddr, int localPort);
-    virtual void connect(int sockId, const L3Address& remoteAddr, int remotePort);
+    virtual void bind(int sockId, const L3Address& localAddr, int localPort) override;
+    virtual void connect(int sockId, const L3Address& remoteAddr, int remotePort) override;
     virtual void close(int sockId);
     virtual void destroySocket(int sockId);
     void destroySocket(SocketsByIdMap::iterator it);

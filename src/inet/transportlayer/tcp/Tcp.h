@@ -16,6 +16,7 @@
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/base/TransportProtocolBase.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
+#include "inet/transportlayer/contract/ITcp.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
@@ -124,7 +125,7 @@ class TcpReceiveQueue;
  * The concrete TcpAlgorithm class to use can be chosen per connection (in OPEN)
  * or in a module parameter.
  */
-class INET_API Tcp : public TransportProtocolBase
+class INET_API Tcp : public TransportProtocolBase, public ITcp
 {
   public:
     static simsignal_t tcpConnectionAddedSignal;
@@ -238,6 +239,12 @@ class INET_API Tcp : public TransportProtocolBase
 
     bool checkCrc(Packet *pk);
     int getMsl() { return msl; }
+
+    virtual void setCallback(int socketId, ITcp::ICallback *callback) override;
+    virtual void listen(int socketId, const L3Address &localAddr, int localPrt, bool fork, bool autoRead, std::string tcpAlgorithmClass) override;
+    virtual void connect(int socketId, const L3Address &localAddr, int localPort, const L3Address &remoteAddr, int remotePort, bool autoRead, std::string tcpAlgorithmClass) override;
+    virtual void accept(int socketId) override;
+    virtual void close(int socketId) override;
 };
 
 } // namespace tcp

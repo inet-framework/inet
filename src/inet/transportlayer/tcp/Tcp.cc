@@ -550,6 +550,63 @@ std::ostream& operator<<(std::ostream& os, const TcpConnection& conn)
     return os;
 }
 
+void Tcp::setCallback(int socketId, ITcp::ICallback *callback)
+{
+    auto connection = findConnForApp(socketId);
+    connection->setCallback(callback);
+}
+
+void Tcp::listen(int socketId, const L3Address &localAddr, int localPrt, bool fork, bool autoRead, std::string tcpAlgorithmClass)
+{
+    // KLUDGE: temporarily use the same command mechanism internally, this should be replaced with method calls
+    TcpOpenCommand *openCmd = new TcpOpenCommand();
+    openCmd->setLocalAddr(localAddr);
+    openCmd->setLocalPort(localPrt);
+    openCmd->setFork(fork);
+    openCmd->setAutoRead(autoRead);
+    openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
+    auto request = new Request("PassiveOPEN", TCP_C_OPEN_PASSIVE);
+    request->addTag<SocketReq>()->setSocketId(socketId);
+    request->setControlInfo(openCmd);
+    handleUpperCommand(request);
+}
+
+void Tcp::connect(int socketId, const L3Address &localAddr, int localPort, const L3Address &remoteAddr, int remotePort, bool autoRead, std::string tcpAlgorithmClass)
+{
+    // KLUDGE: temporarily use the same command mechanism internally, this should be replaced with method calls
+    TcpOpenCommand *openCmd = new TcpOpenCommand();
+    openCmd->setLocalAddr(localAddr);
+    openCmd->setLocalPort(localPort);
+    openCmd->setRemoteAddr(remoteAddr);
+    openCmd->setRemotePort(remotePort);
+    openCmd->setAutoRead(autoRead);
+    openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
+    auto request = new Request("ActiveOPEN", TCP_C_OPEN_ACTIVE);
+    request->addTag<SocketReq>()->setSocketId(socketId);
+    request->setControlInfo(openCmd);
+    handleUpperCommand(request);
+}
+
+void Tcp::accept(int socketId)
+{
+    // KLUDGE: temporarily use the same command mechanism internally, this should be replaced with method calls
+    auto request = new Request("ACCEPT", TCP_C_ACCEPT);
+    TcpAcceptCommand *acceptCmd = new TcpAcceptCommand();
+    request->setControlInfo(acceptCmd);
+    request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleUpperCommand(request);
+}
+
+void Tcp::close(int socketId)
+{
+    // KLUDGE: temporarily use the same command mechanism internally, this should be replaced with method calls
+    auto request = new Request("CLOSE", TCP_C_CLOSE);
+    TcpCommand *closeCmd = new TcpCommand();
+    request->setControlInfo(closeCmd);
+    request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleUpperCommand(request);
+}
+
 } // namespace tcp
 } // namespace inet
 
