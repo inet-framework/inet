@@ -8,7 +8,6 @@
 #ifndef __INET_PACKETDELAYERBASE_H
 #define __INET_PACKETDELAYERBASE_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PacketPusherBase.h"
 
@@ -18,7 +17,7 @@ extern template class ClockUserModuleMixin<queueing::PacketPusherBase>;
 
 namespace queueing {
 
-class INET_API PacketDelayerBase : public ClockUserModuleMixin<PacketPusherBase>, public TransparentProtocolRegistrationListener
+class INET_API PacketDelayerBase : public ClockUserModuleMixin<PacketPusherBase>
 {
   protected:
     int schedulingPriority = -1;
@@ -30,7 +29,6 @@ class INET_API PacketDelayerBase : public ClockUserModuleMixin<PacketPusherBase>
 
     virtual void processPacket(Packet *packet, simtime_t sendingTime);
 
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
     virtual clocktime_t computeDelay(Packet *packet) const = 0;
 

@@ -7,7 +7,6 @@
 
 #include "inet/linklayer/ethernet/modular/EthernetAddressChecker.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -25,7 +24,6 @@ void EthernetAddressChecker::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         promiscuous = par("promiscuous");
         interfaceTable.reference(this, "interfaceTableModule", true);
-        registerProtocol(Protocol::ethernetMac, nullptr, inputGate);
     }
 }
 

@@ -7,7 +7,6 @@
 
 #include "inet/applications/generic/IpvxTrafGen.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -63,9 +62,6 @@ void IpvxTrafGen::initialize(int stage)
         numReceived = 0;
         WATCH(numSent);
         WATCH(numReceived);
-    }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
-        registerProtocol(*protocol, gate("ipOut"), gate("ipIn"));
     }
 }
 

@@ -13,7 +13,6 @@
 
 #include "inet/routing/eigrp/EigrpSplitter.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/Protocol.h"
 
 namespace inet {
@@ -30,12 +29,6 @@ EigrpSplitter::~EigrpSplitter() {
 void EigrpSplitter::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-
-    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        registerService(Protocol::eigrp, gate("splitterIn"), gate("splitterOut"));
-        registerService(Protocol::eigrp, gate("splitter6In"), gate("splitter6Out"));
-        registerProtocol(Protocol::eigrp, gate("ipOut"), gate("ipIn"));
-    }
 }
 
 void EigrpSplitter::handleMessage(cMessage *msg)

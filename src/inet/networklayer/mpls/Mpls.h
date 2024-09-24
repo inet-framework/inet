@@ -10,7 +10,6 @@
 
 #include <vector>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -25,7 +24,7 @@ namespace inet {
 /**
  * Implements the MPLS protocol; see the NED file for more info.
  */
-class INET_API Mpls : public cSimpleModule, public DefaultProtocolRegistrationListener
+class INET_API Mpls : public cSimpleModule
 {
   protected:
     simtime_t delay1;
@@ -57,10 +56,6 @@ class INET_API Mpls : public cSimpleModule, public DefaultProtocolRegistrationLi
     void swapLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader);
     void popLabel(Packet *packet);
     virtual void doStackOps(Packet *packet, const LabelOpVector& outLabel);
-
-    // IProtocolRegistrationListener:
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 };
 
 } // namespace inet

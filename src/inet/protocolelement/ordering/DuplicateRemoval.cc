@@ -7,22 +7,12 @@
 
 #include "inet/protocolelement/ordering/DuplicateRemoval.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"
 
 namespace inet {
 
 Define_Module(DuplicateRemoval);
-
-void DuplicateRemoval::initialize(int stage)
-{
-    PacketPusherBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        registerService(AccessoryProtocol::sequenceNumber, nullptr, inputGate);
-        registerProtocol(AccessoryProtocol::sequenceNumber, nullptr, outputGate);
-    }
-}
 
 void DuplicateRemoval::pushPacket(Packet *packet, const cGate *gate)
 {

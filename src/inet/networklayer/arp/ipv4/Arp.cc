@@ -8,7 +8,6 @@
 
 #include "inet/networklayer/arp/ipv4/Arp.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
@@ -67,8 +66,6 @@ void Arp::initialize(int stage)
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
-        registerService(Protocol::arp, gate("netwIn"), gate("netwOut"));
-        registerProtocol(Protocol::arp, gate("ifOut"), gate("ifIn"));
     }
 }
 

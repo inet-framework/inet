@@ -8,14 +8,13 @@
 #ifndef __INET_STREAMMERGER_H
 #define __INET_STREAMMERGER_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PacketFilterBase.h"
 
 namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API StreamMerger : public PacketFilterBase, public TransparentProtocolRegistrationListener
+class INET_API StreamMerger : public PacketFilterBase
 {
   protected:
     cValueMap *mapping = nullptr;
@@ -32,7 +31,6 @@ class INET_API StreamMerger : public PacketFilterBase, public TransparentProtoco
     virtual bool matchesInputStream(const char *streamName) const;
     virtual bool matchesSequenceNumber(const char *streamName, int sequenceNumber) const;
 
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 
 } // namespace inet

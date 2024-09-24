@@ -7,7 +7,6 @@
 
 #include "inet/linklayer/ethernet/modular/EthernetMacHeaderInserter.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -25,8 +24,6 @@ void EthernetMacHeaderInserter::initialize(int stage)
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         interfaceTable.reference(this, "interfaceTableModule", true);
-    else if (stage == INITSTAGE_LINK_LAYER)
-        registerService(Protocol::ethernetMac, inputGate, nullptr);
 }
 
 void EthernetMacHeaderInserter::processPacket(Packet *packet)

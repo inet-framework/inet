@@ -43,16 +43,6 @@ void StreamEncoder::configureMappings()
     }
 }
 
-cGate *StreamEncoder::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 void StreamEncoder::processPacket(Packet *packet)
 {
     auto streamReq = packet->findTag<StreamReq>();

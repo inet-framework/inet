@@ -7,7 +7,6 @@
 
 #include "inet/protocolelement/forwarding/SendWithHopLimit.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/forwarding/HopLimitHeader_m.h"
@@ -19,11 +18,8 @@ Define_Module(SendWithHopLimit);
 void SendWithHopLimit::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LOCAL)
         hopLimit = par("hopLimit");
-        registerService(AccessoryProtocol::hopLimit, inputGate, nullptr);
-        registerProtocol(AccessoryProtocol::hopLimit, outputGate, nullptr);
-    }
 }
 
 void SendWithHopLimit::processPacket(Packet *packet)

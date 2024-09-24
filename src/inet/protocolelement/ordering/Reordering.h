@@ -20,9 +20,6 @@ class INET_API Reordering : public PacketPusherBase
     int expectedSequenceNumber;
     std::map<int, Packet *> packets;
 
-  protected:
-    virtual void initialize(int stage) override;
-
   public:
     virtual ~Reordering();
 

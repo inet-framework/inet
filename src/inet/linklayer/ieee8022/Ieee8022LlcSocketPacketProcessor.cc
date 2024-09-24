@@ -23,16 +23,6 @@ void Ieee8022LlcSocketPacketProcessor::initialize(int stage)
         socketTable.reference(this, "socketTableModule", true);
 }
 
-cGate *Ieee8022LlcSocketPacketProcessor::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 void Ieee8022LlcSocketPacketProcessor::pushPacket(Packet *packet, const cGate *gate)
 {
     const auto& sap = packet->findTag<Ieee802SapInd>();

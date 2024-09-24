@@ -7,22 +7,12 @@
 
 #include "inet/protocolelement/aggregation/SubpacketLengthHeaderBasedDeaggregator.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/protocolelement/aggregation/header/SubpacketLengthHeader_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 
 namespace inet {
 
 Define_Module(SubpacketLengthHeaderBasedDeaggregator);
-
-void SubpacketLengthHeaderBasedDeaggregator::initialize(int stage)
-{
-    DeaggregatorBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        registerService(AccessoryProtocol::aggregation, nullptr, inputGate);
-        registerProtocol(AccessoryProtocol::aggregation, nullptr, outputGate);
-    }
-}
 
 std::vector<Packet *> SubpacketLengthHeaderBasedDeaggregator::deaggregatePacket(Packet *packet)
 {

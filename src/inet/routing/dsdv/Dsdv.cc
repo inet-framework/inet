@@ -16,7 +16,6 @@
 
 #include "inet/routing/dsdv/Dsdv.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -62,9 +61,6 @@ void Dsdv::initialize(int stage)
         forwardList = new std::list<ForwardEntry *>();
         event = new cMessage("event");
         purgeTimer = new cMessage("purge");
-    }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        registerProtocol(Protocol::manet, gate("ipOut"), gate("ipIn"));
     }
 }
 

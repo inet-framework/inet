@@ -7,7 +7,6 @@
 
 #include "inet/emulation/networklayer/ipv4/Ipv4Encap.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketTag_m.h"
@@ -32,9 +31,6 @@ void Ipv4Encap::initialize(int stage)
         defaultTimeToLive = 16; // par("timeToLive");
         defaultMCTimeToLive = 16; // par("multicastTimeToLive");
         crcMode = CRC_COMPUTED;
-    }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(Protocol::ipv4, gate("upperLayerIn"), gate("upperLayerOut"));
     }
 }
 

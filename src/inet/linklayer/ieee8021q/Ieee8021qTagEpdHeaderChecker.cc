@@ -7,7 +7,6 @@
 
 #include "inet/linklayer/ieee8021q/Ieee8021qTagEpdHeaderChecker.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/ProtocolUtils.h"
@@ -35,8 +34,6 @@ void Ieee8021qTagEpdHeaderChecker::initialize(int stage)
             throw cRuntimeError("Unknown tag type");
         vlanIdFilter = check_and_cast<cValueArray *>(par("vlanIdFilter").objectValue());
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
-        registerProtocol(*qtagProtocol, nullptr, inputGate);
 }
 
 void Ieee8021qTagEpdHeaderChecker::handleParameterChange(const char *name)

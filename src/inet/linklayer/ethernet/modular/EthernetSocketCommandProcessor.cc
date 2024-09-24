@@ -22,16 +22,6 @@ void EthernetSocketCommandProcessor::initialize(int stage)
         socketTable.reference(this, "socketTableModule", true);
 }
 
-cGate *EthernetSocketCommandProcessor::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 void EthernetSocketCommandProcessor::handleMessage(cMessage *message)
 {
     if (auto request = dynamic_cast<Request *>(message))

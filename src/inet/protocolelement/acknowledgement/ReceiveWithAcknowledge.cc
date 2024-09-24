@@ -7,7 +7,6 @@
 
 #include "inet/protocolelement/acknowledgement/ReceiveWithAcknowledge.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/protocolelement/acknowledgement/AcknowledgeHeader_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"
@@ -15,15 +14,6 @@
 namespace inet {
 
 Define_Module(ReceiveWithAcknowledge);
-
-void ReceiveWithAcknowledge::initialize(int stage)
-{
-    PacketPusherBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        registerService(AccessoryProtocol::withAcknowledge, nullptr, inputGate);
-        registerProtocol(AccessoryProtocol::withAcknowledge, nullptr, outputGate);
-    }
-}
 
 void ReceiveWithAcknowledge::pushPacket(Packet *dataPacket, const cGate *gate)
 {

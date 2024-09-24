@@ -41,16 +41,6 @@ void PacketFlowPcapFileRecorder::initialize(int stage)
     }
 }
 
-cGate *PacketFlowPcapFileRecorder::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 void PacketFlowPcapFileRecorder::finish()
 {
     pcapWriter->close();

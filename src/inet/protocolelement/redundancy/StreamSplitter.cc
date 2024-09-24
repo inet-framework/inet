@@ -26,16 +26,6 @@ void StreamSplitter::handleParameterChange(const char *name)
         mapping = check_and_cast<cValueMap *>(par("mapping").objectValue());
 }
 
-cGate *StreamSplitter::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 void StreamSplitter::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");

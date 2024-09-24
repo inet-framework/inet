@@ -11,15 +11,15 @@
 #include <map>
 #include <set>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
-class INET_API NetworkProtocolBase : public LayeredProtocolBase, public DefaultProtocolRegistrationListener
+class INET_API NetworkProtocolBase : public LayeredProtocolBase
 {
   protected:
     struct SocketDescriptor {
@@ -56,10 +56,6 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase, public DefaultP
     virtual void handleUpperCommand(cMessage *msg) override;
 
     virtual const Protocol& getProtocol() const = 0;
-
-  public:
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 };
 
 } // namespace inet

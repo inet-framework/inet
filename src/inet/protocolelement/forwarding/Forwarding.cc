@@ -7,7 +7,6 @@
 
 #include "inet/protocolelement/forwarding/Forwarding.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -26,8 +25,6 @@ void Forwarding::initialize(int stage)
         const char *addressAsString = par("address");
         if (strlen(addressAsString) != 0)
             address = L3AddressResolver().resolve(addressAsString);
-        registerService(AccessoryProtocol::forwarding, inputGate, inputGate);
-        registerProtocol(AccessoryProtocol::forwarding, outputGate, outputGate);
     }
 }
 

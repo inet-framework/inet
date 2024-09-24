@@ -9,7 +9,6 @@
 
 #include <algorithm>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -171,7 +170,6 @@ void Igmpv2::initialize(int stage)
     // TODO INITSTAGE
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         cModule *host = getContainingNode(this);
-        registerProtocol(Protocol::igmp, gate("ipOut"), gate("ipIn"));
         for (int i = 0; i < ift->getNumInterfaces(); ++i) {
             NetworkInterface *ie = ift->getInterface(i);
             if (ie->isMulticast()) {
@@ -361,18 +359,6 @@ void Igmpv2::handleMessage(cMessage *msg)
         auto packet = check_and_cast<Packet *>(msg);
         processIgmpMessage(packet);
     }
-}
-
-void Igmpv2::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterService");
-    if (protocol == Protocol::igmp && servicePrimitive == SP_INDICATION)
-        externalRouter = true;
-}
-
-void Igmpv2::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
 }
 
 // --- Methods for handling self messages ---

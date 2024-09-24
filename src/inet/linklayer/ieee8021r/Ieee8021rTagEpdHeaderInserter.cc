@@ -7,7 +7,6 @@
 
 #include "inet/linklayer/ieee8021r/Ieee8021rTagEpdHeaderInserter.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/ProtocolUtils.h"
@@ -26,8 +25,6 @@ void Ieee8021rTagEpdHeaderInserter::initialize(int stage)
         if (*nextProtocolAsString != '\0')
             nextProtocol = Protocol::getProtocol(nextProtocolAsString);
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
-        registerService(Protocol::ieee8021rTag, inputGate, nullptr);
 }
 
 void Ieee8021rTagEpdHeaderInserter::processPacket(Packet *packet)

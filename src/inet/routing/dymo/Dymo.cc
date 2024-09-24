@@ -8,7 +8,6 @@
 #include "inet/routing/dymo/Dymo.h"
 
 #include "inet/common/INETMath.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/stlutils.h"
@@ -125,7 +124,6 @@ void Dymo::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        registerProtocol(Protocol::manet, gate("ipOut"), gate("ipIn"));
         host->subscribe(linkBrokenSignal, this);
         networkProtocol->registerHook(0, this);
     }

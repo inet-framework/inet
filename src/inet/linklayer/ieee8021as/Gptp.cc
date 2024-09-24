@@ -10,7 +10,6 @@
 #include "GptpPacket_m.h"
 
 #include "inet/clock/model/SettableClock.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/clock/ClockUserModuleBase.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddress.h"
@@ -103,8 +102,6 @@ void Gptp::initialize(int stage)
         correctionField = par("correctionField");
 
         gmRateRatio = 1.0;
-
-        registerProtocol(Protocol::gptp, gate("socketOut"), gate("socketIn"));
 
         /* Only grandmaster in the domain can initialize the synchronization message periodically
          * so below condition checks whether it is grandmaster and then schedule first sync message */
