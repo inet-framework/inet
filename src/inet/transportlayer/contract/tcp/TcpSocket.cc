@@ -101,26 +101,14 @@ void TcpSocket::listen(bool fork)
         throw cRuntimeError(sockstate == NOT_BOUND ? "TcpSocket: must call bind() before listen()"
                 : "TcpSocket::listen(): connect() or listen() already called");
 
-    auto request = new Request("PassiveOPEN", TCP_C_OPEN_PASSIVE);
-
-    TcpOpenCommand *openCmd = new TcpOpenCommand();
-    openCmd->setLocalAddr(localAddr);
-    openCmd->setLocalPort(localPrt);
-    openCmd->setFork(fork);
-    openCmd->setAutoRead(autoRead);
-    openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
-
-    request->setControlInfo(openCmd);
-    sendToTcp(request);
+    tcp->listen(connId, localAddr, localPrt, fork, autoRead, tcpAlgorithmClass);
+    tcp->setCallback(connId, this);
     sockstate = LISTENING;
 }
 
 void TcpSocket::accept(int socketId)
 {
-    auto request = new Request("ACCEPT", TCP_C_ACCEPT);
-    TcpAcceptCommand *acceptCmd = new TcpAcceptCommand();
-    request->setControlInfo(acceptCmd);
-    sendToTcp(request, socketId);
+    tcp->accept(socketId);
 }
 
 void TcpSocket::connect(L3Address remoteAddress, int remotePort)
@@ -136,16 +124,8 @@ void TcpSocket::connect(L3Address remoteAddress, int remotePort)
     remoteAddr = remoteAddress;
     remotePrt = remotePort;
 
-    TcpOpenCommand *openCmd = new TcpOpenCommand();
-    openCmd->setLocalAddr(localAddr);
-    openCmd->setLocalPort(localPrt);
-    openCmd->setRemoteAddr(remoteAddr);
-    openCmd->setRemotePort(remotePrt);
-    openCmd->setAutoRead(autoRead);
-    openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
-
-    request->setControlInfo(openCmd);
-    sendToTcp(request);
+    tcp->connect(connId, localAddr, localPrt, remoteAddr, remotePort, autoRead, tcpAlgorithmClass);
+    tcp->setCallback(connId, this);
     sockstate = CONNECTING;
 }
 
@@ -188,10 +168,7 @@ void TcpSocket::close()
 //        throw cRuntimeError("TcpSocket::close(): not connected or close() already called (sockstate=%s)", stateName(sockstate));
     }
     else {
-        auto request = new Request("CLOSE", TCP_C_CLOSE);
-        TcpCommand *cmd = new TcpCommand();
-        request->setControlInfo(cmd);
-        sendToTcp(request);
+        tcp->close(connId);
         sockstate = (sockstate == CONNECTED) ? LOCALLY_CLOSED : CLOSED;
     }
 }

@@ -11,6 +11,7 @@
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketBase.h"
+#include "inet/linklayer/ethernet/contract/IEthernet.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/queueing/common/PassivePacketSinkRef.h"
 
@@ -45,6 +46,7 @@ class INET_API EthernetSocket : public SocketBase
     ICallback *callback = nullptr;
     NetworkInterface *networkInterface = nullptr;
     PassivePacketSinkRef sink;
+    ModuleRefByGate<IEthernet> ethernet;
 
   protected:
     virtual void sendOut(cMessage *msg) override;
@@ -58,6 +60,7 @@ class INET_API EthernetSocket : public SocketBase
         dispatchProtocolReq.setProtocol(&Protocol::ethernetMac);
         dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
         sink.reference(gate, true, &dispatchProtocolReq);
+        ethernet.reference(gate, true);
     }
 
     /** @name Opening and closing connections, sending data */
