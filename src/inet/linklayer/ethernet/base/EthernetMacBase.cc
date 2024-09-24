@@ -64,6 +64,7 @@ void EthernetMacBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         fcsMode = parseFcsMode(par("fcsMode"));
         allowNonstandardBitrate = par("allowNonstandardBitrate");
+        upperLayerSink.reference(gate("upperLayerOut"), true);
         physInGate = gate("phys$i");
         physOutGate = gate("phys$o");
         lowerLayerInGateId = physInGate->getId();

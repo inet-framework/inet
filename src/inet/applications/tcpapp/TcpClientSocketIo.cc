@@ -19,6 +19,12 @@ TcpClientSocketIo::~TcpClientSocketIo()
     cancelAndDelete(readDelayTimer);
 }
 
+void TcpClientSocketIo::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+        trafficSink.reference(gate("trafficOut"), true);
+}
+
 void TcpClientSocketIo::open()
 {
     socket.setOutputGate(gate("socketOut"));
@@ -58,7 +64,7 @@ void TcpClientSocketIo::handleMessage(cMessage *message)
 void TcpClientSocketIo::socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent)
 {
     packet->removeTag<SocketInd>();
-    send(packet, "trafficOut");
+    trafficSink.pushPacket(packet);
     sendOrScheduleReadCommandIfNeeded();
 }
 

@@ -21,6 +21,7 @@
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
 #include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
 
@@ -75,6 +76,7 @@ class INET_API Arp : public OperationalBase, public IArp, public IPassivePacketS
 
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<IIpv4RoutingTable> rt; // for answering ProxyARP requests
+    PassivePacketSinkRef ifOutSink;
 
   protected:
     // Maps an IP multicast address to an Ethernet multicast address.

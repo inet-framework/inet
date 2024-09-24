@@ -8,6 +8,7 @@
 #ifndef __INET_TCPCLIENTSOCKETIO_H
 #define __INET_TCPCLIENTSOCKETIO_H
 
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
@@ -17,10 +18,12 @@ using namespace inet::queueing;
 class INET_API TcpClientSocketIo : public cSimpleModule, public TcpSocket::ICallback, public IPassivePacketSink
 {
   protected:
+    PassivePacketSinkRef trafficSink;
     TcpSocket socket;
     cMessage *readDelayTimer = nullptr;
 
   protected:
+    virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
     virtual void open();
 

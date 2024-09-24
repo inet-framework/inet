@@ -11,6 +11,7 @@
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/Protocol.h"
 #include "inet/linklayer/ethernet/common/EthernetSocket.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
 
@@ -19,6 +20,7 @@ using namespace inet::queueing;
 class INET_API EthernetSocketIo : public ApplicationBase, public EthernetSocket::ICallback, public IPassivePacketSink
 {
   protected:
+    PassivePacketSinkRef trafficSink;
     NetworkInterface *networkInterface = nullptr;
     const Protocol *protocol = nullptr;
     MacAddress remoteAddress;

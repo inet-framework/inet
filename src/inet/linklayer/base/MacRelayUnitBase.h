@@ -15,6 +15,7 @@
 #include "inet/linklayer/ethernet/contract/IMacForwardingTable.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
 
@@ -25,6 +26,7 @@ class INET_API MacRelayUnitBase : public LayeredProtocolBase, public StringForma
   protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     ModuleRefByPar<IMacForwardingTable> macForwardingTable;
+    PassivePacketSinkRef lowerLayerSink;
 
     long numProcessedFrames = 0;
     long numDroppedFrames = 0;
