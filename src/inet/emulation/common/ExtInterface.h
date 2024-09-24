@@ -8,7 +8,6 @@
 #ifndef __INET_EXTINTERFACE_H
 #define __INET_EXTINTERFACE_H
 
-#include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
