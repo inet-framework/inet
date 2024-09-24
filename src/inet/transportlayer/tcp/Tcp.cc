@@ -5,6 +5,7 @@
 //
 
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/Checksum.h"
@@ -46,6 +47,12 @@ void Tcp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         const char *checksumModeString = par("checksumMode");
         checksumMode = parseChecksumMode(checksumModeString, false);
+        PacketServiceTag packetServiceTag;
+        packetServiceTag.setProtocol(&Protocol::tcp);
+        appSink.reference(gate("appOut"), false, &packetServiceTag);
+        PacketProtocolTag packetProtocolTag;
+        packetProtocolTag.setProtocol(&Protocol::tcp);
+        ipSink.reference(gate("ipOut"), true, &packetProtocolTag);
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
 
@@ -117,14 +124,20 @@ void Tcp::sendToIp(Packet *segment)
     Enter_Method("sendToIp");
     take(segment);
     numSegmentsSent++;
-    send(segment, "ipOut");
+    // KLUDGE: this schedule call is here to keep the fingerprints
+    inet::scheduleAfter("SendToIp", 0, [=] () {
+        ipSink.pushPacket(segment);
+    });
 }
 
 void Tcp::sendToApp(cMessage *msg)
 {
     Enter_Method("sendToApp");
     take(msg);
-    send(msg, "appOut");
+    // KLUDGE: this schedule call is here to keep the fingerprints
+    inet::scheduleAfter("SendToApp", 0, [=] () {
+        appSink.pushPacket(check_and_cast<Packet *>(msg));
+    });
 }
 
 void Tcp::handleUpperPacket(Packet *packet)

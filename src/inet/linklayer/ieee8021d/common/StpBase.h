@@ -14,8 +14,11 @@
 #include "inet/linklayer/ethernet/contract/IMacForwardingTable.h"
 #include "inet/linklayer/ieee8021d/common/Ieee8021dInterfaceData.h"
 #include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * Base class for Stp and Rstp.
@@ -32,6 +35,7 @@ class INET_API StpBase : public OperationalBase, public cListener
     ModuleRefByPar<IMacForwardingTable> macTable;
     ModuleRefByPar<IInterfaceTable> ifTable;
     opp_component_ptr<NetworkInterface> ie;
+    PassivePacketSinkRef relaySink;
 
   public:
     StpBase();

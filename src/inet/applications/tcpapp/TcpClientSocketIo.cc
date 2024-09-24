@@ -19,12 +19,16 @@ TcpClientSocketIo::~TcpClientSocketIo()
     cancelAndDelete(readDelayTimer);
 }
 
-void TcpClientSocketIo::initialize()
+void TcpClientSocketIo::initialize(int stage)
 {
-    WATCH(bytesRcvd);
-    WATCH(bytesSent);
-    WATCH_EXPR("socketState", TcpSocket::stateName(socket.getState()));
+    if (stage == INITSTAGE_LOCAL) {
+        trafficSink.reference(gate("trafficOut"), true);
+        WATCH(bytesRcvd);
+        WATCH(bytesSent);
+        WATCH_EXPR("socketState", TcpSocket::stateName(socket.getState()));
+    }
 }
+
 
 void TcpClientSocketIo::open()
 {
@@ -67,7 +71,7 @@ void TcpClientSocketIo::socketDataArrived(TcpSocket *socket, Packet *packet, boo
 {
     bytesRcvd += packet->getByteLength();
     packet->removeTag<SocketInd>();
-    send(packet, "trafficOut");
+    trafficSink.pushPacket(packet);
     sendOrScheduleReadCommandIfNeeded();
 }
 

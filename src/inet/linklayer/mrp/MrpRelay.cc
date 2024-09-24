@@ -6,6 +6,7 @@
 
 #include "MrpRelay.h"
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/DirectionTag_m.h"
@@ -310,7 +311,7 @@ void MrpRelay::sendPacket(Packet *packet, const MacAddress &destinationAddress, 
         macAddressReq->setSrcAddress(sourceAddress);
     }
     simtime_t switchingDelay = par("switchingDelay").doubleValue();
-    sendDelayed(packet, switchingDelay, "lowerLayerOut");
+    inet::scheduleAfter("switchingDelay", switchingDelay, [this, packet] () { lowerLayerSink.pushPacket(packet); });
 }
 
 MacAddress MrpRelay::getBridgeAddress()

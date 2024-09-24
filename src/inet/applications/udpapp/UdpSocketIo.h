@@ -9,6 +9,7 @@
 #define __INET_UDPSOCKETIO_H
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
@@ -16,6 +17,7 @@ namespace inet {
 class INET_API UdpSocketIo : public ApplicationBase, public UdpSocket::ICallback
 {
   protected:
+    PassivePacketSinkRef trafficSink;
     bool dontFragment = false;
     UdpSocket socket;
     int numSent = 0;

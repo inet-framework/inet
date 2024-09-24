@@ -62,6 +62,8 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
     ModuleRefByPar<Ipv6RoutingTable> rt;
     ModuleRefByPar<Ipv6NeighbourDiscovery> nd;
     ModuleRefByPar<Icmpv6> icmp;
+    PassivePacketSinkRef transportSink;
+    PassivePacketSinkRef queueSink;
 
     // working vars
     bool sendRedirects = true; // whether to send ICMPv6 Redirects when forwarding back out the arrival interface (RFC 4861 8.2)

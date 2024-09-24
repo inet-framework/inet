@@ -21,6 +21,7 @@ namespace inet {
 class INET_API Ieee8021dRelay : public MacRelayUnitBase
 {
   protected:
+    PassivePacketSinkRef upperLayerSink;
     MacAddress bridgeAddress;
     NetworkInterface *bridgeNetworkInterface = nullptr;
 

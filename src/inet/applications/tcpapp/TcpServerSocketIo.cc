@@ -14,12 +14,16 @@ namespace inet {
 
 Define_Module(TcpServerSocketIo);
 
-void TcpServerSocketIo::initialize()
+void TcpServerSocketIo::initialize(int stage)
 {
-    WATCH(bytesRcvd);
-    WATCH(bytesSent);
-    WATCH_EXPR("socketState", socket ? TcpSocket::stateName(socket->getState()) : "none");
+    if (stage == INITSTAGE_LOCAL) {
+        trafficSink.reference(gate("trafficOut"), true);
+        WATCH(bytesRcvd);
+        WATCH(bytesSent);
+        WATCH_EXPR("socketState", socket ? TcpSocket::stateName(socket->getState()) : "none");
+    }
 }
+
 
 void TcpServerSocketIo::acceptSocket(TcpAvailableInfo *availableInfo)
 {
@@ -54,7 +58,7 @@ void TcpServerSocketIo::socketDataArrived(TcpSocket *socket, Packet *packet, boo
     ASSERT(socket == this->socket);
     bytesRcvd += packet->getByteLength();
     packet->removeTag<SocketInd>();
-    send(packet, "trafficOut");
+    trafficSink.pushPacket(packet);
     sendOrScheduleReadCommandIfNeeded();
 }
 

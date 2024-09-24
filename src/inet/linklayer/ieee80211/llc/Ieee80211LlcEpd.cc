@@ -19,6 +19,10 @@ Define_Module(Ieee80211LlcEpd);
 
 void Ieee80211LlcEpd::initialize(int stage)
 {
+    if (stage == INITSTAGE_LOCAL) {
+        lowerLayerSink.reference(gate("lowerLayerOut"), true);
+        upperLayerSink.reference(gate("upperLayerOut"), true);
+    }
 }
 
 void Ieee80211LlcEpd::handleMessage(cMessage *message)
@@ -26,13 +30,13 @@ void Ieee80211LlcEpd::handleMessage(cMessage *message)
     if (message->arrivedOn("upperLayerIn")) {
         auto packet = check_and_cast<Packet *>(message);
         encapsulate(packet);
-        send(packet, "lowerLayerOut");
+        lowerLayerSink.pushPacket(packet);
     }
     else if (message->arrivedOn("lowerLayerIn")) {
         auto packet = check_and_cast<Packet *>(message);
         decapsulate(packet);
         if (packet->getTag<PacketProtocolTag>()->getProtocol() != nullptr)
-            send(packet, "upperLayerOut");
+            upperLayerSink.pushPacket(packet);
         else {
             EV_WARN << "Unknown protocol, dropping packet\n";
             PacketDropDetails details;

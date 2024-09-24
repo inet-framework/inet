@@ -55,6 +55,8 @@ void NextHopForwarding::initialize(int stage)
         interfaceTable.reference(this, "interfaceTableModule", true);
         routingTable.reference(this, "routingTableModule", true);
         arp.reference(this, "arpModule", true);
+        queueSink.reference(gate("queueOut"), true);
+        transportSink.reference(gate("transportOut"), true);
 
         defaultHopLimit = par("hopLimit");
         numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
@@ -543,7 +545,7 @@ void NextHopForwarding::sendDatagramToHL(Packet *packet)
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
             EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);
-            send(packetCopy, "transportOut");
+            transportSink.pushPacket(packetCopy);
             hasSocket = true;
         }
     }
@@ -551,7 +553,7 @@ void NextHopForwarding::sendDatagramToHL(Packet *packet)
     if (contains(upperProtocols, protocol)) {
         EV_INFO << "Passing up to protocol " << *protocol << "\n";
         emit(packetSentToUpperSignal, packet);
-        send(packet, "transportOut");
+        transportSink.pushPacket(packet);
         numLocalDeliver++;
     }
     else {

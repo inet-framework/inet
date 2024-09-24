@@ -29,6 +29,7 @@ MessageHandler::MessageHandler(Router *containingRouter, cSimpleModule *containi
     lsUpdateHandler(containingRouter),
     lsAckHandler(containingRouter)
 {
+    ipSink.reference(ospfModule->gate("ipOut"), true);
 }
 
 void MessageHandler::messageReceived(cMessage *message)
@@ -366,7 +367,7 @@ void MessageHandler::sendPacket(Packet *packet, Ipv4Address destination, Ospfv2I
 
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     check_and_cast<Ospfv2 *>(ospfModule)->countSentPacket();
-    ospfModule->send(packet, "ipOut");
+    ipSink.pushPacket(packet);
 }
 
 void MessageHandler::clearTimer(cMessage *timer)

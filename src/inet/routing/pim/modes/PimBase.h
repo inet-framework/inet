@@ -15,6 +15,7 @@
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/pim/Pim.h"
 #include "inet/routing/pim/PimPacket_m.h"
@@ -22,6 +23,8 @@
 #include "inet/routing/pim/tables/PimNeighborTable.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * Base class of PimSm and PimDm modules.
@@ -147,6 +150,7 @@ class INET_API PimBase : public RoutingProtocolBase
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<PimInterfaceTable> pimIft;
     ModuleRefByPar<PimNeighborTable> pimNbt;
+    PassivePacketSinkRef ipSink;
     opp_component_ptr<Pim> pimModule;
 
     // address family: ipv4 or ipv6

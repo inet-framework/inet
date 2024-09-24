@@ -68,6 +68,10 @@ void EthernetEncapsulation::initialize(int stage)
         WATCH(seqNum);
         totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
         interfaceTable.reference(this, "interfaceTableModule", true);
+        PacketProtocolTag packetProtocolTag;
+        packetProtocolTag.setProtocol(&Protocol::ethernetMac);
+        lowerLayerSink.reference(gate("lowerLayerOut"), true, &packetProtocolTag);
+        upperLayerSink.reference(gate("upperLayerOut"), true);
 
         WATCH(anyUpperProtocols);
         WATCH(upperProtocols);
@@ -180,7 +184,7 @@ void EthernetEncapsulation::processPacketFromHigherLayer(Packet *packet)
     protocolTag->setProtocol(&Protocol::ethernetMac);
     packet->removeTagIfPresent<DispatchProtocolReq>();
     EV_INFO << "Sending " << packet << " to lower layer.\n";
-    send(packet, "lowerLayerOut");
+    lowerLayerSink.pushPacket(packet);
 }
 
 void EthernetEncapsulation::processPacketFromMac(Packet *packet)
@@ -226,7 +230,7 @@ void EthernetEncapsulation::processPacketFromMac(Packet *packet)
             packetCopy->setKind(SOCKET_I_DATA);
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it.first);
             EV_INFO << "Sending " << packetCopy << " to socket " << it.first << ".\n";
-            send(packetCopy, "upperLayerOut");
+            upperLayerSink.pushPacket(packetCopy);
             steal |= socket->steal;
         }
     }
@@ -241,7 +245,7 @@ void EthernetEncapsulation::processPacketFromMac(Packet *packet)
 
         // pass up to higher layers.
         EV_INFO << "Sending " << packet << " to upper layer.\n";
-        send(packet, "upperLayerOut");
+        upperLayerSink.pushPacket(packet);
     }
     else {
         EV_WARN << "Unknown protocol, dropping packet\n";

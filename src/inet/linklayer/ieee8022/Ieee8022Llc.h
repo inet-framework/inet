@@ -15,8 +15,11 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022SnapHeader_m.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 class INET_API Ieee8022Llc : public OperationalBase
 {
@@ -31,6 +34,9 @@ class INET_API Ieee8022Llc : public OperationalBase
     };
 
     friend std::ostream& operator<<(std::ostream& o, const SocketDescriptor& t);
+
+    PassivePacketSinkRef upperLayerSink;
+    PassivePacketSinkRef lowerLayerSink;
 
     std::set<const Protocol *> upperProtocols; // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;

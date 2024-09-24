@@ -6,6 +6,7 @@
 
 #include "inet/common/misc/MessageChecker.h"
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/stlutils.h"
 
 namespace inet {
@@ -20,6 +21,7 @@ MessageChecker::MessageChecker()
 
 void MessageChecker::initialize()
 {
+    outSink.reference(gate("out"), true);
     cXMLElement *root = par("config");
     if (std::string(root->getTagName()) == "checker") {
         m_checkingInfo = root->getChildren();
@@ -207,7 +209,9 @@ void MessageChecker::forwardMessage(cMessage *msg)
     simtime_t delayToWait = 0;
     if (endTransmissionTime > now)
         delayToWait = endTransmissionTime - now;
-    sendDelayed(msg, delayToWait, "out");
+    inet::scheduleAfter("forward", delayToWait, [=] () {
+        outSink.pushPacket(check_and_cast<Packet *>(msg));
+    });
 }
 
 void MessageChecker::finish()

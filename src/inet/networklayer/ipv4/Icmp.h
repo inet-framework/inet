@@ -16,8 +16,11 @@
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/common/checksum/ChecksumMode_m.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 class Ipv4Header;
 
@@ -27,6 +30,8 @@ class Ipv4Header;
 class INET_API Icmp : public SimpleModule
 {
   protected:
+    PassivePacketSinkRef ipSink;
+
     std::set<int> transportProtocols; // where to send up packets
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     B quoteLength;

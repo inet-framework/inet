@@ -18,6 +18,7 @@
 
 #include <sstream>
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -57,6 +58,7 @@ void Dsdv::initialize(int stage)
         host = getContainingNode(this);
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
+        ipSink.reference(gate("ipOut"), true);
 
         routeLifetime = par("routeLifetime").doubleValue();
         helloInterval = par("helloInterval");
@@ -181,7 +183,7 @@ void Dsdv::handleSelfMessage(cMessage *msg)
 
         // broadcast to other nodes the hello message
         numSent++;
-        send(packet, "ipOut");
+        ipSink.pushPacket(packet);
         packet = nullptr;
         hello = nullptr;
 
@@ -198,7 +200,7 @@ void Dsdv::handleSelfMessage(cMessage *msg)
             if ((*it)->event == msg) {
                 EV << "Vou mandar forward do " << (*it)->hello->peekData<DsdvHello>()->getSrcAddress() << endl; // todo
                 numSent++;
-                send((*it)->hello, "ipOut");
+                ipSink.pushPacket((*it)->hello);
                 (*it)->hello = nullptr;
                 delete *it;
                 forwardList->erase(it);
@@ -312,7 +314,7 @@ void Dsdv::handleMessageWhenUp(cMessage *msg)
 //                    waitTime= SIMTIME_DBL (simTime())+waitTime;
                     EV_DETAIL << "waitime for forward is " << waitTime << " And host is " << source << "\n"; // FIXME unchanged waitTime showed twice!!!
                     packet->insertAtBack(recHello);
-                    sendDelayed(packet, waitTime, "ipOut");
+                    inet::scheduleAfter("delay", waitTime, [=] () { ipSink.pushPacket(packet); });
                     packet = nullptr;
                 }
                 else {

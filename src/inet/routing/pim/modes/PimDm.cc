@@ -1735,7 +1735,7 @@ void PimDm::sendToIP(Packet *packet, L3Address srcAddr, L3Address destAddr, int 
     addresses->setDestAddress(destAddr);
     packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
     numSent++;
-    send(packet, "ipOut");
+    ipSink.pushPacket(packet);
 }
 
 //----------------------------------------------------------------------------
