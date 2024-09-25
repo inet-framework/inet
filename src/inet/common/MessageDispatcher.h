@@ -8,8 +8,6 @@
 #ifndef __INET_MESSAGEDISPATCHER_H
 #define __INET_MESSAGEDISPATCHER_H
 
-#include "inet/common/IInterfaceRegistrationListener.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -31,7 +29,6 @@ class INET_API MessageDispatcher :
 #else
     public cSimpleModule,
 #endif // #ifdef INET_WITH_QUEUEING
-    public DefaultProtocolRegistrationListener, public IInterfaceRegistrationListener
 {
   public:
     class INET_API Key {
@@ -55,22 +52,9 @@ class INET_API MessageDispatcher :
     };
 
   protected:
-    bool forwardServiceRegistration;
-    bool forwardProtocolRegistration;
-    ModuleRefByPar<IInterfaceTable> interfaceTable;
-
-    std::map<int, int> socketIdToGateIndex;
-    std::map<int, int> interfaceIdToGateIndex;
-    std::map<Key, int> serviceToGateIndex;
-    std::map<Key, int> protocolToGateIndex;
-    const Protocol *registeringProtocol = nullptr;
-    bool registeringAny = false;
 
   protected:
-    virtual void initialize(int stage) override;
-    virtual void arrived(cMessage *message, cGate *gate, const SendOptions& options, simtime_t time) override;
     virtual cGate *handlePacket(Packet *packet, const cGate *inGate);
-    virtual cGate *handleMessage(Message *request, cGate *inGate);
 
     int getGateIndexToConnectedModule(const char *moduleName);
 
@@ -96,13 +80,6 @@ class INET_API MessageDispatcher :
     virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
 #endif // #ifdef INET_WITH_QUEUEING
 
-    virtual void handleRegisterInterface(const NetworkInterface& interface, cGate *out, cGate *in) override;
-
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterAnyService(cGate *gate, ServicePrimitive servicePrimitive) override;
-
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) override;
 };
 
 std::ostream& operator<<(std::ostream& out, const MessageDispatcher::Key& foo) {
