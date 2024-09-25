@@ -47,6 +47,7 @@ void Tun::handleUpperMessage(cMessage *message)
 
 void Tun::handleUpperPacket(Packet *packet)
 {
+    EV_INFO << "Received packet from upper layer" << EV_FIELD(packet) << EV_ENDL;
     const auto& socketReq = packet->findTag<SocketReq>();
     // check if packet is from app by finding SocketReq with sockedId that is in socketIds
     auto sId = socketReq != nullptr ? socketReq->getSocketId() : -1;
@@ -58,7 +59,8 @@ void Tun::handleUpperPacket(Packet *packet)
         packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         emit(packetSentToUpperSignal, packet);
-        send(packet, "upperLayerOut");
+        EV_INFO << "Sending packet to IPv4" << EV_FIELD(packet) << EV_ENDL;
+        upperLayerSink.pushPacket(packet);
     }
     else {
         for (int socketId : socketIds) {
@@ -71,7 +73,8 @@ void Tun::handleUpperPacket(Packet *packet)
             auto npTag = packet->getTag<NetworkProtocolInd>();
             auto newnpTag = copy->addTag<NetworkProtocolInd>();
             *newnpTag = *npTag;
-            send(copy, "upperLayerOut");
+            EV_INFO << "Sending packet to socket" << EV_FIELD(socketId) << EV_FIELD(packet) << EV_ENDL;
+            upperLayerSink.pushPacket(copy);
         }
         delete packet;
     }
@@ -106,6 +109,33 @@ void Tun::handleUpperCommand(cMessage *message)
     }
     else
         throw cRuntimeError("Unknown command: %s", message->getName());
+}
+
+void Tun::open(int socketId)
+{
+    if (contains(socketIds, socketId))
+        throw cRuntimeError("Socket is already open: %d", socketId);
+    socketIds.push_back(socketId);
+}
+
+cGate *Tun::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("upperLayerIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            if (arguments == nullptr)
+                return gate;
+            else {
+                auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+                if (socketInd != nullptr && contains(socketIds, socketInd->getSocketId()))
+                    return gate;
+            }
+        }
+        else if (type == typeid(ITun))
+            return gate;
+    }
+    return nullptr;
 }
 
 } // namespace inet

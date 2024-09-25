@@ -57,10 +57,8 @@ void TunSocket::open(int interfaceId)
 {
     isOpen_ = true;
     this->interfaceId = interfaceId;
-    auto request = new Request("OPEN", TUN_C_OPEN);
-    TunOpenCommand *command = new TunOpenCommand();
-    request->setControlInfo(command);
-    sendToTun(request);
+    EV_INFO << "Opening socket" << EV_FIELD(socketId) << EV_FIELD(interfaceId) << EV_ENDL;
+    tun->open(socketId);
 }
 
 void TunSocket::send(Packet *packet)
@@ -70,7 +68,10 @@ void TunSocket::send(Packet *packet)
 //    TunSendCommand *command = new TunSendCommand();
 //    packet->setControlInfo(command);
     packet->setKind(TUN_C_DATA);
-    sendToTun(packet);
+    packet->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+    EV_INFO << "Sending packet on socket" << EV_FIELD(socketId) << EV_FIELD(packet) << EV_ENDL;
+    sink.pushPacket(packet);
 }
 
 void TunSocket::close()
