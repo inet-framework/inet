@@ -17,12 +17,16 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/linklayer/ieee8021as/GptpPacket_m.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
 
-class INET_API Gptp : public ClockUserModuleBase, public cListener
+using namespace inet::queueing;
+
+class INET_API Gptp : public ClockUserModuleBase, public cListener, public IPassivePacketSink
 {
     //parameters:
+    PassivePacketSinkRef socketSink;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
 
     GptpNodeType gptpNodeType;
@@ -89,6 +93,14 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
   public:
     virtual ~Gptp();
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
   protected:
     void sendPacketToNIC(Packet *packet, int portId);
 
