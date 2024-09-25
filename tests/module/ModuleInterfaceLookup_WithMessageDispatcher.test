@@ -1,0 +1,71 @@
+%description:
+
+Checks if module interface lookup works when the application, Tcp, Ipv4NetworkLayer, EthernetEncapsulation, and EthernetInterface modules are connected with MessageDispatcher modules.
+
+%file: test.ned
+
+import inet.applications.tcpapp.TcpClientApp;
+import inet.common.MessageDispatcher;
+import inet.linklayer.ethernet.basic.EthernetEncapsulation;
+import inet.linklayer.ethernet.basic.EthernetInterface;
+import inet.networklayer.ipv4.Ipv4NetworkLayer;
+import inet.networklayer.common.InterfaceTable;
+import inet.transportlayer.tcp.Tcp;
+
+network TestNetwork
+{
+    parameters:
+        *.interfaceTableModule = absPath(".interfaceTable");
+        @networkNode;
+    gates:
+        inout phys;
+    submodules:
+        interfaceTable: InterfaceTable;
+        app: TcpClientApp;
+        at: MessageDispatcher;
+        tcp: Tcp;
+        ti: MessageDispatcher;
+        ip: Ipv4NetworkLayer;
+        ie: MessageDispatcher;
+        ethernet: EthernetEncapsulation;
+        ei: MessageDispatcher;
+        interface: EthernetInterface;
+    connections:
+        app.socketOut --> at.in++;
+        app.socketIn <-- at.out++;
+        tcp.appOut --> at.in++;
+        tcp.appIn <-- at.out++;
+        tcp.ipOut --> ti.in++;
+        tcp.ipIn <-- ti.out++;
+        ip.transportOut --> ti.in++;
+        ip.transportIn <-- ti.out++;
+        ip.ifOut --> ie.in++;
+        ip.ifIn <-- ie.out++;
+        ethernet.upperLayerOut --> ie.in++;
+        ethernet.upperLayerIn <-- ie.out++;
+        ethernet.lowerLayerOut --> ei.in++;
+        ethernet.lowerLayerIn <-- ei.out++;
+        interface.upperLayerOut --> ei.in++;
+        interface.upperLayerIn <-- ei.out++;
+        interface.phys <--> phys;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 0s
+
+cmdenv-log-prefix = "%>"
+
+*.app.source.packetLength = 1000B
+*.app.source.productionInterval = 1s
+*.app.io.connectAddress = "127.0.0.1"
+*.app.io.connectPort = 1000
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
