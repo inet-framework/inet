@@ -27,6 +27,7 @@ void VirtualTunnel::initialize(int stage)
         const char *protocolAsString = par("protocol");
         if (*protocolAsString != '\0')
             protocol = Protocol::findProtocol(protocolAsString);
+        upperLayerSink.reference(gate("upperLayerOut"), true);
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
@@ -102,7 +103,7 @@ void VirtualTunnel::socketDataArrived(EthernetSocket *socket, Packet *packet)
 {
     packet->removeTag<SocketInd>();
     packet->getTagForUpdate<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
-    send(packet, "upperLayerOut");
+    upperLayerSink.pushPacket(packet);
 }
 #endif
 
@@ -111,9 +112,25 @@ void VirtualTunnel::socketDataArrived(Ieee8021qSocket *socket, Packet *packet)
 {
     packet->removeTag<SocketInd>();
     packet->getTagForUpdate<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
-    send(packet, "upperLayerOut");
+    upperLayerSink.pushPacket(packet);
 }
 #endif
+
+cGate *VirtualTunnel::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("upperLayerIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            if (arguments == nullptr)
+                return gate;
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr && socketInd->getSocketId() == socket->getSocketId())
+                return gate;
+        }
+    }
+    return nullptr;
+}
 
 } // namespace inet
 

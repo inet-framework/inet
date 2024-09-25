@@ -8,10 +8,12 @@
 #ifndef __INET_VIRTUALTUNNEL_H
 #define __INET_VIRTUALTUNNEL_H
 
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
 #include "inet/queueing/base/PassivePacketSinkBase.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 #ifdef INET_WITH_ETHERNET
 #include "inet/linklayer/ethernet/common/EthernetSocket.h"
@@ -32,8 +34,10 @@ class INET_API VirtualTunnel : public queueing::PassivePacketSinkBase
 #ifdef INET_WITH_IEEE8021Q
         , public Ieee8021qSocket::ICallback
 #endif
+        , public IModuleInterfaceLookup
 {
   protected:
+    queueing::PassivePacketSinkRef upperLayerSink;
     NetworkInterface *realNetworkInterface = nullptr;
     NetworkInterface *networkInterface = nullptr;
     const Protocol *protocol = nullptr;
@@ -61,6 +65,8 @@ class INET_API VirtualTunnel : public queueing::PassivePacketSinkBase
 
   public:
     virtual ~VirtualTunnel() { delete socket; }
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet
