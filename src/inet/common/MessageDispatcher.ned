@@ -40,12 +40,6 @@ import inet.queueing.base.PacketProcessorBase;
 simple MessageDispatcher extends PacketProcessorBase
 {
     parameters:
-        string interfaceTableModule; // Module path to the ~InterfaceTable module
-        bool forwardServiceRegistration = default(true);
-        bool forwardProtocolRegistration = default(true);
-        object interfaceMapping = default({}); // Maps network interface names to connected submodule names (e.g. {"eth0": "bridging"}), overrides automatically learned dispatching; * overrides all learned network interfaces, ? overrides default
-        object serviceMapping = default({}); // Maps protocols to connected submodule names (e.g. {"ethernetmac": "bridging"}), overrides automatically learned dispatching; * overrides all learned services, ? overrides default
-        object protocolMapping = default({}); // Maps protocols to connected submodule names (e.g. {"ipv4": "bridging"}), overrides automatically learned dispatching; * overrides all learned protocols, ? overrides default
         @class(MessageDispatcher);
         @display("i=-;b=100,5,,,,1;");
     gates:
