@@ -386,6 +386,19 @@ void Ppp::processUpperPacket()
     auto packet = dequeuePacket();
     handleUpperPacket(packet);
 }
+//
+//cGate *Ppp::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+//{
+//    Enter_Method("lookupModuleInterface");
+//    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+//    if (gate->isName("upperLayerIn")) {
+//        if (type == typeid(IActivePacketSink)) {
+//            if (arguments == nullptr)
+//                return gate;
+//        }
+//    }
+//    return nullptr;
+//}
 
 } // namespace inet
 

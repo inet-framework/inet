@@ -65,6 +65,8 @@ class INET_API Ppp : public MacProtocolBase, public queueing::IActivePacketSink
   public:
     virtual ~Ppp();
 
+//    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
