@@ -8,21 +8,26 @@
 #ifndef __INET_IPV4SOCKET_H
 #define __INET_IPV4SOCKET_H
 
-#include "inet/common/Protocol.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/INetworkSocket.h"
+#include "inet/networklayer/contract/ipv4/IIpv4.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * This class implements a raw IPv4 socket.
  */
-class INET_API Ipv4Socket : public INetworkSocket
+class INET_API Ipv4Socket : public INetworkSocket, public IIpv4::ICallback
 {
   public:
     class INET_API ICallback : public INetworkSocket::ICallback {
       public:
+        virtual ~ICallback() {}
         virtual void socketDataArrived(INetworkSocket *socket, Packet *packet) override { socketDataArrived(check_and_cast<Ipv4Socket *>(socket), packet); }
         virtual void socketDataArrived(Ipv4Socket *socket, Packet *packet) = 0;
 
@@ -40,6 +45,8 @@ class INET_API Ipv4Socket : public INetworkSocket
     INetworkSocket::ICallback *callback = nullptr;
     void *userData = nullptr;
     cGate *outputGate = nullptr;
+    PassivePacketSinkRef sink;
+    ModuleRefByGate<IIpv4> ipv4;
 
   protected:
     void sendToOutput(cMessage *message);
@@ -52,7 +59,14 @@ class INET_API Ipv4Socket : public INetworkSocket
      * Sets the gate on which to send raw packets. Must be invoked before socket
      * can be used. Example: <tt>socket.setOutputGate(gate("ipOut"));</tt>
      */
-    void setOutputGate(cGate *outputGate) { this->outputGate = outputGate; }
+    void setOutputGate(cGate *outputGate) {
+        this->outputGate = outputGate;
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(&Protocol::ipv4);
+        dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
+        sink.reference(outputGate, true, &dispatchProtocolReq);
+        ipv4.reference(outputGate, true);
+    }
     virtual void setCallback(INetworkSocket::ICallback *callback) override;
 
     void *getUserData() const { return userData; }
@@ -71,6 +85,11 @@ class INET_API Ipv4Socket : public INetworkSocket
     virtual void close() override;
     virtual void destroy() override;
     virtual bool isOpen() const override { return isOpen_; }
+
+    virtual void handleClosed() override {
+        if (callback != nullptr)
+            callback->socketClosed(this);
+    }
 
   protected:
     virtual void bind(const Protocol *protocol, L3Address localAddress) override { bind(protocol, localAddress.toIpv4()); }

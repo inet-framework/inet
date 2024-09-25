@@ -23,13 +23,16 @@
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/IgmpMessage.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 class IInterfaceTable;
 class IRoutingTable;
 
-class INET_API Igmpv3 : public cSimpleModule, protected cListener
+class INET_API Igmpv3 : public cSimpleModule, protected cListener, public IPassivePacketSink
 {
   protected:
     enum RouterState {
@@ -191,6 +194,7 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
   protected:
     ModuleRefByPar<IRoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
+    PassivePacketSinkRef ipSink;
 
     bool enabled;
     int robustness;
@@ -286,6 +290,13 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
     static void insertCrc(CrcMode crcMode, const Ptr<IgmpMessage>& igmpMsg, Packet *payload);
     void insertCrc(const Ptr<IgmpMessage>& igmpMsg, Packet *payload) { insertCrc(crcMode, igmpMsg, payload); }
     bool verifyCrc(const Packet *packet);
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("ipIn") || gate->isName("routerIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("ipIn") || gate->isName("routerIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
   public:
     /**

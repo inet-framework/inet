@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
@@ -70,8 +71,12 @@ void Ipv4::initialize(int stage)
         rt.reference(this, "routingTableModule", true);
         arp.reference(this, "arpModule", true);
         icmp.reference(this, "icmpModule", true);
-        transportSink.reference(gate("transportOut"), true);
-        queueSink.reference(gate("queueOut"), true);
+        PacketServiceTag packetServiceTag;
+        packetServiceTag.setProtocol(&Protocol::ipv4);
+        transportSink.reference(gate("transportOut"), false, &packetServiceTag);
+        PacketProtocolTag packetProtocolTag;
+        packetProtocolTag.setProtocol(&Protocol::ipv4);
+        queueSink.reference(gate("queueOut"), true, &packetProtocolTag);
 
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
@@ -832,7 +837,7 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
             EV_INFO << "Sending packet to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);
-            send(packetCopy, "transportOut");
+            transportSink.pushPacket(packetCopy);
             hasSocket = true;
         }
     }
@@ -1188,11 +1193,11 @@ void Ipv4::sendPacketToNIC(Packet *packet)
     if (auto networkInterfaceProtocol = networkInterface->getProtocol())
         ensureEncapsulationProtocolReq(packet, networkInterfaceProtocol, true, false);
     setDispatchProtocol(packet);
-    queueSink.pushPacket(packet);
     EV_INFO << "Sending datagram to lower layer";
     if (auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>())
         EV_INFO << EV_FIELD(protocol, *dispatchProtocolReq->getProtocol());
     EV_INFO << EV_FIELD(interface, networkInterface->getInterfaceName()) << EV_FIELD(packet) << EV_ENDL;
+    queueSink.pushPacket(packet);
 }
 
 // NetFilter:
@@ -1466,6 +1471,47 @@ void Ipv4::pushPacket(Packet *packet, const cGate *gate)
         handleIncomingDatagram(packet);
     else
         throw cRuntimeError("Unknown gate");
+}
+
+void Ipv4::setCallback(int socketId, ICallback *callback)
+{
+    Enter_Method("setCallback");
+    socketIdToSocketDescriptor[socketId]->callback = callback;
+}
+
+void Ipv4::bind(int socketId, const Protocol *protocol, Ipv4Address localAddress)
+{
+    Enter_Method("bind");
+    SocketDescriptor *descriptor = new SocketDescriptor(socketId, protocol ? protocol->getId() : -1, localAddress);
+    socketIdToSocketDescriptor[socketId] = descriptor;
+}
+
+void Ipv4::connect(int socketId, const Ipv4Address& remoteAddress)
+{
+    Enter_Method("connect");
+    socketIdToSocketDescriptor[socketId]->remoteAddress = remoteAddress;
+}
+
+void Ipv4::close(int socketId)
+{
+    Enter_Method("close");
+    auto it = socketIdToSocketDescriptor.find(socketId);
+    if (it != socketIdToSocketDescriptor.end()) {
+        auto callback = it->second->callback;
+        schedule("handleClose", simTime(), [=]() { callback->handleClosed(); });
+        delete it->second;
+        socketIdToSocketDescriptor.erase(it);
+    }
+}
+
+void Ipv4::destroy(int socketId)
+{
+    Enter_Method("destroy");
+    auto it = socketIdToSocketDescriptor.find(socketId);
+    if (it != socketIdToSocketDescriptor.end()) {
+        delete it->second;
+        socketIdToSocketDescriptor.erase(it);
+    }
 }
 
 } // namespace inet
