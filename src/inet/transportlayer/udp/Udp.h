@@ -97,6 +97,7 @@ class INET_API Udp : public TransportProtocolBase, public IUdp, public IPassiveP
         short dscp = -1;
         short tos = -1;
         MulticastMembershipTable multicastMembershipTable;
+        IUdp::ICallback *callback = nullptr;
 
         MulticastMembershipTable::iterator findFirstMulticastMembership(const L3Address& multicastAddress);
         MulticastMembership *findMulticastMembership(const L3Address& multicastAddress, int interfaceId);
@@ -143,20 +144,23 @@ class INET_API Udp : public TransportProtocolBase, public IUdp, public IPassiveP
     virtual SockDesc *getSocketById(int sockId);
     virtual SockDesc *getOrCreateSocket(int sockId);
     virtual SockDesc *createSocket(int sockId, const L3Address& localAddr, int localPort);
-    virtual void bind(int sockId, const L3Address& localAddr, int localPort) override;
-    virtual void connect(int sockId, const L3Address& remoteAddr, int remotePort) override;
-    virtual void close(int sockId);
-    virtual void destroySocket(int sockId);
     void destroySocket(SocketsByIdMap::iterator it);
     virtual void clearAllSockets();
+    virtual void setTimeToLive(int socketId, int ttl) override;
     virtual void setTimeToLive(SockDesc *sd, int ttl);
+    virtual void setDscp(int socketId, short dscp) override;
     virtual void setDscp(SockDesc *sd, short dscp);
+    virtual void setTos(int socketId, short tos) override;
     virtual void setTos(SockDesc *sd, short tos);
+    virtual void setBroadcast(int socketId, bool broadcast) override;
     virtual void setBroadcast(SockDesc *sd, bool broadcast);
     virtual void setMulticastOutputInterface(SockDesc *sd, int interfaceId);
+    virtual void setMulticastLoop(int socketId, bool loop) override;
     virtual void setMulticastLoop(SockDesc *sd, bool loop);
     virtual void setReuseAddress(SockDesc *sd, bool reuseAddr);
+    virtual void joinMulticastGroups(int socketId, const std::vector<L3Address>& multicastAddresses, const std::vector<int> interfaceIds) override;
     virtual void joinMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multicastAddresses, const std::vector<int> interfaceIds);
+    virtual void leaveMulticastGroups(int socketId, const std::vector<L3Address>& multicastAddresses) override;
     virtual void leaveMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multicastAddresses);
     virtual void blockMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList);
     virtual void unblockMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList);
@@ -218,6 +222,12 @@ class INET_API Udp : public TransportProtocolBase, public IUdp, public IPassiveP
     virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    virtual void setCallback(int sockId, ICallback *callback) override;
+    virtual void bind(int sockId, const L3Address& localAddr, int localPort) override;
+    virtual void connect(int sockId, const L3Address& remoteAddr, int remotePort) override;
+    virtual void close(int sockId) override;
+    virtual void destroy(int sockId) override;
 
   protected:
     virtual void initialize(int stage) override;
