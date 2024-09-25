@@ -17,9 +17,10 @@
 namespace inet {
 
 Ipv6Socket::Ipv6Socket(cGate *outputGate) :
-    socketId(getActiveSimulationOrEnvir()->getUniqueNumber()),
-    outputGate(outputGate)
+    socketId(getActiveSimulationOrEnvir()->getUniqueNumber())
 {
+    if (outputGate != nullptr)
+        setOutputGate(outputGate);
 }
 
 void Ipv6Socket::setCallback(INetworkSocket::ICallback *callback)
@@ -60,12 +61,7 @@ void Ipv6Socket::processMessage(cMessage *msg)
 void Ipv6Socket::bind(const Protocol *protocol, Ipv6Address localAddress)
 {
     ASSERT(!bound);
-    auto *command = new Ipv6SocketBindCommand();
-    command->setProtocol(protocol);
-    command->setLocalAddress(localAddress);
-    auto request = new Request("bind", IPv6_C_BIND);
-    request->setControlInfo(command);
-    sendToOutput(request);
+    ipv6->bind(socketId, protocol, localAddress);
     bound = true;
     isOpen_ = true;
 }
@@ -73,16 +69,14 @@ void Ipv6Socket::bind(const Protocol *protocol, Ipv6Address localAddress)
 void Ipv6Socket::connect(Ipv6Address remoteAddress)
 {
     isOpen_ = true;
-    auto *command = new Ipv6SocketConnectCommand();
-    command->setRemoteAddress(remoteAddress);
-    auto request = new Request("connect", IPv6_C_CONNECT);
-    request->setControlInfo(command);
-    sendToOutput(request);
+    ipv6->connect(socketId, remoteAddress);
 }
 
 void Ipv6Socket::send(Packet *packet)
 {
-    sendToOutput(packet);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
+    packet->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    sink.pushPacket(packet);
 }
 
 void Ipv6Socket::sendTo(Packet *packet, Ipv6Address destAddress)
@@ -95,18 +89,12 @@ void Ipv6Socket::sendTo(Packet *packet, Ipv6Address destAddress)
 void Ipv6Socket::close()
 {
     ASSERT(bound);
-    Ipv6SocketCloseCommand *command = new Ipv6SocketCloseCommand();
-    auto request = new Request("close", IPv6_C_CLOSE);
-    request->setControlInfo(command);
-    sendToOutput(request);
+    ipv6->close(socketId);
 }
 
 void Ipv6Socket::destroy()
 {
-    auto *command = new Ipv6SocketDestroyCommand();
-    auto request = new Request("destroy", IPv6_C_DESTROY);
-    request->setControlInfo(command);
-    sendToOutput(request);
+    ipv6->destroy(socketId);
 }
 
 void Ipv6Socket::sendToOutput(cMessage *message)
