@@ -8,13 +8,13 @@
 #include "inet/networklayer/common/NetworkInterface.h"
 
 #include "inet/common/INETUtils.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/StringFormat.h"
-#include "inet/common/SubmoduleLayout.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/stlutils.h"
+#include "inet/common/StringFormat.h"
+#include "inet/common/SubmoduleLayout.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
 #ifdef INET_WITH_IPv4
@@ -85,7 +85,6 @@ NetworkInterface::NetworkInterface()
 
 NetworkInterface::~NetworkInterface()
 {
-    resetInterface();
 }
 
 void NetworkInterface::clearProtocolDataSet()
@@ -121,8 +120,17 @@ void NetworkInterface::initialize(int stage)
         else
             wireless = rxIn == nullptr && txOut == nullptr;
 
+        if (hasPar("protocol")) {
+            const char *protocolName = par("protocol");
+            if (*protocolName != '\0')
+                protocol = Protocol::getProtocol(protocolName);
+        }
+
         upperLayerInConsumer.reference(upperLayerIn, false, nullptr, 1);
-        upperLayerOutConsumer.reference(upperLayerOut, false, nullptr, 1);
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(protocol);
+        dispatchProtocolReq.setServicePrimitive(SP_INDICATION);
+        upperLayerOutConsumer.reference(upperLayerOut, false, protocol != nullptr ? &dispatchProtocolReq : nullptr, 1);
         interfaceTable.reference(this, "interfaceTableModule", false);
         setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
         setCarrier(computeCarrier());
@@ -145,11 +153,6 @@ void NetworkInterface::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
-        if (hasPar("protocol")) {
-            const char *protocolName = par("protocol");
-            if (*protocolName != '\0')
-                protocol = Protocol::getProtocol(protocolName);
-        }
         if (hasPar("address")) {
             const char *address = par("address");
             if (!strcmp(address, "auto")) {
@@ -220,7 +223,12 @@ void NetworkInterface::pushPacket(Packet *packet, const cGate *gate)
     }
     else if (gate == upperLayerOut) {
         packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
-        pushOrSendPacket(packet, upperLayerOut, upperLayerOutConsumer);
+        if (upperLayerOutConsumer != nullptr)
+            upperLayerOutConsumer.pushPacket(packet);
+        else {
+            EV_WARN << "Network interface has no upper layer connection, dropping packet" << EV_FIELD(packet) << EV_ENDL;
+            dropPacket(packet, OTHER_PACKET_DROP);
+        }
     }
     else
         throw cRuntimeError("Unknown gate: %s", gate->getName());
@@ -405,11 +413,6 @@ void NetworkInterface::changed(simsignal_t signalID, int fieldId)
         NetworkInterfaceChangeDetails details(this, fieldId);
         interfaceTable->interfaceChanged(signalID, &details);
     }
-}
-
-void NetworkInterface::resetInterface()
-{
-    protocolDataSet.clearTags();
 }
 
 bool NetworkInterface::matchesMacAddress(const MacAddress& address) const
@@ -681,6 +684,7 @@ void NetworkInterface::handleStopOperation(LifecycleOperation *operation)
     setState(State::DOWN);
     // TODO carrier and UP/DOWN state is independent
     setCarrier(false);
+    protocolDataSet.clearTags();
 }
 
 void NetworkInterface::handleCrashOperation(LifecycleOperation *operation)
@@ -688,6 +692,7 @@ void NetworkInterface::handleCrashOperation(LifecycleOperation *operation)
     setState(State::DOWN);
     // TODO carrier and UP/DOWN state is independent
     setCarrier(false);
+    protocolDataSet.clearTags();
 }
 
 NetworkInterface *findContainingNicModule(const cModule *from)
@@ -712,18 +717,30 @@ NetworkInterface *getContainingNicModule(const cModule *from)
 
 cGate *NetworkInterface::lookupModuleInterface(cGate *gate, const std::type_info &type, const cObject *arguments, int direction)
 {
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
     if (gate->isName("upperLayerIn")) {
         // TODO accept outgoing network interface specific packets or outgoing protocol specific packets
         // TODO getProtocol()
         if (type == typeid(IPassivePacketSink)) {
             auto interfaceReq = dynamic_cast<const InterfaceReq *>(arguments);
-            if (interfaceReq != nullptr && interfaceReq->getInterfaceId() == getInterfaceId())
-                return findModuleInterface(gate, type, interfaceReq == nullptr ? arguments : nullptr, 1);
+            if (interfaceReq != nullptr && interfaceReq->getInterfaceId() == getInterfaceId() && findModuleInterface(gate, type, nullptr, 1) != nullptr)
+                return gate;
+            auto packetProtocolTag = dynamic_cast<const PacketProtocolTag *>(arguments);
+            if (packetProtocolTag != nullptr && (!hasPar("protocol") || !strcmp(packetProtocolTag->getProtocol()->getName(), par("protocol"))) && findModuleInterface(gate, type, arguments, 1) != nullptr)
+                return gate;
+            auto dispatchProtocolReq = dynamic_cast<const DispatchProtocolReq *>(arguments);
+            if (dispatchProtocolReq != nullptr && findModuleInterface(gate, type, arguments, 1) != nullptr)
+                return gate;
         }
+        else
+            return findModuleInterface(gate, type, arguments, 1);
     }
     else if (gate->isName("upperLayerOut")) {
         if (type == typeid(IPassivePacketSink))
             return gate;
+        else
+            return findModuleInterface(gate, type, arguments);
     }
     else if (gate->isName("phys$o"))
         return findModuleInterface(gate, type, arguments); // forward all other interfaces
