@@ -26,7 +26,7 @@ simple DscpMarker extends PacketProcessorBase
         @signal[packetMarked](type=cPacket);
         @statistic[packetMarked](title="packets marked"; source=packetMarked; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
-        input in[];
+        input in[] @interface[inet::queueing::IPassivePacketSink](forward=out);
         output out;
 }
 

@@ -48,8 +48,8 @@ simple EthernetEncapsulation like IEthernetLayer
         @statistic[decapPk](title="packets decapsulated"; source=decapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[pauseSent](title="pause sent"; record=count,sum,vector);
     gates:
-        input upperLayerIn; // TODO accepts packets and socket commands with  @messageKinds(inet::SocketCommandCode), too
+        input upperLayerIn @interface[inet::IEthernet] @interface[inet::queueing::IPassivePacketSink](protocol=ethernetmac; service=request; protocolGroup=ethertype; sdu=ethernetmac; pdu=ieee8022llc); // TODO accepts packets and socket commands with  @messageKinds(inet::SocketCommandCode), too
         output upperLayerOut; // TODO sends packets and socket indications with @messageKinds(inet::SocketStatusInd), too
-        input lowerLayerIn;
+        input lowerLayerIn @interface[inet::queueing::IPassivePacketSink](protocol=ethernetmac; service=indication; pdu=ethernetmac);
         output lowerLayerOut;
 }

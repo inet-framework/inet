@@ -20,7 +20,7 @@ simple QosClassifier like IIeee8021dQosClassifier
         string defaultUp = default("BE");
         @display("i=block/classifier");
     gates:
-        input in;
+        input in @interface[inet::queueing::IPassivePacketSink](forward=out);
         output out;
 }
 

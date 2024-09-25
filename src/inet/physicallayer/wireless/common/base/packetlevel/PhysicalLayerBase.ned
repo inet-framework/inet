@@ -17,7 +17,7 @@ simple PhysicalLayerBase extends LayeredProtocolBase
     parameters:
         @display("i=block/wrxtx");
     gates:
-        input upperLayerIn @labels(ILinkLayerFrame/down);
+        input upperLayerIn @interface[inet::queueing::IPassivePacketSink] @labels(ILinkLayerFrame/down);
         output upperLayerOut @labels(ILinkLayerFrame/up);
         input radioIn @labels(IWirelessSignal);
 }

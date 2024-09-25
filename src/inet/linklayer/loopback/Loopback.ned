@@ -25,7 +25,7 @@ simple Loopback
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     gates:
-        input upperLayerIn;
+        input upperLayerIn @interface[inet::queueing::IActivePacketSink];
         output upperLayerOut;
 }
 

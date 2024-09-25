@@ -64,9 +64,9 @@ simple Ipv6
         @signal[packetSentToLower](type=inet::Packet);
         @signal[packetReceivedFromLower](type=inet::Packet);
     gates:
-        input transportIn @labels(Ipv6ControlInfo/down,TcpHeader,UdpHeader);
+        input transportIn @interface[inet::IIpv6] @interface[inet::queueing::IPassivePacketSink](protocol=ipv6; service=request; protocolGroup=ip; sdu=ipv6) @labels(Ipv6ControlInfo/down,TcpHeader,UdpHeader);
         output transportOut @labels(Ipv6ControlInfo/up,TcpHeader,UdpHeader);
-        input queueIn @labels(IPv6Datagram);
+        input queueIn @interface[inet::queueing::IPassivePacketSink](protocol=ipv6; service=indication) @labels(IPv6Datagram);
         output queueOut @labels(IPv6Datagram);
         input ndIn;
         output ndOut;

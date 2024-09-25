@@ -25,11 +25,11 @@ simple PimSplitter
         string pimInterfaceTableModule;
 
     gates:
-        input ipIn;
+        input ipIn @interface[inet::queueing::IPassivePacketSink](protocol=pim; service=indication; sdu=ipv4);
         output ipOut;
-        input pimDMIn;
+        input pimDMIn @interface[inet::queueing::IPassivePacketSink];
         output pimDMOut;
-        input pimSMIn;
+        input pimSMIn @interface[inet::queueing::IPassivePacketSink];
         output pimSMOut;
 }
 

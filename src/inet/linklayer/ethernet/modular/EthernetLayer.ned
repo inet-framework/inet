@@ -23,7 +23,7 @@ module EthernetLayer like IEthernetLayer
         paddingInserter.minLength = default(60B);
         @display("i=block/layer");
     gates:
-        input upperLayerIn;
+        input upperLayerIn @interface[inet::queueing::IPassivePacketSink](protocol=ethernetmac; service=request; protocolGroup=ethertype; sdu=ethernetmac);
         output upperLayerOut;
         input lowerLayerIn;
         output lowerLayerOut;

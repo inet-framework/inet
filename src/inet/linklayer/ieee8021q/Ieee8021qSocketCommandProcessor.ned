@@ -16,5 +16,7 @@ simple Ieee8021qSocketCommandProcessor extends PacketFlowBase like IPacketFlow
         @class(Ieee8021qSocketCommandProcessor);
         @display("i=block/cogwheel");
         string socketTableModule;
+    gates:
+        in @interface[inet::IIeee8021q];
 }
 
