@@ -36,7 +36,7 @@ simple TokenBucketMeter extends SimpleModule
         int cbs @unit(B); // Committed burst size
         bool colorAwareMode = default(false); // Enables color-aware mode
     gates:
-        input in;
+        input in @interface[inet::queueing::IPassivePacketSink](forward=greenOut);
         output greenOut;
         output redOut;
 }

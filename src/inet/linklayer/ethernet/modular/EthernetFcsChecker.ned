@@ -17,4 +17,6 @@ simple EthernetFcsChecker extends ChecksumCheckerBase like IPacketFilter
         bool popFcs = default(true);
         @class(EthernetFcsChecker);
         @display("i=block/checker");
+    gates:
+        in @interface[inet::queueing::IPassivePacketSink](protocol=ethernetmac; service=indication) @interface[inet::queueing::IActivePacketSink](protocol=ethernetmac; service=indication);
 }

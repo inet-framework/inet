@@ -40,7 +40,7 @@ simple SingleRateThreeColorMeter extends SimpleModule
         int ebs @unit(B); // Excess burst size
         bool colorAwareMode = default(false); // Enables color-aware mode
     gates:
-        input in;
+        input in @interface[inet::queueing::IPassivePacketSink](forward=greenOut);
         output greenOut;
         output yellowOut;
         output redOut;

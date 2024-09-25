@@ -46,7 +46,7 @@ simple VoipStreamReceiver extends SimpleModule like IApp
         @statistic[numSessions](title="total number of sessions"; source="sum(connState+1)/2"; record=last);
         @display("i=block/arrival");
     gates:
-        input socketIn @labels(UdpCommand/up);
+        input socketIn @interface[inet::queueing::IPassivePacketSink] @labels(UdpCommand/up);
         output socketOut @labels(UdpCommand/down);
 }
 

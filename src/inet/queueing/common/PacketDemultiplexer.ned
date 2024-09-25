@@ -22,6 +22,6 @@ simple PacketDemultiplexer extends PacketProcessorBase like IActivePacketSink //
         @class(PacketDemultiplexer);
         @display("i=block/fork");
     gates:
-        input in @labels(pull);
-        output out[] @labels(pull);
+        input in @interface[inet::queueing::IActivePacketSink] @labels(pull);
+        output out[] @interface[inet::queueing::IPassivePacketSource] @labels(pull);
 }

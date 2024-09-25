@@ -32,6 +32,6 @@ simple Tun extends SimpleModule
         @signal[packetReceivedFromUpper](type=cPacket);
 
     gates:
-        input upperLayerIn @messageKinds(inet::TunCommandCode);    // From upper layers
+        input upperLayerIn @interface[inet::ITun] @messageKinds(inet::TunCommandCode);    // From upper layers
         output upperLayerOut @messageKinds(inet::TunSocketIndication);  // To upper layers
 }

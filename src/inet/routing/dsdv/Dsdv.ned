@@ -38,7 +38,7 @@ simple Dsdv extends SimpleModule like IManetRouting
         bool manetPurgeRoutingTables = default(true);
         volatile double broadcastDelay @unit(s) = default(uniform(0s,0.01s));
     gates:
-        input ipIn;
+        input ipIn @interface[inet::queueing::IPassivePacketSink](protocol=manet; service=indication);
         output ipOut;
 }
 

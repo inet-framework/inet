@@ -33,6 +33,6 @@ simple PacketServerBase extends PacketProcessorBase
         // the statistical value is the data rate of the outgoing packets
         @statistic[outgoingDataRate](title="outgoing datarate"; source=throughput(packetPushed); record=vector; unit=bps; interpolationmode=linear);
     gates:
-        input in;
-        output out;
+        input in @interface[inet::queueing::IActivePacketSink](forward=out,inet::queueing::IPassivePacketSink);
+        output out @interface[inet::queueing::IActivePacketSource];
 }

@@ -15,7 +15,7 @@ simple LocalDelivery extends SimpleModule
         @class(LocalDelivery);
         string interfaceTableModule;
     gates:
-        input in;
+        input in @interface[inet::queueing::IPassivePacketSink];
         output deliveryOut;
         output forwardingOut;
 }

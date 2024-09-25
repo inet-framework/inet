@@ -37,7 +37,7 @@ simple MessageChecker extends SimpleModule
         @class(MessageChecker);
         xml config;   // Configuration file
     gates:
-        input in;
+        input in @interface[inet::queueing::IPassivePacketSink];
         output out;
 }
 

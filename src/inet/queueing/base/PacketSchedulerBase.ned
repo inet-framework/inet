@@ -29,6 +29,6 @@ simple PacketSchedulerBase extends PacketProcessorBase
         // the statistical value is the data rate of the scheduled packets
         @statistic[dataRate](title="data rate"; source=throughput(packetPulled); record=vector; unit=bps; interpolationmode=linear);
     gates:
-        input in[];
-        output out;
+        input in[] @interface[inet::queueing::IActivePacketSink](forward=out) @interface[inet::queueing::IPassivePacketSink](forward=out);
+        output out @interface[inet::queueing::IPassivePacketSource];
 }

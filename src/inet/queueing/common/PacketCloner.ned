@@ -21,6 +21,6 @@ simple PacketCloner extends PacketProcessorBase like IPassivePacketSink // IActi
         @class(PacketCloner);
         @display("i=block/star");
     gates:
-        input in @labels(push);
+        input in @interface[inet::queueing::IPassivePacketSink] @labels(push);
         output out[] @labels(push);
 }
