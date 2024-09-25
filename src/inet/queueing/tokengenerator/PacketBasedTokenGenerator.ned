@@ -22,5 +22,5 @@ simple PacketBasedTokenGenerator extends TokenGeneratorBase like IPassivePacketS
         displayStringTextFormat = default("processed %p pk (%l)\ngenerated %t tk\nto %s"); // %p number of packets, %l total length
         @class(PacketBasedTokenGenerator);
     gates:
-        input in;
+        input in @interface[inet::queueing::IPassivePacketSink];
 }

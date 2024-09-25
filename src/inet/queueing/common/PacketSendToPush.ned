@@ -17,5 +17,5 @@ simple PacketSendToPush extends PacketProcessorBase like IActivePacketSource
         @display("i=block/cogwheel");
     gates:
         input in @labels(push);
-        output out @labels(push);
+        output out @interface[inet::queueing::IActivePacketSource] @labels(push);
 }

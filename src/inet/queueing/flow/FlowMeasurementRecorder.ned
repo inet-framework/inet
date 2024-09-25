@@ -92,4 +92,6 @@ simple FlowMeasurementRecorder extends PacketFlowBase like IPacketFlow
         @statistic[packetDelayDifferenceToMean](title="packet delay difference to mean"; source=differenceToMean(weightedMeanPerGroup(groupRegionsPerPacket(elapsedTimePerRegion(demuxFlow(packetFlowMeasured))))); record=vector,histogram; unit=s; interpolationmode=none);
         // the statistical value is the variation of the mean bit elapsed time per packet
         @statistic[packetDelayVariation](title="packet delay variation"; source=stddev(weightedMeanPerGroup(groupRegionsPerPacket(elapsedTimePerRegion(demuxFlow(packetFlowMeasured))))); record=vector,histogram; unit=s);
+    gates:
+        in @interface[inet::queueing::IPassivePacketSink](forward=out) @interface[inet::queueing::IActivePacketSink](forward=out);
 }

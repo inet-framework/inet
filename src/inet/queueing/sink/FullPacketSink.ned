@@ -24,5 +24,5 @@ simple FullPacketSink extends PacketProcessorBase like IPacketSink, IActivePacke
         @class(FullPacketSink);
         @display("i=block/sink");
     gates:
-        input in @labels(push,pull);
+        input in @interface[inet::queueing::IPassivePacketSink] @labels(push,pull);
 }

@@ -147,8 +147,8 @@ simple Sctp like ISctp
         @display("i=block/wheelbarrow");
 
     gates:
-        input appIn @messageKinds(inet::SctpCommandCode);
-        input ipIn;
+        input appIn @interface[inet::sctp::ISctp] @interface[inet::queueing::IPassivePacketSink](protocol=sctp; service=request) @messageKinds(inet::SctpCommandCode);
+        input ipIn @interface[inet::queueing::IPassivePacketSink](protocol=sctp; service=indication);
         output appOut @labels(SctpCommand/up) @messageKinds(inet::SctpStatusInd);
         output ipOut;
 }

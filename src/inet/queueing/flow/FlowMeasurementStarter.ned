@@ -21,4 +21,6 @@ simple FlowMeasurementStarter extends PacketFlowBase like IPacketFlow
         @class(FlowMeasurementStarter);
         @display("i=block/timer");
         @signal[packetFlowStarted](type=inet::Packet);
+    gates:
+        in @interface[inet::queueing::IPassivePacketSink](forward=out) @interface[inet::queueing::IActivePacketSink](forward=out);
 }

@@ -59,7 +59,7 @@ simple Ppp
         @statistic[rcvdPkFromHl](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
-        input upperLayerIn;
+        input upperLayerIn @interface[inet::queueing::IActivePacketSink](protocol=ppp; service=request; pdu=ipv4);
         output upperLayerOut;
         inout phys @labels(PppFrame);
 }

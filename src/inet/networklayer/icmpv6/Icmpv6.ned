@@ -20,7 +20,7 @@ simple Icmpv6
         string crcMode @enum("declared", "computed") = default("declared");
         @display("i=block/control");
     gates:
-        input transportIn;
+        input transportIn @interface[inet::queueing::IPassivePacketSink](protocol=icmpv6; service=indication);
         output transportOut;
         input ipv6In;
         output ipv6Out;

@@ -25,5 +25,5 @@ simple EmptyPacketSource extends PacketProcessorBase like IPacketSource, IActive
         @class(EmptyPacketSource);
         @display("i=block/source");
     gates:
-        output out @labels(push,pull);
+        output out @interface[inet::queueing::IPassivePacketSource] @interface[inet::queueing::IActivePacketSource] @labels(push,pull);
 }

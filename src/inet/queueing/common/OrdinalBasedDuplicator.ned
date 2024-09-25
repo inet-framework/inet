@@ -22,7 +22,7 @@ simple OrdinalBasedDuplicator extends PacketDuplicatorBase
         @display("i=block/control");
         @class(OrdinalBasedDuplicator);
     gates:
-        input in;
-        output out;
+        input in @interface[inet::queueing::IPassivePacketSink];
+        output out @interface[inet::queueing::IActivePacketSource];
 }
 

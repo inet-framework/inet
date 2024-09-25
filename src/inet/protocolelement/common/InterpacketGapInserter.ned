@@ -22,6 +22,6 @@ simple InterpacketGapInserter extends PacketProcessorBase
         @signal[interpacketGapEnded](type=double);
         @statistic[interpacketGap](title="interpacket gap state"; type=int; source=count(interpacketGapStarted) - count(interpacketGapEnded); record=vector; interpolationmode=sample-hold);
     gates:
-        input in;
-        output out;
+        input in @interface[inet::queueing::IPassivePacketSink];
+        output out @interface[inet::queueing::IActivePacketSource];
 }
