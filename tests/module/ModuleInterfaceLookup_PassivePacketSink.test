@@ -1,0 +1,68 @@
+%description:
+
+Checks if module interface lookup fails when the Ipv4NetworkLayer module is directly connected to the EthernetInterface module.
+
+%file: TestNetwork.ned
+
+import inet.common.MessageDispatcher;
+import inet.queueing.sink.PassivePacketSink;
+
+network TestNetwork
+{
+    submodules:
+        messageDispatcher: MessageDispatcher;
+        sink: PassivePacketSink;
+        test: Test;
+    connections:
+        messageDispatcher.out++ --> sink.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 0s
+
+cmdenv-log-prefix = "%>"
+
+%includes
+#include "inet/common/IModuleInterfaceLookup.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
+
+%activity:
+using namespace inet;
+using namespace inet::queueing;
+
+#define CHECK(gate, argument) { std::cerr << printToStringIfPossible(argument, 0) << " --> " << (findModuleInterface(gate, typeid(IPassivePacketSink), &argument) != nullptr ? "found" : "not found") << std::endl; }
+
+auto messageDispatcher = cSimulation::getActiveSimulation()->getSystemModule()->getModuleByPath("messageDispatcher");
+auto in = messageDispatcher->gate("out", 0);
+
+DispatchProtocolReq dispatchProtocolReq;
+dispatchProtocolReq.setProtocol(&Protocol::ipv4);
+dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
+CHECK(in, dispatchProtocolReq);
+dispatchProtocolReq.setServicePrimitive(SP_INDICATION);
+CHECK(in, dispatchProtocolReq);
+
+PacketProtocolTag packetProtocolTag;
+packetProtocolTag.setProtocol(&Protocol::ipv4);
+CHECK(in, packetProtocolTag);
+
+PacketServiceTag packetServiceTag;
+packetServiceTag.setProtocol(&Protocol::ipv4);
+CHECK(in, packetServiceTag);
+
+%contains: stderr
+DispatchProtocolReq, protocol = ipv4(38), servicePrimitive = 1 (SP_REQUEST) --> found
+DispatchProtocolReq, protocol = ipv4(38), servicePrimitive = 2 (SP_INDICATION) --> found
+PacketProtocolTag, protocol = ipv4(38), frontOffset = 0 B, backOffset = 0 B --> found
+PacketServiceTag, protocol = ipv4(38) --> found
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

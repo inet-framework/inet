@@ -1,0 +1,92 @@
+%description:
+
+Check module interface lookup of UDP module.
+
+%file: TestNetwork.ned
+
+import inet.common.MessageDispatcher;
+import inet.networklayer.common.InterfaceTable;
+import inet.queueing.sink.PassivePacketSink;
+import inet.transportlayer.udp.Udp;
+
+network TestNetwork
+{
+    parameters:
+        *.interfaceTableModule = absPath(".interfaceTable");
+        @networkNode;
+    submodules:
+        messageDispatcher: MessageDispatcher;
+        interfaceTable: InterfaceTable;
+        udp: Udp;
+        upperSink: PassivePacketSink;
+        lowerSink: PassivePacketSink;
+        test: Test;
+    connections:
+        messageDispatcher.out++ --> udp.appIn;
+        messageDispatcher.out++ --> udp.ipIn;
+        udp.appOut --> upperSink.in;
+        udp.ipOut --> lowerSink.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 0s
+
+cmdenv-log-prefix = "%>"
+
+%includes
+#include "inet/common/IModuleInterfaceLookup.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
+
+%activity:
+using namespace inet;
+using namespace inet::queueing;
+
+#define CHECK(gate, argument) { std::cerr << "gate = " << #gate << ", " << printToStringIfPossible(argument, 0) << " --> " << (findModuleInterface(gate, typeid(IPassivePacketSink), &argument) != nullptr ? "found" : "not found") << std::endl; }
+
+auto messageDispatcher = cSimulation::getActiveSimulation()->getSystemModule()->getModuleByPath("messageDispatcher");
+auto appIn = messageDispatcher->gate("out", 0);
+auto ipIn = messageDispatcher->gate("out", 1);
+
+DispatchProtocolReq dispatchProtocolReq;
+dispatchProtocolReq.setProtocol(&Protocol::udp);
+
+PacketProtocolTag packetProtocolTag;
+packetProtocolTag.setProtocol(&Protocol::udp);
+
+PacketServiceTag packetServiceTag;
+packetServiceTag.setProtocol(&Protocol::udp);
+
+dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
+CHECK(appIn, dispatchProtocolReq);
+CHECK(ipIn, dispatchProtocolReq);
+
+dispatchProtocolReq.setServicePrimitive(SP_INDICATION);
+CHECK(appIn, dispatchProtocolReq);
+CHECK(ipIn, dispatchProtocolReq);
+
+CHECK(appIn, packetServiceTag);
+CHECK(appIn, packetProtocolTag);
+
+CHECK(ipIn, packetProtocolTag);
+CHECK(ipIn, packetServiceTag);
+
+%contains: stderr
+gate = appIn, DispatchProtocolReq, protocol = udp(65), servicePrimitive = 1 (SP_REQUEST) --> found
+gate = ipIn, DispatchProtocolReq, protocol = udp(65), servicePrimitive = 1 (SP_REQUEST) --> not found
+gate = appIn, DispatchProtocolReq, protocol = udp(65), servicePrimitive = 2 (SP_INDICATION) --> not found
+gate = ipIn, DispatchProtocolReq, protocol = udp(65), servicePrimitive = 2 (SP_INDICATION) --> found
+gate = appIn, PacketServiceTag, protocol = udp(65) --> found
+gate = appIn, PacketProtocolTag, protocol = udp(65), frontOffset = 0 B, backOffset = 0 B --> not found
+gate = ipIn, PacketProtocolTag, protocol = udp(65), frontOffset = 0 B, backOffset = 0 B --> found
+gate = ipIn, PacketServiceTag, protocol = udp(65) --> not found
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
