@@ -10,6 +10,7 @@
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
+#include "inet/linklayer/ieee80211/llc/IIeee80211Llc.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDs.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
@@ -27,7 +28,6 @@ namespace ieee80211 {
 
 class IContention;
 class IRx;
-class IIeee80211Llc;
 class Ieee80211MacHeader;
 
 /**
@@ -55,8 +55,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     opp_component_ptr<Hcf> hcf;
     opp_component_ptr<Mcf> mcf;
 
-    // The last change channel message received and not yet sent to the physical layer, or nullptr.
-    cMessage *pendingRadioConfigMsg = nullptr;
+    int pendingChannelNumber = -1;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -70,9 +69,6 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     virtual const MacAddress& isInterfaceRegistered();
 
     virtual void handleMessageWhenUp(cMessage *message) override;
-
-    /** @brief Handle commands (msg kind+control info) coming from upper layers */
-    virtual void handleUpperCommand(cMessage *msg) override;
 
     /** @brief Handle timer self messages */
     virtual void handleSelfMessage(cMessage *msg) override;
@@ -95,7 +91,8 @@ class INET_API Ieee80211Mac : public MacProtocolBase
 
   public:
     Ieee80211Mac();
-    virtual ~Ieee80211Mac();
+
+    virtual void setChannelNumber(int channelNumber);
 
     virtual FcsMode getFcsMode() const { return fcsMode; }
     virtual const MacAddress& getAddress() const { return mib->address; }

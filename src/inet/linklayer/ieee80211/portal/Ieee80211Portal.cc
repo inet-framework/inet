@@ -29,6 +29,8 @@ Define_Module(Ieee80211Portal);
 void Ieee80211Portal::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
+        upperLayerSink.reference(gate("upperLayerOut"), true);
+        lowerLayerSink.reference(gate("lowerLayerOut"), true);
         upperLayerOutConnected = gate("upperLayerOut")->getPathEndGate()->isConnected();
 #ifdef INET_WITH_ETHERNET
         fcsMode = parseFcsMode(par("fcsMode"));
@@ -41,13 +43,13 @@ void Ieee80211Portal::handleMessage(cMessage *message)
     if (message->arrivedOn("upperLayerIn")) {
         auto packet = check_and_cast<Packet *>(message);
         encapsulate(packet);
-        send(packet, "lowerLayerOut");
+        lowerLayerSink.pushPacket(packet);
     }
     else if (message->arrivedOn("lowerLayerIn")) {
         auto packet = check_and_cast<Packet *>(message);
         decapsulate(packet);
         if (upperLayerOutConnected)
-            send(packet, "upperLayerOut");
+            upperLayerSink.pushPacket(packet);
         else
             delete packet;
     }
@@ -116,6 +118,23 @@ void Ieee80211Portal::decapsulate(Packet *packet)
 #else // ifdef INET_WITH_ETHERNET
     throw cRuntimeError("INET compiled without ETHERNET feature!");
 #endif // ifdef INET_WITH_ETHERNET
+}
+
+void Ieee80211Portal::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("upperLayerIn")) {
+        encapsulate(packet);
+        lowerLayerSink.pushPacket(packet);
+    }
+    else if (gate->isName("lowerLayerIn")) {
+        decapsulate(packet);
+        if (upperLayerOutConnected)
+            upperLayerSink.pushPacket(packet);
+        else
+            delete packet;
+    }
 }
 
 } // namespace ieee80211
