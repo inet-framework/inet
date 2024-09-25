@@ -16,6 +16,6 @@ simple PacketDelayerBase extends PacketProcessorBase
         @class(PacketDelayerBase);
         @display("i=block/delay");
     gates:
-        input in @labels(push);
-        output out @labels(push);
+        input in @interface[inet::queueing::IPassivePacketSink](forward=out) @labels(push);
+        output out @interface[inet::queueing::IActivePacketSource] @labels(push);
 }

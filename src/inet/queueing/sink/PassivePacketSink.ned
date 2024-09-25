@@ -23,6 +23,6 @@ simple PassivePacketSink extends PassivePacketSinkBase like IPassivePacketSink
         bool scheduleForAbsoluteTime = default(true); // When a clock is used, "relative" means that setting the clock will not affect the simulation time of the event
         @class(PassivePacketSink);
     gates:
-        input in @labels(push);
+        input in @interface[inet::queueing::IPassivePacketSink] @labels(push);
 }
 

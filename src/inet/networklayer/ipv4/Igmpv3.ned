@@ -29,7 +29,7 @@ simple Igmpv3 like IIgmp
         @selfMessageKinds(inet::IgmpTimerKind);
 
     gates:
-        input ipIn @labels(Ipv4ControlInfo/up);  // Delivered IGMP packets
+        input ipIn @interface[inet::queueing::IPassivePacketSink](protocol=igmp; service=indication; sdu=ipv4) @labels(Ipv4ControlInfo/up);  // Delivered IGMP packets
         output ipOut @labels(Ipv4ControlInfo/down); // To ~Ipv4
 
         input routerIn @labels(Ipv4ControlInfo/up);

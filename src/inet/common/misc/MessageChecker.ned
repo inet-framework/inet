@@ -34,7 +34,7 @@ simple MessageChecker
     parameters:
         xml config;   // Configuration file
     gates:
-        input in;
+        input in @interface[inet::queueing::IPassivePacketSink];
         output out;
 }
 

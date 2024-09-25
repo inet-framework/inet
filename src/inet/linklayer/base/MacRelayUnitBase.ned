@@ -20,9 +20,9 @@ simple MacRelayUnitBase
         @signal[packetDropped](type=inet::Packet);
         @statistic[packetDropped](title="packets dropped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
-        input lowerLayerIn;
+        input lowerLayerIn @interface[inet::queueing::IPassivePacketSink];
         output lowerLayerOut;
-        input upperLayerIn;
+        input upperLayerIn @interface[inet::queueing::IPassivePacketSink];
         output upperLayerOut;
 }
 

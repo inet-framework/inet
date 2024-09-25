@@ -16,6 +16,6 @@ simple PacketPushToSend extends PassivePacketSinkBase like IPassivePacketSink
         @class(PacketPushToSend);
         @display("i=block/cogwheel");
     gates:
-        input in @labels(push);
+        input in @interface[inet::queueing::IPassivePacketSink] @labels(push);
         output out @labels(push);
 }

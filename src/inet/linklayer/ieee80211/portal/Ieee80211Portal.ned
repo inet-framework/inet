@@ -16,9 +16,9 @@ simple Ieee80211Portal like IIeee8022Llc, IIeee80211Llc
         string fcsMode @enum("declared", "computed") = default("declared");
         @display("i=block/layer");
     gates:
-        input upperLayerIn;
+        input upperLayerIn @interface[inet::queueing::IPassivePacketSink](protocol=ethernetMac);
         output upperLayerOut;
-        input lowerLayerIn;
+        input lowerLayerIn @interface[inet::queueing::IPassivePacketSink];
         output lowerLayerOut;
 }
 

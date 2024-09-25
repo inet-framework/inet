@@ -16,5 +16,7 @@ simple EthernetSocketCommandProcessor extends PacketFlowBase like IPacketFlow
         @class(EthernetSocketCommandProcessor);
         @display("i=block/cogwheel");
         string socketTableModule;
+    gates:
+        in @interface[inet::IEthernet];
 }
 

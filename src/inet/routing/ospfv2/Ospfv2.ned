@@ -178,7 +178,7 @@ simple Ospfv2 like IOspf
         @display("i=block/network2");
         @selfMessageKinds(inet::ospfv2::Ospfv2TimerType);
     gates:
-        input ipIn @labels(Ipv4ControlInfo/up);
+        input ipIn @interface[inet::queueing::IPassivePacketSink](protocol=ospf; service=indication; sdu=ipv4) @labels(Ipv4ControlInfo/up);
         output ipOut @labels(Ipv4ControlInfo/down);
 }
 

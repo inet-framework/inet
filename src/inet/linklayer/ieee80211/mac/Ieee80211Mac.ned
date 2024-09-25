@@ -106,6 +106,7 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
         @statistic[packetDropDuplicateDetected](title="packet drops: duplicate detected"; source=packetDropReasonIsDuplicateDetected(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropOther](title="packet drops: other"; source=packetDropReasonIsOther(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
+        upperLayerIn @interface[inet::queueing::IPassivePacketSink](pdu=ieee8022llc);
         input mgmtIn;
         output mgmtOut;
     submodules:

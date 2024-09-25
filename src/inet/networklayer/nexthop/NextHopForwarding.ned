@@ -24,9 +24,9 @@ simple NextHopForwarding
         @signal[packetDropped](type=inet::Packet);
         @signal[packetSentToUpper](type=inet::Packet);
     gates:
-        input transportIn @labels(TcpHeader,UdpHeader);
+        input transportIn @interface[inet::queueing::IPassivePacketSink](protocol=nexthopforwarding; service=request; protocolGroup=ip; sdu=nexthopforwarding) @labels(TcpHeader,UdpHeader);
         output transportOut @labels(TcpHeader,UdpHeader);
-        input queueIn @labels(NextHopDatagram);
+        input queueIn @interface[inet::queueing::IPassivePacketSink](protocol=nexthopforwarding; service=indication) @labels(NextHopDatagram);
         output queueOut @labels(NextHopDatagram);
 }
 

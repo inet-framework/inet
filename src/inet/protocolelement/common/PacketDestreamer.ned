@@ -20,6 +20,6 @@ simple PacketDestreamer extends PacketProcessorBase like IPacketFlow
         @class(PacketDestreamer);
         @display("i=block/cogwheel");
     gates:
-        input in @labels(send,push,pull,stream);
-        output out @labels(send,push,pull,pass);
+        input in @interface[inet::queueing::IPassivePacketSink] @labels(send,push,pull,stream);
+        output out @interface[inet::queueing::IPassivePacketSource] @labels(send,push,pull,pass);
 }

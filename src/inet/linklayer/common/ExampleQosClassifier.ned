@@ -16,7 +16,7 @@ simple ExampleQosClassifier like IIeee8021dQosClassifier
     parameters:
         @display("i=block/classifier");
     gates:
-        input in;
+        input in @interface[inet::queueing::IPassivePacketSink](forward=out);
         output out;
 }
 

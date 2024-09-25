@@ -17,8 +17,8 @@ simple Ieee80211LlcEpd like IIeee80211Llc
         @display("i=block/layer");
         @signal[packetDropped](type=Packet);
     gates:
-        input upperLayerIn;
+        input upperLayerIn @interface[inet::queueing::IPassivePacketSink](arguments=null);
         output upperLayerOut;
-        input lowerLayerIn;
+        input lowerLayerIn @interface[inet::queueing::IPassivePacketSink];
         output lowerLayerOut;
 }

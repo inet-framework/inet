@@ -28,6 +28,6 @@ simple PacketQueueBase extends PacketProcessorBase
         displayStringTextFormat = default("contains %p pk (%l)\npushed %u pulled %o dropped %d"); // Determines display string text above the submodule
         @display("i=block/queue");
     gates:
-        input in @loose;
-        output out @loose;
+        input in @interface[inet::queueing::IPassivePacketSink](forward=out,inet::queueing::IActivePacketSink) @loose;
+        output out @interface[inet::queueing::IPassivePacketSource] @loose;
 }

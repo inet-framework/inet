@@ -49,7 +49,7 @@ simple Gptp like IGptp
         @selfMessageKinds(inet::GptpSelfMsgKind);
 
     gates:
-        input socketIn;
+        input socketIn @interface[inet::queueing::IPassivePacketSink](protocol=gptp; service=indication);
         output socketOut;
 }
 

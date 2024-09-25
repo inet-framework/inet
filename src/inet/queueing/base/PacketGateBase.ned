@@ -23,4 +23,6 @@ simple PacketGateBase extends PacketFlowBase
         @display("i=block/cogwheel");
         @signal[gateStateChanged](type=bool);
         @statistic[gateState](title="gate state"; type=enum; enum=CLOSED, OPEN; source=gateStateChanged; record=vector; interpolationmode=sample-hold);
+    gates:
+        in @interface[inet::queueing::IPassivePacketSink](forward=out) @interface[inet::queueing::IActivePacketSink](forward=out);
 }
