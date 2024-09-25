@@ -7,8 +7,9 @@
 
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
 
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
@@ -46,12 +47,40 @@ void Ieee8022LlcSocket::open(int interfaceId, int localSap, int remoteSap)
     this->interfaceId = interfaceId;
     this->localSap = localSap;
     this->remoteSap = remoteSap;
-    auto request = new Request("LLC_OPEN", SOCKET_C_OPEN);
-    Ieee8022LlcSocketOpenCommand *command = new Ieee8022LlcSocketOpenCommand();
-    command->setLocalSap(localSap);
-    request->setControlInfo(command);
+    llc->open(socketId, interfaceId, localSap, remoteSap);
+    llc->setCallback(socketId, this);
     isOpen_ = true;
-    sendOut(request);
+}
+
+void Ieee8022LlcSocket::close()
+{
+    isOpen_ = false; // TODO add states for OPENING, OPEN, CLOSING, CLOSED, etc.
+    llc->close(socketId);
+}
+
+void Ieee8022LlcSocket::send(Packet *packet)
+{
+    packet->setKind(SOCKET_C_DATA);
+    packet->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
+    if (localSap != -1) {
+        auto& sapReq = packet->addTagIfAbsent<Ieee802SapReq>();
+        if (sapReq->getSsap() == -1)
+            sapReq->setSsap(localSap);
+    }
+    if (remoteSap != -1) {
+        auto& sapReq = packet->addTagIfAbsent<Ieee802SapReq>();
+        if (sapReq->getDsap() == -1)
+            sapReq->setDsap(remoteSap);
+    }
+    if (interfaceId != -1) {
+        auto& interfaceReq = packet->addTagIfAbsent<InterfaceReq>();
+        if (interfaceReq->getInterfaceId() == -1)
+            interfaceReq->setInterfaceId(interfaceId);
+    }
+    EV_INFO << "Sending packet on socket" << EV_FIELD(socketId) << EV_FIELD(packet) << EV_ENDL;
+    sink.pushPacket(packet);
+    isOpen_ = true;
 }
 
 void Ieee8022LlcSocket::processMessage(cMessage *msg)

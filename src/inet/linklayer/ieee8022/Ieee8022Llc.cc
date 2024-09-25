@@ -7,11 +7,13 @@
 
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 
+#include "inet/common/FunctionalEvent.h"
+#include "inet/common/IModuleInterfaceLookup.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/stlutils.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
@@ -30,6 +32,11 @@ void Ieee8022Llc::initialize(int stage)
 {
     OperationalBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        upperLayerSink.reference(gate("upperLayerOut"), true);
+        PacketProtocolTag packetProtocolTag;
+        packetProtocolTag.setProtocol(&Protocol::ieee8022llc);
+        lowerLayerSink.reference(gate("lowerLayerOut"), true, &packetProtocolTag);
+
         // TODO parameterization for llc or snap?
         WATCH_PTRMAP(socketIdToSocketDescriptor);
         WATCH_PTRSET(upperProtocols);
@@ -57,7 +64,7 @@ void Ieee8022Llc::handleMessageWhenUp(cMessage *msg)
 void Ieee8022Llc::processPacketFromHigherLayer(Packet *packet)
 {
     encapsulate(packet);
-    send(packet, "lowerLayerOut");
+    lowerLayerSink.pushPacket(packet);
 }
 
 void Ieee8022Llc::processCommandFromHigherLayer(Request *request)
@@ -74,16 +81,13 @@ void Ieee8022Llc::processCommandFromHigherLayer(Request *request)
     else if (dynamic_cast<SocketCloseCommand *>(ctrl) != nullptr) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
+        delete request;
+        auto callback = it->second->callback;
+        callback->handleClosed();
         if (it != socketIdToSocketDescriptor.end()) {
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
         }
-        delete request;
-        auto indication = new Indication("closed", SOCKET_I_CLOSED);
-        auto ctrl = new SocketClosedIndication();
-        indication->setControlInfo(ctrl);
-        indication->addTag<SocketInd>()->setSocketId(socketId);
-        send(indication, "upperLayerOut");
 
     }
     else if (dynamic_cast<SocketDestroyCommand *>(ctrl) != nullptr) {
@@ -113,7 +117,7 @@ bool Ieee8022Llc::deliverCopyToSockets(Packet *packet)
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
                 EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
                 packetCopy->setKind(SOCKET_I_DATA);
-                send(packetCopy, "upperLayerOut");
+                upperLayerSink.pushPacket(packetCopy);
                 isSent = true;
             }
         }
@@ -121,10 +125,29 @@ bool Ieee8022Llc::deliverCopyToSockets(Packet *packet)
     return isSent;
 }
 
+bool Ieee8022Llc::hasUpperProtocol(const Protocol *protocol)
+{
+    if (protocol == nullptr)
+        return false;
+    else if (contains(upperProtocols, protocol))
+        return true;
+    else {
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(protocol);
+        dispatchProtocolReq.setServicePrimitive(SP_INDICATION);
+        if (findModuleInterface(gate("upperLayerOut"), typeid(IPassivePacketSink), &dispatchProtocolReq) == nullptr)
+            return false;
+        else {
+            upperProtocols.insert(protocol);
+            return true;
+        }
+    }
+}
+
 bool Ieee8022Llc::isDeliverableToUpperLayer(Packet *packet)
 {
     const auto& protocolTag = packet->findTag<PacketProtocolTag>();
-    return (protocolTag != nullptr && contains(upperProtocols, protocolTag->getProtocol()));
+    return protocolTag != nullptr && hasUpperProtocol(protocolTag->getProtocol());
 }
 
 void Ieee8022Llc::processPacketFromMac(Packet *packet)
@@ -133,7 +156,7 @@ void Ieee8022Llc::processPacketFromMac(Packet *packet)
     bool isSent = deliverCopyToSockets(packet);
 
     if (isDeliverableToUpperLayer(packet)) {
-        send(packet, "upperLayerOut");
+        upperLayerSink.pushPacket(packet);
     }
     else {
         if (!isSent) {
@@ -263,6 +286,40 @@ void Ieee8022Llc::handleStopOperation(LifecycleOperation *operation)
 void Ieee8022Llc::handleCrashOperation(LifecycleOperation *operation)
 {
     clearSockets();
+}
+
+void Ieee8022Llc::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessageWhenUp(packet);
+}
+
+void Ieee8022Llc::setCallback(int socketId, ICallback *callback)
+{
+    auto it = socketIdToSocketDescriptor.find(socketId);
+    it->second->callback = callback;
+}
+
+void Ieee8022Llc::open(int socketId, int interfaceId, int localSap, int remoteSap)
+{
+    auto request = new Request("LLC_OPEN", SOCKET_C_OPEN);
+    Ieee8022LlcSocketOpenCommand *command = new Ieee8022LlcSocketOpenCommand();
+    command->setLocalSap(localSap);
+    request->setControlInfo(command);
+    request->addTag<SocketReq>()->setSocketId(socketId);
+    processCommandFromHigherLayer(request);
+}
+
+void Ieee8022Llc::close(int socketId)
+{
+    Enter_Method("close");
+    auto request = new Request("CLOSE", SOCKET_C_CLOSE);
+    auto *ctrl = new SocketCloseCommand();
+    request->setControlInfo(ctrl);
+    request->addTag<SocketReq>()->setSocketId(socketId);
+    processCommandFromHigherLayer(request);
 }
 
 } // namespace inet
