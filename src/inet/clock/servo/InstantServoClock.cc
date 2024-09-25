@@ -19,8 +19,8 @@ void InstantServoClock::initialize(int stage)
         if (!adjustClock && adjustDrift) {
             throw cRuntimeError("Cannot adjust drift without adjusting clock");
         }
-        offsetPrev = 0;
-        localPrev = 0;
+        offsetPrev = -1;
+        localPrev = -1;
     }
 }
 
@@ -41,7 +41,7 @@ void InstantServoClock::adjustClockTo(clocktime_t newClockTime)
 
         jumpClockTo(newClockTime);
 
-        if (adjustDrift) {
+        if (adjustDrift && offsetPrev != -1) {
             drift += ppm(1e6 * (offsetPrev - offset) / (localPrev - local));
             EV_INFO << "Drift: " << drift << "\n";
             setOscillatorCompensation(drift);
