@@ -30,7 +30,7 @@ void IpvxTrafSink::initialize(int stage)
         int protocolId = par("protocol");
         if (protocolId < 143 || protocolId > 254)
             throw cRuntimeError("invalid protocol id %d, accepts only between 143 and 254", protocolId);
-        auto protocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(protocolId);
+        protocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(protocolId);
         if (!protocol) {
             char *buff = new char[40];
             sprintf(buff, "prot_%d", protocolId);
@@ -84,6 +84,27 @@ void IpvxTrafSink::processPacket(Packet *msg)
     printPacket(msg);
     delete msg;
     numReceived++;
+}
+
+void IpvxTrafSink::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    processPacket(packet);
+}
+
+cGate *IpvxTrafSink::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("ipIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            auto dispatchProtocolReq = dynamic_cast<const DispatchProtocolReq *>(arguments);
+            if (dispatchProtocolReq != nullptr && dispatchProtocolReq->getProtocol() == protocol && dispatchProtocolReq->getServicePrimitive() == SP_INDICATION)
+                return gate;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace inet

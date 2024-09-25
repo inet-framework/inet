@@ -53,7 +53,7 @@ void TcpServerSocketIo::socketDataArrived(TcpSocket *socket, Packet *packet, boo
     sendOrScheduleReadCommandIfNeeded();
 }
 
-void TcpServerSocketIo::socketEstablished(TcpSocket *socket)
+void TcpServerSocketIo::socketEstablished(TcpSocket *socket, Indication *indication)
 {
     ASSERT(socket == this->socket);
     sendOrScheduleReadCommandIfNeeded();
@@ -91,6 +91,8 @@ void TcpServerSocketIo::pushPacket(Packet *packet, const cGate *gate)
 
 cGate *TcpServerSocketIo::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
     if (gate->isName("trafficIn")) {
         if (type == typeid(IPassivePacketSink))
             return gate;
@@ -99,6 +101,9 @@ cGate *TcpServerSocketIo::lookupModuleInterface(cGate *gate, const std::type_inf
         if (type == typeid(IPassivePacketSink)) {
             auto socketInd = dynamic_cast<const SocketInd *>(arguments);
             if (socketInd != nullptr && socketInd->getSocketId() == socket->getSocketId())
+                return gate;
+            auto packetServiceTag = dynamic_cast<const PacketServiceTag *>(arguments);
+            if (packetServiceTag != nullptr && packetServiceTag->getProtocol() == &Protocol::tcp)
                 return gate;
         }
     }

@@ -35,6 +35,7 @@ void TcpEchoApp::initialize(int stage)
     TcpServerHostApp::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        socketSink.reference(gate("socketOut"), true);
         delay = par("echoDelay");
         echoFactor = par("echoFactor");
 
@@ -51,7 +52,7 @@ void TcpEchoApp::sendDown(Packet *msg)
     bytesSent += msg->getByteLength();
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
     msg->getTag<SocketReq>();
-    send(msg, "socketOut");
+    socketSink.pushPacket(msg);
 }
 
 void TcpEchoApp::refreshDisplay() const

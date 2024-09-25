@@ -11,6 +11,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
@@ -23,6 +24,8 @@ void UdpVideoStreamClient::initialize(int stage)
     ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        socket.setOutputGate(gate("socketOut"));
+        socket.setCallback(this);
         selfMsg = new cMessage("UDPVideoStreamStart");
     }
 }
@@ -55,6 +58,7 @@ void UdpVideoStreamClient::socketErrorArrived(UdpSocket *socket, Indication *ind
 
 void UdpVideoStreamClient::socketClosed(UdpSocket *socket)
 {
+    Enter_Method("socketClosed");
     if (operationalState == State::STOPPING_OPERATION)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
@@ -73,9 +77,7 @@ void UdpVideoStreamClient::requestStream()
 
     EV_INFO << "Requesting video stream from " << svrAddr << ":" << svrPort << "\n";
 
-    socket.setOutputGate(gate("socketOut"));
     socket.bind(localPort);
-    socket.setCallback(this);
 
     Packet *pk = new Packet("VideoStrmReq");
     const auto& payload = makeShared<ByteCountChunk>(B(1)); // FIXME set packet length
@@ -109,6 +111,27 @@ void UdpVideoStreamClient::handleCrashOperation(LifecycleOperation *operation)
     cancelEvent(selfMsg);
     if (operation->getRootModule() != getContainingNode(this)) // closes socket when the application crashed only
         socket.destroy(); // TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
+}
+
+void UdpVideoStreamClient::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    socket.processMessage(packet);
+}
+
+cGate *UdpVideoStreamClient::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("socketIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr && socketInd->getSocketId() == socket.getSocketId())
+                return gate;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace inet

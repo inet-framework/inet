@@ -7,11 +7,12 @@
 #include "inet/applications/ethernet/EtherAppServer.h"
 
 #include "inet/applications/ethernet/EtherApp_m.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/Simsignals.h"
-#include "inet/common/TimeTag_m.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/socket/SocketTag_m.h"
+#include "inet/common/TimeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -49,8 +50,11 @@ void EtherAppServer::handleStartOperation(LifecycleOperation *operation)
 void EtherAppServer::handleStopOperation(LifecycleOperation *operation)
 {
     EV_INFO << "Stop the application\n";
-    llcSocket.close();
-    delayActiveOperationFinish(par("stopOperationTimeout"));
+    if (llcSocket.isOpen()) {
+        llcSocket.close();
+        if (llcSocket.isOpen())
+            delayActiveOperationFinish(par("stopOperationTimeout"));
+    }
 }
 
 void EtherAppServer::handleCrashOperation(LifecycleOperation *operation)
@@ -62,6 +66,7 @@ void EtherAppServer::handleCrashOperation(LifecycleOperation *operation)
 
 void EtherAppServer::socketClosed(Ieee8022LlcSocket *socket)
 {
+    Enter_Method("socketClosed");
     if (operationalState == State::STOPPING_OPERATION && !llcSocket.isOpen())
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
@@ -131,6 +136,27 @@ void EtherAppServer::registerDsap(int dsap)
 
 void EtherAppServer::finish()
 {
+}
+
+void EtherAppServer::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    llcSocket.processMessage(packet);
+}
+
+cGate *EtherAppServer::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("in")) {
+        if (type == typeid(IPassivePacketSink)) {
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr && socketInd->getSocketId() == llcSocket.getSocketId())
+                return gate;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace inet

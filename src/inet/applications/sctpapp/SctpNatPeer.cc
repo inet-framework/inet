@@ -528,7 +528,7 @@ void SctpNatPeer::handleTimer(cMessage *msg)
     }
 }
 
-void SctpNatPeer::socketDataNotificationArrived(SctpSocket *socket, Message *msg)
+void SctpNatPeer::socketDataArrivedNotification(SctpSocket *socket, Message *msg)
 {
     Message *message = check_and_cast<Message *>(msg);
     auto& intags = message->getTags();
@@ -665,7 +665,7 @@ void SctpNatPeer::sendRequest(bool last)
     bytesSent += numBytes;
 }
 
-void SctpNatPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer)
+void SctpNatPeer::socketEstablished(SctpSocket *socket, Indication *indication)
 {
     int32_t count = 0;
     // *redefine* to perform or schedule first sending
@@ -761,11 +761,7 @@ void SctpNatPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer
 
 void SctpNatPeer::sendQueueRequest()
 {
-    Request *cmsg = new Request("SCTP_C_QUEUE_MSGS_LIMIT", SCTP_C_QUEUE_MSGS_LIMIT);
-    auto& qinfo = cmsg->addTag<SctpInfoReq>();
-    qinfo->setText(queueSize);
-    qinfo->setSocketId(clientSocket.getSocketId());
-    clientSocket.sendRequest(cmsg);
+    clientSocket.setQueueLimits(queueSize, B(-1));
 }
 
 void SctpNatPeer::sendRequestArrived(SctpSocket *socket)

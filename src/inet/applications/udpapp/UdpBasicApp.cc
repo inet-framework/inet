@@ -14,6 +14,7 @@
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
@@ -45,6 +46,10 @@ void UdpBasicApp::initialize(int stage)
         dontFragment = par("dontFragment");
         if (stopTime >= CLOCKTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
+
+        socket.setOutputGate(gate("socketOut"));
+        socket.setCallback(this);
+
         selfMsg = new ClockEvent("sendTimer");
     }
 }
@@ -88,7 +93,6 @@ void UdpBasicApp::setSocketOptions()
         MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this)->collectMulticastGroups();
         socket.joinLocalMulticastGroups(mgl);
     }
-    socket.setCallback(this);
 }
 
 L3Address UdpBasicApp::chooseDestAddr()
@@ -114,13 +118,13 @@ void UdpBasicApp::sendPacket()
     packet->insertAtBack(payload);
     L3Address destAddr = chooseDestAddr();
     emit(packetSentSignal, packet);
+    sendInterval = par("sendInterval");
     socket.sendTo(packet, destAddr, destPort);
     numSent++;
 }
 
 void UdpBasicApp::processStart()
 {
-    socket.setOutputGate(gate("socketOut"));
     const char *localAddress = par("localAddress");
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
     setSocketOptions();
@@ -153,7 +157,7 @@ void UdpBasicApp::processStart()
 void UdpBasicApp::processSend()
 {
     sendPacket();
-    clocktime_t d = par("sendInterval");
+    clocktime_t d = sendInterval;
     if (stopTime < CLOCKTIME_ZERO || getClockTime() + d < stopTime) {
         selfMsg->setKind(SEND);
         scheduleClockEventAfter(d, selfMsg);
@@ -208,6 +212,7 @@ void UdpBasicApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
 
 void UdpBasicApp::socketClosed(UdpSocket *socket)
 {
+    Enter_Method("socketClosed");
     if (operationalState == State::STOPPING_OPERATION)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
@@ -249,6 +254,27 @@ void UdpBasicApp::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelClockEvent(selfMsg);
     socket.destroy(); // TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
+}
+
+void UdpBasicApp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    socket.processMessage(packet);
+}
+
+cGate *UdpBasicApp::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("socketIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr && socketInd->getSocketId() == socket.getSocketId())
+                return gate;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace inet

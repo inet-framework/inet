@@ -32,7 +32,7 @@ class INET_API TcpClientSocketIo : public cSimpleModule, public TcpSocket::ICall
 
     virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override;
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;
-    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketEstablished(TcpSocket *socket, Indication *indication) override;
     virtual void socketPeerClosed(TcpSocket *socket) override;
     virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override;

@@ -7,6 +7,7 @@
 
 #include "inet/applications/tcpapp/TcpAppBase.h"
 
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
@@ -112,14 +113,16 @@ void TcpAppBase::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, TcpSocket::stateName(socket.getState()));
 }
 
-void TcpAppBase::socketEstablished(TcpSocket *)
+void TcpAppBase::socketEstablished(TcpSocket *, Indication *indication)
 {
+    Enter_Method("socketEstablished");
     // *redefine* to perform or schedule first sending
     EV_INFO << "connected\n";
 }
 
 void TcpAppBase::socketDataArrived(TcpSocket *, Packet *msg, bool)
 {
+    Enter_Method("socketDataArrived");
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
     bytesRcvd += msg->getByteLength();
@@ -129,6 +132,7 @@ void TcpAppBase::socketDataArrived(TcpSocket *, Packet *msg, bool)
 
 void TcpAppBase::socketPeerClosed(TcpSocket *socket_)
 {
+    Enter_Method("socketPeerClosed");
     ASSERT(socket_ == &socket);
     // close the connection (if not already closed)
     if (socket.getState() == TcpSocket::PEER_CLOSED) {
@@ -139,12 +143,14 @@ void TcpAppBase::socketPeerClosed(TcpSocket *socket_)
 
 void TcpAppBase::socketClosed(TcpSocket *)
 {
+    Enter_Method("socketClosed");
     // *redefine* to start another session etc.
     EV_INFO << "connection closed\n";
 }
 
 void TcpAppBase::socketFailure(TcpSocket *, int code)
 {
+    Enter_Method("socketFailure");
     // subclasses may override this function, and add code try to reconnect after a delay.
     EV_WARN << "connection broken\n";
     numBroken++;
@@ -157,6 +163,30 @@ void TcpAppBase::finish()
     EV_INFO << modulePath << ": opened " << numSessions << " sessions\n";
     EV_INFO << modulePath << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
     EV_INFO << modulePath << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
+}
+
+void TcpAppBase::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    socket.processMessage(packet);
+}
+
+cGate *TcpAppBase::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("socketIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr && socketInd->getSocketId() == socket.getSocketId())
+                return gate;
+            auto packetServiceTag = dynamic_cast<const PacketServiceTag *>(arguments);
+            if (packetServiceTag != nullptr && packetServiceTag->getProtocol() == &Protocol::tcp)
+                return gate;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace inet

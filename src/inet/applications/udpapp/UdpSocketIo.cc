@@ -20,7 +20,7 @@ void UdpSocketIo::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        trafficSink.reference(gate("trafficOut"), true);
+        trafficSink.reference(gate("trafficOut"), false);
         dontFragment = par("dontFragment");
         numSent = 0;
         numReceived = 0;
@@ -148,9 +148,9 @@ void UdpSocketIo::pushPacket(Packet *packet, const cGate *gate)
     if (gate->isName("trafficIn")) {
         if (dontFragment)
             packet->addTagIfAbsent<FragmentationReq>()->setDontFragment(true);
+        emit(packetSentSignal, packet);
         socket.send(packet);
         numSent++;
-        emit(packetSentSignal, packet);
     }
     else {
         if (socket.belongsToSocket(packet))
@@ -160,6 +160,8 @@ void UdpSocketIo::pushPacket(Packet *packet, const cGate *gate)
 
 cGate *UdpSocketIo::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
     if (gate->isName("trafficIn")) {
         if (type == typeid(IPassivePacketSink))
             return gate;

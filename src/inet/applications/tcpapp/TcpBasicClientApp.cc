@@ -130,9 +130,9 @@ void TcpBasicClientApp::handleTimer(cMessage *msg)
     }
 }
 
-void TcpBasicClientApp::socketEstablished(TcpSocket *socket)
+void TcpBasicClientApp::socketEstablished(TcpSocket *socket, Indication *indication)
 {
-    TcpAppBase::socketEstablished(socket);
+    TcpAppBase::socketEstablished(socket, indication);
 
     // perform first request if not already done (next one will be sent when reply arrives)
     if (!earlySend)
@@ -155,6 +155,7 @@ void TcpBasicClientApp::rescheduleAfterOrDeleteTimer(simtime_t d, short int msgK
 
 void TcpBasicClientApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
+    Enter_Method("socketDataArrived");
     TcpAppBase::socketDataArrived(socket, msg, urgent);
 
     EV_INFO << "Arrived data with " << msg->getDataLength() << " length\n";
@@ -193,6 +194,7 @@ void TcpBasicClientApp::close()
 
 void TcpBasicClientApp::socketClosed(TcpSocket *socket)
 {
+    Enter_Method("socketClosed");
     cancelEvent(readDelayTimer);
     TcpAppBase::socketClosed(socket);
 
@@ -205,6 +207,7 @@ void TcpBasicClientApp::socketClosed(TcpSocket *socket)
 
 void TcpBasicClientApp::socketFailure(TcpSocket *socket, int code)
 {
+    Enter_Method("socketFailure");
     cancelEvent(readDelayTimer);
     TcpAppBase::socketFailure(socket, code);
 

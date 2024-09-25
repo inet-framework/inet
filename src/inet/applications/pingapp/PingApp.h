@@ -9,16 +9,20 @@
 #define __INET_PINGAPP_H
 
 #include "inet/applications/base/ApplicationBase.h"
-#include "inet/common/Protocol.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/Protocol.h"
 #include "inet/common/socket/SocketMap.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/INetworkSocket.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 // how many ping request's send time is stored
 #define PING_HISTORY_SIZE    100
@@ -29,7 +33,7 @@ namespace inet {
  *
  * See NED file for detailed description of operation.
  */
-class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallback
+class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallback, public IPassivePacketSink, public IModuleInterfaceLookup
 {
   protected:
     // parameters: for more details, see the corresponding NED parameters' documentation
@@ -106,6 +110,15 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
     PingApp();
     virtual ~PingApp();
     int getPid() const { return pid; }
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet

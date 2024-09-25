@@ -111,7 +111,7 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::ICallback,
     }
 
     /** Does nothing but update statistics/status. Redefine to perform or schedule first sending. */
-    void socketEstablished(SctpSocket *socket, unsigned long int buffer) override;
+    void socketEstablished(SctpSocket *socket, Indication *indication) override;
 
     /**
      * Does nothing but update statistics/status. Redefine to perform or schedule next sending.
@@ -119,7 +119,7 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::ICallback,
      */
     void socketDataArrived(SctpSocket *socket, Packet *msg, bool urgent) override;
 
-    void socketDataNotificationArrived(SctpSocket *socket, Message *msg) override;
+    void socketDataArrivedNotification(SctpSocket *socket, Message *msg) override;
     /** Since remote SCTP closed, invokes close(). Redefine if you want to do something else. */
     void socketPeerClosed(SctpSocket *socket) override;
 

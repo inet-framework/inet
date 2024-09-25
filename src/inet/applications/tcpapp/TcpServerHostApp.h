@@ -9,10 +9,13 @@
 #define __INET_TCPSERVERHOSTAPP_H
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/socket/SocketMap.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 class TcpServerThreadBase;
 
@@ -20,7 +23,7 @@ class TcpServerThreadBase;
  * Opens a TCP server socket, and launches one dynamically created module
  * for each incoming connection. More info in the corresponding NED file.
  */
-class INET_API TcpServerHostApp : public ApplicationBase, public TcpSocket::ICallback
+class INET_API TcpServerHostApp : public ApplicationBase, public TcpSocket::ICallback, public IPassivePacketSink, public IModuleInterfaceLookup
 {
   protected:
     TcpSocket serverSocket;
@@ -36,7 +39,7 @@ class INET_API TcpServerHostApp : public ApplicationBase, public TcpSocket::ICal
 
     virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override { throw cRuntimeError("Unexpected data"); }
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;
-    virtual void socketEstablished(TcpSocket *socket) override {}
+    virtual void socketEstablished(TcpSocket *socket, Indication *indication) override {}
     virtual void socketPeerClosed(TcpSocket *socket) override {}
     virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override {}
@@ -51,6 +54,15 @@ class INET_API TcpServerHostApp : public ApplicationBase, public TcpSocket::ICal
     virtual ~TcpServerHostApp() { socketMap.deleteSockets(); }
     virtual void removeThread(TcpServerThreadBase *thread);
     virtual void threadClosed(TcpServerThreadBase *thread);
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 
     friend class TcpServerThreadBase;
 };
@@ -69,7 +81,7 @@ class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::ICa
     // internal: TcpSocket::ICallback methods
     virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;
-    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketEstablished(TcpSocket *socket, Indication *indication) override;
     virtual void socketPeerClosed(TcpSocket *socket) override;
     virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override;

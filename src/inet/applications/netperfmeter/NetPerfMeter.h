@@ -22,6 +22,7 @@
 #include <fstream>
 
 #include "inet/applications/netperfmeter/NetPerfMeter_m.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
@@ -32,10 +33,12 @@
 
 namespace inet {
 
+using namespace inet::queueing;
+
 /**
  * Implementation of NetPerfMeter. See NED file for more details.
  */
-class INET_API NetPerfMeter : public cSimpleModule
+class INET_API NetPerfMeter : public cSimpleModule, public IPassivePacketSink, public IModuleInterfaceLookup, public UdpSocket::ICallback, public TcpSocket::ICallback, public SctpSocket::ICallback
 {
   public:
     NetPerfMeter();
@@ -47,6 +50,15 @@ class INET_API NetPerfMeter : public cSimpleModule
 
     virtual void refreshDisplay() const override;
 
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
+
     void establishConnection();
     void successfullyEstablishedConnection(cMessage *msg, const unsigned int queueSize);
     void teardownConnection(const bool stopTimeReached = false);
@@ -56,6 +68,24 @@ class INET_API NetPerfMeter : public cSimpleModule
 
     void sendSCTPQueueRequest(const unsigned int queueSize);
     void sendTCPQueueRequest(const unsigned int queueSize);
+
+    virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override { receiveMessage(packet); }
+    virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override { teardownConnection(); }
+    virtual void socketClosed(UdpSocket *socket) override { }
+
+    virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override { receiveMessage(packet); }
+    virtual void socketAvailable(TcpSocket* socket, TcpAvailableInfo* availableInfo) override;
+    virtual void socketEstablished(TcpSocket *socket, Indication *indication) override { Enter_Method("socketEstablished"); successfullyEstablishedConnection(indication, 0); }
+    virtual void socketPeerClosed(TcpSocket *socket) override { teardownConnection(); }
+    virtual void socketClosed(TcpSocket *socket) override { teardownConnection(); }
+    virtual void socketFailure(TcpSocket *socket, int code) override { teardownConnection(); }
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { }
+    virtual void socketDeleted(TcpSocket *socket) override { }
+
+    virtual void socketDataArrived(SctpSocket *socket, Packet *packet, bool urgent) override { receiveMessage(packet); }
+    virtual void socketDataArrivedNotification(SctpSocket *socket, Message *msg) override;
+    virtual void socketAvailable(SctpSocket *socket, Indication *indication) override;
+    virtual void socketEstablished(SctpSocket *socket, Indication *indication) override;
 
   protected:
     // ====== Parameters =====================================================

@@ -137,9 +137,9 @@ void EthernetSocketIo::pushPacket(Packet *packet, const cGate *gate)
         }
         auto& macAddressReq = packet->addTag<MacAddressReq>();
         macAddressReq->setDestAddress(remoteAddress);
+        emit(packetSentSignal, packet);
         socket.send(packet);
         numSent++;
-        emit(packetSentSignal, packet);
     }
     else {
         if (socket.belongsToSocket(packet))
@@ -166,6 +166,8 @@ void EthernetSocketIo::handleCrashOperation(LifecycleOperation *operation)
 
 cGate* EthernetSocketIo::lookupModuleInterface(cGate *gate, const std::type_info &type, const cObject *arguments, int direction)
 {
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
     if (gate->isName("trafficIn")) {
         if (type == typeid(IPassivePacketSink))
             return gate;

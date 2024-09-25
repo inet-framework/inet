@@ -190,8 +190,9 @@ void SctpClient::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, SctpSocket::stateName(socket.getState()));
 }
 
-void SctpClient::socketEstablished(SctpSocket *socket, unsigned long int buffer)
+void SctpClient::socketEstablished(SctpSocket *socket, Indication *indication)
 {
+    unsigned long int buffer = indication->getTag<SctpConnectReq>()->getNumMsgs();
     int count = 0;
     EV_INFO << "SctpClient: connected\n";
     bufferSize = buffer;
@@ -274,11 +275,7 @@ void SctpClient::socketEstablished(SctpSocket *socket, unsigned long int buffer)
 
 void SctpClient::sendQueueRequest()
 {
-    Request *cmsg = new Request("SCTP_C_QUEUE_MSGS_LIMIT", SCTP_C_QUEUE_MSGS_LIMIT);
-    auto qinfo = cmsg->addTag<SctpInfoReq>();
-    qinfo->setText(queueSize);
-    qinfo->setSocketId(socket.getSocketId());
-    socket.sendRequest(cmsg);
+    socket.setQueueLimits(queueSize, B(-1));
 }
 
 void SctpClient::sendRequestArrived(SctpSocket *socket)
@@ -459,17 +456,11 @@ void SctpClient::handleTimer(cMessage *msg)
     }
 }
 
-void SctpClient::socketDataNotificationArrived(SctpSocket *socket, Message *msg)
+void SctpClient::socketDataArrivedNotification(SctpSocket *socket, Message *msg)
 {
     Message *message = check_and_cast<Message *>(msg);
     auto& ind = message->findTag<SctpCommandReq>();
-    Request *cmesg = new Request("SCTP_C_RECEIVE", SCTP_C_RECEIVE);
-    auto cmd = cmesg->addTag<SctpSendReq>();
-    cmd->setSocketId(ind->getSocketId());
-    cmd->setSid(ind->getSid());
-    cmd->setNumMsgs(ind->getNumMsgs());
-    delete msg;
-    socket->sendNotification(cmesg);
+    socket->receive(ind->getSid(), ind->getNumMsgs());
 }
 
 void SctpClient::shutdownReceivedArrived(SctpSocket *socket)
@@ -555,16 +546,8 @@ void SctpClient::setPrimaryPath(const char *str)
 void SctpClient::sendStreamResetNotification()
 {
     unsigned short int type = par("streamResetType");
-    if (type >= 6 && type <= 9) {
-        Message *cmsg = new Message("SCTP_C_STREAM_RESET", SCTP_C_STREAM_RESET);
-        auto rinfo = cmsg->addTag<SctpResetReq>();
-        rinfo->setSocketId(socket.getSocketId());
-        rinfo->setRemoteAddr(socket.getRemoteAddr());
-        rinfo->setRequestType(type);
-        rinfo->setStreamsArraySize(1);
-        rinfo->setStreams(0, par("streamToReset"));
-        socket.sendNotification(cmsg);
-    }
+    if (type >= 6 && type <= 9)
+        socket.streamReset(socket.getRemoteAddr(), type, par("streamToReset"));
 }
 
 void SctpClient::msgAbandonedArrived(SctpSocket *socket)
