@@ -14,9 +14,14 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/ISocket.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
+#include "inet/transportlayer/contract/ISctp.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 
 namespace inet {
+
+using namespace inet::queueing;
+using namespace inet::sctp;
 
 typedef std::vector<L3Address> AddressVector;
 
@@ -45,7 +50,7 @@ typedef struct
     bool streamReset;
 } AppSocketOptions;
 
-class INET_API SctpSocket : public ISocket
+class INET_API SctpSocket : public ISocket, public ISctp::ICallback
 {
   public:
     /**
@@ -60,10 +65,10 @@ class INET_API SctpSocket : public ISocket
       public:
         virtual ~ICallback() {}
         virtual void socketDataArrived(SctpSocket *socket, Packet *packet, bool urgent) = 0;
-        virtual void socketDataNotificationArrived(SctpSocket *socket, Message *msg) = 0;
+        virtual void socketDataArrivedNotification(SctpSocket *socket, Message *msg) = 0;
         virtual void socketAvailable(SctpSocket *socket, Indication *indication) = 0;
         virtual void socketOptionsArrived(SctpSocket *socket, Indication *indication) { delete indication; }
-        virtual void socketEstablished(SctpSocket *socket, unsigned long int buffer) {}
+        virtual void socketEstablished(SctpSocket *socket, Indication *indication) {}
         virtual void socketPeerClosed(SctpSocket *socket) {}
         virtual void socketClosed(SctpSocket *socket) {}
         virtual void socketFailure(SctpSocket *socket, int code) {}
@@ -80,6 +85,9 @@ class INET_API SctpSocket : public ISocket
     enum State { NOT_BOUND, CLOSED, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, SOCKERROR };
 
   protected:
+    PassivePacketSinkRef sink;
+    ModuleRefByGate<ISctp> sctp;
+
     int assocId;
     uint64_t& nextAssocId = SIMULATION_SHARED_COUNTER(nextAssocId);
     int sockstate;
@@ -171,7 +179,14 @@ class INET_API SctpSocket : public ISocket
      * Sets the gate on which to send to SCTP. Must be invoked before socket
      * can be used. Example: <tt>socket.setOutputGate(gate("sctpOut"));</tt>
      */
-    void setOutputGate(cGate *toSctp) { gateToSctp = toSctp; }
+    void setOutputGate(cGate *toSctp) {
+        gateToSctp = toSctp;
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(&Protocol::sctp);
+        dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
+        sink.reference(toSctp, true, &dispatchProtocolReq);
+        sctp.reference(toSctp, true);
+    }
 
     /**
      * Setter and getter methods for socket and API Parameters
@@ -270,6 +285,13 @@ class INET_API SctpSocket : public ISocket
     virtual void send(Packet *packet) override;
 
     /**
+     * Receive data message
+     */
+    virtual void receive(int sid, int numMsgs);
+
+    void streamReset(L3Address remoteAddress, int type, int stream);
+
+    /**
      * Send notification.
      */
     void sendNotification(cMessage *msg);
@@ -277,7 +299,7 @@ class INET_API SctpSocket : public ISocket
     /**
      * Send request.
      */
-    void sendRequest(cMessage *msg);
+    void setQueueLimits(int packetCapacity, B dataCapacity);
 
     /**
      * Closes the local end of the connection. With SCTP, a CLOSE operation
@@ -356,6 +378,75 @@ class INET_API SctpSocket : public ISocket
     virtual void destroy() override;
 
     virtual bool isOpen() const override;
+
+    virtual void handleEstablished(Indication *indication) override;
+
+    virtual void handleAvailable(Indication *indication) override {
+        if (cb != nullptr)
+            cb->socketAvailable(this, indication);
+        else {
+            int newSocketId = indication->getTag<SctpAvailableReq>()->getNewSocketId();
+            acceptSocket(newSocketId);
+        }
+    }
+
+    virtual void handleDataArrived(Packet *packet, bool urgent) override {
+        if (cb != nullptr)
+            cb->socketDataArrived(this, packet, urgent);
+    }
+
+    virtual void handleDataArrivedNotification(Indication *indication) override {
+        if (cb != nullptr)
+            cb->socketDataArrivedNotification(this, indication);
+    }
+
+    virtual void handleClosed() override {
+        if (cb != nullptr)
+            cb->socketClosed(this);
+    }
+
+    virtual void handlePeerClosed() override {
+        if (cb != nullptr)
+            cb->socketPeerClosed(this);
+    }
+
+    virtual void handleFailure(int code) override {
+        if (cb != nullptr)
+            cb->socketFailure(this, code);
+    }
+
+    virtual void handleShutdownReceived() override {
+        if (cb != nullptr)
+            cb->shutdownReceivedArrived(this);
+    }
+
+    virtual void handleAbandoned() override {
+        if (cb != nullptr)
+            cb->msgAbandonedArrived(this);
+    }
+
+    virtual void handleSendStreamReset() override {
+        // void
+    }
+
+    virtual void handleReceiveStreamReset() override {
+        // void
+    }
+
+    virtual void handleSendMessage() override {
+        if (cb != nullptr)
+            cb->sendRequestArrived(this);
+    }
+
+    virtual void handleStatus(Indication *indication) override {
+        if (cb != nullptr)
+            cb->socketStatusArrived(this, const_cast<SctpStatusReq *>(indication->getTag<SctpStatusReq>().get()));
+    }
+
+    virtual void handleAddressAdded(L3Address localAddr, L3Address remoteAddr) override {
+        if (cb != nullptr)
+            cb->addressAddedArrived(this, localAddr, remoteAddr);
+    }
 };
 
 } // namespace inet

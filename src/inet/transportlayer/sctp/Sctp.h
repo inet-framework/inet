@@ -19,14 +19,19 @@
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/transportlayer/contract/ISctp.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/sctp/SctpCrcInsertionHook.h"
 #include "inet/transportlayer/sctp/SctpHeader.h"
 #include "inet/transportlayer/sctp/SctpUdpHook.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
 namespace sctp {
+
+using namespace inet::queueing;
 
 #define SCTP_UDP_PORT    9899
 
@@ -77,7 +82,7 @@ class SctpHeader;
  * The concrete SctpAlgorithm class to use can be chosen per association (in OPEN)
  * or in a module parameter.
  */
-class INET_API Sctp : public cSimpleModule
+class INET_API Sctp : public cSimpleModule, public IPassivePacketSink, public ISctp
 {
   public:
     struct AppAssocKey {
@@ -176,6 +181,8 @@ class INET_API Sctp : public cSimpleModule
   protected:
     ModuleRefByPar<IRoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
+    PassivePacketSinkRef ipSink;
+    PassivePacketSinkRef appSink;
 
     int32_t sizeAssocMap;
 
@@ -271,6 +278,25 @@ class INET_API Sctp : public cSimpleModule
     void setRtoMax(double rtoMax) { socketOptions->rtoMax = rtoMax; }
     void setInterfaceId(int id) { interfaceId = id; }
     int getInterfaceId() { return interfaceId; };
+
+    virtual void setCallback(int socketId, ICallback *callback) override;
+    virtual void listen(int socketId, const std::vector<L3Address>& localAddresses, int localPort, bool fork, int inboundStreams, int outboundStreams, bool streamReset, uint32_t requests, uint32_t messagesToPush) override;
+    virtual void connect(int socketId, const std::vector<L3Address>& localAddresses, int localPort, L3Address remoteAddress, int32_t remotePort, int inboundStreams, int outboundStreams, bool streamReset, int32_t prMethod, uint32_t numRequests) override;
+    virtual void accept(int socketId) override;
+    virtual void abort(int socketId) override;
+    virtual void close(int socketId, int id) override;
+    virtual void shutdown(int socketId, int id) override;
+    virtual void receive(int socketId, int sid, int numMsgs) override;
+    virtual void streamReset(int socketId, L3Address remoteAddress, int type, int stream) override;
+    virtual void getSocketOptions(int socketId) override;
+    virtual void setQueueLimits(int socketId, int packetCapacity, B dataCapacity) override;
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace sctp

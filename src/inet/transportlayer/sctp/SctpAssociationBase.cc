@@ -1732,13 +1732,6 @@ void SctpAssociation::stateEntered(int32_t status)
             pmStartPathManagement();
             state->sendQueueLimit = sctpMain->par("sendQueueLimit");
             EV_INFO << "stateEntered: Established socketId= " << assocId << endl;
-            if (isToBeAccepted()) {
-                EV_INFO << "Listening socket can accept now\n";
-                sendAvailableIndicationToApp();
-            }
-            else {
-                sendEstabIndicationToApp();
-            }
             if (sctpMain->hasPar("addIP")) {
                 const bool addIP = sctpMain->par("addIP");
                 simtime_t addTime = sctpMain->par("addTime");
@@ -1768,6 +1761,13 @@ void SctpAssociation::stateEntered(int32_t status)
             vtagPair.localPort = localPort;
             vtagPair.remotePort = remotePort;
             sctpMain->sctpVTagMap[assocId] = vtagPair;
+            if (isToBeAccepted()) {
+                EV_INFO << "Listening socket can accept now\n";
+                sendAvailableIndicationToApp();
+            }
+            else {
+                sendEstabIndicationToApp();
+            }
             break;
         }
 
