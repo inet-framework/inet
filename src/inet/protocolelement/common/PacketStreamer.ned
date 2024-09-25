@@ -20,6 +20,6 @@ simple PacketStreamer extends PacketProcessorBase like IPacketFlow
         @class(PacketStreamer);
         @display("i=block/cogwheel");
     gates:
-        input in @labels(send,push,pull,pass);
-        output out @labels(send,push,pull,stream);
+        input in @interface[inet::queueing::IPassivePacketSink] @interface[inet::queueing::IActivePacketSink] @labels(send,push,pull,pass);
+        output out @interface[inet::queueing::IPassivePacketSource] @interface[inet::queueing::IActivePacketSource] @labels(send,push,pull,stream);
 }

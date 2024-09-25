@@ -82,7 +82,7 @@ simple Rstp extends SimpleModule like ISpanningTree
 
         @display("i=block/network2");
     gates:
-        input relayIn;
+        input relayIn @interface[inet::queueing::IPassivePacketSink](protocol=stp; service=indication);
         output relayOut;
 }
 

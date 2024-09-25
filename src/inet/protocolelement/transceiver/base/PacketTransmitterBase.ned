@@ -25,6 +25,6 @@ simple PacketTransmitterBase extends PacketProcessorBase
         @statistic[transmissionTime](title="transmission time"; unit=s; source=packetDuration(transmissionEnded); record=vector,histogram; interpolationmode=none);
         @statistic[flowTransmissionTime](title="flow transmission time"; unit=s; source=packetDuration(demuxFlow(transmissionEnded)); record=vector,histogram; interpolationmode=none);
     gates:
-        input in;
+        input in @interface[inet::queueing::IPassivePacketSink];
         output out;
 }

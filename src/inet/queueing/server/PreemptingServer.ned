@@ -16,4 +16,6 @@ simple PreemptingServer extends PacketServerBase like IPacketServer
         string clockModule = default(""); // Relative path of a module that implements IClock; optional
         double datarate @unit(bps);
         @class(PreemptingServer);
+    gates:
+        in @interface[inet::queueing::IPassivePacketSink];
 }

@@ -57,6 +57,6 @@ simple PacketFilterBase extends PacketProcessorBase
         // the statistical value is the flow specific data rate of the dropped packets
         @statistic[flowDroppedDataRate](title="flow specific dropped data rate"; source=throughput(demuxFlow(packetDropped)); record=vector; unit=bps; interpolationmode=linear);
     gates:
-        input in @labels(send,push,pull,pass,stream);
-        output out @labels(send,push,pull,pass,stream);
+        input in @interface[inet::queueing::IPassivePacketSink] @interface[inet::queueing::IActivePacketSink] @labels(send,push,pull,pass,stream);
+        output out @interface[inet::queueing::IPassivePacketSource] @interface[inet::queueing::IActivePacketSource] @labels(send,push,pull,pass,stream);
 }

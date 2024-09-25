@@ -24,7 +24,7 @@ module EthernetLayer like IEthernetLayer
         @class(EthernetLayer);
         @display("i=block/layer");
     gates:
-        input upperLayerIn;
+        input upperLayerIn @interface[inet::queueing::IPassivePacketSink](protocol=ethernetmac; service=request; protocolGroup=ethertype; sdu=ethernetmac; pdu=ieee8022llc);
         output upperLayerOut;
         input lowerLayerIn;
         output lowerLayerOut;

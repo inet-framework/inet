@@ -70,7 +70,7 @@ module Gptp extends Module like IGptp
         @statistic[pdelay](record=vector; source=pdelayChanged; interpolationmode=sample-hold; unit=s);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
-        input socketIn;
+        input socketIn @interface[inet::queueing::IPassivePacketSink](protocol=gptp; service=indication);
         output socketOut;
     submodules:
         clockServo: <default("StepClockServo")> like IClockServo if typename != "" && gptpNodeType != "MASTER_NODE" {

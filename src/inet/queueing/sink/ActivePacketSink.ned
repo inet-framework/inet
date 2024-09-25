@@ -34,6 +34,6 @@ simple ActivePacketSink extends ActivePacketSinkBase like IActivePacketSink
         bool scheduleForAbsoluteTime = default(true); // When a clock is used, relative means that setting the clock will not affect the simulation time of the event
         @class(ActivePacketSink);
     gates:
-        input in @labels(pull);
+        input in @interface[inet::queueing::IActivePacketSink] @labels(pull);
 }
 

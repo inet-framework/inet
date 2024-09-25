@@ -32,5 +32,5 @@ simple ActivePacketSource extends ActivePacketSourceBase like IActivePacketSourc
         bool scheduleForAbsoluteTime = default(true); // When a clock is used, "relative" means that setting the clock will not affect the simulation time of the event
         @class(ActivePacketSource);
     gates:
-        output out @labels(push);
+        output out @interface[inet::queueing::IActivePacketSource] @labels(push);
 }

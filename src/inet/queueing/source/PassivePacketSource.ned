@@ -23,5 +23,5 @@ simple PassivePacketSource extends PassivePacketSourceBase like IPassivePacketSo
         bool scheduleForAbsoluteTime = default(true); // When a clock is used, relative means that setting the clock will not affect the simulation time of the event
         @class(PassivePacketSource);
     gates:
-        output out @labels(pull);
+        output out @interface[inet::queueing::IPassivePacketSource] @labels(pull);
 }

@@ -162,7 +162,7 @@ module EthernetMacPhy extends Module like IEtherMac
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 
     gates:
-        input upperLayerIn @labels(EtherFrame);    // To ~EthernetEncapsulation or ~IMacRelayUnit
+        input upperLayerIn @interface[inet::queueing::IActivePacketSink](protocol=ethernetmac) @labels(EtherFrame);    // To ~EthernetEncapsulation or ~IMacRelayUnit
         output upperLayerOut @labels(EtherFrame);  // To ~EthernetEncapsulation or ~IMacRelayUnit
         inout phys @labels(EthernetSignal);        // To the network
 }
