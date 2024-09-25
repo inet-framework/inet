@@ -45,6 +45,7 @@ void StpBase::initialize(int stage)
         macTable.reference(this, "macTableModule", true);
         ifTable.reference(this, "interfaceTableModule", true);
         switchModule = getContainingNode(this);
+        relaySink.reference(gate("relayOut"), true);
     }
 }
 
@@ -71,7 +72,7 @@ void StpBase::sendOut(Packet *packet, int interfaceId, const MacAddress& destAdd
     auto macAddressReq = packet->addTag<MacAddressReq>();
     macAddressReq->setSrcAddress(bridgeAddress);
     macAddressReq->setDestAddress(destAddress);
-    send(packet, "relayOut");
+    relaySink.pushPacket(packet);
 }
 
 void StpBase::colorLink(NetworkInterface *ie, bool forwarding) const
@@ -203,6 +204,14 @@ void StpBase::handleStopOperation(LifecycleOperation *operation)
 void StpBase::handleCrashOperation(LifecycleOperation *operation)
 {
     stop();
+}
+
+void StpBase::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
 }
 
 } // namespace inet
