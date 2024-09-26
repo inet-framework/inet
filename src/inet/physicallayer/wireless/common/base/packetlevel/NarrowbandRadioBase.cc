@@ -9,7 +9,6 @@
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandReceiverBase.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandTransmitterBase.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {
 
@@ -20,23 +19,6 @@ Define_Module(NarrowbandRadioBase);
 NarrowbandRadioBase::NarrowbandRadioBase() :
     Radio()
 {
-}
-
-void NarrowbandRadioBase::handleUpperCommand(cMessage *message)
-{
-    if (message->getKind() == RADIO_C_CONFIGURE) {
-        ConfigureRadioCommand *configureCommand = check_and_cast<ConfigureRadioCommand *>(message->getControlInfo());
-        const IModulation *newModulation = configureCommand->getModulation();
-        if (newModulation != nullptr)
-            setModulation(newModulation);
-        Hz newCenterFrequency = configureCommand->getCenterFrequency();
-        if (!std::isnan(newCenterFrequency.get()))
-            setCenterFrequency(newCenterFrequency);
-        Hz newBandwidth = configureCommand->getBandwidth();
-        if (!std::isnan(newBandwidth.get()))
-            setBandwidth(newBandwidth);
-    }
-    Radio::handleUpperCommand(message);
 }
 
 void NarrowbandRadioBase::setModulation(const IModulation *newModulation)

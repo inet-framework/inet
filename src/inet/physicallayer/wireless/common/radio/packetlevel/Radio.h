@@ -174,7 +174,6 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     virtual void handleSwitchTimer(cMessage *message);
     virtual void handleTransmissionTimer(cMessage *message);
     virtual void handleReceptionTimer(cMessage *message);
-    virtual void handleUpperCommand(cMessage *command) override;
     virtual void handleLowerCommand(cMessage *command) override;
     virtual void handleUpperPacket(Packet *packet) override;
     virtual void handleSignal(WirelessSignal *signal) override;

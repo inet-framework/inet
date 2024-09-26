@@ -17,7 +17,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReceptionDecision.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReceptionResult.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ISnir.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {
 
