@@ -108,9 +108,13 @@ void StreamThroughTransmitter::endTx(Packet *packet)
     auto signal = encodePacket(packet);
     delete txSignal;
     txSignal = signal->dup();
-    emit(transmissionEndedSignal, txSignal);
     sendSignalEnd(txSignal, packet->getTransmissionId());
-    // 3. clear internal state
+    // 3. notify producer
+    if (producer != nullptr)
+        producer.handlePushPacketProcessed(packet, true);
+    // 4. notify subscribers
+    emit(transmissionEndedSignal, txSignal);
+    // 5. clear internal state
     txSignal = nullptr;
     txDatarate = bps(NaN);
     txStartTime = -1;
@@ -120,11 +124,9 @@ void StreamThroughTransmitter::endTx(Packet *packet)
     lastInputDatarate = bps(NaN);
     lastInputProgressTime = -1;
     lastInputProgressPosition = b(-1);
-    // 4. notify producer
-    if (producer != nullptr) {
-        producer.handlePushPacketProcessed(packet, true);
+    // 6. notify producer
+    if (producer != nullptr)
         producer.handleCanPushPacketChanged();
-    }
     delete signal;
 }
 
@@ -144,12 +146,16 @@ void StreamThroughTransmitter::abortTx()
     // 3. delete old signal
     delete txSignal;
     txSignal = nullptr;
-    // 4. send signal end to receiver and notify subscribers
+    // 4. send signal end to receiver
     EV_INFO << "Aborting transmission" << EV_FIELD(packet) << EV_FIELD(datarate, txDatarate) << EV_ENDL;
     handlePacketProcessed(packet);
-    emit(transmissionEndedSignal, signal);
     sendSignalEnd(signal, packet->getTransmissionId());
-    // 5. clear internal state
+    // 5. notify producer
+    if (producer != nullptr)
+        producer.handlePushPacketProcessed(packet, true);
+    // 6. notify subscribers
+    emit(transmissionEndedSignal, signal);
+    // 7. clear internal state
     txDatarate = bps(NaN);
     txStartTime = -1;
     txStartClockTime = -1;
@@ -158,11 +164,9 @@ void StreamThroughTransmitter::abortTx()
     lastInputDatarate = bps(NaN);
     lastInputProgressTime = -1;
     lastInputProgressPosition = b(-1);
-    // 6. notify producer
-    if (producer != nullptr) {
-        producer.handlePushPacketProcessed(packet, true);
+    // 8. notify producer
+    if (producer != nullptr)
         producer.handleCanPushPacketChanged();
-    }
 }
 
 void StreamThroughTransmitter::scheduleBufferUnderrunTimer()
