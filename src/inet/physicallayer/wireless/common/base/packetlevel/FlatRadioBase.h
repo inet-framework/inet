@@ -17,9 +17,6 @@ namespace physicallayer {
 // REFACTOR TODO
 class INET_API FlatRadioBase : public NarrowbandRadioBase
 {
-  protected:
-    void handleUpperCommand(cMessage *message) override;
-
   public:
     FlatRadioBase();
 
