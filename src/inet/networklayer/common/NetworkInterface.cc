@@ -85,7 +85,6 @@ NetworkInterface::NetworkInterface()
 
 NetworkInterface::~NetworkInterface()
 {
-    resetInterface();
 }
 
 void NetworkInterface::clearProtocolDataSet()
@@ -407,11 +406,6 @@ void NetworkInterface::changed(simsignal_t signalID, int fieldId)
     }
 }
 
-void NetworkInterface::resetInterface()
-{
-    protocolDataSet.clearTags();
-}
-
 bool NetworkInterface::matchesMacAddress(const MacAddress& address) const
 {
     return address.isBroadcast()
@@ -681,6 +675,7 @@ void NetworkInterface::handleStopOperation(LifecycleOperation *operation)
     setState(State::DOWN);
     // TODO carrier and UP/DOWN state is independent
     setCarrier(false);
+    protocolDataSet.clearTags();
 }
 
 void NetworkInterface::handleCrashOperation(LifecycleOperation *operation)
@@ -688,6 +683,7 @@ void NetworkInterface::handleCrashOperation(LifecycleOperation *operation)
     setState(State::DOWN);
     // TODO carrier and UP/DOWN state is independent
     setCarrier(false);
+    protocolDataSet.clearTags();
 }
 
 NetworkInterface *findContainingNicModule(const cModule *from)
