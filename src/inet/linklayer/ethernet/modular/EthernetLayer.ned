@@ -21,6 +21,7 @@ module EthernetLayer like IEthernetLayer
         *.interfaceTableModule = default(this.interfaceTableModule);
         *.socketTableModule = default(absPath(".socketTable"));
         paddingInserter.minLength = default(60B);
+        @class(EthernetLayer);
         @display("i=block/layer");
     gates:
         input upperLayerIn @interface[inet::queueing::IPassivePacketSink](protocol=ethernetmac; service=request; protocolGroup=ethertype; sdu=ethernetmac);
@@ -49,7 +50,7 @@ module EthernetLayer like IEthernetLayer
         macHeaderChecker: <default("EthernetMacHeaderChecker")> like IProtocolHeaderChecker {
             @display("p=600,200");
         }
-        fcsChecker: <default("EthernetFcsChecker")> like IPacketFilter {
+        fcsChecker: <default("EthernetFcsRemover")> like IPacketFilter {
             @display("p=600,400");
         }
     connections:

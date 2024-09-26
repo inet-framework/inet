@@ -64,7 +64,10 @@ void EthernetMacBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         fcsMode = parseFcsMode(par("fcsMode"));
         allowNonstandardBitrate = par("allowNonstandardBitrate");
-        upperLayerSink.reference(gate("upperLayerOut"), true);
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(&Protocol::ethernetMac);
+        dispatchProtocolReq.setServicePrimitive(SP_INDICATION);
+        upperLayerSink.reference(gate("upperLayerOut"), true, &dispatchProtocolReq);
         physInGate = gate("phys$i");
         physOutGate = gate("phys$o");
         lowerLayerInGateId = physInGate->getId();
@@ -618,6 +621,22 @@ void EthernetMacBase::handlePullPacketProcessed(Packet *packet, const cGate *gat
 {
     Enter_Method("handlePullPacketProcessed");
     throw cRuntimeError("Not supported callback");
+}
+
+cGate *EthernetMacBase::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("upperLayerIn")) {
+        if (type == typeid(IActivePacketSink)) {
+            if (arguments == nullptr)
+                return gate;
+            auto packetProtocolTag = dynamic_cast<const PacketProtocolTag *>(arguments);
+            if (packetProtocolTag != nullptr && packetProtocolTag->getProtocol() == &Protocol::ethernetMac)
+                return gate;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace inet

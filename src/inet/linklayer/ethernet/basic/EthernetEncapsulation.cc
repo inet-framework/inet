@@ -66,7 +66,9 @@ void EthernetEncapsulation::initialize(int stage)
         WATCH(seqNum);
         totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
         interfaceTable.reference(this, "interfaceTableModule", true);
-        lowerLayerSink.reference(gate("lowerLayerOut"), true);
+        PacketProtocolTag packetProtocolTag;
+        packetProtocolTag.setProtocol(&Protocol::ethernetMac);
+        lowerLayerSink.reference(gate("lowerLayerOut"), true, &packetProtocolTag);
         upperLayerSink.reference(gate("upperLayerOut"), true);
 
         WATCH_PTRSET(upperProtocols);

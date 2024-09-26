@@ -8,6 +8,7 @@
 #ifndef __INET_ETHERNETMACBASE_H
 #define __INET_ETHERNETMACBASE_H
 
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/INETMath.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -31,7 +32,7 @@ using namespace inet::physicallayer;
 /**
  * Base class for Ethernet MAC implementations.
  */
-class INET_API EthernetMacBase : public MacProtocolBase, public queueing::IActivePacketSink
+class INET_API EthernetMacBase : public MacProtocolBase, public queueing::IActivePacketSink, public IModuleInterfaceLookup
 {
   public:
     enum MacTransmitState {
@@ -121,6 +122,8 @@ class INET_API EthernetMacBase : public MacProtocolBase, public queueing::IActiv
   public:
     EthernetMacBase();
     virtual ~EthernetMacBase();
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 
     virtual MacAddress getMacAddress() { return networkInterface ? networkInterface->getMacAddress() : MacAddress::UNSPECIFIED_ADDRESS; }
 
