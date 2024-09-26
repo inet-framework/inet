@@ -59,6 +59,11 @@ class INET_API SocketMap
     /**
      * Returns the socket specified by socketId
      */
+    ISocket *findSocketById(unsigned int socketId) { auto it = socketMap.find(socketId); return it != socketMap.end() ? it->second : nullptr; }
+
+    /**
+     * Returns the socket specified by socketId
+     */
     ISocket *getSocketById(unsigned int socketId) { return socketMap.at(socketId); }
 
     /**
