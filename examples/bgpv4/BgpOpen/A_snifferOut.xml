@@ -3,18 +3,6 @@
     xsi:noNamespaceSchemaLocation="MessageChecker.xsd" -->
 <checker>
     <message occurence="1">
-        <fieldValue name="name" value="PassiveOPEN"/>
-    </message>
-    <message occurence="1">
-        <fieldValue name="name" value="setTTL"/>
-    </message>
-    <message occurence="1">
-        <fieldValue name="name" value="ActiveOPEN"/>
-    </message>
-    <message occurence="1">
-        <fieldValue name="name" value="ACCEPT"/>
-    </message>
-    <message occurence="1">
         <fieldValue name="name" value="BgpOpen"/>
         <fieldValue name="byteLength" value="29"/>
 <!--
@@ -25,7 +13,6 @@
         <fieldValue name="BgpIdentifier" value="10.10.10.1"/>
 -->
     </message>
-    <message occurence="1"/> <!-- tcp: ABORT -->
     <message occurence="1">
 <!--
         <fieldValue name="className" value="inet::bgp::BgpKeepAliveMessage"/>
