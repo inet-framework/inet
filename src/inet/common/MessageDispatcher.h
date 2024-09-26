@@ -29,6 +29,7 @@ class INET_API MessageDispatcher :
 #else
     public cSimpleModule,
 #endif // #ifdef INET_WITH_QUEUEING
+    public IModuleInterfaceLookup
 {
   public:
     class INET_API Key {
@@ -52,11 +53,12 @@ class INET_API MessageDispatcher :
     };
 
   protected:
+    std::map<int, cGate *> socketIdMap;
+    std::map<Key, cGate *> protocolIdMap;
+    std::map<int, cGate *> interfaceIdMap;
 
   protected:
     virtual cGate *handlePacket(Packet *packet, const cGate *inGate);
-
-    int getGateIndexToConnectedModule(const char *moduleName);
 
   public:
 #ifdef INET_WITH_QUEUEING
@@ -80,6 +82,9 @@ class INET_API MessageDispatcher :
     virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
 #endif // #ifdef INET_WITH_QUEUEING
 
+    bool hasLookupModuleInterface(const cGate *gate, const std::type_info& type, const cObject *arguments, int direction);
+    cGate * forwardLookupModuleInterface(const cGate *gate, const std::type_info& type, const cObject *arguments, int direction);
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 std::ostream& operator<<(std::ostream& out, const MessageDispatcher::Key& foo) {
