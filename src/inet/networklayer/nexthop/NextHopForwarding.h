@@ -23,8 +23,11 @@
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/networklayer/nexthop/NextHopForwardingHeader_m.h"
 #include "inet/networklayer/nexthop/NextHopRoutingTable.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * Implements a next hop forwarding protocol that routes datagrams through the network.
@@ -32,7 +35,7 @@ namespace inet {
  * interface to allow routing protocols to kick in. It doesn't provide datagram fragmentation
  * and reassembling.
  */
-class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase, public INetworkProtocol
+class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase, public INetworkProtocol, public IPassivePacketSink
 {
   protected:
     /**
@@ -65,6 +68,8 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     ModuleRefByPar<NextHopRoutingTable> routingTable;
     ModuleRefByPar<IArp> arp;
+    PassivePacketSinkRef queueSink;
+    PassivePacketSinkRef transportSink;
 
     // config
     int defaultHopLimit;
@@ -154,6 +159,13 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
     virtual void unregisterHook(IHook *hook) override;
     virtual void dropQueuedDatagram(const Packet *datagram) override;
     virtual void reinjectQueuedDatagram(const Packet *datagram) override;
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("trafficIn") || gate->isName("queueIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("trafficIn") || gate->isName("queueIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
   protected:
     /**
