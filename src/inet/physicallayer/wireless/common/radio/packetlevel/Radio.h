@@ -14,9 +14,12 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/signal/WirelessSignal.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 namespace physicallayer {
+
+using namespace inet::queueing;
 
 /**
  * This class is the default implementation of the IRadio interface.
@@ -45,7 +48,7 @@ namespace physicallayer {
  * state changed signal.
  */
 // TODO support capturing a stronger transmission
-class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
+class INET_API Radio : public PhysicalLayerBase, public virtual IRadio, public IPassivePacketSink
 {
   protected:
     /**
@@ -234,6 +237,13 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 
     virtual void encapsulate(Packet *packet) const {}
     virtual void decapsulate(Packet *packet) const {}
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("upperLayerIn") || gate->isName("lowerLayerIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("upperLayerIn") || gate->isName("lowerLayerIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace physicallayer
