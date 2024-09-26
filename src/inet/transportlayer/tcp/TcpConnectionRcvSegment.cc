@@ -124,6 +124,7 @@ bool TcpConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *tcpSegment, c
 
 TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader)
 {
+    EV_INFO << "BUG TcpConnection::processSegment1stThru8th()" << EV_FIELD(name, tcpSegment->getFullName()) << EV_FIELD(listeningSocketId) << EV_FIELD(socketId) << EV_ENDL;
 
     // Delegates additional processing of ECN to the algorithm
     tcpAlgorithm->processEcnInEstablished();
@@ -871,6 +872,7 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
 
 TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address srcAddr, L3Address destAddr)
 {
+    EV_INFO << "BUG TcpConnection::processSegmentInSynSent()" << EV_FIELD(name, tcpSegment->getFullName()) << EV_FIELD(listeningSocketId) << EV_FIELD(socketId) << EV_ENDL;
     EV_DETAIL << "Processing segment in SYN_SENT\n";
 
     //"

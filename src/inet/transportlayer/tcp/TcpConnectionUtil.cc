@@ -203,6 +203,8 @@ void TcpConnection::printSegmentBrief(Packet *tcpSegment, const Ptr<const TcpHea
 
 void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
 {
+    EV_INFO << "BUG TcpConnection::initClonedConnection()" << EV_FIELD(listeningSocketId) << EV_FIELD(socketId) << EV_ENDL;
+
     Enter_Method("initClonedConnection");
     listeningSocketId = listenerConn->getSocketId();
 
@@ -234,7 +236,9 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     localPort = listenerConn->localPort;
     autoRead = listenerConn->autoRead;
 
-    callback = listenerConn->callback;
+//    callback = listenerConn->callback;
+    callback = nullptr;
+    ASSERT(callback == nullptr || socketId == check_and_cast<TcpSocket *>(callback)->getSocketId());
 
     FSM_Goto(fsm, TCP_S_LISTEN);
 }
@@ -349,18 +353,30 @@ void TcpConnection::signalConnectionTimeout()
 void TcpConnection::sendIndicationToApp(int code, const int id)
 {
     EV_INFO << "Notifying app: " << indicationName(code) << "\n";
-    auto indication = new Indication(indicationName(code), code);
-    TcpCommand *ind = new TcpCommand();
-    ind->setUserId(id);
-    indication->addTag<SocketInd>()->setSocketId(socketId);
-    indication->setControlInfo(ind);
-    sendToApp(indication);
+    if (code == TCP_I_CONNECTION_RESET)
+        callback->handleFailure(id);
+    else if (code == TCP_I_CLOSED) {
+        // KLUDGE: this schedule call is here to keep the fingerprints
+        schedule("closed", simTime(), [=] () {
+            callback->handleClosed();
+        });
+    }
+    else if (code == TCP_I_PEER_CLOSED) {
+        // KLUDGE: this schedule call is here to keep the fingerprints
+        schedule("handlePeerClosed", simTime(), [=] () {
+            callback->handlePeerClosed();
+        });
+    }
+    else if (code == TCP_I_TIMED_OUT)
+        callback->handleFailure(0);
+    else
+        throw cRuntimeError("TODO");
 }
 
 void TcpConnection::sendAvailableIndicationToApp()
 {
+    EV_INFO << "BUG TcpConnection::sendAvailableIndicationToApp()" << EV_FIELD(listeningSocketId) << EV_FIELD(socketId) << EV_FIELD(callback) << EV_ENDL;
     EV_INFO << "Notifying app: " << indicationName(TCP_I_AVAILABLE) << "\n";
-    auto indication = new Indication(indicationName(TCP_I_AVAILABLE), TCP_I_AVAILABLE);
     TcpAvailableInfo *ind = new TcpAvailableInfo();
     ind->setNewSocketId(socketId);
     ind->setLocalAddr(localAddr);
@@ -369,15 +385,17 @@ void TcpConnection::sendAvailableIndicationToApp()
     ind->setRemotePort(remotePort);
     ind->setAutoRead(autoRead);
 
-    indication->addTag<SocketInd>()->setSocketId(listeningSocketId);
-    indication->setControlInfo(ind);
+    auto callback = tcpMain->findConnForApp(listeningSocketId)->callback;
     if (callback != nullptr)
         // NOTE: this 0s delay is required to avoid calling the application before TCP completes the processing for the received message
         schedule("available", simTime(), [=] () { callback->handleAvailable(ind); });
+    else
+        EV_INFO << "BUG No callback" << EV_ENDL;
 }
 
 void TcpConnection::sendEstabIndicationToApp()
 {
+    EV_INFO << "BUG TcpConnection::sendEstabIndicationToApp()" << EV_FIELD(listeningSocketId) << EV_FIELD(socketId) << EV_FIELD(callback) << EV_ENDL;
     EV_INFO << "Notifying app: " << indicationName(TCP_I_ESTABLISHED) << "\n";
     auto indication = new Indication(indicationName(TCP_I_ESTABLISHED), TCP_I_ESTABLISHED);
     TcpConnectInfo *ind = new TcpConnectInfo();
@@ -386,9 +404,17 @@ void TcpConnection::sendEstabIndicationToApp()
     ind->setLocalPort(localPort);
     ind->setRemotePort(remotePort);
     ind->setAutoRead(autoRead);
-    indication->addTag<SocketInd>()->setSocketId(socketId);
+    indication->addTag<SocketInd>()->setSocketId(listeningSocketId != -1 ? listeningSocketId : socketId);
     indication->setControlInfo(ind);
-    callback->handleEstablished();
+    if (callback != nullptr) {
+        ASSERT(socketId == check_and_cast<TcpSocket *>(callback)->getSocketId());
+        // NOTE: this 0s delay is required to avoid calling the application before TCP completes the processing for the received message
+        schedule("established", simTime(), [=] () {
+            Enter_Method("sendEstabIndicationToApp");
+            ASSERT(socketId == check_and_cast<TcpSocket *>(callback)->getSocketId());
+            callback->handleEstablished(indication);
+        });
+    }
 }
 
 void TcpConnection::sendToApp(cMessage *msg)
@@ -421,6 +447,8 @@ void TcpConnection::sendAvailableDataToApp()
 
 void TcpConnection::initConnection(TcpOpenCommand *openCmd)
 {
+    EV_INFO << "BUG TcpConnection::initConnection()" << EV_FIELD(listeningSocketId) << EV_FIELD(socketId) << EV_ENDL;
+
     // create send queue
     sendQueue = tcpMain->createSendQueue();
     sendQueue->setConnection(this);

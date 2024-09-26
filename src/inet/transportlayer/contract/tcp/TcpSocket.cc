@@ -18,11 +18,14 @@ TcpSocket::TcpSocket()
     // don't allow user-specified connIds because they may conflict with
     // automatically assigned ones.
     connId = getActiveSimulationOrEnvir()->getUniqueNumber();
+
+    EV_INFO << "BUG TcpSocket::TcpSocket()" << EV_FIELD(connId) << EV_ENDL;
 }
 
 TcpSocket::TcpSocket(cMessage *msg)
 {
     connId = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
+    EV_INFO << "BUG TcpSocket::TcpSocket(cMessage *msg)" << EV_FIELD(connId) << EV_FIELD(name, msg->getFullName()) << EV_ENDL;
     sockstate = CONNECTED;
 
     if (msg->getKind() == TCP_I_AVAILABLE) {
@@ -58,6 +61,7 @@ TcpSocket::TcpSocket(TcpAvailableInfo *availableInfo)
     localPrt = availableInfo->getLocalPort();
     remotePrt = availableInfo->getRemotePort();
     autoRead = availableInfo->getAutoRead();
+    EV_INFO << "BUG TcpSocket::TcpSocket(TcpAvailableInfo *)" << EV_FIELD(connId) << EV_ENDL;
 }
 
 TcpSocket::~TcpSocket()
@@ -71,6 +75,7 @@ TcpSocket::~TcpSocket()
 
 void TcpSocket::bind(int lPort)
 {
+    EV_INFO << "BUG TcpSocket::bind()" << EV_FIELD(connId) << EV_FIELD(lPort) << EV_ENDL;
     if (sockstate != NOT_BOUND)
         throw cRuntimeError("TcpSocket::bind(): socket already bound");
 
@@ -83,6 +88,7 @@ void TcpSocket::bind(int lPort)
 
 void TcpSocket::bind(L3Address lAddr, int lPort)
 {
+    EV_INFO << "BUG TcpSocket::bind()" << EV_FIELD(connId) << EV_FIELD(lAddr) << EV_FIELD(lPort) << EV_ENDL;
     if (sockstate != NOT_BOUND)
         throw cRuntimeError("TcpSocket::bind(): socket already bound");
 
@@ -97,6 +103,7 @@ void TcpSocket::bind(L3Address lAddr, int lPort)
 
 void TcpSocket::listen(bool fork)
 {
+    EV_INFO << "BUG TcpSocket::listen()" << EV_FIELD(connId) << EV_FIELD(fork) << EV_ENDL;
     if (sockstate != BOUND)
         throw cRuntimeError(sockstate == NOT_BOUND ? "TcpSocket: must call bind() before listen()"
                 : "TcpSocket::listen(): connect() or listen() already called");
@@ -108,18 +115,18 @@ void TcpSocket::listen(bool fork)
 
 void TcpSocket::accept(int socketId)
 {
+    EV_INFO << "BUG TcpSocket::accept()" << EV_FIELD(connId) << EV_FIELD(socketId) << EV_ENDL;
     tcp->accept(socketId);
 }
 
 void TcpSocket::connect(L3Address remoteAddress, int remotePort)
 {
+    EV_INFO << "BUG TcpSocket::connect()" << EV_FIELD(connId) << EV_FIELD(remoteAddress) << EV_FIELD(remotePort) << EV_ENDL;
     if (sockstate != NOT_BOUND && sockstate != BOUND)
         throw cRuntimeError("TcpSocket::connect(): connect() or listen() already called (need renewSocket()?)");
 
     if (remotePort < 0 || remotePort > 65535)
         throw cRuntimeError("TcpSocket::connect(): invalid remote port number %d", remotePort);
-
-    auto request = new Request("ActiveOPEN", TCP_C_OPEN_ACTIVE);
 
     remoteAddr = remoteAddress;
     remotePrt = remotePort;
@@ -140,7 +147,6 @@ void TcpSocket::read(int32_t numBytes)
 
     TcpReadCommand *readCmd = new TcpReadCommand();
     readCmd->setMaxByteCount(numBytes);
-
     request->setControlInfo(readCmd);
     sendToTcp(request);
 }
@@ -175,12 +181,8 @@ void TcpSocket::close()
 
 void TcpSocket::abort()
 {
-    if (sockstate != NOT_BOUND && sockstate != BOUND && sockstate != CLOSED && sockstate != SOCKERROR) {
-        auto request = new Request("ABORT", TCP_C_ABORT);
-        TcpCommand *cmd = new TcpCommand();
-        request->setControlInfo(cmd);
-        sendToTcp(request);
-    }
+    if (sockstate != NOT_BOUND && sockstate != BOUND && sockstate != CLOSED && sockstate != SOCKERROR)
+        tcp->abort(connId);
     sockstate = CLOSED;
 }
 
@@ -207,11 +209,7 @@ void TcpSocket::requestStatus()
 
 void TcpSocket::setTimeToLive(int ttl)
 {
-    auto request = new Request("setTTL", TCP_C_SETOPTION);
-    TcpSetTimeToLiveCommand *cmd = new TcpSetTimeToLiveCommand();
-    cmd->setTtl(ttl);
-    request->setControlInfo(cmd);
-    sendToTcp(request);
+    tcp->setTimeToLive(connId, ttl);
 }
 
 void TcpSocket::setDscp(short dscp)
@@ -278,6 +276,7 @@ bool TcpSocket::isOpen() const
 void TcpSocket::setCallback(ICallback *callback)
 {
     cb = callback;
+    EV_INFO << "BUG TcpSocket::setCallback()" << EV_FIELD(connId) << EV_FIELD(callback) << EV_ENDL;
 }
 
 void TcpSocket::processMessage(cMessage *msg)
@@ -325,7 +324,7 @@ void TcpSocket::processMessage(cMessage *msg)
             localPrt = connectInfo->getLocalPort();
             remotePrt = connectInfo->getRemotePort();
             if (cb)
-                cb->socketEstablished(this);
+                cb->socketEstablished(this, check_and_cast<Indication *>(msg));
             delete msg;
             break;
 

@@ -5,6 +5,7 @@
 //
 
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
@@ -52,8 +53,12 @@ void Tcp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
-        appSink.reference(gate("appOut"), true);
-        ipSink.reference(gate("ipOut"), true);
+        PacketServiceTag packetServiceTag;
+        packetServiceTag.setProtocol(&Protocol::tcp);
+        appSink.reference(gate("appOut"), false, &packetServiceTag);
+        PacketProtocolTag packetProtocolTag;
+        packetProtocolTag.setProtocol(&Protocol::tcp);
+        ipSink.reference(gate("ipOut"), true, &packetProtocolTag);
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
 
@@ -118,9 +123,16 @@ void Tcp::sendFromConn(cMessage *msg, const char *gatename, int gateindex)
     Enter_Method("sendFromConn");
     take(msg);
     if (!strcmp(gatename, "ipOut"))
-        ipSink.pushPacket(check_and_cast<Packet *>(msg));
-    else if (!strcmp(gatename, "appOut"))
-        appSink.pushPacket(check_and_cast<Packet *>(msg));
+        // KLUDGE: this schedule call is here to keep the fingerprints
+        schedule("SendToIp", simTime(), [=] () {
+            ipSink.pushPacket(check_and_cast<Packet *>(msg));
+        });
+    else if (!strcmp(gatename, "appOut")) {
+        // KLUDGE: this schedule call is here to keep the fingerprints
+        schedule("SendToApp", simTime(), [=] () {
+            appSink.pushPacket(check_and_cast<Packet *>(msg));
+        });
+    }
     else
         throw cRuntimeError("Unknown gate: %s", gatename);
 }
@@ -593,6 +605,7 @@ void Tcp::connect(int socketId, const L3Address &localAddr, int localPort, const
 
 void Tcp::accept(int socketId)
 {
+    EV_INFO << "BUG Tcp::accept()" << EV_FIELD(socketId) << EV_ENDL;
     // KLUDGE: temporarily use the same command mechanism internally, this should be replaced with method calls
     auto request = new Request("ACCEPT", TCP_C_ACCEPT);
     TcpAcceptCommand *acceptCmd = new TcpAcceptCommand();
@@ -608,6 +621,38 @@ void Tcp::close(int socketId)
     TcpCommand *closeCmd = new TcpCommand();
     request->setControlInfo(closeCmd);
     request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleUpperCommand(request);
+}
+
+void Tcp::abort(int socketId)
+{
+    auto request = new Request("ABORT", TCP_C_ABORT);
+    TcpCommand *cmd = new TcpCommand();
+    request->setControlInfo(cmd);
+    request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleUpperCommand(request);
+}
+
+void Tcp::setTimeToLive(int socketId, int ttl)
+{
+    // KLUDGE: temporarily use the same command mechanism internally, this should be replaced with method calls
+    auto request = new Request("setTTL", TCP_C_SETOPTION);
+    TcpSetTimeToLiveCommand *cmd = new TcpSetTimeToLiveCommand();
+    cmd->setTtl(ttl);
+    request->setControlInfo(cmd);
+    request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleUpperCommand(request);
+}
+
+void Tcp::setQueueLimits(int socketId, int packetCapacity, B dataCapacity)
+{
+    Enter_Method("setQueueLimits");
+    TcpCommand *queueInfo = new TcpCommand();
+    queueInfo->setUserId(dataCapacity.get()); // TODO this was copied from NetPerfMeter, seems wrong!
+
+    auto request = new Request("QueueRequest", TCP_C_QUEUE_BYTES_LIMIT);
+    request->setControlInfo(queueInfo);
+    request->addTag<SocketReq>()->setSocketId(socketId);
     handleUpperCommand(request);
 }
 

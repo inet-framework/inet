@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
@@ -106,6 +107,7 @@ void TcpConnection::initConnection(Tcp *_mod, int _socketId)
 
     tcpMain = _mod;
     socketId = _socketId;
+    ASSERT(callback == nullptr || socketId == check_and_cast<TcpSocket *>(callback)->getSocketId());
 
     fsm.setName(getName());
     fsm.setState(TCP_S_INIT);

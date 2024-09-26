@@ -176,7 +176,6 @@ class INET_API Tcp : public TransportProtocolBase, public ITcp, public IPassiveP
 
     // utility methods
     virtual TcpConnection *findConnForSegment(const Ptr<const TcpHeader>& tcpHeader, L3Address srcAddr, L3Address destAddr);
-    virtual TcpConnection *findConnForApp(int socketId);
     virtual void segmentArrivalWhileClosed(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address src, L3Address dest);
     virtual void refreshDisplay() const override;
 
@@ -187,6 +186,8 @@ class INET_API Tcp : public TransportProtocolBase, public ITcp, public IPassiveP
   public:
     Tcp() {}
     virtual ~Tcp();
+
+    virtual TcpConnection *findConnForApp(int socketId);
 
   protected:
     virtual void initialize(int stage) override;
@@ -251,6 +252,9 @@ class INET_API Tcp : public TransportProtocolBase, public ITcp, public IPassiveP
     virtual void connect(int socketId, const L3Address &localAddr, int localPort, const L3Address &remoteAddr, int remotePort, bool autoRead, std::string tcpAlgorithmClass) override;
     virtual void accept(int socketId) override;
     virtual void close(int socketId) override;
+    virtual void abort(int socketId) override;
+    virtual void setTimeToLive(int socketId, int ttl) override;
+    virtual void setQueueLimits(int socketId, int packetCapacity, B dataCapacity) override;
 
     virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }
     virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }

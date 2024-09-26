@@ -10,6 +10,7 @@
 #define __INET_TCPCONNECTION_H
 
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpConnectionState_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
@@ -363,7 +364,11 @@ class INET_API TcpConnection : public cSimpleModule
 
     int getTtl() const { return ttl; }
     int getSocketId() const { return socketId; }
-    void setSocketId(int newSocketId) { ASSERT(socketId == -1); socketId = newSocketId; }
+    void setSocketId(int newSocketId) {
+        ASSERT(socketId == -1);
+        socketId = newSocketId;
+        ASSERT(callback == nullptr || socketId == check_and_cast<TcpSocket *>(callback)->getSocketId());
+    }
     int getListeningSocketId() const { return listeningSocketId; }
 
     int getLocalPort() const { return localPort; }
@@ -481,7 +486,11 @@ class INET_API TcpConnection : public cSimpleModule
      */
     virtual bool isSendQueueEmpty();
 
-    virtual void setCallback(ITcp::ICallback *callback) { this->callback = callback; }
+    virtual void setCallback(ITcp::ICallback *callback) {
+        ASSERT(callback == nullptr || socketId == check_and_cast<TcpSocket *>(callback)->getSocketId());
+        this->callback = callback;
+        EV_INFO << "BUG TcpConnection::setCallback()" << EV_FIELD(listeningSocketId) << EV_FIELD(socketId) << EV_FIELD(callback) << EV_ENDL;
+    }
 
     friend class Tcp;
 };

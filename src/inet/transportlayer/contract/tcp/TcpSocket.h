@@ -147,7 +147,7 @@ class INET_API TcpSocket : public ISocket, public ITcp::ICallback
          */
         virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) = 0;
         virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) = 0;
-        virtual void socketEstablished(TcpSocket *socket) = 0;
+        virtual void socketEstablished(TcpSocket *socket, Indication *indication) = 0;
         virtual void socketPeerClosed(TcpSocket *socket) = 0;
         virtual void socketClosed(TcpSocket *socket) = 0;
         virtual void socketFailure(TcpSocket *socket, int code) = 0;
@@ -300,6 +300,8 @@ class INET_API TcpSocket : public ISocket, public ITcp::ICallback
         dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
         sink.reference(toTcp, true, &dispatchProtocolReq);
         tcp.reference(toTcp, true);
+        if (sockstate == CONNECTED)
+            tcp->setCallback(connId, this);
     }
 
     /**
@@ -322,6 +324,8 @@ class INET_API TcpSocket : public ISocket, public ITcp::ICallback
      * Sets the tcpAlgorithmClass parameter of the next connect() or listen() call.
      */
     void setTCPAlgorithmClass(const char *tcpAlgorithmClass) { this->tcpAlgorithmClass = tcpAlgorithmClass; }
+
+    void setQueueLimits(int packetCapacity, B dataCapacity) { tcp->setQueueLimits(connId, packetCapacity, dataCapacity); }
 
     /**
      * Initiates passive OPEN, creating a "forking" connection that will listen
@@ -490,12 +494,35 @@ class INET_API TcpSocket : public ISocket, public ITcp::ICallback
     void processMessage(cMessage *msg) override;
     //@}
 
-    virtual void handleEstablished() override {
-        cb->socketEstablished(this);
+    virtual void handleEstablished(Indication *indication) override {
+        EV_INFO << "BUG TcpSocket::handleEstablished()" << EV_FIELD(connId) << EV_ENDL;
+        processMessage(indication);
     }
 
     virtual void handleAvailable(TcpAvailableInfo *availableInfo) override {
-        cb->socketAvailable(this, availableInfo);
+        EV_INFO << "BUG TcpSocket::handleAvailable()" << EV_FIELD(connId) << EV_ENDL;
+        if (cb)
+            cb->socketAvailable(this, availableInfo);
+        else
+            accept(availableInfo->getNewSocketId());
+    }
+
+    virtual void handleClosed() override {
+        sockstate = CLOSED;
+        if (cb)
+            cb->socketClosed(this);
+    }
+
+    virtual void handlePeerClosed() override {
+        sockstate = PEER_CLOSED;
+        if (cb)
+            cb->socketPeerClosed(this);
+    }
+
+    virtual void handleFailure(int code) override {
+        sockstate = SOCKERROR;
+        if (cb)
+            cb->socketFailure(this, code);
     }
 };
 
