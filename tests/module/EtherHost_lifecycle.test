@@ -109,7 +109,6 @@ Doing stage 5/8 of operation inet::ModuleStartOperation on Test\.sender\[0\]
 Doing stage 6/8 of operation inet::ModuleStartOperation on Test\.sender\[0\]
 Starting application
 Test\.sender\[0\]\.srv registering DSAP 241
-Sending message, .*\(Request\).*LLC_OPEN.*\.
 Doing stage 7/8 of operation inet::ModuleStartOperation on Test\.sender\[0\]
 Test\.sender\[0\] started
 \*\* Event #\d+  t=
@@ -117,7 +116,6 @@ Test\.sender\[0\] started
 %contains-regex: stdout
 \*\* Event \#\d+  t=2   Test\.sender\[0\]\.cli \(EtherAppClient, id=\d+\)
 Test\.sender\[0\]\.cli registering DSAP 240
-Sending message, .*\(Request\).*LLC_OPEN.*\.
 Generating packet `req-\d+-1'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
@@ -178,9 +176,7 @@ processing <shutdown> command\.\.\.
 Doing stage 0/8 of operation inet::ModuleStopOperation on Test.sender\[0\]
 Test\.sender\[0\] shutting down
 Doing stage 1/8 of operation inet::ModuleStopOperation on Test\.sender\[0\]
-Sending message, .*\(Request\).*CLOSE.*\.
 Stop the application
-.*
 Doing stage 2/8 of operation inet::ModuleStopOperation on Test\.sender\[0\]
 Doing stage 3/8 of operation inet::ModuleStopOperation on Test\.sender\[0\]
 Doing stage 4/8 of operation inet::ModuleStopOperation on Test\.sender\[0\]
@@ -199,7 +195,6 @@ Generating packet `req-\d+-\d+'
 %contains-regex: stdout
 \*\* Event \#\d+  t=1\.1   Test\.sender\[1\]\.cli \(EtherAppClient, id=\d+\)
 Test\.sender\[1\]\.cli registering DSAP 240
-Sending message, .*\(Request\).*LLC_OPEN.*\.
 Generating packet `req-\d+-1'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
@@ -236,7 +231,6 @@ processing <shutdown> command\.\.\.
 Doing stage 0/8 of operation inet::ModuleStopOperation on Test.sender\[1\]
 Test\.sender\[1\] shutting down
 Doing stage 1/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
-Sending message, .*\(Request\).*CLOSE.*\.
 Stop the application
 .*
 Doing stage 2/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
@@ -264,7 +258,6 @@ Doing stage 5/8 of operation inet::ModuleStartOperation on Test\.sender\[1\]
 Doing stage 6/8 of operation inet::ModuleStartOperation on Test\.sender\[1\]
 Starting application
 Test\.sender\[1\]\.srv registering DSAP 241
-Sending message, .*\(Request\).*LLC_OPEN.*\.
 Doing stage 7/8 of operation inet::ModuleStartOperation on Test\.sender\[1\]
 Test.sender\[1\] started
 \*\* Event #\d+  t=
@@ -272,7 +265,6 @@ Test.sender\[1\] started
 %contains-regex: stdout
 \*\* Event \#\d+  t=6\.1   Test\.sender\[1\]\.cli \(EtherAppClient, id=\d+\)
 Test\.sender\[1\]\.cli registering DSAP 240
-Sending message, .*\(Request\).*LLC_OPEN.*\.
 Generating packet `req-\d+-9'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
@@ -301,9 +293,7 @@ processing <shutdown> command\.\.\.
 Doing stage 0/8 of operation inet::ModuleStopOperation on Test.sender\[1\]
 Test\.sender\[1\] shutting down
 Doing stage 1/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
-Sending message, .*\(Request\).*CLOSE.*\.
 Stop the application
-.*
 Doing stage 2/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
 Doing stage 3/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
 Doing stage 4/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
@@ -328,7 +318,6 @@ Doing stage 5/8 of operation inet::ModuleStartOperation on Test\.recip
 Doing stage 6/8 of operation inet::ModuleStartOperation on Test\.recip
 Starting application
 Test\.recip\.srv registering DSAP 241
-Sending message, .*\(Request\).*LLC_OPEN.*\.
 Doing stage 7/8 of operation inet::ModuleStartOperation on Test\.recip
 Test\.recip started
 \*\* Event #\d+  t=
@@ -339,9 +328,7 @@ processing <shutdown> command\.\.\.
 Doing stage 0/8 of operation inet::ModuleStopOperation on Test.recip
 Test\.recip shutting down
 Doing stage 1/8 of operation inet::ModuleStopOperation on Test\.recip
-Sending message, .*\(Request\).*CLOSE.*\.
 Stop the application
-.*
 Doing stage 2/8 of operation inet::ModuleStopOperation on Test\.recip
 Doing stage 3/8 of operation inet::ModuleStopOperation on Test\.recip
 Doing stage 4/8 of operation inet::ModuleStopOperation on Test\.recip
@@ -365,7 +352,6 @@ Doing stage 5/8 of operation inet::ModuleStartOperation on Test\.recip
 Doing stage 6/8 of operation inet::ModuleStartOperation on Test\.recip
 Starting application
 Test\.recip\.srv registering DSAP 241
-Sending message, .*\(Request\).*LLC_OPEN.*\.
 Doing stage 7/8 of operation inet::ModuleStartOperation on Test\.recip
 Test\.recip started
 \*\* Event #\d+  t=

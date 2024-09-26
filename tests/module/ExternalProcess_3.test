@@ -37,7 +37,7 @@ PING localhost.*?
 64 bytes .*? icmp_seq=1 ttl=64 time=.*? ms
 \*\* Event #2  t=1   TestNetwork.externalProcess\[1\] \(ExternalProcess, id=3\)
 Starting process: killall ping
-
+[\.\n]*
 <!> External process finished -- in module \(inet::ExternalProcess\) TestNetwork.externalProcess\[0\] \(id=2\), at t=.*?, event #2
 
 %#--------------------------------------------------------------------------------------------------------------

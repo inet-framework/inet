@@ -42,6 +42,8 @@ cmdenv-event-banners = false
 *.transmitter.datarate = 1Mbps
 *.receiver.datarate = 1Mbps
 
+%subst: /\nRunning simulation\.\.\.\n//
+
 %contains-regex: stdout
 Producing packet, .*?source-0.*?
 Calculating signal duration, .*?source-0.*?

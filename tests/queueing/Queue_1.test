@@ -46,38 +46,38 @@ cmdenv-log-prefix = "At %ts %N: "
 
 %contains-regex: stdout
 At 0s producer: Producing packet, .*?producer-0.*?
-At 0s queue: Pushing packet, .*?producer-0.*?
-At 0s queue: Pulling packet, .*?producer-0.*?
+At 0s queue: Enqueuing packet, .*?producer-0.*?
+At 0s queue: Dequeuing packet, .*?producer-0.*?
 At 0s collector: Collecting packet, .*?producer-0.*?
 At 1.097627004609s producer: Producing packet, .*?producer-1.*?
-At 1.097627004609s queue: Pushing packet, .*?producer-1.*?
-At 1.185689232778s queue: Pulling packet, .*?producer-1.*?
+At 1.097627004609s queue: Enqueuing packet, .*?producer-1.*?
+At 1.185689232778s queue: Dequeuing packet, .*?producer-1.*?
 At 1.185689232778s collector: Collecting packet, .*?producer-1.*?
 At 2.528005734552s producer: Producing packet, .*?producer-2.*?
-At 2.528005734552s queue: Pushing packet, .*?producer-2.*?
-At 2.874220720958s queue: Pulling packet, .*?producer-2.*?
+At 2.528005734552s queue: Enqueuing packet, .*?producer-2.*?
+At 2.874220720958s queue: Dequeuing packet, .*?producer-2.*?
 At 2.874220720958s collector: Collecting packet, .*?producer-2.*?
 At 3.733532475308s producer: Producing packet, .*?producer-3.*?
-At 3.733532475308s queue: Pushing packet, .*?producer-3.*?
-At 4.590111960657s queue: Pulling packet, .*?producer-3.*?
+At 3.733532475308s queue: Enqueuing packet, .*?producer-3.*?
+At 4.590111960657s queue: Dequeuing packet, .*?producer-3.*?
 At 4.590111960657s collector: Collecting packet, .*?producer-3.*?
 At 4.823298830074s producer: Producing packet, .*?producer-4.*?
-At 4.823298830074s queue: Pushing packet, .*?producer-4.*?
+At 4.823298830074s queue: Enqueuing packet, .*?producer-4.*?
 At 5.670608423651s producer: Producing packet, .*?producer-5.*?
-At 5.670608423651s queue: Pushing packet, .*?producer-5.*?
-At 6.284615435172s queue: Pulling packet, .*?producer-4.*?
+At 5.670608423651s queue: Enqueuing packet, .*?producer-5.*?
+At 6.284615435172s queue: Dequeuing packet, .*?producer-4.*?
 At 6.284615435172s collector: Collecting packet, .*?producer-4.*?
 At 6.917735816446s producer: Producing packet, .*?producer-6.*?
-At 6.917735816446s queue: Pushing packet, .*?producer-6.*?
-At 7.576403665356s queue: Pulling packet, .*?producer-5.*?
+At 6.917735816446s queue: Enqueuing packet, .*?producer-6.*?
+At 7.576403665356s queue: Dequeuing packet, .*?producer-5.*?
 At 7.576403665356s collector: Collecting packet, .*?producer-5.*?
 At 7.686499232893s producer: Producing packet, .*?producer-7.*?
-At 7.686499232893s queue: Pushing packet, .*?producer-7.*?
+At 7.686499232893s queue: Enqueuing packet, .*?producer-7.*?
 At 8.281568443404s producer: Producing packet, .*?producer-8.*?
-At 8.281568443404s queue: Pushing packet, .*?producer-8.*?
-At 8.45157808531s queue: Pulling packet, .*?producer-6.*?
+At 8.281568443404s queue: Enqueuing packet, .*?producer-8.*?
+At 8.45157808531s queue: Dequeuing packet, .*?producer-6.*?
 At 8.45157808531s collector: Collecting packet, .*?producer-6.*?
-At 8.565004036761s queue: Pulling packet, .*?producer-7.*?
+At 8.565004036761s queue: Dequeuing packet, .*?producer-7.*?
 At 8.565004036761s collector: Collecting packet, .*?producer-7.*?
 
 <!> Simulation time limit reached -- at t=10s

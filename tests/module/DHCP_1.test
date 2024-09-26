@@ -72,27 +72,27 @@ network = DhcpExample
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available. Assigning it to cli\[0\].
-.*
+.*?
 The requested IP 192\.168\.1\.101/255\.255\.255\.0 is available. Assigning it to cli\[1\].
-.*
+.*?
 The requested IP 192\.168\.1\.102/255\.255\.255\.0 is available. Assigning it to cli\[2\].
-.*
+.*?
 The requested IP 192\.168\.1\.103/255\.255\.255\.0 is available. Assigning it to cli\[3\].
-.*
+.*?
 The requested IP 192\.168\.1\.104/255\.255\.255\.0 is available. Assigning it to cli\[4\].
-.*
+.*?
 The requested IP 192\.168\.1\.105/255\.255\.255\.0 is available. Assigning it to cli\[5\].
-.*
+.*?
 The requested IP 192\.168\.1\.106/255\.255\.255\.0 is available. Assigning it to cli\[6\].
-.*
+.*?
 The requested IP 192\.168\.1\.107/255\.255\.255\.0 is available. Assigning it to cli\[7\].
-.*
+.*?
 The requested IP 192\.168\.1\.108/255\.255\.255\.0 is available. Assigning it to cli\[8\].
-.*
+.*?
 The requested IP 192\.168\.1\.109/255\.255\.255\.0 is available. Assigning it to cli\[9\].
-.*
+.*?
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out
