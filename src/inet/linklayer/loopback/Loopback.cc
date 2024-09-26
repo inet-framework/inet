@@ -64,7 +64,7 @@ void Loopback::handleUpperPacket(Packet *packet)
     packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
     packet->addTag<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     emit(packetSentToUpperSignal, packet);
-    send(packet, upperLayerOutGateId);
+    upperLayerSink.pushPacket(packet);
 }
 
 void Loopback::refreshDisplay() const
@@ -79,6 +79,19 @@ void Loopback::refreshDisplay() const
     sprintf(buf, "rcv:%ld snt:%ld", numRcvdOK, numSent);
 
     getDisplayString().setTagArg("t", 0, buf);
+}
+
+cGate *Loopback::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("upperLayerIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            if (arguments == nullptr)
+                return gate;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace inet

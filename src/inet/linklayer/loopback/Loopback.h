@@ -8,16 +8,20 @@
 #ifndef __INET_LOOPBACK_H
 #define __INET_LOOPBACK_H
 
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 class NetworkInterface;
 
 /**
  * Loopback interface implementation.
  */
-class INET_API Loopback : public MacProtocolBase
+class INET_API Loopback : public MacProtocolBase, public IModuleInterfaceLookup
 {
   protected:
     // statistics
@@ -30,6 +34,8 @@ class INET_API Loopback : public MacProtocolBase
   public:
     Loopback() {}
     virtual ~Loopback();
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
