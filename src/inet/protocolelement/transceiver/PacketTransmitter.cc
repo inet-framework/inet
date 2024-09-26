@@ -62,20 +62,21 @@ void PacketTransmitter::endTx()
 {
     // 1. check current state
     ASSERT(isTransmitting());
-    // 2. notify subscribers
-    emit(transmissionEndedSignal, txSignal);
-    auto packet = check_and_cast<Packet *>(txSignal->decapsulate());
-    handlePacketProcessed(packet);
-    // 3. clear internal state
-    delete txSignal;
+    // 2. clear internal state
+    auto signal = txSignal;
     txSignal = nullptr;
     txStartTime = -1;
     txStartClockTime = -1;
+    // 3. notify subscribers
+    emit(transmissionEndedSignal, signal);
+    auto packet = check_and_cast<Packet *>(signal->decapsulate());
+    handlePacketProcessed(packet);
     // 4. notify producer
     if (producer != nullptr) {
         producer.handlePushPacketProcessed(packet, true);
         producer.handleCanPushPacketChanged();
     }
+    delete signal;
     delete packet;
 }
 
