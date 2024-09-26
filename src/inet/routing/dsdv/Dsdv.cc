@@ -16,6 +16,7 @@
 
 #include "inet/routing/dsdv/Dsdv.h"
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -55,6 +56,7 @@ void Dsdv::initialize(int stage)
         host = getContainingNode(this);
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
+        ipSink.reference(gate("ipOut"), true);
 
         routeLifetime = par("routeLifetime").doubleValue();
         helloInterval = par("helloInterval");
@@ -171,7 +173,7 @@ void Dsdv::handleSelfMessage(cMessage *msg)
         packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
 
         // broadcast to other nodes the hello message
-        send(packet, "ipOut");
+        ipSink.pushPacket(packet);
         packet = nullptr;
         hello = nullptr;
 
@@ -187,7 +189,7 @@ void Dsdv::handleSelfMessage(cMessage *msg)
         for (auto it = forwardList->begin(); it != forwardList->end(); it++) {
             if ((*it)->event == msg) {
                 EV << "Vou mandar forward do " << (*it)->hello->peekData<DsdvHello>()->getSrcAddress() << endl; // todo
-                send((*it)->hello, "ipOut");
+                ipSink.pushPacket((*it)->hello);
                 (*it)->hello = nullptr;
                 delete *it;
                 forwardList->erase(it);
@@ -300,7 +302,7 @@ void Dsdv::handleMessageWhenUp(cMessage *msg)
 //                    waitTime= SIMTIME_DBL (simTime())+waitTime;
                     EV_DETAIL << "waitime for forward is " << waitTime << " And host is " << source << "\n"; // FIXME unchanged waitTime showed twice!!!
                     packet->insertAtBack(recHello);
-                    sendDelayed(packet, waitTime, "ipOut");
+                    schedule("delay", simTime() + waitTime, [=] () { ipSink.pushPacket(packet); });
                     packet = nullptr;
                 }
                 else {
@@ -354,6 +356,14 @@ void Dsdv::purge()
         else
             i++;
     }
+}
+
+void Dsdv::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
 }
 
 } // namespace inet

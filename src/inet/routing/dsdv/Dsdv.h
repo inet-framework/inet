@@ -31,15 +31,18 @@
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/dsdv/DsdvHello_m.h"
 
 namespace inet {
 
+using namespace inet::queueing;
+
 /**
  * DSDV protocol implementation.
  */
-class INET_API Dsdv : public RoutingProtocolBase
+class INET_API Dsdv : public RoutingProtocolBase, public IPassivePacketSink
 {
   private:
     struct ForwardEntry {
@@ -65,10 +68,18 @@ class INET_API Dsdv : public RoutingProtocolBase
     simtime_t helloInterval;
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<IIpv4RoutingTable> rt;
+    PassivePacketSinkRef ipSink;
 
   public:
     Dsdv();
     ~Dsdv();
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("ipIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("ipIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
