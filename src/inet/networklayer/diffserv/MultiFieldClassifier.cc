@@ -147,6 +147,8 @@ void MultiFieldClassifier::initialize(int stage)
 
 void MultiFieldClassifier::pushPacket(Packet *packet, const cGate *inputGate)
 {
+    Enter_Method("pushPacket");
+    take(packet);
     numRcvd++;
     int gateIndex = classifyPacket(packet);
     emit(pkClassSignal, gateIndex);
