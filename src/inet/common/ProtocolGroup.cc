@@ -246,5 +246,27 @@ ProtocolGroup *ProtocolGroup::getIeee80211LlcProtocolGroup()
     return &getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, "ieee80211Llc", ieee80211LlcProtocols);
 }
 
+ProtocolGroup *ProtocolGroup::findProtocolGroup(const char *name)
+{
+    if (!strcmp(name, "ethertype"))
+        return getEthertypeProtocolGroup();
+    else if (!strcmp(name, "ieee8022"))
+        return getIeee8022ProtocolGroup();
+    else if (!strcmp(name, "ip"))
+        return getIpProtocolGroup();
+    else if (!strcmp(name, "ppp"))
+        return getPppProtocolGroup();
+    else if (!strcmp(name, "snapOui"))
+        return getSnapOuiProtocolGroup();
+    else if (!strcmp(name, "tcp"))
+        return getTcpProtocolGroup();
+    else if (!strcmp(name, "udp"))
+        return getUdpProtocolGroup();
+    else if (!strcmp(name, "ieee80211Llc"))
+        return getIeee80211LlcProtocolGroup();
+    else
+        throw cRuntimeError("Cannot find protocol group: %s", name);
+}
+
 } // namespace inet
 

@@ -48,6 +48,8 @@ class INET_API ProtocolGroup
     static ProtocolGroup *getTcpProtocolGroup();
     static ProtocolGroup *getUdpProtocolGroup();
     static ProtocolGroup *getIeee80211LlcProtocolGroup();
+
+    static ProtocolGroup *findProtocolGroup(const char *name);
 };
 
 inline std::ostream& operator<<(std::ostream& o, const ProtocolGroup& t) { o << t.str(); return o; }
