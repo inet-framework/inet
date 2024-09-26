@@ -44,7 +44,6 @@ module EthernetStreamingMacLayer like IEthernetMacLayer
             @display("p=200,300");
         }
         fcsChecker: <default("EthernetFcsChecker")> like IPacketFilter {
-            popFcs = default(false);
             @display("p=500,200");
         }
         inboundEmitter: <default("PacketEmitter")> like IPacketFlow {

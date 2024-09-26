@@ -50,7 +50,7 @@ module EthernetLayer like IEthernetLayer
         macHeaderChecker: <default("EthernetMacHeaderChecker")> like IProtocolHeaderChecker {
             @display("p=600,200");
         }
-        fcsChecker: <default("EthernetFcsChecker")> like IPacketFilter {
+        fcsChecker: <default("EthernetFcsRemover")> like IPacketFilter {
             @display("p=600,400");
         }
     connections:
