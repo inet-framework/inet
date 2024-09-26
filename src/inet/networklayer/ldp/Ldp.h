@@ -194,7 +194,7 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     //@{
     virtual void socketDataArrived(TcpSocket *socket) override;
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;
-    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketEstablished(TcpSocket *socket, Indication *indication) override;
     virtual void socketPeerClosed(TcpSocket *socket) override;
     virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override;
