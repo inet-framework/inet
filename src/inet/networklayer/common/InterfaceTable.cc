@@ -517,20 +517,10 @@ void InterfaceTable::handleStartOperation(LifecycleOperation *operation)
 
 void InterfaceTable::handleStopOperation(LifecycleOperation *operation)
 {
-    resetInterfaces();
 }
 
 void InterfaceTable::handleCrashOperation(LifecycleOperation *operation)
 {
-    resetInterfaces();
-}
-
-void InterfaceTable::resetInterfaces()
-{
-    int n = idToInterface.size();
-    for (int i = 0; i < n; i++)
-        if (idToInterface[i])
-            idToInterface[i]->resetInterface();
 }
 
 MulticastGroupList InterfaceTable::collectMulticastGroups() const

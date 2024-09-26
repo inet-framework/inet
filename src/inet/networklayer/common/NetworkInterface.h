@@ -178,7 +178,6 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
   public:
     // internal: to be invoked from InterfaceTable only!
     virtual void setInterfaceId(int id) { interfaceId = id; }
-    virtual void resetInterface();
 
   protected:
     virtual std::string getFullPath() const override { return cModule::getFullPath(); }
