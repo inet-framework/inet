@@ -19,3 +19,13 @@ simple EthernetFcsChecker extends PacketFilterBase like IPacketFilter
     gates:
         in @interface[inet::queueing::IPassivePacketSink](protocol=ethernetmac; service=indication) @interface[inet::queueing::IActivePacketSink](protocol=ethernetmac; service=indication);
 }
+
+simple EthernetFcsRemover extends PacketFilterBase like IPacketFilter
+{
+    parameters:
+        bool popFcs = true;
+        @class(EthernetFcsChecker);
+        @display("i=block/checker");
+    gates:
+        in @interface[inet::queueing::IPassivePacketSink](pdu=ethernetmac) @interface[inet::queueing::IActivePacketSink](pdu=ethernetmac);
+}
