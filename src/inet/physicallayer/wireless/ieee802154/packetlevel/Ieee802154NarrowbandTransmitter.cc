@@ -8,7 +8,6 @@
 #include "inet/physicallayer/wireless/ieee802154/packetlevel/Ieee802154NarrowbandTransmitter.h"
 
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/wireless/ieee802154/packetlevel/Ieee802154Transmission.h"
 
 namespace inet {
