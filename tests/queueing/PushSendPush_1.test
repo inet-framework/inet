@@ -6,7 +6,6 @@ and finally they are pushed again synchronously.
 %file: test.ned
 
 import inet.queueing.common.PacketPushToSend;
-import inet.queueing.common.PacketDelayer;
 import inet.queueing.common.PacketSendToPush;
 import inet.queueing.sink.PassivePacketSink;
 import inet.queueing.source.ActivePacketSource;
@@ -20,9 +19,6 @@ network TestPushSendPush
         pushToSend: PacketPushToSend {
             @display("p=200,100");
         }
-        delayer: PacketDelayer {
-            @display("p=300,100");
-        }
         sendToPush: PacketSendToPush {
             @display("p=400,100");
         }
@@ -31,8 +27,7 @@ network TestPushSendPush
         }
     connections allowunconnected:
         producer.out --> pushToSend.in;
-        pushToSend.out --> delayer.in;
-        delayer.out --> sendToPush.in;
+        pushToSend.out --> sendToPush.in;
         sendToPush.out --> consumer.in;
 }
 
@@ -45,7 +40,6 @@ cmdenv-event-banners = false
 cmdenv-log-prefix = "At %ts %N: "
 *.producer.packetLength = 100B
 *.producer.productionInterval = 1s
-*.delayer.delay = 1s
 
 %# remove formatting
 %subst: /\x1B\[[0-9;]*m//
@@ -54,36 +48,26 @@ cmdenv-log-prefix = "At %ts %N: "
 
 %contains-regex: stdout
 At 0s producer: Producing packet, .*?producer-0.*?
-At 0s delayer: Delaying packet, .*?producer-0.*?
+At 0s consumer: Consuming packet, .*?producer-0.*?
 At 1s producer: Producing packet, .*?producer-1.*?
-At 1s delayer: Delaying packet, .*?producer-1.*?
-At 1s consumer: Consuming packet, .*?producer-0.*?
+At 1s consumer: Consuming packet, .*?producer-1.*?
 At 2s producer: Producing packet, .*?producer-2.*?
-At 2s delayer: Delaying packet, .*?producer-2.*?
-At 2s consumer: Consuming packet, .*?producer-1.*?
+At 2s consumer: Consuming packet, .*?producer-2.*?
 At 3s producer: Producing packet, .*?producer-3.*?
-At 3s delayer: Delaying packet, .*?producer-3.*?
-At 3s consumer: Consuming packet, .*?producer-2.*?
+At 3s consumer: Consuming packet, .*?producer-3.*?
 At 4s producer: Producing packet, .*?producer-4.*?
-At 4s delayer: Delaying packet, .*?producer-4.*?
-At 4s consumer: Consuming packet, .*?producer-3.*?
+At 4s consumer: Consuming packet, .*?producer-4.*?
 At 5s producer: Producing packet, .*?producer-5.*?
-At 5s delayer: Delaying packet, .*?producer-5.*?
-At 5s consumer: Consuming packet, .*?producer-4.*?
+At 5s consumer: Consuming packet, .*?producer-5.*?
 At 6s producer: Producing packet, .*?producer-6.*?
-At 6s delayer: Delaying packet, .*?producer-6.*?
-At 6s consumer: Consuming packet, .*?producer-5.*?
+At 6s consumer: Consuming packet, .*?producer-6.*?
 At 7s producer: Producing packet, .*?producer-7.*?
-At 7s delayer: Delaying packet, .*?producer-7.*?
-At 7s consumer: Consuming packet, .*?producer-6.*?
+At 7s consumer: Consuming packet, .*?producer-7.*?
 At 8s producer: Producing packet, .*?producer-8.*?
-At 8s delayer: Delaying packet, .*?producer-8.*?
-At 8s consumer: Consuming packet, .*?producer-7.*?
+At 8s consumer: Consuming packet, .*?producer-8.*?
 At 9s producer: Producing packet, .*?producer-9.*?
-At 9s delayer: Delaying packet, .*?producer-9.*?
-At 9s consumer: Consuming packet, .*?producer-8.*?
+At 9s consumer: Consuming packet, .*?producer-9.*?
 At 10s producer: Producing packet, .*?producer-10.*?
-At 10s delayer: Delaying packet, .*?producer-10.*?
-At 10s consumer: Consuming packet, .*?producer-9.*?
+At 10s consumer: Consuming packet, .*?producer-10.*?
 
 <!> Simulation time limit reached -- at t=10s
