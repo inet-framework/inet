@@ -27,6 +27,12 @@ void PimSplitter::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         ift.reference(this, "interfaceTableModule", true);
         pimIft.reference(this, "pimInterfaceTableModule", true);
+        ipSink.reference(gate("ipOut"), true);
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(&Protocol::pim);
+        dispatchProtocolReq.setServicePrimitive(SP_INDICATION);
+        pimDMSink.reference(gate("pimDMOut"), true, &dispatchProtocolReq);
+        pimSMSink.reference(gate("pimSMOut"), true, &dispatchProtocolReq);
 
         ipIn = gate("ipIn");
         ipOut = gate("ipOut");
@@ -57,8 +63,9 @@ void PimSplitter::handleMessage(cMessage *msg)
     else if (arrivalGate == pimSMIn || arrivalGate == pimDMIn) {
         // Send other packets to the network layer
         EV_INFO << "Received packet from PIM module, sending it to the network." << endl;
-        check_and_cast<Packet *>(msg)->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-        send(msg, ipOut);
+        auto packet = check_and_cast<Packet *>(msg);
+        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+        ipSink.pushPacket(packet);
     }
     else
         throw cRuntimeError("PimSplitter: received packet on the unknown gate: %s.", arrivalGate ? arrivalGate->getBaseName() : "nullptr");
@@ -83,17 +90,25 @@ void PimSplitter::processPIMPacket(Packet *pkt)
     switch (pimInt->getMode()) {
         case PimInterface::DenseMode:
             EV_INFO << "Sending packet to PimDm.\n";
-            send(pkt, pimDMOut);
+            pimDMSink.pushPacket(pkt);
             break;
 
         case PimInterface::SparseMode:
             EV_INFO << "Sending packet to PimSm.\n";
-            send(pkt, pimSMOut);
+            pimSMSink.pushPacket(pkt);
             break;
 
         default:
             throw cRuntimeError("PimSplitter: PIM mode of interface '%s' is invalid.", ie->getInterfaceName());
     }
+}
+
+void PimSplitter::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
 }
 
 } // namespace inet

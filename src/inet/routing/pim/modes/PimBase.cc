@@ -42,6 +42,7 @@ void PimBase::initialize(int stage)
         rt.reference(this, "routingTableModule", true);
         pimIft.reference(this, "pimInterfaceTableModule", true);
         pimNbt.reference(this, "pimNeighborTableModule", true);
+        ipSink.reference(gate("ipOut"), true);
 
         cModule *host = findContainingNode(this);
         if (!host)
@@ -146,7 +147,7 @@ void PimBase::sendHelloPacket(PimInterface *pimInterface)
 
     emit(sentHelloPkSignal, pk);
 
-    send(pk, "ipOut");
+    ipSink.pushPacket(pk);
 }
 
 void PimBase::processHelloPacket(Packet *packet)
@@ -227,6 +228,13 @@ bool PimBase::AssertMetric::operator<(const AssertMetric& other) const
     if (metric != other.metric)
         return metric < other.metric;
     return address > other.address;
+}
+
+void PimBase::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 std::ostream& operator<<(std::ostream& out, const PimBase::SourceAndGroup& sourceGroup)

@@ -13,6 +13,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/pim/Pim.h"
 #include "inet/routing/pim/PimPacket_m.h"
@@ -21,10 +22,12 @@
 
 namespace inet {
 
+using namespace inet::queueing;
+
 /**
  * Base class of PimSm and PimDm modules.
  */
-class INET_API PimBase : public RoutingProtocolBase
+class INET_API PimBase : public RoutingProtocolBase, public IPassivePacketSink
 {
   protected:
 
@@ -147,6 +150,7 @@ class INET_API PimBase : public RoutingProtocolBase
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<PimInterfaceTable> pimIft;
     ModuleRefByPar<PimNeighborTable> pimNbt;
+    PassivePacketSinkRef ipSink;
     opp_component_ptr<Pim> pimModule;
 
     bool isUp = false;
@@ -169,6 +173,13 @@ class INET_API PimBase : public RoutingProtocolBase
   public:
     PimBase(PimInterface::PimMode mode) : mode(mode) {}
     virtual ~PimBase();
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("ipIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("ipIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
