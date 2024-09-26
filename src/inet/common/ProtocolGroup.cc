@@ -200,5 +200,25 @@ ProtocolGroup *ProtocolGroup::getUdpProtocolGroup()
     return &getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, "udp", udpProtocols);
 }
 
+ProtocolGroup *ProtocolGroup::findProtocolGroup(const char *name)
+{
+    if (!strcmp(name, "ethertype"))
+        return getEthertypeProtocolGroup();
+    else if (!strcmp(name, "ieee8022"))
+        return getIeee8022ProtocolGroup();
+    else if (!strcmp(name, "ip"))
+        return getIpProtocolGroup();
+    else if (!strcmp(name, "ppp"))
+        return getPppProtocolGroup();
+    else if (!strcmp(name, "snapOui"))
+        return getSnapOuiProtocolGroup();
+    else if (!strcmp(name, "tcp"))
+        return getTcpProtocolGroup();
+    else if (!strcmp(name, "udp"))
+        return getUdpProtocolGroup();
+    else
+        throw cRuntimeError("Cannot find protocol group: %s", name);
+}
+
 } // namespace inet
 
