@@ -10,13 +10,13 @@ package inet.linklayer.ethernet.modular;
 import inet.protocolelement.checksum.base.ChecksumCheckerBase;
 import inet.queueing.contract.IPacketFilter;
 
-simple EthernetFcsChecker extends ChecksumCheckerBase like IPacketFilter
+simple EthernetFcsRemover extends ChecksumCheckerBase like IPacketFilter
 {
     parameters:
         checksumType = "ethernet-fcs";
-        bool popFcs = false;
+        bool popFcs = true;
         @class(EthernetFcsChecker);
         @display("i=block/checker");
     gates:
-        in @interface[inet::queueing::IPassivePacketSink](protocol=ethernetmac; service=indication) @interface[inet::queueing::IActivePacketSink](protocol=ethernetmac; service=indication);
+        in @interface[inet::queueing::IPassivePacketSink](pdu=ethernetmac) @interface[inet::queueing::IActivePacketSink](pdu=ethernetmac);
 }
