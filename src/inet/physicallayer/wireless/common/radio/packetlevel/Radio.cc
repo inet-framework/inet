@@ -252,18 +252,6 @@ void Radio::handleReceptionTimer(cMessage *message)
         throw cRuntimeError("Unknown self message");
 }
 
-void Radio::handleUpperCommand(cMessage *message)
-{
-    if (message->getKind() == RADIO_C_CONFIGURE) {
-        ConfigureRadioCommand *configureCommand = check_and_cast<ConfigureRadioCommand *>(message->getControlInfo());
-        if (configureCommand->getRadioMode() != -1)
-            setRadioMode((RadioMode)configureCommand->getRadioMode());
-        delete message;
-    }
-    else
-        throw cRuntimeError("Unsupported command");
-}
-
 void Radio::handleLowerCommand(cMessage *message)
 {
     throw cRuntimeError("Unsupported command");
