@@ -461,7 +461,6 @@ void XMac::handleStateEvent(cMessage *msg)
 
                 if ((dest == address) || dest.isBroadcast() || dest.isMulticast()) {
                     decapsulate(packet);
-                    sendUp(packet);
                     nbRxDataPackets++;
                     cancelEvent(data_timeout);
 
@@ -474,6 +473,7 @@ void XMac::handleStateEvent(cMessage *msg)
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                     changeDisplayColor(BLACK);
 
+                    sendUp(packet);
                 }
                 else {
                     delete msg;
