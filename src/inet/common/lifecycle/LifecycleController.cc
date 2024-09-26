@@ -82,6 +82,8 @@ void LifecycleController::doOneStage(LifecycleOperation *operation, cModule *sub
             callback->init(this, operation, submodule);
             operation->pendingList.push_back(callback);
             spareCallback = nullptr;
+            EV << "Waiting for stage completion " << operation->currentStage << "/" << operation->getNumStages() << " in " << submodule->getFullPath()
+               << " of operation " << operation->getClassName() << " on " << operation->rootModule->getFullPath() << endl;
         }
         else
             spareCallback = callback;
