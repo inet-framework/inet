@@ -39,14 +39,14 @@ Define_Module(ExampleQosClassifier);
 
 void ExampleQosClassifier::initialize()
 {
-    // TODO parameters
+    outSink.reference(gate("out"), true);
 }
 
 void ExampleQosClassifier::handleMessage(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     packet->addTagIfAbsent<UserPriorityReq>()->setUserPriority(getUserPriority(msg));
-    send(msg, "out");
+    outSink.pushPacket(packet);
 }
 
 int ExampleQosClassifier::getUserPriority(cMessage *msg)
@@ -129,6 +129,13 @@ int ExampleQosClassifier::getUserPriority(cMessage *msg)
 #endif
 
     return UP_BE;
+}
+
+void ExampleQosClassifier::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace inet

@@ -39,6 +39,7 @@ Define_Module(QosClassifier);
 void QosClassifier::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
+        outSink.reference(gate("out"), true);
         defaultUp = parseUserPriority(par("defaultUp"));
         parseUserPriorityMap(par("ipProtocolUpMap"), ipProtocolUpMap);
         parseUserPriorityMap(par("udpPortUpMap"), udpPortUpMap);
@@ -50,7 +51,7 @@ void QosClassifier::handleMessage(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     packet->addTagIfAbsent<UserPriorityReq>()->setUserPriority(getUserPriority(msg));
-    send(msg, "out");
+    outSink.pushPacket(packet);
 }
 
 int QosClassifier::parseUserPriority(const char *text)
@@ -161,6 +162,13 @@ int QosClassifier::getUserPriority(cMessage *msg)
 #endif
 
     return defaultUp;
+}
+
+void QosClassifier::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace inet
