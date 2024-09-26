@@ -65,21 +65,23 @@ void StreamingTransmitter::endTx()
 {
     // 1. check current state
     ASSERT(isTransmitting());
-    // 2. send signal end to receiver and notify subscribers
+    // 2. send signal end to receiver
     auto packet = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
     EV_INFO << "Ending transmission" << EV_FIELD(packet) << EV_FIELD(txDatarate) << EV_ENDL;
     handlePacketProcessed(packet);
-    emit(transmissionEndedSignal, txSignal);
     sendSignalEnd(txSignal, txSignal->getId());
-    // 3. clear internal state
+    // 3. notify producer
+    if (producer != nullptr)
+        producer.handlePushPacketProcessed(packet, true);
+    // 4. notify subscribers
+    emit(transmissionEndedSignal, txSignal);
+    // 5. clear internal state
     txSignal = nullptr;
     txStartTime = -1;
     txStartClockTime = -1;
-    // 4. notify producer
-    if (producer != nullptr) {
-        producer.handlePushPacketProcessed(packet, true);
+    // 6. notify producer
+    if (producer != nullptr)
         producer.handleCanPushPacketChanged();
-    }
 }
 
 void StreamingTransmitter::abortTx()
@@ -95,22 +97,24 @@ void StreamingTransmitter::abortTx()
     packet->setBitError(true);
     auto signal = encodePacket(packet);
     signal->setDuration(timePosition);
-    // 3. send signal end to receiver and notify subscribers
+    // 3. send signal end to receiver
     EV_INFO << "Aborting transmission" << EV_FIELD(packet) << EV_FIELD(txDatarate) << EV_ENDL;
     handlePacketProcessed(packet);
-    emit(transmissionEndedSignal, signal);
     sendSignalEnd(signal, txSignal->getId());
-    // 4. delete old signal
+    // 4. notify producer
+    if (producer != nullptr)
+        producer.handlePushPacketProcessed(packet, true);
+    // 5. notify subscribers
+    emit(transmissionEndedSignal, signal);
+    // 6. delete old signal
     delete txSignal;
     txSignal = nullptr;
-    // 5. clear internal state
+    // 7. clear internal state
     txStartTime = -1;
     txStartClockTime = -1;
-    // 6. notify producer
-    if (producer != nullptr) {
-        producer.handlePushPacketProcessed(packet, true);
+    // 8. notify producer
+    if (producer != nullptr)
         producer.handleCanPushPacketChanged();
-    }
 }
 
 } // namespace inet
