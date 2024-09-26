@@ -42,6 +42,9 @@ void MacProtocolBase::initialize(int stage)
         upperLayerOutGateId = findGate("upperLayerOut");
         lowerLayerInGateId = findGate("lowerLayerIn");
         lowerLayerOutGateId = findGate("lowerLayerOut");
+        upperLayerSink.reference(gate("upperLayerOut"), false);
+        if (hasGate("lowerLayerOut"))
+            lowerLayerSink.reference(gate("lowerLayerOut"), true);
         currentTxFrame = nullptr;
         hostModule = findContainingNode(this);
     }
@@ -58,16 +61,22 @@ void MacProtocolBase::registerInterface()
 
 void MacProtocolBase::sendUp(cMessage *message)
 {
-    if (message->isPacket())
+    if (message->isPacket()) {
         emit(packetSentToUpperSignal, message);
-    send(message, upperLayerOutGateId);
+        upperLayerSink.pushPacket(check_and_cast<Packet *>(message));
+    }
+    else
+        send(message, upperLayerOutGateId);
 }
 
 void MacProtocolBase::sendDown(cMessage *message)
 {
-    if (message->isPacket())
+    if (message->isPacket()) {
         emit(packetSentToLowerSignal, message);
-    send(message, lowerLayerOutGateId);
+        lowerLayerSink.pushPacket(check_and_cast<Packet *>(message));
+    }
+    else
+        send(message, lowerLayerOutGateId);
 }
 
 bool MacProtocolBase::isUpperMessage(cMessage *message) const
@@ -179,6 +188,14 @@ Packet *MacProtocolBase::dequeuePacket()
     packet->setArrival(getId(), upperLayerInGateId, simTime());
     emit(packetReceivedFromUpperSignal, packet);
     return packet;
+}
+
+void MacProtocolBase::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    emit(packetReceivedFromUpperSignal, packet);
+    handleUpperPacket(packet);
 }
 
 } // namespace inet
