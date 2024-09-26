@@ -31,6 +31,7 @@ void Icmpv6::initialize(int stage)
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
         ipv6Sink.reference(gate("ipv6Out"), true);
+        transportSink.reference(gate("transportOut"), true);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         bool isOperational;
@@ -83,7 +84,7 @@ void Icmpv6::processICMPv6Message(Packet *packet)
             auto dispatchProtocolReq = packet->addTagIfAbsent<DispatchProtocolReq>();
             dispatchProtocolReq->setServicePrimitive(SP_INDICATION);
             dispatchProtocolReq->setProtocol(ProtocolGroup::getIpProtocolGroup()->getProtocol(transportProtocol));
-            send(packet, "transportOut");
+            transportSink.pushPacket(packet);
         }
     }
     else {
@@ -361,6 +362,13 @@ bool Icmpv6::verifyCrc(const Packet *packet)
         default:
             throw cRuntimeError("Unknown CRC mode");
     }
+}
+
+void Icmpv6::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    processICMPv6Message(packet);
 }
 
 } // namespace inet
