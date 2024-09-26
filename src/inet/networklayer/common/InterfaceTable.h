@@ -85,8 +85,6 @@ class INET_API InterfaceTable : public OperationalBase, public IInterfaceTable, 
     // internal
     virtual void invalidateTmpInterfaceList();
 
-    virtual void resetInterfaces();
-
   public:
     InterfaceTable();
     virtual ~InterfaceTable();
