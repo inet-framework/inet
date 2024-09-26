@@ -7,9 +7,10 @@
 
 #include "inet/transportlayer/rtp/Rtcp.h"
 
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
-#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
@@ -504,6 +505,27 @@ void Rtcp::calculateAveragePacketSize(int size)
     // add size of ip and udp header to given size before calculating
     double sumPacketSize = (double)(_packetsCalculated) * _averagePacketSize + (double)(size + 20 + 8);
     _averagePacketSize = sumPacketSize / (double)(++_packetsCalculated);
+}
+
+void Rtcp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessageFromUDP(packet);
+}
+
+cGate *Rtcp::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("udpIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr && socketInd->getSocketId() == _udpSocket.getSocketId())
+                return gate;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace rtp
