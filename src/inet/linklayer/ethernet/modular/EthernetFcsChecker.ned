@@ -14,7 +14,7 @@ simple EthernetFcsChecker extends ChecksumCheckerBase like IPacketFilter
 {
     parameters:
         checksumType = "ethernet-fcs";
-        bool popFcs = default(true);
+        bool popFcs = false;
         @class(EthernetFcsChecker);
         @display("i=block/checker");
     gates:

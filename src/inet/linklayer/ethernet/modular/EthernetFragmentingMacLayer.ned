@@ -39,7 +39,7 @@ module EthernetFragmentingMacLayer like IEthernetMacLayer
         queue: <default("PacketQueue")> like IPacketQueue {
             @display("p=200,100");
         }
-        fcsRemover: <default("EthernetFcsChecker")> like IPacketFilter {
+        fcsRemover: <default("EthernetFcsRemover")> like IPacketFilter {
             @display("p=200,200");
         }
         streamer: <default("PreemptableStreamer")> like IPacketFlow {

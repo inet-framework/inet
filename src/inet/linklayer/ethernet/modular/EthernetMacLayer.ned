@@ -47,7 +47,6 @@ module EthernetMacLayer extends Module like IEthernetMacLayer
             @display("p=200,400");
         }
         fcsChecker: <default("EthernetFcsChecker")> like IPacketFilter {
-            popFcs = default(false);
             @display("p=500,300");
         }
         inboundEmitter: <default("PacketEmitter")> like IPacketFlow {
