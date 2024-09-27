@@ -1,44 +1,35 @@
 #!/usr/bin/env python3
-import sys
+import os
 import re
+import sys
 
 def computeUniqueFingerprints(fingerprints):
     i = 0
     uniqueFingerprints = list()
     while i < len(fingerprints):
-        fingerprint = fingerprints[i]
+        startEventNumber = fingerprints[i][0]
+        startSimulationTime = fingerprints[i][1]
+        fingerprint = fingerprints[i][2]
         j = i
-        while (j < len(fingerprints)) and (fingerprint == fingerprints[j]):
+        while (j < len(fingerprints)) and (fingerprint == fingerprints[j][2]):
+            endEventNumber = fingerprints[j][0]
+            endSimulationTime = fingerprints[j][1]
             j = j + 1
-        uniqueFingerprints.append([j-1, fingerprint])
+        uniqueFingerprints.append([startEventNumber, endEventNumber, startSimulationTime, endSimulationTime, fingerprint])
         i = j
     return uniqueFingerprints
 
-def readFingerprints1(eventlogFile):
+def readFingerprints(eventlogFile):
     "RegExp version"
-    regExp = re.compile(r"^E # ([0-9]+) t ((?:[0-9]*\.)?[0-9]+) m [0-9]+ ce [0-9]+ msg [0-9]+ f (?:\"([^\"]*)\"|(\S+))$")
+    regExp = re.compile(r"^E # ([0-9]+) t ((?:[0-9]*\.)?[0-9]+) m [-0-9]+ ce [-0-9]+ msg [-0-9]+ f (?:\"([^\"]*)\"|(\S+))$")
     fingerprints = list()
     for line in eventlogFile:
         match = regExp.match(line)
         if match:
+            eventNumber = match.group(1)
+            simulationTime = match.group(2)
             fingerprint = match.group(3) if match.group(3) else match.group(4)
-            fingerprints.append(fingerprint)
-    return fingerprints
-
-def isNewEvent(line):
-    return len(line) >= 4 and line[0:4] == "E # "
-
-def getFingerprint(line):
-    n = len(line) - 1
-    return line[(n-14):(n-5)]
-
-def readFingerprints2(eventlogFile):
-    fingerprints = list()
-    eventlogFile.readline() # skip the first line
-    for line in eventlogFile:
-        if isNewEvent(line):
-            fingerprint = getFingerprint(line)
-            fingerprints.append(fingerprint)
+            fingerprints.append([eventNumber, simulationTime, fingerprint])
     return fingerprints
 
 def diffingerprint(elog1Fingerprints, elog2Fingerprints):
@@ -46,20 +37,34 @@ def diffingerprint(elog1Fingerprints, elog2Fingerprints):
     for i in range(0,minSize):
         elog1Fingerprint = elog1Fingerprints[i]
         elog2Fingerprint = elog2Fingerprints[i]
-        if elog1Fingerprint[1] != elog2Fingerprint[1]:
-            return "Diff elog1: " + str(elog1Fingerprint[0]) + " fingerprint = " + elog1Fingerprint[1] + ", elog2: " + str(elog2Fingerprint[0]) + " fingerprint = " + elog2Fingerprint[1]
-    return "No differences"
+        if elog1Fingerprint[4] != elog2Fingerprint[4]:
+            return i
+    return None
 
+def printref(eventNumber, simulationTime, fingerprint):
+    return f"# {eventNumber} t {simulationTime} f {fingerprint}"
 
 elog1FilePath = sys.argv[1]
 elog2FilePath = sys.argv[2]
 
 elog1File = open(elog1FilePath)
 elog2File = open(elog2FilePath)
-uniqueElog1Fingerprints = computeUniqueFingerprints(readFingerprints1(elog1File))
-uniqueElog2Fingerprints = computeUniqueFingerprints(readFingerprints1(elog2File))
-print(diffingerprint(uniqueElog1Fingerprints, uniqueElog2Fingerprints))
+elog1FileName = os.path.basename(elog1FilePath)
+elog2FileName = os.path.basename(elog2FilePath)
+elog1Fingerprints = readFingerprints(elog1File)
+elog2Fingerprints = readFingerprints(elog2File)
+uniqueElog1Fingerprints = computeUniqueFingerprints(elog1Fingerprints)
+uniqueElog2Fingerprints = computeUniqueFingerprints(elog2Fingerprints)
+index = diffingerprint(uniqueElog1Fingerprints, uniqueElog2Fingerprints)
+if index:
+    last1 = printref(uniqueElog1Fingerprints[index - 1][1], uniqueElog1Fingerprints[index - 1][3], uniqueElog1Fingerprints[index - 1][4])
+    last2 = printref(uniqueElog2Fingerprints[index - 1][1], uniqueElog2Fingerprints[index - 1][3], uniqueElog2Fingerprints[index - 1][4])
+    first1 = printref(uniqueElog1Fingerprints[index][0], uniqueElog1Fingerprints[index][2], uniqueElog1Fingerprints[index][4])
+    first2 = printref(uniqueElog2Fingerprints[index][0], uniqueElog2Fingerprints[index][2], uniqueElog2Fingerprints[index][4])
+    print(f"Last matching event, {elog1FileName}: {last1}, {elog2FileName}: {last2}")
+    print(f"First differing event, {elog1FileName}: {first1}, {elog2FileName}: {first2}")
+else:
+    print("No differences")
 
 elog1File.close()
 elog2File.close()
-
