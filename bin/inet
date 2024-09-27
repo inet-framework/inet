@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # This script is intended to run INET simulations both in debug and release mode.
 # It can be used only after the 'setenv' script has been run from both the OMNeT++
@@ -16,7 +16,6 @@
 #
 
 DIR=$(dirname $0)
-OUT=$DIR/../src
 
 #
 # Note: We intentionally do NOT initialize the TOOL and MODE variables, in order
@@ -45,6 +44,12 @@ if [ "$1" = "--sanitize" ]; then
    MODE="sanitize"
    shift;
 fi
+
+OMNETPP_DIR=$(basename "$__omnetpp_root_dir")
+PROJECT_OUTPUT_DIR=$DIR/../out
+TOOLCHAIN_NAME=clang
+CONFIGNAME=$TOOLCHAIN_NAME-$MODE
+OUT="$PROJECT_OUTPUT_DIR/$OMNETPP_DIR/$CONFIGNAME/src"
 
 if [ "$1" = "--printcmd" ] || [ "$1" = "-p" ]; then
    # Equivalent to: TOOL=echo inet
