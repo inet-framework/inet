@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
@@ -19,7 +20,7 @@ namespace inet {
 /**
  * UDP application. See NED for more info.
  */
-class INET_API UdpBasicBurst : public ApplicationBase, public UdpSocket::ICallback
+class INET_API UdpBasicBurst : public ApplicationBase, public UdpSocket::ICallback, public IModuleInterfaceLookup
 {
   public:
     enum ChooseDestAddrMode {
@@ -96,6 +97,8 @@ class INET_API UdpBasicBurst : public ApplicationBase, public UdpSocket::ICallba
   public:
     UdpBasicBurst() {}
     ~UdpBasicBurst();
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet

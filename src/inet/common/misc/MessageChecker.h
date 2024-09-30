@@ -7,6 +7,7 @@
 #ifndef __INET_MESSAGECHECKER_H
 #define __INET_MESSAGECHECKER_H
 
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/common/INETDefs.h"
 
@@ -16,10 +17,12 @@ using namespace inet::queueing;
 
 #define BUFSIZE    4096
 
-class INET_API MessageChecker : public cSimpleModule
+class INET_API MessageChecker : public cSimpleModule, public IModuleInterfaceLookup
 {
   public:
     MessageChecker();
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 
   protected:
     void initialize() override;

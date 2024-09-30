@@ -12,7 +12,7 @@
 
 namespace inet {
 
-class INET_API TunLoopbackApp : public cSimpleModule, public LifecycleUnsupported
+class INET_API TunLoopbackApp : public cSimpleModule, public LifecycleUnsupported, public IModuleInterfaceLookup
 {
   protected:
     const char *tunInterface = nullptr;
@@ -27,6 +27,9 @@ class INET_API TunLoopbackApp : public cSimpleModule, public LifecycleUnsupporte
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     void handleMessage(cMessage *msg) override;
     void finish() override;
+
+  public:
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet

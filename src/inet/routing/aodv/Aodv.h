@@ -10,6 +10,7 @@
 
 #include <map>
 
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
@@ -29,7 +30,7 @@ namespace aodv {
  * in the IP-layer required by this protocol.
  */
 
-class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase, public UdpSocket::ICallback, public cListener
+class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase, public UdpSocket::ICallback, public cListener, public IModuleInterfaceLookup
 {
   protected:
     /*
@@ -210,6 +211,8 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
   public:
     Aodv();
     virtual ~Aodv();
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace aodv

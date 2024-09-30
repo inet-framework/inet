@@ -18,6 +18,7 @@ module VirtualInterface extends NetworkInterface like IVirtualInterface
     parameters:
         string interfaceTableModule;
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+        @class(VirtualInterface);
         @display("i=block/tunnel");
     gates:
         input upperLayerIn;

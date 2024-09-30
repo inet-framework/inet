@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 
@@ -19,7 +20,7 @@ namespace inet {
 /**
  * Consumes and prints packets received from the IP module. See NED for more info.
  */
-class INET_API IpvxTrafSink : public ApplicationBase
+class INET_API IpvxTrafSink : public ApplicationBase, public IModuleInterfaceLookup
 {
   protected:
     const Protocol *protocol = nullptr;
@@ -38,6 +39,9 @@ class INET_API IpvxTrafSink : public ApplicationBase
     virtual void handleStartOperation(LifecycleOperation *operation) override {}
     virtual void handleStopOperation(LifecycleOperation *operation) override {}
     virtual void handleCrashOperation(LifecycleOperation *operation) override {}
+
+  public:
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet

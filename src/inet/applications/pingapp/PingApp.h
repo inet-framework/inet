@@ -9,6 +9,7 @@
 #define __INET_PINGAPP_H
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -29,7 +30,7 @@ namespace inet {
  *
  * See NED file for detailed description of operation.
  */
-class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallback
+class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallback, public IModuleInterfaceLookup
 {
   protected:
     // parameters: for more details, see the corresponding NED parameters' documentation
@@ -106,6 +107,8 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
     PingApp();
     virtual ~PingApp();
     int getPid() const { return pid; }
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet

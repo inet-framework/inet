@@ -23,7 +23,7 @@ namespace inet {
 /**
  * Implements a DHCP server. See NED file for more details.
  */
-class INET_API DhcpServer : public ApplicationBase, public cListener, public UdpSocket::ICallback
+class INET_API DhcpServer : public ApplicationBase, public cListener, public UdpSocket::ICallback, public IModuleInterfaceLookup
 {
   protected:
     typedef std::map<Ipv4Address, DhcpLease> DhcpLeased;
@@ -113,6 +113,8 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
   public:
     DhcpServer();
     virtual ~DhcpServer();
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet

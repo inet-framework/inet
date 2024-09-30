@@ -1237,5 +1237,28 @@ opp_string NetPerfMeter::format(const char *formatString, ...)
     return opp_string(str);
 }
 
+cGate *NetPerfMeter::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("socketIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr) {
+                int socketId = socketInd->getSocketId();
+                if ((SocketUDP != nullptr && socketId == SocketUDP->getSocketId()) ||
+                    (SocketTCP != nullptr && socketId == SocketTCP->getSocketId()) ||
+                    (IncomingSocketTCP != nullptr && socketId == IncomingSocketTCP->getSocketId()) ||
+                    (SocketSCTP != nullptr && socketId == SocketSCTP->getSocketId()) ||
+                    (IncomingSocketSCTP != nullptr && socketId == IncomingSocketSCTP->getSocketId()))
+                {
+                    return gate;
+                }
+            }
+        }
+    }
+    return nullptr;
+}
+
 } // namespace inet
 

@@ -11,6 +11,7 @@
 #define __INET_UDPVIDEOSTREAMCLIENT_H
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
@@ -22,7 +23,7 @@ namespace inet {
  * Basic video stream application. Clients connect to server and get a stream of
  * video back.
  */
-class INET_API UdpVideoStreamClient : public ApplicationBase, public UdpSocket::ICallback
+class INET_API UdpVideoStreamClient : public ApplicationBase, public UdpSocket::ICallback, public IModuleInterfaceLookup
 {
   protected:
 
@@ -51,6 +52,8 @@ class INET_API UdpVideoStreamClient : public ApplicationBase, public UdpSocket::
   public:
     UdpVideoStreamClient() {}
     virtual ~UdpVideoStreamClient() { cancelAndDelete(selfMsg); }
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet

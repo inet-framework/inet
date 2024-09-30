@@ -13,7 +13,7 @@
 
 namespace inet {
 
-class INET_API TcpClientSocketIo : public cSimpleModule, public TcpSocket::ICallback
+class INET_API TcpClientSocketIo : public cSimpleModule, public TcpSocket::ICallback, public IModuleInterfaceLookup
 {
   protected:
     PassivePacketSinkRef trafficSink;
@@ -38,6 +38,8 @@ class INET_API TcpClientSocketIo : public cSimpleModule, public TcpSocket::ICall
     virtual void socketDeleted(TcpSocket *socket) override;
 
     virtual void sendOrScheduleReadCommandIfNeeded();
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet

@@ -13,6 +13,7 @@
 
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/clock/ClockUserModuleMixin.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
@@ -22,7 +23,7 @@ extern template class ClockUserModuleMixin<ApplicationBase>;
 /**
  * UDP application. See NED for more info.
  */
-class INET_API UdpBasicApp : public ClockUserModuleMixin<ApplicationBase>, public UdpSocket::ICallback
+class INET_API UdpBasicApp : public ClockUserModuleMixin<ApplicationBase>, public UdpSocket::ICallback, public IModuleInterfaceLookup
 {
   protected:
     enum SelfMsgKinds { START = 1, SEND, STOP };
@@ -72,6 +73,8 @@ class INET_API UdpBasicApp : public ClockUserModuleMixin<ApplicationBase>, publi
   public:
     UdpBasicApp() {}
     ~UdpBasicApp();
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet
