@@ -8,6 +8,7 @@
 #ifndef __INET_FLOWMEASUREMENTRECORDER_H
 #define __INET_FLOWMEASUREMENTRECORDER_H
 
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/JsonWriter.h"
 #include "inet/common/packet/PacketFilter.h"
 #include "inet/common/TimeTag_m.h"
@@ -16,7 +17,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API FlowMeasurementRecorder : public PacketFlowBase
+class INET_API FlowMeasurementRecorder : public PacketFlowBase, public IModuleInterfaceLookup
 {
   public:
     static simsignal_t packetFlowMeasuredSignal;
@@ -68,6 +69,8 @@ class INET_API FlowMeasurementRecorder : public PacketFlowBase
   public:
     virtual ~FlowMeasurementRecorder();
     virtual void processPacket(Packet *packet) override;
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace queueing

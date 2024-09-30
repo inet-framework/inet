@@ -297,5 +297,34 @@ void Mpls::sendToL3(Packet *msg)
     send(msg, "upperLayerOut");
 }
 
+cGate *Mpls::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("upperLayerIn")) {
+        // all packets from the network layer pass through MPLS on the way down,
+        // so accept the lookup if the layer below accepts it
+        if (type == typeid(IPassivePacketSink))
+            return findModuleInterface(this->gate("lowerLayerOut"), type, arguments) != nullptr ? gate : nullptr;
+    }
+    else if (gate->isName("lowerLayerIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            // MPLS labeled packets are processed here
+            if (auto dispatchProtocolReq = dynamic_cast<const DispatchProtocolReq *>(arguments)) {
+                if (dispatchProtocolReq->getProtocol() == &Protocol::mpls)
+                    return gate;
+            }
+            if (auto packetProtocolTag = dynamic_cast<const PacketProtocolTag *>(arguments)) {
+                if (packetProtocolTag->getProtocol() == &Protocol::mpls)
+                    return gate;
+            }
+            // native packets pass through MPLS on the way up,
+            // so accept the lookup if the layer above accepts it
+            return findModuleInterface(this->gate("upperLayerOut"), type, arguments) != nullptr ? gate : nullptr;
+        }
+    }
+    return nullptr;
+}
+
 } // namespace inet
 

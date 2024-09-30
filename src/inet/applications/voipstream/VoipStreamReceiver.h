@@ -26,16 +26,19 @@ extern "C" {
 
 #include "inet/applications/voipstream/AudioOutFile.h"
 #include "inet/common/SimpleModule.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 
-class INET_API VoipStreamReceiver : public SimpleModule, public LifecycleUnsupported, public UdpSocket::ICallback
+class INET_API VoipStreamReceiver : public SimpleModule, public LifecycleUnsupported, public UdpSocket::ICallback, public IModuleInterfaceLookup
 {
   public:
     VoipStreamReceiver() {}
     ~VoipStreamReceiver();
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 
   protected:
     virtual void initialize(int stage) override;

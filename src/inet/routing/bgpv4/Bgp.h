@@ -8,6 +8,7 @@
 #define __INET_BGP_H
 
 #include "inet/common/Protocol.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -20,7 +21,7 @@ namespace inet {
 
 namespace bgp {
 
-class INET_API Bgp : public RoutingProtocolBase, protected cListener
+class INET_API Bgp : public RoutingProtocolBase, protected cListener, public IModuleInterfaceLookup
 {
   private:
     ModuleRefByPar<IRoutingTable> rt;
@@ -34,6 +35,8 @@ class INET_API Bgp : public RoutingProtocolBase, protected cListener
     Bgp();
     virtual ~Bgp();
     bool isIpv6() const { return networkProtocol == &Protocol::ipv6; }
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

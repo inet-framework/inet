@@ -11,6 +11,7 @@
 #include "inet/common/SimpleModule.h"
 #include <vector>
 
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -25,7 +26,7 @@ namespace inet {
 /**
  * Implements the MPLS protocol; see the NED file for more info.
  */
-class INET_API Mpls : public SimpleModule
+class INET_API Mpls : public SimpleModule, public IModuleInterfaceLookup
 {
   protected:
     simtime_t delay1;
@@ -59,6 +60,9 @@ class INET_API Mpls : public SimpleModule
     void swapLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader);
     void popLabel(Packet *packet);
     virtual void doStackOps(Packet *packet, const LabelOpVector& outLabel);
+
+  public:
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet

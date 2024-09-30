@@ -13,7 +13,7 @@
 
 namespace inet {
 
-class INET_API Tun : public MacProtocolBase
+class INET_API Tun : public MacProtocolBase, public IModuleInterfaceLookup
 {
   protected:
     std::vector<int> socketIds;
@@ -27,6 +27,8 @@ class INET_API Tun : public MacProtocolBase
     virtual void handleUpperMessage(cMessage *message) override;
     virtual void handleUpperPacket(Packet *packet) override;
     virtual void handleUpperCommand(cMessage *message) override;
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet

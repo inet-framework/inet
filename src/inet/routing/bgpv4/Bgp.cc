@@ -7,6 +7,7 @@
 #include "inet/routing/bgpv4/Bgp.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/routing/bgpv4/BgpConfigReader.h"
 #include "inet/routing/bgpv4/BgpSession.h"
 
@@ -205,6 +206,22 @@ void Bgp::handleTimer(cMessage *timer)
                 throw cRuntimeError("Invalid timer kind %d", timer->getKind());
         }
     }
+}
+
+cGate *Bgp::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("socketIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            if (arguments == nullptr)
+                return gate;
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr && bgpRouter->hasSocket(socketInd->getSocketId()))
+                return gate;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace bgp

@@ -20,6 +20,7 @@ module TunInterface extends NetworkInterface like ITunnelInterface
         string interfaceTableModule;
         int mtu @unit(B) = default(1500B);
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+        @class(TunInterface);
         @display("i=block/tunnel");
     gates:
         input upperLayerIn;

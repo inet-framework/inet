@@ -20,7 +20,7 @@ namespace inet {
 /**
  * Implements the SctpServer simple module. See the NED file for more info.
  */
-class INET_API SctpServer : public SimpleModule, public LifecycleUnsupported
+class INET_API SctpServer : public SimpleModule, public LifecycleUnsupported, public IModuleInterfaceLookup
 {
   protected:
     struct ServerAssocStat {
@@ -90,6 +90,8 @@ class INET_API SctpServer : public SimpleModule, public LifecycleUnsupported
   public:
     virtual ~SctpServer();
     SctpServer();
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet

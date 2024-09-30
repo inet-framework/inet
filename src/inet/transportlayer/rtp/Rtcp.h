@@ -9,6 +9,7 @@
 #define __INET_RTCP_H
 
 #include "inet/common/SimpleModule.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
@@ -33,11 +34,13 @@ class RtpSenderInfo;
  * processing of rtcp packets. It also keeps track of this and other
  * Rtp end systems.
  */
-class INET_API Rtcp : public SimpleModule, public LifecycleUnsupported
+class INET_API Rtcp : public SimpleModule, public LifecycleUnsupported, public IModuleInterfaceLookup
 {
   public:
     Rtcp();
     virtual ~Rtcp();
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 
   protected:
     /**

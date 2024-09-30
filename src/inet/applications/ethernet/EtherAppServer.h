@@ -8,6 +8,7 @@
 #define __INET_ETHERAPPSERVER_H
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
@@ -20,7 +21,7 @@ namespace inet {
 /**
  * Server-side process EtherAppClient.
  */
-class INET_API EtherAppServer : public ApplicationBase, public Ieee8022LlcSocket::ICallback
+class INET_API EtherAppServer : public ApplicationBase, public Ieee8022LlcSocket::ICallback, public IModuleInterfaceLookup
 {
   protected:
     int localSap = 0;
@@ -45,6 +46,8 @@ class INET_API EtherAppServer : public ApplicationBase, public Ieee8022LlcSocket
     void sendPacket(Packet *datapacket, int interfaceId, const MacAddress& destAddr, int destSap);
     virtual void socketDataArrived(Ieee8022LlcSocket *, Packet *msg) override;
     virtual void socketClosed(Ieee8022LlcSocket *socket) override;
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet
