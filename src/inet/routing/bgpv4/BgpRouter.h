@@ -92,6 +92,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     void setLocalPreference(Ipv4Address peer, int localPref);
     bool isExternalAddress(const Ipv4Route& rtEntry);
     void processMessageFromTCP(cMessage *msg);
+    bool hasSocket(int socketId) { return _socketMap.getSocketById(socketId) != nullptr; }
 
     void printOpenMessage(const BgpOpenMessage& msg);
     void printUpdateMessage(const BgpUpdateMessage& msg);
