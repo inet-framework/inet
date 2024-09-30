@@ -63,6 +63,7 @@ void EtherAppServer::handleCrashOperation(LifecycleOperation *operation)
 
 void EtherAppServer::socketClosed(Ieee8022LlcSocket *socket)
 {
+    Enter_Method("socketClosed");
     if (operationalState == State::STOPPING_OPERATION && !llcSocket.isOpen())
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }

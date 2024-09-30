@@ -273,6 +273,7 @@ void PingApp::socketDataArrived(INetworkSocket *socket, Packet *packet)
 
 void PingApp::socketClosed(INetworkSocket *socket)
 {
+    Enter_Method("socketClosed");
     if (socket == currentSocket)
         currentSocket = nullptr;
     delete socketMap.removeSocket(socket);
@@ -306,6 +307,7 @@ void PingApp::startSendingPingRequests()
 
 void PingApp::handleStopOperation(LifecycleOperation *operation)
 {
+    Enter_Method("handleStopOperation");
     pid = -1;
     lastStart = -1;
     sendSeqNo = expectedReplySeqNo = 0;
