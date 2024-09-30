@@ -9,6 +9,7 @@
 #define __INET_TUNNELAPP_H
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/socket/SocketMap.h"
 #include "inet/linklayer/tun/TunSocket.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Socket.h"
@@ -16,7 +17,7 @@
 
 namespace inet {
 
-class INET_API TunnelApp : public ApplicationBase, public UdpSocket::ICallback, public Ipv4Socket::ICallback, public TunSocket::ICallback
+class INET_API TunnelApp : public ApplicationBase, public UdpSocket::ICallback, public Ipv4Socket::ICallback, public TunSocket::ICallback, public IModuleInterfaceLookup
 {
   protected:
     const Protocol *protocol = nullptr;
@@ -34,6 +35,8 @@ class INET_API TunnelApp : public ApplicationBase, public UdpSocket::ICallback, 
   public:
     TunnelApp();
     virtual ~TunnelApp();
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

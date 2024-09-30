@@ -21,6 +21,7 @@ module EthernetLayer like IEthernetLayer
         *.interfaceTableModule = default(this.interfaceTableModule);
         *.socketTableModule = default(absPath(".socketTable"));
         paddingInserter.minLength = default(60B);
+        @class(EthernetLayer);
         @display("i=block/layer");
     gates:
         input upperLayerIn;

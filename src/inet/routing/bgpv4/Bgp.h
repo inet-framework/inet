@@ -8,6 +8,7 @@
 #define __INET_BGP_H
 
 #include "inet/common/SimpleModule.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -19,7 +20,7 @@ namespace inet {
 
 namespace bgp {
 
-class INET_API Bgp : public SimpleModule, protected cListener, public LifecycleUnsupported
+class INET_API Bgp : public SimpleModule, protected cListener, public LifecycleUnsupported, public IModuleInterfaceLookup
 {
   private:
     ModuleRefByPar<IIpv4RoutingTable> rt;
@@ -31,6 +32,8 @@ class INET_API Bgp : public SimpleModule, protected cListener, public LifecycleU
   public:
     Bgp();
     virtual ~Bgp();
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

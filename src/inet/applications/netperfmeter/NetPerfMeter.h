@@ -23,6 +23,7 @@
 
 #include "inet/applications/netperfmeter/NetPerfMeter_m.h"
 #include "inet/common/SimpleModule.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
@@ -36,7 +37,7 @@ namespace inet {
 /**
  * Implementation of NetPerfMeter. See NED file for more details.
  */
-class INET_API NetPerfMeter : public SimpleModule
+class INET_API NetPerfMeter : public SimpleModule, public IModuleInterfaceLookup
 {
   public:
     NetPerfMeter();
@@ -47,6 +48,8 @@ class INET_API NetPerfMeter : public SimpleModule
     virtual void handleMessage(cMessage *msg) override;
 
     virtual void refreshDisplay() const override;
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 
     void establishConnection();
     void successfullyEstablishedConnection(cMessage *msg, const unsigned int queueSize);

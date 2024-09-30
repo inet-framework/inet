@@ -9,6 +9,7 @@
 #define __INET_TCPAPPBASE_H
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
@@ -19,7 +20,7 @@ namespace inet {
  *
  * It needs the following NED parameters: localAddress, localPort, connectAddress, connectPort.
  */
-class INET_API TcpAppBase : public ApplicationBase, public TcpSocket::ICallback
+class INET_API TcpAppBase : public ApplicationBase, public TcpSocket::ICallback, public IModuleInterfaceLookup
 {
   protected:
     TcpSocket socket;
@@ -59,6 +60,8 @@ class INET_API TcpAppBase : public ApplicationBase, public TcpSocket::ICallback
     virtual void socketFailure(TcpSocket *socket, int code) override;
     virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override {}
     virtual void socketDeleted(TcpSocket *socket) override {}
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet
