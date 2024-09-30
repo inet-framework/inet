@@ -203,6 +203,7 @@ void DhcpClient::socketErrorArrived(UdpSocket *socket, Indication *indication)
 
 void DhcpClient::socketClosed(UdpSocket *socket_)
 {
+    Enter_Method("socketClosed");
     if (operationalState == State::STOPPING_OPERATION && !socket.isOpen())
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }

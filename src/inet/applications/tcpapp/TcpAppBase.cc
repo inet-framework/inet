@@ -115,12 +115,14 @@ void TcpAppBase::refreshDisplay() const
 
 void TcpAppBase::socketEstablished(TcpSocket *)
 {
+    Enter_Method("socketEstablished");
     // *redefine* to perform or schedule first sending
     EV_INFO << "connected\n";
 }
 
 void TcpAppBase::socketDataArrived(TcpSocket *, Packet *msg, bool)
 {
+    Enter_Method("socketDataArrived");
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
     bytesRcvd += msg->getByteLength();
@@ -130,6 +132,7 @@ void TcpAppBase::socketDataArrived(TcpSocket *, Packet *msg, bool)
 
 void TcpAppBase::socketPeerClosed(TcpSocket *socket_)
 {
+    Enter_Method("socketPeerClosed");
     ASSERT(socket_ == &socket);
     // close the connection (if not already closed)
     if (socket.getState() == TcpSocket::PEER_CLOSED) {
@@ -140,12 +143,14 @@ void TcpAppBase::socketPeerClosed(TcpSocket *socket_)
 
 void TcpAppBase::socketClosed(TcpSocket *)
 {
+    Enter_Method("socketClosed");
     // *redefine* to start another session etc.
     EV_INFO << "connection closed\n";
 }
 
 void TcpAppBase::socketFailure(TcpSocket *, int code)
 {
+    Enter_Method("socketFailure");
     // subclasses may override this function, and add code try to reconnect after a delay.
     EV_WARN << "connection broken\n";
     numBroken++;
