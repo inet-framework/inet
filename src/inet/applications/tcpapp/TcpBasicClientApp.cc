@@ -155,6 +155,7 @@ void TcpBasicClientApp::rescheduleAfterOrDeleteTimer(simtime_t d, short int msgK
 
 void TcpBasicClientApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
+    Enter_Method("socketDataArrived");
     auto dataLength = msg->getDataLength();
     TcpAppBase::socketDataArrived(socket, msg, urgent);
 
@@ -194,6 +195,7 @@ void TcpBasicClientApp::close()
 
 void TcpBasicClientApp::socketClosed(TcpSocket *socket)
 {
+    Enter_Method("socketClosed");
     cancelEvent(readDelayTimer);
     TcpAppBase::socketClosed(socket);
 
@@ -206,6 +208,7 @@ void TcpBasicClientApp::socketClosed(TcpSocket *socket)
 
 void TcpBasicClientApp::socketFailure(TcpSocket *socket, int code)
 {
+    Enter_Method("socketFailure");
     cancelEvent(readDelayTimer);
     TcpAppBase::socketFailure(socket, code);
 
