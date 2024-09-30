@@ -13,6 +13,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
@@ -354,6 +355,20 @@ void UdpBasicBurst::handleCrashOperation(LifecycleOperation *operation)
     activeBurst = false;
     if (operation->getRootModule() != getContainingNode(this)) // closes socket when the application crashed only
         socket.destroy(); // TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
+}
+
+cGate *UdpBasicBurst::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("socketIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr && socketInd->getSocketId() == socket.getSocketId())
+                return gate;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace inet

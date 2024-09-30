@@ -9,6 +9,7 @@
 #define __INET_TCPSERVERHOSTAPP_H
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/socket/SocketMap.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
@@ -20,7 +21,7 @@ class TcpServerThreadBase;
  * Opens a TCP server socket, and launches one dynamically created module
  * for each incoming connection. More info in the corresponding NED file.
  */
-class INET_API TcpServerHostApp : public ApplicationBase, public TcpSocket::ICallback
+class INET_API TcpServerHostApp : public ApplicationBase, public TcpSocket::ICallback, public IModuleInterfaceLookup
 {
   protected:
     TcpSocket serverSocket;
@@ -51,6 +52,8 @@ class INET_API TcpServerHostApp : public ApplicationBase, public TcpSocket::ICal
     virtual ~TcpServerHostApp() { socketMap.deleteSockets(); }
     virtual void removeThread(TcpServerThreadBase *thread);
     virtual void threadClosed(TcpServerThreadBase *thread);
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 
     friend class TcpServerThreadBase;
 };

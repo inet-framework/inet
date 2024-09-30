@@ -9,6 +9,7 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/stlutils.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -146,6 +147,23 @@ void TcpServerHostApp::threadClosed(TcpServerThreadBase *thread)
 
     // remove thread object
     thread->deleteModule();
+}
+
+cGate *TcpServerHostApp::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("socketIn")) {
+        if (type == typeid(IPassivePacketSink)) {
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr && (socketInd->getSocketId() == serverSocket.getSocketId() || socketMap.findSocketById(socketInd->getSocketId()) != nullptr))
+                return gate;
+            auto packetServiceTag = dynamic_cast<const PacketServiceTag *>(arguments);
+            if (packetServiceTag != nullptr && packetServiceTag->getProtocol() == &Protocol::tcp)
+                return gate;
+        }
+    }
+    return nullptr;
 }
 
 void TcpServerThreadBase::socketDeleted(TcpSocket *socket)

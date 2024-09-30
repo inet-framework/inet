@@ -8,6 +8,7 @@
 #define __INET_ETHERAPPCLIENT_H
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
@@ -20,7 +21,7 @@ namespace inet {
 /**
  * Simple traffic generator for the Ethernet model.
  */
-class INET_API EtherAppClient : public ApplicationBase, public Ieee8022LlcSocket::ICallback
+class INET_API EtherAppClient : public ApplicationBase, public Ieee8022LlcSocket::ICallback, public IModuleInterfaceLookup
 {
   protected:
     enum Kinds { START = 100, NEXT };
@@ -73,6 +74,8 @@ class INET_API EtherAppClient : public ApplicationBase, public Ieee8022LlcSocket
   public:
     EtherAppClient() {}
     virtual ~EtherAppClient();
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet

@@ -86,7 +86,7 @@ class INET_API NetworkInterfaceChangeDetails : public cObject
  *
  * @see IInterfaceTable
  */
-class INET_API NetworkInterface : public queueing::PacketProcessorBase, public queueing::IPassivePacketSink, public ILifecycle, public cListener
+class INET_API NetworkInterface : public queueing::PacketProcessorBase, public queueing::IPassivePacketSink, public ILifecycle, public cListener, public IModuleInterfaceLookup
 {
     friend class InterfaceProtocolData; // to call protocolDataChanged()
 
@@ -393,6 +393,8 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     virtual void handleStopOperation(LifecycleOperation *operation);
     virtual void handleCrashOperation(LifecycleOperation *operation);
     //@}
+
+    virtual cGate *lookupModuleInterface(cGate* gate, const std::type_info& type, const cObject* arguments, int direction) override;
 };
 
 std::ostream& operator<<(std::ostream& o, NetworkInterface::State);

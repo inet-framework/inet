@@ -13,6 +13,7 @@
 #include <map>
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
@@ -25,7 +26,7 @@ namespace inet {
  * and UdpVideoStreamServer starts streaming to them. Capable of handling
  * streaming to multiple clients.
  */
-class INET_API UdpVideoStreamServer : public ApplicationBase, public UdpSocket::ICallback
+class INET_API UdpVideoStreamServer : public ApplicationBase, public UdpSocket::ICallback, public IModuleInterfaceLookup
 {
   public:
     struct VideoStreamData {
@@ -76,6 +77,8 @@ class INET_API UdpVideoStreamServer : public ApplicationBase, public UdpSocket::
   public:
     UdpVideoStreamServer() {}
     virtual ~UdpVideoStreamServer();
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };
 
 } // namespace inet

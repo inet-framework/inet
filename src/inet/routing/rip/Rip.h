@@ -8,6 +8,7 @@
 #ifndef __INET_RIP_H
 #define __INET_RIP_H
 
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -77,7 +78,7 @@ struct RipNetworkInterface
  * 2. There is no merging of subnet routes. RFC 2453 3.7 suggests that subnetted network routes should
  *    not be advertised outside the subnetted network.
  */
-class INET_API Rip : public RoutingProtocolBase, protected cListener
+class INET_API Rip : public RoutingProtocolBase, protected cListener, public IModuleInterfaceLookup
 {
     enum Mode { RIPv2, RIPng };
     typedef std::vector<RipNetworkInterface> InterfaceVector;
@@ -115,6 +116,8 @@ class INET_API Rip : public RoutingProtocolBase, protected cListener
   public:
     Rip();
     ~Rip();
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
