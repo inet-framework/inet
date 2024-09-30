@@ -118,6 +118,7 @@ const Protocol Protocol::ieee80211VhtPhy("ieee80211vhtphy", "IEEE 802.11 VHT PHY
 const Protocol Protocol::ieee802154("ieee802154", "IEEE 802.15.4");
 const Protocol Protocol::ieee8021ae("ieee8021ae", "IEEE 802.1AE");
 const Protocol Protocol::ieee8021qCTag("ieee8021qctag", "IEEE 802.1Q C-TAG");
+const Protocol Protocol::ieee8021qCFM("ieee8021qcfm", "IEEE 802.1Q CFM");
 const Protocol Protocol::ieee8021qSTag("ieee8021qstag", "IEEE 802.1Q S-TAG");
 const Protocol Protocol::ieee8022llc("ieee8022llc", "IEEE 802.2 LLC", Protocol::LinkLayer);
 const Protocol Protocol::ieee8022snap("ieee8022snap", "IEEE 802.2 SNAP", Protocol::LinkLayer);
@@ -135,6 +136,7 @@ const Protocol Protocol::lmac("lmac", "L-MAC");
 const Protocol Protocol::manet("manet", "MANET");
 const Protocol Protocol::mobileipv6("mobileipv6", "Mobile IPv6");
 const Protocol Protocol::mpls("mpls", "MPLS");
+const Protocol Protocol::mrp("mrp", "MRP", Protocol::LinkLayer);
 const Protocol Protocol::ospf("ospf", "OSPF");
 const Protocol Protocol::eigrp("eigrp", "EIGRP");
 const Protocol Protocol::pim("pim", "PIM");
@@ -173,4 +175,3 @@ const Protocol Protocol::wiseRoute("wiseroute", "WiseRoute"); // WiseRoute Netwo
 const Protocol Protocol::gptp("gptp", "gPTP");
 const Protocol Protocol::ieee8021rTag("ieee8021rtag", "IEEE 802.1R TAG"); // TODO: move to its place in the alphanumeric ordering, causes fingerprints to change because some hypothetical protocols serialize the protocol ID into the packet
 } // namespace inet
-
