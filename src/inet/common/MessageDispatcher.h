@@ -54,22 +54,9 @@ class INET_API MessageDispatcher :
     };
 
   protected:
-    bool forwardServiceRegistration;
-    bool forwardProtocolRegistration;
-    ModuleRefByPar<IInterfaceTable> interfaceTable;
-
-    std::map<int, int> socketIdToGateIndex;
-    std::map<int, int> interfaceIdToGateIndex;
-    std::map<Key, int> serviceToGateIndex;
-    std::map<Key, int> protocolToGateIndex;
-    const Protocol *registeringProtocol = nullptr;
-    bool registeringAny = false;
 
   protected:
-    virtual void initialize(int stage) override;
-    virtual void arrived(cMessage *message, cGate *gate, const SendOptions& options, simtime_t time) override;
     virtual cGate *handlePacket(Packet *packet, const cGate *inGate);
-    virtual cGate *handleMessage(Message *request, cGate *inGate);
 
     int getGateIndexToConnectedModule(const char *moduleName);
 
