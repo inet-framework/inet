@@ -1127,6 +1127,19 @@ IRoute *Rip::createRoute(const L3Address& dest, int prefixLength, const NetworkI
     return route;
 }
 
+void Rip::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    unsigned char command = packet->peekAtFront<RipPacket>()->getCommand();
+    if (command == RIP_REQUEST)
+        processRequest(packet);
+    else if (command == RIP_RESPONSE)
+        processResponse(packet);
+    else
+        throw cRuntimeError("RIP: unknown command (%d)", (int)command);
+}
+
 cGate *Rip::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     Enter_Method("lookupModuleInterface");

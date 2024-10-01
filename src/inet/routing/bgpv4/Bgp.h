@@ -16,12 +16,13 @@
 #include "inet/routing/bgpv4/BgpCommon.h"
 #include "inet/routing/bgpv4/BgpRouter.h"
 #include "inet/routing/bgpv4/bgpmessage/BgpHeader_m.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 
 namespace bgp {
 
-class INET_API Bgp : public RoutingProtocolBase, protected cListener, public IModuleInterfaceLookup
+class INET_API Bgp : public RoutingProtocolBase, protected cListener, public IPassivePacketSink, public IModuleInterfaceLookup
 {
   private:
     ModuleRefByPar<IRoutingTable> rt;
@@ -35,6 +36,13 @@ class INET_API Bgp : public RoutingProtocolBase, protected cListener, public IMo
     Bgp();
     virtual ~Bgp();
     bool isIpv6() const { return networkProtocol == &Protocol::ipv6; }
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
     virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 

@@ -1550,5 +1550,13 @@ void Ipv6::flush()
     fragbuf.flush();
 }
 
+void Ipv6::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
+}
+
 } // namespace inet
 

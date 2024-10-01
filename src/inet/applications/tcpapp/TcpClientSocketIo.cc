@@ -124,6 +124,22 @@ void TcpClientSocketIo::sendOrScheduleReadCommandIfNeeded()
     }
 }
 
+void TcpClientSocketIo::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("trafficIn")) {
+        if (!socket.isOpen())
+            open();
+        bytesSent += packet->getByteLength();
+        socket.send(packet);
+    }
+    else if (gate->isName("socketIn"))
+        socket.processMessage(packet);
+    else
+        throw cRuntimeError("Unknown packet");
+}
+
 cGate *TcpClientSocketIo::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     Enter_Method("lookupModuleInterface");

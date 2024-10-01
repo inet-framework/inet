@@ -1959,5 +1959,12 @@ bool Igmpv3::verifyChecksum(const Packet *packet)
     }
 }
 
+void Igmpv3::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    processIgmpMessage(packet);
+}
+
 } // namespace inet
 

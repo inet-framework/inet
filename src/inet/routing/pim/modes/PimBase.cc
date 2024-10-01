@@ -448,6 +448,13 @@ void PimBase::getMulticastListenerSources(cObject *obj, NetworkInterface *& ie, 
     }
 }
 
+void PimBase::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
+}
+
 std::ostream& operator<<(std::ostream& out, const PimBase::SourceAndGroup& sourceGroup)
 {
     out << "(source: " << (sourceGroup.source.isUnspecified() ? "*" : sourceGroup.source.str()) << ", "

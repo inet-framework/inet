@@ -607,6 +607,13 @@ void Radio::updateTransceiverPart()
     }
 }
 
+void Radio::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleUpperPacket(packet);
+}
+
 } // namespace physicallayer
 } // namespace inet
 

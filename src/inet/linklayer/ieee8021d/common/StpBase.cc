@@ -232,5 +232,13 @@ void StpBase::handleCrashOperation(LifecycleOperation *operation)
     stop();
 }
 
+void StpBase::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
+}
+
 } // namespace inet
 

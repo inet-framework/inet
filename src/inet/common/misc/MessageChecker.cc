@@ -223,6 +223,13 @@ void MessageChecker::finish()
         throw cRuntimeError("Several message(s) have to be checked");
 }
 
+void MessageChecker::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
+}
+
 cGate *MessageChecker::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     Enter_Method("lookupModuleInterface");

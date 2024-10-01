@@ -23,7 +23,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API Gptp : public ClockUserModuleBase, public cListener
+class INET_API Gptp : public ClockUserModuleBase, public cListener, public IPassivePacketSink
 {
   protected:
     static const MacAddress GPTP_MULTICAST_ADDRESS;
@@ -204,6 +204,14 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
   protected:
     virtual void startSyncProcesses();

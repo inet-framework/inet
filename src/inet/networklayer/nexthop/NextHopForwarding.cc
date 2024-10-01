@@ -877,5 +877,17 @@ void NextHopForwarding::flush()
 // fragbuf.flush();
 }
 
+void NextHopForwarding::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("transportIn"))
+        handlePacketFromHL(packet);
+    else if (gate->isName("queueIn"))
+        handlePacketFromNetwork(packet);
+    else
+        throw cRuntimeError("Unknown gate");
+}
+
 } // namespace inet
 
