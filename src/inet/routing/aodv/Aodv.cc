@@ -7,7 +7,6 @@
 
 #include "inet/routing/aodv/Aodv.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"

@@ -8,7 +8,6 @@
 #ifndef __INET_MESSAGEDISPATCHER_H
 #define __INET_MESSAGEDISPATCHER_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/NetworkInterface.h"
@@ -27,11 +26,10 @@ namespace inet {
  */
 class INET_API MessageDispatcher :
 #ifdef INET_WITH_QUEUEING
-    public queueing::PacketProcessorBase, public queueing::IActivePacketSource, public queueing::IPassivePacketSink,
+    public queueing::PacketProcessorBase, public queueing::IActivePacketSource, public queueing::IPassivePacketSink
 #else
-    public cSimpleModule,
+    public cSimpleModule
 #endif // #ifdef INET_WITH_QUEUEING
-    public DefaultProtocolRegistrationListener
 {
   public:
     class INET_API Key {
@@ -95,12 +93,6 @@ class INET_API MessageDispatcher :
     virtual void handleCanPushPacketChanged(const cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful) override;
 #endif // #ifdef INET_WITH_QUEUEING
-
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterAnyService(cGate *gate, ServicePrimitive servicePrimitive) override;
-
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) override;
 };
 
 std::ostream& operator<<(std::ostream& out, const MessageDispatcher::Key& foo) {

@@ -8,7 +8,6 @@
 #ifndef __INET_ICMPV6_H
 #define __INET_ICMPV6_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
@@ -24,7 +23,7 @@ class PingPayload;
 /**
  * ICMPv6 implementation.
  */
-class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported, public DefaultProtocolRegistrationListener
+class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported
 {
   public:
     /**
@@ -84,9 +83,6 @@ class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported, publi
     virtual bool validateDatagramPromptingError(Packet *packet);
 
     virtual void errorOut(const Ptr<const Icmpv6Header>& header);
-
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
   public:
     static void insertCrc(CrcMode crcMode, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet);

@@ -43,18 +43,6 @@ void PacketMultiplexer::handleMessage(cMessage *message)
     pushPacket(packet, packet->getArrivalGate());
 }
 
-void PacketMultiplexer::mapRegistrationForwardingGates(cGate *gate, std::function<void(cGate *)> f)
-{
-    if (gate == outputGate) {
-        for (auto inputGate : inputGates)
-            f(inputGate);
-    }
-    else if (std::find(inputGates.begin(), inputGates.end(), gate) != inputGates.end())
-        f(outputGate);
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 void PacketMultiplexer::checkPacketStreaming(Packet *packet)
 {
     if (inProgressStreamId != -1 && (packet == nullptr || packet->getTreeId() != inProgressStreamId))

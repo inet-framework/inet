@@ -10,7 +10,6 @@
 
 #include "inet/linklayer/ieee8021d/stp/Stp.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
@@ -35,8 +34,6 @@ void Stp::initialize(int stage)
         WATCH(bridgeAddress);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        registerProtocol(Protocol::stp, gate("relayOut"), gate("relayIn"));
-
         for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
             auto ie = ifTable->getInterface(i);
             if (!ie->isLoopback() && ie->isWired() && ie->isMulticast() /* && ie->getProtocol() == &Protocol::ethernetMac */) {   // TODO check protocol

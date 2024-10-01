@@ -6,7 +6,6 @@
 //
 
 #include "inet/applications/generic/IpvxTrafGen.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -38,7 +37,6 @@ void IpvxTrafSink::initialize(int stage)
             protocol = new Protocol(buff, buff);
             ProtocolGroup::getIpProtocolGroup()->addProtocol(protocolId, protocol);
         }
-        registerProtocol(*protocol, gate("ipOut"), gate("ipIn"));
     }
 }
 

@@ -78,9 +78,6 @@ class INET_API MultiFieldClassifier : public queueing::PacketClassifierBase
     virtual void refreshDisplay() const override;
 
     virtual int classifyPacket(Packet *packet) override;
-
-    virtual void mapRegistrationForwardingGates(cGate *gate, std::function<void(cGate *)> f) override;
-
 };
 
 } // namespace inet

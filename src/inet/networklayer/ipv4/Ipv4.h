@@ -13,7 +13,6 @@
 #include <map>
 #include <set>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Message.h"
@@ -34,7 +33,7 @@ class IIpv4RoutingTable;
 /**
  * Implements the Ipv4 protocol.
  */
-class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetworkProtocol, public DefaultProtocolRegistrationListener, public cListener
+class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetworkProtocol, public cListener
 {
   public:
     /**
@@ -211,9 +210,6 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
   public:
     Ipv4();
     virtual ~Ipv4();
-
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

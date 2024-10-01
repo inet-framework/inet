@@ -8,14 +8,13 @@
 #ifndef __INET_PACKETFLOWPCAPFILERECORDER_H
 #define __INET_PACKETFLOWPCAPFILERECORDER_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/recorder/IPcapWriter.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketFlowPcapFileRecorder : public PacketFlowBase, public TransparentProtocolRegistrationListener
+class INET_API PacketFlowPcapFileRecorder : public PacketFlowBase
 {
   protected:
     IPcapWriter *pcapWriter = nullptr;
@@ -26,7 +25,6 @@ class INET_API PacketFlowPcapFileRecorder : public PacketFlowBase, public Transp
     virtual void initialize(int stage) override;
     virtual void finish() override;
 
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
   public:
     virtual void processPacket(Packet *packet) override;

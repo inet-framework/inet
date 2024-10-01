@@ -43,16 +43,6 @@ void PacketDelayerBase::processPacket(Packet *packet, simtime_t sendingTime)
     pushOrSendPacket(packet, outputGate, consumer);
 }
 
-cGate *PacketDelayerBase::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 void PacketDelayerBase::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");

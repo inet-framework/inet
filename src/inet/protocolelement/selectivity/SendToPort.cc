@@ -7,7 +7,6 @@
 
 #include "inet/protocolelement/selectivity/SendToPort.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
@@ -21,11 +20,8 @@ Define_Module(SendToPort);
 void SendToPort::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LOCAL)
         port = par("port");
-        registerService(AccessoryProtocol::destinationPort, inputGate, nullptr);
-        registerProtocol(AccessoryProtocol::destinationPort, outputGate, nullptr);
-    }
 }
 
 void SendToPort::processPacket(Packet *packet)

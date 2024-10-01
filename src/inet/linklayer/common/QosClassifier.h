@@ -8,14 +8,13 @@
 #ifndef __INET_QOSCLASSIFIER_H
 #define __INET_QOSCLASSIFIER_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 
 namespace inet {
 
 /**
  * This module classifies and assigns User Priority to packets.
  */
-class INET_API QosClassifier : public cSimpleModule, public DefaultProtocolRegistrationListener
+class INET_API QosClassifier : public cSimpleModule
 {
   protected:
     int defaultUp;
@@ -27,9 +26,6 @@ class INET_API QosClassifier : public cSimpleModule, public DefaultProtocolRegis
     virtual void parseUserPriorityMap(const char *text, std::map<int, int>& upMap);
 
     virtual int getUserPriority(cMessage *msg);
-
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
   public:
     QosClassifier() {}

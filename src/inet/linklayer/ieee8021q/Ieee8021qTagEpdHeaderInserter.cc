@@ -7,7 +7,6 @@
 
 #include "inet/linklayer/ieee8021q/Ieee8021qTagEpdHeaderInserter.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/ProtocolUtils.h"
@@ -40,8 +39,6 @@ void Ieee8021qTagEpdHeaderInserter::initialize(int stage)
         defaultUserPriority = par("defaultUserPriority");
         defaultDropEligible = par("defaultDropEligible");
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
-        registerService(*qtagProtocol, inputGate, nullptr);
 }
 
 void Ieee8021qTagEpdHeaderInserter::processPacket(Packet *packet)

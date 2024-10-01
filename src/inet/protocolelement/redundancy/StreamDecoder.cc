@@ -71,16 +71,6 @@ void StreamDecoder::configureMappings()
     }
 }
 
-cGate *StreamDecoder::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 void StreamDecoder::processPacket(Packet *packet)
 {
     auto vlanInd = packet->findTag<VlanInd>();
