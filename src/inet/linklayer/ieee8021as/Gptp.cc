@@ -10,6 +10,7 @@
 
 #include "inet/clock/model/SettableClock.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"

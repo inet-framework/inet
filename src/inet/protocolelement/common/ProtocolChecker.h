@@ -8,6 +8,7 @@
 #ifndef __INET_PROTOCOLCHECKER_H
 #define __INET_PROTOCOLCHECKER_H
 
+#include "inet/common/Protocol.h"
 #include "inet/queueing/base/PacketFilterBase.h"
 
 namespace inet {

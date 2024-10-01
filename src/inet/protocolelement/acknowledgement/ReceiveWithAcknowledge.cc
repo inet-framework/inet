@@ -7,6 +7,7 @@
 
 #include "inet/protocolelement/acknowledgement/ReceiveWithAcknowledge.h"
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/protocolelement/acknowledgement/AcknowledgeHeader_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"
