@@ -20,8 +20,8 @@ void CompoundPacketQueueBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         packetCapacity = par("packetCapacity");
         dataCapacity = b(par("dataCapacity"));
-        consumer.reference(inputGate, true, 1);
-        provider.reference(outputGate, true, -1);
+        consumer.reference(inputGate, true, nullptr, 1);
+        provider.reference(outputGate, true, nullptr, -1);
         collection = check_and_cast<IPacketCollection *>(provider.get());
         packetDropperFunction = createDropperFunction(par("dropperClass"));
         subscribe(packetDroppedSignal, this);
