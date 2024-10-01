@@ -121,8 +121,8 @@ void NetworkInterface::initialize(int stage)
         else
             wireless = rxIn == nullptr && txOut == nullptr;
 
-        upperLayerInConsumer.reference(upperLayerIn, false, 1);
-        upperLayerOutConsumer.reference(upperLayerOut, false, 1);
+        upperLayerInConsumer.reference(upperLayerIn, false, nullptr, 1);
+        upperLayerOutConsumer.reference(upperLayerOut, false, nullptr, 1);
         interfaceTable.reference(this, "interfaceTableModule", false);
         setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
         setCarrier(computeCarrier());
