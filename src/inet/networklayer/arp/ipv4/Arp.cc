@@ -524,5 +524,13 @@ void Arp::sendArpProbe(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Addre
     ifOutSink.pushPacket(packet);
 }
 
+void Arp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("ifIn"))
+        processArpPacket(packet);
+}
+
 } // namespace inet
 

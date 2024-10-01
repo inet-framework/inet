@@ -22,7 +22,7 @@ namespace inet {
 /**
  * Implements a DHCP client. See NED file for more details.
  */
-class INET_API DhcpClient : public ApplicationBase, public cListener, public UdpSocket::ICallback, public IModuleInterfaceLookup
+class INET_API DhcpClient : public ApplicationBase, public cListener, public UdpSocket::ICallback, public IPassivePacketSink, public IModuleInterfaceLookup
 {
   protected:
 
@@ -170,6 +170,13 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
   public:
     DhcpClient() {}
     virtual ~DhcpClient();
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
     virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };

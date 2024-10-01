@@ -184,5 +184,12 @@ void EtherTrafGen::finish()
     timerMsg = nullptr;
 }
 
+void EtherTrafGen::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    receivePacket(packet);
+}
+
 } // namespace inet
 

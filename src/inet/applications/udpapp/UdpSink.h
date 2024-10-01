@@ -14,10 +14,12 @@
 
 namespace inet {
 
+using namespace inet::queueing;
+
 /**
  * Consumes and prints packets received from the Udp module. See NED for more info.
  */
-class INET_API UdpSink : public ApplicationBase, public UdpSocket::ICallback, public IModuleInterfaceLookup
+class INET_API UdpSink : public ApplicationBase, public UdpSocket::ICallback, public IPassivePacketSink, public IModuleInterfaceLookup
 {
   protected:
     enum SelfMsgKinds { START = 1, STOP };
@@ -33,6 +35,13 @@ class INET_API UdpSink : public ApplicationBase, public UdpSocket::ICallback, pu
   public:
     UdpSink() {}
     virtual ~UdpSink();
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("trafficIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("trafficIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
     virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 

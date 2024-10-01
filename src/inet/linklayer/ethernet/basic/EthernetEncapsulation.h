@@ -25,7 +25,7 @@ using namespace inet::queueing;
 /**
  * Performs Ethernet II encapsulation/decapsulation. More info in the NED file.
  */
-class INET_API EthernetEncapsulation : public OperationalBase
+class INET_API EthernetEncapsulation : public OperationalBase, public IPassivePacketSink
 {
   protected:
     std::set<const Protocol *> upperProtocols; // where to send packets after decapsulation
@@ -71,6 +71,13 @@ class INET_API EthernetEncapsulation : public OperationalBase
     virtual void handleSendPause(cMessage *msg);
 
     virtual void refreshDisplay() const override;
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("upperLayerIn") || gate->isName("lowerLayerIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("upperLayerIn") || gate->isName("lowerLayerIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
     // for lifecycle:
     virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }

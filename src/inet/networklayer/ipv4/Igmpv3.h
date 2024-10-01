@@ -33,7 +33,7 @@ using namespace inet::queueing;
 class IInterfaceTable;
 class IRoutingTable;
 
-class INET_API Igmpv3 : public SimpleModule, protected cListener
+class INET_API Igmpv3 : public SimpleModule, protected cListener, public IPassivePacketSink
 {
   protected:
     enum RouterState {
@@ -291,6 +291,13 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
     static void insertChecksum(ChecksumMode checksumMode, const Ptr<IgmpMessage>& igmpMsg, Packet *payload);
     void insertChecksum(const Ptr<IgmpMessage>& igmpMsg, Packet *payload) { insertChecksum(checksumMode, igmpMsg, payload); }
     bool verifyChecksum(const Packet *packet);
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("ipIn") || gate->isName("routerIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("ipIn") || gate->isName("routerIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
   public:
     /**

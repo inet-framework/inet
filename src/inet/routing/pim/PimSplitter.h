@@ -29,7 +29,7 @@ using namespace inet::queueing;
  * Packets received from the PIM modules are simply forwarded to the
  * network layer.
  */
-class INET_API PimSplitter : public SimpleModule
+class INET_API PimSplitter : public SimpleModule, public IPassivePacketSink
 {
   private:
     ModuleRefByPar<IInterfaceTable> ift;
@@ -50,6 +50,14 @@ class INET_API PimSplitter : public SimpleModule
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void processPIMPacket(Packet *pkt);
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("ipIn") || gate->isName("pimDMIn") || gate->isName("pimSMIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("ipIn") || gate->isName("pimDMIn") || gate->isName("pimSMIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace inet

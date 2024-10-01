@@ -19,7 +19,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
+class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener, public IPassivePacketSink
 {
   protected:
     /** @brief Gate ids */
@@ -88,6 +88,14 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
 
     virtual bool canDequeuePacket() const;
     virtual Packet *dequeuePacket();
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("upperLayerIn") || gate->isName("lowerLayerIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return canPushSomePacket(gate); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace inet

@@ -702,4 +702,11 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
         throw cRuntimeError("Unknown signal");
 }
 
+void Gptp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
+}
+
 } // namespace inet

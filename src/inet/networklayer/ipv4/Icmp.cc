@@ -409,5 +409,12 @@ bool Icmp::verifyChecksum(const Packet *packet)
     }
 }
 
+void Icmp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    processIcmpMessage(packet);
+}
+
 } // namespace inet
 
