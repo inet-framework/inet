@@ -8,6 +8,7 @@
 #include "inet/protocolelement/selectivity/SendToMacAddress.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/selectivity/DestinationMacAddressHeader_m.h"

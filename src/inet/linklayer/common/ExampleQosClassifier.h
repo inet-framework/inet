@@ -7,6 +7,7 @@
 #ifndef __INET_EXAMPLEQOSCLASSIFIER_H
 #define __INET_EXAMPLEQOSCLASSIFIER_H
 
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

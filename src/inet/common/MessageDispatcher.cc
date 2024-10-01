@@ -8,7 +8,6 @@
 #include "inet/common/MessageDispatcher.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/queueing/common/PassivePacketSinkRef.h"

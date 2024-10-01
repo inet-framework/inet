@@ -8,6 +8,7 @@
 #ifndef __INET_QOSCLASSIFIER_H
 #define __INET_QOSCLASSIFIER_H
 
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 
