@@ -22,6 +22,8 @@ namespace inet {
 class INET_API IpvxTrafSink : public ApplicationBase
 {
   protected:
+    const Protocol *protocol = nullptr;
+
     int numReceived;
 
   protected:
