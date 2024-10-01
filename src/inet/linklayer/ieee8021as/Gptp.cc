@@ -554,4 +554,11 @@ void Gptp::handleDelayOrSendFollowUp(const GptpBase *gptp, cComponent *source)
     }
 }
 
+void Gptp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
+}
+
 } // namespace inet

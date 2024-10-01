@@ -13,11 +13,14 @@
 #include "inet/common/socket/SocketMap.h"
 #include "inet/linklayer/tun/TunSocket.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Socket.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 
-class INET_API TunnelApp : public ApplicationBase, public UdpSocket::ICallback, public Ipv4Socket::ICallback, public TunSocket::ICallback, public IModuleInterfaceLookup
+using namespace inet::queueing;
+
+class INET_API TunnelApp : public ApplicationBase, public UdpSocket::ICallback, public Ipv4Socket::ICallback, public TunSocket::ICallback, public IPassivePacketSink, public IModuleInterfaceLookup
 {
   protected:
     const Protocol *protocol = nullptr;
@@ -35,6 +38,13 @@ class INET_API TunnelApp : public ApplicationBase, public UdpSocket::ICallback, 
   public:
     TunnelApp();
     virtual ~TunnelApp();
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
     virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 

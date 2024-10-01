@@ -12,10 +12,11 @@
 #include "inet/applications/tcpapp/TcpServerSocketIo.h"
 #include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 
-class INET_API TcpServerListener : public ApplicationBase, public IModuleInterfaceLookup, public TcpSocket::ICallback
+class INET_API TcpServerListener : public ApplicationBase, public IPassivePacketSink, public IModuleInterfaceLookup, public TcpSocket::ICallback
 {
   protected:
     int connectionId = 0;
@@ -42,6 +43,13 @@ class INET_API TcpServerListener : public ApplicationBase, public IModuleInterfa
 
     virtual void removeConnection(TcpServerSocketIo *connection);
     virtual void connectionClosed(TcpServerSocketIo *connection);
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
     virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };

@@ -26,7 +26,7 @@ class Ipv4Header;
 /**
  * Icmp module.
  */
-class INET_API Icmp : public cSimpleModule
+class INET_API Icmp : public cSimpleModule, public IPassivePacketSink
 {
   protected:
     PassivePacketSinkRef ipSink;
@@ -58,6 +58,13 @@ class INET_API Icmp : public cSimpleModule
     static void insertCrc(CrcMode crcMode, const Ptr<IcmpHeader>& icmpHeader, Packet *payload);
     void insertCrc(const Ptr<IcmpHeader>& icmpHeader, Packet *payload) { insertCrc(crcMode, icmpHeader, payload); }
     bool verifyCrc(const Packet *packet);
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("upperLayerIn") || gate->isName("lowerLayerIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("upperLayerIn") || gate->isName("lowerLayerIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

@@ -358,5 +358,13 @@ void Dsdv::purge()
     }
 }
 
+void Dsdv::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
+}
+
 } // namespace inet
 

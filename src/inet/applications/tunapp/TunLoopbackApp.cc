@@ -80,6 +80,14 @@ void TunLoopbackApp::finish()
     EV_INFO << "packets received: " << packetsReceived << endl;
 }
 
+void TunLoopbackApp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
+}
+
 cGate *TunLoopbackApp::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     Enter_Method("lookupModuleInterface");

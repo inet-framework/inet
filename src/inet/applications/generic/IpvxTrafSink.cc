@@ -86,6 +86,13 @@ void IpvxTrafSink::processPacket(Packet *msg)
     numReceived++;
 }
 
+void IpvxTrafSink::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    processPacket(packet);
+}
+
 cGate *IpvxTrafSink::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     Enter_Method("lookupModuleInterface");

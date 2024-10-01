@@ -131,5 +131,12 @@ int ExampleQosClassifier::getUserPriority(cMessage *msg)
     return UP_BE;
 }
 
+void ExampleQosClassifier::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
+}
+
 } // namespace inet
 

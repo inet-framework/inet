@@ -103,5 +103,13 @@ void PimSplitter::processPIMPacket(Packet *pkt)
     }
 }
 
+void PimSplitter::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
+}
+
 } // namespace inet
 

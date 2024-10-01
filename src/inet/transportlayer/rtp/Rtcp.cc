@@ -507,6 +507,13 @@ void Rtcp::calculateAveragePacketSize(int size)
     _averagePacketSize = sumPacketSize / (double)(++_packetsCalculated);
 }
 
+void Rtcp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessageFromUDP(packet);
+}
+
 cGate *Rtcp::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     Enter_Method("lookupModuleInterface");

@@ -112,6 +112,13 @@ void UdpVideoStreamClient::handleCrashOperation(LifecycleOperation *operation)
         socket.destroy(); // TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
+void UdpVideoStreamClient::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    socket.processMessage(packet);
+}
+
 cGate *UdpVideoStreamClient::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     Enter_Method("lookupModuleInterface");

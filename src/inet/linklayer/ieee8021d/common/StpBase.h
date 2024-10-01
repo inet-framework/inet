@@ -23,7 +23,7 @@ using namespace inet::queueing;
 /**
  * Base class for Stp and Rstp.
  */
-class INET_API StpBase : public OperationalBase, public cListener
+class INET_API StpBase : public OperationalBase, public IPassivePacketSink, public cListener
 {
   protected:
     bool visualize = false; // if true it visualize the spanning tree
@@ -50,6 +50,13 @@ class INET_API StpBase : public OperationalBase, public cListener
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("relayIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("relayIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override {}
 

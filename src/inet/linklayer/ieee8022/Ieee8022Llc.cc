@@ -270,5 +270,13 @@ void Ieee8022Llc::handleCrashOperation(LifecycleOperation *operation)
     clearSockets();
 }
 
+void Ieee8022Llc::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessageWhenUp(packet);
+}
+
 } // namespace inet
 

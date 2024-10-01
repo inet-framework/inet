@@ -1254,5 +1254,13 @@ void Ipv6::sendIcmpError(Packet *packet, Icmpv6Type type, int code)
     delete packet;
 }
 
+void Ipv6::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
+}
+
 } // namespace inet
 

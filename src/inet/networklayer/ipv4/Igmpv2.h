@@ -23,7 +23,7 @@ using namespace inet::queueing;
 class IInterfaceTable;
 class IIpv4RoutingTable;
 
-class INET_API Igmpv2 : public cSimpleModule, public cListener
+class INET_API Igmpv2 : public cSimpleModule, public cListener, public IPassivePacketSink
 {
   protected:
     enum RouterState {
@@ -233,6 +233,13 @@ class INET_API Igmpv2 : public cSimpleModule, public cListener
     static void insertCrc(CrcMode crcMode, const Ptr<IgmpMessage>& igmpMsg, Packet *payload);
     void insertCrc(const Ptr<IgmpMessage>& igmpMsg, Packet *payload) { insertCrc(crcMode, igmpMsg, payload); }
     bool verifyCrc(const Packet *packet);
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("ipIn") || gate->isName("routerIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("ipIn") || gate->isName("routerIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace inet

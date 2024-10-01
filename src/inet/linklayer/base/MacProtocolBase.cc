@@ -190,5 +190,13 @@ Packet *MacProtocolBase::dequeuePacket()
     return packet;
 }
 
+void MacProtocolBase::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    emit(packetReceivedFromUpperSignal, packet);
+    handleUpperPacket(packet);
+}
+
 } // namespace inet
 

@@ -87,6 +87,16 @@ void MacRelayUnitBase::updatePeerAddress(NetworkInterface *incomingInterface, Ma
     }
 }
 
+void MacRelayUnitBase::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("lowerLayerIn"))
+        handleLowerPacket(packet);
+    else
+        handleUpperPacket(packet);
+}
+
 void MacRelayUnitBase::finish()
 {
     recordScalar("processed frames", numProcessedFrames);

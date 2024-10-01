@@ -134,6 +134,13 @@ void EtherAppServer::finish()
 {
 }
 
+void EtherAppServer::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    llcSocket.processMessage(packet);
+}
+
 cGate *EtherAppServer::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     Enter_Method("lookupModuleInterface");
