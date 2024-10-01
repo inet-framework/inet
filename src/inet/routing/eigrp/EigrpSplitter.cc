@@ -14,6 +14,7 @@
 #include "inet/routing/eigrp/EigrpSplitter.h"
 
 #include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
 namespace eigrp {
