@@ -164,5 +164,12 @@ int QosClassifier::getUserPriority(cMessage *msg)
     return defaultUp;
 }
 
+void QosClassifier::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
+}
+
 } // namespace inet
 

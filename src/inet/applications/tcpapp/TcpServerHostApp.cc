@@ -149,6 +149,17 @@ void TcpServerHostApp::threadClosed(TcpServerThreadBase *thread)
     thread->deleteModule();
 }
 
+void TcpServerHostApp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    auto socketInd = packet->getTag<SocketInd>();
+    if (auto socket = socketMap.findSocketById(socketInd->getSocketId()))
+        socket->processMessage(packet);
+    else
+        serverSocket.processMessage(packet);
+}
+
 cGate *TcpServerHostApp::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     Enter_Method("lookupModuleInterface");

@@ -104,6 +104,13 @@ void TcpServerListener::connectionClosed(TcpServerSocketIo *connection)
     connection->deleteModule();
 }
 
+void TcpServerListener::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    serverSocket.processMessage(packet);
+}
+
 cGate *TcpServerListener::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     Enter_Method("lookupModuleInterface");

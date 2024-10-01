@@ -993,5 +993,15 @@ bool Igmpv2::verifyCrc(const Packet *packet)
     }
 }
 
+void Igmpv2::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("routerIn"))
+        ipSink.pushPacket(packet);
+    else
+        processIgmpMessage(packet);
+}
+
 } // namespace inet
 

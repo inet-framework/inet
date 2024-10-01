@@ -1704,6 +1704,13 @@ Aodv::~Aodv()
     delete blacklistTimer;
 }
 
+void Aodv::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    socket.processMessage(packet);
+}
+
 cGate *Aodv::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     Enter_Method("lookupModuleInterface");

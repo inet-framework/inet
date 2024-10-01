@@ -13,15 +13,18 @@
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 #define MAX_REPLY_CHUNK_SIZE    1497
 
 /**
  * Server-side process EtherAppClient.
  */
-class INET_API EtherAppServer : public ApplicationBase, public Ieee8022LlcSocket::ICallback, public IModuleInterfaceLookup
+class INET_API EtherAppServer : public ApplicationBase, public Ieee8022LlcSocket::ICallback, public IPassivePacketSink, public IModuleInterfaceLookup
 {
   protected:
     int localSap = 0;
@@ -46,6 +49,14 @@ class INET_API EtherAppServer : public ApplicationBase, public Ieee8022LlcSocket
     void sendPacket(Packet *datapacket, int interfaceId, const MacAddress& destAddr, int destSap);
     virtual void socketDataArrived(Ieee8022LlcSocket *, Packet *msg) override;
     virtual void socketClosed(Ieee8022LlcSocket *socket) override;
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("in"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("in"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
     virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };

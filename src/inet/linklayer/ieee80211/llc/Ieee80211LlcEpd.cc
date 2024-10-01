@@ -74,6 +74,14 @@ const Protocol *Ieee80211LlcEpd::getProtocol() const
     return &Protocol::ieee802epd;
 }
 
+void Ieee80211LlcEpd::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
+}
+
 } // namespace ieee80211
 } // namespace inet
 

@@ -125,6 +125,27 @@ void EthernetSocketIo::socketClosed(EthernetSocket *socket)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
+void EthernetSocketIo::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("trafficIn")) {
+        if (packet->findTag<PacketProtocolTag>() == nullptr) {
+            auto packetProtocolTag = packet->addTag<PacketProtocolTag>();
+            packetProtocolTag->setProtocol(&Protocol::unknown);
+        }
+        auto& macAddressReq = packet->addTag<MacAddressReq>();
+        macAddressReq->setDestAddress(remoteAddress);
+        socket.send(packet);
+        numSent++;
+        emit(packetSentSignal, packet);
+    }
+    else {
+        if (socket.belongsToSocket(packet))
+            socket.processMessage(packet);
+    }
+}
+
 void EthernetSocketIo::handleStartOperation(LifecycleOperation *operation)
 {
     setSocketOptions();

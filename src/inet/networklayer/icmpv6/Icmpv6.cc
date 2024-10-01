@@ -364,5 +364,12 @@ bool Icmpv6::verifyCrc(const Packet *packet)
     }
 }
 
+void Icmpv6::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    processICMPv6Message(packet);
+}
+
 } // namespace inet
 

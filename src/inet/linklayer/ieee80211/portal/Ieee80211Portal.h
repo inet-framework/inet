@@ -20,7 +20,7 @@ namespace ieee80211 {
 
 using namespace inet::queueing;
 
-class INET_API Ieee80211Portal : public cSimpleModule, public IIeee80211Llc
+class INET_API Ieee80211Portal : public cSimpleModule, public IIeee80211Llc, public IPassivePacketSink
 {
   protected:
     PassivePacketSinkRef lowerLayerSink;
@@ -39,6 +39,13 @@ class INET_API Ieee80211Portal : public cSimpleModule, public IIeee80211Llc
 
   public:
     const Protocol *getProtocol() const override { return &Protocol::ieee8022llc; }
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("trafficIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("trafficIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace ieee80211

@@ -24,10 +24,13 @@
 #include "inet/transportlayer/sctp/SctpCrcInsertionHook.h"
 #include "inet/transportlayer/sctp/SctpHeader.h"
 #include "inet/transportlayer/sctp/SctpUdpHook.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 #include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
 namespace sctp {
+
+using namespace inet::queueing;
 
 #define SCTP_UDP_PORT    9899
 
@@ -78,7 +81,7 @@ class SctpHeader;
  * The concrete SctpAlgorithm class to use can be chosen per association (in OPEN)
  * or in a module parameter.
  */
-class INET_API Sctp : public cSimpleModule
+class INET_API Sctp : public cSimpleModule, public IPassivePacketSink
 {
   public:
     struct AppAssocKey {
@@ -274,6 +277,13 @@ class INET_API Sctp : public cSimpleModule
     void setRtoMax(double rtoMax) { socketOptions->rtoMax = rtoMax; }
     void setInterfaceId(int id) { interfaceId = id; }
     int getInterfaceId() { return interfaceId; };
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace sctp

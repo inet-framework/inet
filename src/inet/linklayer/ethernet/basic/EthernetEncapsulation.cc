@@ -321,5 +321,15 @@ void EthernetEncapsulation::handleCrashOperation(LifecycleOperation *operation)
     clearSockets();
 }
 
+void EthernetEncapsulation::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("upperLayerIn"))
+        processPacketFromHigherLayer(packet);
+    else
+        processPacketFromMac(packet);
+}
+
 } // namespace inet
 

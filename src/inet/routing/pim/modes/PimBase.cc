@@ -230,6 +230,13 @@ bool PimBase::AssertMetric::operator<(const AssertMetric& other) const
     return address > other.address;
 }
 
+void PimBase::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
+}
+
 std::ostream& operator<<(std::ostream& out, const PimBase::SourceAndGroup& sourceGroup)
 {
     out << "(source: " << (sourceGroup.source.isUnspecified() ? "*" : sourceGroup.source.str()) << ", "

@@ -13,7 +13,9 @@
 
 namespace inet {
 
-class INET_API TcpServerSocketIo : public cSimpleModule, public TcpSocket::ICallback, public IModuleInterfaceLookup
+using namespace inet::queueing;
+
+class INET_API TcpServerSocketIo : public cSimpleModule, public TcpSocket::ICallback, public IPassivePacketSink, public IModuleInterfaceLookup
 {
   protected:
     PassivePacketSinkRef trafficSink;
@@ -41,6 +43,13 @@ class INET_API TcpServerSocketIo : public cSimpleModule, public TcpSocket::ICall
     virtual void socketDeleted(TcpSocket *socket) override { ASSERT(socket == this->socket); if (readDelayTimer) cancelEvent(readDelayTimer); socket = nullptr; }
 
     virtual void sendOrScheduleReadCommandIfNeeded();
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("trafficIn") || gate->isName("socketIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("trafficIn") || gate->isName("socketIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
     virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };

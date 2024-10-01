@@ -1237,6 +1237,13 @@ opp_string NetPerfMeter::format(const char *formatString, ...)
     return opp_string(str);
 }
 
+void NetPerfMeter::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
+}
+
 cGate *NetPerfMeter::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     Enter_Method("lookupModuleInterface");

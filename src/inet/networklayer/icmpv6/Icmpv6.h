@@ -26,7 +26,7 @@ class PingPayload;
 /**
  * ICMPv6 implementation.
  */
-class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported
+class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported, public IPassivePacketSink
 {
   public:
     /**
@@ -88,6 +88,13 @@ class INET_API Icmpv6 : public cSimpleModule, public LifecycleUnsupported
     virtual void errorOut(const Ptr<const Icmpv6Header>& header);
 
   public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("transportIn") || gate->isName("ipv6In"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("transportIn") || gate->isName("ipv6In"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
     static void insertCrc(CrcMode crcMode, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet);
     void insertCrc(const Ptr<Icmpv6Header>& icmpHeader, Packet *packet) { insertCrc(crcMode, icmpHeader, packet); }
 

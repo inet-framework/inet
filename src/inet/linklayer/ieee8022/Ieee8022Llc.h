@@ -21,7 +21,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API Ieee8022Llc : public OperationalBase
+class INET_API Ieee8022Llc : public OperationalBase, public IPassivePacketSink
 {
   protected:
     struct SocketDescriptor {
@@ -62,6 +62,13 @@ class INET_API Ieee8022Llc : public OperationalBase
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
   public:
     virtual ~Ieee8022Llc();

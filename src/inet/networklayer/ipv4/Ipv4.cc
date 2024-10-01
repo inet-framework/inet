@@ -1440,5 +1440,17 @@ void Ipv4::sendIcmpError(Packet *origPacket, int inputInterfaceId, IcmpType type
     delete origPacket;
 }
 
+void Ipv4::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("transportIn"))
+        handlePacketFromHL(packet);
+    else if (gate->isName("queueIn"))
+        handleIncomingDatagram(packet);
+    else
+        throw cRuntimeError("Unknown gate");
+}
+
 } // namespace inet
 

@@ -120,6 +120,23 @@ void Ieee80211Portal::decapsulate(Packet *packet)
 #endif // ifdef INET_WITH_ETHERNET
 }
 
+void Ieee80211Portal::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("upperLayerIn")) {
+        encapsulate(packet);
+        lowerLayerSink.pushPacket(packet);
+    }
+    else if (gate->isName("lowerLayerIn")) {
+        decapsulate(packet);
+        if (upperLayerOutConnected)
+            upperLayerSink.pushPacket(packet);
+        else
+            delete packet;
+    }
+}
+
 } // namespace ieee80211
 
 } // namespace inet

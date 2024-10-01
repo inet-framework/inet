@@ -77,6 +77,18 @@ void TcpServerSocketIo::sendOrScheduleReadCommandIfNeeded()
     }
 }
 
+void TcpServerSocketIo::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("trafficIn"))
+        socket->send(packet);
+    else if (gate->isName("socketIn"))
+        socket->processMessage(packet);
+    else
+        throw cRuntimeError("Unknown packet");
+}
+
 cGate *TcpServerSocketIo::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     Enter_Method("lookupModuleInterface");

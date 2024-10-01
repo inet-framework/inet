@@ -357,6 +357,14 @@ void UdpBasicBurst::handleCrashOperation(LifecycleOperation *operation)
         socket.destroy(); // TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
+
+void UdpBasicBurst::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    socket.processMessage(packet);
+}
+
 cGate *UdpBasicBurst::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     Enter_Method("lookupModuleInterface");

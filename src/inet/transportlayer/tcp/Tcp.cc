@@ -566,6 +566,18 @@ std::ostream& operator<<(std::ostream& os, const TcpConnection& conn)
     return os;
 }
 
+void Tcp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("appIn"))
+        handleUpperPacket(packet);
+    else if (gate->isName("ipIn"))
+        handleLowerPacket(packet);
+    else
+        throw cRuntimeError("Unknown gate: %s", gate->getFullName());
+}
+
 } // namespace tcp
 } // namespace inet
 
