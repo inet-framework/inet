@@ -11,6 +11,7 @@
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/queueing/common/PassivePacketSinkRef.h"
+#include "inet/queueing/base/AnimatePacket.h"
 
 namespace inet {
 
@@ -39,15 +40,78 @@ bool MessageDispatcher::canPushPacket(Packet *packet, const cGate *inGate) const
     return consumer != nullptr && !dynamic_cast<MessageDispatcher *>(consumer) && consumer->canPushPacket(packet, outGate->getPathEndGate());
 }
 
+cGate *MessageDispatcher::handlePacket(Packet *packet, const cGate *inGate)
+{
+    const TagBase *tag = nullptr;
+    const auto& dispatchProtocolReq = packet->findTag<DispatchProtocolReq>();
+    const auto& interfaceReq = packet->findTag<InterfaceReq>();
+    const auto& socketInd = packet->findTag<SocketInd>();
+    // KLUDGE eliminate this by adding ServicePrimitive to every DispatchProtocolReq
+    DispatchProtocolReq dispatchProtocolReqArgument;
+    cGate *referencedGate;
+    if (socketInd != nullptr) {
+        tag = socketInd.get();
+        auto it = socketIdMap.find(socketInd->getSocketId());
+        if (it != socketIdMap.end())
+            referencedGate = it->second;
+        else {
+            referencedGate = forwardLookupModuleInterface(inGate, typeid(IPassivePacketSink), socketInd.get(), 0);
+            socketIdMap[socketInd->getSocketId()] = referencedGate;
+        }
+    }
+    else if (dispatchProtocolReq != nullptr) {
+        const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();
+        // KLUDGE eliminate this by adding ServicePrimitive to every DispatchProtocolReq
+        dispatchProtocolReqArgument = *dispatchProtocolReq;
+        if (dispatchProtocolReq->getServicePrimitive() == static_cast<ServicePrimitive>(-1)) {
+            if (packetProtocolTag != nullptr && dispatchProtocolReq->getProtocol() == packetProtocolTag->getProtocol())
+                dispatchProtocolReqArgument.setServicePrimitive(SP_INDICATION);
+            else
+                dispatchProtocolReqArgument.setServicePrimitive(SP_REQUEST);
+        }
+        tag = &dispatchProtocolReqArgument;
+        auto key = Key(dispatchProtocolReq->getProtocol()->getId(), dispatchProtocolReqArgument.getServicePrimitive());
+        auto it = protocolIdMap.find(key);
+        if (it != protocolIdMap.end())
+            referencedGate = it->second;
+        else {
+            referencedGate = forwardLookupModuleInterface(inGate, typeid(IPassivePacketSink), &dispatchProtocolReqArgument, 0);
+            protocolIdMap[key] = referencedGate;
+        }
+    }
+    else if (interfaceReq != nullptr) {
+        tag = interfaceReq.get();
+        auto it = interfaceIdMap.find(interfaceReq->getInterfaceId());
+        if (it != interfaceIdMap.end())
+            referencedGate = it->second;
+        else {
+            referencedGate = forwardLookupModuleInterface(inGate, typeid(IPassivePacketSink), interfaceReq.get(), 0);
+            interfaceIdMap[interfaceReq->getInterfaceId()] = referencedGate;
+        }
+    }
+    else
+        throw cRuntimeError("Cannot forward packet because no dispatch information was found, packet = %s, gate = %s, hint = %s",
+                            printToStringIfPossible(packet, 0).c_str(),
+                            printToStringIfPossible(inGate, 0).c_str(),
+                            "the packet should have a DispatchProtocolReq, an InterfaceReq, or a SocketInd packet tag attached");
+    if (referencedGate == nullptr)
+        throw cRuntimeError("Cannot forward packet because no IPassivePacketSink module interface was found, packet = %s, gate = %s, tag = %s, hint = %s",
+                            printToStringIfPossible(packet, 0).c_str(),
+                            printToStringIfPossible(inGate, 0).c_str(),
+                            printToStringIfPossible(tag, 0).c_str(),
+                            "add @interface properties on one of the connected gates or implement the IModuleInterfaceLookup C++ interface with one of the connected modules");
+    return referencedGate;
+}
+
 void MessageDispatcher::pushPacket(Packet *packet, const cGate *inGate)
 {
     Enter_Method("pushPacket");
+    ASSERT(inGate->isName("in"));
     take(packet);
-    auto outGate = handlePacket(packet, inGate);
-    queueing::PassivePacketSinkRef consumer;
-    consumer.reference(outGate, false);
-    handlePacketProcessed(packet);
-    pushOrSendPacket(packet, outGate, consumer);
+    auto referencedGate = handlePacket(packet, inGate);
+    auto passivePacketSink = check_and_cast<IPassivePacketSink *>(referencedGate->getOwnerModule());
+    queueing::animatePushPacket(packet, referencedGate->getPathStartGate(), referencedGate);
+    passivePacketSink->pushPacket(packet, referencedGate);
     updateDisplayString();
 }
 
@@ -91,18 +155,65 @@ void MessageDispatcher::handlePushPacketProcessed(Packet *packet, const cGate *g
 
 #endif // #ifdef INET_WITH_QUEUEING
 
-int MessageDispatcher::getGateIndexToConnectedModule(const char *moduleName)
+bool MessageDispatcher::hasLookupModuleInterface(const cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
-    int size = gateSize("out");
+    int size = gateSize(gate->getType() == cGate::INPUT ? "out" : "in");
     for (int i = 0; i < size; i++) {
-        auto g = gate("out", i);
-        while (g != nullptr) {
-            if (!strcmp(g->getOwnerModule()->getFullName(), moduleName))
-                return i;
-            g = g->getNextGate();
+        if (i != gate->getIndex()) {
+            cGate *referencingGate = this->gate(gate->getType() == cGate::INPUT ? "out" : "in", i);
+            if (findModuleInterface(referencingGate, type, arguments) != nullptr)
+                return true;
         }
     }
-    throw cRuntimeError("Cannot find module: %s", moduleName);
+    return false;
+}
+
+cGate *MessageDispatcher::forwardLookupModuleInterface(const cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    cGate *result = nullptr;
+    int size = gateSize(gate->getType() == cGate::INPUT ? "out" : "in");
+    for (int i = 0; i < size; i++) {
+        if (i != gate->getIndex()) {
+            cGate *referencingGate = this->gate(gate->getType() == cGate::INPUT ? "out" : "in", i);
+            cGate *referencedGate = findModuleInterface(referencingGate, type, arguments);
+            if (referencedGate != nullptr) {
+                auto referencedModule = referencedGate->getOwnerModule();
+                if (result != nullptr) {
+                    // KLUDGE: to avoid ambiguity
+                    bool resultIsMessageDispatcher = dynamic_cast<MessageDispatcher *>(result->getOwnerModule());
+                    bool referencedModuleIsMessageDispatcher = dynamic_cast<MessageDispatcher *>(referencedModule);
+                    if (!resultIsMessageDispatcher && referencedModuleIsMessageDispatcher)
+                        break;
+                    else if (referencedModuleIsMessageDispatcher || (!resultIsMessageDispatcher && !referencedModuleIsMessageDispatcher))
+                        throw cRuntimeError("Cannot find module interface because the result is ambiguous, candidate1 = %s, candidate2 = %s, module = %s, gate = %s, type = %s, arguments = %s, direction = %s",
+                                printToStringIfPossible(result->getOwnerModule(), 0).c_str(),
+                                printToStringIfPossible(referencedModule, 0).c_str(),
+                                printToStringIfPossible(gate->getOwnerModule(), 0).c_str(),
+                                printToStringIfPossible(gate, 0).c_str(),
+                                opp_typename(type),
+                                printToStringIfPossible(arguments, 0).c_str(),
+                                printToStringIfPossible(direction, 0).c_str());
+                }
+                result = referencedGate;
+            }
+        }
+    }
+    return result;
+}
+
+cGate *MessageDispatcher::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("in")) {
+        if (type == typeid(IPassivePacketSink)) { // handle all packets
+            if (arguments == nullptr)
+                return gate;
+            else if (hasLookupModuleInterface(gate, type, arguments, direction))
+                return gate;
+        }
+    }
+    return forwardLookupModuleInterface(gate, type, arguments, direction); // forward all other interfaces
 }
 
 } // namespace inet
