@@ -33,7 +33,6 @@ import inet.linklayer.contract.IEthernetLayer;
 simple EthernetEncapsulation like IEthernetLayer
 {
     parameters:
-        bool registerProtocol = default(false);     //FIXME //KLUDGE should redesign place of EthernetEncapsulation and LLC modules
         string interfaceTableModule;   // The path to the InterfaceTable module
         string fcsMode @enum("declared","computed") = default("declared");
         @lifecycleSupport;

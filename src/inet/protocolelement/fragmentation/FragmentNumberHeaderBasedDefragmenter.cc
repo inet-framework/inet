@@ -7,7 +7,6 @@
 
 #include "inet/protocolelement/fragmentation/FragmentNumberHeaderBasedDefragmenter.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/fragmentation/header/FragmentNumberHeader_m.h"
 
@@ -18,11 +17,8 @@ Define_Module(FragmentNumberHeaderBasedDefragmenter);
 void FragmentNumberHeaderBasedDefragmenter::initialize(int stage)
 {
     DefragmenterBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LOCAL)
         headerPosition = parseHeaderPosition(par("headerPosition"));
-        registerService(AccessoryProtocol::fragmentation, nullptr, inputGate);
-        registerProtocol(AccessoryProtocol::fragmentation, nullptr, outputGate);
-    }
 }
 
 void FragmentNumberHeaderBasedDefragmenter::pushPacket(Packet *fragmentPacket, const cGate *gate)

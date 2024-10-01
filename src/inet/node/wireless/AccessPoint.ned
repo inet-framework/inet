@@ -51,7 +51,6 @@ module AccessPoint
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         bridging.hasStp = false;
         *.fcsMode = this.fcsMode;
-        ethernet.registerProtocol = default(true);
     gates:
         input radioIn[numWlanInterfaces] @directIn;
         inout ethg[] @labels(EtherFrame-conn);

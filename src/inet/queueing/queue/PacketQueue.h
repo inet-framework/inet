@@ -8,7 +8,6 @@
 #ifndef __INET_PACKETQUEUE_H
 #define __INET_PACKETQUEUE_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PacketQueueBase.h"
 #include "inet/queueing/common/ActivePacketSinkRef.h"
 #include "inet/queueing/common/ActivePacketSourceRef.h"
@@ -21,7 +20,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICallback, public TransparentProtocolRegistrationListener
+class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICallback
 {
   protected:
     int packetCapacity = -1;
@@ -47,7 +46,6 @@ class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICall
   public:
     virtual ~PacketQueue() { delete packetDropperFunction; }
 
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
     virtual int getMaxNumPackets() const override { return packetCapacity; }
     virtual int getNumPackets() const override;

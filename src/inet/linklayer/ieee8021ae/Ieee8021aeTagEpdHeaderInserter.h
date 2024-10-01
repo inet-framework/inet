@@ -17,7 +17,6 @@ using namespace inet::queueing;
 class INET_API Ieee8021aeTagEpdHeaderInserter : public PacketFlowBase
 {
   protected:
-    virtual void initialize(int stage) override;
     virtual void processPacket(Packet *packet) override;
 };
 

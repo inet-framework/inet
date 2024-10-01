@@ -73,13 +73,6 @@ void EthernetEncapsulation::initialize(int stage)
         WATCH(totalFromMAC);
         WATCH(totalPauseSent);
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
-        if (par("registerProtocol").boolValue()) { // FIXME //KUDGE should redesign place of EthernetEncapsulation and LLC modules
-            // register service and protocol
-            registerService(Protocol::ethernetMac, gate("upperLayerIn"), gate("upperLayerOut"));
-            registerProtocol(Protocol::ethernetMac, gate("lowerLayerOut"), gate("lowerLayerIn"));
-        }
-    }
 }
 
 void EthernetEncapsulation::handleMessageWhenUp(cMessage *msg)
@@ -321,26 +314,6 @@ void EthernetEncapsulation::handleStopOperation(LifecycleOperation *operation)
 void EthernetEncapsulation::handleCrashOperation(LifecycleOperation *operation)
 {
     clearSockets();
-}
-
-void EthernetEncapsulation::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterService");
-}
-
-void EthernetEncapsulation::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    // KLUDGE this should be here: if (!strcmp("upperLayerOut", gate->getBaseName()))
-    // but then the register protocol calls are lost, because they can't go through the traffic conditioner
-    upperProtocols.insert(&protocol);
-}
-
-void EthernetEncapsulation::handleRegisterAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterAnyProtocol");
-    if (!strcmp("upperLayerOut", gate->getBaseName()))
-        anyUpperProtocols = true;
 }
 
 } // namespace inet

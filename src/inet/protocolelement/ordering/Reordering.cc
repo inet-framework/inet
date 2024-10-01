@@ -7,7 +7,6 @@
 
 #include "inet/protocolelement/ordering/Reordering.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"
 
@@ -19,15 +18,6 @@ Reordering::~Reordering()
 {
     for (auto it : packets)
         delete it.second;
-}
-
-void Reordering::initialize(int stage)
-{
-    PacketPusherBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        registerService(AccessoryProtocol::sequenceNumber, inputGate, nullptr);
-        registerProtocol(AccessoryProtocol::sequenceNumber, outputGate, nullptr);
-    }
 }
 
 void Reordering::pushPacket(Packet *packet, const cGate *gate)

@@ -17,7 +17,6 @@ using namespace inet::queueing;
 class INET_API SubpacketLengthHeaderBasedDeaggregator : public DeaggregatorBase
 {
   protected:
-    virtual void initialize(int stage) override;
     virtual std::vector<Packet *> deaggregatePacket(Packet *packet) override;
 };
 

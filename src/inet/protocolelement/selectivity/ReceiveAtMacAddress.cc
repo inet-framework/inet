@@ -7,7 +7,6 @@
 
 #include "inet/protocolelement/selectivity/ReceiveAtMacAddress.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
@@ -24,8 +23,6 @@ void ReceiveAtMacAddress::initialize(int stage)
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         address = MacAddress(par("address").stringValue());
-        registerService(AccessoryProtocol::destinationMacAddress, nullptr, inputGate);
-        registerProtocol(AccessoryProtocol::destinationMacAddress, nullptr, outputGate);
         getContainingNicModule(this)->setMacAddress(address);
     }
 }

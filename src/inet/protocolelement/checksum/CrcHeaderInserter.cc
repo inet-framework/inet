@@ -7,7 +7,6 @@
 
 #include "inet/protocolelement/checksum/CrcHeaderInserter.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/protocolelement/checksum/header/CrcHeader_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
@@ -19,11 +18,8 @@ Define_Module(CrcHeaderInserter);
 void CrcHeaderInserter::initialize(int stage)
 {
     CrcInserterBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LOCAL)
         headerPosition = parseHeaderPosition(par("headerPosition"));
-        registerService(AccessoryProtocol::crc, inputGate, nullptr);
-        registerProtocol(AccessoryProtocol::crc, outputGate, nullptr);
-    }
 }
 
 void CrcHeaderInserter::processPacket(Packet *packet)

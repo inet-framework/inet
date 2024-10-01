@@ -7,7 +7,6 @@
 
 #include "inet/linklayer/ieee8022/Ieee8022LlcChecker.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -16,15 +15,6 @@
 namespace inet {
 
 Define_Module(Ieee8022LlcChecker);
-
-void Ieee8022LlcChecker::initialize(int stage)
-{
-    PacketFilterBase::initialize(stage);
-    if (stage == INITSTAGE_LINK_LAYER) {
-        registerService(Protocol::ieee8022llc, nullptr, outputGate);
-        registerProtocol(Protocol::ieee8022llc, nullptr, inputGate);
-    }
-}
 
 bool Ieee8022LlcChecker::matchesPacket(const Packet *packet) const
 {

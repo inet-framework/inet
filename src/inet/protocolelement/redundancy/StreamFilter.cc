@@ -22,16 +22,6 @@ void StreamFilter::initialize(int stage)
     }
 }
 
-cGate *StreamFilter::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 bool StreamFilter::matchesPacket(const Packet *packet) const
 {
     const char *streamName = nullptr;

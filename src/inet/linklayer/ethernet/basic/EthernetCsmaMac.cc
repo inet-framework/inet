@@ -8,7 +8,6 @@
 
 #include "inet/linklayer/ethernet/basic/EthernetCsmaMac.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"

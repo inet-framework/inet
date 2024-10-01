@@ -8,7 +8,6 @@
 #include "inet/linklayer/ethernet/common/PacketDirectionReverser.h"
 
 #include "inet/common/DirectionTag_m.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/SequenceNumberTag_m.h"
 #include "inet/linklayer/common/DropEligibleTag_m.h"
@@ -37,8 +36,6 @@ void PacketDirectionReverser::initialize(int stage)
             excludeEncapsulationProtocols.push_back(protocol);
         }
     }
-    else if (stage == INITSTAGE_QUEUEING)
-        registerAnyProtocol(outputGate, inputGate);
 }
 
 void PacketDirectionReverser::processPacket(Packet *packet)

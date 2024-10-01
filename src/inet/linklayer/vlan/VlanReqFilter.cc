@@ -26,16 +26,6 @@ void VlanReqFilter::initialize(int stage)
     }
 }
 
-cGate *VlanReqFilter::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 void VlanReqFilter::dropPacket(Packet *packet)
 {
     EV_WARN << "Received packet is not accepted, dropping packet" << EV_FIELD(packet) << EV_ENDL;

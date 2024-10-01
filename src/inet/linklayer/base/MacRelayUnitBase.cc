@@ -8,7 +8,6 @@
 #include "inet/linklayer/base/MacRelayUnitBase.h"
 
 #include "inet/common/DirectionTag_m.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/StringFormat.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -27,10 +26,6 @@ void MacRelayUnitBase::initialize(int stage)
         numProcessedFrames = numDroppedFrames = 0;
         WATCH(numProcessedFrames);
         WATCH(numDroppedFrames);
-    }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerAnyService(gate("upperLayerIn"), gate("upperLayerOut"));
-        registerAnyProtocol(gate("lowerLayerOut"), gate("lowerLayerIn"));
     }
 }
 

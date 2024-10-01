@@ -27,7 +27,6 @@ module EthernetHost2
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.fcsMode = this.fcsMode;
         eth.csmacdSupport = this.csmacdSupport;
-        llc.registerProtocol = true;
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/pc2");

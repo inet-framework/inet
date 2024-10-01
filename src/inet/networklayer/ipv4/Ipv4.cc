@@ -13,7 +13,6 @@
 
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/common/INETUtils.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -108,22 +107,7 @@ void Ipv4::initialize(int stage)
         cModule *arpModule = check_and_cast<cModule *>(arp.get());
         arpModule->subscribe(IArp::arpResolutionCompletedSignal, this);
         arpModule->subscribe(IArp::arpResolutionFailedSignal, this);
-
-        registerService(Protocol::ipv4, gate("transportIn"), gate("transportOut"));
-        registerProtocol(Protocol::ipv4, gate("queueOut"), gate("queueIn"));
     }
-}
-
-void Ipv4::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterService");
-}
-
-void Ipv4::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    if (gate->isName("transportOut"))
-        upperProtocols.insert(&protocol);
 }
 
 void Ipv4::refreshDisplay() const

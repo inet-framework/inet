@@ -7,7 +7,6 @@
 
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -32,14 +31,6 @@ void Ieee8022Llc::initialize(int stage)
     OperationalBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         // TODO parameterization for llc or snap?
-    }
-    else if (stage == INITSTAGE_LINK_LAYER) {
-        if (par("registerProtocol").boolValue()) { // FIXME //KUDGE should redesign place of EthernetEncapsulation and LLC modules
-            // register service and protocol
-            registerService(Protocol::ieee8022llc, gate("upperLayerIn"), gate("upperLayerOut"));
-            registerProtocol(Protocol::ieee8022llc, gate("lowerLayerOut"), gate("lowerLayerIn"));
-        }
-
         WATCH_PTRMAP(socketIdToSocketDescriptor);
         WATCH_PTRSET(upperProtocols);
     }
@@ -242,19 +233,6 @@ const Protocol *Ieee8022Llc::getProtocol(const Ptr<const Ieee8022LlcHeader>& llc
         payloadProtocol = ProtocolGroup::getIeee8022ProtocolGroup()->findProtocol(sapData); // do not use getProtocol
     }
     return payloadProtocol;
-}
-
-void Ieee8022Llc::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterService");
-}
-
-void Ieee8022Llc::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    // KLUDGE this should be here: if (!strcmp("upperLayerOut", gate->getBaseName()))
-    // but then the register protocol calls are lost, because they can't go through the traffic conditioner
-    upperProtocols.insert(&protocol);
 }
 
 std::ostream& operator<<(std::ostream& o, const Ieee8022Llc::SocketDescriptor& t)
