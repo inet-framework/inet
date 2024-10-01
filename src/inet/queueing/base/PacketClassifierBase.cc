@@ -44,18 +44,6 @@ void PacketClassifierBase::handleMessage(cMessage *message)
     pushPacket(packet, packet->getArrivalGate());
 }
 
-void PacketClassifierBase::mapRegistrationForwardingGates(cGate *gate, std::function<void(cGate *)> f)
-{
-    if (gate == inputGate) {
-        for (auto outputGate : outputGates)
-            f(outputGate);
-    }
-    else if (std::find(outputGates.begin(), outputGates.end(), gate) != outputGates.end())
-        f(inputGate);
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 int PacketClassifierBase::callClassifyPacket(Packet *packet) const
 {
     // KLUDGE

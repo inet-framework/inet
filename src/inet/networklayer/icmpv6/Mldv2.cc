@@ -8,7 +8,6 @@
 
 #include <algorithm>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -85,9 +84,6 @@ void Mldv2::initialize(int stage)
         rt.reference(this, "routingTableModule", true);
 
         cModule *host = getContainingNode(this);
-
-        // Register Protocol::mld so the lp dispatcher delivers MLD ICMPv6 messages to us
-        registerProtocol(Protocol::mld, gate("ipOut"), gate("ipIn"));
 
         for (int i = 0; i < ift->getNumInterfaces(); ++i) {
             NetworkInterface *ie = ift->getInterface(i);

@@ -19,10 +19,9 @@ class INET_API DuplicateRemoval : public PacketPusherBase
   protected:
     int lastSequenceNumber = -1;
 
-  protected:
+  public:
     virtual void initialize(int stage) override;
 
-  public:
     virtual void pushPacket(Packet *packet, const cGate *gate) override;
 };
 

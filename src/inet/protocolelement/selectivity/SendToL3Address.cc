@@ -7,7 +7,6 @@
 
 #include "inet/protocolelement/selectivity/SendToL3Address.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
@@ -20,11 +19,8 @@ Define_Module(SendToL3Address);
 void SendToL3Address::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LOCAL)
         address = Ipv4Address(par("address").stringValue());
-        registerService(AccessoryProtocol::destinationL3Address, inputGate, nullptr);
-        registerProtocol(AccessoryProtocol::destinationL3Address, outputGate, nullptr);
-    }
 }
 
 void SendToL3Address::processPacket(Packet *packet)

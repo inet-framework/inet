@@ -10,16 +10,6 @@
 namespace inet {
 namespace queueing {
 
-cGate *PacketMeterBase::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 void PacketMeterBase::processPacket(Packet *packet)
 {
     EV_INFO << "Metering packet" << EV_FIELD(packet) << EV_ENDL;

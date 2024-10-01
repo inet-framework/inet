@@ -9,7 +9,6 @@
 
 #include <omnetpp/platdep/sockets.h>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/NetworkNamespaceContext.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/packet/Message.h"
@@ -39,9 +38,6 @@ void ExtLowerUdp::initialize(int stage)
         if (auto scheduler = dynamic_cast<RealTimeScheduler *>(getSimulation()->getScheduler())) {
             rtScheduler = scheduler;
         }
-    }
-    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
-        registerService(Protocol::udp, gate("appIn"), gate("appOut"));
     }
 }
 

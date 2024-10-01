@@ -29,16 +29,6 @@ void VlanReqMapper::initialize(int stage)
     }
 }
 
-cGate *VlanReqMapper::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 void VlanReqMapper::processPacket(Packet *packet)
 {
     auto interfaceReq = packet->findTag<InterfaceReq>();

@@ -11,7 +11,6 @@
 #include <map>
 #include <set>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/ipv6/IIpv6ExtensionHeaderHandler.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
@@ -31,7 +30,7 @@ class Icmpv6Header;
 /**
  * Ipv6 implementation.
  */
-class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetworkProtocol, public DefaultProtocolRegistrationListener, protected cListener
+class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetworkProtocol, protected cListener
 {
   public:
     /**
@@ -242,9 +241,6 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
   public:
     Ipv6();
     ~Ipv6();
-
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
     // Netfilter:
     virtual void registerHook(int priority, IHook *hook) override;

@@ -21,7 +21,6 @@
 #include "inet/common/SimpleModule.h"
 #include <omnetpp.h>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/Protocol.h"

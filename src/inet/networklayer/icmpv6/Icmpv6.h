@@ -8,7 +8,6 @@
 #ifndef __INET_ICMPV6_H
 #define __INET_ICMPV6_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Message.h"
@@ -26,7 +25,7 @@ class PingPayload;
 /**
  * ICMPv6 implementation.
  */
-class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrationListener
+class INET_API Icmpv6 : public OperationalBase
 {
   public:
     /**
@@ -93,9 +92,6 @@ class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrati
     virtual bool validateDatagramPromptingError(Packet *packet);
 
     virtual void errorOut(Indication *indication);
-
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
   public:
     static void insertChecksum(ChecksumMode checksumMode, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet);

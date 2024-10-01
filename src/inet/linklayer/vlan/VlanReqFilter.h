@@ -8,7 +8,6 @@
 #ifndef __INET_VLANREQFILTER_H
 #define __INET_VLANREQFILTER_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/base/PacketFilterBase.h"
@@ -17,7 +16,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API VlanReqFilter : public PacketFilterBase, public TransparentProtocolRegistrationListener
+class INET_API VlanReqFilter : public PacketFilterBase
 {
   protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
@@ -27,8 +26,6 @@ class INET_API VlanReqFilter : public PacketFilterBase, public TransparentProtoc
     virtual void initialize(int stage) override;
     virtual void processPacket(Packet *packet) override {}
     virtual void dropPacket(Packet *packet) override;
-
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
   public:
     virtual bool matchesPacket(const Packet *packet) const override;

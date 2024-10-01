@@ -30,16 +30,6 @@ void StreamIdentifier::handleParameterChange(const char *name)
         mapping = check_and_cast<cValueArray *>(par("mapping").objectValue());
 }
 
-cGate *StreamIdentifier::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 int StreamIdentifier::incrementSequenceNumber(const char *stream)
 {
     auto it = sequenceNumbers.find(stream);

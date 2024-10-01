@@ -6,7 +6,6 @@
 
 #include "inet/networklayer/icmpv6/Mldv1.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -135,9 +134,6 @@ void Mldv1::initialize(int stage)
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
-
-        // Register Protocol::mld so the lp dispatcher delivers MLD ICMPv6 messages to us
-        registerProtocol(Protocol::mld, gate("ipOut"), gate("ipIn"));
 
         // Read NED parameter
         unsolicitedReportInterval = par("unsolicitedReportInterval");

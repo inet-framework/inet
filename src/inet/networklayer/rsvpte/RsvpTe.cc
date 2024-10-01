@@ -6,7 +6,6 @@
 
 #include "inet/networklayer/rsvpte/RsvpTe.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/XMLUtils.h"
@@ -79,11 +78,6 @@ void RsvpTe::initialize(int stage)
         WATCH(maxSrcInstance);
         WATCH(retryInterval);
         WATCH(routerId);
-    }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        // process traffic configuration
-        readTrafficFromXML(par("traffic"));
-        registerProtocol(Protocol::rsvpTe, gate("ipOut"), gate("ipIn"));
     }
 }
 

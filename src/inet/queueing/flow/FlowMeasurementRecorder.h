@@ -8,7 +8,6 @@
 #ifndef __INET_FLOWMEASUREMENTRECORDER_H
 #define __INET_FLOWMEASUREMENTRECORDER_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/JsonWriter.h"
 #include "inet/common/packet/PacketFilter.h"
 #include "inet/common/TimeTag_m.h"
@@ -17,7 +16,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API FlowMeasurementRecorder : public PacketFlowBase, public TransparentProtocolRegistrationListener
+class INET_API FlowMeasurementRecorder : public PacketFlowBase
 {
   public:
     static simsignal_t packetFlowMeasuredSignal;
@@ -44,7 +43,6 @@ class INET_API FlowMeasurementRecorder : public PacketFlowBase, public Transpare
     virtual void makeMeasurements(Packet *packet);
     virtual void endMeasurements(Packet *packet);
 
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
     template<typename T>
     void endMeasurement(Packet *packet, b offset, b length) {

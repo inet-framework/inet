@@ -13,7 +13,6 @@
 
 #include "inet/common/checksum/Checksum.h"
 #include "inet/common/INETUtils.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -115,9 +114,6 @@ void Ipv4::initialize(int stage)
         cModule *arpModule = check_and_cast<cModule *>(arp.get());
         arpModule->subscribe(IArp::arpResolutionCompletedSignal, this);
         arpModule->subscribe(IArp::arpResolutionFailedSignal, this);
-
-        registerService(Protocol::ipv4, gate("transportIn"), gate("transportOut"));
-        registerProtocol(Protocol::ipv4, gate("queueOut"), gate("queueIn"));
     }
 }
 
@@ -135,18 +131,6 @@ std::string Ipv4::getIpv4StatusText() const
     if (numUnroutable > 0)
         buf += "UNROUTABLE:" + std::to_string(numUnroutable) + " ";
     return buf;
-}
-
-void Ipv4::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterService");
-}
-
-void Ipv4::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    if (gate->isName("transportOut"))
-        upperProtocols.insert(&protocol);
 }
 
 void Ipv4::handleRequest(Request *request)

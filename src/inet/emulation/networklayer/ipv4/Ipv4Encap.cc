@@ -7,7 +7,6 @@
 
 #include "inet/emulation/networklayer/ipv4/Ipv4Encap.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/checksum/Checksum.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketTag_m.h"
@@ -35,9 +34,6 @@ void Ipv4Encap::initialize(int stage)
         WATCH(defaultTimeToLive);
         WATCH(defaultMCTimeToLive);
         WATCH(checksumMode);
-    }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(Protocol::ipv4, gate("upperLayerIn"), gate("upperLayerOut"));
     }
 }
 

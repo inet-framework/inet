@@ -7,7 +7,6 @@
 
 #include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -33,9 +32,6 @@ void Ieee8021dRelay::initialize(int stage)
         WATCH(numDeliveredBDPUsToSTP);
         WATCH(numDispatchedBDPUFrames);
         WATCH(numDispatchedNonBPDUFrames);
-    }
-    else if (stage == INITSTAGE_LINK_LAYER) {
-        registerService(Protocol::ethernetMac, gate("upperLayerIn"), gate("upperLayerOut"));
     }
 }
 

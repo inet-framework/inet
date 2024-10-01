@@ -7,7 +7,6 @@
 
 #include "inet/protocolelement/acknowledgement/SendWithAcknowledge.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/protocolelement/acknowledgement/AcknowledgeHeader_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
@@ -24,9 +23,6 @@ void SendWithAcknowledge::initialize(int stage)
         acknowledgeTimeout = par("acknowledgeTimeout");
         sequenceNumber = 0;
         WATCH(sequenceNumber);
-        registerService(AccessoryProtocol::withAcknowledge, inputGate, nullptr);
-        registerProtocol(AccessoryProtocol::withAcknowledge, outputGate, nullptr);
-        registerService(AccessoryProtocol::acknowledge, gate("ackIn"), gate("ackIn"));
     }
 }
 

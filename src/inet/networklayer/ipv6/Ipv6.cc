@@ -8,7 +8,6 @@
 #include "inet/networklayer/ipv6/Ipv6.h"
 
 #include "inet/common/INETUtils.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -107,9 +106,6 @@ void Ipv6::initialize(int stage)
         WATCH_EXPR("ipv6StatusText", getIpv6StatusText());
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(Protocol::ipv6, gate("transportIn"), gate("transportOut"));
-        registerProtocol(Protocol::ipv6, gate("queueOut"), gate("queueIn"));
-
         // Subscribe to DAD signals from the NeighbourDiscovery module
         nd->subscribe(Ipv6NeighbourDiscovery::dadCompletedSignal, this);
         nd->subscribe(Ipv6NeighbourDiscovery::dadFailedSignal, this);
@@ -130,18 +126,6 @@ std::string Ipv6::getIpv6StatusText() const
     if (numUnroutable > 0)
         buf += "UNROUTABLE:" + std::to_string(numUnroutable) + " ";
     return buf;
-}
-
-void Ipv6::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterService");
-}
-
-void Ipv6::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    if (gate->isName("transportOut"))
-        upperProtocols.insert(&protocol);
 }
 
 void Ipv6::handleRequest(Request *request)

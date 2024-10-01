@@ -8,7 +8,6 @@
 
 #include <algorithm>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
@@ -94,7 +93,6 @@ void LinkStateRouting::initialize(int stage)
         WATCH(routerId);
         WATCH(peerIfAddrs);
         WATCH(announceMsg);
-        registerProtocol(Protocol::linkStateRouting, gate("ipOut"), gate("ipIn"));
     }
 }
 

@@ -9,7 +9,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -70,8 +69,6 @@ void Pmipv6::initialize(int stage)
         ift.reference(this, "interfaceTableModule", true);
         ipv6nd.reference(this, "ipv6NeighbourDiscoveryModule", true);
         // (both LMA and MAG are routers; forwarding is enabled by the node type)
-        // receive Mobility Header messages (Proxy Binding Updates / Acknowledgements)
-        registerProtocol(Protocol::mobileipv6, gate("toIPv6"), gate("fromIPv6"));
     }
 }
 

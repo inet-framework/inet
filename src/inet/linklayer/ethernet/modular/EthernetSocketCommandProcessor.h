@@ -8,7 +8,6 @@
 #ifndef __INET_ETHERNETSOCKETCOMMANDPROCESSOR_H
 #define __INET_ETHERNETSOCKETCOMMANDPROCESSOR_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Message.h"
 #include "inet/linklayer/ethernet/modular/EthernetSocketTable.h"
@@ -16,7 +15,7 @@
 
 namespace inet {
 
-class INET_API EthernetSocketCommandProcessor : public queueing::PacketFlowBase, public TransparentProtocolRegistrationListener
+class INET_API EthernetSocketCommandProcessor : public queueing::PacketFlowBase
 {
   protected:
     ModuleRefByPar<EthernetSocketTable> socketTable;
@@ -27,7 +26,6 @@ class INET_API EthernetSocketCommandProcessor : public queueing::PacketFlowBase,
     virtual void handleCommand(Request *request);
     virtual void processPacket(Packet *packet) override {}
 
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 
 } // namespace inet

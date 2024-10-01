@@ -7,7 +7,6 @@
 
 #include "inet/protocolelement/fragmentation/FragmentNumberHeaderChecker.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/fragmentation/header/FragmentNumberHeader_m.h"
 #include "inet/protocolelement/fragmentation/tag/FragmentTag_m.h"
@@ -19,11 +18,8 @@ Define_Module(FragmentNumberHeaderChecker);
 void FragmentNumberHeaderChecker::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LOCAL)
         headerPosition = parseHeaderPosition(par("headerPosition"));
-        registerService(AccessoryProtocol::fragmentation, nullptr, inputGate);
-        registerProtocol(AccessoryProtocol::fragmentation, nullptr, outputGate);
-    }
 }
 
 void FragmentNumberHeaderChecker::processPacket(Packet *packet)

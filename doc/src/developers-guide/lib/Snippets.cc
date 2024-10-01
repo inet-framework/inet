@@ -473,10 +473,6 @@ public:
 //!ProtocolRegistrationExample
 void Ipv4::initialize(int stage)
 {
-    if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(Protocol::ipv4, gate("transportIn"), gate("transportOut"));
-        registerProtocol(Protocol::ipv4, gate("queueOut"), gate("queueIn"));
-    }
 }
 //!End
 

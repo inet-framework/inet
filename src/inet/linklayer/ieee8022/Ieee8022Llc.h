@@ -8,7 +8,6 @@
 #ifndef __INET_IEEE8022LLC_H
 #define __INET_IEEE8022LLC_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
@@ -19,7 +18,7 @@
 
 namespace inet {
 
-class INET_API Ieee8022Llc : public OperationalBase, public DefaultProtocolRegistrationListener
+class INET_API Ieee8022Llc : public OperationalBase
 {
   protected:
     struct SocketDescriptor {
@@ -49,9 +48,6 @@ class INET_API Ieee8022Llc : public OperationalBase, public DefaultProtocolRegis
     virtual bool isDeliverableToUpperLayer(Packet *packet);
     virtual void processPacketFromMac(Packet *packet);
     virtual void processCommandFromHigherLayer(Request *request);
-
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
     // for lifecycle:
     virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }

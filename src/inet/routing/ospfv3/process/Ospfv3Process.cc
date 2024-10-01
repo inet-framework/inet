@@ -1,6 +1,5 @@
 #include "inet/routing/ospfv3/process/Ospfv3Process.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/routing/ospfv3/Ospfv3Checksum.h"
 
@@ -48,8 +47,6 @@ void Ospfv3Process::initialize(int stage)
         this->processID = (int)par("processID");
         this->checksumMode = parseChecksumMode(par("checksumMode").stringValue(), false);
         this->parseConfig(par("interfaceConfig"));
-
-        registerProtocol(Protocol::ospf, gate("splitterOut"), gate("splitterIn"));
 
         cMessage *init = new cMessage();
         init->setKind(INIT_PROCESS);

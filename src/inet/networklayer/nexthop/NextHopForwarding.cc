@@ -65,10 +65,6 @@ void NextHopForwarding::initialize(int stage)
         WATCH(numForwarded);
         WATCH_EXPR("nextHopStatusText", getNextHopStatusText());
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(Protocol::nextHopForwarding, gate("transportIn"), gate("transportOut"));
-        registerProtocol(Protocol::nextHopForwarding, gate("queueOut"), gate("queueIn"));
-    }
 }
 
 std::string NextHopForwarding::getNextHopStatusText() const
@@ -83,18 +79,6 @@ std::string NextHopForwarding::getNextHopStatusText() const
     if (numUnroutable > 0)
         buf += "UNROUTABLE:" + std::to_string(numUnroutable) + " ";
     return buf;
-}
-
-void NextHopForwarding::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterService");
-}
-
-void NextHopForwarding::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    if (!strcmp("transportOut", gate->getBaseName()))
-        upperProtocols.insert(&protocol);
 }
 
 void NextHopForwarding::handleMessageWhenUp(cMessage *msg)

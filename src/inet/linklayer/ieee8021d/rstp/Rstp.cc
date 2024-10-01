@@ -7,7 +7,6 @@
 
 #include "inet/linklayer/ieee8021d/rstp/Rstp.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -55,8 +54,6 @@ void Rstp::initialize(int stage)
         WATCH(allowStpPeers);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        registerProtocol(Protocol::stp, gate("relayOut"), gate("relayIn"));
-
         for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
             auto ie = ifTable->getInterface(i);
             if (!ie->isLoopback() && ie->isWired() /* && ie->getProtocol() == &Protocol::ethernetMac */) {   // TODO check protocol

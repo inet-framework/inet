@@ -13,7 +13,6 @@
 #include <map>
 #include <string>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -50,9 +49,6 @@ void Ospfv2::initialize(int stage)
         WATCH_EXPR("numAreas", ospfRouter ? (int)ospfRouter->getAreaCount() : 0);
         WATCH_EXPR("interfaces", ospfRouter ? ospfRouter->getInterfaceInfo() : std::string());
         WATCH_EXPR("routerID", ospfRouter ? ospfRouter->getRouterID().str() : std::string("<ospf inactive>"));
-    }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) { // interfaces and static routes are already initialized
-        registerProtocol(Protocol::ospf, gate("ipOut"), gate("ipIn"));
     }
 }
 

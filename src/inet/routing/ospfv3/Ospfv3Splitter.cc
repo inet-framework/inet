@@ -1,6 +1,5 @@
 #include "inet/routing/ospfv3/Ospfv3Splitter.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/Protocol.h"
 
 namespace inet {
@@ -30,7 +29,6 @@ void Ospfv3Splitter::initialize(int stage)
         routingModule = this->getParentModule();
 
         ift.reference(this, "interfaceTableModule", true);
-        registerProtocol(Protocol::ospf, gate("ipOut"), gate("ipIn"));
 
         this->parseConfig(par("ospfv3RoutingConfig"), par("ospfv3IntConfig"));
 

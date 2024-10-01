@@ -7,7 +7,6 @@
 
 #include "inet/transportlayer/tcp_lwip/TcpLwip.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -76,8 +75,6 @@ void TcpLwip::initialize(int stage)
         EV_INFO << "TcpLwip " << this << " has stack " << pLwipTcpLayerM << "\n";
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
-        registerService(Protocol::tcp, gate("appIn"), gate("appOut"));
-        registerProtocol(Protocol::tcp, gate("ipOut"), gate("ipIn"));
 
         if (checksumMode == CHECKSUM_COMPUTED) {
             cModuleType *moduleType = cModuleType::get("inet.transportlayer.tcp_common.TcpChecksumInsertionHook");

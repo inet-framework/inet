@@ -18,7 +18,6 @@
 
 #include <sstream>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -71,9 +70,6 @@ void Dsdv::initialize(int stage)
         WATCH(interfaceId);
         WATCH(isForwardHello);
         WATCH_EXPR("numRoutes", rt->getNumRoutes());
-    }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        registerProtocol(Protocol::manet, gate("ipOut"), gate("ipIn"));
     }
 }
 

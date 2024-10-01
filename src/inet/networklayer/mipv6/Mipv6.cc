@@ -127,9 +127,6 @@ void Mipv6::initialize(int stage)
         // (replacing the old T2RH/HA_OPT pseudo-tunnels).
         ipv6->registerHook(0, this);
 
-        // Register for Protocol::mobileipv6 so the dispatcher delivers mobility messages to us
-        registerProtocol(Protocol::mobileipv6, gate("toIPv6"), gate("fromIPv6"));
-
         WATCH(cnList);
         WATCH(interfaceCoAList);
         // friendly values for the node's display string (see displayStringTextFormat)

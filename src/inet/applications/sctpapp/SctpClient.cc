@@ -8,7 +8,6 @@
 
 #include "inet/applications/sctpapp/SctpClient.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/lifecycle/NodeStatus.h"
