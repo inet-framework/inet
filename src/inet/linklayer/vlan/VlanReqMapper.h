@@ -9,6 +9,7 @@
 #define __INET_VLANREQMAPPER_H
 
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 

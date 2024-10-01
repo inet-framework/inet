@@ -14,6 +14,7 @@
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {

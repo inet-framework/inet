@@ -11,6 +11,7 @@
 
 #include "inet/clock/model/SettableClock.h"
 #include "inet/common/clock/ClockUserModuleBase.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"

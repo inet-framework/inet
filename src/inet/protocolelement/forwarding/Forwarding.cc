@@ -7,6 +7,8 @@
 
 #include "inet/protocolelement/forwarding/Forwarding.h"
 
+#include "inet/common/ModuleRefByPar.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"

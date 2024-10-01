@@ -7,6 +7,8 @@
 
 #include "inet/protocolelement/forwarding/ReceiveWithHopLimit.h"
 
+#include "inet/common/ModuleRefByPar.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/forwarding/HopLimitHeader_m.h"

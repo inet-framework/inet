@@ -7,6 +7,7 @@
 #include "inet/linklayer/ethernet/basic/EthernetEncapsulation.h"
 
 #include "inet/common/INETUtils.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/stlutils.h"
 #include "inet/linklayer/common/FcsMode_m.h"
