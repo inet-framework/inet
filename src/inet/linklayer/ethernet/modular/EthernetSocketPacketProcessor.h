@@ -8,14 +8,13 @@
 #ifndef __INET_ETHERNETSOCKETPACKETPROCESSOR_H
 #define __INET_ETHERNETSOCKETPACKETPROCESSOR_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/ethernet/modular/EthernetSocketTable.h"
 #include "inet/queueing/base/PacketPusherBase.h"
 
 namespace inet {
 
-class INET_API EthernetSocketPacketProcessor : public queueing::PacketPusherBase, public TransparentProtocolRegistrationListener
+class INET_API EthernetSocketPacketProcessor : public queueing::PacketPusherBase
 {
   protected:
     ModuleRefByPar<EthernetSocketTable> socketTable;
@@ -25,7 +24,6 @@ class INET_API EthernetSocketPacketProcessor : public queueing::PacketPusherBase
 
   public:
     virtual void pushPacket(Packet *packet, const cGate *gate) override;
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 
 } // namespace inet

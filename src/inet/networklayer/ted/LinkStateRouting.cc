@@ -8,7 +8,6 @@
 
 #include <algorithm>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
@@ -58,7 +57,6 @@ void LinkStateRouting::initialize(int stage)
         // schedule start of flooding link state info
         announceMsg = new cMessage("announce");
         scheduleAt(simTime() + exponential(0.01), announceMsg);
-        registerProtocol(Protocol::linkStateRouting, gate("ipOut"), gate("ipIn"));
     }
 }
 

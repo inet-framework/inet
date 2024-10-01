@@ -28,16 +28,6 @@ void RelayInterfaceSelector::initialize(int stage)
     }
 }
 
-cGate *RelayInterfaceSelector::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 void RelayInterfaceSelector::pushPacket(Packet *packet, const cGate *gates)
 {
     Enter_Method("pushPacket");

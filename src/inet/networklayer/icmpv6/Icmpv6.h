@@ -9,7 +9,6 @@
 #define __INET_ICMPV6_H
 
 #include "inet/common/SimpleModule.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
@@ -26,7 +25,7 @@ class PingPayload;
 /**
  * ICMPv6 implementation.
  */
-class INET_API Icmpv6 : public SimpleModule, public LifecycleUnsupported, public DefaultProtocolRegistrationListener
+class INET_API Icmpv6 : public SimpleModule, public LifecycleUnsupported
 {
   public:
     /**
@@ -86,9 +85,6 @@ class INET_API Icmpv6 : public SimpleModule, public LifecycleUnsupported, public
     virtual bool validateDatagramPromptingError(Packet *packet);
 
     virtual void errorOut(Indication *indication);
-
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
   public:
     static void insertChecksum(ChecksumMode checksumMode, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet);

@@ -22,16 +22,6 @@ void Ieee8021qSocketCommandProcessor::initialize(int stage)
         socketTable.reference(this, "socketTableModule", true);
 }
 
-cGate *Ieee8021qSocketCommandProcessor::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 void Ieee8021qSocketCommandProcessor::handleMessage(cMessage *message)
 {
     if (auto request = dynamic_cast<Request *>(message))

@@ -12,7 +12,6 @@
 #include <map>
 #include <set>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
@@ -33,7 +32,7 @@ namespace inet {
  * interface to allow routing protocols to kick in. It doesn't provide datagram fragmentation
  * and reassembling.
  */
-class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase, public INetworkProtocol, public DefaultProtocolRegistrationListener
+class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase, public INetworkProtocol
 {
   protected:
     /**
@@ -150,9 +149,6 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
   public:
     NextHopForwarding();
     ~NextHopForwarding();
-
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
     virtual void registerHook(int priority, IHook *hook) override;
     virtual void unregisterHook(IHook *hook) override;

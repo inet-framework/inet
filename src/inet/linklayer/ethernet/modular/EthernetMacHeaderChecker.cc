@@ -7,7 +7,6 @@
 
 #include "inet/linklayer/ethernet/modular/EthernetMacHeaderChecker.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -29,8 +28,6 @@ void EthernetMacHeaderChecker::initialize(int stage)
         promiscuous = par("promiscuous");
         interfaceTable.reference(this, "interfaceTableModule", true);
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
-        registerProtocol(Protocol::ethernetMac, nullptr, inputGate);
 }
 
 void EthernetMacHeaderChecker::processPacket(Packet *packet)

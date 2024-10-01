@@ -7,7 +7,6 @@
 
 #include "inet/protocolelement/selectivity/ReceiveAtL3Address.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
@@ -20,11 +19,8 @@ Define_Module(ReceiveAtL3Address);
 void ReceiveAtL3Address::initialize(int stage)
 {
     PacketFilterBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LOCAL)
         address = Ipv4Address(par("address").stringValue());
-        registerService(AccessoryProtocol::destinationL3Address, nullptr, inputGate);
-        registerProtocol(AccessoryProtocol::destinationL3Address, nullptr, outputGate);
-    }
 }
 
 void ReceiveAtL3Address::processPacket(Packet *packet)

@@ -27,16 +27,6 @@ void LabelFilter::handleParameterChange(const char *name)
         labelFilter.setPattern(par("labelFilter"), false, true, true);
 }
 
-cGate *LabelFilter::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 bool LabelFilter::matchesPacket(const Packet *packet) const
 {
     auto labelsTag = packet->findTag<LabelsTag>();

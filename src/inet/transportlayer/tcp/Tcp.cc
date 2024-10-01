@@ -5,7 +5,6 @@
 //
 
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/Checksum.h"
@@ -57,8 +56,6 @@ void Tcp::initialize(int stage)
         WATCH_PTRMAP(tcpAppConnMap);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
-        registerService(Protocol::tcp, gate("appIn"), gate("appOut"));
-        registerProtocol(Protocol::tcp, gate("ipOut"), gate("ipIn"));
         if (checksumMode == CHECKSUM_COMPUTED) {
             cModuleType *moduleType = cModuleType::get("inet.transportlayer.tcp_common.TcpChecksumInsertionHook");
             auto checksumInsertion = check_and_cast<TcpChecksumInsertionHook *>(moduleType->create("checksumInsertion", this));

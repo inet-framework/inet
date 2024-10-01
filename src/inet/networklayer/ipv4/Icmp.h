@@ -10,7 +10,6 @@
 
 // Cleanup and rewrite: Andras Varga, 2004
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
@@ -25,7 +24,7 @@ class Ipv4Header;
 /**
  * Icmp module.
  */
-class INET_API Icmp : public SimpleModule, public DefaultProtocolRegistrationListener
+class INET_API Icmp : public SimpleModule
 {
   protected:
     std::set<int> transportProtocols; // where to send up packets
@@ -42,8 +41,6 @@ class INET_API Icmp : public SimpleModule, public DefaultProtocolRegistrationLis
     virtual void sendToIP(Packet *, const Ipv4Address& dest);
     virtual void sendToIP(Packet *msg);
     virtual bool possiblyLocalBroadcast(const Ipv4Address& addr, int interfaceId);
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
   public:
     /**

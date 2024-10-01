@@ -1,6 +1,5 @@
 #include "inet/routing/ospfv3/process/Ospfv3Process.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 
 namespace inet {
 namespace ospfv3 {
@@ -42,8 +41,6 @@ void Ospfv3Process::initialize(int stage)
         this->routerID = Ipv4Address(par("routerID").stringValue());
         this->processID = (int)par("processID");
         this->parseConfig(par("interfaceConfig"));
-
-        registerProtocol(Protocol::ospf, gate("splitterOut"), gate("splitterIn"));
 
         cMessage *init = new cMessage();
         init->setKind(INIT_PROCESS);

@@ -20,7 +20,6 @@ using namespace inet::queueing;
 class INET_API Ieee8022SnapChecker : public PacketFilterBase
 {
   protected:
-    virtual void initialize(int stage) override;
     virtual void processPacket(Packet *packet) override;
     virtual void dropPacket(Packet *packet) override;
 

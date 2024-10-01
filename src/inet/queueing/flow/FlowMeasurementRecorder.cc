@@ -32,16 +32,6 @@ FlowMeasurementRecorder::~FlowMeasurementRecorder()
     }
 }
 
-cGate *FlowMeasurementRecorder::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 void FlowMeasurementRecorder::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);

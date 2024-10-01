@@ -7,7 +7,6 @@
 
 #include "inet/routing/pim/Pim.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/Checksum.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -53,9 +52,6 @@ void Pim::initialize(int stage)
                 ipv6->registerHook(0, checksumInsertion);
 #endif
         }
-    }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        registerProtocol(Protocol::pim, gate("networkLayerOut"), gate("networkLayerIn"));
     }
 }
 

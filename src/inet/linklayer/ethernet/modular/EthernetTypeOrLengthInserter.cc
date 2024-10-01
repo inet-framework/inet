@@ -7,7 +7,6 @@
 
 #include "inet/linklayer/ethernet/modular/EthernetTypeOrLengthInserter.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
@@ -15,13 +14,6 @@
 namespace inet {
 
 Define_Module(EthernetTypeOrLengthInserter);
-
-void EthernetTypeOrLengthInserter::initialize(int stage)
-{
-    PacketFlowBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-        registerService(Protocol::ethernetMac, inputGate, nullptr);
-}
 
 void EthernetTypeOrLengthInserter::processPacket(Packet *packet)
 {

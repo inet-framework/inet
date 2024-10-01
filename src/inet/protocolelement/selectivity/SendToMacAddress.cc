@@ -7,7 +7,6 @@
 
 #include "inet/protocolelement/selectivity/SendToMacAddress.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
@@ -24,8 +23,6 @@ void SendToMacAddress::initialize(int stage)
         const char *addressAsString = par("address");
         if (strlen(addressAsString) != 0)
             address = MacAddress(addressAsString);
-        registerService(AccessoryProtocol::destinationMacAddress, inputGate, nullptr);
-        registerProtocol(AccessoryProtocol::destinationMacAddress, outputGate, nullptr);
     }
 }
 

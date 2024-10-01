@@ -8,19 +8,16 @@
 #define __INET_EXAMPLEQOSCLASSIFIER_H
 
 #include "inet/common/SimpleModule.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 
 namespace inet {
 
 /**
  * An example packet classifier based on the UDP/TCP port number.
  */
-class INET_API ExampleQosClassifier : public SimpleModule, public DefaultProtocolRegistrationListener
+class INET_API ExampleQosClassifier : public SimpleModule
 {
   protected:
     virtual int getUserPriority(cMessage *msg);
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
   public:
     ExampleQosClassifier() {}

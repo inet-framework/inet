@@ -12,7 +12,6 @@
 #include <map>
 #include <set>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Message.h"
 #include "inet/networklayer/contract/INetfilter.h"
@@ -31,7 +30,7 @@ class Icmpv6Header;
 /**
  * Ipv6 implementation.
  */
-class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public LifecycleUnsupported, public INetworkProtocol, public DefaultProtocolRegistrationListener
+class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public LifecycleUnsupported, public INetworkProtocol
 {
   public:
     /**
@@ -219,9 +218,6 @@ class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public Lifecycl
   public:
     Ipv6();
     ~Ipv6();
-
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
     // Netfilter:
     virtual void registerHook(int priority, IHook *hook) override;

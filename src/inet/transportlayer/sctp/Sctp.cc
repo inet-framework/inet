@@ -8,7 +8,6 @@
 
 #include "inet/transportlayer/sctp/Sctp.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
@@ -104,8 +103,6 @@ void Sctp::initialize(int stage)
         checksumMode = parseChecksumMode(checksumModeString, false);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
-        registerService(Protocol::sctp, gate("appIn"), gate("appOut"));
-        registerProtocol(Protocol::sctp, gate("ipOut"), gate("ipIn"));
         if (checksumMode == CHECKSUM_COMPUTED) {
             cModuleType *moduleType = cModuleType::get("inet.transportlayer.sctp.SctpChecksumInsertion");
             auto checksumInsertion = check_and_cast<SctpChecksumInsertion *>(moduleType->create("checksumInsertion", this));

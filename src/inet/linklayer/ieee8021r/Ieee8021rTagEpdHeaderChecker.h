@@ -21,7 +21,6 @@ class INET_API Ieee8021rTagEpdHeaderChecker : public PacketFilterBase
   protected:
 
   protected:
-    virtual void initialize(int stage) override;
     virtual void processPacket(Packet *packet) override;
     virtual void dropPacket(Packet *packet) override;
 

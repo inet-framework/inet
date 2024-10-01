@@ -17,7 +17,6 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NetworkNamespaceContext.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -47,9 +46,6 @@ void ExtIpv4TunDevice::initialize(int stage)
         numSent = numReceived = 0;
         WATCH(numSent);
         WATCH(numReceived);
-    }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerProtocol(Protocol::ipv4, gate("lowerLayerOut"), gate("lowerLayerIn"));
     }
 }
 

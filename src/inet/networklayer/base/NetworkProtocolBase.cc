@@ -30,22 +30,6 @@ void NetworkProtocolBase::initialize(int stage)
     LayeredProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         interfaceTable.reference(this, "interfaceTableModule", true);
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(getProtocol(), gate("transportIn"), gate("transportOut"));
-        registerProtocol(getProtocol(), gate("queueOut"), gate("queueIn"));
-    }
-}
-
-void NetworkProtocolBase::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterService");
-}
-
-void NetworkProtocolBase::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    if (gate->isName("transportOut"))
-        upperProtocols.insert(&protocol);
 }
 
 void NetworkProtocolBase::sendUp(cMessage *message)

@@ -42,7 +42,6 @@ module EthernetHost
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.fcsMode = this.fcsMode;
         eth.encap.typename = "";
-        llc.registerProtocol = true;
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
@@ -72,7 +71,6 @@ module EthernetHost
         }
         encap: <default("EthernetEncapsulation")> like IEthernetLayer if typename != "" {
             parameters:
-                registerProtocol = true;
                 @display("p=350,300");
         }
         ethernet: <default("")> like IEthernetLayer if typename != "" {

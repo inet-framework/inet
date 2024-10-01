@@ -9,7 +9,6 @@
 
 #include <string.h>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -21,10 +20,8 @@ Define_Module(EchoProtocol);
 void EchoProtocol::initialize(int stage)
 {
     SimpleModule::initialize(stage);
-    if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerProtocol(Protocol::echo, gate("ipOut"), gate("ipIn"));
-    }
 }
+
 
 void EchoProtocol::handleMessage(cMessage *msg)
 {

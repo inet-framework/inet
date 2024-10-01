@@ -7,7 +7,6 @@
 
 #include "inet/linklayer/ieee8021r/Ieee8021rTagEpdHeaderChecker.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/ProtocolUtils.h"
@@ -18,13 +17,6 @@
 namespace inet {
 
 Define_Module(Ieee8021rTagEpdHeaderChecker);
-
-void Ieee8021rTagEpdHeaderChecker::initialize(int stage)
-{
-    PacketFilterBase::initialize(stage);
-    if (stage == INITSTAGE_LINK_LAYER)
-        registerProtocol(Protocol::ieee8021rTag, nullptr, inputGate);
-}
 
 void Ieee8021rTagEpdHeaderChecker::processPacket(Packet *packet)
 {

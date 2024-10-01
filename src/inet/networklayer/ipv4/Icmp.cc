@@ -11,7 +11,6 @@
 
 #include <string.h>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -55,10 +54,6 @@ void Icmp::initialize(int stage)
         rt.reference(this, "routingTableModule", true);
         checksumMode = parseChecksumMode(par("checksumMode"), false);
         parseQuoteLengthParameter();
-    }
-    if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
-        registerService(Protocol::icmpv4, gate("transportIn"), gate("transportOut"));
-        registerProtocol(Protocol::icmpv4, gate("ipOut"), gate("ipIn"));
     }
 }
 
@@ -361,21 +356,6 @@ void Icmp::sendToIP(Packet *msg)
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
     send(msg, "ipOut");
-}
-
-void Icmp::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterService");
-}
-
-void Icmp::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    if (!strcmp("transportOut", gate->getBaseName())) {
-        int protocolNumber = ProtocolGroup::getIpProtocolGroup()->findProtocolNumber(&protocol);
-        if (protocolNumber != -1)
-            transportProtocols.insert(protocolNumber);
-    }
 }
 
 void Icmp::insertChecksum(ChecksumMode checksumMode, const Ptr<IcmpHeader>& icmpHeader, Packet *packet)

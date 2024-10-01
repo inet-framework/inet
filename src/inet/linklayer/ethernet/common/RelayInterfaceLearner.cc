@@ -25,16 +25,6 @@ void RelayInterfaceLearner::initialize(int stage)
     }
 }
 
-cGate *RelayInterfaceLearner::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 void RelayInterfaceLearner::processPacket(Packet *packet)
 {
     unsigned int vid = 0;

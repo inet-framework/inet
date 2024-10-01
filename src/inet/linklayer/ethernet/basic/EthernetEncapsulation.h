@@ -7,7 +7,6 @@
 #ifndef __INET_ETHERNETENCAPSULATION_H
 #define __INET_ETHERNETENCAPSULATION_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
@@ -23,7 +22,7 @@ namespace inet {
 /**
  * Performs Ethernet II encapsulation/decapsulation. More info in the NED file.
  */
-class INET_API EthernetEncapsulation : public OperationalBase, public DefaultProtocolRegistrationListener
+class INET_API EthernetEncapsulation : public OperationalBase
 {
   protected:
     std::set<const Protocol *> upperProtocols; // where to send packets after decapsulation
@@ -60,10 +59,6 @@ class INET_API EthernetEncapsulation : public OperationalBase, public DefaultPro
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *message) override;
-
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) override;
 
     virtual void processCommandFromHigherLayer(Request *msg);
     virtual void processPacketFromHigherLayer(Packet *msg);

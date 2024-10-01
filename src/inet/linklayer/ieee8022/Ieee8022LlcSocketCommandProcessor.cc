@@ -22,16 +22,6 @@ void Ieee8022LlcSocketCommandProcessor::initialize(int stage)
         socketTable.reference(this, "socketTableModule", true);
 }
 
-cGate *Ieee8022LlcSocketCommandProcessor::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 void Ieee8022LlcSocketCommandProcessor::handleMessage(cMessage *message)
 {
     if (auto request = dynamic_cast<Request *>(message))

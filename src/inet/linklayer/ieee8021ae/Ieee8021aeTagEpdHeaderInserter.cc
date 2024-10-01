@@ -7,7 +7,6 @@
 
 #include "inet/linklayer/ieee8021ae/Ieee8021aeTagEpdHeaderInserter.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/chunk/EncryptedChunk.h"
@@ -16,13 +15,6 @@
 namespace inet {
 
 Define_Module(Ieee8021aeTagEpdHeaderInserter);
-
-void Ieee8021aeTagEpdHeaderInserter::initialize(int stage)
-{
-    PacketFlowBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-        registerService(Protocol::ethernetMac, inputGate, nullptr);
-}
 
 void Ieee8021aeTagEpdHeaderInserter::processPacket(Packet *packet)
 {

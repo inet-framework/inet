@@ -19,16 +19,6 @@ void ContentBasedFilter::initialize(int stage)
         filter.setExpression(par("packetFilter").objectValue());
 }
 
-cGate *ContentBasedFilter::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 bool ContentBasedFilter::matchesPacket(const Packet *packet) const
 {
     return filter.matches(packet);

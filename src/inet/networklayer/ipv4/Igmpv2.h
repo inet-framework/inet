@@ -11,7 +11,6 @@
 #include "inet/common/SimpleModule.h"
 #include <set>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/NetworkInterface.h"
@@ -23,7 +22,7 @@ namespace inet {
 class IInterfaceTable;
 class IIpv4RoutingTable;
 
-class INET_API Igmpv2 : public SimpleModule, public DefaultProtocolRegistrationListener, public cListener
+class INET_API Igmpv2 : public SimpleModule, public cListener
 {
   protected:
     enum RouterState {
@@ -182,8 +181,6 @@ class INET_API Igmpv2 : public SimpleModule, public DefaultProtocolRegistrationL
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual ~Igmpv2();
 

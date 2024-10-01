@@ -16,15 +16,5 @@ bool BackPressureBasedFilter::matchesPacket(const Packet *packet) const
     return consumer != nullptr && consumer.canPushPacket(const_cast<Packet *>(packet));
 }
 
-cGate *BackPressureBasedFilter::getRegistrationForwardingGate(cGate *gate)
-{
-    if (gate == outputGate)
-        return inputGate;
-    else if (gate == inputGate)
-        return outputGate;
-    else
-        throw cRuntimeError("Unknown gate");
-}
-
 } // namespace queueing
 } // namespace inet

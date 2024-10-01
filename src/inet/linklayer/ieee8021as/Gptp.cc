@@ -9,7 +9,6 @@
 #include "inet/linklayer/ieee8021as/Gptp.h"
 
 #include "inet/clock/model/SettableClock.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"

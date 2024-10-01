@@ -35,13 +35,11 @@ simple EthernetEncapsulation extends SimpleModule like IEthernetLayer
 {
     parameters:
         @class(EthernetEncapsulation);
-        bool registerProtocol = default(false);     //FIXME //KLUDGE should redesign place of EthernetEncapsulation and LLC modules
         string interfaceTableModule;   // The path to the InterfaceTable module
         string fcsMode @enum("declared","computed") = default("declared");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after the lifecycle stop operation has finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for the lifecycle stop operation
-        @class(EthernetEncapsulation);
         @display("i=block/layer");
         @signal[encapPk](type=cPacket);
         @signal[decapPk](type=cPacket);
