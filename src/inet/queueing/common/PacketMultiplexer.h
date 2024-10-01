@@ -19,9 +19,6 @@ namespace queueing {
 class INET_API PacketMultiplexer : public PacketProcessorBase, public virtual IPassivePacketSink, public virtual IActivePacketSource
 {
   protected:
-    bool forwardServiceRegistration;
-    bool forwardProtocolRegistration;
-
     std::vector<cGate *> inputGates;
     std::vector<ActivePacketSourceRef> producers;
 
