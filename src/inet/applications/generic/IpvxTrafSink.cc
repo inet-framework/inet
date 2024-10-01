@@ -30,7 +30,7 @@ void IpvxTrafSink::initialize(int stage)
         int protocolId = par("protocol");
         if (protocolId < 143 || protocolId > 254)
             throw cRuntimeError("invalid protocol id %d, accepts only between 143 and 254", protocolId);
-        auto protocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(protocolId);
+        protocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(protocolId);
         if (!protocol) {
             char *buff = new char[40];
             sprintf(buff, "prot_%d", protocolId);
