@@ -13,6 +13,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/ldp/Ldp.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
 #include "inet/networklayer/rsvpte/Utils.h"
