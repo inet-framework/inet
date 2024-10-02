@@ -86,6 +86,8 @@ cmdenv-event-banners = false
 **.switchApp.packetLength = 400B
 **.switchApp.productionInterval = exponential(1ms)
 
+%subst: /\nRunning simulation\.\.\.\n//
+
 %contains-regex: stdout
 Sending cut-through packet, .*?sourceApp-0.*?
 .*

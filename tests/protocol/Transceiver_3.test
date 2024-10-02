@@ -54,6 +54,8 @@ cmdenv-event-banners = false
 *.receiver.datarate = 1Mbps
 *.destreamer.datarate = 1Mbps
 
+%subst: /\nRunning simulation\.\.\.\n//
+
 %contains-regex: stdout
 Producing packet, .*?source-0.*?
 Starting streaming packet, .*?source-0.*?

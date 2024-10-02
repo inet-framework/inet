@@ -62,6 +62,9 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.client.app[0].cmdenv-log-level=TRACE
 
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
 %contains-regex: stdout
 C:\(TestApp\)SimpleTestNetwork.client.app\[0\]: Sending to UDP protocol, .*?Request.*?setMulticastLoop.*?
 C:\(TestApp\)SimpleTestNetwork.client.app\[0\]: Sending to UDP protocol, .*?Request.*?connect.*?
