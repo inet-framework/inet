@@ -241,7 +241,7 @@ void EthernetEncapsulation::processPacketFromMac(Packet *packet)
     }
     if (steal)
         delete packet;
-    else if (anyUpperProtocols || (payloadProtocol != nullptr && contains(upperProtocols, payloadProtocol))) {
+    else if (hasUpperProtocol(payloadProtocol)) {
         EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
                   << packet->getName() << "' to higher layer\n";
 
@@ -295,6 +295,25 @@ void EthernetEncapsulation::handleSendPause(cMessage *msg)
 
     emit(pauseSentSignal, pauseUnits);
     totalPauseSent++;
+}
+
+bool EthernetEncapsulation::hasUpperProtocol(const Protocol *protocol)
+{
+    if (protocol == nullptr)
+        return false;
+    else if (contains(upperProtocols, protocol))
+        return true;
+    else {
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(protocol);
+        dispatchProtocolReq.setServicePrimitive(SP_INDICATION);
+        if (findModuleInterface(gate("upperLayerOut"), typeid(IPassivePacketSink), &dispatchProtocolReq) == nullptr)
+            return false;
+        else {
+            upperProtocols.insert(protocol);
+            return true;
+        }
+    }
 }
 
 void EthernetEncapsulation::clearSockets()

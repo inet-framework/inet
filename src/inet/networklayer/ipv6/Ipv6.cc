@@ -630,6 +630,25 @@ void Ipv6::routeMulticastPacket(Packet *packet, const NetworkInterface *destIE, 
  */
 }
 
+bool Ipv6::hasUpperProtocol(const Protocol *protocol)
+{
+    if (protocol == nullptr)
+        return false;
+    else if (contains(upperProtocols, protocol))
+        return true;
+    else {
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(protocol);
+        dispatchProtocolReq.setServicePrimitive(SP_INDICATION);
+        if (findModuleInterface(gate("transportOut"), typeid(IPassivePacketSink), &dispatchProtocolReq) == nullptr)
+            return false;
+        else {
+            upperProtocols.insert(protocol);
+            return true;
+        }
+    }
+}
+
 void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
 {
     const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
@@ -712,7 +731,7 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
         EV_INFO << "Tunnelled IP datagram\n";
         send(packet, "upperTunnelingOut");
     }
-    else if (contains(upperProtocols, protocol)) {
+    else if (hasUpperProtocol(protocol)) {
         EV_INFO << "Passing up to protocol " << *protocol << "\n";
         emit(packetSentToUpperSignal, packet);
         transportSink.pushPacket(packet);
