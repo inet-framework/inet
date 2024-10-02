@@ -47,9 +47,12 @@ const MacAddress Gptp::GPTP_MULTICAST_ADDRESS("01:80:C2:00:00:0E");
 
 Gptp::~Gptp()
 {
-    cancelAndDeleteClockEvent(selfMsgDelayReq);
-    cancelAndDeleteClockEvent(selfMsgSync);
-    cancelAndDeleteClockEvent(requestMsg);
+    if (selfMsgDelayReq)
+        cancelAndDeleteClockEvent(selfMsgDelayReq);
+    if (selfMsgSync)
+        cancelAndDeleteClockEvent(selfMsgSync);
+    if(requestMsg)
+        cancelAndDeleteClockEvent(requestMsg);
 }
 
 void Gptp::initialize(int stage)
@@ -210,13 +213,8 @@ void Gptp::handleMessage(cMessage *msg)
                 break;
             case GPTPTYPE_FOLLOW_UP:
                 processFollowUp(packet, check_and_cast<const GptpFollowUp *>(gptp.get()));
-                // Send a request to send Sync message
-                // through other gptp Ethernet interfaces
-                if (gptpNodeType == BRIDGE_NODE)
-                    sendSync();
                 break;
             case GPTPTYPE_PDELAY_RESP:
-
                 processPdelayResp(packet, check_and_cast<const GptpPdelayResp *>(gptp.get()));
                 break;
             case GPTPTYPE_PDELAY_RESP_FOLLOW_UP:
@@ -428,38 +426,28 @@ void Gptp::processFollowUp(Packet *packet, const GptpFollowUp *gptp)
     EV_INFO << "receivedRateRatio         - " << receivedRateRatio << endl;
 
     rcvdGptpSync = false;
+
+    // Send a request to send Sync message
+    // through other gptp Ethernet interfaces
+    if (gptpNodeType == BRIDGE_NODE)
+        sendSync();
 }
 
 void Gptp::synchronize()
 {
-    simtime_t now = simTime();
-    clocktime_t oldLocalTimeAtTimeSync = clock->getClockTime();
-    clocktime_t residenceTime = oldLocalTimeAtTimeSync - syncIngressTimestamp;
-
-    emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(oldLocalTimeAtTimeSync) - now);
-
     /************** Time synchronization *****************************************
      * Local time is adjusted using peer delay, correction field, residence time *
      * and packet transmission time based departure time of Sync message from GM *
      *****************************************************************************/
+    simtime_t now = simTime();
+    clocktime_t oldLocalTimeAtTimeSync = clock->getClockTime();
+    emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(oldLocalTimeAtTimeSync) - now);
+
+    clocktime_t residenceTime = oldLocalTimeAtTimeSync - syncIngressTimestamp;
 
     ASSERT(gptpNodeType != MASTER_NODE);
 
-    switch (gmRateRatioCalculationMethod) {
-    case GmRateRatioCalculationMethod::NONE:
-        gmRateRatio = 1.0;
-        break;
-    case GmRateRatioCalculationMethod::NRR:
-        gmRateRatio = receivedRateRatio * neighborRateRatio;
-        break;
-    case GmRateRatioCalculationMethod::DIRECT:
-        peerSentTimeSync = preciseOriginTimestamp + correctionField;
-        if (syncIngressTimestampLast != -1) {
-            gmRateRatio = (peerSentTimeSync - peerSentTimeSyncLast) / (syncIngressTimestamp - syncIngressTimestampLast);
-        }
-        peerSentTimeSyncLast = peerSentTimeSync;
-        break;
-    }
+    calculateGmRatio();
 
     // preciseOriginTimestamp and correctionField are in the grandmaster's time base
     // meanLinkDelay and residence time are in the local time base
@@ -520,6 +508,25 @@ void Gptp::synchronize()
     emit(gmRateRatioSignal, gmRateRatio);
     emit(localTimeSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync));
     emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now);
+}
+
+void Gptp::calculateGmRatio()
+{
+    switch (gmRateRatioCalculationMethod) {
+    case NONE:
+        gmRateRatio = 1.0;
+        break;
+    case NRR:
+        gmRateRatio = receivedRateRatio * neighborRateRatio;
+        break;
+    case DIRECT:
+        peerSentTimeSync = preciseOriginTimestamp + correctionField;
+        if (syncIngressTimestampLast != -1) {
+            gmRateRatio = (peerSentTimeSync - peerSentTimeSyncLast) / (syncIngressTimestamp - syncIngressTimestampLast);
+        }
+        peerSentTimeSyncLast = peerSentTimeSync;
+        break;
+    }
 }
 
 void Gptp::processPdelayReq(Packet *packet, const GptpPdelayReq *gptp)

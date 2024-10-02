@@ -24,6 +24,7 @@ namespace inet {
 
 class INET_API Gptp : public ClockUserModuleBase, public cListener
 {
+  protected:
     // parameters:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
 
@@ -50,10 +51,13 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     // Timestamps corresponding to the PDelayRequest and PDelayResponse mechanism
     clocktime_t pDelayReqEgressTimestamp = -1;  // egress time of pdelay_req at initiator (this node)
     clocktime_t pDelayReqIngressTimestamp = -1; // ingress time of pdelay_req at responder
-    clocktime_t pDelayRespEgressTimestamp = -1; // egress time of pdelay_resp at responder (received in PDelayRespFollowUp)
-    clocktime_t pDelayRespEgressTimestampSetStart = -1; // egress time of previous pdelay_resp at responder (received in PDelayRespFollowUp)
+    clocktime_t pDelayRespEgressTimestamp =
+        -1; // egress time of pdelay_resp at responder (received in PDelayRespFollowUp)
+    clocktime_t pDelayRespEgressTimestampSetStart =
+        -1; // egress time of previous pdelay_resp at responder (received in PDelayRespFollowUp)
     clocktime_t pDelayRespIngressTimestamp = -1; // ingress time of pdelay_resp at initiator (this node)
-    clocktime_t pDelayRespIngressTimestampSetStart = -1;  // ingress time of previous pdelay_resp at initiator (this node)
+    clocktime_t pDelayRespIngressTimestampSetStart =
+        -1;                           // ingress time of previous pdelay_resp at initiator (this node)
     int nrrCalculationSetMaximum = 1; // TODO: Make this a settable parameter
     int nrrCalculationSetCurrent = 0;
 
@@ -71,8 +75,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     clocktime_t preciseOriginTimestamp = -1;     // timestamp when the last sync message was generated at the GM
     clocktime_t preciseOriginTimestampLast = -1; // timestamp when the last sync message was generated at the GM
 
-    clocktime_t peerSentTimeSync = -1;       // egress time of Sync at master (this node)
-    clocktime_t peerSentTimeSyncLast = -1;   // egress time of previous Sync at master (this node)
+    clocktime_t peerSentTimeSync = -1;     // egress time of Sync at master (this node)
+    clocktime_t peerSentTimeSyncLast = -1; // egress time of previous Sync at master (this node)
 
     clocktime_t syncIngressTimestamp = -1;     // ingress time of Sync at slave (this node)
     clocktime_t syncIngressTimestampLast = -1; // ingress time of previous Sync at slave (this node)
@@ -125,9 +129,9 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
   protected:
     void sendPacketToNIC(Packet *packet, int portId);
 
-    void sendSync();
+    virtual void sendSync();
 
-    void sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syncEgressTimestampOwn);
+    virtual void sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syncEgressTimestampOwn);
 
     void sendPdelayReq();
 
@@ -135,9 +139,9 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     void sendPdelayRespFollowUp(int portId, const GptpPdelayResp *resp);
 
-    void processSync(Packet *packet, const GptpSync *gptp);
+    virtual void processSync(Packet *packet, const GptpSync *gptp);
 
-    void processFollowUp(Packet *packet, const GptpFollowUp *gptp);
+    virtual void processFollowUp(Packet *packet, const GptpFollowUp *gptp);
 
     void processPdelayReq(Packet *packet, const GptpPdelayReq *gptp);
 
@@ -145,7 +149,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     void processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowUp *gptp);
 
-    void synchronize();
+    virtual void synchronize();
 
     inline void adjustLocalTimestamp(clocktime_t &timestamp, clocktime_t difference)
     {
@@ -158,6 +162,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     }
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
+    void calculateGmRatio();
 };
 
 } // namespace inet
