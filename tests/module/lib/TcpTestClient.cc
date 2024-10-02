@@ -10,16 +10,21 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * TCP client application for testing the TCP model.
  */
-class INET_API TcpTestClient : public cSimpleModule
+class INET_API TcpTestClient : public cSimpleModule, public IPassivePacketSink
 {
   protected:
     struct Command
@@ -47,9 +52,17 @@ class INET_API TcpTestClient : public cSimpleModule
     void scheduleNextSend();
 
   protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 Define_Module(TcpTestClient);
@@ -193,6 +206,14 @@ void TcpTestClient::scheduleNextSend()
 void TcpTestClient::finish()
 {
     EV << getFullPath() << ": received " << rcvdBytes << " bytes in " << rcvdPackets << " packets\n";
+}
+
+void TcpTestClient::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
 }
 
 } // namespace inet
