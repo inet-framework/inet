@@ -12,7 +12,7 @@ namespace UDPSocket_2 {
 class TestApp : public cSimpleModule
 {
     public:
-       TestApp() : cSimpleModule(65536) {}
+       TestApp() : cSimpleModule(10 * 65536) {}
     protected:
         virtual void activity();
 };
