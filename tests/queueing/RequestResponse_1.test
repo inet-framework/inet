@@ -66,6 +66,7 @@ cmdenv-event-banners = false
 cmdenv-log-prefix = "At %ts %N: "
 *.requestProducer.packetLength = 1B
 *.requestProducer.productionInterval = uniform(0s, 4s)
+*.requestProducer.initialProductionOffset = -1s
 *.requestConsumer.numKind = 2
 *.requestConsumer.classifier.classifierClass = "TestClassifier"
 *.requestConsumer.responseProducerModule = "^.responseProducer"
