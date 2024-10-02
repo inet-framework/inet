@@ -7,7 +7,7 @@ simple IGMPTester
         int mtu = default(1500);
         string checksumMode @enum("declared","computed") = default("declared");
     gates:
-        input upperLayerIn;    //igmpIn
+        input upperLayerIn @interface[inet::queueing::IPassivePacketSink](pdu=igmp);    //igmpIn
         output upperLayerOut;  //igmpOut
 }
 

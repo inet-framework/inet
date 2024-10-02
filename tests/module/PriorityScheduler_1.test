@@ -51,7 +51,7 @@ Define_Module(TestSource);
 void TestSource::activity()
 {
     auto outputGate = gate("out", 0);
-    ModuleRefByGate<PriorityScheduler> scheduler;
+    ModuleRefByGate<IActivePacketSink> scheduler;
     scheduler.reference(outputGate, true);
     wait(1);
     canPullSomePacketOnGate[0] = true;
@@ -66,7 +66,7 @@ void TestSource::activity()
 simple TestSource
 {
     gates:
-        output out[];
+        output out[] @interface[inet::queueing::IPassivePacketSource];
 }
 
 %file: TestSink.cc
@@ -110,7 +110,7 @@ Define_Module(TestSink);
 void TestSink::activity()
 {
     auto inputGate = gate("in");
-    ModuleRefByGate<PriorityScheduler> scheduler;
+    ModuleRefByGate<IPassivePacketSource> scheduler;
     scheduler.reference(inputGate, true);
     auto packet = scheduler->pullPacketStart(scheduler.getReferencedGate(), bps(8));
     EV_INFO << "Starting packet streaming" << EV_FIELD(packet) << EV_ENDL;
@@ -125,7 +125,7 @@ void TestSink::activity()
 simple TestSink
 {
     gates:
-        input in;
+        input in @interface[inet::queueing::IPassivePacketSink] @interface[inet::queueing::IActivePacketSink];
 }
 
 %file: TestNetwork.ned

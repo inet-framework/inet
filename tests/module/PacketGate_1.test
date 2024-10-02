@@ -49,7 +49,7 @@ Define_Module(TestSource);
 void TestSource::activity()
 {
     auto outputGate = gate("out");
-    ModuleRefByGate<PacketGate> gate;
+    ModuleRefByGate<IPassivePacketSink> gate;
     gate.reference(outputGate, true);
     streamedPacket = new Packet(nullptr, makeShared<ByteCountChunk>(B(10)));
     wait(2);
@@ -67,7 +67,7 @@ void TestSource::activity()
 simple TestSource
 {
     gates:
-        output out;
+        output out @interface[inet::queueing::IPassivePacketSource];
 }
 
 %file: TestSink.cc
@@ -113,7 +113,7 @@ Define_Module(TestSink);
 simple TestSink
 {
     gates:
-        input in;
+        input in @interface[inet::queueing::IPassivePacketSink];
 }
 
 %file: TestNetwork.ned
