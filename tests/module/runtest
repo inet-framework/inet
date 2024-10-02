@@ -4,8 +4,31 @@
 # without args, runs all *.test files in the current directory
 #
 
-MAKE="make MODE=debug"
-DBG_SUFFIX="_dbg"
+MODE="debug"
+SUFFIX="_dbg"
+
+if [ "$1" = "--release" ]; then
+   # Equivalent to: MODE=release inet
+   MODE="release"
+   SUFFIX=""
+   shift;
+fi
+
+if [ "$1" = "--debug" ]; then
+   # Equivalent to: MODE=debug inet
+   MODE="debug"
+   SUFFIX="_dbg"
+   shift;
+fi
+
+if [ "$1" = "--sanitize" ]; then
+   # Equivalent to: MODE=sanitize inet
+   MODE="sanitize"
+   SUFFIX="_sanitize"
+   shift;
+fi
+
+MAKE="make MODE=$MODE"
 
 TESTFILES=$*
 if [ "x$TESTFILES" = "x" ]; then TESTFILES='*.test'; fi
@@ -16,10 +39,10 @@ cp -pPR lib work/       # OSX does not support cp -a
 opp_test gen $OPT -v $TESTFILES || exit 1
 
 echo
-(cd work; opp_makemake -f --deep -lINET$DBG_SUFFIX -L../../../src -P . -I../../../src -i ../makefrag; $MAKE) || exit 1
+(cd work; opp_makemake -f --deep -lINET$SUFFIX -L../../../src -P . -I../../../src -i ../makefrag; $MAKE -j24) || exit 1
 
 echo
-PATH=$PATH:../../src opp_test run $OPT -v -p work$DBG_SUFFIX $TESTFILES -a "--check-signals=false -lINET " || exit 1
+PATH=$PATH:../../src opp_test run $OPT -v -p work$SUFFIX $TESTFILES -a "--check-signals=false -lINET " || exit 1
 
 echo
 echo Results can be found in ./work
