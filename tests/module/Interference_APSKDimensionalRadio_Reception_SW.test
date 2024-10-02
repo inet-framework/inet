@@ -91,8 +91,8 @@ Changing radio reception state from IDLE to RECEIVING.
 Changing radio reception state from RECEIVING to BUSY.
 %contains: results/General-0.elog
 Passing up contained packet 'ping0' to higher layer
-%contains: results/General-0.elog
-Sending datagram 'ping0-reply' with destination = 10.0.0.1
+%contains-regex: results/General-0.elog
+Sending datagram to lower layer, .*?ping0-reply.*?destinationAddress = 10.0.0.1
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out
