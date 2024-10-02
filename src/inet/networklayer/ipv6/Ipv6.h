@@ -170,6 +170,8 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
      */
     virtual void localDeliver(Packet *packet, const NetworkInterface *fromIE);
 
+    virtual bool hasUpperProtocol(const Protocol *protocol);
+
     /**
      * Decapsulate packet.
      */

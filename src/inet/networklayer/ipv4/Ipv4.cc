@@ -289,6 +289,25 @@ bool Ipv4::isLifetimeExpired(const Ptr<const Ipv4Header>& ipv4Header) const
     }
 }
 
+bool Ipv4::hasUpperProtocol(const Protocol *protocol)
+{
+    if (protocol == nullptr)
+        return false;
+    else if (contains(upperProtocols, protocol))
+        return true;
+    else {
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(protocol);
+        dispatchProtocolReq.setServicePrimitive(SP_INDICATION);
+        if (findModuleInterface(gate("transportOut"), typeid(IPassivePacketSink), &dispatchProtocolReq) == nullptr)
+            return false;
+        else {
+            upperProtocols.insert(protocol);
+            return true;
+        }
+    }
+}
+
 void Ipv4::preroutingFinish(Packet *packet)
 {
     const NetworkInterface *fromIE = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
@@ -823,7 +842,7 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
             hasSocket = true;
         }
     }
-    if (contains(upperProtocols, protocol)) {
+    if (hasUpperProtocol(protocol)) {
         EV_INFO << "Passing up to protocol " << *protocol << "\n";
         emit(packetSentToUpperSignal, packet);
         transportSink.pushPacket(packet);
