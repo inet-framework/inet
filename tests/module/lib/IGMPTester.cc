@@ -16,12 +16,15 @@
 #include "inet/networklayer/ipv4/Igmpv3.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 using namespace std;
 
 namespace inet {
 
-class INET_API IGMPTester : public cSimpleModule, public IScriptable
+using namespace inet::queueing;
+
+class INET_API IGMPTester : public cSimpleModule, public IScriptable, public IPassivePacketSink
 {
   private:
     IInterfaceTable *ift;
@@ -47,6 +50,14 @@ class INET_API IGMPTester : public cSimpleModule, public IScriptable
     void processDumpCommand(string what, NetworkInterface *ie);
     void parseIPv4AddressVector(const char *str, Ipv4AddressVector &result);
     void sendIGMP(Packet *msg, NetworkInterface *ie, Ipv4Address dest);
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("upperLayerIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("upperLayerIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 Define_Module(IGMPTester);
@@ -380,6 +391,14 @@ void IGMPTester::parseIPv4AddressVector(const char *str, Ipv4AddressVector &resu
             result.push_back(Ipv4Address(tokens.nextToken()));
     }
     sort(result.begin(), result.end());
+}
+
+void IGMPTester::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
 }
 
 } // namespace inet

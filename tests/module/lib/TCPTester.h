@@ -14,18 +14,23 @@
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "PacketDump.h"
 
 namespace inet {
 
 namespace tcp {
 
+using namespace inet::queueing;
+
 /**
  * Base class for TCP testing modules.
  */
-class INET_API TCPTesterBase : public cSimpleModule
+class INET_API TCPTesterBase : public cSimpleModule, public IPassivePacketSink
 {
   protected:
+    PassivePacketSinkRef outSink1;
+    PassivePacketSinkRef outSink2;
     int fromASeq;
     int fromBSeq;
 
@@ -36,8 +41,15 @@ class INET_API TCPTesterBase : public cSimpleModule
 
   public:
     TCPTesterBase();
-    virtual void initialize();
-    virtual void finish();
+    virtual void initialize() override;
+    virtual void finish() override;
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 
@@ -69,8 +81,8 @@ class INET_API TCPScriptableTester : public TCPTesterBase
 
   public:
     TCPScriptableTester() {}
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
 };
 
 
@@ -92,8 +104,8 @@ class INET_API TCPRandomTester : public TCPTesterBase
 
   public:
     TCPRandomTester() {}
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
 };
 
 } // namespace tcp

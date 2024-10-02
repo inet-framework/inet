@@ -20,6 +20,10 @@ TCPTesterBase::TCPTesterBase() : cSimpleModule()
 
 void TCPTesterBase::initialize()
 {
+    PacketProtocolTag packetProtocolTag;
+    packetProtocolTag.setProtocol(&Protocol::tcp);
+    outSink1.reference(gate("out1"), true, &packetProtocolTag);
+    outSink2.reference(gate("out2"), true, &packetProtocolTag);
     fromASeq = 0;
     fromBSeq = 0;
     tcpdump.setOutStream(EVSTREAM);
@@ -52,6 +56,13 @@ void TCPTesterBase::finish()
 }
 
 
+void TCPTesterBase::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
+}
 
 //---
 
@@ -156,7 +167,7 @@ void TCPScriptableTester::dispatchSegment(Packet *pk)
     bool fromA = cmd->fromA;
     bubble("introducing copy");
     dump(seg, pk->getByteLength(), fromA, "introducing copy");
-    send(pk, fromA ? "out2" : "out1");
+    fromA ? outSink2.pushPacket(pk) : outSink1.pushPacket(pk);
 }
 
 void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
@@ -183,7 +194,7 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
     {
         // dump & forward
         dump(seg, pk->getByteLength(), fromA);
-        send(pk, fromA ? "out2" : "out1");
+        fromA ? outSink2.pushPacket(pk) : outSink1.pushPacket(pk);
     }
     else if (cmd->command==CMD_DELETE)
     {
@@ -204,7 +215,7 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
             {
                 bubble("forwarding after 0 delay");
                 dump(seg, pk->getByteLength(), fromA, "introducing copy");
-                send(segcopy, fromA ? "out2" : "out1");
+                fromA ? outSink2.pushPacket(segcopy) : outSink1.pushPacket(segcopy);
             }
             else
             {
@@ -261,7 +272,7 @@ void TCPRandomTester::dispatchSegment(Packet *pk)
     bool fromA = (bool)pk->getContextPointer();
     bubble("introducing copy");
     dump(seg, pk->getByteLength(), fromA, "introducing copy");
-    send(pk, fromA ? "out2" : "out1");
+    fromA ? outSink2.pushPacket(pk) : outSink1.pushPacket(pk);
 }
 
 void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
@@ -313,7 +324,7 @@ void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
     {
         // dump & forward
         dump(seg, pk->getByteLength(), fromA);
-        send(pk, fromA ? "out2" : "out1");
+        fromA ? outSink2.pushPacket(pk) : outSink1.pushPacket(pk);
     }
 }
 
