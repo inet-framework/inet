@@ -51,6 +51,7 @@ class INET_API Ieee8022Llc : public OperationalBase, public IPassivePacketSink
     virtual void decapsulate(Packet *frame);
     virtual void processPacketFromHigherLayer(Packet *msg);
     virtual bool deliverCopyToSockets(Packet *packet);  // return true when delivered to any socket
+    virtual bool hasUpperProtocol(const Protocol *protocol);
     virtual bool isDeliverableToUpperLayer(Packet *packet);
     virtual void processPacketFromMac(Packet *packet);
     virtual void processCommandFromHigherLayer(Request *request);

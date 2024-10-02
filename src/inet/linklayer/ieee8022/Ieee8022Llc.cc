@@ -7,6 +7,7 @@
 
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -126,10 +127,29 @@ bool Ieee8022Llc::deliverCopyToSockets(Packet *packet)
     return isSent;
 }
 
+bool Ieee8022Llc::hasUpperProtocol(const Protocol *protocol)
+{
+    if (protocol == nullptr)
+        return false;
+    else if (contains(upperProtocols, protocol))
+        return true;
+    else {
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(protocol);
+        dispatchProtocolReq.setServicePrimitive(SP_INDICATION);
+        if (findModuleInterface(gate("upperLayerOut"), typeid(IPassivePacketSink), &dispatchProtocolReq) == nullptr)
+            return false;
+        else {
+            upperProtocols.insert(protocol);
+            return true;
+        }
+    }
+}
+
 bool Ieee8022Llc::isDeliverableToUpperLayer(Packet *packet)
 {
     const auto& protocolTag = packet->findTag<PacketProtocolTag>();
-    return (protocolTag != nullptr && contains(upperProtocols, protocolTag->getProtocol()));
+    return protocolTag != nullptr && hasUpperProtocol(protocolTag->getProtocol());
 }
 
 void Ieee8022Llc::processPacketFromMac(Packet *packet)
