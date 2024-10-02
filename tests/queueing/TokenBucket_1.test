@@ -38,6 +38,7 @@ cmdenv-event-banners = false
 cmdenv-log-prefix = "At %ts %N: "
 *.producer.packetLength = 1B
 *.producer.productionInterval = uniform(0s, 2s)
+*.producer.initialProductionOffset = -1s
 *.bucket.server.maxNumTokens = 10
 *.tokenGenerator.storageModule = "^.bucket.server"
 *.tokenGenerator.generationInterval = uniform(0s, 2s)
