@@ -202,6 +202,8 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
      */
     virtual void localDeliverFinish(Packet *packet);
 
+    virtual bool hasUpperProtocol(const Protocol *protocol);
+
     /**
      * Decapsulate packet.
      */

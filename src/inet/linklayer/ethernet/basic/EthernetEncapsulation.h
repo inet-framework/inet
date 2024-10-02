@@ -57,7 +57,6 @@ class INET_API EthernetEncapsulation : public OperationalBase, public IPassivePa
 
     friend std::ostream& operator<<(std::ostream& o, const Socket& t);
     std::map<int, Socket *> socketIdToSocketMap;
-    bool anyUpperProtocols = false;
 
   protected:
     virtual ~EthernetEncapsulation();
@@ -69,6 +68,7 @@ class INET_API EthernetEncapsulation : public OperationalBase, public IPassivePa
     virtual void processPacketFromHigherLayer(Packet *msg);
     virtual void processPacketFromMac(Packet *packet);
     virtual void handleSendPause(cMessage *msg);
+    virtual bool hasUpperProtocol(const Protocol *protocol);
 
     virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("upperLayerIn") || gate->isName("lowerLayerIn"); }
     virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("upperLayerIn") || gate->isName("lowerLayerIn"); }
