@@ -39,11 +39,11 @@ cmdenv-event-banners = false
 *.source.packetLength = 100B
 *.source.productionInterval = 1s
 
+%subst: /\nRunning simulation\.\.\.\n//
+
 %contains-regex: stdout
 Producing packet, .*?source-0.*?
 Consuming packet, .*?source-0.*?
-
-Running simulation...
 Producing packet, .*?source-1.*?
 Consuming packet, .*?source-1.*?
 Producing packet, .*?source-2.*?
