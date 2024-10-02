@@ -67,66 +67,66 @@ cmdenv-express-mode = false
 %contains-regex: stdout
 
 Running simulation\.\.\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
-.*
-The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
-DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
-.*
+.*?
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*?
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
 DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
 \*\* Event
