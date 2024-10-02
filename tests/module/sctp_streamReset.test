@@ -41,7 +41,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp_client.app[0].queueSize = 1000
 **.sctp_client.app[0].outboundStreams = 4
 **.sctp_client.app[0].streamReset = true
-**.sctp_client.app[0].streamRequestTime = 3s
+**.sctp_client.app[0].streamRequestTime = 2s
 **.sctp_client.app[0].streamResetType =9  #NO_RESET=5, RESET_OUTGOING=7, RESET_INCOMING=8, RESET_BOTH=9, SSN_TSN=10
 **.sctp_client.app[0].streamToReset = 2
 
