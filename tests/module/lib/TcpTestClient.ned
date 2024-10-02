@@ -28,7 +28,7 @@ simple TcpTestClient like IApp
         double tClose @unit(s);
         @display("i=block/app");
     gates:
-        input socketIn;
+        input socketIn @interface[inet::queueing::IPassivePacketSink];
         output socketOut;
 }
 
