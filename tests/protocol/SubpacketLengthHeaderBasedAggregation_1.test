@@ -42,11 +42,11 @@ cmdenv-event-banners = false
 *.aggregator.aggregatorPolicy.maxNumSubpackets = 3
 *.aggregator.aggregatorPolicy.maxAggregatedLength = 1000B
 
+%subst: /\nRunning simulation\.\.\.\n//
+
 %contains-regex: stdout
 Producing packet, .*?source-0.*?
 Aggregating packet, .*?source-0.*?source-0.*?
-
-Running simulation...
 Producing packet, .*?source-1.*?
 Aggregating packet, .*?source-1.*?source-0\+source-1.*?
 Producing packet, .*?source-2.*?

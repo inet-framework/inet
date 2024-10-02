@@ -53,6 +53,8 @@ cmdenv-event-banners = false
 
 %# remove method call lines added in OMNeT++ 6.4
 %subst: /^Method call [^\n]*\n//m
+%subst: /\nRunning simulation\.\.\.\n//
+
 %contains-regex: stdout
 Producing packet, .*?source-0.*?
 Fragmenting packet, .*?source-0.*?source-0-frag0.*?
@@ -76,8 +78,6 @@ Defragmenting packet, .*?source-0.*?source-0-frag8.*?
 Fragmenting packet, .*?source-0.*?source-0-frag9.*?
 Defragmenting packet, .*?source-0.*?source-0-frag9.*?
 Consuming packet, .*?source-0.*?
-
-Running simulation...
 Producing packet, .*?source-1.*?
 Fragmenting packet, .*?source-1.*?source-1-frag0.*?
 Defragmenting packet, .*?source-1.*?source-1-frag0.*?
