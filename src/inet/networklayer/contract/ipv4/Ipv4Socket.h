@@ -12,8 +12,12 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/INetworkSocket.h"
+#include "inet/networklayer/contract/ipv4/IIpv4.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * This class implements a raw IPv4 socket.
@@ -40,6 +44,8 @@ class INET_API Ipv4Socket : public INetworkSocket
     INetworkSocket::ICallback *callback = nullptr;
     void *userData = nullptr;
     cGate *outputGate = nullptr;
+    PassivePacketSinkRef sink;
+    ModuleRefByGate<IIpv4> ipv4;
 
   protected:
     void sendToOutput(cMessage *message);
@@ -52,7 +58,14 @@ class INET_API Ipv4Socket : public INetworkSocket
      * Sets the gate on which to send raw packets. Must be invoked before socket
      * can be used. Example: <tt>socket.setOutputGate(gate("ipOut"));</tt>
      */
-    void setOutputGate(cGate *outputGate) { this->outputGate = outputGate; }
+    void setOutputGate(cGate *outputGate) {
+        this->outputGate = outputGate;
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(&Protocol::ipv4);
+        dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
+        sink.reference(outputGate, true, &dispatchProtocolReq);
+        ipv4.reference(outputGate, true);
+    }
     virtual void setCallback(INetworkSocket::ICallback *callback) override;
 
     void *getUserData() const { return userData; }

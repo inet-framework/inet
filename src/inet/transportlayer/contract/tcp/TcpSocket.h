@@ -13,9 +13,14 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
+#include "inet/transportlayer/contract/ITcp.h"
 
 namespace inet {
+
+using namespace inet::queueing;
+using namespace inet::tcp;
 
 class TcpStatusInfo;
 
@@ -168,6 +173,9 @@ class INET_API TcpSocket : public ISocket
     enum State { NOT_BOUND, BOUND, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, CLOSED, SOCKERROR };
 
   protected:
+    PassivePacketSinkRef sink;
+    ModuleRefByGate<ITcp> tcp;
+
     int connId = -1;
     State sockstate = NOT_BOUND;
 
@@ -285,7 +293,14 @@ class INET_API TcpSocket : public ISocket
      * Sets the gate on which to send to TCP. Must be invoked before socket
      * can be used. Example: <tt>socket.setOutputGate(gate("tcpOut"));</tt>
      */
-    void setOutputGate(cGate *toTcp) { gateToTcp = toTcp; }
+    void setOutputGate(cGate *toTcp) {
+        gateToTcp = toTcp;
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(&Protocol::tcp);
+        dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
+        sink.reference(toTcp, true, &dispatchProtocolReq);
+        tcp.reference(toTcp, true);
+    }
 
     /**
      * Bind the socket to a local port number.

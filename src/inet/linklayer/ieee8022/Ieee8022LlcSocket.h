@@ -9,8 +9,12 @@
 #define __INET_IEEE8022LLCSOCKET_H
 
 #include "inet/common/socket/SocketBase.h"
+#include "inet/linklayer/ieee8022/IIeee8022Llc.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 class INET_API Ieee8022LlcSocket : public SocketBase
 {
@@ -23,6 +27,9 @@ class INET_API Ieee8022LlcSocket : public SocketBase
     };
 
   protected:
+    PassivePacketSinkRef sink;
+    ModuleRefByGate<IIeee8022Llc> llc;
+
     int interfaceId = -1;
     int localSap = -1;
     int remoteSap = -1;
@@ -32,6 +39,15 @@ class INET_API Ieee8022LlcSocket : public SocketBase
     virtual void sendOut(cMessage *msg) override;
 
   public:
+    virtual void setOutputGate(cGate *gate) override {
+        SocketBase::setOutputGate(gate);
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(&Protocol::ieee8022llc);
+        dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
+        sink.reference(gate, true, &dispatchProtocolReq);
+        llc.reference(gate, true);
+    }
+
     /**
      * Sets a callback object, to be used with processMessage().
      * This callback object may be your simple module itself (if it
