@@ -16,9 +16,13 @@
 #include "inet/common/socket/ISocket.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
+#include "inet/transportlayer/contract/IUdp.h"
 #include "inet/transportlayer/contract/udp/UdpCommand_m.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * UdpSocket is a convenience class, to make it easier to send and receive
@@ -83,6 +87,8 @@ class INET_API UdpSocket : public ISocket
     void *userData = nullptr;
     cGate *gateToUdp = nullptr;
     State sockState = CLOSED;
+    PassivePacketSinkRef sink;
+    ModuleRefByGate<IUdp> udp;
 
   protected:
     void sendToUDP(cMessage *msg);
@@ -115,7 +121,14 @@ class INET_API UdpSocket : public ISocket
      * Sets the gate on which to send to UDP. Must be invoked before socket
      * can be used. Example: <tt>socket.setOutputGate(gate("udpOut"));</tt>
      */
-    void setOutputGate(cGate *toUdp) { gateToUdp = toUdp; }
+    void setOutputGate(cGate *toUdp) {
+        gateToUdp = toUdp;
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(&Protocol::udp);
+        dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
+        sink.reference(toUdp, true, &dispatchProtocolReq);
+        udp.reference(toUdp, true);
+    }
 
     /**
      * Bind the socket to a local port number. Use port=0 for ephemeral port.
