@@ -130,7 +130,7 @@ class TcpStatusInfo;
  *
  * @see SocketMap
  */
-class INET_API TcpSocket : public ISocket
+class INET_API TcpSocket : public ISocket, public ITcp::ICallback
 {
   public:
     /**
@@ -489,6 +489,35 @@ class INET_API TcpSocket : public ISocket
      */
     void processMessage(cMessage *msg) override;
     //@}
+
+    virtual void handleEstablished(Indication *indication) override {
+        processMessage(indication);
+    }
+
+    virtual void handleAvailable(TcpAvailableInfo *availableInfo) override {
+        if (cb)
+            cb->socketAvailable(this, availableInfo);
+        else
+            accept(availableInfo->getNewSocketId());
+    }
+
+    virtual void handleClosed() override {
+        sockstate = CLOSED;
+        if (cb)
+            cb->socketClosed(this);
+    }
+
+    virtual void handlePeerClosed() override {
+        sockstate = PEER_CLOSED;
+        if (cb)
+            cb->socketPeerClosed(this);
+    }
+
+    virtual void handleFailure(int code) override {
+        sockstate = SOCKERROR;
+        if (cb)
+            cb->socketFailure(this, code);
+    }
 };
 
 } // namespace inet

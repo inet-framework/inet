@@ -19,7 +19,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API Ieee8021qSocket : public SocketBase
+class INET_API Ieee8021qSocket : public SocketBase, public IIeee8021q::ICallback
 {
   public:
     class INET_API ICallback {

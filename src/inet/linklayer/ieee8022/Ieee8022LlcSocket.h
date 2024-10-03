@@ -16,7 +16,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API Ieee8022LlcSocket : public SocketBase
+class INET_API Ieee8022LlcSocket : public SocketBase, public IIeee8022Llc::ICallback
 {
   public:
     class INET_API ICallback {
@@ -81,6 +81,11 @@ class INET_API Ieee8022LlcSocket : public SocketBase
 
     virtual void open(int interfaceId, int localSap, int remoteSap);
     virtual void processMessage(cMessage *msg) override;
+
+    virtual void handleClosed() override {
+        if (callback)
+            callback->socketClosed(this);
+    }
 };
 
 } // namespace inet
