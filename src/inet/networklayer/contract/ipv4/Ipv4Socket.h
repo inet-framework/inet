@@ -22,7 +22,7 @@ using namespace inet::queueing;
 /**
  * This class implements a raw IPv4 socket.
  */
-class INET_API Ipv4Socket : public INetworkSocket
+class INET_API Ipv4Socket : public INetworkSocket, public IIpv4::ICallback
 {
   public:
     class INET_API ICallback : public INetworkSocket::ICallback {
@@ -84,6 +84,11 @@ class INET_API Ipv4Socket : public INetworkSocket
     virtual void close() override;
     virtual void destroy() override;
     virtual bool isOpen() const override { return isOpen_; }
+
+    virtual void handleClosed() override {
+        if (callback != nullptr)
+            callback->socketClosed(this);
+    }
 
   protected:
     virtual void bind(const Protocol *protocol, L3Address localAddress) override { bind(protocol, localAddress.toIpv4()); }

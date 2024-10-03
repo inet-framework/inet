@@ -21,7 +21,7 @@ using namespace inet::queueing;
 /**
  * This class implements a raw IPv6 socket.
  */
-class INET_API Ipv6Socket : public INetworkSocket
+class INET_API Ipv6Socket : public INetworkSocket, public IIpv6::ICallback
 {
   public:
     class INET_API ICallback : public INetworkSocket::ICallback {
