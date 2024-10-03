@@ -10,6 +10,7 @@
 
 #include "inet/common/ModuleRefByGate.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
+#include "inet/queueing/base/AnimatePacket.h"
 
 namespace inet {
 namespace queueing {
@@ -28,6 +29,7 @@ class INET_API PassivePacketSinkRef : public ModuleRefByGate<IPassivePacketSink>
     }
 
     virtual void pushPacket(Packet *packet) {
+        animatePushPacket(packet, referencingGate, referencedGate);
         referencedModule->pushPacket(packet, referencedGate);
     }
 
