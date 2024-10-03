@@ -14,9 +14,14 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/ISocket.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
+#include "inet/transportlayer/contract/ISctp.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 
 namespace inet {
+
+using namespace inet::queueing;
+using namespace inet::sctp;
 
 typedef std::vector<L3Address> AddressVector;
 
@@ -80,6 +85,9 @@ class INET_API SctpSocket : public ISocket
     enum State { NOT_BOUND, CLOSED, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, SOCKERROR };
 
   protected:
+    PassivePacketSinkRef sink;
+    ModuleRefByGate<ISctp> sctp;
+
     int assocId;
     uint64_t& nextAssocId = SIMULATION_SHARED_COUNTER(nextAssocId);
     int sockstate;
@@ -171,7 +179,14 @@ class INET_API SctpSocket : public ISocket
      * Sets the gate on which to send to SCTP. Must be invoked before socket
      * can be used. Example: <tt>socket.setOutputGate(gate("sctpOut"));</tt>
      */
-    void setOutputGate(cGate *toSctp) { gateToSctp = toSctp; }
+    void setOutputGate(cGate *toSctp) {
+        gateToSctp = toSctp;
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(&Protocol::sctp);
+        dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
+        sink.reference(toSctp, true, &dispatchProtocolReq);
+        sctp.reference(toSctp, true);
+    }
 
     /**
      * Setter and getter methods for socket and API Parameters

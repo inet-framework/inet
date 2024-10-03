@@ -11,9 +11,13 @@
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketBase.h"
+#include "inet/linklayer/ieee8021q/IIeee8021q.h"
 #include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 class INET_API Ieee8021qSocket : public SocketBase
 {
@@ -39,6 +43,8 @@ class INET_API Ieee8021qSocket : public SocketBase
     };
 
   protected:
+    PassivePacketSinkRef sink;
+    ModuleRefByGate<IIeee8021q> ieee8021q;
     ICallback *callback = nullptr;
     NetworkInterface *networkInterface = nullptr;
     const Protocol *protocol = nullptr;
@@ -47,6 +53,15 @@ class INET_API Ieee8021qSocket : public SocketBase
     virtual void sendOut(cMessage *msg) override;
 
   public:
+    virtual void setOutputGate(cGate *gate) override {
+        SocketBase::setOutputGate(gate);
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(&Protocol::ieee8021qCTag);
+        dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
+        sink.reference(gate, true, &dispatchProtocolReq);
+        ieee8021q.reference(gate, true);
+    }
+
     /** @name Opening and closing connections, sending data */
     //@{
     /**
