@@ -50,7 +50,7 @@ typedef struct
     bool streamReset;
 } AppSocketOptions;
 
-class INET_API SctpSocket : public ISocket
+class INET_API SctpSocket : public ISocket, public ISctp::ICallback
 {
   public:
     /**
@@ -371,6 +371,75 @@ class INET_API SctpSocket : public ISocket
     virtual void destroy() override;
 
     virtual bool isOpen() const override;
+
+    virtual void handleEstablished(Indication *indication) override;
+
+    virtual void handleAvailable(Indication *indication) override {
+        if (cb != nullptr)
+            cb->socketAvailable(this, indication);
+        else {
+            int newSocketId = indication->getTag<SctpAvailableReq>()->getNewSocketId();
+            acceptSocket(newSocketId);
+        }
+    }
+
+    virtual void handleDataArrived(Packet *packet, bool urgent) override {
+        if (cb != nullptr)
+            cb->socketDataArrived(this, packet, urgent);
+    }
+
+    virtual void handleDataArrivedNotification(Indication *indication) override {
+        if (cb != nullptr)
+            cb->socketDataNotificationArrived(this, indication);
+    }
+
+    virtual void handleClosed() override {
+        if (cb != nullptr)
+            cb->socketClosed(this);
+    }
+
+    virtual void handlePeerClosed() override {
+        if (cb != nullptr)
+            cb->socketPeerClosed(this);
+    }
+
+    virtual void handleFailure(int code) override {
+        if (cb != nullptr)
+            cb->socketFailure(this, code);
+    }
+
+    virtual void handleShutdownReceived() override {
+        if (cb != nullptr)
+            cb->shutdownReceivedArrived(this);
+    }
+
+    virtual void handleAbandoned() override {
+        if (cb != nullptr)
+            cb->msgAbandonedArrived(this);
+    }
+
+    virtual void handleSendStreamReset() override {
+        // void
+    }
+
+    virtual void handleReceiveStreamReset() override {
+        // void
+    }
+
+    virtual void handleSendMessage() override {
+        if (cb != nullptr)
+            cb->sendRequestArrived(this);
+    }
+
+    virtual void handleStatus(Indication *indication) override {
+        if (cb != nullptr)
+            cb->socketStatusArrived(this, const_cast<SctpStatusReq *>(indication->getTag<SctpStatusReq>().get()));
+    }
+
+    virtual void handleAddressAdded(L3Address localAddr, L3Address remoteAddr) override {
+        if (cb != nullptr)
+            cb->addressAddedArrived(this, localAddr, remoteAddr);
+    }
 };
 
 } // namespace inet

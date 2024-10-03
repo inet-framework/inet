@@ -19,7 +19,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API EthernetSocket : public SocketBase
+class INET_API EthernetSocket : public SocketBase, public IEthernet::ICallback
 {
   public:
     class INET_API ICallback {
