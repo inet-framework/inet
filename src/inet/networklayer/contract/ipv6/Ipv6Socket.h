@@ -11,8 +11,12 @@
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/INetworkSocket.h"
+#include "inet/networklayer/contract/ipv6/IIpv6.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * This class implements a raw IPv6 socket.
@@ -33,6 +37,9 @@ class INET_API Ipv6Socket : public INetworkSocket
     };
 
   protected:
+    PassivePacketSinkRef sink;
+    ModuleRefByGate<IIpv6> ipv6;
+
     bool bound = false;
     bool isOpen_ = false;
     int socketId = -1;
@@ -51,7 +58,15 @@ class INET_API Ipv6Socket : public INetworkSocket
      * Sets the gate on which to send raw packets. Must be invoked before socket
      * can be used. Example: <tt>socket.setOutputGate(gate("ipOut"));</tt>
      */
-    void setOutputGate(cGate *outputGate) { this->outputGate = outputGate; }
+    void setOutputGate(cGate *outputGate) {
+        this->outputGate = outputGate;
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(&Protocol::ipv6);
+        dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
+        sink.reference(outputGate, true, &dispatchProtocolReq);
+        ipv6.reference(outputGate, true);
+    }
+
     virtual void setCallback(INetworkSocket::ICallback *callback) override;
 
     void *getUserData() const { return userData; }

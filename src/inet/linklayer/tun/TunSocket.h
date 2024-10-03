@@ -9,8 +9,11 @@
 #define __INET_TUNSOCKET_H
 
 #include "inet/common/SimpleModule.h"
+#include "inet/common/ModuleRefByGate.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
+#include "inet/linklayer/tun/ITun.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
 
@@ -35,6 +38,8 @@ namespace inet {
  * The socket communicates with the simulated TUN interface using command messages and
  * handles incoming data packets from the interface within the simulation environment.
  */
+using namespace inet::queueing;
+
 class INET_API TunSocket : public ISocket
 {
   public:
@@ -46,6 +51,8 @@ class INET_API TunSocket : public ISocket
     };
 
   protected:
+    PassivePacketSinkRef sink;
+    ModuleRefByGate<ITun> tun;
     int socketId = -1;
     int interfaceId = -1;
     ICallback *callback = nullptr;
@@ -64,7 +71,11 @@ class INET_API TunSocket : public ISocket
      * Sets the gate on which to send raw packets. Must be invoked before socket
      * can be used. Example: <tt>socket.setOutputGate(gate("ipOut"));</tt>
      */
-    void setOutputGate(cGate *outputGate) { this->outputGate = outputGate; }
+    void setOutputGate(cGate *outputGate) {
+        this->outputGate = outputGate;
+        sink.reference(outputGate, true);
+        tun.reference(outputGate, true);
+    }
 
     /**
      * Sets a callback object, to be used with processMessage().
