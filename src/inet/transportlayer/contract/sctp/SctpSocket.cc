@@ -660,5 +660,25 @@ bool SctpSocket::isOpen() const
     }
 }
 
+void SctpSocket::handleEstablished(Indication *indication)
+{
+    EV_INFO << "SCTP_I_ESTABLISHED\n";
+    if (oneToOne)
+        sockstate = CONNECTED;
+    auto connectInfo = indication->getTag<SctpConnectReq>();
+    localAddr = connectInfo->getLocalAddr();
+    remoteAddr = connectInfo->getRemoteAddr();
+    localPrt = connectInfo->getLocalPort();
+    remotePrt = connectInfo->getRemotePort();
+    fsmStatus = connectInfo->getStatus();
+    appOptions->inboundStreams = connectInfo->getInboundStreams();
+    appOptions->outboundStreams = connectInfo->getOutboundStreams();
+    assocId = indication->getTag<SocketInd>()->getSocketId();
+    if (cb != nullptr)
+        cb->socketEstablished(this, connectInfo->getNumMsgs());
+    else
+        EV_WARN << "No callback for socketEstablished" << EV_ENDL;
+}
+
 } // namespace inet
 

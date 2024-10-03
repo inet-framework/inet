@@ -57,7 +57,7 @@ using namespace inet::queueing;
  * USPSocket provides some help for this with the belongsToSocket() and
  * belongsToAnyUDPSocket() methods.
  */
-class INET_API UdpSocket : public ISocket
+class INET_API UdpSocket : public ISocket, public IUdp::ICallback
 {
   public:
     class INET_API ICallback {
@@ -108,6 +108,16 @@ class INET_API UdpSocket : public ISocket
     void *getUserData() const { return userData; }
     void setUserData(void *userData) { this->userData = userData; }
     State getState() const { return sockState; }
+
+    void handleClose() override {
+        if (cb)
+            cb->socketClosed(this);
+    }
+
+    void handleError(Indication *indication) override {
+        if (cb)
+            cb->socketErrorArrived(this, indication);
+    }
 
     /**
      * Returns the internal socket Id.
