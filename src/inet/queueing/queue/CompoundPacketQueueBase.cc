@@ -56,7 +56,6 @@ void CompoundPacketQueueBase::pushPacket(Packet *packet, const cGate *gate)
     take(packet);
     cNamedObject packetPushStartedDetails("atomicOperationStarted");
     emit(packetPushStartedSignal, packet, &packetPushStartedDetails);
-    animatePushPacket(packet, inputGate, consumer.getReferencedGate());
     EV_INFO << "Pushing packet" << EV_FIELD(packet) << EV_ENDL;
     consumer.pushPacket(packet);
     if (packetDropperFunction != nullptr) {
