@@ -82,6 +82,8 @@ class INET_API Ieee8022LlcSocket : public SocketBase, public IIeee8022Llc::ICall
     virtual void open(int interfaceId, int localSap, int remoteSap);
     virtual void processMessage(cMessage *msg) override;
 
+    virtual void send(Packet *msg) override;
+
     virtual void handleClosed() override {
         if (callback)
             callback->socketClosed(this);

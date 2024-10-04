@@ -63,14 +63,18 @@ void UdpSocket::sendTo(Packet *pk, L3Address destAddr, int destPort)
     addressReq->setDestAddress(destAddr);
     if (destPort != -1)
         pk->addTagIfAbsent<L4PortReq>()->setDestPort(destPort);
-    sendToUDP(pk);
+    pk->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::udp);
+    pk->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    sink.pushPacket(pk);
     sockState = CONNECTED;
 }
 
 void UdpSocket::send(Packet *pk)
 {
     pk->setKind(UDP_C_DATA);
-    sendToUDP(pk);
+    pk->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    pk->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::udp);
+    sink.pushPacket(pk);
     sockState = CONNECTED;
 }
 
