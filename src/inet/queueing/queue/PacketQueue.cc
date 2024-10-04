@@ -84,7 +84,7 @@ void PacketQueue::pushPacket(Packet *packet, const cGate *gate)
     take(packet);
     cNamedObject packetPushStartedDetails("atomicOperationStarted");
     emit(packetPushStartedSignal, packet, &packetPushStartedDetails);
-    EV_INFO << "Pushing packet" << EV_FIELD(packet) << EV_ENDL;
+    EV_INFO << "Enqueuing packet" << EV_FIELD(packet) << EV_ENDL;
     queue.insert(packet);
     if (buffer != nullptr)
         buffer->addPacket(packet);
@@ -108,7 +108,7 @@ Packet *PacketQueue::pullPacket(const cGate *gate)
 {
     Enter_Method("pullPacket");
     auto packet = check_and_cast<Packet *>(queue.front());
-    EV_INFO << "Pulling packet" << EV_FIELD(packet) << EV_ENDL;
+    EV_INFO << "Dequeuing packet" << EV_FIELD(packet) << EV_ENDL;
     if (buffer != nullptr) {
         queue.remove(packet);
         buffer->removePacket(packet);

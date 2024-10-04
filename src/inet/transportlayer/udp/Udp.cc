@@ -323,6 +323,7 @@ void Udp::bind(int sockId, const L3Address& localAddr, int localPort)
         sd = createSocket(sockId, localAddr, localPort);
         sd->isBound = true;
     }
+    EV_INFO << "Socket bound" << *sd << EV_ENDL;
 }
 
 Udp::SockDesc *Udp::findFirstSocketByLocalAddress(const L3Address& localAddr, ushort localPort)
@@ -356,7 +357,7 @@ Udp::SockDesc *Udp::createSocket(int sockId, const L3Address& localAddr, int loc
     SockDescList& list = socketsByPortMap[sd->localPort]; // create if doesn't exist
     list.push_back(sd);
 
-    EV_INFO << "Socket created: " << *sd << "\n";
+    EV_INFO << "Socket created" << *sd << EV_ENDL;
     return sd;
 }
 
@@ -391,7 +392,7 @@ void Udp::connect(int sockId, const L3Address& remoteAddr, int remotePort)
     sd->remotePort = remotePort;
     sd->onlyLocalPortIsSet = false;
 
-    EV_INFO << "Socket connected: " << *sd << "\n";
+    EV_INFO << "Socket connected" << *sd << EV_ENDL;
 }
 
 Udp::SockDesc *Udp::getOrCreateSocket(int sockId)
@@ -702,6 +703,7 @@ void Udp::setMulticastSourceFilter(SockDesc *sd, NetworkInterface *ie, L3Address
 
 void Udp::handleUpperPacket(Packet *packet)
 {
+    EV_INFO << "Received packet from upper layer" << EV_FIELD(packet) << EV_ENDL;
     if (packet->getKind() != UDP_C_DATA)
         throw cRuntimeError("Unknown packet command code (message kind) %d received from app", packet->getKind());
 
@@ -791,7 +793,7 @@ void Udp::handleUpperPacket(Packet *packet)
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
     packet->setKind(0);
 
-    EV_INFO << "Sending app packet " << packet->getName() << " over " << l3Protocol->getName() << ".\n";
+    EV_INFO << "Sending packet to lower layer" << EV_FIELD(protocol, l3Protocol->getName()) << EV_FIELD(packet) << EV_ENDL;
     emit(packetSentSignal, packet);
     emit(packetSentToLowerSignal, packet);
     ipSink.pushPacket(packet);
@@ -912,12 +914,12 @@ void Udp::processUDPPacket(Packet *udpPacket)
     emit(packetReceivedFromLowerSignal, udpPacket);
     emit(packetReceivedSignal, udpPacket);
 
+    // simulate checksum: discard packet if it has bit error
+    EV_INFO << "Received packet from lower layer" << EV_FIELD(packet, udpPacket) << EV_ENDL;
+
     udpPacket->removeTag<PacketProtocolTag>();
     b udpHeaderPopPosition = udpPacket->getFrontOffset();
     auto udpHeader = udpPacket->popAtFront<UdpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
-
-    // simulate checksum: discard packet if it has bit error
-    EV_INFO << "Packet " << udpPacket->getName() << " received from network, dest port " << udpHeader->getDestinationPort() << "\n";
 
     auto srcPort = udpHeader->getSourcePort();
     auto destPort = udpHeader->getDestinationPort();
@@ -1123,7 +1125,7 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
 
 void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, ushort srcPort, ushort destPort)
 {
-    EV_INFO << "Sending payload up to socket sockId=" << sd->sockId << "\n";
+    EV_INFO << "Sending packet to socket" << EV_FIELD(socketId, sd->sockId) << EV_FIELD(packet, payload) << EV_ENDL;
 
     // send payload with UdpControlInfo up to the application
     payload->setKind(UDP_I_DATA);
@@ -1430,18 +1432,18 @@ void Udp::SockDesc::deleteMulticastMembership(MulticastMembership *membership)
 
 std::ostream& operator<<(std::ostream& os, const Udp::SockDesc& sd)
 {
-    os << "sockId=" << sd.sockId;
-    os << " localPort=" << sd.localPort;
+    os << EV_FIELD(socketId, sd.sockId);
+    os << EV_FIELD(localPort, sd.localPort);
     if (sd.remotePort != -1)
-        os << " remotePort=" << sd.remotePort;
+        os << EV_FIELD(remotePort, sd.remotePort);
     if (!sd.localAddr.isUnspecified())
-        os << " localAddr=" << sd.localAddr;
+        os << EV_FIELD(localAddress, sd.localAddr);
     if (!sd.remoteAddr.isUnspecified())
-        os << " remoteAddr=" << sd.remoteAddr;
+        os << EV_FIELD(remoteAddress, sd.remoteAddr);
     if (sd.multicastOutputInterfaceId != -1)
-        os << " interfaceId=" << sd.multicastOutputInterfaceId;
+        os << EV_FIELD(interfaceId, sd.multicastOutputInterfaceId);
     if (!sd.multicastLoop)
-        os << " multicastLoop=" << sd.multicastLoop;
+        os << EV_FIELD(multicastLoop, sd.multicastLoop);
 
     return os;
 }

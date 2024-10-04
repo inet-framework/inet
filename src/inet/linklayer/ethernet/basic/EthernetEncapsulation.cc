@@ -152,6 +152,9 @@ void EthernetEncapsulation::refreshDisplay() const
 
 void EthernetEncapsulation::processPacketFromHigherLayer(Packet *packet)
 {
+    // create Ethernet frame, fill it in from Ieee802Ctrl and encapsulate msg in it
+    EV_INFO << "Received packet from higher layer" << EV_FIELD(packet) << EV_ENDL;
+
     if (packet->getDataLength() > MAX_ETHERNET_DATA_BYTES)
         throw cRuntimeError("packet length from higher layer (%s) exceeds maximum Ethernet payload length (%s)", packet->getDataLength().str().c_str(), MAX_ETHERNET_DATA_BYTES.str().c_str());
 
@@ -160,9 +163,6 @@ void EthernetEncapsulation::processPacketFromHigherLayer(Packet *packet)
 
     // Creates MAC header information and encapsulates received higher layer data
     // with this information and transmits resultant frame to lower layer
-
-    // create Ethernet frame, fill it in from Ieee802Ctrl and encapsulate msg in it
-    EV_DETAIL << "Encapsulating higher layer packet `" << packet->getName() << "' for MAC\n";
 
     int typeOrLength = -1;
     const auto& protocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
@@ -188,13 +188,15 @@ void EthernetEncapsulation::processPacketFromHigherLayer(Packet *packet)
     packet->insertAtBack(ethernetFcs);
     protocolTag->setProtocol(&Protocol::ethernetMac);
     packet->removeTagIfPresent<DispatchProtocolReq>();
-    EV_INFO << "Sending " << packet << " to lower layer.\n";
+    EV_INFO << "Sending packet to lower layer" << EV_FIELD(packet) << EV_ENDL;
     lowerLayerSink.pushPacket(packet);
 }
 
 void EthernetEncapsulation::processPacketFromMac(Packet *packet)
 {
     const Protocol *payloadProtocol = nullptr;
+
+    EV_DETAIL << "Received packet from lower layer" << EV_FIELD(packet) << EV_ENDL;
 
     int iface = packet->getTag<InterfaceInd>()->getInterfaceId();
     auto ethHeader = packet->popAtFront<EthernetMacHeader>();
@@ -234,7 +236,7 @@ void EthernetEncapsulation::processPacketFromMac(Packet *packet)
             auto packetCopy = packet->dup();
             packetCopy->setKind(SOCKET_I_DATA);
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it.first);
-            EV_INFO << "Sending " << packetCopy << " to socket " << it.first << ".\n";
+            EV_INFO << "Sending packet to socket" << EV_FIELD(socketId, it.first) << EV_FIELD(packet, packetCopy) << EV_ENDL;
             upperLayerSink.pushPacket(packetCopy);
             steal |= socket->steal;
         }
@@ -242,14 +244,11 @@ void EthernetEncapsulation::processPacketFromMac(Packet *packet)
     if (steal)
         delete packet;
     else if (hasUpperProtocol(payloadProtocol)) {
-        EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
-                  << packet->getName() << "' to higher layer\n";
-
         totalFromMAC++;
         emit(decapPkSignal, packet);
 
         // pass up to higher layers.
-        EV_INFO << "Sending " << packet << " to upper layer.\n";
+        EV_INFO << "Sending packet to upper layer" << EV_FIELD(packet) << EV_ENDL;
         upperLayerSink.pushPacket(packet);
     }
     else {

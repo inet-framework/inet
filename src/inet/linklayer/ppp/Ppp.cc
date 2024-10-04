@@ -178,7 +178,6 @@ void Ppp::startTransmitting()
     encapsulate(pppFrame);
 
     // send
-    EV_INFO << "Transmission of " << pppFrame << " started.\n";
     emit(transmissionStateChangedSignal, 1L);
     emit(packetSentToLowerSignal, pppFrame);
     auto& oldPacketProtocolTag = pppFrame->removeTag<PacketProtocolTag>();
@@ -191,6 +190,7 @@ void Ppp::startTransmitting()
         pppFrame->insertAtFront(bytes);
     }
     curTxPacket = pppFrame->dup();
+    EV_INFO << "Transmission started" << EV_FIELD(packet, pppFrame) << EV_ENDL;
     send(pppFrame, SendOptions().transmissionId(curTxPacket->getId()), physOutGate);
 
     ASSERT(datarateChannel == physOutGate->getTransmissionChannel()); // FIXME reread datarateChannel when changed
@@ -217,10 +217,10 @@ void Ppp::handleSelfMessage(cMessage *message)
 {
     if (message == endTransmissionEvent) {
         deleteCurrentTxFrame();
+        EV_INFO << "Transmission successfully completed" << EV_FIELD(packet, curTxPacket) << EV_ENDL;
         delete curTxPacket;
         curTxPacket = nullptr;
         // Transmission finished, we can start next one.
-        EV_INFO << "Transmission successfully completed.\n";
         emit(transmissionStateChangedSignal, 0L);
         if (canDequeuePacket())
             processUpperPacket();
@@ -231,7 +231,7 @@ void Ppp::handleSelfMessage(cMessage *message)
 
 void Ppp::handleUpperPacket(Packet *packet)
 {
-    EV_INFO << "Received " << packet << " from upper layer.\n";
+    EV_INFO << "Received packet from upper layer" << EV_FIELD(packet) << EV_ENDL;
     if (datarateChannel == nullptr) {
         EV_WARN << "Interface is not connected, dropping packet " << packet << endl;
         numDroppedIfaceDown++;
@@ -251,7 +251,7 @@ void Ppp::handleLowerPacket(Packet *packet)
 {
     // TODO if incoming gate is not connected now, then the link has been deleted
     // during packet transmission --> discard incomplete packet.
-    EV_INFO << "Received " << packet << " from network.\n";
+    EV_INFO << "Received packet from network" << EV_FIELD(packet) << EV_ENDL;
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
 
     // check for bit errors
@@ -273,7 +273,7 @@ void Ppp::handleLowerPacket(Packet *packet)
         decapsulate(packet);
         numRcvdOK++;
         emit(packetSentToUpperSignal, packet);
-        EV_INFO << "Sending " << packet << " to upper layer.\n";
+        EV_INFO << "Sending packet to upper layer" << EV_FIELD(packet) << EV_ENDL;
         upperLayerSink.pushPacket(packet);
     }
 }

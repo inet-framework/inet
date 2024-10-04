@@ -48,6 +48,7 @@ void Tun::handleUpperMessage(cMessage *message)
 
 void Tun::handleUpperPacket(Packet *packet)
 {
+    EV_INFO << "Received packet from upper layer" << EV_FIELD(packet) << EV_ENDL;
     const auto& socketReq = packet->findTag<SocketReq>();
     // check if packet is from app by finding SocketReq with sockedId that is in socketIds
     auto sId = socketReq != nullptr ? socketReq->getSocketId() : -1;
@@ -59,6 +60,7 @@ void Tun::handleUpperPacket(Packet *packet)
         packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         emit(packetSentToUpperSignal, packet);
+        EV_INFO << "Sending packet to IPv4" << EV_FIELD(packet) << EV_ENDL;
         upperLayerSink.pushPacket(packet);
     }
     else {
@@ -72,6 +74,7 @@ void Tun::handleUpperPacket(Packet *packet)
             auto npTag = packet->getTag<NetworkProtocolInd>();
             auto newnpTag = copy->addTag<NetworkProtocolInd>();
             *newnpTag = *npTag;
+            EV_INFO << "Sending packet to socket" << EV_FIELD(socketId) << EV_FIELD(packet) << EV_ENDL;
             upperLayerSink.pushPacket(copy);
         }
         delete packet;

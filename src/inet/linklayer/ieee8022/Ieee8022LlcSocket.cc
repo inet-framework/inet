@@ -72,6 +72,7 @@ void Ieee8022LlcSocket::send(Packet *packet)
         if (interfaceReq->getInterfaceId() == -1)
             interfaceReq->setInterfaceId(interfaceId);
     }
+    EV_INFO << "Sending packet on socket" << EV_FIELD(socketId) << EV_FIELD(packet) << EV_ENDL;
     sink.pushPacket(packet);
     isOpen_ = true;
 }
