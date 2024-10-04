@@ -68,7 +68,7 @@ class INET_API SctpSocket : public ISocket, public ISctp::ICallback
         virtual void socketDataNotificationArrived(SctpSocket *socket, Message *msg) = 0;
         virtual void socketAvailable(SctpSocket *socket, Indication *indication) = 0;
         virtual void socketOptionsArrived(SctpSocket *socket, Indication *indication) { delete indication; }
-        virtual void socketEstablished(SctpSocket *socket, unsigned long int buffer) {}
+        virtual void socketEstablished(SctpSocket *socket, Indication *indication) {}
         virtual void socketPeerClosed(SctpSocket *socket) {}
         virtual void socketClosed(SctpSocket *socket) {}
         virtual void socketFailure(SctpSocket *socket, int code) {}

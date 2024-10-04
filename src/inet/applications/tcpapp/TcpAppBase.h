@@ -55,7 +55,7 @@ class INET_API TcpAppBase : public ApplicationBase, public TcpSocket::ICallback,
     /* TcpSocket::ICallback callback methods */
     virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override { socket->accept(availableInfo->getNewSocketId()); }
-    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketEstablished(TcpSocket *socket, Indication *indication) override;
     virtual void socketPeerClosed(TcpSocket *socket) override;
     virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override;

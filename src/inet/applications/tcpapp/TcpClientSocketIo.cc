@@ -72,7 +72,7 @@ void TcpClientSocketIo::socketAvailable(TcpSocket *socket, TcpAvailableInfo *ava
 {
 }
 
-void TcpClientSocketIo::socketEstablished(TcpSocket *socket)
+void TcpClientSocketIo::socketEstablished(TcpSocket *socket, Indication *indication)
 {
     sendOrScheduleReadCommandIfNeeded();
 }

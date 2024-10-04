@@ -171,9 +171,9 @@ Packet *TcpSessionApp::createDataPacket(long sendBytes)
     return packet;
 }
 
-void TcpSessionApp::socketEstablished(TcpSocket *socket)
+void TcpSessionApp::socketEstablished(TcpSocket *socket, Indication *indication)
 {
-    TcpAppBase::socketEstablished(socket);
+    TcpAppBase::socketEstablished(socket, indication);
 
     ASSERT(commandIndex == 0);
     timeoutMsg->setKind(MSGKIND_SEND);

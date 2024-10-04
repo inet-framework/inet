@@ -562,7 +562,7 @@ void SctpPeer::sendRequest(bool last)
     bytesSent += numBytes;
 }
 
-void SctpPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer)
+void SctpPeer::socketEstablished(SctpSocket *socket, Indication *indication)
 {
     ASSERT(socket == &clientSocket);
     int count = 0;
