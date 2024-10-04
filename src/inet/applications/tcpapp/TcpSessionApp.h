@@ -59,7 +59,7 @@ class INET_API TcpSessionApp : public TcpAppBase
     virtual void handleSenderTimer(cMessage *msg);
     virtual void handleReadTimer(cMessage *msg);
     virtual void handleTimer(cMessage *msg) override;
-    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketEstablished(TcpSocket *socket, Indication *indication) override;
     virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
     virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override;

@@ -315,7 +315,7 @@ void TcpSocket::processMessage(cMessage *msg)
             localPrt = connectInfo->getLocalPort();
             remotePrt = connectInfo->getRemotePort();
             if (cb)
-                cb->socketEstablished(this);
+                cb->socketEstablished(this, check_and_cast<Indication *>(msg));
             delete msg;
             break;
 

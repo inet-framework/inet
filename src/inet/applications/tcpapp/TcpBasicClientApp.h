@@ -37,7 +37,7 @@ class INET_API TcpBasicClientApp : public TcpAppBase
     virtual void initialize(int stage) override;
     virtual void handleTimer(cMessage *msg) override;
 
-    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketEstablished(TcpSocket *socket, Indication *indication) override;
     virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
     virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override;

@@ -145,9 +145,9 @@ void TelnetApp::sendGenericAppMsg(int numBytes, int expectedReplyBytes)
     sendPacket(packet);
 }
 
-void TelnetApp::socketEstablished(TcpSocket *socket)
+void TelnetApp::socketEstablished(TcpSocket *socket, Indication *indication)
 {
-    TcpAppBase::socketEstablished(socket);
+    TcpAppBase::socketEstablished(socket, indication);
 
     // schedule first sending
     numLinesToType = par("numCommands");

@@ -625,7 +625,7 @@ void Ldp::openTCPConnectionToPeer(int peerIndex)
     socket->connect(myPeers[peerIndex].peerIP, LDP_PORT);
 }
 
-void Ldp::socketEstablished(TcpSocket *socket)
+void Ldp::socketEstablished(TcpSocket *socket, Indication *indication)
 {
     peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
     EV_INFO << "TCP connection established with peer " << peer.peerIP << "\n";

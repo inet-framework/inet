@@ -130,9 +130,9 @@ void TcpBasicClientApp::handleTimer(cMessage *msg)
     }
 }
 
-void TcpBasicClientApp::socketEstablished(TcpSocket *socket)
+void TcpBasicClientApp::socketEstablished(TcpSocket *socket, Indication *indication)
 {
-    TcpAppBase::socketEstablished(socket);
+    TcpAppBase::socketEstablished(socket, indication);
 
     // perform first request if not already done (next one will be sent when reply arrives)
     if (!earlySend)
