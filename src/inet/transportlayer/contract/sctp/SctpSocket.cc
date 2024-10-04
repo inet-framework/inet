@@ -338,7 +338,11 @@ void SctpSocket::send(Packet *packet)
         sctpReq->setSid(lastStream);
     }
     packet->setKind(SCTP_C_SEND);
-    sendToSctp(packet);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
+    packet->addTagIfAbsent<SocketReq>()->setSocketId(assocId);
+    if (interfaceIdToTun != -1)
+        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceIdToTun);
+    sink.pushPacket(packet);
 }
 
 void SctpSocket::sendNotification(cMessage *msg)
