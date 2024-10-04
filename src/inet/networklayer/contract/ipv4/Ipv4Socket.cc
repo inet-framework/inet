@@ -76,7 +76,9 @@ void Ipv4Socket::connect(Ipv4Address remoteAddress)
 
 void Ipv4Socket::send(Packet *packet)
 {
-    sendToOutput(packet);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    packet->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    sink.pushPacket(packet);
 }
 
 void Ipv4Socket::sendTo(Packet *packet, Ipv4Address destAddress)

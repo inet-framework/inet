@@ -68,7 +68,9 @@ void TunSocket::send(Packet *packet)
 //    TunSendCommand *command = new TunSendCommand();
 //    packet->setControlInfo(command);
     packet->setKind(TUN_C_DATA);
-    sendToTun(packet);
+    packet->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+    sink.pushPacket(packet);
 }
 
 void TunSocket::close()
