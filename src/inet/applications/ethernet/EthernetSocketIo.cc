@@ -108,7 +108,6 @@ void EthernetSocketIo::setSocketOptions()
 void EthernetSocketIo::socketDataArrived(EthernetSocket *socket, Packet *packet)
 {
     emit(packetReceivedSignal, packet);
-    EV_INFO << "Received packet: " << packet << endl;
     numReceived++;
     packet->removeTag<SocketInd>();
     trafficSink.pushPacket(packet);
