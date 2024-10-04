@@ -111,7 +111,7 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::ICallback,
     }
 
     /** Does nothing but update statistics/status. Redefine to perform or schedule first sending. */
-    void socketEstablished(SctpSocket *socket, unsigned long int buffer) override;
+    void socketEstablished(SctpSocket *socket, Indication *indication) override;
 
     /**
      * Does nothing but update statistics/status. Redefine to perform or schedule next sending.

@@ -201,7 +201,7 @@ void TcpServerThreadBase::socketAvailable(TcpSocket *socket, TcpAvailableInfo *a
     socket->accept(availableInfo->getNewSocketId());
 }
 
-void TcpServerThreadBase::socketEstablished(TcpSocket *socket)
+void TcpServerThreadBase::socketEstablished(TcpSocket *socket, Indication *indication)
 {
     established();
 }

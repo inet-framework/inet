@@ -89,7 +89,7 @@ class INET_API SctpPeer : public cSimpleModule, public SctpSocket::ICallback, pu
 
     void connect();
     virtual void socketAvailable(SctpSocket *socket, Indication *indication) override { throw cRuntimeError("Model error, this module doesn't use any listener SCTP sockets"); }
-    void socketEstablished(SctpSocket *socket, unsigned long int buffer) override;
+    void socketEstablished(SctpSocket *socket, Indication *indication) override;
     void socketDataArrived(SctpSocket *socket, Packet *msg, bool urgent) override;
     void socketDataNotificationArrived(SctpSocket *socket, Message *msg) override;
     void socketPeerClosed(SctpSocket *socket) override;

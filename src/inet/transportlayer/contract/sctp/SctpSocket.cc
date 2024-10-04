@@ -466,7 +466,7 @@ void SctpSocket::processMessage(cMessage *msg)
             assocId = indication->getTag<SocketInd>()->getSocketId();
 
             if (cb) {
-                cb->socketEstablished(this, connectInfo->getNumMsgs());
+                cb->socketEstablished(this, indication);
             }
             delete msg;
             break;
@@ -632,7 +632,7 @@ void SctpSocket::handleEstablished(Indication *indication)
     appOptions->outboundStreams = connectInfo->getOutboundStreams();
     assocId = indication->getTag<SocketInd>()->getSocketId();
     if (cb != nullptr)
-        cb->socketEstablished(this, connectInfo->getNumMsgs());
+        cb->socketEstablished(this, indication);
     else
         EV_WARN << "No callback for socketEstablished" << EV_ENDL;
 }

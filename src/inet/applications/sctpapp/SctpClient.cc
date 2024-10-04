@@ -190,8 +190,9 @@ void SctpClient::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, SctpSocket::stateName(socket.getState()));
 }
 
-void SctpClient::socketEstablished(SctpSocket *socket, unsigned long int buffer)
+void SctpClient::socketEstablished(SctpSocket *socket, Indication *indication)
 {
+    unsigned long int buffer = indication->getTag<SctpConnectReq>()->getNumMsgs();
     int count = 0;
     EV_INFO << "SctpClient: connected\n";
     bufferSize = buffer;

@@ -53,7 +53,7 @@ void TcpServerSocketIo::socketDataArrived(TcpSocket *socket, Packet *packet, boo
     sendOrScheduleReadCommandIfNeeded();
 }
 
-void TcpServerSocketIo::socketEstablished(TcpSocket *socket)
+void TcpServerSocketIo::socketEstablished(TcpSocket *socket, Indication *indication)
 {
     ASSERT(socket == this->socket);
     sendOrScheduleReadCommandIfNeeded();

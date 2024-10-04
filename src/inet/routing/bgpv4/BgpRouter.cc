@@ -379,7 +379,7 @@ void BgpRouter::openTCPConnectionToPeer(SessionId sessionID)
     socket->connect(_BGPSessions[sessionID]->getPeerAddr(), TCP_PORT);
 }
 
-void BgpRouter::socketEstablished(TcpSocket *socket)
+void BgpRouter::socketEstablished(TcpSocket *socket, Indication *indication)
 {
     int connId = socket->getSocketId();
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
