@@ -47,6 +47,7 @@ void SocketBase::send(Packet *packet)
 {
     packet->setKind(SOCKET_C_DATA);
     isOpen_ = true;
+    EV_INFO << "Sending packet on socket" << EV_FIELD(socketId) << EV_FIELD(packet) << EV_ENDL;
     sendOut(packet);
 }
 

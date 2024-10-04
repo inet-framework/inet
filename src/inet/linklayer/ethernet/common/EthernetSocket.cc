@@ -44,6 +44,7 @@ void EthernetSocket::sendOut(Packet *packet)
 void EthernetSocket::bind(const MacAddress& localAddress, const MacAddress& remoteAddress, const Protocol *protocol, bool steal)
 {
     isOpen_ = true;
+    EV_INFO << "Binding socket" << EV_FIELD(socketId) << EV_FIELD(networkInterface) << EV_FIELD(localAddress) << EV_FIELD(remoteAddress) << EV_FIELD(protocol) << EV_FIELD(steal) << EV_ENDL;
     ethernet->bind(socketId, networkInterface->getInterfaceId(), localAddress, remoteAddress, protocol, steal);
 }
 
@@ -52,8 +53,11 @@ void EthernetSocket::processMessage(cMessage *msg)
     ASSERT(belongsToSocket(msg));
     switch (msg->getKind()) {
         case SOCKET_I_DATA:
-            if (callback)
-                callback->socketDataArrived(this, check_and_cast<Packet *>(msg));
+            if (callback) {
+                auto packet = check_and_cast<Packet *>(msg);
+                EV_INFO << "Receiving packet on socket" << EV_FIELD(socketId) << EV_FIELD(packet) << EV_ENDL;
+                callback->socketDataArrived(this, packet);
+            }
             else
                 delete msg;
             break;

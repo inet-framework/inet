@@ -70,6 +70,7 @@ void TunSocket::send(Packet *packet)
     packet->setKind(TUN_C_DATA);
     packet->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+    EV_INFO << "Sending packet on socket" << EV_FIELD(socketId) << EV_FIELD(packet) << EV_ENDL;
     sink.pushPacket(packet);
 }
 
