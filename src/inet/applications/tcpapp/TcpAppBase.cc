@@ -108,7 +108,7 @@ void TcpAppBase::sendPacket(Packet *msg)
     bytesSent += numBytes;
 }
 
-void TcpAppBase::socketEstablished(TcpSocket *)
+void TcpAppBase::socketEstablished(TcpSocket *, Indication *indication)
 {
     Enter_Method("socketEstablished");
     // *redefine* to perform or schedule first sending
