@@ -130,11 +130,7 @@ void SctpSocket::sendToSctp(cMessage *msg)
 void SctpSocket::getSocketOptions()
 {
     EV_INFO << "getSocketOptions\n";
-    Request *cmsg = new Request("GetSocketOptions", SCTP_C_GETSOCKETOPTIONS);
-    auto sctpSendReq = cmsg->addTag<SctpSendReq>();
-    sctpSendReq->setSocketId(assocId);
-    sctpSendReq->setSid(0);
-    sendToSctp(cmsg);
+    sctp->getSocketOptions(assocId);
 }
 
 void SctpSocket::bind(int lPort)
@@ -145,7 +141,7 @@ void SctpSocket::bind(int lPort)
     localAddresses.push_back(L3Address()); // Unspecified address
     localPrt = lPort;
     sockstate = CLOSED;
-    getSocketOptions();
+    sctp->getSocketOptions(assocId);
 }
 
 void SctpSocket::bind(L3Address lAddr, int lPort)
@@ -157,7 +153,7 @@ void SctpSocket::bind(L3Address lAddr, int lPort)
     localAddresses.push_back(lAddr);
     localPrt = lPort;
     sockstate = CLOSED;
-    getSocketOptions();
+    sctp->getSocketOptions(assocId);
 }
 
 void SctpSocket::addAddress(L3Address addr)
@@ -175,7 +171,7 @@ void SctpSocket::bindx(AddressVector lAddresses, int lPort)
     }
     localPrt = lPort;
     sockstate = CLOSED;
-    getSocketOptions();
+    sctp->getSocketOptions(assocId);
 }
 
 void SctpSocket::listen(bool fork, bool reset, uint32_t requests, uint32_t messagesToPush)
@@ -185,24 +181,11 @@ void SctpSocket::listen(bool fork, bool reset, uint32_t requests, uint32_t messa
                 "SctpSocket::listen(): must call bind() before listen()" :
                 "SctpSocket::listen(): connect() or listen() already called");
 
-    Request *cmsg = new Request("PassiveOPEN", SCTP_C_OPEN_PASSIVE);
-    auto openCmd = cmsg->addTag<SctpOpenReq>();
-    openCmd->setLocalAddresses(localAddresses);
-    openCmd->setLocalPort(localPrt);
-    if (oneToOne)
-        openCmd->setSocketId(assocId);
-    else
-        openCmd->setSocketId(getNewAssocId());
-    openCmd->setFork(fork);
-    openCmd->setOutboundStreams(appOptions->outboundStreams);
-    openCmd->setInboundStreams(appOptions->inboundStreams);
+    int socketId = oneToOne ? assocId : getNewAssocId();
     appOptions->streamReset = reset;
-    openCmd->setNumRequests(requests);
-    openCmd->setStreamReset(reset);
-    openCmd->setMessagesToPush(messagesToPush);
-
-    EV_INFO << "Assoc " << openCmd->getSocketId() << ": PassiveOPEN to SCTP from SctpSocket:listen()\n";
-    sendToSctp(cmsg);
+    EV_INFO << "Assoc " << socketId << ": PassiveOPEN to SCTP from SctpSocket:listen()\n";
+    sctp->listen(socketId, localAddresses, localPrt, fork, appOptions->inboundStreams, appOptions->outboundStreams, reset, requests, messagesToPush);
+    sctp->setCallback(socketId, this);
     sockstate = LISTENING;
 }
 
@@ -236,6 +219,11 @@ void SctpSocket::listen(uint32_t requests, bool fork, uint32_t messagesToPush, b
     sockstate = LISTENING;
 }
 
+void SctpSocket::accept(int socketId)
+{
+    sctp->accept(socketId);
+}
+
 void SctpSocket::connect(L3Address remoteAddress, int32_t remotePort, bool streamReset, int32_t prMethod, uint32_t numRequests)
 {
     EV_INFO << "Socket connect. Assoc=" << assocId << ", sockstate=" << stateName(sockstate) << "\n";
@@ -254,26 +242,11 @@ void SctpSocket::connect(L3Address remoteAddress, int32_t remotePort, bool strea
     remoteAddr = remoteAddress;
     remotePrt = remotePort;
 
-    Request *cmsg = new Request("Associate", SCTP_C_ASSOCIATE);
-    auto openCmd = cmsg->addTag<SctpOpenReq>();
-
-    if (oneToOne)
-        openCmd->setSocketId(assocId);
-    else
-        openCmd->setSocketId(getNewAssocId());
-    EV_INFO << "Socket connect. Assoc=" << openCmd->getSocketId() << ", sockstate=" << stateName(sockstate) << "\n";
-    openCmd->setLocalAddresses(localAddresses);
-    openCmd->setLocalPort(localPrt);
-    openCmd->setRemoteAddr(remoteAddr);
-    openCmd->setRemotePort(remotePrt);
-    openCmd->setOutboundStreams(appOptions->outboundStreams);
-    openCmd->setInboundStreams(appOptions->inboundStreams);
+    int socketId = oneToOne ? assocId : getNewAssocId();
     appOptions->streamReset = streamReset;
-    openCmd->setNumRequests(numRequests);
-    openCmd->setPrMethod(prMethod);
-    openCmd->setStreamReset(streamReset);
-
-    sendToSctp(cmsg);
+    EV_INFO << "Socket connect. Assoc=" << socketId << ", sockstate=" << stateName(sockstate) << "\n";
+    sctp->connect(socketId, localAddresses, localPrt, remoteAddress, remotePort, appOptions->inboundStreams, appOptions->outboundStreams, streamReset, prMethod, numRequests);
+    sctp->setCallback(socketId, this);
 
     if (oneToOne)
         sockstate = CONNECTING;
@@ -336,11 +309,7 @@ void SctpSocket::accept(int32_t assId, int32_t fd)
 
 void SctpSocket::acceptSocket(int newSockId)
 {
-    Request *cmsg = new Request("SCTP_C_ACCEPT_SOCKET_ID", SCTP_C_ACCEPT_SOCKET_ID);
-    cmsg->addTag<SctpAvailableReq>()->setSocketId(newSockId);
-    cmsg->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
-    cmsg->addTag<SocketReq>()->setSocketId(newSockId);
-    check_and_cast<cSimpleModule *>(gateToSctp->getOwnerModule())->send(cmsg, gateToSctp);
+    sctp->accept(newSockId);
 }
 
 void SctpSocket::connectx(AddressVector remoteAddressList, int32_t remotePort, bool streamReset, int32_t prMethod, uint32_t numRequests)
@@ -393,27 +362,14 @@ void SctpSocket::close(int id)
 {
     EV_INFO << "SctpSocket::close()\n";
 
-    Request *msg = new Request("CLOSE", SCTP_C_CLOSE);
-    auto cmd = msg->addTag<SctpCommandReq>();
-    if (id == -1)
-        cmd->setSocketId(assocId);
-    else
-        cmd->setFd(id);
-    sendToSctp(msg);
+    sctp->close(assocId, id);
     sockstate = (sockstate == CONNECTED) ? LOCALLY_CLOSED : CLOSED;
 }
 
 void SctpSocket::shutdown(int id)
 {
     EV << "SctpSocket::shutdown()\n";
-
-    Request *msg = new Request("SHUTDOWN", SCTP_C_SHUTDOWN);
-    auto cmd = msg->addTag<SctpCommandReq>();
-    if (id == -1)
-        cmd->setSocketId(assocId);
-    else
-        cmd->setFd(id);
-    sendToSctp(msg);
+    sctp->shutdown(assocId, id);
 }
 
 void SctpSocket::destroy()
@@ -429,10 +385,7 @@ void SctpSocket::destroy()
 void SctpSocket::abort()
 {
     if (sockstate != NOT_BOUND && sockstate != CLOSED && sockstate != SOCKERROR) {
-        Request *msg = new Request("ABORT", SCTP_C_ABORT);
-        auto cmd = msg->addTag<SctpCommandReq>();
-        cmd->setSocketId(assocId);
-        sendToSctp(msg);
+        sctp->abort(assocId);
     }
     sockstate = CLOSED;
 }
