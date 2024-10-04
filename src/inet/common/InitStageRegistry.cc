@@ -93,8 +93,8 @@ void InitStageRegistry::assignInitStageNumbers()
     });
     EV_STATICCONTEXT;
     for (auto stage : stages)
-        EV_DEBUG << "Initialization stage: " << stage->stageDecl->getName() << " = " << stage->number << std::endl;
-    EV_DEBUG << "Total number of initialization stages: " << numInitStages << std::endl;
+        EV_TRACE << "Initialization stage: " << stage->stageDecl->getName() << " = " << stage->number << std::endl;
+    EV_TRACE << "Total number of initialization stages: " << numInitStages << std::endl;
 }
 
 InitStageRegistry& InitStageRegistry::getInstance()

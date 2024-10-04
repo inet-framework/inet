@@ -23,7 +23,7 @@ void OmittedModule::initialize(int stage)
                 auto previousGate = gateIn->getPreviousGate();
                 auto nextGate = gateOut->getNextGate();
                 if (previousGate != nullptr && nextGate != nullptr) {
-                    EV_INFO << "Reconnecting gates: " << previousGate->getFullPath() << " --> " << nextGate->getFullPath() << std::endl;
+                    EV_TRACE << "Reconnecting gates: " << previousGate->getFullPath() << " --> " << nextGate->getFullPath() << std::endl;
                     std::string direction;
                     if (previousGate->getChannel()) {
                         direction = opp_nulltoempty(previousGate->getDisplayString().getTagArg("m", 0));
