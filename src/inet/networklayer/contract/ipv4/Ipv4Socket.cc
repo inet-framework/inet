@@ -61,23 +61,16 @@ void Ipv4Socket::processMessage(cMessage *msg)
 void Ipv4Socket::bind(const Protocol *protocol, Ipv4Address localAddress)
 {
     ASSERT(!bound);
-    Ipv4SocketBindCommand *command = new Ipv4SocketBindCommand();
-    command->setProtocol(protocol);
-    command->setLocalAddress(localAddress);
-    auto request = new Request("bind", IPv4_C_BIND);
-    request->setControlInfo(command);
-    sendToOutput(request);
+    ipv4->bind(socketId, protocol, localAddress);
+    ipv4->setCallback(socketId, this);
     bound = true;
     isOpen_ = true;
 }
 
 void Ipv4Socket::connect(Ipv4Address remoteAddress)
 {
-    Ipv4SocketConnectCommand *command = new Ipv4SocketConnectCommand();
-    command->setRemoteAddress(remoteAddress);
-    auto request = new Request("connect", IPv4_C_CONNECT);
-    request->setControlInfo(command);
-    sendToOutput(request);
+    ipv4->connect(socketId, remoteAddress);
+    ipv4->setCallback(socketId, this);
     isOpen_ = true;
 }
 
@@ -96,19 +89,13 @@ void Ipv4Socket::sendTo(Packet *packet, Ipv4Address destAddress)
 void Ipv4Socket::close()
 {
     ASSERT(bound);
-    Ipv4SocketCloseCommand *command = new Ipv4SocketCloseCommand();
-    auto request = new Request("close", IPv4_C_CLOSE);
-    request->setControlInfo(command);
-    sendToOutput(request);
+    ipv4->close(socketId);
 }
 
 void Ipv4Socket::destroy()
 {
     ASSERT(bound);
-    auto command = new Ipv4SocketDestroyCommand();
-    auto request = new Request("destroy", IPv4_C_DESTROY);
-    request->setControlInfo(command);
-    sendToOutput(request);
+    ipv4->destroy(socketId);
 }
 
 void Ipv4Socket::sendToOutput(cMessage *message)
