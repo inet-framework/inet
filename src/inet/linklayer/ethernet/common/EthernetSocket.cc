@@ -39,15 +39,8 @@ void EthernetSocket::sendOut(Packet *packet)
 
 void EthernetSocket::bind(const MacAddress& localAddress, const MacAddress& remoteAddress, const Protocol *protocol, bool steal)
 {
-    auto request = new Request("BIND", SOCKET_C_BIND);
-    EthernetBindCommand *ctrl = new EthernetBindCommand();
-    ctrl->setLocalAddress(localAddress);
-    ctrl->setRemoteAddress(remoteAddress);
-    ctrl->setProtocol(protocol);
-    ctrl->setSteal(steal);
-    request->setControlInfo(ctrl);
     isOpen_ = true;
-    sendOut(request);
+    ethernet->bind(socketId, networkInterface->getInterfaceId(), localAddress, remoteAddress, protocol, steal);
 }
 
 void EthernetSocket::processMessage(cMessage *msg)

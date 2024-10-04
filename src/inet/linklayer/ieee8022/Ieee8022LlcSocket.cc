@@ -46,12 +46,9 @@ void Ieee8022LlcSocket::open(int interfaceId, int localSap, int remoteSap)
     this->interfaceId = interfaceId;
     this->localSap = localSap;
     this->remoteSap = remoteSap;
-    auto request = new Request("LLC_OPEN", SOCKET_C_OPEN);
-    Ieee8022LlcSocketOpenCommand *command = new Ieee8022LlcSocketOpenCommand();
-    command->setLocalSap(localSap);
-    request->setControlInfo(command);
+    llc->open(socketId, interfaceId, localSap, remoteSap);
+    llc->setCallback(socketId, this);
     isOpen_ = true;
-    sendOut(request);
 }
 
 void Ieee8022LlcSocket::processMessage(cMessage *msg)

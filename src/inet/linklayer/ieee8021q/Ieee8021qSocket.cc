@@ -25,14 +25,8 @@ void Ieee8021qSocket::sendOut(cMessage *msg)
 
 void Ieee8021qSocket::bind(const Protocol *protocol, int vlanId, bool steal)
 {
-    auto request = new Request("BIND", SOCKET_C_BIND);
-    Ieee8021qBindCommand *ctrl = new Ieee8021qBindCommand();
-    ctrl->setProtocol(protocol);
-    ctrl->setVlanId(vlanId);
-    ctrl->setSteal(steal);
-    request->setControlInfo(ctrl);
     isOpen_ = true;
-    sendOut(request);
+    ieee8021q->bind(socketId, protocol, vlanId, steal);
 }
 
 void Ieee8021qSocket::processMessage(cMessage *msg)
