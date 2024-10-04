@@ -9,6 +9,7 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ieee8021q/Ieee8021qCommand_m.h"
 
@@ -21,6 +22,15 @@ void Ieee8021qSocket::sendOut(cMessage *msg)
     if (tags.findTag<DispatchProtocolReq>() == nullptr)
         tags.addTag<DispatchProtocolReq>()->setProtocol(protocol);
     SocketBase::sendOut(msg);
+}
+
+void Ieee8021qSocket::sendOut(Packet *packet)
+{
+    packet->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
+    if (packet->findTag<DispatchProtocolReq>() == nullptr)
+        packet->addTag<DispatchProtocolReq>()->setProtocol(protocol);
+    sink.pushPacket(packet);
 }
 
 void Ieee8021qSocket::bind(const Protocol *protocol, int vlanId, bool steal)

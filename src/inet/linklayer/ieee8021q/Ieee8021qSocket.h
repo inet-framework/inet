@@ -51,6 +51,7 @@ class INET_API Ieee8021qSocket : public SocketBase, public IIeee8021q::ICallback
 
   protected:
     virtual void sendOut(cMessage *msg) override;
+    virtual void sendOut(Packet *packet) override;
 
   public:
     virtual void setOutputGate(cGate *gate) override {

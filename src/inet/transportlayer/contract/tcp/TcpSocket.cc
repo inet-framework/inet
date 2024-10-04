@@ -149,7 +149,10 @@ void TcpSocket::send(Packet *msg)
         throw cRuntimeError("TcpSocket::send(): socket not connected or connecting, state is %s", stateName(sockstate));
 
     msg->setKind(TCP_C_SEND);
-    sendToTcp(msg);
+    auto packet = check_and_cast<Packet *>(msg);
+    packet->addTagIfAbsent<SocketReq>()->setSocketId(connId);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
+    sink.pushPacket(packet);
 }
 
 void TcpSocket::sendCommand(Request *msg)

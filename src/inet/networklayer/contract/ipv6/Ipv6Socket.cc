@@ -73,7 +73,9 @@ void Ipv6Socket::connect(Ipv6Address remoteAddress)
 
 void Ipv6Socket::send(Packet *packet)
 {
-    sendToOutput(packet);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
+    packet->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    sink.pushPacket(packet);
 }
 
 void Ipv6Socket::sendTo(Packet *packet, Ipv6Address destAddress)
