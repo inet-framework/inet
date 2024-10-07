@@ -20,5 +20,5 @@ simple GroupEligibilityTimeMeter extends EligibilityTimeMeter
 {
 	parameters:
         string groupEligibilityTimeTableModule; // Relative path to the eligibilityTimeTable
-        @class(inet::MyEligibilityTimeMeter);
+        @class(GroupEligibilityTimeMeter);
 }
