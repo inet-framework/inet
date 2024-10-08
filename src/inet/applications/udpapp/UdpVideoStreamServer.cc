@@ -47,6 +47,9 @@ void UdpVideoStreamServer::initialize(int stage)
         videoSize = &par("videoSize");
         localPort = par("localPort");
 
+        socket.setOutputGate(gate("socketOut"));
+        socket.setCallback(this);
+
         // statistics
         numStreams = 0;
         numPkSent = 0;
@@ -154,8 +157,6 @@ void UdpVideoStreamServer::clearStreams()
 
 void UdpVideoStreamServer::handleStartOperation(LifecycleOperation *operation)
 {
-    socket.setOutputGate(gate("socketOut"));
-    socket.setCallback(this);
     socket.bind(localPort);
 
     int timeToLive = par("timeToLive");

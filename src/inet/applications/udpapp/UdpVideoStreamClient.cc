@@ -24,6 +24,8 @@ void UdpVideoStreamClient::initialize(int stage)
     ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        socket.setOutputGate(gate("socketOut"));
+        socket.setCallback(this);
         selfMsg = new cMessage("UDPVideoStreamStart");
     }
 }
@@ -75,9 +77,7 @@ void UdpVideoStreamClient::requestStream()
 
     EV_INFO << "Requesting video stream from " << svrAddr << ":" << svrPort << "\n";
 
-    socket.setOutputGate(gate("socketOut"));
     socket.bind(localPort);
-    socket.setCallback(this);
 
     Packet *pk = new Packet("VideoStrmReq");
     const auto& payload = makeShared<ByteCountChunk>(B(1)); // FIXME set packet length
