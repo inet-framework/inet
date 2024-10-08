@@ -33,6 +33,8 @@ void EthernetSocketIo::initialize(int stage)
         WATCH(numReceived);
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION + 1) {
+        setSocketOptions();
+        socket.setOutputGate(gate("socketOut"));
         const char *localAddressString = par("localAddress");
         if (*localAddressString != '\0') {
             L3Address l3Address;
@@ -148,8 +150,6 @@ void EthernetSocketIo::pushPacket(Packet *packet, const cGate *gate)
 
 void EthernetSocketIo::handleStartOperation(LifecycleOperation *operation)
 {
-    setSocketOptions();
-    socket.setOutputGate(gate("socketOut"));
     if (!localAddress.isUnspecified())
         socket.bind(localAddress, remoteAddress, protocol, par("steal"));
 }

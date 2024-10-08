@@ -79,6 +79,8 @@ void Aodv::initialize(int stage)
         blacklistTimer = new cMessage("BlackListTimer");
         if (useHelloMessages)
             helloMsgTimer = new cMessage("HelloMsgTimer");
+        socket.setOutputGate(gate("socketOut"));
+        socket.setCallback(this);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         networkProtocol->registerHook(0, this);
@@ -1209,8 +1211,6 @@ void Aodv::handleStartOperation(LifecycleOperation *operation)
 {
     rebootTime = simTime();
 
-    socket.setOutputGate(gate("socketOut"));
-    socket.setCallback(this);
     socket.bind(L3Address(), aodvUDPPort);
     socket.setBroadcast(true);
 
