@@ -81,6 +81,9 @@ void UdpBasicBurst::initialize(int stage)
         localPort = par("localPort");
         destPort = par("destPort");
 
+        socket.setOutputGate(gate("socketOut"));
+        socket.setCallback(this);
+
         timerNext = new cMessage("UDPBasicBurstTimer");
     }
 }
@@ -112,8 +115,6 @@ Packet *UdpBasicBurst::createPacket()
 
 void UdpBasicBurst::processStart()
 {
-    socket.setOutputGate(gate("socketOut"));
-    socket.setCallback(this);
     socket.bind(localPort);
 
     int timeToLive = par("timeToLive");

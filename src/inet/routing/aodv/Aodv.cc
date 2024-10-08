@@ -94,6 +94,8 @@ void Aodv::initialize(int stage)
         WATCH(rebootTime);
         WATCH(failedNextHop);
         WATCH_EXPR("numRoutes", routingTable->getNumRoutes());
+        socket.setOutputGate(gate("socketOut"));
+        socket.setCallback(this);
     }
     else if (stage == INITSTAGE_ROUTER_ID_ASSIGNMENT) {
         interface = interfaceTable->findInterfaceByName(par("interface"));
@@ -1284,8 +1286,6 @@ void Aodv::handleStartOperation(LifecycleOperation *operation)
 
     rebootTime = simTime();
 
-    socket.setOutputGate(gate("socketOut"));
-    socket.setCallback(this);
     socket.bind(L3Address(), aodvUDPPort);
     socket.setBroadcast(true);
 
