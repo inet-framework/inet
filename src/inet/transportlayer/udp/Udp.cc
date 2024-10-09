@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <string>
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -269,18 +270,12 @@ void Udp::handleUpperCommand(cMessage *msg)
         case UDP_C_CLOSE: {
             int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
             close(socketId);
-            auto indication = new Indication("closed", UDP_I_SOCKET_CLOSED);
-            auto udpCtrl = new UdpSocketClosedIndication();
-            indication->setControlInfo(udpCtrl);
-            indication->addTag<SocketInd>()->setSocketId(socketId);
-            send(indication, "appOut");
-
             break;
         }
 
         case UDP_C_DESTROY: {
             int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
-            destroySocket(socketId);
+            destroy(socketId);
             break;
         }
 
@@ -292,8 +287,15 @@ void Udp::handleUpperCommand(cMessage *msg)
     delete msg; // also deletes control info in it
 }
 
+void Udp::setCallback(int sockId, ICallback *callback)
+{
+    auto sd = socketsByIdMap[sockId];
+    sd->callback = callback;
+}
+
 void Udp::bind(int sockId, const L3Address& localAddr, int localPort)
 {
+    Enter_Method("bind");
     if (sockId == -1)
         throw cRuntimeError("sockId in BIND message not filled in");
 
@@ -344,6 +346,8 @@ Udp::SockDesc *Udp::findFirstSocketByLocalAddress(const L3Address& localAddr, us
 
 Udp::SockDesc *Udp::createSocket(int sockId, const L3Address& localAddr, int localPort)
 {
+    Enter_Method("createSocket");
+
     // create and fill in SockDesc
     SockDesc *sd = new SockDesc(sockId);
     sd->multicastLoop = par("defaultMulticastLoop");
@@ -384,6 +388,7 @@ ushort Udp::getEphemeralPort()
 
 void Udp::connect(int sockId, const L3Address& remoteAddr, int remotePort)
 {
+    Enter_Method("connect");
     if (remoteAddr.isUnspecified())
         throw cRuntimeError("connect: unspecified remote address");
     if (remotePort <= 0 || remotePort > 65535)
@@ -414,9 +419,19 @@ Udp::SockDesc *Udp::getOrCreateSocket(int sockId)
 // ###################### set options start ######################
 // ###############################################################
 
+void Udp::setTimeToLive(int socketId, int ttl)
+{
+    setTimeToLive(getOrCreateSocket(socketId), ttl);
+}
+
 void Udp::setTimeToLive(SockDesc *sd, int ttl)
 {
     sd->ttl = ttl;
+}
+
+void Udp::setDscp(int socketId, short dscp)
+{
+    setDscp(getOrCreateSocket(socketId), dscp);
 }
 
 void Udp::setDscp(SockDesc *sd, short dscp)
@@ -424,9 +439,19 @@ void Udp::setDscp(SockDesc *sd, short dscp)
     sd->dscp = dscp;
 }
 
+void Udp::setTos(int socketId, short tos)
+{
+    setTos(getOrCreateSocket(socketId), tos);
+}
+
 void Udp::setTos(SockDesc *sd, short tos)
 {
     sd->tos = tos;
+}
+
+void Udp::setBroadcast(int socketId, bool broadcast)
+{
+    setBroadcast(getOrCreateSocket(socketId), broadcast);
 }
 
 void Udp::setBroadcast(SockDesc *sd, bool broadcast)
@@ -439,6 +464,11 @@ void Udp::setMulticastOutputInterface(SockDesc *sd, int interfaceId)
     sd->multicastOutputInterfaceId = interfaceId;
 }
 
+void Udp::setMulticastLoop(int socketId, bool loop)
+{
+    setMulticastLoop(getOrCreateSocket(socketId), loop);
+}
+
 void Udp::setMulticastLoop(SockDesc *sd, bool loop)
 {
     sd->multicastLoop = loop;
@@ -447,6 +477,11 @@ void Udp::setMulticastLoop(SockDesc *sd, bool loop)
 void Udp::setReuseAddress(SockDesc *sd, bool reuseAddr)
 {
     sd->reuseAddr = reuseAddr;
+}
+
+void Udp::joinMulticastGroups(int socketId, const std::vector<L3Address>& multicastAddresses, const std::vector<int> interfaceIds)
+{
+    joinMulticastGroups(getOrCreateSocket(socketId), multicastAddresses, interfaceIds);
 }
 
 void Udp::joinMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multicastAddresses, const std::vector<int> interfaceIds)
@@ -503,6 +538,11 @@ void Udp::addMulticastAddressToInterface(NetworkInterface *ie, const L3Address& 
     }
     else
         ie->joinMulticastGroup(multicastAddr);
+}
+
+void Udp::leaveMulticastGroups(int socketId, const std::vector<L3Address>& multicastAddresses)
+{
+    leaveMulticastGroups(getSocketById(socketId), multicastAddresses);
 }
 
 void Udp::leaveMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multicastAddresses)
@@ -867,6 +907,7 @@ uint16_t Udp::computeChecksum(const Protocol *networkProtocol, const L3Address& 
 
 void Udp::close(int sockId)
 {
+    Enter_Method("close");
     // remove from socketsByIdMap
     auto it = socketsByIdMap.find(sockId);
     if (it == socketsByIdMap.end()) {
@@ -875,6 +916,9 @@ void Udp::close(int sockId)
     }
 
     EV_INFO << "Closing socket: " << *(it->second) << "\n";
+    auto callback = it->second->callback;
+    // KLUDGE: this schedule call is here to keep the fingerprints
+    inet::scheduleAfter("handleClose", 0, [=]() { callback->handleClose(); });
 
     destroySocket(it);
 }
@@ -898,7 +942,7 @@ void Udp::destroySocket(SocketsByIdMap::iterator it)
     delete sd;
 }
 
-void Udp::destroySocket(int sockId)
+void Udp::destroy(int sockId)
 {
     // remove from socketsByIdMap
     auto it = socketsByIdMap.find(sockId);
@@ -1215,7 +1259,7 @@ void Udp::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
     indication->setKind(UDP_I_ERROR);
     indication->addTag<SocketInd>()->setSocketId(sd->sockId);
 
-    send(indication, "appOut");
+    sd->callback->handleError(indication);
 }
 
 // #############################

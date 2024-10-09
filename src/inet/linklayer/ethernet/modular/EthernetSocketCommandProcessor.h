@@ -10,12 +10,13 @@
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Message.h"
+#include "inet/linklayer/ethernet/contract/IEthernet.h"
 #include "inet/linklayer/ethernet/modular/EthernetSocketTable.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
 namespace inet {
 
-class INET_API EthernetSocketCommandProcessor : public queueing::PacketFlowBase
+class INET_API EthernetSocketCommandProcessor : public queueing::PacketFlowBase, public IEthernet
 {
   protected:
     ModuleRefByPar<EthernetSocketTable> socketTable;
@@ -26,6 +27,8 @@ class INET_API EthernetSocketCommandProcessor : public queueing::PacketFlowBase
     virtual void handleCommand(Request *request);
     virtual void processPacket(Packet *packet) override {}
 
+  public:
+    virtual void bind(int socketId, int interfaceId, const MacAddress& localAddress, const MacAddress& remoteAddress, const Protocol *protocol, bool steal) override;
 };
 
 } // namespace inet

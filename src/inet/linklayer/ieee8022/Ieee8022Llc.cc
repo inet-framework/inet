@@ -298,5 +298,31 @@ void Ieee8022Llc::pushPacket(Packet *packet, const cGate *gate)
     handleMessageWhenUp(packet);
 }
 
+void Ieee8022Llc::setCallback(int socketId, ICallback *callback)
+{
+    auto it = socketIdToSocketDescriptor.find(socketId);
+    it->second->callback = callback;
+}
+
+void Ieee8022Llc::open(int socketId, int interfaceId, int localSap, int remoteSap)
+{
+    auto request = new Request("LLC_OPEN", SOCKET_C_OPEN);
+    Ieee8022LlcSocketOpenCommand *command = new Ieee8022LlcSocketOpenCommand();
+    command->setLocalSap(localSap);
+    request->setControlInfo(command);
+    request->addTag<SocketReq>()->setSocketId(socketId);
+    processCommandFromHigherLayer(request);
+}
+
+void Ieee8022Llc::close(int socketId)
+{
+    Enter_Method("close");
+    auto request = new Request("CLOSE", SOCKET_C_CLOSE);
+    auto *ctrl = new SocketCloseCommand();
+    request->setControlInfo(ctrl);
+    request->addTag<SocketReq>()->setSocketId(socketId);
+    processCommandFromHigherLayer(request);
+}
+
 } // namespace inet
 

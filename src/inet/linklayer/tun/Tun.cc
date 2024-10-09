@@ -112,6 +112,13 @@ void Tun::handleUpperCommand(cMessage *message)
         throw cRuntimeError("Unknown command: %s", message->getName());
 }
 
+void Tun::open(int socketId)
+{
+    if (contains(socketIds, socketId))
+        throw cRuntimeError("Socket is already open: %d", socketId);
+    socketIds.push_back(socketId);
+}
+
 cGate *Tun::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     Enter_Method("lookupModuleInterface");

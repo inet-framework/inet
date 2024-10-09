@@ -19,6 +19,7 @@
 #include "inet/queueing/contract/IPassivePacketSink.h"
 #include "inet/transportlayer/base/TransportProtocolBase.h"
 #include "inet/common/checksum/ChecksumMode_m.h"
+#include "inet/transportlayer/contract/ITcp.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpChecksumInsertionHook.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
@@ -129,7 +130,7 @@ class TcpReceiveQueue;
  * The concrete TcpAlgorithm class to use can be chosen per connection (in OPEN)
  * or in a module parameter.
  */
-class INET_API Tcp : public TransportProtocolBase, public IPassivePacketSink
+class INET_API Tcp : public TransportProtocolBase, public ITcp, public IPassivePacketSink
 {
   public:
     static simsignal_t tcpConnectionAddedSignal;
@@ -177,7 +178,6 @@ class INET_API Tcp : public TransportProtocolBase, public IPassivePacketSink
     // utility methods
     virtual TcpConnection *findConnForSegment(const Ptr<const TcpHeader>& tcpHeader, L3Address srcAddr, L3Address destAddr);
     virtual TcpConnection *findConnForSockPair(const SockPair& key);
-    virtual TcpConnection *findConnForApp(int socketId);
     virtual void segmentArrivalWhileClosed(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address src, L3Address dest);
     virtual void processIcmpv4Error(Indication *indication);
     virtual void processIcmpv6Error(Indication *indication);
@@ -190,6 +190,8 @@ class INET_API Tcp : public TransportProtocolBase, public IPassivePacketSink
   public:
     Tcp() {}
     virtual ~Tcp();
+
+    virtual TcpConnection *findConnForApp(int socketId);
 
   protected:
     virtual void initialize(int stage) override;
@@ -256,6 +258,15 @@ class INET_API Tcp : public TransportProtocolBase, public IPassivePacketSink
     virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    virtual void setCallback(int socketId, ITcp::ICallback *callback) override;
+    virtual void listen(int socketId, const L3Address &localAddr, int localPrt, bool fork, bool autoRead, std::string tcpAlgorithmClass) override;
+    virtual void connect(int socketId, const L3Address &localAddr, int localPort, const L3Address &remoteAddr, int remotePort, bool autoRead, std::string tcpAlgorithmClass) override;
+    virtual void accept(int socketId) override;
+    virtual void close(int socketId) override;
+    virtual void abort(int socketId) override;
+    virtual void setTimeToLive(int socketId, int ttl) override;
+    virtual void setQueueLimits(int socketId, int packetCapacity, B dataCapacity) override;
 };
 
 } // namespace tcp

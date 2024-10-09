@@ -58,5 +58,10 @@ void Ieee8021qSocketCommandProcessor::handleCommand(Request *request)
         throw cRuntimeError("Unknown request");
 }
 
+void Ieee8021qSocketCommandProcessor::bind(int socketId, const Protocol *protocol, int vlanId, bool steal)
+{
+    socketTable->addSocket(socketId, protocol, vlanId, steal);
+}
+
 } // namespace inet
 
