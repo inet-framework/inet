@@ -81,6 +81,7 @@ bool PacketSchedulerBase::canPushPacket(Packet *packet, const cGate *gate) const
 void PacketSchedulerBase::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
     int index = callSchedulePacket();
     if (index != gate->getIndex())
         throw cRuntimeError("Scheduled packet from wrong input gate");

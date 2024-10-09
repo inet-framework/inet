@@ -25,6 +25,8 @@ void Ieee8022LlcSocketPacketProcessor::initialize(int stage)
 
 void Ieee8022LlcSocketPacketProcessor::pushPacket(Packet *packet, const cGate *gate)
 {
+    Enter_Method("pushPacket");
+    take(packet);
     const auto& sap = packet->findTag<Ieee802SapInd>();
     auto sockets = socketTable->findSockets(sap->getDsap(), sap->getSsap());
     for (auto socket : sockets) {
