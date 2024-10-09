@@ -26,6 +26,8 @@ void LocalDelivery::initialize(int stage)
 
 void LocalDelivery::pushPacket(Packet *packet, const cGate *gate)
 {
+    Enter_Method("pushPacket");
+    take(packet);
     auto interfaceInd = packet->getTag<InterfaceInd>();
     auto interface = interfaceTable->getInterfaceById(interfaceInd->getInterfaceId());
     auto macAddressInd = packet->getTag<MacAddressInd>();

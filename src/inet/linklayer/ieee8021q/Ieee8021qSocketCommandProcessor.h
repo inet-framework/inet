@@ -11,11 +11,12 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Message.h"
 #include "inet/linklayer/ieee8021q/Ieee8021qSocketTable.h"
+#include "inet/linklayer/ieee8021q/IIeee8021q.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
 namespace inet {
 
-class INET_API Ieee8021qSocketCommandProcessor : public queueing::PacketFlowBase
+class INET_API Ieee8021qSocketCommandProcessor : public queueing::PacketFlowBase, public IIeee8021q
 {
   protected:
     ModuleRefByPar<Ieee8021qSocketTable> socketTable;
@@ -25,6 +26,9 @@ class INET_API Ieee8021qSocketCommandProcessor : public queueing::PacketFlowBase
     virtual void handleMessage(cMessage *message) override;
     virtual void handleCommand(Request *request);
     virtual void processPacket(Packet *packet) override {}
+
+  public:
+    virtual void bind(int socketId, const Protocol *protocol, int vlanId, bool steal) override;
 };
 
 } // namespace inet

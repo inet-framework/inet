@@ -1013,6 +1013,7 @@ class INET_API SctpAssociation : public SimpleModule
   protected:
     IRoutingTable *rt;
     IInterfaceTable *ift;
+    ISctp::ICallback *callback = nullptr;
 
     AddressVector localAddressList;
     AddressVector remoteAddressList;
