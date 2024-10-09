@@ -761,11 +761,7 @@ void SctpNatPeer::socketEstablished(SctpSocket *socket, Indication *indication)
 
 void SctpNatPeer::sendQueueRequest()
 {
-    Request *cmsg = new Request("SCTP_C_QUEUE_MSGS_LIMIT", SCTP_C_QUEUE_MSGS_LIMIT);
-    auto& qinfo = cmsg->addTag<SctpInfoReq>();
-    qinfo->setText(queueSize);
-    qinfo->setSocketId(clientSocket.getSocketId());
-    clientSocket.sendRequest(cmsg);
+    clientSocket.setQueueLimits(queueSize, B(-1));
 }
 
 void SctpNatPeer::sendRequestArrived(SctpSocket *socket)
