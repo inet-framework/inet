@@ -926,6 +926,7 @@ class INET_API SctpAssociation : public cObject
   protected:
     IRoutingTable *rt;
     IInterfaceTable *ift;
+    ISctp::ICallback *callback = nullptr;
 
     AddressVector localAddressList;
     AddressVector remoteAddressList;

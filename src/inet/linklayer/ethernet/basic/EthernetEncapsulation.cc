@@ -339,6 +339,19 @@ void EthernetEncapsulation::handleCrashOperation(LifecycleOperation *operation)
     clearSockets();
 }
 
+void EthernetEncapsulation::bind(int socketId, int interfaceId, const MacAddress &localAddress, const MacAddress &remoteAddress, const Protocol *protocol, bool steal)
+{
+    Enter_Method("bind");
+    Socket *socket = new Socket(socketId);
+    socket->interfaceId = interfaceId;
+    socket->localAddress = localAddress;
+    socket->remoteAddress = remoteAddress;
+    socket->protocol = protocol;
+    socket->steal = steal;
+    socketIdToSocketMap[socketId] = socket;
+    EV_INFO << "Socket bound" << EV_FIELD(socketId) << EV_FIELD(interfaceId) << EV_FIELD(localAddress) << EV_FIELD(remoteAddress) << EV_FIELD(protocol) << EV_FIELD(steal) << EV_ENDL;
+}
+
 void EthernetEncapsulation::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");

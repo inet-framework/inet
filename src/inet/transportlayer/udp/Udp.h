@@ -24,6 +24,7 @@
 #include "inet/transportlayer/base/TransportProtocolBase.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
+#include "inet/transportlayer/contract/IUdp.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
@@ -56,7 +57,7 @@ class INET_API UdpCrcInsertionHook : public cSimpleModule, public NetfilterBase:
  *
  * More info in the NED file.
  */
-class INET_API Udp : public TransportProtocolBase, public IPassivePacketSink
+class INET_API Udp : public TransportProtocolBase, public IUdp, public IPassivePacketSink
 {
   public:
 
@@ -96,6 +97,7 @@ class INET_API Udp : public TransportProtocolBase, public IPassivePacketSink
         short dscp = -1;
         short tos = -1;
         MulticastMembershipTable multicastMembershipTable;
+        IUdp::ICallback *callback = nullptr;
 
         MulticastMembershipTable::iterator findFirstMulticastMembership(const L3Address& multicastAddress);
         MulticastMembership *findMulticastMembership(const L3Address& multicastAddress, int interfaceId);
@@ -142,10 +144,6 @@ class INET_API Udp : public TransportProtocolBase, public IPassivePacketSink
     virtual SockDesc *getSocketById(int sockId);
     virtual SockDesc *getOrCreateSocket(int sockId);
     virtual SockDesc *createSocket(int sockId, const L3Address& localAddr, int localPort);
-    virtual void bind(int sockId, const L3Address& localAddr, int localPort);
-    virtual void connect(int sockId, const L3Address& remoteAddr, int remotePort);
-    virtual void close(int sockId);
-    virtual void destroySocket(int sockId);
     void destroySocket(SocketsByIdMap::iterator it);
     virtual void clearAllSockets();
     virtual void setTimeToLive(SockDesc *sd, int ttl);
@@ -217,6 +215,19 @@ class INET_API Udp : public TransportProtocolBase, public IPassivePacketSink
     virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    virtual void setCallback(int socketId, ICallback *callback) override;
+    virtual void bind(int socketId, const L3Address& localAddr, int localPort) override;
+    virtual void connect(int socketId, const L3Address& remoteAddr, int remotePort) override;
+    virtual void setBroadcast(int socketId, bool broadcast) override;
+    virtual void setMulticastLoop(int socketId, bool loop) override;
+    virtual void setTimeToLive(int socketId, int ttl) override;
+    virtual void setDscp(int socketId, short dscp) override;
+    virtual void setTos(int socketId, short tos) override;
+    virtual void joinMulticastGroups(int socketId, const std::vector<L3Address>& multicastAddresses, const std::vector<int> interfaceIds) override;
+    virtual void leaveMulticastGroups(int socketId, const std::vector<L3Address>& multicastAddresses) override;
+    virtual void close(int socketId) override;
+    virtual void destroy(int socketId) override;
 
   protected:
     virtual void initialize(int stage) override;
