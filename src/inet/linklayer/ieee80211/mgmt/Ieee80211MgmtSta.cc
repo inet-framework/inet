@@ -17,7 +17,6 @@
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 
 namespace inet {
 namespace ieee80211 {
