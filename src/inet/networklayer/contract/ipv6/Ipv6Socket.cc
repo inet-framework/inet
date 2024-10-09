@@ -17,9 +17,10 @@
 namespace inet {
 
 Ipv6Socket::Ipv6Socket(cGate *outputGate) :
-    socketId(getActiveSimulationOrEnvir()->getUniqueNumber()),
-    outputGate(outputGate)
+    socketId(getActiveSimulationOrEnvir()->getUniqueNumber())
 {
+    if (outputGate != nullptr)
+        setOutputGate(outputGate);
 }
 
 void Ipv6Socket::setCallback(INetworkSocket::ICallback *callback)
