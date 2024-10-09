@@ -137,9 +137,9 @@ void EthernetSocketIo::pushPacket(Packet *packet, const cGate *gate)
         }
         auto& macAddressReq = packet->addTag<MacAddressReq>();
         macAddressReq->setDestAddress(remoteAddress);
+        emit(packetSentSignal, packet);
         socket.send(packet);
         numSent++;
-        emit(packetSentSignal, packet);
     }
     else {
         if (socket.belongsToSocket(packet))
