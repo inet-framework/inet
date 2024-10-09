@@ -58,5 +58,12 @@ void EthernetSocketCommandProcessor::handleCommand(Request *request)
         throw cRuntimeError("Unknown request");
 }
 
+void EthernetSocketCommandProcessor::bind(int socketId, int interfaceId, const MacAddress &localAddress, const MacAddress &remoteAddress, const Protocol *protocol, bool steal)
+{
+    Enter_Method("bind");
+    socketTable->addSocket(socketId, localAddress, remoteAddress, protocol, steal);
+    EV_INFO << "Socket bound" << EV_FIELD(socketId) << EV_FIELD(interfaceId) << EV_FIELD(localAddress) << EV_FIELD(remoteAddress) << EV_FIELD(protocol) << EV_FIELD(steal) << EV_ENDL;
+}
+
 } // namespace inet
 

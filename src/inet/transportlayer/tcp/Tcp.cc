@@ -578,6 +578,90 @@ void Tcp::pushPacket(Packet *packet, const cGate *gate)
         throw cRuntimeError("Unknown gate: %s", gate->getFullName());
 }
 
+void Tcp::setCallback(int socketId, ITcp::ICallback *callback)
+{
+    auto connection = findConnForApp(socketId);
+    connection->setCallback(callback);
+}
+
+void Tcp::listen(int socketId, const L3Address &localAddr, int localPrt, bool fork, bool autoRead, std::string tcpAlgorithmClass)
+{
+    TcpOpenCommand *openCmd = new TcpOpenCommand();
+    openCmd->setLocalAddr(localAddr);
+    openCmd->setLocalPort(localPrt);
+    openCmd->setFork(fork);
+    openCmd->setAutoRead(autoRead);
+    openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
+    auto request = new Request("PassiveOPEN", TCP_C_OPEN_PASSIVE);
+    request->addTag<SocketReq>()->setSocketId(socketId);
+    request->setControlInfo(openCmd);
+    handleUpperCommand(request);
+}
+
+void Tcp::connect(int socketId, const L3Address &localAddr, int localPort, const L3Address &remoteAddr, int remotePort, bool autoRead, std::string tcpAlgorithmClass)
+{
+    TcpOpenCommand *openCmd = new TcpOpenCommand();
+    openCmd->setLocalAddr(localAddr);
+    openCmd->setLocalPort(localPort);
+    openCmd->setRemoteAddr(remoteAddr);
+    openCmd->setRemotePort(remotePort);
+    openCmd->setAutoRead(autoRead);
+    openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
+    auto request = new Request("ActiveOPEN", TCP_C_OPEN_ACTIVE);
+    request->addTag<SocketReq>()->setSocketId(socketId);
+    request->setControlInfo(openCmd);
+    handleUpperCommand(request);
+}
+
+void Tcp::accept(int socketId)
+{
+    auto request = new Request("ACCEPT", TCP_C_ACCEPT);
+    TcpAcceptCommand *acceptCmd = new TcpAcceptCommand();
+    request->setControlInfo(acceptCmd);
+    request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleUpperCommand(request);
+}
+
+void Tcp::close(int socketId)
+{
+    auto request = new Request("CLOSE", TCP_C_CLOSE);
+    TcpCommand *closeCmd = new TcpCommand();
+    request->setControlInfo(closeCmd);
+    request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleUpperCommand(request);
+}
+
+void Tcp::abort(int socketId)
+{
+    auto request = new Request("ABORT", TCP_C_ABORT);
+    TcpCommand *cmd = new TcpCommand();
+    request->setControlInfo(cmd);
+    request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleUpperCommand(request);
+}
+
+void Tcp::setTimeToLive(int socketId, int ttl)
+{
+    auto request = new Request("setTTL", TCP_C_SETOPTION);
+    TcpSetTimeToLiveCommand *cmd = new TcpSetTimeToLiveCommand();
+    cmd->setTtl(ttl);
+    request->setControlInfo(cmd);
+    request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleUpperCommand(request);
+}
+
+void Tcp::setQueueLimits(int socketId, int packetCapacity, B dataCapacity)
+{
+    Enter_Method("setQueueLimits");
+    TcpCommand *queueInfo = new TcpCommand();
+    queueInfo->setUserId(dataCapacity.get()); // TODO this was copied from NetPerfMeter, seems wrong!
+
+    auto request = new Request("QueueRequest", TCP_C_QUEUE_BYTES_LIMIT);
+    request->setControlInfo(queueInfo);
+    request->addTag<SocketReq>()->setSocketId(socketId);
+    handleUpperCommand(request);
+}
+
 } // namespace tcp
 } // namespace inet
 

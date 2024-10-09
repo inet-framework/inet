@@ -15,6 +15,7 @@
 #include "inet/common/packet/Message.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
+#include "inet/networklayer/contract/ipv6/IIpv6.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
 #include "inet/networklayer/ipv6/Ipv6FragBuf.h"
@@ -31,7 +32,7 @@ class Icmpv6Header;
 /**
  * Ipv6 implementation.
  */
-class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public LifecycleUnsupported, public INetworkProtocol, public IPassivePacketSink
+class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public LifecycleUnsupported, public IIpv6, public INetworkProtocol, public IPassivePacketSink
 {
   public:
     /**
@@ -228,6 +229,11 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    virtual void bind(int socketId, const Protocol *protocol, Ipv6Address localAddress) override;
+    virtual void connect(int socketId, const Ipv6Address& remoteAddress) override;
+    virtual void close(int socketId) override;
+    virtual void destroy(int socketId) override;
 
   protected:
     /**

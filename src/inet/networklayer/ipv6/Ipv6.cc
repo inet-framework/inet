@@ -1281,5 +1281,44 @@ void Ipv6::pushPacket(Packet *packet, const cGate *gate)
     handleMessage(packet);
 }
 
+void Ipv6::bind(int socketId, const Protocol *protocol, Ipv6Address localAddress)
+{
+    auto *command = new Ipv6SocketBindCommand();
+    command->setProtocol(protocol);
+    command->setLocalAddress(localAddress);
+    auto request = new Request("bind", IPv6_C_BIND);
+    request->setControlInfo(command);
+    request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleRequest(request);
+}
+
+void Ipv6::connect(int socketId, const Ipv6Address& remoteAddress)
+{
+    auto *command = new Ipv6SocketConnectCommand();
+    command->setRemoteAddress(remoteAddress);
+    auto request = new Request("connect", IPv6_C_CONNECT);
+    request->setControlInfo(command);
+    request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleRequest(request);
+}
+
+void Ipv6::close(int socketId)
+{
+    Ipv6SocketCloseCommand *command = new Ipv6SocketCloseCommand();
+    auto request = new Request("close", IPv6_C_CLOSE);
+    request->setControlInfo(command);
+    request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleRequest(request);
+}
+
+void Ipv6::destroy(int socketId)
+{
+    auto *command = new Ipv6SocketDestroyCommand();
+    auto request = new Request("destroy", IPv6_C_DESTROY);
+    request->setControlInfo(command);
+    request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleRequest(request);
+}
+
 } // namespace inet
 
