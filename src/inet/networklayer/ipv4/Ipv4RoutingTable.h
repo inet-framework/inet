@@ -97,7 +97,7 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     virtual void configureRouterId();
 
     // adjust routes with src=IFACENETMASK to actual interface netmasks
-    virtual void updateNetmaskRoutes();
+    virtual void updateNetmaskRoutes(NetworkInterface *networkInterface = nullptr);
 
     // creates a new empty route
     virtual Ipv4Route *createNewRoute();
