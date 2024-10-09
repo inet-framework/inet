@@ -18,7 +18,6 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211IrMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
@@ -50,34 +49,6 @@ void Ieee80211Radio::initialize(int stage)
         if (channelNumber != -1)
             setChannelNumber(channelNumber);
     }
-}
-
-void Ieee80211Radio::handleUpperCommand(cMessage *message)
-{
-    if (message->getKind() == RADIO_C_CONFIGURE) {
-        Ieee80211ConfigureRadioCommand *configureCommand = dynamic_cast<Ieee80211ConfigureRadioCommand *>(message->getControlInfo());
-        if (configureCommand != nullptr) {
-            const char *opMode = configureCommand->getOpMode();
-            if (*opMode)
-                setModeSet(Ieee80211ModeSet::getModeSet(opMode));
-            const Ieee80211ModeSet *modeSet = configureCommand->getModeSet();
-            if (modeSet != nullptr)
-                setModeSet(modeSet);
-            const IIeee80211Mode *mode = configureCommand->getMode();
-            if (mode != nullptr)
-                setMode(mode);
-            const IIeee80211Band *band = configureCommand->getBand();
-            if (band != nullptr)
-                setBand(band);
-            const Ieee80211Channel *channel = configureCommand->getChannel();
-            if (channel != nullptr)
-                setChannel(channel);
-            int newChannelNumber = configureCommand->getChannelNumber();
-            if (newChannelNumber != -1)
-                setChannelNumber(newChannelNumber);
-        }
-    }
-    FlatRadioBase::handleUpperCommand(message);
 }
 
 void Ieee80211Radio::setModeSet(const Ieee80211ModeSet *modeSet)
