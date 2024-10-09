@@ -35,8 +35,6 @@ class INET_API Ieee80211Radio : public FlatRadioBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual void handleUpperCommand(cMessage *message) override;
-
     virtual void insertCrc(const Ptr<Ieee80211PhyHeader>& phyHeader) const;
     virtual bool verifyCrc(const Ptr<const Ieee80211PhyHeader>& phyHeader) const;
 
