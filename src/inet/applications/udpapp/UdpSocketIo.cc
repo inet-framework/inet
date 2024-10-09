@@ -148,9 +148,9 @@ void UdpSocketIo::pushPacket(Packet *packet, const cGate *gate)
     if (gate->isName("trafficIn")) {
         if (dontFragment)
             packet->addTagIfAbsent<FragmentationReq>()->setDontFragment(true);
+        emit(packetSentSignal, packet);
         socket.send(packet);
         numSent++;
-        emit(packetSentSignal, packet);
     }
     else {
         if (socket.belongsToSocket(packet))
