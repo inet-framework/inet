@@ -175,7 +175,7 @@ void Ipv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
         const auto *ieChangeDetails = check_and_cast<const NetworkInterfaceChangeDetails *>(obj);
         auto fieldId = ieChangeDetails->getFieldId();
         if (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER) {
-            updateNetmaskRoutes();
+            updateNetmaskRoutes(ieChangeDetails->getNetworkInterface());
             invalidateCache();
         }
     }
@@ -662,11 +662,12 @@ void Ipv4RoutingTable::multicastRouteChanged(Ipv4MulticastRoute *entry, int fiel
     emit(mrouteChangedSignal, entry); // TODO include fieldCode in the notification
 }
 
-void Ipv4RoutingTable::updateNetmaskRoutes()
+void Ipv4RoutingTable::updateNetmaskRoutes(NetworkInterface *networkInterface)
 {
     // first, delete all routes with src=IFACENETMASK
     for (unsigned int k = 0; k < routes.size(); k++) {
-        if (routes[k]->getSourceType() == IRoute::IFACENETMASK) {
+        auto route = routes[k];
+        if ((networkInterface == nullptr || route->getInterface() == networkInterface) && route->getSourceType() == IRoute::IFACENETMASK) {
             auto it = routes.begin() + (k--); // '--' is necessary because indices shift down
             Ipv4Route *route = *it;
             routes.erase(it);
@@ -683,7 +684,7 @@ void Ipv4RoutingTable::updateNetmaskRoutes()
     PatternMatcher interfaceNameMatcher(netmaskRoutes, false, true, true);
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         NetworkInterface *ie = ift->getInterface(i);
-        if (ie->isUp() && ie->hasCarrier() && interfaceNameMatcher.matches(ie->getFullName())) {
+        if ((networkInterface == nullptr || ie == networkInterface) && ie->isUp() && ie->hasCarrier() && interfaceNameMatcher.matches(ie->getFullName())) {
             auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
             if (ipv4Data && ipv4Data->getNetmask() != Ipv4Address::ALLONES_ADDRESS) {
                 Ipv4Route *route = createNewRoute();
