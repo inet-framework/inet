@@ -91,6 +91,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     ClockEvent *selfMsgDelayReq = nullptr;
     ClockEvent *requestMsg = nullptr;
 
+    std::set<GptpReqAnswerEvent*> reqAnswerEvents;
+
     // Statistics information: // TODO remove, and replace with emit() calls
     static simsignal_t localTimeSignal;
     static simsignal_t timeDifferenceSignal;

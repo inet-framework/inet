@@ -321,6 +321,8 @@ void Gptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syn
 
 void Gptp::sendPdelayResp(GptpReqAnswerEvent *req)
 {
+    reqAnswerEvents.erase(req);
+
     int portId = req->getPortId();
     auto packet = new Packet("GptpPdelayResp");
     packet->addTag<MacAddressReq>()->setDestAddress(GPTP_MULTICAST_ADDRESS);
@@ -537,6 +539,8 @@ void Gptp::processPdelayReq(Packet *packet, const GptpPdelayReq *gptp)
     resp->setSourcePortIdentity(gptp->getSourcePortIdentity());
     resp->setSequenceId(gptp->getSequenceId());
 
+    reqAnswerEvents.insert(resp);
+
     scheduleClockEventAfter(pDelayReqProcessingTime, resp);
 }
 
@@ -743,6 +747,13 @@ void Gptp::handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDetails)
     EV_INFO << "PDELAY REQ EGRESS TIME      - " << pDelayReqEgressTimestamp << endl;
     EV_INFO << "PDELAY RESP INGRESS TIME    - " << pDelayRespIngressTimestamp << endl;
     EV_INFO << "PDELAY RESP INGRESS TIME SET- " << pDelayRespIngressTimestampSetStart << endl;
+
+    // We also need to adjust the timestamps of scheduled pDelayResp packets
+    for (auto &reqAnswerEvent : reqAnswerEvents) {
+        auto ingressTimestamp = reqAnswerEvent->getIngressTimestamp();
+        adjustLocalTimestamp(ingressTimestamp, timeDiff);
+        reqAnswerEvent->setIngressTimestamp(ingressTimestamp);
+    }
 
     // This is a very special case, that only occurs when a clock jump occurs between the receptionStarted and
     // receptionEnded signal.
