@@ -67,6 +67,7 @@ void TunLoopbackApp::handleMessage(cMessage *message)
 
         delete message->removeControlInfo();
         packet->clearTags();
+        packet->addTag<PacketProtocolTag>()->setProtocol(&packetProtocol);
         tunSocket.send(packet);
         packetsSent++;
     }

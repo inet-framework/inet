@@ -300,6 +300,8 @@ class INET_API TcpSocket : public ISocket, public ITcp::ICallback
         dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
         sink.reference(toTcp, true, &dispatchProtocolReq);
         tcp.reference(toTcp, true);
+        if (sockstate == CONNECTED)
+            tcp->setCallback(connId, this);
     }
 
     /**
@@ -322,6 +324,8 @@ class INET_API TcpSocket : public ISocket, public ITcp::ICallback
      * Sets the tcpAlgorithmClass parameter of the next connect() or listen() call.
      */
     void setTCPAlgorithmClass(const char *tcpAlgorithmClass) { this->tcpAlgorithmClass = tcpAlgorithmClass; }
+
+    void setQueueLimits(int packetCapacity, B dataCapacity) { tcp->setQueueLimits(connId, packetCapacity, dataCapacity); }
 
     /**
      * Initiates passive OPEN, creating a "forking" connection that will listen

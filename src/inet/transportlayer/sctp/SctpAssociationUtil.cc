@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag_m.h"
@@ -411,7 +412,7 @@ void SctpAssociation::sendToIP(Packet *pkt, const Ptr<SctpHeader>& sctpmsg,
     addresses->setDestAddress(dest);
     pkt->addTagIfAbsent<SocketReq>()->setSocketId(assocId);
     EV_INFO << "send packet " << pkt << " to ipOut\n";
-    sctpMain->send(pkt, "ipOut");
+    sctpMain->send_to_ip(pkt);
 
     if (chunkType == HEARTBEAT) {
         SctpPathVariables *path = getPath(dest);
@@ -446,7 +447,30 @@ void SctpAssociation::sendIndicationToApp(int32_t code, int32_t value)
     indication->setRemoteAddr(remoteAddr);
     indication->setRemotePort(remotePort);
     msg->addTag<SocketInd>()->setSocketId(assocId);
-    sctpMain->send(msg, "appOut");
+    if (code == SCTP_I_CLOSED)
+        callback->handleClosed();
+    else if (code == SCTP_I_PEER_CLOSED)
+        callback->handlePeerClosed();
+    else if (code == SCTP_I_ABORT)
+        callback->handleFailure(code);
+    else if (code == SCTP_I_SHUTDOWN_RECEIVED)
+        callback->handleShutdownReceived();
+    else if (code == SCTP_I_ABANDONED)
+        callback->handleAbandoned();
+    else if (code == SCTP_I_SEND_STREAMS_RESETTED)
+        callback->handleSendStreamReset();
+    else if (code == SCTP_I_RCV_STREAMS_RESETTED)
+        callback->handleReceiveStreamReset();
+    else if (code == SCTP_I_SEND_MSG) {
+        inet::scheduleAfter("handleSendMessage", 0, [=] () {
+            callback->handleSendMessage();
+        });
+    }
+    else if (code == SCTP_I_ADDRESS_ADDED) {
+        callback->handleAddressAdded(localAddr, remoteAddr);
+    }
+    else
+        throw cRuntimeError("Unknown code");
 }
 
 void SctpAssociation::sendAvailableIndicationToApp()
@@ -466,7 +490,7 @@ void SctpAssociation::sendAvailableIndicationToApp()
     availableIndication->setNewSocketId(assocId);
     msg->addTag<SocketInd>()->setSocketId(listeningAssocId);
 //    msg->setControlInfo(availableIndication);
-    sctpMain->send(msg, "appOut");
+    callback->handleAvailable(msg);
 }
 
 void SctpAssociation::sendEstabIndicationToApp()
@@ -489,7 +513,7 @@ void SctpAssociation::sendEstabIndicationToApp()
     establishIndication->setNumMsgs(state->sendQueueLimit);
     msg->addTag<SocketInd>()->setSocketId(assocId);
 //    msg->setControlInfo(establishIndication);
-    sctpMain->send(msg, "appOut");
+    callback->handleEstablished(msg);
 
     char vectorName[128];
     for (uint16_t i = 0; i < inboundStreams; i++) {
@@ -1863,7 +1887,9 @@ void SctpAssociation::sendDataArrivedNotification(uint16_t sid)
     cmd->setNumMsgs(1);
 //    cmsg->setControlInfo(cmd);
 
-    sendToApp(cmsg);
+    inet::scheduleAfter("sendDataArrivedNotification", 0, [=] () {
+        callback->handleDataArrivedNotification(cmsg);
+    });
 }
 
 void SctpAssociation::sendInvalidStreamError(uint16_t sid)
@@ -2062,7 +2088,7 @@ void SctpAssociation::pushUlp()
             chunk->userData->setTimestamp(chunk->firstSendTime);
             delete smsg;
             delete chunk;
-            sendToApp(applicationPacket);
+            callback->handleDataArrived(applicationPacket, false); // TODO: urgent
         }
         i = (i + 1) % inboundStreams;
         count++;
@@ -2830,7 +2856,7 @@ void SctpAssociation::pathStatusIndication(const SctpPathVariables *path,
         auto iter = sctpMain->assocStatMap.find(assocId);
         iter->second.numPathFailures++;
     }
-    sendToApp(msg);
+    callback->handleStatus(msg);
 }
 
 void SctpAssociation::pmRttMeasurement(SctpPathVariables *path,

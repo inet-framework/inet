@@ -32,7 +32,8 @@ void Ipv4NodeConfigurator::initialize(int stage)
         routingTable.reference(this, "routingTableModule", true);
         if (networkConfiguratorPath[0]) {
             networkConfigurator.reference(this, "networkConfiguratorModule", false);
-            networkConfigurator->subscribe(Ipv4NetworkConfigurator::networkConfigurationChangedSignal, this);
+            if (networkConfigurator)
+                networkConfigurator->subscribe(Ipv4NetworkConfigurator::networkConfigurationChangedSignal, this);
         }
     }
     else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
@@ -166,6 +167,8 @@ void Ipv4NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalI
             auto networkInterface = networkInterfaceChangeDetails->getNetworkInterface();
             if (networkConfigurator != nullptr) {
                 if (networkInterface->isUp() && networkInterface->hasCarrier()) {
+                    if (networkInterface->findProtocolData<Ipv4InterfaceData>() == nullptr)
+                        prepareInterface(networkInterface);
                     networkConfigurator->configureInterface(networkInterface);
                     if (_configureRoutingTable)
                         networkConfigurator->addConfigurationToRoutingTable(routingTable, networkInterface);

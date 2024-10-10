@@ -285,6 +285,13 @@ class INET_API SctpSocket : public ISocket, public ISctp::ICallback
     virtual void send(Packet *packet) override;
 
     /**
+     * Receive data message
+     */
+    virtual void receive(int sid, int numMsgs);
+
+    void streamReset(L3Address remoteAddress, int type, int stream);
+
+    /**
      * Send notification.
      */
     void sendNotification(cMessage *msg);
@@ -292,7 +299,7 @@ class INET_API SctpSocket : public ISocket, public ISctp::ICallback
     /**
      * Send request.
      */
-    void sendRequest(cMessage *msg);
+    void setQueueLimits(int packetCapacity, B dataCapacity);
 
     /**
      * Closes the local end of the connection. With SCTP, a CLOSE operation

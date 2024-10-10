@@ -382,10 +382,6 @@ void NetPerfMeter::handleMessage(cMessage *msg)
     // ====== SCTP ===========================================================
     else if (TransportProtocol == SCTP) {
         switch (msg->getKind()) {
-            // ------ Data -----------------------------------------------------
-            case SCTP_I_DATA:
-                receiveMessage(msg);
-                break;
             // ------ Data Arrival Indication ----------------------------------
             case SCTP_I_DATA_NOTIFICATION: {
                 // Data has arrived -> request it from the SCTP module.
@@ -403,38 +399,6 @@ void NetPerfMeter::handleMessage(cMessage *msg)
                 cmsg->addTag<SocketReq>()->setSocketId(dataIndication->getSocketId());
                 cmsg->addTag<DispatchProtocolReq>()->setProtocol(&inet::Protocol::sctp);
                 send(cmsg, "socketOut");
-                break;
-            }
-            // ------ Connection available -----------------------------------
-            case SCTP_I_AVAILABLE: {
-                EV_INFO << "SCTP_I_AVAILABLE arrived\n";
-                Message *message = check_and_cast<Message *>(msg);
-                int newSockId = message->getTag<SctpAvailableReq>()->getNewSocketId();
-                EV_INFO << "new socket id = " << newSockId << endl;
-                Request *cmsg = new Request("SCTP_C_ACCEPT_SOCKET_ID", SCTP_C_ACCEPT_SOCKET_ID);
-                cmsg->addTag<SctpAvailableReq>()->setSocketId(newSockId);
-                cmsg->addTag<DispatchProtocolReq>()->setProtocol(&inet::Protocol::sctp);
-                cmsg->addTag<SocketReq>()->setSocketId(newSockId);
-                EV_INFO << "Sending accept socket id request ..." << endl;
-                send(cmsg, "socketOut");
-                break;
-            }
-            // ------ Connection established -----------------------------------
-            case SCTP_I_ESTABLISHED: {
-                Message *message = check_and_cast<Message *>(msg);
-                auto& tags = message->getTags();
-                auto connectInfo = tags.getTag<SctpConnectReq>();
-                ActualOutboundStreams = connectInfo->getOutboundStreams();
-                if (ActualOutboundStreams > RequestedOutboundStreams) {
-                    ActualOutboundStreams = RequestedOutboundStreams;
-                }
-                ActualInboundStreams = connectInfo->getInboundStreams();
-                if (ActualInboundStreams > MaxInboundStreams) {
-                    ActualInboundStreams = MaxInboundStreams;
-                }
-                LastStreamID = ActualOutboundStreams - 1;
-                // NOTE: Start sending on stream 0!
-                successfullyEstablishedConnection(msg, QueueSize);
                 break;
             }
             // ------ Queue indication -----------------------------------------
@@ -473,30 +437,6 @@ void NetPerfMeter::handleMessage(cMessage *msg)
     else if (TransportProtocol == TCP) {
         short kind = msg->getKind();
         switch (kind) {
-            // ------ Data -----------------------------------------------------
-            case TCP_I_DATA:
-            case TCP_I_URGENT_DATA:
-                receiveMessage(msg);
-                break;
-            // ------ Connection available -----------------------------------
-            case TCP_I_AVAILABLE: {
-                EV_INFO << "TCP_I_AVAILABLE arrived\n";
-                TcpAvailableInfo *availableInfo = check_and_cast<TcpAvailableInfo *>(msg->getControlInfo());
-                int newSockId = availableInfo->getNewSocketId();
-                EV_INFO << "new socket id = " << newSockId << endl;
-                Request *cmsg = new Request("TCP_C_ACCEPT", TCP_C_ACCEPT);
-                auto *acceptCmd = new TcpAcceptCommand();
-                cmsg->setControlInfo(acceptCmd);
-                cmsg->addTag<DispatchProtocolReq>()->setProtocol(&inet::Protocol::tcp);
-                cmsg->addTag<SocketReq>()->setSocketId(newSockId);
-                EV_INFO << "Sending accept socket id request ..." << endl;
-                send(cmsg, "socketOut");
-                break;
-            }
-            // ------ Connection established -----------------------------------
-            case TCP_I_ESTABLISHED:
-                successfullyEstablishedConnection(msg, 0);
-                break;
             // ------ Queue indication -----------------------------------------
             case TCP_I_SEND_MSG: {
                 const TcpCommand *tcpCommand = check_and_cast<TcpCommand *>(msg->getControlInfo());
@@ -509,27 +449,6 @@ void NetPerfMeter::handleMessage(cMessage *msg)
                 }
             }
             break;
-            // ------ Errors ---------------------------------------------------
-            case TCP_I_PEER_CLOSED:
-            case TCP_I_CLOSED:
-            case TCP_I_CONNECTION_REFUSED:
-            case TCP_I_CONNECTION_RESET:
-            case TCP_I_TIMED_OUT:
-                teardownConnection();
-                break;
-        }
-    }
-    // ====== UDP ============================================================
-    else if (TransportProtocol == UDP) {
-        switch (msg->getKind()) {
-            // ------ Data -----------------------------------------------------
-            case UDP_I_DATA:
-                receiveMessage(msg);
-                break;
-            // ------ Error ----------------------------------------------------
-            case UDP_I_ERROR:
-                teardownConnection();
-                break;
         }
     }
 
@@ -602,6 +521,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage *msg,
             }
             IncomingSocketTCP = new TcpSocket(msg);
             IncomingSocketTCP->setOutputGate(gate("socketOut"));
+            IncomingSocketTCP->setCallback(this);
         }
 
         ConnectionID = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
@@ -615,6 +535,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage *msg,
             }
             IncomingSocketSCTP = new SctpSocket(msg);
             IncomingSocketSCTP->setOutputGate(gate("socketOut"));
+            IncomingSocketSCTP->setCallback(this);
         }
 
         ConnectionID = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
@@ -709,6 +630,7 @@ void NetPerfMeter::createAndBindSocket()
         SocketSCTP->setInboundStreams(MaxInboundStreams);
         SocketSCTP->setOutboundStreams(RequestedOutboundStreams);
         SocketSCTP->setOutputGate(gate("socketOut"));
+        SocketSCTP->setCallback(this);
         SocketSCTP->bind(localPort);
         if (ActiveMode == false) {
             SocketSCTP->listen(true);
@@ -718,6 +640,7 @@ void NetPerfMeter::createAndBindSocket()
         ASSERT(SocketTCP == nullptr);
         SocketTCP = new TcpSocket;
         SocketTCP->setOutputGate(gate("socketOut"));
+        SocketTCP->setCallback(this);
         SocketTCP->bind(localAddr, localPort);
         if (ActiveMode == false) {
             SocketTCP->listen();
@@ -727,6 +650,7 @@ void NetPerfMeter::createAndBindSocket()
         ASSERT(SocketUDP == nullptr);
         SocketUDP = new UdpSocket;
         SocketUDP->setOutputGate(gate("socketOut"));
+        SocketUDP->setCallback(this);
         SocketUDP->bind(localAddr, localPort);
     }
 }
@@ -956,7 +880,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
 
                 cmsg->setKind(sendUnordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
                 cmsg->addTag<DispatchProtocolReq>()->setProtocol(&inet::Protocol::sctp);
-                send(cmsg, "socketOut");
+                SocketSCTP->send(cmsg);
 
                 SenderStatistics *senderStatistics = getSenderStatistics(streamID);
                 senderStatistics->SentBytes += msgSize;
@@ -987,6 +911,18 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
         } while (bytesToSend > 0);
     }
     return newlyQueuedBytes;
+}
+
+void NetPerfMeter::socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo)
+{
+    Enter_Method("socketAvailable");
+
+    TcpSocket *newSocket = new TcpSocket(availableInfo);
+    newSocket->setOutputGate(gate("socketOut"));
+    newSocket->setCallback(this);
+    // TODO leak
+
+    socket->accept(availableInfo->getNewSocketId());
 }
 
 // ###### Get frame rate for next frame to be sent on given stream ##########
@@ -1189,17 +1125,11 @@ void NetPerfMeter::sendSCTPQueueRequest(const unsigned int queueSize)
     // Tell SCTP to limit the send queue to the number of bytes specified.
     // When the queue is able accept more data again, it will be indicated by
     // SCTP_I_SENDQUEUE_ABATED!
-
-    Request *cmsg = new Request("QueueRequest", SCTP_C_QUEUE_BYTES_LIMIT);
-    auto queueInfo = cmsg->addTag<SctpInfoReq>();
-    queueInfo->setText(queueSize);
-    queueInfo->setSocketId(ConnectionID);
-
     if (IncomingSocketSCTP) {
-        IncomingSocketSCTP->sendRequest(cmsg);
+        IncomingSocketSCTP->setQueueLimits(queueSize, B(-1));
     }
     else {
-        SocketSCTP->sendRequest(cmsg);
+        SocketSCTP->setQueueLimits(queueSize, B(-1));
     }
 }
 
@@ -1212,18 +1142,10 @@ void NetPerfMeter::sendTCPQueueRequest(const unsigned int queueSize)
     // When the queue is able accept more data again, it will be indicated by
     // TCP_I_SEND_MSG!
 
-    TcpCommand *queueInfo = new TcpCommand();
-    queueInfo->setUserId(queueSize);
-
-    auto request = new Request("QueueRequest", TCP_C_QUEUE_BYTES_LIMIT);
-    request->setControlInfo(queueInfo);
-    request->addTag<SocketReq>()->setSocketId(ConnectionID);
-    if (IncomingSocketTCP) {
-        IncomingSocketTCP->sendCommand(request);
-    }
-    else {
-        SocketTCP->sendCommand(request);
-    }
+    if (IncomingSocketTCP)
+        IncomingSocketTCP->setQueueLimits(-1, B(queueSize));
+    else
+        SocketTCP->setQueueLimits(-1, B(queueSize));
 }
 
 // ###### Return sprintf-formatted string ####################################
@@ -1265,6 +1187,37 @@ cGate *NetPerfMeter::lookupModuleInterface(cGate *gate, const std::type_info& ty
         }
     }
     return nullptr;
+}
+
+void NetPerfMeter::socketDataNotificationArrived(SctpSocket *socket, Message *msg)
+{
+    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
+    auto dataIndication = tags.getTag<SctpCommandReq>();
+    socket->receive(dataIndication->getSid(), 1);
+}
+
+void NetPerfMeter::socketAvailable(SctpSocket *socket, Indication *indication)
+{
+    auto availableIndication = indication->getTag<SctpAvailableReq>();
+    socket->accept(availableIndication->getNewSocketId());
+}
+
+void NetPerfMeter::socketEstablished(SctpSocket *socket, Indication *indication)
+{
+    Enter_Method("socketEstablished");
+    auto& tags = indication->getTags();
+    auto connectInfo = tags.getTag<SctpConnectReq>();
+    ActualOutboundStreams = connectInfo->getOutboundStreams();
+    if (ActualOutboundStreams > RequestedOutboundStreams) {
+        ActualOutboundStreams = RequestedOutboundStreams;
+    }
+    ActualInboundStreams = connectInfo->getInboundStreams();
+    if (ActualInboundStreams > MaxInboundStreams) {
+        ActualInboundStreams = MaxInboundStreams;
+    }
+    LastStreamID = ActualOutboundStreams - 1;
+    // NOTE: Start sending on stream 0!
+    successfullyEstablishedConnection(indication, QueueSize);
 }
 
 } // namespace inet

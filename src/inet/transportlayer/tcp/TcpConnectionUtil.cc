@@ -11,6 +11,7 @@
 
 #include <algorithm> // min,max
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
@@ -232,6 +233,7 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     localAddr = listenerConn->localAddr;
     localPort = listenerConn->localPort;
     autoRead = listenerConn->autoRead;
+    callback = nullptr;
 
     FSM_Goto(fsm, TCP_S_LISTEN);
 }
@@ -346,18 +348,29 @@ void TcpConnection::signalConnectionTimeout()
 void TcpConnection::sendIndicationToApp(int code, const int id)
 {
     EV_INFO << "Notifying app: " << indicationName(code) << "\n";
-    auto indication = new Indication(indicationName(code), code);
-    TcpCommand *ind = new TcpCommand();
-    ind->setUserId(id);
-    indication->addTag<SocketInd>()->setSocketId(socketId);
-    indication->setControlInfo(ind);
-    sendToApp(indication);
+    if (code == TCP_I_CONNECTION_RESET)
+        callback->handleFailure(id);
+    else if (code == TCP_I_CLOSED) {
+        // KLUDGE: this schedule call is here to keep the fingerprints
+        inet::scheduleAfter("closed", 0, [=] () {
+            callback->handleClosed();
+        });
+    }
+    else if (code == TCP_I_PEER_CLOSED) {
+        // KLUDGE: this schedule call is here to keep the fingerprints
+        inet::scheduleAfter("handlePeerClosed", 0, [=] () {
+            callback->handlePeerClosed();
+        });
+    }
+    else if (code == TCP_I_TIMED_OUT)
+        callback->handleFailure(0);
+    else
+        throw cRuntimeError("TODO");
 }
 
 void TcpConnection::sendAvailableIndicationToApp()
 {
     EV_INFO << "Notifying app: " << indicationName(TCP_I_AVAILABLE) << "\n";
-    auto indication = new Indication(indicationName(TCP_I_AVAILABLE), TCP_I_AVAILABLE);
     TcpAvailableInfo *ind = new TcpAvailableInfo();
     ind->setNewSocketId(socketId);
     ind->setLocalAddr(localAddr);
@@ -366,9 +379,10 @@ void TcpConnection::sendAvailableIndicationToApp()
     ind->setRemotePort(remotePort);
     ind->setAutoRead(autoRead);
 
-    indication->addTag<SocketInd>()->setSocketId(listeningSocketId);
-    indication->setControlInfo(ind);
-    sendToApp(indication);
+    auto callback = tcpMain->findConnForApp(listeningSocketId)->callback;
+    if (callback != nullptr)
+        // NOTE: this 0s delay is required to avoid calling the application before TCP completes the processing for the received message
+        inet::scheduleAfter("available", 0, [=] () { callback->handleAvailable(ind); });
 }
 
 void TcpConnection::sendEstabIndicationToApp()
@@ -381,9 +395,15 @@ void TcpConnection::sendEstabIndicationToApp()
     ind->setLocalPort(localPort);
     ind->setRemotePort(remotePort);
     ind->setAutoRead(autoRead);
-    indication->addTag<SocketInd>()->setSocketId(socketId);
+    indication->addTag<SocketInd>()->setSocketId(listeningSocketId != -1 ? listeningSocketId : socketId);
     indication->setControlInfo(ind);
-    sendToApp(indication);
+    if (callback != nullptr) {
+        // NOTE: this 0s delay is required to avoid calling the application before TCP completes the processing for the received message
+        inet::scheduleAfter("established", 0, [=] () {
+            cContextSwitcher switcher(this);
+            callback->handleEstablished(indication);
+        });
+    }
 }
 
 void TcpConnection::sendToApp(cMessage *msg)

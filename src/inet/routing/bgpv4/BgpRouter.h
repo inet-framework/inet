@@ -92,6 +92,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     void setLocalPreference(Ipv4Address peer, int localPref);
     bool isExternalAddress(const Ipv4Route& rtEntry);
     void processMessageFromTCP(cMessage *msg);
+    TcpSocket *ensureSocket(cMessage *msg);
     bool hasSocket(int socketId) { return _socketMap.getSocketById(socketId) != nullptr; }
 
     void printOpenMessage(const BgpOpenMessage& msg);
@@ -104,7 +105,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     //@{
     virtual void socketDataArrived(TcpSocket *socket) override;
     virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override;
-    virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override { socket->accept(availableInfo->getNewSocketId()); } // TODO
+    virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;
     virtual void socketEstablished(TcpSocket *socket, Indication *indication) override;
     virtual void socketPeerClosed(TcpSocket *socket) override {}
     virtual void socketClosed(TcpSocket *socket) override {}

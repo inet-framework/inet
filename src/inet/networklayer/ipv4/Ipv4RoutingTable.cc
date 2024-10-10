@@ -319,10 +319,11 @@ bool Ipv4RoutingTable::isLocalBroadcastAddress(const Ipv4Address& dest) const
             NetworkInterface *ie = ift->getInterface(i);
             if (!ie->isBroadcast())
                 continue;
-            Ipv4Address interfaceAddr = ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
-            Ipv4Address broadcastAddr = interfaceAddr.makeBroadcastAddress(ie->getProtocolData<Ipv4InterfaceData>()->getNetmask());
-            if (!broadcastAddr.isUnspecified()) {
-                localBroadcastAddresses.insert(broadcastAddr);
+            if (auto ipv4ProtocolData = ie->findProtocolData<Ipv4InterfaceData>()) {
+                Ipv4Address interfaceAddr = ipv4ProtocolData->getIPAddress();
+                Ipv4Address broadcastAddr = interfaceAddr.makeBroadcastAddress(ipv4ProtocolData->getNetmask());
+                if (!broadcastAddr.isUnspecified())
+                    localBroadcastAddresses.insert(broadcastAddr);
             }
         }
     }
