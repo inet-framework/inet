@@ -284,6 +284,12 @@ class INET_API SctpSocket : public ISocket, public ISctp::ICallback
      */
     virtual void send(Packet *packet) override;
 
+    void receive(int sid, int numMsgs);
+
+    void streamReset(L3Address remoteAddress, int type, int stream);
+
+    void setQueueLimits(int packetCapacity, B dataCapacity);
+
     /**
      * Send notification.
      */
