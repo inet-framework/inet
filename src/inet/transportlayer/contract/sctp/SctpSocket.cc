@@ -345,6 +345,21 @@ void SctpSocket::send(Packet *packet)
     sink.pushPacket(packet);
 }
 
+void SctpSocket::receive(int sid, int numMsgs)
+{
+    sctp->receive(assocId, sid, numMsgs);
+}
+
+void SctpSocket::streamReset(L3Address remoteAddress, int type, int stream)
+{
+    sctp->streamReset(assocId, remoteAddress, type, stream);
+}
+
+void SctpSocket::setQueueLimits(int packetCapacity, B dataCapacity)
+{
+    sctp->setQueueLimits(assocId, packetCapacity, dataCapacity);
+}
+
 void SctpSocket::sendNotification(cMessage *msg)
 {
     if (oneToOne && sockstate != CONNECTED && sockstate != CONNECTING && sockstate != PEER_CLOSED) {
