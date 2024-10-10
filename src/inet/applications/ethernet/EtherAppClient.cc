@@ -92,8 +92,11 @@ void EtherAppClient::handleStartOperation(LifecycleOperation *operation)
 void EtherAppClient::handleStopOperation(LifecycleOperation *operation)
 {
     cancelNextPacket();
-    llcSocket.close();
-    delayActiveOperationFinish(par("stopOperationTimeout"));
+    if (llcSocket.isOpen()) {
+        llcSocket.close();
+        if (activeOperation.operation != nullptr)
+            delayActiveOperationFinish(par("stopOperationTimeout"));
+    }
 }
 
 void EtherAppClient::handleCrashOperation(LifecycleOperation *operation)

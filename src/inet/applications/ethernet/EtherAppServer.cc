@@ -50,8 +50,11 @@ void EtherAppServer::handleStartOperation(LifecycleOperation *operation)
 void EtherAppServer::handleStopOperation(LifecycleOperation *operation)
 {
     EV_INFO << "Stop the application\n";
-    llcSocket.close();
-    delayActiveOperationFinish(par("stopOperationTimeout"));
+    if (llcSocket.isOpen()) {
+        llcSocket.close();
+        if (activeOperation.operation != nullptr)
+            delayActiveOperationFinish(par("stopOperationTimeout"));
+    }
 }
 
 void EtherAppServer::handleCrashOperation(LifecycleOperation *operation)
