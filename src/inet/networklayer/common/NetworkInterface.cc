@@ -120,8 +120,17 @@ void NetworkInterface::initialize(int stage)
         else
             wireless = rxIn == nullptr && txOut == nullptr;
 
+        if (hasPar("protocol")) {
+            const char *protocolName = par("protocol");
+            if (*protocolName != '\0')
+                protocol = Protocol::getProtocol(protocolName);
+        }
+
         upperLayerInConsumer.reference(upperLayerIn, false, nullptr, 1);
-        upperLayerOutConsumer.reference(upperLayerOut, false, nullptr, 1);
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(protocol);
+        dispatchProtocolReq.setServicePrimitive(SP_INDICATION);
+        upperLayerOutConsumer.reference(upperLayerOut, false, protocol != nullptr ? &dispatchProtocolReq : nullptr, 1);
         interfaceTable.reference(this, "interfaceTableModule", false);
         setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
         setCarrier(computeCarrier());
@@ -144,11 +153,6 @@ void NetworkInterface::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
-        if (hasPar("protocol")) {
-            const char *protocolName = par("protocol");
-            if (*protocolName != '\0')
-                protocol = Protocol::getProtocol(protocolName);
-        }
         if (hasPar("address")) {
             const char *address = par("address");
             if (!strcmp(address, "auto")) {
