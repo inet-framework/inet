@@ -52,6 +52,12 @@ void Ieee8022LlcSocket::open(int interfaceId, int localSap, int remoteSap)
     isOpen_ = true;
 }
 
+void Ieee8022LlcSocket::close()
+{
+    isOpen_ = false;
+    llc->close(socketId);
+}
+
 void Ieee8022LlcSocket::send(Packet *packet)
 {
     packet->setKind(SOCKET_C_DATA);
