@@ -12,6 +12,7 @@
 #include "inet/common/Simsignals.h"
 #include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
@@ -206,12 +207,8 @@ void Ieee80211MgmtSta::clearAPList()
 void Ieee80211MgmtSta::changeChannel(int channelNum)
 {
     EV << "Tuning to channel #" << channelNum << "\n";
-
-    Ieee80211ConfigureRadioCommand *configureCommand = new Ieee80211ConfigureRadioCommand();
-    configureCommand->setChannelNumber(channelNum);
-    auto request = new Request("changeChannel", RADIO_C_CONFIGURE);
-    request->setControlInfo(configureCommand);
-    send(request, "macOut");
+    // TODO KLUDGE
+    check_and_cast<Ieee80211Mac *>(getParentModule()->getSubmodule("mac"))->setChannelNumber(channelNum);
 }
 
 void Ieee80211MgmtSta::beaconLost()

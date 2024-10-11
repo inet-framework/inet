@@ -290,7 +290,8 @@ void EthernetMacPhy::processMsgFromNetwork(Signal *signal)
     bool hasBitError = signal->hasBitError();
     auto packet = check_and_cast<Packet *>(signal->decapsulate());
     delete signal;
-    decapsulate(packet);
+    if (!hasBitError)
+        decapsulate(packet);
     emit(packetReceivedFromLowerSignal, packet);
 
     if (hasBitError || !verifyFcsAndLength(packet)) {
