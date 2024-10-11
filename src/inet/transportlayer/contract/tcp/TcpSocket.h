@@ -323,6 +323,8 @@ class INET_API TcpSocket : public ISocket, public ITcp::ICallback
      */
     void setTCPAlgorithmClass(const char *tcpAlgorithmClass) { this->tcpAlgorithmClass = tcpAlgorithmClass; }
 
+    void setQueueLimits(int packetCapacity, B dataCapacity) { tcp->setQueueLimits(connId, packetCapacity, dataCapacity); }
+
     /**
      * Initiates passive OPEN, creating a "forking" connection that will listen
      * on the port you bound the socket to. Every incoming connection will
