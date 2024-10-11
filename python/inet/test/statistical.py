@@ -30,7 +30,7 @@ class StatisticalTestTask(SimulationTestTask):
         stored_results_directory = simulation_project.get_full_path(os.path.join("statistics", working_directory))
         scalars_match = False
         for current_scalar_result_file_name in glob.glob(os.path.join(current_results_directory, "*.sca")):
-            if re.search("/" + config + "-#", current_scalar_result_file_name):
+            if re.search(r"/" + config + "-#", current_scalar_result_file_name):
                 logger.debug(f"Reading result file {current_scalar_result_file_name}")
                 current_df = read_result_files(current_scalar_result_file_name)
                 current_df = get_scalars(current_df)
@@ -50,7 +50,7 @@ class StatisticalTestTask(SimulationTestTask):
                             current_scalar_result_file = file.readlines()
                         with open(stored_scalar_result_file_name, "r") as file:
                             stored_scalar_result_file = file.readlines()
-                        scalar_result_diff_file_name = re.sub(".sca", ".diff", stored_scalar_result_file_name)
+                        scalar_result_diff_file_name = re.sub(r".sca", ".diff", stored_scalar_result_file_name)
                         with open(scalar_result_diff_file_name, "w") as file:
                             scalar_diff = "".join(difflib.ndiff(current_scalar_result_file, stored_scalar_result_file))
                             file.write(scalar_diff)
@@ -69,8 +69,8 @@ class StatisticalTestTask(SimulationTestTask):
                             df = df[df.apply(lambda row: matches_filter(row["name"], result_name_filter, exclude_result_name_filter, full_match) and \
                                                          matches_filter(row["module"], result_module_filter, exclude_result_module_filter, full_match), axis=1)]
                             reason = df.loc[df["relative_error"].idxmax()].to_string()
-                            reason = re.sub(" +", " = ", reason)
-                            reason = re.sub("\\n", ", ", reason)
+                            reason = re.sub(r" +", " = ", reason)
+                            reason = re.sub(r"\\n", ", ", reason)
                             return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="FAIL", reason=reason)
                 else:
                     return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="ERROR", reason="Stored statistical results are not found")

@@ -32,14 +32,14 @@ class SimulationTaskResult(TaskResult):
             self.last_event_number = int(match.group(2)) if match else None
             self.last_simulation_time = match.group(1) if match else None
             self.elapsed_cpu_time = None # TODO
-            match = re.search("<!> Error: (.*) -- in module (.*)", stderr)
+            match = re.search(r"<!> Error: (.*) -- in module (.*)", stderr)
             self.error_message = match.group(1).strip() if match else None
             self.error_module = match.group(2).strip() if match else None
             if self.error_message is None:
-                match = re.search("<!> Error: (.*)", stderr)
+                match = re.search(r"<!> Error: (.*)", stderr)
                 self.error_message = match.group(1).strip() if match else None
             if self.error_message:
-                if re.search("The simulation attempted to prompt for user input", self.error_message):
+                if re.search(r"The simulation attempted to prompt for user input", self.error_message):
                     self.result = "SKIP"
                     self.color = COLOR_CYAN
                     self.expected_result = "SKIP"
@@ -149,7 +149,7 @@ def clean_simulation_results(simulation_config):
     logger.info("Cleaning simulation results, folder = " + simulation_config.working_directory)
     simulation_project = simulation_config.simulation_project
     path = os.path.join(simulation_project.get_full_path(simulation_config.working_directory), "results")
-    if not re.search(".*/home/.*", path):
+    if not re.search(r".*/home/.*", path):
         raise Exception("Path is not in home")
     if os.path.exists(path):
         shutil.rmtree(path)

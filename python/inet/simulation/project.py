@@ -34,7 +34,7 @@ class SimulationProject:
 
     def get_executable(self, mode="debug"):
         if mode == "release":
-            return self.get_full_path(self.executable + ("_release" if re.search("opp_run", self.executable) else ""))
+            return self.get_full_path(self.executable + ("_release" if re.search(r"opp_run", self.executable) else ""))
         elif mode == "debug":
             return self.get_full_path(self.executable + "_dbg")
         elif mode == "sanitize":
@@ -59,8 +59,8 @@ class SimulationProject:
         file_names = []
         file_names.append(get_workspace_path("omnetpp/bin/opp_run_release"))
         file_names.append(get_workspace_path("omnetpp/bin/opp_python_repl"))
-        file_names += list(filter(lambda path: not re.search("dbg", path) and not re.search("sanitize", path), glob.glob(get_workspace_path("omnetpp/lib/*.so"))))
-        file_names += list(filter(lambda path: not re.search("formatter", path), glob.glob(get_workspace_path("omnetpp/python/**/*.py"), recursive=True)))
+        file_names += list(filter(lambda path: not re.search(r"dbg", path) and not re.search(r"sanitize", path), glob.glob(get_workspace_path("omnetpp/lib/*.so"))))
+        file_names += list(filter(lambda path: not re.search(r"formatter", path), glob.glob(get_workspace_path("omnetpp/python/**/*.py"), recursive=True)))
         file_names.append(self.get_full_path(".nedfolders"))
         file_names.append(self.get_full_path(".nedexclusions"))
         file_names.append(self.get_full_path("bin/inet"))
@@ -69,7 +69,7 @@ class SimulationProject:
         file_names.append(self.get_full_path("src/libINET.so"))
         file_names += glob.glob(self.get_full_path("python/**/*.py"), recursive=True)
         for ned_folder in self.ned_folders:
-            if not re.search("test", ned_folder):
+            if not re.search(r"test", ned_folder):
                 file_names += glob.glob(os.path.join(self.get_full_path(ned_folder), "**/*.ini"), recursive=True)
                 file_names += glob.glob(os.path.join(self.get_full_path(ned_folder), "**/*.ned"), recursive=True)
         return file_names

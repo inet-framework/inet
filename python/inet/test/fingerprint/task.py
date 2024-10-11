@@ -30,7 +30,7 @@ def get_ingredients_extra_args(ingredients):
 
 class Fingerprint:
     def __init__(self, text):
-        match = re.match("(.*)/(.*)", text)
+        match = re.match(r"(.*)/(.*)", text)
         self.fingerprint = match.groups()[0]
         self.ingredients = match.groups()[1]
 
@@ -72,7 +72,7 @@ class FingerprintTestTaskResult(SimulationTestTaskResult):
         eventlog_file = open(eventlog_file_path)
         fingerprints = []
         for line in eventlog_file:
-            match = re.match("E # .* f (.*)", line)
+            match = re.match(r"E # .* f (.*)", line)
             if match:
                 fingerprints.append(Fingerprint(match.group(1)))
         eventlog_file.close()
@@ -303,11 +303,11 @@ class SimulationEvent:
 
 def get_calculated_fingerprint(simulation_result, ingredients):
     stdout = simulation_result.subprocess_result.stdout.decode("utf-8")
-    match = re.search("Fingerprint successfully verified:.*? ([0-9a-f]{4}-[0-9a-f]{4})/" + ingredients, stdout)
+    match = re.search(r"Fingerprint successfully verified:.*? ([0-9a-f]{4}-[0-9a-f]{4})/" + ingredients, stdout)
     if match:
         value = match.groups()[0]
     else:
-        match = re.search("Fingerprint mismatch! calculated:.*? ([0-9a-f]{4}-[0-9a-f]{4})/" + ingredients + ".*expected", stdout)
+        match = re.search(r"Fingerprint mismatch! calculated:.*? ([0-9a-f]{4}-[0-9a-f]{4})/" + ingredients + ".*expected", stdout)
         if match:
             value = match.groups()[0]
         else:

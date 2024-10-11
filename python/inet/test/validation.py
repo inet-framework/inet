@@ -100,15 +100,15 @@ def compute_asynchronousshaper_icct_endtoend_delay_from_simulation_results(**kwa
     filter_expression = """type =~ scalar AND name =~ meanBitLifeTimePerPacket:histogram:max"""
     df = read_result_files(inet_project.get_full_path("tests/validation/tsn/trafficshaping/asynchronousshaper/icct/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
     df = get_scalars(df)
-    df["name"] = df["name"].map(lambda name: re.sub(".*(min|max)", "\\1", name))
-    df["module"] = df["module"].map(lambda name: re.sub(".*N6.app\\[[0-4]\\].*", "Flow 4, Class A", name))
-    df["module"] = df["module"].map(lambda name: re.sub(".*N6.app\\[[5-9]\\].*", "Flow 5, Class B", name))
-    df["module"] = df["module"].map(lambda name: re.sub(".*N7.app\\[[0-9]\\].*", "Flow 1, CDT", name))
-    df["module"] = df["module"].map(lambda name: re.sub(".*N7.app\\[1[0-9]\\].*", "Flow 2, Class A", name))
-    df["module"] = df["module"].map(lambda name: re.sub(".*N7.app\\[2[0-9]\\].*", "Flow 3, Class B", name))
-    df["module"] = df["module"].map(lambda name: re.sub(".*N7.app\\[3[0-4]\\].*", "Flow 6, Class A", name))
-    df["module"] = df["module"].map(lambda name: re.sub(".*N7.app\\[3[5-9]\\].*", "Flow 7, Class B", name))
-    df["module"] = df["module"].map(lambda name: re.sub(".*N7.app\\[40\\].*", "Flow 8, Best Effort", name))
+    df["name"] = df["name"].map(lambda name: re.sub(r".*(min|max)", "\\1", name))
+    df["module"] = df["module"].map(lambda name: re.sub(r".*N6.app\\[[0-4]\\].*", "Flow 4, Class A", name))
+    df["module"] = df["module"].map(lambda name: re.sub(r".*N6.app\\[[5-9]\\].*", "Flow 5, Class B", name))
+    df["module"] = df["module"].map(lambda name: re.sub(r".*N7.app\\[[0-9]\\].*", "Flow 1, CDT", name))
+    df["module"] = df["module"].map(lambda name: re.sub(r".*N7.app\\[1[0-9]\\].*", "Flow 2, Class A", name))
+    df["module"] = df["module"].map(lambda name: re.sub(r".*N7.app\\[2[0-9]\\].*", "Flow 3, Class B", name))
+    df["module"] = df["module"].map(lambda name: re.sub(r".*N7.app\\[3[0-4]\\].*", "Flow 6, Class A", name))
+    df["module"] = df["module"].map(lambda name: re.sub(r".*N7.app\\[3[5-9]\\].*", "Flow 7, Class B", name))
+    df["module"] = df["module"].map(lambda name: re.sub(r".*N7.app\\[40\\].*", "Flow 8, Best Effort", name))
     df = pd.pivot_table(df, index="module", columns="name", values="value", aggfunc=max)
     return df * 1000000
 
@@ -146,11 +146,11 @@ def compute_asynchronousshaper_core4inet_endtoend_delay_from_simulation_results(
     filter_expression = """type =~ scalar AND (name =~ meanBitLifeTimePerPacket:histogram:min OR name =~ meanBitLifeTimePerPacket:histogram:max OR name =~ meanBitLifeTimePerPacket:histogram:mean OR name =~ meanBitLifeTimePerPacket:histogram:stddev)"""
     df = read_result_files(inet_project.get_full_path("tests/validation/tsn/trafficshaping/asynchronousshaper/core4inet/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
     df = get_scalars(df)
-    df["name"] = df["name"].map(lambda name: re.sub(".*(min|max|mean|stddev)", "\\1", name))
-    df["module"] = df["module"].map(lambda name: re.sub(".*app\\[0\\].*", "Best effort", name))
-    df["module"] = df["module"].map(lambda name: re.sub(".*app\\[1\\].*", "Medium", name))
-    df["module"] = df["module"].map(lambda name: re.sub(".*app\\[2\\].*", "High", name))
-    df["module"] = df["module"].map(lambda name: re.sub(".*app\\[3\\].*", "Critical", name))
+    df["name"] = df["name"].map(lambda name: re.sub(r".*(min|max|mean|stddev)", "\\1", name))
+    df["module"] = df["module"].map(lambda name: re.sub(r".*app\\[0\\].*", "Best effort", name))
+    df["module"] = df["module"].map(lambda name: re.sub(r".*app\\[1\\].*", "Medium", name))
+    df["module"] = df["module"].map(lambda name: re.sub(r".*app\\[2\\].*", "High", name))
+    df["module"] = df["module"].map(lambda name: re.sub(r".*app\\[3\\].*", "Critical", name))
     df = df.loc[df["module"]!="Best effort"]
     df = pd.pivot_table(df, index="module", columns="name", values="value")
     return df * 1000000
@@ -213,11 +213,11 @@ def compute_creditbasedshaper_endtoend_delay_from_simulation_results(**kwargs):
     filter_expression = """type =~ scalar AND (name =~ meanBitLifeTimePerPacket:histogram:min OR name =~ meanBitLifeTimePerPacket:histogram:max OR name =~ meanBitLifeTimePerPacket:histogram:mean OR name =~ meanBitLifeTimePerPacket:histogram:stddev)"""
     df = read_result_files(inet_project.get_full_path("tests/validation/tsn/trafficshaping/creditbasedshaper/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
     df = get_scalars(df)
-    df["name"] = df["name"].map(lambda name: re.sub(".*(min|max|mean|stddev)", "\\1", name))
-    df["module"] = df["module"].map(lambda name: re.sub(".*app\\[0\\].*", "Best effort", name))
-    df["module"] = df["module"].map(lambda name: re.sub(".*app\\[1\\].*", "Medium", name))
-    df["module"] = df["module"].map(lambda name: re.sub(".*app\\[2\\].*", "High", name))
-    df["module"] = df["module"].map(lambda name: re.sub(".*app\\[3\\].*", "Critical", name))
+    df["name"] = df["name"].map(lambda name: re.sub(r".*(min|max|mean|stddev)", "\\1", name))
+    df["module"] = df["module"].map(lambda name: re.sub(r".*app\\[0\\].*", "Best effort", name))
+    df["module"] = df["module"].map(lambda name: re.sub(r".*app\\[1\\].*", "Medium", name))
+    df["module"] = df["module"].map(lambda name: re.sub(r".*app\\[2\\].*", "High", name))
+    df["module"] = df["module"].map(lambda name: re.sub(r".*app\\[3\\].*", "Critical", name))
     df = df.loc[df["module"]!="Best effort"]
     df = pd.pivot_table(df, index="module", columns="name", values="value")
     return df * 1000000

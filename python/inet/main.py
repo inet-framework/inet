@@ -43,7 +43,7 @@ def process_arguments(task):
     logger.addHandler(handler)
     kwargs = {k: v for k, v in vars(args).items() if v is not None}
     kwargs["working_directory_filter"] = args.working_directory_filter or os.path.relpath(os.getcwd(), os.path.realpath(inet_project.get_full_path(".")))
-    kwargs["working_directory_filter"] = re.sub("(.*)/$", "\\1", kwargs["working_directory_filter"])
+    kwargs["working_directory_filter"] = re.sub(r"(.*)/$", "\\1", kwargs["working_directory_filter"])
     return kwargs
 
 def run_main(main_function, task_name):

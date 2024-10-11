@@ -35,7 +35,7 @@ def collect_modules(simulation_project, path="src"):
             match = re.match(r"^package ([\w\.]+)", line)
             if match:
                 package = match.group(1)
-                package = re.sub("^\w+?\.", "", package)
+                package = re.sub(r"^\w+?\.", "", package)
             match = re.match(r"^(simple|module) (\w+)\b", line)
             if match:
                 module = match.group(2)
@@ -120,7 +120,7 @@ def collect_classes(simulation_project, path="src"):
             if match:
                 class_name = match.group(1)
                 relative_path = os.path.relpath(os.path.dirname(file_name), project_path)
-                relative_path = re.sub("^(\w+)/", "", relative_path)
+                relative_path = re.sub(r"^(\w+)/", "", relative_path)
                 classes.append(relative_path + "/" + class_name)
         file.close()
     return classes

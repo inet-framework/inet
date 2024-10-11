@@ -76,30 +76,30 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
     config_dicts = {"General": create_config_dict("General")}
     config_dict = {}
     for line in file:
-        match = re.match("\\[(Config +)?(.*?)\\]|\\[(General)\\]", line)
+        match = re.match(r"\\[(Config +)?(.*?)\\]|\\[(General)\\]", line)
         if match:
             config = match.group(2) or match.group(3)
             config_dict = create_config_dict(config)
             config_dicts[config] = config_dict
-        match = re.match(" *extends *= *(\w+)", line)
+        match = re.match(r" *extends *= *(\w+)", line)
         if match:
             config_dict["extends"] = match.group(1)
-        match = re.match(" *user-interface *= \"*(\w+)\"", line)
+        match = re.match(r" *user-interface *= \"*(\w+)\"", line)
         if match:
             config_dict["user_interface"] = match.group(1)
-        match = re.match("#? *abstract-config *= *(\w+)", line)
+        match = re.match(r"#? *abstract-config *= *(\w+)", line)
         if match:
             config_dict["abstract_config"] = bool(match.group(1))
-        match = re.match("#? *expected-result *= *\"(\w+)\"", line)
+        match = re.match(r"#? *expected-result *= *\"(\w+)\"", line)
         if match:
             config_dict["expected_result"] = match.group(1)
-        match = re.match("description *= *\"(.*)\"", line)
+        match = re.match(r"description *= *\"(.*)\"", line)
         if match:
             config_dict["description"] = match.group(1)
-        match = re.match("network *= *(.*)", line)
+        match = re.match(r"network *= *(.*)", line)
         if match:
             config_dict["network"] = match.group(1)
-        match = re.match("sim-time-limit *= *(.*)", line)
+        match = re.match(r"sim-time-limit *= *(.*)", line)
         if match:
             config_dict["sim_time_limit"] = match.group(1)
     general_config_dict = config_dicts["General"]
@@ -119,7 +119,7 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
                 raise Exception("Cannot determine number of runs")
         sim_time_limit = get_sim_time_limit(config_dicts, config)
         description = config_dict["description"]
-        description_abstract = (re.search("\((a|A)bstract\)", description) is not None) if description else False
+        description_abstract = (re.search(r"\((a|A)bstract\)", description) is not None) if description else False
         abstract = (config_dict["network"] is None and config_dict["config"] == "General") or config_dict["abstract_config"] or description_abstract
         expected_result = config_dict["expected_result"]
         user_interface = config_dict["user_interface"] or general_config_dict["user_interface"]
