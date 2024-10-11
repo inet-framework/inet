@@ -300,6 +300,8 @@ class INET_API TcpSocket : public ISocket, public ITcp::ICallback
         dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
         sink.reference(toTcp, true, &dispatchProtocolReq);
         tcp.reference(toTcp, true);
+        if (sockstate == CONNECTED)
+            tcp->setCallback(connId, this);
     }
 
     /**

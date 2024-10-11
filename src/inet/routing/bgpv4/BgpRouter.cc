@@ -9,6 +9,7 @@
 #include <algorithm>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/routing/bgpv4/BgpSession.h"
 
 namespace inet {
@@ -143,6 +144,7 @@ void BgpRouter::setTimer(SessionId id, simtime_t *delayTab)
 void BgpRouter::setSocketListen(SessionId id)
 {
     TcpSocket *socketListen = new TcpSocket();
+    socketListen->setCallback(this);
     _BGPSessions[id]->setSocketListen(socketListen);
 }
 
@@ -278,6 +280,12 @@ void BgpRouter::setRedistributeOspf(std::string str)
 
 void BgpRouter::processMessageFromTCP(cMessage *msg)
 {
+    TcpSocket *socket = ensureSocket(msg);
+    socket->processMessage(msg);
+}
+
+TcpSocket *BgpRouter::ensureSocket(cMessage *msg)
+{
     TcpSocket *socket = check_and_cast_nullable<TcpSocket *>(_socketMap.findSocketFor(msg));
     if (!socket) {
         socket = new TcpSocket(msg);
@@ -290,7 +298,7 @@ void BgpRouter::processMessageFromTCP(cMessage *msg)
             delete socket;
             socket = nullptr;
             delete msg;
-            return;
+            return nullptr;
         }
         socket->setCallback(this);
         socket->setUserData((void *)(uintptr_t)i);
@@ -300,8 +308,7 @@ void BgpRouter::processMessageFromTCP(cMessage *msg)
         _socketMap.removeSocket(_BGPSessions[i]->getSocket());
         _BGPSessions[i]->setSocket(socket);
     }
-
-    socket->processMessage(msg);
+    return socket;
 }
 
 void BgpRouter::listenConnectionFromPeer(SessionId sessionID)
@@ -379,9 +386,20 @@ void BgpRouter::openTCPConnectionToPeer(SessionId sessionID)
     socket->connect(_BGPSessions[sessionID]->getPeerAddr(), TCP_PORT);
 }
 
+void BgpRouter::socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo)
+{
+    auto indication = new Indication("TCP_I_AVAILABLE", TCP_I_AVAILABLE);
+    indication->addTag<SocketInd>()->setSocketId(availableInfo->getNewSocketId());
+    indication->setControlInfo(availableInfo);
+    ensureSocket(indication);
+    socket->accept(availableInfo->getNewSocketId());
+    delete indication;
+}
+
 void BgpRouter::socketEstablished(TcpSocket *socket, Indication *indication)
 {
-    int connId = socket->getSocketId();
+    ensureSocket(indication);
+    int connId = indication->getTag<SocketInd>()->getSocketId();
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
     if (_currSessionId == static_cast<SessionId>(-1)) {
         throw cRuntimeError("socket id=%d is not established", connId);

@@ -118,6 +118,7 @@ void UdpBasicApp::sendPacket()
     packet->insertAtBack(payload);
     L3Address destAddr = chooseDestAddr();
     emit(packetSentSignal, packet);
+    sendInterval = par("sendInterval");
     socket.sendTo(packet, destAddr, destPort);
     numSent++;
 }
@@ -156,7 +157,7 @@ void UdpBasicApp::processStart()
 void UdpBasicApp::processSend()
 {
     sendPacket();
-    clocktime_t d = par("sendInterval");
+    clocktime_t d = sendInterval;
     if (stopTime < CLOCKTIME_ZERO || getClockTime() + d < stopTime) {
         selfMsg->setKind(SEND);
         scheduleClockEventAfter(d, selfMsg);

@@ -273,7 +273,7 @@ void Sctp::handleMessage(cMessage *msg)
             socketOptions = collectSocketOptions();
             cmsg->setContextPointer((void *)socketOptions);
             cmsg->addTag<SocketInd>()->setSocketId(assocId);
-            send(cmsg, "appOut");
+// TODO           send(cmsg, "appOut");
             delete msg;
         }
         else {

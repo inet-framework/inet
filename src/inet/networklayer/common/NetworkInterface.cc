@@ -223,7 +223,12 @@ void NetworkInterface::pushPacket(Packet *packet, const cGate *gate)
     }
     else if (gate == upperLayerOut) {
         packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
-        pushOrSendPacket(packet, upperLayerOut, upperLayerOutConsumer);
+        if (upperLayerOutConsumer != nullptr)
+            upperLayerOutConsumer.pushPacket(packet);
+        else {
+            EV_WARN << "Network interface has no upper layer connection, dropping packet" << EV_FIELD(packet) << EV_ENDL;
+            dropPacket(packet, OTHER_PACKET_DROP);
+        }
     }
     else
         throw cRuntimeError("Unknown gate: %s", gate->getName());

@@ -7,6 +7,7 @@
 
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
@@ -80,16 +81,13 @@ void Ieee8022Llc::processCommandFromHigherLayer(Request *request)
     else if (dynamic_cast<SocketCloseCommand *>(ctrl) != nullptr) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
+        delete request;
+        auto callback = it->second->callback;
+        callback->handleClosed();
         if (it != socketIdToSocketDescriptor.end()) {
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
         }
-        delete request;
-        auto indication = new Indication("closed", SOCKET_I_CLOSED);
-        auto ctrl = new SocketClosedIndication();
-        indication->setControlInfo(ctrl);
-        indication->addTag<SocketInd>()->setSocketId(socketId);
-        send(indication, "upperLayerOut");
 
     }
     else if (dynamic_cast<SocketDestroyCommand *>(ctrl) != nullptr) {

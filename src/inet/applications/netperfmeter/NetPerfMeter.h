@@ -38,7 +38,7 @@ using namespace inet::queueing;
 /**
  * Implementation of NetPerfMeter. See NED file for more details.
  */
-class INET_API NetPerfMeter : public cSimpleModule, public IPassivePacketSink, public IModuleInterfaceLookup
+class INET_API NetPerfMeter : public cSimpleModule, public IPassivePacketSink, public IModuleInterfaceLookup, public UdpSocket::ICallback, public TcpSocket::ICallback, public SctpSocket::ICallback
 {
   public:
     NetPerfMeter();
@@ -68,6 +68,24 @@ class INET_API NetPerfMeter : public cSimpleModule, public IPassivePacketSink, p
 
     void sendSCTPQueueRequest(const unsigned int queueSize);
     void sendTCPQueueRequest(const unsigned int queueSize);
+
+    virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override { receiveMessage(packet); }
+    virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override { teardownConnection(); }
+    virtual void socketClosed(UdpSocket *socket) override { }
+
+    virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override { receiveMessage(packet); }
+    virtual void socketAvailable(TcpSocket* socket, TcpAvailableInfo* availableInfo) override;
+    virtual void socketEstablished(TcpSocket *socket, Indication *indication) override { Enter_Method("socketEstablished"); successfullyEstablishedConnection(indication, 0); }
+    virtual void socketPeerClosed(TcpSocket *socket) override { teardownConnection(); }
+    virtual void socketClosed(TcpSocket *socket) override { teardownConnection(); }
+    virtual void socketFailure(TcpSocket *socket, int code) override { teardownConnection(); }
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { }
+    virtual void socketDeleted(TcpSocket *socket) override { }
+
+    virtual void socketDataArrived(SctpSocket *socket, Packet *packet, bool urgent) override { receiveMessage(packet); }
+    virtual void socketDataNotificationArrived(SctpSocket *socket, Message *msg) override;
+    virtual void socketAvailable(SctpSocket *socket, Indication *indication) override;
+    virtual void socketEstablished(SctpSocket *socket, Indication *indication) override;
 
   protected:
     // ====== Parameters =====================================================

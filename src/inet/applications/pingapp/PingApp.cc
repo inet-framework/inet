@@ -277,6 +277,8 @@ void PingApp::socketClosed(INetworkSocket *socket)
     if (socket == currentSocket)
         currentSocket = nullptr;
     delete socketMap.removeSocket(socket);
+    if (operationalState == State::STOPPING_OPERATION && socketMap.size() == 0)
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
 void PingApp::refreshDisplay() const
@@ -433,12 +435,12 @@ void PingApp::sendPingRequest()
     addressReq->setDestAddress(destAddr);
     if (hopLimit != -1)
         outPacket->addTag<HopLimitReq>()->setHopLimit(hopLimit);
-    EV_INFO << "Sending ping request #" << sendSeqNo << " to lower layer.\n";
-    currentSocket->send(outPacket);
-
     // store the sending time in a circular buffer so we can compute RTT when the packet returns
     sendTimeHistory[sendSeqNo % PING_HISTORY_SIZE] = simTime();
     pongReceived[sendSeqNo % PING_HISTORY_SIZE] = false;
+    EV_INFO << "Sending ping request #" << sendSeqNo << " to lower layer.\n";
+    currentSocket->send(outPacket);
+
     emit(pingTxSeqSignal, sendSeqNo);
 
     sendSeqNo++;

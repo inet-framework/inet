@@ -42,6 +42,7 @@ class INET_API UdpBasicApp : public ClockUserModuleMixin<ApplicationBase>, publi
     // state
     UdpSocket socket;
     ClockEvent *selfMsg = nullptr;
+    clocktime_t sendInterval;
 
     // statistics
     int numSent = 0;

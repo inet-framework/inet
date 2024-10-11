@@ -21,10 +21,11 @@ using namespace inet::queueing;
 /**
  * Implements the SctpServer simple module. See the NED file for more info.
  */
-class INET_API SctpServer : public cSimpleModule, public LifecycleUnsupported, public IPassivePacketSink, public IModuleInterfaceLookup
+class INET_API SctpServer : public cSimpleModule, public SctpSocket::ICallback, public LifecycleUnsupported, public IPassivePacketSink, public IModuleInterfaceLookup
 {
   protected:
     struct ServerAssocStat {
+        SctpSocket *socket = nullptr;
         simtime_t start;
         simtime_t stop;
         simtime_t lifeTime;
@@ -79,18 +80,17 @@ class INET_API SctpServer : public cSimpleModule, public LifecycleUnsupported, p
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
     void handleTimer(cMessage *msg);
-    void sendOrSchedule(cMessage *msg);
-    void sendOrSchedule(Message *msg);
-    void sendOrSchedule(Packet *pkt);
 
-    Message *makeAbortNotification(const SctpCommandReq *msg);
-    Message *makeReceiveRequest(cMessage *msg);
-    Message *makeDefaultReceive();
     void generateAndSend();
 
   public:
     virtual ~SctpServer();
     SctpServer();
+
+    virtual void socketDataArrived(SctpSocket *socket, Packet *packet, bool urgent) override;
+    virtual void socketDataNotificationArrived(SctpSocket *socket, Message *msg) override;
+    virtual void socketAvailable(SctpSocket *socket, Indication *indication) override;
+    virtual void socketEstablished(SctpSocket *socket, Indication *indication) override;
 
     virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("socketIn"); }
     virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("socketIn"); }
