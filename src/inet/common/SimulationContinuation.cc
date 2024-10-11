@@ -13,7 +13,9 @@ static void runSimulationEventLoop()
 {
     EV_DEBUG << "Running event loop" << EV_ENDL;
     cSimulation::getActiveSimulation()->setGlobalContext();
+#ifdef OMNETPP_RUN_EVENT_LOOP
     cSimulation::getActiveEnvir()->runEventLoop();
+#endif
 }
 
 void sleepSimulationTime(simtime_t duration)
