@@ -76,7 +76,7 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
     config_dicts = {"General": create_config_dict("General")}
     config_dict = {}
     for line in file:
-        match = re.match(r"\\[(Config +)?(.*?)\\]|\\[(General)\\]", line)
+        match = re.match(r"\[(Config +)?(.*?)\]|\[(General)\]", line)
         if match:
             config = match.group(2) or match.group(3)
             config_dict = create_config_dict(config)

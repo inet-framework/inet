@@ -70,7 +70,7 @@ class StatisticalTestTask(SimulationTestTask):
                                                          matches_filter(row["module"], result_module_filter, exclude_result_module_filter, full_match), axis=1)]
                             reason = df.loc[df["relative_error"].idxmax()].to_string()
                             reason = re.sub(r" +", " = ", reason)
-                            reason = re.sub(r"\\n", ", ", reason)
+                            reason = re.sub(r"\n", ", ", reason)
                             return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="FAIL", reason=reason)
                 else:
                     return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="ERROR", reason="Stored statistical results are not found")
