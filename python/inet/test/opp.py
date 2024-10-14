@@ -27,13 +27,14 @@ class OppTestTask(TestTask):
         args = [executable, "runtest", self.test_file_name]
         subprocess_result = subprocess.run(args, cwd=self.working_directory, capture_output=capture_output, env=self.simulation_project.get_env())
         stdout = subprocess_result.stdout.decode("utf-8")
+        stderr = subprocess_result.stderr.decode("utf-8")
         match = re.search(r"Aggregate result: (\w+)", stdout)
         if subprocess_result.returncode == signal.SIGINT.value or subprocess_result.returncode == -signal.SIGINT.value:
             return self.task_result_class(self, result="CANCEL", reason="Cancel by user")
         elif match and subprocess_result.returncode == 0:
             return self.task_result_class(self, result=match.group(1))
         else:
-            return self.task_result_class(self, result="FAIL", reason=f"Non-zero exit code: {subprocess_result.returncode}")
+            return self.task_result_class(self, result="FAIL", reason=f"Non-zero exit code: {subprocess_result.returncode}", stdout=stdout, stderr=stderr)
 
 def get_opp_test_tasks(test_folder, simulation_project=default_project, filter=".*", full_match=False, **kwargs):
     def create_test_task(test_file_name):

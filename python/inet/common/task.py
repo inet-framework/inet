@@ -12,7 +12,7 @@ from inet.common.util import *
 logger = logging.getLogger(__name__)
 
 class TaskResult:
-    def __init__(self, task=None, result="DONE", expected_result="DONE", reason=None, error_message=None, exception=None, elapsed_wall_time=None, possible_results=["DONE", "CANCEL", "ERROR"], possible_result_colors=[COLOR_GREEN, COLOR_CYAN, COLOR_RED], **kwargs):
+    def __init__(self, task=None, result="DONE", expected_result="DONE", reason=None, stdout=None, stderr=None, error_message=None, exception=None, elapsed_wall_time=None, possible_results=["DONE", "CANCEL", "ERROR"], possible_result_colors=[COLOR_GREEN, COLOR_CYAN, COLOR_RED], **kwargs):
         self.locals = locals()
         self.locals.pop("self")
         self.kwargs = kwargs
@@ -21,6 +21,8 @@ class TaskResult:
         self.expected_result = expected_result
         self.expected = expected_result == result
         self.reason = reason
+        self.stdout = stdout
+        self.stderr = stderr
         self.error_message = error_message
         self.exception = exception
         self.elapsed_wall_time = elapsed_wall_time
