@@ -1128,7 +1128,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
     stream.readBytes(buffer, B(bufsize));
     auto dest = makeShared<SctpHeader>();
 
-    struct common_header *common_header = (struct common_header *)((void *)&buffer);
+    struct common_header *common_header = (struct common_header *)((void *)buffer);
     int32_t tempChecksum = common_header->checksum;
     common_header->checksum = 0;
     int32_t chksum = SctpChecksum::checksum((unsigned char *)common_header, bufsize);

@@ -155,7 +155,7 @@ const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
     uint8_t *buffer = new uint8_t[B(IPv4_MIN_HEADER_LENGTH).get()];
     stream.readBytes(buffer, IPv4_MIN_HEADER_LENGTH);
     auto ipv4Header = makeShared<Ipv4Header>();
-    const struct ip& iphdr = *static_cast<const struct ip *>((void *)&buffer);
+    const struct ip& iphdr = *static_cast<const struct ip *>((void *)buffer);
     B totalLength, headerLength;
 
     ipv4Header->setVersion(iphdr.ip_v);
