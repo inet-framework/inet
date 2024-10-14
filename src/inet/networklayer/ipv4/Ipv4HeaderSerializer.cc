@@ -152,7 +152,7 @@ const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
 {
     auto position = stream.getPosition();
     B bufsize = stream.getRemainingLength();
-    uint8_t buffer[B(IPv4_MIN_HEADER_LENGTH).get()];
+    uint8_t *buffer = new uint8_t[B(IPv4_MIN_HEADER_LENGTH).get()];
     stream.readBytes(buffer, IPv4_MIN_HEADER_LENGTH);
     auto ipv4Header = makeShared<Ipv4Header>();
     const struct ip& iphdr = *static_cast<const struct ip *>((void *)&buffer);
@@ -198,7 +198,7 @@ const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
 
     ipv4Header->setCrc(ntohs(iphdr.ip_sum));
     ipv4Header->setCrcMode(CRC_COMPUTED);
-
+    delete [] buffer;
     return ipv4Header;
 }
 

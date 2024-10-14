@@ -67,9 +67,10 @@ void ExtEthernetSocket::handleMessage(cMessage *message)
     socket_address.sll_addr[4] = macAddress.getAddressByte(4);
     socket_address.sll_addr[5] = macAddress.getAddressByte(5);
 
-    uint8_t buffer[packet->getByteLength()];
+    size_t bufferSize = packet->getByteLength();
+    uint8_t *buffer = new uint8_t[bufferSize];
     auto bytesChunk = packet->peekAllAsBytes();
-    size_t packetLength = bytesChunk->copyToBuffer(buffer, sizeof(buffer));
+    size_t packetLength = bytesChunk->copyToBuffer(buffer, bufferSize);
     ASSERT(packetLength == (size_t)packet->getByteLength());
 
     int sent = sendto(fd, buffer, packetLength, 0, (struct sockaddr *)&socket_address, sizeof(socket_address));
@@ -81,6 +82,7 @@ void ExtEthernetSocket::handleMessage(cMessage *message)
 
     numSent++;
     delete packet;
+    delete [] buffer;
 }
 
 void ExtEthernetSocket::refreshDisplay() const

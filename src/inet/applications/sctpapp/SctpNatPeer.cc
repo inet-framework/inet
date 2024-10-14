@@ -354,7 +354,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                 if (rendezvous) {
                     const auto& smsg = message->peekDataAsBytes();
                     int bufferlen = B(smsg->getChunkLength()).get();
-                    uint8_t buffer[bufferlen];
+                    uint8_t *buffer = new uint8_t[bufferlen];
                     std::vector<uint8_t> vec = smsg->getBytes();
                     for (int i = 0; i < bufferlen; i++) {
                         buffer[i] = vec[i];
@@ -372,6 +372,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                     }
                     peerPort = nat->portPeer2;
                     delete msg;
+                    delete [] buffer;
                 }
                 else {
                     auto j = rcvdBytesPerAssoc.find(id);

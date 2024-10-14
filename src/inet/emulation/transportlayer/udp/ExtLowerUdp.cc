@@ -256,7 +256,7 @@ void ExtLowerUdp::processPacketFromUpper(Packet *packet)
     else {
         auto socket = it->second;
         auto bytesChunk = packet->peekAllAsBytes();
-        uint8_t buffer[packet->getByteLength()];
+        uint8_t *buffer = new uint8_t[packet->getByteLength()];
         size_t packetLength = bytesChunk->copyToBuffer(buffer, packet->getByteLength());
         ASSERT(packetLength == (size_t)packet->getByteLength());
         if (auto addressReq = packet->findTag<L3AddressReq>()) {
@@ -279,6 +279,7 @@ void ExtLowerUdp::processPacketFromUpper(Packet *packet)
                 throw cRuntimeError("Calling send failed: %d", n);
         }
         emit(packetSentSignal, packet);
+        delete [] buffer;
     }
 }
 
