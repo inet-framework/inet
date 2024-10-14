@@ -42,7 +42,7 @@ class TaskResult:
     result are the result, reason and error_message.
     """
 
-    def __init__(self, task=None, result="DONE", expected_result="DONE", reason=None, error_message=None, exception=None, store_complete_binary_hash=False, store_complete_source_hash=False, store_partial_binary_hash=False, store_partial_source_hash=False, elapsed_wall_time=None, possible_results=["DONE", "SKIP", "CANCEL", "ERROR"], possible_result_colors=[COLOR_GREEN, COLOR_CYAN, COLOR_CYAN, COLOR_RED], **kwargs):
+    def __init__(self, task=None, result="DONE", expected_result="DONE", reason=None, stdout=None, stderr=None, error_message=None, exception=None, store_complete_binary_hash=False, store_complete_source_hash=False, store_partial_binary_hash=False, store_partial_source_hash=False, elapsed_wall_time=None, possible_results=["DONE", "SKIP", "CANCEL", "ERROR"], possible_result_colors=[COLOR_GREEN, COLOR_CYAN, COLOR_CYAN, COLOR_RED], **kwargs):
         """
         Initializes a new task result object.
 
@@ -96,6 +96,8 @@ class TaskResult:
         self.expected_result = expected_result
         self.expected = expected_result == result
         self.reason = reason
+        self.stdout = stdout
+        self.stderr = stderr
         self.error_message = error_message
         self.exception = exception
         self.elapsed_wall_time = elapsed_wall_time
