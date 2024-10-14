@@ -49,7 +49,7 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::Installing Python packages"
-          python3 -m pip install --upgrade matplotlib numpy pandas seaborn scipy ipython posix-ipc cppyy sewar dask distributed optimparallel
+          python3 -m pip install --upgrade matplotlib numpy pandas seaborn scipy ipython posix-ipc cppyy sewar dask distributed optimparallel --break-system-packages
           echo "::endgroup::"
 
           source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
