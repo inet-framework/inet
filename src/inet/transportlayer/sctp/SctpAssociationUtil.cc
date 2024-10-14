@@ -1437,7 +1437,8 @@ inline static bool writeCompressedValue(uint8_t *outputBuffer,
 
 static uint32_t compressGaps(const SctpGapList *gapList, const SctpGapList::GapType type, size_t& space)
 {
-    uint8_t compressedDataBuffer[1 + 6 * gapList->getNumGaps(type)]; // Worst-case size
+    size_t compressedDataBufferSize = 1 + 6 * gapList->getNumGaps(type);
+    uint8_t *compressedDataBuffer = new uint8_t[compressedDataBufferSize]; // Worst-case size
 
     size_t outputPos = 0;
     unsigned int entriesWritten = 0;
@@ -1448,8 +1449,8 @@ static uint32_t compressGaps(const SctpGapList *gapList, const SctpGapList::GapT
         const uint16_t startOffset = gapList->getGapStart(type, i) - last;
         const uint16_t stopOffset = gapList->getGapStop(type, i) - gapList->getGapStart(type, i);
         const size_t lastOutputPos = outputPos;
-        if ((writeCompressedValue((uint8_t *)&compressedDataBuffer, sizeof(compressedDataBuffer), outputPos, startOffset) == false) ||
-            (writeCompressedValue((uint8_t *)&compressedDataBuffer, sizeof(compressedDataBuffer), outputPos, stopOffset) == false) ||
+        if ((writeCompressedValue((uint8_t *)&compressedDataBuffer, compressedDataBufferSize, outputPos, startOffset) == false) ||
+            (writeCompressedValue((uint8_t *)&compressedDataBuffer, compressedDataBufferSize, outputPos, stopOffset) == false) ||
             (outputPos + 1 > space))
         {
             outputPos = lastOutputPos;
@@ -1458,9 +1459,10 @@ static uint32_t compressGaps(const SctpGapList *gapList, const SctpGapList::GapT
         entriesWritten++;
         last = gapList->getGapStop(type, i);
     }
-    assert(writeCompressedValue((uint8_t *)&compressedDataBuffer, sizeof(compressedDataBuffer), outputPos, 0x00) == true);
+    assert(writeCompressedValue((uint8_t *)&compressedDataBuffer, compressedDataBufferSize, outputPos, 0x00) == true);
     space = outputPos;
 
+    delete [] compressedDataBuffer;
     return entriesWritten;
 }
 

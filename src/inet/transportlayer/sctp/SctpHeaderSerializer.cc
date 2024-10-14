@@ -1124,7 +1124,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
 
 //    auto position = stream.getPosition();
     int bufsize = B(stream.getRemainingLength()).get();
-    uint8_t buffer[bufsize];
+    uint8_t *buffer = new uint8_t[bufsize];
     stream.readBytes(buffer, B(bufsize));
     auto dest = makeShared<SctpHeader>();
 
@@ -1156,6 +1156,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
         int32_t chunkType = chunk->type;
         woPadding = ntohs(chunk->length);
         if (woPadding == 0) {
+            delete [] buffer;
             return dest;
         }
         cLen = ADD_PADDING(woPadding);
@@ -2147,6 +2148,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
         chunkPtr += cLen;
     } // end of while()
     EV_INFO << "SctpSerializer - pkt info - " << B(dest->getChunkLength()).get() << " bytes" << endl;
+    delete [] buffer;
     return dest;
 }
 

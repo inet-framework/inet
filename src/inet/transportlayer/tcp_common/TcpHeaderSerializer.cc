@@ -157,7 +157,7 @@ void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TcpO
 const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto position = stream.getPosition();
-    uint8_t buffer[B(TCP_MIN_HEADER_LENGTH).get()];
+    uint8_t *buffer = new uint8_t[B(TCP_MIN_HEADER_LENGTH).get()];
     stream.readBytes(buffer, TCP_MIN_HEADER_LENGTH);
     auto tcpHeader = makeShared<TcpHeader>();
     const struct tcphdr& tcp = *static_cast<const struct tcphdr *>((void *)&buffer);
@@ -194,6 +194,7 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
     tcpHeader->setHeaderLength(headerLength);
     tcpHeader->setCrc(ntohs(tcp.th_sum));
     tcpHeader->setCrcMode(CRC_COMPUTED);
+    delete [] buffer;
     return tcpHeader;
 }
 

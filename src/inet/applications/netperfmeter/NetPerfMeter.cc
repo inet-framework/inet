@@ -1032,7 +1032,7 @@ void NetPerfMeter::sendDataOfSaturatedStreams(const unsigned long long bytesAvai
     if (SendingAllowed) {
         // ====== SCTP tells current queue occupation for each stream =========
         unsigned long long contingent;
-        unsigned long long queued[ActualOutboundStreams];
+        unsigned long long *queued = new unsigned long long[ActualOutboundStreams];
         if (sendQueueAbatedIndication == nullptr) {
             // At the moment, the actual queue size is unknown.
             // => Assume it to be bytesAvailableInQueue.
@@ -1075,6 +1075,7 @@ void NetPerfMeter::sendDataOfSaturatedStreams(const unsigned long long bytesAvai
                 LastStreamID = (LastStreamID + 1) % ActualOutboundStreams;
             } while (LastStreamID != startStreamID);
         } while ((newlyQueuedBytes < bytesAvailableInQueue) && (progress == true));
+        delete [] queued;
     }
 }
 

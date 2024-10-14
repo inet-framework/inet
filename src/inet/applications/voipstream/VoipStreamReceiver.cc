@@ -119,9 +119,10 @@ void VoipStreamReceiver::Connection::writeLostSamples(int sampleCount)
 {
     int pktBytes = sampleCount * av_get_bytes_per_sample(decCtx->sample_fmt);
     if (outFile.isOpen()) {
-        uint8_t decBuf[pktBytes];
+        uint8_t *decBuf = new uint8_t[pktBytes];
         memset(decBuf, 0, pktBytes);
         outFile.write(decBuf, pktBytes);
+        delete [] decBuf;
     }
 }
 

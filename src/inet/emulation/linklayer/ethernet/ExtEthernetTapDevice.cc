@@ -59,7 +59,7 @@ void ExtEthernetTapDevice::handleMessage(cMessage *msg)
     const auto& ethHeader = packet->peekAtFront<EthernetMacHeader>();
     packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
     auto bytesChunk = packet->peekDataAsBytes();
-    uint8_t buffer[packet->getByteLength() + 4];
+    uint8_t *buffer = new uint8_t[packet->getByteLength() + 4];
     buffer[0] = 0;
     buffer[1] = 0;
     buffer[2] = 0x86; // Ethernet
@@ -76,6 +76,7 @@ void ExtEthernetTapDevice::handleMessage(cMessage *msg)
     else
         EV_ERROR << "Sending Ethernet packet FAILED! (sendto returned " << nwrite << " (" << strerror(errno) << ") instead of " << packetLength << ").\n";
     delete packet;
+    delete [] buffer;
 }
 
 void ExtEthernetTapDevice::refreshDisplay() const

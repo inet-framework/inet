@@ -62,7 +62,7 @@ void ExtIpv4TunDevice::handleMessage(cMessage *msg)
         throw cRuntimeError("Accepts IPv4 packets only");
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     auto bytesChunk = packet->peekDataAsBytes();
-    uint8_t buffer[packet->getByteLength()];
+    uint8_t *buffer = new uint8_t[packet->getByteLength()];
     size_t packetLength = bytesChunk->copyToBuffer(buffer, packet->getByteLength());
     ASSERT(packetLength == (size_t)packet->getByteLength());
     ssize_t nwrite = write(fd, buffer, packetLength);
@@ -74,6 +74,7 @@ void ExtIpv4TunDevice::handleMessage(cMessage *msg)
     else
         EV_ERROR << "Sending IPv4 packet FAILED! (sendto returned " << nwrite << " (" << strerror(errno) << ") instead of " << packetLength << ").\n";
     delete packet;
+    delete [] buffer;
 }
 
 void ExtIpv4TunDevice::refreshDisplay() const
