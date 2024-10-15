@@ -120,7 +120,7 @@ aloha_project = get_simulation_project("omnetpp/samples/aloha", executable="aloh
 tictoc_project = get_simulation_project("omnetpp/samples/tictoc", executable="tictoc")
 
 inet_project = get_simulation_project("inet",
-                                      executable=get_workspace_path("omnetpp/bin/opp_run"),
+                                      executable=os.path.join(os.getenv("__omnetpp_root_dir"), "bin/opp_run"),
                                       libraries=["src/INET"],
                                       ned_folders=["src", "examples", "showcases", "tutorials", "tests/networks", "tests/validation"],
                                       ned_exclusions=[s.strip() for s in open(get_workspace_path("inet/.nedexclusions")).readlines()],
