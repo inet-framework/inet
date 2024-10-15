@@ -30,8 +30,8 @@ def compute_frame_replication_success_rate_from_simulation_results(**kwargs):
     filter_expression = """type =~ scalar AND ((module =~ "*.destination.udp" AND name =~ packetReceived:count) OR (module =~ "*.source.udp" AND name =~ packetSent:count))"""
     df = read_result_files(inet_project.get_full_path("tests/validation/tsn/framereplication/results/*.sca"), filter_expression=filter_expression)
     df = get_scalars(df)
-    packetSent = float(df[df.name == "packetSent:count"].value)
-    packetReceived = float(df[df.name == "packetReceived:count"].value)
+    packetSent = float(df[df.name == "packetSent:count"].iloc[0].value)
+    packetReceived = float(df[df.name == "packetReceived:count"].iloc[0].value)
     return packetReceived / packetSent
 
 def compute_frame_replication_success_rate_analytically1():
@@ -109,7 +109,7 @@ def compute_asynchronousshaper_icct_endtoend_delay_from_simulation_results(**kwa
     df["module"] = df["module"].map(lambda name: re.sub(r".*N7.app\[3[0-4]\].*", "Flow 6, Class A", name))
     df["module"] = df["module"].map(lambda name: re.sub(r".*N7.app\[3[5-9]\].*", "Flow 7, Class B", name))
     df["module"] = df["module"].map(lambda name: re.sub(r".*N7.app\[40\].*", "Flow 8, Best Effort", name))
-    df = pd.pivot_table(df, index="module", columns="name", values="value", aggfunc=max)
+    df = pd.pivot_table(df, index="module", columns="name", values="value", aggfunc="max")
     return df * 1000000
 
 def compute_asynchronousshaper_icct_endtoend_delay_alternatively():
