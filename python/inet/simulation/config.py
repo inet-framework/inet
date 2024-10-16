@@ -14,7 +14,7 @@ from inet.simulation.project import *
 logger = logging.getLogger(__name__)
 
 class SimulationConfig:
-    def __init__(self, simulation_project, working_directory, ini_file="omnetpp.ini", config="General", num_runs=1, sim_time_limit=None, abstract=False, expected_result="DONE", user_interface="Cmdenv", description=None):
+    def __init__(self, simulation_project, working_directory, ini_file="omnetpp.ini", config="General", num_runs=1, sim_time_limit=None, abstract=False, emulation=False, expected_result="DONE", user_interface="Cmdenv", description=None):
         self.simulation_project = simulation_project
         self.working_directory = working_directory
         self.ini_file = ini_file
@@ -22,7 +22,7 @@ class SimulationConfig:
         self.num_runs = num_runs
         self.sim_time_limit = sim_time_limit
         self.abstract = abstract
-        self.emulation = working_directory.find("emulation") != -1
+        self.emulation = working_directory.find("emulation") != -1 or emulation
         self.expected_result = expected_result
         self.user_interface = user_interface
         self.description = description
@@ -67,7 +67,7 @@ def get_sim_time_limit(config_dicts, config):
 # KLUDGE TODO replace this with a Python binding to the C++ configuration reader
 def collect_ini_file_simulation_configs(simulation_project, ini_path):
     def create_config_dict(config):
-        return {"config": config, "abstract_config": False, "expected_result": "DONE", "user_interface": None, "description": None, "network": None}
+        return {"config": config, "abstract_config": False, "emulation" : False, "expected_result": "DONE", "user_interface": None, "description": None, "network": None}
     simulation_configs = []
     working_directory = os.path.dirname(ini_path)
     num_runs_fast = get_num_runs_fast(ini_path)
@@ -90,6 +90,9 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
         match = re.match(r"#? *abstract-config *= *(\w+)", line)
         if match:
             config_dict["abstract_config"] = bool(match.group(1))
+        match = re.match(r"#? *emulation *= *(\w+)", line)
+        if match:
+            config_dict["emulation"] = bool(match.group(1))
         match = re.match(r"#? *expected-result *= *\"(\w+)\"", line)
         if match:
             config_dict["expected_result"] = match.group(1)
@@ -121,9 +124,10 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
         description = config_dict["description"]
         description_abstract = (re.search(r"\((a|A)bstract\)", description) is not None) if description else False
         abstract = (config_dict["network"] is None and config_dict["config"] == "General") or config_dict["abstract_config"] or description_abstract
+        emulation = config_dict["emulation"] or general_config_dict["emulation"]
         expected_result = config_dict["expected_result"]
         user_interface = config_dict["user_interface"] or general_config_dict["user_interface"]
-        simulation_config = SimulationConfig(simulation_project, os.path.relpath(working_directory, simulation_project.get_full_path(".")), ini_file=ini_file, config=config, sim_time_limit=sim_time_limit, num_runs=num_runs, abstract=abstract, expected_result=expected_result, user_interface=user_interface, description=description)
+        simulation_config = SimulationConfig(simulation_project, os.path.relpath(working_directory, simulation_project.get_full_path(".")), ini_file=ini_file, config=config, sim_time_limit=sim_time_limit, num_runs=num_runs, abstract=abstract, emulation=emulation, expected_result=expected_result, user_interface=user_interface, description=description)
         simulation_configs.append(simulation_config)
     return simulation_configs
 
