@@ -249,12 +249,14 @@ class ErroneousTask(Task):
         1/0
 
 class MultipleTasks:
-    def __init__(self, tasks=[], name="task", concurrent=True, randomize=False, chunksize=1, pool_class=multiprocessing.pool.ThreadPool, multiple_task_results_class=MultipleTaskResults, **kwargs):
+    def __init__(self, tasks=[], name="task", start=None, end=None, concurrent=True, randomize=False, chunksize=1, pool_class=multiprocessing.pool.ThreadPool, multiple_task_results_class=MultipleTaskResults, **kwargs):
         self.locals = locals()
         self.locals.pop("self")
         self.kwargs = kwargs
         self.tasks = tasks
         self.name = name
+        self.start = start
+        self.end = end
         self.concurrent = concurrent
         self.randomize = randomize
         self.chunksize = chunksize
@@ -289,7 +291,7 @@ class MultipleTasks:
         return multiple_task_results
 
     def run_protected(self, **kwargs):
-        tasks = self.tasks
+        tasks = self.tasks[self.start:self.end+1] if self.start is not None and self.end is not None else self.tasks
         task_count = len(tasks)
         for task in tasks:
             task.set_cancel(False)

@@ -21,6 +21,8 @@ def parse_arguments(task_name):
     parser.add_argument("-u", "--user-interface", choices=["Cmdenv", "Qtenv"], default="Cmdenv", help="User interface")
     parser.add_argument("-t", "--sim-time-limit", default=None, help="Simulation time limit")
     parser.add_argument("-T", "--cpu-time-limit", default=None, help="CPU time limit")
+    parser.add_argument('--start', default=None, help="First task index")
+    parser.add_argument('--end', default=None, help="Last task index")
     parser.add_argument("-f", "--filter", default=None, help="Filter")
     parser.add_argument("--exclude-filter", default=None, help="Exclude filter")
     parser.add_argument("-w", "--working-directory-filter", default=None, help="Working directory filter")
