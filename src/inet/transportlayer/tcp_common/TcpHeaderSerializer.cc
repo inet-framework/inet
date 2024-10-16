@@ -160,7 +160,7 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
     uint8_t *buffer = new uint8_t[B(TCP_MIN_HEADER_LENGTH).get()];
     stream.readBytes(buffer, TCP_MIN_HEADER_LENGTH);
     auto tcpHeader = makeShared<TcpHeader>();
-    const struct tcphdr& tcp = *static_cast<const struct tcphdr *>((void *)&buffer);
+    const struct tcphdr& tcp = *static_cast<const struct tcphdr *>((void *)buffer);
     ASSERT(B(sizeof(tcp)) == TCP_MIN_HEADER_LENGTH);
 
     // fill Tcp header structure
