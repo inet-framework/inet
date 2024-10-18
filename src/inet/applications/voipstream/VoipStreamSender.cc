@@ -191,6 +191,8 @@ void VoipStreamSender::finish()
     if (pFormatCtx) {
         avformat_close_input(&pFormatCtx);
     }
+    if (pCodecCtx)
+        avcodec_free_context(&pCodecCtx);
 }
 
 void VoipStreamSender::openSoundFile(const char *name)

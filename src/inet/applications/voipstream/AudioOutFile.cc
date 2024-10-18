@@ -214,6 +214,8 @@ bool AudioOutFile::close()
     // free the stream
     avformat_free_context(oc);
     oc = nullptr;
+
+    avcodec_free_context(&codecCtx);
     return true;
 }
 
