@@ -21,6 +21,10 @@ void StreamBufferChunkSerializer::serialize(MemoryOutputStream& stream, const Pt
     if (length == b(-1))
         length = streamBufferChunk->getChunkLength() - offset;
     b copyLength = std::max(b(0), std::min(length, currentStreamPosition - offset));
+    // KLUDGE: round up to next value divisible by 8, because serialization doesn't work with arbitrary bit lengths
+    // this rounding doesn't really affect the outcome of the simulation, the limited serialization length just
+    // protects against using data that isn't streamed in the buffer yet
+    copyLength = b(b((copyLength.get() + 7) /  8) * 8);
     if (copyLength > b(0))
         Chunk::serialize(stream, streamBufferChunk->getStreamData(), offset, copyLength);
     if (copyLength < length)
