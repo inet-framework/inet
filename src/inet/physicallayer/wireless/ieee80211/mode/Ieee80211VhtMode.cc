@@ -204,19 +204,19 @@ Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase
     bandwidth(bandwidth)
 {
     if (nss > 1)
-        stream2Modulation = stream1Modulation;
+        stream2Modulation = static_cast<Ieee80211OfdmModulation *>(stream1Modulation->dup());
     if (nss > 2)
-        stream3Modulation = stream1Modulation;
+        stream3Modulation = static_cast<Ieee80211OfdmModulation *>(stream1Modulation->dup());
     if (nss > 3)
-        stream4Modulation = stream1Modulation;
+        stream4Modulation = static_cast<Ieee80211OfdmModulation *>(stream1Modulation->dup());
     if (nss > 4)
-        stream5Modulation = stream1Modulation;
+        stream5Modulation = static_cast<Ieee80211OfdmModulation *>(stream1Modulation->dup());
     if (nss > 5)
-        stream6Modulation = stream1Modulation;
+        stream6Modulation = static_cast<Ieee80211OfdmModulation *>(stream1Modulation->dup());
     if (nss > 6)
-        stream7Modulation = stream1Modulation;
+        stream7Modulation = static_cast<Ieee80211OfdmModulation *>(stream1Modulation->dup());
     if (nss > 7)
-        stream8Modulation = stream1Modulation;
+        stream8Modulation = static_cast<Ieee80211OfdmModulation *>(stream1Modulation->dup());
     code = Ieee80211VhtCompliantCodes::getCompliantCode(convolutionalCode, stream1Modulation, stream2Modulation, stream3Modulation, stream4Modulation, stream5Modulation, stream6Modulation, stream7Modulation, stream8Modulation, bandwidth);
 }
 
@@ -702,6 +702,14 @@ const Ieee80211VhtMode *Ieee80211VhtCompliantModes::getCompliantMode(const Ieee8
 Ieee80211Vhtmcs::~Ieee80211Vhtmcs()
 {
     delete code;
+    delete stream1Modulation;
+    delete stream2Modulation;
+    delete stream3Modulation;
+    delete stream4Modulation;
+    delete stream5Modulation;
+    delete stream6Modulation;
+    delete stream7Modulation;
+    delete stream8Modulation;
 }
 
 Ieee80211VhtSignalMode::~Ieee80211VhtSignalMode()

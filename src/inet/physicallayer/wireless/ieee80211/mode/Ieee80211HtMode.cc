@@ -357,11 +357,16 @@ const Ieee80211HtMode *Ieee80211HtCompliantModes::getCompliantMode(const Ieee802
 Ieee80211Htmcs::~Ieee80211Htmcs()
 {
     delete code;
+    delete stream1Modulation;
+    delete stream2Modulation;
+    delete stream3Modulation;
+    delete stream4Modulation;
 }
 
 Ieee80211HtSignalMode::~Ieee80211HtSignalMode()
 {
     delete code;
+    delete modulation;
 }
 
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs0BW20MHz([](){ return new Ieee80211Htmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20));});
