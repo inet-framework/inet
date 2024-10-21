@@ -261,6 +261,13 @@ void L2NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
     interfaceData->setLinkCost(interfaceInfo->portData.linkCost);
     interfaceData->setPriority(interfaceInfo->portData.priority);
     interfaceData->setEdge(interfaceInfo->portData.edge);
+
+#ifdef INET_WITH_MRP
+    auto mrpInterfaceData = networkInterface->getProtocolDataForUpdate<MrpInterfaceData>();
+    mrpInterfaceData->setContinuityCheck(interfaceInfo->mrpData.continuityCheck);
+    mrpInterfaceData->setCfmEndpointID(interfaceInfo->mrpData.cfmEndpointID);
+    mrpInterfaceData->setCfmName(interfaceInfo->mrpData.cfmName);
+#endif
 }
 
 L2NetworkConfigurator::Matcher::~Matcher()
