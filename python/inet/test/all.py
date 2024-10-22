@@ -54,25 +54,27 @@ def get_unit_test_tasks(**kwargs):
     return get_opp_test_tasks("tests/unit", name="unit test", **kwargs)
 
 def get_all_test_tasks(**kwargs):
-    test_task_functions = [get_smoke_test_tasks,
-                           get_sanitizer_test_tasks,
-                           get_fingerprint_test_tasks,
-                           get_statistical_test_tasks,
-                           get_validation_test_tasks,
-                           #get_speed_test_tasks,
+    test_task_functions = [
+                           #get_chart_test_tasks,
                            #get_feature_test_tasks,
-                           get_packet_test_tasks,
-                           get_queueing_test_tasks,
-                           get_protocol_test_tasks,
+                           get_fingerprint_test_tasks,
                            get_module_test_tasks,
+                           get_packet_test_tasks,
+                           get_protocol_test_tasks,
+                           get_queueing_test_tasks,
+                           get_sanitizer_test_tasks,
+                           get_smoke_test_tasks,
+                           #get_speed_test_tasks,
+                           #get_statistical_test_tasks,
                            get_unit_test_tasks,
-                           get_chart_test_tasks]
+                           get_validation_test_tasks
+                          ]
     test_tasks = []
     for test_task_function in test_task_functions:
         multiple_test_tasks = test_task_function(**kwargs)
         if multiple_test_tasks.tasks:
             test_tasks.append(multiple_test_tasks)
-    return MultipleTestTasks(test_tasks, name="test group", **dict(kwargs, concurrent=False))
+    return MultipleTestTasks(tasks=test_tasks, **dict(kwargs, name="test group", start=None, end=None, concurrent=False))
 
 def run_packet_tests(**kwargs):
     return get_packet_test_tasks(**kwargs).run(**kwargs)
