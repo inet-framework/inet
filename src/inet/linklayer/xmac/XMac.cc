@@ -303,6 +303,8 @@ void XMac::handleSelfMessage(cMessage *msg)
                     macState = WAIT_DATA;
                     scheduleAfter(SIMTIME_ZERO, msg);
                 }
+                else
+                    delete msg;
                 return;
             }
             break;
