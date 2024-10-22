@@ -317,6 +317,8 @@ void XMac::handleStateEvent(cMessage *msg)
                     scheduleAfter(SIMTIME_ZERO, msg);
                     changeDisplayColor(GREEN);
                 }
+                else
+                    delete msg;
                 return;
             }
             else
