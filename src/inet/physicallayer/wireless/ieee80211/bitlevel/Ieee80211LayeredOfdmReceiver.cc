@@ -321,7 +321,9 @@ const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createCompleteSymbolM
 {
     if (levelOfDetail >= SYMBOL_DOMAIN) {
         const std::vector<const ISymbol *> *symbols = signalFieldSymbolModel->getAllSymbols();
-        std::vector<const ISymbol *> *completeSymbols = new std::vector<const ISymbol *>(*symbols);
+        std::vector<const ISymbol *> *completeSymbols = new std::vector<const ISymbol *>();
+        for (auto symbol : *symbols)
+            completeSymbols->push_back(new Ieee80211OfdmSymbol(*static_cast<const Ieee80211OfdmSymbol *>(symbol)));
         if (dataFieldSymbolModel != nullptr) {
             symbols = dataFieldSymbolModel->getAllSymbols();
             for (auto & symbol : *symbols)
@@ -482,7 +484,7 @@ bool Ieee80211LayeredOfdmReceiver::computeIsReceptionPossible(const IListening *
 
 Ieee80211LayeredOfdmReceiver::~Ieee80211LayeredOfdmReceiver()
 {
-    if (!isCompliant) {
+    if (!isCompliant && mode != nullptr) {
         delete mode->getPreambleMode();
         delete mode->getSignalMode();
         delete mode->getDataMode();

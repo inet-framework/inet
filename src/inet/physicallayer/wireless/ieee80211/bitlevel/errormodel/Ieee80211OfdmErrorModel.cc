@@ -203,7 +203,7 @@ const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const L
             auto transmittedSymbol = transmittedOfdmSymbol->getSubCarrierSymbols().at(j >= 26 ? j + 1 : j);
             double symbolErrorRate = modulation->calculateSER(snirMean, symbolFrequencyBandwidth, grossBitrate / numSubcarriers);
             auto receivedSymbol = computeReceivedSymbol(modulation, transmittedSymbol, snirMean, symbolErrorRate);
-            receivedSymbols.push_back(receivedSymbol);
+            receivedSymbols.push_back(new ApskSymbol(*receivedSymbol));
             if (j == 25)
                 receivedSymbols.push_back(nullptr); // see Ieee80211OfdmSymbol
         }
