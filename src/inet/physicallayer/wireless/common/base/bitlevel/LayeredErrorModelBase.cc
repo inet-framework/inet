@@ -62,13 +62,13 @@ const IReceptionSymbolModel *LayeredErrorModelBase::computeSymbolModel(const ITr
             auto transmittedSymbol = check_and_cast<const ApskSymbol *>(transmittedSymbols->at(i));
             bool isCorruptSymbol = symbolErrorRate == 1 || (symbolErrorRate != 0 && uniform(0, 1) < symbolErrorRate);
             auto receivedSymbol = isCorruptSymbol ? computeCorruptSymbol(modulation, transmittedSymbol) : transmittedSymbol;
-            receivedSymbols->at(i) = receivedSymbol;
+            receivedSymbols->at(i) = new ApskSymbol(*receivedSymbol);
         }
         return new ReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getDataSymbolLength(), transmissionSymbolModel->getDataSymbolRate(), receivedSymbols, symbolErrorRate);
     }
 }
 
-const ISymbol *LayeredErrorModelBase::computeCorruptSymbol(const ApskModulationBase *modulation, const ApskSymbol *transmittedSymbol) const
+const ApskSymbol *LayeredErrorModelBase::computeCorruptSymbol(const ApskModulationBase *modulation, const ApskSymbol *transmittedSymbol) const
 {
     auto constellation = modulation->getConstellation();
     if (!strcmp("uniform", symbolCorruptionMode)) {

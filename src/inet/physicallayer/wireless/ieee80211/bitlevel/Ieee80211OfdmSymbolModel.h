@@ -18,14 +18,12 @@ class INET_API Ieee80211OfdmTransmissionSymbolModel : public TransmissionSymbolM
 {
   public:
     Ieee80211OfdmTransmissionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols, const IModulation *headerModulation, const IModulation *payloadModulation);
-    virtual ~Ieee80211OfdmTransmissionSymbolModel();
 };
 
 class INET_API Ieee80211OfdmReceptionSymbolModel : public ReceptionSymbolModel
 {
   public:
     Ieee80211OfdmReceptionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols);
-    virtual ~Ieee80211OfdmReceptionSymbolModel();
 };
 } /* namespace physicallayer */
 } /* namespace inet */
