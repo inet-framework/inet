@@ -72,7 +72,7 @@ class MultipleChartTestTasks(MultipleTestTasks):
         multiple_simulation_task_results = self.multiple_simulation_tasks.run_protected(**kwargs)
         return super().run_protected(**kwargs)
 
-def get_chart_test_tasks(simulation_project=default_project, run_simulations=True, filter=None, working_directory_filter=None, pool_class=multiprocessing.Pool, **kwargs):
+def get_chart_test_tasks(simulation_project=default_project, run=0, run_simulations=True, filter=None, working_directory_filter=None, pool_class=multiprocessing.Pool, **kwargs):
     test_tasks = []
     simulation_tasks = []
     for analysis_file_name in get_analysis_files(simulation_project=simulation_project, filter=filter or working_directory_filter, **kwargs):
@@ -81,7 +81,7 @@ def get_chart_test_tasks(simulation_project=default_project, run_simulations=Tru
             folder = os.path.dirname(simulation_project.get_full_path(analysis_file_name))
             working_directory = os.path.relpath(folder, simulation_project.get_full_path("."))
             if run_simulations:
-                multiple_simulation_tasks = get_simulation_tasks(simulation_project=simulation_project, working_directory_filter=working_directory, sim_time_limit=get_statistical_result_sim_time_limit, **kwargs)
+                multiple_simulation_tasks = get_simulation_tasks(simulation_project=simulation_project, run=run, working_directory_filter=working_directory, sim_time_limit=get_statistical_result_sim_time_limit, **kwargs)
                 for simulation_task in multiple_simulation_tasks.tasks:
                     if not list(builtins.filter(lambda element: element.simulation_config == simulation_task.simulation_config and element._run == simulation_task._run, simulation_tasks)):
                         simulation_tasks.append(simulation_task)
