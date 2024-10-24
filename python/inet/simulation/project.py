@@ -114,10 +114,6 @@ def get_simulation_project(name, workspace_path, **kwargs):
         simulation_projects[name] = SimulationProject(workspace_path, **kwargs)
     return simulation_projects[name]
 
-aloha_project = get_simulation_project("omnetpp/samples/aloha", executable="aloha")
-
-tictoc_project = get_simulation_project("omnetpp/samples/tictoc", executable="tictoc")
-
 inet_project = get_simulation_project("inet", os.getenv("INET_ROOT"),
                                       executable=os.path.join(os.getenv("__omnetpp_root_dir"), "bin/opp_run"),
                                       libraries=["src/INET"],
