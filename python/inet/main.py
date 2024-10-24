@@ -96,4 +96,7 @@ def run_validation_tests_main():
     run_main(run_validation_tests, "validation tests")
 
 def run_all_tests_main():
-    run_main(run_all_tests, "tests")
+    run_main(run_all_tests, "all tests")
+
+def run_release_tests_main():
+    run_main(run_release_tests, "release tests")
