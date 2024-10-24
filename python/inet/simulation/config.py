@@ -10,6 +10,7 @@ import subprocess
 
 from inet.common import *
 from inet.simulation.project import *
+from inet.simulation.build import *
 
 logger = logging.getLogger(__name__)
 
@@ -132,6 +133,7 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
     return simulation_configs
 
 def collect_all_simulation_configs(simulation_project, ini_path_globs, concurrent=True, **kwargs):
+    build_project(simulation_project=simulation_project, mode="release")
     logger.info("Collecting all simulation configs started")
     ini_paths = list(itertools.chain.from_iterable(map(lambda g: glob.glob(g, recursive=True), ini_path_globs)))
     if concurrent:
