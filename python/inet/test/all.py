@@ -32,10 +32,10 @@ class PacketTestTask(TestTask):
         return self.task_result_class(self, result=match.group(1) if match and subprocess_result.returncode == 0 else "FAIL")
 
 def get_packet_test_tasks(filter=None, working_directory_filter=None, ini_file_filter=None, config_filter=None, run_filter=None, **kwargs):
-    if filter or working_directory_filter or ini_file_filter or config_filter or run_filter:
+    if filter or (working_directory_filter and not os.path.abspath("tests/packet").startswith(os.path.abspath(working_directory_filter))) or ini_file_filter or config_filter or run_filter:
         packet_test_tasks = []
     else:
-        packet_test_tasks = [PacketTestTask(inet_project)]
+        packet_test_tasks = [PacketTestTask(inet_project, **kwargs)]
     return MultipleTestTasks(tasks=packet_test_tasks, name="packet test", **kwargs)
 
 def get_queueing_test_tasks(**kwargs):
