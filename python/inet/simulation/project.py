@@ -109,9 +109,8 @@ export PYTHONPATH=$INET_ROOT/python:$PYTHONPATH
 
 simulation_projects = dict()
 
-def get_simulation_project(name, **kwargs):
+def get_simulation_project(name, workspace_path, **kwargs):
     if not name in simulation_projects:
-        workspace_path = get_workspace_path(name)
         simulation_projects[name] = SimulationProject(workspace_path, **kwargs)
     return simulation_projects[name]
 
@@ -119,7 +118,7 @@ aloha_project = get_simulation_project("omnetpp/samples/aloha", executable="aloh
 
 tictoc_project = get_simulation_project("omnetpp/samples/tictoc", executable="tictoc")
 
-inet_project = get_simulation_project("inet",
+inet_project = get_simulation_project("inet", os.getenv("INET_ROOT"),
                                       executable=os.path.join(os.getenv("__omnetpp_root_dir"), "bin/opp_run"),
                                       libraries=["src/INET"],
                                       ned_folders=["src", "examples", "showcases", "tutorials", "tests/networks", "tests/validation"],
@@ -127,7 +126,7 @@ inet_project = get_simulation_project("inet",
                                       ini_file_folders=["examples", "showcases", "tutorials", "tests/fingerprint", "tests/validation"],
                                       image_folders=["images"])
 
-inet_baseline_project = get_simulation_project("inet-baseline",
+inet_baseline_project = get_simulation_project("inet-baseline", get_workspace_path("inet-baseline"),
                                                executable=inet_project.executable,
                                                libraries=inet_project.libraries,
                                                ned_folders=inet_project.ned_folders,
