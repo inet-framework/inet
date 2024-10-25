@@ -170,3 +170,6 @@ def build_project_main():
         else:
             raise e
 
+def run_release_tests_main():
+    run_main(run_release_tests, "release tests")
+
