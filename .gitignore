@@ -63,6 +63,7 @@ compile_commands.json
 
 # ignore binary files
 out/
+*_dbg
 *.so
 *.dylib
 *.dll
