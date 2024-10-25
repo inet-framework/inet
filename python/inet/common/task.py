@@ -124,7 +124,7 @@ class TaskResult:
                (" " + self.get_error_message(complete_error_message=complete_error_message) if self.result == "ERROR" else "")
 
     def get_error_message(self, **kwargs):
-        return self.error_message or "<No error message>"
+        return self.error_message or self.stderr or (self.exception and str(self.exception)) or "<No error message>"
 
     def print_result(self, complete_error_message=False, output_stream=sys.stdout, **kwargs):
         print(self.get_description(complete_error_message=complete_error_message), file=output_stream)
