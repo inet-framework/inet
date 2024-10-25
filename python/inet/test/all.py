@@ -17,7 +17,7 @@ __sphinx_mock__ = True # ignore this module in documentation
 _logger = logging.getLogger(__name__)
 
 class PacketTestTask(TestTask):
-    def __init__(self, simulation_project, name="packet test", task_result_class=TestTaskResult, **kwargs):
+    def __init__(self, simulation_project=inet_project, name="packet test", task_result_class=TestTaskResult, **kwargs):
         super().__init__(name=name, task_result_class=task_result_class, **kwargs)
         self.simulation_project = simulation_project
 
@@ -38,7 +38,7 @@ def get_packet_test_tasks(filter=None, working_directory_filter=None, ini_file_f
     if filter or (working_directory_filter and not os.path.abspath("tests/packet").startswith(os.path.abspath(working_directory_filter))) or ini_file_filter or config_filter or run_filter:
         packet_test_tasks = []
     else:
-        packet_test_tasks = [PacketTestTask(inet_project, **kwargs)]
+        packet_test_tasks = [PacketTestTask(**kwargs)]
     return MultipleTestTasks(tasks=packet_test_tasks, name="packet test", **kwargs)
 
 def get_queueing_test_tasks(**kwargs):
