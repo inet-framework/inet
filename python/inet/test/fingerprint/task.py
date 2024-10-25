@@ -152,13 +152,13 @@ class FingerprintTestTask(SimulationTestTask):
         return hasher.digest()
 
     def run(self, test_result_filter=None, exclude_test_result_filter="SKIP", output_stream=sys.stdout, **kwargs):
-        if self.fingerprint:
+        if self.fingerprint and matches_filter(self.test_result, test_result_filter, exclude_test_result_filter, True):
             simulation_project = self.simulation_task.simulation_config.simulation_project
             return super().run(extra_args=self.get_extra_args(simulation_project, str(self.fingerprint)) + get_ingredients_extra_args(self.ingredients), output_stream=output_stream, **kwargs)
         else:
             if matches_filter("SKIP", test_result_filter, exclude_test_result_filter, True):
                 print("Running " + self.simulation_task.get_parameters_string(**kwargs), end=" ", file=output_stream)
-            return FingerprintTestTaskResult(task=self, result="SKIP", reason="Correct fingerprint not found")
+            return FingerprintTestTaskResult(task=self, result="SKIP", expected_result=self.test_result, reason="Correct fingerprint not found")
 
     def check_simulation_task_result(self, simulation_task_result, **kwargs):
         expected_fingerprint = self.fingerprint
