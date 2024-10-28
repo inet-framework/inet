@@ -152,6 +152,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
             int connId = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
             sendOrScheduleReadCommandIfNeeded(connId);
         }
+        delete msg;
     }
     else {
         // some indication -- ignore
