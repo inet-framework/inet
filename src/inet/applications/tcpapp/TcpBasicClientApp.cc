@@ -155,11 +155,12 @@ void TcpBasicClientApp::rescheduleAfterOrDeleteTimer(simtime_t d, short int msgK
 
 void TcpBasicClientApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
+    auto dataLength = msg->getDataLength();
     TcpAppBase::socketDataArrived(socket, msg, urgent);
 
-    EV_INFO << "Arrived data with " << msg->getDataLength() << " length\n";
+    EV_INFO << "Arrived data with " << dataLength << " length\n";
 
-    waitedReplyLength -= B(msg->getDataLength()).get();
+    waitedReplyLength -= B(dataLength).get();
     if (waitedReplyLength > 0) {
         EV_INFO << "Waiting remained " << waitedReplyLength << " bytes of reply\n";
         sendOrScheduleReadCommandIfNeeded();
