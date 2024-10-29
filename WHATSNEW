@@ -1,6 +1,29 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-4.5.4 (October 2024) - Stable
+----------------------------------
+
+This is a minor patch release containing OMNeT++ 6.1 compatibility fixes (enum
+related issues). It contains also fixes for #880, #886, #913, #919, #956,
+#967, #974, #982. Several memory lake errors were fixed. Added logging and 
+testing framework enhancements. Added a `python/requirements.txt` so Python
+dependenies can be installed by `pip install -r python/requirements.txt`.
+Fixed escaping errors with Python 3.12 in pythons scripts.
+
+Test framework enhancements:
+- Added new commands `inet_run_*_tests` to allow running various tests.
+- Smoke tests are executed for run #0 only by default.
+- Tets marked as intentionally as SKIP are now left out from the test execution.
+- Added `inet_run_release_tests` for pre-release testing.
+- A lot of mischelanous fixes.
+
+
+INET-4.5.3 (September 2024) - Stable
+------------------------------------
+This version was yanked because of `@enum` related issues.
+
+
 INET-4.5.2 (August 2024) - Stable
 ---------------------------------
 
