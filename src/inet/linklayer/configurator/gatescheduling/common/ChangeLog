@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2024-10-29  ------ inet-4.5.4 released ------
+
+2023-09-25  Zoltan Bojthe
+
+	all: follow omnetpp change: cNedValue::OBJECT renamed to POINTER
+
 2023-08-29  ------ inet-4.5.2 released ------
 
 2023-08-24  ------ inet-4.5.1 released ------
@@ -32,4 +38,4 @@
 2021-04-21  Levente Mészáros
 
 	Added AlwaysOpenGateSchedulingConfigurator, SimpleGateSchedulingConfigurator
-	and TSNschedGateSchedulingConfigurator.
+	and TSNschedGateSchedulingConfigurator.\n

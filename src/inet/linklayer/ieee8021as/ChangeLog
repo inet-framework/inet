@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2024-10-29  ------ inet-4.5.4 released ------
+
+2024-10-16  Levente Meszaros
+
+	Gptp: Added missing packetDrop signal and related statistics.
+
 2023-08-29  ------ inet-4.5.2 released ------
 
 2023-04-27  Levente Mészáros
@@ -106,4 +112,4 @@
 	https://gitlab.amd.e-technik.uni-rostock.de/peter.danielis/gptp-implementation.git
 
 	src folder content moved to src/inet/linklayer/ieee8021as/ simulations
-	folder content moved to examples/ieee8021as/
+	folder content moved to examples/ieee8021as/\n

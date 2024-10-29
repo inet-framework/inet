@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2024-10-29  ------ inet-4.5.4 released ------
+
 2024-03-11  Rudolf Hornig
 
 	pathloss: fix#956 - Rayleigh pathloss computation was incorrect
@@ -162,4 +164,4 @@
 	RayleighFading, RicianFading, SUIPathLoss, TwoRayGroundReflection,
 	UWBIRStochasticPathLoss
 
-====== inet-2.x ======
+====== inet-2.x ======\n

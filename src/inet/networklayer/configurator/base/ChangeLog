@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2024-10-29  ------ inet-4.5.4 released ------
+
+2023-10-09  Levente Mészáros
+
+	L3NetworkConfiguratorBase: Fixed #913, copied frame creation code from
+	"errorRate" to "delay" autoroute metric.
+
+	This fix is a temporary kludge but currently there's no other way to make
+	this work.
+
 2023-08-29  ------ inet-4.5.2 released ------
 
 2023-08-24  ------ inet-4.5.1 released ------
@@ -189,4 +199,4 @@
 
 	Moved base classes under the base directory
 
-====== inet-2.x ======
+====== inet-2.x ======\n

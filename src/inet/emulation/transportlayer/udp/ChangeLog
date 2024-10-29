@@ -1,5 +1,12 @@
 ====== inet-4.x ======
 
+2024-10-29  ------ inet-4.5.4 released ------
+
+2024-10-14  Levente Meszaros
+
+	all: Fixed 'warning: variable length arrays in C++ are a Clang
+	extension'.
+
 2023-08-29  ------ inet-4.5.2 released ------
 
 2023-08-24  ------ inet-4.5.1 released ------
@@ -67,4 +74,4 @@
 2018-07-20  Levente Mészáros
 
 	Created a separate folder structure under src for emulation related modules and components.
-	Added ExtLowerUdp module that provides emulation support at the UDP protocol level.
+	Added ExtLowerUdp module that provides emulation support at the UDP protocol level.\n

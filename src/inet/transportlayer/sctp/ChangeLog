@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2024-10-29  ------ inet-4.5.4 released ------
+
+2024-10-16  Levente Meszaros
+
+	all: Fixed passing in the buffer pointer introduced by path all: Fixed
+	'warning: variable length arrays in C++ are a Clang extension'.
+
+2024-10-14  Levente Meszaros
+
+	all: Fixed 'warning: variable length arrays in C++ are a Clang
+	extension'.
+
 2023-08-29  ------ inet-4.5.2 released ------
 
 2023-08-24  ------ inet-4.5.1 released ------
@@ -884,4 +896,4 @@
 	If you are interested in the early history of the SCTP code, change
 	to the project root and type
 
-	$ gitk -- INET/src/transport/sctp
+	$ gitk -- INET/src/transport/sctp\n

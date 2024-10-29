@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2024-10-29  ------ inet-4.5.4 released ------
+
+2024-05-08  Levente Meszaros
+
+	visualizer: Replaced @enum("light", "dark") with documentation.
+
+	Omnetpp now checks the value against the values found in @enum, and these
+	parameters allow for arbitrary color names, so the enumeration was wrong.
+
 2023-08-29  ------ inet-4.5.2 released ------
 
 2023-08-24  ------ inet-4.5.1 released ------
@@ -581,4 +590,4 @@
 	NetworkNodeVisualizerBase, NetworkConnectionVisualizerBase,
 	PhysicalEnvironmentVisualizerBase, RouteVisualizerBase,
 	SceneOsgVisualizerBase, SceneVisualizerBase, StatisticVisualizerBase,
-	TracingObstacleLossVisualizerBase, VisualizerBase
+	TracingObstacleLossVisualizerBase, VisualizerBase\n

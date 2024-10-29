@@ -1,5 +1,44 @@
 ====== inet-4.x ======
 
+2024-10-29  ------ inet-4.5.4 released ------
+
+2024-10-18  Levente Meszaros
+
+	StreamBufferChunkSerializer: Added temporary fix to avoid serialization
+	error due to bit length not divisble by 8.
+
+2023-04-05  Zoltan Bojthe
+
+	ChunkPtr: moved to Chunk.msg
+
+2023-09-25  Zoltan Bojthe
+
+	all: follow omnetpp change: cNedValue::OBJECT renamed to POINTER
+
+2024-10-10  Rudolf Hornig
+
+	prod: version umped to 4.5.4
+
+2024-03-28  Levente Meszaros
+
+	common: Fixed bug #967.
+
+	The std::function in sharedVariables wrapping the value's destructor can
+	be uninitialized because sharedVariables.resize(handle+1) in
+	getSharedVariable() can add more than one item to the vector.
+
+2024-04-10  Andras Varga
+
+	NodeStatus: follow enum registration fix.
+
+2024-08-07  Rudolf Hornig
+
+	prod: version bump to 4.5.2, updated WHATSNEW and ChangeLogs
+
+2024-04-08  Andras Varga
+
+	misc: fix incorrect enum declarations (required for OMNeT++ 6.1)
+
 2023-08-29  ------ inet-4.5.2 released ------
 
 2023-06-01  Levente Mészáros
@@ -2459,4 +2498,4 @@
 	If you are interested in the early history of the code,
 	change to the project root and type
 
-	$ gitk -- src/base INET/src/base Base
+	$ gitk -- src/base INET/src/base Base\n

@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2024-10-29  ------ inet-4.5.4 released ------
+
+2023-04-05  Zoltan Bojthe
+
+	CutthroughTag: Added trailerChunk field.
+
 2023-08-29  ------ inet-4.5.2 released ------
 
 2023-08-24  ------ inet-4.5.1 released ------
@@ -21,4 +27,4 @@
 
 	The cut-through switching uses two modules a cut-through source at the
 	receiver side and a cut-through sink at the transmitter side of the same
-	network node.
+	network node.\n

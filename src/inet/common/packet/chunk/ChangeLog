@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2024-10-29  ------ inet-4.5.4 released ------
+
+2023-04-05  Zoltan Bojthe
+
+	ChunkPtr: moved to Chunk.msg
+
 2023-08-29  ------ inet-4.5.2 released ------
 
 2023-08-24  ------ inet-4.5.1 released ------
@@ -371,4 +377,4 @@
 2017-03-02  Levente Mészáros
 
 	Moved MemoryInputStream and MemoryOutputStream under common.
-	Moved ChunkSerializer under common/packet/serializer.
+	Moved ChunkSerializer under common/packet/serializer.\n

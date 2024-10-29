@@ -1,5 +1,12 @@
 ====== inet-4.x ======
 
+2024-10-29  ------ inet-4.5.4 released ------
+
+2024-10-14  Levente Meszaros
+
+	all: Fixed 'warning: variable length arrays in C++ are a Clang
+	extension'.
+
 2023-08-29  ------ inet-4.5.2 released ------
 
 2023-08-24  ------ inet-4.5.1 released ------
@@ -166,4 +173,4 @@
 
 	Added the a network performance metering application
 
-====== inet-2.x ======
+====== inet-2.x ======\n

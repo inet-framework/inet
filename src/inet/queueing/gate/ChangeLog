@@ -1,5 +1,47 @@
 ====== inet-4.x ======
 
+2024-10-29  ------ inet-4.5.4 released ------
+
+2023-05-05  Levente Mészáros
+
+	CreditBasedGate: Changed scheduling the change timer to allow scheduling
+	for the current simulation time.
+
+	Due to the recent change of the guard condition, the currentCredit and
+	transmitCreditLimit are always different. The changeTime can be zero if
+	the difference is very small and the gain rate is very large.
+
+2023-05-02  Levente Mészáros
+
+	queueing: Added a bit more logging.
+
+2023-05-05  Levente Mészáros
+
+	CreditBasedGate: There's no need to schedule the change timer when
+	processing it.
+
+	When the change timer is processed, currentCredit equals to
+	transmitCreditLimit, so its impossible to reach it again with any gain
+	rate.
+
+2023-05-05  Levente Mészáros
+
+	CreditBasedGate: Changed scheduleChangeTimer() to cancel the timer event
+	if the transmitCreditLimit is unreachable.
+
+	It used to do the changeTime calculation for these cases.
+
+2023-05-02  Levente Mészáros
+
+	CreditBasedGate: Extracted udpateGateState method.
+
+	Previously the gate state update could trigger a sequence of operations
+	in other modules that came back to the CreditBasedGate while it was in a
+	middle of an operation. The gate state should be the last operation that
+	is done by this module.
+
+	This patch fixes issue #886.
+
 2023-08-29  ------ inet-4.5.2 released ------
 
 2023-08-24  ------ inet-4.5.1 released ------
@@ -189,4 +231,4 @@
 
 2020-04-23  Levente Mészáros
 
-	Added new gate package with modules: PacketGate and PeriodicGate.
+	Added new gate package with modules: PacketGate and PeriodicGate.\n

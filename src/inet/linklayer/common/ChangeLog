@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2024-10-29  ------ inet-4.5.4 released ------
+
+2024-05-07  Levente Meszaros
+
+	QosClassifier: Removed useless @enum().
+
 2023-08-29  ------ inet-4.5.2 released ------
 
 2023-08-24  ------ inet-4.5.1 released ------
@@ -345,4 +351,4 @@
 2014-01-22  Levente Meszaros
 
 	Moved classes shared by implementations from contract to common.
-	Added MACProtocolBase.
+	Added MACProtocolBase.\n

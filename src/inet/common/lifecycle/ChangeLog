@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2024-10-29  ------ inet-4.5.4 released ------
+
+2024-04-10  Andras Varga
+
+	NodeStatus: follow enum registration fix.
+
+2024-04-08  Andras Varga
+
+	misc: fix incorrect enum declarations (required for OMNeT++ 6.1)
+
 2023-08-29  ------ inet-4.5.2 released ------
 
 2023-08-24  ------ inet-4.5.1 released ------
@@ -124,4 +134,4 @@
 
 2016-06-16  Levente Mészáros
 
-	Removed icon size specification from module definitions.
+	Removed icon size specification from module definitions.\n

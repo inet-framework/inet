@@ -1,5 +1,26 @@
 ====== inet-4.x ======
 
+2024-10-29  ------ inet-4.5.4 released ------
+
+2023-04-25  Levente Mészáros
+
+	EthernetFcsInserter: Copy received FCS for cut-through packets.
+
+	The FCS is forwarded as is, see EthernetCutthroughInterface for more
+	details.
+
+2023-04-05  Zoltan Bojthe
+
+	EthernetFcsChecker: Skip checking Ethernet FCS for cut-through packets.
+
+	The FCS is forwarded as is without dropping incorrect frames. The first
+	non cut-through node checks the FCS. See EthernetCutthroughInterface for
+	more details.
+
+2023-04-25  Zoltan Bojthe
+
+	PacketDirectionReverser: Copying all fields of CutthroughTag
+
 2023-08-29  ------ inet-4.5.2 released ------
 
 2023-08-24  ------ inet-4.5.1 released ------
@@ -1711,4 +1732,4 @@
 	change to the project root and type
 
 	$ gitk -- NetworkInterfaces/Ethernet INET/src/networkinterfaces/ethernet \
-	    INET/src/linklayer/ethernet
+	    INET/src/linklayer/ethernet\n

@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2024-10-29  ------ inet-4.5.4 released ------
+
+2024-10-18  Levente Meszaros
+
+	802.11: Fixed various memory leaks detected by sanitizer tests.
+
 2023-08-29  ------ inet-4.5.2 released ------
 
 2023-08-24  ------ inet-4.5.1 released ------
@@ -346,4 +352,4 @@
 
 2014-11-07  ------ inet-2.99.0 released ------
 
-====== inet-2.x ======
+====== inet-2.x ======\n
