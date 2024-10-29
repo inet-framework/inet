@@ -96,6 +96,7 @@ void PreemptingServer::pushPacketEnd(Packet *packet, const cGate *gate)
     take(packet);
     consumer.pushPacketEnd(packet);
     cancelEvent(timer);
+    delete streamedPacket;
     streamedPacket = nullptr;
     updateDisplayString();
 }
