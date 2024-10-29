@@ -56,8 +56,8 @@ def get_unit_test_tasks(**kwargs):
 
 def get_all_test_tasks(**kwargs):
     test_task_functions = [
-                           #get_chart_test_tasks,
-                           #get_feature_test_tasks,
+                           get_chart_test_tasks,
+                           get_feature_test_tasks,
                            get_fingerprint_test_tasks,
                            get_module_test_tasks,
                            get_packet_test_tasks,
@@ -65,8 +65,8 @@ def get_all_test_tasks(**kwargs):
                            get_queueing_test_tasks,
                            get_sanitizer_test_tasks,
                            get_smoke_test_tasks,
-                           #get_speed_test_tasks,
-                           #get_statistical_test_tasks,
+                           get_speed_test_tasks,
+                           get_statistical_test_tasks,
                            get_unit_test_tasks,
                            get_validation_test_tasks
                           ]
