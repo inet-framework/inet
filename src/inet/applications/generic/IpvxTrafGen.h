@@ -31,6 +31,7 @@ class INET_API IpvxTrafGen : public ApplicationBase
     simtime_t stopTime;
     cPar *sendIntervalPar = nullptr;
     cPar *packetLengthPar = nullptr;
+    int protocolNumber = -1;
     const Protocol *protocol = nullptr;
     std::vector<L3Address> destAddresses;
     int numPackets = 0;

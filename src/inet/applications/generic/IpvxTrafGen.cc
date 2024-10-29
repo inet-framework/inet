@@ -30,8 +30,10 @@ IpvxTrafGen::IpvxTrafGen()
 IpvxTrafGen::~IpvxTrafGen()
 {
     cancelAndDelete(timer);
-    if (ProtocolGroup::getIpProtocolGroup()->findProtocol(par("protocol")) == nullptr)
+    if (ProtocolGroup::getIpProtocolGroup()->findProtocol(par("protocol")) != nullptr) {
+        ProtocolGroup::getIpProtocolGroup()->removeProtocol(protocolNumber);
         delete protocol;
+    }
 }
 
 void IpvxTrafGen::initialize(int stage)
@@ -39,14 +41,15 @@ void IpvxTrafGen::initialize(int stage)
     ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        int protocolId = par("protocol");
-        if (protocolId < 143 || protocolId > 254)
-            throw cRuntimeError("invalid protocol id %d, accepts only between 143 and 254", protocolId);
-        protocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(protocolId);
+        int protocolNumber = par("protocol");
+        if (protocolNumber < 143 || protocolNumber > 254)
+            throw cRuntimeError("invalid protocol number %d, accepts only between 143 and 254", protocolNumber);
+        protocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(protocolNumber);
         if (!protocol) {
-            std::string name = "prot_" + std::to_string(protocolId);
+            this->protocolNumber = protocolNumber;
+            std::string name = "prot_" + std::to_string(protocolNumber);
             protocol = new Protocol(name.c_str(), name.c_str());
-            ProtocolGroup::getIpProtocolGroup()->addProtocol(protocolId, protocol);
+            ProtocolGroup::getIpProtocolGroup()->addProtocol(protocolNumber, protocol);
         }
         numPackets = par("numPackets");
         startTime = par("startTime");
