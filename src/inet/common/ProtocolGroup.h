@@ -33,6 +33,7 @@ class INET_API ProtocolGroup
     int findProtocolNumber(const Protocol *protocol) const;
     int getProtocolNumber(const Protocol *protocol) const;
     void addProtocol(int protocolId, const Protocol *protocol);
+    void removeProtocol(int protocolNumber);
 
     std::string str() const { return name; }
 
