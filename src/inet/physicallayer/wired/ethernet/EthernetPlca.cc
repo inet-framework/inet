@@ -126,7 +126,7 @@ void EthernetPlca::initialize(int stage)
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         auto networkInterface = getContainingNicModule(this);
         // TODO register to networkInterface parameter change signal and process changes
-        mode = &EthernetModes::getEthernetMode(networkInterface->getDatarate());
+        mode = EthernetModes::getEthernetMode(networkInterface->getDatarate());
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         controlFsm.setStateChangedSignal(controlStateChangedSignal);
@@ -351,7 +351,7 @@ void EthernetPlca::handleWithControlFSM()
         }
         FSMA_State(CS_SEND_BEACON) {
             FSMA_Enter(
-                scheduleAfter(b(beacon_timer_length).get() / mode->bitrate, beacon_timer);
+                scheduleAfter(b(beacon_timer_length).get() / mode.bitrate, beacon_timer);
                 tx_cmd = CMD_BEACON;
                 emit(txCmdSignal, tx_cmd);
                 FSMA_Delay_Action(phy->startSignalTransmission(BEACON));
@@ -390,7 +390,7 @@ void EthernetPlca::handleWithControlFSM()
         }
         FSMA_State(CS_WAIT_TO) {
             FSMA_Enter(
-                scheduleAfter(b(to_timer_length).get() / mode->bitrate, to_timer);
+                scheduleAfter(b(to_timer_length).get() / mode.bitrate, to_timer);
                 numPacketsPerTo = 0;
                 toStartTime = simTime();
             );
@@ -414,7 +414,7 @@ void EthernetPlca::handleWithControlFSM()
         FSMA_State(CS_EARLY_RECEIVE) {
             FSMA_Enter(
                 cancelEvent(to_timer);
-                rescheduleAfter(b(beacon_det_timer_length).get() / mode->bitrate, beacon_det_timer);
+                rescheduleAfter(b(beacon_det_timer_length).get() / mode.bitrate, beacon_det_timer);
             );
             // TODO this transition takes normal nodes to the first transmit opportunity too early because BEACON is detected at RECEPTION_START
             FSMA_Transition(T1, // D
@@ -498,7 +498,7 @@ void EthernetPlca::handleWithControlFSM()
                 tx_cmd = CMD_COMMIT;
                 emit(txCmdSignal, tx_cmd);
                 FSMA_Delay_Action(phy->startSignalTransmission(COMMIT));
-                scheduleAfter(b(burst_timer_length).get() / mode->bitrate, burst_timer);
+                scheduleAfter(b(burst_timer_length).get() / mode.bitrate, burst_timer);
             );
             FSMA_Transition(T1,
                             TX_EN,
@@ -625,7 +625,7 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
             FSMA_Enter(
                 packetPending = true;
                 CARRIER_STATUS = CARRIER_ON;
-                scheduleAfter(delay_line_length * 4 / mode->bitrate, hold_timer);
+                scheduleAfter(delay_line_length * 4 / mode.bitrate, hold_timer);
                 FSMA_Delay_Action(handleWithControlFSM());
             );
             FSMA_Event_Transition(HOLD_END,
@@ -668,7 +668,7 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
         FSMA_State(DS_DELAY_PENDING) {
             FSMA_Enter(
                 SIGNAL_STATUS = NO_SIGNAL_ERROR;
-                scheduleAfter(b(pending_timer_length).get() / mode->bitrate, pending_timer)
+                scheduleAfter(b(pending_timer_length).get() / mode.bitrate, pending_timer)
             );
             FSMA_Event_Transition(PENDING_END,
                                   event == END_PENDING_TIMER,
@@ -694,7 +694,7 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
         FSMA_State(DS_WAIT_MAC) {
             FSMA_Enter(
                 CARRIER_STATUS = CARRIER_OFF;
-                scheduleAfter(b(commit_timer_length).get() / mode->bitrate, commit_timer)
+                scheduleAfter(b(commit_timer_length).get() / mode.bitrate, commit_timer)
             );
             FSMA_Event_Transition(TX_START,
                                   event == START_FRAME_TRANSMISSION,
@@ -722,7 +722,7 @@ void EthernetPlca::handleWithDataFSM(int event, cMessage *message)
                     tx_cmd = CMD_NONE;
                     emit(txCmdSignal, tx_cmd);
                 }
-                simtime_t duration = b(currentTx->getDataLength() + ETHERNET_PHY_HEADER_LEN + getEsdLength()).get() / mode->bitrate;
+                simtime_t duration = b(currentTx->getDataLength() + ETHERNET_PHY_HEADER_LEN + getEsdLength()).get() / mode.bitrate;
                 scheduleAfter(duration, tx_timer);
                 ASSERT(macStartFrameTransmissionTime != -1);
                 simtime_t packetPendingDelay = simTime() - macStartFrameTransmissionTime;

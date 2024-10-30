@@ -68,7 +68,7 @@ void EthernetCsmaPhy::initialize(int stage)
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         networkInterface = getContainingNicModule(this);
         // TODO register to networkInterface parameter change signal and process changes
-        mode = &EthernetModes::getEthernetMode(networkInterface->getDatarate());
+        mode = EthernetModes::getEthernetMode(networkInterface->getDatarate());
     }
 }
 
@@ -324,12 +324,11 @@ void EthernetCsmaPhy::handleStartTransmission(EthernetSignalBase *signal)
 {
     ASSERT(currentTxSignal == nullptr);
     EV_DEBUG << "Handling start transmission" << EV_FIELD(signal) << EV_ENDL;
-    auto bitrate = mode->bitrate;
-    simtime_t dataDuration = signal->getBitLength() / bitrate;
-    simtime_t esdDuration = signal->getEsd1() != ESDNONE || signal->getEsd2() != ESDNONE ? 8 / bitrate : 0;
+    simtime_t dataDuration = signal->getBitLength() / mode.bitrate;
+    simtime_t esdDuration = signal->getEsd1() != ESDNONE || signal->getEsd2() != ESDNONE ? 8 / mode.bitrate : 0;
     simtime_t duration = dataDuration + esdDuration;
     signal->setSrcMacFullDuplex(false);
-    signal->setBitrate(bitrate);
+    signal->setBitrate(mode.bitrate);
     signal->setDuration(duration);
     currentTxSignal = signal;
     txEndTime = simTime() + duration;
@@ -412,9 +411,9 @@ void EthernetCsmaPhy::encapsulate(Packet *packet)
     packet->insertAtFront(phyHeader);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetPhy);
     auto packetEvent = new PacketTransmittedEvent();
-    simtime_t packetTransmissionTime = packet->getBitLength() / mode->bitrate;
-    simtime_t bitTransmissionTime = packet->getBitLength() != 0 ? 1 / mode->bitrate : 0;
-    packetEvent->setDatarate(bps(mode->bitrate));
+    simtime_t packetTransmissionTime = packet->getBitLength() / mode.bitrate;
+    simtime_t bitTransmissionTime = packet->getBitLength() != 0 ? 1 / mode.bitrate : 0;
+    packetEvent->setDatarate(bps(mode.bitrate));
     insertPacketEvent(this, packet, PEK_TRANSMITTED, bitTransmissionTime, 8 * bitTransmissionTime, packetEvent);
     increaseTimeTag<TransmissionTimeTag>(packet, bitTransmissionTime, packetTransmissionTime);
     if (auto channel = dynamic_cast<cDatarateChannel *>(physOutGate->findTransmissionChannel())) {

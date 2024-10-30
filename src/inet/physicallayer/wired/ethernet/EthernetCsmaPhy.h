@@ -55,7 +55,7 @@ class INET_API EthernetCsmaPhy : public cSimpleModule, public virtual IEthernetC
 
   protected:
     // parameters
-    const EthernetModes::EthernetMode *mode = nullptr;
+    EthernetModes::EthernetMode mode;
 
     // environment
     cGate *physInGate = nullptr;

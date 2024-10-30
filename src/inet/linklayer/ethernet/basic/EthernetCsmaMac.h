@@ -62,7 +62,7 @@ class INET_API EthernetCsmaMac : public MacProtocolBase, public virtual IEtherne
     // parameters
     FcsMode fcsMode;
     bool promiscuous = false;
-    const EthernetModes::EthernetMode *mode = nullptr;
+    EthernetModes::EthernetMode mode;
 
     // environment
     opp_component_ptr<IEthernetCsmaPhy> phy = nullptr;

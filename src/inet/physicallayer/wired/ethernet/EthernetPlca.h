@@ -149,7 +149,7 @@ class INET_API EthernetPlca : public cSimpleModule, public virtual IEthernetCsma
     CMD_ENUM tx_cmd = CMD_NONE;
 
     // additional state variables
-    const EthernetModes::EthernetMode *mode = nullptr;
+    EthernetModes::EthernetMode mode;
     simtime_t macStartFrameTransmissionTime = -1;
     simtime_t phyStartFrameTransmissionTime = -1;
     bool old_carrier_sense_signal = false;

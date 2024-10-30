@@ -59,7 +59,7 @@ void EthernetCsmaMac::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         // TODO register to networkInterface parameter change signal and process changes
-        mode = &EthernetModes::getEthernetMode(networkInterface->getDatarate());
+        mode = EthernetModes::getEthernetMode(networkInterface->getDatarate());
     }
 }
 
@@ -451,21 +451,21 @@ void EthernetCsmaMac::handleCanPullPacketChanged(const cGate *gate)
 void EthernetCsmaMac::scheduleTxTimer(Packet *packet)
 {
     EV_DEBUG << "Scheduling TX timer" << EV_FIELD(packet) << EV_ENDL;
-    simtime_t duration = b(packet->getDataLength() + ETHERNET_PHY_HEADER_LEN + phy->getEsdLength()).get() / mode->bitrate;
+    simtime_t duration = b(packet->getDataLength() + ETHERNET_PHY_HEADER_LEN + phy->getEsdLength()).get() / mode.bitrate;
     scheduleAfter(duration, txTimer);
 }
 
 void EthernetCsmaMac::scheduleIfgTimer()
 {
     EV_DEBUG << "Scheduling IFG timer" << EV_ENDL;
-    simtime_t duration = b(INTERFRAME_GAP_BITS).get() / mode->bitrate;
+    simtime_t duration = b(INTERFRAME_GAP_BITS).get() / mode.bitrate;
     scheduleAfter(duration, ifgTimer);
 }
 
 void EthernetCsmaMac::scheduleJamTimer()
 {
     EV_DEBUG << "Scheduling jam timer" << EV_ENDL;
-    simtime_t duration = b(JAM_SIGNAL_BYTES).get() / mode->bitrate;
+    simtime_t duration = b(JAM_SIGNAL_BYTES).get() / mode.bitrate;
     scheduleAfter(duration, jamTimer);
 }
 
@@ -475,7 +475,7 @@ void EthernetCsmaMac::scheduleBackoffTimer()
     int backoffRange = (numRetries >= BACKOFF_RANGE_LIMIT) ? 1024 : (1 << numRetries);
     int slotNumber = intuniform(0, backoffRange - 1);
     EV_DEBUG << "Executing backoff procedure" << EV_FIELD(slotNumber) << ", backoffRange = [0," << backoffRange - 1 << "]" << EV_ENDL;
-    simtime_t backoffDuration = slotNumber * mode->slotTime;
+    simtime_t backoffDuration = slotNumber * mode.slotBitLength / mode.bitrate;
     scheduleAfter(backoffDuration, backoffTimer);
 }
 
