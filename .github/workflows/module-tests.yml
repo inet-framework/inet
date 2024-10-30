@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # TODO: add debug/release mode when the runtest scripts can switch between
+        # TODO: add debug/release mode when it becomes supported
         # MODEs or executables based on command line arguments or envvars
         mode: ["debug"]
       fail-fast: false
@@ -48,6 +48,5 @@ jobs:
           source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
 
           echo "::group::Running module tests"
-          cd tests/module
-          ./runtest
+          inet_run_module_tests
           echo "::endgroup::"
