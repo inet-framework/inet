@@ -52,7 +52,7 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
                 packetCapacity = default(1000);
                 @display("p=300,250");
         }
-        mac: <default(csmacdSupport ? "EthernetCsmaMac" : "EthernetMac")> like IEtherMac {
+        mac: <default(csmacdSupport ? "EthernetCsmaMacPhy" : "EthernetMac")> like IEtherMac {
             parameters:
                 @display("p=500,300");
         }

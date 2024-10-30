@@ -13,7 +13,7 @@
 namespace inet {
 
 /**
- * A simplified version of EthernetCsmaMac. Since modern Ethernets typically
+ * A simplified version of EthernetCsmaMacPhy. Since modern Ethernets typically
  * operate over duplex links where's no contention, the original CSMA/CD
  * algorithm is no longer needed. This simplified implementation doesn't
  * contain CSMA/CD, frames are just simply queued up and sent out one by one.

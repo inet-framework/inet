@@ -126,7 +126,7 @@ Ethernet Interface
 ------------------
 
 The :ned:`EthernetInterface` compound module implements the
-:ned:`IWiredInterface` interface. Complements :ned:`EthernetCsmaMac` and
+:ned:`IWiredInterface` interface. Complements :ned:`EthernetCsmaMacPhy` and
 :ned:`EthernetEncapsulation` with an output queue for QoS and RED support. It also
 has configurable input/output filters as :ned:`IHook` components
 similarly to the :ned:`PppInterface` module.
@@ -143,7 +143,7 @@ point-to-point connections between hosts and switches. This means that
 there are no collisions, and the behavior of the MAC component is much
 simpler than in classic Ethernet that used coaxial cables and hubs. Two MAC modules for Ethernet are provided by the INET framework: the
 :ned:`EthernetMac` is simpler to understand and easier to extend,
-because it supports only full-duplex connections. The :ned:`EthernetCsmaMac`
+because it supports only full-duplex connections. The :ned:`EthernetCsmaMacPhy`
 module implements the full MAC functionality including CSMA/CD, it can
 operate in both half-duplex and full-duplex mode.
 
@@ -156,7 +156,7 @@ The following components are present in the model:
 
 -  :ned:`EthernetMac`
 
--  :ned:`EthernetCsmaMac`
+-  :ned:`EthernetCsmaMacPhy`
 
 -  :ned:`EthernetEncapsulation`
 
@@ -180,7 +180,7 @@ bursting.
 
 .. _ug:sec:ethernet:ethermac:
 
-EthernetCsmaMac
+EthernetCsmaMacPhy
 ~~~~~~~~~~~~~~~
 
 Ethernet MAC layer implementing CSMA/CD. It supports both half-duplex

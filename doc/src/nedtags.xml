@@ -1233,8 +1233,8 @@
     <filename>inet.applications.ethernet.EthernetApp.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.ethernet.basic.EthernetCsmaMac</name>
-    <filename>inet.linklayer.ethernet.basic.EthernetCsmaMac.html</filename>
+    <name>inet.linklayer.ethernet.basic.EthernetCsmaMacPhy</name>
+    <filename>inet.linklayer.ethernet.basic.EthernetCsmaMacPhy.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ethernet.modular.EthernetCutthroughBarrier</name>

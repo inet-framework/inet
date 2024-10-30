@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#ifndef __INET_ETHERNETCSMAMAC_H
-#define __INET_ETHERNETCSMAMAC_H
+#ifndef __INET_ETHERNETCSMAMACPHY_H
+#define __INET_ETHERNETCSMAMACPHY_H
 
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/base/EthernetMacBase.h"
@@ -19,11 +19,11 @@ namespace inet {
  *
  * See NED file for more details.
  */
-class INET_API EthernetCsmaMac : public EthernetMacBase
+class INET_API EthernetCsmaMacPhy : public EthernetMacBase
 {
   public:
-    EthernetCsmaMac() {}
-    virtual ~EthernetCsmaMac();
+    EthernetCsmaMacPhy() {}
+    virtual ~EthernetCsmaMacPhy();
 
     // IActivePacketSink:
     virtual void handleCanPullPacketChanged(const cGate *gate) override;

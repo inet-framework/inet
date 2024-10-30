@@ -96,7 +96,7 @@ import inet.linklayer.contract.IEtherMac;
 // @see ~EthernetMac, ~EthernetInterface, ~IPacketQueue, ~EthernetEncapsulation, ~Ieee8022Llc
 // @see ~EthernetMacHeader, ~Ieee8022LlcHeader, ~EthernetFcs
 //
-module EthernetCsmaMac like IEtherMac
+module EthernetCsmaMacPhy like IEtherMac
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -112,7 +112,7 @@ module EthernetCsmaMac like IEtherMac
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after the lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for the lifecycle stop operation
-        @class(EthernetCsmaMac);
+        @class(EthernetCsmaMacPhy);
         @display("i=block/rxtx");
 
         @signal[rxPkOk](type=inet::Packet);

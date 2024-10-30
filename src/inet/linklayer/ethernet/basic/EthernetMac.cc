@@ -36,7 +36,7 @@ void EthernetMac::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         if (!par("duplexMode"))
-            throw cRuntimeError("Half duplex operation is not supported by EthernetMac, use the EthernetCsmaMac module for that! (Please enable csmacdSupport on EthernetInterface)");
+            throw cRuntimeError("Half duplex operation is not supported by EthernetMac, use the EthernetCsmaMacPhy module for that! (Please enable csmacdSupport on EthernetInterface)");
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         beginSendFrames(); // FIXME choose an another stage for it

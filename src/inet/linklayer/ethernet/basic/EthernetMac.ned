@@ -23,7 +23,7 @@ import inet.linklayer.contract.IEtherMac;
 // for the MAC. (In "traditional" Ethernet simulations, most of the code
 // deals with the shared medium and the CSMA/CD mechanism.)
 // ~EthernetMac implements Ethernet without shared medium and CSMA/CD.
-// (If you need half-duplex operation, see ~EthernetCsmaMac which is for a full-blown
+// (If you need half-duplex operation, see ~EthernetCsmaMacPhy which is for a full-blown
 // and therefore more complicated Ethernet MAC model.)
 //
 // ~EthernetMac performs transmission and reception of frames.
@@ -100,7 +100,7 @@ import inet.linklayer.contract.IEtherMac;
 //
 // Please see <a href="physical.html">Messaging on the physical layer</a>.
 //
-// @see ~EthernetCsmaMac, ~EthernetInterface, ~IPacketQueue, ~EthernetEncapsulation, ~Ieee8022Llc
+// @see ~EthernetCsmaMacPhy, ~EthernetInterface, ~IPacketQueue, ~EthernetEncapsulation, ~Ieee8022Llc
 // @see ~EthernetMacHeader, ~Ieee8022LlcHeader, ~EthernetFcs
 //
 module EthernetMac like IEtherMac

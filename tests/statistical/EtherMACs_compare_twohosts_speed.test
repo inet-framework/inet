@@ -4,7 +4,7 @@ The hosts have same ethernet configurations in pairs.
 
 variations:
  - queue: internal / external
- - implementation: EthernetCsmaMac / EthernetMac
+ - implementation: EthernetCsmaMacPhy / EthernetMac
 
 compare results of variations and checks:
  - the number of sent packets are equals (one packet different is acceptable, because the first event of endtime is processed.)
