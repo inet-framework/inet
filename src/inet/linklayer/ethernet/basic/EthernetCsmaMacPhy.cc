@@ -22,7 +22,7 @@
 
 namespace inet {
 
-// TODO there is some code that is pretty much the same as the one found in EthernetMac.cc (e.g. EthernetCsmaMacPhy::beginSendFrames)
+// TODO there is some code that is pretty much the same as the one found in EthernetMacPhy.cc (e.g. EthernetCsmaMacPhy::beginSendFrames)
 // TODO refactor using a statemachine that is present in a single function
 // TODO this helps understanding what interactions are there and how they affect the state
 
@@ -267,7 +267,7 @@ void EthernetCsmaMacPhy::handleUpperPacket(Packet *packet)
     }
 
     if (currentTxFrame != nullptr)
-        throw cRuntimeError("EthernetMac already has a transmit packet when packet arrived from upper layer");
+        throw cRuntimeError("EthernetMacPhy already has a transmit packet when packet arrived from upper layer");
     addPaddingAndSetFcs(packet, MIN_ETHERNET_FRAME_BYTES);
     currentTxFrame = packet;
     startFrameTransmission();

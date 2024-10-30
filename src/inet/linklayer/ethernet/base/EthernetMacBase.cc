@@ -287,7 +287,7 @@ void EthernetMacBase::decapsulate(Packet *packet)
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 }
 
-// FIXME should use it in EthernetCsmaMacPhy, EthernetMac, etc. modules. But should not use it in EtherBus, EthernetHub.
+// FIXME should use it in EthernetCsmaMacPhy, EthernetMacPhy, etc. modules. But should not use it in EtherBus, EthernetHub.
 bool EthernetMacBase::verifyCrcAndLength(Packet *packet)
 {
     EV_STATICCONTEXT;

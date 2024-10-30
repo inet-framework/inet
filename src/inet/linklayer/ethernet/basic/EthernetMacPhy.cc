@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/linklayer/ethernet/basic/EthernetMac.h"
+#include "inet/linklayer/ethernet/basic/EthernetMacPhy.h"
 
 #include "inet/common/PacketEventTag.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -24,26 +24,26 @@ namespace inet {
 // TODO refactor using a statemachine that is present in a single function
 // TODO this helps understanding what interactions are there and how they affect the state
 
-Define_Module(EthernetMac);
+Define_Module(EthernetMacPhy);
 
-EthernetMac::EthernetMac()
+EthernetMacPhy::EthernetMacPhy()
 {
 }
 
-void EthernetMac::initialize(int stage)
+void EthernetMacPhy::initialize(int stage)
 {
     EthernetMacBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         if (!par("duplexMode"))
-            throw cRuntimeError("Half duplex operation is not supported by EthernetMac, use the EthernetCsmaMacPhy module for that! (Please enable csmacdSupport on EthernetInterface)");
+            throw cRuntimeError("Half duplex operation is not supported by EthernetMacPhy, use the EthernetCsmaMacPhy module for that! (Please enable csmacdSupport on EthernetInterface)");
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         beginSendFrames(); // FIXME choose an another stage for it
     }
 }
 
-void EthernetMac::initializeStatistics()
+void EthernetMacPhy::initializeStatistics()
 {
     EthernetMacBase::initializeStatistics();
 
@@ -51,7 +51,7 @@ void EthernetMac::initializeStatistics()
     totalSuccessfulRxTime = 0.0;
 }
 
-void EthernetMac::initializeFlags()
+void EthernetMacPhy::initializeFlags()
 {
     EthernetMacBase::initializeFlags();
 
@@ -59,7 +59,7 @@ void EthernetMac::initializeFlags()
     physInGate->setDeliverImmediately(false);
 }
 
-void EthernetMac::handleMessageWhenUp(cMessage *msg)
+void EthernetMacPhy::handleMessageWhenUp(cMessage *msg)
 {
     if (channelsDiffer)
         readChannelParameters(true);
@@ -75,7 +75,7 @@ void EthernetMac::handleMessageWhenUp(cMessage *msg)
     processAtHandleMessageFinished();
 }
 
-void EthernetMac::handleSelfMessage(cMessage *msg)
+void EthernetMacPhy::handleSelfMessage(cMessage *msg)
 {
     EV_TRACE << "Self-message " << msg << " received\n";
 
@@ -89,7 +89,7 @@ void EthernetMac::handleSelfMessage(cMessage *msg)
         throw cRuntimeError("Unknown self message received!");
 }
 
-void EthernetMac::startFrameTransmission()
+void EthernetMacPhy::startFrameTransmission()
 {
     ASSERT(currentTxFrame);
     EV_DETAIL << "Transmitting a copy of frame " << currentTxFrame << endl;
@@ -137,9 +137,9 @@ void EthernetMac::startFrameTransmission()
     changeTransmissionState(TRANSMITTING_STATE);
 }
 
-void EthernetMac::handleUpperPacket(Packet *packet)
+void EthernetMacPhy::handleUpperPacket(Packet *packet)
 {
-    //ASSERT2(false, "using EthernetMac");
+    //ASSERT2(false, "using EthernetMacPhy");
     EV_INFO << "Received " << packet << " from upper layer." << endl;
 
     numFramesFromHL++;
@@ -167,15 +167,15 @@ void EthernetMac::handleUpperPacket(Packet *packet)
     }
 
     if (transmitState != TX_IDLE_STATE)
-        throw cRuntimeError("EthernetMac not in TX_IDLE_STATE when packet arrived from upper layer");
+        throw cRuntimeError("EthernetMacPhy not in TX_IDLE_STATE when packet arrived from upper layer");
     if (currentTxFrame != nullptr)
-        throw cRuntimeError("EthernetMac already has a transmit packet when packet arrived from upper layer");
+        throw cRuntimeError("EthernetMacPhy already has a transmit packet when packet arrived from upper layer");
     addPaddingAndSetFcs(packet, MIN_ETHERNET_FRAME_BYTES);
     currentTxFrame = packet;
     startFrameTransmission();
 }
 
-void EthernetMac::processMsgFromNetwork(Signal *signal)
+void EthernetMacPhy::processMsgFromNetwork(Signal *signal)
 {
     EV_INFO << signal << " received." << endl;
 
@@ -253,7 +253,7 @@ void EthernetMac::processMsgFromNetwork(Signal *signal)
     }
 }
 
-void EthernetMac::handleEndIFGPeriod()
+void EthernetMacPhy::handleEndIFGPeriod()
 {
     ASSERT(nullptr == currentTxFrame);
     if (transmitState != WAIT_IFG_STATE)
@@ -269,7 +269,7 @@ void EthernetMac::handleEndIFGPeriod()
     }
 }
 
-void EthernetMac::handleEndTxPeriod()
+void EthernetMacPhy::handleEndTxPeriod()
 {
     // we only get here if transmission has finished successfully
     if (transmitState != TRANSMITTING_STATE)
@@ -312,7 +312,7 @@ void EthernetMac::handleEndTxPeriod()
     }
 }
 
-void EthernetMac::finish()
+void EthernetMacPhy::finish()
 {
     EthernetMacBase::finish();
 
@@ -322,7 +322,7 @@ void EthernetMac::finish()
     recordScalar("rx channel utilization (%)", 100 * (totalSuccessfulRxTime / t));
 }
 
-void EthernetMac::handleEndPausePeriod()
+void EthernetMacPhy::handleEndPausePeriod()
 {
     ASSERT(nullptr == currentTxFrame);
     if (transmitState != PAUSE_STATE)
@@ -337,7 +337,7 @@ void EthernetMac::handleEndPausePeriod()
     }
 }
 
-void EthernetMac::processReceivedDataFrame(Packet *packet, const Ptr<const EthernetMacHeader>& frame)
+void EthernetMacPhy::processReceivedDataFrame(Packet *packet, const Ptr<const EthernetMacHeader>& frame)
 {
     // statistics
     unsigned long curBytes = packet->getByteLength();
@@ -360,7 +360,7 @@ void EthernetMac::processReceivedDataFrame(Packet *packet, const Ptr<const Ether
     send(packet, upperLayerOutGateId);
 }
 
-void EthernetMac::processPauseCommand(int pauseUnits)
+void EthernetMacPhy::processPauseCommand(int pauseUnits)
 {
     if (transmitState == TX_IDLE_STATE) {
         EV_DETAIL << "PAUSE frame received, pausing for " << pauseUnitsRequested << " time units\n";
@@ -383,7 +383,7 @@ void EthernetMac::processPauseCommand(int pauseUnits)
     }
 }
 
-void EthernetMac::scheduleEndIFGPeriod()
+void EthernetMacPhy::scheduleEndIFGPeriod()
 {
     ASSERT(nullptr == currentTxFrame);
     changeTransmissionState(WAIT_IFG_STATE);
@@ -391,7 +391,7 @@ void EthernetMac::scheduleEndIFGPeriod()
     scheduleAt(endIFGTime, endIfgTimer);
 }
 
-void EthernetMac::scheduleEndPausePeriod(int pauseUnits)
+void EthernetMacPhy::scheduleEndPausePeriod(int pauseUnits)
 {
     ASSERT(nullptr == currentTxFrame);
     // length is interpreted as 512-bit-time units
@@ -400,7 +400,7 @@ void EthernetMac::scheduleEndPausePeriod(int pauseUnits)
     changeTransmissionState(PAUSE_STATE);
 }
 
-void EthernetMac::beginSendFrames()
+void EthernetMacPhy::beginSendFrames()
 {
     if (currentTxFrame) {
         // Other frames are queued, transmit next frame
@@ -414,7 +414,7 @@ void EthernetMac::beginSendFrames()
     }
 }
 
-void EthernetMac::handleCanPullPacketChanged(const cGate *gate)
+void EthernetMacPhy::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (currentTxFrame == nullptr && transmitState == TX_IDLE_STATE && canDequeuePacket()) {

@@ -1325,8 +1325,8 @@
     <filename>inet.node.ethernet.EthernetLink.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.ethernet.basic.EthernetMac</name>
-    <filename>inet.linklayer.ethernet.basic.EthernetMac.html</filename>
+    <name>inet.linklayer.ethernet.basic.EthernetMacPhy</name>
+    <filename>inet.linklayer.ethernet.basic.EthernetMacPhy.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ethernet.modular.EthernetMacHeaderChecker</name>

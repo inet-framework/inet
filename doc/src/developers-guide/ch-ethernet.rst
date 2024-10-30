@@ -138,7 +138,7 @@
    .. graphviz:: figures/EtherMAC_txstates.dot
       :align: center
 
-   Unlike :ned:`EthernetMac`, this MAC module processes the incoming
+   Unlike :ned:`EthernetMacPhy`, this MAC module processes the incoming
    packets when their first bit is received. The end of the reception is
    calculated by the MAC and detected by scheduling a self message.
 

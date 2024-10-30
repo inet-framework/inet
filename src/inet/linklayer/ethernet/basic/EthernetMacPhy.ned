@@ -22,11 +22,11 @@ import inet.linklayer.contract.IEtherMac;
 // being used. This allows for a much simpler simulation model
 // for the MAC. (In "traditional" Ethernet simulations, most of the code
 // deals with the shared medium and the CSMA/CD mechanism.)
-// ~EthernetMac implements Ethernet without shared medium and CSMA/CD.
+// ~EthernetMacPhy implements Ethernet without shared medium and CSMA/CD.
 // (If you need half-duplex operation, see ~EthernetCsmaMacPhy which is for a full-blown
 // and therefore more complicated Ethernet MAC model.)
 //
-// ~EthernetMac performs transmission and reception of frames.
+// ~EthernetMacPhy performs transmission and reception of frames.
 // It does not do encapsulation/decapsulation; see ~Ieee8022Llc and ~EthernetEncapsulation
 // for that.
 //
@@ -103,7 +103,7 @@ import inet.linklayer.contract.IEtherMac;
 // @see ~EthernetCsmaMacPhy, ~EthernetInterface, ~IPacketQueue, ~EthernetEncapsulation, ~Ieee8022Llc
 // @see ~EthernetMacHeader, ~Ieee8022LlcHeader, ~EthernetFcs
 //
-module EthernetMac like IEtherMac
+module EthernetMacPhy like IEtherMac
 {
     parameters:
         string interfaceTableModule;        // The path to the InterfaceTable module
@@ -111,7 +111,7 @@ module EthernetMac like IEtherMac
         bool sendRawBytes = default(false); // When true, packets are serialized into a sequence of bytes before sending out
         bool promiscuous = default(false);  // If true, all packets are received; otherwise, only the
                                             // ones with a matching destination MAC address
-        bool duplexMode;                    // Must be set to "true", as EthernetMac does not support half-duplex operation
+        bool duplexMode;                    // Must be set to "true", as EthernetMacPhy does not support half-duplex operation
                                             // (parameter is present to reduce the risk of accidental misconfiguration)
         bool allowNonstandardBitrate = default(false); // Allows any bitrate and uses the first larger bitrate specified parameters
         int mtu @unit(B) = default(1500B);
@@ -119,7 +119,7 @@ module EthernetMac like IEtherMac
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after the lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for the lifecycle stop operation
-        @class(EthernetMac);
+        @class(EthernetMacPhy);
         @display("i=block/rxtx");
 
         @signal[txPk](type=inet::Packet);

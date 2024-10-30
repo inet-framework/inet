@@ -14,7 +14,7 @@ namespace inet {
 
 /**
  * Ethernet MAC module which supports both half-duplex (CSMA/CD) and full-duplex
- * operation. (See also EthernetMac which has a considerably smaller
+ * operation. (See also EthernetMacPhy which has a considerably smaller
  * code with all the CSMA/CD complexity removed.)
  *
  * See NED file for more details.

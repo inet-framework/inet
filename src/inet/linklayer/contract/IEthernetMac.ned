@@ -10,7 +10,7 @@ package inet.linklayer.contract;
 //
 // Interface for Ethernet MAC implementations. All Ethernet MAC implementations
 // should implement this (i.e. declared as: `EthernetCsmaMacPhy` like `IEtherMac`).
-// The existing implementations are these: ~EthernetCsmaMacPhy and ~EthernetMac.
+// The existing implementations are these: ~EthernetCsmaMacPhy and ~EthernetMacPhy.
 //
 // Doesn't do encapsulation/decapsulation; see ~EthernetEncapsulation for that.
 //

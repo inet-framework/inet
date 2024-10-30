@@ -5,8 +5,8 @@
 //
 
 
-#ifndef __INET_ETHERNETMAC_H
-#define __INET_ETHERNETMAC_H
+#ifndef __INET_ETHERNETMACPHY_H
+#define __INET_ETHERNETMACPHY_H
 
 #include "inet/linklayer/ethernet/base/EthernetMacBase.h"
 
@@ -18,10 +18,10 @@ namespace inet {
  * algorithm is no longer needed. This simplified implementation doesn't
  * contain CSMA/CD, frames are just simply queued up and sent out one by one.
  */
-class INET_API EthernetMac : public EthernetMacBase
+class INET_API EthernetMacPhy : public EthernetMacBase
 {
   public:
-    EthernetMac();
+    EthernetMacPhy();
 
     // IActivePacketSink:
     virtual void handleCanPullPacketChanged(const cGate *gate) override;
