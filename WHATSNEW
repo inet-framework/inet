@@ -1,6 +1,12 @@
 Recent changes in the INET Framework
 ====================================
 
+INET 3.8.5 (Nov 2024) - stable
+------------------------------
+
+Contains compatibility fixes for OMNeT++ 6.1.
+Requires OMNeT++ 5.7 or 6.0.
+
 INET 3.8.4 (Aug 2024) - stable
 ------------------------------
 
