@@ -9,7 +9,7 @@ package inet.examples.ethernet.TenBaseT1S;
 import inet.applications.contract.IApp;
 import inet.common.MessageDispatcher;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.ethernet.contract.IEthernetLayer;
+import inet.linklayer.contract.IEthernetLayer;
 import inet.networklayer.common.InterfaceTable;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.physicallayer.wired.ethernet.ISpi;
