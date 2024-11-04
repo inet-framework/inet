@@ -105,7 +105,7 @@ class MultipleChartTestTasks(MultipleTestTasks):
         multiple_simulation_task_results = self.multiple_simulation_tasks.run_protected(**kwargs)
         return super().run_protected(**kwargs)
 
-def get_chart_test_tasks(simulation_project=None, run_simulations=True, filter=None, working_directory_filter=None, chart_filter=None, exclude_chart_filter=None, **kwargs):
+def get_chart_test_tasks(simulation_project=None, run_simulations=True, filter="showcases", working_directory_filter=None, chart_filter=None, exclude_chart_filter=None, **kwargs):
     """
     Returns multiple chart test tasks matching the provided filter criteria. The returned tasks can be run by
     calling the :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
