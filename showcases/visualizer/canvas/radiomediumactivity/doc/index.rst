@@ -56,7 +56,7 @@ configuration from the ini file. The simulation uses the following
 network:
 
 .. figure:: media/simplenetwork.png
-   :width: 100%
+   :width: 70%
 
 The scene size is about 900x600 meters. The network contains two
 :ned:`WirelessHost`'s. ``host1`` is configured to send UDP packets to
@@ -75,14 +75,14 @@ following visualizer settings:
 When the simulation is run the network looks like this:
 
 .. figure:: media/simple.png
-   :width: 100%
+   :width: 90%
 
 Parts of the communication range circles are visible in the image. With
 the current radio settings, the interference ranges are much larger than
 the communication ranges. One has to zoom out for them to be visible:
 
 .. figure:: media/interferencerange.png
-   :width: 100%
+   :width: 90%
 
 The communication and interference ranges are estimated for each node,
 from the node's maximum transmitter power and the lowest receiver
@@ -242,7 +242,7 @@ The configuration
 The example configuration for this section uses the following network:
 
 .. figure:: media/multiplenodesnetwork.png
-   :width: 100%
+   :width: 80%
 
 The scene size is 1000x500 meters. The network contains three
 :ned:`AdhocHost`'s. The ``source`` is configured to ping the

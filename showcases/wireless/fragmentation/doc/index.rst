@@ -86,7 +86,7 @@ the performance. Furthermore, we'll examine the domain of effectiveness for frag
 The example simulation uses the following network:
 
 .. figure:: media/network3.png
-   :width: 90%
+   :width: 80%
    :align: center
 
 The network contains two :ned:`AdhocHost`'s named ``wifiHost1`` and ``wifiHost2``.

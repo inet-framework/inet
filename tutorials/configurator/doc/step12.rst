@@ -16,7 +16,7 @@ This step uses the :ned:`ConfiguratorE` network, defined in
 looks like this:
 
 .. figure:: media/step12network.png
-   :width: 100%
+   :width: 90%
 
 The core of the network is composed of three routers connected to each
 other, each belonging to an area. There are three areas, each containing
@@ -85,7 +85,7 @@ Results
 The routes are visualized on the following image.
 
 .. figure:: media/step12routes_2.png
-   :width: 100%
+   :width: 90%
 
 As intended, ``area1host1`` connects to the network via ``area1host2``.
 

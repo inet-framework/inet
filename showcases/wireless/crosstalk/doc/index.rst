@@ -47,7 +47,7 @@ be a few independent channels, where there is no cross-channel
 interference, e.g., Channels 1, 6, and 11, as illustrated below.
 
 .. figure:: media/channels.png
-   :width: 100%
+   :width: 90%
    :align: center
 
 In INET, the scalar analog model represents signals with a scalar signal power,
@@ -67,7 +67,7 @@ All simulations use variations of the same network, which is
 illustrated by the image below:
 
 .. figure:: media/basenetwork.png
-   :width: 80%
+   :width: 50%
    :align: center
 
 The networks contain four :ned:`AdhocHost`'s, named ``host1`` to
