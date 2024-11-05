@@ -94,35 +94,14 @@ For more information, refer to the NED documentation of
 Try It Yourself
 ---------------
 
-If you already have INET and OMNeT++ installed, start the IDE by typing
+First, install INET and OMNeT++. Then, start the IDE by typing
 ``omnetpp``, import the INET project into the IDE, then navigate to the
 ``inet/showcases/visualizer/osg/environment`` folder in the `Project Explorer`. There, you can view
 and edit the showcase files, run simulations, and analyze results.
 
-Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
-<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
-Ensure that ``opp_env`` is installed on your system, then execute:
+Currently, `opp_env <https://omnetpp.org/opp_env>`__-based installation is not
+available for the 3D visualization (OSG-based) showcases.
 
-.. code-block:: bash
-
-    $ opp_env run inet-4.0 --init -w inet-workspace --install --chdir
-       -c 'cd inet-4.0/showcases/visualizer/osg/environment && inet'
-
-This command creates an ``inet-workspace`` directory, installs the appropriate
-versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
-showcase directory for interactive simulation.
-
-Alternatively, for a more hands-on experience, you can first set up the
-workspace and then open an interactive shell:
-
-.. code-block:: bash
-
-    $ opp_env install --init -w inet-workspace inet-4.0
-    $ cd inet-workspace
-    $ opp_env shell
-
-Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
-then start exploring.
 
 Discussion
 ----------
