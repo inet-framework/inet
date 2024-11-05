@@ -152,7 +152,7 @@ default :ned:`PacketQueue` to :ned:`PriorityQueue`:
 
 The priority queue utilizes two internal queues for the two traffic categories. To limit 
 the queueing time's effect on the measured end-to-end delay, we also limit the length of 
-internal queues to 4. We also disable the shared buffer and set the queue type to 
+internal queues to 4. We also set the queue type to 
 :ned:`DropTailQueue`. We use the priority queue's classifier to put packets into the 
 two traffic categories.
 
@@ -169,8 +169,7 @@ which support preemption.
 There is no priority queue in this configuration. The two MAC submodules both have their own queues.
 We also limit the queue length to 4 and configure the queue type to be :ned:`DropTailQueue`.
 
-.. note:: We could also have just one shared priority queue in the EthernetPreemptableMac module, 
-but this is not covered here.
+.. note:: We could also have just one shared priority queue in the EthernetPreemptableMac module, but this is not covered here.
 
 We use the following traffic for the ``RealisticFifoQueueing``, ``RealisticPriorityQueueing``, 
 and ``RealisticFramePreemption`` configurations:

@@ -64,7 +64,7 @@ INET has different rate control models, such as :ned:`ArfRateControl`,
 The network
 ~~~~~~~~~~~
 
-Two :ned:`StandardHost`'s (``sourceHost`` and ``sinkHost``) are placed on
+Two :ned:`WirelessHost`'s (``sourceHost`` and ``sinkHost``) are placed on
 the edge of the scene. During the simulation, they will move along
 the edge of the scene with different speeds, while ``sourceHost``
 will send UDP packets to ``sinkHost``. There is a forest in the middle
@@ -108,8 +108,7 @@ forest.
 
 Bitrate and throughput are recorded during the simulations. The
 following plots show the nominal data bitrate and the actual application
-level throughput for the two configurations (the values are in s and
-bps).
+level throughput for the two configurations.
 
 .. figure:: media/noratecontrol2.png
    :width: 100%
@@ -136,8 +135,10 @@ rate for the two scenarios can be compared on the following plots.
 .. image:: media/bitrate2.png
    :width: 100%
 
-The received packet count at ``sinkHost`` is 18366 for 'No rate
-control', and 35966 for 'AarfRateControl'.
+Here is the received packet count at ``sinkHost``:
+
+.. figure:: media/numpackets.png
+   :width: 50%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`RateControlShowcase.ned <../RateControlShowcase.ned>`
 

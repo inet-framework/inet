@@ -56,7 +56,7 @@ change in the network topology). Examples of reactive MANET routing
 protocols include DSDV, OLSR, Babel, etc.
 
 Reactive protocols require less overhead than proactive protocols (there
-are no concerning routing when the routes don't change) but also might
+are no messages concerning routing when the routes don't change) but also might
 react more slowly to changes in the network topology. In the case of
 proactive protocols, due to the up-to-date nature of routing
 information, latency is lower than in the case of reactive protocols.
@@ -240,7 +240,7 @@ AODV
 
 The example simulation featuring AODV is defined in the :ned:`Aodv`
 configuration in :download:`omnetpp.ini <../omnetpp.ini>`. This
-configuration uses the ``ManetProtocolShowcaseA`` network. The network
+configuration uses the ``ManetProtocolShowcaseB`` network. The network
 looks like the following:
 
 .. figure:: media/networkA.png
@@ -406,9 +406,9 @@ The following video shows ``source`` pinging ``destination``:
 GPSR
 ~~~~
 
-The example simulation featuring GPSR is defined in the :ned:`Gpsr`
+The example simulation featuring GPSR is defined in the ``Gpsr``
 configuration in :download:`omnetpp.ini <../omnetpp.ini>`. It uses the
-``ManetRoutingProtocolsShowcaseB`` network. The network looks like the
+``ManetRoutingProtocolsShowcaseA`` network. The network looks like the
 following:
 
 .. figure:: media/networkB.png
