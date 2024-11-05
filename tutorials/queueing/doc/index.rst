@@ -1,18 +1,16 @@
 Queueing Tutorial
 =================
 
-INET contains a queueing library which provides various components
-such as traffic generators, queues, and traffic conditioners.
-Elements of the library can be used to assemble queueing functionality
-that can be
-used at layer 2 and layer 3 of the protocol stack. With extra elements, the queueing library can also be used
-to define custom application behavior without C++ programming.
+Explore the use of queueing components in INET, including traffic generators,
+queues, and traffic conditioners. These components can be utilized to build
+diverse functionalities at various layers of the protocol stack.
 
-Each step in this tutorial demonstrates one of the available queueing elements,
-with a few more complex examples at the end.
-Note that most of the available elements are demonstrated here, but not all
-(for example, elements specific to DiffServ are omitted from here).
-See the INET Reference for the complete list of elements.
+Introduction
+
+.. toctree::
+   :maxdepth: 1
+
+   gettingstarted
 
 Sources and Sinks
 
