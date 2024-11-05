@@ -212,6 +212,19 @@ elements (TLVs). The ``nh`` and ``update`` messages indicate that 192.168.4.1
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`BabelShowcase.ned <../BabelShowcase.ned>`
 
+
+Try It Yourself
+---------------
+
+First, install INET and OMNeT++. Then, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/emulation/babel`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Currently, `opp_env <https://omnetpp.org/opp_env>`__-based installation is not
+available for the emulation showcases.
+
+
 Discussion
 ----------
 
