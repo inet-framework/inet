@@ -36,19 +36,16 @@ start forwarding it before the whole packet is received.
 The example simulation contains two :ned:`TsnDevice` nodes connected by two
 :ned:`TsnSwitch` nodes (all connections are 1 Gbps):
 
-.. .. figure:: media/Network.png
+.. figure:: media/Network.png
    :align: center
-   :width: 100%
 
 In the simulation, ``device1`` sends 1000-Byte UDP packets to ``device2``, with a mean arrival time of 200ms,
 and 50ms jitter. There are two configurations in omnetpp.ini, ``StoreAndForward`` and ``CutthroughSwitching``,
 which only differ in the use of cut-through switching.
 
-Here are the two configurations:
+Here are the configurations:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: StoreAndForward
-   :end-at: phyLayer
    :language: ini
 
 
