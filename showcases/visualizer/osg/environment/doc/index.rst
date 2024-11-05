@@ -90,6 +90,19 @@ Further information
 For more information, refer to the NED documentation of
 :ned:`PhysicalEnvironmentVisualizer` and :ned:`SceneCanvasVisualizer`.
 
+
+Try It Yourself
+---------------
+
+First, install INET and OMNeT++. Then, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/visualizer/osg/environment`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Currently, `opp_env <https://omnetpp.org/opp_env>`__-based installation is not
+available for the 3D visualization (OSG-based) showcases.
+
+
 Discussion
 ----------
 
