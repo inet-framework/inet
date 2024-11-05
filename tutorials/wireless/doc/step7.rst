@@ -107,5 +107,5 @@ Discussion
 ----------
 
 Use `this
-page <https://github.com/inet-framework/inet-tutorials/issues/1>`__ in
+page <https://github.com/inet-framework/inet/discussions/998>`__ in
 the GitHub issue tracker for commenting on this tutorial.
