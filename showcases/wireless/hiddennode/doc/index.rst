@@ -166,9 +166,8 @@ overhead, more packets are received correctly at Host B. When RTS/CTS is
 used, the number of packets received correctly at Host B is
 approximately the same regardless of the presence of the wall.
 
-The number of received packets at Host B (wall removed, RTS/CTS off):
-**1966**\ The number of received packets at Host B (wall removed,
-RTS/CTS on): **1987**
+| The number of received packets at Host B (wall removed, RTS/CTS off): **1966** 
+| The number of received packets at Host B (wall removed, RTS/CTS on): **1987**
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`HiddenNodeShowcase.ned <../HiddenNodeShowcase.ned>`
 

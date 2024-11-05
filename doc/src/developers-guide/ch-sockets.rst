@@ -318,7 +318,7 @@ TCP Socket
 The :cpp:`TcpSocket` class provides an easy to use C++ interface to
 manage :protocol:`TCP` connections, and to send and receive data. The
 underlying :protocol:`TCP` protocol is implemented in the :ned:`Tcp`,
-:ned:`TcpLwip`, and :ned:`TcpNsc` modules.
+:ned:`TcpLwip`, and ``TcpNsc`` modules.
 
 .. _callback-interface-1:
 
