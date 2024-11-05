@@ -17,12 +17,10 @@ __sphinx_mock__ = True # ignore this module in documentation
 _logger = logging.getLogger(__name__)
 
 def disable_features(feature):
-    args = ["opp_featuretool", "disable", "-f", feature]
-    subprocess.run(args)
+    run_command_with_logging(["opp_featuretool", "disable", "-f", feature])
 
 def enable_features(feature):
-    args = ["opp_featuretool", "enable", "-f", feature]
-    subprocess.run(args)
+    run_command_with_logging(["opp_featuretool", "enable", "-f", feature])
 
 class FeatureTestTask(TestTask):
     def __init__(self, simulation_project, feature, packages, **kwargs):
@@ -50,12 +48,12 @@ class FeatureTestTask(TestTask):
     def get_parameters_string(self, **kwargs):
         return self.feature
 
-    def run_protected(self, capture_output=True, **kwargs):
+    def run_protected(self, **kwargs):
         disable_features("all")
         enable_features(self.feature)
         make_makefiles(simulation_project=self.simulation_project)
         clean_project(simulation_project=self.simulation_project)
-        build_project(simulation_project=self.simulation_project, capture_output=False)
+        build_project(simulation_project=self.simulation_project)
         multiple_simulation_tasks_result = self.multiple_simulation_tasks.run(**kwargs)
         result="PASS" if multiple_simulation_tasks_result.result == "DONE" else "FAIL" if multiple_simulation_tasks_result.result == "FAIL" else "ERROR"
         return self.task_result_class(self, result=result)
@@ -328,7 +326,7 @@ def update_oppfeatures(simulation_project=None, simulation_results=None):
     enable_features("all")
     make_makefiles(simulation_project=simulation_project)
     clean_project(simulation_project=simulation_project)
-    build_project(simulation_project=simulation_project, capture_output=False)
+    build_project(simulation_project=simulation_project)
     if simulation_results is None:
         simulation_results = run_simulations(simulation_project=simulation_project, run_number=0)
     feature_to_required_features = get_feature_to_required_features_for_simulation_project(simulation_project, simulation_results)

@@ -45,8 +45,7 @@ class BuildTask(Task):
 
     def run_protected(self, **kwargs):
         args = self.get_arguments()
-        _logger.debug(f"Running subprocess: {args}")
-        subprocess_result = subprocess.run(args, cwd=self.simulation_project.get_full_path("."))
+        subprocess_result = run_command_with_logging(args, cwd=self.simulation_project.get_full_path("."))
         if subprocess_result.returncode == signal.SIGINT.value or subprocess_result.returncode == -signal.SIGINT.value:
             return self.task_result_class(task=self, subprocess_result=subprocess_result, result="CANCEL", reason="Cancel by user")
         elif subprocess_result.returncode == 0:

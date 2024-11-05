@@ -30,28 +30,28 @@ class OppTestTask(TestTask):
     def get_parameters_string(self, **kwargs):
         return self.test_file_name
 
-    def run_protected(self, capture_output=True, **kwargs):
+    def run_protected(self, **kwargs):
         binary_suffix = "_dbg" if self.mode == "debug" else ""
         test_binary_name = re.sub(r"\.test", "", self.test_file_name)
         test_directory = os.path.join(self.working_directory, f"work/{test_binary_name}")
         has_lib = os.path.exists(os.path.join(self.working_directory, "lib"))
         os.makedirs(test_directory, exist_ok=True)
         args = ["opp_test", "gen", "-v", self.test_file_name]
-        subprocess_result = subprocess.run(args, cwd=self.working_directory, capture_output=capture_output, env=self.simulation_project.get_env())
+        subprocess_result = run_command_with_logging(args, cwd=self.working_directory, env=self.simulation_project.get_env())
         if subprocess_result.returncode != 0:
-            return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr.decode("utf-8"))
+            return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
         args = ["opp_makemake", "-f", "--deep", f"-lINET{binary_suffix}", "-L../../../../src", *([f"-ltest{binary_suffix}", "-L../../lib"] if has_lib else []), "-P", test_directory, "-I../../../../src", "-I../../lib"]
-        subprocess_result = subprocess.run(args, cwd=test_directory, capture_output=capture_output, env=self.simulation_project.get_env())
+        subprocess_result = run_command_with_logging(args, cwd=test_directory, env=self.simulation_project.get_env())
         if subprocess_result.returncode != 0:
-            return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr.decode("utf-8"))
+            return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
         args = ["make", f"MODE={self.mode}"]
-        subprocess_result = subprocess.run(args, cwd=test_directory, capture_output=capture_output, env=self.simulation_project.get_env())
+        subprocess_result = run_command_with_logging(args, cwd=test_directory, env=self.simulation_project.get_env())
         if subprocess_result.returncode != 0:
-            return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr.decode("utf-8"))
+            return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
         args = ["opp_test", "run", "-v", "-p", f"{test_binary_name}/{test_binary_name}{binary_suffix}", self.test_file_name, "-a", "--check-signals=false", "-lINET", "-n", f"../../../../src:.:{'../../lib' if has_lib else ''}"]
-        subprocess_result = subprocess.run(args, cwd=self.working_directory, capture_output=capture_output, env=self.simulation_project.get_env())
-        stdout = subprocess_result.stdout.decode("utf-8")
-        stderr = subprocess_result.stderr.decode("utf-8")
+        subprocess_result = run_command_with_logging(args, cwd=self.working_directory, env=self.simulation_project.get_env())
+        stdout = subprocess_result.stdout
+        stderr = subprocess_result.stderr
         match = re.search(r"Aggregate result: (\w+)", stdout)
         if match:
             result = match.group(1)
@@ -93,12 +93,12 @@ class MultipleOppTestTasks(MultipleTestTasks):
         self.test_folder = test_folder
         self.mode = mode
 
-    def run_protected(self, capture_output=True, **kwargs):
+    def run_protected(self, **kwargs):
         test_directory = self.simulation_project.get_full_path(self.test_folder)
         lib_directory = os.path.join(test_directory, "lib")
         if os.path.exists(lib_directory):
             args = ["make", f"MODE={self.mode}"]
-            subprocess_result = subprocess.run(args, cwd=lib_directory, capture_output=capture_output, env=self.simulation_project.get_env())
+            subprocess_result = run_command_with_logging(args, cwd=lib_directory, env=self.simulation_project.get_env())
             if subprocess_result.returncode != 0:
                 raise Exception("Cannot build lib")
         return super().run_protected(**kwargs)

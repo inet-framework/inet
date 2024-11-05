@@ -149,12 +149,12 @@ class SimulationProject:
         self.folder_environment_variable = folder_environment_variable
         self.folder = folder
         # TODO this is commented out because it runs subprocesses, and it even does this from the IDE when some completely unrelated modules are loaded, sigh!
-        # self.git_hash = git_hash or subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.get_full_path("."), capture_output=True).stdout.decode("utf-8").strip()
+        # self.git_hash = git_hash or run_command_with_logging(["git", "rev-parse", "HEAD"], cwd=self.get_full_path(".")).stdout.strip()
         # if git_diff_hash:
         #     self.git_diff_hash = git_diff_hash
         # else:
         #     git_diff_hasher = hashlib.sha256()
-        #     git_diff_hasher.update(subprocess.run(["git", "diff", "--quiet"], cwd=self.get_full_path("."), capture_output=True).stdout)
+        #     git_diff_hasher.update(run_command_with_logging(["git", "diff", "--quiet"], cwd=self.get_full_path(".")).stdout)
         #     self.git_diff_hash = git_diff_hasher.digest().hex()
         self.bin_folder = bin_folder
         self.library_folder = library_folder
@@ -358,14 +358,13 @@ class SimulationProject:
                     inifile_contents = InifileContents(ini_path)
                     num_runs = inifile_contents.getNumRunsInConfig(config)
                 except Exception as e:
-                    _logger.debug(f"Running subprocess: {args}")
-                    result = subprocess.run(args, cwd=working_directory, capture_output=True, env=self.get_env())
+                    result = run_command_with_logging(args, cwd=working_directory, env=self.get_env())
                     if result.returncode == 0:
                         # KLUDGE: this was added to test source dependency based task result caching
-                        result.stdout = re.sub(r"INI dependency: (.*)", "", result.stdout.decode("utf-8"))
+                        result.stdout = re.sub(r"INI dependency: (.*)", "", result.stdout)
                         num_runs = int(result.stdout)
                     else:
-                        _logger.warn("Cannot determine number of runs: " + result.stderr.decode("utf-8") + " in " + working_directory)
+                        _logger.warn("Cannot determine number of runs: " + result.stderr + " in " + working_directory)
                         continue
             sim_time_limit = get_sim_time_limit(config_dicts, config)
             description = config_dict["description"]

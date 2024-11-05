@@ -308,8 +308,8 @@ class SimulationEvent:
         self.simulation_task.run(debug_event_number=self.event_number)
 
 def get_calculated_fingerprint(simulation_result, ingredients):
-    stdout = simulation_result.subprocess_result.stdout.decode("utf-8")
-    stderr = simulation_result.subprocess_result.stderr.decode("utf-8")
+    stdout = simulation_result.subprocess_result.stdout
+    stderr = simulation_result.subprocess_result.stderr
     match = re.search(r"Fingerprint successfully verified:.*? ([0-9a-f]{4}-[0-9a-f]{4})/" + ingredients, stdout)
     if match:
         value = match.groups()[0]
