@@ -63,7 +63,7 @@ configuration from the ini file. The simulation uses the following
 simple network:
 
 .. figure:: media/rttnetwork.png
-   :width: 50%
+   :width: 40%
    :align: center
 
 The network contains two :ned:`AdhocHost`'s. The hosts are stationary, and
@@ -98,7 +98,7 @@ receiving node. The simulation can be run by choosing
 network:
 
 .. figure:: media/pernetwork.png
-   :width: 100%
+   :width: 80%
 
 The network contains two :ned:`AdhocHost`'s. One of them, the ``source``, is
 stationary, while the ``destination`` is configured to move horizontally
@@ -117,7 +117,7 @@ of destination host's ``radio`` module:
 This animation illustrates what happens when the simulation is run:
 
 .. video:: media/statisticvisualizer5.mp4
-   :width: 100%
+   :width: 80%
 
 After the first packet exchange, the packet error rate statistic is
 displayed above ``destination``. As the simulation progresses,

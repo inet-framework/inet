@@ -37,15 +37,19 @@ Here are the results:
 
 .. figure:: media/source_outgoing.png
    :align: center
+   :width: 90%
 
 .. figure:: media/destination_incoming.png
    :align: center
+   :width: 90%
 
 .. figure:: media/switch_incoming.png
    :align: center
+   :width: 90%
 
 .. figure:: media/switch_outgoing.png
    :align: center
+   :width: 90%
 
 .. **TODO** why does the switch has more datarate ? protocol headers?
 

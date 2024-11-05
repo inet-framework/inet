@@ -53,9 +53,11 @@ We measure the channel utilization in the source host (the ``source.eth[0].phy.t
 
 .. figure:: media/ChannelUtilizationHistogram.png
    :align: center
+   :width: 90%
 
 .. figure:: media/ChannelUtilizationVector.png
    :align: center
+   :width: 90%
 
 .. note:: This is the channel utilization in the ``source -> destination`` direction. Utilization in the other direction on this link could be measured
    with the utilization statistic in ``destination``, but in this case there is no traffic in that direction.

@@ -146,6 +146,7 @@ the sinks after the shaping process:
 
 .. figure:: media/datarate.png
    :align: center
+   :width: 90%
 
 The data rate of the sinusoidal source traffic occasionally exceeds the 16Mbps
 per-stream shaper limit. However, the shaper does allow a brief burst before
@@ -160,6 +161,7 @@ filter module to provide a comprehensive overview of the shaping process.
 
 .. figure:: media/drop.png
    :align: center
+   :width: 90%
 
 Despite the presence of a single combined shaper in the network (comprising one
 filter, queue, and gate), each stream is individually limited to 16Mbps due to
@@ -176,6 +178,7 @@ The next chart shows how the queueing time changes:
 
 .. figure:: media/QueueingTime.png
    :align: center
+   :width: 90%
 
 The maximum of the queueing time is 10ms, which is due to the max residence time
 set in the filter. Packets that would wait longer in the queue are dropped by
@@ -189,6 +192,7 @@ The next chart shows the queue length:
 
 .. figure:: media/QueueLength.png
    :align: center
+   :width: 90%
 
 The maximum number of packets that can accumulate in the queue from each stream
 is 20, calculated as follows: `max residence time / average production interval

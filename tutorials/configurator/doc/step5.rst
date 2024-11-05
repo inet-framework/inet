@@ -22,7 +22,7 @@ through ``router2`` to reach ``host7`` (as in the previous step.) We
 want them to go through ``router1`` instead.
 
 .. figure:: media/step4network.png
-   :width: 100%
+   :width: 90%
 
 Configuration
 ~~~~~~~~~~~~~

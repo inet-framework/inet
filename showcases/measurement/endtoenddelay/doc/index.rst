@@ -43,9 +43,11 @@ To display the end-to-end delay, we plot the ``meanBitLifeTimePerPacket`` statis
 
 .. figure:: media/EndToEndDelayHistogram.png
    :align: center
+   :width: 90%
 
 .. figure:: media/EndToEndDelayVector.png
    :align: center
+   :width: 90%
 
 .. **TODO** why the uptick?
 

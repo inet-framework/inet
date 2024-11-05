@@ -48,7 +48,7 @@ in the module hierarchy; there are four ``edcaf`` (EDCA Function) modules for th
 four access categories:
 
 .. figure:: media/edca.png
-   :width: 80%
+   :width: 60%
    :align: center
 
 The default value for the :par:`txopLimit` parameter is ``-1`` for all ACs,
@@ -103,7 +103,7 @@ Thus, the list of all alternative frame sequences that can repeat during the TXO
 The simulation uses the following network:
 
 .. figure:: media/network.png
-   :width: 80%
+   :width: 60%
    :align: center
 
 It contains two :ned:`AdhocHost` modules, an :ned:`Ipv4NetworkConfigurator`,
