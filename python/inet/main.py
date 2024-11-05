@@ -134,6 +134,9 @@ def run_validation_tests_main():
 def run_all_tests_main():
     run_tasks_main(run_all_tests, "tests")
 
+def run_release_tests_main():
+    run_tasks_main(run_release_tests, "release tests")
+
 def update_correct_fingerprints_main():
     run_tasks_main(update_correct_fingerprints, "update correct fingerprints")
 
@@ -169,7 +172,3 @@ def build_project_main():
             _logger.error(str(e))
         else:
             raise e
-
-def run_release_tests_main():
-    run_main(run_release_tests, "release tests")
-
