@@ -10,7 +10,6 @@ In this example network, packets are produced periodically by the active packet 
 and pushed into the passive packet sink (:ned:`PassivePacketSink`).
 
 .. figure:: media/ActiveSourcePassiveSink.png
-   :width: 50%
    :align: center
 
 .. literalinclude:: ../QueueingTutorial.ned
