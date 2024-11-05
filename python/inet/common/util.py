@@ -237,7 +237,7 @@ class ColoredLoggingFormatter(logging.Formatter):
                  (COLOR_MAGENTA + "%(threadName)s " if self.print_thread_name else "") + \
                  COLOR_CYAN + "%(name)s " + \
                  (COLOR_MAGENTA + "%(funcName)s " if self.print_function_name else "") + \
-                 COLOR_RESET + "%(message)s (%(filename)s:%(lineno)d)"
+                 COLOR_RESET + "%(message)s"
         formatter = logging.Formatter(format)
         return formatter.format(record)
 
