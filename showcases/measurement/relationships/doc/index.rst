@@ -21,8 +21,8 @@ smaller submodules.
 
 Here is the network:
 
-.. figure:: media/Network.png
-   :align: center
+.. .. figure:: media/Network.png
+..    :align: center
 
 Here is the configuration:
 
@@ -34,8 +34,8 @@ Results
 
 Here are the results:
 
-.. figure:: media/Results.png
-   :align: center
+.. .. figure:: media/Results.png
+..    :align: center
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`MeasurementRelationshipsShowcase.ned <../MeasurementRelationshipsShowcase.ned>`
 
