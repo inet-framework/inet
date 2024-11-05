@@ -9,11 +9,9 @@ In this example network, an active packet sink (:ned:`ActivePacketSink`) periodi
 Whenever the queue becomes empty, a queue filler module (:ned:`QueueFiller`) pushes a packet into it.
 
 .. figure:: media/QueueFillerNetwork.png
-   :width: 80%
    :align: center
 
 .. figure:: media/QueueFiller.png
-   :width: 50%
    :align: center
 
 .. literalinclude:: ../QueueingTutorial.ned

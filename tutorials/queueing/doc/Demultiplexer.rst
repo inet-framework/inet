@@ -11,7 +11,6 @@ packet source (:ned:`PassivePacketSource`). The source is connected to
 the sinks using a demultiplexer, which simply forwards packets.
 
 .. figure:: media/Demultiplexer.png
-   :width: 80%
    :align: center
 
 .. literalinclude:: ../QueueingTutorial.ned
