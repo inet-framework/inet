@@ -93,10 +93,10 @@ These simulations are the extension of the three configurations mentioned above,
 in the ini file as the configurations with the ``Realistic`` prefix.
 
 In the ``General`` configuration, the hosts are configured to use the layered Ethernet model 
-instead of the default, which must be disabled:
+instead of the default:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: encap.typename
+   :start-at: EthernetLayer
    :end-at: LayeredEthernetInterface
    :language: ini
 
@@ -124,7 +124,7 @@ We set up a high-bitrate background traffic (96 Mbps) and a lower-bitrate high-p
 (we want non-empty queues); excess packets will be dropped.
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: app[0].source.packetLength
+   :start-after: io.destPort = 1001
    :end-at: app[1].source.productionInterval
    :language: ini
 
