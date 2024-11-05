@@ -108,14 +108,6 @@ All sensors will send one 10-byte UDP packet to the controller each
 second, with randomized start times. The controller will send one
 10-byte UDP packet per second as well. The controller's app is an
 :ned:`UdpBasicApp`, and all lamp nodes are specified in its ``destination``
-parameter. If multiple destinations are specified in :ned:`UdpBasicApp`, a
-random destination is chosen for each packet. Thus each packet will be
-addressed to a different lamp.
-
-All sensors will send one 10-byte UDP packet to the controller each
-second, with randomized start times. The controller will send one
-10-byte UDP packet per second as well. The controller's app is an
-:ned:`UdpBasicApp`, and all lamp nodes are specified in its ``destination``
 parameter (a random destination is chosen for each packet.)
 
 The radio's parameters are not set; the default values will be used. We
@@ -144,19 +136,19 @@ contains a :ned:`SensorStateBasedEpEnergyConsumer`. The
 
 We want to measure the energy consumption of the different nodes in the
 network. For this, we use the ``Ieee802154Power`` configuration in
-:download:`omnetpp.ini <../omnetpp.ini>`. This configuration just extends the
-``Ieee802154`` configuration with a simulation time limit of 100s:
+:download:`omnetpp.ini <../omnetpp.ini>`. This configuration extends the
+``Ieee802154`` configuration with a simulation time limit of 100s,
+and add the ``last`` to the result recording modes of `residualEnergyCapacity`
+to plot its last recorded value at the end of the simulation:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: Ieee802154Power
-   :end-at: sim-time-limit
    :language: ini
 
 We plotted the energy consumption (-1 \* ``residualEnergyCapacity``) of
 all nodes on the following bar chart (values in Joules):
 
 .. figure:: media/powerconsumption.png
-   :width: 80%
 
 The sensors consumed a bit more power than the lamps, and the controller
 consumed the most energy. Nodes in the same role (i.e. lamps, sensors)

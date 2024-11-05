@@ -42,7 +42,7 @@ The visualizer has several important features:
    default value is 0.25, i.e. a quarter of a circle.
 
 These features are disabled by default; they can be enabled by setting
-the visualizer's ``displayMovementTrails``, ``displayVelocities`` and
+the visualizer's :par:`displayMovementTrails`, :par:`displayVelocities` and
 :par:`displayOrientations` parameters to true.
 
 Visualizing Mobility Features

@@ -46,7 +46,7 @@ representation of their locations:
 The next image displays an internal view of the ingress filter module in the bridging layer of the switch, with the :ned:`EligibilityTimeQueue` and the :ned:`EligibilityTimeFilter`
 modules highlighted:
 
-.. figure:: media/filter2.png
+.. figure:: media/filter_.png
    :align: center
 
 The following image displays an internal view of the queue module in the Ethernet interface's MAC layer, with the :ned:`EligibilityTimeQueue`

@@ -150,6 +150,7 @@ In the client:
 
 In the switch:
 
+- We disable the forwarding of 802.1Q C-tags. The server doesn't have a :ned:`Ieee8021qProtocol` module, and would otherwise drop all packets due to unknown protocol.
 - We configure the stream decoder to decode the streams by the PCP number.
 
 Here is the relevant configuration:

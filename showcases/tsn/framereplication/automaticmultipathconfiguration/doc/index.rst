@@ -33,7 +33,7 @@ Results
 
 Here are the number of received and sent packets:
 
-.. figure:: media/packetsreceivedsent.svg
+.. figure:: media/packetsreceivedsent.png
    :align: center
    :width: 100%
 
@@ -43,7 +43,7 @@ Here is the ratio of received and sent packets:
    :align: center
 
 The expected number of successfully received packets relative to the number of
-sent packets is verified by the python scripts. The expected result is around 0.657.
+sent packets is verified by the python script (``compute_frame_replication_success_rate_analytically2()`` function in ``inet/python/inet/tests/validation.py``). The expected result is around 0.657.
 
 .. The following video shows the behavior in Qtenv:
 
