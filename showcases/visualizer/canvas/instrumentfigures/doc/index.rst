@@ -219,8 +219,8 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 
 .. code-block:: bash
 
-    $ opp_env run inet-4.1 --init -w inet-workspace --install --chdir
-       -c 'cd inet-4.1/showcases/visualizer/canvas/instrumentfigures && inet'
+    $ opp_env run inet-4.1 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.1.*/showcases/visualizer/canvas/instrumentfigures && inet'
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
 versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
