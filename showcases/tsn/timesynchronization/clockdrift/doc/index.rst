@@ -86,6 +86,7 @@ The showcase contains several example simulations. All simulations use the follo
 
 .. figure:: media/Network2.png
    :align: center
+   :width: 90%
 
 The example configurations are the following:
 
@@ -148,6 +149,7 @@ Here are the drifts (time differences) over time:
 
 .. figure:: media/ConstantClockDrift.png
    :align: center
+   :width: 90%
 
 The three clocks have different drift rates. The magnitude and direction of
 drift of ``source1`` and ``source2`` compared to ``switch1`` are different as
@@ -193,7 +195,7 @@ Let's see the time differences:
 
 .. figure:: media/OutOfBandSyncConstant.png
    :align: center
-   :width: 100%
+   :width: 90%
 
 The clock of ``switch1`` has a constant drift rate compared to simulation time.
 Since the clock drift rate in all clocks is constant, the drift rate differences
@@ -204,7 +206,7 @@ the beginning of the above chart:
 
 .. figure:: media/OutOfBandSyncConstantZoomed.png
    :align: center
-   :width: 100%
+   :width: 90%
 
 At the beginning of the simulation, the clocks have a different drift rate,
 until the drift rate is compensated for at the first synchronization event. The
@@ -230,6 +232,7 @@ The following chart displays how the clocks diverge over time:
 
 .. figure:: media/RandomClockDrift.png
    :align: center
+   :width: 90%
 
 Example: Out-of-Band Synchronization of Clocks, Random Drift
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -249,12 +252,14 @@ drift rate synchronization error.
 
 .. figure:: media/OutOfBandSyncRandom.png
    :align: center
+   :width: 90%
 
 The clock of ``switch1`` keeps drifting, but the clocks of the sources are
 synchronized to it. Here is the same chart, but zoomed in:
 
 .. figure:: media/OutOfBandSyncRandomZoomed.png
    :align: center
+   :width: 90%
 
 The rate of clock drift is perfectly synchronized, so the lines for the sources
 are tangential to ``switch1``'s at the synchronization points. However, the
@@ -280,7 +285,7 @@ Here are the time differences:
 
 .. figure:: media/GptpSync.png
    :align: center
-   :width: 100%
+   :width: 90%
 
 The clock of ``switch1`` has a periodically changing random drift rate, and the
 other clocks periodically synchronize to ``switch1``.
@@ -289,7 +294,7 @@ Here is the above chart zoomed in:
 
 .. figure:: media/GptpSyncZoomed.png
    :align: center
-   :width: 100%
+   :width: 90%
 
 The drift rate difference, calculated from the previous two synchronization
 events, is used to set the oscillator compensation.
@@ -304,6 +309,7 @@ precision in time synchronization:
 
 .. figure:: media/gptp_time_accuracy.png
    :align: center
+   :width: 90%
 
 When the clocks are synchronized, the drift rate differences are also
 compensated for by setting the oscillator compensation in clocks. We can
@@ -311,6 +317,7 @@ observe this on the following zoomed-in image:
 
 .. figure:: media/GptpSync_RateAccuracy.png
    :align: center
+   :width: 90%
 
 Synchronization makes the lines more parallel, i.e. drift rates more closely
 match each other. Also, note that the drift rate sometimes changes between
@@ -356,6 +363,7 @@ queues:
 
 .. figure:: media/GatingPriorityQueue.png
    :align: center
+   :width: 90%
 
 In our case, we configure the classifier (set to ContentBasedClassifier) to send
 packets from ``source1`` to the first queue and those from source2 to the
@@ -449,6 +457,7 @@ The following chart displays out-of-band synchronization and gPTP, so they can b
 
 .. figure:: media/delay_outofbandsync_gptp.png
    :align: center
+   :width: 90%
 
 In all these cases, the applications send packets in sync with the opening of
 the gates in the queue in ``switch1``. In the no clock drift case, the delay
@@ -461,6 +470,7 @@ Let's see what happens to delay when there is no synchronization:
 
 .. figure:: media/delay_constant.png
    :align: center
+   :width: 90%
 
 The delay keeps changing substantially compared to the other cases.
 
@@ -513,6 +523,7 @@ Let's examine the random clock drift case:
 
 .. figure:: media/delay_random.png
    :align: center
+   :width: 90%
 
 Unpredictable random clock drift might have an even larger impact on delay.
 
@@ -520,6 +531,7 @@ The following chart compares the constant and random clock drift rate cases:
 
 .. figure:: media/delay_constant_random.png
    :align: center
+   :width: 90%
 
 The clocks in the similar plots (e.g., constant drift/sink1 and random
 drift/sink2) drift in the same direction.

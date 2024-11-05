@@ -17,7 +17,7 @@ The model
 In this step, we'll use the model depicted below.
 
 .. figure:: media/wireless-step1.png
-   :width: 100%
+   :width: 70%
 
 Here is the NED source of the network:
 

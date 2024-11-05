@@ -69,7 +69,7 @@ The first example demonstrates the default operation of the visualizer.
 The simulation uses the following network:
 
 .. figure:: media/simplenetwork.png
-   :width: 60%
+   :width: 40%
    :align: center
 
 The network contains two connected :ned:`StandardHost`'s. IP addresses are
@@ -87,7 +87,7 @@ gates where the interfaces are connected. When the simulation is run,
 the network looks like the following:
 
 .. figure:: media/simple.png
-   :width: 60%
+   :width: 40%
    :align: center
 
 More examples

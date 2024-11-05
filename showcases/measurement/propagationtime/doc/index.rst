@@ -38,6 +38,7 @@ Here are the results:
 
 .. figure:: media/PropagationTime.png
    :align: center
+   :width: 90%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PropagationTimeMeasurementShowcase.ned <../PropagationTimeMeasurementShowcase.ned>`
 

@@ -581,13 +581,13 @@ Note that the values for the ``residualEnergyCapacity`` statistic are
 negative, so they are inverted in the graph. Here are the results.
 
 .. figure:: media/packetsreceived.png
-   :width: 100%
+   :width: 80%
 
 .. figure:: media/powerconsumption.png
-   :width: 100%
+   :width: 80%
 
 .. figure:: media/powerconsumptionperpacket.png
-   :width: 100%
+   :width: 80%
 
 .. .. figure:: media/packetloss.png
    :width: 100%

@@ -44,7 +44,7 @@ networks to actually use overlapping channels. The channel spectra for both
 technologies are shown on the following image:
 
 .. figure:: media/channels.png
-   :width: 100%
+   :width: 90%
    :align: center
 
 For the WPAN, we'll use INET's 802.15.4 narrowband version, in which transmissions
@@ -190,7 +190,7 @@ default flat signal, we configure a more realistic shape.
 We'll use the 802.11 OFDM spectral mask, as in the standard:
 
 .. figure:: media/spectralmask_wifi.png
-   :width: 100%
+   :width: 90%
    :align: center
 
 Here is the ``frequencyGains`` parameter value specifying this spectrum:
@@ -256,7 +256,7 @@ the default flat signal shape is used in time. In frequency, we'll use a more
 realistic shape, based on the modulated spectrum of the CC2420 Zigbee transmitter:
 
 .. figure:: media/spectrum_wpan.png
-   :width: 100%
+   :width: 90%
    :align: center
 
 We'll use the approximation indicated with red. Here is the ``frequencyGains``
@@ -341,7 +341,7 @@ The simulation can be run by choosing the ``Coexistence`` configuration from
 omnepp.ini. It looks like the following when the simulation is run:
 
 .. video:: media/coexistence9.mp4
-   :width: 100%
+   :width: 90%
    :align: center
 
 The Wifi hosts have the MAC contention state, and the WPAN hosts have the

@@ -52,7 +52,7 @@ yet (it will be configured in a later step). Therefore, no packets are
 received by host B.
 
 .. figure:: media/wireless-step3-2.png
-   :width: 100%
+   :width: 80%
 
 Host R1's MAC submodule logs indicate that it is discarding the received
 packets, as they are not addressed to it:

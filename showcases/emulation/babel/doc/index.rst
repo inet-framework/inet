@@ -204,7 +204,7 @@ between ``host[0]`` and ``host[2]`` forms for the first time:
 
 .. figure:: media/babelmessage3.png
    :align: center
-   :width: 100%
+   :width: 90%
 
 This Babel message broadcasts a route; it contains several `type-length-value`
 elements (TLVs). The ``nh`` and ``update`` messages indicate that 192.168.4.1

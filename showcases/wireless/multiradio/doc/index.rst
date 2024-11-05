@@ -35,7 +35,7 @@ To test the router, we'll use two hosts, one on each wireless LAN.
 The network will look like the following:
 
 .. figure:: media/network.png
-   :width: 70%
+   :width: 60%
    :align: center
 
 The network contains the wireless router named ``accessPoint``, and
@@ -71,7 +71,7 @@ The transmissions for the two different networks (both disks and arrows) are col
 differently (red for wlan2.4 and blue for wlan5).
 
 .. video:: media/ping3.mp4
-   :width: 100%
+   :width: 80%
 
 .. run until sendPing, zoom 1.3, no animation speed, playback speed 0.4
 

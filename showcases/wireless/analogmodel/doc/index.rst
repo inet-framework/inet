@@ -110,7 +110,7 @@ We'll demonstrate the unit disk analog model in an example scenario featuring mo
 which use the AODV protocol to maintain routes:
 
 .. figure:: media/unitdisknetwork2.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 In the simulation, ``source`` sends ping requests to ``destination``, and ``destination`` sends back ping replies.
@@ -132,7 +132,7 @@ Here is a video of the simulation running (successful ping message sends between
 destination hosts are indicated with colored arrows; routes to the destination are indicated with black arrows):
 
 .. video:: media/unitdisk2.mp4
-   :width: 80%
+   :width: 70%
 
 The source and destination hosts are connected intermittently. If the intermediate nodes
 move out of range before the routes can be built, then there is no connectivity. This can
@@ -203,7 +203,7 @@ Here is a video of the simulation (successful link-layer transmissions are indic
 incorrectly received packets are indicated with packet drop animations):
 
 .. video:: media/Distance5.mp4
-   :width: 100%
+   :width: 90%
 
 .. normal run, playback speed 1, animation speed 0.1, run until 6.5s
 

@@ -297,7 +297,7 @@ Here is the same frame sequence displayed in Wireshark:
 
 .. figure:: media/wireshark.png
    :align: center
-   :width: 100%
+   :width: 90%
 
 The frames are recorded in the PCAP file at the end of the transmission of 
 each frame or fragment, so the originally intended 1243B ``background-3`` 

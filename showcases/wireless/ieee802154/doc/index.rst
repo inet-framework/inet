@@ -156,7 +156,7 @@ We plotted the energy consumption (-1 \* ``residualEnergyCapacity``) of
 all nodes on the following bar chart (values in Joules):
 
 .. figure:: media/powerconsumption.png
-   :width: 100%
+   :width: 80%
 
 The sensors consumed a bit more power than the lamps, and the controller
 consumed the most energy. Nodes in the same role (i.e. lamps, sensors)

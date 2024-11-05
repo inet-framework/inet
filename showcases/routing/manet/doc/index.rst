@@ -244,7 +244,7 @@ configuration uses the ``ManetProtocolShowcaseA`` network. The network
 looks like the following:
 
 .. figure:: media/networkA.png
-   :width: 60%
+   :width: 50%
    :align: center
 
 The nodes are scattered on the scene. The source and destination
@@ -304,7 +304,7 @@ However, setting the timeout values too low results in increased routing
 protocol overhead.
 
 .. video:: media/Aodv5_s.mp4
-   :width: 420
+   :width: 60%
    :align: center
 
    <!--internal video recording, release mode (does it matter?), normal run, animation speed none, zoom 2 (or 1.54 if smaller), fadeOutMode = animationTime in datalink and networkroute visualizers-->
@@ -390,7 +390,7 @@ arrows represent routes, and routes from all nodes to all destinations
 are visualized here.
 
 .. video:: media/Dsdv1.mp4
-   :width: 420
+   :width: 60%
    :align: center
 
    <!--internal video recording, animation speed none, data link visualizers fadeOutMode set to animation time, zoom 1.54-->
@@ -398,7 +398,7 @@ are visualized here.
 The following video shows ``source`` pinging ``destination``:
 
 .. video:: media/DsdvPing1.mp4
-   :width: 420
+   :width: 60%
    :align: center
 
    <!--internal video recording, animation speed none, playback speed 0.38 (seems to have an effect), zoom 1.54, fadeOutMode animation time, run until event 3000, run until next sendPing-->
@@ -412,7 +412,7 @@ configuration in :download:`omnetpp.ini <../omnetpp.ini>`. It uses the
 following:
 
 .. figure:: media/networkB.png
-   :width: 100%
+   :width: 90%
 
 Just as with the previous two configurations, the nodes are
 :ned:`ManetRouter`\ s. The nodes are laid out along a chain. The
@@ -435,7 +435,7 @@ The hosts' routing protocol type is set to :ned:`Gpsr`:
 The following video shows running the simulation from the beginning:
 
 .. video:: media/Gpsr1.mp4
-   :width: 100%
+   :width: 90%
    :align: center
 
 
@@ -472,7 +472,7 @@ that for routing decisions. Here is ``node12``'s neighbor position
 table:
 
 .. figure:: media/positions.png
-   :width: 100%
+   :width: 80%
 
 The table links node positions with IP addresses (it also contains the
 beacon arrival time).

@@ -19,7 +19,7 @@ The network we want to configure is :ned:`ConfiguratorA`, defined in
 this:
 
 .. figure:: media/step1network.png
-   :width: 100%
+   :width: 90%
 
 The network contains three routers, each connected to the other two.
 There are three subnetworks with ``StandardHosts``, connected to the
