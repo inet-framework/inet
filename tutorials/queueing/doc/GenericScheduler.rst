@@ -22,7 +22,6 @@ the scheduler pops packets from the other provider if it has an available packet
 if it doesn't, the next packet is popped as soon as one becomes available.
 
 .. figure:: media/GenericScheduler.png
-   :width: 80%
    :align: center
 
 .. literalinclude:: ../QueueingTutorial.ned

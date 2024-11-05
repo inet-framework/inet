@@ -11,7 +11,6 @@ multiple sources using an intermediary component (:ned:`PacketMultiplexer`) whic
 forwards packets.
 
 .. figure:: media/Multiplexer.png
-   :width: 80%
    :align: center
 
 .. literalinclude:: ../QueueingTutorial.ned

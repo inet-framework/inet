@@ -12,7 +12,6 @@ queues (:ned:`PacketQueue`). The queues share a :ned:`PriorityBuffer` with a pac
 When the buffer becomes full, it drops packets from the second queue first.
 
 .. figure:: media/PriorityBuffer.png
-   :width: 90%
    :align: center
 
 .. literalinclude:: ../QueueingTutorial.ned
