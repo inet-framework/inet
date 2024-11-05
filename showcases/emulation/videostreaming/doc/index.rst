@@ -8,7 +8,8 @@ This showcase demonstrates the use of real applications in a simulated network, 
 of application behavior without having to set up a physical network. This technique is also known as
 software-in-the-loop (SIL).
 
-.. TODO this paragraph is too generic, it barely means anything
+.. TODO this paragraph is too generic, it barely mean anything
+
 The simulation can be easily configured for various topologies and behaviors to test a variety of cases.
 Using INET's emulation feature, the real world (host OS environment) is interfaced with the simulation.
 INET offers various modules that make this interfacing possible, and more information about these modules
