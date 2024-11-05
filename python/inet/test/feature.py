@@ -90,7 +90,7 @@ def get_feature_test_tasks(simulation_project=None, filter=".*", full_match=Fals
         return FeatureTestTask(simulation_project, feature, feature_to_packages[feature], task_result_class=TestTaskResult, **kwargs)
     test_features = list(builtins.filter(lambda feature: matches_filter(feature, filter, None, full_match), features))
     test_tasks = list(map(create_test_task, test_features))
-    return MultipleFeatureTestTasks(tasks=test_tasks, multiple_task_results_class=MultipleTestTaskResults, concurrent=False, **kwargs)
+    return MultipleFeatureTestTasks(tasks=test_tasks, multiple_task_results_class=MultipleTestTaskResults, **dict(kwargs, concurrent=False))
 
 def run_feature_tests(**kwargs):
     multiple_test_tasks = get_feature_test_tasks(**kwargs)
