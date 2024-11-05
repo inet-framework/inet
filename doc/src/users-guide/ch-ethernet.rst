@@ -229,7 +229,7 @@ feature.
 .. _ug:sec:ethernet:macforwardingtable:
 
 MacForwardingTable
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 The :ned:`MacForwardingTable` module stores the mapping between ports and
 MAC addresses. Entries are deleted if their age exceeds a certain limit.

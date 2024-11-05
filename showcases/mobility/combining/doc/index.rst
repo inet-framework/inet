@@ -286,7 +286,7 @@ The following video shows the results:
 .. video:: media/AntennaOrientation.mp4
    :width: 75%
 
-Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`MobilityShowcase.ned <../MobilityShowcase.ned>`
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`CombiningMobilityShowcase.ned <../CombiningMobilityShowcase.ned>`
 
 Discussion
 ----------

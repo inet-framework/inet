@@ -273,6 +273,8 @@ without breaking time synchronization.
 .. **TODO** time sync: any given moment moment of time, between any two network nodes, time difference is bounded (has an upper bound); itt lehet demonstralni hogy actually true;
    pl a charton; ha az upper bound is small enough its good enough;
 
+.. _sh:tsn:timesync:gptp:redundancy:
+
 Two Master Clocks Exploiting Network Redundancy
 -----------------------------------------------
 
