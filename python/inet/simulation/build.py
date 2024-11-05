@@ -64,13 +64,13 @@ def build_project_using_makefile(simulation_project=None, mode="release", captur
     """
     if simulation_project is None:
         simulation_project = get_default_simulation_project()
-    _logger.info(f"Building {simulation_project.get_name()} started")
+    _logger.info(f"Building {simulation_project.get_name()} in {mode} mode started")
     args = ["make", "MODE=" + mode, "-j", str(multiprocessing.cpu_count())]
     _logger.debug(f"Running subprocess: {args}")
     subprocess_result = subprocess.run(args, cwd=simulation_project.get_full_path("."), capture_output=capture_output)
     if subprocess_result.returncode != 0:
         raise Exception(f"Build {simulation_project.get_name()} failed")
-    _logger.info(f"Building {simulation_project.get_name()} ended")
+    _logger.info(f"Building {simulation_project.get_name()} in {mode} mode ended")
 
 class MultipleBuildTasks(MultipleTasks):
     def __init__(self, simulation_project=None, concurrent=True, multiple_task_results_class=MultipleBuildTaskResults, **kwargs):

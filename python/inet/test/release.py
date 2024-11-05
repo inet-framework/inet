@@ -3,7 +3,7 @@ import logging
 from inet.common import *
 from inet.test.all import *
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 def run_release_tests(capture_output=True, **kwargs):
     if not os.path.exists(get_omnetpp_relative_path("bin/opp_run_release")) or \
