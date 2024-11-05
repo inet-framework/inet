@@ -20,8 +20,8 @@ Here is the network:
 
 Here is the configuration:
 
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
+.. .. literalinclude:: ../omnetpp.ini
+..    :language: ini
 
 Results
 -------
@@ -39,7 +39,7 @@ Here are the simulation results:
    :width: 100%
 
 
-Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`HtbShaperShowcase.ned <../HtbShaperShowcase.ned>`
+.. Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`HtbShaperShowcase.ned <../HtbShaperShowcase.ned>`
 
 
 Try It Yourself

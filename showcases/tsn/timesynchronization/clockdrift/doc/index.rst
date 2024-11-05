@@ -402,9 +402,9 @@ closed gates). This delay value is displayed on the charts as a baseline:
 .. figure:: media/delay_outofbandsync.png
    :align: center
 
-   .. At the beginning of the simulation, the delay is large because the drift rate
-   .. difference between the clocks is not yet synchronized. After that, however, the
-   .. delay is lower and bounded. The following chart shows the same data zoomed in: **TODO** not anymore -> actually, the constant blue is large
+.. At the beginning of the simulation, the delay is large because the drift rate
+.. difference between the clocks is not yet synchronized. After that, however, the
+.. delay is lower and bounded. The following chart shows the same data zoomed in: **TODO** not anymore -> actually, the constant blue is large
 
 At the beginning of the simulation, the delay for constant drift/sink1 is large because the drift rate
 difference between the clocks is not yet synchronized. After that, however, its delay is lower and bounded.
