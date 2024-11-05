@@ -125,5 +125,5 @@ Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 Discussion
 ----------
 
-Use `this page <https://github.com/inet-framework/inet-tutorials/issues/1>`__ in
+Use `this page <https://github.com/inet-framework/inet/discussions/998>`__ in
 the GitHub issue tracker for commenting on this tutorial.
