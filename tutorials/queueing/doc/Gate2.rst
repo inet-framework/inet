@@ -8,7 +8,6 @@ otherwise packets are not generated. The packets are provided by a passive
 packet source (:ned:`PassivePacketSource`).
 
 .. figure:: media/Gate2.png
-   :width: 80%
    :align: center
 
 .. literalinclude:: ../QueueingTutorial.ned
