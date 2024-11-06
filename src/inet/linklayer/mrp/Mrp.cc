@@ -153,7 +153,7 @@ void Mrp::initialize(int stage) {
         EV_DETAIL << "Initialize MRP link layer" << EV_ENDL;
         linkUpHysteresisTimer = new cMessage("linkUpHysteresisTimer");
         startUpTimer = new cMessage("startUpTimer");
-        scheduleAt(SimTime(0, SIMTIME_MS), startUpTimer);
+        scheduleAt(simTime(), startUpTimer);
     }
 }
 
