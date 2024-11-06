@@ -7,7 +7,7 @@
 
 package inet.linklayer.mrp;
 
-import inet.linklayer.contract.IMediaRedundancy;
+import inet.linklayer.contract.IMrp;
 import inet.linklayer.mrp.Mrp;
 
 //
@@ -50,7 +50,7 @@ import inet.linklayer.mrp.Mrp;
 //
 // @see ~Mrp, ~MrpRelay, ~MrpMacForwardingTable, ~L2NetworkConfigurator, ~InterfaceTable
 //
-simple MrpInterconnection extends Mrp like IMediaRedundancy
+simple MrpInterconnection extends Mrp like IMrp
 {
     parameters:
         @class(MrpInterconnection);

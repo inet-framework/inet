@@ -8,9 +8,10 @@
 package inet.linklayer.contract;
 
 //
-// Module interface for MediaRedundancyNodes
+// Interface for modules that implement the Media Redundancy Protocol (MRP),
+// specified in IEC 62439-2.
 //
-moduleinterface IMediaRedundancy
+moduleinterface IMrp
 {
     parameters:
         @display("i=block/network2");

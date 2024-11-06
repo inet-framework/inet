@@ -18,7 +18,7 @@ import inet.linklayer.contract.IIeee8021qLayer;
 import inet.linklayer.contract.IIeee8021rLayer;
 import inet.linklayer.contract.IIeee8022Llc;
 import inet.linklayer.contract.IMacForwardingTable;
-import inet.linklayer.contract.IMediaRedundancy;
+import inet.linklayer.contract.IMrp;
 import inet.linklayer.contract.ISpanningTree;
 import inet.networklayer.common.InterfaceTable;
 import inet.node.contract.IEthernetNetworkNode;
@@ -81,7 +81,7 @@ module MrpSwitch like IEthernetNetworkNode
         measurer: <default("")> like IMeasurer if typename != "" {
             @display("p=125,700;is=s");
         }
-        mrp: <default("Mrp")> like IMediaRedundancy if hasMrp {
+        mrp: <default("Mrp")> like IMrp if hasMrp {
             @display("p=516,49");
         }
         stp: <default("Stp")> like ISpanningTree if hasStp {
