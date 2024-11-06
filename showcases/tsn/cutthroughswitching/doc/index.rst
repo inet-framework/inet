@@ -65,13 +65,13 @@ Results
 The following video shows the store-and-forward behavior in Qtenv:
 
 .. video:: media/storeandforward.mp4
-   :width: 90%
+   :width: 80%
    :align: center
 
 The next video shows the cut-through behavior:
 
 .. video:: media/cutthrough1.mp4
-   :width: 90%
+   :width: 80%
    :align: center
 
 The following sequence chart excerpt shows a packet sent from ``device1`` to ``device2`` via the switches,
@@ -90,7 +90,7 @@ vs cut-through switching:
 
 .. figure:: media/delay.png
    :align: center
-   :width: 100%
+   :width: 90%
 
 We can verify that result analytically. In the case of store-and-forward, the end-to-end duration
 is ``3 * (transmission time + propagation time)``, around 25.296 ms. In the case of cut-through,

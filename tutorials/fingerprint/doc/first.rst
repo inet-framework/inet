@@ -173,13 +173,13 @@ The tutorial contains several simulations, which will be used to demonstrate how
 - ``Ethernet``: Contains an Ethernet network with wired hosts and routers. The server host sends UDP packets to two of the hosts:
 
   .. figure:: media/EthernetNetwork.png
-     :width: 100%
+     :width: 90%
      :align: center
 
 - ``Wifi``: Contains two ad-hoc hosts; one of them sends UDP packets to the other:
 
   .. figure:: media/WifiNetwork.png
-     :width: 100%
+     :width: 80%
      :align: center
 
 - ``EthernetShortPacket``: The same as the ``Ethernet`` configuration, but the server sends 10-Byte UDP packets.

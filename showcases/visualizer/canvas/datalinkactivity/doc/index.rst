@@ -65,7 +65,7 @@ The wired network contains two :ned:`StandardHost`s, ``wiredSource`` and
 :ned:`DataLinkVisualizer`.
 
 .. figure:: media/DataLinkVisualizerSimpleWired.png
-   :width: 100%
+   :width: 80%
 
 In this configuration, ``wiredSource`` pings ``wiredDestination``. Data
 link activity visualization is enabled by setting the ``displayLinks``
@@ -79,7 +79,7 @@ parameter to true.
 The following video shows what happens when the simulation is started.
 
 .. video:: media/EnablingVisualizationWired_v0613.m4v
-   :width: 100%
+   :width: 80%
 
 At the beginning of the video, a red strip appears and moves from
 ``wiredSource`` to ``wiredDestination``. This strip is the standard
@@ -99,12 +99,12 @@ of the wired example. The simulation can be run by choosing the
 ``EnablingVisualizationWireless`` configuration from the ini file.
 
 .. figure:: media/DataLinkVisualizerSimpleWireless.png
-   :width: 100%
+   :width: 80%
 
 The following animation depicts what happens when the simulation is run.
 
 .. video:: media/EnablingVisualizationWireless_v0613.m4v
-   :width: 100%
+   :width: 80%
 
 This animation is similar to the video of the wired example (apart from
 an extra blue dotted line which can be ignored, as it is also part of
@@ -125,7 +125,7 @@ the ini file.
 We use the following network for this showcase.
 
 .. figure:: media/DataLinkVisualizerFiltering.png
-   :width: 100%
+   :width: 90%
 
 This network consists of four switches (``etherSwitch1..etherSwitch4``)
 and six endpoints: two source hosts (``source1``, ``source2``), two
@@ -154,7 +154,7 @@ network, :ned:`DataLinkVisualizer` only takes the latter into account due
 to the presence of the :par:`packetFilter` parameter.
 
 .. video:: media/Filtering_v0613.m4v
-   :width: 100%
+   :width: 90%
 
 It is also possible to filter for network nodes. For the following
 example, let's assume we want to display traffic between the hosts
@@ -171,7 +171,7 @@ the curly brace syntax used for specifying numeric substrings).
 It looks like the following when we run the simulation.
 
 .. video:: media/Filtering2_v0613.m4v
-   :width: 100%
+   :width: 90%
 
 As you can see, visualization allows us to follow the ping packets
 between ``source1`` and ``destination1``. Note, however, that ping
@@ -189,7 +189,7 @@ selecting the ``ActivityLevel`` configuration from the ini file.
 We use the following wireless network for this example.
 
 .. figure:: media/ActivityLevel_v1206.png
-   :width: 100%
+   :width: 80%
 
 The network consists of three :ned:`AdhocHost` nodes: ``person1``, ``person2``,
 and ``videoServer``. ``VideoServer`` will be streaming a video to
@@ -233,7 +233,7 @@ link activity levels easy to distinguish:
 The following video shows what happens when the simulation is running.
 
 .. video:: media/ActivityLevel_v0104.mp4
-   :width: 100%
+   :width: 80%
 
 At the beginning of the video, ``person1`` sends a ``VideoStrmReq``
 packet, requesting the video stream. In response to this,
@@ -265,7 +265,7 @@ ini file.
 We use the following network for this simulation:
 
 .. figure:: media/DataLinkVisualizerDynamic.png
-   :width: 100%
+   :width: 70%
 
 Nodes are of the type :ned:`AodvRouter` and are placed randomly on the
 scene. The communication range of the nodes is chosen so that the
@@ -310,7 +310,7 @@ towards ``source``. Note that nodes appear stationary because the whole
 process takes place in a very short time period.
 
 .. video:: media/AODV_v0614.m4v
-   :width: 100%
+   :width: 70%
 
 In the second experiment, we configure the visualizer to display only
 the ping traffic between ``source`` and ``destination``. (The AODV
@@ -329,7 +329,7 @@ The following animation illustrates what happens when the simulation is
 run.
 
 .. video:: media/Dynamic_v0613.m4v
-   :width: 100%
+   :width: 70%
 
 The communication ranges of ``source`` and ``destination`` are
 visualized as blue circles.

@@ -63,7 +63,7 @@ reduce latency.
 The following image shows the layout of the network:
 
 .. figure:: media/diffserv_network_layout.png
-   :width: 100%
+   :width: 90%
 
 In our setup, ``voipPhone1`` will transmit VoIP packets to ``voipPhone2``.
 ``client`` will generate background traffic towards ``server``.
@@ -199,7 +199,7 @@ which is way too much compared to a real phone call. The following plot
 shows the delay of each VoIP packet:
 
 .. figure:: media/VoIP_WithoutQoS_delay.png
-   :width: 100%
+   :width: 80%
 
 The dropouts you hear can also easily be observed if we zoom into the
 timeline of the received audio using `Audacity <https://www.audacityteam.org/>`__:
@@ -231,7 +231,7 @@ at the beginning of the recording:
 The following plot shows the delay of the VoIP packets:
 
 .. figure:: media/VoIP_WithPolicing_delay.png
-   :width: 100%
+   :width: 80%
 
 Although the delay of the packets is much less than it was with the
 previous configuration (0.3s instead of 2.5s), it is still very high for
@@ -268,7 +268,7 @@ the previous configuration are almost inaudible now.
 As seen from the next plot, the delay of voice packets has been reduced to about 0.11s:
 
 .. figure:: media/VoIP_WithPolicingAndQueueing_delay.png
-   :width: 100%
+   :width: 80%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`DiffservNetwork.ned <../DiffservNetwork.ned>`
 

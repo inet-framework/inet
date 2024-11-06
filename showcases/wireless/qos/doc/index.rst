@@ -94,7 +94,7 @@ The Configuration
 The example simulation uses the following network:
 
 .. figure:: media/network4.png
-   :width: 100%
+   :width: 80%
    :align: center
 
 It contains two :ned:`WirelessHost`'s named ``client`` and ``server``,
@@ -146,8 +146,7 @@ End-to-End Delay
 
 Here is the plot of the end-to-end delay of received packets in the non-QoS case:
 
-.. figure:: media/delay_nonqos.png
-   :width: 100%
+.. figure:: 90%
    :align: center
 
 The end-to-end delay vector data points for the four access
@@ -161,7 +160,7 @@ and packets are dropped. Note that dropped packets are not indicated on the char
 as we're plotting UDP packets received by ``server``.
 
 .. figure:: media/delay_qos.png
-   :width: 100%
+   :width: 90%
    :align: center
 
 In the QoS case, as expected, the higher priority access categories (video, voice) have lower
@@ -199,13 +198,13 @@ Jitter
 Let's take a look at jitter:
 
 .. figure:: media/jitter_nonqos.png
-   :width: 100%
+   :width: 90%
 
 In the non-QoS case, the jitter data points are scattered with the same pattern
 for all four traffic categories.
 
 .. figure:: media/jitter_qos.png
-   :width: 100%
+   :width: 90%
 
 In the QoS case, the jitter is lower for the video
 and voice categories (lowest for voice), and higher for background and best effort.
@@ -262,11 +261,11 @@ Throughput
 Let's see the throughput:
 
 .. figure:: media/throughput_nonqos_.png
-   :width: 90%
+   :width: 80%
    :align: center
 
 .. figure:: media/throughput_qos_.png
-   :width: 90%
+   :width: 80%
    :align: center
 
 In the non-QoS case, the throughput for the four applications is more or less proportional

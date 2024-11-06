@@ -178,6 +178,7 @@ The next chart displays the end-to-end delay of application traffic, which is mo
 
 .. figure:: media/delay_normaloperation.png
    :align: center
+   :width: 90%
 
 In the next section, we examine what happens if we take the master clock node offline during the simulation.
 
@@ -218,6 +219,7 @@ The next chart shows the delay:
 
 .. figure:: media/delay_linkfailure.png
    :align: center
+   :width: 90%
 
 After the clock divergence grows above a certain value, the end-to-end delay
 suddenly increases dramatically. The reason is that frames often wait for the
@@ -278,6 +280,7 @@ The following chart displays the delay:
 
 .. figure:: media/delay_failover.png
    :align: center
+   :width: 90%
 
 The delay is constant and similar to the delay during normal operation, due to
 the seamless failover to the hot-standby master node (not even one frame suffers
@@ -286,6 +289,7 @@ three configurations on individual plots, with the same axis scale:
 
 .. figure:: media/Delay_all.png
    :align: center
+   :width: 90%
 
 .. note:: There is a configuration in :download:`extras.ini <../extras.ini>` that simulates what happens if the primary master clock comes back online after some time, and all nodes switch back to it. The relevant charts are in Extras.anf.
 

@@ -268,12 +268,12 @@ where the set of recorded packets were narrowed with
 The ARP packets from ``host2``:
 
 .. figure:: media/arp.png
-   :width: 100%
+   :width: 90%
 
 The TCP data packets from ``router2``:
 
 .. figure:: media/tcpdata.png
-   :width: 100%
+   :width: 90%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PcapRecordingShowcase.ned <../PcapRecordingShowcase.ned>`
 

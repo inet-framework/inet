@@ -292,7 +292,7 @@ but without a probe module. The network also contains physical objects which rep
 an apartment, and hosts have different positions compared to the previous examples:
 
 .. figure:: media/powerdensitymapnetwork3.png
-   :width: 100%
+   :width: 90%
    :align: center
 
 In :download:`omnetpp.ini <../omnetpp.ini>`, the main and per-node power density map

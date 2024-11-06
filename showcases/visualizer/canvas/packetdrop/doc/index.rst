@@ -190,7 +190,7 @@ routes. The configuration is ``NoRouteToDestination`` in the ini file.
 The network is the following:
 
 .. figure:: media/noroutenetwork.png
-   :width: 60%
+   :width: 40%
    :align: center
 
 It contains two connected :ned:`StandardHost`'s. The
@@ -201,7 +201,7 @@ The ping packets can't be routed, so the IP module drops them. This scenario is
 illustrated in the following video:
 
 .. video:: media/noroute.mp4
-   :width: 416
+   :width: 40%
 
 Here is also a log excerpt illustrating this:
 

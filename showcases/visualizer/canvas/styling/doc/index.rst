@@ -44,11 +44,11 @@ Move the mouse over the image to see the differences between the default
 and the customized visualization.
 
 .. figure:: media/Line_default_v0727.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 .. figure:: media/Line_custom_v0727.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 The :par:`lineColor` parameter specifies the color of the arrow, and it
@@ -89,11 +89,11 @@ Move the mouse over the image to see the differences between the default
 and the customized visualization.
 
 .. figure:: media/Font_default_v0727.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 .. figure:: media/Font_custom_v0727.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 Font family, font size and font style can be set by using the
@@ -135,11 +135,11 @@ Move the mouse over the image to see the differences between the default
 and the customized visualization.
 
 .. figure:: media/Icon_default_v0727.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 .. figure:: media/Icon_custom_v0727.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 The :par:`icon` parameter specifies the icon to be used. The OMNeT++ image
@@ -192,11 +192,11 @@ Move the mouse over the image to see the differences between the default
 and the customized visualization.
 
 .. figure:: media/Annotation_default_v0802.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 .. figure:: media/Annotation_custom_v0802.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 The :par:`placementHint` parameter determines where the annotations will be

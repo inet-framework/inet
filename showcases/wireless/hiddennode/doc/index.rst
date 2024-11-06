@@ -67,7 +67,7 @@ the various simulations. Hosts A and C both send UDP packets to Host B,
 which is able to receive the transmissions of both hosts.
 
 .. figure:: media/network.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 The RTS/CTS mechanism can be enabled or disabled by setting the

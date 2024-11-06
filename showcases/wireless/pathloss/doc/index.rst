@@ -72,7 +72,7 @@ the network also contains a :ned:`PhysicalEnvironment` module, an
 :ned:`Ipv4NetworkConfigurator`, and a :ned:`Ieee80211ScalarRadioMedium`:
 
 .. figure:: media/network.png
-   :width: 80%
+   :width: 60%
    :align: center
 
 .. todo::
