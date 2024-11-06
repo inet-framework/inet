@@ -21,6 +21,7 @@ Here is the network:
 
 .. figure:: media/Network.png
    :align: center
+   :width: 70%
 
 Here is the configuration:
 
@@ -34,21 +35,27 @@ Here are the results:
 
 .. figure:: media/SourceHistogram.png
    :align: center
+   :width: 90%
 
 .. figure:: media/SourceVector.png
    :align: center
+   :width: 90%
 
 .. figure:: media/SwitchHistogram.png
    :align: center
+   :width: 90%
 
 .. figure:: media/SwitchVector.png
    :align: center
+   :width: 90%
 
 .. figure:: media/DestinationHistogram.png
    :align: center
+   :width: 90%
 
 .. figure:: media/DestinationVector.png
    :align: center
+   :width: 90%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`ResidenceTimeMeasurementShowcase.ned <../ResidenceTimeMeasurementShowcase.ned>`
 

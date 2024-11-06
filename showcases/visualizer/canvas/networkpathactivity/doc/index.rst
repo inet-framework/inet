@@ -59,7 +59,7 @@ The network contains two :ned:`StandardHost`'s, a ``source`` host and a
 pinging the ``destination`` host.
 
 .. figure:: media/NetworkPathSimple.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 The ``pathVisualizer's`` type is :ned:`NetworkRouteVisualizer`. We enable
@@ -74,7 +74,7 @@ parameter to true.
 The following video shows what happens when we start the simulation.
 
 .. video:: media/EnablingVisualization_v0614.m4v
-   :width: 560
+   :width: 60%
    :align: center
 
 At the beginning of the video, a red strip appears and moves from
@@ -152,7 +152,7 @@ typically only communicate by using multi-hop paths. The nodes will also
 randomly roam within predefined borders.
 
 .. figure:: media/NetworkPathMobileShowcase_v0606.png
-   :width: 100%
+   :width: 60%
 
 The routing protocol is AODV, a reactive (on-demand) MANET routing
 protocol. AODV operates with RREQ and RRES messages, but these messages
@@ -172,7 +172,7 @@ We use the following configuration for the visualization.
 The following video shows what happens when the simulation is run.
 
 .. video:: media/Mobile_v0614.m4v
-   :width: 100%
+   :width: 60%
 
 Blue circles are displays the communication range of ``source`` and
 ``destination``.

@@ -36,7 +36,7 @@ The simulations will be run using 20 hosts. Here is what the network
 will look like when the simulation is run:
 
 .. figure:: media/network4.png
-   :width: 80%
+   :width: 60%
    :align: center
 
 Configuration and behavior

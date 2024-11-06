@@ -36,9 +36,11 @@ Here are the results:
 
 .. figure:: media/QueueingTimeHistogram.png
    :align: center
+   :width: 90%
 
 .. figure:: media/QueueingTimeVector.png
    :align: center
+   :width: 90%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`QueueingTimeMeasurementShowcase.ned <../QueueingTimeMeasurementShowcase.ned>`
 

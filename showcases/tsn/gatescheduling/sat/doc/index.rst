@@ -36,6 +36,7 @@ The application end-to-end delay for the different traffic classes is displayed 
 
 .. figure:: media/delay.png
     :align: center
+    :width: 90%
 
 The delay is constant for every packet, and within the specified constraint of 500us. Note that the traffic delay is symmetric among the different source and sink combinations (in contrast with the `Eager` case).
 

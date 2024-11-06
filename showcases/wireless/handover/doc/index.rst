@@ -37,7 +37,7 @@ the association is complete, data exchange can begin.
 The example simulation will use the following network:
 
 .. figure:: media/network2.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 The network contains two APs placed 400 meters apart, and a wireless
@@ -120,16 +120,16 @@ The host's ``mgmt`` module contains a variable that indicates which
 access point the host is associated with.
 
 .. figure:: media/assocap2.png
-   :width: 100%
+   :width: 90%
 
 The ``mgmt`` modules of access points maintain a list of hosts that are
 associated with them.
 
 .. figure:: media/stalist1.png
-   :width: 100%
+   :width: 90%
 
 .. figure:: media/stalist2.png
-   :width: 100%
+   :width: 90%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`HandoverShowcase.ned <../HandoverShowcase.ned>`
 

@@ -35,21 +35,27 @@ Here are the results:
 
 .. figure:: media/PacketJitterHistogram.png
    :align: center
+   :width: 90%
 
 .. figure:: media/PacketJitterVector.png
    :align: center
+   :width: 90%
 
 .. figure:: media/PacketDelayDifferenceToMeanHistogram.png
    :align: center
+   :width: 90%
 
 .. figure:: media/PacketDelayDifferenceToMeanVector.png
    :align: center
+   :width: 90%
 
 .. figure:: media/PacketDelayVariationHistogram.png
    :align: center
+   :width: 90%
 
 .. figure:: media/PacketDelayVariationVector.png
    :align: center
+   :width: 90%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`JitterMeasurementShowcase.ned <../JitterMeasurementShowcase.ned>`
 
