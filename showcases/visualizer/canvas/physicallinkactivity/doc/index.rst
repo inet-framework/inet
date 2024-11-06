@@ -53,7 +53,7 @@ The ``linkVisualizer's`` type is :ned:`PhysicalLinkVisualizer`. In this
 simulation, ``source`` will be pinging ``destination``.
 
 .. figure:: media/PhysicalLinkVisualizerSimple.png
-   :width: 100%
+   :width: 80%
 
 Physical link activity visualization is enabled by setting the
 :par:`displayLinks` parameter to true.
@@ -66,7 +66,7 @@ Physical link activity visualization is enabled by setting the
 The following animation shows what happens when we start the simulation.
 
 .. video:: media/EnablingVisualization_v0614.m4v
-   :width: 100%
+   :width: 80%
 
 At the beginning of the animation, a red strip appears and moves from
 ``source`` to ``destination``. This strip is the standard OMNeT++
@@ -121,7 +121,7 @@ video was captured from the point when the hosts had already associated
 with ``accessPoint``.
 
 .. video:: media/Filtering_v0614.m4v
-   :width: 100%
+   :width: 90%
 
 You can see that although there are also ACK frames, Beacon frames and
 ping traffic in the network, :ned:`PhysicalLinkVisualizer` displays only
@@ -145,7 +145,7 @@ nodes is reduced so that nodes can typically communicate only with some
 closer nodes.
 
 .. figure:: media/PhysicalLinkVisualizerDynamic.png
-   :width: 100%
+   :width: 70%
 
 The nodes send UDP packets in every second by using an :ned:`UdpBasicApp`
 application. The packets' names are set to ``Broadcast-nnn``. The nodes
@@ -166,7 +166,7 @@ The following video shows what happens when we run the simulation. (If
 the video does not show up, try refreshing the page with Ctrl+Shift+R.)
 
 .. video:: media/Mobile_v0614.m4v
-   :width: 100%
+   :width: 70%
 
 Here, physical link activity looks like a connection graph, where
 vertices are hosts, and each edge is physical link activity between two

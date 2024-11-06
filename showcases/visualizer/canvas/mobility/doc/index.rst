@@ -60,7 +60,7 @@ The following video has been captured from the simulation. The default
 settings of mobility visualization are used.
 
 .. video:: media/NoFeatures_v0620.m4v
-   :width: 100%
+   :width: 80%
 
 It is difficult to track the nodes because they are moving randomly and
 quite fast. In our next experiment, we enable movement trails, velocity
@@ -75,7 +75,7 @@ easier.
 The following video shows what happens when we run the simulation.
 
 .. video:: media/VisualizingFeatures_v0627.m4v
-   :width: 100%
+   :width: 80%
 
 Compare this video to the previous one! The first thing you may notice
 is that the hosts' movement is the same as in the previous video.

@@ -45,6 +45,7 @@ The following chart displays the delay for individual packets of the different t
 
 .. figure:: media/delay.png
     :align: center
+    :width: 90%
 
 All delays are within the specified constraints.
 

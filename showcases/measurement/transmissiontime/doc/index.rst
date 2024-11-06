@@ -48,9 +48,11 @@ Here are the results:
 
 .. figure:: media/TransmissionTimeHistogram.png
    :align: center
+   :width: 90%
 
 .. figure:: media/TransmissionTimeVector.png
    :align: center
+   :width: 90%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`TransmissionTimeMeasurementShowcase.ned <../TransmissionTimeMeasurementShowcase.ned>`
 

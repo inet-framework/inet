@@ -131,7 +131,7 @@ simulations demonstrate the visualization when it is unfiltered and when
 it is filtered. The network looks like the following:
 
 .. figure:: media/filtersnetwork.png
-   :width: 80%
+   :width: 60%
    :align: center
 
 It consists of a router connected to a switch. Two :ned:`StandardHost`'s are
@@ -186,7 +186,7 @@ and the changes take effect immediately. Just select the
 inspector panel:
 
 .. figure:: media/parameters.png
-   :width: 100%
+   :width: 80%
 
 Visualizing changing routing tables
 -----------------------------------
@@ -217,7 +217,7 @@ configures the routing tables. To reduce clutter, we set the
 The following animation depicts what happens when the simulation is run.
 
 .. video:: media/routingtablevisualizer2.mp4
-   :width: 100%
+   :width: 90%
 
 When ``destinationHost`` starts to move downwards, packets get routed
 along the chain to the host that is currently adjacent to

@@ -28,7 +28,7 @@ Both parts in this step use the :ned:`ConfiguratorA` network defined in
 :download:`ConfiguratorA.ned <../ConfiguratorA.ned>`:
 
 .. figure:: media/step4network.png
-   :width: 100%
+   :width: 90%
 
 The configuration for this part in omnetpp.ini is the following:
 

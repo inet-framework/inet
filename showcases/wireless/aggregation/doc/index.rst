@@ -34,7 +34,7 @@ There are two kinds of frame aggregation in 802.11:
 - MAC Protocol Data Unit (MPDU) aggregation: MPDUs are frames passed from the MAC to the PHY layer. Each MPDU has a MAC header and trailer. Multiple MPDUs are bundled together to create an aggregate MPDU (a-MPDU), which is transmitted with a PHY header by the radio.
 
 .. figure:: media/dataunits3.png
-   :width: 100%
+   :width: 80%
    :align: center
 
 When using aggregation, the reduced number of contention periods, interframe spaces and ACKs might have a greater effect

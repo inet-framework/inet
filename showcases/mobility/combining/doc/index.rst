@@ -32,7 +32,7 @@ The model
 Example simulations in this showcase, except for the last one, use the following network:
 
 .. image:: media/scene.png
-   :width: 50%
+   :width: 40%
    :align: center
 
 The size of the scene is 400x400x0 meters. It contains a configurable
@@ -227,7 +227,7 @@ The simulation contains the following nodes:
 The following image shows the initial layout of the scene:
 
 .. image:: media/AntennaOrientation_layout.png
-   :width: 75%
+   :width: 60%
    :align: center
 
 By default, radio modules contain antenna submodules, whose positions are
@@ -284,7 +284,7 @@ unrealistically large.
 The following video shows the results:
 
 .. video:: media/AntennaOrientation.mp4
-   :width: 75%
+   :width: 60%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`CombiningMobilityShowcase.ned <../CombiningMobilityShowcase.ned>`
 

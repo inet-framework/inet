@@ -160,7 +160,7 @@ Here is the starting frame sequence at the beginning of the simulation displayed
 Qtenv's packet traffic view:
 
 .. figure:: media/startingframesequence.png
-   :width: 100%
+   :width: 90%
    :align: center
 
 First, ``host1`` sends a UDP packet, then an ADDBA request frame. ``host2`` replies
@@ -181,21 +181,21 @@ with a block ack. The block ack frame acknowledges the five previous frames. Her
 request frame displayed in Qtenv's packet inspector:
 
 .. figure:: media/blockackreq.png
-   :width: 90%
+   :width: 80%
    :align: center
 
 The block ack request contains the starting sequence number, which indicates the
 first packet to be acked. Here is the block ack response frame:
 
 .. figure:: media/blockackresp.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 The block ack response frame also contains the starting sequence number and the bitmap, which specifies
 which packets were received correctly. Here is the bitmap:
 
 .. figure:: media/bitmap.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 The first five entries are used. It acknowledges the five packets, starting from sequence number 1.
@@ -214,7 +214,7 @@ and ``Data-18``, were not received correctly, as indicated in the block ack's bi
 sequence number is 16, corresponding to ``Data-16``):
 
 .. figure:: media/retxblockack2.png
-   :width: 80%
+   :width: 70%
    :align: center
 
 The next block starts with ``host1`` retransmitting these two frames, and then transmitting
@@ -290,7 +290,7 @@ all the packets sent by the MAC, so the block ack bitmap contains the (already a
 packets as well:
 
 .. figure:: media/mixed_blockack.png
-   :width: 100%
+   :width: 80%
    :align: center
 
 Furthermore, the block ack is lost, so the not-yet-acked packets in the previous block (``Data-6``

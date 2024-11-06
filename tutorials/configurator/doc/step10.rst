@@ -29,7 +29,7 @@ This step uses the :ned:`ConfiguratorD` network, defined in
 looks like this:
 
 .. figure:: media/step10network.png
-   :width: 100%
+   :width: 90%
 
 It contains seven ``AODVRouters`` laid out in a chain.
 
