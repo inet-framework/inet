@@ -528,7 +528,7 @@ class MultipleTasks:
         Returns (:py:class:`MultipleTaskResults`):
             The task results.
         """
-        _logger.info(f"Running multiple {self.get_description()} started")
+        _logger.info(f"Running {len(self.tasks)} {self.get_description()} started")
         if self.cancel:
             task_results = list(map(lambda task: task.task_result_class(task=task, result="CANCEL", reason="Cancel by user"), self.tasks))
             multiple_task_results = self.multiple_task_results_class(multiple_tasks=self, results=task_results)
@@ -541,7 +541,7 @@ class MultipleTasks:
             except KeyboardInterrupt:
                 task_results = list(map(lambda task: task.task_result_class(task=task, result="CANCEL", reason="Cancel by user"), self.tasks))
                 multiple_task_results = self.multiple_task_results_class(multiple_tasks=self, results=task_results)
-        _logger.info(f"Running multiple {self.get_description()} ended")
+        _logger.info(f"Running {len(self.tasks)} {self.get_description()} ended")
         return multiple_task_results
 
     def run_protected(self, **kwargs):
