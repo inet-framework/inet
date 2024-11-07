@@ -8,7 +8,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
-import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
 import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 import inet.visualizer.common.PhysicalLinkVisualizer;
 
@@ -24,7 +24,7 @@ network PhysicalLinkVisualizerEnablingShowcase
             parameters:
                 @display("p=100,150");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             parameters:
                 @display("p=100,250");
         }
@@ -49,7 +49,7 @@ network PhysicalLinkVisualizerFilteringShowcase
             parameters:
                 @display("p=100,150");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             parameters:
                 @display("p=100,250");
         }
@@ -77,7 +77,7 @@ network PhysicalLinkVisualizerMobileShowcase
         configurator: Ipv4NetworkConfigurator {
             @display("p=100,150");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             @display("p=100,250");
         }
         host1: AdhocHost {
