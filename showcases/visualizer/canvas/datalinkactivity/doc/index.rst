@@ -60,7 +60,7 @@ we configure a simulation for a wired network. The simulation can be run
 by choosing the ``EnablingVisualizationWired`` configuration from the
 ini file.
 
-The wired network contains two :ned:`StandardHost`s, ``wiredSource`` and
+The wired network contains two :ned:`StandardHost`'s, ``wiredSource`` and
 ``wiredDestination``. The ``linkVisualizer`` module's type is
 :ned:`DataLinkVisualizer`.
 
@@ -93,7 +93,7 @@ visualizer is set to a small value.
 
 Visualization in a wireless network is very similar. Our next example is
 the wireless variant of the above simulation. In this network, we use two
-:ned:`AdhocHost`s, ``wirelessSource`` and ``wirelessDestination``. The
+:ned:`AdhocHost`'s, ``wirelessSource`` and ``wirelessDestination``. The
 traffic and the visualization settings are the same as the configuration
 of the wired example. The simulation can be run by choosing the
 ``EnablingVisualizationWireless`` configuration from the ini file.
