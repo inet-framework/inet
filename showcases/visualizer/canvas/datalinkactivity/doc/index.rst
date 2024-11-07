@@ -134,7 +134,7 @@ hosts (``host1``, ``host2``) which are inactive in this simulation.
 ``Source1`` pings ``destination1``, and ``source2`` pings
 ``destination2``.
 
-For this network, the visualizer's type is :ned:`IntegratedVisualizer`.
+For this network, the visualizer's type is :ned:`IntegratedCanvasVisualizer`.
 Data link activity visualization is filtered to display only ping
 messages. The other packets, e.g., ARP packets, are not visualized by
 :ned:`DataLinkVisualizer`. We adjust the ``fadeOutMode`` and the
