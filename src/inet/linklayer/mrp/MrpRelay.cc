@@ -302,13 +302,13 @@ void MrpRelay::sendPacket(Packet *packet, const MacAddress &destinationAddress, 
     else
         packet->removeTagIfPresent<DispatchProtocolReq>();
     emit(packetSentToLowerSignal, packet);
-    switchingDelay = SimTime((int64_t)(par("switchingDelay").doubleValue()), SIMTIME_US);
     if (packet->findTag<MacAddressReq>() == nullptr) {
         auto &macAddressReq = packet->addTag<MacAddressReq>();
         macAddressReq->setDestAddress(destinationAddress);
         const MacAddress &sourceAddress = outgoingInterface->getMacAddress();
         macAddressReq->setSrcAddress(sourceAddress);
     }
+    simtime_t switchingDelay = par("switchingDelay").doubleValue();
     sendDelayed(packet, switchingDelay, "lowerLayerOut");
 }
 

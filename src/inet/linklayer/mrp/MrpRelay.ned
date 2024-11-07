@@ -32,6 +32,6 @@ simple MrpRelay extends Ieee8021dRelay like IMacRelayUnit
         // Switches take a certain amount of time for processing each packet.
         // This parameter sets the processsing delay applied before sending
         // packets out.
-        volatile double switchingDelay @unit(us) = default(truncnormal(8.61us,5.42us));
+        volatile double switchingDelay @unit(s) = default(truncnormal(8.61us,5.42us));
 }
 

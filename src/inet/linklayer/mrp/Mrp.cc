@@ -426,7 +426,7 @@ void Mrp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
                 if (interface->isUp() && interface->hasCarrier())
                     linkDetectionDelay = SimTime(1, SIMTIME_US); //linkUP is handled faster than linkDown
                 else
-                    linkDetectionDelay = SimTime((int64_t)(linkDetectionDelayPar->doubleValue() * 1e3), SIMTIME_MS);
+                    linkDetectionDelay = linkDetectionDelayPar->doubleValue();
                 if (linkUpHysteresisTimer->isScheduled())
                     cancelEvent(linkUpHysteresisTimer);
                 scheduleAfter(linkDetectionDelay, linkUpHysteresisTimer);
@@ -441,7 +441,7 @@ void Mrp::handleMessageWhenUp(cMessage *msg)
     if (!msg->isSelfMessage()) {
         msg->setKind(2);
         EV_INFO << "Received Message on MrpNode, Rescheduling:" << EV_FIELD(msg) << EV_ENDL;
-        simtime_t processingDelay = SimTime((int64_t)(processingDelayPar->doubleValue() * 1e6), SIMTIME_US);
+        simtime_t processingDelay = processingDelayPar->doubleValue();
         scheduleAfter(processingDelay, msg);
     }
     else {
@@ -781,7 +781,7 @@ void Mrp::clearLocalFDB()
     EV_DETAIL << "clearing FDB" << EV_ENDL;
     if (fdbClearDelay->isScheduled())
         cancelEvent(fdbClearDelay);
-    simtime_t processingDelay = SimTime((int64_t)(processingDelayPar->doubleValue() * 1e6), SIMTIME_US);
+    simtime_t processingDelay = processingDelayPar->doubleValue();
     scheduleAfter(processingDelay, fdbClearDelay);
 }
 
