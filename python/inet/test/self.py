@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import sys
+import time
 
 from inet.simulation import *
 from inet.test import *
@@ -10,6 +11,42 @@ from inet.test import *
 __sphinx_mock__ = True # ignore this module in documentation
 
 _logger = logging.getLogger(__name__)
+
+class LongTask(Task):
+    def run_protected(self, **kwargs):
+        _logger.info("Started")
+        for i in range(0, 10):
+            if self.cancel:
+                break
+            time.sleep(1)
+        _logger.info("Finished")
+        return self.task_result_class(task=self, result="CANCEL" if self.cancel else "DONE", reason="Task completed")
+
+class LongExternalTask(Task):
+    def run_protected(self, **kwargs):
+        _logger.info("Started")
+        run_command_with_logging(["sleep", "10"])
+        run_command_with_logging(["echo", "Hello"])
+        _logger.info("Finished")
+        return Task.run_protected(self, **kwargs)
+
+def run_long_task():
+    return LongTask().run()
+
+def run_long_external_task():
+    return LongExternalTask().run()
+
+def run_long_multiple_tasks():
+    return MultipleTasks(tasks=[LongTask(), LongTask(), LongTask()], pass_keyboard_interrupt=True).run()
+
+def run_long_multiple_external_tasks():
+    return MultipleTasks(tasks=[LongExternalTask(), LongExternalTask(), LongExternalTask()], pass_keyboard_interrupt=True).run()
+
+def run_long_nested_multiple_tasks():
+    return MultipleTasks(tasks=[MultipleTasks(tasks=[LongTask(), LongTask(), LongTask()], pass_keyboard_interrupt=True), MultipleTasks(tasks=[LongTask(), LongTask(), LongTask()], pass_keyboard_interrupt=True)], concurrent=False).run()
+
+def run_long_nested_multiple_external_tasks():
+    return MultipleTasks(tasks=[MultipleTasks(tasks=[LongExternalTask(), LongExternalTask(), LongExternalTask()], pass_keyboard_interrupt=True), MultipleTasks(tasks=[LongExternalTask(), LongExternalTask(), LongExternalTask()], pass_keyboard_interrupt=True)], concurrent=False).run()
 
 # TODO
 # running simulations
