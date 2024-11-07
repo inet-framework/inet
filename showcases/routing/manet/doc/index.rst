@@ -209,14 +209,15 @@ featuring stationary hosts. The networks are defined in
 :download:`ManetProtocolsShowcase.ned <../ManetProtocolsShowcase.ned>`.
 Both networks contain hosts of the type :ned:`ManetRouter` (an extension of
 :ned:`WirelessHost`), whose routing module type is configurable. Just as
-:ned:`WirelessHost`, it uses :ned:`Ieee80211ScalarRadio` by default. It also
+:ned:`WirelessHost`, it uses :ned:`Ieee80211Radio` with the scalar 
+analog model by default. It also
 has IP forwarding enabled, and its management module is set to
 :ned:`Ieee80211MgmtAdhoc`. In the network, there is a source host named
 ``source``, a destination host named ``destination``, and a number of
 other hosts, which are named ``node1`` up to ``node10`` (their numbers
 vary in the different networks). In addition to mobile nodes, both
-networks contain an :ned:`Ieee80211ScalarRadioMedium`, an
 :ned:`Ipv4NetworkConfigurator`, and an :ned:`IntegratedMultiVisualizer`
+networks contain an :ned:`Ieee80211RadioMedium`, an
 module. The nodes' default PHY model (IEEE 802.11) will suffice because
 we're focusing on the routing protocols.
 

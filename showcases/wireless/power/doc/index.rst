@@ -90,7 +90,7 @@ module's :par:`nodeShutdownCapacity` and :par:`nodeStartCapacity` parameters.
 Radio modes and states
 ~~~~~~~~~~~~~~~~~~~~~~
 
-In the :ned:`Ieee80211ScalarRadio` model used in this simulation (and in
+In the :ned:`Ieee80211Radio` model used in this simulation (and in
 other radio models), there are different modes in which radios operate,
 such as off, sleep, receiver, and transmitter. The mode is set by the model
 and does not depend on external effects. In addition to mode, radios

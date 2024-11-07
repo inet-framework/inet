@@ -10,7 +10,7 @@ import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
-import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
 import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 import inet.visualizer.common.TransportRouteVisualizer;
 
@@ -45,7 +45,7 @@ network TransportPathVisualizerSimpleWirelessShowcase
         configurator: Ipv4NetworkConfigurator {
             @display("p=80,120");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             @display("p=80,190");
         }
         source: AdhocHost {
