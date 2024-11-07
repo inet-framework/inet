@@ -213,6 +213,14 @@
     <filename>inet.queueing.shaper.AsynchronousShaper.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.validation.tsn.trafficshaping.asynchronousshaper.core4inet.AsynchronousShaperValidation</name>
+    <filename>inet.validation.tsn.trafficshaping.asynchronousshaper.core4inet.AsynchronousShaperValidation.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.validation.tsn.trafficshaping.asynchronousshaper.icct.AsynchronousShaperValidation</name>
+    <filename>inet.validation.tsn.trafficshaping.asynchronousshaper.icct.AsynchronousShaperValidation.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.linklayer.ieee8021q.ATSIeee8021qFilter</name>
     <filename>inet.linklayer.ieee8021q.ATSIeee8021qFilter.html</filename>
   </compound>
@@ -689,6 +697,10 @@
     <filename>inet.queueing.shaper.CreditBasedShaper.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.validation.tsn.trafficshaping.creditbasedshaper.CreditBasedShaperValidation</name>
+    <filename>inet.validation.tsn.trafficshaping.creditbasedshaper.CreditBasedShaperValidation.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.examples.wireless.crosstalk.Crosstalk</name>
     <filename>inet.examples.wireless.crosstalk.Crosstalk.html</filename>
   </compound>
@@ -735,6 +747,10 @@
   <compound kind="class">
     <name>inet.visualizer.canvas.linklayer.DataLinkCanvasVisualizer</name>
     <filename>inet.visualizer.canvas.linklayer.DataLinkCanvasVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.visualizer.osg.linklayer.DataLinkOsgVisualizer</name>
+    <filename>inet.visualizer.osg.linklayer.DataLinkOsgVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.common.DataLinkVisualizer</name>
@@ -1001,6 +1017,18 @@
     <filename>inet.examples.internetcloud.earthcloud.EarthCloud.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.showcases.visualizer.osg.earth.EarthVisualization2</name>
+    <filename>inet.showcases.visualizer.osg.earth.EarthVisualization2.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.showcases.visualizer.osg.earth.EarthVisualization3</name>
+    <filename>inet.showcases.visualizer.osg.earth.EarthVisualization3.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.showcases.visualizer.osg.earth.EarthVisualizationShowcase</name>
+    <filename>inet.showcases.visualizer.osg.earth.EarthVisualizationShowcase.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.networklayer.common.EchoProtocol</name>
     <filename>inet.networklayer.common.EchoProtocol.html</filename>
   </compound>
@@ -1137,6 +1165,10 @@
     <filename>inet.visualizer.canvas.power.EnergyStorageCanvasVisualizer.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.visualizer.osg.power.EnergyStorageOsgVisualizer</name>
+    <filename>inet.visualizer.osg.power.EnergyStorageOsgVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.visualizer.common.EnergyStorageVisualizer</name>
     <filename>inet.visualizer.common.EnergyStorageVisualizer.html</filename>
   </compound>
@@ -1233,8 +1265,16 @@
     <filename>inet.applications.ethernet.EthernetApp.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.linklayer.ethernet.basic.EthernetCsmaMac</name>
+    <filename>inet.linklayer.ethernet.basic.EthernetCsmaMac.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.linklayer.ethernet.basic.EthernetCsmaMacPhy</name>
     <filename>inet.linklayer.ethernet.basic.EthernetCsmaMacPhy.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.physicallayer.wired.ethernet.EthernetCsmaPhy</name>
+    <filename>inet.physicallayer.wired.ethernet.EthernetCsmaPhy.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ethernet.modular.EthernetCutthroughBarrier</name>
@@ -1325,10 +1365,6 @@
     <filename>inet.node.ethernet.EthernetLink.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.ethernet.basic.EthernetMacPhy</name>
-    <filename>inet.linklayer.ethernet.basic.EthernetMacPhy.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.linklayer.ethernet.modular.EthernetMacHeaderChecker</name>
     <filename>inet.linklayer.ethernet.modular.EthernetMacHeaderChecker.html</filename>
   </compound>
@@ -1339,6 +1375,14 @@
   <compound kind="class">
     <name>inet.linklayer.ethernet.modular.EthernetMacLayer</name>
     <filename>inet.linklayer.ethernet.modular.EthernetMacLayer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.linklayer.ethernet.basic.EthernetMacPhy</name>
+    <filename>inet.linklayer.ethernet.basic.EthernetMacPhy.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.node.ethernet.EthernetMultidropLink</name>
+    <filename>inet.node.ethernet.EthernetMultidropLink.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ethernet.modular.EthernetPauseCommandProcessor</name>
@@ -1359,6 +1403,22 @@
   <compound kind="class">
     <name>inet.physicallayer.wired.ethernet.EthernetPhyLayer</name>
     <filename>inet.physicallayer.wired.ethernet.EthernetPhyLayer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.physicallayer.wired.ethernet.EthernetPlca</name>
+    <filename>inet.physicallayer.wired.ethernet.EthernetPlca.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.node.ethernet.EthernetPlcaHost</name>
+    <filename>inet.node.ethernet.EthernetPlcaHost.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.linklayer.ethernet.EthernetPlcaInterface</name>
+    <filename>inet.linklayer.ethernet.EthernetPlcaInterface.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.examples.ethernet.TenBaseT1S.EthernetPlcaNode</name>
+    <filename>inet.examples.ethernet.TenBaseT1S.EthernetPlcaNode.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ethernet.modular.EthernetPreemptingMacLayer</name>
@@ -1669,6 +1729,10 @@
     <filename>inet.showcases.tsn.framepreemption.FramePreemptionShowcase.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.validation.tsn.framereplication.FrameReplicationValidation</name>
+    <filename>inet.validation.tsn.framereplication.FrameReplicationValidation.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.physicallayer.wireless.common.pathloss.FreeSpacePathLoss</name>
     <filename>inet.physicallayer.wireless.common.pathloss.FreeSpacePathLoss.html</filename>
   </compound>
@@ -1699,6 +1763,10 @@
   <compound kind="class">
     <name>inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorBase</name>
     <filename>inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.visualizer.osg.common.GateScheduleOsgVisualizer</name>
+    <filename>inet.visualizer.osg.common.GateScheduleOsgVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.common.GateScheduleVisualizer</name>
@@ -2147,6 +2215,10 @@
   <compound kind="class">
     <name>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmRadio</name>
     <filename>inet.physicallayer.wireless.ieee80211.bitlevel.Ieee80211OfdmRadio.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.visualizer.osg.linklayer.Ieee80211OsgVisualizer</name>
+    <filename>inet.visualizer.osg.linklayer.Ieee80211OsgVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.portal.Ieee80211Portal</name>
@@ -2833,6 +2905,10 @@
     <filename>inet.visualizer.canvas.common.InfoCanvasVisualizer.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.visualizer.osg.common.InfoOsgVisualizer</name>
+    <filename>inet.visualizer.osg.common.InfoOsgVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.visualizer.common.InfoVisualizer</name>
     <filename>inet.visualizer.common.InfoVisualizer.html</filename>
   </compound>
@@ -2869,8 +2945,16 @@
     <filename>inet.visualizer.canvas.integrated.IntegratedMultiCanvasVisualizer.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.visualizer.osg.integrated.IntegratedMultiOsgVisualizer</name>
+    <filename>inet.visualizer.osg.integrated.IntegratedMultiOsgVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.visualizer.common.IntegratedMultiVisualizer</name>
     <filename>inet.visualizer.common.IntegratedMultiVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.visualizer.osg.integrated.IntegratedOsgVisualizer</name>
+    <filename>inet.visualizer.osg.integrated.IntegratedOsgVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.common.IntegratedVisualizer</name>
@@ -2899,6 +2983,10 @@
   <compound kind="class">
     <name>inet.visualizer.canvas.linklayer.InterfaceTableCanvasVisualizer</name>
     <filename>inet.visualizer.canvas.linklayer.InterfaceTableCanvasVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.visualizer.osg.linklayer.InterfaceTableOsgVisualizer</name>
+    <filename>inet.visualizer.osg.linklayer.InterfaceTableOsgVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.showcases.visualizer.canvas.interfacetable.InterfaceTableVisualizationAdvancedFeaturesShowcase</name>
@@ -3333,6 +3421,10 @@
     <filename>inet.linklayer.contract.ISpanningTree.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.physicallayer.wired.ethernet.ISpi</name>
+    <filename>inet.physicallayer.wired.ethernet.ISpi.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.visualizer.contract.IStatisticVisualizer</name>
     <filename>inet.visualizer.contract.IStatisticVisualizer.html</filename>
   </compound>
@@ -3343,6 +3435,10 @@
   <compound kind="class">
     <name>inet.transportlayer.contract.ITcp</name>
     <filename>inet.transportlayer.contract.ITcp.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.queueing.contract.ITokenGenerator</name>
+    <filename>inet.queueing.contract.ITokenGenerator.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.contract.ITracingObstacleLossVisualizer</name>
@@ -3529,6 +3625,10 @@
     <filename>inet.visualizer.canvas.linklayer.LinkBreakCanvasVisualizer.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.visualizer.osg.linklayer.LinkBreakOsgVisualizer</name>
+    <filename>inet.visualizer.osg.linklayer.LinkBreakOsgVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.visualizer.common.LinkBreakVisualizer</name>
     <filename>inet.visualizer.common.LinkBreakVisualizer.html</filename>
   </compound>
@@ -3709,12 +3809,24 @@
     <filename>inet.physicallayer.wireless.common.medium.MediumLimitCache.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.visualizer.osg.physicallayer.MediumOsgVisualizer</name>
+    <filename>inet.visualizer.osg.physicallayer.MediumOsgVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.visualizer.common.MediumVisualizer</name>
     <filename>inet.visualizer.common.MediumVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.base.MediumVisualizerBase</name>
     <filename>inet.visualizer.base.MediumVisualizerBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.protocolelement.authentication.MessageAuthenticationCodeChecker</name>
+    <filename>inet.protocolelement.authentication.MessageAuthenticationCodeChecker.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.protocolelement.authentication.MessageAuthenticationCodeInserter</name>
+    <filename>inet.protocolelement.authentication.MessageAuthenticationCodeInserter.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.common.misc.MessageChecker</name>
@@ -3735,6 +3847,10 @@
   <compound kind="class">
     <name>inet.examples.ethernet.lans.MixedLAN</name>
     <filename>inet.examples.ethernet.lans.MixedLAN.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.examples.ethernet.TenBaseT1S.MixedMultidropNetwork</name>
+    <filename>inet.examples.ethernet.TenBaseT1S.MixedMultidropNetwork.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.examples.rip.mixednetwork.MixedNetwork</name>
@@ -3771,6 +3887,10 @@
   <compound kind="class">
     <name>inet.visualizer.canvas.mobility.MobilityCanvasVisualizer</name>
     <filename>inet.visualizer.canvas.mobility.MobilityCanvasVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.visualizer.osg.mobility.MobilityOsgVisualizer</name>
+    <filename>inet.visualizer.osg.mobility.MobilityOsgVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.common.MobilityVisualizer</name>
@@ -3815,6 +3935,10 @@
   <compound kind="class">
     <name>inet.linklayer.ieee8021as.MultiDomainGptp</name>
     <filename>inet.linklayer.ieee8021as.MultiDomainGptp.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.examples.ethernet.TenBaseT1S.MultidropNetwork</name>
+    <filename>inet.examples.ethernet.TenBaseT1S.MultidropNetwork.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.diffserv.MultiFieldClassifier</name>
@@ -4017,6 +4141,10 @@
     <filename>inet.visualizer.canvas.scene.NetworkConnectionCanvasVisualizer.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.visualizer.osg.scene.NetworkConnectionOsgVisualizer</name>
+    <filename>inet.visualizer.osg.scene.NetworkConnectionOsgVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.visualizer.common.NetworkConnectionVisualizer</name>
     <filename>inet.visualizer.common.NetworkConnectionVisualizer.html</filename>
   </compound>
@@ -4041,12 +4169,20 @@
     <filename>inet.visualizer.canvas.scene.NetworkNodeCanvasVisualizer.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.visualizer.osg.scene.NetworkNodeOsgVisualizer</name>
+    <filename>inet.visualizer.osg.scene.NetworkNodeOsgVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.visualizer.common.NetworkNodeVisualizer</name>
     <filename>inet.visualizer.common.NetworkNodeVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.base.NetworkNodeVisualizerBase</name>
     <filename>inet.visualizer.base.NetworkNodeVisualizerBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.showcases.visualizer.osg.networknode.NetworkNodeVisualizerShowcase</name>
+    <filename>inet.showcases.visualizer.osg.networknode.NetworkNodeVisualizerShowcase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.showcases.visualizer.canvas.networkpathactivity.NetworkPathComplexShowcase</name>
@@ -4071,6 +4207,10 @@
   <compound kind="class">
     <name>inet.visualizer.canvas.networklayer.NetworkRouteCanvasVisualizer</name>
     <filename>inet.visualizer.canvas.networklayer.NetworkRouteCanvasVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.visualizer.osg.networklayer.NetworkRouteOsgVisualizer</name>
+    <filename>inet.visualizer.osg.networklayer.NetworkRouteOsgVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.common.NetworkRouteVisualizer</name>
@@ -4473,6 +4613,10 @@
     <filename>inet.showcases.visualizer.canvas.packetdrop.PacketDropNoRouteToDestinationShowcase.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.visualizer.osg.common.PacketDropOsgVisualizer</name>
+    <filename>inet.visualizer.osg.common.PacketDropOsgVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.showcases.visualizer.canvas.packetdrop.PacketDropQueueOverflowShowcase</name>
     <filename>inet.showcases.visualizer.canvas.packetdrop.PacketDropQueueOverflowShowcase.html</filename>
   </compound>
@@ -4511,6 +4655,10 @@
   <compound kind="class">
     <name>inet.visualizer.canvas.flow.PacketFlowCanvasVisualizer</name>
     <filename>inet.visualizer.canvas.flow.PacketFlowCanvasVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.visualizer.osg.flow.PacketFlowOsgVisualizer</name>
+    <filename>inet.visualizer.osg.flow.PacketFlowOsgVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.queueing.flow.PacketFlowPcapFileRecorder</name>
@@ -4745,6 +4893,14 @@
     <filename>inet.visualizer.canvas.environment.PhysicalEnvironmentCanvasVisualizer.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.visualizer.osg.environment.PhysicalEnvironmentOsgVisualizer</name>
+    <filename>inet.visualizer.osg.environment.PhysicalEnvironmentOsgVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.showcases.visualizer.osg.environment.PhysicalEnvironmentVisualizationShowcase</name>
+    <filename>inet.showcases.visualizer.osg.environment.PhysicalEnvironmentVisualizationShowcase.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.visualizer.common.PhysicalEnvironmentVisualizer</name>
     <filename>inet.visualizer.common.PhysicalEnvironmentVisualizer.html</filename>
   </compound>
@@ -4759,6 +4915,10 @@
   <compound kind="class">
     <name>inet.visualizer.canvas.physicallayer.PhysicalLinkCanvasVisualizer</name>
     <filename>inet.visualizer.canvas.physicallayer.PhysicalLinkCanvasVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.visualizer.osg.physicallayer.PhysicalLinkOsgVisualizer</name>
+    <filename>inet.visualizer.osg.physicallayer.PhysicalLinkOsgVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.common.PhysicalLinkVisualizer</name>
@@ -4981,6 +5141,10 @@
     <filename>inet.showcases.measurement.queueingtime.QueueingTimeMeasurementShowcase.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.visualizer.osg.common.QueueOsgVisualizer</name>
+    <filename>inet.visualizer.osg.common.QueueOsgVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.visualizer.common.QueueVisualizer</name>
     <filename>inet.visualizer.common.QueueVisualizer.html</filename>
   </compound>
@@ -5007,6 +5171,10 @@
   <compound kind="class">
     <name>inet.physicallayer.wireless.common.medium.RadioMedium</name>
     <filename>inet.physicallayer.wireless.common.medium.RadioMedium.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.visualizer.osg.physicallayer.RadioOsgVisualizer</name>
+    <filename>inet.visualizer.osg.physicallayer.RadioOsgVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.common.RadioVisualizer</name>
@@ -5209,6 +5377,10 @@
     <filename>inet.visualizer.canvas.networklayer.RoutingTableCanvasVisualizer.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.visualizer.osg.networklayer.RoutingTableOsgVisualizer</name>
+    <filename>inet.visualizer.osg.networklayer.RoutingTableOsgVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.networklayer.ipv4.RoutingTableRecorder</name>
     <filename>inet.networklayer.ipv4.RoutingTableRecorder.html</filename>
   </compound>
@@ -5375,6 +5547,18 @@
   <compound kind="class">
     <name>inet.visualizer.canvas.scene.SceneCanvasVisualizer</name>
     <filename>inet.visualizer.canvas.scene.SceneCanvasVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.visualizer.osg.scene.SceneOsgEarthVisualizer</name>
+    <filename>inet.visualizer.osg.scene.SceneOsgEarthVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.visualizer.osg.scene.SceneOsgVisualizer</name>
+    <filename>inet.visualizer.osg.scene.SceneOsgVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.visualizer.osg.base.SceneOsgVisualizerBase</name>
+    <filename>inet.visualizer.osg.base.SceneOsgVisualizerBase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.common.SceneVisualizer</name>
@@ -5701,6 +5885,14 @@
     <filename>inet.showcases.visualizer.canvas.spectrum.SpectrumShowcaseSpectrumFigureSpectrogramNetwork.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.physicallayer.wired.ethernet.SpiDelayer</name>
+    <filename>inet.physicallayer.wired.ethernet.SpiDelayer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.physicallayer.wired.ethernet.SpiShaper</name>
+    <filename>inet.physicallayer.wired.ethernet.SpiShaper.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.node.inet.StandardHost</name>
     <filename>inet.node.inet.StandardHost.html</filename>
   </compound>
@@ -5739,6 +5931,10 @@
   <compound kind="class">
     <name>inet.visualizer.canvas.common.StatisticCanvasVisualizer</name>
     <filename>inet.visualizer.canvas.common.StatisticCanvasVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.visualizer.osg.common.StatisticOsgVisualizer</name>
+    <filename>inet.visualizer.osg.common.StatisticOsgVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.showcases.visualizer.canvas.statistic.StatisticVisualizationPacketErrorRateShowcase</name>
@@ -6149,6 +6345,10 @@
     <filename>inet.visualizer.canvas.physicallayer.TracingObstacleLossCanvasVisualizer.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.visualizer.osg.physicallayer.TracingObstacleLossOsgVisualizer</name>
+    <filename>inet.visualizer.osg.physicallayer.TracingObstacleLossOsgVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.visualizer.common.TracingObstacleLossVisualizer</name>
     <filename>inet.visualizer.common.TracingObstacleLossVisualizer.html</filename>
   </compound>
@@ -6179,6 +6379,10 @@
   <compound kind="class">
     <name>inet.visualizer.canvas.transportlayer.TransportConnectionCanvasVisualizer</name>
     <filename>inet.visualizer.canvas.transportlayer.TransportConnectionCanvasVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.visualizer.osg.transportlayer.TransportConnectionOsgVisualizer</name>
+    <filename>inet.visualizer.osg.transportlayer.TransportConnectionOsgVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.showcases.visualizer.canvas.transportconnection.TransportConnectionVisualizationEnablingShowcase</name>
@@ -6219,6 +6423,10 @@
   <compound kind="class">
     <name>inet.visualizer.canvas.transportlayer.TransportRouteCanvasVisualizer</name>
     <filename>inet.visualizer.canvas.transportlayer.TransportRouteCanvasVisualizer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.visualizer.osg.transportlayer.TransportRouteOsgVisualizer</name>
+    <filename>inet.visualizer.osg.transportlayer.TransportRouteOsgVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.common.TransportRouteVisualizer</name>
