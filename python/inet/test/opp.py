@@ -75,7 +75,7 @@ def get_opp_test_tasks(test_folder, simulation_project=None, filter=".*", full_m
         The result can be run (and re-run) without providing additional parameters.
     """
     def create_test_task(test_file_name):
-        return OppTestTask(simulation_project, simulation_project.get_full_path(test_folder), os.path.basename(test_file_name), task_result_class=TestTaskResult, **kwargs)
+        return OppTestTask(simulation_project, simulation_project.get_full_path(test_folder), os.path.basename(test_file_name), task_result_class=TestTaskResult, **dict(kwargs, pass_keyboard_interrupt=True))
     if simulation_project is None:
         simulation_project = get_default_simulation_project()
     test_file_names = list(builtins.filter(lambda test_file_name: matches_filter(test_file_name, filter, None, full_match),

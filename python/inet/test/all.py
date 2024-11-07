@@ -69,7 +69,7 @@ def get_all_test_tasks(**kwargs):
                           ]
     test_tasks = []
     for test_task_function in test_task_functions:
-        multiple_test_tasks = test_task_function(**kwargs)
+        multiple_test_tasks = test_task_function(**dict(kwargs, pass_keyboard_interrupt=True))
         if multiple_test_tasks.tasks:
             test_tasks.append(multiple_test_tasks)
     return MultipleTestTasks(tasks=test_tasks, **dict(kwargs, name="test group", start=None, end=None, concurrent=False))

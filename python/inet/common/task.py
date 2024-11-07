@@ -306,7 +306,7 @@ class Task:
     Represents a self-contained operation that captures all necessary information in order to be run.
     """
 
-    def __init__(self, name="task", action="", print_run_start_separately=True, task_result_class=TaskResult, **kwargs):
+    def __init__(self, name="task", action="", pass_keyboard_interrupt=False, print_run_start_separately=True, task_result_class=TaskResult, **kwargs):
         """
         Initializes a new task object.
 
@@ -328,6 +328,7 @@ class Task:
         self.kwargs = kwargs
         self.name = name
         self.action = action
+        self.pass_keyboard_interrupt = pass_keyboard_interrupt
         self.print_run_start_separately = print_run_start_separately
         self.task_result_class = task_result_class
         self.cancel = False
@@ -400,6 +401,8 @@ class Task:
                         task_result.elapsed_wall_time = end_time - start_time
             except KeyboardInterrupt:
                 task_result = self.task_result_class(task=self, result="CANCEL", reason="Cancel by user")
+                if self.pass_keyboard_interrupt:
+                    raise
             except Exception as e:
                 if handle_exception:
                     task_result = self.task_result_class(task=self, result="ERROR", reason="Exception during task execution", error_message=e.__repr__(), exception=e)
@@ -459,7 +462,7 @@ class MultipleTasks:
     Represents multiple tasks that can be run together. 
     """
 
-    def __init__(self, tasks=[], name="task", concurrent=True, randomize=False, chunksize=1, scheduler="thread", cluster=None, multiple_task_results_class=MultipleTaskResults, **kwargs):
+    def __init__(self, tasks=[], name="task", concurrent=True, pass_keyboard_interrupt=False, randomize=False, chunksize=1, scheduler="thread", cluster=None, multiple_task_results_class=MultipleTaskResults, **kwargs):
         """
         Initializes a new multiple tasks object.
 
@@ -491,11 +494,13 @@ class MultipleTasks:
         self.tasks = tasks
         self.name = name
         self.concurrent = concurrent
+        self.pass_keyboard_interrupt = pass_keyboard_interrupt
         self.randomize = randomize
         self.chunksize = chunksize
         self.cluster = cluster
         self.scheduler = scheduler
         self.multiple_task_results_class = multiple_task_results_class
+        self.task_result_class = multiple_task_results_class
         self.cancel = False
 
     def __repr__(self):
@@ -558,19 +563,25 @@ class MultipleTasks:
                     for task in tasks:
                         task.set_cancel(True)
                     task_results = map_results.get(0xFFFF)
+                    if self.pass_keyboard_interrupt:
+                        raise
             else:
-                keyboard_interrupt_handler = KeyboardInterruptHandler()
-                with DisabledKeyboardInterrupts(keyboard_interrupt_handler):
-                    cancel = False
-                    task_results = []
-                    task_index = 0
+                cancel = False
+                task_results = []
+                task_index = 0
+                try:
                     for task in tasks:
                         task.set_cancel(cancel)
-                        result = task.run(**dict(kwargs, keyboard_interrupt_handler=keyboard_interrupt_handler, index=task_index, count=task_count))
+                        result = task.run(**dict(kwargs, index=task_index, count=task_count))
                         if result.result == "CANCEL":
                             cancel = True
                         task_results.append(result)
                         task_index = task_index + 1
+                except KeyboardInterrupt:
+                    for task in tasks[len(task_results):]:
+                        task_results.append(task.task_result_class(task=task, result="CANCEL", reason="Cancel by user"))
+                    if self.pass_keyboard_interrupt:
+                        raise
             return self.multiple_task_results_class(multiple_tasks=self, results=task_results)
 
     def recreate(self, **kwargs):
@@ -589,11 +600,14 @@ class MultipleTasks:
             return self.recreate(**kwargs).run()
 
 def run_task_with_capturing_output(task, tasks=None, task_count=None, output_stream=sys.stdout, **kwargs):
-    task_output_stream = io.StringIO()
-    task_index = tasks.index(task)
-    task_result = task.run(output_stream=task_output_stream, **dict(kwargs, index=task_index, count=task_count))
-    print(task_output_stream.getvalue(), end="", file=output_stream)
-    return task_result
+    try:
+        task_output_stream = io.StringIO()
+        task_index = tasks.index(task)
+        task_result = task.run(output_stream=task_output_stream, **dict(kwargs, index=task_index, count=task_count))
+        print(task_output_stream.getvalue(), end="", file=output_stream)
+        return task_result
+    except KeyboardInterrupt:
+        return task.task_result_class(task=task, result="CANCEL", reason="Cancel by user")
 
 def run_tasks(tasks, task_result_class=TaskResult, multiple_tasks_class=MultipleTasks, multiple_task_results_class=MultipleTaskResults, **kwargs):
     multiple_tasks = multiple_tasks_class(multiple_tasks=tasks, **kwargs)
