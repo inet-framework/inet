@@ -10,8 +10,9 @@ package inet.showcases.wireless.errorrate;
 import inet.environment.common.PhysicalEnvironment;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
 import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+
 
 network ErrorRateShowcase
 {
@@ -24,7 +25,7 @@ network ErrorRateShowcase
             parameters:
                 @display("p=100,150");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             parameters:
                 @display("p=100,250");
         }

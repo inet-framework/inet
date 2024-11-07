@@ -10,16 +10,17 @@ import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.StandardHost;
-import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
 import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 import inet.visualizer.canvas.integrated.IntegratedMultiCanvasVisualizer;
-import inet.visualizer.common.DataLinkVisualizer;
+import inet.visualizer.canvas.linklayer.DataLinkCanvasVisualizer;
+
 
 network DataLinkVisualizerEnablingWiredShowcase
 {
     @display("bgb=700,250");
     submodules:
-        linkVisualizer: DataLinkVisualizer {
+        linkVisualizer: DataLinkCanvasVisualizer {
             parameters:
                 @display("p=100,50");
         }
@@ -42,7 +43,7 @@ network DataLinkVisualizerEnablingWirelessShowcase
 {
     @display("bgb=700,250");
     submodules:
-        linkVisualizer: DataLinkVisualizer {
+        linkVisualizer: DataLinkCanvasVisualizer {
             parameters:
                 @display("p=100,50");
         }
@@ -50,7 +51,7 @@ network DataLinkVisualizerEnablingWirelessShowcase
             parameters:
                 @display("p=100,120");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             parameters:
                 @display("p=100,190");
         }
@@ -74,7 +75,7 @@ network DataLinkVisualizerActivityLevelShowcase
             parameters:
                 @display("p=100,120");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             parameters:
                 @display("p=100,190");
         }
@@ -152,7 +153,7 @@ network DataLinkVisualizerMobileShowcase
         configurator: Ipv4NetworkConfigurator {
             @display("p=70,150");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             @display("p=70,250");
         }
         destination: AodvRouter {

@@ -10,7 +10,7 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
-import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
 import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 
@@ -39,7 +39,7 @@ network PacketDropQueueOverflowShowcase
         visualizer: IntegratedCanvasVisualizer {
             @display("p=267,37");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             @display("p=465,37");
         }
     connections:
@@ -55,7 +55,7 @@ network PacketDropArpResolutionFailedShowcase
             parameters:
                 @display("p=100,50");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             parameters:
                 @display("p=100,150");
         }
@@ -76,7 +76,7 @@ network PacketDropMacRetryLimitReachedShowcase
             parameters:
                 @display("p=100,50");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             parameters:
                 @display("p=100,150");
         }
