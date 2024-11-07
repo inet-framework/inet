@@ -19,7 +19,7 @@ About the visualizer
 --------------------
 
 The :ned:`TransportConnectionVisualizer` module (also part of
-:ned:`IntegratedVisualizer`) displays color-coded icons above the two
+:ned:`IntegratedCanvasVisualizer`) displays color-coded icons above the two
 endpoints of an active, established transport layer level connection.
 The icons will appear when the connection is established and disappear
 when it is closed. Naturally, there can be multiple connections open at
@@ -91,7 +91,7 @@ There are two :ned:`StandardHost`'s connected to a switch, which is
 connected via a router to the server, another :ned:`StandardHost`. IP
 addresses and routing tables are configured by an
 :ned:`Ipv4NetworkConfigurator` module. The visualizer module is an
-:ned:`IntegratedVisualizer`.
+:ned:`IntegratedCanvasVisualizer`.
 
 The hosts are configured to open TCP connections to the server:
 

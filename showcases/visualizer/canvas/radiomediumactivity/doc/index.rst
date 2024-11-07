@@ -21,7 +21,7 @@ About the visualizer
 --------------------
 
 The :ned:`MediumVisualizer` module (included in the networks for this
-showcase as part of :ned:`IntegratedVisualizer`) can visualize various
+showcase as part of :ned:`IntegratedCanvasVisualizer`) can visualize various
 aspects of radio communications. :ned:`MediumVisualizer` has the following
 three main features, and boolean parameters for turning them on/off:
 
