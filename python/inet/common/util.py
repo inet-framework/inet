@@ -32,20 +32,28 @@ def enable_autoreload():
 
 _logging_initialized = False
 
-def initialize_logging(level):
+def initialize_logging(log_level, external_command_log_level):
     global _logging_initialized
     formatter = ColoredLoggingFormatter()
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
     logger = logging.getLogger()
-    logger.setLevel(level)
+    logger.setLevel(log_level)
     logger.handlers = []
     logger.addHandler(handler)
+    logging.getLogger("make").setLevel(external_command_log_level)
+    logging.getLogger("opp_featuretool").setLevel(external_command_log_level)
+    logging.getLogger("opp_makemake").setLevel(external_command_log_level)
+    logging.getLogger("opp_run").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_dbg").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_release").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_sanitize").setLevel(external_command_log_level)
+    logging.getLogger("opp_test").setLevel(external_command_log_level)
     _logging_initialized = True
 
-def ensure_logging_initialized(level):
+def ensure_logging_initialized(log_level, external_command_log_level):
     if not _logging_initialized:
-        initialize_logging(level)
+        initialize_logging(log_level, external_command_log_level)
         return True
     else:
         return False

@@ -42,6 +42,7 @@ def parse_run_tasks_arguments(task_name):
     parser.add_argument("--hosts", default="localhost", help="specifies the hosts where the simulations are run")
     parser.add_argument("-x", "--nix-shell", default=None, help="specifies the NIX shell in which the simulations are run")
     parser.add_argument("-l", "--log-level", choices=["ERROR", "WARN", "INFO", "DEBUG"], default="WARN", help="specifies the log level for the root logging category")
+    parser.add_argument("--external-command-log-level", choices=["ERROR", "WARN", "INFO", "DEBUG"], default="WARN", help="specifies the log level for the external command logging categories")
     parser.add_argument("--handle-exception", action="store_true", help="disables displaying stacktraces for exceptions")
     parser.add_argument("--no-handle-exception", dest="handle_exception", action="store_false")
     parser.set_defaults(concurrent=True, build=True, dry_run=False, handle_exception=True)
@@ -76,7 +77,7 @@ def process_run_tasks_arguments(args):
 def run_tasks_main(main_function, task_name):
     try:
         args = parse_run_tasks_arguments(task_name)
-        initialize_logging(args.log_level)
+        initialize_logging(args.log_level, args.external_command_log_level)
         _logger.debug(f"Processing command line arguments: {args}")
         kwargs = process_run_tasks_arguments(args)
         _logger.debug(f"Calling main function with: {kwargs}")
@@ -147,11 +148,12 @@ def parse_build_project_arguments():
     parser.add_argument("-m", "--mode", choices=["debug", "release"], help="specifies the build mode of the project")
     parser.add_argument("--concurrent", default=True, action=argparse.BooleanOptionalAction, help="determines if multiple tasks are run concurrently or not")
     parser.add_argument("-l", "--log-level", choices=["ERROR", "WARN", "INFO", "DEBUG"], default="WARN", help="specifies the log level for the root logging category")
+    parser.add_argument("--external-command-log-level", choices=["ERROR", "WARN", "INFO", "DEBUG"], default="INFO", help="specifies the log level for the external command logging categories")
     parser.add_argument("--handle-exception", default=True, action=argparse.BooleanOptionalAction, help="disables displaying stacktraces for exceptions")
     return parser.parse_args(sys.argv[1:])
 
 def process_build_project_arguments(args):
-    initialize_logging(args.log_level)
+    initialize_logging(args.log_level, args.external_command_log_level)
     define_omnetpp_sample_projects()
     simulation_project = determine_default_simulation_project(name=args.simulation_project)
     kwargs = {k: v for k, v in vars(args).items() if v is not None}

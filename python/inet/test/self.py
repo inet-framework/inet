@@ -88,6 +88,7 @@ def parse_arguments():
     parser.add_argument("-r", "--run-filter", default=None, help="includes simulations having the specified run numbers")
     parser.add_argument("--exclude-run-filter", default=None, help="exclude simulations having the specified run numbers")
     parser.add_argument("-l", "--log-level", choices=["ERROR", "WARN", "INFO", "DEBUG"], default="WARN", help="specifies the log level for the root logging category")
+    parser.add_argument("--external-command-log-level", choices=["ERROR", "WARN", "INFO", "DEBUG"], default="WARN", help="specifies the log level for the external command logging categories")
     return parser.parse_args(sys.argv[1:])
 
 def process_arguments(args):
@@ -101,7 +102,7 @@ def define_self_test_projects():
 def run_self_tests_main():
     args = parse_arguments()
     kwargs = process_arguments(args)
-    initialize_logging(args.log_level)
+    initialize_logging(args.log_level, args.external_command_log_level)
     define_self_test_projects()
     self_test_task_results = MultipleSelfTestTasks(**kwargs).run(**kwargs)
     print(self_test_task_results)
