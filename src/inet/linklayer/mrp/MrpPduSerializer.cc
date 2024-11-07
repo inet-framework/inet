@@ -12,9 +12,11 @@
 namespace inet {
 
 Register_Serializer(MrpTlvHeader, MrpTlvSerializer);
+Register_Serializer(MrpEnd, MrpTlvSerializer);
 Register_Serializer(MrpTest, MrpTlvSerializer);
 Register_Serializer(MrpTopologyChange, MrpTlvSerializer);
 Register_Serializer(MrpLinkChange, MrpTlvSerializer);
+Register_Serializer(MrpInTest, MrpTlvSerializer);
 Register_Serializer(MrpInLinkChange, MrpTlvSerializer);
 Register_Serializer(MrpInLinkStatusPoll, MrpTlvSerializer);
 Register_Serializer(MrpInTopologyChange, MrpTlvSerializer);
@@ -109,7 +111,7 @@ void MrpTlvSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chu
     }
     case OPTION: {
         const auto &oh = staticPtrCast<const MrpOption>(chunk);
-        stream.writeUint32Be(oh->getOuiType());
+        stream.writeUint24Be(oh->getOuiType());
         stream.writeUint8(oh->getEd1Type());
         break;
     }
@@ -151,18 +153,20 @@ const Ptr<Chunk> MrpVersionFieldSerializer::deserialize(MemoryInputStream &strea
 }
 
 const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const {
-    auto headerType = static_cast<TlvHeaderType>(stream.readUint16Be());
+    auto headerType = static_cast<TlvHeaderType>(stream.readUint8());
+    uint8_t headerLength = stream.readUint8();
+
     switch (headerType) {
     case END: {
         auto tlv = makeShared<MrpTlvHeader>();
         tlv->setHeaderType(headerType);
-        tlv->setHeaderLength(stream.readUint8());
+        tlv->setHeaderLength(headerLength);
         return tlv;
     }
     case COMMON: {
         auto tlv = makeShared<MrpCommon>();
         tlv->setHeaderType(headerType);
-        tlv->setHeaderLength(stream.readUint8());
+        tlv->setHeaderLength(headerLength);
         tlv->setSequenceID(stream.readUint16Be());
         tlv->setUuid0(stream.readUint64Be());
         tlv->setUuid1(stream.readUint64Be());
@@ -171,7 +175,7 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const 
     case TEST: {
         auto tlv = makeShared<MrpTest>();
         tlv->setHeaderType(headerType);
-        tlv->setHeaderLength(stream.readUint8());
+        tlv->setHeaderLength(headerLength);
         tlv->setPrio(stream.readUint16Be());
         tlv->setSa(stream.readMacAddress());
         tlv->setPortRole(stream.readUint16Be());
@@ -183,7 +187,7 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const 
     case TOPOLOGYCHANGE: {
         auto tlv = makeShared<MrpTopologyChange>();
         tlv->setHeaderType(headerType);
-        tlv->setHeaderLength(stream.readUint8());
+        tlv->setHeaderLength(headerLength);
         tlv->setPrio(stream.readUint16Be());
         tlv->setSa(stream.readMacAddress());
         tlv->setPortRole(stream.readUint16Be());
@@ -194,7 +198,7 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const 
     case LINKUP: {
         auto tlv = makeShared<MrpLinkChange>();
         tlv->setHeaderType(headerType);
-        tlv->setHeaderLength(stream.readUint8());
+        tlv->setHeaderLength(headerLength);
         tlv->setSa(stream.readMacAddress());
         tlv->setPortRole(stream.readUint16Be());
         tlv->setInterval(stream.readUint16Be());
@@ -204,7 +208,7 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const 
     case INTEST: {
         auto tlv = makeShared<MrpInTest>();
         tlv->setHeaderType(headerType);
-        tlv->setHeaderLength(stream.readUint8());
+        tlv->setHeaderLength(headerLength);
         tlv->setInID(stream.readUint16Be());
         tlv->setSa(stream.readMacAddress());
         tlv->setPortRole(stream.readUint16Be());
@@ -216,7 +220,7 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const 
     case INTOPOLOGYCHANGE: {
         auto tlv = makeShared<MrpInTopologyChange>();
         tlv->setHeaderType(headerType);
-        tlv->setHeaderLength(stream.readUint8());
+        tlv->setHeaderLength(headerLength);
         tlv->setSa(stream.readMacAddress());
         tlv->setInID(stream.readUint16Be());
         tlv->setInterval(stream.readUint16Be());
@@ -226,7 +230,7 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const 
     case INLINKUP: {
         auto tlv = makeShared<MrpInLinkChange>();
         tlv->setHeaderType(headerType);
-        tlv->setHeaderLength(stream.readUint8());
+        tlv->setHeaderLength(headerLength);
         tlv->setSa(stream.readMacAddress());
         tlv->setPortRole(stream.readUint16Be());
         tlv->setInID(stream.readUint16Be());
@@ -237,7 +241,7 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const 
     case INLINKSTATUSPOLL: {
         auto tlv = makeShared<MrpInLinkStatusPoll>();
         tlv->setHeaderType(headerType);
-        tlv->setHeaderLength(stream.readUint8());
+        tlv->setHeaderLength(headerLength);
         tlv->setSa(stream.readMacAddress());
         tlv->setPortRole(stream.readUint16Be());
         tlv->setInID(stream.readUint16Be());
@@ -246,7 +250,7 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const 
     case OPTION: {
         auto tlv = makeShared<MrpOption>();
         tlv->setHeaderType(headerType);
-        tlv->setHeaderLength(stream.readUint8());
+        tlv->setHeaderLength(headerLength);
         tlv->setOuiType(static_cast<MrpOuiType>(stream.readUint24Be()));
         tlv->setEd1Type(stream.readUint8());
         return tlv;
@@ -284,8 +288,7 @@ const Ptr<Chunk> MrpSubTlvSerializer::deserialize(MemoryInputStream &stream) con
         return subTlv;
     }
     default:
-        throw cRuntimeError("Unknown Header TYPE value: %d",
-                static_cast<int>(subType));
+        throw cRuntimeError("Unknown Header TYPE value: %d", static_cast<int>(subType));
     }
 }
 
