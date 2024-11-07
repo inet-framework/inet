@@ -21,7 +21,7 @@ About the visualizer
 --------------------
 
 In INET, the :ned:`RoutingTableVisualizer` module (included in the network
-as part of :ned:`IntegratedVisualizer`) is responsible for visualizing
+as part of :ned:`IntegratedCanvasVisualizer`) is responsible for visualizing
 routing table entries.
 
 The visualizer basically annotates network links with labeled arrows
@@ -63,7 +63,7 @@ be run by choosing the ``DisplayingAll`` configuration from the ini
 file. The network for the simulation contains two :ned:`StandardHost`'s,
 each connected to a :ned:`Router`. IP addresses are assigned by the
 :ned:`Ipv4NetworkConfigurator` module, which also fills in the routing tables
-automatically. The visualizer module is an :ned:`IntegratedVisualizer`
+automatically. The visualizer module is an :ned:`IntegratedCanvasVisualizer`
 which contains all available visualizers as submodules.
 
 The configuration contains one line, which enables the visualization of

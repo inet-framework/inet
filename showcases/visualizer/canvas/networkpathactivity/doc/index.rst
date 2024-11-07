@@ -114,7 +114,7 @@ The network consists of five ``routers`` (``router0..router4``), four
 a video to the ``videoClient`` node. The remaining two endpoints
 (``host1`` and ``host2``) are inactive in this simulation.
 
-For this network, the visualizer's type is :ned:`IntegratedVisualizer`.
+For this network, the visualizer's type is :ned:`IntegratedCanvasVisualizer`.
 Network path visualization is filtered to display only ping traffic. The
 video stream packets are not visualized by network path activity
 visualizer. The :par:`fadeOutMode` and :par:`fadeOutTime` parameters have been

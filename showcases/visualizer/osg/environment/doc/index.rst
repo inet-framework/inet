@@ -22,7 +22,7 @@ About the visualizer
 --------------------
 
 The :ned:`PhysicalEnvironmentVisualizer` (also part of
-:ned:`IntegratedVisualizer`) is responsible for displaying the physical
+:ned:`IntegratedCanvasVisualizer`) is responsible for displaying the physical
 objects. The objects themselves are provided by the
 :ned:`PhysicalEnvironment` module; their geometry, physical and visual
 properties are defined in the XML configuration of the
@@ -43,7 +43,7 @@ This example configuration (``DefaultView`` in the ini file)
 demonstrates the default visualization of objects. The objects are
 defined in the ``indoor.xml`` file, which depicts an apartment with
 three rooms. The network contains just two modules, a
-:ned:`PhysicalEnvironment` and an :ned:`IntegratedVisualizer` module. When the
+:ned:`PhysicalEnvironment` and an :ned:`IntegratedCanvasVisualizer` module. When the
 simulation is run, the network looks like this:
 
 .. figure:: media/default.png

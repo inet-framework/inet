@@ -72,7 +72,7 @@ illustrated by the image below:
 
 The networks contain four :ned:`AdhocHost`'s, named ``host1`` to
 ``host4``. The networks also contain an :ned:`Ipv4NetworkConfigurator`
-module, an :ned:`IntegratedVisualizer` module, and one or two radio medium modules.
+module, an :ned:`IntegratedCanvasVisualizer` module, and one or two radio medium modules.
 The number and type of the radio medium modules vary in the networks
 for the different simulations. All hosts
 are within communication range of each other.

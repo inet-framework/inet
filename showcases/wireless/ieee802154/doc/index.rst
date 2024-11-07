@@ -79,7 +79,7 @@ from :download:`omnetpp.ini <../omnetpp.ini>`. It uses the following network:
 The network contains 14 hosts of the :ned:`SensorNode` type, which has an
 :ned:`Ieee802154NarrowbandInterface` by default. The network also contains
 an :ned:`Ipv4NetworkConfigurator`, an :ned:`Ieee802154NarrowbandScalarRadioMedium`,
-and an :ned:`IntegratedVisualizer` module.
+and an :ned:`IntegratedCanvasVisualizer` module.
 
 Routes are set up according to a star topology, with the controller at
 the center. This setup is achieved with the following configuration of

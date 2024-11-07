@@ -90,7 +90,7 @@ The example simulation uses the following network:
    :align: center
 
 The network contains two :ned:`AdhocHost`'s named ``wifiHost1`` and ``wifiHost2``.
-It also contains an :ned:`Ipv4NetworkConfigurator`, an :ned:`IntegratedVisualizer`,
+It also contains an :ned:`Ipv4NetworkConfigurator`, an :ned:`IntegratedCanvasVisualizer`,
 and an :ned:`Ieee80211ScalarRadioMedium` module.
 
 Configuration keys for the UDP traffic, the radio, and the radio medium are defined

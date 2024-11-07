@@ -105,7 +105,7 @@ frames correctly from each other.
    :width: 100%
 
 For this network, the type of ``visualizer`` module is
-:ned:`IntegratedVisualizer`. Physical link activity visualization is
+:ned:`IntegratedCanvasVisualizer`. Physical link activity visualization is
 filtered to display only ping traffic. Other frames, e.g. Beacon frames
 and ACK frames, are not displayed by :ned:`PhysicalLinkVisualizer`.
 
