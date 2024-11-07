@@ -10,6 +10,8 @@ def run_release_tests(**kwargs):
        not os.path.exists(get_omnetpp_relative_path("bin/opp_run_dbg")) or \
        not os.path.exists(get_omnetpp_relative_path("bin/opp_run_sanitize")):
         raise Exception("Cannot run release tests because omnetpp must be first built in release, debug and sanitize mode")
+    logging.getLogger("inet.common.task").setLevel("INFO")
+    logging.getLogger("inet.simulation.build").setLevel("INFO")
     args = ["opp_featuretool", "enable", "all"]
     subprocess_result = run_command_with_logging(args, cwd=inet_project.get_full_path("."), error_message="Enabling all features failed")
     args = ["opp_featuretool", "disable", "SelfDoc"]
