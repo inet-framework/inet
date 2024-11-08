@@ -80,7 +80,7 @@ path loss, background noise, and analog signal representation modules.
 
 The standard radio medium module in INET is :ned:`RadioMedium`. Wireless protocols
 in INET (such as 802.11 or 802.15.4) often have their own radio medium module types
-(e.g. :ned:`Ieee80211DimensionalRadioMedium`), but these modules are actually
+(e.g. :ned:`Ieee80211RadioMedium`), but these modules are actually
 :ned:`RadioMedium`, just with different default parameterizations (each
 parameterized for its typical use case). For example, they might have different
 defaults for path loss type, background noise power, or analog signal representation
@@ -91,7 +91,7 @@ type to dimensional when simulating CTI).
 
 For our simulation, we'll use :ned:`RadioMedium`. Since we'll have two different
 protocols, the analog model and the background noise of the radio medium and the
-protocol specific radios need to match (they need to be dimensional).
+protocol specific radios need to match (the analog model needs to be dimensional).
 We'll set just these two parameters, and leave the others on default.
 
 In INET, different types of radio modules (e.g. 802.11 and 802.15.4) can detect
@@ -175,7 +175,7 @@ The simulation is defined in the ``Coexistence`` configuration in
 :download:`omnetpp.ini <../omnetpp.ini>`. The radio medium module in the network
 is a :ned:`RadioMedium`. It is configured to use the :ned:`DimensionalMediumAnalogModel`.
 The background noise type is set to :ned:`IsotropicDimensionalBackgroundNoise`,
-with a power of -110 dBm. Here is the radio medium configuration in
+with a spectral power density of -113 dBmW/MHz. Here is the radio medium configuration in
 :download:`omnetpp.ini <../omnetpp.ini>`:
 
 .. literalinclude:: ../omnetpp.ini
@@ -193,11 +193,11 @@ We'll use the 802.11 OFDM spectral mask, as in the standard:
    :width: 90%
    :align: center
 
-Here is the ``frequencyGains`` parameter value specifying this spectrum:
+Here is the :par:`frequencyGains` parameter value specifying this spectrum:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: wifiHost*.wlan[*].radio.transmitter.frequencyGains
-   :end-at: wifiHost*.wlan[*].radio.transmitter.frequencyGains
+   :start-at: wifiHost*.wlan[*].radio.transmitter.analogModel.frequencyGains
+   :end-at: wifiHost*.wlan[*].radio.transmitter.analogModel.frequencyGains
    :language: ini
 
 Briefly about the syntax:
@@ -259,12 +259,12 @@ realistic shape, based on the modulated spectrum of the CC2420 Zigbee transmitte
    :width: 90%
    :align: center
 
-We'll use the approximation indicated with red. Here is the ``frequencyGains``
+We'll use the approximation indicated with red. Here is the :par:`frequencyGains`
 parameter value specifying this spectrum:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: wpanHost*.wlan[*].radio.transmitter.frequencyGains = "left c-5MHz
-   :end-at: wpanHost*.wlan[*].radio.transmitter.frequencyGains = "left c-5MHz
+   :start-at: wpanHost*.wlan[*].radio.transmitter.analogModel.frequencyGains = "left c-5MHz
+   :end-at: wpanHost*.wlan[*].radio.transmitter.analogModel.frequencyGains = "left c-5MHz
    :language: ini
 
 The default carrier frequency (2450 MHz) and bandwidth (2.8 MHz) is not changed.
@@ -273,7 +273,7 @@ Here is the configuration for the WPAN host radios in
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: Ieee802154NarrowbandInterface
-   :end-at: Ieee802154NarrowbandDimensionalRadio
+   :end-at: dimensional
    :language: ini
 
 The transmission power parameters for both technologies are left on default
