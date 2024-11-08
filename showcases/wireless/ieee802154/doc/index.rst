@@ -32,20 +32,20 @@ The INET implementation
 INET features a narrowband and an ultra-wideband IEEE 802.15.4 PHY
 model:
 
-- :ned:`Ieee802154NarrowbandScalarRadio`
+- :ned:`Ieee802154NarrowbandRadio`
 - :ned:`Ieee802154UwbIrRadio`
 
 This showcase demonstrates the narrowband model,
-:ned:`Ieee802154NarrowbandScalarRadio`. It simulates a PHY that uses
+:ned:`Ieee802154NarrowbandRadio`. It simulates a PHY that uses
 DSSS-OQPSK modulation and operates at 2.45 GHz. By default, signals
 are transmitted with a bandwidth of 2.8 MHz using 2.24 mW transmission
-power. The model uses the scalar analog model.
+power. The model is configured to use the scalar analog model.
 
 The :ned:`Ieee802154NarrowbandInterface` module contains an
-:ned:`Ieee802154NarrowbandScalarRadio` and the corresponding
+:ned:`Ieee802154NarrowbandRadio` and the corresponding
 :ned:`Ieee802154NarrowbandMac`. The radio medium module required by
-the radio is :ned:`Ieee802154NarrowbandScalarRadioMedium`. As per the name, the
-radio uses the scalar analog model for signal representation. The radio
+the radio is :ned:`Ieee802154NarrowbandScalarRadioMedium`. The analog model type is set
+to ``scalar`` in both the radios and the radio medium by default. The radio
 has default values for its parameters, based on the 802.15.4 standard.
 For example, by default, it uses the carrier frequency of 2450 MHz, 2.8
 MHz bandwidth, 250 kbps bitrate, and 2.24 mW transmission power. As
