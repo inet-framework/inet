@@ -6,7 +6,7 @@
 package inet.showcases.mobility.spatial;
 
 import inet.node.inet.StandardHost;
-import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.common.IntegratedVisualizer;
 
 
 network SpatialMobilityShowcase
@@ -15,7 +15,7 @@ network SpatialMobilityShowcase
         int numHosts;
         @display("bgb=1000,1000");
     submodules:
-        visualizer: IntegratedCanvasVisualizer {
+        visualizer: IntegratedVisualizer {
             @display("p=100,50");
         }
         host[numHosts]: StandardHost {
