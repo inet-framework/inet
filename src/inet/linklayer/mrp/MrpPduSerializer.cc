@@ -63,7 +63,6 @@ void MrpTlvSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chu
         const auto &tcf = staticPtrCast<const MrpTopologyChange>(chunk);
         stream.writeUint16Be(tcf->getPrio());
         stream.writeMacAddress(tcf->getSa());
-        stream.writeUint16Be(tcf->getPortRole());
         stream.writeUint16Be(tcf->getInterval());
         break;
     }
@@ -71,7 +70,6 @@ void MrpTlvSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chu
     case LINKUP: {
         const auto &lcf = staticPtrCast<const MrpLinkChange>(chunk);
         stream.writeMacAddress(lcf->getSa());
-        stream.writeUint16Be(lcf->getPortRole());
         stream.writeUint16Be(lcf->getInterval());
         stream.writeUint16Be(lcf->getBlocked());
         break;
@@ -198,7 +196,6 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const 
         tlv->setHeaderLength(headerLength);
         tlv->setPrio(stream.readUint16Be());
         tlv->setSa(stream.readMacAddress());
-        tlv->setPortRole(stream.readUint16Be());
         tlv->setInterval(stream.readUint16Be());
         return tlv;
     }
@@ -208,7 +205,6 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const 
         tlv->setHeaderType(headerType);
         tlv->setHeaderLength(headerLength);
         tlv->setSa(stream.readMacAddress());
-        tlv->setPortRole(stream.readUint16Be());
         tlv->setInterval(stream.readUint16Be());
         tlv->setBlocked(stream.readUint16Be());
         return tlv;

@@ -532,7 +532,7 @@ void Mrp::handleMrpPDU(Packet* packet) {
         auto linkTlv = dynamicPtrCast<const MrpLinkChange>(firstTlv);
         if (ringID) {
             LinkState linkState = linkTlv->getHeaderType() == LINKDOWN ? LinkState::DOWN : LinkState::UP;
-            linkChangeInd(linkTlv->getPortRole(), linkState);
+            linkChangeInd(linkState);
         } else {
             EV_DETAIL << "Received packet from other Mrp-Domain"
                              << EV_FIELD(incomingInterface) << EV_FIELD(packet)
@@ -1057,10 +1057,8 @@ void Mrp::setupTopologyChangeReq(simtime_t interval) {
 
     topologyChangeTlv->setPrio(localManagerPrio);
     topologyChangeTlv->setSa(localBridgeAddress);
-    topologyChangeTlv->setPortRole(MrpInterfaceData::PRIMARY);
     topologyChangeTlv->setInterval(interval.inUnit(SIMTIME_MS));
     topologyChangeTlv2->setPrio(localManagerPrio);
-    topologyChangeTlv2->setPortRole(MrpInterfaceData::SECONDARY);
     topologyChangeTlv2->setSa(localBridgeAddress);
     topologyChangeTlv2->setInterval(interval.inUnit(SIMTIME_MS));
 
@@ -1102,7 +1100,6 @@ void Mrp::setupLinkChangeReq(int ringPort, LinkState linkState, simtime_t time) 
         throw cRuntimeError("Unknown LinkState in linkChangeRequest");
     }
     linkChangeTlv->setSa(localBridgeAddress);
-    linkChangeTlv->setPortRole(getPortRole(ringPort));
     linkChangeTlv->setInterval(time.inUnit(SIMTIME_MS));
     linkChangeTlv->setBlocked(1);
 
@@ -1327,7 +1324,7 @@ void Mrp::topologyChangeInd(MacAddress sourceAddress, simtime_t time) {
     }
 }
 
-void Mrp::linkChangeInd(uint16_t portState, LinkState linkState) {
+void Mrp::linkChangeInd(LinkState linkState) {
     switch (nodeState) {
     case POWER_ON:
     case AC_STAT1:

@@ -95,12 +95,11 @@ class MrpTest extends MrpTlvHeader
 //
 class MrpTopologyChange extends MrpTlvHeader
 {
-    chunkLength = B(16);
+    chunkLength = B(12);
     headerType = TOPOLOGYCHANGE;
-    headerLength = 14;
+    headerLength = 10;
     uint16_t prio;
     MacAddress sa;
-    uint16_t portRole; // MRP_PortRole
     uint16_t interval; // in milliseconds
 }
 
@@ -111,11 +110,10 @@ class MrpTopologyChange extends MrpTlvHeader
 //
 class MrpLinkChange extends MrpTlvHeader
 {
-    chunkLength = B(16);
+    chunkLength = B(12);
     headerType = LINKDOWN; // LINKUP or LINKDOWN
-    headerLength = 14;
+    headerLength = 10;
     MacAddress sa;
-    uint16_t portRole; // MRP_PortRole
     uint16_t interval; // in milliseconds
     uint16_t blocked;
 }

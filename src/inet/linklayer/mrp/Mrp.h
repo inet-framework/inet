@@ -213,7 +213,7 @@ protected:
     virtual void setupLinkChangeReq(int ringPort, LinkState linkState, simtime_t time);
     virtual void testRingInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio);
     virtual void topologyChangeInd(MacAddress sourceAddress, simtime_t time);
-    virtual void linkChangeInd(uint16_t portMode, LinkState linkState);
+    virtual void linkChangeInd(LinkState linkState);
     virtual void testMgrNackInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio, MacAddress bestMRMSourceAddress);
     virtual void testPropagateInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio, MacAddress bestMRMSourceAddress, MrpPriority bestMRMPrio);
     virtual void mauTypeChangeInd(int ringPort, LinkState linkState);
