@@ -161,22 +161,24 @@ The wireless interface in the sensor nodes and the gateway is specified
 in :download:`omnetpp.ini <../omnetpp.ini>` to be the generic
 :ned:`WirelessInterface` (instead of the IEEE 802.15.4 specific
 :ned:`Ieee802154NarrowbandInterface`, which is the default WLAN interface
-in :ned:`SensorNode`). The radio type is set to :ned:`ApskScalarRadio`.
+in :ned:`SensorNode`). The radio type is set to :ned:`ApskRadio`,
+and configured to use the scalar analog model.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: typename
-   :end-at: radio.typename
+   :end-at: radio.signalAnalogRepresentation
 
 Note that the wireless interface module's name is ``wlan`` in all host
 types that have a wireless interface. The term doesn't imply that it's
 WiFi but stands for wireless LAN.
 
-We are using :ned:`ApskScalarRadio` here because it is a relatively
+We are using :ned:`ApskRadio` here because it is a relatively
 simple, generic radio. It uses amplitude and phase-shift keying
 modulations (e.g. BPSK, QAM-16 or QAM-64, BPSK by default), without
 additional features such as forward error correction, interleaving or
-spreading. We set the bitrate in
+spreading. Also, the scalar analog model is adequate in this scenario, because
+we're not interested in the details of signal reception. We set the bitrate in
 :download:`omnetpp.ini <../omnetpp.ini>` to 19200 bps to match the
 default MAC bitrates (which is 19200 bps for all three MAC types).
 The :par:`preambleDuration` is set to be very short for better compatibility with the MACs.

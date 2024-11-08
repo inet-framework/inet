@@ -133,7 +133,7 @@ reception time of each fragment. Fragments older than
 the timeout is 60s. The timeout is only checked when a fragment is
 received, and at least 10s has elapsed since the last check.
 
-An :msg:`Ipv4ControlInfo` is attached to the decapsulated transport layer
+An :cpp:`Ipv4ControlInfo` is attached to the decapsulated transport layer
 packet. The control info contains fields copied from the IP header
 (source and destination address, protocol, TTL, ToS) as well as the
 interface id through which it was received. The control info also stores
