@@ -979,23 +979,22 @@ void Mrp::handleLinkDownTimer()
 
 void Mrp::setupContinuityCheck(int ringPort)
 {
+    // note: receiver side currently only checks endpointIdentifier and mdLevel
     auto ccm = makeShared<CfmContinuityCheckMessage>();
     auto portData = getPortInterfaceDataForUpdate(ringPort);
-    if (portData->getContinuityCheckInterval() == SimTime(3300, SIMTIME_US)) {  // SimTime(3.3, SIMTIME_MS) would be wrong, as in omnetpp-5.x this SimTime ctor only accepts integers
-        ccm->setFlags(0x00000001);
-    } else if (portData->getContinuityCheckInterval() == SimTime(10, SIMTIME_MS)) {
-        ccm->setFlags(0x00000002);
-    }
-    if (ringPort == primaryRingPortId) {
-        ccm->setSequenceNumber(sequenceCCM1);
-        sequenceCCM1++;
-    } else if (ringPort == secondaryRingPortId) {
-        ccm->setSequenceNumber(sequenceCCM2);
-        sequenceCCM2++;
-    }
+
+    ccm->setMdLevel(0);
+
+    simtime_t interval = portData->getContinuityCheckInterval();
+    ASSERT(interval == SimTime(3300, SIMTIME_US) || interval == SimTime(10, SIMTIME_MS)); // only these two values are legal; note that SimTime(3.3, SIMTIME_MS) would be wrong, as in omnetpp-5.x this SimTime ctor only accepts integers
+    ccm->setFlags(interval == SimTime(3300, SIMTIME_US) ? 0x00000001 : 0x00000002);
+
+    ASSERT(ringPort == primaryRingPortId || ringPort == secondaryRingPortId);
+    ccm->setSequenceNumber(ringPort == primaryRingPortId ? sequenceCCM1++ : sequenceCCM2++);
+
     ccm->setEndpointIdentifier(portData->getCfmEndpointID());
-    auto name = portData->getCfmName();
-    ccm->setMessageName(name.c_str());
+    ccm->setMessageName(portData->getCfmName().c_str());
+
     auto packet = new Packet("ContinuityCheck", ccm);
     sendCCM(ringPort, packet);
 }
