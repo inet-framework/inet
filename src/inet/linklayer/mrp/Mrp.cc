@@ -451,7 +451,7 @@ void Mrp::handleMessageWhenUp(cMessage *msg) {
             Packet *packet = check_and_cast<Packet*>(msg);
             auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
             if (protocol == &Protocol::ieee8021qCFM) {
-                handleContinuityCheckMessage(packet);
+                handleCfmContinuityCheckMessage(packet);
             }
             if (protocol == &Protocol::mrp) {
                 handleMrpPDU(packet);
@@ -696,14 +696,14 @@ void Mrp::handleMrpPDU(Packet* packet) {
     delete packet;
 }
 
-void Mrp::handleContinuityCheckMessage(Packet* packet) {
+void Mrp::handleCfmContinuityCheckMessage(Packet* packet) {
     EV_DETAIL << "Handling CCM" << EV_ENDL;
     auto interfaceInd = packet->getTag<InterfaceInd>();
     auto macAddressInd = packet->getTag<MacAddressInd>();
     auto sourceAddress = macAddressInd->getSrcAddress();
     int ringPort = interfaceInd->getInterfaceId();
     auto incomingInterface = interfaceTable->getInterfaceById(ringPort);
-    auto ccm = packet->popAtFront<ContinuityCheckMessage>();
+    auto ccm = packet->popAtFront<CfmContinuityCheckMessage>();
     auto portData = getPortInterfaceDataForUpdate(ringPort);
     if (ccm->getEndpointIdentifier() == portData->getCfmEndpointID()) {
         int i = sourceAddress.compareTo(incomingInterface->getMacAddress());
@@ -927,7 +927,7 @@ void Mrp::handleLinkDownTimer() {
 }
 
 void Mrp::setupContinuityCheck(int ringPort) {
-    auto ccm = makeShared<ContinuityCheckMessage>();
+    auto ccm = makeShared<CfmContinuityCheckMessage>();
     auto portData = getPortInterfaceDataForUpdate(ringPort);
     if (portData->getContinuityCheckInterval() == SimTime(3300, SIMTIME_US)) {  // SimTime(3.3, SIMTIME_MS) would be wrong, as in omnetpp-5.x this SimTime ctor only accepts integers
         ccm->setFlags(0x00000001);

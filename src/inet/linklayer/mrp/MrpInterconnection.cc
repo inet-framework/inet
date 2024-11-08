@@ -248,7 +248,7 @@ void MrpInterconnection::handleMessageWhenUp(cMessage *msg) {
             Packet *packet = check_and_cast<Packet*>(msg);
             auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
             if (protocol == &Protocol::ieee8021qCFM) {
-                handleContinuityCheckMessage(packet);
+                handleCfmContinuityCheckMessage(packet);
             }
             if (protocol == &Protocol::mrp) {
                 handleMrpPDU(packet);

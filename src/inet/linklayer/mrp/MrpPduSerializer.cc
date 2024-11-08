@@ -8,7 +8,7 @@
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/linklayer/mrp/MrpPdu_m.h"
-#include "inet/linklayer/mrp/ContinuityCheckMessage_m.h"
+#include "inet/linklayer/mrp/CfmContinuityCheckMessage_m.h"
 
 namespace inet {
 
@@ -290,7 +290,7 @@ const Ptr<Chunk> MrpSubTlvSerializer::deserialize(MemoryInputStream &stream) con
     }
 }
 
-class ContinuityCheckMessageSerializer : public FieldsChunkSerializer {
+class CfmContinuityCheckMessageSerializer : public FieldsChunkSerializer {
 public:
     using FieldsChunkSerializer::FieldsChunkSerializer;
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
@@ -298,10 +298,10 @@ public:
 };
 
 
-void ContinuityCheckMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void CfmContinuityCheckMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     // ITU Y.1731 Section 9.2.2
-    const auto& ccm = staticPtrCast<const ContinuityCheckMessage>(chunk);
+    const auto& ccm = staticPtrCast<const CfmContinuityCheckMessage>(chunk);
     stream.writeUint8(ccm->getMdLevel());  // MD Level + Version
     stream.writeUint8(ccm->getOpCode());
     stream.writeUint8(ccm->getFlags());
@@ -323,9 +323,9 @@ void ContinuityCheckMessageSerializer::serialize(MemoryOutputStream& stream, con
     stream.writeUint8(0);  // End TLV
 }
 
-const Ptr<Chunk> ContinuityCheckMessageSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> CfmContinuityCheckMessageSerializer::deserialize(MemoryInputStream& stream) const
 {
-    auto ccm = makeShared<ContinuityCheckMessage>();
+    auto ccm = makeShared<CfmContinuityCheckMessage>();
     ccm->setMdLevel(stream.readUint8());
     ccm->setOpCode(stream.readUint8());
     ccm->setFlags(stream.readUint8());
@@ -350,7 +350,7 @@ const Ptr<Chunk> ContinuityCheckMessageSerializer::deserialize(MemoryInputStream
     return ccm;
 }
 
-Register_Serializer(ContinuityCheckMessage, ContinuityCheckMessageSerializer);
+Register_Serializer(CfmContinuityCheckMessage, CfmContinuityCheckMessageSerializer);
 
 
 } // namespace inet

@@ -17,7 +17,7 @@
 #include "inet/linklayer/mrp/MrpInterfaceData.h"
 #include "inet/linklayer/ethernet/basic/EthernetEncapsulation.h"
 #include "inet/linklayer/mrp/MrpPdu_m.h"
-#include "inet/linklayer/mrp/ContinuityCheckMessage_m.h"
+#include "inet/linklayer/mrp/CfmContinuityCheckMessage_m.h"
 #include "inet/linklayer/ieee8021d/common/Ieee8021dInterfaceData.h"
 #include <algorithm>
 #include <vector>
@@ -212,7 +212,7 @@ bool MrpRelay::isForwardingInterface(NetworkInterface *networkInterface) const {
 }
 
 int MrpRelay::getCcmLevel(Packet *packet) {
-    const auto &ccm = packet->peekAtFront<ContinuityCheckMessage>();
+    const auto &ccm = packet->peekAtFront<CfmContinuityCheckMessage>();
     return ccm->getMdLevel();
 }
 

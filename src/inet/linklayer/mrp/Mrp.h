@@ -18,7 +18,7 @@
 #include "inet/linklayer/mrp/MrpInterfaceData.h"
 #include "inet/linklayer/mrp/MrpRelay.h"
 #include "inet/linklayer/mrp/MrpPdu_m.h"
-#include "inet/linklayer/mrp/ContinuityCheckMessage_m.h"
+#include "inet/linklayer/mrp/CfmContinuityCheckMessage_m.h"
 
 namespace inet {
 
@@ -191,7 +191,7 @@ protected:
     virtual MrpInterfaceData* getPortInterfaceDataForUpdate(int interfaceId);
     virtual const MrpInterfaceData* getPortInterfaceData(int interfaceId) const;
     virtual void handleMrpPDU(Packet* packet);
-    virtual void handleContinuityCheckMessage(Packet* packet);
+    virtual void handleCfmContinuityCheckMessage(Packet* packet);
     virtual void handleDelayTimer(int ringPort, int field);
     virtual void handleTopologyChangeTimer();
     virtual void clearLocalFDB();
