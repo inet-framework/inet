@@ -50,7 +50,8 @@ class MrpVersion extends FieldsChunk
 
 //
 // MRP_TLVHeader: Base class for all TLVs in MRP; contains the Type and
-// Length fields of the TLV.
+// Length fields of the TLV. Note that all TLVs (except for MRP_End)
+// must be padded to a multiple of 32 bits.
 //
 class MrpTlvHeader extends FieldsChunk
 {
@@ -265,7 +266,7 @@ enum Ed1DataLength {
 //
 class MrpOption extends MrpTlvHeader
 {
-    chunkLength = B(6);
+    chunkLength = B(8);
     headerType = OPTION;
     headerLength = 4;
     MrpOuiType ouiType = IEC;
