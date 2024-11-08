@@ -114,7 +114,6 @@ protected:
     //CCM
     int sequenceCCM1 = 0;
     int sequenceCCM2 = 0;
-    const MacAddress ccmMulticastAddress = MacAddress("01:80:C2:00:00:30");
 
     //Variables need for Manager
     bool addTest = false;

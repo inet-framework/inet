@@ -131,8 +131,7 @@ void MrpRelay::handleLowerPacket(Packet *incomingPacket) {
             if (outgoingInterfaceIds.size() == 0)
                 broadcastPacket(outgoingPacket, destinationAddress, incomingInterface);
             else {
-                if (destinationAddress != MacAddress("01:80:C2:00:00:30")
-                        || getCcmLevel(incomingPacket) > 0) {
+                if (destinationAddress != MacAddress::CFM_CCM_MULTICAST_ADDRESS || getCcmLevel(incomingPacket) > 0) {
                     for (auto outgoingInterfaceId : outgoingInterfaceIds) {
                         auto outgoingInterface = interfaceTable->getInterfaceById(outgoingInterfaceId);
                         if (interfaceInd != nullptr

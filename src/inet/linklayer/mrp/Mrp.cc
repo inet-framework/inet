@@ -204,7 +204,7 @@ void Mrp::startContinuityCheck() {
             }
         }
     }
-    relay->registerAddress(ccmMulticastAddress);
+    relay->registerAddress(MacAddress::CFM_CCM_MULTICAST_ADDRESS);
 }
 
 Mrp::MrpRole Mrp::parseMrpRole(const char *mrpRole) const
@@ -1825,7 +1825,7 @@ void Mrp::sendCCM(int portId, Packet *ccm) {
     ccm->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
     auto macAddressReq = ccm->addTag<MacAddressReq>();
     macAddressReq->setSrcAddress(getPortNetworkInterface(portId)->getMacAddress());
-    macAddressReq->setDestAddress(ccmMulticastAddress);
+    macAddressReq->setDestAddress(MacAddress::CFM_CCM_MULTICAST_ADDRESS);
     EV_INFO << "Sending packet down" << EV_FIELD(ccm) << EV_ENDL;
     send(ccm, "relayOut");
 }
