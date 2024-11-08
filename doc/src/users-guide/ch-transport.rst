@@ -54,7 +54,7 @@ There are three implementations of the TCP protocol in INET:
 -  :ned:`TcpLwip` is a wrapper around the lwIP (Lightweight IP) library,
    a widely used open source TCP/IP stack designed for embedded systems.
 
--  :ned:`TcpNsc` wraps Network Simulation Cradle (NSC), a library that
+-  ``TcpNsc`` wraps Network Simulation Cradle (NSC), a library that
    allows real world TCP/IP network stacks to be used inside a network
    simulator.
 
@@ -208,7 +208,7 @@ http://research.wand.net.nz/software/nsc.php. NSC currently contains
 Linux, FreeBSD, OpenBSD, and lwIP network stacks. However, on 64-bit
 systems, only Linux implementations can be built.
 
-To use the :ned:`TcpNsc` module, you should download the
+To use the ``TcpNsc`` module, you should download the
 :file:`nsc-0.5.2.tar.bz2` package and follow the instructions in the
 :file:`<inet_root>/3rdparty/README` file to build it.
 
@@ -218,7 +218,7 @@ To use the :ned:`TcpNsc` module, you should download the
 
    Before generating the INET module, check that the ``opp_makemake`` call
    in the make file (:file:`<inet\_root>/Makefile`) includes the
-   ``-DWITH_TCP_NSC`` argument. Without this option, the :ned:`TcpNsc`
+   ``-DWITH_TCP_NSC`` argument. Without this option, the ``TcpNsc``
    module is not built. If you build the INET library from the IDE, it is enough
    to enable the *TCP (NSC)* project feature.
 
@@ -249,11 +249,11 @@ Limitations
 -  Because the kernel code is not reentrant, NSC creates a record
    containing the global variables of the stack implementation. By
    default, there is room for 50 instances in this table, so you cannot
-   create more than 50 instances of :ned:`TcpNsc`. You can increase the
+   create more than 50 instances of ``TcpNsc``. You can increase the
    :var:`NUM_STACKS` constant in :file:`num_stacks.h` and recompile
    NSC to overcome this limitation.
 
--  The :ned:`TcpNsc` module does not support TCP_TRANSFER_OBJECT data
+-  The ``TcpNsc`` module does not support TCP_TRANSFER_OBJECT data
    transfer mode.
 
 -  The MTU of the network stack fixed to 1500, therefore MSS is 1460.

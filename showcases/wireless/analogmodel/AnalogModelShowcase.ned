@@ -4,12 +4,11 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.ManetRouter;
 import inet.physicallayer.wireless.common.medium.RadioMedium;
-import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
-import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
-import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
 import inet.physicallayer.wireless.noise.NoiseSource;
 import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 import inet.visualizer.canvas.integrated.IntegratedMultiCanvasVisualizer;
+
 
 network AnalogModelShowcaseRoutingNetwork
 {
@@ -27,7 +26,7 @@ network AnalogModelShowcaseRoutingNetwork
         destination: ManetRouter {
             @display("p=292,80");
         }
-        radioMedium: UnitDiskRadioMedium {
+        radioMedium: RadioMedium {
             @display("p=38,28");
         }
         configurator: Ipv4NetworkConfigurator {
@@ -51,33 +50,7 @@ network AnalogModelShowcaseDistanceNetwork
             parameters:
                 @display("p=64.256,180.72");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
-            parameters:
-                @display("p=62.247997,287.14398");
-        }
-        destination: AdhocHost {
-            parameters:
-                @display("p=500,179.60625");
-        }
-        source: AdhocHost {
-            @display("p=363.448,180.72");
-        }
-}
-
-network AnalogModelShowcaseDistanceNetwork_
-{
-    parameters:
-        @display("bgb=901.5187,376.65");
-    submodules:
-        visualizer: IntegratedMultiCanvasVisualizer {
-            parameters:
-                @display("p=64.256,62.247997");
-        }
-        configurator: Ipv4NetworkConfigurator {
-            parameters:
-                @display("p=64.256,180.72");
-        }
-        radioMedium: RadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             parameters:
                 @display("p=62.247997,287.14398");
         }
@@ -98,7 +71,7 @@ network AnalogModelShowcaseNoiseNetwork
         configurator: Ipv4NetworkConfigurator {
             @display("p=35,40");
         }
-        radioMedium: Ieee80211DimensionalRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             @display("p=32,113");
         }
         visualizer: IntegratedCanvasVisualizer {

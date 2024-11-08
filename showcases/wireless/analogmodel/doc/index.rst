@@ -53,11 +53,11 @@ INET contains the following analog model types, presented in the order of increa
   (see also :doc:`/showcases/wireless/coexistence/doc/index`).
 
 More complex models are more accurate but more computationally intensive.
-INET contains a version of radio and radio medium module for each type and technology, e.g.
-:ned:`Ieee80211UnitDiskRadio`/:ned:`UnitDiskRadioMedium`, :ned:`ApskScalarRadio`/:ned:`ScalarRadioMedium`,
-:ned:`Ieee802154NarrowbandDimensionalRadio`/ :ned:`Ieee802154NarrowbandDimensionalRadioMedium`, etc.
-These models use the appropriate analog signal representation (i.e., in the receiver, the transmitter,
-and the radio medium)
+INET contains a version of radio and radio medium module for each technology, e.g.
+:ned:`Ieee80211Radio` / :ned:`Ieee80211RadioMedium`,
+while the generic :ned:`ApskRadio` works with :ned:`RadioMedium`.
+The analog model can be configured in radio and radio medium modules with the :par:`signalAnalogRepresentation` parameter.
+The analog model settings should match between the radios and the radio medium.
 
 Unit Disk Model
 ---------------
@@ -97,11 +97,20 @@ The unit disk model produces the physical phenomena relevant to routing protocol
 nodes have a range, transmissions interfere, and not all packets get delivered and not directly.
 In this case, it is an adequate abstraction for physical layer behavior.
 
-The following modules use the unit disk analog model:
+.. The following modules use the unit disk analog model:
 
-- :ned:`UnitDiskRadioMedium`: the only radio medium using the unit disk analog model; to be used with all unit disk radio types
-- :ned:`GenericUnitDiskRadio`: generic radio using the unit disk analog model; contains :ned:`GenericTransmitter` and :ned:`GenericReceiver`
-- :ned:`Ieee80211UnitDiskRadio`: unit disk version of Wifi; contains :ned:`Ieee80211Transmitter`, :ned:`Ieee80211Receiver`, and :ned:`Ieee80211Mac`
+.. - :ned:`UnitDiskRadioMedium`: the only radio medium using the unit disk analog model; to be used with all unit disk radio types
+.. - :ned:`GenericUnitDiskRadio`: generic radio using the unit disk analog model; contains :ned:`GenericTransmitter` and :ned:`GenericReceiver`
+.. - :ned:`Ieee80211UnitDiskRadio`: unit disk version of Wifi; contains :ned:`Ieee80211Transmitter`, :ned:`Ieee80211Receiver`, and :ned:`Ieee80211Mac`
+
+The following radios can use the unit disk analog model:
+
+- :ned:`GenericRadio`: generic radio using the unit disk analog model; contains :ned:`GenericTransmitter` and :ned:`GenericReceiver`
+- :ned:`ApskRadio`: a hypotetical radio that uses one of the well-known modulations without utilizing techniques such as forward error correction, interleaving, or spreading; contains :ned:`ApskTransmitter` and :ned:`ApskReceiver`
+- :ned:`Ieee80211Radio`: unit disk version of Wifi; contains :ned:`Ieee80211Transmitter`, :ned:`Ieee80211Receiver`, and :ned:`Ieee80211Mac`
+- :ned:`Ieee802154NarrowbandRadio`: TODO
+
+All unit disk radios can be used with :ned:`RadioMedium`, just set the radio medium's signal analog representation to `unitdisk`.
 
 Example: Testing Routing Protocols
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -115,7 +124,7 @@ which use the AODV protocol to maintain routes:
 
 In the simulation, ``source`` sends ping requests to ``destination``, and ``destination`` sends back ping replies.
 The source and the destination hosts are stationary, the other hosts move around the scene in random directions.
-The hosts use :ned:`Ieee80211UnitDiskRadio`, and the communication ranges are displayed as blue circles;
+The hosts use :ned:`Ieee80211Radio`, and the communication ranges are displayed as blue circles;
 the interference ranges are not displayed, but they are large enough so that all concurrent transmissions
 interfere. All hosts use the Ad hoc On-Demand Distance Vector Routing (AODV) protocol to maintain routes
 as the topology changes so that they relay the ping messages between the source and the
@@ -163,11 +172,8 @@ spectra are not supported by this model (and result in an error).
    :align: center
    :width: 60%
 
-INET contains scalar versions of wireless technologies, such as IEEE 802.11 and 802.15.4; it also
-contains the scalar version of :ned:`ApskRadio`, which is a generic radio featuring different modulations
-such as BPSK, 16-QAM, and 64-QAM. Each of these technologies has a scalar radio module and a
-corresponding scalar radio medium module (they have ``Scalar`` in their module names; the
-corresponding radio and radio medium modules should be used together).
+INET supports the scalar analog model in radio and radio medium modules for all available wireless technologies,
+such as IEEE 802.11, 802.15.4 and the generic :ned:`ApskRadio`.
 
 The scalar model is more realistic than the unit disk model but also more computationally intensive.
 It can't simulate partially overlapping spectra, only completely overlapping or not overlapping at all.
@@ -353,7 +359,7 @@ Here is the configuration in :download:`omnetpp.ini <../omnetpp.ini>` pertaining
    :end-at: powerSpectralDensity
    :language: ini
 
-The hosts are configured to have :ned:`Ieee80211DimensionalRadio`. The signal spectra
+The hosts are configured to have :ned:`Ieee80211Radio`, with the analog model set to ``Dimensional``. The signal spectra
 are configured to be the spectral mask of OFDM transmissions in the 802.11 standard.
 Here is the spectrum displayed on a spectrum figure:
 

@@ -50,6 +50,8 @@ std::string MobilityBase::DirectiveResolver::resolveDirective(char directive) co
     switch (directive) {
         case 'p':
             return mobility->getCurrentPosition().str();
+        case 'z':
+            return std::to_string(mobility->getCurrentPosition().getZ());
         case 'v':
             return mobility->getCurrentVelocity().str();
         case 's':
