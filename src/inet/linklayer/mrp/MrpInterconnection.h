@@ -80,7 +80,7 @@ protected:
     cMessage *inLinkTestTimer = nullptr;
     cMessage *inTopologyChangeTimer = nullptr;
 
-    simsignal_t inPortStateChangedSignal;  //TODO emit
+    simsignal_t inPortStateChangedSignal;
     simsignal_t inTopologyChangeAnnouncedSignal;
     simsignal_t inStatusPollSentSignal;
     simsignal_t inLinkChangeDetectedSignal;

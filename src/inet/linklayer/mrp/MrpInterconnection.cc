@@ -880,7 +880,7 @@ void MrpInterconnection::interconnLinkChangeReq(LinkState linkState, simtime_t t
     inLinkChangeTLV3->setSa(localBridgeAddress);
     inLinkChangeTLV3->setPortRole(MrpInterfaceData::INTERCONNECTION);
     inLinkChangeTLV3->setInterval(time.inUnit(SIMTIME_MS));
-    inLinkChangeTLV3->setLinkInfo(0x00); //TODO or maybe 0x01? -- see "Table 39 – MRP_LinkInfo"
+    inLinkChangeTLV3->setLinkInfo(0x00);
 
     commonTLV->setSequenceID(sequenceID);
     sequenceID++;

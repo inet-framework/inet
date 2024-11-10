@@ -162,7 +162,7 @@ simple Mrp like IMrp
         @signal[topologyChangeAnnounced](type=long); // emitted by MRM only with value = constant 1
         @signal[fdbCleared](type=long);  // value = constant 1
         @signal[linkChangeDetected](type=long);  // emitted by the node that detected the link change; value = constant 0 or 1 (for down/up)
-        @signal[testFrameLatency](type=simtime_t); // emitted by the MRM only, upon receiving a Test frame --TODO rename to ringTime?
+        @signal[testFrameLatency](type=simtime_t); // emitted by the MRM only, upon receiving a Test frame
         @statistic[ringState](title="Ring state"; source=ringStateChanged; record=vector; interpolationmode=sample-hold; enumname=inet::Mrp::RingState);
         @statistic[nodeState](title="Node state"; source=nodeStateChanged; record=vector; interpolationmode=sample-hold; enumname=inet::Mrp::NodeState);
         @statistic[ringPort1State](title="State of Primary Ring Port"; source=ringPort1StateChanged; record=vector; interpolationmode=sample-hold; enumname=inet::MrpInterfaceData::PortState);

@@ -1848,8 +1848,6 @@ void Mrp::colorLink(NetworkInterface *ie, bool forwarding) const {
         cGate *inGatePrev = inGate ? inGate->getPreviousGate() : nullptr;
         cGate *inGatePrev2 = inGatePrev ? inGatePrev->getPreviousGate() : nullptr;
 
-        // TODO The Gate::getDisplayString() has a side effect: create a channel when gate currently not connected.
-        //      Should check the channel existing with Gate::getChannel() before use the Gate::getDisplayString().
         if (outGate && inGate && inGatePrev && outGateNext && outGatePrev && inGatePrev2) {
             if (forwarding) {
                 outGatePrev->getDisplayString().setTagArg("ls", 0, ENABLED_LINK_COLOR);
