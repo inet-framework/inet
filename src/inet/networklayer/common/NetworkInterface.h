@@ -91,7 +91,7 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     friend class InterfaceProtocolData; // to call protocolDataChanged()
 
   public:
-    enum State { UP, DOWN, GOING_UP, GOING_DOWN };
+    enum State { UP, DOWN, GOING_UP, GOING_DOWN };  //TODO why is UP=0 and DOWN=1? should be the other way round
 
   protected:
     cGate *upperLayerIn = nullptr;

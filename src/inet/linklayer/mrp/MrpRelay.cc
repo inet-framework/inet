@@ -151,7 +151,7 @@ void MrpRelay::handleLowerPacket(Packet *incomingPacket)
 
                 }
                 else {
-                    EV_DETAIL << "Discarding packet because ccm-levels <= 0"
+                    EV_DETAIL << "Discarding packet because ccm-levels <= 0"  //TODO statement is false, see condition
                               << EV_FIELD(destinationAddress)
                               << EV_FIELD(incomingInterface)
                               << EV_FIELD(incomingPacket) << EV_ENDL;

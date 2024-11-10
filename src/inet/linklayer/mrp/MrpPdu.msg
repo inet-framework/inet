@@ -13,6 +13,8 @@ namespace inet;
 // Note: The data structures defined below are based on "Table 22 – MRP Substitutions"
 // on pp.62 of the IEC-62439-2 specification.
 
+//TODO there seem to be MRP_TestPropagate and MRP_TestMgrNAck frames too, wich are not covered here
+
 //
 // "Type" values for TLVs in the MRP protocol.
 //

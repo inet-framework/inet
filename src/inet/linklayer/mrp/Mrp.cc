@@ -424,7 +424,7 @@ void Mrp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
                     || field == NetworkInterface::F_CARRIER) {
                 simtime_t linkDetectionDelay;
                 if (interface->isUp() && interface->hasCarrier())
-                    linkDetectionDelay = SimTime(1, SIMTIME_US); //linkUP is handled faster than linkDown
+                    linkDetectionDelay = SimTime(1, SIMTIME_US); //linkUP is handled faster than linkDown --TODO parameter!
                 else
                     linkDetectionDelay = linkDetectionDelayPar->doubleValue();
                 if (linkUpHysteresisTimer->isScheduled())
@@ -456,6 +456,8 @@ void Mrp::handleMessageWhenUp(cMessage *msg)
             handleLinkDownTimer();
         else if (msg == fdbClearTimer)
             clearLocalFDB();
+        // TODO what is the difference between fdbClearTimer (above) and fdbClearDelay? they seem to be poorly named
+        // TODO fdbClearDelay is poorly named: it is NOT a "delay", it is a timer! (delay is the amount in simtime_t)
         else if (msg == fdbClearDelay)
             clearLocalFDBDelayed();
         else if (msg == startUpTimer) {
@@ -554,6 +556,7 @@ void Mrp::handleMrpPDU(Packet* packet)
             EV_DETAIL << "Received packet from other Mrp-Domain"
                              << EV_FIELD(incomingInterface) << EV_FIELD(packet)
                              << EV_ENDL;
+            //TODO leak pkt?
         }
         break;
     }
@@ -776,7 +779,7 @@ void Mrp::handleDelayTimer(int interfaceId, int field)
     }
 }
 
-void Mrp::clearLocalFDB()
+void Mrp::clearLocalFDB() //TODO this only *schedules* clearing the FDB, and does not actually do itm right? rename to scheduleClearLocalFDB()?
 {
     EV_DETAIL << "clearing FDB" << EV_ENDL;
     if (fdbClearDelay->isScheduled())
@@ -785,7 +788,7 @@ void Mrp::clearLocalFDB()
     scheduleAfter(processingDelay, fdbClearDelay);
 }
 
-void Mrp::clearLocalFDBDelayed()
+void Mrp::clearLocalFDBDelayed() //TODO this actually does the clearing and not delays it, right? rename to clearLocalFDB()
 {
     mrpMacForwardingTable->clearTable();
     emit(fdbClearedSignal, 1);
@@ -1007,15 +1010,15 @@ void Mrp::testRingReq(simtime_t time)
         scheduleAfter(time, testTimer);
         setupTestRingReq();
     } else
-        EV_DETAIL << "Testtimer already scheduled" << EV_ENDL;
+        EV_DETAIL << "Testtimer already scheduled" << EV_ENDL; //TODO this should never happen -- spec contains TestTimer.start() only in "TestTimer expired" event handlers
 }
 
-void Mrp::topologyChangeReq(simtime_t time)
+void Mrp::topologyChangeReq(simtime_t time)  //TODO apparently time can only be ZERO or topologyChangeInterval -- so this should be something like "bool repeatedly" ?
 {
     if (time == 0) {
         clearLocalFDB();
         setupTopologyChangeReq(time * topologyChangeMaxRepeatCount);
-    } else if (!topologyChangeTimer->isScheduled()) {
+    } else if (!topologyChangeTimer->isScheduled()) {  //TODO spec says "TopTimer.start()" -- so what happens if it is already running???
         scheduleAfter(time, topologyChangeTimer);
         setupTopologyChangeReq(time * topologyChangeMaxRepeatCount);
     } else
@@ -1102,7 +1105,7 @@ void Mrp::setupTestRingReq()
     sendFrameReq(secondaryRingPortId, MacAddress(MC_TEST), sourceAddress2, priority, MRP_LT, packet2);
 }
 
-void Mrp::setupTopologyChangeReq(simtime_t interval)
+void Mrp::setupTopologyChangeReq(simtime_t interval) //TODO why "setup"? why not "sendTopologyChange" instead?
 {
     //Create MRP-PDU according MRP_TopologyChange
     auto version = makeShared<MrpVersion>();
@@ -1881,7 +1884,7 @@ void Mrp::interconnForwardReq(int ringPort, Packet *packet)
     sendFrameReq(ringPort, destinationAddress, sourceAddress, priority, MRP_LT, packet);
 }
 
-void Mrp::sendFrameReq(int portId, const MacAddress &destinationAddress, const MacAddress &sourceAddress, int prio, uint16_t lt, Packet *mrpPDU)
+void Mrp::sendFrameReq(int portId, const MacAddress &destinationAddress, const MacAddress &sourceAddress, int prio, uint16_t lt, Packet *mrpPDU)  //TODO lt is unused
 {
     mrpPDU->addTag<InterfaceReq>()->setInterfaceId(portId);
     mrpPDU->addTag<PacketProtocolTag>()->setProtocol(&Protocol::mrp);
@@ -1930,6 +1933,8 @@ void Mrp::colorLink(NetworkInterface *ie, bool forwarding) const
         cGate *inGatePrev = inGate ? inGate->getPreviousGate() : nullptr;
         cGate *inGatePrev2 = inGatePrev ? inGatePrev->getPreviousGate() : nullptr;
 
+        // TODO The Gate::getDisplayString() has a side effect: create a channel when gate currently not connected.
+        //      Should check the channel existing with Gate::getChannel() before use the Gate::getDisplayString().
         if (outGate && inGate && inGatePrev && outGateNext && outGatePrev && inGatePrev2) {
             if (forwarding) {
                 outGatePrev->getDisplayString().setTagArg("ls", 0, ENABLED_LINK_COLOR);
