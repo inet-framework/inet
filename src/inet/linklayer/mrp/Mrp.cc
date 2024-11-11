@@ -502,7 +502,7 @@ void Mrp::handleMrpPDU(Packet* packet)
     auto version = packet->peekAtFront<MrpVersion>();
     auto offset = version->getChunkLength();
     auto firstTlv = packet->peekDataAt<MrpTlvHeader>(offset);
-    offset = offset + B(firstTlv->getHeaderLength()) + B(2);
+    offset = offset + B(firstTlv->getValueLength()) + B(2);
     auto commonTlv = packet->peekDataAt<MrpCommon>(offset);
     auto sequence = commonTlv->getSequenceID();
     bool ringID = false;
@@ -592,12 +592,12 @@ void Mrp::handleMrpPDU(Packet* packet)
 
             //handle suboption2 if present
             if ((optionTlv->getOuiType() == MrpOuiType::IEC
-                    && optionTlv->getHeaderLength() > 4)
+                    && optionTlv->getValueLength() > 4)
                     || (optionTlv->getEd1Type() == 0x00
-                            && optionTlv->getHeaderLength()
+                            && optionTlv->getValueLength()
                                     > (4 + Ed1DataLength::LENGTH0))
                     || (optionTlv->getEd1Type() == 0x04
-                            && optionTlv->getHeaderLength()
+                            && optionTlv->getValueLength()
                                     > (4 + Ed1DataLength::LENGTH4))) {
                 auto subTlv = packet->peekDataAt<MrpSubTlvHeader>(subOffset);
                 switch (subTlv->getSubType()) {
@@ -686,12 +686,12 @@ void Mrp::handleMrpPDU(Packet* packet)
 
         //handle suboption2 if present
         if ((optionTlv->getOuiType() == MrpOuiType::IEC
-                && optionTlv->getHeaderLength() > 4)
+                && optionTlv->getValueLength() > 4)
                 || (optionTlv->getEd1Type() == 0x00
-                        && optionTlv->getHeaderLength()
+                        && optionTlv->getValueLength()
                                 > (4 + Ed1DataLength::LENGTH0))
                 || (optionTlv->getEd1Type() == 0x04
-                        && optionTlv->getHeaderLength()
+                        && optionTlv->getValueLength()
                                 > (4 + Ed1DataLength::LENGTH4))) {
             auto subTlv = packet->peekDataAt<MrpSubTlvHeader>(subOffset);
             switch (subTlv->getSubType()) {
@@ -723,7 +723,7 @@ void Mrp::handleMrpPDU(Packet* packet)
                 throw cRuntimeError("unknown subTlv TYPE: %d", subTlv->getSubType());
             }
         }
-        offset = offset + B(thirdTlv->getHeaderLength()) + B(2);
+        offset = offset + B(thirdTlv->getValueLength()) + B(2);
     }
     //auto endTlv=Packet->peekDataAt<TlvHeader>(offset);
     delete packet;
@@ -1087,8 +1087,8 @@ void Mrp::setupTestRingReq()
     if (role == MANAGER_AUTO) {
         auto optionTlv = makeShared<MrpOption>();
         auto autoMgrTlv = makeShared<MrpSubTlvHeader>();
-        uint8_t headerLength = optionTlv->getHeaderLength() + autoMgrTlv->getSubHeaderLength() + 2;
-        optionTlv->setHeaderLength(headerLength);
+        uint8_t headerLength = optionTlv->getValueLength() + autoMgrTlv->getSubHeaderLength() + 2;
+        optionTlv->setValueLength(headerLength);
         packet1->insertAtBack(optionTlv);
         packet1->insertAtBack(autoMgrTlv);
         packet2->insertAtBack(optionTlv);
@@ -1192,7 +1192,7 @@ void Mrp::testMgrNackReq(int ringPort, MrpPriority managerPrio, MacAddress sourc
     testMgrTlv->setOtherMRMPrio(0x00);
     testMgrTlv->setOtherMRMSa(sourceAddress);
 
-    optionTlv->setHeaderLength(optionTlv->getHeaderLength() + testMgrTlv->getSubHeaderLength() + 2);
+    optionTlv->setValueLength(optionTlv->getValueLength() + testMgrTlv->getSubHeaderLength() + 2);
 
     commonTlv->setSequenceID(sequenceID);
     sequenceID++;
@@ -1239,7 +1239,7 @@ void Mrp::testPropagateReq(int ringPort, MrpPriority managerPrio, MacAddress sou
     testMgrTlv->setOtherMRMPrio(managerPrio);
     testMgrTlv->setOtherMRMSa(sourceAddress);
 
-    optionTlv->setHeaderLength(optionTlv->getHeaderLength() + testMgrTlv->getSubHeaderLength() + 2);
+    optionTlv->setValueLength(optionTlv->getValueLength() + testMgrTlv->getSubHeaderLength() + 2);
 
     commonTlv->setSequenceID(sequenceID);
     sequenceID++;

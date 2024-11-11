@@ -10,7 +10,7 @@ import inet.linklayer.common.MacAddress;
 
 namespace inet;
 
-// Note: The data structures defined below are based on "Table 22 – MRP Substitutions" 
+// Note: The data structures defined below are based on "Table 22 – MRP Substitutions"
 // on pp.62 of the IEC-62439-2 specification.
 
 //
@@ -56,7 +56,7 @@ class MrpVersion extends FieldsChunk
 class MrpTlvHeader extends FieldsChunk
 {
     TlvHeaderType headerType;
-    uint8_t headerLength;
+    uint8_t valueLength;
 }
 
 //
@@ -66,7 +66,7 @@ class MrpEnd extends MrpTlvHeader
 {
     chunkLength = B(2);
     headerType = END;
-    headerLength = 0;
+    valueLength = 0;
 }
 
 //
@@ -79,10 +79,10 @@ class MrpTest extends MrpTlvHeader
 {
     chunkLength = B(20);
     headerType = TEST;
-    headerLength = 18;
+    valueLength = 18;
     uint16_t prio = 0x8000;  // MRP_Prio, frame priority
     MacAddress sa;   // MRP_SA, source MAC address
-    uint16_t portRole; 
+    uint16_t portRole;
     uint16_t ringState;
     uint16_t transition;
     uint32_t timeStamp; // MRP_TimeStamp, in milliseconds
@@ -98,7 +98,7 @@ class MrpTopologyChange extends MrpTlvHeader
 {
     chunkLength = B(12);
     headerType = TOPOLOGYCHANGE;
-    headerLength = 10;
+    valueLength = 10;
     uint16_t prio;
     MacAddress sa;
     uint16_t interval; // in milliseconds
@@ -113,7 +113,7 @@ class MrpLinkChange extends MrpTlvHeader
 {
     chunkLength = B(12);
     headerType = LINKDOWN; // LINKUP or LINKDOWN
-    headerLength = 10;
+    valueLength = 10;
     MacAddress sa;
     uint16_t interval; // in milliseconds
     uint16_t blocked;
@@ -130,7 +130,7 @@ class MrpInTest extends MrpTlvHeader
 {
     chunkLength = B(20);
     headerType = INTEST;
-    headerLength = 18;
+    valueLength = 18;
     uint16_t inID = 0x8000;
     MacAddress sa;
     uint16_t portRole;
@@ -149,7 +149,7 @@ class MrpInLinkChange extends MrpTlvHeader
 {
     chunkLength = B(16);
     headerType = INLINKDOWN; // INLINKDOWN or INLINKUP
-    headerLength = 14;
+    valueLength = 14;
     MacAddress sa;
     uint16_t portRole;
     uint16_t inID;
@@ -168,7 +168,7 @@ class MrpInLinkStatusPoll extends MrpTlvHeader
 {
     chunkLength = B(12);
     headerType = INLINKSTATUSPOLL;
-    headerLength = 10;
+    valueLength = 10;
     MacAddress sa;
     uint16_t portRole;
     uint16_t inID;
@@ -184,7 +184,7 @@ class MrpInTopologyChange extends MrpTlvHeader
 {
     chunkLength = B(12);
     headerType = INTOPOLOGYCHANGE;
-    headerLength = 10;
+    valueLength = 10;
     MacAddress sa;
     uint16_t inID;
     uint16_t interval; // in milliseconds
@@ -197,7 +197,7 @@ class MrpCommon extends MrpTlvHeader
 {
     chunkLength = B(20);
     headerType = COMMON;
-    headerLength = 18;
+    valueLength = 18;
     uint16_t sequenceID; // MRP_SequenceID
     uint64_t uuid0;  // MRP_DomainUUID (128-bit field)
     uint64_t uuid1;
@@ -221,7 +221,7 @@ class MrpManufacturerFkt extends MrpSubTlvHeader
     chunkLength = B(2);
     subType = RESERVED;
     subHeaderLength= 0;
-    // Followed By DataChunk ManufacturerData, set headerLength accordingly
+    // Followed By DataChunk ManufacturerData, set valueLength accordingly
     // BytesChunk manufacturerData;
 }
 
@@ -268,7 +268,7 @@ class MrpOption extends MrpTlvHeader
 {
     chunkLength = B(8);
     headerType = OPTION;
-    headerLength = 4;
+    valueLength = 4;
     MrpOuiType ouiType = IEC;
     //suboption1
     uint8_t ed1Type = 0xFF;
