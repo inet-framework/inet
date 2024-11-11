@@ -32,10 +32,12 @@ Define_Module(Mrp);
 Register_Enum(Mrp::RingState, (Mrp::OPEN, Mrp::CLOSED, Mrp::UNDEFINED));
 Register_Enum(Mrp::NodeState, (Mrp::POWER_ON, Mrp::AC_STAT1, Mrp::PRM_UP, Mrp::CHK_RO, Mrp::CHK_RC, Mrp::DE_IDLE, Mrp::PT, Mrp::DE, Mrp::PT_IDLE));
 
-Mrp::Mrp() {
+Mrp::Mrp()
+{
 }
 
-Mrp::~Mrp() {
+Mrp::~Mrp()
+{
     cancelAndDelete(linkDownTimer);
     cancelAndDelete(linkUpTimer);
     cancelAndDelete(fdbClearTimer);
@@ -46,14 +48,16 @@ Mrp::~Mrp() {
     cancelAndDelete(linkUpHysteresisTimer);
 }
 
-int Mrp::resolveInterfaceIndex(int interfaceIndex) {
+int Mrp::resolveInterfaceIndex(int interfaceIndex)
+{
     NetworkInterface *interface = interfaceTable->getInterface(interfaceIndex);
     if (interface->getProtocol() != &Protocol::ethernetMac)
         throw cRuntimeError("Chosen interface %d is not an Ethernet interface", interfaceIndex);
     return interface->getInterfaceId();
 }
 
-void Mrp::setPortState(int interfaceId, MrpInterfaceData::PortState state) {
+void Mrp::setPortState(int interfaceId, MrpInterfaceData::PortState state)
+{
     auto portData = getPortInterfaceDataForUpdate(interfaceId);
     portData->setState(state);
     simsignal_t signal = interfaceId == primaryRingPortId ? ringPort1StateChangedSignal :
@@ -64,34 +68,41 @@ void Mrp::setPortState(int interfaceId, MrpInterfaceData::PortState state) {
     EV_INFO << "Setting Port State" << EV_FIELD(interfaceId) << EV_FIELD(state) << EV_ENDL;
 }
 
-void Mrp::setPortRole(int interfaceId, MrpInterfaceData::PortRole role) {
+void Mrp::setPortRole(int interfaceId, MrpInterfaceData::PortRole role)
+{
     getPortInterfaceDataForUpdate(interfaceId)->setRole(role);
 }
 
-MrpInterfaceData::PortState Mrp::getPortState(int interfaceId) const {
+MrpInterfaceData::PortState Mrp::getPortState(int interfaceId) const
+{
     return getPortInterfaceData(interfaceId)->getState();
 }
 
-MrpInterfaceData::PortRole Mrp::getPortRole(int interfaceId) const {
+MrpInterfaceData::PortRole Mrp::getPortRole(int interfaceId) const
+{
     return getPortInterfaceData(interfaceId)->getRole();
 }
 
-const MrpInterfaceData* Mrp::getPortInterfaceData(int interfaceId) const {
+const MrpInterfaceData* Mrp::getPortInterfaceData(int interfaceId) const
+{
     return getPortNetworkInterface(interfaceId)->getProtocolData<MrpInterfaceData>();
 }
 
-MrpInterfaceData* Mrp::getPortInterfaceDataForUpdate(int interfaceId) {
+MrpInterfaceData* Mrp::getPortInterfaceDataForUpdate(int interfaceId)
+{
     return getPortNetworkInterface(interfaceId)->getProtocolDataForUpdate<MrpInterfaceData>();
 }
 
-NetworkInterface* Mrp::getPortNetworkInterface(int interfaceId) const {
+NetworkInterface* Mrp::getPortNetworkInterface(int interfaceId) const
+{
     NetworkInterface *gateIfEntry = interfaceTable->getInterfaceById(interfaceId);
     if (!gateIfEntry)
         throw cRuntimeError("gate's Interface is nullptr");
     return gateIfEntry;
 }
 
-void Mrp::toggleRingPorts() {
+void Mrp::toggleRingPorts()
+{
     int RingPort = secondaryRingPortId;
     secondaryRingPortId = primaryRingPortId;
     primaryRingPortId = RingPort;
@@ -99,7 +110,8 @@ void Mrp::toggleRingPorts() {
     setPortRole(secondaryRingPortId, MrpInterfaceData::SECONDARY);
 }
 
-void Mrp::initialize(int stage) {
+void Mrp::initialize(int stage)
+{
     OperationalBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         //modules
@@ -157,7 +169,8 @@ void Mrp::initialize(int stage) {
     }
 }
 
-void Mrp::initPortTable() {
+void Mrp::initPortTable()
+{
     EV_DEBUG << "MRP Interface Data initialization. Setting port infos to the protocol defaults." << EV_ENDL;
     for (unsigned int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
         auto ie = interfaceTable->getInterface(i);
@@ -167,7 +180,8 @@ void Mrp::initPortTable() {
     }
 }
 
-void Mrp::initInterfacedata(int interfaceId) {
+void Mrp::initInterfacedata(int interfaceId)
+{
     setPortRole(interfaceId, MrpInterfaceData::NOTASSIGNED);
     setPortState(interfaceId, MrpInterfaceData::FORWARDING);
     auto ifd = getPortInterfaceDataForUpdate(interfaceId);
@@ -175,7 +189,8 @@ void Mrp::initInterfacedata(int interfaceId) {
     ifd->setContinuityCheckInterval(trunc_msec(ccmInterval));
 }
 
-void Mrp::initRingPort(int interfaceId, MrpInterfaceData::PortRole role, bool enableLinkCheck) {
+void Mrp::initRingPort(int interfaceId, MrpInterfaceData::PortRole role, bool enableLinkCheck)
+{
     setPortRole(interfaceId, role);
     setPortState(interfaceId, MrpInterfaceData::BLOCKED);
     auto ifd = getPortInterfaceDataForUpdate(interfaceId);
@@ -183,7 +198,8 @@ void Mrp::initRingPort(int interfaceId, MrpInterfaceData::PortRole role, bool en
     ifd->setContinuityCheckInterval(trunc_msec(ccmInterval));
 }
 
-void Mrp::startContinuityCheck() {
+void Mrp::startContinuityCheck()
+{
     for (unsigned int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
         auto ie = interfaceTable->getInterface(i);
         if (ie->getProtocol() == &Protocol::ethernetMac) {
@@ -223,7 +239,8 @@ Mrp::MrpRole Mrp::parseMrpRole(const char *mrpRole) const
         throw cRuntimeError("Unknown MRP role '%s'", mrpRole);
 }
 
-void Mrp::setTimingProfile(int maxRecoveryTime) {
+void Mrp::setTimingProfile(int maxRecoveryTime)
+{
     //maxrecoverytime in ms,
     switch (maxRecoveryTime) {
     case 500:
@@ -263,7 +280,8 @@ void Mrp::setTimingProfile(int maxRecoveryTime) {
     }
 }
 
-void Mrp::start() {
+void Mrp::start()
+{
     fdbClearTimer = new cMessage("fdbClearTimer");
     fdbClearDelay = new cMessage("fdbClearDelay");
     linkDownTimer = new cMessage("LinkDownTimer");
@@ -284,7 +302,8 @@ void Mrp::start() {
     }
 }
 
-void Mrp::stop() {
+void Mrp::stop()
+{
     setPortRole(primaryRingPortId, MrpInterfaceData::NOTASSIGNED);
     setPortRole(secondaryRingPortId, MrpInterfaceData::NOTASSIGNED);
     setPortState(primaryRingPortId, MrpInterfaceData::DISABLED);
@@ -300,7 +319,8 @@ void Mrp::stop() {
     cancelAndDelete(startUpTimer);
 }
 
-void Mrp::mrcInit() {
+void Mrp::mrcInit()
+{
     linkChangeCount = linkMaxChange;
     mrpMacForwardingTable->addMrpForwardingInterface(primaryRingPortId, MacAddress(MC_CONTROL), vlanID);
     mrpMacForwardingTable->addMrpForwardingInterface(secondaryRingPortId, MacAddress(MC_CONTROL), vlanID);
@@ -324,7 +344,8 @@ void Mrp::mrcInit() {
     mauTypeChangeInd(secondaryRingPortId, getPortNetworkInterface(secondaryRingPortId)->getState());
 }
 
-void Mrp::mrmInit() {
+void Mrp::mrmInit()
+{
     localManagerPrio = DEFAULT;
     ringState = OPEN;
     addTest = false;
@@ -350,7 +371,8 @@ void Mrp::mrmInit() {
     mauTypeChangeInd(secondaryRingPortId, getPortNetworkInterface(secondaryRingPortId)->getState());
 }
 
-void Mrp::mraInit() {
+void Mrp::mraInit()
+{
     localManagerPrio = MRADEFAULT;
     ringState = OPEN;
     addTest = false;
@@ -373,7 +395,8 @@ void Mrp::mraInit() {
     mauTypeChangeInd(secondaryRingPortId, getPortNetworkInterface(secondaryRingPortId)->getState());
 }
 
-void Mrp::clearFDB(simtime_t time) {
+void Mrp::clearFDB(simtime_t time)
+{
     if (!fdbClearTimer->isScheduled())
         scheduleAfter(time, fdbClearTimer);
     else if (fdbClearTimer->getArrivalTime() > (simTime() + time)) {
@@ -382,7 +405,8 @@ void Mrp::clearFDB(simtime_t time) {
     }
 }
 
-void Mrp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) {
+void Mrp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
     Enter_Method("receiveSignal");
     EV_DETAIL << "Received Signal:" << EV_FIELD(signalID) << EV_ENDL;
     if (signalID == interfaceStateChangedSignal) {
@@ -412,7 +436,8 @@ void Mrp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
     }
 }
 
-void Mrp::handleMessageWhenUp(cMessage *msg) {
+void Mrp::handleMessageWhenUp(cMessage *msg)
+{
     if (!msg->isSelfMessage()) {
         msg->setKind(2);
         EV_INFO << "Received Message on MrpNode, Rescheduling:" << EV_FIELD(msg) << EV_ENDL;
@@ -461,7 +486,8 @@ void Mrp::handleMessageWhenUp(cMessage *msg) {
     }
 }
 
-void Mrp::handleMrpPDU(Packet* packet) {
+void Mrp::handleMrpPDU(Packet* packet)
+{
     auto interfaceInd = packet->findTag<InterfaceInd>();
     auto macAddressInd = packet->findTag<MacAddressInd>();
     auto sourceAddress = macAddressInd->getSrcAddress();
@@ -696,7 +722,8 @@ void Mrp::handleMrpPDU(Packet* packet) {
     delete packet;
 }
 
-void Mrp::handleCfmContinuityCheckMessage(Packet* packet) {
+void Mrp::handleCfmContinuityCheckMessage(Packet* packet)
+{
     EV_DETAIL << "Handling CCM" << EV_ENDL;
     auto interfaceInd = packet->getTag<InterfaceInd>();
     auto macAddressInd = packet->getTag<MacAddressInd>();
@@ -724,7 +751,8 @@ void Mrp::handleCfmContinuityCheckMessage(Packet* packet) {
     delete packet;
 }
 
-void Mrp::handleDelayTimer(int interfaceId, int field) {
+void Mrp::handleDelayTimer(int interfaceId, int field)
+{
     EV_DETAIL << "handling DelayTimer" << EV_ENDL;
     auto interface = getPortNetworkInterface(interfaceId);
     if (field == NetworkInterface::F_STATE
@@ -741,7 +769,8 @@ void Mrp::handleDelayTimer(int interfaceId, int field) {
     }
 }
 
-void Mrp::clearLocalFDB() {
+void Mrp::clearLocalFDB()
+{
     EV_DETAIL << "clearing FDB" << EV_ENDL;
     if (fdbClearDelay->isScheduled())
         cancelEvent(fdbClearDelay);
@@ -749,13 +778,15 @@ void Mrp::clearLocalFDB() {
     scheduleAfter(processingDelay, fdbClearDelay);
 }
 
-void Mrp::clearLocalFDBDelayed() {
+void Mrp::clearLocalFDBDelayed()
+{
     mrpMacForwardingTable->clearTable();
     emit(fdbClearedSignal, 1);
     EV_DETAIL << "FDB cleared" << EV_ENDL;
 }
 
-bool Mrp::isBetterThanOwnPrio(MrpPriority remotePrio, MacAddress remoteAddress) {
+bool Mrp::isBetterThanOwnPrio(MrpPriority remotePrio, MacAddress remoteAddress)
+{
     if (remotePrio < localManagerPrio)
         return true;
     if (remotePrio == localManagerPrio && remoteAddress < localBridgeAddress)
@@ -763,7 +794,8 @@ bool Mrp::isBetterThanOwnPrio(MrpPriority remotePrio, MacAddress remoteAddress) 
     return false;
 }
 
-bool Mrp::isBetterThanBestPrio(MrpPriority remotePrio, MacAddress remoteAddress) {
+bool Mrp::isBetterThanBestPrio(MrpPriority remotePrio, MacAddress remoteAddress)
+{
     if (remotePrio < hostBestMRMPriority)
         return true;
     if (remotePrio == hostBestMRMPriority && remoteAddress < hostBestMRMSourceAddress)
@@ -771,7 +803,8 @@ bool Mrp::isBetterThanBestPrio(MrpPriority remotePrio, MacAddress remoteAddress)
     return false;
 }
 
-void Mrp::handleContinuityCheckTimer(int ringPort) {
+void Mrp::handleContinuityCheckTimer(int ringPort)
+{
     auto portData = getPortInterfaceDataForUpdate(ringPort);
     EV_DETAIL << "Checktimer:" << EV_FIELD(simTime()) << EV_FIELD(ringPort)
                      << EV_FIELD(portData->getNextUpdate()) << EV_ENDL;
@@ -787,7 +820,8 @@ void Mrp::handleContinuityCheckTimer(int ringPort) {
     scheduleAfter(portData->getContinuityCheckInterval(), checkTimer);
 }
 
-void Mrp::handleTestTimer() {
+void Mrp::handleTestTimer()
+{
     switch (nodeState) {
     case POWER_ON:
     case AC_STAT1:
@@ -864,7 +898,8 @@ void Mrp::handleTestTimer() {
     }
 }
 
-void Mrp::handleTopologyChangeTimer() {
+void Mrp::handleTopologyChangeTimer()
+{
     if (topologyChangeRepeatCount > 0) {
         setupTopologyChangeReq(topologyChangeRepeatCount * topologyChangeInterval);
         topologyChangeRepeatCount--;
@@ -875,7 +910,8 @@ void Mrp::handleTopologyChangeTimer() {
     }
 }
 
-void Mrp::handleLinkUpTimer() {
+void Mrp::handleLinkUpTimer()
+{
     switch (nodeState) {
     case PT:
         if (linkChangeCount == 0) {
@@ -901,7 +937,8 @@ void Mrp::handleLinkUpTimer() {
     }
 }
 
-void Mrp::handleLinkDownTimer() {
+void Mrp::handleLinkDownTimer()
+{
     switch (nodeState) {
     case DE:
         if (linkChangeCount == 0) {
@@ -926,7 +963,8 @@ void Mrp::handleLinkDownTimer() {
     }
 }
 
-void Mrp::setupContinuityCheck(int ringPort) {
+void Mrp::setupContinuityCheck(int ringPort)
+{
     auto ccm = makeShared<CfmContinuityCheckMessage>();
     auto portData = getPortInterfaceDataForUpdate(ringPort);
     if (portData->getContinuityCheckInterval() == SimTime(3300, SIMTIME_US)) {  // SimTime(3.3, SIMTIME_MS) would be wrong, as in omnetpp-5.x this SimTime ctor only accepts integers
@@ -948,7 +986,8 @@ void Mrp::setupContinuityCheck(int ringPort) {
     sendCCM(ringPort, packet);
 }
 
-void Mrp::testRingReq(simtime_t time) {
+void Mrp::testRingReq(simtime_t time)
+{
     if (addTest)
         cancelEvent(testTimer);
     if (!testTimer->isScheduled()) {
@@ -958,7 +997,8 @@ void Mrp::testRingReq(simtime_t time) {
         EV_DETAIL << "Testtimer already scheduled" << EV_ENDL;
 }
 
-void Mrp::topologyChangeReq(simtime_t time) {
+void Mrp::topologyChangeReq(simtime_t time)
+{
     if (time == 0) {
         clearLocalFDB();
         setupTopologyChangeReq(time * topologyChangeMaxRepeatCount);
@@ -970,7 +1010,8 @@ void Mrp::topologyChangeReq(simtime_t time) {
 
 }
 
-void Mrp::linkChangeReq(int ringPort, LinkState linkState) {
+void Mrp::linkChangeReq(int ringPort, LinkState linkState)
+{
     if (linkState == LinkState::DOWN) {
         if (!linkDownTimer->isScheduled()) {
             scheduleAfter(linkDownInterval, linkDownTimer);
@@ -987,7 +1028,8 @@ void Mrp::linkChangeReq(int ringPort, LinkState linkState) {
         throw cRuntimeError("Unknown LinkState in LinkChangeReq");
 }
 
-void Mrp::setupTestRingReq() {
+void Mrp::setupTestRingReq()
+{
     //Create MRP-PDU according MRP_Test
     auto version = makeShared<MrpVersion>();
     auto testTlv1 = makeShared<MrpTest>();
@@ -1047,7 +1089,8 @@ void Mrp::setupTestRingReq() {
     sendFrameReq(secondaryRingPortId, MacAddress(MC_TEST), sourceAddress2, priority, MRP_LT, packet2);
 }
 
-void Mrp::setupTopologyChangeReq(simtime_t interval) {
+void Mrp::setupTopologyChangeReq(simtime_t interval)
+{
     //Create MRP-PDU according MRP_TopologyChange
     auto version = makeShared<MrpVersion>();
     auto topologyChangeTlv = makeShared<MrpTopologyChange>();
@@ -1085,7 +1128,8 @@ void Mrp::setupTopologyChangeReq(simtime_t interval) {
     emit(topologyChangeAnnouncedSignal, 1);
 }
 
-void Mrp::setupLinkChangeReq(int ringPort, LinkState linkState, simtime_t time) {
+void Mrp::setupLinkChangeReq(int ringPort, LinkState linkState, simtime_t time)
+{
     //Create MRP-PDU according MRP_LinkChange
     auto version = makeShared<MrpVersion>();
     auto linkChangeTlv = makeShared<MrpLinkChange>();
@@ -1118,7 +1162,8 @@ void Mrp::setupLinkChangeReq(int ringPort, LinkState linkState, simtime_t time) 
     emit(linkChangeDetectedSignal, linkState == LinkState::DOWN ? 0 : 1);
 }
 
-void Mrp::testMgrNackReq(int ringPort, MrpPriority managerPrio, MacAddress sourceAddress) {
+void Mrp::testMgrNackReq(int ringPort, MrpPriority managerPrio, MacAddress sourceAddress)
+{
     //Create MRP-PDU according MRP_Option and Suboption2 MRP-TestMgrNack
     auto version = makeShared<MrpVersion>();
     auto optionTlv = makeShared<MrpOption>();
@@ -1165,7 +1210,8 @@ void Mrp::testMgrNackReq(int ringPort, MrpPriority managerPrio, MacAddress sourc
     sendFrameReq(secondaryRingPortId, MacAddress(MC_TEST), sourceAddress2, priority, MRP_LT, packet2);
 }
 
-void Mrp::testPropagateReq(int ringPort, MrpPriority managerPrio, MacAddress sourceAddress) {
+void Mrp::testPropagateReq(int ringPort, MrpPriority managerPrio, MacAddress sourceAddress)
+{
     //Create MRP-PDU according MRP_Option and Suboption2 MRP-TestPropagate
     auto version = makeShared<MrpVersion>();
     auto optionTlv = makeShared<MrpOption>();
@@ -1211,7 +1257,8 @@ void Mrp::testPropagateReq(int ringPort, MrpPriority managerPrio, MacAddress sou
     sendFrameReq(secondaryRingPortId, MacAddress(MC_TEST), sourceAddress2, priority, MRP_LT, packet2);
 }
 
-void Mrp::testRingInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio) {
+void Mrp::testRingInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio)
+{
     switch (nodeState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1281,7 +1328,8 @@ void Mrp::testRingInd(int ringPort, MacAddress sourceAddress, MrpPriority manage
     }
 }
 
-void Mrp::topologyChangeInd(MacAddress sourceAddress, simtime_t time) {
+void Mrp::topologyChangeInd(MacAddress sourceAddress, simtime_t time)
+{
     switch (nodeState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1324,7 +1372,8 @@ void Mrp::topologyChangeInd(MacAddress sourceAddress, simtime_t time) {
     }
 }
 
-void Mrp::linkChangeInd(LinkState linkState) {
+void Mrp::linkChangeInd(LinkState linkState)
+{
     switch (nodeState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1418,7 +1467,8 @@ void Mrp::linkChangeInd(LinkState linkState) {
     }
 }
 
-void Mrp::testMgrNackInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio, MacAddress bestMRMSourceAddress) {
+void Mrp::testMgrNackInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio, MacAddress bestMRMSourceAddress)
+{
     switch (nodeState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1475,7 +1525,8 @@ void Mrp::testMgrNackInd(int ringPort, MacAddress sourceAddress, MrpPriority man
     }
 }
 
-void Mrp::testPropagateInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio, MacAddress bestMRMSourceAddress, MrpPriority bestMRMPrio) {
+void Mrp::testPropagateInd(int ringPort, MacAddress sourceAddress, MrpPriority managerPrio, MacAddress bestMRMSourceAddress, MrpPriority bestMRMPrio)
+{
     switch (nodeState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1499,7 +1550,8 @@ void Mrp::testPropagateInd(int ringPort, MacAddress sourceAddress, MrpPriority m
     }
 }
 
-void Mrp::mauTypeChangeInd(int ringPort, LinkState linkState) {
+void Mrp::mauTypeChangeInd(int ringPort, LinkState linkState)
+{
     switch (nodeState) {
     case POWER_ON:
         //all cases: ignore
@@ -1695,7 +1747,8 @@ void Mrp::mauTypeChangeInd(int ringPort, LinkState linkState) {
     }
 }
 
-void Mrp::interconnTopologyChangeInd(MacAddress sourceAddress, simtime_t time, uint16_t inID, int ringPort, Packet *packet) {
+void Mrp::interconnTopologyChangeInd(MacAddress sourceAddress, simtime_t time, uint16_t inID, int ringPort, Packet *packet)
+{
     switch (nodeState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1727,7 +1780,8 @@ void Mrp::interconnTopologyChangeInd(MacAddress sourceAddress, simtime_t time, u
     }
 }
 
-void Mrp::interconnLinkChangeInd(uint16_t inID, LinkState linkstate, int ringPort, Packet *packet) {
+void Mrp::interconnLinkChangeInd(uint16_t inID, LinkState linkstate, int ringPort, Packet *packet)
+{
     switch (nodeState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1750,7 +1804,8 @@ void Mrp::interconnLinkChangeInd(uint16_t inID, LinkState linkstate, int ringPor
     }
 }
 
-void Mrp::interconnLinkStatusPollInd(uint16_t inID, int ringPort, Packet *packet) {
+void Mrp::interconnLinkStatusPollInd(uint16_t inID, int ringPort, Packet *packet)
+{
     switch (nodeState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1773,7 +1828,8 @@ void Mrp::interconnLinkStatusPollInd(uint16_t inID, int ringPort, Packet *packet
     }
 }
 
-void Mrp::interconnTestInd(MacAddress sourceAddress, int ringPort, uint16_t inID, Packet *packet) {
+void Mrp::interconnTestInd(MacAddress sourceAddress, int ringPort, uint16_t inID, Packet *packet)
+{
     switch (nodeState) {
     case POWER_ON:
     case AC_STAT1:
@@ -1796,7 +1852,8 @@ void Mrp::interconnTestInd(MacAddress sourceAddress, int ringPort, uint16_t inID
     }
 }
 
-void Mrp::interconnForwardReq(int ringPort, Packet *packet) {
+void Mrp::interconnForwardReq(int ringPort, Packet *packet)
+{
     auto macAddressInd = packet->findTag<MacAddressInd>();
     auto sourceAddress = macAddressInd->getSrcAddress();
     auto destinationAddress = macAddressInd->getDestAddress();
@@ -1805,7 +1862,8 @@ void Mrp::interconnForwardReq(int ringPort, Packet *packet) {
     sendFrameReq(ringPort, destinationAddress, sourceAddress, priority, MRP_LT, packet);
 }
 
-void Mrp::sendFrameReq(int portId, const MacAddress &destinationAddress, const MacAddress &sourceAddress, int prio, uint16_t lt, Packet *mrpPDU) {
+void Mrp::sendFrameReq(int portId, const MacAddress &destinationAddress, const MacAddress &sourceAddress, int prio, uint16_t lt, Packet *mrpPDU)
+{
     mrpPDU->addTag<InterfaceReq>()->setInterfaceId(portId);
     mrpPDU->addTag<PacketProtocolTag>()->setProtocol(&Protocol::mrp);
     mrpPDU->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
@@ -1816,7 +1874,8 @@ void Mrp::sendFrameReq(int portId, const MacAddress &destinationAddress, const M
     send(mrpPDU, "relayOut");
 }
 
-void Mrp::sendCCM(int portId, Packet *ccm) {
+void Mrp::sendCCM(int portId, Packet *ccm)
+{
     ccm->addTag<InterfaceReq>()->setInterfaceId(portId);
     ccm->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee8021qCFM);
     ccm->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
@@ -1827,19 +1886,23 @@ void Mrp::sendCCM(int portId, Packet *ccm) {
     send(ccm, "relayOut");
 }
 
-void Mrp::handleStartOperation(LifecycleOperation *operation) {
+void Mrp::handleStartOperation(LifecycleOperation *operation)
+{
     //start();
 }
 
-void Mrp::handleStopOperation(LifecycleOperation *operation) {
+void Mrp::handleStopOperation(LifecycleOperation *operation)
+{
     stop();
 }
 
-void Mrp::handleCrashOperation(LifecycleOperation *operation) {
+void Mrp::handleCrashOperation(LifecycleOperation *operation)
+{
     stop();
 }
 
-void Mrp::colorLink(NetworkInterface *ie, bool forwarding) const {
+void Mrp::colorLink(NetworkInterface *ie, bool forwarding) const
+{
     if (visualize) {
         cGate *inGate = switchModule->gate(ie->getNodeInputGateId());
         cGate *outGate = switchModule->gate(ie->getNodeOutputGateId());
@@ -1870,7 +1933,8 @@ void Mrp::colorLink(NetworkInterface *ie, bool forwarding) const {
     }
 }
 
-void Mrp::refreshDisplay() const {
+void Mrp::refreshDisplay() const
+{
     updateDisplayString();
 
     if (visualize) {
@@ -1917,7 +1981,8 @@ std::string Mrp::resolveDirective(char directive) const
     }
 }
 
-const char *Mrp::getMrpRoleName(MrpRole role, bool acronym) {
+const char *Mrp::getMrpRoleName(MrpRole role, bool acronym)
+{
     switch (role) {
         case DISABLED: return "DISABLED";
         case CLIENT: return acronym ? "MRC" : "CLIENT";
@@ -1928,7 +1993,8 @@ const char *Mrp::getMrpRoleName(MrpRole role, bool acronym) {
     }
 }
 
-const char *Mrp::getNodeStateName(NodeState state) {
+const char *Mrp::getNodeStateName(NodeState state)
+{
     switch (state) {
         case POWER_ON: return "POWER_ON";
         case AC_STAT1: return "AC_STAT1";
@@ -1943,7 +2009,8 @@ const char *Mrp::getNodeStateName(NodeState state) {
     }
 }
 
-const char *Mrp::getRingStateName(RingState state) {
+const char *Mrp::getRingStateName(RingState state)
+{
     switch (state) {
         case OPEN: return "OPEN";
         case CLOSED: return "CLOSED";

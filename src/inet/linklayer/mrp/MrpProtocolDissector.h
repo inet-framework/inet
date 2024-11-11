@@ -12,7 +12,8 @@
 
 namespace inet {
 
-class INET_API MrpProtocolDissector: public ProtocolDissector {
+class INET_API MrpProtocolDissector: public ProtocolDissector
+{
 public:
     virtual void dissect(Packet *packet, const Protocol *protocol, ICallback &callback) const override;
 };

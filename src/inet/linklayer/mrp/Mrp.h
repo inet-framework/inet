@@ -28,7 +28,8 @@ inline simtime_t trunc_msec(simtime_t t) { return t.trunc(SIMTIME_MS); }
 /**
  * Implements the base part of the MRP protocol, i.e. roles MRC, MRM and MRA.
  */
-class INET_API Mrp: public OperationalBase, public cListener, public StringFormat::IDirectiveResolver {
+class INET_API Mrp: public OperationalBase, public cListener, public StringFormat::IDirectiveResolver
+{
 public:
     enum FrameType : uint64_t {
         MC_RESERVED = 0x000001154E000000,

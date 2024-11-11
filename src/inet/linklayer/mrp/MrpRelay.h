@@ -19,7 +19,8 @@ namespace inet {
 // This module forward frames (~EtherFrame) based on their destination MAC addresses to appropriate interfaces.
 // See the NED definition for details.
 //
-class INET_API MrpRelay: public Ieee8021dRelay {
+class INET_API MrpRelay: public Ieee8021dRelay
+{
 protected:
     ModuleRefByPar<MrpMacForwardingTable> mrpMacForwardingTable;
 

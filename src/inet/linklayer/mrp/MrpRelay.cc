@@ -28,7 +28,8 @@ namespace inet {
 
 Define_Module(MrpRelay);
 
-void MrpRelay::initialize(int stage) {
+void MrpRelay::initialize(int stage)
+{
     Ieee8021dRelay::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         numDispatchedMRPFrames = numDispatchedNonMRPFrames = numDeliveredPDUsToMRP = 0;
@@ -46,7 +47,8 @@ void MrpRelay::initialize(int stage) {
     }
 }
 
-void MrpRelay::handleLowerPacket(Packet *incomingPacket) {
+void MrpRelay::handleLowerPacket(Packet *incomingPacket)
+{
     numReceivedNetworkFrames++;
     auto protocol = incomingPacket->getTag<PacketProtocolTag>()->getProtocol();
     auto macAddressInd = incomingPacket->getTag<MacAddressInd>();
@@ -200,7 +202,8 @@ void MrpRelay::handleLowerPacket(Packet *incomingPacket) {
     updateDisplayString();
 }
 
-bool MrpRelay::isForwardingInterface(NetworkInterface *networkInterface) const {
+bool MrpRelay::isForwardingInterface(NetworkInterface *networkInterface) const
+{
     const auto &MrpData = networkInterface->findProtocolData<MrpInterfaceData>();
     const auto &Ieee8021dData = networkInterface->findProtocolData<Ieee8021dInterfaceData>();
     if (networkInterface->isLoopback() || !networkInterface->isBroadcast())
@@ -211,12 +214,14 @@ bool MrpRelay::isForwardingInterface(NetworkInterface *networkInterface) const {
         return true;
 }
 
-int MrpRelay::getCcmLevel(Packet *packet) {
+int MrpRelay::getCcmLevel(Packet *packet)
+{
     const auto &ccm = packet->peekAtFront<CfmContinuityCheckMessage>();
     return ccm->getMdLevel();
 }
 
-bool MrpRelay::isMrpMulticast(MacAddress DestinationAddress) {
+bool MrpRelay::isMrpMulticast(MacAddress DestinationAddress)
+{
     if (DestinationAddress.getAddressByte(0) & 0x01
             && DestinationAddress.getAddressByte(1) & 0x15
             && DestinationAddress.getAddressByte(2) & 0x4E)
@@ -224,7 +229,8 @@ bool MrpRelay::isMrpMulticast(MacAddress DestinationAddress) {
     return false;
 }
 
-void MrpRelay::handleUpperPacket(Packet *packet) {
+void MrpRelay::handleUpperPacket(Packet *packet)
+{
     EV_INFO << "Processing upper packet" << EV_FIELD(packet) << EV_ENDL;
     auto macAddressReq = packet->getTag<MacAddressReq>();
     auto destinationAddress = macAddressReq->getDestAddress();
@@ -259,7 +265,8 @@ void MrpRelay::handleUpperPacket(Packet *packet) {
     }
 }
 
-void MrpRelay::updatePeerAddress(NetworkInterface *incomingInterface, MacAddress sourceAddress, unsigned int vlanId) {
+void MrpRelay::updatePeerAddress(NetworkInterface *incomingInterface, MacAddress sourceAddress, unsigned int vlanId)
+{
     EV_INFO << "Learning peer address"
             << EV_FIELD(sourceAddress)
             << EV_FIELD(incomingInterface)
@@ -275,7 +282,8 @@ void MrpRelay::updatePeerAddress(NetworkInterface *incomingInterface, MacAddress
     }
 }
 
-void MrpRelay::sendPacket(Packet *packet, const MacAddress &destinationAddress, NetworkInterface *outgoingInterface) {
+void MrpRelay::sendPacket(Packet *packet, const MacAddress &destinationAddress, NetworkInterface *outgoingInterface)
+{
     EV_INFO << "Sending packet to peer"
             << EV_FIELD(destinationAddress)
             << EV_FIELD(outgoingInterface)
@@ -299,23 +307,28 @@ void MrpRelay::sendPacket(Packet *packet, const MacAddress &destinationAddress, 
     sendDelayed(packet, switchingDelay, "lowerLayerOut");
 }
 
-MacAddress MrpRelay::getBridgeAddress() {
+MacAddress MrpRelay::getBridgeAddress()
+{
     return this->bridgeAddress;
 }
 
-void MrpRelay::handleStartOperation(LifecycleOperation *operation) {
+void MrpRelay::handleStartOperation(LifecycleOperation *operation)
+{
 
 }
 
-void MrpRelay::handleStopOperation(LifecycleOperation *operation) {
+void MrpRelay::handleStopOperation(LifecycleOperation *operation)
+{
 
 }
 
-void MrpRelay::handleCrashOperation(LifecycleOperation *operation) {
+void MrpRelay::handleCrashOperation(LifecycleOperation *operation)
+{
     finish();
 }
 
-void MrpRelay::finish() {
+void MrpRelay::finish()
+{
     Ieee8021dRelay::finish();
     recordScalar("number of received PDUs from MRP module", numReceivedPDUsFromMRP);
     recordScalar("number of received frames from network (including PDUs)", numReceivedNetworkFrames);

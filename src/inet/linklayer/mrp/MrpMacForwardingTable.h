@@ -16,7 +16,8 @@ namespace inet {
  * NOTE that interfaceIds (interfaceId parameters) are actually the corresponding ID of the port interface.
  * i.e. this is an interfaceId and NOT an index of the some kind in a gate vector.
  */
-class INET_API MrpMacForwardingTable: public MacForwardingTable {
+class INET_API MrpMacForwardingTable: public MacForwardingTable
+{
 protected:
     friend std::ostream& operator<<(std::ostream &os,
             const AddressEntry &entry);

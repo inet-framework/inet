@@ -19,7 +19,8 @@ namespace inet {
 /**
  * Adds interconnection support to Mrp, i.e. roles MIC and MIM.
  */
-class INET_API MrpInterconnection: public Mrp {
+class INET_API MrpInterconnection: public Mrp
+{
 public:
     enum InterconnectionNodeState : uint16_t {
         POWER_ON,

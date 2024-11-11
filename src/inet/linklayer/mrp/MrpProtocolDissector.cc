@@ -14,7 +14,8 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::mrp, MrpProtocolDissector);
 
-void MrpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback &callback) const {
+void MrpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback &callback) const
+{
     callback.startProtocolDataUnit(&Protocol::mrp);
 
     auto version = packet->popAtFront<MrpVersion>();
