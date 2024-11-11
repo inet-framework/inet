@@ -123,7 +123,8 @@ void MrpRelay::handleLowerPacket(Packet *incomingPacket)
         emit(packetDroppedSignal, incomingPacket, &details);
         delete incomingPacket;
         delete outgoingPacket;
-    } else {
+    }
+    else {
         // handling Broadcast
         if (destinationAddress.isBroadcast())
             broadcastPacket(outgoingPacket, destinationAddress, incomingInterface);
@@ -148,7 +149,8 @@ void MrpRelay::handleLowerPacket(Packet *incomingPacket)
                             sendPacket(outgoingPacket->dup(), destinationAddress, outgoingInterface);
                     }
 
-                } else {
+                }
+                else {
                     EV_DETAIL << "Discarding packet because ccm-levels <= 0"
                               << EV_FIELD(destinationAddress)
                               << EV_FIELD(incomingInterface)
@@ -182,7 +184,8 @@ void MrpRelay::handleLowerPacket(Packet *incomingPacket)
                         emit(packetDroppedSignal, outgoingPacket, &details);
                         delete outgoingPacket;
                     }
-                } else {
+                }
+                else {
                     EV_DETAIL << "Discarding packet because outgoing interface is the same as incoming interface"
                               << EV_FIELD(destinationAddress)
                               << EV_FIELD(incomingInterface)
@@ -254,7 +257,8 @@ void MrpRelay::handleUpperPacket(Packet *packet)
             }
             delete packet;
         }
-    } else {
+    }
+    else {
         int interfaceId = mrpMacForwardingTable->getUnicastAddressForwardingInterface(destinationAddress);
         if (interfaceId == -1)
             broadcastPacket(packet, destinationAddress, nullptr);
@@ -275,7 +279,8 @@ void MrpRelay::updatePeerAddress(NetworkInterface *incomingInterface, MacAddress
         if (mrpMacForwardingTable->getUnicastAddressForwardingInterface(sourceAddress, vlanId) == -1) {
             mrpMacForwardingTable->learnUnicastAddressForwardingInterface(incomingInterface->getInterfaceId(), sourceAddress, vlanId);
         }
-    } else {
+    }
+    else {
         auto interfaceIds = mrpMacForwardingTable->getMulticastAddressForwardingInterfaces(sourceAddress, vlanId);
         if (std::find(interfaceIds.begin(), interfaceIds.end(), incomingInterface->getInterfaceId()) != interfaceIds.end())
             mrpMacForwardingTable->addMulticastAddressForwardingInterface(incomingInterface->getInterfaceId(), sourceAddress, vlanId);

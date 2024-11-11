@@ -443,7 +443,8 @@ void Mrp::handleMessageWhenUp(cMessage *msg)
         EV_INFO << "Received Message on MrpNode, Rescheduling:" << EV_FIELD(msg) << EV_ENDL;
         simtime_t processingDelay = SimTime((int64_t)(processingDelayPar->doubleValue() * 1e6), SIMTIME_US);
         scheduleAfter(processingDelay, msg);
-    } else {
+    }
+    else {
         EV_INFO << "Received Self-Message:" << EV_FIELD(msg) << EV_ENDL;
         if (msg == testTimer)
             handleTestTimer();
@@ -522,13 +523,15 @@ void Mrp::handleMrpPDU(Packet* packet)
                     simtime_t ringTimePrecise = simTime() - it->second;
                     emit(testFrameLatencySignal, ringTimePrecise);
                     EV_DETAIL << "RingTime" << EV_FIELD(ringTime) << EV_FIELD(ringTimePrecise) << EV_ENDL;
-                } else {
+                }
+                else {
                     EV_DETAIL << "RingTime" << EV_FIELD(ringTime) << EV_ENDL;
                     emit(testFrameLatencySignal, ringTime);
                 }
             }
             testRingInd(ringPort, testTlv->getSa(), static_cast<MrpPriority>(testTlv->getPrio()));
-        } else {
+        }
+        else {
             EV_DETAIL << "Received packet from other Mrp-Domain"
                              << EV_FIELD(incomingInterface) << EV_FIELD(packet)
                              << EV_ENDL;
@@ -541,11 +544,13 @@ void Mrp::handleMrpPDU(Packet* packet)
         if (ringID) {
             if (sequence > lastTopologyId) {
                 topologyChangeInd(topologyTlv->getSa(), SimTime(topologyTlv->getInterval(), SIMTIME_MS));
-            } else {
+            }
+            else {
                 EV_DETAIL << "Received same Frame already" << EV_ENDL;
                 delete packet;
             }
-        } else {
+        }
+        else {
             EV_DETAIL << "Received packet from other Mrp-Domain"
                              << EV_FIELD(incomingInterface) << EV_FIELD(packet)
                              << EV_ENDL;
@@ -559,7 +564,8 @@ void Mrp::handleMrpPDU(Packet* packet)
         if (ringID) {
             LinkState linkState = linkTlv->getHeaderType() == LINKDOWN ? LinkState::DOWN : LinkState::UP;
             linkChangeInd(linkState);
-        } else {
+        }
+        else {
             EV_DETAIL << "Received packet from other Mrp-Domain"
                              << EV_FIELD(incomingInterface) << EV_FIELD(packet)
                              << EV_ENDL;
@@ -623,7 +629,8 @@ void Mrp::handleMrpPDU(Packet* packet)
                     throw cRuntimeError("unknown subTlv TYPE: %d", subTlv->getSubType());
                 }
             }
-        } else {
+        }
+        else {
             EV_DETAIL << "Received packet from other Mrp-Domain" << EV_FIELD(incomingInterface) << EV_FIELD(packet) << EV_ENDL;
         }
         break;
@@ -850,7 +857,8 @@ void Mrp::handleTestTimer()
             nodeState = CHK_RO;
             EV_DETAIL << "Switching State from CHK_RC to CHK_RO" << EV_FIELD(nodeState) << EV_ENDL;
             ringState = OPEN;
-        } else {
+        }
+        else {
             testRetransmissionCount++;
             addTest = false;
             testRingReq(defaultTestInterval);
@@ -862,7 +870,8 @@ void Mrp::handleTestTimer()
             scheduleAfter(trunc_msec(shortTestInterval), testTimer);
             if (monNReturn <= monNRmax) {
                 monNReturn++;
-            } else {
+            }
+            else {
                 mrmInit();
                 nodeState = PRM_UP;
                 EV_DETAIL << "Switching State from DE_IDLE to PRM_UP" << EV_FIELD(nodeState) << EV_ENDL;
@@ -874,7 +883,8 @@ void Mrp::handleTestTimer()
             scheduleAfter(trunc_msec(shortTestInterval), testTimer);
             if (monNReturn <= monNRmax) {
                 monNReturn++;
-            } else {
+            }
+            else {
                 mrmInit();
                 nodeState = CHK_RC;
                 EV_DETAIL << "Switching State from PT to CHK_RC" << EV_FIELD(nodeState) << EV_ENDL;
@@ -886,7 +896,8 @@ void Mrp::handleTestTimer()
             scheduleAfter(trunc_msec(shortTestInterval), testTimer);
             if (monNReturn <= monNRmax) {
                 monNReturn++;
-            } else {
+            }
+            else {
                 mrmInit();
                 nodeState = CHK_RO;
                 EV_DETAIL << "Switching State from PT_IDLE to CHK_RO" << EV_FIELD(nodeState) << EV_ENDL;
@@ -904,7 +915,8 @@ void Mrp::handleTopologyChangeTimer()
         setupTopologyChangeReq(topologyChangeRepeatCount * topologyChangeInterval);
         topologyChangeRepeatCount--;
         scheduleAfter(trunc_msec(topologyChangeInterval), topologyChangeTimer);
-    } else {
+    }
+    else {
         topologyChangeRepeatCount = topologyChangeMaxRepeatCount - 1;
         clearLocalFDB();
     }
@@ -919,7 +931,8 @@ void Mrp::handleLinkUpTimer()
             linkChangeCount = linkMaxChange;
             nodeState = PT_IDLE;
             EV_DETAIL << "Switching State from PT to PT_IDLE" << EV_FIELD(nodeState) << EV_ENDL;
-        } else {
+        }
+        else {
             linkChangeReq(primaryRingPortId, LinkState::UP);
         }
         break;
@@ -945,7 +958,8 @@ void Mrp::handleLinkDownTimer()
             linkChangeCount = linkMaxChange;
             nodeState = DE_IDLE;
             EV_DETAIL << "Switching State from DE to DE_IDLE" << EV_FIELD(nodeState) << EV_ENDL;
-        } else {
+        }
+        else {
             linkChangeReq(primaryRingPortId, LinkState::DOWN);
         }
         break;
@@ -1140,7 +1154,8 @@ void Mrp::setupLinkChangeReq(int ringPort, LinkState linkState, simtime_t time)
         linkChangeTlv->setHeaderType(LINKUP);
     } else if (linkState == LinkState::DOWN) {
         linkChangeTlv->setHeaderType(LINKDOWN);
-    } else {
+    }
+    else {
         throw cRuntimeError("Unknown LinkState in linkChangeRequest");
     }
     linkChangeTlv->setSa(localBridgeAddress);
@@ -1287,7 +1302,8 @@ void Mrp::testRingInd(int ringPort, MacAddress sourceAddress, MrpPriority manage
             testRingReq(defaultTestInterval);
             if (!reactOnLinkChange) {
                 topologyChangeReq(topologyChangeInterval);
-            } else {
+            }
+            else {
                 topologyChangeReq(SIMTIME_ZERO);
             }
             nodeState = CHK_RC;
@@ -1394,7 +1410,8 @@ void Mrp::linkChangeInd(LinkState linkState)
                 topologyChangeReq(SIMTIME_ZERO);
                 break;
             }
-        } else {
+        }
+        else {
             if (!nonblockingMrcSupported && linkState == LinkState::UP) { //18
                 topologyChangeReq(SIMTIME_ZERO);
             }
@@ -1412,7 +1429,8 @@ void Mrp::linkChangeInd(LinkState linkState)
                 if (nonblockingMrcSupported) {
                     addTest = true;
                     testRingReq(shortTestInterval);
-                } else {
+                }
+                else {
                     setPortState(secondaryRingPortId, MrpInterfaceData::BLOCKED);
                     testMaxRetransmissionCount = testMonitoringExtendedCount - 1;
                     testRetransmissionCount = 0;
@@ -1424,7 +1442,8 @@ void Mrp::linkChangeInd(LinkState linkState)
                     EV_DETAIL << "Switching State from CHK_RO to CHK_RC" << EV_FIELD(nodeState) << EV_ENDL;
                 }
             }
-        } else {
+        }
+        else {
             if (!nonblockingMrcSupported && linkState == LinkState::UP) {
                 setPortState(secondaryRingPortId, MrpInterfaceData::BLOCKED);
                 testMaxRetransmissionCount = testMonitoringExtendedCount - 1;
@@ -1450,7 +1469,8 @@ void Mrp::linkChangeInd(LinkState linkState)
             } else if (linkState == LinkState::UP) {
                 if (nonblockingMrcSupported) {
                     testMaxRetransmissionCount = testMonitoringCount - 1;
-                } else {
+                }
+                else {
                     testMaxRetransmissionCount = testMonitoringExtendedCount - 1;
                 }
                 topologyChangeReq(SIMTIME_ZERO);
@@ -1915,7 +1935,8 @@ void Mrp::colorLink(NetworkInterface *ie, bool forwarding) const
             if (forwarding) {
                 outGatePrev->getDisplayString().setTagArg("ls", 0, ENABLED_LINK_COLOR);
                 inGate->getDisplayString().setTagArg("ls", 0, ENABLED_LINK_COLOR);
-            } else {
+            }
+            else {
                 outGatePrev->getDisplayString().setTagArg("ls", 0, DISABLED_LINK_COLOR);
                 inGate->getDisplayString().setTagArg("ls", 0, DISABLED_LINK_COLOR);
             }
@@ -1925,7 +1946,8 @@ void Mrp::colorLink(NetworkInterface *ie, bool forwarding) const
                     && forwarding) {
                 outGate->getDisplayString().setTagArg("ls", 0, ENABLED_LINK_COLOR);
                 inGatePrev->getDisplayString().setTagArg("ls", 0, ENABLED_LINK_COLOR);
-            } else {
+            }
+            else {
                 outGate->getDisplayString().setTagArg("ls", 0, DISABLED_LINK_COLOR);
                 inGatePrev->getDisplayString().setTagArg("ls", 0, DISABLED_LINK_COLOR);
             }
@@ -1951,7 +1973,8 @@ void Mrp::refreshDisplay() const
                     sprintf(buf, "%s\n%s", port->getRoleName(), port->getStateName());
                     nicModule->getDisplayString().setTagArg("t", 0, buf);
                 }
-            } else {
+            }
+            else {
                 // color link
                 colorLink(ie, false);
                 // label ethernet interface with port status and role

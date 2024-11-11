@@ -214,7 +214,8 @@ void MrpInterconnection::handleMessageWhenUp(cMessage *msg)
                        << EV_FIELD(msg) << EV_ENDL;
         simtime_t processingDelay = SimTime((int64_t)(processingDelayPar->doubleValue() * 1e6), SIMTIME_US);
         scheduleAfter(processingDelay, msg);
-    } else {
+    }
+    else {
         EV_INFO << "Received Self-Message:" << EV_FIELD(msg) << EV_ENDL;
         EV_DEBUG << "State:" << EV_FIELD(inNodeState) << EV_ENDL;
         if (msg == inLinkStatusPollTimer)
@@ -284,7 +285,8 @@ void MrpInterconnection::handleInTestTimer()
             inTestRetransmissionCount = 0;
             interconnTopologyChangeReq(inTopologyChangeInterval);
             inNodeState = CHK_IO;
-        } else {
+        }
+        else {
             inTestRetransmissionCount = inTestRetransmissionCount + 1;
         }
         break;
@@ -331,7 +333,8 @@ void MrpInterconnection::handleInLinkUpTimer()
             inLinkChangeCount = inLinkMaxChange;
             setPortState(interconnectionPortId, MrpInterfaceData::FORWARDING);
             inNodeState = IP_IDLE;
-        } else {
+        }
+        else {
             scheduleAfter(inLinkChangeInterval, inLinkUpTimer);
             interconnLinkChangeReq(LinkState::UP, inLinkChangeCount * inLinkChangeInterval);
         }
@@ -355,7 +358,8 @@ void MrpInterconnection::handleInLinkDownTimer()
         if (inRole == INTERCONNECTION_CLIENT) {
             if (inLinkChangeCount == 0) {
                 inLinkChangeCount = inLinkMaxChange;
-            } else {
+            }
+            else {
                 scheduleAfter(inLinkChangeInterval, inLinkDownTimer);
                 interconnLinkChangeReq(LinkState::DOWN, inLinkChangeCount * inLinkChangeInterval);
             }
@@ -458,7 +462,8 @@ void MrpInterconnection::mauTypeChangeInd(int ringPort, LinkState linkState)
         default:
             throw cRuntimeError("Unknown Node State");
         }
-    } else {
+    }
+    else {
         Mrp::mauTypeChangeInd(ringPort, linkState);
     }
 }
@@ -522,11 +527,13 @@ void MrpInterconnection::interconnTopologyChangeInd(MacAddress sourceAddress, si
             default:
                 throw cRuntimeError("Unknown Node State");
             }
-        } else {
+        }
+        else {
             EV_DETAIL << "Received same Frame already" << EV_ENDL;
             delete packet;
         }
-    } else {
+    }
+    else {
         EV_INFO << "Received Frame from other InterConnectionID"
                        << EV_FIELD(inID) << EV_ENDL;
         delete packet;
@@ -607,7 +614,8 @@ void MrpInterconnection::interconnLinkChangeInd(uint16_t InID, LinkState linkSta
         default:
             throw cRuntimeError("Unknown Node State");
         }
-    } else {
+    }
+    else {
         EV_INFO << "Received Frame from other InterConnectionID"
                        << EV_FIELD(ringPort) << EV_FIELD(InID) << EV_ENDL;
         delete packet;
@@ -652,11 +660,13 @@ void MrpInterconnection::interconnLinkStatusPollInd(uint16_t inID, int ringPort,
             default:
                 throw cRuntimeError("Unknown Node State");
             }
-        } else {
+        }
+        else {
             EV_DETAIL << "Received same Frame already" << EV_ENDL;
             delete packet;
         }
-    } else {
+    }
+    else {
         EV_INFO << "Received Frame from other InterConnectionID"
                        << EV_FIELD(ringPort) << EV_FIELD(inID) << EV_ENDL;
         delete packet;
@@ -678,7 +688,8 @@ void MrpInterconnection::interconnTestInd(MacAddress sourceAddress, int ringPort
             emit(inTestFrameLatencySignal, ringTimePrecise);
             EV_DETAIL << "InterconnectionRingTime" << EV_FIELD(ringTime)
                              << EV_FIELD(ringTimePrecise) << EV_ENDL;
-        } else {
+        }
+        else {
             emit(inTestFrameLatencySignal, ringTime);
             EV_DETAIL << "InterconnectionRingTime" << EV_FIELD(ringTime) << EV_ENDL;
         }
@@ -732,7 +743,8 @@ void MrpInterconnection::interconnTestInd(MacAddress sourceAddress, int ringPort
         default:
             throw cRuntimeError("Unknown Node State");
         }
-    } else {
+    }
+    else {
         EV_INFO << "Received Frame from other InterConnectionID"
                        << EV_FIELD(ringPort) << EV_FIELD(inID) << EV_ENDL;
         delete packet;
@@ -865,7 +877,8 @@ void MrpInterconnection::setupInterconnTopologyChangeReq(simtime_t time)
     MacAddress sourceAddress3 = getPortNetworkInterface(interconnectionPortId)->getMacAddress();
     if (inLinkCheckEnabled) {
         sendFrameReq(interconnectionPortId, MacAddress(MC_INTRANSFER), sourceAddress3, priority, MRP_LT, packet3);
-    } else {
+    }
+    else {
         sendFrameReq(interconnectionPortId, MacAddress(MC_INCONTROL), sourceAddress3, priority, MRP_LT, packet3);
     }
     emit(inTopologyChangeAnnouncedSignal, 1);
@@ -941,7 +954,8 @@ void MrpInterconnection::interconnLinkChangeReq(LinkState linkState, simtime_t t
     MacAddress sourceAddress3 = getPortNetworkInterface(interconnectionPortId)->getMacAddress();
     if (inLinkCheckEnabled) {
         sendFrameReq(interconnectionPortId, MacAddress(MC_INTRANSFER), sourceAddress3, priority, MRP_LT, packet3);
-    } else {
+    }
+    else {
         sendFrameReq(interconnectionPortId, MacAddress(MC_INCONTROL), sourceAddress3, priority, MRP_LT, packet3);
     }
     emit(inLinkChangeDetectedSignal, linkState == LinkState::DOWN ? 0 : 1);
