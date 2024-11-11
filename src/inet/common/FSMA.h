@@ -106,10 +106,7 @@ class SIM_API Fsm : public cOwnedObject
     bool busy = false;
 
   private:
-    void copy(const Fsm& other) {
-        stateName = other.stateName;
-        state = other.state;
-    }
+    void copy(const Fsm &other);
 
     virtual void parsimPack(cCommBuffer *) const override {throw cRuntimeError(this, E_CANTPACK);}
     virtual void parsimUnpack(cCommBuffer *) override {throw cRuntimeError(this, E_CANTPACK);}
@@ -135,13 +132,7 @@ class SIM_API Fsm : public cOwnedObject
      * Assignment operator. The name member is not copied;
      * see cOwnedObject's operator=() for more details.
      */
-    Fsm& operator=(const Fsm& vs) {
-        if (this == &vs)
-            return *this;
-        cOwnedObject::operator=(vs);
-        copy(vs);
-        return *this;
-    }
+    Fsm& operator =(const Fsm &vs);
     //@}
 
     /** @name Redefined cObject member functions. */
@@ -157,14 +148,7 @@ class SIM_API Fsm : public cOwnedObject
      * Produces a one-line description of the object's contents.
      * See cObject for more details.
      */
-    virtual std::string str() const override {
-        std::stringstream out;
-        if (!stateName)
-            out << "state: " << state;
-        else
-            out << "state: " << stateName << " (" << state << ")";
-        return out.str();
-    }
+    virtual std::string str() const override;
     //@}
 
     /** @name FSM functions. */
@@ -194,23 +178,11 @@ class SIM_API Fsm : public cOwnedObject
      *
      * @see FSM_Goto
      */
-    void setState(int state, const char *stateName) {
-        this->state = state;
-        this->stateName = stateName;
-        if (stateChangedSignal != -1)
-            cSimulation::getActiveSimulation()->getContextModule()->emit(stateChangedSignal, state);
-    }
+    void setState(int state, const char *stateName);
 
-    void insertDelayedAction(std::function<void ()> action) {
-        delayedActions.push_back(action);
-    }
+    void insertDelayedAction(std::function<void()> action);
 
-    void executeDelayedActions() {
-        auto actions = delayedActions;
-        delayedActions.clear();
-        for (auto action : actions)
-            action();
-    }
+    void executeDelayedActions();
     //@}
 };
 
