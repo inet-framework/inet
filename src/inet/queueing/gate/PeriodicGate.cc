@@ -74,7 +74,7 @@ void PeriodicGate::readDurationsPar()
     for (size_t i = 0; i < size; i++) {
         clocktime_t duration = durationsPar->get(i).doubleValueInUnit("s");
         if (duration <= CLOCKTIME_ZERO)
-            throw cRuntimeError("Unaccepted duration value (%s) at position %zu", durationsPar->get(i).str().c_str(), i);
+            throw cRuntimeError("Unaccepted duration value (%s) at position %u", durationsPar->get(i).str().c_str(), (unsigned int)i);
         durations[i] = duration;
         totalDuration += duration;
     }
