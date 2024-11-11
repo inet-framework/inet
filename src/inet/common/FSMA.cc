@@ -38,7 +38,7 @@ void Fsm::insertDelayedAction(std::function<void()> action)
     delayedActions.push_back(action);
 }
 
-inline void Fsm::executeDelayedActions()
+void Fsm::executeDelayedActions()
 {
     auto actions = delayedActions;
     delayedActions.clear();
