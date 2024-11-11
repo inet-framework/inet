@@ -88,7 +88,7 @@ namespace inet {
     }
  */
 
-class SIM_API Fsm : public cOwnedObject
+class INET_API Fsm : public cOwnedObject
 {
   private:
     //
