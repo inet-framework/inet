@@ -2,8 +2,10 @@ package inet.showcases.routing.manet;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.ManetRouter;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.canvas.integrated.IntegratedMultiCanvasVisualizer;
+
 
 network ManetprotocolsShowcaseA
 {
@@ -22,7 +24,7 @@ network ManetprotocolsShowcaseA
         @figure[tree6](type=image; image="showcases/tree"; pos=0,0; transform=scale(0.1),translate(1050,600));
         @figure[tree7](type=image; image="showcases/tree"; pos=0,0; transform=scale(0.1),translate(1170,620));
     submodules:
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             @display("p=100,100");
         }
         visualizer: IntegratedMultiCanvasVisualizer {
