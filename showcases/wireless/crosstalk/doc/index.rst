@@ -67,7 +67,7 @@ All simulations use variations of the same network, which is
 illustrated by the image below:
 
 .. figure:: media/basenetwork.png
-   :width: 60%
+   :width: 50%
    :align: center
 
 The networks contain four :ned:`AdhocHost`'s, named ``host1`` to
@@ -96,7 +96,7 @@ of the ``General`` configuration, so it's empty:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: CompletelyOverlappingFrequencyBands
-   :end-before: IndependentFrequencyBandsOneScalarRadioMediumModule
+   :end-before: IndependentFrequencyBandsOneRadioMediumModule
    :language: ini
 
 Since the frequency and bandwidth of transmissions for all
@@ -128,12 +128,12 @@ interference. The scalar analog model is sufficient for this case.
 
 In the first configuration for this case, the hosts use the same radio
 medium module. The simulation can be run by choosing the
-``IndependentFrequencyBandsOneScalarRadioMediumModule`` configuration
+``IndependentFrequencyBandsOneRadioMediumModule`` configuration
 from the ini file. The radios of the two host pairs are configured
 to use the non-overlapping Channels 1 and 6:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: IndependentFrequencyBandsOneScalarRadioMediumModule
+   :start-at: IndependentFrequencyBandsOneRadioMediumModule
    :end-at: 6
    :language: ini
 
@@ -167,11 +167,11 @@ By using two radio medium modules, the simulation scales better as the number of
 
 The second example simulation demonstrates the use of two radio medium
 modules to optimize the simulation. The simulation can be run by
-choosing the ``IndependentFrequencyBandsTwoScalarRadioMediumModules``
+choosing the ``IndependentFrequencyBandsTwoRadioMediumModules``
 configuration from the ini file:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: IndependentFrequencyBandsTwoScalarRadioMediumModules
+   :start-at: IndependentFrequencyBandsTwoRadioMediumModules
    :end-at: 6
    :language: ini
 
@@ -200,10 +200,10 @@ In this case, the host pairs communicate on different Wifi channels, which
 partially overlap in frequency. The scalar analog model is insufficient to
 simulate partially overlapping channels, thus we use the dimensional analog model.
 The example simulation for this case uses the
-``CrosstalkShowcasePartiallyOverlappingFrequencyBands`` network, which contains
-a :ned:`Ieee80211DimensionalRadioMedium` module. The simulation is specified
+``CrosstalkShowcaseOneRadioMediumModule`` network. 
+The simulation is specified
 in the ``PartiallyOverlappingFrequencyBands`` configuration.
-The hosts are configured to have :ned:`Ieee80211DimensionalRadio` modules.
+The radio medium module and radios in the hosts are configured to use the dimensional analog model.
 The host pairs are set to adjacent Wifi Channels 1 and 2.
 Also, a more realistic signal spectrum is configured, based on the spectral mask
 of OFDM transmissions, as in the 802.11 standard:

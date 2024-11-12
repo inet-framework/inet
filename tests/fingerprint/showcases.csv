@@ -197,10 +197,10 @@
 /showcases/wireless/blockack/,     -f omnetpp.ini -c Fragmentation -r 0,                                          1s,            7ae9-e07d/tplx;db8b-3b81/~tNl;7c5e-90dc/~tND, PASS,    wireless Ipv4
 /showcases/wireless/blockack/,     -f omnetpp.ini -c MixedTraffic -r 0,                                           1s,            462d-10c7/tplx;727b-d26a/~tNl;8cbb-3d87/~tND, PASS,    wireless Ipv4
 
-/showcases/wireless/crosstalk/,     -f omnetpp.ini -c CompletelyOverlappingFrequencyBands -r 0,                                        1s,            42ab-4cc8/tplx;9f24-7bf3/~tNl;12b9-7639/~tND;37e1-d4df/tyf, PASS,    wireless Ipv4
-/showcases/wireless/crosstalk/,     -f omnetpp.ini -c IndependentFrequencyBandsOneScalarRadioMediumModule -r 0,                                          1s,            efa7-7ab9/tplx;882c-8064/~tNl;1c30-c809/~tND;6c5b-9c89/tyf, PASS,    wireless Ipv4
-/showcases/wireless/crosstalk/,     -f omnetpp.ini -c IndependentFrequencyBandsTwoScalarRadioMediumModules -r 0,                                           1s,            8447-12fd/tplx;28b0-7515/~tNl;c6aa-306d/~tND;2778-d996/tyf, PASS,    wireless Ipv4
-/showcases/wireless/crosstalk/,     -f omnetpp.ini -c PartiallyOverlappingFrequencyBands -r 0,                                           1s,            a9fc-8887/tplx;5fd5-7ddf/~tNl;b7ca-5176/~tND;d800-6246/tyf, PASS,    wireless Ipv4
+/showcases/wireless/crosstalk/,     -f omnetpp.ini -c CompletelyOverlappingFrequencyBands -r 0,                                        1s,            d0d7-43e0/tplx;867a-07a4/~tNl;edeb-c9d1/~tND;37e1-d4df/tyf, PASS,    wireless Ipv4
+/showcases/wireless/crosstalk/,     -f omnetpp.ini -c IndependentFrequencyBandsOneRadioMediumModule -r 0,                                          1s,            70c6-72b6/tplx;cf96-5e4d/~tNl;4d6b-769a/~tND;6c5b-9c89/tyf, PASS,    wireless Ipv4
+/showcases/wireless/crosstalk/,     -f omnetpp.ini -c IndependentFrequencyBandsTwoRadioMediumModules -r 0,                                           1s,            257e-ce2a/tplx;04b4-808a/~tNl;5162-daca/~tND;2778-d996/tyf, PASS,    wireless Ipv4
+/showcases/wireless/crosstalk/,     -f omnetpp.ini -c PartiallyOverlappingFrequencyBands -r 0,                                           1s,            387b-bb0e/tplx;867a-07a4/~tNl;edeb-c9d1/~tND;d800-6246/tyf, PASS,    wireless Ipv4
 
 /showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 0,                                        5s,            6a9f-c21b/tplx;1d7b-ac79/~tNl, PASS,    wireless ieee802154 Ipv4
 /showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 1,                                        5s,            8cb8-6ac7/tplx;2d3f-addc/~tNl, PASS,    wireless ieee802154 Ipv4
