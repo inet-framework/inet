@@ -956,9 +956,9 @@ void Mrp::handleLinkDownTimer() {
 void Mrp::setupContinuityCheck(int ringPort) {
     auto ccm = makeShared<ContinuityCheckMessage>();
     auto portData = getPortInterfaceDataForUpdate(ringPort);
-    if (portData->getContinuityCheckInterval() == 3.3) {
+    if (portData->getContinuityCheckInterval() == SimTime(3300, SIMTIME_US)) {  // SimTime(3.3, SIMTIME_MS) would be wrong, as in omnetpp-5.x this SimTime ctor only accepts integers
         ccm->setFlags(0x00000001);
-    } else if (portData->getContinuityCheckInterval() == 10) {
+    } else if (portData->getContinuityCheckInterval() == SimTime(10, SIMTIME_MS)) {
         ccm->setFlags(0x00000002);
     }
     if (ringPort == primaryRingPort) {
