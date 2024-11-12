@@ -22,8 +22,6 @@
 
 namespace inet {
 
-inline simtime_t trunc_msec(simtime_t t) { return t.trunc(SIMTIME_MS); }
-
 /**
  * Implements the base part of the MRP protocol, i.e. roles MRC, MRM and MRA.
  */
