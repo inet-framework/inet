@@ -35,7 +35,7 @@ To test the router, we'll use two hosts, one on each wireless LAN.
 The network will look like the following:
 
 .. figure:: media/network.png
-   :width: 70%
+   :width: 60%
    :align: center
 
 The network contains the wireless router named ``accessPoint``, and
