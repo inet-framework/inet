@@ -914,7 +914,7 @@ void Mrp::handleTopologyChangeTimer()
     if (topologyChangeRepeatCount > 0) {
         setupTopologyChangeReq(topologyChangeRepeatCount * topologyChangeInterval);
         topologyChangeRepeatCount--;
-        scheduleAfter(trunc_msec(topologyChangeInterval), topologyChangeTimer);
+        scheduleAfter(topologyChangeInterval, topologyChangeTimer);
     }
     else {
         topologyChangeRepeatCount = topologyChangeMaxRepeatCount - 1;
@@ -1005,7 +1005,7 @@ void Mrp::testRingReq(simtime_t time)
     if (addTest)
         cancelEvent(testTimer);
     if (!testTimer->isScheduled()) {
-        scheduleAfter(trunc_msec(time), testTimer);
+        scheduleAfter(time, testTimer);
         setupTestRingReq();
     } else
         EV_DETAIL << "Testtimer already scheduled" << EV_ENDL;
@@ -1017,7 +1017,7 @@ void Mrp::topologyChangeReq(simtime_t time)
         clearLocalFDB();
         setupTopologyChangeReq(time * topologyChangeMaxRepeatCount);
     } else if (!topologyChangeTimer->isScheduled()) {
-        scheduleAfter(trunc_msec(time), topologyChangeTimer);
+        scheduleAfter(time, topologyChangeTimer);
         setupTopologyChangeReq(time * topologyChangeMaxRepeatCount);
     } else
         EV_DETAIL << "TopologyChangeTimer already scheduled" << EV_ENDL;
