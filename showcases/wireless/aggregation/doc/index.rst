@@ -100,7 +100,7 @@ The simulation uses the following network, defined in
 :download:`AggregationShowcase.ned <../AggregationShowcase.ned>`:
 
 .. figure:: media/network.png
-   :width: 90%
+   :width: 60%
    :align: center
 
 It contains two :ned:`AdhocHost`'s, ``host1`` and ``host2``.

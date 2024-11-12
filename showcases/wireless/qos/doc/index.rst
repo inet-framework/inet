@@ -146,7 +146,8 @@ End-to-End Delay
 
 Here is the plot of the end-to-end delay of received packets in the non-QoS case:
 
-.. figure:: 90%
+.. figure:: media/delay_nonqos.png
+   :width: 90%
    :align: center
 
 The end-to-end delay vector data points for the four access
