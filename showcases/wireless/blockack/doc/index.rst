@@ -83,7 +83,7 @@ The Model
 ~~~~~~~~~
 
 The example simulation uses a network that contains two :ned:`AdhocHost` modules,
-an :ned:`Ipv4NetworkConfigurator`, an :ned:`Ieee80211ScalarRadioMedium` and
+an :ned:`Ipv4NetworkConfigurator`, an :ned:`Ieee80211RadioMedium` and
 an :ned:`IntegratedCanvasVisualizer` module. During simulation, ``host1`` will send
 UDP packets to ``host2``.
 

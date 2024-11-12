@@ -105,7 +105,7 @@ The simulation uses the following network, defined in
 
 It contains two :ned:`AdhocHost`'s, ``host1`` and ``host2``.
 It also contains an :ned:`Ipv4NetworkConfigurator` and an
-:ned:`Ieee80211ScalarRadioMedium` module.
+:ned:`Ieee80211RadioMedium` module.
 
 Configurations
 ~~~~~~~~~~~~~~
