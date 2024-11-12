@@ -107,7 +107,7 @@ The simulation uses the following network:
    :align: center
 
 It contains two :ned:`AdhocHost` modules, an :ned:`Ipv4NetworkConfigurator`,
-an :ned:`Ieee80211ScalarRadioMedium` and an :ned:`IntegratedCanvasVisualizer` module.
+an :ned:`Ieee80211RadioMedium` and an :ned:`IntegratedCanvasVisualizer` module.
 
 The simulation is defined in the ``General`` configuration in :download:`omnetpp.ini <../omnetpp.ini>`.
 There are two UDP applications in ``host1``, sending small (1200B) and large
