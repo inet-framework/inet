@@ -186,7 +186,7 @@ void Mrp::initInterfacedata(int interfaceId)
     setPortState(interfaceId, MrpInterfaceData::FORWARDING);
     auto ifd = getPortInterfaceDataForUpdate(interfaceId);
     ifd->setContinuityCheck(false);
-    ifd->setContinuityCheckInterval(trunc_msec(ccmInterval));
+    ifd->setContinuityCheckInterval(ccmInterval);
 }
 
 void Mrp::initRingPort(int interfaceId, MrpInterfaceData::PortRole role, bool enableLinkCheck)
@@ -195,7 +195,7 @@ void Mrp::initRingPort(int interfaceId, MrpInterfaceData::PortRole role, bool en
     setPortState(interfaceId, MrpInterfaceData::BLOCKED);
     auto ifd = getPortInterfaceDataForUpdate(interfaceId);
     ifd->setContinuityCheck(enableLinkCheck);
-    ifd->setContinuityCheckInterval(trunc_msec(ccmInterval));
+    ifd->setContinuityCheckInterval(ccmInterval);
 }
 
 void Mrp::startContinuityCheck()
