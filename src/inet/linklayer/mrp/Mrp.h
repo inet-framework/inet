@@ -22,7 +22,6 @@
 
 namespace inet {
 
-inline simtime_t trunc_usec(simtime_t t) { return t.trunc(SIMTIME_US); }
 inline simtime_t trunc_msec(simtime_t t) { return t.trunc(SIMTIME_MS); }
 
 /**

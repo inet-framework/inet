@@ -867,7 +867,7 @@ void Mrp::handleTestTimer()
     case DE:
     case DE_IDLE:
         if (role == MANAGER_AUTO) {
-            scheduleAfter(trunc_msec(shortTestInterval), testTimer);
+            scheduleAfter(shortTestInterval, testTimer);
             if (monNReturn <= monNRmax) {
                 monNReturn++;
             }
@@ -880,7 +880,7 @@ void Mrp::handleTestTimer()
         break;
     case PT:
         if (role == MANAGER_AUTO) {
-            scheduleAfter(trunc_msec(shortTestInterval), testTimer);
+            scheduleAfter(shortTestInterval, testTimer);
             if (monNReturn <= monNRmax) {
                 monNReturn++;
             }
@@ -893,7 +893,7 @@ void Mrp::handleTestTimer()
         break;
     case PT_IDLE:
         if (role == MANAGER_AUTO) {
-            scheduleAfter(trunc_msec(shortTestInterval), testTimer);
+            scheduleAfter(shortTestInterval, testTimer);
             if (monNReturn <= monNRmax) {
                 monNReturn++;
             }
