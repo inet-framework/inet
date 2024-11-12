@@ -91,7 +91,7 @@ The example simulation uses the following network:
 
 The network contains two :ned:`AdhocHost`'s named ``wifiHost1`` and ``wifiHost2``.
 It also contains an :ned:`Ipv4NetworkConfigurator`, an :ned:`IntegratedCanvasVisualizer`,
-and an :ned:`Ieee80211ScalarRadioMedium` module.
+and an :ned:`Ieee80211RadioMedium` module.
 
 Configuration keys for the UDP traffic, the radio, and the radio medium are defined
 in the ``General`` configuration in :download:`omnetpp.ini <../omnetpp.ini>`.
