@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#ifndef __INET_PICLOCK_H
-#define __INET_PICLOCK_H
+#ifndef __INET_PISERVOCLOCK_H
+#define __INET_PISERVOCLOCK_H
 
 #include "ServoClockBase.h"
 
