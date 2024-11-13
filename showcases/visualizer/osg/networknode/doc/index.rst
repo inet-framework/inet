@@ -13,6 +13,8 @@ icons, 3D models, and colorization.
 This showcase demonstrates the visualization options for network nodes in
 simulations and how to customize their appearance.
 
+.. note:: This showcase require OMNeT++ built with OSG enabled.
+
 | INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/networknode <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/networknode>`__
 
