@@ -14,6 +14,8 @@ network.
 It contains three example configurations of increasing complexity, each
 demonstrating various features of the visualization.
 
+.. note:: This showcase requires OMNeT++ built with OSG and osgEarth enabled. Currently, this is only possible on Windows.
+
 | INET version: ``4.0``
 | Source files location: `inet/showcases/visualizer/earth <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/earth>`__
 
