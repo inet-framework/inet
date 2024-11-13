@@ -32,7 +32,7 @@ simple DhcpServer like IApp
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
     gates:
-        input socketIn @labels(UdpControlInfo/up);
-        output socketOut @labels(UdpControlInfo/down);
+        input socketIn @labels(UdpCommand/up);
+        output socketOut @labels(UdpCommand/down);
 }
 

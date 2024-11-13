@@ -1131,7 +1131,7 @@ void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, us
 {
     EV_INFO << "Sending payload up to socket sockId=" << sd->sockId << "\n";
 
-    // send payload with UdpControlInfo up to the application
+    // send payload up to the application
     payload->setKind(UDP_I_DATA);
     payload->removeTagIfPresent<PacketProtocolTag>();
     payload->removeTagIfPresent<DispatchProtocolReq>();

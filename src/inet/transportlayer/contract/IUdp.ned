@@ -15,14 +15,14 @@ package inet.transportlayer.contract;
 // <b>Communication with clients (applications)</b>
 //
 // The module can (should) be connected to several applications.
-// For sending a UDP packet, the application should attach an ~UdpControlInfo
+// For sending a UDP packet, the application should attach an ~UdpCommand
 // object to the payload, and send it to ~Udp.
-// ~Udp will also attach an ~UdpControlInfo object to any payload
+// ~Udp will also attach an ~UdpCommand object to any payload
 // message it sends up to the application.
 //
 // For receiving UDP packets, the connected applications should first
 // "bind" to the given UDP port. This can be done by sending an
-// arbitrary message with message kind UDP_C_BIND and an ~UdpControlInfo
+// arbitrary message with message kind UDP_C_BIND and an ~UdpCommand
 // attached with `srcPort` filled in.
 //
 // If there is only one app which doesn't bind to any port, it will
@@ -33,7 +33,7 @@ package inet.transportlayer.contract;
 // The ~Udp model relies on sending and receiving ~L3AddressReq/~L3AddressInd
 // objects attached to packets.
 //
-// @see ~Udp, ~UdpHeader, ~UdpControlInfo, ~UdpCommandCode
+// @see ~Udp, ~UdpHeader, ~UdpCommand, ~UdpCommandCode
 //
 moduleinterface IUdp
 {
@@ -41,9 +41,9 @@ moduleinterface IUdp
         @display("i=block/transport");
 
     gates:
-        input appIn @labels(UdpControlInfo/down);
+        input appIn @labels(UdpCommand/down);
         input ipIn @labels(UdpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
-        output appOut @labels(UdpControlInfo/up);
+        output appOut @labels(UdpCommand/up);
         output ipOut @labels(UdpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
 

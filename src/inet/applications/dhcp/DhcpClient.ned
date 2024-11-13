@@ -30,7 +30,7 @@ simple DhcpClient like IApp
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
         @selfMessageKinds(inet::DhcpTimerType);
     gates:
-        input socketIn @labels(UdpControlInfo/up);
-        output socketOut @labels(UdpControlInfo/down);
+        input socketIn @labels(UdpCommand/up);
+        output socketOut @labels(UdpCommand/down);
 }
 
