@@ -5,7 +5,7 @@
 //
 
 
-package inet.networklayer.icmpv6;
+package inet.networklayer.ipv6layer.icmpv6;
 
 //
 // ICMPv6 implementation.
@@ -17,8 +17,9 @@ simple Icmpv6
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
-        string crcMode @enum("declared", "computed") = default("declared");
+        string crcMode @enum("declared","computed") = default("declared");
         @display("i=block/control");
+        @formerly(inet.networklayer.icmpv6.Icmpv6);
     gates:
         input transportIn;
         output transportOut;

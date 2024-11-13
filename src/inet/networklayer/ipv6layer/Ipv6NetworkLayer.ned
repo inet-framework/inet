@@ -7,14 +7,17 @@
 // Edited with OMNeT++ Academic/Noncommercial Edition.
 //
 
-package inet.networklayer.ipv6;
+package inet.networklayer.ipv6layer;
 
 import inet.common.MessageDispatcher;
 import inet.networklayer.contract.IIpv6Tunneling;
 import inet.networklayer.contract.INetworkLayer;
 import inet.networklayer.contract.IxMIPv6Support;
-import inet.networklayer.icmpv6.Icmpv6;
-import inet.networklayer.icmpv6.Ipv6NeighbourDiscovery;
+import inet.networklayer.ipv6layer.icmpv6.Icmpv6;
+import inet.networklayer.ipv6layer.ipv6.Ipv6;
+import inet.networklayer.ipv6layer.neighbourdiscovery.Ipv6NeighbourDiscovery;
+import inet.networklayer.ipv6layer.routingtable.Ipv6RoutingTable;
+
 
 //
 // Represents an IPv6 network layer (L3).
@@ -38,6 +41,7 @@ module Ipv6NetworkLayer like INetworkLayer
         *.icmpv6Module = default(absPath(".icmpv6"));
         *.ipv6TunnelingModule = default(absPath(".iptunneling"));
         @display("i=block/fork");
+        @formerly(inet.networklayer.ipv6.Ipv6NetworkLayer);
 
     gates:
         input ifIn @labels(INetworkHeader);
@@ -111,4 +115,3 @@ module Ipv6NetworkLayer like INetworkLayer
         ipv6.queueOut --> { @display("m=s"); } --> ifOut;
         ipv6.queueIn <-- { @display("m=s"); } <-- ifIn;
 }
-

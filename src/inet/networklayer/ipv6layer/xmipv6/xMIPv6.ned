@@ -9,7 +9,7 @@
 //
 //
 
-package inet.networklayer.xmipv6;
+package inet.networklayer.ipv6layer.xmipv6;
 
 //
 // Implements xMIPv6 (where x = F, H, F-H).
@@ -27,8 +27,8 @@ simple xMIPv6
         @display("i=block/classifier2");
         @signal[mipv6RoCompleted](type=cMessage?);
         @signal[packetDropped](type=cPacket);
+        @formerly(inet.networklayer.xmipv6.xMIPv6);
     gates:
         input fromIPv6;
         output toIPv6;
 }
-

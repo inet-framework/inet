@@ -9,7 +9,7 @@
 //
 //
 
-package inet.networklayer.xmipv6;
+package inet.networklayer.ipv6layer.xmipv6;
 
 //
 // ~xMIPv6 Data structure for the HA and CN(s) only.
@@ -18,5 +18,6 @@ package inet.networklayer.xmipv6;
 //
 simple BindingCache
 {
+    parameters:
+        @formerly(inet.networklayer.xmipv6.BindingCache);
 }
-

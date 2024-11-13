@@ -5,7 +5,7 @@
 //
 
 
-package inet.networklayer.ipv6;
+package inet.networklayer.ipv6layer.ipv6;
 
 //
 // Implements the IPv6 protocol.
@@ -63,6 +63,7 @@ simple Ipv6
         @signal[packetReceivedFromUpper](type=inet::Packet);
         @signal[packetSentToLower](type=inet::Packet);
         @signal[packetReceivedFromLower](type=inet::Packet);
+        @formerly(inet.networklayer.ipv6.Ipv6);
     gates:
         input transportIn @labels(Ipv6ControlInfo/down,TcpHeader,UdpHeader);
         output transportOut @labels(Ipv6ControlInfo/up,TcpHeader,UdpHeader);

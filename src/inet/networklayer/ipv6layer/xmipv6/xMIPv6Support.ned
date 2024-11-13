@@ -9,9 +9,10 @@
 //
 //
 
-package inet.networklayer.xmipv6;
+package inet.networklayer.ipv6layer.xmipv6;
 
 import inet.networklayer.contract.IxMIPv6Support;
+
 
 //
 // Implements xMIPv6 (where x = F, H, F-H).
@@ -30,6 +31,7 @@ module xMIPv6Support like IxMIPv6Support
         *.bindingUpdateListModule = default(absPath(".buList"));
         *.bindingCacheModule = default(absPath(".bindingCache"));
         @display("i=block/classifier2");
+        @formerly(inet.networklayer.xmipv6.xMIPv6Support);
     gates:
         input fromIPv6;
         output toIPv6;
@@ -51,4 +53,3 @@ module xMIPv6Support like IxMIPv6Support
         fromIPv6 --> xMobileIPv6.fromIPv6;
         toIPv6 <-- xMobileIPv6.toIPv6;
 }
-
