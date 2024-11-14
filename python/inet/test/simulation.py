@@ -84,7 +84,10 @@ class SimulationTestTask(TestTask):
         if simulation_config.user_interface and simulation_config.user_interface != self.simulation_task.user_interface:
             return self.task_result_class(task=self, result="SKIP", expected_result="SKIP", reason="Requires different user interface")
         else:
+            start_time = time.time()
             simulation_task_result = self.simulation_task.run_protected(output_stream=output_stream, **kwargs)
+            end_time = time.time()
+            simulation_task_result.elapsed_wall_time = end_time - start_time
             if simulation_task_result.result == "DONE":
                 return self.check_simulation_task_result(simulation_task_result=simulation_task_result, **kwargs)
             else:
@@ -160,7 +163,10 @@ class SimulationUpdateTask(UpdateTask):
         if simulation_config.user_interface and simulation_config.user_interface != self.simulation_task.user_interface:
             return self.task_result_class(task=self, result="SKIP", expected_result="SKIP", reason="Requires different user interface")
         else:
+            start_time = time.time()
             simulation_task_result = self.simulation_task.run_protected(output_stream=output_stream, **kwargs)
+            end_time = time.time()
+            simulation_task_result.elapsed_wall_time = end_time - start_time
             if simulation_task_result.result == "DONE":
                 return self.check_simulation_task_result(simulation_task_result=simulation_task_result, **kwargs)
             else:
