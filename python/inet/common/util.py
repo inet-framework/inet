@@ -282,7 +282,7 @@ class DebugLevel(LoggerLevel):
     def __init__(self, logger):
         super().__init__(self, logger, logging.DEBUG)
 
-def run_command_with_logging(args, error_message=None, **kwargs):
+def run_command_with_logging(args, error_message=None, nice=10, **kwargs):
     logger = logging.getLogger(os.path.basename(args[0]))
     def log_stream(stream, logger, lines):
         for line in iter(stream.readline, ""):
@@ -292,7 +292,7 @@ def run_command_with_logging(args, error_message=None, **kwargs):
     stdout_lines = []
     stderr_lines = []
     logger.info(f"Running external command: {' '.join(args)}")
-    process = subprocess.Popen(["nice", "-n", "10", *args], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, **kwargs)
+    process = subprocess.Popen(["nice", "-n", str(nice), *args], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, **kwargs)
     stdout_thread = threading.Thread(target=log_stream, args=(process.stdout, logger.info, stdout_lines))
     stderr_thread = threading.Thread(target=log_stream, args=(process.stderr, logger.error, stderr_lines))
     stdout_thread.start()
