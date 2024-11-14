@@ -304,30 +304,31 @@ def get_feature_to_required_features_for_simulation_project(simulation_project, 
     simulation_to_used_types = get_simulation_to_used_types(simulation_results)
     return get_feature_to_required_features(simulation_project, features, feature_to_packages, package_to_used_types, package_to_used_headers, defined_types_to_feature, folder_to_simulations, simulation_to_used_types)
 
-def update_oppfeatures_file(simulation_project, feature_to_required_features):
+def update_oppfeatures_file(simulation_project, feature_to_required_features, feature_id_filter=None):
     file_name = simulation_project.get_full_path(".oppfeatures")
     with open(file_name, "r") as file:
         lines = []
+        feature_id = None
         for line in file:
             match = re.search(r"id *= *\"(.*?)\"", line)
             if match:
-                feature = match.group(1)
+                feature_id = match.group(1)
             match = re.search(r"( *requires *= *\").*?(\")", line)
-            if match:
-                lines.append(match.group(1) + " ".join(feature_to_required_features[feature]) + match.group(2) + "\n")
+            if match and (feature_id_filter is None or re.search(feature_id_filter, feature_id)):
+                lines.append(match.group(1) + " ".join(feature_to_required_features[feature_id]) + match.group(2) + "\n")
             else:
                 lines.append(line)
     with open(file_name, "w") as file:
         file.write("".join(lines))
 
-def update_oppfeatures(simulation_project=None, simulation_results=None):
+def update_oppfeatures(simulation_project=None, simulation_results=None, feature_id_filter=None, mode="release", **kwargs):
     if simulation_project is None:
         simulation_project = get_default_simulation_project()
     enable_features("all")
     make_makefiles(simulation_project=simulation_project)
-    clean_project(simulation_project=simulation_project)
-    build_project(simulation_project=simulation_project)
+    clean_project(simulation_project=simulation_project, mode=mode)
+    build_project(simulation_project=simulation_project, mode=mode)
     if simulation_results is None:
-        simulation_results = run_simulations(simulation_project=simulation_project, run_number=0)
+        simulation_results = run_simulations(simulation_project=simulation_project, mode=mode, run_number=0, extra_args=["--print-instantiated-ned-types=true"], **kwargs)
     feature_to_required_features = get_feature_to_required_features_for_simulation_project(simulation_project, simulation_results)
-    update_oppfeatures_file(simulation_project, feature_to_required_features)
+    update_oppfeatures_file(simulation_project, feature_to_required_features, feature_id_filter=feature_id_filter)
