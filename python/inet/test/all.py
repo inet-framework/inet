@@ -27,7 +27,7 @@ class PacketTestTask(TestTask):
     def run_protected(self, **kwargs):
         working_directory = self.simulation_project.get_full_path("tests/packet")
         args = ["make", "-s", "MODE=debug", "-j", str(multiprocessing.cpu_count())]
-        subprocess_result = run_command_with_logging(args, cwd=working_directory, error_message=f"Build {self.simulation_project.get_name()} failed")
+        run_command_with_logging(args, cwd=working_directory, error_message=f"Build {self.simulation_project.get_name()} failed")
         args = [f"./packet_test_dbg", "-s", "-u", "Cmdenv", "-c", "UnitTest"]
         subprocess_result = run_command_with_logging(args, cwd=working_directory, env=self.simulation_project.get_env())
         return self.task_result_class(self, result="PASS" if subprocess_result.returncode == 0 else "FAIL")

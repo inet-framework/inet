@@ -19,10 +19,7 @@ _logger = logging.getLogger(__name__)
 def make_makefiles(simulation_project=None, **kwargs):
     if simulation_project is None:
         simulation_project = get_default_simulation_project()
-    args = ["make", "makefiles"]
-    subprocess_result = run_command_with_logging(args, cwd=simulation_project.get_full_path("."))
-    if subprocess_result.returncode != 0:
-        raise Exception(f"Making {simulation_project.get_name()} makefiles failed")
+    run_command_with_logging(["make", "makefiles"], cwd=simulation_project.get_full_path("."), error_message=f"Making {simulation_project.get_name()} makefiles failed")
 
 def build_project(build_mode="makefile", **kwargs):
     """
@@ -66,9 +63,7 @@ def build_project_using_makefile(simulation_project=None, mode="release", **kwar
         simulation_project = get_default_simulation_project()
     _logger.info(f"Building {simulation_project.get_name()} in {mode} mode started")
     args = ["make", "MODE=" + mode, "-j", str(multiprocessing.cpu_count())]
-    subprocess_result = run_command_with_logging(args, cwd=simulation_project.get_full_path("."))
-    if subprocess_result.returncode != 0:
-        raise Exception(f"Build {simulation_project.get_name()} failed")
+    run_command_with_logging(args, cwd=simulation_project.get_full_path("."), error_message=f"Build {simulation_project.get_name()} failed")
     _logger.info(f"Building {simulation_project.get_name()} in {mode} mode ended")
 
 class MultipleBuildTasks(MultipleTasks):
@@ -318,7 +313,5 @@ def clean_project(simulation_project=None, mode="release", **kwargs):
         simulation_project = get_default_simulation_project()
     _logger.info(f"Cleaning {simulation_project.get_name()} started")
     args = ["make", "MODE=" + mode, "-j", str(multiprocessing.cpu_count()), "clean"]
-    subprocess_result = run_command_with_logging(args, cwd=simulation_project.get_full_path("."))
-    if subprocess_result.returncode != 0:
-        raise Exception(f"Build {simulation_project.get_name()} failed")
+    run_command_with_logging(args, cwd=simulation_project.get_full_path("."), error_message=f"Build {simulation_project.get_name()} failed")
     _logger.info(f"Cleaning {simulation_project.get_name()} ended")
