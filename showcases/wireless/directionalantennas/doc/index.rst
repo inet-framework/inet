@@ -104,7 +104,7 @@ the ``DirectionalAntennasShowcase`` network:
 
 The network contains two :ned:`AdhocHost` s, named ``source`` and
 ``destination``. There is also an :ned:`Ipv4NetworkConfigurator`, an
-:ned:`IntegratedCanvasVisualizer`, and an :ned:`Ieee80211ScalarRadioMedium` module.
+:ned:`IntegratedCanvasVisualizer`, and an :ned:`Ieee80211RadioMedium` module.
 
 The source host is positioned in the center of the playground. The
 destination host is configured to circle the source host, while the
