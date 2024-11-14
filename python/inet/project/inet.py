@@ -19,6 +19,7 @@ inet_project = define_simulation_project("inet", version=None,
                                          media_folder="doc/media",
                                          statistics_folder="statistics",
                                          fingerprint_store="tests/fingerprint/store.json",
+                                         speed_store="tests/speed/store.json",
                                          external_libraries=["avcodec", "avformat", "avutil", "swresample", "osg", "osgText", "osgDB", "osgGA", "osgViewer", "osgUtil", "OpenThreads", "z3", "omp"],
                                          external_include_folders=["/usr/include/x86_64-linux-gnu"])
 
