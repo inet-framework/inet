@@ -204,7 +204,7 @@ class MultipleTaskResults:
             exclude_result_filter = "|".join(filter(lambda possible_result: (self.possible_result_colors[self.possible_results.index(possible_result)] == COLOR_GREEN or
                                                                              self.possible_result_colors[self.possible_results.index(possible_result)] == COLOR_CYAN),
                                                     self.possible_results))
-            details = self.get_details(exclude_result_filter=exclude_result_filter, include_parameters=True)
+            details = self.get_details(exclude_result_filter=exclude_result_filter, expected=False, include_parameters=True)
             return f"Multiple {self.multiple_tasks.name} results: " + self.color + self.result + COLOR_RESET + ", " + \
                    "summary: " + self.get_summary() + ("" if details.strip() == "" else "\n" + details)
 
@@ -242,7 +242,7 @@ class MultipleTaskResults:
         exclude_result_filter = "|".join(filter(lambda possible_result: (self.possible_result_colors[self.possible_results.index(possible_result)] == COLOR_GREEN or
                                                                          self.possible_result_colors[self.possible_results.index(possible_result)] == COLOR_CYAN),
                                                 self.possible_results))
-        details = self.get_details(level=level + 1, exclude_result_filter=exclude_result_filter, include_parameters=True)
+        details = self.get_details(level=level + 1, exclude_result_filter=exclude_result_filter, expected=False, include_parameters=True)
         return f"Multiple {self.multiple_tasks.name}s: " + self.get_summary() + "\n" + details
 
     def get_summary(self):
@@ -256,10 +256,11 @@ class MultipleTaskResults:
                 texts += self.get_result_class_texts(possible_result, self.possible_result_colors[self.possible_results.index(possible_result)], self.num_expected[possible_result], self.num_unexpected[possible_result])
             return ", ".join(texts) + (" in " + str(datetime.timedelta(seconds=self.elapsed_wall_time)) if self.elapsed_wall_time else "")
 
-    def get_details(self, separator="\n  ", level=1, result_filter=None, exclude_result_filter=None, **kwargs):
+    def get_details(self, separator="\n  ", level=1, result_filter=None, exclude_result_filter=None, expected=None, **kwargs):
         texts = []
         def matches_possible_result(task_result, possible_result):
             return task_result and task_result.result == possible_result and \
+                   (expected is None or expected == task_result.expected) and \
                    matches_filter(task_result.result, result_filter, exclude_result_filter, True)
         for possible_result in self.possible_results:
             for result in filter(lambda result: matches_possible_result(result, possible_result), self.results):
