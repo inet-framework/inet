@@ -28,22 +28,14 @@ _logger = logging.getLogger(__name__)
 
 
 def sewar_rmse(a, b):
-    a,b = sewar_initial_check(a,b)
+    assert a.shape == b.shape, "Supplied images have different sizes " + \
+    str(a.shape) + " and " + str(b.shape)
+    if len(a.shape) == 2:
+        a = a[:,:,numpy.newaxis]
+        b = b[:,:,numpy.newaxis]
+    a = a.astype(numpy.float64)
+    b = b.astype(numpy.float64)
     return numpy.sqrt(numpy.mean((a.astype(numpy.float64)-b.astype(numpy.float64))**2))
-
-def sewar_initial_check(GT,P):
-	assert GT.shape == P.shape, "Supplied images have different sizes " + \
-	str(GT.shape) + " and " + str(P.shape)
-	if GT.dtype != P.dtype:
-		msg = "Supplied images have different dtypes " + \
-			str(GT.dtype) + " and " + str(P.dtype)
-		_logger.warn(msg)
-
-	if len(GT.shape) == 2:
-		GT = GT[:,:,numpy.newaxis]
-		P = P[:,:,numpy.newaxis]
-
-	return GT.astype(numpy.float64),P.astype(numpy.float64)
 
 class ChartTestTask(TestTask):
     def __init__(self, analysis_file_name, id, chart_name, simulation_project=None, name="chart test", **kwargs):
@@ -77,6 +69,8 @@ class ChartTestTask(TestTask):
                 if os.path.exists(old_file_name):
                     new_image = matplotlib.image.imread(new_file_name)
                     old_image = matplotlib.image.imread(old_file_name)
+                    if old_image.shape != new_image.shape:
+                        return self.task_result_class(self, result="FAIL", reason="Supplied images have different sizes" + str(old_image.shape) + " and " + str(new_image.shape))
                     metric = sewar_rmse(old_image, new_image)
                     if metric == 0 or not keep_charts:
                         os.remove(new_file_name)
@@ -183,7 +177,10 @@ class ChartUpdateTask(UpdateTask):
                 if os.path.exists(old_file_name):
                     new_image = matplotlib.image.imread(new_file_name)
                     old_image = matplotlib.image.imread(old_file_name)
-                    metric = sewar_rmse(old_image, new_image)
+                    if old_image.shape != new_image.shape:
+                        metric = 1
+                    else:
+                        metric = sewar_rmse(old_image, new_image)
                     if metric == 0:
                         os.remove(new_file_name)
                     else:
