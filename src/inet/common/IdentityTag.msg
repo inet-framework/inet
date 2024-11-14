@@ -35,7 +35,7 @@ cplusplus(IdentityTag) {{
             return const_cast<IdentityTag *>(this)->shared_from_this();
         else {
             const auto& result = staticPtrCast<IdentityTag>(dupShared());
-            result->identityStart += b(offsetDelta).get();
+            result->identityStart += offsetDelta.get<b>();
             return result;
         }
     }
@@ -47,7 +47,7 @@ uint64_t IdentityTag::getNextIdentityStart(b length)
     static int handle = cSimulationOrSharedDataManager::registerSharedCounterName("inet::IdentityTag::nextIdentityStart");
     uint64_t& nextIdentityStart = getSimulationOrSharedDataManager()->getSharedCounter(handle);
     auto result = nextIdentityStart;
-    nextIdentityStart += b(length).get();
+    nextIdentityStart += length.get<b>();
     return result;
 }
 }}

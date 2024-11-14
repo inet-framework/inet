@@ -26,7 +26,7 @@ void EthernetPhyHeaderBaseSerializer::serialize(MemoryOutputStream& stream, cons
 
 const Ptr<Chunk> EthernetPhyHeaderBaseSerializer::deserialize(MemoryInputStream& stream) const
 {
-    uint8_t byte = stream.getData().at(B(PREAMBLE_BYTES).get());
+    uint8_t byte = stream.getData().at(PREAMBLE_BYTES.get<B>());
     if (byte == 0xD5) {
         EthernetPhyHeaderSerializer serializer;
         return serializer.deserialize(stream);
@@ -39,14 +39,14 @@ const Ptr<Chunk> EthernetPhyHeaderBaseSerializer::deserialize(MemoryInputStream&
 
 void EthernetPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    stream.writeByteRepeatedly(0x55, B(PREAMBLE_BYTES).get()); // preamble
+    stream.writeByteRepeatedly(0x55, PREAMBLE_BYTES.get<B>()); // preamble
     stream.writeByte(0xD5); // SFD
 }
 
 const Ptr<Chunk> EthernetPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto header = makeShared<EthernetPhyHeader>();
-    bool preambleReadSuccessfully = stream.readByteRepeatedly(0x55, B(PREAMBLE_BYTES).get()); // preamble
+    bool preambleReadSuccessfully = stream.readByteRepeatedly(0x55, PREAMBLE_BYTES.get<B>()); // preamble
     uint8_t sfd = stream.readByte();
     if (!preambleReadSuccessfully || sfd != 0xD5) {
         header->markIncorrect();
@@ -58,7 +58,7 @@ const Ptr<Chunk> EthernetPhyHeaderSerializer::deserialize(MemoryInputStream& str
 void EthernetFragmentPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& header = staticPtrCast<const EthernetFragmentPhyHeader>(chunk);
-    stream.writeByteRepeatedly(0x55, B(PREAMBLE_BYTES).get() - (header->getPreambleType() == SMD_Cx ? 1 : 0));
+    stream.writeByteRepeatedly(0x55, PREAMBLE_BYTES.get<B>() - (header->getPreambleType() == SMD_Cx ? 1 : 0));
     switch (header->getPreambleType()) {
         case SFD:
             stream.writeByte(0xD5);
@@ -87,7 +87,7 @@ void EthernetFragmentPhyHeaderSerializer::serialize(MemoryOutputStream& stream, 
 const Ptr<Chunk> EthernetFragmentPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto header = makeShared<EthernetFragmentPhyHeader>();
-    bool preambleReadSuccessfully = stream.readByteRepeatedly(0x55, B(PREAMBLE_BYTES).get() - 1);
+    bool preambleReadSuccessfully = stream.readByteRepeatedly(0x55, PREAMBLE_BYTES.get<B>() - 1);
     if (!preambleReadSuccessfully)
         header->markIncorrect();
     uint8_t value = stream.readByte();

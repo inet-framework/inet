@@ -28,7 +28,7 @@ void StreamBufferChunkSerializer::serialize(MemoryOutputStream& stream, const Pt
     if (copyLength > b(0))
         Chunk::serialize(stream, streamBufferChunk->getStreamData(), offset, copyLength);
     if (copyLength < length)
-        stream.writeBitRepeatedly(false, b(length - copyLength).get());
+        stream.writeBitRepeatedly(false, (length - copyLength).get<b>());
 }
 
 const Ptr<Chunk> StreamBufferChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const

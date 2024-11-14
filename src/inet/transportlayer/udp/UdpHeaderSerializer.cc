@@ -19,7 +19,7 @@ void UdpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     const auto& udpHeader = staticPtrCast<const UdpHeader>(chunk);
     stream.writeUint16Be(udpHeader->getSourcePort());
     stream.writeUint16Be(udpHeader->getDestinationPort());
-    stream.writeUint16Be(B(udpHeader->getTotalLengthField()).get());
+    stream.writeUint16Be(udpHeader->getTotalLengthField().get<B>());
     auto crcMode = udpHeader->getCrcMode();
     if (crcMode != CRC_DISABLED && crcMode != CRC_COMPUTED)
         throw cRuntimeError("Cannot serialize UDP header without turned off or properly computed CRC, try changing the value of crcMode parameter for Udp");

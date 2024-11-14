@@ -37,7 +37,7 @@ void SctpHeader::copy(const SctpHeader& other)
         take(chunk);
         sctpChunkList.push_back(chunk);
     }
-    ASSERT(B(getChunkLength()).get() == B(other.getChunkLength()).get());
+    ASSERT(getChunkLength().get<B>() == other.getChunkLength().get<B>());
 }
 
 SctpHeader::~SctpHeader()

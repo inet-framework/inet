@@ -203,7 +203,7 @@ b Ieee80211OfdmDataMode::getPaddingLength(b dataLength) const
         const ConvolutionalCode *convolutionalCode = code->getConvolutionalCode();
         dataBitsPerOFDMSymbol = convolutionalCode->getDecodedLength(codedBitsPerOFDMSymbol);
     }
-    unsigned int dataBitsLength = 6 + b(dataLength).get() + 16;
+    unsigned int dataBitsLength = 6 + dataLength.get<b>() + 16;
     unsigned int numberOfOFDMSymbols = lrint(ceil(1.0 * dataBitsLength / dataBitsPerOFDMSymbol));
     unsigned int numberOfBitsInTheDataField = dataBitsPerOFDMSymbol * numberOfOFDMSymbols; // N_DATA
     unsigned int numberOfPadBits = numberOfBitsInTheDataField - dataBitsLength; // N_PAD

@@ -39,8 +39,8 @@ void SliceChunk::parsimPack(cCommBuffer *buffer) const
 {
     Chunk::parsimPack(buffer);
     buffer->packObject(chunk.get());
-    buffer->pack(b(offset).get());
-    buffer->pack(b(length).get());
+    buffer->pack(offset.get<b>());
+    buffer->pack(length.get<b>());
 }
 
 void SliceChunk::parsimUnpack(cCommBuffer *buffer)

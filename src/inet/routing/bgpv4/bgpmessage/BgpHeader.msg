@@ -53,7 +53,7 @@ class BgpHeader extends FieldsChunk
 {
     chunkLength = BGP_HEADER_OCTETS;
     uint8_t marker[16] = 0xFF;
-    uint16_t totalLength = B(BGP_HEADER_OCTETS).get();
+    uint16_t totalLength = BGP_HEADER_OCTETS.get<B>();
     BgpType type = static_cast<BgpType>(-1);
 }
 
@@ -89,7 +89,7 @@ class BgpOpenMessage extends BgpHeader
 {
     type = BGP_OPEN;
     chunkLength = BGP_HEADER_OCTETS + BGP_OPEN_OCTETS;
-    totalLength = B(BGP_HEADER_OCTETS + BGP_OPEN_OCTETS).get();
+    totalLength = (BGP_HEADER_OCTETS + BGP_OPEN_OCTETS).get<B>();
 
     uint8_t version = 4;    // BGP Version, 1 octet
     uint16_t myAS;    // My Autonomous system, 2 octets
@@ -215,7 +215,7 @@ class BgpUpdateMessage extends BgpHeader
 {
     type = BGP_UPDATE;
     chunkLength = BGP_HEADER_OCTETS + BGP_EMPTY_UPDATE_OCTETS;
-    totalLength = B(BGP_HEADER_OCTETS + BGP_EMPTY_UPDATE_OCTETS).get();
+    totalLength = (BGP_HEADER_OCTETS + BGP_EMPTY_UPDATE_OCTETS).get<B>();
 
     uint16_t withDrawnRoutesLength = 0;    // This 2-octets unsigned integer indicates the total length of
                                            // the Withdrawn Routes field in octets.  Its value allows the

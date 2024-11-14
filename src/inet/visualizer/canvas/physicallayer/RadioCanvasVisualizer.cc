@@ -178,9 +178,9 @@ void RadioCanvasVisualizer::refreshAntennaLobe(const IAntenna *antenna, cPolygon
     double maxGain = antenna->getGain()->getMaxGain();
     auto antennaCanvasPosition = canvasProjection->computeCanvasPoint(antennaPosition, antennaCanvasDepth);
     auto antennaDirection = Quaternion(antenna->getMobility()->getCurrentAngularPosition()).inverse();
-    for (double i = 0; i < unit(deg(360) / antennaLobeStep).get(); i++) {
+    for (double i = 0; i < (deg(360) / antennaLobeStep).get<unit>(); i++) {
         deg angle = i * antennaLobeStep;
-        cFigure::Point lobeCanvasOffset(cos(rad(angle).get()), sin(rad(angle).get()));
+        cFigure::Point lobeCanvasOffset(cos(angle.get<rad>()), sin(angle.get<rad>()));
         if (!strcmp(antennaLobePlane, "view")) {
             auto lobePosition = canvasProjection->computeCanvasPointInverse(antennaCanvasPosition + lobeCanvasOffset, antennaCanvasDepth);
             auto lobeDirection = Quaternion::rotationFromTo(Coord::X_AXIS, lobePosition - antennaPosition);

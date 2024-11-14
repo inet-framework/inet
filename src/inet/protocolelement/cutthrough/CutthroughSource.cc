@@ -48,7 +48,7 @@ void CutthroughSource::handleMessage(cMessage *message)
 void CutthroughSource::pushPacketStart(Packet *packet, const cGate *gate, bps datarate)
 {
     PacketDestreamer::pushPacketStart(packet, gate, datarate);
-    scheduleAfter(s(cutthroughPosition / datarate).get(), cutthroughTimer);
+    scheduleAfter((cutthroughPosition / datarate).get<s>(), cutthroughTimer);
 }
 
 void CutthroughSource::pushPacketEnd(Packet *packet, const cGate *gate)

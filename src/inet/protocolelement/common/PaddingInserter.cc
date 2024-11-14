@@ -27,11 +27,11 @@ void PaddingInserter::initialize(int stage)
 void PaddingInserter::processPacket(Packet *packet)
 {
     auto length = packet->getDataLength();
-    b paddingLength = roundingLength * std::ceil(b(length).get() / b(roundingLength).get()) - length;
+    b paddingLength = roundingLength * std::ceil(length.get<b>() / roundingLength.get<b>()) - length;
     if (length + paddingLength < minLength)
         paddingLength = minLength - length;
     if (paddingLength > b(0)) {
-        if (b(paddingLength).get() % 8 == 0) {
+        if (paddingLength.get<b>() % 8 == 0) {
             const auto& padding = makeShared<ByteCountChunk>(paddingLength, 0);
             insertHeader<ByteCountChunk>(packet, padding, insertionPosition);
         }

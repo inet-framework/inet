@@ -269,7 +269,7 @@ void EthernetCsmaPhy::startJamSignalTransmission()
     EV_DEBUG << "Starting jam signal transmission" << EV_ENDL;
     auto signal = new EthernetSignal("Jam");
     signal->setKind(JAM);
-    signal->setByteLength(B(JAM_SIGNAL_BYTES).get());
+    signal->setByteLength(JAM_SIGNAL_BYTES.get<B>());
     handleWithFsm(TX_START, signal);
 }
 

@@ -42,8 +42,8 @@ void CircleMobility::setInitialPosition()
 void CircleMobility::move()
 {
     angle = startAngle + rad(omega * simTime().dbl());
-    double cosAngle = cos(rad(angle).get());
-    double sinAngle = sin(rad(angle).get());
+    double cosAngle = cos(angle.get<rad>());
+    double sinAngle = sin(angle.get<rad>());
     lastPosition.x = cx + r * cosAngle;
     lastPosition.y = cy + r * sinAngle;
     lastPosition.z = cz;

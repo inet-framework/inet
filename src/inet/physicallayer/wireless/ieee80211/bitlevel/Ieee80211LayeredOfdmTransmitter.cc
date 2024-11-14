@@ -102,8 +102,8 @@ const ITransmissionAnalogModel *Ieee80211LayeredOfdmTransmitter::createDimension
     int headerBitLength = -1;
     int dataBitLength = -1;
     if (levelOfDetail > PACKET_DOMAIN) {
-        headerBitLength = b(bitModel->getHeaderLength()).get();
-        dataBitLength = b(bitModel->getDataLength()).get();
+        headerBitLength = bitModel->getHeaderLength().get<b>();
+        dataBitLength = bitModel->getDataLength().get<b>();
     }
     else {
         if (isCompliant) {

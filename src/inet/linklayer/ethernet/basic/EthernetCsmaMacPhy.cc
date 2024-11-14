@@ -110,7 +110,7 @@ void EthernetCsmaMacPhy::processConnectDisconnect()
         if (!duplexMode) {
             // start RX_RECONNECT_STATE
             changeReceptionState(RX_RECONNECT_STATE);
-            simtime_t reconnectEndTime = simTime() + b(MAX_ETHERNET_FRAME_BYTES + JAM_SIGNAL_BYTES).get() / curEtherDescr.bitrate;
+            simtime_t reconnectEndTime = simTime() + (MAX_ETHERNET_FRAME_BYTES + JAM_SIGNAL_BYTES).get<b>() / curEtherDescr.bitrate;
             for (auto& rx : rxSignals)
                 delete rx.signal;
             rxSignals.clear();
@@ -585,7 +585,7 @@ void EthernetCsmaMacPhy::sendJamSignal()
 
     // send JAM
     EthernetJamSignal *jam = new EthernetJamSignal("JAM_SIGNAL");
-    jam->setByteLength(B(JAM_SIGNAL_BYTES).get());
+    jam->setByteLength(JAM_SIGNAL_BYTES.get<B>());
     jam->setBitrate(curEtherDescr.bitrate);
 //    emit(packetSentToLowerSignal, jam);
     duration = jam->getBitLength() / this->curEtherDescr.bitrate;
@@ -792,7 +792,7 @@ void EthernetCsmaMacPhy::scheduleEndIFGPeriod()
 {
     bytesSentInBurst = B(0);
     framesSentInBurst = 0;
-    simtime_t ifgTime = b(INTERFRAME_GAP_BITS).get() / curEtherDescr.bitrate;
+    simtime_t ifgTime = INTERFRAME_GAP_BITS.get<b>() / curEtherDescr.bitrate;
     scheduleAfter(ifgTime, endIfgTimer);
     changeTransmissionState(WAIT_IFG_STATE);
 }

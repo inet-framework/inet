@@ -78,5 +78,5 @@ packet EthernetJamSignal extends EthernetSignalBase
 packet EthernetFilledIfgSignal extends EthernetSignalBase
 {
     srcMacFullDuplex = false;
-    bitLength = b(INTERFRAME_GAP_BITS).get();
+    bitLength = INTERFRAME_GAP_BITS.get<b>();
 }

@@ -32,7 +32,7 @@ void Ipv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     stream.writeUint4(ipv6Header->getVersion());
     stream.writeUint8(ipv6Header->getTrafficClass());
     stream.writeNBitsOfUint64Be(ipv6Header->getFlowLabel(), 20);
-    stream.writeUint16Be(B(ipv6Header->getPayloadLength()).get());
+    stream.writeUint16Be(ipv6Header->getPayloadLength().get<B>());
     stream.writeByte(ipv6Header->getExtensionHeaderArraySize() != 0 ? ipv6Header->getExtensionHeader(0)->getExtensionType() : ipv6Header->getProtocolId());
     stream.writeByte(ipv6Header->getHopLimit());
     stream.writeIpv6Address(ipv6Header->getSrcAddress());
@@ -43,18 +43,18 @@ void Ipv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     for (size_t i = 0; i < ipv6Header->getExtensionHeaderArraySize(); i++) {
         const Ipv6ExtensionHeader *extHdr = ipv6Header->getExtensionHeader(i);
         stream.writeByte(i + 1 < ipv6Header->getExtensionHeaderArraySize() ? ipv6Header->getExtensionHeader(i + 1)->getExtensionType() : ipv6Header->getProtocolId());
-        ASSERT((B(extHdr->getByteLength()).get() & 7) == 0);
+        ASSERT((extHdr->getByteLength().get<B>() & 7) == 0);
         ASSERT(extHdr->getByteLength() <= B(255 * 8 + 8));
-        stream.writeByte((B(extHdr->getByteLength()).get() - 8) / 8);
+        stream.writeByte((extHdr->getByteLength().get<B>() - 8) / 8);
         switch (extHdr->getExtensionType()) {
             case IP_PROT_IPv6EXT_HOP: {
                 const Ipv6HopByHopOptionsHeader *hdr = check_and_cast<const Ipv6HopByHopOptionsHeader *>(extHdr);
-                stream.writeByteRepeatedly(0, B(hdr->getByteLength()).get() - 2); // TODO
+                stream.writeByteRepeatedly(0, hdr->getByteLength().get<B>() - 2); // TODO
                 break;
             }
             case IP_PROT_IPv6EXT_DEST: {
                 const Ipv6DestinationOptionsHeader *hdr = check_and_cast<const Ipv6DestinationOptionsHeader *>(extHdr);
-                stream.writeByteRepeatedly(0, B(hdr->getByteLength()).get() - 2); // TODO
+                stream.writeByteRepeatedly(0, hdr->getByteLength().get<B>() - 2); // TODO
                 break;
             }
             case IP_PROT_IPv6EXT_ROUTING: {
@@ -79,12 +79,12 @@ void Ipv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             }
             case IP_PROT_IPv6EXT_AUTH: {
                 const Ipv6AuthenticationHeader *hdr = check_and_cast<const Ipv6AuthenticationHeader *>(extHdr);
-                stream.writeByteRepeatedly(0, B(hdr->getByteLength()).get() - 2); // TODO
+                stream.writeByteRepeatedly(0, hdr->getByteLength().get<B>() - 2); // TODO
                 break;
             }
             case IP_PROT_IPv6EXT_ESP: {
                 const Ipv6EncapsulatingSecurityPayloadHeader *hdr = check_and_cast<const Ipv6EncapsulatingSecurityPayloadHeader *>(extHdr);
-                stream.writeByteRepeatedly(0, B(hdr->getByteLength()).get() - 2); // TODO
+                stream.writeByteRepeatedly(0, hdr->getByteLength().get<B>() - 2); // TODO
                 break;
             }
             default: {

@@ -200,7 +200,7 @@ void Sctp::handleMessage(cMessage *msg)
             }
 
             SctpHeader *sctpmsg = (packet->peekAtFront<SctpHeader>().get()->dup());
-            int chunkLength = B(sctpmsg->getChunkLength()).get();
+            int chunkLength = sctpmsg->getChunkLength().get<B>();
 
             if (pktdrop && packet->hasBitError()) {
                 EV_WARN << "Packet has bit-error. Call Pktdrop\n";

@@ -376,7 +376,7 @@ void CsmaCaMac::encapsulate(Packet *frame)
 {
     auto macHeader = makeShared<CsmaCaMacDataHeader>();
     macHeader->setChunkLength(headerLength);
-    macHeader->setHeaderLengthField(B(headerLength).get());
+    macHeader->setHeaderLengthField(headerLength.get<B>());
     auto transportProtocol = frame->getTag<PacketProtocolTag>()->getProtocol();
     auto networkProtocol = ProtocolGroup::getEthertypeProtocolGroup()->getProtocolNumber(transportProtocol);
     macHeader->setNetworkProtocol(networkProtocol);
@@ -511,7 +511,7 @@ void CsmaCaMac::sendAckFrame()
     endSifs->setContextPointer(nullptr);
     auto macHeader = makeShared<CsmaCaMacAckHeader>();
     macHeader->setChunkLength(ackLength);
-    macHeader->setHeaderLengthField(B(ackLength).get());
+    macHeader->setHeaderLengthField(ackLength.get<B>());
     macHeader->setReceiverAddress(frameToAck->peekAtFront<CsmaCaMacHeader>()->getTransmitterAddress());
     auto frame = new Packet("CsmaAck");
     frame->insertAtFront(macHeader);
@@ -617,7 +617,7 @@ bool CsmaCaMac::isFcsOk(Packet *frame)
                 return true;
             case FCS_COMPUTED: {
                 const auto& fcsBytes = frame->peekDataAt<BytesChunk>(B(0), frame->getDataLength() - trailer->getChunkLength());
-                auto bufferLength = B(fcsBytes->getChunkLength()).get();
+                auto bufferLength = fcsBytes->getChunkLength().get<B>();
                 auto buffer = new uint8_t[bufferLength];
                 fcsBytes->copyToBuffer(buffer, bufferLength);
                 auto computedFcs = ethernetCRC(buffer, bufferLength);
@@ -632,7 +632,7 @@ bool CsmaCaMac::isFcsOk(Packet *frame)
 
 uint32_t CsmaCaMac::computeFcs(const Ptr<const BytesChunk>& bytes)
 {
-    auto bufferLength = B(bytes->getChunkLength()).get();
+    auto bufferLength = bytes->getChunkLength().get<B>();
     auto buffer = new uint8_t[bufferLength];
     bytes->copyToBuffer(buffer, bufferLength);
     auto computedFcs = ethernetCRC(buffer, bufferLength);

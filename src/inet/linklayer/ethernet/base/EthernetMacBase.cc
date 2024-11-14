@@ -309,7 +309,7 @@ bool EthernetMacBase::verifyCrcAndLength(Packet *packet)
             bool isFcsBad = false;
             // check the FCS
             auto ethBytes = packet->peekDataAt<BytesChunk>(B(0), packet->getDataLength() - ethTrailer->getChunkLength());
-            auto bufferLength = B(ethBytes->getChunkLength()).get();
+            auto bufferLength = ethBytes->getChunkLength().get<B>();
             auto buffer = new uint8_t[bufferLength];
             // 1. fill in the data
             ethBytes->copyToBuffer(buffer, bufferLength);
@@ -571,7 +571,7 @@ void EthernetMacBase::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) co
             break;
         case FCS_COMPUTED: { // calculate FCS
             auto ethBytes = packet->peekDataAsBytes();
-            auto bufferLength = B(ethBytes->getChunkLength()).get();
+            auto bufferLength = ethBytes->getChunkLength().get<B>();
             auto buffer = new uint8_t[bufferLength];
             // 1. fill in the data
             ethBytes->copyToBuffer(buffer, bufferLength);

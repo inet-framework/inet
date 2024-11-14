@@ -53,7 +53,7 @@ const Ptr<Chunk> OspfPacketSerializer::deserialize(MemoryInputStream& stream) co
             ospfPacket->setAreaID(stream.readIpv4Address());
             ospfPacket->setCrc(stream.readUint16Be());
             ospfPacket->setCrcMode(CRC_COMPUTED);
-            uint16_t curLength = B(stream.getPosition() - startPos).get();
+            uint16_t curLength = (stream.getPosition() - startPos).get<B>();
             if (packetLength > curLength)
                 stream.readByteRepeatedly(0, packetLength - curLength);
             return ospfPacket;

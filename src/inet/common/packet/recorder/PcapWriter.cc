@@ -128,7 +128,7 @@ void PcapWriter::writePacket(simtime_t stime, const Packet *packet, Direction di
     for (size_t i = 0; i < bytes.size(); i++) {
         buf[i] = bytes[i];
     }
-    ph.orig_len = B(data->getChunkLength()).get();
+    ph.orig_len = data->getChunkLength().get<B>();
 
     ph.incl_len = ph.orig_len > snaplen ? snaplen : ph.orig_len;
     fwrite(&ph, sizeof(ph), 1, dumpfile);

@@ -183,7 +183,7 @@ m MediumLimitCache::computeMaxRange(W maxTransmissionPower, W minReceptionPower)
 {
     // TODO this is NaN by default
     Hz centerFrequency = Hz(par("centerFrequency"));
-    double loss = unit(minReceptionPower / maxTransmissionPower).get() / maxAntennaGain / maxAntennaGain;
+    double loss = (minReceptionPower / maxTransmissionPower).get<unit>() / maxAntennaGain / maxAntennaGain;
     return radioMedium->getPathLoss()->computeRange(radioMedium->getPropagation()->getPropagationSpeed(), centerFrequency, loss);
 }
 

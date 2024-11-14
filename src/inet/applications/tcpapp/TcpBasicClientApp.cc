@@ -160,7 +160,7 @@ void TcpBasicClientApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool u
 
     EV_INFO << "Arrived data with " << dataLength << " length\n";
 
-    waitedReplyLength -= B(dataLength).get();
+    waitedReplyLength -= dataLength.get<B>();
     if (waitedReplyLength > 0) {
         EV_INFO << "Waiting remained " << waitedReplyLength << " bytes of reply\n";
         sendOrScheduleReadCommandIfNeeded();

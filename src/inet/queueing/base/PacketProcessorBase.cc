@@ -135,7 +135,7 @@ void PacketProcessorBase::pushOrSendPacket(Packet *packet, cGate *startGate, Pas
 
 void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *startGate, PassivePacketSinkRef& consumer, bps datarate, int transmissionId)
 {
-    simtime_t duration = s(packet->getDataLength() / datarate).get();
+    simtime_t duration = (packet->getDataLength() / datarate).get<s>();
     SendOptions sendOptions;
     sendOptions.duration_ = duration;
     sendOptions.remainingDuration = duration;
@@ -172,7 +172,7 @@ void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *startGate, 
 void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *startGate, PassivePacketSinkRef& consumer, bps datarate, b position, b extraProcessableLength, int transmissionId)
 {
     // NOTE: duration is unknown due to arbitrarily changing datarate
-    simtime_t remainingDuration = s((packet->getDataLength() - position) / datarate).get();
+    simtime_t remainingDuration = ((packet->getDataLength() - position) / datarate).get<s>();
     SendOptions sendOptions;
     sendOptions.updateTx(transmissionId, remainingDuration);
     if (consumer != nullptr) {
@@ -275,7 +275,7 @@ void PacketProcessorBase::animatePacket(Packet *packet, cGate *startGate, cGate 
 
 void PacketProcessorBase::animatePacketStart(Packet *packet, cGate *startGate, cGate *endGate, bps datarate, long transmissionId, Action action) const
 {
-    simtime_t duration = s(packet->getDataLength() / datarate).get();
+    simtime_t duration = (packet->getDataLength() / datarate).get<s>();
     SendOptions sendOptions;
     sendOptions.duration_ = duration;
     sendOptions.remainingDuration = duration;

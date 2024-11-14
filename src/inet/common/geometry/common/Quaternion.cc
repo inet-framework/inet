@@ -19,13 +19,13 @@ Quaternion::Quaternion(const Coord& axis, double angle) : Quaternion(std::cos(an
 
 Quaternion::Quaternion(const EulerAngles& angles)
 {
-    double cos_z_2 = std::cos(0.5 * rad(angles.alpha).get());
-    double cos_y_2 = std::cos(0.5 * rad(angles.beta).get());
-    double cos_x_2 = std::cos(0.5 * rad(angles.gamma).get());
+    double cos_z_2 = std::cos(0.5 * angles.alpha.get<rad>());
+    double cos_y_2 = std::cos(0.5 * angles.beta.get<rad>());
+    double cos_x_2 = std::cos(0.5 * angles.gamma.get<rad>());
 
-    double sin_z_2 = std::sin(0.5 * rad(angles.alpha).get());
-    double sin_y_2 = std::sin(0.5 * rad(angles.beta).get());
-    double sin_x_2 = std::sin(0.5 * rad(angles.gamma).get());
+    double sin_z_2 = std::sin(0.5 * angles.alpha.get<rad>());
+    double sin_y_2 = std::sin(0.5 * angles.beta.get<rad>());
+    double sin_x_2 = std::sin(0.5 * angles.gamma.get<rad>());
 
     // and now compute Quaternion
     s = cos_z_2 * cos_y_2 * cos_x_2 + sin_z_2 * sin_y_2 * sin_x_2;

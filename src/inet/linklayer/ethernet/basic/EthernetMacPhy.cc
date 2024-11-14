@@ -387,7 +387,7 @@ void EthernetMacPhy::scheduleEndIFGPeriod()
 {
     ASSERT(nullptr == currentTxFrame);
     changeTransmissionState(WAIT_IFG_STATE);
-    simtime_t endIFGTime = simTime() + (b(INTERFRAME_GAP_BITS).get() / curEtherDescr.bitrate);
+    simtime_t endIFGTime = simTime() + (INTERFRAME_GAP_BITS.get<b>() / curEtherDescr.bitrate);
     scheduleAt(endIFGTime, endIfgTimer);
 }
 

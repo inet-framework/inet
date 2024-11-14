@@ -17,7 +17,7 @@ void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     auto fieldsChunk = staticPtrCast<const FieldsChunk>(chunk);
     if (length == b(-1))
         length = fieldsChunk->getChunkLength() - offset;
-    if (b(offset).get() % 8 != 0 || b(length).get() % 8 != 0) {
+    if (offset.get<b>() % 8 != 0 || length.get<b>() % 8 != 0) {
         MemoryOutputStream chunkStream(fieldsChunk->getChunkLength());
         serialize(chunkStream, fieldsChunk);
         std::vector<bool> data;
@@ -26,7 +26,7 @@ void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
         ChunkSerializer::totalSerializedLength += chunkStream.getLength();
     }
     else if (fieldsChunk->getSerializedBytes() != nullptr) {
-        CHUNK_CHECK_USAGE(B(fieldsChunk->getSerializedBytes()->size()) == chunk->getChunkLength(), "serialized length is incorrect: serialized=%u, chunk=%" PRId64, (unsigned int)fieldsChunk->getSerializedBytes()->size(), B(chunk->getChunkLength()).get());
+        CHUNK_CHECK_USAGE(B(fieldsChunk->getSerializedBytes()->size()) == chunk->getChunkLength(), "serialized length is incorrect: serialized=%u, chunk=%" PRId64, (unsigned int)fieldsChunk->getSerializedBytes()->size(), chunk->getChunkLength().get<B>());
         stream.writeBytes(*fieldsChunk->getSerializedBytes(), offset, length);
     }
     else if (offset == b(0) && length == chunk->getChunkLength()) {
@@ -38,7 +38,7 @@ void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
         auto serializedBytes = new std::vector<uint8_t>();
         stream.copyData(*serializedBytes, startPosition, serializedLength);
         fieldsChunk->setSerializedBytes(serializedBytes);
-        CHUNK_CHECK_USAGE(B(serializedBytes->size()) == chunk->getChunkLength(), "serialized length is incorrect: serialized=%u, chunk=%" PRId64, (unsigned int)serializedBytes->size(), B(chunk->getChunkLength()).get());
+        CHUNK_CHECK_USAGE(B(serializedBytes->size()) == chunk->getChunkLength(), "serialized length is incorrect: serialized=%u, chunk=%" PRId64, (unsigned int)serializedBytes->size(), chunk->getChunkLength().get<B>());
     }
     else {
         MemoryOutputStream chunkStream(fieldsChunk->getChunkLength());
@@ -48,7 +48,7 @@ void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
         auto serializedBytes = new std::vector<uint8_t>();
         chunkStream.copyData(*serializedBytes);
         fieldsChunk->setSerializedBytes(serializedBytes);
-        CHUNK_CHECK_USAGE(B(serializedBytes->size()) == chunk->getChunkLength(), "serialized length is incorrect: serialized=%u, chunk=%" PRId64, (unsigned int)serializedBytes->size(), B(chunk->getChunkLength()).get());
+        CHUNK_CHECK_USAGE(B(serializedBytes->size()) == chunk->getChunkLength(), "serialized length is incorrect: serialized=%u, chunk=%" PRId64, (unsigned int)serializedBytes->size(), chunk->getChunkLength().get<B>());
     }
 }
 
@@ -63,7 +63,7 @@ const Ptr<Chunk> FieldsChunkSerializer::deserialize(MemoryInputStream& stream, c
     auto serializedBytes = new std::vector<uint8_t>();
     stream.copyData(*serializedBytes, startPosition, chunkLength);
     fieldsChunk->setSerializedBytes(serializedBytes);
-    CHUNK_CHECK_USAGE(B(serializedBytes->size()) == fieldsChunk->getChunkLength(), "serialized length is incorrect: serialized=%u, chunk=%" PRId64, (unsigned int)serializedBytes->size(), B(fieldsChunk->getChunkLength()).get());
+    CHUNK_CHECK_USAGE(B(serializedBytes->size()) == fieldsChunk->getChunkLength(), "serialized length is incorrect: serialized=%u, chunk=%" PRId64, (unsigned int)serializedBytes->size(), fieldsChunk->getChunkLength().get<B>());
     return fieldsChunk;
 }
 

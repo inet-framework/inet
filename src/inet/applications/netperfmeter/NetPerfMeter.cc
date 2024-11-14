@@ -1176,7 +1176,7 @@ void NetPerfMeter::receiveMessage(cMessage *msg)
 
         ReceiverStatistics *receiverStatistics = getReceiverStatistics(streamID);
         receiverStatistics->ReceivedMessages++;
-        receiverStatistics->ReceivedBytes += B(smsg->getChunkLength()).get();
+        receiverStatistics->ReceivedBytes += smsg->getChunkLength().get<B>();
         for (auto& region : smsg->getAllTags<CreationTimeTag>())
             receiverStatistics->ReceivedDelayHistogram.collect(simTime() - region.getTag()->getCreationTime());
     }

@@ -348,7 +348,7 @@ void Ospfv2PacketSerializer::deserializeSummaryLsa(MemoryInputStream& stream, co
         updatePacket->markIncorrect();
     summaryLsa.setRouteCost(stream.readUint24Be());
     int numTos = (B(summaryLsa.getHeader().getLsaLength()) -
-                  OSPFv2_LSA_HEADER_LENGTH - OSPFv2_NETWORKLSA_MASK_LENGTH - B(4)).get() / OSPFv2_TOS_LENGTH.get();
+                  OSPFv2_LSA_HEADER_LENGTH - OSPFv2_NETWORKLSA_MASK_LENGTH - B(4)).get<B>() / OSPFv2_TOS_LENGTH.get();
     if (numTos < 0)
         updatePacket->markIncorrect();
     else

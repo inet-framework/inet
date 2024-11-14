@@ -261,7 +261,7 @@ void Ipv4::handleIncomingDatagram(Packet *packet)
     if (packet->hasBitError()) {
         // probability of bit error in header = size of header / size of total message
         // (ignore bit error if in payload)
-        double relativeHeaderLength = B(ipv4Header->getHeaderLength()).get() / (double)B(ipv4Header->getChunkLength()).get();
+        double relativeHeaderLength = ipv4Header->getHeaderLength().get<B>() / (double)ipv4Header->getChunkLength().get<B>();
         if (dblrand() <= relativeHeaderLength) {
             EV_WARN << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
             sendIcmpError(packet, interfaceId, ICMP_PARAMETER_PROBLEM, 0);
@@ -942,8 +942,8 @@ void Ipv4::fragmentAndSend(Packet *packet)
     }
 
     // FIXME some IP options should not be copied into each fragment, check their COPY bit
-    int headerLength = B(ipv4Header->getHeaderLength()).get();
-    int payloadLength = B(packet->getDataLength()).get() - headerLength;
+    int headerLength = ipv4Header->getHeaderLength().get<B>();
+    int payloadLength = packet->getDataLength().get<B>() - headerLength;
     int fragmentLength = ((mtu - headerLength) / 8) * 8; // payload only (without header)
     int offsetBase = ipv4Header->getFragmentOffset();
     if (fragmentLength <= 0)

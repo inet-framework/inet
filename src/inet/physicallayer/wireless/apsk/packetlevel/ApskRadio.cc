@@ -60,7 +60,7 @@ b ApskRadio::computePaddingLength(b length, const ConvolutionalCode *forwardErro
 {
     int modulationCodeWordSize = modulation->getCodeWordSize();
     int encodedCodeWordSize = forwardErrorCorrection == nullptr ? modulationCodeWordSize : modulationCodeWordSize *forwardErrorCorrection->getCodeRatePuncturingK();
-    return b((encodedCodeWordSize - b(length).get() % encodedCodeWordSize) % encodedCodeWordSize);
+    return b((encodedCodeWordSize - length.get<b>() % encodedCodeWordSize) % encodedCodeWordSize);
 }
 
 const ApskModulationBase *ApskRadio::getModulation() const

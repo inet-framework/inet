@@ -75,7 +75,7 @@ void GaussMarkovMobility::setTargetPosition()
         + (1.0 - alpha) * angleMean
         + rad(sqrt(1.0 - alpha * alpha) * normal(0.0, 1.0) * angleStdDev);
 
-    Coord direction(cos(rad(angle).get()), sin(rad(angle).get()));
+    Coord direction(cos(angle.get<rad>()), sin(angle.get<rad>()));
     nextChange = simTime() + updateInterval;
     targetPosition = lastPosition + direction * (speed * updateInterval.dbl());
 

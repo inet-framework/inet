@@ -57,7 +57,7 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *prot
                 auto msduEndOffset = packet->getFrontOffset() + B(msduSubframeHeader->getLength());
                 packet->setBackOffset(msduEndOffset);
                 callback.dissectPacket(packet, computeLlcProtocol(packet));
-                paddingLength = 4 - B(msduSubframeHeader->getChunkLength() + B(msduSubframeHeader->getLength())).get() % 4;
+                paddingLength = 4 - (msduSubframeHeader->getChunkLength() + B(msduSubframeHeader->getLength())).get<B>() % 4;
                 packet->setBackOffset(originalTrailerPopOffset);
                 packet->setFrontOffset(msduEndOffset);
             }

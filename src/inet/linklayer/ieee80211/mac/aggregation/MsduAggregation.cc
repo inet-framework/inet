@@ -60,12 +60,12 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
         const auto& header = frame->popAtFront<Ieee80211DataHeader>();
         frame->popAtBack<Ieee80211MacTrailer>(B(4));
         auto msdu = frame->peekData();
-        msduSubframeHeader->setLength(B(msdu->getChunkLength()).get());
+        msduSubframeHeader->setLength(msdu->getChunkLength().get<B>());
         setSubframeAddress(msduSubframeHeader, header);
         aggregatedFrame->insertAtBack(msduSubframeHeader);
         aggregatedFrame->insertAtBack(msdu);
         aggregatedFrame->getRegionTags().copyTags(frame->getRegionTags(), frame->getFrontOffset(), aggregatedFrame->getBackOffset() - frame->getDataLength(), frame->getDataLength());
-        int paddingLength = 4 - B(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
+        int paddingLength = 4 - (msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get<B>() % 4;
         if (i + 1 != frames->size() && paddingLength != 4) {
             auto padding = makeShared<ByteCountChunk>(B(paddingLength));
             aggregatedFrame->insertAtBack(padding);

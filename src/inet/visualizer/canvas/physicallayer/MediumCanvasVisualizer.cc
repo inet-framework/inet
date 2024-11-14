@@ -274,21 +274,21 @@ void MediumCanvasVisualizer::refreshPowerDensityMapFigurePowerFunction(const Ptr
     Ptr<const math::IFunction<W, math::Domain<m, m, m, simsec>>> powerFunction;
     if (powerDensityMapBandwidth == Hz(0)) {
         powerFunction = nullptr;
-        figure->setMinValue(wpHz2dBmWpMHz(WpHz(signalMinPowerDensity).get()));
-        figure->setMaxValue(wpHz2dBmWpMHz(WpHz(signalMaxPowerDensity).get()));
+        figure->setMinValue(wpHz2dBmWpMHz(signalMinPowerDensity.get<WpHz>()));
+        figure->setMaxValue(wpHz2dBmWpMHz(signalMaxPowerDensity.get<WpHz>()));
     }
     else if (std::isinf(powerDensityMapBandwidth.get())) {
         powerFunction = integrate<WpHz, Domain<m, m, m, simsec, Hz>, 0b11110, W, Domain<m, m, m, simsec>>(powerDensityFunction);
-        figure->setMinValue(mW2dBmW(mW(signalMinPower).get()));
-        figure->setMaxValue(mW2dBmW(mW(signalMaxPower).get()));
+        figure->setMinValue(mW2dBmW(signalMinPower.get<mW>()));
+        figure->setMaxValue(mW2dBmW(signalMaxPower.get<mW>()));
         throw cRuntimeError("TODO");
     }
     else {
         // TODO
 //        auto bandpassFilterFunction = makeShared<Boxcar1DFunction<double, Hz>>(powerDensityMapCenterFrequency - powerDensityMapBandwidth / 2, powerDensityMapCenterFrequency + powerDensityMapBandwidth / 2, 1);
 //        powerFunction = integrate<WpHz, Domain<m, m, m, simsec, Hz>, 0b11110, W, Domain<m, m, m, simsec>>(powerDensityFunction->multiply(bandpassFilter));
-        figure->setMinValue(mW2dBmW(mW(signalMinPower).get()));
-        figure->setMaxValue(mW2dBmW(mW(signalMaxPower).get()));
+        figure->setMinValue(mW2dBmW(signalMinPower.get<mW>()));
+        figure->setMaxValue(mW2dBmW(signalMaxPower.get<mW>()));
         throw cRuntimeError("TODO");
     }
     auto size = maxPosition - minPosition;
@@ -303,11 +303,11 @@ void MediumCanvasVisualizer::refreshPowerDensityMapFigurePowerFunction(const Ptr
             for (int y = 0; y < pixmapSize.y; y++) {
                 if (powerFunction == nullptr) {
                     auto value = powerDensityFunction->getValue(Point<m, m, m, simsec, Hz>(m(minPosition.x + x * size.x / pixmapSize.x), m(minPosition.y + y * size.y / pixmapSize.y), m(0), simsec(simTime()), powerDensityMapCenterFrequency));
-                    figure->setValue(x, y, wpHz2dBmWpMHz(WpHz(value).get()), channel);
+                    figure->setValue(x, y, wpHz2dBmWpMHz(value.get<WpHz>()), channel);
                 }
                 else {
                     auto value = powerFunction->getValue(Point<m, m, m, simsec>(m(minPosition.x + x * size.x / pixmapSize.x), m(minPosition.y + y * size.y / pixmapSize.y), m(0), simsec(simTime())));
-                    figure->setValue(x, y, mW2dBmW(mW(value).get()), channel);
+                    figure->setValue(x, y, mW2dBmW(value.get<mW>()), channel);
                 }
             }
         }
@@ -322,24 +322,24 @@ void MediumCanvasVisualizer::refreshPowerDensityMapFigurePowerFunction(const Ptr
         approximatedMediumPowerFunction2->partition(i, [&] (const Interval<m, m, m, simsec, Hz>& j, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *partitonPowerFunction) {
             auto lower = j.getLower();
             auto upper = j.getUpper();
-            auto x1 = m(std::get<0>(lower)).get();
-            auto x2 = m(std::get<0>(upper)).get();
-            auto y1 = m(std::get<1>(lower)).get();
-            auto y2 = m(std::get<1>(upper)).get();
+            auto x1 = std::get<0>(lower).get<m>();
+            auto x2 = std::get<0>(upper).get<m>();
+            auto y1 = std::get<1>(lower).get<m>();
+            auto y2 = std::get<1>(upper).get<m>();
             if (auto cf = dynamic_cast<const ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction)) {
-                auto v = cf->getConstantValue() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(cf->getConstantValue()).get());
+                auto v = cf->getConstantValue() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(cf->getConstantValue().get<WpHz>());
                 figure->setConstantValue(x1, x2, y1, y2, v, channel);
             }
             else if (auto lf = dynamic_cast<const UnilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction)) {
-                auto vl = lf->getRLower() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(lf->getRLower()).get());
-                auto vu = lf->getRUpper() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(lf->getRUpper()).get());
+                auto vl = lf->getRLower() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(lf->getRLower().get<WpHz>());
+                auto vu = lf->getRUpper() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(lf->getRUpper().get<WpHz>());
                 figure->setLinearValue(x1, x2, y1, y2, vl, vu, lf->getDimension(), channel);
             }
             else if (auto bf = dynamic_cast<const BilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction)) {
-                auto v11 = bf->getRLowerLower() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(bf->getRLowerLower()).get());
-                auto v21 = bf->getRLowerUpper() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(bf->getRLowerUpper()).get());
-                auto v12 = bf->getRUpperLower() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(bf->getRUpperLower()).get());
-                auto v22 = bf->getRUpperUpper() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(bf->getRUpperUpper()).get());
+                auto v11 = bf->getRLowerLower() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(bf->getRLowerLower().get<WpHz>());
+                auto v21 = bf->getRLowerUpper() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(bf->getRLowerUpper().get<WpHz>());
+                auto v12 = bf->getRUpperLower() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(bf->getRUpperLower().get<WpHz>());
+                auto v22 = bf->getRUpperUpper() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(bf->getRUpperUpper().get<WpHz>());
                 figure->setBilinearValue(x1, x2, y1, y2, v11, v21, v12, v22, channel);
             }
             else
@@ -358,9 +358,9 @@ void MediumCanvasVisualizer::refreshPowerDensityMapFigurePowerFunction(const Ptr
         rasterizedFunction->partition(interval, [&] (const Interval<m, m>& i, const IFunction<WpHz, Domain<m, m>> *f) {
             if (auto cf = dynamic_cast<const ConstantFunction<WpHz, Domain<m, m>> *>(f)) {
                 auto center = (i.getLower() + i.getUpper()) / 2;
-                auto x = m(std::get<0>(center)).get();
-                auto y = m(std::get<1>(center)).get();
-                figure->setValue(x, y, wpHz2dBmWpMHz(WpHz(cf->getConstantValue()).get()), channel);
+                auto x = std::get<0>(center).get<m>();
+                auto y = std::get<1>(center).get<m>();
+                figure->setValue(x, y, wpHz2dBmWpMHz(cf->getConstantValue().get<WpHz>()), channel);
             }
             else
                 throw cRuntimeError("Invalid partition function");
@@ -412,8 +412,8 @@ void MediumCanvasVisualizer::refreshSpectrumFigure(const cModule *networkNode, P
         }
         else
             throw cRuntimeError("Unknown signalFigureMode");
-        double minValue = wpHz2dBmWpMHz(WpHz(signalMinPowerDensity).get());
-        double maxValue = wpHz2dBmWpMHz(WpHz(signalMaxPowerDensity).get());
+        double minValue = wpHz2dBmWpMHz(signalMinPowerDensity.get<WpHz>());
+        double maxValue = wpHz2dBmWpMHz(signalMaxPowerDensity.get<WpHz>());
         if (minValue < maxValue) {
             double margin = 0.05 * (maxValue - minValue);
             figure->setMinY(minValue - margin);
@@ -430,12 +430,12 @@ void MediumCanvasVisualizer::refreshSpectrumFigurePowerFunction(const Ptr<const 
     auto marginFrequency = 0.05 * (signalMaxFrequency - signalMinFrequency);
     auto minFrequency = signalMinFrequency - marginFrequency;
     auto maxFrequency = signalMaxFrequency + marginFrequency;
-    figure->setMinX(GHz(minFrequency).get());
-    figure->setMaxX(GHz(maxFrequency).get());
+    figure->setMinX(minFrequency.get<GHz>());
+    figure->setMaxX(maxFrequency.get<GHz>());
     Point<m, m, m, simsec, Hz> l(m(position.x), m(position.y), m(position.z), simsec(simTime()), minFrequency);
     Point<m, m, m, simsec, Hz> u(m(position.x), m(position.y), m(position.z), simsec(simTime()), maxFrequency);
     Interval<m, m, m, simsec, Hz> i(l, u, 0b11110, 0b11110, 0b11110);
-    auto dx = GHz(maxFrequency - minFrequency).get() * spectrumFigureInterpolationSize / spectrumFigureWidth;
+    auto dx = (maxFrequency - minFrequency).get<GHz>() * spectrumFigureInterpolationSize / spectrumFigureWidth;
     powerFunction->partition(i, [&] (const Interval<m, m, m, simsec, Hz>& j, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *partitonPowerFunction) {
         ASSERT((dynamic_cast<const ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction) != nullptr || dynamic_cast<const UnilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction) != nullptr));
         auto lower = j.getLower();
@@ -449,8 +449,8 @@ void MediumCanvasVisualizer::refreshSpectrumFigurePowerFunction(const Ptr<const 
         std::tie(power1, power2) = computePowerForPartitionBounds(powerFunction, lower, upper, partitonPowerFunction, antenna, position);
         // TODO the function f is assumed to be constant or linear between l1 and u1 but on a logarithmic axis the plot is non-linear
         // TODO the following interpolation should be part of the PlotFigure along with logarithmic axis support
-        auto x1 = GHz(std::get<4>(lower)).get();
-        auto x2 = GHz(std::get<4>(upper)).get();
+        auto x1 = std::get<4>(lower).get<GHz>();
+        auto x2 = std::get<4>(upper).get<GHz>();
         for (double x = x1; x < x2; x += dx) {
             double xi = x;
             double xj = std::min(x2, x + dx);
@@ -458,8 +458,8 @@ void MediumCanvasVisualizer::refreshSpectrumFigurePowerFunction(const Ptr<const 
             double aj = (xj - x1) / (x2 - x1);
             auto yi = power1 * (1 - ai) + power2 * ai;
             auto yj = power1 * (1 - aj) + power2 * aj;
-            figure->setValue(series, xi, wpHz2dBmWpMHz(WpHz(yi).get()));
-            figure->setValue(series, xj, wpHz2dBmWpMHz(WpHz(yj).get()));
+            figure->setValue(series, xi, wpHz2dBmWpMHz(yi.get<WpHz>()));
+            figure->setValue(series, xj, wpHz2dBmWpMHz(yj.get<WpHz>()));
         }
     });
 }
@@ -529,13 +529,13 @@ void MediumCanvasVisualizer::refreshSpectrogramFigure(const cModule *networkNode
         const IAntenna *antenna;
         IMobility *mobility;
         std::tie(transmissionInProgress, receptionInProgress, antenna, mobility) = extractSpectrumFigureParameters(networkNode);
-        double minValue = wpHz2dBmWpMHz(WpHz(signalMinPowerDensity).get());
-        double maxValue = wpHz2dBmWpMHz(WpHz(signalMaxPowerDensity).get());
+        double minValue = wpHz2dBmWpMHz(signalMinPowerDensity.get<WpHz>());
+        double maxValue = wpHz2dBmWpMHz(signalMaxPowerDensity.get<WpHz>());
         auto marginFrequency = 0.05 * (signalMaxFrequency - signalMinFrequency);
         auto minFrequency = signalMinFrequency - marginFrequency;
         auto maxFrequency = signalMaxFrequency + marginFrequency;
-        figure->setMinX(GHz(minFrequency).get());
-        figure->setMaxX(GHz(maxFrequency).get());
+        figure->setMinX(minFrequency.get<GHz>());
+        figure->setMaxX(maxFrequency.get<GHz>());
         SimTimeUnit signalTimeUnit;
         if (signalMaxTime < 1E-9) {
             signalTimeUnit = SIMTIME_PS;
@@ -620,7 +620,7 @@ void MediumCanvasVisualizer::refreshSpectrogramFigurePowerFunction(const Ptr<con
                 auto time = minTime + (maxTime - minTime) * y / pixmapSize.y;
                 Point<m, m, m, simsec, Hz> p(m(position.x), m(position.y), m(position.z), simsec(time), frequency);
                 auto value = powerFunction->getValue(p);
-                figure->setValue(x, y, wpHz2dBmWpMHz(WpHz(value).get()), channel);
+                figure->setValue(x, y, wpHz2dBmWpMHz(value.get<WpHz>()), channel);
             }
         }
     }
@@ -632,24 +632,24 @@ void MediumCanvasVisualizer::refreshSpectrogramFigurePowerFunction(const Ptr<con
         powerFunction->partition(i, [&] (const Interval<m, m, m, simsec, Hz>& j, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *partitonPowerFunction) {
             auto lower = j.getLower();
             auto upper = j.getUpper();
-            auto x1 = GHz(std::get<4>(lower)).get();
-            auto x2 = GHz(std::get<4>(upper)).get();
-            auto y1 = (simsec(std::get<3>(lower)).get() - simTime()).dbl() / std::pow(10.0, signalTimeUnit);
-            auto y2 = (simsec(std::get<3>(upper)).get() - simTime()).dbl() / std::pow(10.0, signalTimeUnit);
+            auto x1 = std::get<4>(lower).get<GHz>();
+            auto x2 = std::get<4>(upper).get<GHz>();
+            auto y1 = (std::get<3>(lower).get<simsec>() - simTime()).dbl() / std::pow(10.0, signalTimeUnit);
+            auto y2 = (std::get<3>(upper).get<simsec>() - simTime()).dbl() / std::pow(10.0, signalTimeUnit);
             if (auto cf = dynamic_cast<const ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction)) {
-                auto v = cf->getConstantValue() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(cf->getConstantValue()).get());
+                auto v = cf->getConstantValue() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(cf->getConstantValue().get<WpHz>());
                 figure->setConstantValue(x1, x2, y1, y2, v, channel);
             }
             else if (auto lf = dynamic_cast<const UnilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction)) {
-                auto vl = lf->getRLower() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(lf->getRLower()).get());
-                auto vu = lf->getRUpper() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(lf->getRUpper()).get());
+                auto vl = lf->getRLower() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(lf->getRLower().get<WpHz>());
+                auto vu = lf->getRUpper() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(lf->getRUpper().get<WpHz>());
                 figure->setLinearValue(x1, x2, y1, y2, vl, vu, 4 - lf->getDimension(), channel);
             }
             else if (auto bf = dynamic_cast<const BilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction)) {
-                auto v11 = bf->getRLowerLower() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(bf->getRLowerLower()).get());
-                auto v21 = bf->getRLowerUpper() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(bf->getRLowerUpper()).get());
-                auto v12 = bf->getRUpperLower() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(bf->getRUpperLower()).get());
-                auto v22 = bf->getRUpperUpper() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(bf->getRUpperUpper()).get());
+                auto v11 = bf->getRLowerLower() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(bf->getRLowerLower().get<WpHz>());
+                auto v21 = bf->getRLowerUpper() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(bf->getRLowerUpper().get<WpHz>());
+                auto v12 = bf->getRUpperLower() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(bf->getRUpperLower().get<WpHz>());
+                auto v22 = bf->getRUpperUpper() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(bf->getRUpperUpper().get<WpHz>());
                 figure->setBilinearValue(x1, x2, y1, y2, v11, v21, v12, v22, 2);
             }
             else
@@ -666,9 +666,9 @@ void MediumCanvasVisualizer::refreshSpectrogramFigurePowerFunction(const Ptr<con
         rasterizedFunction->partition(interval, [&] (const Interval<simsec, Hz>& i, const IFunction<WpHz, Domain<simsec, Hz>> *f) {
             if (auto cf = dynamic_cast<const ConstantFunction<WpHz, Domain<simsec, Hz>> *>(f)) {
                 auto center = (i.getLower() + i.getUpper()) / 2;
-                auto x = GHz(std::get<1>(center)).get();
-                auto y = (simsec(std::get<0>(center)).get() - simTime()).dbl() / std::pow(10.0, signalTimeUnit);
-                figure->setValue(x, y, wpHz2dBmWpMHz(WpHz(cf->getConstantValue()).get()), channel);
+                auto x = std::get<1>(center).get<GHz>();
+                auto y = (std::get<0>(center).get<simsec>() - simTime()).dbl() / std::pow(10.0, signalTimeUnit);
+                figure->setValue(x, y, wpHz2dBmWpMHz(cf->getConstantValue().get<WpHz>()), channel);
             }
             else
                 throw cRuntimeError("Invalid partition function");
@@ -1051,7 +1051,7 @@ void MediumCanvasVisualizer::handleSignalDepartureStarted(const ITransmission *t
             auto labelFigure = check_and_cast<LabeledIconFigure *>(figure)->getLabelFigure();
             if (auto scalarTransmission = dynamic_cast<const ScalarSignalAnalogModel *>(transmission->getAnalogModel())) {
                 char tmp[32];
-                sprintf(tmp, "%.4g dBW", fraction2dB(W(scalarTransmission->getPower()).get()));
+                sprintf(tmp, "%.4g dBW", fraction2dB(scalarTransmission->getPower().get<W>()));
                 labelFigure->setText(tmp);
             }
             else
@@ -1096,7 +1096,7 @@ void MediumCanvasVisualizer::handleSignalArrivalStarted(const IReception *recept
                 auto labelFigure = check_and_cast<LabeledIconFigure *>(figure)->getLabelFigure();
                 if (auto scalarReception = dynamic_cast<const ScalarReceptionAnalogModel *>(reception->getAnalogModel())) {
                     char tmp[32];
-                    sprintf(tmp, "%.4g dBW", fraction2dB(W(scalarReception->getPower()).get()));
+                    sprintf(tmp, "%.4g dBW", fraction2dB(scalarReception->getPower().get<W>()));
                     labelFigure->setText(tmp);
                 }
                 else

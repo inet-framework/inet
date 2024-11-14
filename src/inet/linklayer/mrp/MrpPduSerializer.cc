@@ -36,7 +36,7 @@ void MrpVersionFieldSerializer::serialize(MemoryOutputStream &stream, const Ptr<
 void MrpTlvSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chunk> &chunk) const
 {
     const auto &tlv = staticPtrCast<const MrpTlvHeader>(chunk);
-    size_t startPos = B(stream.getLength()).get();
+    size_t startPos = stream.getLength().get<B>();
     stream.writeUint8(tlv->getHeaderType());
     stream.writeUint8(tlv->getValueLength());
 
@@ -123,7 +123,7 @@ void MrpTlvSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chu
     }
 
     if (tlv->getHeaderType() != END) {
-        size_t length = B(stream.getLength()).get() - startPos;
+        size_t length = stream.getLength().get<B>() - startPos;
         size_t paddingLength = (4 - (length % 4)) % 4;
         stream.writeByteRepeatedly(0, paddingLength);
     }
@@ -163,7 +163,7 @@ const Ptr<Chunk> MrpVersionFieldSerializer::deserialize(MemoryInputStream &strea
 
 const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const
 {
-    size_t startPos = B(stream.getPosition()).get();
+    size_t startPos = stream.getPosition().get<B>();
     auto headerType = static_cast<TlvHeaderType>(stream.readUint8());
     uint8_t headerLength = stream.readUint8();
 
@@ -270,7 +270,7 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const
     }
 
     if (headerType != END) {
-        size_t length = B(stream.getPosition()).get() - startPos;
+        size_t length = stream.getPosition().get<B>() - startPos;
         size_t paddingLength = (4 - (length % 4)) % 4;
         stream.readByteRepeatedly(0, paddingLength);
     }

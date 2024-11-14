@@ -31,8 +31,8 @@ double ApskErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSignal::S
         return 1.0;
     else {
         auto apskTransmission = check_and_cast<const ApskTransmission *>(snir->getReception()->getTransmission());
-        double headerSuccessRate = pow(1.0 - bitErrorRate, b(apskTransmission->getHeaderLength()).get());
-        double dataSuccessRate = pow(1.0 - bitErrorRate, b(apskTransmission->getDataLength()).get());
+        double headerSuccessRate = pow(1.0 - bitErrorRate, apskTransmission->getHeaderLength().get<b>());
+        double dataSuccessRate = pow(1.0 - bitErrorRate, apskTransmission->getDataLength().get<b>());
         switch (part) {
             case IRadioSignal::SIGNAL_PART_WHOLE:
                 return 1.0 - headerSuccessRate * dataSuccessRate;

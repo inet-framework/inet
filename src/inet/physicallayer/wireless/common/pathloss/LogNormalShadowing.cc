@@ -50,7 +50,7 @@ double LogNormalShadowing::computePathLoss(mps propagationSpeed, Hz frequency, m
     double freeSpacePathLoss = computeFreeSpacePathLoss(propagationSpeed / frequency, d0, alpha, systemLoss);
     double PL_d0_db = 10.0 * log10(1 / freeSpacePathLoss);
     // path loss at distance d + normal distribution with sigma standard deviation
-    double PL_db = PL_d0_db + 10 * alpha * log10(unit(distance / d0).get()) + normal(0.0, sigma);
+    double PL_db = PL_d0_db + 10 * alpha * log10((distance / d0).get<unit>()) + normal(0.0, sigma);
     return math::dB2fraction(-PL_db);
 }
 

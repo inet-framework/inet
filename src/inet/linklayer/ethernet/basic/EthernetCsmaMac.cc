@@ -451,21 +451,21 @@ void EthernetCsmaMac::handleCanPullPacketChanged(const cGate *gate)
 void EthernetCsmaMac::scheduleTxTimer(Packet *packet)
 {
     EV_DEBUG << "Scheduling TX timer" << EV_FIELD(packet) << EV_ENDL;
-    simtime_t duration = b(packet->getDataLength() + ETHERNET_PHY_HEADER_LEN + phy->getEsdLength()).get() / mode.bitrate;
+    simtime_t duration = (packet->getDataLength() + ETHERNET_PHY_HEADER_LEN + phy->getEsdLength()).get<b>() / mode.bitrate;
     scheduleAfter(duration, txTimer);
 }
 
 void EthernetCsmaMac::scheduleIfgTimer()
 {
     EV_DEBUG << "Scheduling IFG timer" << EV_ENDL;
-    simtime_t duration = b(INTERFRAME_GAP_BITS).get() / mode.bitrate;
+    simtime_t duration = INTERFRAME_GAP_BITS.get<b>() / mode.bitrate;
     scheduleAfter(duration, ifgTimer);
 }
 
 void EthernetCsmaMac::scheduleJamTimer()
 {
     EV_DEBUG << "Scheduling jam timer" << EV_ENDL;
-    simtime_t duration = b(JAM_SIGNAL_BYTES).get() / mode.bitrate;
+    simtime_t duration = JAM_SIGNAL_BYTES.get<b>() / mode.bitrate;
     scheduleAfter(duration, jamTimer);
 }
 
@@ -500,7 +500,7 @@ void EthernetCsmaMac::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) co
             break;
         case FCS_COMPUTED: { // calculate FCS
             auto ethBytes = packet->peekDataAsBytes();
-            auto bufferLength = B(ethBytes->getChunkLength()).get();
+            auto bufferLength = ethBytes->getChunkLength().get<B>();
             auto buffer = new uint8_t[bufferLength];
             // 1. fill in the data
             ethBytes->copyToBuffer(buffer, bufferLength);

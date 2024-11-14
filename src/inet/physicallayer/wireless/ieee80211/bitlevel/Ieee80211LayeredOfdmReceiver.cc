@@ -305,7 +305,7 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createDataFieldBitModel(
 //        ASSERT(dataFieldLengthInBits % convolutionalCode->getCodeRatePuncturingK() == 0);
         unsigned int encodedDataFieldLengthInBits = dataFieldLengthInBits * codeRate;
         const BitVector *bits = bitModel->getAllBits();
-        unsigned int encodedSignalFieldLength = b(signalFieldBitModel->getHeaderLength()).get();
+        unsigned int encodedSignalFieldLength = signalFieldBitModel->getHeaderLength().get<b>();
         if (dataFieldLengthInBits + encodedSignalFieldLength > bits->getSize())
             throw cRuntimeError("The calculated data field length = %d is greater then the actual bitvector length = %d", dataFieldLengthInBits, bits->getSize());
         BitVector *dataBits = new BitVector();

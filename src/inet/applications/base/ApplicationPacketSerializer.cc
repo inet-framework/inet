@@ -18,11 +18,11 @@ void ApplicationPacketSerializer::serialize(MemoryOutputStream& stream, const Pt
 {
     auto startPosition = stream.getLength();
     const auto& applicationPacket = staticPtrCast<const ApplicationPacket>(chunk);
-    stream.writeUint32Be(B(applicationPacket->getChunkLength()).get());
+    stream.writeUint32Be(applicationPacket->getChunkLength().get<B>());
     stream.writeUint32Be(applicationPacket->getSequenceNumber());
-    int64_t remainders = B(applicationPacket->getChunkLength() - (stream.getLength() - startPosition)).get();
+    int64_t remainders = (applicationPacket->getChunkLength() - (stream.getLength() - startPosition)).get<B>();
     if (remainders < 0)
-        throw cRuntimeError("ApplicationPacket length = %d smaller than required %d bytes", (int)B(applicationPacket->getChunkLength()).get(), (int)B(stream.getLength() - startPosition).get());
+        throw cRuntimeError("ApplicationPacket length = %d smaller than required %d bytes", (int)applicationPacket->getChunkLength().get<B>(), (int)(stream.getLength() - startPosition).get<B>());
     stream.writeByteRepeatedly('?', remainders);
 }
 
@@ -34,7 +34,7 @@ const Ptr<Chunk> ApplicationPacketSerializer::deserialize(MemoryInputStream& str
     applicationPacket->setSequenceNumber(stream.readUint32Be());
     B remainders = dataLength - (stream.getPosition() - startPosition);
     ASSERT(remainders >= B(0));
-    stream.readByteRepeatedly('?', B(remainders).get());
+    stream.readByteRepeatedly('?', remainders.get<B>());
     return applicationPacket;
 }
 

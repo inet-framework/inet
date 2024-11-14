@@ -66,7 +66,7 @@ void TcpConnection::segmentArrivalWhileClosed(Packet *tcpSegment, const Ptr<cons
 
     if (!tcpHeader->getAckBit()) {
         EV_DETAIL << "ACK bit not set: sending RST+ACK\n";
-        uint32_t ackNo = tcpHeader->getSequenceNo() + tcpSegment->getByteLength() - B(tcpHeader->getHeaderLength()).get() + tcpHeader->getSynFinLen();
+        uint32_t ackNo = tcpHeader->getSequenceNo() + tcpSegment->getByteLength() - tcpHeader->getHeaderLength().get<B>() + tcpHeader->getSynFinLen();
         sendRstAck(0, ackNo, destAddr, srcAddr, tcpHeader->getDestPort(), tcpHeader->getSrcPort());
     }
     else {
@@ -84,7 +84,7 @@ TcpEventCode TcpConnection::process_RCV_SEGMENT(Packet *tcpSegment, const Ptr<co
     emit(rcvSeqSignal, tcpHeader->getSequenceNo());
     emit(rcvAckSignal, tcpHeader->getAckNo());
 
-    emit(tcpRcvPayloadBytesSignal, int(tcpSegment->getByteLength() - B(tcpHeader->getHeaderLength()).get()));
+    emit(tcpRcvPayloadBytesSignal, int(tcpSegment->getByteLength() - tcpHeader->getHeaderLength().get<B>()));
     //
     // Note: this code is organized exactly as RFC 793, section "3.9 Event
     // Processing", subsection "SEGMENT ARRIVES".
@@ -111,7 +111,7 @@ bool TcpConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *tcpSegment, c
     // TODO must rewrite it
 //    return (state->freeRcvBuffer >= tcpHeader->getPayloadLength()); // enough freeRcvBuffer in rcvQueue for new segment?
 
-    long int payloadLength = tcpSegment->getByteLength() - B(tcpHeader->getHeaderLength()).get();
+    long int payloadLength = tcpSegment->getByteLength() - tcpHeader->getHeaderLength().get<B>();
     uint32_t payloadSeq = tcpHeader->getSequenceNo();
     uint32_t firstSeq = receiveQueue->getFirstSeqNo();
     if (seqLess(payloadSeq, firstSeq)) {
@@ -153,7 +153,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
     if (acceptable)
         acceptable = isSegmentAcceptable(tcpSegment, tcpHeader);
 
-    int payloadLength = tcpSegment->getByteLength() - B(tcpHeader->getHeaderLength()).get();
+    int payloadLength = tcpSegment->getByteLength() - tcpHeader->getHeaderLength().get<B>();
 
     if (!acceptable) {
         //"
@@ -478,7 +478,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
 
         if (payloadLength > 0) {
             // check for full sized segment
-            if ((uint32_t)payloadLength == state->snd_mss || (uint32_t)payloadLength + B(tcpHeader->getHeaderLength() - TCP_MIN_HEADER_LENGTH).get() == state->snd_mss)
+            if ((uint32_t)payloadLength == state->snd_mss || (uint32_t)payloadLength + (tcpHeader->getHeaderLength() - TCP_MIN_HEADER_LENGTH).get<B>() == state->snd_mss)
                 state->full_sized_segment_counter++;
 
             // check for persist probe
@@ -1128,7 +1128,7 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
 {
     EV_DETAIL << "Processing ACK in a data transfer state\n";
 
-    int payloadLength = tcpSegment->getByteLength() - B(tcpHeader->getHeaderLength()).get();
+    int payloadLength = tcpSegment->getByteLength() - tcpHeader->getHeaderLength().get<B>();
 
     // ECN
     TcpStateVariables *state = getStateForUpdate();

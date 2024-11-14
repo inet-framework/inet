@@ -265,7 +265,7 @@ void SctpNatServer::handleMessage(cMessage *msg)
                 const auto& ind = tags.findTag<SctpRcvReq>();
                 id = ind->getSocketId();
                 const auto& smsg = message->peekDataAsBytes();
-                int bufferlen = B(smsg->getChunkLength()).get();
+                int bufferlen = smsg->getChunkLength().get<B>();
                 uint8_t *buffer = new uint8_t[bufferlen];
                 std::vector<uint8_t> vec = smsg->getBytes();
                 for (int i = 0; i < bufferlen; i++) {

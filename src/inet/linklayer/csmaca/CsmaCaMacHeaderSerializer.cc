@@ -28,7 +28,7 @@ void CsmaCaMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<
         stream.writeUint16Be(macHeader->getNetworkProtocol());
         stream.writeByte(macHeader->getPriority());
         if (macHeader->getChunkLength() > stream.getLength() - startPos)
-            stream.writeByteRepeatedly('?', B(macHeader->getChunkLength() - (stream.getLength() - startPos)).get());
+            stream.writeByteRepeatedly('?', (macHeader->getChunkLength() - (stream.getLength() - startPos)).get<B>());
     }
     else if (auto macHeader = dynamicPtrCast<const CsmaCaMacAckHeader>(chunk)) {
         stream.writeUint8(0x01);
@@ -37,7 +37,7 @@ void CsmaCaMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<
         stream.writeMacAddress(macHeader->getReceiverAddress());
         stream.writeMacAddress(macHeader->getTransmitterAddress());
         if (macHeader->getChunkLength() > stream.getLength() - startPos)
-            stream.writeByteRepeatedly('?', B(macHeader->getChunkLength() - (stream.getLength() - startPos)).get());
+            stream.writeByteRepeatedly('?', (macHeader->getChunkLength() - (stream.getLength() - startPos)).get<B>());
     }
     else
         throw cRuntimeError("CsmaCaMacSerializer: cannot serialize chunk");
@@ -58,7 +58,7 @@ const Ptr<Chunk> CsmaCaMacHeaderSerializer::deserialize(MemoryInputStream& strea
             macHeader->setNetworkProtocol(stream.readUint16Be());
             macHeader->setPriority(stream.readByte());
             if (B(length) > stream.getPosition() - startPos)
-                stream.readByteRepeatedly('?', length - B(stream.getPosition() - startPos).get());
+                stream.readByteRepeatedly('?', length - (stream.getPosition() - startPos).get<B>());
             return macHeader;
         }
         case CSMA_ACK: {
@@ -68,7 +68,7 @@ const Ptr<Chunk> CsmaCaMacHeaderSerializer::deserialize(MemoryInputStream& strea
             macHeader->setReceiverAddress(stream.readMacAddress());
             macHeader->setTransmitterAddress(stream.readMacAddress());
             if (B(length) > stream.getPosition() - startPos)
-                stream.readByteRepeatedly('?', length - B(stream.getPosition() - startPos).get());
+                stream.readByteRepeatedly('?', length - (stream.getPosition() - startPos).get<B>());
             return macHeader;
         }
         default:

@@ -19,8 +19,8 @@ void ApskPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
 {
     auto startPosition = stream.getLength();
     const auto& phyHeader = staticPtrCast<const ApskPhyHeader>(chunk);
-    stream.writeUint16Be(b(phyHeader->getHeaderLengthField()).get());
-    stream.writeUint16Be(b(phyHeader->getPayloadLengthField()).get());
+    stream.writeUint16Be(phyHeader->getHeaderLengthField().get<b>());
+    stream.writeUint16Be(phyHeader->getPayloadLengthField().get<b>());
     auto crcMode = phyHeader->getCrcMode();
     if (crcMode != CRC_DISABLED && crcMode != CRC_COMPUTED)
         throw cRuntimeError("Cannot serialize Apsk Phy header without turned off or properly computed CRC, try changing the value of crcMode parameter for Udp");
@@ -29,9 +29,9 @@ void ApskPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
 
     b remainders = phyHeader->getChunkLength() - (stream.getLength() - startPosition);
     if (remainders < b(0))
-        throw cRuntimeError("ApskPhyHeader length = %d smaller than required %d bytes", (int)B(phyHeader->getChunkLength()).get(), (int)B(stream.getLength() - startPosition).get());
+        throw cRuntimeError("ApskPhyHeader length = %d smaller than required %d bytes", (int)phyHeader->getChunkLength().get<B>(), (int)(stream.getLength() - startPosition).get<B>());
     uint8_t remainderbits = remainders.get() % 8;
-    stream.writeByteRepeatedly('?', B(remainders - b(remainderbits)).get());
+    stream.writeByteRepeatedly('?', (remainders - b(remainderbits)).get<B>());
     stream.writeBitRepeatedly(false, remainderbits);
 }
 
@@ -55,7 +55,7 @@ const Ptr<Chunk> ApskPhyHeaderSerializer::deserialize(MemoryInputStream& stream,
     }
     else {
         uint8_t remainderbits = remainders.get() % 8;
-        stream.readByteRepeatedly('?', B(remainders - b(remainderbits)).get());
+        stream.readByteRepeatedly('?', (remainders - b(remainderbits)).get<B>());
         stream.readBitRepeatedly(false, remainderbits);
     }
     phyHeader->setChunkLength(stream.getPosition() - startPosition);

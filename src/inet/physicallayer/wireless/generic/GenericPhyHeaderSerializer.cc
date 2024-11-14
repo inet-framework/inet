@@ -18,12 +18,12 @@ void GenericPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr
 {
     auto startPosition = stream.getLength();
     const auto& header = staticPtrCast<const GenericPhyHeader>(chunk);
-    stream.writeUint16Be(b(header->getChunkLength()).get());
+    stream.writeUint16Be(header->getChunkLength().get<b>());
     // TODO KLUDGE this makes the serialized form dependent on the protocol ID
     stream.writeUint16Be(header->getPayloadProtocol()->getId());
-    int64_t remainders = b(header->getChunkLength() - (stream.getLength() - startPosition)).get();
+    int64_t remainders = (header->getChunkLength() - (stream.getLength() - startPosition)).get<b>();
     if (remainders < 0)
-        throw cRuntimeError("GenericPhyHeader length = %d bits is smaller than required %d bits", (int)b(header->getChunkLength()).get(), (int)b(stream.getLength() - startPosition).get());
+        throw cRuntimeError("GenericPhyHeader length = %d bits is smaller than required %d bits", (int)header->getChunkLength().get<b>(), (int)(stream.getLength() - startPosition).get<b>());
     stream.writeBitRepeatedly(false, remainders);
 }
 
@@ -37,7 +37,7 @@ const Ptr<Chunk> GenericPhyHeaderSerializer::deserialize(MemoryInputStream& stre
     header->setPayloadProtocol(Protocol::findProtocol(stream.readUint16Be()));
     b remainders = dataLength - (stream.getPosition() - startPosition);
     ASSERT(remainders >= b(0));
-    stream.readBitRepeatedly(false, b(remainders).get());
+    stream.readBitRepeatedly(false, remainders.get<b>());
     return header;
 }
 

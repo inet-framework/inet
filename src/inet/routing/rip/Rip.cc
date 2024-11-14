@@ -537,7 +537,7 @@ void Rip::sendRoutes(const L3Address& address, int port, const RipNetworkInterfa
 
     EV_DEBUG << "Sending " << (changedOnly ? "changed" : "all") << " routes on " << ripInterface.ie->getFullName() << std::endl;
 
-    int maxEntries = mode == RIPv2 ? 25 : B(B(ripInterface.ie->getMtu()) - IPv6_HEADER_BYTES - UDP_HEADER_LENGTH - RIP_HEADER_SIZE).get() / RIP_RTE_SIZE.get();
+    int maxEntries = mode == RIPv2 ? 25 : (B(ripInterface.ie->getMtu()) - IPv6_HEADER_BYTES - UDP_HEADER_LENGTH - RIP_HEADER_SIZE).get<B>() / RIP_RTE_SIZE.get();
 
     Packet *pk = new Packet("RIP response");
     auto packet = makeShared<RipPacket>();

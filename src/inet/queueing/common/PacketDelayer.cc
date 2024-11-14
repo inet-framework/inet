@@ -23,7 +23,7 @@ void PacketDelayer::initialize(int stage)
 
 clocktime_t PacketDelayer::computeDelay(Packet *packet) const
 {
-    return delayParameter->doubleValue() + s(packet->getDataLength() / bps(bitrateParameter->doubleValue())).get();
+    return delayParameter->doubleValue() + (packet->getDataLength() / bps(bitrateParameter->doubleValue())).get<s>();
 }
 
 } // namespace queueing

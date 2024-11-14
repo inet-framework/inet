@@ -39,14 +39,14 @@ const ITransmissionBitModel *Ieee80211OfdmEncoder::encode(const ITransmissionPac
     auto packet = packetModel->getPacket();
     auto length = packet->getDataLength();
     BitVector *encodedBits;
-    if (b(length).get() % 8 == 0) {
+    if (length.get<b>() % 8 == 0) {
         auto bytes = packet->peekAllAsBytes()->getBytes();
         encodedBits = new BitVector(bytes);
     }
     else {
         encodedBits = new BitVector();
         const auto& bitsChunk = packet->peekAllAsBits();
-        for (int i = 0; i < b(length).get(); i++)
+        for (int i = 0; i < length.get<b>(); i++)
             encodedBits->appendBit(bitsChunk->getBit(i));
     }
     const IScrambling *scrambling = nullptr;

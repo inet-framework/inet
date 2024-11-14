@@ -97,7 +97,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             }
 
             case INIT: {
-                EV_INFO << "serialize INIT size=" << (unsigned long)B(msg->getChunkLength()).get() << "\n";
+                EV_INFO << "serialize INIT size=" << (unsigned long)msg->getChunkLength().get<B>() << "\n";
 
                 // source data from internal struct:
                 SctpInitChunk *initChunk = check_and_cast<SctpInitChunk *>(chunk);
@@ -1078,7 +1078,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                 drop->trunc_length = htons(packetdrop->getTruncLength());
                 drop->reserved = 0;
                 SctpHeader *msg = check_and_cast<SctpHeader *>(packetdrop->getEncapsulatedPacket());
-                int msglen = B(msg->getChunkLength()).get();
+                int msglen = msg->getChunkLength().get<B>();
                 drop->length = htons(SCTP_PKTDROP_CHUNK_LENGTH + msglen);
 //                int len = serialize(msg, drop->dropped_data, msglen);
                 writtenbytes += (packetdrop->getByteLength());
@@ -1102,9 +1102,9 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     // finally, set the CRC32 checksum field in the Sctp common header
     ch->checksum = SctpChecksum::checksum((unsigned char *)buffer, writtenbytes);
     // check the serialized packet length
-    if (writtenbytes != B(msg->getChunkLength()).get()) {
+    if (writtenbytes != msg->getChunkLength().get<B>()) {
         throw cRuntimeError("Sctp Serializer error: writtenbytes (%lu) != msgLength(%lu) in message (%s)%s",
-                (unsigned long)writtenbytes, (unsigned long)B(msg->getChunkLength()).get(), msg->getClassName(), msg->getFullName());
+                (unsigned long)writtenbytes, (unsigned long)msg->getChunkLength().get<B>(), msg->getClassName(), msg->getFullName());
     }
     stream.writeBytes((uint8_t *)&buffer, B(writtenbytes));
 }
@@ -1123,7 +1123,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
     int32_t parptr, chunklen, cLen, woPadding;
 
 //    auto position = stream.getPosition();
-    int bufsize = B(stream.getRemainingLength()).get();
+    int bufsize = stream.getRemainingLength().get<B>();
     uint8_t *buffer = new uint8_t[bufsize];
     stream.readBytes(buffer, B(bufsize));
     auto dest = makeShared<SctpHeader>();
@@ -2147,7 +2147,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
         } // end of switch(chunkType)
         chunkPtr += cLen;
     } // end of while()
-    EV_INFO << "SctpSerializer - pkt info - " << B(dest->getChunkLength()).get() << " bytes" << endl;
+    EV_INFO << "SctpSerializer - pkt info - " << dest->getChunkLength().get<B>() << " bytes" << endl;
     delete [] buffer;
     return dest;
 }
