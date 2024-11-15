@@ -148,7 +148,7 @@ to plot its last recorded value at the end of the simulation:
 We plotted the energy consumption (-1 \* ``residualEnergyCapacity``) of
 all nodes on the following bar chart (values in Joules):
 
-.. figure:: media/powerconsumption2.png
+.. figure:: media/powerconsumption.png
 
 The sensors consumed a bit more power than the lamps, and the controller
 consumed the most energy. Nodes in the same role (i.e. lamps, sensors)

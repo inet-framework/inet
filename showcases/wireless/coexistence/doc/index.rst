@@ -183,8 +183,8 @@ with a power of -110 dBm. Here is the radio medium configuration in
    :end-at: radioMedium.backgroundNoise.power
    :language: ini
 
-The Wifi hosts are configured to have :ned:`Ieee80211DimensionalRadio`.
-The default ``timeGains`` parameter is not changed in the transmitter,
+The radios of Wifi hosts are configured to use the dimensional analog model.
+The default :par:`timeGains` parameter is not changed in the transmitter,
 so the radio uses a flat signal in time. In frequency, instead of the
 default flat signal, we configure a more realistic shape.
 We'll use the 802.11 OFDM spectral mask, as in the standard:
@@ -204,7 +204,7 @@ Briefly about the syntax:
 
 - The parameter uses frequency and gain pairs to define points on the frequency/gain graph. ``c`` is the center frequency and ``b`` is the bandwidth. These values are properties of the transmission, i.e. the receiver listens on the frequency band defined by the center frequency and bandwidth. However, the signal can have radio energy outside of this range, which can cause interference.
 - Between these points, the interpolation mode can be specified, e.g. ``left`` (take value of the left point), ``greater`` (take the greater of the two points), ``linear``, etc.
-- The ``-inf Hz/-inf dB`` and the ``+inf Hz/+inf dB`` points are implicit (hence the ``frequencyGains`` string starts with an interpolation mode).
+- The ``-inf Hz/-inf dB`` and the ``+inf Hz/-inf dB`` points are implicit (hence the ``frequencyGains`` string starts with an interpolation mode).
 
 For more on the syntax, see :ned:`DimensionalTransmitterBase`.
 
@@ -238,20 +238,20 @@ don't overlap significantly in the time-frequency space. That is, the WPAN frame
 spectrum is much smaller than the Wifi's; similarly, the Wifi frame is much shorter
 than the WPAN.
 
-The Wifi channel is set to Channel 9 (center frequency of 2452MHz) to ensure that
+The analog model is configured to be dimensional, and the Wifi channel is set to Channel 9 (center frequency of 2452MHz) to ensure that
 the Wifi transmissions overlap with the 802.15.4 transmissions in frequency.
 Here is the configuration for the Wifi host radios in
 :download:`omnetpp.ini <../omnetpp.ini>`:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: Ieee80211DimensionalRadio
+   :start-at: signalAnalogRepresentation
    :end-at: channelNumber
    :language: ini
 
 .. note:: The channel number is set to 8 because in INET's 802.11 model, the channels are numbered from 0, so that this setting corresponds to Wifi Channel 9.
 
 The WPAN hosts are configured to have an :ned:`Ieee802154NarrowbandInterface`,
-with a :ned:`Ieee802154NarrowbandDimensionalRadio`. As in the case of the Wifi hosts,
+with a :ned:`Ieee802154NarrowbandRadio`. As in the case of the Wifi hosts,
 the default flat signal shape is used in time. In frequency, we'll use a more
 realistic shape, based on the modulated spectrum of the CC2420 Zigbee transmitter:
 
@@ -268,6 +268,7 @@ parameter value specifying this spectrum:
    :language: ini
 
 The default carrier frequency (2450 MHz) and bandwidth (2.8 MHz) is not changed.
+The analog model is configured to be dimensional.
 Here is the configuration for the WPAN host radios in
 :download:`omnetpp.ini <../omnetpp.ini>`:
 
