@@ -5,7 +5,7 @@
         <input pattern="results/Ieee802154Power-#0.sca"/>
     </inputs>
     <charts>
-        <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/barchart.png" id="81594067" name="Power consumption" resultTypes="scalar" template="barchart_mpl" type="MATPLOTLIB">
+        <chart createdWith="OMNeT++ 6.1.0.241008-f7568267cd" icon="icons/full/obj/barchart.png" id="1366488475" name="Power consumption" resultTypes="scalar" template="barchart_mpl" type="MATPLOTLIB">
             <script><![CDATA[from omnetpp.scave import results, chart, utils
 
 # get chart properties
@@ -702,7 +702,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="image_export_width" value="12"/>
-            <property name="matplotlibrc" value=""/>
+            <property name="matplotlibrc" value="savefig.transparent : True"/>
         </chart>
     </charts>
 </analysis>
