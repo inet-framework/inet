@@ -151,8 +151,8 @@ const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const I
 
     snirFunction->partition(interval, [&] (const math::Interval<simsec, Hz>& i1, const math::IFunction<double, math::Domain<simsec, Hz>> *f1) {
 
-        auto intervalStartTime = std::get<0>(i1.getLower()).get();
-        auto intervalEndTime = std::get<0>(i1.getUpper()).get();
+        auto intervalStartTime = std::get<0>(i1.getLower()).get<simsec>();
+        auto intervalEndTime = std::get<0>(i1.getUpper()).get<simsec>();
         // sum SNIR
 
         int startTimeSlot = (int)std::floor((intervalStartTime - reception->getHeaderStartTime()) / SimTime(4, SIMTIME_US));

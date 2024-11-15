@@ -24,7 +24,7 @@ class INET_API Ieee80211OfdmTimingRelatedParametersBase
     Ieee80211OfdmTimingRelatedParametersBase(Hz channelSpacing) : channelSpacing(channelSpacing) {}
 
     Hz getSubcarrierFrequencySpacing() const { return channelSpacing / 64; }
-    const simtime_t getFFTTransformPeriod() const { return simtime_t(1 / getSubcarrierFrequencySpacing().get()); }
+    const simtime_t getFFTTransformPeriod() const { return simtime_t(1 / getSubcarrierFrequencySpacing().get<Hz>()); }
     const simtime_t getGIDuration() const { return getFFTTransformPeriod() / 4; }
     const simtime_t getSymbolInterval() const { return getGIDuration() + getFFTTransformPeriod(); }
 

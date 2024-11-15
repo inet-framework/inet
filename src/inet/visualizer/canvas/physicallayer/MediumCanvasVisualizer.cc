@@ -443,7 +443,7 @@ void MediumCanvasVisualizer::refreshSpectrumFigurePowerFunction(const Ptr<const 
         // NOTE: the interval is closed at the lower boundary and open at the upper boundary
         // we want to have the limit of the function's value at the upper boundary from the left
         if (std::get<4>(upper) != std::get<4>(lower))
-            std::get<4>(upper) = Hz(std::nextafter(std::get<4>(upper).get(), std::get<4>(lower).get()));
+            std::get<4>(upper) = Hz(std::nextafter(std::get<4>(upper).get<Hz>(), std::get<4>(lower).get<Hz>()));
         WpHz power1;
         WpHz power2;
         std::tie(power1, power2) = computePowerForPartitionBounds(powerFunction, lower, upper, partitonPowerFunction, antenna, position);
@@ -497,9 +497,9 @@ std::pair<WpHz, WpHz> MediumCanvasVisualizer::computePowerForDirectionalAntenna(
     if (auto rf = dynamicPtrCast<const MultipliedFunction<WpHz, Domain<m, m, m, simsec, Hz>>>(powerFunction)) {
         if (auto tf = dynamicPtrCast<const PropagatedTransmissionPowerFunction>(rf->getF1())) {
             const Point<m, m, m>& startPosition = tf->getStartPosition();
-            double dx = std::get<0>(startPosition).get() - position.x;
-            double dy = std::get<1>(startPosition).get() - position.y;
-            double dz = std::get<2>(startPosition).get() - position.z;
+            double dx = std::get<0>(startPosition).get<m>() - position.x;
+            double dy = std::get<1>(startPosition).get<m>() - position.y;
+            double dz = std::get<2>(startPosition).get<m>() - position.z;
             double gain = 1;
             if (dx != 0 || dy != 0 || dz != 0) {
                 const Quaternion& startOrientation = antenna->getMobility()->getCurrentAngularPosition();
@@ -862,8 +862,8 @@ void MediumCanvasVisualizer::refreshSignalFigure(const ITransmission *transmissi
 {
     const IPropagation *propagation = radioMedium->getPropagation();
     cFigure *groupFigure = getSignalFigure(transmission);
-    double startRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
-    double endRadius = std::max(0.0, propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl());
+    double startRadius = propagation->getPropagationSpeed().get<mps>() * (simTime() - transmission->getStartTime()).dbl();
+    double endRadius = std::max(0.0, propagation->getPropagationSpeed().get<mps>() * (simTime() - transmission->getEndTime()).dbl());
     if (groupFigure) {
         SignalFigure *signalFigure = static_cast<SignalFigure *>(groupFigure->getFigure(0));
         cLabelFigure *labelFigure = static_cast<cLabelFigure *>(groupFigure->getFigure(1));

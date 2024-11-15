@@ -749,7 +749,7 @@ void Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
     ap->beaconInterval = body->getBeaconInterval();
     auto signalPowerInd = packet->getTag<SignalPowerInd>();
     if (signalPowerInd != nullptr) {
-        ap->rxPower = signalPowerInd->getPower().get();
+        ap->rxPower = signalPowerInd->getPower().get<W>();
         if (ap->address == assocAP.address)
             assocAP.rxPower = ap->rxPower;
     }

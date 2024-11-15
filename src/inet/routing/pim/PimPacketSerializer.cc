@@ -235,7 +235,7 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
             pimHello->setCrcMode(pimPacket->getCrcMode());
             PimHelloOptionType type;
             size_t i = 0;
-            while (stream.getRemainingLength().get() > 0) {
+            while (stream.getRemainingLength().get<b>() > 0) {
                 type = static_cast<PimHelloOptionType>(stream.readUint16Be());
                 switch (type) {
                     case Holdtime: {

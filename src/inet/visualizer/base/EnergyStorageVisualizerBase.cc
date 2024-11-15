@@ -64,9 +64,9 @@ void EnergyStorageVisualizerBase::refreshDisplay() const
 double EnergyStorageVisualizerBase::getNominalCapacity(const IEnergyStorage *energyStorage) const
 {
     if (auto epEnergyStorage = dynamic_cast<const IEpEnergyStorage *>(energyStorage))
-        return epEnergyStorage->getNominalEnergyCapacity().get();
+        return epEnergyStorage->getNominalEnergyCapacity().get<J>();
     else if (auto ccEnergyStorage = dynamic_cast<const ICcEnergyStorage *>(energyStorage))
-        return ccEnergyStorage->getNominalChargeCapacity().get();
+        return ccEnergyStorage->getNominalChargeCapacity().get<C>();
     else
         throw cRuntimeError("Unknown energy storage");
 }
@@ -74,9 +74,9 @@ double EnergyStorageVisualizerBase::getNominalCapacity(const IEnergyStorage *ene
 double EnergyStorageVisualizerBase::getResidualCapacity(const IEnergyStorage *energyStorage) const
 {
     if (auto epEnergyStorage = dynamic_cast<const IEpEnergyStorage *>(energyStorage))
-        return epEnergyStorage->getResidualEnergyCapacity().get();
+        return epEnergyStorage->getResidualEnergyCapacity().get<J>();
     else if (auto ccEnergyStorage = dynamic_cast<const ICcEnergyStorage *>(energyStorage))
-        return ccEnergyStorage->getResidualChargeCapacity().get();
+        return ccEnergyStorage->getResidualChargeCapacity().get<C>();
     else
         throw cRuntimeError("Unknown energy storage");
 }

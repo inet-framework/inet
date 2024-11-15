@@ -25,7 +25,7 @@ void GaussMarkovMobility::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         speedMean = par("speed");
         speedStdDev = par("speedStdDev");
-        angleMean = deg(fmod(deg(par("angle")).get(), 360.0));
+        angleMean = deg(fmod(deg(par("angle")).get<deg>(), 360.0));
         angleStdDev = deg(par("angleStdDev"));
         alpha = par("alpha");
         if (alpha < 0.0 || alpha > 1.0)

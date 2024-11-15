@@ -204,7 +204,7 @@ void Ieee80211Mac::handleUpperCommand(cMessage *msg)
             Ieee80211ConfigureRadioCommand *newConfigureCommand = check_and_cast<Ieee80211ConfigureRadioCommand *>(msg->getControlInfo());
             if (newConfigureCommand->getChannelNumber() == -1 && oldConfigureCommand->getChannelNumber() != -1)
                 newConfigureCommand->setChannelNumber(oldConfigureCommand->getChannelNumber());
-            if (std::isnan(newConfigureCommand->getBitrate().get()) && !std::isnan(oldConfigureCommand->getBitrate().get()))
+            if (std::isnan(newConfigureCommand->getBitrate().get<bps>()) && !std::isnan(oldConfigureCommand->getBitrate().get<bps>()))
                 newConfigureCommand->setBitrate(oldConfigureCommand->getBitrate());
             delete pendingRadioConfigMsg;
             pendingRadioConfigMsg = nullptr;

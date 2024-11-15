@@ -17,7 +17,7 @@ namespace rtp {
 void RtcpPacket::paddingAndSetLength()
 {
     handleChange();
-    int64_t chunkBits = getChunkLength().get();
+    int64_t chunkBits = getChunkLength().get<b>();
     rtcpLength = (chunkBits + 31) / 32 - 1;
     setChunkLength(b((rtcpLength + 1) * 32));
 }

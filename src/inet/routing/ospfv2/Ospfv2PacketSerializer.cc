@@ -102,7 +102,7 @@ const Ptr<Chunk> Ospfv2PacketSerializer::deserialize(MemoryInputStream& stream) 
             helloPacket->setRouterDeadInterval(stream.readUint32Be());
             helloPacket->setDesignatedRouter(stream.readIpv4Address());
             helloPacket->setBackupDesignatedRouter(stream.readIpv4Address());
-            int numNeighbors = (B(packetLength) - OSPFv2_HEADER_LENGTH - OSPFv2_HELLO_HEADER_LENGTH).get() / 4;
+            int numNeighbors = (B(packetLength) - OSPFv2_HEADER_LENGTH - OSPFv2_HELLO_HEADER_LENGTH).get<B>() / 4;
             if (numNeighbors < 0)
                 helloPacket->markIncorrect();
             helloPacket->setNeighborArraySize(numNeighbors);
@@ -122,7 +122,7 @@ const Ptr<Chunk> Ospfv2PacketSerializer::deserialize(MemoryInputStream& stream) 
             ddOptions.M_More = stream.readBit();
             ddOptions.MS_MasterSlave = stream.readBit();
             ddPacket->setDdSequenceNumber(stream.readUint32Be());
-            int numLsaHeaders = ((B(packetLength) - OSPFv2_HEADER_LENGTH - OSPFv2_DD_HEADER_LENGTH) / OSPFv2_LSA_HEADER_LENGTH).get();
+            int numLsaHeaders = ((B(packetLength) - OSPFv2_HEADER_LENGTH - OSPFv2_DD_HEADER_LENGTH) / OSPFv2_LSA_HEADER_LENGTH).get<unit>();
             if (numLsaHeaders < 0)
                 ddPacket->markIncorrect();
             ddPacket->setLsaHeadersArraySize(numLsaHeaders);
@@ -136,7 +136,7 @@ const Ptr<Chunk> Ospfv2PacketSerializer::deserialize(MemoryInputStream& stream) 
         case LINKSTATE_REQUEST_PACKET: {
             auto requestPacket = makeShared<Ospfv2LinkStateRequestPacket>();
             copyHeaderFields(ospfPacket, requestPacket);
-            int numReq = (B(packetLength) - OSPFv2_HEADER_LENGTH).get() / OSPFv2_REQUEST_LENGTH.get();
+            int numReq = (B(packetLength) - OSPFv2_HEADER_LENGTH).get<B>() / OSPFv2_REQUEST_LENGTH.get<B>();
             if (numReq < 0)
                 requestPacket->markIncorrect();
             requestPacket->setRequestsArraySize(numReq);
@@ -162,7 +162,7 @@ const Ptr<Chunk> Ospfv2PacketSerializer::deserialize(MemoryInputStream& stream) 
         case LINKSTATE_ACKNOWLEDGEMENT_PACKET: {
             auto ackPacket = makeShared<Ospfv2LinkStateAcknowledgementPacket>();
             copyHeaderFields(ospfPacket, ackPacket);
-            int numHeaders = (B(packetLength) - OSPFv2_HEADER_LENGTH).get() / OSPFv2_LSA_HEADER_LENGTH.get();
+            int numHeaders = (B(packetLength) - OSPFv2_HEADER_LENGTH).get<B>() / OSPFv2_LSA_HEADER_LENGTH.get<B>();
             if (numHeaders < 0)
                 ackPacket->markIncorrect();
             ackPacket->setLsaHeadersArraySize(numHeaders);
@@ -319,7 +319,7 @@ void Ospfv2PacketSerializer::deserializeNetworkLsa(MemoryInputStream& stream, co
 {
     networkLsa.setNetworkMask(stream.readIpv4Address());
     int numAttachedRouters = (B(networkLsa.getHeader().getLsaLength()) -
-                              OSPFv2_LSA_HEADER_LENGTH - OSPFv2_NETWORKLSA_MASK_LENGTH).get() / OSPFv2_NETWORKLSA_ADDRESS_LENGTH.get();
+                              OSPFv2_LSA_HEADER_LENGTH - OSPFv2_NETWORKLSA_MASK_LENGTH).get<B>() / OSPFv2_NETWORKLSA_ADDRESS_LENGTH.get<B>();
     if (numAttachedRouters < 0)
         updatePacket->markIncorrect();
     else
@@ -382,7 +382,7 @@ void Ospfv2PacketSerializer::deserializeAsExternalLsa(MemoryInputStream& stream,
     contents.setNetworkMask(stream.readIpv4Address());
 
     int numExternalTos = (B(asExternalLsa.getHeader().getLsaLength()) -
-                          OSPFv2_LSA_HEADER_LENGTH - OSPFv2_ASEXTERNALLSA_HEADER_LENGTH).get() / OSPFv2_ASEXTERNALLSA_TOS_INFO_LENGTH.get();
+                          OSPFv2_LSA_HEADER_LENGTH - OSPFv2_ASEXTERNALLSA_HEADER_LENGTH).get<B>() / OSPFv2_ASEXTERNALLSA_TOS_INFO_LENGTH.get<B>();
     if (numExternalTos < 0)
         updatePacket->markIncorrect();
     else

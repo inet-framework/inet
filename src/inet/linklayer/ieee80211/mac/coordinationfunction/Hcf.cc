@@ -660,7 +660,7 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         }
         auto mode = rateSelection->computeMode(packet, header, txop);
         setFrameMode(packet, header, mode);
-        emit(IRateSelection::datarateSelectedSignal, mode->getDataMode()->getNetBitrate().get(), packet);
+        emit(IRateSelection::datarateSelectedSignal, mode->getDataMode()->getNetBitrate().get<bps>(), packet);
         EV_DEBUG << "Datarate for " << packet->getName() << " is set to " << mode->getDataMode()->getNetBitrate() << ".\n";
         if (txop->getProtectionMechanism() == TxopProcedure::ProtectionMechanism::SINGLE_PROTECTION) {
             auto pendingPacket = channelOwner->getInProgressFrames()->getPendingFrameFor(packet);
@@ -695,7 +695,7 @@ void Hcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     else
         throw cRuntimeError("Unknown received frame type");
     setFrameMode(responsePacket, responseHeader, responseMode);
-    emit(IRateSelection::datarateSelectedSignal, responseMode->getDataMode()->getNetBitrate().get(), responsePacket);
+    emit(IRateSelection::datarateSelectedSignal, responseMode->getDataMode()->getNetBitrate().get<bps>(), responsePacket);
     EV_DEBUG << "Datarate for " << responsePacket->getName() << " is set to " << responseMode->getDataMode()->getNetBitrate() << ".\n";
     tx->transmitFrame(responsePacket, responseHeader, modeSet->getSifsTime(), this);
     delete responsePacket;

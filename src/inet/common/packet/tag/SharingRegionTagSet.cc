@@ -43,8 +43,8 @@ void SharingRegionTagSet::parsimPack(cCommBuffer *buffer) const
     buffer->pack(getNumTags());
     if (regionTags != nullptr) {
         for (auto regionTag : *regionTags) {
-            buffer->pack(regionTag.getOffset().get());
-            buffer->pack(regionTag.getLength().get());
+            buffer->pack(regionTag.getOffset().get<b>());
+            buffer->pack(regionTag.getLength().get<b>());
             buffer->packObject(const_cast<TagBase *>(regionTag.getTag().get()));
         }
     }

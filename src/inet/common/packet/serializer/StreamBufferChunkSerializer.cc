@@ -17,7 +17,7 @@ Register_Serializer(StreamBufferChunk, StreamBufferChunkSerializer);
 void StreamBufferChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
 {
     const auto& streamBufferChunk = staticPtrCast<const StreamBufferChunk>(chunk);
-    b currentStreamPosition = b((simTime() - streamBufferChunk->getStartTime()).dbl() * streamBufferChunk->getDatarate().get());
+    b currentStreamPosition = b((simTime() - streamBufferChunk->getStartTime()).dbl() * streamBufferChunk->getDatarate().get<bps>());
     if (length == b(-1))
         length = streamBufferChunk->getChunkLength() - offset;
     b copyLength = std::max(b(0), std::min(length, currentStreamPosition - offset));
