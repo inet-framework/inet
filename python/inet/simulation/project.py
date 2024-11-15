@@ -264,7 +264,8 @@ class SimulationProject:
         return [*self.get_full_path_args("-l", self.get_dynamic_libraries_for_running()), *self.get_full_path_args("-n", self.get_ned_folders_for_running()), *self.get_multiple_args("-x", self.ned_exclusions or self.get_ned_exclusions()), *self.get_full_path_args("--image-path", self.image_folders)]
 
     def get_ned_exclusions(self):
-        return [s.strip() for s in open(self.get_full_path(".nedexclusions")).readlines()]
+        nedexclusions_path = self.get_full_path(".nedexclusions")
+        return [s.strip() for s in open(nedexclusions_path).readlines()] if os.path.exists(nedexclusions_path) else []
 
     def get_direct_include_folders(self):
         return list(map(lambda include_folder: self.get_full_path(include_folder), self.include_folders))
