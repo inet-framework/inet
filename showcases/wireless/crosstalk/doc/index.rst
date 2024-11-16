@@ -72,8 +72,8 @@ illustrated by the image below:
 
 The networks contain four :ned:`AdhocHost`'s, named ``host1`` to
 ``host4``. The networks also contain an :ned:`Ipv4NetworkConfigurator`
-module, an :ned:`IntegratedCanvasVisualizer` module, and one or two radio medium modules.
-The number and type of the radio medium modules vary in the networks
+module, an :ned:`IntegratedCanvasVisualizer` module, and one or two :ned:`Ieee80211RadioMedium` modules.
+The number of the radio medium modules vary in the networks
 for the different simulations. All hosts
 are within communication range of each other.
 The hosts are arranged in
@@ -101,7 +101,8 @@ of the ``General`` configuration, so it's empty:
 
 Since the frequency and bandwidth of transmissions for all
 hosts are exactly the same, inferring which transmissions interfere is
-obvious (all of them). In this case, a scalar analog model is sufficient.
+obvious (all of them). In this case, all hosts need to use the same radio medium module,
+and the scalar analog model is sufficient.
 The following video shows the node-pairs communicating; the number of
 sent/received packets is displayed above the nodes, as well as the state
 of the contention modules of the transmitting hosts.
@@ -134,7 +135,7 @@ to use the non-overlapping Channels 1 and 6:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: IndependentFrequencyBandsOneRadioMediumModule
-   :end-at: 6
+   :end-at: 5
    :language: ini
 
 .. note:: The channel numbers are set to 0 and 5 because in INET's 802.11 model, the channels are numbered from 0, so that this setting corresponds to Wifi Channels 1 and 6.
@@ -172,7 +173,7 @@ configuration from the ini file:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: IndependentFrequencyBandsTwoRadioMediumModules
-   :end-at: 6
+   :end-at: 5
    :language: ini
 
 Here, the radios of each host pair are set to use one of the two radio medium modules

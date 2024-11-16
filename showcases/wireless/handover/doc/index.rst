@@ -62,7 +62,7 @@ The following animation shows what happens when the simulation is run:
 At the beginning of the simulation, the host starts to scan the
 channels, looking for an access point to associate with. This process is
 started by the host's agent module, as it is set to active scanning. (In
-INET, an 802.11 interface consists of a MAC module, a management module
+INET, an 802.11 interface includes a management module
 that deals with management frames, and an agent module that initiates
 scanning, association, and other high-level actions.)
 
