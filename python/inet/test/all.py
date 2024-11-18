@@ -37,7 +37,7 @@ def get_packet_test_tasks(filter=None, working_directory_filter=None, ini_file_f
         packet_test_tasks = []
     else:
         packet_test_tasks = [PacketTestTask(**kwargs)]
-    return MultipleTestTasks(tasks=packet_test_tasks, name="packet test", **kwargs)
+    return MultipleTestTasks(tasks=packet_test_tasks, name="packet test", **dict(kwargs, concurrent=False))
 
 def get_queueing_test_tasks(**kwargs):
     return get_opp_test_tasks("tests/queueing", name="queueing test", **kwargs)
