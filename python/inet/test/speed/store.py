@@ -62,7 +62,6 @@ class SpeedMeasurementStore:
         if result is not None:
             return result
         else:
-            print(kwargs)
             raise Exception("Entry not found")
 
     def remove_entry(self, entry):
