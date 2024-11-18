@@ -47,5 +47,6 @@ def run_repl_main():
     except Exception as e:
         if args.handle_exception:
             _logger.error(str(e))
+            sys.exit(1)
         else:
             raise e

@@ -90,6 +90,7 @@ def run_tasks_main(main_function, task_name):
     except Exception as e:
         if args.handle_exception:
             _logger.error(str(e))
+            sys.exit(1)
         else:
             raise e
 
@@ -172,5 +173,6 @@ def build_project_main():
     except Exception as e:
         if args.handle_exception:
             _logger.error(str(e))
+            sys.exit(1)
         else:
             raise e
