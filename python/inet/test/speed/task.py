@@ -56,8 +56,8 @@ def get_speed_test_tasks(mode="release", run_number=0, working_directory_filter=
     for simulation_task in multiple_simulation_tasks.tasks:
         simulation_config = simulation_task.simulation_config
         expected_relative_time = speed_measurement_store.get_elapsed_relative_time(working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run_number=simulation_task.run_number)
-        tasks.append(SpeedTestTask(simulation_task=simulation_task, baseline_elapsed_wall_time=baseline_elapsed_wall_time, expected_relative_time=expected_relative_time, **dict(kwargs, simulation_project=simulation_project)))
-    return MultipleSimulationTestTasks(tasks=tasks, **dict(kwargs, simulation_project=simulation_project, concurrent=False))
+        tasks.append(SpeedTestTask(simulation_task=simulation_task, baseline_elapsed_wall_time=baseline_elapsed_wall_time, expected_relative_time=expected_relative_time, **dict(kwargs, simulation_project=simulation_project, mode=mode)))
+    return MultipleSimulationTestTasks(tasks=tasks, **dict(kwargs, simulation_project=simulation_project, mode=mode, concurrent=False))
 
 def run_speed_tests(**kwargs):
     multiple_test_tasks = get_speed_test_tasks(**kwargs)
