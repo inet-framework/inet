@@ -21,8 +21,11 @@ def get_baseline_elapsed_wall_time():
     else:
         logging.getLogger("routing").setLevel("WARN")
         with open(os.devnull, 'w') as devnull:
-            simulation_task_result = run_simulations(simulation_project=get_simulation_project("routing"), config_filter="Net60a", sim_time_limit="10000s", output_stream=devnull)
-        _baseline_elapsed_wall_time = simulation_task_result.elapsed_wall_time
+            # TODO building the project should be part of collecting the simulation configs
+            simulation_project = get_simulation_project("routing")
+            build_project(simulation_project=simulation_project)
+            simulation_task_result = run_simulations(simulation_project=simulation_project, config_filter="Net60a", sim_time_limit="10000s", output_stream=devnull)
+            _baseline_elapsed_wall_time = simulation_task_result.elapsed_wall_time
         return _baseline_elapsed_wall_time
 
 class SpeedTestTask(SimulationTestTask):
