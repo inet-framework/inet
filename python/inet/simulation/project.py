@@ -351,11 +351,6 @@ class SimulationProject:
         general_config_dict = config_dicts["General"]
         for config, config_dict in config_dicts.items():
             config = config_dict["config"]
-            executable = self.get_executable(mode="release")
-            if not os.path.exists(executable):
-                executable = self.get_executable(mode="release")
-            default_args = self.get_default_args()
-            args = [executable, *default_args, "-s", "-f", ini_file, "-c", config, "-q", "numruns"]
             if num_runs_fast:
                 num_runs = num_runs_fast
             else:
@@ -363,6 +358,11 @@ class SimulationProject:
                     inifile_contents = InifileContents(ini_path)
                     num_runs = inifile_contents.getNumRunsInConfig(config)
                 except Exception as e:
+                    executable = self.get_executable(mode="release")
+                    if not os.path.exists(executable):
+                        executable = self.get_executable(mode="release")
+                    default_args = self.get_default_args()
+                    args = [executable, *default_args, "-s", "-f", ini_file, "-c", config, "-q", "numruns"]
                     result = run_command_with_logging(args, cwd=working_directory, env=self.get_env())
                     if result.returncode == 0:
                         # KLUDGE: this was added to test source dependency based task result caching
