@@ -57,5 +57,5 @@ jobs:
           source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
 
           echo "::group::Running speed tests"
-          inet_run_speed_tests -m release
+          inet_run_speed_tests -m release -w showcases
           echo "::endgroup::"
