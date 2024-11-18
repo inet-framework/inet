@@ -92,7 +92,18 @@ class SpeedMeasurementStore:
     def set_elapsed_wall_time(self, elapsed_wall_time, **kwargs):
         self.get_entry(**kwargs)["elapsed_wall_time"] = elapsed_wall_time
 
-    def insert_elapsed_wall_time(self, elapsed_wall_time, test_result=None, working_directory=os.getcwd(), ini_file="omnetpp.ini", config="General", run_number=0, sim_time_limit=None, itervars="$repetition==0"):
+    def find_elapsed_relative_time(self, **kwargs):
+        entry = self.find_entry(**kwargs)
+        if entry is not None:
+            return entry["elapsed_wall_time"] / entry["baseline_elapsed_wall_time"]
+        else:
+            return None
+
+    def get_elapsed_relative_time(self, **kwargs):
+        entry = self.get_entry(**kwargs)
+        return entry["elapsed_wall_time"] / entry["baseline_elapsed_wall_time"]
+
+    def insert_elapsed_wall_time(self, elapsed_wall_time, baseline_elapsed_wall_time, test_result=None, working_directory=os.getcwd(), ini_file="omnetpp.ini", config="General", run_number=0, sim_time_limit=None, itervars="$repetition==0"):
         # assert test_result == "ERROR" or sim_time_limit is not None
         self.get_entries().append({"working_directory": working_directory,
                                    "ini_file": ini_file,
@@ -101,15 +112,17 @@ class SpeedMeasurementStore:
                                    "sim_time_limit": sim_time_limit,
                                    "test_result": test_result,
                                    "elapsed_wall_time": elapsed_wall_time,
+                                   "baseline_elapsed_wall_time": baseline_elapsed_wall_time,
                                    "timestamp": time.time(),
                                    "itervars": itervars})
 
-    def update_elapsed_wall_time(self, elapsed_wall_time, **kwargs):
+    def update_elapsed_wall_time(self, elapsed_wall_time, baseline_elapsed_wall_time, **kwargs):
         entry = self.find_entry(**kwargs)
         if entry:
             entry["elapsed_wall_time"] = elapsed_wall_time
+            entry["baseline_elapsed_wall_time"] = baseline_elapsed_wall_time
         else:
-            self.insert_elapsed_wall_time(elapsed_wall_time, **kwargs)
+            self.insert_elapsed_wall_time(elapsed_wall_time, baseline_elapsed_wall_time, **kwargs)
 
     def remove_elapsed_wall_times(self, **kwargs):
         list(map(lambda element: self.entries.remove(element), self.filter_entries(**kwargs)))
