@@ -42,7 +42,7 @@ simple Ldp like IApp
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
 
     gates:
-        input socketIn @labels(TcpCommand/up,UdpControlInfo/up);
-        output socketOut @labels(TcpCommand/down,UdpControlInfo/down);
+        input socketIn @labels(TcpCommand/up,UdpCommand/up);
+        output socketOut @labels(TcpCommand/down,UdpCommand/down);
 }
 

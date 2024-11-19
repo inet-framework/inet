@@ -145,7 +145,7 @@ void BgpSession::sendUpdateMessage(std::vector<BgpUpdatePathAttributes *>& conte
     updateMsg->setNLRIArraySize(1);
     updateMsg->setNLRI(0, NLRI);
     updateMsg->addChunkLength(B(1 + (NLRI.length + 7) / 8));
-    updateMsg->setTotalLength(B(updateMsg->getChunkLength()).get());
+    updateMsg->setTotalLength(updateMsg->getChunkLength().get<B>());
 
     EV_INFO << "Sending BGP Update message to " << _info.peerAddr.str(false)
             << " on interface " << _info.linkIntf->getInterfaceName()

@@ -102,8 +102,8 @@ const ITransmissionAnalogModel *Ieee80211LayeredOfdmTransmitter::createDimension
     int headerBitLength = -1;
     int dataBitLength = -1;
     if (levelOfDetail > PACKET_DOMAIN) {
-        headerBitLength = b(bitModel->getHeaderLength()).get();
-        dataBitLength = b(bitModel->getDataLength()).get();
+        headerBitLength = bitModel->getHeaderLength().get<b>();
+        dataBitLength = bitModel->getDataLength().get<b>();
     }
     else {
         if (isCompliant) {
@@ -202,7 +202,7 @@ const ITransmissionSymbolModel *Ieee80211LayeredOfdmTransmitter::createSymbolMod
         }
         const std::vector<const ISymbol *> *dataSymbols = dataFieldSymbolModel->getAllSymbols();
         for (auto& dataSymbol : *dataSymbols) {
-            ofdmSymbol = dynamic_cast<const Ieee80211OfdmSymbol *>(dataSymbol);
+            ofdmSymbol = check_and_cast<const Ieee80211OfdmSymbol *>(dataSymbol);
             mergedSymbols->push_back(new Ieee80211OfdmSymbol(*ofdmSymbol));
         }
         const Ieee80211OfdmTransmissionSymbolModel *transmissionSymbolModel = new Ieee80211OfdmTransmissionSymbolModel(1, 1.0 / mode->getSignalMode()->getDuration(), mergedSymbols->size() - 1, 1.0 / mode->getSymbolInterval(), mergedSymbols, signalFieldSymbolModel->getHeaderModulation(), dataFieldSymbolModel->getDataModulation());

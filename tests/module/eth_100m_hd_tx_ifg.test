@@ -1,5 +1,5 @@
 %description:
-EthernetCsmaMac module: tests IFG in half duplex mode
+EthernetCsmaMacPhy module: tests IFG in half duplex mode
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]

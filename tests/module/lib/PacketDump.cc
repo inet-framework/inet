@@ -519,7 +519,7 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
         out << srcAddr << "." << tcpHeader->getSrcPort() << ": ";
     }
 
-    int payloadLength = tcpLength - B(tcpHeader->getHeaderLength()).get();
+    int payloadLength = tcpLength - tcpHeader->getHeaderLength().get<B>();
 
     // flags
     bool flags = false;

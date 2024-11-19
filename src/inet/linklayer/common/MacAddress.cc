@@ -19,6 +19,7 @@ const MacAddress MacAddress::STP_MULTICAST_ADDRESS("01:80:C2:00:00:00");
 
 const MacAddress MacAddress::CDP_MULTICAST_ADDRESS("01:00:0C:CC:CC:CC");
 const MacAddress MacAddress::LLDP_MULTICAST_ADDRESS("01:80:C2:00:00:0E");
+const MacAddress MacAddress::CFM_CCM_MULTICAST_ADDRESS("01:80:C2:00:00:30");
 
 unsigned char MacAddress::getAddressByte(unsigned int k) const
 {

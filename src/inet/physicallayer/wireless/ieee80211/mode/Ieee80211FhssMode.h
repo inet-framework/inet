@@ -26,7 +26,7 @@ class INET_API Ieee80211FhssPreambleMode : public IIeee80211PreambleMode
 
     virtual bps getNetBitrate() const { return Mbps(1); }
     virtual bps getGrossBitrate() const { return getNetBitrate(); }
-    virtual const simtime_t getDuration() const override { return (double)getLength().get() / getNetBitrate().get(); }
+    virtual const simtime_t getDuration() const override { return (double)getLength().get<b>() / getNetBitrate().get<bps>(); }
 
     virtual Ptr<Ieee80211PhyPreamble> createPreamble() const override { return makeShared<Ieee80211FhssPhyPreamble>(); }
 };
@@ -43,7 +43,7 @@ class INET_API Ieee80211FhssHeaderMode : public IIeee80211HeaderMode
     virtual b getLength() const override { return getPlwFieldLength() + getPsfFieldLength() + getHecFieldLength(); }
     virtual bps getNetBitrate() const override { return Mbps(1); }
     virtual bps getGrossBitrate() const override { return getNetBitrate(); }
-    virtual const simtime_t getDuration() const override { return (double)getLength().get() / getNetBitrate().get(); }
+    virtual const simtime_t getDuration() const override { return (double)getLength().get<b>() / getNetBitrate().get<bps>(); }
     virtual const simtime_t getSymbolInterval() const override { return -1; }
     virtual const GfskModulationBase *getModulation() const override { return nullptr; }
 
@@ -63,7 +63,7 @@ class INET_API Ieee80211FhssDataMode : public IIeee80211DataMode
     virtual bps getGrossBitrate() const override { return getNetBitrate(); }
     virtual b getPaddingLength(b dataLength) const override { return b(0); }
     virtual b getCompleteLength(b dataLength) const override { return dataLength; }
-    virtual const simtime_t getDuration(b length) const override { return (double)length.get() / getNetBitrate().get(); }
+    virtual const simtime_t getDuration(b length) const override { return (double)length.get<b>() / getNetBitrate().get<bps>(); }
     virtual const simtime_t getSymbolInterval() const override { return -1; }
     virtual const GfskModulationBase *getModulation() const override { return modulation; }
     virtual int getNumberOfSpatialStreams() const override { return 1; }

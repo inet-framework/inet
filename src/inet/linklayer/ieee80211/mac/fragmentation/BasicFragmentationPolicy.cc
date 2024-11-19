@@ -30,9 +30,9 @@ std::vector<int> BasicFragmentationPolicy::computeFragmentSizes(Packet *frame)
         // Mgmt frames don't have payload
         const auto& header = frame->peekAtFront<Ieee80211MacHeader>();
         const auto& trailer = frame->peekAtBack<Ieee80211MacTrailer>(B(4));
-        int trailerLength = B(trailer->getChunkLength()).get();
+        int trailerLength = trailer->getChunkLength().get<B>();
         if (dynamicPtrCast<const Ieee80211DataHeader>(header)) {
-            headerLength = B(header->getChunkLength()).get();
+            headerLength = header->getChunkLength().get<B>();
             payloadLength = frame->getByteLength() - headerLength - trailerLength;
         }
         else

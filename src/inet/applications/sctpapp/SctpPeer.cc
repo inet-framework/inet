@@ -383,7 +383,7 @@ void SctpPeer::handleMessage(cMessage *msg)
                     cmd->setPrValue(0);
                     cmd->setSid(lastStream);
                     cmsg->setKind(cmd->getSendUnordered() ? SCTP_C_SEND_UNORDERED : SCTP_C_SEND_ORDERED);
-                    bytesSent += B(smsg->getChunkLength()).get();
+                    bytesSent += smsg->getChunkLength().get<B>();
                     packetsSent++;
                     sendOrSchedule(cmsg);
                 }

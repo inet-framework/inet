@@ -404,7 +404,7 @@ double L3NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const ch
             cModule *transmitterInterfaceModule = link->sourceInterfaceInfo->networkInterface;
             IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
             const FlatTransmitterBase *transmitter = dynamic_cast<const FlatTransmitterBase *>(transmitterRadio->getTransmitter());
-            double dataRate = transmitter ? transmitter->getBitrate().get() : 0;
+            double dataRate = transmitter ? transmitter->getBitrate().get<bps>() : 0;
             return dataRate != 0 ? 1 / dataRate : minLinkWeight;
         }
         else if (!strcmp(metric, "errorRate")) {

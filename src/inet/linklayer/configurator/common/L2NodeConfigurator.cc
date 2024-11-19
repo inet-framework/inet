@@ -11,6 +11,10 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 
+#ifdef INET_WITH_MRP
+#include "inet/linklayer/mrp/MrpInterfaceData.h"
+#endif
+
 namespace inet {
 
 Define_Module(L2NodeConfigurator);
@@ -58,6 +62,9 @@ void L2NodeConfigurator::prepareInterface(NetworkInterface *networkInterface)
 {
 //    ASSERT(!networkInterface->getProtocolData<Ieee8021dInterfaceData>());
     networkInterface->addProtocolData<Ieee8021dInterfaceData>();
+#ifdef INET_WITH_MRP
+    networkInterface->addProtocolData<MrpInterfaceData>();
+#endif
 }
 
 void L2NodeConfigurator::configureNode()

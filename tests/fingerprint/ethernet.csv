@@ -25,7 +25,7 @@
 .,  -f ethernet-hub.ini -r 10,                    ,                 09ce-d06a/tplx;2767-0544/~tNl;cd80-8c81/~tND;0973-2b02/tyf, PASS, EthernetCsmaMac
 .,  -f ethernet-hub.ini -r 11,                    ,                 35c5-dc49/tplx;9dc3-d240/~tNl;bf23-e8d4/~tND;65fa-59bb/tyf, PASS, EthernetCsmaMac
 #
-.,  -f ethernet-hub-reconnect.ini -r 0,           ,                 1aae-9e98/tplx;60fb-76f3/~tNl;2106-d123/~tND;0c66-4273/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub-reconnect.ini -r 0,           ,                 9997-8b49/tplx;a940-8190/~tNl;0e42-e913/~tND;0c66-4273/tyf, PASS, EthernetCsmaMac
 .,  -f ethernet-hub-reconnect.ini -r 1,           ,                 bc65-d917/tplx;fd93-057a/~tNl;451c-37df/~tND;ecbc-5467/tyf, PASS, EthernetCsmaMac
 .,  -f ethernet-hub-reconnect.ini -r 2,           ,                 5b8c-5f6b/tplx;2ed6-478c/~tNl;3ded-8f56/~tND;6ef7-d0e2/tyf, PASS, EthernetCsmaMac
 .,  -f ethernet-hub-reconnect.ini -r 3,           ,                 b176-705e/tplx;c961-e80b/~tNl;c8e6-390f/~tND;ed6a-4a86/tyf, PASS, EthernetCsmaMac

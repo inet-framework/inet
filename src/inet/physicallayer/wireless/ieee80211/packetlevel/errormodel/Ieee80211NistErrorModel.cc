@@ -245,7 +245,7 @@ double Ieee80211NistErrorModel::getHeaderSuccessRate(const IIeee80211Mode *mode,
 {
     double successRate = 0;
     if (auto ofdmMode = dynamic_cast<const Ieee80211OfdmMode *>(mode)) {
-        int chunkLength = bitLength - b(ofdmMode->getHeaderMode()->getServiceFieldLength()).get();
+        int chunkLength = bitLength - ofdmMode->getHeaderMode()->getServiceFieldLength().get<b>();
         ASSERT(chunkLength == 24);
         successRate = getOFDMAndERPOFDMChunkSuccessRate(ofdmMode->getHeaderMode()->getModulation()->getSubcarrierModulation(),
                                                         ofdmMode->getHeaderMode()->getCode()->getConvolutionalCode(),
@@ -253,7 +253,7 @@ double Ieee80211NistErrorModel::getHeaderSuccessRate(const IIeee80211Mode *mode,
                                                         snr);
     }
     else if (auto htMode = dynamic_cast<const Ieee80211HtMode *>(mode)) {
-//        int chunkLength = bitLength - b(htMode->getHeaderMode()->getHTLengthLength()).get();
+//        int chunkLength = bitLength - htMode->getHeaderMode()->getHTLengthLength().get<b>();
 //        ASSERT(chunkLength == 24);
         int chunkLength = bitLength;
         successRate = getOFDMAndERPOFDMChunkSuccessRate(htMode->getHeaderMode()->getModulation()->getSubcarrierModulation(),
@@ -262,7 +262,7 @@ double Ieee80211NistErrorModel::getHeaderSuccessRate(const IIeee80211Mode *mode,
                                                         snr);
     }
     else if (auto vhtMode = dynamic_cast<const Ieee80211VhtMode *>(mode)) {
-//        int chunkLength = bitLength - b(vhtMode->getHeaderMode()->getHTLengthLength()).get();
+//        int chunkLength = bitLength - vhtMode->getHeaderMode()->getHTLengthLength().get<b>();
 //        ASSERT(chunkLength == 24);
         int chunkLength = bitLength;
         successRate = getOFDMAndERPOFDMChunkSuccessRate(vhtMode->getHeaderMode()->getModulation()->getSubcarrierModulation(),
@@ -288,18 +288,18 @@ double Ieee80211NistErrorModel::getDataSuccessRate(const IIeee80211Mode *mode, u
     if (auto ofdmMode = dynamic_cast<const Ieee80211OfdmMode *>(mode))
         successRate = getOFDMAndERPOFDMChunkSuccessRate(ofdmMode->getDataMode()->getModulation()->getSubcarrierModulation(),
                                                         ofdmMode->getDataMode()->getCode()->getConvolutionalCode(),
-                                                        bitLength + b(ofdmMode->getHeaderMode()->getServiceFieldLength()).get(),
+                                                        bitLength + ofdmMode->getHeaderMode()->getServiceFieldLength().get<b>(),
                                                         snr);
     else if (auto htMode = dynamic_cast<const Ieee80211HtMode *>(mode))
         successRate = getOFDMAndERPOFDMChunkSuccessRate(htMode->getDataMode()->getModulation()->getSubcarrierModulation(),
                                                         htMode->getDataMode()->getCode()->getForwardErrorCorrection(),
-                                                        //bitLength + b(htMode->getHeaderMode()->getHTLengthLength()).get(),
+                                                        //bitLength + htMode->getHeaderMode()->getHTLengthLength().get<b>(),
                                                         bitLength,
                                                         snr);
     else if (auto vhtMode = dynamic_cast<const Ieee80211VhtMode *>(mode))
         successRate = getOFDMAndERPOFDMChunkSuccessRate(vhtMode->getDataMode()->getModulation()->getSubcarrierModulation(),
                                                         vhtMode->getDataMode()->getCode()->getForwardErrorCorrection(),
-                                                        //bitLength + b(vhtMode->getHeaderMode()->getHTLengthLength()).get(),
+                                                        //bitLength + vhtMode->getHeaderMode()->getHTLengthLength().get<b>(),
                                                         bitLength,
                                                         snr);
     else if (auto dsssMode = dynamic_cast<const Ieee80211DsssMode *>(mode))

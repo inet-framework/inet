@@ -30,7 +30,7 @@ class INET_API Ieee80211DsssPreambleMode : public Ieee80211DsssChunkMode, public
 
     virtual bps getNetBitrate() const { return Mbps(1); }
     virtual bps getGrossBitrate() const { return getNetBitrate(); }
-    virtual const simtime_t getDuration() const override { return (double)getLength().get() / getNetBitrate().get(); }
+    virtual const simtime_t getDuration() const override { return (double)getLength().get<b>() / getNetBitrate().get<bps>(); }
     virtual const DbpskModulation *getModulation() const { return &DbpskModulation::singleton; }
 
     virtual Ptr<Ieee80211PhyPreamble> createPreamble() const override { return makeShared<Ieee80211DsssPhyPreamble>(); }
@@ -49,7 +49,7 @@ class INET_API Ieee80211DsssHeaderMode : public Ieee80211DsssChunkMode, public I
     virtual b getLength() const override { return getSignalFieldLength() + getServiceFieldLength() + getLengthFieldLength() + getCrcFieldLength(); }
     virtual bps getNetBitrate() const override { return Mbps(1); }
     virtual bps getGrossBitrate() const override { return getNetBitrate(); }
-    virtual const simtime_t getDuration() const override { return (double)getLength().get() / getNetBitrate().get(); }
+    virtual const simtime_t getDuration() const override { return (double)getLength().get<b>() / getNetBitrate().get<bps>(); }
     virtual const simtime_t getSymbolInterval() const override { return -1; }
     virtual const DbpskModulation *getModulation() const override { return &DbpskModulation::singleton; }
 

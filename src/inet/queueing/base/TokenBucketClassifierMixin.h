@@ -32,7 +32,7 @@ class INET_API TokenBucketClassifierMixin : public T
 
     virtual double getNumPacketTokens(Packet *packet) const
     {
-        return b(packet->getDataLength()).get() * tokenConsumptionPerBit + tokenConsumptionPerPacket;
+        return packet->getDataLength().get<b>() * tokenConsumptionPerBit + tokenConsumptionPerPacket;
     }
 };
 

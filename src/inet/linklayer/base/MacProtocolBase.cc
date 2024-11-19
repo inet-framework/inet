@@ -20,6 +20,7 @@ MacProtocolBase::MacProtocolBase()
 MacProtocolBase::~MacProtocolBase()
 {
     delete currentTxFrame;
+    currentTxFrame = nullptr;
 }
 
 MacAddress MacProtocolBase::parseMacAddressParameter(const char *addrstr)

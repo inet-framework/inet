@@ -36,7 +36,7 @@ clocktime_t EthernetCutthroughBarrier::computeDelay(Packet *packet) const
          EV_DEBUG << "Detected cut-through packet" << EV_FIELD(packet) << EV_ENDL;
          b cutthroughPosition = cutthroughTag->getCutthroughPosition();
          auto cutthroughBuffer = packet->peekAt<StreamBufferChunk>(cutthroughTag->getCutthroughPosition(), packet->getTotalLength() - cutthroughPosition - ETHER_FCS_BYTES);
-         return SIMTIME_AS_CLOCKTIME(cutthroughBuffer->getStartTime() + s(cutthroughBuffer->getChunkLength() / cutthroughBuffer->getDatarate()).get());
+         return SIMTIME_AS_CLOCKTIME(cutthroughBuffer->getStartTime() + (cutthroughBuffer->getChunkLength() / cutthroughBuffer->getDatarate()).get<s>());
     }
     else
         return 0;

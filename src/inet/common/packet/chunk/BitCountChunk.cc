@@ -31,7 +31,7 @@ BitCountChunk::BitCountChunk(b length, bool data) :
 void BitCountChunk::parsimPack(cCommBuffer *buffer) const
 {
     Chunk::parsimPack(buffer);
-    buffer->pack(b(length).get());
+    buffer->pack(length.get<b>());
     buffer->pack(data);
 }
 

@@ -44,14 +44,14 @@ class INET_API MemoryOutputStream
 
   protected:
     bool isByteAligned() const {
-        return b(length).get() % 8 == 0;
+        return length.get<b>() % 8 == 0;
     }
 
   public:
     MemoryOutputStream(b initialCapacity = B(64)) :
         length(b(0))
     {
-        data.reserve((b(initialCapacity).get() + 7) >> 3);
+        data.reserve((initialCapacity.get<b>() + 7) >> 3);
     }
 
     /** @name Stream querying functions */
@@ -64,8 +64,8 @@ class INET_API MemoryOutputStream
     const std::vector<uint8_t>& getData() const { return data; }
 
     void copyData(std::vector<bool>& result, b offset = b(0), b length = b(-1)) const {
-        size_t end = b(length == b(-1) ? this->length : offset + length).get();
-        for (size_t i = b(offset).get(); i < end; i++) {
+        size_t end = (length == b(-1) ? this->length : offset + length).get<b>();
+        for (size_t i = offset.get<b>(); i < end; i++) {
             size_t byteIndex = i / 8;
             size_t bitIndex = i % 8;
             uint8_t byte = data.at(byteIndex);
@@ -80,7 +80,7 @@ class INET_API MemoryOutputStream
         ASSERT(b(0) <= offset && offset <= B(data.size()));
         ASSERT(b(0) <= end && end <= B(data.size()));
         ASSERT(offset <= end);
-        result.insert(result.begin(), data.begin() + B(offset).get(), data.begin() + B(end).get());
+        result.insert(result.begin(), data.begin() + offset.get<B>(), data.begin() + end.get<B>());
     }
     //@}
 
@@ -90,7 +90,7 @@ class INET_API MemoryOutputStream
      * Writes a bit to the end of the stream.
      */
     void writeBit(bool value) {
-        size_t i = b(length).get();
+        size_t i = length.get<b>();
         size_t byteIndex = i / 8;
         size_t bitIndex = i % 8;
         if (bitIndex == 0)
@@ -113,8 +113,8 @@ class INET_API MemoryOutputStream
      * bit order.
      */
     void writeBits(const std::vector<bool>& bits, b offset = b(0), b length = b(-1)) {
-        auto end = length == b(-1) ? bits.size() : b(offset + length).get();
-        for (size_t i = b(offset).get(); i < end; i++)
+        auto end = length == b(-1) ? bits.size() : b(offset + length).get<b>();
+        for (size_t i = offset.get<b>(); i < end; i++)
             writeBit(bits.at(i));
     }
     //@}
@@ -128,7 +128,7 @@ class INET_API MemoryOutputStream
         if (isByteAligned())
             data.push_back(value);
         else {
-            int l1 = b(length).get() % 8;
+            int l1 = length.get<b>() % 8;
             int l2 = 8 - l1;
             data.back() |= (value & (0xFF << l1)) >> l1;
             data.push_back((value & (0xFF >> l2)) << l2);
@@ -155,11 +155,11 @@ class INET_API MemoryOutputStream
         ASSERT(b(0) <= end && end <= B(bytes.size()));
         ASSERT(offset <= end);
         if (isByteAligned()) {
-            data.insert(data.end(), bytes.begin() + B(offset).get(), bytes.begin() + B(end).get());
+            data.insert(data.end(), bytes.begin() + offset.get<B>(), bytes.begin() + end.get<B>());
             this->length += end - offset;
         }
         else {
-            for (B::value_type i = B(offset).get(); i < B(end).get(); i++)
+            for (B::value_type i = offset.get<B>(); i < end.get<B>(); i++)
                 writeByte(bytes.at(i));
         }
     }
@@ -170,11 +170,11 @@ class INET_API MemoryOutputStream
      */
     void writeBytes(const uint8_t *buffer, B length) {
         if (isByteAligned()) {
-            data.insert(data.end(), buffer, buffer + B(length).get());
+            data.insert(data.end(), buffer, buffer + length.get<B>());
             this->length += length;
         }
         else {
-            for (B::value_type i = 0; i < B(length).get(); i++)
+            for (B::value_type i = 0; i < length.get<B>(); i++)
                 writeByte(buffer[i]);
         }
     }

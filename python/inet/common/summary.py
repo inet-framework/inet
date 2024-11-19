@@ -49,8 +49,7 @@ def collect_parameters(simulation_project, path="src"):
     project_path = simulation_project.get_full_path(path)
     parameters = []
     for file_name in glob.glob(project_path + "/**/*.ned", recursive=True):
-        args = ["opp_nedtool", "c", file_name]
-        result = subprocess.run(args, capture_output=True)
+        run_command_with_logging(["opp_nedtool", "c", file_name])
         file = open(file_name + ".xml", encoding="utf-8")
         module = None
         for line in file:

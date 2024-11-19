@@ -13,7 +13,7 @@ import inet.linklayer.contract.IEthernetLayer;
 // Performs Ethernet II or Ethernet with LLC/SNAP encapsulation/decapsulation.
 //
 // Expected environment:
-// - `lowerLayerIn`, `lowerLayerOut` gates should be connected to an ~EthernetCsmaMac
+// - `lowerLayerIn`, `lowerLayerOut` gates should be connected to an ~EthernetCsmaMacPhy
 // - `upperLayerIn`, `upperLayerOut` gates should be connected to a higher layer
 //   protocol or application
 //
@@ -22,7 +22,7 @@ import inet.linklayer.contract.IEthernetLayer;
 //   (~EthernetMacHeader) or Ethernet SNAP frame (~Ieee8022LlcSnapHeader)
 //   depending on the `useSNAP` module parameter,
 //   and sent to the MAC. The ~EtherType is taken from the ~PacketProtocolTag tag
-//   attached to the packet. The source address will be filled in by ~EthernetCsmaMac.
+//   attached to the packet. The source address will be filled in by ~EthernetCsmaMacPhy.
 // - also accepts SENDPAUSE command (message kind=IEEE802CTRL_SENDPAUSE) from
 //   the higher layer: it will send a PAUSE frame, as described in
 //   <a href="ether-pause.html">PAUSE frames</a>.

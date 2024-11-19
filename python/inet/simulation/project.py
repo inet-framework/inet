@@ -44,7 +44,7 @@ class SimulationProject:
                  bin_folder=".", library_folder=".", executables=None, dynamic_libraries=None, static_libraries=None, build_types=["dynamic library"],
                  ned_folders=["."], ned_exclusions=[], ini_file_folders=["."], python_folders=["python"], image_folders=["."],
                  include_folders=["."], cpp_folders=["."], cpp_defines=[], msg_folders=["."],
-                 media_folder=".", statistics_folder=".", fingerprint_store="fingerprint.json",
+                 media_folder=".", statistics_folder=".", fingerprint_store="fingerprint.json", speed_store="speed.json",
                  used_projects=[], external_bin_folders=[], external_library_folders=[], external_libraries=[], external_include_folders=[],
                  simulation_configs=None, **kwargs):
         """
@@ -123,6 +123,9 @@ class SimulationProject:
             fingerprint_store (String):
                 The relative path of the JSON fingerprint store for fingerprint tests.
 
+            speed_store (String):
+                The relative path of the JSON measurement store for speed tests.
+
             used_projects (List of strings):
                 The list of used simulation project names.
 
@@ -149,12 +152,12 @@ class SimulationProject:
         self.folder_environment_variable = folder_environment_variable
         self.folder = folder
         # TODO this is commented out because it runs subprocesses, and it even does this from the IDE when some completely unrelated modules are loaded, sigh!
-        # self.git_hash = git_hash or subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.get_full_path("."), capture_output=True).stdout.decode("utf-8").strip()
+        # self.git_hash = git_hash or run_command_with_logging(["git", "rev-parse", "HEAD"], cwd=self.get_full_path(".")).stdout.strip()
         # if git_diff_hash:
         #     self.git_diff_hash = git_diff_hash
         # else:
         #     git_diff_hasher = hashlib.sha256()
-        #     git_diff_hasher.update(subprocess.run(["git", "diff", "--quiet"], cwd=self.get_full_path("."), capture_output=True).stdout)
+        #     git_diff_hasher.update(run_command_with_logging(["git", "diff", "--quiet"], cwd=self.get_full_path(".")).stdout)
         #     self.git_diff_hash = git_diff_hasher.digest().hex()
         self.bin_folder = bin_folder
         self.library_folder = library_folder
@@ -174,6 +177,7 @@ class SimulationProject:
         self.media_folder = media_folder
         self.statistics_folder = statistics_folder
         self.fingerprint_store = fingerprint_store
+        self.speed_store = speed_store
         self.used_projects = used_projects
         self.external_bin_folders = external_bin_folders
         self.external_library_folders = external_library_folders
@@ -260,7 +264,8 @@ class SimulationProject:
         return [*self.get_full_path_args("-l", self.get_dynamic_libraries_for_running()), *self.get_full_path_args("-n", self.get_ned_folders_for_running()), *self.get_multiple_args("-x", self.ned_exclusions or self.get_ned_exclusions()), *self.get_full_path_args("--image-path", self.image_folders)]
 
     def get_ned_exclusions(self):
-        return [s.strip() for s in open(self.get_full_path(".nedexclusions")).readlines()]
+        nedexclusions_path = self.get_full_path(".nedexclusions")
+        return [s.strip() for s in open(nedexclusions_path).readlines()] if os.path.exists(nedexclusions_path) else []
 
     def get_direct_include_folders(self):
         return list(map(lambda include_folder: self.get_full_path(include_folder), self.include_folders))
@@ -346,11 +351,6 @@ class SimulationProject:
         general_config_dict = config_dicts["General"]
         for config, config_dict in config_dicts.items():
             config = config_dict["config"]
-            executable = self.get_executable(mode="release")
-            if not os.path.exists(executable):
-                executable = self.get_executable(mode="release")
-            default_args = self.get_default_args()
-            args = [executable, *default_args, "-s", "-f", ini_file, "-c", config, "-q", "numruns"]
             if num_runs_fast:
                 num_runs = num_runs_fast
             else:
@@ -358,14 +358,18 @@ class SimulationProject:
                     inifile_contents = InifileContents(ini_path)
                     num_runs = inifile_contents.getNumRunsInConfig(config)
                 except Exception as e:
-                    _logger.debug(f"Running subprocess: {args}")
-                    result = subprocess.run(args, cwd=working_directory, capture_output=True, env=self.get_env())
+                    executable = self.get_executable(mode="release")
+                    if not os.path.exists(executable):
+                        executable = self.get_executable(mode="release")
+                    default_args = self.get_default_args()
+                    args = [executable, *default_args, "-s", "-f", ini_file, "-c", config, "-q", "numruns"]
+                    result = run_command_with_logging(args, cwd=working_directory, env=self.get_env())
                     if result.returncode == 0:
                         # KLUDGE: this was added to test source dependency based task result caching
-                        result.stdout = re.sub(r"INI dependency: (.*)", "", result.stdout.decode("utf-8"))
+                        result.stdout = re.sub(r"INI dependency: (.*)", "", result.stdout)
                         num_runs = int(result.stdout)
                     else:
-                        _logger.warn("Cannot determine number of runs: " + result.stderr.decode("utf-8") + " in " + working_directory)
+                        _logger.warn("Cannot determine number of runs: " + result.stderr + " in " + working_directory)
                         continue
             sim_time_limit = get_sim_time_limit(config_dicts, config)
             description = config_dict["description"]

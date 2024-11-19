@@ -84,7 +84,10 @@ class SimulationTestTask(TestTask):
         if simulation_config.user_interface and simulation_config.user_interface != self.simulation_task.user_interface:
             return self.task_result_class(task=self, result="SKIP", expected_result="SKIP", reason="Requires different user interface")
         else:
+            start_time = time.time()
             simulation_task_result = self.simulation_task.run_protected(output_stream=output_stream, **kwargs)
+            end_time = time.time()
+            simulation_task_result.elapsed_wall_time = end_time - start_time
             if simulation_task_result.result == "DONE":
                 return self.check_simulation_task_result(simulation_task_result=simulation_task_result, **kwargs)
             else:
@@ -96,12 +99,13 @@ class SimulationTestTask(TestTask):
         return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result=result, expected_result=expected_result, reason=simulation_task_result.reason)
 
 class MultipleSimulationTestTasks(MultipleTestTasks):
-    def __init__(self, build=True, simulation_project=None, **kwargs):
+    def __init__(self, build=True, mode="debug", simulation_project=None, **kwargs):
         super().__init__(build=build, simulation_project=simulation_project, **kwargs)
         self.locals = locals()
         self.locals.pop("self")
         self.kwargs = kwargs
         self.build = build
+        self.mode = mode
         self.simulation_project = simulation_project
 
     def get_description(self):
@@ -109,7 +113,7 @@ class MultipleSimulationTestTasks(MultipleTestTasks):
 
     def run_protected(self, **kwargs):
         if self.build:
-            build_project(**dict(kwargs, simulation_project=self.simulation_project))
+            build_project(**dict(kwargs, simulation_project=self.simulation_project, mode=self.mode))
         return super().run_protected(**kwargs)
 
 def get_simulation_test_tasks(simulation_test_task_class=SimulationTestTask, multiple_simulation_test_tasks_class=MultipleSimulationTestTasks, **kwargs):
@@ -159,7 +163,10 @@ class SimulationUpdateTask(UpdateTask):
         if simulation_config.user_interface and simulation_config.user_interface != self.simulation_task.user_interface:
             return self.task_result_class(task=self, result="SKIP", expected_result="SKIP", reason="Requires different user interface")
         else:
+            start_time = time.time()
             simulation_task_result = self.simulation_task.run_protected(output_stream=output_stream, **kwargs)
+            end_time = time.time()
+            simulation_task_result.elapsed_wall_time = end_time - start_time
             if simulation_task_result.result == "DONE":
                 return self.check_simulation_task_result(simulation_task_result=simulation_task_result, **kwargs)
             else:

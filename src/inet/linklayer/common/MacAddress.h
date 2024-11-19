@@ -45,6 +45,9 @@ class INET_API MacAddress
     /** The Local link discovery protocol bridge's multicast address, 01:80:C2:00:00:0E */
     static const MacAddress LLDP_MULTICAST_ADDRESS;
 
+    /** Multicast address for CFM CC messages, 01:80:C2:00:00:30 */
+    static const MacAddress CFM_CCM_MULTICAST_ADDRESS;
+
     /**
      * Default constructor initializes address bytes to zero.
      */

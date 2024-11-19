@@ -89,11 +89,11 @@ double SuiPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distan
     double Xh = -d *log10(hr.get() / 2);
     m R0p = R0 * pow(10.0, -((Xf + Xh) / (10 * gamma)));
     if (R > R0p) {
-        alpha = 20 * log10(unit(4 * M_PI * R0p / lambda).get());
-        L = alpha + 10 * gamma * log10(unit(R / R0).get()) + Xf + Xh + s;
+        alpha = 20 * log10((4 * M_PI * R0p / lambda).get<unit>());
+        L = alpha + 10 * gamma * log10((R / R0).get<unit>()) + Xf + Xh + s;
     }
     else {
-        L = 20 * log10(unit(4 * M_PI * R / lambda).get()) + s;
+        L = 20 * log10((4 * M_PI * R / lambda).get<unit>()) + s;
     }
     return math::dB2fraction(-L);
 }

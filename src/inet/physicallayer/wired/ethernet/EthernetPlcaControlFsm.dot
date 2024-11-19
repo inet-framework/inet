@@ -1,0 +1,49 @@
+digraph EthernetPlcaControlFsm {
+    nodesep = 0.5;
+    ranksep = 0.5;
+    node [shape=box, style="rounded,filled", color="#ECECEC", fontname="Arial", fontsize=24, margin=0.15, height=1, width=3];
+    edge [fontname="Arial", fontsize=24];
+
+    DISABLE;
+    RESYNC;
+    RECOVER;
+    SEND_BEACON;
+    SYNCING;
+    WAIT_TO;
+    EARLY_RECEIVE;
+    COMMIT;
+    YIELD;
+    RECEIVE;
+    TRANSMIT;
+    BURST;
+    ABORT;
+    NEXT_TX_OPPORTUNITY;
+
+    DISABLE -> RESYNC [label=""];
+    DISABLE -> RECOVER [label=""];
+    RESYNC -> EARLY_RECEIVE [label=""];
+    RESYNC -> SEND_BEACON [label=""];
+    RECOVER -> WAIT_TO [label=""];
+    SEND_BEACON -> SYNCING [label=""];
+    SYNCING -> WAIT_TO [label=""];
+    WAIT_TO -> EARLY_RECEIVE [label=""];
+    WAIT_TO -> COMMIT [label=""];
+    WAIT_TO -> NEXT_TX_OPPORTUNITY [label=""];
+    WAIT_TO -> YIELD [label=""];
+    EARLY_RECEIVE -> SYNCING [label=""];
+    EARLY_RECEIVE -> RESYNC [label=""];
+    EARLY_RECEIVE -> RECOVER [label=""];
+    EARLY_RECEIVE -> RECEIVE [label=""];
+    COMMIT -> TRANSMIT [label=""];
+    COMMIT -> ABORT [label=""];
+    YIELD -> EARLY_RECEIVE [label=""];
+    YIELD -> NEXT_TX_OPPORTUNITY [label=""];
+    RECEIVE -> NEXT_TX_OPPORTUNITY [label=""];
+    TRANSMIT -> NEXT_TX_OPPORTUNITY [label=""];
+    TRANSMIT -> BURST [label=""];
+    BURST -> TRANSMIT [label=""];
+    BURST -> ABORT [label=""];
+    ABORT -> NEXT_TX_OPPORTUNITY [label=""];
+    NEXT_TX_OPPORTUNITY -> RESYNC [label=""];
+    NEXT_TX_OPPORTUNITY -> WAIT_TO [label=""];
+}

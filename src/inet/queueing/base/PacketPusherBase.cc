@@ -8,6 +8,7 @@
 #include "inet/queueing/base/PacketPusherBase.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/Simsignals.h"
 
 namespace inet {
@@ -28,10 +29,14 @@ void PacketPusherBase::initialize(int stage)
     }
 }
 
-void PacketPusherBase::handleMessage(cMessage *message)
+void PacketPusherBase::handleMessage(cMessage *msg)
 {
-    auto packet = check_and_cast<Packet *>(message);
-    pushPacket(packet, packet->getArrivalGate());
+    if (auto packet = dynamic_cast<Packet *>(msg))
+        pushPacket(packet, packet->getArrivalGate());
+    else if (auto message = dynamic_cast<Message *>(msg))
+        send(message, "out");
+    else
+        throw cRuntimeError("Unknown message");
 }
 
 bool PacketPusherBase::canPushSomePacket(const cGate *gate) const

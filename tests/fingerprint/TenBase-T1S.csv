@@ -1,0 +1,4 @@
+# working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
+/examples/ethernet/TenBaseT1S/,       -f notraffic.ini -c NoTraffic -r 0,                1ms,            8885-3dff/tplx;c7ab-6301/~tNl, PASS,
+/examples/ethernet/TenBaseT1S/,       -f bestcase.ini  -c BestCase -r 0,                 1ms,            ab9b-bf44/tplx;0ce5-190e/~tNl, PASS,
+/examples/ethernet/TenBaseT1S/,       -f worstcase.ini -c WorstCase -r 0,                1ms,            6aeb-366b/tplx;ecaa-38a7/~tNl, PASS,

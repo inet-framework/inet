@@ -8,6 +8,7 @@ import os
 import pickle
 import re
 import signal
+import subprocess
 import sys
 import threading
 import time
@@ -24,6 +25,9 @@ COLOR_GREEN = "\033[0;32m"
 COLOR_MAGENTA = "\033[1;35m"
 COLOR_RESET = "\033[0;0m"
 
+STDOUT_LEVEL = 25  # between INFO (20) and WARNING (30)
+STDERR_LEVEL = 35  # between WARNING (30) and ERROR (40)
+
 def enable_autoreload():
     ipython = IPython.get_ipython()
     ipython.magic("load_ext autoreload")
@@ -31,20 +35,38 @@ def enable_autoreload():
 
 _logging_initialized = False
 
-def initialize_logging(level):
+def initialize_logging(log_level, external_command_log_level):
     global _logging_initialized
     formatter = ColoredLoggingFormatter()
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
     logger = logging.getLogger()
-    logger.setLevel(level)
+    logger.setLevel(log_level)
     logger.handlers = []
     logger.addHandler(handler)
+    logging.getLogger("make").setLevel(external_command_log_level)
+    logging.getLogger("opp_featuretool").setLevel(external_command_log_level)
+    logging.getLogger("opp_makemake").setLevel(external_command_log_level)
+    logging.getLogger("opp_run").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_dbg").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_release").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_sanitize").setLevel(external_command_log_level)
+    logging.getLogger("opp_test").setLevel(external_command_log_level)
+    logging.addLevelName(STDOUT_LEVEL, "STDOUT")
+    logging.addLevelName(STDERR_LEVEL, "STDERR")
+    def stdout(self, message, *args, **kwargs):
+        if self.isEnabledFor(STDOUT_LEVEL):
+            self._log(STDOUT_LEVEL, message, args, **kwargs)
+    def stderr(self, message, *args, **kwargs):
+        if self.isEnabledFor(STDERR_LEVEL):
+            self._log(STDERR_LEVEL, message, args, **kwargs)
+    logging.Logger.stdout = stdout
+    logging.Logger.stderr = stderr
     _logging_initialized = True
 
-def ensure_logging_initialized(level):
+def ensure_logging_initialized(log_level, external_command_log_level):
     if not _logging_initialized:
-        initialize_logging(level)
+        initialize_logging(log_level, external_command_log_level)
         return True
     else:
         return False
@@ -228,7 +250,9 @@ class ColoredLoggingFormatter(logging.Formatter):
         logging.INFO: COLOR_GREEN,
         logging.WARNING: COLOR_YELLOW,
         logging.ERROR: COLOR_RED,
-        logging.CRITICAL: COLOR_RED
+        logging.CRITICAL: COLOR_RED,
+        STDOUT_LEVEL: COLOR_GREEN,
+        STDERR_LEVEL: COLOR_YELLOW,
     }
 
     def format(self, record):
@@ -236,7 +260,7 @@ class ColoredLoggingFormatter(logging.Formatter):
                  (COLOR_MAGENTA + "%(threadName)s " if self.print_thread_name else "") + \
                  COLOR_CYAN + "%(name)s " + \
                  (COLOR_MAGENTA + "%(funcName)s " if self.print_function_name else "") + \
-                 COLOR_RESET + "%(message)s (%(filename)s:%(lineno)d)"
+                 COLOR_RESET + "%(message)s"
         formatter = logging.Formatter(format)
         return formatter.format(record)
 
@@ -272,6 +296,34 @@ class LoggerLevel(object):
 class DebugLevel(LoggerLevel):
     def __init__(self, logger):
         super().__init__(self, logger, logging.DEBUG)
+
+def run_command_with_logging(args, error_message=None, nice=10, **kwargs):
+    logger = logging.getLogger(os.path.basename(args[0]))
+    def log_stream(stream, logger, lines):
+        for line in iter(stream.readline, ""):
+            logger(line.rstrip("\n"))
+            lines.append(line)
+        stream.close()
+    stdout_lines = []
+    stderr_lines = []
+    logger.info(f"Running external command: {' '.join(args)}")
+    process = subprocess.Popen(["nice", "-n", str(nice), *args], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, **kwargs)
+    stdout_thread = threading.Thread(target=log_stream, args=(process.stdout, logger.stdout, stdout_lines))
+    stderr_thread = threading.Thread(target=log_stream, args=(process.stderr, logger.stderr, stderr_lines))
+    stdout_thread.start()
+    stderr_thread.start()
+    try:
+        stdout_thread.join()
+        stderr_thread.join()
+        process.wait()
+    except KeyboardInterrupt:
+        process.kill()
+        raise
+    if process.returncode == -signal.SIGINT:
+        raise KeyboardInterrupt()
+    if error_message and process.returncode != 0:
+        raise Exception(error_message)
+    return subprocess.CompletedProcess(args, process.returncode, "".join(stdout_lines), ''.join(stderr_lines))
 
 def collect_existing_ned_types():
     types = set()

@@ -21,6 +21,7 @@ import inet.linklayer.contract.IIeee8021qLayer;
 import inet.linklayer.contract.IIeee8021rLayer;
 import inet.linklayer.contract.IIeee8022Llc;
 import inet.linklayer.contract.IMacForwardingTable;
+import inet.linklayer.contract.IMrp;
 import inet.linklayer.contract.ISpanningTree;
 import inet.networklayer.common.InterfaceTable;
 import inet.node.contract.IEthernetNetworkNode;
@@ -45,6 +46,7 @@ module EthernetSwitch like IEthernetNetworkNode
         int numApps = default(0);
         bool hasStatus = default(false);
         bool hasStp = default(false);
+        bool hasMrp = default(false);
         bool hasGptp = default(false);
         bool hasCutthroughSwitching = default(false);
         string fcsMode @enum("declared","computed") = default("declared");
@@ -54,6 +56,7 @@ module EthernetSwitch like IEthernetNetworkNode
         *.fcsMode = this.fcsMode;
         **.interfaceTableModule = default(absPath(".interfaceTable"));
         **.macTableModule = default(absPath(".macTable"));
+        **.mrpRelayModule = default(absPath(".bridging"));
         *.clockModule = default(exists(clock) ? absPath(".clock") : "");
 
         llc.registerProtocol = true;
@@ -64,13 +67,13 @@ module EthernetSwitch like IEthernetNetworkNode
     gates:
         inout ethg[numEthInterfaces] @labels(EtherFrame-conn);
     submodules:
-        macTable: <default("MacForwardingTable")> like IMacForwardingTable {
+        macTable: <default(hasMrp ? "MrpMacForwardingTable" : "MacForwardingTable")> like IMacForwardingTable {
             @display("p=100,100;is=s");
         }
         interfaceTable: InterfaceTable {
             @display("p=100,200;is=s");
         }
-        l2NodeConfigurator: <default("L2NodeConfigurator")> like IL2NodeConfigurator if hasStp {
+        l2NodeConfigurator: <default("L2NodeConfigurator")> like IL2NodeConfigurator if hasStp || hasMrp {
             @display("p=100,300;is=s");
         }
         status: NodeStatus if hasStatus {
@@ -84,6 +87,9 @@ module EthernetSwitch like IEthernetNetworkNode
         }
         measurer: <default("")> like IMeasurer if typename != "" {
             @display("p=125,700;is=s");
+        }
+        mrp: <default("Mrp")> like IMrp if hasMrp {
+            @display("p=500,50");
         }
         stp: <spanningTreeProtocol> like ISpanningTree if hasStp {
             @display("p=500,75");
@@ -99,13 +105,13 @@ module EthernetSwitch like IEthernetNetworkNode
         sc: MessageDispatcher {
             @display("p=800,150;b=1200,5");
         }
-        llc: <default("")> like IIeee8022Llc if typename != "" {
+        llc: <default(hasMrp ? "Ieee8022Llc" : "")> like IIeee8022Llc if typename != "" || hasMrp {
             @display("p=700,225");
         }
         cb: MessageDispatcher {
             @display("p=800,300;b=1200,5");
         }
-        bridging: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IProtocolLayer {
+        bridging: <default(hasMrp ? "MrpRelay" : firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IProtocolLayer {
             @display("p=800,375;is=m");
         }
         bl: MessageDispatcher {
@@ -167,6 +173,11 @@ module EthernetSwitch like IEthernetNetworkNode
             li.out++ --> eth[i].upperLayerIn;
             li.in++ <-- eth[i].upperLayerOut;
             eth[i].phys <--> { @display("m=s"); } <--> ethg[i];
+        }
+
+        if hasMrp {
+            mrp.relayIn <-- sc.out++;
+            mrp.relayOut --> sc.in++;
         }
 
         if hasStp {

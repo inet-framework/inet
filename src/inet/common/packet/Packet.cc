@@ -136,9 +136,9 @@ void Packet::parsimPack(cCommBuffer *buffer) const
     cPacket::parsimPack(buffer);
     buffer->packObject(const_cast<Chunk *>(content.get()));
     buffer->pack(frontIterator.getIndex());
-    buffer->pack(frontIterator.getPosition().get());
+    buffer->pack(frontIterator.getPosition().get<b>());
     buffer->pack(backIterator.getIndex());
-    buffer->pack(backIterator.getPosition().get());
+    buffer->pack(backIterator.getPosition().get<b>());
     tags.parsimPack(buffer);
     regionTags.parsimPack(buffer);
 }

@@ -7,8 +7,9 @@
 
 #include "inet/common/ProtocolGroup.h"
 
-#include "inet/networklayer/common/IpProtocolId_m.h"
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/common/EtherType_m.h"
+#include "inet/networklayer/common/IpProtocolId_m.h"
 
 namespace inet {
 
@@ -52,11 +53,19 @@ int ProtocolGroup::getProtocolNumber(const Protocol *protocol) const
         throw cRuntimeError("Unknown protocol: id = %d, name = %s", protocol->getId(), protocol->getName());
 }
 
-void ProtocolGroup::addProtocol(int protocolId, const Protocol *protocol)
+void ProtocolGroup::addProtocol(int protocolNumber, const Protocol *protocol)
 {
     protocols.push_back(protocol);
-    protocolNumberToProtocol[protocolId] = protocol;
-    protocolToProtocolNumber[protocol] = protocolId;
+    protocolNumberToProtocol[protocolNumber] = protocol;
+    protocolToProtocolNumber[protocol] = protocolNumber;
+}
+
+void ProtocolGroup::removeProtocol(int protocolNumber)
+{
+    auto protocol = protocolNumberToProtocol[protocolNumber];
+    remove(protocols, protocol);
+    protocolNumberToProtocol.erase(protocolNumber);
+    protocolToProtocolNumber.erase(protocol);
 }
 
 // FIXME use constants instead of numbers
@@ -85,6 +94,8 @@ static const ProtocolGroup::Protocols ethertypeProtocols {
     { ETHERTYPE_IEEE8021AE, &Protocol::ieee8021ae },
     { ETHERTYPE_TTETH, &Protocol::tteth },
     { ETHERTYPE_IEEE8021_R_TAG, &Protocol::ieee8021rTag },
+    { ETHERTYPE_8021Q_CFM, &Protocol::ieee8021qCFM },
+    { ETHERTYPE_MRP, &Protocol::mrp },
 };
 
 // excerpt from http://www.iana.org/assignments/ppp-numbers/ppp-numbers.xhtml

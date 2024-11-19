@@ -478,7 +478,7 @@ void PingApp::processPingResponse(int originatorId, int seqNo, Packet *packet)
     }
 
     // update statistics
-    countPingResponse(B(pingPayload->getChunkLength()).get(), seqNo, rtt, isDup);
+    countPingResponse(pingPayload->getChunkLength().get<B>(), seqNo, rtt, isDup);
 }
 
 void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt, bool isDup)

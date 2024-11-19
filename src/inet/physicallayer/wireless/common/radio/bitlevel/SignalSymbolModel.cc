@@ -21,7 +21,11 @@ SignalSymbolModel::SignalSymbolModel(int headerSymbolLength, double headerSymbol
 
 SignalSymbolModel::~SignalSymbolModel()
 {
-    delete symbols;
+    if (symbols) {
+        for (auto symbol : *symbols)
+            delete symbol;
+        delete symbols;
+    }
 }
 
 std::ostream& SignalSymbolModel::printToStream(std::ostream& stream, int level, int evFlags) const

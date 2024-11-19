@@ -52,7 +52,7 @@ double BreakpointPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m
     if (distance < breakpointDistance)
         return 1 / (l01 * pow(distance.get(), alpha1));
     else
-        return 1 / (l02 * pow(unit(distance / breakpointDistance).get(), alpha2));
+        return 1 / (l02 * pow((distance / breakpointDistance).get<unit>(), alpha2));
 }
 
 m BreakpointPathLoss::computeRange(mps propagationSpeed, Hz frequency, double loss) const

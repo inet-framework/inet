@@ -208,7 +208,7 @@ void Ospfv2Interface::sendHelloPacket(Ipv4Address destination, short ttl)
         helloPacket->setNeighbor(k, neighbors[k]);
     }
 
-    helloPacket->setPacketLengthField(B(OSPFv2_HEADER_LENGTH + OSPFv2_HELLO_HEADER_LENGTH + B(initedNeighborCount * 4)).get());
+    helloPacket->setPacketLengthField((OSPFv2_HEADER_LENGTH + OSPFv2_HELLO_HEADER_LENGTH + B(initedNeighborCount * 4)).get<B>());
     helloPacket->setChunkLength(B(helloPacket->getPacketLengthField()));
 
     for (int i = 0; i < 8; i++) {
@@ -236,7 +236,7 @@ void Ospfv2Interface::sendLsAcknowledgement(const Ospfv2LsaHeader *lsaHeader, Ip
     lsAckPacket->setLsaHeadersArraySize(1);
     lsAckPacket->setLsaHeaders(0, *lsaHeader);
 
-    lsAckPacket->setPacketLengthField(B(OSPFv2_HEADER_LENGTH + OSPFv2_LSA_HEADER_LENGTH).get());
+    lsAckPacket->setPacketLengthField((OSPFv2_HEADER_LENGTH + OSPFv2_LSA_HEADER_LENGTH).get<B>());
     lsAckPacket->setChunkLength(B(lsAckPacket->getPacketLengthField()));
 
     for (int i = 0; i < 8; i++) {
@@ -509,7 +509,7 @@ Packet *Ospfv2Interface::createUpdatePacket(const Ospfv2Lsa *lsa)
             throw cRuntimeError("Invalid LSA type: %d", lsaType);
     }
 
-    updatePacket->setPacketLengthField(B(packetLength).get());
+    updatePacket->setPacketLengthField(packetLength.get<B>());
     updatePacket->setChunkLength(packetLength);
 
     for (int j = 0; j < 8; j++) {
@@ -572,7 +572,7 @@ void Ospfv2Interface::sendDelayedAcknowledgements()
                     packetSize += OSPFv2_LSA_HEADER_LENGTH;
                 }
 
-                ackPacket->setPacketLengthField(B(packetSize - IPv4_MAX_HEADER_LENGTH).get());
+                ackPacket->setPacketLengthField((packetSize - IPv4_MAX_HEADER_LENGTH).get<B>());
                 ackPacket->setChunkLength(B(ackPacket->getPacketLengthField()));
 
                 for (int i = 0; i < 8; i++) {

@@ -126,7 +126,7 @@ Ethernet Interface
 ------------------
 
 The :ned:`EthernetInterface` compound module implements the
-:ned:`IWiredInterface` interface. Complements :ned:`EthernetCsmaMac` and
+:ned:`IWiredInterface` interface. Complements :ned:`EthernetCsmaMacPhy` and
 :ned:`EthernetEncapsulation` with an output queue for QoS and RED support. It also
 has configurable input/output filters as :ned:`IHook` components
 similarly to the :ned:`PppInterface` module.
@@ -142,8 +142,8 @@ Nowadays, almost all Ethernet networks operate using full-duplex
 point-to-point connections between hosts and switches. This means that
 there are no collisions, and the behavior of the MAC component is much
 simpler than in classic Ethernet that used coaxial cables and hubs. Two MAC modules for Ethernet are provided by the INET framework: the
-:ned:`EthernetMac` is simpler to understand and easier to extend,
-because it supports only full-duplex connections. The :ned:`EthernetCsmaMac`
+:ned:`EthernetMacPhy` is simpler to understand and easier to extend,
+because it supports only full-duplex connections. The :ned:`EthernetCsmaMacPhy`
 module implements the full MAC functionality including CSMA/CD, it can
 operate in both half-duplex and full-duplex mode.
 
@@ -154,9 +154,9 @@ Components
 
 The following components are present in the model:
 
--  :ned:`EthernetMac`
+-  :ned:`EthernetMacPhy`
 
--  :ned:`EthernetCsmaMac`
+-  :ned:`EthernetCsmaMacPhy`
 
 -  :ned:`EthernetEncapsulation`
 
@@ -168,10 +168,10 @@ The following components are present in the model:
 
 .. _ug:sec:ethernet:ethermacfullduplex:
 
-EthernetMac
+EthernetMacPhy
 ~~~~~~~~~~~
 
-From the two MAC implementations, :ned:`EthernetMac` is the simpler
+From the two MAC implementations, :ned:`EthernetMacPhy` is the simpler
 one, it operates only in full-duplex mode (its :par:`duplexEnabled`
 parameter fixed to ``true`` in its NED definition). This module does
 not need to implement CSMA/CD, so there is no collision detection,
@@ -180,12 +180,12 @@ bursting.
 
 .. _ug:sec:ethernet:ethermac:
 
-EthernetCsmaMac
+EthernetCsmaMacPhy
 ~~~~~~~~~~~~~~~
 
 Ethernet MAC layer implementing CSMA/CD. It supports both half-duplex
 and full-duplex operations; in full-duplex mode, it behaves as
-:ned:`EthernetMac`. In half-duplex mode, it detects collisions,
+:ned:`EthernetMacPhy`. In half-duplex mode, it detects collisions,
 sends jam messages, and retransmits frames upon collisions using the
 exponential backoff algorithm. In Gigabit Ethernet networks, it supports
 carrier extension and frame bursting. Carrier extension can be turned

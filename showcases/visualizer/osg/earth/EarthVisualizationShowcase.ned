@@ -1,12 +1,11 @@
 package inet.showcases.visualizer.osg.earth;
 
-import inet.common.geometry.common.OsgGeographicCoordinateSystem;
+import inet.common.geometry.common.IGeographicCoordinateSystem;
 import inet.environment.common.PhysicalEnvironment;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.common.IntegratedVisualizer;
-
 
 network EarthVisualizationShowcase
 {
@@ -15,7 +14,7 @@ network EarthVisualizationShowcase
             parameters:
                 @display("p=100,50");
         }
-        coordinateSystem: OsgGeographicCoordinateSystem {
+        coordinateSystem: <default(firstAvailableOrEmpty("OsgGeographicCoordinateSystem", "SimpleGeographicCoordinateSystem"))> like IGeographicCoordinateSystem {
             parameters:
                 @display("p=100,150");
         }

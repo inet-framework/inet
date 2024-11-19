@@ -39,7 +39,7 @@ void TokenBasedServer::processPackets()
         else {
             auto tokenConsumptionPerPacket = tokenConsumptionPerPacketParameter->doubleValue();
             auto tokenConsumptionPerBit = tokenConsumptionPerBitParameter->doubleValue();
-            int numRequiredTokens = tokenConsumptionPerPacket + tokenConsumptionPerBit * packet->getDataLength().get();
+            int numRequiredTokens = tokenConsumptionPerPacket + tokenConsumptionPerBit * packet->getDataLength().get<b>();
             if (numTokens >= numRequiredTokens) {
                 packet = provider.pullPacket();
                 take(packet);

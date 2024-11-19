@@ -8,7 +8,7 @@
 #ifndef __INET_LIFECYCLEOPERATION_H
 #define __INET_LIFECYCLEOPERATION_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 
@@ -37,6 +37,12 @@ class INET_API LifecycleOperation : public cObject, public noncopyable
   public:
     LifecycleOperation() :
         rootModule(nullptr), currentStage(0), insideInitiateOperation(false), operationCompletionCallback(nullptr) {}
+
+    virtual ~LifecycleOperation() {
+        for (auto callback : pendingList)
+            delete callback;
+        pendingList.clear();
+    }
 
     /**
      * Initialize the operation using the parameters provided in the

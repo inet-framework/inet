@@ -272,7 +272,9 @@ void PimDm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
             for (auto it : routes) {
                 auto route = it.second;
                 auto& dis = route->downstreamInterfaces;
-                auto predicate = [&] (const DownstreamInterface *di) { return di->ie == ie; };
+                auto predicate = [&] (const DownstreamInterface *di) {
+                    return di->ie == ie;
+                };
                 if (ie->isUp() && ie->hasCarrier()) {
                     // mark the interface as pruned
                     if (std::find_if(dis.begin(), dis.end(), predicate) == dis.end()) {
@@ -283,7 +285,13 @@ void PimDm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
                 }
                 else {
                     // delete PIM state to avoid using it when interface comes back UP again
-                    dis.erase(std::remove_if(dis.begin(), dis.end(), predicate), dis.end());
+                    auto it = std::remove_if(dis.begin(), dis.end(), [&] (const DownstreamInterface *di) {
+                        bool result = di->ie == ie;
+                        if (result)
+                            delete di;
+                        return result;
+                    });
+                    dis.erase(it, dis.end());
                 }
             }
         }

@@ -70,7 +70,7 @@ void Ieee80211DsssPhyHeaderSerializer::serialize(MemoryOutputStream& stream, con
     stream.writeUint16Be(0);
     stream.writeByte(dsssPhyHeader->getSignal());
     stream.writeByte(dsssPhyHeader->getService());
-    stream.writeUint16Be(B(dsssPhyHeader->getLengthField()).get());
+    stream.writeUint16Be(dsssPhyHeader->getLengthField().get<B>());
 }
 
 const Ptr<Chunk> Ieee80211DsssPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
@@ -93,7 +93,7 @@ void Ieee80211HrDsssPhyHeaderSerializer::serialize(MemoryOutputStream& stream, c
     stream.writeUint16Be(0);
     stream.writeByte(hrDsssPhyHeader->getSignal());
     stream.writeByte(hrDsssPhyHeader->getService());
-    stream.writeUint16Be(B(hrDsssPhyHeader->getLengthField()).get());
+    stream.writeUint16Be(hrDsssPhyHeader->getLengthField().get<B>());
 }
 
 const Ptr<Chunk> Ieee80211HrDsssPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
@@ -115,7 +115,7 @@ void Ieee80211OfdmPhyHeaderSerializer::serialize(MemoryOutputStream& stream, con
     auto ofdmPhyHeader = dynamicPtrCast<const Ieee80211OfdmPhyHeader>(chunk);
     stream.writeUint4(ofdmPhyHeader->getRate());
     stream.writeBit(ofdmPhyHeader->getReserved());
-    stream.writeNBitsOfUint64Be(B(ofdmPhyHeader->getLengthField()).get(), 12);
+    stream.writeNBitsOfUint64Be(ofdmPhyHeader->getLengthField().get<B>(), 12);
     stream.writeBit(ofdmPhyHeader->getParity());
     stream.writeNBitsOfUint64Be(ofdmPhyHeader->getTail(), 6);
     stream.writeUint16Be(ofdmPhyHeader->getService());
@@ -141,7 +141,7 @@ void Ieee80211ErpOfdmPhyHeaderSerializer::serialize(MemoryOutputStream& stream, 
     auto erpOfdmPhyHeader = dynamicPtrCast<const Ieee80211ErpOfdmPhyHeader>(chunk);
     stream.writeUint4(erpOfdmPhyHeader->getRate());
     stream.writeBit(erpOfdmPhyHeader->getReserved());
-    stream.writeNBitsOfUint64Be(B(erpOfdmPhyHeader->getLengthField()).get(), 12);
+    stream.writeNBitsOfUint64Be(erpOfdmPhyHeader->getLengthField().get<B>(), 12);
     stream.writeBit(erpOfdmPhyHeader->getParity());
     stream.writeNBitsOfUint64Be(erpOfdmPhyHeader->getTail(), 6);
     stream.writeUint16Be(erpOfdmPhyHeader->getService());

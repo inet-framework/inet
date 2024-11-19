@@ -64,6 +64,7 @@ class INET_API LifecycleController
     };
 
     Callback *spareCallback = nullptr;
+    std::vector<LifecycleOperation *> runningOperations;
 
   protected:
     virtual bool resumeOperation(LifecycleOperation *operation);
@@ -72,7 +73,7 @@ class INET_API LifecycleController
 
   public:
     LifecycleController() : spareCallback(nullptr) {}
-    virtual ~LifecycleController() { delete spareCallback; }
+    virtual ~LifecycleController();
 
     /**
      * Initiate an operation. See the class documentation and ILifecycle for

@@ -11,6 +11,18 @@ namespace inet {
 
 namespace physicallayer {
 
+Ieee80211OfdmSymbol::~Ieee80211OfdmSymbol()
+{
+    for (auto symbol : subcarrierSymbols)
+        delete symbol;
+}
+
+Ieee80211OfdmSymbol::Ieee80211OfdmSymbol(const Ieee80211OfdmSymbol& other)
+{
+    for (auto symbol : other.subcarrierSymbols)
+        subcarrierSymbols.push_back(symbol ? new ApskSymbol(*symbol) : nullptr);
+}
+
 void Ieee80211OfdmSymbol::pushApskSymbol(const ApskSymbol *apskSymbol, int subcarrierIndex)
 {
     if (subcarrierIndex >= 53)

@@ -27,6 +27,11 @@ ReceptionBase::ReceptionBase(const IRadio *receiverRadio, const ITransmission *t
 {
 }
 
+ReceptionBase::~ReceptionBase()
+{
+    delete analogModel;
+}
+
 std::ostream& ReceptionBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_DETAIL)

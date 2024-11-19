@@ -14,7 +14,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UdpCommand_m.h"
 
 namespace inet {
 
@@ -191,6 +191,8 @@ void VoipStreamSender::finish()
     if (pFormatCtx) {
         avformat_close_input(&pFormatCtx);
     }
+    if (pCodecCtx)
+        avcodec_free_context(&pCodecCtx);
 }
 
 void VoipStreamSender::openSoundFile(const char *name)
@@ -472,21 +474,24 @@ void VoipStreamSender::readFrame()
 
     sampleBuffer.align();
 
-    AVPacket *packet = av_packet_alloc();
 
     while (sampleBuffer.length() < samplesPerPacket * inBytesPerSample) {
         // read one frame
+        AVPacket *packet = av_packet_alloc();
         int err = av_read_frame(pFormatCtx, packet);
         if (err < 0) { // end of file
             if (pReSampleCtx)
                 resampleFrame(nullptr, 0);  // resample remainder data in internal buffer
+            av_packet_free(&packet);
             break;
         }
 
         // if the frame doesn't belong to our audiostream, continue... is not supposed to happen,
         // since .wav contain only one media stream
-        if (packet->stream_index != streamIndex)
+        if (packet->stream_index != streamIndex) {
+            av_packet_free(&packet);
             continue;
+        }
 
 #if LIBAVUTIL_VERSION_MAJOR < 57
         int skip_samples_size = 0;
@@ -506,8 +511,10 @@ void VoipStreamSender::readFrame()
         }
 
         // packet length == 0 ? read next packet
-        if (packet->size == 0)
+        if (packet->size == 0) {
+            av_packet_free(&packet);
             continue;
+        }
 
         err = avcodec_send_packet(pCodecCtx, packet);
         if (err < 0)
@@ -534,8 +541,8 @@ void VoipStreamSender::readFrame()
             }
         }
         av_frame_free(&frame);
+        av_packet_free(&packet);
     }
-    av_packet_free(&packet);
 }
 
 void VoipStreamSender::resampleFrame(const uint8_t **in_data, int in_nb_samples)

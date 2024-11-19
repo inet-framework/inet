@@ -29,15 +29,15 @@ void SimpleGeographicCoordinateSystem::initialize(int stage)
 
 Coord SimpleGeographicCoordinateSystem::computeSceneCoordinate(const GeoCoord& geographicCoordinate) const
 {
-    double sceneX = deg(geographicCoordinate.longitude - sceneLongitude).get() * cos(fabs(rad(sceneLatitude).get())) * metersPerDegree;
-    double sceneY = deg(sceneLatitude - geographicCoordinate.latitude).get() * metersPerDegree;
-    return Coord(sceneX, sceneY, m(geographicCoordinate.altitude + sceneAltitude).get());
+    double sceneX = (geographicCoordinate.longitude - sceneLongitude).get<deg>() * cos(fabs(sceneLatitude.get<rad>())) * metersPerDegree;
+    double sceneY = (sceneLatitude - geographicCoordinate.latitude).get<deg>() * metersPerDegree;
+    return Coord(sceneX, sceneY, (geographicCoordinate.altitude + sceneAltitude).get<m>());
 }
 
 GeoCoord SimpleGeographicCoordinateSystem::computeGeographicCoordinate(const Coord& sceneCoordinate) const
 {
     auto geograpicLatitude = sceneLatitude - deg(sceneCoordinate.y / metersPerDegree);
-    auto geograpicLongitude = sceneLongitude + deg(sceneCoordinate.x / metersPerDegree / cos(fabs(rad(sceneLatitude).get())));
+    auto geograpicLongitude = sceneLongitude + deg(sceneCoordinate.x / metersPerDegree / cos(fabs(sceneLatitude.get<rad>())));
     return GeoCoord(geograpicLatitude, geograpicLongitude, m(sceneCoordinate.z) - sceneAltitude);
 }
 
@@ -69,7 +69,7 @@ void OsgGeographicCoordinateSystem::initialize(int stage)
 
         geoTransform->addChild(localTransform);
         geoTransform->setPosition(osgEarth::GeoPoint(mapNode->getMapSRS()->getGeographicSRS(),
-            deg(scenePosition.longitude).get(), deg(scenePosition.latitude).get(), m(scenePosition.altitude).get()));
+            scenePosition.longitude.get<deg>(), scenePosition.latitude.get<deg>(), scenePosition.altitude.get<m>()));
 
         localTransform->setAttitude(osg::Quat(osg::Vec4d(sceneOrientation.v.x, sceneOrientation.v.y, sceneOrientation.v.z, sceneOrientation.s)));
 
@@ -88,7 +88,7 @@ Coord OsgGeographicCoordinateSystem::computeSceneCoordinate(const GeoCoord& geog
 {
     auto mapSrs = mapNode->getMapSRS();
     osg::Vec3d ecefCoordinate;
-    osg::Vec3d osgGeographicCoordinate(deg(geographicCoordinate.longitude).get(), deg(geographicCoordinate.latitude).get(), m(geographicCoordinate.altitude).get());
+    osg::Vec3d osgGeographicCoordinate(geographicCoordinate.longitude.get<deg>(), geographicCoordinate.latitude.get<deg>(), geographicCoordinate.altitude.get<m>());
     mapSrs->getGeographicSRS()->transform(osgGeographicCoordinate, mapSrs->getECEF(), ecefCoordinate);
     auto sceneCoordinate = osg::Vec4d(ecefCoordinate.x(), ecefCoordinate.y(), ecefCoordinate.z(), 1.0) * inverseLocatorMatrix;
     return Coord(sceneCoordinate.x(), sceneCoordinate.y(), sceneCoordinate.z());

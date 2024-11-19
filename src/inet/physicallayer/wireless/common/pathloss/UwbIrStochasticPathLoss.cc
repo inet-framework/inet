@@ -70,12 +70,12 @@ std::ostream& UwbIrStochasticPathLoss::printToStream(std::ostream& stream, int l
 }
 
 double UwbIrStochasticPathLoss::getFDPathLoss(Hz frequency, m distance) const {
-    return 0.5 * PL0 * pow(unit(frequency / fc).get(), -2 * (kappa + 1)) / pow(unit(distance / d0).get(), pathloss_exponent);
+    return 0.5 * PL0 * pow((frequency / fc).get<unit>(), -2 * (kappa + 1)) / pow((distance / d0).get<unit>(), pathloss_exponent);
 }
 
 double UwbIrStochasticPathLoss::getNarrowBandFreeSpacePathLoss(Hz frequency, m distance) const
 {
-    double attenuation = 4 * M_PI * unit(distance * frequency / mps(SPEED_OF_LIGHT)).get();
+    double attenuation = 4 * M_PI * (distance * frequency / mps(SPEED_OF_LIGHT)).get<unit>();
     return 1.0 / (attenuation * attenuation);
 }
 
@@ -84,7 +84,7 @@ double UwbIrStochasticPathLoss::getGhassemzadehPathLoss(double gamma, double S, 
     double attenuation = PL0;
     if (distance < d0)
         distance = d0;
-    attenuation = attenuation - 10 * gamma * log10(unit(distance / d0).get());
+    attenuation = attenuation - 10 * gamma * log10((distance / d0).get<unit>());
     if (shadowing)
         attenuation = attenuation - S;
     return math::dB2fraction(attenuation);

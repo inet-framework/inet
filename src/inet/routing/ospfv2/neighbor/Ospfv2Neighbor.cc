@@ -217,7 +217,7 @@ void Neighbor::sendDatabaseDescriptionPacket(bool init)
     }
     ddPacket->setDdOptions(ddOptions);
 
-    ddPacket->setPacketLengthField(B(packetSize).get());
+    ddPacket->setPacketLengthField(packetSize.get<B>());
     ddPacket->setChunkLength(packetSize);
 
     AuthenticationKeyType authKey = parentInterface->getAuthenticationKey();
@@ -352,7 +352,7 @@ void Neighbor::sendLinkStateRequestPacket()
         }
     }
 
-    requestPacket->setPacketLengthField(B(packetSize).get());
+    requestPacket->setPacketLengthField(packetSize.get<B>());
     requestPacket->setChunkLength(packetSize);
 
     AuthenticationKeyType authKey = parentInterface->getAuthenticationKey();
@@ -661,7 +661,7 @@ void Neighbor::retransmitUpdatePacket()
         it++;
     }
 
-    updatePacket->setPacketLengthField(B(packetLength - IPv4_MAX_HEADER_LENGTH).get());
+    updatePacket->setPacketLengthField((packetLength - IPv4_MAX_HEADER_LENGTH).get<B>());
     updatePacket->setChunkLength(B(updatePacket->getPacketLengthField()));
 
     AuthenticationKeyType authKey = parentInterface->getAuthenticationKey();

@@ -1,7 +1,7 @@
 %description:
 
 Test shutdown and startup operations on EtherAppClient/EtherAppServer/EthernetEncapsulation modules.
-The EthernetSwitch, EthernetCsmaMac modules tested, too.
+The EthernetSwitch, EthernetCsmaMacPhy modules tested, too.
 
 sender[0] and recip start at down
 

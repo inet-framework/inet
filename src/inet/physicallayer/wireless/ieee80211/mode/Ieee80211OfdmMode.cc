@@ -203,7 +203,7 @@ b Ieee80211OfdmDataMode::getPaddingLength(b dataLength) const
         const ConvolutionalCode *convolutionalCode = code->getConvolutionalCode();
         dataBitsPerOFDMSymbol = convolutionalCode->getDecodedLength(codedBitsPerOFDMSymbol);
     }
-    unsigned int dataBitsLength = 6 + b(dataLength).get() + 16;
+    unsigned int dataBitsLength = 6 + dataLength.get<b>() + 16;
     unsigned int numberOfOFDMSymbols = lrint(ceil(1.0 * dataBitsLength / dataBitsPerOFDMSymbol));
     unsigned int numberOfBitsInTheDataField = dataBitsPerOFDMSymbol * numberOfOFDMSymbols; // N_DATA
     unsigned int numberOfPadBits = numberOfBitsInTheDataField - dataBitsLength; // N_PAD
@@ -223,7 +223,7 @@ const simtime_t Ieee80211OfdmDataMode::getDuration(b dataLength) const
     const ConvolutionalCode *convolutionalCode = code ? code->getConvolutionalCode() : nullptr;
     unsigned int dataBitsPerOFDMSymbol = convolutionalCode ? convolutionalCode->getDecodedLength(codedBitsPerOFDMSymbol) : codedBitsPerOFDMSymbol;
     // IEEE Std 802.11-2007, section 17.3.5.3, equation (17-11)
-    unsigned int numberOfSymbols = lrint(ceil((double)(getServiceFieldLength() + getCompleteLength(dataLength)).get() / dataBitsPerOFDMSymbol));
+    unsigned int numberOfSymbols = lrint(ceil((double)(getServiceFieldLength() + getCompleteLength(dataLength)).get<b>() / dataBitsPerOFDMSymbol));
     // Add signal extension for ERP PHY
     return numberOfSymbols * getSymbolInterval();
 }

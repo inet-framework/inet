@@ -55,14 +55,9 @@ void SimpleClockSynchronizer::synchronizeSlaveClock()
     auto masterOscillatorBasedClock = check_and_cast<OscillatorBasedClock*>(masterClock.get());
     auto clockTime = masterClock->getClockTime() + synchronizationClockTimeErrorParameter->doubleValue();
     ppm oscillatorCompensation = unit(getCurrentRelativeTickLength(slaveClock.get()) / getCurrentRelativeTickLength(masterClock.get())
-            * (1 + unit(masterOscillatorBasedClock->getOscillatorCompensation()).get())
-            * (1 + unit(ppm(synchronizationOscillatorCompensationErrorParameter->doubleValue())).get()) - 1);
-//    slaveClock->jumpClockTo(clockTime, oscillatorCompensation, true);
-    slaveClock->adjustClockTo(clockTime);
-    slaveClock->resetOscillator();
-    slaveClock->setOscillatorCompensation(oscillatorCompensation);
-
-
+            * (1 + masterOscillatorBasedClock->getOscillatorCompensation().get<unit>())
+            * (1 + ppm(synchronizationOscillatorCompensationErrorParameter->doubleValue()).get<unit>()) - 1);
+    slaveClock->setClockTime(clockTime, oscillatorCompensation, true);
 }
 
 void SimpleClockSynchronizer::scheduleSynchronizationTimer()

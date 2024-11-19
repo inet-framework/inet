@@ -18,7 +18,7 @@ Ieee80211DsssDataMode::Ieee80211DsssDataMode(const DpskModulationBase *modulatio
 
 const simtime_t Ieee80211DsssDataMode::getDuration(b length) const
 {
-    return (simtime_t)(lrint(ceil((double)length.get() / getGrossBitrate().get() * 1E+6))) / 1E+6;
+    return (simtime_t)(lrint(ceil((double)length.get() / getGrossBitrate().get<bps>() * 1E+6))) / 1E+6;
 }
 
 Ieee80211DsssMode::Ieee80211DsssMode(const char *name, const Ieee80211DsssPreambleMode *preambleMode, const Ieee80211DsssHeaderMode *headerMode, const Ieee80211DsssDataMode *dataMode) :

@@ -35,7 +35,7 @@ void StreamBufferChunk::parsimPack(cCommBuffer *buffer) const
     Chunk::parsimPack(buffer);
     buffer->packObject(streamData.get());
     buffer->pack(startTime);
-    buffer->pack(bps(datarate).get());
+    buffer->pack(datarate.get<bps>());
 }
 
 void StreamBufferChunk::parsimUnpack(cCommBuffer *buffer)

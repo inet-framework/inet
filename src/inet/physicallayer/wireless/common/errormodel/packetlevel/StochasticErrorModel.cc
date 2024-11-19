@@ -51,8 +51,8 @@ double StochasticErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSig
         auto transmission = reception->getTransmission();
         auto bitModel = transmission->getBitModel();
         double bitErrorRate = computeBitErrorRate(snir, part);
-        double headerSuccessRate = pow(1.0 - bitErrorRate, b(bitModel->getHeaderLength()).get());
-        double dataSuccessRate = pow(1.0 - bitErrorRate, b(bitModel->getDataLength()).get());
+        double headerSuccessRate = pow(1.0 - bitErrorRate, bitModel->getHeaderLength().get<b>());
+        double dataSuccessRate = pow(1.0 - bitErrorRate, bitModel->getDataLength().get<b>());
         switch (part) {
             case IRadioSignal::SIGNAL_PART_WHOLE:
                 return 1.0 - headerSuccessRate * dataSuccessRate;

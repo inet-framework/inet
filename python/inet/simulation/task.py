@@ -68,8 +68,8 @@ class SimulationTaskResult(TaskResult):
         self.kwargs = kwargs
         self.subprocess_result = subprocess_result
         if subprocess_result:
-            stdout = self.subprocess_result.stdout.decode("utf-8") if self.subprocess_result.stdout else ""
-            stderr = self.subprocess_result.stderr.decode("utf-8") if self.subprocess_result.stderr else ""
+            stdout = self.subprocess_result.stdout or ""
+            stderr = self.subprocess_result.stderr or ""
             match = re.search(r"<!> Simulation time limit reached -- at t=(.*), event #(\d+)", stdout)
             self.last_event_number = int(match.group(2)) if match else None
             self.last_simulation_time = match.group(1) if match else None
@@ -77,7 +77,7 @@ class SimulationTaskResult(TaskResult):
             match = re.search(r"<!> Error: (.*) -- in module (.*)", stderr)
             self.error_message = match.group(1).strip() if match else None
             self.error_module = match.group(2).strip() if match else None
-            matching_lines = [re.sub(r"CREATE (.*)", "\\1", line) for line in stdout.split("\n") if re.search(r"inet\.", line)]
+            matching_lines = [re.sub(r"instantiated NED type: (.*)", "\\1", line) for line in stdout.split("\n") if re.search(r"inet\.", line)]
             self.used_types = sorted(list(set(matching_lines)))
             if self.error_message is None:
                 match = re.search(r"<!> Error: (.*)", stderr)
@@ -212,10 +212,8 @@ class SimulationTask(Task):
             executable = simulation_project.get_executable()
             default_args = simulation_project.get_default_args()
             args = [executable, *default_args, "-s", "-u", "Cmdenv", "-f", simulation_config.ini_file, "-c", simulation_config.config, "-r", "0", "--sim-time-limit", "0s"]
-            _logger.debug(f"Running subprocess: {args}")
-            subprocess_result = subprocess.run(args, cwd=simulation_project.get_full_path(simulation_config.working_directory), capture_output=True, env=simulation_project.get_env())
-            stderr = subprocess_result.stderr.decode("utf-8")
-            match = re.search(r"The simulation wanted to ask a question|The simulation attempted to prompt for user input", stderr)
+            subprocess_result = run_command_with_logging(args, cwd=simulation_project.get_full_path(simulation_config.working_directory), env=simulation_project.get_env())
+            match = re.search(r"The simulation wanted to ask a question|The simulation attempted to prompt for user input", subprocess_result.stderr)
             self.interactive = match is not None
         return self.interactive
 
@@ -243,9 +241,6 @@ class SimulationTask(Task):
         Runs a simulation task by running the simulation as a child process or in the same process where Python is running.
 
         Parameters:
-            capture_output (bool):
-                Determines if the simulation standard error and standard output streams are captured into Python strings or not.
-
             extra_args (list):
                 Additional command line arguments for the simulation executable.
 
@@ -263,7 +258,7 @@ class SimulationTask(Task):
         """
         return super().run(**kwargs)
 
-    def run_protected(self, capture_output=True, extra_args=[],  simulation_runner="subprocess", simulation_runner_class=None, **kwargs):
+    def run_protected(self, extra_args=[],  simulation_runner="subprocess", simulation_runner_class=None, **kwargs):
         simulation_project = self.simulation_config.simulation_project
         working_directory = self.simulation_config.working_directory
         ini_file = self.simulation_config.ini_file
@@ -285,7 +280,7 @@ class SimulationTask(Task):
                 simulation_runner_class = inet.cffi.InprocessSimulationRunner
             else:
                 raise Exception("Unknown simulation_runner")
-        subprocess_result = simulation_runner_class().run(self, args, capture_output=capture_output)
+        subprocess_result = simulation_runner_class().run(self, args)
         if subprocess_result.returncode == signal.SIGINT.value or subprocess_result.returncode == -signal.SIGINT.value:
             task_result = self.task_result_class(task=self, subprocess_result=subprocess_result, result="CANCEL", expected_result=expected_result, reason="Cancel by user")
         elif subprocess_result.returncode == 0:
@@ -298,7 +293,7 @@ class SimulationTask(Task):
 
     # def collect_dependency_source_file_paths(self, simulation_task_result):
     #     simulation_project = self.simulation_config.simulation_project
-    #     stdout = simulation_task_result.subprocess_result.stdout.decode("utf-8")
+    #     stdout = simulation_task_result.subprocess_result.stdout
     #     ini_dependency_file_paths = []
     #     ned_dependency_file_paths = []
     #     cpp_dependency_file_paths = []

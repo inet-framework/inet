@@ -937,7 +937,7 @@ RouterLsa *Ospfv2Area::originateRouterLSA()
     }
 
     // update the length field in the LSA header
-    lsaHeader.setLsaLength(calculateLSASize(routerLSA).get());
+    lsaHeader.setLsaLength(calculateLSASize(routerLSA).get<B>());
 
     routerLSA->setSource(LsaTrackingInfo::ORIGINATED);
 
@@ -976,7 +976,7 @@ NetworkLsa *Ospfv2Area::originateNetworkLSA(const Ospfv2Interface *intf)
         networkLSA->setAttachedRouters(netIndex, Ipv4Address(parentRouter->getRouterID()));
 
         // update the length field in the LSA header
-        lsaHeader.setLsaLength(B(calculateLsaSize(*networkLSA)).get());
+        lsaHeader.setLsaLength(calculateLsaSize(*networkLSA).get<B>());
 
         setLsaCrc(*networkLSA, crcMode);
         return networkLSA;
@@ -1100,7 +1100,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
             summaryLSA->setSource(LsaTrackingInfo::ORIGINATED);
 
             // update the length field in the LSA header
-            lsaHeader.setLsaLength(B(calculateLsaSize(*summaryLSA)).get());
+            lsaHeader.setLsaLength(calculateLsaSize(*summaryLSA).get<B>());
 
             setLsaCrc(*summaryLSA, crcMode);
             return summaryLSA;
@@ -1136,7 +1136,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
                     lsaHeader.setLinkStateID(newLinkStateID);
 
                     // update the length field in the LSA header
-                    lsaHeader.setLsaLength(B(calculateLsaSize(*summaryLSA)).get());
+                    lsaHeader.setLsaLength(calculateLsaSize(*summaryLSA).get<B>());
 
                     setLsaCrc(*summaryLSA, crcMode);
                     return summaryLSA;
@@ -1162,7 +1162,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
                 summaryLSA->setSource(LsaTrackingInfo::ORIGINATED);
 
                 // update the length field in the LSA header
-                lsaHeader.setLsaLength(B(calculateLsaSize(*summaryLSA)).get());
+                lsaHeader.setLsaLength(calculateLsaSize(*summaryLSA).get<B>());
 
                 setLsaCrc(*summaryLSA, crcMode);
                 return summaryLSA;
@@ -1203,7 +1203,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
                         lsaHeader.setLinkStateID(newLinkStateID);
 
                         // update the length field in the LSA header
-                        lsaHeader.setLsaLength(B(calculateLsaSize(*summaryLSA)).get());
+                        lsaHeader.setLsaLength(calculateLsaSize(*summaryLSA).get<B>());
 
                         setLsaCrc(*summaryLSA, crcMode);
                         return summaryLSA;
@@ -1229,7 +1229,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
                     summaryLSA->setSource(LsaTrackingInfo::ORIGINATED);
 
                     // update the length field in the LSA header
-                    lsaHeader.setLsaLength(B(calculateLsaSize(*summaryLSA)).get());
+                    lsaHeader.setLsaLength(calculateLsaSize(*summaryLSA).get<B>());
 
                     setLsaCrc(*summaryLSA, crcMode);
                     return summaryLSA;
@@ -1281,7 +1281,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
                         lsaHeader.setLinkStateID(newLinkStateID);
 
                         // update the length field in the LSA header
-                        lsaHeader.setLsaLength(B(calculateLsaSize(*summaryLSA)).get());
+                        lsaHeader.setLsaLength(calculateLsaSize(*summaryLSA).get<B>());
 
                         setLsaCrc(*summaryLSA, crcMode);
                         return summaryLSA;
@@ -1315,7 +1315,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA(const Ospfv2RoutingTableEntry *entry
                         summaryLSA->setSource(LsaTrackingInfo::ORIGINATED);
 
                         // update the length field in the LSA header
-                        lsaHeader.setLsaLength(B(calculateLsaSize(*summaryLSA)).get());
+                        lsaHeader.setLsaLength(calculateLsaSize(*summaryLSA).get<B>());
 
                         setLsaCrc(*summaryLSA, crcMode);
                         return summaryLSA;
@@ -1349,7 +1349,7 @@ SummaryLsa *Ospfv2Area::originateSummaryLSA_Stub()
     summaryLSA->setSource(LsaTrackingInfo::ORIGINATED);
 
     // update the length field in the LSA header
-    lsaHeader.setLsaLength(B(calculateLsaSize(*summaryLSA)).get());
+    lsaHeader.setLsaLength(calculateLsaSize(*summaryLSA).get<B>());
 
     setLsaCrc(*summaryLSA, crcMode);
     return summaryLSA;

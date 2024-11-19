@@ -32,6 +32,7 @@ extend INET with new protocols or other components using C++, the
    ch-mpls
    ch-ppp
    ch-ethernet
+   ch-10base-t1s
    ch-tsn
    ch-80211
    ch-802154

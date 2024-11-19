@@ -287,8 +287,8 @@ void MediumOsgVisualizer::refreshRingTransmissionNode(const ITransmission *trans
 {
     auto propagation = radioMedium->getPropagation();
     // TODO auto transmissionStart = transmission->getStartPosition();
-    double startRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
-    double endRadius = std::max(0.0, propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl());
+    double startRadius = propagation->getPropagationSpeed().get<mps>() * (simTime() - transmission->getStartTime()).dbl();
+    double endRadius = std::max(0.0, propagation->getPropagationSpeed().get<mps>() * (simTime() - transmission->getEndTime()).dbl());
     auto positionAttitudeTransform = static_cast<osg::PositionAttitudeTransform *>(node);
     auto annulusAutoTransform = static_cast<osg::AutoTransform *>(positionAttitudeTransform->getChild(0));
     auto annulus = static_cast<osg::Geometry *>(static_cast<osg::Geode *>(annulusAutoTransform->getChild(0))->getDrawable(0));
@@ -309,8 +309,8 @@ void MediumOsgVisualizer::refreshSphereTransmissionNode(const ITransmission *tra
 {
     auto propagation = radioMedium->getPropagation();
     // TODO auto transmissionStart = transmission->getStartPosition();
-    double startRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
-    double endRadius = std::max(0.0, propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl());
+    double startRadius = propagation->getPropagationSpeed().get<mps>() * (simTime() - transmission->getStartTime()).dbl();
+    double endRadius = std::max(0.0, propagation->getPropagationSpeed().get<mps>() * (simTime() - transmission->getEndTime()).dbl());
     auto group = static_cast<osg::Group *>(node);
     auto startGeode = static_cast<osg::Geode *>(group->getChild(0));
     startGeode->setNodeMask(startRadius != 0);

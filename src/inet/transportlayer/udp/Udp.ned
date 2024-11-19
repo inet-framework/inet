@@ -17,14 +17,14 @@ import inet.transportlayer.contract.IUdp;
 // <b>Communication with clients (applications)</b>
 //
 // The module can (should) be connected to several applications.
-// For sending a UDP packet, the application should attach an ~UdpControlInfo
+// For sending a UDP packet, the application should attach an ~UdpCommand
 // object to the payload and send it to ~Udp.
-// ~Udp will also attach an ~UdpControlInfo object to any payload
+// ~Udp will also attach an ~UdpCommand object to any payload
 // message it sends up to the application.
 //
 // For receiving UDP packets, the connected applications should first
 // "bind" to the given UDP port. This can be done by sending an
-// arbitrary message with message kind UDP_C_BIND and an ~UdpControlInfo
+// arbitrary message with message kind UDP_C_BIND and an ~UdpCommand
 // attached with `srcPort` filled in.
 //
 // When UDP receives an ICMP error (~IcmpHeader or ~Icmpv6Header)
@@ -52,7 +52,7 @@ import inet.transportlayer.contract.IUdp;
 //    that is to be verified as defined by the RFC (serializable)
 // The incoming packet also fails the CRC verification if any relevant chunk is marked incorrect.
 //
-// @see ~UdpHeader, ~UdpControlInfo, ~UdpCommandCode
+// @see ~UdpHeader, ~UdpCommand, ~UdpCommandCode
 //
 simple Udp like IUdp
 {
@@ -79,9 +79,9 @@ simple Udp like IUdp
         @directSendKinds();     // Kind not used in sendDirect() messages or model doesn't use any sendDirect()
 
     gates:
-        input appIn @labels(UdpControlInfo/down) @messageKinds(inet::UdpCommandCode);
+        input appIn @labels(UdpCommand/down) @messageKinds(inet::UdpCommandCode);
         input ipIn @labels(UdpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
-        output appOut @labels(UdpControlInfo/up) @messageKinds(inet::UdpStatusInd);
+        output appOut @labels(UdpCommand/up) @messageKinds(inet::UdpStatusInd);
         output ipOut @labels(UdpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
 

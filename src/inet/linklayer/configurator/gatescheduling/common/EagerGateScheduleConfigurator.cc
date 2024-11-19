@@ -126,8 +126,8 @@ simtime_t EagerGateScheduleConfigurator::computeStartOffsetForPathFragments(Inpu
                     auto networkInterface = interface->networkInterface;
                     auto& interfaceSchedule = interfaceSchedules[networkInterface];
                     bps interfaceDatarate = bps(networkInterface->getDatarate());
-                    simtime_t transmissionDuration = s(packetLength / interfaceDatarate).get();
-                    simtime_t interFrameGap = s(b(96) / interfaceDatarate).get();
+                    simtime_t transmissionDuration = (packetLength / interfaceDatarate).get<s>();
+                    simtime_t interFrameGap = (b(96) / interfaceDatarate).get<s>();
                     auto channel = dynamic_cast<cDatarateChannel *>(networkInterface->getTxTransmissionChannel());
                     simtime_t propagationDelay = channel != nullptr ? channel->getDelay() : 0;
                     simtime_t gateOpenDuration = transmissionDuration;
@@ -197,8 +197,8 @@ void EagerGateScheduleConfigurator::addGateSchedulingForPathFragments(Input::Flo
                     auto networkInterface = interface->networkInterface;
                     auto& interfaceSchedule = interfaceSchedules[networkInterface];
                     bps interfaceDatarate = bps(networkInterface->getDatarate());
-                    simtime_t transmissionDuration = s(packetLength / interfaceDatarate).get();
-                    simtime_t interFrameGap = s(b(96) / interfaceDatarate).get();
+                    simtime_t transmissionDuration = (packetLength / interfaceDatarate).get<s>();
+                    simtime_t interFrameGap = (b(96) / interfaceDatarate).get<s>();
                     auto channel = dynamic_cast<cDatarateChannel *>(networkInterface->getTxTransmissionChannel());
                     simtime_t propagationDelay = channel != nullptr ? channel->getDelay() : 0;
                     simtime_t gateOpenDuration = transmissionDuration;

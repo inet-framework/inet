@@ -75,7 +75,7 @@ double TwoRayGroundReflection::computePathLoss(const ITransmission *transmission
          * To be consistent with the free space equation, L is added here.
          * The original equation in Rappaport's book assumes L = 1.
          */
-        return unit((transmitterAltitude * transmitterAltitude * receiverAltitude * receiverAltitude) / (distance * distance * distance * distance * systemLoss)).get();
+        return ((transmitterAltitude * transmitterAltitude * receiverAltitude * receiverAltitude) / (distance * distance * distance * distance * systemLoss)).get<unit>();
 }
 
 } // namespace physicallayer

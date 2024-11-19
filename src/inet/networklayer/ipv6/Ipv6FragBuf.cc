@@ -56,7 +56,7 @@ Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const
         buf = &(i->second);
     }
 
-    int fragmentLength = pk->getByteLength() - B(ipv6Header->getChunkLength()).get(); // datagram->calculateFragmentLength();
+    int fragmentLength = pk->getByteLength() - ipv6Header->getChunkLength().get<B>(); // datagram->calculateFragmentLength();
     unsigned short offset = fh->getFragmentOffset();
     bool moreFragments = fh->getMoreFragments();
 

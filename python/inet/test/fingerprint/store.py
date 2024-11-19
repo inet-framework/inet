@@ -11,6 +11,8 @@ __sphinx_mock__ = True # ignore this module in documentation
 
 _logger = logging.getLogger(__name__)
 
+_correct_fingerprint_stores = dict()
+
 class FingerprintStore:
     def __init__(self, simulation_project, file_name):
         self.simulation_project = simulation_project
@@ -129,9 +131,7 @@ class FingerprintStore:
     def remove_fingerprints(self, **kwargs):
         list(map(lambda element: self.entries.remove(element), self.filter_entries(**kwargs)))
 
-correct_fingerprint_stores = dict()
-
 def get_correct_fingerprint_store(simulation_project):
-    if not simulation_project in correct_fingerprint_stores:
-        correct_fingerprint_stores[simulation_project] = FingerprintStore(simulation_project, simulation_project.get_full_path(simulation_project.fingerprint_store))
-    return correct_fingerprint_stores[simulation_project]
+    if not simulation_project in _correct_fingerprint_stores:
+        _correct_fingerprint_stores[simulation_project] = FingerprintStore(simulation_project, simulation_project.get_full_path(simulation_project.fingerprint_store))
+    return _correct_fingerprint_stores[simulation_project]

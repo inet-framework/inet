@@ -80,7 +80,7 @@ void PacketStreamer::pushPacket(Packet *packet, const cGate *gate)
     streamedPacket = packet;
     EV_INFO << "Starting streaming packet" << EV_FIELD(packet) << EV_ENDL;
     if (!std::isnan(streamDatarate.get()))
-        scheduleClockEventAfter(s(streamedPacket->getDataLength() / streamDatarate).get(), endStreamingTimer);
+        scheduleClockEventAfter((streamedPacket->getDataLength() / streamDatarate).get<s>(), endStreamingTimer);
     pushOrSendPacketStart(streamedPacket->dup(), outputGate, consumer, streamDatarate, streamedPacket->getId());
     if (std::isnan(streamDatarate.get()))
         endStreaming();

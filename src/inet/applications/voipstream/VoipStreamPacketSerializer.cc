@@ -31,9 +31,9 @@ void VoipStreamPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr
     if (type == VOICE)
         stream.writeUint16Be(voipStreamPacket->getDataLength());
 
-    int64_t remainders = B(voipStreamPacket->getHeaderLength()).get() - B((stream.getLength() - startPosition)).get();
+    int64_t remainders = voipStreamPacket->getHeaderLength() - (stream.getLength() - startPosition).get<B>();
     if (remainders < 0)
-        throw cRuntimeError("voipStreamPacket length = %d smaller than required %d bytes, try to increment the 'voipHeaderSize' parameter", (int)B(voipStreamPacket->getChunkLength()).get(), (int)B(stream.getLength() - startPosition).get());
+        throw cRuntimeError("voipStreamPacket length = %d smaller than required %d bytes, try to increment the 'voipHeaderSize' parameter", (int)voipStreamPacket->getChunkLength().get<B>(), (int)(stream.getLength() - startPosition).get<B>());
     stream.writeByteRepeatedly('?', remainders);
 }
 
@@ -61,7 +61,7 @@ const Ptr<Chunk> VoipStreamPacketSerializer::deserialize(MemoryInputStream& stre
         voipStreamPacket->markIncorrect();
         return voipStreamPacket;
     }
-    stream.readByteRepeatedly('?', B(remainders).get());
+    stream.readByteRepeatedly('?', remainders.get<B>());
     return voipStreamPacket;
 }
 

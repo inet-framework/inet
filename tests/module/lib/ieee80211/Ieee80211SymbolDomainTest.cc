@@ -7,6 +7,7 @@
 
 #include "Ieee80211SymbolDomainTest.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmSymbol.h"
 #include <fstream>
 
 namespace inet {
@@ -67,9 +68,15 @@ void Ieee80211SymbolDomainTest::test() const
     const ITransmissionBitModel *dataBitModel = ieee80211OFDMDataEncoder->encode(&dataPacketModel);
     const ITransmissionSymbolModel *transmissionSignalSymbolModel = ieee80211OFDMSignalModulator->modulate(signalBitModel);
     const ITransmissionSymbolModel *transmissionDataSymbolModel = ieee80211OFDMDataModulator->modulate(dataBitModel);
-    ReceptionSymbolModel receptionSignalSymbolModel(0, 0, 0, 0, new std::vector<const ISymbol *>(*transmissionSignalSymbolModel->getAllSymbols()), NaN);
+    auto receptionSignalSymbols = new std::vector<const ISymbol *>();
+    for (auto symbol : *transmissionSignalSymbolModel->getAllSymbols())
+        receptionSignalSymbols->push_back(new Ieee80211OfdmSymbol(*check_and_cast<const Ieee80211OfdmSymbol *>(symbol)));
+    ReceptionSymbolModel receptionSignalSymbolModel(0, 0, 0, 0, receptionSignalSymbols, NaN);
     const IReceptionBitModel *receptionSignalBitModel = ieee80211OFDMSignalDemodulator->demodulate(&receptionSignalSymbolModel);
-    ReceptionSymbolModel receptionDataSymbolModel(0, 0, 0, 0, new std::vector<const ISymbol *>(*transmissionDataSymbolModel->getAllSymbols()), NaN);
+    auto receptionDataSymbols = new std::vector<const ISymbol *>();
+    for (auto symbol : *transmissionDataSymbolModel->getAllSymbols())
+        receptionDataSymbols->push_back(new Ieee80211OfdmSymbol(*check_and_cast<const Ieee80211OfdmSymbol *>(symbol)));
+    ReceptionSymbolModel receptionDataSymbolModel(0, 0, 0, 0, receptionDataSymbols, NaN);
     const IReceptionBitModel *receptionDataBitModel = ieee80211OFDMDataDemodulator->demodulate(&receptionDataSymbolModel);
     const IReceptionPacketModel *receptionSignalPacketModel = ieee80211OFDMSignalDecoder->decode(receptionSignalBitModel);
     const IReceptionPacketModel *receptionDataPacketModel = ieee80211OFDMDataDecoder->decode(receptionDataBitModel);

@@ -31,8 +31,8 @@ double Ieee802154ErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSig
         return 1.0;
     else {
         auto ieee802154Transmission = check_and_cast<const Ieee802154Transmission *>(snir->getReception()->getTransmission());
-        double headerSuccessRate = pow(1.0 - bitErrorRate, b(ieee802154Transmission->getHeaderLength()).get());
-        double dataSuccessRate = pow(1.0 - bitErrorRate, b(ieee802154Transmission->getDataLength()).get());
+        double headerSuccessRate = pow(1.0 - bitErrorRate, ieee802154Transmission->getHeaderLength().get<b>());
+        double dataSuccessRate = pow(1.0 - bitErrorRate, ieee802154Transmission->getDataLength().get<b>());
         switch (part) {
             case IRadioSignal::SIGNAL_PART_WHOLE:
                 return 1.0 - headerSuccessRate * dataSuccessRate;
