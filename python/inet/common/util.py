@@ -306,7 +306,7 @@ def run_command_with_logging(args, error_message=None, nice=10, **kwargs):
         stream.close()
     stdout_lines = []
     stderr_lines = []
-    logger.info(f"Running external command: {' '.join(args)}")
+    _logger.info(f"Running external command: {' '.join(args)}")
     process = subprocess.Popen(["nice", "-n", str(nice), *args], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, **kwargs)
     stdout_thread = threading.Thread(target=log_stream, args=(process.stdout, logger.stdout, stdout_lines))
     stderr_thread = threading.Thread(target=log_stream, args=(process.stderr, logger.stderr, stderr_lines))
