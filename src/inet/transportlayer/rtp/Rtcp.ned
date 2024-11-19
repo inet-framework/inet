@@ -21,8 +21,8 @@ simple Rtcp
 
     gates:
         input rtpIn @labels(RtpInnerPacket);
-        input udpIn @labels(UdpControlInfo/up);
+        input udpIn @labels(UdpCommand/up);
         output rtpOut @labels(RtpInnerPacket);
-        output udpOut @labels(UdpControlInfo/down);
+        output udpOut @labels(UdpCommand/down);
 }
 

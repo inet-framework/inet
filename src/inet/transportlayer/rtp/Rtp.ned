@@ -67,10 +67,10 @@ simple Rtp
         input appIn @labels(RtpInterfacePacket/down);
         input profileIn @labels(RtpInnerPacket);
         input rtcpIn @labels(RtpInnerPacket);
-        input udpIn @labels(UdpControlInfo/up);
+        input udpIn @labels(UdpCommand/up);
         output appOut @labels(RtpInterfacePacket/up);
         output profileOut @labels(RtpInnerPacket);
         output rtcpOut @labels(RtpInnerPacket);
-        output udpOut @labels(UdpControlInfo/down);
+        output udpOut @labels(UdpCommand/down);
 }
 
