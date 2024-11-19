@@ -1,4 +1,11 @@
-INET 4.5 release
+ - merge outstanding development branches
+ - merge GitHub pull requests
+ - fix GitHub issues
+ - save all logging in Python into a logfile
+ - add vector statistic (or vci) to statistical tests baseline
+ - add coverage target using clang-cov and some coverage tests based on that
+
+INET 4.6 release
 ================
 
 Implementation
