@@ -43,6 +43,7 @@ simple Gptp like IGptp
         @signal[localTime](type=simtime_t);  // As clocktime_t
         @signal[timeDifference](type=simtime_t);
         @signal[gmRateRatio](type=double);
+        @signal[rateRatio](type=double);
         @signal[receivedRateRatio](type=double);
         @signal[neighborRateRatio](type=double);
         @signal[peerDelay](type=simtime_t);
