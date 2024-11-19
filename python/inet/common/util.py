@@ -25,6 +25,9 @@ COLOR_GREEN = "\033[0;32m"
 COLOR_MAGENTA = "\033[1;35m"
 COLOR_RESET = "\033[0;0m"
 
+STDOUT_LEVEL = 25  # between INFO (20) and WARNING (30)
+STDERR_LEVEL = 35  # between WARNING (30) and ERROR (40)
+
 def enable_autoreload():
     ipython = IPython.get_ipython()
     ipython.magic("load_ext autoreload")
@@ -49,6 +52,16 @@ def initialize_logging(log_level, external_command_log_level):
     logging.getLogger("opp_run_release").setLevel(external_command_log_level)
     logging.getLogger("opp_run_sanitize").setLevel(external_command_log_level)
     logging.getLogger("opp_test").setLevel(external_command_log_level)
+    logging.addLevelName(STDOUT_LEVEL, "STDOUT")
+    logging.addLevelName(STDERR_LEVEL, "STDERR")
+    def stdout(self, message, *args, **kwargs):
+        if self.isEnabledFor(STDOUT_LEVEL):
+            self._log(STDOUT_LEVEL, message, args, **kwargs)
+    def stderr(self, message, *args, **kwargs):
+        if self.isEnabledFor(STDERR_LEVEL):
+            self._log(STDERR_LEVEL, message, args, **kwargs)
+    logging.Logger.stdout = stdout
+    logging.Logger.stderr = stderr
     _logging_initialized = True
 
 def ensure_logging_initialized(log_level, external_command_log_level):
@@ -237,7 +250,9 @@ class ColoredLoggingFormatter(logging.Formatter):
         logging.INFO: COLOR_GREEN,
         logging.WARNING: COLOR_YELLOW,
         logging.ERROR: COLOR_RED,
-        logging.CRITICAL: COLOR_RED
+        logging.CRITICAL: COLOR_RED,
+        STDOUT_LEVEL: COLOR_GREEN,
+        STDERR_LEVEL: COLOR_YELLOW,
     }
 
     def format(self, record):
@@ -293,8 +308,8 @@ def run_command_with_logging(args, error_message=None, nice=10, **kwargs):
     stderr_lines = []
     logger.info(f"Running external command: {' '.join(args)}")
     process = subprocess.Popen(["nice", "-n", str(nice), *args], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, **kwargs)
-    stdout_thread = threading.Thread(target=log_stream, args=(process.stdout, logger.info, stdout_lines))
-    stderr_thread = threading.Thread(target=log_stream, args=(process.stderr, logger.error, stderr_lines))
+    stdout_thread = threading.Thread(target=log_stream, args=(process.stdout, logger.stdout, stdout_lines))
+    stderr_thread = threading.Thread(target=log_stream, args=(process.stderr, logger.stderr, stderr_lines))
     stdout_thread.start()
     stderr_thread.start()
     try:
