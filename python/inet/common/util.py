@@ -35,7 +35,7 @@ def enable_autoreload():
 
 _logging_initialized = False
 
-def initialize_logging(log_level, external_command_log_level):
+def initialize_logging(log_level, external_command_log_level, log_file):
     global _logging_initialized
     formatter = ColoredLoggingFormatter()
     handler = logging.StreamHandler()
@@ -64,9 +64,9 @@ def initialize_logging(log_level, external_command_log_level):
     logging.Logger.stderr = stderr
     _logging_initialized = True
 
-def ensure_logging_initialized(log_level, external_command_log_level):
+def ensure_logging_initialized(log_level, external_command_log_level, log_file):
     if not _logging_initialized:
-        initialize_logging(log_level, external_command_log_level)
+        initialize_logging(log_level, external_command_log_level, log_file)
         return True
     else:
         return False
