@@ -22,7 +22,7 @@ def get_baseline_elapsed_wall_time():
         logging.getLogger("routing").setLevel("WARN")
         with open(os.devnull, 'w') as devnull:
             run_command_with_logging(["make", "MODE=release", "-j16", "samples"], cwd=get_workspace_path("omnetpp"), error_message="Failed to build routing sample")
-            simulation_task_result = run_simulations(simulation_project=get_simulation_project("routing"), config_filter="Net60a", sim_time_limit="10000s", output_stream=devnull)
+            simulation_task_result = run_simulations(simulation_project=get_simulation_project("routing"), config_filter="Net60a", sim_time_limit="10000s", extra_args=_speed_test_extra_args, output_stream=devnull)
             _baseline_elapsed_wall_time = simulation_task_result.elapsed_wall_time
         return _baseline_elapsed_wall_time
 
