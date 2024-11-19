@@ -1,51 +1,15 @@
 [
  {
-  "working_directory": "examples/adhoc/hostautoconf",
-  "ini_file": "omnetpp.ini",
-  "config": "General",
-  "run_number": 0,
-  "sim_time_limit": null,
-  "test_result": "PASS",
-  "elapsed_wall_time": 1.3404104709625244,
-  "timestamp": 1731490286.5250163,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 4.79
- },
- {
-  "working_directory": "examples/adhoc/idealwireless",
-  "ini_file": "omnetpp.ini",
-  "config": "Ping1",
-  "run_number": 0,
-  "sim_time_limit": null,
-  "test_result": "PASS",
-  "elapsed_wall_time": 0.4567997455596924,
-  "timestamp": 1731490286.5250409,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 4.79
- },
- {
-  "working_directory": "examples/adhoc/idealwireless",
-  "ini_file": "omnetpp.ini",
-  "config": "Ping2",
-  "run_number": 0,
-  "sim_time_limit": null,
-  "test_result": "PASS",
-  "elapsed_wall_time": 0.3178904056549072,
-  "timestamp": 1731490286.5250628,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 4.79
- },
- {
   "working_directory": "showcases/general/diffserv",
   "ini_file": "omnetpp.ini",
   "config": "VoIP_WithPolicing",
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 2.0373308658599854,
-  "timestamp": 1731433332.9237978,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 1.7673828601837158,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.455164,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/general/diffserv",
@@ -54,10 +18,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 2.407524824142456,
-  "timestamp": 1731433332.9239094,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 1.871830940246582,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4551816,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/general/diffserv",
@@ -66,10 +30,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 1.8088102340698242,
-  "timestamp": 1731433332.9240212,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 1.6309688091278076,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4551947,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/general/diffserv",
@@ -78,10 +42,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.8191220760345459,
-  "timestamp": 1731433332.9241338,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.8097131252288818,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4552064,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/general/diffserv",
@@ -90,10 +54,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 1.0574719905853271,
-  "timestamp": 1731433332.9242768,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.9712285995483398,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4552171,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/general/diffserv",
@@ -102,10 +66,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.9935269355773926,
-  "timestamp": 1731433332.92439,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.9204015731811523,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.455228,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/general/pcaprecording",
@@ -114,10 +78,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 14.499703168869019,
-  "timestamp": 1731433332.9244993,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 12.774288892745972,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.455238,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/measurement/datarate",
@@ -126,10 +90,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 5.181087255477905,
-  "timestamp": 1731433332.924609,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 4.332429647445679,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4552486,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/measurement/endtoenddelay",
@@ -138,10 +102,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 5.456636667251587,
-  "timestamp": 1731433332.9247186,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 5.5971291065216064,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.455259,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/measurement/flow",
@@ -150,10 +114,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 73.72093081474304,
-  "timestamp": 1731433332.9248312,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 73.28028559684753,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4552708,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/measurement/flow",
@@ -162,10 +126,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 83.73086905479431,
-  "timestamp": 1731433332.924945,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 81.42820572853088,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4552815,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/measurement/jitter",
@@ -174,10 +138,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 13.390792608261108,
-  "timestamp": 1731433332.9250572,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 13.337199211120605,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.455293,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/measurement/propagationtime",
@@ -186,10 +150,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 5.0717713832855225,
-  "timestamp": 1731433332.9251628,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 5.376544237136841,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.455304,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/measurement/queueingtime",
@@ -198,10 +162,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 12.844820261001587,
-  "timestamp": 1731433332.925287,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 13.909381628036499,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4553373,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/measurement/relationships",
@@ -210,10 +174,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3341553211212158,
-  "timestamp": 1731433332.925398,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3398005962371826,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4553492,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/measurement/residencetime",
@@ -222,10 +186,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 4.359521865844727,
-  "timestamp": 1731433332.9255095,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 4.556527137756348,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4553611,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/measurement/throughput",
@@ -234,10 +198,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 2.7122762203216553,
-  "timestamp": 1731433332.9256213,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 2.7203879356384277,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4553733,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/measurement/transmissiontime",
@@ -246,10 +210,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 5.618398904800415,
-  "timestamp": 1731433332.9257329,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 5.3322954177856445,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4553857,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/measurement/utilization",
@@ -258,10 +222,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 2.8653016090393066,
-  "timestamp": 1731433332.9258444,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 2.8023788928985596,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4553976,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/mobility/basic",
@@ -270,10 +234,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.34061670303344727,
-  "timestamp": 1731433332.9259577,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3319404125213623,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4554107,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/mobility/basic",
@@ -282,10 +246,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.324383020401001,
-  "timestamp": 1731433332.9260705,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3227365016937256,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4554236,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/mobility/basic",
@@ -294,10 +258,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3693528175354004,
-  "timestamp": 1731433332.9261847,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3530879020690918,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.455437,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/mobility/basic",
@@ -306,10 +270,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3735530376434326,
-  "timestamp": 1731433332.9263127,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3684523105621338,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4554508,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/mobility/basic",
@@ -318,10 +282,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.36723804473876953,
-  "timestamp": 1731433332.9264274,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3551974296569824,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.455465,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/mobility/basic",
@@ -330,10 +294,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3637261390686035,
-  "timestamp": 1731433332.9265425,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3501441478729248,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4554818,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/mobility/basic",
@@ -342,10 +306,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3350844383239746,
-  "timestamp": 1731433332.9266772,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.32497215270996094,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4554968,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/mobility/basic",
@@ -354,10 +318,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3250279426574707,
-  "timestamp": 1731433332.9268231,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3332688808441162,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4555123,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/mobility/combining",
@@ -366,10 +330,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 3.052103281021118,
-  "timestamp": 1731433332.926942,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 3.060563564300537,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4555266,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/mobility/combining",
@@ -378,10 +342,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.36489248275756836,
-  "timestamp": 1731433332.9270592,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3565547466278076,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4555411,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/mobility/combining",
@@ -390,10 +354,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3648653030395508,
-  "timestamp": 1731433332.9271762,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.37876200675964355,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4555566,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/mobility/combining",
@@ -402,10 +366,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3574557304382324,
-  "timestamp": 1731433332.9273129,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3645150661468506,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4555717,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/mobility/combining",
@@ -414,10 +378,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3346102237701416,
-  "timestamp": 1731433332.9274313,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.33020710945129395,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4555876,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/mobility/combining",
@@ -426,10 +390,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3535640239715576,
-  "timestamp": 1731433332.9275491,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.34567737579345703,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4556103,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/mobility/spatial",
@@ -438,10 +402,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3775665760040283,
-  "timestamp": 1731433332.9276674,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.383026123046875,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.455627,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/mobility/spatial",
@@ -450,10 +414,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3430163860321045,
-  "timestamp": 1731433332.9277868,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.341167688369751,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4556432,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/routing/manet",
@@ -462,10 +426,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 2.227367639541626,
-  "timestamp": 1731433332.927904,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 2.16325044631958,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4556816,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/routing/manet",
@@ -474,10 +438,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 8.449517011642456,
-  "timestamp": 1731433332.9280212,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 8.639335632324219,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4556983,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/routing/manet",
@@ -486,10 +450,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 5.513537883758545,
-  "timestamp": 1731433332.9281394,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 5.495581388473511,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4557152,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/combiningfeatures/fpandtas",
@@ -498,10 +462,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.6125931739807129,
-  "timestamp": 1731433332.928275,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.5513043403625488,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4557316,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/combiningfeatures/frerandcs",
@@ -510,10 +474,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 5.699885606765747,
-  "timestamp": 1731433332.9283922,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 5.118509531021118,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4557488,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/combiningfeatures/frerandtas",
@@ -522,10 +486,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 5.7088422775268555,
-  "timestamp": 1731433332.9285088,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 5.99915337562561,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.455766,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/combiningfeatures/gptpandtas",
@@ -534,10 +498,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 20.647290468215942,
-  "timestamp": 1731433332.9286253,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 19.70129156112671,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4557846,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/combiningfeatures/gptpandtas",
@@ -546,10 +510,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 19.683518886566162,
-  "timestamp": 1731433332.9287426,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 19.546483278274536,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4558024,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/combiningfeatures/gptpandtas",
@@ -558,10 +522,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 19.857470750808716,
-  "timestamp": 1731433332.9288602,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 19.664828538894653,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4558208,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/combiningfeatures/gptpandtas",
@@ -570,10 +534,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 19.973498106002808,
-  "timestamp": 1731433332.9289782,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 20.352821588516235,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4558394,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/combiningfeatures/gsandcs",
@@ -582,10 +546,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 5.451202630996704,
-  "timestamp": 1731433332.9290905,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 5.513815402984619,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4558578,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/combiningfeatures/invehicle",
@@ -594,10 +558,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 62.740944147109985,
-  "timestamp": 1731439436.0608954,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 63.318300008773804,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4558764,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/combiningfeatures/invehicle",
@@ -606,10 +570,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 3.236992597579956,
-  "timestamp": 1731439436.0609367,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 3.1955747604370117,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4558957,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/combiningfeatures/invehicle",
@@ -618,10 +582,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.9493987560272217,
-  "timestamp": 1731439436.0609775,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.9320476055145264,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4559147,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/cutthroughswitching",
@@ -630,10 +594,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 7.1490397453308105,
-  "timestamp": 1731439436.0610192,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 7.557003021240234,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.455934,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/cutthroughswitching",
@@ -642,10 +606,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 7.525928974151611,
-  "timestamp": 1731439436.0610592,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 6.4781272411346436,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4559531,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/framepreemption",
@@ -654,10 +618,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 8.307081699371338,
-  "timestamp": 1731439436.0611,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 8.275107860565186,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.455973,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/framepreemption",
@@ -666,10 +630,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 11.627935409545898,
-  "timestamp": 1731439436.061141,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 12.084309339523315,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4559932,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/framepreemption",
@@ -678,10 +642,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 8.905829191207886,
-  "timestamp": 1731439436.0611823,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 8.562890768051147,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.456015,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/framepreemption",
@@ -690,10 +654,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 7.691162586212158,
-  "timestamp": 1731439436.0612268,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 7.818404197692871,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4560366,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/framepreemption",
@@ -702,10 +666,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 10.66500735282898,
-  "timestamp": 1731439436.0612683,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 10.869322776794434,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4560578,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/framepreemption",
@@ -714,10 +678,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 8.609911680221558,
-  "timestamp": 1731439436.0613098,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 8.155702590942383,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.456079,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/framereplication/automaticfailureprotection",
@@ -726,10 +690,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 4.3662269115448,
-  "timestamp": 1731439436.0613503,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 4.012750625610352,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4561007,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/framereplication/automaticmultipathconfiguration",
@@ -738,10 +702,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 3.897911310195923,
-  "timestamp": 1731439436.0613914,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 3.940107583999634,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.456122,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/framereplication/manualconfiguration",
@@ -750,10 +714,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 5.6472954750061035,
-  "timestamp": 1731439436.0614324,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 5.402284383773804,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4561431,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/framereplication/multicastfailureprotection",
@@ -762,10 +726,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.5316414833068848,
-  "timestamp": 1731439436.0614734,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.5437679290771484,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4561648,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/gatescheduling/eager",
@@ -774,10 +738,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 5.1538567543029785,
-  "timestamp": 1731439436.0615144,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 5.4856603145599365,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4561865,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/gatescheduling/sat",
@@ -786,10 +750,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 5.139958143234253,
-  "timestamp": 1731439436.0615556,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 5.162421226501465,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.456209,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/streamfiltering/statistical",
@@ -798,10 +762,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 11.203803300857544,
-  "timestamp": 1731439436.061597,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 10.614151954650879,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.456231,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/streamfiltering/tokenbucket",
@@ -810,10 +774,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 11.079262971878052,
-  "timestamp": 1731439436.0616386,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 10.91071105003357,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4562542,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/streamfiltering/underthehood",
@@ -822,10 +786,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 2.0432279109954834,
-  "timestamp": 1731439436.0616803,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 2.0429110527038574,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4562776,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/timesynchronization/clockdrift",
@@ -834,10 +798,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 13.688642978668213,
-  "timestamp": 1731439436.0617223,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 13.403371334075928,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4563003,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/timesynchronization/clockdrift",
@@ -846,10 +810,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 13.342812299728394,
-  "timestamp": 1731439436.0617673,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 13.462319612503052,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4563248,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/timesynchronization/clockdrift",
@@ -858,10 +822,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 13.485269784927368,
-  "timestamp": 1731439436.0618093,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 13.856939554214478,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.456357,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/timesynchronization/clockdrift",
@@ -870,10 +834,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 13.504070043563843,
-  "timestamp": 1731439436.0618517,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 13.484982013702393,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4563909,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/timesynchronization/clockdrift",
@@ -882,10 +846,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 15.95663857460022,
-  "timestamp": 1731439436.0618944,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 14.879005432128906,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4564276,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/timesynchronization/clockdrift",
@@ -894,10 +858,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 14.181440353393555,
-  "timestamp": 1731439436.0619366,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 14.011195421218872,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4564662,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/timesynchronization/gptp",
@@ -906,10 +870,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.42766261100769043,
-  "timestamp": 1731439436.0619788,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.4495513439178467,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4565063,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/timesynchronization/gptp",
@@ -918,10 +882,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.6077744960784912,
-  "timestamp": 1731439436.0620208,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.6303291320800781,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4565449,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/timesynchronization/gptp",
@@ -930,10 +894,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.9918115139007568,
-  "timestamp": 1731439436.0620635,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 1.0349860191345215,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.456583,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/trafficshaping/asynchronousshaper",
@@ -942,10 +906,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 93.50295400619507,
-  "timestamp": 1731439436.0621054,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 97.5696952342987,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.456617,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/trafficshaping/cbsandats",
@@ -954,10 +918,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 95.6431725025177,
-  "timestamp": 1731439436.0621476,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 95.09482073783875,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4566436,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/trafficshaping/cbsandtas",
@@ -966,10 +930,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 89.1118996143341,
-  "timestamp": 1731439436.06219,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 87.86165189743042,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4566872,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/trafficshaping/creditbasedshaper",
@@ -978,10 +942,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 87.27673578262329,
-  "timestamp": 1731439436.0622356,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 87.64463710784912,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4567134,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/trafficshaping/timeawareshaper",
@@ -990,10 +954,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 7.981850624084473,
-  "timestamp": 1731439436.062278,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 7.935978174209595,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4567397,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/tsn/trafficshaping/underthehood",
@@ -1002,10 +966,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 7.441026210784912,
-  "timestamp": 1731439436.0623212,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 7.797001123428345,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.456766,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/datalinkactivity",
@@ -1014,10 +978,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.9208242893218994,
-  "timestamp": 1731439436.062364,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.9201931953430176,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4567938,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/datalinkactivity",
@@ -1026,10 +990,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 5.6691365242004395,
-  "timestamp": 1731439436.062407,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 5.633203029632568,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4568212,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/datalinkactivity",
@@ -1038,10 +1002,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.5401179790496826,
-  "timestamp": 1731439436.06245,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.5479462146759033,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4568503,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/datalinkactivity",
@@ -1050,10 +1014,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 1.5796973705291748,
-  "timestamp": 1731439436.062493,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 1.5269534587860107,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4568784,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/datalinkactivity",
@@ -1062,10 +1026,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 1.4025115966796875,
-  "timestamp": 1731439436.0625365,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 1.4719955921173096,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4569068,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/ieee80211",
@@ -1074,10 +1038,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.7040207386016846,
-  "timestamp": 1731439436.0625792,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.7099809646606445,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4569347,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/ieee80211",
@@ -1086,10 +1050,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3704867362976074,
-  "timestamp": 1731439436.0626225,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.38451194763183594,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4569626,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/ieee80211",
@@ -1098,10 +1062,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 5.124351263046265,
-  "timestamp": 1731439436.062666,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 5.39926815032959,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.456991,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/ieee80211",
@@ -1110,10 +1074,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 3.145388126373291,
-  "timestamp": 1731439436.0627096,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 3.1067938804626465,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4570196,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/instrumentfigures",
@@ -1122,10 +1086,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 5.944061279296875,
-  "timestamp": 1731439436.0627565,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 5.498315811157227,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4570475,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/interfacetable",
@@ -1134,10 +1098,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.4854092597961426,
-  "timestamp": 1731439436.0628,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.47092247009277344,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4570765,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/interfacetable",
@@ -1146,10 +1110,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3341095447540283,
-  "timestamp": 1731439436.0628433,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3415207862854004,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4571056,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/mobility",
@@ -1158,10 +1122,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.34816551208496094,
-  "timestamp": 1731439436.062887,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.34104323387145996,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4571352,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/networkpathactivity",
@@ -1170,10 +1134,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 5.865376710891724,
-  "timestamp": 1731439436.0629306,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 5.9068520069122314,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4571648,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/networkpathactivity",
@@ -1182,10 +1146,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.5534079074859619,
-  "timestamp": 1731439436.0629742,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.5612635612487793,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.457195,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/networkpathactivity",
@@ -1194,10 +1158,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 5.449361085891724,
-  "timestamp": 1731439436.0630186,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 5.242535829544067,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4572253,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/networkpathactivity",
@@ -1206,10 +1170,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 2.3193037509918213,
-  "timestamp": 1731439436.0630627,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 2.665494203567505,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4572556,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/packetdrop",
@@ -1218,10 +1182,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.5959479808807373,
-  "timestamp": 1731439436.0631068,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.6135289669036865,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4572861,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/packetdrop",
@@ -1230,10 +1194,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3699374198913574,
-  "timestamp": 1731439436.063151,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3668386936187744,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.457317,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/packetdrop",
@@ -1242,10 +1206,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 1.7511203289031982,
-  "timestamp": 1731439436.0631988,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 1.7460951805114746,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4573486,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/packetdrop",
@@ -1254,10 +1218,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.36855363845825195,
-  "timestamp": 1731439436.0632432,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3656318187713623,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4573805,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/packetdrop",
@@ -1266,10 +1230,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 1.4402358531951904,
-  "timestamp": 1731439436.0632877,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 1.4375500679016113,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4574127,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/physicallinkactivity",
@@ -1278,10 +1242,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 1.5130319595336914,
-  "timestamp": 1731439436.0633318,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 1.528900384902954,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4574435,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/physicallinkactivity",
@@ -1290,10 +1254,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 4.204139947891235,
-  "timestamp": 1731439436.0633767,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 4.171380281448364,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4574752,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/physicallinkactivity",
@@ -1302,10 +1266,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 6.338371753692627,
-  "timestamp": 1731439436.0634215,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 6.29171895980835,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4575078,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/radiomediumactivity",
@@ -1314,10 +1278,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.48333287239074707,
-  "timestamp": 1731439436.0634663,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.4858987331390381,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4575403,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/radiomediumactivity",
@@ -1326,10 +1290,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 6.806322813034058,
-  "timestamp": 1731439436.0635111,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 6.863544225692749,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.457573,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/radiomediumactivity",
@@ -1338,10 +1302,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.6482303142547607,
-  "timestamp": 1731439436.0635562,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.6257960796356201,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4576063,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/routingtable",
@@ -1350,10 +1314,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3550999164581299,
-  "timestamp": 1731439436.0636008,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3530740737915039,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4576395,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/routingtable",
@@ -1362,10 +1326,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 7.215172052383423,
-  "timestamp": 1731439436.0636456,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 7.206084251403809,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4576848,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/routingtable",
@@ -1374,10 +1338,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.38885998725891113,
-  "timestamp": 1731439436.0636907,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3929879665374756,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4577184,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/routingtable",
@@ -1386,10 +1350,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3830382823944092,
-  "timestamp": 1731439436.0637364,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3838019371032715,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.457752,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/spectrum",
@@ -1398,10 +1362,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.46691465377807617,
-  "timestamp": 1731439436.0637836,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.45615291595458984,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4577856,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/spectrum",
@@ -1410,10 +1374,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.4152367115020752,
-  "timestamp": 1731439436.0638325,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.411388635635376,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4578197,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/spectrum",
@@ -1422,10 +1386,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.4363746643066406,
-  "timestamp": 1731439436.0638783,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.4264380931854248,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.457854,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/statistic",
@@ -1434,10 +1398,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 19.423434734344482,
-  "timestamp": 1731439436.063924,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 19.694271564483643,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4578886,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/statistic",
@@ -1446,10 +1410,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 1.5967004299163818,
-  "timestamp": 1731439436.0639699,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 1.5062503814697266,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4579234,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/styling",
@@ -1458,10 +1422,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 26.085540771484375,
-  "timestamp": 1731439436.0640152,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 25.812838792800903,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.457958,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/styling",
@@ -1470,10 +1434,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.4151475429534912,
-  "timestamp": 1731439436.064061,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.41631579399108887,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.457993,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/styling",
@@ -1482,10 +1446,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 26.016421794891357,
-  "timestamp": 1731439436.0641067,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 24.745303869247437,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.458029,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/styling",
@@ -1494,10 +1458,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.40476131439208984,
-  "timestamp": 1731439436.0641527,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.41643381118774414,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4580648,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/submoduleinfo",
@@ -1506,10 +1470,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 1.7318410873413086,
-  "timestamp": 1731439436.0642025,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 1.7253649234771729,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4581013,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/submoduleinfo",
@@ -1518,10 +1482,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 1.8120472431182861,
-  "timestamp": 1731439436.0642488,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 1.7091753482818604,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4581373,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/transportconnection",
@@ -1530,10 +1494,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 21.099292039871216,
-  "timestamp": 1731439436.064295,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 20.470792293548584,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4581735,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/transportconnection",
@@ -1542,10 +1506,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 6.725002765655518,
-  "timestamp": 1731439436.0643415,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 6.756249666213989,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.45821,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/transportpathactivity",
@@ -1554,10 +1518,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.45508289337158203,
-  "timestamp": 1731439436.0643876,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.4518311023712158,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4582462,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/transportpathactivity",
@@ -1566,10 +1530,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 1.015793800354004,
-  "timestamp": 1731439436.0644338,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.9965028762817383,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4582827,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/canvas/transportpathactivity",
@@ -1578,10 +1542,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.9163229465484619,
-  "timestamp": 1731439436.0644805,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.9393913745880127,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.45832,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/osg/earth",
@@ -1590,10 +1554,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3239719867706299,
-  "timestamp": 1731439436.064527,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.32192277908325195,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4583576,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/osg/earth",
@@ -1602,10 +1566,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3838939666748047,
-  "timestamp": 1731439436.0645738,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.38083410263061523,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4583957,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/osg/earth",
@@ -1614,10 +1578,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3083493709564209,
-  "timestamp": 1731439436.0646205,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.32656025886535645,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.458434,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/osg/environment",
@@ -1626,10 +1590,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.32349562644958496,
-  "timestamp": 1731439436.0646675,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3214755058288574,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.458472,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/osg/environment",
@@ -1638,10 +1602,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.32015347480773926,
-  "timestamp": 1731439436.0647144,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3123619556427002,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4585102,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/osg/networknode",
@@ -1650,10 +1614,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.34241271018981934,
-  "timestamp": 1731439436.0647614,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3328065872192383,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4585483,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/osg/networknode",
@@ -1662,10 +1626,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3453943729400635,
-  "timestamp": 1731439436.0648096,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3278186321258545,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.458587,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/osg/networknode",
@@ -1674,10 +1638,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.33051085472106934,
-  "timestamp": 1731439436.0648568,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3364903926849365,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.458626,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/osg/networknode",
@@ -1686,10 +1650,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3398573398590088,
-  "timestamp": 1731439436.0649042,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.32870030403137207,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4586751,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/visualizer/osg/networknode",
@@ -1698,10 +1662,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.33364033699035645,
-  "timestamp": 1731439436.064952,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3379378318786621,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4587154,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/aggregation",
@@ -1710,10 +1674,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 54.009238719940186,
-  "timestamp": 1731439436.0649989,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 56.06326985359192,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4587545,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/aggregation",
@@ -1722,10 +1686,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 50.0091335773468,
-  "timestamp": 1731439436.0650465,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 48.217923164367676,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4587946,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/aggregation",
@@ -1734,10 +1698,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 98.64458322525024,
-  "timestamp": 1731439436.0650945,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 97.48778510093689,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.458835,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/analogmodel",
@@ -1746,10 +1710,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 2.733729124069214,
-  "timestamp": 1731439436.065142,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 2.734426975250244,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4588752,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/analogmodel",
@@ -1758,10 +1722,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.8204352855682373,
-  "timestamp": 1731439436.0651898,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.8317391872406006,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.458915,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/analogmodel",
@@ -1770,10 +1734,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.5546329021453857,
-  "timestamp": 1731439436.0652416,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.5759885311126709,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4589562,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/blockack",
@@ -1782,10 +1746,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 3.1350362300872803,
-  "timestamp": 1731439436.0652897,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 3.140718936920166,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.458997,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/blockack",
@@ -1794,10 +1758,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 2.7953920364379883,
-  "timestamp": 1731439436.0653384,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 2.908460855484009,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4590378,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/blockack",
@@ -1806,10 +1770,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 4.088259935379028,
-  "timestamp": 1731439436.065387,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 4.356268882751465,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4590795,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/blockack",
@@ -1818,10 +1782,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 2.738065719604492,
-  "timestamp": 1731439436.0654356,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 2.73002028465271,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4591215,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/coexistence",
@@ -1830,10 +1794,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 10.835618495941162,
-  "timestamp": 1731439436.065484,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 10.883857488632202,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4591634,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/coexistence",
@@ -1842,10 +1806,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 10.978480100631714,
-  "timestamp": 1731439436.0655324,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 11.549970626831055,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4592056,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/coexistence",
@@ -1854,10 +1818,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.4159820079803467,
-  "timestamp": 1731439436.065581,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.41689181327819824,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4592478,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/crosstalk",
@@ -1866,10 +1830,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.4195740222930908,
-  "timestamp": 1731439436.06563,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.4380922317504883,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4592903,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/crosstalk",
@@ -1878,10 +1842,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3901033401489258,
-  "timestamp": 1731439436.0656793,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.40099096298217773,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4593327,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/crosstalk",
@@ -1890,10 +1854,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.40188002586364746,
-  "timestamp": 1731439436.0657284,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3994283676147461,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4593756,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/crosstalk",
@@ -1902,10 +1866,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.4066808223724365,
-  "timestamp": 1731439436.0657783,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.4217557907104492,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4594188,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/directionalantennas",
@@ -1914,10 +1878,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 2.228349447250366,
-  "timestamp": 1731439436.0658278,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 2.225935459136963,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4594622,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/directionalantennas",
@@ -1926,10 +1890,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 2.226278781890869,
-  "timestamp": 1731439436.0658767,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 2.3774189949035645,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4595065,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/directionalantennas",
@@ -1938,10 +1902,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 2.0560145378112793,
-  "timestamp": 1731439436.065926,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 2.1573848724365234,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4595513,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/directionalantennas",
@@ -1950,10 +1914,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 1.9997289180755615,
-  "timestamp": 1731439436.0659757,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 2.052794933319092,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4595964,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/directionalantennas",
@@ -1962,10 +1926,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 2.2629494667053223,
-  "timestamp": 1731439436.066025,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 2.3119072914123535,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4596415,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/errorrate",
@@ -1974,10 +1938,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.360882043838501,
-  "timestamp": 1731439436.0660753,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.3563385009765625,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4597185,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -1986,10 +1950,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 14.374664306640625,
-  "timestamp": 1731439436.0661244,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 14.014948606491089,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.459763,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -1998,10 +1962,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 3.9671525955200195,
-  "timestamp": 1731439436.0661738,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 3.9334235191345215,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4598074,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -2010,10 +1974,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 29.407440662384033,
-  "timestamp": 1731439436.0662267,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 28.45741295814514,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4598525,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -2022,10 +1986,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 47.86886429786682,
-  "timestamp": 1731439436.0662763,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 49.350759744644165,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.459898,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -2034,10 +1998,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 17.659014225006104,
-  "timestamp": 1731439436.0663257,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 17.70829463005066,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4599438,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -2046,10 +2010,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 18.125653505325317,
-  "timestamp": 1731439436.0663755,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 18.05681300163269,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4599898,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -2058,10 +2022,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 32.71777653694153,
-  "timestamp": 1731439436.066425,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 33.42940163612366,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.460036,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -2070,10 +2034,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 13.972184419631958,
-  "timestamp": 1731439436.066475,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 14.121025323867798,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.460083,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -2082,10 +2046,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 4.797836065292358,
-  "timestamp": 1731439436.0665255,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 4.837126016616821,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.460131,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -2094,10 +2058,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 2.326443910598755,
-  "timestamp": 1731439436.0665753,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 2.101638078689575,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4601786,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -2106,10 +2070,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 6.601298093795776,
-  "timestamp": 1731439436.066626,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 6.660074710845947,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.460227,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -2118,10 +2082,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 9.008769035339355,
-  "timestamp": 1731439436.066677,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 9.378918409347534,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.460277,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -2130,10 +2094,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 29.465564727783203,
-  "timestamp": 1731439436.0667276,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 28.697913885116577,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4603264,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -2142,10 +2106,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 48.095672845840454,
-  "timestamp": 1731439436.0667784,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 47.207560777664185,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.460376,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -2154,10 +2118,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 67.22357678413391,
-  "timestamp": 1731439436.0668297,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 68.76759338378906,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.460426,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -2166,10 +2130,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 3.750765800476074,
-  "timestamp": 1731439436.0668814,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 3.9640400409698486,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4604766,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -2178,10 +2142,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 3.72519850730896,
-  "timestamp": 1731439436.0669327,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 3.9561500549316406,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4605274,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -2190,10 +2154,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 14.15214490890503,
-  "timestamp": 1731439436.0669844,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 14.186784744262695,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4605784,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/fragmentation",
@@ -2202,10 +2166,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 14.08387565612793,
-  "timestamp": 1731439436.0670357,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 14.43731427192688,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4606302,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/handover",
@@ -2214,10 +2178,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 3.5235633850097656,
-  "timestamp": 1731439436.067087,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 3.127323865890503,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4606903,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/hiddennode",
@@ -2226,10 +2190,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 3.2310397624969482,
-  "timestamp": 1731439436.0671372,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 3.057004690170288,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.460739,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/hiddennode",
@@ -2238,10 +2202,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 4.872500896453857,
-  "timestamp": 1731439436.0671883,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 4.9885218143463135,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4607878,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/hiddennode",
@@ -2250,10 +2214,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 3.1771650314331055,
-  "timestamp": 1731439436.0672452,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 2.951749563217163,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4608374,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/hiddennode",
@@ -2262,10 +2226,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 4.868115663528442,
-  "timestamp": 1731439436.0672967,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 4.940885782241821,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4608881,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/ieee802154",
@@ -2274,10 +2238,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 5.302993535995483,
-  "timestamp": 1731439436.067348,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 5.708505868911743,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4609385,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/multiradio",
@@ -2286,10 +2250,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 2.296799659729004,
-  "timestamp": 1731439436.0673997,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 2.318720579147339,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4609892,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/pathloss",
@@ -2298,10 +2262,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3494229316711426,
-  "timestamp": 1731439436.0674515,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.34834766387939453,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.461039,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/power",
@@ -2310,10 +2274,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 26.381236791610718,
-  "timestamp": 1731439436.0675025,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 27.35548996925354,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4610894,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/qos",
@@ -2322,10 +2286,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 23.99619960784912,
-  "timestamp": 1731439436.0675545,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 25.127579927444458,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4611397,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/qos",
@@ -2334,10 +2298,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 28.680163383483887,
-  "timestamp": 1731439436.067607,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 29.019129514694214,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.46119,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/ratecontrol",
@@ -2346,10 +2310,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 93.56092095375061,
-  "timestamp": 1731439436.0676594,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 90.64754986763,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4612415,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/ratecontrol",
@@ -2358,10 +2322,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 63.22120642662048,
-  "timestamp": 1731439436.0677118,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 61.8981499671936,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4612935,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/sensornetwork",
@@ -2370,10 +2334,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 1.0617401599884033,
-  "timestamp": 1731439436.0677638,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 1.009465217590332,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4613452,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/sensornetwork",
@@ -2382,10 +2346,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.3870353698730469,
-  "timestamp": 1731439436.0678158,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.37094998359680176,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4613981,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/sensornetwork",
@@ -2394,10 +2358,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 1.5235941410064697,
-  "timestamp": 1731439436.0678678,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 1.5028178691864014,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4614508,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/sensornetwork",
@@ -2406,10 +2370,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.38736963272094727,
-  "timestamp": 1731439436.0679197,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.37777280807495117,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4615042,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/sensornetwork",
@@ -2418,10 +2382,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.792457103729248,
-  "timestamp": 1731439436.067972,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.7865707874298096,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.461558,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/sensornetwork",
@@ -2430,10 +2394,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.38404321670532227,
-  "timestamp": 1731439436.0680244,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.37485671043395996,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4616122,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/sensornetwork",
@@ -2442,10 +2406,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.9536418914794922,
-  "timestamp": 1731439436.0680773,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.902031660079956,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4616761,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/sensornetwork",
@@ -2454,10 +2418,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 1.3884801864624023,
-  "timestamp": 1731439436.0681298,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 1.3141570091247559,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4617314,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/sensornetwork",
@@ -2466,10 +2430,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 1.0912234783172607,
-  "timestamp": 1731439436.0681825,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 1.0710859298706055,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.461786,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/sensornetwork",
@@ -2478,10 +2442,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.49401068687438965,
-  "timestamp": 1731439436.0682392,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.4973490238189697,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.461841,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/sensornetwork",
@@ -2490,10 +2454,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.8272113800048828,
-  "timestamp": 1731439436.0682924,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.8749969005584717,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4618971,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/sensornetwork",
@@ -2502,10 +2466,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 0.7294440269470215,
-  "timestamp": 1731439436.0683458,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 0.7085134983062744,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.461953,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/throughput",
@@ -2514,10 +2478,10 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 4.67392897605896,
-  "timestamp": 1731439436.0683985,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 4.714620113372803,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4620073,
+  "itervars": "$repetition==0"
  },
  {
   "working_directory": "showcases/wireless/txop",
@@ -2526,9 +2490,9 @@
   "run_number": 0,
   "sim_time_limit": null,
   "test_result": "PASS",
-  "elapsed_wall_time": 21.24956226348877,
-  "timestamp": 1731439436.0684512,
-  "itervars": "$repetition==0",
-  "baseline_elapsed_wall_time": 5.287657737731934
+  "elapsed_wall_time": 20.63347554206848,
+  "baseline_elapsed_wall_time": 4.598637580871582,
+  "timestamp": 1731943637.4620616,
+  "itervars": "$repetition==0"
  }
 ]
