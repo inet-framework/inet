@@ -6,8 +6,9 @@ package inet.showcases.visualizer.canvas.instrumentfigures;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
 import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+
 
 network InstrumentShowcase
 {
@@ -41,7 +42,7 @@ network InstrumentShowcase
         configurator: Ipv4NetworkConfigurator {
             @display("p=62,41");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             @display("p=61,110");
         }
         visualizer: IntegratedCanvasVisualizer {
