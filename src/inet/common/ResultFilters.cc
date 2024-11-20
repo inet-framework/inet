@@ -868,7 +868,7 @@ void LiveThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, 
 void LiveThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (auto packet = dynamic_cast<cPacket *>(object))
-        receiveSignal(prev, t, packet->getByteLength(), details);
+        receiveSignal(prev, t, packet->getBitLength(), details);
 }
 
 void LiveThroughputFilter::timerExpired()
