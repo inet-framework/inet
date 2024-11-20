@@ -542,7 +542,7 @@
 /examples/wireless/layered80211/,    -f omnetpp.ini -c LayeredCompliant80211Ping -r 0, 100s,      88dd-4b30/tplx;6264-75f5/~tNl;336a-1922/~tND;5004-61f2/tyf, PASS, wireless Ipv4
 /examples/wireless/layered80211/,    -f omnetpp.ini -c LayeredNonCompliant80211Ping -r 0, 100s,   3e43-f68c/tplx;868a-0d65/~tNl;b35d-b17a/~tND;b988-fe72/tyf, PASS, wireless Ipv4
 
-/examples/wireless/layeredapsk/,     -f omnetpp.ini -c General -r 0,                100s,            d15b-93d0/tplx;5c96-1938/~tNl;997a-cc25/~tND;13a0-7a33/tyf, PASS, wireless Ipv4
+/examples/wireless/layeredapsk/,     -f omnetpp.ini -c General -r 0,                100s,            1d44-454e/tplx;a4c8-b076/~tNl;c5ec-87ab/~tND;13a0-7a33/tyf, PASS, wireless Ipv4
 
 # /examples/wireless/mactest/,         -f omnetpp.ini -c MacBase -r 0   # abstract-config
 /examples/wireless/mactest/,         -f omnetpp.ini -c MacEdca -r 0,                100s,            980d-e1b0/tplx;5c4e-cf00/~tNl;e05b-82cf/~tND;e9cd-0f54/tyf, PASS, wireless
