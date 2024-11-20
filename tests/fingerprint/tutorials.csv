@@ -91,9 +91,9 @@
 /tutorials/wireless/,                -f omnetpp.ini -c Wireless09 -r 0,                         25s,           d8db-aac2/tplx;6b1e-baa1/~tNl;39e2-4f2e/~tND;a5f2-c207/tyf, PASS, wireless adhoc CsmaCaInterface Ipv4 # Wireless09 extended
 /tutorials/wireless/,                -f omnetpp.ini -c Wireless10 -r 0,                         25s,           0cb3-ecad/tplx;998f-0be0/~tNl;a70d-706f/~tND, PASS, wireless adhoc CsmaCaInterface Ipv4 # Wireless10 extended
 /tutorials/wireless/,                -f omnetpp.ini -c Wireless11 -r 0,                         25s,           314c-74d9/tplx;801a-178f/~tNl;674b-37fd/~tND, PASS, wireless adhoc CsmaCaInterface Ipv4 # Wireless11 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless12 -r 0,                         25s,           682b-77e9/tplx;2181-2648/~tNl;3eed-65c9/~tND;287f-4acf/tyf, PASS, wireless adhoc CsmaCaInterface Ipv4 # Wireless12 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless13 -r 0,                         25s,           a97f-bba2/tplx;92b5-3258/~tNl;d3fa-c14e/~tND;067e-1f88/tyf, PASS, wireless adhoc CsmaCaInterface Ipv4 # Wireless13 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless14 -r 0,                         25s,           8242-cbbb/tplx;1ff1-5244/~tNl;d2dd-5814/~tND;b81d-1763/tyf, PASS, wireless adhoc CsmaCaInterface  Ipv4
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless12 -r 0,                         25s,           682b-77e9/tplx;2181-2648/~tNl;a1a7-10e4/~tND;287f-4acf/tyf, PASS, wireless adhoc CsmaCaInterface Ipv4 # Wireless12 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless13 -r 0,                         25s,           a97f-bba2/tplx;92b5-3258/~tNl;451e-1abd/~tND;067e-1f88/tyf, PASS, wireless adhoc CsmaCaInterface Ipv4 # Wireless13 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless14 -r 0,                         25s,           8242-cbbb/tplx;1ff1-5244/~tNl;5369-32eb/~tND;b81d-1763/tyf, PASS, wireless adhoc CsmaCaInterface  Ipv4
 
 /tutorials/queueing/,                -f omnetpp.ini -c ActiveSourcePassiveSink -r 0,            10s,           ecb4-1904/tplx;0000-0000/~tNl;0000-0000/~tND;3b80-76b8/tyf, PASS, queueing
 /tutorials/queueing/,                -f omnetpp.ini -c PassiveSourceActiveSink -r 0,            10s,           14ca-0145/tplx;0000-0000/~tNl;0000-0000/~tND;3b80-76b8/tyf, PASS, queueing
