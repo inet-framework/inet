@@ -607,8 +607,8 @@
 /examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0,      1s,               9b3b-f88a/tplx;be94-9c8e/~tNl;9eb1-9729/~tND, PASS, wireless AckingWirelessInterface Ipv4
 /examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 0.1s,             fa11-2540/tplx;c2a2-d597/~tNl;c2e9-2b96/~tND, PASS, wireless AckingWirelessInterface Ipv4
 
-/examples/wireless/shortcut/,        -f omnetpp.ini -c ShortcutMac -r 0,            1000s,            994d-b55f/tplx;0ce2-d2da/~tNl;1069-9852/tyf, PASS, wireless Ipv4
-/examples/wireless/shortcut/,        -f omnetpp.ini -c ShortcutRadio -r 0,          1000s,            d058-2e3c/tplx;bfb1-8f27/~tNl;7a3c-9e0d/tyf, PASS, wireless AckingWirelessInterface Ipv4
+/examples/wireless/shortcut/,        -f omnetpp.ini -c ShortcutMac -r 0,            1000s,            994d-b55f/tplx;0ce2-d2da/~tNl;e10e-c59b/~tND;1069-9852/tyf, PASS, wireless Ipv4
+/examples/wireless/shortcut/,        -f omnetpp.ini -c ShortcutRadio -r 0,          1000s,            d058-2e3c/tplx;bfb1-8f27/~tNl;33d6-f4e7/~tND;7a3c-9e0d/tyf, PASS, wireless AckingWirelessInterface Ipv4
 
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              e7f2-040b/tplx;2c58-2e50/~tNl;5e0b-2b84/~tND;2487-52b7/tyf, PASS, wireless Ipv4
 /examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              8a77-1ff3/tplx;4b8d-fd59/~tNl;43e6-0390/~tND;42e1-6ecc/tyf, PASS, wireless Ipv4
