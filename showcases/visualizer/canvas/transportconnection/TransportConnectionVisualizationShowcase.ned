@@ -61,39 +61,3 @@ network TransportConnectionVisualizationMultipleConnectionsShowcase
         switch.ethg++ <--> Eth100M <--> router.ethg++;
         router.ethg++ <--> Eth100M <--> server.ethg++;
 }
-
-network Complexer
-{
-    @display("bgb=596,421");
-    submodules:
-        host1: StandardHost {
-            @display("p=59,103");
-        }
-        host2: StandardHost {
-            @display("p=59,329");
-        }
-        switch: EthernetSwitch {
-            @display("p=199,213");
-        }
-        router: Router {
-            @display("p=299,214");
-        }
-        server: StandardHost {
-            @display("p=410,214;i=device/server");
-        }
-        configurator: Ipv4NetworkConfigurator {
-            @display("p=531,53");
-        }
-        visualizer: IntegratedCanvasVisualizer {
-            @display("p=531,119");
-        }
-        terminalHost: StandardHost {
-            @display("p=362,88;i=device/terminal");
-        }
-    connections:
-        host1.ethg++ <--> Eth100M <--> switch.ethg++;
-        host2.ethg++ <--> Eth100M <--> switch.ethg++;
-        switch.ethg++ <--> Eth100M <--> router.ethg++;
-        router.ethg++ <--> Eth100M <--> server.ethg++;
-        terminalHost.ethg++ <--> Eth100M <--> server.ethg++;
-}
