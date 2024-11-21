@@ -19,12 +19,12 @@ About the visualizer
 
 In INET, IEEE 802.11 network membership can be visualized by including a
 :ned:`Ieee80211Visualizer` module in the simulation. Adding an
-:ned:`IntegratedVisualizer` is also an option because it also contains a
-:ned:`Ieee80211Visualizer`. Displaying network membership is disabled by
+:ned:`IntegratedCanvasVisualizer` is also an option because it also contains a
+:ned:`Ieee80211CanvasVisualizer`. Displaying network membership is disabled by
 default; it can be enabled by setting the visualizer's
 :par:`displayAssociations` parameter to ``true``.
 
-The :ned:`Ieee80211Visualizer` displays an icon and the SSID above network
+The :ned:`Ieee80211CanvasVisualizer` displays an icon and the SSID above network
 nodes which are part of a wifi network. The icons are color-coded
 according to the SSID. The icon, colors, and other visual properties can
 be configured via parameters of the visualizer.
@@ -33,6 +33,10 @@ The visualizer's :par:`nodeFilter` parameter selects which nodes'
 memberships are visualized. The :par:`interfaceFilter` parameter selects
 which interfaces are considered in the visualization. By default, all
 interfaces of all nodes are considered.
+
+Furthermore, the visualization takes the signal strength of the various Wifi networks into account, 
+indicating it with the number of levels in the Wifi icon. The visualizer's :par:`minPower` and :par:`maxPower`
+parameter can configure the indicated power levels.
 
 Basic use
 ---------

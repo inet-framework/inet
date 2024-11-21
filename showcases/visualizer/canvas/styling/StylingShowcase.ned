@@ -7,7 +7,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
-import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
 import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 
@@ -27,7 +27,7 @@ network StylingShowcase
         configurator: Ipv4NetworkConfigurator {
             @display("p=50,100");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             @display("p=50,150");
         }
 }
@@ -48,7 +48,7 @@ network AnnotationShowcase
         configurator: Ipv4NetworkConfigurator {
             @display("p=50,100");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             @display("p=50,150");
         }
         accessPoint: AccessPoint {
