@@ -4,7 +4,7 @@ import inet.environment.common.PhysicalEnvironment;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
-import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
 import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 
@@ -24,7 +24,7 @@ network Ieee80211VisualizationDisplayingAssociationsShowcase
         visualizer: IntegratedCanvasVisualizer {
             @display("p=409,78");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             @display("p=408,123");
         }
 }
@@ -37,7 +37,7 @@ network Ieee80211VisualizationAdvancedFeaturesShowcase
             parameters:
                 @display("p=100,50");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             parameters:
                 @display("p=99,111");
         }
@@ -93,7 +93,7 @@ network Ieee80211VisualizationVisualizingHandoverShowcase
         visualizer: IntegratedCanvasVisualizer {
             @display("p=203,344");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             @display("p=317,346");
         }
         wirelessHost: WirelessHost {
@@ -109,7 +109,7 @@ network Ieee80211VisualizationSignalLevelsShowcase
             parameters:
                 @display("p=100,50");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             parameters:
                 @display("p=99,111");
         }

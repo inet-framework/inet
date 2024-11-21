@@ -94,10 +94,16 @@ the following network:
    :align: center
 
 The analog model needs to be dimensional to properly represent the spectral components
-of signals, thus the radio medium module is :ned:`Ieee80211DimensionalRadioMedium`.
+of signals, thus :ned:`Ieee80211RadioMedium` and hosts' radios are configured to use the dimensional analog model
+in the ``General`` configuration:
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: signalAnalogRepresentation
+   :end-at: radioMedium
+   :language: ini
 
 In the ``General`` configuration, the background noise (:ned:`IsotropicDimensionalBackgroundNoise`
-by default due to using the dimensional radio medium) is set up. By default, this module uses
+by default due to using the dimensional analog model) is set up. By default, this module uses
 the power parameter. However, directly specifying power can only be used when all signals have
 the same center frequency and bandwidth; otherwise, the noise power density parameter needs to
 be specified.
@@ -318,6 +324,8 @@ Also, the resolution of the heatmap is increased to allow zooming in without too
    :start-at: mainPowerDensityMapPixmapDensity
    :end-at: mainPowerDensityMapPixmapDensity
    :language: ini
+
+.. note:: Decrease the pixmap density if the simulation is running slowly or running without OpenMP
 
 In this simulation, all hosts operate on the same Wifi channel:
 

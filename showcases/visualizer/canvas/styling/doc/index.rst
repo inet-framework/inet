@@ -40,8 +40,8 @@ following configuration is used for the visualizer:
    :end-at: dataLinkVisualizer.lineShift
    :language: ini
 
-Move the mouse over the image to see the differences between the default
-and the customized visualization.
+Here are the differences between the default
+and the customized visualization:
 
 .. figure:: media/Line_default_v0727.png
    :width: 70%
@@ -85,8 +85,8 @@ To customize the fonts used in labels, we configure
    :end-at: dataLinkVisualizer.labelColor
    :language: ini
 
-Move the mouse over the image to see the differences between the default
-and the customized visualization.
+Here are the differences between the default
+and the customized visualization:
 
 .. figure:: media/Font_default_v0727.png
    :width: 70%
@@ -131,8 +131,8 @@ icons:
    :end-at: transportConnectionVisualizer.iconColor
    :language: ini
 
-Move the mouse over the image to see the differences between the default
-and the customized visualization.
+Here are the differences between the default
+and the customized visualization:
 
 .. figure:: media/Icon_default_v0727.png
    :width: 70%
@@ -188,8 +188,8 @@ We use the following configuration to place the annotation icons.
    :end-at: placementHint
    :language: ini
 
-Move the mouse over the image to see the differences between the default
-and the customized visualization.
+Here are the differences between the default
+and the customized visualization:
 
 .. figure:: media/Annotation_default_v0802.png
    :width: 70%

@@ -96,7 +96,7 @@ LinearMobility
 ~~~~~~~~~~~~~~
 
 The :ned:`LinearMobility` module describes linear motion with a constant speed or
-constant acceleration. As such, it has parameters for speed, acceleration, and starting angle.
+constant acceleration. As such, it has parameters for speed and starting angle.
 The model also has parameters for initial positioning (:par:`initialX`,
 :par:`initialY`, :par:`initialZ`), which, by default, are random
 values inside the constraint area.
@@ -108,8 +108,8 @@ The configuration in omnetpp.ini is the following:
    :start-at: *.host[*].mobility.typename = "LinearMobility"
    :end-at: speed
 
-We leave both acceleration and angle on their default values, which is
-zero for acceleration and a random value for the angle.
+We leave the angle parameter on its default value, which is
+a random value.
 
 The following video shows the motion of the nodes:
 
@@ -184,7 +184,7 @@ It has an :par:`alpha` parameter which can run from 0
 (totally random motion) to 1 (deterministic linear motion), with the
 default value of 0.5.
 The random variable has a mean of 0, and its variance can be set by
-the :par:`variance` parameter.
+the :par:`speedStdDev` and :par:`angleStdDev` parameters.
 The :par:`margin` parameter adds a margin to the boundaries of the constraint
 area, so that the mobility bounces back before reaching it.
 
@@ -195,7 +195,7 @@ Here is the configuration in omnetpp.ini:
    :start-at: *.host[*].mobility.typename = "GaussMarkovMobility"
    :end-at: alpha
 
-The mobility module is set to totally random motion, with a variance of 0.5.
+The mobility module is set to totally random motion, with a variance of 0.5mps and 0.5rad for the speed and the angle, respectively.
 
 The following video shows the resulting random motion:
 
