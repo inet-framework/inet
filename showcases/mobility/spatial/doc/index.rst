@@ -55,9 +55,7 @@ scene in 3D:
    :start-at: # scene visualization
    :end-at: *.visualizer.osgVisualizer.sceneVisualizer.axisLength = 1000m
 
-By default, :ned:`IntegratedVisualizer` only contains an :ned:`IntegratedCanvasVisualizer`
-as submodule, but no OSG visualizer. To add it, we need to set the ``osgVisualizer`` submodule
-type to :ned:`IntegratedOsgVisualizer`. We use the ``desert`` image as the ground,
+We use the ``desert`` image as the ground,
 and set the background color (:par:`clearColor`) to ``skyblue``.
 The coordinate axes can be displayed by setting the :par:`axisLength` parameter.
 Additional settings (not shown above) stretch the rendered scene a little larger

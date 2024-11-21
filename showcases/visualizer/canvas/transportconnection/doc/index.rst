@@ -58,7 +58,7 @@ following network:
 The network contains two :ned:`StandardHost`'s connected to each other, each
 containing a TCP application. IP addresses and routing tables are
 configured by an :ned:`Ipv4NetworkConfigurator` module. The visualizer
-module is a :ned:`TransportConnectionVisualizer`. The application in
+module is an :ned:`IntegratedCanvasVisualizer`. The application in
 ``host1`` is configured to open a TCP connection to ``host2`` and send
 data to it. The visualization of transport connections is enabled with
 the visualizer's :par:`displayTransportConnections` parameter:

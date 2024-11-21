@@ -33,7 +33,10 @@ The transmission, propagation, and reception process is as follows:
 - The receiver module gets a physical representation of the signal and the calculated signal-to-noise-and-interference-ratio (SNIR) from the radio medium module.
 
 There are distinct types of transmitters, receivers, and radio medium modules for each
-analog signal representation.
+analog signal representation. **TODO** more like
+
+`The different types of transmitter, receivers and radio mediums each have a signalAnalogRepresentation parameter
+to select one of the analog models.`
 
 INET contains the following analog model types, presented in the order of increasing complexity:
 
