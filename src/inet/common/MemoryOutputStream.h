@@ -148,6 +148,8 @@ class INET_API MemoryOutputStream
     void writeBits(const std::vector<bool>& bits, b offset = b(0), b length = b(-1)) {
         ASSERT(b(0) <= offset && offset <= b(bits.size()));
         ASSERT(length == b(-1) || (b(0) <= length && offset + length <= b(bits.size())));
+
+        // TODO optimize
         auto end = length == b(-1) ? bits.size() : b(offset + length).get<b>();
         for (size_t i = offset.get<b>(); i < end; i++)
             writeBit(bits.at(i));
