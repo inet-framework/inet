@@ -469,10 +469,10 @@ class INET_API MemoryInputStream
      * Reads a string from the current position until a zero.
      */
     std::string readString() {
-        std::vector<uint8_t> data;
+        std::string str;
         while (uint8_t b = readByte())
-            data.push_back(b);
-        return std::string(data.begin(), data.end());
+            str.push_back(b);
+        return str;
     }
 
     /**
