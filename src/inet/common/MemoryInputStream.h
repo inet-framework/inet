@@ -43,17 +43,13 @@ class INET_API MemoryInputStream
     b length;
     /**
      * The position of the next bit that will be read measured in bits.
+     * When this value larger than `length`, the stream has been read beyond the end of data.
      */
     b position;
 
-    /**
-     * This flag indicates if the stream has been read beyond the end of data.
-     */
-    bool isReadBeyondEnd_ = false;
-
   protected:
     bool isByteAligned() const {
-        return position.get<b>() % 8 == 0;
+        return (position.get<b>() & 7) == 0;
     }
 
   public:
@@ -80,7 +76,7 @@ class INET_API MemoryInputStream
     /**
      * Returns true if a read operation ever read beyond the end of the stream.
      */
-    bool isReadBeyondEnd() const { return isReadBeyondEnd_; }
+    bool isReadBeyondEnd() const { return position > length; }
 
     /**
      * Returns the total length of the stream measured in bits.
@@ -125,9 +121,9 @@ class INET_API MemoryInputStream
     /**
      * Updates the read position of the stream.
      */
-    void seek(b position) {
-        ASSERT(b(0) <= position && position <= length);
-        this->position = position;
+    void seek(b newPosition) {
+        ASSERT(b(0) <= newPosition && newPosition <= length);
+        position = newPosition;
     }
     //@}
 
@@ -137,26 +133,24 @@ class INET_API MemoryInputStream
      * Reads a bit at the current position of the stream.
      */
     bool readBit() {
-        if (position == length) {
-            isReadBeyondEnd_ = true;
-            return false;
-        }
-        else {
+        bool value = false;
+        if (position < length) {
             size_t i = position.get<b>();
-            size_t byteIndex = i / 8;
-            size_t bitIndex = i % 8;
-            position += b(1);
+            size_t byteIndex = i >> 3;
+            uint8_t bitOffset = i & 7;
             uint8_t byte = data.at(byteIndex);
-            uint8_t mask = 1 << (7 - bitIndex);
-            return byte & mask;
+            uint8_t mask = 1 << (7 - bitOffset);
+            value = (byte & mask) != 0;
         }
+        position += b(1);
+        return value;
     }
 
     /**
      * Reads the same bit repeatedly at the current position of the stream.
      */
     bool readBitRepeatedly(bool value, size_t count) {
-        bool success = true;
+        bool success = position <= length;
         for (size_t i = 0; i < count; i++)
             success &= (value == readBit());
         return success;
@@ -167,13 +161,12 @@ class INET_API MemoryInputStream
      * the original bit order.
      */
     b readBits(std::vector<bool>& bits, b length) {
-        b i;
-        for (i = b(0); i < length; i++) {
-            if (isReadBeyondEnd_)
-                break;
+        b len = (position + length <= this->length) ? length : (position < this->length) ? this->length - position : b(0);
+        for (b i = b(0); i < len; i++)
             bits.push_back(readBit());
-        }
-        return b(i);
+        if (len < length)
+            position += length - len;
+        return b(len);
     }
     //@}
 
@@ -183,24 +176,17 @@ class INET_API MemoryInputStream
      * Reads a byte at the current position of the stream in MSB to LSB bit order.
      */
     uint8_t readByte() {
-        if (position + B(1) > length) {
-            isReadBeyondEnd_ = true;
-            position = length;
-            return 0;
+        uint8_t value = 0;
+        if (position < this->length) {
+            size_t i = position.get<b>();
+            size_t byteIndex = i >> 3;
+            uint8_t bitOffset = i & 7;
+            value = data.at(byteIndex++) << bitOffset;
+            if (bitOffset != 0 && byteIndex < data.size())
+                value |= (data.at(byteIndex) >> (8 - bitOffset));
         }
-        else {
-            uint8_t result;
-            if (isByteAligned())
-                result = data[position.get<B>()];
-            else {
-                int l1 = position.get<b>() % 8;
-                int l2 = 8 - l1;
-                result = data[(position - b(l1)).get<B>()] << l1;
-                result |= data[(position + b(l2)).get<B>()] >> l2;
-            }
-            position += B(1);
-            return result;
-        }
+        position += B(1);
+        return value;
     }
 
     /**
@@ -208,10 +194,12 @@ class INET_API MemoryInputStream
      * MSB to LSB bit order.
      */
     bool readByteRepeatedly(uint8_t value, size_t count) {
+        b endPos = position + B(count);
         bool success = true;
-        for (size_t i = 0; i < count; i++)
+        for (size_t i = 0; i < count && position < this->length; i++)
             success &= (value == readByte());
-        return success;
+        position = endPos;
+        return success && position < this->length;
     }
 
     /**
@@ -219,23 +207,28 @@ class INET_API MemoryInputStream
      * the original byte order in MSB to LSB bit order.
      */
     B readBytes(std::vector<uint8_t>& bytes, B length) {
-        if (position + length > this->length) {
-            length = this->length - position;
-            isReadBeyondEnd_ = true;
+        B readLen(0);
+        if (position < this->length && length > B(0)) {
+            size_t i = position.get<b>();
+            size_t byteIndex = (i+7) >> 3;
+            uint8_t bitOffset = i & 7;
+            size_t endByteIndex = std::min(byteIndex + length.get<B>(), data.size());
+            readLen = B(endByteIndex - byteIndex);
+            if (bitOffset == 0) {
+                bytes.insert(bytes.end(), data.begin() + byteIndex, data.begin() + endByteIndex);
+            }
+            else {
+                bytes.reserve(bytes.size() + B(readLen).get() + 1);
+                for (size_t i = byteIndex; i < endByteIndex; i++)
+                    bytes.push_back(data.at(i-1) << bitOffset | data.at(i) >> (8 - bitOffset));
+                if (readLen < length && position + readLen < this->length) {
+                    bytes.push_back(data.at(endByteIndex-1) << bitOffset);
+                    readLen += B(1);
+                }
+            }
         }
-        auto end = position + length;
-        ASSERT(b(0) <= position && position <= B(data.size()));
-        ASSERT(b(0) <= end && end <= B(data.size()));
-        ASSERT(position <= end);
-        if (isByteAligned()) {
-            bytes.insert(bytes.end(), data.begin() + position.get<B>(), data.begin() + end.get<B>());
-            position += length;
-        }
-        else {
-            for (B::value_type i = 0; i < length.get<B>(); i++)
-                bytes.push_back(readByte());
-        }
-        return length;
+        position += length;
+        return readLen;
     }
 
     /**
@@ -243,19 +236,27 @@ class INET_API MemoryInputStream
      * the original byte order in MSB to LSB bit order.
      */
     B readBytes(uint8_t *buffer, B length) {
-        if (position + length > this->length) {
-            length = this->length - position;
-            isReadBeyondEnd_ = true;
+        B readLen(0);
+        if (position < this->length && length > B(0)) {
+            size_t i = position.get<b>();
+            size_t byteIndex = (i+7) >> 3;
+            uint8_t bitOffset = i & 7;
+            size_t endByteIndex = std::min(byteIndex + length.get<B>(), data.size());
+            readLen = B(endByteIndex - byteIndex);
+            if (bitOffset == 0) {
+                std::copy(data.begin() + byteIndex, data.begin() + endByteIndex, buffer);
+            }
+            else {
+                for (size_t i = byteIndex; i < endByteIndex; i++)
+                    *buffer++ = data.at(i-1) << bitOffset | data.at(i) >> (8 - bitOffset);
+                if (readLen < length && position + readLen < this->length) {
+                    *buffer++ = data.at(endByteIndex-1) << bitOffset;
+                    readLen += B(1);
+                }
+            }
         }
-        if (isByteAligned()) {
-            std::copy(data.begin() + position.get<B>(), data.begin() + (position + length).get<B>(), buffer);
-            position += length;
-        }
-        else {
-            for (B::value_type i = 0; i < length.get<B>(); i++)
-                *buffer++ = readByte();
-        }
-        return length;
+        position += length;
+        return readLen;
     }
     //@}
 
