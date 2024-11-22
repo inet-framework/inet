@@ -160,7 +160,7 @@ class INET_API MemoryOutputStream
      * Writes a byte to the end of the stream in MSB to LSB bit order.
      */
     void writeByte(uint8_t value) {
-        uint8_t bitOffset = length.get<b>() % 8;
+        uint8_t bitOffset = length.get<b>() & 7;
         if (bitOffset == 0)
             data.push_back(value);
         else {
