@@ -113,8 +113,8 @@ class INET_API MemoryOutputStream
      */
     void writeBit(bool value) {
         size_t i = length.get<b>();
-        size_t byteIndex = i / 8;
-        size_t bitIndex = i % 8;
+        size_t byteIndex = i >> 3;
+        uint8_t bitIndex = i & 7;
         if (bitIndex == 0)
             data.push_back(value ? 0x80 : 0);
         else if (value)
