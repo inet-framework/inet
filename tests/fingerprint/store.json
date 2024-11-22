@@ -37818,6 +37818,18 @@
   "run_number": 0,
   "sim_time_limit": "1000s",
   "test_result": "PASS",
+  "ingredients": "~tND",
+  "fingerprint": "e10e-c59b",
+  "timestamp": 1732289521.1319194,
+  "itervars": "$repetition==0"
+ },
+ {
+  "working_directory": "examples/wireless/shortcut",
+  "ini_file": "omnetpp.ini",
+  "config": "ShortcutMac",
+  "run_number": 0,
+  "sim_time_limit": "1000s",
+  "test_result": "PASS",
   "ingredients": "~tNl",
   "fingerprint": "0ce2-d2da",
   "timestamp": 1681992800.699719,
@@ -37845,6 +37857,18 @@
   "ingredients": "tyf",
   "fingerprint": "7a3c-9e0d",
   "timestamp": 1681992800.7041678,
+  "itervars": "$repetition==0"
+ },
+ {
+  "working_directory": "examples/wireless/shortcut",
+  "ini_file": "omnetpp.ini",
+  "config": "ShortcutRadio",
+  "run_number": 0,
+  "sim_time_limit": "1000s",
+  "test_result": "PASS",
+  "ingredients": "~tND",
+  "fingerprint": "33d6-f4e7",
+  "timestamp": 1732289521.1338396,
   "itervars": "$repetition==0"
  },
  {
