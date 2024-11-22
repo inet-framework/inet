@@ -177,14 +177,7 @@ class INET_API MemoryOutputStream
         ASSERT(b(0) <= offset && offset <= B(bytes.size()));
         ASSERT(b(0) <= end && end <= B(bytes.size()));
         ASSERT(offset <= end);
-        if (isByteAligned()) {
-            data.insert(data.end(), bytes.begin() + offset.get<B>(), bytes.begin() + end.get<B>());
-            this->length += end - offset;
-        }
-        else {
-            for (B::value_type i = offset.get<B>(); i < end.get<B>(); i++)
-                writeByte(bytes.at(i));
-        }
+        writeBytes(bytes.data() + offset.get<B>(), end - offset);
     }
 
     /**
@@ -194,6 +187,8 @@ class INET_API MemoryOutputStream
     void writeBytes(const uint8_t *buffer, B length) {
         ASSERT(buffer != nullptr);
         ASSERT(B(0) <= length);
+        if (length == B(0))
+            return;
         if (isByteAligned()) {
             data.insert(data.end(), buffer, buffer + length.get<B>());
             this->length += length;
