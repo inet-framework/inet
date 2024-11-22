@@ -437,10 +437,7 @@ class INET_API MemoryInputStream
      * byte order and MSB to LSB bit order.
      */
     MacAddress readMacAddress() {
-        MacAddress address;
-        for (int i = 0; i < MAC_ADDRESS_SIZE; i++)
-            address.setAddressByte(i, readByte());
-        return address;
+        return MacAddress(readUint48Be());
     }
 
     /**
