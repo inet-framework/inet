@@ -209,14 +209,18 @@ class INET_API MemoryOutputStream
         ASSERT(B(0) <= length);
         if (length == B(0))
             return;
-        if (isByteAligned()) {
+        uint8_t bitOffset = this->length.get<b>() & 7;
+        if (bitOffset == 0) {
             data.insert(data.end(), buffer, buffer + length.get<B>());
-            this->length += length;
         }
         else {
-            for (B::value_type i = 0; i < length.get<B>(); i++)
-                writeByte(buffer[i]);
+            size_t end = length.get<B>() - 1;
+            data.back() |= buffer[0] >> bitOffset;
+            for (size_t i = 0; i < end; i++)
+                data.push_back(buffer[i] << (8 - bitOffset) | buffer[i+1] >> bitOffset);
+            data.push_back(buffer[end] << (8 - bitOffset));
         }
+        this->length += length;
     }
     //@}
 
