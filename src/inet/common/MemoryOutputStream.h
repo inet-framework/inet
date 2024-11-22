@@ -44,7 +44,7 @@ class INET_API MemoryOutputStream
 
   protected:
     bool isByteAligned() const {
-        return length.get<b>() % 8 == 0;
+        return (length.get<b>() & 7) == 0;
     }
 
   public:
