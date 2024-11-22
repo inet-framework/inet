@@ -434,13 +434,25 @@ class INET_API MemoryOutputStream
      * endian byte order and MSB to LSB bit order.
      */
     void writeNBitsOfUint64Be(uint64_t value, uint8_t n) {
+        if (n == 0)
+            return;
         if (n > 64)
             throw cRuntimeError("Can not write more than 64 bits.");
-        uint64_t mul = (uint64_t)1 << (n - 1);
-        for (int i = 0; i < n; ++i) {
-            writeBit((value & mul) != 0);
-            mul >>= 1;
+        if (n < 64) {
+            ASSERT((value >> n) == 0);
+            value <<= (64-n);
         }
+        uint8_t bitOffset = length.get<b>() & 7;
+        uint8_t out = 0;
+        if (bitOffset != 0) {
+            data.back() |= static_cast<uint8_t>(value >> (56 + bitOffset));
+            out = 8 - bitOffset;
+        }
+        for ( ; out < n && out <= 56; out += 8)
+            data.push_back(static_cast<uint8_t>(value >> (56 - out)));
+        if (out < n)
+            data.push_back(static_cast<uint8_t>(value << (8 - (n - out))));
+        length += b(n);
     }
     //@}
 };
