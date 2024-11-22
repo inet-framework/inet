@@ -250,10 +250,16 @@ class INET_API MemoryOutputStream
      */
     void writeUint4(uint8_t value) {
         ASSERT(value >> 4 == 0);
-        writeBit(value & 0x8);
-        writeBit(value & 0x4);
-        writeBit(value & 0x2);
-        writeBit(value & 0x1);
+        uint8_t bitOffset = length.get<b>() & 7;
+        if (bitOffset == 0)
+            data.push_back(value << 4);
+        else if (bitOffset > 4) {
+            data.back() |= (value & 0x0F) >> (bitOffset - 4); // 7:3, 6:2 5:1
+            data.push_back((value & 0x0F) << (12 - bitOffset)); // 7:5, 6:6, 5:7
+        }
+        else
+            data.back() |= (value & 0x0F) << (4 - bitOffset);
+        length += b(4);
     }
 
     /**
