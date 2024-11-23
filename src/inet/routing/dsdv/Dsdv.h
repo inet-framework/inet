@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <sstream>
 #include <list>
 #include <map>
 #include <vector>
@@ -98,6 +99,17 @@ class INET_API DsdvIpv4Route : public Ipv4Route
     simtime_t expiryTime; // time the routing entry is valid until
 
   public:
+    std::string str() const override
+    {
+        std::stringstream out;
+
+        out << Ipv4Route::str() << " ";
+        out << "seqNo:" << getSequencenumber() << " ";
+        out << "expiryTime:" << getExpiryTime();
+
+        return out.str();
+    }
+
     bool isExpired() const { return expiryTime != 0 && expiryTime <= simTime(); }
 
     simtime_t getExpiryTime() const { return expiryTime; }
