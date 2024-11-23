@@ -366,8 +366,34 @@ void Ipv6::datagramLocalOut(Packet *packet, const NetworkInterface *destIE, Ipv6
 {
     const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
     // route packet
-    if (destIE != nullptr)
-        fragmentPostRouting(packet, destIE, MacAddress::BROADCAST_ADDRESS, true); // FIXME what MAC address to use?
+    if (destIE != nullptr) {
+        Ipv6Address destAddress = ipv6Header->getDestAddress();
+        MacAddress macAddr = MacAddress::UNSPECIFIED_ADDRESS;
+        if (!destAddress.isMulticast()) {
+            EV_INFO << "next hop for " << destAddress << " is " << requestedNextHopAddress << ", interface " << destIE->getInterfaceName() << "\n";
+
+            macAddr = nd->resolveNeighbour(requestedNextHopAddress, destIE->getInterfaceId()); // might initiate NUD
+            if (macAddr.isUnspecified()) {
+                if (!destIE->isPointToPoint()) {
+                    EV_INFO << "no link-layer address for next hop yet, passing datagram to Neighbour Discovery module\n";
+                    Ipv6NdControlInfo *ctrl = new Ipv6NdControlInfo();
+                    ctrl->setFromHL(true);
+                    ctrl->setNextHop(requestedNextHopAddress);
+                    ctrl->setInterfaceId(destIE->getInterfaceId());
+                    packet->cMessage::setControlInfo(ctrl);
+                    send(packet, "ndOut");
+                    return;
+                }
+            }
+            else
+                EV_DETAIL << "link-layer address: " << macAddr << "\n";
+            }
+        else
+            macAddr = ipv6Header->getDestAddress().mapToMulticastMacAddress();
+
+        // send out datagram
+        fragmentPostRouting(packet, destIE, macAddr, true);
+    }
     else if (!ipv6Header->getDestAddress().isMulticast())
         routePacket(packet, destIE, nullptr, requestedNextHopAddress, true);
     else
