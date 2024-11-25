@@ -333,8 +333,6 @@ clock's rate.
 
 .. note:: The magnitude of slave clock divergence from the master clock might appear to be large on these charts, but it is only in the order of microseconds (the scale of the y axis is a millionth of the x axis).
 
-.. warning:: The magnitude of slave clock divergence from the master clock might appear to be large on these charts, but it is only in the order of microseconds (the scale of the y axis is a millionth of the x axis).
-
 In the next section, we make the network more redundant, so that the primary
 master clock `and` any link in the network can fail without breaking time
 synchronization. 

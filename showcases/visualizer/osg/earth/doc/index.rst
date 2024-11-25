@@ -40,7 +40,7 @@ following network:
    :width: 20%
    :align: center
 
-The network contains an :ned:`IntegratedCanvasVisualizer` and an
+The network contains an :ned:`IntegratedVisualizer` and an
 :ned:`OsgGeographicCoordinateSystem` module. The configuration from
 :download:`omnetpp.ini <../omnetpp.ini>` is the following:
 
