@@ -32,11 +32,8 @@ The transmission, propagation, and reception process is as follows:
 - The analog model submodule of the radio medium module applies attenuation (potentially in a space, time, and frequency-dependent way).
 - The receiver module gets a physical representation of the signal and the calculated signal-to-noise-and-interference-ratio (SNIR) from the radio medium module.
 
-There are distinct types of transmitters, receivers, and radio medium modules for each
-analog signal representation. **TODO** more like
-
-`The different types of transmitter, receivers and radio mediums each have a signalAnalogRepresentation parameter
-to select one of the analog models.`
+The different types of transmitter, receivers and radio mediums each have a :par:`signalAnalogRepresentation` parameter
+to select one of the analog models.
 
 INET contains the following analog model types, presented in the order of increasing complexity:
 
@@ -61,6 +58,12 @@ INET contains a version of radio and radio medium module for each technology, e.
 while the generic :ned:`ApskRadio` works with :ned:`RadioMedium`.
 The analog model can be configured in radio and radio medium modules with the :par:`signalAnalogRepresentation` parameter.
 The analog model settings should match between the radios and the radio medium.
+
+Here are some of radio types available in INET:
+
+- :ned:`GenericRadio`: simple radio model with parameters for bitrate, header length and preamble duration; contains :ned:`GenericTransmitter` and :ned:`GenericReceiver`
+- :ned:`ApskRadio`: a hypotetical radio that uses one of the well-known modulations without utilizing techniques such as forward error correction, interleaving, or spreading; contains :ned:`ApskTransmitter` and :ned:`ApskReceiver`
+- :ned:`Ieee80211Radio`: Wifi radio; contains :ned:`Ieee80211Transmitter`, :ned:`Ieee80211Receiver`, and :ned:`Ieee80211Mac`
 
 Unit Disk Model
 ---------------
@@ -100,20 +103,7 @@ The unit disk model produces the physical phenomena relevant to routing protocol
 nodes have a range, transmissions interfere, and not all packets get delivered and not directly.
 In this case, it is an adequate abstraction for physical layer behavior.
 
-.. The following modules use the unit disk analog model:
-
-.. - :ned:`UnitDiskRadioMedium`: the only radio medium using the unit disk analog model; to be used with all unit disk radio types
-.. - :ned:`GenericUnitDiskRadio`: generic radio using the unit disk analog model; contains :ned:`GenericTransmitter` and :ned:`GenericReceiver`
-.. - :ned:`Ieee80211UnitDiskRadio`: unit disk version of Wifi; contains :ned:`Ieee80211Transmitter`, :ned:`Ieee80211Receiver`, and :ned:`Ieee80211Mac`
-
-The following radios can use the unit disk analog model:
-
-- :ned:`GenericRadio`: generic radio using the unit disk analog model; contains :ned:`GenericTransmitter` and :ned:`GenericReceiver`
-- :ned:`ApskRadio`: a hypotetical radio that uses one of the well-known modulations without utilizing techniques such as forward error correction, interleaving, or spreading; contains :ned:`ApskTransmitter` and :ned:`ApskReceiver`
-- :ned:`Ieee80211Radio`: unit disk version of Wifi; contains :ned:`Ieee80211Transmitter`, :ned:`Ieee80211Receiver`, and :ned:`Ieee80211Mac`
-- :ned:`Ieee802154NarrowbandRadio`: TODO
-
-All unit disk radios can be used with :ned:`RadioMedium`, just set the radio medium's signal analog representation to `unitdisk`.
+All radios set to unit disk can be used with :ned:`RadioMedium`, just set the radio medium's signal analog representation to `unitdisk`.
 
 Example: Testing Routing Protocols
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
