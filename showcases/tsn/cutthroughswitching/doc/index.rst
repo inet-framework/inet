@@ -39,8 +39,8 @@ The example simulation contains two :ned:`TsnDevice` nodes connected by two
 .. figure:: media/Network.png
    :align: center
 
-In the simulation, ``device1`` sends 1000-Byte UDP packets to ``device2``, with a mean arrival time of 100ms,
-and X ms jitter. There are two configurations in omnetpp.ini, ``StoreAndForward`` and ``CutthroughSwitching``,
+In the simulation, ``device1`` sends 1000-Byte UDP packets to ``device2``, with a mean arrival time of 200ms,
+and 50ms jitter. There are two configurations in omnetpp.ini, ``StoreAndForward`` and ``CutthroughSwitching``,
 which only differ in the use of cut-through switching.
 
 Here are the configurations:
@@ -49,15 +49,8 @@ Here are the configurations:
    :language: ini
 
 
-The default :ned:`EthernetInterface` in Ethernet switches doesn't support cut-through. In order to use 
-cut-through, we replace the default interface with :ned:`EthernetCutthroughInterface`. Cut-through is 
-disabled in this interface by default, thus it needs to be enabled by setting the :par:`enableCutthrough` 
-parameter to ``true``.
-
-In addition, all necessary components in the switch need to support packet streaming.
-The cut-through interface in the switches supports packet streaming by default; the default PHY layer in 
-hosts need to be replaced with
-:ned:`EthernetStreamingPhyLayer`, which supports packet streaming.
+The default :ned:`LayeredEthernetInterface` in :ned:`TsnDevice` and :ned:`TsnSwitch` has cut-through disabled by default. In order to use 
+Cut-through is enabled by setting the :par:`hasCutthroughSwitching` parameter to ``true``.
 
 Results
 -------
@@ -93,8 +86,8 @@ vs cut-through switching:
    :width: 90%
 
 We can verify that result analytically. In the case of store-and-forward, the end-to-end duration
-is ``3 * (transmission time + propagation time)``, around 25.296 ms. In the case of cut-through,
-the duration is ``1 * transmission time + 3 propagation time + 2 * cut-through delay``, around 8.432 ms.
+is ``3 * (transmission time + propagation time)``, around 30.246us. In the case of cut-through,
+the duration is ``1 * transmission time + 3 propagation time + 2 * cut-through delay``, around 10.534us.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`CutthroughSwitchingShowcase.ned <../CutthroughSwitchingShowcase.ned>`
 

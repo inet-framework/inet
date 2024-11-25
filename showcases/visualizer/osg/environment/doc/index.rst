@@ -24,7 +24,7 @@ About the visualizer
 --------------------
 
 The :ned:`PhysicalEnvironmentVisualizer` (also part of
-:ned:`IntegratedCanvasVisualizer`) is responsible for displaying the physical
+:ned:`IntegratedVisualizer`) is responsible for displaying the physical
 objects. The objects themselves are provided by the
 :ned:`PhysicalEnvironment` module; their geometry, physical and visual
 properties are defined in the XML configuration of the
@@ -33,8 +33,8 @@ properties are defined in the XML configuration of the
 .. note:: For more information about the XML format in which the physical environment (geometry, materials, etc.) can be defined, see the NED documentation of the :ned:`PhysicalEnvironment` module.
 
 The two-dimensional projection of physical objects is determined by the
-:ned:`SceneCanvasVisualizer` module. (This is because the projection is
-also needed by other visualizers, for example, :ned:`MobilityVisualizer`.)
+:ned:`SceneCanvasVisualizer` module (projection is
+also needed by other visualizers, for example, :ned:`MobilityVisualizer`).
 The default view is the top view (z-axis), but you can also configure side
 view (x and y axes), or isometric or orthographic projection.
 
@@ -45,7 +45,7 @@ This example configuration (``DefaultView`` in the ini file)
 demonstrates the default visualization of objects. The objects are
 defined in the ``indoor.xml`` file, which depicts an apartment with
 three rooms. The network contains just two modules, a
-:ned:`PhysicalEnvironment` and an :ned:`IntegratedCanvasVisualizer` module. When the
+:ned:`PhysicalEnvironment` and an :ned:`IntegratedVisualizer` module. When the
 simulation is run, the network looks like this:
 
 .. figure:: media/default.png
@@ -90,7 +90,7 @@ Further information
 -------------------
 
 For more information, refer to the NED documentation of
-:ned:`PhysicalEnvironmentVisualizer` and :ned:`SceneCanvasVisualizer`.
+:ned:`PhysicalEnvironmentVisualizer`, :ned:`SceneCanvasVisualizer` and :ned:`SceneOsgVisualizerBase`.
 
 
 Try It Yourself

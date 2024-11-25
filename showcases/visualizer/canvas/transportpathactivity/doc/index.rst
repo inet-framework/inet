@@ -22,8 +22,8 @@ About the Visualizer
 
 In INET, transport path activity can be visualized by including a
 :ned:`TransportRouteVisualizer` module in the simulation. Adding an
-:ned:`IntegratedVisualizer` is also an option because it also contains a
-:ned:`TransportRouteVisualizer`. Transport path activity visualization is
+:ned:`IntegratedCanvasVisualizer` is also an option because it also contains a
+:ned:`TransportRouteCanvasVisualizer`. Transport path activity visualization is
 disabled by default, and it can be enabled by setting the visualizer's
 :par:`displayRoutes` parameter to true.
 
@@ -63,7 +63,7 @@ The ``source`` node will continuously send UDP packets to the
 ``destination`` node by using a :ned:`UdpBasicApp` application.
 
 In this simulation, the ``pathVisualizer's`` type is
-:ned:`TransportRouteVisualizer`. It is enabled by setting the
+:ned:`TransportRouteCanvasVisualizer`. It is enabled by setting the
 :par:`displayRoutes` parameter to true.
 
 .. literalinclude:: ../omnetpp.ini
@@ -146,8 +146,8 @@ does not fade out completely before the next ``UDPBasicAppData`` packet
 arrives.
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: transportRouteVisualizer.displayRoutes
-   :end-at: transportRouteVisualizer.packetFilter
+   :start-at: TransportRouteCanvasVisualizer.displayRoutes
+   :end-at: TransportRouteCanvasVisualizer.packetFilter
    :language: ini
 
 The following video has been captured from the simulation and shows
@@ -173,8 +173,8 @@ visualized.
 We add the following line to the configuration:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: transportRouteVisualizer.nodeFilter
-   :end-at: transportRouteVisualizer.nodeFilter
+   :start-at: TransportRouteCanvasVisualizer.nodeFilter
+   :end-at: TransportRouteCanvasVisualizer.nodeFilter
    :language: ini
 
 The following video has been captured from the simulation and shows
