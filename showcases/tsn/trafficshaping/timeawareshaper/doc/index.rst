@@ -153,7 +153,7 @@ such as with VLAN ID, or PCP number. We assign the best effort stream to PCP 0, 
    :end-at: video
    :language: ini
 
-The Ieee8021qProtocol module in the link layer adds 802.1q headers to packets and sets the PCP field according to the request tags.
+The :ned:`Ieee8021qProtocol` module in the link layer adds 802.1q headers to packets and sets the PCP field according to the request tags.
 
 The traffic shaping takes place in the outgoing network interface of the switch
 where both streams pass through. We enable egress traffic shaping in the switch:
