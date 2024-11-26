@@ -101,8 +101,10 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
 
         if (echoAppModule->delay == 0)
             echoAppModule->sendDown(outPkt);
-        else
-            scheduleAfter(echoAppModule->delay, outPkt); // send after a delay
+        else {
+            outPkt->setContextPointer(this);
+            echoAppModule->scheduleAfter(echoAppModule->delay, outPkt); // send after a delay
+        }
     }
     delete rcvdPkt;
 }
