@@ -5,6 +5,7 @@ import io
 import IPython
 import logging
 import os
+import platform
 import pickle
 import re
 import signal
@@ -356,6 +357,14 @@ def run_command_with_logging(args, error_message=None, nice=10, **kwargs):
     if error_message and process.returncode != 0:
         raise Exception(error_message)
     return subprocess.CompletedProcess(args, process.returncode, "".join(stdout_lines), ''.join(stderr_lines))
+
+def open_file_with_default_editor(file_path):
+    if platform.system() == "Windows":
+        os.startfile(file_path)
+    elif platform.system() == "Darwin":  # macOS
+        subprocess.run(["open", file_path])
+    else:  # Linux/Unix
+        subprocess.run(["xdg-open", file_path])
 
 def collect_existing_ned_types():
     types = set()
