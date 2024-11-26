@@ -369,10 +369,13 @@ void Ipv6NeighbourDiscovery::reachabilityConfirmed(const Ipv6Address& neighbour,
 
     cMessage *msg = nce->nudTimeoutEvent;
     if (msg != nullptr) {
-        EV_INFO << "NUD in progress. Cancelling NUD Timer\n";
-        bubble("Reachability Confirmed via NUD.");
+        EV_INFO << "NUD in progress. Cancelling NUD Timer because TCP ACK received from neighbour.\n";
+        bubble("Reachability Confirmed via NUD. Received TCP ACK.");
         cancelAndDelete(msg);
         nce->nudTimeoutEvent = nullptr;
+        EV_INFO << "Set Neighbour Cache Entry state to REACHABLE\n";
+        nce->reachabilityExpires = simTime() + ift->getInterfaceById(interfaceId)->getProtocolData<Ipv6InterfaceData>()->_getReachableTime();
+        nce->reachabilityState = Ipv6NeighbourCache::REACHABLE;
     }
 
     // TODO (see header file for description)
@@ -479,7 +482,7 @@ void Ipv6NeighbourDiscovery::initiateNeighbourUnreachabilityDetection(Neighbour 
     ASSERT(nce->reachabilityState == Ipv6NeighbourCache::STALE);
     ASSERT(nce->nudTimeoutEvent == nullptr);
     const Key *nceKey = nce->nceKey;
-    EV_INFO << "Initiating Neighbour Unreachability Detection";
+    EV_INFO << "Initiating Neighbour Unreachability Detection.\n";
     NetworkInterface *ie = ift->getInterfaceById(nceKey->interfaceID);
     EV_INFO << "Setting NCE state to DELAY.\n";
     /*The first time a node sends a packet to a neighbor whose entry is
@@ -2091,6 +2094,9 @@ void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6Neighbour
     auto naPacket = new Packet("NApacket");
     Icmpv6::insertCrc(crcMode, na, packet);
     naPacket->insertAtFront(na);
+
+    EV_INFO << "Sending solicited NA to " << naDestAddr << "\n";
+
     sendPacketToIpv6Module(naPacket, naDestAddr, myIPv6Addr, ie->getInterfaceId());
 }
 

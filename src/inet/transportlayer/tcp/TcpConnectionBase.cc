@@ -16,6 +16,10 @@
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
+#ifdef INET_WITH_IPv6
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
+#endif
 
 namespace inet {
 namespace tcp {
@@ -205,6 +209,14 @@ bool TcpConnection::processTCPSegment(Packet *tcpSegment, const Ptr<const TcpHea
 
     // first do actions
     TcpEventCode event = process_RCV_SEGMENT(tcpSegment, tcpHeader, segSrcAddr, segDestAddr);
+
+#ifdef INET_WITH_IPv6
+    if(event == TCP_E_RCV_ACK || event == TCP_E_RCV_SYN_ACK) {
+        Ipv6NeighbourDiscovery *nd = check_and_cast<Ipv6NeighbourDiscovery *>(this->getModuleByPath("^.^.ipv6.neighbourDiscovery"));
+        if(nd !=nullptr)
+            nd->reachabilityConfirmed(segSrcAddr.toIpv6(), tcpSegment->getTag<InterfaceInd>()->getInterfaceId());
+    }
+#endif
 
     // then state transitions
     return performStateTransition(event);
