@@ -9,8 +9,8 @@ __sphinx_mock__ = True # ignore this module in documentation
 
 _logger = logging.getLogger(__name__)
 
-_speed_test_extra_args = ["--cmdenv-express-mode=true", "--cmdenv-performance-display=false", "--cmdenv-status-frequency=1000000s", 
-                          "--record-eventlog=false", "--vector-recording=false", "--scalar-recording=false", "--bin-recording=false", "--param-recording=false"]
+_speed_test_append_args = ["--cmdenv-express-mode=true", "--cmdenv-performance-display=false", "--cmdenv-status-frequency=1000000s", 
+                           "--record-eventlog=false", "--vector-recording=false", "--scalar-recording=false", "--bin-recording=false", "--param-recording=false"]
 
 _baseline_elapsed_wall_time = None
 
@@ -22,7 +22,7 @@ def get_baseline_elapsed_wall_time():
         logging.getLogger("routing").setLevel("WARN")
         with open(os.devnull, 'w') as devnull:
             run_command_with_logging(["make", "MODE=release", "-j16", "samples"], cwd=get_workspace_path("omnetpp"), error_message="Failed to build routing sample")
-            simulation_task_result = run_simulations(simulation_project=get_simulation_project("routing"), config_filter="Net60a", sim_time_limit="10000s", extra_args=_speed_test_extra_args, output_stream=devnull)
+            simulation_task_result = run_simulations(simulation_project=get_simulation_project("routing"), config_filter="Net60a", sim_time_limit="10000s", append_args=_speed_test_append_args, output_stream=devnull)
             _baseline_elapsed_wall_time = simulation_task_result.elapsed_wall_time
         return _baseline_elapsed_wall_time
 
@@ -43,7 +43,7 @@ class SpeedTestTask(SimulationTestTask):
             return super().check_simulation_task_result(simulation_task_result, **kwargs)
 
     def run_protected(self, **kwargs):
-        return super().run_protected(nice=-10, extra_args=_speed_test_extra_args, **kwargs)
+        return super().run_protected(nice=-10, append_args=_speed_test_append_args, **kwargs)
 
 def get_speed_test_tasks(mode="release", run_number=0, working_directory_filter="showcases", **kwargs):
     multiple_simulation_tasks = get_simulation_tasks(name="speed test", mode=mode, run_number=run_number, working_directory_filter=working_directory_filter, **kwargs)
@@ -73,7 +73,7 @@ class SpeedUpdateTask(SimulationUpdateTask):
         simulation_config = self.simulation_task.simulation_config
         simulation_project = simulation_config.simulation_project
         start_time = time.time()
-        simulation_task_result = self.simulation_task.run_protected(nice=-10, extra_args=_speed_test_extra_args, **kwargs)
+        simulation_task_result = self.simulation_task.run_protected(nice=-10, append_args=_speed_test_append_args, **kwargs)
         end_time = time.time()
         simulation_task_result.elapsed_wall_time = end_time - start_time
         speed_measurement_store = get_speed_measurement_store(simulation_project)
