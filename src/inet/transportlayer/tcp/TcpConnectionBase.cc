@@ -212,7 +212,7 @@ bool TcpConnection::processTCPSegment(Packet *tcpSegment, const Ptr<const TcpHea
 
 #ifdef INET_WITH_IPv6
     if(event == TCP_E_RCV_ACK || event == TCP_E_RCV_SYN_ACK) {
-        Ipv6NeighbourDiscovery *nd = check_and_cast<Ipv6NeighbourDiscovery *>(this->getModuleByPath("^.^.ipv6.neighbourDiscovery"));
+        auto nd = dynamic_cast<Ipv6NeighbourDiscovery *>(findModuleByPath("^.^.ipv6.neighbourDiscovery"));
         if(nd !=nullptr)
             nd->reachabilityConfirmed(segSrcAddr.toIpv6(), tcpSegment->getTag<InterfaceInd>()->getInterfaceId());
     }
