@@ -92,6 +92,8 @@ def initialize_logging(log_level, external_command_log_level, log_file):
     logging.getLogger("opp_run_dbg").setLevel(external_command_log_level)
     logging.getLogger("opp_run_release").setLevel(external_command_log_level)
     logging.getLogger("opp_run_sanitize").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_coverage").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_profile").setLevel(external_command_log_level)
     logging.getLogger("opp_test").setLevel(external_command_log_level)
     logging.addLevelName(STDOUT_LEVEL, "STDOUT")
     logging.addLevelName(STDERR_LEVEL, "STDERR")
