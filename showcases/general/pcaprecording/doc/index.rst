@@ -49,7 +49,7 @@ protocol names registered in INET (see
 The parameter's default value is ``"ethernetmac ppp ieee80211mac"``.
 
 By default, the PCAP recorder module records L2 frames, but setting the
-``moduleNamePatterns`` to ``ipv4``, for example, lets one record L3
+:ned:`moduleNamePatterns` to ``ipv4``, for example, lets one record L3
 frames (note that the parameter's value is lowercase because it refers
 to the actual ``ipv4`` module in the host, not the module type.)
 
@@ -129,7 +129,7 @@ In ``host1``, we'll record 802.11 traffic on the ``wlan0`` interface:
 
 In ``host2``, we'll record only the ARP packets from the 802.11 traffic
 on ``wlan0``. The
-:par:`packetFilter` is set to record only to packets of ``ArpPacket``
+:par:`packetFilter` is set to record only packets of ``ArpPacket``
 class:
 
 .. literalinclude:: ../omnetpp.ini
