@@ -126,9 +126,11 @@ NetworkNodeOsgVisualization::NetworkNodeOsgVisualization(cModule *networkNode, b
         autoTransform->addChild(annotationNode);
         osgNode = autoTransform;
     }
+#ifdef WITH_OSGEARTH
     auto objectNode = new cObjectOsgNode(networkNode);
     objectNode->addChild(osgNode);
     addChild(objectNode);
+#endif
     double x = atol(displayString.getTagArg("p", 0));
     double y = atol(displayString.getTagArg("p", 1));
     setPosition(osg::Vec3d(x, y, 0.0));
