@@ -34,7 +34,7 @@ Results
 
 Here is the number of received and sent packets:
 
-.. figure:: media/packetsreceivedsent.svg
+.. figure:: media/packetsreceivedsent.png
    :align: center
    :width: 100%
 
