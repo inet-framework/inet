@@ -288,8 +288,8 @@ The dimensional transmitters in INET use the API to create transmissions. For ex
 
 .. note:: The dimensional transmitters in INET select the most optimal representation for the signal, depending on the gains parameters (described later). For example, if the parameters describe a flat signal, they'll use a boxcar function (in 1D or 2D, whether the signal is flat in one or two dimensions). If the gains parameters describe a complex function, they'll use the generic interpolated function; the gains parameter string actually maps to the samples and the types of interpolation between them.
 
-INET contains dimensional versions of IEEE 802.11, narrowband, and ultra-wideband 802.15.4,
-and APSK radio (the 802.15.4 ultra-wideband version is only available in dimensional form).
+All radios in INET, such as IEEE 802.11, narrowband and ultra-wideband 802.15.4,
+and APSK radio support the dimensional analog model (the 802.15.4 ultra-wideband version only supports the dimensional model).
 
 The signal shapes in frequency and time can be defined with the :par:`frequencyGains`
 and :par:`timeGains` parameters of transmitter modules. Here is an example signal spectrum definition:
