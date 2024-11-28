@@ -44,7 +44,7 @@ class OppTestTask(TestTask):
         subprocess_result = run_command_with_logging(args, cwd=test_directory, env=self.simulation_project.get_env())
         if subprocess_result.returncode != 0:
             return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
-        args = ["make", f"MODE={self.mode}"]
+        args = ["make", f"MODE={self.mode}", "-j", str(multiprocessing.cpu_count())]
         subprocess_result = run_command_with_logging(args, cwd=test_directory, env=self.simulation_project.get_env())
         if subprocess_result.returncode != 0:
             return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
@@ -97,7 +97,7 @@ class MultipleOppTestTasks(MultipleTestTasks):
         test_directory = self.simulation_project.get_full_path(self.test_folder)
         lib_directory = os.path.join(test_directory, "lib")
         if os.path.exists(lib_directory):
-            args = ["make", f"MODE={self.mode}"]
+            args = ["make", f"MODE={self.mode}", "-j", str(multiprocessing.cpu_count())]
             subprocess_result = run_command_with_logging(args, cwd=lib_directory, env=self.simulation_project.get_env())
             if subprocess_result.returncode != 0:
                 raise Exception("Cannot build lib")
