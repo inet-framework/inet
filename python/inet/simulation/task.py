@@ -89,6 +89,10 @@ class SimulationTaskResult(TaskResult):
                     self.expected_result = "SKIP"
                     self.expected = True
                     self.reason = "Interactive simulation"
+            match = re.search(r"Simulation CPU usage: elapsedTime = (.*?), numCycles = (.*?), numInstructions = (.*?)\n", subprocess_result.stdout)
+            self.elapsed_cpu_time = float(match.group(1)) if match else None
+            self.num_cpu_cycles = int(match.group(2)) if match else None
+            self.num_cpu_instructions = int(match.group(3)) if match else None
         else:
             self.last_event_number = None
             self.last_simulation_time = None
