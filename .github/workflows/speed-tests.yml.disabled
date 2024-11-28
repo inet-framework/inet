@@ -1,3 +1,5 @@
+This workflow is disabled because CPU instruction and CPU cycle performance hardware counters are not enabled on virtualized GitHub workflow servers.
+
 name: "Test: speed"
 
 on:
