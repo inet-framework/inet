@@ -35,6 +35,15 @@ jobs:
         env:
           MODE: ${{ matrix.mode }}
         run: |
+          echo "::group::Checking system"
+          sudo apt-get install -y linux-tools-common linux-tools-$(uname -r)
+          lscpu
+          uname -r
+          cat /proc/sys/kernel/perf_event_paranoid
+          perf list
+          perf stat -e cycles sleep 1
+          echo "::endgroup::"
+
           echo "::group::Installing packages"
           sudo apt update
           sudo apt install -y --no-install-recommends git wget curl ca-certificates python3 \
