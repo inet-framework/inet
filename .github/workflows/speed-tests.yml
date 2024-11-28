@@ -40,6 +40,7 @@ jobs:
           lscpu
           uname -r
           cat /proc/sys/kernel/perf_event_paranoid
+          echo 0 | sudo tee /proc/sys/kernel/perf_event_paranoid
           perf list
           perf stat -e cycles sleep 1
           echo "::endgroup::"
