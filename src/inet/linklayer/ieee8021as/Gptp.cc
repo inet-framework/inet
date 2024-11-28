@@ -33,6 +33,7 @@ simsignal_t Gptp::peerDelaySignal = cComponent::registerSignal("peerDelay");
 simsignal_t Gptp::residenceTimeSignal = cComponent::registerSignal("residenceTime");
 simsignal_t Gptp::correctionFieldIngressSignal = cComponent::registerSignal("correctionFieldIngress");
 simsignal_t Gptp::correctionFieldEgressSignal = cComponent::registerSignal("correctionFieldEgress");
+simsignal_t Gptp::gptpSyncSuccessfulSignal = cComponent::registerSignal("correctionFieldEgress");
 
 // MAC address:
 //   01-80-C2-00-00-02 for TimeSync (ieee 802.1as-2020, 13.3.1.2)
@@ -108,6 +109,7 @@ void Gptp::initialize(int stage)
             nic->subscribe(transmissionStartedSignal, this);
             nic->subscribe(receptionStartedSignal, this);
             nic->subscribe(receptionEndedSignal, this);
+            nic->subscribe(gptpSyncSuccessfulSignal, this);
         }
 
         if (slavePortId != -1) {
@@ -510,6 +512,7 @@ void Gptp::synchronize()
     emit(gmRateRatioSignal, gmRateRatio);
     emit(localTimeSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync));
     emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now);
+    emit(gptpSyncSuccessfulSignal, CLOCKTIME_AS_SIMTIME(preciseOriginTimestamp)); // TODO: check if the time stamp is correct
 }
 
 void Gptp::calculateGmRatio()
@@ -666,7 +669,7 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
     }
 
     if (simSignal != receptionStartedSignal && simSignal != transmissionStartedSignal &&
-        simSignal != receptionEndedSignal)
+        simSignal != receptionEndedSignal && simSignal != gptpSyncSuccessfulSignal)
         return;
 
     auto ethernetSignal = check_and_cast<cPacket *>(obj);
@@ -696,6 +699,11 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
     }
     else if (simSignal == transmissionStartedSignal)
         handleTransmissionStartedSignal(gptp, source);
+
+    else if (simSignal == gptpSyncSuccessfulSignal) {
+        //TODO: add functionality
+        handleGptpSyncSuccessfulSignal(gptp, source);
+    }
 }
 
 void Gptp::handleTransmissionStartedSignal(const GptpBase *gptp, cComponent *source)
@@ -721,6 +729,13 @@ void Gptp::handleTransmissionStartedSignal(const GptpBase *gptp, cComponent *sou
     default:
         break;
     }
+}
+
+
+// TODO: whether handlehandleGptpSyncSuccessfulSignal is needed or not
+void Gptp::handleGptpSyncSuccessfulSignal(const GptpBase *gptp, omnetpp::cComponent *source)
+{
+
 }
 
 void Gptp::handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDetails)
