@@ -86,8 +86,6 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     clocktime_t newLocalTimeAtTimeSync;
 
-    std::map<int, clocktime_t> gptpSyncTime; // store each gptp sync time
-
     // self timers:
     ClockEvent *selfMsgSync = nullptr;
     ClockEvent *selfMsgDelayReq = nullptr;
@@ -105,13 +103,16 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     static simsignal_t residenceTimeSignal;
     static simsignal_t correctionFieldIngressSignal;
     static simsignal_t correctionFieldEgressSignal;
-    static simsignal_t gptpSyncSuccessfulSignal;
+
+
 
     // Packet receive signals:
     std::map<uint16_t, clocktime_t> ingressTimeMap; // <sequenceId,ingressTime
 
   public:
     static const MacAddress GPTP_MULTICAST_ADDRESS;
+    static simsignal_t gptpSyncSuccessfulSignal;
+    uint8_t getDomainNumber() const {return this->domainNumber;};
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -125,8 +126,6 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     virtual void handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDetails);
 
     void handleTransmissionStartedSignal(const GptpBase *gptp, omnetpp::cComponent *source);
-
-    void handleGptpSyncSuccessfulSignal(const GptpBase *gptp, omnetpp::cComponent *source);
 
     const GptpBase *extractGptpHeader(Packet *packet);
 

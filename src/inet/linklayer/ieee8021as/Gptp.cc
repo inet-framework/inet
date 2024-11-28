@@ -109,7 +109,6 @@ void Gptp::initialize(int stage)
             nic->subscribe(transmissionStartedSignal, this);
             nic->subscribe(receptionStartedSignal, this);
             nic->subscribe(receptionEndedSignal, this);
-            nic->subscribe(gptpSyncSuccessfulSignal, this);
         }
 
         if (slavePortId != -1) {
@@ -512,7 +511,7 @@ void Gptp::synchronize()
     emit(gmRateRatioSignal, gmRateRatio);
     emit(localTimeSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync));
     emit(timeDifferenceSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync) - now);
-    emit(gptpSyncSuccessfulSignal, CLOCKTIME_AS_SIMTIME(preciseOriginTimestamp)); // TODO: check if the time stamp is correct
+    emit(gptpSyncSuccessfulSignal, CLOCKTIME_AS_SIMTIME(newLocalTimeAtTimeSync)); // TODO: check if the time stamp is correct
 }
 
 void Gptp::calculateGmRatio()
@@ -699,11 +698,6 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
     }
     else if (simSignal == transmissionStartedSignal)
         handleTransmissionStartedSignal(gptp, source);
-
-    else if (simSignal == gptpSyncSuccessfulSignal) {
-        //TODO: add functionality
-        handleGptpSyncSuccessfulSignal(gptp, source);
-    }
 }
 
 void Gptp::handleTransmissionStartedSignal(const GptpBase *gptp, cComponent *source)
@@ -729,13 +723,6 @@ void Gptp::handleTransmissionStartedSignal(const GptpBase *gptp, cComponent *sou
     default:
         break;
     }
-}
-
-
-// TODO: whether handlehandleGptpSyncSuccessfulSignal is needed or not
-void Gptp::handleGptpSyncSuccessfulSignal(const GptpBase *gptp, omnetpp::cComponent *source)
-{
-
 }
 
 void Gptp::handleClockJump(ServoClockBase::ClockJumpDetails *clockJumpDetails)
