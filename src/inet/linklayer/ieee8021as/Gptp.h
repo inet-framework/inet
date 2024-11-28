@@ -103,7 +103,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     static simsignal_t residenceTimeSignal;
     static simsignal_t correctionFieldIngressSignal;
     static simsignal_t correctionFieldEgressSignal;
-
+    static simsignal_t gptpSyncSuccessfulSignal;
 
 
     // Packet receive signals:
@@ -111,7 +111,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
   public:
     static const MacAddress GPTP_MULTICAST_ADDRESS;
-    static simsignal_t gptpSyncSuccessfulSignal;
+
     uint8_t getDomainNumber() const {return this->domainNumber;};
 
   protected:

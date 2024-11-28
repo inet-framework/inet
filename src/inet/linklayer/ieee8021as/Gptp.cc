@@ -33,7 +33,7 @@ simsignal_t Gptp::peerDelaySignal = cComponent::registerSignal("peerDelay");
 simsignal_t Gptp::residenceTimeSignal = cComponent::registerSignal("residenceTime");
 simsignal_t Gptp::correctionFieldIngressSignal = cComponent::registerSignal("correctionFieldIngress");
 simsignal_t Gptp::correctionFieldEgressSignal = cComponent::registerSignal("correctionFieldEgress");
-simsignal_t Gptp::gptpSyncSuccessfulSignal = cComponent::registerSignal("correctionFieldEgress");
+simsignal_t Gptp::gptpSyncSuccessfulSignal = cComponent::registerSignal("gptpSyncSuccessfulSignal");
 
 // MAC address:
 //   01-80-C2-00-00-02 for TimeSync (ieee 802.1as-2020, 13.3.1.2)
