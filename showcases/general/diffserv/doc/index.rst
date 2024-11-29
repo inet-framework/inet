@@ -105,14 +105,14 @@ If both of them are used, the layout of the interface looks like the following:
    :align: center
 
 In the ``VoIP_WithPolicing`` and ``VoIP_WithPolicingAndQueuing``
-configurations, INET's :ned:`TrafficConditioner` module is used in the
+configurations, INET's :ned:`DiffservTrafficConditioner` module is used in the
 router's PPP interface to achieve the required policing.
 
 .. figure:: media/TrafficConditioner.png
    :scale: 100%
    :align: center
 
-In :ned:`TrafficConditioner`, the ``mfClassifier`` submodule is used for
+In :ned:`DiffservTrafficConditioner`, the ``mfClassifier`` submodule is used for
 separating packets of different flows for marking with different DSCP values.
 It contains a list of filters that identifies the flow and determines their classes.
 Each filter can match the source and destination address, IP protocol
