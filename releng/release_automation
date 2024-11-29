@@ -1,0 +1,338 @@
+#!/usr/bin/env python3
+
+# This file defines the release process of the INET framework. In contains several steps that are executed in order.
+# Each step may succeed or fail, and the process will stop at the first failure.
+# If a step fails, the process will print an error message and the script will exit with a non-zero status code.
+# The script also prints a summary of the steps that were executed and whether they succeeded or failed.
+# The steps are defined as functions and are called in the main function.
+# The main function keeps track of the steps successfully executed persistently in a file (.release_state) (the file contains a
+# number indicating the last successful step).
+# When the process re-runs, it starts after the last successful step avoiding repeating previous successful steps.
+# If the script is executed with the --abort option, it will delete the state file and the process will start from
+# the beginning at the next re-run.
+
+import subprocess
+import re
+import argparse
+from datetime import datetime
+from pathlib import Path
+import requests
+
+class INETReleaseAutomation:
+    """Encapsulate the release process and define all the required steps"""
+    def __init__(self, continue_mode: bool = False):
+        """
+        Initialize the release automation with version and milestone information
+        
+        Args:
+            continue_mode: Continue the release process after a manual step
+        """
+        self.continue_mode = continue_mode
+        self.repo_path = Path(subprocess.run(["inet_root"], capture_output=True, check=True).stdout.strip().decode())
+        self.version = subprocess.run(["inet_version"], capture_output=True, check=True).stdout.strip().decode()
+        self.milestone = subprocess.run(["gh", "api", "/repos/inet-framework/inet/milestones", "--jq", f".[] | select(.title == \"INET {self.version}\") | .number"], capture_output=True, check=True).stdout.strip().decode()
+
+    def check_milestone_issues(self) -> bool:
+        """Check if all fixed issues are correctly assigned to the milestone"""
+        url = f"https://api.github.com/repos/inet-framework/inet/milestones/{self.milestone}"
+        response = requests.get(url, timeout=10)
+        if response.status_code != 200:
+            raise RuntimeError(f"Failed to retrieve milestone INET {self.version}: {response.text}")
+        milestone = response.json()
+        if milestone["open_issues"] != 0:
+            raise RuntimeError(f"Milestone INET {self.version} has open issues")
+        if milestone["state"] != "closed":
+            raise RuntimeError(f"Milestone INET {self.version} is not closed")
+        print(f"Verified that milestone INET {self.version} is at 100%")
+        return True
+
+    def run_tests(self) -> bool:
+        """Run the test suite"""
+        try:
+            subprocess.run(["inet_run_all_tests"], cwd=self.repo_path, check=True)
+            return True
+        except subprocess.CalledProcessError:
+            print("Test suite failed!")
+            return False
+
+    def check_selfdoc(self) -> bool:
+        """Check if the tests/fingerprint/SelfDoc.json is up to date. 
+        It's commit date must not be older than 30 days."""
+        selfdoc_file = self.repo_path / "tests" / "fingerprint" / "SelfDoc.json"
+
+        if not selfdoc_file.exists():
+            print(f"SelfDoc.json not found at {selfdoc_file}")
+            return False
+
+        last_commit = subprocess.run(
+            ["git", "log", "-1", "--format=%ad", "--date=short", "--", str(selfdoc_file)],
+            capture_output=True,
+            check=True
+        ).stdout.decode().strip()
+
+        last_commit_date = datetime.strptime(last_commit, "%Y-%m-%d")
+        now = datetime.now()
+
+        if (now - last_commit_date).days > 30:
+            print(f"tests/fingerprint/SelfDoc.json is older than 30 days ({last_commit_date}). Please run 'make selfdoc' to update it and then commit the changes!")
+            return False
+
+        print(f"Verified that tests/fingerprint/SelfDoc.json is not older than 30 days (last commit: {last_commit})")
+        return True
+
+    def generate_ned_documentation(self) -> bool:
+        """Generate NED documentation"""
+        try:
+            subprocess.run(["make", "neddoc"], cwd=self.repo_path, check=True)
+            print("NED documentation generated successfully.")
+            return True
+        except subprocess.CalledProcessError:
+            print("Failed to generate NED documentation!")
+            return False
+
+    def update_whatsnew(self) -> bool:
+        """Update the WHATSNEW file with latest changes"""
+        try:
+
+            with open(self.repo_path / "WHATSNEW", 'r', encoding='utf-8') as file:
+                for line in file:
+                    match = re.match(r"INET-(\d+\.\d+\.\d+)", line)
+                    if match:
+                        latest_version = match.group(1)
+                        break
+                else:
+                    raise RuntimeError("No latest version found in WHATSNEW file")
+
+            subprocess.run(["./releng/update-whatsnew", f"v{latest_version}", "HEAD"], cwd=self.repo_path, check=True)
+            return True
+        except subprocess.CalledProcessError:
+            print("WHATSNEW update failed!")
+            return False
+
+    def tag_repository(self) -> bool:
+        """Tag the git repo with version tag"""
+        tag = f"v{self.version}"
+        try:
+            subprocess.run(["git", "tag", tag, "-n"], cwd=self.repo_path, check=True)
+            return True
+        except subprocess.CalledProcessError:
+            print(f"Failed to create tag {tag}!")
+            return False
+
+    def create_distribution(self) -> bool:
+        """Run releng/makedist and rename the archive"""
+        try:
+            subprocess.run(["bash", "-c", f"./releng/makedist && mv inet-{self.version}-*-src.tgz inet-{self.version}-src.tgz"], cwd=self.repo_path, check=True)
+            return True
+        except subprocess.CalledProcessError:
+            print("Distribution creation failed!")
+            return False
+
+    def push_to_remote(self) -> bool:
+        """Push the version branch and tag to remote"""
+        tag = f"v{self.version}"
+        branch = subprocess.run(["git", "branch", "--show-current"], cwd=self.repo_path, capture_output=True, check=True).stdout.decode().strip()
+        try:
+            subprocess.run(["git", "push", "origin", "-n", branch], cwd=self.repo_path, check=True)
+            subprocess.run(["git", "push", "origin", "-n", tag], cwd=self.repo_path, check=True)
+            return True
+        except subprocess.CalledProcessError:
+            print("Failed to push to remote!")
+            return False
+
+    def create_github_release(self) -> bool:
+        """Create GitHub release and upload archive"""
+        try:
+            tag = f"v{self.version}"
+            whatsnew_path = self.repo_path / "WHATSNEW"
+            archive_name = f"inet-{self.version}-src.tgz"
+
+            # Extract release notes from WHATSNEW
+            with open(whatsnew_path, 'r', encoding='utf-8') as f:
+                whatsnew_content = f.read()
+
+            pattern = re.compile(r"INET-.*?\n.*?\n(.*?)\nINET-", re.MULTILINE | re.DOTALL)
+            match = pattern.search(whatsnew_content)
+            release_notes = match.group(1) if match else None
+
+            if not release_notes:
+                raise ValueError(f"Couldn't find release notes for version {self.version} in WHATSNEW")
+
+            # Create GitHub release in draft mode
+            subprocess.run([
+                "gh", "release", "create", tag,
+                "--draft",
+                "--title", f"INET {self.version}",
+                "--notes", release_notes,
+                archive_name
+            ], cwd=self.repo_path, check=True)
+
+            print(f"Created draft GitHub release for version {self.version}")
+            return True
+        except (subprocess.CalledProcessError, FileNotFoundError, ValueError) as e:
+            print(f"Failed to create GitHub release: {str(e)}")
+            return False
+
+    def update_models_omnetpp_org(self) -> bool:
+        """Update models.omnetpp.org with new version"""
+        print("Please update models.omnetpp.org manually:")
+        print("- Modify latest release version in inet.xml")
+        print("- Update for older omnetpp versions")
+        return True
+
+    def update_inet_website(self) -> bool:
+        """Update inet.omnetpp.org with new version"""
+        print("Please update inet.omnetpp.org manually:")
+        print("- Add new version to Download.md")
+        print("- Add new post in _posts folder")
+        return True
+
+    def update_opp_env(self) -> bool:
+        """Update opp_env database"""
+        print("Please update opp_env manually:")
+        print("- Add new version to inet.py")
+        print("- Tag with new version")
+        return True
+
+    def rebuild_docker_images(self) -> bool:
+        """Rebuild INET based docker images"""
+        print("Please rebuild docker images from:")
+        print("github.com:omnetpp/dockerfiles.git")
+        return True
+
+    def rebuild_documentation(self) -> bool:
+        """Rebuild all INET documentation"""
+        try:
+            # NED reference documentation
+            print("Rebuilding NED reference documentation...")
+
+            # Main documentation
+            print("Rebuilding main documentation...")
+            subprocess.run(
+                ["docker", "run", "make", "html"],
+                cwd=self.repo_path / "doc/src",
+                check=True
+            )
+            return True
+        except subprocess.CalledProcessError:
+            print("Documentation rebuild failed!")
+            return False
+
+    def send_announcements(self) -> bool:
+        """Send release announcements"""
+        print("Please send announcements manually:")
+        print("1. Send email to mailing list")
+        print("2. Post on https://forum.omnetpp.org")
+        if self.version.count('.') == 1:  # Major/Minor release
+            print("3. Post on omnetpp.org main site")
+        return True
+
+    def pause(self, message: str = "") -> bool:
+        """
+        Creates a pause in the release process, requiring manual intervention.
+        Returns True to indicate successful "completion" of the pause step.
+        The actual continuation is handled by the main function.
+        
+        Args:
+            message: Optional message to display to the user about what manual steps are needed
+        """
+
+        if not self.continue_mode:
+            if message:
+                print("\nManual steps required:")
+                print(message)
+
+            print("\nProcess paused. Run with --continue to resume after completing manual steps.")
+            exit(1)
+        else:
+            print("\nAssuming manual steps have been completed. Continuing...")
+            self.continue_mode = False
+            return True
+
+def main():
+    """Main function to run the release process"""
+    parser = argparse.ArgumentParser(description='INET Release Automation')
+    parser.add_argument('--abort', action='store_true',
+                        help='Abort the release process and start from the beginning')
+    parser.add_argument('--continue', dest='continue_process', action='store_true',
+                        help='Continue the release process after a manual step')
+    args = parser.parse_args()
+
+    state_file = Path('.release_state')
+    last_successful_step = -1
+
+    if args.abort:
+        if state_file.exists():
+            state_file.unlink(missing_ok=True)
+            print("Release process aborted. Will start from beginning on next run.")
+            return 0
+        else:
+            print("No state file found. Nothing to abort.")
+            return 1
+
+    # New run requires all parameters
+    automation = INETReleaseAutomation(continue_mode=args.continue_process)
+
+    # Load last successful step from state file
+    if state_file.exists():
+        with open(state_file, 'r', encoding='utf-8') as f:
+            last_successful_step = int(f.read().strip())
+        print(f"Resuming from step {last_successful_step + 1}")
+
+    # Execute release steps
+    steps = [
+        ("Checking version milestone for open issues", automation.check_milestone_issues), # done
+        ("Checking if SelfDoc.json info is recent", automation.check_selfdoc),
+        ("Building NED documentation", automation.generate_ned_documentation),
+        # TODO Manual step: doc/src/nedtags.xml and doc/src/msgtags.xml should be checked too and updated if needed (copy from the src/neddoc folder)
+        ("Updating the WHATSNEW file", automation.update_whatsnew),
+        ("Manual documentation review", lambda: automation.pause(
+            "Please review the following documentation changes:\n"
+            "1. Check the updated WHATSNEW file and make sure that the changes are correct\n" 
+            "2. Make sure that the WHATSNEW is committed to the repo\n"
+            "3. Verify NED documentation in doc/neddoc\n"
+        )),
+        ("Running tests", automation.run_tests),
+        ("Version tagging the local repository", automation.tag_repository),
+        ("Creating distribution archive", automation.create_distribution),
+        ("Pushing the version tag and the current branch to GitHub", automation.push_to_remote),
+        ("Creating draft release on GitHub", automation.create_github_release),
+        ("Publish the release manually on GitHub", lambda: automation.pause(
+            "1. Publish the draft version of the release at: https://github.com/inet-framework/inet/releases\n"
+            "2. Increase the version number in 'src/common/INETDefs.h' to the next version and commit the change\n"
+        )),
+        #("Updating models.omnetpp.org", automation.update_models_omnetpp_org),
+        #("Updating inet.omnetpp.org", automation.update_inet_website),
+        #("Updating opp_env", automation.update_opp_env),
+        #("Rebuilding docker images", automation.rebuild_docker_images),
+        #("Rebuilding documentation", automation.rebuild_documentation),
+        #("Sending announcements", automation.send_announcements),
+    ]
+
+    for step_index, (step_name, step_func) in enumerate(steps):
+        # Skip steps that were already completed successfully
+        if step_index <= last_successful_step:
+            print(f"Step {step_index}: Skipping completed step: {step_name}")
+            continue
+
+        print(f"\nStep {step_index}: Executing: {step_name}")
+        try:
+            if not step_func():
+                print(f"Failed at step: {step_name}")
+                return 1
+
+            # Update state file after successful step
+            with open(state_file, 'w', encoding='utf-8') as f:
+                f.write(str(step_index))
+
+            print(f"Completed: {step_name}")
+        except Exception as e:
+            print(f"Error in step {step_name}: {str(e)}")
+            return 1
+
+    state_file.unlink(missing_ok=True) # All steps completed successfully, remove state files
+    print("\nRelease process completed successfully!")
+    return 0
+
+if __name__ == "__main__":
+    exit(main())
