@@ -136,6 +136,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
   protected:
     void sendPacketToNIC(Packet *packet, int portId);
 
+    virtual void sendAnnounce();
+
     virtual void sendSync();
 
     virtual void sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syncEgressTimestampOwn);

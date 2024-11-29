@@ -33,6 +33,7 @@ const B GPTP_FOLLOW_UP_PACKET_SIZE = GPTP_HEADER_SIZE + B(10) + GPTP_TLV_SIZE + 
 const B GPTP_PDELAY_REQ_PACKET_SIZE = GPTP_HEADER_SIZE + B(20);
 const B GPTP_PDELAY_RESP_PACKET_SIZE = GPTP_HEADER_SIZE + B(20);
 const B GPTP_PDELAY_RESP_FOLLOW_UP_PACKET_SIZE = GPTP_HEADER_SIZE + B(20);
+const B GPTP_ANNOUNCE_PACKET_SIZE = GPTP_HEADER_SIZE + B(30);
 }
 
 }}
@@ -68,6 +69,7 @@ enum GptpMessageType
     GPTPTYPE_PDELAY_REQ = 0x2;
     GPTPTYPE_PDELAY_RESP = 0x3;
     GPTPTYPE_PDELAY_RESP_FOLLOW_UP = 0xA;
+    GPTPTYPE_ANNOUNCE = 0xB;
 }
 
 enum GptpSelfMsgKind {
@@ -114,12 +116,6 @@ struct PortIdentity
     uint16_t portNumber;
 };
 
-//struct ClockQuality
-//{
-//    UInteger8 clockClass;
-//    Enumeration8 clockAccuracy;
-//    UInteger16 offsetScaledLogVariance;
-//};
 
 message GptpReqAnswerEvent extends ClockEvent
 {
@@ -248,6 +244,29 @@ class GptpPdelayRespFollowUp extends GptpBase
     messageLengthField = GPTP_PDELAY_RESP_FOLLOW_UP_PACKET_SIZE.get<B>();
     clocktime_t responseOriginTimestamp;
     PortIdentity requestingPortIdentity;
+}
+
+struct ClockQuality
+{
+    @packetData;
+    uint8_t clockClass;
+    uint8_t clockAccuracy;
+    uint16_t offsetScaledLogVariance;
+};
+
+class GptpAnnounce extends GptpBase {
+    messageType = GPTPTYPE_ANNOUNCE;
+    chunkLength = GPTP_ANNOUNCE_PACKET_SIZE;
+    messageLengthField = GPTP_ANNOUNCE_PACKET_SIZE.get<B>();
+    clocktime_t originTimestamp;
+    int16_t currentUtcOffset;
+    uint8_t reserved;
+    uint8_t grandmasterPriority1;
+    ClockQuality grandmasterClockQuality;
+    uint8_t grandmasterPriority2;
+    uint64_t clockIdentity;
+    uint16_t stepsRemoved;
+    uint8_t timeSource;
 }
 
 class GptpIngressTimeInd extends TagBase

@@ -36,9 +36,9 @@ simsignal_t Gptp::correctionFieldEgressSignal = cComponent::registerSignal("corr
 simsignal_t Gptp::gptpSyncSuccessfulSignal = cComponent::registerSignal("correctionFieldEgress");
 
 // MAC address:
-//   01-80-C2-00-00-02 for TimeSync (ieee 802.1as-2020, 13.3.1.2)
 //   01-80-C2-00-00-0E for Announce and Signaling messages, for Sync, Follow_Up,
-//   Pdelay_Req, Pdelay_Resp, and Pdelay_Resp_Follow_Up messages
+//   Pdelay_Req, Pdelay_Resp, and Pdelay_Resp_Follow_Up messages (ieee 802.1as-2020, 10.5.3 and 11.3.4)
+//   TODO: This does not seem to be correct
 const MacAddress Gptp::GPTP_MULTICAST_ADDRESS("01:80:C2:00:00:0E");
 
 // EtherType:
@@ -222,6 +222,8 @@ void Gptp::handleMessage(cMessage *msg)
             case GPTPTYPE_PDELAY_RESP_FOLLOW_UP:
                 processPdelayRespFollowUp(packet, check_and_cast<const GptpPdelayRespFollowUp *>(gptp.get()));
                 break;
+            case GPTPTYPE_ANNOUNCE:
+                // TODO
             default:
                 throw cRuntimeError("Unknown gPTP packet type: %d", (int)(gptpMessageType));
             }
@@ -257,6 +259,20 @@ void Gptp::sendPacketToNIC(Packet *packet, int portId)
     else
         packet->removeTagIfPresent<DispatchProtocolReq>();
     send(packet, "socketOut");
+}
+
+void Gptp::sendAnnounce()
+{
+    auto packet = new Packet("GptpAnnounce");
+    packet->addTag<MacAddressReq>()->setDestAddress(GPTP_MULTICAST_ADDRESS);
+    auto gptp = makeShared<GptpAnnounce>();
+    gptp->setDomainNumber(domainNumber);
+
+    gptp->setClockIdentity(clockIdentity);
+
+    for (auto port : masterPortIds)
+        sendPacketToNIC(packet->dup(), port);
+    delete packet;
 }
 
 void Gptp::sendSync()
