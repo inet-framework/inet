@@ -78,31 +78,20 @@ class SpeedMeasurementStore:
                    (test_result is None or entry["test_result"] == test_result)
         return list(filter(f, self.get_entries()))
 
-    def find_elapsed_wall_time(self, **kwargs):
+    def find_num_cpu_instructions(self, **kwargs):
         entry = self.find_entry(**kwargs)
         if entry is not None:
-            return entry["elapsed_wall_time"]
+            return entry["num_cpu_instructions"]
         else:
             return None
 
-    def get_elapsed_wall_time(self, **kwargs):
-        return self.get_entry(**kwargs)["elapsed_wall_time"]
+    def get_num_cpu_instructions(self, **kwargs):
+        return self.get_entry(**kwargs)["num_cpu_instructions"]
     
-    def set_elapsed_wall_time(self, elapsed_wall_time, **kwargs):
-        self.get_entry(**kwargs)["elapsed_wall_time"] = elapsed_wall_time
+    def set_num_cpu_instructions(self, num_cpu_instructions, **kwargs):
+        self.get_entry(**kwargs)["num_cpu_instructions"] = num_cpu_instructions
 
-    def find_elapsed_relative_time(self, **kwargs):
-        entry = self.find_entry(**kwargs)
-        if entry is not None:
-            return entry["elapsed_wall_time"] / entry["baseline_elapsed_wall_time"]
-        else:
-            return None
-
-    def get_elapsed_relative_time(self, **kwargs):
-        entry = self.get_entry(**kwargs)
-        return entry["elapsed_wall_time"] / entry["baseline_elapsed_wall_time"]
-
-    def insert_elapsed_wall_time(self, elapsed_wall_time, baseline_elapsed_wall_time, test_result=None, working_directory=os.getcwd(), ini_file="omnetpp.ini", config="General", run_number=0, sim_time_limit=None, itervars="$repetition==0"):
+    def insert_entry(self, elapsed_wall_time=None, elapsed_cpu_time=None, num_cpu_cycles=None, num_cpu_instructions=None, test_result=None, working_directory=os.getcwd(), ini_file="omnetpp.ini", config="General", run_number=0, sim_time_limit=None, itervars="$repetition==0"):
         # assert test_result == "ERROR" or sim_time_limit is not None
         self.get_entries().append({"working_directory": working_directory,
                                    "ini_file": ini_file,
@@ -111,19 +100,23 @@ class SpeedMeasurementStore:
                                    "sim_time_limit": sim_time_limit,
                                    "test_result": test_result,
                                    "elapsed_wall_time": elapsed_wall_time,
-                                   "baseline_elapsed_wall_time": baseline_elapsed_wall_time,
+                                   "elapsed_cpu_time": elapsed_cpu_time,
+                                   "num_cpu_cycles": num_cpu_cycles,
+                                   "num_cpu_instructions": num_cpu_instructions,
                                    "timestamp": time.time(),
                                    "itervars": itervars})
 
-    def update_elapsed_wall_time(self, elapsed_wall_time, baseline_elapsed_wall_time, **kwargs):
+    def update_entry(self, elapsed_wall_time=None, elapsed_cpu_time=None, num_cpu_cycles=None, num_cpu_instructions=None, **kwargs):
         entry = self.find_entry(**kwargs)
         if entry:
             entry["elapsed_wall_time"] = elapsed_wall_time
-            entry["baseline_elapsed_wall_time"] = baseline_elapsed_wall_time
+            entry["elapsed_cpu_time"] = elapsed_cpu_time
+            entry["num_cpu_cycles"] = num_cpu_cycles
+            entry["num_cpu_instructions"] = num_cpu_instructions
         else:
-            self.insert_elapsed_wall_time(elapsed_wall_time, baseline_elapsed_wall_time, **kwargs)
+            self.insert_entry(elapsed_wall_time=elapsed_wall_time, elapsed_cpu_time=elapsed_cpu_time, num_cpu_cycles=num_cpu_cycles, num_cpu_instructions=num_cpu_instructions, **kwargs)
 
-    def remove_elapsed_wall_times(self, **kwargs):
+    def remove_entries(self, **kwargs):
         list(map(lambda element: self.entries.remove(element), self.filter_entries(**kwargs)))
 
 def get_speed_measurement_store(simulation_project):

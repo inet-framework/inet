@@ -34,7 +34,7 @@ def log_chart_name(logger, props):
 
 logger = logging.getLogger(__name__)
 
-if inet.common.util.ensure_logging_initialized(logging.WARN, logging.WARN):
+if inet.common.util.ensure_logging_initialized(logging.WARN, logging.WARN, None):
     inet.common.util.get_logging_formatter().print_function_name = True
 
 def scale_lightness(rgb, scale_l):

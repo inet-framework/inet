@@ -6,8 +6,6 @@
 //
 
 import inet.common.INETDefs;
-import inet.common.Protocol;
-import inet.linklayer.common.MacAddress;
 
 namespace inet;
 

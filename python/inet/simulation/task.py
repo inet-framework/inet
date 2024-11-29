@@ -89,6 +89,10 @@ class SimulationTaskResult(TaskResult):
                     self.expected_result = "SKIP"
                     self.expected = True
                     self.reason = "Interactive simulation"
+            match = re.search(r"Simulation CPU usage: elapsedTime = (.*?), numCycles = (.*?), numInstructions = (.*?)\n", subprocess_result.stdout)
+            self.elapsed_cpu_time = float(match.group(1)) if match else None
+            self.num_cpu_cycles = int(match.group(2)) if match else None
+            self.num_cpu_instructions = int(match.group(3)) if match else None
         else:
             self.last_event_number = None
             self.last_simulation_time = None
@@ -241,7 +245,7 @@ class SimulationTask(Task):
         Runs a simulation task by running the simulation as a child process or in the same process where Python is running.
 
         Parameters:
-            extra_args (list):
+            append_args (list):
                 Additional command line arguments for the simulation executable.
 
             simulation_runner (string):
@@ -258,7 +262,7 @@ class SimulationTask(Task):
         """
         return super().run(**kwargs)
 
-    def run_protected(self, extra_args=[],  simulation_runner="subprocess", simulation_runner_class=None, **kwargs):
+    def run_protected(self, prepend_args=[], append_args=[],  simulation_runner="subprocess", simulation_runner_class=None, **kwargs):
         simulation_project = self.simulation_config.simulation_project
         working_directory = self.simulation_config.working_directory
         ini_file = self.simulation_config.ini_file
@@ -270,7 +274,7 @@ class SimulationTask(Task):
         record_pcap_args = ["--**.numPcapRecorders=1", "--**.crcMode=\"computed\"", "--**.fcsMode=\"computed\""] if self.record_pcap else []
         executable = simulation_project.get_executable(mode=self.mode)
         default_args = simulation_project.get_default_args()
-        args = [executable, *default_args, "-s", "-u", self.user_interface, "-f", ini_file, "-c", config, "-r", str(self.run_number), *result_folder_args, *sim_time_limit_args, *cpu_time_limit_args, *record_eventlog_args, *record_pcap_args, *extra_args]
+        args = [*prepend_args, executable, *default_args, "-s", "-u", self.user_interface, "-f", ini_file, "-c", config, "-r", str(self.run_number), *result_folder_args, *sim_time_limit_args, *cpu_time_limit_args, *record_eventlog_args, *record_pcap_args, *append_args]
         expected_result = self.get_expected_result()
         if simulation_runner_class is None:
             if simulation_runner == "subprocess":

@@ -227,6 +227,10 @@ class SimulationProject:
             return "_dbg"
         elif mode == "sanitize":
             return "_sanitize"
+        elif mode == "coverage":
+            return "_coverage"
+        elif mode == "profile":
+            return "_profile"
         else:
             raise Exception(f"Unknown mode: {mode}")
 

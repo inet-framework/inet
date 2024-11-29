@@ -437,10 +437,7 @@ class INET_API MemoryInputStream
      * byte order and MSB to LSB bit order.
      */
     MacAddress readMacAddress() {
-        MacAddress address;
-        for (int i = 0; i < MAC_ADDRESS_SIZE; i++)
-            address.setAddressByte(i, readByte());
-        return address;
+        return MacAddress(readUint48Be());
     }
 
     /**
@@ -469,10 +466,10 @@ class INET_API MemoryInputStream
      * Reads a string from the current position until a zero.
      */
     std::string readString() {
-        std::vector<uint8_t> data;
+        std::string str;
         while (uint8_t b = readByte())
-            data.push_back(b);
-        return std::string(data.begin(), data.end());
+            str.push_back(b);
+        return str;
     }
 
     /**
