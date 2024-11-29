@@ -2,7 +2,7 @@ FEATURETOOL = opp_featuretool
 FEATURES_H = src/inet/features.h
 SELFDOC = tests/fingerprint/SelfDoc
 
-.PHONY: all clean cleanall neddoc makefiles makefiles-so makefiles-lib makefiles-exe checkenvir checkmakefiles doxy doc submodule-init
+.PHONY: all clean cleanall neddoc doc ddoc selfdoc makefiles makefiles-so makefiles-lib makefiles-exe checkenvir checkmakefiles
 
 all: checkmakefiles $(FEATURES_H)
 	@cd src && $(MAKE)
@@ -56,16 +56,24 @@ $(FEATURES_H): $(wildcard .oppfeaturestate) .oppfeatures
 	@$(FEATURETOOL) defines >$(FEATURES_H).tmp
 	@mv $(FEATURES_H).tmp $(FEATURES_H)
 
+# self-documentation info for neddoc generation
+$(SELFDOC).json:
+	#@opp_featuretool enable all
+	#@cd src && $(MAKE) MODE=debug
+	#@cd tests/fingerprint && ./fingerprinttest_selfdoc
+
+$(SELFDOC).xml: $(SELFDOC).json
+	@inet_selfdoc_json2xml <$< >$@
+
+neddoc: $(SELFDOC).xml
+	#@opp_featuretool enable all
+	@opp_neddoc --verbose --no-automatic-hyperlinks -x "/*/examples,/*/tests,/*/showcases,/*/tutorials" -f $(SELFDOC).xml $(INET_PROJ)
+
+selfdoc: $(SELFDOC).xml
+	
 doc:
 	@cd doc/src && $(MAKE)
 	@doxygen doxy.cfg
 
 ddoc:
 	@cd doc/src && ./docker-make html && echo "===> file:$$(pwd)/_build/html/index.html"
-
-$(SELFDOC).xml: $(SELFDOC).json
-	@inet_selfdoc_json2xml <$< >$@
-
-neddoc: $(SELFDOC).xml
-	@opp_neddoc --verbose --no-automatic-hyperlinks -x "/*/examples,/*/tests,/*/showcases,/*/tutorials" -f $(SELFDOC).xml $(INET_PROJ)
-
