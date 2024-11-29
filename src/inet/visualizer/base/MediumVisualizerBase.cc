@@ -167,7 +167,7 @@ void MediumVisualizerBase::initialize(int stage)
     }
     else if (stage == INITSTAGE_LAST) {
         if (std::isnan(signalPropagationAnimationSpeed) && radioMedium != nullptr) {
-            double maxPropagationDuration = radioMedium->getMediumLimitCache()->getMaxConstraintArea().distance(radioMedium->getMediumLimitCache()->getMinConstraintArea()) / mps(radioMedium->getPropagation()->getPropagationSpeed()).get();
+            double maxPropagationDuration = radioMedium->getMediumLimitCache()->getMaxConstraintArea().distance(radioMedium->getMediumLimitCache()->getMinConstraintArea()) / mps(radioMedium->getPropagation()->getPropagationSpeed()).get<mps>();
             defaultSignalPropagationAnimationSpeed = maxPropagationDuration / signalPropagationAnimationTime;
         }
     }
@@ -311,8 +311,8 @@ void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission 
                         return;
                 }
                 if (autoTimeAxis) {
-                    signalMinTime = std::min(signalMinTime.dbl(), (simsec(std::get<0>(i.getLower())).get() - startTime).dbl());
-                    signalMaxTime = std::max(signalMaxTime.dbl(), (simsec(std::get<0>(i.getUpper())).get() - startTime).dbl());
+                    signalMinTime = std::min(signalMinTime.dbl(), (std::get<0>(i.getLower()).get<simsec>() - startTime).dbl());
+                    signalMaxTime = std::max(signalMaxTime.dbl(), (std::get<0>(i.getUpper()).get<simsec>() - startTime).dbl());
                 }
                 if (autoFrequencyAxis) {
                     signalMinFrequency = std::min(signalMinFrequency, std::get<1>(i.getLower()));
@@ -358,8 +358,8 @@ void MediumVisualizerBase::handleSignalArrivalStarted(const physicallayer::IRece
                         return;
                 }
                 if (autoTimeAxis) {
-                    signalMinTime = std::min(signalMinTime.dbl(), (simsec(std::get<0>(i.getLower())).get() - startTime).dbl());
-                    signalMaxTime = std::max(signalMaxTime.dbl(), (simsec(std::get<0>(i.getUpper())).get() - startTime).dbl());
+                    signalMinTime = std::min(signalMinTime.dbl(), (std::get<0>(i.getLower()).get<simsec>() - startTime).dbl());
+                    signalMaxTime = std::max(signalMaxTime.dbl(), (std::get<0>(i.getUpper()).get<simsec>() - startTime).dbl());
                 }
                 if (autoFrequencyAxis) {
                     signalMinFrequency = std::min(signalMinFrequency, std::get<1>(i.getLower()));

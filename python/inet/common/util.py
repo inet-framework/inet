@@ -5,16 +5,16 @@ import io
 import IPython
 import logging
 import os
+import platform
 import pickle
 import re
 import signal
+import subprocess
 import sys
 import threading
 import time
 
 __sphinx_mock__ = True # ignore this module in documentation
-
-_logger = logging.getLogger(__name__)
 
 COLOR_GRAY = "\033[38;20m"
 COLOR_RED = "\033[1;31m"
@@ -24,27 +24,84 @@ COLOR_GREEN = "\033[0;32m"
 COLOR_MAGENTA = "\033[1;35m"
 COLOR_RESET = "\033[0;0m"
 
+STDOUT_LEVEL = 25  # between INFO (20) and WARNING (30)
+STDERR_LEVEL = 35  # between WARNING (30) and ERROR (40)
+
 def enable_autoreload():
     ipython = IPython.get_ipython()
     ipython.magic("load_ext autoreload")
     ipython.magic("autoreload 2")
 
+_file_handler = None
+
+class LocalLogger(logging.Logger):
+    def stdout(self, message, *args, **kwargs):
+        self._log(STDOUT_LEVEL, message, args, **kwargs)
+
+    def stderr(self, message, *args, **kwargs):
+        self._log(STDERR_LEVEL, message, args, **kwargs)
+
+    def debug(self, msg, *args, **kwargs):
+        self._log(logging.DEBUG, msg, args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        self._log(logging.INFO, msg, args, **kwargs)
+
+    def warning(self, msg, *args, **kwargs):
+        self._log(logging.WARNING, msg, args, **kwargs)
+
+    def error(self, msg, *args, **kwargs):
+        self._log(logging.ERROR, msg, args, **kwargs)
+
+    def critical(self, msg, *args, **kwargs):
+        self._log(logging.CRITICAL, msg, args, **kwargs)
+
+    def log(self, level, msg, *args, **kwargs):
+        self._log(level, msg, args, **kwargs)
+
+    def handle(self, record):
+        global _file_handler
+        if _file_handler:
+            _file_handler.handle(record)
+        if self.isEnabledFor(record.levelno):
+            super().handle(record)
+
+logging.setLoggerClass(LocalLogger)
+
+_logger = logging.getLogger(__name__)
+
 _logging_initialized = False
 
-def initialize_logging(level):
-    global _logging_initialized
+def initialize_logging(log_level, external_command_log_level, log_file):
+    global _file_handler, _logging_initialized
+    if log_file:
+        _file_handler = logging.FileHandler(log_file, mode="w")
+        _file_handler.setLevel(logging.DEBUG)
+        _file_handler.setFormatter(logging.Formatter('%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s'))
     formatter = ColoredLoggingFormatter()
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
     logger = logging.getLogger()
-    logger.setLevel(level)
+    logger.setLevel(log_level)
     logger.handlers = []
     logger.addHandler(handler)
+    logging.getLogger("make").setLevel(external_command_log_level)
+    logging.getLogger("opp_featuretool").setLevel(external_command_log_level)
+    logging.getLogger("opp_makemake").setLevel(external_command_log_level)
+    logging.getLogger("opp_run").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_dbg").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_release").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_sanitize").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_coverage").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_profile").setLevel(external_command_log_level)
+    logging.getLogger("opp_test").setLevel(external_command_log_level)
+    logging.addLevelName(STDOUT_LEVEL, "STDOUT")
+    logging.addLevelName(STDERR_LEVEL, "STDERR")
     _logging_initialized = True
 
-def ensure_logging_initialized(level):
+def ensure_logging_initialized(log_level, external_command_log_level, log_file):
     if not _logging_initialized:
-        initialize_logging(level)
+        initialize_logging(log_level, external_command_log_level, log_file)
         return True
     else:
         return False
@@ -74,7 +131,7 @@ def coalesce(*values):
 
 def convert_to_seconds(s):
     seconds_per_unit = {"ps": 1E-12, "ns": 1E-9, "us": 1E-6, "ms": 1E-3, "s": 1, "second": 1, "m": 60, "min": 60, "h": 3600, "hour": 3600, "d": 86400, "day": 86400, "w": 604800, "week": 604800}
-    match = re.match("(-?[0-9]*\.?[0-9]*) *([a-zA-Z]+)", s)
+    match = re.match(r"(-?[0-9]*\.?[0-9]*) *([a-zA-Z]+)", s)
     return float(match.group(1)) * seconds_per_unit[match.group(2)]
 
 def write_object(file_name, object):
@@ -228,7 +285,9 @@ class ColoredLoggingFormatter(logging.Formatter):
         logging.INFO: COLOR_GREEN,
         logging.WARNING: COLOR_YELLOW,
         logging.ERROR: COLOR_RED,
-        logging.CRITICAL: COLOR_RED
+        logging.CRITICAL: COLOR_RED,
+        STDOUT_LEVEL: COLOR_GREEN,
+        STDERR_LEVEL: COLOR_YELLOW,
     }
 
     def format(self, record):
@@ -236,7 +295,7 @@ class ColoredLoggingFormatter(logging.Formatter):
                  (COLOR_MAGENTA + "%(threadName)s " if self.print_thread_name else "") + \
                  COLOR_CYAN + "%(name)s " + \
                  (COLOR_MAGENTA + "%(funcName)s " if self.print_function_name else "") + \
-                 COLOR_RESET + "%(message)s (%(filename)s:%(lineno)d)"
+                 COLOR_RESET + "%(message)s"
         formatter = logging.Formatter(format)
         return formatter.format(record)
 
@@ -273,10 +332,46 @@ class DebugLevel(LoggerLevel):
     def __init__(self, logger):
         super().__init__(self, logger, logging.DEBUG)
 
+def run_command_with_logging(args, error_message=None, nice=10, **kwargs):
+    logger = logging.getLogger(os.path.basename(args[0]))
+    def log_stream(stream, logger, lines):
+        for line in iter(stream.readline, ""):
+            logger(line.rstrip("\n"))
+            lines.append(line)
+        stream.close()
+    stdout_lines = []
+    stderr_lines = []
+    _logger.debug(f"Running external command: {' '.join(args)}")
+    process = subprocess.Popen(["nice", "-n", str(nice), *args], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, **kwargs)
+    stdout_thread = threading.Thread(target=log_stream, args=(process.stdout, logger.stdout, stdout_lines))
+    stderr_thread = threading.Thread(target=log_stream, args=(process.stderr, logger.stderr, stderr_lines))
+    stdout_thread.start()
+    stderr_thread.start()
+    try:
+        stdout_thread.join()
+        stderr_thread.join()
+        process.wait()
+    except KeyboardInterrupt:
+        process.kill()
+        raise
+    if process.returncode == -signal.SIGINT:
+        raise KeyboardInterrupt()
+    if error_message and process.returncode != 0:
+        raise Exception(error_message)
+    return subprocess.CompletedProcess(args, process.returncode, "".join(stdout_lines), ''.join(stderr_lines))
+
+def open_file_with_default_editor(file_path):
+    if platform.system() == "Windows":
+        os.startfile(file_path)
+    elif platform.system() == "Darwin":  # macOS
+        subprocess.run(["open", file_path])
+    else:  # Linux/Unix
+        subprocess.run(["xdg-open", file_path])
+
 def collect_existing_ned_types():
     types = set()
     for ini_file_path in glob.glob(get_inet_relative_path("**/*.ned"), recursive=True):
-        if not re.search("doc/src/_deploy", ini_file_path):
+        if not re.search(r"doc/src/_deploy", ini_file_path):
             with open(ini_file_path, "r") as f:
                 text = f.read()
                 for type in re.findall("^simple (\\w+)", text, re.M):
@@ -294,17 +389,17 @@ def collect_existing_ned_types():
 def collect_referenced_ned_types():
     types = set()
     for ini_file_path in glob.glob(get_inet_relative_path("**/*.ini"), recursive=True):
-        if not re.search("doc/src/_deploy", ini_file_path):
+        if not re.search(r"doc/src/_deploy", ini_file_path):
             with open(ini_file_path, "r") as f:
                 for type in re.findall("typename = \"(\\w+?)\"", f.read()):
                     types.add(type)
     for ned_file_path in glob.glob(get_inet_relative_path("**/*.ned"), recursive=True):
-        if not re.search("doc/src/_deploy", ini_file_path):
+        if not re.search(r"doc/src/_deploy", ini_file_path):
             with open(ned_file_path, "r") as f:
                 for type in re.findall("~(\\w+)", f.read()):
                     types.add(type)
     for rst_file_path in glob.glob(get_inet_relative_path("**/*.rst"), recursive=True):
-        if not re.search("doc/src/_deploy", ini_file_path):
+        if not re.search(r"doc/src/_deploy", ini_file_path):
             with open(rst_file_path, "r") as f:
                 for type in re.findall(":ned:`(\\w+?)`", f.read()):
                     types.add(type)
@@ -313,12 +408,12 @@ def collect_referenced_ned_types():
 def collect_ned_type_reference_file_paths(type):
     references = []
     for ini_file_path in glob.glob(get_inet_relative_path("**/*.ini"), recursive=True):
-        if not re.search("doc/src/_deploy", ini_file_path):
+        if not re.search(r"doc/src/_deploy", ini_file_path):
             with open(ini_file_path, "r") as f:
                 if re.search(f"typename = \"{type}\"", f.read()):
                     references.append(ini_file_path)
     for rst_file_path in glob.glob(get_inet_relative_path("**/*.rst"), recursive=True):
-        if not re.search("doc/src/_deploy", ini_file_path):
+        if not re.search(r"doc/src/_deploy", ini_file_path):
             with open(rst_file_path, "r") as f:
                 if re.search(f":ned:`{type}`", f.read()):
                     references.append(rst_file_path)
@@ -327,7 +422,7 @@ def collect_ned_type_reference_file_paths(type):
 def collect_existing_msg_types():
     types = set()
     for ini_file_path in glob.glob(get_inet_relative_path("**/*.msg"), recursive=True):
-        if not re.search("doc/src/_deploy", ini_file_path):
+        if not re.search(r"doc/src/_deploy", ini_file_path):
             with open(ini_file_path, "r") as f:
                 text = f.read()
                 for type in re.findall("^class (\\w+)", text, re.M):
@@ -339,7 +434,7 @@ def collect_existing_msg_types():
 def collect_existing_cpp_types():
     types = set()
     for ini_file_path in glob.glob(get_inet_relative_path("**/*.h"), recursive=True):
-        if not re.search("doc/src/_deploy", ini_file_path):
+        if not re.search(r"doc/src/_deploy", ini_file_path):
             with open(ini_file_path, "r") as f:
                 text = f.read()
                 for type in re.findall("^class INET_API (\\w+)", text, re.M):
@@ -347,7 +442,7 @@ def collect_existing_cpp_types():
                 for type in re.findall("^enum (\\w+)", text, re.M):
                     types.add(type)
     for ini_file_path in glob.glob(get_inet_relative_path("**/*.cc"), recursive=True):
-        if not re.search("doc/src/_deploy", ini_file_path):
+        if not re.search(r"doc/src/_deploy", ini_file_path):
             with open(ini_file_path, "r") as f:
                 text = f.read()
                 for type in re.findall("Register_Packet_Dropper_Function\\((\\w+),", text, re.M):

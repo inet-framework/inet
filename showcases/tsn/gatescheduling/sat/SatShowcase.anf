@@ -36,10 +36,10 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-style_tuple_list = [('module', '.*app\[0\].*', {'marker': 'd', 'markersize': 4}), 
-                    ('module', '.*app\[1\].*', {'marker': 'x', 'markersize': 2}),
-                    ('module', '.*app\[2\].*', {'marker': 'd', 'markersize': 4}),
-                    ('module', '.*app\[3\].*', {'marker': 's', 'markersize': 2})]
+style_tuple_list = [('module', '.*app\\[0\\].*', {'marker': 'd', 'markersize': 4}), 
+                    ('module', '.*app\\[1\\].*', {'marker': 'x', 'markersize': 2}),
+                    ('module', '.*app\\[2\\].*', {'marker': 'd', 'markersize': 4}),
+                    ('module', '.*app\\[3\\].*', {'marker': 's', 'markersize': 2})]
 
 order = ['module', {'TsnDumbbellNetwork.server2.app[2].sink': 2,
                     'TsnDumbbellNetwork.server2.app[3].sink': 3,
@@ -716,10 +716,10 @@ df_sat= utils.perform_vector_ops(df_sat, props["vector_operations"])
 
 #print(df_eager, df_sat)
 
-style_tuple_list = [('module', '.*app\[0\].*', {'marker': 'd', 'markersize': 4, 'color': '#1f77b4'}), 
-                    ('module', '.*app\[1\].*', {'marker': 'x', 'markersize': 2, 'color': '#ff7f0e'}),
-                    ('module', '.*app\[2\].*', {'marker': 'd', 'markersize': 4, 'color': '#2ca02c'}),
-                    ('module', '.*app\[3\].*', {'marker': 's', 'markersize': 2, 'color': '#d62728'})]
+style_tuple_list = [('module', '.*app\\[0\\].*', {'marker': 'd', 'markersize': 4, 'color': '#1f77b4'}), 
+                    ('module', '.*app\\[1\\].*', {'marker': 'x', 'markersize': 2, 'color': '#ff7f0e'}),
+                    ('module', '.*app\\[2\\].*', {'marker': 'd', 'markersize': 4, 'color': '#2ca02c'}),
+                    ('module', '.*app\\[3\\].*', {'marker': 's', 'markersize': 2, 'color': '#d62728'})]
 
 #style_tuple_list = []
 

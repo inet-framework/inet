@@ -37,7 +37,7 @@ void StaticLinearMobility::setInitialPosition()
     initialPos.x = initialX;
     initialPos.y = initialY;
     initialPos.z = 0;
-    Coord direction(cos(rad(orientation).get()), sin(rad(orientation).get()));
+    Coord direction(cos(orientation.get<rad>()), sin(orientation.get<rad>()));
     lastPosition = initialPos + (direction * (index * separation));
     if (lastPosition.x >= constraintAreaMax.x)
         lastPosition.x -= 1;

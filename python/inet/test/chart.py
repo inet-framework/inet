@@ -13,7 +13,7 @@ import io
 import logging
 import matplotlib
 import numpy
-import sewar
+import importlib.util
 
 import omnetpp
 import omnetpp.scave
@@ -25,6 +25,17 @@ from inet.test.statistical import *
 from inet.test.task import *
 
 _logger = logging.getLogger(__name__)
+
+
+def sewar_rmse(a, b):
+    assert a.shape == b.shape, "Supplied images have different sizes " + \
+    str(a.shape) + " and " + str(b.shape)
+    if len(a.shape) == 2:
+        a = a[:,:,numpy.newaxis]
+        b = b[:,:,numpy.newaxis]
+    a = a.astype(numpy.float64)
+    b = b.astype(numpy.float64)
+    return numpy.sqrt(numpy.mean((a.astype(numpy.float64)-b.astype(numpy.float64))**2))
 
 class ChartTestTask(TestTask):
     def __init__(self, analysis_file_name, id, chart_name, simulation_project=None, name="chart test", **kwargs):
@@ -51,14 +62,16 @@ class ChartTestTask(TestTask):
                 folder = os.path.dirname(self.simulation_project.get_full_path(self.analysis_file_name))
                 file_name = analysis.export_image(chart, folder, workspace, format="png", dpi=150, target_folder=self.simulation_project.media_folder, filename=image_export_filename + "-new")
                 new_file_name = os.path.join(folder, file_name)
-                old_file_name = os.path.join(folder, re.sub("-new\.png$", ".png", file_name))
-                diff_file_name = os.path.join(folder, re.sub("-new\.png$", "-diff.png", file_name))
+                old_file_name = os.path.join(folder, re.sub(r"-new\.png$", ".png", file_name))
+                diff_file_name = os.path.join(folder, re.sub(r"-new\.png$", "-diff.png", file_name))
                 if os.path.exists(diff_file_name):
                     os.remove(diff_file_name)
                 if os.path.exists(old_file_name):
                     new_image = matplotlib.image.imread(new_file_name)
                     old_image = matplotlib.image.imread(old_file_name)
-                    metric = sewar.rmse(old_image, new_image)
+                    if old_image.shape != new_image.shape:
+                        return self.task_result_class(self, result="FAIL", reason="Supplied images have different sizes" + str(old_image.shape) + " and " + str(new_image.shape))
+                    metric = sewar_rmse(old_image, new_image)
                     if metric == 0 or not keep_charts:
                         os.remove(new_file_name)
                     else:
@@ -86,7 +99,7 @@ class MultipleChartTestTasks(MultipleTestTasks):
         multiple_simulation_task_results = self.multiple_simulation_tasks.run_protected(**kwargs)
         return super().run_protected(**kwargs)
 
-def get_chart_test_tasks(simulation_project=None, run_simulations=True, filter=None, working_directory_filter=None, chart_filter=None, exclude_chart_filter=None, **kwargs):
+def get_chart_test_tasks(simulation_project=None, run_simulations=True, filter="showcases", working_directory_filter=None, chart_filter=None, exclude_chart_filter=None, **kwargs):
     """
     Returns multiple chart test tasks matching the provided filter criteria. The returned tasks can be run by
     calling the :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
@@ -157,19 +170,22 @@ class ChartUpdateTask(UpdateTask):
                 folder = os.path.dirname(self.simulation_project.get_full_path(self.analysis_file_name))
                 file_name = analysis.export_image(chart, folder, workspace, format="png", dpi=150, target_folder=self.simulation_project.media_folder, filename=image_export_filename + "-new")
                 new_file_name = os.path.join(folder, file_name)
-                old_file_name = os.path.join(folder, re.sub("-new\.png$", ".png", file_name))
-                diff_file_name = os.path.join(folder, re.sub("-new\.png$", "-diff.png", file_name))
+                old_file_name = os.path.join(folder, re.sub(r"-new\.png$", ".png", file_name))
+                diff_file_name = os.path.join(folder, re.sub(r"-new\.png$", "-diff.png", file_name))
                 if os.path.exists(diff_file_name):
                     os.remove(diff_file_name)
                 if os.path.exists(old_file_name):
                     new_image = matplotlib.image.imread(new_file_name)
                     old_image = matplotlib.image.imread(old_file_name)
-                    metric = sewar.rmse(old_image, new_image)
+                    if old_image.shape != new_image.shape:
+                        metric = 1
+                    else:
+                        metric = sewar_rmse(old_image, new_image)
                     if metric == 0:
                         os.remove(new_file_name)
                     else:
                         if keep_charts:
-                            os.rename(old_file_name, re.sub("-new\.png$", "-old.png", file_name))
+                            os.rename(old_file_name, re.sub(r"-new\.png$", "-old.png", file_name))
                             image_diff = numpy.abs(new_image - old_image)
                             matplotlib.image.imsave(diff_file_name, image_diff[:, :, :3])
                         else:

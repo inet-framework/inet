@@ -65,6 +65,7 @@ void StreamDecoder::configureMappings()
         mapping.stream = element->get("stream").stringValue();
         if (element->containsKey("interface")) {
             auto interfaceNamePattern = element->get("interface").stringValue();
+            delete mapping.interfaceNameMatcher;
             mapping.interfaceNameMatcher = new cPatternMatcher();
             mapping.interfaceNameMatcher->setPattern(interfaceNamePattern, false, false, false);
         }

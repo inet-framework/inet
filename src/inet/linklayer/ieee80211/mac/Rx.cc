@@ -111,7 +111,7 @@ bool Rx::isFcsOk(Packet *packet) const
                 return true;
             case FCS_COMPUTED: {
                 const auto& fcsBytes = packet->peekDataAt<BytesChunk>(B(0), packet->getDataLength() - trailer->getChunkLength());
-                auto bufferLength = B(fcsBytes->getChunkLength()).get();
+                auto bufferLength = fcsBytes->getChunkLength().get<B>();
                 auto buffer = new uint8_t[bufferLength];
                 fcsBytes->copyToBuffer(buffer, bufferLength);
                 auto computedFcs = ethernetCRC(buffer, bufferLength);

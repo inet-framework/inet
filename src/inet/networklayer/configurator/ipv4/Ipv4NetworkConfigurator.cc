@@ -602,9 +602,9 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
                 }
             }
           found: if (netmaskLength < minimumNetmaskLength || netmaskLength > maximumNetmaskLength)
-                throw cRuntimeError("Failed to find address prefix (using %s with specified bits %s) and netmask (length from %d bits to %d bits) for interface %s and %zu other interface(s). Please refine your parameters and try again!",
+                throw cRuntimeError("Failed to find address prefix (using %s with specified bits %s) and netmask (length from %d bits to %d bits) for interface %s and %u other interface(s). Please refine your parameters and try again!",
                         Ipv4Address(mergedAddress).str().c_str(), Ipv4Address(mergedAddressSpecifiedBits).str().c_str(), minimumNetmaskLength, maximumNetmaskLength,
-                        compatibleInterfaces[0]->networkInterface->getInterfaceFullPath().c_str(), compatibleInterfaces.size() - 1);
+                        compatibleInterfaces[0]->networkInterface->getInterfaceFullPath().c_str(), (unsigned int)compatibleInterfaces.size() - 1);
             EV_TRACE << "Selected netmask length: " << netmaskLength << endl;
             EV_TRACE << "Selected network address: " << Ipv4Address(networkAddress) << endl;
             EV_TRACE << "Selected network netmask: " << Ipv4Address(networkNetmask) << endl;

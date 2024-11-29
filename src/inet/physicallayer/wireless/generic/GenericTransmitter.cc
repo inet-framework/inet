@@ -45,11 +45,11 @@ const ITransmission *GenericTransmitter::createTransmission(const IRadio *transm
     auto headerBitrate = signalBitrateReq != nullptr ? signalBitrateReq->getDataBitrate() : bitrate;
     if (!(headerBitrate > bps(0)))
         throw cRuntimeError("Missing transmission header bitrate (got %g): No header bitrate request on packet, and bitrate parameter is not set", headerBitrate.get());
-    auto headerDuration = s(headerLength / headerBitrate).get();
+    auto headerDuration = (headerLength / headerBitrate).get<s>();
     auto dataBitrate = signalBitrateReq != nullptr ? signalBitrateReq->getDataBitrate() : bitrate;
     if (!(dataBitrate > bps(0)))
         throw cRuntimeError("Missing transmission data bitrate (got %g): No data bitrate request on packet, and bitrate parameter is not set", dataBitrate.get());
-    auto dataDuration = s(dataLength / dataBitrate).get();
+    auto dataDuration = (dataLength / dataBitrate).get<s>();
     auto duration = preambleDuration + headerDuration + dataDuration;
     auto endTime = startTime + duration;
     auto mobility = transmitter->getAntenna()->getMobility();

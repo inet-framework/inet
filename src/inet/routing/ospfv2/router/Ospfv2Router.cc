@@ -1402,7 +1402,7 @@ void Router::updateExternalRoute(Ipv4Address networkAddress, const Ospfv2AsExter
 
     externalRoutes[networkAddress] = externalRouteContents;
 
-    lsaHeader.setLsaLength(B(calculateLsaSize(*asExternalLSA)).get());
+    lsaHeader.setLsaLength(calculateLsaSize(*asExternalLSA).get<B>());
 
     bool rebuild = installASExternalLSA(asExternalLSA);
     floodLSA(asExternalLSA, BACKBONE_AREAID);

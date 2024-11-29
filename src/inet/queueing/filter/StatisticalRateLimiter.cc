@@ -43,7 +43,7 @@ bool StatisticalRateLimiter::matchesPacket(const Packet *packet) const
     auto rateTag = packet->getTag<RateTag>();
     double p = 0;
     if (!std::isnan(maxDatarate.get()) && rateTag->getDatarate() > maxDatarate)
-        p = std::max(p, unit((rateTag->getDatarate() - maxDatarate) / rateTag->getDatarate()).get());
+        p = std::max(p, ((rateTag->getDatarate() - maxDatarate) / rateTag->getDatarate()).get<unit>());
     else if (!std::isnan(maxPacketrate) && rateTag->getPacketrate() > maxPacketrate)
         p = std::max(p, (rateTag->getPacketrate() - maxPacketrate) / rateTag->getPacketrate());
     return p == 0 || dblrand() >= p;

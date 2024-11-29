@@ -225,7 +225,7 @@ bool TcpConnection::nextSeg(uint32_t& seqNum)
     seqNum = 0;
 
     if (state->ts_enabled)
-        shift -= B(TCP_OPTION_TS_SIZE).get();
+        shift -= TCP_OPTION_TS_SIZE.get<B>();
 
     // RFC 3517, page 5: "(1) If there exists a smallest unSACKed sequence number 'S2' that
     // meets the following three criteria for determining loss, the
@@ -547,7 +547,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpHeader)
 
     uint n = state->sacks_array.size();
 
-    uint maxnode = ((B(TCP_OPTIONS_MAX_SIZE - used_options_len).get()) - 2) / 8; // 2: option header, 8: size of one sack entry
+    uint maxnode = (((TCP_OPTIONS_MAX_SIZE - used_options_len).get<B>()) - 2) / 8; // 2: option header, 8: size of one sack entry
 
     if (n > maxnode)
         n = maxnode;
@@ -569,7 +569,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpHeader)
 
     uint optArrSizeAligned = optArrSize;
 
-    while (B(used_options_len).get() % 4 != 2) {
+    while (used_options_len.get<B>() % 4 != 2) {
         used_options_len++;
         optArrSizeAligned++;
     }
@@ -579,7 +579,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpHeader)
         optArrSize++;
     }
 
-    ASSERT(B(used_options_len).get() % 4 == 2);
+    ASSERT(used_options_len.get<B>() % 4 == 2);
 
     TcpOptionSack *option = new TcpOptionSack();
     option->setLength(8 * n + 2);

@@ -22,6 +22,8 @@ class INET_API Ieee80211OfdmModulation : public IModulation
   public:
     Ieee80211OfdmModulation(int numSubcarriers, const ApskModulationBase *subcarrierModulation);
 
+    virtual cObject *dup() const override { return new Ieee80211OfdmModulation(numSubcarriers, subcarrierModulation); }
+
     virtual int getNumSubcarriers() const { return numSubcarriers; }
     const ApskModulationBase *getSubcarrierModulation() const { return subcarrierModulation; }
 

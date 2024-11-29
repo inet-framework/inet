@@ -28,7 +28,7 @@ class INET_API LayeredErrorModelBase : public cModule, public ILayeredErrorModel
     virtual const IReceptionBitModel *computeBitModel(const ITransmission *transmission, double bitErrorRate) const;
     virtual const IReceptionSymbolModel *computeSymbolModel(const ITransmission *transmission, double symbolErrorRate) const;
 
-    virtual const ISymbol *computeCorruptSymbol(const ApskModulationBase *modulation, const ApskSymbol *transmittedSymbol) const;
+    virtual const ApskSymbol *computeCorruptSymbol(const ApskModulationBase *modulation, const ApskSymbol *transmittedSymbol) const;
 };
 
 } // namespace physicallayer

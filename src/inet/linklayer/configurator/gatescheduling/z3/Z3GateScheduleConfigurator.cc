@@ -74,7 +74,7 @@ Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateSched
                 for (size_t nodeIndex = 0; nodeIndex + 1 < pathFragment->networkNodes.size(); nodeIndex++) {
                     auto transmissionPort = pathFragment->outputPorts[nodeIndex];
                     auto transmissionDurationVariable = getTransmissionDurationVariable(flow, transmissionPort);
-                    simtime_t transmissionDuration = s(flow->startApplication->packetLength / transmissionPort->datarate).get();
+                    simtime_t transmissionDuration = (flow->startApplication->packetLength / transmissionPort->datarate).get<s>();
                     addAssert(transmissionDurationVariable == z3Context->real_val(transmissionDuration.str().c_str()));
                     auto transmissionStartTimeVariable = getTransmissionStartTimeVariable(flow, packetIndex, transmissionPort, flow->gateIndex);
                     auto transmissionEndTimeVariable = getTransmissionEndTimeVariable(flow, packetIndex, transmissionPort, flow->gateIndex);
@@ -117,7 +117,7 @@ Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateSched
                         addAssert(applicationStartTimeVariable + packetIntervalVariable * z3Context->real_val(packetIndex) == transmissionStartTimeVariable);
                     else if (previousReceptionEndTimeVariable) {
                         if (transmissionPort->cutthroughSwitchingEnabled && receptionPort->cutthroughSwitchingEnabled && flow->cutthroughSwitchingHeaderSize != b(0)) {
-                            simtime_t cutthroughDelay = s(flow->cutthroughSwitchingHeaderSize / receptionPort->datarate).get();
+                            simtime_t cutthroughDelay = (flow->cutthroughSwitchingHeaderSize / receptionPort->datarate).get<s>();
                             addAssert(transmissionStartTimeVariable >= previousReceptionStartTimeVariable + z3Context->real_val(cutthroughDelay.str().c_str()));
                         }
                         else
@@ -158,7 +158,7 @@ Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateSched
 
     // 5. add one transmission per port at a time constraints
     for (auto port : input.ports) {
-        simtime_t interframeGap = s(b(96) / port->datarate).get();
+        simtime_t interframeGap = (b(96) / port->datarate).get<s>();
         auto interframeGapVariable = getInterframeGapVariable(port);
         addAssert(interframeGapVariable == z3Context->real_val(interframeGap.str().c_str()));
         auto transmissionStartTimeVariables = getTransmissionStartTimeVariables(port);

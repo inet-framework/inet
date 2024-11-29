@@ -19,7 +19,7 @@ from inet.test.simulation import *
 
 _logger = logging.getLogger(__name__)
 all_fingerprint_ingredients = ["tplx", "~tNl", "~tND", "tyf"]
-all_fingerprint_ingredients_extra_args = {
+all_fingerprint_ingredients_append_args = {
     "~tND": {"--**.crcMode=\"computed\"",
              "--**.fcsMode=\"computed\""},
     "tyf" : {"--cmdenv-fake-gui=true",
@@ -32,9 +32,9 @@ all_fingerprint_ingredients_extra_args = {
              "--**.fadeOutMode=\"animationTime\"",
              "--**.signalAnimationSpeedChangeTimeMode=\"animationTime\""}}
 
-def get_ingredients_extra_args(ingredients):
-    global all_fingerprint_ingredients_extra_args
-    return list(all_fingerprint_ingredients_extra_args[ingredients]) if ingredients in all_fingerprint_ingredients_extra_args else []
+def get_ingredients_append_args(ingredients):
+    global all_fingerprint_ingredients_append_args
+    return list(all_fingerprint_ingredients_append_args[ingredients]) if ingredients in all_fingerprint_ingredients_append_args else []
 
 class Fingerprint:
     def __init__(self, fingerprint, ingredients):
@@ -58,7 +58,7 @@ class Fingerprint:
 
     @classmethod
     def parse(self, text):
-        match = re.match("(.*)/(.*)", text)
+        match = re.match(r"(.*)/(.*)", text)
         fingerprint = match.groups()[0]
         ingredients = match.groups()[1]
         return Fingerprint(fingerprint, ingredients)
@@ -92,7 +92,7 @@ class FingerprintTestTaskResult(SimulationTestTaskResult):
         eventlog_file = open(eventlog_file_path)
         fingerprints = []
         for line in eventlog_file:
-            match = re.match("E # .* f (.*)", line)
+            match = re.match(r"E # .* f (.*)", line)
             if match:
                 fingerprints.append(Fingerprint(match.group(1)))
         eventlog_file.close()
@@ -152,13 +152,13 @@ class FingerprintTestTask(SimulationTestTask):
         return hasher.digest()
 
     def run(self, test_result_filter=None, exclude_test_result_filter="SKIP", output_stream=sys.stdout, **kwargs):
-        if self.fingerprint:
+        if self.fingerprint and matches_filter(self.test_result, test_result_filter, exclude_test_result_filter, True):
             simulation_project = self.simulation_task.simulation_config.simulation_project
-            return super().run(extra_args=self.get_extra_args(simulation_project, str(self.fingerprint)) + get_ingredients_extra_args(self.ingredients), output_stream=output_stream, **kwargs)
+            return super().run(append_args=self.get_append_args(simulation_project, str(self.fingerprint)) + get_ingredients_append_args(self.ingredients), output_stream=output_stream, **kwargs)
         else:
             if matches_filter("SKIP", test_result_filter, exclude_test_result_filter, True):
                 print("Running " + self.simulation_task.get_parameters_string(**kwargs), end=" ", file=output_stream)
-            return FingerprintTestTaskResult(task=self, result="SKIP", reason="Correct fingerprint not found")
+            return FingerprintTestTaskResult(task=self, result="SKIP", expected_result=self.test_result, reason="Correct fingerprint not found")
 
     def check_simulation_task_result(self, simulation_task_result, **kwargs):
         expected_fingerprint = self.fingerprint
@@ -180,7 +180,7 @@ class FingerprintTestTask(SimulationTestTask):
                 reason = None
         return FingerprintTestTaskResult(task=self, simulation_task_result=simulation_task_result, expected_fingerprint=expected_fingerprint, calculated_fingerprint=calculated_fingerprint, result=result, expected_result=expected_result, reason=reason)
 
-    def get_extra_args(self, simulation_project, fingerprint_arg):
+    def get_append_args(self, simulation_project, fingerprint_arg):
         return ["--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"]
         # return ["-n", simulation_project.get_full_path(".") + "/tests/networks", "--fingerprintcalculator-class", "inet::FingerprintCalculator", "--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"]
 
@@ -210,11 +210,11 @@ class FingerprintTestGroupTask(MultipleTestTasks):
                 simulation_task = checked_fingerprint_test_tasks[0].simulation_task
                 simulation_project = simulation_task.simulation_config.simulation_project
                 fingerprint_arg = ",".join(map(lambda e: str(e.fingerprint), checked_fingerprint_test_tasks))
-                extra_args = checked_fingerprint_test_tasks[0].get_extra_args(simulation_project, fingerprint_arg)
-                ingredients_extra_args = set()
+                append_args = checked_fingerprint_test_tasks[0].get_append_args(simulation_project, fingerprint_arg)
+                ingredients_append_args = set()
                 for checked_fingerprint_test_task in checked_fingerprint_test_tasks:
-                    ingredients_extra_args = ingredients_extra_args.union(get_ingredients_extra_args(checked_fingerprint_test_task.ingredients))
-                simulation_result = simulation_task.run(print_end=" ", sim_time_limit=sim_time_limit or self.sim_time_limit, output_stream=output_stream, extra_args=extra_args + list(ingredients_extra_args), **kwargs)
+                    ingredients_append_args = ingredients_append_args.union(get_ingredients_append_args(checked_fingerprint_test_task.ingredients))
+                simulation_result = simulation_task.run(print_end=" ", sim_time_limit=sim_time_limit or self.sim_time_limit, output_stream=output_stream, append_args=append_args + list(ingredients_append_args), **kwargs)
                 fingerprint_test_group_results = check_fingerprint_test_group(simulation_result, self, **kwargs)
                 fingerprint_test_results += fingerprint_test_group_results.results
             return MultipleTestResults(self.tasks, fingerprint_test_results)
@@ -308,17 +308,17 @@ class SimulationEvent:
         self.simulation_task.run(debug_event_number=self.event_number)
 
 def get_calculated_fingerprint(simulation_result, ingredients):
-    stdout = simulation_result.subprocess_result.stdout.decode("utf-8")
-    stderr = simulation_result.subprocess_result.stderr.decode("utf-8")
-    match = re.search("Fingerprint successfully verified:.*? ([0-9a-f]{4}-[0-9a-f]{4})/" + ingredients, stdout)
+    stdout = simulation_result.subprocess_result.stdout
+    stderr = simulation_result.subprocess_result.stderr
+    match = re.search(r"Fingerprint successfully verified:.*? ([0-9a-f]{4}-[0-9a-f]{4})/" + ingredients, stdout)
     if match:
         value = match.groups()[0]
     else:
-        match = re.search("Fingerprint mismatch! calculated:.*? ([0-9a-f]{4}-[0-9a-f]{4})/" + ingredients + ".*expected", stdout)
+        match = re.search(r"Fingerprint mismatch! calculated:.*? ([0-9a-f]{4}-[0-9a-f]{4})/" + ingredients + ".*expected", stdout)
         if match:
             value = match.groups()[0]
         else:
-            match = re.search("Fingerprint mismatch! calculated:.*? ([0-9a-f]{4}-[0-9a-f]{4})/" + ingredients + ".*expected", stderr)
+            match = re.search(r"Fingerprint mismatch! calculated:.*? ([0-9a-f]{4}-[0-9a-f]{4})/" + ingredients + ".*expected", stderr)
             if match:
                 value = match.groups()[0]
             else:
@@ -399,7 +399,7 @@ def get_fingerprint_test_tasks(**kwargs):
         fingerprint_test_groups = []
         for simulation_task in multiple_simulation_tasks.tasks:
             simulation_config = simulation_task.simulation_config
-            fingerprint_test_groups += collect_fingerprint_test_groups(simulation_task, **kwargs)
+            fingerprint_test_groups += collect_fingerprint_test_groups(simulation_task, **dict(kwargs, pass_keyboard_interrupt=True))
         return MultipleFingerprintTestTasks(multiple_simulation_tasks=multiple_simulation_tasks, tasks=fingerprint_test_groups, **dict(kwargs, simulation_project=multiple_simulation_tasks.simulation_project))
     return get_tasks(**kwargs)
 
@@ -473,10 +473,10 @@ class FingerprintUpdateTask(SimulationUpdateTask):
         else:
             correct_fingerprint = None
         fingerprint_arg = "0000-0000/" + ingredients
-        extra_args = ["--fingerprintcalculator-class", "inet::FingerprintCalculator"] if simulation_config.simulation_project.name == "inet" else []
-        extra_args = extra_args + ["--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"] + get_ingredients_extra_args(ingredients)
+        append_args = ["--fingerprintcalculator-class", "inet::FingerprintCalculator"] if simulation_config.simulation_project.name == "inet" else []
+        append_args = append_args + ["--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"] + get_ingredients_append_args(ingredients)
         self.simulation_task.sim_time_limit = sim_time_limit
-        simulation_task_result = self.simulation_task.run_protected(sim_time_limit=sim_time_limit, output_stream=output_stream, extra_args=extra_args, **kwargs)
+        simulation_task_result = self.simulation_task.run_protected(sim_time_limit=sim_time_limit, output_stream=output_stream, append_args=append_args, **kwargs)
         calculated_fingerprint = get_calculated_fingerprint(simulation_task_result, ingredients)
         return FingerprintUpdateTaskResult(task=self, simulation_task_result=simulation_task_result, correct_fingerprint=correct_fingerprint, calculated_fingerprint=calculated_fingerprint)
 

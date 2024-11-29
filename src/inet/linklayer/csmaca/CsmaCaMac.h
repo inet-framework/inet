@@ -60,7 +60,7 @@ class INET_API CsmaCaMac : public MacProtocolBase, public IMacProtocol, public q
     ModuleRefByPar<physicallayer::IRadio> radio;
     physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
 
-    cFSM fsm;
+    Fsm fsm;
 
     /** Remaining backoff period in seconds */
     simtime_t backoffPeriod = -1;

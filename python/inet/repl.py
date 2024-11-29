@@ -19,11 +19,12 @@ def parse_run_repl_arguments():
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("-p", "--simulation-project", default=None, help="specifies the name of the project")
     parser.add_argument("-l", "--log-level", choices=["ERROR", "WARN", "INFO", "DEBUG"], default="INFO", help="specifies the log level for the root logging category")
+    parser.add_argument("--external-command-log-level", choices=["ERROR", "WARN", "INFO", "DEBUG"], default="WARN", help="specifies the log level for the external command logging categories")
     parser.add_argument("--handle-exception", default=True, action=argparse.BooleanOptionalAction, help="disables displaying stacktraces for exceptions")
     return parser.parse_args(sys.argv[1:])
 
 def process_run_repl_arguments(args):
-    initialize_logging(args.log_level)
+    initialize_logging(args.log_level, args.external_command_log_level, None)
     logging.getLogger("distributed.deploy.ssh").setLevel(args.log_level)
     define_omnetpp_sample_projects()
     simulation_project = determine_default_simulation_project(name=args.simulation_project, required=False)
@@ -46,5 +47,6 @@ def run_repl_main():
     except Exception as e:
         if args.handle_exception:
             _logger.error(str(e))
+            sys.exit(1)
         else:
             raise e

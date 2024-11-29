@@ -18,6 +18,14 @@
 
 namespace inet {
 
+LifecycleController::~LifecycleController()
+{
+    delete spareCallback;
+    for (auto operation : runningOperations)
+        delete operation;
+    runningOperations.clear();
+}
+
 void LifecycleController::Callback::init(LifecycleController *controller, LifecycleOperation *operation, cModule *module)
 {
     this->controller = controller;
@@ -49,6 +57,7 @@ bool LifecycleController::initiateOperation(LifecycleOperation *operation, IDone
     operation->currentStage = 0;
     operation->operationCompletionCallback = completionCallback;
     operation->insideInitiateOperation = true;
+    runningOperations.push_back(operation);
     return resumeOperation(operation);
 }
 
@@ -68,6 +77,7 @@ bool LifecycleController::resumeOperation(LifecycleOperation *operation)
     // done: invoke callback (unless we are still under initiateOperation())
     if (operation->operationCompletionCallback && !operation->insideInitiateOperation)
         operation->operationCompletionCallback->invoke();
+    remove(runningOperations, operation);
     delete operation;
     return true; // done
 }

@@ -191,8 +191,8 @@ In ``ethHost2``, we'll record traffic of the ``ipv4`` module. The
 
 By default, modules like :ned:`Ipv4` and :ned:`EthernetInterface` don't
 compute CRC and FCS frames, but assumes they are correct ("declared
-correct" mode.) To include the CRC and FCS values in the
-capture file, L2 and L3 modules need to be set to compute CRC and FCS:
+correct" mode). To record PCAP traces with correctly calculated CRC and FCS values,
+the L2 and L3 modules need to be set to compute them:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini

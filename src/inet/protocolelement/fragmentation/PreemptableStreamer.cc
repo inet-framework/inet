@@ -87,7 +87,7 @@ void PreemptableStreamer::pushPacket(Packet *packet, const cGate *gate)
     if (std::isnan(streamDatarate.get()))
         endStreaming();
     else
-        scheduleClockEventAfter(s(streamedPacket->getDataLength() / streamDatarate).get(), endStreamingTimer);
+        scheduleClockEventAfter((streamedPacket->getDataLength() / streamDatarate).get<s>(), endStreamingTimer);
 }
 
 void PreemptableStreamer::pushPacketEnd(Packet *packet, const cGate *gate)

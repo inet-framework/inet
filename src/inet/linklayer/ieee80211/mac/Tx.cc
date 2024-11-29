@@ -61,7 +61,7 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
     updatedTrailer->setFcsMode(mac->getFcsMode());
     if (mac->getFcsMode() == FCS_COMPUTED) {
         const auto& fcsBytes = packet->peekAllAsBytes();
-        auto bufferLength = B(fcsBytes->getChunkLength()).get();
+        auto bufferLength = fcsBytes->getChunkLength().get<B>();
         auto buffer = new uint8_t[bufferLength];
         fcsBytes->copyToBuffer(buffer, bufferLength);
         auto fcs = ethernetCRC(buffer, bufferLength);

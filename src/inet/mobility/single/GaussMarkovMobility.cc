@@ -25,7 +25,7 @@ void GaussMarkovMobility::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         speedMean = par("speed");
         speedStdDev = par("speedStdDev");
-        angleMean = deg(fmod(deg(par("angle")).get(), 360.0));
+        angleMean = deg(fmod(deg(par("angle")).get<deg>(), 360.0));
         angleStdDev = deg(par("angleStdDev"));
         alpha = par("alpha");
         if (alpha < 0.0 || alpha > 1.0)
@@ -75,7 +75,7 @@ void GaussMarkovMobility::setTargetPosition()
         + (1.0 - alpha) * angleMean
         + rad(sqrt(1.0 - alpha * alpha) * normal(0.0, 1.0) * angleStdDev);
 
-    Coord direction(cos(rad(angle).get()), sin(rad(angle).get()));
+    Coord direction(cos(angle.get<rad>()), sin(angle.get<rad>()));
     nextChange = simTime() + updateInterval;
     targetPosition = lastPosition + direction * (speed * updateInterval.dbl());
 

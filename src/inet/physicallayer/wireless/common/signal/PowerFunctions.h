@@ -401,8 +401,8 @@ class INET_API ObstacleLossFunction : public FunctionBase<double, Domain<m, m, m
     ObstacleLossFunction(const IObstacleLoss *obstacleLoss) : obstacleLoss(obstacleLoss) {}
 
     virtual double getValue(const Point<m, m, m, m, m, m, Hz>& p) const override {
-        Coord transmissionPosition(std::get<0>(p).get(), std::get<1>(p).get(), std::get<2>(p).get());
-        Coord receptionPosition(std::get<3>(p).get(), std::get<4>(p).get(), std::get<5>(p).get());
+        Coord transmissionPosition(std::get<0>(p).get<m>(), std::get<1>(p).get<m>(), std::get<2>(p).get<m>());
+        Coord receptionPosition(std::get<3>(p).get<m>(), std::get<4>(p).get<m>(), std::get<5>(p).get<m>());
         Hz frequency = std::get<6>(p);
         return obstacleLoss->computeObstacleLoss(frequency, transmissionPosition, receptionPosition);
     }

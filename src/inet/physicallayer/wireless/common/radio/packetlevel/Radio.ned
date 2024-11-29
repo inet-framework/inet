@@ -76,9 +76,9 @@ module Radio extends PhysicalLayerBase like IRadio
         @signal[receptionStarted];
         @signal[receptionEnded];
 
-        @statistic[radioMode](title="Radio mode"; source=radioModeChanged; record=count,vector; interpolationmode=sample-hold);
-        @statistic[receptionState](title="Radio reception state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
-        @statistic[transmissionState](title="Radio transmission state"; source=transmissionStateChanged; record=count,vector; interpolationmode=sample-hold);
+        @statistic[radioMode](title="Radio mode"; type=enum; enum=OFF, SLEEP, RECEIVER, TRANSMITTER, TRANSCEIVER, SWITCHING; source=radioModeChanged; record=count,vector; interpolationmode=sample-hold);
+        @statistic[receptionState](title="Radio reception state"; type=enum; enum=UNDEFINED, IDLE, BUSY, RECEIVING; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
+        @statistic[transmissionState](title="Radio transmission state"; type=enum; enum=UNDEFINED, IDLE, TRANSMITTING; source=transmissionStateChanged; record=count,vector; interpolationmode=sample-hold);
 
         @statistic[minSnir](title="Min SNIR"; source=minimumSnir(packetSentToUpper); record=histogram);
         @statistic[packetErrorRate](title="Packet error rate"; source=packetErrorRate(packetSentToUpper); record=histogram);

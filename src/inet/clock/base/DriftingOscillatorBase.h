@@ -34,18 +34,18 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
     // IScriptable implementation
     virtual void processCommand(const cXMLElement& node) override;
 
-    ppm invertDriftRate(ppm driftRate) const { return unit(1 / (1 + unit(driftRate).get()) - 1); }
+    ppm invertDriftRate(ppm driftRate) const { return unit(1 / (1 + driftRate.get<unit>()) - 1); }
 
     int64_t increaseWithDriftRate(int64_t value) const { return increaseWithDriftRate(value, driftRate); }
-    int64_t increaseWithDriftRate(int64_t value, ppm driftRate) const { return value + (int64_t)(value * unit(driftRate).get()); }
+    int64_t increaseWithDriftRate(int64_t value, ppm driftRate) const { return value + (int64_t)(value * driftRate.get<unit>()); }
 
     int64_t decreaseWithDriftRate(int64_t value) const { return decreaseWithDriftRate(value, inverseDriftRate); }
-    int64_t decreaseWithDriftRate(int64_t value, ppm inverseDriftRate) const { return value + (int64_t)(value * unit(inverseDriftRate).get()); }
+    int64_t decreaseWithDriftRate(int64_t value, ppm inverseDriftRate) const { return value + (int64_t)(value * inverseDriftRate.get<unit>()); }
 
   public:
     virtual simtime_t getComputationOrigin() const override { return origin; }
     virtual simtime_t getNominalTickLength() const override { return nominalTickLength; }
-    virtual double getCurrentTickLength() const { return nominalTickLength.dbl() + nominalTickLength.dbl() * unit(inverseDriftRate).get(); }
+    virtual double getCurrentTickLength() const { return nominalTickLength.dbl() + nominalTickLength.dbl() * inverseDriftRate.get<unit>(); }
 
     virtual ppm getDriftRate() const { return driftRate; }
     virtual void setDriftRate(ppm driftRate);

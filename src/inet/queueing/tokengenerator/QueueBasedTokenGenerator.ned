@@ -8,6 +8,7 @@
 package inet.queueing.tokengenerator;
 
 import inet.queueing.base.TokenGeneratorBase;
+import inet.queueing.contract.ITokenGenerator;
 
 //
 // This module generates tokens for a ~TokenBasedServer based on the observed state
@@ -20,7 +21,7 @@ import inet.queueing.base.TokenGeneratorBase;
 //  %l - processed total packet length
 //  %t - number of generated tokens
 //
-simple QueueBasedTokenGenerator extends TokenGeneratorBase
+simple QueueBasedTokenGenerator extends TokenGeneratorBase like ITokenGenerator
 {
     parameters:
         string queueModule; // Module path of the observed packet queue

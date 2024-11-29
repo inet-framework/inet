@@ -78,7 +78,7 @@ cValueMap *TSNschedGateScheduleConfigurator::convertInputToJson(const Input& inp
         // TODO KLUDGE this is a wild guess
         double guardBand = 0;
         for (auto flow : input.flows) {
-            double v = b(flow->startApplication->packetLength).get();
+            double v = flow->startApplication->packetLength.get<b>();
             if (guardBand < v)
                 guardBand = v;
         }
@@ -97,7 +97,7 @@ cValueMap *TSNschedGateScheduleConfigurator::convertInputToJson(const Input& inp
             jsonPort->set("timeToTravelUnit", "us");
 //            jsonPort->set("guardBandSize", guardBand);
 //            jsonPort->set("guardBandSizeUnit", "bit");
-            jsonPort->set("portSpeed", bps(port->datarate).get() / 1000000);
+            jsonPort->set("portSpeed", port->datarate.get<bps>() / 1000000);
             jsonPort->set("portSpeedSizeUnit", "bit");
             jsonPort->set("portSpeedTimeUnit", "us");
             jsonPort->set("scheduleType", "Hypercycle");
@@ -119,7 +119,7 @@ cValueMap *TSNschedGateScheduleConfigurator::convertInputToJson(const Input& inp
         jsonFlow->set("priorityValue", flow->gateIndex);
         jsonFlow->set("packetPeriodicity", flow->startApplication->packetInterval.dbl() * 1000000);
         jsonFlow->set("packetPeriodicityUnit", "us");
-        jsonFlow->set("packetSize", b(flow->startApplication->packetLength).get());
+        jsonFlow->set("packetSize", flow->startApplication->packetLength.get<b>());
         jsonFlow->set("packetSizeUnit", "bit");
         jsonFlow->set("hardConstraintTime", flow->startApplication->maxLatency.dbl() * 1000000);
         jsonFlow->set("hardConstraintTimeUnit", "us");
@@ -208,7 +208,7 @@ TSNschedGateScheduleConfigurator::Output *TSNschedGateScheduleConfigurator::conv
         auto application = flow->startApplication;
         auto firstSendingTime = jsonFlow->get("firstSendingTime").doubleValue() / 1000000;
         bps datarate = application->device->ports[0]->datarate;
-        auto startTime = firstSendingTime - s(application->packetLength / datarate).get();
+        auto startTime = firstSendingTime - (application->packetLength / datarate).get<s>();
         while (startTime < 0)
             startTime += application->packetInterval.dbl();
         output->applicationStartTimes[application] = startTime;

@@ -19,12 +19,12 @@ void EtherAppReqSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
 {
     auto startPosition = stream.getLength();
     const auto& etherAppReq = staticPtrCast<const EtherAppReq>(chunk);
-    stream.writeUint32Be(B(etherAppReq->getChunkLength()).get());
+    stream.writeUint32Be(etherAppReq->getChunkLength().get<B>());
     stream.writeUint32Be(etherAppReq->getRequestId());
     stream.writeUint32Be(etherAppReq->getResponseBytes());
-    int64_t remainders = B(etherAppReq->getChunkLength() - (stream.getLength() - startPosition)).get();
+    int64_t remainders = (etherAppReq->getChunkLength() - (stream.getLength() - startPosition)).get<B>();
     if (remainders < 0)
-        throw cRuntimeError("EtherAppReq length = %d smaller than required %d bytes", (int)B(etherAppReq->getChunkLength()).get(), (int)B(stream.getLength() - startPosition).get());
+        throw cRuntimeError("EtherAppReq length = %d smaller than required %d bytes", (int)etherAppReq->getChunkLength().get<B>(), (int)(stream.getLength() - startPosition).get<B>());
     stream.writeByteRepeatedly('?', remainders);
 }
 
@@ -38,7 +38,7 @@ const Ptr<Chunk> EtherAppReqSerializer::deserialize(MemoryInputStream& stream) c
     etherAppReq->setResponseBytes(stream.readUint32Be());
     B remainders = dataLength - (stream.getPosition() - startPosition);
     ASSERT(remainders >= B(0));
-    stream.readByteRepeatedly('?', B(remainders).get());
+    stream.readByteRepeatedly('?', remainders.get<B>());
     return etherAppReq;
 }
 
@@ -46,12 +46,12 @@ void EtherAppRespSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
 {
     auto startPosition = stream.getLength();
     const auto& etherAppResp = staticPtrCast<const EtherAppResp>(chunk);
-    stream.writeUint32Be(B(etherAppResp->getChunkLength()).get());
+    stream.writeUint32Be(etherAppResp->getChunkLength().get<B>());
     stream.writeUint32Be(etherAppResp->getRequestId());
     stream.writeUint32Be(etherAppResp->getNumFrames());
-    int64_t remainders = B(etherAppResp->getChunkLength() - (stream.getLength() - startPosition)).get();
+    int64_t remainders = (etherAppResp->getChunkLength() - (stream.getLength() - startPosition)).get<B>();
     if (remainders < 0)
-        throw cRuntimeError("EtherAppResp length = %d smaller than required %d bytes", (int)B(etherAppResp->getChunkLength()).get(), (int)B(stream.getLength() - startPosition).get());
+        throw cRuntimeError("EtherAppResp length = %d smaller than required %d bytes", (int)etherAppResp->getChunkLength().get<B>(), (int)(stream.getLength() - startPosition).get<B>());
     stream.writeByteRepeatedly('?', remainders);
 }
 
@@ -65,7 +65,7 @@ const Ptr<Chunk> EtherAppRespSerializer::deserialize(MemoryInputStream& stream) 
     etherAppResp->setNumFrames(stream.readUint32Be());
     B remainders = dataLength - (stream.getPosition() - startPosition);
     ASSERT(remainders >= B(0));
-    stream.readByteRepeatedly('?', B(remainders).get());
+    stream.readByteRepeatedly('?', remainders.get<B>());
     return etherAppResp;
 }
 

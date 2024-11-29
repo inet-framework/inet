@@ -37,7 +37,7 @@ def collect_modules(simulation_project, path="src"):
             match = re.match(r"^package ([\w\.]+)", line)
             if match:
                 package = match.group(1)
-                package = re.sub("^\w+?\.", "", package)
+                package = re.sub(r"^\w+?\.", "", package)
             match = re.match(r"^(simple|module|network) (\w+)\b", line)
             if match:
                 module = match.group(2)
@@ -49,8 +49,7 @@ def collect_parameters(simulation_project, path="src"):
     project_path = simulation_project.get_full_path(path)
     parameters = []
     for file_name in glob.glob(project_path + "/**/*.ned", recursive=True):
-        args = ["opp_nedtool", "c", file_name]
-        result = subprocess.run(args, capture_output=True)
+        run_command_with_logging(["opp_nedtool", "c", file_name])
         file = open(file_name + ".xml", encoding="utf-8")
         module = None
         for line in file:
@@ -122,7 +121,7 @@ def collect_classes(simulation_project, path="src"):
             if match:
                 class_name = match.group(1)
                 relative_path = os.path.relpath(os.path.dirname(file_name), project_path)
-                relative_path = re.sub("^(\w+)/", "", relative_path)
+                relative_path = re.sub(r"^(\w+)/", "", relative_path)
                 classes.append(relative_path + "/" + class_name)
         file.close()
     return classes

@@ -52,7 +52,7 @@ void NetworkNodeCanvasVisualizer::refreshDisplay() const
         auto imageFigure = visualization->getImageFigure();
         if (imageFigure != nullptr) {
             auto orientation = getOrientation(networkNode);
-            imageFigure->setTransform(cFigure::Transform().rotate(orientation.toEulerAngles().getAlpha().get()));
+            imageFigure->setTransform(cFigure::Transform().rotate(orientation.toEulerAngles().getAlpha().get<rad>()));
         }
         visualization->refreshDisplay();
     }

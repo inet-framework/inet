@@ -23,7 +23,7 @@ Material::Material(const char *name, Ohmm resistivity, double relativePermittivi
 
 double Material::getDielectricLossTangent(Hz frequency) const
 {
-    return unit(1.0 / (2 * M_PI * frequency * resistivity * relativePermittivity * e0)).get();
+    return (1.0 / (2 * M_PI * frequency * resistivity * relativePermittivity * e0)).get<unit>();
 }
 
 double Material::getRefractiveIndex() const

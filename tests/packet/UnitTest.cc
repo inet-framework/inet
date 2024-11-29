@@ -93,7 +93,7 @@ void ApplicationHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
     const auto& applicationHeader = staticPtrCast<const ApplicationHeader>(chunk);
     auto position = stream.getLength();
     stream.writeUint16Be(applicationHeader->getSomeData());
-    stream.writeByteRepeatedly(0, B(applicationHeader->getChunkLength() - stream.getLength() + position).get());
+    stream.writeByteRepeatedly(0, (applicationHeader->getChunkLength() - stream.getLength() + position).get<B>());
 }
 
 const Ptr<Chunk> ApplicationHeaderSerializer::deserialize(MemoryInputStream& stream) const
@@ -101,7 +101,7 @@ const Ptr<Chunk> ApplicationHeaderSerializer::deserialize(MemoryInputStream& str
     auto applicationHeader = makeShared<ApplicationHeader>();
     auto position = stream.getPosition();
     applicationHeader->setSomeData(stream.readUint16Be());
-    stream.readByteRepeatedly(0, B(applicationHeader->getChunkLength() - stream.getPosition() + position).get());
+    stream.readByteRepeatedly(0, (applicationHeader->getChunkLength() - stream.getPosition() + position).get<B>());
     return applicationHeader;
 }
 
@@ -115,7 +115,7 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     stream.writeUint16Be(tcpHeader->getSrcPort());
     stream.writeUint16Be(tcpHeader->getDestPort());
     stream.writeUint16Be(tcpHeader->getCrc());
-    stream.writeByteRepeatedly(0, B(tcpHeader->getChunkLength() - stream.getLength() + position).get());
+    stream.writeByteRepeatedly(0, (tcpHeader->getChunkLength() - stream.getLength() + position).get<B>());
 }
 
 const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
@@ -128,12 +128,12 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
         tcpHeader->markIncomplete();
     auto length = lengthField < remainingLength ? lengthField : B(remainingLength);
     tcpHeader->setChunkLength(B(length));
-    tcpHeader->setLengthField(B(lengthField).get());
+    tcpHeader->setLengthField(lengthField.get<B>());
     tcpHeader->setSrcPort(stream.readUint16Be());
     tcpHeader->setDestPort(stream.readUint16Be());
     tcpHeader->setCrcMode(CRC_COMPUTED);
     tcpHeader->setCrc(stream.readUint16Be());
-    stream.readByteRepeatedly(0, B(length - stream.getPosition() + position).get());
+    stream.readByteRepeatedly(0, (length - stream.getPosition() + position).get<B>());
     return tcpHeader;
 }
 
@@ -142,7 +142,7 @@ void IpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const C
     const auto& ipHeader = staticPtrCast<const IpHeader>(chunk);
     auto position = stream.getLength();
     stream.writeUint16Be((int16_t)ipHeader->getProtocol());
-    stream.writeByteRepeatedly(0, B(ipHeader->getChunkLength() - stream.getLength() + position).get());
+    stream.writeByteRepeatedly(0, (ipHeader->getChunkLength() - stream.getLength() + position).get<B>());
 }
 
 const Ptr<Chunk> IpHeaderSerializer::deserialize(MemoryInputStream& stream) const
@@ -153,7 +153,7 @@ const Ptr<Chunk> IpHeaderSerializer::deserialize(MemoryInputStream& stream) cons
     if (protocol != Protocol::Tcp && protocol != Protocol::Ip && protocol != Protocol::Ethernet)
         ipHeader->markImproperlyRepresented();
     ipHeader->setProtocol(protocol);
-    stream.readByteRepeatedly(0, B(ipHeader->getChunkLength() - stream.getPosition() + position).get());
+    stream.readByteRepeatedly(0, (ipHeader->getChunkLength() - stream.getPosition() + position).get<B>());
     return ipHeader;
 }
 
@@ -162,7 +162,7 @@ void EthernetHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
     const auto& ethernetHeader = staticPtrCast<const EthernetHeader>(chunk);
     auto position = stream.getLength();
     stream.writeUint16Be((int16_t)ethernetHeader->getProtocol());
-    stream.writeByteRepeatedly(0, B(ethernetHeader->getChunkLength() - stream.getLength() + position).get());
+    stream.writeByteRepeatedly(0, (ethernetHeader->getChunkLength() - stream.getLength() + position).get<B>());
 }
 
 const Ptr<Chunk> EthernetHeaderSerializer::deserialize(MemoryInputStream& stream) const
@@ -170,7 +170,7 @@ const Ptr<Chunk> EthernetHeaderSerializer::deserialize(MemoryInputStream& stream
     auto ethernetHeader = makeShared<EthernetHeader>();
     auto position = stream.getPosition();
     ethernetHeader->setProtocol((Protocol)stream.readUint16Be());
-    stream.readByteRepeatedly(0, B(ethernetHeader->getChunkLength() - stream.getPosition() + position).get());
+    stream.readByteRepeatedly(0, (ethernetHeader->getChunkLength() - stream.getPosition() + position).get<B>());
     return ethernetHeader;
 }
 
@@ -179,7 +179,7 @@ void EthernetTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<
     const auto& ethernetTrailer = staticPtrCast<const EthernetTrailer>(chunk);
     auto position = stream.getLength();
     stream.writeUint16Be(ethernetTrailer->getCrc());
-    stream.writeByteRepeatedly(0, B(ethernetTrailer->getChunkLength() - stream.getLength() + position).get());
+    stream.writeByteRepeatedly(0, (ethernetTrailer->getChunkLength() - stream.getLength() + position).get<B>());
 }
 
 const Ptr<Chunk> EthernetTrailerSerializer::deserialize(MemoryInputStream& stream) const
@@ -187,7 +187,7 @@ const Ptr<Chunk> EthernetTrailerSerializer::deserialize(MemoryInputStream& strea
     auto ethernetTrailer = makeShared<EthernetTrailer>();
     auto position = stream.getPosition();
     ethernetTrailer->setCrc(stream.readUint16Be());
-    stream.readByteRepeatedly(0, B(ethernetTrailer->getChunkLength() - stream.getPosition() + position).get());
+    stream.readByteRepeatedly(0, (ethernetTrailer->getChunkLength() - stream.getPosition() + position).get<B>());
     return ethernetTrailer;
 }
 
@@ -223,7 +223,7 @@ void TlvHeaderBoolSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
 {
     const auto& tlvHeader = staticPtrCast<const TlvHeaderBool>(chunk);
     stream.writeUint8(tlvHeader->getType());
-    stream.writeUint8(B(tlvHeader->getChunkLength()).get());
+    stream.writeUint8(tlvHeader->getChunkLength().get<B>());
     stream.writeUint8(tlvHeader->getBoolValue());
 }
 
@@ -242,7 +242,7 @@ void TlvHeaderIntSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
 {
     const auto& tlvHeader = staticPtrCast<const TlvHeaderInt>(chunk);
     stream.writeUint8(tlvHeader->getType());
-    stream.writeUint8(B(tlvHeader->getChunkLength()).get());
+    stream.writeUint8(tlvHeader->getChunkLength().get<B>());
     stream.writeUint16Be(tlvHeader->getInt16Value());
 }
 
@@ -1433,7 +1433,7 @@ static void testChunkBuffer(cRNG *rng)
     memset(buffer10, -1, bufferSize.get() * sizeof(int));
     for (int c = 0; c < 1000; c++) {
         // replace data
-        B chunkOffset = B(rng->intRand((bufferSize - maxChunkLength).get()));
+        B chunkOffset = B(rng->intRand((bufferSize - maxChunkLength).get<B>()));
         B chunkLength = B(rng->intRand(maxChunkLength.get()) + 1);
         auto chunk = makeShared<BytesChunk>();
         std::vector<uint8_t> bytes;
@@ -1448,7 +1448,7 @@ static void testChunkBuffer(cRNG *rng)
             *(buffer10 + chunkOffset.get() + i.get()) = i.get() & 0xFF;
 
         // clear data
-        chunkOffset = B(rng->intRand((bufferSize - maxChunkLength).get()));
+        chunkOffset = B(rng->intRand((bufferSize - maxChunkLength).get<B>()));
         chunkLength = B(rng->intRand(maxChunkLength.get()) + 1);
         buffer9.clear(B(chunkOffset), chunkLength);
         for (B i = B(0); i < chunkLength; i++)

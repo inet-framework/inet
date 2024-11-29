@@ -18,13 +18,13 @@ void GenericAppMsgSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
 {
     auto startPosition = stream.getLength();
     const auto& msg = staticPtrCast<const GenericAppMsg>(chunk);
-    stream.writeUint32Be(B(msg->getChunkLength()).get());
-    stream.writeUint32Be(B(msg->getExpectedReplyLength()).get());
+    stream.writeUint32Be(msg->getChunkLength().get<B>());
+    stream.writeUint32Be(msg->getExpectedReplyLength().get<B>());
     stream.writeUint64Be(SimTime(msg->getReplyDelay()).raw());
     stream.writeByte(msg->getServerClose());
-    int64_t remainders = B(msg->getChunkLength() - (stream.getLength() - startPosition)).get();
+    int64_t remainders = (msg->getChunkLength() - (stream.getLength() - startPosition)).get<B>();
     if (remainders < 0)
-        throw cRuntimeError("GenericAppMsg length = %d smaller than required %d bytes", (int)B(msg->getChunkLength()).get(), (int)B(stream.getLength() - startPosition).get());
+        throw cRuntimeError("GenericAppMsg length = %d smaller than required %d bytes", (int)msg->getChunkLength().get<B>(), (int)(stream.getLength() - startPosition).get<B>());
     stream.writeByteRepeatedly('?', remainders);
 }
 

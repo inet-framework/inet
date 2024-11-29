@@ -46,7 +46,7 @@ std::ostream& FreeSpacePathLoss::printToStream(std::ostream& stream, int level, 
 double FreeSpacePathLoss::computeFreeSpacePathLoss(m waveLength, m distance, double alpha, double systemLoss) const
 {
     // factor = waveLength ^ 2 / (16 * PI ^ 2 * systemLoss * distance ^ alpha)
-    return distance.get() == 0.0 ? 1.0 : (waveLength * waveLength).get() / (16 * M_PI * M_PI * systemLoss * pow(distance.get(), alpha));
+    return distance.get() == 0.0 ? 1.0 : (waveLength * waveLength).get() / (16 * M_PI * M_PI * systemLoss * pow(distance.get<m>(), alpha));
 }
 
 double FreeSpacePathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const

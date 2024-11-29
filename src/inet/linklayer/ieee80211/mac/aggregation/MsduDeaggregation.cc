@@ -53,7 +53,7 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         aggregatedFrame->setFrontOffset(aggregatedFrame->getFrontOffset() + B(paddingLength == 4 ? 0 : paddingLength));
         const auto& msduSubframeHeader = aggregatedFrame->popAtFront<Ieee80211MsduSubframeHeader>();
         const auto& msdu = aggregatedFrame->peekDataAt(b(0), B(msduSubframeHeader->getLength()));
-        paddingLength = 4 - B(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
+        paddingLength = 4 - (msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get<B>() % 4;
         aggregatedFrame->setFrontOffset(aggregatedFrame->getFrontOffset() + msdu->getChunkLength());
         auto frame = new Packet();
         frame->setName(tokenizer.nextToken());

@@ -110,7 +110,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
         while (queue.has<GenericAppMsg>(b(-1))) {
             const auto& appmsg = queue.pop<GenericAppMsg>(b(-1));
             msgsRcvd++;
-            bytesRcvd += B(appmsg->getChunkLength()).get();
+            bytesRcvd += appmsg->getChunkLength().get<B>();
             B requestedBytes = appmsg->getExpectedReplyLength();
             simtime_t msgDelay = appmsg->getReplyDelay();
             if (msgDelay > maxMsgDelay)
@@ -152,6 +152,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
             int connId = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
             sendOrScheduleReadCommandIfNeeded(connId);
         }
+        delete msg;
     }
     else {
         // some indication -- ignore

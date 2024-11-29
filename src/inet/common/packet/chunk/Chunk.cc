@@ -62,12 +62,12 @@ void Chunk::handleChange()
 
 int Chunk::getBinDumpNumLines() const
 {
-    return (b(getChunkLength()).get() + 31) / 32;
+    return (getChunkLength().get<b>() + 31) / 32;
 }
 
 int Chunk::getHexDumpNumLines() const
 {
-    return ((b(getChunkLength()).get() + 7) / 8 + 15) / 16;
+    return ((getChunkLength().get<b>() + 7) / 8 + 15) / 16;
 }
 
 std::string Chunk::getBinDumpLine(int index)
@@ -75,7 +75,7 @@ std::string Chunk::getBinDumpLine(int index)
     try {
         std::string result;
         int offset = index * 32;
-        int length = std::min(32, (int)b(getChunkLength()).get() - offset);
+        int length = std::min(32, (int)getChunkLength().get<b>() - offset);
         MemoryOutputStream outputStream;
         serialize(outputStream, shared_from_this(), b(offset), b(length));
         std::vector<bool> bits;
@@ -97,7 +97,7 @@ std::string Chunk::getHexDumpLine(int index)
     try {
         std::string result;
         int offset = index * 8 * 16;
-        int length = std::min(8 * 16, (int)b(getChunkLength()).get() - offset);
+        int length = std::min(8 * 16, (int)getChunkLength().get<b>() - offset);
         MemoryOutputStream outputStream;
         serialize(outputStream, shared_from_this(), b(offset), b(length));
         ASSERT(outputStream.getLength() == b(length));

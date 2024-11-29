@@ -54,7 +54,7 @@ class StatisticalTestTask(SimulationTestTask):
         stored_scalar_result_file_name = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory, self.get_scalar_file_name()))
         _logger.debug(f"Reading result file {current_scalar_result_file_name}")
         current_df = _read_scalar_result_file(current_scalar_result_file_name)
-        scalar_result_diff_file_name = re.sub(".sca$", ".diff", stored_scalar_result_file_name)
+        scalar_result_diff_file_name = re.sub(r".sca$", ".diff", stored_scalar_result_file_name)
         if os.path.exists(scalar_result_diff_file_name):
             os.remove(scalar_result_diff_file_name)
         if os.path.exists(stored_scalar_result_file_name):
@@ -77,14 +77,14 @@ class StatisticalTestTask(SimulationTestTask):
                     df = df[df.apply(lambda row: matches_filter(row["name"], result_name_filter, exclude_result_name_filter, full_match) and \
                                                  matches_filter(row["module"], result_module_filter, exclude_result_module_filter, full_match), axis=1)]
                     sorted_df = df.sort_values(by="relative_error", ascending=False)
-                    scalar_result_csv_file_name = re.sub(".sca$", ".csv", stored_scalar_result_file_name)
+                    scalar_result_csv_file_name = re.sub(r".sca$", ".csv", stored_scalar_result_file_name)
                     sorted_df.to_csv(scalar_result_csv_file_name, float_format="%.15g")
                     id = df["relative_error"].idxmax()
                     if math.isnan(id):
                         id = next(iter(df.index), None)
                     reason = df.loc[id].to_string()
-                    reason = re.sub(" +", " = ", reason)
-                    reason = re.sub("\\n", ", ", reason)
+                    reason = re.sub(r" +", " = ", reason)
+                    reason = re.sub(r"\n", ", ", reason)
                     return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="FAIL", reason=reason)
             else:
                 return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="PASS")
@@ -121,7 +121,7 @@ def run_statistical_tests(**kwargs):
         an object that contains a list of :py:class:`SimulationTestTaskResult` objects. Each object describes the result of running one test task.
     """
     multiple_statistical_test_tasks = get_statistical_test_tasks(**kwargs)
-    return multiple_statistical_test_tasks.run(extra_args=["--**.param-recording=false", "--**.vector-recording=false", "--output-scalar-file=${resultdir}/${inifile}-${configname}-#${repetition}.sca"], **kwargs)
+    return multiple_statistical_test_tasks.run(append_args=["--**.param-recording=false", "--**.vector-recording=false", "--output-scalar-file=${resultdir}/${inifile}-${configname}-#${repetition}.sca"], **kwargs)
 
 class StatisticalResultsUpdateTask(SimulationUpdateTask):
     def __init__(self, simulation_config=None, run_number=0, name="statistical results update", **kwargs):
@@ -154,7 +154,7 @@ class StatisticalResultsUpdateTask(SimulationUpdateTask):
         stored_scalar_result_file_name = simulation_project.get_full_path(os.path.join(simulation_project.statistics_folder, working_directory, self.get_scalar_file_name()))
         _logger.debug(f"Reading result file {current_scalar_result_file_name}")
         current_df = _read_scalar_result_file(current_scalar_result_file_name)
-        scalar_result_diff_file_name = re.sub(".sca$", ".diff", stored_scalar_result_file_name)
+        scalar_result_diff_file_name = re.sub(r".sca$", ".diff", stored_scalar_result_file_name)
         if os.path.exists(scalar_result_diff_file_name):
             os.remove(scalar_result_diff_file_name)
         if not os.path.exists(stored_scalar_result_file_name):
@@ -195,4 +195,4 @@ def update_statistical_results(sim_time_limit=get_statistical_test_sim_time_limi
         an object that contains a list of :py:class:`UpdateTaskResult` objects. Each object describes the result of running one update task.
     """
     multiple_update_statistical_result_tasks = get_update_statistical_result_tasks(sim_time_limit=sim_time_limit, **kwargs)
-    return multiple_update_statistical_result_tasks.run(sim_time_limit=sim_time_limit, extra_args=["--**.param-recording=false", "--**.vector-recording=false", "--output-scalar-file=${resultdir}/${inifile}-${configname}-#${repetition}.sca"], **kwargs)
+    return multiple_update_statistical_result_tasks.run(sim_time_limit=sim_time_limit, append_args=["--**.param-recording=false", "--**.vector-recording=false", "--output-scalar-file=${resultdir}/${inifile}-${configname}-#${repetition}.sca"], **kwargs)

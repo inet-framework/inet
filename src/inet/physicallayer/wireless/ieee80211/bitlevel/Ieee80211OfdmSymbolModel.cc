@@ -11,22 +11,6 @@ namespace inet {
 
 namespace physicallayer {
 
-Ieee80211OfdmTransmissionSymbolModel::~Ieee80211OfdmTransmissionSymbolModel()
-{
-    if (symbols) {
-        for (auto it : *symbols)
-            delete it;
-    }
-}
-
-Ieee80211OfdmReceptionSymbolModel::~Ieee80211OfdmReceptionSymbolModel()
-{
-    if (symbols) {
-        for (auto it : *symbols)
-            delete it;
-    }
-}
-
 Ieee80211OfdmTransmissionSymbolModel::Ieee80211OfdmTransmissionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols, const IModulation *headerModulation, const IModulation *payloadModulation) :
     TransmissionSymbolModel(headerSymbolLength, headerSymbolRate, payloadSymbolLength, payloadSymbolRate, symbols, headerModulation, payloadModulation)
 {

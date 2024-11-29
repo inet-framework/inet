@@ -52,7 +52,7 @@ double ParabolicAntenna::AntennaGain::computeGain(const Quaternion& direction) c
     ASSERT(deg(0) <= alpha && alpha <= deg(360));
     if (alpha > deg(180))
         alpha = deg(360) - alpha;
-    return math::maxnan(minGain, maxGain * math::dB2fraction(-12 * pow(unit(alpha / beamWidth).get(), 2)));
+    return math::maxnan(minGain, maxGain * math::dB2fraction(-12 * pow((alpha / beamWidth).get<unit>(), 2)));
 }
 
 } // namespace physicallayer

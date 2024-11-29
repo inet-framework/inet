@@ -1,0 +1,222 @@
+digraph EthernetPlcaDataFsm {
+    nodesep = 1;
+    ranksep = 1;
+
+    graph [
+		label = "EthernetPlcaCtrl"
+		labelloc = t
+		fontname = "Helvetica,Arial,sans-serif"
+		fontsize = 20
+		layout = dot
+		newrank = true
+    ];
+    node [
+		style=filled
+		shape=rect
+		pencolor="#00000044" // frames color
+		fontname="Helvetica,Arial,sans-serif"
+		shape=plain
+    ];
+    edge [fontname="Arial"];
+
+    Global1 [ shape=circle ]
+    Global1 -> NORMAL [label="plca_reset || \n (!plca_en) || \n (plca_status != OK)"]; 
+
+    NORMAL [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                NORMAL
+            </td></tr><tr><td align="left" balign="left">
+                packetPending := FALSE <br/>
+                IF CRS THEN <br/>
+                .   CARRIER_STATUS := CARRIER_ON <br/>
+                ELSE <br/>
+                .   CARRIER_STATUS := CARRIER_OFF <br/>
+                END <br/>
+                TXD := plca_txd <br/>
+                TX_EN := plca_txen <br/>
+                TX_ER := plca_txer <br/>
+                IF COL THEN <br/>
+                .   SIGNAL_STATUS := SIGNAL_ERROR <br/>
+                ELSE <br/>
+                .   SIGNAL_STATUS := NO_SIGNAL_ERROR <br/>
+                END
+            </td></tr></table>>
+    ];
+    NORMAL -> IDLE [ label="plca_en && \n (!plca_reset) && \n (plca_status = OK)" ]
+    NORMAL -> NORMAL [ label="ELSE" ]
+
+    WAIT_IDLE [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                WAIT_IDLE
+            </td></tr><tr><td align="left" balign="left">
+                packetPending := FALSE <br/>
+                CARRIER_STATUS := CARRIER_OFF <br/>
+                SIGNAL_STATUS := NO_SIGNAL_ERROR <br/>
+                TXD := ENCODE_TXD(tx_cmd_sync) <br/>
+                TX_EN := FALSE <br/>
+                TX_ER := ENCODE_TXER(tx_cmd_sync) <br/>
+                a := 0 <br/>
+                b := 0
+            </td></tr></table>>
+    ];
+    WAIT_IDLE -> IDLE [ label="MCD && \n (!CRS)" ]
+    WAIT_IDLE -> TRANSMIT [ label="MCD && \n CRS && \n plca_txen" ]
+    WAIT_IDLE -> WAIT_IDLE [ label="ELSE" ]
+
+    IDLE [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                IDLE
+            </td></tr><tr><td align="left" balign="left">
+                packetPending := FALSE <br/>
+                CARRIER_STATUS := CARRIER_OFF <br/>
+                SIGNAL_STATUS := NO_SIGNAL_ERROR <br/>
+                TXD := ENCODE_TXD(tx_cmd_sync) <br/>
+                TX_EN := FALSE <br/>
+                TX_ER := ENCODE_TXER(tx_cmd_sync) <br/>
+                a := 0 <br/>
+                b := 0
+            </td></tr></table>>
+    ];
+    IDLE -> RECEIVE [ label="receiving && \n (!plca_txen) && \n (tx_cmd = NONE)" ]
+    IDLE -> HOLD [ label="plca_txen" ]
+    IDLE -> IDLE [ label="ELSE" ]
+
+    RECEIVE [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                RECEIVE</td></tr>
+            <tr><td align="left" balign="left">
+                IF CRS &amp;&amp; (rx_cmd != COMMIT) THEN <br/>
+                .   CARRIER_STATUS := CARRIER_ON <br/>
+                ELSE <br/>
+                .   CARRIER_STATUS := CARRIER_OFF <br/>
+                END <br/>
+                TXD := ENCODE_TXD(tx_cmd_sync) <br/>
+                TX_ER := ENCODE_TXER(tx_cmd_sync)
+            </td></tr></table>>
+    ];
+    RECEIVE -> IDLE [ label="(!receiving) && \n (!plca_txen)" ]
+    RECEIVE -> COLLIDE [ label="plca_txen" ]
+    RECEIVE -> RECEIVE [ label="ELSE" ]
+
+    HOLD [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                HOLD
+            </td></tr><tr><td align="left" balign="left">
+                packetPending := TRUE <br/>
+                CARRIER_STATUS := CARRIER_ON <br/>
+                a := a + 1 <br/>
+                TX_ER := ENCODE_TXER(tx_cmd_sync) <br/>
+                TXD := ENCODE_TXD(tx_cmd_sync)
+            </td></tr></table>>
+    ];
+    HOLD -> HOLD [ label="MCD && \n (!committed) && \n (!plca_txer) && \n (!receiving) && \n (a < delay_line_length)" ]
+    HOLD -> COLLIDE [ label="(!plca_txer) && \n (receiving || \n (a >= delay_line_length))" ]
+    HOLD -> TRANSMIT [ label="MCD && \n committed && \n (!receiving) && \n (!plca_txer) && \n (a < delay_line_length)" ]
+    HOLD -> ABORT [ label="MCD && \n plca_txer" ]
+
+    ABORT [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                ABORT
+            </td></tr><tr><td align="left" balign="left">
+                packetPending := FALSE <br/>
+                TX_ER := ENCODE_TXER(tx_cmd_sync) <br/>
+                TXD := ENCODE_TXD(tx_cmd_sync)
+            </td></tr></table>>
+    ];
+    ABORT -> IDLE [ label="!plca_txen" ]
+    ABORT -> ABORT [ label="ELSE" ]
+
+    COLLIDE [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                COLLIDE
+            </td></tr><tr><td align="left" balign="left">
+                packetPending := FALSE <br/>
+                CARRIER_STATUS := CARRIER_ON <br/>
+                SIGNAL_STATUS := SIGNAL_ERROR <br/>
+                a := 0 <br/>
+                b := 0 <br/>
+                TXD := ENCODE_TXD(tx_cmd_sync) <br/>
+                TX_ER := ENCODE_TXER(tx_cmd_sync) <br/>
+                start pending_timer
+            </td></tr></table>>
+    ];
+    COLLIDE -> DELAY_PENDING [ label="!plca_txen" ]
+    COLLIDE -> COLLIDE [ label="ELSE" ]
+
+    DELAY_PENDING [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                DELAY_PENDING
+            </td></tr><tr><td align="left" balign="left">
+                SIGNAL_STATUS := NO_SIGNAL_ERROR <br/>
+                TXD := ENCODE_TXD(tx_cmd_sync) <br/>
+                TX_ER := ENCODE_TXER(tx_cmd_sync)
+            </td></tr></table>>
+    ];
+    DELAY_PENDING -> PENDING [ label="pending_timer_done" ]
+    DELAY_PENDING -> DELAY_PENDING [ label="ELSE" ]
+
+    PENDING [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                PENDING
+            </td></tr><tr><td align="left" balign="left">
+                packetPending := TRUE <br/>
+                start commit_timer <br/>
+                TXD := ENCODE_TXD(tx_cmd_sync) <br/>
+                TX_ER := ENCODE_TXER(tx_cmd_sync)
+            </td></tr></table>>
+    ];
+    PENDING -> WAIT_MAC [ label="committed" ]
+    PENDING -> PENDING [ label="ELSE" ]
+
+    WAIT_MAC [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                WAIT_MAC
+            </td></tr><tr><td align="left" balign="left">
+                CARRIER_STATUS := CARRIER_OFF <br/>
+                TXD := ENCODE_TXD(tx_cmd_sync) <br/>
+                TX_ER := ENCODE_TXER(tx_cmd_sync)
+            </td></tr></table>>
+    ];
+    WAIT_MAC -> TRANSMIT [ label="MCD && \n plca_txen" ]
+    WAIT_MAC -> WAIT_IDLE [ label="(!plca_txen) && \n commit_timer_done" ]
+    WAIT_MAC -> WAIT_MAC [ label="ELSE" ]
+
+    TRANSMIT [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                TRANSMIT
+            </td></tr><tr><td align="left" balign="left">
+                packetPending := FALSE <br/>
+                CARRIER_STATUS := CARRIER_ON <br/>
+                TXD := plca_txdn–a TX_EN := TRUE <br/>
+                TX_ER := plca_txer <br/>
+                IF COL THEN <br/>
+                .   SIGNAL_STATUS := SIGNAL_ERROR <br/>
+                .   a := 0 <br/>
+                ELSE <br/>
+                .   SIGNAL_STATUS := NO_SIGNAL_ERROR <br/>
+                END
+            </td></tr></table>>
+    ];
+    TRANSMIT -> TRANSMIT [ label="MCD && \n plca_txen" ]
+    TRANSMIT -> FLUSH [ label="MCD && \n (!plca_txen) && \n (a > 0)" ]
+    TRANSMIT -> WAIT_IDLE [ label="MCD && \n (!plca_txen) && \n (a = 0)" ]
+
+    FLUSH [
+        label=<<table border="0" cellborder="1" cellspacing="0"><tr><td>
+                FLUSH
+            </td></tr><tr><td align="left" balign="left">
+                CARRIER_STATUS := CARRIER_ON <br/>
+                TXD := plca_txdn–a TX_EN := TRUE <br/>
+                TX_ER := plca_txer <br/>
+                b := b + 1 <br/>
+                IF COL THEN <br/>
+                .   SIGNAL_STATUS := SIGNAL_ERROR <br/>
+                ELSE <br/>
+                .   SIGNAL_STATUS := NO_SIGNAL_ERROR <br/>
+                END
+            </td></tr></table>>
+    ];
+    FLUSH -> FLUSH [ label="MCD && \n (a != b)" ]
+    FLUSH -> WAIT_IDLE [ label="MCD && \n (b = a)" ]
+}
+

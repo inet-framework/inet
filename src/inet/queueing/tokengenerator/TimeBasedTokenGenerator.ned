@@ -8,11 +8,12 @@
 package inet.queueing.tokengenerator;
 
 import inet.queueing.base.TokenGeneratorBase;
+import inet.queueing.contract.ITokenGenerator;
 
 //
 // This module generates tokens for a ~TokenBasedServer repeatedly.
 //
-simple TimeBasedTokenGenerator extends TokenGeneratorBase
+simple TimeBasedTokenGenerator extends TokenGeneratorBase like ITokenGenerator
 {
     parameters:
         string clockModule = default(""); // Relative path of a module that implements IClock; optional

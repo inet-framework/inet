@@ -98,6 +98,10 @@ void EthernetMacBase::initialize(int stage)
         WATCH(promiscuous);
         WATCH(pauseUnitsRequested);
     }
+    else if (stage == INITSTAGE_LINK_LAYER) {
+        emit(transmissionStateChangedSignal, transmitState);
+        emit(receptionStateChangedSignal, receiveState);
+    }
 }
 
 void EthernetMacBase::initializeFlags()
@@ -239,8 +243,10 @@ void EthernetMacBase::processConnectDisconnect()
                 emit(transmissionEndedSignal, curTxSignal);
                 send(curTxSignal, SendOptions().finishTx(curTxSignal->getId()), physOutGate);
             }
-            else
+            else {
+                emit(transmissionEndedSignal, curTxSignal);
                 delete curTxSignal;
+            }
             curTxSignal = nullptr;
             cancelEvent(endTxTimer);
         }
@@ -282,11 +288,10 @@ void EthernetMacBase::encapsulate(Packet *frame)
 void EthernetMacBase::decapsulate(Packet *packet)
 {
     auto phyHeader = packet->popAtFront<EthernetPhyHeader>();
-    ASSERT(packet->getDataLength() >= MIN_ETHERNET_FRAME_BYTES);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 }
 
-// FIXME should use it in EthernetCsmaMac, EthernetMac, etc. modules. But should not use it in EtherBus, EthernetHub.
+// FIXME should use it in EthernetCsmaMacPhy, EthernetMacPhy, etc. modules. But should not use it in EtherBus, EthernetHub.
 bool EthernetMacBase::verifyCrcAndLength(Packet *packet)
 {
     EV_STATICCONTEXT;
@@ -304,7 +309,7 @@ bool EthernetMacBase::verifyCrcAndLength(Packet *packet)
             bool isFcsBad = false;
             // check the FCS
             auto ethBytes = packet->peekDataAt<BytesChunk>(B(0), packet->getDataLength() - ethTrailer->getChunkLength());
-            auto bufferLength = B(ethBytes->getChunkLength()).get();
+            auto bufferLength = ethBytes->getChunkLength().get<B>();
             auto buffer = new uint8_t[bufferLength];
             // 1. fill in the data
             ethBytes->copyToBuffer(buffer, bufferLength);
@@ -531,14 +536,18 @@ void EthernetMacBase::refreshDisplay() const
 
 void EthernetMacBase::changeTransmissionState(MacTransmitState newState)
 {
-    transmitState = newState;
-    emit(transmissionStateChangedSignal, newState);
+    if (transmitState != newState) {
+        transmitState = newState;
+        emit(transmissionStateChangedSignal, newState);
+    }
 }
 
 void EthernetMacBase::changeReceptionState(MacReceiveState newState)
 {
-    receiveState = newState;
-    emit(receptionStateChangedSignal, newState);
+    if (receiveState != newState) {
+        receiveState = newState;
+        emit(receptionStateChangedSignal, newState);
+    }
 }
 
 void EthernetMacBase::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) const
@@ -562,7 +571,7 @@ void EthernetMacBase::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) co
             break;
         case FCS_COMPUTED: { // calculate FCS
             auto ethBytes = packet->peekDataAsBytes();
-            auto bufferLength = B(ethBytes->getChunkLength()).get();
+            auto bufferLength = ethBytes->getChunkLength().get<B>();
             auto buffer = new uint8_t[bufferLength];
             // 1. fill in the data
             ethBytes->copyToBuffer(buffer, bufferLength);

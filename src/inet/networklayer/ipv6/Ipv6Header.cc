@@ -36,7 +36,7 @@ const Ipv6ExtensionHeader *Ipv6Header::findExtensionHeaderByType(IpProtocolId ex
 
 void Ipv6Header::addExtensionHeader(Ipv6ExtensionHeader *eh)
 {
-    ASSERT((eh->getByteLength() >= B(1)) && (eh->getByteLength().get() % 8 == 0));
+    ASSERT((eh->getByteLength() >= B(1)) && (eh->getByteLength().get<B>() % 8 == 0));
     int thisOrder = eh->getOrder();
     size_t i;
     for (i = 0; i < extensionHeader_arraysize; i++) {

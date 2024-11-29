@@ -22,7 +22,7 @@ void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ipv4Heade
     B headerLength = ipv4Header.getHeaderLength();
     ASSERT((headerLength.get() & 3) == 0 && headerLength >= IPv4_MIN_HEADER_LENGTH && headerLength <= IPv4_MAX_HEADER_LENGTH);
     ASSERT(headerLength <= ipv4Header.getTotalLengthField());
-    iphdr.ip_hl = B(headerLength).get() >> 2;
+    iphdr.ip_hl = headerLength.get<B>() >> 2;
     iphdr.ip_v = ipv4Header.getVersion();
     iphdr.ip_tos = ipv4Header.getTypeOfService();
     iphdr.ip_id = htons(ipv4Header.getIdentification());
@@ -39,7 +39,7 @@ void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ipv4Heade
     iphdr.ip_p = ipv4Header.getProtocolId();
     iphdr.ip_src.s_addr = htonl(ipv4Header.getSrcAddress().getInt());
     iphdr.ip_dst.s_addr = htonl(ipv4Header.getDestAddress().getInt());
-    iphdr.ip_len = htons(B(ipv4Header.getTotalLengthField()).get());
+    iphdr.ip_len = htons(ipv4Header.getTotalLengthField().get<B>());
     if (ipv4Header.getCrcMode() != CRC_COMPUTED)
         throw cRuntimeError("Cannot serialize Ipv4 header without a properly computed CRC");
     iphdr.ip_sum = htons(ipv4Header.getCrc());
@@ -59,7 +59,7 @@ void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ipv4Heade
             throw cRuntimeError("Serializing an Ipv4 packet with wrong headerLength value: not enough for store options.\n");
         auto writtenLength = B(stream.getLength() - startPosition);
         if (writtenLength < headerLength)
-            stream.writeByteRepeatedly(IPOPTION_END_OF_OPTIONS, B(headerLength - writtenLength).get());
+            stream.writeByteRepeatedly(IPOPTION_END_OF_OPTIONS, (headerLength - writtenLength).get<B>());
     }
 }
 
@@ -152,10 +152,10 @@ const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
 {
     auto position = stream.getPosition();
     B bufsize = stream.getRemainingLength();
-    uint8_t buffer[B(IPv4_MIN_HEADER_LENGTH).get()];
+    uint8_t *buffer = new uint8_t[IPv4_MIN_HEADER_LENGTH.get<B>()];
     stream.readBytes(buffer, IPv4_MIN_HEADER_LENGTH);
     auto ipv4Header = makeShared<Ipv4Header>();
-    const struct ip& iphdr = *static_cast<const struct ip *>((void *)&buffer);
+    const struct ip& iphdr = *static_cast<const struct ip *>((void *)buffer);
     B totalLength, headerLength;
 
     ipv4Header->setVersion(iphdr.ip_v);
@@ -198,7 +198,7 @@ const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
 
     ipv4Header->setCrc(ntohs(iphdr.ip_sum));
     ipv4Header->setCrcMode(CRC_COMPUTED);
-
+    delete [] buffer;
     return ipv4Header;
 }
 

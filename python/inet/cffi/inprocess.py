@@ -51,7 +51,7 @@ class InprocessSimulationRunner:
     def teardown(self):
         CodeFragments.executeAll(CodeFragments.SHUTDOWN)
 
-    def run(self, simulation_task, args, capture_output=True):
+    def run(self, simulation_task, args):
         old_working_directory = os.getcwd()
         simulation_config = simulation_task.simulation_config
         simulation_project = simulation_config.simulation_project

@@ -55,8 +55,9 @@ std::ostream& Signal::printToStream(std::ostream& stream, int level, int evFlags
     if (level <= PRINT_LEVEL_DETAIL)
         stream << EV_FAINT << "(" << className << ")" << EV_NORMAL;
     stream << EV_ITALIC << getName() << EV_NORMAL << " (" << simsec(getDuration()) << " " << b(getBitLength()) << ")";
-    auto packet = check_and_cast<Packet *>(getEncapsulatedPacket());
-    packet->printToStream(stream, level + 1, evFlags);
+    auto packet = check_and_cast_nullable<Packet *>(getEncapsulatedPacket());
+    if (packet != nullptr)
+        packet->printToStream(stream, level + 1, evFlags);
     return stream;
 }
 

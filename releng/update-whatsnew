@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+
+import subprocess
+import argparse
+import datetime
+import os
+import llm
+from pathlib import Path
+
+def get_commit_history(from_tag: str, to_tag: str) -> str:
+    """Get git commit history between two tags."""
+    cmd = ['git', 'log', '--no-merges', '--pretty=format:%s%n%b', f'{from_tag}..{to_tag}']
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        raise RuntimeError(f"Failed to get git history: {result.stderr}")
+    return result.stdout
+
+def generate_announcement(commit_history: str, from_tag: str, to_tag: str) -> str:
+    """Generate release announcement using OpenAI."""
+    system_prompt = """You are a technical writer helping to create an entry about the new release into the WHATSNEW file.
+    Based on the provided git commit messages, create a concise summary of the main changes.
+    Focus on new features, improvements, and important fixes.
+    Do not include test, fingerprint test, change log, packaging and python related changes.
+    Format the output in markdown. Keep it brief but informative. Leave out greeting, etc.
+    The format is:
+    One or two paragraphs of summary, followed by a bullet list of changes.
+    If there are many changes, split the list into multiple bullet lists.
+"""
+    
+    user_prompt = f"""Create a release announcement for version {to_tag} based on these commit messages:
+
+{commit_history}
+
+Previous version was {from_tag}."""
+
+    model = llm.get_model("gpt-4o")
+    response = model.prompt(system_prompt + "\n" + user_prompt)
+    return str(response)
+
+def update_whatsnew(announcement: str, version: str):
+    """Update WHATSNEW file with the new announcement at the top."""
+    whatsnew_path = Path("WHATSNEW")
+        
+    # Read existing content and prepend new announcement
+    date = datetime.datetime.now().strftime("%B %Y")
+    header = f"INET-{version} ({date}) - Stable"
+    underline = "-" * len(header)
+    lines = whatsnew_path.read_text().splitlines()
+    lines[3:3] = [header, underline, ""] + announcement.strip().splitlines() + [""]
+    whatsnew_path.write_text('\n'.join(lines) + '\n')
+
+def main():
+    parser = argparse.ArgumentParser(description='Generate release announcement from git history')
+    parser.add_argument('from_tag', help='Starting tag')
+    parser.add_argument('to_tag', help='Ending tag')
+    args = parser.parse_args()
+
+    try:
+        commit_history = get_commit_history(args.from_tag, args.to_tag)
+        announcement = generate_announcement(commit_history, args.from_tag, args.to_tag)
+        update_whatsnew(announcement, args.to_tag[1:])
+        print("Successfully updated WHATSNEW file with new release announcement")
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        exit(1)
+
+if __name__ == "__main__":
+    main()

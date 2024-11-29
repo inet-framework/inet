@@ -8,6 +8,7 @@
 #include "inet/queueing/base/PacketFlowBase.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Message.h"
 
 namespace inet {
 namespace queueing {
@@ -31,10 +32,14 @@ void PacketFlowBase::initialize(int stage)
     }
 }
 
-void PacketFlowBase::handleMessage(cMessage *message)
+void PacketFlowBase::handleMessage(cMessage *msg)
 {
-    auto packet = check_and_cast<Packet *>(message);
-    pushPacket(packet, packet->getArrivalGate());
+    if (auto packet = dynamic_cast<Packet *>(msg))
+        pushPacket(packet, packet->getArrivalGate());
+    else if (auto message = dynamic_cast<Message *>(msg))
+        send(message, "out");
+    else
+        throw cRuntimeError("Unknown message");
 }
 
 void PacketFlowBase::checkPacketStreaming(Packet *packet)

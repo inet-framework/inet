@@ -532,9 +532,9 @@ void RadioMedium::sendToAffectedRadios(IRadio *radio, const IWirelessSignal *tra
     if (neighborCache && rangeFilter != RANGE_FILTER_ANYWHERE) {
         double range;
         if (rangeFilter == RANGE_FILTER_COMMUNICATION_RANGE)
-            range = mediumLimitCache->getMaxCommunicationRange(radio).get();
+            range = mediumLimitCache->getMaxCommunicationRange(radio).get<m>();
         else if (rangeFilter == RANGE_FILTER_INTERFERENCE_RANGE)
-            range = mediumLimitCache->getMaxInterferenceRange(radio).get();
+            range = mediumLimitCache->getMaxInterferenceRange(radio).get<m>();
         else
             throw cRuntimeError("Unknown range filter %d", rangeFilter);
         if (std::isnan(range)) {

@@ -28,8 +28,8 @@ void GroupEligibilityTimeMeter::meterPacket(Packet *packet)
 {
     emitNumTokenChangedSignal(packet);
     clocktime_t arrivalTime = getClockTime();
-    clocktime_t lengthRecoveryDuration = s((packet->getDataLength() + packetOverheadLength) / committedInformationRate).get();
-    clocktime_t emptyToFullDuration = s(committedBurstSize / committedInformationRate).get();
+    clocktime_t lengthRecoveryDuration = ((packet->getDataLength() + packetOverheadLength) / committedInformationRate).get<s>();
+    clocktime_t emptyToFullDuration = (committedBurstSize / committedInformationRate).get<s>();
     clocktime_t schedulerEligibilityTime = bucketEmptyTime + lengthRecoveryDuration;
     clocktime_t bucketFullTime = bucketEmptyTime + emptyToFullDuration;
     clocktime_t eligibilityTime;

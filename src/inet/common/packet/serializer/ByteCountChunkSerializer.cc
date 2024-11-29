@@ -18,7 +18,7 @@ void ByteCountChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
 {
     const auto& byteCountChunk = staticPtrCast<const ByteCountChunk>(chunk);
     b serializedLength = length == b(-1) ? byteCountChunk->getChunkLength() - offset : length;
-    stream.writeByteRepeatedly(byteCountChunk->getData(), B(serializedLength).get());
+    stream.writeByteRepeatedly(byteCountChunk->getData(), serializedLength.get<B>());
     ChunkSerializer::totalSerializedLength += serializedLength;
 }
 
@@ -26,7 +26,7 @@ const Ptr<Chunk> ByteCountChunkSerializer::deserialize(MemoryInputStream& stream
 {
     auto byteCountChunk = makeShared<ByteCountChunk>();
     B length = stream.getRemainingLength();
-    stream.readByteRepeatedly(byteCountChunk->getData(), B(length).get());
+    stream.readByteRepeatedly(byteCountChunk->getData(), length.get<B>());
     byteCountChunk->setLength(length);
     ChunkSerializer::totalDeserializedLength += length;
     return byteCountChunk;

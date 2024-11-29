@@ -1,5 +1,5 @@
 %description:
-EthernetCsmaMac module: tests framebursting in half duplex mode on gigabit ethernet
+EthernetCsmaMacPhy module: tests framebursting in half duplex mode on gigabit ethernet
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]

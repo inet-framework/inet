@@ -95,7 +95,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
         state->lastAssocThroughputTime = simTime();
         state->assocThroughput = 0;
     }
-    state->assocThroughput += B(sctpmsg->getChunkLength()).get();
+    state->assocThroughput += sctpmsg->getChunkLength().get<B>();
 
     // ====== Handle chunks ==================================================
     bool trans = true;

@@ -37,7 +37,7 @@ class INET_API Ieee80211HrDsssPreambleMode : public IIeee80211PreambleMode
 
     virtual bps getNetBitrate() const { return Mbps(1); }
     virtual bps getGrossBitrate() const { return getNetBitrate(); }
-    virtual const simtime_t getDuration() const override { return (double)getBitLength().get() / getNetBitrate().get(); }
+    virtual const simtime_t getDuration() const override { return (double)getBitLength().get<b>() / getNetBitrate().get<bps>(); }
     virtual const DbpskModulation *getModulation() const { return &DbpskModulation::singleton; }
 
     virtual Ptr<Ieee80211PhyPreamble> createPreamble() const override { return makeShared<Ieee80211HrDsssPhyPreamble>(); }
@@ -59,7 +59,7 @@ class INET_API Ieee80211HrDsssHeaderMode : public IIeee80211HeaderMode
     virtual b getLength() const override { return getSignalFieldLength() + getServiceFieldLength() + getLengthFieldLength() + getCrcFieldLength(); }
     virtual bps getNetBitrate() const override { return preambleType == IEEE80211_HRDSSS_PREAMBLE_TYPE_SHORT ? Mbps(2) : Mbps(1); }
     virtual bps getGrossBitrate() const override { return getNetBitrate(); }
-    virtual const simtime_t getDuration() const override { return (double)getLength().get() / getNetBitrate().get(); }
+    virtual const simtime_t getDuration() const override { return (double)getLength().get<b>() / getNetBitrate().get<bps>(); }
     virtual const simtime_t getSymbolInterval() const override { return -1; }
     virtual const DpskModulationBase *getModulation() const override { return preambleType == IEEE80211_HRDSSS_PREAMBLE_TYPE_SHORT ? static_cast<const DpskModulationBase *>(&DqpskModulation::singleton) : static_cast<const DpskModulationBase *>(&DbpskModulation::singleton); }
 

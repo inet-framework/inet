@@ -42,7 +42,7 @@ class TaskResult:
     result are the result, reason and error_message.
     """
 
-    def __init__(self, task=None, result="DONE", expected_result="DONE", reason=None, error_message=None, exception=None, store_complete_binary_hash=False, store_complete_source_hash=False, store_partial_binary_hash=False, store_partial_source_hash=False, elapsed_wall_time=None, possible_results=["DONE", "SKIP", "CANCEL", "ERROR"], possible_result_colors=[COLOR_GREEN, COLOR_CYAN, COLOR_CYAN, COLOR_RED], **kwargs):
+    def __init__(self, task=None, result="DONE", expected_result="DONE", reason=None, stdout=None, stderr=None, error_message=None, exception=None, store_complete_binary_hash=False, store_complete_source_hash=False, store_partial_binary_hash=False, store_partial_source_hash=False, elapsed_wall_time=None, possible_results=["DONE", "SKIP", "CANCEL", "ERROR"], possible_result_colors=[COLOR_GREEN, COLOR_CYAN, COLOR_CYAN, COLOR_RED], **kwargs):
         """
         Initializes a new task result object.
 
@@ -96,6 +96,8 @@ class TaskResult:
         self.expected_result = expected_result
         self.expected = expected_result == result
         self.reason = reason
+        self.stdout = stdout
+        self.stderr = stderr
         self.error_message = error_message
         self.exception = exception
         self.elapsed_wall_time = elapsed_wall_time
@@ -122,7 +124,7 @@ class TaskResult:
                (" " + self.get_error_message(complete_error_message=complete_error_message) if self.result == "ERROR" else "")
 
     def get_error_message(self, **kwargs):
-        return self.error_message or "<No error message>"
+        return self.error_message or self.stderr or (self.exception and str(self.exception)) or "<No error message>"
 
     def print_result(self, complete_error_message=False, output_stream=sys.stdout, **kwargs):
         print(self.get_description(complete_error_message=complete_error_message), file=output_stream)
@@ -202,10 +204,9 @@ class MultipleTaskResults:
             exclude_result_filter = "|".join(filter(lambda possible_result: (self.possible_result_colors[self.possible_results.index(possible_result)] == COLOR_GREEN or
                                                                              self.possible_result_colors[self.possible_results.index(possible_result)] == COLOR_CYAN),
                                                     self.possible_results))
-            details = self.get_details(exclude_result_filter=exclude_result_filter, include_parameters=True)
-            return ("" if details.strip() == "" else "\nDetails:\n" + details + "\n\n") + \
-                   f"Multiple {self.multiple_tasks.name} results: " + self.color + self.result + COLOR_RESET + ", " + \
-                   "summary: " + self.get_summary()
+            details = self.get_details(exclude_result_filter=exclude_result_filter, expected=False, include_parameters=True)
+            return f"Multiple {self.multiple_tasks.name} results: " + self.color + self.result + COLOR_RESET + ", " + \
+                   "summary: " + self.get_summary() + ("" if details.strip() == "" else "\n" + details)
 
     def is_all_results_done(self):
         return self.num_expected["DONE"] == len(self.results)
@@ -237,8 +238,12 @@ class MultipleTaskResults:
             texts.append(color + str(num_unexpected) + " " + result + (COLOR_YELLOW + " (unexpected)" + COLOR_RESET if color != COLOR_GREEN else "") + COLOR_RESET)
         return texts
 
-    def get_description(self, **kwargs):
-        return f"Multiple {self.multiple_tasks.name}s: " + self.get_summary()
+    def get_description(self, level=0, **kwargs):
+        exclude_result_filter = "|".join(filter(lambda possible_result: (self.possible_result_colors[self.possible_results.index(possible_result)] == COLOR_GREEN or
+                                                                         self.possible_result_colors[self.possible_results.index(possible_result)] == COLOR_CYAN),
+                                                self.possible_results))
+        details = self.get_details(level=level + 1, exclude_result_filter=exclude_result_filter, expected=False, include_parameters=True)
+        return f"Multiple {self.multiple_tasks.name}s: " + self.get_summary() + "\n" + details
 
     def get_summary(self):
         if len(self.results) == 1:
@@ -251,15 +256,16 @@ class MultipleTaskResults:
                 texts += self.get_result_class_texts(possible_result, self.possible_result_colors[self.possible_results.index(possible_result)], self.num_expected[possible_result], self.num_unexpected[possible_result])
             return ", ".join(texts) + (" in " + str(datetime.timedelta(seconds=self.elapsed_wall_time)) if self.elapsed_wall_time else "")
 
-    def get_details(self, separator="\n  ", result_filter=None, exclude_result_filter=None, **kwargs):
+    def get_details(self, separator="\n  ", level=1, result_filter=None, exclude_result_filter=None, expected=None, **kwargs):
         texts = []
         def matches_possible_result(task_result, possible_result):
             return task_result and task_result.result == possible_result and \
+                   (expected is None or expected == task_result.expected) and \
                    matches_filter(task_result.result, result_filter, exclude_result_filter, True)
         for possible_result in self.possible_results:
             for result in filter(lambda result: matches_possible_result(result, possible_result), self.results):
-                texts.append(result.get_description(**kwargs))
-        return "  " + separator.join(texts)
+                texts.append(result.get_description(level=level, **kwargs))
+        return (" " * level * 2) + separator.join(texts)
 
     def get_done_results(self, exclude_expected=True):
         return self.filter_results(result_filter="DONE", exclude_expected_result_filter="ERROR" if exclude_expected else None)
@@ -304,7 +310,7 @@ class Task:
     Represents a self-contained operation that captures all necessary information in order to be run.
     """
 
-    def __init__(self, name="task", action="", print_run_start_separately=True, task_result_class=TaskResult, **kwargs):
+    def __init__(self, name="task", action="", pass_keyboard_interrupt=False, print_run_start_separately=True, task_result_class=TaskResult, **kwargs):
         """
         Initializes a new task object.
 
@@ -326,6 +332,7 @@ class Task:
         self.kwargs = kwargs
         self.name = name
         self.action = action
+        self.pass_keyboard_interrupt = pass_keyboard_interrupt
         self.print_run_start_separately = print_run_start_separately
         self.task_result_class = task_result_class
         self.cancel = False
@@ -398,6 +405,8 @@ class Task:
                         task_result.elapsed_wall_time = end_time - start_time
             except KeyboardInterrupt:
                 task_result = self.task_result_class(task=self, result="CANCEL", reason="Cancel by user")
+                if self.pass_keyboard_interrupt:
+                    raise
             except Exception as e:
                 if handle_exception:
                     task_result = self.task_result_class(task=self, result="ERROR", reason="Exception during task execution", error_message=e.__repr__(), exception=e)
@@ -457,7 +466,7 @@ class MultipleTasks:
     Represents multiple tasks that can be run together. 
     """
 
-    def __init__(self, tasks=[], name="task", concurrent=True, randomize=False, chunksize=1, scheduler="thread", cluster=None, multiple_task_results_class=MultipleTaskResults, **kwargs):
+    def __init__(self, tasks=[], name="task", concurrent=True, pass_keyboard_interrupt=False, randomize=False, chunksize=1, scheduler="thread", cluster=None, multiple_task_results_class=MultipleTaskResults, **kwargs):
         """
         Initializes a new multiple tasks object.
 
@@ -489,11 +498,13 @@ class MultipleTasks:
         self.tasks = tasks
         self.name = name
         self.concurrent = concurrent
+        self.pass_keyboard_interrupt = pass_keyboard_interrupt
         self.randomize = randomize
         self.chunksize = chunksize
         self.cluster = cluster
         self.scheduler = scheduler
         self.multiple_task_results_class = multiple_task_results_class
+        self.task_result_class = multiple_task_results_class
         self.cancel = False
 
     def __repr__(self):
@@ -518,7 +529,7 @@ class MultipleTasks:
         Returns (:py:class:`MultipleTaskResults`):
             The task results.
         """
-        _logger.info(f"Running multiple {self.get_description()} started")
+        _logger.info(f"Running {len(self.tasks)} {self.get_description()} started")
         if self.cancel:
             task_results = list(map(lambda task: task.task_result_class(task=task, result="CANCEL", reason="Cancel by user"), self.tasks))
             multiple_task_results = self.multiple_task_results_class(multiple_tasks=self, results=task_results)
@@ -531,7 +542,7 @@ class MultipleTasks:
             except KeyboardInterrupt:
                 task_results = list(map(lambda task: task.task_result_class(task=task, result="CANCEL", reason="Cancel by user"), self.tasks))
                 multiple_task_results = self.multiple_task_results_class(multiple_tasks=self, results=task_results)
-        _logger.info(f"Running multiple {self.get_description()} ended")
+        _logger.info(f"Running {len(self.tasks)} {self.get_description()} ended")
         return multiple_task_results
 
     def run_protected(self, **kwargs):
@@ -556,19 +567,25 @@ class MultipleTasks:
                     for task in tasks:
                         task.set_cancel(True)
                     task_results = map_results.get(0xFFFF)
+                    if self.pass_keyboard_interrupt:
+                        raise
             else:
-                keyboard_interrupt_handler = KeyboardInterruptHandler()
-                with DisabledKeyboardInterrupts(keyboard_interrupt_handler):
-                    cancel = False
-                    task_results = []
-                    task_index = 0
+                cancel = False
+                task_results = []
+                task_index = 0
+                try:
                     for task in tasks:
                         task.set_cancel(cancel)
-                        result = task.run(**dict(kwargs, keyboard_interrupt_handler=keyboard_interrupt_handler, index=task_index, count=task_count))
+                        result = task.run(**dict(kwargs, index=task_index, count=task_count))
                         if result.result == "CANCEL":
                             cancel = True
                         task_results.append(result)
                         task_index = task_index + 1
+                except KeyboardInterrupt:
+                    for task in tasks[len(task_results):]:
+                        task_results.append(task.task_result_class(task=task, result="CANCEL", reason="Cancel by user"))
+                    if self.pass_keyboard_interrupt:
+                        raise
             return self.multiple_task_results_class(multiple_tasks=self, results=task_results)
 
     def recreate(self, **kwargs):
@@ -587,11 +604,14 @@ class MultipleTasks:
             return self.recreate(**kwargs).run()
 
 def run_task_with_capturing_output(task, tasks=None, task_count=None, output_stream=sys.stdout, **kwargs):
-    task_output_stream = io.StringIO()
-    task_index = tasks.index(task)
-    task_result = task.run(output_stream=task_output_stream, **dict(kwargs, index=task_index, count=task_count))
-    print(task_output_stream.getvalue(), end="", file=output_stream)
-    return task_result
+    try:
+        task_output_stream = io.StringIO()
+        task_index = tasks.index(task)
+        task_result = task.run(output_stream=task_output_stream, **dict(kwargs, index=task_index, count=task_count))
+        print(task_output_stream.getvalue(), end="", file=output_stream)
+        return task_result
+    except KeyboardInterrupt:
+        return task.task_result_class(task=task, result="CANCEL", reason="Cancel by user")
 
 def run_tasks(tasks, task_result_class=TaskResult, multiple_tasks_class=MultipleTasks, multiple_task_results_class=MultipleTaskResults, **kwargs):
     multiple_tasks = multiple_tasks_class(multiple_tasks=tasks, **kwargs)

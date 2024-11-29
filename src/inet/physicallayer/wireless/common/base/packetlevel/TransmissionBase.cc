@@ -36,6 +36,15 @@ TransmissionBase::TransmissionBase(const IRadio *transmitterRadio, const Packet 
 {
 }
 
+TransmissionBase::~TransmissionBase()
+{
+    delete packetModel;
+    delete bitModel;
+    delete symbolModel;
+    delete sampleModel;
+    delete analogModel;
+}
+
 std::ostream& TransmissionBase::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_DETAIL)

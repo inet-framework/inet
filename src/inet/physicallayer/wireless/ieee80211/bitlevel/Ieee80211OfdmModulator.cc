@@ -67,10 +67,10 @@ int Ieee80211OfdmModulator::getSubcarrierIndex(int ofdmSymbolIndex) const
 
 void Ieee80211OfdmModulator::insertPilotSubcarriers(Ieee80211OfdmSymbol *ofdmSymbol, int symbolID) const
 {
-    ofdmSymbol->pushApskSymbol(pilotSubcarrierPolarityVector[symbolID % 127] == 1 ? &positivePilotSubcarrier : &negativePilotSubcarrier, 5);
-    ofdmSymbol->pushApskSymbol(pilotSubcarrierPolarityVector[symbolID % 127] == 1 ? &positivePilotSubcarrier : &negativePilotSubcarrier, 19);
-    ofdmSymbol->pushApskSymbol(pilotSubcarrierPolarityVector[symbolID % 127] == 1 ? &positivePilotSubcarrier : &negativePilotSubcarrier, 33);
-    ofdmSymbol->pushApskSymbol(pilotSubcarrierPolarityVector[symbolID % 127] == 1 ? &negativePilotSubcarrier : &positivePilotSubcarrier, 47);
+    ofdmSymbol->pushApskSymbol(pilotSubcarrierPolarityVector[symbolID % 127] == 1 ? new ApskSymbol(positivePilotSubcarrier) : new ApskSymbol(negativePilotSubcarrier), 5);
+    ofdmSymbol->pushApskSymbol(pilotSubcarrierPolarityVector[symbolID % 127] == 1 ? new ApskSymbol(positivePilotSubcarrier) : new ApskSymbol(negativePilotSubcarrier), 19);
+    ofdmSymbol->pushApskSymbol(pilotSubcarrierPolarityVector[symbolID % 127] == 1 ? new ApskSymbol(positivePilotSubcarrier) : new ApskSymbol(negativePilotSubcarrier), 33);
+    ofdmSymbol->pushApskSymbol(pilotSubcarrierPolarityVector[symbolID % 127] == 1 ? new ApskSymbol(negativePilotSubcarrier) : new ApskSymbol(positivePilotSubcarrier), 47);
 }
 
 const ITransmissionSymbolModel *Ieee80211OfdmModulator::modulate(const ITransmissionBitModel *bitModel) const
@@ -87,7 +87,7 @@ const ITransmissionSymbolModel *Ieee80211OfdmModulator::modulate(const ITransmis
         // to the modulation encoding tables
         bitGroup.setBit(i % nBPSC, bits->getBit(i));
         if (i % nBPSC == nBPSC - 1) {
-            const ApskSymbol *apskSymbol = subcarrierModulation->mapToConstellationDiagram(bitGroup);
+            const ApskSymbol *apskSymbol = new ApskSymbol(*subcarrierModulation->mapToConstellationDiagram(bitGroup));
             apskSymbols.push_back(apskSymbol);
         }
     }

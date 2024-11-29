@@ -18,7 +18,7 @@ network MobileNetwork
         bool hasVisualizer = default(false);
         bool hasScenarioManager = default(false);
         bool hasEnvironment = default(false);
-        @display("bgb=600,400");
+        @display("bgb=600,600");
     submodules:
         visualizer: IntegratedCanvasVisualizer if hasVisualizer {
             parameters:

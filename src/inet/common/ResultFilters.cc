@@ -131,7 +131,7 @@ void DataAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject
 {
     if (auto packet = dynamic_cast<Packet *>(object)) {
         for (auto& region : packet->peekData()->getAllTags<CreationTimeTag>()) {
-            WeightedHistogramRecorder::cWeight weight(region.getLength().get());
+            WeightedHistogramRecorder::cWeight weight(region.getLength().get<b>());
             fire(this, t, t - region.getTag()->getCreationTime(), &weight);
         }
     }
@@ -245,7 +245,7 @@ Register_ResultFilter("packetLength", PacketLengthFilter);
 void PacketLengthFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     auto packet = check_and_cast<Packet *>(object);
-    fire(this, t, packet->getDataLength().get(), details);
+    fire(this, t, packet->getDataLength().get<b>(), details);
 }
 
 Register_ResultFilter("flowPacketLength", FlowPacketLengthFilter);
@@ -959,7 +959,7 @@ void LiveThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, 
 void LiveThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (auto packet = dynamic_cast<cPacket *>(object))
-        receiveSignal(prev, t, packet->getByteLength(), details);
+        receiveSignal(prev, t, packet->getBitLength(), details);
 }
 
 void LiveThroughputFilter::timerExpired()

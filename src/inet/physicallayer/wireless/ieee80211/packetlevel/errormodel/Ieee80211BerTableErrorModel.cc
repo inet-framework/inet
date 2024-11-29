@@ -60,7 +60,7 @@ double Ieee80211BerTableErrorModel::computePacketErrorRate(const ISnir *snir, IR
     auto bitModel = transmission->getBitModel();
     bps bitrate = transmission->getMode()->getDataMode()->getNetBitrate();
     b dataLength = bitModel->getDataLength();
-    return berTableFile->getPer(bps(bitrate).get(), getScalarSnir(snir), B(dataLength).get());
+    return berTableFile->getPer(bitrate.get<bps>(), getScalarSnir(snir), dataLength.get<B>());
 }
 
 double Ieee80211BerTableErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const

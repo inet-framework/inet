@@ -1,5 +1,5 @@
 %description:
-EthernetCsmaMac module: tests IFG and framebursting in half duplex mode on gigabit ethernet.
+EthernetCsmaMacPhy module: tests IFG and framebursting in half duplex mode on gigabit ethernet.
 
 At 20s we try to transmit a packet but there is an incoming packet at that time.
 Transmission starts at the end of reception plus IFG.

@@ -16,6 +16,8 @@ namespace queueing {
 class INET_API SignalBasedTokenGenerator : public TokenGeneratorBase, public cListener
 {
   protected:
+    int intSignalValue = -1;
+    double doubleSignalValue = NaN;
     cPar *numTokensParameter = nullptr;
 
   protected:

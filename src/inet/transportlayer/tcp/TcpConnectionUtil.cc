@@ -174,7 +174,7 @@ void TcpConnection::printSegmentBrief(Packet *tcpSegment, const Ptr<const TcpHea
     if (tcpHeader->getPshBit())
         EV_INFO << "PSH ";
 
-    auto payloadLength = tcpSegment->getByteLength() - B(tcpHeader->getHeaderLength()).get();
+    auto payloadLength = tcpSegment->getByteLength() - tcpHeader->getHeaderLength().get<B>();
     if (payloadLength > 0 || tcpHeader->getSynBit()) {
         EV_INFO << "[" << tcpHeader->getSequenceNo() << ".." << (tcpHeader->getSequenceNo() + payloadLength) << ") ";
         EV_INFO << "(l=" << payloadLength << ") ";
@@ -251,7 +251,7 @@ TcpConnection *TcpConnection::cloneListeningConnection()
 void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader)
 {
     // record seq (only if we do send data) and ackno
-    if (tcpSegment->getByteLength() > B(tcpHeader->getChunkLength()).get())
+    if (tcpSegment->getByteLength() > tcpHeader->getChunkLength().get<B>())
         emit(sndNxtSignal, tcpHeader->getSequenceNo());
 
     emit(sndAckSignal, tcpHeader->getAckNo());
@@ -515,7 +515,7 @@ bool TcpConnection::isSegmentAcceptable(Packet *tcpSegment, const Ptr<const TcpH
     //      >0       0     not acceptable
     //      >0      >0     RCV.NXT =< SEG.SEQ < RCV.NXT+RCV.WND
     //                  or RCV.NXT =< SEG.SEQ+SEG.LEN-1 < RCV.NXT+RCV.WND"
-    uint32_t len = tcpSegment->getByteLength() - B(tcpHeader->getHeaderLength()).get();
+    uint32_t len = tcpSegment->getByteLength() - tcpHeader->getHeaderLength().get<B>();
     uint32_t seqNo = tcpHeader->getSequenceNo();
     uint32_t ackNo = tcpHeader->getAckNo();
     uint32_t rcvWndEnd = state->rcv_nxt + state->rcv_wnd;
@@ -786,7 +786,7 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     const auto& tmpTcpHeader = makeShared<TcpHeader>();
     tmpTcpHeader->setAckBit(true); // needed for TS option, otherwise TSecr will be set to 0
     writeHeaderOptions(tmpTcpHeader);
-    uint options_len = B(tmpTcpHeader->getHeaderLength() - TCP_MIN_HEADER_LENGTH).get();
+    uint options_len = (tmpTcpHeader->getHeaderLength() - TCP_MIN_HEADER_LENGTH).get<B>();
 
     ASSERT(options_len < state->snd_mss);
 
@@ -899,7 +899,7 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     const auto& tmpTcpHeader = makeShared<TcpHeader>();
     tmpTcpHeader->setAckBit(true); // needed for TS option, otherwise TSecr will be set to 0
     writeHeaderOptions(tmpTcpHeader);
-    uint options_len = B(tmpTcpHeader->getHeaderLength() - TCP_MIN_HEADER_LENGTH).get();
+    uint options_len = (tmpTcpHeader->getHeaderLength() - TCP_MIN_HEADER_LENGTH).get<B>();
     ASSERT(options_len < state->snd_mss);
     uint32_t effectiveMss = state->snd_mss - options_len;
 

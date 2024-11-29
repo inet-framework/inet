@@ -33,8 +33,8 @@ const ITransmission *ApskTransmitter::createTransmission(const IRadio *transmitt
     Hz transmissionCenterFrequency = computeCenterFrequency(packet);
     Hz transmissionBandwidth = computeBandwidth(packet);
     bps transmissionBitrate = computeTransmissionDataBitrate(packet);
-    const simtime_t headerDuration = b(headerLength).get() / bps(transmissionBitrate).get();
-    const simtime_t dataDuration = b(dataLength).get() / bps(transmissionBitrate).get();
+    const simtime_t headerDuration = headerLength.get<b>() / transmissionBitrate.get<bps>();
+    const simtime_t dataDuration = dataLength.get<b>() / transmissionBitrate.get<bps>();
     const simtime_t duration = preambleDuration + headerDuration + dataDuration;
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();

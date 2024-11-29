@@ -24,7 +24,7 @@
    :msg:`EthernetIIFrame`, :msg:`EtherFrameWithLlc` and
    :msg:`EtherFrameWithSNAP`. They all derive from :msg:`EtherFrame` which
    only represents the basic MAC frame with source and destination
-   addresses. :ned:`EthernetCsmaMac` only deals with :msg:`EtherFrame`’s, and does
+   addresses. :ned:`EthernetCsmaMacPhy` only deals with :msg:`EtherFrame`’s, and does
    not care about the specific subclass.
 
    Ethernet frames carry data packets as encapsulated cMessage objects.
@@ -138,7 +138,7 @@
    .. graphviz:: figures/EtherMAC_txstates.dot
       :align: center
 
-   Unlike :ned:`EthernetMac`, this MAC module processes the incoming
+   Unlike :ned:`EthernetMacPhy`, this MAC module processes the incoming
    packets when their first bit is received. The end of the reception is
    calculated by the MAC and detected by scheduling a self message.
 
@@ -146,7 +146,7 @@
    transmitting station transmits a jam signal. Jam signals are represented
    by an :msg:`EthernetJamSignal` message. The jam message contains the tree
    identifier of the frame whose transmission is aborted. When the
-   :ned:`EthernetCsmaMac` receives a jam signal, it knows that the corresponding
+   :ned:`EthernetCsmaMacPhy` receives a jam signal, it knows that the corresponding
    transmission ended in jamming and has been aborted. Thus when it
    receives as many jams as collided frames, it can be sure that the
    channel is free again. (Receiving a jam message marks the beginning of
@@ -196,12 +196,12 @@
    transmitter with a timer value of zero, allowing the transmitter to
    resume immediately.
 
-   :ned:`EthernetCsmaMac` will properly respond to PAUSE frames it receives
+   :ned:`EthernetCsmaMacPhy` will properly respond to PAUSE frames it receives
    (:msg:`EtherPauseFrame` class), however, it will never send a PAUSE frame
    by itself. (For one thing, it doesn’t have an input buffer that can
    overflow.)
 
-   :ned:`EthernetCsmaMac`, however, transmits PAUSE frames received by higher
+   :ned:`EthernetCsmaMacPhy`, however, transmits PAUSE frames received by higher
    layers, and :ned:`Ieee8022Llc` can be instructed by a command to send a
    PAUSE frame to MAC.
 

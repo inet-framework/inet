@@ -111,7 +111,7 @@ enum GroupRecordType
 class GroupRecord
 {
     @packetData;
-    int recordType enum(GroupRecordType);
+    int recordType @enum(GroupRecordType);
     Ipv4Address groupAddress;
     Ipv4AddressVector sourceList;
     uint32_t auxData[];

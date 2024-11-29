@@ -1,0 +1,5 @@
+#!/usr/bin/env python3
+
+from inet.main import *
+
+run_release_tests_main()

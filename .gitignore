@@ -41,6 +41,7 @@ precompiled_*.h.*
 /tests/*/*/work/
 /tests/*/results*/
 /tests/fingerprint/SelfDoc.xml
+/coverage
 *.log
 *.sim
 *.pyc
@@ -63,6 +64,7 @@ compile_commands.json
 
 # ignore binary files
 out/
+*_dbg
 *.so
 *.dylib
 *.dll
@@ -74,6 +76,8 @@ out/
 *.pdb
 *.idb
 *.manifest
+*.profraw
+*.data
 .qtenv.ini
 .qtenvrc
 .tkenvrc
@@ -87,6 +91,7 @@ netanim-trace.txt
 *.FAILED
 *.ERROR
 *.bak
+*.old
 backups
 *~
 xxx

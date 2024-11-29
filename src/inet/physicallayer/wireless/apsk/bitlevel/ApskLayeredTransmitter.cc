@@ -105,8 +105,8 @@ const ITransmissionBitModel *ApskLayeredTransmitter::createBitModel(const ITrans
             if (forwardErrorCorrection == nullptr)
                 return new TransmissionBitModel(netHeaderLength, bitrate, netDataLength, bitrate, nullptr, forwardErrorCorrection, nullptr, nullptr);
             else {
-                b grossHeaderLength = b(forwardErrorCorrection->getEncodedLength(b(netHeaderLength).get()));
-                b grossDataLength = b(forwardErrorCorrection->getEncodedLength(b(netDataLength).get()));
+                b grossHeaderLength = b(forwardErrorCorrection->getEncodedLength(netHeaderLength.get<b>()));
+                b grossDataLength = b(forwardErrorCorrection->getEncodedLength(netDataLength.get<b>()));
                 bps grossBitrate = bitrate / forwardErrorCorrection->getCodeRate();
                 return new TransmissionBitModel(grossHeaderLength, grossBitrate, grossDataLength, grossBitrate, nullptr, forwardErrorCorrection, nullptr, nullptr);
             }
@@ -163,14 +163,14 @@ const ITransmission *ApskLayeredTransmitter::createTransmission(const IRadio *tr
 
     b headerLength = bitModel->getHeaderLength();
     b dataLength = bitModel->getDataLength();
-    simtime_t headerDuration = s(headerLength / bitrate).get();
-    simtime_t dataDuration = s(dataLength / bitrate).get();
+    simtime_t headerDuration = (headerLength / bitrate).get<s>();
+    simtime_t dataDuration = (dataLength / bitrate).get<s>();
 
     auto fec = bitModel->getForwardErrorCorrection();
     auto codeRate = fec ? fec->getCodeRate() : 1.0;
 
     double symbolRate = symbolModel->getDataSymbolRate();
-    auto symbolTime = std::isnan(symbolRate) ? -1 : s(unit(1) / Hz(symbolRate)).get();
+    auto symbolTime = std::isnan(symbolRate) ? -1 : (unit(1) / Hz(symbolRate)).get<s>();
 
     return new ApskTransmission(transmitter, packet, startTime, endTime,
         preambleDuration, headerDuration, dataDuration,

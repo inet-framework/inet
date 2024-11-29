@@ -1,7 +1,11 @@
 import math
-import optimparallel
 import scipy.optimize
 import time
+
+import importlib.util
+
+if importlib.util.find_spec('optimparallel'):
+    import optimparallel
 
 from omnetpp.scave.results import *
 
@@ -17,8 +21,8 @@ def cost_function(parameter_values, simulation_task, expected_result_names, expe
     all_parameter_units = [*fixed_parameter_units, *parameter_units]
     all_parameter_assignment_args = list(map(lambda name, value, unit: "--" + name + "=" + str(value) + unit, all_parameter_assignments, all_parameter_values, all_parameter_units))
     output_vector_file = "results/" + simulation_task.simulation_config.config + "-" + "-".join(map(str, all_parameter_values)) + ".vec"
-    extra_args = ["--output-vector-file=" + output_vector_file, *all_parameter_assignment_args]
-    simulation_result = simulation_task.run(extra_args=extra_args, **kwargs)
+    append_args = ["--output-vector-file=" + output_vector_file, *all_parameter_assignment_args]
+    simulation_result = simulation_task.run(append_args=append_args, **kwargs)
     if simulation_result.result == "DONE":
         filter_expression = """name =~ packetErrorRate:vector"""
         result_file = simulation_task.simulation_config.simulation_project.get_full_path(os.path.join(simulation_task.simulation_config.working_directory, output_vector_file))

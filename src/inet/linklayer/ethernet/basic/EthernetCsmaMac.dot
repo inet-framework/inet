@@ -1,0 +1,32 @@
+digraph EthernetCsmaMac {
+    nodesep = 0.5;
+    ranksep = 0.5;
+    node [shape=box, style="rounded,filled", color="#ECECEC", fontname="Arial", fontsize=18, margin=0.15, height=1, width=3];
+    edge [fontname="Arial", fontsize=18];
+
+    IDLE;
+    TRANSMITTING;
+    RECEIVING;
+    WAIT_IFG;
+    JAMMING;
+    BACKOFF;
+
+    IDLE -> TRANSMITTING [label="UPPER_PACKET"];
+    IDLE -> RECEIVING [label="CRS_START"];
+    WAIT_IFG -> TRANSMITTING [label="IFG_END_AND_HAS_CURRENT_TX\nIFG_END_AND_QUEUE_NOT_EMPTY"];
+    WAIT_IFG -> RECEIVING [label="IFG_END_AND_QUEUE_EMPTY_AND_CRS"];
+    WAIT_IFG -> IDLE [label="IFG_END_AND_QUEUE_EMPTY_AND_NO_CRS"];
+    WAIT_IFG -> WAIT_IFG [label="LOWER_PACKET"];
+    TRANSMITTING -> WAIT_IFG [label="TX_END_AND_NO_CRS"];
+    TRANSMITTING -> RECEIVING [label="TX_END_AND_CRS"];
+    TRANSMITTING -> JAMMING [label="COLLISION_START"];
+    JAMMING -> BACKOFF [label="JAM_END_AND_RETRY"];
+    JAMMING -> WAIT_IFG [label="JAM_END_AND_GIVE_UP_AND_NO_CRS"];
+    JAMMING -> RECEIVING [label="JAM_END_AND_GIVE_UP_AND_CRS"];
+    JAMMING -> JAMMING [label="LOWER_PACKET"];
+    BACKOFF -> WAIT_IFG [label="BACKOFF_END_AND_NO_CRS"];
+    BACKOFF -> RECEIVING [label="BACKOFF_END_AND_CRS"];
+    BACKOFF -> BACKOFF [label="LOWER_PACKET"];
+    RECEIVING -> RECEIVING [label="LOWER_PACKET"];
+    RECEIVING -> WAIT_IFG [label="CRS_END"];
+}

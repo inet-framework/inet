@@ -53,7 +53,7 @@ simple SimpleVoipReceiver like IApp
 
         @display("i=block/source");
     gates:
-        input socketIn @labels(UdpControlInfo/up);
-        output socketOut @labels(UdpControlInfo/down);
+        input socketIn @labels(UdpCommand/up);
+        output socketOut @labels(UdpCommand/down);
 }
 

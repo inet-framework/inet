@@ -1990,7 +1990,7 @@ if df.empty:
 for i in range(len(df['value'])):
     # avoid SettingWithCopyWarning
     value = df['value'].copy()
-    value[i] = float(df['bitrate'][i]) * (1 - float(df['value'][i]))
+    value[i] = float(df.loc[i, 'bitrate']) * (1 - float(df.loc[i, 'value']))
     df['value'] = value
 
 xaxis_itervar, group_by = utils.select_xaxis_and_groupby(df, props)

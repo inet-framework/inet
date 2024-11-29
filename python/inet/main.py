@@ -28,22 +28,24 @@ def parse_run_tasks_arguments(task_name):
     parser.add_argument("-t", "--sim-time-limit", default=None, help="specifies the simulation time limit")
     parser.add_argument("-T", "--cpu-time-limit", default=None, help="specifies the CPU time limit")
     parser.add_argument("-f", "--filter", default=None, help="includes simulations that match the specified generic filter")
-    parser.add_argument("--exclude-filter", default=None, help="exclude simulations that match the specified generic filter")
+    parser.add_argument("--exclude-filter", default=None, help="excludes simulations that match the specified generic filter")
     parser.add_argument("-w", "--working-directory-filter", default=None, help="includes simulations from a specific working directory")
     parser.add_argument("--exclude-working-directory-filter", default=None, help="excludes simulations from a specific working directory")
     parser.add_argument("-i", "--ini-file-filter", default=None, help="includes simulations from matching INI files")
     parser.add_argument("--exclude-ini-file-filter", default=None, help="excludes simulations from matching INI files")
     parser.add_argument("-c", "--config-filter", default=None, help="includes simulations having the specified INI file config sections")
-    parser.add_argument("--exclude-config-filter", default=None, help="exclude simulations having the specified INI file config sections")
+    parser.add_argument("--exclude-config-filter", default=None, help="excludes simulations having the specified INI file config sections")
     parser.add_argument("-r", "--run-number-filter", default=None, help="includes simulations having the specified run numbers")
-    parser.add_argument("--exclude-run-number-filter", default=None, help="exclude simulations having the specified run numbers")
+    parser.add_argument("--exclude-run-number-filter", default=None, help="excludes simulations having the specified run numbers")
     parser.add_argument("--scheduler", choices=["process", "thread", "cluster"], default="thread", help="specifies the scheduler for concurrent simulations")
     parser.add_argument("--simulation-runner", choices=["subprocess", "inprocess"], default="subprocess", help="specifies the simulation runner for individual simulations")
     parser.add_argument("--hosts", default="localhost", help="specifies the hosts where the simulations are run")
     parser.add_argument("-x", "--nix-shell", default=None, help="specifies the NIX shell in which the simulations are run")
     parser.add_argument("-l", "--log-level", choices=["ERROR", "WARN", "INFO", "DEBUG"], default="WARN", help="specifies the log level for the root logging category")
+    parser.add_argument("--external-command-log-level", choices=["ERROR", "WARN", "INFO", "DEBUG"], default="WARN", help="specifies the log level for the external command logging categories")
     parser.add_argument("--handle-exception", action="store_true", help="disables displaying stacktraces for exceptions")
     parser.add_argument("--no-handle-exception", dest="handle_exception", action="store_false")
+    parser.add_argument("--log-file", default=f"{task_name.replace(' ', '_')}.log", help="specifies the log file for all log messages")
     parser.set_defaults(concurrent=True, build=True, dry_run=False, handle_exception=True)
     return parser.parse_args(sys.argv[1:])
 
@@ -59,7 +61,7 @@ def process_run_tasks_arguments(args):
     if not has_filter_kwarg and not args.simulation_project:
         kwargs["working_directory_filter"] = os.path.relpath(os.getcwd(), os.path.realpath(simulation_project.get_full_path(".")))
     if "working_directory_filter" in kwargs:
-        kwargs["working_directory_filter"] = re.sub("(.*)/$", "\\1", kwargs["working_directory_filter"])
+        kwargs["working_directory_filter"] = re.sub(r"(.*)/$", "\\1", kwargs["working_directory_filter"])
     if args.simulation_runner == "inprocess":
         import omnetpp.cffi
     del kwargs["hosts"]
@@ -76,7 +78,7 @@ def process_run_tasks_arguments(args):
 def run_tasks_main(main_function, task_name):
     try:
         args = parse_run_tasks_arguments(task_name)
-        initialize_logging(args.log_level)
+        initialize_logging(args.log_level, args.external_command_log_level, args.log_file)
         _logger.debug(f"Processing command line arguments: {args}")
         kwargs = process_run_tasks_arguments(args)
         _logger.debug(f"Calling main function with: {kwargs}")
@@ -89,6 +91,7 @@ def run_tasks_main(main_function, task_name):
     except Exception as e:
         if args.handle_exception:
             _logger.error(str(e))
+            sys.exit(1)
         else:
             raise e
 
@@ -134,6 +137,9 @@ def run_validation_tests_main():
 def run_all_tests_main():
     run_tasks_main(run_all_tests, "tests")
 
+def run_release_tests_main():
+    run_tasks_main(run_release_tests, "release tests")
+
 def update_correct_fingerprints_main():
     run_tasks_main(update_correct_fingerprints, "update correct fingerprints")
 
@@ -144,11 +150,13 @@ def parse_build_project_arguments():
     parser.add_argument("-m", "--mode", choices=["debug", "release"], help="specifies the build mode of the project")
     parser.add_argument("--concurrent", default=True, action=argparse.BooleanOptionalAction, help="determines if multiple tasks are run concurrently or not")
     parser.add_argument("-l", "--log-level", choices=["ERROR", "WARN", "INFO", "DEBUG"], default="WARN", help="specifies the log level for the root logging category")
+    parser.add_argument("--external-command-log-level", choices=["ERROR", "WARN", "INFO", "DEBUG"], default="INFO", help="specifies the log level for the external command logging categories")
+    parser.add_argument("--log-file", default="build.log", help="specifies the log file for all log messages")
     parser.add_argument("--handle-exception", default=True, action=argparse.BooleanOptionalAction, help="disables displaying stacktraces for exceptions")
     return parser.parse_args(sys.argv[1:])
 
 def process_build_project_arguments(args):
-    initialize_logging(args.log_level)
+    initialize_logging(args.log_level, args.external_command_log_level, args.log_file, args.log_file)
     define_omnetpp_sample_projects()
     simulation_project = determine_default_simulation_project(name=args.simulation_project)
     kwargs = {k: v for k, v in vars(args).items() if v is not None}
@@ -167,6 +175,6 @@ def build_project_main():
     except Exception as e:
         if args.handle_exception:
             _logger.error(str(e))
+            sys.exit(1)
         else:
             raise e
-

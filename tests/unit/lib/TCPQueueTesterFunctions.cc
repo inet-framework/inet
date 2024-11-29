@@ -50,7 +50,7 @@ Packet *createSegmentWithBytes(TcpSendQueue *sq, uint32_t fromSeq, uint32_t toSe
         for (int64_t i = 0; tcpseg->getByteLength() > 0; i++)
         {
             const auto& payload = tcpseg->popAtFront<Chunk>();
-            int len = B(payload->getChunkLength()).get();
+            int len = payload->getChunkLength().get<B>();
             EV << (i?", ":" ") << payload->getClassName() << '[' << startSeq << ".." << startSeq + len <<')';
             startSeq += len;
         }
@@ -79,7 +79,7 @@ void insertSegment(TcpReceiveQueue *rq, Packet *tcpseg)
 {
     const auto& tcphdr = tcpseg->peekAtFront<TcpHeader>();
     uint32_t beg = tcphdr->getSequenceNo();
-    uint32_t end = beg + tcpseg->getByteLength() - B(tcphdr->getHeaderLength()).get();
+    uint32_t end = beg + tcpseg->getByteLength() - tcphdr->getHeaderLength().get<B>();
     EV << "RQ:" << "insertSeg [" << beg << ".." << end << ")";
     uint32_t rcv_nxt = rq->insertBytesFromSegment(tcpseg, tcphdr);
     (void)rcv_nxt;
@@ -91,7 +91,7 @@ void tryinsertSegment(TcpReceiveQueue *rq, Packet *tcpseg)
 {
     const auto& tcphdr = tcpseg->peekAtFront<TcpHeader>();
     uint32_t beg = tcphdr->getSequenceNo();
-    uint32_t end = beg + tcpseg->getByteLength() - B(tcphdr->getHeaderLength()).get();
+    uint32_t end = beg + tcpseg->getByteLength() - tcphdr->getHeaderLength().get<B>();
     EV << "RQ:" << "insertSeg [" << beg << ".." << end << ")";
     try {
         uint32_t rcv_nxt = rq->insertBytesFromSegment(tcpseg,tcphdr);

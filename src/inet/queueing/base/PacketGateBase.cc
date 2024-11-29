@@ -73,6 +73,39 @@ void PacketGateBase::close()
     updateDisplayString();
 }
 
+int PacketGateBase::getNumPackets() const
+{
+    return isOpen() ? PacketFlowBase::getNumPackets() : 0;
+}
+
+b PacketGateBase::getTotalLength() const
+{
+    return isOpen() ? PacketFlowBase::getTotalLength() : b(0);
+}
+
+Packet *PacketGateBase::getPacket(int index) const
+{
+    ASSERT(isOpen());
+    return PacketFlowBase::getPacket(index);
+}
+
+bool PacketGateBase::isEmpty() const
+{
+    return isOpen() ? PacketFlowBase::isEmpty() : true;
+}
+
+void PacketGateBase::removePacket(Packet *packet)
+{
+    ASSERT(isOpen());
+    PacketFlowBase::removePacket(packet);
+}
+
+void PacketGateBase::removeAllPackets()
+{
+    if (isOpen())
+        PacketFlowBase::removeAllPackets();
+}
+
 void PacketGateBase::processPacket(Packet *packet)
 {
     if (!isOpen_)

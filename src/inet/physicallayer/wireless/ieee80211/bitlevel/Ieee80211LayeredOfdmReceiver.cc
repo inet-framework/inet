@@ -305,7 +305,7 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createDataFieldBitModel(
 //        ASSERT(dataFieldLengthInBits % convolutionalCode->getCodeRatePuncturingK() == 0);
         unsigned int encodedDataFieldLengthInBits = dataFieldLengthInBits * codeRate;
         const BitVector *bits = bitModel->getAllBits();
-        unsigned int encodedSignalFieldLength = b(signalFieldBitModel->getHeaderLength()).get();
+        unsigned int encodedSignalFieldLength = signalFieldBitModel->getHeaderLength().get<b>();
         if (dataFieldLengthInBits + encodedSignalFieldLength > bits->getSize())
             throw cRuntimeError("The calculated data field length = %d is greater then the actual bitvector length = %d", dataFieldLengthInBits, bits->getSize());
         BitVector *dataBits = new BitVector();
@@ -320,7 +320,9 @@ const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createCompleteSymbolM
 {
     if (levelOfDetail >= SYMBOL_DOMAIN) {
         const std::vector<const ISymbol *> *symbols = signalFieldSymbolModel->getAllSymbols();
-        std::vector<const ISymbol *> *completeSymbols = new std::vector<const ISymbol *>(*symbols);
+        std::vector<const ISymbol *> *completeSymbols = new std::vector<const ISymbol *>();
+        for (auto symbol : *symbols)
+            completeSymbols->push_back(new Ieee80211OfdmSymbol(*static_cast<const Ieee80211OfdmSymbol *>(symbol)));
         if (dataFieldSymbolModel != nullptr) {
             symbols = dataFieldSymbolModel->getAllSymbols();
             for (auto & symbol : *symbols)

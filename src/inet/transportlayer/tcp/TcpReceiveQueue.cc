@@ -105,7 +105,7 @@ uint32_t TcpReceiveQueue::getAmountOfBufferedBytes()
     uint32_t bytes = 0;
 
     for (int i = 0; i < reorderBuffer.getNumRegions(); i++)
-        bytes += B(reorderBuffer.getRegionLength(i)).get();
+        bytes += reorderBuffer.getRegionLength(i).get<B>();
 
     return bytes;
 }

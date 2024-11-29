@@ -14,8 +14,8 @@ package inet.queueing.gate;
 simple GateControlList
 {
     parameters:
-        object durations @mutable @unit(s) = default([]); // List of entry durations, e.g. [4ms, 2ms, 2ms, 2ms]
-        object gateStates @mutable = default([]); // List of gate states, e.g. ["10000000", "01111111", "10000000", "01111111"]
+        object durations @unit(s) = default([]); // List of entry durations, e.g. [4ms, 2ms, 2ms, 2ms]
+        object gateStates = default([]); // List of gate states, e.g. ["10000000", "01111111", "10000000", "01111111"]
         int numGates = default(8); // Number of configured PeriodicGate modules
         string mapping; // String specifying the gate index for the ith gate state, e.g. "76543210" means reverse gate index order
         @class(GateControlList);

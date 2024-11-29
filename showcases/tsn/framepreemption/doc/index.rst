@@ -129,7 +129,7 @@ We set up a high-bitrate background traffic (96 Mbps) and a lower-bitrate high-p
    :language: ini
 
 The ``FifoQueueing`` configuration uses no preemption or priority queue. The configuration just limits 
-the :ned:`EthernetMac`'s queue length to 4. 
+the :ned:`EthernetMacPhy`'s queue length to 4. 
 
 In all three cases, the queues need to be short to decrease the queueing time's effect on the 
 measured delay. However, if they are too short, they might be empty too often, which renders 

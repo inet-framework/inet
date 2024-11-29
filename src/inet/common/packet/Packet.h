@@ -206,7 +206,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * Returns the length in bits between the front and back offsets.
      * The returned value is in the range [0, +infinity).
      */
-    virtual int64_t getBitLength() const override { return b(getDataLength()).get(); }
+    virtual int64_t getBitLength() const override { return getDataLength().get<b>(); }
 
     /**
      * Returns the current length of the data part of the packet. This is the

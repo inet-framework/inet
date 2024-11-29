@@ -8,8 +8,9 @@
 #ifndef __INET_CONTENTION_H
 #define __INET_CONTENTION_H
 
-#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/common/FSMA.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {
@@ -36,7 +37,7 @@ class INET_API Contention : public cSimpleModule, public IContention
     simtime_t eifs = SIMTIME_ZERO;
     simtime_t slotTime = SIMTIME_ZERO;
 
-    cFSM fsm;
+    Fsm fsm;
     simtime_t endEifsTime = SIMTIME_ZERO;
     int backoffSlots = 0;
     simtime_t scheduledTransmissionTime = SIMTIME_ZERO;

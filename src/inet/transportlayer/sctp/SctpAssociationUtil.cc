@@ -33,7 +33,7 @@
 
 #include "inet/transportlayer/common/L4Tools.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
-#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UdpCommand_m.h"
 #include "inet/transportlayer/sctp/Sctp.h"
 #include "inet/transportlayer/sctp/SctpAlgorithm.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
@@ -748,7 +748,7 @@ void SctpAssociation::sendInit()
     printSctpPathMap();
     EV_INFO << getFullPath() << " sendInit: localVTag=" << localVTag << " peerVTag=" << peerVTag << "\n";
     Packet *fp = new Packet("INIT");
-    EV_INFO << "Length sctpmsg " << B(sctpmsg->getChunkLength()).get() << endl;
+    EV_INFO << "Length sctpmsg " << sctpmsg->getChunkLength().get<B>() << endl;
     sendToIP(fp, sctpmsg);
     sctpMain->assocList.push_back(this);
 }
@@ -1266,9 +1266,9 @@ void SctpAssociation::sendPacketDrop(const bool flag)
     pktdrop->setTruncLength(0);
     pktdrop->setByteLength(SCTP_PKTDROP_CHUNK_LENGTH);
     uint16_t mss = getPath(remoteAddr)->pmtu - SCTP_COMMON_HEADER - SCTP_DATA_CHUNK_LENGTH - IP_HEADER_LENGTH;
-    if (B(drop->getChunkLength()).get() > mss) {
-        uint16_t diff = B(drop->getChunkLength()).get() - mss;
-        pktdrop->setTruncLength(B(drop->getChunkLength()).get());
+    if (drop->getChunkLength().get<B>() > mss) {
+        uint16_t diff = drop->getChunkLength().get<B>() - mss;
+        pktdrop->setTruncLength(drop->getChunkLength().get<B>());
         SctpChunk *sctpchunk = (SctpChunk *)(drop->removeLastChunk());
         if (sctpchunk->getSctpChunkType() == DATA) {
             SctpDataChunk *dataChunk = check_and_cast<SctpDataChunk *>(sctpchunk);
@@ -1292,7 +1292,7 @@ void SctpAssociation::sendPacketDrop(const bool flag)
                 delete sctpchunk;
                 delete pktdrop;
 //                disposeOf(state->sctpmsg);
-                EV_DETAIL << "laenge=" << B(drop->getChunkLength()).get() << " numberOfChunks=1\n";
+                EV_DETAIL << "laenge=" << drop->getChunkLength().get<B>() << " numberOfChunks=1\n";
                 disposeOf(drop);
                 return;
             }
@@ -1300,7 +1300,7 @@ void SctpAssociation::sendPacketDrop(const bool flag)
         else {
             delete pktdrop;
 //            disposeOf(state->sctpmsg);
-            EV_DETAIL << "laenge=" << B(drop->getChunkLength()).get() << " numberOfChunks=1\n";
+            EV_DETAIL << "laenge=" << drop->getChunkLength().get<B>() << " numberOfChunks=1\n";
             disposeOf(drop);
             return;
         }
@@ -1312,7 +1312,7 @@ void SctpAssociation::sendPacketDrop(const bool flag)
 
     EV_DETAIL << "length of PKTDROP chunk=" << pktdrop->getByteLength() << "\n";
     sctpmsg->appendSctpChunks(pktdrop);
-    EV_DETAIL << "total length now " << B(sctpmsg->getChunkLength()).get() << "\n";
+    EV_DETAIL << "total length now " << sctpmsg->getChunkLength().get<B>() << "\n";
 //    disposeOf(state->sctpmsg);
     state->pktDropSent = true;
     sctpMain->numPktDropReports++;
@@ -1437,7 +1437,8 @@ inline static bool writeCompressedValue(uint8_t *outputBuffer,
 
 static uint32_t compressGaps(const SctpGapList *gapList, const SctpGapList::GapType type, size_t& space)
 {
-    uint8_t compressedDataBuffer[1 + 6 * gapList->getNumGaps(type)]; // Worst-case size
+    size_t compressedDataBufferSize = 1 + 6 * gapList->getNumGaps(type);
+    uint8_t *compressedDataBuffer = new uint8_t[compressedDataBufferSize]; // Worst-case size
 
     size_t outputPos = 0;
     unsigned int entriesWritten = 0;
@@ -1448,8 +1449,8 @@ static uint32_t compressGaps(const SctpGapList *gapList, const SctpGapList::GapT
         const uint16_t startOffset = gapList->getGapStart(type, i) - last;
         const uint16_t stopOffset = gapList->getGapStop(type, i) - gapList->getGapStart(type, i);
         const size_t lastOutputPos = outputPos;
-        if ((writeCompressedValue((uint8_t *)&compressedDataBuffer, sizeof(compressedDataBuffer), outputPos, startOffset) == false) ||
-            (writeCompressedValue((uint8_t *)&compressedDataBuffer, sizeof(compressedDataBuffer), outputPos, stopOffset) == false) ||
+        if ((writeCompressedValue(compressedDataBuffer, compressedDataBufferSize, outputPos, startOffset) == false) ||
+            (writeCompressedValue(compressedDataBuffer, compressedDataBufferSize, outputPos, stopOffset) == false) ||
             (outputPos + 1 > space))
         {
             outputPos = lastOutputPos;
@@ -1458,9 +1459,10 @@ static uint32_t compressGaps(const SctpGapList *gapList, const SctpGapList::GapT
         entriesWritten++;
         last = gapList->getGapStop(type, i);
     }
-    ASSERT(writeCompressedValue((uint8_t *)&compressedDataBuffer, sizeof(compressedDataBuffer), outputPos, 0x00) == true);
+    ASSERT(writeCompressedValue(compressedDataBuffer, compressedDataBufferSize, outputPos, 0x00) == true);
     space = outputPos;
 
+    delete [] compressedDataBuffer;
     return entriesWritten;
 }
 

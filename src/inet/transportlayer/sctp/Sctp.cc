@@ -19,7 +19,7 @@
 #include "inet/transportlayer/common/L4Tools.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
-#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UdpCommand_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/transportlayer/sctp/SctpHeaderSerializer.h"
@@ -200,7 +200,7 @@ void Sctp::handleMessage(cMessage *msg)
             }
 
             SctpHeader *sctpmsg = (packet->peekAtFront<SctpHeader>().get()->dup());
-            int chunkLength = B(sctpmsg->getChunkLength()).get();
+            int chunkLength = sctpmsg->getChunkLength().get<B>();
 
             if (pktdrop && packet->hasBitError()) {
                 EV_WARN << "Packet has bit-error. Call Pktdrop\n";

@@ -74,7 +74,7 @@ void PeriodicGate::readDurationsPar()
     for (size_t i = 0; i < size; i++) {
         clocktime_t duration = durationsPar->get(i).doubleValueInUnit("s");
         if (duration <= CLOCKTIME_ZERO)
-            throw cRuntimeError("Unaccepted duration value (%s) at position %zu", durationsPar->get(i).str().c_str(), i);
+            throw cRuntimeError("Unaccepted duration value (%s) at position %u", durationsPar->get(i).str().c_str(), (unsigned int)i);
         durations[i] = duration;
         totalDuration += duration;
     }
@@ -96,7 +96,10 @@ void PeriodicGate::initializeGating()
 {
     index = 0;
     isOpen_ = initiallyOpen;
-    offset.setRaw(totalDuration != 0 ? initialOffset.raw() % totalDuration.raw() : 0);
+    if (totalDuration.raw() == 0)
+        offset.setRaw(0);
+    else
+        offset.setRaw((initialOffset.raw() % totalDuration.raw() + totalDuration.raw()) % totalDuration.raw());
     while (offset > CLOCKTIME_ZERO) {
         clocktime_t duration = durations[index];
         if (offset >= duration) {
@@ -145,7 +148,7 @@ bool PeriodicGate::canPacketFlowThrough(Packet *packet) const
         return false;
     else {
         if (enableImplicitGuardBand) {
-            clocktime_t flowEndTime = getClockTime() + s((packet->getDataLength() + extraLength) / bitrate).get() + SIMTIME_AS_CLOCKTIME(extraDuration);
+            clocktime_t flowEndTime = getClockTime() + ((packet->getDataLength() + extraLength) / bitrate).get<s>() + SIMTIME_AS_CLOCKTIME(extraDuration);
             return !changeTimer->isScheduled() || flowEndTime <= getArrivalClockTime(changeTimer);
         }
         else

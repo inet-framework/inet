@@ -118,6 +118,7 @@ const Protocol Protocol::ieee80211VhtPhy("ieee80211vhtphy", "IEEE 802.11 VHT PHY
 const Protocol Protocol::ieee802154("ieee802154", "IEEE 802.15.4");
 const Protocol Protocol::ieee8021ae("ieee8021ae", "IEEE 802.1AE");
 const Protocol Protocol::ieee8021qCTag("ieee8021qctag", "IEEE 802.1Q C-TAG");
+const Protocol Protocol::ieee8021qCFM("ieee8021qcfm", "IEEE 802.1Q CFM");
 const Protocol Protocol::ieee8021qSTag("ieee8021qstag", "IEEE 802.1Q S-TAG");
 const Protocol Protocol::ieee8022llc("ieee8022llc", "IEEE 802.2 LLC", Protocol::LinkLayer);
 const Protocol Protocol::ieee8022snap("ieee8022snap", "IEEE 802.2 SNAP", Protocol::LinkLayer);
@@ -131,10 +132,11 @@ const Protocol Protocol::ipsecEsp("ipsecEsp", "IPsec ESP", Protocol::NetworkLaye
 const Protocol Protocol::isis("isis", "IS-IS");
 const Protocol Protocol::l2isis("l2isis", "L2 IS-IS");
 const Protocol Protocol::lldp("lldp", "LLDP", Protocol::NetworkLayer);
-const Protocol Protocol::lmac("lmac", "L-MAC");
+const Protocol Protocol::lmac("lmac", "L-MAC", Protocol::LinkLayer);
 const Protocol Protocol::manet("manet", "MANET");
 const Protocol Protocol::mobileipv6("mobileipv6", "Mobile IPv6");
 const Protocol Protocol::mpls("mpls", "MPLS");
+const Protocol Protocol::mrp("mrp", "MRP", Protocol::LinkLayer);
 const Protocol Protocol::ospf("ospf", "OSPF");
 const Protocol Protocol::eigrp("eigrp", "EIGRP");
 const Protocol Protocol::pim("pim", "PIM");
@@ -152,19 +154,19 @@ const Protocol Protocol::trill("trill", "TRILL");
 const Protocol Protocol::tsn("tsn", "TSN");
 const Protocol Protocol::tteth("tteth", "TT-ETH");
 const Protocol Protocol::udp("udp", "UDP", Protocol::TransportLayer);
-const Protocol Protocol::xmac("xmac", "X-MAC");
+const Protocol Protocol::xmac("xmac", "X-MAC", Protocol::LinkLayer);
 const Protocol Protocol::xtp("xtp", "XTP");
 
 // INET specific conceptual protocol identifiers
-const Protocol Protocol::ackingMac("ackingmac", "Acking MAC");
+const Protocol Protocol::ackingMac("ackingmac", "Acking MAC", Protocol::LinkLayer);
 const Protocol Protocol::apskPhy("apskphy", "APSK PHY", Protocol::PhysicalLayer);
-const Protocol Protocol::csmaCaMac("csmacamac", "CSMA/CA MAC");
+const Protocol Protocol::csmaCaMac("csmacamac", "CSMA/CA MAC", Protocol::LinkLayer);
 const Protocol Protocol::echo("echo", "Echo"); // Echo protocol (ping request/reply)
 const Protocol Protocol::flooding("flooding", "Flooding", Protocol::NetworkLayer);
 const Protocol Protocol::linkStateRouting("linkstaterouting", "LinkStateRouting");
 const Protocol Protocol::nextHopForwarding("nexthopforwarding", "Next Hop Forwarding"); // Next Hop Forwarding
 const Protocol Protocol::probabilistic("probabilistic", "Probabilistic", Protocol::NetworkLayer); // Probabilistic Network Protocol
-const Protocol Protocol::shortcutMac("shortcutmac", "Shortcut MAC");
+const Protocol Protocol::shortcutMac("shortcutmac", "Shortcut MAC", Protocol::LinkLayer);
 const Protocol Protocol::shortcutPhy("shortcutphy", "Shortcut PHY", Protocol::PhysicalLayer);
 const Protocol Protocol::genericPhy("genericphy", "Generic PHY");
 const Protocol Protocol::unknown("unknown", "Unknown");
@@ -173,4 +175,3 @@ const Protocol Protocol::wiseRoute("wiseroute", "WiseRoute"); // WiseRoute Netwo
 const Protocol Protocol::gptp("gptp", "gPTP");
 const Protocol Protocol::ieee8021rTag("ieee8021rtag", "IEEE 802.1R TAG"); // TODO: move to its place in the alphanumeric ordering, causes fingerprints to change because some hypothetical protocols serialize the protocol ID into the packet
 } // namespace inet
-

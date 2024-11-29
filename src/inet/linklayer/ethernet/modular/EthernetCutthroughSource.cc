@@ -78,7 +78,7 @@ void EthernetCutthroughSource::pushPacketStart(Packet *packet, const cGate *gate
     PacketDestreamer::pushPacketStart(packet, gate, datarate);
     if (!cutthroughInProgress && isEligibleForCutthrough(packet)) {
         b cutthroughPosition = getCutthroughSwitchingHeaderSize(packet);
-        simtime_t delay = s(cutthroughPosition / datarate).get();
+        simtime_t delay = (cutthroughPosition / datarate).get<s>();
         scheduleAt(simTime() + delay, cutthroughTimer);
         updateDisplayString();
     }

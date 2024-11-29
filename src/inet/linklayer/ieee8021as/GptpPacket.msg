@@ -173,7 +173,7 @@ class GptpTlv extends cObject {
 class GptpFollowUpInformationTlv extends GptpTlv
 {
     tlvType = GPTP_FOLLOW_UP_INFORMATION_TLV;
-    lengthField @bit(16) = B(GPTP_FOLLOW_UP_INFORMATION_TLV_BODYSIZE).get();
+    lengthField @bit(16) = GPTP_FOLLOW_UP_INFORMATION_TLV_BODYSIZE.get<B>();
     uint32_t organizationId @bit(24) = 0x0080C2;
     uint32_t organizationSubType @bit(24) = 1;
     double rateRatio @bit(32); // 11.4.4.3.6 The value of cumulativeScaledRateOffset is equal to (rateRatio – 1.0) / (2^41), truncated to the next smaller
@@ -203,7 +203,7 @@ class GptpSync extends GptpBase
     messageType = GPTPTYPE_SYNC;
     flags = twoStepFlag;
     chunkLength = GPTP_SYNC_2STEP_PACKET_SIZE;
-    messageLengthField = B(GPTP_SYNC_2STEP_PACKET_SIZE).get();
+    messageLengthField = GPTP_SYNC_2STEP_PACKET_SIZE.get<B>();
     // clocktime_t originTimestamp; // filled when twoStep flag is FALSE
     // followUpInformationTLV; // filled when twoStep flag is FALSE
 }
@@ -212,7 +212,7 @@ class GptpFollowUp extends GptpBase
 {
     messageType = GPTPTYPE_FOLLOW_UP;
     chunkLength = GPTP_FOLLOW_UP_PACKET_SIZE;
-    messageLengthField = B(GPTP_FOLLOW_UP_PACKET_SIZE).get();
+    messageLengthField = GPTP_FOLLOW_UP_PACKET_SIZE.get<B>();
     clocktime_t preciseOriginTimestamp;  // 11.4.4.2.1
     GptpFollowUpInformationTlv followUpInformationTLV;
 }
@@ -221,7 +221,7 @@ class GptpPdelayReq extends GptpBase
 {
     messageType = GPTPTYPE_PDELAY_REQ;
     chunkLength = GPTP_PDELAY_REQ_PACKET_SIZE;
-    messageLengthField = B(GPTP_PDELAY_REQ_PACKET_SIZE).get();
+    messageLengthField = GPTP_PDELAY_REQ_PACKET_SIZE.get<B>();
     clocktime_t reserved1;
     clocktime_t reserved2;
 }
@@ -230,7 +230,7 @@ class GptpPdelayResp extends GptpBase
 {
     messageType = GPTPTYPE_PDELAY_RESP;
     chunkLength = GPTP_PDELAY_RESP_PACKET_SIZE;
-    messageLengthField = B(GPTP_PDELAY_RESP_PACKET_SIZE).get();
+    messageLengthField = GPTP_PDELAY_RESP_PACKET_SIZE.get<B>();
     clocktime_t requestReceiptTimestamp;
     PortIdentity requestingPortIdentity;
 }
@@ -239,7 +239,7 @@ class GptpPdelayRespFollowUp extends GptpBase
 {
     messageType = GPTPTYPE_PDELAY_RESP_FOLLOW_UP;
     chunkLength = GPTP_PDELAY_RESP_FOLLOW_UP_PACKET_SIZE;
-    messageLengthField = B(GPTP_PDELAY_RESP_FOLLOW_UP_PACKET_SIZE).get();
+    messageLengthField = GPTP_PDELAY_RESP_FOLLOW_UP_PACKET_SIZE.get<B>();
     clocktime_t responseOriginTimestamp;
     PortIdentity requestingPortIdentity;
 }

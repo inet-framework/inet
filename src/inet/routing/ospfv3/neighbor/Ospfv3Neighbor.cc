@@ -381,7 +381,7 @@ void Ospfv3Neighbor::retransmitUpdatePacket()
                 break;
         }
 
-        if (B(packetLength + lsaSize).get() < this->getInterface()->getInterfaceMTU()) {
+        if ((packetLength + lsaSize).get<B>() < this->getInterface()->getInterfaceMTU()) {
             includeLSA = true;
             lsaCount++;
         }

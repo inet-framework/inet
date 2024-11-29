@@ -45,8 +45,7 @@ class BuildTask(Task):
 
     def run_protected(self, **kwargs):
         args = self.get_arguments()
-        _logger.debug(f"Running subprocess: {args}")
-        subprocess_result = subprocess.run(args, cwd=self.simulation_project.get_full_path("."))
+        subprocess_result = run_command_with_logging(args, cwd=self.simulation_project.get_full_path("."))
         if subprocess_result.returncode == signal.SIGINT.value or subprocess_result.returncode == -signal.SIGINT.value:
             return self.task_result_class(task=self, subprocess_result=subprocess_result, result="CANCEL", reason="Cancel by user")
         elif subprocess_result.returncode == 0:
@@ -68,26 +67,26 @@ class MsgCompileTask(BuildTask):
 
     def get_input_files(self):
         output_folder = f"out/clang-{self.mode}"
-        object_path = re.sub("\\.msg", "_m.cc", self.file_path)
-        dependency_file_path = re.sub("\\.msg", "_m.h.d", self.file_path)
+        object_path = re.sub(r"\.msg", "_m.cc", self.file_path)
+        dependency_file_path = re.sub(r"\.msg", "_m.h.d", self.file_path)
         full_file_path = self.simulation_project.get_full_path(os.path.join(output_folder, dependency_file_path))
         if os.path.exists(full_file_path):
             dependency = read_dependency_file(full_file_path)
             # KLUDGE: src folder hacked in and out
-            file_paths = dependency[re.sub("src/", "", object_path)]
+            file_paths = dependency[re.sub(r"src/", "", object_path)]
             return list(map(lambda file_path: self.simulation_project.get_full_path(os.path.join("src", file_path)), file_paths))
         else:
             return [self.file_path]
 
     def get_output_files(self):
-        cpp_file_path = re.sub("\\.msg", "_m.cc", self.file_path)
-        header_file_path = re.sub("\\.msg", "_m.h", self.file_path)
+        cpp_file_path = re.sub(r"\.msg", "_m.cc", self.file_path)
+        header_file_path = re.sub(r"\.msg", "_m.h", self.file_path)
         return [f"{cpp_file_path}", f"{header_file_path}"]
 
     def get_arguments(self):
         executable = "opp_msgc"
         output_folder = f"out/clang-{self.mode}"
-        header_file_path = re.sub("\\.msg", "_m.h", self.file_path)
+        header_file_path = re.sub(r"\.msg", "_m.h", self.file_path)
         import_paths = list(map(lambda msg_folder: self.simulation_project.get_full_path(msg_folder), self.simulation_project.msg_folders))
         return [executable,
                 "--msg6",
@@ -118,8 +117,8 @@ class CppCompileTask(BuildTask):
 
     def get_input_files(self):
         output_folder = f"out/clang-{self.mode}"
-        object_path = re.sub("\\.cc", ".o", self.file_path)
-        dependency_file_path = re.sub("\\.cc", ".o.d", self.file_path)
+        object_path = re.sub(r"\.cc", ".o", self.file_path)
+        dependency_file_path = re.sub(r"\.cc", ".o.d", self.file_path)
         full_file_path = self.simulation_project.get_full_path(os.path.join(output_folder, dependency_file_path))
         if os.path.exists(full_file_path):
             dependency = read_dependency_file(full_file_path)
@@ -130,7 +129,7 @@ class CppCompileTask(BuildTask):
 
     def get_output_files(self):
         output_folder = f"out/clang-{self.mode}"
-        object_path = re.sub("\\.cc", ".o", self.file_path)
+        object_path = re.sub(r"\.cc", ".o", self.file_path)
         return [f"{output_folder}/{object_path}"]
 
     def get_arguments(self):

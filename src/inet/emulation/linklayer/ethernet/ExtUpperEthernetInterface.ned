@@ -39,7 +39,7 @@ module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
                 packetCapacity = default(10000);
                 @display("p=250,200");
         }
-        mac: <default(csmacdSupport ? "EthernetCsmaMac" : "EthernetMac")> like IEtherMac {
+        mac: <default(csmacdSupport ? "EthernetCsmaMacPhy" : "EthernetMacPhy")> like IEtherMac {
             parameters:
                 @display("p=350,300");
         }

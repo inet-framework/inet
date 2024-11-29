@@ -1,0 +1,64 @@
+This workflow is disabled because CPU instruction and CPU cycle performance hardware counters are not enabled on virtualized GitHub workflow servers.
+
+name: "Test: speed"
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    # nothing
+
+jobs:
+  speed-tests:
+    runs-on: ubuntu-latest
+    # runs-on: [self-hosted, linux]
+    strategy:
+      matrix:
+        mode: ["release"]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: omnetpp/omnetpp
+          path: omnetpp
+          ref: omnetpp-6.x
+      - uses: actions/checkout@v4
+        with:
+          path: inet
+      - run: mkdir -p /home/runner/work/ccache
+      - uses: actions/cache/restore@v4
+        with:
+          path: /home/runner/work/ccache
+          key: native-${{ matrix.mode }}-ccache-${{ github.run_id }}
+          # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
+          restore-keys: native-${{ matrix.mode }}-ccache
+      - name: Build and test
+        env:
+          MODE: ${{ matrix.mode }}
+        run: |
+          echo "::group::Installing packages"
+          sudo apt update
+          sudo apt install -y --no-install-recommends git wget curl ca-certificates python3 \
+            make ccache clang lld gdb bison flex perl doxygen graphviz libxml2-dev zlib1g-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libz3-dev libopenscenegraph-dev
+          echo "::endgroup::"
+
+          source $GITHUB_WORKSPACE/inet/_scripts/github/build-omnetpp.sh
+
+          echo "::group::Installing pip"
+          sudo apt install -y python3-pip
+          echo "::endgroup::"
+
+          echo "::group::Installing Python packages"
+          python3 -m venv $GITHUB_WORKSPACE/venv
+          source $GITHUB_WORKSPACE/venv/bin/activate
+          python3 -m pip install --upgrade matplotlib numpy pandas seaborn scipy ipython posix-ipc cppyy sewar dask distributed optimparallel requests
+          echo "::endgroup::"
+
+          source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
+
+          echo "::group::Running speed tests"
+          echo 0 | sudo tee /proc/sys/kernel/perf_event_paranoid
+          inet_run_speed_tests -m release -w showcases
+          echo "::endgroup::"

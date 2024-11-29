@@ -9,4 +9,4 @@ _logger = logging.getLogger(__name__)
 
 def generate_ned_documentation(excludes = []):
     _logger.info("Generating NED documentation")
-    subprocess.run(["opp_neddoc", "--no-automatic-hyperlinks", "-x", ','.join(excludes), inet_project.get_full_path(".")])
+    run_command_with_logging(["opp_neddoc", "--no-automatic-hyperlinks", "-x", ','.join(excludes), inet_project.get_full_path(".")])

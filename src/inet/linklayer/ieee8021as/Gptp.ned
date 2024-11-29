@@ -42,10 +42,12 @@ simple Gptp like IGptp
         @signal[timeDifference](type=simtime_t);
         @signal[rateRatio](type=double);
         @signal[peerDelay](type=simtime_t);
+        @signal[packetDropped](type=inet::Packet);
         @statistic[localTime](record=vector; interpolationmode=linear);
         @statistic[timeDifference](record=vector; interpolationmode=linear);
         @statistic[rateRatio](record=vector; interpolationmode=sample-hold);
         @statistic[peerDelay](record=vector; interpolationmode=sample-hold);
+        @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @selfMessageKinds(inet::GptpSelfMsgKind);
 
     gates:

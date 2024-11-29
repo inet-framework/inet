@@ -124,7 +124,7 @@ bool RtpAvProfilePayload32Sender::sendPacket()
             mpegHeader->setPictureType(pictureType);
 
             // the maximum number of real data bytes
-            int maxDataSize = _mtu - B(rtpHeader->getChunkLength() + mpegHeader->getChunkLength()).get();
+            int maxDataSize = _mtu - (rtpHeader->getChunkLength() + mpegHeader->getChunkLength()).get<B>();
 
             if (bytesRemaining > maxDataSize) {
                 // we do not know where slices in the

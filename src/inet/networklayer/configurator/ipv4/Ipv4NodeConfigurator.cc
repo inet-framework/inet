@@ -26,14 +26,12 @@ void Ipv4NodeConfigurator::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         _configureRoutingTable = par("configureRoutingTable");
         cModule *node = getContainingNode(this);
-        const char *networkConfiguratorPath = par("networkConfiguratorModule");
         nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
         interfaceTable.reference(this, "interfaceTableModule", true);
         routingTable.reference(this, "routingTableModule", true);
-        if (networkConfiguratorPath[0]) {
-            networkConfigurator.reference(this, "networkConfiguratorModule", false);
+        networkConfigurator.reference(this, "networkConfiguratorModule", false);
+        if (networkConfigurator != nullptr)
             networkConfigurator->subscribe(Ipv4NetworkConfigurator::networkConfigurationChangedSignal, this);
-        }
     }
     else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP)

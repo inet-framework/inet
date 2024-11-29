@@ -1,8 +1,0 @@
-====== inet-4.x ======
-
-2023-04-04  ------ inet-4.5.0 released ------
-
-2018-01-03  Levente Mészáros
-
-	Manet: Ported DSDV routing from INETMANET.
-	This is an incomplete implementation but it works to some extent.

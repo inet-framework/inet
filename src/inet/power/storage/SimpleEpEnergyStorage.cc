@@ -46,7 +46,7 @@ void SimpleEpEnergyStorage::handleMessage(cMessage *message)
     if (message == timer) {
         setResidualCapacity(targetCapacity);
         scheduleTimer();
-        EV_INFO << "Residual capacity = " << residualCapacity.get() << " (" << (int)round(unit(residualCapacity / nominalCapacity).get() * 100) << "%)" << endl;
+        EV_INFO << "Residual capacity = " << residualCapacity.get() << " (" << (int)round((residualCapacity / nominalCapacity).get<unit>() * 100) << "%)" << endl;
     }
     else
         throw cRuntimeError("Unknown message");
@@ -71,7 +71,7 @@ std::string SimpleEpEnergyStorage::resolveDirective(char directive) const
         case 'c':
             return getResidualEnergyCapacity().str();
         case 'p':
-            return std::to_string((int)std::round(100 * unit(getResidualEnergyCapacity() / getNominalEnergyCapacity()).get())) + "%";
+            return std::to_string((int)std::round(100 * (getResidualEnergyCapacity() / getNominalEnergyCapacity()).get<unit>())) + "%";
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
@@ -139,16 +139,16 @@ void SimpleEpEnergyStorage::scheduleTimer()
     W totalPower = totalPowerGeneration - totalPowerConsumption;
     targetCapacity = residualCapacity;
     if (totalPower > W(0)) {
-        targetCapacity = std::isnan(printCapacityStep.get()) ? nominalCapacity : ceil(unit(residualCapacity / printCapacityStep).get()) * printCapacityStep;
+        targetCapacity = std::isnan(printCapacityStep.get()) ? nominalCapacity : ceil((residualCapacity / printCapacityStep).get<unit>()) * printCapacityStep;
         // NOTE: make sure capacity will change over time despite double arithmetic
-        simtime_t remainingTime = unit((targetCapacity - residualCapacity) / totalPower / s(1)).get();
+        simtime_t remainingTime = ((targetCapacity - residualCapacity) / totalPower / s(1)).get<unit>();
         if (remainingTime == 0)
             targetCapacity += printCapacityStep;
     }
     else if (totalPower < W(0)) {
-        targetCapacity = std::isnan(printCapacityStep.get()) ? J(0) : floor(unit(residualCapacity / printCapacityStep).get()) * printCapacityStep;
+        targetCapacity = std::isnan(printCapacityStep.get()) ? J(0) : floor((residualCapacity / printCapacityStep).get<unit>()) * printCapacityStep;
         // make sure capacity will change over time despite double arithmetic
-        simtime_t remainingTime = unit((targetCapacity - residualCapacity) / totalPower / s(1)).get();
+        simtime_t remainingTime = ((targetCapacity - residualCapacity) / totalPower / s(1)).get<unit>();
         if (remainingTime == 0)
             targetCapacity -= printCapacityStep;
     }
@@ -161,7 +161,7 @@ void SimpleEpEnergyStorage::scheduleTimer()
         cancelEvent(timer);
     // don't schedule if there's no progress
     if (totalPower != W(0)) {
-        simtime_t remainingTime = unit((targetCapacity - residualCapacity) / totalPower / s(1)).get();
+        simtime_t remainingTime = ((targetCapacity - residualCapacity) / totalPower / s(1)).get<unit>();
         if (remainingTime > 0)
             scheduleAfter(remainingTime, timer);
     }

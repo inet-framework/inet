@@ -638,7 +638,7 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
             ipv6Header->addExtensionHeader(hdr);
         }
         hdr->getTlvOptionsForUpdate().appendTlvOption(gpsrOption);
-        hdr->setByteLength(B(utils::roundUp(2 + B(hdr->getTlvOptions().getLength()).get(), 8)));
+        hdr->setByteLength(B(utils::roundUp(2 + B(hdr->getTlvOptions().getLength()).get<B>(), 8)));
         B newHlen = ipv6Header->calculateHeaderByteLength();
         ipv6Header->addChunkLength(newHlen - oldHlen);
         insertNetworkProtocolHeader(packet, Protocol::ipv6, ipv6Header);

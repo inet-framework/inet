@@ -48,7 +48,7 @@ const ITransmissionSymbolModel *ApskModulator::modulate(const ITransmissionBitMo
     for (unsigned int i = 0; i < bits->getSize(); i++) {
         symbolBits.setBit(i % codeWordSize, bits->getBit(i));
         if (i % codeWordSize == codeWordSize - 1)
-            symbols->push_back(modulation->mapToConstellationDiagram(symbolBits));
+            symbols->push_back(new ApskSymbol(*modulation->mapToConstellationDiagram(symbolBits)));
     }
     // TODO: double symbolRate = bitModel->getBitrate() / modulation->getCodeWordSize();
     return new TransmissionSymbolModel(symbols->size(), NaN, symbols->size(), NaN, symbols, modulation, modulation);
