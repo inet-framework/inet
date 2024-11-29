@@ -133,11 +133,19 @@ The simulations are defined in separate configurations of :download:`omnetpp.ini
 
 The :ned:`VoipStreamSender` and :ned:`VoipStreamReceiver` modules are configured
 just like they would be in a fully simulated scenario, no special configuration
-is needed. Here is the relevant configuration:
+is needed. Here is the relevant configuration for :ned:`VoipStreamSender`:
 
-.. literalinclude:: ../omnetpp.ini
+.. literalinclude:: ../voipsender.ini
    :language: ini
-   :end-before: VoipSenderLoopback
+   :start-after: General
+   :end-before: Loopback
+
+Here is the relevant configuration for :ned:`VoipStreamReceiver`:
+
+.. literalinclude:: ../voipreceiver.ini
+   :language: ini
+   :start-after: General
+   :end-before: Loopback
 
 Running
 -------
