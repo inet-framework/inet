@@ -6,7 +6,7 @@ Goals
 
 Visualizing network traffic is an important aspect of running simulations. INET
 provides various visualizers to help you understand the network activity,
-including the :ned:`DataLinkVisualizer`, which focuses on the data link level. This
+including the :ned:`DataLinkCanvasVisualizer`, which focuses on the data link level. This
 module allows you to see the visual representation of the data link level traffic
 in the form of arrows that fade as the traffic ceases.
 
@@ -20,13 +20,13 @@ About the Visualizer
 --------------------
 
 In INET, data link activity can be visualized by including a
-:ned:`DataLinkVisualizer` module in the simulation. Adding an
-:ned:`IntegratedVisualizer` module is also an option because it also
-contains a :ned:`DataLinkVisualizer` module. Data link visualization is
+:ned:`DataLinkCanvasVisualizer` module in the simulation. Adding an
+:ned:`IntegratedCanvasVisualizer` module is also an option because it also
+contains a :ned:`DataLinkCanvasVisualizer` module. Data link visualization is
 disabled by default; it can be enabled by setting the visualizer's
 :par:`displayLinks` parameter to true.
 
-:ned:`DataLinkVisualizer` can observe packets at the *service*, *peer*,
+:ned:`DataLinkCanvasVisualizer` can observe packets at the *service*, *peer*,
 and *protocol* level. The level where packets are observed can be set by
 the :par:`activityLevel` parameter.
 
@@ -35,7 +35,7 @@ the :par:`activityLevel` parameter.
 - At the *peer* level, the visualization is triggered by those packets
   which are processed inside the link layer in the source node and
   processed inside the link layer in the destination node.
-- At the *protocol* level, :ned:`DataLinkVisualizer` displays those packets
+- At the *protocol* level, :ned:`DataLinkCanvasVisualizer` displays those packets
   which are going out at the bottom of the link layer in the source node
   and going in at the bottom of the link layer in the destination node.
 
@@ -62,7 +62,7 @@ ini file.
 
 The wired network contains two :ned:`StandardHost`'s, ``wiredSource`` and
 ``wiredDestination``. The ``linkVisualizer`` module's type is
-:ned:`DataLinkVisualizer`.
+:ned:`DataLinkCanvasVisualizer`.
 
 .. figure:: media/DataLinkVisualizerSimpleWired.png
    :width: 80%
@@ -84,9 +84,9 @@ The following video shows what happens when the simulation is started.
 At the beginning of the video, a red strip appears and moves from
 ``wiredSource`` to ``wiredDestination``. This strip is the standard
 OMNeT++ animation for packet transmissions and has nothing to do with
-:ned:`DataLinkVisualizer`. When the packet is received in whole by
+:ned:`DataLinkCanvasVisualizer`. When the packet is received in whole by
 ``wiredDestination`` (the red strip disappears), a dark cyan arrow is
-added by :ned:`DataLinkVisualizer` between the two hosts, indicating data
+added by :ned:`DataLinkCanvasVisualizer` between the two hosts, indicating data
 link activity. The packet's name is also displayed on the arrow. The arrow
 quickly fades out because the :par:`fadeOutTime` parameter of the
 visualizer is set to a small value.
@@ -118,7 +118,7 @@ Filtering Data Link Activity
 In complex networks with many nodes and several protocols in use, it is
 often useful to be able to filter network traffic and visualize only
 the part of the traffic we are interested in. The following example
-shows how to set packet filtering in :ned:`DataLinkVisualizer`. This
+shows how to set packet filtering in :ned:`DataLinkCanvasVisualizer`. This
 simulation can be run by choosing the ``Filtering`` configuration from
 the ini file.
 
@@ -137,7 +137,7 @@ hosts (``host1``, ``host2``) which are inactive in this simulation.
 For this network, the visualizer's type is :ned:`IntegratedCanvasVisualizer`.
 Data link activity visualization is filtered to display only ping
 messages. The other packets, e.g., ARP packets, are not visualized by
-:ned:`DataLinkVisualizer`. We adjust the ``fadeOutMode`` and the
+:ned:`DataLinkCanvasVisualizer`. We adjust the ``fadeOutMode`` and the
 :par:`fadeOutTime` parameters so that the activity arrows do not fade out
 completely before the next ping messages are sent.
 
@@ -150,7 +150,7 @@ We use the following configuration for the visualization.
 
 The following animation shows what happens when we start the simulation.
 You can see that although there is both ARP and ping traffic in the
-network, :ned:`DataLinkVisualizer` only takes the latter into account due
+network, :ned:`DataLinkCanvasVisualizer` only takes the latter into account due
 to the presence of the :par:`packetFilter` parameter.
 
 .. video:: media/Filtering_v0613.m4v
@@ -203,7 +203,7 @@ submodules can be specified with parameters for each visualizer
 submodule.
 
 In this example, data link activity will be displayed at three different
-levels. To achieve this, three :ned:`DataLinkVisualizer` modules will be
+levels. To achieve this, three :ned:`DataLinkCanvasVisualizer` modules will be
 configured, observing packets at *service*, *peer*, and *protocol* level.
 They are marked with different colors. The ``visualizer`` module is
 configured as follows.
@@ -214,13 +214,13 @@ configured as follows.
    :language: ini
 
 By using the :par:`numDataLinkVisualizers` parameter, we set up three
-:ned:`DataLinkVisualizer` modules. In this example, we are interested in
+:ned:`DataLinkCanvasVisualizer` modules. In this example, we are interested in
 *video* packets. To highlight them, we use the :par:`packetFilter`
 parameter. The :par:`fadeOutMode` parameter specifies that inactive links
 fade out during animation time. The :par:`holdAnimationTime` parameter stops
 the animation for a while, delaying the fading of the data link activity
 arrows. The ``activityLevel``, ``lineColor``, and ``labelColor``
-parameters are different for each :ned:`DataLinkVisualizer` to make data
+parameters are different for each :ned:`DataLinkCanvasVisualizer` to make data
 link activity levels easy to distinguish:
 
 - ``dataLinkVisualizer[0]`` is configured to display *protocol* level
@@ -287,7 +287,7 @@ RREP message in each host results in the node updating its routing table
 with the next hop address towards the destination node.
 
 As AODV operates with two message types, we'll use two
-:ned:`DataLinkVisualizer` modules configured to use two different colors.
+:ned:`DataLinkCanvasVisualizer` modules configured to use two different colors.
 
 .. code-block:: ini
 
@@ -358,7 +358,7 @@ More Information
 ----------------
 
 This example only demonstrates the key features of data link activity
-visualization. For more information, refer to the ``DatalinkVisualizer``
+visualization. For more information, refer to the :ned:`DatalinkCanvasVisualizer`
 NED documentation.
 
 
