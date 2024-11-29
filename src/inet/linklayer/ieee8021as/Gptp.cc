@@ -668,7 +668,7 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
     }
 
     if (simSignal != receptionStartedSignal && simSignal != transmissionStartedSignal &&
-        simSignal != receptionEndedSignal && simSignal != gptpSyncSuccessfulSignal)
+        simSignal != receptionEndedSignal)
         return;
 
     auto ethernetSignal = check_and_cast<cPacket *>(obj);

@@ -15,14 +15,15 @@
 
 namespace inet {
 
-class INET_API HotStandby :public ClockUserModuleBase, public cListener
+class INET_API HotStandby : public ClockUserModuleBase, public cListener
 {
   protected:
-    std::map<int, clocktime_t> gptpSyncTime; // store each gptp sync time
+    std::map<uint8_t , clocktime_t> gptpSyncTime; // store each gptp sync time
   public:
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t simSignal, const SimTime& t, cObject *details) override;
     void handleGptpSyncSuccessfulSignal(const Gptp *gptp, const SimTime& t);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 };
 
 } // namespace inet

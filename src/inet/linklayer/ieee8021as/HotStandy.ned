@@ -18,6 +18,6 @@ package inet.linklayer.ieee8021as;
 simple HotStandby
 {
     parameters:
-        @display("i=block/app");
+        @display("i=block/blackboard");
         @class(HotStandby);
 }

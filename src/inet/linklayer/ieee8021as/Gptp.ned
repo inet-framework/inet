@@ -50,6 +50,7 @@ simple Gptp like IGptp
         @signal[residenceTime](type=simtime_t);
         @signal[correctionFieldIngress](type=simtime_t);
         @signal[correctionFieldEgress](type=simtime_t);
+        @signal[gptpSyncSuccessfulSignal](type=simtime_t);
         @signal[packetDropped](type=inet::Packet);
         @statistic[localTime](record=vector; interpolationmode=linear);
         @statistic[timeDifference](record=vector; interpolationmode=linear);
