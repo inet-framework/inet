@@ -1,0 +1,265 @@
+#!/usr/bin/env python3
+
+import os
+import subprocess
+import json
+import re
+import requests
+from pathlib import Path
+from typing import List, Optional
+
+class INETReleaseAutomation:
+    def __init__(self, version: str, milestone: str, repo_path: str):
+        """
+        Initialize the release automation with version and milestone information
+        
+        Args:
+            version: Version string in format 'A.B.C'
+            milestone: GitHub milestone name/number
+            repo_path: Path to INET repository root
+        """
+        self.version = version
+        self.milestone = milestone
+        self.repo_path = Path(repo_path)
+        
+    def check_milestone_issues(self) -> bool:
+        """Check if all fixed issues are correctly assigned to the milestone"""
+        url = f"https://api.github.com/repos/inet-framework/inet/milestones/{self.version}"
+        response = requests.get(url)
+        if response.status_code != 200:
+            raise RuntimeError(f"Failed to retrieve milestone {self.version}: {response.text}")
+        milestone = response.json()
+        if milestone["state"] != "closed":
+            raise RuntimeError(f"Milestone {self.version} is not closed")
+        if milestone["open_issues"] != 0:
+            raise RuntimeError(f"Milestone {self.version} has open issues")
+        print(f"Verified that milestone {self.version} is at 100%")
+        return True
+
+    def update_version_number(self) -> bool:
+        """Modify version number in common/INETDefs.h"""
+        defs_file = self.repo_path / "common" / "INETDefs.h"
+        if not defs_file.exists():
+            raise FileNotFoundError(f"INETDefs.h not found at {defs_file}")
+        
+        version_parts = self.version.split('.')
+        major, minor, patch = map(int, version_parts)
+        
+        with open(defs_file, 'r') as file:
+            content = file.read()
+        
+        new_content = re.sub(
+            r'#define INET_VERSION\s+0x\d{4}',
+            f'#define INET_VERSION        0x{major:02x}{minor:02x}',
+            content
+        )
+        new_content = re.sub(
+            r'#define INET_PATCH_LEVEL\s+0x\d{2}',
+            f'#define INET_PATCH_LEVEL    0x{patch:02x}',
+            new_content
+        )
+        
+        with open(defs_file, 'w') as file:
+            file.write(new_content)
+        
+        print(f"Updated version number to {self.version} in {defs_file}")
+        return True
+
+    def run_tests(self) -> bool:
+        """Run the test suite"""
+        try:
+            subprocess.run(["make", "test"], cwd=self.repo_path, check=True)
+            return True
+        except subprocess.CalledProcessError:
+            print("Tests failed!")
+            return False
+
+    def update_selfdoc(self) -> bool:
+        """Update fingerprint documentation"""
+        try:
+            subprocess.run(
+                ["tests/fingerprint/fingerprinttest_selfdoc"], 
+                cwd=self.repo_path, 
+                check=True
+            )
+            return True
+        except subprocess.CalledProcessError:
+            print("Fingerprint update failed!")
+            return False
+
+    def update_ned_documentation(self) -> bool:
+        """Update NED documentation if new NED types were added"""
+        try:
+            subprocess.run(["make", "neddoc"], cwd=self.repo_path, check=True)
+            print("NED documentation updated successfully.")
+            return True
+        except subprocess.CalledProcessError:
+            print("Failed to update NED documentation!")
+            return False
+
+    def update_whatsnew(self) -> bool:
+        """Update the WHATSNEW file with latest changes"""
+        try:
+            subprocess.run(["./update-whatsnew"], cwd=self.repo_path / "releng", check=True)
+            return True
+        except subprocess.CalledProcessError:
+            print("WHATSNEW update failed!")
+            return False
+
+    def tag_repository(self) -> bool:
+        """Tag the git repo with version tag"""
+        tag = f"v{self.version}"
+        try:
+            subprocess.run(["git", "tag", tag], cwd=self.repo_path, check=True)
+            return True
+        except subprocess.CalledProcessError:
+            print(f"Failed to create tag {tag}!")
+            return False
+
+    def create_distribution(self) -> str:
+        """Run releng/makedist and rename the archive"""
+        try:
+            subprocess.run(["./makedist"], cwd=self.repo_path / "releng", check=True)
+            for file in self.repo_path.glob(f"inet-{self.version}-*-src.tgz"):
+                new_name = f"inet-{self.version}-src.tgz"
+                file.rename(self.repo_path / new_name)
+                return new_name
+            raise FileNotFoundError(f"Distribution archive not found in {self.repo_path}")
+        except subprocess.CalledProcessError:
+            print("Distribution creation failed!")
+            return ""
+
+    def push_to_remote(self) -> bool:
+        """Push the version branch and tag to remote"""
+        tag = f"v{self.version}"
+        branch = f"v{'.'.join(self.version.split('.')[:2])}.x"
+        try:
+            subprocess.run(["git", "push", "origin", branch], cwd=self.repo_path, check=True)
+            subprocess.run(["git", "push", "origin", tag], cwd=self.repo_path, check=True)
+            return True
+        except subprocess.CalledProcessError:
+            print("Failed to push to remote!")
+            return False
+
+    def create_github_release(self) -> bool:
+        """Create GitHub release and upload archive"""
+        try:
+            tag = f"v{self.version}"
+            whatsnew_path = self.repo_path / "WHATSNEW"
+            archive_name = f"inet-{self.version}-src.tgz"
+            archive_path = self.repo_path / archive_name
+
+            # Extract release notes from WHATSNEW
+            with open(whatsnew_path, 'r') as f:
+                whatsnew_content = f.read()
+            release_notes = re.search(f'(What\'s New in INET {self.version}.*?)\n\n', whatsnew_content, re.DOTALL)
+            if not release_notes:
+                raise ValueError(f"Couldn't find release notes for version {self.version} in WHATSNEW")
+
+            # Create GitHub release in draft mode
+            subprocess.run([
+                "gh", "release", "create", tag,
+                "--draft",
+                "--title", f"INET {self.version}",
+                "--notes", release_notes.group(1),
+                archive_path
+            ], cwd=self.repo_path, check=True)
+
+            print(f"Created draft GitHub release for version {self.version}")
+            return True
+        except (subprocess.CalledProcessError, FileNotFoundError, ValueError) as e:
+            print(f"Failed to create GitHub release: {str(e)}")
+            return False
+
+    def update_models_omnetpp_org(self) -> bool:
+        """Update models.omnetpp.org with new version"""
+        print("Please update models.omnetpp.org manually:")
+        print("- Modify latest release version in inet.xml")
+        print("- Update for older omnetpp versions")
+        return True
+
+    def update_inet_website(self) -> bool:
+        """Update inet.omnetpp.org with new version"""
+        print("Please update inet.omnetpp.org manually:")
+        print("- Add new version to Download.md")
+        print("- Add new post in _posts folder")
+        return True
+
+    def update_opp_env(self) -> bool:
+        """Update opp_env database"""
+        print("Please update opp_env manually:")
+        print("- Add new version to inet.py")
+        print("- Tag with new version")
+        return True
+
+    def rebuild_docker_images(self) -> bool:
+        """Rebuild INET based docker images"""
+        print("Please rebuild docker images from:")
+        print("github.com:omnetpp/dockerfiles.git")
+        return True
+
+    def rebuild_documentation(self) -> bool:
+        """Rebuild all INET documentation"""
+        try:
+            # NED reference documentation
+            print("Rebuilding NED reference documentation...")
+            
+            # Main documentation
+            print("Rebuilding main documentation...")
+            subprocess.run(
+                ["docker", "run", "make", "html"], 
+                cwd=self.repo_path / "doc/src",
+                check=True
+            )
+            return True
+        except subprocess.CalledProcessError:
+            print("Documentation rebuild failed!")
+            return False
+
+    def send_announcements(self) -> bool:
+        """Send release announcements"""
+        print("Please send announcements manually:")
+        print("1. Send email to mailing list")
+        print("2. Post on https://forum.omnetpp.org")
+        if self.version.count('.') == 1:  # Major/Minor release
+            print("3. Post on omnetpp.org main site")
+        return True
+
+def main():
+    """Main function to run the release process"""
+    # Example usage
+    automation = INETReleaseAutomation(
+        version="4.5.0",
+        milestone="INET-4.5.0",
+        repo_path="/path/to/inet"
+    )
+    
+    # Execute release steps
+    steps = [
+        ("Checking milestone issues", automation.check_milestone_issues),
+        ("Updating version number", automation.update_version_number),
+        ("Running tests", automation.run_tests),
+        ("Updating SelfDoc info", automation.update_selfdoc),
+        ("Updating NED documentation", automation.update_ned_documentation),
+        ("Updating WHATSNEW", automation.update_whatsnew),
+        ("Tagging repository", automation.tag_repository),
+        ("Creating distribution", automation.create_distribution),
+        ("Pushing to remote", automation.push_to_remote),
+        ("Creating GitHub release", automation.create_github_release),
+        ("Updating models.omnetpp.org", automation.update_models_omnetpp_org),
+        ("Updating inet.omnetpp.org", automation.update_inet_website),
+        ("Updating opp_env", automation.update_opp_env),
+        ("Rebuilding docker images", automation.rebuild_docker_images),
+        ("Rebuilding documentation", automation.rebuild_documentation),
+        ("Sending announcements", automation.send_announcements),
+    ]
+    
+    for step_name, step_func in steps:
+        print(f"\nExecuting: {step_name}")
+        if not step_func():
+            print(f"Failed at step: {step_name}")
+            break
+        print(f"Completed: {step_name}")
+
+if __name__ == "__main__":
+    main()
