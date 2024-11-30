@@ -110,6 +110,57 @@ The script assigns the following IP addresses:
 
 The TAP devices are assigned random MAC addresses by the host OS when they are created.
 
+
+
+We can use the :ned:`ExternalApp` and :ned:`ExternalEnvironment` modules to specify commands to run on the host OS from the ini file.
+This way the commands can be grouped logically to the network node they are associated with TODO
+
+:ned:`ExternalEnvironment` submodule, which deals with preparing the host OS environment
+for running the emulation. Specifically, we use :ned:`ExternalEnvironment`'s :par:`setupCommand` and :ned:`teardownCommand` parameters
+to create network namespaces and virtual network interfaces in the host OS for the containing network node.
+As the name suggests, :par:`setupCommand` is executed at module creation, and :ned:`teardownCommand` at module destruction.
+
+:ned:`ExternalEnvironment` can execute commands on the host OS at module creation and module destruction.
+These commands can be specified by the :par:`setupCommand` and :ned:`teardownCommand` parameters.
+This module can be used to set up network namespaces and virtual network interfaces.
+We include this module in hosts by setting the :par:`hasEnvironment` parameter to ``true``:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: hasEnvironment
+   :end-at: hasEnvironment
+
+Then, we specify the setup and teardown commands, 
+and set which network namespace to run them in (here, we use the node's full name):
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: nodeFullName()
+   :end-at: ip tuntap del mode tap dev tap0
+
+The :ned:`ExternalProcess` module can be used to execute commands in the host OS during the simulation.
+
+which deals with preparing the host OS environment
+for running the emulation. Specifically, we use :ned:`ExternalEnvironment`'s :par:`setupCommand` and :ned:`teardownCommand` parameters
+to create network namespaces and virtual network interfaces in the host OS for the containing network node.
+As the name suggests, :par:`setupCommand` is executed at module creation, and :ned:`teardownCommand` at module destruction.
+
+Here is the configuration in omnetpp.ini where we configure the setup and teardown commands:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: 
+
+The other submodule in :ned:`ExternalApp` is :ned:`ExternalProcess`. This module represents the process corresponding to the network node
+during simulation. The command to execute in the host OS is defined by :ned:`ExternalProcess`'s :par:`command` parameter. Here,
+we use it to start the babel daemon process. TODO namespace
+
+These commands could be defined in shell scripts as well, however, defining them in an :ned:`ExternalApp`
+however, defining commands associated with a network node in the simulation at the node itself makes
+for logical grouping and running the simulation more convenient. For example, we can easily refactor
+shared parts of the command by parameterizing network-node-dependent values such as node index.
+
+
 ``Run.sh`` runs the emulation example; it starts the ``babeld`` instances, runs a
 ``ping`` command in ``host0``'s network namespace each second, and opens the simulation in
 qtenv. The user is expected to run the simulation in express mode. After qtenv is
