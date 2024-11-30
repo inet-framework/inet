@@ -135,7 +135,7 @@ However, the :par:`positionComposition` and :par:`orientationComposition` parame
 can specify other methods of composition. Both parameters support the following values: ``"zero"``, ``"sum"``, ``"average"``,
 with the default for both parameters being ``"sum"``.
 The "zero" composition method means that the mobility submodules are not taken into account.
-This can be useful to decouple the orientation from the mobility module's state, for example.
+This can be useful to decouple the orientation from the mobility module's position, for example.
 Furthermore, the :par:`orientationComposition` parameter can have the ``"faceForward"`` value, which
 makes the mobility face towards the direction of motion.
 
@@ -282,7 +282,7 @@ omnetpp.ini. Here are the parts related to antenna mobility:
 
 Each antenna needs to be attached to the network node, and also face
 towards its target. Thus each antenna has a :ned:`SuperpositioningMobility`
-submodule. :par:`element[0]` of the array is an :ned:`AttachedMobility`, and the
+submodule. ``element[0]`` of the array is an :ned:`AttachedMobility`, and the
 antenna's position is attached to and offset from the position of the
 host. ``element[1]`` is a :ned:`FacingMobility`, the antenna tracks its target.
 
