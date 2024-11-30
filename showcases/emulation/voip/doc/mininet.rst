@@ -106,7 +106,7 @@ To run the simulation, use the ``run_mininet.sh`` script:
       Active Internet connections (servers and established)
       tcp        0      0 0.0.0.0:6653            0.0.0.0:*               LISTEN      1335/ovs-testcontro
 
-   In this case, kill the controller's process with ``kill -9 <PID>``, where <PID> is the process ID. In this case, it's 1335.
+   In this case, kill the controller's process with ``sudo kill -9 <PID>``, where <PID> is the process ID. In this case, it's 1335.
 
 
 When the simulations in Qtenv are loaded, make sure to start the receiver one
