@@ -20,28 +20,28 @@ void Ieee802154MacHeaderSerializer::serialize(MemoryOutputStream& stream, const 
     uint16_t frameControl = 0;
     frameControl |= 0x0001;  // Frame type = data frame
     frameControl |= 0x0C00;  // Dest addressing mode = 3 (64-bit extended)
-    frameControl |= 0x00C0;  // Source addressing mode = 3 (64-bit extended)
-    stream.writeUint16Be(frameControl);
+    frameControl |= 0xC000;  // Source addressing mode = 10 (64-bit extended)
+    stream.writeUint16Le(frameControl);
 
     // Sequence Number (1 byte)
     stream.writeUint8(header->getSequenceId() & 0xFF);
 
     // Addressing Fields
     // Destination PAN ID (2 bytes)
-    stream.writeUint16Be(0xFFFF);  // Broadcast PAN ID
+    stream.writeUint16Le(0xFFFF);  // Broadcast PAN ID
 
     // Destination Address (8 bytes)
     auto destAddr = header->getDestAddr();
-    stream.writeMacAddress(destAddr);  // Writes all 6 bytes
-    stream.writeUint16Be(0);  // Padding to 8 bytes
+    stream.writeUint48Le(destAddr.getInt());  // Writes all 6 bytes
+    stream.writeUint16Le(0);  // Padding to 8 bytes
 
     // Source PAN ID (2 bytes)
-    stream.writeUint16Be(0xFFFF);  // Broadcast PAN ID
+    stream.writeUint16Le(0xFFFF);  // Broadcast PAN ID
 
     // Source Address (8 bytes)
     auto srcAddr = header->getSrcAddr();
-    stream.writeMacAddress(srcAddr);  // Writes all 6 bytes
-    stream.writeUint16Be(0);  // Padding to 8 bytes
+    stream.writeUint48Le(srcAddr.getInt());  // Writes all 6 bytes
+    stream.writeUint16Le(0);  // Padding to 8 bytes
 }
 
 const Ptr<Chunk> Ieee802154MacHeaderSerializer::deserialize(MemoryInputStream& stream) const
