@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
+#ifdef __linux__
+
 #include "inet/common/SimulationCpuUsageMeasurer.h"
 
 #include <asm/unistd.h>
@@ -100,3 +102,5 @@ void SimulationCpuUsageMeasurer::lifecycleEvent(SimulationLifecycleEventType eve
 }
 
 }  // namespace inet
+
+#endif

@@ -5,6 +5,8 @@
 //
 
 
+#ifdef __linux__
+
 #ifndef __INET_SIMULATIONCPUUSAGEMEASURER_H
 #define __INET_SIMULATIONCPUUSAGEMEASURER_H
 
@@ -32,5 +34,7 @@ class SimulationCpuUsageMeasurer : public cISimulationLifecycleListener {
 };
 
 }  // namespace inet
+
+#endif
 
 #endif
