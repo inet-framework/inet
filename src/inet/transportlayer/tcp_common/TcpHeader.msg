@@ -225,6 +225,21 @@ class TcpHeader extends TransportHeaderBase
     TcpOption *headerOption[] @owned;
 }
 
+cplusplus(cc) {{
+void doParsimArrayPacking(omnetpp::cCommBuffer *b, TcpOption* *t, int n)
+{
+    for (int i = 0; i < n; i++)
+        b->packObject(t[i]);
+}
+
+void doParsimArrayUnpacking(omnetpp::cCommBuffer *b, TcpOption* *t, int n)
+{
+    for (int i = 0; i < n; i++)
+        t[i] = check_and_cast<TcpOption*>(b->unpackObject());
+}
+
+}}
+
 cplusplus(TcpHeader) {{
   public:
     /**
