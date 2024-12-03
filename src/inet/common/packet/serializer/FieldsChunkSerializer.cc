@@ -38,8 +38,6 @@ const Ptr<Chunk> FieldsChunkSerializer::deserialize(MemoryInputStream& stream, c
     auto chunkLength = endPosition - startPosition;
     ChunkSerializer::totalDeserializedLength += chunkLength;
     fieldsChunk->setChunkLength(chunkLength);
-    auto serializedBytes = new std::vector<uint8_t>();
-    stream.copyData(*serializedBytes, startPosition, chunkLength);
     auto& chunkStream = fieldsChunk->getSerializedDataForUpdate();
     chunkStream.clear();
     chunkStream.writeData(stream.getData(), startPosition, chunkLength);
