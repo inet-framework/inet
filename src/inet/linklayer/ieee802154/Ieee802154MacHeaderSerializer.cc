@@ -19,8 +19,8 @@ void Ieee802154MacHeaderSerializer::serialize(MemoryOutputStream& stream, const 
     // Frame Control Field (2 bytes)
     uint16_t frameControl = 0;
     frameControl |= 0x0001;  // Frame type = data frame
-    frameControl |= 0x0C00;  // Dest addressing mode = 3 (64-bit extended)
-    frameControl |= 0xC000;  // Source addressing mode = 10 (64-bit extended)
+    frameControl |= 0x0C00;  // Dest addressing mode = 11 (64-bit extended)
+    frameControl |= 0xC000;  // Source addressing mode = 11 (64-bit extended)
     stream.writeUint16Le(frameControl);
 
     // Sequence Number (1 byte)
@@ -49,28 +49,27 @@ const Ptr<Chunk> Ieee802154MacHeaderSerializer::deserialize(MemoryInputStream& s
     auto header = makeShared<Ieee802154MacHeader>();
 
     // Frame Control Field (2 bytes)
-    uint16_t frameControl = stream.readUint16Be();
+    uint16_t frameControl = stream.readUint16Le();
     // We don't need to parse all frame control bits for our internal format
+    ASSERT(frameControl == 0xCC01);
 
     // Sequence Number (1 byte)
     header->setSequenceId(stream.readUint8());
 
     // Skip Destination PAN ID (2 bytes)
-    stream.readUint16Be();
+    stream.readUint16Le();
 
     // Destination Address (8 bytes)
-    MacAddress destAddr;
-    destAddr = stream.readMacAddress();  // Reads 6 bytes
-    stream.readUint16Be();  // Skip padding
+    MacAddress destAddr(stream.readUint48Le());  // Reads 6 bytes
+    stream.readUint16Le();  // Skip padding
     header->setDestAddr(destAddr);
 
     // Skip Source PAN ID (2 bytes)
-    stream.readUint16Be();
+    stream.readUint16Le();
 
     // Source Address (8 bytes)
-    MacAddress srcAddr;
-    srcAddr = stream.readMacAddress();  // Reads 6 bytes
-    stream.readUint16Be();  // Skip padding
+    MacAddress srcAddr(stream.readUint48Le());  // Reads 6 bytes
+    stream.readUint16Le();  // Skip padding
     header->setSrcAddr(srcAddr);
 
     // Set default network protocol
