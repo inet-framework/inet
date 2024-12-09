@@ -15,3 +15,17 @@ To remove extra privileges after you're finished using network namespaces, use t
 
 $> sudo setcap -r /${your-omnetpp-root}/bin/opp_run_release
 $> sudo setcap -r /${your-omnetpp-root}/bin/opp_run_dbg
+
+On Ubuntu systems which use apparmor additional configuration is required:
+
+Copy the opp_run apparmor profile:
+
+$> sudo cp opp_run /etc/apparmor.d
+
+Enable the new opp_run apparmor profile:
+
+$> sudo aa-enforce /etc/apparmor.d/opp_run
+
+If you later edit the opp_run apparmor profile you can reload it:
+
+$> sudo apparmor_parser -r /etc/apparmor.d/opp_run
