@@ -1,0 +1,8 @@
+# Last Modified: Fri Dec  6 11:39:11 2024
+abi <abi/3.0>,
+
+include <tunables/global>
+
+profile opp_run /**/opp_run* flags=(unconfined) {
+}
+

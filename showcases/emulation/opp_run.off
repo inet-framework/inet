@@ -1,0 +1,37 @@
+# Last Modified: Fri Dec  6 11:39:11 2024
+# This profile is not used temporarily because on Ubuntu 24.04 it requires attaching
+# disconnected file system path /proc/self/ns/net as / and allowing read access to it
+abi <abi/3.0>,
+
+include <tunables/global>
+
+profile opp_run /**/opp_run* flags=(attach_disconnected) {
+  include <abstractions/base>
+
+  # Needed for namespace operations and mappings
+  capability sys_admin,
+  capability net_admin,
+
+  # Allow writing to the user namespace mapping files
+  /proc/*/setgroups w,
+  /proc/*/uid_map w,
+  /proc/*/gid_map w,
+
+  # Allow reading the network namespace
+  /proc/*/ns/net r,
+
+  # KLUDGE: Allow reading the network namespace 
+  # KLUDGE: This is a disconnected path and the flag above attaches it to the root
+  / r,
+
+  # Allow operations on the nsfs filesystem
+  mount fstype=nsfs,
+
+  /usr/bin/ip rix,
+  /home/levy/workspace/omnetpp/lib/libopp*.so rm,
+  /home/levy/workspace/omnetpp/bin/opp_run* mr,
+  /home/levy/workspace/inet/src/lib*.so rm,
+  owner /home/levy/workspace/omnetpp/** rw,
+  owner /home/levy/workspace/inet/** rw,
+}
+
