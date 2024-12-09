@@ -8,6 +8,8 @@
 
 #include <fcntl.h>
 #include <fstream>
+#include <linux/prctl.h>
+#include <sys/prctl.h>
 
 namespace inet {
 
@@ -43,6 +45,9 @@ void UnsharedNamespaceInitializer::lifecycleEvent(SimulationLifecycleEventType e
 void UnsharedNamespaceInitializer::unshareUserNamespace()
 {
 #ifdef __linux__
+    // NOTE:  setting the state of the "dumpable" attribute is not striclty needed for unsharing the user and network namespace
+    //        but on Ubuntu 24.04 the system doesn't allow reading the /proc/self/ns/net file
+    prctl(PR_SET_DUMPABLE, 1, 0, 0, 0);
     pid_t originalUid = getuid();
     pid_t originalGid = getgid();
     if (unshare(CLONE_NEWUSER) < 0)
