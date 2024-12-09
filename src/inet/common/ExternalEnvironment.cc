@@ -12,6 +12,14 @@ namespace inet {
 
 Define_Module(ExternalEnvironment);
 
+ExternalEnvironment::~ExternalEnvironment()
+{
+    if (initialized()) {
+        if (!opp_isempty(networkNamespace) && existsNetworkNamespace(networkNamespace))
+            deleteNetworkNamespace(networkNamespace);
+    }
+}
+
 void ExternalEnvironment::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
@@ -41,8 +49,6 @@ void ExternalEnvironment::preDelete(cComponent *root)
                 // cannot throw an exception from the destructor
                 EV_FATAL << "Failed to execute teardown command: " << teardownCommand << std::endl;
         }
-        if (!opp_isempty(networkNamespace) && existsNetworkNamespace(networkNamespace))
-            deleteNetworkNamespace(networkNamespace);
     }
 }
 

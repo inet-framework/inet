@@ -19,6 +19,7 @@ class ExternalEnvironment : public cSimpleModule
     const char *teardownCommand = nullptr;
 
   protected:
+    virtual ~ExternalEnvironment();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void preDelete(cComponent *root) override;
