@@ -16,16 +16,17 @@ To remove extra privileges after you're finished using network namespaces, use t
 $> sudo setcap -r /${your-omnetpp-root}/bin/opp_run_release
 $> sudo setcap -r /${your-omnetpp-root}/bin/opp_run_dbg
 
-On Ubuntu systems which use apparmor additional configuration is required:
+Some Linux systems (Ubuntu 24.04 for example) use AppArmor for fine grained access control.
+On systems with AppArmor you need additional configuration to make the certain emulation showcases work:
 
-Copy the opp_run apparmor profile:
+You can copy the provided opp_run AppArmor profile to the system profiles folder:
 
 $> sudo cp opp_run /etc/apparmor.d
 
-Enable the new opp_run apparmor profile:
+Then enforce and disable the new opp_run AppArmor profile in order to put opp_run_* executables into unconfined mode:
 
 $> sudo aa-enforce /etc/apparmor.d/opp_run
+$> sudo aa-disable /etc/apparmor.d/opp_run
 
-If you later edit the opp_run apparmor profile you can reload it:
-
-$> sudo apparmor_parser -r /etc/apparmor.d/opp_run
+You can build a more specific profile which only allows what is needed by the emulation showcases.
+Such a profile is not provided for INET, see the opp_run.off profile for hints.
