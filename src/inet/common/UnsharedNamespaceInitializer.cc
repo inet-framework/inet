@@ -74,6 +74,8 @@ void UnsharedNamespaceInitializer::unshareNetworkNamespace()
     if (unshare(CLONE_NEWNET) < 0)
         throw cRuntimeError("Failed to unshare network namespace");
     originalNetworkNamespaceFd = open("/proc/self/ns/net", O_RDONLY);
+    if (originalNetworkNamespaceFd == -1)
+        throw cRuntimeError("Cannot open current network namespace: errno=%d (%s)", errno, strerror(errno));
 #endif
 }
 
