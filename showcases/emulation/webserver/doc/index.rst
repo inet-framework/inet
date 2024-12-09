@@ -66,7 +66,37 @@ The output of the processes appears in the Qtenv log window. Here is the output 
 .. figure:: media/wget_module_log.png
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
-:download:`WebserverShowcase.ned <../WebserverShowcase.ned>`,
+:download:`WebserverShowcase.ned <../WebserverShowcase.ned>`
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/emulation/webserver`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-latest --options=inet:full
+    $ cd inet-workspace
+    $ opp_env shell
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and opens an interactive shell. (The
+``--options=inet:full`` argument is required to enable the Emulation feature in
+opp_env.)
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
+
+To experiment with the emulation examples, navigate to the
+``inet/showcases/emulation/webserver`` directory. From there, you can execute the
+commands outlined in the previous sections.
 
 Discussion
 ----------
