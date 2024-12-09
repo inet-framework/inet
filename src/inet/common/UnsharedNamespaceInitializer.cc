@@ -8,6 +8,8 @@
 
 #include <fcntl.h>
 #include <fstream>
+#include <sys/prctl.h>
+
 
 namespace inet {
 
@@ -43,6 +45,7 @@ void UnsharedNamespaceInitializer::lifecycleEvent(SimulationLifecycleEventType e
 void UnsharedNamespaceInitializer::unshareUserNamespace()
 {
 #ifdef __linux__
+    prctl(PR_SET_DUMPABLE, 1, 0, 0, 0);
     pid_t originalUid = getuid();
     pid_t originalGid = getgid();
     if (unshare(CLONE_NEWUSER) < 0)
