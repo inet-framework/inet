@@ -98,6 +98,10 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      */
     bool recordTransmissionLog;
     bool recordReceptionLog;
+    /**
+     * Specifies what should happen if two transmissions start at the same moment
+     */
+    const char *sameTransmissionStartTimeCheck = nullptr;
     //@}
 
     /** @name Timer */

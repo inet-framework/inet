@@ -103,6 +103,7 @@ void RadioMedium::initialize(int stage)
         recordReceptionLog = par("recordReceptionLog");
         if (recordTransmissionLog || recordReceptionLog)
             communicationLog.open();
+        sameTransmissionStartTimeCheck = par("sameTransmissionStartTimeCheck");
     }
     else if (stage == INITSTAGE_LAST)
         EV_INFO << "Initialized " << getCompleteStringRepresentation() << endl;
@@ -460,6 +461,25 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
 {
     Enter_Method("addTransmission");
     transmissionCount++;
+    if (*sameTransmissionStartTimeCheck != 'i') {
+        int count = 0;
+        communicationCache->mapTransmissions([&] (const ITransmission *ongoingTransmission) {
+            if (ongoingTransmission->getStartTime() == transmission->getStartTime()) {
+                if (*sameTransmissionStartTimeCheck == 'w')
+                    count++;
+                else
+                    throw cRuntimeError("Another transmission is already started at precisely the same simulation time!\n\n"
+                            "Such exact coincidence is highly unlikely in the real world and typically indicates a configuration issue."
+                            "It suggests that applications or protocols are set up in a way that synchronizes the transmission timing across multiple network nodes."
+                            "This can lead to undesired behavior that is statistically improbable in the real world."
+                            "For instance, two nodes may repeatedly broadcast packets without detecting channel activity, causing interference and preventing successful receptions."
+                            "One way of addressing this, is randomizing the start time parameters of applications or protocols.\n\n"
+                            "If needed, you can disable this check by setting the RadioMedium module's 'sameTransmissionStartTimeCheck' parameter.\n\n");
+            }
+        });
+        if (count != 0)
+            EV_WARN << "There are " << count << " other transmissions started at precisely the same simulation time" << EV_ENDL;
+    }
     communicationCache->addTransmission(transmission);
     simtime_t maxArrivalEndTime = transmission->getEndTime();
     communicationCache->mapRadios([&] (const IRadio *receiverRadio) {
