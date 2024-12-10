@@ -571,9 +571,9 @@
 /examples/wireless/nic/,             -f omnetpp.ini -c LMacWithUnitDiskRadio -r 0,                100s,     ae44-849a/tplx;a263-5bef/~tNl;cd2e-fed3/tyf, PASS, wireless Ipv4
 /examples/wireless/nic/,             -f omnetpp.ini -c LMacWithApskScalarRadio -r 0,              100s,     340e-9ace/tplx;f8ab-769b/~tNl;9567-1b81/tyf, PASS, wireless Ipv4
 /examples/wireless/nic/,             -f omnetpp.ini -c LMacWithApskDimensionalRadio -r 0,         100s,     340e-9ace/tplx;f8ab-769b/~tNl;9567-1b81/tyf, PASS, wireless Ipv4
-/examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithUnitDiskRadio -r 0,                100s,     5319-5d0c/tplx;f6e0-4dce/~tNl;c69a-76be/tyf, PASS, wireless ieee802154 Ipv4
-/examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithApskScalarRadio -r 0,              100s,     5319-5d0c/tplx;f6e0-4dce/~tNl;f60a-b0cb/tyf, PASS, wireless ieee802154 Ipv4
-/examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithApskDimensionalRadio -r 0,         100s,     5319-5d0c/tplx;f6e0-4dce/~tNl;f60a-b0cb/tyf, PASS, wireless ieee802154 Ipv4
+/examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithUnitDiskRadio -r 0,                100s,     499d-93c4/tplx;cfad-82a3/~tNl;c69a-76be/tyf, PASS, wireless ieee802154 Ipv4
+/examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithApskScalarRadio -r 0,              100s,     499d-93c4/tplx;cfad-82a3/~tNl;f60a-b0cb/tyf, PASS, wireless ieee802154 Ipv4
+/examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithApskDimensionalRadio -r 0,         100s,     499d-93c4/tplx;cfad-82a3/~tNl;f60a-b0cb/tyf, PASS, wireless ieee802154 Ipv4
 /examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithUnitDiskRadio -r 0,              100s,    5365-9610/tplx;ef80-ca8d/~tNl;b744-2949/~tND, PASS, wireless CsmaCaInterface Ipv4
 /examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithApskScalarRadio -r 0,            100s,    5365-9610/tplx;ef80-ca8d/~tNl;c37c-eb13/~tND, PASS, wireless CsmaCaInterface Ipv4
 /examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithApskDimensionalRadio -r 0,       100s,    5365-9610/tplx;ef80-ca8d/~tNl;c37c-eb13/~tND, PASS, wireless CsmaCaInterface Ipv4
