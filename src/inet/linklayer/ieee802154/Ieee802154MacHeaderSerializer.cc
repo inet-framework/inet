@@ -12,6 +12,9 @@ namespace inet {
 
 Register_Serializer(Ieee802154MacHeader, Ieee802154MacHeaderSerializer);
 
+// FIXME TODO KLUDGE: The IEEE 802.15.4 header does not contain information about the payload protocol type.
+// Currently, INET does not use the Source PAN ID field, so we store the payload protocol ID in this field.
+
 void Ieee802154MacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& header = staticPtrCast<const Ieee802154MacHeader>(chunk);
@@ -36,7 +39,8 @@ void Ieee802154MacHeaderSerializer::serialize(MemoryOutputStream& stream, const 
     stream.writeUint16Le(0);  // Padding to 8 bytes
 
     // Source PAN ID (2 bytes)
-    stream.writeUint16Le(0xFFFF);  // Broadcast PAN ID
+    // stream.writeUint16Le(0xFFFF);  // Broadcast PAN ID
+    stream.writeUint16Le(header->getNetworkProtocol());  // FIXME TODO KLUDGE: The IEEE 802.15.4 header does not contain information about the payload protocol type.
 
     // Source Address (8 bytes)
     auto srcAddr = header->getSrcAddr();
@@ -65,15 +69,13 @@ const Ptr<Chunk> Ieee802154MacHeaderSerializer::deserialize(MemoryInputStream& s
     header->setDestAddr(destAddr);
 
     // Skip Source PAN ID (2 bytes)
-    stream.readUint16Le();
+    // stream.readUint16Le();
+    header->setNetworkProtocol(stream.readUint16Le());  // FIXME TODO KLUDGE: The IEEE 802.15.4 header does not contain information about the payload protocol type.
 
     // Source Address (8 bytes)
     MacAddress srcAddr(stream.readUint48Le());  // Reads 6 bytes
     stream.readUint16Le();  // Skip padding
     header->setSrcAddr(srcAddr);
-
-    // Set default network protocol
-    header->setNetworkProtocol(-1);
 
     return header;
 }
