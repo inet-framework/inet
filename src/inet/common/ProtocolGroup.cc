@@ -184,6 +184,7 @@ static const ProtocolGroup::Protocols inetPhyProtocols {
     { 1012, &Protocol::ackingMac },
     { 1013, &Protocol::csmaCaMac },
     { 1014, &Protocol::shortcutMac },
+    { 1015, &Protocol::ieee802154 },
 };
 
 ProtocolGroup *ProtocolGroup::getEthertypeProtocolGroup()
