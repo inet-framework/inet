@@ -44,6 +44,9 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 # mac
 **.contention.initialChannelBusy = false
 
+# radio medium
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+
 # radio
 **.radio.receiver.energyDetection = -100dBm
 
