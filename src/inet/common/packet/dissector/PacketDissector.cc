@@ -83,6 +83,14 @@ void PacketDissector::ChunkBuilder::visitChunk(const Ptr<const Chunk>& chunk, co
     }
 }
 
+// ChunkFinder
+
+void PacketDissector::ChunkFinder::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
+{
+    if (this->protocol == protocol)
+        this->chunk = chunk;
+}
+
 // PduTreeBuilder
 
 void PacketDissector::PduTreeBuilder::startProtocolDataUnit(const Protocol *protocol)
