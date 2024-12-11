@@ -36463,7 +36463,7 @@
   "sim_time_limit": "100s",
   "test_result": "PASS",
   "ingredients": "tplx",
-  "fingerprint": "5319-5d0c",
+  "fingerprint": "499d-93c4",
   "timestamp": 1681992800.6233041,
   "itervars": "$repetition==0"
  },
@@ -36486,8 +36486,20 @@
   "run_number": 0,
   "sim_time_limit": "100s",
   "test_result": "PASS",
+  "ingredients": "~tND",
+  "fingerprint": "44b9-fd9d",
+  "timestamp": 1733931958.5780857,
+  "itervars": "$repetition==0"
+ },
+ {
+  "working_directory": "examples/wireless/nic",
+  "ini_file": "omnetpp.ini",
+  "config": "CSMAWithApskDimensionalRadio",
+  "run_number": 0,
+  "sim_time_limit": "100s",
+  "test_result": "PASS",
   "ingredients": "~tNl",
-  "fingerprint": "f6e0-4dce",
+  "fingerprint": "cfad-82a3",
   "timestamp": 1681992800.6236427,
   "itervars": "$repetition==0"
  },
@@ -36499,7 +36511,7 @@
   "sim_time_limit": "100s",
   "test_result": "PASS",
   "ingredients": "tplx",
-  "fingerprint": "5319-5d0c",
+  "fingerprint": "499d-93c4",
   "timestamp": 1681992800.6220226,
   "itervars": "$repetition==0"
  },
@@ -36522,8 +36534,20 @@
   "run_number": 0,
   "sim_time_limit": "100s",
   "test_result": "PASS",
+  "ingredients": "~tND",
+  "fingerprint": "44b9-fd9d",
+  "timestamp": 1733931958.5762315,
+  "itervars": "$repetition==0"
+ },
+ {
+  "working_directory": "examples/wireless/nic",
+  "ini_file": "omnetpp.ini",
+  "config": "CSMAWithApskScalarRadio",
+  "run_number": 0,
+  "sim_time_limit": "100s",
+  "test_result": "PASS",
   "ingredients": "~tNl",
-  "fingerprint": "f6e0-4dce",
+  "fingerprint": "cfad-82a3",
   "timestamp": 1681992800.6223035,
   "itervars": "$repetition==0"
  },
@@ -36535,7 +36559,7 @@
   "sim_time_limit": "100s",
   "test_result": "PASS",
   "ingredients": "tplx",
-  "fingerprint": "5319-5d0c",
+  "fingerprint": "499d-93c4",
   "timestamp": 1681992800.6209667,
   "itervars": "$repetition==0"
  },
@@ -36558,8 +36582,20 @@
   "run_number": 0,
   "sim_time_limit": "100s",
   "test_result": "PASS",
+  "ingredients": "~tND",
+  "fingerprint": "e9de-33e4",
+  "timestamp": 1733931958.573939,
+  "itervars": "$repetition==0"
+ },
+ {
+  "working_directory": "examples/wireless/nic",
+  "ini_file": "omnetpp.ini",
+  "config": "CSMAWithUnitDiskRadio",
+  "run_number": 0,
+  "sim_time_limit": "100s",
+  "test_result": "PASS",
   "ingredients": "~tNl",
-  "fingerprint": "f6e0-4dce",
+  "fingerprint": "cfad-82a3",
   "timestamp": 1681992800.6212432,
   "itervars": "$repetition==0"
  },
