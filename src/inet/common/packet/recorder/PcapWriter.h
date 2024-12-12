@@ -63,7 +63,7 @@ class INET_API PcapWriter : public IPcapWriter
      * Records the given packet into the output file if it is open,
      * and throws an exception otherwise.
      */
-    void writePacket(simtime_t time, const Packet *packet, Direction direction, NetworkInterface *ie, PcapLinkType linkType) override;
+    void writePacket(simtime_t time, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *ie, PcapLinkType linkType) override;
 
     /**
      * Closes the output file if it is open.

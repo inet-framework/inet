@@ -57,7 +57,7 @@ void PcapFilePacketConsumer::pushPacket(Packet *packet, const cGate *gate)
     Enter_Method("pushPacket");
     take(packet);
     emit(packetPushedSignal, packet);
-    pcapWriter->writePacket(simTime(), packet, direction, getContainingNicModule(this), networkType);
+    pcapWriter->writePacket(simTime(), packet, b(0), b(0), direction, getContainingNicModule(this), networkType);
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
     delete packet;

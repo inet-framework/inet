@@ -58,7 +58,7 @@ void PacketFlowPcapFileRecorder::finish()
 
 void PacketFlowPcapFileRecorder::processPacket(Packet *packet)
 {
-    pcapWriter->writePacket(simTime(), packet, direction, findContainingNicModule(this), networkType);
+    pcapWriter->writePacket(simTime(), packet, b(0), b(0), direction, findContainingNicModule(this), networkType);
 }
 
 } // namespace queueing

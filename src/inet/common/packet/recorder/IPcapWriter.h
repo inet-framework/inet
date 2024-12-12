@@ -211,7 +211,7 @@ class INET_API IPcapWriter
 
     virtual void setFlush(bool flush) = 0;
 
-    virtual void writePacket(simtime_t time, const Packet *packet, Direction direction, NetworkInterface *ie, PcapLinkType linkType) = 0;
+    virtual void writePacket(simtime_t time, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *ie, PcapLinkType linkType) = 0;
 };
 
 } // namespace inet
