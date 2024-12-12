@@ -37,7 +37,7 @@ uint32_t FcsInserterBase::computeComputedFcs(const Packet *packet) const
 {
     auto data = packet->peekDataAsBytes();
     auto bytes = data->getBytes();
-    return ethernetCRC(bytes.data(), packet->getByteLength());
+    return ethernetCRC(bytes.data(), bytes.size());
 }
 
 uint32_t FcsInserterBase::computeFcs(const Packet *packet, FcsMode fcsMode) const

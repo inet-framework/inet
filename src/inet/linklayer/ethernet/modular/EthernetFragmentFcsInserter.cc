@@ -21,11 +21,11 @@ uint32_t EthernetFragmentFcsInserter::computeComputedFcs(const Packet *packet) c
     auto data = packet->peekDataAsBytes();
     auto bytes = data->getBytes();
     auto fragmentTag = packet->getTag<FragmentTag>();
-    currentFragmentCompleteFcs = ethernetCRC(bytes.data(), packet->getByteLength(), fragmentTag->getFirstFragment() ? 0 : lastFragmentCompleteFcs);
+    currentFragmentCompleteFcs = ethernetCRC(bytes.data(), bytes.size(), fragmentTag->getFirstFragment() ? 0 : lastFragmentCompleteFcs);
     if (fragmentTag->getLastFragment())
         return currentFragmentCompleteFcs;
     else
-        return ethernetCRC(bytes.data(), packet->getByteLength()) ^ 0xFFFF0000;
+        return ethernetCRC(bytes.data(), bytes.size()) ^ 0xFFFF0000;
 }
 
 uint32_t EthernetFragmentFcsInserter::computeFcs(const Packet *packet, FcsMode fcsMode) const
