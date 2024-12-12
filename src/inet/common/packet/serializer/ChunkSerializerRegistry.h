@@ -17,7 +17,13 @@ namespace inet {
 class INET_API ChunkSerializerRegistry
 {
   protected:
-    std::map<const std::type_info *, const ChunkSerializer *> serializers;
+    struct compareTypeInfo {
+        bool operator ()(const std::type_info* a, const std::type_info* b) const {
+            return a->before(*b);
+        }
+    };
+
+    std::map<const std::type_info *, const ChunkSerializer *, compareTypeInfo> serializers;
 
   public:
     ~ChunkSerializerRegistry();
