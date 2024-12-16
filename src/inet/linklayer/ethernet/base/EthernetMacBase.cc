@@ -398,8 +398,8 @@ void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
     if (connected && ((!outTrChannel) || (!inTrChannel)))
         throw cRuntimeError("Ethernet phys gate must be connected using a transmission channel");
 
-    double txRate = outTrChannel ? outTrChannel->getNominalDatarate() : 0.0;
-    double rxRate = inTrChannel ? inTrChannel->getNominalDatarate() : 0.0;
+    double txRate = 0.0;
+    double rxRate = 0.0;
 
     bool rxDisabled = !inTrChannel || inTrChannel->isDisabled();
     bool txDisabled = !outTrChannel || outTrChannel->isDisabled();
@@ -425,6 +425,18 @@ void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
     else {
         if (outTrChannel && !transmissionChannel)
             outTrChannel->subscribe(POST_MODEL_CHANGE, this);
+
+        // TODO The NetworkInterface::computeDatarate() function does something similar to the following code:
+        if (networkInterface && networkInterface->hasPar("bitrate"))
+            txRate = rxRate = networkInterface->par("bitrate");
+        double channelTxRate = outTrChannel->getNominalDatarate();
+        if (txRate == 0.0) {
+            txRate = channelTxRate;
+            rxRate = inTrChannel ? inTrChannel->getNominalDatarate() : 0.0;
+        }
+        else if (channelTxRate != 0 && txRate != channelTxRate)
+            throw cRuntimeError("Wired network interface datarate is set on both the network interface module and on the corresponding transmission channel and the two values are different");
+
         transmissionChannel = outTrChannel;
         dataratesDiffer = (txRate != rxRate);
     }
