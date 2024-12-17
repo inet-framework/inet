@@ -32,6 +32,8 @@ simple Gptp like IGptp
         double pdelayInterval @unit(s) = default(1s); // Frequency of link delay measurements
         double syncInitialOffset @unit(s) = default(syncInterval); // Time of first SYNC message
         double pdelayInitialOffset @unit(s) = default(0s); // Time of first link delay measurement
+        bool useBmca = default(true); // Enable/Disable Best Master Clock Algorithm
+        int grandmasterPriority1 = default(0); // Priority1 value for BMCA
 
         // following parameters are used to schedule follow_up and pdelay_resp messages.
         // These numbers must be large enough to prevent creating a queue in the MAC layer.

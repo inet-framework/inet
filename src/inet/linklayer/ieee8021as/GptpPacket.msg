@@ -77,6 +77,7 @@ enum GptpSelfMsgKind {
     GPTP_SELF_MSG_SYNC = 103;
     GPTP_REQUEST_TO_SEND_SYNC = 104;
     GPTP_SELF_MSG_PDELAY_REQ = 105;
+    GPTP_ANNOUNCE_TIMEOUT_KIND = 106;
 }
 
 // ieee802.1AS-2020 10.6.2.2.8: flags (Octet2)
@@ -254,19 +255,98 @@ struct ClockQuality
     uint16_t offsetScaledLogVariance;
 };
 
-class GptpAnnounce extends GptpBase {
-    messageType = GPTPTYPE_ANNOUNCE;
-    chunkLength = GPTP_ANNOUNCE_PACKET_SIZE;
-    messageLengthField = GPTP_ANNOUNCE_PACKET_SIZE.get<B>();
-    clocktime_t originTimestamp;
-    int16_t currentUtcOffset;
-    uint8_t reserved;
+cplusplus(ClockQuality) {{
+    bool operator==(const ClockQuality& rhs) const {
+        return clockClass == rhs.clockClass &&
+               clockAccuracy == rhs.clockAccuracy &&
+               offsetScaledLogVariance == rhs.offsetScaledLogVariance;
+    }
+
+    bool operator!=(const ClockQuality& rhs) const {
+        return !(*this == rhs);
+    }
+
+    bool operator<(const ClockQuality& rhs) const {
+        if (clockClass < rhs.clockClass) return true;
+        if (clockClass > rhs.clockClass) return false;
+        if (clockAccuracy < rhs.clockAccuracy) return true;
+        if (clockAccuracy > rhs.clockAccuracy) return false;
+        return offsetScaledLogVariance < rhs.offsetScaledLogVariance;
+    }
+
+    bool operator>(const ClockQuality& rhs) const {
+        return rhs < *this;
+    }
+
+    bool operator<=(const ClockQuality& rhs) const {
+        return !(rhs < *this);
+    }
+
+    bool operator>=(const ClockQuality& rhs) const {
+        return !(*this < rhs);
+    }
+}}
+
+struct BmcaPriorityVector {
+    @packetData;
     uint8_t grandmasterPriority1;
     ClockQuality grandmasterClockQuality;
     uint8_t grandmasterPriority2;
     uint64_t clockIdentity;
     uint16_t stepsRemoved;
-    uint8_t timeSource;
+}
+
+cplusplus(BmcaPriorityVector) {{
+    // Important: These comparison functions only compare the values as in IEEE 1588-2019 Figure 34
+    // For a full selection made by BCMA tiebreakers need to be implemented as in Figure 35
+    
+    bool operator==(const BmcaPriorityVector& rhs) const {
+        return grandmasterPriority1 == rhs.grandmasterPriority1 &&
+               grandmasterClockQuality == rhs.grandmasterClockQuality &&
+               grandmasterPriority2 == rhs.grandmasterPriority2 &&
+               clockIdentity == rhs.clockIdentity &&
+               stepsRemoved == rhs.stepsRemoved;
+    }
+
+    bool operator!=(const BmcaPriorityVector& rhs) const {
+        return !(*this == rhs);
+    }
+
+    bool operator<(const BmcaPriorityVector& rhs) const {
+        if (grandmasterPriority1 < rhs.grandmasterPriority1) return true;
+        if (grandmasterPriority1 > rhs.grandmasterPriority1) return false;
+        if (grandmasterClockQuality < rhs.grandmasterClockQuality) return true;
+        if (grandmasterClockQuality > rhs.grandmasterClockQuality) return false;
+        if (grandmasterPriority2 < rhs.grandmasterPriority2) return true;
+        if (grandmasterPriority2 > rhs.grandmasterPriority2) return false;
+        if (clockIdentity < rhs.clockIdentity) return true;
+        if (clockIdentity > rhs.clockIdentity) return false;
+        return stepsRemoved < rhs.stepsRemoved;
+    }
+
+    bool operator>(const BmcaPriorityVector& rhs) const {
+        return rhs < *this;
+    }
+
+    bool operator<=(const BmcaPriorityVector& rhs) const {
+        return !(rhs < *this);
+    }
+
+    bool operator>=(const BmcaPriorityVector& rhs) const {
+        return !(*this < rhs);
+    }
+}}
+
+// IEEE 1588-2019 Table 43
+class GptpAnnounce extends GptpBase {
+    messageType = GPTPTYPE_ANNOUNCE;
+    chunkLength = GPTP_ANNOUNCE_PACKET_SIZE;
+    messageLengthField = GPTP_ANNOUNCE_PACKET_SIZE.get<B>();
+    clocktime_t originTimestamp;
+    int16_t currentUtcOffset; // Not important for simulation purposes right now
+    uint8_t reserved;
+    BmcaPriorityVector priorityVector;
+    uint8_t timeSource; // Not important for simulation purposes right now
 }
 
 class GptpIngressTimeInd extends TagBase

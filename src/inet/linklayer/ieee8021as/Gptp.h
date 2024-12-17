@@ -86,12 +86,19 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     clocktime_t newLocalTimeAtTimeSync;
 
+    std::map<int, clocktime_t> gptpSyncTime; // store each gptp sync time
+
+    // BMCA
+    bool useBmca = false;
+    BmcaPriorityVector localPriorityVector;
+    std::map<int, ClockEvent *> announceTimeouts;
+    std::map<int, GptpAnnounce *> receivedAnnounces;
+
     // self timers:
     ClockEvent *selfMsgSync = nullptr;
     ClockEvent *selfMsgDelayReq = nullptr;
-    ClockEvent *requestMsg = nullptr;
 
-    std::set<GptpReqAnswerEvent*> reqAnswerEvents;
+    std::set<GptpReqAnswerEvent *> reqAnswerEvents;
 
     // Statistics information: // TODO remove, and replace with emit() calls
     static simsignal_t localTimeSignal;
@@ -118,6 +125,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     virtual void initialize(int stage) override;
+
+    virtual void initBmca();
 
     virtual void handleMessage(cMessage *msg) override;
 
@@ -147,6 +156,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     void sendPdelayRespFollowUp(int portId, const GptpPdelayResp *resp);
 
+    void processAnnounce(Packet *pPacket, const GptpAnnounce *pAnnounce);
+
     virtual void processSync(Packet *packet, const GptpSync *gptp);
 
     virtual void processFollowUp(Packet *packet, const GptpFollowUp *gptp);
@@ -171,6 +182,9 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
     void calculateGmRatio();
+    void executeBmca();
+    void initPorts();
+    void scheduleInitialEvents();
 };
 
 } // namespace inet
