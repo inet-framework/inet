@@ -37,9 +37,10 @@ The format string can contain the following directives:
 
 - `%n`: packet name
 - `%c`: packet class
-- `%r`: drop reason
+- `%r`: drop reason number
+- `%s`: drop reason string
 
-Packets can be dropped for the following reasons:
+Here are some reasons packets can be dropped:
 
 .. For example, packets can be dropped for the following reasons:
 
