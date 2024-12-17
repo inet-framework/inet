@@ -66,8 +66,8 @@ coordinate offset parameters for position and orientation:
 -  :par:`offsetX`, :par:`offsetY`, :par:`offsetZ`
 -  :par:`offsetHeading`, :par:`offsetElevation`, :par:`offsetBank`
 
-The simulation is run with four hosts. The configuration
-is defined in the omnetpp.ini file:
+The simulation is run with four hosts. The simulation
+is defined in the ``Attached1`` configuration in the omnetpp.ini file:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -103,7 +103,7 @@ defined in the ``Attached2`` configuration in omnetpp.ini:
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: *.numHosts = 5
-   :end-at: offsetHeading
+   :end-at: -180deg
 
 ``host[0]`` moves along a circle, orbiting the center of the
 scene. The other hosts use :ned:`AttachedMobility`, and are
@@ -129,8 +129,15 @@ SuperpositioningMobility
 
 :ned:`SuperpositioningMobility` is a compound module that can contain several
 other mobility modules as submodules, and combines their effects.
-The mobility state (position, orientation, and their derivatives) exposed by
+By default, the mobility state (position, orientation, and their derivatives) exposed by
 :ned:`SuperpositioningMobility` is the sum of the states of these contained submodules.
+However, the :par:`positionComposition` and :par:`orientationComposition` parameters
+can specify other methods of composition. Both parameters support the following values: ``"zero"``, ``"sum"``, ``"average"``,
+with the default for both parameters being ``"sum"``.
+The ``zero`` composition method means that the mobility submodules are not taken into account.
+This can be useful to decouple the orientation from the mobility module's position, for example.
+Furthermore, the :par:`orientationComposition` parameter can have the ``"faceForward"`` value, which
+makes the mobility face towards the direction of motion.
 
 The use of :ned:`SuperpositioningMobility` is that it allows one to create complex motion
 patterns by combining other mobility models, and also to combine arbitrary motion
@@ -143,7 +150,7 @@ In this example simulation, ``host[0]`` moves in a circle using
 :ned:`CircleMobility`. Some random movement is applied to the circular
 motion using :ned:`GaussMarkovMobility`, which is a model to control
 the randomness in the movement. The simulation is run with only one host.
-You can take a look at the configuration in omnetpp.ini:
+You can take a look at the ``Superpositioning1`` configuration in omnetpp.ini:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -188,7 +195,7 @@ The hexagonal pattern is achieved with the following config.xml file:
 
 The other host, ``host[1]``, uses :ned:`SuperpositioningMobility`, with the
 superposition of an :ned:`AttachedMobility` and a :ned:`CircleMobility`. Here
-is the configuration in omnetpp.ini:
+is the ``Superpositioning2`` configuration in omnetpp.ini:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -264,8 +271,9 @@ the antennas tracks the drone, the other one is directed at the base.
 The ``rover`` is configured to use :ned:`LinearMobility` to move on the
 scene. The ``drone`` uses :ned:`CircleMobility` to circle around the
 center of the scene. The ``rover`` has two wireless interfaces, and
-thus, two antennas, which each have a mobility submodule. The configuration in
-omnetpp.ini related to antenna mobility is the following:
+thus, two antennas, which each have a mobility submodule. The simulation is
+defined in the ``AntennaOrientation`` configuration in
+omnetpp.ini. Here are the parts related to antenna mobility:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -274,7 +282,7 @@ omnetpp.ini related to antenna mobility is the following:
 
 Each antenna needs to be attached to the network node, and also face
 towards its target. Thus each antenna has a :ned:`SuperpositioningMobility`
-submodule. :par:`element[0]` of the array is an :ned:`AttachedMobility`, and the
+submodule. ``element[0]`` of the array is an :ned:`AttachedMobility`, and the
 antenna's position is attached to and offset from the position of the
 host. ``element[1]`` is a :ned:`FacingMobility`, the antenna tracks its target.
 
