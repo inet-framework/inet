@@ -152,6 +152,9 @@ then set the idle slope parameters of the two credit-based shapers to
    :start-at: egress traffic shaping
    :language: ini
 
+Note that we also disable forwarding of IEEE 802.1Q C-tags (VLAN tags), because
+we don't need them after the switch. Otherwise the destination would drop all packets due to unknown protocol tag, because it's missing the 8021q module.
+
 Results
 -------
 
