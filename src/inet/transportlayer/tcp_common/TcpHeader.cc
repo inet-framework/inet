@@ -42,7 +42,7 @@ std::string Sack::str() const
     return out.str();
 }
 
-B TcpHeader::getHeaderOptionArrayLength()
+B TcpHeader::getHeaderOptionArrayLength() const
 {
     unsigned short usedLength = 0;
 
