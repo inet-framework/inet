@@ -32,8 +32,7 @@ path loss models in INET, including :ned:`FreeSpacePathLoss`,
 requires a ground model, which is configured in the
 ``physicalEnvironment`` module to be :ned:`FlatGround`. The heights of the
 hosts above the ground are set to 1.5 meters. We assume isotropic
-background noise of -86 dBm (:ned:`IsotropicBackgroundNoise`, using the 
-scalar analog model by default).
+background noise of -86 dBm (:ned:`IsotropicScalarBackgroundNoise`).
 
 We will use the :ned:`Ieee80211NistErrorModel` to compute bit errors. The
 :ned:`Ieee80211NistErrorModel` is based on the Nist error rate model.

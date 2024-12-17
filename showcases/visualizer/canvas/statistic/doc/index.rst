@@ -23,7 +23,7 @@ of the visualization.
 About the visualizer
 --------------------
 
-The :ned:`StatisticVisualizer` (included in the network as part of
+The :ned:`StatisticCanvasVisualizer` (included in the network as part of
 :ned:`IntegratedCanvasVisualizer`) is capable of displaying a statistic for
 multiple network nodes. The visualizer keeps track of the last values of
 statistics and displays them next to the icon of the network node.
@@ -33,7 +33,8 @@ and displays the statistic selected with the :par:`statisticName`
 parameter. It displays the statistic of modules that match the
 expression of the :par:`sourceFilter` parameter, at the network node that
 contains the modules. By default, the :par:`statisticName` is the same as
-the :par:`signalName`.
+the :par:`signalName`. The :par:`unit` parameter can be used to specify the
+unit (or units) to display the statistic in; by default, it is the statistic's unit.
 
 Alternatively, the :par:`statisticExpression` parameter can be used instead of :par:`statisticName`.
 The :par:`statisticExpression` parameter can specify an expression with OMNeT++'s ``@statistic`` syntax.
