@@ -8,7 +8,6 @@
 
 #include <fcntl.h>
 #include <fstream>
-#include <linux/prctl.h>
 #include <sys/prctl.h>
 
 namespace inet {
