@@ -34,6 +34,10 @@ memberships are visualized. The :par:`interfaceFilter` parameter selects
 which interfaces are considered in the visualization. By default, all
 interfaces of all nodes are considered.
 
+Furthermore, the visualization takes the signal strength of the various Wifi networks into account, 
+indicating it with the number of levels in the Wifi icon. The visualizer's :par:`minPower` and :par:`maxPower`
+parameter can configure the indicated power levels.
+
 Basic use
 ---------
 
