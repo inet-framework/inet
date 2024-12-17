@@ -8,6 +8,7 @@
 #ifndef __INET_FIELDSCHUNK_H
 #define __INET_FIELDSCHUNK_H
 
+#include "inet/common/MemoryOutputStream.h"
 #include "inet/common/packet/chunk/Chunk.h"
 
 namespace inet {
@@ -24,19 +25,19 @@ class INET_API FieldsChunk : public Chunk
   protected:
     b chunkLength;
     /**
-     * The serialized representation of this chunk or nullptr if not available.
+     * The serialized representation of this chunk or empty stream if not available.
      * When a chunk is serialized, the result is stored here for fast subsequent
      * serializations. Moreover, if a chunk is created by deserialization, then
      * the original bytes are also stored here. The serialized representation
      * is deleted if a chunk is modified.
      */
-    mutable const std::vector<uint8_t> *serializedBytes;
+    mutable MemoryOutputStream serializedData;
 
   protected:
     /** @name Field accessor functions */
     //@{
-    const std::vector<uint8_t> *getSerializedBytes() const { return serializedBytes; }
-    void setSerializedBytes(const std::vector<uint8_t> *bytes) const { CHUNK_CHECK_IMPLEMENTATION(B(bytes->size()) == chunkLength); this->serializedBytes = bytes; }
+    const std::vector<uint8_t> *getSerializedBytes() const { return &serializedData.getData(); }
+    MemoryOutputStream& getSerializedDataForUpdate() const { return serializedData; }
     //@}
 
     virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;

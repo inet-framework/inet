@@ -19,5 +19,5 @@ simple GroupEligibilityTimeTable
 {
     parameters:
         @display("i=block/table");
-        @class(inet::GroupEligibilityTimeTable);
+        @class(GroupEligibilityTimeTable);
 }

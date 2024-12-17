@@ -7,7 +7,7 @@
 [![Test: fingerprint](https://github.com/inet-framework/inet/actions/workflows/fingerprint-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/fingerprint-tests.yml)
 [![Test: module](https://github.com/inet-framework/inet/actions/workflows/module-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/module-tests.yml)
 [![Test: other](https://github.com/inet-framework/inet/actions/workflows/other-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/other-tests.yml)
-[![Test: speed](https://github.com/inet-framework/inet/actions/workflows/speed-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/speed-tests.yml)
+<!-- [![Test: speed](https://github.com/inet-framework/inet/actions/workflows/speed-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/speed-tests.yml) -->
 [![Test: statistical](https://github.com/inet-framework/inet/actions/workflows/statistical-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/statistical-tests.yml)
 [![Test: unit](https://github.com/inet-framework/inet/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/unit-tests.yml)
 [![Test: validation](https://github.com/inet-framework/inet/actions/workflows/validation-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/validation-tests.yml)

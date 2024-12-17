@@ -63,7 +63,7 @@ def build_project_using_makefile(simulation_project=None, mode="release", **kwar
         simulation_project = get_default_simulation_project()
     _logger.info(f"Building {simulation_project.get_name()} in {mode} mode started")
     args = ["make", "MODE=" + mode, "-j", str(multiprocessing.cpu_count())]
-    run_command_with_logging(args, cwd=simulation_project.get_full_path("."), error_message=f"Build {simulation_project.get_name()} failed")
+    run_command_with_logging(args, cwd=simulation_project.get_full_path("."), error_message=f"Building {simulation_project.get_name()} failed")
     _logger.info(f"Building {simulation_project.get_name()} in {mode} mode ended")
 
 class MultipleBuildTasks(MultipleTasks):
@@ -313,5 +313,5 @@ def clean_project(simulation_project=None, mode="release", **kwargs):
         simulation_project = get_default_simulation_project()
     _logger.info(f"Cleaning {simulation_project.get_name()} started")
     args = ["make", "MODE=" + mode, "-j", str(multiprocessing.cpu_count()), "clean"]
-    run_command_with_logging(args, cwd=simulation_project.get_full_path("."), error_message=f"Build {simulation_project.get_name()} failed")
+    run_command_with_logging(args, cwd=simulation_project.get_full_path("."), error_message=f"Cleaning {simulation_project.get_name()} failed")
     _logger.info(f"Cleaning {simulation_project.get_name()} ended")

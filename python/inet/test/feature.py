@@ -352,6 +352,6 @@ def update_oppfeatures(simulation_project=None, simulation_results=None, feature
     clean_project(simulation_project=simulation_project, mode=mode)
     build_project(simulation_project=simulation_project, mode=mode)
     if simulation_results is None:
-        simulation_results = run_simulations(simulation_project=simulation_project, mode=mode, run_number=0, extra_args=["--print-instantiated-ned-types=true"], **kwargs)
+        simulation_results = run_simulations(simulation_project=simulation_project, mode=mode, run_number=0, append_args=["--print-instantiated-ned-types=true"], **kwargs)
     feature_to_required_features = get_feature_to_required_features_for_simulation_project(simulation_project, simulation_results)
     update_oppfeatures_file(simulation_project, feature_to_required_features, feature_id_filter=feature_id_filter)

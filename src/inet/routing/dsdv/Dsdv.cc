@@ -16,6 +16,8 @@
 
 #include "inet/routing/dsdv/Dsdv.h"
 
+#include <sstream>
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -358,6 +360,13 @@ void Dsdv::purge()
         else
             i++;
     }
+}
+
+std::string DsdvIpv4Route::str() const
+{
+    std::ostringstream out;
+    out << Ipv4Route::str() << " seqNo:" << getSequencenumber() << " expiryTime:" << getExpiryTime();
+    return out.str();
 }
 
 } // namespace inet

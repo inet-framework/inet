@@ -41,6 +41,7 @@ precompiled_*.h.*
 /tests/*/*/work/
 /tests/*/results*/
 /tests/fingerprint/SelfDoc.xml
+/coverage
 *.log
 *.sim
 *.pyc
@@ -75,6 +76,8 @@ out/
 *.pdb
 *.idb
 *.manifest
+*.profraw
+*.data
 .qtenv.ini
 .qtenvrc
 .tkenvrc
@@ -88,6 +91,7 @@ netanim-trace.txt
 *.FAILED
 *.ERROR
 *.bak
+*.old
 backups
 *~
 xxx

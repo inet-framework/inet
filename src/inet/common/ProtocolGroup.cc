@@ -169,10 +169,33 @@ static const ProtocolGroup::Protocols tcpProtocols {
     { 11111, &Protocol::unknown }, // INET specific non-standard protocol
 };
 
+static const ProtocolGroup::Protocols inetPhyProtocols {
+    { 1001, &Protocol::bmac },
+    { 1002, &Protocol::ethernetFlowCtrl },
+    { 1003, &Protocol::ethernetMac },
+    { 1004, &Protocol::ieee80211Mac },
+    { 1005, &Protocol::ieee80211Mgmt },
+    { 1006, &Protocol::ieee8022llc },
+    { 1007, &Protocol::ieee8022snap },
+    { 1008, &Protocol::ieee802epd },
+    { 1009, &Protocol::lmac },
+    { 1010, &Protocol::ppp },
+    { 1011, &Protocol::xmac },
+    { 1012, &Protocol::ackingMac },
+    { 1013, &Protocol::csmaCaMac },
+    { 1014, &Protocol::shortcutMac },
+};
+
 ProtocolGroup *ProtocolGroup::getEthertypeProtocolGroup()
 {
     static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::ethertype");
     return &getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, "ethertype", ethertypeProtocols);
+}
+
+ProtocolGroup *ProtocolGroup::getInetPhyProtocolGroup()
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::inetPhy");
+    return &getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, "inetPhy", inetPhyProtocols);
 }
 
 ProtocolGroup *ProtocolGroup::getPppProtocolGroup()

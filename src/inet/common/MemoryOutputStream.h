@@ -54,6 +54,8 @@ class INET_API MemoryOutputStream
         data.reserve((initialCapacity.get<b>() + 7) >> 3);
     }
 
+    void clear() { data.clear(); length = b(0); }
+
     /** @name Stream querying functions */
     //@{
     /**
@@ -61,7 +63,27 @@ class INET_API MemoryOutputStream
      */
     b getLength() const { return length; }
 
+    void setCapacity(b capacity) {
+        data.reserve((capacity.get<b>() + 7) >> 3);
+    }
+
     const std::vector<uint8_t>& getData() const { return data; }
+
+    void writeData(const std::vector<uint8_t>& src, b srcOffset, b srcLength) {
+        assert(srcOffset + srcLength <= B(src.size()));
+        size_t srcPosInBits = srcOffset.get<b>();
+        size_t srcEndPosInBits = (srcOffset + srcLength).get<b>();
+
+        for ( ; srcPosInBits < srcEndPosInBits && ((srcPosInBits & 7) != 0); srcPosInBits++)
+            writeBit(src.at(srcPosInBits >> 3) & (1 << (7 - (srcPosInBits & 7))));
+        size_t remainedBytes = (srcEndPosInBits - srcPosInBits) >> 3;
+        if (remainedBytes != 0) {
+            writeBytes(&src.at(srcPosInBits >> 3), B(remainedBytes));
+            srcPosInBits += remainedBytes << 3;
+        }
+        for ( ; srcPosInBits < srcEndPosInBits; srcPosInBits++)
+            writeBit(src.at(srcPosInBits >> 3) & (1 << (7 - (srcPosInBits & 7))));
+    }
 
     void copyData(std::vector<bool>& result, b offset = b(0), b length = b(-1)) const {
         size_t end = (length == b(-1) ? this->length : offset + length).get<b>();
@@ -113,6 +135,8 @@ class INET_API MemoryOutputStream
      * bit order.
      */
     void writeBits(const std::vector<bool>& bits, b offset = b(0), b length = b(-1)) {
+        ASSERT(b(0) <= offset && offset <= b(bits.size()));
+        ASSERT(length == b(-1) || (b(0) <= length && offset + length <= b(bits.size())));
         auto end = length == b(-1) ? bits.size() : b(offset + length).get<b>();
         for (size_t i = offset.get<b>(); i < end; i++)
             writeBit(bits.at(i));
@@ -125,13 +149,12 @@ class INET_API MemoryOutputStream
      * Writes a byte to the end of the stream in MSB to LSB bit order.
      */
     void writeByte(uint8_t value) {
-        if (isByteAligned())
+        uint8_t bitOffset = length.get<b>() % 8;
+        if (bitOffset == 0)
             data.push_back(value);
         else {
-            int l1 = length.get<b>() % 8;
-            int l2 = 8 - l1;
-            data.back() |= (value & (0xFF << l1)) >> l1;
-            data.push_back((value & (0xFF >> l2)) << l2);
+            data.back() |= value >> bitOffset;
+            data.push_back(value << (8 - bitOffset));
         }
         length += B(1);
     }
@@ -154,14 +177,7 @@ class INET_API MemoryOutputStream
         ASSERT(b(0) <= offset && offset <= B(bytes.size()));
         ASSERT(b(0) <= end && end <= B(bytes.size()));
         ASSERT(offset <= end);
-        if (isByteAligned()) {
-            data.insert(data.end(), bytes.begin() + offset.get<B>(), bytes.begin() + end.get<B>());
-            this->length += end - offset;
-        }
-        else {
-            for (B::value_type i = offset.get<B>(); i < end.get<B>(); i++)
-                writeByte(bytes.at(i));
-        }
+        writeBytes(bytes.data() + offset.get<B>(), end - offset);
     }
 
     /**
@@ -169,6 +185,10 @@ class INET_API MemoryOutputStream
      * byte order and in MSB to LSB bit order.
      */
     void writeBytes(const uint8_t *buffer, B length) {
+        ASSERT(buffer != nullptr);
+        ASSERT(B(0) <= length);
+        if (length == B(0))
+            return;
         if (isByteAligned()) {
             data.insert(data.end(), buffer, buffer + length.get<B>());
             this->length += length;
@@ -187,6 +207,7 @@ class INET_API MemoryOutputStream
      * bit order.
      */
     void writeUint2(uint8_t value) {
+        ASSERT(value >> 2 == 0);
         writeBit(value & 0x2);
         writeBit(value & 0x1);
     }
@@ -196,6 +217,7 @@ class INET_API MemoryOutputStream
      * bit order.
      */
     void writeUint4(uint8_t value) {
+        ASSERT(value >> 4 == 0);
         writeBit(value & 0x8);
         writeBit(value & 0x4);
         writeBit(value & 0x2);
@@ -233,6 +255,7 @@ class INET_API MemoryOutputStream
      * byte order and MSB to LSB bit order.
      */
     void writeUint24Be(uint32_t value) {
+        ASSERT(value >> 24 == 0);
         writeByte(static_cast<uint8_t>(value >> 16));
         writeByte(static_cast<uint8_t>(value >> 8));
         writeByte(static_cast<uint8_t>(value >> 0));
@@ -243,6 +266,7 @@ class INET_API MemoryOutputStream
      * byte order and MSB to LSB bit order.
      */
     void writeUint24Le(uint32_t value) {
+        ASSERT(value >> 24 == 0);
         writeByte(static_cast<uint8_t>(value >> 0));
         writeByte(static_cast<uint8_t>(value >> 8));
         writeByte(static_cast<uint8_t>(value >> 16));
@@ -275,6 +299,7 @@ class INET_API MemoryOutputStream
      * byte order and MSB to LSB bit order.
      */
     void writeUint48Be(uint64_t value) {
+        ASSERT(value >> 48 == 0);
         writeByte(static_cast<uint8_t>(value >> 40));
         writeByte(static_cast<uint8_t>(value >> 32));
         writeByte(static_cast<uint8_t>(value >> 24));
@@ -288,6 +313,7 @@ class INET_API MemoryOutputStream
      * byte order and MSB to LSB bit order.
      */
     void writeUint48Le(uint64_t value) {
+        ASSERT(value >> 48 == 0);
         writeByte(static_cast<uint8_t>(value >> 0));
         writeByte(static_cast<uint8_t>(value >> 8));
         writeByte(static_cast<uint8_t>(value >> 16));
@@ -334,8 +360,7 @@ class INET_API MemoryOutputStream
      * and MSB to LSB bit order.
      */
     void writeMacAddress(MacAddress address) {
-        for (int i = 0; i < MAC_ADDRESS_SIZE; i++)
-            writeByte(address.getAddressByte(i));
+        writeUint48Be(address.getInt());
     }
 
     /**
@@ -362,7 +387,7 @@ class INET_API MemoryOutputStream
      * Writes a zero terminated string in the order of the characters.
      */
     void writeString(std::string s) {
-        writeBytes(std::vector<uint8_t>(s.begin(), s.end()));
+        writeBytes(reinterpret_cast<const uint8_t*>(s.c_str()), B(s.length()));
         writeByte(0);
     }
 
@@ -371,8 +396,8 @@ class INET_API MemoryOutputStream
      * endian byte order and MSB to LSB bit order.
      */
     void writeNBitsOfUint64Be(uint64_t value, uint8_t n) {
-        if (n == 0 || n > 64)
-            throw cRuntimeError("Can not write 0 bit or more than 64 bits.");
+        if (n > 64)
+            throw cRuntimeError("Can not write more than 64 bits.");
         uint64_t mul = (uint64_t)1 << (n - 1);
         for (int i = 0; i < n; ++i) {
             writeBit((value & mul) != 0);

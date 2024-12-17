@@ -98,6 +98,7 @@ class INET_API DsdvIpv4Route : public Ipv4Route
     simtime_t expiryTime; // time the routing entry is valid until
 
   public:
+    virtual std::string str() const override;
     bool isExpired() const { return expiryTime != 0 && expiryTime <= simTime(); }
 
     simtime_t getExpiryTime() const { return expiryTime; }

@@ -5,6 +5,7 @@ import io
 import IPython
 import logging
 import os
+import platform
 import pickle
 import re
 import signal
@@ -14,8 +15,6 @@ import threading
 import time
 
 __sphinx_mock__ = True # ignore this module in documentation
-
-_logger = logging.getLogger(__name__)
 
 COLOR_GRAY = "\033[38;20m"
 COLOR_RED = "\033[1;31m"
@@ -33,10 +32,52 @@ def enable_autoreload():
     ipython.magic("load_ext autoreload")
     ipython.magic("autoreload 2")
 
+_file_handler = None
+
+class LocalLogger(logging.Logger):
+    def stdout(self, message, *args, **kwargs):
+        self._log(STDOUT_LEVEL, message, args, **kwargs)
+
+    def stderr(self, message, *args, **kwargs):
+        self._log(STDERR_LEVEL, message, args, **kwargs)
+
+    def debug(self, msg, *args, **kwargs):
+        self._log(logging.DEBUG, msg, args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        self._log(logging.INFO, msg, args, **kwargs)
+
+    def warning(self, msg, *args, **kwargs):
+        self._log(logging.WARNING, msg, args, **kwargs)
+
+    def error(self, msg, *args, **kwargs):
+        self._log(logging.ERROR, msg, args, **kwargs)
+
+    def critical(self, msg, *args, **kwargs):
+        self._log(logging.CRITICAL, msg, args, **kwargs)
+
+    def log(self, level, msg, *args, **kwargs):
+        self._log(level, msg, args, **kwargs)
+
+    def handle(self, record):
+        global _file_handler
+        if _file_handler:
+            _file_handler.handle(record)
+        if self.isEnabledFor(record.levelno):
+            super().handle(record)
+
+logging.setLoggerClass(LocalLogger)
+
+_logger = logging.getLogger(__name__)
+
 _logging_initialized = False
 
-def initialize_logging(log_level, external_command_log_level):
-    global _logging_initialized
+def initialize_logging(log_level, external_command_log_level, log_file):
+    global _file_handler, _logging_initialized
+    if log_file:
+        _file_handler = logging.FileHandler(log_file, mode="w")
+        _file_handler.setLevel(logging.DEBUG)
+        _file_handler.setFormatter(logging.Formatter('%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s'))
     formatter = ColoredLoggingFormatter()
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
@@ -51,22 +92,16 @@ def initialize_logging(log_level, external_command_log_level):
     logging.getLogger("opp_run_dbg").setLevel(external_command_log_level)
     logging.getLogger("opp_run_release").setLevel(external_command_log_level)
     logging.getLogger("opp_run_sanitize").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_coverage").setLevel(external_command_log_level)
+    logging.getLogger("opp_run_profile").setLevel(external_command_log_level)
     logging.getLogger("opp_test").setLevel(external_command_log_level)
     logging.addLevelName(STDOUT_LEVEL, "STDOUT")
     logging.addLevelName(STDERR_LEVEL, "STDERR")
-    def stdout(self, message, *args, **kwargs):
-        if self.isEnabledFor(STDOUT_LEVEL):
-            self._log(STDOUT_LEVEL, message, args, **kwargs)
-    def stderr(self, message, *args, **kwargs):
-        if self.isEnabledFor(STDERR_LEVEL):
-            self._log(STDERR_LEVEL, message, args, **kwargs)
-    logging.Logger.stdout = stdout
-    logging.Logger.stderr = stderr
     _logging_initialized = True
 
-def ensure_logging_initialized(log_level, external_command_log_level):
+def ensure_logging_initialized(log_level, external_command_log_level, log_file):
     if not _logging_initialized:
-        initialize_logging(log_level, external_command_log_level)
+        initialize_logging(log_level, external_command_log_level, log_file)
         return True
     else:
         return False
@@ -306,7 +341,7 @@ def run_command_with_logging(args, error_message=None, nice=10, **kwargs):
         stream.close()
     stdout_lines = []
     stderr_lines = []
-    logger.info(f"Running external command: {' '.join(args)}")
+    _logger.debug(f"Running external command: {' '.join(args)}")
     process = subprocess.Popen(["nice", "-n", str(nice), *args], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, **kwargs)
     stdout_thread = threading.Thread(target=log_stream, args=(process.stdout, logger.stdout, stdout_lines))
     stderr_thread = threading.Thread(target=log_stream, args=(process.stderr, logger.stderr, stderr_lines))
@@ -324,6 +359,14 @@ def run_command_with_logging(args, error_message=None, nice=10, **kwargs):
     if error_message and process.returncode != 0:
         raise Exception(error_message)
     return subprocess.CompletedProcess(args, process.returncode, "".join(stdout_lines), ''.join(stderr_lines))
+
+def open_file_with_default_editor(file_path):
+    if platform.system() == "Windows":
+        os.startfile(file_path)
+    elif platform.system() == "Darwin":  # macOS
+        subprocess.run(["open", file_path])
+    else:  # Linux/Unix
+        subprocess.run(["xdg-open", file_path])
 
 def collect_existing_ned_types():
     types = set()

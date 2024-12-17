@@ -11,9 +11,11 @@ It provides several functions to run various tests:
 
 from inet.test.all import *
 from inet.test.chart import *
+from inet.test.coverage import *
 from inet.test.feature import *
 from inet.test.fingerprint import *
 from inet.test.opp import *
+from inet.test.profile import *
 from inet.test.release import *
 from inet.test.sanitizer import *
 from inet.test.simulation import *

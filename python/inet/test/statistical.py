@@ -121,7 +121,7 @@ def run_statistical_tests(**kwargs):
         an object that contains a list of :py:class:`SimulationTestTaskResult` objects. Each object describes the result of running one test task.
     """
     multiple_statistical_test_tasks = get_statistical_test_tasks(**kwargs)
-    return multiple_statistical_test_tasks.run(extra_args=["--**.param-recording=false", "--**.vector-recording=false", "--output-scalar-file=${resultdir}/${inifile}-${configname}-#${repetition}.sca"], **kwargs)
+    return multiple_statistical_test_tasks.run(append_args=["--**.param-recording=false", "--**.vector-recording=false", "--output-scalar-file=${resultdir}/${inifile}-${configname}-#${repetition}.sca"], **kwargs)
 
 class StatisticalResultsUpdateTask(SimulationUpdateTask):
     def __init__(self, simulation_config=None, run_number=0, name="statistical results update", **kwargs):
@@ -195,4 +195,4 @@ def update_statistical_results(sim_time_limit=get_statistical_test_sim_time_limi
         an object that contains a list of :py:class:`UpdateTaskResult` objects. Each object describes the result of running one update task.
     """
     multiple_update_statistical_result_tasks = get_update_statistical_result_tasks(sim_time_limit=sim_time_limit, **kwargs)
-    return multiple_update_statistical_result_tasks.run(sim_time_limit=sim_time_limit, extra_args=["--**.param-recording=false", "--**.vector-recording=false", "--output-scalar-file=${resultdir}/${inifile}-${configname}-#${repetition}.sca"], **kwargs)
+    return multiple_update_statistical_result_tasks.run(sim_time_limit=sim_time_limit, append_args=["--**.param-recording=false", "--**.vector-recording=false", "--output-scalar-file=${resultdir}/${inifile}-${configname}-#${repetition}.sca"], **kwargs)

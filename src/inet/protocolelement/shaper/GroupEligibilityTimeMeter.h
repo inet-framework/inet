@@ -13,7 +13,7 @@
 
 namespace inet {
 
-class GroupEligibilityTimeMeter : public EligibilityTimeMeter
+class INET_API GroupEligibilityTimeMeter : public EligibilityTimeMeter
 {
     protected:
         ModuleRefByPar<GroupEligibilityTimeTable> groupEligibilityTimeTable;

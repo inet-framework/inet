@@ -13,7 +13,7 @@ namespace inet;
 
 class ApskPhyHeader extends FieldsChunk
 {
-    chunkLength = B(6);
+    chunkLength = B(8);
     b headerLengthField;
     b payloadLengthField;
     uint16_t crc = 0;

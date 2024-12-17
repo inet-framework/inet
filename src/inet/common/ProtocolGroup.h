@@ -40,6 +40,7 @@ class INET_API ProtocolGroup
   public:
     // in alphabetic order
     static ProtocolGroup *getEthertypeProtocolGroup();
+    static ProtocolGroup *getInetPhyProtocolGroup();
     static ProtocolGroup *getIeee8022ProtocolGroup();
     static ProtocolGroup *getIpProtocolGroup();
     static ProtocolGroup *getPppProtocolGroup();

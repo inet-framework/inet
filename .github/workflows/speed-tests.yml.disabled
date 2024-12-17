@@ -1,3 +1,5 @@
+This workflow is disabled because CPU instruction and CPU cycle performance hardware counters are not enabled on virtualized GitHub workflow servers.
+
 name: "Test: speed"
 
 on:
@@ -57,5 +59,6 @@ jobs:
           source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
 
           echo "::group::Running speed tests"
+          echo 0 | sudo tee /proc/sys/kernel/perf_event_paranoid
           inet_run_speed_tests -m release -w showcases
           echo "::endgroup::"

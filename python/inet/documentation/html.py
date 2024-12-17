@@ -16,7 +16,8 @@ def generate_html_documentation(docker=False, clean_build=False):
         make_cmd = "./docker-make"
     else:
         make_cmd = "make"
-    run_command_with_logging([make_cmd, "html"], cwd = inet_project.get_full_path("doc/src/"))
+    # run_command_with_logging doesn't work in docker, it adds lots of extra spaces
+    subprocess.run([make_cmd, "html"], cwd = inet_project.get_full_path("doc/src/"))
 
 def upload_html_documentation(path):
     _logger.info("Uploading HTML documentation, path = " + path)
