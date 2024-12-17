@@ -20,6 +20,8 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/physicallayer/common/Signal.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
 
 namespace inet {
 
@@ -49,6 +51,8 @@ void PcapRecorder::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *pro
 {
     if (!contains(dumpProtocols, protocol))
         frontOffset += chunk->getChunkLength();
+    else
+        dumpProtocol = protocol;
 }
 
 void PcapRecorder::initialize()
@@ -174,13 +178,15 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
     Enter_Method("%s", cComponent::getSignalName(signalID));
 
     if (pcapWriter->isOpen()) {
-        cPacket *packet = dynamic_cast<cPacket *>(obj);
-
-        if (packet) {
-            auto i = signalList.find(signalID);
-            Direction direction = (i != signalList.end()) ? i->second : DIRECTION_UNDEFINED;
+        auto i = signalList.find(signalID);
+        ASSERT(i != signalList.end());
+        Direction direction = i->second;
+        if (auto packet = dynamic_cast<cPacket *>(obj))
             recordPacket(packet, direction, source);
-        }
+        else if (auto transmission = dynamic_cast<const physicallayer::ITransmission *>(obj))
+            recordPacket(transmission->getPacket(), direction, source);
+        else if (auto reception = dynamic_cast<const physicallayer::IReception *>(obj))
+            recordPacket(reception->getTransmission()->getPacket(), direction, source);
     }
 }
 
@@ -244,10 +250,12 @@ void PcapRecorder::recordPacket(const cPacket *cpacket, Direction direction, cCo
                 writePacket(protocol, packet, packetProtocolTag->getFrontOffset(), packetProtocolTag->getBackOffset(), direction, networkInterface);
             else {
                 frontOffset = b(0);
+                dumpProtocol = nullptr;
                 Packet dissectedPacket(*packet);
                 PacketDissector packetDissector(ProtocolDissectorRegistry::getInstance(), *this);
                 packetDissector.dissectPacket(&dissectedPacket);
-                writePacket(protocol, packet, frontOffset, b(0), direction, networkInterface);
+                if (dumpProtocol != nullptr)
+                    writePacket(dumpProtocol, packet, frontOffset, b(0), direction, networkInterface);
             }
         }
     }

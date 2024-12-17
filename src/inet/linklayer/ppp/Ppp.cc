@@ -215,6 +215,7 @@ void Ppp::handleMessageWhenUp(cMessage *message)
 void Ppp::handleSelfMessage(cMessage *message)
 {
     if (message == endTransmissionEvent) {
+        emit(transmissionEndedSignal, curTxPacket);
         deleteCurrentTxFrame();
         delete curTxPacket;
         curTxPacket = nullptr;
@@ -268,6 +269,7 @@ void Ppp::handleLowerPacket(Packet *packet)
         const auto& pppTrailer = packet->peekAtBack<PppTrailer>(PPP_TRAILER_LENGTH);
         if (pppHeader == nullptr || pppTrailer == nullptr)
             throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
+        emit(receptionEndedSignal, packet);
         emit(rxPkOkSignal, packet);
         decapsulate(packet);
         numRcvdOK++;

@@ -54,6 +54,7 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener, public 
     static simsignal_t packetRecordedSignal;
 
     b frontOffset;
+    const Protocol *dumpProtocol = nullptr;
 
   public:
     PcapRecorder();

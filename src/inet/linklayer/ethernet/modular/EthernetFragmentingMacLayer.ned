@@ -22,10 +22,6 @@ module EthernetFragmentingMacLayer like IEthernetMacLayer
         *.bitrate = default(this.bitrate);
         lifetimer.collectionModule = default("^.queue");
         streamer.minPacketLength = 60B;
-        outboundEmitter.signalName = "packetSentToLower";
-        outboundEmitter.direction = "outbound";
-        inboundEmitter.signalName = "packetReceivedFromLower";
-        inboundEmitter.direction = "inbound";
         @display("i=block/layer");
     gates:
         input upperLayerIn;
@@ -51,9 +47,6 @@ module EthernetFragmentingMacLayer like IEthernetMacLayer
         fragmentFcsInserter: <default("EthernetFragmentFcsInserter")> like IPacketFlow {
             @display("p=200,500");
         }
-        outboundEmitter: <default("PacketEmitter")> like IPacketFlow {
-            @display("p=200,600");
-        }
         fcsInserter: <default("EthernetFcsInserter")> like IPacketFlow {
             @display("p=500,200");
         }
@@ -63,20 +56,15 @@ module EthernetFragmentingMacLayer like IEthernetMacLayer
         fragmentFcsChecker: <default("EthernetFragmentFcsChecker")> like IPacketFilter {
             @display("p=500,400");
         }
-        inboundEmitter: <default("PacketEmitter")> like IPacketFlow {
-            @display("p=500,500");
-        }
     connections:
         upperLayerIn --> { @display("m=n"); } --> queue.in;
         queue.out --> fcsRemover.in;
         fcsRemover.out --> streamer.in;
         streamer.out --> gate.in;
         gate.out --> fragmentFcsInserter.in;
-        fragmentFcsInserter.out --> outboundEmitter.in;
-        outboundEmitter.out --> { @display("m=s"); } --> lowerLayerOut;
+        fragmentFcsInserter.out --> { @display("m=s"); } --> lowerLayerOut;
 
-        lowerLayerIn --> { @display("m=s"); } --> inboundEmitter.in;
-        inboundEmitter.out --> fragmentFcsChecker.in;
+        lowerLayerIn --> { @display("m=s"); } --> fragmentFcsChecker.in;
         fragmentFcsChecker.out --> defragmenter.in;
         defragmenter.out --> fcsInserter.in;
         fcsInserter.out --> { @display("m=n"); } --> upperLayerOut;
