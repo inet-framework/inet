@@ -33,9 +33,11 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     int domainNumber = -1;
     int slavePortId = -1;        // interface ID of slave port
     std::set<int> masterPortIds; // interface IDs of master ports
+    std::set<int> bmcaPortIds;   // interface IDs of bmca ports
     uint64_t clockIdentity = 0;
     clocktime_t syncInterval;
     clocktime_t pdelayInterval;
+    clocktime_t announceInterval;
     clocktime_t pDelayReqProcessingTime; // processing time between arrived
                                          // PDelayReq and send of PDelayResp
     bool useNrr = false;                 // use neighbor rate ratio
@@ -89,14 +91,15 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     std::map<int, clocktime_t> gptpSyncTime; // store each gptp sync time
 
     // BMCA
-    bool useBmca = false;
     BmcaPriorityVector localPriorityVector;
+    GptpAnnounce *bestAnnounce = nullptr;
     std::map<int, ClockEvent *> announceTimeouts;
     std::map<int, GptpAnnounce *> receivedAnnounces;
 
     // self timers:
     ClockEvent *selfMsgSync = nullptr;
     ClockEvent *selfMsgDelayReq = nullptr;
+    ClockEvent *selfMsgAnnounce = nullptr;
 
     std::set<GptpReqAnswerEvent *> reqAnswerEvents;
 
@@ -111,7 +114,6 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     static simsignal_t correctionFieldIngressSignal;
     static simsignal_t correctionFieldEgressSignal;
 
-
     // Packet receive signals:
     std::map<uint16_t, clocktime_t> ingressTimeMap; // <sequenceId,ingressTime
 
@@ -119,7 +121,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     static const MacAddress GPTP_MULTICAST_ADDRESS;
     static simsignal_t gptpSyncSuccessfulSignal;
 
-    uint8_t getDomainNumber() const {return this->domainNumber;};
+    uint8_t getDomainNumber() const { return this->domainNumber; };
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -184,7 +186,9 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     void calculateGmRatio();
     void executeBmca();
     void initPorts();
-    void scheduleInitialEvents();
+    void scheduleMessageOnTopologyChange();
+    void handleAnnounceTimeout(cMessage *pMessage);
+    bool isGM() const { return gptpNodeType == MASTER_NODE || (gptpNodeType == BMCA_NODE && slavePortId == -1); };
 };
 
 } // namespace inet

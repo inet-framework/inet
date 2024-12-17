@@ -81,8 +81,7 @@ void Gptp::initialize(int stage)
         std::hash<std::string> strHash;
         clockIdentity = strHash(getFullPath());
 
-        useBmca = par("useBmca");
-        if (useBmca) {
+        if (gptpNodeType == BMCA_NODE) {
             initBmca();
         }
     }
@@ -96,18 +95,19 @@ void Gptp::initialize(int stage)
         interfaceTable.reference(this, "interfaceTableModule", true);
 
         initPorts();
-        scheduleInitialEvents();
+        if (gptpNodeType != BMCA_NODE) {
+            scheduleMessageOnTopologyChange();
+        }
+        else {
+            selfMsgAnnounce = new ClockEvent("selfMsgAnnounce", GPTP_SELF_MSG_ANNOUNCE);
+            announceInterval = par("announceInterval");
+            scheduleClockEventAfter(par("announceInitialOffset"), selfMsgAnnounce);
+        }
 
         auto servoClock = check_and_cast<ClockBase *>(clock.get());
         servoClock->subscribe(ServoClockBase::clockJumpSignal, this);
 
         WATCH(meanLinkDelay);
-    }
-    if (stage == INITSTAGE_LAST) {
-        // TODO: Move to scheduleInitialEvents
-        if (useBmca) {
-            sendAnnounce();
-        }
     }
 }
 
@@ -117,19 +117,30 @@ void Gptp::initPorts()
     if (*str) {
         if (gptpNodeType == MASTER_NODE)
             throw cRuntimeError("Parameter inconsistency: MASTER_NODE with slave port");
+        if (gptpNodeType == BMCA_NODE)
+            throw cRuntimeError("Parameter inconsistency: BMCA_NODE with slave port");
         auto nic = CHK(interfaceTable->findInterfaceByName(str));
         slavePortId = nic->getInterfaceId();
         nic->subscribe(transmissionStartedSignal, this);
         nic->subscribe(receptionStartedSignal, this);
         nic->subscribe(receptionEndedSignal, this);
     }
-    else if (gptpNodeType != MASTER_NODE)
+    else if (gptpNodeType != MASTER_NODE && gptpNodeType != BMCA_NODE)
         throw cRuntimeError("Parameter error: Missing slave port for %s", par("gptpNodeType").stringValue());
 
-    auto v = check_and_cast<cValueArray *>(par("masterPorts").objectValue())->asStringVector();
-    if (v.empty() and gptpNodeType != SLAVE_NODE)
+    auto masterPortsVector = check_and_cast<cValueArray *>(par("masterPorts").objectValue())->asStringVector();
+    auto bmcaPortsVector = check_and_cast<cValueArray *>(par("bmcaPorts").objectValue())->asStringVector();
+    if (masterPortsVector.empty() && gptpNodeType != SLAVE_NODE && gptpNodeType != BMCA_NODE)
         throw cRuntimeError("Parameter error: Missing any master port for %s", par("gptpNodeType").stringValue());
-    for (const auto &p : v) {
+    if (!masterPortsVector.empty() && (gptpNodeType == BMCA_NODE || gptpNodeType == SLAVE_NODE))
+        throw cRuntimeError("Parameter inconsistency: %s with master ports", par("gptpNodeType").stringValue());
+
+    if (bmcaPortsVector.empty() && gptpNodeType == BMCA_NODE)
+        throw cRuntimeError("Parameter error: Missing any bmca port for %s", par("gptpNodeType").stringValue());
+    if (!bmcaPortsVector.empty() && gptpNodeType != BMCA_NODE)
+        throw cRuntimeError("Parameter inconsistency: %s with bmca ports", par("gptpNodeType").stringValue());
+
+    for (const auto &p : masterPortsVector) {
         auto nic = CHK(interfaceTable->findInterfaceByName(p.c_str()));
         int portId = nic->getInterfaceId();
         if (portId == slavePortId)
@@ -137,6 +148,15 @@ void Gptp::initPorts()
                                 "master and slave port",
                                 p.c_str());
         masterPortIds.insert(portId);
+        nic->subscribe(transmissionStartedSignal, this);
+        nic->subscribe(receptionStartedSignal, this);
+        nic->subscribe(receptionEndedSignal, this);
+    }
+
+    for (const auto &p : bmcaPortsVector) {
+        auto nic = CHK(interfaceTable->findInterfaceByName(p.c_str()));
+        int portId = nic->getInterfaceId();
+        bmcaPortIds.insert(portId);
         nic->subscribe(transmissionStartedSignal, this);
         nic->subscribe(receptionStartedSignal, this);
         nic->subscribe(receptionEndedSignal, this);
@@ -152,13 +172,31 @@ void Gptp::initPorts()
         if (!networkInterface->matchesMulticastMacAddress(GPTP_MULTICAST_ADDRESS))
             networkInterface->addMulticastMacAddress(GPTP_MULTICAST_ADDRESS);
     }
+    for (auto id : bmcaPortIds) {
+        auto networkInterface = interfaceTable->getInterfaceById(id);
+        if (!networkInterface->matchesMulticastMacAddress(GPTP_MULTICAST_ADDRESS))
+            networkInterface->addMulticastMacAddress(GPTP_MULTICAST_ADDRESS);
+    }
 }
 
-void Gptp::scheduleInitialEvents()
-{ /* Only grandmaster in the domain can initialize the synchronization message
-   * periodically so below condition checks whether it is grandmaster and then
-   * schedule first sync message */
-    if (gptpNodeType == MASTER_NODE) {
+void Gptp::scheduleMessageOnTopologyChange()
+{
+    if (gptpNodeType == BMCA_NODE) {
+        // Cancel old sync and pdelay timers first
+        if (selfMsgSync) {
+            cancelAndDeleteClockEvent(selfMsgSync);
+            selfMsgSync = nullptr;
+        }
+        if (selfMsgDelayReq) {
+            cancelAndDeleteClockEvent(selfMsgDelayReq);
+            selfMsgDelayReq = nullptr;
+        }
+    }
+
+    /* Only grandmaster in the domain can initialize the synchronization message
+     * periodically so below condition checks whether it is grandmaster and then
+     * schedule first sync message */
+    if (isGM()) {
         // Schedule Sync message to be sent
         selfMsgSync = new ClockEvent("selfMsgSync", GPTP_SELF_MSG_SYNC);
 
@@ -183,7 +221,7 @@ void Gptp::initBmca()
     localPriorityVector.grandmasterClockQuality.clockAccuracy = 0;
     localPriorityVector.grandmasterClockQuality.offsetScaledLogVariance = 0;
     localPriorityVector.grandmasterPriority2 = 0;
-    localPriorityVector.clockIdentity = clockIdentity;
+    localPriorityVector.grandmasterIdentity = clockIdentity;
     localPriorityVector.stepsRemoved = 0;
 }
 
@@ -211,7 +249,12 @@ void Gptp::handleSelfMessage(cMessage *msg)
         sendPdelayReq();
         scheduleClockEventAfter(pdelayInterval, selfMsgDelayReq);
         break;
-
+    case GPTP_SELF_MSG_ANNOUNCE:
+        sendAnnounce();
+        break;
+    case GPTP_SELF_MSG_ANNOUNCE_TIMEOUT:
+        handleAnnounceTimeout(msg);
+        break;
     default:
         throw cRuntimeError("Unknown self message (%s)%s, kind=%d", msg->getClassName(), msg->getName(),
                             msg->getKind());
@@ -237,6 +280,9 @@ void Gptp::handleMessage(cMessage *msg)
             details.setReason(NOT_ADDRESSED_TO_US);
             emit(packetDroppedSignal, packet, &details);
         }
+        else if (gptpMessageType == GPTPTYPE_ANNOUNCE && bmcaPortIds.find(incomingNicId) != bmcaPortIds.end()) {
+            processAnnounce(packet, check_and_cast<const GptpAnnounce *>(gptp.get()));
+        }
         else if (incomingNicId == slavePortId) {
             // slave port
             switch (gptpMessageType) {
@@ -252,11 +298,15 @@ void Gptp::handleMessage(cMessage *msg)
             case GPTPTYPE_PDELAY_RESP_FOLLOW_UP:
                 processPdelayRespFollowUp(packet, check_and_cast<const GptpPdelayRespFollowUp *>(gptp.get()));
                 break;
-            case GPTPTYPE_ANNOUNCE:
-                processAnnounce(packet, check_and_cast<const GptpAnnounce *>(gptp.get()));
-                break;
             default:
-                throw cRuntimeError("Unknown gPTP packet type: %d", (int)(gptpMessageType));
+                if (gptpNodeType != BMCA_NODE) {
+                    throw cRuntimeError("Unknown gPTP packet type: %d", (int)(gptpMessageType));
+                } else {
+                    // In BMCA mode, packets might be still in transmission when switching port state
+                    // Ignore and throw warning
+                    EV_WARN << "Message " << msg->getClassAndFullName() << " arrived on slave port " << incomingNicId
+                            << ", dropped\n";
+                }
             }
         }
         else if (masterPortIds.find(incomingNicId) != masterPortIds.end()) {
@@ -265,7 +315,14 @@ void Gptp::handleMessage(cMessage *msg)
                 processPdelayReq(packet, check_and_cast<const GptpPdelayReq *>(gptp.get()));
             }
             else {
-                throw cRuntimeError("Unaccepted gPTP type: %d", (int)(gptpMessageType));
+                if (gptpNodeType != BMCA_NODE) {
+                    throw cRuntimeError("Unaccepted gPTP type: %d", (int)(gptpMessageType));
+                } else {
+                    // In BMCA mode, packets might be still in transmission when switching port state
+                    // Ignore and throw warning
+                    EV_WARN << "Message " << msg->getClassAndFullName() << " arrived on master port " << incomingNicId
+                            << ", dropped\n";
+                }
             }
         }
         else {
@@ -300,10 +357,36 @@ void Gptp::sendAnnounce()
     gptp->setDomainNumber(domainNumber);
     // TODO: IEEE 1588-2019 specifies that it also might be 0, check what this means
     gptp->setOriginTimestamp(clock->getClockTime());
+    gptp->setSequenceId(sequenceId++);
+
+    PortIdentity portId;
+    portId.clockIdentity = clockIdentity;
+    portId.portNumber = slavePortId;
+    gptp->setSourcePortIdentity(portId);
+
+    if (bestAnnounce == nullptr || bestAnnounce->getPriorityVector() == localPriorityVector) {
+        gptp->setPriorityVector(localPriorityVector);
+    }
+    else {
+        auto newPriorityVector = bestAnnounce->getPriorityVector();
+        newPriorityVector.stepsRemoved++;
+        gptp->setPriorityVector(newPriorityVector);
+    }
 
     packet->insertAtFront(gptp);
-    for (auto port : masterPortIds)
+
+    for (auto port : bmcaPortIds) {
+        if (port == slavePortId)
+            continue;
         sendPacketToNIC(packet->dup(), port);
+    }
+
+    if (!masterPortIds.empty() || slavePortId == -1) {
+        // When we are the master to at least one port or we are not a slave (init phase) reschedule the Announce
+        rescheduleClockEventAfter(announceInterval, selfMsgAnnounce);
+    }
+
+
     delete packet;
 }
 
@@ -314,7 +397,7 @@ void Gptp::sendSync()
     auto gptp = makeShared<GptpSync>();
     gptp->setDomainNumber(domainNumber);
     /* OriginTimestamp always get Sync departure time from grand master */
-    if (gptpNodeType == MASTER_NODE) {
+    if (isGM()) {
         preciseOriginTimestamp = clock->getClockTime();
     }
     // gptp->setOriginTimestamp(CLOCKTIME_ZERO);
@@ -343,11 +426,11 @@ void Gptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syn
     gptp->setSequenceId(sync->getSequenceId());
 
     clocktime_t residenceTime;
-    if (gptpNodeType == MASTER_NODE) {
+    if (isGM()) {
         residenceTime = syncEgressTimestampOwn - preciseOriginTimestamp;
         gptp->setCorrectionField(residenceTime);
     }
-    else if (gptpNodeType == BRIDGE_NODE) {
+    else if (gptpNodeType == BRIDGE_NODE || gptpNodeType == BMCA_NODE) {
         residenceTime = syncEgressTimestampOwn - syncIngressTimestamp;
         // meanLinkDelay and residence time are in the local time base
         // In the correctionField we need to express it in the grandmaster's time base
@@ -375,20 +458,186 @@ void Gptp::processAnnounce(Packet *packet, const GptpAnnounce *announce)
     receivedAnnounces[incomingNicId] = announce->dup();
 
     // TODO: Use parameter
-    auto gptpAnnounceTimeoutTime = clocktime_t(500, SIMTIME_MS);
+    auto gptpAnnounceTimeoutTime = clocktime_t(3000, SIMTIME_MS);
     if (announceTimeouts.find(incomingNicId) != announceTimeouts.end()) {
         rescheduleClockEventAfter(gptpAnnounceTimeoutTime, announceTimeouts[incomingNicId]);
     }
-    ClockEvent announceTimeout("gptpAnnounceTimeout", GPTP_ANNOUNCE_TIMEOUT_KIND);
-    auto incomingNicIdCValue = cValue(incomingNicId);
-    auto nicIdPar = announceTimeout.addPar("nicId");
-    nicIdPar.setLongValue(nicIdPar);
-    announceTimeouts[incomingNicId] = &announceTimeout;
+    else {
+        auto announceTimeoutEvent = new ClockEvent("gptpAnnounceTimeout", GPTP_SELF_MSG_ANNOUNCE_TIMEOUT);
+        auto nicIdPar = announceTimeoutEvent->addPar("nicId").setLongValue(incomingNicId);
+        announceTimeouts[incomingNicId] = announceTimeoutEvent;
+        scheduleClockEventAfter(gptpAnnounceTimeoutTime, announceTimeoutEvent);
+    }
 
     executeBmca();
 }
 
-void Gptp::executeBmca() {}
+void Gptp::executeBmca()
+{
+    PortIdentity ownPortIdentity;
+    ownPortIdentity.clockIdentity = clockIdentity;
+    ownPortIdentity.portNumber = 0;
+
+    // IEEE 1588-2019 Table 29
+    auto b = new GptpAnnounce();
+    b->setPriorityVector(localPriorityVector);
+    b->setSourcePortIdentity(ownPortIdentity);
+
+    auto bReceiverIdentity = ownPortIdentity;
+
+    for (const auto &announceEntry : receivedAnnounces) {
+        auto a = announceEntry.second;
+        auto aVec = a->getPriorityVector();
+        auto bVec = b->getPriorityVector();
+
+        auto aReceiverIdentity = PortIdentity();
+        aReceiverIdentity.clockIdentity = clockIdentity;
+        aReceiverIdentity.portNumber = announceEntry.first;
+
+        // IEEE 1588-2019 Figure 34
+        if (aVec.grandmasterIdentity == bVec.grandmasterIdentity) {
+            // Special cases Figure 35
+
+            // Compare steps removed (diff >=2)
+            if (aVec.stepsRemoved + 1 < bVec.stepsRemoved) {
+                b = a;
+                bReceiverIdentity = aReceiverIdentity;
+                continue;
+            }
+            else if (aVec.stepsRemoved > bVec.stepsRemoved + 1) {
+                // B is already the best vector -> do nothing
+                continue;
+            }
+
+            // Compare steps removed |A-B| <= 1
+            if (aVec.stepsRemoved < bVec.stepsRemoved) {
+                if (bReceiverIdentity == b->getSourcePortIdentity()) {
+                    throw cRuntimeError("Error-1: Indicates that one of the PTP messages was "
+                                        "transmitted and received on the same PTP Port.\n"
+                                        "(See IEEE 1588-2019 Figure 35 NOTE 2)");
+                }
+                else if (bReceiverIdentity > b->getSourcePortIdentity()) {
+                    b = a;
+                    bReceiverIdentity = aReceiverIdentity;
+                    continue;
+                }
+                else {
+                    throw cRuntimeError("Unknown case in BMCA -- should never happen");
+                }
+            }
+            else if (aVec.stepsRemoved > bVec.stepsRemoved) {
+                if (aReceiverIdentity == a->getSourcePortIdentity()) {
+                    throw cRuntimeError("Error-1: Indicates that one of the PTP messages was "
+                                        "transmitted and received on the same PTP Port.\n"
+                                        "(See IEEE 1588-2019 Figure 35 NOTE 2)");
+                }
+                else if (aReceiverIdentity > a->getSourcePortIdentity()) {
+                    // B is already the best vector -> do nothing
+                    continue;
+                }
+                else {
+                    throw cRuntimeError("Unknown case in BMCA -- should never happen");
+                }
+            }
+
+            // Compare Identities of senders
+            if (a->getSourcePortIdentity() < b->getSourcePortIdentity()) {
+                // A better by topology
+                b = a;
+                bReceiverIdentity = aReceiverIdentity;
+                continue;
+            }
+            else if (b->getSourcePortIdentity() < a->getSourcePortIdentity()) {
+                // B better by topology
+                // B is already the best vector -> do nothing
+                continue;
+            }
+
+            // Compare port number of receivers
+            if (aReceiverIdentity.portNumber < bReceiverIdentity.portNumber) {
+                // A better by topology
+                b = a;
+                bReceiverIdentity = aReceiverIdentity;
+                continue;
+            }
+            else if (aReceiverIdentity.portNumber > bReceiverIdentity.portNumber) {
+                // B better by topology
+                // B is already the best vector -> do nothing
+                continue;
+            }
+            else {
+                throw cRuntimeError("Error-2: indicates that the PTP messages are duplicates or that they are "
+                                    "an earlier and later PTP message from the same Grandmaster PTP Instance.\n"
+                                    "(See IEEE 1588-2019 Figure 35 NOTE 2)");
+            }
+        }
+        else if (aVec < bVec) {
+            b = a;
+            bReceiverIdentity = aReceiverIdentity;
+        }
+        else if (bVec < aVec) {
+            // Best vector is already b -> do nothing
+        }
+        else {
+            throw cRuntimeError("Unknown case in BMCA -- should never happen");
+        }
+    }
+
+    EV_INFO << "############## BMCA ################################" << endl;
+    EV_INFO << "Choosing from " << receivedAnnounces.size() << " Announces" << endl;
+    EV_INFO << "Selected Grandmaster Identity - " << b->getPriorityVector().grandmasterIdentity << endl;
+    EV_INFO << "Selected Grandmaster Priority1 - " << (int)b->getPriorityVector().grandmasterPriority1 << endl;
+    EV_INFO << "Selected Slave Port Identity - " << bReceiverIdentity.portNumber << endl;
+
+    if (bestAnnounce == b) {
+        // Nothing changed
+    }
+    else if (bestAnnounce && bestAnnounce->getPriorityVector() == b->getPriorityVector()) {
+        // Same priority vector but newer Announce, no topology change because priority vector is the same
+        // Store the new Announce
+        delete bestAnnounce;
+        bestAnnounce = b;
+    }
+    else {
+        // Topology change, update ports and send Announce
+        bool doSendAnnounce = true;
+
+        if (b->getPriorityVector().grandmasterIdentity != clockIdentity) {
+            // We are not the GM
+            slavePortId = bReceiverIdentity.portNumber;
+            masterPortIds.clear();
+            for (const auto &portId : bmcaPortIds) {
+                if (portId != slavePortId) {
+                    masterPortIds.insert(portId);
+                }
+            }
+            auto masterName = interfaceTable->getInterfaceById(slavePortId)
+                                  ->getRxTransmissionChannel()
+                                  ->getSourceGate()
+                                  ->getOwnerModule()
+                                  ->getName();
+            getContainingNode(this)->bubble(("My master is " + std::string(masterName)).c_str());
+        }
+        else {
+            // We are the GM:
+            getContainingNode(this)->bubble("I'm GM");
+            if (slavePortId == -1) {
+                // We were already GM, no need to send Announce again
+                doSendAnnounce = false;
+            }
+            masterPortIds = bmcaPortIds;
+            slavePortId = -1;
+        }
+
+
+        delete bestAnnounce;
+        bestAnnounce = b;
+        if (doSendAnnounce) {
+            sendAnnounce();
+        }
+        scheduleMessageOnTopologyChange();
+    }
+}
 
 void Gptp::sendPdelayResp(GptpReqAnswerEvent *req)
 {
@@ -502,7 +751,7 @@ void Gptp::processFollowUp(Packet *packet, const GptpFollowUp *gptp)
 
     // Send a request to send Sync message
     // through other gptp Ethernet interfaces
-    if (gptpNodeType == BRIDGE_NODE)
+    if (gptpNodeType == BRIDGE_NODE || gptpNodeType == BMCA_NODE)
         sendSync();
 }
 
@@ -518,7 +767,7 @@ void Gptp::synchronize()
 
     clocktime_t residenceTime = oldLocalTimeAtTimeSync - syncIngressTimestamp;
 
-    ASSERT(gptpNodeType != MASTER_NODE);
+    ASSERT(!isGM());
 
     calculateGmRatio();
 
@@ -769,6 +1018,18 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t simSignal, cObject *obj
     }
     else if (simSignal == transmissionStartedSignal)
         handleTransmissionStartedSignal(gptp, source);
+}
+
+void Gptp::handleAnnounceTimeout(cMessage *pMessage)
+{
+    int nicId = pMessage->par("nicId").longValue();
+    auto it = receivedAnnounces.find(nicId);
+    if (it == receivedAnnounces.end()) {
+        throw cRuntimeError("Received announce timeout for unknown NIC %d", nicId);
+    }
+
+    receivedAnnounces.erase(it);
+    executeBmca();
 }
 
 void Gptp::handleTransmissionStartedSignal(const GptpBase *gptp, cComponent *source)

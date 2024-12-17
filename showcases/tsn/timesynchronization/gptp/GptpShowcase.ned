@@ -32,6 +32,27 @@ network OneMasterClockGptpShowcase extends TsnNetworkBase
         tsnSwitch.ethg++ <--> EthernetLink <--> tsnDevice2.ethg++;
 }
 
+network BmcaShowcase extends TsnNetworkBase
+{
+    submodules:
+        tsnDevice1: TsnDevice {
+            @display("p=500,150");
+        }
+        tsnSwitch: TsnSwitch {
+            @display("p=500,300");
+        }
+        tsnDevice2: TsnDevice {
+            @display("p=400,450");
+        }
+        tsnDevice3: TsnDevice {
+            @display("p=600,450");
+        }
+    connections:
+        tsnDevice1.ethg++ <--> EthernetLink <--> tsnSwitch.ethg++;
+        tsnSwitch.ethg++ <--> EthernetLink <--> tsnDevice2.ethg++;
+        tsnSwitch.ethg++ <--> EthernetLink <--> tsnDevice3.ethg++;
+}
+
 network JumpingClockGptpShowcase extends TsnNetworkBase
 {
     submodules:

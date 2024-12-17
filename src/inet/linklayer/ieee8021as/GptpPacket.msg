@@ -47,6 +47,7 @@ enum GptpNodeType
     MASTER_NODE = 11;
     BRIDGE_NODE = 12;
     SLAVE_NODE  = 13;
+    BMCA_NODE = 14;
 }
 
 enum GmRateRatioCalculationMethod {
@@ -74,10 +75,10 @@ enum GptpMessageType
 
 enum GptpSelfMsgKind {
     GPTP_SELF_REQ_ANSWER_KIND = 101;
-    GPTP_SELF_MSG_SYNC = 103;
-    GPTP_REQUEST_TO_SEND_SYNC = 104;
-    GPTP_SELF_MSG_PDELAY_REQ = 105;
-    GPTP_ANNOUNCE_TIMEOUT_KIND = 106;
+    GPTP_SELF_MSG_SYNC = 102;
+    GPTP_SELF_MSG_PDELAY_REQ = 103;
+    GPTP_SELF_MSG_ANNOUNCE = 104;
+    GPTP_SELF_MSG_ANNOUNCE_TIMEOUT = 105;
 }
 
 // ieee802.1AS-2020 10.6.2.2.8: flags (Octet2)
@@ -116,6 +117,35 @@ struct PortIdentity
     uint64_t clockIdentity;
     uint16_t portNumber;
 };
+
+cplusplus(PortIdentity) {{
+    bool operator==(const PortIdentity& rhs) const {
+        return clockIdentity == rhs.clockIdentity &&
+               portNumber == rhs.portNumber;
+    }
+
+    bool operator!=(const PortIdentity& rhs) const {
+        return !(*this == rhs);
+    }
+
+    bool operator<(const PortIdentity& rhs) const {
+        if (clockIdentity < rhs.clockIdentity) return true;
+        if (clockIdentity > rhs.clockIdentity) return false;
+        return portNumber < rhs.portNumber;
+    }
+
+    bool operator>(const PortIdentity& rhs) const {
+        return rhs < *this;
+    }
+
+    bool operator<=(const PortIdentity& rhs) const {
+        return !(rhs < *this);
+    }
+
+    bool operator>=(const PortIdentity& rhs) const {
+        return !(*this < rhs);
+    }
+}}
 
 
 message GptpReqAnswerEvent extends ClockEvent
@@ -292,7 +322,7 @@ struct BmcaPriorityVector {
     uint8_t grandmasterPriority1;
     ClockQuality grandmasterClockQuality;
     uint8_t grandmasterPriority2;
-    uint64_t clockIdentity;
+    uint64_t grandmasterIdentity;
     uint16_t stepsRemoved;
 }
 
@@ -304,7 +334,7 @@ cplusplus(BmcaPriorityVector) {{
         return grandmasterPriority1 == rhs.grandmasterPriority1 &&
                grandmasterClockQuality == rhs.grandmasterClockQuality &&
                grandmasterPriority2 == rhs.grandmasterPriority2 &&
-               clockIdentity == rhs.clockIdentity &&
+               grandmasterIdentity == rhs.grandmasterIdentity &&
                stepsRemoved == rhs.stepsRemoved;
     }
 
@@ -319,8 +349,8 @@ cplusplus(BmcaPriorityVector) {{
         if (grandmasterClockQuality > rhs.grandmasterClockQuality) return false;
         if (grandmasterPriority2 < rhs.grandmasterPriority2) return true;
         if (grandmasterPriority2 > rhs.grandmasterPriority2) return false;
-        if (clockIdentity < rhs.clockIdentity) return true;
-        if (clockIdentity > rhs.clockIdentity) return false;
+        if (grandmasterIdentity < rhs.grandmasterIdentity) return true;
+        if (grandmasterIdentity > rhs.grandmasterIdentity) return false;
         return stepsRemoved < rhs.stepsRemoved;
     }
 
