@@ -80,7 +80,7 @@ void PlotFigure::setBounds(const Rectangle& rect)
     invalidLayout = true;
 }
 
-const cFigure::Color& PlotFigure::getBackgrouncColor() const
+const cFigure::Color& PlotFigure::getBackgroundColor() const
 {
     return backgroundFigure->getFillColor();
 }
