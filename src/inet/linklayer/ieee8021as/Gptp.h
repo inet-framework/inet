@@ -34,6 +34,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     int slavePortId = -1;        // interface ID of slave port
     std::set<int> masterPortIds; // interface IDs of master ports
     std::set<int> bmcaPortIds;   // interface IDs of bmca ports
+    std::set<int> passivePortIds; // interface IDs of passive ports (only relevant for BMCA)
     uint64_t clockIdentity = 0;
     clocktime_t syncInterval;
     clocktime_t pdelayInterval;

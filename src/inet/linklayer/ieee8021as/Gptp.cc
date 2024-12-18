@@ -52,6 +52,8 @@ Gptp::~Gptp()
         cancelAndDeleteClockEvent(selfMsgDelayReq);
     if (selfMsgSync)
         cancelAndDeleteClockEvent(selfMsgSync);
+    if (selfMsgAnnounce)
+        cancelAndDeleteClockEvent(selfMsgAnnounce);
     for (auto &reqAnswerEvent : reqAnswerEvents)
         delete reqAnswerEvent;
     for (auto &announce : receivedAnnounces)
@@ -59,6 +61,7 @@ Gptp::~Gptp()
     for (auto &announceTimeout : announceTimeouts) {
         cancelAndDeleteClockEvent(announceTimeout.second);
     }
+    delete bestAnnounce;
 }
 
 void Gptp::initialize(int stage)
@@ -301,7 +304,8 @@ void Gptp::handleMessage(cMessage *msg)
             default:
                 if (gptpNodeType != BMCA_NODE) {
                     throw cRuntimeError("Unknown gPTP packet type: %d", (int)(gptpMessageType));
-                } else {
+                }
+                else {
                     // In BMCA mode, packets might be still in transmission when switching port state
                     // Ignore and throw warning
                     EV_WARN << "Message " << msg->getClassAndFullName() << " arrived on slave port " << incomingNicId
@@ -317,7 +321,8 @@ void Gptp::handleMessage(cMessage *msg)
             else {
                 if (gptpNodeType != BMCA_NODE) {
                     throw cRuntimeError("Unaccepted gPTP type: %d", (int)(gptpMessageType));
-                } else {
+                }
+                else {
                     // In BMCA mode, packets might be still in transmission when switching port state
                     // Ignore and throw warning
                     EV_WARN << "Message " << msg->getClassAndFullName() << " arrived on master port " << incomingNicId
@@ -385,7 +390,6 @@ void Gptp::sendAnnounce()
         // When we are the master to at least one port or we are not a slave (init phase) reschedule the Announce
         rescheduleClockEventAfter(announceInterval, selfMsgAnnounce);
     }
-
 
     delete packet;
 }
@@ -455,6 +459,9 @@ void Gptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syn
 void Gptp::processAnnounce(Packet *packet, const GptpAnnounce *announce)
 {
     auto incomingNicId = packet->getTag<InterfaceInd>()->getInterfaceId();
+    if (receivedAnnounces.find(incomingNicId) != receivedAnnounces.end()) {
+        delete receivedAnnounces[incomingNicId];
+    }
     receivedAnnounces[incomingNicId] = announce->dup();
 
     // TODO: Use parameter
@@ -479,9 +486,11 @@ void Gptp::executeBmca()
     ownPortIdentity.portNumber = 0;
 
     // IEEE 1588-2019 Table 29
-    auto b = new GptpAnnounce();
-    b->setPriorityVector(localPriorityVector);
-    b->setSourcePortIdentity(ownPortIdentity);
+    auto ownAnnounce = new GptpAnnounce();
+    ownAnnounce->setPriorityVector(localPriorityVector);
+    ownAnnounce->setSourcePortIdentity(ownPortIdentity);
+
+    auto b = ownAnnounce;
 
     auto bReceiverIdentity = ownPortIdentity;
 
@@ -590,13 +599,13 @@ void Gptp::executeBmca()
     EV_INFO << "Selected Slave Port Identity - " << bReceiverIdentity.portNumber << endl;
 
     if (bestAnnounce == b) {
-        // Nothing changed
+        // Received an Announce message, but best clock is still the same
     }
     else if (bestAnnounce && bestAnnounce->getPriorityVector() == b->getPriorityVector()) {
         // Same priority vector but newer Announce, no topology change because priority vector is the same
         // Store the new Announce
         delete bestAnnounce;
-        bestAnnounce = b;
+        bestAnnounce = b->dup();
     }
     else {
         // Topology change, update ports and send Announce
@@ -606,6 +615,7 @@ void Gptp::executeBmca()
             // We are not the GM
             slavePortId = bReceiverIdentity.portNumber;
             masterPortIds.clear();
+            passivePortIds.clear();
             for (const auto &portId : bmcaPortIds) {
                 if (portId != slavePortId) {
                     masterPortIds.insert(portId);
@@ -626,17 +636,20 @@ void Gptp::executeBmca()
                 doSendAnnounce = false;
             }
             masterPortIds = bmcaPortIds;
+            passivePortIds.clear();
             slavePortId = -1;
         }
 
-
         delete bestAnnounce;
-        bestAnnounce = b;
+        bestAnnounce = b->dup();
+
         if (doSendAnnounce) {
             sendAnnounce();
         }
         scheduleMessageOnTopologyChange();
     }
+
+    delete ownAnnounce;
 }
 
 void Gptp::sendPdelayResp(GptpReqAnswerEvent *req)
@@ -1028,6 +1041,7 @@ void Gptp::handleAnnounceTimeout(cMessage *pMessage)
         throw cRuntimeError("Received announce timeout for unknown NIC %d", nicId);
     }
 
+    delete it->second;
     receivedAnnounces.erase(it);
     executeBmca();
 }
