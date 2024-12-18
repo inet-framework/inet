@@ -559,7 +559,7 @@ class MultipleTasks:
             if self.concurrent:
                 pool_class = multiprocessing.pool.ThreadPool if self.scheduler == "thread" else (multiprocessing.Pool if self.scheduler == "process" else None)
                 try:
-                    pool = pool_class(multiprocessing.cpu_count())
+                    pool = multiprocessing.Pool(multiprocessing.cpu_count(), maxtasksperchild=1)
                     partially_applied_function = functools.partial(run_task_with_capturing_output, tasks=tasks, task_count=task_count, **dict(kwargs, keyboard_interrupt_handler=None))
                     map_results = pool.map_async(partially_applied_function, tasks, chunksize=self.chunksize)
                     task_results = map_results.get(0xFFFF)
