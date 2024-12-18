@@ -20,4 +20,6 @@ simple HotStandby
     parameters:
         @display("i=block/blackboard");
         @class(HotStandby);
+        @selfMessageKinds(inet::GptpSelfMsgKind);
+        double delta @unit(s) = default(100us);
 }

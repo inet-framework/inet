@@ -113,6 +113,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     static simsignal_t gptpSyncSuccessfulSignal;
 
     uint8_t getDomainNumber() const {return this->domainNumber;};
+    clocktime_t getSyncInterval() const {return syncInterval;};
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

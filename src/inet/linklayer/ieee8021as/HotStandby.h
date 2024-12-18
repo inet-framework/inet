@@ -19,14 +19,23 @@ class INET_API HotStandby : public ClockUserModuleBase, public cListener
 {
   protected:
     std::map<uint8_t , clocktime_t> gptpSyncTime; // store each gptp sync time
+    ClockEvent *standByMsg = nullptr;
+    const Gptp *gptpModule = nullptr;
+    clocktime_t delta;
+    clocktime_t timer = 0;
+
   public:
+    virtual ~HotStandby();
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t simSignal, const SimTime& t, cObject *details) override;
     void handleGptpSyncSuccessfulSignal(const Gptp *gptp, const SimTime& t);
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; };
+    virtual void handleMessage(cMessage *msg) override;
+    void dropDomain(uint8_t domainNumber);
 };
 
 } // namespace inet
 
 #endif
 
+;
