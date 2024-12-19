@@ -157,10 +157,18 @@ We assign the following IP addresses:
 
 
 
-Namespaces can be managed with shell scripts, but we can also use the
+These network namespaces could be set up by shell scripts, but we can also use the
 :ned:`ExternalEnvironment` and :ned:`ExternalProcess` modules to specify
 commands to run on the host OS from the ini file. This makes the simulation setup self-contained (we don't need to run shell scripts). Also, this way the commands can be
 grouped logically with the network node they are associated with.
+
+In this simulation, we're using unshared user namespaces, so that processes started by these modules have their own separate user and group IDs, allowing them to act as root inside the namespace without affecting the host system.
+This is useful because we can run commands without ``sudo``:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: unshare-
+   :end-at: unshare-
 
 The :ned:`ExternalEnvironment` module deals with preparing the host OS environment
 for running the emulation, then cleaning up afterwards. Specifically, the module's :par:`setupCommand` is executed at module creation, and :ned:`teardownCommand` at module destruction.
@@ -245,10 +253,10 @@ We also employ an :ned:`ExternalApp` module to start the ping command in ``host0
 .. during simulation. The command to execute in the host OS is defined by :ned:`ExternalProcess`'s :par:`command` parameter. Here,
 .. we use it to start the babel daemon process. TODO namespace
 
-These commands could be defined in shell scripts as well, however, defining them in an :ned:`ExternalApp`
-however, defining commands associated with a network node in the simulation at the node itself makes
-for logical grouping and running the simulation more convenient. For example, we can easily refactor
-shared parts of the command by parameterizing network-node-dependent values such as node index.
+.. These commands could be defined in shell scripts as well, however, defining them in an :ned:`ExternalApp`
+.. however, defining commands associated with a network node in the simulation at the node itself makes
+.. for logical grouping and running the simulation more convenient. For example, we can easily refactor
+.. shared parts of the command by parameterizing network-node-dependent values such as node index.
 
 
 .. ``Run.sh`` runs the emulation example; it starts the ``babeld`` instances, runs a
@@ -307,8 +315,37 @@ such as loopback interfaces and unused protocols:
    :end-at: hasIpv6
    :language: ini
 
+Accessing unshared network namespaces
+-------------------------------------
+
+Unshared network namespaces are not visible from the host OS environment as they are isolated (e.g. ``ip netns list`` doesn't list them).
+However, they can be accessed based on Process ID (PID). The babeld processes export their PIDs to files (``babel*.pid``).
+We can run the following command in a terminal to watch routing tables in the network namespace:
+
+.. code:: shell
+
+   watch -n 0.1 "sudo nsenter -t $(cat babel0.pid) -n ip route"
+
+This enters the network namespace (``nsenter``) specified by the PID in ``babel0.pid``, and runs the ``ip route`` command to display the routing table.
+
+Similarly, we can use Wireshark to monitor traffic on the virtual network interfaces; just replace the command with ``wireshark``:
+
+.. code:: shell
+
+   sudo nsenter -t $(cat babel0.pid) -n wireshark
+
+.. note:: ``sudo lsns -t net`` can be used to list process IDs in unshared network namespaces.
+
 Results
 -------
+
+The simulation can be started with the ``inet`` command from a terminal:
+
+.. code:: shell
+
+   inet
+
+**TODO** cut video 10 seconds
 
 Here is a video of the simulation running:
 
@@ -318,7 +355,7 @@ Here is a video of the simulation running:
 
 The simulation is shown running in qtenv on the left.
 The first three terminals on the right display the routing tables of the three hosts
-in the three network namespaces; the fourth terminal displays the Ping output.
+in the three network namespaces; we start the simulation from the fourth terminal; it also displays the Ping output.
 
 Successful link-layer transmissions are visualized with arrows; green for Babel messages,
 and red for Ping.
@@ -357,13 +394,35 @@ Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`BabelShowcase.ned 
 Try It Yourself
 ---------------
 
-First, install INET and OMNeT++. Then, start the IDE by typing
+If you already have INET and OMNeT++ installed, start the IDE by typing
 ``omnetpp``, import the INET project into the IDE, then navigate to the
 ``inet/showcases/emulation/babel`` folder in the `Project Explorer`. There, you can view
 and edit the showcase files, run simulations, and analyze results.
 
-Currently, `opp_env <https://omnetpp.org/opp_env>`__-based installation is not
-available for the emulation showcases.
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.6 --init -w inet-workspace --install --chdir \
+       -c 'cd inet-4.6.*/showcases/emulation/babel && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace inet-4.6
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
 
 
 Discussion
