@@ -25,15 +25,23 @@ namespace inet {
 class INET_API Gptp : public ClockUserModuleBase, public cListener
 {
   protected:
+    enum BmcaPriorityVectorComparisonResult {
+        A_BETTER_THAN_B,
+        A_BETTER_THAN_B_BY_TOPOLOGY,
+        B_BETTER_THAN_A,
+        B_BETTER_THAN_A_BY_TOPOLOGY,
+    };
+
+  protected:
     // parameters:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
 
     // Configuration
     GptpNodeType gptpNodeType;
     int domainNumber = -1;
-    int slavePortId = -1;        // interface ID of slave port
-    std::set<int> masterPortIds; // interface IDs of master ports
-    std::set<int> bmcaPortIds;   // interface IDs of bmca ports
+    int slavePortId = -1;         // interface ID of slave port
+    std::set<int> masterPortIds;  // interface IDs of master ports
+    std::set<int> bmcaPortIds;    // interface IDs of bmca ports
     std::set<int> passivePortIds; // interface IDs of passive ports (only relevant for BMCA)
     uint64_t clockIdentity = 0;
     clocktime_t syncInterval;
@@ -190,6 +198,9 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     void scheduleMessageOnTopologyChange();
     void handleAnnounceTimeout(cMessage *pMessage);
     bool isGM() const { return gptpNodeType == MASTER_NODE || (gptpNodeType == BMCA_NODE && slavePortId == -1); };
+    Gptp::BmcaPriorityVectorComparisonResult compareAnnounceMessages(GptpAnnounce *a, GptpAnnounce *b,
+                                                                     PortIdentity aReceiverIdentity,
+                                                                     PortIdentity bReceiverIdentity);
 };
 
 } // namespace inet

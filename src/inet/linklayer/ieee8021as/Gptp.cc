@@ -220,7 +220,7 @@ void Gptp::initBmca()
 {
     // TODO: harcoded for now
     localPriorityVector.grandmasterPriority1 = par("grandmasterPriority1");
-    localPriorityVector.grandmasterClockQuality.clockClass = 0;
+    localPriorityVector.grandmasterClockQuality.clockClass = 248;
     localPriorityVector.grandmasterClockQuality.clockAccuracy = 0;
     localPriorityVector.grandmasterClockQuality.offsetScaledLogVariance = 0;
     localPriorityVector.grandmasterPriority2 = 0;
@@ -356,42 +356,39 @@ void Gptp::sendPacketToNIC(Packet *packet, int portId)
 
 void Gptp::sendAnnounce()
 {
-    auto packet = new Packet("GptpAnnounce");
-    packet->addTag<MacAddressReq>()->setDestAddress(GPTP_MULTICAST_ADDRESS);
-    auto gptp = makeShared<GptpAnnounce>();
-    gptp->setDomainNumber(domainNumber);
-    // TODO: IEEE 1588-2019 specifies that it also might be 0, check what this means
-    gptp->setOriginTimestamp(clock->getClockTime());
-    gptp->setSequenceId(sequenceId++);
-
-    PortIdentity portId;
-    portId.clockIdentity = clockIdentity;
-    portId.portNumber = slavePortId;
-    gptp->setSourcePortIdentity(portId);
-
-    if (bestAnnounce == nullptr || bestAnnounce->getPriorityVector() == localPriorityVector) {
-        gptp->setPriorityVector(localPriorityVector);
-    }
-    else {
-        auto newPriorityVector = bestAnnounce->getPriorityVector();
-        newPriorityVector.stepsRemoved++;
-        gptp->setPriorityVector(newPriorityVector);
-    }
-
-    packet->insertAtFront(gptp);
-
     for (auto port : bmcaPortIds) {
-        if (port == slavePortId)
+        if (port == slavePortId || passivePortIds.find(port) != passivePortIds.end())
             continue;
-        sendPacketToNIC(packet->dup(), port);
+
+        auto packet = new Packet("GptpAnnounce");
+        packet->addTag<MacAddressReq>()->setDestAddress(GPTP_MULTICAST_ADDRESS);
+
+        auto gptp = makeShared<GptpAnnounce>();
+        gptp->setDomainNumber(domainNumber);
+        // TODO: IEEE 1588-2019 specifies that it also might be 0, check what this means
+        gptp->setOriginTimestamp(clock->getClockTime());
+        gptp->setSequenceId(sequenceId++);
+
+        if (bestAnnounce == nullptr || bestAnnounce->getPriorityVector() == localPriorityVector) {
+            gptp->setPriorityVector(localPriorityVector);
+        }
+        else {
+            auto newPriorityVector = bestAnnounce->getPriorityVector();
+            newPriorityVector.stepsRemoved++;
+            gptp->setPriorityVector(newPriorityVector);
+        }
+
+        PortIdentity portId;
+        portId.clockIdentity = clockIdentity;
+        portId.portNumber = port;
+
+        gptp->setSourcePortIdentity(portId);
+        packet->insertAtFront(gptp);
+
+        sendPacketToNIC(packet, port);
     }
 
-    if (!masterPortIds.empty() || slavePortId == -1) {
-        // When we are the master to at least one port or we are not a slave (init phase) reschedule the Announce
-        rescheduleClockEventAfter(announceInterval, selfMsgAnnounce);
-    }
-
-    delete packet;
+    rescheduleClockEventAfter(announceInterval, selfMsgAnnounce);
 }
 
 void Gptp::sendSync()
@@ -458,6 +455,13 @@ void Gptp::sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syn
 
 void Gptp::processAnnounce(Packet *packet, const GptpAnnounce *announce)
 {
+    if (announce->getPriorityVector().stepsRemoved >= 255) {
+        // IEEE 1588-2019 9.3.2.5 d)
+        EV_WARN << "Announce message dropped because stepsRemoved is 255" << endl;
+        delete packet;
+        return;
+    }
+
     auto incomingNicId = packet->getTag<InterfaceInd>()->getInterfaceId();
     if (receivedAnnounces.find(incomingNicId) != receivedAnnounces.end()) {
         delete receivedAnnounces[incomingNicId];
@@ -490,130 +494,53 @@ void Gptp::executeBmca()
     ownAnnounce->setPriorityVector(localPriorityVector);
     ownAnnounce->setSourcePortIdentity(ownPortIdentity);
 
-    auto b = ownAnnounce;
-
-    auto bReceiverIdentity = ownPortIdentity;
+    auto bestAnnounceCurr = ownAnnounce;
+    auto bestAnnounceReceiverIdentityCurr = ownPortIdentity;
 
     for (const auto &announceEntry : receivedAnnounces) {
         auto a = announceEntry.second;
-        auto aVec = a->getPriorityVector();
-        auto bVec = b->getPriorityVector();
-
         auto aReceiverIdentity = PortIdentity();
         aReceiverIdentity.clockIdentity = clockIdentity;
         aReceiverIdentity.portNumber = announceEntry.first;
 
-        // IEEE 1588-2019 Figure 34
-        if (aVec.grandmasterIdentity == bVec.grandmasterIdentity) {
-            // Special cases Figure 35
-
-            // Compare steps removed (diff >=2)
-            if (aVec.stepsRemoved + 1 < bVec.stepsRemoved) {
-                b = a;
-                bReceiverIdentity = aReceiverIdentity;
-                continue;
-            }
-            else if (aVec.stepsRemoved > bVec.stepsRemoved + 1) {
-                // B is already the best vector -> do nothing
-                continue;
-            }
-
-            // Compare steps removed |A-B| <= 1
-            if (aVec.stepsRemoved < bVec.stepsRemoved) {
-                if (bReceiverIdentity == b->getSourcePortIdentity()) {
-                    throw cRuntimeError("Error-1: Indicates that one of the PTP messages was "
-                                        "transmitted and received on the same PTP Port.\n"
-                                        "(See IEEE 1588-2019 Figure 35 NOTE 2)");
-                }
-                else if (bReceiverIdentity > b->getSourcePortIdentity()) {
-                    b = a;
-                    bReceiverIdentity = aReceiverIdentity;
-                    continue;
-                }
-                else {
-                    throw cRuntimeError("Unknown case in BMCA -- should never happen");
-                }
-            }
-            else if (aVec.stepsRemoved > bVec.stepsRemoved) {
-                if (aReceiverIdentity == a->getSourcePortIdentity()) {
-                    throw cRuntimeError("Error-1: Indicates that one of the PTP messages was "
-                                        "transmitted and received on the same PTP Port.\n"
-                                        "(See IEEE 1588-2019 Figure 35 NOTE 2)");
-                }
-                else if (aReceiverIdentity > a->getSourcePortIdentity()) {
-                    // B is already the best vector -> do nothing
-                    continue;
-                }
-                else {
-                    throw cRuntimeError("Unknown case in BMCA -- should never happen");
-                }
-            }
-
-            // Compare Identities of senders
-            if (a->getSourcePortIdentity() < b->getSourcePortIdentity()) {
-                // A better by topology
-                b = a;
-                bReceiverIdentity = aReceiverIdentity;
-                continue;
-            }
-            else if (b->getSourcePortIdentity() < a->getSourcePortIdentity()) {
-                // B better by topology
-                // B is already the best vector -> do nothing
-                continue;
-            }
-
-            // Compare port number of receivers
-            if (aReceiverIdentity.portNumber < bReceiverIdentity.portNumber) {
-                // A better by topology
-                b = a;
-                bReceiverIdentity = aReceiverIdentity;
-                continue;
-            }
-            else if (aReceiverIdentity.portNumber > bReceiverIdentity.portNumber) {
-                // B better by topology
-                // B is already the best vector -> do nothing
-                continue;
-            }
-            else {
-                throw cRuntimeError("Error-2: indicates that the PTP messages are duplicates or that they are "
-                                    "an earlier and later PTP message from the same Grandmaster PTP Instance.\n"
-                                    "(See IEEE 1588-2019 Figure 35 NOTE 2)");
-            }
-        }
-        else if (aVec < bVec) {
-            b = a;
-            bReceiverIdentity = aReceiverIdentity;
-        }
-        else if (bVec < aVec) {
-            // Best vector is already b -> do nothing
-        }
-        else {
-            throw cRuntimeError("Unknown case in BMCA -- should never happen");
+        switch (compareAnnounceMessages(a, bestAnnounceCurr, aReceiverIdentity, bestAnnounceReceiverIdentityCurr)) {
+        case A_BETTER_THAN_B_BY_TOPOLOGY:
+        case A_BETTER_THAN_B:
+            // If a is better or better by topology, then a becomes the new best Announce
+            bestAnnounceCurr = announceEntry.second;
+            bestAnnounceReceiverIdentityCurr = aReceiverIdentity;
+            break;
+        case B_BETTER_THAN_A_BY_TOPOLOGY:
+        case B_BETTER_THAN_A:
+            // If bestAnnounceCurr is better or better by topology, then nothing changes
+            break;
         }
     }
 
     EV_INFO << "############## BMCA ################################" << endl;
     EV_INFO << "Choosing from " << receivedAnnounces.size() << " Announces" << endl;
-    EV_INFO << "Selected Grandmaster Identity - " << b->getPriorityVector().grandmasterIdentity << endl;
-    EV_INFO << "Selected Grandmaster Priority1 - " << (int)b->getPriorityVector().grandmasterPriority1 << endl;
-    EV_INFO << "Selected Slave Port Identity - " << bReceiverIdentity.portNumber << endl;
+    EV_INFO << "Selected Grandmaster Identity - " << bestAnnounceCurr->getPriorityVector().grandmasterIdentity << endl;
+    EV_INFO << "Selected Grandmaster Priority1 - " << (int)bestAnnounceCurr->getPriorityVector().grandmasterPriority1
+            << endl;
+    EV_INFO << "Selected Slave Port Identity - " << bestAnnounceReceiverIdentityCurr.portNumber << endl;
 
-    if (bestAnnounce == b) {
+    if (bestAnnounce == bestAnnounceCurr) {
         // Received an Announce message, but best clock is still the same
     }
-    else if (bestAnnounce && bestAnnounce->getPriorityVector() == b->getPriorityVector()) {
+    else if (bestAnnounce && bestAnnounce->getPriorityVector() == bestAnnounceCurr->getPriorityVector() &&
+             slavePortId == bestAnnounceReceiverIdentityCurr.portNumber) {
         // Same priority vector but newer Announce, no topology change because priority vector is the same
         // Store the new Announce
         delete bestAnnounce;
-        bestAnnounce = b->dup();
+        bestAnnounce = bestAnnounceCurr->dup();
     }
     else {
         // Topology change, update ports and send Announce
         bool doSendAnnounce = true;
 
-        if (b->getPriorityVector().grandmasterIdentity != clockIdentity) {
+        if (bestAnnounceCurr->getPriorityVector().grandmasterIdentity != clockIdentity) {
             // We are not the GM
-            slavePortId = bReceiverIdentity.portNumber;
+            slavePortId = bestAnnounceReceiverIdentityCurr.portNumber;
             masterPortIds.clear();
             passivePortIds.clear();
             for (const auto &portId : bmcaPortIds) {
@@ -633,6 +560,8 @@ void Gptp::executeBmca()
             getContainingNode(this)->bubble("I'm GM");
             if (slavePortId == -1) {
                 // We were already GM, no need to send Announce again
+                // Should only happen in the bootup phase
+                // (otherwise priority vector would be the same and earlier case would apply)
                 doSendAnnounce = false;
             }
             masterPortIds = bmcaPortIds;
@@ -641,7 +570,7 @@ void Gptp::executeBmca()
         }
 
         delete bestAnnounce;
-        bestAnnounce = b->dup();
+        bestAnnounce = bestAnnounceCurr->dup();
 
         if (doSendAnnounce) {
             sendAnnounce();
@@ -649,7 +578,152 @@ void Gptp::executeBmca()
         scheduleMessageOnTopologyChange();
     }
 
+    // Calculate ports states (based on IEEE 1588-2019 Figure 33)
+    masterPortIds.clear();
+    passivePortIds.clear();
+    for (const auto &portId : bmcaPortIds) {
+        if (portId != slavePortId) {
+            masterPortIds.insert(portId);
+        }
+    }
+    if (slavePortId != -1) {
+        // Don't do this calculation if we're selected as the GM => We assume all gPTP enabled ports are masters
+        for (const auto &portId : masterPortIds) {
+            GptpAnnounce *portAnnounce = nullptr;
+            if (auto it = receivedAnnounces.find(portId); it != receivedAnnounces.end()) {
+                portAnnounce = it->second;
+            }
+
+            PortIdentity receiverPortIdentity;
+            receiverPortIdentity.clockIdentity = clockIdentity;
+            receiverPortIdentity.portNumber = portId;
+
+            // Standard 1588-2019 defines 1 to 127, but 0 is reserved and unused anyway.
+            // The standard thus does not define the behavior for 0, so we just use <= 127
+            if (localPriorityVector.grandmasterClockQuality.clockClass <= 127) {
+                if (portAnnounce == nullptr) {
+                    continue;
+                }
+                auto compareLocalToPort =
+                    compareAnnounceMessages(ownAnnounce, portAnnounce, ownPortIdentity, receiverPortIdentity);
+
+                if (compareLocalToPort == B_BETTER_THAN_A || compareLocalToPort == B_BETTER_THAN_A_BY_TOPOLOGY) {
+                    passivePortIds.insert(portId);
+                }
+                continue;
+            }
+
+            // Clock class >= 128
+            auto compareLocalToBest = compareAnnounceMessages(ownAnnounce, bestAnnounce, ownPortIdentity,
+                                                              bestAnnounceReceiverIdentityCurr);
+
+            if (compareLocalToBest == A_BETTER_THAN_B || compareLocalToBest == A_BETTER_THAN_B_BY_TOPOLOGY) {
+                // Local better than best => Master
+                continue;
+            }
+
+            if (bestAnnounceReceiverIdentityCurr.portNumber == portId) {
+                // => Slave (already set above)
+                continue;
+            }
+
+            if (portAnnounce == nullptr) {
+                continue;
+            }
+
+            auto compareBestToPort = compareAnnounceMessages(
+                bestAnnounce, portAnnounce, bestAnnounceReceiverIdentityCurr, receiverPortIdentity);
+            if (compareBestToPort == A_BETTER_THAN_B_BY_TOPOLOGY) {
+                passivePortIds.insert(portId);
+            }
+        }
+        for (const auto &passivePortId : passivePortIds) {
+            masterPortIds.erase(passivePortId);
+        }
+    }
+
     delete ownAnnounce;
+}
+
+Gptp::BmcaPriorityVectorComparisonResult Gptp::compareAnnounceMessages(GptpAnnounce *a, GptpAnnounce *b,
+                                                                       PortIdentity aReceiverIdentity,
+                                                                       PortIdentity bReceiverIdentity)
+{
+    auto aVec = a->getPriorityVector();
+    auto bVec = b->getPriorityVector();
+
+    // IEEE 1588-2019 Figure 34
+    if (aVec.grandmasterIdentity == bVec.grandmasterIdentity) {
+        // Special cases Figure 35
+
+        // Compare steps removed (|A-B| >=2)
+        if (aVec.stepsRemoved > bVec.stepsRemoved + 1) {
+            return B_BETTER_THAN_A;
+        }
+
+        else if (aVec.stepsRemoved + 1 < bVec.stepsRemoved) {
+            return A_BETTER_THAN_B;
+        }
+
+        // Compare steps removed |A-B| <= 1
+        if (aVec.stepsRemoved > bVec.stepsRemoved) {
+            if (aReceiverIdentity == a->getSourcePortIdentity()) {
+                throw cRuntimeError("Error-1: Indicates that one of the PTP messages was "
+                                    "transmitted and received on the same PTP Port.\n"
+                                    "(See IEEE 1588-2019 Figure 35 NOTE 2)");
+            }
+            else if (aReceiverIdentity < a->getSourcePortIdentity()) {
+                return B_BETTER_THAN_A;
+            }
+            else {
+                // aReceiverIdentity > a->getSourcePortIdentity()
+                return B_BETTER_THAN_A_BY_TOPOLOGY;
+            }
+        }
+        else if (aVec.stepsRemoved < bVec.stepsRemoved) {
+            if (bReceiverIdentity == b->getSourcePortIdentity()) {
+                throw cRuntimeError("Error-1: Indicates that one of the PTP messages was "
+                                    "transmitted and received on the same PTP Port.\n"
+                                    "(See IEEE 1588-2019 Figure 35 NOTE 2)");
+            }
+            else if (bReceiverIdentity < b->getSourcePortIdentity()) {
+                return A_BETTER_THAN_B;
+            }
+            else {
+                return A_BETTER_THAN_B_BY_TOPOLOGY;
+            }
+        }
+
+        // Compare Identities of senders
+        if (a->getSourcePortIdentity() > b->getSourcePortIdentity()) {
+            return B_BETTER_THAN_A_BY_TOPOLOGY;
+        }
+        else if (a->getSourcePortIdentity() < b->getSourcePortIdentity()) {
+            return A_BETTER_THAN_B_BY_TOPOLOGY;
+        }
+
+        // Compare port number of receivers
+        if (aReceiverIdentity.portNumber > bReceiverIdentity.portNumber) {
+            return B_BETTER_THAN_A_BY_TOPOLOGY;
+        }
+        else if (aReceiverIdentity.portNumber < bReceiverIdentity.portNumber) {
+            return A_BETTER_THAN_B_BY_TOPOLOGY;
+        }
+        else {
+            throw cRuntimeError("Error-2: indicates that the PTP messages are duplicates or that they are "
+                                "an earlier and later PTP message from the same Grandmaster PTP Instance.\n"
+                                "(See IEEE 1588-2019 Figure 35 NOTE 2)");
+        }
+    }
+    else if (aVec > bVec) {
+        return B_BETTER_THAN_A;
+    }
+    else if (aVec < bVec) {
+        return A_BETTER_THAN_B;
+    }
+    else {
+        throw cRuntimeError("Unknown case in BMCA -- should never happen");
+    }
 }
 
 void Gptp::sendPdelayResp(GptpReqAnswerEvent *req)

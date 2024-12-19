@@ -38,6 +38,9 @@ network BmcaShowcaseSimple extends TsnNetworkBase
 network BmcaShowcaseDiamond extends TsnNetworkBase
 {
     submodules:
+        scenarioManager: ScenarioManager {
+            @display("p=100,800;is=s");
+        }
         tsnDevice1: TsnDevice {
             @display("p=500,150");
         }
@@ -60,6 +63,9 @@ network BmcaShowcaseDiamond extends TsnNetworkBase
 network BmcaShowcaseDiamondAsymmetric extends TsnNetworkBase
 {
     submodules:
+        scenarioManager: ScenarioManager {
+            @display("p=100,800;is=s");
+        }
         tsnDevice1: TsnDevice {
             @display("p=500,150");
         }
