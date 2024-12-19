@@ -21,17 +21,21 @@ simple Gptp like IGptp
     parameters:
         string clockModule = default(""); // Relative path of a module that implements IClock; optional
         string interfaceTableModule; // Relative path of the interface table module
-        string gptpNodeType; // @enum("GptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE
+        string gptpNodeType; // @enum("GptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE, BMCA_NODE
         bool useNrr = default(false); // Use neighbor rate ratio
         string gmRateRatioCalculationMethod = default("NONE"); // @enum("GptpRateRatioCalculationMethod"): NONE, NRR, DIRECT
         int domainNumber = default(0); // Specifies the time domain number used in gPTP messages
-        string slavePort = default(""); // Port for receiving time (empty for MASTER_NODE)
-        object masterPorts = default([]); // Ports for sending out time (empty for SLAVE_NODE)
+        string slavePort = default(""); // Port for receiving time (empty for MASTER_NODE and BMCA_NODE)
+        object masterPorts = default([]); // Ports for sending out time (empty for SLAVE_NODE and BMCA_NODE)
+        object bmcaPorts = default([]); // Ports for sending out time (only fill when BMCA_NODE is used)
         double correctionField @unit(s) = default(0s); // Time correction for link delay measurements
         double syncInterval @unit(s) = default(0.125s); // Time interval between SYNC messages
         double pdelayInterval @unit(s) = default(1s); // Frequency of link delay measurements
+        double announceInterval @unit(s) = default(1s); // Frequency of Announce messages (BMCA mode only)
         double syncInitialOffset @unit(s) = default(syncInterval); // Time of first SYNC message
         double pdelayInitialOffset @unit(s) = default(0s); // Time of first link delay measurement
+        double announceInitialOffset @unit(s) = default(0s); // Time of first Announce message (BMCA mode only)
+        int grandmasterPriority1 = default(255); // Priority1 value for BMCA
 
         // following parameters are used to schedule follow_up and pdelay_resp messages.
         // These numbers must be large enough to prevent creating a queue in the MAC layer.

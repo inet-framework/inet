@@ -25,17 +25,28 @@ namespace inet {
 class INET_API Gptp : public ClockUserModuleBase, public cListener
 {
   protected:
+    enum BmcaPriorityVectorComparisonResult {
+        A_BETTER_THAN_B,
+        A_BETTER_THAN_B_BY_TOPOLOGY,
+        B_BETTER_THAN_A,
+        B_BETTER_THAN_A_BY_TOPOLOGY,
+    };
+
+  protected:
     // parameters:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
 
     // Configuration
     GptpNodeType gptpNodeType;
     int domainNumber = -1;
-    int slavePortId = -1;        // interface ID of slave port
-    std::set<int> masterPortIds; // interface IDs of master ports
+    int slavePortId = -1;         // interface ID of slave port
+    std::set<int> masterPortIds;  // interface IDs of master ports
+    std::set<int> bmcaPortIds;    // interface IDs of bmca ports
+    std::set<int> passivePortIds; // interface IDs of passive ports (only relevant for BMCA)
     uint64_t clockIdentity = 0;
     clocktime_t syncInterval;
     clocktime_t pdelayInterval;
+    clocktime_t announceInterval;
     clocktime_t pDelayReqProcessingTime; // processing time between arrived
                                          // PDelayReq and send of PDelayResp
     bool useNrr = false;                 // use neighbor rate ratio
@@ -86,12 +97,18 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     clocktime_t newLocalTimeAtTimeSync;
 
+    // BMCA
+    BmcaPriorityVector localPriorityVector;
+    GptpAnnounce *bestAnnounce = nullptr;
+    std::map<int, ClockEvent *> announceTimeouts;
+    std::map<int, GptpAnnounce *> receivedAnnounces;
+
     // self timers:
     ClockEvent *selfMsgSync = nullptr;
     ClockEvent *selfMsgDelayReq = nullptr;
-    ClockEvent *requestMsg = nullptr;
+    ClockEvent *selfMsgAnnounce = nullptr;
 
-    std::set<GptpReqAnswerEvent*> reqAnswerEvents;
+    std::set<GptpReqAnswerEvent *> reqAnswerEvents;
 
     // Statistics information: // TODO remove, and replace with emit() calls
     static simsignal_t localTimeSignal;
@@ -103,7 +120,6 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     static simsignal_t residenceTimeSignal;
     static simsignal_t correctionFieldIngressSignal;
     static simsignal_t correctionFieldEgressSignal;
-
 
     // Packet receive signals:
     std::map<uint16_t, clocktime_t> ingressTimeMap; // <sequenceId,ingressTime
@@ -119,6 +135,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     virtual void initialize(int stage) override;
+
+    virtual void initBmca();
 
     virtual void handleMessage(cMessage *msg) override;
 
@@ -136,6 +154,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
   protected:
     void sendPacketToNIC(Packet *packet, int portId);
 
+    virtual void sendAnnounce();
+
     virtual void sendSync();
 
     virtual void sendFollowUp(int portId, const GptpSync *sync, const clocktime_t &syncEgressTimestampOwn);
@@ -145,6 +165,8 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     void sendPdelayResp(GptpReqAnswerEvent *req);
 
     void sendPdelayRespFollowUp(int portId, const GptpPdelayResp *resp);
+
+    void processAnnounce(Packet *pPacket, const GptpAnnounce *pAnnounce);
 
     virtual void processSync(Packet *packet, const GptpSync *gptp);
 
@@ -170,6 +192,14 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
     void calculateGmRatio();
+    void executeBmca();
+    void initPorts();
+    void scheduleMessageOnTopologyChange();
+    void handleAnnounceTimeout(cMessage *pMessage);
+    bool isGM() const { return gptpNodeType == MASTER_NODE || (gptpNodeType == BMCA_NODE && slavePortId == -1); };
+    Gptp::BmcaPriorityVectorComparisonResult compareAnnounceMessages(GptpAnnounce *a, GptpAnnounce *b,
+                                                                     PortIdentity aReceiverIdentity,
+                                                                     PortIdentity bReceiverIdentity);
 };
 
 } // namespace inet

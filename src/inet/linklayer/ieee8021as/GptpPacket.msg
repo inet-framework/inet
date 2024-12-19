@@ -33,6 +33,7 @@ const B GPTP_FOLLOW_UP_PACKET_SIZE = GPTP_HEADER_SIZE + B(10) + GPTP_TLV_SIZE + 
 const B GPTP_PDELAY_REQ_PACKET_SIZE = GPTP_HEADER_SIZE + B(20);
 const B GPTP_PDELAY_RESP_PACKET_SIZE = GPTP_HEADER_SIZE + B(20);
 const B GPTP_PDELAY_RESP_FOLLOW_UP_PACKET_SIZE = GPTP_HEADER_SIZE + B(20);
+const B GPTP_ANNOUNCE_PACKET_SIZE = GPTP_HEADER_SIZE + B(30);
 }
 
 }}
@@ -46,6 +47,7 @@ enum GptpNodeType
     MASTER_NODE = 11;
     BRIDGE_NODE = 12;
     SLAVE_NODE  = 13;
+    BMCA_NODE = 14;
 }
 
 enum GmRateRatioCalculationMethod {
@@ -68,15 +70,16 @@ enum GptpMessageType
     GPTPTYPE_PDELAY_REQ = 0x2;
     GPTPTYPE_PDELAY_RESP = 0x3;
     GPTPTYPE_PDELAY_RESP_FOLLOW_UP = 0xA;
+    GPTPTYPE_ANNOUNCE = 0xB;
 }
 
 enum GptpSelfMsgKind {
     GPTP_SELF_REQ_ANSWER_KIND = 101;
-    GPTP_SELF_MSG_SYNC = 103;
-    GPTP_REQUEST_TO_SEND_SYNC = 104;
-    GPTP_SELF_MSG_PDELAY_REQ = 105;
-    
-    GPTP_CLOCK_DOWN_MSG = 107;
+    GPTP_SELF_MSG_SYNC = 102;
+    GPTP_SELF_MSG_PDELAY_REQ = 103;
+    GPTP_SELF_MSG_ANNOUNCE = 104;
+    GPTP_SELF_MSG_ANNOUNCE_TIMEOUT = 105;
+    GPTP_CLOCK_DOWN_MSG = 106;
 }
 
 // ieee802.1AS-2020 10.6.2.2.8: flags (Octet2)
@@ -116,12 +119,35 @@ struct PortIdentity
     uint16_t portNumber;
 };
 
-//struct ClockQuality
-//{
-//    UInteger8 clockClass;
-//    Enumeration8 clockAccuracy;
-//    UInteger16 offsetScaledLogVariance;
-//};
+cplusplus(PortIdentity) {{
+    bool operator==(const PortIdentity& rhs) const {
+        return clockIdentity == rhs.clockIdentity &&
+               portNumber == rhs.portNumber;
+    }
+
+    bool operator!=(const PortIdentity& rhs) const {
+        return !(*this == rhs);
+    }
+
+    bool operator<(const PortIdentity& rhs) const {
+        if (clockIdentity < rhs.clockIdentity) return true;
+        if (clockIdentity > rhs.clockIdentity) return false;
+        return portNumber < rhs.portNumber;
+    }
+
+    bool operator>(const PortIdentity& rhs) const {
+        return rhs < *this;
+    }
+
+    bool operator<=(const PortIdentity& rhs) const {
+        return !(rhs < *this);
+    }
+
+    bool operator>=(const PortIdentity& rhs) const {
+        return !(*this < rhs);
+    }
+}}
+
 
 message GptpReqAnswerEvent extends ClockEvent
 {
@@ -250,6 +276,108 @@ class GptpPdelayRespFollowUp extends GptpBase
     messageLengthField = GPTP_PDELAY_RESP_FOLLOW_UP_PACKET_SIZE.get<B>();
     clocktime_t responseOriginTimestamp;
     PortIdentity requestingPortIdentity;
+}
+
+struct ClockQuality
+{
+    @packetData;
+    uint8_t clockClass;
+    uint8_t clockAccuracy;
+    uint16_t offsetScaledLogVariance;
+};
+
+cplusplus(ClockQuality) {{
+    bool operator==(const ClockQuality& rhs) const {
+        return clockClass == rhs.clockClass &&
+               clockAccuracy == rhs.clockAccuracy &&
+               offsetScaledLogVariance == rhs.offsetScaledLogVariance;
+    }
+
+    bool operator!=(const ClockQuality& rhs) const {
+        return !(*this == rhs);
+    }
+
+    bool operator<(const ClockQuality& rhs) const {
+        if (clockClass < rhs.clockClass) return true;
+        if (clockClass > rhs.clockClass) return false;
+        if (clockAccuracy < rhs.clockAccuracy) return true;
+        if (clockAccuracy > rhs.clockAccuracy) return false;
+        return offsetScaledLogVariance < rhs.offsetScaledLogVariance;
+    }
+
+    bool operator>(const ClockQuality& rhs) const {
+        return rhs < *this;
+    }
+
+    bool operator<=(const ClockQuality& rhs) const {
+        return !(rhs < *this);
+    }
+
+    bool operator>=(const ClockQuality& rhs) const {
+        return !(*this < rhs);
+    }
+}}
+
+struct BmcaPriorityVector {
+    @packetData;
+    uint8_t grandmasterPriority1;
+    ClockQuality grandmasterClockQuality;
+    uint8_t grandmasterPriority2;
+    uint64_t grandmasterIdentity;
+    uint16_t stepsRemoved;
+}
+
+cplusplus(BmcaPriorityVector) {{
+    // Important: These comparison functions only compare the values as in IEEE 1588-2019 Figure 34
+    // For a full selection made by BCMA tiebreakers need to be implemented as in Figure 35
+
+    bool operator==(const BmcaPriorityVector& rhs) const {
+        return grandmasterPriority1 == rhs.grandmasterPriority1 &&
+               grandmasterClockQuality == rhs.grandmasterClockQuality &&
+               grandmasterPriority2 == rhs.grandmasterPriority2 &&
+               grandmasterIdentity == rhs.grandmasterIdentity &&
+               stepsRemoved == rhs.stepsRemoved;
+    }
+
+    bool operator!=(const BmcaPriorityVector& rhs) const {
+        return !(*this == rhs);
+    }
+
+    bool operator<(const BmcaPriorityVector& rhs) const {
+        if (grandmasterPriority1 < rhs.grandmasterPriority1) return true;
+        if (grandmasterPriority1 > rhs.grandmasterPriority1) return false;
+        if (grandmasterClockQuality < rhs.grandmasterClockQuality) return true;
+        if (grandmasterClockQuality > rhs.grandmasterClockQuality) return false;
+        if (grandmasterPriority2 < rhs.grandmasterPriority2) return true;
+        if (grandmasterPriority2 > rhs.grandmasterPriority2) return false;
+        if (grandmasterIdentity < rhs.grandmasterIdentity) return true;
+        if (grandmasterIdentity > rhs.grandmasterIdentity) return false;
+        return stepsRemoved < rhs.stepsRemoved;
+    }
+
+    bool operator>(const BmcaPriorityVector& rhs) const {
+        return rhs < *this;
+    }
+
+    bool operator<=(const BmcaPriorityVector& rhs) const {
+        return !(rhs < *this);
+    }
+
+    bool operator>=(const BmcaPriorityVector& rhs) const {
+        return !(*this < rhs);
+    }
+}}
+
+// IEEE 1588-2019 Table 43
+class GptpAnnounce extends GptpBase {
+    messageType = GPTPTYPE_ANNOUNCE;
+    chunkLength = GPTP_ANNOUNCE_PACKET_SIZE;
+    messageLengthField = GPTP_ANNOUNCE_PACKET_SIZE.get<B>();
+    clocktime_t originTimestamp;
+    int16_t currentUtcOffset; // Not important for simulation purposes right now
+    uint8_t reserved;
+    BmcaPriorityVector priorityVector;
+    uint8_t timeSource; // Not important for simulation purposes right now
 }
 
 class GptpIngressTimeInd extends TagBase
